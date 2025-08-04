@@ -1,0 +1,1932 @@
+Comando: bunx tsc --noEmit --pretty
+Fecha: 2025-08-04T03:38:48.780Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+[96msrc/components/features/file-browser/selection/drag-selection-provider.tsx[0m:[93m228[0m:[93m6[0m - [91merror[0m[90m TS2322: [0mType '"auto" | "light" | "dark"' is not assignable to type '"light" | "dark" | undefined'.
+  Type '"auto"' is not assignable to type '"light" | "dark" | undefined'.
+
+[7m228[0m      theme={mergedOverlayConfig.theme}
+[7m   [0m [91m     ~~~~~[0m
+
+[96msrc/components/features/file-browser/selection/drag-selection-provider.tsx[0m:[93m229[0m:[93m6[0m - [91merror[0m[90m TS2322: [0mType '{ enabled: boolean; duration: number; easing: string; }' is not assignable to type 'boolean | undefined'.
+
+[7m229[0m      animation={mergedOverlayConfig.animation}
+[7m   [0m [91m     ~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoPanel.tsx[0m:[93m56[0m:[93m16[0m - [91merror[0m[90m TS2339: [0mProperty 'metadata' does not exist on type 'UndoableAction'.
+
+[7m56[0m  const { type, metadata } = action;
+[7m  [0m [91m               ~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoPanel.tsx[0m:[93m113[0m:[93m24[0m - [91merror[0m[90m TS2339: [0mProperty 'history' does not exist on type 'UndoRedoState'.
+
+[7m113[0m  const history = state.history;
+[7m   [0m [91m                       ~~~~~~~[0m
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoPanel.tsx[0m:[93m182[0m:[93m22[0m - [91merror[0m[90m TS7006: [0mParameter 'action' implicitly has an 'any' type.
+
+[7m182[0m        {history.map((action, index) => {
+[7m   [0m [91m                     ~~~~~~[0m
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoPanel.tsx[0m:[93m182[0m:[93m30[0m - [91merror[0m[90m TS7006: [0mParameter 'index' implicitly has an 'any' type.
+
+[7m182[0m        {history.map((action, index) => {
+[7m   [0m [91m                             ~~~~~[0m
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoToolbar.tsx[0m:[93m55[0m:[93m16[0m - [91merror[0m[90m TS2322: [0mType '"default" | "secondary" | "outline" | "ghost"' is not assignable to type '"primary" | "secondary" | "outline" | "ghost" | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "secondary" | "outline" | "ghost" | undefined'.
+
+[7m55[0m    <UndoButton variant={buttonVariant} size={buttonSize} className={compact ? 'h-7 w-7' : undefined} />
+[7m  [0m [91m               ~~~~~~~[0m
+
+  [96msrc/components/features/file-browser/undo-redo/UndoRedoButton.tsx[0m:[93m20[0m:[93m2[0m
+    [7m20[0m  variant?: 'primary' | 'outline' | 'ghost' | 'secondary';
+    [7m  [0m [96m ~~~~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & Omit<UndoRedoButtonProps, "type">'
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoToolbar.tsx[0m:[93m55[0m:[93m40[0m - [91merror[0m[90m TS2322: [0mType '"default" | "sm" | "lg" | "icon"' is not assignable to type '"sm" | "md" | "lg" | "icon" | undefined'.
+  Type '"default"' is not assignable to type '"sm" | "md" | "lg" | "icon" | undefined'.
+
+[7m55[0m    <UndoButton variant={buttonVariant} size={buttonSize} className={compact ? 'h-7 w-7' : undefined} />
+[7m  [0m [91m                                       ~~~~[0m
+
+  [96msrc/components/features/file-browser/undo-redo/UndoRedoButton.tsx[0m:[93m22[0m:[93m2[0m
+    [7m22[0m  size?: 'md' | 'sm' | 'lg' | 'icon';
+    [7m  [0m [96m ~~~~[0m
+    The expected type comes from property 'size' which is declared here on type 'IntrinsicAttributes & Omit<UndoRedoButtonProps, "type">'
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoToolbar.tsx[0m:[93m58[0m:[93m16[0m - [91merror[0m[90m TS2322: [0mType '"default" | "secondary" | "outline" | "ghost"' is not assignable to type '"primary" | "secondary" | "outline" | "ghost" | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "secondary" | "outline" | "ghost" | undefined'.
+
+[7m58[0m    <RedoButton variant={buttonVariant} size={buttonSize} className={compact ? 'h-7 w-7' : undefined} />
+[7m  [0m [91m               ~~~~~~~[0m
+
+  [96msrc/components/features/file-browser/undo-redo/UndoRedoButton.tsx[0m:[93m20[0m:[93m2[0m
+    [7m20[0m  variant?: 'primary' | 'outline' | 'ghost' | 'secondary';
+    [7m  [0m [96m ~~~~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & Omit<UndoRedoButtonProps, "type">'
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoToolbar.tsx[0m:[93m58[0m:[93m40[0m - [91merror[0m[90m TS2322: [0mType '"default" | "sm" | "lg" | "icon"' is not assignable to type '"sm" | "md" | "lg" | "icon" | undefined'.
+  Type '"default"' is not assignable to type '"sm" | "md" | "lg" | "icon" | undefined'.
+
+[7m58[0m    <RedoButton variant={buttonVariant} size={buttonSize} className={compact ? 'h-7 w-7' : undefined} />
+[7m  [0m [91m                                       ~~~~[0m
+
+  [96msrc/components/features/file-browser/undo-redo/UndoRedoButton.tsx[0m:[93m22[0m:[93m2[0m
+    [7m22[0m  size?: 'md' | 'sm' | 'lg' | 'icon';
+    [7m  [0m [96m ~~~~[0m
+    The expected type comes from property 'size' which is declared here on type 'IntrinsicAttributes & Omit<UndoRedoButtonProps, "type">'
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoToolbar.tsx[0m:[93m65[0m:[93m8[0m - [91merror[0m[90m TS2322: [0mType '"default" | "secondary" | "outline" | "ghost"' is not assignable to type '"primary" | "mono" | "destructive" | "secondary" | "outline" | "dashed" | "ghost" | "dim" | "foreground" | "inverse" | null | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "mono" | "destructive" | "secondary" | "outline" | "dashed" | "ghost" | "dim" | "foreground" | "inverse" | null | undefined'.
+
+[7m65[0m        variant={buttonVariant}
+[7m  [0m [91m       ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 24[0m     inverse: '',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~[0m
+    [7m 25[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoToolbar.tsx[0m:[93m66[0m:[93m8[0m - [91merror[0m[90m TS2322: [0mType '"default" | "sm" | "lg" | "icon"' is not assignable to type '"sm" | "md" | "lg" | "icon" | null | undefined'.
+  Type '"default"' is not assignable to type '"sm" | "md" | "lg" | "icon" | null | undefined'.
+
+[7m66[0m        size={buttonSize}
+[7m  [0m [91m       ~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m38[0m:[93m4[0m
+    [7m 38[0m    size: {
+    [7m   [0m [96m   ~~~~~~~[0m
+    [7m 39[0m     lg: 'h-10 rounded-md px-4 text-sm gap-1.5 [&_svg:not([class*=size-])]:size-4',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 42[0m     icon: 'size-8.5 rounded-md [&_svg:not([class*=size-])]:size-4 shrink-0',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 43[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'size' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoToolbar.tsx[0m:[93m101[0m:[93m16[0m - [91merror[0m[90m TS2322: [0mType '"default" | "secondary" | "outline" | "ghost"' is not assignable to type '"primary" | "secondary" | "outline" | "ghost" | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "secondary" | "outline" | "ghost" | undefined'.
+
+[7m101[0m    <UndoButton variant={buttonVariant} size={buttonSize} className={compact ? 'h-7 w-7' : undefined} />
+[7m   [0m [91m               ~~~~~~~[0m
+
+  [96msrc/components/features/file-browser/undo-redo/UndoRedoButton.tsx[0m:[93m20[0m:[93m2[0m
+    [7m20[0m  variant?: 'primary' | 'outline' | 'ghost' | 'secondary';
+    [7m  [0m [96m ~~~~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & Omit<UndoRedoButtonProps, "type">'
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoToolbar.tsx[0m:[93m101[0m:[93m40[0m - [91merror[0m[90m TS2322: [0mType '"default" | "sm" | "lg" | "icon"' is not assignable to type '"sm" | "md" | "lg" | "icon" | undefined'.
+  Type '"default"' is not assignable to type '"sm" | "md" | "lg" | "icon" | undefined'.
+
+[7m101[0m    <UndoButton variant={buttonVariant} size={buttonSize} className={compact ? 'h-7 w-7' : undefined} />
+[7m   [0m [91m                                       ~~~~[0m
+
+  [96msrc/components/features/file-browser/undo-redo/UndoRedoButton.tsx[0m:[93m22[0m:[93m2[0m
+    [7m22[0m  size?: 'md' | 'sm' | 'lg' | 'icon';
+    [7m  [0m [96m ~~~~[0m
+    The expected type comes from property 'size' which is declared here on type 'IntrinsicAttributes & Omit<UndoRedoButtonProps, "type">'
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoToolbar.tsx[0m:[93m102[0m:[93m16[0m - [91merror[0m[90m TS2322: [0mType '"default" | "secondary" | "outline" | "ghost"' is not assignable to type '"primary" | "secondary" | "outline" | "ghost" | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "secondary" | "outline" | "ghost" | undefined'.
+
+[7m102[0m    <RedoButton variant={buttonVariant} size={buttonSize} className={compact ? 'h-7 w-7' : undefined} />
+[7m   [0m [91m               ~~~~~~~[0m
+
+  [96msrc/components/features/file-browser/undo-redo/UndoRedoButton.tsx[0m:[93m20[0m:[93m2[0m
+    [7m20[0m  variant?: 'primary' | 'outline' | 'ghost' | 'secondary';
+    [7m  [0m [96m ~~~~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & Omit<UndoRedoButtonProps, "type">'
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoToolbar.tsx[0m:[93m102[0m:[93m40[0m - [91merror[0m[90m TS2322: [0mType '"default" | "sm" | "lg" | "icon"' is not assignable to type '"sm" | "md" | "lg" | "icon" | undefined'.
+  Type '"default"' is not assignable to type '"sm" | "md" | "lg" | "icon" | undefined'.
+
+[7m102[0m    <RedoButton variant={buttonVariant} size={buttonSize} className={compact ? 'h-7 w-7' : undefined} />
+[7m   [0m [91m                                       ~~~~[0m
+
+  [96msrc/components/features/file-browser/undo-redo/UndoRedoButton.tsx[0m:[93m22[0m:[93m2[0m
+    [7m22[0m  size?: 'md' | 'sm' | 'lg' | 'icon';
+    [7m  [0m [96m ~~~~[0m
+    The expected type comes from property 'size' which is declared here on type 'IntrinsicAttributes & Omit<UndoRedoButtonProps, "type">'
+
+[96msrc/components/features/file-browser/views/cards-view.tsx[0m:[93m176[0m:[93m6[0m - [91merror[0m[90m TS2322: [0mType '"auto" | "top" | "center" | "bottom"' is not assignable to type '"top" | "center" | "bottom"'.
+  Type '"auto"' is not assignable to type '"top" | "center" | "bottom"'.
+
+[7m176[0m      position={config.interactiveConfig.overlayPosition}
+[7m   [0m [91m     ~~~~~~~~[0m
+
+  [96msrc/components/features/file-browser/views/card-info-overlay.tsx[0m:[93m18[0m:[93m2[0m
+    [7m18[0m  position: 'top' | 'bottom' | 'center';
+    [7m  [0m [96m ~~~~~~~~[0m
+    The expected type comes from property 'position' which is declared here on type 'IntrinsicAttributes & CardInfoOverlayProps'
+
+[96msrc/components/features/file-browser/views/cards-view.tsx[0m:[93m177[0m:[93m6[0m - [91merror[0m[90m TS2322: [0mType '{ showSize: boolean; showDate: boolean; showType: boolean; showDimensions?: boolean | undefined; showDuration?: boolean | undefined; showTags: boolean; showCollection?: boolean | undefined; maxTags?: number | undefined; showDescription: boolean; maxDescriptionLength: number; }' is not assignable to type '{ showSize: boolean; showDate: boolean; showType: boolean; showDimensions: boolean; showDuration: boolean; showTags: boolean; showCollection: boolean; maxTags: number; }'.
+  Types of property 'showDimensions' are incompatible.
+    Type 'boolean | undefined' is not assignable to type 'boolean'.
+      Type 'undefined' is not assignable to type 'boolean'.
+
+[7m177[0m      metadataConfig={config.metadataConfig}
+[7m   [0m [91m     ~~~~~~~~~~~~~~[0m
+
+  [96msrc/components/features/file-browser/views/card-info-overlay.tsx[0m:[93m20[0m:[93m2[0m
+    [7m20[0m  metadataConfig: {
+    [7m  [0m [96m ~~~~~~~~~~~~~~[0m
+    The expected type comes from property 'metadataConfig' which is declared here on type 'IntrinsicAttributes & CardInfoOverlayProps'
+
+[96msrc/components/features/file-browser/views/cards-view.tsx[0m:[93m187[0m:[93m6[0m - [91merror[0m[90m TS2322: [0mType 'string[] | CardActionButton[]' is not assignable to type 'CardActionButton[]'.
+  Type 'string[]' is not assignable to type 'CardActionButton[]'.
+    Type 'string' is not assignable to type 'CardActionButton'.
+
+[7m187[0m      actionButtons={config.interactiveConfig.actionButtons}
+[7m   [0m [91m     ~~~~~~~~~~~~~[0m
+
+  [96msrc/components/features/file-browser/views/card-action-buttons.tsx[0m:[93m21[0m:[93m2[0m
+    [7m21[0m  actionButtons: CardActionButton[];
+    [7m  [0m [96m ~~~~~~~~~~~~~[0m
+    The expected type comes from property 'actionButtons' which is declared here on type 'IntrinsicAttributes & CardActionButtonsProps'
+
+[96msrc/components/features/file-browser/views/grid-item-overlay.tsx[0m:[93m28[0m:[93m22[0m - [91merror[0m[90m TS2339: [0mProperty 'type' does not exist on type 'DisplayableEntity'.
+  Property 'type' does not exist on type 'VideoWithStats & { entityType: "video"; }'.
+
+[7m28[0m  const type = entity.type || 'unknown';
+[7m  [0m [91m                     ~~~~[0m
+
+[96msrc/components/features/file-browser/views/grid-view.tsx[0m:[93m272[0m:[93m13[0m - [91merror[0m[90m TS2322: [0mType '{ entity: DisplayableEntity; isSelected: boolean; compact: true; className: string; itemId: string; onClickById: (itemId: string, e: MouseEvent<Element, MouseEvent>) => void; onDoubleClickById: (itemId: string) => void; "aria-label": string; }' is not assignable to type 'IntrinsicAttributes & EntityCardProps'.
+  Property 'itemId' does not exist on type 'IntrinsicAttributes & EntityCardProps'.
+
+[7m272[0m             itemId={item.id}
+[7m   [0m [91m            ~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/masonry-view.tsx[0m:[93m116[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType '{ entity: DisplayableEntity; layout: "vertical"; size: "md"; isSelected: boolean; compact: false; className: string; itemId: string; onClickById: (id: string, e: MouseEvent<Element, MouseEvent>) => void; onDoubleClickById: (id: string) => void; }' is not assignable to type 'IntrinsicAttributes & EntityCardProps'.
+  Property 'itemId' does not exist on type 'IntrinsicAttributes & EntityCardProps'.
+
+[7m116[0m       itemId={layoutItem.item.id}
+[7m   [0m [91m      ~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/masonry-view.tsx[0m:[93m127[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType '{ duration: number; ease: string; }' is not assignable to type 'Transition<any> | undefined'.
+  Type '{ duration: number; ease: string; }' is not assignable to type 'TransitionWithValueOverrides<any>'.
+    Type '{ duration: number; ease: string; }' is not assignable to type 'ValueAnimationTransition<any>'.
+      Types of property 'ease' are incompatible.
+        Type 'string' is not assignable to type 'Easing | Easing[] | undefined'.
+
+[7m127[0m     transition={transition}
+[7m   [0m [91m    ~~~~~~~~~~[0m
+
+  [96mnode_modules/motion-dom/dist/index.d.ts[0m:[93m1805[0m:[93m5[0m
+    [7m1805[0m     transition?: Transition;
+    [7m    [0m [96m    ~~~~~~~~~~[0m
+    The expected type comes from property 'transition' which is declared here on type 'IntrinsicAttributes & Omit<HTMLMotionProps<"div">, "ref"> & RefAttributes<HTMLDivElement>'
+
+[96msrc/components/features/file-browser/views/masonry-view.tsx[0m:[93m140[0m:[93m6[0m - [91merror[0m[90m TS2322: [0mType '{ entity: DisplayableEntity; layout: "vertical"; size: "md"; isSelected: boolean; compact: false; className: string; itemId: string; onClickById: (id: string, e: MouseEvent<Element, MouseEvent>) => void; onDoubleClickById: (id: string) => void; }' is not assignable to type 'IntrinsicAttributes & EntityCardProps'.
+  Property 'itemId' does not exist on type 'IntrinsicAttributes & EntityCardProps'.
+
+[7m140[0m      itemId={layoutItem.item.id}
+[7m   [0m [91m     ~~~~~~[0m
+
+[96msrc/components/features/file-viewer/viewers/audio-viewer.tsx[0m:[93m10[0m:[93m14[0m - [91merror[0m[90m TS2305: [0mModule '"@/lib/utils"' has no exported member 'formatDuration'.
+
+[7m10[0m import { cn, formatDuration, formatFileSize } from '@/lib/utils';
+[7m  [0m [91m             ~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-viewer/viewers/audio-viewer.tsx[0m:[93m10[0m:[93m30[0m - [91merror[0m[90m TS2305: [0mModule '"@/lib/utils"' has no exported member 'formatFileSize'.
+
+[7m10[0m import { cn, formatDuration, formatFileSize } from '@/lib/utils';
+[7m  [0m [91m                             ~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m20[0m:[93m14[0m - [91merror[0m[90m TS2305: [0mModule '"@/lib/utils"' has no exported member 'formatFileSize'.
+
+[7m20[0m import { cn, formatFileSize } from '@/lib/utils';
+[7m  [0m [91m             ~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m80[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'createElement' does not exist on type 'DocumentWithStats'.
+
+[7m80[0m   const link = document.createElement('a');
+[7m  [0m [91m                        ~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m83[0m:[93m12[0m - [91merror[0m[90m TS2339: [0mProperty 'body' does not exist on type 'DocumentWithStats'.
+
+[7m83[0m   document.body.appendChild(link);
+[7m  [0m [91m           ~~~~[0m
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m85[0m:[93m12[0m - [91merror[0m[90m TS2339: [0mProperty 'body' does not exist on type 'DocumentWithStats'.
+
+[7m85[0m   document.body.removeChild(link);
+[7m  [0m [91m           ~~~~[0m
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m258[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType 'string' is not assignable to type 'number'.
+
+[7m258[0m         size="sm"
+[7m   [0m [91m        ~~~~[0m
+
+  [96mnode_modules/@types/react/index.d.ts[0m:[93m3213[0m:[93m9[0m
+    [7m3213[0m         size?: number | undefined;
+    [7m    [0m [96m        ~~~~[0m
+    The expected type comes from property 'size' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLInputElement> & InputHTMLAttributes<HTMLInputElement>'
+
+[96msrc/components/features/file-viewer/viewers/generic-file-viewer.tsx[0m:[93m25[0m:[93m14[0m - [91merror[0m[90m TS2305: [0mModule '"@/lib/utils"' has no exported member 'formatFileSize'.
+
+[7m25[0m import { cn, formatFileSize } from '@/lib/utils';
+[7m  [0m [91m             ~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-viewer/viewers/generic-file-viewer.tsx[0m:[93m359[0m:[93m14[0m - [91merror[0m[90m TS2339: [0mProperty 'description' does not exist on type 'FileWithStats'.
+
+[7m359[0m        {file.description && (
+[7m   [0m [91m             ~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-viewer/viewers/generic-file-viewer.tsx[0m:[93m362[0m:[93m61[0m - [91merror[0m[90m TS2339: [0mProperty 'description' does not exist on type 'FileWithStats'.
+
+[7m362[0m          <span className="ml-2 text-muted-foreground">{file.description}</span>
+[7m   [0m [91m                                                            ~~~~~~~~~~~[0m
+
+[96msrc/components/file-browser/view-configuration/ViewConfigurationPanel.tsx[0m:[93m120[0m:[93m52[0m - [91merror[0m[90m TS2304: [0mCannot find name 'createPreset'.
+
+[7m120[0m  }, [presetName, presetDescription, currentConfig, createPreset]);
+[7m   [0m [91m                                                   ~~~~~~~~~~~~[0m
+
+[96msrc/components/file-browser/view-configuration/ViewConfigurationPanel.tsx[0m:[93m389[0m:[93m19[0m - [91merror[0m[90m TS2322: [0mType '"default" | "secondary"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+  Type '"default"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+
+[7m389[0m            <Badge variant={preset.category === 'custom' ? 'secondary' : 'default'}>{preset.category}</Badge>
+[7m   [0m [91m                  ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m24[0m:[93m4[0m
+    [7m 24[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 25[0m     primary: 'bg-primary text-primary-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 33[0m     destructive: 'bg-destructive text-destructive-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 34[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/panels/right-panel/right-panel.tsx[0m:[93m127[0m:[93m23[0m - [91merror[0m[90m TS2322: [0mType '{ selectedItems: DisplayableEntity[]; }' is not assignable to type 'IntrinsicAttributes & DetailsPanelProps'.
+  Property 'selectedItems' does not exist on type 'IntrinsicAttributes & DetailsPanelProps'.
+
+[7m127[0m       <DetailsPanelV2 selectedItems={selectedItems} />
+[7m   [0m [91m                      ~~~~~~~~~~~~~[0m
+
+[96msrc/components/settings/folders/folder-types.ts[0m:[93m125[0m:[93m2[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'totalRelations' does not exist in type 'FolderStatistics'.
+
+[7m125[0m  totalRelations: 0,
+[7m   [0m [91m ~~~~~~~~~~~~~~[0m
+
+[96msrc/components/settings/folders/hooks/use-folder-stats.ts[0m:[93m52[0m:[93m6[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'totalRelations' does not exist in type 'FolderStatistics'.
+
+[7m52[0m      totalRelations: 0,
+[7m  [0m [91m     ~~~~~~~~~~~~~~[0m
+
+[96msrc/components/settings/prompts/prompts-settings.tsx[0m:[93m293[0m:[93m8[0m - [91merror[0m[90m TS2322: [0mType '"default" | "outline"' is not assignable to type '"primary" | "secondary" | "outline" | "destructive" | "ghost" | "mono" | "dashed" | "dim" | "foreground" | "inverse" | null | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "secondary" | "outline" | "destructive" | "ghost" | "mono" | "dashed" | "dim" | "foreground" | "inverse" | null | undefined'.
+
+[7m293[0m        variant={showOnlyFavorites ? 'default' : 'outline'}
+[7m   [0m [91m       ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 24[0m     inverse: '',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~[0m
+    [7m 25[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/entity-header.tsx[0m:[93m185[0m:[93m37[0m - [91merror[0m[90m TS2322: [0mType '"default" | "link" | "secondary" | "outline" | "destructive" | "ghost"' is not assignable to type '"primary" | "secondary" | "outline" | "destructive" | "ghost" | "mono" | "dashed" | "dim" | "foreground" | "inverse" | null | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "secondary" | "outline" | "destructive" | "ghost" | "mono" | "dashed" | "dim" | "foreground" | "inverse" | null | undefined'.
+
+[7m185[0m     <Button key={`action-${index}`} variant={action.variant || 'default'} size="sm" asChild>
+[7m   [0m [91m                                    ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 24[0m     inverse: '',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~[0m
+    [7m 25[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/entity-header.tsx[0m:[93m192[0m:[93m36[0m - [91merror[0m[90m TS2322: [0mType '"default" | "link" | "secondary" | "outline" | "destructive" | "ghost"' is not assignable to type '"primary" | "secondary" | "outline" | "destructive" | "ghost" | "mono" | "dashed" | "dim" | "foreground" | "inverse" | null | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "secondary" | "outline" | "destructive" | "ghost" | "mono" | "dashed" | "dim" | "foreground" | "inverse" | null | undefined'.
+
+[7m192[0m    <Button key={`action-${index}`} variant={action.variant || 'default'} size="sm" onClick={action.onClick}>
+[7m   [0m [91m                                   ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 24[0m     inverse: '',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~[0m
+    [7m 25[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/entity-list.tsx[0m:[93m388[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType '"default" | "ghost"' is not assignable to type '"primary" | "mono" | "destructive" | "secondary" | "outline" | "dashed" | "ghost" | "dim" | "foreground" | "inverse" | null | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "mono" | "destructive" | "secondary" | "outline" | "dashed" | "ghost" | "dim" | "foreground" | "inverse" | null | undefined'.
+
+[7m388[0m         variant={viewType === 'grid' ? 'default' : 'ghost'}
+[7m   [0m [91m        ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 24[0m     inverse: '',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~[0m
+    [7m 25[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/entity-list.tsx[0m:[93m396[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType '"default" | "ghost"' is not assignable to type '"primary" | "mono" | "destructive" | "secondary" | "outline" | "dashed" | "ghost" | "dim" | "foreground" | "inverse" | null | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "mono" | "destructive" | "secondary" | "outline" | "dashed" | "ghost" | "dim" | "foreground" | "inverse" | null | undefined'.
+
+[7m396[0m         variant={viewType === 'list' ? 'default' : 'ghost'}
+[7m   [0m [91m        ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 24[0m     inverse: '',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~[0m
+    [7m 25[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/entity-list.tsx[0m:[93m404[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType '"default" | "ghost"' is not assignable to type '"primary" | "mono" | "destructive" | "secondary" | "outline" | "dashed" | "ghost" | "dim" | "foreground" | "inverse" | null | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "mono" | "destructive" | "secondary" | "outline" | "dashed" | "ghost" | "dim" | "foreground" | "inverse" | null | undefined'.
+
+[7m404[0m         variant={viewType === 'compact' ? 'default' : 'ghost'}
+[7m   [0m [91m        ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 24[0m     inverse: '',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~[0m
+    [7m 25[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/entity-list.tsx[0m:[93m449[0m:[93m8[0m - [91merror[0m[90m TS2322: [0mType '"default" | "outline"' is not assignable to type '"primary" | "mono" | "destructive" | "secondary" | "outline" | "dashed" | "ghost" | "dim" | "foreground" | "inverse" | null | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "mono" | "destructive" | "secondary" | "outline" | "dashed" | "ghost" | "dim" | "foreground" | "inverse" | null | undefined'.
+
+[7m449[0m        variant={showFiltersPanel ? 'default' : 'outline'}
+[7m   [0m [91m       ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 24[0m     inverse: '',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~[0m
+    [7m 25[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/entity-list.tsx[0m:[93m468[0m:[93m10[0m - [91merror[0m[90m TS2322: [0mType '"default" | "outline"' is not assignable to type '"success" | "info" | "warning" | "primary" | "destructive" | "secondary" | "outline" | null | undefined'.
+  Type '"default"' is not assignable to type '"success" | "info" | "warning" | "primary" | "destructive" | "secondary" | "outline" | null | undefined'.
+
+[7m468[0m          variant={selectedCategoryFilter === 'all' ? 'default' : 'outline'}
+[7m   [0m [91m         ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m24[0m:[93m4[0m
+    [7m 24[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 25[0m     primary: 'bg-primary text-primary-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 33[0m     destructive: 'bg-destructive text-destructive-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 34[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/entity-list.tsx[0m:[93m477[0m:[93m11[0m - [91merror[0m[90m TS2322: [0mType '"default" | "outline"' is not assignable to type '"success" | "info" | "warning" | "primary" | "destructive" | "secondary" | "outline" | null | undefined'.
+  Type '"default"' is not assignable to type '"success" | "info" | "warning" | "primary" | "destructive" | "secondary" | "outline" | null | undefined'.
+
+[7m477[0m           variant={selectedCategoryFilter === category ? 'default' : 'outline'}
+[7m   [0m [91m          ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m24[0m:[93m4[0m
+    [7m 24[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 25[0m     primary: 'bg-primary text-primary-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 33[0m     destructive: 'bg-destructive text-destructive-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 34[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/entity-list.tsx[0m:[93m494[0m:[93m10[0m - [91merror[0m[90m TS2322: [0mType '"default" | "outline"' is not assignable to type '"success" | "info" | "warning" | "primary" | "destructive" | "secondary" | "outline" | null | undefined'.
+  Type '"default"' is not assignable to type '"success" | "info" | "warning" | "primary" | "destructive" | "secondary" | "outline" | null | undefined'.
+
+[7m494[0m          variant={selectedTagFilter === 'all' ? 'default' : 'outline'}
+[7m   [0m [91m         ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m24[0m:[93m4[0m
+    [7m 24[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 25[0m     primary: 'bg-primary text-primary-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 33[0m     destructive: 'bg-destructive text-destructive-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 34[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/entity-list.tsx[0m:[93m503[0m:[93m11[0m - [91merror[0m[90m TS2322: [0mType '"default" | "outline"' is not assignable to type '"success" | "info" | "warning" | "primary" | "destructive" | "secondary" | "outline" | null | undefined'.
+  Type '"default"' is not assignable to type '"success" | "info" | "warning" | "primary" | "destructive" | "secondary" | "outline" | null | undefined'.
+
+[7m503[0m           variant={selectedTagFilter === tag ? 'default' : 'outline'}
+[7m   [0m [91m          ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m24[0m:[93m4[0m
+    [7m 24[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 25[0m     primary: 'bg-primary text-primary-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 33[0m     destructive: 'bg-destructive text-destructive-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 34[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/entity-list.tsx[0m:[93m565[0m:[93m10[0m - [91merror[0m[90m TS2322: [0mType '"default" | "outline"' is not assignable to type '"primary" | "mono" | "destructive" | "secondary" | "outline" | "dashed" | "ghost" | "dim" | "foreground" | "inverse" | null | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "mono" | "destructive" | "secondary" | "outline" | "dashed" | "ghost" | "dim" | "foreground" | "inverse" | null | undefined'.
+
+[7m565[0m          variant={currentPage === pageNum ? 'default' : 'outline'}
+[7m   [0m [91m         ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 24[0m     inverse: '',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~[0m
+    [7m 25[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/page-heading.tsx[0m:[93m41[0m:[93m15[0m - [91merror[0m[90m TS2322: [0mType '"link"' is not assignable to type '"primary" | "secondary" | "outline" | "destructive" | "ghost" | "mono" | "dashed" | "dim" | "foreground" | "inverse" | null | undefined'.
+
+[7m41[0m       <Button variant="link" className="pl-0 text-muted-foreground" asChild>
+[7m  [0m [91m              ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 24[0m     inverse: '',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~[0m
+    [7m 25[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/pagination.tsx[0m:[93m52[0m:[93m4[0m - [91merror[0m[90m TS2322: [0mType '"default"' is not assignable to type '"icon" | "lg" | "md" | "sm" | null | undefined'.
+
+[7m52[0m    size="default"
+[7m  [0m [91m   ~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m38[0m:[93m4[0m
+    [7m 38[0m    size: {
+    [7m   [0m [96m   ~~~~~~~[0m
+    [7m 39[0m     lg: 'h-10 rounded-md px-4 text-sm gap-1.5 [&_svg:not([class*=size-])]:size-4',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 42[0m     icon: 'size-8.5 rounded-md [&_svg:not([class*=size-])]:size-4 shrink-0',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 43[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'size' which is declared here on type 'IntrinsicAttributes & { isActive?: boolean | undefined; } & Pick<ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }, "size"> & ClassAttributes<...> & AnchorHTMLAttributes<...>'
+
+[96msrc/components/ui/pagination.tsx[0m:[93m66[0m:[93m4[0m - [91merror[0m[90m TS2322: [0mType '"default"' is not assignable to type '"icon" | "lg" | "md" | "sm" | null | undefined'.
+
+[7m66[0m    size="default"
+[7m  [0m [91m   ~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m38[0m:[93m4[0m
+    [7m 38[0m    size: {
+    [7m   [0m [96m   ~~~~~~~[0m
+    [7m 39[0m     lg: 'h-10 rounded-md px-4 text-sm gap-1.5 [&_svg:not([class*=size-])]:size-4',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 42[0m     icon: 'size-8.5 rounded-md [&_svg:not([class*=size-])]:size-4 shrink-0',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 43[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'size' which is declared here on type 'IntrinsicAttributes & { isActive?: boolean | undefined; } & Pick<ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }, "size"> & ClassAttributes<...> & AnchorHTMLAttributes<...>'
+
+[96msrc/components/ui/toggle-group.tsx[0m:[93m10[0m:[93m2[0m - [91merror[0m[90m TS2322: [0mType '"default"' is not assignable to type '"lg" | "md" | "sm" | null | undefined'.
+
+[7m10[0m  size: 'default',
+[7m  [0m [91m ~~~~[0m
+
+  [96msrc/components/ui/toggle.tsx[0m:[93m16[0m:[93m4[0m
+    [7m 16[0m    size: {
+    [7m   [0m [96m   ~~~~~~~[0m
+    [7m 17[0m     lg: 'h-10 min-w-10 rounded-md px-2.5 text-sm gap-1.5 [&_svg]:size-4',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 19[0m     sm: 'h-7 min-w-7 rounded-md px-1.25 text-xs gap-1 [&_svg]:size-3.5',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 20[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'size' which is declared here on type 'VariantProps<(props?: (ConfigVariants<{ variant: { default: string; outline: string; }; size: { lg: string; md: string; sm: string; }; }> & ClassProp) | undefined) => string>'
+
+[96msrc/components/views/all-images/all-images-content-view.tsx[0m:[93m246[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType '"primary"' is not assignable to type 'CardVariant | undefined'.
+
+[7m246[0m     variant="primary"
+[7m   [0m [91m    ~~~~~~~[0m
+
+  [96msrc/components/features/file-browser/file-browser.tsx[0m:[93m79[0m:[93m2[0m
+    [7m79[0m  variant?: CardVariant;
+    [7m  [0m [96m ~~~~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & FileBrowserProps'
+
+[96msrc/components/views/development/charts/tech-metrics.tsx[0m:[93m270[0m:[93m16[0m - [91merror[0m[90m TS2322: [0mType '"default" | "secondary"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+  Type '"default"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+
+[7m270[0m         <Badge variant={technicalMetrics.databaseMetrics.errorRate < 1 ? 'default' : 'secondary'}>
+[7m   [0m [91m               ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m24[0m:[93m4[0m
+    [7m 24[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 25[0m     primary: 'bg-primary text-primary-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 33[0m     destructive: 'bg-destructive text-destructive-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 34[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/views/development/charts/tech-metrics.tsx[0m:[93m295[0m:[93m16[0m - [91merror[0m[90m TS2322: [0mType '"default" | "secondary"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+  Type '"default"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+
+[7m295[0m         <Badge variant={technicalMetrics.apiMetrics.errorRate < 1 ? 'default' : 'secondary'}>
+[7m   [0m [91m               ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m24[0m:[93m4[0m
+    [7m 24[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 25[0m     primary: 'bg-primary text-primary-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 33[0m     destructive: 'bg-destructive text-destructive-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 34[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/views/development/charts/tech-metrics.tsx[0m:[93m436[0m:[93m17[0m - [91merror[0m[90m TS2322: [0mType '"default" | "secondary"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+  Type '"default"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+
+[7m436[0m          <Badge variant={imageProcessingPerformance.successRate > 99 ? 'default' : 'secondary'}>
+[7m   [0m [91m                ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m24[0m:[93m4[0m
+    [7m 24[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 25[0m     primary: 'bg-primary text-primary-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 33[0m     destructive: 'bg-destructive text-destructive-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 34[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/views/documents/documents-content-view.tsx[0m:[93m31[0m:[93m17[0m - [91merror[0m[90m TS2740: [0mType 'DocumentWithStats' is missing the following properties from type 'DocumentWithStats': entityType, hash, folderId, isFavorite, and 16 more.
+
+[7m31[0m   <DocumentCard document={document} onClick={onDocumentClick} className="h-full" />
+[7m  [0m [91m                ~~~~~~~~[0m
+
+  [96msrc/components/cards/document-card/document-card.tsx[0m:[93m11[0m:[93m2[0m
+    [7m11[0m  document: DocumentWithStats;
+    [7m  [0m [96m ~~~~~~~~[0m
+    The expected type comes from property 'document' which is declared here on type 'IntrinsicAttributes & DocumentCardProps'
+
+[96msrc/components/views/files/files-view-2.tsx[0m:[93m72[0m:[93m15[0m - [91merror[0m[90m TS2345: [0mArgument of type 'DocumentWithStats' is not assignable to parameter of type 'DisplayableEntity'.
+  Type 'DocumentWithStats' is not assignable to type 'AudioWithStats & { entityType: "audio"; }'.
+    Type 'DocumentWithStats' is missing the following properties from type 'AudioWithStats': entityType, hash, folderId, isFavorite, and 21 more.
+
+[7m72[0m    files.push(...Object.values(documentsRecord));
+[7m  [0m [91m              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/views/files/files-view-2.tsx[0m:[93m166[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType '"image"' is not assignable to type 'EntityStatsType | "mixed" | undefined'.
+
+[7m166[0m     entityType="image" // Usamos image como base para el FileBrowser
+[7m   [0m [91m    ~~~~~~~~~~[0m
+
+  [96msrc/components/features/file-browser/file-browser.tsx[0m:[93m53[0m:[93m2[0m
+    [7m53[0m  entityType?: EntityStatsType | 'mixed';
+    [7m  [0m [96m ~~~~~~~~~~[0m
+    The expected type comes from property 'entityType' which is declared here on type 'IntrinsicAttributes & FileBrowserProps'
+
+[96msrc/components/views/files/files-view.tsx[0m:[93m72[0m:[93m15[0m - [91merror[0m[90m TS2345: [0mArgument of type 'DocumentWithStats' is not assignable to parameter of type 'DisplayableEntity'.
+  Type 'DocumentWithStats' is not assignable to type 'AudioWithStats & { entityType: "audio"; }'.
+    Type 'DocumentWithStats' is missing the following properties from type 'AudioWithStats': entityType, hash, folderId, isFavorite, and 21 more.
+
+[7m72[0m    files.push(...Object.values(documentsRecord));
+[7m  [0m [91m              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/views/files/files-view.tsx[0m:[93m166[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType '"image"' is not assignable to type 'EntityStatsType | "mixed" | undefined'.
+
+[7m166[0m     entityType="image" // Usamos image como base para el FileBrowser
+[7m   [0m [91m    ~~~~~~~~~~[0m
+
+  [96msrc/components/features/file-browser/file-browser.tsx[0m:[93m53[0m:[93m2[0m
+    [7m53[0m  entityType?: EntityStatsType | 'mixed';
+    [7m  [0m [96m ~~~~~~~~~~[0m
+    The expected type comes from property 'entityType' which is declared here on type 'IntrinsicAttributes & FileBrowserProps'
+
+[96msrc/components/views/mixed/mixed-view.tsx[0m:[93m227[0m:[93m8[0m - [91merror[0m[90m TS2740: [0mType 'DocumentWithStats' is missing the following properties from type 'DocumentWithStats': entityType, hash, folderId, isFavorite, and 16 more.
+
+[7m227[0m        document={item as DocumentWithStats}
+[7m   [0m [91m       ~~~~~~~~[0m
+
+  [96msrc/components/cards/document-card/document-card.tsx[0m:[93m11[0m:[93m2[0m
+    [7m11[0m  document: DocumentWithStats;
+    [7m  [0m [96m ~~~~~~~~[0m
+    The expected type comes from property 'document' which is declared here on type 'IntrinsicAttributes & DocumentCardProps'
+
+[96msrc/components/views/search/search-view.tsx[0m:[93m122[0m:[93m16[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ id: string; name: string; src: string; alt: string; width: number; height: number; thumbnail: string | null; type: string; path: string; size: number; mimeType: string; metadata: null; url: string; parsedMetadata: undefined; ... 4 more ...; updatedAt: Date; }[]' is not assignable to parameter of type 'EntityWithStats<EntityStats>[]'.
+  Type '{ id: string; name: string; src: string; alt: string; width: number; height: number; thumbnail: string | null; type: string; path: string; size: number; mimeType: string; metadata: null; url: string; parsedMetadata: undefined; ... 4 more ...; updatedAt: Date; }' is not assignable to type 'EntityWithStats<EntityStats>'.
+    Types of property 'stats' are incompatible.
+      Type '{ totalItems: number; lastAccessed: Date; accessCount: number; }' is missing the following properties from type 'EntityStats': imageCount, videoCount, albumCount, collectionCount, and 16 more.
+
+[7m122[0m     openViewer(viewerItems, currentIndex);
+[7m   [0m [91m               ~~~~~~~~~~~[0m
+
+[96msrc/components/views/uploaded-images/uploaded-images-view.tsx[0m:[93m72[0m:[93m5[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ id: string; name: string; entityType: "uploaded-image"; description: null; createdAt: Date; updatedAt: Date; stats: { totalItems: number; totalAssociations: number; lastUpdated: Date; }; }[]' is not assignable to parameter of type 'SetStateAction<EntityWithStats<EntityStats>[]>'.
+  Type '{ id: string; name: string; entityType: "uploaded-image"; description: null; createdAt: Date; updatedAt: Date; stats: { totalItems: number; totalAssociations: number; lastUpdated: Date; }; }[]' is not assignable to type 'EntityWithStats<EntityStats>[]'.
+    Type '{ id: string; name: string; entityType: "uploaded-image"; description: null; createdAt: Date; updatedAt: Date; stats: { totalItems: number; totalAssociations: number; lastUpdated: Date; }; }' is not assignable to type 'EntityWithStats<EntityStats>'.
+      Types of property 'stats' are incompatible.
+        Type '{ totalItems: number; totalAssociations: number; lastUpdated: Date; }' is missing the following properties from type 'EntityStats': imageCount, videoCount, albumCount, collectionCount, and 14 more.
+
+[7m 72[0m     response.items.map((item) => ({
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m 73[0m      id: item.id,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m 83[0m      },
+[7m   [0m [91m~~~~~~~[0m
+[7m 84[0m     })) || []
+[7m   [0m [91m~~~~~~~~~~~~~[0m
+
+[96msrc/components/views/wildcards/wildcard-content-view.tsx[0m:[93m109[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType '"default" | "secondary"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+  Type '"default"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+
+[7m109[0m       variant={selectedWildcard.isActive ? 'default' : 'secondary'}
+[7m   [0m [91m      ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m24[0m:[93m4[0m
+    [7m 24[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 25[0m     primary: 'bg-primary text-primary-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 33[0m     destructive: 'bg-destructive text-destructive-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 34[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/views/workflows/workflow-content-view.tsx[0m:[93m78[0m:[93m15[0m - [91merror[0m[90m TS2322: [0mType '"default" | "destructive"' is not assignable to type '"primary" | "secondary" | "outline" | "destructive" | "ghost" | "mono" | "dashed" | "dim" | "foreground" | "inverse" | null | undefined'.
+  Type '"default"' is not assignable to type '"primary" | "secondary" | "outline" | "destructive" | "ghost" | "mono" | "dashed" | "dim" | "foreground" | "inverse" | null | undefined'.
+
+[7m78[0m       <Button variant={isRunning ? 'destructive' : 'default'} size="sm" onClick={toggleWorkflow}>
+[7m  [0m [91m              ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 24[0m     inverse: '',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~[0m
+    [7m 25[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/views/workflows/workflow-content-view.tsx[0m:[93m118[0m:[93m19[0m - [91merror[0m[90m TS2322: [0mType '"default" | "secondary"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+  Type '"default"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+
+[7m118[0m            <Badge variant={workflowData.status === 'idle' ? 'secondary' : 'default'}>
+[7m   [0m [91m                  ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m24[0m:[93m4[0m
+    [7m 24[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 25[0m     primary: 'bg-primary text-primary-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 33[0m     destructive: 'bg-destructive text-destructive-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 34[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/views/workflows/workflow-content-view.tsx[0m:[93m218[0m:[93m15[0m - [91merror[0m[90m TS2322: [0mType '"default" | "secondary" | "outline"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+  Type '"default"' is not assignable to type '"info" | "success" | "warning" | "primary" | "secondary" | "outline" | "destructive" | null | undefined'.
+
+[7m218[0m               variant={
+[7m   [0m [91m              ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m24[0m:[93m4[0m
+    [7m 24[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 25[0m     primary: 'bg-primary text-primary-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 33[0m     destructive: 'bg-destructive text-destructive-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 34[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/views/world-items/world-item-content-view.tsx[0m:[93m23[0m:[93m29[0m - [91merror[0m[90m TS2345: [0mArgument of type 'import("D:/DEV/image-manager/src/types/file-browser/entity-stats").EntityWithStats<import("D:/DEV/image-manager/src/types/file-browser/entity-stats").EntityStats>' is not assignable to parameter of type 'import("D:/DEV/image-manager/src/types/entities/entity.types").EntityWithStats<import("D:/DEV/image-manager/src/types/entities/entity.types").EntityStats>'.
+  Types of property 'entityType' are incompatible.
+    Type 'EntityStatsType' is not assignable to type 'EntityStatsTypeValue'.
+
+[7m23[0m    toggleSelection(item.id, item);
+[7m  [0m [91m                            ~~~~[0m
+
+[96msrc/components/views/world-items/world-item-content-view.tsx[0m:[93m44[0m:[93m8[0m - [91merror[0m[90m TS2322: [0mType '{ items: EntityWithStats[]; isLoading: boolean; error: string | null; toggleItemSelection: (item: EntityWithStats) => void; currentContainerId: string | null; containerName: string | null; emptyState: { ...; }; onRefresh: () => Promise<...>; }' is not assignable to type 'BaseContentProps'.
+  Types of property 'items' are incompatible.
+    Type 'import("D:/DEV/image-manager/src/types/file-browser/entity-stats").EntityWithStats<import("D:/DEV/image-manager/src/types/file-browser/entity-stats").EntityStats>[]' is not assignable to type 'import("D:/DEV/image-manager/src/types/entities/entity.types").EntityWithStats<import("D:/DEV/image-manager/src/types/entities/entity.types").EntityStats>[]'.
+      Type 'import("D:/DEV/image-manager/src/types/file-browser/entity-stats").EntityWithStats<import("D:/DEV/image-manager/src/types/file-browser/entity-stats").EntityStats>' is not assignable to type 'import("D:/DEV/image-manager/src/types/entities/entity.types").EntityWithStats<import("D:/DEV/image-manager/src/types/entities/entity.types").EntityStats>'.
+        Types of property 'entityType' are incompatible.
+          Type 'EntityStatsType' is not assignable to type 'EntityStatsTypeValue'.
+
+[7m44[0m  const contentProps: BaseContentProps = useMemo(
+[7m  [0m [91m       ~~~~~~~~~~~~[0m
+
+[96msrc/components/views/world-items/world-item-content-view.tsx[0m:[93m46[0m:[93m11[0m - [91merror[0m[90m TS2352: [0mConversion of type 'ImageWithStats[]' to type 'EntityWithStats<EntityStats>[]' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type 'ImageWithStats' is not comparable to type 'EntityWithStats<EntityStats>'.
+    Types of property 'stats' are incompatible.
+      Type 'ImageStatistics' is missing the following properties from type 'EntityStats': albumsCount, folderCount, audioCount, documentCount, and 3 more.
+
+[7m46[0m    items: images as EntityWithStats[],
+[7m  [0m [91m          ~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/config/entity-type-configs.ts[0m:[93m175[0m:[93m14[0m - [91merror[0m[90m TS2739: [0mType '{ image: { type: EntityStatsType.IMAGE; displayName: string; displayNamePlural: string; icon: ForwardRefExoticComponent<Omit<LucideProps, "ref"> & RefAttributes<SVGSVGElement>>; ... 6 more ...; metadata: { ...; }; }; ... 16 more ...; uploadedImage: { ...; }; }' is missing the following properties from type 'Record<EntityStatsType, EntityTypeConfig>': jsonFile, file3d
+
+[7m175[0m export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
+[7m   [0m [91m             ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/hooks/use-download-manager.ts[0m:[93m139[0m:[93m58[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ id: string; name: string; path: any; }' is not assignable to parameter of type 'DisplayableEntity | FileItem'.
+  Type '{ id: string; name: string; path: any; }' is not assignable to type 'UploadedImageWithStats & { entityType: "uploaded-image"; }'.
+    Type '{ id: string; name: string; path: any; }' is missing the following properties from type 'UploadedImageWithStats': entityType, stats, uploadedAt, dimensions, and 12 more.
+
+[7m139[0m      result = await enhancedDownloadService.downloadFile(downloadFile, downloadItem.options);
+[7m   [0m [91m                                                         ~~~~~~~~~~~~[0m
+
+[96msrc/hooks/use-download-manager.ts[0m:[93m148[0m:[93m67[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ id: string; name: string; path: any; }[]' is not assignable to parameter of type '(DisplayableEntity | FileItem)[]'.
+  Type '{ id: string; name: string; path: any; }' is not assignable to type 'DisplayableEntity | FileItem'.
+    Type '{ id: string; name: string; path: any; }' is not assignable to type 'UploadedImageWithStats & { entityType: "uploaded-image"; }'.
+      Type '{ id: string; name: string; path: any; }' is missing the following properties from type 'UploadedImageWithStats': entityType, stats, uploadedAt, dimensions, and 12 more.
+
+[7m148[0m      result = await enhancedDownloadService.downloadMultipleFiles(downloadFiles, downloadItem.options);
+[7m   [0m [91m                                                                  ~~~~~~~~~~~~~[0m
+
+[96msrc/hooks/use-grid-view-config.ts[0m:[93m119[0m:[93m39[0m - [91merror[0m[90m TS2363: [0mThe right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+
+[7m119[0m      itemHeight: config.minItemSize * (config.aspectRatio || 1),
+[7m   [0m [91m                                      ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/hooks/use-grid-view-config.ts[0m:[93m156[0m:[93m34[0m - [91merror[0m[90m TS2363: [0mThe right-hand side of an arithmetic operation must be of type 'any', 'number', 'bigint' or an enum type.
+
+[7m156[0m    const itemHeight = itemSize * (config.aspectRatio || 1);
+[7m   [0m [91m                                 ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/hooks/use-grid-view-config.ts[0m:[93m192[0m:[93m4[0m - [91merror[0m[90m TS2322: [0mType '{ position: "tooltip" | GridLabelPosition; showFullName: boolean; showMetadata?: boolean | undefined; maxLines: number; showTooltip?: boolean | undefined; showExtension: boolean; showSize: boolean; showDate: boolean; fontSize: "xs" | "sm" | "md"; truncate: boolean; }' is not assignable to type 'LabelConfig'.
+  Types of property 'position' are incompatible.
+    Type '"tooltip" | GridLabelPosition' is not assignable to type '"none" | "tooltip" | "bottom" | "overlay"'.
+      Type '"top"' is not assignable to type '"none" | "tooltip" | "bottom" | "overlay"'.
+
+[7m192[0m    return {
+[7m   [0m [91m   ~~~~~~[0m
+
+[96msrc/lib/api/client/group.client.ts[0m:[93m4[0m:[93m15[0m - [91merror[0m[90m TS2305: [0mModule '"@/types/entities/group"' has no exported member 'GroupCreateInput'.
+
+[7m4[0m import type { GroupCreateInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group';
+[7m [0m [91m              ~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/api/client/group.client.ts[0m:[93m4[0m:[93m33[0m - [91merror[0m[90m TS2305: [0mModule '"@/types/entities/group"' has no exported member 'GroupUpdateInput'.
+
+[7m4[0m import type { GroupCreateInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group';
+[7m [0m [91m                                ~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/config/settings.ts[0m:[93m8[0m:[93m7[0m - [91merror[0m[90m TS2741: [0mProperty 'fileBrowser' is missing in type '{ appearance: { theme: "system"; fontSize: number; language: "es"; reducedAnimations: false; highContrast: false; }; notifications: { enabled: true; email: false; desktop: true; frequency: "daily"; }; ... 4 more ...; system: { ...; }; }' but required in type '{ version: string; lastUpdate: Date; appearance: { theme: "light" | "dark" | "system"; language: "es" | "en"; fontSize: number; highContrast: boolean; reducedAnimations: boolean; }; ... 4 more ...; fileBrowser: { ...; }; }'.
+
+[7m8[0m const DEFAULT_SETTINGS: Settings = {
+[7m [0m [91m      ~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/transformers/settings/schema.ts[0m:[93m431[0m:[93m2[0m
+    [7m431[0m  fileBrowser: fileBrowserConfigSchema.default({}),
+    [7m   [0m [96m ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'fileBrowser' is declared here.
+
+[96msrc/lib/contexts/file-context.tsx[0m:[93m288[0m:[93m14[0m - [91merror[0m[90m TS2352: [0mConversion of type '{ id: `${string}-${string}-${string}-${string}-${string}`; name: string; description: null; createdAt: Date; updatedAt: Date; entityType: "image"; stats: {}; path: string; size: number; type: string; modified: Date; thumbnail: string; }' to type 'EntityWithStats<EntityStats>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'stats' are incompatible.
+    Type '{}' is missing the following properties from type 'EntityStats': imageCount, videoCount, albumCount, collectionCount, and 17 more.
+
+[7m288[0m       return {
+[7m   [0m [91m             ~[0m
+[7m289[0m        id: crypto.randomUUID(),
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m300[0m        thumbnail,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~[0m
+[7m301[0m       } as EntityWithStats;
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/hooks/entities/use-entity-conversion.ts[0m:[93m133[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType 'DocumentWithStats' is not assignable to type 'DisplayableEntity | null'.
+  Type 'DocumentWithStats' is not assignable to type 'AudioWithStats & { entityType: "audio"; }'.
+    Type 'DocumentWithStats' is missing the following properties from type 'AudioWithStats': entityType, hash, folderId, isFavorite, and 21 more.
+
+[7m133[0m     return { ...fileItem, entityType: 'document' } as DocumentWithStats;
+[7m   [0m [91m    ~~~~~~[0m
+
+[96msrc/lib/keyboard/use-keyboard-shortcuts.ts[0m:[93m68[0m:[93m38[0m - [91merror[0m[90m TS2345: [0mArgument of type '(event: KeyboardEvent) => boolean' is not assignable to parameter of type 'EventListenerOrEventListenerObject'.
+  Type '(event: KeyboardEvent) => boolean' is not assignable to type 'EventListener'.
+    Types of parameters 'event' and 'evt' are incompatible.
+      Type 'Event' is missing the following properties from type 'KeyboardEvent': altKey, charCode, code, ctrlKey, and 17 more.
+
+[7m68[0m   target.addEventListener('keydown', handleKeyDown);
+[7m  [0m [91m                                     ~~~~~~~~~~~~~[0m
+
+[96msrc/lib/keyboard/use-keyboard-shortcuts.ts[0m:[93m71[0m:[93m42[0m - [91merror[0m[90m TS2345: [0mArgument of type '(event: KeyboardEvent) => boolean' is not assignable to parameter of type 'EventListenerOrEventListenerObject'.
+  Type '(event: KeyboardEvent) => boolean' is not assignable to type 'EventListener'.
+    Types of parameters 'event' and 'evt' are incompatible.
+      Type 'Event' is missing the following properties from type 'KeyboardEvent': altKey, charCode, code, ctrlKey, and 17 more.
+
+[7m71[0m    target.removeEventListener('keydown', handleKeyDown);
+[7m  [0m [91m                                         ~~~~~~~~~~~~~[0m
+
+[96msrc/lib/utils/album/helpers.ts[0m:[93m36[0m:[93m29[0m - [91merror[0m[90m TS2339: [0mProperty 'totalSize' does not exist on type 'AlbumStatistics'.
+
+[7m36[0m  if (!album || album.stats?.totalSize === undefined) return 'Desconocido';
+[7m  [0m [91m                            ~~~~~~~~~[0m
+
+[96msrc/lib/utils/album/helpers.ts[0m:[93m37[0m:[93m33[0m - [91merror[0m[90m TS2339: [0mProperty 'totalSize' does not exist on type 'AlbumStatistics'.
+
+[7m37[0m  return formatBytes(album.stats.totalSize);
+[7m  [0m [91m                                ~~~~~~~~~[0m
+
+[96msrc/lib/utils/album/helpers.ts[0m:[93m143[0m:[93m29[0m - [91merror[0m[90m TS2339: [0mProperty 'totalSize' does not exist on type 'AlbumStatistics'.
+
+[7m143[0m    totalSize += album.stats.totalSize || 0;
+[7m   [0m [91m                            ~~~~~~~~~[0m
+
+[96msrc/server/routes/documents.ts[0m:[93m111[0m:[93m44[0m - [91merror[0m[90m TS2345: [0mArgument of type 'DocumentCreateInput' is not assignable to parameter of type '{ name: string; title: string | null; size: number; path: string; mimeType: string; extension: string; hash: string; folderId: string; isFavorite: boolean; content: string | null; summary: string | null; ... 12 more ...; encrypted: boolean | null; }'.
+  Types of property 'title' are incompatible.
+    Type 'string | null | undefined' is not assignable to type 'string | null'.
+      Type 'undefined' is not assignable to type 'string | null'.
+
+[7m111[0m   const newDocument = await createDocument(validatedData);
+[7m   [0m [91m                                           ~~~~~~~~~~~~~[0m
+
+[96msrc/services/cache/file-browser-cache.service.ts[0m:[93m364[0m:[93m25[0m - [91merror[0m[90m TS2341: [0mProperty 'evictLRU' is private and only accessible within class 'LRUCache<K, V>'.
+
+[7m364[0m     this.thumbnailCache.evictLRU();
+[7m   [0m [91m                        ~~~~~~~~[0m
+
+[96msrc/services/cache/file-browser-cache.service.ts[0m:[93m367[0m:[93m24[0m - [91merror[0m[90m TS2341: [0mProperty 'evictLRU' is private and only accessible within class 'LRUCache<K, V>'.
+
+[7m367[0m     this.metadataCache.evictLRU();
+[7m   [0m [91m                       ~~~~~~~~[0m
+
+[96msrc/services/cache/file-browser-cache.service.ts[0m:[93m370[0m:[93m25[0m - [91merror[0m[90m TS2341: [0mProperty 'evictLRU' is private and only accessible within class 'LRUCache<K, V>'.
+
+[7m370[0m     this.directoryCache.evictLRU();
+[7m   [0m [91m                        ~~~~~~~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.test.ts[0m:[93m54[0m:[93m1[0m - [91merror[0m[90m TS2741: [0mProperty 'supports' is missing in type 'Mock<Procedure>' but required in type '{ new (items: Record<string, string | Blob | PromiseLike<string | Blob>>, options?: ClipboardItemOptions | undefined): ClipboardItem; prototype: ClipboardItem; supports(type: string): boolean; }'.
+
+[7m54[0m global.ClipboardItem = vi.fn().mockImplementation((data) => ({ data }));
+[7m  [0m [91m~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96mnode_modules/typescript/lib/lib.dom.d.ts[0m:[93m6250[0m:[93m5[0m
+    [7m6250[0m     supports(type: string): boolean;
+    [7m    [0m [96m    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'supports' is declared here.
+
+[96msrc/services/clipboard/clipboard-manager.test.ts[0m:[93m75[0m:[93m7[0m - [91merror[0m[90m TS2352: [0mConversion of type '{ id: string; fileName: string; filePath: string; entityType: "image"; stats: { formattedSize: string; typeLabel: string; iconName: string; colorCode: string; daysSinceModified: number; daysSinceAccessed: number; ... 4 more ...; shortPath: string; }; }' to type 'DisplayableEntity' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ id: string; fileName: string; filePath: string; entityType: "image"; stats: { formattedSize: string; typeLabel: string; iconName: string; colorCode: string; daysSinceModified: number; daysSinceAccessed: number; ... 4 more ...; shortPath: string; }; }' is not comparable to type 'ImageWithStats & { entityType: "image"; }'.
+    Type '{ id: string; fileName: string; filePath: string; entityType: "image"; stats: { formattedSize: string; typeLabel: string; iconName: string; colorCode: string; daysSinceModified: number; daysSinceAccessed: number; ... 4 more ...; shortPath: string; }; }' is missing the following properties from type 'ImageWithStats': thumbnailUrl, fullUrl, name, description, and 20 more.
+
+[7m 75[0m       {
+[7m   [0m [91m      ~[0m
+[7m 76[0m         id: '1',
+[7m   [0m [91m~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m 92[0m         },
+[7m   [0m [91m~~~~~~~~~~[0m
+[7m 93[0m       } as AnyEntityWithStats,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.test.ts[0m:[93m94[0m:[93m7[0m - [91merror[0m[90m TS2352: [0mConversion of type '{ id: string; fileName: string; filePath: string; entityType: "document"; stats: { formattedSize: string; typeLabel: string; iconName: string; colorCode: string; daysSinceModified: number; daysSinceAccessed: number; ... 4 more ...; shortPath: string; }; }' to type 'DisplayableEntity' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ id: string; fileName: string; filePath: string; entityType: "document"; stats: { formattedSize: string; typeLabel: string; iconName: string; colorCode: string; daysSinceModified: number; daysSinceAccessed: number; ... 4 more ...; shortPath: string; }; }' is not comparable to type 'DocumentWithStats & { entityType: "document"; }'.
+    Type '{ id: string; fileName: string; filePath: string; entityType: "document"; stats: { formattedSize: string; typeLabel: string; iconName: string; colorCode: string; daysSinceModified: number; daysSinceAccessed: number; ... 4 more ...; shortPath: string; }; }' is missing the following properties from type 'DocumentWithStats': name, path, size, hash, and 22 more.
+
+[7m 94[0m       {
+[7m   [0m [91m      ~[0m
+[7m 95[0m         id: '2',
+[7m   [0m [91m~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m111[0m         },
+[7m   [0m [91m~~~~~~~~~~[0m
+[7m112[0m       } as AnyEntityWithStats,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.test.ts[0m:[93m124[0m:[93m38[0m - [91merror[0m[90m TS2339: [0mProperty 'fileName' does not exist on type 'DisplayableEntity'.
+  Property 'fileName' does not exist on type 'ImageWithStats & { entityType: "image"; }'.
+
+[7m124[0m       expect(clipboardData?.items[0].fileName || clipboardData?.items[0].name).toBe('test-image.png');
+[7m   [0m [91m                                     ~~~~~~~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.test.ts[0m:[93m144[0m:[93m9[0m - [91merror[0m[90m TS2352: [0mConversion of type '{ id: string; fileName: string; filePath: string; entityType: "file"; }' to type 'DisplayableEntity' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Type '{ id: string; fileName: string; filePath: string; entityType: "file"; }' is not comparable to type 'UploadedImageWithStats & { entityType: "uploaded-image"; }'.
+    Type '{ id: string; fileName: string; filePath: string; entityType: "file"; }' is missing the following properties from type 'UploadedImageWithStats': stats, uploadedAt, dimensions, url, and 13 more.
+
+[7m144[0m         {
+[7m   [0m [91m        ~[0m
+[7m145[0m           id: '',
+[7m   [0m [91m~~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m148[0m           entityType: 'file',
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m149[0m         } as AnyEntityWithStats,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m125[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'INVALID_OPERATION' does not exist on type 'typeof FileErrorCode'.
+
+[7m125[0m           FileErrorCode.INVALID_OPERATION
+[7m   [0m [91m                        ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m138[0m:[93m69[0m - [91merror[0m[90m TS2339: [0mProperty 'id' does not exist on type 'never'.
+
+[7m138[0m         ? `"${'name' in items[0] ? items[0].name : `item-${items[0].id}`}" copiado al portapapeles`
+[7m   [0m [91m                                                                    ~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m163[0m:[93m25[0m - [91merror[0m[90m TS2339: [0mProperty 'INVALID_OPERATION' does not exist on type 'typeof FileErrorCode'.
+
+[7m163[0m           FileErrorCode.INVALID_OPERATION
+[7m   [0m [91m                        ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m176[0m:[93m69[0m - [91merror[0m[90m TS2339: [0mProperty 'id' does not exist on type 'never'.
+
+[7m176[0m         ? `"${'name' in items[0] ? items[0].name : `item-${items[0].id}`}" cortado al portapapeles`
+[7m   [0m [91m                                                                    ~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m232[0m:[93m74[0m - [91merror[0m[90m TS2345: [0mArgument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+
+[7m232[0m       logger.error('Error generating clipboard data in format:', format, error);
+[7m   [0m [91m                                                                         ~~~~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m369[0m:[93m124[0m - [91merror[0m[90m TS2339: [0mProperty 'id' does not exist on type 'never'.
+
+[7m369[0m         warnings.push(`Moving directories may have restrictions: ${readonlyItems.map(i => 'name' in i ? i.name : `item-${i.id}`).join(', ')}`);
+[7m   [0m [91m                                                                                                                           ~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m549[0m:[93m15[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'SystemClipboardOptions'.
+
+[7m549[0m export type { SystemClipboardOptions, ClipboardValidation };
+[7m   [0m [91m              ~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m549[0m:[93m39[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'ClipboardValidation'.
+
+[7m549[0m export type { SystemClipboardOptions, ClipboardValidation };
+[7m   [0m [91m                                      ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/download/download.service.ts[0m:[93m122[0m:[93m11[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 4.
+
+[7m122[0m           {
+[7m   [0m [91m          ~[0m
+[7m123[0m             showToast: true,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m125[0m             cancellable: true
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m126[0m           }
+[7m   [0m [91m~~~~~~~~~~~[0m
+
+[96msrc/services/download/download.service.ts[0m:[93m225[0m:[93m9[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 4.
+
+[7m225[0m         {
+[7m   [0m [91m        ~[0m
+[7m226[0m           showToast: true,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m228[0m           cancellable: true
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m229[0m         }
+[7m   [0m [91m~~~~~~~~~[0m
+
+[96msrc/services/download/download.service.ts[0m:[93m494[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'DownloadFormat'.
+
+[7m494[0m   DownloadFormat,
+[7m   [0m [91m  ~~~~~~~~~~~~~~[0m
+
+[96msrc/services/download/download.service.ts[0m:[93m495[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'DownloadQuality'.
+
+[7m495[0m   DownloadQuality,
+[7m   [0m [91m  ~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/download/download.service.ts[0m:[93m496[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'DownloadOptions'.
+
+[7m496[0m   DownloadOptions,
+[7m   [0m [91m  ~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/download/download.service.ts[0m:[93m497[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'DownloadResult'.
+
+[7m497[0m   DownloadResult,
+[7m   [0m [91m  ~~~~~~~~~~~~~~[0m
+
+[96msrc/services/download/download.service.ts[0m:[93m498[0m:[93m3[0m - [91merror[0m[90m TS2484: [0mExport declaration conflicts with exported declaration of 'BatchDownloadResult'.
+
+[7m498[0m   BatchDownloadResult
+[7m   [0m [91m  ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/file-entity-mapper/file-entity-mapper.service.ts[0m:[93m352[0m:[93m44[0m - [91merror[0m[90m TS2345: [0mArgument of type 'DocumentCreateInput' is not assignable to parameter of type '{ name: string; title: string | null; size: number; path: string; mimeType: string; extension: string; hash: string; folderId: string; isFavorite: boolean; content: string | null; summary: string | null; ... 12 more ...; encrypted: boolean | null; }'.
+  Types of property 'title' are incompatible.
+    Type 'string | null | undefined' is not assignable to type 'string | null'.
+      Type 'undefined' is not assignable to type 'string | null'.
+
+[7m352[0m      const document = await createDocument(documentData);
+[7m   [0m [91m                                           ~~~~~~~~~~~~[0m
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m64[0m:[93m8[0m - [91merror[0m[90m TS2459: [0mModule '"./file.service"' declares 'FileCopyMoveResult' locally, but it is not exported.
+
+[7m64[0m   type FileCopyMoveResult,
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/services/file/file.service.ts[0m:[93m23[0m:[93m2[0m
+    [7m23[0m  type FileCopyMoveResult,
+    [7m  [0m [96m ~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'FileCopyMoveResult' is declared here.
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m65[0m:[93m8[0m - [91merror[0m[90m TS2459: [0mModule '"./file.service"' declares 'FileOperationResult' locally, but it is not exported.
+
+[7m65[0m   type FileOperationResult,
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/services/file/file.service.ts[0m:[93m27[0m:[93m2[0m
+    [7m27[0m  type FileOperationResult,
+    [7m  [0m [96m ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'FileOperationResult' is declared here.
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m66[0m:[93m8[0m - [91merror[0m[90m TS2459: [0mModule '"./file.service"' declares 'FileOperationOptions' locally, but it is not exported.
+
+[7m66[0m   type FileOperationOptions,
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~[0m
+
+  [96msrc/services/file/file.service.ts[0m:[93m26[0m:[93m2[0m
+    [7m26[0m  type FileOperationOptions,
+    [7m  [0m [96m ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'FileOperationOptions' is declared here.
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m493[0m:[93m9[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 4.
+
+[7m493[0m         {
+[7m   [0m [91m        ~[0m
+[7m494[0m           showToast: operation.options?.showProgress !== false,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m496[0m           cancellable: true,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m497[0m         }
+[7m   [0m [91m~~~~~~~~~[0m
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m504[0m:[93m13[0m - [91merror[0m[90m TS2367: [0mThis comparison appears to be unintentional because the types '"running"' and '"cancelled"' have no overlap.
+
+[7m504[0m         if (operation.status === 'cancelled' || operation.status === 'paused') {
+[7m   [0m [91m            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m504[0m:[93m49[0m - [91merror[0m[90m TS2367: [0mThis comparison appears to be unintentional because the types '"running"' and '"paused"' have no overlap.
+
+[7m504[0m         if (operation.status === 'cancelled' || operation.status === 'paused') {
+[7m   [0m [91m                                                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m516[0m:[93m96[0m - [91merror[0m[90m TS2339: [0mProperty 'id' does not exist on type 'never'.
+
+[7m516[0m           const itemName = 'name' in item ? item.name : (item as any).fileName || `item-${item.id}`;
+[7m   [0m [91m                                                                                               ~~[0m
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m522[0m:[93m61[0m - [91merror[0m[90m TS2345: [0mArgument of type 'BatchOperationOptions | undefined' is not assignable to parameter of type 'FileOperationOptions | undefined'.
+  Type 'BatchOperationOptions' has no properties in common with type 'FileOperationOptions'.
+
+[7m522[0m                 result = await copyFile(itemPath, destPath, operation.options);
+[7m   [0m [91m                                                            ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m529[0m:[93m61[0m - [91merror[0m[90m TS2345: [0mArgument of type 'BatchOperationOptions | undefined' is not assignable to parameter of type 'FileOperationOptions | undefined'.
+  Type 'BatchOperationOptions' has no properties in common with type 'FileOperationOptions'.
+
+[7m529[0m                 result = await moveFile(itemPath, destPath, operation.options);
+[7m   [0m [91m                                                            ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m586[0m:[93m11[0m - [91merror[0m[90m TS2304: [0mCannot find name 'itemName'.
+
+[7m586[0m           itemName
+[7m   [0m [91m          ~~~~~~~~[0m
+
+[96msrc/services/file/enhanced-file-operations.service.ts[0m:[93m273[0m:[93m59[0m - [91merror[0m[90m TS2345: [0mArgument of type 'string' is not assignable to parameter of type 'DisplayableEntity'.
+
+[7m273[0m         const action = undoRedoManager.createRenameAction(oldPath, newPath);
+[7m   [0m [91m                                                          ~~~~~~~[0m
+
+[96msrc/services/file/file.service.ts[0m:[93m502[0m:[93m5[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'overwrite' does not exist in type 'BatchOperationOptions'.
+
+[7m502[0m     overwrite: options.overwrite,
+[7m   [0m [91m    ~~~~~~~~~[0m
+
+[96msrc/services/file/file.service.ts[0m:[93m531[0m:[93m5[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'overwrite' does not exist in type 'BatchOperationOptions'.
+
+[7m531[0m     overwrite: options.overwrite,
+[7m   [0m [91m    ~~~~~~~~~[0m
+
+[96msrc/services/file/file.service.ts[0m:[93m559[0m:[93m5[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'recursive' does not exist in type 'BatchOperationOptions'.
+
+[7m559[0m     recursive: options.recursive,
+[7m   [0m [91m    ~~~~~~~~~[0m
+
+[96msrc/services/image/converter.service.ts[0m:[93m200[0m:[93m3[0m - [91merror[0m[90m TS2322: [0mType '{ id: string; name: string; description: null; path: string; hash: string; size: number; width: number; height: number; metadata: string | null; thumbnail: string | null; thumbnailSize: number | null; ... 16 more ...; _count: { ...; }; }' is not assignable to type 'ImageWithStats'.
+  Types of property 'stats' are incompatible.
+    Type '{ viewCount: number; downloadCount: number; likeCount: number; commentCount: number; tagCount: number; albumCount: number; collectionCount: number; characterCount: number; placeCount: number; ... 7 more ...; aspectRatio: number; }' is missing the following properties from type 'ImageStatistics': imageCount, videoCount, totalItems, totalAssociations, and 5 more.
+
+[7m200[0m   return imageWithStats;
+[7m   [0m [91m  ~~~~~~[0m
+
+[96msrc/services/index.ts[0m:[93m20[0m:[93m1[0m - [91merror[0m[90m TS2308: [0mModule './clipboard/index' has already exported a member named 'ClipboardData'. Consider explicitly re-exporting to resolve the ambiguity.
+
+[7m20[0m export * from './file/index';
+[7m  [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/note/note.service.ts[0m:[93m473[0m:[93m4[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; ... 8 more ...; totalAssociations: number; }' is missing the following properties from type 'NoteStatistics': isDirectory, isFile, noteCount, lastUpdated, and 4 more.
+
+[7m473[0m    stats: {
+[7m   [0m [91m   ~~~~~[0m
+
+[96msrc/services/undo-redo/undo-redo-manager.ts[0m:[93m283[0m:[93m39[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ path: string; entityType: "image"; stats: ImageStatistics; thumbnailUrl: string; fullUrl: string; type?: string | undefined; _count?: { albums?: number | undefined; ... 10 more ...; groups?: number | undefined; } | undefined; ... 22 more ...; tags?: TagWithStats[] | undefined; } | ... 18 more ... | { ...; }' is not assignable to parameter of type 'DisplayableEntity'.
+  Object literal may only specify known properties, and 'path' does not exist in type 'AlbumWithStats & { entityType: "album"; }'.
+
+[7m283[0m           copiedItems.push({ ...item, path: targetFilePath });
+[7m   [0m [91m                                      ~~~~[0m
+
+[96msrc/services/undo-redo/undo-redo-manager.ts[0m:[93m418[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType 'Timeout' is not assignable to type 'number'.
+
+[7m418[0m     this.cleanupTimer = setInterval(() => {
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/store/entities/group/slices/ui.ts[0m:[93m8[0m:[93m15[0m - [91merror[0m[90m TS2305: [0mModule '"@/types/entities/group"' has no exported member 'GroupViewConfig'.
+
+[7m8[0m import type { GroupViewConfig, GroupViewMode, GroupWithStats } from '@/types/entities/group';
+[7m [0m [91m              ~~~~~~~~~~~~~~~[0m
+
+[96msrc/store/entities/group/types.ts[0m:[93m9[0m:[93m2[0m - [91merror[0m[90m TS2305: [0mModule '"@/types/entities/group"' has no exported member 'GroupCreateInput'.
+
+[7m9[0m  GroupCreateInput,
+[7m [0m [91m ~~~~~~~~~~~~~~~~[0m
+
+[96msrc/store/entities/group/types.ts[0m:[93m10[0m:[93m2[0m - [91merror[0m[90m TS2305: [0mModule '"@/types/entities/group"' has no exported member 'GroupUpdateInput'.
+
+[7m10[0m  GroupUpdateInput,
+[7m  [0m [91m ~~~~~~~~~~~~~~~~[0m
+
+[96msrc/store/entities/group/types.ts[0m:[93m11[0m:[93m2[0m - [91merror[0m[90m TS2305: [0mModule '"@/types/entities/group"' has no exported member 'GroupViewConfig'.
+
+[7m11[0m  GroupViewConfig,
+[7m  [0m [91m ~~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/album/mappers.ts[0m:[93m183[0m:[93m8[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; noteCount: number; wildcardCount: number; propertyCount: number; groupCount: number; }' is missing the following properties from type 'AlbumStatistics': isDirectory, isFile, albumCount, totalItems, and 6 more.
+
+[7m183[0m  const stats: AlbumStatistics = {
+[7m   [0m [91m       ~~~~~[0m
+
+[96msrc/transformers/audio/serializers.ts[0m:[93m55[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ duration: number; format: string; bitrate: number; volumePeaks: never[]; sampleRate: number; }' is missing the following properties from type 'AudioStatistics': channels, isDirectory, isFile, imageCount, and 20 more.
+
+[7m55[0m   statistics: {
+[7m  [0m [91m  ~~~~~~~~~~[0m
+
+  [96msrc/types/entities/audio/base.ts[0m:[93m81[0m:[93m2[0m
+    [7m81[0m  statistics?: AudioStatistics;
+    [7m  [0m [96m ~~~~~~~~~~[0m
+    The expected type comes from property 'statistics' which is declared here on type 'AudioWithStats'
+
+[96msrc/transformers/audio/transformer.ts[0m:[93m38[0m:[93m4[0m - [91merror[0m[90m TS2740: [0mType '{ duration: number; format: string; bitrate: number; volumePeaks: never[]; sampleRate: number; }' is missing the following properties from type 'AudioStatistics': channels, isDirectory, isFile, imageCount, and 20 more.
+
+[7m38[0m    statistics: audioStats,
+[7m  [0m [91m   ~~~~~~~~~~[0m
+
+  [96msrc/types/entities/audio/base.ts[0m:[93m81[0m:[93m2[0m
+    [7m81[0m  statistics?: AudioStatistics;
+    [7m  [0m [96m ~~~~~~~~~~[0m
+    The expected type comes from property 'statistics' which is declared here on type 'AudioWithStats'
+
+[96msrc/transformers/audio/transformer.ts[0m:[93m39[0m:[93m4[0m - [91merror[0m[90m TS2740: [0mType '{ duration: number; format: string; bitrate: number; volumePeaks: never[]; sampleRate: number; }' is missing the following properties from type 'AudioStatistics': channels, isDirectory, isFile, imageCount, and 20 more.
+
+[7m39[0m    stats: audioStats,
+[7m  [0m [91m   ~~~~~[0m
+
+  [96msrc/types/entities/audio/base.ts[0m:[93m79[0m:[93m2[0m
+    [7m79[0m  stats: AudioStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'AudioWithStats'
+
+[96msrc/transformers/character/transformer.ts[0m:[93m138[0m:[93m9[0m - [91merror[0m[90m TS2740: [0mType '{ totalImages: number; totalVideos: number; totalTags: number; totalGroups: number; totalProperties: number; totalCollections: number; totalAlbums: number; totalPlaces: number; totalWorldItems: number; ... 9 more ...; rarityLevel: "common" | ... 3 more ... | "legendary"; }' is missing the following properties from type 'CharacterAssociationStats': size, mtime, birthtime, type, and 2 more.
+
+[7m138[0m   const statistics: CharacterAssociationStats = {
+[7m   [0m [91m        ~~~~~~~~~~[0m
+
+[96msrc/transformers/collection/mappers.ts[0m:[93m43[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; noteCount: number; wildcardCount: number; propertyCount: number; groupCount: number; }' is missing the following properties from type 'CollectionStatistics': isDirectory, isFile, collectionCount, totalItems, and 6 more.
+
+[7m43[0m   stats,
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/collection/base.ts[0m:[93m69[0m:[93m2[0m
+    [7m69[0m  stats: CollectionStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'CollectionWithStats'
+
+[96msrc/transformers/collection/transformer.ts[0m:[93m43[0m:[93m9[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; noteCount: number; wildcardCount: number; propertyCount: number; groupCount: number; }' is missing the following properties from type 'CollectionStatistics': isDirectory, isFile, collectionCount, totalItems, and 6 more.
+
+[7m43[0m   const stats: CollectionStatistics = {
+[7m  [0m [91m        ~~~~~[0m
+
+[96msrc/transformers/collection/validators.ts[0m:[93m47[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; noteCount: number; wildcardCount: number; propertyCount: number; groupCount: number; }' is missing the following properties from type 'CollectionStatistics': isDirectory, isFile, collectionCount, totalItems, and 6 more.
+
+[7m47[0m   return CollectionStatisticsSchema.parse(data);
+[7m  [0m [91m  ~~~~~~[0m
+
+[96msrc/transformers/collection/validators.ts[0m:[93m63[0m:[93m3[0m - [91merror[0m[90m TS2322: [0mType '{ createdAt: Date; updatedAt: Date; name: string; id: string; description: string | null; entityType: "collection"; emoji: string | null; color: string | null; featuredImage: string | null; ... 16 more ...; sourceImage: string | null; }' is not assignable to type 'CollectionWithStats'.
+  Types of property 'stats' are incompatible.
+    Type '{ imageCount: number; videoCount: number; albumCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; noteCount: number; wildcardCount: number; propertyCount: number; groupCount: number; }' is missing the following properties from type 'CollectionStatistics': isDirectory, isFile, collectionCount, totalItems, and 6 more.
+
+[7m63[0m   return CollectionWithStatsSchema.parse(data);
+[7m  [0m [91m  ~~~~~~[0m
+
+[96msrc/transformers/concept/transformer.ts[0m:[93m58[0m:[93m9[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; promptCount: number; ... 5 more ...; lastUpdated: Date; }' is missing the following properties from type 'ConceptStatistics': isDirectory, isFile, conceptCount, totalItems, and 4 more.
+
+[7m58[0m   const stats: ConceptStatistics = {
+[7m  [0m [91m        ~~~~~[0m
+
+[96msrc/transformers/concept/validators.ts[0m:[93m49[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ lastUpdated: Date; imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; ... 5 more ...; totalAssociations: number; }' is missing the following properties from type 'ConceptStatistics': isDirectory, isFile, conceptCount, totalItems, and 4 more.
+
+[7m49[0m   return ConceptStatisticsSchema.parse(data);
+[7m  [0m [91m  ~~~~~~[0m
+
+[96msrc/transformers/concept/validators.ts[0m:[93m67[0m:[93m3[0m - [91merror[0m[90m TS2322: [0mType '{ createdAt: Date; updatedAt: Date; name: string; type: string | null; id: string; description: string | null; statistics: { lastUpdated: Date; imageCount: number; videoCount: number; ... 11 more ...; totalAssociations: number; }; ... 16 more ...; _count?: { ...; } | undefined; }' is not assignable to type 'ConceptWithStats'.
+  Types of property 'stats' are incompatible.
+    Type '{ lastUpdated: Date; imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; ... 5 more ...; totalAssociations: number; }' is missing the following properties from type 'ConceptStatistics': isDirectory, isFile, conceptCount, totalItems, and 4 more.
+
+[7m67[0m   return ConceptWithStatsSchema.parse(transformedData);
+[7m  [0m [91m  ~~~~~~[0m
+
+[96msrc/transformers/document/mappers.ts[0m:[93m27[0m:[93m3[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'wordCount' does not exist in type 'DocumentStatistics'.
+
+[7m27[0m   wordCount,
+[7m  [0m [91m  ~~~~~~~~~[0m
+
+[96msrc/transformers/document/serializers.ts[0m:[93m8[0m:[93m15[0m - [91merror[0m[90m TS2724: [0m'"@/types/entities/document"' has no exported member named 'DocumentBase'. Did you mean 'Document'?
+
+[7m8[0m import type { DocumentBase, DocumentWithStats } from '@/types/entities/document';
+[7m [0m [91m              ~~~~~~~~~~~~[0m
+
+[96msrc/transformers/document/serializers.ts[0m:[93m59[0m:[93m15[0m - [91merror[0m[90m TS18048: [0m'document.stats' is possibly 'undefined'.
+
+[7m59[0m    charCount: document.stats.charCount,
+[7m  [0m [91m              ~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/document/serializers.ts[0m:[93m59[0m:[93m30[0m - [91merror[0m[90m TS2339: [0mProperty 'charCount' does not exist on type 'DocumentStats'.
+
+[7m59[0m    charCount: document.stats.charCount,
+[7m  [0m [91m                             ~~~~~~~~~[0m
+
+[96msrc/transformers/document/serializers.ts[0m:[93m60[0m:[93m17[0m - [91merror[0m[90m TS18048: [0m'document.stats' is possibly 'undefined'.
+
+[7m60[0m    readingTime: document.stats.readingTime,
+[7m  [0m [91m                ~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/document/serializers.ts[0m:[93m60[0m:[93m32[0m - [91merror[0m[90m TS2339: [0mProperty 'readingTime' does not exist on type 'DocumentStats'.
+
+[7m60[0m    readingTime: document.stats.readingTime,
+[7m  [0m [91m                               ~~~~~~~~~~~[0m
+
+[96msrc/transformers/document/serializers.ts[0m:[93m61[0m:[93m18[0m - [91merror[0m[90m TS18048: [0m'document.stats' is possibly 'undefined'.
+
+[7m61[0m    versionCount: document.stats.versionCount,
+[7m  [0m [91m                 ~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/document/serializers.ts[0m:[93m61[0m:[93m33[0m - [91merror[0m[90m TS2339: [0mProperty 'versionCount' does not exist on type 'DocumentStats'.
+
+[7m61[0m    versionCount: document.stats.versionCount,
+[7m  [0m [91m                                ~~~~~~~~~~~~[0m
+
+[96msrc/transformers/document/serializers.ts[0m:[93m63[0m:[93m24[0m - [91merror[0m[90m TS2339: [0mProperty 'wordCount' does not exist on type 'DocumentWithStats'.
+
+[7m63[0m    wordCount: document.wordCount,
+[7m  [0m [91m                       ~~~~~~~~~[0m
+
+[96msrc/transformers/favorite/mappers.ts[0m:[93m45[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ entityTypeName: string; formattedCreatedAt: string; daysSinceFavorited: number; isRecent: boolean; isOld: boolean; }' is missing the following properties from type 'FavoriteStatistics': imageCount, videoCount, albumCount, collectionCount, and 17 more.
+
+[7m45[0m  return {
+[7m  [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/file/mappers.ts[0m:[93m32[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ formattedSize: string; typeLabel: FileType; iconName: string; colorCode: string; daysSinceModified: number; daysSinceAccessed: number; isRecent: boolean; isLarge: boolean; formattedModifiedAt: string; childCount: number; shortPath: string; }' is missing the following properties from type 'FileStatistics': checksum, isDirectory, isFile, imageCount, and 20 more.
+
+[7m32[0m  return {
+[7m  [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/file3d/serializers.ts[0m:[93m43[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ polygonCount: number; textureSize: number; format: string; vertexCount: number; materialCount: number; }' is missing the following properties from type 'File3DStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m43[0m   stats: {
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/file3d/base.ts[0m:[93m69[0m:[93m2[0m
+    [7m69[0m  stats: File3DStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'File3DWithStats'
+
+[96msrc/transformers/file3d/transformer.ts[0m:[93m28[0m:[93m9[0m - [91merror[0m[90m TS2740: [0mType '{ polygonCount: number; textureSize: number; format: string; vertexCount: number; materialCount: number; }' is missing the following properties from type 'File3DStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m28[0m   const stats: File3DStatistics = {
+[7m  [0m [91m        ~~~~~[0m
+
+[96msrc/transformers/folder/serializers.ts[0m:[93m125[0m:[93m33[0m - [91merror[0m[90m TS2339: [0mProperty 'totalRelations' does not exist on type 'FolderStatistics'.
+
+[7m125[0m    totalRelations: folder.stats.totalRelations,
+[7m   [0m [91m                                ~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/folder/serializers.ts[0m:[93m189[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'totalRelations' does not exist in type 'FolderStatistics'.
+
+[7m189[0m    totalRelations: data.stats.totalRelations,
+[7m   [0m [91m   ~~~~~~~~~~~~~~[0m
+
+  [96msrc/types/entities/folder/types.ts[0m:[93m37[0m:[93m2[0m
+    [7m37[0m  stats: FolderStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'FolderWithStats'
+
+[96msrc/transformers/folder/transformer.ts[0m:[93m175[0m:[93m3[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'totalRelations' does not exist in type 'FolderStatistics'.
+
+[7m175[0m   totalRelations,
+[7m   [0m [91m  ~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/group/mappers.ts[0m:[93m70[0m:[93m3[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'popularity' does not exist in type 'GroupStatistics'.
+
+[7m70[0m   popularity: Number.parseFloat(popularity.toFixed(2)),
+[7m  [0m [91m  ~~~~~~~~~~[0m
+
+[96msrc/transformers/group/transformer.ts[0m:[93m70[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'totalImages' does not exist in type 'GroupStatistics'.
+
+[7m70[0m    totalImages: imageCount,
+[7m  [0m [91m   ~~~~~~~~~~~[0m
+
+[96msrc/transformers/group/validators.ts[0m:[93m9[0m:[93m26[0m - [91merror[0m[90m TS2305: [0mModule '"../../types/entities/group"' has no exported member 'GroupCreateInput'.
+
+[7m9[0m import type { GroupBase, GroupCreateInput, GroupUpdateInput } from '../../types/entities/group';
+[7m [0m [91m                         ~~~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/group/validators.ts[0m:[93m9[0m:[93m44[0m - [91merror[0m[90m TS2305: [0mModule '"../../types/entities/group"' has no exported member 'GroupUpdateInput'.
+
+[7m9[0m import type { GroupBase, GroupCreateInput, GroupUpdateInput } from '../../types/entities/group';
+[7m [0m [91m                                           ~~~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/image/mappers.ts[0m:[93m37[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ viewCount: number; downloadCount: number; likeCount: number; commentCount: number; tagCount: number; albumCount: number; collectionCount: number; characterCount: number; placeCount: number; ... 7 more ...; aspectRatio: number; }' is missing the following properties from type 'ImageStatistics': imageCount, videoCount, totalItems, totalAssociations, and 5 more.
+
+[7m37[0m   stats: {
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/image/base.ts[0m:[93m66[0m:[93m2[0m
+    [7m66[0m  stats: ImageStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'ImageWithStats'
+
+[96msrc/transformers/image/serializers.ts[0m:[93m49[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ viewCount: number; downloadCount: number; likeCount: number; commentCount: number; tagCount: number; albumCount: number; collectionCount: number; characterCount: number; placeCount: number; ... 7 more ...; aspectRatio: number; }' is missing the following properties from type 'ImageStatistics': imageCount, videoCount, totalItems, totalAssociations, and 5 more.
+
+[7m49[0m   stats: {
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/image/base.ts[0m:[93m66[0m:[93m2[0m
+    [7m66[0m  stats: ImageStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'ImageWithStats'
+
+[96msrc/transformers/image/transformer.ts[0m:[93m143[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ viewCount: number; downloadCount: number; likeCount: number; commentCount: number; tagCount: number; albumCount: number; collectionCount: number; characterCount: number; placeCount: number; ... 7 more ...; aspectRatio: number; }' is missing the following properties from type 'ImageStatistics': imageCount, videoCount, totalItems, totalAssociations, and 5 more.
+
+[7m143[0m  return {
+[7m   [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/json-file/serializers.ts[0m:[93m53[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ size: number; nestingDepth: number; isValid: true; keyCount: number; }' is missing the following properties from type 'JsonFileStatistics': imageCount, videoCount, albumCount, collectionCount, and 16 more.
+
+[7m53[0m   stats: {
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/json-file/base.ts[0m:[93m51[0m:[93m2[0m
+    [7m51[0m  stats: JsonFileStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'JsonFileWithStats'
+
+[96msrc/transformers/json-file/transformer.ts[0m:[93m49[0m:[93m4[0m - [91merror[0m[90m TS2740: [0mType '{ size: number; nestingDepth: number; isValid: boolean; keyCount: number; }' is missing the following properties from type 'JsonFileStatistics': imageCount, videoCount, albumCount, collectionCount, and 16 more.
+
+[7m49[0m    stats,
+[7m  [0m [91m   ~~~~~[0m
+
+  [96msrc/types/entities/json-file/base.ts[0m:[93m51[0m:[93m2[0m
+    [7m51[0m  stats: JsonFileStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'JsonFileWithStats'
+
+[96msrc/transformers/note/note-adapter.ts[0m:[93m34[0m:[93m8[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; ... 8 more ...; totalAssociations: number; }' is missing the following properties from type 'NoteStatistics': isDirectory, isFile, noteCount, lastUpdated, and 4 more.
+
+[7m34[0m  const statistics: NoteStatistics = {
+[7m  [0m [91m       ~~~~~~~~~~[0m
+
+[96msrc/transformers/note/transformer.ts[0m:[93m100[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; ... 8 more ...; totalAssociations: number; }' is missing the following properties from type 'NoteStatistics': isDirectory, isFile, noteCount, lastUpdated, and 4 more.
+
+[7m100[0m  return {
+[7m   [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/place/mappers.ts[0m:[93m146[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ popularity: number; completenessScore: number; spatialRelevance: number; geoContextLevel: number; }' is missing the following properties from type 'PlaceStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m146[0m   stats: statistics,
+[7m   [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/place/base.ts[0m:[93m86[0m:[93m2[0m
+    [7m86[0m  stats: PlaceStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'PlaceWithStats'
+
+[96msrc/transformers/place/transformer.ts[0m:[93m40[0m:[93m9[0m - [91merror[0m[90m TS2740: [0mType '{ spatialRelevance: number; completenessScore: number; geoContextLevel: number; popularity: number; }' is missing the following properties from type 'PlaceStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m40[0m   const stats: PlaceStatistics = {
+[7m  [0m [91m        ~~~~~[0m
+
+[96msrc/transformers/profile/serializers.ts[0m:[93m42[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'totalImages' does not exist on type 'ProfileStatistics'.
+
+[7m42[0m    totalImages: profile.stats.totalImages,
+[7m  [0m [91m                              ~~~~~~~~~~~[0m
+
+[96msrc/transformers/profile/serializers.ts[0m:[93m43[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'totalVideos' does not exist on type 'ProfileStatistics'.
+
+[7m43[0m    totalVideos: profile.stats.totalVideos,
+[7m  [0m [91m                              ~~~~~~~~~~~[0m
+
+[96msrc/transformers/profile/serializers.ts[0m:[93m44[0m:[93m36[0m - [91merror[0m[90m TS2339: [0mProperty 'totalCollections' does not exist on type 'ProfileStatistics'.
+
+[7m44[0m    totalCollections: profile.stats.totalCollections,
+[7m  [0m [91m                                   ~~~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/profile/transformer.ts[0m:[93m37[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'totalImages' does not exist in type 'ProfileStatistics'.
+
+[7m37[0m    totalImages: _count?.images || 0,
+[7m  [0m [91m   ~~~~~~~~~~~[0m
+
+[96msrc/transformers/prompt/transformer.ts[0m:[93m53[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'totalTags' does not exist in type 'PromptStatistics'.
+
+[7m53[0m    totalTags: _count?.tags || 0,
+[7m  [0m [91m   ~~~~~~~~~[0m
+
+[96msrc/transformers/property/mappers.ts[0m:[93m53[0m:[93m3[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'usageDiversity' does not exist in type 'PropertyStatistics'.
+
+[7m53[0m   usageDiversity: Number.parseFloat(diversityRatio.toFixed(2)),
+[7m  [0m [91m  ~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/property/transformer.ts[0m:[93m45[0m:[93m5[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'usageDiversity' does not exist in type 'PropertyStatistics'.
+
+[7m45[0m     usageDiversity: Number.parseFloat(diversityRatio.toFixed(2)),
+[7m  [0m [91m    ~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/property/transformer.ts[0m:[93m63[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'usageDiversity' does not exist in type 'PropertyStatistics'.
+
+[7m63[0m    usageDiversity: 0,
+[7m  [0m [91m   ~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/settings/index.ts[0m:[93m81[0m:[93m2[0m - [91merror[0m[90m TS2741: [0mProperty 'fileBrowser' is missing in type '{ appearance: { theme: "light" | "dark" | "system"; language: "es" | "en"; fontSize: number; highContrast: boolean; reducedAnimations: boolean; }; notifications: { email: boolean; enabled: boolean; desktop: boolean; frequency: "daily" | ... 1 more ... | "monthly"; }; ... 4 more ...; system: { ...; }; }' but required in type '{ version: string; lastUpdate: Date; appearance: { theme: "light" | "dark" | "system"; language: "es" | "en"; fontSize: number; highContrast: boolean; reducedAnimations: boolean; }; ... 4 more ...; fileBrowser: { ...; }; }'.
+
+[7m81[0m  return {
+[7m  [0m [91m ~~~~~~[0m
+
+  [96msrc/transformers/settings/schema.ts[0m:[93m431[0m:[93m2[0m
+    [7m431[0m  fileBrowser: fileBrowserConfigSchema.default({}),
+    [7m   [0m [96m ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'fileBrowser' is declared here.
+
+[96msrc/transformers/settings/mappers.ts[0m:[93m37[0m:[93m2[0m - [91merror[0m[90m TS2741: [0mProperty 'fileBrowser' is missing in type '{ appearance: { theme: "light" | "dark" | "system"; fontSize: any; language: "es" | "en"; reducedAnimations: boolean; highContrast: boolean; }; notifications: { enabled: boolean; email: boolean; desktop: boolean; frequency: "daily" | ... 1 more ... | "monthly"; }; ... 4 more ...; system: { ...; }; }' but required in type '{ version: string; lastUpdate: Date; appearance: { theme: "light" | "dark" | "system"; language: "es" | "en"; fontSize: number; highContrast: boolean; reducedAnimations: boolean; }; ... 4 more ...; fileBrowser: { ...; }; }'.
+
+[7m37[0m  return {
+[7m  [0m [91m ~~~~~~[0m
+
+  [96msrc/transformers/settings/schema.ts[0m:[93m431[0m:[93m2[0m
+    [7m431[0m  fileBrowser: fileBrowserConfigSchema.default({}),
+    [7m   [0m [96m ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'fileBrowser' is declared here.
+
+[96msrc/transformers/settings/serializers.ts[0m:[93m105[0m:[93m8[0m - [91merror[0m[90m TS2741: [0mProperty 'fileBrowser' is missing in type '{ appearance: { theme: "light" | "dark" | "system"; fontSize: number; language: "es" | "en"; reducedAnimations: boolean; highContrast: boolean; }; notifications: { enabled: boolean; email: boolean; desktop: boolean; frequency: "daily" | ... 1 more ... | "monthly"; }; ... 4 more ...; system: { ...; }; }' but required in type '{ version: string; lastUpdate: Date; appearance: { theme: "light" | "dark" | "system"; language: "es" | "en"; fontSize: number; highContrast: boolean; reducedAnimations: boolean; }; ... 4 more ...; fileBrowser: { ...; }; }'.
+
+[7m105[0m  const merged: Settings = {
+[7m   [0m [91m       ~~~~~~[0m
+
+  [96msrc/transformers/settings/schema.ts[0m:[93m431[0m:[93m2[0m
+    [7m431[0m  fileBrowser: fileBrowserConfigSchema.default({}),
+    [7m   [0m [96m ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    'fileBrowser' is declared here.
+
+[96msrc/transformers/tag/mappers.ts[0m:[93m28[0m:[93m8[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; ... 7 more ...; completenessScore: number; }' is missing the following properties from type 'TagStatistics': isDirectory, isFile, tagCount, totalItems, and 6 more.
+
+[7m28[0m  const statistics: TagStatistics = {
+[7m  [0m [91m       ~~~~~~~~~~[0m
+
+[96msrc/transformers/tag/transformer.ts[0m:[93m156[0m:[93m10[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; ... 7 more ...; completenessScore: number; }' is missing the following properties from type 'TagStatistics': isDirectory, isFile, tagCount, totalItems, and 6 more.
+
+[7m156[0m    const stats: TagStatistics = {
+[7m   [0m [91m         ~~~~~[0m
+
+[96msrc/transformers/tag/transformer.ts[0m:[93m184[0m:[93m9[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; ... 7 more ...; completenessScore: number; }' is missing the following properties from type 'TagStatistics': isDirectory, isFile, tagCount, totalItems, and 6 more.
+
+[7m184[0m   const stats: TagStatistics = {
+[7m   [0m [91m        ~~~~~[0m
+
+[96msrc/transformers/thumbnail/mappers.ts[0m:[93m20[0m:[93m8[0m - [91merror[0m[90m TS2740: [0mType '{ aspectRatio: number; compressionRatio: number; qualityScore: number; usageCount: number; storageEfficiency: number; }' is missing the following properties from type 'ThumbnailStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m20[0m  const stats: ThumbnailStatistics = {
+[7m  [0m [91m       ~~~~~[0m
+
+[96msrc/transformers/thumbnail/transformer.ts[0m:[93m59[0m:[93m4[0m - [91merror[0m[90m TS2740: [0mType '{ aspectRatio: number; compressionRatio: number; qualityScore: number; usageCount: number; storageEfficiency: number; }' is missing the following properties from type 'ThumbnailStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m59[0m    stats: {
+[7m  [0m [91m   ~~~~~[0m
+
+  [96msrc/types/entities/thumbnail/base.ts[0m:[93m57[0m:[93m2[0m
+    [7m57[0m  stats: ThumbnailStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'ThumbnailWithStats'
+
+[96msrc/transformers/video/mappers.ts[0m:[93m31[0m:[93m9[0m - [91merror[0m[90m TS2740: [0mType '{ albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; noteCount: number; ... 26 more ...; thumbnailUrl: null; }' is missing the following properties from type 'VideoStatistics': imageCount, videoCount, lastUpdated, size, and 3 more.
+
+[7m31[0m   const statistics: VideoStatistics = {
+[7m  [0m [91m        ~~~~~~~~~~[0m
+
+[96msrc/transformers/video/transformer.ts[0m:[93m172[0m:[93m9[0m - [91merror[0m[90m TS2740: [0mType '{ albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; noteCount: number; ... 26 more ...; thumbnailUrl: string | null; }' is missing the following properties from type 'VideoStatistics': imageCount, videoCount, lastUpdated, size, and 3 more.
+
+[7m172[0m   const statistics: VideoStatistics = {
+[7m   [0m [91m        ~~~~~~~~~~[0m
+
+[96msrc/transformers/wildcard/mappers.ts[0m:[93m44[0m:[93m8[0m - [91merror[0m[90m TS2740: [0mType '{ popularity: number; usageDiversity: number; completenessScore: number; adaptabilityScore: number; }' is missing the following properties from type 'WildcardStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m44[0m  const statistics: WildcardStatistics = {
+[7m  [0m [91m       ~~~~~~~~~~[0m
+
+[96msrc/transformers/workflow/mappers.ts[0m:[93m63[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ totalExecutions: number; successRate: number; averageDuration: number; lastExecutedAt: Date | null; nodeCount: number; connectionCount: number; }' is missing the following properties from type 'WorkflowStatistics': imageCount, videoCount, albumCount, collectionCount, and 17 more.
+
+[7m63[0m  return {
+[7m  [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/workflow/transformer.ts[0m:[93m61[0m:[93m4[0m - [91merror[0m[90m TS2740: [0mType '{ totalExecutions: number; successRate: number; averageDuration: number; lastExecutedAt: null; nodeCount: number; connectionCount: number; }' is missing the following properties from type 'WorkflowStatistics': imageCount, videoCount, albumCount, collectionCount, and 17 more.
+
+[7m61[0m    stats: {
+[7m  [0m [91m   ~~~~~[0m
+
+  [96msrc/types/entities/workflow/base.ts[0m:[93m50[0m:[93m2[0m
+    [7m50[0m  stats: WorkflowStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'WorkflowWithStats'
+
+[96msrc/transformers/workflow/transformer.ts[0m:[93m124[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ totalExecutions: number; successRate: number; averageDuration: number; lastExecutedAt: Date | null; nodeCount: number; connectionCount: number; }' is missing the following properties from type 'WorkflowStatistics': imageCount, videoCount, albumCount, collectionCount, and 17 more.
+
+[7m124[0m  return {
+[7m   [0m [91m ~~~~~~[0m
+
+[96msrc/types/entities/album/types.ts[0m:[93m28[0m:[93m18[0m - [91merror[0m[90m TS2430: [0mInterface 'AlbumStatistics' incorrectly extends interface 'EntityStats'.
+  Types of property 'lastModified' are incompatible.
+    Type 'Date | null' is not assignable to type 'Date | undefined'.
+      Type 'null' is not assignable to type 'Date | undefined'.
+
+[7m28[0m export interface AlbumStatistics extends EntityStats {
+[7m  [0m [91m                 ~~~~~~~~~~~~~~~[0m
+
+[96msrc/types/entities/album/types.ts[0m:[93m36[0m:[93m18[0m - [91merror[0m[90m TS2430: [0mInterface 'AlbumWithStats' incorrectly extends interface 'EntityWithStats<EntityStats>'.
+  The types of 'stats.lastModified' are incompatible between these types.
+    Type 'Date | null' is not assignable to type 'Date | undefined'.
+      Type 'null' is not assignable to type 'Date | undefined'.
+
+[7m36[0m export interface AlbumWithStats extends AlbumBase, EntityWithStats {
+[7m  [0m [91m                 ~~~~~~~~~~~~~~[0m
+
+[96msrc/types/entities/group/base.ts[0m:[93m36[0m:[93m18[0m - [91merror[0m[90m TS2430: [0mInterface 'GroupStatistics' incorrectly extends interface 'EntityStats'.
+  Types of property 'lastUpdated' are incompatible.
+    Type 'string' is not assignable to type 'Date'.
+
+[7m36[0m export interface GroupStatistics extends EntityStats {
+[7m  [0m [91m                 ~~~~~~~~~~~~~~~[0m
+
+[96msrc/types/entities/place/types.ts[0m:[93m92[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ spatialRelevance: number; completenessScore: number; geoContextLevel: number; popularity: number; }' is missing the following properties from type 'PlaceStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m92[0m   stats: stats,
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/place/base.ts[0m:[93m86[0m:[93m2[0m
+    [7m86[0m  stats: PlaceStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'PlaceWithStats'
+
+[96msrc/types/entities/video/base.ts[0m:[93m56[0m:[93m18[0m - [91merror[0m[90m TS2430: [0mInterface 'VideoStatistics' incorrectly extends interface 'EntityStats'.
+  Types of property 'lastViewed' are incompatible.
+    Type 'Date | null' is not assignable to type 'Date | undefined'.
+      Type 'null' is not assignable to type 'Date | undefined'.
+
+[7m56[0m export interface VideoStatistics extends EntityStats {
+[7m  [0m [91m                 ~~~~~~~~~~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m248[0m:[93m44[0m - [91merror[0m[90m TS2304: [0mCannot find name 'AnyEntityWithStats'.
+
+[7m248[0m export function getEntityStatsType(entity: AnyEntityWithStats): EntityStatsType | null {
+[7m   [0m [91m                                           ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m249[0m:[93m32[0m - [91merror[0m[90m TS2322: [0mType '"image"' is not assignable to type 'EntityStatsType | null'.
+
+[7m249[0m  if (isImageWithStats(entity)) return 'image';
+[7m   [0m [91m                               ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m250[0m:[93m32[0m - [91merror[0m[90m TS2322: [0mType '"video"' is not assignable to type 'EntityStatsType | null'.
+
+[7m250[0m  if (isVideoWithStats(entity)) return 'video';
+[7m   [0m [91m                               ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m251[0m:[93m33[0m - [91merror[0m[90m TS2322: [0mType '"folder"' is not assignable to type 'EntityStatsType | null'.
+
+[7m251[0m  if (isFolderWithStats(entity)) return 'folder';
+[7m   [0m [91m                                ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m252[0m:[93m30[0m - [91merror[0m[90m TS2322: [0mType '"tag"' is not assignable to type 'EntityStatsType | null'.
+
+[7m252[0m  if (isTagWithStats(entity)) return 'tag';
+[7m   [0m [91m                             ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m253[0m:[93m32[0m - [91merror[0m[90m TS2322: [0mType '"place"' is not assignable to type 'EntityStatsType | null'.
+
+[7m253[0m  if (isPlaceWithStats(entity)) return 'place';
+[7m   [0m [91m                               ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m254[0m:[93m36[0m - [91merror[0m[90m TS2322: [0mType '"world-item"' is not assignable to type 'EntityStatsType | null'.
+
+[7m254[0m  if (isWorldItemWithStats(entity)) return 'world-item';
+[7m   [0m [91m                                   ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m255[0m:[93m31[0m - [91merror[0m[90m TS2322: [0mType '"note"' is not assignable to type 'EntityStatsType | null'.
+
+[7m255[0m  if (isNoteWithStats(entity)) return 'note';
+[7m   [0m [91m                              ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m256[0m:[93m35[0m - [91merror[0m[90m TS2322: [0mType '"property"' is not assignable to type 'EntityStatsType | null'.
+
+[7m256[0m  if (isPropertyWithStats(entity)) return 'property';
+[7m   [0m [91m                                  ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m257[0m:[93m35[0m - [91merror[0m[90m TS2322: [0mType '"wildcard"' is not assignable to type 'EntityStatsType | null'.
+
+[7m257[0m  if (isWildcardWithStats(entity)) return 'wildcard';
+[7m   [0m [91m                                  ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m258[0m:[93m32[0m - [91merror[0m[90m TS2322: [0mType '"audio"' is not assignable to type 'EntityStatsType | null'.
+
+[7m258[0m  if (isAudioWithStats(entity)) return 'audio';
+[7m   [0m [91m                               ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m259[0m:[93m35[0m - [91merror[0m[90m TS2322: [0mType '"document"' is not assignable to type 'EntityStatsType | null'.
+
+[7m259[0m  if (isDocumentWithStats(entity)) return 'document';
+[7m   [0m [91m                                  ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m260[0m:[93m37[0m - [91merror[0m[90m TS2322: [0mType '"collection"' is not assignable to type 'EntityStatsType | null'.
+
+[7m260[0m  if (isCollectionWithStats(entity)) return 'collection';
+[7m   [0m [91m                                    ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m261[0m:[93m32[0m - [91merror[0m[90m TS2322: [0mType '"album"' is not assignable to type 'EntityStatsType | null'.
+
+[7m261[0m  if (isAlbumWithStats(entity)) return 'album';
+[7m   [0m [91m                               ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m262[0m:[93m36[0m - [91merror[0m[90m TS2322: [0mType '"character"' is not assignable to type 'EntityStatsType | null'.
+
+[7m262[0m  if (isCharacterWithStats(entity)) return 'character';
+[7m   [0m [91m                                   ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m263[0m:[93m34[0m - [91merror[0m[90m TS2322: [0mType '"concept"' is not assignable to type 'EntityStatsType | null'.
+
+[7m263[0m  if (isConceptWithStats(entity)) return 'concept';
+[7m   [0m [91m                                 ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m264[0m:[93m33[0m - [91merror[0m[90m TS2322: [0mType '"prompt"' is not assignable to type 'EntityStatsType | null'.
+
+[7m264[0m  if (isPromptWithStats(entity)) return 'prompt';
+[7m   [0m [91m                                ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m265[0m:[93m32[0m - [91merror[0m[90m TS2322: [0mType '"group"' is not assignable to type 'EntityStatsType | null'.
+
+[7m265[0m  if (isGroupWithStats(entity)) return 'group';
+[7m   [0m [91m                               ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m266[0m:[93m40[0m - [91merror[0m[90m TS2322: [0mType '"uploadedImage"' is not assignable to type 'EntityStatsType | null'.
+
+[7m266[0m  if (isUploadedImageWithStats(entity)) return 'uploadedImage';
+[7m   [0m [91m                                       ~~~~~~[0m
+
+[96msrc/types/migration.ts[0m:[93m271[0m:[93m45[0m - [91merror[0m[90m TS2304: [0mCannot find name 'AnyEntityWithStats'.
+
+[7m271[0m export function getEntityStatistics(entity: AnyEntityWithStats): unknown {
+[7m   [0m [91m                                            ~~~~~~~~~~~~~~~~~~[0m
+
+
+Found 226 errors in 106 files.
+
+Errors  Files
+     2  src/components/features/file-browser/selection/drag-selection-provider.tsx[90m:228[0m
+     4  src/components/features/file-browser/undo-redo/UndoRedoPanel.tsx[90m:56[0m
+    10  src/components/features/file-browser/undo-redo/UndoRedoToolbar.tsx[90m:55[0m
+     3  src/components/features/file-browser/views/cards-view.tsx[90m:176[0m
+     1  src/components/features/file-browser/views/grid-item-overlay.tsx[90m:28[0m
+     1  src/components/features/file-browser/views/grid-view.tsx[90m:272[0m
+     3  src/components/features/file-browser/views/masonry-view.tsx[90m:116[0m
+     2  src/components/features/file-viewer/viewers/audio-viewer.tsx[90m:10[0m
+     5  src/components/features/file-viewer/viewers/document-viewer.tsx[90m:20[0m
+     3  src/components/features/file-viewer/viewers/generic-file-viewer.tsx[90m:25[0m
+     2  src/components/file-browser/view-configuration/ViewConfigurationPanel.tsx[90m:120[0m
+     1  src/components/panels/right-panel/right-panel.tsx[90m:127[0m
+     1  src/components/settings/folders/folder-types.ts[90m:125[0m
+     1  src/components/settings/folders/hooks/use-folder-stats.ts[90m:52[0m
+     1  src/components/settings/prompts/prompts-settings.tsx[90m:293[0m
+     2  src/components/ui/entity-header.tsx[90m:185[0m
+     9  src/components/ui/entity-list.tsx[90m:388[0m
+     1  src/components/ui/page-heading.tsx[90m:41[0m
+     2  src/components/ui/pagination.tsx[90m:52[0m
+     1  src/components/ui/toggle-group.tsx[90m:10[0m
+     1  src/components/views/all-images/all-images-content-view.tsx[90m:246[0m
+     3  src/components/views/development/charts/tech-metrics.tsx[90m:270[0m
+     1  src/components/views/documents/documents-content-view.tsx[90m:31[0m
+     2  src/components/views/files/files-view-2.tsx[90m:72[0m
+     2  src/components/views/files/files-view.tsx[90m:72[0m
+     1  src/components/views/mixed/mixed-view.tsx[90m:227[0m
+     1  src/components/views/search/search-view.tsx[90m:122[0m
+     1  src/components/views/uploaded-images/uploaded-images-view.tsx[90m:72[0m
+     1  src/components/views/wildcards/wildcard-content-view.tsx[90m:109[0m
+     3  src/components/views/workflows/workflow-content-view.tsx[90m:78[0m
+     3  src/components/views/world-items/world-item-content-view.tsx[90m:23[0m
+     1  src/config/entity-type-configs.ts[90m:175[0m
+     2  src/hooks/use-download-manager.ts[90m:139[0m
+     3  src/hooks/use-grid-view-config.ts[90m:119[0m
+     2  src/lib/api/client/group.client.ts[90m:4[0m
+     1  src/lib/config/settings.ts[90m:8[0m
+     1  src/lib/contexts/file-context.tsx[90m:288[0m
+     1  src/lib/hooks/entities/use-entity-conversion.ts[90m:133[0m
+     2  src/lib/keyboard/use-keyboard-shortcuts.ts[90m:68[0m
+     3  src/lib/utils/album/helpers.ts[90m:36[0m
+     1  src/server/routes/documents.ts[90m:111[0m
+     3  src/services/cache/file-browser-cache.service.ts[90m:364[0m
+     5  src/services/clipboard/clipboard-manager.test.ts[90m:54[0m
+     8  src/services/clipboard/clipboard-manager.ts[90m:125[0m
+     7  src/services/download/download.service.ts[90m:122[0m
+     1  src/services/file-entity-mapper/file-entity-mapper.service.ts[90m:352[0m
+    10  src/services/file/batch-operations.service.ts[90m:64[0m
+     1  src/services/file/enhanced-file-operations.service.ts[90m:273[0m
+     3  src/services/file/file.service.ts[90m:502[0m
+     1  src/services/image/converter.service.ts[90m:200[0m
+     1  src/services/index.ts[90m:20[0m
+     1  src/services/note/note.service.ts[90m:473[0m
+     2  src/services/undo-redo/undo-redo-manager.ts[90m:283[0m
+     1  src/store/entities/group/slices/ui.ts[90m:8[0m
+     3  src/store/entities/group/types.ts[90m:9[0m
+     1  src/transformers/album/mappers.ts[90m:183[0m
+     1  src/transformers/audio/serializers.ts[90m:55[0m
+     2  src/transformers/audio/transformer.ts[90m:38[0m
+     1  src/transformers/character/transformer.ts[90m:138[0m
+     1  src/transformers/collection/mappers.ts[90m:43[0m
+     1  src/transformers/collection/transformer.ts[90m:43[0m
+     2  src/transformers/collection/validators.ts[90m:47[0m
+     1  src/transformers/concept/transformer.ts[90m:58[0m
+     2  src/transformers/concept/validators.ts[90m:49[0m
+     1  src/transformers/document/mappers.ts[90m:27[0m
+     8  src/transformers/document/serializers.ts[90m:8[0m
+     1  src/transformers/favorite/mappers.ts[90m:45[0m
+     1  src/transformers/file/mappers.ts[90m:32[0m
+     1  src/transformers/file3d/serializers.ts[90m:43[0m
+     1  src/transformers/file3d/transformer.ts[90m:28[0m
+     2  src/transformers/folder/serializers.ts[90m:125[0m
+     1  src/transformers/folder/transformer.ts[90m:175[0m
+     1  src/transformers/group/mappers.ts[90m:70[0m
+     1  src/transformers/group/transformer.ts[90m:70[0m
+     2  src/transformers/group/validators.ts[90m:9[0m
+     1  src/transformers/image/mappers.ts[90m:37[0m
+     1  src/transformers/image/serializers.ts[90m:49[0m
+     1  src/transformers/image/transformer.ts[90m:143[0m
+     1  src/transformers/json-file/serializers.ts[90m:53[0m
+     1  src/transformers/json-file/transformer.ts[90m:49[0m
+     1  src/transformers/note/note-adapter.ts[90m:34[0m
+     1  src/transformers/note/transformer.ts[90m:100[0m
+     1  src/transformers/place/mappers.ts[90m:146[0m
+     1  src/transformers/place/transformer.ts[90m:40[0m
+     3  src/transformers/profile/serializers.ts[90m:42[0m
+     1  src/transformers/profile/transformer.ts[90m:37[0m
+     1  src/transformers/prompt/transformer.ts[90m:53[0m
+     1  src/transformers/property/mappers.ts[90m:53[0m
+     2  src/transformers/property/transformer.ts[90m:45[0m
+     1  src/transformers/settings/index.ts[90m:81[0m
+     1  src/transformers/settings/mappers.ts[90m:37[0m
+     1  src/transformers/settings/serializers.ts[90m:105[0m
+     1  src/transformers/tag/mappers.ts[90m:28[0m
+     2  src/transformers/tag/transformer.ts[90m:156[0m
+     1  src/transformers/thumbnail/mappers.ts[90m:20[0m
+     1  src/transformers/thumbnail/transformer.ts[90m:59[0m
+     1  src/transformers/video/mappers.ts[90m:31[0m
+     1  src/transformers/video/transformer.ts[90m:172[0m
+     1  src/transformers/wildcard/mappers.ts[90m:44[0m
+     1  src/transformers/workflow/mappers.ts[90m:63[0m
+     2  src/transformers/workflow/transformer.ts[90m:61[0m
+     2  src/types/entities/album/types.ts[90m:28[0m
+     1  src/types/entities/group/base.ts[90m:36[0m
+     1  src/types/entities/place/types.ts[90m:92[0m
+     1  src/types/entities/video/base.ts[90m:56[0m
+    20  src/types/migration.ts[90m:248[0m
