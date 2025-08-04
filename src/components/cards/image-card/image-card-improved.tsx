@@ -9,7 +9,7 @@ import {
 	ZoomInIcon,
 } from 'lucide-react';
 import { motion } from 'motion/react';
-import { memo, useCallback, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -59,11 +59,21 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 	const [error, setError] = useState<string | null>(null);
 	const [isHovered, setIsHovered] = useState(false);
 
-	// Determinar si estamos en modo TCG basado en la variante
-	const isTcgMode = variant === 'tcg';
+	// OPTIMIZACIÓN: Memoizar props estables para evitar re-renders
+	const memoizedProps = useMemo(
+		() => ({
+			isTcgMode: variant === 'tcg',
+			showTags,
+			showDetails,
+			showRelations,
+			isSelected,
+			isHoverable,
+		}),
+		[variant, showTags, showDetails, showRelations, isSelected, isHoverable]
+	);
 
-	// Gestionar las clases de aspect ratio
-	const getAspectRatioClass = useCallback(() => {
+	// OPTIMIZACIÓN: Memoizar clases de aspect ratio
+	const aspectRatioClass = useMemo(() => {
 		switch (aspectRatio) {
 			case 'square':
 				return 'aspect-square';
@@ -79,8 +89,8 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 		}
 	}, [aspectRatio]);
 
-	// Obtener clases específicas para cada variante
-	const getVariantClasses = useCallback(() => {
+	// OPTIMIZACIÓN: Memoizar clases específicas para cada variante
+	const variantClasses = useMemo(() => {
 		switch (variant) {
 			case 'minimal':
 				return 'border-0 shadow-none bg-transparent';
@@ -95,8 +105,45 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 		}
 	}, [variant]);
 
+	// OPTIMIZACIÓN: Memoizar datos derivados de imageData
+	const derivedData = useMemo(() => {
+		if (!imageData) return null;
+
+		const primaryColor =
+			imageData.tags && imageData.tags.length > 0 ? imageData.tags[0]?.color || '#3b82f6' : '#3b82f6';
+
+		const dimensions = imageData.width && imageData.height ? `${imageData.width} × ${imageData.height}` : '';
+
+		const cameraInfo =
+			imageData.metadata?.camera?.make || imageData.metadata?.camera?.model
+				? `${imageData.metadata.camera?.make || ''} ${imageData.metadata.camera?.model || ''}`.trim()
+				: null;
+
+		const totalRelations =
+			memoizedProps.showRelations && imageData.stats
+				? (imageData.stats.tagCount || 0) +
+					(imageData.stats.albumCount || 0) +
+					(imageData.stats.collectionCount || 0) +
+					(imageData.stats.characterCount || 0) +
+					(imageData.stats.placeCount || 0) +
+					(imageData.stats.worldItemCount || 0) +
+					(imageData.stats.noteCount || 0)
+				: 0;
+
+		return {
+			primaryColor,
+			dimensions,
+			cameraInfo,
+			totalRelations,
+			imageFormat: imageData.format || 'unknown',
+		};
+	}, [imageData, memoizedProps.showRelations]);
+
+	// OPTIMIZACIÓN: Carga de datos con useEffect estable
 	useEffect(() => {
 		const loadImageData = async () => {
+			if (!imageId) return;
+
 			try {
 				setIsLoading(true);
 				const data = await getImageCardData(imageId);
@@ -109,31 +156,18 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 			}
 		};
 
-		if (imageId) {
-			loadImageData();
-		}
+		loadImageData();
 	}, [imageId]);
 
-	// Formatear dimensiones para mostrar
-	const getHumanReadableDimensions = useCallback(() => {
-		if (!imageData?.width || !imageData?.height) return '';
-		return `${imageData.width} × ${imageData.height}`;
-	}, [imageData?.width, imageData?.height]);
-
-	// Manejar clic en la tarjeta
+	// OPTIMIZACIÓN: Handlers estables
 	const handleClick = useCallback(() => {
 		if (onClick && imageData) {
 			onClick(imageData);
 		}
 	}, [onClick, imageData]);
 
-	// Determinar color primario para efectos visuales
-	const getPrimaryColor = useCallback(() => {
-		if (imageData?.tags && imageData.tags.length > 0) {
-			return imageData.tags[0]?.color || '#3b82f6';
-		}
-		return '#3b82f6'; // Color predeterminado
-	}, [imageData?.tags]);
+	const handleHoverStart = useCallback(() => setIsHovered(true), []);
+	const handleHoverEnd = useCallback(() => setIsHovered(false), []);
 
 	// Renderizar estado de carga
 	if (isLoading) {
@@ -141,8 +175,8 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 			<div
 				className={cn(
 					'relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-800',
-					getAspectRatioClass(),
-					getVariantClasses(),
+					aspectRatioClass,
+					variantClasses,
 					className
 				)}
 			>
@@ -157,8 +191,8 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 			<div
 				className={cn(
 					'relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
-					getAspectRatioClass(),
-					getVariantClasses(),
+					aspectRatioClass,
+					variantClasses,
 					className
 				)}
 			>
@@ -172,44 +206,33 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 		);
 	}
 
-	const primaryColor = getPrimaryColor();
-	const imageFormat = imageData.format || 'unknown';
-	const cameraInfo =
-		imageData.metadata?.camera?.make || imageData.metadata?.camera?.model
-			? `${imageData.metadata.camera?.make || ''} ${imageData.metadata.camera?.model || ''}`.trim()
-			: null;
-
-	// Calcular total de relaciones
-	const totalRelations =
-		showRelations && imageData.stats
-			? (imageData.stats.tagCount || 0) +
-				(imageData.stats.albumCount || 0) +
-				(imageData.stats.collectionCount || 0) +
-				(imageData.stats.characterCount || 0) +
-				(imageData.stats.placeCount || 0) +
-				(imageData.stats.worldItemCount || 0) +
-				(imageData.stats.noteCount || 0)
-			: 0;
+	// Obtener datos derivados
+	if (!derivedData) return null;
+	const { primaryColor, dimensions, cameraInfo, totalRelations, imageFormat } = derivedData;
 
 	// Contenido de la tarjeta
 	const cardContent = (
 		<motion.div
 			className={cn(
 				'group relative overflow-hidden rounded-lg transition-all',
-				getAspectRatioClass(),
-				getVariantClasses(),
+				aspectRatioClass,
+				variantClasses,
 				isSelected && 'ring-2 ring-primary shadow-md',
-				isHoverable && 'hover:shadow-lg hover:scale-[1.02] duration-300',
+				memoizedProps.isHoverable && 'hover:shadow-lg hover:scale-[1.02] duration-300',
 				onClick && 'cursor-pointer',
 				className
 			)}
-			onHoverStart={() => setIsHovered(true)}
-			onHoverEnd={() => setIsHovered(false)}
+			onHoverStart={handleHoverStart}
+			onHoverEnd={handleHoverEnd}
 			onClick={handleClick}
 			initial={{ opacity: 0, y: 10 }}
 			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.3 }}
-			style={isTcgMode ? { boxShadow: `0 8px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30` } : {}}
+			style={
+				memoizedProps.isTcgMode
+					? { boxShadow: `0 8px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30` }
+					: {}
+			}
 		>
 			{/* Imagen principal */}
 			<div className="relative w-full h-0 pb-[75%]">
@@ -239,11 +262,9 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 							{imageData.name || 'Sin título'}
 						</h3>
 
-						{showDetails && (
+						{memoizedProps.showDetails && (
 							<div className="flex flex-wrap gap-2 mt-1">
-								{getHumanReadableDimensions() && (
-									<p className="text-xs text-white/80">{getHumanReadableDimensions()}</p>
-								)}
+								{dimensions && <p className="text-xs text-white/80">{dimensions}</p>}
 								{imageFormat && imageFormat !== 'unknown' && (
 									<p className="text-xs text-white/80 uppercase">{imageFormat}</p>
 								)}
@@ -280,15 +301,17 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 			</div>
 
 			{/* Contenido bajo la imagen (excepto para variante gallery) */}
-			{variant !== 'gallery' && showDetails && (
+			{variant !== 'gallery' && memoizedProps.showDetails && (
 				<div className="p-3">
 					{/* Título e información principal */}
 					<div className="flex justify-between items-start mb-2">
-						<h3 className={cn('font-medium line-clamp-1', isTcgMode ? 'text-white' : 'text-foreground')}>
+						<h3 className={cn('font-medium line-clamp-1', memoizedProps.isTcgMode ? 'text-white' : 'text-foreground')}>
 							{imageData.name || 'Sin título'}
 						</h3>
 
-						{imageData.isFavorite && !isTcgMode && <StarIcon className="w-4 h-4 text-yellow-400 fill-yellow-400" />}
+						{imageData.isFavorite && !memoizedProps.isTcgMode && (
+							<StarIcon className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+						)}
 					</div>
 
 					{/* Información técnica */}
@@ -316,7 +339,7 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 					</div>
 
 					{/* Etiquetas */}
-					{showTags && imageData.tags && imageData.tags.length > 0 && (
+					{memoizedProps.showTags && imageData.tags && imageData.tags.length > 0 && (
 						<div className="mt-3 flex flex-wrap gap-1">
 							{imageData.tags.slice(0, 3).map((tag: TagWithStats) => (
 								<Badge
@@ -325,7 +348,7 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 									className="text-[10px] h-5 px-1.5 truncate max-w-[100px]"
 									style={{
 										borderColor: `${tag.color}50`,
-										backgroundColor: isTcgMode ? `${tag.color}20` : undefined,
+										backgroundColor: memoizedProps.isTcgMode ? `${tag.color}20` : undefined,
 									}}
 								>
 									{tag.name}
@@ -340,7 +363,7 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 					)}
 
 					{/* Contador de relaciones */}
-					{showRelations && totalRelations > 0 && (
+					{memoizedProps.showRelations && totalRelations > 0 && (
 						<div className="mt-2 flex items-center text-xs text-muted-foreground">
 							<InfoIcon className="w-3 h-3 mr-1" />
 							<span>{totalRelations} relaciones</span>
@@ -350,7 +373,7 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 			)}
 
 			{/* Efectos visuales para modo TCG */}
-			{isTcgMode && (
+			{memoizedProps.isTcgMode && (
 				<>
 					{/* Brillo en hover */}
 					<div

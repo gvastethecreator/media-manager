@@ -5,18 +5,16 @@
  */
 
 export type {
-  GroupBase,
-  GroupComplete,
-  GroupStatistics,
-  GroupWithStats,
-  GroupSortKey
+	GroupBase,
+	GroupComplete,
+	GroupSortKey,
+	GroupStatistics,
+	GroupWithStats,
 } from './group/base';
 
 export { GroupViewMode } from './group/base';
-
-export type {
-  CreateGroupInput,
-  UpdateGroupInput
-} from './group/types';
-
 export * from './group/enums';
+export type {
+	CreateGroupInput,
+	UpdateGroupInput,
+} from './group/types';

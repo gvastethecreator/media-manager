@@ -4,15 +4,10 @@
  * @description Integra el sistema EntityTypeConfig con los servicios existentes de thumbnails
  */
 
-import { imageService } from '@/services/image';
-import { serverLogger } from '@/lib/logger/server-logger';
-import {
-	type AnyEntityWithStats,
-	getEntityStatsType,
-	EntityStatsType,
-	isImageWithStats
-} from '@/types/migration';
 import { ENTITY_TYPE_CONFIGS } from '@/config/entity-type-configs';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { imageService } from '@/services/image';
+import { type AnyEntityWithStats, EntityStatsType, getEntityStatsType, isImageWithStats } from '@/types/migration';
 
 /**
  * Opciones para la generación de thumbnails
@@ -46,10 +41,7 @@ class EntityThumbnailAdapter {
 	/**
 	 * Genera un thumbnail para cualquier tipo de entidad
 	 */
-	async generateThumbnail(
-		entity: AnyEntityWithStats,
-		options: EntityThumbnailOptions = {}
-	): Promise<ThumbnailResult> {
+	async generateThumbnail(entity: AnyEntityWithStats, options: EntityThumbnailOptions = {}): Promise<ThumbnailResult> {
 		const entityType = getEntityStatsType(entity);
 		if (!entityType) {
 			throw new Error(`Cannot determine entity type for entity ${entity.id}`);
@@ -64,7 +56,7 @@ class EntityThumbnailAdapter {
 			entityId: entity.id,
 			entityType,
 			entityName: entity.name,
-			options
+			options,
 		});
 
 		// Generar thumbnail según el tipo de entidad
@@ -73,20 +65,20 @@ class EntityThumbnailAdapter {
 			return {
 				url,
 				cached: false,
-				timestamp: Date.now()
+				timestamp: Date.now(),
 			};
 		} catch (error) {
 			this.logger.error('Failed to generate thumbnail', {
 				entityId: entity.id,
 				entityType,
-				error: error instanceof Error ? error.message : 'Unknown error'
+				error: error instanceof Error ? error.message : 'Unknown error',
 			});
 
 			// Retornar thumbnail por defecto basado en la configuración
 			return {
 				url: this.getDefaultThumbnail(entityType),
 				cached: false,
-				timestamp: Date.now()
+				timestamp: Date.now(),
 			};
 		}
 	}
@@ -117,10 +109,7 @@ class EntityThumbnailAdapter {
 	/**
 	 * Genera thumbnail para imágenes usando el servicio existente
 	 */
-	private async generateImageThumbnail(
-		entity: AnyEntityWithStats,
-		options: EntityThumbnailOptions
-	): Promise<string> {
+	private async generateImageThumbnail(entity: AnyEntityWithStats, options: EntityThumbnailOptions): Promise<string> {
 		// Usar el servicio existente de imágenes
 		await imageService.generateThumbnail(entity.id);
 
@@ -138,10 +127,7 @@ class EntityThumbnailAdapter {
 	/**
 	 * Genera thumbnail basado en el icono del tipo de entidad
 	 */
-	private async generateIconThumbnail(
-		entityType: EntityStatsType,
-		options: EntityThumbnailOptions
-	): Promise<string> {
+	private async generateIconThumbnail(entityType: EntityStatsType, options: EntityThumbnailOptions): Promise<string> {
 		const config = ENTITY_TYPE_CONFIGS[entityType];
 		if (!config) {
 			throw new Error(`No configuration found for entity type ${entityType}`);
@@ -152,8 +138,8 @@ class EntityThumbnailAdapter {
 		const svg = `
 			<svg width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
 				<rect width="100%" height="100%" fill="${config.color}20"/>
-				<g transform="translate(${size/4}, ${size/4})">
-					<rect width="${size/2}" height="${size/2}" fill="${config.color}" rx="8"/>
+				<g transform="translate(${size / 4}, ${size / 4})">
+					<rect width="${size / 2}" height="${size / 2}" fill="${config.color}" rx="8"/>
 				</g>
 			</svg>
 		`.trim();
@@ -193,7 +179,7 @@ class EntityThumbnailAdapter {
 
 		this.logger.info('Starting batch thumbnail generation', {
 			entityCount: entities.length,
-			batchSize
+			batchSize,
 		});
 
 		for (let i = 0; i < entities.length; i += batchSize) {
@@ -211,7 +197,7 @@ class EntityThumbnailAdapter {
 				} catch (error) {
 					this.logger.error('Failed to generate thumbnail in batch', {
 						entityId: entity.id,
-						error: error instanceof Error ? error.message : 'Unknown error'
+						error: error instanceof Error ? error.message : 'Unknown error',
 					});
 				}
 			});
@@ -221,7 +207,7 @@ class EntityThumbnailAdapter {
 
 		this.logger.info('Completed batch thumbnail generation', {
 			totalEntities: entities.length,
-			successfulThumbnails: results.size
+			successfulThumbnails: results.size,
 		});
 
 		return results;
@@ -251,7 +237,7 @@ class EntityThumbnailAdapter {
 			totalCached: 0,
 			totalSize: 0,
 			oldestEntry: null,
-			newestEntry: null
+			newestEntry: null,
 		};
 	}
 }

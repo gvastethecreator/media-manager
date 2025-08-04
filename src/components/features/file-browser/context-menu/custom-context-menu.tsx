@@ -4,18 +4,18 @@
  */
 
 import {
-  ChevronRight,
-  Copy,
-  Download,
-  FolderPlus,
-  MoreHorizontal,
-  Move3D,
-  Scissors,
-  Settings,
-  Share2,
-  Star,
-  Tags,
-  Trash2,
+	ChevronRight,
+	Copy,
+	Download,
+	FolderPlus,
+	MoreHorizontal,
+	Move3D,
+	Scissors,
+	Settings,
+	Share2,
+	Star,
+	Tags,
+	Trash2,
 } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import React, { useEffect, useState } from 'react';
@@ -165,10 +165,10 @@ export const CustomContextMenu: React.FC<CustomContextMenuProps> = ({
 						animate={{ scale: 1, opacity: 1, y: 0 }}
 						exit={{ scale: 0.95, opacity: 0, y: -10 }}
 						transition={{
-							type: "spring",
+							type: 'spring',
 							stiffness: 400,
 							damping: 25,
-							duration: 0.2
+							duration: 0.2,
 						}}
 						className="absolute"
 						style={{
@@ -179,142 +179,142 @@ export const CustomContextMenu: React.FC<CustomContextMenuProps> = ({
 						onClick={(e) => e.stopPropagation()}
 						onKeyDown={handleKeyDown}
 					>
-				<div className="bg-popover border border-border rounded-md shadow-lg min-w-[280px] max-w-[320px] py-2">
-					{/* Encabezado con información de selección */}
-					{selectedCount > 0 && (
-						<>
-							<div className="px-3 py-2 border-b border-border">
-								<div className="flex items-center gap-2">
-									<Badge variant="secondary" className="text-xs">
-										{selectedCount} {selectedCount === 1 ? 'elemento' : 'elementos'}
-									</Badge>
-									{isMultiSelection && <span className="text-xs text-muted-foreground">seleccionados</span>}
+						<div className="bg-popover border border-border rounded-md shadow-lg min-w-[280px] max-w-[320px] py-2">
+							{/* Encabezado con información de selección */}
+							{selectedCount > 0 && (
+								<>
+									<div className="px-3 py-2 border-b border-border">
+										<div className="flex items-center gap-2">
+											<Badge variant="secondary" className="text-xs">
+												{selectedCount} {selectedCount === 1 ? 'elemento' : 'elementos'}
+											</Badge>
+											{isMultiSelection && <span className="text-xs text-muted-foreground">seleccionados</span>}
+										</div>
+									</div>
+								</>
+							)}
+
+							<div className="px-1 py-1">
+								{/* Acciones de Undo/Redo */}
+								<div className="flex items-center gap-1 px-2 py-1">
+									<UndoButton variant="ghost" size="sm" className="h-7" />
+									<RedoButton variant="ghost" size="sm" className="h-7" />
+									<Button variant="ghost" size="sm" className="h-7" onClick={() => handleAction('configure')}>
+										<Settings className="h-3.5 w-3.5" />
+									</Button>
 								</div>
+
+								<Separator className="my-2" />
+
+								{selectedCount > 0 ? (
+									<>
+										{/* Acciones principales para elementos seleccionados */}
+										<MenuItem
+											icon={<Copy className="h-4 w-4" />}
+											label="Copiar"
+											onClick={() => handleAction('copy')}
+											shortcut="Ctrl+C"
+										/>
+										<MenuItem
+											icon={<Scissors className="h-4 w-4" />}
+											label="Cortar"
+											onClick={() => handleAction('cut')}
+											shortcut="Ctrl+X"
+										/>
+										<MenuItem
+											icon={<Download className="h-4 w-4" />}
+											label={isMultiSelection ? 'Descargar elementos' : 'Descargar'}
+											onClick={() => handleAction('download')}
+										/>
+
+										<Separator className="my-2" />
+
+										<MenuItem
+											icon={<Star className="h-4 w-4" />}
+											label={isMultiSelection ? 'Marcar como favoritos' : 'Marcar como favorito'}
+											onClick={() => handleAction('toggle-favorite')}
+										/>
+										<MenuItem
+											icon={<Tags className="h-4 w-4" />}
+											label="Gestionar etiquetas"
+											onClick={() => handleAction('manage-tags')}
+											hasSubmenu
+										/>
+										<MenuItem
+											icon={<Move3D className="h-4 w-4" />}
+											label={isMultiSelection ? 'Mover elementos' : 'Mover'}
+											onClick={() => handleAction('move')}
+											hasSubmenu
+										/>
+										<MenuItem
+											icon={<FolderPlus className="h-4 w-4" />}
+											label="Añadir a colección"
+											onClick={() => handleAction('add-to-collection')}
+											hasSubmenu
+										/>
+
+										<Separator className="my-2" />
+
+										<MenuItem
+											icon={<Share2 className="h-4 w-4" />}
+											label="Compartir"
+											onClick={() => handleAction('share')}
+											hasSubmenu
+										/>
+										<MenuItem
+											icon={<MoreHorizontal className="h-4 w-4" />}
+											label="Más acciones"
+											onClick={() => handleAction('more-actions')}
+											hasSubmenu
+										/>
+
+										<Separator className="my-2" />
+
+										<MenuItem
+											icon={<Trash2 className="h-4 w-4" />}
+											label={isMultiSelection ? 'Eliminar elementos' : 'Eliminar'}
+											onClick={() => handleAction('delete')}
+											variant="destructive"
+											shortcut="Delete"
+										/>
+									</>
+								) : (
+									<>
+										{/* Acciones para espacio vacío */}
+										<MenuItem
+											icon={<FolderPlus className="h-4 w-4" />}
+											label="Nueva carpeta"
+											onClick={() => handleAction('new-folder')}
+										/>
+										<MenuItem
+											icon={<Download className="h-4 w-4" />}
+											label="Subir archivos"
+											onClick={() => handleAction('upload-files')}
+										/>
+
+										<Separator className="my-2" />
+
+										<MenuItem
+											icon={<Copy className="h-4 w-4" />}
+											label="Pegar"
+											onClick={() => handleAction('paste')}
+											shortcut="Ctrl+V"
+											disabled={true} // TODO: Verificar si hay elementos en portapapeles
+										/>
+
+										<Separator className="my-2" />
+
+										<MenuItem
+											icon={<Settings className="h-4 w-4" />}
+											label="Configuración de vista"
+											onClick={() => handleAction('view-settings')}
+										/>
+									</>
+								)}
 							</div>
-						</>
-					)}
-
-					<div className="px-1 py-1">
-						{/* Acciones de Undo/Redo */}
-						<div className="flex items-center gap-1 px-2 py-1">
-							<UndoButton variant="ghost" size="sm" className="h-7" />
-							<RedoButton variant="ghost" size="sm" className="h-7" />
-							<Button variant="ghost" size="sm" className="h-7" onClick={() => handleAction('configure')}>
-								<Settings className="h-3.5 w-3.5" />
-							</Button>
 						</div>
-
-						<Separator className="my-2" />
-
-						{selectedCount > 0 ? (
-							<>
-								{/* Acciones principales para elementos seleccionados */}
-								<MenuItem
-									icon={<Copy className="h-4 w-4" />}
-									label="Copiar"
-									onClick={() => handleAction('copy')}
-									shortcut="Ctrl+C"
-								/>
-								<MenuItem
-									icon={<Scissors className="h-4 w-4" />}
-									label="Cortar"
-									onClick={() => handleAction('cut')}
-									shortcut="Ctrl+X"
-								/>
-								<MenuItem
-									icon={<Download className="h-4 w-4" />}
-									label={isMultiSelection ? 'Descargar elementos' : 'Descargar'}
-									onClick={() => handleAction('download')}
-								/>
-
-								<Separator className="my-2" />
-
-								<MenuItem
-									icon={<Star className="h-4 w-4" />}
-									label={isMultiSelection ? 'Marcar como favoritos' : 'Marcar como favorito'}
-									onClick={() => handleAction('toggle-favorite')}
-								/>
-								<MenuItem
-									icon={<Tags className="h-4 w-4" />}
-									label="Gestionar etiquetas"
-									onClick={() => handleAction('manage-tags')}
-									hasSubmenu
-								/>
-								<MenuItem
-									icon={<Move3D className="h-4 w-4" />}
-									label={isMultiSelection ? 'Mover elementos' : 'Mover'}
-									onClick={() => handleAction('move')}
-									hasSubmenu
-								/>
-								<MenuItem
-									icon={<FolderPlus className="h-4 w-4" />}
-									label="Añadir a colección"
-									onClick={() => handleAction('add-to-collection')}
-									hasSubmenu
-								/>
-
-								<Separator className="my-2" />
-
-								<MenuItem
-									icon={<Share2 className="h-4 w-4" />}
-									label="Compartir"
-									onClick={() => handleAction('share')}
-									hasSubmenu
-								/>
-								<MenuItem
-									icon={<MoreHorizontal className="h-4 w-4" />}
-									label="Más acciones"
-									onClick={() => handleAction('more-actions')}
-									hasSubmenu
-								/>
-
-								<Separator className="my-2" />
-
-								<MenuItem
-									icon={<Trash2 className="h-4 w-4" />}
-									label={isMultiSelection ? 'Eliminar elementos' : 'Eliminar'}
-									onClick={() => handleAction('delete')}
-									variant="destructive"
-									shortcut="Delete"
-								/>
-							</>
-						) : (
-							<>
-								{/* Acciones para espacio vacío */}
-								<MenuItem
-									icon={<FolderPlus className="h-4 w-4" />}
-									label="Nueva carpeta"
-									onClick={() => handleAction('new-folder')}
-								/>
-								<MenuItem
-									icon={<Download className="h-4 w-4" />}
-									label="Subir archivos"
-									onClick={() => handleAction('upload-files')}
-								/>
-
-								<Separator className="my-2" />
-
-								<MenuItem
-									icon={<Copy className="h-4 w-4" />}
-									label="Pegar"
-									onClick={() => handleAction('paste')}
-									shortcut="Ctrl+V"
-									disabled={true} // TODO: Verificar si hay elementos en portapapeles
-								/>
-
-								<Separator className="my-2" />
-
-								<MenuItem
-									icon={<Settings className="h-4 w-4" />}
-									label="Configuración de vista"
-									onClick={() => handleAction('view-settings')}
-								/>
-							</>
-						)}
-					</div>
-				</div>
-			</motion.div>
-		</motion.div>
+					</motion.div>
+				</motion.div>
 			)}
 		</AnimatePresence>
 	);

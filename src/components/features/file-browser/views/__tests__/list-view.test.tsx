@@ -3,8 +3,8 @@
  * @description Tests básicos para verificar funcionalidad del nuevo ListView
  */
 
-import { describe, expect, it, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { ListView } from '@/components/features/file-browser/views/list-view';
 import type { AnyEntityWithStats } from '@/types/migration';
 

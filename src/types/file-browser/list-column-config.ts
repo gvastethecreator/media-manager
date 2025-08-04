@@ -3,8 +3,8 @@
  * @description Configuración de columnas para ListView en FileBrowser
  */
 
-import type { AnyEntityWithStats } from '@/types/entities';
 import type { ListColumnConfig as BaseListColumnConfig, ListViewConfig } from '@/transformers/settings/schema';
+import type { AnyEntityWithStats } from '@/types/entities';
 
 // Re-exportamos el tipo de configuración de ListView
 export type { ListViewConfig };
@@ -456,7 +456,7 @@ export function formatFileSize(bytes: number): string {
 	const k = 1024;
 	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return `${Math.round((bytes / Math.pow(k, i)) * 100) / 100} ${sizes[i]}`;
+	return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`;
 }
 
 /**

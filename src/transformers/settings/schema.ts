@@ -21,29 +21,31 @@ export const listColumnConfigSchema = z.object({
 });
 
 // Esquema para configuración de ListView
-export const listViewConfigSchema = z.object({
-	columns: z.array(listColumnConfigSchema),
-	rowHeight: z.number().min(40).max(120).default(40),
-	showZebraStripes: z.boolean().default(false),
-	showHeader: z.boolean().default(true),
-	allowResize: z.boolean().default(true),
-	allowReorder: z.boolean().default(true),
-	showThumbnails: z.boolean().default(true),
-	thumbnailSize: z.enum(['none', 'small', 'medium', 'large']).default('medium'),
-	rowGap: z.number().min(0).max(20).default(4),
-	cellPadding: z.number().min(4).max(24).default(8),
-}).default({
-	columns: [],
-	rowHeight: 40,
-	showZebraStripes: false,
-	showHeader: true,
-	allowResize: true,
-	allowReorder: true,
-	showThumbnails: true,
-	thumbnailSize: 'medium',
-	rowGap: 4,
-	cellPadding: 8
-});
+export const listViewConfigSchema = z
+	.object({
+		columns: z.array(listColumnConfigSchema),
+		rowHeight: z.number().min(40).max(120).default(40),
+		showZebraStripes: z.boolean().default(false),
+		showHeader: z.boolean().default(true),
+		allowResize: z.boolean().default(true),
+		allowReorder: z.boolean().default(true),
+		showThumbnails: z.boolean().default(true),
+		thumbnailSize: z.enum(['none', 'small', 'medium', 'large']).default('medium'),
+		rowGap: z.number().min(0).max(20).default(4),
+		cellPadding: z.number().min(4).max(24).default(8),
+	})
+	.default({
+		columns: [],
+		rowHeight: 40,
+		showZebraStripes: false,
+		showHeader: true,
+		allowResize: true,
+		allowReorder: true,
+		showThumbnails: true,
+		thumbnailSize: 'medium',
+		rowGap: 4,
+		cellPadding: 8,
+	});
 
 // Esquema para configuración de metadata de CardsView
 export const cardMetadataConfigSchema = z.object({
@@ -150,70 +152,86 @@ export const masonryViewConfigSchema = z.object({
 
 // Esquema para configuración de GridView
 // Esquema para la configuración de vista de cuadrícula
-export const gridViewConfigSchema = z.object({
-	thumbnailSize: z.enum(['none', 'small', 'medium', 'large']).default('medium'),
-	itemSize: z.number().min(50).max(800).default(200),
-	aspectRatio: z.enum(['auto', 'square', '4:3', '16:9', 'custom']).default('auto'),
-	customAspectRatio: z.object({
-		width: z.number().min(1),
-		height: z.number().min(1),
-	}).optional(),
-	gap: z.number().min(0).max(50).default(16),
-	columns: z.union([z.number().min(1).max(20), z.literal('auto')]).default('auto'),
-	showLabels: z.boolean().default(true),
-	labelPosition: z.enum(['top', 'bottom', 'overlay']).default('bottom'),
-	hoverInfo: z.enum(['none', 'basic', 'detailed']).default('basic'),
-	animations: z.object({
-		enabled: z.boolean().default(true),
-		duration: z.number().min(50).max(1000).default(200),
-		hoverScale: z.number().min(1).max(1.2).default(1.05),
-	}).default({
-		enabled: true,
-		duration: 200,
-		hoverScale: 1.05
-	}),
-}).default({
-	thumbnailSize: 'medium',
-	itemSize: 200,
-	aspectRatio: 'auto',
-	gap: 16,
-	columns: 'auto',
-	showLabels: true,
-	labelPosition: 'bottom',
-	hoverInfo: 'basic',
-	animations: {
-		enabled: true,
-		duration: 200,
-		hoverScale: 1.05
-	}
-});
+export const gridViewConfigSchema = z
+	.object({
+		thumbnailSize: z.enum(['none', 'small', 'medium', 'large']).default('medium'),
+		itemSize: z.number().min(50).max(800).default(200),
+		aspectRatio: z.enum(['auto', 'square', '4:3', '16:9', 'custom']).default('auto'),
+		customAspectRatio: z
+			.object({
+				width: z.number().min(1),
+				height: z.number().min(1),
+			})
+			.optional(),
+		gap: z.number().min(0).max(50).default(16),
+		columns: z.union([z.number().min(1).max(20), z.literal('auto')]).default('auto'),
+		showLabels: z.boolean().default(true),
+		labelPosition: z.enum(['top', 'bottom', 'overlay']).default('bottom'),
+		hoverInfo: z.enum(['none', 'basic', 'detailed']).default('basic'),
+		animations: z
+			.object({
+				enabled: z.boolean().default(true),
+				duration: z.number().min(50).max(1000).default(200),
+				hoverScale: z.number().min(1).max(1.2).default(1.05),
+			})
+			.default({
+				enabled: true,
+				duration: 200,
+				hoverScale: 1.05,
+			}),
+	})
+	.default({
+		thumbnailSize: 'medium',
+		itemSize: 200,
+		aspectRatio: 'auto',
+		gap: 16,
+		columns: 'auto',
+		showLabels: true,
+		labelPosition: 'bottom',
+		hoverInfo: 'basic',
+		animations: {
+			enabled: true,
+			duration: 200,
+			hoverScale: 1.05,
+		},
+	});
 
 // Esquema para configuración de animaciones globales
 export const animationConfigSchema = z.object({
 	enabled: z.boolean().default(true),
 	duration: z.number().min(0).max(2000).default(200),
 	easing: z.enum(['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']).default('ease-out'),
-	types: z.object({
-		hover: z.object({
-			enabled: z.boolean().default(true),
-			duration: z.number().min(0).max(1000).default(150),
-			scale: z.number().min(1).max(1.5).default(1.05),
-		}).default({}),
-		selection: z.object({
-			enabled: z.boolean().default(true),
-			duration: z.number().min(0).max(1000).default(200),
-			highlightColor: z.string().default('#3b82f6'),
-		}).default({}),
-		loading: z.object({
-			enabled: z.boolean().default(true),
-			type: z.enum(['spinner', 'skeleton', 'pulse']).default('skeleton'),
-		}).default({}),
-		viewTransition: z.object({
-			enabled: z.boolean().default(true),
-			duration: z.number().min(0).max(1000).default(300),
-			type: z.enum(['fade', 'slide', 'scale']).default('fade'),
-		}).default({}),
-	}).default({}),
+	types: z
+		.object({
+			hover: z
+				.object({
+					enabled: z.boolean().default(true),
+					duration: z.number().min(0).max(1000).default(150),
+					scale: z.number().min(1).max(1.5).default(1.05),
+				})
+				.default({}),
+			selection: z
+				.object({
+					enabled: z.boolean().default(true),
+					duration: z.number().min(0).max(1000).default(200),
+					highlightColor: z.string().default('#3b82f6'),
+				})
+				.default({}),
+			loading: z
+				.object({
+					enabled: z.boolean().default(true),
+					type: z.enum(['spinner', 'skeleton', 'pulse']).default('skeleton'),
+				})
+				.default({}),
+			viewTransition: z
+				.object({
+					enabled: z.boolean().default(true),
+					duration: z.number().min(0).max(1000).default(300),
+					type: z.enum(['fade', 'slide', 'scale']).default('fade'),
+				})
+				.default({}),
+		})
+		.default({}),
 });
 
 // Esquema para configuración de accesibilidad
@@ -223,11 +241,13 @@ export const accessibilityConfigSchema = z.object({
 	highContrast: z.boolean().default(false),
 	reduceMotion: z.boolean().default(false),
 	largeFonts: z.boolean().default(false),
-	focus: z.object({
-		showIndicators: z.boolean().default(true),
-		indicatorColor: z.string().default('#3b82f6'),
-		indicatorWidth: z.number().min(1).max(5).default(2),
-	}).default({}),
+	focus: z
+		.object({
+			showIndicators: z.boolean().default(true),
+			indicatorColor: z.string().default('#3b82f6'),
+			indicatorWidth: z.number().min(1).max(5).default(2),
+		})
+		.default({}),
 });
 
 // Esquema para configuración de rendimiento
@@ -237,16 +257,20 @@ export const performanceConfigSchema = z.object({
 	virtualizationBuffer: z.number().min(1).max(20).default(5),
 	lazyThumbnails: z.boolean().default(true),
 	thumbnailQuality: z.enum(['low', 'medium', 'high']).default('medium'),
-	cache: z.object({
-		thumbnails: z.boolean().default(true),
-		maxSize: z.number().min(10).max(1000).default(100),
-		ttl: z.number().min(60000).max(86400000).default(3600000),
-	}).default({}),
-	debounce: z.object({
-		search: z.number().min(0).max(2000).default(300),
-		scroll: z.number().min(0).max(100).default(16),
-		resize: z.number().min(0).max(500).default(100),
-	}).default({}),
+	cache: z
+		.object({
+			thumbnails: z.boolean().default(true),
+			maxSize: z.number().min(10).max(1000).default(100),
+			ttl: z.number().min(60000).max(86400000).default(3600000),
+		})
+		.default({}),
+	debounce: z
+		.object({
+			search: z.number().min(0).max(2000).default(300),
+			scroll: z.number().min(0).max(100).default(16),
+			resize: z.number().min(0).max(500).default(100),
+		})
+		.default({}),
 });
 
 // Esquema para configuración por tipo de entidad
@@ -276,19 +300,21 @@ const createDefaultSchema = (schema: any) => {
 	}
 };
 
-export const viewConfigurationSchema = z.object({
-	listView: listViewConfigSchema,
-	gridView: gridViewConfigSchema,
-	cardsView: cardsViewConfigSchema,
-	masonryView: masonryViewConfigSchema,
-	global: globalViewConfigSchema,
-}).default({
-	listView: createDefaultSchema(listViewConfigSchema),
-	gridView: createDefaultSchema(gridViewConfigSchema),
-	cardsView: createDefaultSchema(cardsViewConfigSchema),
-	masonryView: createDefaultSchema(masonryViewConfigSchema),
-	global: createDefaultSchema(globalViewConfigSchema),
-});
+export const viewConfigurationSchema = z
+	.object({
+		listView: listViewConfigSchema,
+		gridView: gridViewConfigSchema,
+		cardsView: cardsViewConfigSchema,
+		masonryView: masonryViewConfigSchema,
+		global: globalViewConfigSchema,
+	})
+	.default({
+		listView: createDefaultSchema(listViewConfigSchema),
+		gridView: createDefaultSchema(gridViewConfigSchema),
+		cardsView: createDefaultSchema(cardsViewConfigSchema),
+		masonryView: createDefaultSchema(masonryViewConfigSchema),
+		global: createDefaultSchema(globalViewConfigSchema),
+	});
 
 // Esquema para configuración de ViewConfiguration unificada
 export const viewConfigurationMetadataSchema = z.object({
@@ -345,16 +371,10 @@ export const fileBrowserConfigSchema = z.object({
 	global: globalViewConfigSchema.optional(),
 
 	// Nuevo sistema unificado de configuración de vistas
-	viewConfigurations: z.record(
-		z.enum(['list', 'grid', 'cards', 'masonry']),
-		unifiedViewConfigurationSchema
-	).optional(),
+	viewConfigurations: z.record(z.enum(['list', 'grid', 'cards', 'masonry']), unifiedViewConfigurationSchema).optional(),
 
 	// Presets personalizados por tipo de vista
-	customPresets: z.record(
-		z.enum(['list', 'grid', 'cards', 'masonry']),
-		z.array(viewPresetSchema)
-	).optional(),
+	customPresets: z.record(z.enum(['list', 'grid', 'cards', 'masonry']), z.array(viewPresetSchema)).optional(),
 
 	// Configuración global del navegador de archivos
 	defaultViewType: z.enum(['list', 'grid', 'cards', 'masonry']).default('grid'),

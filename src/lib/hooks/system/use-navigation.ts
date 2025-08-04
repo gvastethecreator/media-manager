@@ -89,13 +89,13 @@ export const useNavigation = () => {
 						emoji: store.currentPlace?.emoji,
 					};
 				case 'world-item':
-				return {
-					type: 'world-item',
-					id: store.currentWorldItemId,
-					name: store.currentWorldItem?.name,
-					count: store.currentWorldItem?.count,
-					emoji: store.currentWorldItem?.emoji,
-				};
+					return {
+						type: 'world-item',
+						id: store.currentWorldItemId,
+						name: store.currentWorldItem?.name,
+						count: store.currentWorldItem?.count,
+						emoji: store.currentWorldItem?.emoji,
+					};
 				case 'all':
 					return {
 						type: 'all',
@@ -161,15 +161,15 @@ export const useNavigation = () => {
 					);
 					break;
 				case 'world-item':
-				breadcrumbs.push(
-					{ name: 'Elementos del Mundo', path: '/world-items', isActive: false },
-					{
-						name: store.currentWorldItem?.name || 'Elemento',
-						path: `/world-items/${store.currentWorldItemId}`,
-						isActive: true,
-					}
-				);
-				break;
+					breadcrumbs.push(
+						{ name: 'Elementos del Mundo', path: '/world-items', isActive: false },
+						{
+							name: store.currentWorldItem?.name || 'Elemento',
+							path: `/world-items/${store.currentWorldItemId}`,
+							isActive: true,
+						}
+					);
+					break;
 				case 'all':
 					breadcrumbs.push({ name: 'Todas las imágenes', path: '/images/all', isActive: true });
 					break;
