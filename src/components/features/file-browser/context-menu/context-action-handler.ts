@@ -6,17 +6,17 @@
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
-import {
-	moveFile as moveFileService,
-	copyFile as copyFileService,
-	getFileAsDataUrl
-} from '@/services/file/file.service';
-import { enhancedFileOperationsService } from '@/services/file/enhanced-file-operations.service';
 import { enhancedDownloadService } from '@/services/download/download.service';
+import { enhancedFileOperationsService } from '@/services/file/enhanced-file-operations.service';
+import {
+	copyFile as copyFileService,
+	getFileAsDataUrl,
+	moveFile as moveFileService,
+} from '@/services/file/file.service';
 import { addImageToTag } from '@/services/tag/tag.service';
-import type { FileItem } from '@/types/file-browser/file-item';
 import type { AnyEntityWithStats } from '@/types/entities';
-import type { ContextMenuAction, MultiSelectionAction, EmptySpaceAction } from './types';
+import type { FileItem } from '@/types/file-browser/file-item';
+import type { ContextMenuAction, EmptySpaceAction, MultiSelectionAction } from './types';
 
 const actionLogger = clientLogger.withContext('ContextActionHandler');
 
@@ -132,7 +132,8 @@ function convertFileItemToEntity(item: FileItem): AnyEntityWithStats {
 			depth: 0,
 			stats: basicImageStats,
 		} as any; // Cast to any to satisfy type constraints
-	} else if (item.mimeType?.startsWith('video/')) {
+	}
+	if (item.mimeType?.startsWith('video/')) {
 		return {
 			...baseEntity,
 			entityType: 'video' as const,
@@ -162,31 +163,30 @@ function convertFileItemToEntity(item: FileItem): AnyEntityWithStats {
 			isPublic: true,
 			stats: basicImageStats,
 		} as any; // Cast to any to satisfy type constraints
-	} else {
-		// Default to image
-		return {
-			...baseEntity,
-			entityType: 'image' as const,
-			hash: '',
-			mimeType: item.mimeType || 'image/jpeg',
-			width: item.metadata?.width || 0,
-			height: item.metadata?.height || 0,
-			metadata: null,
-			thumbnail: null,
-			thumbnailSize: null,
-			thumbnailWidth: null,
-			thumbnailHeight: null,
-			thumbnailMimeType: null,
-			thumbnailError: null,
-			thumbnailErrorAt: null,
-			thumbnailOptimizedAt: null,
-			folderId: '',
-			noteId: null,
-			thumbnailUrl: item.thumbnailUrl || '',
-			fullUrl: item.path,
-			stats: basicImageStats,
-		} as any; // Cast to any to satisfy type constraints
 	}
+	// Default to image
+	return {
+		...baseEntity,
+		entityType: 'image' as const,
+		hash: '',
+		mimeType: item.mimeType || 'image/jpeg',
+		width: item.metadata?.width || 0,
+		height: item.metadata?.height || 0,
+		metadata: null,
+		thumbnail: null,
+		thumbnailSize: null,
+		thumbnailWidth: null,
+		thumbnailHeight: null,
+		thumbnailMimeType: null,
+		thumbnailError: null,
+		thumbnailErrorAt: null,
+		thumbnailOptimizedAt: null,
+		folderId: '',
+		noteId: null,
+		thumbnailUrl: item.thumbnailUrl || '',
+		fullUrl: item.path,
+		stats: basicImageStats,
+	} as any; // Cast to any to satisfy type constraints
 }
 
 // Implementación del servicio de operaciones de archivos
@@ -209,11 +209,14 @@ const customFileOperationsService = {
 	},
 
 	// Descarga el archivo al dispositivo del usuario con funcionalidad mejorada
-	downloadFile: async (path: string, options?: {
-		format?: 'original' | 'zip' | 'pdf';
-		quality?: 'original' | 'high' | 'medium' | 'low';
-		showProgress?: boolean;
-	}) => {
+	downloadFile: async (
+		path: string,
+		options?: {
+			format?: 'original' | 'zip' | 'pdf';
+			quality?: 'original' | 'high' | 'medium' | 'low';
+			showProgress?: boolean;
+		}
+	) => {
 		try {
 			const filename = path.split('/').pop() || 'download';
 
@@ -221,7 +224,7 @@ const customFileOperationsService = {
 			const fileItem = {
 				id: path,
 				name: filename,
-				path: path
+				path: path,
 			};
 
 			// Convert to proper entity
@@ -231,7 +234,7 @@ const customFileOperationsService = {
 			const result = await enhancedDownloadService.downloadFile(entity, {
 				format: options?.format || 'original',
 				quality: options?.quality || 'original',
-				showProgress: options?.showProgress !== false
+				showProgress: options?.showProgress !== false,
 			});
 
 			if (result.success) {
@@ -239,12 +242,11 @@ const customFileOperationsService = {
 					path,
 					filename: result.filename,
 					size: result.size,
-					duration: result.duration
+					duration: result.duration,
 				});
 				return Promise.resolve();
-			} else {
-				throw new Error(result.error || 'Download failed');
 			}
+			throw new Error(result.error || 'Download failed');
 		} catch (error) {
 			actionLogger.error('❌ Error al descargar archivo:', error);
 			return Promise.reject(error);
@@ -381,7 +383,7 @@ const customFileOperationsService = {
 			actionLogger.info('📋 Pegando archivos con undo/redo:', {
 				count: clipboardData.items.length,
 				operation: clipboardData.operation,
-				target: targetPath
+				target: targetPath,
 			});
 
 			// Convert FileItems to entities
@@ -582,7 +584,10 @@ export const contextActionHandler = {
 					if (item) {
 						const tags = prompt('Etiquetas (separadas por comas):');
 						if (tags) {
-							const tagList = tags.split(',').map(t => t.trim()).filter(t => t);
+							const tagList = tags
+								.split(',')
+								.map((t) => t.trim())
+								.filter((t) => t);
 							for (const tag of tagList) {
 								await addImageToTag(item.path, tag);
 							}

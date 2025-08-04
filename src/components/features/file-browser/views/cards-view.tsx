@@ -21,7 +21,7 @@ interface CardsViewProps {
 	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 }
 
-// Componente interno memoizado para cada carta
+// Componente interno memoizado para cada carta - OPTIMIZADO
 const CardItem = memo<{
 	item: AnyEntityWithStats;
 	isSelected: boolean;
@@ -35,34 +35,87 @@ const CardItem = memo<{
 	const [isHovered, setIsHovered] = useState(false);
 	const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
 
-	const handleMouseEnter = useCallback(() => {
-		if (config.interactiveConfig.enabled) {
-			const timeout = setTimeout(() => {
-				setIsHovered(true);
-			}, config.interactiveConfig.hoverDelay);
-			setHoverTimeout(timeout);
-		}
-	}, [config.interactiveConfig.enabled, config.interactiveConfig.hoverDelay]);
+	// OPTIMIZACIÓN: Memoizar props derivadas para evitar re-cálculos
+	const derivedProps = useMemo(
+		() => ({
+			interactiveEnabled: config.interactiveConfig.enabled,
+			hoverDelay: config.interactiveConfig.hoverDelay,
+			showInfoOverlay: config.interactiveConfig.showInfoOverlay,
+			showActionButtons: config.interactiveConfig.showActionButtons,
+			isCompact: config.cardStyle === 'compact',
+		}),
+		[
+			config.interactiveConfig.enabled,
+			config.interactiveConfig.hoverDelay,
+			config.interactiveConfig.showInfoOverlay,
+			config.interactiveConfig.showActionButtons,
+			config.cardStyle,
+		]
+	);
 
-	const handleMouseLeave = useCallback(() => {
-		if (hoverTimeout) {
-			clearTimeout(hoverTimeout);
-			setHoverTimeout(null);
-		}
-		setIsHovered(false);
-	}, [hoverTimeout]);
-
-	const handleClick = useCallback(
-		(e: React.MouseEvent) => {
+	// OPTIMIZACIÓN: Handlers estables con useRef
+	const handlersRef = useRef({
+		onMouseEnter: () => {
+			if (derivedProps.interactiveEnabled) {
+				const timeout = setTimeout(() => {
+					setIsHovered(true);
+				}, derivedProps.hoverDelay);
+				setHoverTimeout(timeout);
+			}
+		},
+		onMouseLeave: () => {
+			if (hoverTimeout) {
+				clearTimeout(hoverTimeout);
+				setHoverTimeout(null);
+			}
+			setIsHovered(false);
+		},
+		onClick: (e: React.MouseEvent) => {
 			e.stopPropagation();
 			onItemClickById(item.id, e);
 		},
-		[item.id, onItemClickById]
-	);
+		onDoubleClick: () => {
+			onItemDoubleClickById(item.id);
+		},
+	});
+
+	// Actualizar handlers cuando cambien las dependencias
+	useMemo(() => {
+		handlersRef.current.onMouseEnter = () => {
+			if (derivedProps.interactiveEnabled) {
+				const timeout = setTimeout(() => {
+					setIsHovered(true);
+				}, derivedProps.hoverDelay);
+				setHoverTimeout(timeout);
+			}
+		};
+
+		handlersRef.current.onClick = (e: React.MouseEvent) => {
+			e.stopPropagation();
+			onItemClickById(item.id, e);
+		};
+
+		handlersRef.current.onDoubleClick = () => {
+			onItemDoubleClickById(item.id);
+		};
+	}, [derivedProps.interactiveEnabled, derivedProps.hoverDelay, onItemClickById, onItemDoubleClickById, item.id]);
+
+	// Handlers estables que no cambian entre renders
+	const handleMouseEnter = useCallback(() => {
+		handlersRef.current.onMouseEnter();
+	}, []);
+
+	const handleMouseLeave = useCallback(() => {
+		handlersRef.current.onMouseLeave();
+	}, []);
+
+	const handleClick = useCallback((e: React.MouseEvent) => {
+		handlersRef.current.onClick(e);
+	}, []);
 
 	const handleDoubleClick = useCallback(() => {
-		onItemDoubleClickById(item.id);
-	}, [item.id, onItemDoubleClickById]);
+		handlersRef.current.onDoubleClick();
+	}, []);
 
 	const cardStyleClasses = useMemo(() => {
 		const baseClasses = 'relative overflow-hidden transition-all duration-200';
@@ -149,43 +202,91 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 	const parentRef = useRef<any>(null);
 	const { config, calculateLayout } = useCardsViewConfig();
 
-	// Map optimizado para lookups O(1)
-	const itemsById = useMemo(() => {
-		const map = new Map<string, AnyEntityWithStats>();
+	// OPTIMIZACIÓN AVANZADA: Memoización de props derivadas para evitar re-cálculos
+	const derivedProps = useMemo(
+		() => ({
+			hasSelection: selectedIds.length > 0,
+			itemCount: items.length,
+			isVirtualized: items.length > 100,
+			animationsEnabled: config.animationsEnabled,
+			showShadows: config.showShadows,
+			roundedCorners: config.roundedCorners,
+			showSelectionIndicators: config.showSelectionIndicators,
+		}),
+		[
+			selectedIds.length,
+			items.length,
+			config.animationsEnabled,
+			config.showShadows,
+			config.roundedCorners,
+			config.showSelectionIndicators,
+		]
+	);
+
+	// OPTIMIZACIÓN: Referencias estables con useRef para máximo rendimiento
+	const itemsByIdRef = useRef(new Map<string, AnyEntityWithStats>());
+	const selectedIdsSetRef = useRef(new Set<string>());
+
+	// Actualizar refs solo cuando sea necesario - Optimizado para evitar re-cálculos
+	useMemo(() => {
+		const newMap = new Map<string, AnyEntityWithStats>();
 		for (const item of items) {
-			map.set(item.id, item);
+			newMap.set(item.id, item);
 		}
-		return map;
-	}, [items]);
+		itemsByIdRef.current = newMap;
 
-	// Set optimizado para verificación de selección O(1)
-	const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+		const newSet = new Set(selectedIds);
+		selectedIdsSetRef.current = newSet;
 
-	// Handlers optimizados con Map lookups
-	const handleItemClickById = useCallback(
-		(id: string, e: React.MouseEvent) => {
-			const item = itemsById.get(id);
+		return { map: newMap, set: newSet };
+	}, [items, selectedIds]);
+
+	// OPTIMIZACIÓN AVANZADA: Handlers estables con useRef para máximo rendimiento
+	const handlersRef = useRef({
+		onItemClick: (id: string, e: React.MouseEvent) => {
+			const item = itemsByIdRef.current.get(id);
 			if (item) {
 				onItemClick(item, e);
 			}
 		},
-		[itemsById, onItemClick]
-	);
-
-	const handleItemDoubleClickById = useCallback(
-		(id: string) => {
-			const item = itemsById.get(id);
+		onItemDoubleClick: (id: string) => {
+			const item = itemsByIdRef.current.get(id);
 			if (item) {
 				onItemDoubleClick(item);
 			}
 		},
-		[itemsById, onItemDoubleClick]
-	);
+	});
 
-	// Calcular layout dinámico
+	// Actualizar handlers cuando cambien las dependencias
+	useMemo(() => {
+		handlersRef.current.onItemClick = (id: string, e: React.MouseEvent) => {
+			const item = itemsByIdRef.current.get(id);
+			if (item) {
+				onItemClick(item, e);
+			}
+		};
+
+		handlersRef.current.onItemDoubleClick = (id: string) => {
+			const item = itemsByIdRef.current.get(id);
+			if (item) {
+				onItemDoubleClick(item);
+			}
+		};
+	}, [onItemClick, onItemDoubleClick]);
+
+	// Handlers estables que no cambian entre renders
+	const handleItemClickById = useCallback((id: string, e: React.MouseEvent) => {
+		handlersRef.current.onItemClick(id, e);
+	}, []);
+
+	const handleItemDoubleClickById = useCallback((id: string) => {
+		handlersRef.current.onItemDoubleClick(id);
+	}, []);
+
+	// Calcular layout dinámico - Optimizado con dependencias mínimas
 	const layout = useMemo(() => {
-		return calculateLayout(containerWidth, items.length);
-	}, [calculateLayout, containerWidth, items.length]);
+		return calculateLayout(containerWidth, derivedProps.itemCount);
+	}, [calculateLayout, containerWidth, derivedProps.itemCount]);
 
 	// Handler para clicks en espacio vacío - mejorado para deselección
 	const handleEmptySpaceClick = useCallback(
@@ -212,7 +313,7 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 				// No hacer preventDefault() para permitir que el evento burbujee
 
 				// Feedback visual opcional si hay elementos seleccionados
-				if (selectedIds.length > 0) {
+				if (derivedProps.hasSelection) {
 					currentTarget.style.transition = 'background-color 0.15s ease';
 					currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
 
@@ -223,7 +324,7 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 				}
 			}
 		},
-		[selectedIds.length]
+		[derivedProps.hasSelection]
 	);
 
 	// Estado para altura del contenedor
@@ -307,7 +408,7 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 									}}
 								>
 									{rowItems.map((item, columnIndex) => {
-										const isSelected = selectedIdsSet.has(item.id);
+										const isSelected = selectedIdsSetRef.current.has(item.id);
 										const itemIndex = virtualRow.index * layout.columns + columnIndex;
 
 										return (

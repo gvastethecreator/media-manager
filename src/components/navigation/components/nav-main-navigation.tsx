@@ -290,12 +290,11 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 											{category.label}
 										</span>
 										{((category.children && category.children.length > 0) || category.showTreeView) &&
-										(expandedCategories.has(category.id) ? (
-											<ChevronDown className="h-4 w-4 text-muted-foreground" />
-										) : (
-											<ChevronRight className="h-4 w-4 text-muted-foreground" />
-										))
-									}
+											(expandedCategories.has(category.id) ? (
+												<ChevronDown className="h-4 w-4 text-muted-foreground" />
+											) : (
+												<ChevronRight className="h-4 w-4 text-muted-foreground" />
+											))}
 									</>
 								)}
 							</div>
@@ -328,24 +327,22 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 														)}
 													>
 														<div
-																className={cn(
-																	'flex items-center flex-1 cursor-pointer',
-																	isCollapsed ? 'justify-center' : ''
-																)}
-																onClick={() => onNavigate(child.id as ViewType)}
-																onKeyDown={(e) => {
-																	if (e.key === 'Enter' || e.key === ' ') {
-																		e.preventDefault();
-																		onNavigate(child.id as ViewType);
-																	}
-																}}
-																tabIndex={0}
-																role="button"
-															>
+															className={cn(
+																'flex items-center flex-1 cursor-pointer',
+																isCollapsed ? 'justify-center' : ''
+															)}
+															onClick={() => onNavigate(child.id as ViewType)}
+															onKeyDown={(e) => {
+																if (e.key === 'Enter' || e.key === ' ') {
+																	e.preventDefault();
+																	onNavigate(child.id as ViewType);
+																}
+															}}
+															tabIndex={0}
+															role="button"
+														>
 															<child.icon className="h-3 w-3" style={{ color: child.color }} />
-																{!isCollapsed && (
-																	<span className="ml-2">{child.label}</span>
-																)}
+															{!isCollapsed && <span className="ml-2">{child.label}</span>}
 														</div>
 														{!isCollapsed && (
 															<div className="flex items-center gap-1">
@@ -355,16 +352,16 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 																	</span>
 																)}
 																{child.hasChildren && (
-																				<button
-																					type="button"
-																					className="h-5 w-5 p-0.5 hover:bg-secondary/70 rounded-sm flex items-center justify-center border border-border/30 bg-background/50"
-																					onClick={(e) => {
-																						e.stopPropagation();
-																						toggleCategory(child.id);
-																					}}
-																					aria-expanded={expandedCategories.has(child.id)}
-																					aria-label={`Toggle ${child.label} children`}
-																				>
+																	<button
+																		type="button"
+																		className="h-5 w-5 p-0.5 hover:bg-secondary/70 rounded-sm flex items-center justify-center border border-border/30 bg-background/50"
+																		onClick={(e) => {
+																			e.stopPropagation();
+																			toggleCategory(child.id);
+																		}}
+																		aria-expanded={expandedCategories.has(child.id)}
+																		aria-label={`Toggle ${child.label} children`}
+																	>
 																		{expandedCategories.has(child.id) ? (
 																			<ChevronDown className="h-3 w-3" />
 																		) : (

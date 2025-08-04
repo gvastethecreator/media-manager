@@ -1,6 +1,6 @@
 import { memo, Suspense, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { DetailsPanelV2 } from '@/components/panels/details-panel/details-panel';
+import { DetailsPanelV2 } from '@/components/panels/details-panel';
 import { FolderStatsDisplay } from '@/components/panels/stats-panel/folder-stats-display';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
@@ -13,12 +13,7 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 // ); // Temporalmente comentado - archivo no existe
 
 // Componente para manejar la carga perezosa del StatsPanel
-const LazyStatsPanel = memo(function LazyStatsPanel({
-	folderId,
-}: {
-	folderId?: string;
-	folderName?: string;
-}) {
+const LazyStatsPanel = memo(function LazyStatsPanel({ folderId }: { folderId?: string; folderName?: string }) {
 	// Usamos un estado para controlar si el panel ha sido visible por suficiente tiempo
 	const [shouldRender, setShouldRender] = useState(false);
 
@@ -68,10 +63,7 @@ interface RightPanelProps {
  * que se pueden mostrar en el panel lateral derecho de la aplicación.
  * Muestra estadísticas por defecto o detalles de las imágenes seleccionadas.
  */
-export const RightPanel = memo(function RightPanel({
-	isCollapsed,
-	isAnimating = false,
-}: RightPanelProps) {
+export const RightPanel = memo(function RightPanel({ isCollapsed, isAnimating = false }: RightPanelProps) {
 	const { isVisible, selectedItems, showStatsWhenEmpty } = useDetailsPanel();
 	const location = useLocation();
 	const [mounted, setMounted] = useState(false);

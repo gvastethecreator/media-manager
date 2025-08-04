@@ -67,7 +67,13 @@ export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | nu
 
 	const { _count, tags: relationTags, properties: relationProperties, ...baseData } = worldItem;
 
-	const totalRelations = (_count?.images ?? 0) + (_count?.videos ?? 0) + (_count?.characters ?? 0) + (_count?.places ?? 0) + (_count?.notes ?? 0) + (_count?.concepts ?? 0);
+	const totalRelations =
+		(_count?.images ?? 0) +
+		(_count?.videos ?? 0) +
+		(_count?.characters ?? 0) +
+		(_count?.places ?? 0) +
+		(_count?.notes ?? 0) +
+		(_count?.concepts ?? 0);
 
 	const statistics: WorldItemStatistics = {
 		// Conteos de relaciones

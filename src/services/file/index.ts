@@ -4,12 +4,11 @@
  * @description Centralized exports for file service functionality
  */
 
-// Export all existing file operations
-export * from './file.service';
-
 // Export enhanced file operations service
 export {
-  enhancedFileOperationsService,
-  clipboardManager,
-  type ClipboardData,
+	type ClipboardData,
+	clipboardManager,
+	enhancedFileOperationsService,
 } from './enhanced-file-operations.service';
+// Export all existing file operations
+export * from './file.service';

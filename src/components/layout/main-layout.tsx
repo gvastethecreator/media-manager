@@ -5,6 +5,7 @@ import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { NavPanel } from '@/components/navigation/navigation-panel';
 import { RightPanel } from '@/components/panels/right-panel/right-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
+import { NavigationTransition } from '@/components/transitions/ViewTransition';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useReindexFolder } from '@/lib/api/folders';
 import { toastService } from '@/lib/ui/toast';
@@ -173,9 +174,9 @@ export const MainLayout = memo(function MainLayout() {
 							/>
 						</div>{' '}
 						{/* Contenido principal */}
-						<div className="flex-1 min-h-0 bg-background">
+						<NavigationTransition className="flex-1 min-h-0 bg-background">
 							<Outlet />
-						</div>
+						</NavigationTransition>
 					</div>
 				</ResizablePanel>
 

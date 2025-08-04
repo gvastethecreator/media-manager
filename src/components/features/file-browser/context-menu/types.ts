@@ -123,7 +123,11 @@ export interface MultiSelectionContextMenuProps {
 	/** Elementos seleccionados */
 	selectedItems: FileItem[];
 	/** Manejador de acciones del menú */
-	onAction: (action: MultiSelectionAction | ContextMenuAction, items: FileItem[], data?: Record<string, unknown>) => Promise<void>;
+	onAction: (
+		action: MultiSelectionAction | ContextMenuAction,
+		items: FileItem[],
+		data?: Record<string, unknown>
+	) => Promise<void>;
 	/** Posición del menú contextual */
 	position: { x: number; y: number };
 }

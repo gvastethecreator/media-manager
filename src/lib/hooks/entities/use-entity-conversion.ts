@@ -6,6 +6,7 @@
 
 import { useCallback } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
+import type { AnyEntityWithStats } from '@/types/entities';
 import type { AlbumWithStats } from '@/types/entities/album';
 import type { AudioWithStats } from '@/types/entities/audio';
 import type { CharacterWithStats } from '@/types/entities/character';
@@ -23,7 +24,6 @@ import type { TagWithStats } from '@/types/entities/tag';
 import type { VideoWithStats } from '@/types/entities/video';
 import type { WildcardWithStats } from '@/types/entities/wildcard';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
-import type { AnyEntityWithStats } from '@/types/entities';
 import {
 	isAlbumWithStats,
 	isAudioWithStats,

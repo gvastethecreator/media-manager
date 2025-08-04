@@ -3,10 +3,16 @@
  * @description Componente de encabezado que maneja ordenamiento, redimensionado y reordenado de columnas
  */
 
-import React, { useState, useCallback, useMemo } from 'react';
-import { ChevronUp, ChevronDown, Grip, Eye, EyeOff, Settings2 } from 'lucide-react';
+import { ChevronDown, ChevronUp, Eye, EyeOff, Grip, Settings2 } from 'lucide-react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import type { ListColumnConfig } from '@/types/file-browser/list-column-config';
 
 interface ListViewHeaderProps {
@@ -43,48 +49,53 @@ export function ListViewHeader({
 
 	// Columnas visibles ordenadas
 	const visibleColumns = useMemo(() => {
-		return columns
-			.filter(col => col.visible)
-			.sort((a, b) => (a.order || 0) - (b.order || 0));
+		return columns.filter((col) => col.visible).sort((a, b) => (a.order || 0) - (b.order || 0));
 	}, [columns]);
 
 	// Manejo de ordenamiento
-	const handleSort = useCallback((columnKey: string) => {
-		if (!onSort) return;
+	const handleSort = useCallback(
+		(columnKey: string) => {
+			if (!onSort) return;
 
-		if (sortBy === columnKey) {
-			// Cambiar dirección si es la misma columna
-			onSort(columnKey, sortDirection === 'asc' ? 'desc' : 'asc');
-		} else {
-			// Nueva columna, empezar con ascendente
-			onSort(columnKey, 'asc');
-		}
-	}, [sortBy, sortDirection, onSort]);
+			if (sortBy === columnKey) {
+				// Cambiar dirección si es la misma columna
+				onSort(columnKey, sortDirection === 'asc' ? 'desc' : 'asc');
+			} else {
+				// Nueva columna, empezar con ascendente
+				onSort(columnKey, 'asc');
+			}
+		},
+		[sortBy, sortDirection, onSort]
+	);
 
 	// Manejo de redimensionado
-	const handleMouseDown = useCallback((e: React.MouseEvent, columnKey: string) => {
-		e.preventDefault();
-		setResizingColumn(columnKey);
+	const handleMouseDown = useCallback(
+		(e: React.MouseEvent, columnKey: string) => {
+			e.preventDefault();
+			setResizingColumn(columnKey);
 
-		const startX = e.clientX;
-		const startWidth = e.currentTarget.closest('th')?.offsetWidth || 0;
+			const startX = e.clientX;
+			const startWidth = e.currentTarget.closest('th')?.offsetWidth || 0;
 
-		const handleMouseMove = (e: MouseEvent) => {
-			const newWidth = startWidth + (e.clientX - startX);
-			if (newWidth >= 50 && onColumnResize) { // Ancho mínimo
-				onColumnResize(columnKey, newWidth);
-			}
-		};
+			const handleMouseMove = (e: MouseEvent) => {
+				const newWidth = startWidth + (e.clientX - startX);
+				if (newWidth >= 50 && onColumnResize) {
+					// Ancho mínimo
+					onColumnResize(columnKey, newWidth);
+				}
+			};
 
-		const handleMouseUp = () => {
-			setResizingColumn(null);
-			document.removeEventListener('mousemove', handleMouseMove);
-			document.removeEventListener('mouseup', handleMouseUp);
-		};
+			const handleMouseUp = () => {
+				setResizingColumn(null);
+				document.removeEventListener('mousemove', handleMouseMove);
+				document.removeEventListener('mouseup', handleMouseUp);
+			};
 
-		document.addEventListener('mousemove', handleMouseMove);
-		document.addEventListener('mouseup', handleMouseUp);
-	}, [onColumnResize]);
+			document.addEventListener('mousemove', handleMouseMove);
+			document.addEventListener('mouseup', handleMouseUp);
+		},
+		[onColumnResize]
+	);
 
 	// Manejo de drag and drop para reordenar
 	const handleDragStart = useCallback((e: React.DragEvent, index: number) => {
@@ -97,26 +108,25 @@ export function ListViewHeader({
 		setDragTarget(index);
 	}, []);
 
-	const handleDrop = useCallback((e: React.DragEvent, index: number) => {
-		e.preventDefault();
+	const handleDrop = useCallback(
+		(e: React.DragEvent, index: number) => {
+			e.preventDefault();
 
-		if (draggedColumn !== null && draggedColumn !== index && onColumnReorder) {
-			onColumnReorder(draggedColumn, index);
-		}
+			if (draggedColumn !== null && draggedColumn !== index && onColumnReorder) {
+				onColumnReorder(draggedColumn, index);
+			}
 
-		setDraggedColumn(null);
-		setDragTarget(null);
-	}, [draggedColumn, onColumnReorder]);
+			setDraggedColumn(null);
+			setDragTarget(null);
+		},
+		[draggedColumn, onColumnReorder]
+	);
 
 	// Renderizar icono de ordenamiento
 	const renderSortIcon = (columnKey: string) => {
 		if (sortBy !== columnKey) return null;
 
-		return sortDirection === 'asc' ? (
-			<ChevronUp className="h-3 w-3" />
-		) : (
-			<ChevronDown className="h-3 w-3" />
-		);
+		return sortDirection === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />;
 	};
 
 	// Obtener ancho de columna
@@ -169,9 +179,7 @@ export function ListViewHeader({
 									`}
 									onClick={column.sortable ? () => handleSort(column.key) : undefined}
 								>
-									<span className="truncate text-sm font-medium">
-										{column.label}
-									</span>
+									<span className="truncate text-sm font-medium">{column.label}</span>
 									{renderSortIcon(column.key)}
 								</div>
 
@@ -192,29 +200,19 @@ export function ListViewHeader({
 					<th className="w-10 px-2">
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
-								<Button
-									variant="ghost"
-									size="sm"
-									className="h-8 w-8 p-0 opacity-50 hover:opacity-100"
-								>
+								<Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-50 hover:opacity-100">
 									<Settings2 className="h-3 w-3" />
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end" className="w-48">
-								<div className="px-2 py-1 text-xs font-medium text-muted-foreground">
-									Columnas
-								</div>
+								<div className="px-2 py-1 text-xs font-medium text-muted-foreground">Columnas</div>
 								{columns.map((column) => (
 									<DropdownMenuItem
 										key={column.key}
 										onClick={() => onColumnToggle?.(column.key)}
 										className="flex items-center gap-2"
 									>
-										{column.visible ? (
-											<Eye className="h-3 w-3" />
-										) : (
-											<EyeOff className="h-3 w-3" />
-										)}
+										{column.visible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
 										<span className="flex-1">{column.label}</span>
 									</DropdownMenuItem>
 								))}

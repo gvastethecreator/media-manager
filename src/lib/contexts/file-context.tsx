@@ -3,11 +3,11 @@
 import { createContext, type ReactNode, useCallback, useContext, useState } from 'react';
 import { useLogActivity } from '@/lib/api/activity';
 import {
-    useAddTags,
-    useAddToCollection,
-    useRemoveFromCollection,
-    useRemoveTags,
-    useToggleFavorite,
+	useAddTags,
+	useAddToCollection,
+	useRemoveFromCollection,
+	useRemoveTags,
+	useToggleFavorite,
 } from '@/lib/api/files';
 import { clientEvents } from '@/lib/client/events.client';
 

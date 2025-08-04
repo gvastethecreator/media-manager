@@ -36,7 +36,20 @@ interface UseCardLayoutReturn {
  * Hook para obtener clases CSS y estilos basados en la configuración de layout
  */
 export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): UseCardLayoutReturn {
-	const config = useMemo(() => resolveLayoutConfig(props, preset), [props, preset]);
+	// OPTIMIZACIÓN: Estabilizar la configuración para evitar re-renders
+	const stableConfigProps = useMemo(
+		() => ({
+			layoutConfig: props.layoutConfig,
+			layout: props.layout,
+			size: props.size,
+			variant: props.variant,
+			compact: props.compact,
+			tcgMode: props.tcgMode,
+		}),
+		[props.layoutConfig, props.layout, props.size, props.variant, props.compact, props.tcgMode]
+	);
+
+	const config = useMemo(() => resolveLayoutConfig(stableConfigProps, preset), [stableConfigProps, preset]);
 
 	// Resolver dimensiones
 	const dimensions = useMemo(() => {
@@ -158,7 +171,7 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 		}
 
 		return cn(classes, props.className);
-	}, [config, props]);
+	}, [config, props.isSelected, props.isActive, props.isLoading, props.onClick, props.className]);
 
 	// Generar clases para el contenido
 	const contentClasses = useMemo(() => {

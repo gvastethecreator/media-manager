@@ -25,73 +25,106 @@ interface MasonryItemProps {
 		y: number;
 		width: number;
 		height: number;
-		aspectRatio: number;
 	};
 	isSelected: boolean;
 	itemIndex: number;
 	onItemClickById: (id: string, e: React.MouseEvent) => void;
 	onItemDoubleClickById: (id: string) => void;
+	masonryConfig: {
+		shouldUseAnimations: boolean;
+		animationDuration: number;
+		hoverEffects: boolean;
+		showShadows: boolean;
+		roundedCorners: boolean;
+		showSelectionIndicators: boolean;
+	};
 }
 
-// Componente interno memoizado para cada item con optimizaciones avanzadas
-const MasonryItem = memo<MasonryItemProps>(function MasonryItem({
-	layoutItem,
-	isSelected,
-	itemIndex,
-	onItemClickById,
-	onItemDoubleClickById,
-}) {
-	const { config } = useMasonryViewConfig();
-
-	// OPTIMIZACIÓN: Estabilizar handlers con dependencias mínimas
-	const handleClick = useCallback(
-		(e: React.MouseEvent) => {
-			e.stopPropagation();
-			onItemClickById(layoutItem.item.id, e);
-		},
-		[layoutItem.item.id, onItemClickById]
-	);
-
-	const handleDoubleClick = useCallback(() => {
-		onItemDoubleClickById(layoutItem.item.id);
-	}, [layoutItem.item.id, onItemDoubleClickById]);
-
-	// OPTIMIZACIÓN: Memoizar clases CSS para evitar recálculos innecesarios
-	const itemClasses = useMemo(() => {
-		const baseClasses = 'absolute cursor-pointer transition-all duration-200';
-		const hoverClasses = config.hoverEffects ? 'hover:z-10 hover:scale-105 hover:rotate-1' : '';
-		const shadowClasses = config.showShadows ? 'shadow-sm hover:shadow-lg' : '';
-		const roundedClasses = config.roundedCorners ? 'rounded-lg overflow-hidden' : '';
-		const selectionClasses = isSelected && config.showSelectionIndicators ? 'ring-2 ring-primary ring-offset-2' : '';
-
-		return cn(baseClasses, hoverClasses, shadowClasses, roundedClasses, selectionClasses);
-	}, [config.hoverEffects, config.showShadows, config.roundedCorners, config.showSelectionIndicators, isSelected]);
-
-	// OPTIMIZACIÓN: Solo calcular transición si las animaciones están habilitadas
-	const transition = useMemo(() => {
-		if (!config.animationsEnabled) return undefined;
-
-		return {
-			duration: config.animationDuration / 1000,
-			delay: Math.min(itemIndex * 0.02, 0.4),
-			type: 'spring' as const,
-			stiffness: 100,
-			damping: 15,
+const MasonryItem = memo<MasonryItemProps>(
+	function MasonryItem({ layoutItem, isSelected, itemIndex, onItemClickById, onItemDoubleClickById, masonryConfig }) {
+		const style: React.CSSProperties = {
+			position: 'absolute',
+			left: layoutItem.x,
+			top: layoutItem.y,
+			width: layoutItem.width,
+			height: layoutItem.height,
 		};
-	}, [config.animationsEnabled, config.animationDuration, itemIndex]);
 
-	// OPTIMIZACIÓN: Memoizar props de posición y tamaño
-	const style = useMemo(() => ({
-		left: `${layoutItem.x}px`,
-		top: `${layoutItem.y}px`,
-		width: `${layoutItem.width}px`,
-		height: `${layoutItem.height}px`,
-	}), [layoutItem.x, layoutItem.y, layoutItem.width, layoutItem.height]);
+		const handleClick = useCallback(
+			(e: React.MouseEvent) => {
+				e.stopPropagation();
+				onItemClickById(layoutItem.item.id, e);
+			},
+			[layoutItem.item.id, onItemClickById]
+		);
 
-	// OPTIMIZACIÓN: Solo usar motion.div si las animaciones están habilitadas
-	if (!config.animationsEnabled) {
+		const handleDoubleClick = useCallback(
+			(e: React.MouseEvent) => {
+				e.stopPropagation();
+				onItemDoubleClickById(layoutItem.item.id);
+			},
+			[layoutItem.item.id, onItemDoubleClickById]
+		);
+
+		// OPTIMIZACIÓN: Propiedades de motion estables que no cambian entre renders
+		const staticMotionProps = useMemo(
+			() => ({
+				layout: masonryConfig.shouldUseAnimations,
+				initial: masonryConfig.shouldUseAnimations ? { opacity: 0, scale: 0.9 } : false,
+				animate: masonryConfig.shouldUseAnimations ? { opacity: 1, scale: 1 } : false,
+				exit: masonryConfig.shouldUseAnimations ? { opacity: 0, scale: 0.8 } : false,
+				'data-testid': 'file-browser-item',
+				'data-entity-id': layoutItem.item.id,
+				'data-item-index': itemIndex,
+			}),
+			[masonryConfig.shouldUseAnimations, layoutItem.item.id, itemIndex]
+		);
+
+		const transition = useMemo(
+			() => ({
+				duration: masonryConfig.animationDuration / 1000,
+				ease: 'easeOut',
+			}),
+			[masonryConfig.animationDuration]
+		);
+
+		const itemClasses = cn('cursor-pointer select-none overflow-hidden', {
+			'rounded-lg': masonryConfig.roundedCorners,
+			'shadow-sm hover:shadow-md transition-shadow duration-200': masonryConfig.showShadows,
+			'ring-2 ring-primary ring-offset-2': isSelected && masonryConfig.showSelectionIndicators,
+		});
+
+		// Para elementos no animados, usar div simple
+		if (!masonryConfig.shouldUseAnimations) {
+			return (
+				<div
+					className={itemClasses}
+					style={style}
+					onClick={handleClick}
+					onDoubleClick={handleDoubleClick}
+					data-testid="file-browser-item"
+					data-entity-id={layoutItem.item.id}
+					data-item-index={itemIndex}
+				>
+					<OptimizedEntityCard
+						entity={layoutItem.item}
+						layout="vertical"
+						size="md"
+						isSelected={isSelected}
+						compact={false}
+						className="w-full h-full"
+						itemId={layoutItem.item.id}
+						onClickById={onItemClickById}
+						onDoubleClickById={onItemDoubleClickById}
+					/>
+				</div>
+			);
+		}
+
 		return (
-			<div
+			<motion.div
+				{...staticMotionProps}
+				transition={transition}
 				className={itemClasses}
 				style={style}
 				onClick={handleClick}
@@ -108,47 +141,36 @@ const MasonryItem = memo<MasonryItemProps>(function MasonryItem({
 					onClickById={onItemClickById}
 					onDoubleClickById={onItemDoubleClickById}
 				/>
-			</div>
+			</motion.div>
 		);
-	}
+	},
+	(prevProps, nextProps) => {
+		// OPTIMIZACIÓN: Comparación más eficiente que evita re-renders innecesarios
+		const layoutChanged =
+			prevProps.layoutItem.x !== nextProps.layoutItem.x ||
+			prevProps.layoutItem.y !== nextProps.layoutItem.y ||
+			prevProps.layoutItem.width !== nextProps.layoutItem.width ||
+			prevProps.layoutItem.height !== nextProps.layoutItem.height;
 
-	return (
-		<motion.div
-			initial={{ opacity: 0, y: 30, scale: 0.8 }}
-			animate={{ opacity: 1, y: 0, scale: 1 }}
-			transition={transition}
-			className={itemClasses}
-			style={style}
-			onClick={handleClick}
-			onDoubleClick={handleDoubleClick}
-		>
-			<OptimizedEntityCard
-				entity={layoutItem.item}
-				layout="vertical"
-				size="md"
-				isSelected={isSelected}
-				compact={false}
-				className="w-full h-full"
-				itemId={layoutItem.item.id}
-				onClickById={onItemClickById}
-				onDoubleClickById={onItemDoubleClickById}
-			/>
-		</motion.div>
-	);
-}, (prevProps, nextProps) => {
-	// OPTIMIZACIÓN: Comparación personalizada para evitar re-renders innecesarios
-	return (
-		prevProps.layoutItem.item.id === nextProps.layoutItem.item.id &&
-		prevProps.layoutItem.x === nextProps.layoutItem.x &&
-		prevProps.layoutItem.y === nextProps.layoutItem.y &&
-		prevProps.layoutItem.width === nextProps.layoutItem.width &&
-		prevProps.layoutItem.height === nextProps.layoutItem.height &&
-		prevProps.isSelected === nextProps.isSelected &&
-		prevProps.itemIndex === nextProps.itemIndex &&
-		prevProps.onItemClickById === nextProps.onItemClickById &&
-		prevProps.onItemDoubleClickById === nextProps.onItemDoubleClickById
-	);
-});
+		const propsChanged =
+			prevProps.layoutItem.item.id !== nextProps.layoutItem.item.id ||
+			prevProps.isSelected !== nextProps.isSelected ||
+			prevProps.itemIndex !== nextProps.itemIndex;
+
+		// OPTIMIZACIÓN: Comparación superficial de la configuración de masonry
+		const configChanged =
+			prevProps.masonryConfig.shouldUseAnimations !== nextProps.masonryConfig.shouldUseAnimations ||
+			prevProps.masonryConfig.animationDuration !== nextProps.masonryConfig.animationDuration ||
+			prevProps.masonryConfig.hoverEffects !== nextProps.masonryConfig.hoverEffects ||
+			prevProps.masonryConfig.showShadows !== nextProps.masonryConfig.showShadows ||
+			prevProps.masonryConfig.roundedCorners !== nextProps.masonryConfig.roundedCorners ||
+			prevProps.masonryConfig.showSelectionIndicators !== nextProps.masonryConfig.showSelectionIndicators;
+
+		// OPTIMIZACIÓN: No comparar funciones directamente ya que pueden cambiar de referencia
+		// En su lugar, confiar en que los handlers estables no cambien innecesariamente
+		return !layoutChanged && !propsChanged && !configChanged;
+	}
+);
 
 export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 	items,
@@ -173,25 +195,57 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 	// Set optimizado para verificación de selección O(1)
 	const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
-	// Handlers optimizados con Map lookups
-	const handleItemClickById = useCallback(
-		(id: string, e: React.MouseEvent) => {
+	// OPTIMIZACIÓN: Estabilizar handlers con dependencias mínimas usando useRef
+	const stableHandlersRef = useRef({
+		onItemClickById: (_id: string, _e: React.MouseEvent) => {},
+		onItemDoubleClickById: (_id: string) => {},
+	});
+
+	// Actualizar handlers sin cambiar referencia
+	useEffect(() => {
+		stableHandlersRef.current.onItemClickById = (id: string, e: React.MouseEvent) => {
 			const item = itemsById.get(id);
 			if (item) {
 				onItemClick(item, e);
 			}
-		},
-		[itemsById, onItemClick]
-	);
+		};
 
-	const handleItemDoubleClickById = useCallback(
-		(id: string) => {
+		stableHandlersRef.current.onItemDoubleClickById = (id: string) => {
 			const item = itemsById.get(id);
 			if (item) {
 				onItemDoubleClick(item);
 			}
-		},
-		[itemsById, onItemDoubleClick]
+		};
+	}, [itemsById, onItemClick, onItemDoubleClick]);
+
+	// OPTIMIZACIÓN: Handlers estables que no cambian de referencia
+	const handleItemClickById = useCallback((id: string, e: React.MouseEvent) => {
+		stableHandlersRef.current.onItemClickById(id, e);
+	}, []);
+
+	const handleItemDoubleClickById = useCallback((id: string) => {
+		stableHandlersRef.current.onItemDoubleClickById(id);
+	}, []);
+
+	// OPTIMIZACIÓN: Configuración estable de masonry para evitar cambios de props
+	const masonryConfig = useMemo(
+		() => ({
+			shouldUseAnimations: config.animationsEnabled && items.length < 100,
+			animationDuration: config.animationDuration,
+			hoverEffects: config.hoverEffects,
+			showShadows: config.showShadows,
+			roundedCorners: config.roundedCorners,
+			showSelectionIndicators: config.showSelectionIndicators,
+		}),
+		[
+			config.animationsEnabled,
+			config.animationDuration,
+			config.hoverEffects,
+			config.showShadows,
+			config.roundedCorners,
+			config.showSelectionIndicators,
+			items.length,
+		]
 	);
 
 	// Calcular layout usando el nuevo algoritmo
@@ -300,6 +354,7 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 								itemIndex={index}
 								onItemClickById={handleItemClickById}
 								onItemDoubleClickById={handleItemDoubleClickById}
+								masonryConfig={masonryConfig}
 							/>
 						);
 					})}
@@ -308,3 +363,5 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 		</div>
 	);
 });
+
+MasonryView.displayName = 'MasonryView';

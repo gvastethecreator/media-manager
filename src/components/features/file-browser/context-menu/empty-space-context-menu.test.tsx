@@ -3,60 +3,60 @@
  * Este archivo verifica que el componente se renderice correctamente
  */
 
-import { describe, it, expect, vi } from 'vitest';
 import { render, screen } from '@testing-library/react';
+import { describe, expect, it, vi } from 'vitest';
 import { EmptySpaceContextMenu } from './empty-space-context-menu';
 
 // Mock de las dependencias
 vi.mock('@/lib/keyboard', () => ({
-  useContextMenuNavigation: () => ({
-    selectedIndex: -1,
-    getItemProps: () => ({}),
-  }),
+	useContextMenuNavigation: () => ({
+		selectedIndex: -1,
+		getItemProps: () => ({}),
+	}),
 }));
 
 vi.mock('./context-action-handler', () => ({
-  clipboardManager: {
-    canPaste: () => false,
-  },
+	clipboardManager: {
+		canPaste: () => false,
+	},
 }));
 
 describe('EmptySpaceContextMenu', () => {
-  const defaultProps = {
-    onAction: vi.fn(),
-    position: { x: 100, y: 100 },
-    totalItems: 5,
-  };
+	const defaultProps = {
+		onAction: vi.fn(),
+		position: { x: 100, y: 100 },
+		totalItems: 5,
+	};
 
-  it('should render all menu options', () => {
-    render(<EmptySpaceContextMenu {...defaultProps} />);
+	it('should render all menu options', () => {
+		render(<EmptySpaceContextMenu {...defaultProps} />);
 
-    expect(screen.getByText('Seleccionar todo (5)')).toBeInTheDocument();
-    expect(screen.getByText('Pegar')).toBeInTheDocument();
-    expect(screen.getByText('Actualizar')).toBeInTheDocument();
-    expect(screen.getByText('Nueva carpeta')).toBeInTheDocument();
-  });
+		expect(screen.getByText('Seleccionar todo (5)')).toBeInTheDocument();
+		expect(screen.getByText('Pegar')).toBeInTheDocument();
+		expect(screen.getByText('Actualizar')).toBeInTheDocument();
+		expect(screen.getByText('Nueva carpeta')).toBeInTheDocument();
+	});
 
-  it('should disable select all when no items', () => {
-    render(<EmptySpaceContextMenu {...defaultProps} totalItems={0} />);
+	it('should disable select all when no items', () => {
+		render(<EmptySpaceContextMenu {...defaultProps} totalItems={0} />);
 
-    const selectAllButton = screen.getByText('Seleccionar todo (0)');
-    expect(selectAllButton).toBeDisabled();
-  });
+		const selectAllButton = screen.getByText('Seleccionar todo (0)');
+		expect(selectAllButton).toBeDisabled();
+	});
 
-  it('should show current path when provided', () => {
-    render(<EmptySpaceContextMenu {...defaultProps} currentPath="/test/path" />);
+	it('should show current path when provided', () => {
+		render(<EmptySpaceContextMenu {...defaultProps} currentPath="/test/path" />);
 
-    expect(screen.getByText('/test/path')).toBeInTheDocument();
-  });
+		expect(screen.getByText('/test/path')).toBeInTheDocument();
+	});
 
-  it('should call onAction when menu item is clicked', () => {
-    const onAction = vi.fn();
-    render(<EmptySpaceContextMenu {...defaultProps} onAction={onAction} />);
+	it('should call onAction when menu item is clicked', () => {
+		const onAction = vi.fn();
+		render(<EmptySpaceContextMenu {...defaultProps} onAction={onAction} />);
 
-    const refreshButton = screen.getByText('Actualizar');
-    refreshButton.click();
+		const refreshButton = screen.getByText('Actualizar');
+		refreshButton.click();
 
-    expect(onAction).toHaveBeenCalledWith('refresh', undefined);
-  });
+		expect(onAction).toHaveBeenCalledWith('refresh', undefined);
+	});
 });

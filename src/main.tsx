@@ -7,6 +7,7 @@ import './app/globals.css';
 import './styles/globals.css';
 import './styles/scrollbar.css';
 import './styles/selecto.css';
+import './styles/view-transition.css';
 
 const container = document.getElementById('root');
 if (!container) {

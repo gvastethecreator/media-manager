@@ -7,10 +7,13 @@ test.describe('Selección con Drag - Performance y Funcionalidad', () => {
 		await page.waitForSelector('[data-testid="file-browser"]', { timeout: 10000 });
 
 		// Esperar a que se carguen las imágenes
-		await page.waitForFunction(() => {
-			const images = document.querySelectorAll('[data-item-id]');
-			return images.length > 10;
-		}, { timeout: 15000 });
+		await page.waitForFunction(
+			() => {
+				const images = document.querySelectorAll('[data-item-id]');
+				return images.length > 10;
+			},
+			{ timeout: 15000 }
+		);
 	});
 
 	test('Performance - No hay re-renders masivos durante hover', async ({ page }) => {

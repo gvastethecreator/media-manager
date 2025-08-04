@@ -8,7 +8,6 @@
  */
 
 import { FileTextIcon } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebouncedCallback } from 'use-debounce';
 import { OptimizedEntityCard } from '@/components/cards/entity-card';
@@ -38,7 +37,6 @@ import { KeyboardNavigation } from './navigation/keyboard-navigation';
 import { ProgressOverlay } from './progress/progress-overlay';
 import { DragSelectionProvider } from './selection/drag-selection-provider';
 import { StatusBar } from './toolbar/status-bar';
-import { ViewToolbar } from './toolbar/ViewToolbar';
 import { CardsView } from './views/cards-view';
 import { GridView } from './views/grid-view';
 import { ListView } from './views/list-view';
@@ -102,23 +100,24 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	variant = 'default',
 	size = 'md',
 }) {
-	// Estados globales y stores
+	// Estados globales y stores - OPTIMIZACIÓN: Selectors específicos para evitar re-renders
 	const viewMode = useViewOptionsStore((state) => state.viewMode);
 	const itemSize = useViewOptionsStore((state) => state.itemSize);
 	const searchQuery = useViewOptionsStore((state) => state.searchQuery);
 	const sortOptions = useViewOptionsStore((state) => state.sortOptions);
-	const {
-		selectedIds: globalSelectedIds,
-		clearSelection,
-		focusedId,
-		setFocusedId,
-		addToSelection,
-		removeFromSelection,
-		setSelectedIds,
-		selectRange,
-		toggleSelection,
-		selectAll,
-	} = useSelectionStore();
+
+	// Selectors específicos del store de selección para evitar re-renders innecesarios
+	const globalSelectedIds = useSelectionStore((state) => state.selectedIds);
+	const clearSelection = useSelectionStore((state) => state.clearSelection);
+	const focusedId = useSelectionStore((state) => state.focusedId);
+	const setFocusedId = useSelectionStore((state) => state.setFocusedId);
+	const addToSelection = useSelectionStore((state) => state.addToSelection);
+	const removeFromSelection = useSelectionStore((state) => state.removeFromSelection);
+	const setSelectedIds = useSelectionStore((state) => state.setSelectedIds);
+	const selectRange = useSelectionStore((state) => state.selectRange);
+	const toggleSelection = useSelectionStore((state) => state.toggleSelection);
+	const selectAll = useSelectionStore((state) => state.selectAll);
+
 	const { setVisible: setDetailsPanelVisible, setSelectedItems: setDetailsPanelItems } = useDetailsPanel();
 	const { openViewer } = useFileViewerStore();
 
@@ -168,9 +167,13 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// const { videos: videosRecord, isLoading: videosLoading, ... } = useVideoStore();
 	// const { audios: audiosRecord, isLoading: audiosLoading, ... } = useAudioStore();
 
+	// OPTIMIZACIÓN: Clave de parámetros estable para evitar JSON.stringify costoso
+	const loadParamsKey = useMemo(() => {
+		return `${entityType}|${entityTypes.join(',')}|${filterId}|${filterType}|${mode}`;
+	}, [entityType, entityTypes, filterId, filterType, mode]);
+
 	// Función de carga con debounce para evitar llamadas excesivas
 	const debouncedLoadData = useDebouncedCallback(() => {
-		console.log('🔍 FileBrowser - debouncedLoadData ejecutándose con:', { entityType, filterId, filterType, mode });
 		// En modo manual, no cargar datos automáticamente
 		if (mode === 'manual') {
 			return;
@@ -178,22 +181,16 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		// Solo cargar si hay un filterId válido
 		if (!filterId) {
-			logger.debug('⚠️ No hay filterId, saltando carga automática');
 			return;
 		}
 
-		// Crear una clave única para los parámetros de carga
-		const loadParamsKey = JSON.stringify({ entityType, entityTypes, filterId, filterType, mode });
-
 		// Evitar cargas duplicadas comparando parámetros
 		if (lastLoadParamsRef.current === loadParamsKey) {
-			logger.debug('⚠️ Parámetros de carga idénticos, saltando carga duplicada');
 			return;
 		}
 
 		// Evitar múltiples cargas simultáneas
 		if (isLoadingRef.current) {
-			logger.debug('⚠️ Carga ya en progreso, saltando llamada del FileBrowser');
 			return;
 		}
 
@@ -208,19 +205,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				// Verificar si ya existen imágenes para esta carpeta
 				if (filterId && filterType === 'folder') {
 					const existingImages = getImagesByFolder(filterId);
-					console.log('🔍 FileBrowser - Verificando imágenes existentes para carpeta:', {
-						filterId,
-						existingImagesCount: existingImages.length,
-						existingImages: existingImages.slice(0, 3),
-						storeState: {
-							totalImages: Object.keys(useImageStore.getState().core.images).length,
-							isLoading: useImageStore.getState().core.isLoading,
-							error: useImageStore.getState().core.error,
-						},
-					});
 					if (existingImages.length > 0) {
-						console.log('🔍 FileBrowser - Ya existen imágenes para esta carpeta, saltando carga');
-						logger.debug('✅ Ya existen imágenes para esta carpeta, saltando carga');
 						lastLoadParamsRef.current = loadParamsKey;
 						return;
 					}
@@ -233,35 +218,23 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					loadParams.folderId = filterId;
 				}
 
-				console.log('🔄 FileBrowser - Iniciando carga de imágenes', {
-					filterId,
-					filterType,
-					loadParams,
-					storeLoadImages: typeof storeLoadImages,
-				});
-				logger.debug('🔄 FileBrowser iniciando carga de imágenes', { filterId, filterType, loadParams });
+				// OPTIMIZACIÓN: Eliminar logs costosos en producción
+				if (process.env.NODE_ENV === 'development') {
+					logger.debug('🔄 FileBrowser iniciando carga de imágenes', { filterId, filterType, loadParams });
+				}
 
 				// Marcar como cargando
 				isLoadingRef.current = true;
 				lastLoadParamsRef.current = loadParamsKey;
 
 				// Llamar a la función del store directamente
-				console.log('🚀 FileBrowser - Llamando a storeLoadImages con parámetros:', loadParams);
 				storeLoadImages(loadParams)
 					.then(() => {
-						console.log('✅ FileBrowser - Carga de imágenes completada');
-						logger.debug('✅ Carga de imágenes completada');
-						// Verificar el estado del store después de la carga
-						const newState = useImageStore.getState();
-						console.log('📊 FileBrowser - Estado del store después de la carga:', {
-							totalImages: Object.keys(newState.core.images).length,
-							imagesByFolder: getImagesByFolder(filterId).length,
-							isLoading: newState.core.isLoading,
-							error: newState.core.error,
-						});
+						if (process.env.NODE_ENV === 'development') {
+							logger.debug('✅ Carga de imágenes completada');
+						}
 					})
 					.catch((error: Error) => {
-						console.error('❌ FileBrowser - Error al cargar imágenes:', error);
 						logger.error('❌ Error al cargar imágenes en FileBrowser:', error);
 					})
 					.finally(() => {
@@ -277,12 +250,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		debouncedLoadData();
 	}, [debouncedLoadData]);
 
-	// Obtener raw items - Memoizado separadamente para evitar re-cálculos innecesarios
+	// Obtener raw items - OPTIMIZACIÓN: Memoizado separadamente para evitar re-cálculos innecesarios
 	const rawItems = useMemo(() => {
-		if (process.env.NODE_ENV !== 'production') {
-			console.log('🔍 FileBrowser - Calculando items con:', { entityType, filterId, filterType, mode });
-		}
-
 		// En modo manual, usar los items proporcionados
 		if (mode === 'manual' && manualItems) {
 			return manualItems;
@@ -312,37 +281,33 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					// Si hay filtro por carpeta, usar getImagesByFolder
 					if (filterId && filterType === 'folder') {
 						items = getImagesByFolder(filterId);
-						if (process.env.NODE_ENV !== 'production') {
-							console.log('🔍 FileBrowser - Imágenes filtradas por carpeta:', items.length, { filterId });
-						}
 					} else {
 						items = getSortedImages();
-						if (process.env.NODE_ENV !== 'production') {
-							console.log('🔍 FileBrowser - Todas las imágenes ordenadas:', items.length);
-						}
 					}
 					break;
 				}
 				// TODO: Añadir otros casos según se implementen
 				default:
-					if (process.env.NODE_ENV !== 'production') {
-						console.log('🔍 FileBrowser - Retornando array vacío (entityType no coincide)');
-					}
 					break;
 			}
 		}
 
 		return items;
-	}, [
-		entityType,
-		entityTypes,
-		filterId,
-		filterType,
-		mode,
-		manualItems,
-		getSortedImages,
-		getImagesByFolder,
-	]);
+	}, [entityType, entityTypes, filterId, filterType, mode, manualItems, getSortedImages, getImagesByFolder]);
+
+	// OPTIMIZACIÓN: Memoizar helpers de sorting para evitar recreaciones
+	const sortingHelpers = useMemo(() => ({
+		getEntityName: (entity: AnyEntityWithStats): string => {
+			if ('name' in entity && typeof entity.name === 'string') return entity.name;
+			if ('title' in entity && typeof entity.title === 'string') return entity.title;
+			return '';
+		},
+		getEntityPath: (entity: AnyEntityWithStats): string => {
+			if ('path' in entity && typeof entity.path === 'string') return entity.path;
+			if ('category' in entity && typeof entity.category === 'string') return entity.category;
+			return '';
+		}
+	}), []);
 
 	// Separar filtering y sorting para mejor performance
 	const items = useMemo(() => {
@@ -351,88 +316,88 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		if (searchQuery?.trim()) {
 			const query = searchQuery.toLowerCase().trim();
 			filteredItems = rawItems.filter((item) => {
-				// Helper para obtener el nombre de la entidad
-				const getEntityName = (entity: AnyEntityWithStats): string => {
-					if ('name' in entity && typeof entity.name === 'string') return entity.name;
-					if ('title' in entity && typeof entity.title === 'string') return entity.title;
-					return '';
-				};
-
-				// Helper para obtener el path de la entidad
-				const getEntityPath = (entity: AnyEntityWithStats): string => {
-					if ('path' in entity && typeof entity.path === 'string') return entity.path;
-					if ('category' in entity && typeof entity.category === 'string') return entity.category;
-					return '';
-				};
-
-				const itemName = getEntityName(item).toLowerCase();
-				const itemPath = getEntityPath(item).toLowerCase();
+				const itemName = sortingHelpers.getEntityName(item).toLowerCase();
+				const itemPath = sortingHelpers.getEntityPath(item).toLowerCase();
 				return itemName.includes(query) || itemPath.includes(query);
 			});
 		}
 
-		// Aplicar ordenación si existe
+		// OPTIMIZACIÓN: Aplicar ordenación más eficiente
 		if (sortOptions.length > 0) {
-			console.log('🔧 FileBrowser - Aplicando ordenación:', sortOptions);
-			filteredItems.sort((a, b) => {
+			// Pre-calcular valores de sorting para evitar cálculos repetidos
+			const itemsWithSortValues = filteredItems.map(item => {
+				const sortValues: Record<string, any> = {};
 				for (const sortOption of sortOptions) {
-					const { field, direction } = sortOption;
-					let aValue: any;
-					let bValue: any;
-
+					const { field } = sortOption;
 					switch (field) {
-						case 'name': {
-							// Helper para obtener el nombre de la entidad
-							const getEntityName = (entity: AnyEntityWithStats): string => {
-								if ('name' in entity && typeof entity.name === 'string') return entity.name;
-								if ('title' in entity && typeof entity.title === 'string') return entity.title;
-								return '';
-							};
-							aValue = getEntityName(a).toLowerCase();
-							bValue = getEntityName(b).toLowerCase();
+						case 'name':
+							sortValues[field] = sortingHelpers.getEntityName(item).toLowerCase();
 							break;
-						}
 						case 'modifiedAt':
-							aValue = new Date((a as any).updatedAt || (a as any).modifiedAt || 0);
-							bValue = new Date((b as any).updatedAt || (b as any).modifiedAt || 0);
+							sortValues[field] = (item as any).updatedAt || (item as any).modifiedAt || 0;
 							break;
 						case 'createdAt':
-							aValue = new Date((a as any).createdAt || 0);
-							bValue = new Date((b as any).createdAt || 0);
+							sortValues[field] = (item as any).createdAt || 0;
 							break;
-						default:
-							continue;
+					}
+				}
+				return { item, sortValues };
+			});
+
+			// Sorting optimizado con valores pre-calculados
+			itemsWithSortValues.sort((a, b) => {
+				for (const sortOption of sortOptions) {
+					const { field, direction } = sortOption;
+					const aValue = a.sortValues[field];
+					const bValue = b.sortValues[field];
+
+					let result = 0;
+					if (typeof aValue === 'string' && typeof bValue === 'string') {
+						result = aValue.localeCompare(bValue);
+					} else {
+						// Para fechas, convertir solo una vez
+						const aTime = typeof aValue === 'string' || typeof aValue === 'number' ? new Date(aValue).getTime() : 0;
+						const bTime = typeof bValue === 'string' || typeof bValue === 'number' ? new Date(bValue).getTime() : 0;
+						result = aTime - bTime;
 					}
 
-					// Comparación más robusta
-					if (typeof aValue === 'string' && typeof bValue === 'string') {
-						const result = aValue.localeCompare(bValue);
-						if (result !== 0) return direction === 'asc' ? result : -result;
-					} else if (aValue instanceof Date && bValue instanceof Date) {
-						const result = aValue.getTime() - bValue.getTime();
-						if (result !== 0) return direction === 'asc' ? result : -result;
-					} else {
-						if (aValue < bValue) return direction === 'asc' ? -1 : 1;
-						if (aValue > bValue) return direction === 'asc' ? 1 : -1;
-					}
+					if (result !== 0) return direction === 'asc' ? result : -result;
 				}
 				return 0;
 			});
-		} else {
-			// Ordenación por defecto: fecha de modificación descendente
-			filteredItems.sort((a, b) => {
-				const aDate = new Date((a as any).updatedAt || (a as any).modifiedAt || 0);
-				const bDate = new Date((b as any).updatedAt || (b as any).modifiedAt || 0);
-				return bDate.getTime() - aDate.getTime();
-			});
+
+			return itemsWithSortValues.map(({ item }) => item);
 		}
 
-		return filteredItems;
-	}, [
-		rawItems,
-		searchQuery,
-		sortOptions, // Solo dependencias necesarias para filtering y sorting
-	]);
+		// Ordenación por defecto optimizada
+		return filteredItems.sort((a, b) => {
+			const aTime = new Date((a as any).updatedAt || (a as any).modifiedAt || 0).getTime();
+			const bTime = new Date((b as any).updatedAt || (b as any).modifiedAt || 0).getTime();
+			return bTime - aTime;
+		});
+	}, [rawItems, searchQuery, sortOptions, sortingHelpers]);
+
+	// OPTIMIZACIÓN: Memoizar handlers para evitar re-renders de componentes hijos
+	const memoizedOnItemSelect = useCallback(
+		(item: AnyEntityWithStats) => {
+			onItemSelect?.(item);
+		},
+		[onItemSelect]
+	);
+
+	const memoizedOnItemClick = useCallback(
+		(item: AnyEntityWithStats, e: React.MouseEvent) => {
+			onItemClick?.(item, e);
+		},
+		[onItemClick]
+	);
+
+	const memoizedOnItemDoubleClick = useCallback(
+		(item: AnyEntityWithStats) => {
+			onItemDoubleClick?.(item);
+		},
+		[onItemDoubleClick]
+	);
 
 	// Callback para el menú contextual
 	const handleAdvancedContextMenu = useCallback(
@@ -449,6 +414,20 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		[handleContextMenu]
 	);
 
+	// OPTIMIZACIÓN: Estabilizar items para useAdvancedSelection usando un Map por ID
+	const stableItemsRef = useRef<AnyEntityWithStats[]>([]);
+	const itemsStabilized = useMemo(() => {
+		// Solo actualizar si los IDs realmente cambiaron
+		const currentIds = items.map(item => item.id).sort().join(',');
+		const prevIds = stableItemsRef.current.map(item => item.id).sort().join(',');
+
+		if (currentIds !== prevIds) {
+			stableItemsRef.current = items;
+		}
+
+		return stableItemsRef.current;
+	}, [items]);
+
 	// Hook de selección avanzada con toda la lógica de clicks mejorada
 	const {
 		handleItemClick: advancedHandleItemClick,
@@ -461,18 +440,18 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		selectionCount,
 		isDragSelecting,
 	} = useAdvancedSelection({
-		items,
+		items: itemsStabilized, // OPTIMIZACIÓN: Usar items estabilizados
 		onContextMenu: handleAdvancedContextMenu,
-		onItemSelect,
-		onItemClick,
+		onItemSelect: memoizedOnItemSelect,
+		onItemClick: memoizedOnItemClick,
 		enableDragSelection: true,
 		dragContainer: containerRef.current || undefined,
 	});
 
-	// Hook de rendimiento después de la declaración de items
+	// OPTIMIZACIÓN: Hook de rendimiento con datos vacíos en producción para evitar overhead
 	const performance = usePerformance({
-		data: items || [],
-		searchTerm: searchQuery,
+		data: process.env.NODE_ENV === 'development' ? items : [],
+		searchTerm: process.env.NODE_ENV === 'development' ? (searchQuery || '') : '',
 	});
 
 	// Determinar estado de carga y error
@@ -532,20 +511,16 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 	})();
 
-	// Medir contenedor con optimización mejorada y ResizeObserver
+	// OPTIMIZACIÓN: Medir contenedor con logs mínimos para mejor performance
 	const measureContainer = useCallback((element: any) => {
 		// Evitar múltiples mediciones del mismo elemento
 		if (lastMeasuredElementRef.current === element) {
 			return;
 		}
 
-		const attempt = ++measurementAttemptsRef.current;
-		logger.debug(`[FileBrowserV2] Intento medición ${attempt}`);
-
 		const measure = () => {
 			const width = element?.clientWidth || element?.offsetWidth;
 			if (width > 0) {
-				logger.info(`[FileBrowserV2] ✅ Medición exitosa: ${width}px`);
 				setContainerWidth(width);
 				lastMeasuredElementRef.current = element;
 				return true;
@@ -561,7 +536,6 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			for (const entry of entries) {
 				const width = entry.contentRect.width;
 				if (width > 0) {
-					logger.info(`[FileBrowserV2] ✅ ResizeObserver medición: ${width}px`);
 					setContainerWidth(width);
 					lastMeasuredElementRef.current = element;
 					resizeObserver.disconnect();
@@ -584,7 +558,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 						resizeObserver.disconnect();
 						return;
 					}
-					logger.warn(`[FileBrowserV2] ⚠️ Falló medición, usando fallback: ${FALLBACK_WIDTH}px`);
+					// Fallback final
 					setContainerWidth(FALLBACK_WIDTH);
 					lastMeasuredElementRef.current = element;
 					resizeObserver.disconnect();
@@ -593,19 +567,24 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 	}, []);
 
+	// OPTIMIZACIÓN: Debounce del ResizeObserver para evitar cálculos excesivos
+	const debouncedSetContainerWidth = useDebouncedCallback((width: number) => {
+		setContainerWidth(width);
+	}, 150); // Debounce de 150ms
+
 	const containerCallbackRef = useCallback(
 		(element: any) => {
 			if (element && containerRef.current !== element) {
 				containerRef.current = element;
 				measureContainer(element);
 
-				// Mantener ResizeObserver activo para cambios dinámicos de tamaño
+				// OPTIMIZACIÓN: ResizeObserver sin logs costosos
 				const resizeObserver = new ResizeObserver((entries) => {
 					for (const entry of entries) {
 						const width = entry.contentRect.width;
-						if (width > 0 && width !== containerWidth) {
-							logger.debug(`[FileBrowserV2] 📏 Cambio de tamaño detectado: ${containerWidth}px → ${width}px`);
-							setContainerWidth(width);
+						if (width > 0 && Math.abs(width - containerWidth) > 5) {
+							// Solo actualizar si el cambio es significativo (>5px)
+							debouncedSetContainerWidth(width);
 						}
 					}
 				});
@@ -618,32 +597,21 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				};
 			}
 		},
-		[measureContainer, containerWidth]
+		[measureContainer, containerWidth, debouncedSetContainerWidth]
 	);
 
-	// Manejar click en item - Ahora usando selección avanzada
+	// OPTIMIZACIÓN: Manejar click en item con logging mínimo
 	const handleItemClick = useCallback(
 		(item: AnyEntityWithStats, e: React.MouseEvent) => {
-			logger.debug('🔍 FileBrowser - handleItemClick (legacy wrapper):', {
-				itemId: item.id,
-				hasOnItemClick: !!onItemClick,
-				hasOnItemSelect: !!onItemSelect,
-			});
-
 			// Delegar al handler avanzado
 			advancedHandleItemClick(item, e);
 		},
-		[advancedHandleItemClick, onItemClick, onItemSelect]
+		[advancedHandleItemClick]
 	);
 
 	// Manejar doble click
 	const handleItemDoubleClick = useCallback(
 		(item: AnyEntityWithStats) => {
-			console.log('🔍 FileBrowser - handleItemDoubleClick ejecutado:', {
-				itemId: item.id,
-				hasOnItemDoubleClick: !!onItemDoubleClick,
-			});
-
 			onItemDoubleClick?.(item);
 		},
 		[onItemDoubleClick]
@@ -652,11 +620,6 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// Manejar acciones del menú contextual
 	const handleItemContextAction = useCallback(
 		async (action: string, item: AnyEntityWithStats, _data?: Record<string, unknown>) => {
-			console.log('🔍 FileBrowser - handleItemContextAction ejecutado:', {
-				action,
-				itemId: item.id,
-			});
-
 			// Implementación simple para compatibilidad
 			try {
 				toastService.info(`Acción "${action}" ejecutada para ${item.name || item.id}`);
@@ -1073,12 +1036,12 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				if (e.ctrlKey || e.metaKey) {
 					toggleSelection(itemId);
 				} else if (e.shiftKey && focusedId) {
-					const currentIndex = items.findIndex(i => i.id === itemId);
-					const focusedIndex = items.findIndex(i => i.id === focusedId);
+					const currentIndex = items.findIndex((i) => i.id === itemId);
+					const focusedIndex = items.findIndex((i) => i.id === focusedId);
 					if (currentIndex !== -1 && focusedIndex !== -1) {
 						const start = Math.min(currentIndex, focusedIndex);
 						const end = Math.max(currentIndex, focusedIndex);
-						const idsToSelect = items.slice(start, end + 1).map(i => i.id);
+						const idsToSelect = items.slice(start, end + 1).map((i) => i.id);
 						setSelectedIds(idsToSelect);
 					}
 				} else {
@@ -1093,12 +1056,12 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				onItemDoubleClick?.(item);
 			}
 		},
-		handleItemContextMenuById: (itemId: string, e: React.MouseEvent) => {
-			const item = itemsByIdRef.current.get(itemId);
+		handleItemContextMenuById: (_itemId: string, _e: React.MouseEvent) => {
+			const item = itemsByIdRef.current.get(_itemId);
 			if (item) {
-				console.log('🗂️ Menú contextual para item:', itemId);
+				// Context menu logic here
 			}
-		}
+		},
 	});
 
 	// Actualizar las funciones ref cuando cambien las dependencias críticas
@@ -1110,12 +1073,12 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				if (e.ctrlKey || e.metaKey) {
 					toggleSelection(itemId);
 				} else if (e.shiftKey && focusedId) {
-					const currentIndex = items.findIndex(i => i.id === itemId);
-					const focusedIndex = items.findIndex(i => i.id === focusedId);
+					const currentIndex = items.findIndex((i) => i.id === itemId);
+					const focusedIndex = items.findIndex((i) => i.id === focusedId);
 					if (currentIndex !== -1 && focusedIndex !== -1) {
 						const start = Math.min(currentIndex, focusedIndex);
 						const end = Math.max(currentIndex, focusedIndex);
-						const idsToSelect = items.slice(start, end + 1).map(i => i.id);
+						const idsToSelect = items.slice(start, end + 1).map((i) => i.id);
 						setSelectedIds(idsToSelect);
 					}
 				} else {
@@ -1132,10 +1095,10 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			}
 		};
 
-		stableHandlersRef.current.handleItemContextMenuById = (itemId: string, e: React.MouseEvent) => {
-			const item = itemsByIdRef.current.get(itemId);
+		stableHandlersRef.current.handleItemContextMenuById = (_itemId: string, _e: React.MouseEvent) => {
+			const item = itemsByIdRef.current.get(_itemId);
 			if (item) {
-				console.log('🗂️ Menú contextual para item:', itemId);
+				// Context menu logic here
 			}
 		};
 	}, [onItemClick, onItemDoubleClick, toggleSelection, focusedId, setSelectedIds, setFocusedId, items]);
@@ -1156,13 +1119,10 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// Función para renderizar item usando EntityCard - OPTIMIZADA con memoización selectiva
 	const renderItem = useCallback(
 		(item: AnyEntityWithStats, _index: number) => {
-			const isSelected = effectiveSelectedIds.includes(item.id);
-
 			return (
 				<OptimizedEntityCard
 					key={item.id}
 					entity={item as AnyEntityWithStats}
-					isSelected={isSelected}
 					itemId={item.id}
 					onClickById={handleItemClickById}
 					onDoubleClickById={handleItemDoubleClickById}
@@ -1176,7 +1136,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			);
 		},
 		[
-			effectiveSelectedIds,
+			// Solo dependencias estables para evitar re-renders
 			handleItemClickById,
 			handleItemDoubleClickById,
 			handleItemContextMenuById,
@@ -1189,18 +1149,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Renderizar contenido según el estado
 	const renderContent = () => {
-		console.log('🔍 FileBrowser - Estado de renderizado:', {
-			isLoading,
-			error,
-			itemsLength: items.length,
-			containerWidth,
-			entityType,
-			filterId,
-			filterType,
-		});
-
 		if (isLoading && items.length === 0) {
-			console.log('🔍 FileBrowser - Renderizando loading...');
 			return (
 				<div className="flex h-full w-full items-center justify-center">
 					<Spinner />
@@ -1209,7 +1158,6 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 
 		if (error) {
-			console.log('🔍 FileBrowser - Renderizando error:', error);
 			return (
 				<div className="flex h-full w-full items-center justify-center">
 					<p className="text-destructive">Error: {error}</p>
@@ -1218,11 +1166,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 
 		if (items.length === 0) {
-			console.log('🔍 FileBrowser - Renderizando estado vacío');
 			return <EmptyState icon={FileTextIcon} title="Sin elementos" description="No hay elementos para mostrar." />;
 		}
-
-		console.log('🔍 FileBrowser - Renderizando contenido con', items.length, 'items');
 
 		const commonViewProps = {
 			items,
@@ -1235,26 +1180,18 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			onContextAction: handleItemContextAction,
 		};
 
-		console.log('🔍 FileBrowser - SWITCH de vista:', { viewMode, willRenderView: viewMode || 'default' });
-
 		switch (viewMode) {
 			case 'list':
-				console.log('🔍 FileBrowser - Renderizando ListView');
 				return <ListView {...commonViewProps} />;
 			case 'grid':
-				console.log('🔍 FileBrowser - Renderizando GridView');
 				return <GridView {...commonViewProps} />;
 			case 'cards':
-				console.log('🔍 FileBrowser - Renderizando CardsView');
 				return <CardsView {...commonViewProps} />;
 			case 'simple-grid':
-				console.log('🔍 FileBrowser - Renderizando GridView (simple-grid)');
 				return <GridView {...commonViewProps} />;
 			case 'masonry':
-				console.log('🔍 FileBrowser - Renderizando MasonryView');
 				return <MasonryView {...commonViewProps} />;
 			default:
-				console.log('🔍 FileBrowser - Renderizando CardsView (default)');
 				return <CardsView {...commonViewProps} />;
 		}
 	};
@@ -1327,28 +1264,6 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			</div>
 
 			<ScrollArea className="flex-1 min-h-0 relative" aria-live="polite" aria-atomic="false">
-				{/* Toolbar flotante que aparece cuando hay elementos seleccionados */}
-				<AnimatePresence>
-					{effectiveSelectedIds.length > 0 && (
-						<motion.div
-							initial={{ y: -100, opacity: 0 }}
-							animate={{ y: 0, opacity: 1 }}
-							exit={{ y: -100, opacity: 0 }}
-							transition={{
-								type: 'spring',
-								stiffness: 400,
-								damping: 30,
-								duration: 0.3,
-							}}
-							className="absolute top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-sm border-b border-border shadow-lg"
-						>
-							<div className="p-4">
-								<ViewToolbar />
-							</div>
-						</motion.div>
-					)}
-				</AnimatePresence>
-
 				<DragSelectionProvider
 					containerRef={containerRef as React.RefObject<HTMLElement>}
 					items={fileItems as any}
@@ -1383,20 +1298,19 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 							easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
 						},
 					}}
-					onSelectionStart={(state) => {
-						console.log('🎯 Drag selection started:', state);
+					onSelectionStart={(_state) => {
+						// Drag selection started
 					}}
-					onSelectionUpdate={(state, selectedIds) => {
-						console.log('🎯 Drag selection updated:', { state, selectedIds });
+					onSelectionUpdate={(_state, _selectedIds) => {
+						// Drag selection updated
 					}}
-					onSelectionEnd={(state, selectedIds) => {
-						console.log('🎯 Drag selection ended:', { state, selectedIds });
+					onSelectionEnd={(_state, selectedIds) => {
 						if (selectedIds.length > 0) {
 							setSelectedIds(selectedIds);
 						}
 					}}
 					onSelectionCancel={() => {
-						console.log('🎯 Drag selection cancelled');
+						// Drag selection cancelled
 					}}
 				>
 					<div
@@ -1430,16 +1344,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 							viewType={viewMode === 'list' ? 'list' : viewMode === 'grid' ? 'grid' : 'cards'}
 						/>
 
-						<AnimatePresence>
-							<motion.div
-								initial={{ opacity: 0 }}
-								animate={{ opacity: 1 }}
-								exit={{ opacity: 0 }}
-								className="h-full w-full"
-							>
-								{containerWidth > 0 ? renderContent() : <Spinner />}
-							</motion.div>
-						</AnimatePresence>
+						{containerWidth > 0 ? renderContent() : <Spinner />}
 
 						{/* Menú contextual personalizado */}
 						<CustomContextMenu

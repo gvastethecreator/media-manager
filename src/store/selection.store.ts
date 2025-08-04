@@ -171,7 +171,7 @@ export const useSelectionStore = create<SelectionState>()(
 
 			removeFromSelection: (id: string) => {
 				const { selectedIds } = get();
-				set({ selectedIds: selectedIds.filter(itemId => itemId !== id) });
+				set({ selectedIds: selectedIds.filter((itemId) => itemId !== id) });
 				selectionLogger.debug('➖ Removido de selección:', id);
 			},
 
@@ -198,12 +198,12 @@ export const useSelectionStore = create<SelectionState>()(
 			},
 
 			selectAll: (items: EntityWithStats[]) => {
-				const allIds = items.map(item => item.id);
+				const allIds = items.map((item) => item.id);
 				set({
 					selectedItems: items,
 					selectedIds: allIds,
 					lastSelectedItem: items.length > 0 ? items[items.length - 1] : null,
-					isMultiSelectMode: items.length > 1
+					isMultiSelectMode: items.length > 1,
 				});
 				selectionLogger.debug('🎯 Seleccionados todos los items:', `${items.length} items`);
 			},

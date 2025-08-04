@@ -71,9 +71,9 @@ export async function generateAdvancedImageThumbnail(
 	// Prioridad de fuentes de thumbnail
 	const sources = [
 		() => (item as any).thumbnailUrl,
-		() => (item as any).thumbnail ? `data:image/jpeg;base64,${(item as any).thumbnail}` : null,
+		() => ((item as any).thumbnail ? `data:image/jpeg;base64,${(item as any).thumbnail}` : null),
 		() => `/api/images/${item.id}/thumbnail?quality=${quality}`,
-		() => (item as any).path ? `/api/files/thumbnail?path=${encodeURIComponent((item as any).path)}` : null,
+		() => ((item as any).path ? `/api/files/thumbnail?path=${encodeURIComponent((item as any).path)}` : null),
 	];
 
 	for (const source of sources) {
@@ -102,9 +102,12 @@ export async function generateAdvancedVideoThumbnail(
 	// Prioridad de fuentes de thumbnail
 	const sources = [
 		() => (item as any).thumbnailUrl,
-		() => (item as any).thumbnail ? `data:image/jpeg;base64,${(item as any).thumbnail}` : null,
+		() => ((item as any).thumbnail ? `data:image/jpeg;base64,${(item as any).thumbnail}` : null),
 		() => `/api/videos/${item.id}/thumbnail?time=${timeOffset}&quality=${quality}`,
-		() => (item as any).path ? `/api/files/video-thumbnail?path=${encodeURIComponent((item as any).path)}&time=${timeOffset}` : null,
+		() =>
+			(item as any).path
+				? `/api/files/video-thumbnail?path=${encodeURIComponent((item as any).path)}&time=${timeOffset}`
+				: null,
 	];
 
 	for (const source of sources) {
@@ -331,10 +334,7 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 /**
  * 💾 Obtiene thumbnail desde cache o genera uno nuevo
  */
-export async function getCachedThumbnail(
-	item: AnyEntityWithStats,
-	options: Record<string, any> = {}
-): Promise<string> {
+export async function getCachedThumbnail(item: AnyEntityWithStats, options: Record<string, any> = {}): Promise<string> {
 	const cacheKey = `${item.entityType}-${item.id}-${JSON.stringify(options)}`;
 	const cached = thumbnailCache.get(cacheKey);
 

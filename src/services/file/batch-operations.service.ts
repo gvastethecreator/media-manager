@@ -1,102 +1,103 @@
 /**
  * Batch File Operations Service
- * 
+ *
  * This service extends the existing file operations with batch processing
  * capabilities, progress tracking, and operation queuing.
  */
 
 // Browser-compatible EventEmitter implementation
 class EventEmitter {
-  private events: { [key: string]: Function[] } = {};
+	private events: { [key: string]: Function[] } = {};
 
-  on(event: string, listener: Function): this {
-    if (!this.events[event]) {
-      this.events[event] = [];
-    }
-    this.events[event].push(listener);
-    return this;
-  }
+	on(event: string, listener: Function): this {
+		if (!this.events[event]) {
+			this.events[event] = [];
+		}
+		this.events[event].push(listener);
+		return this;
+	}
 
-  emit(event: string, ...args: any[]): boolean {
-    if (!this.events[event]) {
-      return false;
-    }
-    this.events[event].forEach(listener => {
-      try {
-        listener(...args);
-      } catch (error) {
-        console.error('Error in event listener:', error);
-      }
-    });
-    return true;
-  }
+	emit(event: string, ...args: any[]): boolean {
+		if (!this.events[event]) {
+			return false;
+		}
+		this.events[event].forEach((listener) => {
+			try {
+				listener(...args);
+			} catch (error) {
+				console.error('Error in event listener:', error);
+			}
+		});
+		return true;
+	}
 
-  removeListener(event: string, listener: Function): this {
-    if (!this.events[event]) {
-      return this;
-    }
-    const index = this.events[event].indexOf(listener);
-    if (index > -1) {
-      this.events[event].splice(index, 1);
-    }
-    return this;
-  }
+	removeListener(event: string, listener: Function): this {
+		if (!this.events[event]) {
+			return this;
+		}
+		const index = this.events[event].indexOf(listener);
+		if (index > -1) {
+			this.events[event].splice(index, 1);
+		}
+		return this;
+	}
 
-  removeAllListeners(event?: string): this {
-    if (event) {
-      delete this.events[event];
-    } else {
-      this.events = {};
-    }
-    return this;
-  }
+	removeAllListeners(event?: string): this {
+		if (event) {
+			delete this.events[event];
+		} else {
+			this.events = {};
+		}
+		return this;
+	}
 }
+
 import * as path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { toastService } from '@/services/toast/toast.service';
 import { progressTrackingService } from '@/services/progress/progress-tracking.service';
+import { toastService } from '@/services/toast/toast.service';
 import type { AnyEntityWithStats } from '@/types/entities';
-import {
-  copyFile,
-  moveFile,
-  deleteFile,
-  getFileInfo,
-  type FileCopyMoveResult,
-  type FileOperationResult,
-  type FileOperationOptions,
-} from './file.service';
 import { FileErrorCode } from '@/types/entities/file';
+import {
+	copyFile,
+	deleteFile,
+	type FileCopyMoveResult,
+	type FileOperationOptions,
+	type FileOperationResult,
+	getFileInfo,
+	moveFile,
+} from './file.service';
 
 const logger = serverLogger.withContext('BatchOperationsService');
 
 // Batch operation types
 export interface BatchOperation {
-  /** Unique operation identifier */
-  id: string;
-  /** Operation type */
-  type: BatchOperationType;
-  /** Items to process */
-  items: AnyEntityWithStats[];
-  /** Target path for copy/move operations */
-  targetPath?: string;
-  /** Operation options */
-  options?: BatchOperationOptions;
-  /** Operation status */
-  status: BatchOperationStatus;
-  /** Priority level */
-  priority: BatchOperationPriority;
-  /** Creation timestamp */
-  createdAt: number;
-  /** Start timestamp */
-  startedAt?: number;
-  /** Completion timestamp */
-  completedAt?: number;
-  /** Progress information */
-  progress: BatchProgress;
-  /** Results */
-  results: BatchOperationResult[];
-  /** Errors */
-  errors: BatchOperationError[];
+	/** Unique operation identifier */
+	id: string;
+	/** Operation type */
+	type: BatchOperationType;
+	/** Items to process */
+	items: AnyEntityWithStats[];
+	/** Target path for copy/move operations */
+	targetPath?: string;
+	/** Operation options */
+	options?: BatchOperationOptions;
+	/** Operation status */
+	status: BatchOperationStatus;
+	/** Priority level */
+	priority: BatchOperationPriority;
+	/** Creation timestamp */
+	createdAt: number;
+	/** Start timestamp */
+	startedAt?: number;
+	/** Completion timestamp */
+	completedAt?: number;
+	/** Progress information */
+	progress: BatchProgress;
+	/** Results */
+	results: BatchOperationResult[];
+	/** Errors */
+	errors: BatchOperationError[];
 }
 
 export type BatchOperationType = 'copy' | 'move' | 'delete' | 'rename';
@@ -104,561 +105,551 @@ export type BatchOperationStatus = 'queued' | 'running' | 'completed' | 'failed'
 export type BatchOperationPriority = 'low' | 'normal' | 'high' | 'urgent';
 
 export interface BatchOperationOptions extends FileOperationOptions {
-  /** Maximum concurrent operations */
-  maxConcurrency?: number;
-  /** Retry failed operations */
-  retryOnFailure?: boolean;
-  /** Maximum retry attempts */
-  maxRetries?: number;
-  /** Continue on errors */
-  continueOnError?: boolean;
-  /** Show progress notifications */
-  showProgress?: boolean;
-  /** Auto-cleanup completed operations */
-  autoCleanup?: boolean;
-  /** Custom operation description */
-  description?: string;
-  /** Operation priority */
-  priority?: BatchOperationPriority;
+	/** Maximum concurrent operations */
+	maxConcurrency?: number;
+	/** Retry failed operations */
+	retryOnFailure?: boolean;
+	/** Maximum retry attempts */
+	maxRetries?: number;
+	/** Continue on errors */
+	continueOnError?: boolean;
+	/** Show progress notifications */
+	showProgress?: boolean;
+	/** Auto-cleanup completed operations */
+	autoCleanup?: boolean;
+	/** Custom operation description */
+	description?: string;
+	/** Operation priority */
+	priority?: BatchOperationPriority;
 }
 
 export interface BatchProgress {
-  /** Total items */
-  total: number;
-  /** Processed items */
-  processed: number;
-  /** Failed items */
-  failed: number;
-  /** Skipped items */
-  skipped: number;
-  /** Progress percentage */
-  percentage: number;
-  /** Current item being processed */
-  currentItem?: string;
-  /** Estimated time remaining */
-  estimatedTimeRemaining?: number;
-  /** Throughput (items per second) */
-  throughput?: number;
+	/** Total items */
+	total: number;
+	/** Processed items */
+	processed: number;
+	/** Failed items */
+	failed: number;
+	/** Skipped items */
+	skipped: number;
+	/** Progress percentage */
+	percentage: number;
+	/** Current item being processed */
+	currentItem?: string;
+	/** Estimated time remaining */
+	estimatedTimeRemaining?: number;
+	/** Throughput (items per second) */
+	throughput?: number;
 }
 
 export interface BatchOperationResult {
-  /** Source item */
-  item: AnyEntityWithStats;
-  /** Operation success */
-  success: boolean;
-  /** Result data */
-  result?: FileCopyMoveResult | FileOperationResult;
-  /** Error if failed */
-  error?: string;
-  /** Processing time */
-  processingTime: number;
+	/** Source item */
+	item: AnyEntityWithStats;
+	/** Operation success */
+	success: boolean;
+	/** Result data */
+	result?: FileCopyMoveResult | FileOperationResult;
+	/** Error if failed */
+	error?: string;
+	/** Processing time */
+	processingTime: number;
 }
 
 export interface BatchOperationError {
-  /** Source item */
-  item: AnyEntityWithStats;
-  /** Error message */
-  message: string;
-  /** Error code */
-  code?: FileErrorCode;
-  /** Retry count */
-  retryCount: number;
-  /** Timestamp */
-  timestamp: number;
+	/** Source item */
+	item: AnyEntityWithStats;
+	/** Error message */
+	message: string;
+	/** Error code */
+	code?: FileErrorCode;
+	/** Retry count */
+	retryCount: number;
+	/** Timestamp */
+	timestamp: number;
 }
 
 /**
  * Batch File Operations Service
  */
 class BatchFileOperationsService extends EventEmitter {
-  private operations = new Map<string, BatchOperation>();
-  private queue: string[] = [];
-  private running = new Set<string>();
-  private maxConcurrentOperations = 3;
-  private isProcessing = false;
+	private operations = new Map<string, BatchOperation>();
+	private queue: string[] = [];
+	private running = new Set<string>();
+	private maxConcurrentOperations = 3;
+	private isProcessing = false;
 
-  constructor() {
-    super();
-    this.startQueueProcessor();
-  }
+	constructor() {
+		super();
+		this.startQueueProcessor();
+	}
 
-  /**
-   * Queue a batch copy operation
-   */
-  async queueCopyOperation(
-    items: AnyEntityWithStats[],
-    targetPath: string,
-    options: BatchOperationOptions = {}
-  ): Promise<string> {
-    const operationId = this.generateOperationId();
-    
-    const operation: BatchOperation = {
-      id: operationId,
-      type: 'copy',
-      items,
-      targetPath,
-      options: {
-        maxConcurrency: 3,
-        retryOnFailure: true,
-        maxRetries: 2,
-        continueOnError: true,
-        showProgress: true,
-        autoCleanup: true,
-        priority: 'normal',
-        ...options
-      },
-      status: 'queued',
-      priority: options.priority || 'normal',
-      createdAt: Date.now(),
-      progress: {
-        total: items.length,
-        processed: 0,
-        failed: 0,
-        skipped: 0,
-        percentage: 0,
-      },
-      results: [],
-      errors: [],
-    };
+	/**
+	 * Queue a batch copy operation
+	 */
+	async queueCopyOperation(
+		items: AnyEntityWithStats[],
+		targetPath: string,
+		options: BatchOperationOptions = {}
+	): Promise<string> {
+		const operationId = this.generateOperationId();
 
-    this.operations.set(operationId, operation);
-    this.addToQueue(operationId);
+		const operation: BatchOperation = {
+			id: operationId,
+			type: 'copy',
+			items,
+			targetPath,
+			options: {
+				maxConcurrency: 3,
+				retryOnFailure: true,
+				maxRetries: 2,
+				continueOnError: true,
+				showProgress: true,
+				autoCleanup: true,
+				priority: 'normal',
+				...options,
+			},
+			status: 'queued',
+			priority: options.priority || 'normal',
+			createdAt: Date.now(),
+			progress: {
+				total: items.length,
+				processed: 0,
+				failed: 0,
+				skipped: 0,
+				percentage: 0,
+			},
+			results: [],
+			errors: [],
+		};
 
-    logger.info('📋 Batch copy operation queued:', {
-      operationId,
-      itemCount: items.length,
-      targetPath,
-    });
+		this.operations.set(operationId, operation);
+		this.addToQueue(operationId);
 
-    return operationId;
-  }
+		logger.info('📋 Batch copy operation queued:', {
+			operationId,
+			itemCount: items.length,
+			targetPath,
+		});
 
-  /**
-   * Queue a batch move operation
-   */
-  async queueMoveOperation(
-    items: AnyEntityWithStats[],
-    targetPath: string,
-    options: BatchOperationOptions = {}
-  ): Promise<string> {
-    const operationId = this.generateOperationId();
-    
-    const operation: BatchOperation = {
-      id: operationId,
-      type: 'move',
-      items,
-      targetPath,
-      options: {
-        maxConcurrency: 3,
-        retryOnFailure: true,
-        maxRetries: 2,
-        continueOnError: true,
-        showProgress: true,
-        autoCleanup: true,
-        priority: 'normal',
-        ...options
-      },
-      status: 'queued',
-      priority: options.priority || 'normal',
-      createdAt: Date.now(),
-      progress: {
-        total: items.length,
-        processed: 0,
-        failed: 0,
-        skipped: 0,
-        percentage: 0,
-      },
-      results: [],
-      errors: [],
-    };
+		return operationId;
+	}
 
-    this.operations.set(operationId, operation);
-    this.addToQueue(operationId);
+	/**
+	 * Queue a batch move operation
+	 */
+	async queueMoveOperation(
+		items: AnyEntityWithStats[],
+		targetPath: string,
+		options: BatchOperationOptions = {}
+	): Promise<string> {
+		const operationId = this.generateOperationId();
 
-    logger.info('🚚 Batch move operation queued:', {
-      operationId,
-      itemCount: items.length,
-      targetPath,
-    });
+		const operation: BatchOperation = {
+			id: operationId,
+			type: 'move',
+			items,
+			targetPath,
+			options: {
+				maxConcurrency: 3,
+				retryOnFailure: true,
+				maxRetries: 2,
+				continueOnError: true,
+				showProgress: true,
+				autoCleanup: true,
+				priority: 'normal',
+				...options,
+			},
+			status: 'queued',
+			priority: options.priority || 'normal',
+			createdAt: Date.now(),
+			progress: {
+				total: items.length,
+				processed: 0,
+				failed: 0,
+				skipped: 0,
+				percentage: 0,
+			},
+			results: [],
+			errors: [],
+		};
 
-    return operationId;
-  }
+		this.operations.set(operationId, operation);
+		this.addToQueue(operationId);
 
-  /**
-   * Queue a batch delete operation
-   */
-  async queueDeleteOperation(
-    items: AnyEntityWithStats[],
-    options: BatchOperationOptions = {}
-  ): Promise<string> {
-    const operationId = this.generateOperationId();
-    
-    const operation: BatchOperation = {
-      id: operationId,
-      type: 'delete',
-      items,
-      options,
-      status: 'queued',
-      priority: options.priority || 'normal',
-      createdAt: Date.now(),
-      progress: {
-        total: items.length,
-        processed: 0,
-        failed: 0,
-        skipped: 0,
-        percentage: 0,
-      },
-      results: [],
-      errors: [],
-    };
+		logger.info('🚚 Batch move operation queued:', {
+			operationId,
+			itemCount: items.length,
+			targetPath,
+		});
 
-    this.operations.set(operationId, operation);
-    this.addToQueue(operationId);
+		return operationId;
+	}
 
-    logger.info('🗑️ Batch delete operation queued:', {
-      operationId,
-      itemCount: items.length,
-    });
+	/**
+	 * Queue a batch delete operation
+	 */
+	async queueDeleteOperation(items: AnyEntityWithStats[], options: BatchOperationOptions = {}): Promise<string> {
+		const operationId = this.generateOperationId();
 
-    return operationId;
-  }
+		const operation: BatchOperation = {
+			id: operationId,
+			type: 'delete',
+			items,
+			options,
+			status: 'queued',
+			priority: options.priority || 'normal',
+			createdAt: Date.now(),
+			progress: {
+				total: items.length,
+				processed: 0,
+				failed: 0,
+				skipped: 0,
+				percentage: 0,
+			},
+			results: [],
+			errors: [],
+		};
 
-  /**
-   * Get operation status
-   */
-  getOperation(operationId: string): BatchOperation | undefined {
-    return this.operations.get(operationId);
-  }
+		this.operations.set(operationId, operation);
+		this.addToQueue(operationId);
 
-  /**
-   * Get all operations
-   */
-  getAllOperations(): BatchOperation[] {
-    return Array.from(this.operations.values());
-  }
+		logger.info('🗑️ Batch delete operation queued:', {
+			operationId,
+			itemCount: items.length,
+		});
 
-  /**
-   * Cancel an operation
-   */
-  cancelOperation(operationId: string): boolean {
-    const operation = this.operations.get(operationId);
-    if (!operation) {
-      return false;
-    }
+		return operationId;
+	}
 
-    if (operation.status === 'queued') {
-      // Remove from queue
-      const queueIndex = this.queue.indexOf(operationId);
-      if (queueIndex !== -1) {
-        this.queue.splice(queueIndex, 1);
-      }
-    }
+	/**
+	 * Get operation status
+	 */
+	getOperation(operationId: string): BatchOperation | undefined {
+		return this.operations.get(operationId);
+	}
 
-    operation.status = 'cancelled';
-    operation.completedAt = Date.now();
-    
-    this.running.delete(operationId);
-    this.emit('operationCancelled', operation);
+	/**
+	 * Get all operations
+	 */
+	getAllOperations(): BatchOperation[] {
+		return Array.from(this.operations.values());
+	}
 
-    logger.info('❌ Operation cancelled:', operationId);
-    return true;
-  }
+	/**
+	 * Cancel an operation
+	 */
+	cancelOperation(operationId: string): boolean {
+		const operation = this.operations.get(operationId);
+		if (!operation) {
+			return false;
+		}
 
-  /**
-   * Pause an operation
-   */
-  pauseOperation(operationId: string): boolean {
-    const operation = this.operations.get(operationId);
-    if (!operation || operation.status !== 'running') {
-      return false;
-    }
+		if (operation.status === 'queued') {
+			// Remove from queue
+			const queueIndex = this.queue.indexOf(operationId);
+			if (queueIndex !== -1) {
+				this.queue.splice(queueIndex, 1);
+			}
+		}
 
-    operation.status = 'paused';
-    this.emit('operationPaused', operation);
+		operation.status = 'cancelled';
+		operation.completedAt = Date.now();
 
-    logger.info('⏸️ Operation paused:', operationId);
-    return true;
-  }
+		this.running.delete(operationId);
+		this.emit('operationCancelled', operation);
 
-  /**
-   * Resume a paused operation
-   */
-  resumeOperation(operationId: string): boolean {
-    const operation = this.operations.get(operationId);
-    if (!operation || operation.status !== 'paused') {
-      return false;
-    }
+		logger.info('❌ Operation cancelled:', operationId);
+		return true;
+	}
 
-    operation.status = 'queued';
-    this.addToQueue(operationId);
-    this.emit('operationResumed', operation);
+	/**
+	 * Pause an operation
+	 */
+	pauseOperation(operationId: string): boolean {
+		const operation = this.operations.get(operationId);
+		if (!operation || operation.status !== 'running') {
+			return false;
+		}
 
-    logger.info('▶️ Operation resumed:', operationId);
-    return true;
-  }
+		operation.status = 'paused';
+		this.emit('operationPaused', operation);
 
-  /**
-   * Clear completed operations
-   */
-  clearCompletedOperations(): void {
-    const completedIds: string[] = [];
-    
-    for (const [id, operation] of this.operations) {
-      if (operation.status === 'completed' || operation.status === 'failed' || operation.status === 'cancelled') {
-        completedIds.push(id);
-      }
-    }
+		logger.info('⏸️ Operation paused:', operationId);
+		return true;
+	}
 
-    completedIds.forEach(id => {
-      this.operations.delete(id);
-    });
+	/**
+	 * Resume a paused operation
+	 */
+	resumeOperation(operationId: string): boolean {
+		const operation = this.operations.get(operationId);
+		if (!operation || operation.status !== 'paused') {
+			return false;
+		}
 
-    logger.info('🧹 Cleared completed operations:', completedIds.length);
-  }
+		operation.status = 'queued';
+		this.addToQueue(operationId);
+		this.emit('operationResumed', operation);
 
-  /**
-   * Add operation to queue with priority sorting
-   */
-  private addToQueue(operationId: string): void {
-    const operation = this.operations.get(operationId);
-    if (!operation) return;
+		logger.info('▶️ Operation resumed:', operationId);
+		return true;
+	}
 
-    // Insert based on priority
-    const priorityOrder = { urgent: 0, high: 1, normal: 2, low: 3 };
-    const operationPriority = priorityOrder[operation.priority];
+	/**
+	 * Clear completed operations
+	 */
+	clearCompletedOperations(): void {
+		const completedIds: string[] = [];
 
-    let insertIndex = this.queue.length;
-    for (let i = 0; i < this.queue.length; i++) {
-      const queuedOperation = this.operations.get(this.queue[i]);
-      if (queuedOperation && priorityOrder[queuedOperation.priority] > operationPriority) {
-        insertIndex = i;
-        break;
-      }
-    }
+		for (const [id, operation] of this.operations) {
+			if (operation.status === 'completed' || operation.status === 'failed' || operation.status === 'cancelled') {
+				completedIds.push(id);
+			}
+		}
 
-    this.queue.splice(insertIndex, 0, operationId);
-  }
+		completedIds.forEach((id) => {
+			this.operations.delete(id);
+		});
 
-  /**
-   * Start queue processor
-   */
-  private startQueueProcessor(): void {
-    if (this.isProcessing) return;
-    
-    this.isProcessing = true;
-    this.processQueue();
-  }
+		logger.info('🧹 Cleared completed operations:', completedIds.length);
+	}
 
-  /**
-   * Process operation queue
-   */
-  private async processQueue(): Promise<void> {
-    while (this.isProcessing) {
-      // Check if we can start more operations
-      if (this.running.size >= this.maxConcurrentOperations || this.queue.length === 0) {
-        await new Promise(resolve => setTimeout(resolve, 100));
-        continue;
-      }
+	/**
+	 * Add operation to queue with priority sorting
+	 */
+	private addToQueue(operationId: string): void {
+		const operation = this.operations.get(operationId);
+		if (!operation) return;
 
-      const operationId = this.queue.shift();
-      if (!operationId) continue;
+		// Insert based on priority
+		const priorityOrder = { urgent: 0, high: 1, normal: 2, low: 3 };
+		const operationPriority = priorityOrder[operation.priority];
 
-      const operation = this.operations.get(operationId);
-      if (!operation || operation.status !== 'queued') continue;
+		let insertIndex = this.queue.length;
+		for (let i = 0; i < this.queue.length; i++) {
+			const queuedOperation = this.operations.get(this.queue[i]);
+			if (queuedOperation && priorityOrder[queuedOperation.priority] > operationPriority) {
+				insertIndex = i;
+				break;
+			}
+		}
 
-      this.running.add(operationId);
-      this.executeOperation(operationId).finally(() => {
-        this.running.delete(operationId);
-      });
-    }
-  }
+		this.queue.splice(insertIndex, 0, operationId);
+	}
 
-  /**
-   * Execute a batch operation
-   */
-  private async executeOperation(operationId: string): Promise<void> {
-    const operation = this.operations.get(operationId);
-    if (!operation) return;
+	/**
+	 * Start queue processor
+	 */
+	private startQueueProcessor(): void {
+		if (this.isProcessing) return;
 
-    try {
-      operation.status = 'running';
-      operation.startedAt = Date.now();
-      
-      // Start progress tracking
-      const progressId = `batch-${operationId}`;
-      progressTrackingService.startOperation(
-        progressId,
-        operation.type,
-        operation.items.length,
-        {
-          showToast: operation.options?.showProgress !== false,
-          description: operation.options?.description || this.getOperationDescription(operation),
-          cancellable: true,
-        }
-      );
+		this.isProcessing = true;
+		this.processQueue();
+	}
 
-      this.emit('operationStarted', operation);
+	/**
+	 * Process operation queue
+	 */
+	private async processQueue(): Promise<void> {
+		while (this.isProcessing) {
+			// Check if we can start more operations
+			if (this.running.size >= this.maxConcurrentOperations || this.queue.length === 0) {
+				await new Promise((resolve) => setTimeout(resolve, 100));
+				continue;
+			}
 
-      // Process items
-      for (let i = 0; i < operation.items.length; i++) {
-        if (operation.status === 'cancelled' || operation.status === 'paused') {
-          break;
-        }
+			const operationId = this.queue.shift();
+			if (!operationId) continue;
 
-        const item = operation.items[i];
-        const startTime = Date.now();
+			const operation = this.operations.get(operationId);
+			if (!operation || operation.status !== 'queued') continue;
 
-        try {
-          let result: FileCopyMoveResult | FileOperationResult | undefined;
+			this.running.add(operationId);
+			this.executeOperation(operationId).finally(() => {
+				this.running.delete(operationId);
+			});
+		}
+	}
 
-          // Get file path from entity
-          const itemPath = 'path' in item ? item.path : (item as any).filePath || '';
-          const itemName = 'name' in item ? item.name : (item as any).fileName || `item-${item.id}`;
+	/**
+	 * Execute a batch operation
+	 */
+	private async executeOperation(operationId: string): Promise<void> {
+		const operation = this.operations.get(operationId);
+		if (!operation) return;
 
-          switch (operation.type) {
-            case 'copy':
-              if (operation.targetPath && itemPath) {
-                const destPath = path.join(operation.targetPath, itemName);
-                result = await copyFile(itemPath, destPath, operation.options);
-              }
-              break;
+		try {
+			operation.status = 'running';
+			operation.startedAt = Date.now();
 
-            case 'move':
-              if (operation.targetPath && itemPath) {
-                const destPath = path.join(operation.targetPath, itemName);
-                result = await moveFile(itemPath, destPath, operation.options);
-              }
-              break;
+			// Start progress tracking
+			const progressId = `batch-${operationId}`;
+			progressTrackingService.startOperation(progressId, operation.type, operation.items.length, {
+				showToast: operation.options?.showProgress !== false,
+				description: operation.options?.description || this.getOperationDescription(operation),
+				cancellable: true,
+			});
 
-            case 'delete':
-              if (itemPath) {
-                result = await deleteFile(itemPath);
-              }
-              break;
-          }
+			this.emit('operationStarted', operation);
 
-          const processingTime = Date.now() - startTime;
-          
-          operation.results.push({
-            item,
-            success: true,
-            result,
-            processingTime,
-          });
+			// Process items
+			for (let i = 0; i < operation.items.length; i++) {
+				if (operation.status === 'cancelled' || operation.status === 'paused') {
+					break;
+				}
 
-          operation.progress.processed++;
+				const item = operation.items[i];
+				const startTime = Date.now();
 
-        } catch (error) {
-          const processingTime = Date.now() - startTime;
-          const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-          
-          operation.errors.push({
-            item,
-            message: errorMessage,
-            code: (error as any)?.code,
-            retryCount: 0,
-            timestamp: Date.now(),
-          });
+				try {
+					let result: FileCopyMoveResult | FileOperationResult | undefined;
 
-          operation.results.push({
-            item,
-            success: false,
-            error: errorMessage,
-            processingTime,
-          });
+					// Get file path from entity
+					const itemPath = 'path' in item ? item.path : (item as any).filePath || '';
+					const itemName = 'name' in item ? item.name : (item as any).fileName || `item-${item.id}`;
 
-          operation.progress.failed++;
+					switch (operation.type) {
+						case 'copy':
+							if (operation.targetPath && itemPath) {
+								const destPath = path.join(operation.targetPath, itemName);
+								result = await copyFile(itemPath, destPath, operation.options);
+							}
+							break;
 
-          // Continue on error if configured
-          if (!operation.options?.continueOnError) {
-            throw error;
-          }
-        }
+						case 'move':
+							if (operation.targetPath && itemPath) {
+								const destPath = path.join(operation.targetPath, itemName);
+								result = await moveFile(itemPath, destPath, operation.options);
+							}
+							break;
 
-        // Update progress
-        operation.progress.percentage = Math.round(
-          ((operation.progress.processed + operation.progress.failed) / operation.progress.total) * 100
-        );
+						case 'delete':
+							if (itemPath) {
+								result = await deleteFile(itemPath);
+							}
+							break;
+					}
 
-        progressTrackingService.updateProgress(
-          progressId,
-          operation.progress.processed + operation.progress.failed,
-          itemName
-        );
+					const processingTime = Date.now() - startTime;
 
-        this.emit('operationProgress', operation);
-      }
+					operation.results.push({
+						item,
+						success: true,
+						result,
+						processingTime,
+					});
 
-      // Complete operation
-      operation.status = operation.progress.failed > 0 && !operation.options?.continueOnError ? 'failed' : 'completed';
-      operation.completedAt = Date.now();
-      
-      progressTrackingService.completeOperation(progressId);
-      this.emit('operationCompleted', operation);
+					operation.progress.processed++;
+				} catch (error) {
+					const processingTime = Date.now() - startTime;
+					const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 
-      // Show completion toast
-      if (operation.options?.showProgress !== false) {
-        const successCount = operation.progress.processed;
-        const failedCount = operation.progress.failed;
-        
-        if (failedCount === 0) {
-          toastService.success(
-            `${this.getOperationDescription(operation)} completada: ${successCount} elementos procesados`
-          );
-        } else {
-          toastService.warning(
-            `${this.getOperationDescription(operation)} completada con errores: ${successCount} exitosos, ${failedCount} fallidos`
-          );
-        }
-      }
+					operation.errors.push({
+						item,
+						message: errorMessage,
+						code: (error as any)?.code,
+						retryCount: 0,
+						timestamp: Date.now(),
+					});
 
-      // Auto-cleanup if enabled
-      if (operation.options?.autoCleanup) {
-        setTimeout(() => {
-          this.operations.delete(operationId);
-        }, 30000); // Clean up after 30 seconds
-      }
+					operation.results.push({
+						item,
+						success: false,
+						error: errorMessage,
+						processingTime,
+					});
 
-    } catch (error) {
-      operation.status = 'failed';
-      operation.completedAt = Date.now();
-      
-      const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-      logger.error('❌ Batch operation failed:', { operationId, error: errorMessage });
-      
-      this.emit('operationFailed', operation, error);
-      
-      if (operation.options?.showProgress !== false) {
-        toastService.error(`${this.getOperationDescription(operation)} falló: ${errorMessage}`);
-      }
-    }
-  }
+					operation.progress.failed++;
 
-  /**
-   * Generate unique operation ID
-   */
-  private generateOperationId(): string {
-    return `batch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
-  }
+					// Continue on error if configured
+					if (!operation.options?.continueOnError) {
+						throw error;
+					}
+				}
 
-  /**
-   * Get operation description
-   */
-  private getOperationDescription(operation: BatchOperation): string {
-    const itemCount = operation.items.length;
-    const itemText = itemCount === 1 ? 'elemento' : 'elementos';
-    
-    switch (operation.type) {
-      case 'copy':
-        return `Copiando ${itemCount} ${itemText}`;
-      case 'move':
-        return `Moviendo ${itemCount} ${itemText}`;
-      case 'delete':
-        return `Eliminando ${itemCount} ${itemText}`;
-      default:
-        return `Procesando ${itemCount} ${itemText}`;
-    }
-  }
+				// Update progress
+				operation.progress.percentage = Math.round(
+					((operation.progress.processed + operation.progress.failed) / operation.progress.total) * 100
+				);
+
+				progressTrackingService.updateProgress(
+					progressId,
+					operation.progress.processed + operation.progress.failed,
+					itemName
+				);
+
+				this.emit('operationProgress', operation);
+			}
+
+			// Complete operation
+			operation.status = operation.progress.failed > 0 && !operation.options?.continueOnError ? 'failed' : 'completed';
+			operation.completedAt = Date.now();
+
+			progressTrackingService.completeOperation(progressId);
+			this.emit('operationCompleted', operation);
+
+			// Show completion toast
+			if (operation.options?.showProgress !== false) {
+				const successCount = operation.progress.processed;
+				const failedCount = operation.progress.failed;
+
+				if (failedCount === 0) {
+					toastService.success(
+						`${this.getOperationDescription(operation)} completada: ${successCount} elementos procesados`
+					);
+				} else {
+					toastService.warning(
+						`${this.getOperationDescription(operation)} completada con errores: ${successCount} exitosos, ${failedCount} fallidos`
+					);
+				}
+			}
+
+			// Auto-cleanup if enabled
+			if (operation.options?.autoCleanup) {
+				setTimeout(() => {
+					this.operations.delete(operationId);
+				}, 30000); // Clean up after 30 seconds
+			}
+		} catch (error) {
+			operation.status = 'failed';
+			operation.completedAt = Date.now();
+
+			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+			logger.error('❌ Batch operation failed:', { operationId, error: errorMessage });
+
+			this.emit('operationFailed', operation, error);
+
+			if (operation.options?.showProgress !== false) {
+				toastService.error(`${this.getOperationDescription(operation)} falló: ${errorMessage}`);
+			}
+		}
+	}
+
+	/**
+	 * Generate unique operation ID
+	 */
+	private generateOperationId(): string {
+		return `batch-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+	}
+
+	/**
+	 * Get operation description
+	 */
+	private getOperationDescription(operation: BatchOperation): string {
+		const itemCount = operation.items.length;
+		const itemText = itemCount === 1 ? 'elemento' : 'elementos';
+
+		switch (operation.type) {
+			case 'copy':
+				return `Copiando ${itemCount} ${itemText}`;
+			case 'move':
+				return `Moviendo ${itemCount} ${itemText}`;
+			case 'delete':
+				return `Eliminando ${itemCount} ${itemText}`;
+			default:
+				return `Procesando ${itemCount} ${itemText}`;
+		}
+	}
 }
 
 // Create and export service instance

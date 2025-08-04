@@ -6,7 +6,6 @@
  * @updated 2025-07-28 - MIGRADO A DRIZZLE ORM Y UNIFICADO CON ESTADÍSTICAS
  */
 
-
 import type { AlbumWithStats } from '@/types/entities/album';
 import type { AudioWithStats } from '@/types/entities/audio';
 import type { CharacterWithStats } from '@/types/entities/character';

@@ -3,12 +3,12 @@
  * @description Muestra información detallada al hacer hover sobre items del grid
  */
 
+import { Calendar, Clock, FileText, Image, Tag } from 'lucide-react';
+import { AnimatePresence, motion } from 'motion/react';
 import { memo } from 'react';
-import { motion, AnimatePresence } from 'motion/react';
-import { Calendar, Clock, Image, Tag, FileText } from 'lucide-react';
-import type { AnyEntityWithStats } from '@/types/migration';
 import type { GridHoverOverlay } from '@/types/file-browser/grid-view-config';
-import { formatFileSize, formatDate, formatDuration } from '@/types/file-browser/list-column-config';
+import { formatDate, formatDuration, formatFileSize } from '@/types/file-browser/list-column-config';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 interface GridItemOverlayProps {
 	entity: AnyEntityWithStats;
@@ -20,12 +20,7 @@ interface GridItemOverlayProps {
 /**
  * Overlay de información para items del grid
  */
-export const GridItemOverlay = memo<GridItemOverlayProps>(({
-	entity,
-	config,
-	isVisible,
-	className = '',
-}) => {
+export const GridItemOverlay = memo<GridItemOverlayProps>(({ entity, config, isVisible, className = '' }) => {
 	// Obtener información del entity
 	const name = entity.name || 'Unknown';
 	const size = entity.stats?.size || 0;
@@ -64,9 +59,7 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({
 		if (config.showSize && size > 0) {
 			items.push(
 				<div key="size" className="flex items-center gap-1">
-					<span className="text-xs text-muted-foreground">
-						{formatFileSize(size)}
-					</span>
+					<span className="text-xs text-muted-foreground">{formatFileSize(size)}</span>
 				</div>
 			);
 		}
@@ -74,9 +67,7 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({
 		if (config.showType) {
 			items.push(
 				<div key="type" className="flex items-center gap-1">
-					<span className="text-xs uppercase tracking-wide text-muted-foreground">
-						{type}
-					</span>
+					<span className="text-xs uppercase tracking-wide text-muted-foreground">{type}</span>
 				</div>
 			);
 		}
@@ -96,9 +87,7 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({
 			items.push(
 				<div key="duration" className="flex items-center gap-1">
 					<Clock className="h-3 w-3 flex-shrink-0" />
-					<span className="text-xs text-muted-foreground">
-						{formatDuration(duration)}
-					</span>
+					<span className="text-xs text-muted-foreground">{formatDuration(duration)}</span>
 				</div>
 			);
 		}
@@ -107,9 +96,7 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({
 			items.push(
 				<div key="date" className="flex items-center gap-1">
 					<Calendar className="h-3 w-3 flex-shrink-0" />
-					<span className="text-xs text-muted-foreground">
-						{formatDate(new Date(mtime))}
-					</span>
+					<span className="text-xs text-muted-foreground">{formatDate(new Date(mtime))}</span>
 				</div>
 			);
 		}
@@ -127,11 +114,7 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({
 								{tag}
 							</span>
 						))}
-						{tags.length > 2 && (
-							<span className="text-xs text-muted-foreground">
-								+{tags.length - 2}
-							</span>
-						)}
+						{tags.length > 2 && <span className="text-xs text-muted-foreground">+{tags.length - 2}</span>}
 					</div>
 				</div>
 			);
@@ -164,15 +147,10 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({
 					<div
 						className={`
 							max-w-full m-1 p-2 rounded-md shadow-lg
-							${config.showBackground
-								? 'bg-background/95 border border-border backdrop-blur-sm'
-								: ''
-							}
+							${config.showBackground ? 'bg-background/95 border border-border backdrop-blur-sm' : ''}
 						`}
 					>
-						<div className="space-y-1">
-							{content}
-						</div>
+						<div className="space-y-1">{content}</div>
 					</div>
 				</motion.div>
 			)}

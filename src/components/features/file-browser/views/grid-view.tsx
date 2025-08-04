@@ -32,10 +32,38 @@ export const GridView = memo<GridViewProps>(function GridView({
 	// Configuración simplificada
 	const { config, calculateLayout } = useGridViewConfig();
 
-	// Calcular layout de la grid
+	// OPTIMIZACIÓN AVANZADA: Memoización de props derivadas para evitar re-cálculos
+	const derivedProps = useMemo(
+		() => ({
+			hasSelection: selectedIds.length > 0,
+			itemCount: items.length,
+			isVirtualized: items.length > 100,
+		}),
+		[selectedIds.length, items.length]
+	);
+
+	// Calcular layout de la grid - Optimizado con dependencias mínimas
 	const layout = useMemo(() => {
-		return calculateLayout(containerWidth, items.length);
-	}, [calculateLayout, containerWidth, items.length]);
+		return calculateLayout(containerWidth, derivedProps.itemCount);
+	}, [calculateLayout, containerWidth, derivedProps.itemCount]);
+
+	// OPTIMIZACIÓN: Crear Map estable con useRef para máximo rendimiento
+	const itemsByIdRef = useRef(new Map<string, AnyEntityWithStats>());
+	const selectedIdsSetRef = useRef(new Set<string>());
+
+	// Actualizar refs solo cuando sea necesario
+	useMemo(() => {
+		const newMap = new Map<string, AnyEntityWithStats>();
+		for (const item of items) {
+			newMap.set(item.id, item);
+		}
+		itemsByIdRef.current = newMap;
+
+		const newSet = new Set(selectedIds);
+		selectedIdsSetRef.current = newSet;
+
+		return { map: newMap, set: newSet };
+	}, [items, selectedIds]);
 
 	// Handler para clicks en espacio vacío
 	const handleEmptySpaceClick = useCallback(
@@ -50,7 +78,7 @@ export const GridView = memo<GridViewProps>(function GridView({
 					!target.closest('button') &&
 					!target.closest('[data-testid="file-browser-item"]'));
 
-			if (isEmptySpaceClick && selectedIds.length > 0) {
+			if (isEmptySpaceClick && derivedProps.hasSelection) {
 				// Visual feedback
 				currentTarget.style.transition = 'background-color 0.15s ease';
 				currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
@@ -60,7 +88,7 @@ export const GridView = memo<GridViewProps>(function GridView({
 				}, 150);
 			}
 		},
-		[selectedIds.length]
+		[derivedProps.hasSelection]
 	);
 
 	// Navegación por teclado
@@ -120,37 +148,58 @@ export const GridView = memo<GridViewProps>(function GridView({
 		overscan: 2,
 	});
 
-	// Crear un Map de items por ID para búsquedas O(1)
-	const itemsById = useMemo(() => {
-		const map = new Map<string, AnyEntityWithStats>();
-		for (const item of items) {
-			map.set(item.id, item);
-		}
-		return map;
-	}, [items]);
-
 	// Función para obtener items de una fila específica - Memoizada
-	const getRowItems = useCallback((rowIndex: number): AnyEntityWithStats[] => {
-		const startIndex = rowIndex * layout.columns;
-		const endIndex = Math.min(startIndex + layout.columns, items.length);
-		return items.slice(startIndex, endIndex);
-	}, [items, layout.columns]);
+	const getRowItems = useCallback(
+		(rowIndex: number): AnyEntityWithStats[] => {
+			const startIndex = rowIndex * layout.columns;
+			const endIndex = Math.min(startIndex + layout.columns, items.length);
+			return items.slice(startIndex, endIndex);
+		},
+		[items, layout.columns]
+	);
 
-	// Handlers optimizados estables que no se recrean por item
+	// OPTIMIZACIÓN AVANZADA: Handlers estables con useRef para máximo rendimiento
+	const handlersRef = useRef({
+		onItemClick: (itemId: string, e: React.MouseEvent) => {
+			const item = itemsByIdRef.current.get(itemId);
+			if (item) {
+				onItemClick(item, e);
+			}
+		},
+		onItemDoubleClick: (itemId: string) => {
+			const item = itemsByIdRef.current.get(itemId);
+			if (item) {
+				onItemDoubleClick(item);
+			}
+		},
+	});
+
+	// Actualizar handlers cuando cambien las dependencias
+	useMemo(() => {
+		handlersRef.current.onItemClick = (itemId: string, e: React.MouseEvent) => {
+			const item = itemsByIdRef.current.get(itemId);
+			if (item) {
+				onItemClick(item, e);
+			}
+		};
+
+		handlersRef.current.onItemDoubleClick = (itemId: string) => {
+			const item = itemsByIdRef.current.get(itemId);
+			if (item) {
+				onItemDoubleClick(item);
+			}
+		};
+	}, [onItemClick, onItemDoubleClick]);
+
+	// Handlers estables que no cambian entre renders
 	const handleItemClickById = useCallback((itemId: string, e: React.MouseEvent) => {
 		e.stopPropagation();
-		const item = itemsById.get(itemId);
-		if (item) {
-			onItemClick(item, e);
-		}
-	}, [itemsById, onItemClick]);
+		handlersRef.current.onItemClick(itemId, e);
+	}, []);
 
 	const handleItemDoubleClickById = useCallback((itemId: string) => {
-		const item = itemsById.get(itemId);
-		if (item) {
-			onItemDoubleClick(item);
-		}
-	}, [itemsById, onItemDoubleClick]);
+		handlersRef.current.onItemDoubleClick(itemId);
+	}, []);
 
 	return (
 		<div
@@ -158,13 +207,15 @@ export const GridView = memo<GridViewProps>(function GridView({
 			className="w-full h-full overflow-auto"
 			data-testid="grid-view"
 			data-view-type="grid"
-			onClick={handleEmptySpaceClick}
+			onClickCapture={handleEmptySpaceClick}
+			role="grid"
+			aria-label={`Vista de cuadrícula con ${items.length} elementos`}
 		>
 			<div
 				ref={gridRef}
 				className="relative"
 				onKeyDown={handleKeyDown}
-				tabIndex={0}
+				role="presentation"
 				style={{
 					height: `${rowVirtualizer.getTotalSize()}px`,
 					width: '100%',
@@ -192,7 +243,7 @@ export const GridView = memo<GridViewProps>(function GridView({
 								}}
 							>
 								{rowItems.map((item, columnIndex) => {
-									const isSelected = selectedIds.includes(item.id);
+									const isSelected = selectedIdsSetRef.current.has(item.id);
 									const itemIndex = virtualRow.index * layout.columns + columnIndex;
 
 									return (
@@ -204,10 +255,7 @@ export const GridView = memo<GridViewProps>(function GridView({
 												delay: itemIndex * 0.02,
 												duration: 0.2,
 											}}
-											className={cn(
-												'relative cursor-pointer',
-												isSelected && 'ring-2 ring-primary ring-offset-2'
-											)}
+											className={cn('relative cursor-pointer', isSelected && 'ring-2 ring-primary ring-offset-2')}
 											style={{
 												width: `${itemWidth}px`,
 												height: `${itemHeight}px`,
@@ -216,7 +264,6 @@ export const GridView = memo<GridViewProps>(function GridView({
 											data-selectable="true"
 											tabIndex={itemIndex === 0 ? 0 : -1}
 										>
-											{/* Menú contextual deshabilitado para optimizar performance */}
 											<OptimizedEntityCard
 												entity={item}
 												isSelected={isSelected}
