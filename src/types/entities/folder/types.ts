@@ -135,6 +135,7 @@ export interface FolderStatistics extends EntityStats {
 	totalFolders: number; // Total de carpetas
 	totalFiles: number; // Total de archivos
 	documentCount: number; // Conteo de documentos
+	totalRelations: number; // Total de relaciones
 
 	// Métricas de uso
 	accessFrequency: number;

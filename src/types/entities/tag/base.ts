@@ -75,10 +75,6 @@ export interface TagStatistics extends EntityStats {
 	usageDiversity: number; // Cuán distribuido está el uso del tag entre diferentes tipos de entidades
 	popularity: number; // Un score de popularidad general
 	completenessScore: number; // Qué tan completo está el perfil del tag (descripción, etc.)
-
-	// File system functions
-	isDirectory: boolean;
-	isFile: boolean;
 }
 
 /**
