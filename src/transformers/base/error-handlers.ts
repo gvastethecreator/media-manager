@@ -4,20 +4,20 @@
  * @description Define funciones helper para manejo consistente de errores
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
 import {
-  MappingError,
-  MetadataError,
-  RelationError,
-  SearchError,
-  SerializationError,
-  TransformerError,
-  TransformerErrorContext,
-  TypeMismatchError,
-  UIError,
-  ValidationError,
-  handleTransformerError,
+	handleTransformerError,
+	MappingError,
+	MetadataError,
+	RelationError,
+	SearchError,
+	SerializationError,
+	TransformerError,
+	TransformerErrorContext,
+	TypeMismatchError,
+	UIError,
+	ValidationError,
 } from '@/lib/errors/transformer-error';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const logger = serverLogger.withContext('TransformerErrorHandlers');
 
@@ -28,135 +28,116 @@ const logger = serverLogger.withContext('TransformerErrorHandlers');
  * @param descriptor Descriptor del método
  */
 export function handleTransformerErrors(
-  target: any,
-  propertyKey: string,
-  descriptor: PropertyDescriptor
+	target: any,
+	propertyKey: string,
+	descriptor: PropertyDescriptor
 ): PropertyDescriptor {
-  const originalMethod = descriptor.value;
+	const originalMethod = descriptor.value;
 
-  descriptor.value = function (...args: any[]) {
-    try {
-      return originalMethod.apply(this, args);
-    } catch (error) {
-      // Manejar el error y re-lanzar el tipo correcto
-      throw handleTransformerError(error, {
-        operation: propertyKey,
-        entityType: (this as any)?.entityType || 'unknown',
-        entityId: args[0]?.id,
-      });
-    }
-  };
+	descriptor.value = function (...args: any[]) {
+		try {
+			return originalMethod.apply(this, args);
+		} catch (error) {
+			// Manejar el error y re-lanzar el tipo correcto
+			throw handleTransformerError(error, {
+				operation: propertyKey,
+				entityType: (this as any)?.entityType || 'unknown',
+				entityId: args[0]?.id,
+			});
+		}
+	};
 
-  return descriptor;
+	return descriptor;
 }
 
 /**
  * 🔍 Validación básica de entidad con manejo de errores
  */
 export function validateEntity<T extends { id: string }>(
-  entity: T | null | undefined,
-  context?: TransformerErrorContext
+	entity: T | null | undefined,
+	context?: TransformerErrorContext
 ): void {
-  if (!entity) {
-    throw new ValidationError('Entidad nula o undefined', context);
-  }
+	if (!entity) {
+		throw new ValidationError('Entidad nula o undefined', context);
+	}
 
-  if (!entity.id) {
-    throw new ValidationError('ID de entidad requerido', context);
-  }
+	if (!entity.id) {
+		throw new ValidationError('ID de entidad requerido', context);
+	}
 }
 
 /**
  * 🎯 Validación de tipo de entidad
  */
-export function validateEntityType(
-  actualType: string,
-  expectedType: string,
-  context?: TransformerErrorContext
-): void {
-  if (actualType !== expectedType) {
-    throw new TypeMismatchError(
-      `Tipo de entidad incorrecto: esperado ${expectedType}, recibido ${actualType}`,
-      context
-    );
-  }
+export function validateEntityType(actualType: string, expectedType: string, context?: TransformerErrorContext): void {
+	if (actualType !== expectedType) {
+		throw new TypeMismatchError(
+			`Tipo de entidad incorrecto: esperado ${expectedType}, recibido ${actualType}`,
+			context
+		);
+	}
 }
 
 /**
  * 🔄 Manejo seguro de operación async con log
  */
 export async function safeTransform<T, R>(
-  operation: (data: T) => Promise<R>,
-  data: T,
-  context: TransformerErrorContext
+	operation: (data: T) => Promise<R>,
+	data: T,
+	context: TransformerErrorContext
 ): Promise<R> {
-  try {
-    return await operation(data);
-  } catch (error) {
-    logger.error('Error en transformación', { error, context });
-    throw handleTransformerError(error, context);
-  }
+	try {
+		return await operation(data);
+	} catch (error) {
+		logger.error('Error en transformación', { error, context });
+		throw handleTransformerError(error, context);
+	}
 }
 
 /**
  * 📦 Manejo seguro de serialización
  */
-export function safeSerialize<T>(
-  data: T,
-  context?: TransformerErrorContext
-): string {
-  try {
-    return JSON.stringify(data);
-  } catch (error) {
-    throw new SerializationError(
-      'Error serializando datos',
-      { ...context, data }
-    );
-  }
+export function safeSerialize<T>(data: T, context?: TransformerErrorContext): string {
+	try {
+		return JSON.stringify(data);
+	} catch (error) {
+		throw new SerializationError('Error serializando datos', { ...context, data });
+	}
 }
 
 /**
  * 📥 Manejo seguro de deserialización
  */
-export function safeDeserialize<T>(
-  data: string,
-  context?: TransformerErrorContext
-): T {
-  try {
-    return JSON.parse(data) as T;
-  } catch (error) {
-    throw new SerializationError(
-      'Error deserializando datos',
-      { ...context, data }
-    );
-  }
+export function safeDeserialize<T>(data: string, context?: TransformerErrorContext): T {
+	try {
+		return JSON.parse(data) as T;
+	} catch (error) {
+		throw new SerializationError('Error deserializando datos', { ...context, data });
+	}
 }
 
 /**
  * 🔗 Manejo seguro de relaciones
  */
 export function validateRelation<T>(
-  relation: T | null | undefined,
-  entityType: string,
-  relationName: string,
-  context?: TransformerErrorContext
+	relation: T | null | undefined,
+	entityType: string,
+	relationName: string,
+	context?: TransformerErrorContext
 ): void {
-  if (!relation) {
-    throw new RelationError(
-      `Relación ${relationName} no encontrada para entidad ${entityType}`,
-      context
-    );
-  }
+	if (!relation) {
+		throw new RelationError(`Relación ${relationName} no encontrada para entidad ${entityType}`, context);
+	}
 }
 
 export {
-  MappingError,
-  MetadataError,
-  RelationError,
-  SearchError,
-  SerializationError,
-  TransformerError,
-  TypeMismatchError,
-  UIError,
-  ValidationError,
+	MappingError,
+	MetadataError,
+	RelationError,
+	SearchError,
+	SerializationError,
+	TransformerError,
+	TypeMismatchError,
+	UIError,
+	ValidationError,
 };

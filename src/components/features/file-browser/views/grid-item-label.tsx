@@ -5,9 +5,9 @@
 
 import { memo } from 'react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import type { AnyEntityWithStats } from '@/types/migration';
 import type { GridLabelConfig } from '@/types/file-browser/grid-view-config';
 import { formatFileSize } from '@/types/file-browser/list-column-config';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 interface GridItemLabelProps {
 	entity: AnyEntityWithStats;
@@ -18,11 +18,7 @@ interface GridItemLabelProps {
 /**
  * Componente de label para items del grid
  */
-export const GridItemLabel = memo<GridItemLabelProps>(({
-	entity,
-	config,
-	className = '',
-}) => {
+export const GridItemLabel = memo<GridItemLabelProps>(({ entity, config, className = '' }) => {
 	// No mostrar si la posición es 'none'
 	if (config.position === 'none') {
 		return null;
@@ -91,10 +87,12 @@ export const GridItemLabel = memo<GridItemLabelProps>(({
 		}
 
 		return (
-			<div className={`
+			<div
+				className={`
 				text-xs text-muted-foreground mt-1
 				${config.position === 'overlay' ? 'text-white/80' : ''}
-			`}>
+			`}
+			>
 				{metadata.join(' • ')}
 			</div>
 		);
@@ -105,13 +103,13 @@ export const GridItemLabel = memo<GridItemLabelProps>(({
 		const truncatedName = getTruncatedName();
 
 		return (
-			<div className={`
+			<div
+				className={`
 				${getTextClasses()}
 				${config.maxLines > 0 ? `line-clamp-${config.maxLines}` : ''}
-			`}>
-				<div className="font-medium truncate">
-					{truncatedName}
-				</div>
+			`}
+			>
+				<div className="font-medium truncate">{truncatedName}</div>
 				{renderMetadata()}
 			</div>
 		);
@@ -126,9 +124,7 @@ export const GridItemLabel = memo<GridItemLabelProps>(({
 				<TooltipProvider>
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<div className="cursor-default">
-								{content}
-							</div>
+							<div className="cursor-default">{content}</div>
 						</TooltipTrigger>
 						<TooltipContent side="bottom" className="max-w-xs">
 							<div className="text-sm">
@@ -146,11 +142,7 @@ export const GridItemLabel = memo<GridItemLabelProps>(({
 		);
 	}
 
-	return (
-		<div className={`${getPositionClasses()} ${className}`}>
-			{content}
-		</div>
-	);
+	return <div className={`${getPositionClasses()} ${className}`}>{content}</div>;
 });
 
 GridItemLabel.displayName = 'GridItemLabel';

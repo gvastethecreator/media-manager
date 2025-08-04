@@ -1,8 +1,8 @@
-import type { AnyEntityWithStats } from '@/types/entities';
 import type {
+	CardActionButton as BaseCardActionButton,
 	CardsViewConfig as BaseCardsViewConfig,
-	CardActionButton as BaseCardActionButton
 } from '@/transformers/settings/schema';
+import type { AnyEntityWithStats } from '@/types/entities';
 
 /**
  * Estilos de tarjeta disponibles
@@ -198,7 +198,7 @@ export const DEFAULT_ACTION_BUTTONS: CardActionButton[] = [
 		id: 'quick-view',
 		icon: 'Eye',
 		tooltip: 'Vista rápida',
-		action: () => { },
+		action: () => {},
 		visible: true,
 		position: 'top-right',
 	},
@@ -206,7 +206,7 @@ export const DEFAULT_ACTION_BUTTONS: CardActionButton[] = [
 		id: 'favorite',
 		icon: 'Heart',
 		tooltip: 'Agregar a favoritos',
-		action: () => { },
+		action: () => {},
 		visible: true,
 		position: 'top-left',
 	},
@@ -214,7 +214,7 @@ export const DEFAULT_ACTION_BUTTONS: CardActionButton[] = [
 		id: 'share',
 		icon: 'Share2',
 		tooltip: 'Compartir',
-		action: () => { },
+		action: () => {},
 		visible: false,
 		position: 'bottom-right',
 	},
@@ -222,7 +222,7 @@ export const DEFAULT_ACTION_BUTTONS: CardActionButton[] = [
 		id: 'download',
 		icon: 'Download',
 		tooltip: 'Descargar',
-		action: () => { },
+		action: () => {},
 		visible: false,
 		position: 'bottom-left',
 	},
@@ -231,18 +231,14 @@ export const DEFAULT_ACTION_BUTTONS: CardActionButton[] = [
 /**
  * Helper para calcular layout dinámico
  */
-export function calculateCardsLayout(
-	config: CardsViewConfig,
-	containerWidth: number,
-	itemCount: number
-) {
-	const availableWidth = containerWidth - (config.padding * 2);
+export function calculateCardsLayout(config: CardsViewConfig, containerWidth: number, itemCount: number) {
+	const availableWidth = containerWidth - config.padding * 2;
 
 	// Calcular número óptimo de columnas
 	let columns = Math.max(1, Math.floor((availableWidth + config.gap) / (config.minCardWidth + config.gap)));
 
 	// Ajustar ancho de card basado en columnas
-	let cardWidth = Math.floor((availableWidth - (config.gap * (columns - 1))) / columns);
+	let cardWidth = Math.floor((availableWidth - config.gap * (columns - 1)) / columns);
 
 	// Asegurar que el ancho esté dentro de los límites
 	if (cardWidth > config.maxCardWidth) {
@@ -266,6 +262,6 @@ export function calculateCardsLayout(
 		cardHeight,
 		gap: config.gap,
 		padding: config.padding,
-		totalHeight: rows * (cardHeight + config.gap) - config.gap + (config.padding * 2),
+		totalHeight: rows * (cardHeight + config.gap) - config.gap + config.padding * 2,
 	};
 }

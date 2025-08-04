@@ -3,9 +3,9 @@
  * @description Componente para mostrar thumbnails de imágenes con carga lazy y fallbacks
  */
 
-import React, { useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
 import { FileImage, Image as ImageIcon } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { cn } from '@/lib/utils';
 
 interface ImageThumbnailProps {
 	path: string;
@@ -18,13 +18,7 @@ interface ImageThumbnailProps {
 /**
  * Componente de thumbnail de imagen con carga lazy
  */
-export function ImageThumbnail({
-	path,
-	name,
-	size = 48,
-	className = '',
-	fallbackIcon,
-}: ImageThumbnailProps) {
+export function ImageThumbnail({ path, name, size = 48, className = '', fallbackIcon }: ImageThumbnailProps) {
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
 	const [imageSrc, setImageSrc] = useState<string>('');
@@ -51,10 +45,7 @@ export function ImageThumbnail({
 	if (hasError) {
 		return (
 			<div
-				className={cn(
-					'flex items-center justify-center bg-muted text-muted-foreground rounded border',
-					className
-				)}
+				className={cn('flex items-center justify-center bg-muted text-muted-foreground rounded border', className)}
 				style={{ width: size, height: size }}
 			>
 				{fallbackIcon || <FileImage className="h-4 w-4" />}
@@ -63,10 +54,7 @@ export function ImageThumbnail({
 	}
 
 	return (
-		<div
-			className={cn('relative overflow-hidden rounded border', className)}
-			style={{ width: size, height: size }}
-		>
+		<div className={cn('relative overflow-hidden rounded border', className)} style={{ width: size, height: size }}>
 			{/* Loading placeholder */}
 			{isLoading && (
 				<div

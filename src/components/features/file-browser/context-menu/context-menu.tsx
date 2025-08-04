@@ -16,8 +16,8 @@ import {
 } from 'lucide-react';
 import { memo, useState } from 'react';
 import { useEntityLoader } from '@/components/features/file-browser/context-menu/hooks/use-entity-loader';
-import { useContextMenuNavigation } from '@/lib/keyboard';
 import { Separator } from '@/components/ui/separator';
+import { useContextMenuNavigation } from '@/lib/keyboard';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCollectionStore } from '@/store/entities/collection';
 import { useTagStore } from '@/store/entities/tag';
@@ -37,20 +37,30 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 	const [processingAction, setProcessingAction] = useState<ContextMenuAction | null>(null);
 
 	// Definir las acciones del menú en orden
-	const menuActions: Array<{ action: ContextMenuAction; label: string; icon: React.ReactNode; destructive?: boolean }> = [
-		{ action: 'preview', label: 'Vista previa', icon: <ExternalLink className="mr-2 h-4 w-4" /> },
-		{ action: 'favorite-toggle', label: 'isFavorite' in file && file.isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos', icon: 'isFavorite' in file && file.isFavorite ? <HeartOff className="mr-2 h-4 w-4" /> : <Heart className="mr-2 h-4 w-4" /> },
-		{ action: 'mark-toggle', label: 'Marcar/Desmarcar', icon: <Star className="mr-2 h-4 w-4" /> },
-		{ action: 'open', label: 'Abrir ubicación', icon: <ExternalLink className="mr-2 h-4 w-4" /> },
-		{ action: 'download', label: 'Descargar', icon: <Download className="mr-2 h-4 w-4" /> },
-		{ action: 'copy', label: 'Copiar al portapapeles', icon: <Copy className="mr-2 h-4 w-4" /> },
-		{ action: 'paste', label: 'Pegar', icon: <Copy className="mr-2 h-4 w-4" /> },
-		{ action: 'rename', label: 'Renombrar', icon: <Edit3 className="mr-2 h-4 w-4" /> },
-		{ action: 'move', label: 'Mover', icon: <Move3D className="mr-2 h-4 w-4" /> },
-		{ action: 'open-in-explorer', label: 'Ver en explorador', icon: <FolderOpen className="mr-2 h-4 w-4" /> },
-		{ action: 'copy-path', label: 'Copiar ruta', icon: <Copy className="mr-2 h-4 w-4" /> },
-		{ action: 'delete', label: 'Eliminar', icon: <Trash className="mr-2 h-4 w-4" />, destructive: true },
-	];
+	const menuActions: Array<{ action: ContextMenuAction; label: string; icon: React.ReactNode; destructive?: boolean }> =
+		[
+			{ action: 'preview', label: 'Vista previa', icon: <ExternalLink className="mr-2 h-4 w-4" /> },
+			{
+				action: 'favorite-toggle',
+				label: 'isFavorite' in file && file.isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos',
+				icon:
+					'isFavorite' in file && file.isFavorite ? (
+						<HeartOff className="mr-2 h-4 w-4" />
+					) : (
+						<Heart className="mr-2 h-4 w-4" />
+					),
+			},
+			{ action: 'mark-toggle', label: 'Marcar/Desmarcar', icon: <Star className="mr-2 h-4 w-4" /> },
+			{ action: 'open', label: 'Abrir ubicación', icon: <ExternalLink className="mr-2 h-4 w-4" /> },
+			{ action: 'download', label: 'Descargar', icon: <Download className="mr-2 h-4 w-4" /> },
+			{ action: 'copy', label: 'Copiar al portapapeles', icon: <Copy className="mr-2 h-4 w-4" /> },
+			{ action: 'paste', label: 'Pegar', icon: <Copy className="mr-2 h-4 w-4" /> },
+			{ action: 'rename', label: 'Renombrar', icon: <Edit3 className="mr-2 h-4 w-4" /> },
+			{ action: 'move', label: 'Mover', icon: <Move3D className="mr-2 h-4 w-4" /> },
+			{ action: 'open-in-explorer', label: 'Ver en explorador', icon: <FolderOpen className="mr-2 h-4 w-4" /> },
+			{ action: 'copy-path', label: 'Copiar ruta', icon: <Copy className="mr-2 h-4 w-4" /> },
+			{ action: 'delete', label: 'Eliminar', icon: <Trash className="mr-2 h-4 w-4" />, destructive: true },
+		];
 
 	// Configurar navegación por teclado
 	const { selectedIndex, getItemProps } = useContextMenuNavigation(menuActions.length, {
@@ -94,16 +104,13 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 				<button
 					key={menuAction.action}
 					type="button"
-					className={`${menuItemStyle} ${menuAction.destructive ? 'text-red-600 hover:text-red-600' : ''} ${selectedIndex === index ? 'bg-accent text-accent-foreground' : ''
-						}`}
+					className={`${menuItemStyle} ${menuAction.destructive ? 'text-red-600 hover:text-red-600' : ''} ${
+						selectedIndex === index ? 'bg-accent text-accent-foreground' : ''
+					}`}
 					disabled={processingAction === menuAction.action}
 					{...getItemProps(index)}
 				>
-					{processingAction === menuAction.action ? (
-						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-					) : (
-						menuAction.icon
-					)}
+					{processingAction === menuAction.action ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : menuAction.icon}
 					<span>{menuAction.label}</span>
 				</button>
 			))}
@@ -178,8 +185,9 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 					<button
 						key={menuAction.action}
 						type="button"
-						className={`${menuItemStyle} ${menuAction.destructive ? 'text-red-600 hover:text-red-600' : ''} ${selectedIndex === actualIndex ? 'bg-accent text-accent-foreground' : ''
-							}`}
+						className={`${menuItemStyle} ${menuAction.destructive ? 'text-red-600 hover:text-red-600' : ''} ${
+							selectedIndex === actualIndex ? 'bg-accent text-accent-foreground' : ''
+						}`}
 						disabled={processingAction === menuAction.action}
 						{...getItemProps(actualIndex)}
 					>

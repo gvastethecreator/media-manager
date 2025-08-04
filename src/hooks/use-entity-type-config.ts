@@ -7,20 +7,20 @@
 
 import { useMemo } from 'react';
 import {
-  type EntityTypeConfig,
-  ENTITY_TYPE_CONFIGS,
-  getAllEntityTypes,
-  getEntityTypeColor,
-  getEntityTypeConfig,
-  getEntityTypeDisplayName,
-  getEntityTypeEmoji,
-  getEntityTypeIcon,
-  getEntityTypeSupportedOperations,
-  isFormatSupported,
+	ENTITY_TYPE_CONFIGS,
+	type EntityTypeConfig,
+	getAllEntityTypes,
+	getEntityTypeColor,
+	getEntityTypeConfig,
+	getEntityTypeDisplayName,
+	getEntityTypeEmoji,
+	getEntityTypeIcon,
+	getEntityTypeSupportedOperations,
+	isFormatSupported,
 } from '@/config/entity-type-configs';
 import { getCachedThumbnail } from '@/config/thumbnail-generators';
-import { EntityStatsType } from '@/types/migration';
 import type { AnyEntityWithStats } from '@/types/entities';
+import { EntityStatsType } from '@/types/migration';
 
 /**
  * 🎯 Resultado del hook useEntityTypeConfig
@@ -80,7 +80,7 @@ export function useEntityTypeConfig(type: EntityStatsType): UseEntityTypeConfigR
 export function useAllEntityTypeConfigs() {
 	return useMemo(() => {
 		const types = getAllEntityTypes();
-		const configs = types.map(type => {
+		const configs = types.map((type) => {
 			const config = getEntityTypeConfig(type);
 
 			return {
@@ -145,8 +145,7 @@ export function useEntityTypeFromItem(item: AnyEntityWithStats | null) {
 			supportedOperations: getEntityTypeSupportedOperations(type),
 			metadata: config?.metadata || {},
 			isFormatSupported: (format: string) => isFormatSupported(type, format),
-			generateThumbnail: (options: Record<string, any> = {}) =>
-				getCachedThumbnail(item, options),
+			generateThumbnail: (options: Record<string, any> = {}) => getCachedThumbnail(item, options),
 		};
 	}, [item]);
 }
@@ -161,7 +160,7 @@ export function useEntityTypeFilter() {
 		return {
 			allTypes,
 			filterByType: (items: AnyEntityWithStats[], types: EntityStatsType[]) => {
-				return items.filter(item => types.includes(item.entityType as EntityStatsType));
+				return items.filter((item) => types.includes(item.entityType as EntityStatsType));
 			},
 			groupByType: (items: AnyEntityWithStats[]) => {
 				const grouped: Record<EntityStatsType, AnyEntityWithStats[]> = {} as any;
@@ -204,7 +203,7 @@ export function useEntityTypeColors() {
 		const configs = Object.values(ENTITY_TYPE_CONFIGS);
 
 		return {
-			colors: configs.map(config => ({
+			colors: configs.map((config) => ({
 				type: config.type,
 				primary: config.color,
 				secondary: config.secondaryColor,
@@ -229,10 +228,7 @@ export function useEntityTypeColors() {
 export function useEntityThumbnails() {
 	return useMemo(() => {
 		return {
-			generateThumbnail: async (
-				item: AnyEntityWithStats,
-				options: Record<string, any> = {}
-			): Promise<string> => {
+			generateThumbnail: async (item: AnyEntityWithStats, options: Record<string, any> = {}): Promise<string> => {
 				return getCachedThumbnail(item, options);
 			},
 
@@ -274,11 +270,14 @@ export function useEntityThumbnails() {
  */
 export function useEntityTypeStats(items: AnyEntityWithStats[]) {
 	return useMemo(() => {
-		const stats = items.reduce((acc, item) => {
-			const type = item.entityType as EntityStatsType;
-			acc[type] = (acc[type] || 0) + 1;
-			return acc;
-		}, {} as Record<EntityStatsType, number>);
+		const stats = items.reduce(
+			(acc, item) => {
+				const type = item.entityType as EntityStatsType;
+				acc[type] = (acc[type] || 0) + 1;
+				return acc;
+			},
+			{} as Record<EntityStatsType, number>
+		);
 
 		const total = items.length;
 		const typesWithItems = Object.keys(stats).length;
@@ -313,26 +312,23 @@ export function useEntityTypeSearch() {
 		return {
 			searchByName: (query: string) => {
 				const lowerQuery = query.toLowerCase();
-				return allConfigs.filter(config =>
-					config.displayName.toLowerCase().includes(lowerQuery) ||
-					config.displayNamePlural.toLowerCase().includes(lowerQuery)
+				return allConfigs.filter(
+					(config) =>
+						config.displayName.toLowerCase().includes(lowerQuery) ||
+						config.displayNamePlural.toLowerCase().includes(lowerQuery)
 				);
 			},
 
 			filterByCategory: (category: string) => {
 				// Filtrar por metadatos específicos
-				return allConfigs.filter(config => {
+				return allConfigs.filter((config) => {
 					const metadata = config.metadata || {};
-					return Object.values(metadata).some(value =>
-						String(value).toLowerCase().includes(category.toLowerCase())
-					);
+					return Object.values(metadata).some((value) => String(value).toLowerCase().includes(category.toLowerCase()));
 				});
 			},
 
 			filterBySupport: (operation: string) => {
-				return allConfigs.filter(config =>
-					config.supportedOperations.includes(operation as any)
-				);
+				return allConfigs.filter((config) => config.supportedOperations.includes(operation as any));
 			},
 		};
 	}, []);

@@ -159,8 +159,8 @@ export function CreateWorldItemForm({
 					color: data.color || null,
 					category: data.category || null,
 					entityType: 'world-item',
-				statistics: mockStatistics,
-				stats: mockStatistics,
+					statistics: mockStatistics,
+					stats: mockStatistics,
 					tags: [],
 					relations: {
 						images: [],
