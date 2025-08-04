@@ -6,12 +6,12 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import { getEntityPath, getEntitySize, isEntityDirectory } from '@/lib/utils/entity-properties.utils';
-import { formatFileSize } from '@/lib/utils/format.utils';
-import { getFileAsDataUrl } from '@/services/file/file.service';
 import { toastService } from '@/services/toast/toast.service';
 import type { AnyEntityWithStats } from '@/types/entities';
+import { getFileAsDataUrl } from '@/services/file/file.service';
 import { FileErrorCode, FileType } from '@/types/entities/file';
+import { getEntitySize, getEntityPath, isEntityDirectory } from '@/lib/utils/entity-properties.utils';
+import { formatFileSize } from '@/lib/utils/format.utils';
 
 const logger = serverLogger.withContext('ClipboardManager');
 
@@ -19,527 +19,527 @@ const logger = serverLogger.withContext('ClipboardManager');
  * Supported clipboard data formats
  */
 export enum ClipboardFormat {
-	TEXT = 'text/plain',
-	HTML = 'text/html',
-	IMAGE = 'image/png',
-	FILES = 'application/x-file-list',
-	JSON = 'application/json',
-	URI_LIST = 'text/uri-list',
+  TEXT = 'text/plain',
+  HTML = 'text/html',
+  IMAGE = 'image/png',
+  FILES = 'application/x-file-list',
+  JSON = 'application/json',
+  URI_LIST = 'text/uri-list',
 }
 
 /**
  * Clipboard data structure with metadata
  */
 export interface ClipboardData {
-	/** Items being copied/cut */
-	items: AnyEntityWithStats[];
-	/** Operation type */
-	operation: 'copy' | 'cut';
-	/** Timestamp when operation was performed */
-	timestamp: number;
-	/** Source context (e.g., 'file-browser', 'image-viewer') */
-	source: string;
-	/** Supported formats for this clipboard data */
-	formats: ClipboardFormat[];
-	/** Additional metadata */
-	metadata: {
-		/** Total size of all items */
-		totalSize: number;
-		/** File types present */
-		fileTypes: FileType[];
-		/** Whether items can be pasted to file system */
-		canPasteToFileSystem: boolean;
-		/** Whether items can be pasted to other applications */
-		canPasteToSystem: boolean;
-	};
+  /** Items being copied/cut */
+  items: AnyEntityWithStats[];
+  /** Operation type */
+  operation: 'copy' | 'cut';
+  /** Timestamp when operation was performed */
+  timestamp: number;
+  /** Source context (e.g., 'file-browser', 'image-viewer') */
+  source: string;
+  /** Supported formats for this clipboard data */
+  formats: ClipboardFormat[];
+  /** Additional metadata */
+  metadata: {
+    /** Total size of all items */
+    totalSize: number;
+    /** File types present */
+    fileTypes: FileType[];
+    /** Whether items can be pasted to file system */
+    canPasteToFileSystem: boolean;
+    /** Whether items can be pasted to other applications */
+    canPasteToSystem: boolean;
+  };
 }
 
 /**
  * System clipboard integration options
  */
 export interface SystemClipboardOptions {
-	/** Include file paths as text */
-	includeText: boolean;
-	/** Include HTML representation */
-	includeHtml: boolean;
-	/** Include images as data URLs */
-	includeImages: boolean;
-	/** Include file URIs */
-	includeUris: boolean;
-	/** Maximum image size for clipboard (in bytes) */
-	maxImageSize: number;
+  /** Include file paths as text */
+  includeText: boolean;
+  /** Include HTML representation */
+  includeHtml: boolean;
+  /** Include images as data URLs */
+  includeImages: boolean;
+  /** Include file URIs */
+  includeUris: boolean;
+  /** Maximum image size for clipboard (in bytes) */
+  maxImageSize: number;
 }
 
 /**
  * Clipboard validation result
  */
 export interface ClipboardValidation {
-	/** Whether clipboard data is valid */
-	isValid: boolean;
-	/** Validation errors */
-	errors: string[];
-	/** Warnings */
-	warnings: string[];
-	/** Supported operations */
-	supportedOperations: ('copy' | 'cut' | 'paste')[];
+  /** Whether clipboard data is valid */
+  isValid: boolean;
+  /** Validation errors */
+  errors: string[];
+  /** Warnings */
+  warnings: string[];
+  /** Supported operations */
+  supportedOperations: ('copy' | 'cut' | 'paste')[];
 }
 
 /**
  * Function creator for file operation errors
  */
 const createClipboardError = (
-	message: string,
-	code: FileErrorCode = FileErrorCode.OPERATION_FAILED,
-	cause?: unknown
+  message: string,
+  code: FileErrorCode = FileErrorCode.OPERATION_FAILED,
+  cause?: unknown
 ): Error & { code: FileErrorCode; cause?: unknown } => {
-	const error = new Error(message);
-	error.name = 'ClipboardError';
-	return Object.assign(error, { code, cause });
+  const error = new Error(message);
+  error.name = 'ClipboardError';
+  return Object.assign(error, { code, cause });
 };
 
 /**
  * Enhanced clipboard manager with system integration
  */
 export class ClipboardManager {
-	private clipboardData: ClipboardData | null = null;
-	private systemClipboardOptions: SystemClipboardOptions = {
-		includeText: true,
-		includeHtml: true,
-		includeImages: true,
-		includeUris: true,
-		maxImageSize: 10 * 1024 * 1024, // 10MB
-	};
+  private clipboardData: ClipboardData | null = null;
+  private systemClipboardOptions: SystemClipboardOptions = {
+    includeText: true,
+    includeHtml: true,
+    includeImages: true,
+    includeUris: true,
+    maxImageSize: 10 * 1024 * 1024, // 10MB
+  };
 
-	/**
-	 * Copy items to clipboard with system integration
-	 */
-	async copy(items: AnyEntityWithStats[], source = 'file-browser'): Promise<void> {
-		try {
-			logger.info('📋 Copying items to clipboard with system integration:', items.length);
+  /**
+   * Copy items to clipboard with system integration
+   */
+  async copy(items: AnyEntityWithStats[], source: string = 'file-browser'): Promise<void> {
+    try {
+      logger.info('📋 Copying items to clipboard with system integration:', items.length);
 
-			// Validate items
-			const validation = this.validateItems(items, 'copy');
-			if (!validation.isValid) {
-				throw createClipboardError(
-					`Validation failed: ${validation.errors.join(', ')}`,
-					FileErrorCode.INVALID_OPERATION
-				);
-			}
+      // Validate items
+      const validation = this.validateItems(items, 'copy');
+      if (!validation.isValid) {
+        throw createClipboardError(
+          `Validation failed: ${validation.errors.join(', ')}`,
+          FileErrorCode.INVALID_OPERATION
+        );
+      }
 
-			// Create clipboard data
-			const clipboardData = await this.createClipboardData(items, 'copy', source);
-			this.clipboardData = clipboardData;
+      // Create clipboard data
+      const clipboardData = await this.createClipboardData(items, 'copy', source);
+      this.clipboardData = clipboardData;
 
-			// Integrate with system clipboard
-			await this.writeToSystemClipboard(clipboardData);
+      // Integrate with system clipboard
+      await this.writeToSystemClipboard(clipboardData);
 
-			// Show success notification
-			const message =
-				items.length === 1
-					? `"${'name' in items[0] ? items[0].name : `item-${items[0].id}`}" copiado al portapapeles`
-					: `${items.length} elementos copiados al portapapeles`;
-			toastService.success(message);
+      // Show success notification
+      const message = items.length === 1
+        ? `"${'name' in items[0] ? items[0].name : `item-${items[0].id}`}" copiado al portapapeles`
+        : `${items.length} elementos copiados al portapapeles`;
+      toastService.success(message);
 
-			logger.info('✅ Items copied to clipboard successfully');
-		} catch (error) {
-			logger.error('❌ Error copying to clipboard:', error);
-			toastService.error('Error al copiar al portapapeles');
-			throw createClipboardError('No se pudo copiar al portapapeles', FileErrorCode.OPERATION_FAILED, error);
-		}
-	}
+      logger.info('✅ Items copied to clipboard successfully');
 
-	/**
-	 * Cut items to clipboard with system integration
-	 */
-	async cut(items: AnyEntityWithStats[], source = 'file-browser'): Promise<void> {
-		try {
-			logger.info('✂️ Cutting items to clipboard with system integration:', items.length);
+    } catch (error) {
+      logger.error('❌ Error copying to clipboard:', error);
+      toastService.error('Error al copiar al portapapeles');
+      throw createClipboardError('No se pudo copiar al portapapeles', FileErrorCode.OPERATION_FAILED, error);
+    }
+  }
 
-			// Validate items
-			const validation = this.validateItems(items, 'cut');
-			if (!validation.isValid) {
-				throw createClipboardError(
-					`Validation failed: ${validation.errors.join(', ')}`,
-					FileErrorCode.INVALID_OPERATION
-				);
-			}
+  /**
+   * Cut items to clipboard with system integration
+   */
+  async cut(items: AnyEntityWithStats[], source: string = 'file-browser'): Promise<void> {
+    try {
+      logger.info('✂️ Cutting items to clipboard with system integration:', items.length);
 
-			// Create clipboard data
-			const clipboardData = await this.createClipboardData(items, 'cut', source);
-			this.clipboardData = clipboardData;
+      // Validate items
+      const validation = this.validateItems(items, 'cut');
+      if (!validation.isValid) {
+        throw createClipboardError(
+          `Validation failed: ${validation.errors.join(', ')}`,
+          FileErrorCode.INVALID_OPERATION
+        );
+      }
 
-			// Integrate with system clipboard
-			await this.writeToSystemClipboard(clipboardData);
+      // Create clipboard data
+      const clipboardData = await this.createClipboardData(items, 'cut', source);
+      this.clipboardData = clipboardData;
 
-			// Show success notification
-			const message =
-				items.length === 1
-					? `"${'name' in items[0] ? items[0].name : `item-${items[0].id}`}" cortado al portapapeles`
-					: `${items.length} elementos cortados al portapapeles`;
-			toastService.success(message);
+      // Integrate with system clipboard
+      await this.writeToSystemClipboard(clipboardData);
 
-			logger.info('✅ Items cut to clipboard successfully');
-		} catch (error) {
-			logger.error('❌ Error cutting to clipboard:', error);
-			toastService.error('Error al cortar al portapapeles');
-			throw createClipboardError('No se pudo cortar al portapapeles', FileErrorCode.OPERATION_FAILED, error);
-		}
-	}
+      // Show success notification
+      const message = items.length === 1
+        ? `"${'name' in items[0] ? items[0].name : `item-${items[0].id}`}" cortado al portapapeles`
+        : `${items.length} elementos cortados al portapapeles`;
+      toastService.success(message);
 
-	/**
-	 * Check if clipboard has items that can be pasted
-	 */
-	canPaste(): boolean {
-		return (
-			this.clipboardData !== null &&
-			this.clipboardData.items.length > 0 &&
-			this.clipboardData.metadata.canPasteToFileSystem
-		);
-	}
+      logger.info('✅ Items cut to clipboard successfully');
 
-	/**
-	 * Get clipboard data
-	 */
-	getClipboardData(): ClipboardData | null {
-		return this.clipboardData;
-	}
+    } catch (error) {
+      logger.error('❌ Error cutting to clipboard:', error);
+      toastService.error('Error al cortar al portapapeles');
+      throw createClipboardError('No se pudo cortar al portapapeles', FileErrorCode.OPERATION_FAILED, error);
+    }
+  }
 
-	/**
-	 * Get clipboard data in specific format
-	 */
-	async getClipboardDataInFormat(format: ClipboardFormat): Promise<string | null> {
-		if (!this.clipboardData) {
-			return null;
-		}
+  /**
+   * Check if clipboard has items that can be pasted
+   */
+  canPaste(): boolean {
+    return this.clipboardData !== null &&
+      this.clipboardData.items.length > 0 &&
+      this.clipboardData.metadata.canPasteToFileSystem;
+  }
 
-		try {
-			switch (format) {
-				case ClipboardFormat.TEXT:
-					return this.generateTextRepresentation(this.clipboardData);
+  /**
+   * Get clipboard data
+   */
+  getClipboardData(): ClipboardData | null {
+    return this.clipboardData;
+  }
 
-				case ClipboardFormat.HTML:
-					return this.generateHtmlRepresentation(this.clipboardData);
+  /**
+   * Get clipboard data in specific format
+   */
+  async getClipboardDataInFormat(format: ClipboardFormat): Promise<string | null> {
+    if (!this.clipboardData) {
+      return null;
+    }
 
-				case ClipboardFormat.JSON:
-					return JSON.stringify(this.clipboardData, null, 2);
+    try {
+      switch (format) {
+        case ClipboardFormat.TEXT:
+          return this.generateTextRepresentation(this.clipboardData);
 
-				case ClipboardFormat.URI_LIST:
-					return this.generateUriListRepresentation(this.clipboardData);
+        case ClipboardFormat.HTML:
+          return this.generateHtmlRepresentation(this.clipboardData);
 
-				default:
-					logger.warn('Unsupported clipboard format requested:', format);
-					return null;
-			}
-		} catch (error) {
-			logger.error('Error generating clipboard data in format:', format, error);
-			return null;
-		}
-	}
+        case ClipboardFormat.JSON:
+          return JSON.stringify(this.clipboardData, null, 2);
 
-	/**
-	 * Clear clipboard
-	 */
-	clear(): void {
-		this.clipboardData = null;
-		logger.info('🗑️ Clipboard cleared');
-		toastService.info('Portapapeles limpiado');
-	}
+        case ClipboardFormat.URI_LIST:
+          return this.generateUriListRepresentation(this.clipboardData);
 
-	/**
-	 * Validate clipboard state and operations
-	 */
-	validateClipboard(): ClipboardValidation {
-		if (!this.clipboardData) {
-			return {
-				isValid: false,
-				errors: ['No clipboard data available'],
-				warnings: [],
-				supportedOperations: [],
-			};
-		}
+        default:
+          logger.warn('Unsupported clipboard format requested:', format);
+          return null;
+      }
+    } catch (error) {
+      logger.error('Error generating clipboard data in format:', format, error);
+      return null;
+    }
+  }
 
-		return this.validateItems(this.clipboardData.items, this.clipboardData.operation);
-	}
+  /**
+   * Clear clipboard
+   */
+  clear(): void {
+    this.clipboardData = null;
+    logger.info('🗑️ Clipboard cleared');
+    toastService.info('Portapapeles limpiado');
+  }
 
-	/**
-	 * Update system clipboard options
-	 */
-	updateSystemClipboardOptions(options: Partial<SystemClipboardOptions>): void {
-		this.systemClipboardOptions = {
-			...this.systemClipboardOptions,
-			...options,
-		};
-		logger.info('📋 System clipboard options updated:', this.systemClipboardOptions);
-	}
+  /**
+   * Validate clipboard state and operations
+   */
+  validateClipboard(): ClipboardValidation {
+    if (!this.clipboardData) {
+      return {
+        isValid: false,
+        errors: ['No clipboard data available'],
+        warnings: [],
+        supportedOperations: [],
+      };
+    }
 
-	/**
-	 * Get system clipboard options
-	 */
-	getSystemClipboardOptions(): SystemClipboardOptions {
-		return { ...this.systemClipboardOptions };
-	}
+    return this.validateItems(this.clipboardData.items, this.clipboardData.operation);
+  }
 
-	/**
-	 * Create clipboard data with metadata
-	 */
-	private async createClipboardData(
-		items: AnyEntityWithStats[],
-		operation: 'copy' | 'cut',
-		source: string
-	): Promise<ClipboardData> {
-		// Calculate metadata
-		const totalSize = items.reduce((sum, item) => sum + getEntitySize(item), 0);
-		const fileTypes = Array.from(
-			new Set(items.map((item) => ('entityType' in item ? item.entityType : 'unknown')).filter(Boolean))
-		) as FileType[];
+  /**
+   * Update system clipboard options
+   */
+  updateSystemClipboardOptions(options: Partial<SystemClipboardOptions>): void {
+    this.systemClipboardOptions = {
+      ...this.systemClipboardOptions,
+      ...options,
+    };
+    logger.info('📋 System clipboard options updated:', this.systemClipboardOptions);
+  }
 
-		// Determine supported formats
-		const formats: ClipboardFormat[] = [ClipboardFormat.TEXT, ClipboardFormat.JSON];
+  /**
+   * Get system clipboard options
+   */
+  getSystemClipboardOptions(): SystemClipboardOptions {
+    return { ...this.systemClipboardOptions };
+  }
 
-		if (this.systemClipboardOptions.includeHtml) {
-			formats.push(ClipboardFormat.HTML);
-		}
+  /**
+   * Create clipboard data with metadata
+   */
+  private async createClipboardData(
+    items: AnyEntityWithStats[],
+    operation: 'copy' | 'cut',
+    source: string
+  ): Promise<ClipboardData> {
+    // Calculate metadata
+    const totalSize = items.reduce((sum, item) => sum + getEntitySize(item), 0);
+    const fileTypes = Array.from(new Set(items.map(item => 
+      'entityType' in item ? item.entityType : 'unknown'
+    ).filter(Boolean))) as FileType[];
 
-		if (this.systemClipboardOptions.includeUris) {
-			formats.push(ClipboardFormat.URI_LIST);
-		}
+    // Determine supported formats
+    const formats: ClipboardFormat[] = [ClipboardFormat.TEXT, ClipboardFormat.JSON];
 
-		// Check if any items are images within size limit
-		const hasValidImages = items.some(
-			(item) => item.entityType === 'image' && getEntitySize(item) <= this.systemClipboardOptions.maxImageSize
-		);
+    if (this.systemClipboardOptions.includeHtml) {
+      formats.push(ClipboardFormat.HTML);
+    }
 
-		if (hasValidImages && this.systemClipboardOptions.includeImages) {
-			formats.push(ClipboardFormat.IMAGE);
-		}
+    if (this.systemClipboardOptions.includeUris) {
+      formats.push(ClipboardFormat.URI_LIST);
+    }
 
-		return {
-			items,
-			operation,
-			timestamp: Date.now(),
-			source,
-			formats,
-			metadata: {
-				totalSize,
-				fileTypes,
-				canPasteToFileSystem: true,
-				canPasteToSystem: formats.length > 1,
-			},
-		};
-	}
+    // Check if any items are images within size limit
+    const hasValidImages = items.some(item =>
+      item.entityType === 'image' &&
+      getEntitySize(item) <= this.systemClipboardOptions.maxImageSize
+    );
 
-	/**
-	 * Validate items for clipboard operations
-	 */
-	private validateItems(items: AnyEntityWithStats[], operation: 'copy' | 'cut' | 'paste'): ClipboardValidation {
-		const errors: string[] = [];
-		const warnings: string[] = [];
-		const supportedOperations: ('copy' | 'cut' | 'paste')[] = [];
+    if (hasValidImages && this.systemClipboardOptions.includeImages) {
+      formats.push(ClipboardFormat.IMAGE);
+    }
 
-		// Basic validation
-		if (!items || items.length === 0) {
-			errors.push('No items provided');
-			return {
-				isValid: false,
-				errors,
-				warnings,
-				supportedOperations,
-			};
-		}
+    return {
+      items,
+      operation,
+      timestamp: Date.now(),
+      source,
+      formats,
+      metadata: {
+        totalSize,
+        fileTypes,
+        canPasteToFileSystem: true,
+        canPasteToSystem: formats.length > 1,
+      },
+    };
+  }
 
-		// Check for required properties
-		for (const item of items) {
-			if (!item.id) {
-				errors.push(`Item missing ID: ${'name' in item ? item.name : 'unknown'}`);
-			}
-			const itemPath = getEntityPath(item);
-			if (!itemPath) {
-				errors.push(`Item missing path: ${'name' in item ? item.name : 'unknown'}`);
-			}
-			if (!('name' in item) || !item.name) {
-				warnings.push(`Item missing name: ${item.id || 'unknown'}`);
-			}
-		}
+  /**
+   * Validate items for clipboard operations
+   */
+  private validateItems(items: AnyEntityWithStats[], operation: 'copy' | 'cut' | 'paste'): ClipboardValidation {
+    const errors: string[] = [];
+    const warnings: string[] = [];
+    const supportedOperations: ('copy' | 'cut' | 'paste')[] = [];
 
-		// Operation-specific validation
-		if (operation === 'cut') {
-			// Check if items can be moved (not readonly)
-			// Note: For now, we assume all entities can be moved unless they're directories
-			const readonlyItems = items.filter((item) => isEntityDirectory(item));
-			if (readonlyItems.length > 0) {
-				warnings.push(
-					`Moving directories may have restrictions: ${readonlyItems.map((i) => ('name' in i ? i.name : `item-${i.id}`)).join(', ')}`
-				);
-			}
-		}
+    // Basic validation
+    if (!items || items.length === 0) {
+      errors.push('No items provided');
+      return {
+        isValid: false,
+        errors,
+        warnings,
+        supportedOperations,
+      };
+    }
 
-		// Size validation
-		const totalSize = items.reduce((sum, item) => sum + getEntitySize(item), 0);
-		const maxClipboardSize = 100 * 1024 * 1024; // 100MB
-		if (totalSize > maxClipboardSize) {
-			warnings.push(`Total size (${formatFileSize(totalSize)}) exceeds recommended clipboard limit`);
-		}
+    // Check for required properties
+    for (const item of items) {
+      if (!item.id) {
+        errors.push(`Item missing ID: ${'name' in item ? item.name : 'unknown'}`);
+      }
+      const itemPath = getEntityPath(item);
+      if (!itemPath) {
+        errors.push(`Item missing path: ${'name' in item ? item.name : 'unknown'}`);
+      }
+      if (!('name' in item) || !item.name) {
+        warnings.push(`Item missing name: ${item.id || 'unknown'}`);
+      }
+    }
 
-		// Determine supported operations
-		if (errors.length === 0) {
-			supportedOperations.push('copy');
+    // Operation-specific validation
+    if (operation === 'cut') {
+      // Check if items can be moved (not readonly)
+      // Note: For now, we assume all entities can be moved unless they're directories
+      const readonlyItems = items.filter(item => isEntityDirectory(item));
+      if (readonlyItems.length > 0) {
+        warnings.push(`Moving directories may have restrictions: ${readonlyItems.map(i => 'name' in i ? i.name : `item-${i.id}`).join(', ')}`);
+      }
+    }
 
-			// For now, allow cut operations on all non-directory items
-			const hasMovableItems = items.some((item) => !isEntityDirectory(item));
-			if (hasMovableItems) {
-				supportedOperations.push('cut');
-			}
+    // Size validation
+    const totalSize = items.reduce((sum, item) => sum + getEntitySize(item), 0);
+    const maxClipboardSize = 100 * 1024 * 1024; // 100MB
+    if (totalSize > maxClipboardSize) {
+      warnings.push(`Total size (${formatFileSize(totalSize)}) exceeds recommended clipboard limit`);
+    }
 
-			supportedOperations.push('paste');
-		}
+    // Determine supported operations
+    if (errors.length === 0) {
+      supportedOperations.push('copy');
 
-		return {
-			isValid: errors.length === 0,
-			errors,
-			warnings,
-			supportedOperations,
-		};
-	}
+      // For now, allow cut operations on all non-directory items
+      const hasMovableItems = items.some(item => !isEntityDirectory(item));
+      if (hasMovableItems) {
+        supportedOperations.push('cut');
+      }
 
-	/**
-	 * Write clipboard data to system clipboard
-	 */
-	private async writeToSystemClipboard(clipboardData: ClipboardData): Promise<void> {
-		try {
-			// In a browser environment, we would use the Clipboard API
-			// For now, we'll prepare the data for system integration
+      supportedOperations.push('paste');
+    }
 
-			if (typeof navigator !== 'undefined' && navigator.clipboard) {
-				const clipboardItems: Record<string, Blob> = {};
+    return {
+      isValid: errors.length === 0,
+      errors,
+      warnings,
+      supportedOperations,
+    };
+  }
 
-				// Add text representation
-				if (this.systemClipboardOptions.includeText) {
-					const textData = await this.generateTextRepresentation(clipboardData);
-					if (textData) {
-						clipboardItems[ClipboardFormat.TEXT] = new Blob([textData], { type: ClipboardFormat.TEXT });
-					}
-				}
+  /**
+   * Write clipboard data to system clipboard
+   */
+  private async writeToSystemClipboard(clipboardData: ClipboardData): Promise<void> {
+    try {
+      // In a browser environment, we would use the Clipboard API
+      // For now, we'll prepare the data for system integration
 
-				// Add HTML representation
-				if (this.systemClipboardOptions.includeHtml) {
-					const htmlData = await this.generateHtmlRepresentation(clipboardData);
-					if (htmlData) {
-						clipboardItems[ClipboardFormat.HTML] = new Blob([htmlData], { type: ClipboardFormat.HTML });
-					}
-				}
+      if (typeof navigator !== 'undefined' && navigator.clipboard) {
+        const clipboardItems: Record<string, Blob> = {};
 
-				// Add image data for single image items
-				if (this.systemClipboardOptions.includeImages && clipboardData.items.length === 1) {
-					const item = clipboardData.items[0];
-					if (item.entityType === 'image' && getEntitySize(item) <= this.systemClipboardOptions.maxImageSize) {
-						try {
-							const itemPath = getEntityPath(item);
-							const dataUrlResponse = await getFileAsDataUrl(itemPath);
-							const base64Data = dataUrlResponse.dataUrl.split(',')[1];
-							const binaryData = atob(base64Data);
-							const bytes = new Uint8Array(binaryData.length);
-							for (let i = 0; i < binaryData.length; i++) {
-								bytes[i] = binaryData.charCodeAt(i);
-							}
-							clipboardItems[ClipboardFormat.IMAGE] = new Blob([bytes], { type: dataUrlResponse.mimeType });
-						} catch (error) {
-							logger.warn('Failed to add image to system clipboard:', error);
-						}
-					}
-				}
+        // Add text representation
+        if (this.systemClipboardOptions.includeText) {
+          const textData = await this.generateTextRepresentation(clipboardData);
+          if (textData) {
+            clipboardItems[ClipboardFormat.TEXT] = new Blob([textData], { type: ClipboardFormat.TEXT });
+          }
+        }
 
-				// Write to system clipboard if we have data
-				if (Object.keys(clipboardItems).length > 0) {
-					const clipboardItem = new ClipboardItem(clipboardItems);
-					await navigator.clipboard.write([clipboardItem]);
-					logger.info('✅ Data written to system clipboard');
-				}
-			} else {
-				logger.warn('System clipboard API not available');
-			}
-		} catch (error) {
-			logger.error('❌ Error writing to system clipboard:', error);
-			// Don't throw error here as internal clipboard still works
-		}
-	}
+        // Add HTML representation
+        if (this.systemClipboardOptions.includeHtml) {
+          const htmlData = await this.generateHtmlRepresentation(clipboardData);
+          if (htmlData) {
+            clipboardItems[ClipboardFormat.HTML] = new Blob([htmlData], { type: ClipboardFormat.HTML });
+          }
+        }
 
-	/**
-	 * Generate text representation of clipboard data
-	 */
-	private async generateTextRepresentation(clipboardData: ClipboardData): Promise<string> {
-		const lines: string[] = [];
+        // Add image data for single image items
+        if (this.systemClipboardOptions.includeImages && clipboardData.items.length === 1) {
+          const item = clipboardData.items[0];
+          if (item.entityType === 'image' && getEntitySize(item) <= this.systemClipboardOptions.maxImageSize) {
+            try {
+              const itemPath = getEntityPath(item);
+              const dataUrlResponse = await getFileAsDataUrl(itemPath);
+              const base64Data = dataUrlResponse.dataUrl.split(',')[1];
+              const binaryData = atob(base64Data);
+              const bytes = new Uint8Array(binaryData.length);
+              for (let i = 0; i < binaryData.length; i++) {
+                bytes[i] = binaryData.charCodeAt(i);
+              }
+              clipboardItems[ClipboardFormat.IMAGE] = new Blob([bytes], { type: dataUrlResponse.mimeType });
+            } catch (error) {
+              logger.warn('Failed to add image to system clipboard:', error);
+            }
+          }
+        }
 
-		// Add header
-		const operationText = clipboardData.operation === 'copy' ? 'Copied' : 'Cut';
-		lines.push(`${operationText} ${clipboardData.items.length} item(s):`);
-		lines.push('');
+        // Write to system clipboard if we have data
+        if (Object.keys(clipboardItems).length > 0) {
+          const clipboardItem = new ClipboardItem(clipboardItems);
+          await navigator.clipboard.write([clipboardItem]);
+          logger.info('✅ Data written to system clipboard');
+        }
+      } else {
+        logger.warn('System clipboard API not available');
+      }
 
-		// Add item details
-		for (const item of clipboardData.items) {
-			lines.push(`• ${item.name}`);
-			const itemPath = getEntityPath(item);
-			if (itemPath) {
-				lines.push(`  Path: ${itemPath}`);
-			}
-			const itemSize = getEntitySize(item);
-			if (itemSize > 0) {
-				lines.push(`  Size: ${formatFileSize(itemSize)}`);
-			}
-			lines.push(`  Type: ${item.entityType}`);
-			lines.push('');
-		}
+    } catch (error) {
+      logger.error('❌ Error writing to system clipboard:', error);
+      // Don't throw error here as internal clipboard still works
+    }
+  }
 
-		return lines.join('\n');
-	}
+  /**
+   * Generate text representation of clipboard data
+   */
+  private async generateTextRepresentation(clipboardData: ClipboardData): Promise<string> {
+    const lines: string[] = [];
 
-	/**
-	 * Generate HTML representation of clipboard data
-	 */
-	private async generateHtmlRepresentation(clipboardData: ClipboardData): Promise<string> {
-		const operationText = clipboardData.operation === 'copy' ? 'Copied' : 'Cut';
+    // Add header
+    const operationText = clipboardData.operation === 'copy' ? 'Copied' : 'Cut';
+    lines.push(`${operationText} ${clipboardData.items.length} item(s):`);
+    lines.push('');
 
-		let html = `<div class="clipboard-data">`;
-		html += `<h3>${operationText} ${clipboardData.items.length} item(s)</h3>`;
-		html += '<ul>';
+    // Add item details
+    for (const item of clipboardData.items) {
+      lines.push(`• ${item.name}`);
+      const itemPath = getEntityPath(item);
+      if (itemPath) {
+        lines.push(`  Path: ${itemPath}`);
+      }
+      const itemSize = getEntitySize(item);
+      if (itemSize > 0) {
+        lines.push(`  Size: ${formatFileSize(itemSize)}`);
+      }
+      lines.push(`  Type: ${item.entityType}`);
+      lines.push('');
+    }
 
-		for (const item of clipboardData.items) {
-			html += '<li>';
-			html += `<strong>${item.name}</strong>`;
-			const itemPath = getEntityPath(item);
-			if (itemPath) {
-				html += `<br><small>Path: ${itemPath}</small>`;
-			}
-			const itemSize = getEntitySize(item);
-			if (itemSize > 0) {
-				html += `<br><small>Size: ${formatFileSize(itemSize)}</small>`;
-			}
-			html += `<br><small>Type: ${item.entityType}</small>`;
-			html += '</li>';
-		}
+    return lines.join('\n');
+  }
 
-		html += '</ul>';
-		html += '</div>';
+  /**
+   * Generate HTML representation of clipboard data
+   */
+  private async generateHtmlRepresentation(clipboardData: ClipboardData): Promise<string> {
+    const operationText = clipboardData.operation === 'copy' ? 'Copied' : 'Cut';
 
-		return html;
-	}
+    let html = `<div class="clipboard-data">`;
+    html += `<h3>${operationText} ${clipboardData.items.length} item(s)</h3>`;
+    html += `<ul>`;
 
-	/**
-	 * Generate URI list representation of clipboard data
-	 */
-	private async generateUriListRepresentation(clipboardData: ClipboardData): Promise<string> {
-		const uris: string[] = [];
+    for (const item of clipboardData.items) {
+      html += `<li>`;
+      html += `<strong>${item.name}</strong>`;
+      const itemPath = getEntityPath(item);
+      if (itemPath) {
+        html += `<br><small>Path: ${itemPath}</small>`;
+      }
+      const itemSize = getEntitySize(item);
+      if (itemSize > 0) {
+        html += `<br><small>Size: ${formatFileSize(itemSize)}</small>`;
+      }
+      html += `<br><small>Type: ${item.entityType}</small>`;
+      html += `</li>`;
+    }
 
-		for (const item of clipboardData.items) {
-			const itemPath = getEntityPath(item);
-			if (itemPath) {
-				// Convert file path to file:// URI
-				const uri = `file://${itemPath.replace(/\\/g, '/')}`;
-				uris.push(uri);
-			}
-		}
+    html += `</ul>`;
+    html += `</div>`;
 
-		return uris.join('\n');
-	}
+    return html;
+  }
+
+  /**
+   * Generate URI list representation of clipboard data
+   */
+  private async generateUriListRepresentation(clipboardData: ClipboardData): Promise<string> {
+    const uris: string[] = [];
+
+    for (const item of clipboardData.items) {
+      const itemPath = getEntityPath(item);
+      if (itemPath) {
+        // Convert file path to file:// URI
+        const uri = `file://${itemPath.replace(/\\/g, '/')}`;
+        uris.push(uri);
+      }
+    }
+
+    return uris.join('\n');
+  }
+
+
 }
 
 // Create and export singleton instance

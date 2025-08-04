@@ -334,7 +334,7 @@ const CACHE_DURATION = 5 * 60 * 1000; // 5 minutos
 /**
  * 💾 Obtiene thumbnail desde cache o genera uno nuevo
  */
-export async function getCachedThumbnail(item: AnyEntityWithStats, options: Record<string, any> = {}): Promise<string> {
+export async function getCachedThumbnail(item: DisplayableEntity, options: Record<string, any> = {}): Promise<string> {
 	const cacheKey = `${item.entityType}-${item.id}-${JSON.stringify(options)}`;
 	const cached = thumbnailCache.get(cacheKey);
 

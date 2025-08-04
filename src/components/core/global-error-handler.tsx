@@ -25,7 +25,7 @@ export function GlobalErrorFallback({ error, resetError }: { error: Error; reset
 					<div className="bg-muted/50 rounded p-3 mb-4 w-full overflow-auto max-h-32">
 						<p className="text-xs font-mono text-destructive/80">{error.message || 'Error desconocido'}</p>
 					</div>
-					<Button onClick={resetError} variant="default" className="flex items-center">
+					<Button onClick={resetError} variant="primary" className="flex items-center">
 						<RefreshCw className="h-4 w-4 mr-2" />
 						Reintentar
 					</Button>

@@ -321,7 +321,7 @@ export function UploadedImagesView() {
 							onChange={handleFileInput}
 						/>
 						<Button
-							variant="default"
+							variant="primary"
 							size="sm"
 							className={cn('h-8 gap-1.5', isUploading && 'opacity-70 cursor-not-allowed')}
 							onClick={() => document.getElementById('file-upload')?.click()}

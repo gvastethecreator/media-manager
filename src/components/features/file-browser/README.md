@@ -13,40 +13,71 @@ El componente `FileBrowser` es un explorador de archivos completo con soporte pa
 - 📱 Diseño responsivo con virtualización optimizada
 - ⚡ Carga diferida y scroll infinito
 
-## Estado actual y optimizaciones completadas ✅
+## Auditoría y limpieza V3 completada ✅
 
-### Componentes principales consolidados
+### Directorios eliminados por falta de uso
 
-- `FileBrowser.tsx` - Componente principal (reducido de 865 a 682 líneas)
-- `SimpleGridView.tsx` - Vista de cuadrícula optimizada (única implementación)
-- `MasonryView.tsx` - Vista de mosaico con virtualización
-- `ListView.tsx` - Vista de lista con virtualización
-- `CardsView.tsx` - Vista de tarjetas
-- `ImageRenderer.tsx` - Renderizador de imágenes optimizado
+- ❌ **`download/`** - Sistema de descarga no utilizado (3 archivos eliminados)
+- ❌ **`filters/`** - Panel de filtros no utilizado (2 archivos eliminados)
+- ❌ **`config/`** - Configuraciones redundantes (1 archivo eliminado)
+- ❌ **`settings/`** - Configuraciones no utilizadas externamente (5 archivos eliminados)
 
-### Componentes extraídos y organizados
+### Hooks innecesarios eliminados
 
-- `components/GridItem.tsx` - Elemento individual de cuadrícula extraído
-- `toolbar/` - Componentes de barra de herramientas organizados por función
-- `context-menu/` - Sistema de menú contextual modular
-- `views/` - Todas las vistas organizadas en un directorio
+- ❌ **`use-grid-virtualizer.ts`** - Virtualización compleja no utilizada
+- ❌ **`use-stable-handlers.ts`** - Handlers obsoletos
+- ❌ **`use-thumbnail-loader.ts`** - Carga de thumbnails redundante
+- ❌ **`use-filtered-data.ts`** - Duplicado de hook en lib/
 
-### Limpieza completada
+### Vistas redundantes eliminadas
 
-- ✅ **Eliminado `GridView.tsx`** (versión obsoleta con virtualización compleja)
-- ✅ **Eliminado `use-grid-view.ts`** (hook obsoleto)
-- ✅ **Eliminado `virtualizer-wrapper.original.tsx`** (versión antigua)
-- ✅ **Eliminado `test-grid-view.tsx`** (componente de prueba)
-- ✅ **Extraído `GridItem` a archivo separado** para mejor modularidad
-- ✅ **Agregadas transiciones suaves** entre vistas con `motion`
-- ✅ **Mejorada accesibilidad** con roles ARIA apropiados
+- ❌ **`masonry-view-fixed.tsx`** - Implementación redundante de masonry
+- ❌ **`true-masonry-view.tsx`** - Otra implementación redundante de masonry
 
-### Optimizaciones implementadas
+### Archivos individuales eliminados
 
-1. **Arquitectura simplificada:**
-   - Solo `SimpleGridView` como implementación de cuadrícula
-   - Virtualización solo donde es realmente necesaria (List, Masonry, Cards)
-   - Componentes extraídos para mejor mantenimiento
+- ❌ **`entity-preloader.tsx`** - Precarga no utilizada
+- ❌ **`grid-config.ts`** - Configuración solo usada por hook eliminado
+
+### Estructura final limpia
+
+```
+file-browser/
+├── file-browser.tsx              # Componente principal
+├── index.ts                      # Exports limpios
+├── image-renderer.tsx            # Renderizador de imágenes
+├── types.tsx                     # Tipos del componente
+├── README.md                     # Esta documentación
+├── click-to-deselect.test.tsx    # Tests (mantenido)
+├── components/                   # Sub-componentes
+│   ├── grid-item.tsx
+│   ├── selection-counter.tsx
+│   └── index.ts
+├── context-menu/                 # Sistema de menú contextual
+├── hooks/                        # Solo hooks utilizados
+│   ├── use-accessibility.ts
+│   └── use-performance.ts
+├── navigation/                   # Navegación por teclado
+├── progress/                     # Indicadores de progreso
+├── selection/                    # Sistema de selección
+├── styles/                       # Estilos específicos
+├── toolbar/                      # Barra de herramientas
+├── undo-redo/                    # Sistema de deshacer/rehacer
+└── views/                        # Vistas disponibles
+    ├── cards-view.tsx
+    ├── grid-view.tsx
+    ├── list-view.tsx
+    ├── masonry-view.tsx
+    └── componentes de apoyo...
+```
+
+### Beneficios de la limpieza
+
+1. **Reducción significativa de archivos:** 15+ archivos eliminados
+2. **Imports más claros:** Solo se exporta lo que realmente se usa
+3. **Menor complejidad:** Código más mantenible y enfocado
+4. **Mejor rendimiento:** Menos código JavaScript en el bundle final
+5. **Estructura más clara:** Directorios organizados por funcionalidad real
 
 2. **Transiciones animadas:**
    - `AnimatePresence` para cambios suaves entre vistas

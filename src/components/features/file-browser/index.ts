@@ -1,11 +1,9 @@
-// ✅ LIMPIADO: Exportaciones finales después de la migración V2
+// ✅ LIMPIADO: Exportaciones finales después de la auditoría y limpieza V3
 
 // Export sub-components
 export { GridItem } from './components/grid-item';
 // Export main components
 export { FileBrowser } from './file-browser';
-// Export utility hooks and helpers
-export { useFilteredData } from './hooks/use-filtered-data';
 // Export renderer
 export { ImageRenderer } from './image-renderer';
 

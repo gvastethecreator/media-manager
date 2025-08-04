@@ -342,7 +342,7 @@ export function BatchOperationDialog({
 					<Button variant="outline" onClick={handleCancel}>
 						Cancelar
 					</Button>
-					<Button onClick={handleConfirm} disabled={!isValid()} variant={type === 'delete' ? 'destructive' : 'default'}>
+					<Button onClick={handleConfirm} disabled={!isValid()} variant={type === 'delete' ? 'destructive' : 'primary'}>
 						{type === 'delete' ? 'Eliminar' : 'Iniciar operación'}
 					</Button>
 				</DialogFooter>
