@@ -39,14 +39,41 @@ export const ListView = memo<ListViewProps>(function ListView({
 	const tableRef = useRef<HTMLTableElement>(null);
 	const [containerHeight, setContainerHeight] = useState<number>(600);
 
-	// Set optimizado para verificación de selección O(1)
-	const selectedIdsSet = useMemo(() => new Set(selectedIds), [selectedIds]);
+	// OPTIMIZACIÓN AVANZADA: Memoización de props derivadas para evitar re-cálculos
+	const derivedProps = useMemo(
+		() => ({
+			hasSelection: selectedIds.length > 0,
+			itemCount: items.length,
+			isVirtualized: items.length > 50,
+			hasSort: Boolean(sortBy),
+			sortConfig: { field: sortBy, direction: sortDirection },
+		}),
+		[selectedIds.length, items.length, sortBy, sortDirection]
+	);
+
+	// OPTIMIZACIÓN: Referencias estables con useRef para máximo rendimiento
+	const itemsByIdRef = useRef(new Map<string, AnyEntityWithStats>());
+	const selectedIdsSetRef = useRef(new Set<string>());
+
+	// Actualizar refs solo cuando sea necesario - Optimizado para evitar re-cálculos
+	useMemo(() => {
+		const newMap = new Map<string, AnyEntityWithStats>();
+		for (const item of items) {
+			newMap.set(item.id, item);
+		}
+		itemsByIdRef.current = newMap;
+
+		const newSet = new Set(selectedIds);
+		selectedIdsSetRef.current = newSet;
+
+		return { map: newMap, set: newSet };
+	}, [items, selectedIds]);
 
 	// Usar hook de configuración de ListView
 	const { config, visibleColumns, updateColumn, reorderColumns, toggleColumnVisibility, getColumnsWithRenderers } =
 		useListViewConfig();
 
-	// Obtener columnas con renderers para el tipo de entidad actual
+	// Obtener columnas con renderers para el tipo de entidad actual - Memoizado
 	const columnsWithRenderers = useMemo(() => {
 		return getColumnsWithRenderers(entityType);
 	}, [getColumnsWithRenderers, entityType]);
@@ -70,7 +97,7 @@ export const ListView = memo<ListViewProps>(function ListView({
 					!target.closest('[data-radix-dropdown-menu-content]') &&
 					!target.closest('[data-radix-dropdown-menu-trigger]'));
 
-			if (isEmptySpaceClick && selectedIds.length > 0) {
+			if (isEmptySpaceClick && derivedProps.hasSelection) {
 				// Feedback visual para la deselección
 				currentTarget.style.transition = 'background-color 0.15s ease';
 				currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
@@ -84,7 +111,7 @@ export const ListView = memo<ListViewProps>(function ListView({
 			// Propagar el evento hacia arriba para que FileBrowser lo maneje
 			// No hacer e.stopPropagation() aquí para permitir que el evento burbujee
 		},
-		[selectedIds.length]
+		[derivedProps.hasSelection]
 	);
 
 	// Navegación por teclado para vista de lista
@@ -160,27 +187,51 @@ export const ListView = memo<ListViewProps>(function ListView({
 		overscan: 5,
 	});
 
-	// Handlers para funcionalidades del header
-	const handleColumnResize = useCallback(
-		async (columnKey: string, width: number) => {
-			await updateColumn(columnKey, { width });
-		},
-		[updateColumn]
+	// Handlers para funcionalidades del header - Optimizados con memoización
+	const headerHandlers = useMemo(
+		() => ({
+			onColumnResize: async (columnKey: string, width: number) => {
+				await updateColumn(columnKey, { width });
+			},
+			onColumnReorder: async (fromIndex: number, toIndex: number) => {
+				await reorderColumns(fromIndex, toIndex);
+			},
+			onColumnToggle: async (columnKey: string) => {
+				await toggleColumnVisibility(columnKey);
+			},
+		}),
+		[updateColumn, reorderColumns, toggleColumnVisibility]
 	);
 
-	const handleColumnReorder = useCallback(
-		async (fromIndex: number, toIndex: number) => {
-			await reorderColumns(fromIndex, toIndex);
+	// OPTIMIZACIÓN AVANZADA: Handlers estables con useRef para máximo rendimiento
+	const handlersRef = useRef({
+		onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => {
+			onItemClick(item, e);
 		},
-		[reorderColumns]
-	);
+		onItemDoubleClick: (item: AnyEntityWithStats) => {
+			onItemDoubleClick(item);
+		},
+	});
 
-	const handleColumnToggle = useCallback(
-		async (columnKey: string) => {
-			await toggleColumnVisibility(columnKey);
-		},
-		[toggleColumnVisibility]
-	);
+	// Actualizar handlers cuando cambien las dependencias
+	useMemo(() => {
+		handlersRef.current.onItemClick = (item: AnyEntityWithStats, e: React.MouseEvent) => {
+			onItemClick(item, e);
+		};
+
+		handlersRef.current.onItemDoubleClick = (item: AnyEntityWithStats) => {
+			onItemDoubleClick(item);
+		};
+	}, [onItemClick, onItemDoubleClick]);
+
+	// Handlers estables que no cambian entre renders
+	const stableOnItemClick = useCallback((item: AnyEntityWithStats, e: React.MouseEvent) => {
+		handlersRef.current.onItemClick(item, e);
+	}, []);
+
+	const stableOnItemDoubleClick = useCallback((item: AnyEntityWithStats) => {
+		handlersRef.current.onItemDoubleClick(item);
+	}, []);
 
 	// Calcular altura de header
 	const headerHeight = config.showHeader ? 40 : 0;
@@ -208,9 +259,9 @@ export const ListView = memo<ListViewProps>(function ListView({
 						sortBy={sortBy}
 						sortDirection={sortDirection}
 						onSort={onSort}
-						onColumnResize={handleColumnResize}
-						onColumnReorder={handleColumnReorder}
-						onColumnToggle={handleColumnToggle}
+						onColumnResize={headerHandlers.onColumnResize}
+						onColumnReorder={headerHandlers.onColumnReorder}
+						onColumnToggle={headerHandlers.onColumnToggle}
 						showSettings={true}
 					/>
 				)}
@@ -238,7 +289,7 @@ export const ListView = memo<ListViewProps>(function ListView({
 				>
 					{rowVirtualizer.getVirtualItems().map((virtualItem) => {
 						const item = items[virtualItem.index];
-						const isSelected = selectedIdsSet.has(item.id);
+						const isSelected = selectedIdsSetRef.current.has(item.id);
 						const isEven = virtualItem.index % 2 === 0;
 
 						return (
@@ -278,8 +329,8 @@ export const ListView = memo<ListViewProps>(function ListView({
 											cellPadding={config.cellPadding}
 											showThumbnails={config.showThumbnails}
 											thumbnailSize={config.thumbnailSize === 'none' ? undefined : config.thumbnailSize}
-											onClick={onItemClick}
-											onDoubleClick={onItemDoubleClick}
+											onClick={stableOnItemClick}
+											onDoubleClick={stableOnItemDoubleClick}
 										/>
 									</tbody>
 								</table>

@@ -328,10 +328,7 @@ export interface MasonryLayoutResult {
 /**
  * Helper para obtener aspect ratio de una entidad
  */
-export function getEntityAspectRatio(
-	entity: AnyEntityWithStats,
-	config: MasonryViewConfig
-): number {
+export function getEntityAspectRatio(entity: AnyEntityWithStats, config: MasonryViewConfig): number {
 	// Intentar obtener dimensiones reales
 	if (config.height.useRealDimensions) {
 		if ('width' in entity && 'height' in entity && entity.width && entity.height) {

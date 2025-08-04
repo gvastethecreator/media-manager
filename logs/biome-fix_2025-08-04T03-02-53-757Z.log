@@ -1,0 +1,3728 @@
+Comando: bunx biome check --max-diagnostics=500 --write .
+Fecha: 2025-08-04T03:02:53.758Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+src\components\features\file-browser\context-menu\custom-context-menu.tsx:185:9 lint/complexity/noUselessFragments  FIXABLE  ━━━━━━━━━━
+
+  i This fragment is unnecessary.
+  
+    183 │ 							{/* Encabezado con información de selección */}
+    184 │ 							{selectedCount > 0 && (
+  > 185 │ 								<>
+        │ 								^^
+  > 186 │ 									<div className="px-3 py-2 border-b border-border">
+         ...
+  > 193 │ 									</div>
+  > 194 │ 								</>
+        │ 								^^^
+    195 │ 							)}
+    196 │ 
+  
+  i A fragment is redundant if it contains only one child, or if it is the child of a html element, and is not a keyed fragment.
+  
+  i Unsafe fix: Remove the Fragment
+  
+    183 183 │   							{/* Encabezado con información de selección */}
+    184 184 │   							{selectedCount > 0 && (
+    185     │ - → → → → → → → → <>
+    186     │ - → → → → → → → → → <div·className="px-3·py-2·border-b·border-border">
+        185 │ + → → → → → → → → <div·className="px-3·py-2·border-b·border-border">
+    187 186 │   										<div className="flex items-center gap-2">
+    188 187 │   											<Badge variant="secondary" className="text-xs">
+    ······· │ 
+    191 190 │   											{isMultiSelection && <span className="text-xs text-muted-foreground">seleccionados</span>}
+    192 191 │   										</div>
+    193     │ - → → → → → → → → → </div>
+    194     │ - → → → → → → → → </>
+        192 │ + → → → → → → → → → </div>
+    195 193 │   							)}
+    196 194 │   
+  
+
+src\components\features\file-browser\views\grid-item-label.tsx:38:4 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━
+
+  i Useless case clause.
+  
+    36 │ 			case 'overlay':
+    37 │ 				return 'absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 to-transparent text-white p-2';
+  > 38 │ 			case 'bottom':
+       │ 			^^^^^^^^^^^^^^
+    39 │ 			default:
+    40 │ 				return 'mt-2';
+  
+  i because the default clause is present:
+  
+    37 │ 				return 'absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 to-transparent text-white p-2';
+    38 │ 			case 'bottom':
+  > 39 │ 			default:
+       │ 			^^^^^^^^
+  > 40 │ 				return 'mt-2';
+       │ 				^^^^^^^^^^^^^^
+    41 │ 		}
+    42 │ 	};
+  
+  i Unsafe fix: Remove the useless case.
+  
+     36  36 │   			case 'overlay':
+     37  37 │   				return 'absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 to-transparent text-white p-2';
+     38     │ - → → → case·'bottom':
+     39  38 │   			default:
+     40  39 │   				return 'mt-2';
+  
+
+src\components\features\file-browser\views\grid-item-overlay.tsx:40:4 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━
+
+  i Useless case clause.
+  
+    38 │ 			case 'center':
+    39 │ 				return 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2';
+  > 40 │ 			case 'bottom':
+       │ 			^^^^^^^^^^^^^^
+    41 │ 			default:
+    42 │ 				return 'bottom-0 left-0 right-0';
+  
+  i because the default clause is present:
+  
+    39 │ 				return 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2';
+    40 │ 			case 'bottom':
+  > 41 │ 			default:
+       │ 			^^^^^^^^
+  > 42 │ 				return 'bottom-0 left-0 right-0';
+       │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    43 │ 		}
+    44 │ 	};
+  
+  i Unsafe fix: Remove the useless case.
+  
+     38  38 │   			case 'center':
+     39  39 │   				return 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2';
+     40     │ - → → → case·'bottom':
+     41  40 │   			default:
+     42  41 │   				return 'bottom-0 left-0 right-0';
+  
+
+src\components\features\file-browser\views\list-view-header.tsx:161:19 lint/complexity/noUselessTernary  FIXABLE  ━━━━━━━━━━
+
+  i Unnecessary use of boolean literals in conditional expression.
+  
+    159 │ 								textAlign: column.align || 'left',
+    160 │ 							}}
+  > 161 │ 							draggable={onColumnReorder ? true : false}
+        │ 							           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    162 │ 							onDragStart={(e) => handleDragStart(e, index)}
+    163 │ 							onDragOver={(e) => handleDragOver(e, index)}
+  
+  i Simplify your code by directly assigning the result without using a ternary operator.
+  
+  i If your goal is negation, you may use the logical NOT (!) or double NOT (!!) operator for clearer and concise code.
+     Check for more details about NOT operator.
+  
+  i Unsafe fix: Remove the conditional expression with
+  
+    159 159 │   								textAlign: column.align || 'left',
+    160 160 │   							}}
+    161     │ - → → → → → → → draggable={onColumnReorder·?·true·:·false}
+        161 │ + → → → → → → → draggable={!!onColumnReorder}
+    162 162 │   							onDragStart={(e) => handleDragStart(e, index)}
+    163 163 │   							onDragOver={(e) => handleDragOver(e, index)}
+  
+
+src\hooks\use-masonry-view-config.ts:192:6 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━━
+
+  i Useless case clause.
+  
+    190 │ 						columnIndex = Math.floor(Math.random() * columns);
+    191 │ 						break;
+  > 192 │ 					case 'balanced':
+        │ 					^^^^^^^^^^^^^^^^
+    193 │ 					default:
+    194 │ 						// Find the column that would result in the best balance
+  
+  i because the default clause is present:
+  
+    191 │ 						break;
+    192 │ 					case 'balanced':
+  > 193 │ 					default:
+        │ 					^^^^^^^^
+  > 194 │ 						// Find the column that would result in the best balance
+  > 195 │ 						columnIndex = findBestColumn(columnHeights, itemHeight, config.optimization.maxHeightDifference);
+  > 196 │ 						break;
+        │ 						^^^^^^
+    197 │ 				}
+    198 │ 
+  
+  i Unsafe fix: Remove the useless case.
+  
+    190 190 │   						columnIndex = Math.floor(Math.random() * columns);
+    191 191 │   						break;
+    192     │ - → → → → → case·'balanced':
+    193 192 │   					default:
+    194 193 │   						// Find the column that would result in the best balance
+  
+
+src\lib\keyboard\__tests__\integration.test.ts:92:18 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    91 │ 	it('should enable/disable functionality', () => {
+  > 92 │ 		expect(manager['isEnabled']).toBe(true);
+       │ 		               ^^^^^^^^^^^
+    93 │ 
+    94 │ 		manager.setEnabled(false);
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     90  90 │   
+     91  91 │   	it('should enable/disable functionality', () => {
+     92     │ - → → expect(manager['isEnabled']).toBe(true);
+         92 │ + → → expect(manager.isEnabled).toBe(true);
+     93  93 │   
+     94  94 │   		manager.setEnabled(false);
+  
+
+src\lib\keyboard\__tests__\integration.test.ts:95:18 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+    94 │ 		manager.setEnabled(false);
+  > 95 │ 		expect(manager['isEnabled']).toBe(false);
+       │ 		               ^^^^^^^^^^^
+    96 │ 
+    97 │ 		manager.setEnabled(true);
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     93  93 │   
+     94  94 │   		manager.setEnabled(false);
+     95     │ - → → expect(manager['isEnabled']).toBe(false);
+         95 │ + → → expect(manager.isEnabled).toBe(false);
+     96  96 │   
+     97  97 │   		manager.setEnabled(true);
+  
+
+src\lib\keyboard\__tests__\integration.test.ts:98:18 lint/complexity/useLiteralKeys  FIXABLE  ━━━━━━━━━━
+
+  i The computed expression can be simplified without the use of a string literal.
+  
+     97 │ 		manager.setEnabled(true);
+   > 98 │ 		expect(manager['isEnabled']).toBe(true);
+        │ 		               ^^^^^^^^^^^
+     99 │ 	});
+    100 │ });
+  
+  i Unsafe fix: Use a literal key instead.
+  
+     96  96 │   
+     97  97 │   		manager.setEnabled(true);
+     98     │ - → → expect(manager['isEnabled']).toBe(true);
+         98 │ + → → expect(manager.isEnabled).toBe(true);
+     99  99 │   	});
+    100 100 │   });
+  
+
+src\services\progress\progress-tracking.service.ts:485:4 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━
+
+  i Useless case clause.
+  
+    483 │ 			case 'batch_operation':
+    484 │ 				return `Operación en lote: ${totalItems} ${itemText}`;
+  > 485 │ 			case 'custom':
+        │ 			^^^^^^^^^^^^^^
+    486 │ 			default:
+    487 │ 				return `Procesando ${totalItems} ${itemText}`;
+  
+  i because the default clause is present:
+  
+    484 │ 				return `Operación en lote: ${totalItems} ${itemText}`;
+    485 │ 			case 'custom':
+  > 486 │ 			default:
+        │ 			^^^^^^^^
+  > 487 │ 				return `Procesando ${totalItems} ${itemText}`;
+        │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    488 │ 		}
+    489 │ 	}
+  
+  i Unsafe fix: Remove the useless case.
+  
+    483 483 │   			case 'batch_operation':
+    484 484 │   				return `Operación en lote: ${totalItems} ${itemText}`;
+    485     │ - → → → case·'custom':
+    486 485 │   			default:
+    487 486 │   				return `Procesando ${totalItems} ${itemText}`;
+  
+
+src\types\file-browser\grid-view-config.ts:235:3 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━
+
+  i Useless case clause.
+  
+    233 │ 		case 'custom':
+    234 │ 			return config.customAspectRatio ? config.customAspectRatio.width / config.customAspectRatio.height : 1;
+  > 235 │ 		case 'auto':
+        │ 		^^^^^^^^^^^^
+    236 │ 		default:
+    237 │ 			return 0; // 0 significa usar aspect ratio natural del contenido
+  
+  i because the default clause is present:
+  
+    234 │ 			return config.customAspectRatio ? config.customAspectRatio.width / config.customAspectRatio.height : 1;
+    235 │ 		case 'auto':
+  > 236 │ 		default:
+        │ 		^^^^^^^^
+  > 237 │ 			return 0; // 0 significa usar aspect ratio natural del contenido
+        │ 			^^^^^^^^^
+    238 │ 	}
+    239 │ }
+  
+  i Unsafe fix: Remove the useless case.
+  
+    233 233 │   		case 'custom':
+    234 234 │   			return config.customAspectRatio ? config.customAspectRatio.width / config.customAspectRatio.height : 1;
+    235     │ - → → case·'auto':
+    236 235 │   		default:
+    237 236 │   			return 0; // 0 significa usar aspect ratio natural del contenido
+  
+
+src\components\batch-operations\BatchOperationsIndicator.tsx:13:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    11 │ import { Button } from '@/components/ui/button';
+    12 │ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+  > 13 │ import { Progress } from '@/components/ui/progress';
+       │        ^^^^^^^^^^^^
+    14 │ import { useBatchOperations } from '@/hooks/useBatchOperations';
+    15 │ import { cn } from '@/lib/utils';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     11  11 │   import { Button } from '@/components/ui/button';
+     12  12 │   import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+     13     │ - import·{·Progress·}·from·'@/components/ui/progress';
+     14  13 │   import { useBatchOperations } from '@/hooks/useBatchOperations';
+     15  14 │   import { cn } from '@/lib/utils';
+  
+
+src\components\batch-operations\BatchOperationsPanel.tsx:9:2 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+     8 │ import {
+   > 9 │ 	AlertCircle,
+       │ 	^^^^^^^^^^^
+    10 │ 	CheckCircle,
+    11 │ 	ChevronDown,
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      7   7 │   
+      8   8 │   import {
+      9     │ - → AlertCircle,
+     10   9 │   	CheckCircle,
+     11  10 │   	ChevronDown,
+  
+
+src\components\batch-operations\BatchOperationsPanel.tsx:38:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    36 │ import { cn } from '@/lib/utils';
+    37 │ import { formatDuration } from '@/lib/utils/format';
+  > 38 │ import { formatBytes } from '@/lib/utils/format.utils';
+       │        ^^^^^^^^^^^^^^^
+    39 │ import {
+    40 │ 	type BatchOperation,
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     36  36 │   import { cn } from '@/lib/utils';
+     37  37 │   import { formatDuration } from '@/lib/utils/format';
+     38     │ - import·{·formatBytes·}·from·'@/lib/utils/format.utils';
+     39  38 │   import {
+     40  39 │   	type BatchOperation,
+  
+
+src\components\batch-operations\BatchOperationsPanel.tsx:24:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! These imports are unused.
+  
+    22 │ 	XCircle,
+    23 │ } from 'lucide-react';
+  > 24 │ import React, { useEffect, useState } from 'react';
+       │        ^^^^^
+    25 │ import { Badge } from '@/components/ui/badge';
+    26 │ import { Button } from '@/components/ui/button';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    24 │ import·React,·{·useEffect,·useState·}·from·'react';
+       │        -------                                     
+
+src\components\cards\card-header.tsx:18:85 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    16 │  * Similar al encabezado de una carta Magic con título, subtítulo e icono
+    17 │  */
+  > 18 │ export function CardHeader({ title, subtitle, icon, emoji, primaryColor, className, compact }: CardHeaderProps) {
+       │                                                                                     ^^^^^^^
+    19 │ 	return (
+    20 │ 		<div
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\cards\card-header.tsx:18:53 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    16 │  * Similar al encabezado de una carta Magic con título, subtítulo e icono
+    17 │  */
+  > 18 │ export function CardHeader({ title, subtitle, icon, emoji, primaryColor, className, compact }: CardHeaderProps) {
+       │                                                     ^^^^^
+    19 │ 	return (
+    20 │ 		<div
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\cards\image-card\image-card.tsx:60:6 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    58 │ 		'aria-describedby': ariaDescribedBy,
+    59 │ 		onKeyDown,
+  > 60 │ 		...restProps
+       │ 		   ^^^^^^^^^
+    61 │ 	}: ImageCardProps) {
+    62 │ 		const { data: imageData, isLoading, error } = useImage(imageId);
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\cards\world-item-card\world-item-card-footer.tsx:25:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    23 │ 	primaryColor,
+    24 │ 	secondaryColor,
+  > 25 │ 	intensityFactor,
+       │ 	^^^^^^^^^^^^^^^
+    26 │ 	compact = false,
+    27 │ }: WorldItemCardFooterProps) => {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\common\thumbnails\entity-thumbnail.tsx:63:3 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    61 │ 		onClick,
+    62 │ 		loading = false,
+  > 63 │ 		aspectRatio,
+       │ 		^^^^^^^^^^^
+    64 │ 	}) => {
+    65 │ 		// Obtener tipo de entidad y configuración (sin romper reglas de hooks)
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\common\thumbnails\entity-thumbnail.tsx:173:27 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    171 │  */
+    172 │ export const EntityThumbnailCompact = memo<Omit<EntityThumbnailProps, 'size' | 'showOverlay' | 'animated'>>(
+  > 173 │ 	({ entity, className, ...props }) => {
+        │ 	                         ^^^^^
+    174 │ 		const entityType = getEntityStatsType(entity);
+    175 │ 		// Fallback a un tipo seguro existente cuando no haya entityType
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\entity\entity-type-badge.tsx:8:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+     7 │ import { motion } from 'motion/react';
+   > 8 │ import type { ComponentProps } from 'react';
+       │             ^^^^^^^^^^^^^^^^^^
+     9 │ import { Badge } from '@/components/ui/badge';
+    10 │ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      6   6 │   
+      7   7 │   import { motion } from 'motion/react';
+      8     │ - import·type·{·ComponentProps·}·from·'react';
+      9   8 │   import { Badge } from '@/components/ui/badge';
+     10   9 │   import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+  
+
+src\components\entity\entity-type-badge.tsx:9:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+     7 │ import { motion } from 'motion/react';
+     8 │ import type { ComponentProps } from 'react';
+   > 9 │ import { Badge } from '@/components/ui/badge';
+       │        ^^^^^^^^^
+    10 │ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+    11 │ import { useEntityTypeConfig } from '@/hooks/use-entity-type-config';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      7   7 │   import { motion } from 'motion/react';
+      8   8 │   import type { ComponentProps } from 'react';
+      9     │ - import·{·Badge·}·from·'@/components/ui/badge';
+     10   9 │   import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+     11  10 │   import { useEntityTypeConfig } from '@/hooks/use-entity-type-config';
+  
+
+src\components\features\file-browser\context-menu\context-action-handler.ts:526:10 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━
+
+  ! Change to an optional chain.
+  
+    524 │ 				// Acciones de portapapeles
+    525 │ 				case 'copy':
+  > 526 │ 					if (item && item.mimeType?.startsWith('image/')) {
+        │ 					    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    527 │ 						await customFileOperationsService.copyFileToClipboard(item.path);
+    528 │ 					} else if (items && items.length > 0) {
+  
+  i Unsafe fix: Change to an optional chain.
+  
+    524 524 │   				// Acciones de portapapeles
+    525 525 │   				case 'copy':
+    526     │ - → → → → → if·(item·&&·item.mimeType?.startsWith('image/'))·{
+        526 │ + → → → → → if·(item?.mimeType?.startsWith('image/'))·{
+    527 527 │   						await customFileOperationsService.copyFileToClipboard(item.path);
+    528 528 │   					} else if (items && items.length > 0) {
+  
+
+src\components\features\file-browser\context-menu\context-action-handler.ts:493:3 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    491 │ 		item?: FileItem,
+    492 │ 		items?: FileItem[],
+  > 493 │ 		toggleSelection?: ToggleItemSelectionFunction,
+        │ 		^^^^^^^^^^^^^^^
+    494 │ 		refreshView?: () => void
+    495 │ 	) => {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend toggleSelection with an underscore.
+  
+    491 491 │   		item?: FileItem,
+    492 492 │   		items?: FileItem[],
+    493     │ - → → toggleSelection?:·ToggleItemSelectionFunction,
+        493 │ + → → _toggleSelection?:·ToggleItemSelectionFunction,
+    494 494 │   		refreshView?: () => void
+    495 495 │   	) => {
+  
+
+src\components\features\file-browser\context-menu\empty-space-context-menu.tsx:14:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    12 │ export const EmptySpaceContextMenu = memo<EmptySpaceContextMenuProps>(function EmptySpaceContextMenu({
+    13 │ 	onAction,
+  > 14 │ 	position,
+       │ 	^^^^^^^^
+    15 │ 	currentPath,
+    16 │ 	canPaste = false,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\features\file-browser\context-menu\multi-selection-context-menu.tsx:19:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    17 │ import { useTagStore } from '@/store/entities/tag';
+    18 │ import type { TagWithStats } from '@/types/entities/tag';
+  > 19 │ import type { FileItem } from '@/types/files';
+       │             ^^^^^^^^^^^^
+    20 │ import { EnhancedSubmenu } from './components/enhanced-submenu';
+    21 │ import type { ContextMenuAction, MultiSelectionAction, MultiSelectionContextMenuProps } from './types';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     17  17 │   import { useTagStore } from '@/store/entities/tag';
+     18  18 │   import type { TagWithStats } from '@/types/entities/tag';
+     19     │ - import·type·{·FileItem·}·from·'@/types/files';
+     20  19 │   import { EnhancedSubmenu } from './components/enhanced-submenu';
+     21  20 │   import type { ContextMenuAction, MultiSelectionAction, MultiSelectionContextMenuProps } from './types';
+  
+
+src\components\features\file-browser\context-menu\multi-selection-context-menu.tsx:21:15 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    19 │ import type { FileItem } from '@/types/files';
+    20 │ import { EnhancedSubmenu } from './components/enhanced-submenu';
+  > 21 │ import type { ContextMenuAction, MultiSelectionAction, MultiSelectionContextMenuProps } from './types';
+       │               ^^^^^^^^^^^^^^^^^
+    22 │ 
+    23 │ /**
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    21 │ import·type·{·ContextMenuAction,·MultiSelectionAction,·MultiSelectionContextMenuProps·}·from·'./types';
+       │               -------------------                                                                      
+
+src\components\features\file-browser\context-menu\multi-selection-context-menu.tsx:110:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    108 │ 	selectedItems,
+    109 │ 	onAction,
+  > 110 │ 	position,
+        │ 	^^^^^^^^
+    111 │ }) {
+    112 │ 	const [processingAction, setProcessingAction] = useState<MultiSelectionAction | null>(null);
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\features\file-browser\context-menu\multi-selection-context-menu.tsx:286:31 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    284 │ 					isLoading={false}
+    285 │ 					file={selectedItems[0]} // Usar el primer elemento como referencia
+  > 286 │ 					onAction={async (action, file, data) => {
+        │ 					                         ^^^^
+    287 │ 						await onAction(action as MultiSelectionAction, selectedItems, data);
+    288 │ 					}}
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend file with an underscore.
+  
+    284 284 │   					isLoading={false}
+    285 285 │   					file={selectedItems[0]} // Usar el primer elemento como referencia
+    286     │ - → → → → → onAction={async·(action,·file,·data)·=>·{
+        286 │ + → → → → → onAction={async·(action,·_file,·data)·=>·{
+    287 287 │   						await onAction(action as MultiSelectionAction, selectedItems, data);
+    288 288 │   					}}
+  
+
+src\components\features\file-browser\context-menu\multi-selection-context-menu.tsx:306:31 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    304 │ 					isLoading={false}
+    305 │ 					file={selectedItems[0]} // Usar el primer elemento como referencia
+  > 306 │ 					onAction={async (action, file, data) => {
+        │ 					                         ^^^^
+    307 │ 						await onAction(action as MultiSelectionAction, selectedItems, data);
+    308 │ 					}}
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend file with an underscore.
+  
+    304 304 │   					isLoading={false}
+    305 305 │   					file={selectedItems[0]} // Usar el primer elemento como referencia
+    306     │ - → → → → → onAction={async·(action,·file,·data)·=>·{
+        306 │ + → → → → → onAction={async·(action,·_file,·data)·=>·{
+    307 307 │   						await onAction(action as MultiSelectionAction, selectedItems, data);
+    308 308 │   					}}
+  
+
+src\components\features\file-browser\context-menu\multi-selection-context-menu.tsx:328:31 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    326 │ 					isLoading={false}
+    327 │ 					file={selectedItems[0]} // Usar el primer elemento como referencia
+  > 328 │ 					onAction={async (action, file, data) => {
+        │ 					                         ^^^^
+    329 │ 						await onAction(action as MultiSelectionAction, selectedItems, data);
+    330 │ 					}}
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend file with an underscore.
+  
+    326 326 │   					isLoading={false}
+    327 327 │   					file={selectedItems[0]} // Usar el primer elemento como referencia
+    328     │ - → → → → → onAction={async·(action,·file,·data)·=>·{
+        328 │ + → → → → → onAction={async·(action,·_file,·data)·=>·{
+    329 329 │   						await onAction(action as MultiSelectionAction, selectedItems, data);
+    330 330 │   					}}
+  
+
+src\components\features\file-browser\download\download-progress-indicator.tsx:8:70 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+     6 │  */
+     7 │ 
+   > 8 │ import { AlertCircle, CheckCircle, ChevronDown, ChevronUp, Download, Pause, Play, X } from 'lucide-react';
+       │                                                                      ^^^^^^^^^^^
+     9 │ import { AnimatePresence, motion } from 'motion/react';
+    10 │ import React, { useState } from 'react';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    8 │ import·{·AlertCircle,·CheckCircle,·ChevronDown,·ChevronUp,·Download,·Pause,·Play,·X·}·from·'lucide-react';
+      │                                                                      -------------                        
+
+src\components\features\file-browser\download\download-progress-indicator.tsx:10:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! These imports are unused.
+  
+     8 │ import { AlertCircle, CheckCircle, ChevronDown, ChevronUp, Download, Pause, Play, X } from 'lucide-react';
+     9 │ import { AnimatePresence, motion } from 'motion/react';
+  > 10 │ import React, { useState } from 'react';
+       │        ^^^^^
+    11 │ import { useDownloadManager } from '@/hooks/use-download-manager';
+    12 │ import { useProgressTracking } from '@/hooks/use-progress-tracking';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    10 │ import·React,·{·useState·}·from·'react';
+       │        -------                          
+
+src\components\features\file-browser\download\download-progress-indicator.tsx:13:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    11 │ import { useDownloadManager } from '@/hooks/use-download-manager';
+    12 │ import { useProgressTracking } from '@/hooks/use-progress-tracking';
+  > 13 │ import { formatDuration, formatFileSize } from '@/lib/utils/format.utils';
+       │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    14 │ 
+    15 │ interface DownloadProgressIndicatorProps {
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     11  11 │   import { useDownloadManager } from '@/hooks/use-download-manager';
+     12  12 │   import { useProgressTracking } from '@/hooks/use-progress-tracking';
+     13     │ - import·{·formatDuration,·formatFileSize·}·from·'@/lib/utils/format.utils';
+     14  13 │   
+     15  14 │   interface DownloadProgressIndicatorProps {
+  
+
+src\components\features\file-browser\download\download-progress-indicator.tsx:31:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    29 │ export function DownloadProgressIndicator({
+    30 │ 	position = 'bottom-right',
+  > 31 │ 	showDetails = false,
+       │ 	^^^^^^^^^^^
+    32 │ }: DownloadProgressIndicatorProps) {
+    33 │ 	const [isExpanded, setIsExpanded] = useState(false);
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\features\file-browser\download\download-settings.tsx:8:32 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+     6 │  */
+     7 │ 
+   > 8 │ import { Download, FolderOpen, HelpCircle, RotateCcw, Save, Settings, Shield, Zap } from 'lucide-react';
+       │                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+     9 │ import { motion } from 'motion/react';
+    10 │ import React, { useEffect, useState } from 'react';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    8 │ import·{·Download,·FolderOpen,·HelpCircle,·RotateCcw,·Save,·Settings,·Shield,·Zap·}·from·'lucide-react';
+      │                                -----------------------------          --------                          
+
+src\components\features\file-browser\download\download-settings.tsx:10:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! These imports are unused.
+  
+     8 │ import { Download, FolderOpen, HelpCircle, RotateCcw, Save, Settings, Shield, Zap } from 'lucide-react';
+     9 │ import { motion } from 'motion/react';
+  > 10 │ import React, { useEffect, useState } from 'react';
+       │        ^^^^^
+    11 │ import { toast } from 'sonner';
+    12 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    10 │ import·React,·{·useEffect,·useState·}·from·'react';
+       │        -------                                     
+
+src\components\features\file-browser\hooks\use-performance.ts:94:50 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  ! This dependencies list is not an array literal.
+  
+    92 │ 	const cacheRef = useRef(new Map<string, { value: T; timestamp: number }>());
+    93 │ 
+  > 94 │ 	const key = useMemo(() => JSON.stringify(deps), deps);
+       │ 	                                                ^^^^
+    95 │ 
+    96 │ 	return useMemo(() => {
+  
+  i Biome can't statically verify whether you've passed the correct dependencies.
+  
+  i Replace with an array literal and list your dependencies within it.
+  
+
+src\components\features\file-browser\navigation\keyboard-navigation.tsx:2:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ import React, { useCallback, useEffect, useRef } from 'react';
+  > 2 │ import { toast } from 'sonner';
+      │        ^^^^^^^^^
+    3 │ import { useSelectionStore } from '@/store/selection.store';
+    4 │ import { keyboardShortcutManager } from '../../../../lib/keyboard/keyboard-shortcut-manager';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      1   1 │   import React, { useCallback, useEffect, useRef } from 'react';
+      2     │ - import·{·toast·}·from·'sonner';
+      3   2 │   import { useSelectionStore } from '@/store/selection.store';
+      4   3 │   import { keyboardShortcutManager } from '../../../../lib/keyboard/keyboard-shortcut-manager';
+  
+
+src\components\features\file-browser\progress\progress-operation-card.tsx:20:2 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    18 │ 	Image,
+    19 │ 	MoreHorizontal,
+  > 20 │ 	Music,
+       │ 	^^^^^^
+  > 21 │ 	Pause,
+        ...
+  > 26 │ 	Upload,
+  > 27 │ 	Video,
+       │ 	^^^^^
+    28 │ 	X,
+    29 │ 	XCircle,
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     18  18 │   	Image,
+     19  19 │   	MoreHorizontal,
+     20     │ - → Music,
+     21  20 │   	Pause,
+     22  21 │   	Play,
+    ······· │ 
+     25  24 │   	Trash2,
+     26  25 │   	Upload,
+     27     │ - → Video,
+     28  26 │   	X,
+     29  27 │   	XCircle,
+  
+
+src\components\features\file-browser\progress\progress-overlay.tsx:16:2 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    14 │ 	FolderOpen,
+    15 │ 	Move,
+  > 16 │ 	Pause,
+       │ 	^^^^^^
+  > 17 │ 	Play,
+  > 18 │ 	Square,
+       │ 	^^^^^^
+    19 │ 	Trash2,
+    20 │ 	Upload,
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     14  14 │   	FolderOpen,
+     15  15 │   	Move,
+     16     │ - → Pause,
+     17     │ - → Play,
+     18     │ - → Square,
+     19  16 │   	Trash2,
+     20  17 │   	Upload,
+  
+
+src\components\features\file-browser\progress\progress-panel.tsx:58:16 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    56 │ 		notifications: [],
+    57 │ 		unreadCount: 0,
+  > 58 │ 		markAsRead: (id: string) => {},
+       │ 		             ^^
+    59 │ 		removeNotification: (id: string) => {},
+    60 │ 		clearAll: () => {},
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend id with an underscore.
+  
+     56  56 │   		notifications: [],
+     57  57 │   		unreadCount: 0,
+     58     │ - → → markAsRead:·(id:·string)·=>·{},
+         58 │ + → → markAsRead:·(_id:·string)·=>·{},
+     59  59 │   		removeNotification: (id: string) => {},
+     60  60 │   		clearAll: () => {},
+  
+
+src\components\features\file-browser\progress\progress-panel.tsx:227:39 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    226 │ 		if (filter.statuses?.length) {
+  > 227 │ 			filtered = filtered.filter((op) => filter.statuses!.includes(op.status));
+        │ 			                                   ^^^^^^^^^^^^^^^^
+    228 │ 		}
+    229 │ 
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+    225 225 │   
+    226 226 │   		if (filter.statuses?.length) {
+    227     │ - → → → filtered·=·filtered.filter((op)·=>·filter.statuses!.includes(op.status));
+        227 │ + → → → filtered·=·filtered.filter((op)·=>·filter.statuses?.includes(op.status));
+    228 228 │   		}
+    229 229 │   
+  
+
+src\components\features\file-browser\progress\progress-panel.tsx:59:24 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    57 │ 		unreadCount: 0,
+    58 │ 		markAsRead: (id: string) => {},
+  > 59 │ 		removeNotification: (id: string) => {},
+       │ 		                     ^^
+    60 │ 		clearAll: () => {},
+    61 │ 	};
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend id with an underscore.
+  
+     57  57 │   		unreadCount: 0,
+     58  58 │   		markAsRead: (id: string) => {},
+     59     │ - → → removeNotification:·(id:·string)·=>·{},
+         59 │ + → → removeNotification:·(_id:·string)·=>·{},
+     60  60 │   		clearAll: () => {},
+     61  61 │   	};
+  
+
+src\components\features\file-browser\selection\drag-selection-provider.tsx:90:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    88 │ 	containerRef,
+    89 │ 	items,
+  > 90 │ 	getItemElement,
+       │ 	^^^^^^^^^^^^^^
+    91 │ 	config = {},
+    92 │ 	overlayConfig = {},
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\features\file-browser\selection\drag-selection-provider.tsx:93:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    91 │ 	config = {},
+    92 │ 	overlayConfig = {},
+  > 93 │ 	onSelectionStart,
+       │ 	^^^^^^^^^^^^^^^^
+    94 │ 	onSelectionUpdate,
+    95 │ 	onSelectionEnd,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\features\file-browser\selection\drag-selection-provider.tsx:94:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    92 │ 	overlayConfig = {},
+    93 │ 	onSelectionStart,
+  > 94 │ 	onSelectionUpdate,
+       │ 	^^^^^^^^^^^^^^^^^
+    95 │ 	onSelectionEnd,
+    96 │ 	onSelectionCancel,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\features\file-browser\selection\drag-selection-provider.tsx:95:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    93 │ 	onSelectionStart,
+    94 │ 	onSelectionUpdate,
+  > 95 │ 	onSelectionEnd,
+       │ 	^^^^^^^^^^^^^^
+    96 │ 	onSelectionCancel,
+    97 │ 	disabled = false,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\features\file-browser\selection\drag-selection-provider.tsx:139:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on containerRef.current.
+  
+    138 │ 	// Initialize the DragSelectionManager
+  > 139 │ 	useEffect(() => {
+        │ 	^^^^^^^^^
+    140 │ 		if (containerRef.current && dragSelectionManager) {
+    141 │ 			try {
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    138 │ 	// Initialize the DragSelectionManager
+    139 │ 	useEffect(() => {
+  > 140 │ 		if (containerRef.current && dragSelectionManager) {
+        │ 		    ^^^^^^^^^^^^^^^^^^^^
+    141 │ 			try {
+    142 │ 				dragSelectionManager.initialize(containerRef.current);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    140 │ 		if (containerRef.current && dragSelectionManager) {
+    141 │ 			try {
+  > 142 │ 				dragSelectionManager.initialize(containerRef.current);
+        │ 				                                ^^^^^^^^^^^^^^^^^^^^
+    143 │ 			} catch (error) {
+    144 │ 				console.error('Error initializing DragSelectionManager:', error);
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    155 │ → },·[dragSelectionManager,·containerRef.current]);·//·Update·config·when·props·change
+        │                           ++++++++++++++++++++++                                      
+
+src\components\features\file-browser\selection\drag-selection-provider.tsx:156:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on dragSelectionManager.updateConfig.
+  
+    154 │ 		};
+    155 │ 	}, [dragSelectionManager]); // Update config when props change
+  > 156 │ 	useEffect(() => {
+        │ 	^^^^^^^^^
+    157 │ 		const newConfig = {
+    158 │ 			...defaultConfig,
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    160 │ 		};
+    161 │ 		setCurrentConfig(newConfig);
+  > 162 │ 		dragSelectionManager.updateConfig(newConfig);
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    163 │ 	}, [config]);
+    164 │ 
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    163 │ → },·[config,·dragSelectionManager.updateConfig]);
+        │             +++++++++++++++++++++++++++++++++++   
+
+src\components\features\file-browser\selection\drag-selection-provider.tsx:166:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on dragSelectionManager.disable.
+  
+    165 │ 	// Handle disabled state
+  > 166 │ 	useEffect(() => {
+        │ 	^^^^^^^^^
+    167 │ 		if (disabled) {
+    168 │ 			dragSelectionManager.disable();
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    166 │ 	useEffect(() => {
+    167 │ 		if (disabled) {
+  > 168 │ 			dragSelectionManager.disable();
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    169 │ 			setIsActive(false);
+    170 │ 		} else {
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    173 │ → },·[disabled,·dragSelectionManager.disable]);
+        │               ++++++++++++++++++++++++++++++   
+
+src\components\features\file-browser\selection\drag-selection-provider.tsx:166:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on dragSelectionManager.enable.
+  
+    165 │ 	// Handle disabled state
+  > 166 │ 	useEffect(() => {
+        │ 	^^^^^^^^^
+    167 │ 		if (disabled) {
+    168 │ 			dragSelectionManager.disable();
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    169 │ 			setIsActive(false);
+    170 │ 		} else {
+  > 171 │ 			dragSelectionManager.enable();
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    172 │ 		}
+    173 │ 	}, [disabled]);
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    173 │ → },·[disabled,·dragSelectionManager.enable]);
+        │               +++++++++++++++++++++++++++++   
+
+src\components\features\file-browser\selection\selection-overlay.tsx:44:80 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    43 │ // Legacy component for backward compatibility
+  > 44 │ const LegacySelectionOverlay: React.FC<LegacySelectionOverlayProps> = ({ rect, containerRef, className = '' }) => {
+       │                                                                                ^^^^^^^^^^^^
+    45 │ 	// Calculate normalized rectangle dimensions
+    46 │ 	const left = Math.min(rect.startX, rect.currentX);
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\features\file-browser\selection\selection-overlay.tsx:179:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    177 │ export const EnhancedSelectionOverlay: React.FC<EnhancedSelectionOverlayProps> = ({
+    178 │ 	rect,
+  > 179 │ 	containerRef,
+        │ 	^^^^^^^^^^^^
+    180 │ 	isActive = true,
+    181 │ 	selectedCount = 0,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\features\file-browser\settings\file-browser-settings.tsx:158:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  ! 
+    		setViewMode changes on every re-render and should not be used as a hook dependency.
+  
+    156 │ 		toastService.info('Settings reset to defaults');
+    157 │ 	}, [
+  > 158 │ 		setViewMode,
+        │ 		^^^^^^^^^^^
+    159 │ 		setSortBy,
+    160 │ 		setSortDirection,
+  
+  i To fix this, wrap the definition of 
+    		setViewMode in its own useCallback() hook.
+  
+
+src\components\features\file-browser\settings\file-browser-settings.tsx:159:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  ! 
+    		setSortBy changes on every re-render and should not be used as a hook dependency.
+  
+    157 │ 	}, [
+    158 │ 		setViewMode,
+  > 159 │ 		setSortBy,
+        │ 		^^^^^^^^^
+    160 │ 		setSortDirection,
+    161 │ 		setShowHiddenFiles,
+  
+  i To fix this, wrap the definition of 
+    		setSortBy in its own useCallback() hook.
+  
+
+src\components\features\file-browser\settings\file-browser-settings.tsx:160:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  ! 
+    		setSortDirection changes on every re-render and should not be used as a hook dependency.
+  
+    158 │ 		setViewMode,
+    159 │ 		setSortBy,
+  > 160 │ 		setSortDirection,
+        │ 		^^^^^^^^^^^^^^^^
+    161 │ 		setShowHiddenFiles,
+    162 │ 		setThumbnailSize,
+  
+  i To fix this, wrap the definition of 
+    		setSortDirection in its own useCallback() hook.
+  
+
+src\components\features\file-browser\settings\file-browser-settings.tsx:161:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  ! 
+    		setShowHiddenFiles changes on every re-render and should not be used as a hook dependency.
+  
+    159 │ 		setSortBy,
+    160 │ 		setSortDirection,
+  > 161 │ 		setShowHiddenFiles,
+        │ 		^^^^^^^^^^^^^^^^^^
+    162 │ 		setThumbnailSize,
+    163 │ 		setEnableVirtualization,
+  
+  i To fix this, wrap the definition of 
+    		setShowHiddenFiles in its own useCallback() hook.
+  
+
+src\components\features\file-browser\settings\file-browser-settings.tsx:162:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  ! 
+    		setThumbnailSize changes on every re-render and should not be used as a hook dependency.
+  
+    160 │ 		setSortDirection,
+    161 │ 		setShowHiddenFiles,
+  > 162 │ 		setThumbnailSize,
+        │ 		^^^^^^^^^^^^^^^^
+    163 │ 		setEnableVirtualization,
+    164 │ 		setItemsPerPage,
+  
+  i To fix this, wrap the definition of 
+    		setThumbnailSize in its own useCallback() hook.
+  
+
+src\components\features\file-browser\settings\file-browser-settings.tsx:163:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  ! 
+    		setEnableVirtualization changes on every re-render and should not be used as a hook dependency.
+  
+    161 │ 		setShowHiddenFiles,
+    162 │ 		setThumbnailSize,
+  > 163 │ 		setEnableVirtualization,
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^
+    164 │ 		setItemsPerPage,
+    165 │ 	]);
+  
+  i To fix this, wrap the definition of 
+    		setEnableVirtualization in its own useCallback() hook.
+  
+
+src\components\features\file-browser\settings\file-browser-settings.tsx:164:3 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  ! 
+    		setItemsPerPage changes on every re-render and should not be used as a hook dependency.
+  
+    162 │ 		setThumbnailSize,
+    163 │ 		setEnableVirtualization,
+  > 164 │ 		setItemsPerPage,
+        │ 		^^^^^^^^^^^^^^^
+    165 │ 	]);
+    166 │ 
+  
+  i To fix this, wrap the definition of 
+    		setItemsPerPage in its own useCallback() hook.
+  
+
+src\components\features\file-browser\settings\file-browser-settings.tsx:53:21 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    51 │ 	};
+    52 │ 
+  > 53 │ 	const setSortBy = (field: string) => {
+       │ 	                   ^^^^^
+    54 │ 		// For now, just trigger the change handler
+    55 │ 		handleSettingChange();
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend field with an underscore.
+  
+     51  51 │   	};
+     52  52 │   
+     53     │ - → const·setSortBy·=·(field:·string)·=>·{
+         53 │ + → const·setSortBy·=·(_field:·string)·=>·{
+     54  54 │   		// For now, just trigger the change handler
+     55  55 │   		handleSettingChange();
+  
+
+src\components\features\file-browser\settings\file-browser-settings.tsx:58:28 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    56 │ 	};
+    57 │ 
+  > 58 │ 	const setSortDirection = (direction: 'asc' | 'desc') => {
+       │ 	                          ^^^^^^^^^
+    59 │ 		// For now, just trigger the change handler
+    60 │ 		handleSettingChange();
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend direction with an underscore.
+  
+     56  56 │   	};
+     57  57 │   
+     58     │ - → const·setSortDirection·=·(direction:·'asc'·|·'desc')·=>·{
+         58 │ + → const·setSortDirection·=·(_direction:·'asc'·|·'desc')·=>·{
+     59  59 │   		// For now, just trigger the change handler
+     60  60 │   		handleSettingChange();
+  
+
+src\components\features\file-browser\settings\file-browser-settings.tsx:63:30 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    61 │ 	};
+    62 │ 
+  > 63 │ 	const setShowHiddenFiles = (show: boolean) => {
+       │ 	                            ^^^^
+    64 │ 		// For now, just trigger the change handler
+    65 │ 		handleSettingChange();
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend show with an underscore.
+  
+     61  61 │   	};
+     62  62 │   
+     63     │ - → const·setShowHiddenFiles·=·(show:·boolean)·=>·{
+         63 │ + → const·setShowHiddenFiles·=·(_show:·boolean)·=>·{
+     64  64 │   		// For now, just trigger the change handler
+     65  65 │   		handleSettingChange();
+  
+
+src\components\features\file-browser\settings\global-configs.tsx:10:2 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+     8 │ import {
+     9 │ 	Clock,
+  > 10 │ 	Contrast,
+       │ 	^^^^^^^^^
+  > 11 │ 	Cpu,
+        ...
+  > 22 │ 	Volume2,
+  > 23 │ 	Zap,
+       │ 	^^^
+    24 │ } from 'lucide-react';
+    25 │ import React, { useCallback } from 'react';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      8   8 │   import {
+      9   9 │   	Clock,
+     10     │ - → Contrast,
+     11  10 │   	Cpu,
+     12  11 │   	Database,
+    ······· │ 
+     17  16 │   	Monitor,
+     18  17 │   	Mouse,
+     19     │ - → Settings,
+     20  18 │   	Sparkles,
+     21     │ - → Type,
+     22  19 │   	Volume2,
+     23     │ - → Zap,
+     24  20 │   } from 'lucide-react';
+     25  21 │   import React, { useCallback } from 'react';
+  
+
+src\components\features\file-browser\settings\global-configs.tsx:25:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! These imports are unused.
+  
+    23 │ 	Zap,
+    24 │ } from 'lucide-react';
+  > 25 │ import React, { useCallback } from 'react';
+       │        ^^^^^
+    26 │ import { Badge } from '@/components/ui/badge';
+    27 │ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    25 │ import·React,·{·useCallback·}·from·'react';
+       │        -------                             
+
+src\components\features\file-browser\settings\global-configs.tsx:26:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    24 │ } from 'lucide-react';
+    25 │ import React, { useCallback } from 'react';
+  > 26 │ import { Badge } from '@/components/ui/badge';
+       │        ^^^^^^^^^
+    27 │ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+    28 │ import { Input } from '@/components/ui/input';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     24  24 │   } from 'lucide-react';
+     25  25 │   import React, { useCallback } from 'react';
+     26     │ - import·{·Badge·}·from·'@/components/ui/badge';
+     27  26 │   import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+     28  27 │   import { Input } from '@/components/ui/input';
+  
+
+src\components\features\file-browser\settings\global-configs.tsx:28:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    26 │ import { Badge } from '@/components/ui/badge';
+    27 │ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+  > 28 │ import { Input } from '@/components/ui/input';
+       │        ^^^^^^^^^
+    29 │ import { Label } from '@/components/ui/label';
+    30 │ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     26  26 │   import { Badge } from '@/components/ui/badge';
+     27  27 │   import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+     28     │ - import·{·Input·}·from·'@/components/ui/input';
+     29  28 │   import { Label } from '@/components/ui/label';
+     30  29 │   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+  
+
+src\components\features\file-browser\settings\global-configs.tsx:31:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    29 │ import { Label } from '@/components/ui/label';
+    30 │ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+  > 31 │ import { Separator } from '@/components/ui/separator';
+       │        ^^^^^^^^^^^^^
+    32 │ import { Slider } from '@/components/ui/slider';
+    33 │ import { Switch } from '@/components/ui/switch';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     29  29 │   import { Label } from '@/components/ui/label';
+     30  30 │   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+     31     │ - import·{·Separator·}·from·'@/components/ui/separator';
+     32  31 │   import { Slider } from '@/components/ui/slider';
+     33  32 │   import { Switch } from '@/components/ui/switch';
+  
+
+src\components\features\file-browser\settings\global-entity-configs.tsx:8:2 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+     7 │ import {
+   > 8 │ 	Accessibility,
+       │ 	^^^^^^^^^^^^^^
+   > 9 │ 	Album,
+        ...
+  > 26 │ 	Music,
+  > 27 │ 	Palette,
+       │ 	^^^^^^^
+    28 │ 	Settings,
+    29 │ 	Sparkles,
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      6   6 │   
+      7   7 │   import {
+      8     │ - → Accessibility,
+      9   8 │   	Album,
+     10   9 │   	Bookmark,
+     11     │ - → Clock,
+     12     │ - → Columns,
+     13     │ - → Cpu,
+     14  10 │   	Eye,
+     15  11 │   	FileText,
+     16  12 │   	Folder,
+     17     │ - → Grid3X3,
+     18     │ - → HardDrive,
+     19  13 │   	Image,
+     20     │ - → LayoutGrid,
+     21  14 │   	Lightbulb,
+     22     │ - → List,
+     23  15 │   	MapPin,
+     24     │ - → Monitor,
+     25     │ - → MousePointer,
+     26  16 │   	Music,
+     27     │ - → Palette,
+     28  17 │   	Settings,
+     29  18 │   	Sparkles,
+  
+
+src\components\features\file-browser\settings\global-entity-configs.tsx:36:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    34 │ 	Zap,
+    35 │ } from 'lucide-react';
+  > 36 │ import { motion } from 'motion/react';
+       │        ^^^^^^^^^^
+    37 │ import React, { useCallback } from 'react';
+    38 │ import { Badge } from '@/components/ui/badge';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     34  34 │   	Zap,
+     35  35 │   } from 'lucide-react';
+     36     │ - import·{·motion·}·from·'motion/react';
+     37  36 │   import React, { useCallback } from 'react';
+     38  37 │   import { Badge } from '@/components/ui/badge';
+  
+
+src\components\features\file-browser\settings\global-entity-configs.tsx:37:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! These imports are unused.
+  
+    35 │ } from 'lucide-react';
+    36 │ import { motion } from 'motion/react';
+  > 37 │ import React, { useCallback } from 'react';
+       │        ^^^^^
+    38 │ import { Badge } from '@/components/ui/badge';
+    39 │ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    37 │ import·React,·{·useCallback·}·from·'react';
+       │        -------                             
+
+src\components\features\file-browser\settings\global-entity-configs.tsx:38:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    36 │ import { motion } from 'motion/react';
+    37 │ import React, { useCallback } from 'react';
+  > 38 │ import { Badge } from '@/components/ui/badge';
+       │        ^^^^^^^^^
+    39 │ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+    40 │ import { Input } from '@/components/ui/input';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     36  36 │   import { motion } from 'motion/react';
+     37  37 │   import React, { useCallback } from 'react';
+     38     │ - import·{·Badge·}·from·'@/components/ui/badge';
+     39  38 │   import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+     40  39 │   import { Input } from '@/components/ui/input';
+  
+
+src\components\features\file-browser\settings\global-entity-configs.tsx:40:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    38 │ import { Badge } from '@/components/ui/badge';
+    39 │ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+  > 40 │ import { Input } from '@/components/ui/input';
+       │        ^^^^^^^^^
+    41 │ import { Label } from '@/components/ui/label';
+    42 │ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     38  38 │   import { Badge } from '@/components/ui/badge';
+     39  39 │   import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+     40     │ - import·{·Input·}·from·'@/components/ui/input';
+     41  40 │   import { Label } from '@/components/ui/label';
+     42  41 │   import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+  
+
+src\components\features\file-browser\settings\view-configuration-panel.tsx:80:10 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    78 │ 	// Create wrapper functions for component compatibility
+    79 │ 	const wrappedUpdateViewConfig = useCallback(
+  > 80 │ 		async (viewType: any, config: any): Promise<boolean> => {
+       │ 		       ^^^^^^^^
+    81 │ 			try {
+    82 │ 				updateViewConfig(config);
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend viewType with an underscore.
+  
+     78  78 │   	// Create wrapper functions for component compatibility
+     79  79 │   	const wrappedUpdateViewConfig = useCallback(
+     80     │ - → → async·(viewType:·any,·config:·any):·Promise<boolean>·=>·{
+         80 │ + → → async·(_viewType:·any,·config:·any):·Promise<boolean>·=>·{
+     81  81 │   			try {
+     82  82 │   				updateViewConfig(config);
+  
+
+src\components\features\file-browser\settings\view-configuration-panel.tsx:104:10 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    103 │ 	const wrappedUpdateEntityConfig = useCallback(
+  > 104 │ 		async (entityType: any, config: any): Promise<boolean> => {
+        │ 		       ^^^^^^^^^^
+    105 │ 			try {
+    106 │ 				updateEntityConfig(config);
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend entityType with an underscore.
+  
+    102 102 │   
+    103 103 │   	const wrappedUpdateEntityConfig = useCallback(
+    104     │ - → → async·(entityType:·any,·config:·any):·Promise<boolean>·=>·{
+        104 │ + → → async·(_entityType:·any,·config:·any):·Promise<boolean>·=>·{
+    105 105 │   			try {
+    106 106 │   				updateEntityConfig(config);
+  
+
+src\components\features\file-browser\undo-redo\UndoRedoButton.tsx:9:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+     8 │ import { Redo2, Undo2 } from 'lucide-react';
+   > 9 │ import React from 'react';
+       │        ^^^^^
+    10 │ import { Button } from '@/components/ui/button';
+    11 │ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      7   7 │   
+      8   8 │   import { Redo2, Undo2 } from 'lucide-react';
+      9     │ - import·React·from·'react';
+     10   9 │   import { Button } from '@/components/ui/button';
+     11  10 │   import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+  
+
+src\components\features\file-browser\undo-redo\UndoRedoPanel.tsx:9:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! These imports are unused.
+  
+     8 │ import { Clock, Copy, Edit, Move, RotateCcw, RotateCw, Trash2, X } from 'lucide-react';
+   > 9 │ import React, { useState } from 'react';
+       │        ^^^^^
+    10 │ import { Badge } from '@/components/ui/badge';
+    11 │ import { Button } from '@/components/ui/button';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    9 │ import·React,·{·useState·}·from·'react';
+      │        -------                          
+
+src\components\features\file-browser\undo-redo\undo-redo-panel.tsx:124:43 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    122 │ 		// Apply type filter
+    123 │ 		if (filter.types && filter.types.length > 0) {
+  > 124 │ 			filtered = filtered.filter((action) => filter.types!.includes(action.type));
+        │ 			                                       ^^^^^^^^^^^^^
+    125 │ 		}
+    126 │ 
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+    122 122 │   		// Apply type filter
+    123 123 │   		if (filter.types && filter.types.length > 0) {
+    124     │ - → → → filtered·=·filtered.filter((action)·=>·filter.types!.includes(action.type));
+        124 │ + → → → filtered·=·filtered.filter((action)·=>·filter.types?.includes(action.type));
+    125 125 │   		}
+    126 126 │   
+  
+
+src\components\features\file-browser\undo-redo\undo-redo-panel.tsx:3:2 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+     1 │ import { formatDistanceToNow } from 'date-fns';
+     2 │ import {
+   > 3 │ 	AlertCircle,
+       │ 	^^^^^^^^^^^^
+   > 4 │ 	BarChart3,
+        ...
+  > 25 │ 	Users,
+  > 26 │ 	XCircle,
+       │ 	^^^^^^^
+    27 │ } from 'lucide-react';
+    28 │ import React, { useMemo, useState } from 'react';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      1   1 │   import { formatDistanceToNow } from 'date-fns';
+      2   2 │   import {
+      3     │ - → AlertCircle,
+      4     │ - → BarChart3,
+      5   3 │   	Camera,
+      6   4 │   	CheckCircle,
+      7     │ - → Clock,
+      8   5 │   	Download,
+      9     │ - → Eye,
+     10     │ - → EyeOff,
+     11   6 │   	FileText,
+     12   7 │   	Filter,
+     13   8 │   	FolderOpen,
+     14   9 │   	History,
+     15     │ - → Pause,
+     16     │ - → Play,
+     17  10 │   	Redo2,
+     18  11 │   	RotateCcw,
+     19     │ - → Save,
+     20  12 │   	Search,
+     21     │ - → Settings,
+     22  13 │   	Trash2,
+     23  14 │   	Undo2,
+     24  15 │   	Upload,
+     25     │ - → Users,
+     26     │ - → XCircle,
+     27  16 │   } from 'lucide-react';
+     28  17 │   import React, { useMemo, useState } from 'react';
+  
+
+src\components\features\file-browser\undo-redo\undo-redo-panel.tsx:81:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    79 │ 	showStatistics = true,
+    80 │ 	showSnapshots = false, // Disabled since snapshots aren't implemented in hook
+  > 81 │ 	showGroups = false, // Disabled since groups aren't implemented in hook
+       │ 	^^^^^^^^^^
+    82 │ }) => {
+    83 │ 	const { state, undo, redo, clear, canUndo, canRedo, getHistory, actions } = useUndoRedo();
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\features\file-browser\undo-redo\undo-redo-panel.tsx:271:20 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: selectedTab
+  
+    270 │ 	// Get snapshots from localStorage
+  > 271 │ 	const snapshots = useMemo(() => {
+        │ 	                  ^^^^^^^
+    272 │ 		try {
+    273 │ 			return JSON.parse(localStorage.getItem('undo-redo-snapshots') || '[]');
+  
+  i This dependency can be removed from the list.
+  
+    275 │ 			return [];
+    276 │ 		}
+  > 277 │ 	}, [selectedTab]); // Re-read when switching to snapshots tab
+        │ 	    ^^^^^^^^^^^
+    278 │ 
+    279 │ 	const handleRestoreSnapshot = (snapshotId: string) => {
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    277 │ → },·[selectedTab]);·//·Re-read·when·switching·to·snapshots·tab
+        │       -----------                                              
+
+src\components\features\file-viewer\multi-entity-viewer.tsx:17:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    16 │ // Import viewers
+  > 17 │ import { FileViewer } from './file-viewer'; // For images
+       │        ^^^^^^^^^^^^^^
+    18 │ import { AudioViewer } from './viewers/audio-viewer';
+    19 │ import { DocumentViewer } from './viewers/document-viewer';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     12  12 │   import type { ImageWithStats } from '@/types/entities/image';
+     13  13 │   import type { VideoWithStats } from '@/types/entities/video';
+     14     │ - import·{·EntityStatsType·}·from·'@/types/migration';
+         14 │ + import·{·EntityStatsType·}·from·'@/types/migration';
+     15  15 │   
+     16     │ - //·Import·viewers
+     17     │ - import·{·FileViewer·}·from·'./file-viewer';·//·For·images
+     18  16 │   import { AudioViewer } from './viewers/audio-viewer';
+     19  17 │   import { DocumentViewer } from './viewers/document-viewer';
+  
+
+src\components\features\file-viewer\multi-entity-viewer.tsx:48:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on handleNext.
+  
+    47 │ 	// Keyboard navigation
+  > 48 │ 	useEffect(() => {
+       │ 	^^^^^^^^^
+    49 │ 		if (!isOpen) return;
+    50 │ 
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    55 │ 				handlePrevious();
+    56 │ 			} else if (e.key === 'ArrowRight') {
+  > 57 │ 				handleNext();
+       │ 				^^^^^^^^^^
+    58 │ 			}
+    59 │ 		};
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    63 │ → },·[isOpen,·onClose,·handleNext]);
+       │                      ++++++++++++   
+
+src\components\features\file-viewer\multi-entity-viewer.tsx:48:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on handlePrevious.
+  
+    47 │ 	// Keyboard navigation
+  > 48 │ 	useEffect(() => {
+       │ 	^^^^^^^^^
+    49 │ 		if (!isOpen) return;
+    50 │ 
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    53 │ 				onClose();
+    54 │ 			} else if (e.key === 'ArrowLeft') {
+  > 55 │ 				handlePrevious();
+       │ 				^^^^^^^^^^^^^^
+    56 │ 			} else if (e.key === 'ArrowRight') {
+    57 │ 				handleNext();
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    63 │ → },·[isOpen,·onClose,·handlePrevious]);
+       │                      ++++++++++++++++   
+
+src\components\features\file-viewer\multi-entity-viewer.tsx:12:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    10 │ import type { DocumentWithStats } from '@/types/entities/document';
+    11 │ import type { FileWithStats } from '@/types/entities/file/base';
+  > 12 │ import type { ImageWithStats } from '@/types/entities/image';
+       │             ^^^^^^^^^^^^^^^^^^
+    13 │ import type { VideoWithStats } from '@/types/entities/video';
+    14 │ import { EntityStatsType } from '@/types/migration';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     10  10 │   import type { DocumentWithStats } from '@/types/entities/document';
+     11  11 │   import type { FileWithStats } from '@/types/entities/file/base';
+     12     │ - import·type·{·ImageWithStats·}·from·'@/types/entities/image';
+     13  12 │   import type { VideoWithStats } from '@/types/entities/video';
+     14  13 │   import { EntityStatsType } from '@/types/migration';
+  
+
+src\components\features\file-viewer\viewers\audio-viewer.tsx:7:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! These imports are unused.
+  
+    6 │ import { Download, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
+  > 7 │ import React, { useEffect, useRef, useState } from 'react';
+      │        ^^^^^
+    8 │ import { Button } from '@/components/ui/button';
+    9 │ import { Slider } from '@/components/ui/slider';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    7 │ import·React,·{·useEffect,·useRef,·useState·}·from·'react';
+      │        -------                                             
+
+src\components\features\file-viewer\viewers\audio-viewer.tsx:10:10 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+     8 │ import { Button } from '@/components/ui/button';
+     9 │ import { Slider } from '@/components/ui/slider';
+  > 10 │ import { cn, formatDuration, formatFileSize } from '@/lib/utils';
+       │          ^^
+    11 │ import type { AudioWithStats } from '@/types/entities/audio';
+    12 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    10 │ import·{·cn,·formatDuration,·formatFileSize·}·from·'@/lib/utils';
+       │          ----                                                    
+
+src\components\features\file-viewer\viewers\audio-viewer.tsx:33:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: audioSrc
+  
+    31 │ 	const audioSrc = audio.path || `/api/audio/${audio.id}/stream`;
+    32 │ 
+  > 33 │ 	useEffect(() => {
+       │ 	^^^^^^^^^
+    34 │ 		const audioElement = audioRef.current;
+    35 │ 		if (!audioElement) return;
+  
+  i This dependency can be removed from the list.
+  
+    71 │ 			audioElement.removeEventListener('canplay', handleCanPlay);
+    72 │ 		};
+  > 73 │ 	}, [audioSrc]);
+       │ 	    ^^^^^^^^
+    74 │ 
+    75 │ 	const togglePlayPause = () => {
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    73 │ → },·[audioSrc]);
+       │       --------   
+
+src\components\features\file-viewer\viewers\document-viewer.tsx:17:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! These imports are unused.
+  
+    15 │ 	ZoomOut,
+    16 │ } from 'lucide-react';
+  > 17 │ import React, { useEffect, useRef, useState } from 'react';
+       │        ^^^^^
+    18 │ import { Button } from '@/components/ui/button';
+    19 │ import { Input } from '@/components/ui/input';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    17 │ import·React,·{·useEffect,·useRef,·useState·}·from·'react';
+       │        -------                                             
+
+src\components\features\file-viewer\viewers\document-viewer.tsx:20:10 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    18 │ import { Button } from '@/components/ui/button';
+    19 │ import { Input } from '@/components/ui/input';
+  > 20 │ import { cn, formatFileSize } from '@/lib/utils';
+       │          ^^
+    21 │ import type { DocumentWithStats } from '@/types/entities/document';
+    22 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    20 │ import·{·cn,·formatFileSize·}·from·'@/lib/utils';
+       │          ----                                    
+
+src\components\features\file-viewer\viewers\document-viewer.tsx:48:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: documentSrc
+  
+    46 │ 	const isOfficeDoc = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(fileExtension);
+    47 │ 
+  > 48 │ 	useEffect(() => {
+       │ 	^^^^^^^^^
+    49 │ 		// Simulate loading and check if document can be rendered
+    50 │ 		const timer = setTimeout(() => {
+  
+  i This dependency can be removed from the list.
+  
+    58 │ 		return () => clearTimeout(timer);
+  > 59 │ 	}, [documentSrc, isPDF, isTextFile, document.stats?.pageCount]);
+       │ 	    ^^^^^^^^^^^
+    60 │ 
+    61 │ 	const handleZoomIn = () => {
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    59 │ → },·[documentSrc,·isPDF,·isTextFile,·document.stats?.pageCount]);
+       │       -------------                                               
+
+src\components\features\file-viewer\viewers\generic-file-viewer.tsx:25:10 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    23 │ import { Button } from '@/components/ui/button';
+    24 │ import { Textarea } from '@/components/ui/textarea';
+  > 25 │ import { cn, formatFileSize } from '@/lib/utils';
+       │          ^^
+    26 │ import type { FileWithStats } from '@/types/entities/file/base';
+    27 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    25 │ import·{·cn,·formatFileSize·}·from·'@/lib/utils';
+       │          ----                                    
+
+src\components\features\file-viewer\viewers\generic-file-viewer.tsx:20:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    18 │ 	FileText,
+    19 │ } from 'lucide-react';
+  > 20 │ import React, { useEffect, useState } from 'react';
+       │        ^^^^^^^^^^^^^^^^^^
+    21 │ import { toast } from 'sonner';
+    22 │ import { Badge } from '@/components/ui/badge';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    20 │ import·React,·{·useEffect,·useState·}·from·'react';
+       │        ------- -----------                         
+
+src\components\file-browser\view-configuration\ViewConfigurationPanel.tsx:1:19 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+  > 1 │ import { Columns, Eye, Grid, LayoutGrid, List, Settings, Sliders } from 'lucide-react';
+      │                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import React, { useCallback, useState } from 'react';
+    3 │ import { toast } from 'sonner';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·{·Columns,·Eye,·Grid,·LayoutGrid,·List,·Settings,·Sliders·}·from·'lucide-react';
+      │                   -----                                  --------                      
+
+src\components\file-browser\view-configuration\ViewConfigurationPanel.tsx:104:29 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on saveAsPreset.
+  
+    102 │ 	);
+    103 │ 
+  > 104 │ 	const handleCreatePreset = useCallback(async () => {
+        │ 	                           ^^^^^^^^^^^
+    105 │ 		if (!presetName.trim()) {
+    106 │ 			toast.error('El nombre del preset es requerido');
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    110 │ 		try {
+  > 111 │ 			await saveAsPreset(presetName, presetDescription);
+        │ 			      ^^^^^^^^^^^^
+    112 │ 
+    113 │ 			setPresetName('');
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    120 │ → },·[presetName,·presetDescription,·currentConfig,·createPreset,·saveAsPreset]);
+        │                                                                 ++++++++++++++   
+
+src\components\file-browser\view-configuration\ViewConfigurationPanel.tsx:104:29 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: currentConfig, createPreset
+  
+    102 │ 	);
+    103 │ 
+  > 104 │ 	const handleCreatePreset = useCallback(async () => {
+        │ 	                           ^^^^^^^^^^^
+    105 │ 		if (!presetName.trim()) {
+    106 │ 			toast.error('El nombre del preset es requerido');
+  
+  i This dependency can be removed from the list.
+  
+    118 │ 			toast.error('Error al crear el preset');
+    119 │ 		}
+  > 120 │ 	}, [presetName, presetDescription, currentConfig, createPreset]);
+        │ 	                                   ^^^^^^^^^^^^^
+    121 │ 
+    122 │ 	const handleExport = useCallback(async () => {
+  
+  i This dependency can be removed from the list.
+  
+    118 │ 			toast.error('Error al crear el preset');
+    119 │ 		}
+  > 120 │ 	}, [presetName, presetDescription, currentConfig, createPreset]);
+        │ 	                                                  ^^^^^^^^^^^^
+    121 │ 
+    122 │ 	const handleExport = useCallback(async () => {
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    120 │ → },·[presetName,·presetDescription,·currentConfig,·createPreset]);
+        │                                    -----------------------------   
+
+src\components\navigation\components\nav-category-children.tsx:19:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    17 │ export const NavCategoryChildren = memo(function NavCategoryChildren({
+    18 │ 	categoryId,
+  > 19 │ 	isCollapsed,
+       │ 	^^^^^^^^^^^
+    20 │ 	selectedChildId,
+    21 │ 	currentView,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\navigation\components\nav-category-children.tsx:21:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    19 │ 	isCollapsed,
+    20 │ 	selectedChildId,
+  > 21 │ 	currentView,
+       │ 	^^^^^^^^^^^
+    22 │ 	items,
+    23 │ 	onItemClick,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\navigation\components\nav-panel-header.tsx:117:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    115 │ 	onOpenEntityCards,
+    116 │ 	onToggleZenMode, // 🧘 Nuevo prop para modo zen
+  > 117 │ 	isAnimating = false,
+        │ 	^^^^^^^^^^^
+    118 │ }: NavPanelHeaderProps) {
+    119 │ 	// Perfil por defecto - reemplazar con datos reales del contexto de usuario
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\navigation\navigation-panel.tsx:13:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    11 │ export const NavPanel = memo(function NavPanel({
+    12 │ 	isCollapsed = false,
+  > 13 │ 	onToggleCollapse,
+       │ 	^^^^^^^^^^^^^^^^
+    14 │ 	isAnimating = false,
+    15 │ }: Omit<NavPanelProps, 'initialData'>) {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\settings\folders\folder-card.tsx:364:32 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    362 │ 													onClick={() => {
+    363 │ 														console.log('Toggling expansion for folder:', folder.id, 'current state:', isExpanded);
+  > 364 │ 														onToggleExpanded(folder.id!);
+        │ 														                 ^^^^^^^^^^
+    365 │ 													}}
+    366 │ 													disabled={isGloballyProcessing || !folder.id}
+  
+
+src\components\settings\folders\hooks\use-folders-operations.ts:30:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    28 │ 	onLoadData,
+    29 │ 	onError,
+  > 30 │ 	onReindexAllStart,
+       │ 	^^^^^^^^^^^^^^^^^
+    31 │ }: UseOperationsOptions) {
+    32 │ 	// ✅ Llamar todos los hooks al nivel superior
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\settings\folders\subfolder-card.tsx:33:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    31 │ 	onReindex,
+    32 │ 	onToggleAutoReindex,
+  > 33 │ 	onFolderClick,
+       │ 	^^^^^^^^^^^^^
+    34 │ 	getFolderIndexStatus,
+    35 │ }: SubfolderCardProps) {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\toolbar\main-toolbar.tsx:74:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    72 │ 	isRightPanelCollapsed,
+    73 │ 	toggleRightPanelCollapse,
+  > 74 │ 	isRightPanelVisible,
+       │ 	^^^^^^^^^^^^^^^^^^^
+    75 │ 	isLeftPanelCollapsed,
+    76 │ 	toggleLeftPanelCollapse,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\ui\gradient-background.tsx:4:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    3 │ import { HTMLMotionProps, motion, type Transition } from 'motion/react';
+  > 4 │ import * as React from 'react';
+      │             ^^^^^
+    5 │ import { cn } from '@/lib/utils';
+    6 │ 
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     2  2 │   
+     3  3 │   import { HTMLMotionProps, motion, type Transition } from 'motion/react';
+     4    │ - import·*·as·React·from·'react';
+     5  4 │   import { cn } from '@/lib/utils';
+     6  5 │   
+  
+
+src\components\ui\particles.tsx:222:71 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━
+
+  ! remapValue changes on every re-render and should not be used as a hook dependency.
+  
+    220 │ 		}
+    221 │ 		rafID.current = window.requestAnimationFrame(animate);
+  > 222 │ 	}, [circleParams, clearContext, drawCircle, ease, staticity, vx, vy, remapValue]);
+        │ 	                                                                     ^^^^^^^^^^
+    223 │ 
+    224 │ 	const onMouseMove = useCallback(() => {
+  
+  i To fix this, wrap the definition of remapValue in its own useCallback() hook.
+  
+
+src\components\ui\theme-provider.tsx:104:4 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━
+
+  ! getSystemTheme changes on every re-render and should not be used as a hook dependency.
+  
+    102 │ 			return currentTheme as (typeof customThemes)[number];
+    103 │ 		},
+  > 104 │ 		[getSystemTheme]
+        │ 		 ^^^^^^^^^^^^^^
+    105 │ 	);
+    106 │ 
+  
+  i To fix this, wrap the definition of getSystemTheme in its own useCallback() hook.
+  
+
+src\components\views\audio\audio-content-view.tsx:118:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    116 │ 	showForm,
+    117 │ 	newAudioName,
+  > 118 │ 	newAudioFile,
+        │ 	^^^^^^^^^^^^
+    119 │ 	currentAudio,
+    120 │ 	editingAudio,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\views\audio\audio-content-view.tsx:125:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    123 │ 	setNewAudioFile,
+    124 │ 	setCurrentAudio,
+  > 125 │ 	setEditingAudio,
+        │ 	^^^^^^^^^^^^^^^
+    126 │ 	handleAudioClick,
+    127 │ 	handleEditAudio,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\views\audio\audio-content-view.tsx:120:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    118 │ 	newAudioFile,
+    119 │ 	currentAudio,
+  > 120 │ 	editingAudio,
+        │ 	^^^^^^^^^^^^
+    121 │ 	setShowForm,
+    122 │ 	setNewAudioName,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\views\audio\audio-content-view.tsx:123:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    121 │ 	setShowForm,
+    122 │ 	setNewAudioName,
+  > 123 │ 	setNewAudioFile,
+        │ 	^^^^^^^^^^^^^^^
+    124 │ 	setCurrentAudio,
+    125 │ 	setEditingAudio,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\views\documents\documents-content-view.tsx:46:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    44 │ 	showForm,
+    45 │ 	newDocumentName,
+  > 46 │ 	newDocumentFile,
+       │ 	^^^^^^^^^^^^^^^
+    47 │ 	setShowForm,
+    48 │ 	setNewDocumentName,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\views\documents\documents-content-view.tsx:49:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    47 │ 	setShowForm,
+    48 │ 	setNewDocumentName,
+  > 49 │ 	setNewDocumentFile,
+       │ 	^^^^^^^^^^^^^^^^^^
+    50 │ 	handleDocumentClick,
+    51 │ 	handleFileChange,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\views\favorites\favorites-view.tsx:53:4 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  ! setSelectedFavoriteId changes on every re-render and should not be used as a hook dependency.
+  
+    51 │ 			clientEvents.emit('favorite:selected', { favoriteId });
+    52 │ 		},
+  > 53 │ 		[setSelectedFavoriteId]
+       │ 		 ^^^^^^^^^^^^^^^^^^^^^
+    54 │ 	);
+    55 │ 
+  
+  i To fix this, wrap the definition of setSelectedFavoriteId in its own useCallback() hook.
+  
+
+src\components\views\file3d\file3d-content-view.tsx:46:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    44 │ 	showForm,
+    45 │ 	newFile3DName,
+  > 46 │ 	newFile3DFile,
+       │ 	^^^^^^^^^^^^^
+    47 │ 	setShowForm,
+    48 │ 	setNewFile3DName,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\views\file3d\file3d-content-view.tsx:49:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    47 │ 	setShowForm,
+    48 │ 	setNewFile3DName,
+  > 49 │ 	setNewFile3DFile,
+       │ 	^^^^^^^^^^^^^^^^
+    50 │ 	handleFile3DClick,
+    51 │ 	handleFileChange,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\views\groups\groups-content-view.tsx:56:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    55 │ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
+  > 56 │ 	groups,
+       │ 	^^^^^^
+    57 │ 	isLoading,
+    58 │ 	error,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\views\properties\property-content-view.tsx:16:72 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    14 │  * Muestra detalles, valores asociados e imágenes relacionadas
+    15 │  */
+  > 16 │ export const PropertyContentView = memo(function PropertyContentView({ className }: PropertyContentViewProps) {
+       │                                                                        ^^^^^^^^^
+    17 │ 	// TODO: Implementar lógica de selección de propiedad desde el store
+    18 │ 	// const { selectedProperty } = usePropertyStore();
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\views\videos\videos-view.tsx:30:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on fetchVideos.
+  
+    29 │ 	// Cargar videos al montar el componente solo una vez
+  > 30 │ 	useEffect(() => {
+       │ 	^^^^^^^^^
+    31 │ 		fetchVideos();
+    32 │ 	}, []);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    29 │ 	// Cargar videos al montar el componente solo una vez
+    30 │ 	useEffect(() => {
+  > 31 │ 		fetchVideos();
+       │ 		^^^^^^^^^^^
+    32 │ 	}, []);
+    33 │ 
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    32 │ → },·[fetchVideos]);
+       │       +++++++++++   
+
+src\components\views\workflows\workflows-view.tsx:28:24 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on isLoading.
+  
+    26 │ 	const [newWorkflowDescription, setNewWorkflowDescription] = useState('');
+    27 │ 
+  > 28 │ 	const loadWorkflows = useCallback(async () => {
+       │ 	                      ^^^^^^^^^^^
+    29 │ 		if (isLoading) return;
+    30 │ 		setIsLoading(true);
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    28 │ 	const loadWorkflows = useCallback(async () => {
+  > 29 │ 		if (isLoading) return;
+       │ 		    ^^^^^^^^^
+    30 │ 		setIsLoading(true);
+    31 │ 		setError(null);
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    43 │ → },·[isLoading]);·//·Sin·dependencias·para·evitar·recreaciones·innecesarias
+       │       +++++++++                                                             
+
+src\components\views\workflows\workflows-view.tsx:45:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on loadWorkflows.
+  
+    43 │ 	}, []); // Sin dependencias para evitar recreaciones innecesarias
+    44 │ 
+  > 45 │ 	useEffect(() => {
+       │ 	^^^^^^^^^
+    46 │ 		loadWorkflows();
+    47 │ 	}, []); // Solo ejecutar al montar el componente
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    45 │ 	useEffect(() => {
+  > 46 │ 		loadWorkflows();
+       │ 		^^^^^^^^^^^^^
+    47 │ 	}, []); // Solo ejecutar al montar el componente
+    48 │ 
+  
+  i Either include it or remove the dependency array.
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    47 │ → },·[loadWorkflows]);·//·Solo·ejecutar·al·montar·el·componente
+       │       +++++++++++++                                            
+
+src\hooks\use-download-manager.ts:86:23 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on executeDownload.
+  
+    84 │ 	 * Process the download queue
+    85 │ 	 */
+  > 86 │ 	const processQueue = useCallback(async () => {
+       │ 	                     ^^^^^^^^^^^
+    87 │ 		if (processingRef.current) return;
+    88 │ 
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    109 │ 				// Start download (don't await to allow concurrent downloads)
+  > 110 │ 				executeDownload(downloadItem).finally(() => {
+        │ 				^^^^^^^^^^^^^^^
+    111 │ 					activeDownloadsRef.current--;
+    112 │ 					// Continue processing queue
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    118 118 │   			setIsProcessing(activeDownloadsRef.current > 0);
+    119 119 │   		}
+    120     │ - → },·[queue,·maxConcurrent]);
+        120 │ + → },·[queue,·maxConcurrent,·//·Start·download·(don't·await·to·allow·concurrent·downloads)
+        121 │ + → → → → executeDownload]);
+    121 122 │   
+    122 123 │   	/**
+  
+
+src\hooks\use-grid-view-config.ts:114:35 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    113 │ 	const calculateLayout = useMemo(() => {
+  > 114 │ 		return (containerWidth: number, itemCount: number): GridLayout => {
+        │ 		                                ^^^^^^^^^
+    115 │ 			if (!containerWidth || containerWidth <= 0) {
+    116 │ 				return {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend itemCount with an underscore.
+  
+    112 112 │   
+    113 113 │   	const calculateLayout = useMemo(() => {
+    114     │ - → → return·(containerWidth:·number,·itemCount:·number):·GridLayout·=>·{
+        114 │ + → → return·(containerWidth:·number,·_itemCount:·number):·GridLayout·=>·{
+    115 115 │   			if (!containerWidth || containerWidth <= 0) {
+    116 116 │   				return {
+  
+
+src\hooks\use-grid-view-config.ts:177:32 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on gridConfig?.hoverOverlay.
+  
+    175 │ 	}, []);
+    176 │ 
+  > 177 │ 	const getHoverOverlayConfig = useMemo(() => {
+        │ 	                              ^^^^^^^
+    178 │ 		return (): HoverOverlayConfig | null => {
+    179 │ 			if (!config.hoverEffects) return null;
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    179 │ 			if (!config.hoverEffects) return null;
+    180 │ 
+  > 181 │ 			const overlayConfig = gridConfig?.hoverOverlay;
+        │ 			                      ^^^^^^^^^^^^^^^^^^^^^^^^
+    182 │ 			return {
+    183 │ 				...DEFAULT_HOVER_OVERLAY_CONFIG,
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    187 │ → },·[config.hoverEffects,·currentConfig,·gridConfig?.hoverOverlay]);
+        │                                         ++++++++++++++++++++++++++   
+
+src\hooks\use-grid-view-config.ts:177:32 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: currentConfig
+  
+    175 │ 	}, []);
+    176 │ 
+  > 177 │ 	const getHoverOverlayConfig = useMemo(() => {
+        │ 	                              ^^^^^^^
+    178 │ 		return (): HoverOverlayConfig | null => {
+    179 │ 			if (!config.hoverEffects) return null;
+  
+  i This dependency can be removed from the list.
+  
+    185 │ 			};
+    186 │ 		};
+  > 187 │ 	}, [config.hoverEffects, currentConfig]);
+        │ 	                         ^^^^^^^^^^^^^
+    188 │ 
+    189 │ 	const getLabelConfig = useMemo(() => {
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    187 │ → },·[config.hoverEffects,·currentConfig]);
+        │                          ---------------   
+
+src\hooks\use-grid-view-config.ts:189:25 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on gridConfig?.labelConfig.
+  
+    187 │ 	}, [config.hoverEffects, currentConfig]);
+    188 │ 
+  > 189 │ 	const getLabelConfig = useMemo(() => {
+        │ 	                       ^^^^^^^
+    190 │ 		return (): LabelConfig => {
+    191 │ 			const labelConfig = gridConfig?.labelConfig;
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    189 │ 	const getLabelConfig = useMemo(() => {
+    190 │ 		return (): LabelConfig => {
+  > 191 │ 			const labelConfig = gridConfig?.labelConfig;
+        │ 			                    ^^^^^^^^^^^^^^^^^^^^^^^
+    192 │ 			return {
+    193 │ 				...DEFAULT_LABEL_CONFIG,
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    197 │ → },·[currentConfig,·gridConfig?.labelConfig]);
+        │                    +++++++++++++++++++++++++   
+
+src\hooks\use-grid-view-config.ts:189:25 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: currentConfig
+  
+    187 │ 	}, [config.hoverEffects, currentConfig]);
+    188 │ 
+  > 189 │ 	const getLabelConfig = useMemo(() => {
+        │ 	                       ^^^^^^^
+    190 │ 		return (): LabelConfig => {
+    191 │ 			const labelConfig = gridConfig?.labelConfig;
+  
+  i This dependency can be removed from the list.
+  
+    195 │ 			};
+    196 │ 		};
+  > 197 │ 	}, [currentConfig]);
+        │ 	    ^^^^^^^^^^^^^
+    198 │ 
+    199 │ 	const shouldShowAnimation = useMemo(() => {
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    197 │ → },·[currentConfig]);
+        │       -------------   
+
+src\hooks\use-masonry-view-config.ts:153:37 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    151 │ 	// Generate aspect ratio for an item
+    152 │ 	const getItemAspectRatio = useMemo(() => {
+  > 153 │ 		return (item: AnyEntityWithStats, index: number): number => {
+        │ 		                                  ^^^^^
+    154 │ 			if (!config.aspectRatioVariation.enabled) {
+    155 │ 				return 1.2; // Default aspect ratio
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend index with an underscore.
+  
+    151 151 │   	// Generate aspect ratio for an item
+    152 152 │   	const getItemAspectRatio = useMemo(() => {
+    153     │ - → → return·(item:·AnyEntityWithStats,·index:·number):·number·=>·{
+        153 │ + → → return·(item:·AnyEntityWithStats,·_index:·number):·number·=>·{
+    154 154 │   			if (!config.aspectRatioVariation.enabled) {
+    155 155 │   				return 1.2; // Default aspect ratio
+  
+
+src\hooks\use-progress-tracking.ts:230:31 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    228 │ 		// Filter by operation types if specified
+    229 │ 		const filteredOps = options.operationTypes
+  > 230 │ 			? activeOps.filter((op) => options.operationTypes!.includes(op.type))
+        │ 			                           ^^^^^^^^^^^^^^^^^^^^^^^
+    231 │ 			: activeOps;
+    232 │ 
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+    228 228 │   		// Filter by operation types if specified
+    229 229 │   		const filteredOps = options.operationTypes
+    230     │ - → → → ?·activeOps.filter((op)·=>·options.operationTypes!.includes(op.type))
+        230 │ + → → → ?·activeOps.filter((op)·=>·options.operationTypes?.includes(op.type))
+    231 231 │   			: activeOps;
+    232 232 │   
+  
+
+src\hooks\use-progress-tracking.ts:189:3 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    187 │ 			this.eventListeners.set(event, []);
+    188 │ 		}
+  > 189 │ 		this.eventListeners.get(event)!.push(listener);
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    190 │ 	}
+    191 │ 
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+    187 187 │   			this.eventListeners.set(event, []);
+    188 188 │   		}
+    189     │ - → → this.eventListeners.get(event)!.push(listener);
+        189 │ + → → this.eventListeners.get(event)?.push(listener);
+    190 190 │   	}
+    191 191 │   
+  
+
+src\hooks\use-progress-tracking.ts:106:62 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    104 │ 	}
+    105 │ 
+  > 106 │ 	updateProgress(operationId: string, progress: ProgressInfo, stepId?: string): void {
+        │ 	                                                            ^^^^^^
+    107 │ 		const operation = this.operations.get(operationId);
+    108 │ 		if (!operation) return;
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend stepId with an underscore.
+  
+    104 104 │   	}
+    105 105 │   
+    106     │ - → updateProgress(operationId:·string,·progress:·ProgressInfo,·stepId?:·string):·void·{
+        106 │ + → updateProgress(operationId:·string,·progress:·ProgressInfo,·_stepId?:·string):·void·{
+    107 107 │   		const operation = this.operations.get(operationId);
+    108 108 │   		if (!operation) return;
+  
+
+src\hooks\use-progress-tracking.ts:247:33 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    245 │ 		};
+    246 │ 
+  > 247 │ 		const handleProgressUpdate = (operation: ProgressOperation) => {
+        │ 		                              ^^^^^^^^^
+    248 │ 			updateOperations();
+    249 │ 		};
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend operation with an underscore.
+  
+    245 245 │   		};
+    246 246 │   
+    247     │ - → → const·handleProgressUpdate·=·(operation:·ProgressOperation)·=>·{
+        247 │ + → → const·handleProgressUpdate·=·(_operation:·ProgressOperation)·=>·{
+    248 248 │   			updateOperations();
+    249 249 │   		};
+  
+
+src\hooks\use-progress-tracking.ts:405:88 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    403 │ 	);
+    404 │ 
+  > 405 │ 	const updateBatchProgress = useCallback((operationId: string, processedCount: number, currentItem?: string) => {
+        │ 	                                                                                      ^^^^^^^^^^^
+    406 │ 		const operation = progressService.getOperation(operationId);
+    407 │ 		if (operation) {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend currentItem with an underscore.
+  
+    403 403 │   	);
+    404 404 │   
+    405     │ - → const·updateBatchProgress·=·useCallback((operationId:·string,·processedCount:·number,·currentItem?:·string)·=>·{
+        405 │ + → const·updateBatchProgress·=·useCallback((operationId:·string,·processedCount:·number,·_currentItem?:·string)·=>·{
+    406 406 │   		const operation = progressService.getOperation(operationId);
+    407 407 │   		if (operation) {
+  
+
+src\hooks\use-selecto.ts:32:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    30 │ 	onDeselect,
+    31 │ 	enabled = true,
+  > 32 │ 	selectColor = '#3b82f6',
+       │ 	^^^^^^^^^^^
+    33 │ 	selectOpacity = 0.1,
+    34 │ }: UseSelectoProps = {}) {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\hooks\use-selecto.ts:33:2 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    31 │ 	enabled = true,
+    32 │ 	selectColor = '#3b82f6',
+  > 33 │ 	selectOpacity = 0.1,
+       │ 	^^^^^^^^^^^^^
+    34 │ }: UseSelectoProps = {}) {
+    35 │ 	const selectoRef = useRef<Selecto | null>(null);
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\hooks\use-system-integration.ts:75:38 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    73 │ }
+    74 │ 
+  > 75 │ export const useSystemIntegration = (options: SystemIntegrationOptions = {}): UseSystemIntegrationReturn => {
+       │                                      ^^^^^^^
+    76 │ 	const [capabilities, setCapabilities] = useState<SystemCapabilities>({
+    77 │ 		hasFileSystemAccess: false,
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend options with an underscore.
+  
+     73  73 │   }
+     74  74 │   
+     75     │ - export·const·useSystemIntegration·=·(options:·SystemIntegrationOptions·=·{}):·UseSystemIntegrationReturn·=>·{
+         75 │ + export·const·useSystemIntegration·=·(_options:·SystemIntegrationOptions·=·{}):·UseSystemIntegrationReturn·=>·{
+     76  76 │   	const [capabilities, setCapabilities] = useState<SystemCapabilities>({
+     77  77 │   		hasFileSystemAccess: false,
+  
+
+src\hooks\use-undo-redo.ts:69:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━
+
+  ! This hook does not specify its dependency on redo.
+  
+    68 │ 	// Keyboard shortcuts
+  > 69 │ 	useEffect(() => {
+       │ 	^^^^^^^^^
+    70 │ 		if (!enableKeyboardShortcuts) return;
+    71 │ 
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    81 │ 			if ((event.ctrlKey && event.shiftKey && event.key === 'Z') || (event.ctrlKey && event.key === 'y')) {
+    82 │ 				event.preventDefault();
+  > 83 │ 				redo();
+       │ 				^^^^
+    84 │ 				return;
+    85 │ 			}
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    93 │ → },·[enableKeyboardShortcuts,·redo]);
+       │                              ++++++   
+
+src\hooks\use-undo-redo.ts:69:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━━━━━━
+
+  ! This hook does not specify its dependency on undo.
+  
+    68 │ 	// Keyboard shortcuts
+  > 69 │ 	useEffect(() => {
+       │ 	^^^^^^^^^
+    70 │ 		if (!enableKeyboardShortcuts) return;
+    71 │ 
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    74 │ 			if (event.ctrlKey && event.key === 'z' && !event.shiftKey) {
+    75 │ 				event.preventDefault();
+  > 76 │ 				undo();
+       │ 				^^^^
+    77 │ 				return;
+    78 │ 			}
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    93 │ → },·[enableKeyboardShortcuts,·undo]);
+       │                              ++++++   
+
+src\hooks\use-view-configuration.ts:11:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+     9 │ import { useCallback, useMemo } from 'react';
+    10 │ import { useSettingsStore } from '@/store/settings.store';
+  > 11 │ import { CardsViewConfig } from '@/types/file-browser/cards-view-config';
+       │        ^^^^^^^^^^^^^^^^^^^
+    12 │ import { GridViewConfig } from '@/types/file-browser/grid-view-config';
+    13 │ import { MasonryViewConfig } from '@/types/file-browser/masonry-view-config';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      9   9 │   import { useCallback, useMemo } from 'react';
+     10  10 │   import { useSettingsStore } from '@/store/settings.store';
+     11     │ - import·{·CardsViewConfig·}·from·'@/types/file-browser/cards-view-config';
+     12  11 │   import { GridViewConfig } from '@/types/file-browser/grid-view-config';
+     13  12 │   import { MasonryViewConfig } from '@/types/file-browser/masonry-view-config';
+  
+
+src\hooks\use-view-configuration.ts:12:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    10 │ import { useSettingsStore } from '@/store/settings.store';
+    11 │ import { CardsViewConfig } from '@/types/file-browser/cards-view-config';
+  > 12 │ import { GridViewConfig } from '@/types/file-browser/grid-view-config';
+       │        ^^^^^^^^^^^^^^^^^^
+    13 │ import { MasonryViewConfig } from '@/types/file-browser/masonry-view-config';
+    14 │ import {
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     10  10 │   import { useSettingsStore } from '@/store/settings.store';
+     11  11 │   import { CardsViewConfig } from '@/types/file-browser/cards-view-config';
+     12     │ - import·{·GridViewConfig·}·from·'@/types/file-browser/grid-view-config';
+     13  12 │   import { MasonryViewConfig } from '@/types/file-browser/masonry-view-config';
+     14  13 │   import {
+  
+
+src\hooks\use-view-configuration.ts:13:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━
+
+  ! This import is unused.
+  
+    11 │ import { CardsViewConfig } from '@/types/file-browser/cards-view-config';
+    12 │ import { GridViewConfig } from '@/types/file-browser/grid-view-config';
+  > 13 │ import { MasonryViewConfig } from '@/types/file-browser/masonry-view-config';
+       │        ^^^^^^^^^^^^^^^^^^^^^
+    14 │ import {
+    15 │ 	CommonViewSettings,
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     11  11 │   import { CardsViewConfig } from '@/types/file-browser/cards-view-config';
+     12  12 │   import { GridViewConfig } from '@/types/file-browser/grid-view-config';
+     13     │ - import·{·MasonryViewConfig·}·from·'@/types/file-browser/masonry-view-config';
+     14  13 │   import {
+     15  14 │   	CommonViewSettings,
+  
+
+src\hooks\use-view-configuration.ts:402:4 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    401 │ 	const exportConfigurationWithOptions = useCallback(
+  > 402 │ 		(options?: any) => {
+        │ 		 ^^^^^^^
+    403 │ 			const data = exportConfiguration();
+    404 │ 			return {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend options with an underscore.
+  
+    400 400 │   
+    401 401 │   	const exportConfigurationWithOptions = useCallback(
+    402     │ - → → (options?:·any)·=>·{
+        402 │ + → → (_options?:·any)·=>·{
+    403 403 │   			const data = exportConfiguration();
+    404 404 │   			return {
+  
+
+src\hooks\use-view-configuration.ts:413:30 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    412 │ 	const importConfigurationAsync = useCallback(
+  > 413 │ 		async (configJson: string, options?: any): Promise<{ success: boolean; errors: string[] }> => {
+        │ 		                           ^^^^^^^
+    414 │ 			try {
+    415 │ 				const success = importConfiguration(configJson);
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend options with an underscore.
+  
+    411 411 │   
+    412 412 │   	const importConfigurationAsync = useCallback(
+    413     │ - → → async·(configJson:·string,·options?:·any):·Promise<{·success:·boolean;·errors:·string[]·}>·=>·{
+        413 │ + → → async·(configJson:·string,·_options?:·any):·Promise<{·success:·boolean;·errors:·string[]·}>·=>·{
+    414 414 │   			try {
+    415 415 │   				const success = importConfiguration(configJson);
+  
+
+src\lib\contexts\theme-provider.tsx:148:27 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━
+
+  ! applyTheme changes on every re-render and should not be used as a hook dependency.
+  
+    146 │ 			return () => mediaQuery.removeEventListener('change', handleChange);
+    147 │ 		}
+  > 148 │ 	}, [theme, enableSystem, applyTheme, resolveTheme]);
+        │ 	                         ^^^^^^^^^^
+    149 │ 
+    150 │ 	// Función para cambiar tema
+  
+  i To fix this, wrap the definition of applyTheme in its own useCallback() hook.
+  
+
+src\lib\contexts\theme-provider.tsx:148:39 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━
+
+  ! resolveTheme changes on every re-render and should not be used as a hook dependency.
+  
+    146 │ 			return () => mediaQuery.removeEventListener('change', handleChange);
+    147 │ 		}
+  > 148 │ 	}, [theme, enableSystem, applyTheme, resolveTheme]);
+        │ 	                                     ^^^^^^^^^^^^
+    149 │ 
+    150 │ 	// Función para cambiar tema
+  
+  i To fix this, wrap the definition of resolveTheme in its own useCallback() hook.
+  
+
+src\lib\drizzle\relations.ts:23:68 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    21 │  * 👤 Relaciones de Profile
+    22 │  */
+  > 23 │ export const profileRelations = relations(schema.profiles, ({ one, many }) => ({
+       │                                                                    ^^^^
+    24 │ 	// Relación 1:1 con Settings
+    25 │ 	settings: one(schema.settings, {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\lib\drizzle\relations.ts:369:66 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    367 │  * 📋 Relaciones de Activity
+    368 │  */
+  > 369 │ export const activityRelations = relations(schema.activities, ({ one }) => ({
+        │                                                                  ^^^
+    370 │ 	// Las actividades usan relaciones polimórficas basadas en entityType y entityId
+    371 │ 	// La relación con imágenes se resuelve en el código de aplicación
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\lib\drizzle\relations.ts:387:65 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    385 │  * 🏷� Relaciones de Metadata
+    386 │  */
+  > 387 │ export const metadataRelations = relations(schema.metadatas, ({ one }) => ({
+        │                                                                 ^^^
+    388 │ 	// Relación polimórfica - se resuelve en el código de aplicación
+    389 │ 	// basándose en entityType y entityId
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\lib\drizzle\relations.ts:395:67 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    393 │  * 🖼� Relaciones de Thumbnail
+    394 │  */
+  > 395 │ export const thumbnailRelations = relations(schema.thumbnails, ({ one }) => ({
+        │                                                                   ^^^
+    396 │ 	// Relación polimórfica - se resuelve en el código de aplicación
+    397 │ 	// basándose en entityType y entityId
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\lib\drizzle\relations.ts:403:65 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    401 │  * ⭐ Relaciones de Favorite
+    402 │  */
+  > 403 │ export const favoriteRelations = relations(schema.favorites, ({ one }) => ({
+        │                                                                 ^^^
+    404 │ 	// Relación polimórfica - se resuelve en el código de aplicación
+    405 │ 	// basándose en entityType y entityId
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\server\services\video.server.service.ts:357:60 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    355 │ 		const avgDuration =
+    356 │ 			validDurations.length > 0
+  > 357 │ 				? validDurations.reduce((sum: number, v: any) => sum + v.duration!, 0) / validDurations.length
+        │ 				                                                       ^^^^^^^^^^^
+    358 │ 				: 0;
+    359 │ 
+  
+
+src\server\services\video.server.service.ts:362:77 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    360 │ 		const validSizes = allVideos.filter((v: any) => v.width && v.height);
+    361 │ 		const avgWidth =
+  > 362 │ 			validSizes.length > 0 ? validSizes.reduce((sum: number, v: any) => sum + v.width!, 0) / validSizes.length : 0;
+        │ 			                                                                         ^^^^^^^^
+    363 │ 		const avgHeight =
+    364 │ 			validSizes.length > 0 ? validSizes.reduce((sum: number, v: any) => sum + v.height!, 0) / validSizes.length : 0;
+  
+
+src\server\services\video.server.service.ts:364:77 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    362 │ 			validSizes.length > 0 ? validSizes.reduce((sum: number, v: any) => sum + v.width!, 0) / validSizes.length : 0;
+    363 │ 		const avgHeight =
+  > 364 │ 			validSizes.length > 0 ? validSizes.reduce((sum: number, v: any) => sum + v.height!, 0) / validSizes.length : 0;
+        │ 			                                                                         ^^^^^^^^^
+    365 │ 
+    366 │ 		return [
+  
+
+src\services\cache\cache-manager.ts:142:22 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    140 │ 			// Remove existing entry if it exists
+    141 │ 			if (this.cache.has(key)) {
+  > 142 │ 				const oldEntry = this.cache.get(key)!;
+        │ 				                 ^^^^^^^^^^^^^^^^^^^^
+    143 │ 				this.statistics.totalSize -= oldEntry.size;
+    144 │ 			}
+  
+
+src\services\clipboard\clipboard-manager.test.ts:230:30 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    228 │ 			const jsonData = await clipboardManager.getClipboardDataInFormat(ClipboardFormat.JSON);
+    229 │ 			expect(jsonData).toBeTruthy();
+  > 230 │ 			const parsed = JSON.parse(jsonData!);
+        │ 			                          ^^^^^^^^^
+    231 │ 			expect(parsed.items).toHaveLength(2);
+    232 │ 			expect(parsed.operation).toBe('copy');
+  
+
+src\services\download\download.service.ts:373:48 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    371 │ 	 * Download image as PDF
+    372 │ 	 */
+  > 373 │ 	private async downloadAsPdf(filePath: string, filename: string, signal: AbortSignal): Promise<Blob> {
+        │ 	                                              ^^^^^^^^
+    374 │ 		// For now, return original blob
+    375 │ 		// In a real implementation, you'd convert image to PDF
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend filename with an underscore.
+  
+    371 371 │   	 * Download image as PDF
+    372 372 │   	 */
+    373     │ - → private·async·downloadAsPdf(filePath:·string,·filename:·string,·signal:·AbortSignal):·Promise<Blob>·{
+        373 │ + → private·async·downloadAsPdf(filePath:·string,·_filename:·string,·signal:·AbortSignal):·Promise<Blob>·{
+    374 374 │   		// For now, return original blob
+    375 375 │   		// In a real implementation, you'd convert image to PDF
+  
+
+src\services\download\download.service.ts:337:51 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    335 │ 	 * Download file in original format
+    336 │ 	 */
+  > 337 │ 	private async downloadOriginal(filePath: string, options: DownloadOptions, signal: AbortSignal): Promise<Blob> {
+        │ 	                                                 ^^^^^^^
+    338 │ 		// Try to get file as data URL first (for images)
+    339 │ 		try {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend options with an underscore.
+  
+    335 335 │   	 * Download file in original format
+    336 336 │   	 */
+    337     │ - → private·async·downloadOriginal(filePath:·string,·options:·DownloadOptions,·signal:·AbortSignal):·Promise<Blob>·{
+        337 │ + → private·async·downloadOriginal(filePath:·string,·_options:·DownloadOptions,·signal:·AbortSignal):·Promise<Blob>·{
+    338 338 │   		// Try to get file as data URL first (for images)
+    339 339 │   		try {
+  
+
+src\services\download\download.service.ts:360:48 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    358 │ 	 * Download file as ZIP
+    359 │ 	 */
+  > 360 │ 	private async downloadAsZip(filePath: string, filename: string, signal: AbortSignal): Promise<Blob> {
+        │ 	                                              ^^^^^^^^
+    361 │ 		// For now, we'll use a simple approach
+    362 │ 		// In a real implementation, you'd use a library like JSZip
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend filename with an underscore.
+  
+    358 358 │   	 * Download file as ZIP
+    359 359 │   	 */
+    360     │ - → private·async·downloadAsZip(filePath:·string,·filename:·string,·signal:·AbortSignal):·Promise<Blob>·{
+        360 │ + → private·async·downloadAsZip(filePath:·string,·_filename:·string,·signal:·AbortSignal):·Promise<Blob>·{
+    361 361 │   		// For now, we'll use a simple approach
+    362 362 │   		// In a real implementation, you'd use a library like JSZip
+  
+
+src\services\drag-selection\drag-selection-manager.ts:243:16 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    241 │ 	// Selection logic
+    242 │ 	private startSelection(event: MouseEvent): void {
+  > 243 │ 		const rect = this.container!.getBoundingClientRect();
+        │ 		             ^^^^^^^^^^^^^^^
+    244 │ 
+    245 │ 		this.state.isActive = true;
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+    241 241 │   	// Selection logic
+    242 242 │   	private startSelection(event: MouseEvent): void {
+    243     │ - → → const·rect·=·this.container!.getBoundingClientRect();
+        243 │ + → → const·rect·=·this.container?.getBoundingClientRect();
+    244 244 │   
+    245 245 │   		this.state.isActive = true;
+  
+
+src\services\drag-selection\drag-selection-manager.ts:298:23 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    296 │ 	}
+    297 │ 
+  > 298 │ 	private endSelection(event: MouseEvent): void {
+        │ 	                     ^^^^^
+    299 │ 		if (!this.state.isActive) return;
+    300 │ 
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend event with an underscore.
+  
+    296 296 │   	}
+    297 297 │   
+    298     │ - → private·endSelection(event:·MouseEvent):·void·{
+        298 │ + → private·endSelection(_event:·MouseEvent):·void·{
+    299 299 │   		if (!this.state.isActive) return;
+    300 300 │   
+  
+
+src\services\drag-selection\drag-selection-manager.ts:263:4 lint/style/noNonNullAssertion  FIXABLE  ━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    261 │ 		// Add visual feedback class to container
+    262 │ 		if (this.config.visualFeedback) {
+  > 263 │ 			this.container!.classList.add('drag-selecting');
+        │ 			^^^^^^^^^^^^^^^
+    264 │ 		}
+    265 │ 
+  
+  i Unsafe fix: Replace with optional chain operator ?. This operator includes runtime checks, so it is safer than the compile-only non-null assertion operator
+  
+    261 261 │   		// Add visual feedback class to container
+    262 262 │   		if (this.config.visualFeedback) {
+    263     │ - → → → this.container!.classList.add('drag-selecting');
+        263 │ + → → → this.container?.classList.add('drag-selecting');
+    264 264 │   		}
+    265 265 │   
+  
+
+src\services\drag-selection\drag-selection-manager.ts:3:13 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! This import is unused.
+  
+    1 │ import type { SelectionState } from '@/store/selection.store';
+    2 │ import { useSelectionStore } from '@/store/selection.store';
+  > 3 │ import type { EntityWithStats } from '../../types/migration';
+      │             ^^^^^^^^^^^^^^^^^^^
+    4 │ 
+    5 │ export interface DragSelectionConfig {
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      1   1 │   import type { SelectionState } from '@/store/selection.store';
+      2   2 │   import { useSelectionStore } from '@/store/selection.store';
+      3     │ - import·type·{·EntityWithStats·}·from·'../../types/migration';
+      4   3 │   
+      5   4 │   export interface DragSelectionConfig {
+  
+
+src\services\drag-selection\drag-selection-manager.ts:234:28 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    232 │ 	}
+    233 │ 
+  > 234 │ 	private handleContextMenu(event: MouseEvent): void {
+        │ 	                          ^^^^^
+    235 │ 		// Cancel selection on right click
+    236 │ 		if (this.state.isActive) {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend event with an underscore.
+  
+    232 232 │   	}
+    233 233 │   
+    234     │ - → private·handleContextMenu(event:·MouseEvent):·void·{
+        234 │ + → private·handleContextMenu(_event:·MouseEvent):·void·{
+    235 235 │   		// Cancel selection on right click
+    236 236 │   		if (this.state.isActive) {
+  
+
+src\services\file\batch-operations.service.ts:34:42 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━
+
+  ! Don't use 'Function' as a type.
+  
+    32 │ 	}
+    33 │ 
+  > 34 │ 	removeListener(event: string, listener: Function): this {
+       │ 	                                        ^^^^^^^^
+    35 │ 		if (!this.events[event]) {
+    36 │ 			return this;
+  
+  i Prefer explicitly define the function shape. This type accepts any function-like value, which can be a common source of bugs.
+  
+
+src\services\file\batch-operations.service.ts:10:35 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━
+
+  ! Don't use 'Function' as a type.
+  
+     8 │ // Browser-compatible EventEmitter implementation
+     9 │ class EventEmitter {
+  > 10 │ 	private events: { [key: string]: Function[] } = {};
+       │ 	                                 ^^^^^^^^
+    11 │ 
+    12 │ 	on(event: string, listener: Function): this {
+  
+  i Prefer explicitly define the function shape. This type accepts any function-like value, which can be a common source of bugs.
+  
+
+src\services\file\batch-operations.service.ts:12:30 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━
+
+  ! Don't use 'Function' as a type.
+  
+    10 │ 	private events: { [key: string]: Function[] } = {};
+    11 │ 
+  > 12 │ 	on(event: string, listener: Function): this {
+       │ 	                            ^^^^^^^^
+    13 │ 		if (!this.events[event]) {
+    14 │ 			this.events[event] = [];
+  
+  i Prefer explicitly define the function shape. This type accepts any function-like value, which can be a common source of bugs.
+  
+
+src\services\file\batch-operations.service.ts:67:2 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  ! Several of these imports are unused.
+  
+    65 │ 	type FileOperationOptions,
+    66 │ 	type FileOperationResult,
+  > 67 │ 	getFileInfo,
+       │ 	^^^^^^^^^^^
+    68 │ 	moveFile,
+    69 │ } from './file.service';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     65  65 │   	type FileOperationOptions,
+     66  66 │   	type FileOperationResult,
+     67     │ - → getFileInfo,
+     68  67 │   	moveFile,
+     69  68 │   } from './file.service';
+  
+
+src\services\progress\progress-tracking.service.ts:28:33 lint/complexity/noBannedTypes ━━━━━━━━━━━━━
+
+  ! Don't use 'Function' as a type.
+  
+    26 │ // Simple EventEmitter implementation for browser compatibility
+    27 │ class SimpleEventEmitter {
+  > 28 │ 	private events: Record<string, Function[]> = {};
+       │ 	                               ^^^^^^^^
+    29 │ 
+    30 │ 	on(event: string, listener: Function): void {
+  
+  i Prefer explicitly define the function shape. This type accepts any function-like value, which can be a common source of bugs.
+  
+
+src\services\progress\progress-tracking.service.ts:30:30 lint/complexity/noBannedTypes ━━━━━━━━━━━━━
+
+  ! Don't use 'Function' as a type.
+  
+    28 │ 	private events: Record<string, Function[]> = {};
+    29 │ 
+  > 30 │ 	on(event: string, listener: Function): void {
+       │ 	                            ^^^^^^^^
+    31 │ 		if (!this.events[event]) {
+    32 │ 			this.events[event] = [];
+  
+  i Prefer explicitly define the function shape. This type accepts any function-like value, which can be a common source of bugs.
+  
+
+src\services\progress\progress-tracking.service.ts:37:31 lint/complexity/noBannedTypes ━━━━━━━━━━━━━
+
+  ! Don't use 'Function' as a type.
+  
+    35 │ 	}
+    36 │ 
+  > 37 │ 	off(event: string, listener: Function): void {
+       │ 	                             ^^^^^^^^
+    38 │ 		if (!this.events[event]) return;
+    39 │ 		const index = this.events[event].indexOf(listener);
+  
+  i Prefer explicitly define the function shape. This type accepts any function-like value, which can be a common source of bugs.
+  
+
+src\services\progress\progress-tracking.service.ts:176:61 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    174 │ 	 * Update operation progress
+    175 │ 	 */
+  > 176 │ 	updateProgress(operationId: string, progressValue: number, currentItem?: string): void {
+        │ 	                                                           ^^^^^^^^^^^
+    177 │ 		const operation = this.operations.get(operationId);
+    178 │ 		if (!operation || operation.status === 'cancelled') {
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend currentItem with an underscore.
+  
+    174 174 │   	 * Update operation progress
+    175 175 │   	 */
+    176     │ - → updateProgress(operationId:·string,·progressValue:·number,·currentItem?:·string):·void·{
+        176 │ + → updateProgress(operationId:·string,·progressValue:·number,·_currentItem?:·string):·void·{
+    177 177 │   		const operation = this.operations.get(operationId);
+    178 178 │   		if (!operation || operation.status === 'cancelled') {
+  
+
+src\services\thumbnails\entity-thumbnail-adapter.ts:112:67 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    110 │ 	 * Genera thumbnail para imágenes usando el servicio existente
+    111 │ 	 */
+  > 112 │ 	private async generateImageThumbnail(entity: AnyEntityWithStats, options: EntityThumbnailOptions): Promise<string> {
+        │ 	                                                                 ^^^^^^^
+    113 │ 		// Usar el servicio existente de imágenes
+    114 │ 		await imageService.generateThumbnail(entity.id);
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend options with an underscore.
+  
+    110 110 │   	 * Genera thumbnail para imágenes usando el servicio existente
+    111 111 │   	 */
+    112     │ - → private·async·generateImageThumbnail(entity:·AnyEntityWithStats,·options:·EntityThumbnailOptions):·Promise<string>·{
+        112 │ + → private·async·generateImageThumbnail(entity:·AnyEntityWithStats,·_options:·EntityThumbnailOptions):·Promise<string>·{
+    113 113 │   		// Usar el servicio existente de imágenes
+    114 114 │   		await imageService.generateThumbnail(entity.id);
+  
+
+src\services\undo-redo\undo-redo-manager.ts:11:35 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use 'Function' as a type.
+  
+     9 │ // Browser-compatible EventEmitter implementation
+    10 │ class EventEmitter {
+  > 11 │ 	private events: { [key: string]: Function[] } = {};
+       │ 	                                 ^^^^^^^^
+    12 │ 
+    13 │ 	on(event: string, listener: Function): this {
+  
+  i Prefer explicitly define the function shape. This type accepts any function-like value, which can be a common source of bugs.
+  
+
+src\services\undo-redo\undo-redo-manager.ts:13:30 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use 'Function' as a type.
+  
+    11 │ 	private events: { [key: string]: Function[] } = {};
+    12 │ 
+  > 13 │ 	on(event: string, listener: Function): this {
+       │ 	                            ^^^^^^^^
+    14 │ 		if (!this.events[event]) {
+    15 │ 			this.events[event] = [];
+  
+  i Prefer explicitly define the function shape. This type accepts any function-like value, which can be a common source of bugs.
+  
+
+src\services\undo-redo\undo-redo-manager.ts:35:42 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use 'Function' as a type.
+  
+    33 │ 	}
+    34 │ 
+  > 35 │ 	removeListener(event: string, listener: Function): this {
+       │ 	                                        ^^^^^^^^
+    36 │ 		if (!this.events[event]) {
+    37 │ 			return this;
+  
+  i Prefer explicitly define the function shape. This type accepts any function-like value, which can be a common source of bugs.
+  
+
+src\store\entities\album\types.ts:26:32 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use '{}' as a type.
+  
+    24 │ }
+    25 │ 
+  > 26 │ export type AlbumFilterState = {};
+       │                                ^^
+    27 │ 
+    28 │ // --- Acciones del Slice ---
+  
+  i Prefer explicitly define the object shape. '{}' means "any non-nullable value".
+  
+
+src\store\entities\album\types.ts:43:34 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use '{}' as a type.
+  
+    41 │ }
+    42 │ 
+  > 43 │ export type AlbumFilterActions = {};
+       │                                  ^^
+    44 │ 
+    45 │ // --- Store Completo ---
+  
+  i Prefer explicitly define the object shape. '{}' means "any non-nullable value".
+  
+
+src\stores\file-browser-store.ts:29:15 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    27 │ export const useFileBrowserStore = create<FileBrowserStore>()(
+    28 │ 	devtools(
+  > 29 │ 		immer((set, get) => ({
+       │ 		            ^^^
+    30 │ 			// State
+    31 │ 			currentViewType: 'grid',
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend get with an underscore.
+  
+    27 27 │   export const useFileBrowserStore = create<FileBrowserStore>()(
+    28 28 │   	devtools(
+    29    │ - → → immer((set,·get)·=>·({
+       29 │ + → → immer((set,·_get)·=>·({
+    30 30 │   			// State
+    31 31 │   			currentViewType: 'grid',
+  
+
+src\transformers\base\error-handlers.ts:31:2 lint/correctness/noUnusedFunctionParameters  FIXABLE  ━━━━━━━━━━
+
+  ! This parameter is unused.
+  
+    29 │  */
+    30 │ export function handleTransformerErrors(
+  > 31 │ 	target: any,
+       │ 	^^^^^^
+    32 │ 	propertyKey: string,
+    33 │ 	descriptor: PropertyDescriptor
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: If this is intentional, prepend target with an underscore.
+  
+     29  29 │    */
+     30  30 │   export function handleTransformerErrors(
+     31     │ - → target:·any,
+         31 │ + → _target:·any,
+     32  32 │   	propertyKey: string,
+     33  33 │   	descriptor: PropertyDescriptor
+  
+
+src\transformers\prompt\mappers.ts:373:37 lint/style/noNonNullAssertion ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Forbidden non-null assertion.
+  
+    371 │ 			? (() => {
+    372 │ 					try {
+  > 373 │ 						return Object.keys(JSON.parse(prompt.parameters!)).length;
+        │ 						                              ^^^^^^^^^^^^^^^^^^
+    374 │ 					} catch {
+    375 │ 						return 0;
+  
+
+src\transformers\settings\schema.ts:124:13 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━
+
+  ! Prefer constants from the standard library.
+  
+    122 │ 		folder: 1.0,
+    123 │ 		audio: 2.0,
+  > 124 │ 		document: 1.414,
+        │ 		          ^^^^^
+    125 │ 		default: 1.2,
+    126 │ 	}),
+  
+  i Unsafe fix: Use Math.SQRT2 instead.
+  
+    122 122 │   		folder: 1.0,
+    123 123 │   		audio: 2.0,
+    124     │ - → → document:·1.414,
+        124 │ + → → document:·Math.SQRT2,
+    125 125 │   		default: 1.2,
+    126 126 │   	}),
+  
+
+src\types\entities\favorite\types.ts:56:33 lint/complexity/noBannedTypes ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Don't use '{}' as a type.
+  
+    54 │  * Por ahora, un favorito no tiene relaciones directas complejas.
+    55 │  */
+  > 56 │ export type FavoriteRelations = {};
+       │                                 ^^
+    57 │ 
+    58 │ /**
+  
+  i Prefer explicitly define the object shape. '{}' means "any non-nullable value".
+  
+
+src\types\file-browser\masonry-view-config.ts:116:14 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━
+
+  ! Prefer constants from the standard library.
+  
+    114 │ 			folder: 1.0,
+    115 │ 			audio: 2.0,
+  > 116 │ 			document: 1.414, // A4 ratio
+        │ 			          ^^^^^
+    117 │ 			default: 1.2,
+    118 │ 		},
+  
+  i Unsafe fix: Use Math.SQRT2 instead.
+  
+    114 114 │   			folder: 1.0,
+    115 115 │   			audio: 2.0,
+    116     │ - → → → document:·1.414,·//·A4·ratio
+        116 │ + → → → document:·Math.SQRT2,·//·A4·ratio
+    117 117 │   			default: 1.2,
+    118 118 │   		},
+  
+
+src\types\file-browser\masonry-view-config.ts:189:15 lint/suspicious/noApproximativeNumericConstant  FIXABLE  ━━━━━━━━━━
+
+  ! Prefer constants from the standard library.
+  
+    187 │ 				folder: 1.2,
+    188 │ 				audio: 2.5,
+  > 189 │ 				document: 1.414,
+        │ 				          ^^^^^
+    190 │ 				default: 1.3,
+    191 │ 			},
+  
+  i Unsafe fix: Use Math.SQRT2 instead.
+  
+    187 187 │   				folder: 1.2,
+    188 188 │   				audio: 2.5,
+    189     │ - → → → → document:·1.414,
+        189 │ + → → → → document:·Math.SQRT2,
+    190 190 │   				default: 1.3,
+    191 191 │   			},
+  
+
+scripts\migration\analyze-bun-migration.js:122:3 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    120 │ 		// Análisis detallado por dependencia
+    121 │ 		console.log(chalk.yellow('\n🔧 ANÁLISIS DETALLADO DE DEPENDENCIAS'));
+  > 122 │ 		this.dependencies.forEach((dep) => {
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 123 │ 			const complexityColor =
+         ...
+  > 130 │ 			console.log(`  Notas: ${dep.notes}`);
+  > 131 │ 		});
+        │ 		^^
+    132 │ 
+    133 │ 		// Benchmarks de rendimiento estimados
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+scripts\migration\benchmark-current-performance.js:189:54 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    187 │ 		);
+    188 │ 
+  > 189 │ 		console.log(`📊 Mejora en build time: ${chalk.green(buildImprovement + '%')}`);
+        │ 		                                                    ^^^^^^^^^^^^^^^^^^^^^^
+    190 │ 		console.log(`📊 Mejora en memoria: ${chalk.green(memoryImprovement + '%')}`);
+    191 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+    187 187 │   		);
+    188 188 │   
+    189     │ - → → console.log(`📊·Mejora·en·build·time:·${chalk.green(buildImprovement·+·'%')}`);
+        189 │ + → → console.log(`📊·Mejora·en·build·time:·${chalk.green(`${buildImprovement}%`)}`);
+    190 190 │   		console.log(`📊 Mejora en memoria: ${chalk.green(memoryImprovement + '%')}`);
+    191 191 │   
+  
+
+scripts\migration\benchmark-current-performance.js:190:51 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    189 │ 		console.log(`📊 Mejora en build time: ${chalk.green(buildImprovement + '%')}`);
+  > 190 │ 		console.log(`📊 Mejora en memoria: ${chalk.green(memoryImprovement + '%')}`);
+        │ 		                                                 ^^^^^^^^^^^^^^^^^^^^^^^
+    191 │ 
+    192 │ 		// Calculamos si vale la pena
+  
+  i Unsafe fix: Use a template literal.
+  
+    188 188 │   
+    189 189 │   		console.log(`📊 Mejora en build time: ${chalk.green(buildImprovement + '%')}`);
+    190     │ - → → console.log(`📊·Mejora·en·memoria:·${chalk.green(memoryImprovement·+·'%')}`);
+        190 │ + → → console.log(`📊·Mejora·en·memoria:·${chalk.green(`${memoryImprovement}%`)}`);
+    191 191 │   
+    192 192 │   		// Calculamos si vale la pena
+  
+
+src\components\batch-operations\BatchOperationDialog.tsx:189:21 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    187 │ 							

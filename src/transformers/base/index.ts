@@ -4,5 +4,5 @@
  * @description Exporta las clases e interfaces base para transformadores
  */
 
-export { BaseEntityTransformer } from './transformer';
 export type { EntityTransformer } from './transformer';
+export { BaseEntityTransformer } from './transformer';

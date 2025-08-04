@@ -219,7 +219,10 @@ interface VirtualizedContainerProps {
 }
 
 export const VirtualizedContainer = React.forwardRef<HTMLDivElement, VirtualizedContainerProps>(
-	function VirtualizedContainer({ children, height, width, padding = 16, className = '', isReady = true, onClick }, ref) {
+	function VirtualizedContainer(
+		{ children, height, width, padding = 16, className = '', isReady = true, onClick },
+		ref
+	) {
 		const paddingObj =
 			typeof padding === 'number'
 				? { top: padding, bottom: padding, left: padding, right: padding }
