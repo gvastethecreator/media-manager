@@ -4,8 +4,6 @@
  * @description Funciones utilitarias para type checking y migración de tipos legacy a EntityWithStats
  */
 
-// Import para uso interno
-import type { AnyEntityWithStats } from '@/types/entities';
 import type { AlbumWithStats } from '@/types/entities/album';
 // Imports para los tipos re-exportados
 // Re-exportar tipos reales en lugar de definiciones temporales
@@ -56,8 +54,8 @@ export type { WorldItemWithStats } from './entities/world-item';
 // Import EntityStatsType from the main definition
 import { EntityStatsType } from './file-browser/entity-stats';
 
-// Re-export para compatibilidad
-export { EntityStatsType } from './file-browser/entity-stats';
+// Re-export EntityStatsType for convenience
+export { EntityStatsType };
 
 // Función helper para verificar si es una entidad con el campo entityType
 function hasEntityType(entity: unknown): entity is { entityType: string } {
@@ -248,24 +246,24 @@ export function isUploadedImageWithStats(entity: unknown): entity is UploadedIma
 
 // Función helper para obtener el tipo de estadísticas de una entidad
 export function getEntityStatsType(entity: AnyEntityWithStats): EntityStatsType | null {
-	if (isImageWithStats(entity)) return EntityStatsType.IMAGE;
-	if (isVideoWithStats(entity)) return EntityStatsType.VIDEO;
-	if (isFolderWithStats(entity)) return EntityStatsType.FOLDER;
-	if (isTagWithStats(entity)) return EntityStatsType.TAG;
-	if (isPlaceWithStats(entity)) return EntityStatsType.PLACE;
-	if (isWorldItemWithStats(entity)) return EntityStatsType.WORLD_ITEM;
-	if (isNoteWithStats(entity)) return EntityStatsType.NOTE;
-	if (isPropertyWithStats(entity)) return EntityStatsType.PROPERTY;
-	if (isWildcardWithStats(entity)) return EntityStatsType.WILDCARD;
-	if (isAudioWithStats(entity)) return EntityStatsType.AUDIO;
-	if (isDocumentWithStats(entity)) return EntityStatsType.DOCUMENT;
-	if (isCollectionWithStats(entity)) return EntityStatsType.COLLECTION;
-	if (isAlbumWithStats(entity)) return EntityStatsType.ALBUM;
-	if (isCharacterWithStats(entity)) return EntityStatsType.CHARACTER;
-	if (isConceptWithStats(entity)) return EntityStatsType.CONCEPT;
-	if (isPromptWithStats(entity)) return EntityStatsType.PROMPT;
-	if (isGroupWithStats(entity)) return EntityStatsType.GROUP;
-	if (isUploadedImageWithStats(entity)) return EntityStatsType.UPLOADED_IMAGE;
+	if (isImageWithStats(entity)) return 'image';
+	if (isVideoWithStats(entity)) return 'video';
+	if (isFolderWithStats(entity)) return 'folder';
+	if (isTagWithStats(entity)) return 'tag';
+	if (isPlaceWithStats(entity)) return 'place';
+	if (isWorldItemWithStats(entity)) return 'world-item';
+	if (isNoteWithStats(entity)) return 'note';
+	if (isPropertyWithStats(entity)) return 'property';
+	if (isWildcardWithStats(entity)) return 'wildcard';
+	if (isAudioWithStats(entity)) return 'audio';
+	if (isDocumentWithStats(entity)) return 'document';
+	if (isCollectionWithStats(entity)) return 'collection';
+	if (isAlbumWithStats(entity)) return 'album';
+	if (isCharacterWithStats(entity)) return 'character';
+	if (isConceptWithStats(entity)) return 'concept';
+	if (isPromptWithStats(entity)) return 'prompt';
+	if (isGroupWithStats(entity)) return 'group';
+	if (isUploadedImageWithStats(entity)) return 'uploadedImage';
 	return null;
 }
 

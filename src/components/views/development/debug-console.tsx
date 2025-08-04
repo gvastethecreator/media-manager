@@ -93,7 +93,7 @@ export function DebugConsole() {
 				</CardHeader>
 				<CardContent>
 					<div className="flex flex-wrap gap-2 mb-4">
-						<Button type="button" onClick={generateExampleLogs} variant="default">
+						<Button type="button" onClick={generateExampleLogs} variant="primary">
 							Generar logs de ejemplo
 						</Button>
 						<Button type="button" onClick={generateGroupedLogs} variant="outline">
@@ -108,7 +108,7 @@ export function DebugConsole() {
 						<Button
 							type="button"
 							onClick={isCapturing ? stopCapture : startCapture}
-							variant={isCapturing ? 'default' : 'outline'}
+							variant={isCapturing ? 'primary' : 'outline'}
 						>
 							{isCapturing ? 'Detener captura' : 'Iniciar captura'}
 						</Button>

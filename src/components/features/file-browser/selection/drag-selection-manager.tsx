@@ -106,17 +106,17 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 						removeFromSelection(item.id);
 					} else {
 						// Item was not selected at drag start, add it
-						addToSelection(item);
+						addToSelection(item.id);
 					}
 				});
 			} else if (modifierKeys.shiftKey) {
 				// Shift+drag: add to existing selection
 				intersectingItems.forEach((item) => {
-					addToSelection(item);
+					addToSelection(item.id);
 				});
 			} else {
 				// Normal drag: replace selection
-				setSelection(intersectingItems);
+				setSelection(intersectingItems.map(item => item.id));
 			}
 		},
 		[items, isItemInSelection, dragStartItems, addToSelection, removeFromSelection, setSelection]

@@ -33,7 +33,7 @@ export function TauriBackendStatus() {
 		}
 		if (isRunning) {
 			return (
-				<Badge variant="default" className="bg-green-500">
+				<Badge variant="primary" className="bg-green-500">
 					Conectado
 				</Badge>
 			);

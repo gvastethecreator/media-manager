@@ -57,7 +57,7 @@ export function ProfileCard({
 							<AvatarImage src={imageId || undefined} alt={name} />
 							<AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
 						</Avatar>
-						<Badge variant={isActive ? 'default' : 'secondary'}>{isActive ? 'Activo' : 'Inactivo'}</Badge>
+						<Badge variant={isActive ? 'primary' : 'secondary'}>{isActive ? 'Activo' : 'Inactivo'}</Badge>
 					</div>
 					<div>
 						<CardTitle className="line-clamp-1">{name}</CardTitle>

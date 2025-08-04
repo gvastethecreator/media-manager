@@ -1123,10 +1123,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				<OptimizedEntityCard
 					key={item.id}
 					entity={item as AnyEntityWithStats}
-					itemId={item.id}
-					onClickById={handleItemClickById}
-					onDoubleClickById={handleItemDoubleClickById}
-					onContextMenuById={handleItemContextMenuById}
+					onClick={(e) => handleItemClickById(item.id, e)}
+					onDoubleClick={() => handleItemDoubleClickById(item.id)}
 					layout={layout}
 					preset={preset}
 					variant={variant}
@@ -1139,7 +1137,6 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			// Solo dependencias estables para evitar re-renders
 			handleItemClickById,
 			handleItemDoubleClickById,
-			handleItemContextMenuById,
 			layout,
 			preset,
 			variant,

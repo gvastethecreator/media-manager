@@ -367,7 +367,7 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
 							Cancelar
 						</Button>
 						<Button
-							variant={confirmationDialog.action === 'delete-multiple' ? 'destructive' : 'default'}
+							variant={confirmationDialog.action === 'delete-multiple' ? 'destructive' : 'primary'}
 							onClick={handleConfirmAction}
 							disabled={processingAction !== null}
 						>

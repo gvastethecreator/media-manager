@@ -287,7 +287,7 @@ export function ImageGallery({
 
 							{/* Selección */}
 							{selectable && selectedImages.length > 0 && (
-								<Button variant="default" size="sm" className="h-9" onClick={clearSelection}>
+								<Button variant="primary" size="sm" className="h-9" onClick={clearSelection}>
 									Limpiar ({selectedImages.length})
 								</Button>
 							)}

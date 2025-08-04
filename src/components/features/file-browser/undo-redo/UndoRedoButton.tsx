@@ -17,9 +17,9 @@ export interface UndoRedoButtonProps {
 	/** Button type */
 	type: 'undo' | 'redo';
 	/** Button variant */
-	variant?: 'default' | 'outline' | 'ghost' | 'secondary';
+	variant?: 'primary' | 'outline' | 'ghost' | 'secondary';
 	/** Button size */
-	size?: 'default' | 'sm' | 'lg' | 'icon';
+	size?: 'md' | 'sm' | 'lg' | 'icon';
 	/** Additional CSS classes */
 	className?: string;
 	/** Show keyboard shortcut in tooltip */

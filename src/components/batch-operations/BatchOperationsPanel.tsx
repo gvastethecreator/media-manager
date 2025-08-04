@@ -135,7 +135,7 @@ export function BatchOperationsPanel({ className, maxHeight = '400px' }: BatchOp
 	const getStatusBadgeVariant = (status: BatchOperationStatus) => {
 		switch (status) {
 			case 'running':
-				return 'default';
+				return 'primary';
 			case 'completed':
 				return 'secondary'; // Changed from 'success'
 			case 'failed':
