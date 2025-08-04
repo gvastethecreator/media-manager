@@ -46,10 +46,6 @@ import type { EntityStats } from '../entity.types';
 export interface ImageStatistics extends EntityStats {
 	// Propiedades específicas de imágenes
 	aspectRatio: number;
-
-	// Funciones de archivo del sistema
-	isDirectory?: () => boolean;
-	isFile?: () => boolean;
 }
 
 /**

@@ -597,3 +597,6 @@ export const deleteFileOrDirectory = deleteFile;
 export const copyFileOrDirectory = copyFile;
 export const moveFileOrDirectory = moveFile;
 export const renameFileOrDirectory = renameFile;
+
+// Export types for external use
+export type { FileCopyMoveResult, FileOperationResult, FileOperationOptions };
