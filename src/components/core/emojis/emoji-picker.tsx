@@ -111,7 +111,7 @@ export function EmojiPicker({
 			<PopoverTrigger asChild>
 				<Button
 					variant="outline"
-					size={compact ? 'sm' : 'default'}
+					size={compact ? 'sm' : 'md'}
 					className={cn(
 						compact ? 'h-8 w-full' : 'h-10 w-full',
 						showLabel ? 'justify-between' : 'justify-center',
