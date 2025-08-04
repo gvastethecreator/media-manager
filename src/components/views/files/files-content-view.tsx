@@ -185,10 +185,10 @@ const FilesContentView: React.FC<FilesContentViewProps> = ({
 					<Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
 						<DialogTrigger asChild>
 							<Button
-								variant="default"
-								className="fixed bottom-4 right-4 z-50"
-								onClick={() => setIsUploadDialogOpen(true)}
-							>
+						variant="primary"
+						className="fixed bottom-4 right-4 z-50"
+						onClick={() => setIsUploadDialogOpen(true)}
+					>
 								<Upload className="w-4 h-4 mr-2" />
 								Subir Archivos
 							</Button>

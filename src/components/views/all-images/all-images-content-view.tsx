@@ -243,7 +243,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 				onItemDoubleClick={handleImageDoubleClick}
 				className="min-h-[600px]"
 				layout="vertical"
-				variant="default"
+				variant="primary"
 				size="md"
 			/>
 
@@ -266,7 +266,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 			{/* Dialog para upload de imágenes */}
 			<Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
 				<DialogTrigger asChild>
-					<Button variant="default" className="fixed bottom-4 right-4 z-50" onClick={() => setIsUploadDialogOpen(true)}>
+					<Button variant="primary" className="fixed bottom-4 right-4 z-50" onClick={() => setIsUploadDialogOpen(true)}>
 						<Upload className="w-4 h-4 mr-2" />
 						Subir Imágenes
 					</Button>
