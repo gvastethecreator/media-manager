@@ -30,7 +30,7 @@ export interface ViewProps {
  * currentView en el NavigationStore.
  */
 export type ViewType =
-	| 'dashboard'
+	| '' // Ruta raíz (dashboard)
 	| 'settings'
 	| 'all-images'
 	| 'uploaded-images'

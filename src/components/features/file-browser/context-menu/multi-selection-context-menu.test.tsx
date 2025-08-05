@@ -1,44 +1,44 @@
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import type { FileItem } from '@/types/file-browser/file-item';
 import { MultiSelectionContextMenu } from './multi-selection-context-menu';
 
 // Mock the stores
-vi.mock('@/store/entities/album', () => ({
-	useAlbumStore: vi.fn((selector) => {
+mock.module('@/store/entities/album', () => ({
+	useAlbumStore: mock.fn((selector) => {
 		const mockState = { albums: {} };
 		return selector ? selector(mockState) : mockState;
 	}),
 }));
 
-vi.mock('@/store/entities/collection', () => ({
-	useCollectionStore: vi.fn((selector) => {
+mock.module('@/store/entities/collection', () => ({
+	useCollectionStore: mock.fn((selector) => {
 		const mockState = { collections: {} };
 		return selector ? selector(mockState) : mockState;
 	}),
 }));
 
-vi.mock('@/store/entities/tag', () => ({
-	useTagStore: vi.fn((selector) => {
+mock.module('@/store/entities/tag', () => ({
+	useTagStore: mock.fn((selector) => {
 		const mockState = { getTags: () => [] };
 		return selector ? selector(mockState) : mockState;
 	}),
 }));
 
 // Mock the toast service
-vi.mock('@/lib/ui/toast', () => ({
+mock.module('@/lib/ui/toast', () => ({
 	toastService: {
-		success: vi.fn(),
-		error: vi.fn(),
-		info: vi.fn(),
+		success: mock(),
+		error: mock(),
+		info: mock(),
 	},
 }));
 
 // Mock the keyboard navigation hook
-vi.mock('@/lib/keyboard', () => ({
-	useContextMenuNavigation: vi.fn(() => ({
+mock.module('@/lib/keyboard', () => ({
+	useContextMenuNavigation: mock.fn(() => ({
 		selectedIndex: -1,
-		getItemProps: vi.fn(() => ({})),
+		getItemProps: mock.fn(() => ({})),
 	})),
 }));
 
@@ -82,11 +82,11 @@ describe('MultiSelectionContextMenu', () => {
 		},
 	];
 
-	const mockOnAction = vi.fn();
+	const mockOnAction = mock();
 	const mockPosition = { x: 100, y: 100 };
 
 	beforeEach(() => {
-		vi.clearAllMocks();
+		mock.restore();
 	});
 
 	it('renders with correct selection count', () => {

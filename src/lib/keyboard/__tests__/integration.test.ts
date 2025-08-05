@@ -3,7 +3,7 @@
  * @description Test de integración básico para verificar que el sistema funciona
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import { KeyboardShortcutManager } from '../keyboard-shortcut-manager';
 
 describe('Keyboard Shortcuts Integration', () => {
@@ -68,7 +68,7 @@ describe('Keyboard Shortcuts Integration', () => {
 				description: 'Test',
 			};
 
-			const handler = vi.fn();
+			const handler = mock();
 			manager.register(shortcut, handler);
 
 			// Verificar que el shortcut se registró correctamente

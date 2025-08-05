@@ -3,15 +3,29 @@ import { randomUUID } from 'crypto';
 import { eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import {
-	characters,
-	collections,
-	folders,
-	imageStats,
-	images,
-	places,
-	tags,
-	videos,
-	worldItems,
+    albums,
+    audios,
+    characters,
+    collections,
+    concepts,
+    documents,
+    favorites,
+    file3Ds,
+    folders,
+    imageStats,
+    images,
+    jsonFiles,
+    metadatas,
+    notes,
+    places,
+    prompts,
+    properties,
+    tags,
+    thumbnails,
+    videos,
+    wildcards,
+    workflows,
+    worldItems,
 } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
@@ -41,18 +55,40 @@ const createStatsError = (message: string, code: StatsErrorCode = StatsErrorCode
 // Interfaces
 export interface GeneralStats {
 	totalImages: number;
+	totalVideos: number;
+	totalAudio: number;
+	totalDocuments: number;
+	totalJsonFiles: number;
+	totalFile3D: number;
+	totalWorkflows: number;
 	totalFolders: number;
-	totalTags: number;
-	totalCollections: number;
 	totalAlbums: number;
+	totalCollections: number;
+	totalTags: number;
 	totalCharacters: number;
 	totalPlaces: number;
 	totalWorldItems: number;
+	totalConcepts: number;
+	totalPrompts: number;
+	totalNotes: number;
+	totalProperties: number;
+	totalWildcards: number;
 	totalFavorites: number;
+	totalThumbnails: number;
+	totalMetadata: number;
 	totalViews: number;
 	totalDownloads: number;
 	totalSize: number;
 	totalActivities: number;
+	// Información de espacio
+	usedSpace?: number;
+	freeSpace?: number;
+	diskUsage?: {
+		total: number;
+		used: number;
+		free: number;
+		usedPercentage: number;
+	};
 	topTags: Array<{
 		id: string;
 		name: string;
@@ -128,37 +164,125 @@ interface TopTag {
 }
 
 // Funciones exportadas
-export async function getSystemStats(): Promise<GeneralStats | null> {
-	console.log('🔍 [getSystemStats] Iniciando función...');
-	statsLogger.info('📊 Obteniendo estadísticas del sistema');
+export async function getGeneralSystemStats(): Promise<GeneralStats | null> {
+	console.log('🎯🎯🎯 [NUEVA FUNCIÓN] getGeneralSystemStats MEJORADA iniciando...');
+	statsLogger.info('📊 Obteniendo estadísticas del sistema CON 22 ENTIDADES');
 
 	try {
-		// Obtener conteos reales de la base de datos
-		const [foldersCount, imagesCount, videosCount] = await Promise.all([
+		console.log('🎯🎯🎯 [NUEVA FUNCIÓN] Ejecutando 22 consultas en paralelo...');
+
+		// Obtener conteos de todas las entidades en paralelo para mejor rendimiento
+		const [
+			foldersCount,
+			imagesCount,
+			videosCount,
+			audiosCount,
+			documentsCount,
+			jsonFilesCount,
+			file3DsCount,
+			workflowsCount,
+			albumsCount,
+			collectionsCount,
+			tagsCount,
+			charactersCount,
+			placesCount,
+			worldItemsCount,
+			conceptsCount,
+			promptsCount,
+			notesCount,
+			propertiesCount,
+			wildcardsCount,
+			favoritesCount,
+			thumbnailsCount,
+			metadataCount,
+		] = await Promise.all([
 			db.select({ count: sql<number>`count(*)` }).from(folders),
 			db.select({ count: sql<number>`count(*)` }).from(images),
 			db.select({ count: sql<number>`count(*)` }).from(videos),
+			db.select({ count: sql<number>`count(*)` }).from(audios),
+			db.select({ count: sql<number>`count(*)` }).from(documents),
+			db.select({ count: sql<number>`count(*)` }).from(jsonFiles),
+			db.select({ count: sql<number>`count(*)` }).from(file3Ds),
+			db.select({ count: sql<number>`count(*)` }).from(workflows),
+			db.select({ count: sql<number>`count(*)` }).from(albums),
+			db.select({ count: sql<number>`count(*)` }).from(collections),
+			db.select({ count: sql<number>`count(*)` }).from(tags),
+			db.select({ count: sql<number>`count(*)` }).from(characters),
+			db.select({ count: sql<number>`count(*)` }).from(places),
+			db.select({ count: sql<number>`count(*)` }).from(worldItems),
+			db.select({ count: sql<number>`count(*)` }).from(concepts),
+			db.select({ count: sql<number>`count(*)` }).from(prompts),
+			db.select({ count: sql<number>`count(*)` }).from(notes),
+			db.select({ count: sql<number>`count(*)` }).from(properties),
+			db.select({ count: sql<number>`count(*)` }).from(wildcards),
+			db.select({ count: sql<number>`count(*)` }).from(favorites),
+			db.select({ count: sql<number>`count(*)` }).from(thumbnails),
+			db.select({ count: sql<number>`count(*)` }).from(metadatas),
 		]);
 
-		// Calcular tamaño total
-		const totalSizeResult = await db
-			.select({ totalSize: sql<number>`COALESCE(SUM(${folders.totalSize}), 0)` })
-			.from(folders);
+		console.log('🎯🎯🎯 [NUEVA FUNCIÓN] ✅ Todas las 22 consultas completadas exitosamente');
+
+		// Calcular tamaños
+		const [totalSizeResult, audioSizeResult, documentSizeResult, jsonSizeResult, file3DSizeResult] = await Promise.all([
+			db.select({ totalSize: sql<number>`COALESCE(SUM(${folders.totalSize}), 0)` }).from(folders),
+			db.select({ totalSize: sql<number>`COALESCE(SUM(${audios.size}), 0)` }).from(audios),
+			db.select({ totalSize: sql<number>`COALESCE(SUM(${documents.size}), 0)` }).from(documents),
+			db.select({ totalSize: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)` }).from(jsonFiles),
+			db.select({ totalSize: sql<number>`COALESCE(SUM(${file3Ds.size}), 0)` }).from(file3Ds),
+		]);
+
+		// Calcular información de disco (aproximada basada en el total de archivos)
+		const totalFileSize = (totalSizeResult[0]?.totalSize || 0) +
+							  (audioSizeResult[0]?.totalSize || 0) +
+							  (documentSizeResult[0]?.totalSize || 0) +
+							  (jsonSizeResult[0]?.totalSize || 0) +
+							  (file3DSizeResult[0]?.totalSize || 0);
 
 		const result = {
+			// Archivos multimedia
 			totalImages: imagesCount[0]?.count || 0,
+			totalVideos: videosCount[0]?.count || 0,
+			totalAudio: audiosCount[0]?.count || 0,
+			totalDocuments: documentsCount[0]?.count || 0,
+			totalJsonFiles: jsonFilesCount[0]?.count || 0,
+			totalFile3D: file3DsCount[0]?.count || 0,
+			totalWorkflows: workflowsCount[0]?.count || 0,
+
+			// Organización
 			totalFolders: foldersCount[0]?.count || 0,
-			totalTags: 0,
-			totalCollections: 0,
-			totalAlbums: 0,
-			totalCharacters: 0,
-			totalPlaces: 0,
-			totalWorldItems: 0,
-			totalFavorites: 0,
-			totalViews: 0,
-			totalDownloads: 0,
-			totalSize: totalSizeResult[0]?.totalSize || 0,
-			totalActivities: 0,
+			totalAlbums: albumsCount[0]?.count || 0,
+			totalCollections: collectionsCount[0]?.count || 0,
+			totalTags: tagsCount[0]?.count || 0,
+			totalFavorites: favoritesCount[0]?.count || 0,
+
+			// Worldbuilding
+			totalCharacters: charactersCount[0]?.count || 0,
+			totalPlaces: placesCount[0]?.count || 0,
+			totalWorldItems: worldItemsCount[0]?.count || 0,
+			totalConcepts: conceptsCount[0]?.count || 0,
+			totalPrompts: promptsCount[0]?.count || 0,
+			totalNotes: notesCount[0]?.count || 0,
+			totalProperties: propertiesCount[0]?.count || 0,
+			totalWildcards: wildcardsCount[0]?.count || 0,
+
+			// Sistema
+			totalThumbnails: thumbnailsCount[0]?.count || 0,
+			totalMetadata: metadataCount[0]?.count || 0,
+			totalViews: 0, // TODO: Implementar cuando se agregue sistema de vistas
+			totalDownloads: 0, // TODO: Implementar cuando se agregue sistema de descargas
+			totalSize: totalFileSize,
+			totalActivities: 0, // TODO: Implementar actividades
+
+			// Información de espacio
+			usedSpace: totalFileSize,
+			freeSpace: 0, // TODO: Calcular espacio libre real del disco
+			diskUsage: {
+				total: totalFileSize, // Temporal - usar espacio total del disco
+				used: totalFileSize,
+				free: 0,
+				usedPercentage: 0,
+			},
+
 			topTags: [],
 			recentActivity: [],
 		} satisfies GeneralStats;
@@ -166,10 +290,16 @@ export async function getSystemStats(): Promise<GeneralStats | null> {
 		statsLogger.info('✅ Estadísticas del sistema obtenidas');
 		return result;
 	} catch (error) {
-		console.error('🚨 [getSystemStats] Error capturado:', error);
+		console.error('🚨 [getGeneralSystemStats] Error capturado:', error);
 		statsLogger.error('Error al obtener estadísticas del sistema:', error);
 		return null;
 	}
+}
+
+// Función de compatibilidad para evitar conflictos con system.service.ts
+export async function getSystemStats(): Promise<GeneralStats | null> {
+	console.log('🔄 [COMPATIBILITY] getSystemStats redirigiendo a getGeneralSystemStats...');
+	return await getGeneralSystemStats();
 }
 
 // Nuevos tipos para stats de entidades extendidas
@@ -274,7 +404,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 
 // Extender getSystemStats para incluir nuevas entidades
 export async function getSystemStatsExtended(): Promise<(GeneralStats & ExtendedStats) | null> {
-	const base = await getSystemStats();
+	const base = await getGeneralSystemStats();
 	if (!base) return null;
 	// TODO: Reemplazar por queries reales con Drizzle
 	return {
@@ -309,32 +439,20 @@ interface EntityWithEmoji extends EntityWithImageCount {
 	emoji: string;
 }
 
-export async function getStats(): Promise<StatsResponse | null> {
+export async function getStats(): Promise<GeneralStats | null> {
 	try {
-		statsLogger.info('📊 Obteniendo estadísticas detalladas');
+		statsLogger.info('📊 Obteniendo estadísticas detalladas (usando getGeneralSystemStats)');
 
-		// Por ahora, usar contadores simples sin relaciones complejas
-		const [collectionsCount, foldersCount, tagsCount, charactersCount, placesCount, worldItemsCount] =
-			await Promise.all([
-				db.select({ count: sql<number>`count(*)` }).from(collections),
-				db.select({ count: sql<number>`count(*)` }).from(folders),
-				db.select({ count: sql<number>`count(*)` }).from(tags),
-				db.select({ count: sql<number>`count(*)` }).from(characters),
-				db.select({ count: sql<number>`count(*)` }).from(places),
-				db.select({ count: sql<number>`count(*)` }).from(worldItems),
-			]);
+		// Usar la función mejorada getGeneralSystemStats() que incluye todas las entidades
+		const systemStats = await getGeneralSystemStats();
 
-		statsLogger.info('✅ Estadísticas detalladas obtenidas');
+		if (!systemStats) {
+			statsLogger.error('❌ No se pudieron obtener las estadísticas del sistema');
+			return null;
+		}
 
-		return {
-			collections: [],
-			folders: [],
-			tags: [],
-			albums: [],
-			characters: [],
-			places: [],
-			worldItems: [],
-		} satisfies StatsResponse;
+		statsLogger.info('✅ Estadísticas detalladas obtenidas exitosamente');
+		return systemStats;
 	} catch (error) {
 		statsLogger.error('❌ Error al obtener las estadísticas detalladas:', error);
 		return null;

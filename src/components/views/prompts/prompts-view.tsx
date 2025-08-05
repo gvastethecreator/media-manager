@@ -1,7 +1,6 @@
 import { AlertCircle, MessageSquare } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { MemoizedPromptCard } from '@/components/cards/prompt-card';
 import { EmptyState } from '@/components/core/data-display';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
@@ -12,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { useCreatePrompt, usePrompts } from '@/lib/api/prompts';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -22,7 +22,7 @@ import type { ViewProps } from '../types';
 const viewLogger = clientLogger.withContext('PromptsView');
 
 export function PromptsView({ isVisible }: ViewProps) {
-	const navigate = useNavigate();
+	const { navigateWithTransition } = useSeamlessNavigation();
 	const { selectedPrompt, selectPrompt } = usePromptStore();
 	const { mutate: createPrompt } = useCreatePrompt();
 
@@ -61,9 +61,9 @@ export function PromptsView({ isVisible }: ViewProps) {
 	const handlePromptEdit = useCallback(
 		(promptId: string) => {
 			viewLogger.info('✏️ Editando prompt', { promptId });
-			navigate(`/prompts/${promptId}/edit`);
+			navigateWithTransition(`/prompts/${promptId}/edit`);
 		},
-		[navigate]
+		[navigateWithTransition]
 	);
 
 	const { toast } = useToast();

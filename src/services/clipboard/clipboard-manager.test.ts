@@ -4,32 +4,32 @@
  * @description Comprehensive tests for ClipboardManager functionality
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, mock } from 'bun:test';
 import { ClipboardManager, ClipboardFormat } from './clipboard-manager';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { FileType } from '@/types/entities/file';
 
 // Mock dependencies
-vi.mock('@/lib/logger/server-logger', () => ({
+mock.module('@/lib/logger/server-logger', () => ({
   serverLogger: {
     withContext: () => ({
-      info: vi.fn(),
-      warn: vi.fn(),
-      error: vi.fn(),
+      info: mock(),
+      warn: mock(),
+      error: mock(),
     }),
   },
 }));
 
-vi.mock('@/services/toast', () => ({
+mock.module('@/services/toast', () => ({
   toastService: {
-    success: vi.fn(),
-    error: vi.fn(),
-    info: vi.fn(),
+    success: mock(),
+    error: mock(),
+    info: mock(),
   },
 }));
 
-vi.mock('@/services/file/file.service', () => ({
-  getFileAsDataUrl: vi.fn().mockResolvedValue({
+mock.module('@/services/file/file.service', () => ({
+  getFileAsDataUrl: mock().mockResolvedValue({
     dataUrl: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAI9jU77zgAAAABJRU5ErkJggg==',
     mimeType: 'image/png',
   }),
@@ -37,10 +37,10 @@ vi.mock('@/services/file/file.service', () => ({
 
 // Mock navigator.clipboard
 const mockClipboard = {
-  write: vi.fn().mockResolvedValue(undefined),
-  writeText: vi.fn().mockResolvedValue(undefined),
-  read: vi.fn().mockResolvedValue([]),
-  readText: vi.fn().mockResolvedValue(''),
+  write: mock().mockResolvedValue(undefined),
+  writeText: mock().mockResolvedValue(undefined),
+  read: mock().mockResolvedValue([]),
+  readText: mock().mockResolvedValue(''),
 };
 
 Object.defineProperty(global, 'navigator', {
@@ -51,16 +51,16 @@ Object.defineProperty(global, 'navigator', {
 });
 
 // Mock ClipboardItem
-global.ClipboardItem = vi.fn().mockImplementation((data) => ({ data }));
+global.ClipboardItem = mock().mockImplementation((data) => ({ data }));
 
 // Mock Blob
-global.Blob = vi.fn().mockImplementation((content, options) => ({
+global.Blob = mock().mockImplementation((content, options) => ({
   content,
   type: options?.type || 'text/plain',
 }));
 
 // Mock atob
-global.atob = vi.fn().mockImplementation((str) => str);
+global.atob = mock().mockImplementation((str) => str);
 
 describe('ClipboardManager', () => {
   let clipboardManager: ClipboardManager;
@@ -68,7 +68,7 @@ describe('ClipboardManager', () => {
 
   beforeEach(() => {
     clipboardManager = new ClipboardManager();
-    vi.clearAllMocks();
+    mock.restore();
 
     // Create mock items
     mockItems = [
@@ -342,7 +342,7 @@ describe('ClipboardManager', () => {
 
       // Mock JSON.stringify to throw error
       const originalStringify = JSON.stringify;
-      JSON.stringify = vi.fn().mockImplementation(() => {
+      JSON.stringify = mock().mockImplementation(() => {
         throw new Error('JSON error');
       });
 

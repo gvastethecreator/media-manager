@@ -1119,11 +1119,13 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// Función para renderizar item usando EntityCard - OPTIMIZADA con memoización selectiva
 	const renderItem = useCallback(
 		(item: AnyEntityWithStats, _index: number) => {
+			const clickHandler = (e: React.MouseEvent) => handleItemClickById(item.id, e);
+			console.log('🔧 FileBrowser.renderItem - Creando handler para item:', item.id, 'handler:', !!clickHandler);
 			return (
 				<OptimizedEntityCard
 					key={item.id}
 					entity={item as AnyEntityWithStats}
-					onClick={(e) => handleItemClickById(item.id, e)}
+					onClick={clickHandler}
 					onDoubleClick={() => handleItemDoubleClickById(item.id)}
 					layout={layout}
 					preset={preset}
@@ -1166,6 +1168,15 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			return <EmptyState icon={FileTextIcon} title="Sin elementos" description="No hay elementos para mostrar." />;
 		}
 
+		console.log('🔧 FileBrowser - Construyendo commonViewProps:', {
+			handleItemClickType: typeof handleItemClick,
+			handleItemClickValue: handleItemClick,
+			itemsLength: items.length,
+			viewMode
+		});
+
+		console.log('🔧 FileBrowser - ViewMode detectado:', { viewMode, type: typeof viewMode });
+
 		const commonViewProps = {
 			items,
 			itemSize,
@@ -1179,16 +1190,22 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 		switch (viewMode) {
 			case 'list':
+				console.log('🔧 FileBrowser - Renderizando ListView');
 				return <ListView {...commonViewProps} />;
 			case 'grid':
+				console.log('🔧 FileBrowser - Renderizando GridView');
 				return <GridView {...commonViewProps} />;
 			case 'cards':
+				console.log('🔧 FileBrowser - Renderizando CardsView (case cards)');
 				return <CardsView {...commonViewProps} />;
 			case 'simple-grid':
+				console.log('🔧 FileBrowser - Renderizando GridView (simple-grid)');
 				return <GridView {...commonViewProps} />;
 			case 'masonry':
+				console.log('🔧 FileBrowser - Renderizando MasonryView');
 				return <MasonryView {...commonViewProps} />;
 			default:
+				console.log('🔧 FileBrowser - Renderizando CardsView (default case)');
 				return <CardsView {...commonViewProps} />;
 		}
 	};

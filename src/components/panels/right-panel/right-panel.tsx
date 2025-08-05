@@ -2,6 +2,7 @@ import { memo, Suspense, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { DetailsPanelV2 } from '@/components/panels/details-panel';
 import { FolderStatsDisplay } from '@/components/panels/stats-panel/folder-stats-display';
+import { SystemStatsDisplay } from '@/components/panels/stats-panel/system-stats-display';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
@@ -34,17 +35,19 @@ const LazyStatsPanel = memo(function LazyStatsPanel({ folderId }: { folderId?: s
 		);
 	}
 
-	if (!folderId) {
+	// Si hay folderId, mostrar estadísticas de carpeta
+	if (folderId) {
 		return (
-			<div className="p-4 text-muted-foreground text-sm text-center">
-				<p>No hay carpeta seleccionada</p>
-			</div>
+			<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>}>
+				<FolderStatsDisplay folderId={folderId} />
+			</Suspense>
 		);
 	}
 
+	// Si no hay folderId, mostrar estadísticas del sistema
 	return (
 		<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando estadísticas...</div>}>
-			<FolderStatsDisplay folderId={folderId} />
+			<SystemStatsDisplay />
 		</Suspense>
 	);
 });
@@ -124,7 +127,7 @@ export const RightPanel = memo(function RightPanel({ isCollapsed, isAnimating = 
 			{!isCollapsed &&
 				(hasSelectedItems ? (
 					<ScrollArea className="flex-1">
-						<DetailsPanelV2 selectedItems={selectedItems} />
+						<DetailsPanelV2 />
 					</ScrollArea>
 				) : (
 					shouldShowStats && (

@@ -4,11 +4,11 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, mock } from 'bun:test';
 import { useListViewConfig } from '@/hooks/use-list-view-config';
 
 // Mock de dependencias
-vi.mock('@/store/settings.store', () => ({
+mock.module('@/store/settings.store', () => ({
 	useSettingsStore: {
 		use: {
 			settings: () => ({
@@ -44,7 +44,7 @@ vi.mock('@/store/settings.store', () => ({
 					},
 				},
 			}),
-			updateSettings: () => vi.fn(),
+			updateSettings: () => mock(),
 		},
 	},
 }));

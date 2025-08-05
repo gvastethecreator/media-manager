@@ -6,25 +6,28 @@ import { createDocument, getDocumentByHash } from '@/services/document/document.
 import { createFile3D, getFile3DByHash } from '@/services/file3d/file3d.service';
 import type { CreateImageInput } from '@/services/image/image.service';
 import { ImageService } from '@/services/image/image.service';
+import { MetadataIntegrationService } from '@/services/metadata-integration.service';
 import { createVideo, getVideoByHash } from '@/services/video/video.service';
+import type { DocumentCreateInput } from '@/transformers/document/validators';
 import type { AudioCreateInput } from '@/types/entities/audio';
-import type { DocumentCreateInput } from '@/types/entities/document';
 import type { File3DCreateInput } from '@/types/entities/file3d';
 import type { VideoCreateInput } from '@/types/entities/video';
 import {
-	ENTITY_TYPE_MAPPING,
-	EntityCreationResult,
-	EntityCreationStats,
-	EntityType,
-	FileInfo,
+    ENTITY_TYPE_MAPPING,
+    EntityCreationResult,
+    EntityCreationStats,
+    EntityType,
+    FileInfo,
 } from '@/types/file-entity-mapper';
 
 export class FileEntityMapperService {
 	private static instance: FileEntityMapperService;
 	private imageService: ImageService;
+	private metadataService: MetadataIntegrationService;
 
 	private constructor() {
 		this.imageService = ImageService.getInstance();
+		this.metadataService = MetadataIntegrationService.getInstance();
 	}
 
 	public static getInstance(): FileEntityMapperService {
@@ -178,6 +181,7 @@ export class FileEntityMapperService {
 	 * Crea una entidad basada en el tipo de archivo
 	 */
 	public async createEntityFromFile(filePath: string, folderId: string): Promise<EntityCreationResult> {
+		console.log(`🔧 FileEntityMapper: Procesando archivo ${filePath}`);
 		try {
 			// Obtener información del archivo
 			const fileInfo = await this.getFileInfo(filePath, folderId);
@@ -195,6 +199,7 @@ export class FileEntityMapperService {
 			// Verificar si ya existe una entidad para este archivo
 			const exists = await this.checkExistingEntity(fileInfo, entityType);
 			if (exists) {
+				console.log(`⚠️ FileEntityMapper: Entidad ya existe para ${filePath} - SALTANDO metadata`);
 				return {
 					success: true,
 					entityType,
@@ -356,6 +361,34 @@ export class FileEntityMapperService {
 
 				default:
 					throw new Error(`Unsupported entity type: ${entityType}`);
+			}
+
+			// 🔍 NUEVA FUNCIONALIDAD: Extraer metadata automáticamente después de crear la entidad
+			console.log(`🔍 FileEntityMapper: Iniciando extracción de metadata para ${fileInfo.path}`);
+			try {
+				console.log(`🔍 Extrayendo metadata para: ${fileInfo.path}`);
+
+				// Importar el servicio de extracción de metadata unificado
+				const { extractAllMetadata } = await import('@/server/services/metadata/unified-parser.service');
+
+				// Leer el archivo como buffer
+				const fileBuffer = await fs.readFile(fileInfo.path);
+
+				// Extraer metadata usando el servicio unificado
+				const metadataResult = await extractAllMetadata(fileBuffer, fileInfo.name);
+
+				if (metadataResult.success) {
+					console.log(`✅ Metadata extraída exitosamente para: ${fileInfo.path}`, {
+						origin: metadataResult.origin?.engine,
+						hasAI: metadataResult.ai_metadata ? 'Sí' : 'No',
+						errorsCount: metadataResult.errors.length,
+					});
+				} else {
+					console.warn(`⚠️ No se pudo extraer metadata de ${fileInfo.path}:`, metadataResult.errors);
+				}
+			} catch (metadataError) {
+				// No fallar la creación de entidad si falla la extracción de metadata
+				console.warn(`⚠️ Error al extraer metadata de ${fileInfo.path}:`, metadataError);
 			}
 
 			return {
