@@ -1,13 +1,13 @@
 import { ArrowLeft, Download, Edit, Play, Settings, Share2, Square, Trash2, Workflow } from 'lucide-react';
 import { motion } from 'motion/react';
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
+import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import type { ViewProps } from '../types';
 
 interface WorkflowContentViewProps extends ViewProps {
@@ -15,11 +15,11 @@ interface WorkflowContentViewProps extends ViewProps {
 }
 
 export const WorkflowContentView: React.FC<WorkflowContentViewProps> = ({ className, workflowId }) => {
-	const navigate = useNavigate();
+	const { navigateWithTransition } = useSeamlessNavigation();
 	const [isRunning, setIsRunning] = React.useState(false);
 
 	const handleGoBack = () => {
-		navigate(-1);
+		navigateWithTransition(-1);
 	};
 
 	const toggleWorkflow = () => {

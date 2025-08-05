@@ -9,7 +9,6 @@ import {
     Code,
     Database,
     FileImage,
-    FileText,
     FolderOpen,
     HardDrive,
     Heart,
@@ -32,21 +31,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Progress } from '@/components/ui/progress';
 import Silk from '@/components/ui/silk-background';
 import { useGeneralStats, useRecentActivity, useSystemStatsExtended, useTopTags } from '@/lib/api/stats';
-import type { SystemStats } from '@/lib/api/system';
 import { useSystemStats } from '@/lib/api/system';
 
-interface DashboardContentViewProps {
-	stats: SystemStats | undefined;
-	isLoading: boolean;
-	isError: boolean;
-	error: Error | null;
-}
-
-const DashboardContentView: React.FC<DashboardContentViewProps> = memo(function DashboardContentView({
-	isLoading: legacyLoading,
-	isError: legacyError,
-	error: legacyErrorObject,
-}) {
+export const Dashboard = memo(function Dashboard() {
 	// Usar hooks de estadísticas más detalladas
 	const { data: systemStats, isLoading: systemLoading } = useSystemStats();
 	const { data: extendedStats, isLoading: extendedLoading } = useSystemStatsExtended();
@@ -56,9 +43,7 @@ const DashboardContentView: React.FC<DashboardContentViewProps> = memo(function 
 	const { data: topTags, isLoading: tagsLoading } = useTopTags(6);
 
 	// Estados de carga combinados
-	const isLoading = systemLoading || extendedLoading || generalLoading || folderLoading || legacyLoading;
-	const isError = legacyError;
-	const error = legacyErrorObject;
+	const isLoading = systemLoading || extendedLoading || generalLoading || folderLoading;
 
 	// Combinar estadísticas de diferentes fuentes con fallbacks inteligentes
 	const combinedStats = {
@@ -126,6 +111,7 @@ const DashboardContentView: React.FC<DashboardContentViewProps> = memo(function 
 		combinedStats.totalThumbnails + combinedStats.totalMetadata + combinedStats.totalWorkflows;
 	const totalAllEntities =
 		totalContentFiles + totalOrganizationEntities + totalWorldbuildingEntities + totalSystemEntities;
+
 	const storageUsedPercentage =
 		combinedStats.storageAvailable > 0
 			? (combinedStats.storageUsed / (combinedStats.storageUsed + combinedStats.storageAvailable)) * 100
@@ -160,26 +146,6 @@ const DashboardContentView: React.FC<DashboardContentViewProps> = memo(function 
 						<div className="h-8 w-64 bg-white/20 rounded" />
 						<div className="h-4 w-48 bg-white/10 rounded" />
 					</div>
-				</div>
-			</div>
-		);
-	}
-
-	if (isError) {
-		return (
-			<div className="relative h-full w-full">
-				{/* Silk Background */}
-				<div className="absolute inset-0 z-0">
-					<Silk speed={3} scale={1.2} color="#7B7481" noiseIntensity={1.2} rotation={0.1} />
-				</div>
-
-				{/* Content overlay */}
-				<div className="relative z-10 h-full w-full flex flex-col items-center justify-center p-6">
-					<Card className="bg-red-50/90 border-red-200">
-						<CardContent className="p-6">
-							<p className="text-red-600">Error al cargar las estadísticas: {error?.message}</p>
-						</CardContent>
-					</Card>
 				</div>
 			</div>
 		);
@@ -314,20 +280,6 @@ const DashboardContentView: React.FC<DashboardContentViewProps> = memo(function 
 							<CardContent>
 								<div className="text-2xl font-bold text-white">{formatNumber(combinedStats.totalTags)}</div>
 								<div className="text-xs text-cyan-200">Etiquetas</div>
-							</CardContent>
-						</Card>
-
-						{/* Documentos */}
-						<Card className="bg-gradient-to-br from-orange-500/20 to-orange-600/30 backdrop-blur-sm border-orange-300/30 hover:from-orange-500/30 hover:to-orange-600/40 transition-all">
-							<CardHeader className="pb-2">
-								<CardTitle className="text-sm font-medium flex items-center gap-2">
-									<FileText className="h-4 w-4 text-orange-400" />
-									Documentos
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="text-2xl font-bold text-white">{formatNumber(combinedStats.totalDocuments)}</div>
-								<div className="text-xs text-orange-200">Archivos</div>
 							</CardContent>
 						</Card>
 
@@ -688,4 +640,4 @@ const DashboardContentView: React.FC<DashboardContentViewProps> = memo(function 
 	);
 });
 
-export default DashboardContentView;
+export default Dashboard;

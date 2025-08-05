@@ -1,6 +1,5 @@
 import { Filter, Grid, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { DocumentCard } from '@/components/cards/document-card';
 import { FolderCard } from '@/components/cards/folder-card';
 import { ImageCard } from '@/components/cards/image-card';
@@ -11,6 +10,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAudioStore } from '@/store/entities/audio';
@@ -34,7 +34,7 @@ interface MixedViewProps {
 }
 
 export default function MixedView({ className }: MixedViewProps) {
-	const navigate = useNavigate();
+	const { navigateWithTransition } = useSeamlessNavigation();
 
 	// Estados de los diferentes stores
 	const images = useImageStore((state) => state.core.images);
@@ -159,25 +159,25 @@ export default function MixedView({ className }: MixedViewProps) {
 			// Navegar según el tipo de elemento
 			switch (item.itemType) {
 				case 'images':
-					navigate(`/images/${item.id}`);
+					navigateWithTransition(`/images/${item.id}`);
 					break;
 				case 'videos':
-					navigate(`/videos/${item.id}`);
+					navigateWithTransition(`/videos/${item.id}`);
 					break;
 				case 'documents':
-					navigate(`/documents/${item.id}`);
+					navigateWithTransition(`/documents/${item.id}`);
 					break;
 				case 'audios':
-					navigate(`/audios/${item.id}`);
+					navigateWithTransition(`/audios/${item.id}`);
 					break;
 				case 'folders':
-					navigate(`/folders/${item.id}`);
+					navigateWithTransition(`/folders/${item.id}`);
 					break;
 				default:
 					logger.warn(`Tipo de elemento no reconocido: ${item.itemType}`);
 			}
 		},
-		[navigate]
+		[navigateWithTransition]
 	);
 
 	// Manejar reintento

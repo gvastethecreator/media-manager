@@ -81,6 +81,8 @@ const CardItem = memo<{
 
 	// Actualizar handlers cuando cambien las dependencias
 	useMemo(() => {
+		console.log('🔧 CardsView.CardItem - Actualizando handlersRef para item:', item.id, 'onItemClickById:', !!onItemClickById);
+
 		handlersRef.current.onMouseEnter = () => {
 			if (derivedProps.interactiveEnabled) {
 				const timeout = setTimeout(() => {
@@ -110,8 +112,9 @@ const CardItem = memo<{
 	}, []);
 
 	const handleClick = useCallback((e: React.MouseEvent) => {
+		console.log('🔧 CardsView.CardItem - handleClick ejecutado para item:', item.id, 'handlersRef.onClick:', !!handlersRef.current.onClick);
 		handlersRef.current.onClick(e);
-	}, []);
+	}, [item.id]);
 
 	const handleDoubleClick = useCallback(() => {
 		handlersRef.current.onDoubleClick();
@@ -199,6 +202,10 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 	onItemClick,
 	onItemDoubleClick,
 }) {
+	console.log('🚀 CARDSVIEW SE ESTÁ RENDERIZANDO!', {
+		onItemClick: typeof onItemClick,
+		itemsLength: items.length
+	});
 	const parentRef = useRef<any>(null);
 	const { config, calculateLayout } = useCardsViewConfig();
 
@@ -224,6 +231,14 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 	);
 
 	// OPTIMIZACIÓN: Referencias estables con useRef para máximo rendimiento
+	// DEBUG: Verificar qué está llegando como props de handlers
+	console.log('🔍 CardsView - Props de handlers recibidos:', {
+		onItemClick: typeof onItemClick,
+		onItemClickValue: onItemClick && onItemClick.toString().substring(0, 100),
+		onItemDoubleClick: typeof onItemDoubleClick,
+		onItemDoubleClickValue: onItemDoubleClick && onItemDoubleClick.toString().substring(0, 100)
+	});
+
 	const itemsByIdRef = useRef(new Map<string, AnyEntityWithStats>());
 	const selectedIdsSetRef = useRef(new Set<string>());
 

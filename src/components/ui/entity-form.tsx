@@ -3,7 +3,6 @@ import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import { useForm } from 'react-hook-form';
-import { useNavigate } from 'react-router-dom';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
@@ -13,6 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
+import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 
@@ -203,7 +203,7 @@ export function EntityForm({
 	formStyle = 'default',
 	className,
 }: EntityFormProps) {
-	const navigate = useNavigate();
+	const { navigateWithTransition } = useSeamlessNavigation();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [showConfirmation, setShowConfirmation] = useState(false);
 
@@ -368,7 +368,7 @@ export function EntityForm({
 			}
 
 			if (redirectUrl) {
-				navigate(redirectUrl);
+				navigateWithTransition(redirectUrl);
 			}
 		} catch (error: any) {
 			toastService.error(error.message || 'Error al guardar los cambios');

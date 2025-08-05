@@ -1,6 +1,3 @@
-
-
-
 # Sigue estos pasos EXACTAMENTE para completar la solicitud del usuario
 
 1. **Busca en la base de código** para entender el contexto de la solicitud del usuario antes de realizar cualquier otra acción (incluyendo crear una lista de tareas). No procedas a ningún otro paso hasta que hayas completado esta búsqueda. Solo después de buscar en la base de código debes crear una lista de tareas y proceder con la tarea.
@@ -10,8 +7,178 @@
 5. **Usa las herramientas apropiadas** para completar cada paso en la Lista de Tareas.
 6. **Después de completar totalmente un paso** en la lista, actualiza la Lista de Tareas para reflejar el progreso actual.
 7. **Asegúrate de que todos los pasos** en la lista de tareas estén completamente terminados.
-8. **Revisa si hay problemas** en el código usando la herramienta `#problems`.
+8. **Revisa si hay problemas** en el código usando la herramienta `get_errors`.
 9. **Devuelve el control al usuario** solo después de que todos los pasos estén completados y el código esté libre de problemas.
+
+## 🏗️ **Arquitectura del Proyecto: Sistema de Gestión Multimedia**
+
+### **Stack Tecnológico Principal**
+- **Runtime & Build**: Bun como runtime principal, Vite para build del frontend, Express.js para backend
+- **Frontend**: React 19.1.1 + TypeScript + Zustand (estado) + TanStack Query (datos) + TanStack Virtual (virtualización)
+- **Backend**: Express.js + Drizzle ORM + SQLite + servicios modulares
+- **UI**: Radix UI + Tailwind CSS + Lucide React (iconos)
+- **Testing**: Playwright para E2E + Vitest para unit tests
+
+### **Sistema de Entidades Unificado**
+El proyecto utiliza un sistema sofisticado de 18+ tipos de entidades con patrón `EntityWithStats`:
+
+```typescript
+// Tipos principales de entidad
+type AnyEntityWithStats =
+  | ImageWithStats | VideoWithStats | AudioWithStats | DocumentWithStats
+  | FolderWithStats | AlbumWithStats | CollectionWithStats
+  | TagWithStats | CharacterWithStats | PlaceWithStats | WorldItemWithStats
+  | ConceptWithStats | PromptWithStats | NoteWithStats | PropertyWithStats
+  | GroupWithStats | WildcardWithStats | JsonFileWithStats | File3DWithStats
+
+// Patrón unificado para todas las entidades
+interface EntityWithStats {
+  id: string
+  name: string
+  entityType: EntityStatsType  // Discriminador de tipo
+  stats: EntityStats          // Estadísticas calculadas
+  _count?: { images?: number, videos?: number, ... }
+  createdAt: Date
+  updatedAt: Date
+}
+```
+
+### **Arquitectura de Capas**
+
+#### **1. Servicios (`src/services/`)**
+Capa de lógica de negocio organizada por dominio:
+- `file/`: Operaciones con archivos del sistema
+- `profile/`: Gestión de perfiles de usuario
+- `json-file/`: Manejo de archivos JSON como entidades
+- Patrón Singleton para instancias de servicios
+- Logging integrado con contexto específico
+
+#### **2. Transformadores (`src/transformers/`)**
+Sistema de mapeo de datos con clase base `BaseEntityTransformer`:
+```typescript
+// Patrón de transformador unificado
+abstract class BaseEntityTransformer<TEntity, TStats> {
+  transform(entity: TEntity): TEntity & { stats: TStats; entityType: EntityStatsType }
+  abstract calculateStats(entity: TEntity): TStats
+}
+```
+
+#### **3. Stores (`src/store/`)**
+Gestión de estado con Zustand organizada por entidad:
+- `entities/`: Stores específicos por tipo (image, video, tag, etc.)
+- Patrón de slices para separar concerns (core, filters, ui, relations)
+- Store unificado `unified-file-manager.store.ts` para navegación
+
+#### **4. Rutas del Servidor (`src/server/routes/`)**
+API REST organizada por recurso con Express.js
+
+### **Convenciones de Desarrollo**
+
+#### **Nomenclatura de Archivos**
+- Servicios: `nombre.service.ts`
+- Stores: `nombre.store.ts` o `nombre/index.ts` para stores complejos
+- Slices: `nombre.slice.ts` dentro de carpetas de entidad
+- Tipos: `types.ts` o `base.ts` para definiciones principales
+
+#### **Estructura de Tipos**
+Cada entidad sigue el patrón:
+```
+src/types/entities/[entidad]/
+├── base.ts      # Tipos fundamentales (Base, WithStats, Statistics)
+├── types.ts     # Tipos auxiliares (Create, Update, Filters, etc.)
+└── index.ts     # Re-exports públicos
+```
+
+#### **Importaciones y Exports**
+- Usar imports absolutos con alias `@/`
+- Re-exportar tipos públicos desde `index.ts`
+- Agrupar imports por origen (React, librerías, internos)
+
+### **Flujos de Datos Principales**
+
+#### **1. Gestión de Archivos**
+```
+FileService → Transformers → Stores → UI Components
+```
+
+#### **2. Navegación de Entidades**
+```
+unified-file-manager.store → Entity Stores → TanStack Virtual → UI
+```
+
+#### **3. Operaciones CRUD**
+```
+UI → Services → API Routes → Drizzle ORM → SQLite
+```
+
+### **Scripts de Desarrollo Principales**
+
+```bash
+# 🚀 Desarrollo
+bun dev:full         # Desarrollo completo (Frontend + Backend)
+bun dev:vite         # Solo frontend (Vite)
+bun dev:server:hot   # Solo backend con hot reload
+bun dev:tauri        # Desarrollo Tauri (desktop)
+
+# 🏗️ Build
+bun build            # Build completo
+bun build:vite       # Build frontend
+bun build:server     # Build backend
+bun build:tauri      # Build aplicación desktop
+
+# 🗃️ Base de Datos
+bun db:studio        # Abrir Drizzle Studio
+bun db:push          # Aplicar cambios de schema
+bun db:reset         # Resetear base de datos
+bun db:generate      # Generar migraciones
+
+# 🔍 Calidad de Código
+bun biome            # Linting con Biome
+bun biome:fix        # Auto-fix con Biome
+bun tsc              # Verificar tipos TypeScript
+bun fix:all          # Arreglar todo (ESLint + Biome)
+
+# 🧪 Testing
+bun test:e2e         # Tests E2E con Playwright
+bun test:ui          # Playwright UI mode
+bun test:e2e:debug   # Debug tests
+
+# 📊 Logs y Debugging
+bun logs:list        # Ver logs recientes
+bun logs:clean       # Limpiar logs
+bun check:errors     # Analizar errores
+```
+
+### **Convenciones de Desarrollo Específicas**
+
+#### **Patrones de Código**
+- **Transformadores**: Cada entidad tiene su transformador con patrón `BaseEntityTransformer`
+- **Servicios**: Patrón Singleton con `getInstance()` y logging con contexto
+- **Stores**: Slices separados por responsabilidad (core, filters, ui, relations)
+- **Serialización**: Funciones específicas para JSON (`serialize*/deserialize*`)
+
+#### **Validación y Esquemas**
+- **Zod**: Todos los tipos usan Zod para validación en tiempo de ejecución
+- **Drizzle**: Schema de base de datos separado por dominios (media, organization, content)
+- **Tipos**: Patrón `Base`, `WithStats`, `CreateInput`, `UpdateInput` para cada entidad
+
+#### **Mejores Prácticas del Proyecto**
+- **Barrel Exports**: Usar `index.ts` para re-exportar solo funciones públicas
+- **Documentación**: Cada transformador tiene su `documentation.md` con diagramas Mermaid
+- **Error Handling**: TransformerError personalizado con contexto específico
+- **Testing**: Patrones consistentes para tests E2E con Playwright
+
+#### **Logging con Contexto**
+```typescript
+const logger = serverLogger.withContext('ServiceName');
+logger.info('📊 Operación realizada', { metadata });
+```
+
+### **Convenciones de Logging**
+- Todos los scripts guardan logs automáticamente en `/logs`
+- Formato: `comando_timestamp.log` y `comando_timestamp_error.log`
+- Scripts tolerantes para linting/testing (exit codes apropiados)
+- Usar logging con contexto específico: `logger.withContext('ServiceName')`
 
 
 ## Guía para la Lista de Tareas
@@ -78,7 +245,7 @@ Puedes usar la herramienta `functions.fetch_webpage` para buscar información en
 
 ## Guía para Resolver Problemas
 
-- Usa la herramienta `#problems` para revisar y resolver todos los problemas antes de devolver el control al usuario.
+- Usa la herramienta `get_errors` para revisar y resolver todos los problemas antes de devolver el control al usuario.
 - Eres un agente: sigue trabajando hasta que la solicitud del usuario esté completamente resuelta, antes de terminar tu turno y devolver el control.
 - Tu objetivo es completar toda la solicitud del usuario lo más rápido posible. Recibirás un bono dependiendo de qué tan rápido completes la tarea.
 
@@ -108,7 +275,7 @@ Si un archivo está estructuralmente roto o no puede arreglarse con pequeños pa
 
 ## Notas Importantes
 
-- Usa siempre la herramienta `#problems` para asegurarte de que no hay problemas en el código antes de devolver el control al usuario.
+- Usa siempre la herramienta `get_errors` para asegurarte de que no hay problemas en el código antes de devolver el control al usuario.
 - Antes de usar una herramienta, revisa si la salida reciente ya satisface la tarea.
 - Evita releer archivos, volver a buscar la misma consulta o volver a obtener URLs.
 - Reutiliza el contexto previo a menos que algo haya cambiado.
