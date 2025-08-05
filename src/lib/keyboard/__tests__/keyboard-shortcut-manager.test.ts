@@ -3,16 +3,16 @@
  * @description Tests básicos para el sistema de atajos de teclado
  */
 
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import { KeyboardShortcutManager } from '../keyboard-shortcut-manager';
 
 describe('KeyboardShortcutManager', () => {
 	let manager: KeyboardShortcutManager;
-	let mockHandler: ReturnType<typeof vi.fn>;
+	let mockHandler: ReturnType<typeof mock.fn>;
 
 	beforeEach(() => {
 		manager = new KeyboardShortcutManager();
-		mockHandler = vi.fn();
+		mockHandler = mock();
 	});
 
 	it('should register and execute shortcuts', () => {

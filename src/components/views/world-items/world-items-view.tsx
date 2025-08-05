@@ -1,11 +1,11 @@
 import { Box } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useCallback } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { WorldItemCard } from '@/components/cards/world-item-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { useWorldItems } from '@/lib/api/world-items';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useWorldItemStore } from '@/store/entities/world-item';
@@ -14,7 +14,7 @@ import type { ViewProps } from '../types';
 const viewLogger = clientLogger.withContext('WorldItemsView');
 
 export function WorldItemsView(_props: ViewProps) {
-	const navigate = useNavigate();
+	const { navigateWithTransition } = useSeamlessNavigation();
 	const selectWorldItem = useWorldItemStore((state) => state.selectWorldItem);
 
 	const { data: worldItemsResponse, isLoading, error } = useWorldItems();
@@ -23,10 +23,10 @@ export function WorldItemsView(_props: ViewProps) {
 	const handleWorldItemClick = useCallback(
 		(worldItem: any) => {
 			viewLogger.info('🖱️ Click en objeto del mundo:', worldItem.name);
-			navigate('/world-item-content');
+			navigateWithTransition('/world-item-content');
 			selectWorldItem(worldItem.id);
 		},
-		[navigate, selectWorldItem]
+		[navigateWithTransition, selectWorldItem]
 	);
 
 	if (error) {

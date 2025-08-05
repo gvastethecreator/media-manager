@@ -1,0 +1,503 @@
+/**
+ * Servicio unificado para extracción completa de metadatos
+ * Orquesta todos los parsers especializados para proporcionar un resultado integral
+ */
+
+import { serverLogger } from '@/lib/logger/server-logger';
+import {
+    AIEngine,
+    type BaseMetadata,
+    type MetadataExtractionOptions,
+    type MetadataExtractionResult,
+    type TechnicalMetadata,
+} from '@/types/metadata-origin.types';
+
+// Servicios especializados
+import { extractMetadata as extractExifMetadata } from './exifr-parser.service';
+import { extractPngMetadata } from './png-parser.service';
+import { detectOrigin, hasAIGenerationData } from './origin-detector.service';
+import {
+	extractCommonAIParameters,
+	parseAutomatic1111Metadata,
+	parseComfyUIMetadata,
+	parseSwarmUIMetadata,
+} from './sd-parser.service';
+
+const logger = serverLogger.withContext('UnifiedParserService');
+
+/**
+ * Opciones por defecto para extracción de metadatos
+ */
+const DEFAULT_OPTIONS: MetadataExtractionOptions = {
+	extract_exif: true,
+	extract_iptc: true,
+	extract_xmp: true,
+	extract_c2pa: false, // Por ahora deshabilitado hasta implementar C2PA
+	extract_ai_metadata: true,
+	extract_video_metadata: false, // Se habilitará cuando sea video
+	timeout: 30000, // 30 segundos
+	max_file_size: 100 * 1024 * 1024, // 100MB
+	debug: false,
+	include_raw_data: false,
+};
+
+/**
+ * Extrae todos los metadatos de un archivo (imagen o video)
+ */
+export async function extractAllMetadata(
+	buffer: Buffer,
+	filename: string,
+	options: Partial<MetadataExtractionOptions> = {}
+): Promise<MetadataExtractionResult> {
+	const startTime = Date.now();
+	const opts = { ...DEFAULT_OPTIONS, ...options };
+	const result: MetadataExtractionResult = {
+		success: false,
+		base: await extractBaseMetadata(buffer, filename),
+		errors: [],
+		warnings: [],
+	};
+
+	logger.info('Iniciando extracción completa de metadatos', {
+		filename,
+		bufferSize: buffer.length,
+		options: opts,
+	});
+
+	try {
+		// 1. Verificar tamaño del archivo
+		if (opts.max_file_size && buffer.length > opts.max_file_size) {
+			throw new Error(`Archivo demasiado grande: ${buffer.length} bytes (máximo: ${opts.max_file_size})`);
+		}
+
+		// 2. Extraer metadatos técnicos (EXIF/IPTC/XMP)
+		if (opts.extract_exif || opts.extract_iptc || opts.extract_xmp) {
+			logger.info('🔧 UNIFIED PARSER: Iniciando extracción de metadatos técnicos...');
+			const technicalMetadata = await extractTechnicalMetadata(buffer, opts);
+			logger.info('🔧 UNIFIED PARSER: Metadatos técnicos extraídos', {
+				hasResult: !!technicalMetadata,
+				hasExif: !!technicalMetadata?.exif,
+				hasIptc: !!technicalMetadata?.iptc,
+				hasXmp: !!technicalMetadata?.xmp
+			});
+
+			if (technicalMetadata) {
+				result.exif = technicalMetadata.exif as any;
+				result.iptc = technicalMetadata.iptc as any;
+				result.xmp = technicalMetadata.xmp as any;
+
+				logger.info('🔧 UNIFIED PARSER: Asignando metadatos al resultado', {
+					resultHasExif: !!result.exif,
+					resultHasIptc: !!result.iptc,
+					resultHasXmp: !!result.xmp
+				});
+
+				if (opts.include_raw_data) {
+					(result as any).raw_exif_tags = technicalMetadata.rawTags;
+				}
+			}
+		}
+
+		// 3. Crear metadata combinado para análisis de IA
+		const combinedMetadata = createCombinedMetadata(result);
+
+		// 4. Detectar origen de generación IA
+		if (opts.extract_ai_metadata) {
+			const originResult = await detectOrigin(combinedMetadata);
+			result.origin = originResult;
+
+			// 5. Si es contenido generado por IA, extraer metadatos específicos
+			if (await hasAIGenerationData(combinedMetadata)) {
+				const aiMetadata = await extractAIMetadata(combinedMetadata, originResult.engine);
+				if (aiMetadata) {
+					result.ai_metadata = aiMetadata;
+				}
+			}
+		}
+
+		// 6. C2PA (Content Credentials) si está habilitado
+		if (opts.extract_c2pa) {
+			try {
+				// TODO: Implementar cuando C2PA esté disponible
+				result.warnings.push('C2PA extraction no implementado aún');
+			} catch (error) {
+				result.warnings.push(`Error C2PA: ${error}`);
+			}
+		}
+
+		// 7. Video metadata si es aplicable
+		if (opts.extract_video_metadata && isVideoFile(filename)) {
+			try {
+				// TODO: Implementar extracción de video metadata
+				result.warnings.push('Video metadata extraction no implementado aún');
+			} catch (error) {
+				result.warnings.push(`Error video metadata: ${error}`);
+			}
+		}
+
+		result.success = true;
+		result.processing_time = Date.now() - startTime;
+		result.parser_used = 'unified-parser';
+
+		logger.info('Extracción completa exitosa', {
+			filename,
+			processingTime: result.processing_time,
+			hasAI: !!result.ai_metadata,
+			engine: result.origin?.engine,
+			confidence: result.origin?.confidence,
+		});
+	} catch (error) {
+		result.errors.push(`Error general: ${error}`);
+		result.processing_time = Date.now() - startTime;
+
+		logger.error('Error en extracción de metadatos', {
+			filename,
+			error,
+			processingTime: result.processing_time,
+		});
+	}
+
+	return result;
+}
+
+/**
+ * Extrae metadatos base del archivo (dimensiones, formato, etc.)
+ */
+async function extractBaseMetadata(buffer: Buffer, filename: string): Promise<BaseMetadata> {
+	const base: BaseMetadata = {
+		file: {
+			size: buffer.length,
+			format: getFileFormat(filename),
+			mimeType: getMimeType(filename),
+			filename: filename,
+		},
+	};
+
+	// Para imágenes, usar Sharp para obtener dimensiones básicas
+	if (isImageFile(filename)) {
+		try {
+			// Importar Sharp dinámicamente
+			const sharp = await import('sharp');
+			const metadata = await sharp.default(buffer).metadata();
+
+			base.dimensions = {
+				width: metadata.width || 0,
+				height: metadata.height || 0,
+				megapixels:
+					metadata.width && metadata.height
+						? Number.parseFloat(((metadata.width * metadata.height) / 1000000).toFixed(2))
+						: undefined,
+				aspectRatio:
+					metadata.width && metadata.height ? calculateAspectRatio(metadata.width, metadata.height) : undefined,
+			};
+
+			base.color = {
+				colorType: metadata.channels ? `${metadata.channels} channels` : undefined,
+				bitDepth: typeof metadata.depth === 'string' ? undefined : (metadata.depth as number),
+				compression: metadata.compression as string,
+				hasAlpha: metadata.hasAlpha,
+			};
+
+			if (metadata.format === 'png') {
+				base.png = {
+					// Sharp no expone estos detalles PNG específicos
+					interlacing: false, // placeholder
+				};
+			}
+		} catch (error) {
+			logger.warn('Error extrayendo metadatos base con Sharp', { error });
+		}
+	}
+
+	return base;
+}
+
+/**
+ * Extrae metadatos técnicos usando ExifReader y PNG parser
+ */
+async function extractTechnicalMetadata(
+	buffer: Buffer,
+	options: MetadataExtractionOptions
+): Promise<TechnicalMetadata | null> {
+	try {
+		logger.info('🔧 UNIFIED PARSER: extractTechnicalMetadata iniciado', {
+			extract_exif: options.extract_exif,
+			extract_iptc: options.extract_iptc,
+			extract_xmp: options.extract_xmp
+		});
+
+		if (!options.extract_exif && !options.extract_iptc && !options.extract_xmp) {
+			logger.info('🔧 UNIFIED PARSER: No extraction options enabled - retornando null');
+			return null;
+		}
+
+		// Extraer metadatos EXIF/IPTC/XMP
+		logger.info('🔧 UNIFIED PARSER: Llamando extractExifMetadata...');
+		const result = await extractExifMetadata(buffer);
+		logger.info('🔧 UNIFIED PARSER: extractExifMetadata completado', {
+			hasResult: !!result,
+			resultType: typeof result,
+			hasExif: result?.exif ? 'yes' : 'no',
+			hasIptc: result?.iptc ? 'yes' : 'no',
+			hasXmp: result?.xmp ? 'yes' : 'no'
+		});
+
+		// Extraer PNG text chunks si es un archivo PNG
+		if (isPNGFile(buffer)) {
+			logger.info('🔧 UNIFIED PARSER: Detectado archivo PNG, extrayendo text chunks...');
+			try {
+				const pngMetadata = await extractPngMetadata(buffer);
+				logger.info('🔧 UNIFIED PARSER: PNG text chunks extraídos', {
+					hasMetadata: !!pngMetadata,
+					chunksCount: pngMetadata ? Object.keys(pngMetadata).length : 0
+				});
+
+				// Combinar metadatos PNG con los existentes
+				if (pngMetadata && result) {
+					// Agregar chunks PNG al resultado existente
+					if (!result.exif) result.exif = {};
+					Object.assign(result.exif, pngMetadata);
+				} else if (pngMetadata && !result) {
+					// Si no hay resultado EXIF pero sí PNG, crear resultado
+					return {
+						exif: pngMetadata,
+						iptc: null,
+						xmp: null,
+						rawTags: {}
+					};
+				}
+			} catch (pngError) {
+				logger.warn('🔧 UNIFIED PARSER: Error extrayendo PNG text chunks', { error: pngError });
+			}
+		}
+
+		return result;
+	} catch (error) {
+		logger.error('🔧 UNIFIED PARSER: Error extrayendo metadatos técnicos', { error });
+		return null;
+	}
+}
+
+/**
+ * Combina metadatos de diferentes fuentes para análisis
+ */
+function createCombinedMetadata(result: MetadataExtractionResult): Record<string, unknown> {
+	const combined: Record<string, unknown> = {};
+
+	// Agregar EXIF
+	if (result.exif) {
+		Object.assign(combined, result.exif);
+	}
+
+	// Agregar IPTC
+	if (result.iptc) {
+		Object.assign(combined, result.iptc);
+		// Mapear campos IPTC comunes
+		if (result.iptc.description) combined.Description = result.iptc.description;
+		if (result.iptc.title) combined.Title = result.iptc.title;
+		if (result.iptc.keywords) combined.Keywords = result.iptc.keywords;
+	}
+
+	// Agregar XMP
+	if (result.xmp) {
+		Object.assign(combined, result.xmp);
+		// Mapear campos XMP comunes
+		if (result.xmp.description) combined.Description = result.xmp.description;
+		if (result.xmp.title) combined.Title = result.xmp.title;
+	}
+
+	// Buscar en campos comunes donde suelen estar los metadatos de IA
+	const commonFields = ['parameters', 'prompt', 'workflow', 'Software', 'Comment'];
+	for (const field of commonFields) {
+		if (field in combined) {
+			// Campo ya está en combined, no hace falta reasignar
+		}
+	}
+
+	return combined;
+}
+
+/**
+ * Extrae metadatos específicos de IA basado en el engine detectado
+ */
+async function extractAIMetadata(metadata: Record<string, unknown>, engine: AIEngine): Promise<any> {
+	try {
+		switch (engine) {
+			case AIEngine.AUTOMATIC1111:
+			case AIEngine.FORGE: {
+				// Buscar parámetros en campos comunes
+				const parametersText = findParametersText(metadata);
+				if (parametersText) {
+					const result = await parseAutomatic1111Metadata(parametersText);
+					return result.detected ? result.data : null;
+				}
+				break;
+			}
+
+			case AIEngine.COMFYUI: {
+				// Buscar workflow en campos comunes
+				const workflowData = findWorkflowData(metadata);
+				if (workflowData) {
+					const result = await parseComfyUIMetadata(workflowData);
+					return result.detected ? result.data : null;
+				}
+				break;
+			}
+
+			case AIEngine.SWARMUI: {
+				// SwarmUI almacena metadatos de forma más estructurada
+				const result = await parseSwarmUIMetadata(metadata);
+				return result.detected ? result.data : null;
+			}
+
+			default:
+				// Para engines no específicos, extraer parámetros comunes
+				return await extractCommonAIParameters(metadata);
+		}
+	} catch (error) {
+		logger.warn('Error extrayendo metadatos específicos de IA', { engine, error });
+	}
+
+	return null;
+}
+
+/**
+ * Busca texto de parámetros en metadatos
+ */
+function findParametersText(metadata: Record<string, unknown>): string | null {
+	const possibleFields = [
+		'parameters',
+		'Parameters',
+		'Comment',
+		'Description',
+		'UserComment',
+		'Software',
+		'ImageDescription',
+	];
+
+	for (const field of possibleFields) {
+		if (field in metadata) {
+			const value = metadata[field];
+			if (typeof value === 'string' && value.includes('Steps:')) {
+				return value;
+			}
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Busca datos de workflow en metadatos
+ */
+function findWorkflowData(metadata: Record<string, unknown>): string | Record<string, unknown> | null {
+	const possibleFields = ['workflow', 'Workflow', 'prompt', 'Prompt', 'Comment', 'Description'];
+
+	for (const field of possibleFields) {
+		if (field in metadata) {
+			const value = metadata[field];
+			if (typeof value === 'string') {
+				// Intentar parsear como JSON
+				try {
+					const parsed = JSON.parse(value);
+					if (parsed && typeof parsed === 'object') {
+						return parsed;
+					}
+				} catch {
+					// Si no es JSON válido pero contiene indicadores de ComfyUI
+					if (value.includes('class_type') || value.includes('ComfyUI')) {
+						return value;
+					}
+				}
+			} else if (typeof value === 'object') {
+				return value as Record<string, unknown>;
+			}
+		}
+	}
+
+	return null;
+}
+
+/**
+ * Utilidades para archivos
+ */
+function isImageFile(filename: string): boolean {
+	const ext = filename.toLowerCase().split('.').pop() || '';
+	return ['jpg', 'jpeg', 'png', 'webp', 'gif', 'bmp', 'tiff', 'tif'].includes(ext);
+}
+
+/**
+ * Detecta si un buffer es un archivo PNG por su signature
+ */
+function isPNGFile(buffer: Buffer): boolean {
+	// PNG signature: 89 50 4E 47 0D 0A 1A 0A
+	if (buffer.length < 8) return false;
+	return (
+		buffer[0] === 0x89 &&
+		buffer[1] === 0x50 &&
+		buffer[2] === 0x4E &&
+		buffer[3] === 0x47 &&
+		buffer[4] === 0x0D &&
+		buffer[5] === 0x0A &&
+		buffer[6] === 0x1A &&
+		buffer[7] === 0x0A
+	);
+}
+
+function isVideoFile(filename: string): boolean {
+	const ext = filename.toLowerCase().split('.').pop() || '';
+	return ['mp4', 'mov', 'avi', 'webm', 'mkv', 'wmv', 'flv'].includes(ext);
+}
+
+function getFileFormat(filename: string): string {
+	return filename.toLowerCase().split('.').pop() || 'unknown';
+}
+
+function getMimeType(filename: string): string {
+	const ext = getFileFormat(filename);
+	const mimeTypes: Record<string, string> = {
+		jpg: 'image/jpeg',
+		jpeg: 'image/jpeg',
+		png: 'image/png',
+		webp: 'image/webp',
+		gif: 'image/gif',
+		bmp: 'image/bmp',
+		tiff: 'image/tiff',
+		mp4: 'video/mp4',
+		mov: 'video/quicktime',
+		avi: 'video/x-msvideo',
+		webm: 'video/webm',
+	};
+
+	return mimeTypes[ext] || 'application/octet-stream';
+}
+
+function calculateAspectRatio(width: number, height: number): string {
+	const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
+	const divisor = gcd(width, height);
+	return `${width / divisor}:${height / divisor}`;
+}
+
+/**
+ * Versión simplificada para casos donde solo se necesita detección rápida
+ */
+export async function quickOriginDetection(buffer: Buffer): Promise<{ engine: AIEngine; confidence: number }> {
+	try {
+		const technicalMetadata = await extractExifMetadata(buffer);
+		if (!technicalMetadata) {
+			return { engine: AIEngine.UNKNOWN, confidence: 0 };
+		}
+
+		const combined = {
+			...technicalMetadata.exif,
+			...technicalMetadata.iptc,
+			...technicalMetadata.xmp,
+		};
+
+		const result = await detectOrigin(combined);
+		return { engine: result.engine, confidence: result.confidence };
+	} catch (error) {
+		logger.warn('Error en detección rápida', { error });
+		return { engine: AIEngine.UNKNOWN, confidence: 0 };
+	}
+}

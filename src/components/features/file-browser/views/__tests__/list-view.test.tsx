@@ -4,12 +4,12 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, mock } from 'bun:test';
 import { ListView } from '@/components/features/file-browser/views/list-view';
 import type { AnyEntityWithStats } from '@/types/migration';
 
 // Mock de dependencias
-vi.mock('@/hooks/use-list-view-config', () => ({
+mock.module('@/hooks/use-list-view-config', () => ({
 	useListViewConfig: () => ({
 		config: {
 			columns: [
@@ -58,9 +58,9 @@ vi.mock('@/hooks/use-list-view-config', () => ({
 				order: 1,
 			},
 		],
-		updateColumn: vi.fn(),
-		reorderColumns: vi.fn(),
-		toggleColumnVisibility: vi.fn(),
+		updateColumn: mock(),
+		reorderColumns: mock(),
+		toggleColumnVisibility: mock(),
 		getColumnsWithRenderers: () => [
 			{
 				key: 'name',
@@ -82,7 +82,7 @@ vi.mock('@/hooks/use-list-view-config', () => ({
 	}),
 }));
 
-vi.mock('@tanstack/react-virtual', () => ({
+mock.module('@tanstack/react-virtual', () => ({
 	useVirtualizer: () => ({
 		getTotalSize: () => 500,
 		getVirtualItems: () => [
@@ -95,7 +95,7 @@ vi.mock('@tanstack/react-virtual', () => ({
 	}),
 }));
 
-vi.mock('motion/react', () => ({
+mock.module('motion/react', () => ({
 	motion: {
 		div: ({ children, ...props }: any) => <div {...props}>{children}</div>,
 	},
@@ -120,10 +120,10 @@ describe('ListView', () => {
 		items: mockItems,
 		selectedIds: [],
 		containerWidth: 800,
-		onItemClick: vi.fn(),
-		onItemDoubleClick: vi.fn(),
-		onItemContextMenu: vi.fn(),
-		onSort: vi.fn(),
+		onItemClick: mock(),
+		onItemDoubleClick: mock(),
+		onItemContextMenu: mock(),
+		onSort: mock(),
 	};
 
 	it('renderiza correctamente con items', () => {
@@ -148,7 +148,7 @@ describe('ListView', () => {
 	});
 
 	it('llama a onItemClick cuando se hace click en un item', () => {
-		const onItemClick = vi.fn();
+		const onItemClick = mock();
 		render(<ListView {...defaultProps} onItemClick={onItemClick} />);
 
 		// Verificar que el evento se configura correctamente

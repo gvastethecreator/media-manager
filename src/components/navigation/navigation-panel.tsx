@@ -1,8 +1,9 @@
 import { memo, useCallback } from 'react';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import type { NavPanelProps } from '@/components/navigation/types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { ViewType } from '@/components/views/types';
+import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { cn } from '@/lib/utils';
 import { NavMainNavigation } from './components/nav-main-navigation';
 import { NavPanelHeader } from './components/nav-panel-header';
@@ -13,31 +14,33 @@ export const NavPanel = memo(function NavPanel({
 	onToggleCollapse,
 	isAnimating = false,
 }: Omit<NavPanelProps, 'initialData'>) {
-	const navigate = useNavigate();
+	const { navigateWithTransition } = useSeamlessNavigation();
 	const location = useLocation();
 	const { stats } = useCategoryStats();
 
 	// Obtener la vista actual desde la URL
-	const currentView = location.pathname.slice(1) || 'dashboard';
+	const currentView = location.pathname.slice(1) || '';
 
 	const handleNavigate = useCallback(
 		(id: ViewType) => {
-			navigate(`/${id}`);
+			// Para la ruta raíz (dashboard), navegar a '/'
+			const path = id === '' ? '/' : `/${id}`;
+			navigateWithTransition(path);
 		},
-		[navigate]
+		[navigateWithTransition]
 	);
 
 	const handleOpenSettings = useCallback(() => {
-		navigate('/settings');
-	}, [navigate]);
+		navigateWithTransition('/settings');
+	}, [navigateWithTransition]);
 
 	const handleOpenDevelopment = useCallback(() => {
-		navigate('/development');
-	}, [navigate]);
+		navigateWithTransition('/development');
+	}, [navigateWithTransition]);
 
 	const handleOpenEntityCards = useCallback(() => {
-		navigate('/entity-cards');
-	}, [navigate]);
+		navigateWithTransition('/entity-cards');
+	}, [navigateWithTransition]);
 
 	return (
 		<aside
@@ -55,7 +58,7 @@ export const NavPanel = memo(function NavPanel({
 				isAnimating={isAnimating}
 			/>
 			<ScrollArea className="flex-1">
-				<NavMainNavigation currentView={currentView} onNavigate={handleNavigate} isCollapsed={isCollapsed} />
+				<NavMainNavigation currentView={currentView} isCollapsed={isCollapsed} />
 			</ScrollArea>
 		</aside>
 	);

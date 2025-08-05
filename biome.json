@@ -1,7 +1,12 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.0.6/schema.json",
-
-  "assist": { "actions": { "source": { "organizeImports": "on" } } },
+  "$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
+  "assist": {
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {
@@ -16,7 +21,14 @@
       },
       "suspicious": {
         "noExplicitAny": "off",
-        "noConsole": { "level": "off", "options": { "allow": ["log"] } }
+        "noConsole": {
+          "level": "off",
+          "options": {
+            "allow": [
+              "log"
+            ]
+          }
+        }
       },
       "a11y": {
         "useAltText": "error",
@@ -85,5 +97,8 @@
     "enabled": true,
     "clientKind": "git",
     "useIgnoreFile": true
-  }
+  },
+  "extends": [
+    "ultracite"
+  ]
 }

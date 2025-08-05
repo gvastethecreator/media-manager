@@ -12,11 +12,13 @@ import { toastService } from '@/lib/ui/toast';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFolderStore } from '@/store/entities/folder';
 import { useImageStore } from '@/store/entities/image';
+import { useUIStore } from '@/store/ui.store';
 
 export const MainLayout = memo(function MainLayout() {
 	const location = useLocation();
 	const params = useParams<{ id: string }>();
 	const { isVisible } = useDetailsPanel();
+	const { isRightPanelCollapsed: uiPanelCollapsed } = useUIStore();
 
 	const [isLeftCollapsed, setIsLeftCollapsed] = useState(false);
 	// Inicializar con false para coincidir con el valor por defecto del store (isVisible: true -> !isVisible = false)
@@ -30,22 +32,36 @@ export const MainLayout = memo(function MainLayout() {
 	const { getSortedImages, getImagesByFolder } = useImageStore();
 	const { selectedFolderId } = useFolderStore();
 
+	// Determinar qué vistas no necesitan toolbar ni panel derecho
+	const viewsWithoutToolbarAndPanel = useMemo(() => [
+		'', // Ruta raíz (dashboard)
+		'settings',
+		'development'
+	], []);
+
+	const currentView = useMemo(() => {
+		const pathSegments = location.pathname.split('/');
+		return pathSegments[1] || '';
+	}, [location.pathname]);
+
+	const shouldHideToolbarAndPanel = useMemo(() =>
+		viewsWithoutToolbarAndPanel.includes(currentView),
+		[viewsWithoutToolbarAndPanel, currentView]
+	);
+
 	// Hook para reindexar carpeta
 	const reindexFolderMutation = useReindexFolder();
 
 	// Obtener el folderId actual según la ruta
 	const currentFolderId = useMemo(() => {
-		const currentView = location.pathname.split('/')[1] || 'gallery';
 		if (currentView === 'folders' && params.id) {
 			return params.id;
 		}
 		return null;
-	}, [location.pathname, params.id]);
+	}, [currentView, params.id]);
 
 	// Calcular los IDs de elementos disponibles según la vista actual
 	const allItemIds = useMemo(() => {
-		const currentView = location.pathname.split('/')[1] || 'gallery';
-
 		switch (currentView) {
 			case 'folders':
 				if (currentFolderId) {
@@ -58,7 +74,7 @@ export const MainLayout = memo(function MainLayout() {
 			default:
 				return [];
 		}
-	}, [location.pathname, currentFolderId, getSortedImages, getImagesByFolder]);
+	}, [currentView, currentFolderId, getSortedImages, getImagesByFolder]);
 
 	// Funciones para acciones de carpeta
 	const handleScanFolder = useCallback(async () => {
@@ -91,12 +107,25 @@ export const MainLayout = memo(function MainLayout() {
 	const leftPanelRef = useRef<ImperativePanelHandle>(null);
 	const rightPanelRef = useRef<ImperativePanelHandle>(null);
 
-	// Sincronizar el estado del panel derecho con el store
+	// Sincronizar visibilidad del details panel con el estado del layout
 	useEffect(() => {
+		console.log('📋 MainLayout: Sincronizando isVisible:', isVisible);
 		setIsRightCollapsed(!isVisible);
 	}, [isVisible]);
 
-	// Handlers para sincronizar con los componentes resizable
+	// Sincronizar store UI con el panel físico
+	useEffect(() => {
+		console.log('🔄 MainLayout: Sincronizando UI store panel collapsed:', uiPanelCollapsed);
+		if (rightPanelRef.current) {
+			if (uiPanelCollapsed) {
+				console.log('📐 MainLayout: Colapsando panel físico');
+				rightPanelRef.current.collapse();
+			} else {
+				console.log('📐 MainLayout: Expandiendo panel físico');
+				rightPanelRef.current.expand();
+			}
+		}
+	}, [uiPanelCollapsed]);	// Handlers para sincronizar con los componentes resizable
 	const handleLeftPanelCollapse = (collapsed: boolean) => {
 		setIsLeftCollapsed(collapsed);
 	};
@@ -156,23 +185,29 @@ export const MainLayout = memo(function MainLayout() {
 				<ResizableHandle withHandle />
 
 				{/* Panel central con toolbar y view container */}
-				<ResizablePanel defaultSize={55} minSize={30} className="flex flex-col">
+				<ResizablePanel
+					defaultSize={shouldHideToolbarAndPanel ? 80 : 50}
+					minSize={30}
+					className="flex flex-col"
+				>
 					<div className="h-full flex flex-col bg-background">
-						{/* Toolbar superior */}
-						<div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95">
-							<ViewToolbar
-								isLeftPanelCollapsed={isLeftCollapsed}
-								toggleLeftPanelCollapse={toggleLeftPanel}
-								isRightPanelCollapsed={isRightCollapsed}
-								toggleRightPanelCollapse={toggleRightPanel}
-								isRightPanelVisible={true}
-								allItemIds={allItemIds}
-								currentFolderId={currentFolderId || undefined}
-								onScanFolder={handleScanFolder}
-								onRefreshFolder={handleRefreshFolder}
-								isRetrying={reindexFolderMutation.isPending}
-							/>
-						</div>{' '}
+						{/* Toolbar superior - solo mostrar en vistas que lo necesiten */}
+						{!shouldHideToolbarAndPanel && (
+							<div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95">
+								<ViewToolbar
+									isLeftPanelCollapsed={isLeftCollapsed}
+									toggleLeftPanelCollapse={toggleLeftPanel}
+									isRightPanelCollapsed={isRightCollapsed}
+									toggleRightPanelCollapse={toggleRightPanel}
+									isRightPanelVisible={true}
+									allItemIds={allItemIds}
+									currentFolderId={currentFolderId || undefined}
+									onScanFolder={handleScanFolder}
+									onRefreshFolder={handleRefreshFolder}
+									isRetrying={reindexFolderMutation.isPending}
+								/>
+							</div>
+						)}
 						{/* Contenido principal */}
 						<NavigationTransition className="flex-1 min-h-0 bg-background">
 							<Outlet />
@@ -180,27 +215,31 @@ export const MainLayout = memo(function MainLayout() {
 					</div>
 				</ResizablePanel>
 
-				{/* Panel de detalles derecho - siempre presente */}
-				<ResizableHandle withHandle />
-				<ResizablePanel
-					ref={rightPanelRef}
-					defaultSize={25}
-					minSize={20}
-					maxSize={50}
-					collapsedSize={0}
-					collapsible={true}
-					onCollapse={() => handleRightPanelCollapse(true)}
-					onExpand={() => handleRightPanelCollapse(false)}
-					className="border-l border-border"
-				>
-					{!isRightCollapsed && (
-						<RightPanel
-							isCollapsed={isRightCollapsed}
-							onToggleCollapse={toggleRightPanel}
-							isAnimating={isRightAnimating}
-						/>
-					)}
-				</ResizablePanel>
+				{/* Panel de detalles derecho - solo mostrar en vistas que lo necesiten */}
+				{!shouldHideToolbarAndPanel && (
+					<>
+						<ResizableHandle withHandle />
+						<ResizablePanel
+							ref={rightPanelRef}
+							defaultSize={30}
+							minSize={25}
+							maxSize={55}
+							collapsedSize={0}
+							collapsible={true}
+							onCollapse={() => handleRightPanelCollapse(true)}
+							onExpand={() => handleRightPanelCollapse(false)}
+							className="border-l border-border"
+						>
+							{!isRightCollapsed && (
+								<RightPanel
+									isCollapsed={isRightCollapsed}
+									onToggleCollapse={toggleRightPanel}
+									isAnimating={isRightAnimating}
+								/>
+							)}
+						</ResizablePanel>
+					</>
+				)}
 			</ResizablePanelGroup>
 
 			{/* FileViewer global - modal overlay */}

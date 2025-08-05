@@ -1,7 +1,9 @@
 import { serverLogger } from '@/lib/logger/server-logger';
+import { AIEngine, type AIGenerationParameters } from '@/types/metadata-origin.types';
+import { extractAllMetadata, quickOriginDetection } from './unified-parser.service';
 
 /**
- * Tipo para los datos de generación por IA
+ * Tipo para los datos de generación por IA (legacy compatibility)
  */
 export interface AIGenerationMetadata {
 	type: string;
@@ -20,12 +22,12 @@ export interface AIGenerationMetadata {
 }
 
 /**
- * Tipo para las funciones de parseo
+ * Tipo para las funciones de parseo (legacy compatibility)
  */
 export type ParserFunction = (metadata: Record<string, unknown>) => Promise<AIGenerationMetadata | null>;
 
 /**
- * Interfaz para un parser
+ * Interfaz para un parser (legacy compatibility)
  */
 export interface AIGenerationParserModule {
 	/**
@@ -47,6 +49,134 @@ export interface AIGenerationParserModule {
  * Logger común para los parsers de generación por IA
  */
 const parserLogger = serverLogger.withContext('AIGenerationParserService');
+
+/**
+ * Extrae información de generación por IA de un buffer (NUEVA FUNCIÓN PRINCIPAL)
+ * Utiliza el nuevo sistema unificado de parsers
+ */
+export async function extractAIGenerationFromBuffer(
+	buffer: Buffer,
+	filename: string
+): Promise<AIGenerationMetadata | null> {
+	try {
+		parserLogger.info('Extrayendo metadatos de IA con sistema unificado', { filename, bufferSize: buffer.length });
+
+		// Usar el nuevo sistema unificado
+		const result = await extractAllMetadata(buffer, filename, {
+			extract_ai_metadata: true,
+			extract_exif: true,
+			extract_iptc: true,
+			extract_xmp: true,
+			debug: false,
+		});
+
+		if (!result.success) {
+			parserLogger.warn('Extracción fallida', { errors: result.errors });
+			return null;
+		}
+
+		// Convertir al formato legacy si hay datos de IA
+		if (result.ai_metadata) {
+			return convertToLegacyFormat(result.ai_metadata, result.origin?.engine);
+		}
+
+		parserLogger.debug('No se encontraron metadatos de IA');
+		return null;
+	} catch (error) {
+		parserLogger.error('Error en extracción con sistema unificado', { error });
+		// Fallback a método legacy
+		return await extractAIGenerationInfoLegacy(buffer);
+	}
+}
+
+/**
+ * Convierte el nuevo formato de metadatos al formato legacy
+ */
+function convertToLegacyFormat(aiMetadata: AIGenerationParameters, engine?: AIEngine): AIGenerationMetadata {
+	const engineNames: Record<AIEngine, string> = {
+		[AIEngine.AUTOMATIC1111]: 'Automatic1111',
+		[AIEngine.FORGE]: 'Forge',
+		[AIEngine.COMFYUI]: 'ComfyUI',
+		[AIEngine.SWARMUI]: 'SwarmUI',
+		[AIEngine.MIDJOURNEY]: 'Midjourney',
+		[AIEngine.INVOKEAI]: 'InvokeAI',
+		[AIEngine.NOVELAI]: 'NovelAI',
+		[AIEngine.IDEOGRAM]: 'Ideogram',
+		[AIEngine.STABILITY_AI]: 'Stability AI',
+		[AIEngine.DALLE]: 'DALL-E',
+		[AIEngine.UNKNOWN]: 'Unknown',
+	};
+
+	return {
+		type: engine ? engineNames[engine] : 'Unknown',
+		prompt: aiMetadata.prompt,
+		negative_prompt: aiMetadata.negative_prompt,
+		model: aiMetadata.model || aiMetadata.checkpoint,
+		steps: aiMetadata.steps,
+		cfg_scale: aiMetadata.cfg_scale || aiMetadata.cfg,
+		cfg: aiMetadata.cfg,
+		seed: aiMetadata.seed,
+		sampler: aiMetadata.sampler,
+		scheduler: aiMetadata.scheduler,
+		clip_skip: aiMetadata.clip_skip,
+		workflow: aiMetadata.workflow,
+		extra_params: aiMetadata.extra_params as any,
+	};
+}
+
+/**
+ * Detección rápida de origen de IA
+ */
+export async function detectAIOrigin(buffer: Buffer): Promise<{ engine: string; confidence: number }> {
+	try {
+		const result = await quickOriginDetection(buffer);
+
+		const engineNames: Record<AIEngine, string> = {
+			[AIEngine.AUTOMATIC1111]: 'Automatic1111',
+			[AIEngine.FORGE]: 'Forge',
+			[AIEngine.COMFYUI]: 'ComfyUI',
+			[AIEngine.SWARMUI]: 'SwarmUI',
+			[AIEngine.MIDJOURNEY]: 'Midjourney',
+			[AIEngine.INVOKEAI]: 'InvokeAI',
+			[AIEngine.NOVELAI]: 'NovelAI',
+			[AIEngine.IDEOGRAM]: 'Ideogram',
+			[AIEngine.STABILITY_AI]: 'Stability AI',
+			[AIEngine.DALLE]: 'DALL-E',
+			[AIEngine.UNKNOWN]: 'Unknown',
+		};
+
+		return {
+			engine: engineNames[result.engine],
+			confidence: result.confidence,
+		};
+	} catch (error) {
+		parserLogger.error('Error en detección rápida', { error });
+		return { engine: 'Unknown', confidence: 0 };
+	}
+}
+
+/**
+ * Función legacy para compatibilidad hacia atrás
+ * Usa el sistema anterior de parsers para casos de fallback
+ */
+async function extractAIGenerationInfoLegacy(buffer: Buffer): Promise<AIGenerationMetadata | null> {
+	try {
+		// Intentar extraer metadatos básicos primero
+		const sharp = await import('sharp');
+		const metadata = await sharp.default(buffer).metadata();
+
+		if (metadata.exif) {
+			// Simplificado: parsear EXIF básico
+			const exifData = { parameters: metadata.exif.toString() };
+			return await extractAIGenerationInfo(exifData);
+		}
+
+		return null;
+	} catch (error) {
+		parserLogger.error('Error en extracción legacy', { error });
+		return null;
+	}
+}
 
 /**
  * Función para convertir valores numéricos almacenados como string

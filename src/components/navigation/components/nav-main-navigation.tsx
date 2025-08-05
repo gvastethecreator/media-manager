@@ -1,39 +1,40 @@
 import {
-	Album,
-	Asterisk,
-	Bookmark,
-	Box,
-	Brackets,
-	ChevronDown,
-	ChevronRight,
-	FileStack,
-	Files,
-	FileText,
-	Folder,
-	Globe,
-	Image as ImageIcon,
-	Layers,
-	Lightbulb,
-	MapPin,
-	MessageSquare,
-	Music,
-	Star,
-	Tag,
-	User,
-	Users,
-	Video,
-	Workflow,
+    Album,
+    Asterisk,
+    Bookmark,
+    Box,
+    Brackets,
+    ChevronDown,
+    ChevronRight,
+    FileStack,
+    Files,
+    FileText,
+    Folder,
+    Globe,
+    Image as ImageIcon,
+    Layers,
+    Lightbulb,
+    MapPin,
+    MessageSquare,
+    Music,
+    Star,
+    Tag,
+    User,
+    Users,
+    Video,
+    Workflow,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ViewType } from '@/components/views/types';
+import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { cn } from '@/lib/utils';
 import { useCategoryStats } from '../hooks/use-category-stats';
 import { NavCategoryChildren } from './nav-category-children';
 
 interface NavMainNavigationProps {
 	currentView: string;
-	onNavigate: (id: ViewType) => void;
+	onNavigate?: (id: ViewType) => void;
 	isCollapsed?: boolean;
 }
 
@@ -43,6 +44,7 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 	isCollapsed = false,
 }: NavMainNavigationProps) {
 	const { stats, getCategoryItemCount, getCategoryItems } = useCategoryStats();
+	const { navigateWithTransition } = useSeamlessNavigation();
 
 	// Nueva estructura file-centric con contadores y colores únicos
 	const NAVIGATION_CATEGORIES = useMemo(
@@ -249,6 +251,17 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 		console.log('Navegando a item hijo:', childId);
 	}, []);
 
+	const handleNavigate = useCallback(
+		(id: ViewType) => {
+			if (onNavigate) {
+				onNavigate(id);
+			} else {
+				navigateWithTransition(id === '' ? '/' : `/${id}`);
+			}
+		},
+		[onNavigate, navigateWithTransition]
+	);
+
 	return (
 		<div className={containerClasses}>
 			<div className={innerContainerClasses}>
@@ -331,11 +344,11 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 																'flex items-center flex-1 cursor-pointer',
 																isCollapsed ? 'justify-center' : ''
 															)}
-															onClick={() => onNavigate(child.id as ViewType)}
+															onClick={() => handleNavigate(child.id as ViewType)}
 															onKeyDown={(e) => {
 																if (e.key === 'Enter' || e.key === ' ') {
 																	e.preventDefault();
-																	onNavigate(child.id as ViewType);
+																	handleNavigate(child.id as ViewType);
 																}
 															}}
 															tabIndex={0}

@@ -6,17 +6,35 @@ export interface GeneralStats {
 	totalVideos: number;
 	totalAudio: number;
 	totalDocuments: number;
+	totalJsonFiles: number;
+	totalFile3D: number;
+	totalWorkflows: number;
 	totalFolders: number;
 	totalAlbums: number;
-	totalCharacters: number;
 	totalCollections: number;
 	totalTags: number;
+	totalCharacters: number;
 	totalPlaces: number;
-	totalConcepts: number;
-	totalNotes: number;
 	totalWorldItems: number;
+	totalConcepts: number;
 	totalPrompts: number;
+	totalNotes: number;
+	totalProperties: number;
 	totalWildcards: number;
+	totalFavorites: number;
+	totalThumbnails: number;
+	totalMetadata: number;
+	totalActivities: number;
+	// Información de espacio
+	usedSpace?: number;
+	freeSpace?: number;
+	diskUsage?: {
+		total: number;
+		used: number;
+		free: number;
+		usedPercentage: number;
+	};
+	// Estadísticas calculadas
 	storageUsed: number;
 	averageFileSize: number;
 }
