@@ -21,24 +21,24 @@ import type { WildcardWithStats } from '@/types/entities/wildcard';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
 import type { AnyEntityWithStats } from '@/types/migration';
 import {
-	getEntityStatsType,
-	isAlbumWithStats,
-	isAudioWithStats,
-	isCharacterWithStats,
-	isCollectionWithStats,
-	isConceptWithStats,
-	isDocumentWithStats,
-	isFolderWithStats,
-	isGroupWithStats,
-	isImageWithStats,
-	isNoteWithStats,
-	isPlaceWithStats,
-	isPromptWithStats,
-	isPropertyWithStats,
-	isTagWithStats,
-	isVideoWithStats,
-	isWildcardWithStats,
-	isWorldItemWithStats,
+    getEntityStatsType,
+    isAlbumWithStats,
+    isAudioWithStats,
+    isCharacterWithStats,
+    isCollectionWithStats,
+    isConceptWithStats,
+    isDocumentWithStats,
+    isFolderWithStats,
+    isGroupWithStats,
+    isImageWithStats,
+    isNoteWithStats,
+    isPlaceWithStats,
+    isPromptWithStats,
+    isPropertyWithStats,
+    isTagWithStats,
+    isVideoWithStats,
+    isWildcardWithStats,
+    isWorldItemWithStats,
 } from '@/types/migration';
 // Importar componentes de tarjetas
 import { AlbumCard } from './album-card/album-card';
@@ -88,6 +88,23 @@ export const EntityCard: FC<EntityCardProps> = memo(
 		tcgMode,
 		...props
 	}) => {
+		console.log('🔧 EntityCard - Recibido onClick:', !!onClick, 'para entity:', entity.id);
+
+		// Extraer handlers *ById de props si existen
+		const { onClickById, onDoubleClickById, itemId, ...restProps } = props as any;
+
+		// Convertir handlers *ById en handlers normales si no hay handlers directos
+		const finalOnClick = onClick || (onClickById && itemId ? (e: React.MouseEvent) => onClickById(itemId, e) : undefined);
+		const finalOnDoubleClick = onDoubleClick || (onDoubleClickById && itemId ? () => onDoubleClickById(itemId) : undefined);
+
+		console.log('🔧 EntityCard - Handlers finales:', {
+			hasDirectOnClick: !!onClick,
+			hasOnClickById: !!onClickById,
+			hasItemId: !!itemId,
+			finalHasOnClick: !!finalOnClick,
+			finalHasOnDoubleClick: !!finalOnDoubleClick
+		});
+
 		// Usar el hook de layout para obtener la configuración
 		const { config } = useCardLayout(
 			{
@@ -98,8 +115,8 @@ export const EntityCard: FC<EntityCardProps> = memo(
 				className,
 				isSelected,
 				isActive,
-				onClick,
-				onDoubleClick,
+				onClick: finalOnClick,
+				onDoubleClick: finalOnDoubleClick,
 				compact,
 				tcgMode,
 			},
@@ -108,8 +125,8 @@ export const EntityCard: FC<EntityCardProps> = memo(
 
 		// Props comunes para todas las cards
 		const commonProps = {
-			onClick,
-			onDoubleClick,
+			onClick: finalOnClick,
+			onDoubleClick: finalOnDoubleClick,
 			isSelected,
 			isActive,
 			className,
@@ -127,7 +144,7 @@ export const EntityCard: FC<EntityCardProps> = memo(
 			showStats: config.showStats,
 			showMetadata: config.showMetadata,
 			showActions: config.showActions,
-			...props,
+			...restProps,
 		};
 
 		// Función para mapear CardVariant a variantes específicas de ImageCard
@@ -195,8 +212,8 @@ export const EntityCard: FC<EntityCardProps> = memo(
 
 		// Renderizar componente específico basado en type guards
 		if (isImageWithStats(entity)) {
-			const imageClickHandler = createImageClickHandler(onClick);
-			const imageDoubleClickHandler = onDoubleClick ? () => onDoubleClick() : undefined;
+			const imageClickHandler = createImageClickHandler(finalOnClick);
+			const imageDoubleClickHandler = finalOnDoubleClick ? () => finalOnDoubleClick() : undefined;
 
 			console.log('🔧 EntityCard - Renderizando ImageCard con handlers:', {
 				hasClickHandler: !!imageClickHandler,

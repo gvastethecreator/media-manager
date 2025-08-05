@@ -1,12 +1,12 @@
 import { Play, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { VideoCard } from '@/components/cards/video-card';
 import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useVideoStore } from '@/store/entities/video';
 import type { VideoWithStats } from '@/types/entities/video';
@@ -16,7 +16,7 @@ interface VideosViewProps {
 }
 
 export default function VideosView({ className = '' }: VideosViewProps) {
-	const navigate = useNavigate();
+	const { navigateWithTransition } = useSeamlessNavigation();
 	const { getVideos, fetchVideos, createVideo, isLoading, error, setError } = useVideoStore();
 
 	const videos = getVideos();
@@ -35,9 +35,9 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 	const handleVideoClick = useCallback(
 		(video: VideoWithStats) => {
 			clientLogger.info('🖱️ Video seleccionado:', video.name);
-			navigate(`/videos/${video.id}`);
+			navigateWithTransition(`/videos/${video.id}`);
 		},
-		[navigate]
+		[navigateWithTransition]
 	);
 
 	// Manejar creación de video

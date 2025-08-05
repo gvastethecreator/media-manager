@@ -2,7 +2,7 @@ import { createBrowserRouter, useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/main-layout';
 // Importar todas las vistas
 import { AllImagesView } from '@/components/views/all-images/all-images-view';
-import { DashboardView } from '@/components/views/dashboard/dashboard-view';
+import Dashboard from '@/components/views/dashboard/dashboard';
 import DevelopmentContentView from '@/components/views/development/development-content-view';
 import { File3DContentView as File3DDetailView } from '@/components/views/file3d/file-3d-content-view';
 import { FilesView } from '@/components/views/files/files-view';
@@ -70,16 +70,12 @@ export const router = createBrowserRouter([
 		path: '/',
 		element: <MainLayout />,
 		children: [
-			// Ruta principal
+			// Ruta principal - Dashboard
 			{
 				index: true,
-				element: <DashboardView />,
+				element: <Dashboard />,
 			},
 			// Rutas principales
-			{
-				path: 'dashboard',
-				element: <DashboardView />,
-			},
 			{
 				path: 'settings',
 				element: <SettingsContentView />,

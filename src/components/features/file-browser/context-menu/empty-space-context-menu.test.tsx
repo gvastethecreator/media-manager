@@ -4,18 +4,18 @@
  */
 
 import { render, screen } from '@testing-library/react';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it, mock } from 'bun:test';
 import { EmptySpaceContextMenu } from './empty-space-context-menu';
 
 // Mock de las dependencias
-vi.mock('@/lib/keyboard', () => ({
+mock.module('@/lib/keyboard', () => ({
 	useContextMenuNavigation: () => ({
 		selectedIndex: -1,
 		getItemProps: () => ({}),
 	}),
 }));
 
-vi.mock('./context-action-handler', () => ({
+mock.module('./context-action-handler', () => ({
 	clipboardManager: {
 		canPaste: () => false,
 	},
@@ -23,7 +23,7 @@ vi.mock('./context-action-handler', () => ({
 
 describe('EmptySpaceContextMenu', () => {
 	const defaultProps = {
-		onAction: vi.fn(),
+		onAction: mock(),
 		position: { x: 100, y: 100 },
 		totalItems: 5,
 	};
@@ -51,7 +51,7 @@ describe('EmptySpaceContextMenu', () => {
 	});
 
 	it('should call onAction when menu item is clicked', () => {
-		const onAction = vi.fn();
+		const onAction = mock();
 		render(<EmptySpaceContextMenu {...defaultProps} onAction={onAction} />);
 
 		const refreshButton = screen.getByText('Actualizar');

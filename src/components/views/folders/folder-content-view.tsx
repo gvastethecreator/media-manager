@@ -9,6 +9,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageStore } from '@/store/entities/image';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
+import { useUIStore } from '@/store/ui.store';
 import type { ImageWithStats } from '@/types/entities/image';
 import { type AnyEntityWithStats, EntityStatsType } from '@/types/migration';
 
@@ -63,9 +64,26 @@ export function FolderContentView({
 	});
 
 	// Estados globales para panel de detalles y visor
-	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
+	const { isVisible, setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 	const { openViewer } = useFileViewerStore();
 	const { getImagesByFolder } = useImageStore();
+
+	// Importar el store de UI para controlar el panel físico
+	const { isRightPanelCollapsed, toggleRightPanel } = useUIStore();
+
+	// Efecto para abrir automáticamente el panel de estadísticas al navegar a una carpeta
+	useEffect(() => {
+		if (currentFolderId) {
+			logger.info('📂 Navegando a carpeta:', currentFolderId);
+			// Asegurar visibilidad del contenido del panel de detalles
+			setDetailsPanelVisible(true);
+			// Abrir el panel físico si está colapsado
+			if (isRightPanelCollapsed) {
+				logger.info('🔧 Abriendo panel físico para mostrar estadísticas');
+				toggleRightPanel();
+			}
+		}
+	}, [currentFolderId, setDetailsPanelVisible, isRightPanelCollapsed, toggleRightPanel]);
 
 	// Estado local para controlar operaciones (usar externo si está disponible)
 	const [internalIsRetrying, setInternalIsRetrying] = useState(false);

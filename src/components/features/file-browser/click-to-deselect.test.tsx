@@ -3,20 +3,20 @@
  */
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it, mock } from 'bun:test';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { AnyEntityWithStats } from '@/types/migration';
 import { EntityStatsType } from '@/types/migration';
 import { FileBrowser } from './file-browser';
 
 // Mock the stores and dependencies
-vi.mock('@/store/ui/selection.slice');
-vi.mock('@/store/ui/view-options.slice');
-vi.mock('@/store/ui/file-viewer.slice');
-vi.mock('@/store/details-panel.store');
-vi.mock('@/store/entities/image');
-vi.mock('@/lib/keyboard');
-vi.mock('@/lib/ui/toast');
+mock.module('@/store/ui/selection.slice');
+mock.module('@/store/ui/view-options.slice');
+mock.module('@/store/ui/file-viewer.slice');
+mock.module('@/store/details-panel.store');
+mock.module('@/store/entities/image');
+mock.module('@/lib/keyboard');
+mock.module('@/lib/ui/toast');
 
 // Mock data
 const mockItems: AnyEntityWithStats[] = [
@@ -35,23 +35,23 @@ const mockItems: AnyEntityWithStats[] = [
 ] as AnyEntityWithStats[];
 
 describe('FileBrowser Click-to-Deselect', () => {
-	const mockClearSelection = vi.fn();
-	const mockSetSelectedIds = vi.fn();
+	const mockClearSelection = mock();
+	const mockSetSelectedIds = mock();
 
 	beforeEach(() => {
-		vi.clearAllMocks();
+		mock.restore();
 
 		// Mock useSelectionStore
 		(useSelectionStore as any).mockReturnValue({
 			selectedIds: ['1'],
 			clearSelection: mockClearSelection,
 			setSelectedIds: mockSetSelectedIds,
-			selectAll: vi.fn(),
+			selectAll: mock(),
 		});
 
 		// Mock other stores
-		vi.doMock('@/store/ui/view-options.slice', () => ({
-			useViewOptionsStore: vi.fn(() => ({
+		mock.doMock('@/store/ui/view-options.slice', () => ({
+			useViewOptionsStore: mock.fn(() => ({
 				viewMode: 'cards',
 				itemSize: 200,
 				searchQuery: '',
@@ -59,21 +59,21 @@ describe('FileBrowser Click-to-Deselect', () => {
 			})),
 		}));
 
-		vi.doMock('@/store/entities/image', () => ({
-			useImageStore: vi.fn(() => ({
+		mock.doMock('@/store/entities/image', () => ({
+			useImageStore: mock.fn(() => ({
 				images: {},
 				isLoading: false,
 				error: null,
-				loadImages: vi.fn(),
+				loadImages: mock(),
 				getSortedImages: () => mockItems,
 				getImagesByFolder: () => mockItems,
 			})),
 		}));
 
-		vi.doMock('@/lib/keyboard', () => ({
+		mock.doMock('@/lib/keyboard', () => ({
 			useFileBrowserShortcuts: () => ({
-				register: vi.fn(),
-				setContext: vi.fn(),
+				register: mock(),
+				setContext: mock(),
 			}),
 		}));
 	});
@@ -106,11 +106,11 @@ describe('FileBrowser Click-to-Deselect', () => {
 		const viewModes = ['list', 'grid', 'cards', 'masonry'];
 
 		viewModes.forEach((viewMode) => {
-			vi.clearAllMocks();
+			mock.restore();
 
 			// Mock the view mode
-			vi.doMock('@/store/ui/view-options.slice', () => ({
-				useViewOptionsStore: vi.fn(() => ({
+			mock.doMock('@/store/ui/view-options.slice', () => ({
+				useViewOptionsStore: mock.fn(() => ({
 					viewMode,
 					itemSize: 200,
 					searchQuery: '',
