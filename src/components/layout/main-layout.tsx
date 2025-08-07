@@ -3,7 +3,7 @@ import { ImperativePanelHandle } from 'react-resizable-panels';
 import { Outlet, useLocation, useParams } from 'react-router-dom';
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { NavPanel } from '@/components/navigation/navigation-panel';
-import { RightPanel } from '@/components/panels/right-panel/right-panel';
+import { RightPanel } from '@/components/panels/right-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
 import { NavigationTransition } from '@/components/transitions/ViewTransition';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';

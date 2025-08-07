@@ -1,0 +1,387 @@
+Comando: bunx biome format --write .
+Fecha: 2025-08-07T03:18:12.023Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:492:8 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Expected a parameter but instead found ''File hash is required for audio creation''.
+  
+    490 │ 	throw;
+    491 │ 	new;
+  > 492 │ 	Error('File hash is required for audio creation');
+        │ 	      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    493 │ }
+    494 │ const audioData: AudioCreateInput = {
+  
+  i Expected a parameter here.
+  
+    490 │ 	throw;
+    491 │ 	new;
+  > 492 │ 	Error('File hash is required for audio creation');
+        │ 	      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    493 │ }
+    494 │ const audioData: AudioCreateInput = {
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:528:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × A `break` statement can only be used within an enclosing iteration or switch statement.
+  
+    526 │ const audio = await createAudio(audioData);
+    527 │ entityId = audio.id;
+  > 528 │ break;
+        │ ^^^^^
+    529 │ }
+    530 │ 
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:529:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}
+    
+    				case EntityType.FILE3D:'.
+  
+    527 │ entityId = audio.id;
+    528 │ break;
+  > 529 │ }
+        │ ^
+  > 530 │ 
+  > 531 │ 				case EntityType.FILE3D:
+        │ 				^^^^^^^^^^^^^^^^^^^^^^^
+    532 │ {
+    533 │ 	if (!fileInfo.hash) {
+  
+  i Expected a statement here.
+  
+    527 │ entityId = audio.id;
+    528 │ break;
+  > 529 │ }
+        │ ^
+  > 530 │ 
+  > 531 │ 				case EntityType.FILE3D:
+        │ 				^^^^^^^^^^^^^^^^^^^^^^^
+    532 │ {
+    533 │ 	if (!fileInfo.hash) {
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:565:2 parse ━━━━━━━━━━━━━━━━━━━
+
+  × A `break` statement can only be used within an enclosing iteration or switch statement.
+  
+    563 │ 	const file3d = await createFile3D(file3dData);
+    564 │ 	entityId = file3d.id;
+  > 565 │ 	break;
+        │ 	^^^^^
+    566 │ }
+    567 │ 
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:568:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found 'case EntityType.DOCUMENT:'.
+  
+    566 │ }
+    567 │ 
+  > 568 │ case EntityType.DOCUMENT:
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    569 │ {
+    570 │ 	if (!fileInfo.hash) {
+  
+  i Expected a statement here.
+  
+    566 │ }
+    567 │ 
+  > 568 │ case EntityType.DOCUMENT:
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^
+    569 │ {
+    570 │ 	if (!fileInfo.hash) {
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:601:2 parse ━━━━━━━━━━━━━━━━━━━
+
+  × A `break` statement can only be used within an enclosing iteration or switch statement.
+  
+    599 │ 	const document = await createDocument(documentData);
+    600 │ 	entityId = docThe number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 3.
+Formatted 1588 files in 2s. Fixed 1 file.
+Found 23 errors.
+ument.id;
+  > 601 │ 	break;
+        │ 	^^^^^
+    602 │ }
+    603 │ 
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:604:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found 'default:'.
+  
+    602 │ }
+    603 │ 
+  > 604 │ default:
+        │ ^^^^^^^^
+    605 │ throw new Error(`Unsupported entity type: ${entityType}`);
+    606 │ }
+  
+  i Expected a statement here.
+  
+    602 │ }
+    603 │ 
+  > 604 │ default:
+        │ ^^^^^^^^
+    605 │ throw new Error(`Unsupported entity type: ${entityType}`);
+    606 │ }
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:606:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}
+    
+    			// 🔍 NUEVA FUNCIONALIDAD: Extraer metadata automáticamente después de crear la entidad
+    			console.log(`🔍 FileEntityMapper: Iniciando extracción de metadata para $'.
+  
+    604 │ default:
+    605 │ throw new Error(`Unsupported entity type: ${entityType}`);
+  > 606 │ }
+        │ ^
+  > 607 │ 
+  > 608 │ 			// 🔍 NUEVA FUNCIONALIDAD: Extraer metadata automáticamente después de crear la entidad
+  > 609 │ 			console.log(`🔍 FileEntityMapper: Iniciando extracción de metadata para $
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    610 │ {
+    611 │ 	fileInfo.path;
+  
+  i Expected a statement here.
+  
+    604 │ default:
+    605 │ throw new Error(`Unsupported entity type: ${entityType}`);
+  > 606 │ }
+        │ ^
+  > 607 │ 
+  > 608 │ 			// 🔍 NUEVA FUNCIONALIDAD: Extraer metadata automáticamente después de crear la entidad
+  > 609 │ 			console.log(`🔍 FileEntityMapper: Iniciando extracción de metadata para $
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    610 │ {
+    611 │ 	fileInfo.path;
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:609:17 parse ━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token `🔍`
+  
+    608 │ 			// 🔍 NUEVA FUNCIONALIDAD: Extraer metadata automáticamente después de crear la entidad
+  > 609 │ 			console.log(`🔍 FileEntityMapper: Iniciando extracción de metadata para $
+        │ 			             ^^
+    610 │ {
+    611 │ 	fileInfo.path;
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:616:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token `🔍`
+  
+    614 │ 			try {
+    615 │ 				console.log(`;
+  > 616 │ 🔍 Extrayendo metadata para: $
+        │ ^^
+    617 │ {
+    618 │ 	fileInfo.path;
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:633:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token `✅`
+  
+    631 │ 				if (metadataResult.success) {
+    632 │ 					console.log(`;
+  > 633 │ ✅ Metadata extraída exitosamente para: $
+        │ ^^
+    634 │ {
+    635 │ 	fileInfo.path;
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:644:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token `!`
+  
+    642 │ 				} else {
+    643 │ 					console.warn(`;
+  > 644 │ !� No se pudo extraer metadata de $
+        │ ^
+    645 │ {
+    646 │ 	fileInfo.path;
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:644:2 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected token ``
+  
+    642 │ 				} else {
+    643 │ 					console.warn(`;
+  > 644 │ !� No se pudo extraer metadata de $
+        │  
+    645 │ {
+    646 │ 	fileInfo.path;
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:648:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found ':`, metadataResult.errors)
+    }
+    			} catch (metadataError)'.
+  
+    646 │ 	fileInfo.path;
+    647 │ }
+  > 648 │ :`, metadataResult.errors)
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 649 │ }
+  > 650 │ 			} catch (metadataError)
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^
+    651 │ {
+    652 │ 	// No fallar la creación de entidad si falla la extracción de metadata
+  
+  i Expected a statement here.
+  
+    646 │ 	fileInfo.path;
+    647 │ }
+  > 648 │ :`, metadataResult.errors)
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 649 │ }
+  > 650 │ 			} catch (metadataError)
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^
+    651 │ {
+    652 │ 	// No fallar la creación de entidad si falla la extracción de metadata
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:656:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+    654 │ }
+    655 │ 
+  > 656 │ return {
+        │ ^^^^^^^^
+  > 657 │ 				success: true,
+  > 658 │ 				entityType,
+  > 659 │ 				entityId,
+  > 660 │ 			};
+        │ 			^^
+    661 │ } catch (error)
+    662 │ {
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:661:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '} catch (error)'.
+  
+    659 │ 				entityId,
+    660 │ 			};
+  > 661 │ } catch (error)
+        │ ^^^^^^^^^^^^^^^
+    662 │ {
+    663 │ 	console.error(`Error creating entity for ${filePath}:`, error);
+  
+  i Expected a statement here.
+  
+    659 │ 				entityId,
+    660 │ 			};
+  > 661 │ } catch (error)
+        │ ^^^^^^^^^^^^^^^
+    662 │ {
+    663 │ 	console.error(`Error creating entity for ${filePath}:`, error);
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:664:2 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+    662 │ {
+    663 │ 	console.error(`Error creating entity for ${filePath}:`, error);
+  > 664 │ 	return {
+        │ 	^^^^^^^^
+  > 665 │ 				success: false,
+  > 666 │ 				entityType: EntityType.UNKNOWN,
+  > 667 │ 				error: error instanceof Error ? error.message : 'Unknown error',
+  > 668 │ 			};
+        │ 			^^
+    669 │ }
+    670 │ }
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:670:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}
+    
+    	/**
+    	 * Procesa múltiples archivos y crea sus entidades correspondientes
+    	 */
+    	public async processFiles(filePaths: string[], folderId: string): Promise<EntityCreationStats>'.
+  
+    668 │ 			};
+    669 │ }
+  > 670 │ }
+        │ ^
+  > 671 │ 
+  > 672 │ 	/**
+  > 673 │ 	 * Procesa múltiples archivos y crea sus entidades correspondientes
+  > 674 │ 	 */
+  > 675 │ 	public async processFiles(filePaths: string[], folderId: string): Promise<EntityCreationStats>
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    676 │ {
+    677 │ 	const stats: EntityCreationStats = {
+  
+  i Expected a statement here.
+  
+    668 │ 			};
+    669 │ }
+  > 670 │ }
+        │ ^
+  > 671 │ 
+  > 672 │ 	/**
+  > 673 │ 	 * Procesa múltiples archivos y crea sus entidades correspondientes
+  > 674 │ 	 */
+  > 675 │ 	public async processFiles(filePaths: string[], folderId: string): Promise<EntityCreationStats>
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    676 │ {
+    677 │ 	const stats: EntityCreationStats = {
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:711:2 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+    709 │ 	}
+    710 │ 
+  > 711 │ 	return stats;
+        │ 	^^^^^^^^^^^^^
+    712 │ }
+    713 │ }
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:713:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}'.
+  
+    711 │ 	return stats;
+    712 │ }
+  > 713 │ }
+        │ ^
+    714 │ 
+  
+  i Expected a statement here.
+  
+    711 │ 	return stats;
+    712 │ }
+  > 713 │ }
+        │ ^
+    714 │ 
+  
+
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
