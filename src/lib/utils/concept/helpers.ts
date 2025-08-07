@@ -52,7 +52,7 @@ export function generateEmojiForCategory(category?: string): string {
 
 	const defaultEmojis = ['💡', '📝', '🧠', '💭'];
 
-	if (!category || !categoryEmojis[category]) {
+	if (!(category && categoryEmojis[category])) {
 		return defaultEmojis[Math.floor(Math.random() * defaultEmojis.length)];
 	}
 

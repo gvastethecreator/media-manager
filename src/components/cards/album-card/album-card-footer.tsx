@@ -29,9 +29,9 @@ export function AlbumCardFooter({
 	};
 
 	return (
-		<footer className="p-2 text-xs border-t border-white/10 relative">
+		<footer className="relative border-white/10 border-t p-2 text-xs">
 			{/* Id de carta y contenido tipo TCG */}
-			<div className="flex justify-between items-center">
+			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-1">
 					<span className="text-muted-foreground">ID:</span>
 					<span className="font-mono">{cardId}</span>
@@ -44,7 +44,7 @@ export function AlbumCardFooter({
 			</div>
 
 			{/* Estadísticas adicionales */}
-			<div className="flex justify-between items-center mt-1">
+			<div className="mt-1 flex items-center justify-between">
 				<div className="flex items-center gap-1">
 					<span className="text-muted-foreground">Entidades:</span>
 					<span>{totalEntities}</span>
@@ -60,7 +60,7 @@ export function AlbumCardFooter({
 			{tcgMode && (
 				<div
 					className={cn(
-						'absolute bottom-1 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full text-[10px] font-medium z-20',
+						'-translate-x-1/2 absolute bottom-1 left-1/2 z-20 rounded-full px-3 py-0.5 font-medium text-[10px]',
 						rarityLevel === 'Mítica' && 'bg-gradient-to-r from-amber-400 via-purple-500 to-pink-500 text-white',
 						rarityLevel === 'Rara' && 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white',
 						rarityLevel === 'Poco común' && 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white',
@@ -73,9 +73,9 @@ export function AlbumCardFooter({
 
 			{/* Sello de rareza holográfico cuando es favorito - solo visible en modo TCG */}
 			{tcgMode && album.isFavorite && (
-				<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
+				<div className="pointer-events-none absolute top-0 right-0 z-30 h-24 w-24 overflow-hidden">
 					<div
-						className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
+						className="-translate-y-8 absolute top-0 right-0 h-24 w-24 translate-x-12 rotate-45 opacity-70"
 						style={{
 							background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
 							backgroundSize: '600% 600%',

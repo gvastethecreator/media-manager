@@ -34,7 +34,7 @@ export async function seedThumbnails(db: LibSQLDatabase<Record<string, never>>) 
 				height: 200,
 				format: 'jpeg',
 				quality: 85,
-				fileSize: 16384, // 16KB
+				fileSize: 16_384, // 16KB
 				isGenerated: true,
 			},
 		];

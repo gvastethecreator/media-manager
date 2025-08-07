@@ -8,8 +8,10 @@ export function Toaster() {
 
 	return (
 		<SonnerToaster
-			theme={resolvedTheme as 'light' | 'dark'}
 			className="toaster group"
+			expand
+			position="bottom-right"
+			richColors
 			style={
 				{
 					'--normal-bg': 'var(--popover)',
@@ -17,9 +19,7 @@ export function Toaster() {
 					'--normal-border': 'var(--border)',
 				} as React.CSSProperties
 			}
-			position="bottom-right"
-			richColors
-			expand
+			theme={resolvedTheme as 'light' | 'dark'}
 		/>
 	);
 }

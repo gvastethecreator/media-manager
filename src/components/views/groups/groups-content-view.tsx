@@ -37,7 +37,7 @@ const MemoizedGroupCard = memo(
 			color: '#60a5fa',
 		};
 
-		return <GroupCard groupId={group.id} onClick={onGroupClick} className="h-full" />;
+		return <GroupCard className="h-full" groupId={group.id} onClick={onGroupClick} />;
 	},
 	(prevProps, nextProps) => {
 		// Memoización personalizada para solo re-renderizar si cambian propiedades importantes
@@ -69,7 +69,7 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 }) => {
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<p className="text-destructive">Error: {error}</p>
 			</div>
 		);
@@ -82,31 +82,31 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 	return (
 		<ScrollArea className={className || 'h-full'}>
 			<div className="container mx-auto p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Grupos</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Grupos</h2>
 
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
 					{showForm ? 'Cancelar' : 'Crear Grupo'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nuevo Grupo</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nuevo Grupo</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="groupName">Nombre</Label>
 							<Input
 								id="groupName"
-								value={newGroupName}
 								onChange={(e) => setNewGroupName(e.target.value)}
 								placeholder="Nombre del grupo"
+								value={newGroupName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="groupDescription">Descripción</Label>
 							<Textarea
 								id="groupDescription"
-								value={newGroupDescription}
 								onChange={(e) => setNewGroupDescription(e.target.value)}
 								placeholder="Descripción del grupo (opcional)"
+								value={newGroupDescription}
 							/>
 						</div>
 						<Button onClick={handleCreateGroup}>Guardar Grupo</Button>
@@ -115,15 +115,15 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 
 				{!optimisticGroups || (optimisticGroups.length === 0 && !isLoading && !showForm) ? (
 					<EmptyState
+						description="Crea un grupo para organizar tus entidades."
 						icon={GroupIcon}
 						title="No hay grupos creados"
-						description="Crea un grupo para organizar tus entidades."
 					/>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 						{optimisticGroups.map((group, index) => {
 							// Verificar que el grupo tenga un id válido
-							if (!group || !group.id) {
+							if (!(group && group.id)) {
 								console.error('Grupo sin id válido:', group);
 								return null;
 							}
@@ -133,14 +133,14 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 
 							return (
 								<motion.div
-									key={group.id}
-									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
-									transition={{ delay: index * 0.1 }}
 									className="perspective-1000"
+									initial={{ opacity: 0, y: 20 }}
+									key={group.id}
+									transition={{ delay: index * 0.1 }}
 								>
 									<div
-										className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
+										className="h-full w-full transition-all duration-300 ease-in-out hover:z-10 hover:scale-[1.03] active:scale-[0.98]"
 										data-group-id={group.id}
 									>
 										<MemoizedGroupCard group={group} onGroupClick={onGroupClick} />
@@ -153,8 +153,8 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 
 				{/* Footer con información adicional */}
 				{optimisticGroups.length > 0 && (
-					<div className="mt-8 pt-6 border-t border-border">
-						<p className="text-sm text-muted-foreground text-center">
+					<div className="mt-8 border-border border-t pt-6">
+						<p className="text-center text-muted-foreground text-sm">
 							Mostrando {optimisticGroups.length} {optimisticGroups.length === 1 ? 'grupo' : 'grupos'}
 						</p>
 					</div>

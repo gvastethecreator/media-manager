@@ -49,15 +49,15 @@ export const NoteCardImages = memo(function NoteCardImages({
 
 	return (
 		<div
-			className={cn('relative h-[150px] overflow-hidden border-b border-gray-400/30', tcgMode && 'pb-1')}
+			className={cn('relative h-[150px] overflow-hidden border-gray-400/30 border-b', tcgMode && 'pb-1')}
 			style={getBorderStyles}
 		>
 			{/* Contenedor de im?genes con grid */}
 			<div
 				className={cn(
-					'w-full h-full grid gap-0.5',
+					'grid h-full w-full gap-0.5',
 					images.length >= 4 ? 'grid-cols-3 grid-rows-2' : 'grid-cols-2 grid-rows-2',
-					tcgMode && 'rounded-md overflow-hidden'
+					tcgMode && 'overflow-hidden rounded-md'
 				)}
 				style={backgroundStyle}
 			>
@@ -65,7 +65,7 @@ export const NoteCardImages = memo(function NoteCardImages({
 					{isLoading ? (
 						// Mostrar placeholders mientras carga
 						[...Array(6)].map((_, i) => (
-							<ImageLoading key={`loading-${renderKey}-position-${i + 1}`} backgroundColor={secondaryColor} />
+							<ImageLoading backgroundColor={secondaryColor} key={`loading-${renderKey}-position-${i + 1}`} />
 						))
 					) : error ? (
 						// Mostrar mensaje de error
@@ -74,8 +74,8 @@ export const NoteCardImages = memo(function NoteCardImages({
 						</div>
 					) : images.length === 0 ? (
 						// Mostrar mensaje si no hay im?genes
-						<div className="col-span-full row-span-full flex flex-col items-center justify-center text-center p-4">
-							<ImageIcon className="h-8 w-8 opacity-30 mb-2" />
+						<div className="col-span-full row-span-full flex flex-col items-center justify-center p-4 text-center">
+							<ImageIcon className="mb-2 h-8 w-8 opacity-30" />
 							<p className="text-sm opacity-70">No hay im?genes</p>
 						</div>
 					) : (
@@ -83,18 +83,18 @@ export const NoteCardImages = memo(function NoteCardImages({
 						<>
 							{images.map((image, index) => (
 								<div
-									key={image.id}
 									className={cn(
-										'relative overflow-hidden w-full h-full',
+										'relative h-full w-full overflow-hidden',
 										tcgMode &&
-											'transition-all duration-300 hover:brightness-110 hover:z-10 hover:transform hover:scale-105'
+											'transition-all duration-300 hover:z-10 hover:scale-105 hover:transform hover:brightness-110'
 									)}
+									key={image.id}
 								>
 									<img
-										src={image.thumbnailUrl}
 										alt={`Imagen ${index + 1}`}
-										className="w-full h-full object-cover"
+										className="h-full w-full object-cover"
 										loading="lazy"
+										src={image.thumbnailUrl}
 									/>
 									{/* Degradado inferior para TCG mode */}
 									{tcgMode && (
@@ -106,13 +106,13 @@ export const NoteCardImages = memo(function NoteCardImages({
 							{images.length < 6 &&
 								[...Array(6 - images.length)].map((_, i) => (
 									<div
-										key={`placeholder-${renderKey}-position-${i + 1}`}
 										className={cn(
-											'bg-black/20 w-full h-full flex items-center justify-center',
+											'flex h-full w-full items-center justify-center bg-black/20',
 											tcgMode && 'border border-white/10'
 										)}
+										key={`placeholder-${renderKey}-position-${i + 1}`}
 									>
-										<ImageIcon className="w-5 h-5 opacity-20" />
+										<ImageIcon className="h-5 w-5 opacity-20" />
 									</div>
 								))}
 						</>
@@ -122,7 +122,7 @@ export const NoteCardImages = memo(function NoteCardImages({
 
 			{/* Decoraci?n TCG por debajo de las im?genes */}
 			{tcgMode && (
-				<div className="absolute inset-x-0 -bottom-1 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+				<div className="-bottom-1 absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 			)}
 		</div>
 	);
@@ -132,10 +132,10 @@ export const NoteCardImages = memo(function NoteCardImages({
 function ImageLoading({ backgroundColor }: { backgroundColor: string }) {
 	return (
 		<div
-			className="animate-pulse relative overflow-hidden w-full h-full flex items-center justify-center"
+			className="relative flex h-full w-full animate-pulse items-center justify-center overflow-hidden"
 			style={{ backgroundColor: `${backgroundColor}30` }}
 		>
-			<ImageIcon className="w-5 h-5 opacity-20" />
+			<ImageIcon className="h-5 w-5 opacity-20" />
 		</div>
 	);
 }

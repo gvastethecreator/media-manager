@@ -178,7 +178,7 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 			</CardHeader>
 
 			<CardContent>
-				<Tabs defaultValue="common" className="w-full">
+				<Tabs className="w-full" defaultValue="common">
 					<TabsList className="grid w-full grid-cols-4">
 						<TabsTrigger value="common">General</TabsTrigger>
 						<TabsTrigger value="specific">Específico</TabsTrigger>
@@ -186,16 +186,16 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 						<TabsTrigger value="advanced">Avanzado</TabsTrigger>
 					</TabsList>
 
-					<TabsContent value="common" className="space-y-6">
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+					<TabsContent className="space-y-6" value="common">
+						<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 							<div className="space-y-4">
-								<h3 className="text-lg font-medium">Elementos Visibles</h3>
+								<h3 className="font-medium text-lg">Elementos Visibles</h3>
 
 								<div className="flex items-center justify-between">
 									<Label htmlFor="show-thumbnails">Mostrar miniaturas</Label>
 									<Switch
-										id="show-thumbnails"
 										checked={currentConfig.common.showThumbnails}
+										id="show-thumbnails"
 										onCheckedChange={(checked) => handleCommonSettingChange('showThumbnails', checked)}
 									/>
 								</div>
@@ -203,8 +203,8 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 								<div className="flex items-center justify-between">
 									<Label htmlFor="show-metadata">Mostrar metadatos</Label>
 									<Switch
-										id="show-metadata"
 										checked={currentConfig.common.showMetadata}
+										id="show-metadata"
 										onCheckedChange={(checked) => handleCommonSettingChange('showMetadata', checked)}
 									/>
 								</div>
@@ -212,8 +212,8 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 								<div className="flex items-center justify-between">
 									<Label htmlFor="show-tags">Mostrar etiquetas</Label>
 									<Switch
-										id="show-tags"
 										checked={currentConfig.common.showTags}
+										id="show-tags"
 										onCheckedChange={(checked) => handleCommonSettingChange('showTags', checked)}
 									/>
 								</div>
@@ -221,8 +221,8 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 								<div className="flex items-center justify-between">
 									<Label htmlFor="show-stats">Mostrar estadísticas</Label>
 									<Switch
-										id="show-stats"
 										checked={currentConfig.common.showStats}
+										id="show-stats"
 										onCheckedChange={(checked) => handleCommonSettingChange('showStats', checked)}
 									/>
 								</div>
@@ -230,21 +230,21 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 								<div className="flex items-center justify-between">
 									<Label htmlFor="show-hidden">Mostrar archivos ocultos</Label>
 									<Switch
-										id="show-hidden"
 										checked={currentConfig.common.showHiddenFiles}
+										id="show-hidden"
 										onCheckedChange={(checked) => handleCommonSettingChange('showHiddenFiles', checked)}
 									/>
 								</div>
 							</div>
 
 							<div className="space-y-4">
-								<h3 className="text-lg font-medium">Ordenamiento</h3>
+								<h3 className="font-medium text-lg">Ordenamiento</h3>
 
 								<div className="space-y-2">
 									<Label htmlFor="sort-by">Ordenar por</Label>
 									<Select
-										value={currentConfig.common.sortBy}
 										onValueChange={(value) => handleCommonSettingChange('sortBy', value)}
+										value={currentConfig.common.sortBy}
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -262,8 +262,8 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 								<div className="space-y-2">
 									<Label htmlFor="sort-direction">Dirección</Label>
 									<Select
-										value={currentConfig.common.sortDirection}
 										onValueChange={(value: 'asc' | 'desc') => handleCommonSettingChange('sortDirection', value)}
+										value={currentConfig.common.sortDirection}
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -280,13 +280,13 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 						<Separator />
 
 						<div className="space-y-4">
-							<h3 className="text-lg font-medium">Animaciones y Efectos</h3>
+							<h3 className="font-medium text-lg">Animaciones y Efectos</h3>
 
 							<div className="flex items-center justify-between">
 								<Label htmlFor="enable-animations">Habilitar animaciones</Label>
 								<Switch
-									id="enable-animations"
 									checked={currentConfig.common.enableAnimations}
+									id="enable-animations"
 									onCheckedChange={(checked) => handleCommonSettingChange('enableAnimations', checked)}
 								/>
 							</div>
@@ -297,13 +297,13 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 										Duración de animación: {currentConfig.common.animationDuration}ms
 									</Label>
 									<Slider
+										className="w-full"
 										id="animation-duration"
-										min={0}
 										max={1000}
+										min={0}
+										onValueChange={([value]) => handleCommonSettingChange('animationDuration', value)}
 										step={50}
 										value={[currentConfig.common.animationDuration]}
-										onValueChange={([value]) => handleCommonSettingChange('animationDuration', value)}
-										className="w-full"
 									/>
 								</div>
 							)}
@@ -311,28 +311,28 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 							<div className="flex items-center justify-between">
 								<Label htmlFor="hover-effects">Efectos de hover</Label>
 								<Switch
-									id="hover-effects"
 									checked={currentConfig.common.enableHoverEffects}
+									id="hover-effects"
 									onCheckedChange={(checked) => handleCommonSettingChange('enableHoverEffects', checked)}
 								/>
 							</div>
 						</div>
 					</TabsContent>
 
-					<TabsContent value="specific" className="space-y-6">
-						<div className="text-center py-8">
-							<Settings className="h-12 w-12 mx-auto text-muted-foreground mb-4" />
-							<h3 className="text-lg font-medium mb-2">Configuración Específica de {VIEW_TYPE_LABELS[viewType]}</h3>
+					<TabsContent className="space-y-6" value="specific">
+						<div className="py-8 text-center">
+							<Settings className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
+							<h3 className="mb-2 font-medium text-lg">Configuración Específica de {VIEW_TYPE_LABELS[viewType]}</h3>
 							<p className="text-muted-foreground">
 								Las opciones específicas para la vista {VIEW_TYPE_LABELS[viewType].toLowerCase()} aparecerán aquí.
 							</p>
 						</div>
 					</TabsContent>
 
-					<TabsContent value="presets" className="space-y-6">
+					<TabsContent className="space-y-6" value="presets">
 						<div className="flex items-center justify-between">
-							<h3 className="text-lg font-medium">Presets Disponibles</h3>
-							<Button variant="outline" size="sm" onClick={() => setIsCreatingPreset(true)}>
+							<h3 className="font-medium text-lg">Presets Disponibles</h3>
+							<Button onClick={() => setIsCreatingPreset(true)} size="sm" variant="outline">
 								Crear Preset
 							</Button>
 						</div>
@@ -347,9 +347,9 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 										<Label htmlFor="preset-name">Nombre</Label>
 										<Input
 											id="preset-name"
-											value={presetName}
 											onChange={(e) => setPresetName(e.target.value)}
 											placeholder="Nombre del preset"
+											value={presetName}
 										/>
 									</div>
 
@@ -357,21 +357,21 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 										<Label htmlFor="preset-description">Descripción (opcional)</Label>
 										<Input
 											id="preset-description"
-											value={presetDescription}
 											onChange={(e) => setPresetDescription(e.target.value)}
 											placeholder="Descripción del preset"
+											value={presetDescription}
 										/>
 									</div>
 
 									<div className="flex gap-2">
 										<Button onClick={handleCreatePreset}>Crear</Button>
 										<Button
-											variant="outline"
 											onClick={() => {
 												setIsCreatingPreset(false);
 												setPresetName('');
 												setPresetDescription('');
 											}}
+											variant="outline"
 										>
 											Cancelar
 										</Button>
@@ -380,9 +380,9 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 							</Card>
 						)}
 
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 							{presets.map((preset) => (
-								<Card key={preset.id} className="cursor-pointer hover:shadow-md transition-shadow">
+								<Card className="cursor-pointer transition-shadow hover:shadow-md" key={preset.id}>
 									<CardHeader className="pb-2">
 										<div className="flex items-center justify-between">
 											<CardTitle className="text-base">{preset.name}</CardTitle>
@@ -391,7 +391,7 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 										{preset.description && <CardDescription className="text-sm">{preset.description}</CardDescription>}
 									</CardHeader>
 									<CardContent>
-										<Button variant="outline" size="sm" onClick={() => handlePresetApply(preset)} className="w-full">
+										<Button className="w-full" onClick={() => handlePresetApply(preset)} size="sm" variant="outline">
 											Aplicar
 										</Button>
 									</CardContent>
@@ -400,27 +400,27 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 						</div>
 					</TabsContent>
 
-					<TabsContent value="advanced" className="space-y-6">
+					<TabsContent className="space-y-6" value="advanced">
 						<div className="space-y-4">
-							<h3 className="text-lg font-medium">Importar/Exportar</h3>
+							<h3 className="font-medium text-lg">Importar/Exportar</h3>
 
 							<div className="flex gap-2">
-								<Button variant="outline" onClick={handleExport}>
+								<Button onClick={handleExport} variant="outline">
 									Exportar Configuración
 								</Button>
 
 								<div className="relative">
-									<Button variant="outline" asChild>
-										<label htmlFor="import-config" className="cursor-pointer">
+									<Button asChild variant="outline">
+										<label className="cursor-pointer" htmlFor="import-config">
 											Importar Configuración
 										</label>
 									</Button>
 									<input
-										id="import-config"
-										type="file"
 										accept=".json"
+										className="absolute inset-0 cursor-pointer opacity-0"
+										id="import-config"
 										onChange={handleImport}
-										className="absolute inset-0 opacity-0 cursor-pointer"
+										type="file"
 									/>
 								</div>
 							</div>
@@ -429,9 +429,9 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 						<Separator />
 
 						<div className="space-y-4">
-							<h3 className="text-lg font-medium">Información de Configuración</h3>
+							<h3 className="font-medium text-lg">Información de Configuración</h3>
 
-							<div className="bg-muted p-4 rounded-lg space-y-2">
+							<div className="space-y-2 rounded-lg bg-muted p-4">
 								<div className="flex justify-between">
 									<span className="font-medium">Nombre:</span>
 									<span>{currentConfig.metadata.name}</span>

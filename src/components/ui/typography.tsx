@@ -11,7 +11,7 @@ interface TypographyProps extends HTMLAttributes<HTMLElement> {
  */
 export function TypographyH1({ children, className, ...props }: TypographyProps) {
 	return (
-		<h1 className={cn('scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl', className)} {...props}>
+		<h1 className={cn('scroll-m-20 font-extrabold text-4xl tracking-tight lg:text-5xl', className)} {...props}>
 			{children}
 		</h1>
 	);
@@ -23,7 +23,7 @@ export function TypographyH1({ children, className, ...props }: TypographyProps)
 export function TypographyH2({ children, className, ...props }: TypographyProps) {
 	return (
 		<h2
-			className={cn('scroll-m-20 border-b pb-2 text-3xl font-semibold tracking-tight first:mt-0', className)}
+			className={cn('scroll-m-20 border-b pb-2 font-semibold text-3xl tracking-tight first:mt-0', className)}
 			{...props}
 		>
 			{children}
@@ -36,7 +36,7 @@ export function TypographyH2({ children, className, ...props }: TypographyProps)
  */
 export function TypographyH3({ children, className, ...props }: TypographyProps) {
 	return (
-		<h3 className={cn('scroll-m-20 text-2xl font-semibold tracking-tight', className)} {...props}>
+		<h3 className={cn('scroll-m-20 font-semibold text-2xl tracking-tight', className)} {...props}>
 			{children}
 		</h3>
 	);
@@ -47,7 +47,7 @@ export function TypographyH3({ children, className, ...props }: TypographyProps)
  */
 export function TypographyH4({ children, className, ...props }: TypographyProps) {
 	return (
-		<h4 className={cn('scroll-m-20 text-xl font-semibold tracking-tight', className)} {...props}>
+		<h4 className={cn('scroll-m-20 font-semibold text-xl tracking-tight', className)} {...props}>
 			{children}
 		</h4>
 	);
@@ -91,7 +91,7 @@ export function TypographyList({ children, className, ...props }: TypographyProp
  */
 export function TypographySmall({ children, className, ...props }: TypographyProps) {
 	return (
-		<small className={cn('text-sm font-medium leading-none', className)} {...props}>
+		<small className={cn('font-medium text-sm leading-none', className)} {...props}>
 			{children}
 		</small>
 	);
@@ -102,7 +102,7 @@ export function TypographySmall({ children, className, ...props }: TypographyPro
  */
 export function TypographyLarge({ children, className, ...props }: TypographyProps) {
 	return (
-		<div className={cn('text-lg font-semibold', className)} {...props}>
+		<div className={cn('font-semibold text-lg', className)} {...props}>
 			{children}
 		</div>
 	);
@@ -113,7 +113,7 @@ export function TypographyLarge({ children, className, ...props }: TypographyPro
  */
 export function TypographyLead({ children, className, ...props }: TypographyProps) {
 	return (
-		<p className={cn('text-xl text-muted-foreground', className)} {...props}>
+		<p className={cn('text-muted-foreground text-xl', className)} {...props}>
 			{children}
 		</p>
 	);
@@ -124,7 +124,7 @@ export function TypographyLead({ children, className, ...props }: TypographyProp
  */
 export function TypographyMuted({ children, className, ...props }: TypographyProps) {
 	return (
-		<p className={cn('text-sm text-muted-foreground', className)} {...props}>
+		<p className={cn('text-muted-foreground text-sm', className)} {...props}>
 			{children}
 		</p>
 	);

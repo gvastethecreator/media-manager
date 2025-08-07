@@ -65,7 +65,7 @@ const NoteServiceImpl = {
 					priority: data.priority || 0,
 					status: data.status || 'active',
 					featuredImage: data.featuredImage || null,
-					isFavorite: data.isFavorite || false,
+					isFavorite: data.isFavorite,
 					createdAt: new Date(),
 					updatedAt: new Date(),
 					presetId: data.presetId || null,
@@ -125,7 +125,7 @@ const NoteServiceImpl = {
 					priority: data.priority || 0,
 					status: data.status || 'active',
 					featuredImage: data.featuredImage || null,
-					isFavorite: data.isFavorite || false,
+					isFavorite: data.isFavorite,
 					updatedAt: new Date(),
 				})
 				.where(eq(notes.id, id))

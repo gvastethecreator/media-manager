@@ -46,7 +46,7 @@ const deserializeArray = <T>(jsonString: string | null | undefined, _fieldName: 
 
 	// Si el string no parece JSON válido (no empieza con [ o {), tratarlo como array de strings
 	const trimmed = jsonString.trim();
-	if (!trimmed.startsWith('[') && !trimmed.startsWith('{')) {
+	if (!(trimmed.startsWith('[') || trimmed.startsWith('{'))) {
 		// Tratar como string simple o lista separada por comas
 		if (trimmed.includes(',')) {
 			return trimmed
@@ -107,7 +107,7 @@ export function extendWorldItem(item: Record<string, unknown>): Record<string, u
  * Extiende múltiples WorldItems con datos adicionales
  */
 export function extendWorldItems(items: Record<string, unknown>[]): Record<string, unknown>[] {
-	if (!items || !Array.isArray(items)) return [];
+	if (!(items && Array.isArray(items))) return [];
 
 	return items.map(extendWorldItem);
 }

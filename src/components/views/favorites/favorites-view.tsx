@@ -79,20 +79,20 @@ export function FavoritesView({ isVisible }: ViewProps) {
 
 	return (
 		<FavoritesContentView
-			favorites={favorites}
-			isLoading={isLoading}
 			error={error}
-			localSearch={localSearch}
-			showForm={showForm}
-			newFavoriteName={newFavoriteName}
-			newFavoriteDescription={newFavoriteDescription}
-			selectedFavoriteId={selectedFavoriteId}
-			setShowForm={setShowForm}
-			setNewFavoriteName={setNewFavoriteName}
-			setNewFavoriteDescription={setNewFavoriteDescription}
-			handleFavoriteSelect={handleFavoriteSelect}
+			favorites={favorites}
 			handleCreateFavorite={handleCreateFavorite}
+			handleFavoriteSelect={handleFavoriteSelect}
 			handleRetry={handleRetry}
+			isLoading={isLoading}
+			localSearch={localSearch}
+			newFavoriteDescription={newFavoriteDescription}
+			newFavoriteName={newFavoriteName}
+			selectedFavoriteId={selectedFavoriteId}
+			setNewFavoriteDescription={setNewFavoriteDescription}
+			setNewFavoriteName={setNewFavoriteName}
+			setShowForm={setShowForm}
+			showForm={showForm}
 		/>
 	);
 }

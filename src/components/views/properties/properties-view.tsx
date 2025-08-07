@@ -72,39 +72,39 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 	return (
 		<div className={className}>
 			<div className="p-4">
-				<h2 className="text-xl font-bold mb-4">Vista de Propiedades</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Propiedades</h2>
 
 				<Button
+					className="mb-4"
 					onClick={() => {
 						setShowForm(!showForm);
 						setEditingProperty(null);
 						setPropertyName('');
 						setPropertyValue('');
 					}}
-					className="mb-4"
 				>
 					{showForm ? 'Cancelar' : 'Crear Propiedad'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">{editingProperty ? 'Editar Propiedad' : 'Nueva Propiedad'}</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">{editingProperty ? 'Editar Propiedad' : 'Nueva Propiedad'}</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="propertyName">Nombre</Label>
 							<Input
 								id="propertyName"
-								value={propertyName}
 								onChange={(e) => setPropertyName(e.target.value)}
 								placeholder="Nombre de la propiedad"
+								value={propertyName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="propertyValue">Valor</Label>
 							<Input
 								id="propertyValue"
-								value={propertyValue}
 								onChange={(e) => setPropertyValue(e.target.value)}
 								placeholder="Valor de la propiedad"
+								value={propertyValue}
 							/>
 						</div>
 						<Button onClick={handleSubmitForm}>{editingProperty ? 'Guardar Cambios' : 'Guardar Propiedad'}</Button>
@@ -115,22 +115,22 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 					<p>Cargando propiedades...</p>
 				) : properties && properties.length > 0 ? (
 					<ScrollArea className="h-[calc(100vh-200px)]">
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 							{properties.map((property: any) => (
 								<Card key={property.id}>
 									<CardHeader>
 										<CardTitle>{property.name}</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<p className="text-sm text-muted-foreground">{property.value}</p>
-										<div className="flex gap-2 mt-2">
-											<Button variant="outline" size="sm" onClick={() => handleEditProperty(property)}>
-												<Edit className="h-4 w-4 mr-1" /> Editar
+										<p className="text-muted-foreground text-sm">{property.value}</p>
+										<div className="mt-2 flex gap-2">
+											<Button onClick={() => handleEditProperty(property)} size="sm" variant="outline">
+												<Edit className="mr-1 h-4 w-4" /> Editar
 											</Button>
 											<AlertDialog>
 												<AlertDialogTrigger asChild>
-													<Button variant="destructive" size="sm">
-														<Trash2 className="h-4 w-4 mr-1" /> Eliminar
+													<Button size="sm" variant="destructive">
+														<Trash2 className="mr-1 h-4 w-4" /> Eliminar
 													</Button>
 												</AlertDialogTrigger>
 												<AlertDialogContent>
@@ -143,8 +143,8 @@ export const PropertiesView = memo(function PropertiesView({ className }: ViewPr
 													<AlertDialogFooter>
 														<AlertDialogCancel>Cancelar</AlertDialogCancel>
 														<AlertDialogAction
-															onClick={() => handleDeleteProperty(property.id)}
 															className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+															onClick={() => handleDeleteProperty(property.id)}
 														>
 															Eliminar
 														</AlertDialogAction>

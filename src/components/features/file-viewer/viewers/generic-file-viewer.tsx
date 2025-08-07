@@ -135,7 +135,7 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 	const canPreview = isTextFile && fileSize < 1024 * 1024; // Only preview files smaller than 1MB
 
 	const loadFileContent = async () => {
-		if (!canPreview || !file.path) return;
+		if (!(canPreview && file.path)) return;
 
 		setIsLoadingContent(true);
 		setError(null);
@@ -151,7 +151,7 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 		} catch (err) {
 			setError(err instanceof Error ? err.message : 'Error desconocido');
 			// Fallback: try to read as text if it's a small file
-			if (fileSize < 10000) {
+			if (fileSize < 10_000) {
 				try {
 					const fallbackResponse = await fetch(file.path);
 					const fallbackContent = await fallbackResponse.text();
@@ -167,7 +167,7 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 	};
 
 	const handleToggleContent = () => {
-		if (!showContent && !fileContent && canPreview) {
+		if (!(showContent || fileContent) && canPreview) {
 			loadFileContent();
 		}
 		setShowContent(!showContent);
@@ -226,37 +226,37 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 	};
 
 	return (
-		<div className="flex flex-col h-full bg-background">
+		<div className="flex h-full flex-col bg-background">
 			{/* Header */}
-			<div className="flex items-center justify-between p-4 border-b">
+			<div className="flex items-center justify-between border-b p-4">
 				<div className="flex items-center space-x-4">
-					<Button variant="ghost" size="sm" onClick={onPrevious}>
+					<Button onClick={onPrevious} size="sm" variant="ghost">
 						<ChevronLeft className="h-4 w-4" />
 					</Button>
-					<Button variant="ghost" size="sm" onClick={onNext}>
+					<Button onClick={onNext} size="sm" variant="ghost">
 						<ChevronRight className="h-4 w-4" />
 					</Button>
 				</div>
 
 				<div className="flex items-center space-x-2">
-					<h2 className="text-lg font-semibold truncate max-w-md">{fileName}</h2>
+					<h2 className="max-w-md truncate font-semibold text-lg">{fileName}</h2>
 				</div>
 
-				<Button variant="ghost" size="sm" onClick={onClose}>
+				<Button onClick={onClose} size="sm" variant="ghost">
 					✕
 				</Button>
 			</div>
 
 			{/* Main Content */}
 			<div className="flex-1 overflow-auto p-6">
-				<div className="max-w-4xl mx-auto">
+				<div className="mx-auto max-w-4xl">
 					{/* File Icon and Basic Info */}
-					<div className="text-center mb-8">
-						<div className="inline-flex items-center justify-center w-24 h-24 rounded-full bg-muted mb-4">
+					<div className="mb-8 text-center">
+						<div className="mb-4 inline-flex h-24 w-24 items-center justify-center rounded-full bg-muted">
 							<FileIcon className="h-12 w-12 text-muted-foreground" />
 						</div>
-						<h1 className="text-2xl font-bold mb-2">{fileName}</h1>
-						<div className="flex items-center justify-center space-x-2 mb-4">
+						<h1 className="mb-2 font-bold text-2xl">{fileName}</h1>
+						<div className="mb-4 flex items-center justify-center space-x-2">
 							<Badge className={getCategoryColor(fileCategory)}>{fileExtension.toUpperCase()}</Badge>
 							<Badge variant="outline">{formatFileSize(fileSize)}</Badge>
 						</div>
@@ -264,18 +264,18 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 					</div>
 
 					{/* Action Buttons */}
-					<div className="flex justify-center space-x-4 mb-8">
+					<div className="mb-8 flex justify-center space-x-4">
 						<Button onClick={handleDownload}>
-							<Download className="h-4 w-4 mr-2" />
+							<Download className="mr-2 h-4 w-4" />
 							Descargar
 						</Button>
-						<Button variant="outline" onClick={handleOpenExternal}>
-							<ExternalLink className="h-4 w-4 mr-2" />
+						<Button onClick={handleOpenExternal} variant="outline">
+							<ExternalLink className="mr-2 h-4 w-4" />
 							Abrir externamente
 						</Button>
 						{canPreview && (
-							<Button variant="outline" onClick={handleToggleContent}>
-								{showContent ? <EyeOff className="h-4 w-4 mr-2" /> : <Eye className="h-4 w-4 mr-2" />}
+							<Button onClick={handleToggleContent} variant="outline">
+								{showContent ? <EyeOff className="mr-2 h-4 w-4" /> : <Eye className="mr-2 h-4 w-4" />}
 								{showContent ? 'Ocultar contenido' : 'Ver contenido'}
 							</Button>
 						)}
@@ -284,11 +284,11 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 					{/* File Content Preview */}
 					{showContent && canPreview && (
 						<div className="mb-8">
-							<div className="flex items-center justify-between mb-4">
-								<h3 className="text-lg font-semibold">Contenido del archivo</h3>
+							<div className="mb-4 flex items-center justify-between">
+								<h3 className="font-semibold text-lg">Contenido del archivo</h3>
 								{fileContent && (
-									<Button variant="ghost" size="sm" onClick={handleCopyContent}>
-										<Copy className="h-4 w-4 mr-2" />
+									<Button onClick={handleCopyContent} size="sm" variant="ghost">
+										<Copy className="mr-2 h-4 w-4" />
 										Copiar
 									</Button>
 								)}
@@ -296,24 +296,24 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 
 							{isLoadingContent && (
 								<div className="flex items-center justify-center p-8">
-									<div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary" />
+									<div className="h-6 w-6 animate-spin rounded-full border-primary border-b-2" />
 									<span className="ml-2">Cargando contenido...</span>
 								</div>
 							)}
 
 							{error && (
-								<div className="p-4 border border-red-200 rounded-lg bg-red-50 dark:bg-red-900/20 dark:border-red-800">
+								<div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
 									<p className="text-red-600 dark:text-red-400">{error}</p>
 								</div>
 							)}
 
 							{fileContent && (
-								<div className="border rounded-lg overflow-hidden">
+								<div className="overflow-hidden rounded-lg border">
 									<Textarea
-										value={fileContent}
-										readOnly
-										className="min-h-[400px] font-mono text-sm resize-none border-0 focus:ring-0"
+										className="min-h-[400px] resize-none border-0 font-mono text-sm focus:ring-0"
 										placeholder="Contenido del archivo..."
+										readOnly
+										value={fileContent}
 									/>
 								</div>
 							)}
@@ -321,9 +321,9 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 					)}
 
 					{/* File Metadata */}
-					<div className="border rounded-lg p-6">
-						<h3 className="text-lg font-semibold mb-4">Información del archivo</h3>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+					<div className="rounded-lg border p-6">
+						<h3 className="mb-4 font-semibold text-lg">Información del archivo</h3>
+						<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 							<div>
 								<span className="font-medium">Nombre:</span>
 								<span className="ml-2 text-muted-foreground">{fileName}</span>
@@ -353,7 +353,7 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 							{file.path && (
 								<div className="md:col-span-2">
 									<span className="font-medium">Ruta:</span>
-									<span className="ml-2 text-muted-foreground font-mono text-sm break-all">{file.path}</span>
+									<span className="ml-2 break-all font-mono text-muted-foreground text-sm">{file.path}</span>
 								</div>
 							)}
 							{file.description && (
@@ -365,7 +365,7 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 							{file.stats?.checksum && (
 								<div className="md:col-span-2">
 									<span className="font-medium">Checksum:</span>
-									<span className="ml-2 text-muted-foreground font-mono text-sm">{file.stats.checksum}</span>
+									<span className="ml-2 font-mono text-muted-foreground text-sm">{file.stats.checksum}</span>
 								</div>
 							)}
 						</div>

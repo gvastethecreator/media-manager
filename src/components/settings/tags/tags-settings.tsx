@@ -91,11 +91,11 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 	// Estado de carga
 	if (isLoading) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-8">
 						<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-						<span className="text-sm text-muted-foreground">Cargando etiquetas...</span>
+						<span className="text-muted-foreground text-sm">Cargando etiquetas...</span>
 					</div>
 				</CardContent>
 			</Card>
@@ -105,10 +105,10 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 	// Estado de error
 	if (error) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-8">
-						<p className="text-sm text-destructive">Error al cargar etiquetas: {error.message}</p>
+						<p className="text-destructive text-sm">Error al cargar etiquetas: {error.message}</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -119,26 +119,26 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 		<ScrollArea className="h-[calc(100vh-8rem)] w-full">
 			<div className={className}>
 				{/* 📊 Estadísticas */}
-				<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+				<div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="text-sm font-medium">Total de Etiquetas</CardTitle>
+							<CardTitle className="font-medium text-sm">Total de Etiquetas</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<div className="text-2xl font-bold">{stats.total}</div>
+							<div className="font-bold text-2xl">{stats.total}</div>
 						</CardContent>
 					</Card>
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="text-sm font-medium">Favoritas</CardTitle>
+							<CardTitle className="font-medium text-sm">Favoritas</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<div className="text-2xl font-bold">{stats.favorites}</div>
+							<div className="font-bold text-2xl">{stats.favorites}</div>
 						</CardContent>
 					</Card>
 					<Card>
 						<CardHeader className="pb-2">
-							<CardTitle className="text-sm font-medium">Más Usada</CardTitle>
+							<CardTitle className="font-medium text-sm">Más Usada</CardTitle>
 						</CardHeader>
 						<CardContent>
 							<div className="text-sm">
@@ -153,13 +153,13 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 				</div>
 
 				{/* 🔍 Controles */}
-				<div className="flex flex-col sm:flex-row gap-4 mb-6">
+				<div className="mb-6 flex flex-col gap-4 sm:flex-row">
 					<div className="flex-1">
 						<Input
+							className="w-full"
+							onChange={(e) => setSearchTerm(e.target.value)}
 							placeholder="Buscar etiquetas..."
 							value={searchTerm}
-							onChange={(e) => setSearchTerm(e.target.value)}
-							className="w-full"
 						/>
 					</div>
 
@@ -167,33 +167,33 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 						{/* Filtro por categoría */}
 						<Popover>
 							<PopoverTrigger>
-								<Button variant="outline" size="sm">
-									<Filter className="h-4 w-4 mr-2" />
+								<Button size="sm" variant="outline">
+									<Filter className="mr-2 h-4 w-4" />
 									{selectedCategory || 'Todas las categorías'}
 								</Button>
 							</PopoverTrigger>
 							<PopoverContent className="w-56">
 								<div className="space-y-2">
-									<Label className="text-sm font-medium">Filtrar por categoría</Label>
+									<Label className="font-medium text-sm">Filtrar por categoría</Label>
 									<div className="space-y-1">
 										<div className="flex items-center space-x-2">
 											<Checkbox
-												id="all-categories"
 												checked={!selectedCategory}
+												id="all-categories"
 												onCheckedChange={() => setSelectedCategory(null)}
 											/>
-											<Label htmlFor="all-categories" className="text-sm">
+											<Label className="text-sm" htmlFor="all-categories">
 												Todas
 											</Label>
 										</div>
 										{Object.values(TagCategory).map((category) => (
-											<div key={category} className="flex items-center space-x-2">
+											<div className="flex items-center space-x-2" key={category}>
 												<Checkbox
-													id={`category-${category}`}
 													checked={selectedCategory === category}
+													id={`category-${category}`}
 													onCheckedChange={() => setSelectedCategory(selectedCategory === category ? null : category)}
 												/>
-												<Label htmlFor={`category-${category}`} className="text-sm">
+												<Label className="text-sm" htmlFor={`category-${category}`}>
 													{category} ({stats.byCategory[category] || 0})
 												</Label>
 											</div>
@@ -206,18 +206,18 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 						{/* Filtro por favoritas */}
 						<div className="flex items-center space-x-2">
 							<Checkbox
-								id="favorites-only"
 								checked={showOnlyFavorites}
+								id="favorites-only"
 								onCheckedChange={(checked) => setShowOnlyFavorites(checked === true)}
 							/>
-							<Label htmlFor="favorites-only" className="text-sm">
+							<Label className="text-sm" htmlFor="favorites-only">
 								Solo favoritas
 							</Label>
 						</div>
 
 						{/* Botón crear */}
 						<Button onClick={() => setShowCreateForm(true)} size="sm">
-							<PlusCircle className="h-4 w-4 mr-2" />
+							<PlusCircle className="mr-2 h-4 w-4" />
 							Nueva etiqueta
 						</Button>
 					</div>
@@ -226,50 +226,50 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 				{/* 📋 Lista de etiquetas con scroll compacto */}
 				{filteredTags.length === 0 ? (
 					<EmptyState
-						icon={TagIcon}
-						title="No hay etiquetas"
+						actions={
+							<Button onClick={() => setShowCreateForm(true)}>
+								<PlusCircle className="mr-2 h-4 w-4" />
+								Crear primera etiqueta
+							</Button>
+						}
 						description={
 							searchTerm || selectedCategory || showOnlyFavorites
 								? 'No se encontraron etiquetas que coincidan con los filtros aplicados.'
 								: 'Aún no has creado ninguna etiqueta. ¡Crea tu primera etiqueta!'
 						}
-						actions={
-							<Button onClick={() => setShowCreateForm(true)}>
-								<PlusCircle className="h-4 w-4 mr-2" />
-								Crear primera etiqueta
-							</Button>
-						}
+						icon={TagIcon}
+						title="No hay etiquetas"
 					/>
 				) : (
 					<div
-						className="max-h-[600px] overflow-y-auto pr-2 space-y-4"
+						className="max-h-[600px] space-y-4 overflow-y-auto pr-2"
 						style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgb(203 213 225) transparent' }}
 					>
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 							{filteredTags.map((tag) => (
-								<Card key={tag.id} className="hover:shadow-md transition-shadow">
+								<Card className="transition-shadow hover:shadow-md" key={tag.id}>
 									<CardHeader className="pb-3">
 										<div className="flex items-start justify-between">
 											<div className="flex items-center gap-2">
 												<span className="text-lg">{tag.emoji}</span>
 												<div>
-													<CardTitle className="text-sm font-medium">{tag.name}</CardTitle>
+													<CardTitle className="font-medium text-sm">{tag.name}</CardTitle>
 													{tag.description && (
-														<CardDescription className="text-xs mt-1">{tag.description}</CardDescription>
+														<CardDescription className="mt-1 text-xs">{tag.description}</CardDescription>
 													)}
 												</div>
 											</div>
 											<div className="flex items-center gap-1">
 												{tag.isFavorite && (
-													<Badge variant="secondary" className="text-xs">
+													<Badge className="text-xs" variant="secondary">
 														Favorita
 													</Badge>
 												)}
 												<Button
-													variant="ghost"
-													size="sm"
-													onClick={() => handleDeleteTag(tag.id)}
 													className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+													onClick={() => handleDeleteTag(tag.id)}
+													size="sm"
+													variant="ghost"
 												>
 													<Trash className="h-4 w-4" />
 												</Button>
@@ -277,17 +277,17 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 										</div>
 									</CardHeader>
 									<CardContent className="pt-0">
-										<div className="flex items-center justify-between text-xs text-muted-foreground">
+										<div className="flex items-center justify-between text-muted-foreground text-xs">
 											<div className="flex items-center gap-4">
 												<span>Relaciones: {tag.stats?.totalRelations || 0}</span>
 												{tag.category && (
-													<Badge variant="outline" className="text-xs">
+													<Badge className="text-xs" variant="outline">
 														{tag.category}
 													</Badge>
 												)}
 											</div>
 											<div
-												className="w-4 h-4 rounded-full border"
+												className="h-4 w-4 rounded-full border"
 												style={{ backgroundColor: tag.color || '#6b7280' }}
 											/>
 										</div>
@@ -299,7 +299,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 				)}
 
 				{/* 📝 Formulario de creación */}
-				{showCreateForm && <CreateTagForm onCreated={handleTagCreated} onCancel={() => setShowCreateForm(false)} />}
+				{showCreateForm && <CreateTagForm onCancel={() => setShowCreateForm(false)} onCreated={handleTagCreated} />}
 			</div>
 		</ScrollArea>
 	);

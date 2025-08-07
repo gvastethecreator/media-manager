@@ -103,7 +103,7 @@ export function CreateCollectionForm({
 				url: collection.url || '',
 				alternativeUrl: collection.alternativeUrl || '',
 				price: collection.price || undefined,
-				isFavorite: collection.isFavorite || false,
+				isFavorite: collection.isFavorite,
 			});
 		}
 	}, [form, isEditing, collection]);
@@ -190,7 +190,7 @@ export function CreateCollectionForm({
 					color: data.color || undefined,
 					emoji: data.emoji || undefined,
 					description: data.description || undefined,
-					isFavorite: data.isFavorite || false,
+					isFavorite: data.isFavorite,
 				};
 				const updated = await updateCollectionMutation.mutateAsync({
 					id: collection.id,
@@ -209,7 +209,7 @@ export function CreateCollectionForm({
 					emoji: data.emoji || undefined,
 					description: data.description || undefined,
 
-					isFavorite: data.isFavorite || false,
+					isFavorite: data.isFavorite,
 				} as CreateCollectionInput);
 				onCreated?.(created);
 				form.reset();
@@ -231,7 +231,7 @@ export function CreateCollectionForm({
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(_onSubmit)} className="space-y-4">
+			<form className="space-y-4" onSubmit={form.handleSubmit(_onSubmit)}>
 				<FormField
 					control={form.control}
 					name="name"
@@ -253,7 +253,7 @@ export function CreateCollectionForm({
 						<FormItem>
 							<FormLabel>Emoji</FormLabel>
 							<FormControl>
-								<EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact showLabel={false} />
+								<EmojiPicker compact onEmojiSelect={field.onChange} showLabel={false} value={field.value} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -267,7 +267,7 @@ export function CreateCollectionForm({
 						<FormItem>
 							<FormLabel>Color</FormLabel>
 							<FormControl>
-								<ColorPicker value={field.value} onChange={field.onChange} compact showLabel={false} />
+								<ColorPicker compact onChange={field.onChange} showLabel={false} value={field.value} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -294,7 +294,7 @@ export function CreateCollectionForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Categoría</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value}>
+							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
 										<SelectValue placeholder="Seleccionar categoría" />
@@ -319,7 +319,7 @@ export function CreateCollectionForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Plataforma</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value}>
+							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
 										<SelectValue placeholder="Seleccionar plataforma" />
@@ -359,9 +359,9 @@ export function CreateCollectionForm({
 							<FormLabel>Precio</FormLabel>
 							<FormControl>
 								<Input
-									type="number"
 									min={0}
 									step={0.01}
+									type="number"
 									{...field}
 									onChange={(e) => field.onChange(Number(e.target.value))}
 								/>
@@ -387,7 +387,7 @@ export function CreateCollectionForm({
 				/>
 
 				<div className="flex justify-end space-x-2">
-					<Button type="button" variant="outline" onClick={onCancel}>
+					<Button onClick={onCancel} type="button" variant="outline">
 						Cancelar
 					</Button>
 					<Button type="submit">{isEditing ? 'Guardar cambios' : 'Crear colección'}</Button>

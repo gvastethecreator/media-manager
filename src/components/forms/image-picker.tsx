@@ -24,30 +24,30 @@ export function ImagePicker({ value, onChange, className }: ImagePickerProps) {
 	return (
 		<div className={cn('space-y-4', className)}>
 			{value ? (
-				<div className="relative aspect-video rounded-lg overflow-hidden bg-muted">
-					<img src={value} alt="Imagen seleccionada" className="object-cover" />
-					<div className="absolute inset-0 bg-black/40 opacity-0 hover:opacity-100 transition-opacity">
+				<div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
+					<img alt="Imagen seleccionada" className="object-cover" src={value} />
+					<div className="absolute inset-0 bg-black/40 opacity-0 transition-opacity hover:opacity-100">
 						<div className="absolute inset-0 flex items-center justify-center gap-2">
-							<Button type="button" variant="secondary" size="sm" onClick={() => onChange(null)}>
+							<Button onClick={() => onChange(null)} size="sm" type="button" variant="secondary">
 								Eliminar
 							</Button>
 						</div>
 					</div>
 				</div>
 			) : (
-				<div className="flex flex-col items-center justify-center gap-4 p-4 border-2 border-dashed rounded-lg">
+				<div className="flex flex-col items-center justify-center gap-4 rounded-lg border-2 border-dashed p-4">
 					<ImageIcon className="h-8 w-8 text-muted-foreground" />
-					<div className="flex flex-col items-center gap-1 text-sm text-muted-foreground">
+					<div className="flex flex-col items-center gap-1 text-muted-foreground text-sm">
 						<p>Arrastra una imagen o haz clic para seleccionar</p>
 						<p className="text-xs">PNG, JPG o GIF hasta 10MB</p>
 					</div>
-					<Input type="file" accept="image/*" onChange={handleFileChange} className="hidden" id="image-upload" />
+					<Input accept="image/*" className="hidden" id="image-upload" onChange={handleFileChange} type="file" />
 					<Button
-						type="button"
-						variant="secondary"
 						onClick={() => {
 							document.getElementById('image-upload')?.click();
 						}}
+						type="button"
+						variant="secondary"
 					>
 						Seleccionar archivo
 					</Button>

@@ -93,7 +93,7 @@ export function fromDrizzleConcept(
 			...conceptData,
 			entityType: 'concept' as const,
 			statistics: stats,
-			stats: stats,
+			stats,
 			_count,
 		};
 	} catch (error) {

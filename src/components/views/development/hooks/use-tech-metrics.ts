@@ -42,7 +42,7 @@ export function useTechMetrics() {
 		// Actualizar datos cada 15 segundos
 		const intervalId = setInterval(() => {
 			fetchMetrics();
-		}, 15000);
+		}, 15_000);
 
 		return () => clearInterval(intervalId);
 	}, [fetchMetrics]);

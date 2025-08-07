@@ -60,7 +60,7 @@ export const ThumbnailQualitySchema = z.nativeEnum(ThumbnailQuality);
  * @returns La calidad normalizada (la misma, si es válida, o MEDIUM si no)
  */
 export function normalizeQuality(quality: string | undefined): ThumbnailQuality {
-	if (!quality || !Object.values(ThumbnailQuality).includes(quality as ThumbnailQuality)) {
+	if (!(quality && Object.values(ThumbnailQuality).includes(quality as ThumbnailQuality))) {
 		return ThumbnailQuality.MEDIUM;
 	}
 	return quality as ThumbnailQuality;

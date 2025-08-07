@@ -137,32 +137,32 @@ export function WorldItemCard({
 
 		switch (worldItem?.type?.toLowerCase()) {
 			case 'artifact':
-				iconComponent = <GemIcon className="w-4 h-4" />;
+				iconComponent = <GemIcon className="h-4 w-4" />;
 				primaryCol = baseColor || '#ad5389';
 				secondaryCol = darkenColor(baseColor) || '#3c1053';
 				break;
 			case 'book':
-				iconComponent = <BookOpenText className="w-4 h-4" />;
+				iconComponent = <BookOpenText className="h-4 w-4" />;
 				primaryCol = baseColor || '#007991';
 				secondaryCol = darkenColor(baseColor) || '#78ffd6';
 				break;
 			case 'consumable':
-				iconComponent = <Beaker className="w-4 h-4" />;
+				iconComponent = <Beaker className="h-4 w-4" />;
 				primaryCol = baseColor || '#659999';
 				secondaryCol = darkenColor(baseColor) || '#f4791f';
 				break;
 			case 'weapon':
-				iconComponent = <Sword className="w-4 h-4" />;
+				iconComponent = <Sword className="h-4 w-4" />;
 				primaryCol = baseColor || '#8A2387';
 				secondaryCol = darkenColor(baseColor) || '#F27121';
 				break;
 			case 'equipment':
-				iconComponent = <StoreIcon className="w-4 h-4" />;
+				iconComponent = <StoreIcon className="h-4 w-4" />;
 				primaryCol = baseColor || '#3A1C71';
 				secondaryCol = darkenColor(baseColor) || '#FFAF7B';
 				break;
 			default:
-				iconComponent = <Box className="w-4 h-4" />;
+				iconComponent = <Box className="h-4 w-4" />;
 				primaryCol = baseColor || '#0f0c29';
 				secondaryCol = darkenColor(baseColor) || '#302b63';
 		}
@@ -199,7 +199,7 @@ export function WorldItemCard({
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
 					className
 				)}
 			>
@@ -212,7 +212,7 @@ export function WorldItemCard({
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
 					className
 				)}
 			>
@@ -304,12 +304,19 @@ export function WorldItemCard({
 	// Render del componente
 	return (
 		<motion.article
+			aria-label={`Objeto: ${name}`}
 			className={cn(
-				'flex flex-col overflow-hidden border-border relative z-0',
-				disabled && 'opacity-70 pointer-events-none',
-				interactive && !disabled && 'cursor-pointer hover:shadow-lg transition-shadow duration-300',
+				'relative z-0 flex flex-col overflow-hidden border-border',
+				disabled && 'pointer-events-none opacity-70',
+				interactive && !disabled && 'cursor-pointer transition-shadow duration-300 hover:shadow-lg',
 				className
 			)}
+			data-world-item-id={id}
+			onClick={disabled || !interactive || !onClick || !worldItem ? undefined : () => onClick(worldItem)}
+			onKeyDown={handleKeyDown}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
+			role={onClick && interactive ? 'button' : 'article'}
 			style={{
 				background: 'rgba(0, 0, 0, 0.05)',
 				border: tcgMode ? `1px solid ${primaryColor}60` : undefined,
@@ -318,22 +325,15 @@ export function WorldItemCard({
 				boxShadow: tcgMode ? `0 0 ${rarityGlow}px ${primaryColor}30` : undefined,
 				...style,
 			}}
+			tabIndex={disabled || !interactive || !onClick ? -1 : 0}
 			whileHover={!disabled && interactive ? { y: -5 } : {}}
 			whileTap={!disabled && interactive && onClick ? { scale: 0.98 } : {}}
-			onClick={disabled || !interactive || !onClick || !worldItem ? undefined : () => onClick(worldItem)}
-			onKeyDown={handleKeyDown}
-			tabIndex={disabled || !interactive || !onClick ? -1 : 0}
-			role={onClick && interactive ? 'button' : 'article'}
-			aria-label={`Objeto: ${name}`}
-			data-world-item-id={id}
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
 			{...rest}
 		>
 			{/* Card Container con efecto TCG */}
 			<div
 				className={cn(
-					'rounded-xl h-full w-full overflow-hidden transition-all duration-300 ease-out',
+					'h-full w-full overflow-hidden rounded-xl transition-all duration-300 ease-out',
 					tcgMode && 'shadow-md',
 					isHovered && tcgMode && 'scale-[1.01]'
 				)}
@@ -346,7 +346,7 @@ export function WorldItemCard({
 					<>
 						{/* Efecto holográfico con gradiente */}
 						<div
-							className="absolute inset-0 opacity-0 hover:opacity-30 transition-opacity duration-300 pointer-events-none"
+							className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-30"
 							style={{
 								backgroundImage: `
 									linear-gradient(125deg,
@@ -363,12 +363,12 @@ export function WorldItemCard({
 
 						{/* Sello de rareza */}
 						<div
-							className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 opacity-10 pointer-events-none"
+							className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/4 left-1/2 h-24 w-24 opacity-10"
 							style={{
 								background: `radial-gradient(circle, ${rarityColor}50 0%, transparent 70%)`,
 							}}
 						>
-							<div className="w-full h-full flex items-center justify-center">{icon}</div>
+							<div className="flex h-full w-full items-center justify-center">{icon}</div>
 						</div>
 
 						{/* Indicador visual de rareza */}
@@ -388,30 +388,30 @@ export function WorldItemCard({
 				{/* Contenido estructurado de la tarjeta */}
 
 				{/* Encabezado de la tarjeta */}
-				<CardHeader title={name} subtitle={type || 'Objeto'} icon={icon} primaryColor={primaryColor} />
+				<CardHeader icon={icon} primaryColor={primaryColor} subtitle={type || 'Objeto'} title={name} />
 
 				{/* Sección de imágenes */}
-				<WorldItemCardImages worldItemId={id} primaryColor={primaryColor} secondaryColor={secondaryColor} />
+				<WorldItemCardImages primaryColor={primaryColor} secondaryColor={secondaryColor} worldItemId={id} />
 
 				{/* Contenido principal */}
 				<WorldItemCardContent
-					description={description}
-					properties={parsedProperties}
-					requirements={parsedRequirements}
 					attributes={parsedAttributes}
+					description={description}
 					effects={parsedEffects}
-					stats={parsedStats}
 					origin={origin}
-					rarity={rarity}
 					primaryColor={rarityColor}
+					properties={parsedProperties}
+					rarity={rarity}
+					requirements={parsedRequirements}
+					stats={parsedStats}
 				/>
 				<WorldItemCardFooter
-					worldItem={worldItem}
 					_totalRelations={_totalRelations}
+					compact={compact}
+					intensityFactor={intensityFactor}
 					primaryColor={rarityColor}
 					secondaryColor={secondaryColor || '#000000'}
-					intensityFactor={intensityFactor}
-					compact={compact}
+					worldItem={worldItem}
 				/>
 			</div>
 		</motion.article>

@@ -117,10 +117,10 @@ export function ShortcutsSettings() {
 
 	return (
 		<ScrollArea className="h-[calc(100vh-8rem)] w-full">
-			<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm border-none">
-				<CardHeader className="p-2 pb-0 bg-transparent">
-					<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
-						<span className="flex items-center gap-2 h-7">
+			<Card className="flex flex-col gap-2 rounded-sm border-none bg-muted/30">
+				<CardHeader className="bg-transparent p-2 pb-0">
+					<CardTitle className="flex items-center justify-between pl-1 font-semibold text-base text-muted-foreground">
+						<span className="flex h-7 items-center gap-2">
 							<Keyboard className="h-5 w-5" /> Atajos de Teclado
 						</span>
 					</CardTitle>
@@ -130,57 +130,57 @@ export function ShortcutsSettings() {
 					<div className="space-y-3">
 						{shortcutCategories.map((category, categoryIndex) => (
 							<motion.div
-								key={category.name}
 								animate={{
 									opacity: [0, 1],
 									y: [20, 0],
 								}}
+								key={category.name}
 								transition={{ delay: categoryIndex * 0.1 }}
 							>
 								<Card className="overflow-hidden bg-muted/30">
 									<CardHeader className="p-4 pb-3">
 										<div className="flex items-center gap-2">
 											<category.icon className="h-4 w-4" />
-											<CardTitle className="text-sm font-medium">{category.name}</CardTitle>
+											<CardTitle className="font-medium text-sm">{category.name}</CardTitle>
 										</div>
 									</CardHeader>
 									<CardContent className="p-2">
 										{category.shortcuts.map((shortcut, index) => (
 											<motion.div
-												key={shortcut.action}
 												animate={{
 													opacity: [0, 1],
 													x: [-20, 0],
 												}}
+												className="group flex items-center justify-between rounded-lg p-2 hover:bg-accent"
+												key={shortcut.action}
 												transition={{ delay: categoryIndex * 0.1 + index * 0.05 }}
-												className="flex items-center justify-between p-2 rounded-lg hover:bg-accent group"
 											>
 												<div className="flex items-center gap-2">
-													<div className="p-1 rounded-md bg-muted">
+													<div className="rounded-md bg-muted p-1">
 														<shortcut.Icon className="h-3.5 w-3.5 text-muted-foreground" />
 													</div>
-													<span className="text-xs font-medium">{shortcut.action}</span>
+													<span className="font-medium text-xs">{shortcut.action}</span>
 												</div>
 												<div className="flex items-center gap-1">
 													{editingShortcut === shortcut.action ? (
 														<Input
-															className="w-24 h-7 text-center text-xs"
+															autoFocus
+															className="h-7 w-24 text-center text-xs"
+															onKeyDown={(e) => handleKeyDown(e, shortcut.action)}
 															placeholder="Presiona teclas..."
 															value=""
-															onKeyDown={(e) => handleKeyDown(e, shortcut.action)}
-															autoFocus
 														/>
 													) : (
-														<Badge variant="outline" className="px-1.5 py-0.5 text-[10px] font-mono">
+														<Badge className="px-1.5 py-0.5 font-mono text-[10px]" variant="outline">
 															{customShortcuts[shortcut.action] || shortcut.keys}
 														</Badge>
 													)}
 													<motion.div initial={{ opacity: 0, x: 20 }} whileHover={{ opacity: 1, x: 0 }}>
 														<Button
-															variant="ghost"
-															size="icon"
-															className="h-6 w-6 opacity-0 group-hover:opacity-100 transition-opacity"
+															className="h-6 w-6 opacity-0 transition-opacity group-hover:opacity-100"
 															onClick={() => handleStartEditing(shortcut.action)}
+															size="icon"
+															variant="ghost"
 														>
 															<Keyboard className="h-3 w-3" />
 														</Button>

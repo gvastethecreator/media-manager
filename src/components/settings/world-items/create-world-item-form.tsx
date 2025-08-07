@@ -177,7 +177,7 @@ export function CreateWorldItemForm({
 						groups: [],
 					},
 
-					isFavorite: data.isFavorite || false,
+					isFavorite: data.isFavorite,
 					totalImages: 0,
 					totalVideos: 0,
 					type: data.type ?? null,
@@ -232,7 +232,7 @@ export function CreateWorldItemForm({
 				category: worldItem.category || 'none',
 				rarity: worldItem.rarity || 'none',
 				origin: worldItem.origin || '',
-				isFavorite: worldItem.isFavorite || false,
+				isFavorite: worldItem.isFavorite,
 			});
 		}
 	}, [worldItem, isEditing, form]);
@@ -263,7 +263,7 @@ export function CreateWorldItemForm({
 					color: data.color || null,
 					category: data.category || null,
 
-					isFavorite: data.isFavorite || false,
+					isFavorite: data.isFavorite,
 					totalImages: 0,
 					totalVideos: 0,
 					type: data.type || null,
@@ -312,23 +312,23 @@ export function CreateWorldItemForm({
 		{
 			name: 'emoji',
 			label: 'Emoji',
-			render: ({ value, onChange }: any) => <EmojiPicker value={value} onEmojiSelect={onChange} />,
+			render: ({ value, onChange }: any) => <EmojiPicker onEmojiSelect={onChange} value={value} />,
 		},
 		{
 			name: 'color',
 			label: 'Color',
-			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} />,
+			render: ({ value, onChange }: any) => <ColorPicker onChange={onChange} value={value} />,
 		},
 		{
 			name: 'description',
 			label: 'Descripción',
 			render: ({ value, onChange }: any) => (
 				<textarea
-					placeholder="Descripción del objeto..."
-					value={value || ''}
+					className="w-full resize-none rounded border p-2 text-xs"
 					onChange={(e) => onChange(e.target.value)}
+					placeholder="Descripción del objeto..."
 					rows={3}
-					className="text-xs resize-none w-full border rounded p-2"
+					value={value || ''}
 				/>
 			),
 		},
@@ -394,11 +394,11 @@ export function CreateWorldItemForm({
 			label: 'Origen',
 			render: ({ value, onChange }: any) => (
 				<input
+					className="w-full rounded border p-2 text-xs"
+					onChange={(e) => onChange(e.target.value)}
+					placeholder="Origen del objeto"
 					type="text"
 					value={value || ''}
-					onChange={(e) => onChange(e.target.value)}
-					className="w-full border rounded p-2 text-xs"
-					placeholder="Origen del objeto"
 				/>
 			),
 		},
@@ -411,7 +411,6 @@ export function CreateWorldItemForm({
 
 	return (
 		<DynamicCreateForm<WorldItemFormInput>
-			optionalFields={optionalFields as any}
 			onSubmit={async (data) => {
 				try {
 					if (isEditing && worldItem) {
@@ -451,6 +450,7 @@ export function CreateWorldItemForm({
 					console.error('Error al procesar el world item:', error);
 				}
 			}}
+			optionalFields={optionalFields as any}
 			submitLabel={isEditing ? 'Guardar cambios' : 'Crear objeto'}
 		/>
 	);

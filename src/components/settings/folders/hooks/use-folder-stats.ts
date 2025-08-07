@@ -55,9 +55,9 @@ export function useFolderStats() {
 
 			return response.data;
 		},
-		refetchInterval: 30000, // Actualizar cada 30 segundos
-		staleTime: 10000, // Considerar datos obsoletos después de 10 segundos
+		refetchInterval: 30_000, // Actualizar cada 30 segundos
+		staleTime: 10_000, // Considerar datos obsoletos después de 10 segundos
 		retry: 3,
-		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30000),
+		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30_000),
 	});
 }

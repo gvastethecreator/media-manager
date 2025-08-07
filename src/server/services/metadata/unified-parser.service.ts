@@ -5,17 +5,17 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    AIEngine,
-    type BaseMetadata,
-    type MetadataExtractionOptions,
-    type MetadataExtractionResult,
-    type TechnicalMetadata,
+	AIEngine,
+	type BaseMetadata,
+	type MetadataExtractionOptions,
+	type MetadataExtractionResult,
+	type TechnicalMetadata,
 } from '@/types/metadata-origin.types';
 
 // Servicios especializados
 import { extractMetadata as extractExifMetadata } from './exifr-parser.service';
-import { extractPngMetadata } from './png-parser.service';
 import { detectOrigin, hasAIGenerationData } from './origin-detector.service';
+import { extractPngMetadata } from './png-parser.service';
 import {
 	extractCommonAIParameters,
 	parseAutomatic1111Metadata,
@@ -35,7 +35,7 @@ const DEFAULT_OPTIONS: MetadataExtractionOptions = {
 	extract_c2pa: false, // Por ahora deshabilitado hasta implementar C2PA
 	extract_ai_metadata: true,
 	extract_video_metadata: false, // Se habilitará cuando sea video
-	timeout: 30000, // 30 segundos
+	timeout: 30_000, // 30 segundos
 	max_file_size: 100 * 1024 * 1024, // 100MB
 	debug: false,
 	include_raw_data: false,
@@ -78,7 +78,7 @@ export async function extractAllMetadata(
 				hasResult: !!technicalMetadata,
 				hasExif: !!technicalMetadata?.exif,
 				hasIptc: !!technicalMetadata?.iptc,
-				hasXmp: !!technicalMetadata?.xmp
+				hasXmp: !!technicalMetadata?.xmp,
 			});
 
 			if (technicalMetadata) {
@@ -89,7 +89,7 @@ export async function extractAllMetadata(
 				logger.info('🔧 UNIFIED PARSER: Asignando metadatos al resultado', {
 					resultHasExif: !!result.exif,
 					resultHasIptc: !!result.iptc,
-					resultHasXmp: !!result.xmp
+					resultHasXmp: !!result.xmp,
 				});
 
 				if (opts.include_raw_data) {
@@ -169,7 +169,7 @@ async function extractBaseMetadata(buffer: Buffer, filename: string): Promise<Ba
 			size: buffer.length,
 			format: getFileFormat(filename),
 			mimeType: getMimeType(filename),
-			filename: filename,
+			filename,
 		},
 	};
 
@@ -185,7 +185,7 @@ async function extractBaseMetadata(buffer: Buffer, filename: string): Promise<Ba
 				height: metadata.height || 0,
 				megapixels:
 					metadata.width && metadata.height
-						? Number.parseFloat(((metadata.width * metadata.height) / 1000000).toFixed(2))
+						? Number.parseFloat(((metadata.width * metadata.height) / 1_000_000).toFixed(2))
 						: undefined,
 				aspectRatio:
 					metadata.width && metadata.height ? calculateAspectRatio(metadata.width, metadata.height) : undefined,
@@ -223,10 +223,10 @@ async function extractTechnicalMetadata(
 		logger.info('🔧 UNIFIED PARSER: extractTechnicalMetadata iniciado', {
 			extract_exif: options.extract_exif,
 			extract_iptc: options.extract_iptc,
-			extract_xmp: options.extract_xmp
+			extract_xmp: options.extract_xmp,
 		});
 
-		if (!options.extract_exif && !options.extract_iptc && !options.extract_xmp) {
+		if (!(options.extract_exif || options.extract_iptc || options.extract_xmp)) {
 			logger.info('🔧 UNIFIED PARSER: No extraction options enabled - retornando null');
 			return null;
 		}
@@ -239,7 +239,7 @@ async function extractTechnicalMetadata(
 			resultType: typeof result,
 			hasExif: result?.exif ? 'yes' : 'no',
 			hasIptc: result?.iptc ? 'yes' : 'no',
-			hasXmp: result?.xmp ? 'yes' : 'no'
+			hasXmp: result?.xmp ? 'yes' : 'no',
 		});
 
 		// Extraer PNG text chunks si es un archivo PNG
@@ -249,7 +249,7 @@ async function extractTechnicalMetadata(
 				const pngMetadata = await extractPngMetadata(buffer);
 				logger.info('🔧 UNIFIED PARSER: PNG text chunks extraídos', {
 					hasMetadata: !!pngMetadata,
-					chunksCount: pngMetadata ? Object.keys(pngMetadata).length : 0
+					chunksCount: pngMetadata ? Object.keys(pngMetadata).length : 0,
 				});
 
 				// Combinar metadatos PNG con los existentes
@@ -263,7 +263,7 @@ async function extractTechnicalMetadata(
 						exif: pngMetadata,
 						iptc: null,
 						xmp: null,
-						rawTags: {}
+						rawTags: {},
 					};
 				}
 			} catch (pngError) {
@@ -435,12 +435,12 @@ function isPNGFile(buffer: Buffer): boolean {
 	return (
 		buffer[0] === 0x89 &&
 		buffer[1] === 0x50 &&
-		buffer[2] === 0x4E &&
+		buffer[2] === 0x4e &&
 		buffer[3] === 0x47 &&
-		buffer[4] === 0x0D &&
-		buffer[5] === 0x0A &&
-		buffer[6] === 0x1A &&
-		buffer[7] === 0x0A
+		buffer[4] === 0x0d &&
+		buffer[5] === 0x0a &&
+		buffer[6] === 0x1a &&
+		buffer[7] === 0x0a
 	);
 }
 

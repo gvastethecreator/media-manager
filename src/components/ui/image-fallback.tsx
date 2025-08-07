@@ -55,12 +55,12 @@ export function ImageFallback({
 	if (hasError) {
 		return (
 			<div
-				className={cn('flex items-center justify-center bg-muted/50 rounded-md', className, fallbackClassName)}
-				style={containerStyle}
-				role="img"
 				aria-label={alt}
+				className={cn('flex items-center justify-center rounded-md bg-muted/50', className, fallbackClassName)}
+				role="img"
+				style={containerStyle}
 			>
-				<ImageIcon className="w-8 h-8 text-muted-foreground/40" aria-hidden="true" />
+				<ImageIcon aria-hidden="true" className="h-8 w-8 text-muted-foreground/40" />
 			</div>
 		);
 	}
@@ -69,21 +69,21 @@ export function ImageFallback({
 	return (
 		<div className={cn('relative', className)} style={containerStyle}>
 			<img
-				ref={imgRef}
-				src={src}
 				alt={alt}
-				className="w-full h-full object-cover transition-opacity duration-300"
-				style={{ opacity: isLoaded ? 1 : 0 }}
+				className="h-full w-full object-cover transition-opacity duration-300"
 				onError={handleError}
 				onLoad={handleLoad}
+				ref={imgRef}
+				src={src}
+				style={{ opacity: isLoaded ? 1 : 0 }}
 			/>
 
 			{!isLoaded && (
 				<div
-					className={cn('absolute inset-0 flex items-center justify-center bg-muted/50', fallbackClassName)}
 					aria-hidden="true"
+					className={cn('absolute inset-0 flex items-center justify-center bg-muted/50', fallbackClassName)}
 				>
-					<ImageIcon className="w-8 h-8 text-muted-foreground/40" aria-hidden="true" />
+					<ImageIcon aria-hidden="true" className="h-8 w-8 text-muted-foreground/40" />
 				</div>
 			)}
 		</div>

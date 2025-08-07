@@ -4,9 +4,9 @@ import { JSDOM } from 'jsdom';
 
 // Configurar JSDOM para Bun test
 const dom = new JSDOM('<!DOCTYPE html><html><body></body></html>', {
-  url: 'http://localhost',
-  pretendToBeVisual: true,
-  resources: 'usable'
+	url: 'http://localhost',
+	pretendToBeVisual: true,
+	resources: 'usable',
 });
 
 global.window = dom.window as any;

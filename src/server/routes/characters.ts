@@ -53,8 +53,8 @@ const getCharactersHandler: ExpressHandler = async (req, res) => {
 			db.query.characters.findMany({
 				where: and(...whereConditions),
 				orderBy: orderByClause,
-				limit: limit,
-				offset: offset,
+				limit,
+				offset,
 			}),
 			db
 				.select({ count: count() })

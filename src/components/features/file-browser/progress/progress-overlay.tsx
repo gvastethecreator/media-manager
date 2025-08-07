@@ -148,24 +148,24 @@ export function ProgressOverlay({ className }: ProgressOverlayProps) {
 	return (
 		<AnimatePresence>
 			<motion.div
-				initial={{ opacity: 0, y: 100 }}
 				animate={{ opacity: 1, y: 0 }}
-				exit={{ opacity: 0, y: 100 }}
-				transition={{ type: 'spring', stiffness: 300, damping: 30 }}
 				className={cn(
-					'fixed bottom-4 right-4 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 min-w-80 max-w-md',
+					'fixed right-4 bottom-4 z-50 min-w-80 max-w-md rounded-lg border border-gray-200 bg-white shadow-lg dark:border-gray-700 dark:bg-gray-800',
 					className
 				)}
+				exit={{ opacity: 0, y: 100 }}
+				initial={{ opacity: 0, y: 100 }}
+				transition={{ type: 'spring', stiffness: 300, damping: 30 }}
 			>
 				{/* Header */}
-				<div className="flex items-center justify-between p-3 border-b border-gray-200 dark:border-gray-700">
+				<div className="flex items-center justify-between border-gray-200 border-b p-3 dark:border-gray-700">
 					<div className="flex items-center gap-2">
-						<div className="text-sm font-medium text-gray-900 dark:text-gray-100">
+						<div className="font-medium text-gray-900 text-sm dark:text-gray-100">
 							Operaciones en progreso ({operations.length})
 						</div>
 					</div>
 					<div className="flex items-center gap-1">
-						<Button variant="ghost" size="sm" onClick={() => setIsExpanded(!isExpanded)} className="h-6 w-6 p-0">
+						<Button className="h-6 w-6 p-0" onClick={() => setIsExpanded(!isExpanded)} size="sm" variant="ghost">
 							{isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
 						</Button>
 					</div>
@@ -175,11 +175,11 @@ export function ProgressOverlay({ className }: ProgressOverlayProps) {
 				<AnimatePresence>
 					{isExpanded && (
 						<motion.div
-							initial={{ height: 0, opacity: 0 }}
 							animate={{ height: 'auto', opacity: 1 }}
-							exit={{ height: 0, opacity: 0 }}
-							transition={{ duration: 0.2 }}
 							className="overflow-hidden"
+							exit={{ height: 0, opacity: 0 }}
+							initial={{ height: 0, opacity: 0 }}
+							transition={{ duration: 0.2 }}
 						>
 							<div className="max-h-80 overflow-y-auto">
 								{operations.map((operation) => {
@@ -188,24 +188,24 @@ export function ProgressOverlay({ className }: ProgressOverlayProps) {
 
 									return (
 										<div
+											className="border-gray-100 border-b p-3 last:border-b-0 dark:border-gray-700"
 											key={operation.id}
-											className="p-3 border-b border-gray-100 dark:border-gray-700 last:border-b-0"
 										>
 											{/* Operation Header */}
-											<div className="flex items-center justify-between mb-2">
+											<div className="mb-2 flex items-center justify-between">
 												<div className="flex items-center gap-2">
 													<Icon className={cn('h-4 w-4', colorClass)} />
-													<span className="text-sm font-medium text-gray-900 dark:text-gray-100">
+													<span className="font-medium text-gray-900 text-sm dark:text-gray-100">
 														{operation.type.charAt(0).toUpperCase() + operation.type.slice(1)}
 													</span>
 												</div>
 												<div className="flex items-center gap-1">
 													<Button
-														variant="ghost"
-														size="sm"
-														onClick={() => handleCancelOperation(operation.id)}
 														className="h-6 w-6 p-0 text-gray-500 hover:text-red-600"
+														onClick={() => handleCancelOperation(operation.id)}
+														size="sm"
 														title="Cancelar operación"
+														variant="ghost"
 													>
 														<X className="h-3 w-3" />
 													</Button>
@@ -214,11 +214,11 @@ export function ProgressOverlay({ className }: ProgressOverlayProps) {
 
 											{/* Progress Bar */}
 											<div className="mb-2">
-												<Progress value={operation.progress.percentage} className="h-2" />
+												<Progress className="h-2" value={operation.progress.percentage} />
 											</div>
 
 											{/* Progress Details */}
-											<div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-400">
+											<div className="flex items-center justify-between text-gray-600 text-xs dark:text-gray-400">
 												<span>
 													{operation.items.processed} / {operation.items.total} elementos
 												</span>
@@ -227,13 +227,13 @@ export function ProgressOverlay({ className }: ProgressOverlayProps) {
 
 											{/* Current Step */}
 											{operation.currentStep && (
-												<div className="mt-1 text-xs text-gray-500 dark:text-gray-500 truncate">
+												<div className="mt-1 truncate text-gray-500 text-xs dark:text-gray-500">
 													{operation.currentStep}
 												</div>
 											)}
 
 											{/* Time and Speed */}
-											<div className="flex items-center justify-between mt-2 text-xs text-gray-500 dark:text-gray-500">
+											<div className="mt-2 flex items-center justify-between text-gray-500 text-xs dark:text-gray-500">
 												{operation.progress.eta && (
 													<span>{formatTimeRemaining(operation.progress.eta - Date.now())} restante</span>
 												)}
@@ -244,7 +244,7 @@ export function ProgressOverlay({ className }: ProgressOverlayProps) {
 											{operation.status !== 'running' && (
 												<div className="mt-2">
 													<span
-														className={cn('inline-flex items-center px-2 py-1 rounded-full text-xs font-medium', {
+														className={cn('inline-flex items-center rounded-full px-2 py-1 font-medium text-xs', {
 															'bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200':
 																operation.status === 'pending',
 															'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200':
@@ -268,7 +268,7 @@ export function ProgressOverlay({ className }: ProgressOverlayProps) {
 
 											{/* Error Message */}
 											{operation.error && (
-												<div className="mt-2 text-xs text-red-600 dark:text-red-400">{operation.error}</div>
+												<div className="mt-2 text-red-600 text-xs dark:text-red-400">{operation.error}</div>
 											)}
 										</div>
 									);

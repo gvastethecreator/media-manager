@@ -44,16 +44,16 @@ export function ProfileList({ className }: ProfileListProps) {
 
 	return (
 		<div className={className}>
-			<motion.div layout className={`grid ${gridCols} gap-4`}>
+			<motion.div className={`grid ${gridCols} gap-4`} layout>
 				<AnimatePresence>
 					{profiles.map((profile) => (
 						<ProfileCard
-							key={profile.id}
-							profile={profile}
-							isSelected={profile.id === selectedProfileId}
 							isExpanded={expandedProfileIds.includes(profile.id)}
-							onSelect={handleSelect}
+							isSelected={profile.id === selectedProfileId}
+							key={profile.id}
 							onExpand={handleExpand}
+							onSelect={handleSelect}
+							profile={profile}
 						/>
 					))}
 				</AnimatePresence>
@@ -61,8 +61,8 @@ export function ProfileList({ className }: ProfileListProps) {
 
 			{profiles.length === 0 && (
 				<div className="flex flex-col items-center justify-center py-12">
-					<p className="text-lg font-medium text-muted-foreground">No hay perfiles para mostrar</p>
-					<p className="text-sm text-muted-foreground mt-2">Crea un nuevo perfil para empezar</p>
+					<p className="font-medium text-lg text-muted-foreground">No hay perfiles para mostrar</p>
+					<p className="mt-2 text-muted-foreground text-sm">Crea un nuevo perfil para empezar</p>
 				</div>
 			)}
 		</div>

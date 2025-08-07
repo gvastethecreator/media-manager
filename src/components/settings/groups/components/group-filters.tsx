@@ -48,19 +48,19 @@ export function GroupFilters({ filtersString }: GroupFiltersProps) {
 
 	return (
 		<div className="space-y-2">
-			<h3 className="text-sm font-medium">Filtros</h3>
+			<h3 className="font-medium text-sm">Filtros</h3>
 			<div className="grid grid-cols-2 gap-2">
 				{filters.map((filter) => (
 					<div
-						key={`${filter.type}-${filter.operator}-${filter.value}`}
 						className={cn(
-							'flex items-center justify-between p-2 rounded-md',
-							'bg-muted/50 hover:bg-muted/70 transition-colors'
+							'flex items-center justify-between rounded-md p-2',
+							'bg-muted/50 transition-colors hover:bg-muted/70'
 						)}
+						key={`${filter.type}-${filter.operator}-${filter.value}`}
 					>
 						<span className="text-sm capitalize">{filter.type}</span>
-						<span className="text-xs text-muted-foreground">{filter.operator}</span>
-						<span className="text-sm font-medium">{filter.value.toString()}</span>
+						<span className="text-muted-foreground text-xs">{filter.operator}</span>
+						<span className="font-medium text-sm">{filter.value.toString()}</span>
 					</div>
 				))}
 			</div>

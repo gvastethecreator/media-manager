@@ -58,55 +58,55 @@ export function ColorPicker({ value, onChange, className, compact = false, showL
 	const isSelected = (color: string) => color.toLowerCase() === currentColor.toLowerCase();
 
 	return (
-		<Popover open={open} onOpenChange={setOpen}>
+		<Popover onOpenChange={setOpen} open={open}>
 			<PopoverTrigger asChild>
 				<Button
-					variant="outline"
 					aria-expanded={open}
 					className={cn(
 						compact ? 'h-8' : 'h-9',
-						showLabel || !compact ? 'w-full justify-between' : 'w-8 p-0 justify-center',
+						showLabel || !compact ? 'w-full justify-between' : 'w-8 justify-center p-0',
 						className
 					)}
+					variant="outline"
 				>
 					<div className={cn('flex items-center gap-2', !showLabel && compact && 'flex-1 justify-center')}>
 						<div
 							className={cn('rounded-full border', compact ? 'h-4 w-4' : 'h-5 w-5')}
 							style={{ backgroundColor: currentColor }}
 						/>
-						{(showLabel || !compact) && <span className={compact ? 'text-xs truncate' : ''}>{currentColor}</span>}
+						{(showLabel || !compact) && <span className={compact ? 'truncate text-xs' : ''}>{currentColor}</span>}
 					</div>
 					{(showLabel || !compact) && (
 						<Palette className={cn('ml-auto shrink-0 opacity-50', compact ? 'h-3 w-3' : 'h-4 w-4')} />
 					)}
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className={cn('p-3', compact ? 'w-56' : 'w-64')} align="start" sideOffset={8}>
+			<PopoverContent align="start" className={cn('p-3', compact ? 'w-56' : 'w-64')} sideOffset={8}>
 				<div className="space-y-3">
 					<div className="space-y-1">
-						<Label htmlFor="custom-color" className={compact ? 'text-xs' : ''}>
+						<Label className={compact ? 'text-xs' : ''} htmlFor="custom-color">
 							Color personalizado
 						</Label>
 						<div className="flex gap-2">
 							<Input
+								className={cn('cursor-pointer p-0', compact ? 'h-7 w-7' : 'h-8 w-8')}
 								id="custom-color"
+								onChange={handleColorChange}
 								type="color"
 								value={currentColor}
-								onChange={handleColorChange}
-								className={cn('p-0 cursor-pointer', compact ? 'h-7 w-7' : 'h-8 w-8')}
 							/>
 							<Input
-								type="text"
-								value={currentColor}
-								onChange={(e) => setCurrentColor(e.target.value)}
 								className={cn('flex-1', compact ? 'h-7 text-xs' : 'h-8')}
 								maxLength={9}
+								onChange={(e) => setCurrentColor(e.target.value)}
+								type="text"
+								value={currentColor}
 							/>
 							<Button
-								variant="outline"
-								size="sm"
 								className={cn('p-0', compact ? 'h-7 w-7' : 'h-8 w-8')}
 								onClick={() => applyColor(currentColor)}
+								size="sm"
+								variant="outline"
 							>
 								<Check className={compact ? 'h-3 w-3' : 'h-4 w-4'} />
 								<span className="sr-only">Aplicar color</span>
@@ -119,15 +119,15 @@ export function ColorPicker({ value, onChange, className, compact = false, showL
 						<div className={cn('grid gap-2', compact ? 'grid-cols-6' : 'grid-cols-5')}>
 							{PRESET_COLORS.slice(0, compact ? 12 : 20).map((color) => (
 								<button
-									key={color}
+									aria-label={`Seleccionar color ${color}`}
 									className={cn(
-										'w-6 h-6 rounded-md border border-muted flex items-center justify-center',
+										'flex h-6 w-6 items-center justify-center rounded-md border border-muted',
 										isSelected(color) && 'ring-1 ring-ring'
 									)}
-									style={{ backgroundColor: color }}
+									key={color}
 									onClick={() => applyColor(color)}
+									style={{ backgroundColor: color }}
 									type="button"
-									aria-label={`Seleccionar color ${color}`}
 								>
 									{isSelected(color) && (
 										<Check

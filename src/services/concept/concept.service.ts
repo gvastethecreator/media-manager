@@ -51,7 +51,7 @@ export const ConceptService = {
 					color: data.color || '#3b82f6',
 					category: data.category || null,
 
-					isFavorite: data.isFavorite || false,
+					isFavorite: data.isFavorite,
 					totalImages: data.totalImages || 0,
 					totalVideos: data.totalVideos || 0,
 					type: data.type || null,

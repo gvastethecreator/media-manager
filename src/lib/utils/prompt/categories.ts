@@ -159,7 +159,7 @@ export function getCategoryMetadata(categoryId: PromptCategory | string): Prompt
 		return PROMPT_CATEGORIES[categoryId as PromptCategory];
 	} catch (error) {
 		categoriesLogger.error('❌ Error al obtener metadatos de categoría:', error);
-		return undefined;
+		return;
 	}
 }
 

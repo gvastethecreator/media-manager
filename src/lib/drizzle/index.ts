@@ -240,6 +240,19 @@ if (typeof window === 'undefined') {
 				}),
 			}
 		),
+		// Agregar las tablas del schema como proxies para evitar errores
+		...Object.keys(fullSchema).reduce((acc, tableName) => {
+			acc[tableName] = new Proxy(
+				{},
+				{
+					get: () => ({
+						id: 'mock-column',
+						// Otros campos se pueden agregar aquí si es necesario
+					}),
+				}
+			);
+			return acc;
+		}, {} as any),
 		transaction: (fn: any) => Promise.resolve(fn({})),
 	} as any; // Mock object para el cliente
 }

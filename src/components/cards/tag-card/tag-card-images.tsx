@@ -49,9 +49,9 @@ export function TagCardImages({
 
 	// Elemento placeholder para cuando no hay imágenes
 	const renderPlaceholder = () => (
-		<div className="flex flex-col items-center justify-center h-full">
-			<ImageIcon className="text-muted-foreground mb-2" style={{ color: `${primaryColor}70` }} />
-			<p className="text-xs text-muted-foreground text-center" style={{ color: `${primaryColor}90` }}>
+		<div className="flex h-full flex-col items-center justify-center">
+			<ImageIcon className="mb-2 text-muted-foreground" style={{ color: `${primaryColor}70` }} />
+			<p className="text-center text-muted-foreground text-xs" style={{ color: `${primaryColor}90` }}>
 				{error?.message || 'No hay imágenes con esta etiqueta'}
 			</p>
 		</div>
@@ -61,14 +61,14 @@ export function TagCardImages({
 	if (loading) {
 		return (
 			<div
-				className={cn('flex-shrink-0 flex items-center justify-center bg-black/5', compact ? 'h-[120px]' : 'h-[140px]')}
+				className={cn('flex flex-shrink-0 items-center justify-center bg-black/5', compact ? 'h-[120px]' : 'h-[140px]')}
 				style={{
 					borderBottom: `1px solid ${primaryColor}20`,
 					background: tcgMode ? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)` : `${primaryColor}05`,
 				}}
 			>
 				<div
-					className="w-6 h-6 rounded-full border-2 border-t-transparent animate-spin"
+					className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
 					style={{ borderColor: `${primaryColor}80 transparent ${primaryColor}30 ${primaryColor}30` }}
 				/>
 			</div>
@@ -93,14 +93,14 @@ export function TagCardImages({
 	// Renderizar mosaico de imágenes - diseño especial para etiquetas
 	return (
 		<div
-			className={cn('flex-shrink-0 overflow-hidden relative', compact ? 'h-[120px]' : 'h-[140px]')}
+			className={cn('relative flex-shrink-0 overflow-hidden', compact ? 'h-[120px]' : 'h-[140px]')}
 			style={{
 				borderBottom: `1px solid ${primaryColor}20`,
 			}}
 		>
 			{/* Fondo estilizado */}
 			<div
-				className="absolute inset-0 -z-10"
+				className="-z-10 absolute inset-0"
 				style={{
 					background: tcgMode ? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)` : `${primaryColor}05`,
 				}}
@@ -108,24 +108,24 @@ export function TagCardImages({
 
 			{/* Esquinas TCG decorativas para imágenes */}
 			{tcgMode && (
-				<div className="absolute inset-0 pointer-events-none z-10">
-					<div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-white/20" />
-					<div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-white/20" />
-					<div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-white/20" />
-					<div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-white/20" />
+				<div className="pointer-events-none absolute inset-0 z-10">
+					<div className="absolute top-0 left-0 h-4 w-4 border-white/20 border-t border-l" />
+					<div className="absolute top-0 right-0 h-4 w-4 border-white/20 border-t border-r" />
+					<div className="absolute bottom-0 left-0 h-4 w-4 border-white/20 border-b border-l" />
+					<div className="absolute right-0 bottom-0 h-4 w-4 border-white/20 border-r border-b" />
 				</div>
 			)}
 
 			{/* Grid de imágenes con efecto de mosaico etiquetado */}
-			<div className="grid grid-cols-3 grid-rows-2 gap-px h-full">
+			<div className="grid h-full grid-cols-3 grid-rows-2 gap-px">
 				{images.slice(0, 6).map((image, index) => (
-					<div key={image.id} className="relative overflow-hidden bg-black/20">
+					<div className="relative overflow-hidden bg-black/20" key={image.id}>
 						{/* Imagen */}
 						<img
-							src={image.thumbnailUrl}
 							alt={image.name || 'Imagen etiquetada'}
-							className="w-full h-full object-cover"
+							className="h-full w-full object-cover"
 							loading="lazy"
+							src={image.thumbnailUrl}
 							style={{
 								opacity: tcgMode ? 0.9 : 1,
 								// Efectos específicos de etiqueta: borde sutil y tratamiento de imágen
@@ -136,7 +136,7 @@ export function TagCardImages({
 						{/* Corner tag emblem en cada imagen */}
 						{tcgMode && (
 							<div
-								className="absolute top-0 left-0 w-[20px] h-[20px] opacity-70"
+								className="absolute top-0 left-0 h-[20px] w-[20px] opacity-70"
 								style={{
 									background: primaryColor,
 									clipPath: 'polygon(0 0, 100% 0, 0 100%)',
@@ -146,7 +146,7 @@ export function TagCardImages({
 
 						{/* Overlay sutil con efecto de brillo basado en rareza */}
 						<div
-							className="absolute inset-0 pointer-events-none"
+							className="pointer-events-none absolute inset-0"
 							style={{
 								boxShadow: `inset 0 0 0 1px ${primaryColor}30`,
 								background: tcgMode ? `linear-gradient(135deg, ${primaryColor}20, transparent)` : 'none',
@@ -157,7 +157,7 @@ export function TagCardImages({
 						{/* Destacar la primera imagen si es la destacada */}
 						{index === 0 && featuredImage && featuredImage.id === image.id && tcgMode && (
 							<div
-								className="absolute bottom-0 right-0 w-[15px] h-[15px]"
+								className="absolute right-0 bottom-0 h-[15px] w-[15px]"
 								style={{
 									background: primaryColor,
 									clipPath: 'polygon(100% 0, 100% 100%, 0 100%)',
@@ -171,7 +171,7 @@ export function TagCardImages({
 			{/* Indicador de total */}
 			{tcgMode && images.length > 6 && (
 				<div
-					className="absolute bottom-1 right-1 text-xs px-1.5 py-0.5 rounded-sm backdrop-blur-sm z-10"
+					className="absolute right-1 bottom-1 z-10 rounded-sm px-1.5 py-0.5 text-xs backdrop-blur-sm"
 					style={{
 						background: `${primaryColor}80`,
 						color: 'white',

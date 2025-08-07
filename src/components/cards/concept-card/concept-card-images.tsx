@@ -46,26 +46,26 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 	}, [conceptId]);
 
 	return (
-		<div className={cn('relative h-[160px] overflow-hidden', tcgMode ? 'border-b-0' : 'border-b border-gray-400/30')}>
+		<div className={cn('relative h-[160px] overflow-hidden', tcgMode ? 'border-b-0' : 'border-gray-400/30 border-b')}>
 			{/* Marco decorativo para TCG */}
 			{tcgMode && (
 				<>
 					{/* Borde superior con gradiente */}
 					<div
-						className="absolute top-0 inset-x-0 h-[4px] z-10"
+						className="absolute inset-x-0 top-0 z-10 h-[4px]"
 						style={{ background: `linear-gradient(to right, transparent, ${primaryColor}, transparent)` }}
 					/>
 
 					{/* Bordes laterales con el color primario */}
-					<div className="absolute top-0 bottom-0 left-0 w-[2px] z-10" style={{ background: primaryColor }} />
-					<div className="absolute top-0 bottom-0 right-0 w-[2px] z-10" style={{ background: primaryColor }} />
+					<div className="absolute top-0 bottom-0 left-0 z-10 w-[2px]" style={{ background: primaryColor }} />
+					<div className="absolute top-0 right-0 bottom-0 z-10 w-[2px]" style={{ background: primaryColor }} />
 				</>
 			)}
 
 			{/* Contenedor de imágenes con grid */}
 			<div
 				className={cn(
-					'w-full h-full grid gap-0.5',
+					'grid h-full w-full gap-0.5',
 					images.length >= 4 ? 'grid-cols-3 grid-rows-2' : 'grid-cols-2 grid-rows-2'
 				)}
 				style={{
@@ -80,8 +80,8 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 						// Mostrar placeholders mientras carga
 						[...Array(6)].map((_, i) => (
 							<ImageLoading
-								key={`loading-${renderKey}-star-${i + 1}`}
 								backgroundColor={secondaryColor}
+								key={`loading-${renderKey}-star-${i + 1}`}
 								tcgMode={tcgMode}
 							/>
 						))
@@ -94,23 +94,23 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 						// Mostrar mensaje si no hay imágenes
 						<div
 							className={cn(
-								'col-span-full row-span-full flex flex-col items-center justify-center text-center p-4',
+								'col-span-full row-span-full flex flex-col items-center justify-center p-4 text-center',
 								tcgMode ? 'bg-black/30' : ''
 							)}
 						>
 							{tcgMode ? (
 								<div className="text-center">
-									<div className="flex items-center justify-center mb-1">
-										<Sparkles className="h-5 w-5 text-white/40 mr-1" />
+									<div className="mb-1 flex items-center justify-center">
+										<Sparkles className="mr-1 h-5 w-5 text-white/40" />
 										<ImageIcon className="h-6 w-6 text-white/60" />
-										<Sparkles className="h-5 w-5 text-white/40 ml-1" />
+										<Sparkles className="ml-1 h-5 w-5 text-white/40" />
 									</div>
-									<p className="text-sm text-white/80 font-semibold">Imaginación Conceptual</p>
-									<p className="text-xs text-white/50 italic">Sin visualizaciones</p>
+									<p className="font-semibold text-sm text-white/80">Imaginación Conceptual</p>
+									<p className="text-white/50 text-xs italic">Sin visualizaciones</p>
 								</div>
 							) : (
 								<>
-									<ImageIcon className="h-8 w-8 opacity-30 mb-2" />
+									<ImageIcon className="mb-2 h-8 w-8 opacity-30" />
 									<p className="text-sm opacity-70">No hay imágenes</p>
 								</>
 							)}
@@ -120,17 +120,17 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 						<>
 							{images.map((image, index) => (
 								<div
+									className={cn('relative h-full w-full overflow-hidden', tcgMode ? 'border border-white/10' : '')}
 									key={image.id}
-									className={cn('relative overflow-hidden w-full h-full', tcgMode ? 'border border-white/10' : '')}
 								>
 									<img
-										src={image.thumbnailUrl}
 										alt={`Imagen ${index + 1}`}
 										className={cn(
-											'w-full h-full object-cover',
-											tcgMode ? 'hover:scale-110 transition-transform duration-500' : ''
+											'h-full w-full object-cover',
+											tcgMode ? 'transition-transform duration-500 hover:scale-110' : ''
 										)}
 										loading="lazy"
+										src={image.thumbnailUrl}
 									/>
 									{tcgMode && (
 										<div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent opacity-60" />
@@ -141,13 +141,13 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 							{images.length < 6 &&
 								[...Array(6 - images.length)].map((_, i) => (
 									<div
-										key={`placeholder-${renderKey}-position-${i + 1}`}
 										className={cn(
-											'w-full h-full flex items-center justify-center',
-											tcgMode ? 'bg-black/40 border border-white/5' : 'bg-black/20'
+											'flex h-full w-full items-center justify-center',
+											tcgMode ? 'border border-white/5 bg-black/40' : 'bg-black/20'
 										)}
+										key={`placeholder-${renderKey}-position-${i + 1}`}
 									>
-										<ImageIcon className="w-5 h-5 opacity-20" />
+										<ImageIcon className="h-5 w-5 opacity-20" />
 									</div>
 								))}
 						</>
@@ -157,7 +157,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 
 			{/* Sello de agua TCG */}
 			{tcgMode && (
-				<div className="absolute bottom-2 right-2 opacity-20 text-white text-xs font-mono tracking-tight">
+				<div className="absolute right-2 bottom-2 font-mono text-white text-xs tracking-tight opacity-20">
 					◊ C-{conceptId.substring(0, 4)} ◊
 				</div>
 			)}
@@ -170,12 +170,12 @@ function ImageLoading({ backgroundColor, tcgMode = false }: { backgroundColor: s
 	return (
 		<div
 			className={cn(
-				'animate-pulse relative overflow-hidden w-full h-full flex items-center justify-center',
+				'relative flex h-full w-full animate-pulse items-center justify-center overflow-hidden',
 				tcgMode ? 'border border-white/5' : ''
 			)}
 			style={{ backgroundColor: tcgMode ? `${backgroundColor}60` : `${backgroundColor}30` }}
 		>
-			<ImageIcon className="w-5 h-5 opacity-20" />
+			<ImageIcon className="h-5 w-5 opacity-20" />
 		</div>
 	);
 }

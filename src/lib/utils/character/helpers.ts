@@ -49,7 +49,7 @@ export function createNewCharacter(overrides: Partial<CharacterBase> = {}): Char
 		description: overrides.description || null,
 		category: overrides.category || null,
 
-		isFavorite: overrides.isFavorite || false,
+		isFavorite: overrides.isFavorite,
 		totalImages: overrides.totalImages || 0,
 		totalVideos: overrides.totalVideos || 0,
 		age: overrides.age || null,
@@ -258,7 +258,7 @@ export function createCharacterRelationship(
 		id: `rel_${Date.now()}`,
 		targetId: targetCharacterId,
 		targetName: targetCharacterName,
-		type: type,
+		type,
 		strength: Math.max(0, Math.min(100, strength)),
 	};
 }

@@ -56,7 +56,7 @@ const LegacySelectionOverlay: React.FC<LegacySelectionOverlayProps> = ({ rect, c
 	return (
 		<div
 			className={cn(
-				'absolute pointer-events-none z-50',
+				'pointer-events-none absolute z-50',
 				'border-2 border-blue-500 border-dashed',
 				'bg-blue-500/10 backdrop-blur-sm',
 				'transition-all duration-75 ease-out',
@@ -72,14 +72,14 @@ const LegacySelectionOverlay: React.FC<LegacySelectionOverlayProps> = ({ rect, c
 			}}
 		>
 			{/* Corner indicators */}
-			<div className="absolute -top-1 -left-1 w-2 h-2 bg-blue-500 rounded-full" />
-			<div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
-			<div className="absolute -bottom-1 -left-1 w-2 h-2 bg-blue-500 rounded-full" />
-			<div className="absolute -bottom-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
+			<div className="-top-1 -left-1 absolute h-2 w-2 rounded-full bg-blue-500" />
+			<div className="-top-1 -right-1 absolute h-2 w-2 rounded-full bg-blue-500" />
+			<div className="-bottom-1 -left-1 absolute h-2 w-2 rounded-full bg-blue-500" />
+			<div className="-bottom-1 -right-1 absolute h-2 w-2 rounded-full bg-blue-500" />
 
 			{/* Selection info tooltip */}
 			{width > 100 && height > 50 && (
-				<div className="absolute top-2 left-2 px-2 py-1 bg-blue-600 text-white text-xs rounded shadow-lg">
+				<div className="absolute top-2 left-2 rounded bg-blue-600 px-2 py-1 text-white text-xs shadow-lg">
 					{Math.round(width)} × {Math.round(height)}
 				</div>
 			)}
@@ -107,7 +107,7 @@ const DragSelectionOverlay: React.FC<DragSelectionOverlayProps> = ({
 	}, [dragSelectionManager]);
 
 	// Don't render if not active or no selection rect
-	if (!state.isActive || !state.selectionRect) {
+	if (!(state.isActive && state.selectionRect)) {
 		return null;
 	}
 
@@ -117,11 +117,11 @@ const DragSelectionOverlay: React.FC<DragSelectionOverlayProps> = ({
 	return (
 		<div
 			className={cn(
-				'absolute pointer-events-none z-50',
+				'pointer-events-none absolute z-50',
 				'border-2 border-blue-500',
 				'bg-blue-500/10 backdrop-blur-sm',
 				'transition-all duration-75 ease-out',
-				animation && 'border-dashed animate-pulse',
+				animation && 'animate-pulse border-dashed',
 				!animation && 'border-solid',
 				theme === 'dark' && 'border-blue-400 bg-blue-400/10',
 				className
@@ -135,21 +135,21 @@ const DragSelectionOverlay: React.FC<DragSelectionOverlayProps> = ({
 			}}
 		>
 			{/* Corner indicators */}
-			<div className="absolute -top-1 -left-1 w-2 h-2 bg-blue-500 rounded-full" />
-			<div className="absolute -top-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
-			<div className="absolute -bottom-1 -left-1 w-2 h-2 bg-blue-500 rounded-full" />
-			<div className="absolute -bottom-1 -right-1 w-2 h-2 bg-blue-500 rounded-full" />
+			<div className="-top-1 -left-1 absolute h-2 w-2 rounded-full bg-blue-500" />
+			<div className="-top-1 -right-1 absolute h-2 w-2 rounded-full bg-blue-500" />
+			<div className="-bottom-1 -left-1 absolute h-2 w-2 rounded-full bg-blue-500" />
+			<div className="-bottom-1 -right-1 absolute h-2 w-2 rounded-full bg-blue-500" />
 
 			{/* Selection count */}
 			{showCount && selectedCount > 0 && rect.width > 80 && rect.height > 40 && (
-				<div className="absolute top-2 left-2 px-3 py-1.5 bg-blue-600 text-white text-sm font-medium rounded-full shadow-lg border-2 border-white">
+				<div className="absolute top-2 left-2 rounded-full border-2 border-white bg-blue-600 px-3 py-1.5 font-medium text-sm text-white shadow-lg">
 					{selectedCount} selected
 				</div>
 			)}
 
 			{/* Coordinates tooltip */}
 			{showCoordinates && rect.width > 120 && rect.height > 60 && (
-				<div className="absolute bottom-2 right-2 px-2 py-1 bg-gray-800/80 text-white text-xs font-mono rounded shadow-md backdrop-blur-sm">
+				<div className="absolute right-2 bottom-2 rounded bg-gray-800/80 px-2 py-1 font-mono text-white text-xs shadow-md backdrop-blur-sm">
 					{Math.round(rect.width)} × {Math.round(rect.height)}
 				</div>
 			)}
@@ -194,7 +194,7 @@ export const EnhancedSelectionOverlay: React.FC<EnhancedSelectionOverlayProps> =
 	return (
 		<div
 			className={cn(
-				'absolute pointer-events-none z-50',
+				'pointer-events-none absolute z-50',
 				'transition-all duration-100 ease-out',
 				isActive ? 'opacity-100' : 'opacity-0',
 				className
@@ -213,7 +213,7 @@ export const EnhancedSelectionOverlay: React.FC<EnhancedSelectionOverlayProps> =
 					'border-2 border-blue-500',
 					'bg-blue-500/10 backdrop-blur-sm',
 					'rounded-sm',
-					isActive ? 'border-dashed animate-pulse' : 'border-solid'
+					isActive ? 'animate-pulse border-dashed' : 'border-solid'
 				)}
 			/>
 
@@ -221,10 +221,10 @@ export const EnhancedSelectionOverlay: React.FC<EnhancedSelectionOverlayProps> =
 			<div className={cn('absolute inset-0', 'border-2 border-blue-400/50', 'rounded-sm', 'animate-ping')} />
 
 			{/* Corner handles */}
-			<div className="absolute -top-1 -left-1 w-3 h-3 bg-blue-500 border-2 border-white rounded-full shadow-md" />
-			<div className="absolute -top-1 -right-1 w-3 h-3 bg-blue-500 border-2 border-white rounded-full shadow-md" />
-			<div className="absolute -bottom-1 -left-1 w-3 h-3 bg-blue-500 border-2 border-white rounded-full shadow-md" />
-			<div className="absolute -bottom-1 -right-1 w-3 h-3 bg-blue-500 border-2 border-white rounded-full shadow-md" />
+			<div className="-top-1 -left-1 absolute h-3 w-3 rounded-full border-2 border-white bg-blue-500 shadow-md" />
+			<div className="-top-1 -right-1 absolute h-3 w-3 rounded-full border-2 border-white bg-blue-500 shadow-md" />
+			<div className="-bottom-1 -left-1 absolute h-3 w-3 rounded-full border-2 border-white bg-blue-500 shadow-md" />
+			<div className="-bottom-1 -right-1 absolute h-3 w-3 rounded-full border-2 border-white bg-blue-500 shadow-md" />
 
 			{/* Selection count badge */}
 			{showCount && selectedCount > 0 && width > 80 && height > 40 && (
@@ -233,10 +233,10 @@ export const EnhancedSelectionOverlay: React.FC<EnhancedSelectionOverlayProps> =
 						'absolute top-2 left-2',
 						'px-3 py-1.5',
 						'bg-blue-600 text-white',
-						'text-sm font-medium',
+						'font-medium text-sm',
 						'rounded-full shadow-lg',
 						'border-2 border-white',
-						'animate-in slide-in-from-top-2 duration-200'
+						'slide-in-from-top-2 animate-in duration-200'
 					)}
 				>
 					{selectedCount} selected
@@ -247,10 +247,10 @@ export const EnhancedSelectionOverlay: React.FC<EnhancedSelectionOverlayProps> =
 			{width > 120 && height > 60 && (
 				<div
 					className={cn(
-						'absolute bottom-2 right-2',
+						'absolute right-2 bottom-2',
 						'px-2 py-1',
 						'bg-gray-800/80 text-white',
-						'text-xs font-mono',
+						'font-mono text-xs',
 						'rounded shadow-md',
 						'backdrop-blur-sm'
 					)}

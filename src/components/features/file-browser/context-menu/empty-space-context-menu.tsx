@@ -88,12 +88,12 @@ export const EmptySpaceContextMenu = memo<EmptySpaceContextMenuProps>(function E
 			{/* Acciones principales */}
 			{menuActions.map((menuAction, index) => (
 				<button
-					key={menuAction.action}
-					type="button"
 					className={`${menuItemStyle} ${
 						menuAction.destructive ? 'text-red-600 hover:text-red-600' : ''
 					} ${selectedIndex === index ? 'bg-accent text-accent-foreground' : ''}`}
 					disabled={processingAction === menuAction.action || menuAction.disabled}
+					key={menuAction.action}
+					type="button"
 					{...getItemProps(index)}
 					onClick={() => handleAction(menuAction.action)}
 				>
@@ -105,7 +105,7 @@ export const EmptySpaceContextMenu = memo<EmptySpaceContextMenuProps>(function E
 			{currentPath && (
 				<>
 					<Separator className="my-1" />
-					<div className="px-2 py-1 text-xs text-muted-foreground">
+					<div className="px-2 py-1 text-muted-foreground text-xs">
 						<span className="truncate" title={currentPath}>
 							{currentPath}
 						</span>

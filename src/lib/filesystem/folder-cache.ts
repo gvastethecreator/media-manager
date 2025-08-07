@@ -43,7 +43,7 @@ class FolderResponseCache {
 
 		this.misses++;
 		cacheLogger.debug(`❌ Cache miss: ${key}`);
-		return undefined;
+		return;
 	}
 
 	/**
@@ -116,7 +116,7 @@ class FolderResponseCache {
 		return {
 			size: this.cache.size,
 			maxSize: this.maxSize,
-			hitRate: hitRate,
+			hitRate,
 			hits: this.hits,
 			misses: this.misses,
 			totalRequests,

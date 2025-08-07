@@ -92,10 +92,10 @@ export function PromptsView({ isVisible }: ViewProps) {
 
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<div className="flex flex-col items-center gap-3">
 					<Spinner size="lg" />
-					<p className="text-sm text-muted-foreground">Cargando prompts...</p>
+					<p className="text-muted-foreground text-sm">Cargando prompts...</p>
 				</div>
 			</div>
 		);
@@ -109,7 +109,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 					<AlertTitle>Error al cargar prompts</AlertTitle>
 					<AlertDescription>
 						{error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
-						<button onClick={handleRetry} className="ml-2 underline hover:no-underline">
+						<button className="ml-2 underline hover:no-underline" onClick={handleRetry}>
 							Reintentar
 						</button>
 					</AlertDescription>
@@ -121,78 +121,78 @@ export function PromptsView({ isVisible }: ViewProps) {
 	return (
 		<ScrollArea className="flex-1">
 			<div className="p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Prompts</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Prompts</h2>
 
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
 					{showForm ? 'Cancelar' : 'Crear Prompt'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nuevo Prompt</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nuevo Prompt</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="promptName">Nombre</Label>
 							<Input
 								id="promptName"
-								value={newPromptName}
 								onChange={(e) => setNewPromptName(e.target.value)}
 								placeholder="Nombre del prompt"
+								value={newPromptName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-3">
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="promptContent">Contenido</Label>
 							<Textarea
 								id="promptContent"
-								value={newPromptContent}
 								onChange={(e) => setNewPromptContent(e.target.value)}
 								placeholder="Contenido del prompt"
+								value={newPromptContent}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="promptDescription">Descripción</Label>
 							<Textarea
 								id="promptDescription"
-								value={newPromptDescription}
 								onChange={(e) => setNewPromptDescription(e.target.value)}
 								placeholder="Descripción del prompt (opcional)"
+								value={newPromptDescription}
 							/>
 						</div>
 						<Button onClick={handleCreatePrompt}>Guardar Prompt</Button>
 					</div>
 				)}
 
-				{!prompts.length && !isLoading && !showForm ? (
+				{prompts.length || isLoading || showForm ? (
+					<motion.div
+						animate={{ opacity: 1, y: 0 }}
+						className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+						initial={{ opacity: 0, y: 20 }}
+						transition={{ duration: 0.3 }}
+					>
+						{prompts.map((prompt, index) => (
+							<motion.div
+								animate={{ opacity: 1, y: 0 }}
+								initial={{ opacity: 0, y: 20 }}
+								key={prompt.id}
+								transition={{ duration: 0.3, delay: index * 0.05 }}
+							>
+								<MemoizedPromptCard
+									className={prompt.id === selectedPrompt?.id ? 'ring-2 ring-primary' : ''}
+									onClick={() => handlePromptSelect(prompt.id)}
+									promptId={prompt.id}
+								/>
+							</motion.div>
+						))}
+					</motion.div>
+				) : (
 					<EmptyState
-						icon={MessageSquare}
-						title="Sin prompts"
 						description={
 							localSearch
 								? `No se encontraron prompts que coincidan con "${localSearch}"`
 								: 'No hay prompts disponibles'
 						}
+						icon={MessageSquare}
+						title="Sin prompts"
 					/>
-				) : (
-					<motion.div
-						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.3 }}
-					>
-						{prompts.map((prompt, index) => (
-							<motion.div
-								key={prompt.id}
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.3, delay: index * 0.05 }}
-							>
-								<MemoizedPromptCard
-									promptId={prompt.id}
-									onClick={() => handlePromptSelect(prompt.id)}
-									className={prompt.id === selectedPrompt?.id ? 'ring-2 ring-primary' : ''}
-								/>
-							</motion.div>
-						))}
-					</motion.div>
 				)}
 			</div>
 		</ScrollArea>

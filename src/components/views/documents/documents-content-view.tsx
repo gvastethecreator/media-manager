@@ -28,7 +28,7 @@ interface DocumentsContentViewProps {
 
 const MemoizedDocumentCard = React.memo(
 	({ document, onDocumentClick }: { document: DocumentWithStats; onDocumentClick: () => void }) => (
-		<DocumentCard document={document} onClick={onDocumentClick} className="h-full" />
+		<DocumentCard className="h-full" document={document} onClick={onDocumentClick} />
 	),
 	(prevProps, nextProps) =>
 		prevProps.document.id === nextProps.document.id &&
@@ -55,7 +55,7 @@ const DocumentsContentView: React.FC<DocumentsContentViewProps> = ({
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<p className="text-destructive">Error: {error}</p>
 			</div>
 		);
@@ -68,31 +68,31 @@ const DocumentsContentView: React.FC<DocumentsContentViewProps> = ({
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Documentos</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Documentos</h2>
 
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
 					{showForm ? 'Cancelar' : 'Subir Documento'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nuevo Documento</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nuevo Documento</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="documentName">Nombre</Label>
 							<Input
 								id="documentName"
-								value={newDocumentName}
 								onChange={(e) => setNewDocumentName(e.target.value)}
 								placeholder="Nombre del documento"
+								value={newDocumentName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="documentFile">Archivo de Documento</Label>
 							<Input
+								accept=".pdf,.doc,.docx,.txt,.md"
 								id="documentFile"
+								onChange={handleFileChange} // Aceptar tipos de documentos comunes
 								type="file"
-								accept=".pdf,.doc,.docx,.txt,.md" // Aceptar tipos de documentos comunes
-								onChange={handleFileChange}
 							/>
 						</div>
 						<Button onClick={handleCreateDocument}>Guardar Documento</Button>
@@ -101,24 +101,24 @@ const DocumentsContentView: React.FC<DocumentsContentViewProps> = ({
 
 				{(!documents || documents.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
+						description="Sube documentos para comenzar a usar el visor y editor."
 						icon={FileText}
 						title="No hay documentos"
-						description="Sube documentos para comenzar a usar el visor y editor."
 					/>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 						{documents?.map((document: DocumentWithStats, index: number) => {
 							const onDocumentClick = () => handleDocumentClick(document);
 							return (
 								<motion.div
-									key={document.id}
-									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
-									transition={{ delay: index * 0.1 }}
 									className="perspective-1000"
+									initial={{ opacity: 0, y: 20 }}
+									key={document.id}
+									transition={{ delay: index * 0.1 }}
 								>
 									<div
-										className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
+										className="h-full w-full transition-all duration-300 ease-in-out hover:z-10 hover:scale-[1.03] active:scale-[0.98]"
 										data-document-id={document.id}
 									>
 										<MemoizedDocumentCard document={document} onDocumentClick={onDocumentClick} />

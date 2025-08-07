@@ -48,8 +48,7 @@ export function useGroupFilters({ groups }: UseGroupFiltersProps) {
 			matches =
 				matches &&
 				(group.name.toLowerCase().includes(normalizedQuery) ||
-					group.description?.toLowerCase().includes(normalizedQuery) ||
-					false);
+					group.description?.toLowerCase().includes(normalizedQuery));
 		}
 
 		// Filtrar por categorías

@@ -22,9 +22,9 @@ export function FolderCardImages({
 	// Si hay una imagen destacada, la mostramos como principal
 	if (featuredImage) {
 		return (
-			<div className={cn('relative w-full h-40 overflow-hidden', tcgMode ? 'border-b border-white/10' : '')}>
+			<div className={cn('relative h-40 w-full overflow-hidden', tcgMode ? 'border-white/10 border-b' : '')}>
 				{/* Imagen principal */}
-				<img src={featuredImage} alt="Imagen destacada" className="object-cover w-full h-full" />
+				<img alt="Imagen destacada" className="h-full w-full object-cover" src={featuredImage} />
 
 				{/* Overlay para TCG mode */}
 				{tcgMode && (
@@ -41,14 +41,14 @@ export function FolderCardImages({
 				{tcgMode && (
 					<>
 						{/* Esquinas decorativas */}
-						<div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-white/30" />
-						<div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-white/30" />
-						<div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-white/30" />
-						<div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-white/30" />
+						<div className="absolute top-0 left-0 h-6 w-6 border-white/30 border-t-2 border-l-2" />
+						<div className="absolute top-0 right-0 h-6 w-6 border-white/30 border-t-2 border-r-2" />
+						<div className="absolute bottom-0 left-0 h-6 w-6 border-white/30 border-b-2 border-l-2" />
+						<div className="absolute right-0 bottom-0 h-6 w-6 border-white/30 border-r-2 border-b-2" />
 
 						{/* Insignia de rareza */}
 						<div
-							className="absolute top-2 right-2 w-4 h-4 rounded-full"
+							className="absolute top-2 right-2 h-4 w-4 rounded-full"
 							style={{ background: `radial-gradient(circle, ${primaryColor}, ${secondaryColor})` }}
 						/>
 					</>
@@ -64,13 +64,13 @@ export function FolderCardImages({
 		return (
 			<div
 				className={cn(
-					'relative w-full h-40 grid grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden',
-					tcgMode ? 'border-b border-white/10 p-0.5 bg-black/20' : ''
+					'relative grid h-40 w-full grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden',
+					tcgMode ? 'border-white/10 border-b bg-black/20 p-0.5' : ''
 				)}
 			>
 				{images.map((image, index) => (
-					<div key={`recent-image-${generateImageKey(image, index)}`} className="relative overflow-hidden">
-						<img src={image} alt={`Imagen reciente ${index + 1}`} className="object-cover w-full h-full" />
+					<div className="relative overflow-hidden" key={`recent-image-${generateImageKey(image, index)}`}>
+						<img alt={`Imagen reciente ${index + 1}`} className="h-full w-full object-cover" src={image} />
 
 						{/* Overlay para TCG mode */}
 						{tcgMode && (
@@ -87,16 +87,16 @@ export function FolderCardImages({
 
 				{/* Decoraciones para TCG mode */}
 				{tcgMode && (
-					<div className="absolute inset-0 pointer-events-none">
+					<div className="pointer-events-none absolute inset-0">
 						{/* Bordes externos decorativos */}
-						<div className="absolute top-0 left-0 w-4 h-4 border-t border-l border-white/30" />
-						<div className="absolute top-0 right-0 w-4 h-4 border-t border-r border-white/30" />
-						<div className="absolute bottom-0 left-0 w-4 h-4 border-b border-l border-white/30" />
-						<div className="absolute bottom-0 right-0 w-4 h-4 border-b border-r border-white/30" />
+						<div className="absolute top-0 left-0 h-4 w-4 border-white/30 border-t border-l" />
+						<div className="absolute top-0 right-0 h-4 w-4 border-white/30 border-t border-r" />
+						<div className="absolute bottom-0 left-0 h-4 w-4 border-white/30 border-b border-l" />
+						<div className="absolute right-0 bottom-0 h-4 w-4 border-white/30 border-r border-b" />
 
 						{/* Marcador de elementos */}
 						<div
-							className="absolute top-1 right-1 text-xs font-bold px-1 rounded-sm"
+							className="absolute top-1 right-1 rounded-sm px-1 font-bold text-xs"
 							style={{
 								background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`,
 								color: 'white',
@@ -115,8 +115,8 @@ export function FolderCardImages({
 	return (
 		<div
 			className={cn(
-				'relative w-full h-40 flex items-center justify-center',
-				tcgMode ? 'bg-gradient-to-br from-gray-900 to-gray-800 border-b border-white/10' : 'bg-muted'
+				'relative flex h-40 w-full items-center justify-center',
+				tcgMode ? 'border-white/10 border-b bg-gradient-to-br from-gray-900 to-gray-800' : 'bg-muted'
 			)}
 			style={
 				tcgMode
@@ -126,20 +126,20 @@ export function FolderCardImages({
 					: {}
 			}
 		>
-			<div className={cn('text-lg font-medium text-center p-4', tcgMode ? 'text-white/70' : 'text-muted-foreground')}>
+			<div className={cn('p-4 text-center font-medium text-lg', tcgMode ? 'text-white/70' : 'text-muted-foreground')}>
 				Sin imágenes
 			</div>
 
 			{/* Decoraciones TCG para el placeholder */}
 			{tcgMode && (
 				<>
-					<div className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 border-white/20" />
-					<div className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 border-white/20" />
-					<div className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 border-white/20" />
-					<div className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 border-white/20" />
+					<div className="absolute top-0 left-0 h-6 w-6 border-white/20 border-t-2 border-l-2" />
+					<div className="absolute top-0 right-0 h-6 w-6 border-white/20 border-t-2 border-r-2" />
+					<div className="absolute bottom-0 left-0 h-6 w-6 border-white/20 border-b-2 border-l-2" />
+					<div className="absolute right-0 bottom-0 h-6 w-6 border-white/20 border-r-2 border-b-2" />
 
 					<div
-						className="absolute bottom-2 right-2 w-8 h-8 rounded-full opacity-30"
+						className="absolute right-2 bottom-2 h-8 w-8 rounded-full opacity-30"
 						style={{
 							background: `conic-gradient(${primaryColor}, ${secondaryColor}, ${primaryColor})`,
 						}}

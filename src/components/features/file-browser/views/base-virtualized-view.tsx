@@ -144,21 +144,23 @@ export function useVirtualizedContainer({
 					}
 				}
 
-				if (adjustedWidth > 0 && adjustedHeight > 0) {
-					if (Math.abs(adjustedHeight - containerHeight) > 1 || Math.abs(adjustedWidth - containerWidth) > 1) {
-						logger.debug('🔄 ResizeObserver detectó cambio:', {
-							height: `${containerHeight}px → ${adjustedHeight}px`,
-							width: `${containerWidth}px → ${adjustedWidth}px`,
-							original: `${width}x${height}`,
-						});
+				if (
+					adjustedWidth > 0 &&
+					adjustedHeight > 0 &&
+					(Math.abs(adjustedHeight - containerHeight) > 1 || Math.abs(adjustedWidth - containerWidth) > 1)
+				) {
+					logger.debug('🔄 ResizeObserver detectó cambio:', {
+						height: `${containerHeight}px → ${adjustedHeight}px`,
+						width: `${containerWidth}px → ${adjustedWidth}px`,
+						original: `${width}x${height}`,
+					});
 
-						setContainerHeight(adjustedHeight);
-						setContainerWidth(adjustedWidth);
+					setContainerHeight(adjustedHeight);
+					setContainerWidth(adjustedWidth);
 
-						if (!isReady && adjustedHeight > minHeight && adjustedWidth > 100) {
-							setIsReady(true);
-							logger.info('✅ Contenedor virtualizado listo (ResizeObserver)');
-						}
+					if (!isReady && adjustedHeight > minHeight && adjustedWidth > 100) {
+						setIsReady(true);
+						logger.info('✅ Contenedor virtualizado listo (ResizeObserver)');
 					}
 				}
 			}
@@ -231,8 +233,8 @@ export const VirtualizedContainer = React.forwardRef<HTMLDivElement, Virtualized
 		if (!isReady) {
 			return (
 				<div
+					className={`flex select-none items-center justify-center text-muted-foreground ${className}`}
 					ref={ref}
-					className={`flex items-center justify-center text-muted-foreground select-none ${className}`}
 					style={{
 						height: `${height}px`,
 						width: `${width}px`,
@@ -249,9 +251,9 @@ export const VirtualizedContainer = React.forwardRef<HTMLDivElement, Virtualized
 
 		return (
 			<div
-				ref={ref}
 				className={`relative select-none ${className}`}
 				onClick={onClick}
+				ref={ref}
 				style={{
 					height: `${height}px`,
 					width: `${width}px`,

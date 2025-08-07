@@ -93,17 +93,17 @@ export function CardActionButtons({ entity, visible, actionButtons, animationDur
 			<Tooltip key={button.id}>
 				<TooltipTrigger asChild>
 					<Button
-						variant="secondary"
-						size="sm"
 						className={cn(
-							'h-8 w-8 p-0 bg-background/80 hover:bg-background border shadow-sm',
+							'h-8 w-8 border bg-background/80 p-0 shadow-sm hover:bg-background',
 							'backdrop-blur-sm transition-all duration-200',
 							'hover:scale-110 active:scale-95'
 						)}
 						onClick={handleClick}
+						size="sm"
 						style={{
 							animationDelay: `${index * 50}ms`,
 						}}
+						variant="secondary"
 					>
 						<IconComponent className="h-4 w-4" />
 					</Button>
@@ -121,33 +121,33 @@ export function CardActionButtons({ entity, visible, actionButtons, animationDur
 				{visible &&
 					Object.entries(buttonsByPosition).map(([position, buttons]) => (
 						<motion.div
-							key={position}
+							animate="animate"
 							className={cn(
 								'absolute z-20 flex gap-1',
 								getPositionClasses(position),
 								position.includes('left') ? 'flex-row' : 'flex-row-reverse',
 								position.includes('top') ? 'flex-col' : 'flex-col-reverse'
 							)}
-							variants={getAnimationVariants(position)}
-							initial="initial"
-							animate="animate"
 							exit="exit"
+							initial="initial"
+							key={position}
 							transition={{
 								duration: animationDuration / 1000,
 								staggerChildren: 0.05,
 							}}
+							variants={getAnimationVariants(position)}
 						>
 							{buttons.map((button, index) => (
 								<motion.div
 									key={button.id}
+									transition={{
+										delay: index * 0.05,
+										duration: animationDuration / 1000,
+									}}
 									variants={{
 										initial: { opacity: 0, scale: 0.5 },
 										animate: { opacity: 1, scale: 1 },
 										exit: { opacity: 0, scale: 0.5 },
-									}}
-									transition={{
-										delay: index * 0.05,
-										duration: animationDuration / 1000,
 									}}
 								>
 									{renderActionButton(button, index)}

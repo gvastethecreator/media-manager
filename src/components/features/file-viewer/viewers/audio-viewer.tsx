@@ -122,32 +122,32 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 	const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
 	return (
-		<div className="flex flex-col h-full bg-background">
+		<div className="flex h-full flex-col bg-background">
 			{/* Header */}
-			<div className="flex items-center justify-between p-4 border-b">
+			<div className="flex items-center justify-between border-b p-4">
 				<div className="flex items-center space-x-4">
-					<Button variant="ghost" size="sm" onClick={onPrevious}>
+					<Button onClick={onPrevious} size="sm" variant="ghost">
 						<SkipBack className="h-4 w-4" />
 					</Button>
-					<Button variant="ghost" size="sm" onClick={onNext}>
+					<Button onClick={onNext} size="sm" variant="ghost">
 						<SkipForward className="h-4 w-4" />
 					</Button>
 				</div>
-				<Button variant="ghost" size="sm" onClick={onClose}>
+				<Button onClick={onClose} size="sm" variant="ghost">
 					✕
 				</Button>
 			</div>
 
 			{/* Main Content */}
-			<div className="flex-1 flex flex-col items-center justify-center p-8">
+			<div className="flex flex-1 flex-col items-center justify-center p-8">
 				{/* Audio Element */}
-				<audio ref={audioRef} src={audioSrc} preload="metadata" className="hidden" />
+				<audio className="hidden" preload="metadata" ref={audioRef} src={audioSrc} />
 
 				{/* Audio Info */}
-				<div className="text-center mb-8">
-					<h2 className="text-2xl font-bold mb-2">{audio.name}</h2>
-					{audio.description && <p className="text-muted-foreground mb-4">{audio.description}</p>}
-					<div className="flex items-center justify-center space-x-4 text-sm text-muted-foreground">
+				<div className="mb-8 text-center">
+					<h2 className="mb-2 font-bold text-2xl">{audio.name}</h2>
+					{audio.description && <p className="mb-4 text-muted-foreground">{audio.description}</p>}
+					<div className="flex items-center justify-center space-x-4 text-muted-foreground text-sm">
 						<span>Tamaño: {formatFileSize(audio.size || 0)}</span>
 						{duration > 0 && <span>Duración: {formatDuration(duration)}</span>}
 						{audio.stats?.bitrate && <span>Bitrate: {audio.stats.bitrate} kbps</span>}
@@ -155,29 +155,29 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 				</div>
 
 				{/* Waveform Placeholder */}
-				<div className="w-full max-w-2xl h-32 bg-muted rounded-lg mb-8 flex items-center justify-center">
+				<div className="mb-8 flex h-32 w-full max-w-2xl items-center justify-center rounded-lg bg-muted">
 					<div className="text-muted-foreground text-sm">Visualización de forma de onda</div>
 				</div>
 
 				{/* Error State */}
-				{error && <div className="text-center text-red-500 mb-4">{error}</div>}
+				{error && <div className="mb-4 text-center text-red-500">{error}</div>}
 
 				{/* Loading State */}
-				{isLoading && <div className="text-center text-muted-foreground mb-4">Cargando audio...</div>}
+				{isLoading && <div className="mb-4 text-center text-muted-foreground">Cargando audio...</div>}
 
 				{/* Controls */}
 				<div className="w-full max-w-2xl">
 					{/* Progress Bar */}
 					<div className="mb-4">
 						<Slider
-							value={[progress]}
-							onValueChange={handleSeek}
-							max={100}
-							step={0.1}
 							className="w-full"
 							disabled={isLoading || !!error}
+							max={100}
+							onValueChange={handleSeek}
+							step={0.1}
+							value={[progress]}
 						/>
-						<div className="flex justify-between text-xs text-muted-foreground mt-1">
+						<div className="mt-1 flex justify-between text-muted-foreground text-xs">
 							<span>{formatDuration(currentTime)}</span>
 							<span>{formatDuration(duration)}</span>
 						</div>
@@ -185,18 +185,18 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 
 					{/* Control Buttons */}
 					<div className="flex items-center justify-center space-x-4">
-						<Button variant="outline" size="icon" onClick={togglePlayPause} disabled={isLoading || !!error}>
+						<Button disabled={isLoading || !!error} onClick={togglePlayPause} size="icon" variant="outline">
 							{isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
 						</Button>
 
 						<div className="flex items-center space-x-2">
-							<Button variant="ghost" size="icon" onClick={toggleMute}>
+							<Button onClick={toggleMute} size="icon" variant="ghost">
 								{isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
 							</Button>
-							<Slider value={[volume * 100]} onValueChange={handleVolumeChange} max={100} step={1} className="w-24" />
+							<Slider className="w-24" max={100} onValueChange={handleVolumeChange} step={1} value={[volume * 100]} />
 						</div>
 
-						<Button variant="outline" size="icon" onClick={handleDownload}>
+						<Button onClick={handleDownload} size="icon" variant="outline">
 							<Download className="h-4 w-4" />
 						</Button>
 					</div>

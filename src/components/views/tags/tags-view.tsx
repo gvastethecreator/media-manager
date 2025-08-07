@@ -19,7 +19,7 @@ const viewLogger = clientLogger.withContext('TagsView');
 
 // Crear un componente de tarjeta memorizada para optimizar
 const MemoizedTagCard = memo(
-	({ tag, onClick }: { tag: TagWithStats; onClick: () => void }) => <TagCard tag={tag} onClick={onClick} />,
+	({ tag, onClick }: { tag: TagWithStats; onClick: () => void }) => <TagCard onClick={onClick} tag={tag} />,
 	(prevProps, nextProps) => {
 		// Solo re-renderizar si cambian estos valores
 		return (
@@ -52,7 +52,7 @@ export function TagsView() {
 	// Manejar el clic en una etiqueta
 	const handleTagClick = useCallback(
 		(tag: TagWithStats) => {
-			if (!tag || !tag.id) {
+			if (!(tag && tag.id)) {
 				console.error('❌ Error: Intento de seleccionar una etiqueta inválida', tag);
 				return;
 			}
@@ -87,7 +87,7 @@ export function TagsView() {
 	// Renderizar estados de carga y error
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<p className="text-destructive">Error: {error.message}</p>
 			</div>
 		);
@@ -100,31 +100,31 @@ export function TagsView() {
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Etiquetas</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Etiquetas</h2>
 
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
 					{showForm ? 'Cancelar' : 'Crear Etiqueta'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nueva Etiqueta</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nueva Etiqueta</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="tagName">Nombre</Label>
 							<Input
 								id="tagName"
-								value={newTagName}
 								onChange={(e) => setNewTagName(e.target.value)}
 								placeholder="Nombre de la etiqueta"
+								value={newTagName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="tagDescription">Descripción</Label>
 							<Textarea
 								id="tagDescription"
-								value={newTagDescription}
 								onChange={(e) => setNewTagDescription(e.target.value)}
 								placeholder="Descripción de la etiqueta (opcional)"
+								value={newTagDescription}
 							/>
 						</div>
 						<Button onClick={handleCreateTag}>Guardar Etiqueta</Button>
@@ -133,20 +133,20 @@ export function TagsView() {
 
 				{!tags || (tags.length === 0 && !isLoading && !showForm) ? (
 					<EmptyState
+						description="Crea etiquetas para organizar tus imágenes por temas o características."
 						icon={Tag}
 						title="No hay etiquetas creadas"
-						description="Crea etiquetas para organizar tus imágenes por temas o características."
 					/>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 						{tags.map((tag, index) => (
 							<motion.div
-								key={tag.id}
-								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
+								initial={{ opacity: 0, y: 20 }}
+								key={tag.id}
 								transition={{ delay: index * 0.05 }}
 							>
-								{tag.id && <MemoizedTagCard tag={tag} onClick={() => handleTagClick(tag)} />}
+								{tag.id && <MemoizedTagCard onClick={() => handleTagClick(tag)} tag={tag} />}
 							</motion.div>
 						))}
 					</div>

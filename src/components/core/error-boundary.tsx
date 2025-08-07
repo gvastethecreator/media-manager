@@ -1,5 +1,5 @@
 import React from 'react';
-import packageJson from '../../../package.json';
+import packageJson from '../../../package.json' with { type: 'json' };
 import { GlobalErrorFallback } from './global-error-handler';
 
 interface ErrorBoundaryProps {
@@ -67,18 +67,18 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
 				// In development, show the detailed error UI.
 				return (
-					<div className="flex flex-row items-stretch justify-center h-full p-8 gap-8 bg-neutral-900 text-neutral-100">
-						<div className="flex flex-col items-center justify-center flex-1 max-w-2xl">
-							<div className="bg-neutral-800 rounded-xl shadow-lg p-8 w-full flex flex-col items-center border border-neutral-700">
-								<h1 className="text-3xl font-bold mb-4 text-red-400">¡Algo salió mal!</h1>
+					<div className="flex h-full flex-row items-stretch justify-center gap-8 bg-neutral-900 p-8 text-neutral-100">
+						<div className="flex max-w-2xl flex-1 flex-col items-center justify-center">
+							<div className="flex w-full flex-col items-center rounded-xl border border-neutral-700 bg-neutral-800 p-8 shadow-lg">
+								<h1 className="mb-4 font-bold text-3xl text-red-400">¡Algo salió mal!</h1>
 								<p className="mb-4 text-neutral-200">Intenta recargar la página o reporta el error.</p>
-								<button type="button" onClick={this.handleReload} className="btn btn-primary mb-4">
+								<button className="btn btn-primary mb-4" onClick={this.handleReload} type="button">
 									Recargar
 								</button>
-								<div className="w-full mt-4 flex flex-col gap-6 items-start">
-									<div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 w-full">
+								<div className="mt-4 flex w-full flex-col items-start gap-6">
+									<div className="w-full rounded-lg border border-neutral-700 bg-neutral-900 p-4">
 										<strong className="text-red-300">Archivos afectados:</strong>
-										<ul className="list-disc ml-6 text-xs mt-2 text-neutral-200">
+										<ul className="mt-2 ml-6 list-disc text-neutral-200 text-xs">
 											{affectedFiles.length === 0 && <li>No detectados en el stack trace.</li>}
 											{affectedFiles.map((f) => (
 												<li key={`${f.file}:${f.line}`}>
@@ -89,24 +89,24 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 											))}
 										</ul>
 									</div>
-									<div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 w-full">
-										<div className="flex items-center mb-2">
+									<div className="w-full rounded-lg border border-neutral-700 bg-neutral-900 p-4">
+										<div className="mb-2 flex items-center">
 											<strong className="text-blue-300">Stack trace:</strong>
 											<button
-												type="button"
-												className="ml-2 text-xs underline text-blue-400 hover:text-blue-200"
+												className="ml-2 text-blue-400 text-xs underline hover:text-blue-200"
 												onClick={() => navigator.clipboard.writeText(stack)}
+												type="button"
 											>
 												Copiar
 											</button>
 										</div>
-										<pre className="bg-neutral-800 p-2 rounded text-xs max-w-xl overflow-x-auto mt-2 text-neutral-200">
+										<pre className="mt-2 max-w-xl overflow-x-auto rounded bg-neutral-800 p-2 text-neutral-200 text-xs">
 											{stack}
 										</pre>
 									</div>
-									<div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 w-full">
+									<div className="w-full rounded-lg border border-neutral-700 bg-neutral-900 p-4">
 										<strong className="text-green-300">Información de entorno:</strong>
-										<ul className="text-xs ml-4 mt-2 text-neutral-200">
+										<ul className="mt-2 ml-4 text-neutral-200 text-xs">
 											<li>
 												Versión: <span className="font-mono text-green-200">{envInfo.version}</span>
 											</li>
@@ -121,9 +121,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 											</li>
 										</ul>
 									</div>
-									<div className="bg-neutral-900 border border-neutral-700 rounded-lg p-4 w-full">
+									<div className="w-full rounded-lg border border-neutral-700 bg-neutral-900 p-4">
 										<strong className="text-yellow-300">Estado de stores (debug):</strong>
-										<pre className="text-xs bg-neutral-800 rounded p-2 mt-2 text-yellow-200 max-h-40 overflow-auto">
+										<pre className="mt-2 max-h-40 overflow-auto rounded bg-neutral-800 p-2 text-xs text-yellow-200">
 											{JSON.stringify(
 												{ /* TODO: dump real de stores aquí */ demo: 'Implementa aquí el snapshot de Zustand o Redux' },
 												null,
@@ -135,11 +135,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 							</div>
 						</div>
 						{this.props.lastLogContent && (
-							<aside className="w-[420px] max-w-full bg-neutral-950 border-l border-neutral-800 p-4 overflow-auto rounded-lg shadow-inner flex flex-col">
-								<h2 className="font-semibold text-sm mb-2 text-neutral-200">
-									Último log: <span className="font-mono text-xs text-blue-300">{this.props.lastLogContent.file}</span>
+							<aside className="flex w-[420px] max-w-full flex-col overflow-auto rounded-lg border-neutral-800 border-l bg-neutral-950 p-4 shadow-inner">
+								<h2 className="mb-2 font-semibold text-neutral-200 text-sm">
+									Último log: <span className="font-mono text-blue-300 text-xs">{this.props.lastLogContent.file}</span>
 								</h2>
-								<pre className="text-xs bg-neutral-900 rounded p-2 max-h-[400px] overflow-auto text-neutral-300">
+								<pre className="max-h-[400px] overflow-auto rounded bg-neutral-900 p-2 text-neutral-300 text-xs">
 									{this.props.lastLogContent.lines.join('\n')}
 								</pre>
 							</aside>

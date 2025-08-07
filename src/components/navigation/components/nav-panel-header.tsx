@@ -42,10 +42,10 @@ const MemoizedHeaderButton = memo(function HeaderButton({
 		<Tooltip>
 			<TooltipTrigger asChild>
 				<Button
-					variant="ghost"
-					size="icon"
-					className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+					className="h-7 w-7 cursor-pointer rounded-md bg-transparent text-muted-foreground transition-all hover:bg-secondary/40 hover:text-foreground"
 					onClick={onClick}
+					size="icon"
+					variant="ghost"
 				>
 					{icon}
 				</Button>
@@ -53,7 +53,7 @@ const MemoizedHeaderButton = memo(function HeaderButton({
 			<TooltipContent className="text-xs">
 				<p className="font-medium text-amber-400">{tooltipTitle}</p>
 				<p>{tooltipContent}</p>
-				{tooltipNote && <p className="text-[10px] text-zinc-400 mt-1.5">{tooltipNote}</p>}
+				{tooltipNote && <p className="mt-1.5 text-[10px] text-zinc-400">{tooltipNote}</p>}
 			</TooltipContent>
 		</Tooltip>
 	);
@@ -62,15 +62,15 @@ const MemoizedHeaderButton = memo(function HeaderButton({
 // Componente de avatar memoizado
 const MemoizedAvatar = memo(function Avatar({ color, emoji }: { color: string; emoji: string }) {
 	return (
-		<motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} className="relative group">
+		<motion.div className="group relative" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
 			<div
-				className="h-6 w-6 rounded-full flex items-center justify-center shadow-sm transition-all duration-200 overflow-hidden group-hover:brightness-110 cursor-pointer"
+				className="flex h-6 w-6 cursor-pointer items-center justify-center overflow-hidden rounded-full shadow-sm transition-all duration-200 group-hover:brightness-110"
 				style={{
 					backgroundColor: color,
 					boxShadow: '0 0 0 1px rgba(0,0,0,0.05), 0 1px 3px 0 rgba(0,0,0,0.1)',
 				}}
 			>
-				<span className="text-sm font-large">{emoji}</span>
+				<span className="font-large text-sm">{emoji}</span>
 			</div>
 		</motion.div>
 	);
@@ -140,9 +140,9 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 
 	return (
 		<motion.div
-			initial={{ opacity: 1 }}
 			animate={{ opacity: 1 }}
-			className="relative bg-gradient-to-b from-background/90 to-transparent py-2 border-b border-border/20 shadow-sm"
+			className="relative border-border/20 border-b bg-gradient-to-b from-background/90 to-transparent py-2 shadow-sm"
+			initial={{ opacity: 1 }}
 		>
 			{/* 📋 Layout responsivo */}
 			<div
@@ -152,17 +152,17 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 				)}
 			>
 				{/* Avatar */}
-				<div className={cn('flex items-center', isCollapsed ? 'justify-center mb-1' : 'justify-between w-full')}>
+				<div className={cn('flex items-center', isCollapsed ? 'mb-1 justify-center' : 'w-full justify-between')}>
 					<div className={cn('flex items-center gap-2', isCollapsed && 'justify-center')}>
 						<MemoizedAvatar color={activeProfileData.color} emoji={activeProfileData.emoji} />
 
 						{!isCollapsed && (
 							<div className="flex flex-col">
 								<div className="flex items-center gap-2">
-									<span className="text-xs leading-tight text-foreground/80 font-medium">
+									<span className="font-medium text-foreground/80 text-xs leading-tight">
 										{activeProfileData?.name}
 									</span>
-									<span className="text-xs leading-tight text-foreground/80 font-medium">
+									<span className="font-medium text-foreground/80 text-xs leading-tight">
 										{activeProfileData?.name}
 									</span>
 								</div>
@@ -173,27 +173,27 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 
 				{/* Botones de acción */}
 				{!isCollapsed && (
-					<div className="flex items-center justify-center gap-1 flex-wrap">
+					<div className="flex flex-wrap items-center justify-center gap-1">
 						<MemoizedHeaderButton
 							icon={<Home className="h-3.5 w-3.5" />}
 							onClick={handleHomeClick}
-							tooltipTitle="Inicio"
 							tooltipContent="Volver al dashboard"
+							tooltipTitle="Inicio"
 						/>
 
 						<MemoizedHeaderButton
 							icon={<IdCard className="h-3.5 w-3.5" />}
 							onClick={onOpenEntityCards}
-							tooltipTitle="Entity Cards"
 							tooltipContent="Visualizador y herramientas para tarjetas de entidades"
+							tooltipTitle="Entity Cards"
 						/>
 
 						<MemoizedHeaderButton
 							icon={<Bug className="h-3.5 w-3.5" />}
 							onClick={onOpenDevelopment}
-							tooltipTitle="Modo Desarrollador"
 							tooltipContent="Accede a herramientas de desarrollo y depuración"
 							tooltipNote="Solo para administradores"
+							tooltipTitle="Modo Desarrollador"
 						/>
 
 						{/* 🧘 Botón de modo zen */}
@@ -201,18 +201,18 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 							<MemoizedHeaderButton
 								icon={<Eye className="h-3.5 w-3.5" />}
 								onClick={onToggleZenMode}
-								tooltipTitle="Modo Zen"
 								tooltipContent="Activa el modo de concentración"
 								tooltipNote="Oculta distracciones"
+								tooltipTitle="Modo Zen"
 							/>
 						)}
 
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
 								<Button
-									variant="ghost"
+									className="h-7 w-7 cursor-pointer rounded-md bg-transparent text-muted-foreground transition-all hover:bg-secondary/40 hover:text-foreground"
 									size="icon"
-									className="h-7 w-7 bg-transparent hover:bg-secondary/40 rounded-md text-muted-foreground hover:text-foreground transition-all cursor-pointer"
+									variant="ghost"
 								>
 									{getThemeIcon(theme)}
 								</Button>
@@ -221,11 +221,11 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 								{themes.map((t) => (
 									<DropdownMenuItem key={t} onClick={() => setTheme(t as any)}>
 										{t.charAt(0).toUpperCase() + t.slice(1)}
-										{theme === t && <span className="ml-2 text-xs text-primary">(actual)</span>}
+										{theme === t && <span className="ml-2 text-primary text-xs">(actual)</span>}
 									</DropdownMenuItem>
 								))}
 								<DropdownMenuItem onClick={() => setTheme('system')}>
-									Sistema{theme === 'system' && <span className="ml-2 text-xs text-primary">(actual)</span>}
+									Sistema{theme === 'system' && <span className="ml-2 text-primary text-xs">(actual)</span>}
 								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
@@ -233,20 +233,20 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 						<MemoizedHeaderButton
 							icon={<Settings2 className="h-3.5 w-3.5" />}
 							onClick={onOpenSettings}
-							tooltipTitle="Configuración"
 							tooltipContent="Personaliza tu experiencia"
+							tooltipTitle="Configuración"
 						/>
 					</div>
 				)}
 
 				{/* Solo avatar cuando está colapsado */}
 				{isCollapsed && (
-					<div className="flex flex-col items-center gap-0.5 mt-1">
+					<div className="mt-1 flex flex-col items-center gap-0.5">
 						<MemoizedHeaderButton
 							icon={<Settings2 className="h-2.5 w-2.5" />}
 							onClick={onOpenSettings}
-							tooltipTitle="Configuración"
 							tooltipContent="Personaliza tu experiencia"
+							tooltipTitle="Configuración"
 						/>
 					</div>
 				)}

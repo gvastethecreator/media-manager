@@ -102,7 +102,7 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 					const searchLower = filters.search.toLowerCase();
 					const matchesName = video.name.toLowerCase().includes(searchLower);
 					const matchesDescription = video.description?.toLowerCase().includes(searchLower);
-					if (!matchesName && !matchesDescription) return false;
+					if (!(matchesName || matchesDescription)) return false;
 				}
 
 				// Filtro de favoritos
@@ -265,12 +265,12 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 				get().addVideo(video);
 				return video;
 			}
-			return undefined;
+			return;
 		} catch (e) {
 			videoLogger.error('Failed to fetch video', { error: e });
 			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch video';
 			get().setError(errorMessage);
-			return undefined;
+			return;
 		} finally {
 			get().setLoading(false);
 		}
@@ -308,7 +308,7 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 			const errorMessage = e instanceof Error ? e.message : 'Error creating video';
 			toastService.error(errorMessage);
 			get().setError(errorMessage);
-			return undefined;
+			return;
 		} finally {
 			get().setLoading(false);
 		}

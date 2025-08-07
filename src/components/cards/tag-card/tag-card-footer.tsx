@@ -56,7 +56,7 @@ export function TagCardFooter({
 				<div className="flex items-center gap-1.5">
 					<div
 						className={cn(
-							'text-sm font-bold bg-black/20 rounded px-2 py-1 flex items-center gap-1',
+							'flex items-center gap-1 rounded bg-black/20 px-2 py-1 font-bold text-sm',
 							tcgMode && 'border'
 						)}
 						style={{
@@ -68,7 +68,7 @@ export function TagCardFooter({
 						}}
 					>
 						{/* El contador de imágenes */}
-						<Image className="w-3.5 h-3.5" />
+						<Image className="h-3.5 w-3.5" />
 						<span className="text-foreground">{imagesCount}</span>
 					</div>
 
@@ -76,7 +76,7 @@ export function TagCardFooter({
 					{videosCount > 0 && (
 						<div
 							className={cn(
-								'text-sm font-bold bg-black/20 rounded px-2 py-1 flex items-center gap-1',
+								'flex items-center gap-1 rounded bg-black/20 px-2 py-1 font-bold text-sm',
 								tcgMode && 'border'
 							)}
 							style={{
@@ -87,7 +87,7 @@ export function TagCardFooter({
 								boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}60` : 'none',
 							}}
 						>
-							<Video className="w-3.5 h-3.5" />
+							<Video className="h-3.5 w-3.5" />
 							<span className="text-foreground">{videosCount}</span>
 						</div>
 					)}
@@ -97,7 +97,7 @@ export function TagCardFooter({
 				{isFavorite && (
 					<div
 						className={cn(
-							'flex items-center gap-1 bg-black/10 px-2 py-1 rounded-sm',
+							'flex items-center gap-1 rounded-sm bg-black/10 px-2 py-1',
 							tcgMode && 'border border-red-900/20'
 						)}
 						style={{
@@ -105,27 +105,27 @@ export function TagCardFooter({
 							boxShadow: tcgMode ? '0 0 5px rgba(239, 68, 68, 0.3)' : 'none',
 						}}
 					>
-						<Heart className="w-3.5 h-3.5 fill-current" />
-						<span className="text-xs font-medium uppercase tracking-wide">Fav</span>
+						<Heart className="h-3.5 w-3.5 fill-current" />
+						<span className="font-medium text-xs uppercase tracking-wide">Fav</span>
 					</div>
 				)}
 			</div>
 
 			{/* Información adicional - Similar a la línea de coleccionista en cartas TCG */}
 			<div
-				className={cn('flex items-center justify-between text-xs text-muted-foreground', compact ? 'mt-1.5' : 'mt-2')}
+				className={cn('flex items-center justify-between text-muted-foreground text-xs', compact ? 'mt-1.5' : 'mt-2')}
 			>
 				{/* Fecha de creación */}
 				<div className="flex items-center gap-1">
-					<Calendar className="w-3 h-3" />
-					<span className="opacity-70 mr-1">Creado:</span>
+					<Calendar className="h-3 w-3" />
+					<span className="mr-1 opacity-70">Creado:</span>
 					<span className="font-medium">{formattedCreated}</span>
 				</div>
 
 				{/* Fecha de actualización */}
 				<div className="flex items-center gap-1">
-					<Clock className="w-3 h-3" />
-					<span className="opacity-70 mr-1">Act:</span>
+					<Clock className="h-3 w-3" />
+					<span className="mr-1 opacity-70">Act:</span>
 					<span className="font-medium">{formattedUpdated}</span>
 				</div>
 			</div>
@@ -133,7 +133,7 @@ export function TagCardFooter({
 			{/* Línea de colección */}
 			{tcgMode && (
 				<div
-					className={cn('text-xs text-center text-muted-foreground italic', compact ? 'mt-0.5' : 'mt-1')}
+					className={cn('text-center text-muted-foreground text-xs italic', compact ? 'mt-0.5' : 'mt-1')}
 					style={{ opacity: 0.7 }}
 				>
 					♦ Colección personal ♦

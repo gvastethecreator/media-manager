@@ -91,7 +91,7 @@ export function useFeaturesIssues() {
 		// Intervalo para actualizaciones periódicas sin indicador de carga
 		const intervalId = setInterval(() => {
 			fetchData(false);
-		}, 60000);
+		}, 60_000);
 
 		// Limpieza del intervalo al desmontar
 		return () => clearInterval(intervalId);

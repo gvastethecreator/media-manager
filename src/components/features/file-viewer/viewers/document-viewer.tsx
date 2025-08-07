@@ -92,9 +92,9 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 	const renderDocumentContent = () => {
 		if (isLoading) {
 			return (
-				<div className="flex items-center justify-center h-full">
+				<div className="flex h-full items-center justify-center">
 					<div className="text-center">
-						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
+						<div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
 						<p className="text-muted-foreground">Cargando documento...</p>
 					</div>
 				</div>
@@ -103,12 +103,12 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 
 		if (error) {
 			return (
-				<div className="flex items-center justify-center h-full">
+				<div className="flex h-full items-center justify-center">
 					<div className="text-center">
-						<FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-						<p className="text-red-500 mb-4">{error}</p>
+						<FileText className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+						<p className="mb-4 text-red-500">{error}</p>
 						<Button onClick={handleDownload} variant="outline">
-							<Download className="h-4 w-4 mr-2" />
+							<Download className="mr-2 h-4 w-4" />
 							Descargar archivo
 						</Button>
 					</div>
@@ -118,20 +118,20 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 
 		if (!canRender) {
 			return (
-				<div className="flex items-center justify-center h-full">
-					<div className="text-center max-w-md">
-						<FileText className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
-						<h3 className="text-lg font-semibold mb-2">Vista previa no disponible</h3>
-						<p className="text-muted-foreground mb-6">
+				<div className="flex h-full items-center justify-center">
+					<div className="max-w-md text-center">
+						<FileText className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
+						<h3 className="mb-2 font-semibold text-lg">Vista previa no disponible</h3>
+						<p className="mb-6 text-muted-foreground">
 							Este tipo de archivo ({fileExtension.toUpperCase()}) no se puede previsualizar en el navegador.
 						</p>
-						<div className="flex gap-2 justify-center">
+						<div className="flex justify-center gap-2">
 							<Button onClick={handleDownload} variant="outline">
-								<Download className="h-4 w-4 mr-2" />
+								<Download className="mr-2 h-4 w-4" />
 								Descargar
 							</Button>
 							<Button onClick={handleOpenExternal} variant="outline">
-								<ExternalLink className="h-4 w-4 mr-2" />
+								<ExternalLink className="mr-2 h-4 w-4" />
 								Abrir en nueva pestaña
 							</Button>
 						</div>
@@ -142,17 +142,17 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 
 		if (isPDF) {
 			return (
-				<div className="h-full flex items-center justify-center">
+				<div className="flex h-full items-center justify-center">
 					<iframe
+						className="h-full w-full border-0"
+						onError={() => setError('Error al cargar el documento PDF')}
+						onLoad={() => setIsLoading(false)}
 						ref={iframeRef}
 						src={`${documentSrc}#page=${currentPage}&zoom=${zoom}`}
-						className="w-full h-full border-0"
 						style={{
 							transform: `rotate(${rotation}deg)`,
 							transformOrigin: 'center center',
 						}}
-						onLoad={() => setIsLoading(false)}
-						onError={() => setError('Error al cargar el documento PDF')}
 					/>
 				</div>
 			);
@@ -160,18 +160,18 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 
 		if (isTextFile) {
 			return (
-				<div className="h-full p-4 overflow-auto">
+				<div className="h-full overflow-auto p-4">
 					<iframe
+						className="h-full w-full rounded-lg border"
+						onError={() => setError('Error al cargar el archivo de texto')}
+						onLoad={() => setIsLoading(false)}
 						ref={iframeRef}
 						src={documentSrc}
-						className="w-full h-full border rounded-lg"
 						style={{
 							fontSize: `${zoom}%`,
 							transform: `rotate(${rotation}deg)`,
 							transformOrigin: 'center center',
 						}}
-						onLoad={() => setIsLoading(false)}
-						onError={() => setError('Error al cargar el archivo de texto')}
 					/>
 				</div>
 			);
@@ -181,42 +181,42 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 	};
 
 	return (
-		<div className="flex flex-col h-full bg-background">
+		<div className="flex h-full flex-col bg-background">
 			{/* Header */}
-			<div className="flex items-center justify-between p-4 border-b">
+			<div className="flex items-center justify-between border-b p-4">
 				<div className="flex items-center space-x-4">
-					<Button variant="ghost" size="sm" onClick={onPrevious}>
+					<Button onClick={onPrevious} size="sm" variant="ghost">
 						<ChevronLeft className="h-4 w-4" />
 					</Button>
-					<Button variant="ghost" size="sm" onClick={onNext}>
+					<Button onClick={onNext} size="sm" variant="ghost">
 						<ChevronRight className="h-4 w-4" />
 					</Button>
 				</div>
 
 				<div className="flex items-center space-x-2">
-					<h2 className="text-lg font-semibold truncate max-w-md">{document.name}</h2>
+					<h2 className="max-w-md truncate font-semibold text-lg">{document.name}</h2>
 				</div>
 
-				<Button variant="ghost" size="sm" onClick={onClose}>
+				<Button onClick={onClose} size="sm" variant="ghost">
 					✕
 				</Button>
 			</div>
 
 			{/* Toolbar */}
 			{canRender && !isLoading && !error && (
-				<div className="flex items-center justify-between p-2 border-b bg-muted/50">
+				<div className="flex items-center justify-between border-b bg-muted/50 p-2">
 					<div className="flex items-center space-x-2">
 						{/* Zoom Controls */}
-						<Button variant="ghost" size="sm" onClick={handleZoomOut}>
+						<Button onClick={handleZoomOut} size="sm" variant="ghost">
 							<ZoomOut className="h-4 w-4" />
 						</Button>
-						<span className="text-sm font-medium min-w-[60px] text-center">{zoom}%</span>
-						<Button variant="ghost" size="sm" onClick={handleZoomIn}>
+						<span className="min-w-[60px] text-center font-medium text-sm">{zoom}%</span>
+						<Button onClick={handleZoomIn} size="sm" variant="ghost">
 							<ZoomIn className="h-4 w-4" />
 						</Button>
 
 						{/* Rotation */}
-						<Button variant="ghost" size="sm" onClick={handleRotate}>
+						<Button onClick={handleRotate} size="sm" variant="ghost">
 							<RotateCw className="h-4 w-4" />
 						</Button>
 					</div>
@@ -225,10 +225,10 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 					{isPDF && totalPages > 1 && (
 						<div className="flex items-center space-x-2">
 							<Button
-								variant="ghost"
-								size="sm"
-								onClick={() => handlePageChange(currentPage - 1)}
 								disabled={currentPage <= 1}
+								onClick={() => handlePageChange(currentPage - 1)}
+								size="sm"
+								variant="ghost"
 							>
 								<ChevronLeft className="h-4 w-4" />
 							</Button>
@@ -236,10 +236,10 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 								Página {currentPage} de {totalPages}
 							</span>
 							<Button
-								variant="ghost"
-								size="sm"
-								onClick={() => handlePageChange(currentPage + 1)}
 								disabled={currentPage >= totalPages}
+								onClick={() => handlePageChange(currentPage + 1)}
+								size="sm"
+								variant="ghost"
 							>
 								<ChevronRight className="h-4 w-4" />
 							</Button>
@@ -249,16 +249,16 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 					{/* Search */}
 					<div className="flex items-center space-x-2">
 						<div className="relative">
-							<Search className="h-4 w-4 absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+							<Search className="-translate-y-1/2 absolute top-1/2 left-2 h-4 w-4 transform text-muted-foreground" />
 							<Input
-								placeholder="Buscar en documento..."
-								value={searchTerm}
+								className="w-48 pl-8"
 								onChange={(e) => setSearchTerm(e.target.value)}
-								className="pl-8 w-48"
+								placeholder="Buscar en documento..."
 								size="sm"
+								value={searchTerm}
 							/>
 						</div>
-						<Button variant="ghost" size="sm" onClick={handleDownload}>
+						<Button onClick={handleDownload} size="sm" variant="ghost">
 							<Download className="h-4 w-4" />
 						</Button>
 					</div>
@@ -270,7 +270,7 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 
 			{/* Metadata Panel */}
 			<div className="border-t p-4">
-				<div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+				<div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
 					<div>
 						<span className="font-medium">Tipo:</span>
 						<span className="ml-2 text-muted-foreground">{fileExtension.toUpperCase()}</span>

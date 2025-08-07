@@ -99,7 +99,7 @@ export enum AIEngine {
 	IDEOGRAM = 'ideogram',
 	STABILITY_AI = 'stability_ai',
 	DALLE = 'dalle',
-	UNKNOWN = 'unknown'
+	UNKNOWN = 'unknown',
 }
 
 export interface OriginDetectionResult {

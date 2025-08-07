@@ -102,7 +102,7 @@ export function CreateCharacterForm({
 				emoji: character.emoji || '👤',
 				backstory: character.background || '',
 				category: character.category as CharacterCategory | undefined,
-				isFavorite: character.isFavorite || false,
+				isFavorite: character.isFavorite,
 			});
 		}
 	}, [form, isEditing, character]);
@@ -195,7 +195,7 @@ export function CreateCharacterForm({
 				emoji: data.emoji || '👤',
 				color: data.color || '#3b82f6',
 
-				isFavorite: data.isFavorite || false,
+				isFavorite: data.isFavorite,
 				totalImages: 0,
 				totalVideos: 0,
 				age: null,
@@ -217,7 +217,7 @@ export function CreateCharacterForm({
 				const updateData: CharacterUpdateInput = {
 					...characterData,
 					background: data.backstory || null,
-					isFavorite: data.isFavorite || false,
+					isFavorite: data.isFavorite,
 				};
 				const updated = await updateCharacterMutation.mutateAsync({ id: character.id, data: updateData });
 				onUpdated?.(updated);
@@ -240,7 +240,7 @@ export function CreateCharacterForm({
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(_onSubmit)} className="space-y-4">
+			<form className="space-y-4" onSubmit={form.handleSubmit(_onSubmit)}>
 				<FormField
 					control={form.control}
 					name="name"
@@ -262,7 +262,7 @@ export function CreateCharacterForm({
 						<FormItem>
 							<FormLabel>Emoji</FormLabel>
 							<FormControl>
-								<EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact showLabel={false} />
+								<EmojiPicker compact onEmojiSelect={field.onChange} showLabel={false} value={field.value} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -276,7 +276,7 @@ export function CreateCharacterForm({
 						<FormItem>
 							<FormLabel>Color</FormLabel>
 							<FormControl>
-								<ColorPicker value={field.value} onChange={field.onChange} compact showLabel={false} />
+								<ColorPicker compact onChange={field.onChange} showLabel={false} value={field.value} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -289,7 +289,7 @@ export function CreateCharacterForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Clase</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value}>
+							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
 										<SelectValue placeholder="Seleccionar clase" />
@@ -314,7 +314,7 @@ export function CreateCharacterForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Raza</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value}>
+							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
 										<SelectValue placeholder="Seleccionar raza" />
@@ -355,11 +355,11 @@ export function CreateCharacterForm({
 							<FormLabel>Nivel</FormLabel>
 							<FormControl>
 								<Input
-									type="number"
-									min={1}
 									max={100}
-									value={field.value ?? ''}
+									min={1}
 									onChange={(e) => field.onChange(e.target.value ? Number(e.target.value) : undefined)}
+									type="number"
+									value={field.value ?? ''}
 								/>
 							</FormControl>
 							<FormMessage />
@@ -383,7 +383,7 @@ export function CreateCharacterForm({
 				/>
 
 				<div className="flex justify-end space-x-2">
-					<Button type="button" variant="outline" onClick={onCancel}>
+					<Button onClick={onCancel} type="button" variant="outline">
 						Cancelar
 					</Button>
 					<Button type="submit">{isEditing ? 'Guardar cambios' : 'Crear personaje'}</Button>

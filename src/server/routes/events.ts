@@ -162,7 +162,7 @@ router.delete('/', async (req, res) => {
  */
 router.get('/stream', async (req, res) => {
 	try {
-		const HEARTBEAT_INTERVAL = 15000;
+		const HEARTBEAT_INTERVAL = 15_000;
 		res.set({
 			'Content-Type': 'text/event-stream',
 			'Cache-Control': 'no-cache, no-transform',

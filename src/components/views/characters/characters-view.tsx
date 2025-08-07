@@ -64,19 +64,19 @@ export function CharactersView({}: ViewProps) {
 	return (
 		<CharactersContentView
 			characters={characters}
-			isLoading={isLoading}
 			error={error}
-			localSearch={localSearch}
-			showForm={showForm}
-			newCharacterName={newCharacterName}
-			newCharacterDescription={newCharacterDescription}
-			selectedCharacterId={selectedCharacterId}
-			setShowForm={setShowForm}
-			setNewCharacterName={setNewCharacterName}
-			setNewCharacterDescription={setNewCharacterDescription}
 			handleCharacterSelect={handleCharacterSelect}
 			handleCreateCharacter={handleCreateCharacter}
 			handleRetry={handleRetry}
+			isLoading={isLoading}
+			localSearch={localSearch}
+			newCharacterDescription={newCharacterDescription}
+			newCharacterName={newCharacterName}
+			selectedCharacterId={selectedCharacterId}
+			setNewCharacterDescription={setNewCharacterDescription}
+			setNewCharacterName={setNewCharacterName}
+			setShowForm={setShowForm}
+			showForm={showForm}
 		/>
 	);
 }

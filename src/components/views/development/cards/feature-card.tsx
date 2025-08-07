@@ -12,18 +12,18 @@ export interface Feature {
 export function FeatureCard({ feature }: { feature: Feature }) {
 	return (
 		<Card className="h-full border-2 border-primary/10">
-			<CardContent className="py-1 px-3">
-				<div className="flex items-center justify-between mb-2 relative">
+			<CardContent className="px-3 py-1">
+				<div className="relative mb-2 flex items-center justify-between">
 					<div>
 						<h3 className="font-medium text-sm">{feature.name}</h3>
-						<p className="text-xs text-muted-foreground">{feature.description}</p>
+						<p className="text-muted-foreground text-xs">{feature.description}</p>
 					</div>
 					<StatusBadge status={feature.status} />
 				</div>
 				{feature.progress !== undefined && (
 					<div className="space-y-1">
-						<Progress value={feature.progress} className="h-1" />
-						<p className="text-xs text-right text-muted-foreground">{feature.progress}%</p>
+						<Progress className="h-1" value={feature.progress} />
+						<p className="text-right text-muted-foreground text-xs">{feature.progress}%</p>
 					</div>
 				)}
 			</CardContent>

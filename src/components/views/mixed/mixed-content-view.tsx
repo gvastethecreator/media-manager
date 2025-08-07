@@ -79,22 +79,22 @@ export function MixedContentView({ filterType, filterId }: MixedContentViewProps
 	// Renderizar vista de contenido mixto usando BaseContentView y FileBrowser
 	return (
 		<BaseContentView
-			title="Contenido Mixto"
 			description="Vista unificada de todos los tipos de archivos"
 			headerControls={
-				<Button variant="outline" size="sm" onClick={handleForceRefresh} disabled={isRetrying}>
-					<RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+				<Button disabled={isRetrying} onClick={handleForceRefresh} size="sm" variant="outline">
+					<RefreshCw className={`mr-2 h-4 w-4 ${isRetrying ? 'animate-spin' : ''}`} />
 					{isRetrying ? 'Recargando...' : 'Recargar'}
 				</Button>
 			}
+			title="Contenido Mixto"
 		>
 			<FileBrowser
+				className="h-full"
 				entityType={'mixed'}
 				filterId={filterId}
 				filterType={(filterType as 'folder' | 'collection' | 'tag' | 'album' | 'video') || 'folder'}
 				onItemClick={handleItemSelect}
 				onItemDoubleClick={handleItemDoubleClick}
-				className="h-full"
 			/>
 		</BaseContentView>
 	);

@@ -15,13 +15,13 @@ export async function seedFile3Ds(db: LibSQLDatabase<Record<string, never>>) {
 				id: '3d-1',
 				name: 'character-model.fbx',
 				path: '/examples/3d/character-model.fbx',
-				size: 10485760, // 10MB
+				size: 10_485_760, // 10MB
 				mimeType: 'application/octet-stream',
 				extension: 'fbx',
 				hash: '3d123abc456def789',
 				format: 'FBX',
-				vertices: 15000,
-				faces: 12000,
+				vertices: 15_000,
+				faces: 12_000,
 				materials: 3,
 				textures: 5,
 				animations: 8,
@@ -36,13 +36,13 @@ export async function seedFile3Ds(db: LibSQLDatabase<Record<string, never>>) {
 				id: '3d-2',
 				name: 'environment-scene.obj',
 				path: '/examples/3d/environment-scene.obj',
-				size: 5242880, // 5MB
+				size: 5_242_880, // 5MB
 				mimeType: 'application/octet-stream',
 				extension: 'obj',
 				hash: '3d456def789ghi012',
 				format: 'OBJ',
-				vertices: 25000,
-				faces: 20000,
+				vertices: 25_000,
+				faces: 20_000,
 				materials: 8,
 				textures: 12,
 				animations: 0,

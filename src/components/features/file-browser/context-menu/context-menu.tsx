@@ -102,12 +102,12 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 			{/* Acciones principales con navegación por teclado */}
 			{menuActions.slice(0, 3).map((menuAction, index) => (
 				<button
-					key={menuAction.action}
-					type="button"
 					className={`${menuItemStyle} ${menuAction.destructive ? 'text-red-600 hover:text-red-600' : ''} ${
 						selectedIndex === index ? 'bg-accent text-accent-foreground' : ''
 					}`}
 					disabled={processingAction === menuAction.action}
+					key={menuAction.action}
+					type="button"
 					{...getItemProps(index)}
 				>
 					{processingAction === menuAction.action ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : menuAction.icon}
@@ -119,8 +119,11 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 
 			{/* Submenús mejorados para entidades */}
 			<EnhancedSubmenu
-				title="Colecciones"
+				actionType="add-to-collection"
+				createActionType="collection-create"
+				file={file}
 				icon={<BookImage className="h-4 w-4" />}
+				isLoading={loadingStates.collections.loading}
 				items={collections.map((c) => ({
 					...c,
 					emoji: c.emoji ?? undefined,
@@ -128,17 +131,19 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 					isFavorite: Boolean(c.isFavorite),
 					isRecent: Boolean(c.isRecent),
 				}))}
-				isLoading={loadingStates.collections.loading}
-				file={file}
 				onAction={onAction}
-				actionType="add-to-collection"
-				createActionType="collection-create"
 				onOpenChange={(isOpen) => handleOpenChange('collections', isOpen)}
+				title="Colecciones"
 			/>
 
 			<EnhancedSubmenu
-				title="Etiquetas"
+				actionType="add-tag"
+				createActionType="tag-create"
+				dataIdField="tagId"
+				dataNameField="tagName"
+				file={file}
 				icon={<Tag className="h-4 w-4" />}
+				isLoading={loadingStates.tags.loading}
 				items={tags.map((t: TagWithStats) => ({
 					id: t.id,
 					name: t.name,
@@ -146,19 +151,19 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 					isFavorite: false,
 					isRecent: false,
 				}))}
-				isLoading={loadingStates.tags.loading}
-				file={file}
 				onAction={onAction}
-				actionType="add-tag"
-				createActionType="tag-create"
 				onOpenChange={(isOpen) => handleOpenChange('tags', isOpen)}
-				dataIdField="tagId"
-				dataNameField="tagName"
+				title="Etiquetas"
 			/>
 
 			<EnhancedSubmenu
-				title="Álbumes"
+				actionType="add-to-album"
+				createActionType="album-create"
+				dataIdField="albumId"
+				dataNameField="albumName"
+				file={file}
 				icon={<Album className="h-4 w-4" />}
+				isLoading={loadingStates.albums.loading}
 				items={albums.map((a) => ({
 					...a,
 					emoji: a.emoji ?? undefined,
@@ -166,14 +171,9 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 					isFavorite: Boolean(a.isFavorite),
 					isRecent: Boolean(a.isRecent),
 				}))}
-				isLoading={loadingStates.albums.loading}
-				file={file}
 				onAction={onAction}
-				actionType="add-to-album"
-				createActionType="album-create"
 				onOpenChange={(isOpen) => handleOpenChange('albums', isOpen)}
-				dataIdField="albumId"
-				dataNameField="albumName"
+				title="Álbumes"
 			/>
 
 			<Separator className="my-1" />
@@ -183,12 +183,12 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 				const actualIndex = index + 3;
 				return (
 					<button
-						key={menuAction.action}
-						type="button"
 						className={`${menuItemStyle} ${menuAction.destructive ? 'text-red-600 hover:text-red-600' : ''} ${
 							selectedIndex === actualIndex ? 'bg-accent text-accent-foreground' : ''
 						}`}
 						disabled={processingAction === menuAction.action}
+						key={menuAction.action}
+						type="button"
 						{...getItemProps(actualIndex)}
 					>
 						{processingAction === menuAction.action ? (

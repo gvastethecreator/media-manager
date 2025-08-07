@@ -134,17 +134,17 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 
 	return (
 		<AllImagesContentView
-			images={sortedImages}
-			isLoading={isLoading}
 			error={error}
-			indexingStatus={status}
-			isIndexing={isIndexing}
-			progress={progress}
-			startIndexing={startIndexing}
+			handleFileSelect={handleFileSelect}
+			handleFileUpload={handleFileUpload}
 			handleImageClick={handleImageClick}
 			handleImageDoubleClick={handleImageDoubleClick}
-			handleFileUpload={handleFileUpload}
-			handleFileSelect={handleFileSelect}
+			images={sortedImages}
+			indexingStatus={status}
+			isIndexing={isIndexing}
+			isLoading={isLoading}
+			progress={progress}
+			startIndexing={startIndexing}
 		/>
 	);
 };

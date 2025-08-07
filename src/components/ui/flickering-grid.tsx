@@ -111,7 +111,7 @@ const FlickeringGrid: React.FC<FlickeringGridProps> = ({
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		const container = containerRef.current;
-		if (!canvas || !container) {
+		if (!(canvas && container)) {
 			return;
 		}
 
@@ -173,10 +173,10 @@ const FlickeringGrid: React.FC<FlickeringGridProps> = ({
 	}, [setupCanvas, updateSquares, drawGrid, width, height, isInView]);
 
 	return (
-		<div ref={containerRef} className={`w-full h-full ${className}`}>
+		<div className={`h-full w-full ${className}`} ref={containerRef}>
 			<canvas
-				ref={canvasRef}
 				className="pointer-events-none"
+				ref={canvasRef}
 				style={{
 					width: canvasSize.width,
 					height: canvasSize.height,

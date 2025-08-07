@@ -3,29 +3,29 @@ import { randomUUID } from 'crypto';
 import { eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import {
-    albums,
-    audios,
-    characters,
-    collections,
-    concepts,
-    documents,
-    favorites,
-    file3Ds,
-    folders,
-    imageStats,
-    images,
-    jsonFiles,
-    metadatas,
-    notes,
-    places,
-    prompts,
-    properties,
-    tags,
-    thumbnails,
-    videos,
-    wildcards,
-    workflows,
-    worldItems,
+	albums,
+	audios,
+	characters,
+	collections,
+	concepts,
+	documents,
+	favorites,
+	file3Ds,
+	folders,
+	imageStats,
+	images,
+	jsonFiles,
+	metadatas,
+	notes,
+	places,
+	prompts,
+	properties,
+	tags,
+	thumbnails,
+	videos,
+	wildcards,
+	workflows,
+	worldItems,
 } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
@@ -232,11 +232,12 @@ export async function getGeneralSystemStats(): Promise<GeneralStats | null> {
 		]);
 
 		// Calcular información de disco (aproximada basada en el total de archivos)
-		const totalFileSize = (totalSizeResult[0]?.totalSize || 0) +
-							  (audioSizeResult[0]?.totalSize || 0) +
-							  (documentSizeResult[0]?.totalSize || 0) +
-							  (jsonSizeResult[0]?.totalSize || 0) +
-							  (file3DSizeResult[0]?.totalSize || 0);
+		const totalFileSize =
+			(totalSizeResult[0]?.totalSize || 0) +
+			(audioSizeResult[0]?.totalSize || 0) +
+			(documentSizeResult[0]?.totalSize || 0) +
+			(jsonSizeResult[0]?.totalSize || 0) +
+			(file3DSizeResult[0]?.totalSize || 0);
 
 		const result = {
 			// Archivos multimedia

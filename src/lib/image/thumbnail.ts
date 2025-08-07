@@ -243,7 +243,7 @@ export async function generateThumbnail(
 
 		// Obtener metadata
 		const metadata = await image.metadata();
-		if (!metadata.width || !metadata.height) {
+		if (!(metadata.width && metadata.height)) {
 			thumbLogger.error('No se pudieron obtener las dimensiones de la imagen', { filePath });
 			throw new Error('No se pudieron obtener las dimensiones de la imagen');
 		}

@@ -143,7 +143,7 @@ class ProgressTrackingService extends SimpleEventEmitter {
 			createdAt: now,
 			updatedAt: now,
 			startTime: now,
-			cancellable: options.cancellable || false,
+			cancellable: options.cancellable,
 			pausable: false,
 			paused: false,
 		};
@@ -327,7 +327,7 @@ class ProgressTrackingService extends SimpleEventEmitter {
 		// Clean up after delay
 		setTimeout(() => {
 			this.cleanupOperation(operationId);
-		}, 10000);
+		}, 10_000);
 	}
 
 	/**
@@ -411,7 +411,7 @@ class ProgressTrackingService extends SimpleEventEmitter {
 	 */
 	isCancelled(operationId: string): boolean {
 		const operation = this.operations.get(operationId);
-		return operation?.status === 'cancelled' || false;
+		return operation?.status === 'cancelled';
 	}
 
 	/**

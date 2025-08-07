@@ -322,8 +322,8 @@ export class MetadataIntegrationService {
 	}
 
 	private formatBitrate(bitrate: number): string {
-		if (bitrate >= 1000000) {
-			return `${(bitrate / 1000000).toFixed(1)} Mbps`;
+		if (bitrate >= 1_000_000) {
+			return `${(bitrate / 1_000_000).toFixed(1)} Mbps`;
 		}
 		if (bitrate >= 1000) {
 			return `${(bitrate / 1000).toFixed(1)} kbps`;

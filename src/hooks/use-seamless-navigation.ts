@@ -11,7 +11,7 @@ export function useSeamlessNavigation() {
 		(to: string | number, options?: { replace?: boolean }) => {
 			// Verificar si el navegador soporta ViewTransition API
 			if ('startViewTransition' in document) {
-				// @ts-ignore - ViewTransition API es experimental
+				// @ts-expect-error - ViewTransition API es experimental
 				document.startViewTransition(() => {
 					if (typeof to === 'number') {
 						navigate(to);

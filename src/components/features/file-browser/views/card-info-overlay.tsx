@@ -78,7 +78,7 @@ export function CardInfoOverlay({
 		if (!value) return null;
 
 		return (
-			<div key={key} className="flex items-center justify-between text-xs">
+			<div className="flex items-center justify-between text-xs" key={key}>
 				<span className="text-muted-foreground capitalize">{key}:</span>
 				<span className="font-medium">{value}</span>
 			</div>
@@ -115,7 +115,7 @@ export function CardInfoOverlay({
 	};
 
 	const getEntityTags = () => {
-		if (!metadataConfig.showTags || !('tags' in entity) || !entity.tags) {
+		if (!(metadataConfig.showTags && 'tags' in entity && entity.tags)) {
 			return [];
 		}
 
@@ -127,36 +127,36 @@ export function CardInfoOverlay({
 		<AnimatePresence>
 			{visible && (
 				<motion.div
+					animate="animate"
 					className={cn(
 						'absolute z-10 rounded-lg shadow-lg backdrop-blur-sm',
 						position === 'center'
-							? 'bg-background/95 border max-w-xs p-3'
-							: 'bg-gradient-to-t from-black/80 to-transparent text-white p-3',
+							? 'max-w-xs border bg-background/95 p-3'
+							: 'bg-gradient-to-t from-black/80 to-transparent p-3 text-white',
 						getPositionClasses()
 					)}
-					variants={getAnimationVariants()}
-					initial="initial"
-					animate="animate"
 					exit="exit"
+					initial="initial"
 					transition={{ duration: animationDuration / 1000 }}
+					variants={getAnimationVariants()}
 				>
 					{/* Información básica */}
 					<div className="space-y-1">{getEntityMetadata().map(({ key, value }) => renderMetadataItem(key, value))}</div>
 
 					{/* Etiquetas */}
 					{getEntityTags().length > 0 && (
-						<div className="mt-2 pt-2 border-t border-white/20">
+						<div className="mt-2 border-white/20 border-t pt-2">
 							<div className="flex flex-wrap gap-1">
 								{getEntityTags().map((tag) => (
 									<Badge
-										key={typeof tag === 'string' ? tag : String(tag)}
-										variant="secondary"
 										className={cn(
-											'text-xs px-1.5 py-0.5',
+											'px-1.5 py-0.5 text-xs',
 											position === 'center'
 												? 'bg-muted text-muted-foreground'
 												: 'bg-white/20 text-white hover:bg-white/30'
 										)}
+										key={typeof tag === 'string' ? tag : String(tag)}
+										variant="secondary"
 									>
 										{tag}
 									</Badge>
@@ -167,7 +167,7 @@ export function CardInfoOverlay({
 
 					{/* Información de colección */}
 					{metadataConfig.showCollection && 'collections' in entity && entity.collections && (
-						<div className="mt-2 pt-2 border-t border-white/20">
+						<div className="mt-2 border-white/20 border-t pt-2">
 							<div className="text-xs">
 								<span className="text-muted-foreground">Colección:</span>
 								<span className="ml-1 font-medium">

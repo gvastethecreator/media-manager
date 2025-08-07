@@ -19,7 +19,7 @@ export function extendAlbum(album: Album): AlbumWithStats {
 		description: album.description || '',
 		emoji: album.emoji || '📸',
 		color: album.color || '#3b82f6',
-		isFavorite: album.isFavorite || false,
+		isFavorite: album.isFavorite,
 	};
 }
 

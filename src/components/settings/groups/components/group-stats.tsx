@@ -14,23 +14,23 @@ export function GroupStats({ count }: GroupStatsProps) {
 
 	return (
 		<div className="space-y-2">
-			<h3 className="text-sm font-medium">Estadísticas</h3>
+			<h3 className="font-medium text-sm">Estadísticas</h3>
 			<div className="grid grid-cols-2 gap-2">
 				{Object.entries(count).map(([key, value]: [string, number]) => (
 					<div
-						key={key}
 						className={cn(
-							'flex items-center justify-between p-2 rounded-md',
-							'bg-muted/50 hover:bg-muted/70 transition-colors'
+							'flex items-center justify-between rounded-md p-2',
+							'bg-muted/50 transition-colors hover:bg-muted/70'
 						)}
+						key={key}
 					>
 						<span className="text-sm capitalize">{key}</span>
-						<span className="text-sm font-medium">{value}</span>
+						<span className="font-medium text-sm">{value}</span>
 					</div>
 				))}
-				<div className="col-span-2 flex items-center justify-between p-2 rounded-md bg-primary/10">
-					<span className="text-sm font-medium">Total</span>
-					<span className="text-sm font-medium">{total}</span>
+				<div className="col-span-2 flex items-center justify-between rounded-md bg-primary/10 p-2">
+					<span className="font-medium text-sm">Total</span>
+					<span className="font-medium text-sm">{total}</span>
 				</div>
 			</div>
 		</div>

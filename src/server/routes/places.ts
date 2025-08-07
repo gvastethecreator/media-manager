@@ -55,8 +55,8 @@ router.get('/', async (req, res) => {
 			db.query.places.findMany({
 				where: and(...whereConditions),
 				orderBy: orderByClause,
-				limit: limit,
-				offset: offset,
+				limit,
+				offset,
 			}),
 			db
 				.select({ count: count() })

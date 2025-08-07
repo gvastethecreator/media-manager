@@ -50,7 +50,7 @@ function PromptCardComponent({
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
 					className
 				)}
 			>
@@ -63,7 +63,7 @@ function PromptCardComponent({
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
 					className
 				)}
 			>
@@ -212,34 +212,34 @@ function PromptCardComponent({
 
 	return (
 		<motion.div
+			aria-label={`Prompt: ${name}`}
 			className={cn(
 				'w-[300px] md:w-[320px]',
 				tcgMode ? 'h-[470px]' : 'h-auto',
 				compact && 'h-auto',
-				disabled && 'opacity-70 pointer-events-none',
+				disabled && 'pointer-events-none opacity-70',
 				className
 			)}
-			style={cardStyle}
-			whileHover={!disabled ? { y: -8, transition: { duration: 0.3 } } : {}}
-			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
 			onClick={disabled ? undefined : () => onClick?.(prompt)}
 			onKeyDown={handleKeyDown}
-			tabIndex={disabled || !onClick ? -1 : 0}
-			role={onClick ? 'button' : 'article'}
-			aria-label={`Prompt: ${name}`}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
+			role={onClick ? 'button' : 'article'}
+			style={cardStyle}
+			tabIndex={disabled || !onClick ? -1 : 0}
+			whileHover={disabled ? {} : { y: -8, transition: { duration: 0.3 } }}
+			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
 		>
 			<CardContainer
-				primaryColor={primaryColor}
-				secondaryColor={secondaryColor}
 				className={cn(
 					'transition-all duration-300',
 					isHovered && 'scale-[1.02]',
 					isSelected && 'ring-4 ring-primary/60'
 				)}
+				primaryColor={primaryColor}
+				secondaryColor={secondaryColor}
 			>
-				<div className="flex flex-col h-full relative z-1">
+				<div className="relative z-1 flex h-full flex-col">
 					{!compact && recentImagesData && (
 						<PromptCardImages
 							images={recentImagesData.map((img) => img.thumbnailUrl)}
@@ -248,26 +248,26 @@ function PromptCardComponent({
 						/>
 					)}
 					<PromptCardContent
-						name={name}
-						emoji={emoji}
-						description={description || ''}
-						content={content || ''}
 						category={category || 'general'}
+						compact={compact}
+						content={content || ''}
+						description={description || ''}
+						emoji={emoji}
+						name={name}
 						parameters={parsedParameters}
+						primaryColor={primaryColor}
 						relationCounts={relationCounts}
 						tcgMode={tcgMode}
-						compact={compact}
-						primaryColor={primaryColor}
 					/>
 					<PromptCardFooter
-						imagesCount={imagesCount}
-						videosCount={videosCount}
-						tagsCount={tagsCount}
 						createdAt={createdAt}
-						updatedAt={updatedAt}
+						imagesCount={imagesCount}
 						primaryColor={primaryColor}
 						secondaryColor={secondaryColor}
+						tagsCount={tagsCount}
 						tcgMode={tcgMode}
+						updatedAt={updatedAt}
+						videosCount={videosCount}
 					/>
 				</div>
 			</CardContainer>

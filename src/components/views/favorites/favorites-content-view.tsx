@@ -79,10 +79,10 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 	if (error) {
 		return (
 			<EmptyState
+				actions={<Button onClick={handleRetry}>Reintentar</Button>}
+				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
 				icon={Heart}
 				title="Error al cargar favoritos"
-				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
-				actions={<Button onClick={handleRetry}>Reintentar</Button>}
 			/>
 		);
 	}
@@ -90,59 +90,49 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 	return (
 		<ScrollArea className={className || 'flex-1'}>
 			<div className="p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Favoritos</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Favoritos</h2>
 
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
 					{showForm ? 'Cancelar' : 'Crear Favorito'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nuevo Favorito</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nuevo Favorito</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="favoriteName">Nombre</Label>
 							<Input
 								id="favoriteName"
-								value={newFavoriteName}
 								onChange={(e) => setNewFavoriteName(e.target.value)}
 								placeholder="Nombre del favorito"
+								value={newFavoriteName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="favoriteDescription">Descripción</Label>
 							<Textarea
 								id="favoriteDescription"
-								value={newFavoriteDescription}
 								onChange={(e) => setNewFavoriteDescription(e.target.value)}
 								placeholder="Descripción del favorito (opcional)"
+								value={newFavoriteDescription}
 							/>
 						</div>
 						<Button onClick={handleCreateFavorite}>Guardar Favorito</Button>
 					</div>
 				)}
 
-				{(!favorites || !favorites.length) && !isLoading && !showForm ? (
-					<EmptyState
-						icon={Heart}
-						title="Sin favoritos"
-						description={
-							localSearch
-								? `No se encontraron favoritos que coincidan con "${localSearch}"`
-								: 'No hay favoritos disponibles'
-						}
-					/>
-				) : (
+				{(favorites && favorites.length) || isLoading || showForm ? (
 					<motion.div
-						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
-						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
+						className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+						initial={{ opacity: 0, y: 20 }}
 						transition={{ duration: 0.3 }}
 					>
 						{favorites?.map((favorite, index) => (
 							<motion.div
-								key={favorite.id}
-								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
+								initial={{ opacity: 0, y: 20 }}
+								key={favorite.id}
 								transition={{ duration: 0.3, delay: index * 0.05 }}
 							>
 								<FavoriteCard
@@ -153,6 +143,16 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 							</motion.div>
 						))}
 					</motion.div>
+				) : (
+					<EmptyState
+						description={
+							localSearch
+								? `No se encontraron favoritos que coincidan con "${localSearch}"`
+								: 'No hay favoritos disponibles'
+						}
+						icon={Heart}
+						title="Sin favoritos"
+					/>
 				)}
 			</div>
 		</ScrollArea>

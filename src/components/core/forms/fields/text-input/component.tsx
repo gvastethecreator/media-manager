@@ -27,19 +27,19 @@ const TextInput: React.FC<TextInputProps> = ({
 		<div className="grid w-full max-w-sm items-center gap-1.5">
 			{label && <Label htmlFor={id}>{label}</Label>}
 			<BaseTextInput
+				className={className}
+				disabled={disabled}
 				id={id}
+				maxLength={maxLength}
 				name={name}
-				value={value}
 				onChange={onChange}
 				placeholder={placeholder}
-				type={type}
-				maxLength={maxLength}
 				required={required}
-				disabled={disabled}
-				className={className}
+				type={type}
+				value={value}
 				{...(props as any)}
 			/>
-			{error && <p className="text-sm text-red-500 mt-1">{error}</p>}
+			{error && <p className="mt-1 text-red-500 text-sm">{error}</p>}
 		</div>
 	);
 };

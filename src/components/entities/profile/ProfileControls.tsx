@@ -58,28 +58,28 @@ export function ProfileControls({ className }: ProfileControlsProps) {
 		<div className={`flex flex-col gap-4 sm:flex-row sm:items-center ${className}`}>
 			{/* Búsqueda */}
 			<div className="relative flex-1">
-				<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-				<Input placeholder="Buscar perfiles..." value={searchTerm} onChange={handleSearchChange} className="pl-9" />
+				<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 text-muted-foreground" />
+				<Input className="pl-9" onChange={handleSearchChange} placeholder="Buscar perfiles..." value={searchTerm} />
 			</div>
 
 			<div className="flex items-center gap-2">
 				{/* Modo de vista */}
 				<div className="flex items-center rounded-lg border p-1">
 					<Button
-						variant="ghost"
-						size="icon"
-						onClick={() => setViewMode('grid')}
 						className={viewConfig.mode === 'grid' ? 'bg-muted' : ''}
+						onClick={() => setViewMode('grid')}
+						size="icon"
 						title="Vista en grid"
+						variant="ghost"
 					>
 						<LayoutGrid className="h-4 w-4" />
 					</Button>
 					<Button
-						variant="ghost"
-						size="icon"
-						onClick={() => setViewMode('list')}
 						className={viewConfig.mode === 'list' ? 'bg-muted' : ''}
+						onClick={() => setViewMode('list')}
+						size="icon"
 						title="Vista en lista"
+						variant="ghost"
 					>
 						<List className="h-4 w-4" />
 					</Button>
@@ -89,29 +89,29 @@ export function ProfileControls({ className }: ProfileControlsProps) {
 				{viewConfig.mode === 'grid' && (
 					<div className="flex items-center rounded-lg border p-1">
 						<Button
-							variant="ghost"
-							size="icon"
-							onClick={() => setGridColumns(2)}
 							className={viewConfig.gridColumns === 2 ? 'bg-muted' : ''}
+							onClick={() => setGridColumns(2)}
+							size="icon"
 							title="2 columnas"
+							variant="ghost"
 						>
 							<Grid2x2 className="h-4 w-4" />
 						</Button>
 						<Button
-							variant="ghost"
-							size="icon"
-							onClick={() => setGridColumns(3)}
 							className={viewConfig.gridColumns === 3 ? 'bg-muted' : ''}
+							onClick={() => setGridColumns(3)}
+							size="icon"
 							title="3 columnas"
+							variant="ghost"
 						>
 							<Grid3x3 className="h-4 w-4" />
 						</Button>
 						<Button
-							variant="ghost"
-							size="icon"
-							onClick={() => setGridColumns(4)}
 							className={viewConfig.gridColumns === 4 ? 'bg-muted' : ''}
+							onClick={() => setGridColumns(4)}
+							size="icon"
 							title="4 columnas"
+							variant="ghost"
 						>
 							<Layers className="h-4 w-4" />
 						</Button>
@@ -119,7 +119,7 @@ export function ProfileControls({ className }: ProfileControlsProps) {
 				)}
 
 				{/* Ordenamiento */}
-				<Select value={currentSortOption} onValueChange={handleSortChange}>
+				<Select onValueChange={handleSortChange} value={currentSortOption}>
 					<SelectTrigger className="w-[180px]">
 						<SelectValue placeholder="Ordenar por..." />
 					</SelectTrigger>
@@ -152,7 +152,7 @@ export function ProfileControls({ className }: ProfileControlsProps) {
 				</Select>
 
 				{/* Agrupar por */}
-				<Select value={groupBy} onValueChange={handleGroupByChange as (value: string) => void}>
+				<Select onValueChange={handleGroupByChange as (value: string) => void} value={groupBy}>
 					<SelectTrigger className="w-[150px]">
 						<SelectValue placeholder="Agrupar por..." />
 					</SelectTrigger>

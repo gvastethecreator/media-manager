@@ -66,9 +66,9 @@ export const ViewConfigurationSelector: React.FC<ViewConfigurationSelectorProps>
 	const currentPreset = presets.find((p) => p.id === currentPresetId);
 
 	return (
-		<DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
+		<DropdownMenu onOpenChange={setIsOpen} open={isOpen}>
 			<DropdownMenuTrigger asChild>
-				<Button variant="outline" size="sm" className={`h-8 gap-2 ${className}`}>
+				<Button className={`h-8 gap-2 ${className}`} size="sm" variant="outline">
 					<ViewIcon className="h-4 w-4" />
 					<span className="hidden sm:inline">{currentPreset?.name || 'Configuración'}</span>
 					<ChevronDown className="h-3 w-3" />
@@ -90,15 +90,15 @@ export const ViewConfigurationSelector: React.FC<ViewConfigurationSelectorProps>
 
 							return (
 								<DropdownMenuItem
+									className="flex cursor-pointer items-center justify-between"
 									key={preset.id}
 									onClick={() => handlePresetSelect(preset)}
-									className="flex items-center justify-between cursor-pointer"
 								>
 									<div className="flex items-center gap-2">
-										<div className="flex items-center gap-2 flex-1">
+										<div className="flex flex-1 items-center gap-2">
 											<span className="font-medium">{preset.name}</span>
 											{preset.category !== 'default' && (
-												<Badge variant={preset.category === 'custom' ? 'secondary' : 'outline'} className="text-xs">
+												<Badge className="text-xs" variant={preset.category === 'custom' ? 'secondary' : 'outline'}>
 													{preset.category}
 												</Badge>
 											)}
@@ -117,7 +117,7 @@ export const ViewConfigurationSelector: React.FC<ViewConfigurationSelectorProps>
 					</DropdownMenuItem>
 				)}
 
-				<DropdownMenuItem onClick={handleOpenConfigPanel} className="flex items-center gap-2 cursor-pointer">
+				<DropdownMenuItem className="flex cursor-pointer items-center gap-2" onClick={handleOpenConfigPanel}>
 					<Settings className="h-4 w-4" />
 					<span>Configuración avanzada...</span>
 				</DropdownMenuItem>

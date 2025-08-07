@@ -130,14 +130,12 @@ export function FileProvider({ children }: { children: ReactNode }) {
 					// Si no es multiselección, deseleccionar todo y seleccionar solo este
 					setSelectedFiles([]);
 				}
+			} else if (multiSelect) {
+				// Añadir a la selección existente
+				selectFiles([item.id]);
 			} else {
-				if (multiSelect) {
-					// Añadir a la selección existente
-					selectFiles([item.id]);
-				} else {
-					// Reemplazar la selección actual
-					setSelectedFiles([item.id]);
-				}
+				// Reemplazar la selección actual
+				setSelectedFiles([item.id]);
 			}
 
 			// Emitir evento de actualización si es necesario

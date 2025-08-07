@@ -95,7 +95,7 @@ export function CreatePromptForm({
 				emoji: prompt.emoji || '💬',
 				category: prompt.category as PromptCategory | undefined,
 				parameters: prompt.parameters || '{}',
-				isFavorite: prompt.isFavorite || false,
+				isFavorite: prompt.isFavorite,
 			});
 		}
 	}, [prompt, isEditing, form]);
@@ -138,23 +138,23 @@ export function CreatePromptForm({
 		{
 			name: 'emoji',
 			label: 'Emoji',
-			render: ({ value, onChange }: any) => <EmojiPicker value={value} onEmojiSelect={onChange} />,
+			render: ({ value, onChange }: any) => <EmojiPicker onEmojiSelect={onChange} value={value} />,
 		},
 		{
 			name: 'color',
 			label: 'Color',
-			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} />,
+			render: ({ value, onChange }: any) => <ColorPicker onChange={onChange} value={value} />,
 		},
 		{
 			name: 'description',
 			label: 'Descripción',
 			render: ({ value, onChange }: any) => (
 				<textarea
-					placeholder="Descripción del prompt..."
-					value={value || ''}
+					className="w-full resize-none rounded border p-2 text-xs"
 					onChange={(e) => onChange(e.target.value)}
+					placeholder="Descripción del prompt..."
 					rows={3}
-					className="text-xs resize-none w-full border rounded p-2"
+					value={value || ''}
 				/>
 			),
 		},
@@ -194,7 +194,6 @@ export function CreatePromptForm({
 
 	return (
 		<DynamicCreateForm
-			optionalFields={optionalFields}
 			onSubmit={async (data) => {
 				try {
 					if (isEditing && prompt) {
@@ -208,6 +207,7 @@ export function CreatePromptForm({
 					console.error('Error al procesar el prompt:', error);
 				}
 			}}
+			optionalFields={optionalFields}
 			submitLabel={isEditing ? 'Guardar cambios' : 'Crear prompt'}
 		/>
 	);

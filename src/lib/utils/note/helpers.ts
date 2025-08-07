@@ -19,7 +19,7 @@ export function filterNotes(notes: NoteWithStats[], filters: NoteFilters): NoteW
 			const matchesContent = note.content.toLowerCase().includes(searchQuery);
 			const matchesExcerpt = note.summary?.toLowerCase().includes(searchQuery) ?? false;
 
-			if (!matchesTitle && !matchesContent && !matchesExcerpt) {
+			if (!(matchesTitle || matchesContent || matchesExcerpt)) {
 				return false;
 			}
 		}
@@ -231,7 +231,7 @@ export function compareNotes(noteA: NoteWithStats, noteB: NoteWithStats) {
 		statusChanged: noteA.status !== noteB.status,
 		favoriteChanged: noteA.isFavorite !== noteB.isFavorite,
 		relationsChanged: noteA.stats.totalItems !== noteB.stats.totalItems,
-		hasSignificantChanges: function () {
+		hasSignificantChanges() {
 			return (
 				this.titleChanged ||
 				this.contentChanged ||

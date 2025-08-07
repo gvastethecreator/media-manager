@@ -44,16 +44,16 @@ function ThumbnailItem({ image, index }: { image: LastProcessedThumbnail; index:
 
 	return (
 		<motion.div
-			key={image.id}
-			initial={{ opacity: 0, scale: 0.8 }}
 			animate={{ opacity: 1, scale: 1 }}
+			className="group relative aspect-square overflow-hidden rounded-md bg-muted"
 			exit={{ opacity: 0, scale: 0.8 }}
+			initial={{ opacity: 0, scale: 0.8 }}
+			key={image.id}
 			transition={{ delay: index * 0.1 }}
-			className="relative aspect-square rounded-md overflow-hidden bg-muted group"
 		>
 			{isLoading ? (
 				<div className="absolute inset-0 flex items-center justify-center">
-					<div className="animate-spin h-4 w-4 border-2 border-primary border-t-transparent rounded-full" />
+					<div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
 				</div>
 			) : error ? (
 				<div className="absolute inset-0 flex items-center justify-center text-red-500 text-xs">Error</div>
@@ -61,17 +61,17 @@ function ThumbnailItem({ image, index }: { image: LastProcessedThumbnail; index:
 				thumbnailData?.thumbnailUrl && (
 					<>
 						<img
-							src={thumbnailData.thumbnailUrl}
 							alt={image.path}
 							className="object-cover transition-transform group-hover:scale-105"
+							src={thumbnailData.thumbnailUrl}
 						/>
 						<motion.div
+							className="absolute inset-0 bg-black/60 p-1.5"
 							initial={{ opacity: 0 }}
 							whileHover={{ opacity: 1 }}
-							className="absolute inset-0 bg-black/60 p-1.5"
 						>
-							<p className="text-[10px] text-white truncate">{image.path}</p>
-							<p className="text-[10px] text-white/70 absolute bottom-1.5 left-1.5">
+							<p className="truncate text-[10px] text-white">{image.path}</p>
+							<p className="absolute bottom-1.5 left-1.5 text-[10px] text-white/70">
 								{new Date(image.processedAt).toLocaleTimeString()}
 							</p>
 						</motion.div>
@@ -201,119 +201,119 @@ export function ThumbnailsSettings() {
 	const handleCleanThumbnails = () => handleThumbnailProcess(cleanThumbnailsMutation, 'Limpieza');
 
 	return (
-		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm border-none h-full">
-			<CardHeader className="p-2 pb-0 bg-transparent">
-				<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
-					<span className="flex items-center gap-2 h-7">
+		<Card className="flex h-full flex-col gap-2 rounded-sm border-none bg-muted/30">
+			<CardHeader className="bg-transparent p-2 pb-0">
+				<CardTitle className="flex items-center justify-between pl-1 font-semibold text-base text-muted-foreground">
+					<span className="flex h-7 items-center gap-2">
 						<Settings2 className="h-5 w-5" /> Miniaturas
 					</span>
 				</CardTitle>
 			</CardHeader>
 			<Separator className="my-0" />
-			<CardContent className="overflow-y-auto flex-1 p-2">
-				<ScrollArea className="h-full flex flex-col">
+			<CardContent className="flex-1 overflow-y-auto p-2">
+				<ScrollArea className="flex h-full flex-col">
 					{thumbnailError && (
 						<div className="mb-4">
 							<ThumbnailError
+								description="No se pudieron cargar las estadísticas de miniaturas. Esto puede deberse a un problema de conexión con la base de datos."
 								error={thumbnailError}
 								onRetry={handleRetryInitialize}
-								description="No se pudieron cargar las estadísticas de miniaturas. Esto puede deberse a un problema de conexión con la base de datos."
 							/>
 						</div>
 					)}
 					<div className="space-y-3">
-						<div className="grid grid-cols-2 gap-1	">
+						<div className="grid grid-cols-2 gap-1">
 							<div className="space-y-1.5">
 								<Label className="text-sm">Calidad de Miniaturas</Label>
-								<Select value={settings.thumbnailQuality} onValueChange={handleQualityChange}>
+								<Select onValueChange={handleQualityChange} value={settings.thumbnailQuality}>
 									<SelectTrigger className="h-8 text-xs">
 										<SelectValue placeholder="Selecciona la calidad" />
 									</SelectTrigger>
 									<SelectContent>
 										{thumbnailQualityOptions.map((option) => (
-											<SelectItem key={option.value} value={option.value} className="text-xs">
+											<SelectItem className="text-xs" key={option.value} value={option.value}>
 												{option.label}
 											</SelectItem>
 										))}
 									</SelectContent>
 								</Select>
-								<p className="text-xs text-muted-foreground">
+								<p className="text-muted-foreground text-xs">
 									Una calidad más alta resultará en miniaturas más nítidas pero ocupará más espacio
 								</p>
 							</div>
 
 							<div className="flex items-center justify-between space-x-4 py-1">
 								<div className="space-y-0.5">
-									<Label htmlFor="video-animation" className="text-sm">
+									<Label className="text-sm" htmlFor="video-animation">
 										Animación en videos
 									</Label>
-									<p className="text-xs text-muted-foreground">
+									<p className="text-muted-foreground text-xs">
 										Mostrar un preview animado al pasar el cursor sobre videos
 									</p>
 								</div>
 								<Switch
-									id={idVideoAnimation}
 									checked={settings.videoThumbnailAnimation}
-									onCheckedChange={handleVideoAnimationToggle}
 									className="scale-90"
+									id={idVideoAnimation}
+									onCheckedChange={handleVideoAnimationToggle}
 								/>
 							</div>
 						</div>
 
 						<div className="flex flex-wrap gap-1.5 pt-2">
 							<Button
-								variant="outline"
-								size="sm"
 								className="h-7 text-xs"
-								onClick={handleOptimizeThumbnails}
 								disabled={isThumbnailLoading || isThumbnailProcessing}
+								onClick={handleOptimizeThumbnails}
+								size="sm"
+								variant="outline"
 							>
 								{isThumbnailProcessing ? (
 									<>
-										<Zap className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+										<Zap className="mr-1.5 h-3.5 w-3.5 animate-spin" />
 										Optimizando...
 									</>
 								) : (
 									<>
-										<Zap className="h-3.5 w-3.5 mr-1.5" />
+										<Zap className="mr-1.5 h-3.5 w-3.5" />
 										Optimizar
 									</>
 								)}
 							</Button>
 							<Button
-								variant="outline"
-								size="sm"
 								className="h-7 text-xs"
-								onClick={handleReprocessThumbnails}
 								disabled={isThumbnailLoading || isThumbnailProcessing}
+								onClick={handleReprocessThumbnails}
+								size="sm"
+								variant="outline"
 							>
 								{isThumbnailProcessing ? (
 									<>
-										<Settings2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+										<Settings2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
 										Procesando...
 									</>
 								) : (
 									<>
-										<Settings2 className="h-3.5 w-3.5 mr-1.5" />
+										<Settings2 className="mr-1.5 h-3.5 w-3.5" />
 										Reprocesar
 									</>
 								)}
 							</Button>
 							<Button
-								variant="outline"
-								size="sm"
 								className="h-7 text-xs"
-								onClick={handleCleanThumbnails}
 								disabled={isThumbnailLoading || isThumbnailProcessing}
+								onClick={handleCleanThumbnails}
+								size="sm"
+								variant="outline"
 							>
 								{isThumbnailProcessing ? (
 									<>
-										<Trash2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+										<Trash2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
 										Limpiando...
 									</>
 								) : (
 									<>
-										<Trash2 className="h-3.5 w-3.5 mr-1.5" />
+										<Trash2 className="mr-1.5 h-3.5 w-3.5" />
 										Limpiar
 									</>
 								)}
@@ -321,10 +321,10 @@ export function ThumbnailsSettings() {
 
 							{isThumbnailProcessing && (
 								<Button
-									variant="ghost"
-									size="sm"
+									className="h-7 text-red-500 text-xs hover:text-red-600"
 									onClick={() => setThumbnailProcessing(false)}
-									className="h-7 text-xs text-red-500 hover:text-red-600"
+									size="sm"
+									variant="ghost"
 								>
 									Cancelar
 								</Button>
@@ -336,48 +336,48 @@ export function ThumbnailsSettings() {
 							{thumbnailStats && (
 								<>
 									<motion.div
-										initial={{ opacity: 0, x: -20 }}
 										animate={{ opacity: 1, x: 0 }}
-										transition={{ delay: 0.1 }}
 										className="space-y-1.5"
+										initial={{ opacity: 0, x: -20 }}
+										transition={{ delay: 0.1 }}
 									>
 										<div className="flex items-center justify-between">
 											<Label className="text-sm">Miniaturas</Label>
-											<Badge variant="secondary" className="text-xs">
+											<Badge className="text-xs" variant="secondary">
 												{formatBytes(thumbnailStats.totalSize || 0)}
 											</Badge>
 										</div>
-										<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
-											<span className="text-sm font-medium">{thumbnailStats.totalFiles || 0} totales</span>
-											<span className="text-sm text-muted-foreground">{thumbnailStats.pending} pendientes</span>
+										<div className="flex items-center justify-between rounded-lg bg-muted/50 p-2">
+											<span className="font-medium text-sm">{thumbnailStats.totalFiles || 0} totales</span>
+											<span className="text-muted-foreground text-sm">{thumbnailStats.pending} pendientes</span>
 										</div>
 									</motion.div>
 
 									<motion.div
-										initial={{ opacity: 0, x: 20 }}
 										animate={{ opacity: 1, x: 0 }}
-										transition={{ delay: 0.2 }}
 										className="space-y-1.5"
+										initial={{ opacity: 0, x: 20 }}
+										transition={{ delay: 0.2 }}
 									>
 										<div className="flex items-center justify-between">
 											<Label className="text-sm">Estado</Label>
 											{thumbnailStats.errors.length > 0 && (
 												<Button
-													variant="ghost"
-													size="sm"
-													className="h-6 text-xs text-red-500 hover:text-red-600"
+													className="h-6 text-red-500 text-xs hover:text-red-600"
 													onClick={() => setShowErrors(true)}
+													size="sm"
+													variant="ghost"
 												>
-													<AlertCircle className="h-3.5 w-3.5 mr-1" />
+													<AlertCircle className="mr-1 h-3.5 w-3.5" />
 													Ver errores
 												</Button>
 											)}
 										</div>
-										<div className="flex items-center justify-between bg-muted/50 p-2 rounded-lg">
-											<span className="text-sm font-medium">{thumbnailStats.errors.length} errores</span>
+										<div className="flex items-center justify-between rounded-lg bg-muted/50 p-2">
+											<span className="font-medium text-sm">{thumbnailStats.errors.length} errores</span>
 											<Badge
-												variant="secondary"
 												className={cn('text-xs', thumbnailStats.pending === 0 && 'bg-green-500/20 text-green-500')}
+												variant="secondary"
 											>
 												{thumbnailStats.pending === 0 ? 'Al día' : 'Pendiente'}
 											</Badge>
@@ -388,10 +388,10 @@ export function ThumbnailsSettings() {
 						</div>
 						{isThumbnailProcessing && (
 							<motion.div
-								initial={{ opacity: 0, height: 0 }}
 								animate={{ opacity: 1, height: 'auto' }}
+								className="mt-3 space-y-1.5 rounded-lg bg-muted/30 p-3"
 								exit={{ opacity: 0, height: 0 }}
-								className="space-y-1.5 bg-muted/30 p-3 rounded-lg mt-3"
+								initial={{ opacity: 0, height: 0 }}
 							>
 								<div className="flex justify-between text-xs">
 									<span>
@@ -400,25 +400,25 @@ export function ThumbnailsSettings() {
 									</span>
 									<span className="text-muted-foreground">{thumbnailProcessStatus.status || 'Procesando...'}</span>
 								</div>
-								<Progress value={thumbnailProcessStatus.progress} className="h-1.5" />
+								<Progress className="h-1.5" value={thumbnailProcessStatus.progress} />
 								{thumbnailProcessStatus.currentFile && (
-									<p className="text-xs text-muted-foreground truncate">{thumbnailProcessStatus.currentFile}</p>
+									<p className="truncate text-muted-foreground text-xs">{thumbnailProcessStatus.currentFile}</p>
 								)}
 							</motion.div>
 						)}
 
 						{lastProcessedThumbnails.length > 0 && (
 							<motion.div
-								initial={{ opacity: 0 }}
 								animate={{ opacity: 1 }}
+								className="mt-3 space-y-1.5"
+								initial={{ opacity: 0 }}
 								transition={{ delay: 0.3 }}
-								className="space-y-1.5 mt-3"
 							>
 								<Label className="text-sm">Últimas Procesadas</Label>
-								<div className="grid grid-cols-3 gap-1.5 bg-muted/30 p-2 rounded-lg">
+								<div className="grid grid-cols-3 gap-1.5 rounded-lg bg-muted/30 p-2">
 									<AnimatePresence>
 										{lastProcessedThumbnails.map((image, index) => (
-											<ThumbnailItem key={image.id} image={image} index={index} />
+											<ThumbnailItem image={image} index={index} key={image.id} />
 										))}
 									</AnimatePresence>
 								</div>
@@ -428,25 +428,25 @@ export function ThumbnailsSettings() {
 				</ScrollArea>
 			</CardContent>
 
-			<Dialog open={showErrors} onOpenChange={setShowErrors}>
+			<Dialog onOpenChange={setShowErrors} open={showErrors}>
 				<DialogContent className="max-w-2xl">
 					<DialogHeader>
 						<DialogTitle>Errores en Miniaturas</DialogTitle>
 					</DialogHeader>
-					<ScrollArea className="h-[400px] mt-4">
+					<ScrollArea className="mt-4 h-[400px]">
 						<div className="space-y-4">
 							{thumbnailStats?.errors.map((error: any) => (
 								<motion.div
-									key={error.imageId}
-									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
-									className="p-4 rounded-lg border bg-muted/50"
+									className="rounded-lg border bg-muted/50 p-4"
+									initial={{ opacity: 0, y: 20 }}
+									key={error.imageId}
 								>
-									<div className="flex justify-between items-start mb-2">
+									<div className="mb-2 flex items-start justify-between">
 										<span className="font-medium">{error.imagePath}</span>
-										<span className="text-sm text-muted-foreground">{new Date(error.timestamp).toLocaleString()}</span>
+										<span className="text-muted-foreground text-sm">{new Date(error.timestamp).toLocaleString()}</span>
 									</div>
-									<p className="text-sm text-red-500">{error.error}</p>
+									<p className="text-red-500 text-sm">{error.error}</p>
 								</motion.div>
 							))}
 						</div>

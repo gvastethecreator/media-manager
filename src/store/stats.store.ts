@@ -270,7 +270,7 @@ export const useStatsFiltersStore = create<StatsFilters>((set) => ({
 		endDate: null,
 		type: [],
 	},
-	refreshInterval: 60000,
+	refreshInterval: 60_000,
 	lastRefresh: Date.now(),
 
 	setFilters: (filters) =>

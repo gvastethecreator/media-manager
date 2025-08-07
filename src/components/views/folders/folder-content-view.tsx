@@ -188,11 +188,11 @@ export function FolderContentView({
 	if (!currentFolderId) {
 		logger.warn('⚠️ No hay carpeta seleccionada');
 		return (
-			<div className="flex flex-col items-center justify-center h-full gap-0">
+			<div className="flex h-full flex-col items-center justify-center gap-0">
 				<EmptyState
+					description="Selecciona una carpeta desde la vista de carpetas para ver su contenido."
 					icon={Folder}
 					title="No hay carpeta seleccionada"
-					description="Selecciona una carpeta desde la vista de carpetas para ver su contenido."
 				/>
 			</div>
 		);
@@ -201,8 +201,8 @@ export function FolderContentView({
 	// 🔄 Mostrar estado de carga mientras se obtiene información de la carpeta
 	if (isFolderLoading) {
 		return (
-			<div className="flex flex-col items-center justify-center h-full gap-4">
-				<EmptyState icon={RefreshCw} title="Cargando carpeta..." description="Obteniendo información de la carpeta." />
+			<div className="flex h-full flex-col items-center justify-center gap-4">
+				<EmptyState description="Obteniendo información de la carpeta." icon={RefreshCw} title="Cargando carpeta..." />
 			</div>
 		);
 	}
@@ -211,11 +211,11 @@ export function FolderContentView({
 	if (folderError) {
 		logger.error('❌ Error al cargar carpeta:', folderError);
 		return (
-			<div className="flex flex-col items-center justify-center h-full gap-4">
+			<div className="flex h-full flex-col items-center justify-center gap-4">
 				<EmptyState
+					description="No se pudo obtener la información de la carpeta. Verifica que existe y tienes permisos para acceder."
 					icon={Folder}
 					title="Error al cargar carpeta"
-					description="No se pudo obtener la información de la carpeta. Verifica que existe y tienes permisos para acceder."
 				/>
 			</div>
 		);
@@ -226,12 +226,12 @@ export function FolderContentView({
 	return (
 		<BaseContentView showHeader={false}>
 			<FileBrowser
+				className="h-full"
 				entityType={EntityStatsType.IMAGE}
 				filterId={currentFolderId}
 				filterType="folder"
 				onItemClick={handleImageSelect}
 				onItemDoubleClick={handleImageDoubleClick}
-				className="h-full"
 			/>
 		</BaseContentView>
 	);

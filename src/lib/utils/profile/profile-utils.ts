@@ -153,20 +153,19 @@ export async function ensureDefaultProfile(): Promise<DrizzleProfile> {
 		// Si no hay perfil activo pero hay perfiles, activamos el primero
 		const [activeProfile] = await db.select().from(profiles).where(eq(profiles.isActive, true)).limit(1);
 
-		if (!activeProfile) {
-			const [firstProfile] = await db.select().from(profiles).orderBy(asc(profiles.createdAt)).limit(1);
-
-			if (firstProfile) {
-				const [updatedProfile] = await db
-					.update(profiles)
-					.set({ isActive: true })
-					.where(eq(profiles.id, firstProfile.id))
-					.returning();
-
-				return updatedProfile;
-			}
-		} else {
+		if (activeProfile) {
 			return activeProfile;
+		}
+		const [firstProfile] = await db.select().from(profiles).orderBy(asc(profiles.createdAt)).limit(1);
+
+		if (firstProfile) {
+			const [updatedProfile] = await db
+				.update(profiles)
+				.set({ isActive: true })
+				.where(eq(profiles.id, firstProfile.id))
+				.returning();
+
+			return updatedProfile;
 		}
 	}
 

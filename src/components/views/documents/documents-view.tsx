@@ -104,17 +104,17 @@ export function DocumentsView(_props: ViewProps) {
 	return (
 		<DocumentsContentView
 			documents={sortedDocuments}
-			isLoading={isLoading}
 			error={error}
-			showForm={showForm}
-			newDocumentName={newDocumentName}
-			newDocumentFile={newDocumentFile}
-			setShowForm={setShowForm}
-			setNewDocumentName={setNewDocumentName}
-			setNewDocumentFile={setNewDocumentFile}
+			handleCreateDocument={handleCreateDocument}
 			handleDocumentClick={handleDocumentClick}
 			handleFileChange={handleFileChange}
-			handleCreateDocument={handleCreateDocument}
+			isLoading={isLoading}
+			newDocumentFile={newDocumentFile}
+			newDocumentName={newDocumentName}
+			setNewDocumentFile={setNewDocumentFile}
+			setNewDocumentName={setNewDocumentName}
+			setShowForm={setShowForm}
+			showForm={showForm}
 		/>
 	);
 }

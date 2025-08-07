@@ -111,7 +111,7 @@ function convertFileItemToEntity(item: FileItem): AnyEntityWithStats {
 		updatedAt: item.modifiedAt || new Date(),
 		path: item.path,
 		size: item.size,
-		isFavorite: item.isFavorite || false,
+		isFavorite: item.isFavorite,
 		addedAt: new Date(),
 	};
 
@@ -224,7 +224,7 @@ const customFileOperationsService = {
 			const fileItem = {
 				id: path,
 				name: filename,
-				path: path,
+				path,
 			};
 
 			// Convert to proper entity
@@ -414,7 +414,7 @@ const customFileOperationsService = {
 			const fileItem: FileItem = {
 				id: path,
 				name: path.split('/').pop() || '',
-				path: path,
+				path,
 				size: 0,
 				mimeType: 'application/octet-stream',
 				extension: '',
@@ -450,35 +450,33 @@ export const contextActionHandler = {
 			// Acciones para un solo elemento
 			if (item.isDirectory) {
 				actions.push('open', 'rename', 'delete', 'copy-path');
+			} else if (item.mimeType?.startsWith('image/')) {
+				actions.push(
+					'preview',
+					'open',
+					'download',
+					'copy',
+					'add-to-album',
+					'add-to-collection',
+					'add-tag',
+					'rename',
+					'delete',
+					'copy-path'
+				);
+			} else if (item.mimeType?.startsWith('video/')) {
+				actions.push(
+					'preview',
+					'open',
+					'download',
+					'add-to-album',
+					'add-to-collection',
+					'add-tag',
+					'rename',
+					'delete',
+					'copy-path'
+				);
 			} else {
-				if (item.mimeType?.startsWith('image/')) {
-					actions.push(
-						'preview',
-						'open',
-						'download',
-						'copy',
-						'add-to-album',
-						'add-to-collection',
-						'add-tag',
-						'rename',
-						'delete',
-						'copy-path'
-					);
-				} else if (item.mimeType?.startsWith('video/')) {
-					actions.push(
-						'preview',
-						'open',
-						'download',
-						'add-to-album',
-						'add-to-collection',
-						'add-tag',
-						'rename',
-						'delete',
-						'copy-path'
-					);
-				} else {
-					actions.push('download', 'rename', 'delete', 'copy-path');
-				}
+				actions.push('download', 'rename', 'delete', 'copy-path');
 			}
 		}
 
@@ -562,12 +560,14 @@ export const contextActionHandler = {
 							await customFileOperationsService.deleteFile(item.path);
 							refreshView?.();
 						}
-					} else if (items && items.length > 0) {
-						if (confirm(`¿Estás seguro de que quieres eliminar ${items.length} elemento(s)?`)) {
-							const entities = items.map(convertFileItemToEntity);
-							await enhancedFileOperationsService.deleteItems(entities);
-							refreshView?.();
-						}
+					} else if (
+						items &&
+						items.length > 0 &&
+						confirm(`¿Estás seguro de que quieres eliminar ${items.length} elemento(s)?`)
+					) {
+						const entities = items.map(convertFileItemToEntity);
+						await enhancedFileOperationsService.deleteItems(entities);
+						refreshView?.();
 					}
 					break;
 

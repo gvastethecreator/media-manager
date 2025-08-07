@@ -1,8 +1,8 @@
-import { serverLogger } from '@/lib/logger/server-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { IndexStatus } from './folder-index-status-badge';
 import type { ExtendedFolder } from './folder-types';
 
-const folderLogger = serverLogger.withContext('FolderUtils');
+const folderLogger = clientLogger.withContext('FolderUtils');
 
 export function getFolderIndexStatus(folder: ExtendedFolder): IndexStatus {
 	// Verificar si hay un error en la carpeta
@@ -14,26 +14,17 @@ export function getFolderIndexStatus(folder: ExtendedFolder): IndexStatus {
 			folder.error.includes('no encontrada') ||
 			folder.error.toLowerCase().includes('not found')
 		) {
-			folderLogger.debug('Carpeta no encontrada:', {
-				folderId: folder.id,
-				error: folder.error,
-			});
+			// Solo log en casos de error real, no en cada render
 			return 'not_found';
 		}
 
 		// Para otros tipos de errores
-		folderLogger.debug('Carpeta con error:', {
-			folderId: folder.id,
-			error: folder.error,
-		});
 		return 'error';
 	}
 
 	// Si no tiene lastIndexed, nunca se ha indexado
 	if (!folder.lastIndexed) {
-		folderLogger.debug('Carpeta nunca indexada:', {
-			folderId: folder.id,
-		});
+		// Reducir logs - solo hacer log una vez o en casos específicos
 		return 'pending';
 	}
 
@@ -43,17 +34,9 @@ export function getFolderIndexStatus(folder: ExtendedFolder): IndexStatus {
 
 	// Si se indexó hace más de 24 horas
 	if (diffHours > 24) {
-		folderLogger.debug('Carpeta con indexación desactualizada:', {
-			folderId: folder.id,
-			diffHours,
-		});
 		return 'outdated';
 	}
 
 	// Si fue indexada recientemente (menos de 24 horas)
-	folderLogger.debug('Carpeta con indexación actualizada:', {
-		folderId: folder.id,
-		diffHours,
-	});
 	return 'indexed';
 }

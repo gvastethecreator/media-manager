@@ -60,7 +60,7 @@ router.post('/bulk-generate', async (req, res) => {
 	try {
 		const { imageIds, ...options } = req.body;
 
-		if (!imageIds || !Array.isArray(imageIds)) {
+		if (!(imageIds && Array.isArray(imageIds))) {
 			res.status(400).json({
 				error: 'imageIds (array) es requerido',
 			});
@@ -172,7 +172,7 @@ router.get('/last-processed', async (req, res) => {
 // GET /thumbnails/events - Eventos SSE de procesamiento
 router.get('/events', async (req, res) => {
 	try {
-		const HEARTBEAT_INTERVAL = 15000;
+		const HEARTBEAT_INTERVAL = 15_000;
 		res.set({
 			'Content-Type': 'text/event-stream',
 			'Cache-Control': 'no-cache, no-transform',

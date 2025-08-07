@@ -47,12 +47,15 @@ export function FolderCardContent({
 		: 'Nunca';
 
 	// Calcular puntaje de "poder" para la carpeta (estilo TCG)
-	const powerScore = Math.min(99, Math.max(1, Math.floor(totalFiles * 0.3 + childrenCount * 2 + totalSize / 1000000)));
+	const powerScore = Math.min(
+		99,
+		Math.max(1, Math.floor(totalFiles * 0.3 + childrenCount * 2 + totalSize / 1_000_000))
+	);
 
 	return (
 		<div
 			className={cn(
-				'flex-grow p-3 text-card-foreground relative overflow-hidden',
+				'relative flex-grow overflow-hidden p-3 text-card-foreground',
 				tcgMode ? 'bg-black/20' : 'bg-card/90'
 			)}
 			style={{
@@ -63,18 +66,18 @@ export function FolderCardContent({
 			}}
 		>
 			{/* Overlay para mantener legibilidad sobre imagen */}
-			{featuredImage && <div className="absolute inset-0 bg-black/50 z-0" />}
+			{featuredImage && <div className="absolute inset-0 z-0 bg-black/50" />}
 
 			{/* Contenido con posición relativa para estar sobre el overlay */}
-			<div className="relative z-10 flex flex-col h-full">
+			<div className="relative z-10 flex h-full flex-col">
 				{/* Descripción de la carpeta (como texto de flavor en TCG) */}
 				<div className="mb-3 flex-grow">
 					{description ? (
 						<div
 							className={cn(
-								'italic min-h-[3em]',
+								'min-h-[3em] italic',
 								tcgMode
-									? 'text-white/90 bg-black/40 p-2 rounded-sm border border-white/10 shadow-inner text-sm'
+									? 'rounded-sm border border-white/10 bg-black/40 p-2 text-sm text-white/90 shadow-inner'
 									: 'text-muted-foreground text-sm'
 							)}
 							style={tcgMode ? {} : { color: primaryColor }}
@@ -84,8 +87,8 @@ export function FolderCardContent({
 					) : (
 						<div
 							className={cn(
-								'min-h-[3em] italic text-center flex items-center justify-center',
-								tcgMode ? 'text-white/50 bg-black/20 rounded-sm p-2' : 'text-muted-foreground/50'
+								'flex min-h-[3em] items-center justify-center text-center italic',
+								tcgMode ? 'rounded-sm bg-black/20 p-2 text-white/50' : 'text-muted-foreground/50'
 							)}
 						>
 							Sin descripción
@@ -96,25 +99,25 @@ export function FolderCardContent({
 				{/* Estadísticas de la carpeta (como caja de texto en TCG) */}
 				<div
 					className={cn(
-						'pt-1 text-xs rounded-sm',
-						tcgMode ? 'border p-2 bg-black/30 shadow-inner border-white/10' : 'border-t p-1'
+						'rounded-sm pt-1 text-xs',
+						tcgMode ? 'border border-white/10 bg-black/30 p-2 shadow-inner' : 'border-t p-1'
 					)}
 					style={
-						!tcgMode
-							? {
+						tcgMode
+							? {}
+							: {
 									borderColor: `${primaryColor}30`,
 									backgroundColor: `${primaryColor}15`,
 								}
-							: {}
 					}
 				>
 					{/* Stats especiales para modo TCG */}
 					{tcgMode && (
-						<div className="flex justify-between items-center mb-2">
+						<div className="mb-2 flex items-center justify-between">
 							<div className="flex flex-col">
-								<span className="text-white/70 uppercase tracking-wide text-[0.65rem] mb-0.5">Poder</span>
+								<span className="mb-0.5 text-[0.65rem] text-white/70 uppercase tracking-wide">Poder</span>
 								<div className="flex items-center">
-									<div className="w-full bg-black/50 h-1.5 rounded-sm overflow-hidden" style={{ width: '60px' }}>
+									<div className="h-1.5 w-full overflow-hidden rounded-sm bg-black/50" style={{ width: '60px' }}>
 										<div
 											className="h-full"
 											style={{
@@ -130,14 +133,14 @@ export function FolderCardContent({
 							<div className="flex items-center">
 								{autoReindex ? (
 									<div
-										className="py-0.5 px-1.5 rounded-sm bg-green-600/30 text-green-400 font-semibold text-[0.65rem] border border-green-500/20"
+										className="rounded-sm border border-green-500/20 bg-green-600/30 px-1.5 py-0.5 font-semibold text-[0.65rem] text-green-400"
 										title="Auto-reindexación activada"
 									>
 										AUTO
 									</div>
 								) : (
 									<div
-										className="py-0.5 px-1.5 rounded-sm bg-yellow-600/20 text-yellow-400 font-semibold text-[0.65rem] border border-yellow-500/20"
+										className="rounded-sm border border-yellow-500/20 bg-yellow-600/20 px-1.5 py-0.5 font-semibold text-[0.65rem] text-yellow-400"
 										title="Auto-reindexación desactivada"
 									>
 										MANUAL
@@ -149,16 +152,16 @@ export function FolderCardContent({
 
 					{/* Datos principales en estilo de atributos de carta TCG */}
 					<div className="grid grid-cols-2 gap-2">
-						<div className="flex justify-between items-center">
-							<span className={tcgMode ? 'text-white/70 font-medium' : 'text-muted-foreground'}>
-								<FolderOutputIcon className="inline w-3 h-3 mr-1" />
+						<div className="flex items-center justify-between">
+							<span className={tcgMode ? 'font-medium text-white/70' : 'text-muted-foreground'}>
+								<FolderOutputIcon className="mr-1 inline h-3 w-3" />
 								Archivos:
 							</span>
 							<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{totalFiles}</span>
 						</div>
-						<div className="flex justify-between items-center">
-							<span className={tcgMode ? 'text-white/70 font-medium' : 'text-muted-foreground'}>
-								<HardDriveIcon className="inline w-3 h-3 mr-1" />
+						<div className="flex items-center justify-between">
+							<span className={tcgMode ? 'font-medium text-white/70' : 'text-muted-foreground'}>
+								<HardDriveIcon className="mr-1 inline h-3 w-3" />
 								Tamaño:
 							</span>
 							<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{formattedSize}</span>
@@ -166,14 +169,14 @@ export function FolderCardContent({
 					</div>
 
 					{/* Segunda fila de atributos */}
-					<div className="grid grid-cols-2 gap-2 mt-1">
-						<div className="flex justify-between items-center">
-							<span className={tcgMode ? 'text-white/70 font-medium' : 'text-muted-foreground'}>Subcarpetas:</span>
+					<div className="mt-1 grid grid-cols-2 gap-2">
+						<div className="flex items-center justify-between">
+							<span className={tcgMode ? 'font-medium text-white/70' : 'text-muted-foreground'}>Subcarpetas:</span>
 							<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{childrenCount}</span>
 						</div>
 
 						{!tcgMode && (
-							<div className="flex justify-between items-center">
+							<div className="flex items-center justify-between">
 								<span className="text-muted-foreground">Auto-Reindex:</span>
 								<span className="font-medium">{autoReindex ? '✓' : '✗'}</span>
 							</div>
@@ -183,13 +186,13 @@ export function FolderCardContent({
 					{/* Última indexación */}
 					<div
 						className={cn(
-							'flex justify-between items-center mt-1 pt-1',
-							tcgMode ? 'border-t border-white/10' : 'border-t border-dashed'
+							'mt-1 flex items-center justify-between pt-1',
+							tcgMode ? 'border-white/10 border-t' : 'border-t border-dashed'
 						)}
-						style={!tcgMode ? { borderColor: `${primaryColor}20` } : {}}
+						style={tcgMode ? {} : { borderColor: `${primaryColor}20` }}
 					>
-						<span className={tcgMode ? 'text-white/70 font-medium' : 'text-muted-foreground'}>
-							<TimerResetIcon className="inline w-3 h-3 mr-1" />
+						<span className={tcgMode ? 'font-medium text-white/70' : 'text-muted-foreground'}>
+							<TimerResetIcon className="mr-1 inline h-3 w-3" />
 							Última indexación:
 						</span>
 						<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{formattedLastIndexed}</span>
@@ -199,8 +202,8 @@ export function FolderCardContent({
 
 			{/* Decoración de esquina estilo TCG */}
 			{tcgMode && (
-				<div className="absolute bottom-1 right-1 w-4 h-4 opacity-70" style={{ color: primaryColor }}>
-					<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+				<div className="absolute right-1 bottom-1 h-4 w-4 opacity-70" style={{ color: primaryColor }}>
+					<svg aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
 						<path d="M22 8L16 2H8L2 8v8l6 6h8l6-6V8z" />
 					</svg>
 				</div>

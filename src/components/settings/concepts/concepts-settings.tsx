@@ -146,11 +146,11 @@ export function ConceptsSettings() {
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-3">
 						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">Cargando conceptos...</p>
+						<p className="text-muted-foreground text-sm">Cargando conceptos...</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -159,10 +159,10 @@ export function ConceptsSettings() {
 
 	if (error) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-3">
-						<p className="text-sm text-destructive">Error al cargar conceptos: {error.message}</p>
+						<p className="text-destructive text-sm">Error al cargar conceptos: {error.message}</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -173,13 +173,13 @@ export function ConceptsSettings() {
 		<div className="grid grid-cols-12 gap-3">
 			{/* Panel izquierdo: Lista de conceptos */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="space-y-1 py-2 px-3">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-sm flex items-center">
+							<CardTitle className="flex items-center text-sm">
 								Conceptos ({filteredConcepts.length})
 								{filteredConcepts.length !== concepts.length && (
-									<Badge variant="outline" className="ml-2 text-[10px]">
+									<Badge className="ml-2 text-[10px]" variant="outline">
 										Filtrados
 									</Badge>
 								)}
@@ -187,32 +187,32 @@ export function ConceptsSettings() {
 							<div className="flex items-center gap-1">
 								<Popover>
 									<PopoverTrigger asChild>
-										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+										<Button className="h-6 w-6 p-0" size="sm" variant="ghost">
 											<Filter className="h-3.5 w-3.5" />
 										</Button>
 									</PopoverTrigger>
-									<PopoverContent className="w-72" align="end">
+									<PopoverContent align="end" className="w-72">
 										<div className="space-y-4">
 											<h4 className="font-medium text-sm">Filtrar Conceptos</h4>
 
 											<div className="space-y-2">
 												<Label htmlFor={searchInputId}>Buscar</Label>
 												<Input
+													className="h-8 text-xs"
 													id={searchInputId}
+													onChange={(e) => setSearchQuery(e.target.value)}
 													placeholder="Buscar conceptos..."
 													value={searchQuery}
-													onChange={(e) => setSearchQuery(e.target.value)}
-													className="h-8 text-xs"
 												/>
 											</div>
 
 											<div className="space-y-2">
 												<Label htmlFor={categorySelectId}>Categoría</Label>
 												<select
+													className="h-8 w-full rounded-md border border-input px-3 text-xs"
 													id={categorySelectId}
-													value={selectedCategory || ''}
 													onChange={(e) => setSelectedCategory(e.target.value || null)}
-													className="w-full h-8 text-xs rounded-md border border-input px-3"
+													value={selectedCategory || ''}
 												>
 													<option value="">Todas las categorías</option>
 													{uniqueCategories.map((category) => (
@@ -225,20 +225,20 @@ export function ConceptsSettings() {
 
 											<div className="flex items-center space-x-2">
 												<Checkbox
-													id={favoritesCheckboxId}
 													checked={onlyFavorites}
+													id={favoritesCheckboxId}
 													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
 												/>
-												<Label htmlFor={favoritesCheckboxId} className="text-xs">
+												<Label className="text-xs" htmlFor={favoritesCheckboxId}>
 													Solo favoritos
 												</Label>
 											</div>
 
 											<div className="flex justify-between">
-												<Button size="sm" variant="outline" onClick={clearFilters} className="h-8 text-xs">
+												<Button className="h-8 text-xs" onClick={clearFilters} size="sm" variant="outline">
 													Limpiar filtros
 												</Button>
-												<Button size="sm" className="h-8 text-xs">
+												<Button className="h-8 text-xs" size="sm">
 													Aplicar
 												</Button>
 											</div>
@@ -246,19 +246,19 @@ export function ConceptsSettings() {
 									</PopoverContent>
 								</Popover>
 								<Button
+									className="h-6 w-6 p-0"
 									onClick={() => {
 										setSelectedConcept(null);
 										setIsEditing(false);
 									}}
 									size="sm"
 									variant="ghost"
-									className="h-6 w-6 p-0"
 								>
 									<PlusCircle className="h-3.5 w-3.5" />
 								</Button>
 							</div>
 						</div>
-						<div className="flex gap-2 text-xs text-muted-foreground">
+						<div className="flex gap-2 text-muted-foreground text-xs">
 							<span>{stats.totalConcepts} conceptos</span>
 							{stats.favoriteConcepts > 0 && (
 								<>
@@ -278,45 +278,45 @@ export function ConceptsSettings() {
 						<ScrollArea className="h-full px-3 pb-3">
 							{filteredConcepts.length === 0 ? (
 								<EmptyState
-									icon={LightbulbIcon}
-									title="No hay conceptos"
+									actions={
+										concepts.length > 0 && (
+											<Button onClick={clearFilters} size="sm" variant="outline">
+												Limpiar filtros
+											</Button>
+										)
+									}
+									className="py-6"
 									description={
 										concepts.length > 0
 											? 'No se encontraron conceptos con los filtros aplicados'
 											: 'Crea tu primer concepto'
 									}
-									className="py-6"
-									actions={
-										concepts.length > 0 && (
-											<Button size="sm" variant="outline" onClick={clearFilters}>
-												Limpiar filtros
-											</Button>
-										)
-									}
+									icon={LightbulbIcon}
+									title="No hay conceptos"
 								/>
 							) : (
 								<div className="space-y-1">
 									{filteredConcepts.map((concept) => (
 										<div
+											className={`group/item relative flex w-full items-center gap-2 rounded-md p-1.5 transition-colors hover:bg-muted/50 ${selectedConcept?.id === concept.id ? 'bg-muted' : ''}`}
 											key={concept.id}
-											className={`relative group/item flex items-center gap-2 p-1.5 rounded-md transition-colors hover:bg-muted/50 w-full ${selectedConcept?.id === concept.id ? 'bg-muted' : ''}`}
 										>
 											<button
-												className="flex items-center gap-2 w-full text-left cursor-pointer"
+												aria-pressed={selectedConcept?.id === concept.id}
+												className="flex w-full cursor-pointer items-center gap-2 text-left"
 												onClick={() => handleEditConcept(concept)}
 												type="button"
-												aria-pressed={selectedConcept?.id === concept.id}
 											>
 												<div
-													className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
+													className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-white"
 													style={{
 														backgroundColor: concept.color,
 													}}
 												>
 													<span className="text-xs">{concept.emoji}</span>
 												</div>
-												<div className="flex-1 min-w-0">
-													<h4 className="text-xs font-medium truncate">{concept.name}</h4>
+												<div className="min-w-0 flex-1">
+													<h4 className="truncate font-medium text-xs">{concept.name}</h4>
 													<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
 														<span>{concept.stats?.imageCount || 0} imágenes</span>
 														{concept.category && (
@@ -329,14 +329,14 @@ export function ConceptsSettings() {
 												</div>
 											</button>
 											<Button
-												variant="ghost"
-												size="icon"
-												type="button"
-												className="h-5 w-5 opacity-0 group-hover/item:opacity-100 absolute right-1"
+												className="absolute right-1 h-5 w-5 opacity-0 group-hover/item:opacity-100"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDeleteConcept(concept.id);
 												}}
+												size="icon"
+												type="button"
+												variant="ghost"
 											>
 												<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
 											</Button>
@@ -351,8 +351,8 @@ export function ConceptsSettings() {
 
 			{/* Panel derecho: Formulario y Preview */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="py-2 px-3">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="px-3 py-2">
 						<div className="flex items-center justify-between">
 							<div>
 								<CardTitle className="text-sm">{isEditing ? 'Editar Concepto' : 'Nuevo Concepto'}</CardTitle>
@@ -365,79 +365,79 @@ export function ConceptsSettings() {
 							<div className="flex gap-1">
 								{isEditing && selectedConcept && (
 									<>
-										<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleReset}>
+										<Button className="h-7 text-xs" onClick={handleReset} size="sm" variant="outline">
 											Cancelar
 										</Button>
 										<Button
-											variant="destructive"
-											size="sm"
 											className="h-7 text-xs"
 											onClick={() => handleDeleteConcept(selectedConcept.id)}
+											size="sm"
+											variant="destructive"
 										>
-											<Trash className="h-3 w-3 mr-1" />
+											<Trash className="mr-1 h-3 w-3" />
 											Eliminar
 										</Button>
 									</>
 								)}
-								<Button type="submit" size="sm" className="h-7 text-xs" form="concept-form">
-									<Save className="h-3 w-3 mr-1" />
+								<Button className="h-7 text-xs" form="concept-form" size="sm" type="submit">
+									<Save className="mr-1 h-3 w-3" />
 									{isEditing ? 'Guardar' : 'Crear'}
 								</Button>
 							</div>
 						</div>
 					</CardHeader>
-					<CardContent className="p-3 flex-1 overflow-hidden">
+					<CardContent className="flex-1 overflow-hidden p-3">
 						<ScrollArea className="h-full pr-3">
-							<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+							<div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-2">
 								<div className="space-y-3">
 									<CreateConceptForm
 										concept={selectedConcept as ConceptExtended}
 										isEditing={isEditing}
-										onCreated={handleConceptCreated}
-										onUpdated={handleConceptUpdated}
 										onCancel={handleReset}
+										onCreated={handleConceptCreated}
 										onPreview={handlePreview}
+										onUpdated={handleConceptUpdated}
 									/>
 								</div>
-								<div className="hidden lg:flex flex-col items-center justify-start">
-									<h3 className="text-xs font-medium mb-2">Vista Previa</h3>
+								<div className="hidden flex-col items-center justify-start lg:flex">
+									<h3 className="mb-2 font-medium text-xs">Vista Previa</h3>
 									<div className="w-[180px] transition-all duration-300">
 										{previewData || selectedConcept ? (
-											<div className="flex flex-col items-center p-4 border rounded-lg bg-background">
+											<div className="flex flex-col items-center rounded-lg border bg-background p-4">
 												<div
-													className="w-12 h-12 mb-3 rounded-full flex items-center justify-center text-2xl"
+													className="mb-3 flex h-12 w-12 items-center justify-center rounded-full text-2xl"
 													style={{ backgroundColor: previewData?.color || selectedConcept?.color || '#3b82f6' }}
 												>
 													{previewData?.emoji || selectedConcept?.emoji || '💡'}
 												</div>
-												<h3 className="text-lg font-medium">
+												<h3 className="font-medium text-lg">
 													{previewData?.name || selectedConcept?.name || 'Nuevo Concepto'}
 												</h3>
-												<p className="text-center text-muted-foreground mt-2 text-sm">
+												<p className="mt-2 text-center text-muted-foreground text-sm">
 													{previewData?.description || selectedConcept?.description || 'Sin descripción'}
 												</p>
 
-												<div className="flex flex-wrap gap-2 mt-3 justify-center">
-													<Badge variant="secondary" className="text-xs">
+												<div className="mt-3 flex flex-wrap justify-center gap-2">
+													<Badge className="text-xs" variant="secondary">
 														{previewData?.category || selectedConcept?.category || 'general'}
 													</Badge>
 													{(previewData?.isFavorite || selectedConcept?.isFavorite) && (
-														<Badge variant="outline" className="text-xs">
+														<Badge className="text-xs" variant="outline">
 															Favorito
 														</Badge>
 													)}
 												</div>
 
 												{(previewData?.content || selectedConcept?.content) && (
-													<div className="mt-4 p-2 text-xs bg-muted rounded w-full">
+													<div className="mt-4 w-full rounded bg-muted p-2 text-xs">
 														<p className="line-clamp-3">{previewData?.content || selectedConcept?.content}</p>
 													</div>
 												)}
 											</div>
 										) : (
-											<div className="flex flex-col items-center justify-center h-[260px] bg-muted/50 rounded-lg border border-dashed">
+											<div className="flex h-[260px] flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50">
 												<LightbulbIcon className="h-7 w-7 text-muted-foreground/50" />
-												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
+												<p className="mt-2 text-[10px] text-muted-foreground">Vista previa</p>
 											</div>
 										)}
 									</div>

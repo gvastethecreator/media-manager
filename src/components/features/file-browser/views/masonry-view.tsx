@@ -90,7 +90,7 @@ const MasonryItem = memo<MasonryItemProps>(
 
 		const itemClasses = cn('cursor-pointer select-none overflow-hidden', {
 			'rounded-lg': masonryConfig.roundedCorners,
-			'shadow-sm hover:shadow-md transition-shadow duration-200': masonryConfig.showShadows,
+			'shadow-sm transition-shadow duration-200 hover:shadow-md': masonryConfig.showShadows,
 			'ring-2 ring-primary ring-offset-2': isSelected && masonryConfig.showSelectionIndicators,
 		});
 
@@ -99,23 +99,23 @@ const MasonryItem = memo<MasonryItemProps>(
 			return (
 				<div
 					className={itemClasses}
-					style={style}
-					onClick={handleClick}
-					onDoubleClick={handleDoubleClick}
-					data-testid="file-browser-item"
 					data-entity-id={layoutItem.item.id}
 					data-item-index={itemIndex}
+					data-testid="file-browser-item"
+					onClick={handleClick}
+					onDoubleClick={handleDoubleClick}
+					style={style}
 				>
 					<OptimizedEntityCard
-						entity={layoutItem.item}
-						layout="vertical"
-						size="md"
-						isSelected={isSelected}
+						className="h-full w-full"
 						compact={false}
-						className="w-full h-full"
+						entity={layoutItem.item}
+						isSelected={isSelected}
 						itemId={layoutItem.item.id}
+						layout="vertical"
 						onClickById={onItemClickById}
 						onDoubleClickById={onItemDoubleClickById}
+						size="md"
 					/>
 				</div>
 			);
@@ -124,22 +124,22 @@ const MasonryItem = memo<MasonryItemProps>(
 		return (
 			<motion.div
 				{...staticMotionProps}
-				transition={transition}
 				className={itemClasses}
-				style={style}
 				onClick={handleClick}
 				onDoubleClick={handleDoubleClick}
+				style={style}
+				transition={transition}
 			>
 				<OptimizedEntityCard
-					entity={layoutItem.item}
-					layout="vertical"
-					size="md"
-					isSelected={isSelected}
+					className="h-full w-full"
 					compact={false}
-					className="w-full h-full"
+					entity={layoutItem.item}
+					isSelected={isSelected}
 					itemId={layoutItem.item.id}
+					layout="vertical"
 					onClickById={onItemClickById}
 					onDoubleClickById={onItemDoubleClickById}
+					size="md"
 				/>
 			</motion.div>
 		);
@@ -168,7 +168,7 @@ const MasonryItem = memo<MasonryItemProps>(
 
 		// OPTIMIZACIÓN: No comparar funciones directamente ya que pueden cambiar de referencia
 		// En su lugar, confiar en que los handlers estables no cambien innecesariamente
-		return !layoutChanged && !propsChanged && !configChanged;
+		return !(layoutChanged || propsChanged || configChanged);
 	}
 );
 
@@ -261,15 +261,17 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 
 			const isEmptySpaceClick =
 				target === currentTarget ||
-				(!target.closest('.entity-card') &&
-					!target.closest('[data-entity-card]') &&
-					!target.closest('button') &&
-					!target.closest('[role="button"]') &&
-					!target.closest('input') &&
-					!target.closest('textarea') &&
-					!target.closest('[data-testid="file-browser-item"]') &&
-					!target.closest('[style*="position: absolute"]') &&
-					!target.closest('[data-virtualized-item="true"]'));
+				!(
+					target.closest('.entity-card') ||
+					target.closest('[data-entity-card]') ||
+					target.closest('button') ||
+					target.closest('[role="button"]') ||
+					target.closest('input') ||
+					target.closest('textarea') ||
+					target.closest('[data-testid="file-browser-item"]') ||
+					target.closest('[style*="position: absolute"]') ||
+					target.closest('[data-virtualized-item="true"]')
+				);
 
 			if (isEmptySpaceClick && selectedIds.length > 0) {
 				currentTarget.style.transition = 'background-color 0.15s ease';
@@ -305,7 +307,7 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 
 	if (!containerWidth || containerWidth <= 0) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<div className="text-muted-foreground">Calculando layout masonry...</div>
 			</div>
 		);
@@ -313,11 +315,11 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 
 	return (
 		<div
-			ref={parentRef}
 			className="w-full overflow-auto"
 			data-testid="masonry-view"
 			data-view-type="masonry"
 			onClick={handleEmptySpaceClick}
+			ref={parentRef}
 			style={{
 				height: `${containerHeight}px`,
 				contain: 'strict',
@@ -326,7 +328,7 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 		>
 			{/* Información de debug del layout (opcional) */}
 			{process.env.NODE_ENV === 'development' && (
-				<div className="fixed top-2 right-2 z-50 bg-background/90 backdrop-blur-sm border rounded p-2 text-xs font-mono">
+				<div className="fixed top-2 right-2 z-50 rounded border bg-background/90 p-2 font-mono text-xs backdrop-blur-sm">
 					<div>Columns: {layoutResult.columns}</div>
 					<div>Algorithm: {config.optimization.algorithm}</div>
 					<div>Balance: {(layoutResult.balance.balanceFactor * 100).toFixed(1)}%</div>
@@ -348,13 +350,13 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 
 						return (
 							<MasonryItem
-								key={layoutItem.item.id}
-								layoutItem={layoutItem}
 								isSelected={isSelected}
 								itemIndex={index}
+								key={layoutItem.item.id}
+								layoutItem={layoutItem}
+								masonryConfig={masonryConfig}
 								onItemClickById={handleItemClickById}
 								onItemDoubleClickById={handleItemDoubleClickById}
-								masonryConfig={masonryConfig}
 							/>
 						);
 					})}

@@ -198,10 +198,10 @@ export function WorldItemsSettings() {
 	// Mostrar loading state
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+			<div className="flex h-[calc(100vh-8rem)] items-center justify-center">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" />
-					<p className="mt-2 text-sm text-gray-500">Cargando objetos del mundo...</p>
+					<div className="mx-auto h-8 w-8 animate-spin rounded-full border-gray-900 border-b-2" />
+					<p className="mt-2 text-gray-500 text-sm">Cargando objetos del mundo...</p>
 				</div>
 			</div>
 		);
@@ -210,36 +210,36 @@ export function WorldItemsSettings() {
 	// Mostrar error state
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+			<div className="flex h-[calc(100vh-8rem)] items-center justify-center">
 				<div className="text-center">
 					<p className="text-red-500">Error al cargar los objetos del mundo</p>
-					<p className="text-sm text-gray-500 mt-1">{error instanceof Error ? error.message : 'Error desconocido'}</p>
+					<p className="mt-1 text-gray-500 text-sm">{error instanceof Error ? error.message : 'Error desconocido'}</p>
 				</div>
 			</div>
 		);
 	}
 
 	return (
-		<div className="grid grid-cols-12 gap-3 h-[calc(100vh-8rem)]">
+		<div className="grid h-[calc(100vh-8rem)] grid-cols-12 gap-3">
 			{/* Panel izquierdo: Lista de objetos */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="rounded-sm bg-muted/30 border-none h-full flex flex-col">
-					<CardHeader className="space-y-1 py-2 px-3">
+				<Card className="flex h-full flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="text-xl font-bold">Objetos del Mundo</CardTitle>
+								<CardTitle className="font-bold text-xl">Objetos del Mundo</CardTitle>
 								<CardDescription className="text-xs">
 									{stats.totalItems} objetos • {stats.favoriteItems} favoritos
 								</CardDescription>
 							</div>
 							<Button
-								size="sm"
-								variant="ghost"
 								onClick={() => {
 									setIsEditing(false);
 									setSelectedItem(null);
 									setPreviewData(null);
 								}}
+								size="sm"
+								variant="ghost"
 							>
 								<PlusCircle className="h-4 w-4" />
 							</Button>
@@ -250,10 +250,10 @@ export function WorldItemsSettings() {
 							{/* Búsqueda */}
 							<div className="relative">
 								<Input
+									className="h-8"
+									onChange={(e) => setSearchTerm(e.target.value)}
 									placeholder="Buscar objetos..."
 									value={searchTerm}
-									onChange={(e) => setSearchTerm(e.target.value)}
-									className="h-8"
 								/>
 							</div>
 
@@ -263,11 +263,11 @@ export function WorldItemsSettings() {
 								{uniqueTypes.length > 0 && (
 									<Popover>
 										<PopoverTrigger asChild>
-											<Button variant="outline" size="sm" className="h-8">
-												<Filter className="h-4 w-4 mr-1" />
+											<Button className="h-8" size="sm" variant="outline">
+												<Filter className="mr-1 h-4 w-4" />
 												Tipos
 												{filterTypes.length > 0 && (
-													<Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">
+													<Badge className="ml-1 h-4 px-1 text-xs" variant="secondary">
 														{filterTypes.length}
 													</Badge>
 												)}
@@ -276,13 +276,13 @@ export function WorldItemsSettings() {
 										<PopoverContent className="w-48 p-2">
 											<div className="space-y-2">
 												{uniqueTypes.map((type) => (
-													<div key={type} className="flex items-center space-x-2">
+													<div className="flex items-center space-x-2" key={type}>
 														<Checkbox
-															id={`type-${type}`}
 															checked={filterTypes.includes(type)}
+															id={`type-${type}`}
 															onCheckedChange={() => toggleType(type)}
 														/>
-														<Label htmlFor={`type-${type}`} className="text-sm">
+														<Label className="text-sm" htmlFor={`type-${type}`}>
 															{type}
 														</Label>
 													</div>
@@ -296,11 +296,11 @@ export function WorldItemsSettings() {
 								{uniqueRarities.length > 0 && (
 									<Popover>
 										<PopoverTrigger asChild>
-											<Button variant="outline" size="sm" className="h-8">
-												<Filter className="h-4 w-4 mr-1" />
+											<Button className="h-8" size="sm" variant="outline">
+												<Filter className="mr-1 h-4 w-4" />
 												Rareza
 												{filterRarities.length > 0 && (
-													<Badge variant="secondary" className="ml-1 h-4 px-1 text-xs">
+													<Badge className="ml-1 h-4 px-1 text-xs" variant="secondary">
 														{filterRarities.length}
 													</Badge>
 												)}
@@ -309,13 +309,13 @@ export function WorldItemsSettings() {
 										<PopoverContent className="w-48 p-2">
 											<div className="space-y-2">
 												{uniqueRarities.map((rarity) => (
-													<div key={rarity} className="flex items-center space-x-2">
+													<div className="flex items-center space-x-2" key={rarity}>
 														<Checkbox
-															id={`rarity-${rarity}`}
 															checked={filterRarities.includes(rarity)}
+															id={`rarity-${rarity}`}
 															onCheckedChange={() => toggleRarity(rarity)}
 														/>
-														<Label htmlFor={`rarity-${rarity}`} className="text-sm">
+														<Label className="text-sm" htmlFor={`rarity-${rarity}`}>
 															{rarity}
 														</Label>
 													</div>
@@ -328,11 +328,11 @@ export function WorldItemsSettings() {
 								{/* Favoritos */}
 								<div className="flex items-center space-x-2">
 									<Checkbox
-										id={idShowFavorites}
 										checked={showOnlyFavorites}
+										id={idShowFavorites}
 										onCheckedChange={(checked) => setShowOnlyFavorites(!!checked)}
 									/>
-									<Label htmlFor={idShowFavorites} className="text-sm">
+									<Label className="text-sm" htmlFor={idShowFavorites}>
 										Solo favoritos
 									</Label>
 								</div>
@@ -340,8 +340,8 @@ export function WorldItemsSettings() {
 
 							{/* Limpiar filtros */}
 							{(filterTypes.length > 0 || filterRarities.length > 0 || showOnlyFavorites || searchTerm) && (
-								<Button variant="ghost" size="sm" onClick={clearFilters} className="h-6 px-2 text-xs">
-									<X className="h-3 w-3 mr-1" />
+								<Button className="h-6 px-2 text-xs" onClick={clearFilters} size="sm" variant="ghost">
+									<X className="mr-1 h-3 w-3" />
 									Limpiar filtros
 								</Button>
 							)}
@@ -353,48 +353,48 @@ export function WorldItemsSettings() {
 							<div className="space-y-1 p-2">
 								{filteredItemsList.length === 0 ? (
 									<EmptyState
-										icon={Package}
-										title="No se encontraron objetos"
 										description={
 											searchTerm || filterTypes.length > 0 || filterRarities.length > 0 || showOnlyFavorites
 												? 'Intenta ajustar los filtros de búsqueda'
 												: 'Crea tu primer objeto del mundo'
 										}
+										icon={Package}
+										title="No se encontraron objetos"
 									/>
 								) : (
 									filteredItemsList.map((item) => (
 										<div
-											key={item.id}
 											className={cn(
-												'relative group/item rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
+												'group/item relative rounded-md transition-colors hover:bg-accent hover:text-accent-foreground',
 												selectedItem?.id === item.id && 'bg-secondary text-secondary-foreground'
 											)}
+											key={item.id}
 										>
 											<Button
-												variant="ghost"
-												className="w-full justify-start h-12 relative"
+												className="relative h-12 w-full justify-start"
 												onClick={() => setSelectedItem(item as unknown as WorldItemComplete)}
+												variant="ghost"
 											>
-												<div className="flex items-center gap-2 w-full">
-													<div className="flex flex-col items-start flex-1">
+												<div className="flex w-full items-center gap-2">
+													<div className="flex flex-1 flex-col items-start">
 														<span className="font-medium">{item.name}</span>
 														<span className="text-xs opacity-50">{item._count?.images || 0} imágenes</span>
 													</div>
 													{item.isFavorite && (
-														<Badge variant="secondary" className="text-xs">
+														<Badge className="text-xs" variant="secondary">
 															⭐
 														</Badge>
 													)}
 												</div>
 											</Button>
 											<Button
-												variant="ghost"
-												size="icon"
-												className="absolute right-1 top-1 opacity-0 group-hover/item:opacity-100 h-10 w-10"
+												className="absolute top-1 right-1 h-10 w-10 opacity-0 group-hover/item:opacity-100"
 												onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
 													e.stopPropagation();
 													handleDeleteItem(item.id);
 												}}
+												size="icon"
+												variant="ghost"
 											>
 												<Trash className="h-4 w-4" />
 											</Button>
@@ -409,24 +409,24 @@ export function WorldItemsSettings() {
 
 			{/* Panel derecho: Formulario o vista previa */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="rounded-sm bg-muted/30 border-none h-full flex flex-col">
+				<Card className="flex h-full flex-col rounded-sm border-none bg-muted/30">
 					{isEditing && selectedItem ? (
 						<>
 							<CardHeader>
 								<div className="flex items-center justify-between">
 									<CardTitle>Editar Objeto</CardTitle>
-									<Button variant="ghost" size="sm" onClick={handleReset}>
+									<Button onClick={handleReset} size="sm" variant="ghost">
 										<X className="h-4 w-4" />
 									</Button>
 								</div>
 							</CardHeader>
 							<CardContent className="flex-1">
 								<CreateWorldItemForm
-									worldItem={selectedItem}
 									isEditing={true}
-									onUpdated={(updatedItem) => handleItemUpdated(selectedItem.id, updatedItem as WorldItemUpdateInput)}
 									onCancel={handleReset}
 									onPreview={handlePreview}
+									onUpdated={(updatedItem) => handleItemUpdated(selectedItem.id, updatedItem as WorldItemUpdateInput)}
+									worldItem={selectedItem}
 								/>
 							</CardContent>
 						</>
@@ -439,10 +439,10 @@ export function WorldItemsSettings() {
 										<CardDescription>{selectedItem.description}</CardDescription>
 									</div>
 									<div className="flex gap-2">
-										<Button size="sm" variant="outline" onClick={() => handleEditItem(selectedItem)}>
+										<Button onClick={() => handleEditItem(selectedItem)} size="sm" variant="outline">
 											Editar
 										</Button>
-										<Button size="sm" variant="destructive" onClick={() => handleDeleteItem(selectedItem.id)}>
+										<Button onClick={() => handleDeleteItem(selectedItem.id)} size="sm" variant="destructive">
 											Eliminar
 										</Button>
 									</div>
@@ -452,20 +452,20 @@ export function WorldItemsSettings() {
 								<div className="space-y-4">
 									{selectedItem.type && selectedItem.type !== 'none' && (
 										<div>
-											<h4 className="font-medium mb-2">Tipo</h4>
+											<h4 className="mb-2 font-medium">Tipo</h4>
 											<Badge variant="outline">{selectedItem.type}</Badge>
 										</div>
 									)}
 									{selectedItem.rarity && selectedItem.rarity !== 'none' && (
 										<div>
-											<h4 className="font-medium mb-2">Rareza</h4>
+											<h4 className="mb-2 font-medium">Rareza</h4>
 											<Badge variant="outline">{selectedItem.rarity}</Badge>
 										</div>
 									)}
 									{selectedItem.origin && (
 										<div>
-											<h4 className="font-medium mb-2">Origen</h4>
-											<p className="text-sm text-muted-foreground">{selectedItem.origin}</p>
+											<h4 className="mb-2 font-medium">Origen</h4>
+											<p className="text-muted-foreground text-sm">{selectedItem.origin}</p>
 										</div>
 									)}
 								</div>
@@ -477,7 +477,7 @@ export function WorldItemsSettings() {
 								<CardTitle>Crear Nuevo Objeto</CardTitle>
 							</CardHeader>
 							<CardContent className="flex-1">
-								<CreateWorldItemForm onCreated={handleItemCreated} onCancel={handleReset} onPreview={handlePreview} />
+								<CreateWorldItemForm onCancel={handleReset} onCreated={handleItemCreated} onPreview={handlePreview} />
 							</CardContent>
 						</>
 					)}

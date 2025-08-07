@@ -51,7 +51,7 @@ export function PlaceCardImages({
 
 	// Determinar los efectos holográficos basados en la rareza
 	const getHolographicEffects = () => {
-		if (!tcgMode || !holographicEffect) return {};
+		if (!(tcgMode && holographicEffect)) return {};
 
 		// A mayor rareza, más pronunciados son los efectos
 		if (rarityLevel >= 9) {
@@ -85,7 +85,7 @@ export function PlaceCardImages({
 
 	// Manejar el efecto holográfico en movimiento
 	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (!tcgMode || !holographicEffect) return;
+		if (!(tcgMode && holographicEffect)) return;
 
 		const el = e.currentTarget;
 		const rect = el.getBoundingClientRect();
@@ -109,14 +109,14 @@ export function PlaceCardImages({
 
 	return (
 		<div
-			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-48', tcgMode && 'border-b border-white/10')}
-			onMouseMove={handleMouseMove}
+			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-48', tcgMode && 'border-white/10 border-b')}
 			onMouseLeave={handleMouseLeave}
+			onMouseMove={handleMouseMove}
 		>
 			{/* Fondo decorativo para cartas TCG */}
 			{tcgMode && (
 				<div
-					className="absolute inset-0 bg-black/20 z-0"
+					className="absolute inset-0 z-0 bg-black/20"
 					style={{
 						backgroundImage: `radial-gradient(circle at 50% 50%, ${primaryColor}30, transparent 80%)`,
 					}}
@@ -125,22 +125,22 @@ export function PlaceCardImages({
 
 			{/* Marco decorativo para lugares raros */}
 			{tcgMode && rarityLevel >= 3 && (
-				<div className="absolute inset-0 z-10 pointer-events-none">
+				<div className="pointer-events-none absolute inset-0 z-10">
 					{/* Bordes en estilo TCG */}
 					<div
-						className="absolute top-0 left-0 w-8 h-8 border-t-2 border-l-2 rounded-br-sm opacity-60"
+						className="absolute top-0 left-0 h-8 w-8 rounded-br-sm border-t-2 border-l-2 opacity-60"
 						style={{ borderColor: primaryColor }}
 					/>
 					<div
-						className="absolute top-0 right-0 w-8 h-8 border-t-2 border-r-2 rounded-bl-sm opacity-60"
+						className="absolute top-0 right-0 h-8 w-8 rounded-bl-sm border-t-2 border-r-2 opacity-60"
 						style={{ borderColor: primaryColor }}
 					/>
 					<div
-						className="absolute bottom-0 left-0 w-8 h-8 border-b-2 border-l-2 rounded-tr-sm opacity-60"
+						className="absolute bottom-0 left-0 h-8 w-8 rounded-tr-sm border-b-2 border-l-2 opacity-60"
 						style={{ borderColor: primaryColor }}
 					/>
 					<div
-						className="absolute bottom-0 right-0 w-8 h-8 border-b-2 border-r-2 rounded-tl-sm opacity-60"
+						className="absolute right-0 bottom-0 h-8 w-8 rounded-tl-sm border-r-2 border-b-2 opacity-60"
 						style={{ borderColor: primaryColor }}
 					/>
 				</div>
@@ -149,7 +149,7 @@ export function PlaceCardImages({
 			{/* Imagen principal con efectos holográficos */}
 			{hasImage ? (
 				<motion.div
-					className="relative w-full h-full z-10"
+					className="relative z-10 h-full w-full"
 					style={{
 						transform: `perspective(1000px) rotateY(${viewAngle.x * 5}deg) rotateX(${-viewAngle.y * 5}deg)`,
 						transformStyle: 'preserve-3d',
@@ -158,12 +158,12 @@ export function PlaceCardImages({
 				>
 					{/* Imagen del lugar */}
 					<img
-						src={displayImage?.thumbnailUrl || ''}
 						alt="Place image"
 						className={cn(
-							'object-cover w-full h-full',
+							'h-full w-full object-cover',
 							rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
 						)}
+						src={displayImage?.thumbnailUrl || ''}
 						style={{
 							...holographicStyle,
 							transformStyle: 'preserve-3d',
@@ -173,7 +173,7 @@ export function PlaceCardImages({
 					{/* Efecto holográfico de brillo */}
 					{tcgMode && holographicEffect && rarityLevel >= 3 && (
 						<div
-							className="absolute inset-0 z-20 pointer-events-none opacity-30"
+							className="pointer-events-none absolute inset-0 z-20 opacity-30"
 							style={{
 								background: `linear-gradient(
 									${135 + viewAngle.x * 30}deg,
@@ -188,7 +188,7 @@ export function PlaceCardImages({
 					{/* Patrón de líneas holográficas para lugares especiales */}
 					{tcgMode && holographicEffect && rarityLevel >= 7 && (
 						<div
-							className="absolute inset-0 z-20 pointer-events-none opacity-10 mix-blend-overlay"
+							className="pointer-events-none absolute inset-0 z-20 opacity-10 mix-blend-overlay"
 							style={{
 								backgroundImage: `repeating-linear-gradient(
 									${90 + viewAngle.x * 20}deg,
@@ -204,21 +204,21 @@ export function PlaceCardImages({
 			) : (
 				// Placeholder cuando no hay imagen
 				<div
-					className="w-full h-full flex items-center justify-center bg-black/20 text-white/50"
+					className="flex h-full w-full items-center justify-center bg-black/20 text-white/50"
 					style={{
 						background: `radial-gradient(circle, ${primaryColor}30 0%, transparent 70%)`,
 					}}
 				>
-					<span className="text-4xl transform -rotate-12">📍</span>
+					<span className="-rotate-12 transform text-4xl">📍</span>
 				</div>
 			)}
 
 			{/* Capa de arte para cartas TCG (marco y efectos) */}
 			{tcgMode && (
-				<div className="absolute inset-0 pointer-events-none z-30">
+				<div className="pointer-events-none absolute inset-0 z-30">
 					{/* Marco interno */}
 					<div
-						className="absolute inset-3 border border-white/10 rounded"
+						className="absolute inset-3 rounded border border-white/10"
 						style={{
 							boxShadow: rarityLevel >= 5 ? `0 0 10px ${primaryColor}50 inset` : 'none',
 						}}
@@ -228,7 +228,7 @@ export function PlaceCardImages({
 					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
 
 					{/* Efecto de brillo superior */}
-					<div className="absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-white/10 to-transparent" />
+					<div className="absolute top-0 right-0 left-0 h-[20%] bg-gradient-to-b from-white/10 to-transparent" />
 				</div>
 			)}
 		</div>

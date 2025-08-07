@@ -227,7 +227,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 			showLogSummary(args[0]);
 			break;
 		case 'exec':
-			if (!args[0] || !args[1]) {
+			if (!(args[0] && args[1])) {
 				console.error('❌ Uso: node logging-utils.js exec <nombre-log> <comando>');
 				process.exit(1);
 			}

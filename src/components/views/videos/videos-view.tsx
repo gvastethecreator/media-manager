@@ -42,7 +42,7 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 
 	// Manejar creación de video
 	const handleCreateVideo = async () => {
-		if (!newVideoName.trim() || !newVideoPath.trim()) return;
+		if (!(newVideoName.trim() && newVideoPath.trim())) return;
 
 		try {
 			await createVideo({
@@ -77,8 +77,8 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 		return (
 			<div className="flex h-full flex-col items-center justify-center space-y-4">
 				<div className="text-center">
-					<h3 className="text-lg font-semibold text-destructive">Error al cargar videos</h3>
-					<p className="text-sm text-muted-foreground">{error}</p>
+					<h3 className="font-semibold text-destructive text-lg">Error al cargar videos</h3>
+					<p className="text-muted-foreground text-sm">{error}</p>
 				</div>
 				<Button onClick={handleManualRetry} variant="outline">
 					<RefreshCw className="mr-2 h-4 w-4" />
@@ -91,33 +91,33 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 	// Mostrar estado vacío si no hay videos
 	if (videos.length === 0) {
 		return (
-			<div className={`h-full flex flex-col ${className}`}>
-				<div className="flex items-center justify-between p-6 border-b">
-					<h2 className="text-2xl font-bold">Videos</h2>
+			<div className={`flex h-full flex-col ${className}`}>
+				<div className="flex items-center justify-between border-b p-6">
+					<h2 className="font-bold text-2xl">Videos</h2>
 					<Button onClick={() => setShowForm(true)}>
-						<Play className="h-4 w-4 mr-2" />
+						<Play className="mr-2 h-4 w-4" />
 						Subir Video
 					</Button>
 				</div>
 
 				{showForm && (
-					<div className="p-6 border-b bg-muted/50">
-						<div className="space-y-4 max-w-md">
+					<div className="border-b bg-muted/50 p-6">
+						<div className="max-w-md space-y-4">
 							<Input
+								onChange={(e) => setNewVideoName(e.target.value)}
 								placeholder="Nombre del video"
 								value={newVideoName}
-								onChange={(e) => setNewVideoName(e.target.value)}
 							/>
 							<Input
+								onChange={(e) => setNewVideoPath(e.target.value)}
 								placeholder="Ruta del archivo"
 								value={newVideoPath}
-								onChange={(e) => setNewVideoPath(e.target.value)}
 							/>
 							<div className="flex gap-2">
-								<Button onClick={handleCreateVideo} disabled={!newVideoName.trim() || !newVideoPath.trim()}>
+								<Button disabled={!(newVideoName.trim() && newVideoPath.trim())} onClick={handleCreateVideo}>
 									Crear Video
 								</Button>
-								<Button variant="outline" onClick={() => setShowForm(false)}>
+								<Button onClick={() => setShowForm(false)} variant="outline">
 									Cancelar
 								</Button>
 							</div>
@@ -125,17 +125,17 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 					</div>
 				)}
 
-				<div className="flex-1 flex items-center justify-center">
+				<div className="flex flex-1 items-center justify-center">
 					<EmptyState
-						icon={Play}
-						title="Sin videos"
-						description="No hay videos disponibles. Sube tu primer video para comenzar."
 						actions={
 							<Button onClick={() => setShowForm(true)}>
-								<Play className="h-4 w-4 mr-2" />
+								<Play className="mr-2 h-4 w-4" />
 								Subir Video
 							</Button>
 						}
+						description="No hay videos disponibles. Sube tu primer video para comenzar."
+						icon={Play}
+						title="Sin videos"
 					/>
 				</div>
 			</div>
@@ -143,33 +143,33 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 	}
 
 	return (
-		<div className={`h-full flex flex-col p-0 m-0 ${className}`}>
-			<div className="flex items-center justify-between p-6 border-b">
-				<h2 className="text-2xl font-bold">Videos ({videos.length})</h2>
+		<div className={`m-0 flex h-full flex-col p-0 ${className}`}>
+			<div className="flex items-center justify-between border-b p-6">
+				<h2 className="font-bold text-2xl">Videos ({videos.length})</h2>
 				<Button onClick={() => setShowForm(true)}>
-					<Play className="h-4 w-4 mr-2" />
+					<Play className="mr-2 h-4 w-4" />
 					Subir Video
 				</Button>
 			</div>
 
 			{showForm && (
-				<div className="p-6 border-b bg-muted/50">
-					<div className="space-y-4 max-w-md">
+				<div className="border-b bg-muted/50 p-6">
+					<div className="max-w-md space-y-4">
 						<Input
+							onChange={(e) => setNewVideoName(e.target.value)}
 							placeholder="Nombre del video"
 							value={newVideoName}
-							onChange={(e) => setNewVideoName(e.target.value)}
 						/>
 						<Input
+							onChange={(e) => setNewVideoPath(e.target.value)}
 							placeholder="Ruta del archivo"
 							value={newVideoPath}
-							onChange={(e) => setNewVideoPath(e.target.value)}
 						/>
 						<div className="flex gap-2">
-							<Button onClick={handleCreateVideo} disabled={!newVideoName.trim() || !newVideoPath.trim()}>
+							<Button disabled={!(newVideoName.trim() && newVideoPath.trim())} onClick={handleCreateVideo}>
 								Crear Video
 							</Button>
-							<Button variant="outline" onClick={() => setShowForm(false)}>
+							<Button onClick={() => setShowForm(false)} variant="outline">
 								Cancelar
 							</Button>
 						</div>
@@ -181,11 +181,11 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 				<div className="grid grid-cols-4 gap-2 p-6">
 					{videos.map((video) => (
 						<VideoCard
-							key={video.id}
-							videoId={video.id}
-							onClick={() => handleVideoClick(video)}
 							className="h-full cursor-pointer"
+							key={video.id}
+							onClick={() => handleVideoClick(video)}
 							tcgMode={true}
+							videoId={video.id}
 						/>
 					))}
 				</div>

@@ -42,11 +42,11 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 	}, [worldItemId, worldItemService]);
 
 	return (
-		<div className="relative h-[160px] overflow-hidden border-b border-gray-400/30">
+		<div className="relative h-[160px] overflow-hidden border-gray-400/30 border-b">
 			{/* Contenedor de imágenes con grid */}
 			<div
 				className={cn(
-					'w-full h-full grid gap-0.5',
+					'grid h-full w-full gap-0.5',
 					images.length >= 4 ? 'grid-cols-3 grid-rows-2' : 'grid-cols-2 grid-rows-2'
 				)}
 				style={{
@@ -59,8 +59,8 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 						// Mostrar placeholders mientras carga
 						Array.from({ length: 6 }).map((_, _i) => (
 							<ImageLoading
-								key={`loading-placeholder-${worldItemId}-${Math.random().toString(36).substring(2, 9)}`}
 								backgroundColor={secondaryColor}
+								key={`loading-placeholder-${worldItemId}-${Math.random().toString(36).substring(2, 9)}`}
 							/>
 						))
 					) : error ? (
@@ -70,20 +70,20 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 						</div>
 					) : images.length === 0 ? (
 						// Mostrar mensaje si no hay imágenes
-						<div className="col-span-full row-span-full flex flex-col items-center justify-center text-center p-4">
-							<ImageIcon className="h-8 w-8 opacity-30 mb-2" />
+						<div className="col-span-full row-span-full flex flex-col items-center justify-center p-4 text-center">
+							<ImageIcon className="mb-2 h-8 w-8 opacity-30" />
 							<p className="text-sm opacity-70">No hay imágenes</p>
 						</div>
 					) : (
 						// Mostrar las imágenes disponibles
 						<>
 							{images.map((image, index) => (
-								<div key={image.id} className="relative overflow-hidden w-full h-full">
+								<div className="relative h-full w-full overflow-hidden" key={image.id}>
 									<img
-										src={image.fullUrl}
 										alt={`Imagen ${index + 1}`}
-										className="w-full h-full object-cover"
+										className="h-full w-full object-cover"
 										loading="lazy"
+										src={image.fullUrl}
 									/>
 								</div>
 							))}
@@ -91,10 +91,10 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 							{images.length < 6 &&
 								Array.from({ length: 6 - images.length }).map((_, _i) => (
 									<div
+										className="flex h-full w-full items-center justify-center bg-black/20"
 										key={`empty-placeholder-${worldItemId}-${Math.random().toString(36).substring(2, 9)}`}
-										className="bg-black/20 w-full h-full flex items-center justify-center"
 									>
-										<ImageIcon className="w-5 h-5 opacity-20" />
+										<ImageIcon className="h-5 w-5 opacity-20" />
 									</div>
 								))}
 						</>
@@ -109,10 +109,10 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 function ImageLoading({ backgroundColor }: { backgroundColor: string }) {
 	return (
 		<div
-			className="animate-pulse relative overflow-hidden w-full h-full flex items-center justify-center"
+			className="relative flex h-full w-full animate-pulse items-center justify-center overflow-hidden"
 			style={{ backgroundColor: `${backgroundColor}30` }}
 		>
-			<ImageIcon className="w-5 h-5 opacity-20" />
+			<ImageIcon className="h-5 w-5 opacity-20" />
 		</div>
 	);
 }

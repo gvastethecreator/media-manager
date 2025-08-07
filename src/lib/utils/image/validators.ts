@@ -134,6 +134,6 @@ export function isImageUrl(url: string): boolean {
  * @param maxHeight Alto máximo permitido
  * @returns true si las dimensiones son válidas, false en caso contrario
  */
-export function validateImageDimensions(width: number, height: number, maxWidth = 10000, maxHeight = 10000): boolean {
+export function validateImageDimensions(width: number, height: number, maxWidth = 10_000, maxHeight = 10_000): boolean {
 	return width > 0 && height > 0 && width <= maxWidth && height <= maxHeight;
 }

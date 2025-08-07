@@ -28,20 +28,20 @@ export function MetricCard({ metric }: { metric: SystemMetric }) {
 		<Card className="h-full border-2 border-primary/10">
 			<CardContent className="p-3">
 				<div className="flex items-center gap-4">
-					<div className="p-2 rounded-md bg-primary/10 border-2 border-primary/10">
+					<div className="rounded-md border-2 border-primary/10 bg-primary/10 p-2">
 						<Icon className="h-7 w-7" />
 					</div>
 					<div className="flex-1">
-						<p className="text-sm text-muted-foreground">{metric.name}</p>
+						<p className="text-muted-foreground text-sm">{metric.name}</p>
 						<div className="flex items-end gap-2">
-							<p className="text-xl font-semibold">
+							<p className="font-semibold text-xl">
 								{metric.value}
-								<span className="text-sm text-muted-foreground ml-1">{metric.unit}</span>
+								<span className="ml-1 text-muted-foreground text-sm">{metric.unit}</span>
 							</p>
 							{metric.change && (
 								<div
 									className={cn(
-										'text-xs font-medium flex items-center gap-1',
+										'flex items-center gap-1 font-medium text-xs',
 										metric.change.type === 'increase' ? 'text-green-500' : 'text-red-500'
 									)}
 								>
@@ -56,8 +56,8 @@ export function MetricCard({ metric }: { metric: SystemMetric }) {
 					<div className="mt-2 h-[50px]">
 						{chartData.map((value, index) => (
 							<div
+								className="mx-[2px] inline-block w-[6px] rounded-sm bg-primary/20"
 								key={`chart-bar-${metric.name}-${index}`}
-								className="inline-block w-[6px] mx-[2px] bg-primary/20 rounded-sm"
 								style={{
 									height: `${(value / maxChartValue) * 100}%`,
 								}}

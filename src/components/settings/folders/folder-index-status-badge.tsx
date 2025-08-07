@@ -77,9 +77,8 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 			<Tooltip>
 				<TooltipTrigger asChild>
 					<Badge
-						variant="outline"
 						className={cn(
-							'text-[10px] px-2 h-4 flex items-center gap-1',
+							'flex h-4 items-center gap-1 px-2 text-[10px]',
 							status === 'indexed' && 'border-green-200 bg-green-50/30 text-green-600',
 							status === 'outdated' && 'border-amber-200 bg-amber-50/30 text-amber-600',
 							status === 'pending' && 'border-muted bg-muted/30 text-muted-foreground',
@@ -87,12 +86,13 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 								'border-destructive/30 bg-destructive/10 text-destructive',
 							className
 						)}
+						variant="outline"
 					>
 						{getStatusIcon()}
 						{getStatusLabel()}
 					</Badge>
 				</TooltipTrigger>
-				<TooltipContent side="top" align="center" className="text-xs">
+				<TooltipContent align="center" className="text-xs" side="top">
 					{tooltipContent}
 				</TooltipContent>
 			</Tooltip>

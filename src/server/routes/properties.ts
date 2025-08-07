@@ -81,7 +81,7 @@ router.post('/', async (req, res) => {
 	try {
 		const { name, value, category, description, isPublic } = req.body;
 
-		if (!name || !value) {
+		if (!(name && value)) {
 			res.status(400).json({ error: 'El nombre y valor son requeridos' });
 			return;
 		}

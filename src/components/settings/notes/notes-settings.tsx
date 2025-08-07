@@ -142,11 +142,11 @@ export function NotesSettings() {
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-3">
 						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">Cargando notas...</p>
+						<p className="text-muted-foreground text-sm">Cargando notas...</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -155,10 +155,10 @@ export function NotesSettings() {
 
 	if (error) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-3">
-						<p className="text-sm text-destructive">Error al cargar notas: {error.message}</p>
+						<p className="text-destructive text-sm">Error al cargar notas: {error.message}</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -169,13 +169,13 @@ export function NotesSettings() {
 		<div className="grid grid-cols-12 gap-3">
 			{/* Panel izquierdo: Lista de notas */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="space-y-1 py-2 px-3">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-sm flex items-center">
+							<CardTitle className="flex items-center text-sm">
 								Notas ({filteredNotes.length})
 								{filteredNotes.length !== notes.length && (
-									<Badge variant="outline" className="ml-2 text-[10px]">
+									<Badge className="ml-2 text-[10px]" variant="outline">
 										Filtradas
 									</Badge>
 								)}
@@ -183,32 +183,32 @@ export function NotesSettings() {
 							<div className="flex items-center gap-1">
 								<Popover>
 									<PopoverTrigger asChild>
-										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+										<Button className="h-6 w-6 p-0" size="sm" variant="ghost">
 											<Filter className="h-3.5 w-3.5" />
 										</Button>
 									</PopoverTrigger>
-									<PopoverContent className="w-72" align="end">
+									<PopoverContent align="end" className="w-72">
 										<div className="space-y-4">
 											<h4 className="font-medium text-sm">Filtrar Notas</h4>
 
 											<div className="space-y-2">
 												<Label htmlFor="search">Buscar</Label>
 												<Input
+													className="h-8 text-xs"
 													id="search"
+													onChange={(e) => setSearchQuery(e.target.value)}
 													placeholder="Buscar notas..."
 													value={searchQuery}
-													onChange={(e) => setSearchQuery(e.target.value)}
-													className="h-8 text-xs"
 												/>
 											</div>
 
 											<div className="space-y-2">
 												<Label htmlFor="category">Categoría</Label>
 												<select
+													className="h-8 w-full rounded-md border border-input px-3 text-xs"
 													id="category"
-													value={selectedCategory || ''}
 													onChange={(e) => setSelectedCategory(e.target.value || null)}
-													className="w-full h-8 text-xs rounded-md border border-input px-3"
+													value={selectedCategory || ''}
 												>
 													<option value="">Todas las categorías</option>
 													{uniqueCategories.map((category) => (
@@ -221,20 +221,20 @@ export function NotesSettings() {
 
 											<div className="flex items-center space-x-2">
 												<Checkbox
-													id="favorites"
 													checked={onlyFavorites}
+													id="favorites"
 													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
 												/>
-												<Label htmlFor="favorites" className="text-xs">
+												<Label className="text-xs" htmlFor="favorites">
 													Solo favoritas
 												</Label>
 											</div>
 
 											<div className="flex justify-between">
-												<Button size="sm" variant="outline" onClick={clearFilters} className="h-8 text-xs">
+												<Button className="h-8 text-xs" onClick={clearFilters} size="sm" variant="outline">
 													Limpiar filtros
 												</Button>
-												<Button size="sm" className="h-8 text-xs">
+												<Button className="h-8 text-xs" size="sm">
 													Aplicar
 												</Button>
 											</div>
@@ -242,19 +242,19 @@ export function NotesSettings() {
 									</PopoverContent>
 								</Popover>
 								<Button
+									className="h-6 w-6 p-0"
 									onClick={() => {
 										setSelectedNote(null);
 										setIsEditing(false);
 									}}
 									size="sm"
 									variant="ghost"
-									className="h-6 w-6 p-0"
 								>
 									<PlusCircle className="h-3.5 w-3.5" />
 								</Button>
 							</div>
 						</div>
-						<div className="flex gap-2 text-xs text-muted-foreground">
+						<div className="flex gap-2 text-muted-foreground text-xs">
 							<span>{stats.totalNotes} notas</span>
 							{stats.favoriteNotes > 0 && (
 								<>
@@ -286,40 +286,40 @@ export function NotesSettings() {
 						<ScrollArea className="h-full px-3 pb-3">
 							{filteredNotes.length === 0 ? (
 								<EmptyState
-									icon={NotebookPen}
-									title="No hay notas"
-									description={
-										notes.length > 0 ? 'No se encontraron notas con los filtros aplicados' : 'Crea tu primera nota'
-									}
-									className="py-6"
 									actions={
 										notes.length > 0 && (
-											<Button size="sm" variant="outline" onClick={clearFilters}>
+											<Button onClick={clearFilters} size="sm" variant="outline">
 												Limpiar filtros
 											</Button>
 										)
 									}
+									className="py-6"
+									description={
+										notes.length > 0 ? 'No se encontraron notas con los filtros aplicados' : 'Crea tu primera nota'
+									}
+									icon={NotebookPen}
+									title="No hay notas"
 								/>
 							) : (
 								<div className="space-y-1">
 									{filteredNotes.map((note) => (
 										<button
+											aria-pressed={selectedNote?.id === note.id}
+											className={`flex w-full cursor-pointer items-center gap-2 rounded-md p-1.5 text-left transition-colors hover:bg-muted/50 ${selectedNote?.id === note.id ? 'bg-muted' : ''}`}
 											key={note.id}
-											className={`flex items-center gap-2 p-1.5 rounded-md transition-colors cursor-pointer hover:bg-muted/50 w-full text-left ${selectedNote?.id === note.id ? 'bg-muted' : ''}`}
 											onClick={() => handleEditNote(note)}
 											type="button"
-											aria-pressed={selectedNote?.id === note.id}
 										>
 											<div
-												className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
+												className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-white"
 												style={{
 													backgroundColor: note.color || '#3b82f6',
 												}}
 											>
 												<span className="text-xs">{note.emoji}</span>
 											</div>
-											<div className="flex-1 min-w-0">
-												<h4 className="text-xs font-medium truncate">{note.title}</h4>
+											<div className="min-w-0 flex-1">
+												<h4 className="truncate font-medium text-xs">{note.title}</h4>
 												<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
 													<span>Actualizado {formatDate(note.updatedAt)}</span>
 													{note.tags?.length > 0 && (
@@ -331,15 +331,15 @@ export function NotesSettings() {
 												</div>
 											</div>
 											<Button
-												variant="ghost"
-												size="icon"
+												aria-label="Eliminar nota"
 												className="h-5 w-5 opacity-0 hover:opacity-100 group-hover:opacity-100"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDeleteButtonClick(note.id);
 												}}
+												size="icon"
 												type="button"
-												aria-label="Eliminar nota"
+												variant="ghost"
 											>
 												<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
 											</Button>
@@ -354,8 +354,8 @@ export function NotesSettings() {
 
 			{/* Panel derecho: Formulario y Preview */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="py-2 px-3">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="px-3 py-2">
 						<div className="flex items-center justify-between">
 							<div>
 								<CardTitle className="text-sm">{isEditing ? 'Editar Nota' : 'Nueva Nota'}</CardTitle>
@@ -368,49 +368,49 @@ export function NotesSettings() {
 							<div className="flex gap-1">
 								{isEditing && selectedNote && (
 									<>
-										<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleReset}>
+										<Button className="h-7 text-xs" onClick={handleReset} size="sm" variant="outline">
 											Cancelar
 										</Button>
 										<Button
-											variant="destructive"
-											size="sm"
 											className="h-7 text-xs"
 											onClick={() => handleDeleteNote(selectedNote.id)}
+											size="sm"
+											variant="destructive"
 										>
-											<Trash className="h-3 w-3 mr-1" />
+											<Trash className="mr-1 h-3 w-3" />
 											Eliminar
 										</Button>
 									</>
 								)}
-								<Button type="submit" size="sm" className="h-7 text-xs" form="note-form">
-									<Save className="h-3 w-3 mr-1" />
+								<Button className="h-7 text-xs" form="note-form" size="sm" type="submit">
+									<Save className="mr-1 h-3 w-3" />
 									{isEditing ? 'Guardar' : 'Crear'}
 								</Button>
 							</div>
 						</div>
 					</CardHeader>
-					<CardContent className="p-3 flex-1 overflow-hidden">
+					<CardContent className="flex-1 overflow-hidden p-3">
 						<ScrollArea className="h-full pr-3">
-							<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+							<div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-2">
 								<div className="space-y-3">
 									<CreateNoteForm
+										isEditing={isEditing}
 										key={selectedNote?.id || 'new-note'}
 										note={selectedNote}
-										isEditing={isEditing}
-										onSuccess={handleNoteCreated}
-										onUpdated={handleNoteUpdated}
 										onCancel={handleReset}
 										onPreview={handlePreview}
+										onSuccess={handleNoteCreated}
+										onUpdated={handleNoteUpdated}
 									/>
 								</div>
-								<div className="hidden lg:flex flex-col items-center justify-start">
-									<h3 className="text-xs font-medium mb-2">Vista Previa</h3>
+								<div className="hidden flex-col items-center justify-start lg:flex">
+									<h3 className="mb-2 font-medium text-xs">Vista Previa</h3>
 									<div className="w-[220px] transition-all duration-300">
 										{previewData || selectedNote ? (
-											<div className="flex flex-col p-4 border rounded-lg bg-background">
-												<div className="flex items-center mb-3 gap-2">
+											<div className="flex flex-col rounded-lg border bg-background p-4">
+												<div className="mb-3 flex items-center gap-2">
 													<div
-														className="w-10 h-10 rounded-md flex items-center justify-center text-xl"
+														className="flex h-10 w-10 items-center justify-center rounded-md text-xl"
 														style={{
 															backgroundColor:
 																previewData?.color || (selectedNote as NoteWithStats)?.color || '#3b82f6',
@@ -419,11 +419,11 @@ export function NotesSettings() {
 														{previewData?.emoji || (selectedNote as NoteWithStats)?.emoji || '📝'}
 													</div>
 													<div className="flex-1">
-														<h3 className="text-md font-medium">
+														<h3 className="font-medium text-md">
 															{previewData?.name || selectedNote?.title || 'Nueva Nota'}
 														</h3>
 														{(previewData?.category || selectedNote?.category) && (
-															<p className="text-xs text-muted-foreground">
+															<p className="text-muted-foreground text-xs">
 																{previewData?.category || selectedNote?.category}
 															</p>
 														)}
@@ -431,12 +431,12 @@ export function NotesSettings() {
 												</div>
 
 												{(previewData?.content || (selectedNote as NoteWithStats)?.summary) && (
-													<p className="text-muted-foreground text-sm mb-3">
+													<p className="mb-3 text-muted-foreground text-sm">
 														{previewData?.content || (selectedNote as NoteWithStats)?.summary}
 													</p>
 												)}
 
-												<div className="bg-muted p-3 rounded-md text-xs max-h-[200px] overflow-y-auto mb-3">
+												<div className="mb-3 max-h-[200px] overflow-y-auto rounded-md bg-muted p-3 text-xs">
 													<div className="prose prose-sm prose-stone dark:prose-invert">
 														{previewData?.content ||
 															selectedNote?.content ||
@@ -444,18 +444,18 @@ export function NotesSettings() {
 													</div>
 												</div>
 
-												<div className="flex flex-wrap gap-2 mt-auto">
+												<div className="mt-auto flex flex-wrap gap-2">
 													{(previewData?.isFavorite || selectedNote?.isFavorite) && (
-														<Badge variant="outline" className="text-xs">
+														<Badge className="text-xs" variant="outline">
 															Favorita
 														</Badge>
 													)}
 												</div>
 											</div>
 										) : (
-											<div className="flex flex-col items-center justify-center h-[300px] bg-muted/50 rounded-lg border border-dashed">
+											<div className="flex h-[300px] flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50">
 												<NotebookPen className="h-7 w-7 text-muted-foreground/50" />
-												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
+												<p className="mt-2 text-[10px] text-muted-foreground">Vista previa</p>
 											</div>
 										)}
 									</div>

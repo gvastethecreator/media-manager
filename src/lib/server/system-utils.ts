@@ -59,13 +59,13 @@ export async function getSystemInfo(): Promise<SystemInfo> {
 				loadAvg: [0, 0, 0],
 			},
 			memory: {
-				total: 8589934592, // 8GB
-				free: 4294967296, // 4GB
-				used: 4294967296, // 4GB
+				total: 8_589_934_592, // 8GB
+				free: 4_294_967_296, // 4GB
+				used: 4_294_967_296, // 4GB
 				usedPercent: 50,
 			},
 			uptime: {
-				system: 86400, // 1 día
+				system: 86_400, // 1 día
 			},
 			platform: {
 				type: 'unknown',

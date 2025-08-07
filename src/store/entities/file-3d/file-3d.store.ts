@@ -87,7 +87,7 @@ const useFile3DStoreBase = create<File3DState>()(
 					return newFile3D;
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
-					return undefined;
+					return;
 				}
 			},
 
@@ -103,7 +103,7 @@ const useFile3DStoreBase = create<File3DState>()(
 					return updatedFile3D;
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
-					return undefined;
+					return;
 				}
 			},
 

@@ -54,7 +54,7 @@ export default function MixedView({ className }: MixedViewProps) {
 	const documents = Object.values(documentsRecord || {});
 
 	const audios: AudioWithStats[] = useAudioStore((state) => state.audios) || [];
-	const audiosLoading: boolean = useAudioStore((state) => state.isLoading) || false;
+	const audiosLoading: boolean = useAudioStore((state) => state.isLoading);
 	const audiosError: string | null = useAudioStore((state) => state.error) || null;
 	const fetchAudios = useAudioStore((state) => state.fetchAudios);
 
@@ -205,43 +205,43 @@ export default function MixedView({ className }: MixedViewProps) {
 				case 'images':
 					return (
 						<ImageCard
-							key={key}
+							className="cursor-pointer transition-shadow hover:shadow-lg"
 							imageId={item.id}
+							key={key}
 							onClick={() => handleItemClick(item)}
-							className="cursor-pointer hover:shadow-lg transition-shadow"
 						/>
 					);
 				case 'videos':
 					return (
 						<VideoCard
+							className="cursor-pointer transition-shadow hover:shadow-lg"
 							key={key}
-							videoId={item.id}
 							onClick={() => handleItemClick(item)}
-							className="cursor-pointer hover:shadow-lg transition-shadow"
+							videoId={item.id}
 						/>
 					);
 				case 'documents':
 					return (
 						<DocumentCard
-							key={key}
+							className="cursor-pointer transition-shadow hover:shadow-lg"
 							document={item as DocumentWithStats}
+							key={key}
 							onClick={() => handleItemClick(item)}
-							className="cursor-pointer hover:shadow-lg transition-shadow"
 						/>
 					);
 				case 'folders':
 					return (
 						<FolderCard
-							key={key}
+							className="cursor-pointer transition-shadow hover:shadow-lg"
 							folder={item as FolderWithStats}
+							key={key}
 							onClick={() => handleItemClick(item)}
-							className="cursor-pointer hover:shadow-lg transition-shadow"
 						/>
 					);
 				default:
 					return (
-						<div key={key} className="p-4 border rounded-lg">
-							<p className="text-sm text-muted-foreground">Tipo no soportado: {item.itemType}</p>
+						<div className="rounded-lg border p-4" key={key}>
+							<p className="text-muted-foreground text-sm">Tipo no soportado: {item.itemType}</p>
 							<p className="font-medium">{item.name}</p>
 						</div>
 					);
@@ -258,30 +258,30 @@ export default function MixedView({ className }: MixedViewProps) {
 	// Mostrar error si hay problemas
 	if (hasError && allItems.length === 0) {
 		return (
-			<div className="flex flex-col items-center justify-center h-full gap-4">
+			<div className="flex h-full flex-col items-center justify-center gap-4">
 				<EmptyState
+					actions={<Button onClick={handleRetry}>Reintentar</Button>}
+					description="No se pudieron cargar algunos tipos de archivos. Verifica tu conexión e inténtalo de nuevo."
 					icon={Grid}
 					title="Error al cargar archivos"
-					description="No se pudieron cargar algunos tipos de archivos. Verifica tu conexión e inténtalo de nuevo."
-					actions={<Button onClick={handleRetry}>Reintentar</Button>}
 				/>
 			</div>
 		);
 	}
 
 	return (
-		<div className={`flex flex-col h-full ${className}`}>
+		<div className={`flex h-full flex-col ${className}`}>
 			{/* Header con controles */}
-			<div className="flex flex-col gap-4 p-6 border-b">
+			<div className="flex flex-col gap-4 border-b p-6">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<Grid className="h-5 w-5" />
-						<h1 className="text-2xl font-bold">Todos los Archivos</h1>
-						<span className="text-sm text-muted-foreground">({filteredItems.length} elementos)</span>
+						<h1 className="font-bold text-2xl">Todos los Archivos</h1>
+						<span className="text-muted-foreground text-sm">({filteredItems.length} elementos)</span>
 					</div>
 					<div className="flex items-center gap-2">
-						<Button variant="outline" size="sm" onClick={handleRetry} disabled={isRetrying}>
-							<RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+						<Button disabled={isRetrying} onClick={handleRetry} size="sm" variant="outline">
+							<RefreshCw className={`mr-2 h-4 w-4 ${isRetrying ? 'animate-spin' : ''}`} />
 							{isRetrying ? 'Recargando...' : 'Recargar'}
 						</Button>
 					</div>
@@ -291,7 +291,7 @@ export default function MixedView({ className }: MixedViewProps) {
 				<div className="flex items-center gap-4">
 					<div className="flex items-center gap-2">
 						<Filter className="h-4 w-4" />
-						<Select value={selectedType} onValueChange={(value: FileType) => setSelectedType(value)}>
+						<Select onValueChange={(value: FileType) => setSelectedType(value)} value={selectedType}>
 							<SelectTrigger className="w-40">
 								<SelectValue placeholder="Filtrar por tipo" />
 							</SelectTrigger>
@@ -307,10 +307,10 @@ export default function MixedView({ className }: MixedViewProps) {
 					</div>
 
 					<Input
+						className="max-w-sm"
+						onChange={(e) => setSearchQuery(e.target.value)}
 						placeholder="Buscar archivos..."
 						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						className="max-w-sm"
 					/>
 				</div>
 			</div>
@@ -320,16 +320,16 @@ export default function MixedView({ className }: MixedViewProps) {
 				<div className="p-6">
 					{filteredItems.length === 0 ? (
 						<EmptyState
-							icon={Grid}
-							title={searchQuery ? 'No se encontraron archivos' : 'No hay archivos disponibles'}
 							description={
 								searchQuery
 									? `No se encontraron archivos que coincidan con "${searchQuery}"`
 									: 'Comienza subiendo algunos archivos para verlos aquí.'
 							}
+							icon={Grid}
+							title={searchQuery ? 'No se encontraron archivos' : 'No hay archivos disponibles'}
 						/>
 					) : (
-						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 							{filteredItems.map(renderCard)}
 						</div>
 					)}

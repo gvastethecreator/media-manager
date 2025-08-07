@@ -44,18 +44,18 @@ export const NavPanel = memo(function NavPanel({
 
 	return (
 		<aside
+			aria-label="Panel de navegación principal"
 			className={cn(
-				'h-full flex flex-col bg-background border-r border-border overflow-hidden',
+				'flex h-full flex-col overflow-hidden border-border border-r bg-background',
 				isAnimating && 'transition-all duration-300 ease-in-out'
 			)}
-			aria-label="Panel de navegación principal"
 		>
 			<NavPanelHeader
+				isAnimating={isAnimating}
 				isCollapsed={isCollapsed}
-				onOpenSettings={handleOpenSettings}
 				onOpenDevelopment={handleOpenDevelopment}
 				onOpenEntityCards={handleOpenEntityCards}
-				isAnimating={isAnimating}
+				onOpenSettings={handleOpenSettings}
 			/>
 			<ScrollArea className="flex-1">
 				<NavMainNavigation currentView={currentView} isCollapsed={isCollapsed} />

@@ -24,11 +24,11 @@ export function StatusBadge({ status }: { status: string }) {
 
 	return (
 		<Badge
-			variant="secondary"
 			className={cn(
-				'transition-colors text-[10px] absolute top-2 right-2 p-2 h-4 rounded-lg border-2 border-primary/10',
+				'absolute top-2 right-2 h-4 rounded-lg border-2 border-primary/10 p-2 text-[10px] transition-colors',
 				getStatusColor()
 			)}
+			variant="secondary"
 		>
 			{status}
 		</Badge>

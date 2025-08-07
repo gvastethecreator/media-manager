@@ -3,8 +3,8 @@
  * @module transformers/image/mappers
  */
 
-import type { ImageBase, ImageWithStats } from '@/types/entities/image/base';
 import { createDefaultEntityStats } from '@/lib/utils';
+import type { ImageBase, ImageWithStats } from '@/types/entities/image/base';
 
 /**
  * Convierte cualquier objeto plano a ImageWithStats (rellena campos obligatorios)

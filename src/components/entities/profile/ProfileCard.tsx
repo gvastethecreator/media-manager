@@ -34,17 +34,17 @@ export function ProfileCard({
 
 	return (
 		<motion.div
-			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
 			exit={{ opacity: 0, y: -20 }}
+			initial={{ opacity: 0, y: 20 }}
+			transition={{ duration: 0.2 }}
 			whileHover={{ scale: 1.02 }}
 			whileTap={{ scale: 0.98 }}
-			transition={{ duration: 0.2 }}
 		>
 			<Card
 				className={cn(
 					'relative overflow-hidden transition-all duration-300',
-					isSelected && 'ring-2 ring-primary shadow-lg',
+					isSelected && 'shadow-lg ring-2 ring-primary',
 					isExpanded && 'h-auto',
 					!isExpanded && 'h-[280px]',
 					className
@@ -54,21 +54,21 @@ export function ProfileCard({
 				<CardHeader className="space-y-4">
 					<div className="flex items-start justify-between">
 						<Avatar className="h-16 w-16">
-							<AvatarImage src={imageId || undefined} alt={name} />
+							<AvatarImage alt={name} src={imageId || undefined} />
 							<AvatarFallback>{name.slice(0, 2).toUpperCase()}</AvatarFallback>
 						</Avatar>
 						<Badge variant={isActive ? 'primary' : 'secondary'}>{isActive ? 'Activo' : 'Inactivo'}</Badge>
 					</div>
 					<div>
 						<CardTitle className="line-clamp-1">{name}</CardTitle>
-						<CardDescription className="flex gap-2 mt-1">
+						<CardDescription className="mt-1 flex gap-2">
 							{preferences?.theme && (
-								<Badge variant="outline" className="capitalize">
+								<Badge className="capitalize" variant="outline">
 									{preferences.theme}
 								</Badge>
 							)}
 							{preferences?.language && (
-								<Badge variant="outline" className="capitalize">
+								<Badge className="capitalize" variant="outline">
 									{preferences.language}
 								</Badge>
 							)}
@@ -78,17 +78,17 @@ export function ProfileCard({
 
 				<CardContent>
 					{description && (
-						<p className={cn('text-sm text-muted-foreground', isExpanded ? 'line-clamp-none' : 'line-clamp-2')}>
+						<p className={cn('text-muted-foreground text-sm', isExpanded ? 'line-clamp-none' : 'line-clamp-2')}>
 							{description}
 						</p>
 					)}
 
 					{isExpanded && (
 						<motion.div
-							initial={{ opacity: 0, height: 0 }}
 							animate={{ opacity: 1, height: 'auto' }}
+							className="mt-4 border-t pt-4"
 							exit={{ opacity: 0, height: 0 }}
-							className="mt-4 pt-4 border-t"
+							initial={{ opacity: 0, height: 0 }}
 						>
 							{/* Contenido expandido */}
 							<div className="space-y-2">
@@ -107,27 +107,27 @@ export function ProfileCard({
 
 				{/* Botón para expandir/colapsar */}
 				<button
-					type="button"
-					className="absolute bottom-2 right-2 p-2 rounded-full hover:bg-muted"
+					className="absolute right-2 bottom-2 rounded-full p-2 hover:bg-muted"
 					onClick={(e) => {
 						e.stopPropagation();
 						onExpand?.(profile);
 					}}
 					title={isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}
+					type="button"
 				>
 					<motion.svg
-						xmlns="http://www.w3.org/2000/svg"
-						width="20"
-						height="20"
-						viewBox="0 0 24 24"
-						fill="none"
-						stroke="currentColor"
-						strokeWidth="2"
-						strokeLinecap="round"
-						strokeLinejoin="round"
 						animate={{ rotate: isExpanded ? 180 : 0 }}
 						aria-label={isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}
+						fill="none"
+						height="20"
 						role="img"
+						stroke="currentColor"
+						strokeLinecap="round"
+						strokeLinejoin="round"
+						strokeWidth="2"
+						viewBox="0 0 24 24"
+						width="20"
+						xmlns="http://www.w3.org/2000/svg"
 					>
 						<title>{isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}</title>
 						<polyline points="6 9 12 15 18 9" />

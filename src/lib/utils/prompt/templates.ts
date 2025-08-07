@@ -179,7 +179,7 @@ export function getTemplateById(templateId: string): PromptTemplate | undefined 
 		return PREDEFINED_TEMPLATES[templateId];
 	} catch (error) {
 		templatesLogger.error('❌ Error al obtener plantilla por ID:', error);
-		return undefined;
+		return;
 	}
 }
 

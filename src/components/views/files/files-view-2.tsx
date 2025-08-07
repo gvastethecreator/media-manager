@@ -140,17 +140,17 @@ export function FilesView(_: ViewProps) {
 
 	if (error && allFiles.length === 0) {
 		return (
-			<BaseContentView title="Error al cargar archivos" description={`Error: ${error}`}>
+			<BaseContentView description={`Error: ${error}`} title="Error al cargar archivos">
 				<div className="text-center">
-					<p className="text-muted-foreground mb-4">Ha ocurrido un error al cargar los archivos.</p>
+					<p className="mb-4 text-muted-foreground">Ha ocurrido un error al cargar los archivos.</p>
 					<button
+						className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
 						onClick={() => {
 							loadImages();
 							fetchVideos();
 							fetchAudios();
 							fetchDocuments();
 						}}
-						className="px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90"
 					>
 						Intentar de nuevo
 					</button>
@@ -160,13 +160,13 @@ export function FilesView(_: ViewProps) {
 	}
 
 	return (
-		<BaseContentView title="Todos los archivos" description={`${fileCount} archivos en total`}>
+		<BaseContentView description={`${fileCount} archivos en total`} title="Todos los archivos">
 			<FileBrowser
+				entityType="image"
+				isLoading={isLoading} // Usamos image como base para el FileBrowser
 				items={allFiles}
-				entityType="image" // Usamos image como base para el FileBrowser
 				onItemClick={handleFileClick}
 				onItemDoubleClick={handleFileDoubleClick}
-				isLoading={isLoading}
 			/>
 		</BaseContentView>
 	);

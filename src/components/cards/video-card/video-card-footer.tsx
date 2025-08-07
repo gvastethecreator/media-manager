@@ -37,7 +37,7 @@ export function VideoCardFooter({
 	const glow = rarityLevel >= 7 ? 4 : rarityLevel >= 5 ? 2 : 0;
 
 	return (
-		<div className={cn('border-t mt-auto', compact ? 'p-2' : 'p-3')} style={{ borderColor: `${primaryColor}30` }}>
+		<div className={cn('mt-auto border-t', compact ? 'p-2' : 'p-3')} style={{ borderColor: `${primaryColor}30` }}>
 			{/* Fondo decorativo */}
 			{tcgMode && (
 				<div
@@ -54,14 +54,14 @@ export function VideoCardFooter({
 					{/* Contador de álbumes */}
 					{albumsCount > 0 && (
 						<div
-							className={cn('flex items-center gap-1 text-xs px-2 py-1 rounded', tcgMode && 'border')}
+							className={cn('flex items-center gap-1 rounded px-2 py-1 text-xs', tcgMode && 'border')}
 							style={{
 								backgroundColor: tcgMode ? `${primaryColor}15` : 'rgba(0,0,0,0.1)',
 								borderColor: tcgMode ? `${primaryColor}40` : 'transparent',
 								boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}60` : 'none',
 							}}
 						>
-							<Image className="w-3 h-3" />
+							<Image className="h-3 w-3" />
 							<span className="font-medium">{albumsCount}</span>
 						</div>
 					)}
@@ -69,14 +69,14 @@ export function VideoCardFooter({
 					{/* Contador de tags */}
 					{tagsCount > 0 && (
 						<div
-							className={cn('flex items-center gap-1 text-xs px-2 py-1 rounded', tcgMode && 'border')}
+							className={cn('flex items-center gap-1 rounded px-2 py-1 text-xs', tcgMode && 'border')}
 							style={{
 								backgroundColor: tcgMode ? `${primaryColor}15` : 'rgba(0,0,0,0.1)',
 								borderColor: tcgMode ? `${primaryColor}40` : 'transparent',
 								boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}60` : 'none',
 							}}
 						>
-							<Tag className="w-3 h-3" />
+							<Tag className="h-3 w-3" />
 							<span className="font-medium">{tagsCount}</span>
 						</div>
 					)}
@@ -84,14 +84,14 @@ export function VideoCardFooter({
 					{/* Contador de colecciones */}
 					{collectionsCount > 0 && (
 						<div
-							className={cn('flex items-center gap-1 text-xs px-2 py-1 rounded', tcgMode && 'border')}
+							className={cn('flex items-center gap-1 rounded px-2 py-1 text-xs', tcgMode && 'border')}
 							style={{
 								backgroundColor: tcgMode ? `${primaryColor}15` : 'rgba(0,0,0,0.1)',
 								borderColor: tcgMode ? `${primaryColor}40` : 'transparent',
 								boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}60` : 'none',
 							}}
 						>
-							<Users className="w-3 h-3" />
+							<Users className="h-3 w-3" />
 							<span className="font-medium">{collectionsCount}</span>
 						</div>
 					)}
@@ -100,12 +100,12 @@ export function VideoCardFooter({
 				{/* Lado derecho: Stats TCG */}
 				<div className="flex items-center gap-2">
 					{/* Indicador de favorito */}
-					{isFavorite && <Heart className="w-4 h-4 fill-red-500 text-red-500" />}
+					{isFavorite && <Heart className="h-4 w-4 fill-red-500 text-red-500" />}
 
 					{/* ID de carta TCG */}
 					{tcgMode && !compact && (
 						<div
-							className="text-xs font-mono px-2 py-1 rounded border"
+							className="rounded border px-2 py-1 font-mono text-xs"
 							style={{
 								backgroundColor: `${primaryColor}10`,
 								borderColor: `${primaryColor}30`,
@@ -118,7 +118,7 @@ export function VideoCardFooter({
 
 					{/* Grade técnico */}
 					<div
-						className={cn('text-xs font-bold px-2 py-1 rounded', tcgMode && 'border')}
+						className={cn('rounded px-2 py-1 font-bold text-xs', tcgMode && 'border')}
 						style={{
 							backgroundColor: `${primaryColor}20`,
 							borderColor: tcgMode ? `${primaryColor}50` : 'transparent',
@@ -133,12 +133,12 @@ export function VideoCardFooter({
 
 			{/* Barra de rareza para TCG */}
 			{tcgMode && rarityLevel >= 5 && (
-				<div className="flex justify-center mt-2">
+				<div className="mt-2 flex justify-center">
 					<div className="flex gap-1">
 						{Array.from({ length: 5 }, (_, i) => (
 							<div
+								className={cn('h-1 w-1 rounded-full', i < Math.floor(rarityLevel / 2) ? 'opacity-100' : 'opacity-30')}
 								key={i}
-								className={cn('w-1 h-1 rounded-full', i < Math.floor(rarityLevel / 2) ? 'opacity-100' : 'opacity-30')}
 								style={{ backgroundColor: primaryColor }}
 							/>
 						))}

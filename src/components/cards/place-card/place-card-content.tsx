@@ -51,11 +51,11 @@ export function PlaceCardContent({
 	const getStatIcon = (statName: string) => {
 		switch (statName.toLowerCase()) {
 			case 'defense':
-				return <ShieldIcon className="w-3 h-3 mr-1" />;
+				return <ShieldIcon className="mr-1 h-3 w-3" />;
 			case 'wealth':
-				return <CircleDollarSignIcon className="w-3 h-3 mr-1" />;
+				return <CircleDollarSignIcon className="mr-1 h-3 w-3" />;
 			case 'danger':
-				return <AlertTriangleIcon className="w-3 h-3 mr-1" />;
+				return <AlertTriangleIcon className="mr-1 h-3 w-3" />;
 			default:
 				return null;
 		}
@@ -82,17 +82,17 @@ export function PlaceCardContent({
 			{!tcgMode && (
 				<div className="flex flex-wrap gap-1 text-xs">
 					{region && (
-						<Badge variant="outline" className="px-1 h-5">
+						<Badge className="h-5 px-1" variant="outline">
 							<span className="text-xs">{region}</span>
 						</Badge>
 					)}
 					{type && (
-						<Badge variant="outline" className="px-1 h-5">
+						<Badge className="h-5 px-1" variant="outline">
 							<span className="text-xs">{type}</span>
 						</Badge>
 					)}
 					{climate && (
-						<Badge variant="outline" className="px-1 h-5">
+						<Badge className="h-5 px-1" variant="outline">
 							<span className="text-xs">{climate}</span>
 						</Badge>
 					)}
@@ -105,23 +105,23 @@ export function PlaceCardContent({
 					{/* Columna de recursos */}
 					{parsedResources && parsedResources.length > 0 && (
 						<div className="space-y-1">
-							<div className="font-semibold text-xs flex items-center" style={{ color: primaryColor }}>
-								<CircleDollarSignIcon className="w-3 h-3 mr-1" />
+							<div className="flex items-center font-semibold text-xs" style={{ color: primaryColor }}>
+								<CircleDollarSignIcon className="mr-1 h-3 w-3" />
 								Recursos
 							</div>
 							<div className="flex flex-wrap gap-1">
 								{parsedResources.slice(0, maxTags).map((resource) => (
 									<Badge
+										className="h-5 bg-black/10 px-1 text-xs"
 										key={`resource-${resource.name}`}
-										variant="outline"
-										className="px-1 h-5 bg-black/10 text-xs"
 										style={{ borderColor: tagColor }}
+										variant="outline"
 									>
 										{resource.name}
 									</Badge>
 								))}
 								{parsedResources.length > maxTags && (
-									<Badge variant="outline" className="px-1 h-5 bg-black/10 text-xs" style={{ borderColor: tagColor }}>
+									<Badge className="h-5 bg-black/10 px-1 text-xs" style={{ borderColor: tagColor }} variant="outline">
 										+{parsedResources.length - maxTags}
 									</Badge>
 								)}
@@ -132,23 +132,23 @@ export function PlaceCardContent({
 					{/* Columna de peligros */}
 					{parsedDangers && parsedDangers.length > 0 && (
 						<div className="space-y-1">
-							<div className="font-semibold text-xs flex items-center" style={{ color: primaryColor }}>
-								<AlertTriangleIcon className="w-3 h-3 mr-1" />
+							<div className="flex items-center font-semibold text-xs" style={{ color: primaryColor }}>
+								<AlertTriangleIcon className="mr-1 h-3 w-3" />
 								Peligros
 							</div>
 							<div className="flex flex-wrap gap-1">
 								{parsedDangers.slice(0, maxTags).map((danger) => (
 									<Badge
+										className="h-5 bg-black/10 px-1 text-xs"
 										key={`danger-${danger.type}`}
-										variant="outline"
-										className="px-1 h-5 bg-black/10 text-xs"
 										style={{ borderColor: tagColor }}
+										variant="outline"
 									>
 										{danger.type}
 									</Badge>
 								))}
 								{parsedDangers.length > maxTags && (
-									<Badge variant="outline" className="px-1 h-5 bg-black/10 text-xs" style={{ borderColor: tagColor }}>
+									<Badge className="h-5 bg-black/10 px-1 text-xs" style={{ borderColor: tagColor }} variant="outline">
 										+{parsedDangers.length - maxTags}
 									</Badge>
 								)}
@@ -163,8 +163,8 @@ export function PlaceCardContent({
 				<div className={cn('grid gap-1', compact ? 'grid-cols-2' : 'grid-cols-4')}>
 					{displayStats.map(([stat, value]) => (
 						<div
+							className="flex items-center rounded bg-black/5 px-1 py-0.5 text-xs"
 							key={`stat-${stat}`}
-							className="flex items-center text-xs bg-black/5 rounded px-1 py-0.5"
 							style={{ borderLeft: `2px solid ${primaryColor}` }}
 						>
 							{getStatIcon(stat)}
@@ -179,14 +179,14 @@ export function PlaceCardContent({
 			{tcgMode && compact && (government || population !== undefined) && (
 				<div className="flex gap-2 text-xs">
 					{government && (
-						<div className="flex-1 flex items-center">
-							<span className="font-semibold mr-1">Gob:</span>
+						<div className="flex flex-1 items-center">
+							<span className="mr-1 font-semibold">Gob:</span>
 							<span className="truncate">{government}</span>
 						</div>
 					)}
 					{population !== undefined && (
 						<div className="flex items-center">
-							<span className="font-semibold mr-1">Pop:</span>
+							<span className="mr-1 font-semibold">Pop:</span>
 							<span>{population.toLocaleString()}</span>
 						</div>
 					)}

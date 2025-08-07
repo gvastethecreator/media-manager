@@ -141,7 +141,7 @@ export function useSystemStats() {
 		// Actualizar datos cada 30 segundos
 		const intervalId = setInterval(() => {
 			fetchData();
-		}, 30000);
+		}, 30_000);
 
 		return () => clearInterval(intervalId);
 	}, [fetchData]);

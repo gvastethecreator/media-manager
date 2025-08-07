@@ -183,9 +183,13 @@ export function useReindexFolder() {
 
 	return useMutation<FolderWithStats, Error, string>({
 		mutationFn: (id) => reindexFolder(id),
+		retry: false, // ✅ Deshabilitar retry automático para evitar loops infinitos
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
+		},
+		onError: (error) => {
+			console.error('❌ Error en reindexación de carpeta:', error);
 		},
 	});
 }
@@ -195,9 +199,13 @@ export function useReindexAllFolders() {
 
 	return useMutation<{ processed: number; errors: string[] }, Error, void>({
 		mutationFn: () => reindexAllFolders(),
+		retry: false, // ✅ Deshabilitar retry automático para evitar loops infinitos en ERR_EMPTY_RESPONSE
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
+		},
+		onError: (error) => {
+			console.error('❌ Error en reindexación global:', error);
 		},
 	});
 }

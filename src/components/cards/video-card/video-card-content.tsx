@@ -20,17 +20,17 @@ export function VideoCardContent({ video, primaryColor, tcgMode = true }: VideoC
 	const autoTags: TagWithStats[] = [];
 
 	return (
-		<div className="flex-1 p-3 space-y-3">
+		<div className="flex-1 space-y-3 p-3">
 			{/* Descripción si existe */}
-			{description && <p className="text-sm text-muted-foreground line-clamp-2">{description}</p>}
+			{description && <p className="line-clamp-2 text-muted-foreground text-sm">{description}</p>}
 
 			{/* Estadísticas técnicas */}
 			<div className="space-y-2">
 				{/* Quality Score */}
 				<div className="flex items-center justify-between">
-					<span className="text-sm font-medium">Calidad</span>
+					<span className="font-medium text-sm">Calidad</span>
 					<div className="flex items-center gap-2">
-						<div className="h-2 w-16 bg-gray-200 rounded-full overflow-hidden">
+						<div className="h-2 w-16 overflow-hidden rounded-full bg-gray-200">
 							<div
 								className="h-full transition-all duration-300"
 								style={{
@@ -39,7 +39,7 @@ export function VideoCardContent({ video, primaryColor, tcgMode = true }: VideoC
 								}}
 							/>
 						</div>
-						<span className="text-sm font-bold" style={{ color: primaryColor }}>
+						<span className="font-bold text-sm" style={{ color: primaryColor }}>
 							{qualityScore}
 						</span>
 					</div>
@@ -82,24 +82,24 @@ export function VideoCardContent({ video, primaryColor, tcgMode = true }: VideoC
 			{/* Auto-tags */}
 			{autoTags.length > 0 && (
 				<div className="space-y-1">
-					<span className="text-xs font-medium text-muted-foreground">Tags automáticos:</span>
+					<span className="font-medium text-muted-foreground text-xs">Tags automáticos:</span>
 					<div className="flex flex-wrap gap-1">
 						{autoTags.slice(0, 4).map((tag: TagWithStats) => (
 							<Badge
+								className="px-1.5 py-0.5 text-xs"
 								key={tag.id}
-								variant="secondary"
-								className="text-xs px-1.5 py-0.5"
 								style={{
 									backgroundColor: `${primaryColor}15`,
 									color: primaryColor,
 									borderColor: `${primaryColor}30`,
 								}}
+								variant="secondary"
 							>
 								{tag.name}
 							</Badge>
 						))}
 						{autoTags.length > 4 && (
-							<Badge variant="outline" className="text-xs px-1.5 py-0.5">
+							<Badge className="px-1.5 py-0.5 text-xs" variant="outline">
 								+{autoTags.length - 4}
 							</Badge>
 						)}

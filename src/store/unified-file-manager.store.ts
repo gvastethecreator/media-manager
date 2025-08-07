@@ -394,7 +394,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 								rawResponse = await getFolderImagesFromApi(id, { skip, take });
 
 								// Verificar si se obtuvo una respuesta válida
-								if (!rawResponse || !Array.isArray(rawResponse.items)) {
+								if (!(rawResponse && Array.isArray(rawResponse.items))) {
 									fileManagerLogger.warn(`⚠️ La respuesta no es válida: ${typeof rawResponse}`);
 									rawResponse = { items: [], pagination: { hasMore: false, total: 0, currentPage: 0 } };
 								}
@@ -428,7 +428,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 					currentItems: updatedItems,
 					displayedItems: updatedItems,
 					isProcessingThumbnails: updatedItems.length > 0,
-					hasMoreItems: rawResponse?.pagination?.hasMore || false,
+					hasMoreItems: rawResponse?.pagination?.hasMore,
 					totalItems: rawResponse?.pagination?.total || updatedItems.length,
 					currentPage: rawResponse?.pagination?.currentPage || 0,
 					lastUpdate: Date.now(),
@@ -457,7 +457,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 			return;
 		}
 
-		if (!state.currentContext || !state.currentFolderId) {
+		if (!(state.currentContext && state.currentFolderId)) {
 			fileManagerLogger.warn('📂 No hay contexto actual para cargar más items');
 			return;
 		}
@@ -571,12 +571,12 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 		const folder = state.folders.find((f) => f.id === id);
 		// Si no se encuentra la carpeta o no tiene información completa, intentar obtenerla
 		let folderWithDetails = folder;
-		if (!folder || !folder.count) {
+		if (!(folder && folder.count)) {
 			try {
 				// TODO: Implementar obtención de detalles de carpeta cuando la función esté disponible
 				fileManagerLogger.debug('📊 Usando información básica de carpeta');
 				folderWithDetails = folder || {
-					id: id,
+					id,
 					name: `Carpeta ${id}`,
 					count: 0,
 				};

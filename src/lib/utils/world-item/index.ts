@@ -211,7 +211,7 @@ export function applyWorldItemFilters(worldItems: WorldItemExtended[], filters: 
 		// Filtro por tipo
 		if (filters.type) {
 			const typeFilter = Array.isArray(filters.type) ? filters.type : [filters.type];
-			if (!item.type || !typeFilter.includes(item.type)) {
+			if (!(item.type && typeFilter.includes(item.type))) {
 				return false;
 			}
 		}
@@ -219,7 +219,7 @@ export function applyWorldItemFilters(worldItems: WorldItemExtended[], filters: 
 		// Filtro por categoría
 		if (filters.category) {
 			const categoryFilter = Array.isArray(filters.category) ? filters.category : [filters.category];
-			if (!item.category || !categoryFilter.includes(item.category)) {
+			if (!(item.category && categoryFilter.includes(item.category))) {
 				return false;
 			}
 		}
@@ -227,7 +227,7 @@ export function applyWorldItemFilters(worldItems: WorldItemExtended[], filters: 
 		// Filtro por rareza
 		if (filters.rarity) {
 			const rarityFilter = Array.isArray(filters.rarity) ? filters.rarity : [filters.rarity];
-			if (!item.rarity || !rarityFilter.includes(item.rarity)) {
+			if (!(item.rarity && rarityFilter.includes(item.rarity))) {
 				return false;
 			}
 		}

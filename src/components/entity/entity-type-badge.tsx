@@ -65,14 +65,14 @@ export function EntityTypeBadge({
 			case 'outline':
 				return {
 					backgroundColor: 'transparent',
-					color: color,
+					color,
 					borderColor: color,
 					borderWidth: '1px',
 				};
 			case 'ghost':
 				return {
 					backgroundColor: `${color}10`, // 10% opacity
-					color: color,
+					color,
 					border: 'none',
 				};
 			default:
@@ -82,15 +82,15 @@ export function EntityTypeBadge({
 
 	const badgeContent = (
 		<motion.div
-			initial={animated ? { scale: 1 } : false}
-			whileHover={animated ? { scale: 1.05 } : {}}
-			whileTap={animated ? { scale: 0.95 } : {}}
 			className={cn(
 				'inline-flex items-center rounded-full font-medium transition-all duration-200',
 				sizeClasses[size],
 				className
 			)}
+			initial={animated ? { scale: 1 } : false}
 			style={getVariantStyles()}
+			whileHover={animated ? { scale: 1.05 } : {}}
+			whileTap={animated ? { scale: 0.95 } : {}}
 		>
 			<Icon className={cn('flex-shrink-0', size === 'sm' ? 'h-3 w-3' : size === 'md' ? 'h-4 w-4' : 'h-5 w-5')} />
 			{showText && <span className="truncate">{displayName}</span>}
@@ -105,7 +105,7 @@ export function EntityTypeBadge({
 		<TooltipProvider>
 			<Tooltip>
 				<TooltipTrigger asChild>{badgeContent}</TooltipTrigger>
-				<TooltipContent side="top" className="max-w-xs">
+				<TooltipContent className="max-w-xs" side="top">
 					<div className="space-y-2">
 						<div className="flex items-center gap-2">
 							<span className="text-lg">{emoji}</span>
@@ -113,15 +113,15 @@ export function EntityTypeBadge({
 						</div>
 
 						{metadata?.hasPreview === true && (
-							<div className="text-xs text-muted-foreground">✨ Soporta vista previa</div>
+							<div className="text-muted-foreground text-xs">✨ Soporta vista previa</div>
 						)}
 
 						{metadata?.isContainer === true && (
-							<div className="text-xs text-muted-foreground">📦 Contenedor de elementos</div>
+							<div className="text-muted-foreground text-xs">📦 Contenedor de elementos</div>
 						)}
 
 						{metadata?.isRelational === true && (
-							<div className="text-xs text-muted-foreground">🔗 Entidad relacional</div>
+							<div className="text-muted-foreground text-xs">🔗 Entidad relacional</div>
 						)}
 					</div>
 				</TooltipContent>
@@ -164,9 +164,9 @@ export function EntityTypeStats({ stats, hideEmpty = true, limit, orientation = 
 	return (
 		<div className={containerClasses}>
 			{sortedStats.map(([type, count]) => (
-				<div key={type} className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2">
-					<EntityTypeBadge type={type as EntityStatsType} size="sm" variant="ghost" showTooltip={false} />
-					<span className="text-sm font-medium">{count}</span>
+				<div className="flex items-center gap-2 rounded-lg bg-muted/50 px-3 py-2" key={type}>
+					<EntityTypeBadge showTooltip={false} size="sm" type={type as EntityStatsType} variant="ghost" />
+					<span className="font-medium text-sm">{count}</span>
 				</div>
 			))}
 		</div>
@@ -221,14 +221,14 @@ export function EntityTypeSelector({
 
 				return (
 					<button
-						key={type}
-						onClick={() => handleTypeToggle(type)}
 						className={cn(
 							'transition-all duration-200',
 							isSelected ? 'ring-2 ring-primary ring-offset-2' : 'hover:scale-105'
 						)}
+						key={type}
+						onClick={() => handleTypeToggle(type)}
 					>
-						<EntityTypeBadge type={type} size={size} variant={isSelected ? 'solid' : 'outline'} showText animated />
+						<EntityTypeBadge animated showText size={size} type={type} variant={isSelected ? 'solid' : 'outline'} />
 					</button>
 				);
 			})}

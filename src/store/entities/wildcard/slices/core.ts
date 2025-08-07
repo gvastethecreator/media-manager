@@ -172,12 +172,12 @@ export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreS
 				get().addWildcard(wildcard);
 				return wildcard;
 			}
-			return undefined;
+			return;
 		} catch (e) {
 			const errorMsg = e instanceof Error ? e.message : 'Error fetching wildcard';
 			wildcardLogger.error('Failed to fetch wildcard', { error: e });
 			get().setError(errorMsg);
-			return undefined;
+			return;
 		} finally {
 			get().setLoading(false);
 		}
@@ -208,7 +208,7 @@ export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreS
 			const errorMsg = e instanceof Error ? e.message : 'Error creating wildcard';
 			wildcardLogger.error('Failed to create wildcard', { error: e });
 			toastService.error(errorMsg);
-			return undefined;
+			return;
 		} finally {
 			get().setLoading(false);
 		}
@@ -224,7 +224,7 @@ export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreS
 			const errorMsg = e instanceof Error ? e.message : 'Error updating wildcard';
 			wildcardLogger.error('Failed to update wildcard', { error: e });
 			toastService.error(errorMsg);
-			return undefined;
+			return;
 		} finally {
 			get().setLoading(false);
 		}

@@ -250,7 +250,7 @@ export const useActivityStore = create<ActivityStore>()(
 							set(() => ({
 								error: error instanceof Error ? error.message : 'Error desconocido',
 							}));
-							return undefined;
+							return;
 						} finally {
 							set(() => ({
 								isLoading: false,
@@ -285,12 +285,12 @@ export const useActivityStore = create<ActivityStore>()(
 								}));
 								return result;
 							}
-							return undefined;
+							return;
 						} catch (error) {
 							set(() => ({
 								error: error instanceof Error ? error.message : 'Error desconocido',
 							}));
-							return undefined;
+							return;
 						} finally {
 							set(() => ({
 								isLoading: false,
@@ -334,7 +334,7 @@ export const useActivityStore = create<ActivityStore>()(
 							set(() => ({
 								error: error instanceof Error ? error.message : 'Error desconocido',
 							}));
-							return undefined;
+							return;
 						} finally {
 							set(() => ({
 								isLoading: false,

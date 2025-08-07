@@ -26,9 +26,9 @@ export function CollectionCardImages({ collectionId, primaryColor, secondaryColo
 
 	// Placeholder para mostrar cuando no hay imágenes
 	const renderPlaceholder = () => (
-		<div className="h-full flex items-center justify-center p-4 text-center" style={{ color: `${primaryColor}80` }}>
+		<div className="flex h-full items-center justify-center p-4 text-center" style={{ color: `${primaryColor}80` }}>
 			<div className="flex flex-col items-center gap-2">
-				<ImageOffIcon className="w-10 h-10 opacity-40" />
+				<ImageOffIcon className="h-10 w-10 opacity-40" />
 				<p className="text-xs opacity-60">No hay imágenes disponibles</p>
 			</div>
 		</div>
@@ -37,14 +37,14 @@ export function CollectionCardImages({ collectionId, primaryColor, secondaryColo
 	// Render de estado de carga
 	if (loading) {
 		return (
-			<div className="h-24 p-1 relative">
+			<div className="relative h-24 p-1">
 				<div
 					className="absolute inset-0 z-0 opacity-30"
 					style={{
 						background: `linear-gradient(135deg, ${primaryColor}30, ${derivedSecondaryColor}40)`,
 					}}
 				/>
-				<div className="relative z-10 grid grid-cols-3 gap-1 h-full">
+				<div className="relative z-10 grid h-full grid-cols-3 gap-1">
 					<Skeleton className="h-full w-full rounded-sm bg-primary/10" />
 					<Skeleton className="h-full w-full rounded-sm bg-primary/10" />
 					<Skeleton className="h-full w-full rounded-sm bg-primary/10" />
@@ -54,7 +54,7 @@ export function CollectionCardImages({ collectionId, primaryColor, secondaryColo
 	}
 
 	return (
-		<div className="h-24 p-1 relative">
+		<div className="relative h-24 p-1">
 			{/* Fondo decorativo para la sección de imágenes */}
 			<div
 				className="absolute inset-0 z-0 opacity-30"
@@ -65,29 +65,29 @@ export function CollectionCardImages({ collectionId, primaryColor, secondaryColo
 
 			{/* Marco decorativo */}
 			<div
-				className="absolute inset-0 border-2 border-dashed rounded-sm pointer-events-none z-10 opacity-20"
+				className="pointer-events-none absolute inset-0 z-10 rounded-sm border-2 border-dashed opacity-20"
 				style={{ borderColor: primaryColor }}
 			/>
 
 			{/* Contenedor de imágenes */}
-			<div className="relative z-1 grid grid-cols-3 gap-1 h-full">
+			<div className="relative z-1 grid h-full grid-cols-3 gap-1">
 				{sortedThumbnails.length > 0
 					? // Mostrar hasta 3 imágenes
 						sortedThumbnails
 							.slice(0, 3)
 							.map((thumbnail, idx) => (
 								<motion.div
-									key={thumbnail.id}
-									className="h-full rounded-sm overflow-hidden shadow-sm bg-black/30 relative"
-									initial={{ opacity: 0, y: 10 }}
 									animate={{ opacity: 1, y: 0 }}
+									className="relative h-full overflow-hidden rounded-sm bg-black/30 shadow-sm"
+									initial={{ opacity: 0, y: 10 }}
+									key={thumbnail.id}
 									transition={{ duration: 0.3, delay: idx * 0.1 }}
 								>
-									<img src={thumbnail.thumbnailUrl} alt="" className="w-full h-full object-cover" loading="lazy" />
+									<img alt="" className="h-full w-full object-cover" loading="lazy" src={thumbnail.thumbnailUrl} />
 									{/* Indicador para videos */}
 									{thumbnail.isVideo && (
-										<div className="absolute bottom-1 right-1 bg-black/60 p-0.5 rounded-full">
-											<VideoIcon className="w-3 h-3 text-white" />
+										<div className="absolute right-1 bottom-1 rounded-full bg-black/60 p-0.5">
+											<VideoIcon className="h-3 w-3 text-white" />
 										</div>
 									)}
 								</motion.div>
@@ -98,11 +98,11 @@ export function CollectionCardImages({ collectionId, primaryColor, secondaryColo
 
 			{/* Partículas decorativas estilo TCG */}
 			<div
-				className="absolute -bottom-1 right-2 w-4 h-4 rounded-full opacity-60 z-10"
+				className="-bottom-1 absolute right-2 z-10 h-4 w-4 rounded-full opacity-60"
 				style={{ backgroundColor: primaryColor }}
 			/>
 			<div
-				className="absolute -top-1 left-2 w-2 h-2 rounded-full opacity-60 z-10"
+				className="-top-1 absolute left-2 z-10 h-2 w-2 rounded-full opacity-60"
 				style={{ backgroundColor: derivedSecondaryColor }}
 			/>
 		</div>

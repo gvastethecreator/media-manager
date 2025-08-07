@@ -146,14 +146,14 @@ export function ServerStats() {
 	return (
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
-				<h2 className="text-2xl font-bold">Estadísticas del Servidor</h2>
+				<h2 className="font-bold text-2xl">Estadísticas del Servidor</h2>
 				<Button
+					className="flex items-center gap-2"
+					disabled={loading}
+					onClick={handleRefresh}
+					size="sm"
 					type="button"
 					variant="outline"
-					size="sm"
-					onClick={handleRefresh}
-					disabled={loading}
-					className="flex items-center gap-2"
 				>
 					<RefreshCw className={`h-4 w-4 ${loading ? 'animate-spin' : ''}`} />
 					Actualizar
@@ -170,13 +170,13 @@ export function ServerStats() {
 				</Card>
 			)}
 
-			<Tabs value={activeTab} onValueChange={setActiveTab}>
+			<Tabs onValueChange={setActiveTab} value={activeTab}>
 				<TabsList className="grid w-full grid-cols-2">
 					<TabsTrigger value="system">Sistema</TabsTrigger>
 					<TabsTrigger value="app">Aplicación</TabsTrigger>
 				</TabsList>
 
-				<TabsContent value="system" className="space-y-4 mt-4">
+				<TabsContent className="mt-4 space-y-4" value="system">
 					{systemStats ? (
 						<>
 							<Card>
@@ -187,19 +187,19 @@ export function ServerStats() {
 								<CardContent className="space-y-4">
 									<div className="grid grid-cols-2 gap-4">
 										<div>
-											<p className="text-sm text-muted-foreground">Plataforma</p>
+											<p className="text-muted-foreground text-sm">Plataforma</p>
 											<p className="font-medium">{systemStats.platform}</p>
 										</div>
 										<div>
-											<p className="text-sm text-muted-foreground">Versión de Node.js</p>
+											<p className="text-muted-foreground text-sm">Versión de Node.js</p>
 											<p className="font-medium">{systemStats.nodeVersion}</p>
 										</div>
 										<div>
-											<p className="text-sm text-muted-foreground">Tiempo de actividad</p>
+											<p className="text-muted-foreground text-sm">Tiempo de actividad</p>
 											<p className="font-medium">{systemStats.uptime}</p>
 										</div>
 										<div>
-											<p className="text-sm text-muted-foreground">Procesador</p>
+											<p className="text-muted-foreground text-sm">Procesador</p>
 											<p className="font-medium">
 												{systemStats.cpu.model} ({systemStats.cpu.cores} núcleos)
 											</p>
@@ -208,18 +208,18 @@ export function ServerStats() {
 								</CardContent>
 							</Card>
 
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 								<Card>
 									<CardHeader>
 										<CardTitle>CPU</CardTitle>
 										<CardDescription>Uso actual del procesador</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-2">
-										<div className="flex justify-between items-center">
-											<span className="text-sm text-muted-foreground">Uso</span>
+										<div className="flex items-center justify-between">
+											<span className="text-muted-foreground text-sm">Uso</span>
 											<span className="font-medium">{systemStats.cpu.usage.toFixed(1)}%</span>
 										</div>
-										<Progress value={systemStats.cpu.usage} className="h-2" />
+										<Progress className="h-2" value={systemStats.cpu.usage} />
 									</CardContent>
 								</Card>
 
@@ -229,19 +229,19 @@ export function ServerStats() {
 										<CardDescription>Uso actual de memoria</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-2">
-										<div className="flex justify-between items-center text-sm">
+										<div className="flex items-center justify-between text-sm">
 											<span className="text-muted-foreground">Total</span>
 											<span>{systemStats.memory.total}</span>
 										</div>
-										<div className="flex justify-between items-center text-sm">
+										<div className="flex items-center justify-between text-sm">
 											<span className="text-muted-foreground">Usado</span>
 											<span>{systemStats.memory.used}</span>
 										</div>
-										<div className="flex justify-between items-center text-sm">
+										<div className="flex items-center justify-between text-sm">
 											<span className="text-muted-foreground">Libre</span>
 											<span>{systemStats.memory.free}</span>
 										</div>
-										<Progress value={systemStats.memory.usedPercentage} className="h-2 mt-2" />
+										<Progress className="mt-2 h-2" value={systemStats.memory.usedPercentage} />
 									</CardContent>
 								</Card>
 							</div>
@@ -254,7 +254,7 @@ export function ServerStats() {
 								<CardContent>
 									<div className="space-y-3">
 										{systemStats.network.map((net, index) => (
-											<div key={index} className="p-3 border rounded-lg">
+											<div className="rounded-lg border p-3" key={index}>
 												<div className="grid grid-cols-2 gap-2 text-sm">
 													<div>
 														<span className="text-muted-foreground">Interfaz:</span>
@@ -294,10 +294,10 @@ export function ServerStats() {
 					)}
 				</TabsContent>
 
-				<TabsContent value="app" className="space-y-4 mt-4">
+				<TabsContent className="mt-4 space-y-4" value="app">
 					{appStats ? (
 						<>
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 								<Card>
 									<CardHeader>
 										<CardTitle>Solicitudes HTTP</CardTitle>
@@ -305,20 +305,20 @@ export function ServerStats() {
 									</CardHeader>
 									<CardContent className="space-y-4">
 										<div className="grid grid-cols-2 gap-4">
-											<div className="text-center p-3 bg-green-50 rounded-lg">
-												<p className="text-2xl font-bold text-green-600">{appStats.requests.success}</p>
-												<p className="text-sm text-green-700">Exitosas</p>
+											<div className="rounded-lg bg-green-50 p-3 text-center">
+												<p className="font-bold text-2xl text-green-600">{appStats.requests.success}</p>
+												<p className="text-green-700 text-sm">Exitosas</p>
 											</div>
-											<div className="text-center p-3 bg-red-50 rounded-lg">
-												<p className="text-2xl font-bold text-red-600">{appStats.requests.error}</p>
-												<p className="text-sm text-red-700">Errores</p>
+											<div className="rounded-lg bg-red-50 p-3 text-center">
+												<p className="font-bold text-2xl text-red-600">{appStats.requests.error}</p>
+												<p className="text-red-700 text-sm">Errores</p>
 											</div>
 										</div>
 										<div className="text-center">
-											<p className="text-sm text-muted-foreground">Total de solicitudes</p>
-											<p className="text-lg font-semibold">{appStats.requests.total}</p>
+											<p className="text-muted-foreground text-sm">Total de solicitudes</p>
+											<p className="font-semibold text-lg">{appStats.requests.total}</p>
 											{appStats.requests.successRate && (
-												<Badge variant="secondary" className="mt-1">
+												<Badge className="mt-1" variant="secondary">
 													{appStats.requests.successRate} éxito
 												</Badge>
 											)}
@@ -332,43 +332,43 @@ export function ServerStats() {
 										<CardDescription>Tiempos de respuesta</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-3">
-										<div className="flex justify-between items-center">
-											<span className="text-sm text-muted-foreground">Promedio</span>
+										<div className="flex items-center justify-between">
+											<span className="text-muted-foreground text-sm">Promedio</span>
 											<span className="font-medium">{appStats.performance.avgResponseTime}</span>
 										</div>
-										<div className="flex justify-between items-center">
-											<span className="text-sm text-muted-foreground">Mínimo</span>
+										<div className="flex items-center justify-between">
+											<span className="text-muted-foreground text-sm">Mínimo</span>
 											<span className="font-medium">{appStats.performance.minResponseTime}</span>
 										</div>
-										<div className="flex justify-between items-center">
-											<span className="text-sm text-muted-foreground">Máximo</span>
+										<div className="flex items-center justify-between">
+											<span className="text-muted-foreground text-sm">Máximo</span>
 											<span className="font-medium">{appStats.performance.maxResponseTime}</span>
 										</div>
-										<div className="flex justify-between items-center">
-											<span className="text-sm text-muted-foreground">P95</span>
+										<div className="flex items-center justify-between">
+											<span className="text-muted-foreground text-sm">P95</span>
 											<span className="font-medium">{appStats.performance.p95ResponseTime}</span>
 										</div>
 									</CardContent>
 								</Card>
 							</div>
 
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 								<Card>
 									<CardHeader>
 										<CardTitle>Base de Datos</CardTitle>
 										<CardDescription>Estadísticas de consultas</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-3">
-										<div className="flex justify-between items-center">
-											<span className="text-sm text-muted-foreground">Consultas totales</span>
+										<div className="flex items-center justify-between">
+											<span className="text-muted-foreground text-sm">Consultas totales</span>
 											<span className="font-medium">{appStats.database.queries}</span>
 										</div>
-										<div className="flex justify-between items-center">
-											<span className="text-sm text-muted-foreground">Tiempo promedio</span>
+										<div className="flex items-center justify-between">
+											<span className="text-muted-foreground text-sm">Tiempo promedio</span>
 											<span className="font-medium">{appStats.database.avgQueryTime}</span>
 										</div>
-										<div className="flex justify-between items-center">
-											<span className="text-sm text-muted-foreground">Consultas lentas</span>
+										<div className="flex items-center justify-between">
+											<span className="text-muted-foreground text-sm">Consultas lentas</span>
 											<span className="font-medium">{appStats.database.slowQueries}</span>
 										</div>
 									</CardContent>
@@ -380,16 +380,16 @@ export function ServerStats() {
 										<CardDescription>Estadísticas de caché</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-3">
-										<div className="flex justify-between items-center">
-											<span className="text-sm text-muted-foreground">Aciertos</span>
+										<div className="flex items-center justify-between">
+											<span className="text-muted-foreground text-sm">Aciertos</span>
 											<span className="font-medium">{appStats.cache.hits}</span>
 										</div>
-										<div className="flex justify-between items-center">
-											<span className="text-sm text-muted-foreground">Fallos</span>
+										<div className="flex items-center justify-between">
+											<span className="text-muted-foreground text-sm">Fallos</span>
 											<span className="font-medium">{appStats.cache.misses}</span>
 										</div>
-										<div className="flex justify-between items-center">
-											<span className="text-sm text-muted-foreground">Ratio</span>
+										<div className="flex items-center justify-between">
+											<span className="text-muted-foreground text-sm">Ratio</span>
 											<Badge variant="secondary">{appStats.cache.ratio}</Badge>
 										</div>
 									</CardContent>
@@ -403,25 +403,25 @@ export function ServerStats() {
 										<CardDescription>Últimos errores registrados</CardDescription>
 									</CardHeader>
 									<CardContent className="space-y-3">
-										<div className="flex justify-between items-center">
-											<span className="text-sm text-muted-foreground">Total de errores</span>
+										<div className="flex items-center justify-between">
+											<span className="text-muted-foreground text-sm">Total de errores</span>
 											<Badge variant="destructive">{appStats.errors.count}</Badge>
 										</div>
 										{appStats.errors.last && (
-											<div className="p-3 bg-red-50 border border-red-200 rounded-lg">
+											<div className="rounded-lg border border-red-200 bg-red-50 p-3">
 												<p className="font-medium text-red-800">Último error:</p>
-												<p className="text-sm text-red-700 mt-1">{appStats.errors.last.mensaje}</p>
-												<Badge variant="outline" className="mt-2">
+												<p className="mt-1 text-red-700 text-sm">{appStats.errors.last.mensaje}</p>
+												<Badge className="mt-2" variant="outline">
 													{appStats.errors.last.tipo}
 												</Badge>
 											</div>
 										)}
 										{Object.keys(appStats.errors.byType).length > 0 && (
 											<div>
-												<p className="text-sm font-medium mb-2">Errores por tipo:</p>
+												<p className="mb-2 font-medium text-sm">Errores por tipo:</p>
 												<div className="space-y-1">
 													{Object.entries(appStats.errors.byType).map(([type, count]) => (
-														<div key={type} className="flex justify-between items-center text-sm">
+														<div className="flex items-center justify-between text-sm" key={type}>
 															<span className="text-muted-foreground">{type}</span>
 															<Badge variant="outline">{count}</Badge>
 														</div>

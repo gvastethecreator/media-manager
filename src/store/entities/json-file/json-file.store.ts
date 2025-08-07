@@ -90,7 +90,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 					return newJsonFile;
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
-					return undefined;
+					return;
 				}
 			},
 
@@ -106,7 +106,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 					return updatedJsonFile;
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
-					return undefined;
+					return;
 				}
 			},
 
@@ -170,7 +170,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 				const jsonFile = get().getJsonFileById(id);
 				if (jsonFile) {
 					await get().updateJsonFile(id, {
-						// @ts-ignore TODO: Arreglar el tipo isFavorite cuando se refactoricen las actions
+						// @ts-expect-error TODO: Arreglar el tipo isFavorite cuando se refactoricen las actions
 						isFavorite: !jsonFile.isFavorite,
 					});
 				}

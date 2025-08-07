@@ -266,7 +266,7 @@ export async function createTag(data: TagCreateInput): Promise<TagWithStats> {
 				description: data.description || null,
 				color: data.color || '#3b82f6',
 				emoji: data.emoji || '🏷️',
-				isFavorite: data.isFavorite || false,
+				isFavorite: data.isFavorite,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			})

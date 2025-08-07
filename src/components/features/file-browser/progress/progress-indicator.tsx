@@ -103,7 +103,7 @@ export function ProgressIndicator({
 			return <XCircle className="h-4 w-4 text-red-500" />;
 		}
 		if (runningOperations.length > 0) {
-			return <Loader2 className="h-4 w-4 text-blue-500 animate-spin" />;
+			return <Loader2 className="h-4 w-4 animate-spin text-blue-500" />;
 		}
 		if (completedOperations.length > 0) {
 			return <CheckCircle className="h-4 w-4 text-green-500" />;
@@ -133,7 +133,7 @@ export function ProgressIndicator({
 		const remainingCount = Math.max(0, operations.length - maxOperationsShown);
 
 		return (
-			<div className="space-y-2 max-w-xs">
+			<div className="max-w-xs space-y-2">
 				<div className="font-medium text-sm">Operaciones activas ({operations.length})</div>
 
 				{operationsToShow.map((operation) => {
@@ -141,16 +141,17 @@ export function ProgressIndicator({
 					const label = OPERATION_LABELS[operation.type];
 
 					return (
-						<div key={operation.id} className="space-y-1">
+						<div className="space-y-1" key={operation.id}>
 							<div className="flex items-center gap-2">
 								<Icon className="h-3 w-3" />
 								<span className="text-xs">{label}</span>
-								<span className="text-xs text-gray-400">{Math.round(operation.progress.percentage)}%</span>
+								<span className="text-gray-400 text-xs">{Math.round(operation.progress.percentage)}%</span>
 							</div>
 
 							{/* Mini progress bar */}
-							<div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-1">
+							<div className="h-1 w-full rounded-full bg-gray-200 dark:bg-gray-700">
 								<motion.div
+									animate={{ width: `${operation.progress}%` }}
 									className={cn('h-1 rounded-full transition-all duration-300', {
 										'bg-blue-500': operation.status === 'running',
 										'bg-green-500': operation.status === 'completed',
@@ -159,13 +160,12 @@ export function ProgressIndicator({
 										'bg-gray-400': operation.status === 'cancelled',
 									})}
 									initial={{ width: 0 }}
-									animate={{ width: `${operation.progress}%` }}
 								/>
 							</div>
 
-							{operation.currentStep && <div className="text-xs text-gray-500 truncate">{operation.currentStep}</div>}
+							{operation.currentStep && <div className="truncate text-gray-500 text-xs">{operation.currentStep}</div>}
 
-							<div className="flex justify-between text-xs text-gray-400">
+							<div className="flex justify-between text-gray-400 text-xs">
 								<span>
 									{operation.items.processed} / {operation.items.total}
 								</span>
@@ -178,12 +178,12 @@ export function ProgressIndicator({
 				})}
 
 				{remainingCount > 0 && (
-					<div className="text-xs text-gray-400 pt-1 border-t border-gray-200 dark:border-gray-600">
+					<div className="border-gray-200 border-t pt-1 text-gray-400 text-xs dark:border-gray-600">
 						+{remainingCount} operación{remainingCount > 1 ? 'es' : ''} más
 					</div>
 				)}
 
-				<div className="text-xs text-gray-400 pt-1 border-t border-gray-200 dark:border-gray-600">
+				<div className="border-gray-200 border-t pt-1 text-gray-400 text-xs dark:border-gray-600">
 					Progreso total: {Math.round(totalProgress)}%
 				</div>
 			</div>
@@ -195,44 +195,44 @@ export function ProgressIndicator({
 			<Tooltip>
 				<TooltipTrigger asChild>
 					<Button
-						variant="ghost"
-						size="sm"
+						className={cn('flex h-8 items-center gap-2 px-2 text-xs', className)}
 						onClick={onClick}
-						className={cn('flex items-center gap-2 h-8 px-2 text-xs', className)}
+						size="sm"
+						variant="ghost"
 					>
 						{getStatusIcon()}
 
 						{/* Progress ring */}
 						<div className="relative">
-							<svg className="h-4 w-4 transform -rotate-90" viewBox="0 0 16 16">
+							<svg className="-rotate-90 h-4 w-4 transform" viewBox="0 0 16 16">
 								{/* Background circle */}
 								<circle
+									className="text-gray-300 dark:text-gray-600"
 									cx="8"
 									cy="8"
-									r="6"
 									fill="none"
+									r="6"
 									stroke="currentColor"
 									strokeWidth="1"
-									className="text-gray-300 dark:text-gray-600"
 								/>
 								{/* Progress circle */}
 								<motion.circle
-									cx="8"
-									cy="8"
-									r="6"
-									fill="none"
-									stroke="currentColor"
-									strokeWidth="1"
-									strokeLinecap="round"
+									animate={{
+										strokeDasharray: `${(totalProgress / 100) * 37.7} 37.7`,
+									}}
 									className={cn({
 										'text-blue-500': runningOperations.length > 0,
 										'text-green-500': runningOperations.length === 0 && completedOperations.length > 0,
 										'text-red-500': failedOperations.length > 0,
 									})}
+									cx="8"
+									cy="8"
+									fill="none"
 									initial={{ strokeDasharray: '0 37.7' }}
-									animate={{
-										strokeDasharray: `${(totalProgress / 100) * 37.7} 37.7`,
-									}}
+									r="6"
+									stroke="currentColor"
+									strokeLinecap="round"
+									strokeWidth="1"
 									transition={{ duration: 0.3 }}
 								/>
 							</svg>
@@ -242,7 +242,7 @@ export function ProgressIndicator({
 					</Button>
 				</TooltipTrigger>
 
-				<TooltipContent side="top" className="max-w-none">
+				<TooltipContent className="max-w-none" side="top">
 					{renderTooltipContent()}
 				</TooltipContent>
 			</Tooltip>

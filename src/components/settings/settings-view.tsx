@@ -260,27 +260,27 @@ export function SettingsView() {
 	}, []);
 
 	return (
-		<div className="h-full w-full p-0 m-0">
-			<Tabs value={activeTab} onValueChange={setActiveTab} className="h-full flex flex-row">
+		<div className="m-0 h-full w-full p-0">
+			<Tabs className="flex h-full flex-row" onValueChange={setActiveTab} value={activeTab}>
 				{/* 📋 Contenido de los tabs - ÁREA PRINCIPAL A LA IZQUIERDA */}
-				<div className="flex-1 h-full overflow-hidden p-0 m-0">
-					<TabsContent value="folders" className="h-full w-full p-0 m-0 border-none">
+				<div className="m-0 h-full flex-1 overflow-hidden p-0">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="folders">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<FoldersSettings />
 							</div>
 						</ScrollArea>
 					</TabsContent>
-					<TabsContent value="system" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="system">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
-								<div className="grid grid-cols-1 w-full">
+								<div className="grid w-full grid-cols-1">
 									<SystemSettings />
 								</div>
 							</div>
 						</ScrollArea>
 					</TabsContent>
-					<TabsContent value="interface" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="interface">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<InterfaceSection />
@@ -288,7 +288,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="entities-cards" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="entities-cards">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<EntitiesCardsSettings />
@@ -296,7 +296,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="albums" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="albums">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<AlbumsSettings />
@@ -304,7 +304,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="collections" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="collections">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<CollectionsSettings />
@@ -312,7 +312,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="tags" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="tags">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<TagsSettings />
@@ -320,7 +320,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="characters" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="characters">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<CharactersSettings />
@@ -328,7 +328,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="world-items" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="world-items">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<WorldItemsSettings />
@@ -336,7 +336,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="places" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="places">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<PlacesSettings />
@@ -344,7 +344,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="concepts" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="concepts">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<ConceptsSettings />
@@ -352,7 +352,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="prompts" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="prompts">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<PromptSettings />
@@ -360,7 +360,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="notes" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="notes">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<NotesSettings />
@@ -368,7 +368,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="uploaded-images" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="uploaded-images">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<UploadedImagesSettings />
@@ -376,7 +376,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="shortcuts" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="shortcuts">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<ShortcutsSettings />
@@ -384,7 +384,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="profiles" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="profiles">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<ProfilesSettings />
@@ -392,7 +392,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="properties" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="properties">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<PropertiesSettings />
@@ -400,7 +400,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="groups" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="groups">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<GroupsSettings />
@@ -408,7 +408,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="wildcards" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="wildcards">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<WildcardsSettings />
@@ -416,7 +416,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="thumbnails" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="thumbnails">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<ThumbnailsSettings />
@@ -424,7 +424,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="document" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="document">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<DocumentSettings />
@@ -432,7 +432,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="audio" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="audio">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<AudioSettings />
@@ -440,7 +440,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="json-file" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="json-file">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<JsonFileSettings />
@@ -448,7 +448,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="workflow" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="workflow">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<WorkflowSettings />
@@ -456,7 +456,7 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 
-					<TabsContent value="file3d" className="h-full w-full p-0 m-0 border-none">
+					<TabsContent className="m-0 h-full w-full border-none p-0" value="file3d">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<File3DSettings />
@@ -466,32 +466,32 @@ export function SettingsView() {
 				</div>
 
 				{/* 🎨 Sidebar vertical con navegación de tabs - COMPACTO A LA DERECHA */}
-				<div className="w-44 flex-shrink-0 border-l border-border/20 bg-background/50 backdrop-blur-sm h-full overflow-y-auto">
-					<TabsList className="flex flex-col w-full h-auto bg-transparent rounded-none p-1 gap-0.5 justify-start">
+				<div className="h-full w-44 flex-shrink-0 overflow-y-auto border-border/20 border-l bg-background/50 backdrop-blur-sm">
+					<TabsList className="flex h-auto w-full flex-col justify-start gap-0.5 rounded-none bg-transparent p-1">
 						{tabsData.map((tab) => (
 							<TabsTrigger
-								key={tab.id}
-								value={tab.id}
 								className={cn(
-									'flex items-center justify-start gap-2 px-2 py-1.5 w-full',
-									'text-xs font-medium border border-transparent rounded-md',
-									'cursor-pointer group transition-all duration-200',
-									'hover:bg-secondary/30 hover:border-border/20',
-									'data-[state=active]:bg-secondary/50 data-[state=active]:border-white/10',
+									'flex w-full items-center justify-start gap-2 px-2 py-1.5',
+									'rounded-md border border-transparent font-medium text-xs',
+									'group cursor-pointer transition-all duration-200',
+									'hover:border-border/20 hover:bg-secondary/30',
+									'data-[state=active]:border-white/10 data-[state=active]:bg-secondary/50',
 									'data-[state=active]:text-primary data-[state=active]:shadow-sm'
 								)}
+								key={tab.id}
+								value={tab.id}
 							>
 								{/* 🎨 Icono con color temático */}
-								<span style={{ color: tab.color }} className="flex items-center justify-center flex-shrink-0">
+								<span className="flex flex-shrink-0 items-center justify-center" style={{ color: tab.color }}>
 									{tab.icon}
 								</span>
 
 								{/* 📝 Label con truncado inteligente */}
-								<span className="text-left truncate flex-1 group-data-[state=active]:font-semibold">{tab.label}</span>
+								<span className="flex-1 truncate text-left group-data-[state=active]:font-semibold">{tab.label}</span>
 
 								{/* ✨ Indicador visual del estado activo */}
 								<div
-									className="w-0.5 h-3 rounded-full opacity-0 group-data-[state=active]:opacity-100 transition-opacity duration-200"
+									className="h-3 w-0.5 rounded-full opacity-0 transition-opacity duration-200 group-data-[state=active]:opacity-100"
 									style={{ backgroundColor: tab.color }}
 								/>
 							</TabsTrigger>

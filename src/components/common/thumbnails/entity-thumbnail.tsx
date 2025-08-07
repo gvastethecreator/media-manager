@@ -75,13 +75,13 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 		const isLoading = loading;
 
 		// Flags de guardas para el render (evitar return temprano antes de hooks)
-		const cannotRender = !entityType || !config;
+		const cannotRender = !(entityType && config);
 
 		// Clases CSS del contenedor
 		const containerClasses = cn(
 			'relative overflow-hidden rounded-lg border bg-muted/50',
 			sizeClasses[size],
-			onClick && 'cursor-pointer hover:ring-2 hover:ring-primary/50 transition-all duration-200',
+			onClick && 'cursor-pointer transition-all duration-200 hover:ring-2 hover:ring-primary/50',
 			isLoading && 'animate-pulse',
 			className
 		);
@@ -100,8 +100,8 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 			// Si no podemos determinar tipo o config, mostrar placeholder neutro
 			if (cannotRender) {
 				return (
-					<div className="w-full h-full flex items-center justify-center bg-muted/40">
-						<div className="w-4 h-4 border-2 border-muted-foreground/50 border-t-transparent rounded-full animate-spin" />
+					<div className="flex h-full w-full items-center justify-center bg-muted/40">
+						<div className="h-4 w-4 animate-spin rounded-full border-2 border-muted-foreground/50 border-t-transparent" />
 					</div>
 				);
 			}
@@ -110,10 +110,10 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 			if (entityType === EntityStatsType.IMAGE) {
 				return (
 					<ImageThumbnail
-						path={(entity as any)?.path || '/placeholder.jpg'}
+						className="h-full w-full object-cover"
 						name={entity?.name || 'Sin nombre'}
+						path={(entity as any)?.path || '/placeholder.jpg'}
 						size={qualityToImageSize[quality]}
-						className="w-full h-full object-cover"
 					/>
 				);
 			}
@@ -122,10 +122,10 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 			const IconComponent = config.icon;
 			return (
 				<div
-					className="w-full h-full flex items-center justify-center"
+					className="flex h-full w-full items-center justify-center"
 					style={{ backgroundColor: `${config.color}20` }}
 				>
-					<IconComponent className="w-1/2 h-1/2 text-muted-foreground" style={{ color: config.color }} />
+					<IconComponent className="h-1/2 w-1/2 text-muted-foreground" style={{ color: config.color }} />
 				</div>
 			);
 		};
@@ -135,9 +135,9 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 			if (!showOverlay) return null;
 
 			return (
-				<div className="absolute inset-0 bg-black/50 opacity-0 hover:opacity-100 transition-opacity duration-200 flex items-end p-2">
+				<div className="absolute inset-0 flex items-end bg-black/50 p-2 opacity-0 transition-opacity duration-200 hover:opacity-100">
 					<div className="text-white text-xs">
-						<div className="font-medium truncate">{entity?.name || 'Sin nombre'}</div>
+						<div className="truncate font-medium">{entity?.name || 'Sin nombre'}</div>
 						<div className="text-white/80">{config?.displayName ?? ''}</div>
 					</div>
 				</div>
@@ -148,8 +148,8 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 		if (isLoading) {
 			return (
 				<motion.div className={containerClasses} {...motionProps}>
-					<div className="w-full h-full bg-muted animate-pulse flex items-center justify-center">
-						<div className="w-4 h-4 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+					<div className="flex h-full w-full animate-pulse items-center justify-center bg-muted">
+						<div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
 					</div>
 				</motion.div>
 			);
@@ -179,15 +179,15 @@ export const EntityThumbnailCompact = memo<Omit<EntityThumbnailProps, 'size' | '
 
 		return (
 			<div
-				className={cn('w-6 h-6 rounded flex items-center justify-center flex-shrink-0', className)}
-				style={{ backgroundColor: `${config?.color ?? '#888'}20` }}
-				role="img"
 				aria-label={config?.displayName ?? 'thumbnail'}
+				className={cn('flex h-6 w-6 flex-shrink-0 items-center justify-center rounded', className)}
+				role="img"
+				style={{ backgroundColor: `${config?.color ?? '#888'}20` }}
 			>
 				{IconComponent ? (
-					<IconComponent className="w-4 h-4" style={{ color: config?.color }} />
+					<IconComponent className="h-4 w-4" style={{ color: config?.color }} />
 				) : (
-					<div className="w-3 h-3 rounded-full bg-muted-foreground/60" />
+					<div className="h-3 w-3 rounded-full bg-muted-foreground/60" />
 				)}
 			</div>
 		);
@@ -217,17 +217,17 @@ export const EntityThumbnailGrid = memo<EntityThumbnailGridProps>(
 			<div className={cn('flex flex-wrap gap-1', className)}>
 				{displayEntities.map((entity) => (
 					<EntityThumbnail
-						key={entity.id}
-						entity={entity}
-						size={size}
-						onClick={() => onEntityClick?.(entity)}
 						animated={false}
+						entity={entity}
+						key={entity.id}
+						onClick={() => onEntityClick?.(entity)}
+						size={size}
 					/>
 				))}
 				{remainingCount > 0 && (
 					<div
 						className={cn(
-							'flex items-center justify-center bg-muted rounded-lg border text-xs font-medium text-muted-foreground',
+							'flex items-center justify-center rounded-lg border bg-muted font-medium text-muted-foreground text-xs',
 							sizeClasses[size]
 						)}
 					>

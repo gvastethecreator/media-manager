@@ -91,7 +91,7 @@ export function PromptCardContent({
 
 	return (
 		<div
-			className={cn('flex flex-col p-3 flex-1 overflow-hidden', tcgMode ? 'bg-card/80' : 'bg-card')}
+			className={cn('flex flex-1 flex-col overflow-hidden p-3', tcgMode ? 'bg-card/80' : 'bg-card')}
 			style={{
 				background: tcgMode ? `linear-gradient(to bottom, transparent, ${primaryColor}10)` : undefined,
 				borderBottom: tcgMode ? `1px solid ${borderColor}` : undefined,
@@ -99,18 +99,18 @@ export function PromptCardContent({
 			}}
 		>
 			{/* Sección de categoría y etiquetas */}
-			<div className="mb-2 flex justify-between items-center">
+			<div className="mb-2 flex items-center justify-between">
 				<div
-					className="text-xs uppercase tracking-wider font-medium flex items-center gap-1"
+					className="flex items-center gap-1 font-medium text-xs uppercase tracking-wider"
 					style={{ color: primaryColor }}
 				>
 					{category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Prompt'}
-					{tcgMode && <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: primaryColor }} />}
+					{tcgMode && <div className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: primaryColor }} />}
 				</div>
 
 				{hasParameters && (
 					<div className="flex items-center text-xs opacity-70">
-						<Settings className="h-3.5 w-3.5 mr-1" />
+						<Settings className="mr-1 h-3.5 w-3.5" />
 						<span>
 							{parameterKeys.length} {parameterKeys.length === 1 ? 'parámetro' : 'parámetros'}
 						</span>
@@ -130,8 +130,8 @@ export function PromptCardContent({
 			{/* Sección de propósito, si existe y no se ha mostrado antes */}
 			{purpose && !description && (
 				<div className="mb-2 flex items-start gap-1">
-					<Target className="h-3.5 w-3.5 mt-0.5 flex-shrink-0 text-primary" style={{ color: primaryColor }} />
-					<div className="text-xs line-clamp-2 text-muted-foreground">{purpose}</div>
+					<Target className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-primary" style={{ color: primaryColor }} />
+					<div className="line-clamp-2 text-muted-foreground text-xs">{purpose}</div>
 				</div>
 			)}
 
@@ -141,21 +141,21 @@ export function PromptCardContent({
 					<div className="flex flex-wrap gap-1">
 						{parsedTags.slice(0, maxTagsToShow).map((tag: string) => (
 							<Badge
-								key={`tag-${tag}`}
-								variant="outline"
 								className="px-1.5 py-0.5 text-xs"
+								key={`tag-${tag}`}
 								style={{
 									backgroundColor: tagColor,
 									color: primaryColor,
 									borderColor: primaryColor,
 									boxShadow: tcgMode ? `0 0 5px ${primaryColor}30` : undefined,
 								}}
+								variant="outline"
 							>
 								{tag}
 							</Badge>
 						))}
 						{parsedTags.length > maxTagsToShow && (
-							<Badge variant="outline" className="px-1.5 py-0.5 text-xs opacity-70">
+							<Badge className="px-1.5 py-0.5 text-xs opacity-70" variant="outline">
 								+{parsedTags.length - maxTagsToShow}
 							</Badge>
 						)}
@@ -165,20 +165,20 @@ export function PromptCardContent({
 
 			{/* Parámetros principales si existen (en modo no compacto) */}
 			{hasParameters && !compact && (
-				<div className="mb-2 bg-black/5 rounded p-1.5 border" style={{ borderColor: `${primaryColor}40` }}>
-					<div className="text-xs font-medium mb-1 flex items-center gap-1" style={{ color: primaryColor }}>
+				<div className="mb-2 rounded border bg-black/5 p-1.5" style={{ borderColor: `${primaryColor}40` }}>
+					<div className="mb-1 flex items-center gap-1 font-medium text-xs" style={{ color: primaryColor }}>
 						<Settings className="h-3.5 w-3.5" />
 						<span>Parámetros</span>
 					</div>
 					<div className="grid grid-cols-2 gap-1.5 text-xs">
 						{parameterKeys.slice(0, 4).map((key) => (
 							<div
+								className="flex justify-between overflow-hidden rounded bg-black/5 px-1.5 py-0.5"
 								key={`param-${key}`}
-								className="flex justify-between bg-black/5 px-1.5 py-0.5 rounded overflow-hidden"
 								style={{ backgroundColor: `${primaryColor}10` }}
 							>
-								<span className="font-medium truncate">{key}:</span>
-								<span className="truncate ml-1 opacity-80">
+								<span className="truncate font-medium">{key}:</span>
+								<span className="ml-1 truncate opacity-80">
 									{typeof parsedParameters[key] === 'object'
 										? '{...}'
 										: String(parsedParameters[key]).substring(0, 10) +
@@ -193,26 +193,26 @@ export function PromptCardContent({
 			{/* Contadores de relaciones */}
 			<div className="mt-auto grid grid-cols-4 gap-2 text-xs">
 				<StatCounter
-					icon={<Image className="h-3.5 w-3.5" />}
 					count={relationCounts.collections || 0}
+					icon={<Image className="h-3.5 w-3.5" />}
 					label="Colecciones"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
-					icon={<Album className="h-3.5 w-3.5" />}
 					count={relationCounts.albums || 0}
+					icon={<Album className="h-3.5 w-3.5" />}
 					label="Álbumes"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
-					icon={<UserSquare className="h-3.5 w-3.5" />}
 					count={relationCounts.characters || 0}
+					icon={<UserSquare className="h-3.5 w-3.5" />}
 					label="Personajes"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
-					icon={<Code className="h-3.5 w-3.5" />}
 					count={content ? Math.ceil(content.length / 100) : 0}
+					icon={<Code className="h-3.5 w-3.5" />}
 					label="Tokens"
 					primaryColor={primaryColor}
 				/>
@@ -235,7 +235,7 @@ function StatCounter({
 }) {
 	return (
 		<div className="flex flex-col items-center">
-			<div className="flex items-center gap-1 mb-1">
+			<div className="mb-1 flex items-center gap-1">
 				{icon}
 				<span className="font-medium" style={{ color: primaryColor }}>
 					{count}

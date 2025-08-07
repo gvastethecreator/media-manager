@@ -18,7 +18,7 @@ interface CardHeaderProps {
 export function CardHeader({ title, subtitle, icon, emoji, primaryColor, className, compact }: CardHeaderProps) {
 	return (
 		<div
-			className={cn('px-3 py-2 border-b', 'flex items-center gap-2', className)}
+			className={cn('border-b px-3 py-2', 'flex items-center gap-2', className)}
 			style={{
 				borderColor: `${primaryColor}40`,
 				background: `linear-gradient(135deg, ${primaryColor}25, ${primaryColor}15)`,
@@ -26,20 +26,20 @@ export function CardHeader({ title, subtitle, icon, emoji, primaryColor, classNa
 		>
 			{/* Icono si está presente */}
 			{icon && (
-				<div className="flex-shrink-0 p-1 rounded-full" style={{ backgroundColor: `${primaryColor}30` }}>
+				<div className="flex-shrink-0 rounded-full p-1" style={{ backgroundColor: `${primaryColor}30` }}>
 					{icon}
 				</div>
 			)}
 
 			{/* Contenido de texto */}
-			<div className="flex-1 min-w-0">
+			<div className="min-w-0 flex-1">
 				{/* Título principal */}
-				<h3 className="font-bold text-base truncate" style={{ color: primaryColor }}>
+				<h3 className="truncate font-bold text-base" style={{ color: primaryColor }}>
 					{title}
 				</h3>
 
 				{/* Subtítulo opcional */}
-				{subtitle && <p className="text-xs text-muted-foreground truncate capitalize">{subtitle}</p>}
+				{subtitle && <p className="truncate text-muted-foreground text-xs capitalize">{subtitle}</p>}
 			</div>
 		</div>
 	);

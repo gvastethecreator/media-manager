@@ -21,12 +21,12 @@ export const EntitiesCardsSettings: React.FC = () => {
 		<div className="space-y-6 p-6">
 			{/* Header */}
 			<div className="flex items-center gap-3">
-				<div className="p-2 bg-blue-100 dark:bg-blue-900/20 rounded-lg">
+				<div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/20">
 					<IdCard className="h-5 w-5 text-blue-600 dark:text-blue-400" />
 				</div>
 				<div>
-					<h2 className="text-xl font-semibold">Configuración de Tarjetas de Entidades</h2>
-					<p className="text-sm text-muted-foreground">
+					<h2 className="font-semibold text-xl">Configuración de Tarjetas de Entidades</h2>
+					<p className="text-muted-foreground text-sm">
 						Personaliza la apariencia y comportamiento de las tarjetas de entidades
 					</p>
 				</div>
@@ -47,9 +47,9 @@ export const EntitiesCardsSettings: React.FC = () => {
 					<CardContent className="space-y-6">
 						{/* Tamaño de tarjetas */}
 						<div className="space-y-3">
-							<Label className="text-sm font-medium">Tamaño de tarjetas: {cardSize[0]}px</Label>
-							<Slider value={cardSize} onValueChange={setCardSize} max={400} min={150} step={10} className="w-full" />
-							<div className="flex justify-between text-xs text-muted-foreground">
+							<Label className="font-medium text-sm">Tamaño de tarjetas: {cardSize[0]}px</Label>
+							<Slider className="w-full" max={400} min={150} onValueChange={setCardSize} step={10} value={cardSize} />
+							<div className="flex justify-between text-muted-foreground text-xs">
 								<span>Compacto (150px)</span>
 								<span>Grande (400px)</span>
 							</div>
@@ -57,8 +57,8 @@ export const EntitiesCardsSettings: React.FC = () => {
 
 						{/* Estilo de tarjetas */}
 						<div className="space-y-3">
-							<Label className="text-sm font-medium">Estilo de tarjetas</Label>
-							<Select value={cardStyle} onValueChange={setCardStyle}>
+							<Label className="font-medium text-sm">Estilo de tarjetas</Label>
+							<Select onValueChange={setCardStyle} value={cardStyle}>
 								<SelectTrigger>
 									<SelectValue />
 								</SelectTrigger>
@@ -74,8 +74,8 @@ export const EntitiesCardsSettings: React.FC = () => {
 
 						{/* Modo de densidad */}
 						<div className="space-y-3">
-							<Label className="text-sm font-medium">Densidad del layout</Label>
-							<Select value={densityMode} onValueChange={setDensityMode}>
+							<Label className="font-medium text-sm">Densidad del layout</Label>
+							<Select onValueChange={setDensityMode} value={densityMode}>
 								<SelectTrigger>
 									<SelectValue />
 								</SelectTrigger>
@@ -102,8 +102,8 @@ export const EntitiesCardsSettings: React.FC = () => {
 						{/* Mostrar metadatos */}
 						<div className="flex items-center justify-between">
 							<div className="space-y-1">
-								<Label className="text-sm font-medium">Mostrar metadatos</Label>
-								<p className="text-xs text-muted-foreground">
+								<Label className="font-medium text-sm">Mostrar metadatos</Label>
+								<p className="text-muted-foreground text-xs">
 									Incluye información adicional como fechas, tamaños y etiquetas
 								</p>
 							</div>
@@ -113,8 +113,8 @@ export const EntitiesCardsSettings: React.FC = () => {
 						{/* Mostrar vista previa */}
 						<div className="flex items-center justify-between">
 							<div className="space-y-1">
-								<Label className="text-sm font-medium">Vista previa automática</Label>
-								<p className="text-xs text-muted-foreground">
+								<Label className="font-medium text-sm">Vista previa automática</Label>
+								<p className="text-muted-foreground text-xs">
 									Muestra una vista previa al pasar el cursor sobre la tarjeta
 								</p>
 							</div>
@@ -124,8 +124,8 @@ export const EntitiesCardsSettings: React.FC = () => {
 						{/* Efectos hover */}
 						<div className="flex items-center justify-between">
 							<div className="space-y-1">
-								<Label className="text-sm font-medium">Efectos de hover</Label>
-								<p className="text-xs text-muted-foreground">
+								<Label className="font-medium text-sm">Efectos de hover</Label>
+								<p className="text-muted-foreground text-xs">
 									Animaciones y efectos visuales al interactuar con las tarjetas
 								</p>
 							</div>
@@ -144,11 +144,9 @@ export const EntitiesCardsSettings: React.FC = () => {
 						<CardDescription>Ejemplo de cómo se verán las tarjetas con la configuración actual</CardDescription>
 					</CardHeader>
 					<CardContent>
-						<div className="border rounded-lg p-4 bg-muted/20">
+						<div className="rounded-lg border bg-muted/20 p-4">
 							<div
-								className={`
-									border rounded-lg p-3 bg-background
-									${cardStyle === 'rounded' ? 'rounded-xl' : ''}
+								className={`rounded-lg border p-3 bg-background${cardStyle === 'rounded' ? 'rounded-xl' : ''}
 									${cardStyle === 'sharp' ? 'rounded-none' : ''}
 									${cardStyle === 'shadow' ? 'shadow-lg' : ''}
 									${cardStyle === 'minimal' ? 'border-none shadow-sm' : ''}
@@ -156,18 +154,18 @@ export const EntitiesCardsSettings: React.FC = () => {
 								`}
 								style={{ width: Math.min(cardSize[0], 300) }}
 							>
-								<div className="aspect-video bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20 rounded-md mb-3 flex items-center justify-center">
+								<div className="mb-3 flex aspect-video items-center justify-center rounded-md bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20">
 									<IdCard className="h-8 w-8 text-muted-foreground" />
 								</div>
-								<h3 className="font-medium text-sm mb-1">Tarjeta de Ejemplo</h3>
+								<h3 className="mb-1 font-medium text-sm">Tarjeta de Ejemplo</h3>
 								{showMetadata && (
 									<div className="space-y-1">
-										<p className="text-xs text-muted-foreground">Ejemplo de metadatos</p>
+										<p className="text-muted-foreground text-xs">Ejemplo de metadatos</p>
 										<div className="flex gap-1">
-											<Badge variant="secondary" className="text-xs">
+											<Badge className="text-xs" variant="secondary">
 												Etiqueta
 											</Badge>
-											<Badge variant="outline" className="text-xs">
+											<Badge className="text-xs" variant="outline">
 												Tipo
 											</Badge>
 										</div>

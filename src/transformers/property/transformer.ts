@@ -50,7 +50,7 @@ export function fromDrizzleProperty(drizzleProperty: any | null): PropertyWithSt
 				...baseProperty,
 				entityType: 'property',
 				statistics: stats,
-				stats: stats,
+				stats,
 				_count: drizzleProperty._count,
 			};
 		}
@@ -69,7 +69,7 @@ export function fromDrizzleProperty(drizzleProperty: any | null): PropertyWithSt
 			...(drizzleProperty as PropertyBase),
 			entityType: 'property',
 			statistics: stats,
-			stats: stats,
+			stats,
 			_count: {
 				images: 0,
 				videos: 0,

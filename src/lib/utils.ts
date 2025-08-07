@@ -19,11 +19,11 @@ export function cn(...inputs: ClassValue[]): string {
  */
 export function formatDuration(seconds: number): string {
 	if (seconds < 0) return '0:00';
-	
+
 	const hours = Math.floor(seconds / 3600);
 	const minutes = Math.floor((seconds % 3600) / 60);
 	const secs = Math.floor(seconds % 60);
-	
+
 	if (hours > 0) {
 		return `${hours}:${minutes.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
 	}
@@ -38,14 +38,14 @@ export function formatDuration(seconds: number): string {
  */
 export function formatFileSize(bytes: number, decimals = 2): string {
 	if (bytes === 0) return '0 Bytes';
-	
+
 	const k = 1024;
 	const dm = decimals < 0 ? 0 : decimals;
 	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
-	
+
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	
-	return `${Number.parseFloat((bytes / Math.pow(k, i)).toFixed(dm))} ${sizes[i]}`;
+
+	return `${Number.parseFloat((bytes / k ** i).toFixed(dm))} ${sizes[i]}`;
 }
 
 /**
@@ -71,37 +71,37 @@ export function createDefaultEntityStats(overrides: Partial<EntityStats> = {}): 
 		wildcardCount: 0,
 		propertyCount: 0,
 		groupCount: 0,
-		
+
 		// Métricas globales
 		totalItems: 0,
 		totalAssociations: 0,
-		
+
 		// Timestamps
 		lastUpdated: now,
 		lastViewed: now,
 		lastModified: now,
-		
+
 		// Métricas de uso
 		viewCount: 0,
 		downloadCount: 0,
 		likeCount: 0,
 		commentCount: 0,
-		
+
 		// Métricas de calidad
 		qualityScore: 0,
 		completenessScore: 0,
-		
+
 		// Estado
 		isDuplicate: false,
 		isOrphaned: false,
 		needsAttention: false,
-		
+
 		// Propiedades del sistema de archivos
 		size: 0,
 		mtime: now,
 		birthtime: now,
 		type: 'file',
-		
+
 		// Aplicar overrides
 		...overrides,
 	};

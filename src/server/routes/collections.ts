@@ -40,8 +40,8 @@ const getCollectionsHandler = async (req: Request, res: Response) => {
 			db.query.collections.findMany({
 				where: and(...whereConditions),
 				orderBy: orderByClause,
-				limit: limit,
-				offset: offset,
+				limit,
+				offset,
 			}),
 			db
 				.select({ count: count() })

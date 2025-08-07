@@ -28,24 +28,22 @@ export function filterPlaces(places: PlaceWithStats[], filters: PlaceFilters): P
 		}
 
 		// Filtro por categoría
-		if (filters.category && filters.category.length > 0) {
-			if (!place.category || !filters.category.includes(place.category as any)) {
-				return false;
-			}
+		if (
+			filters.category &&
+			filters.category.length > 0 &&
+			!(place.category && filters.category.includes(place.category as any))
+		) {
+			return false;
 		}
 
 		// Filtro por tipo
-		if (filters.type && filters.type.length > 0) {
-			if (!place.type || !filters.type.includes(place.type as any)) {
-				return false;
-			}
+		if (filters.type && filters.type.length > 0 && !(place.type && filters.type.includes(place.type as any))) {
+			return false;
 		}
 
 		// Filtro por favoritos
-		if (typeof filters.isFavorite === 'boolean') {
-			if (place.isFavorite !== filters.isFavorite) {
-				return false;
-			}
+		if (typeof filters.isFavorite === 'boolean' && place.isFavorite !== filters.isFavorite) {
+			return false;
 		}
 
 		// Filtro por presencia de imágenes

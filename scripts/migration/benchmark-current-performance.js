@@ -190,7 +190,7 @@ class PerformanceBenchmark {
 		console.log(`📊 Mejora en memoria: ${chalk.green(memoryImprovement + '%')}`);
 
 		// Calculamos si vale la pena
-		const worthIt = this.results.bundleTime > 10000 || this.results.memoryUsage > 500 * 1024 * 1024;
+		const worthIt = this.results.bundleTime > 10_000 || this.results.memoryUsage > 500 * 1024 * 1024;
 
 		console.log(chalk.yellow('\n🎯 VEREDICTO'));
 		if (worthIt) {

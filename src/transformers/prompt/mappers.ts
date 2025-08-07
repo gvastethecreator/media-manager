@@ -397,7 +397,7 @@ export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
 		isWellStructured:
 			!!prompt.description && !!prompt.content && (Array.isArray(prompt.tags) ? prompt.tags.length > 0 : false),
 		qualityGrade: calculateQualityGrade(prompt),
-		completenessScore: completenessScore,
+		completenessScore,
 		creativeScore: 0,
 		technicalScore: 0,
 		usabilityScore: 0,

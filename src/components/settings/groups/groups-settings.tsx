@@ -164,10 +164,10 @@ export function GroupsSettings() {
 	// Mostrar loading state
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+			<div className="flex h-[calc(100vh-8rem)] items-center justify-center">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" />
-					<p className="mt-2 text-sm text-gray-500">Cargando grupos...</p>
+					<div className="mx-auto h-8 w-8 animate-spin rounded-full border-gray-900 border-b-2" />
+					<p className="mt-2 text-gray-500 text-sm">Cargando grupos...</p>
 				</div>
 			</div>
 		);
@@ -176,10 +176,10 @@ export function GroupsSettings() {
 	// Mostrar error state
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+			<div className="flex h-[calc(100vh-8rem)] items-center justify-center">
 				<div className="text-center">
 					<p className="text-red-500">Error al cargar los grupos</p>
-					<p className="text-sm text-gray-500 mt-1">{error instanceof Error ? error.message : 'Error desconocido'}</p>
+					<p className="mt-1 text-gray-500 text-sm">{error instanceof Error ? error.message : 'Error desconocido'}</p>
 				</div>
 			</div>
 		);
@@ -188,27 +188,27 @@ export function GroupsSettings() {
 	return (
 		<div className="grid grid-cols-12 gap-3">
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="space-y-1 py-2 px-3">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-xl font-bold">Grupos</CardTitle>
-							<Button size="sm" variant="ghost" onClick={() => setIsCreateDialogOpen(true)}>
+							<CardTitle className="font-bold text-xl">Grupos</CardTitle>
+							<Button onClick={() => setIsCreateDialogOpen(true)} size="sm" variant="ghost">
 								<PlusIcon className="h-4 w-4" />
 							</Button>
 						</div>
 						<div className="flex gap-2">
-							<div className="flex items-center gap-2 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors">
+							<div className="flex w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors">
 								<SearchIcon className="h-4 w-4 opacity-50" />
 								<Input
+									className="h-8 border-0 bg-transparent p-0 focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0"
+									onChange={(e) => setSearchQuery(e.target.value)}
 									placeholder="Buscar grupos..."
 									value={searchQuery}
-									onChange={(e) => setSearchQuery(e.target.value)}
-									className="h-8 p-0 border-0 bg-transparent focus-visible:outline-none focus-visible:ring-0 focus-visible:ring-ring focus-visible:ring-offset-0"
 								/>
 							</div>
 						</div>
 						<div className="flex gap-2">
-							<Select value={sortBy} onValueChange={(value: GroupSortCriteria) => setSortBy(value)}>
+							<Select onValueChange={(value: GroupSortCriteria) => setSortBy(value)} value={sortBy}>
 								<SelectTrigger className="h-8">
 									<SelectValue placeholder="Ordenar por..." />
 								</SelectTrigger>
@@ -220,7 +220,7 @@ export function GroupsSettings() {
 									))}
 								</SelectContent>
 							</Select>
-							<Toggle pressed={onlyFavorites} onPressedChange={(value) => setOnlyFavorites(value)} size="sm">
+							<Toggle onPressedChange={(value) => setOnlyFavorites(value)} pressed={onlyFavorites} size="sm">
 								<StarIcon className="h-4 w-4" />
 							</Toggle>
 						</div>
@@ -230,18 +230,18 @@ export function GroupsSettings() {
 							<div className="space-y-1 p-2">
 								{sortedGroups.map((group) => (
 									<div
-										key={group.id}
-										className={`relative group/item rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${
+										className={`group/item relative rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${
 											selectedGroup?.id === group.id ? 'bg-secondary text-secondary-foreground' : ''
 										}`}
+										key={group.id}
 									>
 										<Button
-											variant="ghost"
-											className="w-full justify-start h-12 relative"
+											className="relative h-12 w-full justify-start"
 											onClick={() => setSelectedGroup(group)}
+											variant="ghost"
 										>
 											<div className="flex items-center gap-2">
-												<span role="img" aria-label="emoji">
+												<span aria-label="emoji" role="img">
 													{group.emoji}
 												</span>
 												<div className="flex flex-col items-start">
@@ -251,16 +251,16 @@ export function GroupsSettings() {
 													</span>
 												</div>
 											</div>
-											{group.isFavorite && <StarIcon className="h-3 w-3 absolute right-8 top-2" />}
+											{group.isFavorite && <StarIcon className="absolute top-2 right-8 h-3 w-3" />}
 										</Button>
 										<Button
-											variant="ghost"
-											size="icon"
-											className="absolute right-1 top-1 opacity-0 group-hover/item:opacity-100 h-10 w-10"
+											className="absolute top-1 right-1 h-10 w-10 opacity-0 group-hover/item:opacity-100"
 											onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
 												e.stopPropagation();
 												handleDeleteGroup(group.id);
 											}}
+											size="icon"
+											variant="ghost"
 										>
 											<Trash className="h-4 w-4" />
 										</Button>
@@ -276,33 +276,33 @@ export function GroupsSettings() {
 				{selectedGroup && !isEditMode ? (
 					<GroupPreview
 						group={selectedGroup}
-						onEdit={() => setIsEditMode(true)}
 						onDelete={() => handleDeleteGroup(selectedGroup.id)}
+						onEdit={() => setIsEditMode(true)}
 						stats={stats}
 					/>
 				) : isEditMode && selectedGroup ? (
 					<CreateGroupForm
 						group={selectedGroup}
-						onSubmit={(data) => handleUpdateGroup(selectedGroup.id, data)}
 						onCancel={() => setIsEditMode(false)}
+						onSubmit={(data) => handleUpdateGroup(selectedGroup.id, data)}
 					/>
 				) : (
-					<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col items-center justify-center">
+					<Card className="flex h-[calc(100vh-8rem)] flex-col items-center justify-center rounded-sm border-none bg-muted/30">
 						<div className="text-center">
 							<FolderIcon className="mx-auto h-12 w-12 text-gray-400" />
-							<h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Selecciona un grupo</h3>
-							<p className="mt-1 text-sm text-gray-500">O crea uno nuevo para empezar a organizarte</p>
+							<h3 className="mt-2 font-medium text-gray-900 text-sm dark:text-gray-100">Selecciona un grupo</h3>
+							<p className="mt-1 text-gray-500 text-sm">O crea uno nuevo para empezar a organizarte</p>
 						</div>
 					</Card>
 				)}
 			</div>
 
-			<Dialog open={isCreateDialogOpen} onOpenChange={(isOpen) => setIsCreateDialogOpen(isOpen)}>
+			<Dialog onOpenChange={(isOpen) => setIsCreateDialogOpen(isOpen)} open={isCreateDialogOpen}>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>Crear Nuevo Grupo</DialogTitle>
 					</DialogHeader>
-					<CreateGroupForm onSubmit={handleCreateGroup} onCancel={() => setIsCreateDialogOpen(false)} />
+					<CreateGroupForm onCancel={() => setIsCreateDialogOpen(false)} onSubmit={handleCreateGroup} />
 				</DialogContent>
 			</Dialog>
 		</div>

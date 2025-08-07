@@ -194,7 +194,7 @@ export function ProgressOperationCard({
 				<TooltipProvider key="start">
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Button variant="outline" size="sm" onClick={() => onStart(operation.id)}>
+							<Button onClick={() => onStart(operation.id)} size="sm" variant="outline">
 								<Play className="h-4 w-4" />
 							</Button>
 						</TooltipTrigger>
@@ -209,7 +209,7 @@ export function ProgressOperationCard({
 				<TooltipProvider key="pause">
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Button variant="outline" size="sm" onClick={() => onPause(operation.id)}>
+							<Button onClick={() => onPause(operation.id)} size="sm" variant="outline">
 								<Pause className="h-4 w-4" />
 							</Button>
 						</TooltipTrigger>
@@ -224,7 +224,7 @@ export function ProgressOperationCard({
 				<TooltipProvider key="resume">
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Button variant="outline" size="sm" onClick={() => onResume(operation.id)}>
+							<Button onClick={() => onResume(operation.id)} size="sm" variant="outline">
 								<Play className="h-4 w-4" />
 							</Button>
 						</TooltipTrigger>
@@ -240,7 +240,7 @@ export function ProgressOperationCard({
 				<TooltipProvider key="cancel">
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Button variant="outline" size="sm" onClick={() => onCancel(operation.id)}>
+							<Button onClick={() => onCancel(operation.id)} size="sm" variant="outline">
 								<Square className="h-4 w-4" />
 							</Button>
 						</TooltipTrigger>
@@ -256,7 +256,7 @@ export function ProgressOperationCard({
 				<TooltipProvider key="remove">
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Button variant="outline" size="sm" onClick={() => onRemove(operation.id)}>
+							<Button onClick={() => onRemove(operation.id)} size="sm" variant="outline">
 								<X className="h-4 w-4" />
 							</Button>
 						</TooltipTrigger>
@@ -272,7 +272,7 @@ export function ProgressOperationCard({
 				<TooltipProvider key="details">
 					<Tooltip>
 						<TooltipTrigger asChild>
-							<Button variant="outline" size="sm" onClick={() => onViewDetails(operation.id)}>
+							<Button onClick={() => onViewDetails(operation.id)} size="sm" variant="outline">
 								<MoreHorizontal className="h-4 w-4" />
 							</Button>
 						</TooltipTrigger>
@@ -287,20 +287,20 @@ export function ProgressOperationCard({
 
 	if (compact) {
 		return (
-			<div className={cn('flex items-center gap-3 p-3 border rounded-lg bg-white', className)}>
+			<div className={cn('flex items-center gap-3 rounded-lg border bg-white p-3', className)}>
 				{/* Icono y estado */}
 				<div className="flex items-center gap-2">
-					<div className={cn('p-1.5 rounded-full', statusInfo.bgColor)}>
+					<div className={cn('rounded-full p-1.5', statusInfo.bgColor)}>
 						<OperationIcon className={cn('h-4 w-4', statusInfo.color)} />
 					</div>
 					<StatusIcon className={cn('h-4 w-4', statusInfo.color)} />
 				</div>
 
 				{/* Información básica */}
-				<div className="flex-1 min-w-0">
+				<div className="min-w-0 flex-1">
 					<div className="flex items-center gap-2">
-						<p className="text-sm font-medium truncate">{operation.name}</p>
-						<Badge variant="secondary" className={cn('text-xs px-1.5 py-0.5', statusInfo.color)}>
+						<p className="truncate font-medium text-sm">{operation.name}</p>
+						<Badge className={cn('px-1.5 py-0.5 text-xs', statusInfo.color)} variant="secondary">
 							{statusInfo.label}
 						</Badge>
 					</div>
@@ -308,8 +308,8 @@ export function ProgressOperationCard({
 					{/* Barra de progreso */}
 					{operation.status === 'running' && (
 						<div className="mt-1">
-							<Progress value={operation.progress.percentage} className="h-1.5" />
-							<p className="text-xs text-muted-foreground mt-0.5">
+							<Progress className="h-1.5" value={operation.progress.percentage} />
+							<p className="mt-0.5 text-muted-foreground text-xs">
 								{operation.progress.percentage.toFixed(1)}%{eta && ` • ETA: ${format(eta, 'HH:mm', { locale: es })}`}
 							</p>
 						</div>
@@ -327,25 +327,25 @@ export function ProgressOperationCard({
 			<CardHeader className="pb-3">
 				<div className="flex items-start justify-between">
 					<div className="flex items-center gap-3">
-						<div className={cn('p-2 rounded-lg', statusInfo.bgColor)}>
+						<div className={cn('rounded-lg p-2', statusInfo.bgColor)}>
 							<OperationIcon className={cn('h-5 w-5', statusInfo.color)} />
 						</div>
 
 						<div className="flex-1">
 							<div className="flex items-center gap-2">
 								<CardTitle className="text-base">{operation.name}</CardTitle>
-								<Badge variant="secondary" className={cn('text-xs', statusInfo.color)}>
+								<Badge className={cn('text-xs', statusInfo.color)} variant="secondary">
 									{statusInfo.label}
 								</Badge>
 
 								{/* Indicador de prioridad */}
 								<div
-									className={cn('w-2 h-2 rounded-full', priorityColors[operation.priority])}
+									className={cn('h-2 w-2 rounded-full', priorityColors[operation.priority])}
 									title={`Prioridad: ${operation.priority}`}
 								/>
 							</div>
 
-							{operation.description && <p className="text-sm text-muted-foreground mt-1">{operation.description}</p>}
+							{operation.description && <p className="mt-1 text-muted-foreground text-sm">{operation.description}</p>}
 						</div>
 					</div>
 
@@ -360,26 +360,26 @@ export function ProgressOperationCard({
 				{/* Barra de progreso */}
 				{['running', 'completed'].includes(operation.status) && (
 					<div className="mb-4">
-						<div className="flex items-center justify-between mb-2">
-							<span className="text-sm font-medium">Progreso: {operation.progress.percentage.toFixed(1)}%</span>
+						<div className="mb-2 flex items-center justify-between">
+							<span className="font-medium text-sm">Progreso: {operation.progress.percentage.toFixed(1)}%</span>
 							{eta && (
-								<span className="text-sm text-muted-foreground">ETA: {format(eta, 'HH:mm', { locale: es })}</span>
+								<span className="text-muted-foreground text-sm">ETA: {format(eta, 'HH:mm', { locale: es })}</span>
 							)}
 						</div>
-						<Progress value={operation.progress.percentage} className="h-2" />
+						<Progress className="h-2" value={operation.progress.percentage} />
 					</div>
 				)}
 
 				{/* Pasos de la operación */}
 				{operation.steps.length > 0 && (
 					<div className="mb-4">
-						<h4 className="text-sm font-medium mb-2">Pasos:</h4>
+						<h4 className="mb-2 font-medium text-sm">Pasos:</h4>
 						<div className="space-y-2">
 							{operation.steps.slice(-3).map((step) => (
-								<div key={step.id} className="flex items-center gap-2 text-sm">
+								<div className="flex items-center gap-2 text-sm" key={step.id}>
 									<div
 										className={cn(
-											'w-2 h-2 rounded-full',
+											'h-2 w-2 rounded-full',
 											step.status === 'completed'
 												? 'bg-green-500'
 												: step.status === 'running'
@@ -391,12 +391,12 @@ export function ProgressOperationCard({
 									/>
 									<span className="flex-1 truncate">{step.name}</span>
 									{step.status === 'running' && (
-										<span className="text-xs text-muted-foreground">{step.progress.toFixed(0)}%</span>
+										<span className="text-muted-foreground text-xs">{step.progress.toFixed(0)}%</span>
 									)}
 								</div>
 							))}
 							{operation.steps.length > 3 && (
-								<p className="text-xs text-muted-foreground">... y {operation.steps.length - 3} pasos más</p>
+								<p className="text-muted-foreground text-xs">... y {operation.steps.length - 3} pasos más</p>
 							)}
 						</div>
 					</div>
@@ -438,18 +438,18 @@ export function ProgressOperationCard({
 
 				{/* Error si existe */}
 				{operation.error && (
-					<div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+					<div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3">
 						<div className="flex items-center gap-2 text-red-800">
 							<AlertCircle className="h-4 w-4" />
 							<span className="font-medium">Error:</span>
 						</div>
-						<p className="text-sm text-red-700 mt-1">{operation.error}</p>
+						<p className="mt-1 text-red-700 text-sm">{operation.error}</p>
 					</div>
 				)}
 
 				{/* Indicador de pausa */}
 				{operation.paused && (
-					<div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+					<div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3">
 						<div className="flex items-center gap-2 text-yellow-800">
 							<Pause className="h-4 w-4" />
 							<span className="font-medium">Operación pausada</span>

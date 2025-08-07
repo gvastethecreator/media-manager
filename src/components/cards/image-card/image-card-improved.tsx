@@ -190,15 +190,15 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 		return (
 			<div
 				className={cn(
-					'relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					'relative flex items-center justify-center overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-900',
 					aspectRatioClass,
 					variantClasses,
 					className
 				)}
 			>
-				<div className="text-center p-4">
-					<ImageIcon className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-					<p className="text-sm text-gray-500 dark:text-gray-400">
+				<div className="p-4 text-center">
+					<ImageIcon className="mx-auto mb-2 h-10 w-10 text-gray-400" />
+					<p className="text-gray-500 text-sm dark:text-gray-400">
 						{error?.toString() || 'No se pudo cargar la imagen'}
 					</p>
 				</div>
@@ -213,35 +213,35 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 	// Contenido de la tarjeta
 	const cardContent = (
 		<motion.div
+			animate={{ opacity: 1, y: 0 }}
 			className={cn(
 				'group relative overflow-hidden rounded-lg transition-all',
 				aspectRatioClass,
 				variantClasses,
-				isSelected && 'ring-2 ring-primary shadow-md',
-				memoizedProps.isHoverable && 'hover:shadow-lg hover:scale-[1.02] duration-300',
+				isSelected && 'shadow-md ring-2 ring-primary',
+				memoizedProps.isHoverable && 'duration-300 hover:scale-[1.02] hover:shadow-lg',
 				onClick && 'cursor-pointer',
 				className
 			)}
-			onHoverStart={handleHoverStart}
-			onHoverEnd={handleHoverEnd}
-			onClick={handleClick}
 			initial={{ opacity: 0, y: 10 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.3 }}
+			onClick={handleClick}
+			onHoverEnd={handleHoverEnd}
+			onHoverStart={handleHoverStart}
 			style={
 				memoizedProps.isTcgMode
 					? { boxShadow: `0 8px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30` }
 					: {}
 			}
+			transition={{ duration: 0.3 }}
 		>
 			{/* Imagen principal */}
-			<div className="relative w-full h-0 pb-[75%]">
+			<div className="relative h-0 w-full pb-[75%]">
 				{imageData.thumbnail ? (
 					<img
-						src={imageData.thumbnail}
 						alt={imageData.name || 'Imagen'}
-						className="w-full h-full object-cover"
+						className="h-full w-full object-cover"
 						loading="lazy"
+						src={imageData.thumbnail}
 					/>
 				) : (
 					<div className="absolute inset-0 flex items-center justify-center bg-gray-200 dark:bg-gray-700">
@@ -257,16 +257,16 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 					)}
 				>
 					{/* Información en overlay */}
-					<div className="absolute bottom-0 left-0 right-0 p-3">
-						<h3 className="text-white font-medium line-clamp-1 text-sm sm:text-base">
+					<div className="absolute right-0 bottom-0 left-0 p-3">
+						<h3 className="line-clamp-1 font-medium text-sm text-white sm:text-base">
 							{imageData.name || 'Sin título'}
 						</h3>
 
 						{memoizedProps.showDetails && (
-							<div className="flex flex-wrap gap-2 mt-1">
-								{dimensions && <p className="text-xs text-white/80">{dimensions}</p>}
+							<div className="mt-1 flex flex-wrap gap-2">
+								{dimensions && <p className="text-white/80 text-xs">{dimensions}</p>}
 								{imageFormat && imageFormat !== 'unknown' && (
-									<p className="text-xs text-white/80 uppercase">{imageFormat}</p>
+									<p className="text-white/80 text-xs uppercase">{imageFormat}</p>
 								)}
 							</div>
 						)}
@@ -275,27 +275,27 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 					{/* Acciones en hover */}
 					<div className="absolute top-2 right-2 flex gap-1">
 						<motion.button
-							className="w-7 h-7 rounded-full bg-black/60 text-white flex items-center justify-center hover:bg-primary/90"
+							aria-label="Ampliar imagen"
+							className="flex h-7 w-7 items-center justify-center rounded-full bg-black/60 text-white hover:bg-primary/90"
 							whileHover={{ scale: 1.1 }}
 							whileTap={{ scale: 0.95 }}
-							aria-label="Ampliar imagen"
 						>
-							<ZoomInIcon className="w-4 h-4" />
+							<ZoomInIcon className="h-4 w-4" />
 						</motion.button>
 					</div>
 				</div>
 
 				{/* Indicador de selección */}
 				{isSelected && (
-					<div className="absolute top-2 left-2 w-6 h-6 rounded-full bg-primary text-white flex items-center justify-center shadow-md">
-						<CheckCircle2 className="w-4 h-4" />
+					<div className="absolute top-2 left-2 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-white shadow-md">
+						<CheckCircle2 className="h-4 w-4" />
 					</div>
 				)}
 
 				{/* Indicador de favoritos */}
 				{imageData.isFavorite && (
 					<div className={cn('absolute top-2 left-2 flex items-center justify-center', isSelected && 'left-9')}>
-						<StarIcon className="w-5 h-5 text-yellow-400 fill-yellow-400" />
+						<StarIcon className="h-5 w-5 fill-yellow-400 text-yellow-400" />
 					</div>
 				)}
 			</div>
@@ -304,35 +304,35 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 			{variant !== 'gallery' && memoizedProps.showDetails && (
 				<div className="p-3">
 					{/* Título e información principal */}
-					<div className="flex justify-between items-start mb-2">
-						<h3 className={cn('font-medium line-clamp-1', memoizedProps.isTcgMode ? 'text-white' : 'text-foreground')}>
+					<div className="mb-2 flex items-start justify-between">
+						<h3 className={cn('line-clamp-1 font-medium', memoizedProps.isTcgMode ? 'text-white' : 'text-foreground')}>
 							{imageData.name || 'Sin título'}
 						</h3>
 
 						{imageData.isFavorite && !memoizedProps.isTcgMode && (
-							<StarIcon className="w-4 h-4 text-yellow-400 fill-yellow-400" />
+							<StarIcon className="h-4 w-4 fill-yellow-400 text-yellow-400" />
 						)}
 					</div>
 
 					{/* Información técnica */}
 					<div className="space-y-1">
 						{cameraInfo && (
-							<div className="flex items-center text-xs text-muted-foreground gap-1">
-								<CameraIcon className="w-3 h-3" />
+							<div className="flex items-center gap-1 text-muted-foreground text-xs">
+								<CameraIcon className="h-3 w-3" />
 								<span className="truncate">{cameraInfo}</span>
 							</div>
 						)}
 
 						{imageData.folderId && (
-							<div className="flex items-center text-xs text-muted-foreground gap-1">
-								<FolderIcon className="w-3 h-3" />
+							<div className="flex items-center gap-1 text-muted-foreground text-xs">
+								<FolderIcon className="h-3 w-3" />
 								<span className="truncate">{'Carpeta'}</span>
 							</div>
 						)}
 
 						{imageData.createdAt && (
-							<div className="flex items-center text-xs text-muted-foreground gap-1">
-								<CalendarIcon className="w-3 h-3" />
+							<div className="flex items-center gap-1 text-muted-foreground text-xs">
+								<CalendarIcon className="h-3 w-3" />
 								<span>{formatDate(imageData.createdAt)}</span>
 							</div>
 						)}
@@ -343,19 +343,19 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 						<div className="mt-3 flex flex-wrap gap-1">
 							{imageData.tags.slice(0, 3).map((tag: TagWithStats) => (
 								<Badge
+									className="h-5 max-w-[100px] truncate px-1.5 text-[10px]"
 									key={tag.id}
-									variant="outline"
-									className="text-[10px] h-5 px-1.5 truncate max-w-[100px]"
 									style={{
 										borderColor: `${tag.color}50`,
 										backgroundColor: memoizedProps.isTcgMode ? `${tag.color}20` : undefined,
 									}}
+									variant="outline"
 								>
 									{tag.name}
 								</Badge>
 							))}
 							{imageData.tags.length > 3 && (
-								<Badge variant="outline" className="text-[10px] h-5 px-1.5">
+								<Badge className="h-5 px-1.5 text-[10px]" variant="outline">
 									+{imageData.tags.length - 3}
 								</Badge>
 							)}
@@ -364,8 +364,8 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 
 					{/* Contador de relaciones */}
 					{memoizedProps.showRelations && totalRelations > 0 && (
-						<div className="mt-2 flex items-center text-xs text-muted-foreground">
-							<InfoIcon className="w-3 h-3 mr-1" />
+						<div className="mt-2 flex items-center text-muted-foreground text-xs">
+							<InfoIcon className="mr-1 h-3 w-3" />
 							<span>{totalRelations} relaciones</span>
 						</div>
 					)}
@@ -377,7 +377,7 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 				<>
 					{/* Brillo en hover */}
 					<div
-						className="absolute inset-0 opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-500"
+						className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 						style={{
 							background: `radial-gradient(circle at 50% 50%, ${primaryColor}20 0%, transparent 70%)`,
 							zIndex: 1,
@@ -386,19 +386,19 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 
 					{/* Esquinas decorativas */}
 					<div
-						className="absolute top-0 left-0 w-5 h-5 border-t border-l rounded-br-sm opacity-60 pointer-events-none"
+						className="pointer-events-none absolute top-0 left-0 h-5 w-5 rounded-br-sm border-t border-l opacity-60"
 						style={{ borderColor: `${primaryColor}80` }}
 					/>
 					<div
-						className="absolute top-0 right-0 w-5 h-5 border-t border-r rounded-bl-sm opacity-60 pointer-events-none"
+						className="pointer-events-none absolute top-0 right-0 h-5 w-5 rounded-bl-sm border-t border-r opacity-60"
 						style={{ borderColor: `${primaryColor}80` }}
 					/>
 					<div
-						className="absolute bottom-0 left-0 w-5 h-5 border-b border-l rounded-tr-sm opacity-60 pointer-events-none"
+						className="pointer-events-none absolute bottom-0 left-0 h-5 w-5 rounded-tr-sm border-b border-l opacity-60"
 						style={{ borderColor: `${primaryColor}80` }}
 					/>
 					<div
-						className="absolute bottom-0 right-0 w-5 h-5 border-b border-r rounded-tl-sm opacity-60 pointer-events-none"
+						className="pointer-events-none absolute right-0 bottom-0 h-5 w-5 rounded-tl-sm border-r border-b opacity-60"
 						style={{ borderColor: `${primaryColor}80` }}
 					/>
 				</>
@@ -409,7 +409,7 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 	// Si no hay onClick, envolver en un Link para navegación
 	if (!onClick) {
 		return (
-			<Link to={`/images/${imageData.id}`} className="block h-full">
+			<Link className="block h-full" to={`/images/${imageData.id}`}>
 				{cardContent}
 			</Link>
 		);

@@ -36,46 +36,46 @@ export const DocumentContentView: React.FC<DocumentContentViewProps> = ({ classN
 
 	return (
 		<motion.div
-			initial={{ opacity: 0, x: 20 }}
 			animate={{ opacity: 1, x: 0 }}
-			exit={{ opacity: 0, x: -20 }}
-			transition={{ duration: 0.3 }}
 			className={className}
+			exit={{ opacity: 0, x: -20 }}
+			initial={{ opacity: 0, x: 20 }}
+			transition={{ duration: 0.3 }}
 		>
-			<div className="h-full flex flex-col">
+			<div className="flex h-full flex-col">
 				{/* Header con navegación */}
-				<div className="flex items-center gap-4 p-4 border-b border-border bg-background/50 backdrop-blur-sm">
-					<Button variant="ghost" size="icon" onClick={handleGoBack} className="shrink-0">
+				<div className="flex items-center gap-4 border-border border-b bg-background/50 p-4 backdrop-blur-sm">
+					<Button className="shrink-0" onClick={handleGoBack} size="icon" variant="ghost">
 						<ArrowLeft className="h-4 w-4" />
 					</Button>
-					<div className="flex items-center gap-3 min-w-0 flex-1">
-						<FileText className="h-6 w-6 text-primary shrink-0" />
+					<div className="flex min-w-0 flex-1 items-center gap-3">
+						<FileText className="h-6 w-6 shrink-0 text-primary" />
 						<div className="min-w-0 flex-1">
-							<h1 className="text-xl font-semibold truncate">{documentData.name}</h1>
-							<p className="text-sm text-muted-foreground truncate">{documentData.path}</p>
+							<h1 className="truncate font-semibold text-xl">{documentData.name}</h1>
+							<p className="truncate text-muted-foreground text-sm">{documentData.path}</p>
 						</div>
 					</div>
-					<div className="flex items-center gap-2 shrink-0">
-						<Button variant="outline" size="sm">
-							<Download className="h-4 w-4 mr-2" />
+					<div className="flex shrink-0 items-center gap-2">
+						<Button size="sm" variant="outline">
+							<Download className="mr-2 h-4 w-4" />
 							Descargar
 						</Button>
-						<Button variant="outline" size="sm">
-							<Edit className="h-4 w-4 mr-2" />
+						<Button size="sm" variant="outline">
+							<Edit className="mr-2 h-4 w-4" />
 							Editar
 						</Button>
-						<Button variant="outline" size="sm">
-							<Share2 className="h-4 w-4 mr-2" />
+						<Button size="sm" variant="outline">
+							<Share2 className="mr-2 h-4 w-4" />
 							Compartir
 						</Button>
-						<Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+						<Button className="text-destructive hover:text-destructive" size="sm" variant="outline">
 							<Trash2 className="h-4 w-4" />
 						</Button>
 					</div>
 				</div>
 
 				{/* Contenido principal */}
-				<div className="flex-1 flex gap-4 p-4 min-h-0">
+				<div className="flex min-h-0 flex-1 gap-4 p-4">
 					{/* Panel de información lateral */}
 					<div className="w-80 shrink-0">
 						<ScrollArea className="h-full">
@@ -109,7 +109,7 @@ export const DocumentContentView: React.FC<DocumentContentViewProps> = ({ classN
 									<CardContent>
 										<div className="flex flex-wrap gap-2">
 											{documentData.tags.map((tag) => (
-												<Badge key={tag} variant="outline" className="text-xs">
+												<Badge className="text-xs" key={tag} variant="outline">
 													{tag}
 												</Badge>
 											))}
@@ -123,16 +123,16 @@ export const DocumentContentView: React.FC<DocumentContentViewProps> = ({ classN
 										<CardTitle className="text-sm">Acciones Rápidas</CardTitle>
 									</CardHeader>
 									<CardContent className="space-y-2">
-										<Button variant="outline" size="sm" className="w-full justify-start">
-											<FileText className="h-4 w-4 mr-2" />
+										<Button className="w-full justify-start" size="sm" variant="outline">
+											<FileText className="mr-2 h-4 w-4" />
 											Ver en visor
 										</Button>
-										<Button variant="outline" size="sm" className="w-full justify-start">
-											<Edit className="h-4 w-4 mr-2" />
+										<Button className="w-full justify-start" size="sm" variant="outline">
+											<Edit className="mr-2 h-4 w-4" />
 											Editar texto
 										</Button>
-										<Button variant="outline" size="sm" className="w-full justify-start">
-											<Share2 className="h-4 w-4 mr-2" />
+										<Button className="w-full justify-start" size="sm" variant="outline">
+											<Share2 className="mr-2 h-4 w-4" />
 											Crear enlace
 										</Button>
 									</CardContent>
@@ -144,24 +144,24 @@ export const DocumentContentView: React.FC<DocumentContentViewProps> = ({ classN
 					<Separator orientation="vertical" />
 
 					{/* Área de vista previa del contenido */}
-					<div className="flex-1 min-w-0">
+					<div className="min-w-0 flex-1">
 						<Card className="h-full">
 							<CardHeader>
 								<CardTitle className="text-sm">Vista Previa del Contenido</CardTitle>
 							</CardHeader>
 							<CardContent className="h-full">
 								<ScrollArea className="h-full">
-									<div className="bg-muted/20 rounded-lg p-6 h-full flex items-center justify-center">
-										<div className="text-center space-y-4">
-											<FileText className="h-16 w-16 mx-auto text-muted-foreground" />
+									<div className="flex h-full items-center justify-center rounded-lg bg-muted/20 p-6">
+										<div className="space-y-4 text-center">
+											<FileText className="mx-auto h-16 w-16 text-muted-foreground" />
 											<div>
-												<h3 className="text-lg font-medium">Vista Previa No Disponible</h3>
-												<p className="text-sm text-muted-foreground">
+												<h3 className="font-medium text-lg">Vista Previa No Disponible</h3>
+												<p className="text-muted-foreground text-sm">
 													La vista previa se implementará cuando se conecte con el backend
 												</p>
 											</div>
 											<Button variant="outline">
-												<Download className="h-4 w-4 mr-2" />
+												<Download className="mr-2 h-4 w-4" />
 												Descargar para Ver
 											</Button>
 										</div>

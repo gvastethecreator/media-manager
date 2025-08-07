@@ -23,7 +23,7 @@ export function DataTableRowActions<TData>({ row, actions }: DataTableRowActions
 	return (
 		<DropdownMenu>
 			<DropdownMenuTrigger asChild>
-				<Button variant="ghost" className="flex h-8 w-8 p-0 data-[state=open]:bg-muted">
+				<Button className="flex h-8 w-8 p-0 data-[state=open]:bg-muted" variant="ghost">
 					<MoreHorizontal className="h-4 w-4" />
 					<span className="sr-only">Abrir menú</span>
 				</Button>
@@ -31,9 +31,9 @@ export function DataTableRowActions<TData>({ row, actions }: DataTableRowActions
 			<DropdownMenuContent align="end" className="w-[160px]">
 				{actions.map((action, _index) => (
 					<DropdownMenuItem
+						className={action.variant === 'destructive' ? 'text-red-600' : ''}
 						key={action.label}
 						onClick={() => action.onClick(row.original)}
-						className={action.variant === 'destructive' ? 'text-red-600' : ''}
 					>
 						{action.label}
 					</DropdownMenuItem>

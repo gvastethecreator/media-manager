@@ -23,22 +23,22 @@ export function TestContextMenu() {
 	return (
 		<div className="p-8">
 			<div
-				className="w-full h-96 bg-muted border border-border rounded-lg flex items-center justify-center cursor-default"
+				aria-label="Área de prueba del menú contextual"
+				className="flex h-96 w-full cursor-default items-center justify-center rounded-lg border border-border bg-muted"
 				onContextMenu={handleContextMenu}
 				onKeyDown={handleKeyDown}
 				role="button"
 				tabIndex={0}
-				aria-label="Área de prueba del menú contextual"
 			>
 				<p className="text-lg text-muted-foreground">Haz click derecho aquí para ver el menú contextual</p>
 			</div>
 
 			<CustomContextMenu
 				isOpen={isOpen}
-				onClose={closeMenu}
-				position={position}
-				selectedItems={[]} // Sin elementos seleccionados para probar menú de espacio vacío
 				onAction={handleAction}
+				onClose={closeMenu}
+				position={position} // Sin elementos seleccionados para probar menú de espacio vacío
+				selectedItems={[]}
 			/>
 		</div>
 	);

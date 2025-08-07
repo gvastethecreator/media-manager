@@ -17,7 +17,7 @@ export function File3DView(_props: ViewProps) {
 
 	// Usar selectores normales de Zustand
 	const file3ds = useFile3DStore((state) => state.file3Ds) || [];
-	const loading = useFile3DStore((state) => state.loading) || false;
+	const loading = useFile3DStore((state) => state.loading);
 	const error = useFile3DStore((state) => state.error) || null;
 	const fetchFile3Ds = useFile3DStore((state) => state.fetchFile3Ds);
 	const createFile3D = useFile3DStore((state) => state.createFile3D);
@@ -100,18 +100,18 @@ export function File3DView(_props: ViewProps) {
 
 	return (
 		<File3DContentView
-			file3ds={sortedFile3Ds}
-			isLoading={loading}
 			error={error}
-			showForm={showForm}
-			newFile3DName={newFile3DName}
-			newFile3DFile={newFile3DFile}
-			setShowForm={setShowForm}
-			setNewFile3DName={setNewFile3DName}
-			setNewFile3DFile={setNewFile3DFile}
+			file3ds={sortedFile3Ds}
+			handleCreateFile3D={handleCreateFile3D}
 			handleFile3DClick={handleFile3DClick}
 			handleFileChange={handleFileChange}
-			handleCreateFile3D={handleCreateFile3D}
+			isLoading={loading}
+			newFile3DFile={newFile3DFile}
+			newFile3DName={newFile3DName}
+			setNewFile3DFile={setNewFile3DFile}
+			setNewFile3DName={setNewFile3DName}
+			setShowForm={setShowForm}
+			showForm={showForm}
 		/>
 	);
 }

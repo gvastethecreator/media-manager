@@ -45,7 +45,7 @@ export function ImageThumbnail({ path, name, size = 48, className = '', fallback
 	if (hasError) {
 		return (
 			<div
-				className={cn('flex items-center justify-center bg-muted text-muted-foreground rounded border', className)}
+				className={cn('flex items-center justify-center rounded border bg-muted text-muted-foreground', className)}
 				style={{ width: size, height: size }}
 			>
 				{fallbackIcon || <FileImage className="h-4 w-4" />}
@@ -58,7 +58,7 @@ export function ImageThumbnail({ path, name, size = 48, className = '', fallback
 			{/* Loading placeholder */}
 			{isLoading && (
 				<div
-					className="absolute inset-0 flex items-center justify-center bg-muted animate-pulse"
+					className="absolute inset-0 flex animate-pulse items-center justify-center bg-muted"
 					style={{ width: size, height: size }}
 				>
 					<ImageIcon className="h-4 w-4 text-muted-foreground" />
@@ -67,15 +67,15 @@ export function ImageThumbnail({ path, name, size = 48, className = '', fallback
 
 			{/* Imagen real */}
 			<img
-				src={imageSrc}
 				alt={name}
 				className={cn(
-					'w-full h-full object-cover transition-opacity duration-200',
+					'h-full w-full object-cover transition-opacity duration-200',
 					isLoading ? 'opacity-0' : 'opacity-100'
 				)}
-				onLoad={handleLoad}
-				onError={handleError}
 				loading="lazy"
+				onError={handleError}
+				onLoad={handleLoad}
+				src={imageSrc}
 			/>
 		</div>
 	);

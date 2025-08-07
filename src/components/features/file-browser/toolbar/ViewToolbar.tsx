@@ -71,19 +71,19 @@ export const ViewToolbar: React.FC<ViewToolbarProps> = ({ className }) => {
 				<div className="flex items-center gap-2">
 					{/* Undo/Redo Toolbar */}
 					<UndoRedoToolbar
-						className="flex items-center gap-1"
-						buttonVariant="outline"
 						buttonSize="sm"
+						buttonVariant="outline"
+						className="flex items-center gap-1"
 						showHistoryButton={false}
 						showSeparator={false}
 					/>
 
-					<Separator orientation="vertical" className="h-6" />
+					<Separator className="h-6" orientation="vertical" />
 
 					{/* Selector de modo de vista */}
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Button variant="outline" size="sm" className="h-8 gap-2">
+							<Button className="h-8 gap-2" size="sm" variant="outline">
 								{React.createElement(VIEW_MODE_ICONS[currentViewType] || Grid, {
 									className: 'h-4 w-4',
 								})}
@@ -97,9 +97,9 @@ export const ViewToolbar: React.FC<ViewToolbarProps> = ({ className }) => {
 
 								return (
 									<DropdownMenuItem
+										className={cn('flex cursor-pointer items-center gap-2', isSelected && 'bg-accent')}
 										key={mode}
 										onClick={() => handleViewModeChange(mode)}
-										className={cn('flex items-center gap-2 cursor-pointer', isSelected && 'bg-accent')}
 									>
 										<Icon className="h-4 w-4" />
 										<span>{label}</span>
@@ -110,36 +110,36 @@ export const ViewToolbar: React.FC<ViewToolbarProps> = ({ className }) => {
 					</DropdownMenu>
 
 					{/* Selector de configuración de vista */}
-					<ViewConfigurationSelector viewType={currentViewType} onConfigurationPanelOpen={handleConfigPanelOpen} />
+					<ViewConfigurationSelector onConfigurationPanelOpen={handleConfigPanelOpen} viewType={currentViewType} />
 
 					{/* Botón de configuración avanzada */}
-					<Button variant="outline" size="sm" onClick={handleConfigPanelOpen} className="h-8">
+					<Button className="h-8" onClick={handleConfigPanelOpen} size="sm" variant="outline">
 						<Settings className="h-4 w-4" />
-						<span className="hidden md:inline ml-2">Configurar</span>
+						<span className="ml-2 hidden md:inline">Configurar</span>
 					</Button>
 				</div>
 
 				{/* Progress Indicator */}
 				<ProgressIndicator
-					showDetails={true}
 					onClick={() => {
 						// TODO: Abrir panel de progreso detallado si es necesario
 						console.log('Progress indicator clicked');
 					}}
+					showDetails={true}
 				/>
 			</div>
 
 			{/* Panel de configuración */}
-			<Dialog open={showConfigPanel} onOpenChange={setShowConfigPanel}>
-				<DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+			<Dialog onOpenChange={setShowConfigPanel} open={showConfigPanel}>
+				<DialogContent className="max-h-[90vh] max-w-4xl overflow-y-auto">
 					<DialogHeader>
 						<DialogTitle>Configuración de Vista</DialogTitle>
 					</DialogHeader>
 					<ViewConfigurationPanel
-						viewType={currentViewType}
 						onConfigurationChange={() => {
 							// Opcional: manejar cambios de configuración
 						}}
+						viewType={currentViewType}
 					/>
 				</DialogContent>
 			</Dialog>

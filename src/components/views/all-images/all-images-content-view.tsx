@@ -131,19 +131,19 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 
 		return (
 			<motion.div
-				initial={{ opacity: 0, y: -20 }}
 				animate={{ opacity: 1, y: 0 }}
-				className="mb-4 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-800"
+				className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950/30"
+				initial={{ opacity: 0, y: -20 }}
 			>
-				<div className="flex items-center justify-between mb-2">
+				<div className="mb-2 flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<FolderSync className={`h-4 w-4 text-blue-600 ${isIndexing ? 'animate-spin' : ''}`} />
-						<span className="text-sm font-medium text-blue-900 dark:text-blue-100">
+						<span className="font-medium text-blue-900 text-sm dark:text-blue-100">
 							{isIndexing ? 'Indexando carpetas...' : 'Indexación completada'}
 						</span>
 					</div>
 					{!isIndexing && (
-						<Button size="sm" variant="outline" onClick={startIndexing} className="h-7 text-xs">
+						<Button className="h-7 text-xs" onClick={startIndexing} size="sm" variant="outline">
 							Reindexar
 						</Button>
 					)}
@@ -151,13 +151,13 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 
 				{isIndexing && (
 					<>
-						<Progress value={progress * 100} className="h-2 mb-2" />
-						<div className="flex items-center justify-between text-xs text-blue-700 dark:text-blue-300">
+						<Progress className="mb-2 h-2" value={progress * 100} />
+						<div className="flex items-center justify-between text-blue-700 text-xs dark:text-blue-300">
 							<span>
 								{indexingStatus?.indexedFolders || 0} de {indexingStatus?.totalFolders || 0} carpetas
 							</span>
 							{indexingStatus?.currentFolder && (
-								<span className="truncate max-w-40">Procesando: {indexingStatus.currentFolder}</span>
+								<span className="max-w-40 truncate">Procesando: {indexingStatus.currentFolder}</span>
 							)}
 						</div>
 					</>
@@ -166,7 +166,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 				{indexingStatus?.errors && indexingStatus.errors.length > 0 && (
 					<div className="mt-2 flex items-center gap-2">
 						<AlertTriangle className="h-4 w-4 text-amber-600" />
-						<Badge variant="outline" className="text-amber-700 border-amber-600">
+						<Badge className="border-amber-600 text-amber-700" variant="outline">
 							{indexingStatus.errors.length} errores
 						</Badge>
 					</div>
@@ -177,7 +177,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<p className="text-destructive">Error: {error}</p>
 			</div>
 		);
@@ -214,43 +214,43 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 
 	return (
 		<BaseContentView
-			title="Todas las Imágenes"
 			description={`${images?.length || 0} ${(images?.length || 0) === 1 ? 'imagen' : 'imágenes'} en total`}
-			icon="image"
 			headerControls={
 				<>
 					{isIndexing && (
-						<Badge variant="secondary" className="animate-pulse">
-							<FolderSync className="h-3 w-3 mr-1 animate-spin" />
+						<Badge className="animate-pulse" variant="secondary">
+							<FolderSync className="mr-1 h-3 w-3 animate-spin" />
 							Indexando
 						</Badge>
 					)}
 					<Button onClick={startIndexing} variant="outline">
-						<FolderSync className="h-4 w-4 mr-2" />
+						<FolderSync className="mr-2 h-4 w-4" />
 						Reindexar
 					</Button>
 				</>
 			}
+			icon="image"
+			title="Todas las Imágenes"
 		>
 			{/* Barra de estado de indexación */}
 			{renderIndexingStatus()}
 
 			{/* FileBrowser para mostrar todas las imágenes */}
 			<FileBrowser
-				entityType={EntityStatsType.IMAGE}
-				mode="auto"
-				onItemSelect={handleImageClick}
-				onItemDoubleClick={handleImageDoubleClick}
 				className="min-h-[600px]"
+				entityType={EntityStatsType.IMAGE}
 				layout="vertical"
-				variant="primary"
+				mode="auto"
+				onItemDoubleClick={handleImageDoubleClick}
+				onItemSelect={handleImageClick}
 				size="md"
+				variant="primary"
 			/>
 
 			{/* Footer con información adicional */}
 			{images && images.length > 0 && (
-				<div className="mt-8 pt-6 border-t border-border">
-					<div className="flex items-center justify-between text-sm text-muted-foreground">
+				<div className="mt-8 border-border border-t pt-6">
+					<div className="flex items-center justify-between text-muted-foreground text-sm">
 						<span>
 							Mostrando {images?.length || 0} {(images?.length || 0) === 1 ? 'imagen' : 'imágenes'}
 						</span>
@@ -264,10 +264,10 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 			)}
 
 			{/* Dialog para upload de imágenes */}
-			<Dialog open={isUploadDialogOpen} onOpenChange={setIsUploadDialogOpen}>
+			<Dialog onOpenChange={setIsUploadDialogOpen} open={isUploadDialogOpen}>
 				<DialogTrigger asChild>
-					<Button variant="primary" className="fixed bottom-4 right-4 z-50" onClick={() => setIsUploadDialogOpen(true)}>
-						<Upload className="w-4 h-4 mr-2" />
+					<Button className="fixed right-4 bottom-4 z-50" onClick={() => setIsUploadDialogOpen(true)} variant="primary">
+						<Upload className="mr-2 h-4 w-4" />
 						Subir Imágenes
 					</Button>
 				</DialogTrigger>
@@ -280,16 +280,16 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 						{/* Instrucciones */}
 						<Card>
 							<CardHeader>
-								<CardTitle className="text-base font-semibold">Instrucciones</CardTitle>
+								<CardTitle className="font-semibold text-base">Instrucciones</CardTitle>
 							</CardHeader>
 							<CardContent>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-muted-foreground text-sm">
 									1. Selecciona las imágenes que deseas subir desde tu dispositivo.
 								</p>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-muted-foreground text-sm">
 									2. Asegúrate de que las imágenes cumplan con los requisitos de tamaño y formato.
 								</p>
-								<p className="text-sm text-muted-foreground">
+								<p className="text-muted-foreground text-sm">
 									3. Haz clic en "Subir Imágenes" para iniciar el proceso de carga.
 								</p>
 							</CardContent>
@@ -297,36 +297,36 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 
 						{/* Selector de archivos */}
 						<div>
-							<Label htmlFor="image-upload" className="block text-sm font-medium">
+							<Label className="block font-medium text-sm" htmlFor="image-upload">
 								Seleccionar Imágenes
 							</Label>
 							<Input
-								id="image-upload"
-								type="file"
 								accept="image/*"
+								className="mt-1"
+								id="image-upload"
 								multiple
 								onChange={handleFileSelectInternal}
-								className="mt-1"
+								type="file"
 							/>
 						</div>
 
 						{/* Progreso de carga */}
 						{isUploading && (
 							<div className="flex flex-col gap-2">
-								<Progress value={uploadProgress} className="h-2" />
-								<span className="text-xs text-muted-foreground">Cargando... {uploadProgress}%</span>
+								<Progress className="h-2" value={uploadProgress} />
+								<span className="text-muted-foreground text-xs">Cargando... {uploadProgress}%</span>
 							</div>
 						)}
 
 						{/* Botones de acción */}
 						<div className="flex justify-end gap-2">
-							<Button variant="outline" onClick={() => setIsUploadDialogOpen(false)} className="h-9">
+							<Button className="h-9" onClick={() => setIsUploadDialogOpen(false)} variant="outline">
 								Cancelar
 							</Button>
 							<Button
-								onClick={() => handleFileUploadInternal(uploadFiles)}
 								className="h-9"
 								disabled={isUploading || !uploadFiles || uploadFiles.length === 0}
+								onClick={() => handleFileUploadInternal(uploadFiles)}
 							>
 								{isUploading ? 'Subiendo...' : 'Subir Imágenes'}
 							</Button>

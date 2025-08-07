@@ -143,7 +143,7 @@ export function useAdvancedSelection({
 			const isCurrentlySelected = isItemSelected(item.id);
 
 			// Respuesta visual inmediata con estado optimista
-			if (!isShiftClick && !isCtrlClick) {
+			if (!(isShiftClick || isCtrlClick)) {
 				// Para click simple, mostrar inmediatamente la selección
 				setOptimisticSelection([item.id]);
 			} else if (isCtrlClick) {
@@ -272,14 +272,16 @@ export function useAdvancedSelection({
 			// Verificar que realmente es un click en espacio vacío
 			const isEmptySpaceClick =
 				target === currentTarget ||
-				(!target.closest('[data-entity-card]') &&
-					!target.closest('.entity-card') &&
-					!target.closest('button') &&
-					!target.closest('[role="button"]') &&
-					!target.closest('input') &&
-					!target.closest('textarea') &&
-					!target.closest('.context-menu') &&
-					!target.closest('[data-testid="file-browser-item"]') &&
+				(!(
+					target.closest('[data-entity-card]') ||
+					target.closest('.entity-card') ||
+					target.closest('button') ||
+					target.closest('[role="button"]') ||
+					target.closest('input') ||
+					target.closest('textarea') ||
+					target.closest('.context-menu') ||
+					target.closest('[data-testid="file-browser-item"]')
+				) &&
 					currentTarget.contains(target));
 
 			if (isEmptySpaceClick && selectedIds.length > 0) {

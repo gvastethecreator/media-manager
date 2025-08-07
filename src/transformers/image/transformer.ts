@@ -158,7 +158,7 @@ function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageSt
 		wildcardCount: wildcards,
 		propertyCount: properties,
 		groupCount: groups,
-		aspectRatio: aspectRatio,
+		aspectRatio,
 	};
 }
 
@@ -423,7 +423,7 @@ export function getAllImages(images: Record<string, ImageWithStats>): ImageWithS
  * 🎨 Transforma imágenes para mostrar en tarjetas - función básica de compatibilidad
  */
 export function transformImagesForCard(images: any[]): any[] {
-	if (!images || !Array.isArray(images)) {
+	if (!(images && Array.isArray(images))) {
 		return [];
 	}
 	return images.map((img) => ({

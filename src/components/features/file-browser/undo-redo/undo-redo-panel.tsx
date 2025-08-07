@@ -199,7 +199,7 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 			name: snapshotName.trim(),
 			description: snapshotDescription.trim() || undefined,
 			timestamp: new Date(),
-			state: state,
+			state,
 			history: getHistory(),
 		};
 
@@ -311,24 +311,24 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 
 		return (
 			<div
-				className={`flex items-center gap-3 p-3 rounded-lg border transition-colors ${
-					isCurrentAction ? 'bg-blue-50 border-blue-200' : 'bg-white border-gray-200'
+				className={`flex items-center gap-3 rounded-lg border p-3 transition-colors ${
+					isCurrentAction ? 'border-blue-200 bg-blue-50' : 'border-gray-200 bg-white'
 				}`}
 			>
 				<div className="flex-shrink-0">
-					<Icon className="w-4 h-4 text-gray-600" />
+					<Icon className="h-4 w-4 text-gray-600" />
 				</div>
 
-				<div className="flex-1 min-w-0">
-					<div className="flex items-center gap-2 mb-1">
-						<span className="font-medium text-sm truncate">{action.description}</span>
-						<Badge className="text-xs bg-green-100 text-green-800">
-							<CheckCircle className="w-3 h-3 mr-1" />
+				<div className="min-w-0 flex-1">
+					<div className="mb-1 flex items-center gap-2">
+						<span className="truncate font-medium text-sm">{action.description}</span>
+						<Badge className="bg-green-100 text-green-800 text-xs">
+							<CheckCircle className="mr-1 h-3 w-3" />
 							completed
 						</Badge>
 					</div>
 
-					<div className="flex items-center gap-4 text-xs text-gray-500">
+					<div className="flex items-center gap-4 text-gray-500 text-xs">
 						<span>{action.type.replace('-', ' ')}</span>
 						<span>{formatDistanceToNow(action.timestamp, { addSuffix: true })}</span>
 					</div>
@@ -341,26 +341,26 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 		return (
 			<div className={`flex items-center gap-2 ${className}`}>
 				<Button
-					variant="outline"
-					size="sm"
-					onClick={handleUndo}
 					disabled={!canUndo}
+					onClick={handleUndo}
+					size="sm"
 					title={canUndo ? 'Undo last action' : 'Nothing to undo'}
+					variant="outline"
 				>
-					<Undo2 className="w-4 h-4" />
+					<Undo2 className="h-4 w-4" />
 				</Button>
 
 				<Button
-					variant="outline"
-					size="sm"
-					onClick={handleRedo}
 					disabled={!canRedo}
+					onClick={handleRedo}
+					size="sm"
 					title={canRedo ? 'Redo last action' : 'Nothing to redo'}
+					variant="outline"
 				>
-					<Redo2 className="w-4 h-4" />
+					<Redo2 className="h-4 w-4" />
 				</Button>
 
-				<Badge variant="outline" className="text-xs">
+				<Badge className="text-xs" variant="outline">
 					{filteredHistory.length} actions
 				</Badge>
 			</div>
@@ -372,46 +372,46 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 			<CardHeader className="pb-3">
 				<div className="flex items-center justify-between">
 					<CardTitle className="flex items-center gap-2">
-						<History className="w-5 h-5" />
+						<History className="h-5 w-5" />
 						Undo/Redo History
 					</CardTitle>
 
 					<div className="flex items-center gap-2">
 						<Button
-							variant="outline"
-							size="sm"
-							onClick={handleUndo}
 							disabled={!canUndo}
+							onClick={handleUndo}
+							size="sm"
 							title={canUndo ? 'Undo last action' : 'Nothing to undo'}
+							variant="outline"
 						>
-							<Undo2 className="w-4 h-4" />
+							<Undo2 className="h-4 w-4" />
 						</Button>
 
 						<Button
-							variant="outline"
-							size="sm"
-							onClick={handleRedo}
 							disabled={!canRedo}
+							onClick={handleRedo}
+							size="sm"
 							title={canRedo ? 'Redo last action' : 'Nothing to redo'}
+							variant="outline"
 						>
-							<Redo2 className="w-4 h-4" />
+							<Redo2 className="h-4 w-4" />
 						</Button>
 
 						<Button
-							variant="outline"
-							size="sm"
-							onClick={handleClear}
 							disabled={filteredHistory.length === 0}
+							onClick={handleClear}
+							size="sm"
 							title="Clear history"
+							variant="outline"
 						>
-							<Trash2 className="w-4 h-4" />
+							<Trash2 className="h-4 w-4" />
 						</Button>
 					</div>
 				</div>
 			</CardHeader>
 
 			<CardContent>
-				<Tabs value={selectedTab} onValueChange={setSelectedTab}>
+				<Tabs onValueChange={setSelectedTab} value={selectedTab}>
 					<TabsList className="grid w-full grid-cols-4">
 						<TabsTrigger value="history">History</TabsTrigger>
 						{showStatistics && <TabsTrigger value="statistics">Stats</TabsTrigger>}
@@ -419,50 +419,50 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 						<TabsTrigger value="settings">Settings</TabsTrigger>
 					</TabsList>
 
-					<TabsContent value="history" className="space-y-4">
+					<TabsContent className="space-y-4" value="history">
 						{/* Search and Filters */}
 						<div className="space-y-3">
 							<div className="flex items-center gap-2">
 								<div className="relative flex-1">
-									<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+									<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-gray-400" />
 									<Input
+										className="pl-10"
+										onChange={(e) => setSearchQuery(e.target.value)}
 										placeholder="Search actions..."
 										value={searchQuery}
-										onChange={(e) => setSearchQuery(e.target.value)}
-										className="pl-10"
 									/>
 								</div>
 
-								<Button variant="outline" size="sm" onClick={() => setShowFilters(!showFilters)}>
-									<Filter className="w-4 h-4" />
+								<Button onClick={() => setShowFilters(!showFilters)} size="sm" variant="outline">
+									<Filter className="h-4 w-4" />
 								</Button>
 
-								<Button variant="outline" size="sm" onClick={handleExportHistory}>
-									<Download className="w-4 h-4" />
+								<Button onClick={handleExportHistory} size="sm" variant="outline">
+									<Download className="h-4 w-4" />
 								</Button>
 
 								<label className="cursor-pointer">
-									<Button variant="outline" size="sm" asChild>
+									<Button asChild size="sm" variant="outline">
 										<span>
-											<Upload className="w-4 h-4" />
+											<Upload className="h-4 w-4" />
 										</span>
 									</Button>
-									<input type="file" accept=".json" onChange={handleImportHistory} className="hidden" />
+									<input accept=".json" className="hidden" onChange={handleImportHistory} type="file" />
 								</label>
 							</div>
 
 							{showFilters && (
-								<div className="grid grid-cols-2 gap-3 p-3 bg-gray-50 rounded-lg">
+								<div className="grid grid-cols-2 gap-3 rounded-lg bg-gray-50 p-3">
 									<div>
-										<Label className="text-xs font-medium">Action Type</Label>
+										<Label className="font-medium text-xs">Action Type</Label>
 										<Select
-											value={filter.types?.[0] || ''}
 											onValueChange={(value) =>
 												setFilter((prev) => ({
 													...prev,
 													types: value ? [value as UndoActionType] : undefined,
 												}))
 											}
+											value={filter.types?.[0] || ''}
 										>
 											<SelectTrigger className="h-8">
 												<SelectValue placeholder="All types" />
@@ -483,15 +483,15 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 									</div>
 
 									<div>
-										<Label className="text-xs font-medium">Sort By</Label>
+										<Label className="font-medium text-xs">Sort By</Label>
 										<Select
-											value={sortOptions.field}
 											onValueChange={(value) =>
 												setSortOptions((prev) => ({
 													...prev,
 													field: value as any,
 												}))
 											}
+											value={sortOptions.field}
 										>
 											<SelectTrigger className="h-8">
 												<SelectValue />
@@ -511,45 +511,45 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 						<ScrollArea className="h-96">
 							<div className="space-y-2">
 								{filteredHistory.length === 0 ? (
-									<div className="text-center py-8 text-gray-500">
-										<History className="w-8 h-8 mx-auto mb-2 opacity-50" />
+									<div className="py-8 text-center text-gray-500">
+										<History className="mx-auto mb-2 h-8 w-8 opacity-50" />
 										<p>No actions in history</p>
 									</div>
 								) : (
-									filteredHistory.map((action, index) => <ActionItem key={action.id} action={action} index={index} />)
+									filteredHistory.map((action, index) => <ActionItem action={action} index={index} key={action.id} />)
 								)}
 							</div>
 						</ScrollArea>
 					</TabsContent>
 
 					{showStatistics && (
-						<TabsContent value="statistics" className="space-y-4">
+						<TabsContent className="space-y-4" value="statistics">
 							<div className="grid grid-cols-2 gap-4">
 								<Card>
 									<CardContent className="p-4">
-										<div className="text-2xl font-bold">{statistics.totalActions}</div>
-										<div className="text-sm text-gray-600">Total Actions</div>
+										<div className="font-bold text-2xl">{statistics.totalActions}</div>
+										<div className="text-gray-600 text-sm">Total Actions</div>
 									</CardContent>
 								</Card>
 
 								<Card>
 									<CardContent className="p-4">
-										<div className="text-2xl font-bold">{statistics.undoCount}</div>
-										<div className="text-sm text-gray-600">Actions Available to Undo</div>
+										<div className="font-bold text-2xl">{statistics.undoCount}</div>
+										<div className="text-gray-600 text-sm">Actions Available to Undo</div>
 									</CardContent>
 								</Card>
 
 								<Card>
 									<CardContent className="p-4">
-										<div className="text-2xl font-bold">{statistics.redoCount}</div>
-										<div className="text-sm text-gray-600">Actions Available to Redo</div>
+										<div className="font-bold text-2xl">{statistics.redoCount}</div>
+										<div className="text-gray-600 text-sm">Actions Available to Redo</div>
 									</CardContent>
 								</Card>
 
 								<Card>
 									<CardContent className="p-4">
-										<div className="text-2xl font-bold">{statistics.successRate.toFixed(1)}%</div>
-										<div className="text-sm text-gray-600">Success Rate</div>
+										<div className="font-bold text-2xl">{statistics.successRate.toFixed(1)}%</div>
+										<div className="text-gray-600 text-sm">Success Rate</div>
 									</CardContent>
 								</Card>
 							</div>
@@ -557,35 +557,35 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 							<div className="space-y-3">
 								<h4 className="font-medium">Actions by Type</h4>
 								{Object.entries(statistics.actionsByType).map(([type, count]) => (
-									<div key={type} className="flex justify-between items-center">
+									<div className="flex items-center justify-between" key={type}>
 										<span className="text-sm capitalize">{type.replace('-', ' ')}</span>
 										<Badge variant="outline">{String(count)}</Badge>
 									</div>
 								))}
 								{Object.keys(statistics.actionsByType).length === 0 && (
-									<p className="text-sm text-gray-500">No actions recorded yet</p>
+									<p className="text-gray-500 text-sm">No actions recorded yet</p>
 								)}
 							</div>
 						</TabsContent>
 					)}
 
 					{showSnapshots && (
-						<TabsContent value="snapshots" className="space-y-4">
+						<TabsContent className="space-y-4" value="snapshots">
 							<div className="space-y-3">
 								<div className="grid grid-cols-1 gap-2">
 									<Input
+										onChange={(e) => setSnapshotName(e.target.value)}
 										placeholder="Snapshot name"
 										value={snapshotName}
-										onChange={(e) => setSnapshotName(e.target.value)}
 									/>
 									<Textarea
-										placeholder="Description (optional)"
-										value={snapshotDescription}
 										onChange={(e) => setSnapshotDescription(e.target.value)}
+										placeholder="Description (optional)"
 										rows={2}
+										value={snapshotDescription}
 									/>
-									<Button onClick={handleCreateSnapshot} disabled={!snapshotName.trim()}>
-										<Camera className="w-4 h-4 mr-2" />
+									<Button disabled={!snapshotName.trim()} onClick={handleCreateSnapshot}>
+										<Camera className="mr-2 h-4 w-4" />
 										Create Snapshot
 									</Button>
 								</div>
@@ -595,29 +595,29 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 								<ScrollArea className="h-64">
 									<div className="space-y-2">
 										{snapshots.length === 0 ? (
-											<div className="text-center py-8 text-gray-500">
-												<Camera className="w-8 h-8 mx-auto mb-2 opacity-50" />
+											<div className="py-8 text-center text-gray-500">
+												<Camera className="mx-auto mb-2 h-8 w-8 opacity-50" />
 												<p>No snapshots created</p>
 											</div>
 										) : (
 											snapshots.map((snapshot: any) => (
-												<div key={snapshot.id} className="flex items-center justify-between p-3 border rounded-lg">
+												<div className="flex items-center justify-between rounded-lg border p-3" key={snapshot.id}>
 													<div className="flex-1">
 														<div className="font-medium text-sm">{snapshot.name}</div>
-														<div className="text-xs text-gray-500">
+														<div className="text-gray-500 text-xs">
 															{formatDistanceToNow(new Date(snapshot.timestamp), { addSuffix: true })}
 														</div>
 														{snapshot.description && (
-															<div className="text-xs text-gray-600 mt-1">{snapshot.description}</div>
+															<div className="mt-1 text-gray-600 text-xs">{snapshot.description}</div>
 														)}
 													</div>
 
 													<div className="flex items-center gap-1">
-														<Button variant="outline" size="sm" onClick={() => handleRestoreSnapshot(snapshot.id)}>
-															<RotateCcw className="w-3 h-3" />
+														<Button onClick={() => handleRestoreSnapshot(snapshot.id)} size="sm" variant="outline">
+															<RotateCcw className="h-3 w-3" />
 														</Button>
-														<Button variant="outline" size="sm" onClick={() => handleDeleteSnapshot(snapshot.id)}>
-															<Trash2 className="w-3 h-3" />
+														<Button onClick={() => handleDeleteSnapshot(snapshot.id)} size="sm" variant="outline">
+															<Trash2 className="h-3 w-3" />
 														</Button>
 													</div>
 												</div>
@@ -629,13 +629,13 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 						</TabsContent>
 					)}
 
-					<TabsContent value="settings" className="space-y-4">
+					<TabsContent className="space-y-4" value="settings">
 						<div className="space-y-4">
 							<div className="flex items-center justify-between">
 								<Label htmlFor="auto-cleanup">Auto Cleanup</Label>
 								<Switch
-									id="auto-cleanup"
 									checked={config.history.autoCleanup}
+									id="auto-cleanup"
 									onCheckedChange={(checked) =>
 										updateConfig({
 											history: { ...config.history, autoCleanup: checked },
@@ -647,8 +647,8 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 							<div className="flex items-center justify-between">
 								<Label htmlFor="persist-history">Persist History</Label>
 								<Switch
-									id="persist-history"
 									checked={config.history.persistHistory}
+									id="persist-history"
 									onCheckedChange={(checked) =>
 										updateConfig({
 											history: { ...config.history, persistHistory: checked },
@@ -660,8 +660,8 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 							<div className="flex items-center justify-between">
 								<Label htmlFor="validate-actions">Validate Actions</Label>
 								<Switch
-									id="validate-actions"
 									checked={config.validation.validateActions}
+									id="validate-actions"
 									onCheckedChange={(checked) =>
 										updateConfig({
 											validation: { ...config.validation, validateActions: checked },
@@ -673,16 +673,16 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 							<div className="space-y-2">
 								<Label>Max Actions ({config.history.maxActions})</Label>
 								<input
-									type="range"
-									min="10"
+									className="w-full"
 									max="500"
-									value={config.history.maxActions}
+									min="10"
 									onChange={(e) =>
 										updateConfig({
 											history: { ...config.history, maxActions: Number.parseInt(e.target.value) },
 										})
 									}
-									className="w-full"
+									type="range"
+									value={config.history.maxActions}
 								/>
 							</div>
 						</div>

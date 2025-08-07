@@ -225,7 +225,7 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 			entityType: 'video' as const,
 			isHidden: false,
 			isPublic: false,
-			statistics: statistics,
+			statistics,
 			stats: statistics,
 			thumbnailUrl: baseData.thumbnail ? `/api/videos/${baseData.id}/thumbnail` : null,
 			description: null,
@@ -335,7 +335,7 @@ export function getAllVideos(videos: Record<string, VideoWithStats>): VideoWithS
  * 📐 Calcula la relación de aspecto de un video
  */
 function calculateAspectRatio(width: number | null, height: number | null): string {
-	if (!width || !height) return 'unknown';
+	if (!(width && height)) return 'unknown';
 	const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
 	const divisor = gcd(width, height);
 	const aspectWidth = width / divisor;
@@ -355,7 +355,7 @@ function calculateAspectRatio(width: number | null, height: number | null): stri
  * 📏 Formatea la resolución del video
  */
 function formatResolution(width: number | null, height: number | null): string {
-	if (!width || !height) return 'unknown';
+	if (!(width && height)) return 'unknown';
 	return `${width}x${height}`;
 }
 
@@ -363,14 +363,14 @@ function formatResolution(width: number | null, height: number | null): string {
  * 🏆 Determina el nivel de calidad basado en resolución
  */
 function determineQualityLevel(width: number | null, height: number | null): VideoQualityLocal {
-	if (!width || !height) return VideoQualityLocal.UNKNOWN;
+	if (!(width && height)) return VideoQualityLocal.UNKNOWN;
 
 	const pixels = width * height;
 
-	if (pixels >= 8294400) return VideoQualityLocal.ULTRA; // 3840x2160 (4K)
-	if (pixels >= 2073600) return VideoQualityLocal.HIGH; // 1920x1080 (2K/FHD)
-	if (pixels >= 921600) return VideoQualityLocal.MEDIUM; // 1280x720 (HD)
-	if (pixels >= 307200) return VideoQualityLocal.MEDIUM; // 640x480 (SD)
+	if (pixels >= 8_294_400) return VideoQualityLocal.ULTRA; // 3840x2160 (4K)
+	if (pixels >= 2_073_600) return VideoQualityLocal.HIGH; // 1920x1080 (2K/FHD)
+	if (pixels >= 921_600) return VideoQualityLocal.MEDIUM; // 1280x720 (HD)
+	if (pixels >= 307_200) return VideoQualityLocal.MEDIUM; // 640x480 (SD)
 
 	return VideoQualityLocal.LOW;
 }
@@ -391,13 +391,13 @@ function calculateQualityScore(params: {
 
 	// Resolución (40 puntos máximo)
 	const pixels = (params.width || 0) * (params.height || 0);
-	if (pixels >= 8294400)
+	if (pixels >= 8_294_400)
 		score += 40; // 4K
-	else if (pixels >= 2073600)
+	else if (pixels >= 2_073_600)
 		score += 35; // 2K
-	else if (pixels >= 921600)
+	else if (pixels >= 921_600)
 		score += 30; // HD
-	else if (pixels >= 307200)
+	else if (pixels >= 307_200)
 		score += 20; // SD
 	else score += 10; // Low
 

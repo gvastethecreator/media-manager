@@ -32,19 +32,20 @@ export function ShineBorder({
 }: ShineBorderProps) {
 	return (
 		<div
+			className={cn(
+				'relative w-full rounded-(--border-radius) p-(--border-width) transition-all',
+				'border border-transparent',
+				className
+			)}
 			style={
 				{
 					'--border-width': `${borderWidth}px`,
 					'--border-radius': `${borderRadius}px`,
 				} as React.CSSProperties
 			}
-			className={cn(
-				'relative w-full rounded-(--border-radius) p-(--border-width) transition-all',
-				'border border-transparent',
-				className
-			)}
 		>
 			<div
+				className="pointer-events-none relative h-full w-full overflow-hidden rounded-(--border-radius) before:absolute before:inset-0 before:size-full before:rounded-(--border-radius) before:bg-shine-size before:p-(--border-width) before:will-change-[background-position] before:content-[''] motion-safe:before:animate-shine before:[-webkit-mask-composite:xor]! before:[background-image:var(--background-radial-gradient)] before:[background-size:300%_300%] before:[mask-composite:exclude]! before:[mask:var(--mask-linear-gradient)]"
 				style={
 					{
 						'--mask-width': `${borderWidth}px`,
@@ -54,7 +55,6 @@ export function ShineBorder({
 						'--background-radial-gradient': `radial-gradient(transparent,transparent, ${Array.isArray(color) ? color.join(',') : color},transparent,transparent)`,
 					} as React.CSSProperties
 				}
-				className="relative h-full w-full rounded-(--border-radius) overflow-hidden pointer-events-none before:bg-shine-size before:absolute before:inset-0 before:size-full before:rounded-(--border-radius) before:p-(--border-width) before:will-change-[background-position] before:content-[''] before:[-webkit-mask-composite:xor]! before:[mask-composite:exclude]! before:[background-image:var(--background-radial-gradient)] before:[background-size:300%_300%] before:[mask:var(--mask-linear-gradient)] motion-safe:before:animate-shine"
 			/>
 			<div className="absolute inset-0 rounded-(--border-radius) p-(--border-width)">
 				<div className="h-full w-full rounded-(--border-radius)">{children}</div>

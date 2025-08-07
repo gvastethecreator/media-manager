@@ -21,7 +21,7 @@ export const NavCategoryWithChildren = memo(function NavCategoryWithChildren({
 }) {
 	return (
 		<div key={id}>
-			<div className="flex items-center gap-2 mb-1">
+			<div className="mb-1 flex items-center gap-2">
 				<Icon className="h-4 w-4" style={{ color }} />
 				<span className="font-semibold text-xs" style={{ color }}>
 					{label}
