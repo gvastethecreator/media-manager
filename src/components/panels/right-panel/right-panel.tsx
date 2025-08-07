@@ -29,7 +29,7 @@ const LazyStatsPanel = memo(function LazyStatsPanel({ folderId }: { folderId?: s
 
 	if (!shouldRender) {
 		return (
-			<div className="flex items-center justify-center w-full h-full">
+			<div className="flex h-full w-full items-center justify-center">
 				<div className="animate-pulse p-4 text-muted-foreground text-sm">Inicializando estadísticas...</div>
 			</div>
 		);
@@ -90,7 +90,7 @@ export const RightPanel = memo(function RightPanel({ isCollapsed, isAnimating = 
 	// Determina si debemos mostrar el panel - siempre mostrar en views con contenido
 	const shouldShowPanel = !isInSettingsView && (isVisible || hasSelectedItems || showStatsWhenEmpty);
 	// Determina si debemos mostrar las estadísticas - mostrar cuando no hay items seleccionados
-	const shouldShowStats = !isInSettingsView && !hasSelectedItems;
+	const shouldShowStats = !(isInSettingsView || hasSelectedItems);
 
 	// Al montar el componente, marcamos que estamos listos para renderizar
 	useEffect(() => {
@@ -115,13 +115,13 @@ export const RightPanel = memo(function RightPanel({ isCollapsed, isAnimating = 
 	return (
 		<div
 			className={cn(
-				'flex flex-col h-full bg-background',
+				'flex h-full flex-col bg-background',
 				isAnimating && 'transition-all duration-300',
 				isCollapsed && 'right-panel-collapsed'
 			)}
 		>
-			<div className="flex items-center justify-between p-2 border-b">
-				<h3 className="text-sm font-medium">{panelTitle}</h3>
+			<div className="flex items-center justify-between border-b p-2">
+				<h3 className="font-medium text-sm">{panelTitle}</h3>
 			</div>
 
 			{!isCollapsed &&

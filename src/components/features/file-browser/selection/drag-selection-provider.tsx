@@ -222,11 +222,11 @@ export const DragSelectionProvider: React.FC<DragSelectionProviderProps> = ({
 			{children}
 			{!disabled && (
 				<SelectionOverlay
-					dragSelectionManager={dragSelectionManager}
-					showCount={mergedOverlayConfig.showCount}
-					showCoordinates={mergedOverlayConfig.showCoordinates}
-					theme={mergedOverlayConfig.theme}
 					animation={mergedOverlayConfig.animation}
+					dragSelectionManager={dragSelectionManager}
+					showCoordinates={mergedOverlayConfig.showCoordinates}
+					showCount={mergedOverlayConfig.showCount}
+					theme={mergedOverlayConfig.theme}
 				/>
 			)}
 		</DragSelectionContext.Provider>

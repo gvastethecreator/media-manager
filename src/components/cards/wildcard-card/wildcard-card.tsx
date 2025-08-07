@@ -79,36 +79,36 @@ export function WildcardCard({ wildcard, onClick, className, showBadges = true }
 		>
 			{/* Encabezado */}
 			<CardHeader
-				title={wildcard.name}
-				subtitle={wildcard.category || 'General'}
 				icon={wildcard.emoji ? <span className="text-lg">{wildcard.emoji}</span> : <Shuffle className="h-4 w-4" />}
 				primaryColor={primaryColor}
+				subtitle={wildcard.category || 'General'}
+				title={wildcard.name}
 			/>
 
 			{/* Contenido */}
-			<div className="flex-1 p-3 flex flex-col">
+			<div className="flex flex-1 flex-col p-3">
 				{/* Descripción */}
 				{wildcard.description && (
-					<p className="text-sm line-clamp-2 mb-2 text-muted-foreground">{wildcard.description}</p>
+					<p className="mb-2 line-clamp-2 text-muted-foreground text-sm">{wildcard.description}</p>
 				)}
 
 				{/* Estadísticas */}
 				{showBadges && (
 					<div className="mt-auto flex flex-wrap gap-1">
 						{totalMedia > 0 && (
-							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
+							<Badge className="text-xs" style={{ borderColor: `${primaryColor}50` }} variant="outline">
 								{totalMedia} archivos
 							</Badge>
 						)}
 
 						{childCount > 0 && (
-							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
+							<Badge className="text-xs" style={{ borderColor: `${primaryColor}50` }} variant="outline">
 								{childCount} variantes
 							</Badge>
 						)}
 
 						{Array.isArray(children) && children.length > 0 && (
-							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
+							<Badge className="text-xs" style={{ borderColor: `${primaryColor}50` }} variant="outline">
 								{children.length} opciones
 							</Badge>
 						)}
@@ -122,9 +122,9 @@ export function WildcardCard({ wildcard, onClick, className, showBadges = true }
 	if (onClick) {
 		return (
 			<button
+				className={cn('m-0 w-full cursor-pointer p-0 text-left', className)}
 				onClick={handleClick}
 				onKeyDown={handleKeyDown}
-				className={cn('cursor-pointer text-left p-0 m-0 w-full', className)}
 				type="button"
 			>
 				{cardContent}
@@ -134,7 +134,7 @@ export function WildcardCard({ wildcard, onClick, className, showBadges = true }
 
 	// Si no hay onClick, lo envolvemos en un Link para navegar a la página del comodín
 	return (
-		<Link to={`/dashboard/wildcards/${wildcard.id}`} className="block">
+		<Link className="block" to={`/dashboard/wildcards/${wildcard.id}`}>
 			{cardContent}
 		</Link>
 	);

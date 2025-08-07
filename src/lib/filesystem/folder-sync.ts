@@ -334,7 +334,7 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 						id: folder.id,
 						name: folder.name,
 						path: folder.path,
-						parentId: parentId,
+						parentId,
 						totalFiles: 0,
 						totalSize: 0,
 						lastIndexed: new Date(),

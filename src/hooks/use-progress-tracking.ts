@@ -235,7 +235,7 @@ export function useProgressTracking(options: UseProgressTrackingOptions = {}): U
 
 	// Set up event listeners
 	useEffect(() => {
-		if (!options.trackAll && !options.operationTypes) {
+		if (!(options.trackAll || options.operationTypes)) {
 			return;
 		}
 

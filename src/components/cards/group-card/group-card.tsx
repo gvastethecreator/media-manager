@@ -109,7 +109,7 @@ export function GroupCard({
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
 					className
 				)}
 			>
@@ -122,7 +122,7 @@ export function GroupCard({
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
 					className
 				)}
 			>
@@ -135,8 +135,8 @@ export function GroupCard({
 	const cardContent = (
 		<div
 			className={cn(
-				'relative rounded-lg overflow-hidden bg-card text-card-foreground shadow-sm transition-all',
-				isHovered && !disabled && 'shadow-md scale-[1.01]',
+				'relative overflow-hidden rounded-lg bg-card text-card-foreground shadow-sm transition-all',
+				isHovered && !disabled && 'scale-[1.01] shadow-md',
 				disabled && 'opacity-70',
 				isSelected && 'ring-2',
 				className
@@ -152,65 +152,64 @@ export function GroupCard({
 		>
 			{/* Encabezado */}
 			<GroupCardHeader
-				name={group.name}
-				emoji={group.emoji || ''}
-				color={primaryColor}
 				category={group.category || undefined}
-				organizationType={group.organizationType || ''}
-				organizationLevel={Number(group.organizationLevel) || 1}
-				isFavorite={group.isFavorite || false}
-				tcgMode={tcgMode}
+				color={primaryColor}
 				compact={compact}
+				emoji={group.emoji || ''}
+				isFavorite={group.isFavorite}
+				name={group.name}
+				organizationLevel={Number(group.organizationLevel) || 1}
+				organizationType={group.organizationType || ''}
+				tcgMode={tcgMode}
 			/>
 
 			{/* Imágenes */}
 			<GroupCardImages
-				images={group.recentImages || []}
-				videos={group.recentVideos || []}
+				compact={compact}
 				emoji={group.emoji || ''}
+				holographicEffect={isHovered}
+				images={group.recentImages || []}
 				primaryColor={primaryColor}
 				rarityLevel={Number(group.rarityLevel) || 1}
-				holographicEffect={isHovered}
 				tcgMode={tcgMode}
-				compact={compact}
+				videos={group.recentVideos || []}
 			/>
 
 			{/* Contenido */}
 			<GroupCardContent
-				description={group.description || undefined}
 				category={group.category || undefined}
-				organizationType={group.organizationType || ''}
-				flexibilityScore={group.flexibilityScore || 0}
-				filtersCount={filtersCount}
+				compact={compact}
+				description={group.description || undefined}
 				entityCounts={entityCounts}
+				filtersCount={filtersCount}
+				flexibilityScore={group.flexibilityScore || 0}
+				organizationType={group.organizationType || ''}
 				primaryColor={primaryColor}
 				tcgMode={tcgMode}
-				compact={compact}
 			/>
 
 			{/* Pie */}
 			<GroupCardFooter
-				id={group.id}
-				name={group.name}
-				isFavorite={group.isFavorite || false}
+				cardId={group.cardId || ''}
 				category={group.category || undefined}
+				compact={compact}
+				hp={group.hp || 0}
+				id={group.id}
+				imagesCount={group.stats.imageCount}
+				isFavorite={group.isFavorite}
+				mp={group.mp || 0}
+				name={group.name}
 				organizationType={group.organizationType || ''}
 				power={group.power || 0}
-				rarityLevel={Number(group.rarityLevel) || 1}
-				hp={group.hp || 0}
-				mp={group.mp || 0}
 				primaryColor={primaryColor}
-				cardId={group.cardId || ''}
+				rarityLevel={Number(group.rarityLevel) || 1}
 				tcgMode={tcgMode}
-				compact={compact}
-				imagesCount={group.stats.imageCount}
 				videosCount={group.stats.videoCount}
 			/>
 
 			{/* Efecto holográfico general en modo TCG */}
 			{tcgMode && isHovered && !disabled && (
 				<motion.div
-					className="absolute inset-0 pointer-events-none z-50 opacity-30 mix-blend-overlay"
 					animate={{
 						opacity: [0.1, 0.2, 0.1],
 						background: [
@@ -219,6 +218,7 @@ export function GroupCard({
 							`linear-gradient(45deg, ${primaryColor}50, transparent)`,
 						],
 					}}
+					className="pointer-events-none absolute inset-0 z-50 opacity-30 mix-blend-overlay"
 					transition={{
 						duration: 2,
 						repeat: Number.POSITIVE_INFINITY,
@@ -233,18 +233,18 @@ export function GroupCard({
 	if (onClick) {
 		return (
 			<button
+				aria-pressed={isSelected}
+				className={cn(
+					'm-0 w-full cursor-pointer border-0 bg-transparent p-0 text-left focus:outline-none focus:ring-2 focus:ring-offset-2',
+					!disabled && 'hover:opacity-100',
+					disabled && 'cursor-not-allowed'
+				)}
+				disabled={disabled}
 				onClick={handleClick}
 				onKeyDown={handleKeyDown}
 				onMouseEnter={() => setIsHovered(true)}
 				onMouseLeave={() => setIsHovered(false)}
-				className={cn(
-					'cursor-pointer text-left p-0 m-0 w-full border-0 bg-transparent focus:outline-none focus:ring-2 focus:ring-offset-2',
-					!disabled && 'hover:opacity-100',
-					disabled && 'cursor-not-allowed'
-				)}
 				type="button"
-				disabled={disabled}
-				aria-pressed={isSelected}
 			>
 				{cardContent}
 			</button>
@@ -254,10 +254,10 @@ export function GroupCard({
 	// Si no hay onClick, lo envolvemos en un Link para navegar a la página del grupo
 	return (
 		<Link
-			to={`/dashboard/groups/${group.id}`}
 			className="block"
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
+			to={`/dashboard/groups/${group.id}`}
 		>
 			{cardContent}
 		</Link>

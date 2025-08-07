@@ -161,33 +161,33 @@ export const EmojiPicker = memo(function EmojiPicker({ value, onChange, classNam
 	);
 
 	return (
-		<Popover open={open} onOpenChange={setOpen}>
+		<Popover onOpenChange={setOpen} open={open}>
 			<PopoverTrigger asChild>
-				<Button variant="outline" type="button" className={cn('w-24 justify-center', className)}>
+				<Button className={cn('w-24 justify-center', className)} type="button" variant="outline">
 					<span className="text-lg">{value || '😀'}</span>
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-80 p-0" align="start">
-				<Tabs value={activeTab} onValueChange={setActiveTab}>
+			<PopoverContent align="start" className="w-80 p-0">
+				<Tabs onValueChange={setActiveTab} value={activeTab}>
 					{/* 🎨 Navegación por categorías */}
 					<div className="border-b px-3">
 						<TabsList className="h-11 w-full">
-							<TabsTrigger value="activities" className="text-lg" title="Actividades">
+							<TabsTrigger className="text-lg" title="Actividades" value="activities">
 								🎨
 							</TabsTrigger>
-							<TabsTrigger value="faces" className="text-lg" title="Caras">
+							<TabsTrigger className="text-lg" title="Caras" value="faces">
 								😀
 							</TabsTrigger>
-							<TabsTrigger value="nature" className="text-lg" title="Naturaleza">
+							<TabsTrigger className="text-lg" title="Naturaleza" value="nature">
 								🌟
 							</TabsTrigger>
-							<TabsTrigger value="food" className="text-lg" title="Comida">
+							<TabsTrigger className="text-lg" title="Comida" value="food">
 								🍎
 							</TabsTrigger>
-							<TabsTrigger value="objects" className="text-lg" title="Objetos">
+							<TabsTrigger className="text-lg" title="Objetos" value="objects">
 								📱
 							</TabsTrigger>
-							<TabsTrigger value="symbols" className="text-lg" title="Símbolos">
+							<TabsTrigger className="text-lg" title="Símbolos" value="symbols">
 								❤️
 							</TabsTrigger>
 						</TabsList>
@@ -196,17 +196,17 @@ export const EmojiPicker = memo(function EmojiPicker({ value, onChange, classNam
 					{/* 📱 Contenido de cada categoría */}
 					<ScrollArea className="h-72">
 						{Object.entries(emojisByCategory).map(([category, emojis]) => (
-							<TabsContent key={category} value={category} className="m-0">
+							<TabsContent className="m-0" key={category} value={category}>
 								<div className="grid grid-cols-8 gap-2 p-4">
 									{emojis.map((emoji) => (
 										<Button
-											key={emoji}
-											variant="ghost"
 											className={cn(
 												'h-9 w-9 p-0 text-lg hover:bg-accent',
 												value === emoji && 'bg-accent text-accent-foreground'
 											)}
+											key={emoji}
 											onClick={() => handleEmojiSelect(emoji)}
+											variant="ghost"
 										>
 											{emoji}
 										</Button>

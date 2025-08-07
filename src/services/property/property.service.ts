@@ -296,7 +296,7 @@ export async function createProperty(data: PropertyCreateInput): Promise<Propert
 				category: data.category || null,
 				shortcut: data.shortcut || null,
 				featuredImage: data.featuredImage || null,
-				isFavorite: data.isFavorite || false,
+				isFavorite: data.isFavorite,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			})

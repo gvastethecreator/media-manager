@@ -161,14 +161,14 @@ export function getActivityCategory(type: string): string {
  * @returns Objeto de metadatos o undefined
  */
 export function parseActivityMetadata(metadata: string | object | undefined): ActivityMetadata | undefined {
-	if (!metadata) return undefined;
+	if (!metadata) return;
 
 	if (typeof metadata === 'string') {
 		try {
 			return JSON.parse(metadata) as ActivityMetadata;
 		} catch (error) {
 			console.error('Error parsing activity metadata', error);
-			return undefined;
+			return;
 		}
 	}
 
@@ -181,13 +181,13 @@ export function parseActivityMetadata(metadata: string | object | undefined): Ac
  * @returns String serializado o undefined
  */
 export function serializeActivityMetadata(metadata?: ActivityMetadata): string | undefined {
-	if (!metadata) return undefined;
+	if (!metadata) return;
 
 	try {
 		return JSON.stringify(metadata);
 	} catch (error) {
 		console.error('Error serializing activity metadata', error);
-		return undefined;
+		return;
 	}
 }
 

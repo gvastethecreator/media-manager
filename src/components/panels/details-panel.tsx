@@ -36,7 +36,6 @@ import {
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/format';
@@ -216,7 +215,9 @@ const getRelatedEntities = (item: AnyEntityWithStats) => {
 };
 
 // Función para obtener metadatos detallados usando el nuevo sistema de extracción
-const getEnhancedMetadata = async (item: AnyEntityWithStats): Promise<Array<{ key: string; value: string; category?: string }>> => {
+const getEnhancedMetadata = async (
+	item: AnyEntityWithStats
+): Promise<Array<{ key: string; value: string; category?: string }>> => {
 	// Solo procesar imágenes por ahora
 	if (item.entityType !== 'image') {
 		return [];
@@ -286,51 +287,67 @@ const getEnhancedMetadata = async (item: AnyEntityWithStats): Promise<Array<{ ke
 			// Información del engine
 			if (result.metadata.origin?.engine) {
 				const engineNames: Record<string, string> = {
-					'automatic1111': 'Automatic1111',
-					'forge': 'Forge',
-					'comfyui': 'ComfyUI',
-					'swarmui': 'SwarmUI',
-					'midjourney': 'Midjourney',
-					'invokeai': 'InvokeAI',
-					'novelai': 'NovelAI',
-					'ideogram': 'Ideogram',
-					'stability_ai': 'Stability AI',
-					'dalle': 'DALL·E',
-					'unknown': 'Desconocido'
+					automatic1111: 'Automatic1111',
+					forge: 'Forge',
+					comfyui: 'ComfyUI',
+					swarmui: 'SwarmUI',
+					midjourney: 'Midjourney',
+					invokeai: 'InvokeAI',
+					novelai: 'NovelAI',
+					ideogram: 'Ideogram',
+					stability_ai: 'Stability AI',
+					dalle: 'DALL·E',
+					unknown: 'Desconocido',
 				};
 				const engineName = engineNames[result.metadata.origin.engine] || result.metadata.origin.engine;
-				const confidence = result.metadata.origin.confidence ?
-					` (${Math.round(result.metadata.origin.confidence * 100)}%)` : '';
+				const confidence = result.metadata.origin.confidence
+					? ` (${Math.round(result.metadata.origin.confidence * 100)}%)`
+					: '';
 				metadata.push({
 					key: 'Engine IA',
 					value: `${engineName}${confidence}`,
-					category: 'ia'
+					category: 'ia',
 				});
 			}
 
 			// Parámetros de generación
 			if (ai.prompt) {
-				const promptText = ai.prompt.length > 150 ?
-					`${ai.prompt.substring(0, 150)}...` : ai.prompt;
+				const promptText = ai.prompt.length > 150 ? `${ai.prompt.substring(0, 150)}...` : ai.prompt;
 				metadata.push({ key: 'Prompt', value: promptText, category: 'ia' });
 			}
 
 			if (ai.negativePrompt) {
-				const negPromptText = ai.negativePrompt.length > 100 ?
-					`${ai.negativePrompt.substring(0, 100)}...` : ai.negativePrompt;
+				const negPromptText =
+					ai.negativePrompt.length > 100 ? `${ai.negativePrompt.substring(0, 100)}...` : ai.negativePrompt;
 				metadata.push({ key: 'Prompt Negativo', value: negPromptText, category: 'ia' });
 			}
 
-			if (ai.model) metadata.push({ key: 'Modelo', value: ai.model, category: 'ia' });
-			if (ai.steps) metadata.push({ key: 'Pasos', value: ai.steps.toString(), category: 'ia' });
-			if (ai.cfgScale) metadata.push({ key: 'CFG Scale', value: ai.cfgScale.toString(), category: 'ia' });
-			if (ai.seed) metadata.push({ key: 'Seed', value: ai.seed.toString(), category: 'ia' });
-			if (ai.sampler) metadata.push({ key: 'Sampler', value: ai.sampler, category: 'ia' });
-			if (ai.scheduler) metadata.push({ key: 'Scheduler', value: ai.scheduler, category: 'ia' });
+			if (ai.model) {
+				metadata.push({ key: 'Modelo', value: ai.model, category: 'ia' });
+			}
+			if (ai.steps) {
+				metadata.push({ key: 'Pasos', value: ai.steps.toString(), category: 'ia' });
+			}
+			if (ai.cfgScale) {
+				metadata.push({ key: 'CFG Scale', value: ai.cfgScale.toString(), category: 'ia' });
+			}
+			if (ai.seed) {
+				metadata.push({ key: 'Seed', value: ai.seed.toString(), category: 'ia' });
+			}
+			if (ai.sampler) {
+				metadata.push({ key: 'Sampler', value: ai.sampler, category: 'ia' });
+			}
+			if (ai.scheduler) {
+				metadata.push({ key: 'Scheduler', value: ai.scheduler, category: 'ia' });
+			}
 
 			// ComfyUI específicos
-			if (ai.workflowId) metadata.push({ key: 'Workflow ID', value: ai.workflowId, category: 'ia' });
-			if (ai.nodeCount) metadata.push({ key: 'Nodos', value: ai.nodeCount.toString(), category: 'ia' });
+			if (ai.workflowId) {
+				metadata.push({ key: 'Workflow ID', value: ai.workflowId, category: 'ia' });
+			}
+			if (ai.nodeCount) {
+				metadata.push({ key: 'Nodos', value: ai.nodeCount.toString(), category: 'ia' });
+			}
 		}
 
 		// Procesar metadatos EXIF
@@ -378,7 +395,10 @@ const getEnhancedMetadata = async (item: AnyEntityWithStats): Promise<Array<{ ke
 };
 
 // Función para obtener metadatos detallados
-const getDetailedMetadata = (item: AnyEntityWithStats, enhancedMetadata: Array<{ key: string; value: string; category?: string }>) => {
+const getDetailedMetadata = (
+	item: AnyEntityWithStats,
+	enhancedMetadata: Array<{ key: string; value: string; category?: string }>
+) => {
 	// Si tenemos metadatos mejorados, devolverlos directamente
 	if (enhancedMetadata.length > 0) {
 		console.log('📊 Usando metadatos mejorados:', enhancedMetadata.length, 'campos');
@@ -397,7 +417,7 @@ const getDetailedMetadata = (item: AnyEntityWithStats, enhancedMetadata: Array<{
 	// Metadatos específicos de imágenes
 	if (item.entityType === 'image') {
 		// Agregar metadatos sintéticos para testing si no hay otros disponibles
-		if (!('metadata' in item) || !item.metadata) {
+		if (!('metadata' in item && item.metadata)) {
 			// Metadatos básicos sintéticos para asegurar que siempre haya contenido
 			metadata.push({ key: 'Formato', value: 'JPEG', category: 'técnico' });
 			metadata.push({ key: 'Compresión', value: 'JPEG', category: 'técnico' });
@@ -432,46 +452,49 @@ const getDetailedMetadata = (item: AnyEntityWithStats, enhancedMetadata: Array<{
 					// Engine/Origen detectado
 					if (parsedMetadata.origin?.engine) {
 						const engineNames: Record<string, string> = {
-							'automatic1111': 'Automatic1111',
-							'forge': 'Forge',
-							'comfyui': 'ComfyUI',
-							'swarmui': 'SwarmUI',
-							'midjourney': 'Midjourney',
-							'invokeai': 'InvokeAI',
-							'novelai': 'NovelAI',
-							'ideogram': 'Ideogram',
-							'stability_ai': 'Stability AI',
-							'dalle': 'DALL·E',
-							'unknown': 'Desconocido'
+							automatic1111: 'Automatic1111',
+							forge: 'Forge',
+							comfyui: 'ComfyUI',
+							swarmui: 'SwarmUI',
+							midjourney: 'Midjourney',
+							invokeai: 'InvokeAI',
+							novelai: 'NovelAI',
+							ideogram: 'Ideogram',
+							stability_ai: 'Stability AI',
+							dalle: 'DALL·E',
+							unknown: 'Desconocido',
 						};
 						const engineName = engineNames[parsedMetadata.origin.engine] || parsedMetadata.origin.engine;
-						const confidence = parsedMetadata.origin.confidence ? ` (${Math.round(parsedMetadata.origin.confidence * 100)}%)` : '';
+						const confidence = parsedMetadata.origin.confidence
+							? ` (${Math.round(parsedMetadata.origin.confidence * 100)}%)`
+							: '';
 						metadata.push({
 							key: 'Engine IA',
 							value: `${engineName}${confidence}`,
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 
 					// Prompt positivo
 					if (aiData.prompt) {
-						const promptText = aiData.prompt.length > 150 ?
-							`${aiData.prompt.substring(0, 150)}...` : aiData.prompt;
+						const promptText = aiData.prompt.length > 150 ? `${aiData.prompt.substring(0, 150)}...` : aiData.prompt;
 						metadata.push({
 							key: 'Prompt',
 							value: promptText,
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 
 					// Prompt negativo
 					if (aiData.negative_prompt) {
-						const negPromptText = aiData.negative_prompt.length > 100 ?
-							`${aiData.negative_prompt.substring(0, 100)}...` : aiData.negative_prompt;
+						const negPromptText =
+							aiData.negative_prompt.length > 100
+								? `${aiData.negative_prompt.substring(0, 100)}...`
+								: aiData.negative_prompt;
 						metadata.push({
 							key: 'Prompt Negativo',
 							value: negPromptText,
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 
@@ -480,42 +503,42 @@ const getDetailedMetadata = (item: AnyEntityWithStats, enhancedMetadata: Array<{
 						metadata.push({
 							key: 'Modelo',
 							value: aiData.model || aiData.checkpoint,
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 					if (aiData.steps) {
 						metadata.push({
 							key: 'Pasos',
 							value: aiData.steps.toString(),
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 					if (aiData.cfg_scale || aiData.cfg) {
 						metadata.push({
 							key: 'CFG Scale',
 							value: (aiData.cfg_scale || aiData.cfg).toString(),
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 					if (aiData.seed) {
 						metadata.push({
 							key: 'Seed',
 							value: aiData.seed.toString(),
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 					if (aiData.sampler) {
 						metadata.push({
 							key: 'Sampler',
 							value: aiData.sampler,
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 					if (aiData.scheduler) {
 						metadata.push({
 							key: 'Scheduler',
 							value: aiData.scheduler,
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 
@@ -524,14 +547,14 @@ const getDetailedMetadata = (item: AnyEntityWithStats, enhancedMetadata: Array<{
 						metadata.push({
 							key: 'Clip Skip',
 							value: aiData.clip_skip.toString(),
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 					if (aiData.denoise) {
 						metadata.push({
 							key: 'Denoising',
 							value: aiData.denoise.toString(),
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 
@@ -540,21 +563,21 @@ const getDetailedMetadata = (item: AnyEntityWithStats, enhancedMetadata: Array<{
 						metadata.push({
 							key: 'Restore Faces',
 							value: 'Sí',
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 					if (aiData.hires_upscaler) {
 						metadata.push({
 							key: 'Hires Upscaler',
 							value: aiData.hires_upscaler,
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 					if (aiData.forge_attention) {
 						metadata.push({
 							key: 'Forge Attention',
 							value: aiData.forge_attention,
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 
@@ -563,14 +586,14 @@ const getDetailedMetadata = (item: AnyEntityWithStats, enhancedMetadata: Array<{
 						metadata.push({
 							key: 'Tiempo Generación',
 							value: `${aiData.generation_time}s`,
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 					if (aiData.prep_time) {
 						metadata.push({
 							key: 'Tiempo Preparación',
 							value: `${aiData.prep_time}s`,
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 
@@ -579,35 +602,35 @@ const getDetailedMetadata = (item: AnyEntityWithStats, enhancedMetadata: Array<{
 						metadata.push({
 							key: 'Job ID',
 							value: aiData.job_id,
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 					if (aiData.chaos) {
 						metadata.push({
 							key: 'Chaos',
 							value: aiData.chaos.toString(),
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 					if (aiData.stylize) {
 						metadata.push({
 							key: 'Stylize',
 							value: aiData.stylize.toString(),
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 					if (aiData.quality) {
 						metadata.push({
 							key: 'Quality',
 							value: aiData.quality.toString(),
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 					if (aiData.version) {
 						metadata.push({
 							key: 'Versión',
 							value: aiData.version,
-							category: 'ia'
+							category: 'ia',
 						});
 					}
 				}
@@ -626,18 +649,23 @@ const getDetailedMetadata = (item: AnyEntityWithStats, enhancedMetadata: Array<{
 					if (exif.iso) metadata.push({ key: 'ISO', value: exif.iso.toString(), category: 'exif' });
 					if (exif.fNumber) metadata.push({ key: 'Apertura', value: `f/${exif.fNumber}`, category: 'exif' });
 					if (exif.exposureTime) metadata.push({ key: 'Velocidad', value: exif.exposureTime, category: 'exif' });
-					if (exif.focalLength) metadata.push({ key: 'Distancia focal', value: `${exif.focalLength}mm`, category: 'exif' });
+					if (exif.focalLength)
+						metadata.push({ key: 'Distancia focal', value: `${exif.focalLength}mm`, category: 'exif' });
 
 					// Fecha y hora
-					if (exif.dateTimeOriginal) metadata.push({ key: 'Fecha captura', value: exif.dateTimeOriginal, category: 'exif' });
+					if (exif.dateTimeOriginal)
+						metadata.push({ key: 'Fecha captura', value: exif.dateTimeOriginal, category: 'exif' });
 					if (exif.dateTime) metadata.push({ key: 'Fecha modificación', value: exif.dateTime, category: 'exif' });
 
 					// Información técnica
-					if (exif.software && !parsedMetadata.ai_metadata) { // Solo mostrar si no hay metadatos IA
+					if (exif.software && !parsedMetadata.ai_metadata) {
+						// Solo mostrar si no hay metadatos IA
 						metadata.push({ key: 'Software', value: exif.software, category: 'exif' });
 					}
-					if (exif.colorSpace) metadata.push({ key: 'Espacio color', value: exif.colorSpace.toString(), category: 'exif' });
-					if (exif.whiteBalance) metadata.push({ key: 'Balance blancos', value: exif.whiteBalance.toString(), category: 'exif' });
+					if (exif.colorSpace)
+						metadata.push({ key: 'Espacio color', value: exif.colorSpace.toString(), category: 'exif' });
+					if (exif.whiteBalance)
+						metadata.push({ key: 'Balance blancos', value: exif.whiteBalance.toString(), category: 'exif' });
 					if (exif.flash) metadata.push({ key: 'Flash', value: exif.flash.toString(), category: 'exif' });
 
 					// GPS
@@ -645,7 +673,7 @@ const getDetailedMetadata = (item: AnyEntityWithStats, enhancedMetadata: Array<{
 						metadata.push({
 							key: 'Coordenadas GPS',
 							value: `${exif.gps.latitude}, ${exif.gps.longitude}`,
-							category: 'exif'
+							category: 'exif',
 						});
 					}
 				}
@@ -659,7 +687,7 @@ const getDetailedMetadata = (item: AnyEntityWithStats, enhancedMetadata: Array<{
 						metadata.push({
 							key: 'Palabras clave',
 							value: iptc.keywords.join(', '),
-							category: 'iptc'
+							category: 'iptc',
 						});
 					}
 					if (iptc.copyright) metadata.push({ key: 'Copyright', value: iptc.copyright, category: 'iptc' });
@@ -684,26 +712,30 @@ const getDetailedMetadata = (item: AnyEntityWithStats, enhancedMetadata: Array<{
 
 				// === Metadatos técnicos básicos ===
 				if (parsedMetadata.format) metadata.push({ key: 'Formato', value: parsedMetadata.format, category: 'técnico' });
-				if (parsedMetadata.compression) metadata.push({ key: 'Compresión', value: parsedMetadata.compression, category: 'técnico' });
-				if (parsedMetadata.bitDepth) metadata.push({ key: 'Profundidad bits', value: `${parsedMetadata.bitDepth} bits`, category: 'técnico' });
-				if (parsedMetadata.channels) metadata.push({ key: 'Canales', value: parsedMetadata.channels.toString(), category: 'técnico' });
-				if (parsedMetadata.profileDescription) metadata.push({ key: 'Perfil ICC', value: parsedMetadata.profileDescription, category: 'técnico' });
+				if (parsedMetadata.compression)
+					metadata.push({ key: 'Compresión', value: parsedMetadata.compression, category: 'técnico' });
+				if (parsedMetadata.bitDepth)
+					metadata.push({ key: 'Profundidad bits', value: `${parsedMetadata.bitDepth} bits`, category: 'técnico' });
+				if (parsedMetadata.channels)
+					metadata.push({ key: 'Canales', value: parsedMetadata.channels.toString(), category: 'técnico' });
+				if (parsedMetadata.profileDescription)
+					metadata.push({ key: 'Perfil ICC', value: parsedMetadata.profileDescription, category: 'técnico' });
 
 				console.log('📊 Metadatos legacy procesados:', metadata.length, 'campos');
-
 			} catch (error) {
 				// Agregar error de parsing como metadato para debug
 				metadata.push({
 					key: 'Error parsing',
 					value: `No se pudieron parsear los metadatos: ${error}`,
-					category: 'error'
+					category: 'error',
 				});
 				console.error('❌ Error procesando metadatos legacy:', error);
 			}
 		}
 
 		// Si después de todo no tenemos metadatos suficientes, agregar sintéticos
-		if (metadata.length <= 1) { // Solo hash
+		if (metadata.length <= 1) {
+			// Solo hash
 			metadata.push({ key: 'Estado', value: 'Metadatos no disponibles', category: 'ia' });
 			metadata.push({ key: 'Cámara', value: 'Información no disponible', category: 'exif' });
 			metadata.push({ key: 'Descripción', value: 'No disponible', category: 'iptc' });
@@ -729,7 +761,7 @@ const exportToCSV = (metadata: Array<{ key: string; value: string; category?: st
 			const escapedKey = `"${key.replace(/"/g, '""')}"`;
 			const escapedCategory = `"${category.replace(/"/g, '""')}"`;
 			return `${escapedCategory},${escapedKey},${escapedValue}`;
-		})
+		}),
 	].join('\n');
 
 	// Crear y descargar archivo
@@ -745,19 +777,22 @@ const exportToJSON = (metadata: Array<{ key: string; value: string; category?: s
 	if (metadata.length === 0) return;
 
 	// Agrupar por categoría para mejor estructura JSON
-	const groupedMetadata = metadata.reduce((acc, item) => {
-		const category = item.category || 'general';
-		if (!acc[category]) acc[category] = {};
-		acc[category][item.key] = item.value;
-		return acc;
-	}, {} as Record<string, Record<string, string>>);
+	const groupedMetadata = metadata.reduce(
+		(acc, item) => {
+			const category = item.category || 'general';
+			if (!acc[category]) acc[category] = {};
+			acc[category][item.key] = item.value;
+			return acc;
+		},
+		{} as Record<string, Record<string, string>>
+	);
 
 	// Crear JSON con metadata adicional
 	const exportData = {
 		timestamp: new Date().toISOString(),
 		total_fields: metadata.length,
 		categories: Object.keys(groupedMetadata),
-		metadata: groupedMetadata
+		metadata: groupedMetadata,
 	};
 
 	// Crear y descargar archivo
@@ -773,7 +808,9 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({ className = '' }) =>
 	const { selectedItems } = useDetailsPanel();
 
 	// Estado para metadatos mejorados
-	const [enhancedMetadata, setEnhancedMetadata] = useState<Array<{ key: string; value: string; category?: string }>>([]);
+	const [enhancedMetadata, setEnhancedMetadata] = useState<Array<{ key: string; value: string; category?: string }>>(
+		[]
+	);
 	const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
 
 	// Cargar metadatos mejorados cuando cambia la entidad seleccionada
@@ -781,10 +818,10 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({ className = '' }) =>
 		if (selectedItems.length === 1 && selectedItems[0]?.entityType === 'image') {
 			setIsLoadingMetadata(true);
 			getEnhancedMetadata(selectedItems[0])
-				.then(metadata => {
+				.then((metadata) => {
 					setEnhancedMetadata(metadata);
 				})
-				.catch(error => {
+				.catch((error) => {
 					console.error('Error al cargar metadatos mejorados:', error);
 					setEnhancedMetadata([]);
 				})
@@ -814,10 +851,13 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({ className = '' }) =>
 	if (displayData.type === 'empty') {
 		return (
 			<div
-				className={cn('details-panel bg-background border-l p-4 h-full flex items-center justify-center overflow-hidden', className)}
+				className={cn(
+					'details-panel flex h-full items-center justify-center overflow-hidden border-l bg-background p-4',
+					className
+				)}
 			>
 				<div className="text-center text-muted-foreground">
-					<ImageIcon className="h-12 w-12 mx-auto mb-4 opacity-50" />
+					<ImageIcon className="mx-auto mb-4 h-12 w-12 opacity-50" />
 					<p className="text-sm">Selecciona un elemento para ver sus detalles</p>
 				</div>
 			</div>
@@ -832,44 +872,44 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({ className = '' }) =>
 		}, 0);
 
 		return (
-			<div className={cn('details-panel bg-background border-l h-full flex flex-col overflow-hidden', className)}>
-				<div className="p-4 border-b">
-					<h2 className="text-lg font-semibold">Múltiples elementos</h2>
-					<p className="text-sm text-muted-foreground">{items.length} elementos seleccionados</p>
+			<div className={cn('details-panel flex h-full w-full flex-col bg-background', className)}>
+				<div className="border-b p-4">
+					<h2 className="font-semibold text-lg">Múltiples elementos</h2>
+					<p className="text-muted-foreground text-sm">{items.length} elementos seleccionados</p>
 				</div>
 
-				<ScrollArea className="flex-1 p-4">
+				<div className="flex-1 overflow-y-auto p-4">
 					<div className="space-y-4">
 						{/* Estadísticas generales */}
 						<div className="grid grid-cols-2 gap-4">
-							<div className="text-center p-3 border rounded-lg">
-								<div className="text-2xl font-bold">{items.length}</div>
-								<div className="text-xs text-muted-foreground">Elementos</div>
+							<div className="rounded-lg border p-3 text-center">
+								<div className="font-bold text-2xl">{items.length}</div>
+								<div className="text-muted-foreground text-xs">Elementos</div>
 							</div>
-							<div className="text-center p-3 border rounded-lg">
-								<div className="text-2xl font-bold">{formatFileSize(totalSize)}</div>
-								<div className="text-xs text-muted-foreground">Tamaño total</div>
+							<div className="rounded-lg border p-3 text-center">
+								<div className="font-bold text-2xl">{formatFileSize(totalSize)}</div>
+								<div className="text-muted-foreground text-xs">Tamaño total</div>
 							</div>
 						</div>
 
 						{/* Lista de elementos */}
 						<div className="space-y-2">
-							<h3 className="text-sm font-medium">Elementos seleccionados</h3>
+							<h3 className="font-medium text-sm">Elementos seleccionados</h3>
 							{items.map((item) => {
 								const EntityIcon = getEntityIcon(item.entityType || 'file');
 								return (
-									<div key={item.id} className="flex items-center gap-2 p-2 border rounded-lg">
+									<div className="flex items-center gap-2 rounded-lg border p-2" key={item.id}>
 										<EntityIcon className="h-4 w-4 text-muted-foreground" />
-										<span className="text-sm truncate flex-1">{'name' in item ? item.name : 'Sin nombre'}</span>
+										<span className="flex-1 truncate text-sm">{'name' in item ? item.name : 'Sin nombre'}</span>
 										{'size' in item && typeof item.size === 'number' && (
-											<span className="text-xs text-muted-foreground">{formatFileSize(item.size)}</span>
+											<span className="text-muted-foreground text-xs">{formatFileSize(item.size)}</span>
 										)}
 									</div>
 								);
 							})}
 						</div>
 					</div>
-				</ScrollArea>
+				</div>
 			</div>
 		);
 	}
@@ -887,30 +927,30 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({ className = '' }) =>
 	const EntityIcon = getEntityIcon(item.entityType || 'file');
 
 	return (
-			<div className={cn('details-panel bg-background border-l h-full flex flex-col overflow-hidden', className)}>
-				{/* Header */}
-				<div className="p-4 border-b flex-shrink-0">
-					<div className="flex items-center gap-2 mb-2">
-						<EntityIcon className="h-5 w-5 text-muted-foreground" />
-						<h2 className="text-lg font-semibold truncate">{'name' in item ? item.name : 'Sin nombre'}</h2>
-					</div>
-					{'description' in item && item.description && (
-						<p className="text-sm text-muted-foreground line-clamp-2">{item.description}</p>
-					)}
+		<div className={cn('details-panel flex h-full w-full flex-col bg-background', className)}>
+			{/* Header */}
+			<div className="flex-shrink-0 border-b p-4">
+				<div className="mb-2 flex items-center gap-2">
+					<EntityIcon className="h-5 w-5 text-muted-foreground" />
+					<h2 className="truncate font-semibold text-lg">{'name' in item ? item.name : 'Sin nombre'}</h2>
 				</div>
+				{'description' in item && item.description && (
+					<p className="line-clamp-2 text-muted-foreground text-sm">{item.description}</p>
+				)}
+			</div>
 
-				<ScrollArea className="flex-1 h-0">
-					<div className="p-3 space-y-4 w-full overflow-hidden">
+			<div className="flex-1 overflow-y-auto">
+				<div className="w-full space-y-4 p-4">
 					{/* Imagen principal */}
 					{mainImageUrl && (
-						<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+						<motion.div animate={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 20 }} transition={{ duration: 0.3 }}>
 							<div className="w-full max-w-full">
-								<AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden w-full">
+								<AspectRatio className="w-full overflow-hidden rounded-lg bg-muted" ratio={16 / 9}>
 									<img
-										src={mainImageUrl}
 										alt={'name' in item ? item.name || 'Sin nombre' : 'Sin nombre'}
-										className="object-contain w-full h-full"
+										className="h-full w-full object-contain"
 										loading="lazy"
+										src={mainImageUrl}
 									/>
 								</AspectRatio>
 							</div>
@@ -919,15 +959,15 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({ className = '' }) =>
 
 					{/* Toolbar de acciones */}
 					<motion.div
-						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.3, delay: 0.1 }}
 						className="flex items-center gap-2"
+						initial={{ opacity: 0, y: 20 }}
+						transition={{ duration: 0.3, delay: 0.1 }}
 					>
 						<TooltipProvider>
 							<Tooltip>
 								<TooltipTrigger asChild>
-									<Button variant="outline" size="icon">
+									<Button size="icon" variant="outline">
 										<Copy className="h-4 w-4" />
 									</Button>
 								</TooltipTrigger>
@@ -936,7 +976,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({ className = '' }) =>
 
 							<Tooltip>
 								<TooltipTrigger asChild>
-									<Button variant="outline" size="icon">
+									<Button size="icon" variant="outline">
 										<Download className="h-4 w-4" />
 									</Button>
 								</TooltipTrigger>
@@ -945,7 +985,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({ className = '' }) =>
 
 							<Tooltip>
 								<TooltipTrigger asChild>
-									<Button variant="outline" size="icon">
+									<Button size="icon" variant="outline">
 										<Heart
 											className={cn('h-4 w-4', 'isFavorite' in item && item.isFavorite && 'fill-red-500 text-red-500')}
 										/>
@@ -956,7 +996,7 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({ className = '' }) =>
 
 							<Tooltip>
 								<TooltipTrigger asChild>
-									<Button variant="outline" size="icon">
+									<Button size="icon" variant="outline">
 										<Edit className="h-4 w-4" />
 									</Button>
 								</TooltipTrigger>
@@ -965,22 +1005,22 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({ className = '' }) =>
 
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
-									<Button variant="outline" size="icon">
+									<Button size="icon" variant="outline">
 										<MoreHorizontal className="h-4 w-4" />
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent>
 									<DropdownMenuItem>
-										<Edit className="h-4 w-4 mr-2" />
+										<Edit className="mr-2 h-4 w-4" />
 										Renombrar
 									</DropdownMenuItem>
 									<DropdownMenuItem>
-										<Copy className="h-4 w-4 mr-2" />
+										<Copy className="mr-2 h-4 w-4" />
 										Duplicar
 									</DropdownMenuItem>
 									<DropdownMenuSeparator />
 									<DropdownMenuItem className="text-destructive">
-										<Trash2 className="h-4 w-4 mr-2" />
+										<Trash2 className="mr-2 h-4 w-4" />
 										Eliminar
 									</DropdownMenuItem>
 								</DropdownMenuContent>
@@ -991,15 +1031,15 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({ className = '' }) =>
 					{/* Información básica */}
 					{basicMetadata.length > 0 && (
 						<motion.div
-							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.3, delay: 0.2 }}
 							className="space-y-3"
+							initial={{ opacity: 0, y: 20 }}
+							transition={{ duration: 0.3, delay: 0.2 }}
 						>
-							<h3 className="text-sm font-medium">Información básica</h3>
+							<h3 className="font-medium text-sm">Información básica</h3>
 							<div className="space-y-2">
 								{basicMetadata.map(({ key, value, icon: Icon }) => (
-									<div key={key} className="flex items-center justify-between text-sm">
+									<div className="flex items-center justify-between text-sm" key={key}>
 										<div className="flex items-center gap-2 text-muted-foreground">
 											<Icon className="h-4 w-4" />
 											{key}
@@ -1014,15 +1054,15 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({ className = '' }) =>
 					{/* Entidades relacionadas */}
 					{relatedEntities.length > 0 && (
 						<motion.div
-							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
-							transition={{ duration: 0.3, delay: 0.3 }}
 							className="space-y-3"
+							initial={{ opacity: 0, y: 20 }}
+							transition={{ duration: 0.3, delay: 0.3 }}
 						>
-							<h3 className="text-sm font-medium">Entidades relacionadas</h3>
+							<h3 className="font-medium text-sm">Entidades relacionadas</h3>
 							<div className="flex flex-wrap gap-2">
 								{relatedEntities.map(({ type, count, icon: Icon, color }) => (
-									<Badge key={type} variant="secondary" className={cn('gap-1', color)}>
+									<Badge className={cn('gap-1', color)} key={type} variant="secondary">
 										<Icon className="h-3 w-3" />
 										{count} {type}
 									</Badge>
@@ -1032,106 +1072,123 @@ export const DetailsPanel: React.FC<DetailsPanelProps> = ({ className = '' }) =>
 					)}
 
 					{/* Metadatos detallados organizados por categorías */}
-					{detailedMetadata.length > 0 && (() => {
-						// Agrupar metadatos por categoría
-						const groupedMetadata = detailedMetadata.reduce((acc, item) => {
-							const category = item.category || 'general';
-							if (!acc[category]) acc[category] = [];
-							acc[category].push(item);
-							return acc;
-						}, {} as Record<string, typeof detailedMetadata>);
+					{detailedMetadata.length > 0 &&
+						(() => {
+							// Agrupar metadatos por categoría
+							const groupedMetadata = detailedMetadata.reduce(
+								(acc, item) => {
+									const category = item.category || 'general';
+									if (!acc[category]) acc[category] = [];
+									acc[category].push(item);
+									return acc;
+								},
+								{} as Record<string, typeof detailedMetadata>
+							);
 
-						// Orden de prioridad para categorías
-						const categoryOrder = ['ia', 'exif', 'iptc', 'xmp', 'técnico', 'general', 'error'];
-						const categoryNames = {
-							'ia': '🤖 Metadatos de IA',
-							'exif': '📷 EXIF (Cámara)',
-							'iptc': '📝 IPTC (Editorial)',
-							'xmp': '🏷️ XMP (Extensibles)',
-							'técnico': '⚙️ Técnico',
-							'general': '📊 General',
-							'error': '⚠️ Errores'
-						};
+							// Orden de prioridad para categorías
+							const categoryOrder = ['ia', 'exif', 'iptc', 'xmp', 'técnico', 'general', 'error'];
+							const categoryNames = {
+								ia: '🤖 Metadatos de IA',
+								exif: '📷 EXIF (Cámara)',
+								iptc: '📝 IPTC (Editorial)',
+								xmp: '🏷️ XMP (Extensibles)',
+								técnico: '⚙️ Técnico',
+								general: '📊 General',
+								error: '⚠️ Errores',
+							};
 
-						const sortedCategories = categoryOrder.filter(cat => groupedMetadata[cat]);
+							const sortedCategories = categoryOrder.filter((cat) => groupedMetadata[cat]);
 
-						return (
-							<motion.div
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.3, delay: 0.4 }}
-								className="space-y-4"
-							>
-								<h3 className="text-sm font-medium">Metadatos detallados</h3>
+							return (
+								<motion.div
+									animate={{ opacity: 1, y: 0 }}
+									className="space-y-4"
+									initial={{ opacity: 0, y: 20 }}
+									transition={{ duration: 0.3, delay: 0.4 }}
+								>
+									<h3 className="font-medium text-sm">Metadatos detallados</h3>
 
-								{sortedCategories.map((category) => (
-									<div key={category} className="space-y-2">
-										<h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wide border-b pb-1">
-											{categoryNames[category as keyof typeof categoryNames] || category}
-										</h4>
-										<div className="space-y-3 pl-1">
-											{groupedMetadata[category].map(({ key, value }) => (
-																<div key={`${category}-${key}-${value.substring(0, 20)}`} className="flex flex-col gap-1 w-full min-w-0">
-																	<span className="text-xs text-muted-foreground font-medium truncate">{key}</span>
-																	<span className={cn(
-																		"text-sm break-words overflow-wrap-anywhere leading-relaxed w-full min-w-0",
-																		category === 'ia' && "text-blue-600 dark:text-blue-400",
-																		category === 'error' && "text-red-600 dark:text-red-400"
-																	)}>
-																		{value}
-																	</span>
-																</div>
-														))}
+									{sortedCategories.map((category) => (
+										<div className="space-y-2" key={category}>
+											<h4 className="border-b pb-1 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+												{categoryNames[category as keyof typeof categoryNames] || category}
+											</h4>
+											<div className="space-y-3 pl-1">
+												{groupedMetadata[category].map(({ key, value }) => (
+													<div
+														className="flex w-full min-w-0 flex-col gap-1"
+														key={`${category}-${key}-${value.substring(0, 20)}`}
+													>
+														<span className="truncate font-medium text-muted-foreground text-xs">{key}</span>
+														<span
+															className={cn(
+																'overflow-wrap-anywhere w-full min-w-0 break-words text-sm leading-relaxed',
+																category === 'ia' && 'text-blue-600 dark:text-blue-400',
+																category === 'error' && 'text-red-600 dark:text-red-400'
+															)}
+														>
+															{value}
+														</span>
+													</div>
+												))}
+											</div>
 										</div>
-									</div>
-								))}
-							</motion.div>
-						);
-					})()}
+									))}
+								</motion.div>
+							);
+						})()}
 
 					{/* Botones de exportación de metadatos */}
 					{detailedMetadata.length > 0 && (
 						<motion.div
-							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
+							className="space-y-3 border-t pt-4"
+							initial={{ opacity: 0, y: 20 }}
 							transition={{ duration: 0.3, delay: 0.5 }}
-							className="space-y-3 pt-4 border-t"
 						>
-							<h3 className="text-sm font-medium">Exportar metadatos</h3>
+							<h3 className="font-medium text-sm">Exportar metadatos</h3>
 							<div className="flex gap-2">
 								<Button
-									variant="outline"
-									size="sm"
+									className="flex-1"
 									onClick={() => {
-										const filename = 'path' in item ?
-											`${item.path.split(/[/\\]/).pop()?.replace(/\.[^/.]+$/, '')}_metadata` :
-											`${item.name}_metadata`;
+										const filename =
+											'path' in item
+												? `${item.path
+														.split(/[/\\]/)
+														.pop()
+														?.replace(/\.[^/.]+$/, '')}_metadata`
+												: `${item.name}_metadata`;
 										exportToCSV(detailedMetadata, filename);
 									}}
-									className="flex-1"
+									size="sm"
+									variant="outline"
 								>
-									<Download className="h-4 w-4 mr-2" />
+									<Download className="mr-2 h-4 w-4" />
 									CSV
 								</Button>
 								<Button
-									variant="outline"
-									size="sm"
+									className="flex-1"
 									onClick={() => {
-										const filename = 'path' in item ?
-											`${item.path.split(/[/\\]/).pop()?.replace(/\.[^/.]+$/, '')}_metadata` :
-											`${item.name}_metadata`;
+										const filename =
+											'path' in item
+												? `${item.path
+														.split(/[/\\]/)
+														.pop()
+														?.replace(/\.[^/.]+$/, '')}_metadata`
+												: `${item.name}_metadata`;
 										exportToJSON(detailedMetadata, filename);
 									}}
-									className="flex-1"
+									size="sm"
+									variant="outline"
 								>
-									<Download className="h-4 w-4 mr-2" />
+									<Download className="mr-2 h-4 w-4" />
 									JSON
 								</Button>
 							</div>
 						</motion.div>
 					)}
 				</div>
-			</ScrollArea>
+			</div>
 		</div>
 	);
 };

@@ -69,7 +69,7 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+			<form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
 				<FormField
 					control={form.control}
 					name="name"
@@ -91,7 +91,7 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 						<FormItem>
 							<FormLabel>Emoji</FormLabel>
 							<FormControl>
-								<EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact showLabel={false} />
+								<EmojiPicker compact onEmojiSelect={field.onChange} showLabel={false} value={field.value} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -105,7 +105,7 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 						<FormItem>
 							<FormLabel>Color</FormLabel>
 							<FormControl>
-								<ColorPicker value={field.value || '#3b82f6'} onChange={field.onChange} compact showLabel={false} />
+								<ColorPicker compact onChange={field.onChange} showLabel={false} value={field.value || '#3b82f6'} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -156,11 +156,11 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 				/>
 
 				<div className="flex justify-end space-x-2">
-					<Button type="button" variant="outline" onClick={onCancel}>
+					<Button onClick={onCancel} type="button" variant="outline">
 						Cancelar
 					</Button>
 					{onPreview && (
-						<Button type="button" variant="secondary" onClick={onPreview}>
+						<Button onClick={onPreview} type="button" variant="secondary">
 							Vista previa
 						</Button>
 					)}

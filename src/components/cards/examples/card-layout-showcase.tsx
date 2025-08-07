@@ -34,7 +34,7 @@ const mockEntities: AnyEntityWithStats[] = [
 		updatedAt: new Date(),
 		path: '/uploads/landscape.jpg',
 		hash: 'abc123def456',
-		size: 1024000,
+		size: 1_024_000,
 		width: 1920,
 		height: 1080,
 		metadata: null,
@@ -79,7 +79,7 @@ const mockEntities: AnyEntityWithStats[] = [
 			likeCount: 5,
 			commentCount: 1,
 			// Propiedades del sistema de archivos
-			size: 1024000,
+			size: 1_024_000,
 			mtime: new Date(),
 			birthtime: new Date(),
 			type: 'image',
@@ -113,7 +113,7 @@ const mockEntities: AnyEntityWithStats[] = [
 		sourceImage: null,
 		totalImages: 18,
 		totalVideos: 2,
-		totalSize: 15728640,
+		totalSize: 15_728_640,
 		lastImageAddedAt: new Date(),
 		lastVideoAddedAt: new Date(),
 		createdAt: new Date(),
@@ -140,7 +140,7 @@ const mockEntities: AnyEntityWithStats[] = [
 			// Timestamps
 			lastUpdated: new Date(),
 			// Propiedades del sistema de archivos
-			size: 15728640,
+			size: 15_728_640,
 			mtime: new Date(),
 			birthtime: new Date(),
 			type: 'collection',
@@ -157,7 +157,7 @@ const mockEntities: AnyEntityWithStats[] = [
 		isFavorite: false,
 		path: '/home/user/documents/trabajo',
 		totalFiles: 78,
-		totalSize: 52428800,
+		totalSize: 52_428_800,
 		autoReindex: true,
 		lastIndexed: new Date(),
 		parentId: null,
@@ -186,7 +186,7 @@ const mockEntities: AnyEntityWithStats[] = [
 			// Timestamps
 			lastUpdated: new Date(),
 			// Propiedades del sistema de archivos
-			size: 52428800,
+			size: 52_428_800,
 			mtime: new Date(),
 			birthtime: new Date(),
 			type: 'folder',
@@ -208,9 +208,9 @@ const mockEntities: AnyEntityWithStats[] = [
 			totalAudio: 0,
 			totalOthers: 0,
 			formattedSize: '50 MB',
-			totalSize: 52428800,
-			averageFileSize: 672164,
-			largestFile: 5242880,
+			totalSize: 52_428_800,
+			averageFileSize: 672_164,
+			largestFile: 5_242_880,
 			hasConsistentNaming: true,
 			hasDeepHierarchy: false,
 			isWellOrganized: true,
@@ -243,24 +243,24 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 	return (
 		<div className={cn('space-y-8 p-6', className)}>
 			<div className="space-y-4">
-				<h2 className="text-2xl font-bold">Sistema de Layouts para Cards</h2>
+				<h2 className="font-bold text-2xl">Sistema de Layouts para Cards</h2>
 				<p className="text-muted-foreground">
 					Explora los diferentes layouts, variantes y tamaños disponibles para las cards.
 				</p>
 			</div>
 
 			{/* Controles */}
-			<div className="grid grid-cols-1 md:grid-cols-4 gap-4 p-4 bg-muted/50 rounded-lg">
+			<div className="grid grid-cols-1 gap-4 rounded-lg bg-muted/50 p-4 md:grid-cols-4">
 				{/* Layout */}
 				<div className="space-y-2">
-					<label htmlFor="layout-select" className="text-sm font-medium">
+					<label className="font-medium text-sm" htmlFor="layout-select">
 						Layout
 					</label>
 					<select
+						className="w-full rounded border p-2"
 						id="layout-select"
-						value={selectedLayout}
 						onChange={(e) => setSelectedLayout(e.target.value as CardLayout)}
-						className="w-full p-2 border rounded"
+						value={selectedLayout}
 					>
 						{layouts.map((layout) => (
 							<option key={layout} value={layout}>
@@ -272,14 +272,14 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 
 				{/* Variante */}
 				<div className="space-y-2">
-					<label htmlFor="variant-select" className="text-sm font-medium">
+					<label className="font-medium text-sm" htmlFor="variant-select">
 						Variante
 					</label>
 					<select
+						className="w-full rounded border p-2"
 						id="variant-select"
-						value={selectedVariant}
 						onChange={(e) => setSelectedVariant(e.target.value as CardVariant)}
-						className="w-full p-2 border rounded"
+						value={selectedVariant}
 					>
 						{variants.map((variant) => (
 							<option key={variant} value={variant}>
@@ -291,14 +291,14 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 
 				{/* Tamaño */}
 				<div className="space-y-2">
-					<label htmlFor="size-select" className="text-sm font-medium">
+					<label className="font-medium text-sm" htmlFor="size-select">
 						Tamaño
 					</label>
 					<select
+						className="w-full rounded border p-2"
 						id="size-select"
-						value={selectedSize}
 						onChange={(e) => setSelectedSize(e.target.value as CardSize)}
-						className="w-full p-2 border rounded"
+						value={selectedSize}
 					>
 						{sizes.map((size) => (
 							<option key={size} value={size}>
@@ -310,14 +310,14 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 
 				{/* Preset */}
 				<div className="space-y-2">
-					<label htmlFor="preset-select" className="text-sm font-medium">
+					<label className="font-medium text-sm" htmlFor="preset-select">
 						Preset
 					</label>
 					<select
+						className="w-full rounded border p-2"
 						id="preset-select"
-						value={selectedPreset}
 						onChange={(e) => setSelectedPreset(e.target.value)}
-						className="w-full p-2 border rounded"
+						value={selectedPreset}
 					>
 						<option value="">Sin preset</option>
 						{Object.keys(LAYOUT_PRESETS).map((preset) => (
@@ -331,18 +331,18 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 
 			{/* Vista previa de configuración actual */}
 			<div className="space-y-4">
-				<h3 className="text-lg font-semibold">Vista Previa - Configuración Actual</h3>
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 border rounded-lg">
+				<h3 className="font-semibold text-lg">Vista Previa - Configuración Actual</h3>
+				<div className="grid grid-cols-1 gap-4 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3">
 					{mockEntities.map((entity) => (
 						<EntityCard
-							key={entity.id}
 							entity={entity}
+							key={entity.id}
 							layout={selectedLayout}
-							variant={selectedVariant}
-							size={selectedSize}
-							preset={selectedPreset || undefined}
 							onClick={() => console.log('Clicked:', entity.name || entity.id)}
 							onDoubleClick={() => console.log('Double clicked:', entity.name || entity.id)}
+							preset={selectedPreset || undefined}
+							size={selectedSize}
+							variant={selectedVariant}
 						/>
 					))}
 				</div>
@@ -350,26 +350,26 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 
 			{/* Presets predefinidos */}
 			<div className="space-y-4">
-				<h3 className="text-lg font-semibold">Presets Predefinidos</h3>
-				<div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+				<h3 className="font-semibold text-lg">Presets Predefinidos</h3>
+				<div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
 					{Object.entries(LAYOUT_PRESETS).map(([presetName, config]) => (
-						<div key={presetName} className="space-y-3">
+						<div className="space-y-3" key={presetName}>
 							<div className="flex items-center justify-between">
 								<h4 className="font-medium">{presetName}</h4>
 								<button
-									type="button"
+									className="rounded bg-primary px-2 py-1 text-primary-foreground text-xs"
 									onClick={() => {
 										setSelectedLayout(config.layout);
 										setSelectedVariant(config.variant);
 										setSelectedSize(config.size);
 										setSelectedPreset(presetName);
 									}}
-									className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded"
+									type="button"
 								>
 									Aplicar
 								</button>
 							</div>
-							<div className="text-xs text-muted-foreground space-y-1">
+							<div className="space-y-1 text-muted-foreground text-xs">
 								<div>Layout: {config.layout}</div>
 								<div>Variante: {config.variant}</div>
 								<div>Tamaño: {config.size}</div>
@@ -378,10 +378,10 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 							<div className="grid grid-cols-3 gap-2">
 								{mockEntities.map((entity) => (
 									<EntityCard
-										key={`${presetName}-${entity.id}`}
+										className="origin-top-left scale-75"
 										entity={entity}
+										key={`${presetName}-${entity.id}`}
 										preset={presetName}
-										className="scale-75 origin-top-left"
 									/>
 								))}
 							</div>
@@ -392,19 +392,19 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 
 			{/* Comparación de layouts */}
 			<div className="space-y-4">
-				<h3 className="text-lg font-semibold">Comparación de Layouts</h3>
+				<h3 className="font-semibold text-lg">Comparación de Layouts</h3>
 				<div className="space-y-6">
 					{layouts.map((layout) => (
-						<div key={layout} className="space-y-2">
+						<div className="space-y-2" key={layout}>
 							<h4 className="font-medium capitalize">{layout}</h4>
-							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 border rounded-lg">
+							<div className="grid grid-cols-1 gap-4 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3">
 								{mockEntities.map((entity) => (
 									<EntityCard
-										key={`${layout}-${entity.id}`}
 										entity={entity}
+										key={`${layout}-${entity.id}`}
 										layout={layout}
-										variant="default"
 										size="md"
+										variant="default"
 									/>
 								))}
 							</div>
@@ -415,19 +415,19 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 
 			{/* Comparación de variantes */}
 			<div className="space-y-4">
-				<h3 className="text-lg font-semibold">Comparación de Variantes</h3>
+				<h3 className="font-semibold text-lg">Comparación de Variantes</h3>
 				<div className="space-y-6">
 					{variants.map((variant) => (
-						<div key={variant} className="space-y-2">
+						<div className="space-y-2" key={variant}>
 							<h4 className="font-medium capitalize">{variant}</h4>
-							<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 p-4 border rounded-lg">
+							<div className="grid grid-cols-1 gap-4 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3">
 								{mockEntities.map((entity) => (
 									<EntityCard
-										key={`${variant}-${entity.id}`}
 										entity={entity}
+										key={`${variant}-${entity.id}`}
 										layout="complete"
-										variant={variant}
 										size="md"
+										variant={variant}
 									/>
 								))}
 							</div>
@@ -438,47 +438,47 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 
 			{/* Casos de uso recomendados */}
 			<div className="space-y-4">
-				<h3 className="text-lg font-semibold">Casos de Uso Recomendados</h3>
+				<h3 className="font-semibold text-lg">Casos de Uso Recomendados</h3>
 				<div className="space-y-4">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-						<div className="p-4 border rounded-lg space-y-2">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+						<div className="space-y-2 rounded-lg border p-4">
 							<h4 className="font-medium">File Browser - Vista Grid</h4>
-							<p className="text-sm text-muted-foreground">
+							<p className="text-muted-foreground text-sm">
 								Layout vertical con información esencial para navegación rápida
 							</p>
 							<div className="grid grid-cols-3 gap-2">
 								{mockEntities.map((entity) => (
-									<EntityCard key={`grid-${entity.id}`} entity={entity} preset="file-browser-grid" />
+									<EntityCard entity={entity} key={`grid-${entity.id}`} preset="file-browser-grid" />
 								))}
 							</div>
 						</div>
 
-						<div className="p-4 border rounded-lg space-y-2">
+						<div className="space-y-2 rounded-lg border p-4">
 							<h4 className="font-medium">File Browser - Vista Lista</h4>
-							<p className="text-sm text-muted-foreground">Layout horizontal compacto para listas de archivos</p>
+							<p className="text-muted-foreground text-sm">Layout horizontal compacto para listas de archivos</p>
 							<div className="space-y-2">
 								{mockEntities.map((entity) => (
-									<EntityCard key={`list-${entity.id}`} entity={entity} preset="file-browser-list" />
+									<EntityCard entity={entity} key={`list-${entity.id}`} preset="file-browser-list" />
 								))}
 							</div>
 						</div>
 
-						<div className="p-4 border rounded-lg space-y-2">
+						<div className="space-y-2 rounded-lg border p-4">
 							<h4 className="font-medium">Dashboard</h4>
-							<p className="text-sm text-muted-foreground">Layout completo con toda la información disponible</p>
+							<p className="text-muted-foreground text-sm">Layout completo con toda la información disponible</p>
 							<div className="grid grid-cols-2 gap-2">
 								{mockEntities.slice(0, 2).map((entity) => (
-									<EntityCard key={`dashboard-${entity.id}`} entity={entity} preset="dashboard" />
+									<EntityCard entity={entity} key={`dashboard-${entity.id}`} preset="dashboard" />
 								))}
 							</div>
 						</div>
 
-						<div className="p-4 border rounded-lg space-y-2">
+						<div className="space-y-2 rounded-lg border p-4">
 							<h4 className="font-medium">TCG Mode</h4>
-							<p className="text-sm text-muted-foreground">Estilo Trading Card Game para una experiencia inmersiva</p>
+							<p className="text-muted-foreground text-sm">Estilo Trading Card Game para una experiencia inmersiva</p>
 							<div className="grid grid-cols-2 gap-2">
 								{mockEntities.slice(0, 2).map((entity) => (
-									<EntityCard key={`tcg-${entity.id}`} entity={entity} preset="tcg-mode" />
+									<EntityCard entity={entity} key={`tcg-${entity.id}`} preset="tcg-mode" />
 								))}
 							</div>
 						</div>

@@ -1,0 +1,2869 @@
+Comando: bunx biome check --max-diagnostics=500 .
+Fecha: 2025-08-07T00:11:30.498Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+scripts\analysis\dependency-analyzer.js:79:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    78 │ 	categorizeDependency(name) {
+  > 79 │ 		if (name.includes('vite') || name.includes('rollup')) return 'bundler';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    80 │ 		if (name.includes('react')) return 'framework';
+    81 │ 		if (name.includes('@types/') || name === 'typescript') return 'types';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    79 │ → → if·(name.includes('vite')·||·name.includes('rollup'))·{·return·'bundler';·}
+       │                                                           ++                 ++
+
+scripts\analysis\dependency-analyzer.js:80:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    78 │ 	categorizeDependency(name) {
+    79 │ 		if (name.includes('vite') || name.includes('rollup')) return 'bundler';
+  > 80 │ 		if (name.includes('react')) return 'framework';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    81 │ 		if (name.includes('@types/') || name === 'typescript') return 'types';
+    82 │ 		if (name.includes('tailwind') || name.includes('postcss')) return 'css';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    80 │ → → if·(name.includes('react'))·{·return·'framework';·}
+       │                                 ++                   ++
+
+scripts\analysis\dependency-analyzer.js:81:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    79 │ 		if (name.includes('vite') || name.includes('rollup')) return 'bundler';
+    80 │ 		if (name.includes('react')) return 'framework';
+  > 81 │ 		if (name.includes('@types/') || name === 'typescript') return 'types';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    82 │ 		if (name.includes('tailwind') || name.includes('postcss')) return 'css';
+    83 │ 		if (name.includes('plugin')) return 'plugin';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    81 │ → → if·(name.includes('@types/')·||·name·===·'typescript')·{·return·'types';·}
+       │                                                            ++               ++
+
+scripts\analysis\dependency-analyzer.js:82:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    80 │ 		if (name.includes('react')) return 'framework';
+    81 │ 		if (name.includes('@types/') || name === 'typescript') return 'types';
+  > 82 │ 		if (name.includes('tailwind') || name.includes('postcss')) return 'css';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    83 │ 		if (name.includes('plugin')) return 'plugin';
+    84 │ 		return 'library';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    82 │ → → if·(name.includes('tailwind')·||·name.includes('postcss'))·{·return·'css';·}
+       │                                                                ++             ++
+
+scripts\analysis\dependency-analyzer.js:83:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    81 │ 		if (name.includes('@types/') || name === 'typescript') return 'types';
+    82 │ 		if (name.includes('tailwind') || name.includes('postcss')) return 'css';
+  > 83 │ 		if (name.includes('plugin')) return 'plugin';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    84 │ 		return 'library';
+    85 │ 	}
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    83 │ → → if·(name.includes('plugin'))·{·return·'plugin';·}
+       │                                  ++                ++
+
+scripts\analysis\dependency-analyzer.js:257:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    255 │ 		console.log(chalk.yellow('\n📦 Cargando información de dependencias...'));
+    256 │ 		const packageJson = await this.loadPackageJson();
+  > 257 │ 		if (!packageJson) return;
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^
+    258 │ 
+    259 │ 		// Analizar dependencias críticas
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    257 │ → → if·(!packageJson)·{·return;·}
+        │                       ++       ++
+
+scripts\analysis\dependency-analyzer.js:306:51 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    304 │ 		for (const plugin of this.analysis.vite_plugins) {
+    305 │ 			const complexity =
+  > 306 │ 				plugin.migration_complexity === 'low' ? '🟢' : plugin.migration_complexity === 'medium' ? '🟡' : '🔴';
+        │ 				                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    307 │ 			console.log(`   ${complexity} ${plugin.name} - ${plugin.purpose}`);
+    308 │ 		}
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+scripts\analysis\dependency-analyzer.js:311:63 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    310 │ 		console.log(chalk.yellow('\n🔄 MIGRACIONES CRÍTICAS:'));
+  > 311 │ 		for (const item of this.analysis.requires_migration.filter((item) => item.priority === 'critical')) {
+        │ 		                                                            ^^^^
+    312 │ 			console.log(`   🔴 ${item.name} - ${item.reason}`);
+    313 │ 		}
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    310 │ 		console.log(chalk.yellow('\n🔄 MIGRACIONES CRÍTICAS:'));
+  > 311 │ 		for (const item of this.analysis.requires_migration.filter((item) => item.priority === 'critical')) {
+        │ 		           ^^^^
+    312 │ 			console.log(`   🔴 ${item.name} - ${item.reason}`);
+    313 │ 		}
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\analysis\dependency-analyzer.js:316:62 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    315 │ 		console.log(chalk.red('\n!�  PRINCIPALES DESAFÍOS:'));
+  > 316 │ 		for (const issue of this.analysis.potential_issues.filter((issue) => issue.impact === 'high')) {
+        │ 		                                                           ^^^^^
+    317 │ 			console.log(`   🔴 ${issue.category}: ${issue.description}`);
+    318 │ 		}
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    315 │ 		console.log(chalk.red('\n!�  PRINCIPALES DESAFÍOS:'));
+  > 316 │ 		for (const issue of this.analysis.potential_issues.filter((issue) => issue.impact === 'high')) {
+        │ 		           ^^^^^
+    317 │ 			console.log(`   🔴 ${issue.category}: ${issue.description}`);
+    318 │ 		}
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\benchmarks\benchmark-bun.js:16:31 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━
+
+  × The Bun variable is undeclared.
+  
+    14 │ const startTime = performance.now();
+    15 │ 
+  > 16 │ console.log(`✅ Bun Runtime v${Bun.version}`);
+       │                                ^^^
+    17 │ console.log(`🏁 Tiempo de inicio: ${(performance.now() - startTime).toFixed(2)}ms`);
+    18 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:54:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    52 │ 	}
+    53 │ 
+  > 54 │ 	async runCommand(command, args = [], options = {}) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 55 │ 		return new Promise((resolve, reject) => {
+        ...
+  > 80 │ 		});
+  > 81 │ 	}
+       │ 	^
+    82 │ 
+    83 │ 	async createTempScript(filename, content, isESModule = true) {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    52 │ 	}
+    53 │ 
+  > 54 │ 	async runCommand(command, args = [], options = {}) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 55 │ 		return new Promise((resolve, reject) => {
+        ...
+  > 80 │ 		});
+  > 81 │ 	}
+       │ 	^
+    82 │ 
+    83 │ 	async createTempScript(filename, content, isESModule = true) {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:101:5 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+     99 │ 			const start = performance.now();
+    100 │ 			try {
+  > 101 │ 				await this.runCommand(command, [tempScript]);
+        │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    102 │ 				const end = performance.now();
+    103 │ 				times.push(end - start);
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:110:43 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━
+
+  × Unexpected empty block.
+  
+    109 │ 		// Limpiar archivo temporal
+  > 110 │ 		await fs.unlink(tempScript).catch(() => {});
+        │ 		                                        ^^
+    111 │ 
+    112 │ 		return this.calculateStats(times);
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:132:20 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    130 │ 		for (let i = 0; i < ITERATIONS; i++) {
+    131 │ 			try {
+  > 132 │ 				const result = await this.runCommand(command, [tempScript]);
+        │ 				               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    133 │ 				const time = Number.parseFloat(result.trim());
+    134 │ 				if (!Number.isNaN(time)) {
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:143:43 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━
+
+  × Unexpected empty block.
+  
+    142 │ 		// Limpiar archivo temporal
+  > 143 │ 		await fs.unlink(tempScript).catch(() => {});
+        │ 		                                        ^^
+    144 │ 
+    145 │ 		return this.calculateStats(times);
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:182:20 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    180 │ 		for (let i = 0; i < ITERATIONS; i++) {
+    181 │ 			try {
+  > 182 │ 				const result = await this.runCommand(command, [tempScript]);
+        │ 				               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    183 │ 				const time = Number.parseFloat(result.trim());
+    184 │ 				if (!Number.isNaN(time)) {
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:193:43 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━
+
+  × Unexpected empty block.
+  
+    192 │ 		// Limpiar archivo temporal
+  > 193 │ 		await fs.unlink(tempScript).catch(() => {});
+        │ 		                                        ^^
+    194 │ 
+    195 │ 		return this.calculateStats(times);
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:210:6 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    209 │ 				if (runtime === 'bun') {
+  > 210 │ 					await this.runCommand('bun', ['install', '--dry-run']);
+        │ 					^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    211 │ 				} else {
+    212 │ 					await this.runCommand('npm', ['list', '--depth=0']);
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:294:2 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 20 detected (max: 15).
+  
+    292 │ 	}
+    293 │ 
+  > 294 │ 	printSummary() {
+        │ 	^^^^^^^^^^^^
+    295 │ 		console.log(chalk.blue.bold('\n📊 RESUMEN DE RESULTADOS V2'));
+    296 │ 		console.log('='.repeat(70));
+  
+  i Please refactor this function to reduce its complexity score from 20 to the max allowed complexity 15.
+  
+
+scripts\benchmarks\performance-comparison.js:48:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    46 │ 	}
+    47 │ 
+  > 48 │ 	async runCommand(command, args = [], options = {}) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 49 │ 		return new Promise((resolve, reject) => {
+        ...
+  > 74 │ 		});
+  > 75 │ 	}
+       │ 	^
+    76 │ 
+    77 │ 	async benchmarkStartupTime(runtime) {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    46 │ 	}
+    47 │ 
+  > 48 │ 	async runCommand(command, args = [], options = {}) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 49 │ 		return new Promise((resolve, reject) => {
+        ...
+  > 74 │ 		});
+  > 75 │ 	}
+       │ 	^
+    76 │ 
+    77 │ 	async benchmarkStartupTime(runtime) {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+scripts\benchmarks\performance-comparison.js:88:5 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    86 │ 			const start = performance.now();
+    87 │ 			try {
+  > 88 │ 				await this.runCommand(command, [tempScript]);
+       │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    89 │ 				const end = performance.now();
+    90 │ 				times.push(end - start);
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison.js:97:43 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━
+
+  × Unexpected empty block.
+  
+    96 │ 		// Limpiar archivo temporal
+  > 97 │ 		await fs.unlink(tempScript).catch(() => {});
+       │ 		                                        ^^
+    98 │ 
+    99 │ 		return {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+scripts\benchmarks\performance-comparison.js:125:20 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    123 │ 		for (let i = 0; i < ITERATIONS; i++) {
+    124 │ 			try {
+  > 125 │ 				const result = await this.runCommand(command, [tempScript]);
+        │ 				               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    126 │ 				const time = Number.parseFloat(result.trim());
+    127 │ 				if (!Number.isNaN(time)) {
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison.js:136:43 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━
+
+  × Unexpected empty block.
+  
+    135 │ 		// Limpiar archivo temporal
+  > 136 │ 		await fs.unlink(tempScript).catch(() => {});
+        │ 		                                        ^^
+    137 │ 
+    138 │ 		return {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+scripts\benchmarks\performance-comparison.js:177:20 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    175 │ 		for (let i = 0; i < ITERATIONS; i++) {
+    176 │ 			try {
+  > 177 │ 				const result = await this.runCommand(command, [tempScript]);
+        │ 				               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    178 │ 				const time = Number.parseFloat(result.trim());
+    179 │ 				if (!Number.isNaN(time)) {
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison.js:188:43 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━
+
+  × Unexpected empty block.
+  
+    187 │ 		// Limpiar archivo temporal
+  > 188 │ 		await fs.unlink(tempScript).catch(() => {});
+        │ 		                                        ^^
+    189 │ 
+    190 │ 		return {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+scripts\benchmarks\performance-comparison.js:209:5 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    207 │ 			try {
+    208 │ 				// Limpiar dist antes del build
+  > 209 │ 				await fs.rm('dist', { recursive: true, force: true });
+        │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    210 │ 
+    211 │ 				const start = performance.now();
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\check-errors.js:126:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    124 │ 		const fileData = await filterRelevantFiles(files, options);
+    125 │ 
+  > 126 │ 		if (!fileData) return;
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    127 │ 
+    128 │ 		const { relevantFiles, cutoff } = fileData;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    126 │ → → if·(!fileData)·{·return;·}
+        │                    ++       ++
+
+scripts\check-errors.js:133:23 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    132 │ 		for (const file of relevantFiles) {
+  > 133 │ 			const fileErrors = await extractErrorsFromFile(file, cutoff);
+        │ 			                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    134 │ 
+    135 │ 			if (fileErrors.length > 0) {
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\check-errors.js:51:43 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    49 │ }
+    50 │ 
+  > 51 │ async function filterRelevantFiles(files, options) {
+       │                                           ^^^^^^^
+    52 │ 	const now = new Date();
+    53 │ 	const cutoff = now.setDate(now.getDate() - options.days);
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    10 │ // Parser de argumentos simple
+  > 11 │ const options = {
+       │       ^^^^^^^
+    12 │ 	tool: 'all',
+    13 │ 	days: 1,
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\check-errors.js:75:21 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    73 │ 	const lines = content.split('\n');
+    74 │ 
+  > 75 │ 	const errorRegex = /error|failed|✘|exception/i;
+       │ 	                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    76 │ 	return lines.filter((line) => errorRegex.test(line) && !line.includes('0 errors'));
+    77 │ }
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\check-errors.js:70:2 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    68 │ 	const stats = await stat(filePath);
+    69 │ 
+  > 70 │ 	if (stats.mtime.getTime() < cutoff) return [];
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    71 │ 
+    72 │ 	const content = await readFile(filePath, 'utf-8');
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    70 │ → if·(stats.mtime.getTime()·<·cutoff)·{·return·[];·}
+       │                                       ++          ++
+
+scripts\check-errors.js:51:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    49 │ }
+    50 │ 
+  > 51 │ async function filterRelevantFiles(files, options) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 52 │ 	const now = new Date();
+        ...
+  > 63 │ 	return { relevantFiles, cutoff };
+  > 64 │ }
+       │ ^
+    65 │ 
+    66 │ async function extractErrorsFromFile(file, cutoff) {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    49 │ }
+    50 │ 
+  > 51 │ async function filterRelevantFiles(files, options) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 52 │ 	const now = new Date();
+        ...
+  > 63 │ 	return { relevantFiles, cutoff };
+  > 64 │ }
+       │ ^
+    65 │ 
+    66 │ async function extractErrorsFromFile(file, cutoff) {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+scripts\db\check.js:59:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Excessive complexity of 25 detected (max: 15).
+  
+    58 │ // Función principal
+  > 59 │ function checkDatabase() {
+       │          ^^^^^^^^^^^^^
+    60 │ 	log('\n🔍 Verificando estado de la base de datos...', colors.blue);
+    61 │ 	log('=============================================', colors.blue);
+  
+  i Please refactor this function to reduce its complexity score from 25 to the max allowed complexity 15.
+  
+
+scripts\db\check.js:72:41 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    70 │ 			const envContent = fs.readFileSync(envPath, 'utf8');
+    71 │ 			if (envContent.includes('DATABASE_URL=')) {
+  > 72 │ 				const dbUrlMatch = envContent.match(/DATABASE_URL=["']?(.*?)["']?$/m);
+       │ 				                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ 				if (dbUrlMatch?.[1]) {
+    74 │ 					log(`✅ DATABASE_URL configurada: ${dbUrlMatch[1]}`, colors.green);
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\db\clean-and-seed.ts:38:4 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    36 │ 			const tableName = table.name;
+    37 │ 			console.log(`🗑� Limpiando tabla: ${tableName}`);
+  > 38 │ 			await db.run(sql.raw(`DELETE FROM "${tableName}"`));
+       │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ 		}
+    40 │ 
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\db\debug-profile-settings.ts:10:16 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 25 detected (max: 15).
+  
+     8 │  */
+     9 │ 
+  > 10 │ async function debugProfileSettings() {
+       │                ^^^^^^^^^^^^^^^^^^^^
+    11 │ 	console.log('🔍 Investigando relación Profile-Settings...\n');
+    12 │ 
+  
+  i Please refactor this function to reduce its complexity score from 25 to the max allowed complexity 15.
+  
+
+scripts\db\force-create-db.ts:5:8 lint/performance/noNamespaceImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid namespace imports, it can prevent efficient tree shaking and increase bundle size.
+  
+    3 │ import { sql } from 'drizzle-orm';
+    4 │ import { drizzle } from 'drizzle-orm/libsql';
+  > 5 │ import * as schema from '../../src/lib/drizzle/schema/index.js';
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ console.log('🔧 Forzando creación de base de datos...');
+  
+  i Use named imports instead.
+  
+
+scripts\db\migration-status-report.ts:26:16 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 39 detected (max: 15).
+  
+    24 │ }
+    25 │ 
+  > 26 │ async function generateMigrationStatusReport() {
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 	console.log('📊 === REPORTE DE ESTADO DE MIGRACIÓN DRIZZLE ===\n');
+    28 │ 
+  
+  i Please refactor this function to reduce its complexity score from 39 to the max allowed complexity 15.
+  
+
+scripts\db\migration-status-report.ts:276:60 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    275 │ 	for (const service of services) {
+  > 276 │ 		const statusIcon = service.status === 'COMPLETE' ? '✅' : service.status === 'PARTIAL' ? '🔄' : '❌';
+        │ 		                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    277 │ 		console.log(`\n${statusIcon} **${service.name}** (${service.status})`);
+    278 │ 		console.log(`   📝 Métodos migrados: ${service.migratedMethods.join(', ')}`);
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+scripts\db\migration-status-report.ts:163:46 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━
+
+  × The start1 variable is undeclared.
+  
+    161 │ 	try {
+    162 │ 		const places = await getPlaces({});
+  > 163 │ 		placeStatus.avgResponseTime = Date.now() - start1;
+        │ 		                                           ^^^^^^
+    164 │ 		console.log(`   ✅ PlaceService: ${places.length} places encontrados`);
+    165 │ 	} catch (error) {
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+scripts\db\migration-status-report.ts:184:50 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━
+
+  × The start1 variable is undeclared.
+  
+    182 │ 	try {
+    183 │ 		const worldItems = await getWorldItems({});
+  > 184 │ 		worldItemStatus.avgResponseTime = Date.now() - start1;
+        │ 		                                               ^^^^^^
+    185 │ 		console.log(`   ✅ WorldItemService: ${worldItems.length} world items encontrados`);
+    186 │ 	} catch (error) {
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+scripts\db\migration-status-report.ts:205:51 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━
+
+  × The start1 variable is undeclared.
+  
+    203 │ 	try {
+    204 │ 		const collections = await getCollections();
+  > 205 │ 		collectionStatus.avgResponseTime = Date.now() - start1;
+        │ 		                                                ^^^^^^
+    206 │ 		console.log(`   ✅ CollectionService: ${collections.length} colecciones encontradas`);
+    207 │ 	} catch (error) {
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+scripts\db\migration-status-report.ts:226:50 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━
+
+  × The start1 variable is undeclared.
+  
+    224 │ 	try {
+    225 │ 		const charactersResult = await getCharacters({});
+  > 226 │ 		characterStatus.avgResponseTime = Date.now() - start1;
+        │ 		                                               ^^^^^^
+    227 │ 		console.log(`   ✅ CharacterService: ${charactersResult.characters.length} personajes encontrados`);
+    228 │ 	} catch (error) {
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+scripts\db\reset.js:137:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    136 │ // Función principal para resetear la base de datos con Drizzle
+  > 137 │ async function resetDatabase() {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 138 │ 	log('Iniciando reset de la base de datos con Drizzle...', 'info');
+         ...
+  > 190 │ 	return true;
+  > 191 │ }
+        │ ^
+    192 │ 
+    193 │ // Ejecutar la función principal
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    136 │ // Función principal para resetear la base de datos con Drizzle
+  > 137 │ async function resetDatabase() {
+        │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 138 │ 	log('Iniciando reset de la base de datos con Drizzle...', 'info');
+         ...
+  > 190 │ 	return true;
+  > 191 │ }
+        │ ^
+    192 │ 
+    193 │ // Ejecutar la función principal
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+scripts\dev-server-hot.js:71:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    70 │ // Función para compilar el servidor con Bun
+  > 71 │ async function buildServer() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 72 │ 	console.log(chalk.blue('🔨 Compilando servidor con Bun...'));
+        ...
+  > 94 │ 	}
+  > 95 │ }
+       │ ^
+    96 │ 
+    97 │ // Función para iniciar el servidor
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    70 │ // Función para compilar el servidor con Bun
+  > 71 │ async function buildServer() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 72 │ 	console.log(chalk.blue('🔨 Compilando servidor con Bun...'));
+        ...
+  > 94 │ 	}
+  > 95 │ }
+       │ ^
+    96 │ 
+    97 │ // Función para iniciar el servidor
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+scripts\logging-utils.js:20:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━
+
+  × Excessive complexity of 24 detected (max: 15).
+  
+    19 │ // Función para ejecutar comando y guardar logs
+  > 20 │ export function executeWithLogging(command, logFileName, options = {}) {
+       │                 ^^^^^^^^^^^^^^^^^^
+    21 │ 	const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+    22 │ 	const logFile = join(LOGS_DIR, `${logFileName}_${timestamp}.log`);
+  
+  i Please refactor this function to reduce its complexity score from 24 to the max allowed complexity 15.
+  
+
+scripts\logging-utils.js:139:2 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    137 │ export function showLogSummary(logFile) {
+    138 │ 	const categories = parseLogsByCategory(logFile);
+  > 139 │ 	if (!categories) return;
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^
+    140 │ 
+    141 │ 	console.log('\n📊 Resumen del log:');
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    139 │ → if·(!categories)·{·return;·}
+        │                    ++       ++
+
+scripts\logging-utils.js:220:29 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing radix parameter
+  
+    218 │ 	switch (action) {
+    219 │ 		case 'list':
+  > 220 │ 			listRecentLogs(args[0] ? Number.parseInt(args[0]) : 10);
+        │ 			                         ^^^^^^^^^^^^^^^^^^^^^^^^
+    221 │ 			break;
+    222 │ 		case 'parse':
+  
+  i Add a non-fractional number between 2 and 36
+  
+  i Unsafe fix: Add a radix of 10
+  
+    220 │ → → → listRecentLogs(args[0]·?·Number.parseInt(args[0],·10)·:·10);
+        │                                                       ++++        
+
+scripts\logging-utils.js:237:27 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Missing radix parameter
+  
+    235 │ 			break;
+    236 │ 		case 'clean':
+  > 237 │ 			cleanOldLogs(args[0] ? Number.parseInt(args[0]) : 7);
+        │ 			                       ^^^^^^^^^^^^^^^^^^^^^^^^
+    238 │ 			break;
+    239 │ 		default:
+  
+  i Add a non-fractional number between 2 and 36
+  
+  i Unsafe fix: Add a radix of 10
+  
+    237 │ → → → cleanOldLogs(args[0]·?·Number.parseInt(args[0],·10)·:·7);
+        │                                                     ++++       
+
+scripts\logging-utils.js:182:20 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The index variable is undeclared.
+  
+    180 │ 		const isError = file.name.includes('_error');
+    181 │ 		const icon = isError ? '❌' : '✅';
+  > 182 │ 		console.log(`  ${index + 1}. ${icon} ${file.name} (${new Date(file.stats.mtime).toLocaleString()})`);
+        │ 		                 ^^^^^
+    183 │ 	}
+    184 │ 
+  
+  i By default, Biome recognizes browser and Node.js globals.
+    You can ignore more globals using the javascript.globals configuration.
+  
+
+scripts\migration\analyze-bun-migration.js:89:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    88 │ 		let riskLevel = 'low';
+  > 89 │ 		if (blockers > 0) riskLevel = 'high';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 90 │ 		else if (highComplexity > 2) riskLevel = 'high';
+  > 91 │ 		else if (highComplexity > 0 || mediumComplexity > 3) riskLevel = 'medium';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    92 │ 
+    93 │ 		return {
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    89 │ → → if·(blockers·>·0)·{·riskLevel·=·'high';·}
+       │                       ++                   ++
+
+scripts\migration\analyze-bun-migration.js:90:8 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    88 │ 		let riskLevel = 'low';
+    89 │ 		if (blockers > 0) riskLevel = 'high';
+  > 90 │ 		else if (highComplexity > 2) riskLevel = 'high';
+       │ 		     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 91 │ 		else if (highComplexity > 0 || mediumComplexity > 3) riskLevel = 'medium';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    92 │ 
+    93 │ 		return {
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    90 │ → → else·if·(highComplexity·>·2)·{·riskLevel·=·'high';·}
+       │                                  ++                   ++
+
+scripts\migration\analyze-bun-migration.js:91:8 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    89 │ 		if (blockers > 0) riskLevel = 'high';
+    90 │ 		else if (highComplexity > 2) riskLevel = 'high';
+  > 91 │ 		else if (highComplexity > 0 || mediumComplexity > 3) riskLevel = 'medium';
+       │ 		     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    92 │ 
+    93 │ 		return {
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    91 │ → → else·if·(highComplexity·>·0·||·mediumComplexity·>·3)·{·riskLevel·=·'medium';·}
+       │                                                          ++                     ++
+
+scripts\migration\analyze-bun-migration.js:117:71 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    115 │ 		console.log(`⏰ Estimación: ${metrics.estimatedHours} horas (${Math.ceil(metrics.estimatedHours / 8)} días)`);
+    116 │ 		console.log(
+  > 117 │ 			`🎯 Nivel de riesgo: ${chalk[metrics.riskLevel === 'high' ? 'red' : metrics.riskLevel === 'medium' ? 'yellow' : 'green'](metrics.riskLevel.toUpperCase())}`
+        │ 			                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    118 │ 		);
+    119 │ 
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+scripts\migration\analyze-bun-migration.js:122:3 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Prefer for...of instead of forEach.
+  
+    120 │ 		// Análisis detallado por dependencia
+    121 │ 		console.log(chalk.yellow('\n🔧 ANÁLISIS DETALLADO DE DEPENDENCIAS'));
+  > 122 │ 		this.dependencies.forEach((dep) => {
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 123 │ 			const complexityColor =
+         ...
+  > 130 │ 			console.log(`  Notas: ${dep.notes}`);
+  > 131 │ 		});
+        │ 		^^
+    132 │ 
+    133 │ 		// Benchmarks de rendimiento estimados
+  
+  i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
+  
+
+scripts\migration\analyze-bun-migration.js:124:53 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    122 │ 		this.dependencies.forEach((dep) => {
+    123 │ 			const complexityColor =
+  > 124 │ 				dep.migrationComplexity === 'blocker' ? 'red' : dep.migrationComplexity === 'high' ? 'yellow' : 'green';
+        │ 				                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    125 │ 
+    126 │ 			console.log(`\n${chalk.bold(dep.name)}`);
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+scripts\migration\benchmark-current-performance.js:189:54 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    187 │ 		);
+    188 │ 
+  > 189 │ 		console.log(`📊 Mejora en build time: ${chalk.green(buildImprovement + '%')}`);
+        │ 		                                                    ^^^^^^^^^^^^^^^^^^^^^^
+    190 │ 		console.log(`📊 Mejora en memoria: ${chalk.green(memoryImprovement + '%')}`);
+    191 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+    187 187 │   		);
+    188 188 │   
+    189     │ - → → console.log(`📊·Mejora·en·build·time:·${chalk.green(buildImprovement·+·'%')}`);
+        189 │ + → → console.log(`📊·Mejora·en·build·time:·${chalk.green(`${buildImprovement}%`)}`);
+    190 190 │   		console.log(`📊 Mejora en memoria: ${chalk.green(memoryImprovement + '%')}`);
+    191 191 │   
+  
+
+scripts\migration\benchmark-current-performance.js:81:13 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    79 │ 			const calculateDirSize = (dirPath) => {
+    80 │ 				let totalSize = 0;
+  > 81 │ 				const { execSync } = require('child_process');
+       │ 				        ^^^^^^^^
+    82 │ 
+    83 │ 				try {
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+     8 │ import chalk from 'chalk';
+   > 9 │ import { execSync } from 'child_process';
+       │          ^^^^^^^^
+    10 │ import { readFileSync, statSync } from 'fs';
+    11 │ import { join } from 'path';
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\migration\benchmark-current-performance.js:40:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    39 │ 	formatTime(ms) {
+  > 40 │ 		if (ms < 1000) return `${ms.toFixed(0)}ms`;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    41 │ 		return `${(ms / 1000).toFixed(2)}s`;
+    42 │ 	}
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    40 │ → → if·(ms·<·1000)·{·return·`${ms.toFixed(0)}ms`;·}
+       │                    ++                            ++
+
+scripts\migration\benchmark-current-performance.js:44:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    42 │ 	}
+    43 │ 
+  > 44 │ 	async measureBundleTime() {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 45 │ 		console.log(chalk.yellow('📦 Midiendo tiempo de build...'));
+        ...
+  > 68 │ 		}
+  > 69 │ 	}
+       │ 	^
+    70 │ 
+    71 │ 	measureBundleSize() {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    42 │ 	}
+    43 │ 
+  > 44 │ 	async measureBundleTime() {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 45 │ 		console.log(chalk.yellow('📦 Midiendo tiempo de build...'));
+        ...
+  > 68 │ 		}
+  > 69 │ 	}
+       │ 	^
+    70 │ 
+    71 │ 	measureBundleSize() {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+scripts\migration\benchmark-current-performance.js:91:18 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━━━
+
+  × Missing radix parameter
+  
+    90 │ 					const result = execSync(command, { encoding: 'utf8' }).trim();
+  > 91 │ 					totalSize = Number.parseInt(result) || 0;
+       │ 					            ^^^^^^^^^^^^^^^^^^^^^^^
+    92 │ 				} catch (error) {
+    93 │ 					console.log(chalk.yellow('!� No se pudo calcular tamaño exacto'));
+  
+  i Add a non-fractional number between 2 and 36
+  
+  i Unsafe fix: Add a radix of 10
+  
+    91 │ → → → → → totalSize·=·Number.parseInt(result,·10)·||·0;
+       │                                             ++++       
+
+scripts\migration\benchmark-current-performance.js:190:51 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    189 │ 		console.log(`📊 Mejora en build time: ${chalk.green(buildImprovement + '%')}`);
+  > 190 │ 		console.log(`📊 Mejora en memoria: ${chalk.green(memoryImprovement + '%')}`);
+        │ 		                                                 ^^^^^^^^^^^^^^^^^^^^^^^
+    191 │ 
+    192 │ 		// Calculamos si vale la pena
+  
+  i Unsafe fix: Use a template literal.
+  
+    188 188 │   
+    189 189 │   		console.log(`📊 Mejora en build time: ${chalk.green(buildImprovement + '%')}`);
+    190     │ - → → console.log(`📊·Mejora·en·memoria:·${chalk.green(memoryImprovement·+·'%')}`);
+        190 │ + → → console.log(`📊·Mejora·en·memoria:·${chalk.green(`${memoryImprovement}%`)}`);
+    191 191 │   
+    192 192 │   		// Calculamos si vale la pena
+  
+
+scripts\run-with-log-tolerant.js:108:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    106 │ 	// Salida de error del proceso
+    107 │ 	if (isError) {
+  > 108 │ 		if (hasRealErrors) return { color: chalk.redBright, emoji: '🔴' };
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    109 │ 		if (isTolerantCommand) return { color: chalk.cyan, emoji: '🔍' };
+    110 │ 	}
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    108 │ → → if·(hasRealErrors)·{·return·{·color:·chalk.redBright,·emoji:·'🔴'·};·}
+        │                        ++                                               ++
+
+scripts\run-with-log-tolerant.js:109:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    107 │ 	if (isError) {
+    108 │ 		if (hasRealErrors) return { color: chalk.redBright, emoji: '🔴' };
+  > 109 │ 		if (isTolerantCommand) return { color: chalk.cyan, emoji: '🔍' };
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    110 │ 	}
+    111 │ 
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    109 │ → → if·(isTolerantCommand)·{·return·{·color:·chalk.cyan,·emoji:·'🔍'·};·}
+        │                            ++                                          ++
+
+scripts\run-with-log-tolerant.js:83:53 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    82 │ // Función para determinar el color y emoji según el tipo de línea
+  > 83 │ function getLineStyle(line, isError, hasRealErrors, isTolerantCommand) {
+       │                                                     ^^^^^^^^^^^^^^^^^
+    84 │ 	// Casos de éxito
+    85 │ 	if (line.includes('✓') || line.includes('success') || line.includes('Fixed')) {
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    37 │ const isLintingCommand = LINTING_COMMANDS.some((cmd) => fullCommand.includes(cmd));
+    38 │ const isTestingCommand = TESTING_COMMANDS.some((cmd) => fullCommand.includes(cmd));
+  > 39 │ const isTolerantCommand = isLintingCommand || isTestingCommand;
+       │       ^^^^^^^^^^^^^^^^^
+    40 │ 
+    41 │ const logsDir = join(process.cwd(), 'logs');
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\run-with-log-tolerant.js:121:6 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    119 │ 	const lines = text.split('\n').filter((line) => line.trim());
+    120 │ 
+  > 121 │ 	if (/Cannot find module/.test(text)) {
+        │ 	    ^^^^^^^^^^^^^^^^^^^^
+    122 │ 		missingDep = true;
+    123 │ 		hasRealErrors = true;
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\run-with-log-tolerant.js:127:6 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    126 │ 	// Detectar errores críticos reales vs issues de linting/testing
+  > 127 │ 	if (/ENOENT|spawn.*failed|permission denied|command not found|out of memory/i.test(text)) {
+        │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    128 │ 		hasRealErrors = true;
+    129 │ 	}
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\run-with-log-tolerant.js:132:6 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    131 │ 	// Detectar errores de dependencias
+  > 132 │ 	if (/MODULE_NOT_FOUND|Error: Cannot resolve module|bun.*ERR/i.test(text)) {
+        │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    133 │ 		hasRealErrors = true;
+    134 │ 	}
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\run-with-log-tolerant.js:170:47 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    168 │ 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
+    169 │ 	} else if (isTolerantCommand && !hasRealErrors) {
+  > 170 │ 		const tipo = isLintingCommand ? 'Linting' : isTestingCommand ? 'Testing' : 'Proceso';
+        │ 		                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    171 │ 		console.log(chalk.yellow.bold(`!�  ${tipo} completado con issues encontrados (Exit code: ${code})`));
+    172 │ 		console.log(chalk.cyan(`🔍 Esto es normal para herramientas de ${tipo.toLowerCase()} cuando encuentran problemas`));
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+scripts\run-with-log-tolerant.js:83:38 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    82 │ // Función para determinar el color y emoji según el tipo de línea
+  > 83 │ function getLineStyle(line, isError, hasRealErrors, isTolerantCommand) {
+       │                                      ^^^^^^^^^^^^^
+    84 │ 	// Casos de éxito
+    85 │ 	if (line.includes('✓') || line.includes('success') || line.includes('Fixed')) {
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    79 │ let missingDep = false;
+  > 80 │ let hasRealErrors = false;
+       │     ^^^^^^^^^^^^^
+    81 │ 
+    82 │ // Función para determinar el color y emoji según el tipo de línea
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\run-with-log-tolerant.js:53:46 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    51 │ console.log(chalk.gray(`📄 Logs en: ${logFilePath}`));
+    52 │ if (isTolerantCommand) {
+  > 53 │ 	const tipo = isLintingCommand ? 'linting' : isTestingCommand ? 'testing' : 'tolerante';
+       │ 	                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ 	console.log(chalk.blue(`🔍 Comando de ${tipo} detectado - tolerando códigos de salida no-cero`));
+    55 │ }
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+scripts\run-with-log-tolerant.js:65:42 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    63 │ 	`Directorio: ${process.cwd()}`,
+    64 │ 	`Modo tolerante: ${isTolerantCommand ? 'SÍ' : 'NO'}`,
+  > 65 │ 	`Tipo: ${isLintingCommand ? 'Linting' : isTestingCommand ? 'Testing' : 'Normal'}`,
+       │ 	                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ 	'===============================================',
+    67 │ 	'',
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+scripts\run-with-log-tolerant.js:83:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━
+
+  × Excessive complexity of 16 detected (max: 15).
+  
+    82 │ // Función para determinar el color y emoji según el tipo de línea
+  > 83 │ function getLineStyle(line, isError, hasRealErrors, isTolerantCommand) {
+       │          ^^^^^^^^^^^^
+    84 │ 	// Casos de éxito
+    85 │ 	if (line.includes('✓') || line.includes('success') || line.includes('Fixed')) {
+  
+  i Please refactor this function to reduce its complexity score from 16 to the max allowed complexity 15.
+  
+
+scripts\run-with-log.js:58:46 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    56 │ console.log(chalk.gray(`📄 Logs en: ${logFilePath}`));
+    57 │ if (isTolerantCommand) {
+  > 58 │ 	const tipo = isLintingCommand ? 'linting' : isTestingCommand ? 'testing' : 'tolerante';
+       │ 	                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ 	console.log(chalk.blue(`🔍 Comando de ${tipo} detectado - tolerando códigos de salida no-cero`));
+    60 │ }
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+scripts\run-with-log.js:70:42 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    68 │ 	`Directorio: ${process.cwd()}`,
+    69 │ 	`Modo tolerante: ${isTolerantCommand ? 'SÍ' : 'NO'}`,
+  > 70 │ 	`Tipo: ${isLintingCommand ? 'Linting' : isTestingCommand ? 'Testing' : 'Normal'}`,
+       │ 	                                        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    71 │ 	'===============================================',
+    72 │ 	'',
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+scripts\run-with-log.js:88:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Excessive complexity of 16 detected (max: 15).
+  
+    87 │ // Función para determinar el color y emoji según el tipo de línea
+  > 88 │ function getLineStyle(line, isError, hasRealErrors, isTolerantCommand) {
+       │          ^^^^^^^^^^^^
+    89 │ 	// Casos de éxito
+    90 │ 	if (line.includes('✓') || line.includes('success') || line.includes('Fixed')) {
+  
+  i Please refactor this function to reduce its complexity score from 16 to the max allowed complexity 15.
+  
+
+scripts\run-with-log.js:113:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    111 │ 	// Salida de error del proceso
+    112 │ 	if (isError) {
+  > 113 │ 		if (hasRealErrors) return { color: chalk.redBright, emoji: '🔴' };
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    114 │ 		if (isTolerantCommand) return { color: chalk.cyan, emoji: '🔍' };
+    115 │ 	}
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    113 │ → → if·(hasRealErrors)·{·return·{·color:·chalk.redBright,·emoji:·'🔴'·};·}
+        │                        ++                                               ++
+
+scripts\run-with-log.js:114:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    112 │ 	if (isError) {
+    113 │ 		if (hasRealErrors) return { color: chalk.redBright, emoji: '🔴' };
+  > 114 │ 		if (isTolerantCommand) return { color: chalk.cyan, emoji: '🔍' };
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    115 │ 	}
+    116 │ 
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    114 │ → → if·(isTolerantCommand)·{·return·{·color:·chalk.cyan,·emoji:·'🔍'·};·}
+        │                            ++                                          ++
+
+scripts\run-with-log.js:126:6 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    124 │ 	const lines = text.split('\n').filter((line) => line.trim());
+    125 │ 
+  > 126 │ 	if (/Cannot find module/.test(text)) {
+        │ 	    ^^^^^^^^^^^^^^^^^^^^
+    127 │ 		missingDep = true;
+    128 │ 		hasRealErrors = true;
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\run-with-log.js:132:6 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    131 │ 	// Detectar errores críticos reales vs issues de linting/testing
+  > 132 │ 	if (/ENOENT|spawn.*failed|permission denied|command not found|out of memory/i.test(text)) {
+        │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    133 │ 		hasRealErrors = true;
+    134 │ 	}
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\run-with-log.js:137:6 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    136 │ 	// Detectar errores de dependencias
+  > 137 │ 	if (/MODULE_NOT_FOUND|Error: Cannot resolve module|bun.*ERR/i.test(text)) {
+        │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    138 │ 		hasRealErrors = true;
+    139 │ 	}
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\run-with-log.js:175:47 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    173 │ 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
+    174 │ 	} else if (isTolerantCommand && !hasRealErrors) {
+  > 175 │ 		const tipo = isLintingCommand ? 'Linting' : isTestingCommand ? 'Testing' : 'Proceso';
+        │ 		                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    176 │ 		console.log(chalk.yellow.bold(`!�  ${tipo} completado con issues encontrados (Exit code: ${code})`));
+    177 │ 		console.log(chalk.cyan(`🔍 Esto es normal para herramientas de ${tipo.toLowerCase()} cuando encuentran problemas`));
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+scripts\run-with-log.js:88:38 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    87 │ // Función para determinar el color y emoji según el tipo de línea
+  > 88 │ function getLineStyle(line, isError, hasRealErrors, isTolerantCommand) {
+       │                                      ^^^^^^^^^^^^^
+    89 │ 	// Casos de éxito
+    90 │ 	if (line.includes('✓') || line.includes('success') || line.includes('Fixed')) {
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    84 │ let missingDep = false;
+  > 85 │ let hasRealErrors = false;
+       │     ^^^^^^^^^^^^^
+    86 │ 
+    87 │ // Función para determinar el color y emoji según el tipo de línea
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\run-with-log.js:88:53 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    87 │ // Función para determinar el color y emoji según el tipo de línea
+  > 88 │ function getLineStyle(line, isError, hasRealErrors, isTolerantCommand) {
+       │                                                     ^^^^^^^^^^^^^^^^^
+    89 │ 	// Casos de éxito
+    90 │ 	if (line.includes('✓') || line.includes('success') || line.includes('Fixed')) {
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    42 │ const isLintingCommand = LINTING_COMMANDS.some((cmd) => fullCommand.includes(cmd));
+    43 │ const isTestingCommand = TESTING_COMMANDS.some((cmd) => fullCommand.includes(cmd));
+  > 44 │ const isTolerantCommand = isLintingCommand || isTestingCommand;
+       │       ^^^^^^^^^^^^^^^^^
+    45 │ 
+    46 │ const logsDir = join(process.cwd(), 'logs');
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\utils\document-component.js:68:40 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    67 │ 		// Extraer nombre del componente
+  > 68 │ 		const componentMatch = content.match(/export function (\w+)/);
+       │ 		                                     ^^^^^^^^^^^^^^^^^^^^^^^
+    69 │ 		const componentName = componentMatch ? componentMatch[1] : 'UnknownComponent';
+    70 │ 
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\utils\document-component.js:72:36 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    71 │ 		// Extraer props interface
+  > 72 │ 		const propsMatch = content.match(/interface (\w+Props)[^}]+}/);
+       │ 		                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ 		const propsInterface = propsMatch ? propsMatch[0] : null;
+    74 │ 
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\utils\document-component.js:82:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    80 │ 		// Detectar imports importantes
+    81 │ 		const imports = [];
+  > 82 │ 		if (content.includes('lucide-react')) imports.push('lucide-react');
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    83 │ 		if (content.includes('sonner')) imports.push('sonner (toasts)');
+    84 │ 		if (content.includes('zustand')) imports.push('zustand (estado)');
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    82 │ → → if·(content.includes('lucide-react'))·{·imports.push('lucide-react');·}
+       │                                           ++                             ++
+
+scripts\utils\document-component.js:83:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    81 │ 		const imports = [];
+    82 │ 		if (content.includes('lucide-react')) imports.push('lucide-react');
+  > 83 │ 		if (content.includes('sonner')) imports.push('sonner (toasts)');
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    84 │ 		if (content.includes('zustand')) imports.push('zustand (estado)');
+    85 │ 
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    83 │ → → if·(content.includes('sonner'))·{·imports.push('sonner·(toasts)');·}
+       │                                     ++                                ++
+
+scripts\utils\document-component.js:84:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    82 │ 		if (content.includes('lucide-react')) imports.push('lucide-react');
+    83 │ 		if (content.includes('sonner')) imports.push('sonner (toasts)');
+  > 84 │ 		if (content.includes('zustand')) imports.push('zustand (estado)');
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    85 │ 
+    86 │ 		return {
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    84 │ → → if·(content.includes('zustand'))·{·imports.push('zustand·(estado)');·}
+       │                                      ++                                 ++
+
+scripts\utils\playwright-mcp-helper.js:36:45 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    34 │  * Generar test a partir de un escenario
+    35 │  */
+  > 36 │ function generateTestFromScenario(scenario, config) {
+       │                                             ^^^^^^
+    37 │ 	const testName = scenario.name.toLowerCase().replace(/\s+/g, '-');
+    38 │ 	const testContent = `import { test, expect } from '@playwright/test';
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    191 │ }
+    192 │ 
+  > 193 │ const config = loadConfig();
+        │       ^^^^^^
+    194 │ 
+    195 │ switch (command) {
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\utils\playwright-mcp-helper.js:67:33 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    65 │  * Generar código para un paso específico
+    66 │  */
+  > 67 │ function generateStepCode(step, config) {
+       │                                 ^^^^^^
+    68 │ 	const stepLower = step.toLowerCase();
+    69 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    191 │ }
+    192 │ 
+  > 193 │ const config = loadConfig();
+        │       ^^^^^^
+    194 │ 
+    195 │ switch (command) {
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\utils\playwright-mcp-helper.js:130:24 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    128 │  * Listar escenarios disponibles
+    129 │  */
+  > 130 │ function listScenarios(config) {
+        │                        ^^^^^^
+    131 │ 	console.log(chalk.blue('\n📋 Escenarios disponibles:\n'));
+    132 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    191 │ }
+    192 │ 
+  > 193 │ const config = loadConfig();
+        │       ^^^^^^
+    194 │ 
+    195 │ switch (command) {
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\utils\playwright-mcp-helper.js:144:25 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    142 │  * Validar configuración
+    143 │  */
+  > 144 │ function validateConfig(config) {
+        │                         ^^^^^^
+    145 │ 	console.log(chalk.blue('🔍 Validando configuración...\n'));
+    146 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    191 │ }
+    192 │ 
+  > 193 │ const config = loadConfig();
+        │       ^^^^^^
+    194 │ 
+    195 │ switch (command) {
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\utils\playwright-mcp-helper.js:170:27 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    168 │  * Generar todos los tests
+    169 │  */
+  > 170 │ function generateAllTests(config) {
+        │                           ^^^^^^
+    171 │ 	console.log(chalk.blue('🚀 Generando tests automáticamente...\n'));
+    172 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    191 │ }
+    192 │ 
+  > 193 │ const config = loadConfig();
+        │       ^^^^^^
+    194 │ 
+    195 │ switch (command) {
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+src\App.tsx lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    app.tsx
+  
+
+src\components\batch-operations\BatchOperationDialog.tsx:83:3 lint/style/useDefaultSwitchClause ━━━━━━━━━━
+
+  × Expected a default switch clause.
+  
+    82 │ 	const getOperationIcon = () => {
+  > 83 │ 		switch (type) {
+       │ 		^^^^^^^^^^^^^^^
+  > 84 │ 			case 'copy':
+        ...
+  > 89 │ 				return <Trash2 className="h-5 w-5 text-red-500" />;
+  > 90 │ 		}
+       │ 		^
+    91 │ 	};
+    92 │ 
+  
+  i The lack of a default clause can be a possible omission.
+  
+  i Consider adding a default clause.
+  
+
+src\components\batch-operations\BatchOperationDialog.tsx:97:3 lint/style/useDefaultSwitchClause ━━━━━━━━━━
+
+  × Expected a default switch clause.
+  
+     95 │ 		const itemText = itemCount === 1 ? 'elemento' : 'elementos';
+     96 │ 
+   > 97 │ 		switch (type) {
+        │ 		^^^^^^^^^^^^^^^
+   > 98 │ 			case 'copy':
+         ...
+  > 103 │ 				return `Eliminar ${itemCount} ${itemText}`;
+  > 104 │ 		}
+        │ 		^
+    105 │ 	};
+    106 │ 
+  
+  i The lack of a default clause can be a possible omission.
+  
+  i Consider adding a default clause.
+  
+
+src\components\batch-operations\BatchOperationDialog.tsx:108:3 lint/style/useDefaultSwitchClause ━━━━━━━━━━
+
+  × Expected a default switch clause.
+  
+    107 │ 	const getOperationDescription = () => {
+  > 108 │ 		switch (type) {
+        │ 		^^^^^^^^^^^^^^^
+  > 109 │ 			case 'copy':
+         ...
+  > 114 │ 				return 'Los archivos se eliminarán permanentemente. Esta acción no se puede deshacer.';
+  > 115 │ 		}
+        │ 		^
+    116 │ 	};
+    117 │ 
+  
+  i The lack of a default clause can be a possible omission.
+  
+  i Consider adding a default clause.
+  
+
+src\components\batch-operations\BatchOperationDialog.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    batch-operation-dialog.tsx
+  
+
+src\components\batch-operations\BatchOperationDialog.tsx:133:34 lint/nursery/noShadow ━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    131 │ 	};
+    132 │ 
+  > 133 │ 	const getPriorityDescription = (priority: string) => {
+        │ 	                                ^^^^^^^^
+    134 │ 		switch (priority) {
+    135 │ 			case 'urgent':
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    52 │ 	const [targetPath, setTargetPath] = useState(initialTargetPath || '');
+    53 │ 	const [description, setDescription] = useState('');
+  > 54 │ 	const [priority, setPriority] = useState<'low' | 'normal' | 'high' | 'urgent'>('normal');
+       │ 	       ^^^^^^^^
+    55 │ 	const [overwrite, setOverwrite] = useState(false);
+    56 │ 	const [continueOnError, setContinueOnError] = useState(type !== 'delete');
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+src\components\batch-operations\BatchOperationDialog.tsx:189:60 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    187 │ 								<div className="max-h-20 space-y-1 overflow-y-auto">
+    188 │ 									{items.slice(0, 5).map((item, index) => (
+  > 189 │ 										<div className="truncate font-mono text-xs" key={index}>
+        │ 										                                                 ^^^^^
+    190 │ 											{item.name}
+    191 │ 										</div>
+  
+  i This is the source of the key value.
+  
+    186 │ 								<div className="mb-1 text-muted-foreground text-xs">Elementos:</div>
+    187 │ 								<div className="max-h-20 space-y-1 overflow-y-auto">
+  > 188 │ 									{items.slice(0, 5).map((item, index) => (
+        │ 									                              ^^^^^
+    189 │ 										<div className="truncate font-mono text-xs" key={index}>
+    190 │ 											{item.name}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+src\components\batch-operations\BatchOperationsIndicator.tsx:55:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    53 │ 		if (summary.failed > 0) return 'failed';
+    54 │ 		if (summary.paused > 0) return 'paused';
+  > 55 │ 		if (summary.queued > 0) return 'queued';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ 		if (summary.completed > 0) return 'completed';
+    57 │ 		return 'idle';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    55 │ → → if·(summary.queued·>·0)·{·return·'queued';·}
+       │                             ++                ++
+
+src\components\batch-operations\BatchOperationsIndicator.tsx:56:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    54 │ 		if (summary.paused > 0) return 'paused';
+    55 │ 		if (summary.queued > 0) return 'queued';
+  > 56 │ 		if (summary.completed > 0) return 'completed';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 		return 'idle';
+    58 │ 	};
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    56 │ → → if·(summary.completed·>·0)·{·return·'completed';·}
+       │                                ++                   ++
+
+src\components\batch-operations\BatchOperationsIndicator.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    batch-operations-indicator.tsx
+  
+
+src\components\batch-operations\BatchOperationsIndicator.tsx:13:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  × This import is unused.
+  
+    11 │ import { Button } from '@/components/ui/button';
+    12 │ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+  > 13 │ import { Progress } from '@/components/ui/progress';
+       │        ^^^^^^^^^^^^
+    14 │ import { useBatchOperations } from '@/hooks/useBatchOperations';
+    15 │ import { cn } from '@/lib/utils';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     11  11 │   import { Button } from '@/components/ui/button';
+     12  12 │   import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+     13     │ - import·{·Progress·}·from·'@/components/ui/progress';
+     14  13 │   import { useBatchOperations } from '@/hooks/useBatchOperations';
+     15  14 │   import { cn } from '@/lib/utils';
+  
+
+src\components\batch-operations\BatchOperationsIndicator.tsx:54:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    52 │ 		if (summary.running > 0) return 'running';
+    53 │ 		if (summary.failed > 0) return 'failed';
+  > 54 │ 		if (summary.paused > 0) return 'paused';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    55 │ 		if (summary.queued > 0) return 'queued';
+    56 │ 		if (summary.completed > 0) return 'completed';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    54 │ → → if·(summary.paused·>·0)·{·return·'paused';·}
+       │                             ++                ++
+
+src\components\batch-operations\BatchOperationsIndicator.tsx:53:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    51 │ 	const getIndicatorStatus = () => {
+    52 │ 		if (summary.running > 0) return 'running';
+  > 53 │ 		if (summary.failed > 0) return 'failed';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ 		if (summary.paused > 0) return 'paused';
+    55 │ 		if (summary.queued > 0) return 'queued';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    53 │ → → if·(summary.failed·>·0)·{·return·'failed';·}
+       │                             ++                ++
+
+src\components\batch-operations\BatchOperationsIndicator.tsx:52:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    50 │ 	// Get the most relevant status
+    51 │ 	const getIndicatorStatus = () => {
+  > 52 │ 		if (summary.running > 0) return 'running';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ 		if (summary.failed > 0) return 'failed';
+    54 │ 		if (summary.paused > 0) return 'paused';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    52 │ → → if·(summary.running·>·0)·{·return·'running';·}
+       │                              ++                 ++
+
+src\components\batch-operations\BatchOperationsPanel.tsx:171:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    170 │ 	const getElapsedTime = (operation: BatchOperation) => {
+  > 171 │ 		if (!operation.startedAt) return null;
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    172 │ 
+    173 │ 		const endTime = operation.completedAt || Date.now();
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    171 │ → → if·(!operation.startedAt)·{·return·null;·}
+        │                               ++            ++
+
+src\components\batch-operations\BatchOperationsPanel.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    batch-operations-panel.tsx
+  
+
+src\components\batch-operations\BatchOperationsPanel.tsx:9:2 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  × Several of these imports are unused.
+  
+     8 │ import {
+   > 9 │ 	AlertCircle,
+       │ 	^^^^^^^^^^^
+    10 │ 	CheckCircle,
+    11 │ 	ChevronDown,
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      7   7 │   
+      8   8 │   import {
+      9     │ - → AlertCircle,
+     10   9 │   	CheckCircle,
+     11  10 │   	ChevronDown,
+  
+
+src\components\batch-operations\BatchOperationsPanel.tsx:24:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  × These imports are unused.
+  
+    22 │ 	XCircle,
+    23 │ } from 'lucide-react';
+  > 24 │ import React, { useEffect, useState } from 'react';
+       │        ^^^^^
+    25 │ import { Badge } from '@/components/ui/badge';
+    26 │ import { Button } from '@/components/ui/button';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    24 │ import·React,·{·useEffect,·useState·}·from·'react';
+       │        -------                                     
+
+src\components\batch-operations\BatchOperationsPanel.tsx:38:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  × This import is unused.
+  
+    36 │ import { cn } from '@/lib/utils';
+    37 │ import { formatDuration } from '@/lib/utils/format';
+  > 38 │ import { formatBytes } from '@/lib/utils/format.utils';
+       │        ^^^^^^^^^^^^^^^
+    39 │ import {
+    40 │ 	type BatchOperation,
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+     36  36 │   import { cn } from '@/lib/utils';
+     37  37 │   import { formatDuration } from '@/lib/utils/format';
+     38     │ - import·{·formatBytes·}·from·'@/lib/utils/format.utils';
+     39  38 │   import {
+     40  39 │   	type BatchOperation,
+  
+
+src\components\batch-operations\BatchOperationsPanel.tsx:348:67 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    346 │ 												<div className="max-h-20 space-y-1 overflow-y-auto">
+    347 │ 													{operation.errors.slice(0, 3).map((error, index) => (
+  > 348 │ 														<div className="text-muted-foreground text-xs" key={index}>
+        │ 														                                                    ^^^^^
+    349 │ 															<span className="font-medium">{error.item.name}:</span>
+    350 │ 															<span className="ml-1">{error.message}</span>
+  
+  i This is the source of the key value.
+  
+    345 │ 												<h5 className="mb-2 font-medium text-red-600 text-xs">Errores ({operation.errors.length}):</h5>
+    346 │ 												<div className="max-h-20 space-y-1 overflow-y-auto">
+  > 347 │ 													{operation.errors.slice(0, 3).map((error, index) => (
+        │ 													                                          ^^^^^
+    348 │ 														<div className="text-muted-foreground text-xs" key={index}>
+    349 │ 															<span className="font-medium">{error.item.name}:</span>
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
+  
+
+src\components\cards\album-card\album-card-content.tsx:26:6 lint/style/noNestedTernary ━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    24 │ 		album.filters === 'empty_array'
+    25 │ 			? []
+  > 26 │ 			: typeof album.filters === 'string'
+       │ 			  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 27 │ 				? JSON.parse(album.filters)
+  > 28 │ 				: album.filters || [];
+       │ 				^^^^^^^^^^^^^^^^^^^^^
+    29 │ 
+    30 │ 	return (
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src\components\cards\album-card\album-card-footer.tsx:26:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    24 │ 	// Formatear el tamaño en MB
+    25 │ 	const formatSize = (bytes?: number): string => {
+  > 26 │ 		if (!bytes) return '0 MB';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 		const mb = bytes / (1024 * 1024);
+    28 │ 		return `${mb.toFixed(1)} MB`;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    26 │ → → if·(!bytes)·{·return·'0·MB';·}
+       │                 ++              ++
+
+src\components\cards\album-card\album-card-images.tsx:62:6 lint/performance/noImgElement ━━━━━━━━━━━
+
+  × Don't use <img> element.
+  
+    60 │ 					key={`album-img-${imgSrc.substring(imgSrc.lastIndexOf('/') + 1)}`}
+    61 │ 				>
+  > 62 │ 					<img alt={`Imagen de álbum ${index + 1}`} className="h-full w-full object-cover" src={imgSrc} />
+       │ 					^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ 					{/* Indicador de video */}
+    64 │ 					{recentVideos.includes(imgSrc) && (
+  
+  i Using the <img> can lead to slower LCP and higher bandwidth. Consider using <Image /> from next/image to automatically optimize images.
+  
+
+src\components\cards\album-card\album-card.tsx:44:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 30 detected (max: 15).
+  
+    42 │  * secciones que muestran datos y miniaturas de las imágenes contenidas.
+    43 │  */
+  > 44 │ export function AlbumCard({
+       │                 ^^^^^^^^^
+    45 │ 	album,
+    46 │ 	onClick,
+  
+  i Please refactor this function to reduce its complexity score from 30 to the max allowed complexity 15.
+  
+
+src\components\cards\album-card\album-card.tsx:76:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    74 │ 	const secondaryColor = useMemo(() => {
+    75 │ 		// Si no hay color definido, usar un valor por defecto
+  > 76 │ 		if (!album.color) return '#6d28d9';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    77 │ 
+    78 │ 		// Oscurecer el color primario para el secundario
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    76 │ → → if·(!album.color)·{·return·'#6d28d9';·}
+       │                       ++                 ++
+
+src\components\cards\album-card\album-card.tsx:155:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    153 │ 	const rarityLevel = useMemo(() => {
+    154 │ 		const total = totalMedia + totalEntities;
+  > 155 │ 		if (total > 200) return 'Mítica';
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    156 │ 		if (total > 100) return 'Rara';
+    157 │ 		if (total > 50) return 'Poco común';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    155 │ → → if·(total·>·200)·{·return·'Mítica';·}
+        │                      ++                ++
+
+src\components\cards\album-card\album-card.tsx:156:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    154 │ 		const total = totalMedia + totalEntities;
+    155 │ 		if (total > 200) return 'Mítica';
+  > 156 │ 		if (total > 100) return 'Rara';
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    157 │ 		if (total > 50) return 'Poco común';
+    158 │ 		return 'Común';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    156 │ → → if·(total·>·100)·{·return·'Rara';·}
+        │                      ++              ++
+
+src\components\cards\album-card\album-card.tsx:157:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    155 │ 		if (total > 200) return 'Mítica';
+    156 │ 		if (total > 100) return 'Rara';
+  > 157 │ 		if (total > 50) return 'Poco común';
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    158 │ 		return 'Común';
+    159 │ 	}, [totalMedia, totalEntities]);
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    157 │ → → if·(total·>·50)·{·return·'Poco·común';·}
+        │                     ++                    ++
+
+src\components\cards\audio-card\audio-card.tsx:24:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 19 detected (max: 15).
+  
+    22 │  * AudioCard - Componente de tarjeta para archivos de audio con player integrado
+    23 │  */
+  > 24 │ export function AudioCard({
+       │                 ^^^^^^^^^
+    25 │ 	audio,
+    26 │ 	compact = false,
+  
+  i Please refactor this function to reduce its complexity score from 19 to the max allowed complexity 15.
+  
+
+src\components\cards\audio-card\audio-card.tsx:79:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    77 │ 	// Formatear tamaño de archivo
+    78 │ 	const fileSize = useMemo(() => {
+  > 79 │ 		if (!audio.size) return 'N/A';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    80 │ 		const mb = audio.size / (1024 * 1024);
+    81 │ 		if (mb < 1) {
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    79 │ → → if·(!audio.size)·{·return·'N/A';·}
+       │                      ++             ++
+
+src\components\cards\audio-card\audio-card.tsx:92:4 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    90 │ 		(e: React.MouseEvent) => {
+    91 │ 			e.stopPropagation();
+  > 92 │ 			if (!audioRef.current) return;
+       │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    93 │ 
+    94 │ 			if (isPlaying) {
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    92 │ → → → if·(!audioRef.current)·{·return;·}
+       │                              ++       ++
+
+src\components\cards\audio-card\audio-card.tsx:107:4 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    105 │ 		(e: React.MouseEvent) => {
+    106 │ 			e.stopPropagation();
+  > 107 │ 			if (!audioRef.current) return;
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    108 │ 
+    109 │ 			audioRef.current.muted = !isMuted;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    107 │ → → → if·(!audioRef.current)·{·return;·}
+        │                              ++       ++
+
+src\components\cards\audio-card\audio-card.tsx:116:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    115 │ 	const handleTimeUpdate = useCallback(() => {
+  > 116 │ 		if (!audioRef.current) return;
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    117 │ 		setCurrentTime(audioRef.current.currentTime);
+    118 │ 	}, []);
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    116 │ → → if·(!audioRef.current)·{·return;·}
+        │                            ++       ++
+
+src\components\cards\audio-card\audio-card.tsx:121:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    120 │ 	const handleLoadedMetadata = useCallback(() => {
+  > 121 │ 		if (!audioRef.current) return;
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    122 │ 		setDuration(audioRef.current.duration);
+    123 │ 	}, []);
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    121 │ → → if·(!audioRef.current)·{·return;·}
+        │                            ++       ++
+
+src\components\cards\card-header.tsx:18:53 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━
+
+  × This parameter is unused.
+  
+    16 │  * Similar al encabezado de una carta Magic con título, subtítulo e icono
+    17 │  */
+  > 18 │ export function CardHeader({ title, subtitle, icon, emoji, primaryColor, className, compact }: CardHeaderProps) {
+       │                                                     ^^^^^
+    19 │ 	return (
+    20 │ 		<div
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\cards\card-header.tsx:18:85 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━
+
+  × This parameter is unused.
+  
+    16 │  * Similar al encabezado de una carta Magic con título, subtítulo e icono
+    17 │  */
+  > 18 │ export function CardHeader({ title, subtitle, icon, emoji, primaryColor, className, compact }: CardHeaderProps) {
+       │                                                                                     ^^^^^^^
+    19 │ 	return (
+    20 │ 		<div
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\cards\character-card\character-card-adapter.ts:42:7 lint/style/noNestedTernary ━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    40 │ 			typeof character.stats === 'string'
+    41 │ 				? safeJsonParse<CharacterStats>(character.stats, {} as CharacterStats)
+  > 42 │ 				: character.statistics
+       │ 				  ^^^^^^^^^^^^^^^^^^^^
+  > 43 │ 					? ({
+        ...
+  > 50 │ 						} as CharacterStats)
+  > 51 │ 					: ({} as CharacterStats),
+       │ 					^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ 		parsedRelationships: safeJsonParse<Record<string, any>>(character.relationships, {}),
+    53 │ 		parsedGoals: safeJsonParse<Record<string, any>>(character.goals, {}),
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src\components\cards\character-card\character-card-adapter.ts:24:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    23 │ 	const safeJsonParse = <T>(jsonStr: string | null | undefined, fallback: T): T => {
+  > 24 │ 		if (!jsonStr) return fallback;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ 		try {
+    26 │ 			return JSON.parse(jsonStr) as T;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    24 │ → → if·(!jsonStr)·{·return·fallback;·}
+       │                   ++                ++
+
+src\components\cards\character-card\character-card-content.tsx:71:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    69 │ 		if (key.includes('cha') || key.includes('soc') || key.includes('charisma')) return <User className="h-3 w-3" />;
+    70 │ 		if (key.includes('hp') || key.includes('health')) return <Heart className="h-3 w-3" />;
+  > 71 │ 		if (key.includes('mp') || key.includes('mana')) return <Wand className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ 		return <Star className="h-3 w-3" />;
+    73 │ 	};
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    71 │ → → if·(key.includes('mp')·||·key.includes('mana'))·{·return·<Wand·className="h-3·w-3"·/>;·}
+       │                                                     ++                                    ++
+
+src\components\cards\character-card\character-card-content.tsx:100:48 lint/nursery/noShadow ━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+     98 │ 		}
+     99 │ 		// Si es un Record, convertir a array
+  > 100 │ 		return Object.entries(abilities).map(([name, description]) => ({
+        │ 		                                             ^^^^^^^^^^^
+    101 │ 			name,
+    102 │ 			description: typeof description === 'string' ? description : '',
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    34 │ export function CharacterCardContent({
+  > 35 │ 	description,
+       │ 	^^^^^^^^^^^
+    36 │ 	primaryColor = '#8e44ad',
+    37 │ 	secondaryColor = '#6d28d9',
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+src\components\cards\character-card\character-card-content.tsx:34:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 24 detected (max: 15).
+  
+    32 │ }
+    33 │ 
+  > 34 │ export function CharacterCardContent({
+       │                 ^^^^^^^^^^^^^^^^^^^^
+    35 │ 	description,
+    36 │ 	primaryColor = '#8e44ad',
+  
+  i Please refactor this function to reduce its complexity score from 24 to the max allowed complexity 15.
+  
+
+src\components\cards\character-card\character-card-content.tsx:55:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    53 │ 	const getAlignmentColor = () => {
+    54 │ 		const align = alignment?.toLowerCase() ?? 'neutral';
+  > 55 │ 		if (align.includes('evil')) return '#dc2626';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ 		if (align.includes('good')) return '#16a34a';
+    57 │ 		if (align.includes('lawful')) return '#2563eb';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    55 │ → → if·(align.includes('evil'))·{·return·'#dc2626';·}
+       │                                 ++                 ++
+
+src\components\cards\character-card\character-card-content.tsx:56:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    54 │ 		const align = alignment?.toLowerCase() ?? 'neutral';
+    55 │ 		if (align.includes('evil')) return '#dc2626';
+  > 56 │ 		if (align.includes('good')) return '#16a34a';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 		if (align.includes('lawful')) return '#2563eb';
+    58 │ 		if (align.includes('chaotic')) return '#d97706';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    56 │ → → if·(align.includes('good'))·{·return·'#16a34a';·}
+       │                                 ++                 ++
+
+src\components\cards\character-card\character-card-content.tsx:57:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    55 │ 		if (align.includes('evil')) return '#dc2626';
+    56 │ 		if (align.includes('good')) return '#16a34a';
+  > 57 │ 		if (align.includes('lawful')) return '#2563eb';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ 		if (align.includes('chaotic')) return '#d97706';
+    59 │ 		return '#6b7280';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    57 │ → → if·(align.includes('lawful'))·{·return·'#2563eb';·}
+       │                                   ++                 ++
+
+src\components\cards\character-card\character-card-content.tsx:58:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    56 │ 		if (align.includes('good')) return '#16a34a';
+    57 │ 		if (align.includes('lawful')) return '#2563eb';
+  > 58 │ 		if (align.includes('chaotic')) return '#d97706';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ 		return '#6b7280';
+    60 │ 	};
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    58 │ → → if·(align.includes('chaotic'))·{·return·'#d97706';·}
+       │                                    ++                 ++
+
+src\components\cards\character-card\character-card-content.tsx:62:40 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 24 detected (max: 15).
+  
+    60 │ 	};
+    61 │ 
+  > 62 │ 	const getStatIcon = (statKey: string) => {
+       │ 	                                      ^^^
+    63 │ 		const key = statKey.toLowerCase();
+    64 │ 		if (key.includes('str') || key.includes('force') || key.includes('power')) return <Swords className="h-3 w-3" />;
+  
+  i Please refactor this function to reduce its complexity score from 24 to the max allowed complexity 15.
+  
+
+src\components\cards\character-card\character-card-content.tsx:64:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    62 │ 	const getStatIcon = (statKey: string) => {
+    63 │ 		const key = statKey.toLowerCase();
+  > 64 │ 		if (key.includes('str') || key.includes('force') || key.includes('power')) return <Swords className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ 		if (key.includes('int') || key.includes('intellect')) return <Brain className="h-3 w-3" />;
+    66 │ 		if (key.includes('wis') || key.includes('wisdom')) return <Sparkles className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    64 │ → → if·(key.includes('str')·||·key.includes('force')·||·key.includes('power'))·{·return·<Swords·className="h-3·w-3"·/>;·}
+       │                                                                                ++                                      ++
+
+src\components\cards\character-card\character-card-content.tsx:65:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    63 │ 		const key = statKey.toLowerCase();
+    64 │ 		if (key.includes('str') || key.includes('force') || key.includes('power')) return <Swords className="h-3 w-3" />;
+  > 65 │ 		if (key.includes('int') || key.includes('intellect')) return <Brain className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ 		if (key.includes('wis') || key.includes('wisdom')) return <Sparkles className="h-3 w-3" />;
+    67 │ 		if (key.includes('dex') || key.includes('agility') || key.includes('speed')) return <Zap className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    65 │ → → if·(key.includes('int')·||·key.includes('intellect'))·{·return·<Brain·className="h-3·w-3"·/>;·}
+       │                                                           ++                                     ++
+
+src\components\cards\character-card\character-card-content.tsx:66:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    64 │ 		if (key.includes('str') || key.includes('force') || key.includes('power')) return <Swords className="h-3 w-3" />;
+    65 │ 		if (key.includes('int') || key.includes('intellect')) return <Brain className="h-3 w-3" />;
+  > 66 │ 		if (key.includes('wis') || key.includes('wisdom')) return <Sparkles className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    67 │ 		if (key.includes('dex') || key.includes('agility') || key.includes('speed')) return <Zap className="h-3 w-3" />;
+    68 │ 		if (key.includes('con') || key.includes('armor') || key.includes('stamina')) return <Shield className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    66 │ → → if·(key.includes('wis')·||·key.includes('wisdom'))·{·return·<Sparkles·className="h-3·w-3"·/>;·}
+       │                                                        ++                                        ++
+
+src\components\cards\character-card\character-card-content.tsx:67:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    65 │ 		if (key.includes('int') || key.includes('intellect')) return <Brain className="h-3 w-3" />;
+    66 │ 		if (key.includes('wis') || key.includes('wisdom')) return <Sparkles className="h-3 w-3" />;
+  > 67 │ 		if (key.includes('dex') || key.includes('agility') || key.includes('speed')) return <Zap className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    68 │ 		if (key.includes('con') || key.includes('armor') || key.includes('stamina')) return <Shield className="h-3 w-3" />;
+    69 │ 		if (key.includes('cha') || key.includes('soc') || key.includes('charisma')) return <User className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    67 │ → → if·(key.includes('dex')·||·key.includes('agility')·||·key.includes('speed'))·{·return·<Zap·className="h-3·w-3"·/>;·}
+       │                                                                                  ++                                   ++
+
+src\components\cards\character-card\character-card-content.tsx:68:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    66 │ 		if (key.includes('wis') || key.includes('wisdom')) return <Sparkles className="h-3 w-3" />;
+    67 │ 		if (key.includes('dex') || key.includes('agility') || key.includes('speed')) return <Zap className="h-3 w-3" />;
+  > 68 │ 		if (key.includes('con') || key.includes('armor') || key.includes('stamina')) return <Shield className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    69 │ 		if (key.includes('cha') || key.includes('soc') || key.includes('charisma')) return <User className="h-3 w-3" />;
+    70 │ 		if (key.includes('hp') || key.includes('health')) return <Heart className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    68 │ → → if·(key.includes('con')·||·key.includes('armor')·||·key.includes('stamina'))·{·return·<Shield·className="h-3·w-3"·/>;·}
+       │                                                                                  ++                                      ++
+
+src\components\cards\character-card\character-card-content.tsx:69:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    67 │ 		if (key.includes('dex') || key.includes('agility') || key.includes('speed')) return <Zap className="h-3 w-3" />;
+    68 │ 		if (key.includes('con') || key.includes('armor') || key.includes('stamina')) return <Shield className="h-3 w-3" />;
+  > 69 │ 		if (key.includes('cha') || key.includes('soc') || key.includes('charisma')) return <User className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ 		if (key.includes('hp') || key.includes('health')) return <Heart className="h-3 w-3" />;
+    71 │ 		if (key.includes('mp') || key.includes('mana')) return <Wand className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    69 │ → → if·(key.includes('cha')·||·key.includes('soc')·||·key.includes('charisma'))·{·return·<User·className="h-3·w-3"·/>;·}
+       │                                                                                 ++                                    ++
+
+src\components\cards\character-card\character-card-content.tsx:70:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    68 │ 		if (key.includes('con') || key.includes('armor') || key.includes('stamina')) return <Shield className="h-3 w-3" />;
+    69 │ 		if (key.includes('cha') || key.includes('soc') || key.includes('charisma')) return <User className="h-3 w-3" />;
+  > 70 │ 		if (key.includes('hp') || key.includes('health')) return <Heart className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    71 │ 		if (key.includes('mp') || key.includes('mana')) return <Wand className="h-3 w-3" />;
+    72 │ 		return <Star className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    70 │ → → if·(key.includes('hp')·||·key.includes('health'))·{·return·<Heart·className="h-3·w-3"·/>;·}
+       │                                                       ++                                     ++
+
+src\components\cards\character-card\character-card-content.tsx:84:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    82 │ 			.join(' ');
+    83 │ 
+  > 84 │ 		if (formatted.toLowerCase().includes('strength')) return 'STR';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    85 │ 		if (formatted.toLowerCase().includes('dexterity')) return 'DEX';
+    86 │ 		if (formatted.toLowerCase().includes('constitution')) return 'CON';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    84 │ → → if·(formatted.toLowerCase().includes('strength'))·{·return·'STR';·}
+       │                                                       ++             ++
+
+src\components\cards\character-card\character-card-content.tsx:85:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    84 │ 		if (formatted.toLowerCase().includes('strength')) return 'STR';
+  > 85 │ 		if (formatted.toLowerCase().includes('dexterity')) return 'DEX';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    86 │ 		if (formatted.toLowerCase().includes('constitution')) return 'CON';
+    87 │ 		if (formatted.toLowerCase().includes('intelligence')) return 'INT';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    85 │ → → if·(formatted.toLowerCase().includes('dexterity'))·{·return·'DEX';·}
+       │                                                        ++             ++
+
+src\components\cards\character-card\character-card-content.tsx:86:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    84 │ 		if (formatted.toLowerCase().includes('strength')) return 'STR';
+    85 │ 		if (formatted.toLowerCase().includes('dexterity')) return 'DEX';
+  > 86 │ 		if (formatted.toLowerCase().includes('constitution')) return 'CON';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    87 │ 		if (formatted.toLowerCase().includes('intelligence')) return 'INT';
+    88 │ 		if (formatted.toLowerCase().includes('wisdom')) return 'WIS';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    86 │ → → if·(formatted.toLowerCase().includes('constitution'))·{·return·'CON';·}
+       │                                                           ++             ++
+
+src\components\cards\character-card\character-card-content.tsx:87:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    85 │ 		if (formatted.toLowerCase().includes('dexterity')) return 'DEX';
+    86 │ 		if (formatted.toLowerCase().includes('constitution')) return 'CON';
+  > 87 │ 		if (formatted.toLowerCase().includes('intelligence')) return 'INT';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    88 │ 		if (formatted.toLowerCase().includes('wisdom')) return 'WIS';
+    89 │ 		if (formatted.toLowerCase().includes('charisma')) return 'CHA';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    87 │ → → if·(formatted.toLowerCase().includes('intelligence'))·{·return·'INT';·}
+       │                                                           ++             ++
+
+src\components\cards\character-card\character-card-content.tsx:88:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    86 │ 		if (formatted.toLowerCase().includes('constitution')) return 'CON';
+    87 │ 		if (formatted.toLowerCase().includes('intelligence')) return 'INT';
+  > 88 │ 		if (formatted.toLowerCase().includes('wisdom')) return 'WIS';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    89 │ 		if (formatted.toLowerCase().includes('charisma')) return 'CHA';
+    90 │ 
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    88 │ → → if·(formatted.toLowerCase().includes('wisdom'))·{·return·'WIS';·}
+       │                                                     ++             ++
+
+src\components\cards\character-card\character-card-content.tsx:89:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    87 │ 		if (formatted.toLowerCase().includes('intelligence')) return 'INT';
+    88 │ 		if (formatted.toLowerCase().includes('wisdom')) return 'WIS';
+  > 89 │ 		if (formatted.toLowerCase().includes('charisma')) return 'CHA';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    90 │ 
+    91 │ 		return formatted;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    89 │ → → if·(formatted.toLowerCase().includes('charisma'))·{·return·'CHA';·}
+       │                                                       ++             ++
+
+src\components\cards\character-card\character-card-content.tsx:95:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    94 │ 	const normalizedAbilities = (() => {
+  > 95 │ 		if (!abilities) return [];
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^
+    96 │ 		if (Array.isArray(abilities)) {
+    97 │ 			return abilities.map((ability) => (typeof ability === 'string' ? { name: ability, description: '' } : ability));
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    95 │ → → if·(!abilities)·{·return·[];·}
+       │                     ++          ++
+
+src\components\cards\character-card\character-card-footer.tsx:59:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    57 │ 	// Determinar el color de rareza
+    58 │ 	const getRarityColor = (level: number) => {
+  > 59 │ 		if (level >= 9) return 'rgb(255, 100, 255)'; // Mítico
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ 		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
+    61 │ 		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+     57  57 │   	// Determinar el color de rareza
+     58  58 │   	const getRarityColor = (level: number) => {
+     59     │ - → → if·(level·>=·9)·return·'rgb(255,·100,·255)';·//·Mítico
+         59 │ + → → if·(level·>=·9)·{·return·'rgb(255,·100,·255)';·//·Mítico
+         60 │ + }
+     60  61 │   		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
+     61  62 │   		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
+  
+
+src\components\cards\character-card\character-card-footer.tsx:60:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    58 │ 	const getRarityColor = (level: number) => {
+    59 │ 		if (level >= 9) return 'rgb(255, 100, 255)'; // Mítico
+  > 60 │ 		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    61 │ 		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
+    62 │ 		if (level >= 3) return 'rgb(0, 112, 221)'; // Raro
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+     58  58 │   	const getRarityColor = (level: number) => {
+     59  59 │   		if (level >= 9) return 'rgb(255, 100, 255)'; // Mítico
+     60     │ - → → if·(level·>=·7)·return·'rgb(255,·128,·0)';·//·Legendario
+         60 │ + → → if·(level·>=·7)·{·return·'rgb(255,·128,·0)';·//·Legendario
+         61 │ + }
+     61  62 │   		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
+     62  63 │   		if (level >= 3) return 'rgb(0, 112, 221)'; // Raro
+  
+
+src\components\cards\character-card\character-card-footer.tsx:61:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    59 │ 		if (level >= 9) return 'rgb(255, 100, 255)'; // Mítico
+    60 │ 		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
+  > 61 │ 		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │ 		if (level >= 3) return 'rgb(0, 112, 221)'; // Raro
+    63 │ 		return 'rgb(30, 255, 0)'; // Común
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+     59  59 │   		if (level >= 9) return 'rgb(255, 100, 255)'; // Mítico
+     60  60 │   		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
+     61     │ - → → if·(level·>=·5)·return·'rgb(163,·53,·238)';·//·Épico
+         61 │ + → → if·(level·>=·5)·{·return·'rgb(163,·53,·238)';·//·Épico
+         62 │ + }
+     62  63 │   		if (level >= 3) return 'rgb(0, 112, 221)'; // Raro
+     63  64 │   		return 'rgb(30, 255, 0)'; // Común
+  
+
+src\components\cards\character-card\character-card-footer.tsx:62:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    60 │ 		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
+    61 │ 		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
+  > 62 │ 		if (level >= 3) return 'rgb(0, 112, 221)'; // Raro
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    63 │ 		return 'rgb(30, 255, 0)'; // Común
+    64 │ 	};
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+     60  60 │   		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
+     61  61 │   		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
+     62     │ - → → if·(level·>=·3)·return·'rgb(0,·112,·221)';·//·Raro
+         62 │ + → → if·(level·>=·3)·{·return·'rgb(0,·112,·221)';·//·Raro
+         63 │ + }
+     63  64 │   		return 'rgb(30, 255, 0)'; // Común
+     64  65 │   	};
+  
+
+src\components\cards\character-card\character-card-footer.tsx:72:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    70 │ 	const getAlignmentIcon = () => {
+    71 │ 		const lowerAlignment = alignment.toLowerCase();
+  > 72 │ 		if (lowerAlignment.includes('good') || lowerAlignment.includes('lawful')) return <Shield className="h-3.5 w-3.5" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ 		if (lowerAlignment.includes('evil') || lowerAlignment.includes('chaotic'))
+    74 │ 			return <Swords className="h-3.5 w-3.5" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    72 │ → → if·(lowerAlignment.includes('good')·||·lowerAlignment.includes('lawful'))·{·return·<Shield·className="h-3.5·w-3.5"·/>;·}
+       │                                                                               ++                                          ++
+
+src\components\cards\character-card\character-card-footer.tsx:73:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    71 │ 		const lowerAlignment = alignment.toLowerCase();
+    72 │ 		if (lowerAlignment.includes('good') || lowerAlignment.includes('lawful')) return <Shield className="h-3.5 w-3.5" />;
+  > 73 │ 		if (lowerAlignment.includes('evil') || lowerAlignment.includes('chaotic'))
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 74 │ 			return <Swords className="h-3.5 w-3.5" />;
+       │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    75 │ 		if (lowerAlignment.includes('neutral')) return <Scroll className="h-3.5 w-3.5" />;
+    76 │ 		return <Star className="h-3.5 w-3.5" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+     71  71 │   		const lowerAlignment = alignment.toLowerCase();
+     72  72 │   		if (lowerAlignment.includes('good') || lowerAlignment.includes('lawful')) return <Shield className="h-3.5 w-3.5" />;
+     73     │ - → → if·(lowerAlignment.includes('evil')·||·lowerAlignment.includes('chaotic'))
+     74     │ - → → → return·<Swords·className="h-3.5·w-3.5"·/>;
+         73 │ + → → if·(lowerAlignment.includes('evil')·||·lowerAlignment.includes('chaotic'))·{
+         74 │ + → → → return·<Swords·className="h-3.5·w-3.5"·/>;
+         75 │ + → → }
+     75  76 │   		if (lowerAlignment.includes('neutral')) return <Scroll className="h-3.5 w-3.5" />;
+     76  77 │   		return <Star className="h-3.5 w-3.5" />;
+  
+
+src\components\cards\character-card\character-card-footer.tsx:75:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    73 │ 		if (lowerAlignment.includes('evil') || lowerAlignment.includes('chaotic'))
+    74 │ 			return <Swords className="h-3.5 w-3.5" />;
+  > 75 │ 		if (lowerAlignment.includes('neutral')) return <Scroll className="h-3.5 w-3.5" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    76 │ 		return <Star className="h-3.5 w-3.5" />;
+    77 │ 	};
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    75 │ → → if·(lowerAlignment.includes('neutral'))·{·return·<Scroll·className="h-3.5·w-3.5"·/>;·}
+       │                                             ++                                          ++
+
+src\components\cards\character-card\character-card-footer.tsx:153:10 lint/style/noNestedTernary ━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    151 │ 						{rarityLevel >= 9
+    152 │ 							? 'MYTHIC'
+  > 153 │ 							: rarityLevel >= 7
+        │ 							  ^^^^^^^^^^^^^^^^
+  > 154 │ 								? 'LEGENDARY'
+         ...
+  > 158 │ 										? 'RARE'
+  > 159 │ 										: 'COMMON'}
+        │ 										^^^^^^^^^^
+    160 │ 					</span>
+    161 │ 					{[...Array(rarityStars)].map((_, i) => (
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src\components\cards\character-card\character-card-footer.tsx:155:11 lint/style/noNestedTernary ━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    153 │ 							: rarityLevel >= 7
+    154 │ 								? 'LEGENDARY'
+  > 155 │ 								: rarityLevel >= 5
+        │ 								  ^^^^^^^^^^^^^^^^
+  > 156 │ 									? 'EPIC'
+  > 157 │ 									: rarityLevel >= 3
+  > 158 │ 										? 'RARE'
+  > 159 │ 										: 'COMMON'}
+        │ 										^^^^^^^^^^
+    160 │ 					</span>
+    161 │ 					{[...Array(rarityStars)].map((_, i) => (
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src\components\cards\character-card\character-card-footer.tsx:157:12 lint/style/noNestedTernary ━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    155 │ 								: rarityLevel >= 5
+    156 │ 									? 'EPIC'
+  > 157 │ 									: rarityLevel >= 3
+        │ 									  ^^^^^^^^^^^^^^^^
+  > 158 │ 										? 'RARE'
+  > 159 │ 										: 'COMMON'}
+        │ 										^^^^^^^^^^
+    160 │ 					</span>
+    161 │ 					{[...Array(rarityStars)].map((_, i) => (
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src\components\cards\character-card\character-card-footer.tsx:161:11 lint/style/useConsistentBuiltinInstantiation  FIXABLE  ━━━━━━━━━━
+
+  × Use new Array() instead of Array().
+  
+    159 │ 										: 'COMMON'}
+    160 │ 					</span>
+  > 161 │ 					{[...Array(rarityStars)].map((_, i) => (
+        │ 					     ^^^^^^^^^^^^^^^^^^
+    162 │ 						<Star className="h-3 w-3 fill-current" key={`rarity-star-${renderKey}-${i + 1}`} />
+    163 │ 					))}
+  
+  i Unsafe fix: Add new keyword.
+  
+    161 │ → → → → → {[...new·Array(rarityStars)].map((_,·i)·=>·(
+        │                ++++                                   
+
+src\components\cards\character-card\character-card-header.tsx:31:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    29 │ 		if (lowerCaseClass?.includes('warrior')) return <Sword className="h-3.5 w-3.5" />;
+    30 │ 		if (lowerCaseClass?.includes('mage')) return <Wand className="h-3.5 w-3.5" />;
+  > 31 │ 		if (lowerCaseClass?.includes('tank')) return <Shield className="h-3.5 w-3.5" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    32 │ 		return null;
+    33 │ 	};
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    31 │ → → if·(lowerCaseClass?.includes('tank'))·{·return·<Shield·className="h-3.5·w-3.5"·/>;·}
+       │                                           ++                                          ++
+
+src\components\cards\character-card\character-card-header.tsx:29:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    27 │ 	const classIcon = () => {
+    28 │ 		const lowerCaseClass = characterClass?.toLowerCase();
+  > 29 │ 		if (lowerCaseClass?.includes('warrior')) return <Sword className="h-3.5 w-3.5" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    30 │ 		if (lowerCaseClass?.includes('mage')) return <Wand className="h-3.5 w-3.5" />;
+    31 │ 		if (lowerCaseClass?.includes('tank')) return <Shield className="h-3.5 w-3.5" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    29 │ → → if·(lowerCaseClass?.includes('warrior'))·{·return·<Sword·className="h-3.5·w-3.5"·/>;·}
+       │                                              ++                                         ++
+
+src\components\cards\character-card\character-card-header.tsx:30:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    28 │ 		const lowerCaseClass = characterClass?.toLowerCase();
+    29 │ 		if (lowerCaseClass?.includes('warrior')) return <Sword className="h-3.5 

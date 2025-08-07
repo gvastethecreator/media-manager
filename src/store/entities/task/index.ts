@@ -106,7 +106,7 @@ export const useTaskStore = create<TaskStore>()(
 					filters: {
 						...state.filters,
 						searchQuery: query,
-						query: query, // Mantener ambos sincronizados
+						query, // Mantener ambos sincronizados
 					},
 				})),
 

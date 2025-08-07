@@ -14,12 +14,12 @@ export function EmptyState({ icon: Icon, title, description, className }: EmptyS
 	return (
 		<motion.div
 			animate={{ opacity: [0, 1], y: [20, 0] }}
-			className={cn('flex flex-col items-center justify-center h-full w-full text-muted-foreground', className)}
+			className={cn('flex h-full w-full flex-col items-center justify-center text-muted-foreground', className)}
 		>
-			<BlurFade className="text-center flex flex-col items-center justify-center" delay={0.5} inView={true}>
-				<Icon className="w-12 h-12 mb-4 opacity-50" />
-				<h3 className="text-lg font-medium mb-2">{title}</h3>
-				<p className="text-sm text-muted-foreground">{description}</p>
+			<BlurFade className="flex flex-col items-center justify-center text-center" delay={0.5} inView={true}>
+				<Icon className="mb-4 h-12 w-12 opacity-50" />
+				<h3 className="mb-2 font-medium text-lg">{title}</h3>
+				<p className="text-muted-foreground text-sm">{description}</p>
 			</BlurFade>
 		</motion.div>
 	);

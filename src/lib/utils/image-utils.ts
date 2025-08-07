@@ -10,7 +10,7 @@
  * @returns Relación de aspecto como string en formato "16:9"
  */
 export function calculateAspectRatio(width: number, height: number): string {
-	if (!width || !height) return '1:1';
+	if (!(width && height)) return '1:1';
 
 	// Encontrar el máximo común divisor (MCD)
 	const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
@@ -37,7 +37,7 @@ export function calculateAspectRatio(width: number, height: number): string {
  */
 export function calculateDominantColor(_image: Image): string | undefined {
 	// Actualmente la metadata no incluye color dominante
-	return undefined;
+	return;
 }
 
 /**

@@ -61,7 +61,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 
 	// --- Operaciones síncronas ---
 	addImage: (image) => {
-		if (!image || !image.id) {
+		if (!(image && image.id)) {
 			imageLogger.warn('Intento de agregar una imagen inválida', { image });
 			return;
 		}
@@ -121,7 +121,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch image';
 			imageLogger.error(errorMessage, { error: e });
 			set({ error: errorMessage });
-			return undefined;
+			return;
 		} finally {
 			set({ isLoading: false });
 		}
@@ -246,7 +246,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 			imageLogger.error(errorMessage, { error: e, id, data });
 			set({ error: errorMessage });
 			toastService.error(errorMessage);
-			return undefined;
+			return;
 		} finally {
 			set({ isLoading: false });
 		}

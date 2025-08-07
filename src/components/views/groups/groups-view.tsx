@@ -58,18 +58,18 @@ export function GroupsView(_props: ViewProps) {
 
 	return (
 		<GroupsContentView
-			groups={groups}
-			isLoading={isLoading}
 			error={error}
-			showForm={showForm}
-			newGroupName={newGroupName}
-			newGroupDescription={newGroupDescription}
-			optimisticGroups={optimisticGroups}
-			setShowForm={setShowForm}
-			setNewGroupName={setNewGroupName}
-			setNewGroupDescription={setNewGroupDescription}
-			handleGroupClick={handleGroupClick}
+			groups={groups}
 			handleCreateGroup={handleCreateGroup}
+			handleGroupClick={handleGroupClick}
+			isLoading={isLoading}
+			newGroupDescription={newGroupDescription}
+			newGroupName={newGroupName}
+			optimisticGroups={optimisticGroups}
+			setNewGroupDescription={setNewGroupDescription}
+			setNewGroupName={setNewGroupName}
+			setShowForm={setShowForm}
+			showForm={showForm}
 		/>
 	);
 }

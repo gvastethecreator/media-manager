@@ -85,7 +85,7 @@ export function CreateConceptForm({
 				color: (concept as ConceptBase).color || '#3b82f6',
 				emoji: (concept as ConceptBase).emoji || '💡',
 				category: (concept as ConceptBase).category || 'general',
-				isFavorite: (concept as ConceptBase).isFavorite || false,
+				isFavorite: (concept as ConceptBase).isFavorite,
 			});
 		}
 	}, [concept, isEditing, form]);
@@ -137,24 +137,24 @@ export function CreateConceptForm({
 			name: 'emoji',
 			label: 'Emoji',
 			render: ({ value, onChange }: any) => (
-				<EmojiPicker value={value} onEmojiSelect={onChange} compact showLabel={false} />
+				<EmojiPicker compact onEmojiSelect={onChange} showLabel={false} value={value} />
 			),
 		},
 		{
 			name: 'color',
 			label: 'Color',
-			render: ({ value, onChange }: any) => <ColorPicker value={value} onChange={onChange} compact showLabel={false} />,
+			render: ({ value, onChange }: any) => <ColorPicker compact onChange={onChange} showLabel={false} value={value} />,
 		},
 		{
 			name: 'description',
 			label: 'Descripción',
 			render: ({ value, onChange }: any) => (
 				<textarea
-					placeholder="Descripción del concepto..."
-					value={value || ''}
+					className="w-full resize-none rounded border p-2 text-xs"
 					onChange={(e) => onChange(e.target.value)}
+					placeholder="Descripción del concepto..."
 					rows={3}
-					className="text-xs resize-none w-full border rounded p-2"
+					value={value || ''}
 				/>
 			),
 		},
@@ -163,8 +163,8 @@ export function CreateConceptForm({
 
 	return (
 		<DynamicCreateForm
-			optionalFields={optionalFields}
 			onSubmit={_onSubmit}
+			optionalFields={optionalFields}
 			submitLabel={isEditing ? 'Guardar cambios' : 'Crear concepto'}
 		/>
 	);

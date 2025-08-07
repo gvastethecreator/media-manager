@@ -77,10 +77,10 @@ export const createTagFiltersSlice: StateCreator<TagStore, [], [], { filters: Ta
 
 		return tags.filter((tag) => {
 			// Filtrar por término de búsqueda (en nombre o descripción)
-			const matchesSearch = !searchTerm
-				? true
-				: tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-					tag.description?.toLowerCase().includes(searchTerm.toLowerCase());
+			const matchesSearch = searchTerm
+				? tag.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+					tag.description?.toLowerCase().includes(searchTerm.toLowerCase())
+				: true;
 
 			// Filtrar por categoría
 			const matchesCategory = category === null || tag.category === category;

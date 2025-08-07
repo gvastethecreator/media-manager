@@ -60,18 +60,18 @@ export const CharacterContentView = memo(function CharacterContentView() {
 
 	const emptyState = useMemo(
 		() =>
-			!selectedCharacterId
+			selectedCharacterId
 				? {
-						icon: Users,
-						title: 'No hay personaje seleccionado',
-						description: 'Selecciona un personaje para ver su contenido.',
-					}
-				: {
 						icon: Users,
 						title: 'Personaje sin imágenes',
 						description: currentCharacter
 							? `${currentCharacter.name} no tiene imágenes asociadas.`
 							: 'Este personaje no tiene imágenes asociadas.',
+					}
+				: {
+						icon: Users,
+						title: 'No hay personaje seleccionado',
+						description: 'Selecciona un personaje para ver su contenido.',
 					},
 		[selectedCharacterId, currentCharacter]
 	);
@@ -107,15 +107,15 @@ export const CharacterContentView = memo(function CharacterContentView() {
 		<ContentViewProvider {...contentProps}>
 			<BaseContentView>
 				<div className="p-4">
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 						{items.map((item) => (
 							<div
+								className="cursor-pointer rounded-lg border p-4 hover:bg-accent"
 								key={item.id}
-								className="p-4 border rounded-lg hover:bg-accent cursor-pointer"
 								onClick={() => handleItemSelection(item)}
 							>
 								<h3 className="font-medium">{item.name}</h3>
-								<p className="text-sm text-muted-foreground">{item.entityType}</p>
+								<p className="text-muted-foreground text-sm">{item.entityType}</p>
 							</div>
 						))}
 					</div>

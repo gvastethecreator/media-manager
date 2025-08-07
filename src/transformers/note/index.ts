@@ -124,7 +124,7 @@ export function toRelatedNote(
 				color: note.color || '#3b82f6',
 				category: note.category || 'general',
 				excerpt: note.excerpt || note.content?.substring(0, 100) || '',
-				isFavorite: note.isFavorite || note.isFavorite || false,
+				isFavorite: note.isFavorite || note.isFavorite,
 				createdAt: note.createdAt,
 				updatedAt: note.updatedAt,
 			};

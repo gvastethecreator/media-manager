@@ -32,19 +32,19 @@ export function DebugNav() {
 	return (
 		<div className="flex flex-col space-y-1">
 			<div className="px-3 py-2">
-				<h2 className="mb-2 px-4 text-lg font-semibold tracking-tight">Herramientas de Depuración</h2>
+				<h2 className="mb-2 px-4 font-semibold text-lg tracking-tight">Herramientas de Depuración</h2>
 				<div className="space-y-1">
 					{navItems.map((item) => (
 						<Link
-							key={item.href}
-							to={item.href}
 							className={cn(
-								'flex flex-col items-start gap-1 rounded-md px-3 py-2 text-sm font-medium hover:bg-accent hover:text-accent-foreground',
+								'flex flex-col items-start gap-1 rounded-md px-3 py-2 font-medium text-sm hover:bg-accent hover:text-accent-foreground',
 								pathname === item.href && 'bg-accent text-accent-foreground'
 							)}
+							key={item.href}
+							to={item.href}
 						>
 							<span>{item.title}</span>
-							<span className="text-xs text-muted-foreground line-clamp-1">{item.description}</span>
+							<span className="line-clamp-1 text-muted-foreground text-xs">{item.description}</span>
 						</Link>
 					))}
 				</div>

@@ -69,7 +69,7 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 				emoji: note.emoji || '📝',
 				category: note.category as NoteCategory,
 				tags: Array.isArray(note.tags) ? note.tags : [],
-				isFavorite: note.isFavorite || false,
+				isFavorite: note.isFavorite,
 			});
 		}
 	}, [note, isEditing, form]);
@@ -98,7 +98,7 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+			<form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
 				<FormField
 					control={form.control}
 					name="title"
@@ -120,7 +120,7 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 						<FormItem>
 							<FormLabel>Emoji</FormLabel>
 							<FormControl>
-								<EmojiPicker value={field.value} onEmojiSelect={field.onChange} compact showLabel={false} />
+								<EmojiPicker compact onEmojiSelect={field.onChange} showLabel={false} value={field.value} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -134,7 +134,7 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 						<FormItem>
 							<FormLabel>Color</FormLabel>
 							<FormControl>
-								<ColorPicker value={field.value || '#3b82f6'} onChange={field.onChange} compact showLabel={false} />
+								<ColorPicker compact onChange={field.onChange} showLabel={false} value={field.value || '#3b82f6'} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -147,7 +147,7 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Categoría</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value}>
+							<Select defaultValue={field.value} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
 										<SelectValue placeholder="Selecciona una categoría" />
@@ -210,11 +210,11 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 				/>
 
 				<div className="flex justify-end space-x-2">
-					<Button type="button" variant="outline" onClick={onCancel}>
+					<Button onClick={onCancel} type="button" variant="outline">
 						Cancelar
 					</Button>
 					{onPreview && (
-						<Button type="button" variant="secondary" onClick={onPreview}>
+						<Button onClick={onPreview} type="button" variant="secondary">
 							Vista previa
 						</Button>
 					)}

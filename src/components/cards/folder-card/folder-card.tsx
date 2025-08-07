@@ -63,9 +63,9 @@ export const FolderCard = memo(function FolderCard({
 	const cardContent = (
 		<div
 			className={cn(
-				'group flex flex-col relative h-full overflow-hidden rounded-md transition-all duration-300',
-				tcgMode ? 'bg-gradient-to-b from-gray-900 to-black shadow-lg border border-white/10' : 'bg-card shadow',
-				interactive && 'hover:shadow-md cursor-pointer',
+				'group relative flex h-full flex-col overflow-hidden rounded-md transition-all duration-300',
+				tcgMode ? 'border border-white/10 bg-gradient-to-b from-gray-900 to-black shadow-lg' : 'bg-card shadow',
+				interactive && 'cursor-pointer hover:shadow-md',
 				className
 			)}
 			style={
@@ -79,7 +79,7 @@ export const FolderCard = memo(function FolderCard({
 			{/* Borde brillante para TCG mode */}
 			{tcgMode && (
 				<div
-					className="absolute inset-0 rounded-md opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300"
+					className="pointer-events-none absolute inset-0 rounded-md opacity-0 transition-opacity duration-300 group-hover:opacity-100"
 					style={{
 						boxShadow: `inset 0 0 0 1px ${primaryColor}50, 0 0 15px ${primaryColor}30`,
 						zIndex: 20,
@@ -89,9 +89,9 @@ export const FolderCard = memo(function FolderCard({
 
 			{/* Header de la carpeta */}
 			<FolderCardHeader
-				name={folderData.name}
 				emoji={folderData.emoji || undefined}
 				isFavorite={folderData.isFavorite}
+				name={folderData.name}
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
 				tcgMode={tcgMode}
@@ -100,23 +100,23 @@ export const FolderCard = memo(function FolderCard({
 			{/* Sección de imágenes */}
 			<FolderCardImages
 				featuredImage={folderData.featuredImage}
-				recentImages={folderData.recentImageUrls || []}
 				primaryColor={primaryColor}
+				recentImages={folderData.recentImageUrls || []}
 				secondaryColor={secondaryColor}
 				tcgMode={tcgMode}
 			/>
 
 			{/* Contenido y estadísticas */}
 			<FolderCardContent
-				description={folderData.description}
-				totalFiles={folderData.totalFiles}
-				totalSize={folderData.totalSize}
-				lastIndexed={folderData.lastIndexed}
 				autoReindex={folderData.autoReindex}
 				childrenCount={folderData.childrenCount || 0}
-				primaryColor={primaryColor}
+				description={folderData.description}
 				featuredImage={folderData.featuredImage}
+				lastIndexed={folderData.lastIndexed}
+				primaryColor={primaryColor}
 				tcgMode={tcgMode}
+				totalFiles={folderData.totalFiles}
+				totalSize={folderData.totalSize}
 			/>
 
 			{/* Footer con información adicional */}
@@ -130,7 +130,7 @@ export const FolderCard = memo(function FolderCard({
 			>
 				{tcgMode && (
 					<div className="flex items-center">
-						<span className="text-xs text-white/60">
+						<span className="text-white/60 text-xs">
 							{folderData.updatedAt ? new Date(folderData.updatedAt).toLocaleDateString() : ''}
 						</span>
 					</div>
@@ -142,7 +142,7 @@ export const FolderCard = memo(function FolderCard({
 				<>
 					{/* Textura de fondo sutil */}
 					<div
-						className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-300"
+						className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
 						style={{
 							background: `radial-gradient(circle at 50% 50%, ${primaryColor}10 0%, transparent 70%)`,
 							zIndex: 1,
@@ -151,19 +151,19 @@ export const FolderCard = memo(function FolderCard({
 
 					{/* Esquinas decorativas TCG */}
 					<div
-						className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 rounded-br-sm opacity-60 pointer-events-none"
+						className="pointer-events-none absolute top-0 left-0 h-6 w-6 rounded-br-sm border-t-2 border-l-2 opacity-60"
 						style={{ borderColor: `${primaryColor}80` }}
 					/>
 					<div
-						className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 rounded-bl-sm opacity-60 pointer-events-none"
+						className="pointer-events-none absolute top-0 right-0 h-6 w-6 rounded-bl-sm border-t-2 border-r-2 opacity-60"
 						style={{ borderColor: `${primaryColor}80` }}
 					/>
 					<div
-						className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 rounded-tr-sm opacity-60 pointer-events-none"
+						className="pointer-events-none absolute bottom-0 left-0 h-6 w-6 rounded-tr-sm border-b-2 border-l-2 opacity-60"
 						style={{ borderColor: `${primaryColor}80` }}
 					/>
 					<div
-						className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 rounded-tl-sm opacity-60 pointer-events-none"
+						className="pointer-events-none absolute right-0 bottom-0 h-6 w-6 rounded-tl-sm border-r-2 border-b-2 opacity-60"
 						style={{ borderColor: `${primaryColor}80` }}
 					/>
 				</>
@@ -174,7 +174,7 @@ export const FolderCard = memo(function FolderCard({
 	// Renderizar con o sin enlace
 	if (href && interactive) {
 		return (
-			<a href={href} className="block h-full" onClick={handleCardClick}>
+			<a className="block h-full" href={href} onClick={handleCardClick}>
 				{cardContent}
 			</a>
 		);
@@ -184,7 +184,6 @@ export const FolderCard = memo(function FolderCard({
 	if (interactive && onClick) {
 		return (
 			<button
-				type="button"
 				className="block h-full w-full text-left"
 				onClick={handleCardClick}
 				onKeyDown={(event) => {
@@ -193,6 +192,7 @@ export const FolderCard = memo(function FolderCard({
 						handleCardClick();
 					}
 				}}
+				type="button"
 			>
 				{cardContent}
 			</button>

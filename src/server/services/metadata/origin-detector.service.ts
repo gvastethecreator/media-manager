@@ -4,11 +4,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import {
-    AIEngine,
-    type OriginDetectionResult,
-    type SupportedEngine
-} from '@/types/metadata-origin.types';
+import { AIEngine, type OriginDetectionResult, type SupportedEngine } from '@/types/metadata-origin.types';
 
 const logger = serverLogger.withContext('OriginDetectorService');
 
@@ -26,48 +22,28 @@ const ENGINE_PATTERNS = {
 			/Seed:\s*\d+/,
 			/Size:\s*\d+x\d+/,
 			/Model:\s*[^,\n]+/,
-			/Negative prompt:/
+			/Negative prompt:/,
 		],
 		// Patrones en Software EXIF
-		software_patterns: [
-			/AUTOMATIC1111/i,
-			/stable-diffusion-webui/i,
-			/webui/i
-		],
+		software_patterns: [/AUTOMATIC1111/i, /stable-diffusion-webui/i, /webui/i],
 		// PNG text chunks específicos
 		png_chunk_keys: ['parameters', 'Parameters', 'Comment', 'Description'],
-		png_chunk_patterns: [
-			/Steps:\s*\d+/,
-			/CFG scale:/,
-			/Negative prompt:/,
-			/Model hash:/
-		],
+		png_chunk_patterns: [/Steps:\s*\d+/, /CFG scale:/, /Negative prompt:/, /Model hash:/],
 		// Combinaciones específicas
 		specific_combinations: [
 			['parameters', 'Steps:'],
 			['Parameters', 'Steps:'],
 			['parameters', 'CFG scale:'],
 			['parameters', 'Negative prompt:'],
-			['png_parameters', 'Steps:']
-		]
+			['png_parameters', 'Steps:'],
+		],
 	},
 
 	[AIEngine.FORGE]: {
 		metadata_keys: ['parameters', 'forge_version', 'forge_attention'],
-		metadata_patterns: [
-			/Forge/i,
-			/forge_attention/i,
-			/forge_memory/i
-		],
-		software_patterns: [
-			/forge/i,
-			/stable-diffusion-webui-forge/i
-		],
-		specific_combinations: [
-			['parameters', 'Forge'],
-			['forge_version'],
-			['forge_attention']
-		]
+		metadata_patterns: [/Forge/i, /forge_attention/i, /forge_memory/i],
+		software_patterns: [/forge/i, /stable-diffusion-webui-forge/i],
+		specific_combinations: [['parameters', 'Forge'], ['forge_version'], ['forge_attention']],
 	},
 
 	[AIEngine.COMFYUI]: {
@@ -80,46 +56,26 @@ const ENGINE_PATTERNS = {
 			/"nodes"/,
 			/"links"/,
 			/"extra"/,
-			/"version"/
+			/"version"/,
 		],
-		software_patterns: [
-			/ComfyUI/i,
-			/comfy/i
-		],
+		software_patterns: [/ComfyUI/i, /comfy/i],
 		// PNG text chunks específicos para ComfyUI
 		png_chunk_keys: ['prompt', 'Prompt', 'workflow', 'Workflow', 'Comment'],
-		png_chunk_patterns: [
-			/"class_type":/,
-			/"inputs":/,
-			/"outputs":/,
-			/ComfyUI/i,
-			/{.*"nodes".*}/
-		],
+		png_chunk_patterns: [/"class_type":/, /"inputs":/, /"outputs":/, /ComfyUI/i, /{.*"nodes".*}/],
 		specific_combinations: [
 			['prompt', 'workflow'],
 			['Prompt', 'Workflow'],
 			['workflow', 'class_type'],
 			['png_workflow', 'class_type'],
-			['ComfyUI']
-		]
+			['ComfyUI'],
+		],
 	},
 
 	[AIEngine.SWARMUI]: {
 		metadata_keys: ['swarm_metadata', 'generation_time', 'prep_time'],
-		metadata_patterns: [
-			/SwarmUI/i,
-			/generation_time/i,
-			/prep_time/i
-		],
-		software_patterns: [
-			/SwarmUI/i,
-			/swarm/i
-		],
-		specific_combinations: [
-			['generation_time', 'prep_time'],
-			['swarm_metadata'],
-			['SwarmUI']
-		]
+		metadata_patterns: [/SwarmUI/i, /generation_time/i, /prep_time/i],
+		software_patterns: [/SwarmUI/i, /swarm/i],
+		specific_combinations: [['generation_time', 'prep_time'], ['swarm_metadata'], ['SwarmUI']],
 	},
 
 	[AIEngine.MIDJOURNEY]: {
@@ -131,104 +87,46 @@ const ENGINE_PATTERNS = {
 			/--stylize\s+\d+/,
 			/--quality\s+\d+/,
 			/Job ID:/i,
-			/midjourney/i
+			/midjourney/i,
 		],
-		software_patterns: [
-			/Midjourney/i,
-			/MJ/
-		],
-		specific_combinations: [
-			['Description', '--v'],
-			['Comment', '--ar'],
-			['job_id'],
-			['author', 'Job ID']
-		]
+		software_patterns: [/Midjourney/i, /MJ/],
+		specific_combinations: [['Description', '--v'], ['Comment', '--ar'], ['job_id'], ['author', 'Job ID']],
 	},
 
 	[AIEngine.INVOKEAI]: {
 		metadata_keys: ['invokeai_metadata', 'invoke_ai', 'InvokeAI'],
-		metadata_patterns: [
-			/InvokeAI/i,
-			/invoke/i
-		],
-		software_patterns: [
-			/InvokeAI/i,
-			/invoke/i
-		],
-		specific_combinations: [
-			['invokeai_metadata'],
-			['invoke_ai'],
-			['InvokeAI']
-		]
+		metadata_patterns: [/InvokeAI/i, /invoke/i],
+		software_patterns: [/InvokeAI/i, /invoke/i],
+		specific_combinations: [['invokeai_metadata'], ['invoke_ai'], ['InvokeAI']],
 	},
 
 	[AIEngine.NOVELAI]: {
 		metadata_keys: ['Description', 'Comment', 'NovelAI'],
-		metadata_patterns: [
-			/NovelAI/i,
-			/Undesired content:/,
-			/Quality tags:/,
-			/novelai/i
-		],
-		software_patterns: [
-			/NovelAI/i
-		],
-		specific_combinations: [
-			['Description', 'Steps:'],
-			['Description', 'Undesired content:'],
-			['NovelAI']
-		]
+		metadata_patterns: [/NovelAI/i, /Undesired content:/, /Quality tags:/, /novelai/i],
+		software_patterns: [/NovelAI/i],
+		specific_combinations: [['Description', 'Steps:'], ['Description', 'Undesired content:'], ['NovelAI']],
 	},
 
 	[AIEngine.IDEOGRAM]: {
 		metadata_keys: ['Software', 'Description', 'ideogram'],
-		metadata_patterns: [
-			/ideogram/i,
-			/Ideogram/
-		],
-		software_patterns: [
-			/Ideogram/i
-		],
-		specific_combinations: [
-			['Software', 'Ideogram'],
-			['ideogram']
-		]
+		metadata_patterns: [/ideogram/i, /Ideogram/],
+		software_patterns: [/Ideogram/i],
+		specific_combinations: [['Software', 'Ideogram'], ['ideogram']],
 	},
 
 	[AIEngine.STABILITY_AI]: {
 		metadata_keys: ['Description', 'Software', 'stability'],
-		metadata_patterns: [
-			/Stability AI/i,
-			/stability/i,
-			/stablediffusion/i
-		],
-		software_patterns: [
-			/Stability AI/i,
-			/DreamStudio/i
-		],
-		specific_combinations: [
-			['Software', 'Stability'],
-			['stability']
-		]
+		metadata_patterns: [/Stability AI/i, /stability/i, /stablediffusion/i],
+		software_patterns: [/Stability AI/i, /DreamStudio/i],
+		specific_combinations: [['Software', 'Stability'], ['stability']],
 	},
 
 	[AIEngine.DALLE]: {
 		metadata_keys: ['Description', 'Software', 'dalle', 'openai'],
-		metadata_patterns: [
-			/DALL·E/i,
-			/dall-e/i,
-			/OpenAI/i
-		],
-		software_patterns: [
-			/DALL·E/i,
-			/OpenAI/i
-		],
-		specific_combinations: [
-			['Software', 'OpenAI'],
-			['dalle'],
-			['Description', 'DALL']
-		]
-	}
+		metadata_patterns: [/DALL·E/i, /dall-e/i, /OpenAI/i],
+		software_patterns: [/DALL·E/i, /OpenAI/i],
+		specific_combinations: [['Software', 'OpenAI'], ['dalle'], ['Description', 'DALL']],
+	},
 };
 
 /**
@@ -258,14 +156,14 @@ export async function detectOrigin(metadata: Record<string, unknown>): Promise<O
 		logger.info('Origen detectado', {
 			engine: best.engine,
 			confidence: best.confidence,
-			evidenceCount: best.evidence.length
+			evidenceCount: best.evidence.length,
 		});
 
 		return {
 			engine: best.engine,
 			confidence: best.confidence,
 			evidence: best.evidence,
-			version: await detectEngineVersion(metadata, best.engine)
+			version: await detectEngineVersion(metadata, best.engine),
 		};
 	}
 
@@ -273,7 +171,7 @@ export async function detectOrigin(metadata: Record<string, unknown>): Promise<O
 	return {
 		engine: AIEngine.UNKNOWN,
 		confidence: 0,
-		evidence: ['No se encontraron patrones reconocibles']
+		evidence: ['No se encontraron patrones reconocibles'],
 	};
 }
 
@@ -285,7 +183,6 @@ async function analyzeEnginePatterns(
 	engine: AIEngine,
 	patterns: any
 ): Promise<{ engine: AIEngine; confidence: number; evidence: string[] }> {
-
 	let confidence = 0;
 	const evidence: string[] = [];
 
@@ -363,11 +260,9 @@ async function analyzeEnginePatterns(
 		} else if (combination.length === 2) {
 			// Buscar clave + patrón
 			const [key, pattern] = combination;
-			if (key in metadata && typeof metadata[key] === 'string') {
-				if (metadata[key].includes(pattern)) {
-					confidence += 0.3;
-					evidence.push(`Combinación encontrada: ${key} contiene "${pattern}"`);
-				}
+			if (key in metadata && typeof metadata[key] === 'string' && metadata[key].includes(pattern)) {
+				confidence += 0.3;
+				evidence.push(`Combinación encontrada: ${key} contiene "${pattern}"`);
 			}
 		}
 	}
@@ -419,7 +314,7 @@ async function detectEngineVersion(metadata: Record<string, unknown>, engine: AI
 			break;
 	}
 
-	return undefined;
+	return;
 }
 
 /**
@@ -442,7 +337,7 @@ export function getSupportedEngines(): SupportedEngine[] {
 		AIEngine.MIDJOURNEY,
 		AIEngine.INVOKEAI,
 		AIEngine.NOVELAI,
-		AIEngine.IDEOGRAM
+		AIEngine.IDEOGRAM,
 	];
 }
 
@@ -463,17 +358,17 @@ export function getEngineInfo(engine: AIEngine): { name: string; description: st
 		[AIEngine.IDEOGRAM]: 'Ideogram - Generación de imágenes con texto',
 		[AIEngine.STABILITY_AI]: 'Stability AI - API oficial de Stable Diffusion',
 		[AIEngine.DALLE]: 'DALL·E - Generador de OpenAI',
-		[AIEngine.UNKNOWN]: 'Motor desconocido'
+		[AIEngine.UNKNOWN]: 'Motor desconocido',
 	};
 
 	return {
 		name: engine,
 		description: descriptions[engine] || 'Descripción no disponible',
-		patterns: patterns ? (
-			patterns.metadata_keys.length +
-			patterns.metadata_patterns.length +
-			(patterns.software_patterns?.length || 0) +
-			patterns.specific_combinations.length
-		) : 0
+		patterns: patterns
+			? patterns.metadata_keys.length +
+				patterns.metadata_patterns.length +
+				(patterns.software_patterns?.length || 0) +
+				patterns.specific_combinations.length
+			: 0,
 	};
 }

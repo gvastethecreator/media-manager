@@ -26,7 +26,7 @@ export function formatImageDimensions(width: number, height: number): string {
  * @returns Dimensiones formateadas como megapíxeles
  */
 export function calculateMegapixels(width: number, height: number): string {
-	const mp = (width * height) / 1000000;
+	const mp = (width * height) / 1_000_000;
 	return `${mp.toFixed(1)} MP`;
 }
 
@@ -59,7 +59,7 @@ export function generateThumbnailUrl(image: Image | string, width?: number, heig
  */
 export function getImageFormatFromPath(path: string): ImageFormat | undefined {
 	const extension = path.split('.').pop()?.toLowerCase();
-	if (!extension) return undefined;
+	if (!extension) return;
 
 	return isValidImageFormat(extension) ? (extension as ImageFormat) : undefined;
 }
@@ -70,7 +70,7 @@ export function getImageFormatFromPath(path: string): ImageFormat | undefined {
  * @returns Objeto con los datos más relevantes para mostrar
  */
 export function getExifSummary(metadata?: ImageMetadata): Record<string, string> {
-	if (!metadata || !metadata.exif) {
+	if (!(metadata && metadata.exif)) {
 		return {};
 	}
 

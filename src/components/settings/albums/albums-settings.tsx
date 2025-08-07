@@ -91,11 +91,11 @@ export function AlbumsSettings() {
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-3">
 						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">Cargando álbumes...</p>
+						<p className="text-muted-foreground text-sm">Cargando álbumes...</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -104,13 +104,13 @@ export function AlbumsSettings() {
 
 	if (error) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
 					<EmptyState
+						actions={<Button onClick={() => loadAlbums()}>Intentar de nuevo</Button>}
+						description={error instanceof Error ? error.message : 'Error desconocido'}
 						icon={Info}
 						title="Error al cargar álbumes"
-						description={error instanceof Error ? error.message : 'Error desconocido'}
-						actions={<Button onClick={() => loadAlbums()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -121,18 +121,18 @@ export function AlbumsSettings() {
 		<div className="grid grid-cols-12 gap-2">
 			{/* Panel izquierdo: Lista de álbumes */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-12rem)] flex flex-col">
-					<CardHeader className="space-y-0.5 py-1.5 px-2">
+				<Card className="flex h-[calc(100vh-12rem)] flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="space-y-0.5 px-2 py-1.5">
 						<div className="flex items-center justify-between">
 							<CardTitle className="text-xs">Álbumes ({albums.length})</CardTitle>
 							<Button
+								className="h-5 w-5 p-0"
 								onClick={() => {
 									setSelectedAlbum(null);
 									setIsEditing(false);
 								}}
 								size="sm"
 								variant="ghost"
-								className="h-5 w-5 p-0"
 							>
 								<PlusCircle className="h-3 w-3" />
 							</Button>
@@ -147,44 +147,44 @@ export function AlbumsSettings() {
 						<ScrollArea className="h-full px-2 pb-2">
 							{albums.length === 0 ? (
 								<EmptyState
+									className="py-6"
+									description="Crea tu primer álbum"
 									icon={AlbumIcon}
 									title="No hay álbumes"
-									description="Crea tu primer álbum"
-									className="py-6"
 								/>
 							) : (
 								<div className="space-y-0.5">
 									{albums.map((album) => (
 										<div
+											className={`group/item relative flex w-full items-center gap-1.5 rounded-sm p-1 transition-colors hover:bg-muted/50 ${selectedAlbum?.id === album.id ? 'bg-muted' : ''}`}
 											key={album.id}
-											className={`relative group/item flex items-center gap-1.5 p-1 rounded-sm transition-colors hover:bg-muted/50 w-full ${selectedAlbum?.id === album.id ? 'bg-muted' : ''}`}
 										>
 											<button
-												className="flex items-center gap-1.5 w-full text-left cursor-pointer"
-												onClick={() => handleEditAlbum(album)}
 												aria-pressed={selectedAlbum?.id === album.id}
+												className="flex w-full cursor-pointer items-center gap-1.5 text-left"
+												onClick={() => handleEditAlbum(album)}
 												type="button"
 											>
 												<span className="text-sm">{album.emoji}</span>
-												<div className="flex-1 min-w-0">
-													<h4 className="text-[11px] font-medium truncate">{album.name}</h4>
+												<div className="min-w-0 flex-1">
+													<h4 className="truncate font-medium text-[11px]">{album.name}</h4>
 													<div className="flex items-center gap-1 text-[9px] text-muted-foreground">
 														<span>{album.stats.imageCount || 0} img</span>
 														{album.category && (
 															<>
 																<span>•</span>
-																<span className="truncate max-w-[60px]">{album.category}</span>
+																<span className="max-w-[60px] truncate">{album.category}</span>
 															</>
 														)}
 													</div>
 												</div>
 											</button>
 											<Button
-												variant="ghost"
-												size="sm"
-												onClick={(e) => _handleDeleteButtonClick(e, album.id)}
+												className="h-5 w-5 p-0 text-destructive opacity-0 hover:text-destructive group-hover/item:opacity-100"
 												disabled={deleteAlbumMutation.isPending}
-												className="opacity-0 group-hover/item:opacity-100 h-5 w-5 p-0 text-destructive hover:text-destructive"
+												onClick={(e) => _handleDeleteButtonClick(e, album.id)}
+												size="sm"
+												variant="ghost"
 											>
 												<Trash className="h-3 w-3" />
 											</Button>
@@ -199,8 +199,8 @@ export function AlbumsSettings() {
 
 			{/* Panel derecho: Formulario de creación/edición */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-12rem)]">
-					<CardHeader className="space-y-0.5 py-1.5 px-2">
+				<Card className="h-[calc(100vh-12rem)] rounded-sm border-none bg-muted/30">
+					<CardHeader className="space-y-0.5 px-2 py-1.5">
 						<CardTitle className="text-xs">
 							{selectedAlbum ? (isEditing ? 'Editar álbum' : 'Vista previa') : 'Crear álbum'}
 						</CardTitle>
@@ -213,10 +213,10 @@ export function AlbumsSettings() {
 					<CardContent className="flex-1 p-2">
 						<CreateAlbumForm
 							album={selectedAlbum}
-							onSubmit={selectedAlbum ? handleAlbumUpdated : handleAlbumCreated}
+							isEditing={isEditing}
 							onCancel={handleReset}
 							onPreview={handlePreview}
-							isEditing={isEditing}
+							onSubmit={selectedAlbum ? handleAlbumUpdated : handleAlbumCreated}
 						/>
 					</CardContent>
 				</Card>

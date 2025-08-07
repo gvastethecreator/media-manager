@@ -106,7 +106,7 @@ export function VideoCard({
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
 					className
 				)}
 			>
@@ -119,7 +119,7 @@ export function VideoCard({
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
 					className
 				)}
 			>
@@ -139,69 +139,69 @@ export function VideoCard({
 
 	return (
 		<motion.button
-			type="button"
+			aria-label={`Video: ${name}`}
 			className={cn(
-				'relative group cursor-pointer select-none',
+				'group relative cursor-pointer select-none',
 				'transition-all duration-300 ease-out',
 				isSelected && 'ring-2 ring-primary ring-offset-2',
-				disabled && 'opacity-50 cursor-not-allowed',
+				disabled && 'cursor-not-allowed opacity-50',
 				compact ? 'w-40' : 'w-64',
 				className
 			)}
-			style={style}
+			disabled={disabled}
 			onClick={handleClick}
 			onKeyDown={handleKeyDown}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
-			whileHover={!disabled ? { y: -4, scale: 1.02 } : {}}
-			whileTap={!disabled ? { scale: 0.98 } : {}}
-			disabled={disabled}
-			aria-label={`Video: ${name}`}
+			style={style}
+			type="button"
+			whileHover={disabled ? {} : { y: -4, scale: 1.02 }}
+			whileTap={disabled ? {} : { scale: 0.98 }}
 		>
 			<CardContainer
-				primaryColor={primaryColor}
-				secondaryColor={secondaryColor}
-				glowLevel={isHovered ? 2 : 0} // Añadir glowLevel basado en isHovered
 				className={cn(
 					'transition-all duration-300',
 					isHovered && 'scale-[1.02]',
 					isSelected && 'ring-4 ring-primary/60'
 				)}
+				glowLevel={isHovered ? 2 : 0}
+				primaryColor={primaryColor} // Añadir glowLevel basado en isHovered
+				secondaryColor={secondaryColor}
 			>
-				<div className="flex flex-col h-full relative z-10">
+				<div className="relative z-10 flex h-full flex-col">
 					{/* Header con nombre, duración y calidad */}
-					<VideoCardHeader video={video} primaryColor={primaryColor} tcgMode={tcgMode} compact={compact} />
+					<VideoCardHeader compact={compact} primaryColor={primaryColor} tcgMode={tcgMode} video={video} />
 
 					{/* Thumbnail del video */}
 					<VideoCardThumbnail
-						video={video}
+						compact={compact}
+						isHovered={isHovered}
 						primaryColor={primaryColor}
 						rarityLevel={rarityLevel}
-						isHovered={isHovered}
 						tcgMode={tcgMode}
-						compact={compact}
+						video={video}
 					/>
 
 					{/* Contenido con estadísticas y metadatos */}
 					{!compact && (
 						<VideoCardContent
-							video={video}
 							primaryColor={primaryColor}
 							secondaryColor={secondaryColor}
 							tcgMode={tcgMode}
+							video={video}
 						/>
 					)}
 
 					{/* Footer con conteos y stats TCG */}
 					<VideoCardFooter
-						video={video}
-						primaryColor={primaryColor}
-						secondaryColor={secondaryColor}
 						cardId={cardId}
-						rarityLevel={rarityLevel}
-						totalRelations={totalRelations}
-						tcgMode={tcgMode}
 						compact={compact}
+						primaryColor={primaryColor}
+						rarityLevel={rarityLevel}
+						secondaryColor={secondaryColor}
+						tcgMode={tcgMode}
+						totalRelations={totalRelations}
+						video={video}
 					/>
 				</div>
 			</CardContainer>

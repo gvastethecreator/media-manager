@@ -61,7 +61,7 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 	const isItemInSelection = useCallback(
 		(itemId: string, rect: SelectionRect) => {
 			const itemBounds = getItemBounds(itemId);
-			if (!itemBounds || !containerRef.current) return false;
+			if (!(itemBounds && containerRef.current)) return false;
 
 			const containerBounds = containerRef.current.getBoundingClientRect();
 			const normalizedRect = getNormalizedRect(rect);
@@ -116,7 +116,7 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 				});
 			} else {
 				// Normal drag: replace selection
-				setSelection(intersectingItems.map(item => item.id));
+				setSelection(intersectingItems.map((item) => item.id));
 			}
 		},
 		[items, isItemInSelection, dragStartItems, addToSelection, removeFromSelection, setSelection]
@@ -154,7 +154,7 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 			setDragStartItems(new Set(selectedItems.map((item) => item.id)));
 
 			// Clear selection if not using modifiers (unless clicking on selected item)
-			if (!event.ctrlKey && !event.shiftKey) {
+			if (!(event.ctrlKey || event.shiftKey)) {
 				const clickedItem = items.find((item) => {
 					const bounds = getItemBounds(item.id);
 					if (!bounds) return false;
@@ -167,7 +167,7 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 					);
 				});
 
-				if (!clickedItem || !selectedItems.some((selected) => selected.id === clickedItem.id)) {
+				if (!(clickedItem && selectedItems.some((selected) => selected.id === clickedItem.id))) {
 					clearSelection();
 				}
 			}
@@ -182,7 +182,7 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 	 */
 	const handleMouseMove = useCallback(
 		(event: MouseEvent) => {
-			if (!isMouseDownRef.current || !dragStartRef.current || !containerRef.current) return;
+			if (!(isMouseDownRef.current && dragStartRef.current && containerRef.current)) return;
 
 			const containerBounds = containerRef.current.getBoundingClientRect();
 			const currentX = event.clientX - containerBounds.left;
@@ -258,7 +258,7 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 		<div className={`relative ${className}`} onMouseDown={handleMouseDown} style={{ userSelect: 'none' }}>
 			{children}
 
-			{isDragging && selectionRect && <SelectionOverlay rect={selectionRect} containerRef={containerRef} />}
+			{isDragging && selectionRect && <SelectionOverlay containerRef={containerRef} rect={selectionRect} />}
 		</div>
 	);
 };

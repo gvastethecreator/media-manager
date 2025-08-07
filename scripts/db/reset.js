@@ -103,29 +103,29 @@ function ensureEnvFile() {
 	const rootDir = path.resolve(__dirname, '../..');
 	const envPath = path.join(rootDir, '.env');
 
-	if (!fileExists(envPath)) {
+	if (fileExists(envPath)) {
+		log('El archivo .env ya existe', 'info');
+
+		try {
+			const envContent = fs.readFileSync(envPath, 'utf8');
+			if (envContent.includes('DATABASE_URL=')) {
+				log('DATABASE_URL ya existe en el archivo .env', 'info');
+			} else {
+				log('Añadiendo DATABASE_URL al archivo .env...', 'info');
+				fs.appendFileSync(envPath, '\nDATABASE_URL="file:./db.sqlite"\n');
+				log('DATABASE_URL añadido al archivo .env', 'success');
+			}
+		} catch (error) {
+			log(`Error al leer/modificar el archivo .env: ${error.message}`, 'error');
+			return false;
+		}
+	} else {
 		log('Creando archivo .env...', 'info');
 		try {
 			fs.writeFileSync(envPath, 'DATABASE_URL="file:./db.sqlite"\n');
 			log('Archivo .env creado correctamente', 'success');
 		} catch (error) {
 			log(`Error al crear el archivo .env: ${error.message}`, 'error');
-			return false;
-		}
-	} else {
-		log('El archivo .env ya existe', 'info');
-
-		try {
-			const envContent = fs.readFileSync(envPath, 'utf8');
-			if (!envContent.includes('DATABASE_URL=')) {
-				log('Añadiendo DATABASE_URL al archivo .env...', 'info');
-				fs.appendFileSync(envPath, '\nDATABASE_URL="file:./db.sqlite"\n');
-				log('DATABASE_URL añadido al archivo .env', 'success');
-			} else {
-				log('DATABASE_URL ya existe en el archivo .env', 'info');
-			}
-		} catch (error) {
-			log(`Error al leer/modificar el archivo .env: ${error.message}`, 'error');
 			return false;
 		}
 	}

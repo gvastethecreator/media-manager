@@ -691,7 +691,7 @@ class ImageService {
 
 			await this.generateThumbnail(imageId);
 			const updatedImage = await this.getImage(imageId);
-			if (!updatedImage || !updatedImage.thumbnail) {
+			if (!(updatedImage && updatedImage.thumbnail)) {
 				throw createFileNotFoundError(`Miniatura para la imagen ${imageId} no encontrada después de la generación`);
 			}
 			// Convertir string base64 a Buffer

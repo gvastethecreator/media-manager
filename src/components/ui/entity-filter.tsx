@@ -234,7 +234,7 @@ export function EntityFilter({
 
 	// Guardar filtro actual
 	const saveCurrentFilter = () => {
-		if (!filterName.trim() || !onSaveFilter) return;
+		if (!(filterName.trim() && onSaveFilter)) return;
 
 		const newFilter: SavedFilter = {
 			name: filterName.trim(),
@@ -260,9 +260,9 @@ export function EntityFilter({
 						<Label htmlFor={filter.id}>{filter.label}</Label>
 						<Input
 							id={filter.id}
-							value={filterValues[filter.id] || ''}
 							onChange={(e) => updateFilterValue(filter.id, e.target.value)}
 							placeholder={filter.placeholder}
+							value={filterValues[filter.id] || ''}
 						/>
 					</div>
 				);
@@ -272,8 +272,8 @@ export function EntityFilter({
 					<div className="space-y-2" key={filter.id}>
 						<Label htmlFor={filter.id}>{filter.label}</Label>
 						<Select
-							value={filterValues[filter.id] || ''}
 							onValueChange={(value) => updateFilterValue(filter.id, value)}
+							value={filterValues[filter.id] || ''}
 						>
 							<SelectTrigger id={filter.id}>
 								<SelectValue placeholder={filter.placeholder || `Seleccionar ${filter.label.toLowerCase()}`} />
@@ -298,8 +298,8 @@ export function EntityFilter({
 							{filter.options?.map((option) => (
 								<div className="flex items-center space-x-2" key={String(option.value)}>
 									<Checkbox
-										id={`${filter.id}-${option.value}`}
 										checked={Array.isArray(filterValues[filter.id]) && filterValues[filter.id]?.includes(option.value)}
+										id={`${filter.id}-${option.value}`}
 										onCheckedChange={(checked) => {
 											const values = Array.isArray(filterValues[filter.id]) ? [...filterValues[filter.id]] : [];
 											if (checked) {
@@ -312,7 +312,7 @@ export function EntityFilter({
 											}
 										}}
 									/>
-									<Label htmlFor={`${filter.id}-${option.value}`} className="cursor-pointer">
+									<Label className="cursor-pointer" htmlFor={`${filter.id}-${option.value}`}>
 										{option.label}
 									</Label>
 								</div>
@@ -326,14 +326,14 @@ export function EntityFilter({
 					<div className="space-y-2" key={filter.id}>
 						<Label>{filter.label}</Label>
 						<RadioGroup
-							value={filterValues[filter.id] || ''}
 							onValueChange={(value) => updateFilterValue(filter.id, value)}
+							value={filterValues[filter.id] || ''}
 						>
 							<div className="space-y-2">
 								{filter.options?.map((option) => (
 									<div className="flex items-center space-x-2" key={String(option.value)}>
-										<RadioGroupItem value={String(option.value)} id={`${filter.id}-${option.value}`} />
-										<Label htmlFor={`${filter.id}-${option.value}`} className="cursor-pointer">
+										<RadioGroupItem id={`${filter.id}-${option.value}`} value={String(option.value)} />
+										<Label className="cursor-pointer" htmlFor={`${filter.id}-${option.value}`}>
 											{option.label}
 										</Label>
 									</div>
@@ -350,12 +350,12 @@ export function EntityFilter({
 						<Popover>
 							<PopoverTrigger asChild>
 								<Button
-									id={filter.id}
-									variant="outline"
 									className={cn(
 										'w-full justify-start text-left font-normal',
 										!filterValues[filter.id] && 'text-muted-foreground'
 									)}
+									id={filter.id}
+									variant="outline"
 								>
 									<CalendarIcon className="mr-2 h-4 w-4" />
 									{filterValues[filter.id]
@@ -367,10 +367,10 @@ export function EntityFilter({
 							</PopoverTrigger>
 							<PopoverContent className="w-auto p-0">
 								<Calendar
-									mode="single"
-									selected={filterValues[filter.id] ? new Date(filterValues[filter.id]) : undefined}
-									onSelect={(date) => updateFilterValue(filter.id, date)}
 									initialFocus
+									mode="single"
+									onSelect={(date) => updateFilterValue(filter.id, date)}
+									selected={filterValues[filter.id] ? new Date(filterValues[filter.id]) : undefined}
 								/>
 							</PopoverContent>
 						</Popover>
@@ -381,11 +381,11 @@ export function EntityFilter({
 				return (
 					<div className="flex items-center space-x-2" key={filter.id}>
 						<Checkbox
-							id={filter.id}
 							checked={!!filterValues[filter.id]}
+							id={filter.id}
 							onCheckedChange={(checked) => updateFilterValue(filter.id, Boolean(checked))}
 						/>
-						<Label htmlFor={filter.id} className="cursor-pointer">
+						<Label className="cursor-pointer" htmlFor={filter.id}>
 							{filter.label}
 						</Label>
 					</div>
@@ -400,44 +400,44 @@ export function EntityFilter({
 	return (
 		<div className={cn('space-y-4', className)}>
 			{/* Barra superior con búsqueda rápida y botones de acción */}
-			<div className="flex flex-col sm:flex-row gap-2">
+			<div className="flex flex-col gap-2 sm:flex-row">
 				{/* Búsqueda rápida */}
 				{showQuickSearch && (
 					<div className="relative flex-1">
-						<SearchIcon className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+						<SearchIcon className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
 						<Input
-							type="search"
-							placeholder={searchPlaceholder}
 							className="pl-8"
-							value={quickSearch}
 							onChange={(e) => setQuickSearch(e.target.value)}
+							placeholder={searchPlaceholder}
+							type="search"
+							value={quickSearch}
 						/>
 					</div>
 				)}
 
 				{/* Botón de filtros avanzados */}
-				<Popover open={isFilterPanelOpen} onOpenChange={setIsFilterPanelOpen}>
+				<Popover onOpenChange={setIsFilterPanelOpen} open={isFilterPanelOpen}>
 					<PopoverTrigger asChild>
 						<Button
-							variant="outline"
-							size="sm"
 							className={cn('flex items-center gap-1', activeFiltersCount > 0 && 'bg-primary/10')}
+							size="sm"
+							variant="outline"
 						>
 							<SlidersHorizontal className="h-4 w-4" />
 							<span>Filtros</span>
 							{showActiveCount && activeFiltersCount > 0 && (
-								<Badge variant="secondary" className="ml-1 rounded-full px-1 py-0 text-xs">
+								<Badge className="ml-1 rounded-full px-1 py-0 text-xs" variant="secondary">
 									{activeFiltersCount}
 								</Badge>
 							)}
 						</Button>
 					</PopoverTrigger>
-					<PopoverContent className="w-80 sm:w-[450px] p-4" align="end">
+					<PopoverContent align="end" className="w-80 p-4 sm:w-[450px]">
 						<div className="space-y-4">
 							<div className="flex items-center justify-between">
-								<h3 className="text-sm font-medium">Filtros avanzados</h3>
+								<h3 className="font-medium text-sm">Filtros avanzados</h3>
 								{activeFiltersCount > 0 && (
-									<Button variant="ghost" size="sm" className="h-8 px-2 text-xs" onClick={clearAllFilters}>
+									<Button className="h-8 px-2 text-xs" onClick={clearAllFilters} size="sm" variant="ghost">
 										<RotateCcw className="mr-2 h-3 w-3" />
 										{clearButtonText}
 									</Button>
@@ -451,29 +451,29 @@ export function EntityFilter({
 
 							{/* Filtros guardados */}
 							{allowSavedFilters && (
-								<div className="pt-4 border-t">
-									<h4 className="text-sm font-medium mb-2">Filtros guardados</h4>
+								<div className="border-t pt-4">
+									<h4 className="mb-2 font-medium text-sm">Filtros guardados</h4>
 
 									{/* Lista de filtros guardados */}
 									{savedFilters.length > 0 && (
-										<div className="space-y-2 mb-4">
+										<div className="mb-4 space-y-2">
 											{savedFilters.map((filter) => (
-												<div key={filter.name} className="flex items-center justify-between">
+												<div className="flex items-center justify-between" key={filter.name}>
 													<Button
-														variant="ghost"
-														size="sm"
-														className="h-8 justify-start px-2 text-left font-normal w-[calc(100%-36px)]"
+														className="h-8 w-[calc(100%-36px)] justify-start px-2 text-left font-normal"
 														onClick={() => applyFilter(filter)}
+														size="sm"
+														variant="ghost"
 													>
 														<Filter className="mr-2 h-3.5 w-3.5" />
 														{filter.name}
 													</Button>
 													{onDeleteSavedFilter && (
 														<Button
-															variant="ghost"
-															size="sm"
 															className="h-8 w-8 p-0"
 															onClick={() => onDeleteSavedFilter(filter.name)}
+															size="sm"
+															variant="ghost"
 														>
 															<Trash className="h-3.5 w-3.5 text-muted-foreground" />
 														</Button>
@@ -487,19 +487,19 @@ export function EntityFilter({
 									{onSaveFilter && (
 										<div className="flex items-center gap-2">
 											<Input
-												placeholder="Nombre del filtro"
-												value={filterName}
 												onChange={(e) => setFilterName(e.target.value)}
+												placeholder="Nombre del filtro"
 												size={1}
+												value={filterName}
 											/>
 											<Button
-												type="button"
-												size="sm"
-												variant="outline"
-												onClick={saveCurrentFilter}
 												disabled={!filterName.trim()}
+												onClick={saveCurrentFilter}
+												size="sm"
+												type="button"
+												variant="outline"
 											>
-												<Save className="h-3.5 w-3.5 mr-1" />
+												<Save className="mr-1 h-3.5 w-3.5" />
 												Guardar
 											</Button>
 										</div>
@@ -512,8 +512,8 @@ export function EntityFilter({
 
 				{/* Mostrar filtros activos como badges */}
 				{activeFiltersCount > 0 && (
-					<Button variant="ghost" size="sm" onClick={clearAllFilters} className="hidden sm:flex items-center gap-1">
-						<RotateCcw className="h-3.5 w-3.5 mr-1" />
+					<Button className="hidden items-center gap-1 sm:flex" onClick={clearAllFilters} size="sm" variant="ghost">
+						<RotateCcw className="mr-1 h-3.5 w-3.5" />
 						Limpiar filtros
 					</Button>
 				)}
@@ -573,15 +573,15 @@ export function EntityFilter({
 							}
 
 							return (
-								<Badge key={key} variant="outline" className="flex items-center gap-1 py-1 pl-2 pr-1">
+								<Badge className="flex items-center gap-1 py-1 pr-1 pl-2" key={key} variant="outline">
 									<span className="font-medium">{filterDef.label}:</span>
 									<span className="mr-1">{displayValue}</span>
 									<Button
+										className="h-5 w-5 rounded-full p-0"
+										onClick={() => updateFilterValue(key, undefined)}
+										size="sm"
 										type="button"
 										variant="ghost"
-										size="sm"
-										className="h-5 w-5 p-0 rounded-full"
-										onClick={() => updateFilterValue(key, undefined)}
 									>
 										<Trash className="h-3 w-3" />
 									</Button>

@@ -385,7 +385,7 @@ export const createCollection = async (data: CollectionCreateInput): Promise<Col
 				tokenId: data.tokenId || null,
 				editions: data.editions || null,
 				featuredImage: data.featuredImage || null,
-				isFavorite: data.isFavorite || false,
+				isFavorite: data.isFavorite,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			})
@@ -475,7 +475,7 @@ export const updateCollection = async (id: string, data: CollectionUpdateInput):
 				tokenId: data.tokenId || null,
 				editions: data.editions || null,
 				featuredImage: data.featuredImage || null,
-				isFavorite: data.isFavorite || false,
+				isFavorite: data.isFavorite,
 				updatedAt: new Date(),
 			})
 			.where(eq(collections.id, id))

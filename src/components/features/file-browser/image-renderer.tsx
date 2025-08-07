@@ -90,8 +90,8 @@ export const ImageRenderer = React.memo(function ImageRenderer({
 	// Si no tenemos src o src es un objeto (error común), mostramos un placeholder
 	if (!src || typeof src === 'object') {
 		return (
-			<div className={cn('bg-muted/30 flex items-center justify-center', className)} {...rest}>
-				<span className="text-xs text-muted-foreground">
+			<div className={cn('flex items-center justify-center bg-muted/30', className)} {...rest}>
+				<span className="text-muted-foreground text-xs">
 					{typeof src === 'object' ? 'Error de formato' : 'Sin imagen'}
 				</span>
 			</div>
@@ -106,7 +106,7 @@ export const ImageRenderer = React.memo(function ImageRenderer({
 
 	// Si la imagen es local y no es un blob ni una URL de datos, se renderiza
 	// directamente con `<img>` ignorando props innecesarias
-	if (!isRemoteImage && !isBlobOrDataUrl && src.startsWith('/')) {
+	if (!(isRemoteImage || isBlobOrDataUrl) && src.startsWith('/')) {
 		// Filtrar las propiedades que no aplican al elemento nativo
 		const {
 			onLoad,
@@ -124,12 +124,12 @@ export const ImageRenderer = React.memo(function ImageRenderer({
 
 		return (
 			<img
-				src={src}
 				alt={alt}
-				width={width || 300}
-				height={height || 300}
 				className={className}
+				height={height || 300}
 				loading={priority ? 'eager' : 'lazy'}
+				src={src}
+				width={width || 300}
 				{...imgProps}
 			/>
 		);
@@ -138,12 +138,12 @@ export const ImageRenderer = React.memo(function ImageRenderer({
 	// Para imágenes remotas o blobs, usar img estándar
 	return (
 		<img
-			src={src}
 			alt={alt}
-			width={width}
-			height={height}
 			className={className}
+			height={height}
 			loading={priority ? 'eager' : 'lazy'}
+			src={src}
+			width={width}
 			{...rest}
 		/>
 	);

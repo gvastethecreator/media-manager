@@ -40,7 +40,7 @@ export interface UseAutoFolderIndexingOptions {
  */
 export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}) {
 	const {
-		checkInterval = 30000, // 30 segundos
+		checkInterval = 30_000, // 30 segundos
 		maxFoldersPerBatch = 5,
 		autoStart = true,
 		onIndexingStart,

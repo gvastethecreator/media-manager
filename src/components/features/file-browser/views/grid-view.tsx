@@ -73,10 +73,12 @@ export const GridView = memo<GridViewProps>(function GridView({
 
 			const isEmptySpaceClick =
 				target === currentTarget ||
-				(!target.closest('.entity-card') &&
-					!target.closest('[data-entity-card]') &&
-					!target.closest('button') &&
-					!target.closest('[data-testid="file-browser-item"]'));
+				!(
+					target.closest('.entity-card') ||
+					target.closest('[data-entity-card]') ||
+					target.closest('button') ||
+					target.closest('[data-testid="file-browser-item"]')
+				);
 
 			if (isEmptySpaceClick && derivedProps.hasSelection) {
 				// Visual feedback
@@ -203,18 +205,18 @@ export const GridView = memo<GridViewProps>(function GridView({
 
 	return (
 		<div
-			ref={parentRef}
-			className="w-full h-full overflow-auto"
+			aria-label={`Vista de cuadrícula con ${items.length} elementos`}
+			className="h-full w-full overflow-auto"
 			data-testid="grid-view"
 			data-view-type="grid"
 			onClickCapture={handleEmptySpaceClick}
+			ref={parentRef}
 			role="grid"
-			aria-label={`Vista de cuadrícula con ${items.length} elementos`}
 		>
 			<div
-				ref={gridRef}
 				className="relative"
 				onKeyDown={handleKeyDown}
+				ref={gridRef}
 				role="presentation"
 				style={{
 					height: `${rowVirtualizer.getTotalSize()}px`,
@@ -226,8 +228,8 @@ export const GridView = memo<GridViewProps>(function GridView({
 
 					return (
 						<div
-							key={virtualRow.key}
 							className="absolute top-0 left-0 w-full"
+							key={virtualRow.key}
 							style={{
 								height: `${rowHeight}px`,
 								transform: `translateY(${virtualRow.start}px)`,
@@ -248,31 +250,31 @@ export const GridView = memo<GridViewProps>(function GridView({
 
 									return (
 										<motion.div
-											key={item.id}
-											initial={{ opacity: 0, scale: 0.8 }}
 											animate={{ opacity: 1, scale: 1 }}
-											transition={{
-												delay: itemIndex * 0.02,
-												duration: 0.2,
-											}}
 											className={cn('relative cursor-pointer', isSelected && 'ring-2 ring-primary ring-offset-2')}
+											data-item-id={item.id}
+											data-selectable="true"
+											initial={{ opacity: 0, scale: 0.8 }}
+											key={item.id}
 											style={{
 												width: `${itemWidth}px`,
 												height: `${itemHeight}px`,
 											}}
-											data-item-id={item.id}
-											data-selectable="true"
 											tabIndex={itemIndex === 0 ? 0 : -1}
+											transition={{
+												delay: itemIndex * 0.02,
+												duration: 0.2,
+											}}
 										>
 											<OptimizedEntityCard
+												aria-label={`${item.name || 'Elemento'} - ${(item as any).entityType || 'archivo'}`}
+												className="h-full w-full"
+												compact={true}
 												entity={item}
 												isSelected={isSelected}
-												compact={true}
-												className="h-full w-full"
 												itemId={item.id}
 												onClickById={handleItemClickById}
 												onDoubleClickById={handleItemDoubleClickById}
-												aria-label={`${item.name || 'Elemento'} - ${(item as any).entityType || 'archivo'}`}
 											/>
 										</motion.div>
 									);

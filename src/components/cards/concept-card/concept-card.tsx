@@ -139,7 +139,7 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
 					className
 				)}
 			>
@@ -152,7 +152,7 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
 					className
 				)}
 			>
@@ -164,36 +164,36 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 	// Render del componente
 	return (
 		<motion.div
+			aria-label={`Concepto: ${concept.name}`}
 			className={cn(
 				// Base
 				'relative bg-card',
-				'w-[300px] h-[420px] rounded-[4.75%] overflow-hidden',
+				'h-[420px] w-[300px] overflow-hidden rounded-[4.75%]',
 				'border-2 shadow-md',
 				// Interacción
 				'transition-all duration-300 ease-out',
-				'hover:shadow-lg hover:scale-[1.02]',
+				'hover:scale-[1.02] hover:shadow-lg',
 				'active:scale-[0.98]',
 				// Cursor
 				onClick ? 'cursor-pointer' : '',
 				// Clase personalizada
 				className
 			)}
-			whileHover={{ y: -5 }}
-			whileTap={{ scale: 0.98 }}
+			data-concept-id={concept.id}
 			onClick={handleClick}
 			onKeyDown={handleKeyDown}
-			tabIndex={onClick ? 0 : -1}
 			role={onClick ? 'button' : 'article'}
-			aria-label={`Concepto: ${concept.name}`}
-			data-concept-id={concept.id}
 			style={cardStyle}
+			tabIndex={onClick ? 0 : -1}
+			whileHover={{ y: -5 }}
+			whileTap={{ scale: 0.98 }}
 		>
 			{/* Efectos decorativos de carta TCG */}
 			{tcgMode && (
 				<>
 					{/* Textura de fondo */}
 					<div
-						className="absolute inset-0 opacity-5 pointer-events-none mix-blend-overlay"
+						className="pointer-events-none absolute inset-0 opacity-5 mix-blend-overlay"
 						style={{
 							backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23${primaryColor.slice(1)}' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E")`,
 						}}
@@ -201,7 +201,7 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 
 					{/* Brillo superior */}
 					<div
-						className="absolute top-0 left-0 right-0 h-[30%] opacity-20 pointer-events-none"
+						className="pointer-events-none absolute top-0 right-0 left-0 h-[30%] opacity-20"
 						style={{
 							background: `linear-gradient(to bottom, ${primaryColor}70, transparent)`,
 						}}
@@ -209,7 +209,7 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 
 					{/* Decoración lateral */}
 					<div
-						className="absolute top-0 bottom-0 right-0 w-[15px] opacity-30 pointer-events-none"
+						className="pointer-events-none absolute top-0 right-0 bottom-0 w-[15px] opacity-30"
 						style={{
 							background: `linear-gradient(to left, ${secondaryColor}, transparent)`,
 						}}
@@ -217,46 +217,46 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 
 					{/* Esquinas decorativas */}
 					<div
-						className="absolute top-2 left-2 w-6 h-6 border-t-2 border-l-2 opacity-50 pointer-events-none rounded-tl"
+						className="pointer-events-none absolute top-2 left-2 h-6 w-6 rounded-tl border-t-2 border-l-2 opacity-50"
 						style={{ borderColor: primaryColor }}
 					/>
 					<div
-						className="absolute top-2 right-2 w-6 h-6 border-t-2 border-r-2 opacity-50 pointer-events-none rounded-tr"
+						className="pointer-events-none absolute top-2 right-2 h-6 w-6 rounded-tr border-t-2 border-r-2 opacity-50"
 						style={{ borderColor: primaryColor }}
 					/>
 					<div
-						className="absolute bottom-2 left-2 w-6 h-6 border-b-2 border-l-2 opacity-50 pointer-events-none rounded-bl"
+						className="pointer-events-none absolute bottom-2 left-2 h-6 w-6 rounded-bl border-b-2 border-l-2 opacity-50"
 						style={{ borderColor: primaryColor }}
 					/>
 					<div
-						className="absolute bottom-2 right-2 w-6 h-6 border-b-2 border-r-2 opacity-50 pointer-events-none rounded-br"
+						className="pointer-events-none absolute right-2 bottom-2 h-6 w-6 rounded-br border-r-2 border-b-2 opacity-50"
 						style={{ borderColor: primaryColor }}
 					/>
 				</>
 			)}
 
 			{/* Resplandor de borde en hover */}
-			<div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+			<div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-100">
 				<div
-					className="absolute inset-0 rounded-[4.75%] blur-sm -z-10"
+					className="-z-10 absolute inset-0 rounded-[4.75%] blur-sm"
 					style={{ boxShadow: `0 0 15px 2px ${primaryColor}` }}
 				/>
 			</div>
 
 			{/* Encabezado de la tarjeta */}
 			<CardHeader
-				title={concept.name}
-				subtitle={concept.category || 'General'}
 				icon={
 					concept.emoji ? (
 						<span className="text-lg">{concept.emoji}</span>
 					) : tcgMode ? (
-						<BrainCircuitIcon className="w-4 h-4" />
+						<BrainCircuitIcon className="h-4 w-4" />
 					) : (
-						<LightbulbIcon className="w-4 h-4" />
+						<LightbulbIcon className="h-4 w-4" />
 					)
 				}
 				primaryColor={primaryColor}
+				subtitle={concept.category || 'General'}
+				title={concept.name}
 			/>
 
 			{/* Sección de imágenes */}
@@ -265,30 +265,30 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 
 			{/* Contenido principal */}
 			<ConceptCardContent
-				description={concept.description}
-				content={concept.content}
 				category={concept.category}
-				tags={tags}
+				conceptId={concept.id}
+				content={concept.content}
+				description={concept.description}
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
-				conceptId={concept.id}
+				tags={tags}
 				tcgMode={tcgMode}
 			/>
 
 			{/* Pie de la tarjeta */}
 			<ConceptCardFooter
-				createdAt={concept.createdAt}
-				updatedAt={concept.updatedAt}
-				imagesCount={imagesCount}
-				videosCount={videosCount}
-				promptsCount={promptsCount}
-				notesCount={notesCount}
-				totalRelations={totalRelations}
-				isFavorite={concept.isFavorite}
 				category={concept.category}
+				createdAt={concept.createdAt}
+				imagesCount={imagesCount}
+				isFavorite={concept.isFavorite}
+				notesCount={notesCount}
 				primaryColor={primaryColor}
+				promptsCount={promptsCount}
 				secondaryColor={secondaryColor}
 				tcgMode={tcgMode}
+				totalRelations={totalRelations}
+				updatedAt={concept.updatedAt}
+				videosCount={videosCount}
 			/>
 		</motion.div>
 	);

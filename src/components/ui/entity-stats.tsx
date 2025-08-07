@@ -102,9 +102,9 @@ export function EntityStats({
 						<Tooltip>
 							<TooltipTrigger asChild>
 								<Badge
-									variant="outline"
 									className={cn(fontSize, 'whitespace-nowrap')}
 									style={{ borderColor: stat.color ? `${stat.color}50` : `${primaryColor}50` }}
+									variant="outline"
 								>
 									{stat.icon ? <span className="mr-1">{stat.icon}</span> : null}
 									{stat.value} {stat.label}
@@ -134,9 +134,9 @@ export function EntityStats({
 							<TooltipTrigger asChild>
 								<StatsContainer
 									className={cn(
-										'rounded-md px-2 py-1 flex items-center',
+										'flex items-center rounded-md px-2 py-1',
 										fontSize,
-										'transition-colors bg-background-muted/10 hover:bg-background-muted/20'
+										'bg-background-muted/10 transition-colors hover:bg-background-muted/20'
 									)}
 									style={{ borderLeft: `3px solid ${stat.color || primaryColor}` }}
 									{...(animated
@@ -148,7 +148,7 @@ export function EntityStats({
 										: {})}
 								>
 									{stat.icon && <span className="mr-1.5">{stat.icon}</span>}
-									<span className="font-semibold mr-1">{stat.value}</span>
+									<span className="mr-1 font-semibold">{stat.value}</span>
 									<span className="text-muted-foreground">{stat.label}</span>
 								</StatsContainer>
 							</TooltipTrigger>

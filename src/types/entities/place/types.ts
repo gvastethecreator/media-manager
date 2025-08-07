@@ -89,7 +89,7 @@ export function extendPlace(place: PlaceBase): PlaceWithStats {
 		...place,
 		entityType: 'place' as const,
 		_stats: stats,
-		stats: stats,
+		stats,
 		parsedDangers: [],
 		parsedResources: [],
 		parsedStats: {},

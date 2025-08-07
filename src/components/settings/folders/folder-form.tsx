@@ -96,7 +96,7 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 			if (directoryPicker) {
 				// Intentar obtener la ruta completa del sistema de archivos
 				try {
-					// @ts-ignore - La API de FileSystemHandle tiene una propiedad _path en algunos navegadores
+					// @ts-expect-error - La API de FileSystemHandle tiene una propiedad _path en algunos navegadores
 					const fullPath = directoryPicker._path || directoryPicker.name;
 					formLogger.info('Carpeta seleccionada:', { path: fullPath });
 					setFolderPath(fullPath);
@@ -124,52 +124,52 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 	};
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-2">
+		<form className="space-y-2" onSubmit={handleSubmit}>
 			<div className="flex items-center gap-2">
 				<div className="relative flex-1">
 					<Input
-						type="text"
-						placeholder="Ruta de la carpeta"
-						value={folderPath}
-						onChange={handleInputChange}
 						className={`pr-24 ${errorMessage ? 'border-red-500' : ''}`}
 						disabled={isSubmitting || isProcessing || isLoading}
+						onChange={handleInputChange}
+						placeholder="Ruta de la carpeta"
+						type="text"
+						value={folderPath}
 					/>
 					<Button
+						className="-translate-y-1/2 absolute top-1/2 right-1 h-7 cursor-pointer text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
+						disabled={isSubmitting || isProcessing || isLoading}
+						onClick={handleBrowse}
+						size="sm"
 						type="button"
 						variant="ghost"
-						size="sm"
-						className="absolute right-1 top-1/2 -translate-y-1/2 h-7 text-xs cursor-pointer hover:bg-accent hover:text-accent-foreground transition-colors"
-						onClick={handleBrowse}
-						disabled={isSubmitting || isProcessing || isLoading}
 					>
-						<Folder className="h-3.5 w-3.5 mr-1" />
+						<Folder className="mr-1 h-3.5 w-3.5" />
 						Explorar
 					</Button>
 				</div>
 				<Button
-					type="submit"
-					size="sm"
-					className="h-9 cursor-pointer hover:bg-primary/90 transition-colors"
+					className="h-9 cursor-pointer transition-colors hover:bg-primary/90"
 					disabled={isSubmitting || isProcessing || isLoading || !folderPath.trim()}
+					size="sm"
+					type="submit"
 				>
 					{isSubmitting ? 'Agregando...' : 'Agregar'}
 				</Button>
 			</div>
 
 			{errorMessage && (
-				<div className="bg-red-50 border border-red-200 rounded-md p-2 mt-1">
+				<div className="mt-1 rounded-md border border-red-200 bg-red-50 p-2">
 					<div className="flex items-start gap-2">
-						<div className="text-red-400 mt-0.5">
+						<div className="mt-0.5 text-red-400">
 							<svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
 								<path
-									fillRule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
 									clipRule="evenodd"
+									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+									fillRule="evenodd"
 								/>
 							</svg>
 						</div>
-						<div className="text-xs text-red-700">{errorMessage}</div>
+						<div className="text-red-700 text-xs">{errorMessage}</div>
 					</div>
 				</div>
 			)}

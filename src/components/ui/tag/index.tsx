@@ -100,13 +100,13 @@ const TagInputRoot = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLD
 		const { isFocused, disabled } = useTagInput();
 		return (
 			<div
-				ref={ref}
 				className={cn(
 					'flex flex-wrap items-center gap-2 rounded-md border border-input bg-background p-2 ring-offset-background',
 					isFocused && 'outline-none ring-2 ring-ring ring-offset-2',
 					disabled && 'cursor-not-allowed opacity-50',
 					className
 				)}
+				ref={ref}
 				{...props}
 			/>
 		);
@@ -118,20 +118,20 @@ const TagList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEle
 	({ className, ...props }, ref) => {
 		const { tags, removeTag, disabled } = useTagInput();
 		return (
-			<div ref={ref} className={cn('flex flex-wrap gap-2', className)} {...props}>
+			<div className={cn('flex flex-wrap gap-2', className)} ref={ref} {...props}>
 				{tags.map((tag, index) => (
 					<Badge
+						className={cn('px-2 py-1 text-xs', disabled && 'opacity-50')}
 						key={`tag-${tag}-${index}`}
 						variant="secondary"
-						className={cn('px-2 py-1 text-xs', disabled && 'opacity-50')}
 					>
 						{tag}
 						{!disabled && (
 							<button
-								type="button"
-								onClick={() => removeTag(index)}
-								className="ml-1 rounded-full outline-none hover:bg-accent hover:text-destructive focus:ring-2 focus:ring-ring focus:ring-offset-2"
 								aria-label={`Remove ${tag}`}
+								className="ml-1 rounded-full outline-none hover:bg-accent hover:text-destructive focus:ring-2 focus:ring-ring focus:ring-offset-2"
+								onClick={() => removeTag(index)}
+								type="button"
 							>
 								<X className="h-3 w-3" />
 							</button>
@@ -152,16 +152,16 @@ const TagInput = React.forwardRef<
 
 	return (
 		<Input
+			className={cn('h-auto flex-1 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0', className)}
+			disabled={disabled}
+			onBlur={handleInputBlur}
+			onChange={handleInputChange}
+			onFocus={handleInputFocus}
+			onKeyDown={handleInputKeyDown}
+			placeholder={placeholder || 'Presiona Enter para agregar'}
 			ref={ref}
 			type="text"
 			value={input}
-			onChange={handleInputChange}
-			onKeyDown={handleInputKeyDown}
-			onFocus={handleInputFocus}
-			onBlur={handleInputBlur}
-			placeholder={placeholder || 'Presiona Enter para agregar'}
-			className={cn('h-auto flex-1 border-0 bg-transparent p-0 text-sm shadow-none focus-visible:ring-0', className)}
-			disabled={disabled}
 			{...props}
 		/>
 	);

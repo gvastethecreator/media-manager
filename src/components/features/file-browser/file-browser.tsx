@@ -17,6 +17,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
 import { useAdvancedSelection } from '@/hooks/use-advanced-selection';
 import { useCustomContextMenu } from '@/hooks/use-custom-context-menu';
+import { useFileSync } from '@/hooks/use-file-sync';
 import { useUndoRedo } from '@/hooks/use-undo-redo';
 import { useFileBrowserShortcuts } from '@/lib/keyboard';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -89,7 +90,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	mode = 'auto',
 	items: manualItems = [],
 	filterId,
-	filterType = undefined,
+	filterType,
 	selectedIds = [],
 	onItemSelect,
 	onItemClick,
@@ -145,6 +146,13 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	// Integración de Undo/Redo
 	const { canUndo, canRedo, undo, redo } = useUndoRedo({ enableKeyboardShortcuts: true });
+
+	// Hook de sincronización de archivos - Solo activar si hay filterId de carpeta
+	// Deshabilitar autoSync para carpetas problemáticas
+	const shouldAutoSync = Boolean(filterId && filterType === 'folder' && filterId !== 'photography');
+	const { isSyncing, syncFiles } = useFileSync(filterId && filterType === 'folder' ? filterId : undefined, {
+		autoSync: shouldAutoSync,
+	});
 
 	// Usar selectedIds globales en lugar de prop local - Memoizado para evitar re-cálculos
 	const effectiveSelectedIds = useMemo(() => {
@@ -296,18 +304,21 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	}, [entityType, entityTypes, filterId, filterType, mode, manualItems, getSortedImages, getImagesByFolder]);
 
 	// OPTIMIZACIÓN: Memoizar helpers de sorting para evitar recreaciones
-	const sortingHelpers = useMemo(() => ({
-		getEntityName: (entity: AnyEntityWithStats): string => {
-			if ('name' in entity && typeof entity.name === 'string') return entity.name;
-			if ('title' in entity && typeof entity.title === 'string') return entity.title;
-			return '';
-		},
-		getEntityPath: (entity: AnyEntityWithStats): string => {
-			if ('path' in entity && typeof entity.path === 'string') return entity.path;
-			if ('category' in entity && typeof entity.category === 'string') return entity.category;
-			return '';
-		}
-	}), []);
+	const sortingHelpers = useMemo(
+		() => ({
+			getEntityName: (entity: AnyEntityWithStats): string => {
+				if ('name' in entity && typeof entity.name === 'string') return entity.name;
+				if ('title' in entity && typeof entity.title === 'string') return entity.title;
+				return '';
+			},
+			getEntityPath: (entity: AnyEntityWithStats): string => {
+				if ('path' in entity && typeof entity.path === 'string') return entity.path;
+				if ('category' in entity && typeof entity.category === 'string') return entity.category;
+				return '';
+			},
+		}),
+		[]
+	);
 
 	// Separar filtering y sorting para mejor performance
 	const items = useMemo(() => {
@@ -325,7 +336,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		// OPTIMIZACIÓN: Aplicar ordenación más eficiente
 		if (sortOptions.length > 0) {
 			// Pre-calcular valores de sorting para evitar cálculos repetidos
-			const itemsWithSortValues = filteredItems.map(item => {
+			const itemsWithSortValues = filteredItems.map((item) => {
 				const sortValues: Record<string, any> = {};
 				for (const sortOption of sortOptions) {
 					const { field } = sortOption;
@@ -418,8 +429,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	const stableItemsRef = useRef<AnyEntityWithStats[]>([]);
 	const itemsStabilized = useMemo(() => {
 		// Solo actualizar si los IDs realmente cambiaron
-		const currentIds = items.map(item => item.id).sort().join(',');
-		const prevIds = stableItemsRef.current.map(item => item.id).sort().join(',');
+		const currentIds = items
+			.map((item) => item.id)
+			.sort()
+			.join(',');
+		const prevIds = stableItemsRef.current
+			.map((item) => item.id)
+			.sort()
+			.join(',');
 
 		if (currentIds !== prevIds) {
 			stableItemsRef.current = items;
@@ -451,7 +468,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 	// OPTIMIZACIÓN: Hook de rendimiento con datos vacíos en producción para evitar overhead
 	const performance = usePerformance({
 		data: process.env.NODE_ENV === 'development' ? items : [],
-		searchTerm: process.env.NODE_ENV === 'development' ? (searchQuery || '') : '',
+		searchTerm: process.env.NODE_ENV === 'development' ? searchQuery || '' : '',
 	});
 
 	// Determinar estado de carga y error
@@ -1123,15 +1140,15 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 			console.log('🔧 FileBrowser.renderItem - Creando handler para item:', item.id, 'handler:', !!clickHandler);
 			return (
 				<OptimizedEntityCard
-					key={item.id}
+					className="h-full w-full"
 					entity={item as AnyEntityWithStats}
+					key={item.id}
+					layout={layout}
 					onClick={clickHandler}
 					onDoubleClick={() => handleItemDoubleClickById(item.id)}
-					layout={layout}
 					preset={preset}
-					variant={variant}
 					size={size}
-					className="w-full h-full"
+					variant={variant}
 				/>
 			);
 		},
@@ -1165,14 +1182,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 		}
 
 		if (items.length === 0) {
-			return <EmptyState icon={FileTextIcon} title="Sin elementos" description="No hay elementos para mostrar." />;
+			return <EmptyState description="No hay elementos para mostrar." icon={FileTextIcon} title="Sin elementos" />;
 		}
 
 		console.log('🔧 FileBrowser - Construyendo commonViewProps:', {
 			handleItemClickType: typeof handleItemClick,
 			handleItemClickValue: handleItemClick,
 			itemsLength: items.length,
-			viewMode
+			viewMode,
 		});
 
 		console.log('🔧 FileBrowser - ViewMode detectado:', { viewMode, type: typeof viewMode });
@@ -1232,8 +1249,10 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 
 	return (
 		<div
+			aria-describedby="file-browser-description"
+			aria-label="Explorador de archivos"
 			className={cn(
-				'flex h-full w-full flex-col bg-background overflow-hidden',
+				'flex h-full w-full flex-col overflow-hidden bg-background',
 				{
 					'accessibility-high-contrast': accessibility.config.highContrast,
 					'accessibility-large-fonts': accessibility.config.largeFonts,
@@ -1242,9 +1261,6 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 				className
 			)}
 			data-testid="file-browser-container"
-			role="application"
-			aria-label="Explorador de archivos"
-			aria-describedby="file-browser-description"
 			onClick={handleContainerClick}
 			onContextMenuCapture={handleContextMenu}
 			onKeyDown={(e) => {
@@ -1271,18 +1287,15 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 					}
 				}
 			}}
+			role="application"
 		>
-			<div id="file-browser-description" className="sr-only">
+			<div className="sr-only" id="file-browser-description">
 				Explorador de archivos con {items.length} elementos. Usa las flechas para navegar, Enter para abrir, Espacio
 				para seleccionar.
 			</div>
 
-			<ScrollArea className="flex-1 min-h-0 relative" aria-live="polite" aria-atomic="false">
+			<ScrollArea aria-atomic="false" aria-live="polite" className="relative min-h-0 flex-1">
 				<DragSelectionProvider
-					containerRef={containerRef as React.RefObject<HTMLElement>}
-					items={fileItems as any}
-					getItemElement={getItemElement}
-					disabled={true}
 					config={{
 						enabled: false,
 						threshold: 5,
@@ -1302,6 +1315,24 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 						selectingClass: 'entity-card--selecting',
 						containerClass: 'file-browser-container',
 					}}
+					containerRef={containerRef as React.RefObject<HTMLElement>}
+					disabled={true}
+					getItemElement={getItemElement}
+					items={fileItems as any}
+					onSelectionCancel={() => {
+						// Drag selection cancelled
+					}}
+					onSelectionEnd={(_state, selectedIds) => {
+						if (selectedIds.length > 0) {
+							setSelectedIds(selectedIds);
+						}
+					}}
+					onSelectionStart={(_state) => {
+						// Drag selection started
+					}}
+					onSelectionUpdate={(_state, _selectedIds) => {
+						// Drag selection updated
+					}}
 					overlayConfig={{
 						showCount: true,
 						showCoordinates: false,
@@ -1312,30 +1343,16 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 							easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
 						},
 					}}
-					onSelectionStart={(_state) => {
-						// Drag selection started
-					}}
-					onSelectionUpdate={(_state, _selectedIds) => {
-						// Drag selection updated
-					}}
-					onSelectionEnd={(_state, selectedIds) => {
-						if (selectedIds.length > 0) {
-							setSelectedIds(selectedIds);
-						}
-					}}
-					onSelectionCancel={() => {
-						// Drag selection cancelled
-					}}
 				>
 					<div
+						className="file-browser-container relative h-full w-full cursor-default bg-transparent"
 						ref={containerCallbackRef}
-						className="relative h-full w-full bg-transparent cursor-default file-browser-container"
 					>
 						{/* Navegación por teclado */}
 						<KeyboardNavigation
-							items={items}
 							containerRef={containerRef as React.RefObject<HTMLElement>}
 							getItemElement={getItemElement}
+							items={items}
 							onOpenItem={onItemDoubleClick}
 							onPreviewItem={(item: AnyEntityWithStats) => {
 								// Abrir en el file viewer para preview
@@ -1363,30 +1380,30 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowser({
 						{/* Menú contextual personalizado */}
 						<CustomContextMenu
 							isOpen={contextMenuOpen}
+							onAction={handleCustomContextMenuAction}
 							onClose={closeContextMenu}
 							position={contextMenuPosition}
 							selectedItems={items.filter((item) => effectiveSelectedIds.includes(item.id))}
-							onAction={handleCustomContextMenuAction}
 						/>
 					</div>
 				</DragSelectionProvider>
 			</ScrollArea>
 
 			<StatusBar
-				totalItems={items.length}
-				selectedCount={effectiveSelectedIds.length}
 				entityType={entityType === 'mixed' ? EntityStatsType.IMAGE : (entityType as EntityStatsType)}
+				selectedCount={effectiveSelectedIds.length}
+				totalItems={items.length}
 			/>
 
 			{/* Progress Overlay */}
 			<ProgressOverlay />
 
 			{/* Región para anuncios de lectores de pantalla */}
-			<div id="screen-reader-announcements" aria-live="assertive" aria-atomic="true" className="sr-only" />
+			<div aria-atomic="true" aria-live="assertive" className="sr-only" id="screen-reader-announcements" />
 
 			{/* Información de rendimiento (solo en desarrollo) */}
 			{process.env.NODE_ENV === 'development' && performance.isMonitoring && (
-				<div className="fixed bottom-4 right-4 bg-black/80 text-white p-2 rounded text-xs font-mono">
+				<div className="fixed right-4 bottom-4 rounded bg-black/80 p-2 font-mono text-white text-xs">
 					<div>FPS: {performance.metrics?.averageFPS ?? 'N/A'}</div>
 					<div>Memory: {performance.metrics?.memoryUsage ?? 'N/A'}MB</div>
 					<div>Entities: {items.length}</div>

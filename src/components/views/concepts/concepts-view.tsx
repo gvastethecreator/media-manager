@@ -81,18 +81,18 @@ export function ConceptsView() {
 	return (
 		<ConceptsContentView
 			concepts={concepts}
-			isLoading={isLoading}
 			error={error}
-			showForm={showForm}
-			newConceptName={newConceptName}
-			newConceptDescription={newConceptDescription}
-			searchTerm={searchTerm}
-			setShowForm={setShowForm}
-			setNewConceptName={setNewConceptName}
-			setNewConceptDescription={setNewConceptDescription}
-			setSearchTerm={setSearchTerm}
 			handleConceptSelect={handleConceptSelect}
 			handleCreateConcept={handleCreateConcept}
+			isLoading={isLoading}
+			newConceptDescription={newConceptDescription}
+			newConceptName={newConceptName}
+			searchTerm={searchTerm}
+			setNewConceptDescription={setNewConceptDescription}
+			setNewConceptName={setNewConceptName}
+			setSearchTerm={setSearchTerm}
+			setShowForm={setShowForm}
+			showForm={showForm}
 		/>
 	);
 }

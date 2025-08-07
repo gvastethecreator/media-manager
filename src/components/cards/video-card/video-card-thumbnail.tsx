@@ -36,10 +36,10 @@ export function VideoCardThumbnail({
 
 			{/* Thumbnail o placeholder */}
 			{thumbnailUrl ? (
-				<img src={thumbnailUrl} alt={`Thumbnail de ${video.name}`} className="object-cover w-full h-full" />
+				<img alt={`Thumbnail de ${video.name}`} className="h-full w-full object-cover" src={thumbnailUrl} />
 			) : (
-				<div className="w-full h-full flex items-center justify-center" style={{ background: placeholderGradient }}>
-					<Play className="w-8 h-8 text-white/80" />
+				<div className="flex h-full w-full items-center justify-center" style={{ background: placeholderGradient }}>
+					<Play className="h-8 w-8 text-white/80" />
 				</div>
 			)}
 
@@ -48,30 +48,30 @@ export function VideoCardThumbnail({
 				{/* Información técnica en la esquina inferior */}
 				<div className="absolute bottom-1 left-1 flex flex-col gap-1">
 					{/* Resolución */}
-					<div className="text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">{resolution}</div>
+					<div className="rounded bg-black/60 px-1.5 py-0.5 text-white text-xs">{resolution}</div>
 
 					{/* Tamaño del archivo */}
-					{!compact && <div className="text-xs bg-black/60 text-white px-1.5 py-0.5 rounded">{formattedSize}</div>}
+					{!compact && <div className="rounded bg-black/60 px-1.5 py-0.5 text-white text-xs">{formattedSize}</div>}
 				</div>
 
 				{/* Indicadores en la esquina superior derecha */}
 				<div className="absolute top-1 right-1 flex gap-1">
 					{/* Indicador de audio */}
-					{hasAudio ? <Volume2 className="w-4 h-4 text-white/80" /> : <VolumeX className="w-4 h-4 text-white/60" />}
+					{hasAudio ? <Volume2 className="h-4 w-4 text-white/80" /> : <VolumeX className="h-4 w-4 text-white/60" />}
 				</div>
 
 				{/* Botón de play centrado */}
 				<div className="absolute inset-0 flex items-center justify-center">
 					<motion.div
-						className="w-12 h-12 bg-black/50 rounded-full flex items-center justify-center backdrop-blur-sm"
-						initial={{ scale: 0.8, opacity: 0.6 }}
 						animate={{
 							scale: isHovered ? 1.1 : 0.8,
 							opacity: isHovered ? 1 : 0.6,
 						}}
+						className="flex h-12 w-12 items-center justify-center rounded-full bg-black/50 backdrop-blur-sm"
+						initial={{ scale: 0.8, opacity: 0.6 }}
 						transition={{ duration: 0.2 }}
 					>
-						<Play className="w-6 h-6 text-white ml-0.5" />
+						<Play className="ml-0.5 h-6 w-6 text-white" />
 					</motion.div>
 				</div>
 			</div>
@@ -79,10 +79,10 @@ export function VideoCardThumbnail({
 			{/* Efectos holográficos para rareza alta */}
 			{tcgMode && rarityLevel >= 7 && isHovered && (
 				<motion.div
-					className="absolute inset-0 pointer-events-none"
-					initial={{ opacity: 0 }}
 					animate={{ opacity: 0.3 }}
+					className="pointer-events-none absolute inset-0"
 					exit={{ opacity: 0 }}
+					initial={{ opacity: 0 }}
 				>
 					<div
 						className="absolute inset-0"
@@ -97,7 +97,7 @@ export function VideoCardThumbnail({
 			{/* Marco decorativo para rareza mítica */}
 			{tcgMode && rarityLevel >= 9 && (
 				<div
-					className="absolute inset-0 border-2 border-dashed opacity-40 pointer-events-none animate-pulse"
+					className="pointer-events-none absolute inset-0 animate-pulse border-2 border-dashed opacity-40"
 					style={{ borderColor: primaryColor }}
 				/>
 			)}

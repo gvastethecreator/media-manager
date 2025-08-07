@@ -102,61 +102,61 @@ export function LogViewer({
 				<div className="flex items-center justify-between">
 					<CardTitle>{title}</CardTitle>
 					<div className="flex items-center gap-2">
-						<Badge variant="outline" className="text-xs">
+						<Badge className="text-xs" variant="outline">
 							{filteredLogs.length} logs
 						</Badge>
 						{onClear && (
-							<Button type="button" variant="ghost" size="sm" onClick={onClear}>
+							<Button onClick={onClear} size="sm" type="button" variant="ghost">
 								Limpiar
 							</Button>
 						)}
 					</div>
 				</div>
-				<div className="flex items-center gap-2 mt-2">
+				<div className="mt-2 flex items-center gap-2">
 					<Input
+						className="h-8 text-sm"
+						onChange={(e) => setFilter(e.target.value)}
 						placeholder="Filtrar logs..."
 						value={filter}
-						onChange={(e) => setFilter(e.target.value)}
-						className="h-8 text-sm"
 					/>
 					<div className="flex items-center space-x-2">
-						<Switch id="show-timestamp" checked={showTimestamp} onCheckedChange={setShowTimestamp} />
-						<Label htmlFor="show-timestamp" className="text-xs">
+						<Switch checked={showTimestamp} id="show-timestamp" onCheckedChange={setShowTimestamp} />
+						<Label className="text-xs" htmlFor="show-timestamp">
 							Timestamp
 						</Label>
 					</div>
 				</div>
 			</CardHeader>
 
-			<Tabs value={activeTab} onValueChange={setActiveTab} className="px-4">
-				<TabsList className="grid grid-cols-5 h-8">
-					<TabsTrigger value="all" className="text-xs">
+			<Tabs className="px-4" onValueChange={setActiveTab} value={activeTab}>
+				<TabsList className="grid h-8 grid-cols-5">
+					<TabsTrigger className="text-xs" value="all">
 						Todos
-						<Badge variant="secondary" className="ml-1 text-xs">
+						<Badge className="ml-1 text-xs" variant="secondary">
 							{logs.length}
 						</Badge>
 					</TabsTrigger>
-					<TabsTrigger value="debug" className="text-xs">
+					<TabsTrigger className="text-xs" value="debug">
 						Debug
-						<Badge variant="secondary" className="ml-1 text-xs">
+						<Badge className="ml-1 text-xs" variant="secondary">
 							{logCounts.debug || 0}
 						</Badge>
 					</TabsTrigger>
-					<TabsTrigger value="info" className="text-xs">
+					<TabsTrigger className="text-xs" value="info">
 						Info
-						<Badge variant="secondary" className="ml-1 text-xs">
+						<Badge className="ml-1 text-xs" variant="secondary">
 							{logCounts.info || 0}
 						</Badge>
 					</TabsTrigger>
-					<TabsTrigger value="warn" className="text-xs">
+					<TabsTrigger className="text-xs" value="warn">
 						Warn
-						<Badge variant="secondary" className="ml-1 text-xs">
+						<Badge className="ml-1 text-xs" variant="secondary">
 							{logCounts.warn || 0}
 						</Badge>
 					</TabsTrigger>
-					<TabsTrigger value="error" className="text-xs">
+					<TabsTrigger className="text-xs" value="error">
 						Error
-						<Badge variant="secondary" className="ml-1 text-xs">
+						<Badge className="ml-1 text-xs" variant="secondary">
 							{logCounts.error || 0}
 						</Badge>
 					</TabsTrigger>
@@ -164,11 +164,11 @@ export function LogViewer({
 			</Tabs>
 
 			<CardContent className="p-0">
-				<ScrollArea ref={scrollRef} className="border rounded-md mx-4 mb-4" style={{ height: maxHeight }}>
+				<ScrollArea className="mx-4 mb-4 rounded-md border" ref={scrollRef} style={{ height: maxHeight }}>
 					{filteredLogs.length === 0 ? (
-						<div className="flex items-center justify-center h-20 text-muted-foreground">No hay logs para mostrar</div>
+						<div className="flex h-20 items-center justify-center text-muted-foreground">No hay logs para mostrar</div>
 					) : (
-						<div className="p-2 space-y-1">
+						<div className="space-y-1 p-2">
 							{filteredLogs.map((log) => {
 								const logDataText = log.data
 									? typeof log.data === 'string'
@@ -177,12 +177,12 @@ export function LogViewer({
 									: null;
 
 								return (
-									<div key={log.id} className={cn('p-2 rounded text-sm font-mono break-all', LOG_COLORS[log.level])}>
-										{showTimestamp && <span className="opacity-70 mr-2">[{log.timestamp}]</span>}
+									<div className={cn('break-all rounded p-2 font-mono text-sm', LOG_COLORS[log.level])} key={log.id}>
+										{showTimestamp && <span className="mr-2 opacity-70">[{log.timestamp}]</span>}
 										<span className="mr-1">{LOG_ICONS[log.level]}</span>
-										{log.context && <span className="font-semibold mr-1">[{log.context}]</span>}
+										{log.context && <span className="mr-1 font-semibold">[{log.context}]</span>}
 										<span>{log.message}</span>
-										{logDataText && <pre className="mt-1 text-xs overflow-x-auto">{logDataText}</pre>}
+										{logDataText && <pre className="mt-1 overflow-x-auto text-xs">{logDataText}</pre>}
 									</div>
 								);
 							})}
@@ -192,7 +192,7 @@ export function LogViewer({
 			</CardContent>
 
 			<CardFooter className="flex justify-between py-2">
-				<div className="text-xs text-muted-foreground">
+				<div className="text-muted-foreground text-xs">
 					{logs.length > 0
 						? `Último log: ${new Date(logs[logs.length - 1].timestamp).toLocaleTimeString()}`
 						: 'No hay logs'}
@@ -200,9 +200,9 @@ export function LogViewer({
 				<div className="flex gap-1">
 					{Object.entries(logCounts).map(([level, count]) => (
 						<Badge
+							className={cn('text-xs', LOG_COLORS[level as keyof typeof LOG_COLORS])}
 							key={level}
 							variant="outline"
-							className={cn('text-xs', LOG_COLORS[level as keyof typeof LOG_COLORS])}
 						>
 							{level}: {count}
 						</Badge>

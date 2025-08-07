@@ -22,12 +22,12 @@ export const ClickableContainer = React.forwardRef<HTMLDivElement, ClickableCont
 
 		return (
 			<div
+				className={cn('focus:outline-none', className)}
+				onClick={onClick}
+				onKeyDown={handleKeyDown}
 				ref={ref}
 				role="button"
 				tabIndex={0}
-				onClick={onClick}
-				onKeyDown={handleKeyDown}
-				className={cn('focus:outline-none', className)}
 				{...props}
 			>
 				{children}

@@ -15,7 +15,7 @@ export async function seedDocuments(db: LibSQLDatabase<Record<string, never>>) {
 				id: 'doc-1',
 				name: 'project-proposal.pdf',
 				path: '/examples/documents/project-proposal.pdf',
-				size: 1048576, // 1MB
+				size: 1_048_576, // 1MB
 				mimeType: 'application/pdf',
 				extension: 'pdf',
 				pageCount: 15,
@@ -35,7 +35,7 @@ export async function seedDocuments(db: LibSQLDatabase<Record<string, never>>) {
 				id: 'doc-2',
 				name: 'user-manual.docx',
 				path: '/examples/documents/user-manual.docx',
-				size: 2097152, // 2MB
+				size: 2_097_152, // 2MB
 				mimeType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
 				extension: 'docx',
 				pageCount: 45,

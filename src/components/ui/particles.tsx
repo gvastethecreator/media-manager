@@ -269,8 +269,8 @@ const Particles: React.FC<ParticlesProps> = ({
 	}, [onMouseMove]);
 
 	return (
-		<div className={cn('pointer-events-none', className)} ref={canvasContainerRef} aria-hidden="true">
-			<canvas ref={canvasRef} className="size-full" />
+		<div aria-hidden="true" className={cn('pointer-events-none', className)} ref={canvasContainerRef}>
+			<canvas className="size-full" ref={canvasRef} />
 		</div>
 	);
 };

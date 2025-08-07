@@ -78,39 +78,39 @@ export function ImageDetailView() {
 	// Controles del header
 	const headerControls = (
 		<div className="flex items-center gap-2">
-			<Button variant="outline" size="sm" onClick={() => navigate(-1)} className="gap-2">
+			<Button className="gap-2" onClick={() => navigate(-1)} size="sm" variant="outline">
 				<ArrowLeft className="h-4 w-4" />
 				Volver
 			</Button>
 
 			{image && (
 				<>
-					<Button variant="outline" size="sm" onClick={handleOpenViewer} className="gap-2">
+					<Button className="gap-2" onClick={handleOpenViewer} size="sm" variant="outline">
 						<Share2 className="h-4 w-4" />
 						Visor
 					</Button>
 
 					<Button
-						variant="outline"
-						size="sm"
+						className="gap-2"
 						onClick={() => {
 							// TODO: Implementar descarga
 							viewLogger.info('Descarga solicitada para imagen:', image.name);
 						}}
-						className="gap-2"
+						size="sm"
+						variant="outline"
 					>
 						<Download className="h-4 w-4" />
 						Descargar
 					</Button>
 
 					<Button
-						variant="outline"
-						size="sm"
+						className="gap-2"
 						onClick={() => {
 							// TODO: Implementar favoritos
 							viewLogger.info('Favorito toggleado para imagen:', image.name);
 						}}
-						className="gap-2"
+						size="sm"
+						variant="outline"
 					>
 						<Heart className="h-4 w-4" />
 						Favorito
@@ -123,14 +123,14 @@ export function ImageDetailView() {
 	if (isLoading) {
 		return (
 			<BaseContentView
-				title="Cargando imagen..."
 				description="Obteniendo información de la imagen..."
-				icon="🖼️"
 				headerControls={headerControls}
+				icon="🖼️"
+				title="Cargando imagen..."
 			>
-				<div className="flex items-center justify-center h-full">
+				<div className="flex h-full items-center justify-center">
 					<div className="text-center">
-						<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4" />
+						<div className="mx-auto mb-4 h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
 						<p className="text-muted-foreground">Cargando imagen...</p>
 					</div>
 				</div>
@@ -141,14 +141,14 @@ export function ImageDetailView() {
 	if (error || !image) {
 		return (
 			<BaseContentView
-				title="Error"
 				description={error || 'Imagen no encontrada'}
-				icon="❌"
 				headerControls={headerControls}
+				icon="❌"
+				title="Error"
 			>
-				<div className="flex items-center justify-center h-full">
+				<div className="flex h-full items-center justify-center">
 					<div className="text-center">
-						<p className="text-destructive mb-4">{error || 'Imagen no encontrada'}</p>
+						<p className="mb-4 text-destructive">{error || 'Imagen no encontrada'}</p>
 						<Button onClick={() => navigate(-1)} variant="outline">
 							Volver
 						</Button>
@@ -160,18 +160,18 @@ export function ImageDetailView() {
 
 	return (
 		<BaseContentView
-			title={image.name || 'Sin nombre'}
 			description={`${image.width || 0} × ${image.height || 0} píxeles`}
-			icon="🖼️"
 			headerControls={headerControls}
+			icon="🖼️"
+			title={image.name || 'Sin nombre'}
 		>
-			<div className="h-full w-full flex items-center justify-center p-4">
-				<div className="max-w-full max-h-full">
+			<div className="flex h-full w-full items-center justify-center p-4">
+				<div className="max-h-full max-w-full">
 					<img
-						src={image.thumbnailUrl || `/api/images/${image.id}/content`}
 						alt={image.name || 'Imagen'}
-						className="max-w-full max-h-full object-contain rounded-lg shadow-lg cursor-pointer"
+						className="max-h-full max-w-full cursor-pointer rounded-lg object-contain shadow-lg"
 						onClick={handleOpenViewer}
+						src={image.thumbnailUrl || `/api/images/${image.id}/content`}
 						style={{
 							maxHeight: 'calc(100vh - 200px)',
 							maxWidth: 'calc(100vw - 100px)',

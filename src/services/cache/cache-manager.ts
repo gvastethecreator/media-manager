@@ -55,7 +55,7 @@ export class CacheManager {
 	constructor(config: Partial<CacheConfig> = {}, events: CacheEvents = {}) {
 		this.config = {
 			maxSize: 100 * 1024 * 1024, // 100MB
-			maxEntries: 10000,
+			maxEntries: 10_000,
 			defaultTtl: 30 * 60 * 1000, // 30 minutes
 			cleanupInterval: 5 * 60 * 1000, // 5 minutes
 			compressionEnabled: false,

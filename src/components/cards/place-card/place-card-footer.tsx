@@ -39,7 +39,7 @@ export function PlaceCardFooter({
 
 	return (
 		<div
-			className={cn('px-3 py-2', tcgMode ? 'border-t border-white/10' : '')}
+			className={cn('px-3 py-2', tcgMode ? 'border-white/10 border-t' : '')}
 			style={{
 				background: tcgMode ? `linear-gradient(to top, ${primaryColor}20, transparent)` : undefined,
 			}}
@@ -47,11 +47,11 @@ export function PlaceCardFooter({
 			{tcgMode ? (
 				<div className="flex flex-col space-y-1.5">
 					{/* Primera fila: HP y fecha */}
-					<div className="flex justify-between items-center">
+					<div className="flex items-center justify-between">
 						{/* HP */}
 						<div className="flex items-center">
-							<HeartIcon className="h-3.5 w-3.5 mr-1" style={{ color: primaryColor }} />
-							<span className="text-xs font-semibold">{healthPoints}</span>
+							<HeartIcon className="mr-1 h-3.5 w-3.5" style={{ color: primaryColor }} />
+							<span className="font-semibold text-xs">{healthPoints}</span>
 						</div>
 
 						{/* Fecha de creación */}
@@ -63,13 +63,13 @@ export function PlaceCardFooter({
 						<div className="flex items-center gap-2">
 							{imagesCount > 0 && (
 								<div className="flex items-center text-xs">
-									<ImageIcon className="h-3 w-3 mr-1 opacity-70" />
+									<ImageIcon className="mr-1 h-3 w-3 opacity-70" />
 									<span>{imagesCount}</span>
 								</div>
 							)}
 							{videosCount > 0 && (
 								<div className="flex items-center text-xs">
-									<VideoIcon className="h-3 w-3 mr-1 opacity-70" />
+									<VideoIcon className="mr-1 h-3 w-3 opacity-70" />
 									<span>{videosCount}</span>
 								</div>
 							)}
@@ -77,7 +77,7 @@ export function PlaceCardFooter({
 					)}
 
 					{/* Tercera fila: estrellas de poder e ID de carta */}
-					<div className="flex justify-between items-center">
+					<div className="flex items-center justify-between">
 						{/* Estrellas de poder */}
 						<div className="flex items-center">
 							{/* Renderizar estrellas sin usar índices como keys */}
@@ -91,26 +91,26 @@ export function PlaceCardFooter({
 						</div>
 
 						{/* ID de carta */}
-						<div className="text-[10px] opacity-60 font-mono">{cardId}</div>
+						<div className="font-mono text-[10px] opacity-60">{cardId}</div>
 					</div>
 				</div>
 			) : (
 				// Versión no-TCG simplificada
-				<div className="flex justify-between items-center">
-					<div className="flex items-center text-xs text-muted-foreground">
+				<div className="flex items-center justify-between">
+					<div className="flex items-center text-muted-foreground text-xs">
 						{createdAt && <span>{formattedDate}</span>}
 					</div>
 
-					<div className="flex items-center space-x-2 text-xs text-muted-foreground">
+					<div className="flex items-center space-x-2 text-muted-foreground text-xs">
 						{imagesCount > 0 && (
 							<div className="flex items-center">
-								<ImageIcon className="h-3.5 w-3.5 mr-1 opacity-70" />
+								<ImageIcon className="mr-1 h-3.5 w-3.5 opacity-70" />
 								<span>{imagesCount}</span>
 							</div>
 						)}
 						{videosCount > 0 && (
 							<div className="flex items-center">
-								<VideoIcon className="h-3.5 w-3.5 mr-1 opacity-70" />
+								<VideoIcon className="mr-1 h-3.5 w-3.5 opacity-70" />
 								<span>{videosCount}</span>
 							</div>
 						)}

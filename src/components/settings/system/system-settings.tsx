@@ -105,18 +105,18 @@ export function SystemSettings() {
 
 	return (
 		<ScrollArea className="h-[calc(100vh-8rem)] w-full">
-			<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm border-none h-full">
-				<CardHeader className="p-2 pb-0 bg-transparent">
-					<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
-						<span className="flex items-center gap-2 h-7">
+			<Card className="flex h-full flex-col gap-2 rounded-sm border-none bg-muted/30">
+				<CardHeader className="bg-transparent p-2 pb-0">
+					<CardTitle className="flex items-center justify-between pl-1 font-semibold text-base text-muted-foreground">
+						<span className="flex h-7 items-center gap-2">
 							<Activity className="h-5 w-5" /> Estado del Sistema
 						</span>
 						<Button
-							variant="ghost"
-							size="sm"
 							className="h-7 w-7 p-0"
-							onClick={() => loadSystemStats()}
 							disabled={isLoading}
+							onClick={() => loadSystemStats()}
+							size="sm"
+							variant="ghost"
 						>
 							<RefreshCw className={`h-4 w-4 ${isLoading ? 'animate-spin' : ''}`} />
 							<span className="sr-only">Actualizar</span>
@@ -124,8 +124,8 @@ export function SystemSettings() {
 					</CardTitle>
 				</CardHeader>
 				<Separator className="my-0" />
-				<CardContent className="p-2 overflow-y-auto flex-1">
-					<div className="space-y-3 h-full flex flex-col">
+				<CardContent className="flex-1 overflow-y-auto p-2">
+					<div className="flex h-full flex-col space-y-3">
 						<motion.div
 							animate={{
 								opacity: [0, 1],
@@ -139,11 +139,11 @@ export function SystemSettings() {
 										<Activity className="h-3.5 w-3.5 text-muted-foreground" />
 										<span className="text-xs">CPU</span>
 									</div>
-									<Badge variant="outline" className="text-[10px] font-mono h-4 px-1">
+									<Badge className="h-4 px-1 font-mono text-[10px]" variant="outline">
 										{systemData.cpuUsage}%
 									</Badge>
 								</div>
-								<Progress value={systemData.cpuUsage} className="h-1" />
+								<Progress className="h-1" value={systemData.cpuUsage} />
 							</div>
 
 							<div className="space-y-1.5">
@@ -152,11 +152,11 @@ export function SystemSettings() {
 										<HardDrive className="h-3.5 w-3.5 text-muted-foreground" />
 										<span className="text-xs">Memoria</span>
 									</div>
-									<Badge variant="outline" className="text-[10px] font-mono h-4 px-1">
+									<Badge className="h-4 px-1 font-mono text-[10px]" variant="outline">
 										{systemData.memoryUsage}%
 									</Badge>
 								</div>
-								<Progress value={systemData.memoryUsage} className="h-1" />
+								<Progress className="h-1" value={systemData.memoryUsage} />
 							</div>
 
 							<div className="space-y-1.5">
@@ -165,15 +165,15 @@ export function SystemSettings() {
 										<Database className="h-3.5 w-3.5 text-muted-foreground" />
 										<span className="text-xs">Caché</span>
 									</div>
-									<Badge variant="outline" className="text-[10px] font-mono h-4 px-1">
+									<Badge className="h-4 px-1 font-mono text-[10px]" variant="outline">
 										{systemData.cacheSize}MB
 									</Badge>
 								</div>
-								<Progress value={(systemData.cacheSize / 1000) * 100} max={100} className="h-1" />
+								<Progress className="h-1" max={100} value={(systemData.cacheSize / 1000) * 100} />
 							</div>
 
 							{/* Información adicional */}
-							<div className="mt-2 text-xs text-muted-foreground space-y-1 p-2 bg-background/50 rounded-md flex-1">
+							<div className="mt-2 flex-1 space-y-1 rounded-md bg-background/50 p-2 text-muted-foreground text-xs">
 								<div className="flex justify-between">
 									<span>Entidades:</span>
 									<span className="font-medium">{systemData.totalEntities}</span>
@@ -202,25 +202,25 @@ export function SystemSettings() {
 						{/* Acciones del sistema */}
 						<div className="space-y-2">
 							<Button
-								variant="outline"
-								size="sm"
-								onClick={handleRepair}
-								disabled={repairSystemMutation.isPending}
 								className="w-full justify-start"
+								disabled={repairSystemMutation.isPending}
+								onClick={handleRepair}
+								size="sm"
+								variant="outline"
 							>
-								<RefreshCw className={`h-4 w-4 mr-2 ${repairSystemMutation.isPending ? 'animate-spin' : ''}`} />
+								<RefreshCw className={`mr-2 h-4 w-4 ${repairSystemMutation.isPending ? 'animate-spin' : ''}`} />
 								{repairSystemMutation.isPending ? 'Reparando...' : 'Reparar Sistema'}
 							</Button>
 
 							<AlertDialog>
 								<AlertDialogTrigger asChild>
 									<Button
-										variant="destructive"
-										size="sm"
-										disabled={resetDatabaseMutation.isPending}
 										className="w-full justify-start"
+										disabled={resetDatabaseMutation.isPending}
+										size="sm"
+										variant="destructive"
 									>
-										<Trash2 className="h-4 w-4 mr-2" />
+										<Trash2 className="mr-2 h-4 w-4" />
 										Resetear Base de Datos
 									</Button>
 								</AlertDialogTrigger>
@@ -238,8 +238,8 @@ export function SystemSettings() {
 									<AlertDialogFooter>
 										<AlertDialogCancel>Cancelar</AlertDialogCancel>
 										<AlertDialogAction
-											onClick={handleReset}
 											className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+											onClick={handleReset}
 										>
 											{resetDatabaseMutation.isPending ? 'Reseteando...' : 'Resetear'}
 										</AlertDialogAction>

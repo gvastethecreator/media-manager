@@ -455,11 +455,11 @@ export function createElapsedTime(
 	let timeStr: string;
 	if (elapsed < 1000 || showMs) {
 		timeStr = `${elapsed}ms`;
-	} else if (elapsed < 60000) {
+	} else if (elapsed < 60_000) {
 		timeStr = `${(elapsed / 1000).toFixed(2)}s`;
 	} else {
-		const minutes = Math.floor(elapsed / 60000);
-		const seconds = ((elapsed % 60000) / 1000).toFixed(2);
+		const minutes = Math.floor(elapsed / 60_000);
+		const seconds = ((elapsed % 60_000) / 1000).toFixed(2);
 		timeStr = `${minutes}m ${seconds}s`;
 	}
 

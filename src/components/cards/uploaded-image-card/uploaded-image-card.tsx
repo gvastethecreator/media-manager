@@ -88,7 +88,7 @@ export function UploadedImageCard({
 
 	// Dimensiones formateadas
 	const dimensions = useMemo(() => {
-		if (!uploadedImage.dimensions?.width || !uploadedImage.dimensions?.height) return 'N/A';
+		if (!(uploadedImage.dimensions?.width && uploadedImage.dimensions?.height)) return 'N/A';
 		return `${uploadedImage.dimensions.width}×${uploadedImage.dimensions.height}`;
 	}, [uploadedImage.dimensions?.width, uploadedImage.dimensions?.height]);
 
@@ -113,14 +113,14 @@ export function UploadedImageCard({
 	return (
 		<CardContainer
 			className={cn(
-				'relative overflow-hidden cursor-pointer transition-all duration-300',
+				'relative cursor-pointer overflow-hidden transition-all duration-300',
 				'bg-gradient-to-br from-background via-background/95 to-background/90',
 				'border border-border/50 hover:border-border',
 				'shadow-sm hover:shadow-lg',
-				tcgMode && 'hover:shadow-2xl hover:scale-[1.02]',
+				tcgMode && 'hover:scale-[1.02] hover:shadow-2xl',
 				isSelected && 'ring-2 ring-primary ring-offset-2',
 				isActive && 'ring-2 ring-accent ring-offset-2',
-				disabled && 'opacity-50 cursor-not-allowed',
+				disabled && 'cursor-not-allowed opacity-50',
 				compact ? 'h-32' : 'h-64',
 				className
 			)}
@@ -142,13 +142,13 @@ export function UploadedImageCard({
 					{/* Efecto de brillo en hover */}
 					{isHovered && (
 						<motion.div
-							className="absolute inset-0 opacity-20 pointer-events-none"
+							animate={{
+								backgroundPosition: ['0% 0%', '100% 100%'],
+							}}
+							className="pointer-events-none absolute inset-0 opacity-20"
 							style={{
 								background: `linear-gradient(45deg, transparent 30%, ${primaryColor}40 50%, transparent 70%)`,
 								backgroundSize: '200% 200%',
-							}}
-							animate={{
-								backgroundPosition: ['0% 0%', '100% 100%'],
 							}}
 							transition={{
 								duration: 2,
@@ -163,17 +163,17 @@ export function UploadedImageCard({
 			)}
 
 			{/* Contenedor principal */}
-			<div className="flex flex-col h-full relative z-1">
+			<div className="relative z-1 flex h-full flex-col">
 				{/* Cabecera */}
-				<CardHeader title={uploadedImage.name || 'Sin nombre'} primaryColor={primaryColor} compact={compact} />
+				<CardHeader compact={compact} primaryColor={primaryColor} title={uploadedImage.name || 'Sin nombre'} />
 
 				{/* Contenido principal */}
 				{!compact && (
-					<div className="flex-1 p-4 flex flex-col gap-3">
+					<div className="flex flex-1 flex-col gap-3 p-4">
 						{/* Preview de la imagen */}
 						<div className="flex items-center justify-center py-2">
 							<div
-								className="relative rounded-lg overflow-hidden"
+								className="relative overflow-hidden rounded-lg"
 								style={{
 									backgroundColor: `${primaryColor}20`,
 									border: `2px solid ${primaryColor}40`,
@@ -181,22 +181,22 @@ export function UploadedImageCard({
 									height: '80px',
 								}}
 							>
-								{!imageError ? (
-									<img
-										src={imageUrl}
-										alt={uploadedImage.name || 'Imagen subida'}
-										className="object-cover w-full h-full"
-										onError={handleImageError}
-									/>
-								) : (
-									<div className="w-full h-full flex items-center justify-center">
+								{imageError ? (
+									<div className="flex h-full w-full items-center justify-center">
 										<ImageIcon className="h-8 w-8" style={{ color: primaryColor }} />
 									</div>
+								) : (
+									<img
+										alt={uploadedImage.name || 'Imagen subida'}
+										className="h-full w-full object-cover"
+										onError={handleImageError}
+										src={imageUrl}
+									/>
 								)}
 
 								{/* Badge de la categoría */}
 								<div
-									className="absolute top-1 right-1 px-1.5 py-0.5 rounded text-xs font-bold"
+									className="absolute top-1 right-1 rounded px-1.5 py-0.5 font-bold text-xs"
 									style={{
 										backgroundColor: primaryColor,
 										color: 'white',
@@ -208,7 +208,7 @@ export function UploadedImageCard({
 								{/* Indicador de procesamiento completo */}
 								{uploadedImage.imageId && (
 									<div
-										className="absolute bottom-1 right-1 p-0.5 rounded-full"
+										className="absolute right-1 bottom-1 rounded-full p-0.5"
 										style={{
 											backgroundColor: '#10b981',
 											color: 'white',
@@ -224,21 +224,21 @@ export function UploadedImageCard({
 						{tcgMode && (
 							<div className="grid grid-cols-2 gap-2 text-xs">
 								<div
-									className="flex items-center justify-between px-2 py-1 rounded"
+									className="flex items-center justify-between rounded px-2 py-1"
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
 									<span>Tamaño</span>
 									<span className="font-bold">{fileSize}</span>
 								</div>
 								<div
-									className="flex items-center justify-between px-2 py-1 rounded"
+									className="flex items-center justify-between rounded px-2 py-1"
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
 									<span>Dimensiones</span>
 									<span className="font-bold">{dimensions}</span>
 								</div>
 								<div
-									className="col-span-2 flex items-center justify-between px-2 py-1 rounded"
+									className="col-span-2 flex items-center justify-between rounded px-2 py-1"
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
 									<span>Hash</span>
@@ -250,31 +250,31 @@ export function UploadedImageCard({
 				)}
 
 				{/* Pie de tarjeta */}
-				<div className="p-3 border-t border-border/20">
+				<div className="border-border/20 border-t p-3">
 					<div className="flex items-center justify-between text-xs">
 						{/* Acciones rápidas */}
 						<div className="flex items-center gap-2">
 							<button
-								type="button"
-								className="p-1 rounded hover:bg-muted/50 transition-colors"
+								className="rounded p-1 transition-colors hover:bg-muted/50"
 								style={{ color: primaryColor }}
 								title="Vista previa"
+								type="button"
 							>
 								<EyeIcon className="h-3.5 w-3.5" />
 							</button>
 							<button
-								type="button"
-								className="p-1 rounded hover:bg-muted/50 transition-colors"
+								className="rounded p-1 transition-colors hover:bg-muted/50"
 								style={{ color: primaryColor }}
 								title="Información"
+								type="button"
 							>
 								<InfoIcon className="h-3.5 w-3.5" />
 							</button>
 							<button
-								type="button"
-								className="p-1 rounded hover:bg-muted/50 transition-colors"
+								className="rounded p-1 transition-colors hover:bg-muted/50"
 								style={{ color: primaryColor }}
 								title="Descargar"
+								type="button"
 							>
 								<DownloadIcon className="h-3.5 w-3.5" />
 							</button>
@@ -283,7 +283,7 @@ export function UploadedImageCard({
 						{/* Estado y fecha */}
 						<div className="flex items-center gap-2">
 							<span
-								className="px-2 py-1 rounded text-xs font-medium"
+								className="rounded px-2 py-1 font-medium text-xs"
 								style={{
 									backgroundColor: uploadedImage.imageId ? '#10b98120' : `${primaryColor}20`,
 									color: uploadedImage.imageId ? '#10b981' : primaryColor,
@@ -297,7 +297,7 @@ export function UploadedImageCard({
 
 					{/* Barra de progreso estilo TCG */}
 					{tcgMode && (
-						<div className="mt-2 h-1 w-full rounded-full overflow-hidden bg-muted/30">
+						<div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-muted/30">
 							<div
 								className="h-full rounded-full transition-all duration-500"
 								style={{

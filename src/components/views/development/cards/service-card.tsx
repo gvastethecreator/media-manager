@@ -14,13 +14,13 @@ export function ServiceCard({ service }: { service: ServiceStatus }) {
 	const { icon: Icon } = service;
 
 	return (
-		<Card className="relative overflow-hidden h-full border-2 border-primary/10">
+		<Card className="relative h-full overflow-hidden border-2 border-primary/10">
 			<CardHeader className="p-2">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<div
 							className={cn(
-								'p-2 rounded-md border-2 border-primary/10',
+								'rounded-md border-2 border-primary/10 p-2',
 								service.status === 'online' && 'bg-green-500/20',
 								service.status === 'warning' && 'bg-yellow-500/20',
 								service.status === 'offline' && 'bg-red-500/20'
@@ -30,7 +30,7 @@ export function ServiceCard({ service }: { service: ServiceStatus }) {
 						</div>
 						<div>
 							<CardTitle className="text-sm">{service.name}</CardTitle>
-							<CardDescription className="text-[10px] truncate">{service.description}</CardDescription>
+							<CardDescription className="truncate text-[10px]">{service.description}</CardDescription>
 						</div>
 					</div>
 					<StatusBadge status={service.status} />

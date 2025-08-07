@@ -107,39 +107,39 @@ export function EmojiPicker({
 	);
 
 	return (
-		<Popover open={open} onOpenChange={setOpen}>
+		<Popover onOpenChange={setOpen} open={open}>
 			<PopoverTrigger asChild>
 				<Button
-					variant="outline"
-					size={compact ? 'sm' : 'md'}
 					className={cn(
 						compact ? 'h-8 w-full' : 'h-10 w-full',
 						showLabel ? 'justify-between' : 'justify-center',
 						className
 					)}
+					size={compact ? 'sm' : 'md'}
+					variant="outline"
 				>
 					<span className={compact ? 'text-sm' : 'text-base'}>{selectedEmoji || value || '😀'}</span>
 					{showLabel && <Smile className={cn('ml-2 text-muted-foreground', compact ? 'h-3 w-3' : 'h-4 w-4')} />}
 				</Button>
 			</PopoverTrigger>
 
-			<PopoverContent className={cn('p-0', compact ? 'w-80' : 'w-96')} align="start" sideOffset={8}>
+			<PopoverContent align="start" className={cn('p-0', compact ? 'w-80' : 'w-96')} sideOffset={8}>
 				<div className="emoji-picker-core">
 					{/* 🔍 Emojis frecuentes */}
-					<div className="px-3 pt-3 pb-2 border-b">
-						<div className="text-xs font-medium text-muted-foreground mb-2">Emojis frecuentes</div>
+					<div className="border-b px-3 pt-3 pb-2">
+						<div className="mb-2 font-medium text-muted-foreground text-xs">Emojis frecuentes</div>
 						<div className={cn('grid gap-1', compact ? 'grid-cols-10' : 'grid-cols-12')}>
 							{frequentEmojis.slice(0, compact ? 20 : 24).map((emoji) => (
 								<Button
-									key={emoji}
-									variant="ghost"
-									size="sm"
 									className={cn(
 										'p-0 text-sm hover:bg-accent',
 										compact ? 'h-6 w-6' : 'h-8 w-8',
 										selectedEmoji === emoji && 'bg-accent text-accent-foreground'
 									)}
+									key={emoji}
 									onClick={() => handleQuickSelect(emoji)}
+									size="sm"
+									variant="ghost"
 								>
 									{emoji}
 								</Button>
@@ -149,7 +149,7 @@ export function EmojiPicker({
 
 					{/* 🎨 Picker principal con EmojiPickerReact */}
 					<div className="p-3">
-						<EmojiPickerReact onEmojiClick={handleEmojiSelect} width="100%" height={compact ? 200 : 250} />
+						<EmojiPickerReact height={compact ? 200 : 250} onEmojiClick={handleEmojiSelect} width="100%" />
 					</div>
 				</div>
 			</PopoverContent>

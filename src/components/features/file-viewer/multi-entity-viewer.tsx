@@ -122,7 +122,7 @@ export function MultiEntityViewer({ entities, currentIndex, isOpen, onClose, onI
 	};
 
 	// Don't render if not open or no entities
-	if (!isOpen || !entities?.length || !currentEntity) {
+	if (!(isOpen && entities?.length && currentEntity)) {
 		return null;
 	}
 
@@ -130,11 +130,11 @@ export function MultiEntityViewer({ entities, currentIndex, isOpen, onClose, onI
 		<AnimatePresence mode="wait">
 			{isOpen && (
 				<motion.div
-					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
-					transition={{ duration: 0.2 }}
 					className="fixed inset-0 z-[9999] bg-background"
+					exit={{ opacity: 0 }}
+					initial={{ opacity: 0 }}
+					transition={{ duration: 0.2 }}
 				>
 					{renderViewer()}
 				</motion.div>

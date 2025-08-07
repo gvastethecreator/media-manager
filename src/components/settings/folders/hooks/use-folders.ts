@@ -63,7 +63,7 @@ export function useFolders() {
 				phase: 'complete',
 				status: 'completed',
 				progress: 100,
-				folderId: folderId,
+				folderId,
 			}));
 
 			// 🟢 FIX: Forzar recarga inmediata de carpetas y estadísticas tras completar
@@ -202,30 +202,43 @@ export function useFolders() {
 	);
 
 	// Función para manejar el progreso del reindexado global
-	const handleReindexAllProgress = useCallback((status: ProcessStatus & { currentFolder?: string }) => {
-		folderLogger.info('🌍 Progreso de reindexado global:', status);
+	const handleReindexAllProgress = useCallback(
+		(status: ProcessStatus & { currentFolder?: string }) => {
+			folderLogger.info('🌍 Progreso de reindexado global:', status);
 
-		setGlobalReindexStatus((prev) => ({
-			...prev,
-			isProcessing: status.isProcessing,
-			progress: status.progress || 0,
-			currentFolder: status.currentFolder || prev.currentFolder,
-			processedFolders: status.filesProcessed || prev.processedFolders,
-			totalFolders: status.totalFiles || prev.totalFolders,
-			lastUpdate: Date.now(),
-		}));
-
-		// Si el reindexado global ha terminado
-		if (!status.isProcessing && status.progress === 100) {
-			folderLogger.info('✅ Reindexado global completado');
 			setGlobalReindexStatus((prev) => ({
 				...prev,
-				isProcessing: false,
-				endTime: Date.now(),
+				isProcessing: status.isProcessing,
+				progress: status.progress || 0,
+				currentFolder: status.currentFolder || prev.currentFolder,
+				processedFolders: status.filesProcessed || prev.processedFolders,
+				totalFolders: status.totalFiles || prev.totalFolders,
+				lastUpdate: Date.now(),
 			}));
-			toastService.success('Reindexado global completado correctamente');
-		}
-	}, []);
+
+			// Si el reindexado global ha terminado (progress 100% Y isProcessing false)
+			if (!status.isProcessing && status.progress === 100) {
+				folderLogger.info('✅ Reindexado global completado');
+
+				// Actualizar estado final
+				setGlobalReindexStatus((prev) => ({
+					...prev,
+					isProcessing: false,
+					progress: 100,
+					endTime: Date.now(),
+				}));
+
+				// Notificar éxito
+				toastService.success('Reindexado global completado correctamente');
+
+				// Recargar datos para reflejar cambios
+				loadFolders().catch((err) => {
+					folderLogger.error('Error recargando carpetas tras reindexado global:', err);
+				});
+			}
+		},
+		[loadFolders]
+	);
 
 	// Función de procesamiento simplificada (sin polling)
 	const startProcessing = useCallback((folderId: string) => {
@@ -260,7 +273,9 @@ export function useFolders() {
 				handleProcessComplete(data.id);
 			}
 		},
-		onStats: () => {},
+		onStats: () => {
+			// Callback vacío para stats
+		},
 		onReindexAllProgress: handleReindexAllProgress,
 	});
 
@@ -445,7 +460,7 @@ export function useFolders() {
 		handleReindexAll: foldersOperations.handleReindexAll,
 		handleAutoReindexToggle: foldersOperations.handleAutoReindexToggle,
 		handleClearCache: foldersOperations.handleClearCache,
-		handleFolderClick: handleFolderClick,
+		handleFolderClick,
 
 		// Funciones de UI eliminadas - no más diálogos de confirmación
 
@@ -453,7 +468,7 @@ export function useFolders() {
 		loadFolders,
 		loadStats,
 		updateFolder: updateSpecificFolder,
-		setError: setError, // desde useFoldersState
+		setError, // desde useFoldersState
 
 		// Funciones de utilidad
 		startProcessing,

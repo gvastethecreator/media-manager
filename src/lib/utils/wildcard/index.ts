@@ -216,10 +216,12 @@ export function applyWildcardFilters(wildcards: WildcardComplete[], filters: Wil
 		}
 
 		// Filtro por categorías
-		if (filters.categories && filters.categories.length > 0) {
-			if (!wildcard.category || !filters.categories.includes(wildcard.category)) {
-				return false;
-			}
+		if (
+			filters.categories &&
+			filters.categories.length > 0 &&
+			!(wildcard.category && filters.categories.includes(wildcard.category))
+		) {
+			return false;
 		}
 
 		// Filtro por favoritos
@@ -228,10 +230,8 @@ export function applyWildcardFilters(wildcards: WildcardComplete[], filters: Wil
 		}
 
 		// Filtro por parentId
-		if (filters.parentId !== undefined) {
-			if (wildcard.parentId !== filters.parentId) {
-				return false;
-			}
+		if (filters.parentId !== undefined && wildcard.parentId !== filters.parentId) {
+			return false;
 		}
 
 		// Filtro por si tiene hijos

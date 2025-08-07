@@ -45,37 +45,37 @@ export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 	const getTypeIcon = () => {
 		switch (type?.toUpperCase()) {
 			case 'ARTIFACT':
-				return <Sparkles size={14} className="mr-1.5 opacity-80" />;
+				return <Sparkles className="mr-1.5 opacity-80" size={14} />;
 			case 'WEAPON':
-				return <ShieldCheck size={14} className="mr-1.5 opacity-80" />;
+				return <ShieldCheck className="mr-1.5 opacity-80" size={14} />;
 			default:
-				return <Sparkles size={14} className="mr-1.5 opacity-80" />;
+				return <Sparkles className="mr-1.5 opacity-80" size={14} />;
 		}
 	};
 
 	return (
 		<div
-			className="px-3 py-2 text-xs text-white/80"
+			className="px-3 py-2 text-white/80 text-xs"
 			style={{
 				background: `linear-gradient(to top, ${secondaryColor}90, ${secondaryColor}60)`,
 				borderTop: `1px solid ${primaryColor}40`,
 			}}
 		>
-			<div className="flex justify-between items-center mb-1.5">
+			<div className="mb-1.5 flex items-center justify-between">
 				{/* Categoría del objeto */}
 				<div className="flex items-center">
 					{getTypeIcon()}
-					<span className="uppercase tracking-wide font-medium">{category || type}</span>
+					<span className="font-medium uppercase tracking-wide">{category || type}</span>
 				</div>
 
 				{/* Contador de imágenes y favorito */}
 				<div className="flex items-center space-x-2">
 					{/* Indicador de favorito */}
-					{isFavorite && <Star size={14} className="fill-yellow-400 text-yellow-400" aria-label="Favorito" />}
+					{isFavorite && <Star aria-label="Favorito" className="fill-yellow-400 text-yellow-400" size={14} />}
 
 					{/* Contador de imágenes */}
 					<div className="flex items-center">
-						<ImageIcon size={14} className="mr-1 opacity-80" />
+						<ImageIcon className="mr-1 opacity-80" size={14} />
 						<span>{imagesCount}</span>
 					</div>
 				</div>
@@ -83,11 +83,11 @@ export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 				{!compact && (
 					<div className="flex justify-between text-[0.65rem] text-white/60">
 						<div className="flex items-center">
-							<Calendar size={12} className="mr-1" />
+							<Calendar className="mr-1" size={12} />
 							<span title={`Creado: ${createdAtDate.toLocaleString()}`}>{createdTimeAgo}</span>
 						</div>
 						<div className="flex items-center">
-							<Clock size={12} className="mr-1" />
+							<Clock className="mr-1" size={12} />
 							<span title={`Actualizado: ${updatedAtDate.toLocaleString()}`}>{updatedTimeAgo}</span>
 						</div>
 					</div>

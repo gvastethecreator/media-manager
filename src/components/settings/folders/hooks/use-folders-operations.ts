@@ -43,7 +43,7 @@ export function useFoldersOperations({
 				operationsLogger.info('➕ Agregando carpeta:', { path: folderPath });
 
 				// Validar que la ruta no esté vacía
-				if (!folderPath || !folderPath.trim()) {
+				if (!(folderPath && folderPath.trim())) {
 					const errorMessage = 'La ruta de la carpeta no puede estar vacía';
 					operationsLogger.error('❌ Ruta de carpeta vacía');
 					onError(errorMessage);
@@ -88,7 +88,7 @@ export function useFoldersOperations({
 				const result = await createFolderMutation.mutateAsync(input);
 
 				// Validación defensiva: asegurar que result tiene un ID válido
-				if (!result || !result.id) {
+				if (!(result && result.id)) {
 					throw new Error('Error: La respuesta del servidor no contiene un ID válido');
 				}
 

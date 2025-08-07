@@ -179,78 +179,78 @@ export function CreateAlbumForm({
 	}, [onReset]);
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
+		<form className="space-y-4" onSubmit={handleSubmit}>
 			{/* Nombre */}
 			<div>
-				<Label htmlFor="name" className="text-sm font-medium">
+				<Label className="font-medium text-sm" htmlFor="name">
 					Nombre *
 				</Label>
 				<Input
-					id="name"
-					type="text"
-					placeholder="Nombre del álbum..."
-					value={formData.name}
-					onChange={(e) => handleChange('name', e.target.value)}
 					className={errors.name ? 'border-red-500' : ''}
+					id="name"
+					onChange={(e) => handleChange('name', e.target.value)}
+					placeholder="Nombre del álbum..."
+					type="text"
+					value={formData.name}
 				/>
-				{errors.name && <p className="text-xs text-red-500 mt-1">{errors.name}</p>}
+				{errors.name && <p className="mt-1 text-red-500 text-xs">{errors.name}</p>}
 			</div>
 
 			{/* Descripción */}
 			<div>
-				<Label htmlFor="description" className="text-sm font-medium">
+				<Label className="font-medium text-sm" htmlFor="description">
 					Descripción
 				</Label>
 				<Textarea
 					id="description"
-					placeholder="Descripción opcional..."
-					value={formData.description}
 					onChange={(e) => handleChange('description', e.target.value)}
+					placeholder="Descripción opcional..."
 					rows={3}
+					value={formData.description}
 				/>
 			</div>
 
 			{/* Emoji */}
 			<div>
-				<Label htmlFor="emoji" className="text-sm font-medium">
+				<Label className="font-medium text-sm" htmlFor="emoji">
 					Emoji
 				</Label>
 				<div className="flex items-center gap-2">
 					<span className="text-2xl">{formData.emoji}</span>
 					<Input
-						id="emoji"
-						type="text"
-						placeholder="📔"
-						value={formData.emoji}
-						onChange={(e) => handleChange('emoji', e.target.value)}
 						className="w-20"
+						id="emoji"
+						onChange={(e) => handleChange('emoji', e.target.value)}
+						placeholder="📔"
+						type="text"
+						value={formData.emoji}
 					/>
 				</div>
 			</div>
 
 			{/* Color */}
 			<div>
-				<Label htmlFor="color" className="text-sm font-medium">
+				<Label className="font-medium text-sm" htmlFor="color">
 					Color
 				</Label>
 				<div className="flex items-center gap-2">
-					<div className="w-8 h-8 rounded border-2 border-gray-300" style={{ backgroundColor: formData.color }} />
+					<div className="h-8 w-8 rounded border-2 border-gray-300" style={{ backgroundColor: formData.color }} />
 					<Input
+						className="w-20"
 						id="color"
+						onChange={(e) => handleChange('color', e.target.value)}
 						type="color"
 						value={formData.color}
-						onChange={(e) => handleChange('color', e.target.value)}
-						className="w-20"
 					/>
 				</div>
 			</div>
 
 			{/* Categoría */}
 			<div>
-				<Label htmlFor="category" className="text-sm font-medium">
+				<Label className="font-medium text-sm" htmlFor="category">
 					Categoría
 				</Label>
-				<Select value={formData.category} onValueChange={(value) => handleChange('category', value)}>
+				<Select onValueChange={(value) => handleChange('category', value)} value={formData.category}>
 					<SelectTrigger>
 						<SelectValue placeholder="Seleccionar categoría..." />
 					</SelectTrigger>
@@ -271,12 +271,12 @@ export function CreateAlbumForm({
 
 			{/* Botones */}
 			<div className="flex justify-end gap-2 pt-4">
-				<Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting}>
-					<X className="h-4 w-4 mr-2" />
+				<Button disabled={isSubmitting} onClick={handleCancel} type="button" variant="outline">
+					<X className="mr-2 h-4 w-4" />
 					Cancelar
 				</Button>
-				<Button type="submit" disabled={isSubmitting}>
-					{isSubmitting ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
+				<Button disabled={isSubmitting} type="submit">
+					{isSubmitting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Save className="mr-2 h-4 w-4" />}
 					{isEditing ? 'Actualizar' : 'Crear'} álbum
 				</Button>
 			</div>

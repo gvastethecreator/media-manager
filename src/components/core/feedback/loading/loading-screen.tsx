@@ -9,11 +9,11 @@ export function LoadingScreen({ message = 'Cargando...' }: LoadingScreenProps) {
 	return (
 		<motion.div
 			animate={{ opacity: [0, 1] }}
+			className="fixed inset-0 flex h-full w-full flex-col items-center justify-center"
 			exit={{ opacity: 0 }}
-			className="fixed inset-0 flex flex-col items-center justify-center w-full h-full"
 		>
-			<CircleDashed className="w-10 h-10 text-primary animate-spin text-white/70" />
-			<p className="text-xs text-white/70 p-2">{message}</p>
+			<CircleDashed className="h-10 w-10 animate-spin text-primary text-white/70" />
+			<p className="p-2 text-white/70 text-xs">{message}</p>
 		</motion.div>
 	);
 }

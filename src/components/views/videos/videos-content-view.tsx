@@ -124,11 +124,11 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 	if (!currentVideoId) {
 		logger.warn('⚠️ No hay video seleccionado');
 		return (
-			<div className="flex flex-col items-center justify-center h-full gap-4">
+			<div className="flex h-full flex-col items-center justify-center gap-4">
 				<EmptyState
+					description="Selecciona un video desde la vista de videos para ver su contenido."
 					icon={Video}
 					title="No hay video seleccionado"
-					description="Selecciona un video desde la vista de videos para ver su contenido."
 				/>
 			</div>
 		);
@@ -137,8 +137,8 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 	// 🔄 Mostrar estado de carga mientras se obtiene información del video
 	if (isLoading) {
 		return (
-			<div className="flex flex-col items-center justify-center h-full gap-4">
-				<EmptyState icon={RefreshCw} title="Cargando video..." description="Obteniendo información del video." />
+			<div className="flex h-full flex-col items-center justify-center gap-4">
+				<EmptyState description="Obteniendo información del video." icon={RefreshCw} title="Cargando video..." />
 			</div>
 		);
 	}
@@ -147,18 +147,18 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 	if (error || !currentVideo) {
 		logger.error('❌ Error al cargar video:', error);
 		return (
-			<div className="flex flex-col items-center justify-center h-full gap-4">
+			<div className="flex h-full flex-col items-center justify-center gap-4">
 				<EmptyState
-					icon={Video}
-					title="Error al cargar video"
-					description={
-						error || 'No se pudo obtener la información del video. Verifica que existe y tienes permisos para acceder.'
-					}
 					actions={
 						<Button onClick={handleForceRefresh} variant="outline">
 							Reintentar
 						</Button>
 					}
+					description={
+						error || 'No se pudo obtener la información del video. Verifica que existe y tienes permisos para acceder.'
+					}
+					icon={Video}
+					title="Error al cargar video"
 				/>
 			</div>
 		);
@@ -167,29 +167,29 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 	// Renderizar vista del video usando BaseContentView y FileBrowser
 	return (
 		<BaseContentView
-			title={currentVideo.name || 'Video'}
 			description={currentVideo.description || undefined}
-			icon={undefined}
 			headerControls={
 				<>
-					<Button variant="outline" size="sm" onClick={handleForceRefresh} disabled={isRetrying}>
-						<RefreshCw className={`h-4 w-4 mr-2 ${isRetrying ? 'animate-spin' : ''}`} />
+					<Button disabled={isRetrying} onClick={handleForceRefresh} size="sm" variant="outline">
+						<RefreshCw className={`mr-2 h-4 w-4 ${isRetrying ? 'animate-spin' : ''}`} />
 						{isRetrying ? 'Recargando...' : 'Recargar'}
 					</Button>
-					<Button variant="outline" size="sm">
-						<Play className="h-4 w-4 mr-2" />
+					<Button size="sm" variant="outline">
+						<Play className="mr-2 h-4 w-4" />
 						Reproducir
 					</Button>
 				</>
 			}
+			icon={undefined}
+			title={currentVideo.name || 'Video'}
 		>
 			<FileBrowser
+				className="h-full"
 				entityType={EntityStatsType.VIDEO}
 				filterId={currentVideoId}
 				filterType="video"
 				onItemClick={handleVideoSelect}
 				onItemDoubleClick={handleVideoDoubleClick}
-				className="h-full"
 			/>
 		</BaseContentView>
 	);

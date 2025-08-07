@@ -3,8 +3,8 @@
  * Este archivo verifica que el componente se renderice correctamente
  */
 
-import { render, screen } from '@testing-library/react';
 import { describe, expect, it, mock } from 'bun:test';
+import { render, screen } from '@testing-library/react';
 import { EmptySpaceContextMenu } from './empty-space-context-menu';
 
 // Mock de las dependencias

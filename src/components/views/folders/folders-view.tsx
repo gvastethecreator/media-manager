@@ -30,7 +30,7 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 
 	// Manejar creación de carpeta
 	const handleCreateFolder = async () => {
-		if (!newFolderName.trim() || !newFolderPath.trim()) return;
+		if (!(newFolderName.trim() && newFolderPath.trim())) return;
 
 		try {
 			await createFolder({
@@ -63,8 +63,8 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 		return (
 			<div className="flex h-full flex-col items-center justify-center space-y-4">
 				<div className="text-center">
-					<h3 className="text-lg font-semibold text-destructive">Error al cargar carpetas</h3>
-					<p className="text-sm text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
+					<h3 className="font-semibold text-destructive text-lg">Error al cargar carpetas</h3>
+					<p className="text-muted-foreground text-sm">{error instanceof Error ? error.message : String(error)}</p>
 				</div>
 				<Button onClick={handleManualRetry} variant="outline">
 					<RefreshCw className="mr-2 h-4 w-4" />
@@ -75,17 +75,17 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 	}
 
 	return (
-		<div className={`h-full flex flex-col p-0 m-0 ${className}`}>
+		<div className={`m-0 flex h-full flex-col p-0 ${className}`}>
 			<ScrollArea className="flex-1">
 				<div className="grid grid-cols-4 gap-2 p-0">
 					{allFolders.map((folder) => (
 						<FolderCard
-							key={folder.id}
-							folder={folder}
-							onClick={() => handleFolderClick(folder)}
-							interactive={true}
-							tcgMode={false}
 							className="h-full"
+							folder={folder}
+							interactive={true}
+							key={folder.id}
+							onClick={() => handleFolderClick(folder)}
+							tcgMode={false}
 						/>
 					))}
 				</div>

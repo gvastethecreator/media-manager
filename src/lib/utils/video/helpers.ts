@@ -74,7 +74,7 @@ export function formatVideoSize(metadata?: VideoMetadata): string {
  * @returns Dimensiones formateadas
  */
 export function formatVideoDimensions(width?: number, height?: number): string {
-	if (!width || !height) return 'Desconocido';
+	if (!(width && height)) return 'Desconocido';
 	return `${width} × ${height}`;
 }
 
@@ -113,7 +113,7 @@ export function getVideoFormatDescription(format?: VideoFormat): string {
  * @returns Bitrate formateado o undefined
  */
 export function calculateBitrate(size?: number, durationSeconds?: number): string | undefined {
-	if (!size || !durationSeconds) return undefined;
+	if (!(size && durationSeconds)) return;
 
 	// Bitrate en kilobits por segundo (kbps)
 	const bitrateKbps = (size * 8) / (durationSeconds * 1000);
@@ -261,7 +261,7 @@ export function hasVisualConfigChanged(
 	configA?: Partial<Record<string, any>>,
 	configB?: Partial<Record<string, any>>
 ): boolean {
-	if (!configA || !configB) return true;
+	if (!(configA && configB)) return true;
 
 	const keysToCompare = [
 		'enable3DEffect',

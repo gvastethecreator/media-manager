@@ -127,7 +127,7 @@ export function useBatchOperations(options: UseBatchOperationsOptions = {}): Use
 				batchFileOperationsService.clearCompletedOperations();
 				refresh();
 			}
-		}, 60000); // Check every minute
+		}, 60_000); // Check every minute
 
 		return () => clearInterval(cleanupInterval);
 	}, [operations, autoCleanup, refresh]);
@@ -178,7 +178,7 @@ export function useBatchOperations(options: UseBatchOperationsOptions = {}): Use
 				const operationId = await batchFileOperationsService.queueCopyOperation(items, targetPath, {
 					showProgress: true,
 					continueOnError: true,
-					autoCleanup: autoCleanup,
+					autoCleanup,
 					...options,
 				});
 
@@ -200,7 +200,7 @@ export function useBatchOperations(options: UseBatchOperationsOptions = {}): Use
 				const operationId = await batchFileOperationsService.queueMoveOperation(items, targetPath, {
 					showProgress: true,
 					continueOnError: true,
-					autoCleanup: autoCleanup,
+					autoCleanup,
 					...options,
 				});
 
@@ -222,7 +222,7 @@ export function useBatchOperations(options: UseBatchOperationsOptions = {}): Use
 				const operationId = await batchFileOperationsService.queueDeleteOperation(items, {
 					showProgress: true,
 					continueOnError: false, // More conservative for delete operations
-					autoCleanup: autoCleanup,
+					autoCleanup,
 					...options,
 				});
 
