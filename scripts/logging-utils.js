@@ -5,6 +5,7 @@ import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSy
 import { readdir, rm, stat } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'url';
+import { detectToolFromFileName, displaySimpleErrorSummary, generateLogSummary, parseLogFile } from './error-parser.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -39,6 +40,11 @@ export function executeWithLogging(command, logFileName, options = {}) {
 		// Mostrar resumen en consola
 		console.log('✅ Comando ejecutado exitosamente');
 
+		// Generar resumen automático de errores si el comando es de linting/checking
+		if (isLintingTool(command)) {
+			generatePostExecutionSummary(logFile, command);
+		}
+
 		// Si hay salida, mostrar primeras líneas
 		if (output) {
 			const lines = output.split('\n').filter((l) => l.trim());
@@ -64,6 +70,11 @@ export function executeWithLogging(command, logFileName, options = {}) {
 
 		console.error('❌ Error al ejecutar comando');
 		console.error(`📄 Detalles del error en: ${errorFile}`);
+
+		// Generar resumen automático de errores si hay salida
+		if (isLintingTool(command) && (error.stdout || error.stderr)) {
+			generatePostExecutionSummary(errorFile, command);
+		}
 
 		// Mostrar resumen del error
 		if (error.stdout || error.stderr) {
@@ -133,29 +144,19 @@ export function parseLogsByCategory(logFile) {
 	return categories;
 }
 
-// Función para mostrar resumen de logs
+// Función para mostrar resumen de logs usando el nuevo parser
 export function showLogSummary(logFile) {
-	const categories = parseLogsByCategory(logFile);
-	if (!categories) return;
+	console.log(`\n📄 Analizando: ${logFile}`);
 
-	console.log('\n📊 Resumen del log:');
-	console.log(`  ❌ Errores: ${categories.errors.length}`);
-	console.log(`  ⚠️  Warnings: ${categories.warnings.length}`);
-	console.log(`  ℹ️  Info: ${categories.info.length}`);
+	const toolHint = detectToolFromFileName(logFile);
+	const summary = parseLogFile(logFile, toolHint);
 
-	if (categories.errors.length > 0) {
-		console.log('\n❌ Primeros errores:');
-		for (const error of categories.errors.slice(0, 3)) {
-			console.log(`  ${error.trim()}`);
-		}
+	if (summary) {
+		displaySimpleErrorSummary(summary);
+		return summary.stats;
 	}
-
-	if (categories.warnings.length > 0) {
-		console.log('\n⚠️  Primeros warnings:');
-		for (const warning of categories.warnings.slice(0, 3)) {
-			console.log(`  ${warning.trim()}`);
-		}
-	}
+	console.log('❌ No se pudo analizar el archivo de log');
+	return null;
 }
 
 // Función para listar logs recientes
@@ -185,7 +186,66 @@ export function listRecentLogs(limit = 10) {
 	return files;
 }
 
-// Función para limpiar logs antiguos
+// Función para generar resumen automático al finalizar el comando
+/**
+ * Genera el resumen de errores al final de la ejecución y lo agrega al principio del log
+ */
+export function generatePostExecutionSummary(logFile, command) {
+	console.log('\n' + '═'.repeat(60));
+	console.log('📊 RESUMEN AUTOMÁTICO DE ERRORES');
+	console.log('═'.repeat(60));
+
+	const toolHint = detectToolFromFileName(logFile) || detectToolFromCommand(command);
+	const summary = parseLogFile(logFile, toolHint);
+
+	if (summary && summary.stats && summary.stats.totalErrors > 0) {
+		// Mostrar el resumen completo en consola
+		displaySimpleErrorSummary(summary);
+
+		// Ahora agregar el resumen al principio del archivo de log
+		try {
+			const originalContent = readFileSync(logFile, 'utf-8');
+			const summaryText = generateLogSummary(summary);
+
+			// Crear el nuevo contenido con el resumen al principio
+			const newContent = [
+				summaryText,
+				'',
+				'═'.repeat(80),
+				'📄 LOG ORIGINAL:',
+				'═'.repeat(80),
+				'',
+				originalContent,
+			].join('\n');
+
+			// Escribir el archivo actualizado
+			writeFileSync(logFile, newContent);
+
+			console.log(`\n✅ Resumen agregado al principio del archivo: ${logFile}`);
+		} catch (error) {
+			console.error(`❌ Error al actualizar el archivo de log: ${error.message}`);
+		}
+
+		return summary.stats;
+	}
+	console.log('\n✅ No se encontraron errores de sintaxis o linting');
+	return null;
+}
+
+// Función auxiliar para detectar si es una herramienta de linting/checking
+function isLintingTool(command) {
+	return (
+		command.includes('biome') || command.includes('eslint') || command.includes('tsc') || command.includes('prettier')
+	);
+}
+
+// Función auxiliar para detectar herramienta desde el comando
+function detectToolFromCommand(command) {
+	if (command.includes('tsc') || command.includes('typescript')) return 'tsc';
+	if (command.includes('biome')) return 'biome';
+	if (command.includes('eslint')) return 'eslint';
+	return null;
+}
 export async function cleanOldLogs(days = 7) {
 	try {
 		const files = await readdir(LOGS_DIR);

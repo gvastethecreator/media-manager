@@ -3,6 +3,7 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import chalk from 'chalk';
 import { join } from 'path';
+import { parseLogFile, detectToolFromFileName, displaySimpleErrorSummary } from './error-parser.js';
 
 const LOGS_DIR = join(process.cwd(), 'logs');
 const [, , ...args] = process.argv;
@@ -67,46 +68,98 @@ async function extractErrorsFromFile(file, cutoff) {
 	const filePath = join(LOGS_DIR, file);
 	const stats = await stat(filePath);
 
-	if (stats.mtime.getTime() < cutoff) return [];
+	if (stats.mtime.getTime() < cutoff) return null;
 
-	const content = await readFile(filePath, 'utf-8');
-	const lines = content.split('\n');
+	// Usar el nuevo parser para obtener un resumen estructurado
+	const toolHint = detectToolFromFileName(file);
+	const summary = parseLogFile(filePath, toolHint);
 
-	const errorRegex = /error|failed|✘|exception/i;
-	return lines.filter((line) => errorRegex.test(line) && !line.includes('0 errors'));
+	return summary;
 }
 
-function displayResults(allErrors, totalErrors) {
-	if (totalErrors === 0) {
-		console.log(chalk.green('✅ ¡No se encontraron errores!'));
+function displayResults(allSummaries, totalFiles) {
+	if (totalFiles === 0) {
+		console.log(chalk.green('✅ ¡No se encontraron archivos con errores!'));
 		return;
 	}
 
-	console.log(chalk.red(`\n❌ Total de errores encontrados: ${totalErrors}`));
+	let totalErrors = 0;
+	let totalAffectedFiles = new Set();
 
-	for (const [toolName, errors] of allErrors.entries()) {
-		console.log(chalk.yellow(`\n🔧 ${toolName} (${errors.length} errores):`));
-		const uniqueErrors = [...new Set(errors)];
-		uniqueErrors.slice(0, 5).forEach((error, i) => {
-			console.log(chalk.redBright(`  ${i + 1}: ${error.trim()}`));
-		});
-		if (uniqueErrors.length > 5) {
-			console.log(chalk.dim(`  ... y ${uniqueErrors.length - 5} errores únicos más.`));
+	console.log(chalk.cyan.bold('\n📊 RESUMEN CONSOLIDADO DE ERRORES'));
+	console.log(chalk.gray('═'.repeat(50)));
+
+	for (const [toolName, summaries] of allSummaries.entries()) {
+		let toolErrors = 0;
+		let toolFilesSet = new Set();
+
+		console.log(chalk.yellow.bold(`\n🔧 ${toolName.toUpperCase()}:`));
+
+		for (const summary of summaries) {
+			if (summary.stats.totalErrors > 0) {
+				toolErrors += summary.stats.totalErrors;
+
+				// Agregar archivos al set para evitar duplicados
+				for (const file of summary.stats.filesWithErrors) {
+					toolFilesSet.add(file);
+					totalAffectedFiles.add(file);
+				}
+			}
+		}
+
+		if (toolErrors > 0) {
+			console.log(chalk.red(`  ❌ Errores: ${toolErrors}`));
+			console.log(chalk.blue(`  📁 Archivos únicos: ${toolFilesSet.size}`));
+
+			// Mostrar archivos únicos ordenados por número de errores
+			const fileErrorCounts = new Map();
+			for (const summary of summaries) {
+				for (const [file, errors] of summary.stats.fileErrors) {
+					fileErrorCounts.set(file, (fileErrorCounts.get(file) || 0) + errors.length);
+				}
+			}
+
+			const sortedFiles = Array.from(fileErrorCounts.entries())
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, 3);
+
+			for (const [file, errorCount] of sortedFiles) {
+				console.log(chalk.cyan(`    ${file} (${errorCount} errores)`));
+			}
+
+			if (toolFilesSet.size > 3) {
+				console.log(chalk.dim(`    ... y ${toolFilesSet.size - 3} archivos más`));
+			}
+		}
+
+		totalErrors += toolErrors;
+
+		if (toolErrors === 0) {
+			console.log(chalk.green('  ✅ Sin errores'));
 		}
 	}
+
+	console.log(chalk.gray('═'.repeat(50)));
+	console.log(chalk.red.bold(`📊 TOTAL GENERAL:`));
+	console.log(chalk.red(`  ❌ Total de errores: ${totalErrors}`));
+	console.log(chalk.blue(`  📁 Total de archivos únicos afectados: ${totalAffectedFiles.size}`));
 }
 
-function showSuggestedCommands(allErrors) {
+function showSuggestedCommands(allSummaries) {
 	console.log(chalk.cyan('\n💡 Comandos sugeridos para corregir:'));
-	if (allErrors.has('eslint') || allErrors.has('eslint-fix')) {
+
+	if (allSummaries.has('eslint') || allSummaries.has('eslint-fix')) {
 		console.log(chalk.yellow('  bun lint:fix'));
 	}
-	if (allErrors.has('biome') || allErrors.has('biome-check') || allErrors.has('biome-fix')) {
+	if (allSummaries.has('biome') || allSummaries.has('biome-check') || allSummaries.has('biome-fix')) {
 		console.log(chalk.yellow('  bun biome:fix'));
 	}
-	if (allErrors.has('tsc')) {
+	if (allSummaries.has('tsc')) {
 		console.log(chalk.dim('  # Los errores de TypeScript requieren corrección manual.'));
 	}
+
+	console.log(chalk.gray('\n📋 Para ver detalles completos de un log específico:'));
+	console.log(chalk.dim('  bun scripts/error-parser.js <ruta-del-log>'));
 }
 
 async function checkErrors() {
@@ -126,25 +179,25 @@ async function checkErrors() {
 		if (!fileData) return;
 
 		const { relevantFiles, cutoff } = fileData;
-		const allErrors = new Map();
-		let totalErrors = 0;
+		const allSummaries = new Map();
+		let totalFilesWithErrors = 0;
 
 		for (const file of relevantFiles) {
-			const fileErrors = await extractErrorsFromFile(file, cutoff);
+			const summary = await extractErrorsFromFile(file, cutoff);
 
-			if (fileErrors.length > 0) {
+			if (summary && summary.stats.totalErrors > 0) {
 				const toolName = file.split('_')[0];
-				if (!allErrors.has(toolName)) {
-					allErrors.set(toolName, []);
+				if (!allSummaries.has(toolName)) {
+					allSummaries.set(toolName, []);
 				}
-				allErrors.get(toolName).push(...fileErrors);
-				totalErrors += fileErrors.length;
+				allSummaries.get(toolName).push(summary);
+				totalFilesWithErrors++;
 			}
 		}
 
-		displayResults(allErrors, totalErrors);
-		if (totalErrors > 0) {
-			showSuggestedCommands(allErrors);
+		displayResults(allSummaries, totalFilesWithErrors);
+		if (totalFilesWithErrors > 0) {
+			showSuggestedCommands(allSummaries);
 		}
 	} catch (error) {
 		if (error.code === 'ENOENT') {

@@ -17,7 +17,9 @@
     "forceConsistentCasingInFileNames": true,
     "types": [
       "vite/client",
-      "vitest/globals",
+      "bun-types",
+      "@testing-library/jest-dom",
+      "web",
       "@types/react",
       "@types/react-dom"
     ],

@@ -71,7 +71,6 @@ export function FoldersSettings() {
 		handleReindexFolder,
 		handleFolderClick,
 		reindexAll,
-		handleAutoReindexToggle,
 		handleClearCache,
 		loadStats,
 		setError,
@@ -202,31 +201,24 @@ export function FoldersSettings() {
 						{/* Formulario para agregar carpetas */}
 						<FolderForm isLoading={isLoading} isProcessing={isProcessing} onAddFolder={handleAddFolder} />
 
-						{/* Lista de carpetas - todas como tarjetas individuales */}
-						<div className="grid grid-cols-1 gap-4 pr-3 lg:grid-cols-2">
+						{/* Lista de carpetas - diseño mejorado más compacto */}
+						<div className="grid grid-cols-1 gap-3 pr-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 							{(() => {
 								const sortedFolders = createHierarchicalOrder(folders);
 
 								return sortedFolders.map((folder) => (
-									<div className="col-span-1" key={folder.id}>
-										<FolderCard
-											allFolders={folders}
-											folder={folder}
-											getFolderIndexStatus={getFolderIndexStatus}
-											isGloballyProcessing={isGloballyProcessing}
-											isProcessing={isProcessing}
-											onFolderClick={handleFolderClick}
-											onReindex={handleReindexFolder}
-											onToggleAutoReindex={(folderId: string) => {
-												const targetFolder = folders.find((f) => f.id === folderId);
-												if (targetFolder) {
-													handleAutoReindexToggle(folderId, !targetFolder.autoReindex);
-												}
-											}}
-											processStatus={processStatus}
-											selectedFolder={selectedFolder}
-										/>
-									</div>
+									<FolderCard
+										allFolders={folders}
+										folder={folder}
+										getFolderIndexStatus={getFolderIndexStatus}
+										isGloballyProcessing={isGloballyProcessing}
+										isProcessing={isProcessing}
+										key={folder.id}
+										onFolderClick={handleFolderClick}
+										onReindex={handleReindexFolder}
+										processStatus={processStatus}
+										selectedFolder={selectedFolder}
+									/>
 								));
 							})()}
 
