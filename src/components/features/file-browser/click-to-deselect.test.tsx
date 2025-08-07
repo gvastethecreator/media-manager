@@ -3,20 +3,20 @@
  */
 
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@/test/test-utils';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { AnyEntityWithStats } from '@/types/migration';
 import { EntityStatsType } from '@/types/migration';
 import { FileBrowser } from './file-browser';
 
 // Mock the stores and dependencies
-mock.module('@/store/ui/selection.slice');
-mock.module('@/store/ui/view-options.slice');
-mock.module('@/store/ui/file-viewer.slice');
-mock.module('@/store/details-panel.store');
-mock.module('@/store/entities/image');
-mock.module('@/lib/keyboard');
-mock.module('@/lib/ui/toast');
+mock.module('@/store/ui/selection.slice', () => ({ useSelectionStore: mock() }));
+mock.module('@/store/ui/view-options.slice', () => ({ useViewOptionsStore: mock() }));
+mock.module('@/store/ui/file-viewer.slice', () => ({ useFileViewerStore: mock() }));
+mock.module('@/store/details-panel.store', () => ({ useDetailsPanelStore: mock() }));
+mock.module('@/store/entities/image', () => ({ useImageStore: mock() }));
+mock.module('@/lib/keyboard', () => ({ useFileBrowserShortcuts: mock() }));
+mock.module('@/lib/ui/toast', () => ({ toastService: { success: mock(() => {}), error: mock(() => {}), info: mock(() => {}) } }));
 
 // Mock data
 const mockItems: AnyEntityWithStats[] = [
@@ -50,8 +50,8 @@ describe('FileBrowser Click-to-Deselect', () => {
 		});
 
 		// Mock other stores
-		mock.doMock('@/store/ui/view-options.slice', () => ({
-			useViewOptionsStore: mock.fn(() => ({
+		mock.module('@/store/ui/view-options.slice', () => ({
+			useViewOptionsStore: mock(() => ({
 				viewMode: 'cards',
 				itemSize: 200,
 				searchQuery: '',
@@ -59,8 +59,8 @@ describe('FileBrowser Click-to-Deselect', () => {
 			})),
 		}));
 
-		mock.doMock('@/store/entities/image', () => ({
-			useImageStore: mock.fn(() => ({
+		mock.module('@/store/entities/image', () => ({
+			useImageStore: mock(() => ({
 				images: {},
 				isLoading: false,
 				error: null,
@@ -70,7 +70,7 @@ describe('FileBrowser Click-to-Deselect', () => {
 			})),
 		}));
 
-		mock.doMock('@/lib/keyboard', () => ({
+		mock.module('@/lib/keyboard', () => ({
 			useFileBrowserShortcuts: () => ({
 				register: mock(),
 				setContext: mock(),
@@ -109,8 +109,8 @@ describe('FileBrowser Click-to-Deselect', () => {
 			mock.restore();
 
 			// Mock the view mode
-			mock.doMock('@/store/ui/view-options.slice', () => ({
-				useViewOptionsStore: mock.fn(() => ({
+			mock.module('@/store/ui/view-options.slice', () => ({
+				useViewOptionsStore: mock(() => ({
 					viewMode,
 					itemSize: 200,
 					searchQuery: '',

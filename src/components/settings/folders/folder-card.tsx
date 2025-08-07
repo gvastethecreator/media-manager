@@ -8,7 +8,6 @@ import type { FolderStatsResponse } from '@/types/folders';
 import { ExpandedSubfolders } from './expanded-subfolders';
 import { NormalModeControls } from './folder-card-action-controls';
 import { EditModeControls } from './folder-card-edit-controls';
-import { FolderHeader } from './folder-card-header';
 import { FolderStatsDisplay } from './folder-card-stats-display';
 import { FolderErrorDisplay } from './folder-error-display';
 import { FolderIndexStatusBadge, type IndexStatus } from './folder-index-status-badge';
@@ -28,7 +27,6 @@ interface FolderCardProps {
 	isGloballyProcessing: boolean;
 	allFolders?: ExtendedFolder[]; // Para buscar información del padre
 	onReindex: (folderId: string) => void;
-	onToggleAutoReindex: (folderId: string, value: boolean) => void;
 	onFolderClick: (folderId: string) => void;
 	getFolderIndexStatus: (folder: ExtendedFolder) => IndexStatus;
 	onUpdateFolder?: (folderId: string, updates: { emoji?: string; description?: string; isFavorite?: boolean }) => void;
@@ -44,7 +42,6 @@ export function FolderCard({
 	isGloballyProcessing,
 	allFolders = [],
 	onReindex,
-	onToggleAutoReindex,
 	onFolderClick,
 	getFolderIndexStatus,
 	onUpdateFolder,
@@ -121,19 +118,28 @@ export function FolderCard({
 	// Obtener mensaje de estado
 	const statusMessage = getStatusMessage(isReindexing, showCompleteAnimation, isProcessing);
 
+	// Función helper para encontrar el nombre de la carpeta padre
+	const parentFolderName = useMemo(() => {
+		if (!(folder.parentId && allFolders.length)) {
+			return null;
+		}
+		const parentFolder = allFolders.find((f) => f.id === folder.parentId);
+		return parentFolder?.name || null;
+	}, [folder.parentId, allFolders]);
+
 	return (
 		<motion.div
 			animate={{
 				opacity: [0, 1],
 				y: [20, 0],
 			}}
-			className={cn('group rounded-sm', selectedFolder === folder.id && 'ring-1 ring-primary')}
+			className={cn('group rounded-lg', selectedFolder === folder.id && 'ring-2 ring-primary')}
 		>
 			<Card
 				className={cn(
-					'overflow-hidden border-0 transition-all',
-					isReindexing && 'ring-1 ring-primary/20',
-					showCompleteAnimation && 'ring-1 ring-emerald-400/20'
+					'h-full overflow-hidden border transition-all hover:shadow-md',
+					isReindexing && 'ring-2 ring-primary/20',
+					showCompleteAnimation && 'ring-2 ring-emerald-400/20'
 				)}
 			>
 				{/* Indicador visual de procesamiento */}
@@ -143,72 +149,91 @@ export function FolderCard({
 					showCompleteAnimation={showCompleteAnimation}
 				/>
 
-				<CardContent className="p-3">
-					<div className="space-y-2">
-						{/* Cabecera de la carpeta */}
-						<FolderHeader
-							editValues={editValues}
-							folder={folder}
-							isEditing={isEditing}
-							onEditValuesChange={handleEditValuesChange}
-							onEmojiSelect={handleEmojiSelect}
-							onToggleEmojiPicker={() => setShowEmojiPicker(!showEmojiPicker)}
-							parentFolderName={getParentFolderName()}
-							showEmojiPicker={showEmojiPicker}
-							statusMessage={statusMessage}
-						/>
+				<CardContent className="p-4">
+					<div className="space-y-3">
+						{/* Header compacto */}
+						<div className="flex items-start justify-between">
+							<div className="min-w-0 flex-1">
+								<div className="flex items-center gap-2">
+									{/* Emoji o ícono de carpeta */}
+									<div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-primary/10">
+										{folder.emoji ? (
+											<span className="text-sm">{folder.emoji}</span>
+										) : (
+											<Folder className="h-4 w-4 text-primary" />
+										)}
+									</div>
 
-						{/* Detalles de la carpeta en 3 columnas */}
-						<div className="grid grid-cols-[auto,1fr,auto] gap-3">
-							{/* Columna 1: Thumbnail Grid */}
-							<div className="flex items-start">
-								{folderStats?.recentImages && folderStats.recentImages.length > 0 ? (
-									<ThumbnailGrid images={folderStats.recentImages} totalImages={folderStats.totalImages || 0} />
+									{/* Información básica */}
+									<div className="min-w-0 flex-1">
+										<h3 className="truncate font-medium text-sm">{folder.name}</h3>
+										{parentFolderName && (
+											<p className="truncate text-muted-foreground text-xs">en {parentFolderName}</p>
+										)}
+									</div>
+								</div>
+
+								{/* Status y mensaje */}
+								<div className="mt-2 flex items-center gap-2">
+									<FolderIndexStatusBadge lastIndexed={folder.lastIndexed} status={indexStatus} />
+									{statusMessage && <span className="text-muted-foreground text-xs">{statusMessage}</span>}
+								</div>
+							</div>
+
+							{/* Controles */}
+							<div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+								{isEditing ? (
+									<EditModeControls
+										isDisabled={isGloballyProcessing}
+										onCancel={handleCancelEdit}
+										onSave={handleSaveEdit}
+									/>
 								) : (
-									<div className="flex h-16 w-16 items-center justify-center rounded-md border-2 border-muted-foreground/20 border-dashed bg-muted/30">
-										<Folder className="h-6 w-6 text-muted-foreground/50" />
+									<NormalModeControls
+										folder={folder}
+										hasChildren={Boolean(folder.children && folder.children.length > 0)}
+										isExpanded={isExpanded}
+										isGloballyProcessing={isGloballyProcessing}
+										isReindexing={isReindexing}
+										onEdit={() => setIsEditing(true)}
+										onFolderClick={onFolderClick}
+										onReindex={onReindex}
+										onToggleExpanded={onToggleExpanded}
+										processStatus={processStatus}
+										selectedFolder={selectedFolder}
+									/>
+								)}
+							</div>
+						</div>
+
+						{/* Grid de miniaturas y estadísticas */}
+						<div className="flex items-center gap-3">
+							{/* Thumbnail grid más pequeño */}
+							<div className="flex-shrink-0">
+								{folderStats?.recentImages && folderStats.recentImages.length > 0 ? (
+									<div className="relative h-12 w-12">
+										<ThumbnailGrid
+											images={folderStats.recentImages.slice(0, 4)}
+											totalImages={folderStats.totalImages || 0}
+										/>
+									</div>
+								) : (
+									<div className="flex h-12 w-12 items-center justify-center rounded-md border-2 border-muted-foreground/20 border-dashed bg-muted/30">
+										<Folder className="h-5 w-5 text-muted-foreground/50" />
 									</div>
 								)}
 							</div>
 
-							{/* Columna 2: Información principal */}
-							<FolderStatsDisplay folder={folder} folderStats={folderStats} />
-
-							{/* Columna 3: Status y botones */}
-							<div className="flex flex-col items-end gap-1">
-								<FolderIndexStatusBadge lastIndexed={folder.lastIndexed} status={indexStatus} />
-
-								<div className="flex items-center gap-1">
-									{isEditing ? (
-										<EditModeControls
-											isDisabled={isGloballyProcessing}
-											onCancel={handleCancelEdit}
-											onSave={handleSaveEdit}
-										/>
-									) : (
-										<NormalModeControls
-											folder={folder}
-											hasChildren={Boolean(folder.children && folder.children.length > 0)}
-											isExpanded={isExpanded}
-											isGloballyProcessing={isGloballyProcessing}
-											isReindexing={isReindexing}
-											onEdit={() => setIsEditing(true)}
-											onFolderClick={onFolderClick}
-											onReindex={onReindex}
-											onToggleAutoReindex={onToggleAutoReindex}
-											onToggleExpanded={onToggleExpanded}
-											processStatus={processStatus}
-											selectedFolder={selectedFolder}
-										/>
-									)}
-								</div>
+							{/* Estadísticas compactas */}
+							<div className="min-w-0 flex-1">
+								<FolderStatsDisplay folder={folder} folderStats={folderStats} />
 							</div>
 						</div>
 
-						{/* Muestra error si existe */}
+						{/* Error display si existe */}
 						<FolderErrorDisplay folder={folder} />
 
-						{/* Detalles del proceso con indicador de etapas */}
+						{/* Detalles del proceso */}
 						{isReindexing && (
 							<FolderProcessingDetails
 								isReindexing={isReindexing}

@@ -1,25 +1,25 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { render, screen, waitFor } from '@/test/test-utils';
 import type { FileItem } from '@/types/file-browser/file-item';
 import { MultiSelectionContextMenu } from './multi-selection-context-menu';
 
 // Mock the stores
 mock.module('@/store/entities/album', () => ({
-	useAlbumStore: mock.fn((selector) => {
+	useAlbumStore: mock((selector) => {
 		const mockState = { albums: {} };
 		return selector ? selector(mockState) : mockState;
 	}),
 }));
 
 mock.module('@/store/entities/collection', () => ({
-	useCollectionStore: mock.fn((selector) => {
+	useCollectionStore: mock((selector) => {
 		const mockState = { collections: {} };
 		return selector ? selector(mockState) : mockState;
 	}),
 }));
 
 mock.module('@/store/entities/tag', () => ({
-	useTagStore: mock.fn((selector) => {
+	useTagStore: mock((selector) => {
 		const mockState = { getTags: () => [] };
 		return selector ? selector(mockState) : mockState;
 	}),
@@ -36,9 +36,9 @@ mock.module('@/lib/ui/toast', () => ({
 
 // Mock the keyboard navigation hook
 mock.module('@/lib/keyboard', () => ({
-	useContextMenuNavigation: mock.fn(() => ({
+	useContextMenuNavigation: mock(() => ({
 		selectedIndex: -1,
-		getItemProps: mock.fn(() => ({})),
+		getItemProps: mock(() => ({})),
 	})),
 }));
 

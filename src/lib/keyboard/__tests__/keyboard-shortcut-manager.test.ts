@@ -29,6 +29,7 @@ describe('KeyboardShortcutManager', () => {
 		const event = new KeyboardEvent('keydown', {
 			key: 'a',
 			ctrlKey: true,
+			target: document.body, // Añadir un target válido
 		});
 
 		const handled = manager.handleKeyDown(event);
@@ -96,6 +97,7 @@ describe('KeyboardShortcutManager', () => {
 
 		const event = new KeyboardEvent('keydown', {
 			key: 'escape',
+			target: document.body, // Añadir un target válido
 		});
 
 		const handled = manager.handleKeyDown(event);

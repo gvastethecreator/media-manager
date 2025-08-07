@@ -19,7 +19,7 @@ interface GridViewProps {
 	onItemDoubleClick: (item: AnyEntityWithStats) => void;
 }
 
-export const GridView = memo<GridViewProps>(function GridView({
+export const GridView = memo<GridViewProps>(function GridViewComponent({
 	items,
 	selectedIds,
 	containerWidth,
@@ -96,14 +96,20 @@ export const GridView = memo<GridViewProps>(function GridView({
 	// Navegación por teclado
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
-			if (!gridRef.current) return;
+			if (!gridRef.current) {
+				return;
+			}
 
 			const focusedElement = document.activeElement as HTMLElement;
-			if (!focusedElement?.closest('[data-item-id]')) return;
+			if (!focusedElement?.closest('[data-item-id]')) {
+				return;
+			}
 
 			const gridItems = Array.from(gridRef.current.querySelectorAll('[data-item-id]')) as HTMLElement[];
 			const currentIndex = gridItems.findIndex((item) => item.contains(focusedElement));
-			if (currentIndex === -1) return;
+			if (currentIndex === -1) {
+				return;
+			}
 
 			let nextIndex = currentIndex;
 
@@ -204,18 +210,22 @@ export const GridView = memo<GridViewProps>(function GridView({
 	}, []);
 
 	return (
-		<div
+		<section
 			aria-label={`Vista de cuadrícula con ${items.length} elementos`}
-			className="h-full w-full overflow-auto"
+			className="h-full w-full overflow-hidden"
 			data-testid="grid-view"
 			data-view-type="grid"
 			onClickCapture={handleEmptySpaceClick}
+			onKeyDown={handleKeyDown}
 			ref={parentRef}
-			role="grid"
+			style={{
+				position: 'relative',
+				overflowY: 'auto',
+				overflowX: 'hidden',
+			}}
 		>
 			<div
 				className="relative"
-				onKeyDown={handleKeyDown}
 				ref={gridRef}
 				role="presentation"
 				style={{
@@ -272,9 +282,8 @@ export const GridView = memo<GridViewProps>(function GridView({
 												compact={true}
 												entity={item}
 												isSelected={isSelected}
-												itemId={item.id}
-												onClickById={handleItemClickById}
-												onDoubleClickById={handleItemDoubleClickById}
+												onClick={(e) => handleItemClickById(item.id, e)}
+												onDoubleClick={() => handleItemDoubleClickById(item.id)}
 											/>
 										</motion.div>
 									);
@@ -284,6 +293,6 @@ export const GridView = memo<GridViewProps>(function GridView({
 					);
 				})}
 			</div>
-		</div>
+		</section>
 	);
 });

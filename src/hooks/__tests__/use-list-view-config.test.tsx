@@ -9,44 +9,42 @@ import { useListViewConfig } from '@/hooks/use-list-view-config';
 
 // Mock de dependencias
 mock.module('@/store/settings.store', () => ({
-	useSettingsStore: {
-		use: {
-			settings: () => ({
-				fileViews: {
-					listView: {
-						columns: [
-							{
-								key: 'name',
-								label: 'Nombre',
-								width: 'auto',
-								visible: true,
-								sortable: true,
-								order: 0,
-							},
-							{
-								key: 'size',
-								label: 'Tamaño',
-								width: 100,
-								visible: true,
-								sortable: true,
-								order: 1,
-							},
-						],
-						rowHeight: 72,
-						showZebraStripes: true,
-						showHeader: true,
-						allowResize: true,
-						allowReorder: true,
-						showThumbnails: true,
-						thumbnailSize: 'none',
-						rowGap: 2,
-						cellPadding: 12,
-					},
+	useSettingsStore: () => ({
+		settings: {
+			fileViews: {
+				listView: {
+					columns: [
+						{
+							key: 'name',
+							label: 'Nombre',
+							width: 'auto',
+							visible: true,
+							sortable: true,
+							order: 0,
+						},
+						{
+							key: 'size',
+							label: 'Tamaño',
+							width: 100,
+							visible: true,
+							sortable: true,
+							order: 1,
+						},
+					],
+					rowHeight: 72,
+					showZebraStripes: true,
+					showHeader: true,
+					allowResize: true,
+					allowReorder: true,
+					showThumbnails: true,
+					thumbnailSize: 'none',
+					rowGap: 2,
+					cellPadding: 12,
 				},
-			}),
-			updateSettings: () => mock(),
+			},
 		},
-	},
+		updateSettings: mock(),
+	}),
 }));
 
 describe('useListViewConfig', () => {
