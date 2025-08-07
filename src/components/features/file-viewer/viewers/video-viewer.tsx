@@ -45,12 +45,12 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className }) =>
 	const handleFullscreen = () => {
 		const vid = videoRef.current;
 		if (!vid) return;
-		if (!fullscreen) {
-			vid.requestFullscreen?.();
-			setFullscreen(true);
-		} else {
+		if (fullscreen) {
 			document.exitFullscreen?.();
 			setFullscreen(false);
+		} else {
+			vid.requestFullscreen?.();
+			setFullscreen(true);
 		}
 	};
 
@@ -97,50 +97,50 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className }) =>
 	};
 
 	return (
-		<div className={cn('w-full max-w-3xl mx-auto bg-card rounded-lg shadow-lg p-4', className)}>
+		<div className={cn('mx-auto w-full max-w-3xl rounded-lg bg-card p-4 shadow-lg', className)}>
 			<video
-				ref={videoRef}
-				src={video.path}
+				className="w-full rounded-lg bg-black"
 				controls={false}
 				muted={muted}
-				className="w-full rounded-lg bg-black"
 				onClick={handlePlayPause}
-				onTimeUpdate={handleTimeUpdate}
 				onLoadedMetadata={handleLoadedMetadata}
+				onTimeUpdate={handleTimeUpdate}
 				poster={video.thumbnail || undefined}
+				ref={videoRef}
+				src={video.path}
 			>
 				Sorry, your browser does not support embedded videos.
 			</video>
-			<div className="flex items-center gap-2 mt-2">
-				<Button variant="ghost" size="icon" onClick={handlePlayPause} aria-label={playing ? 'Pausar' : 'Reproducir'}>
+			<div className="mt-2 flex items-center gap-2">
+				<Button aria-label={playing ? 'Pausar' : 'Reproducir'} onClick={handlePlayPause} size="icon" variant="ghost">
 					{playing ? <Pause /> : <Play />}
 				</Button>
-				<Button variant="ghost" size="icon" onClick={handleRestart} aria-label="Reiniciar">
+				<Button aria-label="Reiniciar" onClick={handleRestart} size="icon" variant="ghost">
 					<RotateCcw />
 				</Button>
-				<Button variant="ghost" size="icon" onClick={handleMute} aria-label={muted ? 'Activar sonido' : 'Silenciar'}>
+				<Button aria-label={muted ? 'Activar sonido' : 'Silenciar'} onClick={handleMute} size="icon" variant="ghost">
 					{muted ? <VolumeX /> : <Volume2 />}
 				</Button>
 				<input
-					type="range"
-					min={0}
+					className="mx-2 h-1 flex-1 accent-primary"
 					max={duration}
-					value={currentTime}
+					min={0}
 					onChange={handleSeek}
-					className="flex-1 accent-primary h-1 mx-2"
+					type="range"
+					value={currentTime}
 				/>
-				<span className="text-xs w-14 text-right">
+				<span className="w-14 text-right text-xs">
 					{formatTime(currentTime)} / {formatTime(duration)}
 				</span>
-				<Button variant="ghost" size="icon" onClick={handleFullscreen} aria-label="Pantalla completa">
+				<Button aria-label="Pantalla completa" onClick={handleFullscreen} size="icon" variant="ghost">
 					{fullscreen ? <Minimize2 /> : <Maximize2 />}
 				</Button>
-				<Button variant="ghost" size="icon" onClick={handleDownload} aria-label="Descargar video">
+				<Button aria-label="Descargar video" onClick={handleDownload} size="icon" variant="ghost">
 					<Download />
 				</Button>
 			</div>
 			{/* Metadatos del video */}
-			<div className="mt-4 grid grid-cols-2 gap-2 text-xs text-muted-foreground">
+			<div className="mt-4 grid grid-cols-2 gap-2 text-muted-foreground text-xs">
 				<div>
 					<span className="font-medium">Nombre:</span> {video.name}
 				</div>

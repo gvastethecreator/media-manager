@@ -215,7 +215,7 @@ export async function createAlbum(data: AlbumCreateInput): Promise<AlbumWithStat
 				description: data.description || null,
 				featuredImage: data.featuredImage || null,
 
-				isFavorite: data.isFavorite || false,
+				isFavorite: data.isFavorite,
 				totalImages: 0,
 				totalVideos: 0,
 				totalSize: 0,

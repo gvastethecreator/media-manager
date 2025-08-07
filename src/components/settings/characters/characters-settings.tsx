@@ -145,11 +145,11 @@ export function CharactersSettings() {
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-3">
 						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">Cargando personajes...</p>
+						<p className="text-muted-foreground text-sm">Cargando personajes...</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -158,10 +158,10 @@ export function CharactersSettings() {
 
 	if (error) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-3">
-						<p className="text-sm text-destructive">Error al cargar personajes: {error.message}</p>
+						<p className="text-destructive text-sm">Error al cargar personajes: {error.message}</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -172,13 +172,13 @@ export function CharactersSettings() {
 		<div className="grid grid-cols-12 gap-3">
 			{/* Panel izquierdo: Lista de personajes */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="space-y-1 py-2 px-3">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-sm flex items-center">
+							<CardTitle className="flex items-center text-sm">
 								Personajes ({filteredCharacters.length})
 								{filteredCharacters.length !== characters.length && (
-									<Badge variant="outline" className="ml-2 text-[10px]">
+									<Badge className="ml-2 text-[10px]" variant="outline">
 										Filtrados
 									</Badge>
 								)}
@@ -186,22 +186,22 @@ export function CharactersSettings() {
 							<div className="flex items-center gap-1">
 								<Popover>
 									<PopoverTrigger asChild>
-										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+										<Button className="h-6 w-6 p-0" size="sm" variant="ghost">
 											<Filter className="h-3.5 w-3.5" />
 										</Button>
 									</PopoverTrigger>
-									<PopoverContent className="w-72" align="end">
+									<PopoverContent align="end" className="w-72">
 										<div className="space-y-4">
 											<h4 className="font-medium text-sm">Filtrar Personajes</h4>
 
 											<div className="space-y-2">
 												<Label htmlFor="search">Buscar</Label>
 												<Input
+													className="h-8 text-xs"
 													id="search"
+													onChange={(e) => setSearchQuery(e.target.value)}
 													placeholder="Buscar personajes..."
 													value={searchQuery}
-													onChange={(e) => setSearchQuery(e.target.value)}
-													className="h-8 text-xs"
 												/>
 											</div>
 
@@ -209,10 +209,10 @@ export function CharactersSettings() {
 												<Label>Categorías</Label>
 												<div className="grid grid-cols-2 gap-2">
 													{uniqueCategories.map((category) => (
-														<div key={category} className="flex items-center space-x-2">
+														<div className="flex items-center space-x-2" key={category}>
 															<Checkbox
-																id={`category-${category}`}
 																checked={selectedCategories.includes(category)}
+																id={`category-${category}`}
 																onCheckedChange={(checked) => {
 																	if (checked) {
 																		setSelectedCategories((prev) => [...prev, category]);
@@ -221,7 +221,7 @@ export function CharactersSettings() {
 																	}
 																}}
 															/>
-															<Label htmlFor={`category-${category}`} className="text-xs">
+															<Label className="text-xs" htmlFor={`category-${category}`}>
 																{category}
 															</Label>
 														</div>
@@ -233,10 +233,10 @@ export function CharactersSettings() {
 												<Label>Clases</Label>
 												<div className="grid grid-cols-2 gap-2">
 													{uniqueClasses.map((characterClass) => (
-														<div key={characterClass} className="flex items-center space-x-2">
+														<div className="flex items-center space-x-2" key={characterClass}>
 															<Checkbox
-																id={`class-${characterClass}`}
 																checked={selectedClasses.includes(characterClass)}
+																id={`class-${characterClass}`}
 																onCheckedChange={(checked) => {
 																	if (checked) {
 																		setSelectedClasses((prev) => [...prev, characterClass]);
@@ -245,7 +245,7 @@ export function CharactersSettings() {
 																	}
 																}}
 															/>
-															<Label htmlFor={`class-${characterClass}`} className="text-xs">
+															<Label className="text-xs" htmlFor={`class-${characterClass}`}>
 																{characterClass}
 															</Label>
 														</div>
@@ -255,20 +255,20 @@ export function CharactersSettings() {
 
 											<div className="flex items-center space-x-2">
 												<Checkbox
-													id="favorites"
 													checked={onlyFavorites}
+													id="favorites"
 													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
 												/>
-												<Label htmlFor="favorites" className="text-xs">
+												<Label className="text-xs" htmlFor="favorites">
 													Solo favoritos
 												</Label>
 											</div>
 
 											<div className="flex justify-between">
-												<Button size="sm" variant="outline" onClick={clearFilters} className="h-8 text-xs">
+												<Button className="h-8 text-xs" onClick={clearFilters} size="sm" variant="outline">
 													Limpiar filtros
 												</Button>
-												<Button size="sm" className="h-8 text-xs">
+												<Button className="h-8 text-xs" size="sm">
 													Aplicar
 												</Button>
 											</div>
@@ -276,19 +276,19 @@ export function CharactersSettings() {
 									</PopoverContent>
 								</Popover>
 								<Button
+									className="h-6 w-6 p-0"
 									onClick={() => {
 										setSelectedCharacter(null);
 										setIsEditing(false);
 									}}
 									size="sm"
 									variant="ghost"
-									className="h-6 w-6 p-0"
 								>
 									<PlusCircle className="h-3.5 w-3.5" />
 								</Button>
 							</div>
 						</div>
-						<div className="flex gap-2 text-xs text-muted-foreground">
+						<div className="flex gap-2 text-muted-foreground text-xs">
 							<span>{stats.totalCharacters} personajes</span>
 							<span>•</span>
 							<span>{stats.totalImages} imágenes</span>
@@ -304,44 +304,44 @@ export function CharactersSettings() {
 						<ScrollArea className="h-full px-3 pb-3">
 							{filteredCharacters.length === 0 ? (
 								<EmptyState
-									icon={Users}
-									title="No hay personajes"
+									actions={
+										characters.length > 0 && (
+											<Button onClick={clearFilters} size="sm" variant="outline">
+												Limpiar filtros
+											</Button>
+										)
+									}
+									className="py-6"
 									description={
 										characters.length > 0
 											? 'No se encontraron personajes con los filtros aplicados'
 											: 'Crea tu primer personaje'
 									}
-									className="py-6"
-									actions={
-										characters.length > 0 && (
-											<Button size="sm" variant="outline" onClick={clearFilters}>
-												Limpiar filtros
-											</Button>
-										)
-									}
+									icon={Users}
+									title="No hay personajes"
 								/>
 							) : (
 								<div className="space-y-1">
 									{filteredCharacters.map((character) => (
 										<div
+											className={`group/item relative flex w-full items-center gap-2 rounded-md p-1.5 transition-colors hover:bg-muted/50 ${selectedCharacter?.id === character.id ? 'bg-muted' : ''}`}
 											key={character.id}
-											className={`relative group/item flex items-center gap-2 p-1.5 rounded-md transition-colors hover:bg-muted/50 w-full ${selectedCharacter?.id === character.id ? 'bg-muted' : ''}`}
 										>
 											<button
-												className="flex items-center gap-2 w-full text-left cursor-pointer"
+												aria-label={`Editar personaje ${character.name}`}
+												aria-pressed={selectedCharacter?.id === character.id}
+												className="flex w-full cursor-pointer items-center gap-2 text-left"
 												onClick={() => handleEditCharacter(character)}
 												type="button"
-												aria-pressed={selectedCharacter?.id === character.id}
-												aria-label={`Editar personaje ${character.name}`}
 											>
 												<div
-													className="w-7 h-7 flex-shrink-0 rounded-full flex items-center justify-center text-white"
+													className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-white"
 													style={{ backgroundColor: character.color || '' }}
 												>
 													<span className="text-xs">{character.emoji || character.name.charAt(0).toUpperCase()}</span>
 												</div>
-												<div className="flex-1 min-w-0">
-													<h4 className="text-xs font-medium truncate">{character.name}</h4>
+												<div className="min-w-0 flex-1">
+													<h4 className="truncate font-medium text-xs">{character.name}</h4>
 													<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
 														{character.race && <span>{character.race}</span>}
 														{character.class && (
@@ -360,14 +360,14 @@ export function CharactersSettings() {
 												</div>
 											</button>
 											<Button
-												variant="ghost"
-												size="icon"
-												type="button"
-												className="h-5 w-5 opacity-0 group-hover/item:opacity-100 absolute right-1"
+												className="absolute right-1 h-5 w-5 opacity-0 group-hover/item:opacity-100"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDeleteCharacter(character.id);
 												}}
+												size="icon"
+												type="button"
+												variant="ghost"
 											>
 												<Trash className="h-3 w-3" />
 											</Button>
@@ -382,8 +382,8 @@ export function CharactersSettings() {
 
 			{/* Panel derecho: Formulario y Preview */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="py-2 px-3">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="px-3 py-2">
 						<div className="flex items-center justify-between">
 							<div>
 								<CardTitle className="text-sm">{isEditing ? 'Editar Personaje' : 'Nuevo Personaje'}</CardTitle>
@@ -396,74 +396,74 @@ export function CharactersSettings() {
 							<div className="flex gap-1">
 								{isEditing && selectedCharacter && (
 									<>
-										<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleReset}>
+										<Button className="h-7 text-xs" onClick={handleReset} size="sm" variant="outline">
 											Cancelar
 										</Button>
 										<Button
-											variant="destructive"
-											size="sm"
 											className="h-7 text-xs"
 											onClick={() => handleDeleteCharacter(selectedCharacter.id)}
+											size="sm"
+											variant="destructive"
 										>
-											<Trash className="h-3 w-3 mr-1" />
+											<Trash className="mr-1 h-3 w-3" />
 											Eliminar
 										</Button>
 									</>
 								)}
-								<Button type="submit" size="sm" className="h-7 text-xs" form="character-form">
-									<Save className="h-3 w-3 mr-1" />
+								<Button className="h-7 text-xs" form="character-form" size="sm" type="submit">
+									<Save className="mr-1 h-3 w-3" />
 									{isEditing ? 'Guardar' : 'Crear'}
 								</Button>
 							</div>
 						</div>
 					</CardHeader>
-					<CardContent className="p-3 flex-1 overflow-hidden">
+					<CardContent className="flex-1 overflow-hidden p-3">
 						<ScrollArea className="h-full pr-3">
-							<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+							<div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-2">
 								<div className="space-y-3">
 									<CreateCharacterForm
 										character={selectedCharacter}
 										isEditing={isEditing}
-										onCreated={handleCharacterCreated}
-										onUpdated={handleCharacterUpdated}
 										onCancel={handleReset}
+										onCreated={handleCharacterCreated}
 										onPreview={handlePreview}
+										onUpdated={handleCharacterUpdated}
 									/>
 								</div>
-								<div className="hidden lg:flex flex-col items-center justify-start">
-									<h3 className="text-xs font-medium mb-2">Vista Previa</h3>
+								<div className="hidden flex-col items-center justify-start lg:flex">
+									<h3 className="mb-2 font-medium text-xs">Vista Previa</h3>
 									<div className="w-[220px] transition-all duration-300">
 										{previewData || selectedCharacter ? (
-											<div className="flex flex-col items-center p-4 border rounded-lg bg-background">
+											<div className="flex flex-col items-center rounded-lg border bg-background p-4">
 												<div
-													className="w-16 h-16 mb-3 rounded-full flex items-center justify-center text-white"
+													className="mb-3 flex h-16 w-16 items-center justify-center rounded-full text-white"
 													style={{ backgroundColor: previewData?.color || selectedCharacter?.color || '#3b82f6' }}
 												>
 													<span className="text-xl">{previewData?.emoji || selectedCharacter?.emoji || '👤'}</span>
 												</div>
-												<h3 className="text-lg font-medium text-center">
+												<h3 className="text-center font-medium text-lg">
 													{previewData?.name || selectedCharacter?.name || 'Nuevo Personaje'}
 												</h3>
 
-												<div className="flex flex-wrap gap-2 mt-3 justify-center">
+												<div className="mt-3 flex flex-wrap justify-center gap-2">
 													{(previewData?.race || selectedCharacter?.race) && (
-														<Badge variant="secondary" className="text-xs">
+														<Badge className="text-xs" variant="secondary">
 															{previewData?.race || selectedCharacter?.race}
 														</Badge>
 													)}
 													{(previewData?.class || selectedCharacter?.class) && (
-														<Badge variant="outline" className="text-xs">
+														<Badge className="text-xs" variant="outline">
 															{previewData?.class || selectedCharacter?.class}
 														</Badge>
 													)}
 												</div>
 
-												<p className="text-center text-muted-foreground mt-3 text-sm">
+												<p className="mt-3 text-center text-muted-foreground text-sm">
 													{previewData?.description || selectedCharacter?.description || 'Sin descripción'}
 												</p>
 
 												{(previewData?.category || selectedCharacter?.category) && (
-													<p className="mt-3 text-xs text-muted-foreground">
+													<p className="mt-3 text-muted-foreground text-xs">
 														Categoría: {previewData?.category || selectedCharacter?.category}
 													</p>
 												)}
@@ -473,9 +473,9 @@ export function CharactersSettings() {
 												)}
 											</div>
 										) : (
-											<div className="flex flex-col items-center justify-center h-[300px] bg-muted/50 rounded-lg border border-dashed">
+											<div className="flex h-[300px] flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50">
 												<Users className="h-7 w-7 text-muted-foreground/50" />
-												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
+												<p className="mt-2 text-[10px] text-muted-foreground">Vista previa</p>
 											</div>
 										)}
 									</div>

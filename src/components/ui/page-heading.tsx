@@ -38,11 +38,11 @@ export default function PageHeading({
 			<div className="flex items-center justify-between">
 				<div className="space-y-1">
 					{backLink && (
-						<Button variant="link" className="pl-0 text-muted-foreground" asChild>
+						<Button asChild className="pl-0 text-muted-foreground" variant="link">
 							<Link to={backLink}>← Volver</Link>
 						</Button>
 					)}
-					<h1 className={cn('text-3xl font-bold tracking-tight', titleClassName)}>{title}</h1>
+					<h1 className={cn('font-bold text-3xl tracking-tight', titleClassName)}>{title}</h1>
 					{description && <p className={cn('text-lg text-muted-foreground', descriptionClassName)}>{description}</p>}
 				</div>
 				{actions && <div className={cn('flex items-center space-x-2', actionsClassName)}>{actions}</div>}

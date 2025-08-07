@@ -4,11 +4,11 @@ import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } 
 export function ContextMenuTest() {
 	return (
 		<div className="p-8">
-			<h1 className="text-2xl font-bold mb-4">Context Menu Test</h1>
+			<h1 className="mb-4 font-bold text-2xl">Context Menu Test</h1>
 
 			<ContextMenu>
 				<ContextMenuTrigger asChild>
-					<div className="w-32 h-32 bg-blue-500 text-white flex items-center justify-center cursor-pointer rounded-lg">
+					<div className="flex h-32 w-32 cursor-pointer items-center justify-center rounded-lg bg-blue-500 text-white">
 						Right-click me!
 					</div>
 				</ContextMenuTrigger>

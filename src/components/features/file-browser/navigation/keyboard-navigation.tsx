@@ -69,7 +69,7 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
 	const scrollToItem = useCallback(
 		(itemId: string) => {
 			const element = getItemElement(itemId);
-			if (!element || !containerRef.current) return;
+			if (!(element && containerRef.current)) return;
 
 			const container = containerRef.current;
 			const containerRect = container.getBoundingClientRect();

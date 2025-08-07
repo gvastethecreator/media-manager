@@ -252,7 +252,7 @@ export const accessibilityConfigSchema = z.object({
 
 // Esquema para configuración de rendimiento
 export const performanceConfigSchema = z.object({
-	maxRenderItems: z.number().min(10).max(10000).default(1000),
+	maxRenderItems: z.number().min(10).max(10_000).default(1000),
 	virtualization: z.boolean().default(true),
 	virtualizationBuffer: z.number().min(1).max(20).default(5),
 	lazyThumbnails: z.boolean().default(true),
@@ -261,7 +261,7 @@ export const performanceConfigSchema = z.object({
 		.object({
 			thumbnails: z.boolean().default(true),
 			maxSize: z.number().min(10).max(1000).default(100),
-			ttl: z.number().min(60000).max(86400000).default(3600000),
+			ttl: z.number().min(60_000).max(86_400_000).default(3_600_000),
 		})
 		.default({}),
 	debounce: z

@@ -31,7 +31,7 @@ export function WorldItemsView(_props: ViewProps) {
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<p className="text-destructive">Error: {error.message}</p>
 			</div>
 		);
@@ -44,9 +44,9 @@ export function WorldItemsView(_props: ViewProps) {
 	if (!worldItems || worldItems.length === 0) {
 		return (
 			<EmptyState
+				description="Los objetos del mundo te ayudan a organizar tus imágenes. Crea un nuevo objeto del mundo desde el panel de configuración."
 				icon={Box}
 				title="No hay objetos del mundo"
-				description="Los objetos del mundo te ayudan a organizar tus imágenes. Crea un nuevo objeto del mundo desde el panel de configuración."
 			/>
 		);
 	}
@@ -54,15 +54,15 @@ export function WorldItemsView(_props: ViewProps) {
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 					{worldItems.map((worldItem, index) => (
 						<motion.div
-							key={worldItem.id}
-							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
+							initial={{ opacity: 0, y: 20 }}
+							key={worldItem.id}
 							transition={{ delay: index * 0.1 }}
 						>
-							<WorldItemCard worldItemId={worldItem.id} onClick={handleWorldItemClick} className="h-full" />
+							<WorldItemCard className="h-full" onClick={handleWorldItemClick} worldItemId={worldItem.id} />
 						</motion.div>
 					))}
 				</div>

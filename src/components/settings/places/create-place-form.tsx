@@ -171,7 +171,7 @@ export function CreatePlaceForm({
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+			<form className="space-y-6" onSubmit={form.handleSubmit(onSubmit)}>
 				<div className="space-y-4">
 					<div className="grid grid-cols-1 gap-4">
 						{/* Nombre */}
@@ -199,8 +199,8 @@ export function CreatePlaceForm({
 									<FormLabel>Descripción</FormLabel>
 									<FormControl>
 										<Textarea
-											placeholder="Descripción breve del lugar"
 											className="min-h-24 resize-none"
+											placeholder="Descripción breve del lugar"
 											{...field}
 											value={field.value ?? ''}
 										/>
@@ -221,7 +221,7 @@ export function CreatePlaceForm({
 								<FormItem>
 									<FormLabel>Emoji</FormLabel>
 									<FormControl>
-										<EmojiPicker value={field.value} onChange={field.onChange} onEmojiSelect={field.onChange} />
+										<EmojiPicker onChange={field.onChange} onEmojiSelect={field.onChange} value={field.value} />
 									</FormControl>
 									<FormDescription>Un emoji representativo</FormDescription>
 									<FormMessage />
@@ -237,7 +237,7 @@ export function CreatePlaceForm({
 								<FormItem>
 									<FormLabel>Color</FormLabel>
 									<FormControl>
-										<ColorPicker value={field.value} onChange={field.onChange} />
+										<ColorPicker onChange={field.onChange} value={field.value} />
 									</FormControl>
 									<FormDescription>Color representativo</FormDescription>
 									<FormMessage />
@@ -342,7 +342,7 @@ export function CreatePlaceForm({
 								<FormItem>
 									<FormLabel>Población</FormLabel>
 									<FormControl>
-										<Input type="number" placeholder="0" {...field} value={field.value ?? ''} />
+										<Input placeholder="0" type="number" {...field} value={field.value ?? ''} />
 									</FormControl>
 									<FormDescription>Número estimado de habitantes</FormDescription>
 									<FormMessage />
@@ -389,8 +389,8 @@ export function CreatePlaceForm({
 								<FormLabel>Lore</FormLabel>
 								<FormControl>
 									<Textarea
-										placeholder="Lore e historias del lugar..."
 										className="min-h-32 resize-none"
+										placeholder="Lore e historias del lugar..."
 										{...field}
 										value={field.value ?? ''}
 									/>
@@ -409,8 +409,8 @@ export function CreatePlaceForm({
 								<FormLabel>Historia</FormLabel>
 								<FormControl>
 									<Textarea
-										placeholder="Historia del lugar..."
 										className="min-h-32 resize-none"
+										placeholder="Historia del lugar..."
 										{...field}
 										value={field.value ?? ''}
 									/>
@@ -456,11 +456,11 @@ export function CreatePlaceForm({
 				</div>
 				<div className="flex justify-end gap-2">
 					{onCancel && (
-						<Button type="button" variant="outline" onClick={onCancel}>
+						<Button onClick={onCancel} type="button" variant="outline">
 							Cancelar
 						</Button>
 					)}
-					<Button type="submit" disabled={createPlaceMutation.isPending || updatePlaceMutation.isPending}>
+					<Button disabled={createPlaceMutation.isPending || updatePlaceMutation.isPending} type="submit">
 						{isEditing ? 'Guardar Cambios' : 'Crear Lugar'}
 					</Button>
 				</div>

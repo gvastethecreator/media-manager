@@ -62,16 +62,16 @@ export function AlbumContentView() {
 		toggleItemSelection: handleItemSelection,
 		currentContainerId: currentAlbumId ?? null,
 		containerName: album?.name ?? null,
-		emptyState: !currentAlbumId
+		emptyState: currentAlbumId
 			? {
-					icon: Album,
-					title: 'No hay álbum seleccionado',
-					description: 'Selecciona un álbum para ver su contenido.',
-				}
-			: {
 					icon: Album,
 					title: 'Álbum sin imágenes',
 					description: 'Este álbum no tiene imágenes asociadas.',
+				}
+			: {
+					icon: Album,
+					title: 'No hay álbum seleccionado',
+					description: 'Selecciona un álbum para ver su contenido.',
 				},
 		onRefresh: loadAlbumImages,
 	};
@@ -94,7 +94,7 @@ export function AlbumContentView() {
 		<ContentViewProvider {...contentProps}>
 			<BaseContentView>
 				<div className="p-4">
-					<h2 className="text-lg font-semibold mb-4">{album?.name || 'Álbum'}</h2>
+					<h2 className="mb-4 font-semibold text-lg">{album?.name || 'Álbum'}</h2>
 					{/* Contenido del álbum */}
 				</div>
 			</BaseContentView>

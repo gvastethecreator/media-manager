@@ -56,11 +56,11 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 		return (
 			<div className="flex flex-col items-center justify-center py-12">
 				<EmptyState
+					description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
 					icon={Users}
 					title="Error al cargar personajes"
-					description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
 				/>
-				<Button onClick={handleRetry} className="mt-4">
+				<Button className="mt-4" onClick={handleRetry}>
 					Reintentar
 				</Button>
 			</div>
@@ -70,59 +70,49 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 	return (
 		<ScrollArea className={className || 'flex-1'}>
 			<div className="p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Personajes</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Personajes</h2>
 
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
 					{showForm ? 'Cancelar' : 'Crear Personaje'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nuevo Personaje</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nuevo Personaje</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="characterName">Nombre</Label>
 							<Input
 								id="characterName"
-								value={newCharacterName}
 								onChange={(e) => setNewCharacterName(e.target.value)}
 								placeholder="Nombre del personaje"
+								value={newCharacterName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="characterDescription">Descripción</Label>
 							<Textarea
 								id="characterDescription"
-								value={newCharacterDescription}
 								onChange={(e) => setNewCharacterDescription(e.target.value)}
 								placeholder="Descripción del personaje (opcional)"
+								value={newCharacterDescription}
 							/>
 						</div>
 						<Button onClick={handleCreateCharacter}>Guardar Personaje</Button>
 					</div>
 				)}
 
-				{!characters.length && !isLoading && !showForm ? (
-					<EmptyState
-						icon={Users}
-						title="Sin personajes"
-						description={
-							localSearch
-								? `No se encontraron personajes que coincidan con "${localSearch}"`
-								: 'No hay personajes disponibles'
-						}
-					/>
-				) : (
+				{characters.length || isLoading || showForm ? (
 					<motion.div
-						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
-						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
+						className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+						initial={{ opacity: 0, y: 20 }}
 						transition={{ duration: 0.3 }}
 					>
 						{characters.map((character, index) => (
 							<motion.div
-								key={character.id}
-								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
+								initial={{ opacity: 0, y: 20 }}
+								key={character.id}
 								transition={{ duration: 0.3, delay: index * 0.05 }}
 							>
 								<CharacterCard
@@ -134,6 +124,16 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 							</motion.div>
 						))}
 					</motion.div>
+				) : (
+					<EmptyState
+						description={
+							localSearch
+								? `No se encontraron personajes que coincidan con "${localSearch}"`
+								: 'No hay personajes disponibles'
+						}
+						icon={Users}
+						title="Sin personajes"
+					/>
 				)}
 			</div>
 		</ScrollArea>

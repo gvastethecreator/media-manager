@@ -149,7 +149,7 @@ export async function getFolderStats(folderId: string) {
 }
 
 /**
- * 🆕 Procesa archivos con emisión de eventos de progreso
+ * 🆕 Procesa archivos con progreso detallado en 3 etapas
  */
 async function processFilesWithProgress(
 	filePaths: string[],
@@ -158,7 +158,6 @@ async function processFilesWithProgress(
 	emitEvents: boolean
 ): Promise<EntityCreationStats> {
 	const totalFiles = filePaths.length;
-	let processedFiles = 0;
 	const stats: EntityCreationStats = {
 		totalFiles: filePaths.length,
 		processed: 0,
@@ -167,57 +166,191 @@ async function processFilesWithProgress(
 		errors: [],
 	};
 
-	// Procesar archivos en lotes para evitar sobrecarga
+	if (totalFiles === 0) {
+		return stats;
+	}
+
 	const batchSize = 10;
 	const progressUpdateInterval = Math.max(1, Math.floor(totalFiles / 20)); // Actualizar progreso cada 5%
+	const startTime = Date.now();
+
+	// Emitir progreso inicial
+	if (emitEvents) {
+		await emitProgress('folder:progress', {
+			folderId,
+			status: 'processing',
+			isProcessing: true,
+			progress: 0,
+			totalFiles,
+			filesProcessed: 0,
+			message: 'Iniciando reindexado en 3 etapas...',
+			phase: 'starting',
+			timestamp: Date.now(),
+		});
+	}
+
+	// ETAPA 1: Indexación de archivos y creación de entidades básicas (0-33%)
+	console.log('🔧 [ETAPA 1/3] Iniciando indexación de archivos...');
+	const entityIds: string[] = [];
+	let stage1ProcessedFiles = 0;
 
 	for (let i = 0; i < filePaths.length; i += batchSize) {
 		const batch = filePaths.slice(i, i + batchSize);
 
-		// Procesar lote
 		for (const filePath of batch) {
 			try {
-				const result = await fileEntityMapper.createEntityFromFile(filePath, folderId);
-				if (result) {
+				const result = await fileEntityMapper.createBasicEntityFromFile(filePath, folderId);
+				stats.processed++;
+
+				if (result.success) {
 					stats.successful++;
+					if (result.entityId) {
+						entityIds.push(result.entityId);
+					}
+				} else if (result.error !== 'Entity already exists') {
+					stats.failed++;
+					stats.errors.push({ file: filePath, error: result.error || 'Unknown error' });
 				} else {
 					stats.successful++;
 				}
-				stats.processed++;
 			} catch (error) {
-				console.error(`Error procesando archivo ${filePath}:`, error);
 				stats.failed++;
 				stats.errors.push({ file: filePath, error: (error as Error).message || 'Unknown error' });
 				stats.processed++;
 			}
 
-			processedFiles++;
+			stage1ProcessedFiles++;
 
-			// Emitir progreso cada cierto intervalo
-			if (emitEvents && (processedFiles % progressUpdateInterval === 0 || processedFiles === totalFiles)) {
-				const progress = Math.round((processedFiles / totalFiles) * 100);
+			// Emitir progreso de etapa 1 (0-33%)
+			if (emitEvents && (stage1ProcessedFiles % progressUpdateInterval === 0 || stage1ProcessedFiles === totalFiles)) {
+				const stageProgress = Math.round((stage1ProcessedFiles / totalFiles) * 100);
+				const overallProgress = Math.round(stageProgress / 3);
+
 				await emitProgress('folder:progress', {
 					folderId,
-					status: processedFiles < totalFiles ? 'processing' : 'completed',
-					isProcessing: processedFiles < totalFiles,
-					progress,
+					status: 'processing',
+					isProcessing: true,
+					progress: overallProgress,
 					totalFiles,
-					filesProcessed: processedFiles,
-					message:
-						processedFiles === totalFiles
-							? 'Indexación completada'
-							: `Procesando archivos... ${processedFiles}/${totalFiles}`,
-					phase: processedFiles === totalFiles ? 'complete' : 'processing',
+					filesProcessed: stage1ProcessedFiles,
+					message: `Etapa 1/3: Indexando archivos... ${stage1ProcessedFiles}/${totalFiles}`,
+					phase: 'scanning',
 					timestamp: Date.now(),
 				});
 			}
 		}
 
-		// Pequeña pausa entre lotes para evitar bloqueo
+		// Pequeña pausa entre lotes
 		if (i + batchSize < filePaths.length) {
 			await new Promise((resolve) => setTimeout(resolve, 10));
 		}
 	}
+
+	// ETAPA 2: Extracción de metadata (33-66%)
+	console.log('🔍 [ETAPA 2/3] Iniciando extracción de metadata...');
+	let stage2ProcessedFiles = 0;
+
+	for (let i = 0; i < filePaths.length; i += batchSize) {
+		const batch = filePaths.slice(i, i + batchSize);
+
+		for (let j = 0; j < batch.length; j++) {
+			const filePath = batch[j];
+			const entityId = entityIds[i + j];
+
+			if (entityId) {
+				try {
+					const entityType = fileEntityMapper.getEntityTypeFromExtension(path.extname(filePath));
+					await fileEntityMapper.extractMetadataForEntity(filePath, entityId, entityType);
+				} catch (error) {
+					console.warn(`⚠️ [ETAPA 2] Error extrayendo metadata de ${filePath}:`, error);
+				}
+			}
+
+			stage2ProcessedFiles++;
+
+			// Emitir progreso de etapa 2 (33-66%)
+			if (emitEvents && (stage2ProcessedFiles % progressUpdateInterval === 0 || stage2ProcessedFiles === totalFiles)) {
+				const stageProgress = Math.round((stage2ProcessedFiles / totalFiles) * 100);
+				const overallProgress = Math.round(33 + stageProgress / 3);
+
+				await emitProgress('folder:progress', {
+					folderId,
+					status: 'processing',
+					isProcessing: true,
+					progress: overallProgress,
+					totalFiles,
+					filesProcessed: stage2ProcessedFiles,
+					message: `Etapa 2/3: Extrayendo metadata... ${stage2ProcessedFiles}/${totalFiles}`,
+					phase: 'metadata',
+					timestamp: Date.now(),
+				});
+			}
+		}
+
+		// Pequeña pausa entre lotes
+		if (i + batchSize < filePaths.length) {
+			await new Promise((resolve) => setTimeout(resolve, 10));
+		}
+	}
+
+	// ETAPA 3: Procesamiento de thumbnails (66-100%)
+	console.log('🖼️ [ETAPA 3/3] Iniciando procesamiento de thumbnails...');
+	let stage3ProcessedFiles = 0;
+
+	for (let i = 0; i < filePaths.length; i += batchSize) {
+		const batch = filePaths.slice(i, i + batchSize);
+
+		for (let j = 0; j < batch.length; j++) {
+			const filePath = batch[j];
+			const entityId = entityIds[i + j];
+
+			if (entityId) {
+				try {
+					const entityType = fileEntityMapper.getEntityTypeFromExtension(path.extname(filePath));
+					await fileEntityMapper.processThumbnailForEntity(filePath, entityId, entityType);
+				} catch (error) {
+					console.warn(`⚠️ [ETAPA 3] Error procesando thumbnail de ${filePath}:`, error);
+				}
+			}
+
+			stage3ProcessedFiles++;
+
+			// Emitir progreso de etapa 3 (66-100%)
+			if (emitEvents && (stage3ProcessedFiles % progressUpdateInterval === 0 || stage3ProcessedFiles === totalFiles)) {
+				const stageProgress = Math.round((stage3ProcessedFiles / totalFiles) * 100);
+				const overallProgress = Math.round(66 + stageProgress / 3);
+
+				await emitProgress('folder:progress', {
+					folderId,
+					status: stage3ProcessedFiles === totalFiles ? 'completed' : 'processing',
+					isProcessing: stage3ProcessedFiles < totalFiles,
+					progress: overallProgress,
+					totalFiles,
+					filesProcessed: stage3ProcessedFiles,
+					message:
+						stage3ProcessedFiles === totalFiles
+							? 'Reindexado completado en 3 etapas'
+							: `Etapa 3/3: Procesando thumbnails... ${stage3ProcessedFiles}/${totalFiles}`,
+					phase: stage3ProcessedFiles === totalFiles ? 'complete' : 'processing',
+					timestamp: Date.now(),
+				});
+			}
+		}
+
+		// Pequeña pausa entre lotes
+		if (i + batchSize < filePaths.length) {
+			await new Promise((resolve) => setTimeout(resolve, 10));
+		}
+	}
+
+	const endTime = Date.now();
+	const duration = endTime - startTime;
+	console.log(`✅ Reindexado completado en ${duration}ms. Estadísticas:`, {
+		totalFiles: stats.totalFiles,
+		successful: stats.successful,
+		failed: stats.failed,
+		processed: stats.processed,
+	});
 
 	return stats;
 }
@@ -235,60 +368,81 @@ async function processSubfolders(
 ): Promise<EntityCreationStats> {
 	const totalStats: EntityCreationStats = { totalFiles: 0, processed: 0, successful: 0, failed: 0, errors: [] };
 
-	for (const directory of directories) {
-		try {
-			// Verificar si ya existe una carpeta con esta ruta
-			const existingFolder = await db.query.folders.findFirst({
-				where: eq(folders.path, directory.path),
-				columns: { id: true },
-			});
-
-			let subfolderId: string;
-
-			if (existingFolder) {
-				// La carpeta ya existe, usar su ID
-				subfolderId = existingFolder.id;
-				totalStats.successful++;
-				totalStats.processed++;
-			} else {
-				// Crear nueva carpeta
-				subfolderId = randomUUID();
-				const folderName = path.basename(directory.path);
-
-				await db.insert(folders).values({
-					id: subfolderId,
-					name: folderName,
-					path: directory.path,
-					parentId: parentFolderId,
-					totalFiles: 0,
-					totalSize: 0,
-					lastIndexed: new Date(),
-					autoReindex: false,
+	// Procesar directorios en paralelo para mejorar performance
+	const results = await Promise.allSettled(
+		directories.map(async (directory) => {
+			try {
+				// Verificar si ya existe una carpeta con esta ruta
+				const existingFolder = await db.query.folders.findFirst({
+					where: eq(folders.path, directory.path),
+					columns: { id: true },
 				});
 
-				totalStats.successful++;
-				totalStats.processed++;
-			}
+				let subfolderId: string;
 
-			// Indexar recursivamente la subcarpeta (sin emitir eventos de progreso)
-			const subfolderStats = await updateFolderStats(
-				subfolderId,
-				processedPaths,
-				maxDepth,
-				currentDepth,
-				false, // No sincronizar subcarpetas
-				false // No emitir eventos de progreso en subcarpetas
-			);
-			totalStats.totalFiles += subfolderStats.totalFiles;
-			totalStats.processed += subfolderStats.processed;
-			totalStats.successful += subfolderStats.successful;
-			totalStats.failed += subfolderStats.failed;
-			totalStats.errors.push(...subfolderStats.errors);
-		} catch (error) {
-			console.error(`Error procesando subcarpeta ${directory.path}:`, error);
+				if (existingFolder) {
+					// La carpeta ya existe, usar su ID
+					subfolderId = existingFolder.id;
+				} else {
+					// Crear nueva carpeta
+					subfolderId = randomUUID();
+					const folderName = path.basename(directory.path);
+
+					await db.insert(folders).values({
+						id: subfolderId,
+						name: folderName,
+						path: directory.path,
+						parentId: parentFolderId,
+						totalFiles: 0,
+						totalSize: 0,
+						lastIndexed: new Date(),
+						autoReindex: false,
+					});
+				}
+
+				// Indexar recursivamente la subcarpeta (sin emitir eventos de progreso)
+				const subfolderStats = await updateFolderStats(
+					subfolderId,
+					processedPaths,
+					maxDepth,
+					currentDepth,
+					false, // No sincronizar subcarpetas
+					false // No emitir eventos de progreso en subcarpetas
+				);
+
+				return {
+					success: true,
+					stats: subfolderStats,
+				};
+			} catch (error) {
+				console.error(`Error procesando subcarpeta ${directory.path}:`, error);
+				return {
+					success: false,
+					error: { file: directory.path, error: (error as Error).message || 'Unknown error' },
+				};
+			}
+		})
+	);
+
+	// Agregar estadísticas de los resultados
+	for (const result of results) {
+		if (result.status === 'fulfilled') {
+			const resultValue = result.value;
+			if (resultValue.success && resultValue.stats) {
+				totalStats.totalFiles += resultValue.stats.totalFiles;
+				totalStats.processed += resultValue.stats.processed;
+				totalStats.successful += resultValue.stats.successful;
+				totalStats.failed += resultValue.stats.failed;
+				totalStats.errors.push(...resultValue.stats.errors);
+			} else if (!resultValue.success && resultValue.error) {
+				totalStats.failed++;
+				totalStats.processed++;
+				totalStats.errors.push(resultValue.error);
+			}
+		} else {
 			totalStats.failed++;
 			totalStats.processed++;
-			totalStats.errors.push({ file: directory.path, error: (error as Error).message || 'Unknown error' });
+			totalStats.errors.push({ file: 'unknown', error: result.reason });
 		}
 	}
 
@@ -300,7 +454,14 @@ export async function updateAllFolderStats() {
 		columns: { id: true },
 	});
 
-	for (const folder of foldersData) {
-		await updateFolderStats(folder.id);
-	}
+	// Procesar carpetas en paralelo para mejorar performance
+	await Promise.allSettled(
+		foldersData.map(async (folder: { id: string }) => {
+			try {
+				await updateFolderStats(folder.id);
+			} catch (error) {
+				console.error(`Error actualizando estadísticas de carpeta ${folder.id}:`, error);
+			}
+		})
+	);
 }

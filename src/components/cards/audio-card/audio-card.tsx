@@ -136,14 +136,14 @@ export function AudioCard({
 	return (
 		<CardContainer
 			className={cn(
-				'relative overflow-hidden cursor-pointer transition-all duration-300',
+				'relative cursor-pointer overflow-hidden transition-all duration-300',
 				'bg-gradient-to-br from-background via-background/95 to-background/90',
 				'border border-border/50 hover:border-border',
 				'shadow-sm hover:shadow-lg',
-				tcgMode && 'hover:shadow-2xl hover:scale-[1.02]',
+				tcgMode && 'hover:scale-[1.02] hover:shadow-2xl',
 				isSelected && 'ring-2 ring-primary ring-offset-2',
 				isActive && 'ring-2 ring-accent ring-offset-2',
-				disabled && 'opacity-50 cursor-not-allowed',
+				disabled && 'cursor-not-allowed opacity-50',
 				compact ? 'h-32' : 'h-64',
 				className
 			)}
@@ -153,11 +153,11 @@ export function AudioCard({
 		>
 			{/* Audio element oculto */}
 			<audio
+				onEnded={() => setIsPlaying(false)}
+				onLoadedMetadata={handleLoadedMetadata}
+				onTimeUpdate={handleTimeUpdate}
 				ref={audioRef}
 				src={audio.path}
-				onTimeUpdate={handleTimeUpdate}
-				onLoadedMetadata={handleLoadedMetadata}
-				onEnded={() => setIsPlaying(false)}
 			>
 				<track kind="captions" />
 			</audio>
@@ -176,13 +176,13 @@ export function AudioCard({
 					{/* Efecto de ondas sonoras cuando reproduce */}
 					{isPlaying && (
 						<motion.div
-							className="absolute inset-0 opacity-20 pointer-events-none"
-							style={{
-								background: `radial-gradient(circle at center, ${primaryColor}40 0%, transparent 70%)`,
-							}}
 							animate={{
 								scale: [1, 1.1, 1],
 								opacity: [0.2, 0.4, 0.2],
+							}}
+							className="pointer-events-none absolute inset-0 opacity-20"
+							style={{
+								background: `radial-gradient(circle at center, ${primaryColor}40 0%, transparent 70%)`,
 							}}
 							transition={{
 								duration: 2,
@@ -194,9 +194,9 @@ export function AudioCard({
 
 					{/* Brillo en favoritos */}
 					{audio.isFavorite && (
-						<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
+						<div className="pointer-events-none absolute top-0 right-0 z-30 h-24 w-24 overflow-hidden">
 							<div
-								className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
+								className="-translate-y-8 absolute top-0 right-0 h-24 w-24 translate-x-12 rotate-45 opacity-70"
 								style={{
 									background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
 									backgroundSize: '600% 600%',
@@ -209,21 +209,21 @@ export function AudioCard({
 			)}
 
 			{/* Contenedor principal */}
-			<div className="flex flex-col h-full relative z-1">
+			<div className="relative z-1 flex h-full flex-col">
 				{/* Cabecera */}
 				<CardHeader
-					title={audio.name || 'Sin nombre'}
 					icon={<MusicIcon className="h-4 w-4" />}
 					primaryColor={primaryColor}
+					title={audio.name || 'Sin nombre'}
 				/>
 
 				{/* Contenido principal */}
 				{!compact && (
-					<div className="flex-1 p-4 flex flex-col gap-3">
+					<div className="flex flex-1 flex-col gap-3 p-4">
 						{/* Visualizador de audio */}
 						<div className="flex items-center justify-center py-4">
 							<div
-								className="relative p-6 rounded-2xl"
+								className="relative rounded-2xl p-6"
 								style={{
 									backgroundColor: `${primaryColor}20`,
 									border: `2px solid ${primaryColor}40`,
@@ -233,7 +233,7 @@ export function AudioCard({
 
 								{/* Badge del formato */}
 								<div
-									className="absolute -top-2 -right-2 px-2 py-1 rounded-md text-xs font-bold"
+									className="-top-2 -right-2 absolute rounded-md px-2 py-1 font-bold text-xs"
 									style={{
 										backgroundColor: primaryColor,
 										color: 'white',
@@ -245,12 +245,12 @@ export function AudioCard({
 								{/* Indicador de reproducción */}
 								{isPlaying && (
 									<motion.div
-										className="absolute inset-0 rounded-2xl border-2"
-										style={{ borderColor: primaryColor }}
 										animate={{
 											scale: [1, 1.1, 1],
 											opacity: [0.5, 1, 0.5],
 										}}
+										className="absolute inset-0 rounded-2xl border-2"
+										style={{ borderColor: primaryColor }}
 										transition={{
 											duration: 1,
 											repeat: Number.POSITIVE_INFINITY,
@@ -265,14 +265,14 @@ export function AudioCard({
 						{tcgMode && (
 							<div className="grid grid-cols-2 gap-2 text-xs">
 								<div
-									className="flex items-center justify-between px-2 py-1 rounded"
+									className="flex items-center justify-between rounded px-2 py-1"
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
 									<span>Duración</span>
 									<span className="font-bold">{formatTime(audio.duration || 0)}</span>
 								</div>
 								<div
-									className="flex items-center justify-between px-2 py-1 rounded"
+									className="flex items-center justify-between rounded px-2 py-1"
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
 									<span>Tamaño</span>
@@ -284,14 +284,14 @@ export function AudioCard({
 				)}
 
 				{/* Controles del reproductor */}
-				<div className="p-3 border-t border-border/20">
+				<div className="border-border/20 border-t p-3">
 					{/* Barra de progreso */}
 					<div className="mb-3">
-						<div className="flex items-center justify-between text-xs text-muted-foreground mb-1">
+						<div className="mb-1 flex items-center justify-between text-muted-foreground text-xs">
 							<span>{formatTime(currentTime)}</span>
 							<span>{formatTime(duration)}</span>
 						</div>
-						<div className="h-1 w-full rounded-full overflow-hidden bg-muted/30">
+						<div className="h-1 w-full overflow-hidden rounded-full bg-muted/30">
 							<div
 								className="h-full rounded-full transition-all duration-300"
 								style={{
@@ -308,29 +308,29 @@ export function AudioCard({
 						<div className="flex items-center gap-2">
 							{/* Botón play/pause */}
 							<button
-								type="button"
+								className="rounded-full p-2 transition-colors hover:bg-muted/50"
 								onClick={togglePlay}
-								className="p-2 rounded-full hover:bg-muted/50 transition-colors"
 								style={{ color: primaryColor }}
 								title={isPlaying ? 'Pausar' : 'Reproducir'}
+								type="button"
 							>
 								{isPlaying ? <PauseIcon className="h-4 w-4" /> : <PlayIcon className="h-4 w-4" />}
 							</button>
 
 							{/* Botón mute */}
 							<button
-								type="button"
+								className="rounded p-1 transition-colors hover:bg-muted/50"
 								onClick={toggleMute}
-								className="p-1 rounded hover:bg-muted/50 transition-colors"
 								style={{ color: primaryColor }}
 								title={isMuted ? 'Activar sonido' : 'Silenciar'}
+								type="button"
 							>
 								{isMuted ? <VolumeXIcon className="h-3.5 w-3.5" /> : <Volume2Icon className="h-3.5 w-3.5" />}
 							</button>
 						</div>
 
 						{/* Fecha de modificación */}
-						<span className="text-xs text-muted-foreground">{new Date(audio.updatedAt).toLocaleDateString()}</span>
+						<span className="text-muted-foreground text-xs">{new Date(audio.updatedAt).toLocaleDateString()}</span>
 					</div>
 				</div>
 			</div>

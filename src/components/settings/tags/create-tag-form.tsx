@@ -58,7 +58,7 @@ export function CreateTagForm({
 				color: tag.color || undefined,
 				emoji: tag.emoji || '🏷️',
 				category: tag.category as TagCategory | undefined,
-				isFavorite: tag.isFavorite || false,
+				isFavorite: tag.isFavorite,
 			});
 		}
 	}, [form, isEditing, tag]);
@@ -109,7 +109,7 @@ export function CreateTagForm({
 
 	return (
 		<Form {...form}>
-			<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+			<form className="space-y-4" onSubmit={form.handleSubmit(onSubmit)}>
 				<FormField
 					control={form.control}
 					name="name"
@@ -132,10 +132,10 @@ export function CreateTagForm({
 							<FormLabel>Emoji</FormLabel>
 							<FormControl>
 								<EmojiPicker
-									value={field.value || undefined}
-									onEmojiSelect={field.onChange}
 									compact
+									onEmojiSelect={field.onChange}
 									showLabel={false}
+									value={field.value || undefined}
 								/>
 							</FormControl>
 							<FormMessage />
@@ -150,7 +150,7 @@ export function CreateTagForm({
 						<FormItem>
 							<FormLabel>Color</FormLabel>
 							<FormControl>
-								<ColorPicker value={field.value || '#3b82f6'} onChange={field.onChange} compact showLabel={false} />
+								<ColorPicker compact onChange={field.onChange} showLabel={false} value={field.value || '#3b82f6'} />
 							</FormControl>
 							<FormMessage />
 						</FormItem>
@@ -163,7 +163,7 @@ export function CreateTagForm({
 					render={({ field }) => (
 						<FormItem>
 							<FormLabel>Categoría</FormLabel>
-							<Select onValueChange={field.onChange} defaultValue={field.value || undefined}>
+							<Select defaultValue={field.value || undefined} onValueChange={field.onChange}>
 								<FormControl>
 									<SelectTrigger>
 										<SelectValue placeholder="Selecciona una categoría" />
@@ -212,11 +212,11 @@ export function CreateTagForm({
 				/>
 
 				<div className="flex justify-end space-x-2">
-					<Button type="button" variant="outline" onClick={onCancel}>
+					<Button onClick={onCancel} type="button" variant="outline">
 						Cancelar
 					</Button>
 					{onPreview && (
-						<Button type="button" variant="secondary" onClick={() => onPreview(form.getValues())}>
+						<Button onClick={() => onPreview(form.getValues())} type="button" variant="secondary">
 							Vista previa
 						</Button>
 					)}

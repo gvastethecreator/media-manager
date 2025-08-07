@@ -329,7 +329,7 @@ export const createGroupService = async (data: CreateGroupInput): Promise<GroupW
 				id: crypto.randomUUID(),
 				name: data.name,
 				description: data.description,
-				isFavorite: data.isFavorite || false,
+				isFavorite: data.isFavorite,
 				category: data.category,
 				filters: data.filters || '[]',
 				// isActive: data.isActive !== false, // true por defecto - campo no existe en el esquema

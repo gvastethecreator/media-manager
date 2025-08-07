@@ -42,14 +42,14 @@ export function DevelopmentView(_props: ViewProps) {
 
 	return (
 		<ScrollArea className="h-full w-full">
-			<div className="p-4 space-y-4">
+			<div className="space-y-4 p-4">
 				{/* Header */}
 				<div className="flex items-center justify-between">
 					<div>
-						<h1 className="text-2xl font-bold">Panel de Desarrollo</h1>
+						<h1 className="font-bold text-2xl">Panel de Desarrollo</h1>
 						<p className="text-muted-foreground">Monitoreo y gestión del sistema</p>
 					</div>
-					<Button type="button" variant="outline" className="gap-2" onClick={handleRefresh} disabled={isLoading}>
+					<Button className="gap-2" disabled={isLoading} onClick={handleRefresh} type="button" variant="outline">
 						{isLoading ? (
 							<>
 								<Loader2 className="h-4 w-4 animate-spin" />
@@ -64,53 +64,53 @@ export function DevelopmentView(_props: ViewProps) {
 					</Button>
 				</div>
 
-				<Tabs defaultValue="services" className="space-y-4">
+				<Tabs className="space-y-4" defaultValue="services">
 					<TabsList>
-						<TabsTrigger value="services" className="gap-2">
+						<TabsTrigger className="gap-2" value="services">
 							<Server className="h-4 w-4" />
 							Servicios
 						</TabsTrigger>
-						<TabsTrigger value="features" className="gap-2">
+						<TabsTrigger className="gap-2" value="features">
 							<Code2 className="h-4 w-4" />
 							Features
 						</TabsTrigger>
-						<TabsTrigger value="issues" className="gap-2">
+						<TabsTrigger className="gap-2" value="issues">
 							<Bug className="h-4 w-4" />
 							Issues
 						</TabsTrigger>
-						<TabsTrigger value="docs" className="gap-2">
+						<TabsTrigger className="gap-2" value="docs">
 							<FileCode2 className="h-4 w-4" />
 							Documentación
 						</TabsTrigger>
-						<TabsTrigger value="folders" className="gap-2">
+						<TabsTrigger className="gap-2" value="folders">
 							<Folder className="h-4 w-4" />
 							Carpetas
 						</TabsTrigger>
-						<TabsTrigger value="tags" className="gap-2">
+						<TabsTrigger className="gap-2" value="tags">
 							<Tag className="h-4 w-4" />
 							Etiquetas
 						</TabsTrigger>
-						<TabsTrigger value="images" className="gap-2">
+						<TabsTrigger className="gap-2" value="images">
 							<Image className="h-4 w-4" />
 							Imágenes
 						</TabsTrigger>
-						<TabsTrigger value="stats" className="gap-2">
+						<TabsTrigger className="gap-2" value="stats">
 							<BarChart className="h-4 w-4" />
 							Estadísticas
 						</TabsTrigger>
-						<TabsTrigger value="tech" className="gap-2">
+						<TabsTrigger className="gap-2" value="tech">
 							<Gauge className="h-4 w-4" />
 							Métricas Técnicas
 						</TabsTrigger>
 					</TabsList>
 
-					<TabsContent value="services" className="space-y-4">
-						<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+					<TabsContent className="space-y-4" value="services">
+						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 							{services.map((service, index) => (
 								<motion.div
-									key={service.name}
-									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
+									initial={{ opacity: 0, y: 20 }}
+									key={service.name}
 									transition={{ delay: index * 0.05 }}
 								>
 									<ServiceCard service={service} />
@@ -119,13 +119,13 @@ export function DevelopmentView(_props: ViewProps) {
 						</div>
 					</TabsContent>
 
-					<TabsContent value="features" className="space-y-4">
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+					<TabsContent className="space-y-4" value="features">
+						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 							{features.map((feature, index) => (
 								<motion.div
-									key={feature.name}
-									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
+									initial={{ opacity: 0, y: 20 }}
+									key={feature.name}
 									transition={{ delay: index * 0.05 }}
 								>
 									<FeatureCard feature={feature} />
@@ -134,13 +134,13 @@ export function DevelopmentView(_props: ViewProps) {
 						</div>
 					</TabsContent>
 
-					<TabsContent value="issues" className="space-y-4">
-						<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+					<TabsContent className="space-y-4" value="issues">
+						<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
 							{issues.map((issue, index) => (
 								<motion.div
-									key={issue.id}
-									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
+									initial={{ opacity: 0, y: 20 }}
+									key={issue.id}
 									transition={{ delay: index * 0.05 }}
 								>
 									<IssueCard issue={issue} />
@@ -149,20 +149,20 @@ export function DevelopmentView(_props: ViewProps) {
 						</div>
 					</TabsContent>
 
-					<TabsContent value="docs" className="mt-4">
+					<TabsContent className="mt-4" value="docs">
 						<Card className="border-2 border-primary/10">
 							<CardContent className="p-4">
-								<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+								<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-4">
 									{DOCUMENTATION_FILES.map((doc) => (
 										<HoverCard key={doc}>
 											<HoverCardTrigger asChild>
-												<Button variant="outline" className="w-full justify-start gap-2">
+												<Button className="w-full justify-start gap-2" variant="outline">
 													<FileCode2 className="h-4 w-4" />
 													{doc}
 												</Button>
 											</HoverCardTrigger>
-											<HoverCardContent side="right" className="w-[450px] max-h-[500px] overflow-auto">
-												<h4 className="font-medium mb-2">{doc.replace('.md', '')}</h4>
+											<HoverCardContent className="max-h-[500px] w-[450px] overflow-auto" side="right">
+												<h4 className="mb-2 font-medium">{doc.replace('.md', '')}</h4>
 												<div className="prose prose-sm dark:prose-invert">
 													{documentationContent[doc] ? (
 														<MDEditor.Markdown source={documentationContent[doc]} />
@@ -180,34 +180,34 @@ export function DevelopmentView(_props: ViewProps) {
 						</Card>
 					</TabsContent>
 
-					<TabsContent value="folders" className="mt-4">
+					<TabsContent className="mt-4" value="folders">
 						<FoldersSettings />
 					</TabsContent>
 
-					<TabsContent value="tags" className="mt-4">
+					<TabsContent className="mt-4" value="tags">
 						<Card className="border-2 border-primary/10">
 							<CardContent className="p-4">
 								<div className="p-4">
-									<h3 className="text-lg font-medium">Etiquetas</h3>
+									<h3 className="font-medium text-lg">Etiquetas</h3>
 									<p className="text-muted-foreground">Gestión de etiquetas en desarrollo</p>
 								</div>
 							</CardContent>
 						</Card>
 					</TabsContent>
 
-					<TabsContent value="images" className="mt-4">
+					<TabsContent className="mt-4" value="images">
 						<Card className="border-2 border-primary/10">
 							<CardContent className="p-4">
 								<div className="p-4">
-									<h3 className="text-lg font-medium">Imágenes</h3>
+									<h3 className="font-medium text-lg">Imágenes</h3>
 									<p className="text-muted-foreground">Gestión de imágenes en desarrollo</p>
 								</div>
 							</CardContent>
 						</Card>
 					</TabsContent>
 
-					<TabsContent value="stats" className="mt-4">
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+					<TabsContent className="mt-4" value="stats">
+						<div className="grid grid-cols-1 gap-3 md:grid-cols-2">
 							<FileDistributionChart />
 							<IndexingActivityChart />
 							<ResourceUsageChart />
@@ -215,7 +215,7 @@ export function DevelopmentView(_props: ViewProps) {
 						</div>
 					</TabsContent>
 
-					<TabsContent value="tech" className="mt-4">
+					<TabsContent className="mt-4" value="tech">
 						<Card className="border-2 border-primary/10">
 							<CardContent className="p-4">
 								<SystemMetricsPanel />
@@ -225,12 +225,12 @@ export function DevelopmentView(_props: ViewProps) {
 				</Tabs>
 
 				{/* Métricas de Procesamiento */}
-				<div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+				<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 					{processingMetrics.map((metric, index) => (
 						<motion.div
-							key={metric.name}
-							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
+							initial={{ opacity: 0, y: 20 }}
+							key={metric.name}
 							transition={{ delay: index * 0.05 }}
 						>
 							<ProcessingMetricCard metric={metric} />
@@ -239,12 +239,12 @@ export function DevelopmentView(_props: ViewProps) {
 				</div>
 
 				{/* Métricas del Sistema */}
-				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+				<div className="grid grid-cols-1 gap-3 sm:grid-cols-2 md:grid-cols-3">
 					{metrics.map((metric, index) => (
 						<motion.div
-							key={metric.name}
-							initial={{ opacity: 0, y: 20 }}
 							animate={{ opacity: 1, y: 0 }}
+							initial={{ opacity: 0, y: 20 }}
+							key={metric.name}
 							transition={{ delay: index * 0.05 }}
 						>
 							<MetricCard metric={metric} />

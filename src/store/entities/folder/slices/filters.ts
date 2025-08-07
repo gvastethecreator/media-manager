@@ -67,7 +67,7 @@ export const createFolderFiltersSlice: StateCreator<CompleteFolderStore, [], [],
 				const matchesPath = folder.path.toLowerCase().includes(query);
 				const matchesTags = folder.stats.autoTags.some((tag) => tag.toLowerCase().includes(query));
 
-				if (!matchesName && !matchesDescription && !matchesPath && !matchesTags) {
+				if (!(matchesName || matchesDescription || matchesPath || matchesTags)) {
 					return false;
 				}
 			}

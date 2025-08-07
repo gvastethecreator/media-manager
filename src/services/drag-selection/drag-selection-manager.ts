@@ -161,7 +161,7 @@ export class DragSelectionManager {
 
 	// Mouse event handlers
 	private handleMouseDown(event: MouseEvent): void {
-		if (!this.config.enabled || !this.container) return;
+		if (!(this.config.enabled && this.container)) return;
 
 		// Only handle left mouse button
 		if (event.button !== 0) return;
@@ -267,7 +267,7 @@ export class DragSelectionManager {
 	}
 
 	private updateSelection(event: MouseEvent): void {
-		if (!this.state.startPoint || !this.container) return;
+		if (!(this.state.startPoint && this.container)) return;
 
 		const rect = this.container.getBoundingClientRect();
 		this.state.currentPoint = {
@@ -385,7 +385,7 @@ export class DragSelectionManager {
 	}
 
 	private updateSelectionRect(): void {
-		if (!this.state.startPoint || !this.state.currentPoint) return;
+		if (!(this.state.startPoint && this.state.currentPoint)) return;
 
 		const left = Math.min(this.state.startPoint.x, this.state.currentPoint.x);
 		const top = Math.min(this.state.startPoint.y, this.state.currentPoint.y);
@@ -396,7 +396,7 @@ export class DragSelectionManager {
 	}
 
 	private findIntersectingElements(): string[] {
-		if (!this.state.selectionRect || !this.container) return [];
+		if (!(this.state.selectionRect && this.container)) return [];
 
 		const containerRect = this.container.getBoundingClientRect();
 		const intersectingIds: string[] = [];

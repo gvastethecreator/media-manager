@@ -65,7 +65,7 @@ export function FolderProgressDetails({ status, isProcessing, className }: Folde
 					const timeSinceLastUpdate = now - lastUpdateTime;
 
 					// Solo marcar como estancado si han pasado más de 15 segundos
-					if (timeSinceLastUpdate > 15000) {
+					if (timeSinceLastUpdate > 15_000) {
 						setIsStale(true);
 						componentLogger.warn('Estado del proceso estancado:', {
 							lastUpdate: new Date(lastUpdateTime).toISOString(),
@@ -78,7 +78,7 @@ export function FolderProgressDetails({ status, isProcessing, className }: Folde
 
 					// Limpiar la referencia del temporizador
 					staleTimerRef.current = null;
-				}, 15000);
+				}, 15_000);
 			}
 		} else {
 			// Si no está procesando, asegurarse de que no esté marcado como estancado
@@ -145,8 +145,8 @@ export function FolderProgressDetails({ status, isProcessing, className }: Folde
 		const duration = Math.max(1, endTime - status.startTime);
 
 		// Formato como minutos:segundos si es relevante
-		const minutes = Math.floor(duration / 60000);
-		const seconds = Math.floor((duration % 60000) / 1000);
+		const minutes = Math.floor(duration / 60_000);
+		const seconds = Math.floor((duration % 60_000) / 1000);
 
 		if (minutes > 0) {
 			return `${minutes}m ${seconds}s`;
@@ -169,18 +169,18 @@ export function FolderProgressDetails({ status, isProcessing, className }: Folde
 	}, [status.extendedStats?.processingSpeed]);
 
 	return (
-		<div className={cn('space-y-2 animate-in fade-in', className)}>
+		<div className={cn('fade-in animate-in space-y-2', className)}>
 			{/* Barra de progreso con animación */}
 			<div className="space-y-1">
-				<div className="flex items-center justify-between mb-1">
+				<div className="mb-1 flex items-center justify-between">
 					<div className="flex items-center gap-1.5">
 						{getPhaseIcon()}
-						<span className="text-xs font-medium">{getStatusMessage()}</span>
+						<span className="font-medium text-xs">{getStatusMessage()}</span>
 
 						{isStale && !isComplete && (
 							<Badge
+								className="h-3.5 border-yellow-200 bg-yellow-50 px-1 py-0 text-[9px] text-yellow-500"
 								variant="outline"
-								className="text-[9px] h-3.5 px-1 py-0 text-yellow-500 border-yellow-200 bg-yellow-50"
 							>
 								Actualizando...
 							</Badge>
@@ -188,24 +188,24 @@ export function FolderProgressDetails({ status, isProcessing, className }: Folde
 
 						{isComplete && (
 							<Badge
+								className="h-3.5 border-emerald-200 bg-emerald-50 px-1 py-0 text-[9px] text-emerald-500"
 								variant="outline"
-								className="text-[9px] h-3.5 px-1 py-0 text-emerald-500 border-emerald-200 bg-emerald-50"
 							>
 								Completado
 							</Badge>
 						)}
 					</div>
 
-					<div className="text-xs text-muted-foreground">
+					<div className="text-muted-foreground text-xs">
 						{getProcessingTime()}
 						{status.extendedStats?.processingSpeed && !isComplete ? ` ⋅ ${getProcessingSpeed()}` : ''}
 					</div>
 				</div>
 
-				<Progress value={isComplete ? 100 : progress} className="h-1.5" />
+				<Progress className="h-1.5" value={isComplete ? 100 : progress} />
 
 				{/* Información detallada del progreso */}
-				<div className="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1.5">
+				<div className="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1">
 					{showFileCounter && (
 						<div className="text-[10px] text-muted-foreground">
 							<span className="font-medium">{status.filesProcessed}</span>
@@ -216,7 +216,7 @@ export function FolderProgressDetails({ status, isProcessing, className }: Folde
 					)}
 
 					{status.currentFile && !isComplete && (
-						<div className="text-[10px] text-muted-foreground truncate max-w-[200px]">
+						<div className="max-w-[200px] truncate text-[10px] text-muted-foreground">
 							<span>Archivo: </span>
 							<span className="font-mono">{status.currentFile.split('/').pop()}</span>
 						</div>
@@ -246,14 +246,14 @@ export function FolderProgressDetails({ status, isProcessing, className }: Folde
 			<AnimatePresence>
 				{status.errors && Array.isArray(status.errors) && status.errors.length > 0 && (
 					<motion.div
-						initial={{ opacity: 0, height: 0 }}
 						animate={{ opacity: 1, height: 'auto' }}
+						className="mt-1 rounded border border-destructive/20 bg-destructive/5 p-1 text-[10px] text-destructive"
 						exit={{ opacity: 0, height: 0 }}
-						className="text-[10px] text-destructive border border-destructive/20 rounded p-1 bg-destructive/5 mt-1"
+						initial={{ opacity: 0, height: 0 }}
 					>
 						<div className="font-medium">Errores encontrados:</div>
 						{status.errors.slice(0, 3).map((errorItem: any, index: number) => (
-							<div key={`error-${index}-${errorItem.file || index}`} className="truncate">
+							<div className="truncate" key={`error-${index}-${errorItem.file || index}`}>
 								• {errorItem.file ? errorItem.file.split('/').pop() : 'Archivo desconocido'}:{' '}
 								{errorItem.error || errorItem.message || String(errorItem)}
 							</div>

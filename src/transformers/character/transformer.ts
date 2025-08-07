@@ -235,7 +235,7 @@ export function toDrizzleCharacterCreate(character: Partial<CharacterWithStats>)
 		color: baseData.color || '#CCCCCC',
 		category: baseData.category || null,
 
-		isFavorite: baseData.isFavorite || false,
+		isFavorite: baseData.isFavorite,
 		age: baseData.age || null,
 		gender: baseData.gender || null,
 		species: baseData.species || null,

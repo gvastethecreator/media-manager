@@ -53,10 +53,7 @@ async function testDrizzleConfiguration() {
 
 		// Verificar que la tabla Profile existe
 		const hasProfileTable = dbInfo.tableNames.includes('Profile');
-		if (!hasProfileTable) {
-			console.log('⚠️ La tabla Profile no existe. Esto es normal si la DB está vacía.');
-			console.log('   Ejecuta `bun run db:reset` para poblar la base de datos.\n');
-		} else {
+		if (hasProfileTable) {
 			// Intentar consulta a la tabla profiles
 			const profileCount = await db.select().from(profiles);
 			console.log(`✅ Consulta exitosa: ${profileCount.length} perfiles encontrados`);
@@ -65,6 +62,9 @@ async function testDrizzleConfiguration() {
 				console.log(`   - Primer perfil: ${profileCount[0].name}`);
 			}
 			console.log('');
+		} else {
+			console.log('⚠️ La tabla Profile no existe. Esto es normal si la DB está vacía.');
+			console.log('   Ejecuta `bun run db:reset` para poblar la base de datos.\n');
 		}
 
 		// 4. Probar inserción de prueba (solo si hay datos)
@@ -93,10 +93,10 @@ async function testDrizzleConfiguration() {
 		console.log('   ✅ Consultas básicas: OK');
 		console.log('   ✅ Schema: OK');
 
-		if (!hasProfileTable) {
-			console.log('\n💡 Próximo paso: Ejecutar `bun run db:reset` para poblar la base de datos');
-		} else {
+		if (hasProfileTable) {
 			console.log('\n💡 Próximo paso: Comenzar migración de servicios de solo lectura');
+		} else {
+			console.log('\n💡 Próximo paso: Ejecutar `bun run db:reset` para poblar la base de datos');
 		}
 	} catch (error) {
 		console.error('❌ Error durante las pruebas:', error);

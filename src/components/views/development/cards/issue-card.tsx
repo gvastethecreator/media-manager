@@ -25,16 +25,16 @@ export function IssueCard({ issue }: { issue: Issue }) {
 	};
 
 	return (
-		<Card className="h-full border-2 border-primary/10 relative">
+		<Card className="relative h-full border-2 border-primary/10">
 			<CardContent className="p-3">
 				<div className="flex items-start gap-3">
 					<div className="mt-0.5">{getSeverityIcon()}</div>
 					<div className="flex-1">
-						<div className="flex items-center justify-between mb-1">
+						<div className="mb-1 flex items-center justify-between">
 							<h3 className="font-medium text-sm">{issue.title}</h3>
 							<StatusBadge status={issue.status} />
 						</div>
-						<p className="text-xs text-muted-foreground">{issue.description}</p>
+						<p className="text-muted-foreground text-xs">{issue.description}</p>
 					</div>
 				</div>
 			</CardContent>

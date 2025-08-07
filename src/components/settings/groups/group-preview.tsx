@@ -37,21 +37,21 @@ export function GroupPreview({ group, onEdit, onDelete, onFavoriteToggle, isDele
 		<>
 			<GroupHeader
 				emoji={group.emoji || '📂'}
-				name={group.name}
-				isFavorite={group.isFavorite}
-				onEdit={onEdit}
-				onDelete={onDelete}
-				onFavoriteToggle={onFavoriteToggle}
 				isDeleting={isDeleting}
+				isFavorite={group.isFavorite}
+				name={group.name}
+				onDelete={onDelete}
+				onEdit={onEdit}
+				onFavoriteToggle={onFavoriteToggle}
 			/>
 
 			<CardContent className="space-y-4 px-6">
 				<GroupDetails
-					description={group.description}
 					category={group.category}
+					color={group.color}
+					description={group.description}
 					shortcut={group.shortcut}
 					sortBy={group.sortBy}
-					color={group.color}
 				/>
 
 				<GroupFilters filtersString={group.filters} />
@@ -61,16 +61,16 @@ export function GroupPreview({ group, onEdit, onDelete, onFavoriteToggle, isDele
 				{/* Imagen destacada */}
 				{group.featuredImage && (
 					<div className="space-y-2">
-						<h3 className="text-sm font-medium">Imagen destacada</h3>
-						<div className="relative w-full h-32 bg-muted rounded-md overflow-hidden">
-							<img src={group.featuredImage} alt={group.name} className="w-full h-full object-cover" />
+						<h3 className="font-medium text-sm">Imagen destacada</h3>
+						<div className="relative h-32 w-full overflow-hidden rounded-md bg-muted">
+							<img alt={group.name} className="h-full w-full object-cover" src={group.featuredImage} />
 						</div>
 					</div>
 				)}
 			</CardContent>
 
 			<CardFooter className="px-6">
-				<div className="text-sm text-muted-foreground">Creado el {formatDate(group.createdAt)}</div>
+				<div className="text-muted-foreground text-sm">Creado el {formatDate(group.createdAt)}</div>
 			</CardFooter>
 		</>
 	);

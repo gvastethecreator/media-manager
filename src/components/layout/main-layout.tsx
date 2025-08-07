@@ -33,19 +33,22 @@ export const MainLayout = memo(function MainLayout() {
 	const { selectedFolderId } = useFolderStore();
 
 	// Determinar qué vistas no necesitan toolbar ni panel derecho
-	const viewsWithoutToolbarAndPanel = useMemo(() => [
-		'', // Ruta raíz (dashboard)
-		'settings',
-		'development'
-	], []);
+	const viewsWithoutToolbarAndPanel = useMemo(
+		() => [
+			'', // Ruta raíz (dashboard)
+			'settings',
+			'development',
+		],
+		[]
+	);
 
 	const currentView = useMemo(() => {
 		const pathSegments = location.pathname.split('/');
 		return pathSegments[1] || '';
 	}, [location.pathname]);
 
-	const shouldHideToolbarAndPanel = useMemo(() =>
-		viewsWithoutToolbarAndPanel.includes(currentView),
+	const shouldHideToolbarAndPanel = useMemo(
+		() => viewsWithoutToolbarAndPanel.includes(currentView),
 		[viewsWithoutToolbarAndPanel, currentView]
 	);
 
@@ -125,7 +128,7 @@ export const MainLayout = memo(function MainLayout() {
 				rightPanelRef.current.expand();
 			}
 		}
-	}, [uiPanelCollapsed]);	// Handlers para sincronizar con los componentes resizable
+	}, [uiPanelCollapsed]); // Handlers para sincronizar con los componentes resizable
 	const handleLeftPanelCollapse = (collapsed: boolean) => {
 		setIsLeftCollapsed(collapsed);
 	};
@@ -165,51 +168,47 @@ export const MainLayout = memo(function MainLayout() {
 	};
 
 	return (
-		<div className="h-screen w-full flex bg-background text-foreground">
-			<ResizablePanelGroup direction="horizontal" className="h-full">
+		<div className="flex h-screen w-full bg-background text-foreground">
+			<ResizablePanelGroup className="h-full" direction="horizontal">
 				{/* Panel de navegación izquierdo */}
 				<ResizablePanel
-					ref={leftPanelRef}
-					defaultSize={20}
-					minSize={15}
-					maxSize={35}
+					className="border-border border-r"
 					collapsedSize={2}
 					collapsible={true}
+					defaultSize={20}
+					maxSize={35}
+					minSize={15}
 					onCollapse={() => handleLeftPanelCollapse(true)}
 					onExpand={() => handleLeftPanelCollapse(false)}
-					className="border-r border-border"
+					ref={leftPanelRef}
 				>
-					<NavPanel isCollapsed={isLeftCollapsed} onToggleCollapse={toggleLeftPanel} isAnimating={isLeftAnimating} />
+					<NavPanel isAnimating={isLeftAnimating} isCollapsed={isLeftCollapsed} onToggleCollapse={toggleLeftPanel} />
 				</ResizablePanel>
 
 				<ResizableHandle withHandle />
 
 				{/* Panel central con toolbar y view container */}
-				<ResizablePanel
-					defaultSize={shouldHideToolbarAndPanel ? 80 : 50}
-					minSize={30}
-					className="flex flex-col"
-				>
-					<div className="h-full flex flex-col bg-background">
+				<ResizablePanel className="flex flex-col" defaultSize={shouldHideToolbarAndPanel ? 80 : 50} minSize={30}>
+					<div className="flex h-full flex-col bg-background">
 						{/* Toolbar superior - solo mostrar en vistas que lo necesiten */}
 						{!shouldHideToolbarAndPanel && (
-							<div className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95">
+							<div className="border-border border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/95">
 								<ViewToolbar
-									isLeftPanelCollapsed={isLeftCollapsed}
-									toggleLeftPanelCollapse={toggleLeftPanel}
-									isRightPanelCollapsed={isRightCollapsed}
-									toggleRightPanelCollapse={toggleRightPanel}
-									isRightPanelVisible={true}
 									allItemIds={allItemIds}
 									currentFolderId={currentFolderId || undefined}
-									onScanFolder={handleScanFolder}
-									onRefreshFolder={handleRefreshFolder}
+									isLeftPanelCollapsed={isLeftCollapsed}
 									isRetrying={reindexFolderMutation.isPending}
+									isRightPanelCollapsed={isRightCollapsed}
+									isRightPanelVisible={true}
+									onRefreshFolder={handleRefreshFolder}
+									onScanFolder={handleScanFolder}
+									toggleLeftPanelCollapse={toggleLeftPanel}
+									toggleRightPanelCollapse={toggleRightPanel}
 								/>
 							</div>
 						)}
 						{/* Contenido principal */}
-						<NavigationTransition className="flex-1 min-h-0 bg-background">
+						<NavigationTransition className="min-h-0 flex-1 bg-background">
 							<Outlet />
 						</NavigationTransition>
 					</div>
@@ -220,21 +219,21 @@ export const MainLayout = memo(function MainLayout() {
 					<>
 						<ResizableHandle withHandle />
 						<ResizablePanel
-							ref={rightPanelRef}
-							defaultSize={30}
-							minSize={25}
-							maxSize={55}
+							className="border-border border-l"
 							collapsedSize={0}
 							collapsible={true}
+							defaultSize={30}
+							maxSize={55}
+							minSize={25}
 							onCollapse={() => handleRightPanelCollapse(true)}
 							onExpand={() => handleRightPanelCollapse(false)}
-							className="border-l border-border"
+							ref={rightPanelRef}
 						>
 							{!isRightCollapsed && (
 								<RightPanel
+									isAnimating={isRightAnimating}
 									isCollapsed={isRightCollapsed}
 									onToggleCollapse={toggleRightPanel}
-									isAnimating={isRightAnimating}
 								/>
 							)}
 						</ResizablePanel>

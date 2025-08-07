@@ -55,55 +55,55 @@ export const WorkflowContentView: React.FC<WorkflowContentViewProps> = ({ classN
 
 	return (
 		<motion.div
-			initial={{ opacity: 0, x: 20 }}
 			animate={{ opacity: 1, x: 0 }}
-			exit={{ opacity: 0, x: -20 }}
-			transition={{ duration: 0.3 }}
 			className={className}
+			exit={{ opacity: 0, x: -20 }}
+			initial={{ opacity: 0, x: 20 }}
+			transition={{ duration: 0.3 }}
 		>
-			<div className="h-full flex flex-col">
+			<div className="flex h-full flex-col">
 				{/* Header con navegación */}
-				<div className="flex items-center gap-4 p-4 border-b border-border bg-background/50 backdrop-blur-sm">
-					<Button variant="ghost" size="icon" onClick={handleGoBack} className="shrink-0">
+				<div className="flex items-center gap-4 border-border border-b bg-background/50 p-4 backdrop-blur-sm">
+					<Button className="shrink-0" onClick={handleGoBack} size="icon" variant="ghost">
 						<ArrowLeft className="h-4 w-4" />
 					</Button>
-					<div className="flex items-center gap-3 min-w-0 flex-1">
-						<Workflow className="h-6 w-6 text-primary shrink-0" />
+					<div className="flex min-w-0 flex-1 items-center gap-3">
+						<Workflow className="h-6 w-6 shrink-0 text-primary" />
 						<div className="min-w-0 flex-1">
-							<h1 className="text-xl font-semibold truncate">{workflowData.name}</h1>
-							<p className="text-sm text-muted-foreground truncate">{workflowData.description}</p>
+							<h1 className="truncate font-semibold text-xl">{workflowData.name}</h1>
+							<p className="truncate text-muted-foreground text-sm">{workflowData.description}</p>
 						</div>
 					</div>
-					<div className="flex items-center gap-2 shrink-0">
-						<Button variant={isRunning ? 'destructive' : 'default'} size="sm" onClick={toggleWorkflow}>
+					<div className="flex shrink-0 items-center gap-2">
+						<Button onClick={toggleWorkflow} size="sm" variant={isRunning ? 'destructive' : 'default'}>
 							{isRunning ? (
 								<>
-									<Square className="h-4 w-4 mr-2" />
+									<Square className="mr-2 h-4 w-4" />
 									Detener
 								</>
 							) : (
 								<>
-									<Play className="h-4 w-4 mr-2" />
+									<Play className="mr-2 h-4 w-4" />
 									Ejecutar
 								</>
 							)}
 						</Button>
-						<Button variant="outline" size="sm">
-							<Settings className="h-4 w-4 mr-2" />
+						<Button size="sm" variant="outline">
+							<Settings className="mr-2 h-4 w-4" />
 							Configurar
 						</Button>
-						<Button variant="outline" size="sm">
-							<Download className="h-4 w-4 mr-2" />
+						<Button size="sm" variant="outline">
+							<Download className="mr-2 h-4 w-4" />
 							Exportar
 						</Button>
-						<Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+						<Button className="text-destructive hover:text-destructive" size="sm" variant="outline">
 							<Trash2 className="h-4 w-4" />
 						</Button>
 					</div>
 				</div>
 
 				{/* Contenido principal */}
-				<div className="flex-1 flex gap-4 p-4 min-h-0">
+				<div className="flex min-h-0 flex-1 gap-4 p-4">
 					{/* Panel de información lateral */}
 					<div className="w-80 shrink-0">
 						<ScrollArea className="h-full">
@@ -159,7 +159,7 @@ export const WorkflowContentView: React.FC<WorkflowContentViewProps> = ({ classN
 									<CardContent>
 										<div className="flex flex-wrap gap-2">
 											{workflowData.tags.map((tag) => (
-												<Badge key={tag} variant="outline" className="text-xs">
+												<Badge className="text-xs" key={tag} variant="outline">
 													{tag}
 												</Badge>
 											))}
@@ -173,16 +173,16 @@ export const WorkflowContentView: React.FC<WorkflowContentViewProps> = ({ classN
 										<CardTitle className="text-sm">Acciones Rápidas</CardTitle>
 									</CardHeader>
 									<CardContent className="space-y-2">
-										<Button variant="outline" size="sm" className="w-full justify-start">
-											<Edit className="h-4 w-4 mr-2" />
+										<Button className="w-full justify-start" size="sm" variant="outline">
+											<Edit className="mr-2 h-4 w-4" />
 											Editar workflow
 										</Button>
-										<Button variant="outline" size="sm" className="w-full justify-start">
-											<Settings className="h-4 w-4 mr-2" />
+										<Button className="w-full justify-start" size="sm" variant="outline">
+											<Settings className="mr-2 h-4 w-4" />
 											Configurar triggers
 										</Button>
-										<Button variant="outline" size="sm" className="w-full justify-start">
-											<Share2 className="h-4 w-4 mr-2" />
+										<Button className="w-full justify-start" size="sm" variant="outline">
+											<Share2 className="mr-2 h-4 w-4" />
 											Duplicar workflow
 										</Button>
 									</CardContent>
@@ -194,7 +194,7 @@ export const WorkflowContentView: React.FC<WorkflowContentViewProps> = ({ classN
 					<Separator orientation="vertical" />
 
 					{/* Panel de pasos del workflow */}
-					<div className="flex-1 min-w-0">
+					<div className="min-w-0 flex-1">
 						<Card className="h-full">
 							<CardHeader>
 								<CardTitle className="text-sm">Pasos del Workflow</CardTitle>
@@ -203,31 +203,31 @@ export const WorkflowContentView: React.FC<WorkflowContentViewProps> = ({ classN
 								<ScrollArea className="h-full">
 									<div className="space-y-4">
 										{workflowData.steps.map((step, index) => (
-											<div key={step.id} className="border rounded-lg p-4">
-												<div className="flex items-center justify-between mb-2">
+											<div className="rounded-lg border p-4" key={step.id}>
+												<div className="mb-2 flex items-center justify-between">
 													<div className="flex items-center gap-3">
-														<div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium">
+														<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10 font-medium text-sm">
 															{step.id}
 														</div>
 														<div>
 															<h4 className="font-medium">{step.name}</h4>
-															<p className="text-sm text-muted-foreground">Duración: {step.duration}</p>
+															<p className="text-muted-foreground text-sm">Duración: {step.duration}</p>
 														</div>
 													</div>
 													<Badge
-														variant={
-															step.status === 'completed'
-																? 'default'
-																: step.status === 'running'
-																	? 'secondary'
-																	: 'outline'
-														}
 														className={
 															step.status === 'completed'
 																? 'bg-green-100 text-green-800'
 																: step.status === 'running'
 																	? 'bg-blue-100 text-blue-800'
 																	: 'bg-gray-100 text-gray-800'
+														}
+														variant={
+															step.status === 'completed'
+																? 'default'
+																: step.status === 'running'
+																	? 'secondary'
+																	: 'outline'
 														}
 													>
 														{step.status === 'completed'
@@ -240,14 +240,14 @@ export const WorkflowContentView: React.FC<WorkflowContentViewProps> = ({ classN
 
 												{step.status === 'running' && (
 													<div className="mt-3">
-														<Progress value={65} className="h-2" />
-														<p className="text-xs text-muted-foreground mt-1">Procesando... 65% completado</p>
+														<Progress className="h-2" value={65} />
+														<p className="mt-1 text-muted-foreground text-xs">Procesando... 65% completado</p>
 													</div>
 												)}
 
 												{index < workflowData.steps.length - 1 && (
-													<div className="flex justify-center mt-4">
-														<div className="w-px h-6 bg-border" />
+													<div className="mt-4 flex justify-center">
+														<div className="h-6 w-px bg-border" />
 													</div>
 												)}
 											</div>

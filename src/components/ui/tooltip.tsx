@@ -22,12 +22,12 @@ function TooltipTrigger({ ...props }: React.ComponentProps<typeof TooltipPrimiti
 }
 
 const tooltipVariants = cva(
-	'z-50 overflow-hidden rounded-md px-3 py-1.5 text-xs animate-in fade-in-0 zoom-in-95 data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2',
+	'fade-in-0 zoom-in-95 data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95 data-[side=bottom]:slide-in-from-top-2 data-[side=left]:slide-in-from-right-2 data-[side=right]:slide-in-from-left-2 data-[side=top]:slide-in-from-bottom-2 z-50 animate-in overflow-hidden rounded-md px-3 py-1.5 text-xs data-[state=closed]:animate-out',
 	{
 		variants: {
 			variant: {
-				light: 'border border-border bg-background text-foreground shadow-md shadow-black/5',
-				dark: 'dark:border dark:border-border bg-zinc-950 text-white dark:bg-zinc-300 dark:text-black shadow-md shadow-black/5',
+				light: 'border border-border bg-background text-foreground shadow-black/5 shadow-md',
+				dark: 'bg-zinc-950 text-white shadow-black/5 shadow-md dark:border dark:border-border dark:bg-zinc-300 dark:text-black',
 			},
 		},
 		defaultVariants: {
@@ -44,9 +44,9 @@ function TooltipContent({
 }: React.ComponentProps<typeof TooltipPrimitive.Content> & VariantProps<typeof tooltipVariants>) {
 	return (
 		<TooltipPrimitive.Content
+			className={cn(tooltipVariants({ variant }), className)}
 			data-slot="tooltip-content"
 			sideOffset={sideOffset}
-			className={cn(tooltipVariants({ variant }), className)}
 			{...props}
 		/>
 	);

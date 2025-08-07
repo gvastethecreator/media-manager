@@ -18,7 +18,7 @@ export function AudioView(_props: ViewProps) {
 	// Usar el store completo para evitar errores de tipado
 	const audioStore = useAudioStore();
 	const audios = audioStore.audios || [];
-	const loading = audioStore.loading || false;
+	const loading = audioStore.loading;
 	const error = audioStore.error || null;
 	const fetchAudios = audioStore.fetchAudios;
 	const createAudio = audioStore.createAudio;
@@ -107,23 +107,23 @@ export function AudioView(_props: ViewProps) {
 	return (
 		<AudioContentView
 			audios={sortedAudios}
-			isLoading={loading}
-			error={error}
-			showForm={showForm}
-			newAudioName={newAudioName}
-			newAudioFile={newAudioFile}
 			currentAudio={currentAudio}
 			editingAudio={editingAudio}
-			setShowForm={setShowForm}
-			setNewAudioName={setNewAudioName}
-			setNewAudioFile={setNewAudioFile}
+			error={error}
+			handleAudioClick={handleAudioClick}
+			handleCreateAudio={handleCreateAudio}
+			handleDeleteAudio={handleDeleteAudio}
+			handleEditAudio={handleEditAudio}
+			handleFileChange={handleFileChange}
+			isLoading={loading}
+			newAudioFile={newAudioFile}
+			newAudioName={newAudioName}
 			setCurrentAudio={setCurrentAudio}
 			setEditingAudio={setEditingAudio}
-			handleAudioClick={handleAudioClick}
-			handleEditAudio={handleEditAudio}
-			handleDeleteAudio={handleDeleteAudio}
-			handleFileChange={handleFileChange}
-			handleCreateAudio={handleCreateAudio}
+			setNewAudioFile={setNewAudioFile}
+			setNewAudioName={setNewAudioName}
+			setShowForm={setShowForm}
+			showForm={showForm}
 		/>
 	);
 }

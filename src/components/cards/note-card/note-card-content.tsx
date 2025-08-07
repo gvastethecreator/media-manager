@@ -63,13 +63,13 @@ export function NoteCardContent({
 	return (
 		<div
 			className={cn(
-				'p-3 flex-1 overflow-hidden flex flex-col',
+				'flex flex-1 flex-col overflow-hidden p-3',
 				tcgMode ? 'bg-card/90 bg-gradient-to-b from-black/40 to-black/60' : 'bg-card/80'
 			)}
 		>
 			{/* Sección de categoría y etiquetas */}
-			<div className="mb-2 flex justify-between items-center">
-				<div className="text-xs uppercase tracking-wider font-medium" style={{ color: primaryColor }}>
+			<div className="mb-2 flex items-center justify-between">
+				<div className="font-medium text-xs uppercase tracking-wider" style={{ color: primaryColor }}>
 					{category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Nota'}
 				</div>
 				{status && (
@@ -84,48 +84,48 @@ export function NoteCardContent({
 
 			{/* Prioridad de la nota */}
 			<div className="mb-2 flex items-center">
-				<BarChart4 className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
-				<span className="text-xs text-muted-foreground">
+				<BarChart4 className="mr-1 h-3.5 w-3.5 text-muted-foreground" />
+				<span className="text-muted-foreground text-xs">
 					Prioridad: <span style={{ color: primaryColor }}>{priorityLabel}</span>
 				</span>
 			</div>
 
 			{/* Contenido de la nota */}
 			<div
-				className={cn('mb-2 text-muted-foreground', tcgMode ? 'p-2 bg-black/20 rounded border border-white/10' : '')}
+				className={cn('mb-2 text-muted-foreground', tcgMode ? 'rounded border border-white/10 bg-black/20 p-2' : '')}
 				style={{ fontSize: '0.8rem', lineHeight: '1.25rem' }}
 			>
 				{hasContent ? (
-					<div className="overflow-hidden line-clamp-4">{content}</div>
+					<div className="line-clamp-4 overflow-hidden">{content}</div>
 				) : (
-					<div className="italic opacity-70 text-center py-1">Sin contenido</div>
+					<div className="py-1 text-center italic opacity-70">Sin contenido</div>
 				)}
 			</div>
 
 			{/* Etiquetas de la nota (si hay) */}
 			{hasTags && (
 				<div className="mb-2">
-					<div className="flex items-center gap-1 text-xs opacity-70 mb-1">
+					<div className="mb-1 flex items-center gap-1 text-xs opacity-70">
 						<Tag className="h-3.5 w-3.5" />
 						<span>Etiquetas</span>
 					</div>
 					<div className="flex flex-wrap gap-1">
 						{tags.slice(0, 5).map((tag: string, _index: number) => (
 							<Badge
+								className="rounded-sm px-1.5 py-0.5 text-xs"
 								key={`tag-${renderKey}-${tag}`}
-								variant="outline"
-								className="text-xs px-1.5 py-0.5 rounded-sm"
 								style={{
 									backgroundColor: `${primaryColor}20`,
 									borderColor: `${primaryColor}40`,
 									color: primaryColor,
 								}}
+								variant="outline"
 							>
 								{tag}
 							</Badge>
 						))}
 						{Array.isArray(tags) && tags.length > 5 && (
-							<Badge variant="outline" className="text-xs px-1.5 py-0.5 opacity-70">
+							<Badge className="px-1.5 py-0.5 text-xs opacity-70" variant="outline">
 								+{tags.length - 5} más
 							</Badge>
 						)}
@@ -135,34 +135,34 @@ export function NoteCardContent({
 
 			{/* Estadísticas TCG */}
 			{tcgMode && (
-				<div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-auto py-2 px-3 bg-black/30 rounded border border-white/10">
+				<div className="mt-auto grid grid-cols-2 gap-x-4 gap-y-1 rounded border border-white/10 bg-black/30 px-3 py-2">
 					<StatBar
 						icon={<Image className="h-3.5 w-3.5" />}
 						label="Imágenes"
-						value={relationCounts?.images || 0}
 						maxValue={20}
 						primaryColor={primaryColor}
+						value={relationCounts?.images || 0}
 					/>
 					<StatBar
 						icon={<Video className="h-3.5 w-3.5" />}
 						label="Videos"
-						value={relationCounts?.videos || 0}
 						maxValue={20}
 						primaryColor={primaryColor}
+						value={relationCounts?.videos || 0}
 					/>
 					<StatBar
 						icon={<UserSquare className="h-3.5 w-3.5" />}
 						label="Personajes"
-						value={relationCounts?.characters || 0}
 						maxValue={20}
 						primaryColor={primaryColor}
+						value={relationCounts?.characters || 0}
 					/>
 					<StatBar
 						icon={<FolderOpen className="h-3.5 w-3.5" />}
 						label="Colecciones"
-						value={relationCounts?.collections || 0}
 						maxValue={20}
 						primaryColor={primaryColor}
+						value={relationCounts?.collections || 0}
 					/>
 				</div>
 			)}
@@ -171,26 +171,26 @@ export function NoteCardContent({
 			{!tcgMode && (
 				<div className="mt-auto grid grid-cols-2 gap-2 text-xs">
 					<StatCounter
-						icon={<UserSquare className="h-3.5 w-3.5" />}
 						count={relationCounts?.characters || 0}
+						icon={<UserSquare className="h-3.5 w-3.5" />}
 						label="Personajes"
 						primaryColor={primaryColor}
 					/>
 					<StatCounter
-						icon={<MapPin className="h-3.5 w-3.5" />}
 						count={relationCounts?.places || 0}
+						icon={<MapPin className="h-3.5 w-3.5" />}
 						label="Lugares"
 						primaryColor={primaryColor}
 					/>
 					<StatCounter
-						icon={<FileText className="h-3.5 w-3.5" />}
 						count={(relationCounts?.worldItems || 0) + (relationCounts?.concepts || 0)}
+						icon={<FileText className="h-3.5 w-3.5" />}
 						label="Objetos"
 						primaryColor={primaryColor}
 					/>
 					<StatCounter
-						icon={<ListChecks className="h-3.5 w-3.5" />}
 						count={relationCounts?.prompts || 0}
+						icon={<ListChecks className="h-3.5 w-3.5" />}
 						label="Prompts"
 						primaryColor={primaryColor}
 					/>
@@ -199,11 +199,11 @@ export function NoteCardContent({
 
 			{/* Relaciones adicionales en estilo TCG */}
 			{tcgMode && totalRelations > 0 && (
-				<div className="flex justify-center gap-2 mt-2">
+				<div className="mt-2 flex justify-center gap-2">
 					{relationCounts?.tags && relationCounts.tags > 0 && (
 						<Badge
+							className="flex items-center gap-1 border-white/20 bg-black/40 px-1.5 py-0.5 text-xs"
 							variant="outline"
-							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
 						>
 							<TagIcon className="h-3 w-3" />
 							<span>{relationCounts.tags}</span>
@@ -211,8 +211,8 @@ export function NoteCardContent({
 					)}
 					{relationCounts?.prompts && relationCounts.prompts > 0 && (
 						<Badge
+							className="flex items-center gap-1 border-white/20 bg-black/40 px-1.5 py-0.5 text-xs"
 							variant="outline"
-							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
 						>
 							<BookMarked className="h-3 w-3" />
 							<span>{relationCounts.prompts}</span>
@@ -220,8 +220,8 @@ export function NoteCardContent({
 					)}
 					{relationCounts?.places && relationCounts.places > 0 && (
 						<Badge
+							className="flex items-center gap-1 border-white/20 bg-black/40 px-1.5 py-0.5 text-xs"
 							variant="outline"
-							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
 						>
 							<MapPin className="h-3 w-3" />
 							<span>{relationCounts.places}</span>
@@ -229,8 +229,8 @@ export function NoteCardContent({
 					)}
 					{relationCounts?.worldItems && relationCounts.worldItems > 0 && (
 						<Badge
+							className="flex items-center gap-1 border-white/20 bg-black/40 px-1.5 py-0.5 text-xs"
 							variant="outline"
-							className="text-xs px-1.5 py-0.5 flex items-center gap-1 bg-black/40 border-white/20"
 						>
 							<HashIcon className="h-3 w-3" />
 							<span>{relationCounts.worldItems}</span>
@@ -285,8 +285,8 @@ function StatBar({
 	const percentage = value > 0 ? Math.max(5, Math.min(100, (value / maxValue) * 100)) : 0;
 
 	return (
-		<div className="flex flex-col w-full text-[0.7rem]">
-			<div className="flex items-center justify-between mb-1">
+		<div className="flex w-full flex-col text-[0.7rem]">
+			<div className="mb-1 flex items-center justify-between">
 				<div className="flex items-center gap-1">
 					{icon}
 					<span className="opacity-80">{label}</span>
@@ -295,7 +295,7 @@ function StatBar({
 					{value}
 				</span>
 			</div>
-			<div className="w-full h-1.5 bg-gray-800 rounded-full overflow-hidden">
+			<div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
 				<div
 					className="h-full rounded-full"
 					style={{

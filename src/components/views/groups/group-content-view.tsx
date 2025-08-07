@@ -22,7 +22,7 @@ export function GroupContentView(_props: ViewProps) {
 
 	if (error || !group) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<p className="text-destructive">Error: {error instanceof Error ? error.message : 'Grupo no encontrado'}</p>
 			</div>
 		);
@@ -34,27 +34,27 @@ export function GroupContentView(_props: ViewProps) {
 				{/* Cabecera del grupo */}
 				<div className="mb-6 flex items-center gap-4">
 					<div
-						className="flex items-center justify-center w-14 h-14 rounded-full text-3xl"
+						className="flex h-14 w-14 items-center justify-center rounded-full text-3xl"
 						style={{ backgroundColor: `${group.color ?? '#60a5fa'}25` }}
 					>
 						{group.emoji || '📂'}
 					</div>
 					<div>
-						<h1 className="text-2xl font-bold">{group.name}</h1>
+						<h1 className="font-bold text-2xl">{group.name}</h1>
 						{group.category && <p className="text-muted-foreground">{group.category}</p>}
 					</div>
 				</div>
 
 				{/* Descripción */}
 				{group.description && (
-					<div className="mb-6 p-4 rounded-lg bg-muted/30">
+					<div className="mb-6 rounded-lg bg-muted/30 p-4">
 						<p>{group.description}</p>
 					</div>
 				)}
 
 				{/* Pestañas para diferentes tipos de contenido */}
-				<Tabs defaultValue="all" className="mt-6">
-					<TabsList className="grid grid-cols-4 mb-4">
+				<Tabs className="mt-6" defaultValue="all">
+					<TabsList className="mb-4 grid grid-cols-4">
 						<TabsTrigger value="all">Todos</TabsTrigger>
 						<TabsTrigger value="images">
 							<ImageIcon className="mr-2 h-4 w-4" />
@@ -71,27 +71,27 @@ export function GroupContentView(_props: ViewProps) {
 					</TabsList>
 
 					{/* Contenido de cada pestaña */}
-					<TabsContent value="all" className="space-y-4">
-						<p className="text-center text-muted-foreground py-10">
+					<TabsContent className="space-y-4" value="all">
+						<p className="py-10 text-center text-muted-foreground">
 							Este grupo contiene {group.stats?.totalItems ?? 0} entidades en total
 						</p>
 					</TabsContent>
 
-					<TabsContent value="images" className="space-y-4">
-						<p className="text-center text-muted-foreground py-10">Este grupo contiene imágenes</p>
+					<TabsContent className="space-y-4" value="images">
+						<p className="py-10 text-center text-muted-foreground">Este grupo contiene imágenes</p>
 					</TabsContent>
 
-					<TabsContent value="tags" className="space-y-4">
-						<p className="text-center text-muted-foreground py-10">Este grupo contiene tags</p>
+					<TabsContent className="space-y-4" value="tags">
+						<p className="py-10 text-center text-muted-foreground">Este grupo contiene tags</p>
 					</TabsContent>
 
-					<TabsContent value="entities" className="space-y-4">
-						<p className="text-center text-muted-foreground py-10">Este grupo contiene entidades de diferentes tipos</p>
-						<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+					<TabsContent className="space-y-4" value="entities">
+						<p className="py-10 text-center text-muted-foreground">Este grupo contiene entidades de diferentes tipos</p>
+						<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
 							{/* Información general */}
-							<div className="p-4 rounded-lg border bg-background hover:shadow-md transition-shadow">
+							<div className="rounded-lg border bg-background p-4 transition-shadow hover:shadow-md">
 								<p className="font-medium">Total de elementos</p>
-								<p className="text-lg font-bold">{group.stats?.totalItems ?? 0}</p>
+								<p className="font-bold text-lg">{group.stats?.totalItems ?? 0}</p>
 							</div>
 
 							{/* Otros tipos... */}

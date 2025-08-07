@@ -92,56 +92,56 @@ export function DebugConsole() {
 					<CardDescription>Herramienta para visualizar y capturar logs de la aplicación</CardDescription>
 				</CardHeader>
 				<CardContent>
-					<div className="flex flex-wrap gap-2 mb-4">
-						<Button type="button" onClick={generateExampleLogs} variant="primary">
+					<div className="mb-4 flex flex-wrap gap-2">
+						<Button onClick={generateExampleLogs} type="button" variant="primary">
 							Generar logs de ejemplo
 						</Button>
-						<Button type="button" onClick={generateGroupedLogs} variant="outline">
+						<Button onClick={generateGroupedLogs} type="button" variant="outline">
 							Generar logs agrupados
 						</Button>
-						<Button type="button" onClick={measurePerformance} variant="outline">
+						<Button onClick={measurePerformance} type="button" variant="outline">
 							Medir rendimiento
 						</Button>
-						<Button type="button" onClick={clearLogs} variant="destructive">
+						<Button onClick={clearLogs} type="button" variant="destructive">
 							Limpiar logs
 						</Button>
 						<Button
-							type="button"
 							onClick={isCapturing ? stopCapture : startCapture}
+							type="button"
 							variant={isCapturing ? 'primary' : 'outline'}
 						>
 							{isCapturing ? 'Detener captura' : 'Iniciar captura'}
 						</Button>
 					</div>
 
-					<Tabs value={activeTab} onValueChange={setActiveTab}>
+					<Tabs onValueChange={setActiveTab} value={activeTab}>
 						<TabsList className="grid w-full grid-cols-2">
 							<TabsTrigger value="console">Consola</TabsTrigger>
 							<TabsTrigger value="help">Ayuda</TabsTrigger>
 						</TabsList>
-						<TabsContent value="console" className="mt-4">
-							<LogViewer logs={logs} onClear={clearLogs} maxHeight="500px" title="Logs Capturados" />
+						<TabsContent className="mt-4" value="console">
+							<LogViewer logs={logs} maxHeight="500px" onClear={clearLogs} title="Logs Capturados" />
 						</TabsContent>
-						<TabsContent value="help" className="mt-4">
+						<TabsContent className="mt-4" value="help">
 							<Card>
 								<CardHeader>
 									<CardTitle>Guía de Uso</CardTitle>
 								</CardHeader>
 								<CardContent className="space-y-4">
 									<div>
-										<h3 className="text-lg font-medium">Captura de Logs</h3>
-										<p className="text-sm text-muted-foreground">
+										<h3 className="font-medium text-lg">Captura de Logs</h3>
+										<p className="text-muted-foreground text-sm">
 											Esta herramienta captura automáticamente todos los logs de consola y los muestra en la interfaz.
 											Puedes detener la captura en cualquier momento con el botón &quot;Detener Captura&quot;.
 										</p>
 									</div>
 
 									<div>
-										<h3 className="text-lg font-medium">Logger Mejorado</h3>
-										<p className="text-sm text-muted-foreground">
+										<h3 className="font-medium text-lg">Logger Mejorado</h3>
+										<p className="text-muted-foreground text-sm">
 											Puedes usar el logger mejorado en tu código importando:
 										</p>
-										<pre className="bg-muted p-2 rounded-md text-xs mt-2">
+										<pre className="mt-2 rounded-md bg-muted p-2 text-xs">
 											{`import { clientLogger } from '@/lib/logger/client-logger';
 
 // Crear un logger específico para tu componente
@@ -156,11 +156,11 @@ myLogger.error('Error', { detalles: 'Información adicional' });`}
 									</div>
 
 									<div>
-										<h3 className="text-lg font-medium">Visor de Logs</h3>
-										<p className="text-sm text-muted-foreground">
+										<h3 className="font-medium text-lg">Visor de Logs</h3>
+										<p className="text-muted-foreground text-sm">
 											Puedes integrar el visor de logs en cualquier componente:
 										</p>
-										<pre className="bg-muted p-2 rounded-md text-xs mt-2">
+										<pre className="mt-2 rounded-md bg-muted p-2 text-xs">
 											{`import { LogViewer, useLogViewer } from '@/components/ui/log-viewer';
 
 // En tu componente

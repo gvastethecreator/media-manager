@@ -2,8 +2,8 @@
  * @file Test for click-to-deselect functionality in FileBrowser
  */
 
-import { fireEvent, render, screen } from '@testing-library/react';
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { fireEvent, render, screen } from '@testing-library/react';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { AnyEntityWithStats } from '@/types/migration';
 import { EntityStatsType } from '@/types/migration';
@@ -79,7 +79,7 @@ describe('FileBrowser Click-to-Deselect', () => {
 	});
 
 	it('should call clearSelection when clicking on empty space in main container', () => {
-		render(<FileBrowser entityType={EntityStatsType.IMAGE} mode="manual" items={mockItems} />);
+		render(<FileBrowser entityType={EntityStatsType.IMAGE} items={mockItems} mode="manual" />);
 
 		const container = screen.getByTestId('file-browser-container');
 
@@ -90,7 +90,7 @@ describe('FileBrowser Click-to-Deselect', () => {
 	});
 
 	it('should not call clearSelection when clicking on an item', () => {
-		render(<FileBrowser entityType={EntityStatsType.IMAGE} mode="manual" items={mockItems} />);
+		render(<FileBrowser entityType={EntityStatsType.IMAGE} items={mockItems} mode="manual" />);
 
 		// Find an entity card (this might need adjustment based on actual DOM structure)
 		const entityCards = screen.getAllByRole('button');
@@ -118,7 +118,7 @@ describe('FileBrowser Click-to-Deselect', () => {
 				})),
 			}));
 
-			render(<FileBrowser entityType={EntityStatsType.IMAGE} mode="manual" items={mockItems} />);
+			render(<FileBrowser entityType={EntityStatsType.IMAGE} items={mockItems} mode="manual" />);
 
 			const container = screen.getByTestId('file-browser-container');
 			fireEvent.click(container);

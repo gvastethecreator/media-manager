@@ -52,14 +52,14 @@ export function CreatePropertyForm({
 			name: 'emoji' as const,
 			label: 'Emoji',
 			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => (
-				<EmojiPicker value={value} onEmojiSelect={onChange} compact showLabel={false} />
+				<EmojiPicker compact onEmojiSelect={onChange} showLabel={false} value={value} />
 			),
 		},
 		{
 			name: 'color' as const,
 			label: 'Color',
 			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => (
-				<ColorPicker value={value} onChange={onChange} compact showLabel={false} />
+				<ColorPicker compact onChange={onChange} showLabel={false} value={value} />
 			),
 		},
 		{
@@ -67,11 +67,11 @@ export function CreatePropertyForm({
 			label: 'Descripción',
 			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => (
 				<textarea
-					placeholder="Descripción de la propiedad..."
-					value={value || ''}
+					className="w-full resize-none rounded border p-2 text-xs"
 					onChange={(e) => onChange(e.target.value)}
+					placeholder="Descripción de la propiedad..."
 					rows={3}
-					className="text-xs resize-none w-full border rounded p-2"
+					value={value || ''}
 				/>
 			),
 		},
@@ -102,19 +102,19 @@ export function CreatePropertyForm({
 	};
 
 	return (
-		<DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+		<DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
 			<DialogHeader>
 				<DialogTitle>{property ? 'Editar propiedad' : 'Crear nueva propiedad'}</DialogTitle>
 			</DialogHeader>
 
 			<DynamicCreateForm
-				optionalFields={optionalFields}
 				onSubmit={handleSubmit}
+				optionalFields={optionalFields}
 				submitLabel={isEditing ? 'Guardar cambios' : 'Crear propiedad'}
 			/>
 
 			<DialogFooter>
-				<Button variant="outline" type="button" onClick={onCancel}>
+				<Button onClick={onCancel} type="button" variant="outline">
 					Cancelar
 				</Button>
 			</DialogFooter>

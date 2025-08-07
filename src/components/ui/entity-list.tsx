@@ -303,12 +303,12 @@ export function EntityList({
 		if (paginatedItems.length === 0) {
 			return (
 				emptyState || (
-					<div className="w-full flex flex-col items-center justify-center py-12 text-center">
+					<div className="flex w-full flex-col items-center justify-center py-12 text-center">
 						<div className="mb-4 rounded-full bg-muted p-3">
 							<Search className="h-6 w-6 text-muted-foreground" />
 						</div>
-						<h3 className="text-lg font-medium">No se encontraron elementos</h3>
-						<p className="text-sm text-muted-foreground mt-1">Intenta ajustar tus filtros o búsqueda</p>
+						<h3 className="font-medium text-lg">No se encontraron elementos</h3>
+						<p className="mt-1 text-muted-foreground text-sm">Intenta ajustar tus filtros o búsqueda</p>
 					</div>
 				)
 			);
@@ -332,8 +332,8 @@ export function EntityList({
 						onClick: () => handleItemClick(item.id),
 						className: cn(isSelected && allowSelection && 'ring-2 ring-primary', item.className),
 						compact: viewType === 'compact',
-						tcgMode: tcgMode,
-						isSelected: isSelected,
+						tcgMode,
+						isSelected,
 						onDoubleClick: onItemDoubleClick ? () => onItemDoubleClick(item.id) : undefined,
 					};
 
@@ -348,18 +348,18 @@ export function EntityList({
 
 					return (
 						<motion.div
-							key={item.id}
-							initial={{ opacity: 0, y: 10 }}
 							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, scale: 0.9 }}
-							layout
 							className="relative"
+							exit={{ opacity: 0, scale: 0.9 }}
+							initial={{ opacity: 0, y: 10 }}
+							key={item.id}
+							layout
 						>
 							<EntityCard {...cardProps} />
 
 							{/* Indicador de selección */}
 							{isSelected && allowSelection && (
-								<div className="absolute top-2 right-2 z-10 w-6 h-6 bg-primary text-primary-foreground rounded-full flex items-center justify-center">
+								<div className="absolute top-2 right-2 z-10 flex h-6 w-6 items-center justify-center rounded-full bg-primary text-primary-foreground">
 									<span className="text-xs">✓</span>
 								</div>
 							)}
@@ -374,37 +374,37 @@ export function EntityList({
 	return (
 		<div className={cn('w-full space-y-4', className)}>
 			{/* Encabezado con título y acciones */}
-			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+			<div className="flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
 				<div>
-					<h2 className="text-2xl font-bold">{title}</h2>
+					<h2 className="font-bold text-2xl">{title}</h2>
 					{description && <p className="text-muted-foreground">{description}</p>}
 				</div>
 
 				{/* Opciones de visualización */}
 				{allowViewChange && (
 					<div className="flex items-center">
-						<div className="bg-background border rounded-md p-1 flex">
+						<div className="flex rounded-md border bg-background p-1">
 							<Button
-								variant={viewType === 'grid' ? 'default' : 'ghost'}
-								size="sm"
 								className="h-8 px-2"
 								onClick={() => setViewType('grid')}
+								size="sm"
+								variant={viewType === 'grid' ? 'default' : 'ghost'}
 							>
 								<LayoutGrid className="h-4 w-4" />
 							</Button>
 							<Button
-								variant={viewType === 'list' ? 'default' : 'ghost'}
-								size="sm"
 								className="h-8 px-2"
 								onClick={() => setViewType('list')}
+								size="sm"
+								variant={viewType === 'list' ? 'default' : 'ghost'}
 							>
 								<ListIcon className="h-4 w-4" />
 							</Button>
 							<Button
-								variant={viewType === 'compact' ? 'default' : 'ghost'}
-								size="sm"
 								className="h-8 px-2"
 								onClick={() => setViewType('compact')}
+								size="sm"
+								variant={viewType === 'compact' ? 'default' : 'ghost'}
 							>
 								<Rows className="h-4 w-4" />
 							</Button>
@@ -414,16 +414,16 @@ export function EntityList({
 			</div>
 
 			{/* Barra de búsqueda y filtros */}
-			<div className="flex flex-col sm:flex-row gap-4">
+			<div className="flex flex-col gap-4 sm:flex-row">
 				{showSearch && (
 					<div className="relative flex-1">
-						<Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+						<Search className="absolute top-2.5 left-2.5 h-4 w-4 text-muted-foreground" />
 						<Input
-							type="search"
-							placeholder={searchPlaceholder}
 							className="pl-8"
-							value={searchTerm}
 							onChange={(e) => setSearchTerm(e.target.value)}
+							placeholder={searchPlaceholder}
+							type="search"
+							value={searchTerm}
 						/>
 					</div>
 				)}
@@ -431,7 +431,7 @@ export function EntityList({
 				{showFilters && (
 					<div className="flex items-center gap-2">
 						{/* Selector de ordenación */}
-						<Select value={selectedSort} onValueChange={setSelectedSort}>
+						<Select onValueChange={setSelectedSort} value={selectedSort}>
 							<SelectTrigger className="w-[140px]">
 								<SelectValue placeholder="Ordenar por" />
 							</SelectTrigger>
@@ -446,9 +446,9 @@ export function EntityList({
 
 						{/* Botón para mostrar filtros adicionales */}
 						<Button
-							variant={showFiltersPanel ? 'default' : 'outline'}
-							size="icon"
 							onClick={() => setShowFiltersPanel(!showFiltersPanel)}
+							size="icon"
+							variant={showFiltersPanel ? 'default' : 'outline'}
 						>
 							<SlidersHorizontal className="h-4 w-4" />
 						</Button>
@@ -458,25 +458,25 @@ export function EntityList({
 
 			{/* Panel de filtros expandible */}
 			{showFiltersPanel && showFilters && (
-				<div className="bg-muted/40 p-4 rounded-md grid gap-4 grid-cols-1 sm:grid-cols-2">
+				<div className="grid grid-cols-1 gap-4 rounded-md bg-muted/40 p-4 sm:grid-cols-2">
 					{/* Filtros de categoría */}
 					{categoryFilters.length > 0 && (
 						<div>
-							<h4 className="text-sm font-medium mb-2">Categorías</h4>
+							<h4 className="mb-2 font-medium text-sm">Categorías</h4>
 							<div className="flex flex-wrap gap-2">
 								<Badge
-									variant={selectedCategoryFilter === 'all' ? 'default' : 'outline'}
 									className="cursor-pointer"
 									onClick={() => setSelectedCategoryFilter('all')}
+									variant={selectedCategoryFilter === 'all' ? 'default' : 'outline'}
 								>
 									Todas
 								</Badge>
 								{categoryFilters.map((category) => (
 									<Badge
-										key={category}
-										variant={selectedCategoryFilter === category ? 'default' : 'outline'}
 										className="cursor-pointer"
+										key={category}
 										onClick={() => setSelectedCategoryFilter(category)}
+										variant={selectedCategoryFilter === category ? 'default' : 'outline'}
 									>
 										{category}
 									</Badge>
@@ -488,21 +488,21 @@ export function EntityList({
 					{/* Filtros de etiquetas */}
 					{tagFilters.length > 0 && (
 						<div>
-							<h4 className="text-sm font-medium mb-2">Etiquetas</h4>
+							<h4 className="mb-2 font-medium text-sm">Etiquetas</h4>
 							<div className="flex flex-wrap gap-2">
 								<Badge
-									variant={selectedTagFilter === 'all' ? 'default' : 'outline'}
 									className="cursor-pointer"
 									onClick={() => setSelectedTagFilter('all')}
+									variant={selectedTagFilter === 'all' ? 'default' : 'outline'}
 								>
 									Todas
 								</Badge>
 								{tagFilters.map((tag) => (
 									<Badge
-										key={tag}
-										variant={selectedTagFilter === tag ? 'default' : 'outline'}
 										className="cursor-pointer"
+										key={tag}
 										onClick={() => setSelectedTagFilter(tag)}
+										variant={selectedTagFilter === tag ? 'default' : 'outline'}
 									>
 										{tag}
 									</Badge>
@@ -515,13 +515,13 @@ export function EntityList({
 
 			{/* Barra de información y selección */}
 			{(allowSelection || filteredItems.length > 0) && (
-				<div className="flex justify-between items-center text-sm text-muted-foreground">
+				<div className="flex items-center justify-between text-muted-foreground text-sm">
 					<div>{filteredItems.length} elementos encontrados</div>
 
 					{allowSelection && selectedIds.length > 0 && (
 						<div className="flex items-center gap-2">
 							<span>{selectedIds.length} seleccionados</span>
-							<Button size="sm" variant="ghost" onClick={clearSelection}>
+							<Button onClick={clearSelection} size="sm" variant="ghost">
 								Limpiar
 							</Button>
 						</div>
@@ -534,12 +534,12 @@ export function EntityList({
 
 			{/* Paginación */}
 			{pagination && totalPages > 1 && (
-				<div className="flex justify-center items-center gap-2 mt-6">
+				<div className="mt-6 flex items-center justify-center gap-2">
 					<Button
-						variant="outline"
-						size="icon"
-						onClick={() => handlePageChange(currentPage - 1)}
 						disabled={currentPage === 1}
+						onClick={() => handlePageChange(currentPage - 1)}
+						size="icon"
+						variant="outline"
 					>
 						<ChevronLeft className="h-4 w-4" />
 					</Button>
@@ -561,11 +561,11 @@ export function EntityList({
 
 							return (
 								<Button
+									className="mx-1 h-8 w-8 p-0"
 									key={`page-${pageNum}`}
-									variant={currentPage === pageNum ? 'default' : 'outline'}
-									size="sm"
-									className="mx-1 w-8 h-8 p-0"
 									onClick={() => handlePageChange(pageNum)}
+									size="sm"
+									variant={currentPage === pageNum ? 'default' : 'outline'}
 								>
 									{pageNum}
 								</Button>
@@ -574,10 +574,10 @@ export function EntityList({
 					</div>
 
 					<Button
-						variant="outline"
-						size="icon"
-						onClick={() => handlePageChange(currentPage + 1)}
 						disabled={currentPage === totalPages}
+						onClick={() => handlePageChange(currentPage + 1)}
+						size="icon"
+						variant="outline"
 					>
 						<ChevronRight className="h-4 w-4" />
 					</Button>

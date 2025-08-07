@@ -374,7 +374,7 @@ export function importPromptFromJSON(content: string): PromptBase | null {
 		const parsed = JSON.parse(content);
 
 		// Verificar campos mínimos requeridos
-		if (!parsed.name || !parsed.content) {
+		if (!(parsed.name && parsed.content)) {
 			throw new Error('El JSON no contiene un prompt válido (faltan name o content)');
 		}
 
@@ -391,7 +391,7 @@ export function importPromptFromJSON(content: string): PromptBase | null {
 			content: parsed.content,
 			category: parsed.category || null,
 
-			isFavorite: parsed.isFavorite || false,
+			isFavorite: parsed.isFavorite,
 			totalImages: 0,
 			totalVideos: 0,
 			type: parsed.type || null,

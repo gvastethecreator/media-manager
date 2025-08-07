@@ -314,7 +314,7 @@ export const createPromptService = async (data: PromptCreateInput): Promise<Prom
 				color: data.color,
 				category: data.category,
 
-				isFavorite: data.isFavorite || false,
+				isFavorite: data.isFavorite,
 				type: data.type,
 				content: data.content,
 				parameters: data.parameters,

@@ -9,8 +9,8 @@ import { z } from 'zod';
 export const dbConfigSchema = z.object({
 	url: z.string().url('URL de base de datos inválida'),
 	maxConnections: z.number().min(1).max(100).default(10),
-	connectionTimeout: z.number().min(1000).max(60000).default(10000),
-	queryTimeout: z.number().min(1000).max(30000).default(5000),
+	connectionTimeout: z.number().min(1000).max(60_000).default(10_000),
+	queryTimeout: z.number().min(1000).max(30_000).default(5000),
 	logLevel: z.enum(['debug', 'info', 'warn', 'error']).default('info'),
 	enableLogging: z.boolean().default(false),
 });
@@ -21,7 +21,7 @@ export type DbConfig = z.infer<typeof dbConfigSchema>;
 export const defaultDbConfig: DbConfig = {
 	url: process.env.DATABASE_URL || 'file:./db.sqlite',
 	maxConnections: 10,
-	connectionTimeout: 10000,
+	connectionTimeout: 10_000,
 	queryTimeout: 5000,
 	logLevel: 'info',
 	enableLogging: process.env.NODE_ENV === 'development',

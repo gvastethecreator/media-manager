@@ -20,7 +20,7 @@ const viewLogger = clientLogger.withContext('JsonFilesView');
 
 const MemoizedJsonFileCard = React.memo(
 	({ jsonFile, onJsonFileClick }: { jsonFile: JsonFileWithStats; onJsonFileClick: () => void }) => (
-		<JsonFileCard jsonFileId={jsonFile.id} onClick={onJsonFileClick} className="h-full" />
+		<JsonFileCard className="h-full" jsonFileId={jsonFile.id} onClick={onJsonFileClick} />
 	),
 	(prevProps, nextProps) =>
 		prevProps.jsonFile.id === nextProps.jsonFile.id &&
@@ -110,7 +110,7 @@ export function JsonFilesView(_props: ViewProps) {
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<p className="text-destructive">Error: {error}</p>
 			</div>
 		);
@@ -123,31 +123,31 @@ export function JsonFilesView(_props: ViewProps) {
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Archivos JSON</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Archivos JSON</h2>
 
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
 					{showForm ? 'Cancelar' : 'Crear Archivo JSON'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nuevo Archivo JSON</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nuevo Archivo JSON</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="jsonFileName">Nombre</Label>
 							<Input
 								id="jsonFileName"
-								value={newJsonFileName}
 								onChange={(e) => setNewJsonFileName(e.target.value)}
 								placeholder="Nombre del archivo JSON"
+								value={newJsonFileName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="jsonFileContent">Contenido JSON</Label>
 							<Textarea
 								id="jsonFileContent"
-								value={newJsonFileContent}
 								onChange={(e) => setNewJsonFileContent(e.target.value)}
 								placeholder='Contenido JSON (ej: { "key": "value" })'
+								value={newJsonFileContent}
 							/>
 						</div>
 						<Button onClick={handleCreateJsonFile}>Guardar Archivo JSON</Button>
@@ -156,24 +156,24 @@ export function JsonFilesView(_props: ViewProps) {
 
 				{(!sortedJsonFiles || sortedJsonFiles.length === 0) && !loading && !showForm ? (
 					<EmptyState
+						description="Sube archivos JSON para comenzar a usar el editor."
 						icon={Braces}
 						title="No hay archivos JSON"
-						description="Sube archivos JSON para comenzar a usar el editor."
 					/>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 						{sortedJsonFiles?.map((jsonFile: JsonFileWithStats, index: number) => {
 							const onJsonFileClick = () => handleJsonFileClick(jsonFile);
 							return (
 								<motion.div
-									key={jsonFile.id}
-									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
-									transition={{ delay: index * 0.1 }}
 									className="perspective-1000"
+									initial={{ opacity: 0, y: 20 }}
+									key={jsonFile.id}
+									transition={{ delay: index * 0.1 }}
 								>
 									<div
-										className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
+										className="h-full w-full transition-all duration-300 ease-in-out hover:z-10 hover:scale-[1.03] active:scale-[0.98]"
 										data-json-file-id={jsonFile.id}
 									>
 										<MemoizedJsonFileCard jsonFile={jsonFile} onJsonFileClick={onJsonFileClick} />

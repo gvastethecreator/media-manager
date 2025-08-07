@@ -396,8 +396,8 @@ export function EntityForm({
 			case 'text':
 				return (
 					<FormField
-						key={field.name}
 						control={form.control}
+						key={field.name}
 						name={field.name}
 						render={({ field: formField }) => (
 							<FormItem className={cn('space-y-2', field.fullWidth ? 'col-span-2' : '')}>
@@ -420,8 +420,8 @@ export function EntityForm({
 			case 'textarea':
 				return (
 					<FormField
-						key={field.name}
 						control={form.control}
+						key={field.name}
 						name={field.name}
 						render={({ field: formField }) => (
 							<FormItem className={cn('space-y-2', field.fullWidth ? 'col-span-2' : '')}>
@@ -430,9 +430,9 @@ export function EntityForm({
 									<Textarea
 										placeholder={field.placeholder}
 										{...formField}
-										value={formField.value || ''}
-										rows={field.props?.rows || 3}
 										className={cn(form.formState.errors[field.name] && 'border-destructive')}
+										rows={field.props?.rows || 3}
+										value={formField.value || ''}
 										{...field.props}
 									/>
 								</FormControl>
@@ -446,13 +446,13 @@ export function EntityForm({
 			case 'select':
 				return (
 					<FormField
-						key={field.name}
 						control={form.control}
+						key={field.name}
 						name={field.name}
 						render={({ field: formField }) => (
 							<FormItem className={cn('space-y-2', field.fullWidth ? 'col-span-2' : '')}>
 								<FormLabel>{field.label}</FormLabel>
-								<Select onValueChange={formField.onChange} defaultValue={formField.value}>
+								<Select defaultValue={formField.value} onValueChange={formField.onChange}>
 									<FormControl>
 										<SelectTrigger>
 											<SelectValue placeholder={field.placeholder || `Seleccionar ${field.label.toLowerCase()}`} />
@@ -476,8 +476,8 @@ export function EntityForm({
 			case 'switch':
 				return (
 					<FormField
-						key={field.name}
 						control={form.control}
+						key={field.name}
 						name={field.name}
 						render={({ field: formField }) => (
 							<FormItem
@@ -503,8 +503,8 @@ export function EntityForm({
 			case 'color':
 				return (
 					<FormField
-						key={field.name}
 						control={form.control}
+						key={field.name}
 						name={field.name}
 						render={({ field: formField }) => (
 							<FormItem className={cn('space-y-2', field.fullWidth ? 'col-span-2' : '')}>
@@ -514,14 +514,14 @@ export function EntityForm({
 										<FormControl>
 											<div className="flex items-center gap-2">
 												<div
-													className="h-5 w-5 rounded-md border cursor-pointer"
+													className="h-5 w-5 cursor-pointer rounded-md border"
 													style={{ backgroundColor: formField.value }}
 												/>
 												<Input
-													value={formField.value}
+													className="w-20 font-mono"
 													onChange={formField.onChange}
 													placeholder="#RRGGBB"
-													className="w-20 font-mono"
+													value={formField.value}
 												/>
 											</div>
 										</FormControl>
@@ -540,14 +540,14 @@ export function EntityForm({
 			case 'emoji':
 				return (
 					<FormField
-						key={field.name}
 						control={form.control}
+						key={field.name}
 						name={field.name}
 						render={({ field: formField }) => (
 							<FormItem className={cn('space-y-2', field.fullWidth ? 'col-span-2' : '')}>
 								<FormLabel>{field.label}</FormLabel>
 								<FormControl>
-									<EmojiPicker value={formField.value} onChange={formField.onChange} />
+									<EmojiPicker onChange={formField.onChange} value={formField.value} />
 								</FormControl>
 								{field.description && <FormDescription>{field.description}</FormDescription>}
 								<FormMessage />
@@ -566,8 +566,8 @@ export function EntityForm({
 	const formContainerStyles = cn(
 		className,
 		'space-y-6',
-		formStyle === 'compact' && 'max-w-md mx-auto',
-		formStyle === 'card' && 'bg-card rounded-lg border shadow p-6'
+		formStyle === 'compact' && 'mx-auto max-w-md',
+		formStyle === 'card' && 'rounded-lg border bg-card p-6 shadow'
 	);
 
 	return (
@@ -575,30 +575,30 @@ export function EntityForm({
 			<div className={formContainerStyles}>
 				{/* Encabezado del formulario */}
 				{(title || description) && (
-					<div className="space-y-1.5 mb-6">
-						{title && <h2 className="text-2xl font-bold">{title}</h2>}
+					<div className="mb-6 space-y-1.5">
+						{title && <h2 className="font-bold text-2xl">{title}</h2>}
 						{description && <p className="text-muted-foreground">{description}</p>}
 					</div>
 				)}
 
-				<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+				<form className="space-y-6" onSubmit={form.handleSubmit(handleSubmit)}>
 					{/* Grid de campos */}
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-6">{sortedFields.map(renderField)}</div>
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2">{sortedFields.map(renderField)}</div>
 
 					{/* Botones de acción */}
 					<div className="flex justify-end gap-3 pt-2">
 						{onCancel && (
-							<Button type="button" variant="outline" onClick={handleCancel} disabled={isSubmitting || isLoading}>
+							<Button disabled={isSubmitting || isLoading} onClick={handleCancel} type="button" variant="outline">
 								{cancelLabel}
 							</Button>
 						)}
 
-						<Button type="submit" disabled={isSubmitting || isLoading} className="min-w-24">
+						<Button className="min-w-24" disabled={isSubmitting || isLoading} type="submit">
 							{isSubmitting || isLoading ? (
 								<motion.div
 									animate={{ rotate: 360 }}
+									className="h-4 w-4 rounded-full border-2 border-current border-t-transparent"
 									transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
-									className="h-4 w-4 border-2 border-current border-t-transparent rounded-full"
 								/>
 							) : (
 								submitLabel
@@ -609,12 +609,12 @@ export function EntityForm({
 
 				{/* Confirmación antes de enviar (esto podría expandirse a un componente de diálogo) */}
 				{showConfirmation && (
-					<div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-						<div className="bg-card p-6 rounded-lg shadow-lg max-w-md w-full">
-							<h3 className="text-lg font-medium mb-4">Confirmar acción</h3>
+					<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+						<div className="w-full max-w-md rounded-lg bg-card p-6 shadow-lg">
+							<h3 className="mb-4 font-medium text-lg">Confirmar acción</h3>
 							<p className="mb-6">{confirmMessage}</p>
 							<div className="flex justify-end gap-3">
-								<Button variant="outline" onClick={() => setShowConfirmation(false)}>
+								<Button onClick={() => setShowConfirmation(false)} variant="outline">
 									Cancelar
 								</Button>
 								<Button onClick={() => form.handleSubmit(handleSubmit)()}>Confirmar</Button>

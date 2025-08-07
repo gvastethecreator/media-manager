@@ -154,12 +154,19 @@ export function TagCard({
 	// Render
 	return (
 		<motion.article
+			aria-label={`Etiqueta: ${name}`}
 			className={cn(
-				'flex flex-col overflow-hidden border-border relative z-0',
-				disabled && 'opacity-70 pointer-events-none',
-				interactive && !disabled && 'cursor-pointer hover:shadow-lg transition-shadow duration-300',
+				'relative z-0 flex flex-col overflow-hidden border-border',
+				disabled && 'pointer-events-none opacity-70',
+				interactive && !disabled && 'cursor-pointer transition-shadow duration-300 hover:shadow-lg',
 				className
 			)}
+			data-tag-id={id}
+			onClick={disabled || !interactive ? undefined : onClick}
+			onKeyDown={handleKeyDown}
+			onMouseEnter={() => setIsHovered(true)}
+			onMouseLeave={() => setIsHovered(false)}
+			role={onClick && interactive ? 'button' : 'article'}
 			style={{
 				background: 'rgba(0, 0, 0, 0.05)',
 				border: tcgMode ? `1px solid ${cardColor}60` : undefined,
@@ -168,22 +175,15 @@ export function TagCard({
 				boxShadow: tcgMode ? `0 0 ${rarityGlow}px ${cardColor}30` : undefined,
 				...style,
 			}}
+			tabIndex={disabled || !interactive || !onClick ? -1 : 0}
 			whileHover={!disabled && interactive ? { y: -5 } : {}}
 			whileTap={!disabled && interactive && onClick ? { scale: 0.98 } : {}}
-			onClick={disabled || !interactive ? undefined : onClick}
-			onKeyDown={handleKeyDown}
-			tabIndex={disabled || !interactive || !onClick ? -1 : 0}
-			role={onClick && interactive ? 'button' : 'article'}
-			aria-label={`Etiqueta: ${name}`}
-			data-tag-id={id}
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
 			{...rest}
 		>
 			{/* Card Container con efecto TCG */}
 			<div
 				className={cn(
-					'rounded-xl h-full w-full overflow-hidden transition-all duration-300 ease-out',
+					'h-full w-full overflow-hidden rounded-xl transition-all duration-300 ease-out',
 					tcgMode && 'shadow-md',
 					isHovered && tcgMode && 'scale-[1.01]'
 				)}
@@ -195,7 +195,7 @@ export function TagCard({
 				{tcgMode && (
 					<>
 						<div
-							className="absolute inset-0 opacity-0 hover:opacity-30 transition-opacity duration-300 pointer-events-none"
+							className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-30"
 							style={{
 								backgroundImage: `
 									linear-gradient(125deg,
@@ -212,13 +212,13 @@ export function TagCard({
 
 						{/* Sello de rareza */}
 						<div
-							className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-24 h-24 opacity-10 pointer-events-none"
+							className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/4 left-1/2 h-24 w-24 opacity-10"
 							style={{
 								background: `radial-gradient(circle, ${rarityColor}50 0%, transparent 70%)`,
 							}}
 						>
-							<div className="w-full h-full flex items-center justify-center">
-								<Tag className="w-10 h-10" style={{ color: rarityColor }} />
+							<div className="flex h-full w-full items-center justify-center">
+								<Tag className="h-10 w-10" style={{ color: rarityColor }} />
 							</div>
 						</div>
 
@@ -237,64 +237,64 @@ export function TagCard({
 				)}
 
 				{/* Estructura principal de la tarjeta */}
-				<div className="flex flex-col h-full">
+				<div className="flex h-full flex-col">
 					{/* Cabecera con nombre e icono */}
 					<TagCardHeader
-						name={name}
-						emoji={emoji ?? '🏷️'}
-						color={cardColor}
 						category={category as TagCategory}
-						rarity={calculatedRarity}
-						isFavorite={isFavorite}
-						tcgMode={tcgMode}
+						color={cardColor}
 						compact={compact}
+						emoji={emoji ?? '🏷️'}
+						isFavorite={isFavorite}
+						name={name}
+						rarity={calculatedRarity}
+						tcgMode={tcgMode}
 					/>
 
 					{/* Sección de imágenes */}
 					<TagCardImages
-						tagId={id}
-						primaryColor={cardColor}
-						secondaryColor={secondaryColor}
-						rarity={calculatedRarity}
-						featuredImage={processedFeaturedImage}
-						tcgMode={tcgMode}
 						compact={compact}
+						featuredImage={processedFeaturedImage}
+						primaryColor={cardColor}
+						rarity={calculatedRarity}
+						secondaryColor={secondaryColor}
+						tagId={id}
+						tcgMode={tcgMode}
 					/>
 
 					{/* Contenido principal */}
 					<TagCardContent
-						description={description}
-						shortcut={shortcut}
-						primaryColor={cardColor}
-						secondaryColor={secondaryColor}
-						rarity={calculatedRarity}
-						tcgMode={tcgMode}
-						imagesCount={imagesCount}
-						videosCount={videosCount}
 						albumsCount={albumsCount}
-						collectionsCount={collectionsCount}
 						charactersCount={charactersCount}
-						placesCount={placesCount}
-						worldItemsCount={worldItemsCount}
+						collectionsCount={collectionsCount}
 						conceptsCount={conceptsCount}
-						promptsCount={promptsCount}
-						notesCount={notesCount}
-						wildcardsCount={wildcardsCount}
-						propertiesCount={propertiesCount}
+						description={description}
 						groupsCount={groupsCount}
+						imagesCount={imagesCount}
+						notesCount={notesCount}
+						placesCount={placesCount}
+						primaryColor={cardColor}
+						promptsCount={promptsCount}
+						propertiesCount={propertiesCount}
+						rarity={calculatedRarity}
+						secondaryColor={secondaryColor}
+						shortcut={shortcut}
+						tcgMode={tcgMode}
+						videosCount={videosCount}
+						wildcardsCount={wildcardsCount}
+						worldItemsCount={worldItemsCount}
 					/>
 
 					{/* Pie de tarjeta */}
 					<TagCardFooter
-						createdAt={createdAt}
-						updatedAt={updatedAt}
-						primaryColor={cardColor}
-						secondaryColor={secondaryColor}
-						rarity={calculatedRarity}
-						isFavorite={isFavorite}
-						tcgMode={tcgMode}
 						compact={compact}
+						createdAt={createdAt}
 						imagesCount={imagesCount}
+						isFavorite={isFavorite}
+						primaryColor={cardColor}
+						rarity={calculatedRarity}
+						secondaryColor={secondaryColor}
+						tcgMode={tcgMode}
+						updatedAt={updatedAt}
 						videosCount={videosCount}
 					/>
 				</div>

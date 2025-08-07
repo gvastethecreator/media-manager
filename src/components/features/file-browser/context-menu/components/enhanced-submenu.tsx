@@ -72,7 +72,7 @@ export const EnhancedSubmenu = memo<EnhancedSubmenuProps>(function EnhancedSubme
 		// Agrupar por categorías
 		const favorites = filtered.filter((item) => item.isFavorite);
 		const recents = filtered.filter((item) => !item.isFavorite && item.isRecent);
-		const others = filtered.filter((item) => !item.isFavorite && !item.isRecent);
+		const others = filtered.filter((item) => !(item.isFavorite || item.isRecent));
 
 		return {
 			favorites,
@@ -115,7 +115,7 @@ export const EnhancedSubmenu = memo<EnhancedSubmenuProps>(function EnhancedSubme
 
 			<ContextMenuSubContent className="w-64 p-2">
 				{/* Barra de búsqueda */}
-				<SubmenuSearch searchTerm={searchTerm} onSearchChange={setSearchTerm} className="mb-2" />
+				<SubmenuSearch className="mb-2" onSearchChange={setSearchTerm} searchTerm={searchTerm} />
 
 				{isLoading ? (
 					<div className="flex items-center justify-center py-4">
@@ -127,12 +127,12 @@ export const EnhancedSubmenu = memo<EnhancedSubmenuProps>(function EnhancedSubme
 						{favorites.length > 0 && (
 							<>
 								<ContextMenuGroup>
-									<div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Favoritos</div>
+									<div className="px-2 py-1.5 font-medium text-muted-foreground text-xs">Favoritos</div>
 									{favorites.map((item) => (
 										<ContextMenuItem
+											className="flex items-center gap-2"
 											key={item.id}
 											onClick={() => handleSelect(item)}
-											className="flex items-center gap-2"
 										>
 											{item.emoji && <span>{item.emoji}</span>}
 											<span className={cn('flex-1 truncate', item.color && `text-[${item.color}]`)}>{item.name}</span>
@@ -147,12 +147,12 @@ export const EnhancedSubmenu = memo<EnhancedSubmenuProps>(function EnhancedSubme
 						{recents.length > 0 && (
 							<>
 								<ContextMenuGroup>
-									<div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">Recientes</div>
+									<div className="px-2 py-1.5 font-medium text-muted-foreground text-xs">Recientes</div>
 									{recents.map((item) => (
 										<ContextMenuItem
+											className="flex items-center gap-2"
 											key={item.id}
 											onClick={() => handleSelect(item)}
-											className="flex items-center gap-2"
 										>
 											{item.emoji && <span>{item.emoji}</span>}
 											<span className={cn('flex-1 truncate', item.color && `text-[${item.color}]`)}>{item.name}</span>
@@ -166,26 +166,25 @@ export const EnhancedSubmenu = memo<EnhancedSubmenuProps>(function EnhancedSubme
 						{/* Otros */}
 						{others.length > 0 ? (
 							<ContextMenuGroup>
-								{!favorites.length && !recents.length && (
-									<div className="px-2 py-1.5 text-xs font-medium text-muted-foreground">{title}</div>
+								{!(favorites.length || recents.length) && (
+									<div className="px-2 py-1.5 font-medium text-muted-foreground text-xs">{title}</div>
 								)}
 								{others.map((item) => (
-									<ContextMenuItem key={item.id} onClick={() => handleSelect(item)} className="flex items-center gap-2">
+									<ContextMenuItem className="flex items-center gap-2" key={item.id} onClick={() => handleSelect(item)}>
 										{item.emoji && <span>{item.emoji}</span>}
 										<span className={cn('flex-1 truncate', item.color && `text-[${item.color}]`)}>{item.name}</span>
 									</ContextMenuItem>
 								))}
 							</ContextMenuGroup>
 						) : (
-							!favorites.length &&
-							!recents.length && (
-								<div className="px-2 py-4 text-center text-sm text-muted-foreground">No se encontraron resultados</div>
+							!(favorites.length || recents.length) && (
+								<div className="px-2 py-4 text-center text-muted-foreground text-sm">No se encontraron resultados</div>
 							)
 						)}
 
 						{/* Opción de crear nuevo */}
 						<ContextMenuSeparator />
-						<ContextMenuItem onClick={handleCreate} className="flex items-center gap-2 text-primary">
+						<ContextMenuItem className="flex items-center gap-2 text-primary" onClick={handleCreate}>
 							<Plus className="h-4 w-4" />
 							<span>{searchTerm ? `Crear "${searchTerm}"` : `Crear ${title.toLowerCase()}`}</span>
 						</ContextMenuItem>

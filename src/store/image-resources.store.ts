@@ -32,7 +32,7 @@ class LRUCache<K, V> {
 			// No modificar la caché aquí. Solo retornar el valor.
 			return item.value;
 		}
-		return undefined;
+		return;
 	}
 
 	set(key: K, value: V): void {
@@ -132,7 +132,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 			if (!id || typeof id !== 'string' || id.trim() === '') {
 				resourceLogger.error('❌ Intento de cargar thumbnail con ID inválido:', { id });
-				return undefined;
+				return;
 			}
 
 			const resource = state.resources.get(id);
@@ -167,7 +167,7 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 		getOriginalUrl: async (id: string) => {
 			// Lógica similar para la URL original
-			if (!id) return undefined;
+			if (!id) return;
 			const originalUrl = getImageUrl(id, 'original');
 
 			const existingResource = get().resources.get(id);

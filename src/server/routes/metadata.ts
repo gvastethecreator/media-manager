@@ -134,7 +134,7 @@ router.put('/bulk-update', async (req, res) => {
 	try {
 		const { updates } = req.body;
 
-		if (!updates || !Array.isArray(updates)) {
+		if (!(updates && Array.isArray(updates))) {
 			res.status(400).json({
 				error: 'El campo "updates" (un array de objetos con id y data) es requerido',
 			});

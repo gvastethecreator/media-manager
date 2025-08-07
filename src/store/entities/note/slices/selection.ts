@@ -59,13 +59,13 @@ export const createSelectionSlice: StateCreator<NoteStore, [], [], SelectionSlic
 		});
 
 		// Si desactivamos el modo de selección múltiple, limpiamos la selección
-		if (!newMode) {
+		if (newMode) {
+			set({ isMultiSelectMode: newMode });
+		} else {
 			set({
 				isMultiSelectMode: newMode,
 				selectedNoteIds: [],
 			});
-		} else {
-			set({ isMultiSelectMode: newMode });
 		}
 	},
 

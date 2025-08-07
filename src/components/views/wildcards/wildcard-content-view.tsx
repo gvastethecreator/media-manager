@@ -80,25 +80,25 @@ export function WildcardContentView() {
 
 	return (
 		<motion.div
-			initial={{ opacity: 0, y: 20 }}
 			animate={{ opacity: 1, y: 0 }}
+			className="h-full space-y-6 overflow-auto p-6"
 			exit={{ opacity: 0, y: -20 }}
+			initial={{ opacity: 0, y: 20 }}
 			transition={{ duration: 0.3, ease: 'easeOut' }}
-			className="h-full p-6 space-y-6 overflow-auto"
 		>
 			{/* 📊 Header con información del wildcard */}
 			<motion.div
-				initial={{ opacity: 0, x: -20 }}
 				animate={{ opacity: 1, x: 0 }}
-				transition={{ delay: 0.1 }}
 				className="flex items-center justify-between"
+				initial={{ opacity: 0, x: -20 }}
+				transition={{ delay: 0.1 }}
 			>
 				<div className="flex items-center gap-4">
-					<div className="p-3 rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 text-white">
-						<Globe className="w-6 h-6" />
+					<div className="rounded-lg bg-gradient-to-r from-purple-500 to-pink-500 p-3 text-white">
+						<Globe className="h-6 w-6" />
 					</div>
 					<div>
-						<h1 className="text-2xl font-bold text-gray-900">{selectedWildcard.pattern}</h1>
+						<h1 className="font-bold text-2xl text-gray-900">{selectedWildcard.pattern}</h1>
 						<p className="text-gray-600">{selectedWildcard.description}</p>
 					</div>
 				</div>
@@ -106,13 +106,13 @@ export function WildcardContentView() {
 				<div className="flex items-center gap-2">
 					<Badge className={getPriorityColor(selectedWildcard.priority)}>Prioridad {selectedWildcard.priority}</Badge>
 					<Badge
-						variant={selectedWildcard.isActive ? 'default' : 'secondary'}
 						className={selectedWildcard.isActive ? 'bg-green-100 text-green-800' : ''}
+						variant={selectedWildcard.isActive ? 'default' : 'secondary'}
 					>
 						{selectedWildcard.isActive ? 'Activo' : 'Inactivo'}
 					</Badge>
-					<Button variant="outline" size="sm" onClick={() => setIsEditing(!isEditing)}>
-						<Edit3 className="w-4 h-4 mr-2" />
+					<Button onClick={() => setIsEditing(!isEditing)} size="sm" variant="outline">
+						<Edit3 className="mr-2 h-4 w-4" />
 						{isEditing ? 'Cancelar' : 'Editar'}
 					</Button>
 				</div>
@@ -120,37 +120,37 @@ export function WildcardContentView() {
 
 			{/* 🔍 Barra de búsqueda */}
 			<motion.div
-				initial={{ opacity: 0, x: -20 }}
 				animate={{ opacity: 1, x: 0 }}
-				transition={{ delay: 0.2 }}
 				className="flex items-center gap-4"
+				initial={{ opacity: 0, x: -20 }}
+				transition={{ delay: 0.2 }}
 			>
 				<div className="relative flex-1">
-					<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+					<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-gray-400" />
 					<Input
+						className="pl-10"
+						onChange={(e) => setSearchQuery(e.target.value)}
 						placeholder="Buscar archivos coincidentes..."
 						value={searchQuery}
-						onChange={(e) => setSearchQuery(e.target.value)}
-						className="pl-10"
 					/>
 				</div>
-				<Button variant="outline" size="icon">
-					<Filter className="w-4 h-4" />
+				<Button size="icon" variant="outline">
+					<Filter className="h-4 w-4" />
 				</Button>
 			</motion.div>
 
-			<div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+			<div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
 				{/* 📋 Panel de información del wildcard */}
 				<motion.div
-					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.3 }}
 					className="lg:col-span-1"
+					initial={{ opacity: 0, y: 20 }}
+					transition={{ delay: 0.3 }}
 				>
 					<Card>
 						<CardHeader>
 							<CardTitle className="flex items-center gap-2">
-								<Hash className="w-5 h-5" />
+								<Hash className="h-5 w-5" />
 								Información del Patrón
 							</CardTitle>
 							<CardDescription>Detalles y configuración del wildcard</CardDescription>
@@ -160,30 +160,30 @@ export function WildcardContentView() {
 								<>
 									{' '}
 									<div className="space-y-2">
-										<label htmlFor="wildcard-pattern" className="text-sm font-medium">
+										<label className="font-medium text-sm" htmlFor="wildcard-pattern">
 											Patrón
 										</label>
-										<Input id="wildcard-pattern" defaultValue={selectedWildcard.pattern} />
+										<Input defaultValue={selectedWildcard.pattern} id="wildcard-pattern" />
 									</div>
 									<div className="space-y-2">
-										<label htmlFor="wildcard-description" className="text-sm font-medium">
+										<label className="font-medium text-sm" htmlFor="wildcard-description">
 											Descripción
 										</label>
-										<Textarea id="wildcard-description" defaultValue={selectedWildcard.description} />
+										<Textarea defaultValue={selectedWildcard.description} id="wildcard-description" />
 									</div>
 									<div className="space-y-2">
-										<label htmlFor="wildcard-category" className="text-sm font-medium">
+										<label className="font-medium text-sm" htmlFor="wildcard-category">
 											Categoría
 										</label>
-										<Input id="wildcard-category" defaultValue={selectedWildcard.category} />
+										<Input defaultValue={selectedWildcard.category} id="wildcard-category" />
 									</div>
 									<div className="flex gap-2">
-										<Button size="sm" className="flex-1">
-											<Check className="w-4 h-4 mr-2" />
+										<Button className="flex-1" size="sm">
+											<Check className="mr-2 h-4 w-4" />
 											Guardar
 										</Button>
-										<Button variant="outline" size="sm" onClick={() => setIsEditing(false)}>
-											<X className="w-4 h-4" />
+										<Button onClick={() => setIsEditing(false)} size="sm" variant="outline">
+											<X className="h-4 w-4" />
 										</Button>
 									</div>
 								</>
@@ -191,43 +191,43 @@ export function WildcardContentView() {
 								<>
 									<div className="space-y-3">
 										<div className="flex justify-between">
-											<span className="text-sm text-gray-600">Coincidencias:</span>
+											<span className="text-gray-600 text-sm">Coincidencias:</span>
 											<Badge variant="secondary">{selectedWildcard.matchCount.toLocaleString()}</Badge>
 										</div>
 										<div className="flex justify-between">
-											<span className="text-sm text-gray-600">Categoría:</span>
+											<span className="text-gray-600 text-sm">Categoría:</span>
 											<Badge className={getCategoryColor(selectedWildcard.category)}>{selectedWildcard.category}</Badge>
 										</div>
 										<div className="flex justify-between">
-											<span className="text-sm text-gray-600">Creado:</span>
-											<span className="text-sm text-gray-900">
+											<span className="text-gray-600 text-sm">Creado:</span>
+											<span className="text-gray-900 text-sm">
 												{new Date(selectedWildcard.createdAt).toLocaleDateString()}
 											</span>
 										</div>
 										<div className="flex justify-between">
-											<span className="text-sm text-gray-600">Último uso:</span>
-											<span className="text-sm text-gray-900">
+											<span className="text-gray-600 text-sm">Último uso:</span>
+											<span className="text-gray-900 text-sm">
 												{new Date(selectedWildcard.lastUsed).toLocaleDateString()}
 											</span>
 										</div>
 									</div>
 
-									<div className="pt-4 border-t space-y-2">
+									<div className="space-y-2 border-t pt-4">
 										<Button
-											variant="outline"
-											size="sm"
 											className="w-full justify-start"
 											disabled={!selectedWildcard.isActive}
+											size="sm"
+											variant="outline"
 										>
-											<Star className="w-4 h-4 mr-2" />
+											<Star className="mr-2 h-4 w-4" />
 											Marcar como favorito
 										</Button>
 										<Button
-											variant="outline"
-											size="sm"
 											className="w-full justify-start text-red-600 hover:text-red-700"
+											size="sm"
+											variant="outline"
 										>
-											<Trash2 className="w-4 h-4 mr-2" />
+											<Trash2 className="mr-2 h-4 w-4" />
 											Eliminar patrón
 										</Button>
 									</div>
@@ -239,10 +239,10 @@ export function WildcardContentView() {
 
 				{/* 📁 Lista de archivos coincidentes */}
 				<motion.div
-					initial={{ opacity: 0, y: 20 }}
 					animate={{ opacity: 1, y: 0 }}
-					transition={{ delay: 0.4 }}
 					className="lg:col-span-2"
+					initial={{ opacity: 0, y: 20 }}
+					transition={{ delay: 0.4 }}
 				>
 					<Card>
 						<CardHeader>
@@ -260,39 +260,39 @@ export function WildcardContentView() {
 									{ name: 'screenshot_app.jpg', size: '654 KB', modified: '2024-01-16', path: '/temp/screenshots/' },
 								].map((file, index) => (
 									<motion.div
-										key={file.name}
-										initial={{ opacity: 0, x: 20 }}
 										animate={{ opacity: 1, x: 0 }}
+										className="flex cursor-pointer items-center justify-between rounded-lg border p-3 transition-colors hover:bg-gray-50"
+										initial={{ opacity: 0, x: 20 }}
+										key={file.name}
 										transition={{ delay: 0.5 + index * 0.1 }}
-										className="flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 transition-colors cursor-pointer"
 									>
 										<div className="flex items-center gap-3">
-											<div className="w-10 h-10 rounded bg-blue-100 flex items-center justify-center">
-												<span className="text-blue-600 font-semibold text-sm">
+											<div className="flex h-10 w-10 items-center justify-center rounded bg-blue-100">
+												<span className="font-semibold text-blue-600 text-sm">
 													{file.name.split('.').pop()?.toUpperCase()}
 												</span>
 											</div>
 											<div>
 												<p className="font-medium text-gray-900">{file.name}</p>
-												<p className="text-sm text-gray-500">{file.path}</p>
+												<p className="text-gray-500 text-sm">{file.path}</p>
 											</div>
 										</div>
 										<div className="text-right">
-											<p className="text-sm font-medium text-gray-700">{file.size}</p>
-											<p className="text-xs text-gray-500">{file.modified}</p>
+											<p className="font-medium text-gray-700 text-sm">{file.size}</p>
+											<p className="text-gray-500 text-xs">{file.modified}</p>
 										</div>
 									</motion.div>
 								))}
 
 								{/* 🔗 Botón para ver más */}
 								<motion.div
-									initial={{ opacity: 0 }}
 									animate={{ opacity: 1 }}
-									transition={{ delay: 1.0 }}
 									className="pt-4 text-center"
+									initial={{ opacity: 0 }}
+									transition={{ delay: 1.0 }}
 								>
 									<Button variant="outline">
-										<Plus className="w-4 h-4 mr-2" />
+										<Plus className="mr-2 h-4 w-4" />
 										Ver más coincidencias ({selectedWildcard.matchCount - 5})
 									</Button>
 								</motion.div>
@@ -304,14 +304,14 @@ export function WildcardContentView() {
 
 			{/* ⚠️ Advertencias del sistema */}
 			{!selectedWildcard.isActive && (
-				<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6 }}>
+				<motion.div animate={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 20 }} transition={{ delay: 0.6 }}>
 					<Card className="border-amber-200 bg-amber-50">
 						<CardContent className="pt-6">
 							<div className="flex items-center gap-3">
-								<AlertCircle className="w-5 h-5 text-amber-600" />
+								<AlertCircle className="h-5 w-5 text-amber-600" />
 								<div>
 									<h4 className="font-medium text-amber-900">Patrón Inactivo</h4>
-									<p className="text-sm text-amber-700">
+									<p className="text-amber-700 text-sm">
 										Este patrón wildcard está desactivado y no se aplicará en las búsquedas.
 									</p>
 								</div>

@@ -47,11 +47,11 @@ export const CardContainer = forwardRef<HTMLDivElement, CardContainerProps>(
 		};
 
 		return (
-			<div ref={ref} className={cn('card-container border-2 relative', className)} style={containerStyle} {...props}>
+			<div className={cn('card-container relative border-2', className)} ref={ref} style={containerStyle} {...props}>
 				{/* Efecto de brillo interno */}
 				{glowLevel > 0 && (
 					<div
-						className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-[4.5%]"
+						className="pointer-events-none absolute inset-0 rounded-[4.5%] opacity-0 transition-opacity duration-300 hover:opacity-100"
 						style={glowStyle}
 					/>
 				)}

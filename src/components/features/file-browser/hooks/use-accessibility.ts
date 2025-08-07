@@ -267,7 +267,7 @@ export function useAccessibility(options: UseAccessibilityOptions = {}) {
 
 	// Configurar listener de teclado
 	useEffect(() => {
-		if (!config.keyboardNavigation || !containerRef?.current) return;
+		if (!(config.keyboardNavigation && containerRef?.current)) return;
 
 		const container = containerRef.current;
 

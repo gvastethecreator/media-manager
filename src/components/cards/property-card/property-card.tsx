@@ -34,7 +34,7 @@ export function PropertyCard({ propertyId, onClick, className, showBadges = true
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
 					className
 				)}
 			>
@@ -47,7 +47,7 @@ export function PropertyCard({ propertyId, onClick, className, showBadges = true
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
 					className
 				)}
 			>
@@ -105,24 +105,24 @@ export function PropertyCard({ propertyId, onClick, className, showBadges = true
 		>
 			{/* Encabezado */}
 			<CardHeader
-				title={property.name}
-				subtitle={property.category || 'General'}
 				icon={property.emoji ? <span className="text-lg">{property.emoji}</span> : <Microscope className="h-4 w-4" />}
 				primaryColor={primaryColor}
+				subtitle={property.category || 'General'}
+				title={property.name}
 			/>
 
 			{/* Contenido */}
-			<div className="flex-1 p-3 flex flex-col">
+			<div className="flex flex-1 flex-col p-3">
 				{/* Descripción */}
 				{property.description && (
-					<p className="text-sm line-clamp-2 mb-2 text-muted-foreground">{property.description}</p>
+					<p className="mb-2 line-clamp-2 text-muted-foreground text-sm">{property.description}</p>
 				)}
 
 				{/* Estadísticas */}
 				{showBadges && (
 					<div className="mt-auto flex flex-wrap gap-1">
 						{totalRelations > 0 && (
-							<Badge variant="outline" className="text-xs" style={{ borderColor: `${primaryColor}50` }}>
+							<Badge className="text-xs" style={{ borderColor: `${primaryColor}50` }} variant="outline">
 								{totalRelations} relaciones
 							</Badge>
 						)}
@@ -136,9 +136,9 @@ export function PropertyCard({ propertyId, onClick, className, showBadges = true
 	if (onClick) {
 		return (
 			<button
+				className={cn('m-0 w-full cursor-pointer p-0 text-left', className)}
 				onClick={handleClick}
 				onKeyDown={handleKeyDown}
-				className={cn('cursor-pointer text-left p-0 m-0 w-full', className)}
 				type="button"
 			>
 				{cardContent}
@@ -148,7 +148,7 @@ export function PropertyCard({ propertyId, onClick, className, showBadges = true
 
 	// Si no hay onClick, lo envolvemos en Link para navegar a la página de la propiedad
 	return (
-		<Link to={`/dashboard/properties/${property.id}`} className="block">
+		<Link className="block" to={`/dashboard/properties/${property.id}`}>
 			{cardContent}
 		</Link>
 	);

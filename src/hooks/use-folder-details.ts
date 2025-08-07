@@ -16,6 +16,6 @@ export function useFolderDetails(folderId?: string) {
 		staleTime: 5 * 60 * 1000, // 5 minutos
 		gcTime: 10 * 60 * 1000, // 10 minutos
 		retry: 2,
-		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10000),
+		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 10_000),
 	});
 }

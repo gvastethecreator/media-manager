@@ -96,12 +96,12 @@ export function TagCardContent({
 		if (!tcgMode || count === 0) return null;
 
 		return (
-			<div className="flex items-center gap-1.5 text-xs mb-1 last:mb-0">
-				<div className="flex items-center gap-1 min-w-12">
+			<div className="mb-1 flex items-center gap-1.5 text-xs last:mb-0">
+				<div className="flex min-w-12 items-center gap-1">
 					{icon}
 					<span className="opacity-90">{label}</span>
 				</div>
-				<div className="flex-grow h-1.5 rounded-full bg-black/20 overflow-hidden">
+				<div className="h-1.5 flex-grow overflow-hidden rounded-full bg-black/20">
 					<div
 						className="h-full rounded-full"
 						style={{
@@ -120,7 +120,7 @@ export function TagCardContent({
 
 	return (
 		<div
-			className={cn('flex-grow p-3 overflow-y-auto scrollbar-thin', tcgMode && 'bg-black/5')}
+			className={cn('scrollbar-thin flex-grow overflow-y-auto p-3', tcgMode && 'bg-black/5')}
 			style={{
 				scrollbarColor: `${primaryColor} transparent`,
 				background: tcgMode ? 'rgba(0,0,0,0.03)' : 'transparent',
@@ -128,7 +128,7 @@ export function TagCardContent({
 		>
 			{/* Contenedor con borde estilizado similar a las reglas de TCG */}
 			<div
-				className="h-full flex flex-col"
+				className="flex h-full flex-col"
 				style={{
 					borderLeft: tcgMode ? `1px solid ${primaryColor}20` : 'none',
 					paddingLeft: tcgMode ? '0.5rem' : '0',
@@ -136,10 +136,10 @@ export function TagCardContent({
 			>
 				{/* Icono decorativo de etiqueta */}
 				{tcgMode && (
-					<div className="flex items-center gap-1 mb-2">
-						<TagIcon className="w-4 h-4 opacity-70" style={{ color: primaryColor }} />
+					<div className="mb-2 flex items-center gap-1">
+						<TagIcon className="h-4 w-4 opacity-70" style={{ color: primaryColor }} />
 						<div
-							className="flex-grow h-px"
+							className="h-px flex-grow"
 							style={{ background: `linear-gradient(to right, ${primaryColor}70, transparent)` }}
 						/>
 					</div>
@@ -149,7 +149,7 @@ export function TagCardContent({
 				<div
 					className={cn(
 						'mb-3 text-xs',
-						tcgMode ? 'bg-black/10 p-2 rounded border border-white/5' : 'text-muted-foreground'
+						tcgMode ? 'rounded border border-white/5 bg-black/10 p-2' : 'text-muted-foreground'
 					)}
 					style={{
 						lineHeight: '1.25rem',
@@ -160,26 +160,26 @@ export function TagCardContent({
 					{description ? (
 						<p className={tcgMode ? '' : 'italic'}>{description}</p>
 					) : (
-						<p className="italic text-center opacity-70">Sin descripción</p>
+						<p className="text-center italic opacity-70">Sin descripción</p>
 					)}
 				</div>
 
 				{/* Contadores de relaciones en modo TCG */}
 				{tcgMode && hasRelationships && (
 					<div className="mb-3 flex flex-col">
-						{renderStatBar(<Image className="w-3.5 h-3.5" />, imagesCount, 'Imágenes')}
-						{renderStatBar(<Video className="w-3.5 h-3.5" />, videosCount, 'Videos')}
-						{renderStatBar(<Album className="w-3.5 h-3.5" />, albumsCount, 'Álbumes')}
-						{renderStatBar(<Folder className="w-3.5 h-3.5" />, collectionsCount, 'Colecciones')}
-						{renderStatBar(<UserSquare className="w-3.5 h-3.5" />, charactersCount, 'Personajes')}
-						{renderStatBar(<MapPin className="w-3.5 h-3.5" />, placesCount, 'Lugares')}
-						{renderStatBar(<Package className="w-3.5 h-3.5" />, worldItemsCount, 'Objetos')}
-						{renderStatBar(<BookOpen className="w-3.5 h-3.5" />, conceptsCount, 'Conceptos')}
-						{renderStatBar(<MessageSquare className="w-3.5 h-3.5" />, promptsCount, 'Prompts')}
-						{renderStatBar(<FileText className="w-3.5 h-3.5" />, notesCount, 'Notas')}
-						{renderStatBar(<FileImage className="w-3.5 h-3.5" />, wildcardsCount, 'Wildcards')}
-						{renderStatBar(<ListChecks className="w-3.5 h-3.5" />, propertiesCount, 'Propiedades')}
-						{renderStatBar(<PanelTop className="w-3.5 h-3.5" />, groupsCount, 'Grupos')}
+						{renderStatBar(<Image className="h-3.5 w-3.5" />, imagesCount, 'Imágenes')}
+						{renderStatBar(<Video className="h-3.5 w-3.5" />, videosCount, 'Videos')}
+						{renderStatBar(<Album className="h-3.5 w-3.5" />, albumsCount, 'Álbumes')}
+						{renderStatBar(<Folder className="h-3.5 w-3.5" />, collectionsCount, 'Colecciones')}
+						{renderStatBar(<UserSquare className="h-3.5 w-3.5" />, charactersCount, 'Personajes')}
+						{renderStatBar(<MapPin className="h-3.5 w-3.5" />, placesCount, 'Lugares')}
+						{renderStatBar(<Package className="h-3.5 w-3.5" />, worldItemsCount, 'Objetos')}
+						{renderStatBar(<BookOpen className="h-3.5 w-3.5" />, conceptsCount, 'Conceptos')}
+						{renderStatBar(<MessageSquare className="h-3.5 w-3.5" />, promptsCount, 'Prompts')}
+						{renderStatBar(<FileText className="h-3.5 w-3.5" />, notesCount, 'Notas')}
+						{renderStatBar(<FileImage className="h-3.5 w-3.5" />, wildcardsCount, 'Wildcards')}
+						{renderStatBar(<ListChecks className="h-3.5 w-3.5" />, propertiesCount, 'Propiedades')}
+						{renderStatBar(<PanelTop className="h-3.5 w-3.5" />, groupsCount, 'Grupos')}
 					</div>
 				)}
 
@@ -187,10 +187,10 @@ export function TagCardContent({
 				{shortcut && (
 					<div className={cn('mt-auto', !tcgMode && 'pt-2')}>
 						<div className="flex items-center gap-1 text-xs">
-							<Keyboard className="w-3.5 h-3.5 text-muted-foreground" />
+							<Keyboard className="h-3.5 w-3.5 text-muted-foreground" />
 							<span className="font-medium text-muted-foreground">Atajo:</span>
 							<code
-								className="px-1.5 py-0.5 rounded text-xs font-mono"
+								className="rounded px-1.5 py-0.5 font-mono text-xs"
 								style={{
 									background: `${primaryColor}15`,
 									border: `1px solid ${primaryColor}30`,
@@ -200,22 +200,22 @@ export function TagCardContent({
 								{shortcut}
 							</code>
 						</div>
-						<div className="mt-1 text-xs text-muted-foreground">
+						<div className="mt-1 text-muted-foreground text-xs">
 							<span className="opacity-70">Puedes usar este atajo para aplicar rápidamente esta etiqueta.</span>
 						</div>
 					</div>
 				)}
 
 				{/* Diseño decorativo para rellenar espacio vacío */}
-				{!shortcut && !hasRelationships && (
+				{!(shortcut || hasRelationships) && (
 					<div className="mt-auto">
 						<div
-							className="w-full h-px mb-2 opacity-30"
+							className="mb-2 h-px w-full opacity-30"
 							style={{ background: `linear-gradient(to right, ${primaryColor}, transparent 80%)` }}
 						/>
 						<div className="flex justify-center">
 							<div
-								className="w-8 h-8 rounded-full opacity-10"
+								className="h-8 w-8 rounded-full opacity-10"
 								style={{
 									background: `radial-gradient(circle, ${primaryColor} 0%, transparent 70%)`,
 								}}

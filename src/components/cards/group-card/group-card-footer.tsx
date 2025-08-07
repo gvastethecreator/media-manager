@@ -45,7 +45,7 @@ export function GroupCardFooter({
 
 	return (
 		<div
-			className={cn('px-3 py-2', tcgMode ? 'border-t border-white/10' : '')}
+			className={cn('px-3 py-2', tcgMode ? 'border-white/10 border-t' : '')}
 			style={{
 				background: tcgMode ? `linear-gradient(to top, ${primaryColor}20, transparent)` : undefined,
 			}}
@@ -53,41 +53,41 @@ export function GroupCardFooter({
 			{tcgMode ? (
 				<div className="flex flex-col space-y-2">
 					{/* Primera fila: HP, MP y Poder */}
-					<div className="flex justify-between items-center">
+					<div className="flex items-center justify-between">
 						{/* HP */}
 						<div className="flex items-center">
-							<HeartIcon className="h-3.5 w-3.5 mr-1" style={{ color: primaryColor }} />
-							<span className="text-xs font-semibold">{hp}</span>
+							<HeartIcon className="mr-1 h-3.5 w-3.5" style={{ color: primaryColor }} />
+							<span className="font-semibold text-xs">{hp}</span>
 						</div>
 
 						{/* MP */}
 						<div className="flex items-center">
-							<BrainIcon className="h-3.5 w-3.5 mr-1" style={{ color: primaryColor }} />
-							<span className="text-xs font-semibold">{mp}</span>
+							<BrainIcon className="mr-1 h-3.5 w-3.5" style={{ color: primaryColor }} />
+							<span className="font-semibold text-xs">{mp}</span>
 						</div>
 
 						{/* Poder */}
-						<div className="flex items-center bg-black/10 px-1 rounded">
-							<span className="text-xs font-medium">{power}</span>
+						<div className="flex items-center rounded bg-black/10 px-1">
+							<span className="font-medium text-xs">{power}</span>
 						</div>
 					</div>
 
 					{/* Segunda fila: metadatos (solo en modo completo) */}
 					{!compact && (
-						<div className="flex justify-between items-center">
+						<div className="flex items-center justify-between">
 							<div className="text-xs opacity-80">{organizationType}</div>
 							<div className="text-xs opacity-80">{category}</div>
 						</div>
 					)}
 
 					{/* Tercera fila: estrellas de rareza e info */}
-					<div className="flex justify-between items-center">
+					<div className="flex items-center justify-between">
 						{/* Estrellas de rareza */}
 						<div className="flex items-center">
 							{Array.from({ length: rarity }).map((_, i) => (
 								<Star
-									key={`rarity-${id}-${name}-${rarity}-${i + 1}`}
 									className="h-3 w-3 fill-current"
+									key={`rarity-${id}-${name}-${rarity}-${i + 1}`}
 									style={{ color: primaryColor }}
 								/>
 							))}
@@ -106,22 +106,22 @@ export function GroupCardFooter({
 				</div>
 			) : (
 				// Versión no-TCG simplificada
-				<div className="flex justify-between items-center">
+				<div className="flex items-center justify-between">
 					<div className="flex items-center">
 						{organizationType && (
-							<Badge variant="outline" className="px-1 h-5 mr-1">
+							<Badge className="mr-1 h-5 px-1" variant="outline">
 								<span className="text-xs">{organizationType}</span>
 							</Badge>
 						)}
 						{category && category !== 'General' && (
-							<Badge variant="outline" className="px-1 h-5">
+							<Badge className="h-5 px-1" variant="outline">
 								<span className="text-xs">{category}</span>
 							</Badge>
 						)}
 					</div>
 
 					{/* Información de archivos */}
-					<div className="flex items-center space-x-2 text-xs text-muted-foreground">
+					<div className="flex items-center space-x-2 text-muted-foreground text-xs">
 						{isFavorite && <HeartIcon className="h-3.5 w-3.5 fill-rose-500 text-rose-500" />}
 						{imagesCount > 0 && <span>🖼️ {imagesCount}</span>}
 						{videosCount > 0 && <span>🎬 {videosCount}</span>}

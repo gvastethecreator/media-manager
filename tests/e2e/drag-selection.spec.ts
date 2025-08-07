@@ -4,7 +4,7 @@ test.describe('Selección con Drag - Performance y Funcionalidad', () => {
 	test.beforeEach(async ({ page }) => {
 		// Ir a la página de carpetas con imágenes
 		await page.goto('http://localhost:5173/folders/cartoons');
-		await page.waitForSelector('[data-testid="file-browser"]', { timeout: 10000 });
+		await page.waitForSelector('[data-testid="file-browser"]', { timeout: 10_000 });
 
 		// Esperar a que se carguen las imágenes
 		await page.waitForFunction(
@@ -12,7 +12,7 @@ test.describe('Selección con Drag - Performance y Funcionalidad', () => {
 				const images = document.querySelectorAll('[data-item-id]');
 				return images.length > 10;
 			},
-			{ timeout: 15000 }
+			{ timeout: 15_000 }
 		);
 	});
 

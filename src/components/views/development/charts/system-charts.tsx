@@ -26,24 +26,24 @@ export function FileDistributionChart() {
 	return (
 		<Card className="h-full border-2 border-primary/10">
 			<CardHeader className="pb-2">
-				<CardTitle className="text-sm font-medium">Distribución de Archivos</CardTitle>
+				<CardTitle className="font-medium text-sm">Distribución de Archivos</CardTitle>
 			</CardHeader>
 			<CardContent className="p-2">
 				<div className="h-[180px]">
-					<ResponsiveContainer width="100%" height="100%">
+					<ResponsiveContainer height="100%" width="100%">
 						<PieChart>
 							<Pie
-								data={data}
 								cx="50%"
 								cy="50%"
+								data={data}
+								dataKey="value"
+								fill="#8884d8"
 								innerRadius={50}
 								outerRadius={70}
-								fill="#8884d8"
 								paddingAngle={5}
-								dataKey="value"
 							>
 								{data.map((entry) => (
-									<Cell key={`cell-${entry.name}`} fill={entry.color} />
+									<Cell fill={entry.color} key={`cell-${entry.name}`} />
 								))}
 							</Pie>
 							<Tooltip
@@ -72,14 +72,14 @@ export function IndexingActivityChart() {
 	return (
 		<Card className="h-full border-2 border-primary/10">
 			<CardHeader className="pb-2">
-				<CardTitle className="text-sm font-medium">Actividad de Indexación</CardTitle>
+				<CardTitle className="font-medium text-sm">Actividad de Indexación</CardTitle>
 			</CardHeader>
 			<CardContent className="p-2">
 				<div className="h-[180px]">
-					<ResponsiveContainer width="100%" height="100%">
+					<ResponsiveContainer height="100%" width="100%">
 						<AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
 							<defs>
-								<linearGradient id="colorArchivos" x1="0" y1="0" x2="0" y2="1">
+								<linearGradient id="colorArchivos" x1="0" x2="0" y1="0" y2="1">
 									<stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
 									<stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
 								</linearGradient>
@@ -91,7 +91,7 @@ export function IndexingActivityChart() {
 								formatter={(value: number) => [`${value} archivos`, 'Indexados']}
 								labelFormatter={(name) => `Día: ${name}`}
 							/>
-							<Area type="monotone" dataKey="archivos" stroke="#3b82f6" fillOpacity={1} fill="url(#colorArchivos)" />
+							<Area dataKey="archivos" fill="url(#colorArchivos)" fillOpacity={1} stroke="#3b82f6" type="monotone" />
 						</AreaChart>
 					</ResponsiveContainer>
 				</div>
@@ -111,11 +111,11 @@ export function ResourceUsageChart() {
 	return (
 		<Card className="h-full border-2 border-primary/10">
 			<CardHeader className="pb-2">
-				<CardTitle className="text-sm font-medium">Uso de Recursos</CardTitle>
+				<CardTitle className="font-medium text-sm">Uso de Recursos</CardTitle>
 			</CardHeader>
 			<CardContent className="p-2">
 				<div className="h-[180px]">
-					<ResponsiveContainer width="100%" height="100%">
+					<ResponsiveContainer height="100%" width="100%">
 						<BarChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
 							<XAxis dataKey="name" tick={{ fontSize: 12 }} />
 							<YAxis tick={{ fontSize: 12 }} width={30} />
@@ -146,11 +146,11 @@ export function SystemPerformanceChart() {
 	return (
 		<Card className="h-full border-2 border-primary/10">
 			<CardHeader className="pb-2">
-				<CardTitle className="text-sm font-medium">Rendimiento del Sistema</CardTitle>
+				<CardTitle className="font-medium text-sm">Rendimiento del Sistema</CardTitle>
 			</CardHeader>
 			<CardContent className="p-2">
 				<div className="h-[180px]">
-					<ResponsiveContainer width="100%" height="100%">
+					<ResponsiveContainer height="100%" width="100%">
 						<LineChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
 							<XAxis dataKey="name" tick={{ fontSize: 12 }} />
 							<YAxis tick={{ fontSize: 12 }} width={30} />
@@ -159,7 +159,7 @@ export function SystemPerformanceChart() {
 								formatter={(value: number) => [`${value}/100`, 'Puntuación']}
 								labelFormatter={(name) => `Hora: ${name}`}
 							/>
-							<Line type="monotone" dataKey="valor" stroke="#f59e0b" strokeWidth={2} />
+							<Line dataKey="valor" stroke="#f59e0b" strokeWidth={2} type="monotone" />
 						</LineChart>
 					</ResponsiveContainer>
 				</div>

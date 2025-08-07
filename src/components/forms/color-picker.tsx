@@ -41,27 +41,27 @@ export const ColorPicker = memo(function ColorPicker({ value, onChange, classNam
 	);
 
 	return (
-		<Popover open={open} onOpenChange={setOpen}>
+		<Popover onOpenChange={setOpen} open={open}>
 			<PopoverTrigger asChild>
 				<Button
-					variant="outline"
-					type="button"
 					className={cn('w-[4rem] justify-center', className)}
 					style={{ backgroundColor: value }}
+					type="button"
+					variant="outline"
 				>
 					<span className="sr-only">Color seleccionado: {value}</span>
 				</Button>
 			</PopoverTrigger>
-			<PopoverContent className="w-64 p-3" align="start">
+			<PopoverContent align="start" className="w-64 p-3">
 				<div className="grid grid-cols-4 gap-2">
 					{presetColors.map((color) => (
 						<Button
+							className="flex h-8 w-8 items-center justify-center p-0"
 							key={color}
-							variant="outline"
-							className="h-8 w-8 p-0 flex items-center justify-center"
-							style={{ backgroundColor: color }}
 							onClick={() => handleColorSelect(color)}
+							style={{ backgroundColor: color }}
 							title={`Color: ${color}`}
+							variant="outline"
 						>
 							{value === color && <span className="text-white text-xs">✓</span>}
 						</Button>

@@ -38,19 +38,19 @@ export function ProfilesSettings() {
 
 	if (!profiles || profiles.length === 0) {
 		return (
-			<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm border-none">
-				<CardHeader className="p-2 pb-0 bg-transparent">
-					<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
-						<span className="flex items-center gap-2 h-7">
+			<Card className="flex flex-col gap-2 rounded-sm border-none bg-muted/30">
+				<CardHeader className="bg-transparent p-2 pb-0">
+					<CardTitle className="flex items-center justify-between pl-1 font-semibold text-base text-muted-foreground">
+						<span className="flex h-7 items-center gap-2">
 							<UserCog className="h-5 w-5" /> Perfiles
 						</span>
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="p-6 py-8 text-center">
-					<UserPlus className="h-8 w-8 mx-auto mb-3 text-muted-foreground/50" />
-					<p className="text-sm text-muted-foreground">No hay perfiles configurados</p>
-					<p className="text-xs mt-1 text-muted-foreground/75 mb-4">Crea un perfil para personalizar tu experiencia</p>
-					<Button onClick={handleAddProfile} className="mt-2">
+					<UserPlus className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
+					<p className="text-muted-foreground text-sm">No hay perfiles configurados</p>
+					<p className="mt-1 mb-4 text-muted-foreground/75 text-xs">Crea un perfil para personalizar tu experiencia</p>
+					<Button className="mt-2" onClick={handleAddProfile}>
 						Crear perfil
 					</Button>
 				</CardContent>
@@ -59,21 +59,21 @@ export function ProfilesSettings() {
 	}
 
 	return (
-		<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm border-none">
+		<Card className="flex flex-col gap-2 rounded-sm border-none bg-muted/30">
 			{/* Perfil Activo */}
-			<CardHeader className="p-2 pb-0 bg-transparent">
-				<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
-					<span className="flex items-center gap-2 h-7">
+			<CardHeader className="bg-transparent p-2 pb-0">
+				<CardTitle className="flex items-center justify-between pl-1 font-semibold text-base text-muted-foreground">
+					<span className="flex h-7 items-center gap-2">
 						<UserCog className="h-5 w-5" /> Perfiles
 					</span>
-					<Button variant="outline" size="sm" onClick={handleAddProfile} className="h-7 text-xs">
+					<Button className="h-7 text-xs" onClick={handleAddProfile} size="sm" variant="outline">
 						<UserPlus className="h-3.5 w-3.5" />
 					</Button>
 				</CardTitle>
 			</CardHeader>
 			<Separator className="my-0" />
 			<CardContent className="p-2 py-0">
-				<div className="flex items-center gap-2 text-xs text-muted-foreground/75 mb-3">
+				<div className="mb-3 flex items-center gap-2 text-muted-foreground/75 text-xs">
 					<Smile className="h-4 w-4" /> Perfil Activo
 				</div>
 				<div>
@@ -81,40 +81,40 @@ export function ProfilesSettings() {
 						<Popover>
 							<PopoverTrigger asChild>
 								<Button
-									variant="ghost"
+									className="h-8 w-8 items-center justify-center rounded-md"
 									size="icon"
-									className="h-8 w-8 rounded-md items-center justify-center"
 									style={{ backgroundColor: activeProfileData?.color }}
+									variant="ghost"
 								>
 									<span className="text-lg">{activeProfileData?.emoji}</span>
 								</Button>
 							</PopoverTrigger>
-							<PopoverContent className="w-[320px] border-none p-0 bg-transparent" align="start">
-								<EmojiPicker onEmojiSelect={(emoji: string) => handleUpdateActiveProfile({ emoji: emoji })} />
+							<PopoverContent align="start" className="w-[320px] border-none bg-transparent p-0">
+								<EmojiPicker onEmojiSelect={(emoji: string) => handleUpdateActiveProfile({ emoji })} />
 							</PopoverContent>
 						</Popover>
-						<div className="flex-1 min-w-0 space-y-1">
+						<div className="min-w-0 flex-1 space-y-1">
 							<Input
-								value={activeProfileData?.name}
+								className="h-8 border-none p-3 text-base"
 								onChange={(e) => handleUpdateActiveProfile({ name: e.target.value })}
-								className="h-8 text-base border-none p-3"
 								placeholder="Nombre del perfil"
+								value={activeProfileData?.name}
 							/>
 
 							<div className="flex gap-2">
-								<div className="text-xs text-muted-foreground">Perfil: {activeProfileData?.name}</div>
+								<div className="text-muted-foreground text-xs">Perfil: {activeProfileData?.name}</div>
 							</div>
 						</div>
 						<Popover>
 							<PopoverTrigger asChild>
-								<Button variant="ghost" size="icon" className="h-8 w-8 rounded-full">
+								<Button className="h-8 w-8 rounded-full" size="icon" variant="ghost">
 									<div className="h-4 w-4 rounded-full" style={{ backgroundColor: activeProfileData?.color }} />
 								</Button>
 							</PopoverTrigger>
-							<PopoverContent className="w-auto p-0 bg-transparent border-none" align="end">
+							<PopoverContent align="end" className="w-auto border-none bg-transparent p-0">
 								<CompactPicker
+									className="overflow-hidden bg-black/90 text-white"
 									color={activeProfileData?.color}
-									className="bg-black/90 text-white overflow-hidden"
 									onChange={(color) => handleUpdateActiveProfile({ color: color.hex })}
 								/>
 							</PopoverContent>
@@ -125,7 +125,7 @@ export function ProfilesSettings() {
 			{/* Otros Perfiles */}
 			<Separator className="my-0" />
 			<CardContent className="px-2">
-				<div className="flex items-center gap-2 text-xs text-muted-foreground/75 mb-3">
+				<div className="mb-3 flex items-center gap-2 text-muted-foreground/75 text-xs">
 					<Users className="h-4 w-4" /> Otros Perfiles
 				</div>
 				<div className="grid grid-cols-2 gap-2">
@@ -133,20 +133,20 @@ export function ProfilesSettings() {
 						.filter((profile) => profile.id !== activeProfile)
 						.map((profile) => (
 							<Card
+								className={cn('group rounded-sm bg-muted/30', profile.isActive && 'ring-1 ring-primary')}
 								key={profile.id}
-								className={cn('bg-muted/30 group rounded-sm', profile.isActive && 'ring-1 ring-primary')}
 							>
 								<CardContent className="p-2">
-									<div className="flex items-center gap-2 relative">
-										<div className="flex items-center gap-2 min-w-0">
+									<div className="relative flex items-center gap-2">
+										<div className="flex min-w-0 items-center gap-2">
 											<div
-												className="h-8 w-8 rounded-full flex items-center justify-center shadow-xs"
+												className="flex h-8 w-8 items-center justify-center rounded-full shadow-xs"
 												style={{ backgroundColor: profile.color }}
 											>
 												<span className="text-lg">{profile.emoji}</span>
 											</div>
-											<div className="flex-1 min-w-0">
-												<span className="text-xs font-semibold truncate pl-1">{profile.name}</span>
+											<div className="min-w-0 flex-1">
+												<span className="truncate pl-1 font-semibold text-xs">{profile.name}</span>
 												<div className="flex gap-1 text-[10px] text-muted-foreground/75">
 													<span>
 														{profile.preferences?.theme === 'system'
@@ -160,19 +160,19 @@ export function ProfilesSettings() {
 												</div>
 											</div>
 										</div>
-										<div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-0 top-8 shadow-lg">
+										<div className="absolute top-8 right-0 flex items-center gap-1 opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
 											<Button
-												variant="outline"
+												className="h-4 gap-1 rounded-sm p-2 text-[9px] text-xs"
 												onClick={() => setActiveProfile(profile.id)}
-												className="h-4 text-xs gap-1 text-[9px] rounded-sm p-2"
+												variant="outline"
 											>
 												<Check className="h-3.5 w-3.5 text-green-500" />
 												Activar
 											</Button>
 											<Button
-												variant="ghost"
+												className="h-4 rounded-sm p-1 py-2 text-[9px] text-red-500 hover:text-red-500/90"
 												onClick={() => handleDeleteProfile(profile.id)}
-												className="h-4 text-red-500 hover:text-red-500/90 text-[9px] rounded-sm p-1 py-2"
+												variant="ghost"
 											>
 												<UserX className="h-2 w-2" />
 											</Button>
@@ -184,9 +184,9 @@ export function ProfilesSettings() {
 
 					{profiles.length <= 1 && (
 						<div className="py-6 text-center">
-							<UserPlus className="h-6 w-6 mx-auto mb-2 text-muted-foreground/50" />
-							<p className="text-xs text-muted-foreground">No hay perfiles adicionales</p>
-							<p className="text-[10px] mt-1 text-muted-foreground/75">
+							<UserPlus className="mx-auto mb-2 h-6 w-6 text-muted-foreground/50" />
+							<p className="text-muted-foreground text-xs">No hay perfiles adicionales</p>
+							<p className="mt-1 text-[10px] text-muted-foreground/75">
 								Crea más perfiles para diferentes configuraciones
 							</p>
 						</div>

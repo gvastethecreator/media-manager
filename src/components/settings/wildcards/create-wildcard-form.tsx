@@ -80,17 +80,17 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 
 	return (
 		<>
-			<CardHeader className="pb-4 px-6">
+			<CardHeader className="px-6 pb-4">
 				<div className="flex items-center justify-between">
-					<CardTitle className="text-xl font-bold">{wildcard ? 'Editar' : 'Nuevo'} Comodín</CardTitle>
-					<Button variant="ghost" size="icon" onClick={onCancel} title="Cerrar">
+					<CardTitle className="font-bold text-xl">{wildcard ? 'Editar' : 'Nuevo'} Comodín</CardTitle>
+					<Button onClick={onCancel} size="icon" title="Cerrar" variant="ghost">
 						<XIcon className="h-4 w-4" />
 					</Button>
 				</div>
 			</CardHeader>
 
 			<Form {...form}>
-				<form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+				<form className="space-y-4" onSubmit={form.handleSubmit(handleSubmit)}>
 					<CardContent className="space-y-4 px-6">
 						<FormField
 							control={form.control}
@@ -114,7 +114,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 									<FormItem>
 										<FormLabel>Emoji</FormLabel>
 										<FormControl>
-											<EmojiPicker value={field.value} onChange={field.onChange} />
+											<EmojiPicker onChange={field.onChange} value={field.value} />
 										</FormControl>
 									</FormItem>
 								)}
@@ -127,7 +127,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 									<FormItem>
 										<FormLabel>Color</FormLabel>
 										<FormControl>
-											<ColorPicker value={field.value} onChange={field.onChange} />
+											<ColorPicker onChange={field.onChange} value={field.value} />
 										</FormControl>
 									</FormItem>
 								)}
@@ -141,7 +141,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<FormItem>
 									<FormLabel>Descripción</FormLabel>
 									<FormControl>
-										<Input {...field} value={field.value || ''} placeholder="Descripción del comodín" />
+										<Input {...field} placeholder="Descripción del comodín" value={field.value || ''} />
 									</FormControl>
 								</FormItem>
 							)}
@@ -154,7 +154,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<FormItem>
 									<FormLabel>Atajo</FormLabel>
 									<FormControl>
-										<Input {...field} value={field.value || ''} placeholder="Atajo de teclado (opcional)" />
+										<Input {...field} placeholder="Atajo de teclado (opcional)" value={field.value || ''} />
 									</FormControl>
 								</FormItem>
 							)}
@@ -167,7 +167,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<FormItem>
 									<FormLabel>Categoría</FormLabel>
 									<FormControl>
-										<Select value={field.value || undefined} onValueChange={field.onChange}>
+										<Select onValueChange={field.onChange} value={field.value || undefined}>
 											<SelectTrigger>
 												<SelectValue placeholder="Selecciona una categoría" />
 											</SelectTrigger>
@@ -191,8 +191,8 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<FormItem>
 									<FormLabel>Comodín padre</FormLabel>
 									<Select
-										value={field.value || 'none'}
 										onValueChange={(value) => field.onChange(value === 'none' ? null : value)}
+										value={field.value || 'none'}
 									>
 										<FormControl>
 											<SelectTrigger>
@@ -218,7 +218,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 							<FormDescription>Los valores son opciones predefinidas para este comodín</FormDescription>
 
 							{fields.map((field: any, index: number) => (
-								<div key={field.id} className="flex items-center gap-2">
+								<div className="flex items-center gap-2" key={field.id}>
 									<FormField
 										control={form.control}
 										name={`children.${index}.value`}
@@ -230,14 +230,14 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 											</FormItem>
 										)}
 									/>
-									<Button type="button" variant="ghost" size="icon" onClick={() => remove(index)}>
+									<Button onClick={() => remove(index)} size="icon" type="button" variant="ghost">
 										<Trash2Icon className="h-4 w-4" />
 									</Button>
 								</div>
 							))}
 
-							<Button type="button" variant="outline" size="sm" className="mt-2" onClick={() => append({ value: '' })}>
-								<PlusIcon className="h-4 w-4 mr-2" />
+							<Button className="mt-2" onClick={() => append({ value: '' })} size="sm" type="button" variant="outline">
+								<PlusIcon className="mr-2 h-4 w-4" />
 								Añadir valor
 							</Button>
 						</div>
@@ -249,7 +249,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 								<FormItem>
 									<FormLabel>Imagen destacada</FormLabel>
 									<FormControl>
-										<ImagePicker value={field.value} onChange={field.onChange} />
+										<ImagePicker onChange={field.onChange} value={field.value} />
 									</FormControl>
 								</FormItem>
 							)}
@@ -268,7 +268,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 						/>
 					</CardContent>
 					<CardFooter className="flex justify-end gap-2 px-6">
-						<Button type="button" variant="outline" onClick={onCancel}>
+						<Button onClick={onCancel} type="button" variant="outline">
 							Cancelar
 						</Button>
 						<Button type="submit">{wildcard ? 'Guardar cambios' : 'Crear comodín'}</Button>

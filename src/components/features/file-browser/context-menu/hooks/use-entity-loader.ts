@@ -130,7 +130,7 @@ const _withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, entityNam
 			entityLoaderLogger.warn(
 				`⚠️ Timeout al cargar ${entityName} después de ${timeoutMs}ms - continuando con datos parciales`
 			);
-			// @ts-ignore
+			// @ts-expect-error
 			_resolve([]);
 		}, timeoutMs);
 	});
@@ -139,7 +139,7 @@ const _withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, entityNam
 		return await Promise.race([promise, timeoutPromise]);
 	} catch (error) {
 		entityLoaderLogger.warn(`⚠️ Error durante la carga de ${entityName} con timeout:`, error);
-		// @ts-ignore
+		// @ts-expect-error
 		return [];
 	} finally {
 		if (timeoutId) clearTimeout(timeoutId);

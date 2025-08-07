@@ -44,17 +44,17 @@ export function TagCardHeader({
 		<div className="relative">
 			{/* Encabezado distintivo de etiqueta */}
 			<div
-				className={cn('flex items-center justify-between', compact ? 'py-2 px-3' : 'py-2.5 px-3.5')}
+				className={cn('flex items-center justify-between', compact ? 'px-3 py-2' : 'px-3.5 py-2.5')}
 				style={{
 					background: tcgMode ? `linear-gradient(135deg, ${color}90, ${color}70)` : `${color}80`,
 					borderBottom: `1px solid ${color}`,
 				}}
 			>
 				{/* Parte izquierda: Emoji y nombre */}
-				<div className="flex items-center gap-2 max-w-[75%]">
+				<div className="flex max-w-[75%] items-center gap-2">
 					{/* Emoji con estilo de tag */}
 					<div
-						className={cn('rounded-full flex items-center justify-center text-lg', compact ? 'w-6 h-6' : 'w-7 h-7')}
+						className={cn('flex items-center justify-center rounded-full text-lg', compact ? 'h-6 w-6' : 'h-7 w-7')}
 						style={{
 							background: 'rgba(255, 255, 255, 0.25)',
 							boxShadow: `0 0 8px ${color}40`,
@@ -64,21 +64,21 @@ export function TagCardHeader({
 					</div>
 
 					{/* Nombre de la etiqueta */}
-					<h3 className={cn('font-bold text-white truncate', compact ? 'text-base' : 'text-lg', 'drop-shadow-sm')}>
+					<h3 className={cn('truncate font-bold text-white', compact ? 'text-base' : 'text-lg', 'drop-shadow-sm')}>
 						{name}
 					</h3>
 				</div>
 
 				{/* Icono de etiqueta o favorito a la derecha */}
 				<div
-					className="flex-shrink-0 flex items-center gap-1"
+					className="flex flex-shrink-0 items-center gap-1"
 					style={{
 						color: 'rgba(255, 255, 255, 0.7)',
 					}}
 				>
 					{isFavorite && (
 						<Heart
-							className={cn('drop-shadow-sm', compact ? 'w-4 h-4' : 'w-5 h-5')}
+							className={cn('drop-shadow-sm', compact ? 'h-4 w-4' : 'h-5 w-5')}
 							style={{
 								color: 'rgb(239, 68, 68)',
 								fill: 'rgb(239, 68, 68)',
@@ -86,7 +86,7 @@ export function TagCardHeader({
 						/>
 					)}
 					<TagIcon
-						className={cn('drop-shadow-sm', compact ? 'w-4 h-4' : 'w-5 h-5')}
+						className={cn('drop-shadow-sm', compact ? 'h-4 w-4' : 'h-5 w-5')}
 						style={{
 							filter: 'drop-shadow(0 0 2px rgba(0, 0, 0, 0.3))',
 						}}
@@ -96,7 +96,7 @@ export function TagCardHeader({
 
 			{/* Barra secundaria con categoría y rareza */}
 			<div
-				className={cn('flex items-center justify-between text-xs text-white', compact ? 'py-1 px-3' : 'py-1.5 px-3.5')}
+				className={cn('flex items-center justify-between text-white text-xs', compact ? 'px-3 py-1' : 'px-3.5 py-1.5')}
 				style={{
 					background: tcgMode ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.2)',
 					borderBottom: `1px solid ${color}50`,
@@ -109,7 +109,7 @@ export function TagCardHeader({
 						<>
 							<span className="mx-0.5">•</span>
 							<div className="flex items-center gap-1">
-								<BookOpen className="w-3 h-3" />
+								<BookOpen className="h-3 w-3" />
 								<span>{typeof category === 'string' ? category.toUpperCase() : 'GENERAL'}</span>
 							</div>
 						</>
@@ -119,7 +119,7 @@ export function TagCardHeader({
 				{/* Indicador de rareza para modo TCG */}
 				{tcgMode && (
 					<div className="flex items-center gap-1">
-						{rarity !== TagRarity.COMMON && <Sparkles className="w-3 h-3" />}
+						{rarity !== TagRarity.COMMON && <Sparkles className="h-3 w-3" />}
 						<span className="font-medium">{rarityLabel}</span>
 					</div>
 				)}

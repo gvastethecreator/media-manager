@@ -347,7 +347,7 @@ export async function createWildcard(data: WildcardCreateInput): Promise<Wildcar
 				shortcut: data.shortcut || null,
 				children: data.children || null,
 				featuredImage: data.featuredImage || null,
-				isFavorite: Boolean(data.isFavorite) || false,
+				isFavorite: Boolean(data.isFavorite),
 				parentId: data.parentId || null,
 				createdAt: new Date(),
 				updatedAt: new Date(),

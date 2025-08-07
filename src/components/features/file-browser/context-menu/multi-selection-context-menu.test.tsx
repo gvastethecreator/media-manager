@@ -1,5 +1,5 @@
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import type { FileItem } from '@/types/file-browser/file-item';
 import { MultiSelectionContextMenu } from './multi-selection-context-menu';
 
@@ -91,7 +91,7 @@ describe('MultiSelectionContextMenu', () => {
 
 	it('renders with correct selection count', () => {
 		render(
-			<MultiSelectionContextMenu selectedItems={mockSelectedItems} onAction={mockOnAction} position={mockPosition} />
+			<MultiSelectionContextMenu onAction={mockOnAction} position={mockPosition} selectedItems={mockSelectedItems} />
 		);
 
 		expect(screen.getByText('2 elementos seleccionados')).toBeInTheDocument();
@@ -100,7 +100,7 @@ describe('MultiSelectionContextMenu', () => {
 
 	it('displays all bulk operation actions', () => {
 		render(
-			<MultiSelectionContextMenu selectedItems={mockSelectedItems} onAction={mockOnAction} position={mockPosition} />
+			<MultiSelectionContextMenu onAction={mockOnAction} position={mockPosition} selectedItems={mockSelectedItems} />
 		);
 
 		expect(screen.getByText('Copiar 2 elementos')).toBeInTheDocument();
@@ -111,7 +111,7 @@ describe('MultiSelectionContextMenu', () => {
 
 	it('shows estimated time for operations', () => {
 		render(
-			<MultiSelectionContextMenu selectedItems={mockSelectedItems} onAction={mockOnAction} position={mockPosition} />
+			<MultiSelectionContextMenu onAction={mockOnAction} position={mockPosition} selectedItems={mockSelectedItems} />
 		);
 
 		// Check that estimated times are displayed (they should be ~1s, ~2s, ~4s, ~1s for the operations)
@@ -123,7 +123,7 @@ describe('MultiSelectionContextMenu', () => {
 
 	it('calls onAction when non-destructive action is clicked', async () => {
 		render(
-			<MultiSelectionContextMenu selectedItems={mockSelectedItems} onAction={mockOnAction} position={mockPosition} />
+			<MultiSelectionContextMenu onAction={mockOnAction} position={mockPosition} selectedItems={mockSelectedItems} />
 		);
 
 		const copyButton = screen.getByText('Copiar 2 elementos');
@@ -136,7 +136,7 @@ describe('MultiSelectionContextMenu', () => {
 
 	it('shows confirmation dialog for destructive actions', async () => {
 		render(
-			<MultiSelectionContextMenu selectedItems={mockSelectedItems} onAction={mockOnAction} position={mockPosition} />
+			<MultiSelectionContextMenu onAction={mockOnAction} position={mockPosition} selectedItems={mockSelectedItems} />
 		);
 
 		const deleteButton = screen.getByText('Eliminar 2 elementos');
@@ -154,7 +154,7 @@ describe('MultiSelectionContextMenu', () => {
 
 	it('executes destructive action after confirmation', async () => {
 		render(
-			<MultiSelectionContextMenu selectedItems={mockSelectedItems} onAction={mockOnAction} position={mockPosition} />
+			<MultiSelectionContextMenu onAction={mockOnAction} position={mockPosition} selectedItems={mockSelectedItems} />
 		);
 
 		// Click delete button
@@ -177,7 +177,7 @@ describe('MultiSelectionContextMenu', () => {
 
 	it('cancels destructive action when cancel is clicked', async () => {
 		render(
-			<MultiSelectionContextMenu selectedItems={mockSelectedItems} onAction={mockOnAction} position={mockPosition} />
+			<MultiSelectionContextMenu onAction={mockOnAction} position={mockPosition} selectedItems={mockSelectedItems} />
 		);
 
 		// Click delete button
@@ -204,7 +204,7 @@ describe('MultiSelectionContextMenu', () => {
 	it('handles single item selection correctly', () => {
 		const singleItem = [mockSelectedItems[0]];
 
-		render(<MultiSelectionContextMenu selectedItems={singleItem} onAction={mockOnAction} position={mockPosition} />);
+		render(<MultiSelectionContextMenu onAction={mockOnAction} position={mockPosition} selectedItems={singleItem} />);
 
 		expect(screen.getByText('1 elemento seleccionado')).toBeInTheDocument();
 		expect(screen.getByText('Copiar 1 elemento')).toBeInTheDocument();
@@ -213,7 +213,7 @@ describe('MultiSelectionContextMenu', () => {
 
 	it('displays entity submenus for collections, tags, and albums', () => {
 		render(
-			<MultiSelectionContextMenu selectedItems={mockSelectedItems} onAction={mockOnAction} position={mockPosition} />
+			<MultiSelectionContextMenu onAction={mockOnAction} position={mockPosition} selectedItems={mockSelectedItems} />
 		);
 
 		expect(screen.getByText('Colecciones')).toBeInTheDocument();

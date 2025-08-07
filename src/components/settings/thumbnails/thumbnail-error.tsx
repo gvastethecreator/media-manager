@@ -28,7 +28,7 @@ export function ThumbnailError({
 
 	return (
 		<Card className="border-destructive/30 bg-destructive/5 p-0">
-			<Alert variant="destructive" className="border-none bg-transparent">
+			<Alert className="border-none bg-transparent" variant="destructive">
 				<div className="flex items-start gap-3">
 					{isDatabaseError ? (
 						<Database className="h-5 w-5 text-destructive" />
@@ -37,10 +37,10 @@ export function ThumbnailError({
 					)}
 					<div className="flex-1">
 						<AlertTitle className="text-destructive">{title}</AlertTitle>
-						<AlertDescription className="text-destructive/80 mt-1">{description}</AlertDescription>
+						<AlertDescription className="mt-1 text-destructive/80">{description}</AlertDescription>
 
 						{showDetails && (
-							<div className="mt-3 bg-background/20 p-2 rounded text-xs font-mono text-destructive/70 max-h-20 overflow-auto">
+							<div className="mt-3 max-h-20 overflow-auto rounded bg-background/20 p-2 font-mono text-destructive/70 text-xs">
 								{errorMessage}
 							</div>
 						)}
@@ -48,12 +48,12 @@ export function ThumbnailError({
 						{onRetry && (
 							<div className="mt-3">
 								<Button
-									variant="outline"
-									size="sm"
+									className="border-destructive/30 bg-background/30 hover:bg-background/50"
 									onClick={onRetry}
-									className="bg-background/30 hover:bg-background/50 border-destructive/30"
+									size="sm"
+									variant="outline"
 								>
-									<RefreshCw className="h-3.5 w-3.5 mr-2" />
+									<RefreshCw className="mr-2 h-3.5 w-3.5" />
 									Reintentar
 								</Button>
 							</div>

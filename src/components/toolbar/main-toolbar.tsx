@@ -239,15 +239,15 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	const renderSortButtons = () => (
 		<div className="flex items-center gap-0.5">
 			<Button
-				variant="ghost"
-				size="icon"
 				className={cn(
 					'h-7 hover:bg-accent',
 					sortOptions.some((opt: any) => opt.field === 'name') ? 'w-10 bg-accent/50' : 'w-7'
 				)}
-				title="Ordenar por nombre"
-				onClick={() => handleSort('name')}
 				data-active={sortOptions.some((opt: any) => opt.field === 'name')}
+				onClick={() => handleSort('name')}
+				size="icon"
+				title="Ordenar por nombre"
+				variant="ghost"
 			>
 				<div className="flex items-center justify-center gap-0.5">
 					<FileText
@@ -268,15 +268,15 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 				</div>
 			</Button>
 			<Button
-				variant="ghost"
-				size="icon"
 				className={cn(
 					'h-7 hover:bg-accent',
 					sortOptions.some((opt: any) => opt.field === 'modifiedAt') ? 'w-10 bg-accent/50' : 'w-7'
 				)}
-				title="Ordenar por fecha de modificación"
-				onClick={() => handleSort('modifiedAt')}
 				data-active={sortOptions.some((opt: any) => opt.field === 'modifiedAt')}
+				onClick={() => handleSort('modifiedAt')}
+				size="icon"
+				title="Ordenar por fecha de modificación"
+				variant="ghost"
 			>
 				<div className="flex items-center justify-center gap-0.5">
 					<Clock
@@ -297,15 +297,15 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 				</div>
 			</Button>
 			<Button
-				variant="ghost"
-				size="icon"
 				className={cn(
 					'h-7 hover:bg-accent',
 					sortOptions.some((opt: any) => opt.field === 'createdAt') ? 'w-10 bg-accent/50' : 'w-7'
 				)}
-				title="Ordenar por fecha de creación"
-				onClick={() => handleSort('createdAt')}
 				data-active={sortOptions.some((opt: any) => opt.field === 'createdAt')}
+				onClick={() => handleSort('createdAt')}
+				size="icon"
+				title="Ordenar por fecha de creación"
+				variant="ghost"
 			>
 				<div className="flex items-center justify-center gap-0.5">
 					<Calendar
@@ -329,46 +329,46 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	);
 
 	const renderViewButtons = () => (
-		<div className="flex items-center gap-0.5 bg-accent/10 rounded-md p-0.5">
+		<div className="flex items-center gap-0.5 rounded-md bg-accent/10 p-0.5">
 			<Button
-				variant="ghost"
-				size="icon"
 				className="h-7 w-7 hover:bg-accent"
-				onClick={() => setViewMode('grid')}
-				title="Vista de cuadrícula"
 				data-active={viewMode === 'grid'}
+				onClick={() => setViewMode('grid')}
+				size="icon"
+				title="Vista de cuadrícula"
+				variant="ghost"
 			>
-				<Grid className={cn('h-3.5 w-3.5', viewMode === 'grid' && 'text-primary font-bold')} />
+				<Grid className={cn('h-3.5 w-3.5', viewMode === 'grid' && 'font-bold text-primary')} />
 			</Button>
 			<Button
-				variant="ghost"
-				size="icon"
 				className="h-7 w-7 hover:bg-accent"
-				onClick={() => setViewMode('cards')}
-				title="Vista de tarjetas"
 				data-active={viewMode === 'cards'}
+				onClick={() => setViewMode('cards')}
+				size="icon"
+				title="Vista de tarjetas"
+				variant="ghost"
 			>
-				<LayoutGrid className={cn('h-3.5 w-3.5', viewMode === 'cards' && 'text-primary font-bold')} />
+				<LayoutGrid className={cn('h-3.5 w-3.5', viewMode === 'cards' && 'font-bold text-primary')} />
 			</Button>
 			<Button
-				variant="ghost"
-				size="icon"
 				className="h-7 w-7 hover:bg-accent"
-				onClick={() => setViewModeDebounced('masonry')}
-				title="Vista de mosaico"
 				data-active={viewMode === 'masonry'}
+				onClick={() => setViewModeDebounced('masonry')}
+				size="icon"
+				title="Vista de mosaico"
+				variant="ghost"
 			>
-				<GalleryHorizontal className={cn('h-3.5 w-3.5', viewMode === 'masonry' && 'text-primary font-bold')} />
+				<GalleryHorizontal className={cn('h-3.5 w-3.5', viewMode === 'masonry' && 'font-bold text-primary')} />
 			</Button>
 			<Button
-				variant="ghost"
-				size="icon"
 				className="h-7 w-7 hover:bg-accent"
-				onClick={() => setViewMode('list')}
-				title="Vista de lista"
 				data-active={viewMode === 'list'}
+				onClick={() => setViewMode('list')}
+				size="icon"
+				title="Vista de lista"
+				variant="ghost"
 			>
-				<List className={cn('h-3.5 w-3.5', viewMode === 'list' && 'text-primary font-bold')} />
+				<List className={cn('h-3.5 w-3.5', viewMode === 'list' && 'font-bold text-primary')} />
 			</Button>
 		</div>
 	);
@@ -378,76 +378,76 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 
 		return (
 			<motion.div
-				initial={{ opacity: 0, y: -10 }}
 				animate={{ opacity: 1, y: 0 }}
+				className="ml-2 flex items-center gap-1"
 				exit={{ opacity: 0, y: -10 }}
-				className="flex items-center gap-1 ml-2"
+				initial={{ opacity: 0, y: -10 }}
 			>
-				<Badge variant="secondary" className="h-5 px-1.5">
+				<Badge className="h-5 px-1.5" variant="secondary">
 					{selectedIds.length} {selectedIds.length === 1 ? 'seleccionado' : 'seleccionados'}
 				</Badge>
 				<Button
-					variant="ghost"
-					size="icon"
 					className="h-6 w-6 hover:bg-accent"
 					onClick={clearSelection}
+					size="icon"
 					title="Limpiar selección"
+					variant="ghost"
 				>
 					<X className="h-3.5 w-3.5" />
 				</Button>
-				<Separator orientation="vertical" className="h-4 mx-1" />
+				<Separator className="mx-1 h-4" orientation="vertical" />
 				<Button
-					variant="ghost"
-					size="icon"
 					className="h-6 w-6 hover:bg-accent"
 					onClick={handleSelectAll}
+					size="icon"
 					title="Seleccionar todo"
+					variant="ghost"
 				>
 					<Plus className="h-3.5 w-3.5" />
 				</Button>
 				<Button
-					variant="ghost"
-					size="icon"
 					className="h-6 w-6 hover:bg-accent"
 					onClick={handleInvertSelection}
+					size="icon"
 					title="Invertir selección"
+					variant="ghost"
 				>
 					<ArrowRight className="h-3.5 w-3.5" />
 				</Button>
-				<Separator orientation="vertical" className="h-4 mx-1" />
+				<Separator className="mx-1 h-4" orientation="vertical" />
 				<Button
-					variant="ghost"
-					size="icon"
 					className="h-6 w-6 hover:bg-accent"
 					onClick={handleDeleteSelected}
+					size="icon"
 					title="Eliminar seleccionados"
+					variant="ghost"
 				>
 					<Trash2 className="h-3.5 w-3.5 text-destructive" />
 				</Button>
 				<Button
-					variant="ghost"
-					size="icon"
 					className="h-6 w-6 hover:bg-accent"
 					onClick={handleDownloadSelected}
+					size="icon"
 					title="Descargar seleccionados"
+					variant="ghost"
 				>
 					<Download className="h-3.5 w-3.5" />
 				</Button>
 				<Button
-					variant="ghost"
-					size="icon"
 					className="h-6 w-6 hover:bg-accent"
 					onClick={handleCopySelected}
+					size="icon"
 					title="Copiar seleccionados"
+					variant="ghost"
 				>
 					<Copy className="h-3.5 w-3.5" />
 				</Button>
 				<Button
-					variant="ghost"
-					size="icon"
 					className="h-6 w-6 hover:bg-accent"
 					onClick={handleCompressFiles}
+					size="icon"
 					title="Comprimir seleccionados"
+					variant="ghost"
 				>
 					<Archive className="h-3.5 w-3.5" />
 				</Button>
@@ -459,20 +459,20 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	const renderSizeControls = () => (
 		<div className="flex items-center gap-0.5">
 			<Button
-				variant="ghost"
-				size="icon"
 				className="h-7 w-7 hover:bg-accent"
 				onClick={() => handleSizeChange(-10)}
+				size="icon"
 				title="Reducir tamaño de miniaturas"
+				variant="ghost"
 			>
 				<ZoomOut className="h-3.5 w-3.5" />
 			</Button>
 			<Button
-				variant="ghost"
-				size="icon"
 				className="h-7 w-7 hover:bg-accent"
 				onClick={() => handleSizeChange(10)}
+				size="icon"
 				title="Aumentar tamaño de miniaturas"
+				variant="ghost"
 			>
 				<ZoomIn className="h-3.5 w-3.5" />
 			</Button>
@@ -481,23 +481,23 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 
 	// 🔄 Añadir campo de búsqueda
 	const renderSearchInput = () => (
-		<div className="flex items-center gap-1 ml-2">
+		<div className="ml-2 flex items-center gap-1">
 			<div className="relative">
-				<Search className="h-3.5 w-3.5 absolute left-2 top-1/2 transform -translate-y-1/2 text-muted-foreground" />
+				<Search className="-translate-y-1/2 absolute top-1/2 left-2 h-3.5 w-3.5 transform text-muted-foreground" />
 				<input
-					type="text"
-					placeholder="Buscar..."
-					className="h-7 pl-7 pr-2 rounded-md bg-accent/10 border-none focus:ring-1 focus:ring-primary text-sm"
-					value={searchQuery}
+					className="h-7 rounded-md border-none bg-accent/10 pr-2 pl-7 text-sm focus:ring-1 focus:ring-primary"
 					onChange={(e) => setSearchQuery(e.target.value)}
+					placeholder="Buscar..."
+					type="text"
+					value={searchQuery}
 				/>
 				{searchQuery && (
 					<Button
-						variant="ghost"
-						size="icon"
-						className="h-5 w-5 absolute right-1 top-1/2 transform -translate-y-1/2 hover:bg-accent"
+						className="-translate-y-1/2 absolute top-1/2 right-1 h-5 w-5 transform hover:bg-accent"
 						onClick={() => setSearchQuery('')}
+						size="icon"
 						title="Limpiar búsqueda"
+						variant="ghost"
 					>
 						<X className="h-2.5 w-2.5" />
 					</Button>
@@ -511,16 +511,16 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 			case 'collection-content':
 				return (
 					<div className="flex items-center gap-0.5">
-						<Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-accent">
-							<Plus className="h-3.5 w-3.5 mr-1" />
+						<Button className="h-7 px-2 hover:bg-accent" size="sm" variant="ghost">
+							<Plus className="mr-1 h-3.5 w-3.5" />
 							<span className="text-xs">Añadir imágenes</span>
 						</Button>
-						<Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-accent">
-							<Edit className="h-3.5 w-3.5 mr-1" />
+						<Button className="h-7 px-2 hover:bg-accent" size="sm" variant="ghost">
+							<Edit className="mr-1 h-3.5 w-3.5" />
 							<span className="text-xs">Editar colección</span>
 						</Button>
-						<Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-accent">
-							<Share2 className="h-3.5 w-3.5 mr-1" />
+						<Button className="h-7 px-2 hover:bg-accent" size="sm" variant="ghost">
+							<Share2 className="mr-1 h-3.5 w-3.5" />
 							<span className="text-xs">Compartir</span>
 						</Button>
 					</div>
@@ -531,37 +531,37 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 						{/* Botones de escanear y recargar carpeta */}
 						{currentFolderId && onScanFolder && (
 							<Button
-								variant="ghost"
-								size="sm"
 								className="h-7 px-2 hover:bg-accent"
-								onClick={onScanFolder}
 								disabled={isRetrying}
+								onClick={onScanFolder}
+								size="sm"
+								variant="ghost"
 							>
-								<FolderSearch className="h-3.5 w-3.5 mr-1" />
+								<FolderSearch className="mr-1 h-3.5 w-3.5" />
 								<span className="text-xs">{isRetrying ? 'Escaneando...' : 'Escanear'}</span>
 							</Button>
 						)}
 						{currentFolderId && onRefreshFolder && (
 							<Button
-								variant="ghost"
-								size="sm"
 								className="h-7 px-2 hover:bg-accent"
-								onClick={onRefreshFolder}
 								disabled={isRetrying}
+								onClick={onRefreshFolder}
+								size="sm"
+								variant="ghost"
 							>
-								<RefreshCw className={`h-3.5 w-3.5 mr-1 ${isRetrying ? 'animate-spin' : ''}`} />
+								<RefreshCw className={`mr-1 h-3.5 w-3.5 ${isRetrying ? 'animate-spin' : ''}`} />
 								<span className="text-xs">{isRetrying ? 'Recargando...' : 'Recargar'}</span>
 							</Button>
 						)}
 						{currentFolderId && (onScanFolder || onRefreshFolder) && (
-							<Separator orientation="vertical" className="h-4 mx-1" />
+							<Separator className="mx-1 h-4" orientation="vertical" />
 						)}
-						<Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-accent">
-							<Plus className="h-3.5 w-3.5 mr-1" />
+						<Button className="h-7 px-2 hover:bg-accent" size="sm" variant="ghost">
+							<Plus className="mr-1 h-3.5 w-3.5" />
 							<span className="text-xs">Nueva carpeta</span>
 						</Button>
-						<Button variant="ghost" size="sm" className="h-7 px-2 hover:bg-accent">
-							<ImageIcon className="h-3.5 w-3.5 mr-1" />
+						<Button className="h-7 px-2 hover:bg-accent" size="sm" variant="ghost">
+							<ImageIcon className="mr-1 h-3.5 w-3.5" />
 							<span className="text-xs">Subir imágenes</span>
 						</Button>
 					</div>
@@ -574,40 +574,40 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	const _renderIcon = () => {
 		switch (currentView) {
 			case 'all-images':
-				return <ImageIcon className="h-4 w-4 mr-2 text-primary" />;
+				return <ImageIcon className="mr-2 h-4 w-4 text-primary" />;
 			case 'favorites':
-				return <Star className="h-4 w-4 mr-2 text-yellow-500" />;
+				return <Star className="mr-2 h-4 w-4 text-yellow-500" />;
 			case 'collection-content':
-				return <BookImage className="h-4 w-4 mr-2 text-blue-500" />;
+				return <BookImage className="mr-2 h-4 w-4 text-blue-500" />;
 			case 'folder-content':
-				return <FolderIcon className="h-4 w-4 mr-2 text-yellow-500" />;
+				return <FolderIcon className="mr-2 h-4 w-4 text-yellow-500" />;
 			case 'tag-content':
-				return <TagIcon className="h-4 w-4 mr-2 text-green-500" />;
+				return <TagIcon className="mr-2 h-4 w-4 text-green-500" />;
 			case 'album-content':
-				return <Camera className="h-4 w-4 mr-2 text-purple-500" />;
+				return <Camera className="mr-2 h-4 w-4 text-purple-500" />;
 			case 'character-content':
-				return <User2 className="h-4 w-4 mr-2 text-red-500" />;
+				return <User2 className="mr-2 h-4 w-4 text-red-500" />;
 			case 'place-content':
-				return <MapPin className="h-4 w-4 mr-2 text-cyan-500" />;
+				return <MapPin className="mr-2 h-4 w-4 text-cyan-500" />;
 			case 'world-item-content':
-				return <Box className="h-4 w-4 mr-2 text-orange-500" />;
+				return <Box className="mr-2 h-4 w-4 text-orange-500" />;
 			default:
 				return null;
 		}
 	};
 
 	return (
-		<div className="flex items-center justify-between h-10 px-2 border-b">
+		<div className="flex h-10 items-center justify-between border-b px-2">
 			{/* Lado izquierdo: Botón colapsar panel izquierdo + breadcrumbs + selecciones */}
 			<div className="flex items-center gap-2">
 				{/* Botón de colapsar panel izquierdo */}
 				{toggleLeftPanelCollapse && (
 					<Button
-						variant="ghost"
-						size="icon"
 						className="h-7 w-7 hover:bg-accent"
 						onClick={toggleLeftPanelCollapse}
+						size="icon"
 						title={isLeftPanelCollapsed ? 'Abrir panel izquierdo' : 'Cerrar panel izquierdo'}
+						variant="ghost"
 					>
 						{isLeftPanelCollapsed ? (
 							<PanelLeftOpen className="h-3.5 w-3.5" />
@@ -631,11 +631,11 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 
 				{!isInSettingsView && showDetailsButton && (
 					<Button
-						variant="ghost"
-						size="icon"
 						className={cn('h-7 w-7 hover:bg-accent', isVisible && 'bg-accent')}
 						onClick={toggleVisibility}
+						size="icon"
 						title={isVisible ? 'Ocultar detalles' : 'Mostrar detalles'}
+						variant="ghost"
 					>
 						<Info className="h-3.5 w-3.5" />
 					</Button>
@@ -644,11 +644,11 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 				{/* Botón de colapsar panel derecho */}
 				{!isInSettingsView && toggleRightPanelCollapse && (
 					<Button
-						variant="ghost"
-						size="icon"
 						className="h-7 w-7 hover:bg-accent"
 						onClick={toggleRightPanelCollapse}
+						size="icon"
 						title={isRightPanelCollapsed ? 'Abrir panel derecho' : 'Cerrar panel derecho'}
+						variant="ghost"
 					>
 						{isRightPanelCollapsed ? (
 							<PanelRightOpen className="h-3.5 w-3.5" />

@@ -66,28 +66,28 @@ const MemoizedAlbumCard = React.memo(
 						lastModified: album.updatedAt,
 					},
 				}}
-				onClick={onAlbumClick}
 				className="h-full"
+				onClick={onAlbumClick}
 			/>
 			<div className="absolute top-2 right-2 flex gap-1">
 				<Button
-					variant="ghost"
-					size="icon"
 					className="h-7 w-7"
 					onClick={(e) => {
 						e.stopPropagation();
 						onEdit(album);
 					}}
+					size="icon"
+					variant="ghost"
 				>
 					<Edit className="h-4 w-4" />
 				</Button>
 				<AlertDialog>
 					<AlertDialogTrigger asChild>
 						<Button
-							variant="ghost"
-							size="icon"
 							className="h-7 w-7 text-destructive"
 							onClick={(e) => e.stopPropagation()}
+							size="icon"
+							variant="ghost"
 						>
 							<Trash2 className="h-4 w-4" />
 						</Button>
@@ -102,8 +102,8 @@ const MemoizedAlbumCard = React.memo(
 						<AlertDialogFooter>
 							<AlertDialogCancel>Cancelar</AlertDialogCancel>
 							<AlertDialogAction
-								onClick={() => onDelete(album.id)}
 								className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+								onClick={() => onDelete(album.id)}
 							>
 								Eliminar
 							</AlertDialogAction>
@@ -140,7 +140,7 @@ const AlbumsContentView: React.FC<AlbumsContentViewProps> = ({
 }) => {
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<p className="text-destructive">Error: {error}</p>
 			</div>
 		);
@@ -153,39 +153,39 @@ const AlbumsContentView: React.FC<AlbumsContentViewProps> = ({
 	return (
 		<ScrollArea className={className || 'h-full'}>
 			<div className="container mx-auto p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Álbumes</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Álbumes</h2>
 
 				<Button
+					className="mb-4"
 					onClick={() => {
 						setShowForm(!showForm);
 						setEditingAlbum(null);
 						setAlbumName('');
 						setAlbumDescription('');
 					}}
-					className="mb-4"
 				>
 					{showForm ? 'Cancelar' : 'Crear Álbum'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">{editingAlbum ? 'Editar Álbum' : 'Nuevo Álbum'}</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">{editingAlbum ? 'Editar Álbum' : 'Nuevo Álbum'}</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="albumName">Nombre</Label>
 							<Input
 								id="albumName"
-								value={albumName}
 								onChange={(e) => setAlbumName(e.target.value)}
 								placeholder="Nombre del álbum"
+								value={albumName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="albumDescription">Descripción</Label>
 							<Textarea
 								id="albumDescription"
-								value={albumDescription}
 								onChange={(e) => setAlbumDescription(e.target.value)}
 								placeholder="Descripción del álbum (opcional)"
+								value={albumDescription}
 							/>
 						</div>
 						<Button onClick={handleSubmitForm}>{editingAlbum ? 'Guardar Cambios' : 'Guardar Álbum'}</Button>
@@ -194,27 +194,27 @@ const AlbumsContentView: React.FC<AlbumsContentViewProps> = ({
 
 				{(!albums || albums.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
+						description="Crea un álbum para organizar tus imágenes."
 						icon={AlbumIcon}
 						title="No hay álbumes creados"
-						description="Crea un álbum para organizar tus imágenes."
 					/>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 						{albums?.map((album, index) => {
 							const onAlbumClick = () => handleAlbumClick(album);
 							return (
 								<motion.div
-									key={album.id}
-									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
-									transition={{ delay: index * 0.1 }}
 									className="perspective-1000"
+									initial={{ opacity: 0, y: 20 }}
+									key={album.id}
+									transition={{ delay: index * 0.1 }}
 								>
 									<MemoizedAlbumCard
 										album={album}
 										onAlbumClick={onAlbumClick}
-										onEdit={handleEditAlbum}
 										onDelete={handleDeleteAlbum}
+										onEdit={handleEditAlbum}
 									/>
 								</motion.div>
 							);

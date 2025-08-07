@@ -22,17 +22,17 @@ export function GroupHeader({
 	isDeleting = false,
 }: GroupHeaderProps) {
 	return (
-		<CardHeader className="pb-4 px-6">
+		<CardHeader className="px-6 pb-4">
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-2">
-					<span role="img" aria-label="emoji" className="text-2xl">
+					<span aria-label="emoji" className="text-2xl" role="img">
 						{emoji}
 					</span>
 					<div className="flex flex-col">
-						<CardTitle className="text-xl font-bold flex items-center gap-2">
+						<CardTitle className="flex items-center gap-2 font-bold text-xl">
 							{name}
 							{isFavorite && onFavoriteToggle && (
-								<Button variant="ghost" size="icon" onClick={onFavoriteToggle} className="h-4 w-4 p-0" title="Favorito">
+								<Button className="h-4 w-4 p-0" onClick={onFavoriteToggle} size="icon" title="Favorito" variant="ghost">
 									<StarIcon className="h-4 w-4 text-yellow-500" />
 								</Button>
 							)}
@@ -41,12 +41,12 @@ export function GroupHeader({
 				</div>
 				<div className="flex items-center gap-2">
 					{onEdit && (
-						<Button variant="ghost" size="icon" onClick={onEdit} title="Editar">
+						<Button onClick={onEdit} size="icon" title="Editar" variant="ghost">
 							<EditIcon className="h-4 w-4" />
 						</Button>
 					)}
 					{onDelete && (
-						<Button variant="ghost" size="icon" onClick={onDelete} disabled={isDeleting} title="Eliminar">
+						<Button disabled={isDeleting} onClick={onDelete} size="icon" title="Eliminar" variant="ghost">
 							<Trash className="h-4 w-4" />
 						</Button>
 					)}

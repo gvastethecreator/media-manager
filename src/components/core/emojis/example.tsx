@@ -20,9 +20,9 @@ export function EmojiPickerExample() {
 	};
 
 	return (
-		<div className="space-y-6 p-6 max-w-4xl mx-auto">
-			<div className="text-center space-y-2">
-				<h1 className="text-3xl font-bold">🎨 EmojiPicker con Frimousse</h1>
+		<div className="mx-auto max-w-4xl space-y-6 p-6">
+			<div className="space-y-2 text-center">
+				<h1 className="font-bold text-3xl">🎨 EmojiPicker con Frimousse</h1>
 				<p className="text-muted-foreground">Ejemplos de uso después de la migración de emoji-mart</p>
 			</div>
 
@@ -35,19 +35,19 @@ export function EmojiPickerExample() {
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="space-y-2">
-							<div className="text-sm font-medium">Emoji seleccionado:</div>
+							<div className="font-medium text-sm">Emoji seleccionado:</div>
 							<div className="text-2xl">{selectedEmojis.compact}</div>
 						</div>
 
 						<EmojiPicker
-							value={selectedEmojis.compact}
-							onEmojiSelect={handleEmojiChange('compact')}
-							compact={true}
-							showLabel={true}
 							className="w-full"
+							compact={true}
+							onEmojiSelect={handleEmojiChange('compact')}
+							showLabel={true}
+							value={selectedEmojis.compact}
 						/>
 
-						<div className="text-xs text-muted-foreground">
+						<div className="text-muted-foreground text-xs">
 							• Emojis frecuentes visibles
 							<br />• Búsqueda integrada
 							<br />• Optimizado para formularios
@@ -63,19 +63,19 @@ export function EmojiPickerExample() {
 					</CardHeader>
 					<CardContent className="space-y-4">
 						<div className="space-y-2">
-							<div className="text-sm font-medium">Emoji seleccionado:</div>
+							<div className="font-medium text-sm">Emoji seleccionado:</div>
 							<div className="text-2xl">{selectedEmojis.full}</div>
 						</div>
 
 						<EmojiPicker
-							value={selectedEmojis.full}
-							onEmojiSelect={handleEmojiChange('full')}
-							compact={false}
-							showLabel={true}
 							className="w-full"
+							compact={false}
+							onEmojiSelect={handleEmojiChange('full')}
+							showLabel={true}
+							value={selectedEmojis.full}
 						/>
 
-						<div className="text-xs text-muted-foreground">
+						<div className="text-muted-foreground text-xs">
 							• Más emojis frecuentes
 							<br />• Búsqueda expandida
 							<br />• Mejor para desktop
@@ -91,34 +91,34 @@ export function EmojiPickerExample() {
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 								<div className="space-y-2">
-									<label htmlFor="album-name" className="text-sm font-medium">
+									<label className="font-medium text-sm" htmlFor="album-name">
 										Nombre
 									</label>
 									<input
-										id="album-name"
-										className="w-full px-3 py-2 border rounded-md"
-										placeholder="Mi álbum..."
+										className="w-full rounded-md border px-3 py-2"
 										defaultValue="Mi Álbum de Fotos"
+										id="album-name"
+										placeholder="Mi álbum..."
 									/>
 								</div>
 
 								<div className="space-y-2">
-									<div className="text-sm font-medium">Emoji</div>
+									<div className="font-medium text-sm">Emoji</div>
 									<EmojiPicker
-										value={selectedEmojis.form}
-										onEmojiSelect={handleEmojiChange('form')}
 										compact={true}
+										onEmojiSelect={handleEmojiChange('form')}
 										showLabel={false}
+										value={selectedEmojis.form}
 									/>
 								</div>
 
 								<div className="space-y-2">
-									<label htmlFor="album-category" className="text-sm font-medium">
+									<label className="font-medium text-sm" htmlFor="album-category">
 										Categoría
 									</label>
-									<select id="album-category" className="w-full px-3 py-2 border rounded-md">
+									<select className="w-full rounded-md border px-3 py-2" id="album-category">
 										<option>Personal</option>
 										<option>Trabajo</option>
 										<option>Viajes</option>
@@ -126,13 +126,13 @@ export function EmojiPickerExample() {
 								</div>
 							</div>
 
-							<div className="pt-4 border-t">
-								<h4 className="font-medium mb-2">Vista previa:</h4>
-								<div className="flex items-center gap-3 p-3 bg-muted rounded-lg">
+							<div className="border-t pt-4">
+								<h4 className="mb-2 font-medium">Vista previa:</h4>
+								<div className="flex items-center gap-3 rounded-lg bg-muted p-3">
 									<span className="text-2xl">{selectedEmojis.form}</span>
 									<div>
 										<div className="font-medium">Mi Álbum de Fotos</div>
-										<div className="text-sm text-muted-foreground">Personal</div>
+										<div className="text-muted-foreground text-sm">Personal</div>
 									</div>
 								</div>
 							</div>
@@ -142,16 +142,16 @@ export function EmojiPickerExample() {
 			</div>
 
 			{/* Información de migración */}
-			<Card className="border-green-200 bg-green-50 dark:bg-green-950 dark:border-green-800">
+			<Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
 				<CardHeader>
 					<CardTitle className="flex items-center gap-2 text-green-800 dark:text-green-200">
 						✅ Migración Exitosa
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="text-green-700 dark:text-green-300">
-					<div className="grid md:grid-cols-2 gap-4 text-sm">
+					<div className="grid gap-4 text-sm md:grid-cols-2">
 						<div>
-							<h5 className="font-medium mb-2">Beneficios obtenidos:</h5>
+							<h5 className="mb-2 font-medium">Beneficios obtenidos:</h5>
 							<ul className="space-y-1">
 								<li>• 90% menos bundle size</li>
 								<li>• Mejor rendimiento</li>
@@ -160,7 +160,7 @@ export function EmojiPickerExample() {
 							</ul>
 						</div>
 						<div>
-							<h5 className="font-medium mb-2">Características nuevas:</h5>
+							<h5 className="mb-2 font-medium">Características nuevas:</h5>
 							<ul className="space-y-1">
 								<li>• Emojis frecuentes curados</li>
 								<li>• Búsqueda mejorada</li>

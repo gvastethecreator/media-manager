@@ -114,7 +114,7 @@ async function simulatePromptExecution(content: string, config: PromptExecutionC
 			total: promptTokens + completionTokens,
 		},
 		model: config.model || 'simulation',
-		executionTime: executionTime,
+		executionTime,
 	};
 }
 
@@ -137,7 +137,7 @@ export async function executePrompt(
 			temperature: 0.7,
 			maxTokens: 1000,
 			saveToHistory: true,
-			timeoutMs: 30000,
+			timeoutMs: 30_000,
 		}; // Combinar configuración por defecto con la proporcionada
 		const finalConfig = { ...defaultConfig, ...config };
 

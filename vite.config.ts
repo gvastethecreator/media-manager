@@ -60,8 +60,8 @@ export default defineConfig({
 				changeOrigin: true,
 				secure: false,
 				// Optimizaciones de proxy
-				timeout: 30000,
-				proxyTimeout: 30000,
+				timeout: 30_000,
+				proxyTimeout: 30_000,
 			},
 		},
 		// Optimizaci?n de watch para Bun

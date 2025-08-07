@@ -48,7 +48,7 @@ export function PlaceCard({
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
 					className
 				)}
 			>
@@ -61,7 +61,7 @@ export function PlaceCard({
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
 					className
 				)}
 			>
@@ -181,38 +181,38 @@ export function PlaceCard({
 
 	return (
 		<motion.div
+			aria-label={`Lugar: ${name}`}
 			className={cn(
 				'w-[300px] md:w-[320px]',
 				tcgMode ? 'h-[470px]' : 'h-[400px]',
 				compact && 'h-[220px]',
-				disabled && 'opacity-70 pointer-events-none',
+				disabled && 'pointer-events-none opacity-70',
 				className
 			)}
-			whileHover={!disabled ? { y: -8, transition: { duration: 0.3 } } : {}}
-			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
 			onClick={disabled || !onClick ? undefined : () => onClick(place)}
 			onKeyDown={handleKeyDown}
-			tabIndex={disabled || !onClick ? -1 : 0}
-			role={onClick ? 'button' : 'article'}
-			aria-label={`Lugar: ${name}`}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
+			role={onClick ? 'button' : 'article'}
+			tabIndex={disabled || !onClick ? -1 : 0}
+			whileHover={disabled ? {} : { y: -8, transition: { duration: 0.3 } }}
+			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
 		>
 			<CardContainer
-				primaryColor={primaryColor}
-				secondaryColor={secondaryColor}
 				className={cn(
 					'transition-all duration-300',
 					isHovered && 'scale-[1.02]',
 					isSelected && 'ring-4 ring-primary/60'
 				)}
+				primaryColor={primaryColor}
+				secondaryColor={secondaryColor}
 			>
 				{/* Efectos holográficos especiales para el modo TCG */}
 				{tcgMode && (
 					<>
 						{/* Efecto holográfico de resplandor que se mueve con hover */}
 						<div
-							className="absolute inset-0 opacity-0 hover:opacity-30 transition-opacity duration-300 pointer-events-none z-1"
+							className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-30"
 							style={{
 								backgroundImage: `
 									linear-gradient(125deg,
@@ -228,7 +228,7 @@ export function PlaceCard({
 						/>
 
 						{/* Efecto holográfico de rareza */}
-						<div className="absolute inset-0 opacity-0 hover:opacity-20 transition-opacity duration-300 pointer-events-none z-1">
+						<div className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-20">
 							<div
 								className="absolute inset-0"
 								style={{
@@ -247,12 +247,12 @@ export function PlaceCard({
 						</div>
 
 						{/* Sello de valor estratégico en el modo TCG */}
-						<div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 opacity-10 pointer-events-none z-1">
+						<div className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/3 left-1/2 z-1 h-20 w-20 opacity-10">
 							<div
-								className="w-full h-full rounded-full border-2 border-dashed flex items-center justify-center"
+								className="flex h-full w-full items-center justify-center rounded-full border-2 border-dashed"
 								style={{ borderColor: primaryColor }}
 							>
-								<div className="text-xs font-bold" style={{ color: primaryColor }}>
+								<div className="font-bold text-xs" style={{ color: primaryColor }}>
 									VALOR
 									<br />
 									{valueLevel}
@@ -262,9 +262,9 @@ export function PlaceCard({
 
 						{/* Sello de rareza holográfico cuando es favorito */}
 						{isFavorite && (
-							<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
+							<div className="pointer-events-none absolute top-0 right-0 z-30 h-24 w-24 overflow-hidden">
 								<div
-									className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
+									className="-translate-y-8 absolute top-0 right-0 h-24 w-24 translate-x-12 rotate-45 opacity-70"
 									style={{
 										background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
 										backgroundSize: '600% 600%',
@@ -277,18 +277,18 @@ export function PlaceCard({
 				)}
 
 				{/* Contenedor principal */}
-				<div className="flex flex-col h-full relative z-1">
+				<div className="relative z-1 flex h-full flex-col">
 					{/* Cabecera con nombre, emoji, región y tipo */}
 					<PlaceCardHeader
-						name={name}
-						emoji={emoji || '📍'}
-						color={primaryColor}
-						region={region || 'desconocido'}
-						type={type || 'desconocido'}
 						climate={climate || 'templado'}
-						isFavorite={isFavorite}
-						tcgMode={tcgMode}
+						color={primaryColor}
 						compact={compact}
+						emoji={emoji || '📍'}
+						isFavorite={isFavorite}
+						name={name}
+						region={region || 'desconocido'}
+						tcgMode={tcgMode}
+						type={type || 'desconocido'}
 					/>
 
 					{/* En modo compacto solo mostrar header y footer */}
@@ -296,37 +296,37 @@ export function PlaceCard({
 						<>
 							{/* Galería de imágenes */}
 							<PlaceCardImages
-								mainImage={cardMedia[0]}
+								compact={false}
 								images={cardMedia}
+								mainImage={cardMedia[0]}
 								primaryColor={primaryColor}
 								rarityLevel={rarityLevel}
 								tcgMode={tcgMode}
-								compact={false}
 							/>
 
 							{/* Contenido principal con descripción, recursos y estadísticas */}
 							<PlaceCardContent
-								description={description || undefined}
 								climate={climate || undefined}
-								population={population || 0}
+								description={description || undefined}
 								government={government || undefined}
-								parsedResources={safeParsedResources}
 								parsedDangers={safeParsedDangers}
+								parsedResources={safeParsedResources}
 								parsedStats={safeParsedStats}
+								population={population || 0}
 							/>
 
 							{/* Pie de carta con conteos y valores TCG */}
 							<PlaceCardFooter
+								cardId={cardId}
+								compact={compact}
 								createdAt={createdAt}
+								healthPoints={healthPoints}
 								imagesCount={imagesCount}
-								videosCount={videosCount}
+								power={power}
 								primaryColor={primaryColor}
 								secondaryColor={secondaryColor}
-								power={power}
-								healthPoints={healthPoints}
-								cardId={cardId}
 								tcgMode={tcgMode}
-								compact={compact}
+								videosCount={videosCount}
 							/>
 						</>
 					)}

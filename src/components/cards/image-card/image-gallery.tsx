@@ -204,10 +204,10 @@ export function ImageGallery({
 	// Renderizar contenido vacío
 	if (!loading && sortedImages.length === 0) {
 		return (
-			<div className={cn('flex flex-col items-center justify-center py-12 px-4', className)}>
+			<div className={cn('flex flex-col items-center justify-center px-4 py-12', className)}>
 				<div className="text-center">
-					<h3 className="mt-2 text-lg font-medium text-gray-900 dark:text-gray-100">{emptyMessage}</h3>
-					<p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+					<h3 className="mt-2 font-medium text-gray-900 text-lg dark:text-gray-100">{emptyMessage}</h3>
+					<p className="mt-1 text-gray-500 text-sm dark:text-gray-400">
 						No se encontraron imágenes que coincidan con los criterios actuales.
 					</p>
 				</div>
@@ -219,27 +219,27 @@ export function ImageGallery({
 		<div className={cn('space-y-4', className)}>
 			{/* Cabecera con título y controles */}
 			{(title || showControls) && (
-				<div className="flex flex-col sm:flex-row sm:items-center justify-between mb-6 gap-4">
-					{title && <h2 className="text-2xl font-bold dark:text-white">{title}</h2>}
+				<div className="mb-6 flex flex-col justify-between gap-4 sm:flex-row sm:items-center">
+					{title && <h2 className="font-bold text-2xl dark:text-white">{title}</h2>}
 
 					{showControls && (
-						<div className="flex flex-wrap gap-2 items-center">
+						<div className="flex flex-wrap items-center gap-2">
 							{/* Búsqueda */}
 							<div className="w-full sm:w-auto">
 								<Input
+									className="h-9"
+									onChange={(e) => setSearchTerm(e.target.value)}
 									placeholder="Buscar imágenes..."
 									value={searchTerm}
-									onChange={(e) => setSearchTerm(e.target.value)}
-									className="h-9"
 								/>
 							</div>
 
 							{/* Ordenamiento */}
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
-									<Button variant="outline" size="sm" className="h-9">
-										<SortAsc className={cn('h-4 w-4 mr-2', sortDirection === 'desc' && 'hidden')} />
-										<SortDesc className={cn('h-4 w-4 mr-2', sortDirection === 'asc' && 'hidden')} />
+									<Button className="h-9" size="sm" variant="outline">
+										<SortAsc className={cn('mr-2 h-4 w-4', sortDirection === 'desc' && 'hidden')} />
+										<SortDesc className={cn('mr-2 h-4 w-4', sortDirection === 'asc' && 'hidden')} />
 										<span>Ordenar</span>
 									</Button>
 								</DropdownMenuTrigger>
@@ -257,29 +257,29 @@ export function ImageGallery({
 							{/* Selector de layout */}
 							<div className="flex items-center rounded-md border border-input">
 								<Button
-									variant="ghost"
-									size="sm"
-									className={cn('h-9 px-2 rounded-none rounded-l-md', layout === 'grid' && 'bg-primary/10')}
+									className={cn('h-9 rounded-none rounded-l-md px-2', layout === 'grid' && 'bg-primary/10')}
 									onClick={() => setLayout('grid')}
+									size="sm"
+									variant="ghost"
 								>
 									<Grid3X3Icon className="h-4 w-4" />
 								</Button>
 								<Button
-									variant="ghost"
-									size="sm"
 									className={cn(
-										'h-9 px-2 rounded-none border-l border-r border-input',
+										'h-9 rounded-none border-input border-r border-l px-2',
 										layout === 'grid-dense' && 'bg-primary/10'
 									)}
 									onClick={() => setLayout('grid-dense')}
+									size="sm"
+									variant="ghost"
 								>
 									<Grid2X2Icon className="h-4 w-4" />
 								</Button>
 								<Button
-									variant="ghost"
-									size="sm"
-									className={cn('h-9 px-2 rounded-none rounded-r-md', layout === 'list' && 'bg-primary/10')}
+									className={cn('h-9 rounded-none rounded-r-md px-2', layout === 'list' && 'bg-primary/10')}
 									onClick={() => setLayout('list')}
+									size="sm"
+									variant="ghost"
 								>
 									<ListIcon className="h-4 w-4" />
 								</Button>
@@ -287,7 +287,7 @@ export function ImageGallery({
 
 							{/* Selección */}
 							{selectable && selectedImages.length > 0 && (
-								<Button variant="primary" size="sm" className="h-9" onClick={clearSelection}>
+								<Button className="h-9" onClick={clearSelection} size="sm" variant="primary">
 									Limpiar ({selectedImages.length})
 								</Button>
 							)}
@@ -298,10 +298,10 @@ export function ImageGallery({
 
 			{/* Contenedor principal de imágenes */}
 			<motion.div
-				className={getLayoutClasses()}
-				layout
-				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
+				className={getLayoutClasses()}
+				initial={{ opacity: 0 }}
+				layout
 				transition={{ duration: 0.3 }}
 			>
 				{sortedImages.map((image, index) => {
@@ -310,38 +310,38 @@ export function ImageGallery({
 
 					return (
 						<motion.div
-							key={imageId}
-							layout
-							initial={{ opacity: 0, y: 20 }}
 							animate={{
 								opacity: 1,
 								y: 0,
 								transition: { delay: index * 0.05, duration: 0.3 },
 							}}
-							exit={{ opacity: 0, scale: 0.9 }}
 							className={layout === 'list' ? 'w-full' : undefined}
+							exit={{ opacity: 0, scale: 0.9 }}
+							initial={{ opacity: 0, y: 20 }}
+							key={imageId}
+							layout
 						>
 							{typeof image === 'string' ? (
 								// Renderizar tarjeta con solo el ID, cargará datos internamente
 								<ImageCardImproved
-									imageId={image}
-									variant={variant}
 									aspectRatio={layout === 'list' ? 'auto' : aspectRatio}
-									onClick={onImageClick ? handleImageClick : undefined}
+									className={layout === 'list' ? 'flex h-20 flex-row items-center' : undefined}
+									imageId={image}
 									isSelected={isSelected}
-									className={layout === 'list' ? 'flex flex-row items-center h-20' : undefined}
-									priority={index < 8} // Cargar con prioridad las primeras 8 imágenes
+									onClick={onImageClick ? handleImageClick : undefined}
+									priority={index < 8}
+									variant={variant} // Cargar con prioridad las primeras 8 imágenes
 								/>
 							) : (
 								// Renderizar tarjeta con los datos completos
 								<ImageCardImproved
-									imageId={image.id}
-									variant={variant}
 									aspectRatio={layout === 'list' ? 'auto' : aspectRatio}
-									onClick={onImageClick ? handleImageClick : undefined}
+									className={layout === 'list' ? 'flex h-20 flex-row items-center' : undefined}
+									imageId={image.id}
 									isSelected={isSelected}
-									className={layout === 'list' ? 'flex flex-row items-center h-20' : undefined}
+									onClick={onImageClick ? handleImageClick : undefined}
 									priority={index < 8}
+									variant={variant}
 								/>
 							)}
 						</motion.div>
@@ -352,7 +352,7 @@ export function ImageGallery({
 			{/* Botón "Cargar más" */}
 			{showLoadMore && hasMoreImages && (
 				<div className="mt-8 flex justify-center">
-					<Button variant="outline" onClick={handleLoadMore} disabled={isLoadingMore} className="px-4 py-2">
+					<Button className="px-4 py-2" disabled={isLoadingMore} onClick={handleLoadMore} variant="outline">
 						{isLoadingMore ? (
 							<>
 								<RefreshCw className="mr-2 h-4 w-4 animate-spin" />

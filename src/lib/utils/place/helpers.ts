@@ -116,9 +116,7 @@ export function buildPlaceTree(places: PlaceWithStats[]) {
 	const rootPlaces: PlaceWithStats[] = [];
 
 	for (const place of places) {
-		if (!place.region) {
-			rootPlaces.push(place);
-		} else {
+		if (place.region) {
 			const path = place.region.split('/').filter(Boolean);
 			let current = tree;
 
@@ -131,6 +129,8 @@ export function buildPlaceTree(places: PlaceWithStats[]) {
 				}
 				current = current[segment].children;
 			}
+		} else {
+			rootPlaces.push(place);
 		}
 	}
 

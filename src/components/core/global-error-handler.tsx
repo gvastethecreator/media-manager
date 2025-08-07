@@ -14,19 +14,19 @@ export function GlobalErrorFallback({ error, resetError }: { error: Error; reset
 	}, [error]);
 
 	return (
-		<div className="flex flex-col items-center justify-center min-h-[50vh] p-6">
-			<div className="max-w-md w-full bg-card border border-destructive/30 rounded-lg shadow-lg p-6">
+		<div className="flex min-h-[50vh] flex-col items-center justify-center p-6">
+			<div className="w-full max-w-md rounded-lg border border-destructive/30 bg-card p-6 shadow-lg">
 				<div className="flex flex-col items-center text-center">
-					<AlertCircle className="h-12 w-12 text-destructive mb-4" />
-					<h2 className="text-xl font-bold mb-2">Ha ocurrido un error</h2>
-					<p className="text-muted-foreground mb-4">
+					<AlertCircle className="mb-4 h-12 w-12 text-destructive" />
+					<h2 className="mb-2 font-bold text-xl">Ha ocurrido un error</h2>
+					<p className="mb-4 text-muted-foreground">
 						Lo sentimos, algo salió mal. Estamos trabajando para solucionarlo.
 					</p>
-					<div className="bg-muted/50 rounded p-3 mb-4 w-full overflow-auto max-h-32">
-						<p className="text-xs font-mono text-destructive/80">{error.message || 'Error desconocido'}</p>
+					<div className="mb-4 max-h-32 w-full overflow-auto rounded bg-muted/50 p-3">
+						<p className="font-mono text-destructive/80 text-xs">{error.message || 'Error desconocido'}</p>
 					</div>
-					<Button onClick={resetError} variant="primary" className="flex items-center">
-						<RefreshCw className="h-4 w-4 mr-2" />
+					<Button className="flex items-center" onClick={resetError} variant="primary">
+						<RefreshCw className="mr-2 h-4 w-4" />
 						Reintentar
 					</Button>
 				</div>

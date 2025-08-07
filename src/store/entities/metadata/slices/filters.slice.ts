@@ -90,10 +90,8 @@ export const createFiltersSlice: StateCreator<MetadataStore, [], [], FiltersStat
 
 		return metadatas.filter((metadata) => {
 			// Filtro por formato
-			if (filterOptions.format && filterOptions.format.length > 0) {
-				if (!filterOptions.format.includes(metadata.format)) {
-					return false;
-				}
+			if (filterOptions.format && filterOptions.format.length > 0 && !filterOptions.format.includes(metadata.format)) {
+				return false;
 			}
 
 			// Filtro por dimensiones
@@ -119,17 +117,17 @@ export const createFiltersSlice: StateCreator<MetadataStore, [], [], FiltersStat
 			}
 
 			// Filtro por espacio de color
-			if (filterOptions.colorSpace && filterOptions.colorSpace.length > 0) {
-				if (!metadata.colorSpace || !filterOptions.colorSpace.includes(metadata.colorSpace)) {
-					return false;
-				}
+			if (
+				filterOptions.colorSpace &&
+				filterOptions.colorSpace.length > 0 &&
+				!(metadata.colorSpace && filterOptions.colorSpace.includes(metadata.colorSpace))
+			) {
+				return false;
 			}
 
 			// Filtro por canal alfa
-			if (filterOptions.hasAlpha !== undefined) {
-				if (metadata.hasAlpha !== filterOptions.hasAlpha) {
-					return false;
-				}
+			if (filterOptions.hasAlpha !== undefined && metadata.hasAlpha !== filterOptions.hasAlpha) {
+				return false;
 			}
 
 			// Filtro por búsqueda de texto

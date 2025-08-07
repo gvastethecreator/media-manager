@@ -232,7 +232,7 @@ export async function createPlace(input: PlaceCreateInput): Promise<PlaceWithSta
 				notes: input.notes || null,
 				featuredImage: input.featuredImage || null,
 				parentId: input.parentId || null,
-				isFavorite: input.isFavorite || false,
+				isFavorite: input.isFavorite,
 				totalImages: 0,
 				totalVideos: 0,
 

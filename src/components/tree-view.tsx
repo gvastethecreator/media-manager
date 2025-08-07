@@ -102,29 +102,29 @@ export function TreeView({
 			);
 
 		return (
-			<div key={node.id} className="select-none">
+			<div className="select-none" key={node.id}>
 				<motion.div
 					className={cn(
-						'flex items-center py-1 px-2 cursor-pointer transition-all duration-200 relative group rounded-sm',
+						'group relative flex cursor-pointer items-center rounded-sm px-2 py-1 transition-all duration-200',
 						'hover:bg-accent/30',
 						isSelected && 'bg-accent/60',
 						selectable && 'hover:border-accent-foreground/10'
 					)}
-					style={{ paddingLeft: level * indent + 4 }}
 					onClick={(e) => {
 						if (hasChildren) toggleExpanded(node.id);
 						handleSelection(node.id, e.ctrlKey || e.metaKey);
 						onNodeClick?.(node);
 					}}
+					style={{ paddingLeft: level * indent + 4 }}
 					whileTap={{ scale: 0.98, transition: { duration: 0.1 } }}
 				>
 					{/* Tree Lines */}
 					{showLines && level > 0 && (
-						<div className="absolute left-0 top-0 bottom-0 pointer-events-none">
+						<div className="pointer-events-none absolute top-0 bottom-0 left-0">
 							{currentPath.map((isLastInPath, pathIndex) => (
 								<div
+									className="absolute top-0 bottom-0 border-border/40 border-l"
 									key={pathIndex}
-									className="absolute top-0 bottom-0 border-l border-border/40"
 									style={{
 										left: pathIndex * indent + 12,
 										display: pathIndex === currentPath.length - 1 && isLastInPath ? 'none' : 'block',
@@ -132,7 +132,7 @@ export function TreeView({
 								/>
 							))}
 							<div
-								className="absolute top-1/2 border-t border-border/40"
+								className="absolute top-1/2 border-border/40 border-t"
 								style={{
 									left: (level - 1) * indent + 12,
 									width: indent - 4,
@@ -141,7 +141,7 @@ export function TreeView({
 							/>
 							{isLast && (
 								<div
-									className="absolute top-0 border-l border-border/40"
+									className="absolute top-0 border-border/40 border-l"
 									style={{
 										left: (level - 1) * indent + 12,
 										height: '50%',
@@ -153,8 +153,8 @@ export function TreeView({
 
 					{/* Expand Icon */}
 					<motion.div
-						className="flex items-center justify-center w-3 h-3 mr-1"
 						animate={{ rotate: hasChildren && isExpanded ? 90 : 0 }}
+						className="mr-1 flex h-3 w-3 items-center justify-center"
 						transition={{ duration: 0.2, ease: 'easeInOut' }}
 					>
 						{hasChildren && <ChevronRight className="h-2.5 w-2.5 text-muted-foreground" />}
@@ -163,35 +163,35 @@ export function TreeView({
 					{/* Node Icon */}
 					{showIcons && (
 						<motion.div
-							className="flex items-center justify-center w-3 h-3 mr-1.5 text-muted-foreground"
-							whileHover={{ scale: 1.1 }}
+							className="mr-1.5 flex h-3 w-3 items-center justify-center text-muted-foreground"
 							transition={{ duration: 0.15 }}
+							whileHover={{ scale: 1.1 }}
 						>
 							{node.icon || getDefaultIcon()}
 						</motion.div>
 					)}
 
 					{/* Label */}
-					<span className="text-xs font-medium truncate flex-1">{node.label}</span>
+					<span className="flex-1 truncate font-medium text-xs">{node.label}</span>
 				</motion.div>
 
 				{/* Children */}
 				<AnimatePresence>
 					{hasChildren && isExpanded && (
 						<motion.div
-							initial={{ height: 0, opacity: 0 }}
 							animate={{ height: 'auto', opacity: 1 }}
+							className="overflow-hidden"
 							exit={{ height: 0, opacity: 0 }}
+							initial={{ height: 0, opacity: 0 }}
 							transition={{
 								duration: animateExpand ? 0.3 : 0,
 								ease: 'easeInOut',
 							}}
-							className="overflow-hidden"
 						>
 							<motion.div
-								initial={{ y: -10 }}
 								animate={{ y: 0 }}
 								exit={{ y: -10 }}
+								initial={{ y: -10 }}
 								transition={{
 									duration: animateExpand ? 0.2 : 0,
 									delay: animateExpand ? 0.1 : 0,
@@ -210,9 +210,9 @@ export function TreeView({
 
 	return (
 		<motion.div
+			animate={{ opacity: 1, y: 0 }}
 			className={cn('w-full bg-background', className)}
 			initial={{ opacity: 0, y: 5 }}
-			animate={{ opacity: 1, y: 0 }}
 			transition={{ duration: 0.2, ease: 'easeOut' }}
 		>
 			<div className="p-0">{data.map((node, index) => renderNode(node, 0, index === data.length - 1))}</div>

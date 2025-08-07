@@ -63,15 +63,15 @@ async function getSystemStats(): Promise<SystemStats> {
 				loadAvg: [0, 0, 0],
 			},
 			memory: {
-				total: 8589934592, // 8GB
-				free: 4294967296, // 4GB
-				used: 4294967296, // 4GB
+				total: 8_589_934_592, // 8GB
+				free: 4_294_967_296, // 4GB
+				used: 4_294_967_296, // 4GB
 				usedPercent: 50,
-				processUsed: 134217728, // 128MB
+				processUsed: 134_217_728, // 128MB
 				processUsedPercent: 2,
 			},
 			uptime: {
-				system: 86400, // 1 día
+				system: 86_400, // 1 día
 				process: 3600, // 1 hora
 			},
 			network: {
@@ -158,7 +158,7 @@ async function logSystemStats(): Promise<void> {
  * @param interval Intervalo en milisegundos (por defecto 60000 = 1 minuto)
  * @returns Función para detener el monitor
  */
-export async function startSystemMonitor(interval = 60000): Promise<() => void> {
+export async function startSystemMonitor(interval = 60_000): Promise<() => void> {
 	console.log('🖥️ Iniciando monitor de sistema (cliente)...');
 
 	const intervalId = setInterval(logSystemStats, interval);

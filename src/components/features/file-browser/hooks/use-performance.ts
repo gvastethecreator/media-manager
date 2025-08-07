@@ -145,7 +145,7 @@ export function usePerformance(options: UsePerformanceOptions = {}) {
 		cache: {
 			thumbnails: true,
 			maxSize: 100,
-			ttl: 3600000,
+			ttl: 3_600_000,
 		},
 		debounce: {
 			search: 300,
@@ -176,7 +176,7 @@ export function usePerformance(options: UsePerformanceOptions = {}) {
 	// Filtrado optimizado con memoización
 	const filteredData = useAdvancedMemo(
 		() => {
-			if (!filterFn && !debouncedSearchTerm) return data;
+			if (!(filterFn || debouncedSearchTerm)) return data;
 
 			return measureTime(() => {
 				let result = data;

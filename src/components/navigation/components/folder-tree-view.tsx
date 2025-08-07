@@ -100,17 +100,17 @@ export const FolderTreeView = memo(function FolderTreeView({
 
 	return (
 		<TreeView
-			data={treeData}
+			animateExpand={true}
 			className={cn('text-xs', className)}
+			data={treeData}
+			indent={12}
+			multiSelect={false}
 			onNodeClick={handleNodeClick}
 			onNodeExpand={handleNodeExpand}
-			selectedIds={selectedFolderId ? [selectedFolderId] : []}
-			showLines={false}
-			showIcons={true}
 			selectable={true}
-			multiSelect={false}
-			indent={12}
-			animateExpand={true}
+			selectedIds={selectedFolderId ? [selectedFolderId] : []}
+			showIcons={true}
+			showLines={false}
 		/>
 	);
 });

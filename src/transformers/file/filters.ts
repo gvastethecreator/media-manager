@@ -87,10 +87,8 @@ export function applySortToFiles(
 		let comparison = 0;
 
 		// Siempre mostrar directorios primero si se ordena por nombre
-		if (actualSortBy === 'name') {
-			if (a.isDirectory !== b.isDirectory) {
-				return a.isDirectory ? -1 : 1;
-			}
+		if (actualSortBy === 'name' && a.isDirectory !== b.isDirectory) {
+			return a.isDirectory ? -1 : 1;
 		}
 
 		// Ordenar por el campo específico

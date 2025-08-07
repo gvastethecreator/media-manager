@@ -99,7 +99,7 @@ export function WorkflowsView() {
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<p className="text-destructive">Error: {error}</p>
 			</div>
 		);
@@ -112,31 +112,31 @@ export function WorkflowsView() {
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Workflows</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Workflows</h2>
 
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
 					{showForm ? 'Cancelar' : 'Crear Workflow'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nuevo Workflow</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nuevo Workflow</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="workflowName">Nombre</Label>
 							<Input
 								id="workflowName"
-								value={newWorkflowName}
 								onChange={(e) => setNewWorkflowName(e.target.value)}
 								placeholder="Nombre del workflow"
+								value={newWorkflowName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="workflowDescription">Descripción</Label>
 							<Textarea
 								id="workflowDescription"
-								value={newWorkflowDescription}
 								onChange={(e) => setNewWorkflowDescription(e.target.value)}
 								placeholder="Descripción del workflow (opcional)"
+								value={newWorkflowDescription}
 							/>
 						</div>
 						<Button onClick={handleCreateWorkflow}>Guardar Workflow</Button>
@@ -145,19 +145,19 @@ export function WorkflowsView() {
 
 				{(!workflows || workflows.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
+						description="Crea un workflow para automatizar tareas."
 						icon={Workflow}
 						title="No hay workflows creados"
-						description="Crea un workflow para automatizar tareas."
 					/>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 						{workflows?.map((wf, index) => (
 							<motion.div
-								key={wf.id}
-								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
-								transition={{ delay: index * 0.1 }}
 								className="perspective-1000"
+								initial={{ opacity: 0, y: 20 }}
+								key={wf.id}
+								transition={{ delay: index * 0.1 }}
 							>
 								<WorkflowCard key={wf.id} name={wf.name} />
 							</motion.div>

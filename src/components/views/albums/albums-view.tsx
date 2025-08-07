@@ -87,21 +87,21 @@ export function AlbumsView(_props: ViewProps) {
 
 	return (
 		<AlbumsContentView
-			albums={sortedAlbums}
-			isLoading={isLoading}
-			error={error}
-			showForm={showForm}
-			editingAlbum={editingAlbum}
-			albumName={albumName}
 			albumDescription={albumDescription}
-			setShowForm={setShowForm}
-			setEditingAlbum={setEditingAlbum}
-			setAlbumName={setAlbumName}
-			setAlbumDescription={setAlbumDescription}
+			albumName={albumName}
+			albums={sortedAlbums}
+			editingAlbum={editingAlbum}
+			error={error}
 			handleAlbumClick={handleAlbumClick}
-			handleEditAlbum={handleEditAlbum}
 			handleDeleteAlbum={handleDeleteAlbum}
+			handleEditAlbum={handleEditAlbum}
 			handleSubmitForm={handleSubmitForm}
+			isLoading={isLoading}
+			setAlbumDescription={setAlbumDescription}
+			setAlbumName={setAlbumName}
+			setEditingAlbum={setEditingAlbum}
+			setShowForm={setShowForm}
+			showForm={showForm}
 		/>
 	);
 }

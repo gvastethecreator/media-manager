@@ -183,7 +183,7 @@ async function extractAIGenerationInfoLegacy(buffer: Buffer): Promise<AIGenerati
  */
 function convertToNumber(value: unknown): number | string | undefined {
 	if (value === undefined || value === null) {
-		return undefined;
+		return;
 	}
 
 	if (typeof value === 'number') {
@@ -266,12 +266,9 @@ const comfyuiParser: AIGenerationParserModule = {
 
 		for (const nodeId in promptData) {
 			const node = promptData[nodeId];
-			if (node.class_type === 'CLIPTextEncode') {
-				if (node.inputs.text) {
-					if (!prompt)
-						prompt = node.inputs.text; // Asume el primer prompt es el principal
-					else negative_prompt = node.inputs.text; // Asume el segundo es el negativo
-				}
+			if (node.class_type === 'CLIPTextEncode' && node.inputs.text) {
+				if (prompt) negative_prompt = node.inputs.text; // Asume el segundo es el negativo else
+				prompt = node.inputs.text; // Asume el segundo es el negativo
 			}
 		}
 

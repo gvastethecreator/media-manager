@@ -182,14 +182,14 @@ export function EntityHeader({
 
 		if (action.href) {
 			return (
-				<Button key={`action-${index}`} variant={action.variant || 'default'} size="sm" asChild>
+				<Button asChild key={`action-${index}`} size="sm" variant={action.variant || 'default'}>
 					<a href={action.href}>{buttonContent}</a>
 				</Button>
 			);
 		}
 
 		return (
-			<Button key={`action-${index}`} variant={action.variant || 'default'} size="sm" onClick={action.onClick}>
+			<Button key={`action-${index}`} onClick={action.onClick} size="sm" variant={action.variant || 'default'}>
 				{buttonContent}
 			</Button>
 		);
@@ -219,8 +219,8 @@ export function EntityHeader({
 					<BreadcrumbList>
 						{backUrl && (
 							<BreadcrumbItem>
-								<BreadcrumbLink href={backUrl} className="flex items-center">
-									<ChevronLeft className="h-4 w-4 mr-1" />
+								<BreadcrumbLink className="flex items-center" href={backUrl}>
+									<ChevronLeft className="mr-1 h-4 w-4" />
 									{backLabel}
 								</BreadcrumbLink>
 							</BreadcrumbItem>
@@ -243,28 +243,28 @@ export function EntityHeader({
 			)}
 
 			{/* Contenedor principal */}
-			<div className="flex flex-col sm:flex-row justify-between gap-4">
+			<div className="flex flex-col justify-between gap-4 sm:flex-row">
 				{/* Columna izquierda: título e información */}
-				<div className="space-y-2 flex-1">
+				<div className="flex-1 space-y-2">
 					{/* Encabezado */}
 					<div className="flex items-center gap-2">
 						{icon && (
 							<div
-								className="w-8 h-8 flex items-center justify-center rounded-full"
+								className="flex h-8 w-8 items-center justify-center rounded-full"
 								style={{ backgroundColor: `${primaryColor}20` }}
 							>
 								{icon}
 							</div>
 						)}
 						<div>
-							<h1 className="text-3xl font-bold flex items-center gap-2">
+							<h1 className="flex items-center gap-2 font-bold text-3xl">
 								{title}
 								{showFavoriteButton && onToggleFavorite && (
 									<button
-										type="button"
-										onClick={onToggleFavorite}
-										className="focus:outline-none"
 										aria-label={isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos'}
+										className="focus:outline-none"
+										onClick={onToggleFavorite}
+										type="button"
 									>
 										<StarIcon
 											className={cn(
@@ -280,12 +280,12 @@ export function EntityHeader({
 					</div>
 
 					{/* Descripción */}
-					{description && <p className="text-muted-foreground max-w-2xl">{description}</p>}
+					{description && <p className="max-w-2xl text-muted-foreground">{description}</p>}
 
 					{/* Estadísticas */}
 					{stats && stats.length > 0 && (
 						<div className="pt-1">
-							<EntityStats stats={stats} primaryColor={primaryColor} asBadges={true} animated={true} />
+							<EntityStats animated={true} asBadges={true} primaryColor={primaryColor} stats={stats} />
 						</div>
 					)}
 				</div>
@@ -301,7 +301,7 @@ export function EntityHeader({
 							{dropdownActions.length > 0 && (
 								<DropdownMenu>
 									<DropdownMenuTrigger asChild>
-										<Button variant="outline" size="sm">
+										<Button size="sm" variant="outline">
 											<MoreHorizontal className="h-4 w-4" />
 											<span className="sr-only">Más acciones</span>
 										</Button>
@@ -309,13 +309,13 @@ export function EntityHeader({
 									<DropdownMenuContent align="end">
 										{dropdownActions.map((action) => (
 											<DropdownMenuItem
-												key={action.label}
-												onClick={action.onClick}
 												className={cn(
 													'cursor-pointer',
 													action.variant === 'destructive' &&
-														'text-destructive focus:text-destructive hover:text-destructive'
+														'text-destructive hover:text-destructive focus:text-destructive'
 												)}
+												key={action.label}
+												onClick={action.onClick}
 											>
 												{action.icon && <span className="mr-2">{action.icon}</span>}
 												{action.label}
@@ -332,13 +332,13 @@ export function EntityHeader({
 			{/* Imagen destacada (opcional) */}
 			{featuredImage && (
 				<motion.div
-					initial={{ opacity: 0, y: 10 }}
 					animate={{ opacity: 1, y: 0 }}
+					className="relative h-40 w-full overflow-hidden rounded-lg sm:h-60"
+					initial={{ opacity: 0, y: 10 }}
 					transition={{ duration: 0.3 }}
-					className="relative w-full h-40 sm:h-60 overflow-hidden rounded-lg"
 				>
-					<img src={featuredImage} alt={`Imagen destacada de ${title}`} className="w-full h-full object-cover" />
-					<div className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" aria-hidden="true" />
+					<img alt={`Imagen destacada de ${title}`} className="h-full w-full object-cover" src={featuredImage} />
+					<div aria-hidden="true" className="absolute inset-0 bg-gradient-to-t from-black/30 to-transparent" />
 				</motion.div>
 			)}
 		</div>

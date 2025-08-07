@@ -29,34 +29,34 @@ export const PropertyContentView = memo(function PropertyContentView({ className
 	};
 
 	return (
-		<div className="h-full flex flex-col">
+		<div className="flex h-full flex-col">
 			{/* 📋 Header con información básica */}
 			<div className="shrink-0 border-b bg-background/50 backdrop-blur-sm">
 				<div className="flex items-center gap-3 px-6 py-4">
-					<Button variant="ghost" size="sm" className="shrink-0">
-						<ArrowLeft className="h-4 w-4 mr-2" />
+					<Button className="shrink-0" size="sm" variant="ghost">
+						<ArrowLeft className="mr-2 h-4 w-4" />
 						Volver a Propiedades
 					</Button>
 
-					<div className="flex items-center gap-3 min-w-0 flex-1">
-						<div className="shrink-0 w-3 h-3 rounded-full" style={{ backgroundColor: mockProperty.color }} />
+					<div className="flex min-w-0 flex-1 items-center gap-3">
+						<div className="h-3 w-3 shrink-0 rounded-full" style={{ backgroundColor: mockProperty.color }} />
 						<div className="min-w-0 flex-1">
-							<h1 className="text-xl font-semibold truncate flex items-center gap-2">
+							<h1 className="flex items-center gap-2 truncate font-semibold text-xl">
 								<Database className="h-5 w-5 text-blue-500" />
 								{mockProperty.name}
 							</h1>
-							<p className="text-sm text-muted-foreground truncate">{mockProperty.description}</p>
+							<p className="truncate text-muted-foreground text-sm">{mockProperty.description}</p>
 						</div>
 					</div>
 
-					<div className="shrink-0 flex items-center gap-2">
+					<div className="flex shrink-0 items-center gap-2">
 						<Badge variant="secondary">{mockProperty._count.images} imágenes</Badge>
-						<Button variant="outline" size="sm">
-							<Edit className="h-4 w-4 mr-2" />
+						<Button size="sm" variant="outline">
+							<Edit className="mr-2 h-4 w-4" />
 							Editar
 						</Button>
-						<Button variant="outline" size="sm">
-							<Trash2 className="h-4 w-4 mr-2" />
+						<Button size="sm" variant="outline">
+							<Trash2 className="mr-2 h-4 w-4" />
 							Eliminar
 						</Button>
 					</div>
@@ -65,7 +65,7 @@ export const PropertyContentView = memo(function PropertyContentView({ className
 
 			{/* 📊 Contenido principal */}
 			<div className="flex-1 overflow-auto p-6">
-				<div className="max-w-6xl mx-auto space-y-6">
+				<div className="mx-auto max-w-6xl space-y-6">
 					{/* 📋 Información de la propiedad */}
 					<Card>
 						<CardHeader>
@@ -75,32 +75,32 @@ export const PropertyContentView = memo(function PropertyContentView({ className
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="space-y-4">
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
 								{' '}
 								<div>
-									<div className="text-sm font-medium text-muted-foreground">Tipo</div>
-									<p className="mt-1 font-mono text-sm bg-muted px-2 py-1 rounded">{mockProperty.type}</p>
+									<div className="font-medium text-muted-foreground text-sm">Tipo</div>
+									<p className="mt-1 rounded bg-muted px-2 py-1 font-mono text-sm">{mockProperty.type}</p>
 								</div>
 								<div>
-									<div className="text-sm font-medium text-muted-foreground">Color</div>
+									<div className="font-medium text-muted-foreground text-sm">Color</div>
 									<div className="mt-1 flex items-center gap-2">
-										<div className="w-6 h-6 rounded border" style={{ backgroundColor: mockProperty.color }} />
+										<div className="h-6 w-6 rounded border" style={{ backgroundColor: mockProperty.color }} />
 										<span className="font-mono text-sm">{mockProperty.color}</span>
 									</div>
 								</div>
 							</div>
 							{/* 🏷️ Valores disponibles */}{' '}
 							<div>
-								<div className="text-sm font-medium text-muted-foreground">Valores Disponibles</div>
+								<div className="font-medium text-muted-foreground text-sm">Valores Disponibles</div>
 								<div className="mt-2 flex flex-wrap gap-2">
 									{mockProperty.values.map((value, index) => (
 										<motion.div
-											key={value}
-											initial={{ opacity: 0, scale: 0.9 }}
 											animate={{ opacity: 1, scale: 1 }}
+											initial={{ opacity: 0, scale: 0.9 }}
+											key={value}
 											transition={{ delay: index * 0.1 }}
 										>
-											<Badge variant="outline" className="text-sm">
+											<Badge className="text-sm" variant="outline">
 												{value}
 											</Badge>
 										</motion.div>
@@ -116,10 +116,10 @@ export const PropertyContentView = memo(function PropertyContentView({ className
 							<CardTitle>Imágenes Asociadas</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<div className="text-center py-12 text-muted-foreground">
-								<Database className="h-12 w-12 mx-auto mb-4 opacity-50" />
+							<div className="py-12 text-center text-muted-foreground">
+								<Database className="mx-auto mb-4 h-12 w-12 opacity-50" />
 								<p>Funcionalidad de galería en desarrollo</p>
-								<p className="text-sm mt-2">
+								<p className="mt-2 text-sm">
 									Se mostrará aquí la galería de imágenes que tienen esta propiedad asignada
 								</p>
 							</div>

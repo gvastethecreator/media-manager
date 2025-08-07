@@ -15,8 +15,8 @@ interface UsePollingOptions {
 // - Polling cada 10s si el proceso está en 'starting', luego cada 30s
 // - Si tras 3 intentos no hay estado, fuerza error y notifica
 
-const DEFAULT_POLLING_INTERVAL = 30000; // 30s
-const FAST_POLLING_INTERVAL = 10000; // 10s para fase 'starting'
+const DEFAULT_POLLING_INTERVAL = 30_000; // 30s
+const FAST_POLLING_INTERVAL = 10_000; // 10s para fase 'starting'
 const MAX_NO_STATUS_ATTEMPTS = 3;
 
 /**
@@ -31,7 +31,7 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 	const originalFolderIdRef = useRef<string | null>(null);
 	const lastUpdatedRef = useRef<Record<string, number>>({});
 	// Intervalo de polling más espaciado para reducir llamadas al servidor
-	const pollingIntervalRef = useRef<number>(30000); // 30 segundos
+	const pollingIntervalRef = useRef<number>(30_000); // 30 segundos
 	const pollingErrorCountRef = useRef<number>(0);
 	const consecutiveNoStatusCountRef = useRef<number>(0);
 
@@ -200,7 +200,7 @@ export function useFoldersPolling({ onStatusUpdate, onComplete }: UsePollingOpti
 			pollForStatus().catch((error) => pollingLogger.error('Error en polling inicial:', error));
 
 			// Configurar intervalo de polling más espacioso
-			pollingIntervalRef.current = 30000; // 30 segundos
+			pollingIntervalRef.current = 30_000; // 30 segundos
 			pollingTimerRef.current = setInterval(pollForStatus, pollingIntervalRef.current) as unknown as number;
 			setIsPolling(true);
 		},

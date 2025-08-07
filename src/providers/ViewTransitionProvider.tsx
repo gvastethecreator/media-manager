@@ -89,7 +89,7 @@ export function ViewTransitionProvider({
 
 	// Crear polyfill si es necesario
 	const polyfill = useMemo(() => {
-		if (!isNativeSupported || !config.enabled) {
+		if (!(isNativeSupported && config.enabled)) {
 			return createViewTransitionPolyfill();
 		}
 		return null;

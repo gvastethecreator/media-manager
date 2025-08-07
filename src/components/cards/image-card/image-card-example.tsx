@@ -14,15 +14,15 @@ const mockImageIds = ['img-001', 'img-002', 'img-003', 'img-004', 'img-005', 'im
  */
 export default function ImageCardExample() {
 	return (
-		<div className="space-y-8 container mx-auto py-6">
+		<div className="container mx-auto space-y-8 py-6">
 			<div>
-				<h2 className="text-3xl font-bold mb-2">Tarjetas de Imagen</h2>
+				<h2 className="mb-2 font-bold text-3xl">Tarjetas de Imagen</h2>
 				<p className="text-muted-foreground">
 					Componente mejorado para mostrar imágenes con diferentes estilos y funcionalidades
 				</p>
 			</div>
 
-			<Tabs defaultValue="variants" className="w-full">
+			<Tabs className="w-full" defaultValue="variants">
 				<TabsList className="mb-4">
 					<TabsTrigger value="variants">Variantes Visuales</TabsTrigger>
 					<TabsTrigger value="aspect-ratios">Proporciones</TabsTrigger>
@@ -32,39 +32,39 @@ export default function ImageCardExample() {
 
 				{/* Pestaña: Variantes visuales */}
 				<TabsContent value="variants">
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						<div className="border rounded-lg p-4 space-y-4">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">Variante Default</h3>
 							<div className="h-96 w-full">
-								<ImageCardImproved imageId={mockImageIds[0]} variant="default" className="h-full" />
+								<ImageCardImproved className="h-full" imageId={mockImageIds[0]} variant="default" />
 							</div>
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">Variante Minimal</h3>
 							<div className="h-96 w-full">
-								<ImageCardImproved imageId={mockImageIds[1]} variant="minimal" className="h-full" />
+								<ImageCardImproved className="h-full" imageId={mockImageIds[1]} variant="minimal" />
 							</div>
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">Variante Polaroid</h3>
 							<div className="h-96 w-full">
-								<ImageCardImproved imageId={mockImageIds[2]} variant="polaroid" className="h-full" />
+								<ImageCardImproved className="h-full" imageId={mockImageIds[2]} variant="polaroid" />
 							</div>
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4 dark bg-gray-950">
+						<div className="dark space-y-4 rounded-lg border bg-gray-950 p-4">
 							<h3 className="font-medium text-lg text-white">Variante TCG</h3>
 							<div className="h-96 w-full">
-								<ImageCardImproved imageId={mockImageIds[3]} variant="tcg" className="h-full" />
+								<ImageCardImproved className="h-full" imageId={mockImageIds[3]} variant="tcg" />
 							</div>
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">Variante Gallery</h3>
 							<div className="h-96 w-full">
-								<ImageCardImproved imageId={mockImageIds[4]} variant="gallery" className="h-full" />
+								<ImageCardImproved className="h-full" imageId={mockImageIds[4]} variant="gallery" />
 							</div>
 						</div>
 					</div>
@@ -72,53 +72,53 @@ export default function ImageCardExample() {
 
 				{/* Pestaña: Proporciones de aspecto */}
 				<TabsContent value="aspect-ratios">
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						<div className="border rounded-lg p-4 space-y-4">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">1:1 (Square)</h3>
-							<ImageCardImproved imageId={mockImageIds[0]} aspectRatio="square" />
+							<ImageCardImproved aspectRatio="square" imageId={mockImageIds[0]} />
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">16:9 (Video)</h3>
-							<ImageCardImproved imageId={mockImageIds[1]} aspectRatio="video" />
+							<ImageCardImproved aspectRatio="video" imageId={mockImageIds[1]} />
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">3:2 (Foto)</h3>
-							<ImageCardImproved imageId={mockImageIds[2]} aspectRatio="3/2" />
+							<ImageCardImproved aspectRatio="3/2" imageId={mockImageIds[2]} />
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">4:5 (Portrait)</h3>
-							<ImageCardImproved imageId={mockImageIds[3]} aspectRatio="4/5" />
+							<ImageCardImproved aspectRatio="4/5" imageId={mockImageIds[3]} />
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">2:1 (Panorámica)</h3>
-							<ImageCardImproved imageId={mockImageIds[4]} aspectRatio="2/1" />
+							<ImageCardImproved aspectRatio="2/1" imageId={mockImageIds[4]} />
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">Auto (Sin restricción)</h3>
-							<ImageCardImproved imageId={mockImageIds[5]} aspectRatio="auto" />
+							<ImageCardImproved aspectRatio="auto" imageId={mockImageIds[5]} />
 						</div>
 					</div>
 				</TabsContent>
 
 				{/* Pestaña: Estados */}
 				<TabsContent value="states">
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						<div className="border rounded-lg p-4 space-y-4">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">Normal</h3>
 							<ImageCardImproved imageId={mockImageIds[0]} />
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">Seleccionada</h3>
 							<ImageCardImproved imageId={mockImageIds[1]} isSelected={true} />
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">No Hovereable</h3>
 							<ImageCardImproved imageId={mockImageIds[2]} isHoverable={false} />
 						</div>
@@ -127,43 +127,44 @@ export default function ImageCardExample() {
 
 				{/* Pestaña: Opciones */}
 				<TabsContent value="options">
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						<div className="border rounded-lg p-4 space-y-4">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">Sin etiquetas</h3>
 							<ImageCardImproved imageId={mockImageIds[0]} showTags={false} />
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">Sin detalles</h3>
 							<ImageCardImproved imageId={mockImageIds[1]} showDetails={false} />
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">Con relaciones</h3>
 							<ImageCardImproved imageId={mockImageIds[2]} showRelations={true} />
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">Alta prioridad</h3>
 							<ImageCardImproved imageId={mockImageIds[3]} priority={true} />
 						</div>
 
-						<div className="border rounded-lg p-4 space-y-4">
+						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">Minimalista</h3>
-							<ImageCardImproved imageId={mockImageIds[4]} variant="minimal" showTags={false} showDetails={false} />
+							<ImageCardImproved imageId={mockImageIds[4]} showDetails={false} showTags={false} variant="minimal" />
 						</div>
 					</div>
 				</TabsContent>
 			</Tabs>
 
 			{/* Rejilla con todas las imágenes */}
-			<div className="border-t pt-8 mt-8">
-				<h3 className="text-2xl font-bold mb-6">Todas las tarjetas</h3>
-				<div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+			<div className="mt-8 border-t pt-8">
+				<h3 className="mb-6 font-bold text-2xl">Todas las tarjetas</h3>
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
 					{mockImageIds.map((id, index) => (
 						<ImageCardImproved
-							key={id}
 							imageId={id}
+							isSelected={index === 2}
+							key={id}
 							variant={
 								index % 5 === 0
 									? 'default'
@@ -175,7 +176,6 @@ export default function ImageCardExample() {
 												? 'tcg'
 												: 'gallery'
 							}
-							isSelected={index === 2}
 						/>
 					))}
 				</div>

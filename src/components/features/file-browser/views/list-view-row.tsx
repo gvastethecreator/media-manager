@@ -73,10 +73,10 @@ export const ListViewRow = memo<ListViewRowProps>(
 				return (
 					<div className="flex items-center justify-center">
 						<ImageThumbnail
-							path={('path' in item ? item.path : '') || item.id || ''}
-							name={item.name}
-							size={getThumbnailSize()}
 							className="rounded"
+							name={item.name}
+							path={('path' in item ? item.path : '') || item.id || ''}
+							size={getThumbnailSize()}
 						/>
 					</div>
 				);
@@ -88,7 +88,7 @@ export const ListViewRow = memo<ListViewRowProps>(
 			}
 
 			// Fallback por defecto
-			return <span className="text-sm text-muted-foreground">—</span>;
+			return <span className="text-muted-foreground text-sm">—</span>;
 		};
 
 		// Manejadores de eventos
@@ -110,27 +110,21 @@ export const ListViewRow = memo<ListViewRowProps>(
 
 		return (
 			<tr
-				className={`
-				group cursor-pointer transition-colors duration-150
-				${isSelected ? 'bg-accent text-accent-foreground' : ''}
-				${showZebraStripes && isEven && !isSelected ? 'bg-muted/30' : ''}
-				hover:bg-accent/50
-				${className}
+				className={`group cursor-pointer transition-colors duration-150${isSelected ? 'bg-accent text-accent-foreground' : ''}
+				${showZebraStripes && isEven && !isSelected ? 'bg-muted/30' : ''}hover:bg-accent/50${className}
 			`}
-				style={{ height: `${rowHeight}px` }}
-				onClick={handleClick}
-				onDoubleClick={handleDoubleClick}
-				onContextMenu={handleContextMenu}
-				data-testid={`list-row-${index}`}
 				data-path={('path' in item ? item.path : '') || item.id || ''}
+				data-testid={`list-row-${index}`}
+				onClick={handleClick}
+				onContextMenu={handleContextMenu}
+				onDoubleClick={handleDoubleClick}
+				style={{ height: `${rowHeight}px` }}
 			>
 				{visibleColumns.map((column) => (
 					<td
-						key={column.key}
-						className={`
-						border-r border-border/50 last:border-r-0 overflow-hidden
-						${column.key === 'thumbnail' ? 'p-1' : ''}
+						className={`border-border/50 border-r last:border-r-0 overflow-hidden${column.key === 'thumbnail' ? 'p-1' : ''}
 					`}
+						key={column.key}
 						style={{
 							width: getColumnWidth(column),
 							minWidth: column.minWidth ? `${column.minWidth}px` : undefined,
@@ -139,7 +133,7 @@ export const ListViewRow = memo<ListViewRowProps>(
 							padding: column.key === 'thumbnail' ? '4px' : `${cellPadding}px`,
 						}}
 					>
-						<div className="min-w-0 h-full flex items-center">{renderCellContent(column)}</div>
+						<div className="flex h-full min-w-0 items-center">{renderCellContent(column)}</div>
 					</td>
 				))}
 			</tr>

@@ -23,7 +23,7 @@ export async function extractMetadata(buffer: Buffer): Promise<TechnicalMetadata
 			extractXmpData(buffer),
 		]);
 
-		if (!exifData && !iptcData && !xmpData) {
+		if (!(exifData || iptcData || xmpData)) {
 			logger.debug('No se encontraron metadatos');
 			return null;
 		}
@@ -88,11 +88,14 @@ async function extractExifData(buffer: Buffer): Promise<ExifData | null> {
 			orientation: exifData.Orientation || undefined,
 
 			// GPS (si está disponible)
-			gps: exifData.latitude && exifData.longitude ? {
-				latitude: exifData.latitude,
-				longitude: exifData.longitude,
-				altitude: exifData.GPSAltitude || undefined,
-			} : undefined,
+			gps:
+				exifData.latitude && exifData.longitude
+					? {
+							latitude: exifData.latitude,
+							longitude: exifData.longitude,
+							altitude: exifData.GPSAltitude || undefined,
+						}
+					: undefined,
 
 			// Metadatos técnicos adicionales
 			colorSpace: exifData.ColorSpace || undefined,
@@ -117,7 +120,7 @@ async function extractIptcData(buffer: Buffer): Promise<IptcData | null> {
 			iptc: true,
 		});
 
-		if (!iptcData || !iptcData.iptc) {
+		if (!(iptcData && iptcData.iptc)) {
 			return null;
 		}
 
@@ -172,7 +175,7 @@ async function extractXmpData(buffer: Buffer): Promise<XmpData | null> {
 			xmp: true,
 		});
 
-		if (!xmpData || !xmpData.xmp) {
+		if (!(xmpData && xmpData.xmp)) {
 			return null;
 		}
 
@@ -229,7 +232,7 @@ function extractAIMetadataFromXmp(xmp: any): Record<string, any> | undefined {
 
 	for (const [key, value] of Object.entries(xmp)) {
 		const lowerKey = key.toLowerCase();
-		if (aiPatterns.some(pattern => lowerKey.includes(pattern))) {
+		if (aiPatterns.some((pattern) => lowerKey.includes(pattern))) {
 			aiFields[key] = value;
 		}
 	}

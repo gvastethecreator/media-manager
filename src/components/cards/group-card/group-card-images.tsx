@@ -47,7 +47,7 @@ export function GroupCardImages({
 
 	// Determinar los efectos holográficos basados en la rareza
 	const getHolographicEffects = () => {
-		if (!tcgMode || !holographicEffect) return {};
+		if (!(tcgMode && holographicEffect)) return {};
 
 		// A mayor rareza, más pronunciados son los efectos
 		if (rarityLevel >= 9) {
@@ -81,7 +81,7 @@ export function GroupCardImages({
 
 	// Manejar el efecto holográfico en movimiento
 	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (!tcgMode || !holographicEffect) return;
+		if (!(tcgMode && holographicEffect)) return;
 
 		const el = e.currentTarget;
 		const rect = el.getBoundingClientRect();
@@ -105,14 +105,14 @@ export function GroupCardImages({
 
 	return (
 		<div
-			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-40', tcgMode && 'border-b border-white/10')}
-			onMouseMove={handleMouseMove}
+			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-40', tcgMode && 'border-white/10 border-b')}
 			onMouseLeave={handleMouseLeave}
+			onMouseMove={handleMouseMove}
 		>
 			{/* Fondo decorativo para cartas TCG */}
 			{tcgMode && (
 				<div
-					className="absolute inset-0 bg-black/20 z-0"
+					className="absolute inset-0 z-0 bg-black/20"
 					style={{
 						backgroundImage: `radial-gradient(circle at 50% 50%, ${primaryColor}30, transparent 80%)`,
 					}}
@@ -121,22 +121,22 @@ export function GroupCardImages({
 
 			{/* Marco decorativo para grupos raros */}
 			{tcgMode && rarityLevel >= 3 && (
-				<div className="absolute inset-0 z-10 pointer-events-none">
+				<div className="pointer-events-none absolute inset-0 z-10">
 					{/* Bordes estilo TCG */}
 					<div
-						className="absolute top-0 left-0 w-6 h-6 border-t-2 border-l-2 rounded-br-sm opacity-60"
+						className="absolute top-0 left-0 h-6 w-6 rounded-br-sm border-t-2 border-l-2 opacity-60"
 						style={{ borderColor: primaryColor }}
 					/>
 					<div
-						className="absolute top-0 right-0 w-6 h-6 border-t-2 border-r-2 rounded-bl-sm opacity-60"
+						className="absolute top-0 right-0 h-6 w-6 rounded-bl-sm border-t-2 border-r-2 opacity-60"
 						style={{ borderColor: primaryColor }}
 					/>
 					<div
-						className="absolute bottom-0 left-0 w-6 h-6 border-b-2 border-l-2 rounded-tr-sm opacity-60"
+						className="absolute bottom-0 left-0 h-6 w-6 rounded-tr-sm border-b-2 border-l-2 opacity-60"
 						style={{ borderColor: primaryColor }}
 					/>
 					<div
-						className="absolute bottom-0 right-0 w-6 h-6 border-b-2 border-r-2 rounded-tl-sm opacity-60"
+						className="absolute right-0 bottom-0 h-6 w-6 rounded-tl-sm border-r-2 border-b-2 opacity-60"
 						style={{ borderColor: primaryColor }}
 					/>
 				</div>
@@ -144,7 +144,7 @@ export function GroupCardImages({
 
 			{hasMedia ? (
 				<motion.div
-					className="relative w-full h-full z-10 grid grid-cols-2 grid-rows-2 gap-px"
+					className="relative z-10 grid h-full w-full grid-cols-2 grid-rows-2 gap-px"
 					style={{
 						transform:
 							tcgMode && holographicEffect
@@ -157,16 +157,16 @@ export function GroupCardImages({
 					{/* Mostrar imágenes en una grilla 2x2 */}
 					{allMedia.map((media, index) => (
 						<div
-							key={`media-${index}-${media.substring(media.lastIndexOf('/') + 1)}`}
 							className="relative overflow-hidden bg-black/10"
+							key={`media-${index}-${media.substring(media.lastIndexOf('/') + 1)}`}
 						>
 							<img
-								src={media}
 								alt={`Group content ${index + 1}`}
 								className={cn(
-									'absolute inset-0 w-full h-full object-cover',
+									'absolute inset-0 h-full w-full object-cover',
 									rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
 								)}
+								src={media}
 								style={{
 									...holographicStyle,
 									transformStyle: 'preserve-3d',
@@ -176,7 +176,7 @@ export function GroupCardImages({
 
 							{/* Overlay para dar uniformidad */}
 							<div
-								className="absolute inset-0 pointer-events-none"
+								className="pointer-events-none absolute inset-0"
 								style={{
 									background: `linear-gradient(to bottom, transparent 70%, ${primaryColor}40 100%)`,
 									opacity: 0.6,
@@ -188,17 +188,17 @@ export function GroupCardImages({
 					{/* Relleno para grilla si faltan imágenes */}
 					{Array.from({ length: Math.max(0, 4 - allMedia.length) }).map((_, idx) => (
 						<div
+							className="flex items-center justify-center bg-black/10"
 							key={`placeholder-${emoji}-${rarityLevel}-${idx + 1}`}
-							className="bg-black/10 flex items-center justify-center"
 						>
-							<FolderIcon className="opacity-20 h-6 w-6" />
+							<FolderIcon className="h-6 w-6 opacity-20" />
 						</div>
 					))}
 
 					{/* Efecto holográfico general */}
 					{tcgMode && holographicEffect && rarityLevel >= 3 && (
 						<div
-							className="absolute inset-0 z-20 pointer-events-none opacity-30"
+							className="pointer-events-none absolute inset-0 z-20 opacity-30"
 							style={{
 								background: `linear-gradient(
                   ${135 + viewAngle.x * 30}deg,
@@ -213,23 +213,23 @@ export function GroupCardImages({
 			) : (
 				// Placeholder cuando no hay multimedia
 				<div
-					className="w-full h-full flex items-center justify-center bg-black/10 text-white/50"
+					className="flex h-full w-full items-center justify-center bg-black/10 text-white/50"
 					style={{
 						background: `radial-gradient(circle, ${primaryColor}30 0%, transparent 70%)`,
 					}}
 				>
-					<span className="text-4xl transform -rotate-12">{emoji}</span>
+					<span className="-rotate-12 transform text-4xl">{emoji}</span>
 				</div>
 			)}
 
 			{/* Capa de arte para cartas TCG (marco y efectos) */}
 			{tcgMode && (
-				<div className="absolute inset-0 pointer-events-none z-30">
+				<div className="pointer-events-none absolute inset-0 z-30">
 					{/* Efecto viñeta */}
 					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
 
 					{/* Efecto de brillo superior */}
-					<div className="absolute top-0 left-0 right-0 h-[20%] bg-gradient-to-b from-white/10 to-transparent" />
+					<div className="absolute top-0 right-0 left-0 h-[20%] bg-gradient-to-b from-white/10 to-transparent" />
 				</div>
 			)}
 		</div>

@@ -8,8 +8,8 @@ interface LoadingSpinnerProps extends React.HTMLAttributes<HTMLDivElement> {
 
 export function LoadingSpinner({ size = 24, className, ...props }: LoadingSpinnerProps) {
 	return (
-		<div className={cn('animate-spin', className)} aria-live="polite" {...props}>
-			<Loader2 size={size} className="text-muted-foreground" />
+		<div aria-live="polite" className={cn('animate-spin', className)} {...props}>
+			<Loader2 className="text-muted-foreground" size={size} />
 			<span className="sr-only">Cargando...</span>
 		</div>
 	);

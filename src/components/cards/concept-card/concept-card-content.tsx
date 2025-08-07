@@ -88,7 +88,7 @@ export function ConceptCardContent({
 
 	return (
 		<div
-			className={`p-3 flex-1 overflow-hidden flex flex-col ${tcgMode ? 'bg-black/10' : 'bg-card/80'}`}
+			className={`flex flex-1 flex-col overflow-hidden p-3 ${tcgMode ? 'bg-black/10' : 'bg-card/80'}`}
 			style={
 				tcgMode
 					? {
@@ -108,16 +108,16 @@ export function ConceptCardContent({
 						style={{ background: `linear-gradient(to right, transparent, ${primaryColor}, transparent)` }}
 					/>
 					<div
-						className="absolute right-3 top-[160px] h-6 w-6 rounded-full opacity-10"
+						className="absolute top-[160px] right-3 h-6 w-6 rounded-full opacity-10"
 						style={{ background: `radial-gradient(circle, ${primaryColor}, transparent 70%)` }}
 					/>
 				</>
 			)}
 
 			{/* Sección de categoría y rareza (basada en total relaciones) */}
-			<div className="mb-2 flex justify-between items-center">
+			<div className="mb-2 flex items-center justify-between">
 				<div
-					className={cn('text-sm font-semibold mb-2', tcgMode && 'uppercase tracking-wide')}
+					className={cn('mb-2 font-semibold text-sm', tcgMode && 'uppercase tracking-wide')}
 					style={{ color: primaryColor }}
 				>
 					{tcgMode ? '◇ Concepto ◇' : 'Concepto'}
@@ -127,7 +127,7 @@ export function ConceptCardContent({
 						<span className="capitalize">{category}</span>
 						{tcgMode && (
 							<span
-								className="ml-1 px-1 rounded-sm text-[0.65rem]"
+								className="ml-1 rounded-sm px-1 text-[0.65rem]"
 								style={{
 									backgroundColor: `${primaryColor}30`,
 									color: 'white',
@@ -143,7 +143,7 @@ export function ConceptCardContent({
 
 			{/* Descripción del concepto */}
 			<div
-				className={`mb-3 ${tcgMode ? 'text-white/90 bg-black/20 px-2 py-1.5 rounded-sm border border-white/5' : 'text-muted-foreground'}`}
+				className={`mb-3 ${tcgMode ? 'rounded-sm border border-white/5 bg-black/20 px-2 py-1.5 text-white/90' : 'text-muted-foreground'}`}
 				style={{
 					fontSize: '0.8rem',
 					lineHeight: '1.25rem',
@@ -151,11 +151,11 @@ export function ConceptCardContent({
 				}}
 			>
 				{description ? (
-					<div className="overflow-hidden line-clamp-3">{description}</div>
+					<div className="line-clamp-3 overflow-hidden">{description}</div>
 				) : contentPreview ? (
-					<div className="overflow-hidden line-clamp-2 italic">{contentPreview}</div>
+					<div className="line-clamp-2 overflow-hidden italic">{contentPreview}</div>
 				) : (
-					<div className="italic opacity-70 text-center py-1">Sin descripción</div>
+					<div className="py-1 text-center italic opacity-70">Sin descripción</div>
 				)}
 			</div>
 
@@ -165,8 +165,8 @@ export function ConceptCardContent({
 					<div className="flex flex-wrap gap-1">
 						{parsedTags.slice(0, 5).map((tag: string, _index: number) => (
 							<span
+								className={`rounded-sm px-1.5 py-0.5 text-xs ${tcgMode ? 'border border-white/10' : 'bg-primary/10'}`}
 								key={`tag-${renderKey}-${tag}`}
-								className={`text-xs px-1.5 py-0.5 rounded-sm ${tcgMode ? 'border border-white/10' : 'bg-primary/10'}`}
 								style={{
 									backgroundColor: tcgMode ? `${primaryColor}30` : `${primaryColor}20`,
 									color: tcgMode ? 'white' : primaryColor,
@@ -177,7 +177,7 @@ export function ConceptCardContent({
 							</span>
 						))}
 						{parsedTags.length > 5 && (
-							<span className={`text-xs px-1.5 py-0.5 rounded-sm opacity-80 ${tcgMode ? 'bg-black/20' : ''}`}>
+							<span className={`rounded-sm px-1.5 py-0.5 text-xs opacity-80 ${tcgMode ? 'bg-black/20' : ''}`}>
 								+{parsedTags.length - 5}
 							</span>
 						)}
@@ -188,36 +188,36 @@ export function ConceptCardContent({
 			{/* Stats al estilo TCG */}
 			{tcgMode && (
 				<div className="mb-2">
-					<div className="grid grid-cols-2 gap-1 text-[0.65rem] font-medium">
+					<div className="grid grid-cols-2 gap-1 font-medium text-[0.65rem]">
 						<StatBar
-							label="Conocimiento"
-							value={Math.min(100, relationCounts.notes * 10 + relationCounts.prompts * 5)}
 							color={primaryColor}
+							label="Conocimiento"
 							max={100}
+							value={Math.min(100, relationCounts.notes * 10 + relationCounts.prompts * 5)}
 						/>
 						<StatBar
+							color={primaryColor}
 							label="Influencia"
+							max={100}
 							value={Math.min(
 								100,
 								relationCounts.characters * 8 + relationCounts.places * 6 + relationCounts.worldItems * 4
 							)}
-							color={primaryColor}
-							max={100}
 						/>
 						<StatBar
+							color={primaryColor}
 							label="Visibilidad"
-							value={Math.min(100, relationCounts.images * 5 + relationCounts.videos * 10 + relationCounts.albums * 3)}
-							color={primaryColor}
 							max={100}
+							value={Math.min(100, relationCounts.images * 5 + relationCounts.videos * 10 + relationCounts.albums * 3)}
 						/>
 						<StatBar
+							color={primaryColor}
 							label="Conectividad"
+							max={100}
 							value={Math.min(
 								100,
 								relationCounts.collections * 6 + relationCounts.tags * 4 + relationCounts.groups * 8
 							)}
-							color={primaryColor}
-							max={100}
 						/>
 					</div>
 				</div>
@@ -226,7 +226,7 @@ export function ConceptCardContent({
 			{/* Contadores de relaciones */}
 			<div className="mt-auto grid grid-cols-4 gap-2 text-xs">
 				<div className="col-span-4 mb-1">
-					<div className="flex justify-between pb-1 mb-1 text-xs opacity-60 border-b border-white/10">
+					<div className="mb-1 flex justify-between border-white/10 border-b pb-1 text-xs opacity-60">
 						<span>Relaciones principales</span>
 						<span>{totalRelations}</span>
 					</div>
@@ -234,52 +234,52 @@ export function ConceptCardContent({
 
 				{/* Primera fila - Mundo */}
 				<StatCounter
-					icon={<UserSquare className="h-3 w-3" />}
 					count={relationCounts.characters}
+					icon={<UserSquare className="h-3 w-3" />}
 					label="Personajes"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
-					icon={<Globe className="h-3 w-3" />}
 					count={relationCounts.places}
+					icon={<Globe className="h-3 w-3" />}
 					label="Lugares"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
-					icon={<Package className="h-3 w-3" />}
 					count={relationCounts.worldItems}
+					icon={<Package className="h-3 w-3" />}
 					label="Objetos"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
-					icon={<BookText className="h-3 w-3" />}
 					count={relationCounts.notes}
+					icon={<BookText className="h-3 w-3" />}
 					label="Notas"
 					primaryColor={primaryColor}
 				/>
 
 				{/* Segunda fila - Contenido */}
 				<StatCounter
-					icon={<Image className="h-3 w-3" />}
 					count={relationCounts.images}
+					icon={<Image className="h-3 w-3" />}
 					label="Imágenes"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
-					icon={<VideoIcon className="h-3 w-3" />}
 					count={relationCounts.videos}
+					icon={<VideoIcon className="h-3 w-3" />}
 					label="Videos"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
-					icon={<MessageSquare className="h-3 w-3" />}
 					count={relationCounts.prompts}
+					icon={<MessageSquare className="h-3 w-3" />}
 					label="Prompts"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
-					icon={<Tag className="h-3 w-3" />}
 					count={relationCounts.properties}
+					icon={<Tag className="h-3 w-3" />}
 					label="Props"
 					primaryColor={primaryColor}
 				/>
@@ -303,7 +303,7 @@ function StatCounter({
 	return (
 		<div className="flex flex-col items-center">
 			<div
-				className="flex items-center gap-0.5 mb-0.5 font-medium"
+				className="mb-0.5 flex items-center gap-0.5 font-medium"
 				style={{ color: count > 0 ? primaryColor : undefined }}
 			>
 				{icon}
@@ -321,11 +321,11 @@ function StatBar({ label, value, color, max }: { label: string; value: number; c
 
 	return (
 		<div className="flex flex-col">
-			<div className="flex justify-between items-center mb-0.5">
+			<div className="mb-0.5 flex items-center justify-between">
 				<span className="uppercase tracking-wider">{label}</span>
 				<span>{value}</span>
 			</div>
-			<div className="h-1.5 bg-black/30 rounded-sm overflow-hidden border border-white/5">
+			<div className="h-1.5 overflow-hidden rounded-sm border border-white/5 bg-black/30">
 				<div
 					className="h-full rounded-sm"
 					style={{

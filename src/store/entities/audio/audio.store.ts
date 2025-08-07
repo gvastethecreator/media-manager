@@ -89,7 +89,7 @@ const useAudioStoreBase = create<AudioState>()(
 					return newAudio;
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
-					return undefined;
+					return;
 				}
 			},
 
@@ -105,7 +105,7 @@ const useAudioStoreBase = create<AudioState>()(
 					return updatedAudio;
 				} catch (error) {
 					set({ error: (error as Error).message, loading: false });
-					return undefined;
+					return;
 				}
 			},
 

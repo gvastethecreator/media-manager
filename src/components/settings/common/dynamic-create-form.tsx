@@ -92,25 +92,25 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 	const availableFields = optionalFields.filter((f) => !addedFields.includes(f.name));
 
 	return (
-		<form onSubmit={handleSubmit} className="space-y-4">
+		<form className="space-y-4" onSubmit={handleSubmit}>
 			<div className="space-y-2">
 				<Label htmlFor="name">Nombre</Label>
 				<Input
+					className={error ? 'border-red-500' : ''}
+					disabled={isSubmitting}
 					id="name"
-					value={formData.name || ''}
 					onChange={handleNameChange}
 					placeholder="Nombre de la entidad"
 					required
-					className={error ? 'border-red-500' : ''}
-					disabled={isSubmitting}
+					value={formData.name || ''}
 				/>
-				{error && <p className="text-sm text-red-500">{error}</p>}
+				{error && <p className="text-red-500 text-sm">{error}</p>}
 			</div>
 
 			{/* Selector para agregar campos opcionales */}
 			{availableFields.length > 0 && (
-				<div className="flex gap-2 items-end">
-					<Select value={selectedField} onValueChange={setSelectedField}>
+				<div className="flex items-end gap-2">
+					<Select onValueChange={setSelectedField} value={selectedField}>
 						<SelectTrigger className="w-48">
 							<SelectValue placeholder="Agregar campo opcional" />
 						</SelectTrigger>
@@ -122,7 +122,7 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 							))}
 						</SelectContent>
 					</Select>
-					<Button type="button" onClick={handleAddField} disabled={!selectedField}>
+					<Button disabled={!selectedField} onClick={handleAddField} type="button">
 						Agregar campo
 					</Button>
 				</div>
@@ -133,7 +133,7 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 				const field = optionalFields.find((f) => f.name === fieldName);
 				if (!field) return null;
 				return (
-					<div key={fieldName} className="space-y-2">
+					<div className="space-y-2" key={fieldName}>
 						<Label>{field.label}</Label>
 						{field.render({
 							value: formData[fieldName],
@@ -143,7 +143,7 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 				);
 			})}
 
-			<Button type="submit" disabled={isSubmitting || !formData.name}>
+			<Button disabled={isSubmitting || !formData.name} type="submit">
 				{isSubmitting ? 'Guardando...' : submitLabel}
 			</Button>
 		</form>

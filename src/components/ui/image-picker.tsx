@@ -44,24 +44,24 @@ export function ImagePicker({
 	return (
 		<div className={cn('space-y-2', className)}>
 			{selectedImage ? (
-				<div className="relative w-full aspect-video rounded-lg overflow-hidden bg-muted">
-					<img src={selectedImage} alt="Selected" className="w-full h-full object-cover" />
+				<div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
+					<img alt="Selected" className="h-full w-full object-cover" src={selectedImage} />
 					{!disabled && (
-						<Button variant="destructive" size="icon" className="absolute top-2 right-2" onClick={handleRemoveImage}>
+						<Button className="absolute top-2 right-2" onClick={handleRemoveImage} size="icon" variant="destructive">
 							<X className="h-4 w-4" />
 						</Button>
 					)}
 				</div>
 			) : (
-				<Dialog open={isOpen} onOpenChange={setIsOpen}>
+				<Dialog onOpenChange={setIsOpen} open={isOpen}>
 					<DialogTrigger asChild>
 						<Button
-							variant="outline"
-							className="w-full h-32 border-dashed flex flex-col gap-2 items-center justify-center"
+							className="flex h-32 w-full flex-col items-center justify-center gap-2 border-dashed"
 							disabled={disabled}
+							variant="outline"
 						>
 							<Image className="h-8 w-8 opacity-50" />
-							<span className="text-sm text-muted-foreground">{placeholder}</span>
+							<span className="text-muted-foreground text-sm">{placeholder}</span>
 						</Button>
 					</DialogTrigger>
 					<DialogContent>
@@ -70,7 +70,7 @@ export function ImagePicker({
 						</DialogHeader>
 						<div className="grid grid-cols-3 gap-4 py-4">
 							{/* Aquí irá la galería de imágenes */}
-							<div className="text-center text-sm text-muted-foreground">Galería en desarrollo...</div>
+							<div className="text-center text-muted-foreground text-sm">Galería en desarrollo...</div>
 						</div>
 					</DialogContent>
 				</Dialog>

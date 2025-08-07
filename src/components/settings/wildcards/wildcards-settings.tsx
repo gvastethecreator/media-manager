@@ -152,8 +152,7 @@ export function WildcardsSettings() {
 			matches =
 				matches &&
 				(wildcard.name.toLowerCase().includes(normalizedQuery) ||
-					wildcard.description?.toLowerCase().includes(normalizedQuery) ||
-					false);
+					wildcard.description?.toLowerCase().includes(normalizedQuery));
 		}
 
 		// Filtrado por categoría
@@ -274,27 +273,27 @@ export function WildcardsSettings() {
 	const renderWildcardItems = (wildcardsList: WildcardWithRelations[]) => {
 		return wildcardsList.map((wildcard) => {
 			const hasChildren = (wildcard._count?.childWildcards || 0) > 0;
-			const isExpanded = expandedWildcards[wildcard.id] || false;
+			const isExpanded = expandedWildcards[wildcard.id];
 
 			return (
-				<div key={wildcard.id} className="flex flex-col">
+				<div className="flex flex-col" key={wildcard.id}>
 					<Button
-						variant={selectedWildcard?.id === wildcard.id ? 'secondary' : 'ghost'}
-						className="w-full justify-start h-12 relative group"
+						className="group relative h-12 w-full justify-start"
 						onClick={() => setSelectedWildcard(wildcard)}
+						variant={selectedWildcard?.id === wildcard.id ? 'secondary' : 'ghost'}
 					>
-						<div className="flex items-center gap-2 flex-1">
+						<div className="flex flex-1 items-center gap-2">
 							{hasChildren && (
 								<Button
-									variant="ghost"
-									size="icon"
 									className="h-5 w-5 p-0"
 									onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleExpandClick(event, wildcard.id)}
+									size="icon"
+									variant="ghost"
 								>
 									<ChevronRight className={cn('h-4 w-4 transition-transform', isExpanded && 'rotate-90')} />
 								</Button>
 							)}
-							<span role="img" aria-label="emoji">
+							<span aria-label="emoji" role="img">
 								{wildcard.emoji}
 							</span>
 							<div className="flex flex-col items-start">
@@ -304,12 +303,12 @@ export function WildcardsSettings() {
 								)}
 							</div>
 						</div>
-						{wildcard.isFavorite && <StarIcon className="h-3 w-3 absolute right-8 top-2" />}
+						{wildcard.isFavorite && <StarIcon className="absolute top-2 right-8 h-3 w-3" />}
 						<Button
-							variant="ghost"
-							size="icon"
 							className="absolute right-1 opacity-0 group-hover:opacity-100"
 							onClick={(event: React.MouseEvent<HTMLButtonElement>) => handleDeleteClick(event, wildcard.id)}
+							size="icon"
+							variant="ghost"
 						>
 							<Trash className="h-4 w-4" />
 						</Button>
@@ -317,7 +316,7 @@ export function WildcardsSettings() {
 
 					{/* Mostrar hijos si está expandido */}
 					{isExpanded && wildcard.childWildcards && wildcard.childWildcards.length > 0 && (
-						<div className="pl-6 mt-1 border-l-2 border-dotted border-muted ml-2">
+						<div className="mt-1 ml-2 border-muted border-l-2 border-dotted pl-6">
 							{renderWildcardItems(wildcard.childWildcards as WildcardWithRelations[])}
 						</div>
 					)}
@@ -335,21 +334,21 @@ export function WildcardsSettings() {
 		if (!currentWildcard) return null;
 
 		return (
-			<div className="flex items-center gap-1 mb-2 text-sm text-muted-foreground">
-				<Button variant="ghost" size="sm" className="h-6 px-2" onClick={() => changeParent(null)}>
+			<div className="mb-2 flex items-center gap-1 text-muted-foreground text-sm">
+				<Button className="h-6 px-2" onClick={() => changeParent(null)} size="sm" variant="ghost">
 					Raíz
 				</Button>
 				{breadcrumbs.map((crumb, _index) => (
-					<div key={crumb.id} className="flex items-center">
-						<ChevronRight className="h-3 w-3 mx-1" />
-						<Button variant="ghost" size="sm" className="h-6 px-2" onClick={() => changeParent(crumb.id)}>
+					<div className="flex items-center" key={crumb.id}>
+						<ChevronRight className="mx-1 h-3 w-3" />
+						<Button className="h-6 px-2" onClick={() => changeParent(crumb.id)} size="sm" variant="ghost">
 							{crumb.name}
 						</Button>
 					</div>
 				))}
 				{currentWildcard && (
 					<>
-						<ChevronRight className="h-3 w-3 mx-1" />
+						<ChevronRight className="mx-1 h-3 w-3" />
 						<span className="font-medium">{currentWildcard.name}</span>
 					</>
 				)}
@@ -361,11 +360,11 @@ export function WildcardsSettings() {
 		<div className="grid grid-cols-12 gap-3">
 			{/* Panel izquierdo: Lista jerárquica de comodines */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="space-y-1 py-2 px-3">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-xl font-bold">Comodines</CardTitle>
-							<Button size="sm" variant="ghost" onClick={() => setIsCreateDialogOpen(true)}>
+							<CardTitle className="font-bold text-xl">Comodines</CardTitle>
+							<Button onClick={() => setIsCreateDialogOpen(true)} size="sm" variant="ghost">
 								<PlusIcon className="h-4 w-4" />
 							</Button>
 						</div>
@@ -374,17 +373,17 @@ export function WildcardsSettings() {
 
 						<div className="flex gap-2">
 							<div className="relative w-full">
-								<SearchIcon className="absolute left-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+								<SearchIcon className="-translate-y-1/2 absolute top-1/2 left-2 h-4 w-4 transform text-muted-foreground" />
 								<Input
+									className="h-8 pl-8"
+									onChange={(e) => setSearchQuery(e.target.value)}
 									placeholder="Buscar comodines..."
 									value={searchQuery}
-									onChange={(e) => setSearchQuery(e.target.value)}
-									className="h-8 pl-8"
 								/>
 							</div>
 						</div>
 						<div className="flex gap-2">
-							<Select value={sortBy} onValueChange={(value) => setSortBy(value as typeof sortBy)}>
+							<Select onValueChange={(value) => setSortBy(value as typeof sortBy)} value={sortBy}>
 								<SelectTrigger className="h-8">
 									<SelectValue placeholder="Ordenar por..." />
 								</SelectTrigger>
@@ -394,12 +393,12 @@ export function WildcardsSettings() {
 									<SelectItem value="createdAt">Fecha</SelectItem>
 								</SelectContent>
 							</Select>
-							<Toggle pressed={onlyFavorites} onPressedChange={setOnlyFavorites} size="sm">
+							<Toggle onPressedChange={setOnlyFavorites} pressed={onlyFavorites} size="sm">
 								<StarIcon className="h-4 w-4" />
 							</Toggle>
 							<Toggle
-								pressed={showOnlyRoots}
 								onPressedChange={setShowOnlyRoots}
+								pressed={showOnlyRoots}
 								size="sm"
 								title="Mostrar sólo nivel actual"
 							>
@@ -414,10 +413,10 @@ export function WildcardsSettings() {
 									renderWildcardItems(sortedWildcards)
 								) : (
 									<div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
-										<WandIcon className="h-10 w-10 mb-2 opacity-30" />
+										<WandIcon className="mb-2 h-10 w-10 opacity-30" />
 										<p className="text-sm">No hay comodines disponibles</p>
 										{(searchQuery || onlyFavorites || selectedCategories.length > 0) && (
-											<p className="text-xs mt-1">Intenta ajustar los filtros</p>
+											<p className="mt-1 text-xs">Intenta ajustar los filtros</p>
 										)}
 									</div>
 								)}
@@ -429,15 +428,15 @@ export function WildcardsSettings() {
 
 			{/* Panel derecho: Formulario y Preview */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
 					{selectedWildcard ? (
 						isEditMode ? (
-							<Dialog open={isEditMode} onOpenChange={setIsEditMode}>
-								<DialogContent className="max-w-3xl p-0 overflow-hidden">
+							<Dialog onOpenChange={setIsEditMode} open={isEditMode}>
+								<DialogContent className="max-w-3xl overflow-hidden p-0">
 									<Suspense fallback={<div className="p-8">Cargando formulario…</div>}>
 										<CreateWildcardForm
-											onSubmit={(data) => handleUpdateWildcard(selectedWildcard.id, data)}
 											onCancel={() => setIsEditMode(false)}
+											onSubmit={(data) => handleUpdateWildcard(selectedWildcard.id, data)}
 											parentWildcards={wildcards}
 											wildcard={selectedWildcard}
 										/>
@@ -446,27 +445,27 @@ export function WildcardsSettings() {
 							</Dialog>
 						) : (
 							<WildcardPreview
-								wildcard={selectedWildcard}
-								onEdit={() => setIsEditMode(true)}
 								onDelete={() => handleDeleteWildcard(selectedWildcard.id)}
+								onEdit={() => setIsEditMode(true)}
+								wildcard={selectedWildcard}
 							/>
 						)
 					) : (
-						<div className="flex flex-col items-center justify-center h-full">
+						<div className="flex h-full flex-col items-center justify-center">
 							<WandIcon className="h-12 w-12 opacity-20" />
-							<p className="text-sm opacity-50 mt-2">Selecciona un comodín para ver sus detalles</p>
+							<p className="mt-2 text-sm opacity-50">Selecciona un comodín para ver sus detalles</p>
 						</div>
 					)}
 				</Card>
 			</div>
 
 			{/* Dialog para crear nuevo comodín */}
-			<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
-				<DialogContent className="max-w-3xl p-0 overflow-hidden">
+			<Dialog onOpenChange={setIsCreateDialogOpen} open={isCreateDialogOpen}>
+				<DialogContent className="max-w-3xl overflow-hidden p-0">
 					<Suspense fallback={<div className="p-8">Cargando formulario…</div>}>
 						<CreateWildcardForm
-							onSubmit={handleCreateWildcard}
 							onCancel={() => setIsCreateDialogOpen(false)}
+							onSubmit={handleCreateWildcard}
 							parentWildcards={wildcards}
 							wildcard={undefined}
 						/>

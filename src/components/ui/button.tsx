@@ -5,19 +5,19 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-	'cursor-pointer group whitespace-nowrap focus-visible:outline-hidden inline-flex items-center justify-center has-data-[arrow=true]:justify-between whitespace-nowrap text-sm font-medium ring-offset-background transition-[color,box-shadow] disabled:pointer-events-none disabled:opacity-60 [&_svg]:shrink-0',
+	'group inline-flex cursor-pointer items-center justify-center whitespace-nowrap whitespace-nowrap font-medium text-sm ring-offset-background transition-[color,box-shadow] focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-60 has-data-[arrow=true]:justify-between [&_svg]:shrink-0',
 	{
 		variants: {
 			variant: {
 				default: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
 				primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
-				mono: 'bg-zinc-950 text-white dark:bg-zinc-300 dark:text-black hover:bg-zinc-950/90 dark:hover:bg-zinc-300/90 data-[state=open]:bg-zinc-950/90 dark:data-[state=open]:bg-zinc-300/90',
+				mono: 'bg-zinc-950 text-white hover:bg-zinc-950/90 data-[state=open]:bg-zinc-950/90 dark:bg-zinc-300 dark:text-black dark:data-[state=open]:bg-zinc-300/90 dark:hover:bg-zinc-300/90',
 				destructive:
 					'bg-destructive text-destructive-foreground hover:bg-destructive/90 data-[state=open]:bg-destructive/90',
 				secondary: 'bg-secondary text-secondary-foreground hover:bg-secondary/90 data-[state=open]:bg-secondary/90',
-				outline: 'bg-background text-accent-foreground border border-input hover:bg-accent data-[state=open]:bg-accent',
+				outline: 'border border-input bg-background text-accent-foreground hover:bg-accent data-[state=open]:bg-accent',
 				dashed:
-					'text-accent-foreground border border-input border-dashed bg-background hover:bg-accent hover:text-accent-foreground data-[state=open]:text-accent-foreground',
+					'border border-input border-dashed bg-background text-accent-foreground hover:bg-accent hover:text-accent-foreground data-[state=open]:text-accent-foreground',
 				ghost:
 					'text-accent-foreground hover:bg-accent hover:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
 				dim: 'text-muted-foreground hover:text-foreground data-[state=open]:text-foreground',
@@ -37,10 +37,10 @@ const buttonVariants = cva(
 				dashed: '',
 			},
 			size: {
-				lg: 'h-10 rounded-md px-4 text-sm gap-1.5 [&_svg:not([class*=size-])]:size-4',
-				md: 'h-8.5 rounded-md px-3 gap-1.5 text-[0.8125rem] leading-(--text-sm--line-height) [&_svg:not([class*=size-])]:size-4',
-				sm: 'h-7 rounded-md px-2.5 gap-1.25 text-xs [&_svg:not([class*=size-])]:size-3.5',
-				icon: 'size-8.5 rounded-md [&_svg:not([class*=size-])]:size-4 shrink-0',
+				lg: 'h-10 gap-1.5 rounded-md px-4 text-sm [&_svg:not([class*=size-])]:size-4',
+				md: 'h-8.5 gap-1.5 rounded-md px-3 text-[0.8125rem] leading-(--text-sm--line-height) [&_svg:not([class*=size-])]:size-4',
+				sm: 'h-7 gap-1.25 rounded-md px-2.5 text-xs [&_svg:not([class*=size-])]:size-3.5',
+				icon: 'size-8.5 shrink-0 rounded-md [&_svg:not([class*=size-])]:size-4',
 			},
 			autoHeight: {
 				true: '',
@@ -52,8 +52,8 @@ const buttonVariants = cva(
 			},
 			mode: {
 				default: 'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-				icon: 'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 shrink-0',
-				link: 'text-primary h-auto p-0 bg-transparent rounded-none hover:bg-transparent data-[state=open]:bg-transparent',
+				icon: 'shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
+				link: 'h-auto rounded-none bg-transparent p-0 text-primary hover:bg-transparent data-[state=open]:bg-transparent',
 				input: `
             justify-start font-normal hover:bg-background [&_svg]:transition-colors [&_svg]:hover:text-foreground data-[state=open]:bg-background 
             focus-visible:border-ring focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-ring/30 
@@ -125,37 +125,37 @@ const buttonVariants = cva(
 				variant: 'primary',
 				mode: 'default',
 				appearance: 'default',
-				className: 'shadow-xs shadow-black/5',
+				className: 'shadow-black/5 shadow-xs',
 			},
 			{
 				variant: 'mono',
 				mode: 'default',
 				appearance: 'default',
-				className: 'shadow-xs shadow-black/5',
+				className: 'shadow-black/5 shadow-xs',
 			},
 			{
 				variant: 'secondary',
 				mode: 'default',
 				appearance: 'default',
-				className: 'shadow-xs shadow-black/5',
+				className: 'shadow-black/5 shadow-xs',
 			},
 			{
 				variant: 'outline',
 				mode: 'default',
 				appearance: 'default',
-				className: 'shadow-xs shadow-black/5',
+				className: 'shadow-black/5 shadow-xs',
 			},
 			{
 				variant: 'dashed',
 				mode: 'default',
 				appearance: 'default',
-				className: 'shadow-xs shadow-black/5',
+				className: 'shadow-black/5 shadow-xs',
 			},
 			{
 				variant: 'destructive',
 				mode: 'default',
 				appearance: 'default',
-				className: 'shadow-xs shadow-black/5',
+				className: 'shadow-black/5 shadow-xs',
 			},
 
 			// Shadow support
@@ -163,37 +163,37 @@ const buttonVariants = cva(
 				variant: 'primary',
 				mode: 'icon',
 				appearance: 'default',
-				className: 'shadow-xs shadow-black/5',
+				className: 'shadow-black/5 shadow-xs',
 			},
 			{
 				variant: 'mono',
 				mode: 'icon',
 				appearance: 'default',
-				className: 'shadow-xs shadow-black/5',
+				className: 'shadow-black/5 shadow-xs',
 			},
 			{
 				variant: 'secondary',
 				mode: 'icon',
 				appearance: 'default',
-				className: 'shadow-xs shadow-black/5',
+				className: 'shadow-black/5 shadow-xs',
 			},
 			{
 				variant: 'outline',
 				mode: 'icon',
 				appearance: 'default',
-				className: 'shadow-xs shadow-black/5',
+				className: 'shadow-black/5 shadow-xs',
 			},
 			{
 				variant: 'dashed',
 				mode: 'icon',
 				appearance: 'default',
-				className: 'shadow-xs shadow-black/5',
+				className: 'shadow-black/5 shadow-xs',
 			},
 			{
 				variant: 'destructive',
 				mode: 'icon',
 				appearance: 'default',
-				className: 'shadow-xs shadow-black/5',
+				className: 'shadow-black/5 shadow-xs',
 			},
 
 			// Link
@@ -202,28 +202,28 @@ const buttonVariants = cva(
 				mode: 'link',
 				underline: 'solid',
 				className:
-					'font-medium text-primary hover:text-primary/90 [&_svg:not([role=img]):not([class*=text-])]:opacity-60 hover:underline hover:underline-offset-4 hover:decoration-solid',
+					'font-medium text-primary hover:text-primary/90 hover:underline hover:decoration-solid hover:underline-offset-4 [&_svg:not([role=img]):not([class*=text-])]:opacity-60',
 			},
 			{
 				variant: 'primary',
 				mode: 'link',
 				underline: 'dashed',
 				className:
-					'font-medium text-primary hover:text-primary/90 [&_svg:not([role=img]):not([class*=text-])]:opacity-60 hover:underline hover:underline-offset-4 hover:decoration-dashed decoration-1',
+					'font-medium text-primary decoration-1 hover:text-primary/90 hover:underline hover:decoration-dashed hover:underline-offset-4 [&_svg:not([role=img]):not([class*=text-])]:opacity-60',
 			},
 			{
 				variant: 'primary',
 				mode: 'link',
 				underlined: 'solid',
 				className:
-					'font-medium text-primary hover:text-primary/90 [&_svg:not([role=img]):not([class*=text-])]:opacity-60 underline underline-offset-4 decoration-solid',
+					'font-medium text-primary underline decoration-solid underline-offset-4 hover:text-primary/90 [&_svg:not([role=img]):not([class*=text-])]:opacity-60',
 			},
 			{
 				variant: 'primary',
 				mode: 'link',
 				underlined: 'dashed',
 				className:
-					'font-medium text-primary hover:text-primary/90 [&_svg]:opacity-60 underline underline-offset-4 decoration-dashed decoration-1',
+					'font-medium text-primary underline decoration-1 decoration-dashed underline-offset-4 hover:text-primary/90 [&_svg]:opacity-60',
 			},
 
 			{
@@ -231,28 +231,28 @@ const buttonVariants = cva(
 				mode: 'link',
 				underline: 'solid',
 				className:
-					'font-medium text-inherit [&_svg:not([role=img]):not([class*=text-])]:opacity-60 hover:underline hover:underline-offset-4 hover:decoration-solid',
+					'font-medium text-inherit hover:underline hover:decoration-solid hover:underline-offset-4 [&_svg:not([role=img]):not([class*=text-])]:opacity-60',
 			},
 			{
 				variant: 'inverse',
 				mode: 'link',
 				underline: 'dashed',
 				className:
-					'font-medium text-inherit [&_svg:not([role=img]):not([class*=text-])]:opacity-60 hover:underline hover:underline-offset-4 hover:decoration-dashed decoration-1',
+					'font-medium text-inherit decoration-1 hover:underline hover:decoration-dashed hover:underline-offset-4 [&_svg:not([role=img]):not([class*=text-])]:opacity-60',
 			},
 			{
 				variant: 'inverse',
 				mode: 'link',
 				underlined: 'solid',
 				className:
-					'font-medium text-inherit [&_svg:not([role=img]):not([class*=text-])]:opacity-60 underline underline-offset-4 decoration-solid',
+					'font-medium text-inherit underline decoration-solid underline-offset-4 [&_svg:not([role=img]):not([class*=text-])]:opacity-60',
 			},
 			{
 				variant: 'inverse',
 				mode: 'link',
 				underlined: 'dashed',
 				className:
-					'font-medium text-inherit [&_svg:not([role=img]):not([class*=text-])]:opacity-60 underline underline-offset-4 decoration-dashed decoration-1',
+					'font-medium text-inherit underline decoration-1 decoration-dashed underline-offset-4 [&_svg:not([role=img]):not([class*=text-])]:opacity-60',
 			},
 
 			{
@@ -260,28 +260,28 @@ const buttonVariants = cva(
 				mode: 'link',
 				underline: 'solid',
 				className:
-					'font-medium text-foreground [&_svg:not([role=img]):not([class*=text-])]:opacity-60 hover:underline hover:underline-offset-4 hover:decoration-solid',
+					'font-medium text-foreground hover:underline hover:decoration-solid hover:underline-offset-4 [&_svg:not([role=img]):not([class*=text-])]:opacity-60',
 			},
 			{
 				variant: 'foreground',
 				mode: 'link',
 				underline: 'dashed',
 				className:
-					'font-medium text-foreground [&_svg:not([role=img]):not([class*=text-])]:opacity-60 hover:underline hover:underline-offset-4 hover:decoration-dashed decoration-1',
+					'font-medium text-foreground decoration-1 hover:underline hover:decoration-dashed hover:underline-offset-4 [&_svg:not([role=img]):not([class*=text-])]:opacity-60',
 			},
 			{
 				variant: 'foreground',
 				mode: 'link',
 				underlined: 'solid',
 				className:
-					'font-medium text-foreground [&_svg:not([role=img]):not([class*=text-])]:opacity-60 underline underline-offset-4 decoration-solid',
+					'font-medium text-foreground underline decoration-solid underline-offset-4 [&_svg:not([role=img]):not([class*=text-])]:opacity-60',
 			},
 			{
 				variant: 'foreground',
 				mode: 'link',
 				underlined: 'dashed',
 				className:
-					'font-medium text-foreground [&_svg:not([role=img]):not([class*=text-])]:opacity-60 underline underline-offset-4 decoration-dashed decoration-1',
+					'font-medium text-foreground underline decoration-1 decoration-dashed underline-offset-4 [&_svg:not([role=img]):not([class*=text-])]:opacity-60',
 			},
 
 			// Ghost
@@ -305,21 +305,21 @@ const buttonVariants = cva(
 			{
 				size: 'sm',
 				mode: 'icon',
-				className: 'w-7 h-7 p-0 [[&_svg:not([class*=size-])]:size-3.5',
+				className: 'h-7 w-7 p-0 [[&_svg:not([class*=size-])]:size-3.5',
 			},
 			{
 				size: 'md',
 				mode: 'icon',
-				className: 'w-8.5 h-8.5 p-0 [&_svg:not([class*=size-])]:size-4',
+				className: 'h-8.5 w-8.5 p-0 [&_svg:not([class*=size-])]:size-4',
 			},
 			{
 				size: 'icon',
-				className: 'w-8.5 h-8.5 p-0 [&_svg:not([class*=size-])]:size-4',
+				className: 'h-8.5 w-8.5 p-0 [&_svg:not([class*=size-])]:size-4',
 			},
 			{
 				size: 'lg',
 				mode: 'icon',
-				className: 'w-10 h-10 p-0 [&_svg:not([class*=size-])]:size-4',
+				className: 'h-10 w-10 p-0 [&_svg:not([class*=size-])]:size-4',
 			},
 
 			// Input mode
@@ -380,7 +380,6 @@ function Button({
 	const Comp = asChild ? SlotPrimitive.Slot : 'button';
 	return (
 		<Comp
-			data-slot="button"
 			className={cn(
 				buttonVariants({
 					variant,
@@ -396,6 +395,7 @@ function Button({
 				}),
 				asChild && props.disabled && 'pointer-events-none opacity-50'
 			)}
+			data-slot="button"
 			{...(selected && { 'data-state': 'open' })}
 			{...props}
 		/>
@@ -407,7 +407,7 @@ interface ButtonArrowProps extends React.SVGProps<SVGSVGElement> {
 }
 
 function ButtonArrow({ icon: Icon = ChevronDown, className, ...props }: ButtonArrowProps) {
-	return <Icon data-slot="button-arrow" className={cn('ms-auto -me-1', className)} {...props} />;
+	return <Icon className={cn('-me-1 ms-auto', className)} data-slot="button-arrow" {...props} />;
 }
 
 export { Button, ButtonArrow, buttonVariants };

@@ -211,7 +211,7 @@ export async function createWorldItem(input: WorldItemCreateInput): Promise<Worl
 				color: input.color || '#3b82f6',
 				category: input.category || null,
 
-				isFavorite: input.isFavorite || false,
+				isFavorite: input.isFavorite,
 				totalImages: input.totalImages || 0,
 				totalVideos: input.totalVideos || 0,
 				type: input.type || null,

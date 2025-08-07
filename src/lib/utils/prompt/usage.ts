@@ -25,11 +25,11 @@ const MODEL_TOKEN_RATES: Record<PromptModel, TokenRates> = {
 	[PromptModel.CLAUDE_2]: { inputTokenRate: 0.008, outputTokenRate: 0.024 },
 	[PromptModel.CLAUDE_3_OPUS]: { inputTokenRate: 0.015, outputTokenRate: 0.075 },
 	[PromptModel.CLAUDE_3_SONNET]: { inputTokenRate: 0.003, outputTokenRate: 0.015 },
-	[PromptModel.CLAUDE_3_HAIKU]: { inputTokenRate: 0.00025, outputTokenRate: 0.00125 },
+	[PromptModel.CLAUDE_3_HAIKU]: { inputTokenRate: 0.000_25, outputTokenRate: 0.001_25 },
 	[PromptModel.LLAMA_3_8B]: { inputTokenRate: 0.0001, outputTokenRate: 0.0002 },
 	[PromptModel.LLAMA_3_70B]: { inputTokenRate: 0.0007, outputTokenRate: 0.0014 },
 	[PromptModel.GEMINI_PRO]: { inputTokenRate: 0.0005, outputTokenRate: 0.0015 },
-	[PromptModel.GEMINI_FLASH]: { inputTokenRate: 0.00035, outputTokenRate: 0.00105 },
+	[PromptModel.GEMINI_FLASH]: { inputTokenRate: 0.000_35, outputTokenRate: 0.001_05 },
 	[PromptModel.MISTRAL_7B]: { inputTokenRate: 0.0002, outputTokenRate: 0.0006 },
 	[PromptModel.CUSTOM]: { inputTokenRate: 0.001, outputTokenRate: 0.002 },
 };

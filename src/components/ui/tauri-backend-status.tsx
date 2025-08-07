@@ -33,7 +33,7 @@ export function TauriBackendStatus() {
 		}
 		if (isRunning) {
 			return (
-				<Badge variant="primary" className="bg-green-500">
+				<Badge className="bg-green-500" variant="primary">
 					Conectado
 				</Badge>
 			);
@@ -54,25 +54,25 @@ export function TauriBackendStatus() {
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						{getStatusIcon()}
-						<span className="text-sm font-medium">{isRunning ? 'Backend operativo' : 'Backend no disponible'}</span>
+						<span className="font-medium text-sm">{isRunning ? 'Backend operativo' : 'Backend no disponible'}</span>
 					</div>
 					{getStatusBadge()}
 				</div>
 
 				{error && (
-					<div className="text-xs text-muted-foreground bg-muted p-2 rounded">
+					<div className="rounded bg-muted p-2 text-muted-foreground text-xs">
 						<strong>Error:</strong> {error}
 					</div>
 				)}
 
 				<div className="flex gap-2">
-					<Button size="sm" variant="outline" onClick={checkBackendHealth} disabled={isChecking} className="flex-1">
-						<RefreshCw className={`h-3 w-3 mr-1 ${isChecking ? 'animate-spin' : ''}`} />
+					<Button className="flex-1" disabled={isChecking} onClick={checkBackendHealth} size="sm" variant="outline">
+						<RefreshCw className={`mr-1 h-3 w-3 ${isChecking ? 'animate-spin' : ''}`} />
 						Verificar
 					</Button>
 				</div>
 
-				<div className="text-xs text-muted-foreground space-y-1">
+				<div className="space-y-1 text-muted-foreground text-xs">
 					<div>Puerto: 4000</div>
 					<div>Modo: Aplicación de escritorio</div>
 				</div>

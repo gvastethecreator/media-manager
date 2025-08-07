@@ -85,12 +85,12 @@ export function UndoRedoButton({
 			<Tooltip>
 				<TooltipTrigger asChild>
 					<Button
-						variant={variant}
-						size={size}
-						className={cn('transition-all duration-200', isDisabled && 'opacity-50 cursor-not-allowed', className)}
-						onClick={handleClick}
-						disabled={isDisabled}
 						aria-label={getTooltipContent()}
+						className={cn('transition-all duration-200', isDisabled && 'cursor-not-allowed opacity-50', className)}
+						disabled={isDisabled}
+						onClick={handleClick}
+						size={size}
+						variant={variant}
 					>
 						<Icon className="h-4 w-4" />
 					</Button>

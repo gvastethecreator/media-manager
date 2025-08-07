@@ -45,7 +45,7 @@ export function NoteCardFooter({
 	});
 
 	// Formatear fecha actualizada si es diferente a la creación
-	const wasUpdated = updatedAtDate.getTime() - createdAtDate.getTime() > 60000; // 1 minuto de diferencia
+	const wasUpdated = updatedAtDate.getTime() - createdAtDate.getTime() > 60_000; // 1 minuto de diferencia
 	const updatedFormattedDate = wasUpdated
 		? formatDistanceToNow(updatedAtDate, {
 				addSuffix: true,
@@ -86,14 +86,14 @@ export function NoteCardFooter({
 	return (
 		<div
 			className={cn(
-				'px-3 py-2 mt-auto border-t border-gray-400/30 flex flex-col gap-1',
-				tcgMode && 'backdrop-blur-sm rounded-b-[4.75%]'
+				'mt-auto flex flex-col gap-1 border-gray-400/30 border-t px-3 py-2',
+				tcgMode && 'rounded-b-[4.75%] backdrop-blur-sm'
 			)}
 			style={getFooterStyles()}
 		>
 			{/* Fila superior con estado y prioridad */}
 			{(status || priority !== undefined) && (
-				<div className="flex justify-between items-center text-xs">
+				<div className="flex items-center justify-between text-xs">
 					{status && (
 						<div className="flex items-center gap-1">
 							<ListChecks className="h-3 w-3" style={{ color: primaryColor }} />
@@ -114,7 +114,7 @@ export function NoteCardFooter({
 			)}
 
 			{/* Fila de contadores con iconos */}
-			<div className="flex justify-between items-center text-xs">
+			<div className="flex items-center justify-between text-xs">
 				<div className="flex items-center gap-3">
 					{/* Contador de imágenes */}
 					<div className="flex items-center gap-1">
@@ -152,7 +152,7 @@ export function NoteCardFooter({
 					) : (
 						<Calendar className="h-3 w-3 text-muted-foreground" />
 					)}
-					<span className={cn('opacity-80 text-[0.65rem]', tcgMode && 'tracking-tight')}>
+					<span className={cn('text-[0.65rem] opacity-80', tcgMode && 'tracking-tight')}>
 						{wasUpdated ? updatedFormattedDate : formattedDate}
 					</span>
 				</div>
@@ -160,16 +160,16 @@ export function NoteCardFooter({
 
 			{/* Fecha de actualización (solo en modo no-TCG) */}
 			{wasUpdated && updatedFormattedDate && !tcgMode && (
-				<div className="flex justify-end items-center text-[0.65rem] opacity-60 mt-0.5">
+				<div className="mt-0.5 flex items-center justify-end text-[0.65rem] opacity-60">
 					<span>Actualizado {updatedFormattedDate}</span>
 				</div>
 			)}
 
 			{/* Sello TCG en la parte inferior */}
 			{tcgMode && (
-				<div className="mt-1 pt-1 border-t border-white/10 flex justify-center">
+				<div className="mt-1 flex justify-center border-white/10 border-t pt-1">
 					<div
-						className="text-[0.65rem] opacity-60 tracking-wide uppercase font-medium"
+						className="font-medium text-[0.65rem] uppercase tracking-wide opacity-60"
 						style={{ color: primaryColor }}
 					>
 						Image Manager • Note

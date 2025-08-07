@@ -61,9 +61,9 @@ export const PlaceContentView = memo(function PlaceContentView() {
 	const noSelectionEmptyState = useMemo(
 		() => (
 			<EmptyState
+				description="Selecciona un lugar para ver su contenido"
 				icon={MapPin}
 				title="No hay lugar seleccionado"
-				description="Selecciona un lugar para ver su contenido"
 			/>
 		),
 		[]
@@ -89,14 +89,14 @@ export const PlaceContentView = memo(function PlaceContentView() {
 
 	return (
 		<ContentViewProvider
-			items={items}
-			isLoading={isLoading}
-			error={error}
-			toggleItemSelection={handleItemSelection}
-			currentContainerId={selectedPlaceId}
 			containerName={selectedPlace?.name ?? 'lugar'}
+			currentContainerId={selectedPlaceId}
 			emptyState={emptyStateConfig}
+			error={error}
+			isLoading={isLoading}
+			items={items}
 			onRefresh={loadPlaceImages}
+			toggleItemSelection={handleItemSelection}
 		>
 			<BaseContentView>
 				{/* Place content will be added here */}

@@ -228,14 +228,14 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
 		<>
 			<div className="w-72 py-1">
 				{/* Encabezado con información de selección */}
-				<div className="px-2 py-2 border-b border-border">
-					<div className="flex items-center gap-2 text-sm font-medium">
+				<div className="border-border border-b px-2 py-2">
+					<div className="flex items-center gap-2 font-medium text-sm">
 						<Users className="h-4 w-4" />
 						<span>
 							{itemCount} elemento{itemCount > 1 ? 's' : ''} seleccionado{itemCount > 1 ? 's' : ''}
 						</span>
 					</div>
-					<div className="text-xs text-muted-foreground mt-1">
+					<div className="mt-1 text-muted-foreground text-xs">
 						Tamaño total:{' '}
 						{selectedItems.reduce((acc, item) => acc + (('size' in item ? item.size : 0) || 0), 0).toLocaleString()}{' '}
 						bytes
@@ -245,12 +245,12 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
 				{/* Acciones principales con navegación por teclado */}
 				{menuActions.map((menuAction, index) => (
 					<button
-						key={menuAction.action}
-						type="button"
 						className={`${menuItemStyle} ${
 							menuAction.destructive ? 'text-red-600 hover:text-red-600' : ''
 						} ${selectedIndex === index ? 'bg-accent text-accent-foreground' : ''}`}
 						disabled={processingAction === menuAction.action}
+						key={menuAction.action}
+						type="button"
 						{...getItemProps(index)}
 					>
 						{processingAction === menuAction.action ? (
@@ -260,8 +260,8 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
 						)}
 						<div className="flex-1">
 							<div>{menuAction.label}</div>
-							<div className="text-xs text-muted-foreground">
-								<Clock className="inline h-3 w-3 mr-1" />
+							<div className="text-muted-foreground text-xs">
+								<Clock className="mr-1 inline h-3 w-3" />
 								{calculateEstimatedTime(itemCount, menuAction.action)}
 							</div>
 						</div>
@@ -272,8 +272,11 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
 
 				{/* Submenús para agregar a entidades */}
 				<EnhancedSubmenu
-					title="Colecciones"
+					actionType="add-to-collection"
+					createActionType="collection-create"
+					file={selectedItems[0]}
 					icon={<BookImage className="h-4 w-4" />}
+					isLoading={false} // Usar el primer elemento como referencia
 					items={collections.map((c) => ({
 						...c,
 						emoji: c.emoji ?? undefined,
@@ -281,19 +284,21 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
 						isFavorite: Boolean(c.isFavorite),
 						isRecent: Boolean(c.isRecent),
 					}))}
-					isLoading={false}
-					file={selectedItems[0]} // Usar el primer elemento como referencia
 					onAction={async (action, file, data) => {
 						await onAction(action as MultiSelectionAction, selectedItems, data);
 					}}
-					actionType="add-to-collection"
-					createActionType="collection-create"
 					onOpenChange={() => {}}
+					title="Colecciones"
 				/>
 
 				<EnhancedSubmenu
-					title="Etiquetas"
+					actionType="add-tag"
+					createActionType="tag-create"
+					dataIdField="tagId"
+					dataNameField="tagName"
+					file={selectedItems[0]} // Usar el primer elemento como referencia
 					icon={<Tag className="h-4 w-4" />}
+					isLoading={false}
 					items={tags.map((t: TagWithStats) => ({
 						id: t.id,
 						name: t.name,
@@ -301,21 +306,21 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
 						isFavorite: false,
 						isRecent: false,
 					}))}
-					isLoading={false}
-					file={selectedItems[0]} // Usar el primer elemento como referencia
 					onAction={async (action, file, data) => {
 						await onAction(action as MultiSelectionAction, selectedItems, data);
 					}}
-					actionType="add-tag"
-					createActionType="tag-create"
 					onOpenChange={() => {}}
-					dataIdField="tagId"
-					dataNameField="tagName"
+					title="Etiquetas"
 				/>
 
 				<EnhancedSubmenu
-					title="Álbumes"
+					actionType="add-to-album"
+					createActionType="album-create"
+					dataIdField="albumId"
+					dataNameField="albumName"
+					file={selectedItems[0]} // Usar el primer elemento como referencia
 					icon={<Album className="h-4 w-4" />}
+					isLoading={false}
 					items={albums.map((a) => ({
 						...a,
 						emoji: a.emoji ?? undefined,
@@ -323,21 +328,16 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
 						isFavorite: Boolean(a.isFavorite),
 						isRecent: Boolean(a.isRecent),
 					}))}
-					isLoading={false}
-					file={selectedItems[0]} // Usar el primer elemento como referencia
 					onAction={async (action, file, data) => {
 						await onAction(action as MultiSelectionAction, selectedItems, data);
 					}}
-					actionType="add-to-album"
-					createActionType="album-create"
 					onOpenChange={() => {}}
-					dataIdField="albumId"
-					dataNameField="albumName"
+					title="Álbumes"
 				/>
 			</div>
 
 			{/* Diálogo de confirmación para operaciones destructivas */}
-			<Dialog open={confirmationDialog.isOpen} onOpenChange={handleCancelConfirmation}>
+			<Dialog onOpenChange={handleCancelConfirmation} open={confirmationDialog.isOpen}>
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle className="flex items-center gap-2">
@@ -348,14 +348,14 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
 					</DialogHeader>
 
 					<div className="py-4">
-						<div className="flex items-center gap-2 text-sm text-muted-foreground">
+						<div className="flex items-center gap-2 text-muted-foreground text-sm">
 							<Clock className="h-4 w-4" />
 							<span>Tiempo estimado: {confirmationDialog.operationInfo.estimatedTime}</span>
 						</div>
 
 						{confirmationDialog.action === 'delete-multiple' && (
-							<div className="mt-3 p-3 bg-red-50 dark:bg-red-950/20 rounded-md">
-								<p className="text-sm text-red-800 dark:text-red-200">
+							<div className="mt-3 rounded-md bg-red-50 p-3 dark:bg-red-950/20">
+								<p className="text-red-800 text-sm dark:text-red-200">
 									⚠️ Esta acción no se puede deshacer. Los elementos se eliminarán permanentemente.
 								</p>
 							</div>
@@ -363,13 +363,13 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
 					</div>
 
 					<DialogFooter>
-						<Button variant="outline" onClick={handleCancelConfirmation}>
+						<Button onClick={handleCancelConfirmation} variant="outline">
 							Cancelar
 						</Button>
 						<Button
-							variant={confirmationDialog.action === 'delete-multiple' ? 'destructive' : 'primary'}
-							onClick={handleConfirmAction}
 							disabled={processingAction !== null}
+							onClick={handleConfirmAction}
+							variant={confirmationDialog.action === 'delete-multiple' ? 'destructive' : 'primary'}
 						>
 							{processingAction !== null ? (
 								<>

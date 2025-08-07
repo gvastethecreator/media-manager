@@ -82,21 +82,21 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 					<div className="space-y-6">
 						{/* Estadísticas básicas */}
 						<div className="grid grid-cols-2 gap-4">
-							<div className="flex flex-col items-center justify-center p-4 rounded-sm bg-muted/50">
-								<span className="text-2xl font-bold">{stats.total}</span>
-								<span className="text-xs text-muted-foreground">Total</span>
+							<div className="flex flex-col items-center justify-center rounded-sm bg-muted/50 p-4">
+								<span className="font-bold text-2xl">{stats.total}</span>
+								<span className="text-muted-foreground text-xs">Total</span>
 							</div>
-							<div className="flex flex-col items-center justify-center p-4 rounded-sm bg-muted/50">
-								<span className="text-2xl font-bold">{stats.active}</span>
-								<span className="text-xs text-muted-foreground">Activos</span>
+							<div className="flex flex-col items-center justify-center rounded-sm bg-muted/50 p-4">
+								<span className="font-bold text-2xl">{stats.active}</span>
+								<span className="text-muted-foreground text-xs">Activos</span>
 							</div>
-							<div className="flex flex-col items-center justify-center p-4 rounded-sm bg-muted/50">
-								<span className="text-2xl font-bold">{stats.isFavorite}</span>
-								<span className="text-xs text-muted-foreground">Favoritos</span>
+							<div className="flex flex-col items-center justify-center rounded-sm bg-muted/50 p-4">
+								<span className="font-bold text-2xl">{stats.isFavorite}</span>
+								<span className="text-muted-foreground text-xs">Favoritos</span>
 							</div>
-							<div className="flex flex-col items-center justify-center p-4 rounded-sm bg-muted/50">
-								<span className="text-2xl font-bold">{stats.archived}</span>
-								<span className="text-xs text-muted-foreground">Archivados</span>
+							<div className="flex flex-col items-center justify-center rounded-sm bg-muted/50 p-4">
+								<span className="font-bold text-2xl">{stats.archived}</span>
+								<span className="text-muted-foreground text-xs">Archivados</span>
 							</div>
 						</div>
 
@@ -112,8 +112,8 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 											<TooltipTrigger asChild>
 												<div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-3 transition-colors hover:bg-background/80">
 													<Hash className="mb-2 h-4 w-4 text-primary" />
-													<p className="text-2xl font-bold">{stats.totalItems}</p>
-													<p className="text-xs text-muted-foreground">Total</p>
+													<p className="font-bold text-2xl">{stats.totalItems}</p>
+													<p className="text-muted-foreground text-xs">Total</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -127,8 +127,8 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 											<TooltipTrigger asChild>
 												<div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-3 transition-colors hover:bg-background/80">
 													<ImageIcon className="mb-2 h-4 w-4 text-primary" />
-													<p className="text-2xl font-bold">{stats.totalImages}</p>
-													<p className="text-xs text-muted-foreground">Imágenes</p>
+													<p className="font-bold text-2xl">{stats.totalImages}</p>
+													<p className="text-muted-foreground text-xs">Imágenes</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -142,8 +142,8 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 											<TooltipTrigger asChild>
 												<div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-3 transition-colors hover:bg-background/80">
 													<HardDrive className="mb-2 h-4 w-4 text-primary" />
-													<p className="text-2xl font-bold">{formatSize(stats.totalSize)}</p>
-													<p className="text-xs text-muted-foreground">Tamaño</p>
+													<p className="font-bold text-2xl">{formatSize(stats.totalSize)}</p>
+													<p className="text-muted-foreground text-xs">Tamaño</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -157,8 +157,8 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 											<TooltipTrigger asChild>
 												<div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-3 transition-colors hover:bg-background/80">
 													<Calendar className="mb-2 h-4 w-4 text-primary" />
-													<p className="text-sm font-medium">{formatDate(stats.lastUpdated)}</p>
-													<p className="text-xs text-muted-foreground">Actualizado</p>
+													<p className="font-medium text-sm">{formatDate(stats.lastUpdated)}</p>
+													<p className="text-muted-foreground text-xs">Actualizado</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -174,8 +174,8 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 						{stats.recentItems && stats.recentItems.length > 0 && (
 							<div className="space-y-3">
 								<div className="flex items-center justify-between">
-									<h4 className="text-sm font-medium">Elementos Recientes</h4>
-									<Badge variant="outline" className="text-xs">
+									<h4 className="font-medium text-sm">Elementos Recientes</h4>
+									<Badge className="text-xs" variant="outline">
 										{stats.recentItems.length}
 									</Badge>
 								</div>
@@ -183,8 +183,8 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 									<div className="space-y-2">
 										{stats.recentItems.map((item) => (
 											<div
-												key={item.id}
 												className="group flex items-center justify-between rounded-md p-2 transition-colors hover:bg-muted"
+												key={item.id}
 											>
 												<div className="flex items-center gap-2">
 													<div
@@ -196,9 +196,9 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 														{item.emoji || <Hash className="h-4 w-4" />}
 													</div>
 													<div>
-														<p className="text-sm font-medium">{item.name}</p>
+														<p className="font-medium text-sm">{item.name}</p>
 														{item.count !== undefined && (
-															<p className="text-xs text-muted-foreground">{item.count} imágenes</p>
+															<p className="text-muted-foreground text-xs">{item.count} imágenes</p>
 														)}
 													</div>
 												</div>
@@ -214,22 +214,22 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 						{stats.distribution && stats.distribution.length > 0 && (
 							<div className="space-y-3">
 								<div className="flex items-center justify-between">
-									<h4 className="text-sm font-medium">Distribución</h4>
-									<Badge variant="outline" className="text-xs">
+									<h4 className="font-medium text-sm">Distribución</h4>
+									<Badge className="text-xs" variant="outline">
 										{stats.distribution.length}
 									</Badge>
 								</div>
 								<div className="space-y-2">
 									{stats.distribution.map((item) => (
-										<div key={item.name} className="space-y-1">
+										<div className="space-y-1" key={item.name}>
 											<div className="flex items-center justify-between text-sm">
 												<div className="flex items-center gap-2">
 													<Folder className="h-4 w-4 text-muted-foreground" />
 													<span className="font-medium">{item.name}</span>
 												</div>
-												<span className="text-xs text-muted-foreground">{item.count}</span>
+												<span className="text-muted-foreground text-xs">{item.count}</span>
 											</div>
-											<Progress value={(item.count / maxCount) * 100} className="h-2" />
+											<Progress className="h-2" value={(item.count / maxCount) * 100} />
 										</div>
 									))}
 								</div>

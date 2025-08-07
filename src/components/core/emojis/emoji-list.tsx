@@ -10,7 +10,7 @@ const GetEmojis = ({ category }: EmojiCategoryProps) => {
 	return (
 		<div className="grid grid-cols-8 gap-2">
 			{emojis.map((emoji: EmojiData) => (
-				<span key={emoji.emoji} className="text-2xl cursor-pointer hover:scale-110 transition-transform">
+				<span className="cursor-pointer text-2xl transition-transform hover:scale-110" key={emoji.emoji}>
 					{emoji.emoji}
 				</span>
 			))}
@@ -67,8 +67,8 @@ const list = [
 
 const EmojiList = () => {
 	return (
-		<Tabs defaultValue="smilies" className="items-center justify-center flex flex-col space-y-8 md:max-w-7xl">
-			<TabsList className="w-96 md:w-auto touch-none select-none flex justify-start overflow-x-scroll md:overflow-auto overflow-y-hidden scroll-mt-4">
+		<Tabs className="flex flex-col items-center justify-center space-y-8 md:max-w-7xl" defaultValue="smilies">
+			<TabsList className="flex w-96 touch-none select-none scroll-mt-4 justify-start overflow-y-hidden overflow-x-scroll md:w-auto md:overflow-auto">
 				{list.map((item) => (
 					<TabsTrigger key={item.value} value={item.value}>
 						{item.name}

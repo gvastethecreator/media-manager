@@ -30,7 +30,7 @@ export const transformMetadata = (metadata: MetadataBase | null): MetadataExtend
  * @returns Array de metadata con propiedades adicionales
  */
 export const transformMetadatas = (metadataArray: MetadataBase[] | null): MetadataExtended[] => {
-	if (!metadataArray || !Array.isArray(metadataArray)) return [];
+	if (!(metadataArray && Array.isArray(metadataArray))) return [];
 
 	return metadataArray
 		.map((metadata) => transformMetadata(metadata))

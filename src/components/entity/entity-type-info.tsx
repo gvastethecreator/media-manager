@@ -59,15 +59,15 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 		if (mode === 'compact') {
 			return (
 				<div className={cn('flex items-center gap-2', className)}>
-					<EntityTypeBadge type={entityType} size="sm" />
-					<span className="text-sm text-muted-foreground truncate">{entity.name || 'Sin nombre'}</span>
+					<EntityTypeBadge size="sm" type={entityType} />
+					<span className="truncate text-muted-foreground text-sm">{entity.name || 'Sin nombre'}</span>
 				</div>
 			);
 		}
 
 		// Renderizar acciones disponibles
 		const renderActions = () => {
-			if (!showActions || !config.supportedOperations) return null;
+			if (!(showActions && config.supportedOperations)) return null;
 
 			return (
 				<div className="flex items-center gap-1">
@@ -77,18 +77,18 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 
 						return (
 							<Button
-								key={action}
-								variant="ghost"
-								size="sm"
-								onClick={() => onAction?.(action, entity)}
 								className="h-8 w-8 p-0"
+								key={action}
+								onClick={() => onAction?.(action, entity)}
+								size="sm"
+								variant="ghost"
 							>
 								<IconComponent className="h-4 w-4" />
 							</Button>
 						);
 					})}
 					{config.supportedOperations.length > 4 && (
-						<Button variant="ghost" size="sm" onClick={() => onAction?.('more', entity)} className="h-8 w-8 p-0">
+						<Button className="h-8 w-8 p-0" onClick={() => onAction?.('more', entity)} size="sm" variant="ghost">
 							<MoreHorizontal className="h-4 w-4" />
 						</Button>
 					)}
@@ -129,7 +129,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 			return (
 				<div className="grid grid-cols-2 gap-2 text-xs">
 					{stats.map((stat, index) => (
-						<div key={index} className="flex flex-col">
+						<div className="flex flex-col" key={index}>
 							<span className="text-muted-foreground">{stat.label}</span>
 							<span className="font-medium">{stat.value}</span>
 						</div>
@@ -142,19 +142,19 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 		if (mode === 'detailed') {
 			return (
 				<motion.div
-					className={cn('rounded-lg border bg-card p-4 space-y-3', className)}
-					initial={{ opacity: 0, y: 10 }}
 					animate={{ opacity: 1, y: 0 }}
+					className={cn('space-y-3 rounded-lg border bg-card p-4', className)}
+					initial={{ opacity: 0, y: 10 }}
 					transition={{ duration: 0.2 }}
 				>
 					<div className="flex items-start justify-between">
 						<div className="flex items-center gap-3">
-							<div className="p-2 rounded-md" style={{ backgroundColor: `${config.color}20` }}>
+							<div className="rounded-md p-2" style={{ backgroundColor: `${config.color}20` }}>
 								<config.icon className="h-5 w-5" style={{ color: config.color }} />
 							</div>
 							<div>
-								<h3 className="font-medium truncate">{entity.name || 'Sin nombre'}</h3>
-								<p className="text-sm text-muted-foreground">{config.displayName}</p>
+								<h3 className="truncate font-medium">{entity.name || 'Sin nombre'}</h3>
+								<p className="text-muted-foreground text-sm">{config.displayName}</p>
 							</div>
 						</div>
 						{renderActions()}
@@ -167,19 +167,19 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 		// Renderizar modo completo
 		return (
 			<motion.div
-				className={cn('rounded-lg border bg-card p-6 space-y-4', className)}
-				initial={{ opacity: 0, y: 10 }}
 				animate={{ opacity: 1, y: 0 }}
+				className={cn('space-y-4 rounded-lg border bg-card p-6', className)}
+				initial={{ opacity: 0, y: 10 }}
 				transition={{ duration: 0.2 }}
 			>
 				<div className="flex items-start justify-between">
 					<div className="flex items-center gap-4">
-						<div className="p-3 rounded-lg" style={{ backgroundColor: `${config.color}20` }}>
+						<div className="rounded-lg p-3" style={{ backgroundColor: `${config.color}20` }}>
 							<config.icon className="h-8 w-8" style={{ color: config.color }} />
 						</div>
 						<div>
-							<h2 className="text-xl font-semibold">{entity.name || 'Sin nombre'}</h2>
-							<div className="flex items-center gap-2 mt-1">
+							<h2 className="font-semibold text-xl">{entity.name || 'Sin nombre'}</h2>
+							<div className="mt-1 flex items-center gap-2">
 								<EntityTypeBadge type={entityType} />
 								<Badge variant="outline">
 									{config.emoji} {config.displayName}
@@ -191,7 +191,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 				</div>
 
 				{/* Información adicional basada en el tipo */}
-				<div className="text-sm text-muted-foreground">Tipo de entidad: {config.displayName}</div>
+				<div className="text-muted-foreground text-sm">Tipo de entidad: {config.displayName}</div>
 
 				{renderStats()}
 			</motion.div>
@@ -217,8 +217,8 @@ export const EntityTypeHeader = memo<{
 	return (
 		<div className={cn('flex items-center gap-2', className)}>
 			<config.icon className="h-4 w-4 flex-shrink-0" style={{ color: config.color }} />
-			<span className="text-sm font-medium truncate">{entity.name || 'Sin nombre'}</span>
-			<Badge variant="secondary" className="ml-auto">
+			<span className="truncate font-medium text-sm">{entity.name || 'Sin nombre'}</span>
+			<Badge className="ml-auto" variant="secondary">
 				{config.emoji}
 			</Badge>
 		</div>

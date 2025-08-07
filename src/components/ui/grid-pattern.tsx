@@ -35,20 +35,20 @@ export function GridPattern({
 			{...props}
 		>
 			<defs>
-				<pattern id={id} width={width} height={height} patternUnits="userSpaceOnUse" x={x} y={y}>
+				<pattern height={height} id={id} patternUnits="userSpaceOnUse" width={width} x={x} y={y}>
 					<path d={`M.5 ${height}V.5H${width}`} fill="none" strokeDasharray={strokeDasharray} />
 				</pattern>
 			</defs>
-			<rect width="100%" height="100%" strokeWidth={0} fill={`url(#${id})`} />
+			<rect fill={`url(#${id})`} height="100%" strokeWidth={0} width="100%" />
 			{squares && (
-				<svg x={x} y={y} className="overflow-visible" aria-labelledby={`title-${id}`}>
+				<svg aria-labelledby={`title-${id}`} className="overflow-visible" x={x} y={y}>
 					<title id={`title-${id}`}>Patrón de cuadrícula</title>
 					{squares.map(([x, y]) => (
 						<rect
-							strokeWidth="0"
-							key={`${x}-${y}`}
-							width={width - 1}
 							height={height - 1}
+							key={`${x}-${y}`}
+							strokeWidth="0"
+							width={width - 1}
 							x={x * width + 1}
 							y={y * height + 1}
 						/>

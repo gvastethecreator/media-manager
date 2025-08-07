@@ -144,7 +144,7 @@ router.post('/', async (req, res) => {
 	try {
 		const { name, content, description, category, tags } = req.body;
 
-		if (!name || !content) {
+		if (!(name && content)) {
 			return res.status(400).json({ error: 'El nombre y contenido son requeridos' });
 		}
 

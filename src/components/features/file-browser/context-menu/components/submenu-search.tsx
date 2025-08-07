@@ -34,15 +34,15 @@ export const SubmenuSearch = memo<SubmenuSearchProps>(function SubmenuSearch({
 
 	return (
 		<div className={cn('relative', className)}>
-			<Search className="absolute left-2 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+			<Search className="-translate-y-1/2 absolute top-1/2 left-2 h-4 w-4 text-muted-foreground" />
 
-			<Input value={searchTerm} onChange={handleChange} placeholder={placeholder} className="h-8 pl-8 pr-8 text-sm" />
+			<Input className="h-8 pr-8 pl-8 text-sm" onChange={handleChange} placeholder={placeholder} value={searchTerm} />
 
 			{searchTerm && (
 				<button
-					type="button"
+					className="-translate-y-1/2 absolute top-1/2 right-2 text-muted-foreground hover:text-foreground"
 					onClick={handleClear}
-					className="absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+					type="button"
 				>
 					<X className="h-4 w-4" />
 					<span className="sr-only">Limpiar búsqueda</span>

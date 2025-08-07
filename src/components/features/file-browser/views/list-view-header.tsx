@@ -145,48 +145,44 @@ export function ListViewHeader({
 
 					return (
 						<th
-							key={column.key}
-							className={`
-								relative group select-none border-r border-border/50 last:border-r-0
-								${isDragging ? 'opacity-50' : ''}
+							className={`group relative select-none border-border/50 border-r last:border-r-0${isDragging ? 'opacity-50' : ''}
 								${isDragTarget ? 'bg-accent' : ''}
 								${isResizing ? 'cursor-col-resize' : ''}
 							`}
+							draggable={onColumnReorder ? true : false}
+							key={column.key}
+							onDragOver={(e) => handleDragOver(e, index)}
+							onDragStart={(e) => handleDragStart(e, index)}
+							onDrop={(e) => handleDrop(e, index)}
 							style={{
 								width: getColumnWidth(column),
 								minWidth: column.minWidth ? `${column.minWidth}px` : undefined,
 								maxWidth: column.maxWidth ? `${column.maxWidth}px` : undefined,
 								textAlign: column.align || 'left',
 							}}
-							draggable={onColumnReorder ? true : false}
-							onDragStart={(e) => handleDragStart(e, index)}
-							onDragOver={(e) => handleDragOver(e, index)}
-							onDrop={(e) => handleDrop(e, index)}
 						>
-							<div className="flex items-center gap-2 px-3 py-2 min-h-[40px]">
+							<div className="flex min-h-[40px] items-center gap-2 px-3 py-2">
 								{/* Grip para drag and drop */}
 								{onColumnReorder && (
-									<div className="opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing">
+									<div className="cursor-grab opacity-0 transition-opacity active:cursor-grabbing group-hover:opacity-100">
 										<Grip className="h-3 w-3 text-muted-foreground" />
 									</div>
 								)}
 
 								{/* Contenido de la columna */}
 								<div
-									className={`
-										flex items-center gap-1 min-w-0 flex-1
-										${column.sortable && onSort ? 'cursor-pointer hover:text-foreground' : ''}
+									className={`flex min-w-0 items-center gap-1 flex-1${column.sortable && onSort ? 'cursor-pointer hover:text-foreground' : ''}
 									`}
 									onClick={column.sortable ? () => handleSort(column.key) : undefined}
 								>
-									<span className="truncate text-sm font-medium">{column.label}</span>
+									<span className="truncate font-medium text-sm">{column.label}</span>
 									{renderSortIcon(column.key)}
 								</div>
 
 								{/* Resize handle */}
 								{column.resizable !== false && onColumnResize && (
 									<div
-										className="absolute right-0 top-0 bottom-0 w-1 cursor-col-resize opacity-0 group-hover:opacity-100 hover:bg-border transition-opacity"
+										className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize opacity-0 transition-opacity hover:bg-border group-hover:opacity-100"
 										onMouseDown={(e) => handleMouseDown(e, column.key)}
 									/>
 								)}
@@ -200,17 +196,17 @@ export function ListViewHeader({
 					<th className="w-10 px-2">
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
-								<Button variant="ghost" size="sm" className="h-8 w-8 p-0 opacity-50 hover:opacity-100">
+								<Button className="h-8 w-8 p-0 opacity-50 hover:opacity-100" size="sm" variant="ghost">
 									<Settings2 className="h-3 w-3" />
 								</Button>
 							</DropdownMenuTrigger>
 							<DropdownMenuContent align="end" className="w-48">
-								<div className="px-2 py-1 text-xs font-medium text-muted-foreground">Columnas</div>
+								<div className="px-2 py-1 font-medium text-muted-foreground text-xs">Columnas</div>
 								{columns.map((column) => (
 									<DropdownMenuItem
+										className="flex items-center gap-2"
 										key={column.key}
 										onClick={() => onColumnToggle?.(column.key)}
-										className="flex items-center gap-2"
 									>
 										{column.visible ? <Eye className="h-3 w-3" /> : <EyeOff className="h-3 w-3" />}
 										<span className="flex-1">{column.label}</span>
@@ -221,7 +217,7 @@ export function ListViewHeader({
 									<>
 										<DropdownMenuSeparator />
 										<DropdownMenuItem onClick={onSettingsClick}>
-											<Settings2 className="h-3 w-3 mr-2" />
+											<Settings2 className="mr-2 h-3 w-3" />
 											Configurar vista
 										</DropdownMenuItem>
 									</>

@@ -39,7 +39,7 @@ const FolderContentWrapper = () => {
 const CharactersViewWrapper = () => {
 	return (
 		<div className="p-6">
-			<h2 className="text-2xl font-bold">Vista de Personajes</h2>
+			<h2 className="font-bold text-2xl">Vista de Personajes</h2>
 			<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
 		</div>
 	);
@@ -53,11 +53,11 @@ const CharactersViewWrapper = () => {
 // Componente NotFound simple
 const NotFoundPage = () => {
 	return (
-		<div className="flex items-center justify-center min-h-screen bg-red-50 p-4">
-			<div className="max-w-md w-full border border-red-200 rounded-lg p-6 text-center">
-				<h1 className="text-2xl font-bold mb-4 text-red-800">Página no encontrada</h1>
-				<p className="text-red-600 mb-4">La página que estás buscando no existe o ha sido movida.</p>
-				<a href="/" className="text-red-700 hover:underline font-semibold">
+		<div className="flex min-h-screen items-center justify-center bg-red-50 p-4">
+			<div className="w-full max-w-md rounded-lg border border-red-200 p-6 text-center">
+				<h1 className="mb-4 font-bold text-2xl text-red-800">Página no encontrada</h1>
+				<p className="mb-4 text-red-600">La página que estás buscando no existe o ha sido movida.</p>
+				<a className="font-semibold text-red-700 hover:underline" href="/">
 					Volver al inicio
 				</a>
 			</div>
@@ -115,7 +115,7 @@ export const router = createBrowserRouter([
 				path: 'audios',
 				element: (
 					<div className="p-6">
-						<h2 className="text-2xl font-bold">Vista de Audio</h2>
+						<h2 className="font-bold text-2xl">Vista de Audio</h2>
 						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
 					</div>
 				),
@@ -124,7 +124,7 @@ export const router = createBrowserRouter([
 				path: 'documents',
 				element: (
 					<div className="p-6">
-						<h2 className="text-2xl font-bold">Vista de Documentos</h2>
+						<h2 className="font-bold text-2xl">Vista de Documentos</h2>
 						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
 					</div>
 				),
@@ -141,7 +141,7 @@ export const router = createBrowserRouter([
 				path: 'file-3ds',
 				element: (
 					<div className="p-6">
-						<h2 className="text-2xl font-bold">Vista de Archivos 3D</h2>
+						<h2 className="font-bold text-2xl">Vista de Archivos 3D</h2>
 						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
 					</div>
 				),
@@ -151,7 +151,7 @@ export const router = createBrowserRouter([
 				path: 'favorites',
 				element: (
 					<div className="p-6">
-						<h2 className="text-2xl font-bold">Vista de Favoritos</h2>
+						<h2 className="font-bold text-2xl">Vista de Favoritos</h2>
 						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
 					</div>
 				),
@@ -160,7 +160,7 @@ export const router = createBrowserRouter([
 				path: 'collections',
 				element: (
 					<div className="p-6">
-						<h2 className="text-2xl font-bold">Vista de Colecciones</h2>
+						<h2 className="font-bold text-2xl">Vista de Colecciones</h2>
 						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
 					</div>
 				),
@@ -169,7 +169,7 @@ export const router = createBrowserRouter([
 				path: 'albums',
 				element: (
 					<div className="p-6">
-						<h2 className="text-2xl font-bold">Vista de Álbumes</h2>
+						<h2 className="font-bold text-2xl">Vista de Álbumes</h2>
 						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
 					</div>
 				),
@@ -178,7 +178,7 @@ export const router = createBrowserRouter([
 				path: 'groups',
 				element: (
 					<div className="p-6">
-						<h2 className="text-2xl font-bold">Vista de Grupos</h2>
+						<h2 className="font-bold text-2xl">Vista de Grupos</h2>
 						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
 					</div>
 				),
@@ -204,7 +204,7 @@ export const router = createBrowserRouter([
 				path: 'concepts',
 				element: (
 					<div className="p-6">
-						<h2 className="text-2xl font-bold">Vista de Conceptos</h2>
+						<h2 className="font-bold text-2xl">Vista de Conceptos</h2>
 						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
 					</div>
 				),
@@ -235,7 +235,7 @@ export const router = createBrowserRouter([
 				path: 'entity-cards',
 				element: (
 					<div className="p-6">
-						<h2 className="text-2xl font-bold">Vista de Tarjetas de Entidad</h2>
+						<h2 className="font-bold text-2xl">Vista de Tarjetas de Entidad</h2>
 						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
 					</div>
 				),
@@ -260,7 +260,7 @@ export const router = createBrowserRouter([
 				path: 'document-content',
 				element: (
 					<div className="p-6">
-						<h2 className="text-2xl font-bold">Contenido de Documento</h2>
+						<h2 className="font-bold text-2xl">Contenido de Documento</h2>
 						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
 					</div>
 				),
@@ -269,7 +269,7 @@ export const router = createBrowserRouter([
 				path: 'audio-content',
 				element: (
 					<div className="p-6">
-						<h2 className="text-2xl font-bold">Contenido de Audio</h2>
+						<h2 className="font-bold text-2xl">Contenido de Audio</h2>
 						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
 					</div>
 				),

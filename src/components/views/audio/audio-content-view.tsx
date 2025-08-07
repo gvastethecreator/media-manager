@@ -57,26 +57,26 @@ const MemoizedAudioCard = React.memo(
 		onDelete: (audioId: string) => void;
 	}) => (
 		<div className="relative">
-			<AudioCard audio={audio} onClick={onAudioClick} className="h-full" />
+			<AudioCard audio={audio} className="h-full" onClick={onAudioClick} />
 			<div className="absolute top-2 right-2 flex gap-1">
 				<Button
-					variant="ghost"
-					size="icon"
 					className="h-7 w-7"
 					onClick={(e) => {
 						e.stopPropagation();
 						onEdit(audio);
 					}}
+					size="icon"
+					variant="ghost"
 				>
 					<Edit className="h-4 w-4" />
 				</Button>
 				<AlertDialog>
 					<AlertDialogTrigger asChild>
 						<Button
-							variant="ghost"
-							size="icon"
 							className="h-7 w-7 text-destructive"
 							onClick={(e) => e.stopPropagation()}
+							size="icon"
+							variant="ghost"
 						>
 							<Trash2 className="h-4 w-4" />
 						</Button>
@@ -91,8 +91,8 @@ const MemoizedAudioCard = React.memo(
 						<AlertDialogFooter>
 							<AlertDialogCancel>Cancelar</AlertDialogCancel>
 							<AlertDialogAction
-								onClick={() => onDelete(audio.id)}
 								className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+								onClick={() => onDelete(audio.id)}
 							>
 								Eliminar
 							</AlertDialogAction>
@@ -131,7 +131,7 @@ const AudioContentView: React.FC<AudioContentViewProps> = ({
 }) => {
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<p className="text-destructive">Error: {error}</p>
 			</div>
 		);
@@ -144,27 +144,27 @@ const AudioContentView: React.FC<AudioContentViewProps> = ({
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Audios</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Audios</h2>
 
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
 					{showForm ? 'Cancelar' : 'Subir Audio'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nuevo Audio</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nuevo Audio</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="audioName">Nombre</Label>
 							<Input
 								id="audioName"
-								value={newAudioName}
 								onChange={(e) => setNewAudioName(e.target.value)}
 								placeholder="Nombre del audio"
+								value={newAudioName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="audioFile">Archivo de Audio</Label>
-							<Input id="audioFile" type="file" accept="audio/*" onChange={handleFileChange} />
+							<Input accept="audio/*" id="audioFile" onChange={handleFileChange} type="file" />
 						</div>
 						<Button onClick={handleCreateAudio}>Guardar Audio</Button>
 					</div>
@@ -172,31 +172,31 @@ const AudioContentView: React.FC<AudioContentViewProps> = ({
 
 				{(!audios || audios.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
+						description="Sube archivos de audio para comenzar a usar el reproductor."
 						icon={Music}
 						title="No hay archivos de audio"
-						description="Sube archivos de audio para comenzar a usar el reproductor."
 					/>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 						{audios?.map((audio: AudioWithStats, index: number) => {
 							const onAudioClick = () => handleAudioClick(audio);
 							return (
 								<motion.div
-									key={audio.id}
-									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
-									transition={{ delay: index * 0.1 }}
 									className="perspective-1000"
+									initial={{ opacity: 0, y: 20 }}
+									key={audio.id}
+									transition={{ delay: index * 0.1 }}
 								>
 									<div
-										className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
+										className="h-full w-full transition-all duration-300 ease-in-out hover:z-10 hover:scale-[1.03] active:scale-[0.98]"
 										data-audio-id={audio.id}
 									>
 										<MemoizedAudioCard
 											audio={audio}
 											onAudioClick={onAudioClick}
-											onEdit={handleEditAudio}
 											onDelete={handleDeleteAudio}
+											onEdit={handleEditAudio}
 										/>
 									</div>
 								</motion.div>
@@ -288,30 +288,30 @@ const AudioPlayer = ({ audio, onClose }: { audio: AudioWithStats; onClose: () =>
 	};
 
 	return (
-		<Card className="fixed bottom-4 left-4 right-4 z-50 mx-auto max-w-md">
+		<Card className="fixed right-4 bottom-4 left-4 z-50 mx-auto max-w-md">
 			<CardHeader className="pb-2">
 				<div className="flex items-center justify-between">
-					<CardTitle className="text-sm font-medium truncate">{audio.name}</CardTitle>
-					<Button variant="ghost" size="sm" onClick={onClose} className="h-6 w-6 p-0">
+					<CardTitle className="truncate font-medium text-sm">{audio.name}</CardTitle>
+					<Button className="h-6 w-6 p-0" onClick={onClose} size="sm" variant="ghost">
 						×
 					</Button>
 				</div>
 			</CardHeader>
 			<CardContent className="space-y-3">
-				<audio ref={audioRef} src={`/api/audio/${audio.id}/stream`} preload="metadata">
-					<track kind="captions" srcLang="es" label="Español" />
+				<audio preload="metadata" ref={audioRef} src={`/api/audio/${audio.id}/stream`}>
+					<track kind="captions" label="Español" srcLang="es" />
 				</audio>
 
 				{/* Controles de tiempo */}
 				<div className="space-y-2">
 					<Slider
-						value={[currentTime]}
-						max={duration}
-						step={1}
-						onValueChange={handleTimeChange}
 						className="cursor-pointer"
+						max={duration}
+						onValueChange={handleTimeChange}
+						step={1}
+						value={[currentTime]}
 					/>
-					<div className="flex justify-between text-xs text-muted-foreground">
+					<div className="flex justify-between text-muted-foreground text-xs">
 						<span>{formatTime(currentTime)}</span>
 						<span>{formatTime(duration)}</span>
 					</div>
@@ -319,20 +319,20 @@ const AudioPlayer = ({ audio, onClose }: { audio: AudioWithStats; onClose: () =>
 
 				{/* Controles de reproducción */}
 				<div className="flex items-center justify-between">
-					<Button variant="ghost" size="sm" onClick={handlePlayPause} className="h-8 w-8 p-0">
+					<Button className="h-8 w-8 p-0" onClick={handlePlayPause} size="sm" variant="ghost">
 						{isPlaying ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
 					</Button>
 
 					<div className="flex items-center gap-2">
-						<Button variant="ghost" size="sm" onClick={handleMute} className="h-6 w-6 p-0">
+						<Button className="h-6 w-6 p-0" onClick={handleMute} size="sm" variant="ghost">
 							{isMuted ? <VolumeX className="h-3 w-3" /> : <Volume2 className="h-3 w-3" />}
 						</Button>
 						<Slider
-							value={[isMuted ? 0 : volume]}
-							max={1}
-							step={0.1}
-							onValueChange={handleVolumeChange}
 							className="w-16"
+							max={1}
+							onValueChange={handleVolumeChange}
+							step={0.1}
+							value={[isMuted ? 0 : volume]}
 						/>
 					</div>
 				</div>

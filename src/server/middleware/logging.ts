@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 
 // Configuración de logging
-const LOG_TO_FILE = process.env.LOG_TO_FILE === 'true' || true; // Por defecto habilitado
+const LOG_TO_FILE = true; // Por defecto habilitado
 const LOG_TO_CONSOLE = process.env.LOG_TO_CONSOLE !== 'false'; // Por defecto habilitado
 const LOG_LEVEL = process.env.LOG_LEVEL || 'info';
 

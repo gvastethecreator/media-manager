@@ -88,9 +88,7 @@ export const GridItemLabel = memo<GridItemLabelProps>(({ entity, config, classNa
 
 		return (
 			<div
-				className={`
-				text-xs text-muted-foreground mt-1
-				${config.position === 'overlay' ? 'text-white/80' : ''}
+				className={`text-muted-foreground text-xs mt-1${config.position === 'overlay' ? 'text-white/80' : ''}
 			`}
 			>
 				{metadata.join(' • ')}
@@ -109,7 +107,7 @@ export const GridItemLabel = memo<GridItemLabelProps>(({ entity, config, classNa
 				${config.maxLines > 0 ? `line-clamp-${config.maxLines}` : ''}
 			`}
 			>
-				<div className="font-medium truncate">{truncatedName}</div>
+				<div className="truncate font-medium">{truncatedName}</div>
 				{renderMetadata()}
 			</div>
 		);
@@ -126,11 +124,11 @@ export const GridItemLabel = memo<GridItemLabelProps>(({ entity, config, classNa
 						<TooltipTrigger asChild>
 							<div className="cursor-default">{content}</div>
 						</TooltipTrigger>
-						<TooltipContent side="bottom" className="max-w-xs">
+						<TooltipContent className="max-w-xs" side="bottom">
 							<div className="text-sm">
 								<div className="font-medium">{name}</div>
 								{size > 0 && (
-									<div className="text-xs text-muted-foreground mt-1">
+									<div className="mt-1 text-muted-foreground text-xs">
 										{formatFileSize(size)} • {type.toUpperCase()}
 									</div>
 								)}

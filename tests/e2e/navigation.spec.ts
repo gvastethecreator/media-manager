@@ -24,7 +24,7 @@ test.describe('Navegación', () => {
 		if ((await navigationPanel.count()) === 0) {
 			// Buscar por texto de categorías
 			const foldersText = page.locator('text=Carpetas');
-			await expect(foldersText).toBeVisible({ timeout: 10000 });
+			await expect(foldersText).toBeVisible({ timeout: 10_000 });
 		} else {
 			await expect(navigationPanel.first()).toBeVisible();
 		}
@@ -35,10 +35,10 @@ test.describe('Navegación', () => {
 
 	test('verifica que las carpetas estén visibles', async ({ page }) => {
 		// Esperar y verificar que las carpetas estén visibles
-		await page.waitForSelector('text=Cartoons', { timeout: 10000 });
-		await page.waitForSelector('text=Wallpapers', { timeout: 10000 });
-		await page.waitForSelector('text=Photography', { timeout: 10000 });
-		await page.waitForSelector('text=Memes', { timeout: 10000 });
+		await page.waitForSelector('text=Cartoons', { timeout: 10_000 });
+		await page.waitForSelector('text=Wallpapers', { timeout: 10_000 });
+		await page.waitForSelector('text=Photography', { timeout: 10_000 });
+		await page.waitForSelector('text=Memes', { timeout: 10_000 });
 
 		// Verificar que estén visibles
 		await expect(page.locator('text=Cartoons')).toBeVisible();
@@ -52,7 +52,7 @@ test.describe('Navegación', () => {
 
 	test('verifica que los elementos sean clickeables', async ({ page }) => {
 		// Esperar a que Cartoons esté visible
-		await page.waitForSelector('text=Cartoons', { timeout: 10000 });
+		await page.waitForSelector('text=Cartoons', { timeout: 10_000 });
 
 		// Buscar el elemento clickeable de Cartoons
 		const cartoonsElement = page.locator('text=Cartoons').first();

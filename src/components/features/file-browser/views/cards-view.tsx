@@ -81,7 +81,12 @@ const CardItem = memo<{
 
 	// Actualizar handlers cuando cambien las dependencias
 	useMemo(() => {
-		console.log('🔧 CardsView.CardItem - Actualizando handlersRef para item:', item.id, 'onItemClickById:', !!onItemClickById);
+		console.log(
+			'🔧 CardsView.CardItem - Actualizando handlersRef para item:',
+			item.id,
+			'onItemClickById:',
+			!!onItemClickById
+		);
 
 		handlersRef.current.onMouseEnter = () => {
 			if (derivedProps.interactiveEnabled) {
@@ -111,10 +116,18 @@ const CardItem = memo<{
 		handlersRef.current.onMouseLeave();
 	}, []);
 
-	const handleClick = useCallback((e: React.MouseEvent) => {
-		console.log('🔧 CardsView.CardItem - handleClick ejecutado para item:', item.id, 'handlersRef.onClick:', !!handlersRef.current.onClick);
-		handlersRef.current.onClick(e);
-	}, [item.id]);
+	const handleClick = useCallback(
+		(e: React.MouseEvent) => {
+			console.log(
+				'🔧 CardsView.CardItem - handleClick ejecutado para item:',
+				item.id,
+				'handlersRef.onClick:',
+				!!handlersRef.current.onClick
+			);
+			handlersRef.current.onClick(e);
+		},
+		[item.id]
+	);
 
 	const handleDoubleClick = useCallback(() => {
 		handlersRef.current.onDoubleClick();
@@ -148,25 +161,25 @@ const CardItem = memo<{
 
 	return (
 		<motion.div
-			key={item.id}
-			initial={config.animationsEnabled ? { opacity: 0, y: 20 } : false}
 			animate={config.animationsEnabled ? { opacity: 1, y: 0 } : false}
-			transition={transition}
 			className={cardStyleClasses}
+			initial={config.animationsEnabled ? { opacity: 0, y: 20 } : false}
+			key={item.id}
+			onMouseEnter={handleMouseEnter}
+			onMouseLeave={handleMouseLeave}
 			style={{
 				width: `${cardWidth}px`,
 				height: `${cardHeight}px`,
 			}}
-			onMouseEnter={handleMouseEnter}
-			onMouseLeave={handleMouseLeave}
+			transition={transition}
 		>
 			{/* Tarjeta base con menú contextual */}
 			{/* Menú contextual deshabilitado para optimizar performance */}
 			<OptimizedEntityCard
+				className="h-full w-full"
+				compact={config.cardStyle === 'compact'}
 				entity={item}
 				isSelected={isSelected}
-				compact={config.cardStyle === 'compact'}
-				className="h-full w-full"
 				onClick={handleClick}
 				onDoubleClick={handleDoubleClick}
 			/>
@@ -174,21 +187,21 @@ const CardItem = memo<{
 			{/* Overlay de información */}
 			{config.interactiveConfig.enabled && config.interactiveConfig.showInfoOverlay && (
 				<CardInfoOverlay
-					entity={item}
-					visible={isHovered}
-					position={config.interactiveConfig.overlayPosition}
-					metadataConfig={config.metadataConfig}
 					animationDuration={config.animationDuration}
+					entity={item}
+					metadataConfig={config.metadataConfig}
+					position={config.interactiveConfig.overlayPosition}
+					visible={isHovered}
 				/>
 			)}
 
 			{/* Botones de acción */}
 			{config.interactiveConfig.enabled && config.interactiveConfig.showActionButtons && (
 				<CardActionButtons
-					entity={item}
-					visible={isHovered}
 					actionButtons={config.interactiveConfig.actionButtons}
 					animationDuration={config.animationDuration}
+					entity={item}
+					visible={isHovered}
 				/>
 			)}
 		</motion.div>
@@ -204,7 +217,7 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 }) {
 	console.log('🚀 CARDSVIEW SE ESTÁ RENDERIZANDO!', {
 		onItemClick: typeof onItemClick,
-		itemsLength: items.length
+		itemsLength: items.length,
 	});
 	const parentRef = useRef<any>(null);
 	const { config, calculateLayout } = useCardsViewConfig();
@@ -236,7 +249,7 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 		onItemClick: typeof onItemClick,
 		onItemClickValue: onItemClick && onItemClick.toString().substring(0, 100),
 		onItemDoubleClick: typeof onItemDoubleClick,
-		onItemDoubleClickValue: onItemDoubleClick && onItemDoubleClick.toString().substring(0, 100)
+		onItemDoubleClickValue: onItemDoubleClick && onItemDoubleClick.toString().substring(0, 100),
 	});
 
 	const itemsByIdRef = useRef(new Map<string, AnyEntityWithStats>());
@@ -312,16 +325,18 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 			// Verificar si el click fue en espacio vacío (no en un item)
 			const isEmptySpaceClick =
 				target === currentTarget ||
-				(!target.closest('.entity-card') &&
-					!target.closest('[data-entity-card]') &&
-					!target.closest('button') &&
-					!target.closest('[role="button"]') &&
-					!target.closest('input') &&
-					!target.closest('textarea') &&
-					!target.closest('[data-testid="file-browser-item"]') &&
-					!target.closest('.grid > div') &&
-					!target.closest('[style*="position: absolute"]') &&
-					!target.closest('[data-virtualized-item="true"]'));
+				!(
+					target.closest('.entity-card') ||
+					target.closest('[data-entity-card]') ||
+					target.closest('button') ||
+					target.closest('[role="button"]') ||
+					target.closest('input') ||
+					target.closest('textarea') ||
+					target.closest('[data-testid="file-browser-item"]') ||
+					target.closest('.grid > div') ||
+					target.closest('[style*="position: absolute"]') ||
+					target.closest('[data-virtualized-item="true"]')
+				);
 
 			if (isEmptySpaceClick) {
 				// Propagar el evento hacia arriba para que el FileBrowser maneje la deselección
@@ -379,11 +394,11 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 
 	return (
 		<div
-			ref={parentRef}
+			className="w-full"
 			data-testid="cards-view"
 			data-view-type="cards"
-			className="w-full"
 			onClick={handleEmptySpaceClick}
+			ref={parentRef}
 			style={{
 				contain: 'layout style',
 				padding: `${layout.padding}px`,
@@ -428,12 +443,12 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 
 										return (
 											<CardItem
-												key={item.id}
-												item={item}
-												isSelected={isSelected}
-												itemIndex={itemIndex}
-												cardWidth={layout.cardWidth}
 												cardHeight={layout.cardHeight}
+												cardWidth={layout.cardWidth}
+												isSelected={isSelected}
+												item={item}
+												itemIndex={itemIndex}
+												key={item.id}
 												onItemClickById={handleItemClickById}
 												onItemDoubleClickById={handleItemDoubleClickById}
 											/>

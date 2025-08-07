@@ -80,24 +80,22 @@ export function meetsRequirements(
 	requiredRarities?: WorldItemRarity[]
 ): boolean {
 	// Verificar nivel
-	if (requiredLevel !== undefined && worldItem.stats.level) {
-		if (worldItem.stats.level < requiredLevel) {
-			return false;
-		}
+	if (requiredLevel !== undefined && worldItem.stats.level && worldItem.stats.level < requiredLevel) {
+		return false;
 	}
 
 	// Verificar tipo
-	if (requiredTypes && requiredTypes.length > 0) {
-		if (!requiredTypes.includes(worldItem.type as WorldItemType)) {
-			return false;
-		}
+	if (requiredTypes && requiredTypes.length > 0 && !requiredTypes.includes(worldItem.type as WorldItemType)) {
+		return false;
 	}
 
 	// Verificar rareza
-	if (requiredRarities && requiredRarities.length > 0) {
-		if (!worldItem.rarity || !requiredRarities.includes(worldItem.rarity as WorldItemRarity)) {
-			return false;
-		}
+	if (
+		requiredRarities &&
+		requiredRarities.length > 0 &&
+		!(worldItem.rarity && requiredRarities.includes(worldItem.rarity as WorldItemRarity))
+	) {
+		return false;
 	}
 
 	return true;
@@ -202,63 +200,51 @@ export function filterWorldItems(
 			const matchesName = item.name.toLowerCase().includes(query);
 			const matchesDescription = item.description?.toLowerCase().includes(query);
 
-			if (!matchesName && !matchesDescription) {
+			if (!(matchesName || matchesDescription)) {
 				return false;
 			}
 		}
 
 		// Filtrar por categoría
-		if (filters.categories && filters.categories.length > 0) {
-			if (!item.category || !filters.categories.includes(item.category)) {
-				return false;
-			}
+		if (
+			filters.categories &&
+			filters.categories.length > 0 &&
+			!(item.category && filters.categories.includes(item.category))
+		) {
+			return false;
 		}
 
 		// Filtrar por tipo
-		if (filters.types && filters.types.length > 0) {
-			if (!item.type || !filters.types.includes(item.type)) {
-				return false;
-			}
+		if (filters.types && filters.types.length > 0 && !(item.type && filters.types.includes(item.type))) {
+			return false;
 		}
 
 		// Filtrar por rareza
-		if (filters.rarities && filters.rarities.length > 0) {
-			if (!item.rarity || !filters.rarities.includes(item.rarity)) {
-				return false;
-			}
+		if (filters.rarities && filters.rarities.length > 0 && !(item.rarity && filters.rarities.includes(item.rarity))) {
+			return false;
 		}
 
 		// Filtrar por nivel
-		if (filters.minLevel !== undefined && item.stats.level !== undefined) {
-			if (item.stats.level < filters.minLevel) {
-				return false;
-			}
+		if (filters.minLevel !== undefined && item.stats.level !== undefined && item.stats.level < filters.minLevel) {
+			return false;
 		}
 
-		if (filters.maxLevel !== undefined && item.stats.level !== undefined) {
-			if (item.stats.level > filters.maxLevel) {
-				return false;
-			}
+		if (filters.maxLevel !== undefined && item.stats.level !== undefined && item.stats.level > filters.maxLevel) {
+			return false;
 		}
 
 		// Filtrar por valor
-		if (filters.minValue !== undefined && item.stats.value !== undefined) {
-			if (item.stats.value < filters.minValue) {
-				return false;
-			}
+		if (filters.minValue !== undefined && item.stats.value !== undefined && item.stats.value < filters.minValue) {
+			return false;
 		}
 
-		if (filters.maxValue !== undefined && item.stats.value !== undefined) {
-			if (item.stats.value > filters.maxValue) {
-				return false;
-			}
+		if (filters.maxValue !== undefined && item.stats.value !== undefined && item.stats.value > filters.maxValue) {
+			return false;
 		}
 
 		// Filtrar por favoritos
-		if (filters.onlyFavorites) {
-			if (!item.isFavorite) {
-				return false;
-			}
+		if (filters.onlyFavorites && !item.isFavorite) {
+			return false;
 		}
 
 		return true;

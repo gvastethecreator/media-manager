@@ -123,18 +123,18 @@ export function UploadedImagesSettings() {
 
 	return (
 		<ScrollArea className="h-[calc(100vh-8rem)] w-full">
-			<Card className="flex flex-col gap-2 bg-muted/30 rounded-sm border-none">
-				<CardHeader className="p-2 pb-0 bg-transparent">
-					<CardTitle className="text-base text-muted-foreground font-semibold flex items-center justify-between pl-1">
-						<span className="flex items-center gap-2 h-7">
+			<Card className="flex flex-col gap-2 rounded-sm border-none bg-muted/30">
+				<CardHeader className="bg-transparent p-2 pb-0">
+					<CardTitle className="flex items-center justify-between pl-1 font-semibold text-base text-muted-foreground">
+						<span className="flex h-7 items-center gap-2">
 							<UploadCloud className="h-5 w-5" /> Imágenes Subidas
 						</span>
 						<div className="flex items-center gap-2">
 							<Button
-								variant="outline"
-								size="sm"
 								className="h-7 gap-1.5 text-xs"
 								onClick={() => setShowFilters(!showFilters)}
+								size="sm"
+								variant="outline"
 							>
 								<Filter className="h-3.5 w-3.5" />
 								<span>Filtros</span>
@@ -142,23 +142,23 @@ export function UploadedImagesSettings() {
 
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
-									<Button variant="outline" size="sm" className="h-7 w-7 p-0">
+									<Button className="h-7 w-7 p-0" size="sm" variant="outline">
 										<SlidersHorizontal className="h-3.5 w-3.5" />
 									</Button>
 								</DropdownMenuTrigger>
 								<DropdownMenuContent align="end" className="w-56">
-									<DropdownMenuItem onClick={() => refetch()} className="text-xs cursor-pointer">
-										<RefreshCw className="h-3.5 w-3.5 mr-2" /> Actualizar estadísticas
+									<DropdownMenuItem className="cursor-pointer text-xs" onClick={() => refetch()}>
+										<RefreshCw className="mr-2 h-3.5 w-3.5" /> Actualizar estadísticas
 									</DropdownMenuItem>
 								</DropdownMenuContent>
 							</DropdownMenu>
 
 							<Button
-								variant="outline"
-								size="sm"
 								className="h-7 w-7 p-0"
-								onClick={() => document.getElementById('image-upload')?.click()}
 								disabled={uploadImagesMutation.isPending}
+								onClick={() => document.getElementById('image-upload')?.click()}
+								size="sm"
+								variant="outline"
 							>
 								{uploadImagesMutation.isPending ? (
 									<RefreshCw className="h-3.5 w-3.5 animate-spin" />
@@ -167,12 +167,12 @@ export function UploadedImagesSettings() {
 								)}
 							</Button>
 							<Input
-								id={idImageUpload}
-								type="file"
-								multiple
 								accept="image/*"
 								className="hidden"
+								id={idImageUpload}
+								multiple
 								onChange={handleFileInput}
+								type="file"
 							/>
 						</div>
 					</CardTitle>
@@ -181,27 +181,27 @@ export function UploadedImagesSettings() {
 
 				{showFilters && (
 					<motion.div
-						initial={{ height: 0, opacity: 0 }}
 						animate={{ height: 'auto', opacity: 1 }}
-						exit={{ height: 0, opacity: 0 }}
 						className="overflow-hidden px-2 pb-2"
+						exit={{ height: 0, opacity: 0 }}
+						initial={{ height: 0, opacity: 0 }}
 					>
 						<Card className="bg-background shadow-sm">
-							<CardContent className="p-3 space-y-3">
+							<CardContent className="space-y-3 p-3">
 								<div className="grid grid-cols-2 gap-3">
 									<div className="space-y-1">
-										<Label htmlFor={idSearchImages} className="text-xs">
+										<Label className="text-xs" htmlFor={idSearchImages}>
 											Buscar
 										</Label>
-										<Input id={idSearchImages} placeholder="Nombre de imagen..." className="h-8 text-xs" />
+										<Input className="h-8 text-xs" id={idSearchImages} placeholder="Nombre de imagen..." />
 									</div>
 									<div className="space-y-1">
-										<Label htmlFor={idTypeFilter} className="text-xs">
+										<Label className="text-xs" htmlFor={idTypeFilter}>
 											Tipo
 										</Label>
 										<select
-											id={idTypeFilter}
 											className="h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
+											id={idTypeFilter}
 										>
 											<option value="">Todos los tipos</option>
 											<option value="icon">Iconos</option>
@@ -217,7 +217,7 @@ export function UploadedImagesSettings() {
 									</div>
 								</div>
 								<div className="flex justify-end">
-									<Button variant="outline" size="sm" className="h-7 text-xs">
+									<Button className="h-7 text-xs" size="sm" variant="outline">
 										Aplicar filtros
 									</Button>
 								</div>
@@ -227,34 +227,34 @@ export function UploadedImagesSettings() {
 				)}
 
 				<CardContent className="p-2">
-					<Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-2">
-						<TabsList className="bg-muted h-8 p-0.5">
-							<TabsTrigger value="general" className={cn('text-xs h-7', activeTab === 'general' && 'text-primary')}>
+					<Tabs className="space-y-2" onValueChange={setActiveTab} value={activeTab}>
+						<TabsList className="h-8 bg-muted p-0.5">
+							<TabsTrigger className={cn('h-7 text-xs', activeTab === 'general' && 'text-primary')} value="general">
 								General
 							</TabsTrigger>
 							<TabsTrigger
+								className={cn('h-7 text-xs', activeTab === 'categories' && 'text-primary')}
 								value="categories"
-								className={cn('text-xs h-7', activeTab === 'categories' && 'text-primary')}
 							>
 								Categorías
 							</TabsTrigger>
-							<TabsTrigger value="import" className={cn('text-xs h-7', activeTab === 'import' && 'text-primary')}>
+							<TabsTrigger className={cn('h-7 text-xs', activeTab === 'import' && 'text-primary')} value="import">
 								Importar
 							</TabsTrigger>
 						</TabsList>
 
-						<TabsContent value="general" className="space-y-3 mt-2">
+						<TabsContent className="mt-2 space-y-3" value="general">
 							{/* Estadísticas generales */}
-							<div className="grid grid-cols-2 md:grid-cols-4 gap-2">
-								<div className="bg-card rounded-md p-3 shadow-sm">
-									<div className="text-xs text-muted-foreground">Total de Imágenes</div>
-									<div className="text-lg font-semibold">
+							<div className="grid grid-cols-2 gap-2 md:grid-cols-4">
+								<div className="rounded-md bg-card p-3 shadow-sm">
+									<div className="text-muted-foreground text-xs">Total de Imágenes</div>
+									<div className="font-semibold text-lg">
 										{isLoading ? <RefreshCw className="h-4 w-4 animate-spin" /> : stats?.total || 0}
 									</div>
 								</div>
-								<div className="bg-card rounded-md p-3 shadow-sm">
-									<div className="text-xs text-muted-foreground">Tamaño Total</div>
-									<div className="text-lg font-semibold">
+								<div className="rounded-md bg-card p-3 shadow-sm">
+									<div className="text-muted-foreground text-xs">Tamaño Total</div>
+									<div className="font-semibold text-lg">
 										{isLoading ? (
 											<RefreshCw className="h-4 w-4 animate-spin" />
 										) : (
@@ -262,9 +262,9 @@ export function UploadedImagesSettings() {
 										)}
 									</div>
 								</div>
-								<div className="bg-card rounded-md p-3 shadow-sm">
-									<div className="text-xs text-muted-foreground">Tamaño Promedio</div>
-									<div className="text-lg font-semibold">
+								<div className="rounded-md bg-card p-3 shadow-sm">
+									<div className="text-muted-foreground text-xs">Tamaño Promedio</div>
+									<div className="font-semibold text-lg">
 										{isLoading ? (
 											<RefreshCw className="h-4 w-4 animate-spin" />
 										) : (
@@ -272,9 +272,9 @@ export function UploadedImagesSettings() {
 										)}
 									</div>
 								</div>
-								<div className="bg-card rounded-md p-3 shadow-sm">
-									<div className="text-xs text-muted-foreground">Tipos</div>
-									<div className="text-lg font-semibold">
+								<div className="rounded-md bg-card p-3 shadow-sm">
+									<div className="text-muted-foreground text-xs">Tipos</div>
+									<div className="font-semibold text-lg">
 										{isLoading ? (
 											<RefreshCw className="h-4 w-4 animate-spin" />
 										) : (
@@ -287,22 +287,22 @@ export function UploadedImagesSettings() {
 							{/* Configuraciones adicionales */}
 							<Card className="overflow-hidden">
 								<CardHeader className="bg-muted/50 p-2">
-									<CardTitle className="text-sm font-semibold">Configuraciones</CardTitle>
+									<CardTitle className="font-semibold text-sm">Configuraciones</CardTitle>
 								</CardHeader>
-								<CardContent className="p-3 space-y-3">
+								<CardContent className="space-y-3 p-3">
 									<div className="flex items-center justify-between">
 										<div>
-											<Label className="text-sm font-medium">Optimización automática</Label>
-											<p className="text-xs text-muted-foreground">Optimizar imágenes al subirlas</p>
+											<Label className="font-medium text-sm">Optimización automática</Label>
+											<p className="text-muted-foreground text-xs">Optimizar imágenes al subirlas</p>
 										</div>
 										<Switch defaultChecked />
 									</div>
 									<div className="flex items-center justify-between">
 										<div>
-											<Label className="text-sm font-medium">Formato de conversión</Label>
-											<p className="text-xs text-muted-foreground">Formato al que se convertirán las imágenes</p>
+											<Label className="font-medium text-sm">Formato de conversión</Label>
+											<p className="text-muted-foreground text-xs">Formato al que se convertirán las imágenes</p>
 										</div>
-										<select className="w-24 h-8 rounded-md border text-xs">
+										<select className="h-8 w-24 rounded-md border text-xs">
 											<option value="webp">WebP</option>
 											<option value="jpg">JPG</option>
 											<option value="png">PNG</option>
@@ -312,8 +312,8 @@ export function UploadedImagesSettings() {
 									<Separator />
 									<AlertDialog>
 										<AlertDialogTrigger asChild>
-											<Button variant="destructive" size="sm" className="w-full h-8 text-xs">
-												<Trash2 className="h-3.5 w-3.5 mr-2" /> Eliminar todas las imágenes
+											<Button className="h-8 w-full text-xs" size="sm" variant="destructive">
+												<Trash2 className="mr-2 h-3.5 w-3.5" /> Eliminar todas las imágenes
 											</Button>
 										</AlertDialogTrigger>
 										<AlertDialogContent>
@@ -341,17 +341,17 @@ export function UploadedImagesSettings() {
 							</Card>
 						</TabsContent>
 
-						<TabsContent value="categories" className="space-y-3 mt-2">
+						<TabsContent className="mt-2 space-y-3" value="categories">
 							<Card className="overflow-hidden">
 								<CardHeader className="bg-muted/50 p-2">
-									<CardTitle className="text-sm font-semibold flex items-center justify-between">
+									<CardTitle className="flex items-center justify-between font-semibold text-sm">
 										<span>Tipos de Imágenes</span>
-										<Button variant="ghost" size="sm" className="h-7 gap-1 text-xs">
+										<Button className="h-7 gap-1 text-xs" size="sm" variant="ghost">
 											<Plus className="h-3.5 w-3.5" /> Añadir tipo
 										</Button>
 									</CardTitle>
 								</CardHeader>
-								<CardContent className="p-3 space-y-2">
+								<CardContent className="space-y-2 p-3">
 									{isLoading ? (
 										<div className="flex justify-center py-4">
 											<RefreshCw className="h-5 w-5 animate-spin text-muted-foreground" />
@@ -359,65 +359,65 @@ export function UploadedImagesSettings() {
 									) : Object.entries(stats?.byType || {}).length > 0 ? (
 										Object.entries(stats?.byType || {}).map(([type, count]) => (
 											<div
+												className="flex items-center justify-between rounded-md border p-2 transition-colors hover:bg-muted/50"
 												key={type}
-												className="flex items-center justify-between p-2 rounded-md border hover:bg-muted/50 transition-colors"
 											>
 												<div className="flex items-center gap-2">
-													<Badge variant="outline" className="h-6 text-xs px-2 py-0.5">
+													<Badge className="h-6 px-2 py-0.5 text-xs" variant="outline">
 														{type}
 													</Badge>
-													<span className="text-xs text-muted-foreground">{count} imágenes</span>
+													<span className="text-muted-foreground text-xs">{count} imágenes</span>
 												</div>
 												<Button
-													variant="ghost"
-													size="sm"
 													className="h-7 w-7 p-0"
 													onClick={() => {
 														// Lógica para eliminar el tipo
 													}}
+													size="sm"
+													variant="ghost"
 												>
 													<X className="h-3.5 w-3.5 text-muted-foreground" />
 												</Button>
 											</div>
 										))
 									) : (
-										<div className="text-center py-4">
-											<p className="text-sm text-muted-foreground">No hay tipos de imágenes definidos</p>
+										<div className="py-4 text-center">
+											<p className="text-muted-foreground text-sm">No hay tipos de imágenes definidos</p>
 										</div>
 									)}
 								</CardContent>
 							</Card>
 						</TabsContent>
 
-						<TabsContent value="import" className="space-y-3 mt-2">
+						<TabsContent className="mt-2 space-y-3" value="import">
 							<Card className="overflow-hidden">
 								<CardHeader className="bg-muted/50 p-2">
-									<CardTitle className="text-sm font-semibold">Importar Imágenes</CardTitle>
+									<CardTitle className="font-semibold text-sm">Importar Imágenes</CardTitle>
 								</CardHeader>
-								<CardContent className="p-3 space-y-3">
+								<CardContent className="space-y-3 p-3">
 									<Button
-										variant="ghost"
-										className="w-full h-auto p-6 border-2 border-dashed rounded-md hover:bg-muted/50 transition-colors flex flex-col items-center justify-center"
+										className="flex h-auto w-full flex-col items-center justify-center rounded-md border-2 border-dashed p-6 transition-colors hover:bg-muted/50"
 										onClick={() => document.getElementById('bulk-image-upload')?.click()}
+										variant="ghost"
 									>
-										<UploadCloud className="h-10 w-10 text-muted-foreground mb-2" />
-										<p className="text-sm font-medium">Arrastra y suelta imágenes aquí</p>
-										<p className="text-xs text-muted-foreground mt-1">O haz clic para seleccionar archivos</p>
+										<UploadCloud className="mb-2 h-10 w-10 text-muted-foreground" />
+										<p className="font-medium text-sm">Arrastra y suelta imágenes aquí</p>
+										<p className="mt-1 text-muted-foreground text-xs">O haz clic para seleccionar archivos</p>
 										<Input
-											id={idBulkImageUpload}
-											type="file"
-											multiple
 											accept="image/*"
 											className="hidden"
+											id={idBulkImageUpload}
+											multiple
 											onChange={handleFileInput}
+											type="file"
 										/>
 									</Button>
 
-									<div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-										<Button variant="outline" size="sm" className="h-9 gap-2 text-xs">
+									<div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+										<Button className="h-9 gap-2 text-xs" size="sm" variant="outline">
 											<FolderUp className="h-4 w-4" /> Importar desde carpeta
 										</Button>
-										<Button variant="outline" size="sm" className="h-9 gap-2 text-xs">
+										<Button className="h-9 gap-2 text-xs" size="sm" variant="outline">
 											<ImportIcon className="h-4 w-4" /> Importar desde URL
 										</Button>
 									</div>
@@ -425,13 +425,13 @@ export function UploadedImagesSettings() {
 									<Separator />
 
 									<div className="space-y-2">
-										<Label className="text-sm font-medium">Ajustes de importación</Label>
+										<Label className="font-medium text-sm">Ajustes de importación</Label>
 										<div className="grid grid-cols-2 gap-2">
 											<div className="space-y-1">
-												<Label htmlFor={idImportType} className="text-xs">
+												<Label className="text-xs" htmlFor={idImportType}>
 													Tipo predeterminado
 												</Label>
-												<select id={idImportType} className="w-full h-8 rounded-md border text-xs">
+												<select className="h-8 w-full rounded-md border text-xs" id={idImportType}>
 													<option value="thumbnail">Miniatura</option>
 													<option value="avatar">Avatar</option>
 													<option value="icon">Icono</option>
@@ -439,19 +439,19 @@ export function UploadedImagesSettings() {
 												</select>
 											</div>
 											<div className="space-y-1">
-												<Label htmlFor={idImportCategory} className="text-xs">
+												<Label className="text-xs" htmlFor={idImportCategory}>
 													Categoría predeterminada
 												</Label>
-												<select id={idImportCategory} className="w-full h-8 rounded-md border text-xs">
+												<select className="h-8 w-full rounded-md border text-xs" id={idImportCategory}>
 													<option value="user">Usuario</option>
 													<option value="system">Sistema</option>
 													<option value="ui">Interfaz</option>
 												</select>
 											</div>
 										</div>
-										<div className="flex items-center space-x-2 mt-2">
+										<div className="mt-2 flex items-center space-x-2">
 											<Switch id={idOptimizeImport} />
-											<Label htmlFor={idOptimizeImport} className="text-xs">
+											<Label className="text-xs" htmlFor={idOptimizeImport}>
 												Optimizar al importar
 											</Label>
 										</div>
@@ -461,13 +461,13 @@ export function UploadedImagesSettings() {
 
 							<Card className="overflow-hidden">
 								<CardHeader className="bg-muted/50 p-2">
-									<CardTitle className="text-sm font-semibold">Exportar Imágenes</CardTitle>
+									<CardTitle className="font-semibold text-sm">Exportar Imágenes</CardTitle>
 								</CardHeader>
-								<CardContent className="p-3 space-y-3">
-									<Button variant="outline" size="sm" className="w-full h-9 gap-2 text-xs">
+								<CardContent className="space-y-3 p-3">
+									<Button className="h-9 w-full gap-2 text-xs" size="sm" variant="outline">
 										<FileSpreadsheet className="h-4 w-4" /> Exportar inventario a CSV
 									</Button>
-									<Button variant="outline" size="sm" className="w-full h-9 gap-2 text-xs">
+									<Button className="h-9 w-full gap-2 text-xs" size="sm" variant="outline">
 										<Grid3X3 className="h-4 w-4" /> Exportar galería de imágenes
 									</Button>
 								</CardContent>

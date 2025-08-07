@@ -122,19 +122,19 @@ export function BatchOperationsIndicator({
 	};
 
 	return (
-		<Popover open={isOpen} onOpenChange={setIsOpen}>
+		<Popover onOpenChange={setIsOpen} open={isOpen}>
 			<PopoverTrigger asChild>
 				<Button
-					variant="ghost"
-					size="sm"
 					className={cn(
-						'h-8 px-2 gap-2 text-xs font-medium transition-all duration-200',
+						'h-8 gap-2 px-2 font-medium text-xs transition-all duration-200',
 						isProcessing && 'animate-pulse',
 						className
 					)}
+					size="sm"
+					variant="ghost"
 				>
 					{/* Status indicator dot */}
-					<div className={cn('w-2 h-2 rounded-full transition-colors', getStatusColor())} />
+					<div className={cn('h-2 w-2 rounded-full transition-colors', getStatusColor())} />
 
 					{/* Status icon */}
 					{getStatusIcon()}
@@ -147,7 +147,7 @@ export function BatchOperationsIndicator({
 
 					{/* Progress indicator */}
 					{showProgress && isProcessing && (
-						<div className="w-8 h-1 bg-muted rounded-full overflow-hidden">
+						<div className="h-1 w-8 overflow-hidden rounded-full bg-muted">
 							<div className="h-full bg-primary transition-all duration-300" style={{ width: `${overallProgress}%` }} />
 						</div>
 					)}
@@ -158,11 +158,11 @@ export function BatchOperationsIndicator({
 					{/* Quick cancel button for running operations */}
 					{summary.running > 0 && (
 						<Button
-							variant="ghost"
-							size="sm"
 							className="h-4 w-4 p-0 hover:bg-red-100 hover:text-red-600"
 							onClick={handleQuickCancel}
+							size="sm"
 							title="Cancelar operación activa"
+							variant="ghost"
 						>
 							<X className="h-3 w-3" />
 						</Button>
@@ -170,7 +170,7 @@ export function BatchOperationsIndicator({
 				</Button>
 			</PopoverTrigger>
 
-			<PopoverContent side={popoverSide} className="w-96 p-0" sideOffset={8}>
+			<PopoverContent className="w-96 p-0" side={popoverSide} sideOffset={8}>
 				<div className="p-4">
 					<BatchOperationsPanel maxHeight="300px" />
 				</div>
@@ -192,7 +192,7 @@ export function BatchOperationsStatusIndicator({ className }: { className?: stri
 	}
 
 	return (
-		<div className={cn('flex items-center gap-1 text-xs text-muted-foreground', className)}>
+		<div className={cn('flex items-center gap-1 text-muted-foreground text-xs', className)}>
 			{isProcessing && <Loader2 className="h-3 w-3 animate-spin" />}
 
 			<span>
@@ -202,7 +202,7 @@ export function BatchOperationsStatusIndicator({ className }: { className?: stri
 			</span>
 
 			{summary.failed > 0 && (
-				<Badge variant="destructive" className="h-4 px-1 text-xs">
+				<Badge className="h-4 px-1 text-xs" variant="destructive">
 					{summary.failed}
 				</Badge>
 			)}

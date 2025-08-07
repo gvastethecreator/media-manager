@@ -126,39 +126,39 @@ export function SearchView(_props: ViewProps) {
 	);
 
 	return (
-		<div className="h-full flex flex-col">
+		<div className="flex h-full flex-col">
 			<Card className="m-6">
 				<CardContent className="p-6">
 					<div className="space-y-4">
 						<div className="flex gap-4">
 							<Input
-								placeholder="Buscar imágenes..."
-								value={filters.query}
 								onChange={(e) => setFilters((prev) => ({ ...prev, query: e.target.value }))}
 								onKeyDown={(e) => {
 									if (e.key === 'Enter') {
 										handleSearch();
 									}
 								}}
+								placeholder="Buscar imágenes..."
+								value={filters.query}
 							/>
-							<Button type="button" onClick={handleSearch}>
+							<Button onClick={handleSearch} type="button">
 								Buscar
 							</Button>
 						</div>
 
-						<Tabs defaultValue="basic" className="w-full">
+						<Tabs className="w-full" defaultValue="basic">
 							<TabsList>
 								<TabsTrigger value="basic">Búsqueda Básica</TabsTrigger>
 								<TabsTrigger value="advanced">Filtros Avanzados</TabsTrigger>
 							</TabsList>
-							<TabsContent value="basic" className="space-y-4">
+							<TabsContent className="space-y-4" value="basic">
 								<div className="grid grid-cols-2 gap-4">
 									<div>
 										<Label>Tipo de búsqueda</Label>
 										<select
-											value={filters.type}
+											className="w-full rounded border p-2"
 											onChange={(e) => setFilters((prev) => ({ ...prev, type: e.target.value as any }))}
-											className="w-full p-2 border rounded"
+											value={filters.type}
 										>
 											<option value="all">Todo</option>
 											<option value="name">Nombre</option>
@@ -168,37 +168,36 @@ export function SearchView(_props: ViewProps) {
 									</div>
 								</div>
 							</TabsContent>
-							<TabsContent value="advanced" className="space-y-4">
+							<TabsContent className="space-y-4" value="advanced">
 								<div className="grid grid-cols-2 gap-4">
 									<div>
 										<Label>Fecha desde</Label>
 										<Input
-											type="date"
 											onChange={(e) =>
 												setFilters((prev) => ({
 													...prev,
 													dateFrom: e.target.value ? new Date(e.target.value) : undefined,
 												}))
 											}
+											type="date"
 										/>
 									</div>
 									<div>
 										<Label>Fecha hasta</Label>
 										<Input
-											type="date"
 											onChange={(e) =>
 												setFilters((prev) => ({
 													...prev,
 													dateTo: e.target.value ? new Date(e.target.value) : undefined,
 												}))
 											}
+											type="date"
 										/>
 									</div>
 								</div>
 								<div>
 									<Label>Tags (separados por comas)</Label>
 									<Input
-										placeholder="tag1, tag2, tag3"
 										onChange={(e) => {
 											const tags = e.target.value
 												.split(',')
@@ -206,6 +205,7 @@ export function SearchView(_props: ViewProps) {
 												.filter(Boolean);
 											setFilters((prev) => ({ ...prev, tags }));
 										}}
+										placeholder="tag1, tag2, tag3"
 									/>
 								</div>
 							</TabsContent>
@@ -218,12 +218,12 @@ export function SearchView(_props: ViewProps) {
 				{isLoading ? (
 					<LoadingScreen />
 				) : items && items.length > 0 ? (
-					<FileBrowser entityType="mixed" onItemSelect={handleItemSelect} onItemDoubleClick={handleItemDoubleClick} />
+					<FileBrowser entityType="mixed" onItemDoubleClick={handleItemDoubleClick} onItemSelect={handleItemSelect} />
 				) : filters.query ? (
 					<EmptyState
+						description="Intenta con otros términos de búsqueda"
 						icon={Search}
 						title="No se encontraron resultados"
-						description="Intenta con otros términos de búsqueda"
 					/>
 				) : null}
 			</div>

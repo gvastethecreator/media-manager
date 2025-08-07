@@ -19,24 +19,24 @@ export function FolderCardFooter({ folder, tcgMode = false, children }: FolderCa
 	return (
 		<div
 			className={cn(
-				'flex justify-between items-center mt-auto p-2',
-				tcgMode ? 'border-t border-white/20 bg-black/40' : 'bg-card'
+				'mt-auto flex items-center justify-between p-2',
+				tcgMode ? 'border-white/20 border-t bg-black/40' : 'bg-card'
 			)}
-			style={!tcgMode ? { borderTop: `1px solid ${folder.color ?? '#000000'}20` } : {}}
+			style={tcgMode ? {} : { borderTop: `1px solid ${folder.color ?? '#000000'}20` }}
 		>
 			{/* Contenido del footer */}
 			<div className="flex items-center gap-2">
 				{/* Información de la carta TCG */}
 				{tcgMode && (
-					<div className="text-xs flex items-center">
+					<div className="flex items-center text-xs">
 						<div
-							className="w-5 h-5 flex items-center justify-center rounded-full bg-black/50 border border-white/10"
+							className="flex h-5 w-5 items-center justify-center rounded-full border border-white/10 bg-black/50"
 							style={{ borderColor: `${folder.color ?? '#000000'}50` }}
 							title="Folder icon"
 						>
-							<FolderIcon className="w-3 h-3" style={{ color: folder.color ?? '#000000' }} />
+							<FolderIcon className="h-3 w-3" style={{ color: folder.color ?? '#000000' }} />
 						</div>
-						<span className="ml-1 text-[0.65rem] font-semibold text-white/70">
+						<span className="ml-1 font-semibold text-[0.65rem] text-white/70">
 							Collection ID: {folderId.slice(0, 8)}
 						</span>
 					</div>

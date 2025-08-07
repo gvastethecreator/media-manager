@@ -60,8 +60,6 @@ export const GridItem = memo<GridItemProps>(function GridItem({
 	return (
 		<FileContextMenu file={item} onAction={handleAction}>
 			<motion.div
-				whileHover={{ scale: 1.02 }}
-				whileTap={{ scale: 0.98 }}
 				className={clsx(
 					'relative overflow-hidden rounded-md border transition-colors',
 					isSelected
@@ -72,21 +70,23 @@ export const GridItem = memo<GridItemProps>(function GridItem({
 					e.stopPropagation();
 					onClick(e);
 				}}
-				onDoubleClick={(e) => {
-					e.stopPropagation();
-					onDoubleClick();
-				}}
 				onContextMenu={(e) => {
 					e.stopPropagation();
 					onContextMenu();
 				}}
+				onDoubleClick={(e) => {
+					e.stopPropagation();
+					onDoubleClick();
+				}}
+				whileHover={{ scale: 1.02 }}
+				whileTap={{ scale: 0.98 }}
 			>
 				{/* 🖼️ Imagen */}
 				<div className="aspect-[3/2] w-full overflow-hidden bg-muted">
 					<ImageRenderer
-						src={thumbnailUrl}
 						alt={item.name}
 						className="h-full w-full object-cover transition-transform"
+						src={thumbnailUrl}
 					/>
 				</div>
 

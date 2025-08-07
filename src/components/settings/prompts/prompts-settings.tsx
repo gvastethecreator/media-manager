@@ -100,7 +100,7 @@ export const PromptSettings = () => {
 			emoji: prompt.emoji || null,
 			description: prompt.description || null,
 			category: prompt.category || null,
-			isFavorite: prompt.isFavorite || false,
+			isFavorite: prompt.isFavorite,
 
 			totalImages: prompt.totalImages || 0,
 			totalVideos: prompt.totalVideos || 0,
@@ -197,10 +197,10 @@ export const PromptSettings = () => {
 	if (loading) {
 		return (
 			<ScrollArea className="h-[calc(100vh-8rem)] w-full">
-				<div className="flex items-center justify-center h-full">
+				<div className="flex h-full items-center justify-center">
 					<div className="flex flex-col items-center gap-3">
 						<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">Cargando prompts...</p>
+						<p className="text-muted-foreground text-sm">Cargando prompts...</p>
 					</div>
 				</div>
 			</ScrollArea>
@@ -214,8 +214,8 @@ export const PromptSettings = () => {
 					<div className="flex flex-col items-center gap-4 text-center">
 						<AlertCircle className="h-12 w-12 text-destructive" />
 						<div>
-							<h3 className="text-lg font-semibold">Error al cargar prompts</h3>
-							<p className="text-sm text-muted-foreground mt-1">
+							<h3 className="font-semibold text-lg">Error al cargar prompts</h3>
+							<p className="mt-1 text-muted-foreground text-sm">
 								{error instanceof Error ? error.message : 'Error desconocido'}
 							</p>
 						</div>
@@ -232,9 +232,9 @@ export const PromptSettings = () => {
 		<ScrollArea className="h-[calc(100vh-8rem)] w-full">
 			<div className="space-y-6">
 				<div className="flex flex-col space-y-4">
-					<div className="flex justify-between items-center">
-						<h2 className="text-2xl font-bold tracking-tight">Prompts</h2>
-						<Dialog open={showCreateDialog} onOpenChange={setShowCreateDialog}>
+					<div className="flex items-center justify-between">
+						<h2 className="font-bold text-2xl tracking-tight">Prompts</h2>
+						<Dialog onOpenChange={setShowCreateDialog} open={showCreateDialog}>
 							<DialogTrigger asChild>
 								<Button>
 									<Plus className="mr-2 h-4 w-4" />
@@ -251,31 +251,31 @@ export const PromptSettings = () => {
 									</DialogDescription>
 								</DialogHeader>
 								<CreatePromptForm
-									prompt={editingPrompt}
 									isEditing={!!editingPrompt}
-									onCreated={handlePromptCreated}
-									onUpdated={handlePromptUpdated}
 									onCancel={() => {
 										setShowCreateDialog(false);
 										setEditingPrompt(null);
 									}}
+									onCreated={handlePromptCreated}
+									onUpdated={handlePromptUpdated}
+									prompt={editingPrompt}
 								/>
 							</DialogContent>
 						</Dialog>
 					</div>
 
-					<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 						<div className="relative">
-							<Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
+							<Search className="absolute top-2.5 left-2 h-4 w-4 text-muted-foreground" />
 							<Input
+								className="pl-8"
+								onChange={(e) => setSearchTerm(e.target.value)}
 								placeholder="Buscar prompts..."
 								value={searchTerm}
-								onChange={(e) => setSearchTerm(e.target.value)}
-								className="pl-8"
 							/>
 						</div>
 
-						<Select value={categoryFilter} onValueChange={setCategoryFilter}>
+						<Select onValueChange={setCategoryFilter} value={categoryFilter}>
 							<SelectTrigger>
 								<SelectValue placeholder="Todas las categorías" />
 							</SelectTrigger>
@@ -290,10 +290,10 @@ export const PromptSettings = () => {
 						</Select>
 
 						<Button
-							variant={showOnlyFavorites ? 'default' : 'outline'}
 							onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
+							variant={showOnlyFavorites ? 'default' : 'outline'}
 						>
-							<Star className={`mr-2 h-4 w-4 ${showOnlyFavorites ? 'text-yellow-300 fill-yellow-300' : ''}`} />
+							<Star className={`mr-2 h-4 w-4 ${showOnlyFavorites ? 'fill-yellow-300 text-yellow-300' : ''}`} />
 							Solo favoritos
 						</Button>
 					</div>
@@ -305,43 +305,43 @@ export const PromptSettings = () => {
 						<TabsTrigger value="list">Lista</TabsTrigger>
 					</TabsList>
 
-					<TabsContent value="grid" className="space-y-4">
+					<TabsContent className="space-y-4" value="grid">
 						{loading ? (
-							<div className="text-center py-8">Cargando prompts...</div>
+							<div className="py-8 text-center">Cargando prompts...</div>
 						) : filteredPrompts.length === 0 ? (
-							<div className="text-center py-8">No se encontraron prompts.</div>
+							<div className="py-8 text-center">No se encontraron prompts.</div>
 						) : (
-							<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+							<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 								{filteredPrompts.map((prompt) => (
 									<div
+										className="rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md"
 										key={prompt.id}
-										className="bg-card rounded-lg border p-4 shadow-sm transition-all hover:shadow-md"
 									>
-										<div className="flex justify-between items-start">
+										<div className="flex items-start justify-between">
 											<div className="flex items-center gap-2">
 												<span className="text-2xl">{prompt.emoji || '📝'}</span>
 												<div>
 													<h3 className="font-semibold">{prompt.name}</h3>
-													<p className="text-xs text-muted-foreground">{prompt.category}</p>
+													<p className="text-muted-foreground text-xs">{prompt.category}</p>
 												</div>
 											</div>
-											{prompt.isFavorite && <Star className="h-4 w-4 text-yellow-300 fill-yellow-300" />}
+											{prompt.isFavorite && <Star className="h-4 w-4 fill-yellow-300 text-yellow-300" />}
 										</div>
 
-										<p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+										<p className="mt-2 line-clamp-2 text-muted-foreground text-sm">
 											{prompt.description || 'Sin descripción'}
 										</p>
 
 										<div className="mt-4 flex justify-end gap-2">
-											<Button variant="ghost" size="sm" onClick={() => handleEdit(prompt)}>
+											<Button onClick={() => handleEdit(prompt)} size="sm" variant="ghost">
 												<Edit className="h-4 w-4" />
 											</Button>
 											<Button
-												variant="ghost"
-												size="sm"
+												className="text-destructive"
 												data-id={prompt.id}
 												onClick={handleDeleteButtonClick as unknown as () => void}
-												className="text-destructive"
+												size="sm"
+												variant="ghost"
 											>
 												<Delete className="h-4 w-4" />
 											</Button>
@@ -354,9 +354,9 @@ export const PromptSettings = () => {
 
 					<TabsContent value="list">
 						{loading ? (
-							<div className="text-center py-8">Cargando prompts...</div>
+							<div className="py-8 text-center">Cargando prompts...</div>
 						) : filteredPrompts.length === 0 ? (
-							<div className="text-center py-8">No se encontraron prompts.</div>
+							<div className="py-8 text-center">No se encontraron prompts.</div>
 						) : (
 							<div className="rounded-md border">
 								<Table>
@@ -388,15 +388,15 @@ export const PromptSettings = () => {
 												</TableCell>
 												<TableCell className="text-right">
 													<div className="flex justify-end gap-2">
-														<Button variant="outline" size="sm" onClick={() => handleEdit(prompt)}>
+														<Button onClick={() => handleEdit(prompt)} size="sm" variant="outline">
 															<Edit className="h-4 w-4" />
 														</Button>
 														<Button
-															variant="outline"
-															size="sm"
+															className="text-destructive"
 															data-id={prompt.id}
 															onClick={handleDeleteButtonClick as unknown as () => void}
-															className="text-destructive"
+															size="sm"
+															variant="outline"
 														>
 															<Delete className="h-4 w-4" />
 														</Button>

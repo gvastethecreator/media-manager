@@ -6,7 +6,7 @@ test.describe('Navigation Item Counts', () => {
 		await page.goto('http://localhost:5173/');
 
 		// Esperar a que la navegación se cargue
-		await page.waitForSelector('[data-testid="navigation-panel"]', { timeout: 10000 });
+		await page.waitForSelector('[data-testid="navigation-panel"]', { timeout: 10_000 });
 
 		// Buscar elementos de carpetas en la navegación
 		const folderItems = page.locator('[data-testid="folder-item"]');
@@ -54,7 +54,7 @@ test.describe('Navigation Item Counts', () => {
 		await page.goto('http://localhost:5173/');
 
 		// Esperar a que la navegación se cargue
-		await page.waitForSelector('[data-testid="navigation-panel"]', { timeout: 10000 });
+		await page.waitForSelector('[data-testid="navigation-panel"]', { timeout: 10_000 });
 
 		// Buscar elementos de colecciones en la navegación
 		const collectionItems = page.locator('[data-testid="collection-item"]');
@@ -90,7 +90,7 @@ test.describe('Navigation Item Counts', () => {
 		await page.goto('http://localhost:5173/');
 
 		// Esperar a que la navegación se cargue
-		await page.waitForSelector('[data-testid="navigation-panel"]', { timeout: 10000 });
+		await page.waitForSelector('[data-testid="navigation-panel"]', { timeout: 10_000 });
 
 		// Buscar elementos de álbumes en la navegación
 		const albumItems = page.locator('[data-testid="album-item"]');

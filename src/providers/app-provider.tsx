@@ -16,7 +16,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 				<QueryProvider>
 					<CacheProvider>
 						<FileProvider>
-							<Toaster position="bottom-right" richColors closeButton />
+							<Toaster closeButton position="bottom-right" richColors />
 							{children}
 						</FileProvider>
 					</CacheProvider>

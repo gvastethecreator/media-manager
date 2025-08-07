@@ -83,9 +83,9 @@ const InterfaceSection: React.FC = () => {
 	return (
 		<div className="space-y-6">
 			{/* Configuración General de Interfaz */}
-			<Card className="bg-muted/30 rounded-sm border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardHeader className="p-3 pb-2">
-					<CardTitle className="text-base text-muted-foreground font-medium flex items-center gap-2">
+					<CardTitle className="flex items-center gap-2 font-medium text-base text-muted-foreground">
 						<Settings className="h-4 w-4" />
 						<span>Interfaz General</span>
 					</CardTitle>
@@ -96,7 +96,7 @@ const InterfaceSection: React.FC = () => {
 						{/* Selector de tipografía */}
 						<div className="flex flex-col gap-1">
 							<Label htmlFor="fontFamily">Tipografía</Label>
-							<Select value={preferences.fontFamily} onValueChange={(v) => setPreferences({ fontFamily: v })}>
+							<Select onValueChange={(v) => setPreferences({ fontFamily: v })} value={preferences.fontFamily}>
 								<SelectTrigger className="w-full">
 									<SelectValue />
 								</SelectTrigger>
@@ -112,7 +112,7 @@ const InterfaceSection: React.FC = () => {
 						{/* Selector de tamaño de fuente */}
 						<div className="flex flex-col gap-1">
 							<Label htmlFor="fontSize">Tamaño de fuente</Label>
-							<Select value={preferences.fontSize} onValueChange={(v) => setPreferences({ fontSize: v })}>
+							<Select onValueChange={(v) => setPreferences({ fontSize: v })} value={preferences.fontSize}>
 								<SelectTrigger className="w-full">
 									<SelectValue />
 								</SelectTrigger>
@@ -127,7 +127,7 @@ const InterfaceSection: React.FC = () => {
 						{/* Selector de tema */}
 						<div className="flex flex-col gap-1">
 							<Label htmlFor="theme">Tema</Label>
-							<Select value={preferences.theme} onValueChange={(v) => setPreferences({ theme: v })}>
+							<Select onValueChange={(v) => setPreferences({ theme: v })} value={preferences.theme}>
 								<SelectTrigger className="w-full">
 									<SelectValue />
 								</SelectTrigger>
@@ -144,8 +144,8 @@ const InterfaceSection: React.FC = () => {
 							<Label htmlFor={animationsId}>Animaciones</Label>
 							<Switch
 								checked={preferences.animations}
-								onCheckedChange={(v) => setPreferences({ animations: v })}
 								id={animationsId}
+								onCheckedChange={(v) => setPreferences({ animations: v })}
 							/>
 						</div>
 
@@ -154,53 +154,53 @@ const InterfaceSection: React.FC = () => {
 							<Label htmlFor={thumbnailsRespectAspectRatioId}>Respetar aspect ratio (grilla)</Label>
 							<Switch
 								checked={preferences.thumbnailsRespectAspectRatio}
-								onCheckedChange={(v) => setPreferences({ thumbnailsRespectAspectRatio: v })}
 								id={thumbnailsRespectAspectRatioId}
+								onCheckedChange={(v) => setPreferences({ thumbnailsRespectAspectRatio: v })}
 							/>
 						</div>
 
 						{/* Thumbnails: Bordes redondeados por modo */}
 						<div className="flex flex-col gap-1">
 							<Label>Borde redondeado thumbnails</Label>
-							<div className="flex gap-2 items-center">
-								<span className="text-xs text-muted-foreground w-12">Grilla</span>
+							<div className="flex items-center gap-2">
+								<span className="w-12 text-muted-foreground text-xs">Grilla</span>
 								<Input
-									type="number"
-									min={0}
+									className="w-16"
 									max={32}
-									value={preferences.thumbnailsBorderRadius.grid}
+									min={0}
 									onChange={(e) =>
 										setPreferences({
 											thumbnailsBorderRadius: { ...preferences.thumbnailsBorderRadius, grid: Number(e.target.value) },
 										})
 									}
-									className="w-16"
-								/>
-								<span className="text-xs text-muted-foreground w-12">Card</span>
-								<Input
 									type="number"
-									min={0}
+									value={preferences.thumbnailsBorderRadius.grid}
+								/>
+								<span className="w-12 text-muted-foreground text-xs">Card</span>
+								<Input
+									className="w-16"
 									max={32}
-									value={preferences.thumbnailsBorderRadius.card}
+									min={0}
 									onChange={(e) =>
 										setPreferences({
 											thumbnailsBorderRadius: { ...preferences.thumbnailsBorderRadius, card: Number(e.target.value) },
 										})
 									}
-									className="w-16"
-								/>
-								<span className="text-xs text-muted-foreground w-12">Mosaico</span>
-								<Input
 									type="number"
-									min={0}
+									value={preferences.thumbnailsBorderRadius.card}
+								/>
+								<span className="w-12 text-muted-foreground text-xs">Mosaico</span>
+								<Input
+									className="w-16"
 									max={32}
-									value={preferences.thumbnailsBorderRadius.mosaic}
+									min={0}
 									onChange={(e) =>
 										setPreferences({
 											thumbnailsBorderRadius: { ...preferences.thumbnailsBorderRadius, mosaic: Number(e.target.value) },
 										})
 									}
-									className="w-16"
+									type="number"
+									value={preferences.thumbnailsBorderRadius.mosaic}
 								/>
 							</div>
 						</div>
@@ -210,8 +210,8 @@ const InterfaceSection: React.FC = () => {
 							<Label htmlFor={thumbnailsAnimationsId}>Animaciones de thumbnails</Label>
 							<Switch
 								checked={preferences.thumbnailsAnimations}
-								onCheckedChange={(v) => setPreferences({ thumbnailsAnimations: v })}
 								id={thumbnailsAnimationsId}
+								onCheckedChange={(v) => setPreferences({ thumbnailsAnimations: v })}
 							/>
 						</div>
 
@@ -220,8 +220,8 @@ const InterfaceSection: React.FC = () => {
 							<Label htmlFor={thumbnailsUltraPerformanceId}>Modo ultra performance</Label>
 							<Switch
 								checked={preferences.thumbnailsUltraPerformance}
-								onCheckedChange={(v) => setPreferences({ thumbnailsUltraPerformance: v })}
 								id={thumbnailsUltraPerformanceId}
+								onCheckedChange={(v) => setPreferences({ thumbnailsUltraPerformance: v })}
 							/>
 						</div>
 					</div>
@@ -229,54 +229,54 @@ const InterfaceSection: React.FC = () => {
 			</Card>
 
 			{/* Configuración específica del FileBrowser */}
-			<Card className="bg-muted/30 rounded-sm border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardHeader className="p-3 pb-2">
-					<CardTitle className="text-base text-muted-foreground font-medium flex items-center gap-2">
+					<CardTitle className="flex items-center gap-2 font-medium text-base text-muted-foreground">
 						<Eye className="h-4 w-4" />
 						<span>Visor de Archivos</span>
-						<Badge variant="secondary" className="text-xs">
+						<Badge className="text-xs" variant="secondary">
 							FileBrowser
 						</Badge>
 					</CardTitle>
 				</CardHeader>
 				<Separator className="my-0" />
 				<CardContent className="p-3">
-					<Tabs value={activeFileBrowserTab} onValueChange={setActiveFileBrowserTab}>
+					<Tabs onValueChange={setActiveFileBrowserTab} value={activeFileBrowserTab}>
 						<TabsList className="grid w-full grid-cols-6">
-							<TabsTrigger value="general" className="text-xs">
-								<Settings className="h-3 w-3 mr-1" />
+							<TabsTrigger className="text-xs" value="general">
+								<Settings className="mr-1 h-3 w-3" />
 								General
 							</TabsTrigger>
-							<TabsTrigger value="grid" className="text-xs">
-								<Grid className="h-3 w-3 mr-1" />
+							<TabsTrigger className="text-xs" value="grid">
+								<Grid className="mr-1 h-3 w-3" />
 								Grid
 							</TabsTrigger>
-							<TabsTrigger value="cards" className="text-xs">
-								<LayoutGrid className="h-3 w-3 mr-1" />
+							<TabsTrigger className="text-xs" value="cards">
+								<LayoutGrid className="mr-1 h-3 w-3" />
 								Cards
 							</TabsTrigger>
-							<TabsTrigger value="masonry" className="text-xs">
-								<Columns className="h-3 w-3 mr-1" />
+							<TabsTrigger className="text-xs" value="masonry">
+								<Columns className="mr-1 h-3 w-3" />
 								Mosaico
 							</TabsTrigger>
-							<TabsTrigger value="list" className="text-xs">
-								<List className="h-3 w-3 mr-1" />
+							<TabsTrigger className="text-xs" value="list">
+								<List className="mr-1 h-3 w-3" />
 								Lista
 							</TabsTrigger>
-							<TabsTrigger value="performance" className="text-xs">
-								<Zap className="h-3 w-3 mr-1" />
+							<TabsTrigger className="text-xs" value="performance">
+								<Zap className="mr-1 h-3 w-3" />
 								Rendimiento
 							</TabsTrigger>
 						</TabsList>
 
 						{/* Tab General */}
-						<TabsContent value="general" className="space-y-4 mt-4">
+						<TabsContent className="mt-4 space-y-4" value="general">
 							<div className="flex flex-col gap-3">
 								<div className="flex flex-col gap-1">
 									<Label>Vista por defecto</Label>
 									<Select
-										value={preferences.fileBrowser.general.defaultViewMode}
 										onValueChange={(v) => updateFileBrowserConfig('general', 'defaultViewMode', v)}
+										value={preferences.fileBrowser.general.defaultViewMode}
 									>
 										<SelectTrigger>
 											<SelectValue />
@@ -293,11 +293,11 @@ const InterfaceSection: React.FC = () => {
 								<div className="flex flex-col gap-1">
 									<Label>Elementos por lote</Label>
 									<Input
-										type="number"
-										min={10}
 										max={200}
-										value={preferences.fileBrowser.general.itemsPerBatch}
+										min={10}
 										onChange={(e) => updateFileBrowserConfig('general', 'itemsPerBatch', Number(e.target.value))}
+										type="number"
+										value={preferences.fileBrowser.general.itemsPerBatch}
 									/>
 								</div>
 
@@ -354,27 +354,27 @@ const InterfaceSection: React.FC = () => {
 						</TabsContent>
 
 						{/* Tab Grid */}
-						<TabsContent value="grid" className="space-y-4 mt-4">
+						<TabsContent className="mt-4 space-y-4" value="grid">
 							<div className="space-y-3">
 								<div className="grid grid-cols-2 gap-3">
 									<div className="flex flex-col gap-1">
 										<Label>Min. columnas</Label>
 										<Input
-											type="number"
-											min={1}
 											max={10}
-											value={preferences.fileBrowser.views.grid.minColumns}
+											min={1}
 											onChange={(e) => updateViewConfig('grid', 'minColumns', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.grid.minColumns}
 										/>
 									</div>
 									<div className="flex flex-col gap-1">
 										<Label>Max. columnas</Label>
 										<Input
-											type="number"
-											min={2}
 											max={12}
-											value={preferences.fileBrowser.views.grid.maxColumns}
+											min={2}
 											onChange={(e) => updateViewConfig('grid', 'maxColumns', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.grid.maxColumns}
 										/>
 									</div>
 								</div>
@@ -383,21 +383,21 @@ const InterfaceSection: React.FC = () => {
 									<div className="flex flex-col gap-1">
 										<Label>Tamaño elemento</Label>
 										<Input
-											type="number"
-											min={80}
 											max={400}
-											value={preferences.fileBrowser.views.grid.itemSize}
+											min={80}
 											onChange={(e) => updateViewConfig('grid', 'itemSize', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.grid.itemSize}
 										/>
 									</div>
 									<div className="flex flex-col gap-1">
 										<Label>Espaciado</Label>
 										<Input
-											type="number"
-											min={0}
 											max={32}
-											value={preferences.fileBrowser.views.grid.gap}
+											min={0}
 											onChange={(e) => updateViewConfig('grid', 'gap', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.grid.gap}
 										/>
 									</div>
 								</div>
@@ -405,12 +405,12 @@ const InterfaceSection: React.FC = () => {
 								<div className="flex flex-col gap-1">
 									<Label>Relación de aspecto</Label>
 									<Input
-										type="number"
-										min={0.5}
 										max={3}
-										step={0.1}
-										value={preferences.fileBrowser.views.grid.aspectRatio}
+										min={0.5}
 										onChange={(e) => updateViewConfig('grid', 'aspectRatio', Number(e.target.value))}
+										step={0.1}
+										type="number"
+										value={preferences.fileBrowser.views.grid.aspectRatio}
 									/>
 								</div>
 
@@ -435,27 +435,27 @@ const InterfaceSection: React.FC = () => {
 						</TabsContent>
 
 						{/* Tab Cards */}
-						<TabsContent value="cards" className="space-y-4 mt-4">
+						<TabsContent className="mt-4 space-y-4" value="cards">
 							<div className="space-y-3">
 								<div className="grid grid-cols-2 gap-3">
 									<div className="flex flex-col gap-1">
 										<Label>Min. columnas</Label>
 										<Input
-											type="number"
-											min={1}
 											max={6}
-											value={preferences.fileBrowser.views.cards.minColumns}
+											min={1}
 											onChange={(e) => updateViewConfig('cards', 'minColumns', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.cards.minColumns}
 										/>
 									</div>
 									<div className="flex flex-col gap-1">
 										<Label>Max. columnas</Label>
 										<Input
-											type="number"
-											min={2}
 											max={8}
-											value={preferences.fileBrowser.views.cards.maxColumns}
+											min={2}
 											onChange={(e) => updateViewConfig('cards', 'maxColumns', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.cards.maxColumns}
 										/>
 									</div>
 								</div>
@@ -464,21 +464,21 @@ const InterfaceSection: React.FC = () => {
 									<div className="flex flex-col gap-1">
 										<Label>Ancho tarjeta</Label>
 										<Input
-											type="number"
-											min={200}
 											max={600}
-											value={preferences.fileBrowser.views.cards.cardWidth}
+											min={200}
 											onChange={(e) => updateViewConfig('cards', 'cardWidth', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.cards.cardWidth}
 										/>
 									</div>
 									<div className="flex flex-col gap-1">
 										<Label>Alto tarjeta</Label>
 										<Input
-											type="number"
-											min={250}
 											max={800}
-											value={preferences.fileBrowser.views.cards.cardHeight}
+											min={250}
 											onChange={(e) => updateViewConfig('cards', 'cardHeight', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.cards.cardHeight}
 										/>
 									</div>
 								</div>
@@ -487,18 +487,18 @@ const InterfaceSection: React.FC = () => {
 									<div className="flex flex-col gap-1">
 										<Label>Espaciado</Label>
 										<Input
-											type="number"
-											min={8}
 											max={48}
-											value={preferences.fileBrowser.views.cards.gap}
+											min={8}
 											onChange={(e) => updateViewConfig('cards', 'gap', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.cards.gap}
 										/>
 									</div>
 									<div className="flex flex-col gap-1">
 										<Label>Tamaño preview</Label>
 										<Select
-											value={preferences.fileBrowser.views.cards.previewSize}
 											onValueChange={(v) => updateViewConfig('cards', 'previewSize', v)}
+											value={preferences.fileBrowser.views.cards.previewSize}
 										>
 											<SelectTrigger>
 												<SelectValue />
@@ -541,27 +541,27 @@ const InterfaceSection: React.FC = () => {
 						</TabsContent>
 
 						{/* Tab Masonry */}
-						<TabsContent value="masonry" className="space-y-4 mt-4">
+						<TabsContent className="mt-4 space-y-4" value="masonry">
 							<div className="space-y-3">
 								<div className="grid grid-cols-2 gap-3">
 									<div className="flex flex-col gap-1">
 										<Label>Min. columnas</Label>
 										<Input
-											type="number"
-											min={2}
 											max={8}
-											value={preferences.fileBrowser.views.masonry.minColumns}
+											min={2}
 											onChange={(e) => updateViewConfig('masonry', 'minColumns', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.masonry.minColumns}
 										/>
 									</div>
 									<div className="flex flex-col gap-1">
 										<Label>Max. columnas</Label>
 										<Input
-											type="number"
-											min={3}
 											max={12}
-											value={preferences.fileBrowser.views.masonry.maxColumns}
+											min={3}
 											onChange={(e) => updateViewConfig('masonry', 'maxColumns', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.masonry.maxColumns}
 										/>
 									</div>
 								</div>
@@ -570,21 +570,21 @@ const InterfaceSection: React.FC = () => {
 									<div className="flex flex-col gap-1">
 										<Label>Ancho columna</Label>
 										<Input
-											type="number"
-											min={120}
 											max={400}
-											value={preferences.fileBrowser.views.masonry.columnWidth}
+											min={120}
 											onChange={(e) => updateViewConfig('masonry', 'columnWidth', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.masonry.columnWidth}
 										/>
 									</div>
 									<div className="flex flex-col gap-1">
 										<Label>Gap columnas</Label>
 										<Input
-											type="number"
-											min={2}
 											max={24}
-											value={preferences.fileBrowser.views.masonry.columnGap}
+											min={2}
 											onChange={(e) => updateViewConfig('masonry', 'columnGap', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.masonry.columnGap}
 										/>
 									</div>
 								</div>
@@ -593,21 +593,21 @@ const InterfaceSection: React.FC = () => {
 									<div className="flex flex-col gap-1">
 										<Label>Gap filas</Label>
 										<Input
-											type="number"
-											min={2}
 											max={24}
-											value={preferences.fileBrowser.views.masonry.rowGap}
+											min={2}
 											onChange={(e) => updateViewConfig('masonry', 'rowGap', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.masonry.rowGap}
 										/>
 									</div>
 									<div className="flex flex-col gap-1">
 										<Label>Alt. máxima</Label>
 										<Input
-											type="number"
-											min={200}
 											max={800}
-											value={preferences.fileBrowser.views.masonry.maxItemHeight}
+											min={200}
 											onChange={(e) => updateViewConfig('masonry', 'maxItemHeight', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.masonry.maxItemHeight}
 										/>
 									</div>
 								</div>
@@ -615,11 +615,11 @@ const InterfaceSection: React.FC = () => {
 								<div className="flex flex-col gap-1">
 									<Label>Altura mínima</Label>
 									<Input
-										type="number"
-										min={80}
 										max={300}
-										value={preferences.fileBrowser.views.masonry.minItemHeight}
+										min={80}
 										onChange={(e) => updateViewConfig('masonry', 'minItemHeight', Number(e.target.value))}
+										type="number"
+										value={preferences.fileBrowser.views.masonry.minItemHeight}
 									/>
 								</div>
 
@@ -644,27 +644,27 @@ const InterfaceSection: React.FC = () => {
 						</TabsContent>
 
 						{/* Tab List */}
-						<TabsContent value="list" className="space-y-4 mt-4">
+						<TabsContent className="mt-4 space-y-4" value="list">
 							<div className="space-y-3">
 								<div className="grid grid-cols-2 gap-3">
 									<div className="flex flex-col gap-1">
 										<Label>Altura fila</Label>
 										<Input
-											type="number"
-											min={40}
 											max={120}
-											value={preferences.fileBrowser.views.list.rowHeight}
+											min={40}
 											onChange={(e) => updateViewConfig('list', 'rowHeight', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.list.rowHeight}
 										/>
 									</div>
 									<div className="flex flex-col gap-1">
 										<Label>Gap filas</Label>
 										<Input
-											type="number"
-											min={0}
 											max={16}
-											value={preferences.fileBrowser.views.list.rowGap}
+											min={0}
 											onChange={(e) => updateViewConfig('list', 'rowGap', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.views.list.rowGap}
 										/>
 									</div>
 								</div>
@@ -673,8 +673,8 @@ const InterfaceSection: React.FC = () => {
 									<div className="flex flex-col gap-1">
 										<Label>Tamaño thumbnails</Label>
 										<Select
-											value={preferences.fileBrowser.views.list.thumbnailSize}
 											onValueChange={(v) => updateViewConfig('list', 'thumbnailSize', v)}
+											value={preferences.fileBrowser.views.list.thumbnailSize}
 										>
 											<SelectTrigger>
 												<SelectValue />
@@ -686,7 +686,7 @@ const InterfaceSection: React.FC = () => {
 											</SelectContent>
 										</Select>
 									</div>
-									<div className="flex items-center gap-3 mt-6">
+									<div className="mt-6 flex items-center gap-3">
 										<Label>Mostrar thumbnails</Label>
 										<Switch
 											checked={preferences.fileBrowser.views.list.showThumbnails}
@@ -696,16 +696,16 @@ const InterfaceSection: React.FC = () => {
 								</div>
 
 								<div className="space-y-2">
-									<Label className="text-sm font-medium">Columnas visibles</Label>
+									<Label className="font-medium text-sm">Columnas visibles</Label>
 									<div className="grid grid-cols-2 gap-2">
 										{Object.entries(preferences.fileBrowser.views.list.visibleColumns).map(([column, visible]) => (
-											<div key={column} className="flex items-center gap-2">
+											<div className="flex items-center gap-2" key={column}>
 												<Switch
 													checked={visible}
-													onCheckedChange={(v) => updateListColumn(column, v)}
 													id={`column-${column}`}
+													onCheckedChange={(v) => updateListColumn(column, v)}
 												/>
-												<Label htmlFor={`column-${column}`} className="text-xs capitalize">
+												<Label className="text-xs capitalize" htmlFor={`column-${column}`}>
 													{column === 'dateModified'
 														? 'Fecha Mod.'
 														: column === 'dateCreated'
@@ -748,29 +748,29 @@ const InterfaceSection: React.FC = () => {
 						</TabsContent>
 
 						{/* Tab Performance */}
-						<TabsContent value="performance" className="space-y-4 mt-4">
+						<TabsContent className="mt-4 space-y-4" value="performance">
 							<div className="space-y-3">
 								<div className="grid grid-cols-2 gap-3">
 									<div className="flex flex-col gap-1">
 										<Label>Elementos pre-carga</Label>
 										<Input
-											type="number"
-											min={5}
 											max={100}
-											value={preferences.fileBrowser.performance.overscanCount}
+											min={5}
 											onChange={(e) => updateFileBrowserConfig('performance', 'overscanCount', Number(e.target.value))}
+											type="number"
+											value={preferences.fileBrowser.performance.overscanCount}
 										/>
 									</div>
 									<div className="flex flex-col gap-1">
 										<Label>Límite cache</Label>
 										<Input
-											type="number"
-											min={50}
 											max={1000}
-											value={preferences.fileBrowser.performance.thumbnailCacheLimit}
+											min={50}
 											onChange={(e) =>
 												updateFileBrowserConfig('performance', 'thumbnailCacheLimit', Number(e.target.value))
 											}
+											type="number"
+											value={preferences.fileBrowser.performance.thumbnailCacheLimit}
 										/>
 									</div>
 								</div>
@@ -778,8 +778,8 @@ const InterfaceSection: React.FC = () => {
 								<div className="flex flex-col gap-1">
 									<Label>Calidad thumbnails</Label>
 									<Select
-										value={preferences.fileBrowser.performance.thumbnailQuality}
 										onValueChange={(v) => updateFileBrowserConfig('performance', 'thumbnailQuality', v)}
+										value={preferences.fileBrowser.performance.thumbnailQuality}
 									>
 										<SelectTrigger>
 											<SelectValue />

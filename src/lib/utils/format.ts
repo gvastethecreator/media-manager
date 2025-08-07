@@ -52,11 +52,11 @@ export function formatRelativeTime(date: Date | string): string {
 
 	if (diffInSeconds < 60) return 'hace unos segundos';
 	if (diffInSeconds < 3600) return `hace ${Math.floor(diffInSeconds / 60)} minutos`;
-	if (diffInSeconds < 86400) return `hace ${Math.floor(diffInSeconds / 3600)} horas`;
-	if (diffInSeconds < 2592000) return `hace ${Math.floor(diffInSeconds / 86400)} días`;
-	if (diffInSeconds < 31536000) return `hace ${Math.floor(diffInSeconds / 2592000)} meses`;
+	if (diffInSeconds < 86_400) return `hace ${Math.floor(diffInSeconds / 3600)} horas`;
+	if (diffInSeconds < 2_592_000) return `hace ${Math.floor(diffInSeconds / 86_400)} días`;
+	if (diffInSeconds < 31_536_000) return `hace ${Math.floor(diffInSeconds / 2_592_000)} meses`;
 
-	return `hace ${Math.floor(diffInSeconds / 31536000)} años`;
+	return `hace ${Math.floor(diffInSeconds / 31_536_000)} años`;
 }
 
 /**

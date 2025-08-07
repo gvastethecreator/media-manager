@@ -126,7 +126,7 @@ function extractExifData(rawMetadata: any): Partial<ExifData> {
 			hasPng: !!rawMetadata.png,
 			hasText: !!rawMetadata.text,
 			hasZtxt: !!rawMetadata.ztxt,
-			hasItxt: !!rawMetadata.itxt
+			hasItxt: !!rawMetadata.itxt,
 		});
 
 		// Extraer chunks de texto PNG que pueden contener metadatos de IA
@@ -134,7 +134,7 @@ function extractExifData(rawMetadata: any): Partial<ExifData> {
 			...rawMetadata.png,
 			...rawMetadata.text,
 			...rawMetadata.ztxt,
-			...rawMetadata.itxt
+			...rawMetadata.itxt,
 		};
 
 		// Buscar campos específicos de IA en PNG chunks
@@ -143,13 +143,13 @@ function extractExifData(rawMetadata: any): Partial<ExifData> {
 			if (pngChunks[field]) {
 				(data as any)[field] = pngChunks[field];
 				logger.info(`🔧 EXIFR PARSER: PNG chunk encontrado: ${field}`, {
-					value: typeof pngChunks[field] === 'string' ? pngChunks[field].substring(0, 100) + '...' : pngChunks[field]
+					value: typeof pngChunks[field] === 'string' ? pngChunks[field].substring(0, 100) + '...' : pngChunks[field],
 				});
 			}
 		}
 
 		// Agregar todos los chunks PNG como campos adicionales
-		Object.keys(pngChunks).forEach(key => {
+		Object.keys(pngChunks).forEach((key) => {
 			if (!aiFields.includes(key)) {
 				(data as any)[`png_${key}`] = pngChunks[key];
 			}

@@ -85,8 +85,8 @@ export function ConceptCardFooter({
 	return (
 		<div
 			className={cn(
-				'px-3 py-2 text-xs text-white/80',
-				tcgMode ? 'border-t border-white/10' : '',
+				'px-3 py-2 text-white/80 text-xs',
+				tcgMode ? 'border-white/10 border-t' : '',
 				isFavorite && tcgMode ? 'bg-gradient-to-t from-amber-950/40 to-amber-900/20' : ''
 			)}
 			style={{
@@ -97,13 +97,13 @@ export function ConceptCardFooter({
 				boxShadow: isFavorite && tcgMode ? 'inset 0 0 10px rgba(255, 215, 0, 0.2)' : undefined,
 			}}
 		>
-			<div className="flex justify-between items-center mb-1.5">
+			<div className="mb-1.5 flex items-center justify-between">
 				{/* Información principal */}
 				<div className="flex items-center">
 					{tcgMode ? (
-						<BookOpen size={14} className="mr-1.5 opacity-80" />
+						<BookOpen className="mr-1.5 opacity-80" size={14} />
 					) : (
-						<Lightbulb size={14} className="mr-1.5 opacity-80" />
+						<Lightbulb className="mr-1.5 opacity-80" size={14} />
 					)}
 					<span className={cn('uppercase tracking-wide', tcgMode ? 'font-semibold' : 'font-medium')}>{category}</span>
 
@@ -112,7 +112,7 @@ export function ConceptCardFooter({
 						<div className="ml-1.5 flex items-center">
 							<span className="mx-1 text-[0.6rem] opacity-70">LVL</span>
 							<span
-								className="px-1.5 py-0.5 text-[0.7rem] font-bold rounded-sm"
+								className="rounded-sm px-1.5 py-0.5 font-bold text-[0.7rem]"
 								style={{
 									backgroundColor: `${primaryColor}60`,
 									color: 'white',
@@ -130,7 +130,7 @@ export function ConceptCardFooter({
 					{/* Rareza solo en modo TCG */}
 					{tcgMode && rarity && (
 						<span
-							className="px-1.5 py-0.5 text-[0.65rem] font-bold rounded-sm"
+							className="rounded-sm px-1.5 py-0.5 font-bold text-[0.65rem]"
 							style={{
 								backgroundColor: isFavorite ? '#FFD700' : primaryColor,
 								color: isFavorite ? 'black' : 'white',
@@ -144,19 +144,19 @@ export function ConceptCardFooter({
 					{/* Indicador de favorito */}
 					{isFavorite && (
 						<Star
-							size={14}
-							className={cn(tcgMode ? 'text-yellow-300 fill-yellow-300' : 'fill-yellow-400 text-yellow-400')}
 							aria-label="Favorito"
+							className={cn(tcgMode ? 'fill-yellow-300 text-yellow-300' : 'fill-yellow-400 text-yellow-400')}
+							size={14}
 						/>
 					)}
 				</div>
 			</div>
 
 			{/* Segunda línea - Información adicional */}
-			<div className="flex justify-between items-center mb-1.5 text-[0.65rem]">
+			<div className="mb-1.5 flex items-center justify-between text-[0.65rem]">
 				{/* ID de colección */}
 				{tcgMode && collectionId && (
-					<div className="flex items-center bg-black/30 px-1.5 py-0.5 rounded-sm">
+					<div className="flex items-center rounded-sm bg-black/30 px-1.5 py-0.5">
 						<span className="font-mono tracking-wide">{collectionId}</span>
 					</div>
 				)}
@@ -165,13 +165,13 @@ export function ConceptCardFooter({
 				<div className="flex items-center gap-3">
 					{/* Contador de imágenes y videos */}
 					<div className="flex items-center">
-						<span className="opacity-60 mr-1">IMG</span>
+						<span className="mr-1 opacity-60">IMG</span>
 						<span className="font-medium">{imagesCount + videosCount}</span>
 					</div>
 
 					{/* Contador de prompts */}
 					<div className="flex items-center">
-						<span className="opacity-60 mr-1">TXT</span>
+						<span className="mr-1 opacity-60">TXT</span>
 						<span className="font-medium">{promptsCount + notesCount}</span>
 					</div>
 				</div>
@@ -180,18 +180,18 @@ export function ConceptCardFooter({
 			{/* Fechas de creación y modificación */}
 			<div className="flex justify-between text-[0.65rem] text-white/60">
 				<div className="flex items-center">
-					<Calendar size={12} className="mr-1" />
+					<Calendar className="mr-1" size={12} />
 					<span title={`Creado: ${createdAtDate.toLocaleString()}`}>{createdTimeAgo}</span>
 				</div>
 				<div className="flex items-center">
-					<Clock size={12} className="mr-1" />
+					<Clock className="mr-1" size={12} />
 					<span title={`Actualizado: ${updatedAtDate.toLocaleString()}`}>{updatedTimeAgo}</span>
 				</div>
 			</div>
 
 			{/* Sello de copyright al estilo TCG */}
 			{tcgMode && (
-				<div className="mt-1 pt-1 text-[0.6rem] text-center opacity-60 border-t border-white/10">
+				<div className="mt-1 border-white/10 border-t pt-1 text-center text-[0.6rem] opacity-60">
 					™ & © {new Date().getFullYear()} IdeaVault · {(category || 'CONCEPTO').toUpperCase()} · #{collectionId}
 				</div>
 			)}

@@ -1,13 +1,13 @@
 import {
-    ArchiveIcon,
-    BoxIcon,
-    FileTextIcon,
-    FolderIcon,
-    ImageIcon,
-    MapPinIcon,
-    SparklesIcon,
-    TagIcon,
-    UsersIcon,
+	ArchiveIcon,
+	BoxIcon,
+	FileTextIcon,
+	FolderIcon,
+	ImageIcon,
+	MapPinIcon,
+	SparklesIcon,
+	TagIcon,
+	UsersIcon,
 } from 'lucide-react';
 import { memo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,11 +27,11 @@ const StatsItem = memo(function StatsItem({
 	color?: string;
 }) {
 	return (
-		<div className="flex items-center gap-3 p-2 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors">
+		<div className="flex items-center gap-3 rounded-lg bg-muted/30 p-2 transition-colors hover:bg-muted/50">
 			<Icon className={`h-4 w-4 ${color}`} />
-			<div className="flex-1 min-w-0">
-				<p className="text-sm font-medium truncate">{label}</p>
-				<p className="text-xs text-muted-foreground">{value}</p>
+			<div className="min-w-0 flex-1">
+				<p className="truncate font-medium text-sm">{label}</p>
+				<p className="text-muted-foreground text-xs">{value}</p>
 			</div>
 		</div>
 	);
@@ -47,7 +47,7 @@ const StatsGrid = memo(function StatsGrid({
 	return (
 		<Card className="mb-4">
 			<CardHeader className="pb-3">
-				<CardTitle className="text-sm font-medium">{title}</CardTitle>
+				<CardTitle className="font-medium text-sm">{title}</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-2">
 				{items.map((item, index) => (
@@ -67,13 +67,13 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplay() {
 
 	if (isLoading) {
 		return (
-			<div className="p-4 space-y-4">
+			<div className="space-y-4 p-4">
 				<div className="space-y-2">
 					<Skeleton className="h-4 w-24" />
 					<Skeleton className="h-3 w-32" />
 				</div>
 				{Array.from({ length: 6 }).map((_, i) => (
-					<div key={`skeleton-${i}`} className="space-y-2">
+					<div className="space-y-2" key={`skeleton-${i}`}>
 						<Skeleton className="h-10 w-full" />
 						<Skeleton className="h-8 w-full" />
 						<Skeleton className="h-8 w-full" />
@@ -86,8 +86,8 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplay() {
 	if (error) {
 		return (
 			<div className="p-4 text-center">
-				<p className="text-sm text-destructive">Error al cargar estadísticas</p>
-				<p className="text-xs text-muted-foreground mt-1">{error.message || 'Error desconocido'}</p>
+				<p className="text-destructive text-sm">Error al cargar estadísticas</p>
+				<p className="mt-1 text-muted-foreground text-xs">{error.message || 'Error desconocido'}</p>
 			</div>
 		);
 	}
@@ -95,7 +95,7 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplay() {
 	if (!stats) {
 		return (
 			<div className="p-4 text-center">
-				<p className="text-sm text-muted-foreground">No hay datos disponibles</p>
+				<p className="text-muted-foreground text-sm">No hay datos disponibles</p>
 			</div>
 		);
 	}
@@ -183,16 +183,16 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplay() {
 	];
 
 	return (
-		<div className="p-4 space-y-4 max-h-full overflow-y-auto">
-			<div className="text-center mb-4">
-				<h4 className="text-sm font-medium text-muted-foreground">Estadísticas del Sistema</h4>
-				<p className="text-xs text-muted-foreground mt-1">Resumen general de todo el contenido</p>
+		<div className="max-h-full space-y-4 overflow-y-auto p-4">
+			<div className="mb-4 text-center">
+				<h4 className="font-medium text-muted-foreground text-sm">Estadísticas del Sistema</h4>
+				<p className="mt-1 text-muted-foreground text-xs">Resumen general de todo el contenido</p>
 			</div>
 
-			<StatsGrid title="📁 Contenido Principal" items={contentStats} />
-			<StatsGrid title="🌍 Worldbuilding" items={worldStats} />
-			<StatsGrid title="📊 Actividad" items={activityStats} />
-			<StatsGrid title="💾 Almacenamiento" items={storageStats} />
+			<StatsGrid items={contentStats} title="📁 Contenido Principal" />
+			<StatsGrid items={worldStats} title="🌍 Worldbuilding" />
+			<StatsGrid items={activityStats} title="📊 Actividad" />
+			<StatsGrid items={storageStats} title="💾 Almacenamiento" />
 		</div>
 	);
 });

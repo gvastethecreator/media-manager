@@ -38,48 +38,48 @@ export function SelectionCounter({
 	return (
 		<AnimatePresence>
 			<motion.div
-				initial={{ opacity: 0, scale: 0.8, y: -10 }}
 				animate={{ opacity: 1, scale: 1, y: 0 }}
-				exit={{ opacity: 0, scale: 0.8, y: -10 }}
-				transition={{ duration: 0.2, ease: 'easeOut' }}
+				aria-label={`${count} elemento${count > 1 ? 's' : ''} seleccionado${count > 1 ? 's' : ''}${showTotal ? ` de ${total}` : ''}`}
+				aria-live="polite"
 				className={cn(
-					'fixed z-50 flex items-center gap-2 px-3 py-2 bg-primary text-primary-foreground rounded-lg shadow-lg border',
-					'backdrop-blur-sm bg-primary/90',
+					'fixed z-50 flex items-center gap-2 rounded-lg border bg-primary px-3 py-2 text-primary-foreground shadow-lg',
+					'bg-primary/90 backdrop-blur-sm',
 					positionClasses[position],
 					className
 				)}
+				exit={{ opacity: 0, scale: 0.8, y: -10 }}
+				initial={{ opacity: 0, scale: 0.8, y: -10 }}
 				role="status"
-				aria-live="polite"
-				aria-label={`${count} elemento${count > 1 ? 's' : ''} seleccionado${count > 1 ? 's' : ''}${showTotal ? ` de ${total}` : ''}`}
+				transition={{ duration: 0.2, ease: 'easeOut' }}
 			>
 				{/* Icono de selección */}
-				<div className="flex items-center justify-center w-5 h-5 bg-primary-foreground/20 rounded-full">
-					<Check className="w-3 h-3" />
+				<div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary-foreground/20">
+					<Check className="h-3 w-3" />
 				</div>
 
 				{/* Contador */}
-				<span className="text-sm font-semibold">
+				<span className="font-semibold text-sm">
 					{count}
-					{showTotal && <span className="text-primary-foreground/70 ml-1">/ {total}</span>}
+					{showTotal && <span className="ml-1 text-primary-foreground/70">/ {total}</span>}
 				</span>
 
 				{/* Texto descriptivo */}
-				<span className="text-xs text-primary-foreground/80">{count === 1 ? 'elemento' : 'elementos'}</span>
+				<span className="text-primary-foreground/80 text-xs">{count === 1 ? 'elemento' : 'elementos'}</span>
 
 				{/* Botón de limpiar selección */}
 				{showClearButton && onClear && (
 					<button
-						onClick={onClear}
+						aria-label="Limpiar selección"
 						className={cn(
-							'flex items-center justify-center w-5 h-5 ml-1',
+							'ml-1 flex h-5 w-5 items-center justify-center',
 							'bg-primary-foreground/20 hover:bg-primary-foreground/30',
 							'rounded-full transition-colors duration-150',
 							'focus:outline-none focus:ring-2 focus:ring-primary-foreground/50'
 						)}
-						aria-label="Limpiar selección"
+						onClick={onClear}
 						title="Limpiar selección (Esc)"
 					>
-						<X className="w-3 h-3" />
+						<X className="h-3 w-3" />
 					</button>
 				)}
 			</motion.div>
@@ -95,20 +95,20 @@ export function CompactSelectionCounter({ count, className }: { count: number; c
 
 	return (
 		<motion.div
-			initial={{ opacity: 0, scale: 0 }}
 			animate={{ opacity: 1, scale: 1 }}
-			exit={{ opacity: 0, scale: 0 }}
-			transition={{ duration: 0.15 }}
+			aria-label={`${count} seleccionado${count > 1 ? 's' : ''}`}
 			className={cn(
 				'selection-counter',
 				'absolute top-2 right-2 z-10',
-				'w-6 h-6 bg-primary text-primary-foreground',
-				'rounded-full flex items-center justify-center',
-				'text-xs font-bold shadow-md',
+				'h-6 w-6 bg-primary text-primary-foreground',
+				'flex items-center justify-center rounded-full',
+				'font-bold text-xs shadow-md',
 				className
 			)}
+			exit={{ opacity: 0, scale: 0 }}
+			initial={{ opacity: 0, scale: 0 }}
 			role="status"
-			aria-label={`${count} seleccionado${count > 1 ? 's' : ''}`}
+			transition={{ duration: 0.15 }}
 		>
 			{count > 99 ? '99+' : count}
 		</motion.div>

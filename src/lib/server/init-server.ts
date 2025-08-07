@@ -33,9 +33,9 @@ export async function initializeServer() {
 
 		// Iniciar monitor con intervalos personalizados
 		const stopMonitor = await appMonitor.start({
-			interval: 60000, // Estadísticas de aplicación cada 1 minuto
+			interval: 60_000, // Estadísticas de aplicación cada 1 minuto
 			includeSystemStats: true,
-			systemStatsInterval: 300000, // Estadísticas de sistema cada 5 minutos
+			systemStatsInterval: 300_000, // Estadísticas de sistema cada 5 minutos
 		});
 
 		// Configurar cierre limpio

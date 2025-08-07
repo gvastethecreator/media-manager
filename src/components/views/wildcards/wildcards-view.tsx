@@ -84,14 +84,14 @@ export function WildcardsView({ isVisible }: ViewProps) {
 	if (error) {
 		return (
 			<EmptyState
-				icon={Sparkles}
-				title="Error al cargar wildcards"
-				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
 				actions={
 					<Button onClick={handleRetry} variant="outline">
 						Reintentar
 					</Button>
 				}
+				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
+				icon={Sparkles}
+				title="Error al cargar wildcards"
 			/>
 		);
 	}
@@ -99,69 +99,69 @@ export function WildcardsView({ isVisible }: ViewProps) {
 	return (
 		<ScrollArea className="flex-1">
 			<div className="p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Wildcards</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Wildcards</h2>
 
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
 					{showForm ? 'Cancelar' : 'Crear Wildcard'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nuevo Wildcard</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nuevo Wildcard</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="wildcardName">Nombre</Label>
 							<Input
 								id="wildcardName"
-								value={newWildcardName}
 								onChange={(e) => setNewWildcardName(e.target.value)}
 								placeholder="Nombre del wildcard"
+								value={newWildcardName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="wildcardDescription">Descripción</Label>
 							<Textarea
 								id="wildcardDescription"
-								value={newWildcardDescription}
 								onChange={(e) => setNewWildcardDescription(e.target.value)}
 								placeholder="Descripción del wildcard (opcional)"
+								value={newWildcardDescription}
 							/>
 						</div>
 						<Button onClick={handleCreateWildcard}>Guardar Wildcard</Button>
 					</div>
 				)}
 
-				{!wildcards.length && !isLoading && !showForm ? (
+				{wildcards.length || isLoading || showForm ? (
+					<motion.div
+						animate={{ opacity: 1, y: 0 }}
+						className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+						initial={{ opacity: 0, y: 20 }}
+						transition={{ duration: 0.3 }}
+					>
+						{wildcards.map((wildcard, index) => (
+							<motion.div
+								animate={{ opacity: 1, y: 0 }}
+								initial={{ opacity: 0, y: 20 }}
+								key={wildcard.id}
+								transition={{ duration: 0.3, delay: index * 0.05 }}
+							>
+								<WildcardCard
+									className={wildcard.id === currentWildcardId ? 'ring-2 ring-primary' : ''}
+									onClick={() => handleWildcardSelect(wildcard.id)}
+									wildcard={wildcard}
+								/>
+							</motion.div>
+						))}
+					</motion.div>
+				) : (
 					<EmptyState
-						icon={Sparkles}
-						title="Sin wildcards"
 						description={
 							localSearch
 								? `No se encontraron wildcards que coincidan con "${localSearch}"`
 								: 'No hay wildcards disponibles'
 						}
+						icon={Sparkles}
+						title="Sin wildcards"
 					/>
-				) : (
-					<motion.div
-						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.3 }}
-					>
-						{wildcards.map((wildcard, index) => (
-							<motion.div
-								key={wildcard.id}
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.3, delay: index * 0.05 }}
-							>
-								<WildcardCard
-									wildcard={wildcard}
-									onClick={() => handleWildcardSelect(wildcard.id)}
-									className={wildcard.id === currentWildcardId ? 'ring-2 ring-primary' : ''}
-								/>
-							</motion.div>
-						))}
-					</motion.div>
 				)}
 			</div>
 		</ScrollArea>
