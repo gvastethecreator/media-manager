@@ -5,7 +5,7 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { useListViewConfig } from '@/hooks/use-list-view-config';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
@@ -24,7 +24,7 @@ interface ListViewProps {
 	className?: string;
 }
 
-export const ListView = memo<ListViewProps>(function ListView({
+export const ListView = memo<ListViewProps>(function ListViewComponent({
 	items,
 	selectedIds,
 	sortBy,
@@ -35,9 +35,8 @@ export const ListView = memo<ListViewProps>(function ListView({
 	entityType = 'default',
 	className = '',
 }) {
-	const parentRef = useRef<HTMLDivElement>(null);
+	const parentRef = useRef<HTMLTableElement>(null);
 	const tableRef = useRef<HTMLTableElement>(null);
-	const [containerHeight, setContainerHeight] = useState<number>(600);
 
 	// OPTIMIZACIÓN AVANZADA: Memoización de props derivadas para evitar re-cálculos
 	const derivedProps = useMemo(
@@ -116,16 +115,33 @@ export const ListView = memo<ListViewProps>(function ListView({
 		[derivedProps.hasSelection]
 	);
 
+	// Manejo de teclado en espacio vacío
+	const handleEmptySpaceKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (e.key === 'Escape' && derivedProps.hasSelection) {
+				e.preventDefault();
+				// Propagar hacia FileBrowser
+			}
+		},
+		[derivedProps.hasSelection]
+	);
+
 	// Navegación por teclado para vista de lista
 	const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-		if (!parentRef.current) return;
+		if (!parentRef.current) {
+			return;
+		}
 
 		const focusedElement = document.activeElement as HTMLElement;
-		if (!focusedElement?.closest('[data-testid^="list-row-"]')) return;
+		if (!focusedElement?.closest('[data-testid^="list-row-"]')) {
+			return;
+		}
 
 		const rows = Array.from(parentRef.current.querySelectorAll('[data-testid^="list-row-"]')) as HTMLElement[];
 		const currentIndex = rows.findIndex((row) => row.contains(focusedElement));
-		if (currentIndex === -1) return;
+		if (currentIndex === -1) {
+			return;
+		}
 
 		let nextIndex = currentIndex;
 
@@ -157,31 +173,7 @@ export const ListView = memo<ListViewProps>(function ListView({
 		rows[nextIndex]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 	}, []);
 
-	// Efecto para medir y establecer altura del contenedor
-	useEffect(() => {
-		if (parentRef.current) {
-			const scrollAreaViewport = parentRef.current.closest('[data-radix-scroll-area-viewport]');
-			if (scrollAreaViewport) {
-				const observer = new ResizeObserver((entries) => {
-					for (const entry of entries) {
-						const height = entry.contentRect.height;
-						if (height > 0) {
-							setContainerHeight(height - 48); // Restar padding
-						}
-					}
-				});
-				observer.observe(scrollAreaViewport);
-				return () => observer.disconnect();
-			}
-			// Fallback: usar el viewport más cercano
-			const viewport = parentRef.current.closest('.flex-1, .h-full');
-			if (viewport) {
-				setContainerHeight(viewport.clientHeight - 48);
-			}
-		}
-	}, []);
-
-	// Configurar virtualizador
+	// Navegación por teclado para vista de lista	// Configurar virtualizador
 	const rowVirtualizer = useVirtualizer({
 		count: items.length,
 		getScrollElement: () => parentRef.current,
@@ -270,19 +262,17 @@ export const ListView = memo<ListViewProps>(function ListView({
 			</table>
 
 			{/* Contenedor virtualizado */}
-			<div
+			<table
 				aria-busy={false}
 				aria-live="polite"
-				className="w-full overflow-auto"
-				onClick={handleEmptySpaceClick}
+				className="h-full w-full"
+				onKeyDown={handleEmptySpaceKeyDown}
 				ref={parentRef}
-				role="rowgroup"
 				style={{
-					height: `${containerHeight - headerHeight}px`,
 					contain: 'strict',
 				}}
 			>
-				<div
+				<tbody
 					style={{
 						height: `${rowVirtualizer.getTotalSize()}px`,
 						width: '100%',
@@ -295,7 +285,7 @@ export const ListView = memo<ListViewProps>(function ListView({
 						const isEven = virtualItem.index % 2 === 0;
 
 						return (
-							<motion.div
+							<motion.tr
 								animate={{ opacity: 1, y: 0 }}
 								aria-rowindex={virtualItem.index + 1}
 								aria-setsize={items.length}
@@ -303,7 +293,6 @@ export const ListView = memo<ListViewProps>(function ListView({
 								data-selectable="true"
 								initial={{ opacity: 0, y: 10 }}
 								key={item.id}
-								role="row"
 								style={{
 									position: 'absolute',
 									top: `${virtualItem.start}px`,
@@ -336,11 +325,11 @@ export const ListView = memo<ListViewProps>(function ListView({
 										/>
 									</tbody>
 								</table>
-							</motion.div>
+							</motion.tr>
 						);
 					})}
-				</div>
-			</div>
+				</tbody>
+			</table>
 		</div>
 	);
 });

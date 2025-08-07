@@ -13,7 +13,6 @@ interface NormalModeControlsProps {
 	onEdit: () => void;
 	onToggleExpanded?: (folderId: string) => void;
 	onReindex: (folderId: string) => void;
-	onToggleAutoReindex: (folderId: string, value: boolean) => void;
 	onFolderClick: (folderId: string) => void;
 	hasChildren: boolean;
 	isExpanded?: boolean;
@@ -28,7 +27,6 @@ export function NormalModeControls({
 	onEdit,
 	onToggleExpanded,
 	onReindex,
-	onToggleAutoReindex,
 	onFolderClick,
 	hasChildren,
 	isExpanded = false,
@@ -100,41 +98,6 @@ export function NormalModeControls({
 						</Button>
 					</TooltipTrigger>
 					<TooltipContent className="text-xs">{isReindexing ? 'Reindexando...' : 'Reindexar carpeta'}</TooltipContent>
-				</Tooltip>
-			</TooltipProvider>
-
-			{/* Auto-reindex toggle */}
-			<TooltipProvider>
-				<Tooltip>
-					<TooltipTrigger asChild>
-						<Button
-							className={cn(
-								'h-6 w-6 cursor-pointer transition-colors',
-								folder.autoReindex
-									? 'bg-primary text-primary-foreground hover:bg-primary/90'
-									: 'hover:bg-accent hover:text-accent-foreground'
-							)}
-							disabled={isGloballyProcessing || !folder.id}
-							onClick={() => {
-								if (!folder.id) {
-									console.error('[FolderCard] ❌ Error: folder.id is undefined for auto-reindex', {
-										folder,
-									});
-									return;
-								}
-								onToggleAutoReindex(folder.id, !folder.autoReindex);
-							}}
-							size="icon"
-							variant="ghost"
-						>
-							<RefreshCw
-								className={cn('h-3.5 w-3.5', folder.autoReindex ? 'text-background' : 'text-muted-foreground')}
-							/>
-						</Button>
-					</TooltipTrigger>
-					<TooltipContent className="text-xs">
-						{folder.autoReindex ? 'Deshabilitar auto-reindexación' : 'Habilitar auto-reindexación'}
-					</TooltipContent>
 				</Tooltip>
 			</TooltipProvider>
 

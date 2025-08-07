@@ -1,22 +1,8 @@
 [test]
-# Configuración para Bun test
-preload = ["./src/test/setup.ts"]
+exclude = ["tests/e2e/**"]
+preload = ["./tests/setup.ts"]
+coverage = true
+coverageReporter = ["text"]
 
-# Configurar entorno DOM para tests de React
-env = "jsdom"
-
-# Excluir archivos de Playwright y otros directorios
-exclude = [
-  "tests/e2e/**/*",
-  "node_modules/**/*",
-  "dist/**/*",
-  "build/**/*"
-]
-
-# Incluir solo archivos de test unitarios
-include = [
-  "src/**/*.test.ts",
-  "src/**/*.test.tsx",
-  "src/**/*.spec.ts",
-  "src/**/*.spec.tsx"
-]
+[test.coverageThreshold]
+statements = 90

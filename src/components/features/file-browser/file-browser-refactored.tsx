@@ -231,12 +231,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 			containerWidth,
 			onItemClick: handleItemClick,
 			onItemDoubleClick: handleItemDoubleClick,
-			onItemContextMenu: () => {
-				// Implementar si es necesario
-			},
-			onContextAction: () => {
-				// Implementar si es necesario
-			},
+			onItemContextMenu: () => {}, // Implementar si es necesario
+			onContextAction: () => {}, // Implementar si es necesario
 		}),
 		[items, itemSize, effectiveSelectedIds, containerWidth, handleItemClick, handleItemDoubleClick]
 	);
@@ -247,16 +243,12 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 	}, []);
 
 	const getViewType = useCallback(() => {
-		if (viewMode === 'list') {
-			return 'list';
-		}
-		if (viewMode === 'grid') {
-			return 'grid';
-		}
+		if (viewMode === 'list') return 'list';
+		if (viewMode === 'grid') return 'grid';
 		return 'cards';
 	}, [viewMode]);
 
-	const handlePreviewItem = useCallback(() => {
+	const handlePreviewItem = useCallback((item: any) => {
 		// Implementar previsualización si es necesario
 	}, []);
 
@@ -348,20 +340,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 						disabled={true}
 						getItemElement={getItemElement}
 						items={fileItems as any}
-						onSelectionCancel={() => {
-							// Drag selection cancelled
-						}}
+						onSelectionCancel={() => {}}
 						onSelectionEnd={(_state, newSelectedIds) => {
 							if (newSelectedIds.length > 0) {
 								// setSelectedIds(newSelectedIds);
 							}
 						}}
-						onSelectionStart={(_state) => {
-							// Drag selection started
-						}}
-						onSelectionUpdate={(_state, _selectedIds) => {
-							// Drag selection updated
-						}}
+						onSelectionStart={(_state) => {}}
+						onSelectionUpdate={(_state, _selectedIds) => {}}
 						overlayConfig={{
 							showCount: true,
 							showCoordinates: false,
