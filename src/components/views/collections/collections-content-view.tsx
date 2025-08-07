@@ -44,7 +44,7 @@ const CollectionsContentView: React.FC<CollectionsContentViewProps> = ({
 }) => {
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<p className="text-destructive">Error: {error}</p>
 			</div>
 		);
@@ -57,31 +57,31 @@ const CollectionsContentView: React.FC<CollectionsContentViewProps> = ({
 	return (
 		<ScrollArea className={className || 'h-full'}>
 			<div className="container mx-auto p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Colecciones</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Colecciones</h2>
 
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
 					{showForm ? 'Cancelar' : 'Crear Colección'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nueva Colección</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nueva Colección</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="collectionName">Nombre</Label>
 							<Input
 								id="collectionName"
-								value={newCollectionName}
 								onChange={(e) => setNewCollectionName(e.target.value)}
 								placeholder="Nombre de la colección"
+								value={newCollectionName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="collectionDescription">Descripción</Label>
 							<Textarea
 								id="collectionDescription"
-								value={newCollectionDescription}
 								onChange={(e) => setNewCollectionDescription(e.target.value)}
 								placeholder="Descripción de la colección (opcional)"
+								value={newCollectionDescription}
 							/>
 						</div>
 						<Button onClick={handleCreateCollection}>Guardar Colección</Button>
@@ -90,17 +90,17 @@ const CollectionsContentView: React.FC<CollectionsContentViewProps> = ({
 
 				{(!collections || collections.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
+						description="Crea una colección para organizar tus imágenes de forma temática."
 						icon={BookMarked}
 						title="No hay colecciones creadas"
-						description="Crea una colección para organizar tus imágenes de forma temática."
 					/>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 						{collections?.map((collection, index) => (
 							<motion.div
-								key={collection.id}
-								initial={{ opacity: 0, y: 20 }}
 								animate={{ opacity: 1, y: 0 }}
+								initial={{ opacity: 0, y: 20 }}
+								key={collection.id}
 								transition={{ delay: index * 0.1 }}
 							>
 								<MemoizedCollectionCard collection={collection} onClick={() => handleCollectionClick(collection)} />

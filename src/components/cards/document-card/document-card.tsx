@@ -98,14 +98,14 @@ export function DocumentCard({
 	return (
 		<CardContainer
 			className={cn(
-				'relative overflow-hidden cursor-pointer transition-all duration-300',
+				'relative cursor-pointer overflow-hidden transition-all duration-300',
 				'bg-gradient-to-br from-background via-background/95 to-background/90',
 				'border border-border/50 hover:border-border',
 				'shadow-sm hover:shadow-lg',
-				tcgMode && 'hover:shadow-2xl hover:scale-[1.02]',
+				tcgMode && 'hover:scale-[1.02] hover:shadow-2xl',
 				isSelected && 'ring-2 ring-primary ring-offset-2',
 				isActive && 'ring-2 ring-accent ring-offset-2',
-				disabled && 'opacity-50 cursor-not-allowed',
+				disabled && 'cursor-not-allowed opacity-50',
 				compact ? 'h-32' : 'h-64',
 				className
 			)}
@@ -127,13 +127,13 @@ export function DocumentCard({
 					{/* Efecto holográfico en hover */}
 					{isHovered && (
 						<motion.div
-							className="absolute inset-0 opacity-20 pointer-events-none"
+							animate={{
+								backgroundPosition: ['0% 0%', '100% 100%'],
+							}}
+							className="pointer-events-none absolute inset-0 opacity-20"
 							style={{
 								background: `linear-gradient(45deg, transparent 30%, ${primaryColor}40 50%, transparent 70%)`,
 								backgroundSize: '200% 200%',
-							}}
-							animate={{
-								backgroundPosition: ['0% 0%', '100% 100%'],
 							}}
 							transition={{
 								duration: 2,
@@ -145,9 +145,9 @@ export function DocumentCard({
 
 					{/* Brillo en favoritos */}
 					{document.isFavorite && (
-						<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
+						<div className="pointer-events-none absolute top-0 right-0 z-30 h-24 w-24 overflow-hidden">
 							<div
-								className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
+								className="-translate-y-8 absolute top-0 right-0 h-24 w-24 translate-x-12 rotate-45 opacity-70"
 								style={{
 									background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
 									backgroundSize: '600% 600%',
@@ -160,16 +160,16 @@ export function DocumentCard({
 			)}
 
 			{/* Contenedor principal */}
-			<div className="flex flex-col h-full relative z-1">
+			<div className="relative z-1 flex h-full flex-col">
 				{/* Cabecera */}
-				<CardHeader title={document.name || 'Sin nombre'} emoji="📄" primaryColor={primaryColor} compact={compact} />
+				<CardHeader compact={compact} emoji="📄" primaryColor={primaryColor} title={document.name || 'Sin nombre'} />
 				{/* Contenido principal */}
 				{!compact && (
-					<div className="flex-1 p-4 flex flex-col gap-3">
+					<div className="flex flex-1 flex-col gap-3 p-4">
 						{/* Icono del documento */}
 						<div className="flex items-center justify-center py-6">
 							<div
-								className="relative p-6 rounded-2xl"
+								className="relative rounded-2xl p-6"
 								style={{
 									backgroundColor: `${primaryColor}20`,
 									border: `2px solid ${primaryColor}40`,
@@ -179,7 +179,7 @@ export function DocumentCard({
 
 								{/* Badge del tipo de archivo */}
 								<div
-									className="absolute -top-2 -right-2 px-2 py-1 rounded-md text-xs font-bold"
+									className="-top-2 -right-2 absolute rounded-md px-2 py-1 font-bold text-xs"
 									style={{
 										backgroundColor: primaryColor,
 										color: 'white',
@@ -192,21 +192,21 @@ export function DocumentCard({
 
 						{/* Descripción */}
 						{document.summary && (
-							<div className="text-sm text-muted-foreground line-clamp-2 italic">{document.summary}</div>
+							<div className="line-clamp-2 text-muted-foreground text-sm italic">{document.summary}</div>
 						)}
 
 						{/* Estadísticas en modo TCG */}
 						{tcgMode && (
 							<div className="grid grid-cols-2 gap-2 text-xs">
 								<div
-									className="flex items-center justify-between px-2 py-1 rounded"
+									className="flex items-center justify-between rounded px-2 py-1"
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
 									<span>Tamaño</span>
 									<span className="font-bold">{fileSize}</span>
 								</div>
 								<div
-									className="flex items-center justify-between px-2 py-1 rounded"
+									className="flex items-center justify-between rounded px-2 py-1"
 									style={{ backgroundColor: `${primaryColor}20` }}
 								>
 									<span>Páginas</span>
@@ -217,23 +217,23 @@ export function DocumentCard({
 					</div>
 				)}
 				{/* Pie de tarjeta */}
-				<div className="p-3 border-t border-border/20">
+				<div className="border-border/20 border-t p-3">
 					<div className="flex items-center justify-between text-xs">
 						{/* Acciones rápidas */}
 						<div className="flex items-center gap-2">
 							<button
-								type="button"
-								className="p-1 rounded hover:bg-muted/50 transition-colors"
+								className="rounded p-1 transition-colors hover:bg-muted/50"
 								style={{ color: primaryColor }}
 								title="Vista previa"
+								type="button"
 							>
 								<EyeIcon className="h-3.5 w-3.5" />
 							</button>
 							<button
-								type="button"
-								className="p-1 rounded hover:bg-muted/50 transition-colors"
+								className="rounded p-1 transition-colors hover:bg-muted/50"
 								style={{ color: primaryColor }}
 								title="Descargar"
+								type="button"
 							>
 								<DownloadIcon className="h-3.5 w-3.5" />
 							</button>
@@ -245,7 +245,7 @@ export function DocumentCard({
 
 					{/* Barra de progreso estilo TCG */}
 					{tcgMode && (
-						<div className="mt-2 h-1 w-full rounded-full overflow-hidden bg-muted/30">
+						<div className="mt-2 h-1 w-full overflow-hidden rounded-full bg-muted/30">
 							<div
 								className="h-full rounded-full transition-all duration-500"
 								style={{

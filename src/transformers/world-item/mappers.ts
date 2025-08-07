@@ -89,7 +89,7 @@ export function mapCreateWorldItemDataToDrizzle(input: WorldItemCreateInput): Dr
 			properties: typeof input.properties === 'string' ? input.properties : JSON.stringify(input.properties || {}),
 			filters: '{}', // Campo adicional para Drizzle
 			tags: '[]', // Campo adicional para Drizzle
-			isFavorite: input.isFavorite || false,
+			isFavorite: input.isFavorite,
 		};
 
 		return drizzleData;

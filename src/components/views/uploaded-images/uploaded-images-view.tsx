@@ -249,44 +249,44 @@ export function UploadedImagesView() {
 	};
 
 	return (
-		<div className="w-full h-full flex flex-col" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
+		<div className="flex h-full w-full flex-col" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
 			{/* Barra de herramientas */}
-			<div className="flex items-center justify-between p-2 border-b">
+			<div className="flex items-center justify-between border-b p-2">
 				<div className="flex items-center gap-2">
-					<h2 className="text-sm font-medium">Imágenes Subidas</h2>
+					<h2 className="font-medium text-sm">Imágenes Subidas</h2>
 					{isLoading && <RefreshCw className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
 					{!isLoading && (
-						<span className="text-xs text-muted-foreground">
+						<span className="text-muted-foreground text-xs">
 							{totalItems} {totalItems === 1 ? 'imagen' : 'imágenes'}
 						</span>
 					)}
 				</div>
 
 				<div className="flex items-center gap-2">
-					<Button variant="outline" size="sm" className="h-8 gap-1" onClick={() => setShowFilters(!showFilters)}>
+					<Button className="h-8 gap-1" onClick={() => setShowFilters(!showFilters)} size="sm" variant="outline">
 						<Filter className="h-3.5 w-3.5" />
 						<span className="text-xs">Filtros</span>
 					</Button>
 
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Button variant="outline" size="icon" className="h-8 w-8">
+							<Button className="h-8 w-8" size="icon" variant="outline">
 								<SlidersHorizontal className="h-3.5 w-3.5" />
 							</Button>
 						</DropdownMenuTrigger>
 						<DropdownMenuContent align="end" className="w-40">
-							<DropdownMenuItem className="text-xs cursor-pointer" onClick={loadImages}>
-								<RefreshCw className="h-3.5 w-3.5 mr-2" /> Actualizar
+							<DropdownMenuItem className="cursor-pointer text-xs" onClick={loadImages}>
+								<RefreshCw className="mr-2 h-3.5 w-3.5" /> Actualizar
 							</DropdownMenuItem>
 
 							{selectedImage && (
 								<AlertDialog>
 									<AlertDialogTrigger asChild>
 										<DropdownMenuItem
-											className="text-xs cursor-pointer text-destructive"
+											className="cursor-pointer text-destructive text-xs"
 											onSelect={(e) => e.preventDefault()}
 										>
-											<Trash2 className="h-3.5 w-3.5 mr-2" /> Eliminar
+											<Trash2 className="mr-2 h-3.5 w-3.5" /> Eliminar
 										</DropdownMenuItem>
 									</AlertDialogTrigger>
 									<AlertDialogContent>
@@ -299,8 +299,8 @@ export function UploadedImagesView() {
 										<AlertDialogFooter>
 											<AlertDialogCancel>Cancelar</AlertDialogCancel>
 											<AlertDialogAction
-												onClick={() => handleDeleteImage(selectedImage)}
 												className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+												onClick={() => handleDeleteImage(selectedImage)}
 											>
 												Eliminar
 											</AlertDialogAction>
@@ -313,19 +313,19 @@ export function UploadedImagesView() {
 
 					<div className="relative">
 						<Input
-							id="file-upload"
-							type="file"
-							multiple
 							accept="image/*"
 							className="hidden"
+							id="file-upload"
+							multiple
 							onChange={handleFileInput}
+							type="file"
 						/>
 						<Button
-							variant="primary"
-							size="sm"
-							className={cn('h-8 gap-1.5', isUploading && 'opacity-70 cursor-not-allowed')}
-							onClick={() => document.getElementById('file-upload')?.click()}
+							className={cn('h-8 gap-1.5', isUploading && 'cursor-not-allowed opacity-70')}
 							disabled={isUploading}
+							onClick={() => document.getElementById('file-upload')?.click()}
+							size="sm"
+							variant="primary"
 						>
 							{isUploading ? (
 								<RefreshCw className="h-3.5 w-3.5 animate-spin" />
@@ -341,39 +341,39 @@ export function UploadedImagesView() {
 			{/* Panel de filtros desplegable */}
 			{showFilters && (
 				<motion.div
-					initial={{ height: 0, opacity: 0 }}
 					animate={{ height: 'auto', opacity: 1 }}
+					className="overflow-hidden border-b"
 					exit={{ height: 0, opacity: 0 }}
-					className="border-b overflow-hidden"
+					initial={{ height: 0, opacity: 0 }}
 				>
-					<Card className="border-0 rounded-none shadow-none">
-						<CardContent className="p-3 grid grid-cols-1 md:grid-cols-3 gap-3">
+					<Card className="rounded-none border-0 shadow-none">
+						<CardContent className="grid grid-cols-1 gap-3 p-3 md:grid-cols-3">
 							<div className="space-y-1">
-								<label htmlFor="search" className="text-xs font-medium">
+								<label className="font-medium text-xs" htmlFor="search">
 									Buscar
 								</label>
 								<Input
-									id="search"
-									placeholder="Buscar por nombre..."
 									className="h-8 text-xs"
-									value={filters.search || ''}
+									id="search"
 									onChange={(e) => setFilters({ ...filters, search: e.target.value })}
+									placeholder="Buscar por nombre..."
+									value={filters.search || ''}
 								/>
 							</div>
 							<div className="space-y-1">
-								<label htmlFor="type" className="text-xs font-medium">
+								<label className="font-medium text-xs" htmlFor="type">
 									Tipo
 								</label>
 								<select
-									id="type"
 									className="h-8 w-full rounded-md border border-input bg-transparent px-3 py-1 text-xs shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring"
-									value={filters.type || ''}
+									id="type"
 									onChange={(e) =>
 										setFilters({
 											...filters,
 											type: e.target.value as UploadedFileType,
 										})
 									}
+									value={filters.type || ''}
 								>
 									<option value="">Todos los tipos</option>
 									<option value="icon">Iconos</option>
@@ -389,12 +389,12 @@ export function UploadedImagesView() {
 							</div>
 							<div className="flex items-end">
 								<Button
-									size="sm"
-									variant="outline"
 									className="h-8 text-xs"
 									onClick={() => {
 										setFilters({});
 									}}
+									size="sm"
+									variant="outline"
 								>
 									Limpiar filtros
 								</Button>
@@ -405,36 +405,36 @@ export function UploadedImagesView() {
 			)}
 
 			{/* Contenido principal con soporte para arrastrar y soltar */}
-			<div className="flex-1 relative">
+			<div className="relative flex-1">
 				{isLoading ? (
-					<div className="flex justify-center items-center h-64">
+					<div className="flex h-64 items-center justify-center">
 						<RefreshCw className="h-10 w-10 animate-spin text-primary" />
 					</div>
 				) : error ? (
-					<Alert variant="destructive" className="m-4">
+					<Alert className="m-4" variant="destructive">
 						<AlertCircle className="h-4 w-4" />
 						<AlertTitle>Error</AlertTitle>
 						<AlertDescription>{error}</AlertDescription>
 					</Alert>
 				) : adaptedItems.length === 0 ? (
-					<div className="flex flex-col items-center justify-center h-64 p-4">
-						<ImageIcon className="h-16 w-16 text-muted-foreground mb-4" />
-						<h3 className="text-lg font-medium mb-2">No hay imágenes subidas</h3>
-						<p className="text-sm text-muted-foreground text-center max-w-md">
+					<div className="flex h-64 flex-col items-center justify-center p-4">
+						<ImageIcon className="mb-4 h-16 w-16 text-muted-foreground" />
+						<h3 className="mb-2 font-medium text-lg">No hay imágenes subidas</h3>
+						<p className="max-w-md text-center text-muted-foreground text-sm">
 							No se encontraron imágenes subidas. Sube imágenes haciendo clic en el botón de arriba o arrastra y suelta
 							archivos aquí.
 						</p>
 					</div>
 				) : (
-					<div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 p-4">
+					<div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 						{adaptedItems.map((image) => (
 							<MemoizedImageCard
-								key={image.id}
-								imageId={image.id}
 								aspectRatio="square"
-								showTags={true}
-								onClick={() => handleSelectItem(image)}
 								className={cn(selectedImage === image.id && 'ring-2 ring-primary')}
+								imageId={image.id}
+								key={image.id}
+								onClick={() => handleSelectItem(image)}
+								showTags={true}
 							/>
 						))}
 					</div>
@@ -442,11 +442,11 @@ export function UploadedImagesView() {
 
 				{/* Overlay para arrastrar y soltar archivos */}
 				{isUploading && (
-					<div className="absolute inset-0 bg-background/80 backdrop-blur-sm flex items-center justify-center">
+					<div className="absolute inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
 						<Card className="w-64 border shadow-md">
-							<CardContent className="p-4 flex flex-col items-center justify-center gap-3">
+							<CardContent className="flex flex-col items-center justify-center gap-3 p-4">
 								<RefreshCw className="h-8 w-8 animate-spin text-primary" />
-								<p className="text-sm font-medium">Subiendo imágenes...</p>
+								<p className="font-medium text-sm">Subiendo imágenes...</p>
 							</CardContent>
 						</Card>
 					</div>
@@ -455,27 +455,27 @@ export function UploadedImagesView() {
 
 			{/* Paginación */}
 			{totalPages > 1 && (
-				<div className="flex items-center justify-center p-2 border-t gap-1">
+				<div className="flex items-center justify-center gap-1 border-t p-2">
 					<Button
-						variant="outline"
-						size="sm"
 						className="h-7 w-7 p-0"
-						onClick={() => handlePageChange(currentPage - 1)}
 						disabled={currentPage === 1 || isLoading}
+						onClick={() => handlePageChange(currentPage - 1)}
+						size="sm"
+						variant="outline"
 					>
 						&lt;
 					</Button>
 
-					<span className="text-xs mx-2">
+					<span className="mx-2 text-xs">
 						Página {currentPage} de {totalPages}
 					</span>
 
 					<Button
-						variant="outline"
-						size="sm"
 						className="h-7 w-7 p-0"
-						onClick={() => handlePageChange(currentPage + 1)}
 						disabled={currentPage === totalPages || isLoading}
+						onClick={() => handlePageChange(currentPage + 1)}
+						size="sm"
+						variant="outline"
 					>
 						&gt;
 					</Button>

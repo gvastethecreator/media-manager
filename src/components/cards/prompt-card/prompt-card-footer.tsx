@@ -38,7 +38,7 @@ export function PromptCardFooter({
 	return (
 		<div
 			className={cn(
-				'mt-auto py-2 px-3 text-xs flex items-center justify-between text-muted-foreground',
+				'mt-auto flex items-center justify-between px-3 py-2 text-muted-foreground text-xs',
 				tcgMode && 'rounded-b-lg'
 			)}
 			style={{
@@ -52,7 +52,7 @@ export function PromptCardFooter({
 				<span>{formattedDate}</span>
 				{isRecent && (
 					<span
-						className="text-[0.65rem] px-1 rounded-full"
+						className="rounded-full px-1 text-[0.65rem]"
 						style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}
 					>
 						{daysSinceUpdate === 0 ? 'Hoy' : `${daysSinceUpdate}d`}
@@ -87,7 +87,7 @@ export function PromptCardFooter({
 
 			{/* Sello TCG en la esquina inferior */}
 			{tcgMode && (
-				<div className="absolute bottom-1 right-1 text-[0.6rem] font-mono opacity-60" style={{ color: primaryColor }}>
+				<div className="absolute right-1 bottom-1 font-mono text-[0.6rem] opacity-60" style={{ color: primaryColor }}>
 					P{String(createdAt.getTime()).slice(-4)}
 				</div>
 			)}

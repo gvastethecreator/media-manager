@@ -22,27 +22,27 @@ export function PropertyPreview({
 }: PropertyPreviewProps) {
 	return (
 		<>
-			<CardHeader className="pb-4 px-6">
+			<CardHeader className="px-6 pb-4">
 				<div className="flex items-center justify-between">
-					<CardTitle className="text-xl font-bold flex items-center gap-2">
-						<span role="img" aria-label="emoji">
+					<CardTitle className="flex items-center gap-2 font-bold text-xl">
+						<span aria-label="emoji" role="img">
 							{property.emoji}
 						</span>
 						{property.name}
 					</CardTitle>
 					<div className="flex items-center gap-2">
 						<Button
-							variant="ghost"
-							size="icon"
 							onClick={onFavoriteToggle}
+							size="icon"
 							title={property.isFavorite ? 'Quitar de favoritos' : 'Marcar como favorito'}
+							variant="ghost"
 						>
-							<StarIcon className={`h-4 w-4 ${property.isFavorite ? 'text-yellow-500 fill-yellow-500' : ''}`} />
+							<StarIcon className={`h-4 w-4 ${property.isFavorite ? 'fill-yellow-500 text-yellow-500' : ''}`} />
 						</Button>
-						<Button variant="ghost" size="icon" onClick={onEdit} title="Editar propiedad">
+						<Button onClick={onEdit} size="icon" title="Editar propiedad" variant="ghost">
 							<PencilIcon className="h-4 w-4" />
 						</Button>
-						<Button variant="ghost" size="icon" onClick={onDelete} disabled={isDeleting} title="Eliminar propiedad">
+						<Button disabled={isDeleting} onClick={onDelete} size="icon" title="Eliminar propiedad" variant="ghost">
 							<TrashIcon className="h-4 w-4" />
 						</Button>
 					</div>
@@ -51,11 +51,11 @@ export function PropertyPreview({
 
 			<CardContent className="px-6">
 				<div className="space-y-6">
-					{property.description && <p className="text-sm text-muted-foreground">{property.description}</p>}
+					{property.description && <p className="text-muted-foreground text-sm">{property.description}</p>}
 
 					<div className="grid grid-cols-2 gap-4">
 						<div>
-							<h4 className="text-sm font-medium mb-2">Detalles</h4>
+							<h4 className="mb-2 font-medium text-sm">Detalles</h4>
 							<dl className="space-y-2 text-sm">
 								<div className="flex justify-between">
 									<dt className="text-muted-foreground">Categoría</dt>
@@ -65,7 +65,7 @@ export function PropertyPreview({
 									<dt className="text-muted-foreground">Color</dt>
 									<dd className="font-medium">
 										<div className="flex items-center gap-2">
-											<div className="w-4 h-4 rounded-full" style={{ backgroundColor: property.color || '#64748b' }} />
+											<div className="h-4 w-4 rounded-full" style={{ backgroundColor: property.color || '#64748b' }} />
 											{property.color || '#64748b'}
 										</div>
 									</dd>
@@ -80,14 +80,14 @@ export function PropertyPreview({
 						</div>
 
 						<div>
-							<h4 className="text-sm font-medium mb-2">Elementos asociados</h4>
+							<h4 className="mb-2 font-medium text-sm">Elementos asociados</h4>
 							<dl className="space-y-2 text-sm">
 								{property._count &&
 									Object.entries(property._count).map(
 										([key, count]) =>
 											count &&
 											count > 0 && (
-												<div key={key} className="flex justify-between">
+												<div className="flex justify-between" key={key}>
 													<dt className="text-muted-foreground capitalize">
 														{key.replace(/([A-Z])/g, ' $1').toLowerCase()}
 													</dt>
@@ -100,8 +100,8 @@ export function PropertyPreview({
 					</div>
 				</div>
 
-				<div className="flex justify-end mt-8">
-					<Button variant="secondary" onClick={onContinue}>
+				<div className="mt-8 flex justify-end">
+					<Button onClick={onContinue} variant="secondary">
 						Continuar
 					</Button>
 				</div>

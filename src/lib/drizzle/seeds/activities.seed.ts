@@ -19,7 +19,12 @@ export async function seedActivities(db: LibSQLDatabase<Record<string, never>>) 
 				userId: 'profile-1',
 				action: 'upload',
 				description: 'Usuario subió una imagen de paisaje',
-				metadata: JSON.stringify({ filename: 'landscape.jpg', size: 2048000, source: 'camera', location: 'mountain' }),
+				metadata: JSON.stringify({
+					filename: 'landscape.jpg',
+					size: 2_048_000,
+					source: 'camera',
+					location: 'mountain',
+				}),
 			},
 			{
 				id: 'activity-2',

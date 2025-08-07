@@ -361,32 +361,32 @@ export function ProgressPanel({
 		return (
 			<Card className="mb-4">
 				<CardHeader className="pb-3">
-					<CardTitle className="text-sm flex items-center gap-2">
+					<CardTitle className="flex items-center gap-2 text-sm">
 						<BarChart3 className="h-4 w-4" />
 						Estadísticas
 					</CardTitle>
 				</CardHeader>
 				<CardContent className="pt-0">
-					<div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+					<div className="grid grid-cols-2 gap-4 md:grid-cols-5">
 						<div className="text-center">
-							<p className="text-2xl font-bold text-blue-600">{statistics.totalOperations}</p>
-							<p className="text-xs text-muted-foreground">Total</p>
+							<p className="font-bold text-2xl text-blue-600">{statistics.totalOperations}</p>
+							<p className="text-muted-foreground text-xs">Total</p>
 						</div>
 						<div className="text-center">
-							<p className="text-2xl font-bold text-orange-600">{statistics.activeOperations}</p>
-							<p className="text-xs text-muted-foreground">En progreso</p>
+							<p className="font-bold text-2xl text-orange-600">{statistics.activeOperations}</p>
+							<p className="text-muted-foreground text-xs">En progreso</p>
 						</div>
 						<div className="text-center">
-							<p className="text-2xl font-bold text-green-600">{statistics.completedOperations}</p>
-							<p className="text-xs text-muted-foreground">Completadas</p>
+							<p className="font-bold text-2xl text-green-600">{statistics.completedOperations}</p>
+							<p className="text-muted-foreground text-xs">Completadas</p>
 						</div>
 						<div className="text-center">
-							<p className="text-2xl font-bold text-red-600">{statistics.failedOperations}</p>
-							<p className="text-xs text-muted-foreground">Fallidas</p>
+							<p className="font-bold text-2xl text-red-600">{statistics.failedOperations}</p>
+							<p className="text-muted-foreground text-xs">Fallidas</p>
 						</div>
 						<div className="text-center">
-							<p className="text-2xl font-bold text-purple-600">{statistics.successRate.toFixed(1)}%</p>
-							<p className="text-xs text-muted-foreground">Éxito</p>
+							<p className="font-bold text-2xl text-purple-600">{statistics.successRate.toFixed(1)}%</p>
+							<p className="text-muted-foreground text-xs">Éxito</p>
 						</div>
 					</div>
 				</CardContent>
@@ -402,16 +402,16 @@ export function ProgressPanel({
 			<Card className="mb-4">
 				<CardHeader className="pb-3">
 					<div className="flex items-center justify-between">
-						<CardTitle className="text-sm flex items-center gap-2">
+						<CardTitle className="flex items-center gap-2 text-sm">
 							<Bell className="h-4 w-4" />
 							Notificaciones
 							{unreadCount > 0 && (
-								<Badge variant="destructive" className="text-xs">
+								<Badge className="text-xs" variant="destructive">
 									{unreadCount}
 								</Badge>
 							)}
 						</CardTitle>
-						<Button variant="ghost" size="sm" onClick={clearAll}>
+						<Button onClick={clearAll} size="sm" variant="ghost">
 							Limpiar todo
 						</Button>
 					</div>
@@ -421,23 +421,23 @@ export function ProgressPanel({
 						<div className="space-y-2">
 							{notifications.slice(0, 5).map((notification: Notification) => (
 								<div
-									key={notification.id}
 									className={cn(
-										'flex items-start gap-2 p-2 rounded-lg border',
-										notification.read ? 'bg-gray-50' : 'bg-blue-50 border-blue-200'
+										'flex items-start gap-2 rounded-lg border p-2',
+										notification.read ? 'bg-gray-50' : 'border-blue-200 bg-blue-50'
 									)}
+									key={notification.id}
 								>
-									<div className="flex-1 min-w-0">
-										<p className="text-sm font-medium">{notification.title}</p>
-										<p className="text-xs text-muted-foreground">{notification.message}</p>
+									<div className="min-w-0 flex-1">
+										<p className="font-medium text-sm">{notification.title}</p>
+										<p className="text-muted-foreground text-xs">{notification.message}</p>
 									</div>
 									<div className="flex items-center gap-1">
 										{!notification.read && (
-											<Button variant="ghost" size="sm" onClick={() => markAsRead(notification.id)}>
+											<Button onClick={() => markAsRead(notification.id)} size="sm" variant="ghost">
 												<Eye className="h-3 w-3" />
 											</Button>
 										)}
-										<Button variant="ghost" size="sm" onClick={() => removeNotification(notification.id)}>
+										<Button onClick={() => removeNotification(notification.id)} size="sm" variant="ghost">
 											<X className="h-3 w-3" />
 										</Button>
 									</div>
@@ -458,22 +458,22 @@ export function ProgressPanel({
 					<div className="space-y-4">
 						{/* Búsqueda */}
 						<div className="relative">
-							<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+							<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
 							<Input
+								className="pl-10"
+								onChange={(e) => setSearchText(e.target.value)}
 								placeholder="Buscar operaciones..."
 								value={searchText}
-								onChange={(e) => setSearchText(e.target.value)}
-								className="pl-10"
 							/>
 						</div>
 
 						{/* Filtros */}
-						<div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+						<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 							<div>
 								<Label className="text-xs">Estado</Label>
 								<Select
-									value={statusFilter.join(',')}
 									onValueChange={(value) => setStatusFilter(value ? (value.split(',') as ProgressStatus[]) : [])}
+									value={statusFilter.join(',')}
 								>
 									<SelectTrigger>
 										<SelectValue placeholder="Todos los estados" />
@@ -498,8 +498,8 @@ export function ProgressPanel({
 							<div>
 								<Label className="text-xs">Tipo</Label>
 								<Select
-									value={typeFilter.join(',')}
 									onValueChange={(value) => setTypeFilter(value ? (value.split(',') as OperationType[]) : [])}
+									value={typeFilter.join(',')}
 								>
 									<SelectTrigger>
 										<SelectValue placeholder="Todos los tipos" />
@@ -519,8 +519,8 @@ export function ProgressPanel({
 								<Label className="text-xs">Ordenar por</Label>
 								<div className="flex gap-2">
 									<Select
-										value={sortBy}
 										onValueChange={(value) => setSortBy(value as 'createdAt' | 'name' | 'progress' | 'type')}
+										value={sortBy}
 									>
 										<SelectTrigger className="flex-1">
 											<SelectValue />
@@ -534,9 +534,9 @@ export function ProgressPanel({
 										</SelectContent>
 									</Select>
 									<Button
-										variant="outline"
-										size="sm"
 										onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
+										size="sm"
+										variant="outline"
 									>
 										{sortOrder === 'asc' ? <SortAsc className="h-4 w-4" /> : <SortDesc className="h-4 w-4" />}
 									</Button>
@@ -548,15 +548,15 @@ export function ProgressPanel({
 						<div className="flex items-center justify-between">
 							<div className="flex items-center gap-4">
 								<div className="flex items-center space-x-2">
-									<Switch id="show-completed" checked={showCompleted} onCheckedChange={setShowCompleted} />
-									<Label htmlFor="show-completed" className="text-sm">
+									<Switch checked={showCompleted} id="show-completed" onCheckedChange={setShowCompleted} />
+									<Label className="text-sm" htmlFor="show-completed">
 										Mostrar completadas
 									</Label>
 								</div>
 
 								<div className="flex items-center space-x-2">
-									<Switch id="auto-refresh" checked={autoRefresh} onCheckedChange={setAutoRefresh} />
-									<Label htmlFor="auto-refresh" className="text-sm">
+									<Switch checked={autoRefresh} id="auto-refresh" onCheckedChange={setAutoRefresh} />
+									<Label className="text-sm" htmlFor="auto-refresh">
 										Auto-actualizar
 									</Label>
 								</div>
@@ -564,8 +564,6 @@ export function ProgressPanel({
 
 							<div className="flex items-center gap-2">
 								<Button
-									variant="outline"
-									size="sm"
 									onClick={() => {
 										setSearchText('');
 										setStatusFilter([]);
@@ -573,6 +571,8 @@ export function ProgressPanel({
 										setSortBy('createdAt');
 										setSortOrder('desc');
 									}}
+									size="sm"
+									variant="outline"
 								>
 									<RefreshCw className="h-4 w-4" />
 									Limpiar filtros
@@ -598,12 +598,12 @@ export function ProgressPanel({
 				</CardHeader>
 				<CardContent className="pt-0">
 					{filteredOperations.length === 0 ? (
-						<div className="text-center py-8">
-							<AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
+						<div className="py-8 text-center">
+							<AlertCircle className="mx-auto mb-4 h-12 w-12 text-muted-foreground" />
 							<p className="text-muted-foreground">No hay operaciones que coincidan con los filtros</p>
 						</div>
 					) : (
-						<Tabs defaultValue="all" className="w-full">
+						<Tabs className="w-full" defaultValue="all">
 							<TabsList className="grid w-full grid-cols-6">
 								<TabsTrigger value="all">Todas ({filteredOperations.length})</TabsTrigger>
 								<TabsTrigger value="running">En progreso ({operationsByStatus.running.length})</TabsTrigger>
@@ -613,20 +613,20 @@ export function ProgressPanel({
 								<TabsTrigger value="cancelled">Canceladas ({operationsByStatus.cancelled.length})</TabsTrigger>
 							</TabsList>
 
-							<TabsContent value="all" className="mt-4">
+							<TabsContent className="mt-4" value="all">
 								<ScrollArea className="h-96">
 									<div className="space-y-3">
 										{filteredOperations.map((operation) => (
 											<ProgressOperationCard
-												key={operation.id}
-												operation={operation}
 												compact={compact}
-												onStart={(id) => handleOperationAction('start', id)}
-												onPause={(id) => handleOperationAction('pause', id)}
-												onResume={(id) => handleOperationAction('resume', id)}
+												key={operation.id}
 												onCancel={(id) => handleOperationAction('cancel', id)}
+												onPause={(id) => handleOperationAction('pause', id)}
 												onRemove={(id) => handleOperationAction('remove', id)}
+												onResume={(id) => handleOperationAction('resume', id)}
+												onStart={(id) => handleOperationAction('start', id)}
 												onViewDetails={(id) => handleOperationAction('details', id)}
+												operation={operation}
 											/>
 										))}
 									</div>
@@ -634,20 +634,20 @@ export function ProgressPanel({
 							</TabsContent>
 
 							{statusOptions.map((status) => (
-								<TabsContent key={status.value} value={status.value} className="mt-4">
+								<TabsContent className="mt-4" key={status.value} value={status.value}>
 									<ScrollArea className="h-96">
 										<div className="space-y-3">
 											{operationsByStatus[status.value].map((operation) => (
 												<ProgressOperationCard
-													key={operation.id}
-													operation={operation}
 													compact={compact}
-													onStart={(id) => handleOperationAction('start', id)}
-													onPause={(id) => handleOperationAction('pause', id)}
-													onResume={(id) => handleOperationAction('resume', id)}
+													key={operation.id}
 													onCancel={(id) => handleOperationAction('cancel', id)}
+													onPause={(id) => handleOperationAction('pause', id)}
 													onRemove={(id) => handleOperationAction('remove', id)}
+													onResume={(id) => handleOperationAction('resume', id)}
+													onStart={(id) => handleOperationAction('start', id)}
 													onViewDetails={(id) => handleOperationAction('details', id)}
+													operation={operation}
 												/>
 											))}
 										</div>

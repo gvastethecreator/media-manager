@@ -3,8 +3,8 @@
  * @description Tests básicos para verificar funcionalidad del nuevo ListView
  */
 
-import { render, screen } from '@testing-library/react';
 import { describe, expect, it, mock } from 'bun:test';
+import { render, screen } from '@testing-library/react';
 import { ListView } from '@/components/features/file-browser/views/list-view';
 import type { AnyEntityWithStats } from '@/types/migration';
 
@@ -109,7 +109,7 @@ describe('ListView', () => {
 			entityType: 'image',
 			type: 'image',
 			stats: {
-				size: 1024000,
+				size: 1_024_000,
 				mtime: new Date('2023-01-01').toISOString(),
 				birthtime: new Date('2023-01-01').toISOString(),
 			},

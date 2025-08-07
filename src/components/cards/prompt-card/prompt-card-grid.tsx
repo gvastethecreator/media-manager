@@ -88,8 +88,8 @@ export function PromptCardGrid({
 	const renderSkeletons = () => {
 		return Array.from({ length: 6 }).map((_, _index) => (
 			<div
+				className="h-[400px] w-[300px] md:w-[320px]"
 				key={`prompt-skeleton-${Math.random().toString(36).substring(2)}`}
-				className="w-[300px] md:w-[320px] h-[400px]"
 			>
 				<Skeleton className="h-full w-full rounded-xl" />
 			</div>
@@ -99,18 +99,18 @@ export function PromptCardGrid({
 	return (
 		<div className="w-full space-y-4">
 			{/* Cabecera con título y búsqueda */}
-			<header className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
-				<h2 className="text-2xl font-bold">{title}</h2>
+			<header className="flex flex-col items-start justify-between gap-4 md:flex-row md:items-center">
+				<h2 className="font-bold text-2xl">{title}</h2>
 
 				{showSearch && (
 					<div className="relative w-full md:w-[320px]">
-						<Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+						<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
 						<Input
-							type="search"
-							placeholder={searchPlaceholder}
-							className="pl-10 w-full"
-							value={searchTerm}
+							className="w-full pl-10"
 							onChange={handleSearchChange}
+							placeholder={searchPlaceholder}
+							type="search"
+							value={searchTerm}
 						/>
 					</div>
 				)}
@@ -118,8 +118,8 @@ export function PromptCardGrid({
 
 			{/* Grid de tarjetas */}
 			<div
+				className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
 				ref={containerRef}
-				className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 justify-items-center"
 			>
 				{loading ? (
 					renderSkeletons()
@@ -130,12 +130,12 @@ export function PromptCardGrid({
 				) : (
 					prompts.map((prompt) => (
 						<PromptCard
+							compact={compact}
+							isSelected={selectedPromptId === prompt.id}
 							key={prompt.id}
+							onClick={onPromptClick ? () => onPromptClick(prompt) : undefined}
 							promptId={prompt.id}
 							tcgMode={tcgMode}
-							compact={compact}
-							onClick={onPromptClick ? () => onPromptClick(prompt) : undefined}
-							isSelected={selectedPromptId === prompt.id}
 						/>
 					))
 				)}

@@ -42,7 +42,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 			functions: true,
 			assistants: true,
 		},
-		contextSize: 16385,
+		contextSize: 16_385,
 		order: 1,
 		isAvailable: true,
 	},
@@ -76,7 +76,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 			functions: true,
 			assistants: true,
 		},
-		contextSize: 128000,
+		contextSize: 128_000,
 		order: 3,
 		isAvailable: true,
 	},
@@ -93,7 +93,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 			functions: true,
 			assistants: true,
 		},
-		contextSize: 128000,
+		contextSize: 128_000,
 		order: 4,
 		isAvailable: true,
 	},
@@ -110,7 +110,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 			functions: false,
 			assistants: false,
 		},
-		contextSize: 100000,
+		contextSize: 100_000,
 		order: 5,
 		isAvailable: false,
 	},
@@ -127,7 +127,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 			functions: false,
 			assistants: false,
 		},
-		contextSize: 100000,
+		contextSize: 100_000,
 		order: 6,
 		isAvailable: false,
 	},
@@ -144,7 +144,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 			functions: false,
 			assistants: false,
 		},
-		contextSize: 200000,
+		contextSize: 200_000,
 		order: 7,
 		isAvailable: true,
 	},
@@ -161,7 +161,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 			functions: false,
 			assistants: false,
 		},
-		contextSize: 200000,
+		contextSize: 200_000,
 		order: 8,
 		isAvailable: true,
 	},
@@ -178,7 +178,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 			functions: false,
 			assistants: false,
 		},
-		contextSize: 200000,
+		contextSize: 200_000,
 		order: 9,
 		isAvailable: true,
 	},
@@ -229,7 +229,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 			functions: true,
 			assistants: false,
 		},
-		contextSize: 32768,
+		contextSize: 32_768,
 		order: 12,
 		isAvailable: false,
 	},
@@ -246,7 +246,7 @@ export const AI_MODELS: Record<PromptModel, AIModelMetadata> = {
 			functions: true,
 			assistants: false,
 		},
-		contextSize: 16384,
+		contextSize: 16_384,
 		order: 13,
 		isAvailable: false,
 	},
@@ -296,7 +296,7 @@ export function getModelMetadata(modelId: PromptModel | string): AIModelMetadata
 		return AI_MODELS[modelId as PromptModel];
 	} catch (error) {
 		modelsLogger.error('❌ Error al obtener metadatos de modelo:', error);
-		return undefined;
+		return;
 	}
 }
 
@@ -393,7 +393,7 @@ export function modelSupportsFeature(
 ): boolean {
 	try {
 		const model = getModelMetadata(modelId);
-		return model?.supports[feature] || false;
+		return model?.supports[feature];
 	} catch (error) {
 		modelsLogger.error('❌ Error al verificar soporte de característica:', error);
 		return false;

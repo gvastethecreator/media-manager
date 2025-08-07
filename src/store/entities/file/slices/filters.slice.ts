@@ -118,10 +118,8 @@ export const createFiltersSlice: StateCreator<FileStore, [], [], FiltersState & 
 			let comparison = 0;
 
 			// Siempre mostrar directorios primero si se ordena por nombre
-			if (sortBy === 'name') {
-				if (a.isDirectory !== b.isDirectory) {
-					return a.isDirectory ? -1 : 1;
-				}
+			if (sortBy === 'name' && a.isDirectory !== b.isDirectory) {
+				return a.isDirectory ? -1 : 1;
 			}
 
 			// Ordenar por el campo específico

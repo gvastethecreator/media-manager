@@ -127,7 +127,7 @@ export const usePlaceStore = create<PlaceStore>()(
 				})),
 			getFilteredPlaces: () => {
 				const { places, filters, searchQuery } = get();
-				if (!filters && !searchQuery) return places;
+				if (!(filters || searchQuery)) return places;
 
 				return places.filter((place) => {
 					if (searchQuery && !place.name.toLowerCase().includes(searchQuery.toLowerCase())) {

@@ -22,20 +22,20 @@ const NotesViewSimple: React.FC<NotesViewSimpleProps> = ({ className }) => {
 	return (
 		<ScrollArea className={className || 'flex-1'}>
 			<div className="p-6">
-				<div className="flex items-center justify-between mb-6">
-					<h2 className="text-2xl font-bold">Vista de Notas</h2>
+				<div className="mb-6 flex items-center justify-between">
+					<h2 className="font-bold text-2xl">Vista de Notas</h2>
 					<Button>
-						<StickyNote className="h-4 w-4 mr-2" />
+						<StickyNote className="mr-2 h-4 w-4" />
 						Crear Nota
 					</Button>
 				</div>
 
 				{!showForm && (
-					<motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
+					<motion.div animate={{ opacity: 1, y: 0 }} initial={{ opacity: 0, y: 20 }} transition={{ duration: 0.3 }}>
 						<EmptyState
+							description="No hay notas disponibles en este momento. Crea tu primera nota para comenzar."
 							icon={StickyNote}
 							title="Sin notas"
-							description="No hay notas disponibles en este momento. Crea tu primera nota para comenzar."
 						/>
 					</motion.div>
 				)}

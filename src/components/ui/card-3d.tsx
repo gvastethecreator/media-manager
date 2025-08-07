@@ -54,7 +54,7 @@ export function Card3D({
 	// Manejar movimiento del ratón
 	const handleMouseMove = useCallback(
 		(e: MouseEvent<HTMLDivElement>) => {
-			if (!cardRef.current || !enable3DEffect || isTouchDevice) return;
+			if (!(cardRef.current && enable3DEffect) || isTouchDevice) return;
 
 			const rect = cardRef.current.getBoundingClientRect();
 			const width = rect.width;
@@ -97,8 +97,14 @@ export function Card3D({
 
 	return (
 		<motion.div
-			ref={cardRef}
+			aria-describedby={ariaDescribedby}
+			aria-labelledby={ariaLabelledby}
 			className={cn('card-3d', className)}
+			onClick={onClick}
+			onMouseEnter={handleMouseEnter}
+			onMouseLeave={handleMouseLeave}
+			onMouseMove={handleMouseMove}
+			ref={cardRef}
 			style={{
 				...style,
 				...dynamicStyles,
@@ -106,12 +112,6 @@ export function Card3D({
 				rotateX: enable3DEffect ? rotateX : 0,
 				rotateY: enable3DEffect ? rotateY : 0,
 			}}
-			onMouseMove={handleMouseMove}
-			onMouseLeave={handleMouseLeave}
-			onMouseEnter={handleMouseEnter}
-			onClick={onClick}
-			aria-labelledby={ariaLabelledby}
-			aria-describedby={ariaDescribedby}
 		>
 			{children}
 		</motion.div>

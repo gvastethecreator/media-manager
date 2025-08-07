@@ -55,7 +55,7 @@ export function normalizeId(id: string): string {
  * @returns true si los IDs son equivalentes
  */
 export function areIdsEquivalent(id1: string, id2: string): boolean {
-	if (!id1 || !id2) {
+	if (!(id1 && id2)) {
 		return false;
 	}
 	return normalizeId(id1) === normalizeId(id2);

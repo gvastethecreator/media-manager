@@ -52,7 +52,7 @@ const EntityItem = memo(function EntityItem<T>({
 // Componente para estado de carga memoizado
 const LoadingState = memo(function LoadingState({ entityName }: { entityName: string }) {
 	return (
-		<div className="flex justify-center items-center py-2">
+		<div className="flex items-center justify-center py-2">
 			<LoadingSpinner size={16} />
 			<span className="ml-2 text-sm">Cargando {entityName}...</span>
 		</div>
@@ -71,7 +71,7 @@ const EmptyState = memo(function EmptyState({ entityName }: { entityName: string
 // Componente para estado de error memoizado
 const ErrorState = memo(function ErrorState({ entityName }: { entityName: string }) {
 	return (
-		<MemoizedContextMenuItem disabled className="text-destructive">
+		<MemoizedContextMenuItem className="text-destructive" disabled>
 			<span>Error al cargar {entityName}s</span>
 		</MemoizedContextMenuItem>
 	);
@@ -118,7 +118,7 @@ const CreateButton = memo(function CreateButton({ entityName, onClick }: { entit
 	}, [onClick, entityName, navigate]);
 
 	return (
-		<MemoizedContextMenuItem onClick={handleCreateClick} className="text-primary">
+		<MemoizedContextMenuItem className="text-primary" onClick={handleCreateClick}>
 			<Plus className="mr-2 h-4 w-4" />
 			<span>Nuevo {entityName}</span>
 		</MemoizedContextMenuItem>
@@ -186,19 +186,19 @@ export const EntitySubMenu = memo(function EntitySubMenu({
 			// Generar key única para cada entidad
 			let itemKey = `entity-${index}`;
 
-			if (entity && typeof entity === 'object') {
-				if (
-					'id' in entity &&
-					(typeof (entity as EntityWithId).id === 'string' || typeof (entity as EntityWithId).id === 'number')
-				) {
-					itemKey = `entity-${String((entity as EntityWithId).id)}`;
-				}
+			if (
+				entity &&
+				typeof entity === 'object' &&
+				'id' in entity &&
+				(typeof (entity as EntityWithId).id === 'string' || typeof (entity as EntityWithId).id === 'number')
+			) {
+				itemKey = `entity-${String((entity as EntityWithId).id)}`;
 			}
 
 			return (
 				<EntityItem
-					key={itemKey}
 					entity={entity}
+					key={itemKey}
 					onSelectAction={handleSelectAction}
 					renderItemAction={renderItemAction}
 				/>
@@ -268,5 +268,5 @@ export const EntitySubMenu = memo(function EntitySubMenu({
 
 // Nuevo componente para mostrar un indicador de error sin bloquear el contenido
 const ErrorIndicator = memo(function ErrorIndicator({ entityName }: { entityName: string }) {
-	return <div className="px-2 py-1 text-xs text-red-500 italic">Error al cargar todos los {entityName}</div>;
+	return <div className="px-2 py-1 text-red-500 text-xs italic">Error al cargar todos los {entityName}</div>;
 });

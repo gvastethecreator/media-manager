@@ -28,32 +28,32 @@ export function AlbumCardContent({
 				: album.filters || [];
 
 	return (
-		<div className="px-3 py-2 flex-shrink-0">
+		<div className="flex-shrink-0 px-3 py-2">
 			{/* Descripción principal */}
 			{album.description && (
-				<p className={cn('text-xs text-muted-foreground line-clamp-2 mb-2', tcgMode && 'italic')}>
+				<p className={cn('mb-2 line-clamp-2 text-muted-foreground text-xs', tcgMode && 'italic')}>
 					{album.description}
 				</p>
 			)}
 
 			{/* Datos principales */}
-			<div className="grid grid-cols-2 gap-2 mb-2">
+			<div className="mb-2 grid grid-cols-2 gap-2">
 				{/* Contadores */}
 				<div className="flex flex-col gap-1">
 					<div className="flex items-center justify-between">
-						<span className="text-xs text-muted-foreground">Imágenes:</span>
-						<span className="text-xs font-medium">{imagesCount}</span>
+						<span className="text-muted-foreground text-xs">Imágenes:</span>
+						<span className="font-medium text-xs">{imagesCount}</span>
 					</div>
 
 					<div className="flex items-center justify-between">
-						<span className="text-xs text-muted-foreground">Videos:</span>
-						<span className="text-xs font-medium">{videosCount}</span>
+						<span className="text-muted-foreground text-xs">Videos:</span>
+						<span className="font-medium text-xs">{videosCount}</span>
 					</div>
 
 					{album.shortcut && (
 						<div className="flex items-center justify-between">
-							<span className="text-xs text-muted-foreground">Atajo:</span>
-							<span className="text-xs font-mono bg-muted px-1.5 rounded">{album.shortcut}</span>
+							<span className="text-muted-foreground text-xs">Atajo:</span>
+							<span className="rounded bg-muted px-1.5 font-mono text-xs">{album.shortcut}</span>
 						</div>
 					)}
 				</div>
@@ -63,13 +63,13 @@ export function AlbumCardContent({
 					<div className="flex flex-col gap-1">
 						{/* Barra de progreso estilo TCG - Porcentaje de imágenes */}
 						<div className="flex flex-col">
-							<div className="flex justify-between items-center mb-1">
-								<span className="text-xs text-muted-foreground">Imágenes</span>
-								<span className="text-xs font-medium">
+							<div className="mb-1 flex items-center justify-between">
+								<span className="text-muted-foreground text-xs">Imágenes</span>
+								<span className="font-medium text-xs">
 									{imagesCount}/{imagesCount + videosCount}
 								</span>
 							</div>
-							<div className="h-2 bg-background/30 rounded-full overflow-hidden">
+							<div className="h-2 overflow-hidden rounded-full bg-background/30">
 								<div
 									className="h-full rounded-full"
 									style={{
@@ -82,13 +82,13 @@ export function AlbumCardContent({
 
 						{/* Barra de progreso estilo TCG - Porcentaje de videos */}
 						<div className="flex flex-col">
-							<div className="flex justify-between items-center mb-1">
-								<span className="text-xs text-muted-foreground">Videos</span>
-								<span className="text-xs font-medium">
+							<div className="mb-1 flex items-center justify-between">
+								<span className="text-muted-foreground text-xs">Videos</span>
+								<span className="font-medium text-xs">
 									{videosCount}/{imagesCount + videosCount}
 								</span>
 							</div>
-							<div className="h-2 bg-background/30 rounded-full overflow-hidden">
+							<div className="h-2 overflow-hidden rounded-full bg-background/30">
 								<div
 									className="h-full rounded-full"
 									style={{
@@ -105,18 +105,18 @@ export function AlbumCardContent({
 			{/* Filtros si existen */}
 			{filters.length > 0 && (
 				<div className="mb-2">
-					<p className="text-xs font-medium mb-1">Filtros activos:</p>
+					<p className="mb-1 font-medium text-xs">Filtros activos:</p>
 					<div className="flex flex-wrap gap-1">
 						{filters.slice(0, 3).map((filter: any) => (
 							<span
+								className="rounded bg-background/40 px-1.5 py-0.5 text-[10px]"
 								key={`filter-${filter.field || filter.type || 'unknown'}-${filter.value || ''}`}
-								className="text-[10px] bg-background/40 px-1.5 py-0.5 rounded"
 							>
 								{filter.field || filter.type}
 							</span>
 						))}
 						{filters.length > 3 && (
-							<span className="text-[10px] bg-background/40 px-1.5 py-0.5 rounded">+{filters.length - 3} más</span>
+							<span className="rounded bg-background/40 px-1.5 py-0.5 text-[10px]">+{filters.length - 3} más</span>
 						)}
 					</div>
 				</div>

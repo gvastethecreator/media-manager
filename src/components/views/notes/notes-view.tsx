@@ -73,39 +73,39 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 	return (
 		<div className={className}>
 			<div className="p-4">
-				<h2 className="text-xl font-bold mb-4">Vista de Notas</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Notas</h2>
 
 				<Button
+					className="mb-4"
 					onClick={() => {
 						setShowForm(!showForm);
 						setEditingNote(null);
 						setNoteTitle('');
 						setNoteContent('');
 					}}
-					className="mb-4"
 				>
 					{showForm ? 'Cancelar' : 'Crear Nota'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">{editingNote ? 'Editar Nota' : 'Nueva Nota'}</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">{editingNote ? 'Editar Nota' : 'Nueva Nota'}</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="noteTitle">Título</Label>
 							<Input
 								id="noteTitle"
-								value={noteTitle}
 								onChange={(e) => setNoteTitle(e.target.value)}
 								placeholder="Título de la nota"
+								value={noteTitle}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="noteContent">Contenido</Label>
 							<Textarea
 								id="noteContent"
-								value={noteContent}
 								onChange={(e) => setNoteContent(e.target.value)}
 								placeholder="Contenido de la nota"
+								value={noteContent}
 							/>
 						</div>
 						<Button onClick={handleSubmitForm}>{editingNote ? 'Guardar Cambios' : 'Guardar Nota'}</Button>
@@ -116,22 +116,22 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 					<p>Cargando notas...</p>
 				) : notes && notes.length > 0 ? (
 					<ScrollArea className="h-[calc(100vh-200px)]">
-						<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 							{notes.map((note: any) => (
 								<Card key={note.id}>
 									<CardHeader>
 										<CardTitle>{note.title}</CardTitle>
 									</CardHeader>
 									<CardContent>
-										<p className="text-sm text-muted-foreground">{note.content}</p>
-										<div className="flex gap-2 mt-2">
-											<Button variant="outline" size="sm" onClick={() => handleEditNote(note)}>
-												<Edit className="h-4 w-4 mr-1" /> Editar
+										<p className="text-muted-foreground text-sm">{note.content}</p>
+										<div className="mt-2 flex gap-2">
+											<Button onClick={() => handleEditNote(note)} size="sm" variant="outline">
+												<Edit className="mr-1 h-4 w-4" /> Editar
 											</Button>
 											<AlertDialog>
 												<AlertDialogTrigger asChild>
-													<Button variant="destructive" size="sm">
-														<Trash2 className="h-4 w-4 mr-1" /> Eliminar
+													<Button size="sm" variant="destructive">
+														<Trash2 className="mr-1 h-4 w-4" /> Eliminar
 													</Button>
 												</AlertDialogTrigger>
 												<AlertDialogContent>
@@ -144,8 +144,8 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 													<AlertDialogFooter>
 														<AlertDialogCancel>Cancelar</AlertDialogCancel>
 														<AlertDialogAction
-															onClick={() => handleDeleteNote(note.id)}
 															className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+															onClick={() => handleDeleteNote(note.id)}
 														>
 															Eliminar
 														</AlertDialogAction>

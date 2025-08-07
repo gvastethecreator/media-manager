@@ -28,7 +28,7 @@ interface File3DContentViewProps {
 
 const MemoizedFile3DCard = React.memo(
 	({ file3d, onFile3DClick }: { file3d: File3DWithStats; onFile3DClick: () => void }) => (
-		<File3DCard file3d={file3d} onClick={onFile3DClick} className="h-full" />
+		<File3DCard className="h-full" file3d={file3d} onClick={onFile3DClick} />
 	),
 	(prevProps, nextProps) =>
 		prevProps.file3d.id === nextProps.file3d.id &&
@@ -55,7 +55,7 @@ const File3DContentView: React.FC<File3DContentViewProps> = ({
 
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-full">
+			<div className="flex h-full items-center justify-center">
 				<p className="text-destructive">Error: {error}</p>
 			</div>
 		);
@@ -68,31 +68,31 @@ const File3DContentView: React.FC<File3DContentViewProps> = ({
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Archivos 3D</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Archivos 3D</h2>
 
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
 					{showForm ? 'Cancelar' : 'Subir Archivo 3D'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nuevo Archivo 3D</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nuevo Archivo 3D</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="file3dName">Nombre</Label>
 							<Input
 								id="file3dName"
-								value={newFile3DName}
 								onChange={(e) => setNewFile3DName(e.target.value)}
 								placeholder="Nombre del archivo 3D"
+								value={newFile3DName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="file3dFile">Archivo 3D</Label>
 							<Input
+								accept=".glb,.gltf,.obj,.fbx"
 								id="file3dFile"
+								onChange={handleFileChange} // Aceptar tipos de archivos 3D comunes
 								type="file"
-								accept=".glb,.gltf,.obj,.fbx" // Aceptar tipos de archivos 3D comunes
-								onChange={handleFileChange}
 							/>
 						</div>
 						<Button onClick={handleCreateFile3D}>Guardar Archivo 3D</Button>
@@ -101,24 +101,24 @@ const File3DContentView: React.FC<File3DContentViewProps> = ({
 
 				{(!file3ds || file3ds.length === 0) && !isLoading && !showForm ? (
 					<EmptyState
+						description="Sube archivos 3D para comenzar a usar el visor."
 						icon={Box}
 						title="No hay archivos 3D"
-						description="Sube archivos 3D para comenzar a usar el visor."
 					/>
 				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 						{file3ds?.map((file3d, index) => {
 							const onFile3DClick = () => handleFile3DClick(file3d);
 							return (
 								<motion.div
-									key={file3d.id}
-									initial={{ opacity: 0, y: 20 }}
 									animate={{ opacity: 1, y: 0 }}
-									transition={{ delay: index * 0.1 }}
 									className="perspective-1000"
+									initial={{ opacity: 0, y: 20 }}
+									key={file3d.id}
+									transition={{ delay: index * 0.1 }}
 								>
 									<div
-										className="h-full w-full transition-all ease-in-out hover:scale-[1.03] active:scale-[0.98] duration-300 hover:z-10"
+										className="h-full w-full transition-all duration-300 ease-in-out hover:z-10 hover:scale-[1.03] active:scale-[0.98]"
 										data-file3d-id={file3d.id}
 									>
 										<MemoizedFile3DCard file3d={file3d} onFile3DClick={onFile3DClick} />

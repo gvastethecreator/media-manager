@@ -89,7 +89,7 @@ const ThumbnailItem = memo(function ThumbnailItem({
 		}
 
 		// Detectar errores en imágenes
-		if (!thumbnailUrl && !error) {
+		if (!(thumbnailUrl || error)) {
 			setError(true);
 		}
 	}, [image.id, image.thumbnail, imageResources.resources, thumbnail, error]);
@@ -98,7 +98,7 @@ const ThumbnailItem = memo(function ThumbnailItem({
 	const baseClassName = useMemo(
 		() =>
 			cn(
-				'relative overflow-hidden rounded-md mr-2 cursor-pointer',
+				'relative mr-2 cursor-pointer overflow-hidden rounded-md',
 				'transition-all duration-200 ease-out',
 				isActive ? 'ring-2 ring-primary' : 'hover:ring-1 hover:ring-primary/50'
 			),
@@ -109,19 +109,19 @@ const ThumbnailItem = memo(function ThumbnailItem({
 	const thumbnailContent = useMemo(() => {
 		if (error || !thumbnail) {
 			return (
-				<div className="w-full h-full flex items-center justify-center bg-muted">
-					<ImageIcon className="w-6 h-6 text-muted-foreground/50" />
+				<div className="flex h-full w-full items-center justify-center bg-muted">
+					<ImageIcon className="h-6 w-6 text-muted-foreground/50" />
 				</div>
 			);
 		}
 
 		return (
-			<div className="w-full h-full">
+			<div className="h-full w-full">
 				{isValidSrc(thumbnail) ? (
-					<img src={thumbnail} alt={image.name} className="w-full h-full object-cover" loading="lazy" />
+					<img alt={image.name} className="h-full w-full object-cover" loading="lazy" src={thumbnail} />
 				) : (
-					<div className="w-full h-full flex items-center justify-center bg-muted">
-						<ImageIcon className="w-6 h-6 text-muted-foreground/50" />
+					<div className="flex h-full w-full items-center justify-center bg-muted">
+						<ImageIcon className="h-6 w-6 text-muted-foreground/50" />
 					</div>
 				)}
 			</div>
@@ -140,10 +140,10 @@ const ThumbnailItem = memo(function ThumbnailItem({
 
 	return (
 		<motion.div
-			className={baseClassName}
 			animate={animateStyles}
-			transition={THUMBNAIL_ANIMATION}
+			className={baseClassName}
 			onClick={onClick}
+			transition={THUMBNAIL_ANIMATION}
 			whileHover={{
 				opacity: 1,
 				scale: 1.02,
@@ -153,9 +153,9 @@ const ThumbnailItem = memo(function ThumbnailItem({
 			{thumbnailContent}
 			{isActive && (
 				<motion.div
-					className="absolute inset-0 bg-primary/10 pointer-events-none"
-					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
+					className="pointer-events-none absolute inset-0 bg-primary/10"
+					initial={{ opacity: 0 }}
 					transition={{ duration: 0.2 }}
 				/>
 			)}
@@ -180,26 +180,26 @@ const ToolbarActions = memo(function ToolbarActions({
 	onClose: () => void;
 }) {
 	return (
-		<div className="fixed top-4 inset-x-4 flex items-center justify-between z-[9999]">
+		<div className="fixed inset-x-4 top-4 z-[9999] flex items-center justify-between">
 			<div className="flex space-x-2">
-				<Button variant="outline" size="icon" onClick={onZoomIn} title="Acercar">
+				<Button onClick={onZoomIn} size="icon" title="Acercar" variant="outline">
 					<ZoomIn className="h-4 w-4" />
 				</Button>
-				<Button variant="outline" size="icon" onClick={onZoomOut} title="Alejar">
+				<Button onClick={onZoomOut} size="icon" title="Alejar" variant="outline">
 					<ZoomOut className="h-4 w-4" />
 				</Button>
-				<Button variant="outline" size="icon" onClick={onReset} title="Restablecer vista">
+				<Button onClick={onReset} size="icon" title="Restablecer vista" variant="outline">
 					<RotateCcw className="h-4 w-4" />
 				</Button>
-				<Button variant="outline" size="icon" onClick={onCopy} title="Copiar">
+				<Button onClick={onCopy} size="icon" title="Copiar" variant="outline">
 					<Copy className="h-4 w-4" />
 				</Button>
-				<Button variant="outline" size="icon" onClick={onDownload} title="Descargar">
+				<Button onClick={onDownload} size="icon" title="Descargar" variant="outline">
 					<Download className="h-4 w-4" />
 				</Button>
 			</div>
 
-			<Button variant="outline" size="icon" onClick={onClose} title="Cerrar">
+			<Button onClick={onClose} size="icon" title="Cerrar" variant="outline">
 				<X className="h-4 w-4" />
 			</Button>
 		</div>
@@ -228,14 +228,14 @@ const ThumbnailNavigation = memo(function ThumbnailNavigation({
 	}, [images, currentIndex]);
 
 	return (
-		<div className="fixed bottom-6 left-1/2 -translate-x-1/2 flex items-center justify-center z-[9999]">
-			<div className="flex items-center bg-background/5 backdrop-blur-xs px-2 py-1 rounded-lg">
+		<div className="-translate-x-1/2 fixed bottom-6 left-1/2 z-[9999] flex items-center justify-center">
+			<div className="flex items-center rounded-lg bg-background/5 px-2 py-1 backdrop-blur-xs">
 				{visibleThumbnails.map(({ image, isActive, index }) => (
 					<ThumbnailItem
-						key={image.id}
 						image={image}
 						images={images}
 						isActive={isActive}
+						key={image.id}
 						onClick={() => onSelectImage(index)}
 					/>
 				))}
@@ -310,7 +310,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 
 	// Validate images and index
 	useEffect(() => {
-		if (!images || !images.length) {
+		if (!(images && images.length)) {
 			setIsLoading(false);
 			return;
 		}
@@ -517,7 +517,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 	const dialogClassName = useMemo(
 		() =>
 			cn(
-				'fixed inset-0 z-[9999] flex flex-col items-center justify-center w-full h-full bg-black/90 backdrop-blur-sm p-0 m-0',
+				'fixed inset-0 z-[9999] m-0 flex h-full w-full flex-col items-center justify-center bg-black/90 p-0 backdrop-blur-sm',
 				isOpen ? 'flex' : 'hidden'
 			),
 		[isOpen]
@@ -539,8 +539,8 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 
 	const viewerContent = (
 		<dialog
+			aria-modal="true"
 			className={dialogClassName}
-			open={isOpen}
 			onClick={(e) => {
 				if (e.target === e.currentTarget) {
 					onClose();
@@ -551,12 +551,13 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 					onClose();
 				}
 			}}
-			aria-modal="true"
+			open={isOpen}
 		>
 			<div
-				ref={imageContainerRef}
-				className="relative w-full h-full flex flex-col items-center justify-center"
+				aria-label="Visor de imágenes"
+				className="relative flex h-full w-full flex-col items-center justify-center"
 				onClick={(e) => e.stopPropagation()}
+				onDoubleClick={resetView}
 				onKeyDown={(e) => {
 					if (e.key === 'Escape') {
 						onClose();
@@ -573,47 +574,46 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 						setAnnounceMessage('Vista restablecida');
 					}
 				}}
-				onWheel={handleWheel}
-				onDoubleClick={resetView}
 				onMouseDown={handleDragStart}
 				onTouchStart={handleDragStart}
-				aria-label="Visor de imágenes"
+				onWheel={handleWheel}
+				ref={imageContainerRef}
 			>
 				{/* Toolbar */}
 				<ToolbarActions
-					onZoomIn={handleZoomIn}
-					onZoomOut={handleZoomOut}
-					onReset={resetView}
+					onClose={onClose}
 					onCopy={handleCopy}
 					onDownload={handleDownload}
-					onClose={onClose}
+					onReset={resetView}
+					onZoomIn={handleZoomIn}
+					onZoomOut={handleZoomOut}
 				/>
 
 				{/* Main Image Container */}
 				<motion.div
-					key={currentImage?.id || 'no-image'}
-					className="absolute inset-0 flex items-center justify-center"
-					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
+					className="absolute inset-0 flex items-center justify-center"
 					exit={{ opacity: 0 }}
+					initial={{ opacity: 0 }}
+					key={currentImage?.id || 'no-image'}
 					transition={{ duration: 0.3 }}
 				>
-					<div className="relative w-full h-full flex items-center justify-center overflow-hidden">
+					<div className="relative flex h-full w-full items-center justify-center overflow-hidden">
 						<AnimatePresence mode="wait">
 							{isLoading && (
 								<motion.div
-									initial={{ opacity: 0 }}
 									animate={{ opacity: 1 }}
-									exit={{ opacity: 0 }}
-									transition={{ duration: 0.3 }}
 									className="absolute inset-0 flex items-center justify-center"
+									exit={{ opacity: 0 }}
+									initial={{ opacity: 0 }}
+									transition={{ duration: 0.3 }}
 								>
 									{currentImage && urls[currentImage.id] ? (
 										<motion.div
-											className="absolute inset-0 flex items-center justify-center"
-											initial={{ opacity: 0, filter: 'blur(10px)' }}
 											animate={{ opacity: 1, filter: 'blur(3px)' }}
+											className="absolute inset-0 flex items-center justify-center"
 											exit={{ opacity: 0, filter: 'blur(0px)' }}
+											initial={{ opacity: 0, filter: 'blur(10px)' }}
 											transition={{
 												duration: 0.8,
 												opacity: { duration: 0.5 },
@@ -621,17 +621,17 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 											}}
 										>
 											<motion.img
-												src={urls[currentImage.id]}
 												alt="Loading preview"
-												className="w-full h-full object-contain"
-												initial={{ scale: 1.1 }}
 												animate={{ scale: 1 }}
+												className="h-full w-full object-contain"
 												exit={{ scale: 1 }}
+												initial={{ scale: 1.1 }}
+												src={urls[currentImage.id]}
 												transition={{ duration: 0.5 }}
 											/>
 										</motion.div>
 									) : (
-										<Skeleton className="w-full h-full" />
+										<Skeleton className="h-full w-full" />
 									)}
 								</motion.div>
 							)}
@@ -647,15 +647,15 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 								}}
 							>
 								<img
-									src={currentImage ? urls[currentImage.id] : ''}
 									alt={currentImage?.name || 'Image'}
-									className="max-w-full max-h-full object-contain"
+									className="max-h-full max-w-full object-contain"
+									src={currentImage ? urls[currentImage.id] : ''}
 								/>
 							</motion.div>
 						)}
 
 						{!currentImage ||
-							(!urls[currentImage.id] && !isLoading && (
+							(!(urls[currentImage.id] || isLoading) && (
 								<div className="absolute inset-0 flex items-center justify-center text-center text-muted-foreground">
 									<p>Error al cargar la imagen</p>
 								</div>
@@ -664,10 +664,10 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 				</motion.div>
 
 				{/* Thumbnails */}
-				<ThumbnailNavigation images={images} currentIndex={currentIndex} onSelectImage={handleSelectImage} />
+				<ThumbnailNavigation currentIndex={currentIndex} images={images} onSelectImage={handleSelectImage} />
 
 				{/* Navigation hints */}
-				<div className="fixed bottom-4 left-4 text-xs text-muted-foreground/50 pointer-events-none select-none max-w-[300px]">
+				<div className="pointer-events-none fixed bottom-4 left-4 max-w-[300px] select-none text-muted-foreground/50 text-xs">
 					<p>Flechas: navegar • Rueda: zoom • Arrastrar: mover</p>
 					<p>ESC: cerrar • R: restablecer • +/-: zoom</p>
 				</div>
@@ -676,7 +676,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 	);
 
 	// No renderizar nada si no hay imágenes o el visor está cerrado
-	if (!isOpen || !images?.length || !currentImage) {
+	if (!(isOpen && images?.length && currentImage)) {
 		return null;
 	}
 

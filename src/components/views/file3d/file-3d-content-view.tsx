@@ -29,7 +29,7 @@ export const File3DContentView: React.FC<File3DContentViewProps> = ({ className,
 		size: '15.3 MB',
 		created: '2024-01-15',
 		modified: '2024-01-20',
-		vertices: 12450,
+		vertices: 12_450,
 		faces: 8320,
 		textures: 3,
 		materials: 2,
@@ -45,50 +45,50 @@ export const File3DContentView: React.FC<File3DContentViewProps> = ({ className,
 
 	return (
 		<motion.div
-			initial={{ opacity: 0, x: 20 }}
 			animate={{ opacity: 1, x: 0 }}
-			exit={{ opacity: 0, x: -20 }}
-			transition={{ duration: 0.3 }}
 			className={className}
+			exit={{ opacity: 0, x: -20 }}
+			initial={{ opacity: 0, x: 20 }}
+			transition={{ duration: 0.3 }}
 		>
-			<div className="h-full flex flex-col">
+			<div className="flex h-full flex-col">
 				{/* Header con navegación */}
-				<div className="flex items-center gap-4 p-4 border-b border-border bg-background/50 backdrop-blur-sm">
-					<Button variant="ghost" size="icon" onClick={handleGoBack} className="shrink-0">
+				<div className="flex items-center gap-4 border-border border-b bg-background/50 p-4 backdrop-blur-sm">
+					<Button className="shrink-0" onClick={handleGoBack} size="icon" variant="ghost">
 						<ArrowLeft className="h-4 w-4" />
 					</Button>
-					<div className="flex items-center gap-3 min-w-0 flex-1">
-						<Box className="h-6 w-6 text-primary shrink-0" />
+					<div className="flex min-w-0 flex-1 items-center gap-3">
+						<Box className="h-6 w-6 shrink-0 text-primary" />
 						<div className="min-w-0 flex-1">
-							<h1 className="text-xl font-semibold truncate">{file3DData.name}</h1>
-							<p className="text-sm text-muted-foreground truncate">{file3DData.path}</p>
+							<h1 className="truncate font-semibold text-xl">{file3DData.name}</h1>
+							<p className="truncate text-muted-foreground text-sm">{file3DData.path}</p>
 						</div>
 					</div>
-					<div className="flex items-center gap-2 shrink-0">
-						<Button variant="outline" size="sm">
-							<Eye className="h-4 w-4 mr-2" />
+					<div className="flex shrink-0 items-center gap-2">
+						<Button size="sm" variant="outline">
+							<Eye className="mr-2 h-4 w-4" />
 							Vista 3D
 						</Button>
-						<Button variant="outline" size="sm">
-							<Download className="h-4 w-4 mr-2" />
+						<Button size="sm" variant="outline">
+							<Download className="mr-2 h-4 w-4" />
 							Descargar
 						</Button>
-						<Button variant="outline" size="sm">
-							<Edit className="h-4 w-4 mr-2" />
+						<Button size="sm" variant="outline">
+							<Edit className="mr-2 h-4 w-4" />
 							Editar
 						</Button>
-						<Button variant="outline" size="sm">
-							<Share2 className="h-4 w-4 mr-2" />
+						<Button size="sm" variant="outline">
+							<Share2 className="mr-2 h-4 w-4" />
 							Compartir
 						</Button>
-						<Button variant="outline" size="sm" className="text-destructive hover:text-destructive">
+						<Button className="text-destructive hover:text-destructive" size="sm" variant="outline">
 							<Trash2 className="h-4 w-4" />
 						</Button>
 					</div>
 				</div>
 
 				{/* Contenido principal */}
-				<div className="flex-1 flex gap-4 p-4 min-h-0">
+				<div className="flex min-h-0 flex-1 gap-4 p-4">
 					{/* Panel de información lateral */}
 					<div className="w-80 shrink-0">
 						<ScrollArea className="h-full">
@@ -147,7 +147,7 @@ export const File3DContentView: React.FC<File3DContentViewProps> = ({ className,
 									<CardContent>
 										<div className="flex flex-wrap gap-2">
 											{file3DData.tags.map((tag) => (
-												<Badge key={tag} variant="outline" className="text-xs">
+												<Badge className="text-xs" key={tag} variant="outline">
 													{tag}
 												</Badge>
 											))}
@@ -161,16 +161,16 @@ export const File3DContentView: React.FC<File3DContentViewProps> = ({ className,
 										<CardTitle className="text-sm">Acciones Rápidas</CardTitle>
 									</CardHeader>
 									<CardContent className="space-y-2">
-										<Button variant="outline" size="sm" className="w-full justify-start">
-											<Eye className="h-4 w-4 mr-2" />
+										<Button className="w-full justify-start" size="sm" variant="outline">
+											<Eye className="mr-2 h-4 w-4" />
 											Abrir en visor 3D
 										</Button>
-										<Button variant="outline" size="sm" className="w-full justify-start">
-											<Edit className="h-4 w-4 mr-2" />
+										<Button className="w-full justify-start" size="sm" variant="outline">
+											<Edit className="mr-2 h-4 w-4" />
 											Editar metadatos
 										</Button>
-										<Button variant="outline" size="sm" className="w-full justify-start">
-											<Share2 className="h-4 w-4 mr-2" />
+										<Button className="w-full justify-start" size="sm" variant="outline">
+											<Share2 className="mr-2 h-4 w-4" />
 											Generar vista previa
 										</Button>
 									</CardContent>
@@ -182,31 +182,31 @@ export const File3DContentView: React.FC<File3DContentViewProps> = ({ className,
 					<Separator orientation="vertical" />
 
 					{/* Visor 3D */}
-					<div className="flex-1 min-w-0">
+					<div className="min-w-0 flex-1">
 						<Card className="h-full">
 							<CardHeader>
-								<CardTitle className="text-sm flex items-center justify-between">
+								<CardTitle className="flex items-center justify-between text-sm">
 									<span>Vista Previa 3D</span>
 									<div className="flex items-center gap-2">
-										<Button variant="outline" size="sm">
-											<RotateCcw className="h-4 w-4 mr-2" />
+										<Button size="sm" variant="outline">
+											<RotateCcw className="mr-2 h-4 w-4" />
 											Reset
 										</Button>
 									</div>
 								</CardTitle>
 							</CardHeader>
-							<CardContent className="h-full flex flex-col">
+							<CardContent className="flex h-full flex-col">
 								{/* Área de renderizado 3D */}
-								<div className="flex-1 bg-muted/20 rounded-lg flex items-center justify-center mb-4">
-									<div className="text-center space-y-4">
-										<Box className="h-16 w-16 mx-auto text-muted-foreground" />
+								<div className="mb-4 flex flex-1 items-center justify-center rounded-lg bg-muted/20">
+									<div className="space-y-4 text-center">
+										<Box className="mx-auto h-16 w-16 text-muted-foreground" />
 										<div>
-											<h3 className="text-lg font-medium">Visor 3D No Disponible</h3>
-											<p className="text-sm text-muted-foreground">
+											<h3 className="font-medium text-lg">Visor 3D No Disponible</h3>
+											<p className="text-muted-foreground text-sm">
 												El visor 3D se implementará cuando se conecte con el backend
 											</p>
 										</div>
-										<div className="bg-background/80 backdrop-blur-sm rounded-lg p-4 border">
+										<div className="rounded-lg border bg-background/80 p-4 backdrop-blur-sm">
 											<div className="grid grid-cols-3 gap-4 text-sm">
 												<div className="text-center">
 													<div className="font-medium">{file3DData.vertices.toLocaleString()}</div>
@@ -226,20 +226,20 @@ export const File3DContentView: React.FC<File3DContentViewProps> = ({ className,
 								</div>
 
 								{/* Controles de vista */}
-								<div className="border-t pt-4 space-y-3">
+								<div className="space-y-3 border-t pt-4">
 									<div className="grid grid-cols-2 gap-4">
 										<div className="space-y-2">
-											<span className="text-sm font-medium">Rotación X</span>
-											<Slider defaultValue={[0]} min={-180} max={180} step={1} />
+											<span className="font-medium text-sm">Rotación X</span>
+											<Slider defaultValue={[0]} max={180} min={-180} step={1} />
 										</div>
 										<div className="space-y-2">
-											<span className="text-sm font-medium">Rotación Y</span>
-											<Slider defaultValue={[0]} min={-180} max={180} step={1} />
+											<span className="font-medium text-sm">Rotación Y</span>
+											<Slider defaultValue={[0]} max={180} min={-180} step={1} />
 										</div>
 									</div>
 									<div className="space-y-2">
-										<span className="text-sm font-medium">Zoom</span>
-										<Slider defaultValue={[50]} min={10} max={200} step={5} />
+										<span className="font-medium text-sm">Zoom</span>
+										<Slider defaultValue={[50]} max={200} min={10} step={5} />
 									</div>
 								</div>
 							</CardContent>

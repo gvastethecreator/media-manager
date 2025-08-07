@@ -5,12 +5,12 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-    AIEngine,
-    type AIGenerationParameters,
-    type Automatic1111Metadata,
-    type ComfyUIMetadata,
-    type ParserResult,
-    type SwarmUIMetadata,
+	AIEngine,
+	type AIGenerationParameters,
+	type Automatic1111Metadata,
+	type ComfyUIMetadata,
+	type ParserResult,
+	type SwarmUIMetadata,
 } from '@/types/metadata-origin.types';
 
 const logger = serverLogger.withContext('SDParserService');

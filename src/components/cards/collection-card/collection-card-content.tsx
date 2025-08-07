@@ -69,7 +69,7 @@ export function CollectionCardContent({
 
 	return (
 		<div
-			className="flex-grow p-3 overflow-hidden relative rounded-sm"
+			className="relative flex-grow overflow-hidden rounded-sm p-3"
 			style={{
 				backgroundColor: `${primaryColor}10`,
 				backgroundImage: backgroundImage ? `url(${backgroundImage})` : undefined,
@@ -79,15 +79,15 @@ export function CollectionCardContent({
 			}}
 		>
 			{/* Overlay para mantener legibilidad sobre imagen */}
-			{backgroundImage && <div className="absolute inset-0 bg-black/30 z-0" />}
+			{backgroundImage && <div className="absolute inset-0 z-0 bg-black/30" />}
 
 			{/* Contenido con posición relativa para estar sobre el overlay */}
-			<div className="relative z-10 h-full flex flex-col">
+			<div className="relative z-10 flex h-full flex-col">
 				{/* Sello de rareza y cardId estilo TCG */}
 				{metadata && (
-					<div className="absolute -top-1 -right-1 flex items-center gap-1">
+					<div className="-top-1 -right-1 absolute flex items-center gap-1">
 						<Badge
-							className="text-[9px] py-0 h-5 shadow-md uppercase font-bold"
+							className="h-5 py-0 font-bold text-[9px] uppercase shadow-md"
 							style={{
 								backgroundColor: rarityColors.background,
 								color: rarityColors.text,
@@ -101,20 +101,20 @@ export function CollectionCardContent({
 
 				{/* Descripción principal con estilo TCG */}
 				{description && (
-					<div className="mb-2 text-xs leading-relaxed line-clamp-3" style={{ color: `${primaryColor}DD` }}>
+					<div className="mb-2 line-clamp-3 text-xs leading-relaxed" style={{ color: `${primaryColor}DD` }}>
 						<p className="italic">{description}</p>
 					</div>
 				)}
 
 				{/* Contadores con estilo TCG */}
 				{metadata && (
-					<div className="flex items-center gap-3 mb-2">
+					<div className="mb-2 flex items-center gap-3">
 						<motion.div className="flex items-center gap-1 text-xs" whileHover={{ scale: 1.05 }}>
-							<Diamond className="w-3.5 h-3.5" style={{ color: rarityColors.border }} />
+							<Diamond className="h-3.5 w-3.5" style={{ color: rarityColors.border }} />
 							<span className="font-bold">{metadata.cardId}</span>
 						</motion.div>
 						<motion.div className="flex items-center gap-1 text-xs" whileHover={{ scale: 1.05 }}>
-							<Bookmark className="w-3.5 h-3.5 text-muted-foreground" />
+							<Bookmark className="h-3.5 w-3.5 text-muted-foreground" />
 							<span className="font-medium">{metadata.totalItems} elementos</span>
 						</motion.div>
 					</div>
@@ -122,7 +122,7 @@ export function CollectionCardContent({
 
 				{/* Caja de propiedades estilo TCG */}
 				<div
-					className="mt-auto pt-1 text-xs space-y-1.5 border-t rounded-sm p-1"
+					className="mt-auto space-y-1.5 rounded-sm border-t p-1 pt-1 text-xs"
 					style={{
 						borderColor: `${primaryColor}30`,
 						backgroundColor: `${primaryColor}15`,
@@ -134,15 +134,15 @@ export function CollectionCardContent({
 						{/* Plataforma */}
 						{platform && (
 							<div className="flex items-center gap-1 text-xs">
-								<Globe className="w-3.5 h-3.5 text-muted-foreground" />
-								<span className="font-medium truncate">{platform}</span>
+								<Globe className="h-3.5 w-3.5 text-muted-foreground" />
+								<span className="truncate font-medium">{platform}</span>
 							</div>
 						)}
 
 						{/* Precio */}
 						{formattedPrice && (
 							<div className="flex items-center gap-1 text-xs">
-								<Tag className="w-3.5 h-3.5 text-muted-foreground" />
+								<Tag className="h-3.5 w-3.5 text-muted-foreground" />
 								<span className="font-medium">{formattedPrice}</span>
 							</div>
 						)}
@@ -150,16 +150,16 @@ export function CollectionCardContent({
 						{/* Red blockchain */}
 						{network && (
 							<div className="flex items-center gap-1 text-xs">
-								<Currency className="w-3.5 h-3.5 text-muted-foreground" />
-								<span className="font-medium truncate">{network}</span>
+								<Currency className="h-3.5 w-3.5 text-muted-foreground" />
+								<span className="truncate font-medium">{network}</span>
 							</div>
 						)}
 
 						{/* Token ID (reducido si es muy largo) */}
 						{tokenId && (
 							<div className="flex items-center gap-1 text-xs">
-								<span className="text-xs text-muted-foreground">Token:</span>
-								<span className="font-medium truncate">
+								<span className="text-muted-foreground text-xs">Token:</span>
+								<span className="truncate font-medium">
 									{tokenId.length > 8 ? `${tokenId.substring(0, 5)}...` : tokenId}
 								</span>
 							</div>
@@ -167,9 +167,9 @@ export function CollectionCardContent({
 
 						{/* URL externa */}
 						{url && (
-							<div className="flex items-center gap-1 text-xs col-span-2">
-								<Link className="w-3.5 h-3.5 text-muted-foreground" />
-								<span className="font-medium truncate underline text-blue-500 hover:text-blue-600">
+							<div className="col-span-2 flex items-center gap-1 text-xs">
+								<Link className="h-3.5 w-3.5 text-muted-foreground" />
+								<span className="truncate font-medium text-blue-500 underline hover:text-blue-600">
 									{url.replace(/https?:\/\/(www\.)?/, '').substring(0, 30)}
 									{url.length > 30 && '...'}
 								</span>
@@ -179,17 +179,17 @@ export function CollectionCardContent({
 
 					{/* Ediciones disponibles */}
 					{editionsList.length > 0 && (
-						<div className="mt-1 pt-1 border-t border-dashed" style={{ borderColor: `${primaryColor}20` }}>
-							<div className="flex items-center gap-1 mb-1 text-xs text-muted-foreground">
-								<Calendar className="w-3.5 h-3.5" />
+						<div className="mt-1 border-t border-dashed pt-1" style={{ borderColor: `${primaryColor}20` }}>
+							<div className="mb-1 flex items-center gap-1 text-muted-foreground text-xs">
+								<Calendar className="h-3.5 w-3.5" />
 								<span className="font-medium">Ediciones</span>
 							</div>
-							<ul className="text-xs space-y-0.5 max-h-12 overflow-y-auto scrollbar-thin overflow-x-hidden">
+							<ul className="scrollbar-thin max-h-12 space-y-0.5 overflow-y-auto overflow-x-hidden text-xs">
 								{editionsList.slice(0, 2).map((edition: CollectionEdition) => (
-									<li key={edition.name} className="flex justify-between text-xs text-muted-foreground">
-										<span className="font-medium truncate">{edition.name}</span>
+									<li className="flex justify-between text-muted-foreground text-xs" key={edition.name}>
+										<span className="truncate font-medium">{edition.name}</span>
 										{edition.releaseDate && (
-											<span className="ml-1 text-muted-foreground whitespace-nowrap">
+											<span className="ml-1 whitespace-nowrap text-muted-foreground">
 												({new Date(edition.releaseDate).getFullYear()})
 											</span>
 										)}
@@ -197,7 +197,7 @@ export function CollectionCardContent({
 								))}
 
 								{editionsList.length > 2 && (
-									<li className="text-xs italic text-muted-foreground">...y {editionsList.length - 2} más</li>
+									<li className="text-muted-foreground text-xs italic">...y {editionsList.length - 2} más</li>
 								)}
 							</ul>
 						</div>
@@ -206,8 +206,8 @@ export function CollectionCardContent({
 			</div>
 
 			{/* Decoración de esquina estilo TCG */}
-			<div className="absolute bottom-1 right-1 w-4 h-4 opacity-70" style={{ color: primaryColor }}>
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
+			<div className="absolute right-1 bottom-1 h-4 w-4 opacity-70" style={{ color: primaryColor }}>
+				<svg aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
 					<path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
 					<path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
 				</svg>

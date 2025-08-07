@@ -112,7 +112,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
 					className
 				)}
 			>
@@ -125,7 +125,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
 					className
 				)}
 			>
@@ -137,34 +137,34 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 	// Render del componente
 	return (
 		<motion.div
+			aria-label={`Nota: ${note.title}`}
 			className={cn(
 				// Base
 				'relative bg-card',
-				'w-[300px] h-[420px] rounded-[4.75%] overflow-hidden',
+				'h-[420px] w-[300px] overflow-hidden rounded-[4.75%]',
 				tcgMode ? 'border-[3px] shadow-xl' : 'border-2 shadow-md',
 				// Interacción
 				'transition-all duration-300 ease-out',
-				'hover:shadow-lg hover:scale-[1.02]',
+				'hover:scale-[1.02] hover:shadow-lg',
 				'active:scale-[0.98]',
 				// Cursor
 				onClick ? 'cursor-pointer' : '',
 				// Clase personalizada
 				className
 			)}
-			whileHover={{ y: -5 }}
-			whileTap={{ scale: 0.98 }}
+			data-note-id={note.id}
 			onClick={onClick ? (_e: React.MouseEvent<HTMLDivElement>) => onClick(note) : undefined}
 			onKeyDown={handleKeyDown}
-			tabIndex={onClick ? 0 : -1}
 			role={onClick ? 'button' : 'article'}
-			aria-label={`Nota: ${note.title}`}
-			data-note-id={note.id}
 			style={cardStyle}
+			tabIndex={onClick ? 0 : -1}
+			whileHover={{ y: -5 }}
+			whileTap={{ scale: 0.98 }}
 		>
 			{/* Resplandor de borde en hover */}
-			<div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none">
+			<div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-100">
 				<div
-					className="absolute inset-0 rounded-[4.75%] blur-sm -z-10"
+					className="-z-10 absolute inset-0 rounded-[4.75%] blur-sm"
 					style={{ boxShadow: `0 0 15px 2px ${primaryColor}` }}
 				/>
 			</div>
@@ -173,18 +173,18 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 
 			{/* Encabezado de la tarjeta */}
 			<CardHeader
-				title={note.title || 'Sin título'}
-				subtitle={note.category || 'General'}
 				icon={
 					note.emoji ? (
 						<span className="text-lg">{note.emoji}</span>
 					) : tcgMode ? (
-						<BookOpen className="w-4 h-4" />
+						<BookOpen className="h-4 w-4" />
 					) : (
-						<ScrollText className="w-4 h-4" />
+						<ScrollText className="h-4 w-4" />
 					)
 				}
 				primaryColor={primaryColor}
+				subtitle={note.category || 'General'}
+				title={note.title || 'Sin título'}
 			/>
 
 			{/* Sección de imágenes */}
@@ -192,30 +192,30 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 
 			{/* Contenido principal */}
 			<NoteCardContent
-				content={note.content}
 				category={note.category}
-				tags={tags}
-				status={note.status}
-				priority={note.priority}
-				primaryColor={primaryColor}
-				secondaryColor={secondaryColor}
+				content={note.content}
 				noteId={note.id}
+				primaryColor={primaryColor}
+				priority={note.priority}
+				secondaryColor={secondaryColor}
+				status={note.status}
+				tags={tags}
 				tcgMode={tcgMode}
 			/>
 
 			{/* Pie de la tarjeta */}
 			<NoteCardFooter
 				createdAt={note.createdAt}
-				updatedAt={note.updatedAt}
 				imagesCount={imagesCount}
-				videosCount={videosCount}
-				relationsCount={relationsCount}
 				isFavorite={note.isFavorite}
-				status={note.status}
-				priority={note.priority}
 				primaryColor={primaryColor}
+				priority={note.priority}
+				relationsCount={relationsCount}
 				secondaryColor={secondaryColor}
+				status={note.status}
 				tcgMode={tcgMode}
+				updatedAt={note.updatedAt}
+				videosCount={videosCount}
 			/>
 		</motion.div>
 	);

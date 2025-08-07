@@ -78,7 +78,7 @@ export function useTauriBackend() {
 		performHealthCheck();
 
 		// Verificar cada 30 segundos si el backend sigue funcionando
-		const interval = setInterval(performHealthCheck, 30000);
+		const interval = setInterval(performHealthCheck, 30_000);
 
 		return () => clearInterval(interval);
 	}, []);
@@ -100,7 +100,7 @@ export function useTauriContext() {
 		// Verificar si estamos en Tauri
 		const checkTauri = () => {
 			try {
-				// @ts-ignore - window.__TAURI__ existe en contexto Tauri
+				// @ts-expect-error - window.__TAURI__ existe en contexto Tauri
 				return typeof window !== 'undefined' && window.__TAURI__ !== undefined;
 			} catch {
 				return false;

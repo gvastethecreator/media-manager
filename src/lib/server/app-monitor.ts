@@ -253,7 +253,7 @@ function logAppStats(): void {
 export async function start(
 	options: { interval?: number; includeSystemStats?: boolean; systemStatsInterval?: number } = {}
 ): Promise<() => void> {
-	const { interval = 60000, includeSystemStats = true, systemStatsInterval = 300000 } = options;
+	const { interval = 60_000, includeSystemStats = true, systemStatsInterval = 300_000 } = options;
 
 	// Mostrar estadísticas iniciales
 	logAppStats();

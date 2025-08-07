@@ -58,7 +58,14 @@ export function ShimmeringText({
 
 	return (
 		<motion.span
-			ref={ref}
+			animate={
+				shouldAnimate
+					? {
+							backgroundPosition: '0% center',
+							opacity: 1,
+						}
+					: {}
+			}
 			className={cn(
 				'relative inline-block bg-[length:250%_100%,auto] bg-clip-text text-transparent',
 				'[--base-color:var(--color-zinc-400)] [--shimmer-color:var(--color-zinc-950)]',
@@ -67,6 +74,11 @@ export function ShimmeringText({
 				'dark:[--base-color:var(--color-zinc-600)] dark:[--shimmer-color:var(--color-white)]',
 				className
 			)}
+			initial={{
+				backgroundPosition: '100% center',
+				opacity: 0,
+			}}
+			ref={ref}
 			style={
 				{
 					'--spread': `${dynamicSpread}px`,
@@ -74,18 +86,6 @@ export function ShimmeringText({
 					...(shimmerColor && { '--shimmer-color': shimmerColor }),
 					backgroundImage: 'var(--shimmer-bg), linear-gradient(var(--base-color), var(--base-color))',
 				} as React.CSSProperties
-			}
-			initial={{
-				backgroundPosition: '100% center',
-				opacity: 0,
-			}}
-			animate={
-				shouldAnimate
-					? {
-							backgroundPosition: '0% center',
-							opacity: 1,
-						}
-					: {}
 			}
 			transition={{
 				backgroundPosition: {

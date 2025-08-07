@@ -166,7 +166,7 @@ export function preparePromptForSaving(extendedPrompt: PromptExtended): PromptCo
 			color: extendedPrompt.color || null,
 			category: extendedPrompt.category || null,
 
-			isFavorite: extendedPrompt.isFavorite || false,
+			isFavorite: extendedPrompt.isFavorite,
 			totalImages: extendedPrompt.totalImages || 0,
 			totalVideos: extendedPrompt.totalVideos || 0,
 			type: extendedPrompt.type || null,

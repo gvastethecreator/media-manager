@@ -5,7 +5,7 @@
 import { Canvas, RootState, useFrame, useThree } from '@react-three/fiber';
 /* eslint-disable react/no-unknown-property */
 import React, { forwardRef, useLayoutEffect, useMemo, useRef } from 'react';
-// @ts-ignore: Three.js types not available, but module works correctly
+// @ts-expect-error: Three.js types not available, but module works correctly
 import { Color, IUniform, Mesh, ShaderMaterial } from 'three';
 
 type NormalizedRGB = [number, number, number];
@@ -116,7 +116,7 @@ const SilkPlane = forwardRef<Mesh, SilkPlaneProps>(function SilkPlane({ uniforms
 	return (
 		<mesh ref={ref}>
 			<planeGeometry args={[1, 1, 1, 1]} />
-			<shaderMaterial uniforms={uniforms} vertexShader={vertexShader} fragmentShader={fragmentShader} />
+			<shaderMaterial fragmentShader={fragmentShader} uniforms={uniforms} vertexShader={vertexShader} />
 		</mesh>
 	);
 });

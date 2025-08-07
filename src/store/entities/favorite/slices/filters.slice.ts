@@ -73,7 +73,7 @@ const applyFilters = (favorites: FavoriteExtended[], filters: FavoriteFilters): 
 			const nameMatch = favoriteExtended.entityName?.toLowerCase().includes(searchLower);
 			const typeMatch = favorite.entityType.toLowerCase().includes(searchLower);
 
-			if (!nameMatch && !typeMatch) {
+			if (!(nameMatch || typeMatch)) {
 				return false;
 			}
 		}

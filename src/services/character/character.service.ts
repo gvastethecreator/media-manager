@@ -298,7 +298,7 @@ export async function createCharacter(data: CharacterCreateInput): Promise<Chara
 				featuredImage: data.featuredImage || null,
 				parentId: data.parentId || null,
 
-				isFavorite: data.isFavorite || false,
+				isFavorite: data.isFavorite,
 				createdAt: new Date(),
 				updatedAt: new Date(),
 			})

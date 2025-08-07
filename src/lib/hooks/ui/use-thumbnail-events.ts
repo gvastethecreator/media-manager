@@ -6,7 +6,7 @@ import { useThumbnailStore } from '@/store/thumbnails.store';
 import type { ThumbnailError } from '@/types/thumbnails';
 
 const RETRY_INTERVAL = 5000;
-const HEARTBEAT_TIMEOUT = 30000;
+const HEARTBEAT_TIMEOUT = 30_000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 

@@ -66,7 +66,7 @@ export function CharacterCard({
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
 					className
 				)}
 			>
@@ -79,7 +79,7 @@ export function CharacterCard({
 		return (
 			<div
 				className={cn(
-					'w-[300px] md:w-[320px] h-[470px] rounded-lg overflow-hidden bg-red-100 dark:bg-red-900 flex items-center justify-center',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
 					className
 				)}
 			>
@@ -90,36 +90,36 @@ export function CharacterCard({
 
 	return (
 		<motion.div
+			aria-label={`Character: ${character.name}`}
 			className={cn(
 				'w-[300px] md:w-[320px]',
 				tcgMode ? 'h-[470px]' : 'h-[400px]',
 				compact && 'h-[220px]',
-				disabled && 'opacity-70 pointer-events-none',
+				disabled && 'pointer-events-none opacity-70',
 				className
 			)}
-			whileHover={!disabled ? { y: -8, transition: { duration: 0.3 } } : {}}
-			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
 			onClick={disabled || !character ? undefined : () => onClick?.(character)}
 			onKeyDown={handleKeyDown}
-			tabIndex={disabled || !onClick ? -1 : 0}
-			role={onClick ? 'button' : 'article'}
-			aria-label={`Character: ${character.name}`}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
+			role={onClick ? 'button' : 'article'}
+			tabIndex={disabled || !onClick ? -1 : 0}
+			whileHover={disabled ? {} : { y: -8, transition: { duration: 0.3 } }}
+			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
 		>
 			<CardContainer
-				primaryColor={primaryColor}
-				secondaryColor={secondaryColor}
 				className={cn(
 					'transition-all duration-300',
 					isHovered && 'scale-[1.02]',
 					isSelected && 'ring-4 ring-primary/60'
 				)}
+				primaryColor={primaryColor}
+				secondaryColor={secondaryColor}
 			>
 				{tcgMode && (
 					<>
 						<div
-							className="absolute inset-0 opacity-0 hover:opacity-30 transition-opacity duration-300 pointer-events-none z-1"
+							className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-30"
 							style={{
 								backgroundImage: `
 									linear-gradient(125deg,
@@ -133,7 +133,7 @@ export function CharacterCard({
 								animation: 'gradient-shift 3s ease infinite',
 							}}
 						/>
-						<div className="absolute inset-0 opacity-0 hover:opacity-20 transition-opacity duration-300 pointer-events-none z-1">
+						<div className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-20">
 							<div
 								className="absolute inset-0"
 								style={{
@@ -150,12 +150,12 @@ export function CharacterCard({
 								}}
 							/>
 						</div>
-						<div className="absolute top-1/3 left-1/2 -translate-x-1/2 -translate-y-1/2 w-20 h-20 opacity-10 pointer-events-none z-1">
+						<div className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/3 left-1/2 z-1 h-20 w-20 opacity-10">
 							<div
-								className="w-full h-full rounded-full border-2 border-dashed flex items-center justify-center"
+								className="flex h-full w-full items-center justify-center rounded-full border-2 border-dashed"
 								style={{ borderColor: primaryColor }}
 							>
-								<div className="text-xs font-bold" style={{ color: primaryColor }}>
+								<div className="font-bold text-xs" style={{ color: primaryColor }}>
 									POWER
 									<br />
 									{character.metadata?.power}
@@ -163,9 +163,9 @@ export function CharacterCard({
 							</div>
 						</div>
 						{character.isFavorite && (
-							<div className="absolute top-0 right-0 w-24 h-24 overflow-hidden z-30 pointer-events-none">
+							<div className="pointer-events-none absolute top-0 right-0 z-30 h-24 w-24 overflow-hidden">
 								<div
-									className="absolute top-0 right-0 w-24 h-24 rotate-45 translate-x-12 -translate-y-8 opacity-70"
+									className="-translate-y-8 absolute top-0 right-0 h-24 w-24 translate-x-12 rotate-45 opacity-70"
 									style={{
 										background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
 										backgroundSize: '600% 600%',
@@ -176,49 +176,49 @@ export function CharacterCard({
 						)}
 					</>
 				)}
-				<div className="flex flex-col h-full relative z-1">
+				<div className="relative z-1 flex h-full flex-col">
 					<CharacterCardHeader
-						name={character.name || 'Sin nombre'}
-						emoji={character.emoji || ''}
-						color={primaryColor}
-						isFavorite={character.isFavorite || false}
 						class={character.class}
+						color={primaryColor}
+						compact={compact}
+						emoji={character.emoji || ''}
+						isFavorite={character.isFavorite}
 						level={character.level}
+						name={character.name || 'Sin nombre'}
 						race={character.race}
 						tcgMode={tcgMode}
-						compact={compact}
 					/>
 					{!compact && (
 						<>
 							<CharacterCardImages
+								compact={false}
 								images={recentMediaData?.map((m) => m.thumbnailUrl) ?? []}
 								tcgMode={tcgMode}
-								compact={false}
 							/>
 							<CharacterCardContent
-								description={character.description}
-								stats={character.stats}
 								abilities={character.parsedAbilities}
-								backstory={character.backstory}
 								alignment={character.alignment}
+								backstory={character.backstory}
+								description={character.description}
+								metadata={character.metadata}
 								primaryColor={primaryColor}
 								secondaryColor={secondaryColor}
-								metadata={character.metadata}
+								stats={character.stats}
 								tcgMode={tcgMode}
 							/>
 						</>
 					)}
 					<CharacterCardFooter
-						id={character.id}
 						cardId={character.metadata?.cardId ?? ''}
+						compact={compact}
+						id={character.id}
+						level={character.level}
+						primaryColor={primaryColor}
 						rarityLevel={
 							character.metadata?.rarityLevel
 								? ({ Common: 1, Uncommon: 2, Rare: 3, Mythic: 4 }[character.metadata.rarityLevel] ?? 1)
 								: 1
 						}
-						primaryColor={primaryColor}
-						level={character.level}
-						compact={compact}
 					/>
 				</div>
 			</CardContainer>

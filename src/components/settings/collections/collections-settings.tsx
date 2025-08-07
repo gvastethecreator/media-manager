@@ -161,11 +161,11 @@ export function CollectionsSettings() {
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-3">
 						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">Cargando colecciones...</p>
+						<p className="text-muted-foreground text-sm">Cargando colecciones...</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -174,13 +174,13 @@ export function CollectionsSettings() {
 
 	if (error) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
-					<div className="flex flex-col items-center gap-4 text-center p-6">
+					<div className="flex flex-col items-center gap-4 p-6 text-center">
 						<AlertCircle className="h-12 w-12 text-destructive" />
 						<div>
-							<h3 className="text-lg font-semibold">Error al cargar colecciones</h3>
-							<p className="text-sm text-muted-foreground mt-1">
+							<h3 className="font-semibold text-lg">Error al cargar colecciones</h3>
+							<p className="mt-1 text-muted-foreground text-sm">
 								{error instanceof Error ? error.message : 'Error desconocido'}
 							</p>
 						</div>
@@ -197,13 +197,13 @@ export function CollectionsSettings() {
 		<div className="grid grid-cols-12 gap-3">
 			{/* Panel izquierdo: Lista de colecciones */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="space-y-1 py-2 px-3">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-sm flex items-center">
+							<CardTitle className="flex items-center text-sm">
 								Colecciones ({filteredCollections.length})
 								{filteredCollections.length !== collections.length && (
-									<Badge variant="outline" className="ml-2 text-[10px]">
+									<Badge className="ml-2 text-[10px]" variant="outline">
 										Filtradas
 									</Badge>
 								)}
@@ -211,11 +211,11 @@ export function CollectionsSettings() {
 							<div className="flex items-center gap-1">
 								<Popover>
 									<PopoverTrigger asChild>
-										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+										<Button className="h-6 w-6 p-0" size="sm" variant="ghost">
 											<Filter className="h-3.5 w-3.5" />
 										</Button>
 									</PopoverTrigger>
-									<PopoverContent className="w-72" align="end">
+									<PopoverContent align="end" className="w-72">
 										<div className="space-y-4">
 											<h4 className="font-medium text-sm">Filtrar Colecciones</h4>
 
@@ -223,9 +223,9 @@ export function CollectionsSettings() {
 												<Label htmlFor="search">Buscar</Label>
 												<Input
 													id="search"
+													onChange={(e) => setSearchQuery(e.target.value)}
 													placeholder="Buscar colecciones..."
 													value={searchQuery}
-													onChange={(e) => setSearchQuery(e.target.value)}
 												/>
 											</div>
 
@@ -233,17 +233,17 @@ export function CollectionsSettings() {
 												<Label>Categorías</Label>
 												<div className="grid grid-cols-2 gap-2">
 													{Object.values(CollectionCategory).map((category) => (
-														<div key={category} className="flex items-center space-x-2">
+														<div className="flex items-center space-x-2" key={category}>
 															<Checkbox
-																id={`category-${category}`}
 																checked={selectedCategories.includes(category)}
+																id={`category-${category}`}
 																onCheckedChange={(checked) => {
 																	setSelectedCategories((prev) =>
 																		checked ? [...prev, category] : prev.filter((c) => c !== category)
 																	);
 																}}
 															/>
-															<Label htmlFor={`category-${category}`} className="text-sm">
+															<Label className="text-sm" htmlFor={`category-${category}`}>
 																{category}
 															</Label>
 														</div>
@@ -253,22 +253,22 @@ export function CollectionsSettings() {
 
 											<div className="flex items-center space-x-2">
 												<Checkbox
-													id="only-favorites"
 													checked={onlyFavorites}
+													id="only-favorites"
 													onCheckedChange={(checked) => setOnlyFavorites(Boolean(checked))}
 												/>
-												<Label htmlFor="only-favorites" className="text-sm">
+												<Label className="text-sm" htmlFor="only-favorites">
 													Solo favoritos
 												</Label>
 											</div>
 
-											<Button onClick={clearFilters} variant="outline" className="w-full">
+											<Button className="w-full" onClick={clearFilters} variant="outline">
 												Limpiar Filtros
 											</Button>
 										</div>
 									</PopoverContent>
 								</Popover>
-								<Button size="sm" onClick={() => setIsEditing(false)}>
+								<Button onClick={() => setIsEditing(false)} size="sm">
 									<PlusCircle className="h-4 w-4" />
 								</Button>
 							</div>
@@ -279,16 +279,15 @@ export function CollectionsSettings() {
 							<div className="space-y-2">
 								{filteredCollections.length === 0 && (
 									<EmptyState
+										description="Crea tu primera colección para organizar tus imágenes."
 										icon={Library}
 										title="No hay colecciones"
-										description="Crea tu primera colección para organizar tus imágenes."
 									/>
 								)}
 								{filteredCollections.map((collection: CollectionWithStats) => (
 									<div
+										className={`flex cursor-pointer items-center justify-between rounded-md p-2 transition-colors${selectedCollection?.id === collection.id ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
 										key={collection.id}
-										className={`flex items-center justify-between p-2 rounded-md cursor-pointer transition-colors
-											${selectedCollection?.id === collection.id ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
 										onClick={() => handleEditCollection(collection)}
 									>
 										<div className="flex items-center gap-2">
@@ -297,18 +296,18 @@ export function CollectionsSettings() {
 											</span>
 											<div className="flex flex-col">
 												<span className="font-medium text-sm">{collection.name}</span>
-												<span className="text-xs text-muted-foreground">
+												<span className="text-muted-foreground text-xs">
 													{collection.stats?.imageCount || 0} imágenes
 												</span>
 											</div>
 										</div>
 										<Button
-											variant="ghost"
-											size="sm"
 											onClick={(e) => {
 												e.stopPropagation();
 												handleDeleteButtonClick(collection.id);
 											}}
+											size="sm"
+											variant="ghost"
 										>
 											<Trash className="h-4 w-4 text-destructive" />
 										</Button>
@@ -321,8 +320,8 @@ export function CollectionsSettings() {
 			</div>
 			{/* Panel derecho: Formulario de edición/creación */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="py-2 px-3">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="px-3 py-2">
 						<div className="flex items-center justify-between">
 							<div>
 								<CardTitle className="text-sm">{isEditing ? 'Editar Colección' : 'Nueva Colección'}</CardTitle>
@@ -335,48 +334,48 @@ export function CollectionsSettings() {
 							<div className="flex gap-1">
 								{isEditing && selectedCollection && (
 									<>
-										<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleReset}>
+										<Button className="h-7 text-xs" onClick={handleReset} size="sm" variant="outline">
 											Cancelar
 										</Button>
 										<Button
-											variant="destructive"
-											size="sm"
 											className="h-7 text-xs"
 											onClick={() => handleDeleteCollection(selectedCollection.id)}
+											size="sm"
+											variant="destructive"
 										>
-											<Trash className="h-3 w-3 mr-1" />
+											<Trash className="mr-1 h-3 w-3" />
 											Eliminar
 										</Button>
 									</>
 								)}
-								<Button type="submit" size="sm" className="h-7 text-xs" form="collection-form">
-									<Save className="h-3 w-3 mr-1" />
+								<Button className="h-7 text-xs" form="collection-form" size="sm" type="submit">
+									<Save className="mr-1 h-3 w-3" />
 									{isEditing ? 'Guardar' : 'Crear'}
 								</Button>
 							</div>
 						</div>
 					</CardHeader>
-					<CardContent className="p-3 flex-1 overflow-hidden">
+					<CardContent className="flex-1 overflow-hidden p-3">
 						<ScrollArea className="h-full pr-3">
-							<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+							<div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-2">
 								<div className="space-y-3">
 									<CreateCollectionForm
-										key={selectedCollection?.id || 'new-collection'}
 										collection={selectedCollection}
 										isEditing={isEditing}
-										onCreated={handleCollectionCreated}
-										onUpdated={handleCollectionUpdated}
+										key={selectedCollection?.id || 'new-collection'}
 										onCancel={handleReset}
+										onCreated={handleCollectionCreated}
 										onPreview={handlePreview}
+										onUpdated={handleCollectionUpdated}
 									/>
 								</div>
-								<div className="hidden lg:flex flex-col items-center justify-start">
-									<h3 className="text-xs font-medium mb-2">Vista Previa</h3>
+								<div className="hidden flex-col items-center justify-start lg:flex">
+									<h3 className="mb-2 font-medium text-xs">Vista Previa</h3>
 									<div className="w-[220px] transition-all duration-300">
 										{previewData || selectedCollection ? (
-											<div className="flex flex-col p-4 border rounded-lg bg-background">
+											<div className="flex flex-col rounded-lg border bg-background p-4">
 												<div
-													className="w-full aspect-video mb-3 rounded-md flex items-center justify-center bg-muted"
+													className="mb-3 flex aspect-video w-full items-center justify-center rounded-md bg-muted"
 													style={{
 														backgroundColor:
 															COLLECTION_CATEGORY_COLORS[
@@ -390,36 +389,36 @@ export function CollectionsSettings() {
 														] || '📚'}
 													</span>
 												</div>
-												<h3 className="text-lg font-medium">
+												<h3 className="font-medium text-lg">
 													{previewData?.name || selectedCollection?.name || 'Nueva Colección'}
 												</h3>
-												<p className="text-muted-foreground mt-2 text-sm">
+												<p className="mt-2 text-muted-foreground text-sm">
 													{previewData?.description || selectedCollection?.description || 'Sin descripción'}
 												</p>
 
-												<div className="flex flex-wrap gap-2 mt-3">
+												<div className="mt-3 flex flex-wrap gap-2">
 													{(previewData?.category || selectedCollection?.category) && (
-														<Badge variant="secondary" className="text-xs">
+														<Badge className="text-xs" variant="secondary">
 															{previewData?.category || selectedCollection?.category}
 														</Badge>
 													)}
 													{(previewData?.isFavorite || selectedCollection?.isFavorite) && (
-														<Badge variant="outline" className="text-xs">
+														<Badge className="text-xs" variant="outline">
 															Favorito
 														</Badge>
 													)}
 												</div>
 
 												{selectedCollection?.stats?.imageCount ? (
-													<p className="mt-4 text-xs text-muted-foreground">
+													<p className="mt-4 text-muted-foreground text-xs">
 														{selectedCollection.stats.imageCount} imágenes asociadas
 													</p>
 												) : null}
 											</div>
 										) : (
-											<div className="flex flex-col items-center justify-center h-[260px] bg-muted/50 rounded-lg border border-dashed">
+											<div className="flex h-[260px] flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50">
 												<Library className="h-7 w-7 text-muted-foreground/50" />
-												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
+												<p className="mt-2 text-[10px] text-muted-foreground">Vista previa</p>
 											</div>
 										)}
 									</div>

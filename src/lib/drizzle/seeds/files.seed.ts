@@ -30,7 +30,7 @@ export async function seedFiles(db: LibSQLDatabase<Record<string, never>>) {
 				name: 'backup.zip',
 				path: '/backups/backup.zip',
 				folderId: 'folder-2',
-				size: 1048576,
+				size: 1_048_576,
 				mimeType: 'application/zip',
 				fileType: 'archive',
 				extension: 'zip',

@@ -41,12 +41,12 @@ export function TagContentView() {
 
 	// Renderizar el componente adecuadamente
 	return (
-		<div className="flex flex-col h-full w-full p-4">
-			<h1 className="text-2xl font-bold mb-4">Imágenes con etiqueta: {selectedTag?.name || 'Cargando...'}</h1>
+		<div className="flex h-full w-full flex-col p-4">
+			<h1 className="mb-4 font-bold text-2xl">Imágenes con etiqueta: {selectedTag?.name || 'Cargando...'}</h1>
 
-			<p className="text-muted-foreground mb-6">{selectedTag?._count?.images || 0} imágenes con esta etiqueta</p>
+			<p className="mb-6 text-muted-foreground">{selectedTag?._count?.images || 0} imágenes con esta etiqueta</p>
 
-			<div className="text-center mt-8">
+			<div className="mt-8 text-center">
 				<p className="text-muted-foreground">Componente TagContentView en desarrollo. Próximamente disponible.</p>
 			</div>
 		</div>

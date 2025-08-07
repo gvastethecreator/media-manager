@@ -49,34 +49,34 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({ entity, config, isV
 
 		if (config.showName) {
 			items.push(
-				<div key="name" className="flex items-center gap-1">
+				<div className="flex items-center gap-1" key="name">
 					<FileText className="h-3 w-3 flex-shrink-0" />
-					<span className="truncate text-sm font-medium">{name}</span>
+					<span className="truncate font-medium text-sm">{name}</span>
 				</div>
 			);
 		}
 
 		if (config.showSize && size > 0) {
 			items.push(
-				<div key="size" className="flex items-center gap-1">
-					<span className="text-xs text-muted-foreground">{formatFileSize(size)}</span>
+				<div className="flex items-center gap-1" key="size">
+					<span className="text-muted-foreground text-xs">{formatFileSize(size)}</span>
 				</div>
 			);
 		}
 
 		if (config.showType) {
 			items.push(
-				<div key="type" className="flex items-center gap-1">
-					<span className="text-xs uppercase tracking-wide text-muted-foreground">{type}</span>
+				<div className="flex items-center gap-1" key="type">
+					<span className="text-muted-foreground text-xs uppercase tracking-wide">{type}</span>
 				</div>
 			);
 		}
 
 		if (config.showDimensions && dimensions?.width && dimensions?.height) {
 			items.push(
-				<div key="dimensions" className="flex items-center gap-1">
+				<div className="flex items-center gap-1" key="dimensions">
 					<Image className="h-3 w-3 flex-shrink-0" />
-					<span className="text-xs text-muted-foreground">
+					<span className="text-muted-foreground text-xs">
 						{dimensions.width} × {dimensions.height}
 					</span>
 				</div>
@@ -85,36 +85,36 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({ entity, config, isV
 
 		if (config.showDuration && typeof duration === 'number') {
 			items.push(
-				<div key="duration" className="flex items-center gap-1">
+				<div className="flex items-center gap-1" key="duration">
 					<Clock className="h-3 w-3 flex-shrink-0" />
-					<span className="text-xs text-muted-foreground">{formatDuration(duration)}</span>
+					<span className="text-muted-foreground text-xs">{formatDuration(duration)}</span>
 				</div>
 			);
 		}
 
 		if (config.showDate && mtime) {
 			items.push(
-				<div key="date" className="flex items-center gap-1">
+				<div className="flex items-center gap-1" key="date">
 					<Calendar className="h-3 w-3 flex-shrink-0" />
-					<span className="text-xs text-muted-foreground">{formatDate(new Date(mtime))}</span>
+					<span className="text-muted-foreground text-xs">{formatDate(new Date(mtime))}</span>
 				</div>
 			);
 		}
 
 		if (config.showTags && tags.length > 0) {
 			items.push(
-				<div key="tags" className="flex items-center gap-1">
+				<div className="flex items-center gap-1" key="tags">
 					<Tag className="h-3 w-3 flex-shrink-0" />
 					<div className="flex flex-wrap gap-1">
 						{tags.slice(0, 2).map((tag: string, index: number) => (
 							<span
+								className="inline-block rounded bg-secondary/80 px-1 py-0.5 text-secondary-foreground text-xs"
 								key={index}
-								className="inline-block px-1 py-0.5 rounded text-xs bg-secondary/80 text-secondary-foreground"
 							>
 								{tag}
 							</span>
 						))}
-						{tags.length > 2 && <span className="text-xs text-muted-foreground">+{tags.length - 2}</span>}
+						{tags.length > 2 && <span className="text-muted-foreground text-xs">+{tags.length - 2}</span>}
 					</div>
 				</div>
 			);
@@ -134,20 +134,16 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({ entity, config, isV
 		<AnimatePresence>
 			{isVisible && (
 				<motion.div
-					initial={{ opacity: 0, scale: 0.95 }}
 					animate={{ opacity: 1, scale: 1 }}
-					exit={{ opacity: 0, scale: 0.95 }}
-					transition={{ duration: 0.15 }}
-					className={`
-						absolute z-10 pointer-events-none
-						${getPositionClasses()}
+					className={`absolute z-10 pointer-events-none${getPositionClasses()}
 						${className}
 					`}
+					exit={{ opacity: 0, scale: 0.95 }}
+					initial={{ opacity: 0, scale: 0.95 }}
+					transition={{ duration: 0.15 }}
 				>
 					<div
-						className={`
-							max-w-full m-1 p-2 rounded-md shadow-lg
-							${config.showBackground ? 'bg-background/95 border border-border backdrop-blur-sm' : ''}
+						className={`m-1 max-w-full rounded-md p-2 shadow-lg${config.showBackground ? 'border border-border bg-background/95 backdrop-blur-sm' : ''}
 						`}
 					>
 						<div className="space-y-1">{content}</div>

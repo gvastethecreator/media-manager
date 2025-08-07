@@ -41,8 +41,7 @@ export function PropertiesSettings() {
 				matches =
 					matches &&
 					(property.name.toLowerCase().includes(normalizedQuery) ||
-						property.description?.toLowerCase().includes(normalizedQuery) ||
-						false);
+						property.description?.toLowerCase().includes(normalizedQuery));
 			}
 
 			if (selectedCategories.length > 0) {
@@ -128,7 +127,7 @@ export function PropertiesSettings() {
 			// Implementar toggle favorite cuando esté disponible en la API
 			// const updatedProperty = await togglePropertyFavorite(property.id);
 			toastService.success(
-				`${property.name} ${!property.isFavorite ? 'marcada como favorita' : 'desmarcada como favorita'}`
+				`${property.name} ${property.isFavorite ? 'desmarcada como favorita' : 'marcada como favorita'}`
 			);
 		} catch (err) {
 			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
@@ -141,10 +140,10 @@ export function PropertiesSettings() {
 	// Mostrar loading state
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+			<div className="flex h-[calc(100vh-8rem)] items-center justify-center">
 				<div className="text-center">
-					<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gray-900 mx-auto" />
-					<p className="mt-2 text-sm text-gray-500">Cargando propiedades...</p>
+					<div className="mx-auto h-8 w-8 animate-spin rounded-full border-gray-900 border-b-2" />
+					<p className="mt-2 text-gray-500 text-sm">Cargando propiedades...</p>
 				</div>
 			</div>
 		);
@@ -153,10 +152,10 @@ export function PropertiesSettings() {
 	// Mostrar error state
 	if (error) {
 		return (
-			<div className="flex items-center justify-center h-[calc(100vh-8rem)]">
+			<div className="flex h-[calc(100vh-8rem)] items-center justify-center">
 				<div className="text-center">
 					<p className="text-red-500">Error al cargar las propiedades</p>
-					<p className="text-sm text-gray-500 mt-1">{error instanceof Error ? error.message : 'Error desconocido'}</p>
+					<p className="mt-1 text-gray-500 text-sm">{error instanceof Error ? error.message : 'Error desconocido'}</p>
 				</div>
 			</div>
 		);
@@ -167,16 +166,16 @@ export function PropertiesSettings() {
 			<div className="grid grid-cols-12 gap-3">
 				{/* Panel izquierdo: Lista de propiedades */}
 				<div className="col-span-12 md:col-span-5 lg:col-span-4">
-					<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-						<CardHeader className="space-y-1 py-2 px-3">
+					<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+						<CardHeader className="space-y-1 px-3 py-2">
 							<div className="flex items-center justify-between">
 								<div>
-									<CardTitle className="text-xl font-bold">Propiedades</CardTitle>
-									<p className="text-xs text-muted-foreground">
+									<CardTitle className="font-bold text-xl">Propiedades</CardTitle>
+									<p className="text-muted-foreground text-xs">
 										{stats.totalProperties} total • {stats.favoriteProperties} favoritas
 									</p>
 								</div>
-								<Button size="sm" variant="ghost" onClick={() => setIsCreateDialogOpen(true)}>
+								<Button onClick={() => setIsCreateDialogOpen(true)} size="sm" variant="ghost">
 									<Plus className="h-4 w-4" />
 								</Button>
 							</div>
@@ -184,19 +183,19 @@ export function PropertiesSettings() {
 							{/* Filtros */}
 							<div className="space-y-2">
 								{/* Búsqueda */}
-								<div className="flex items-center gap-2 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors">
+								<div className="flex w-full items-center gap-2 rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors">
 									<Search className="h-4 w-4 opacity-50" />
 									<Input
+										className="h-8 border-0 bg-transparent p-0 focus-visible:outline-none focus-visible:ring-0"
+										onChange={(e) => setSearchQuery(e.target.value)}
 										placeholder="Buscar propiedades..."
 										value={searchQuery}
-										onChange={(e) => setSearchQuery(e.target.value)}
-										className="h-8 p-0 border-0 bg-transparent focus-visible:outline-none focus-visible:ring-0"
 									/>
 								</div>
 
 								{/* Filtros adicionales */}
 								<div className="flex gap-2">
-									<Toggle pressed={onlyFavorites} onPressedChange={setOnlyFavorites} size="sm">
+									<Toggle onPressedChange={setOnlyFavorites} pressed={onlyFavorites} size="sm">
 										<Star className="h-4 w-4" />
 									</Toggle>
 								</div>
@@ -208,34 +207,34 @@ export function PropertiesSettings() {
 								<div className="space-y-1 p-2">
 									{sortedProperties.map((property) => (
 										<div
-											key={property.id}
-											className={`relative group/item rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${
+											className={`group/item relative rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${
 												selectedProperty?.id === property.id ? 'bg-secondary text-secondary-foreground' : ''
 											}`}
+											key={property.id}
 										>
 											<Button
-												variant="ghost"
-												className="w-full justify-start h-12 relative"
+												className="relative h-12 w-full justify-start"
 												onClick={() => setSelectedProperty(property)}
+												variant="ghost"
 											>
-												<div className="flex items-center gap-2 w-full">
-													<div className="flex flex-col items-start flex-1">
+												<div className="flex w-full items-center gap-2">
+													<div className="flex flex-1 flex-col items-start">
 														<span className="font-medium">{property.name}</span>
 														<span className="text-xs opacity-50">
 															{property.stats?.totalAssociations || 0} asociaciones
 														</span>
 													</div>
 												</div>
-												{property.isFavorite && <Star className="h-3 w-3 absolute right-8 top-2" />}
+												{property.isFavorite && <Star className="absolute top-2 right-8 h-3 w-3" />}
 											</Button>
 											<Button
-												variant="ghost"
-												size="icon"
-												className="absolute right-1 top-1 opacity-0 group-hover/item:opacity-100 h-10 w-10"
+												className="absolute top-1 right-1 h-10 w-10 opacity-0 group-hover/item:opacity-100"
 												onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
 													e.stopPropagation();
 													handleDeleteProperty(property.id);
 												}}
+												size="icon"
+												variant="ghost"
 											>
 												<Trash2 className="h-4 w-4" />
 											</Button>
@@ -250,15 +249,15 @@ export function PropertiesSettings() {
 				{/* Panel derecho: Detalles o creación */}
 				<div className="col-span-12 md:col-span-7 lg:col-span-8">
 					{selectedProperty && !isEditMode ? (
-						<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)]">
+						<Card className="h-[calc(100vh-8rem)] rounded-sm border-none bg-muted/30">
 							<CardHeader>
 								<div className="flex items-center justify-between">
 									<CardTitle>{selectedProperty.name}</CardTitle>
 									<div className="flex gap-2">
-										<Button size="sm" variant="outline" onClick={() => setIsEditMode(true)}>
+										<Button onClick={() => setIsEditMode(true)} size="sm" variant="outline">
 											Editar
 										</Button>
-										<Button size="sm" variant="destructive" onClick={() => handleDeleteProperty(selectedProperty.id)}>
+										<Button onClick={() => handleDeleteProperty(selectedProperty.id)} size="sm" variant="destructive">
 											Eliminar
 										</Button>
 									</div>
@@ -267,18 +266,18 @@ export function PropertiesSettings() {
 							<CardContent>
 								<div className="space-y-4">
 									<div>
-										<h4 className="font-medium mb-2">Valor</h4>
-										<p className="text-sm text-muted-foreground">{selectedProperty.value}</p>
+										<h4 className="mb-2 font-medium">Valor</h4>
+										<p className="text-muted-foreground text-sm">{selectedProperty.value}</p>
 									</div>
 									{selectedProperty.description && (
 										<div>
-											<h4 className="font-medium mb-2">Descripción</h4>
-											<p className="text-sm text-muted-foreground">{selectedProperty.description}</p>
+											<h4 className="mb-2 font-medium">Descripción</h4>
+											<p className="text-muted-foreground text-sm">{selectedProperty.description}</p>
 										</div>
 									)}
 									<div>
-										<h4 className="font-medium mb-2">Estadísticas</h4>
-										<p className="text-sm text-muted-foreground">
+										<h4 className="mb-2 font-medium">Estadísticas</h4>
+										<p className="text-muted-foreground text-sm">
 											{selectedProperty.stats?.totalAssociations || 0} asociaciones totales
 										</p>
 									</div>
@@ -287,34 +286,34 @@ export function PropertiesSettings() {
 						</Card>
 					) : isEditMode && selectedProperty ? (
 						<CreatePropertyForm
-							property={selectedProperty}
 							isEditing
+							onCancel={() => setIsEditMode(false)}
+							onCreated={() => {}}
 							onUpdated={(data) => {
 								setIsEditMode(false);
 								setSelectedProperty(data);
 							}}
-							onCreated={() => {}}
-							onCancel={() => setIsEditMode(false)}
+							property={selectedProperty}
 						/>
 					) : (
-						<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col items-center justify-center">
+						<Card className="flex h-[calc(100vh-8rem)] flex-col items-center justify-center rounded-sm border-none bg-muted/30">
 							<div className="text-center">
 								<Plus className="mx-auto h-12 w-12 text-gray-400" />
-								<h3 className="mt-2 text-sm font-medium text-gray-900 dark:text-gray-100">Selecciona una propiedad</h3>
-								<p className="mt-1 text-sm text-gray-500">O crea una nueva para empezar</p>
+								<h3 className="mt-2 font-medium text-gray-900 text-sm dark:text-gray-100">Selecciona una propiedad</h3>
+								<p className="mt-1 text-gray-500 text-sm">O crea una nueva para empezar</p>
 							</div>
 						</Card>
 					)}
 				</div>
 
-				<Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+				<Dialog onOpenChange={setIsCreateDialogOpen} open={isCreateDialogOpen}>
 					<CreatePropertyForm
+						onCancel={() => setIsCreateDialogOpen(false)}
 						onCreated={(_data) => {
 							setIsCreateDialogOpen(false);
 							toastService.success('Propiedad creada correctamente');
 						}}
 						onUpdated={() => {}}
-						onCancel={() => setIsCreateDialogOpen(false)}
 					/>
 				</Dialog>
 			</div>

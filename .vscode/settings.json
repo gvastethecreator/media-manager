@@ -25,10 +25,7 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "smoothtype.duration": 160,
-  "gitlens.gitCommands.skipConfirmations": [
-    "fetch:command",
-    "switch:command"
-  ],
+  "gitlens.gitCommands.skipConfirmations": ["fetch:command", "switch:command"],
   "files.autoGuessEncoding": true,
   "editor.inlineSuggest.enabled": true,
   "editor.suggest.preview": true,
@@ -89,9 +86,7 @@
   "terminal.integrated.profiles.windows": {
     "PowerShell": {
       "source": "PowerShell",
-      "args": [
-        "-NoProfile"
-      ],
+      "args": ["-NoProfile"],
       "icon": "terminal-powershell"
     }
   },

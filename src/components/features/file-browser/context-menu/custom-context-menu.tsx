@@ -60,23 +60,23 @@ const MenuItem: React.FC<MenuItemProps> = ({
 }) => {
 	return (
 		<Button
-			variant="ghost"
 			className={cn(
-				'w-full justify-start h-8 px-3 py-1.5 text-sm font-normal',
+				'h-8 w-full justify-start px-3 py-1.5 font-normal text-sm',
 				'hover:bg-accent hover:text-accent-foreground',
 				variant === 'destructive' && 'text-destructive hover:bg-destructive/10 hover:text-destructive',
-				disabled && 'opacity-50 cursor-not-allowed'
+				disabled && 'cursor-not-allowed opacity-50'
 			)}
-			onClick={onClick}
 			disabled={disabled}
+			onClick={onClick}
+			variant="ghost"
 		>
-			<div className="flex items-center justify-between w-full">
+			<div className="flex w-full items-center justify-between">
 				<div className="flex items-center gap-2">
 					{icon}
 					<span>{label}</span>
 				</div>
 				<div className="flex items-center gap-1">
-					{shortcut && <span className="text-xs text-muted-foreground">{shortcut}</span>}
+					{shortcut && <span className="text-muted-foreground text-xs">{shortcut}</span>}
 					{hasSubmenu && <ChevronRight className="h-3 w-3 text-muted-foreground" />}
 				</div>
 			</div>
@@ -147,48 +147,48 @@ export const CustomContextMenu: React.FC<CustomContextMenuProps> = ({
 		<AnimatePresence>
 			{isOpen && (
 				<motion.div
-					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
-					exit={{ opacity: 0 }}
-					transition={{ duration: 0.15 }}
-					className="fixed inset-0 z-[9999]"
-					role="dialog"
-					aria-modal="true"
 					aria-label="Menú contextual"
+					aria-modal="true"
+					className="fixed inset-0 z-[9999]"
+					exit={{ opacity: 0 }}
+					initial={{ opacity: 0 }}
 					onClick={handleBackdropClick}
-					onKeyDown={handleKeyDown}
 					onContextMenu={(e) => e.preventDefault()}
+					onKeyDown={handleKeyDown}
+					role="dialog"
 					tabIndex={-1}
+					transition={{ duration: 0.15 }}
 				>
 					<motion.div
-						initial={{ scale: 0.95, opacity: 0, y: -10 }}
 						animate={{ scale: 1, opacity: 1, y: 0 }}
+						className="absolute"
 						exit={{ scale: 0.95, opacity: 0, y: -10 }}
+						initial={{ scale: 0.95, opacity: 0, y: -10 }}
+						onClick={(e) => e.stopPropagation()}
+						onKeyDown={handleKeyDown}
+						role="menu"
+						style={{
+							left: menuPosition.x,
+							top: menuPosition.y,
+						}}
 						transition={{
 							type: 'spring',
 							stiffness: 400,
 							damping: 25,
 							duration: 0.2,
 						}}
-						className="absolute"
-						style={{
-							left: menuPosition.x,
-							top: menuPosition.y,
-						}}
-						role="menu"
-						onClick={(e) => e.stopPropagation()}
-						onKeyDown={handleKeyDown}
 					>
-						<div className="bg-popover border border-border rounded-md shadow-lg min-w-[280px] max-w-[320px] py-2">
+						<div className="min-w-[280px] max-w-[320px] rounded-md border border-border bg-popover py-2 shadow-lg">
 							{/* Encabezado con información de selección */}
 							{selectedCount > 0 && (
 								<>
-									<div className="px-3 py-2 border-b border-border">
+									<div className="border-border border-b px-3 py-2">
 										<div className="flex items-center gap-2">
-											<Badge variant="secondary" className="text-xs">
+											<Badge className="text-xs" variant="secondary">
 												{selectedCount} {selectedCount === 1 ? 'elemento' : 'elementos'}
 											</Badge>
-											{isMultiSelection && <span className="text-xs text-muted-foreground">seleccionados</span>}
+											{isMultiSelection && <span className="text-muted-foreground text-xs">seleccionados</span>}
 										</div>
 									</div>
 								</>
@@ -197,9 +197,9 @@ export const CustomContextMenu: React.FC<CustomContextMenuProps> = ({
 							<div className="px-1 py-1">
 								{/* Acciones de Undo/Redo */}
 								<div className="flex items-center gap-1 px-2 py-1">
-									<UndoButton variant="ghost" size="sm" className="h-7" />
-									<RedoButton variant="ghost" size="sm" className="h-7" />
-									<Button variant="ghost" size="sm" className="h-7" onClick={() => handleAction('configure')}>
+									<UndoButton className="h-7" size="sm" variant="ghost" />
+									<RedoButton className="h-7" size="sm" variant="ghost" />
+									<Button className="h-7" onClick={() => handleAction('configure')} size="sm" variant="ghost">
 										<Settings className="h-3.5 w-3.5" />
 									</Button>
 								</div>
@@ -235,37 +235,37 @@ export const CustomContextMenu: React.FC<CustomContextMenuProps> = ({
 											onClick={() => handleAction('toggle-favorite')}
 										/>
 										<MenuItem
+											hasSubmenu
 											icon={<Tags className="h-4 w-4" />}
 											label="Gestionar etiquetas"
 											onClick={() => handleAction('manage-tags')}
-											hasSubmenu
 										/>
 										<MenuItem
+											hasSubmenu
 											icon={<Move3D className="h-4 w-4" />}
 											label={isMultiSelection ? 'Mover elementos' : 'Mover'}
 											onClick={() => handleAction('move')}
-											hasSubmenu
 										/>
 										<MenuItem
+											hasSubmenu
 											icon={<FolderPlus className="h-4 w-4" />}
 											label="Añadir a colección"
 											onClick={() => handleAction('add-to-collection')}
-											hasSubmenu
 										/>
 
 										<Separator className="my-2" />
 
 										<MenuItem
+											hasSubmenu
 											icon={<Share2 className="h-4 w-4" />}
 											label="Compartir"
 											onClick={() => handleAction('share')}
-											hasSubmenu
 										/>
 										<MenuItem
+											hasSubmenu
 											icon={<MoreHorizontal className="h-4 w-4" />}
 											label="Más acciones"
 											onClick={() => handleAction('more-actions')}
-											hasSubmenu
 										/>
 
 										<Separator className="my-2" />
@@ -274,8 +274,8 @@ export const CustomContextMenu: React.FC<CustomContextMenuProps> = ({
 											icon={<Trash2 className="h-4 w-4" />}
 											label={isMultiSelection ? 'Eliminar elementos' : 'Eliminar'}
 											onClick={() => handleAction('delete')}
-											variant="destructive"
 											shortcut="Delete"
+											variant="destructive"
 										/>
 									</>
 								) : (
@@ -295,11 +295,11 @@ export const CustomContextMenu: React.FC<CustomContextMenuProps> = ({
 										<Separator className="my-2" />
 
 										<MenuItem
+											disabled={true}
 											icon={<Copy className="h-4 w-4" />}
 											label="Pegar"
 											onClick={() => handleAction('paste')}
-											shortcut="Ctrl+V"
-											disabled={true} // TODO: Verificar si hay elementos en portapapeles
+											shortcut="Ctrl+V" // TODO: Verificar si hay elementos en portapapeles
 										/>
 
 										<Separator className="my-2" />

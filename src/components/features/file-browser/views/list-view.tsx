@@ -88,14 +88,16 @@ export const ListView = memo<ListViewProps>(function ListView({
 			// Verificar si es un click en espacio vacío (no en elementos de la lista)
 			const isEmptySpaceClick =
 				target === currentTarget ||
-				(!target.closest('[data-testid^="list-row-"]') &&
-					!target.closest('th') &&
-					!target.closest('button') &&
-					!target.closest('[role="button"]') &&
-					!target.closest('input') &&
-					!target.closest('textarea') &&
-					!target.closest('[data-radix-dropdown-menu-content]') &&
-					!target.closest('[data-radix-dropdown-menu-trigger]'));
+				!(
+					target.closest('[data-testid^="list-row-"]') ||
+					target.closest('th') ||
+					target.closest('button') ||
+					target.closest('[role="button"]') ||
+					target.closest('input') ||
+					target.closest('textarea') ||
+					target.closest('[data-radix-dropdown-menu-content]') ||
+					target.closest('[data-radix-dropdown-menu-trigger]')
+				);
 
 			if (isEmptySpaceClick && derivedProps.hasSelection) {
 				// Feedback visual para la deselección
@@ -238,47 +240,47 @@ export const ListView = memo<ListViewProps>(function ListView({
 
 	return (
 		<div
+			aria-describedby="list-view-instructions"
+			aria-label={`Vista de lista con ${items.length} elementos`}
 			className={cn('w-full overflow-hidden', className)}
 			data-testid="listview-container"
 			data-view-type="list"
-			role="grid"
-			aria-label={`Vista de lista con ${items.length} elementos`}
-			aria-describedby="list-view-instructions"
 			onKeyDown={handleKeyDown}
+			role="grid"
 		>
-			<div id="list-view-instructions" className="sr-only">
+			<div className="sr-only" id="list-view-instructions">
 				Usa las flechas arriba y abajo para navegar, Home y End para ir al inicio o final, PageUp y PageDown para
 				navegar rápidamente.
 			</div>
 			{/* Tabla con header fijo */}
-			<table ref={tableRef} className="w-full table-fixed">
+			<table className="w-full table-fixed" ref={tableRef}>
 				{/* Header */}
 				{config.showHeader && (
 					<ListViewHeader
 						columns={columnsWithRenderers}
+						onColumnReorder={headerHandlers.onColumnReorder}
+						onColumnResize={headerHandlers.onColumnResize}
+						onColumnToggle={headerHandlers.onColumnToggle}
+						onSort={onSort}
+						showSettings={true}
 						sortBy={sortBy}
 						sortDirection={sortDirection}
-						onSort={onSort}
-						onColumnResize={headerHandlers.onColumnResize}
-						onColumnReorder={headerHandlers.onColumnReorder}
-						onColumnToggle={headerHandlers.onColumnToggle}
-						showSettings={true}
 					/>
 				)}
 			</table>
 
 			{/* Contenedor virtualizado */}
 			<div
-				ref={parentRef}
+				aria-busy={false}
+				aria-live="polite"
 				className="w-full overflow-auto"
 				onClick={handleEmptySpaceClick}
+				ref={parentRef}
+				role="rowgroup"
 				style={{
 					height: `${containerHeight - headerHeight}px`,
 					contain: 'strict',
 				}}
-				role="rowgroup"
-				aria-live="polite"
-				aria-busy={false}
 			>
 				<div
 					style={{
@@ -294,13 +296,14 @@ export const ListView = memo<ListViewProps>(function ListView({
 
 						return (
 							<motion.div
-								key={item.id}
-								initial={{ opacity: 0, y: 10 }}
 								animate={{ opacity: 1, y: 0 }}
-								transition={{
-									delay: Math.min(virtualItem.index * 0.005, 0.2),
-									duration: 0.2,
-								}}
+								aria-rowindex={virtualItem.index + 1}
+								aria-setsize={items.length}
+								data-item-id={item.id}
+								data-selectable="true"
+								initial={{ opacity: 0, y: 10 }}
+								key={item.id}
+								role="row"
 								style={{
 									position: 'absolute',
 									top: `${virtualItem.start}px`,
@@ -308,29 +311,28 @@ export const ListView = memo<ListViewProps>(function ListView({
 									width: '100%',
 									height: `${virtualItem.size}px`,
 								}}
-								role="row"
-								aria-rowindex={virtualItem.index + 1}
-								aria-setsize={items.length}
 								tabIndex={virtualItem.index === 0 ? 0 : -1}
-								data-item-id={item.id}
-								data-selectable="true"
+								transition={{
+									delay: Math.min(virtualItem.index * 0.005, 0.2),
+									duration: 0.2,
+								}}
 							>
 								{/* Menú contextual deshabilitado para optimizar performance */}
 								<table className="w-full table-fixed">
 									<tbody>
 										<ListViewRow
-											item={item}
+											cellPadding={config.cellPadding}
 											columns={columnsWithRenderers}
 											index={virtualItem.index}
-											isSelected={isSelected}
 											isEven={isEven}
-											showZebraStripes={config.showZebraStripes}
-											rowHeight={config.rowHeight}
-											cellPadding={config.cellPadding}
-											showThumbnails={config.showThumbnails}
-											thumbnailSize={config.thumbnailSize === 'none' ? undefined : config.thumbnailSize}
+											isSelected={isSelected}
+											item={item}
 											onClick={stableOnItemClick}
 											onDoubleClick={stableOnItemDoubleClick}
+											rowHeight={config.rowHeight}
+											showThumbnails={config.showThumbnails}
+											showZebraStripes={config.showZebraStripes}
+											thumbnailSize={config.thumbnailSize === 'none' ? undefined : config.thumbnailSize}
 										/>
 									</tbody>
 								</table>

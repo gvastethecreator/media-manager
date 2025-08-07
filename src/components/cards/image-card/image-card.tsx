@@ -166,15 +166,15 @@ export const ImageCard = memo(
 			return (
 				<div
 					className={cn(
-						'relative overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-900 flex items-center justify-center',
+						'relative flex items-center justify-center overflow-hidden rounded-lg bg-gray-100 dark:bg-gray-900',
 						getAspectRatioClass(),
 						getVariantClasses(),
 						className
 					)}
 				>
-					<div className="text-center p-4">
-						<ImageIcon className="h-10 w-10 text-gray-400 mx-auto mb-2" />
-						<p className="text-sm text-gray-500">{error?.message || 'No se pudo cargar la imagen'}</p>
+					<div className="p-4 text-center">
+						<ImageIcon className="mx-auto mb-2 h-10 w-10 text-gray-400" />
+						<p className="text-gray-500 text-sm">{error?.message || 'No se pudo cargar la imagen'}</p>
 					</div>
 				</div>
 			);
@@ -224,59 +224,59 @@ export const ImageCard = memo(
 		};
 
 		const getHumanReadableDimensions = () => {
-			if (!imageData?.width || !imageData?.height) return '';
+			if (!(imageData?.width && imageData?.height)) return '';
 			return `${imageData.width} × ${imageData.height}`;
 		};
 
 		const cardContent = (
 			<button
-				type="button"
+				aria-describedby={ariaDescribedBy}
+				aria-label={ariaLabel}
+				aria-selected={ariaSelected}
 				className={cn(
-					'group relative overflow-hidden rounded-lg transition-all duration-300 w-full h-full border-0 bg-transparent p-0',
+					'group relative h-full w-full overflow-hidden rounded-lg border-0 bg-transparent p-0 transition-all duration-300',
 					getAspectRatioClass(),
 					getVariantClasses(),
-					isHovered ? 'shadow-lg scale-[1.02]' : 'hover:shadow-lg hover:scale-[1.02]',
+					isHovered ? 'scale-[1.02] shadow-lg' : 'hover:scale-[1.02] hover:shadow-lg',
 					(onClick || onDoubleClick) && 'cursor-pointer',
 					className
 				)}
+				data-item-id={dataItemId}
+				disabled={!(onClick || onDoubleClick)}
+				onClick={handleClick}
+				onContextMenu={onContextMenu}
+				onDoubleClick={handleDoubleClick}
+				onKeyDown={onKeyDown}
 				onMouseEnter={() => setIsHovered(true)}
 				onMouseLeave={() => setIsHovered(false)}
-				onClick={handleClick}
-				onDoubleClick={handleDoubleClick}
-				onContextMenu={onContextMenu}
-				disabled={!onClick && !onDoubleClick}
-				data-item-id={dataItemId}
 				role={role}
 				tabIndex={tabIndex}
-				aria-label={ariaLabel}
-				aria-selected={ariaSelected}
-				aria-describedby={ariaDescribedBy}
-				onKeyDown={onKeyDown}
+				type="button"
 			>
 				{/* Elementos decorativos TCG */}
 				{tcgMode && (
 					<>
 						{/* Esquinas decorativas en estilo TCG */}
 						<div
-							className="absolute top-0 left-0 w-5 h-5 border-t-2 border-l-2 rounded-tl-md z-20 pointer-events-none"
+							className="pointer-events-none absolute top-0 left-0 z-20 h-5 w-5 rounded-tl-md border-t-2 border-l-2"
 							style={{ borderColor: `${primaryColor}70` }}
 						/>
 						<div
-							className="absolute top-0 right-0 w-5 h-5 border-t-2 border-r-2 rounded-tr-md z-20 pointer-events-none"
+							className="pointer-events-none absolute top-0 right-0 z-20 h-5 w-5 rounded-tr-md border-t-2 border-r-2"
 							style={{ borderColor: `${primaryColor}70` }}
 						/>
 						<div
-							className="absolute bottom-0 left-0 w-5 h-5 border-b-2 border-l-2 rounded-bl-md z-20 pointer-events-none"
+							className="pointer-events-none absolute bottom-0 left-0 z-20 h-5 w-5 rounded-bl-md border-b-2 border-l-2"
 							style={{ borderColor: `${primaryColor}70` }}
 						/>
 						<div
-							className="absolute bottom-0 right-0 w-5 h-5 border-b-2 border-r-2 rounded-br-md z-20 pointer-events-none"
+							className="pointer-events-none absolute right-0 bottom-0 z-20 h-5 w-5 rounded-br-md border-r-2 border-b-2"
 							style={{ borderColor: `${primaryColor}70` }}
 						/>
 
 						{/* Borde brillante al hacer hover */}
 						<div
-							className="absolute inset-0 rounded-lg opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-300 z-10"
+							className="pointer-events-none absolute inset-0 z-10 rounded-lg opacity-0 transition-opacity duration-300 group-hover:opacity-100"
 							style={{
 								boxShadow: `inset 0 0 0 1px ${primaryColor}50, 0 0 15px ${primaryColor}30`,
 							}}
@@ -284,13 +284,13 @@ export const ImageCard = memo(
 
 						{/* Barra superior TCG */}
 						<div
-							className="absolute top-0 left-0 right-0 h-8 bg-gradient-to-r z-20"
+							className="absolute top-0 right-0 left-0 z-20 h-8 bg-gradient-to-r"
 							style={{
 								background: `linear-gradient(to right, ${primaryColor}90, ${primaryColor}30)`,
 							}}
 						>
-							<div className="flex items-center justify-between px-2 h-full">
-								<span className="text-xs font-medium text-white truncate max-w-[70%]">
+							<div className="flex h-full items-center justify-between px-2">
+								<span className="max-w-[70%] truncate font-medium text-white text-xs">
 									{imageData.name || 'Sin título'}
 								</span>
 								<div className="flex items-center gap-1">
@@ -298,7 +298,7 @@ export const ImageCard = memo(
 										try {
 											const metadata = imageData.metadata ? JSON.parse(imageData.metadata) : null;
 											return metadata?.format ? (
-												<span className="px-1.5 py-0.5 text-[10px] bg-black/30 rounded uppercase text-white/90">
+												<span className="rounded bg-black/30 px-1.5 py-0.5 text-[10px] text-white/90 uppercase">
 													{metadata.format}
 												</span>
 											) : null;
@@ -313,28 +313,23 @@ export const ImageCard = memo(
 				)}
 
 				{/* Imagen principal */}
-				<div className="relative w-full h-full">
+				<div className="relative h-full w-full">
 					{/* Mostrar skeleton mientras carga el thumbnail */}
 					{shouldShowThumbnailLoading && (
 						<div className={cn('absolute inset-0 z-10', tcgMode && 'pt-8')}>
-							<Skeleton className="w-full h-full" />
+							<Skeleton className="h-full w-full" />
 						</div>
 					)}
 
 					{displayThumbnailUrl ? (
 						<img
-							src={displayThumbnailUrl}
 							alt={imageData.name || 'Imagen'}
 							className={cn(
-								'w-full h-full object-cover',
+								'h-full w-full object-cover',
 								tcgMode && 'pt-8', // Espacio para la barra superior en modo TCG
 								shouldShowThumbnailLoading && 'opacity-0' // Ocultar mientras carga
 							)}
 							loading="lazy"
-							onLoad={() => {
-								// Ocultar skeleton cuando la imagen se carga
-								setThumbnailLoading(false);
-							}}
 							onError={(e) => {
 								// Fallback si el thumbnail falla
 								console.warn(`Error cargando thumbnail para ${imageId}:`, e);
@@ -352,11 +347,16 @@ export const ImageCard = memo(
 								}
 								setThumbnailLoading(false);
 							}}
+							onLoad={() => {
+								// Ocultar skeleton cuando la imagen se carga
+								setThumbnailLoading(false);
+							}}
+							src={displayThumbnailUrl}
 						/>
 					) : (
 						<div
 							className={cn(
-								'w-full h-full flex items-center justify-center bg-gray-100 dark:bg-gray-900',
+								'flex h-full w-full items-center justify-center bg-gray-100 dark:bg-gray-900',
 								tcgMode && 'pt-8' // Espacio para la barra superior en modo TCG
 							)}
 						>
@@ -372,19 +372,19 @@ export const ImageCard = memo(
 								tcgMode ? 'opacity-70 group-hover:opacity-90' : isHovered ? 'opacity-100' : 'opacity-0'
 							)}
 						>
-							<div className="absolute bottom-0 left-0 right-0 p-3">
+							<div className="absolute right-0 bottom-0 left-0 p-3">
 								{/* Nombre y dimensiones */}
 								{!tcgMode && (
-									<h3 className="text-white font-medium line-clamp-1 text-sm mb-1">
+									<h3 className="mb-1 line-clamp-1 font-medium text-sm text-white">
 										{imageData.name || 'Sin título'}
 										{imageData.isFavorite && (
-											<Star className="w-3.5 h-3.5 inline ml-1 -mt-1 text-yellow-300 fill-yellow-300" />
+											<Star className="-mt-1 ml-1 inline h-3.5 w-3.5 fill-yellow-300 text-yellow-300" />
 										)}
 									</h3>
 								)}
 
 								{/* Información técnica */}
-								<div className="flex flex-col gap-1 text-xs text-gray-200">
+								<div className="flex flex-col gap-1 text-gray-200 text-xs">
 									{/* Dimensiones */}
 									<div className="flex items-center gap-1.5">
 										<Info className="h-3 w-3" />
@@ -403,7 +403,7 @@ export const ImageCard = memo(
 									{getCameraInfo() && (
 										<div className="flex items-center gap-1.5">
 											<CameraIcon className="h-3 w-3" />
-											<span className="truncate max-w-[180px]">{getCameraInfo()}</span>
+											<span className="max-w-[180px] truncate">{getCameraInfo()}</span>
 										</div>
 									)}
 
@@ -414,7 +414,7 @@ export const ImageCard = memo(
 												try {
 													const metadata = imageData.metadata ? JSON.parse(imageData.metadata) : null;
 													return metadata?.format ? (
-														<Badge variant="outline" className="bg-black/40 text-[10px] border-none py-0 px-1.5 h-4">
+														<Badge className="h-4 border-none bg-black/40 px-1.5 py-0 text-[10px]" variant="outline">
 															{metadata.format.toUpperCase()}
 														</Badge>
 													) : null;
@@ -423,16 +423,16 @@ export const ImageCard = memo(
 												}
 											})()}
 											{imageData.size && (
-												<Badge variant="outline" className="bg-black/40 text-[10px] border-none py-0 px-1.5 h-4">
+												<Badge className="h-4 border-none bg-black/40 px-1.5 py-0 text-[10px]" variant="outline">
 													{Math.round(imageData.size / 1024)} KB
 												</Badge>
 											)}
 											{imageData.hash && (
 												<Badge
+													className="h-4 max-w-[60px] truncate border-none bg-black/40 px-1.5 py-0 text-[10px]"
 													variant="outline"
-													className="bg-black/40 text-[10px] border-none py-0 px-1.5 h-4 truncate max-w-[60px]"
 												>
-													<HashIcon className="h-2 w-2 mr-1" />
+													<HashIcon className="mr-1 h-2 w-2" />
 													{imageData.hash.substring(0, 6)}
 												</Badge>
 											)}
@@ -444,19 +444,19 @@ export const ImageCard = memo(
 								{showRelations && (tcgMode || isHovered) && (
 									<div className="mt-2 flex items-center gap-2">
 										{imageData.stats?.tagCount && imageData.stats.tagCount > 0 && (
-											<Badge variant="secondary" className="bg-black/40 border-none gap-1">
+											<Badge className="gap-1 border-none bg-black/40" variant="secondary">
 												<TagIcon className="h-3 w-3" />
 												{imageData.stats.tagCount}
 											</Badge>
 										)}
 										{imageData.stats?.albumCount && imageData.stats.albumCount > 0 && (
-											<Badge variant="secondary" className="bg-black/40 border-none gap-1">
+											<Badge className="gap-1 border-none bg-black/40" variant="secondary">
 												<FolderIcon className="h-3 w-3" />
 												{imageData.stats.albumCount}
 											</Badge>
 										)}
 										{getTotalRelationsCount() > 0 && (
-											<Badge variant="secondary" className="bg-black/40 border-none px-1.5">
+											<Badge className="border-none bg-black/40 px-1.5" variant="secondary">
 												{getTotalRelationsCount()}
 											</Badge>
 										)}
@@ -468,35 +468,35 @@ export const ImageCard = memo(
 
 					{/* Estilo TCG para la imagen */}
 					{tcgMode && (
-						<div className="absolute inset-0 pointer-events-none">
+						<div className="pointer-events-none absolute inset-0">
 							{/* Efecto viñeta */}
 							<div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-black/10 opacity-60" />
 
 							{/* Brillo superior */}
-							<div className="absolute inset-0 bg-gradient-to-b from-white/10 to-transparent h-[20%] opacity-60" />
+							<div className="absolute inset-0 h-[20%] bg-gradient-to-b from-white/10 to-transparent opacity-60" />
 
 							{/* Información TCG en parte inferior (siempre visible) */}
-							<div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black to-transparent pt-2">
+							<div className="absolute right-0 bottom-0 left-0 h-16 bg-gradient-to-t from-black to-transparent pt-2">
 								{/* Etiquetas en modo TCG (visible siempre) */}
 								{showTags && imageData.tags && imageData.tags.length > 0 && (
 									<div className="px-3">
-										<div className="flex flex-wrap gap-1 mb-1">
+										<div className="mb-1 flex flex-wrap gap-1">
 											{imageData.tags?.slice(0, 3).map((tag: TagWithStats) => (
 												<Badge
+													className="h-4 py-0 text-[10px]"
 													key={tag.id}
-													variant="outline"
-													className="py-0 h-4 text-[10px]"
 													style={{
 														backgroundColor: `${tag.color}20`,
 														borderColor: `${tag.color}40`,
 														color: `${tag.color}`,
 													}}
+													variant="outline"
 												>
 													{tag.name}
 												</Badge>
 											))}
 											{imageData.tags && imageData.tags.length > 3 && (
-												<Badge variant="outline" className="py-0 h-4 text-[10px] bg-gray-800/60 border-gray-700/60">
+												<Badge className="h-4 border-gray-700/60 bg-gray-800/60 py-0 text-[10px]" variant="outline">
 													+{imageData.tags ? imageData.tags.length - 3 : 0}
 												</Badge>
 											)}
@@ -507,8 +507,8 @@ export const ImageCard = memo(
 
 							{/* Indicador de favorito */}
 							{imageData.isFavorite && (
-								<div className="absolute top-9 right-2 transform rotate-12">
-									<Star className="h-5 w-5 text-yellow-300 fill-yellow-300 drop-shadow-md" />
+								<div className="absolute top-9 right-2 rotate-12 transform">
+									<Star className="h-5 w-5 fill-yellow-300 text-yellow-300 drop-shadow-md" />
 								</div>
 							)}
 						</div>
@@ -519,7 +519,7 @@ export const ImageCard = memo(
 				{showTags && imageData.tags && imageData.tags.length > 0 && !tcgMode && (
 					<div
 						className={cn(
-							'absolute left-0 right-0 bottom-0 p-3 pt-10 bg-gradient-to-t from-black/70 to-transparent',
+							'absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-10',
 							isHovered ? 'opacity-100' : 'opacity-0',
 							'transition-opacity duration-300'
 						)}
@@ -527,20 +527,20 @@ export const ImageCard = memo(
 						<div className="flex flex-wrap gap-1">
 							{imageData.tags?.slice(0, 5).map((tag: TagWithStats) => (
 								<Badge
+									className="h-5 py-0 text-[10px]"
 									key={tag.id}
-									variant="outline"
-									className="py-0 h-5 text-[10px]"
 									style={{
 										backgroundColor: `${tag.color}30`,
 										borderColor: `${tag.color}40`,
 										color: `${tag.color}`,
 									}}
+									variant="outline"
 								>
 									{tag.name}
 								</Badge>
 							))}
 							{imageData.tags && imageData.tags.length > 5 && (
-								<Badge variant="outline" className="py-0 h-5 text-[10px] bg-gray-800/60 border-gray-700/60">
+								<Badge className="h-5 border-gray-700/60 bg-gray-800/60 py-0 text-[10px]" variant="outline">
 									+{imageData.tags ? imageData.tags.length - 5 : 0}
 								</Badge>
 							)}

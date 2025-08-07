@@ -57,7 +57,7 @@ export function deserializeAudio(drizzleAudio: DrizzleAudio): AudioWithStats {
 			format: format ?? 'mp3',
 			bitrate: bitrate ?? 128,
 			volumePeaks: [],
-			sampleRate: sampleRate ?? 44100,
+			sampleRate: sampleRate ?? 44_100,
 		},
 		path: drizzleAudio.filePath,
 		description: null,

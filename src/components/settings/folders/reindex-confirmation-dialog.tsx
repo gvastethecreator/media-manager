@@ -31,7 +31,7 @@ export function ReindexConfirmationDialog({
 	};
 
 	return (
-		<Dialog open={open} onOpenChange={onOpenChange}>
+		<Dialog onOpenChange={onOpenChange} open={open}>
 			<DialogContent className="sm:max-w-md">
 				<DialogHeader>
 					<DialogTitle>Reindexar todas las carpetas</DialogTitle>
@@ -45,18 +45,18 @@ export function ReindexConfirmationDialog({
 						<div className="flex items-center justify-center py-4">
 							<RefreshCw className="h-10 w-10 animate-spin text-primary" />
 						</div>
-						<div className="text-center text-sm text-muted-foreground">Reindexando ({Math.round(progress)}%)</div>
-						<div className="w-full bg-muted h-2 rounded-full overflow-hidden">
+						<div className="text-center text-muted-foreground text-sm">Reindexando ({Math.round(progress)}%)</div>
+						<div className="h-2 w-full overflow-hidden rounded-full bg-muted">
 							<div
-								className="bg-primary h-full transition-all duration-300 ease-in-out"
+								className="h-full bg-primary transition-all duration-300 ease-in-out"
 								style={{ width: `${progress}%` }}
 							/>
 						</div>
 					</div>
 				) : (
-					<div className="text-sm text-muted-foreground py-4">
+					<div className="py-4 text-muted-foreground text-sm">
 						<p>Durante este proceso:</p>
-						<ul className="list-disc ml-5 mt-2 space-y-1">
+						<ul className="mt-2 ml-5 list-disc space-y-1">
 							<li>Se escanearán todas las carpetas configuradas</li>
 							<li>Se actualizarán los conteos de archivos y tamaños</li>
 							<li>Se actualizará la fecha de indexación</li>
@@ -64,10 +64,10 @@ export function ReindexConfirmationDialog({
 					</div>
 				)}
 				<DialogFooter className="flex justify-between sm:justify-between">
-					<Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isProcessing}>
+					<Button disabled={isProcessing} onClick={() => onOpenChange(false)} type="button" variant="outline">
 						Cancelar
 					</Button>
-					<Button type="button" onClick={handleConfirm} disabled={isProcessing} className="ml-2">
+					<Button className="ml-2" disabled={isProcessing} onClick={handleConfirm} type="button">
 						{isProcessing ? (
 							<>
 								<RefreshCw className="mr-2 h-4 w-4 animate-spin" />

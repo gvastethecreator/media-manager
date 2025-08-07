@@ -22,8 +22,8 @@ export function AlbumCardImages({
 	// Si no hay imágenes, mostrar placeholder
 	if (allImages.length === 0) {
 		return (
-			<div className={cn('flex items-center justify-center p-4 bg-background/10', className)}>
-				<p className="text-xs text-muted-foreground">No hay imágenes</p>
+			<div className={cn('flex items-center justify-center bg-background/10 p-4', className)}>
+				<p className="text-muted-foreground text-xs">No hay imágenes</p>
 			</div>
 		);
 	}
@@ -53,17 +53,17 @@ export function AlbumCardImages({
 
 	// Renderizar la cuadrícula de imágenes
 	return (
-		<div className={cn('grid gap-1 p-1.5 relative overflow-hidden', getGridClass(), className)}>
+		<div className={cn('relative grid gap-1 overflow-hidden p-1.5', getGridClass(), className)}>
 			{allImages.map((imgSrc, index) => (
 				<div
+					className={cn('relative overflow-hidden rounded bg-background/20', index < 3 && 'border-white/10 border-b')}
 					key={`album-img-${imgSrc.substring(imgSrc.lastIndexOf('/') + 1)}`}
-					className={cn('relative rounded overflow-hidden bg-background/20', index < 3 && 'border-b border-white/10')}
 				>
-					<img src={imgSrc} alt={`Imagen de álbum ${index + 1}`} className="object-cover w-full h-full" />
+					<img alt={`Imagen de álbum ${index + 1}`} className="h-full w-full object-cover" src={imgSrc} />
 					{/* Indicador de video */}
 					{recentVideos.includes(imgSrc) && (
-						<div className="absolute top-1 right-1 bg-black/50 rounded-full w-4 h-4 flex items-center justify-center">
-							<div className="w-0 h-0 border-t-4 border-t-transparent border-l-4 border-l-white border-b-4 border-b-transparent ml-0.5" />
+						<div className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-black/50">
+							<div className="ml-0.5 h-0 w-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-l-4 border-l-white" />
 						</div>
 					)}
 				</div>

@@ -6,7 +6,7 @@
 
 import { readPngChunks } from 'png-itxt';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { AIMetadata, AIEngine } from '@/types/metadata-origin.types';
+import type { AIEngine, AIMetadata } from '@/types/metadata-origin.types';
 
 const logger = serverLogger.withContext('PNGParser');
 
@@ -35,7 +35,7 @@ const AI_KEYWORDS = {
 	// Midjourney
 	midjourney: ['Description', 'description', 'Comment'],
 	// Otros
-	general: ['prompt', 'Prompt', 'generation_data', 'ai_data']
+	general: ['prompt', 'Prompt', 'generation_data', 'ai_data'],
 };
 
 /**
@@ -59,13 +59,13 @@ export async function extractPngTextChunks(buffer: Buffer): Promise<PngChunksRes
 						logger.debug('📝 PNG PARSER: Text chunk encontrado', {
 							type: textChunk.type,
 							keyword: textChunk.keyword,
-							textLength: textChunk.text.length
+							textLength: textChunk.text.length,
 						});
 					}
 				} catch (error) {
 					logger.warn('⚠️ PNG PARSER: Error procesando chunk', {
 						type: chunk.type,
-						error: error instanceof Error ? error.message : 'Error desconocido'
+						error: error instanceof Error ? error.message : 'Error desconocido',
 					});
 				}
 			}
@@ -74,17 +74,17 @@ export async function extractPngTextChunks(buffer: Buffer): Promise<PngChunksRes
 		logger.info('✅ PNG PARSER: Text chunks extraídos', {
 			totalChunks: chunks.length,
 			textChunks: textChunks.length,
-			keywords: textChunks.map(c => c.keyword)
+			keywords: textChunks.map((c) => c.keyword),
 		});
 
 		return {
 			textChunks,
-			rawChunks: chunks
+			rawChunks: chunks,
 		};
 	} catch (error) {
 		logger.error('❌ PNG PARSER: Error extrayendo text chunks', {
 			error: error instanceof Error ? error.message : 'Error desconocido',
-			bufferSize: buffer.length
+			bufferSize: buffer.length,
 		});
 		throw error;
 	}
@@ -104,7 +104,7 @@ function parseTextChunk(chunk: any): PngTextChunk | null {
 			return {
 				type: 'tEXt',
 				keyword: data.substring(0, nullIndex),
-				text: data.substring(nullIndex + 1)
+				text: data.substring(nullIndex + 1),
 			};
 		}
 
@@ -114,7 +114,7 @@ function parseTextChunk(chunk: any): PngTextChunk | null {
 			let offset = 0;
 
 			// Encontrar keyword (hasta el primer null)
-			let nullIndex = data.indexOf(0, offset);
+			const nullIndex = data.indexOf(0, offset);
 			if (nullIndex === -1) return null;
 			const keyword = data.subarray(offset, nullIndex).toString('latin1');
 			offset = nullIndex + 1;
@@ -134,7 +134,7 @@ function parseTextChunk(chunk: any): PngTextChunk | null {
 			return {
 				type: 'zTXt',
 				keyword,
-				text
+				text,
 			};
 		}
 
@@ -187,7 +187,7 @@ function parseTextChunk(chunk: any): PngTextChunk | null {
 				keyword,
 				text,
 				language: language || undefined,
-				translatedKeyword: translatedKeyword || undefined
+				translatedKeyword: translatedKeyword || undefined,
 			};
 		}
 
@@ -195,7 +195,7 @@ function parseTextChunk(chunk: any): PngTextChunk | null {
 	} catch (error) {
 		logger.warn('⚠️ PNG PARSER: Error parseando chunk individual', {
 			type: chunk.type,
-			error: error instanceof Error ? error.message : 'Error desconocido'
+			error: error instanceof Error ? error.message : 'Error desconocido',
 		});
 		return null;
 	}
@@ -211,7 +211,7 @@ export async function extractAIMetadataFromChunks(textChunks: PngTextChunk[]): P
 }> {
 	logger.info('🤖 PNG PARSER: Iniciando extracción de metadatos IA', {
 		totalChunks: textChunks.length,
-		keywords: textChunks.map(c => c.keyword)
+		keywords: textChunks.map((c) => c.keyword),
 	});
 
 	const aiMetadata: Partial<AIMetadata> = {};
@@ -224,7 +224,7 @@ export async function extractAIMetadataFromChunks(textChunks: PngTextChunk[]): P
 		const text = chunk.text;
 
 		// Automatic1111/Forge - Parameters
-		if (AI_KEYWORDS.parameters.some(k => k.toLowerCase() === keyword)) {
+		if (AI_KEYWORDS.parameters.some((k) => k.toLowerCase() === keyword)) {
 			logger.info('🎯 PNG PARSER: Detectado chunk de Automatic1111/Forge', { keyword });
 			const a1111Data = parseAutomatic1111Parameters(text);
 			Object.assign(aiMetadata, a1111Data);
@@ -233,7 +233,7 @@ export async function extractAIMetadataFromChunks(textChunks: PngTextChunk[]): P
 		}
 
 		// ComfyUI - Workflow
-		else if (AI_KEYWORDS.workflow.some(k => k.toLowerCase() === keyword)) {
+		else if (AI_KEYWORDS.workflow.some((k) => k.toLowerCase() === keyword)) {
 			logger.info('🎯 PNG PARSER: Detectado chunk de ComfyUI', { keyword });
 			const comfyData = parseComfyUIWorkflow(text);
 			Object.assign(aiMetadata, comfyData);
@@ -242,7 +242,7 @@ export async function extractAIMetadataFromChunks(textChunks: PngTextChunk[]): P
 		}
 
 		// SwarmUI
-		else if (AI_KEYWORDS.swarmui.some(k => k.toLowerCase() === keyword)) {
+		else if (AI_KEYWORDS.swarmui.some((k) => k.toLowerCase() === keyword)) {
 			logger.info('🎯 PNG PARSER: Detectado chunk de SwarmUI', { keyword });
 			const swarmData = parseSwarmUIParameters(text);
 			Object.assign(aiMetadata, swarmData);
@@ -251,7 +251,7 @@ export async function extractAIMetadataFromChunks(textChunks: PngTextChunk[]): P
 		}
 
 		// Midjourney
-		else if (AI_KEYWORDS.midjourney.some(k => k.toLowerCase() === keyword)) {
+		else if (AI_KEYWORDS.midjourney.some((k) => k.toLowerCase() === keyword)) {
 			logger.info('🎯 PNG PARSER: Detectado chunk de Midjourney', { keyword });
 			const mjData = parseMidjourneyDescription(text);
 			Object.assign(aiMetadata, mjData);
@@ -260,7 +260,7 @@ export async function extractAIMetadataFromChunks(textChunks: PngTextChunk[]): P
 		}
 
 		// Otros engines generales
-		else if (AI_KEYWORDS.general.some(k => k.toLowerCase() === keyword)) {
+		else if (AI_KEYWORDS.general.some((k) => k.toLowerCase() === keyword)) {
 			logger.info('🎯 PNG PARSER: Detectado chunk genérico de IA', { keyword });
 			const genericData = parseGenericAIData(text);
 			Object.assign(aiMetadata, genericData);
@@ -276,13 +276,13 @@ export async function extractAIMetadataFromChunks(textChunks: PngTextChunk[]): P
 		confidence,
 		hasPrompt: !!aiMetadata.prompt,
 		hasModel: !!aiMetadata.model,
-		hasSteps: !!aiMetadata.steps
+		hasSteps: !!aiMetadata.steps,
 	});
 
 	return {
 		aiMetadata,
 		detectedEngine,
-		confidence
+		confidence,
 	};
 }
 
@@ -297,7 +297,7 @@ function parseAutomatic1111Parameters(text: string): Partial<AIMetadata> {
 		const negativeIndex = text.indexOf('Negative prompt:');
 		if (negativeIndex > 0) {
 			metadata.prompt = text.substring(0, negativeIndex).trim();
-			
+
 			// Buscar negative prompt
 			const afterNegative = text.substring(negativeIndex + 16); // "Negative prompt:".length
 			const stepsIndex = afterNegative.search(/\bSteps:/i);
@@ -322,7 +322,7 @@ function parseAutomatic1111Parameters(text: string): Partial<AIMetadata> {
 			model: /Model:\s*([^,\n]+)/i,
 			modelHash: /Model hash:\s*([^,\n]+)/i,
 			denoise: /Denoising strength:\s*([\d.]+)/i,
-			clipSkip: /Clip skip:\s*(\d+)/i
+			clipSkip: /Clip skip:\s*(\d+)/i,
 		};
 
 		for (const [key, regex] of Object.entries(params)) {
@@ -332,11 +332,11 @@ function parseAutomatic1111Parameters(text: string): Partial<AIMetadata> {
 					case 'steps':
 					case 'seed':
 					case 'clipSkip':
-						(metadata as any)[key] = parseInt(match[1]);
+						(metadata as any)[key] = Number.parseInt(match[1]);
 						break;
 					case 'cfgScale':
 					case 'denoise':
-						(metadata as any)[key] = parseFloat(match[1]);
+						(metadata as any)[key] = Number.parseFloat(match[1]);
 						break;
 					default:
 						(metadata as any)[key] = match[1].trim();
@@ -347,7 +347,7 @@ function parseAutomatic1111Parameters(text: string): Partial<AIMetadata> {
 		return metadata;
 	} catch (error) {
 		logger.warn('⚠️ PNG PARSER: Error parseando parámetros A1111', {
-			error: error instanceof Error ? error.message : 'Error desconocido'
+			error: error instanceof Error ? error.message : 'Error desconocido',
 		});
 		return {};
 	}
@@ -375,7 +375,7 @@ function parseComfyUIWorkflow(text: string): Partial<AIMetadata> {
 			for (const [nodeId, node] of Object.entries(workflow)) {
 				if (typeof node === 'object' && node !== null) {
 					const nodeObj = node as any;
-					
+
 					// CLIPTextEncode nodes para prompts
 					if (nodeObj.class_type === 'CLIPTextEncode' && nodeObj.inputs?.text) {
 						if (!metadata.prompt) {
@@ -387,12 +387,12 @@ function parseComfyUIWorkflow(text: string): Partial<AIMetadata> {
 
 					// KSampler nodes para parámetros
 					if (nodeObj.class_type === 'KSampler' && nodeObj.inputs) {
-						if (nodeObj.inputs.steps) metadata.steps = parseInt(nodeObj.inputs.steps);
-						if (nodeObj.inputs.cfg) metadata.cfgScale = parseFloat(nodeObj.inputs.cfg);
+						if (nodeObj.inputs.steps) metadata.steps = Number.parseInt(nodeObj.inputs.steps);
+						if (nodeObj.inputs.cfg) metadata.cfgScale = Number.parseFloat(nodeObj.inputs.cfg);
 						if (nodeObj.inputs.sampler_name) metadata.sampler = nodeObj.inputs.sampler_name;
 						if (nodeObj.inputs.scheduler) metadata.scheduler = nodeObj.inputs.scheduler;
-						if (nodeObj.inputs.seed) metadata.seed = parseInt(nodeObj.inputs.seed);
-						if (nodeObj.inputs.denoise) metadata.denoise = parseFloat(nodeObj.inputs.denoise);
+						if (nodeObj.inputs.seed) metadata.seed = Number.parseInt(nodeObj.inputs.seed);
+						if (nodeObj.inputs.denoise) metadata.denoise = Number.parseFloat(nodeObj.inputs.denoise);
 					}
 
 					// CheckpointLoaderSimple para modelo
@@ -410,7 +410,7 @@ function parseComfyUIWorkflow(text: string): Partial<AIMetadata> {
 		return metadata;
 	} catch (error) {
 		logger.warn('⚠️ PNG PARSER: Error parseando workflow ComfyUI', {
-			error: error instanceof Error ? error.message : 'Error desconocido'
+			error: error instanceof Error ? error.message : 'Error desconocido',
 		});
 		return {};
 	}
@@ -435,23 +435,23 @@ function parseSwarmUIParameters(text: string): Partial<AIMetadata> {
 			// Mapear campos de SwarmUI
 			if (params.prompt) metadata.prompt = params.prompt;
 			if (params.negativeprompt) metadata.negativePrompt = params.negativeprompt;
-			if (params.steps) metadata.steps = parseInt(params.steps);
-			if (params.cfgscale) metadata.cfgScale = parseFloat(params.cfgscale);
+			if (params.steps) metadata.steps = Number.parseInt(params.steps);
+			if (params.cfgscale) metadata.cfgScale = Number.parseFloat(params.cfgscale);
 			if (params.sampler) metadata.sampler = params.sampler;
 			if (params.scheduler) metadata.scheduler = params.scheduler;
-			if (params.seed) metadata.seed = parseInt(params.seed);
+			if (params.seed) metadata.seed = Number.parseInt(params.seed);
 			if (params.model) metadata.model = params.model;
-			if (params.denoise) metadata.denoise = parseFloat(params.denoise);
+			if (params.denoise) metadata.denoise = Number.parseFloat(params.denoise);
 
 			// Timing específico de SwarmUI
-			if (params.generation_time) metadata.generationTime = parseFloat(params.generation_time);
-			if (params.prep_time) metadata.prepTime = parseFloat(params.prep_time);
+			if (params.generation_time) metadata.generationTime = Number.parseFloat(params.generation_time);
+			if (params.prep_time) metadata.prepTime = Number.parseFloat(params.prep_time);
 		}
 
 		return metadata;
 	} catch (error) {
 		logger.warn('⚠️ PNG PARSER: Error parseando parámetros SwarmUI', {
-			error: error instanceof Error ? error.message : 'Error desconocido'
+			error: error instanceof Error ? error.message : 'Error desconocido',
 		});
 		return {};
 	}
@@ -474,7 +474,7 @@ function parseMidjourneyDescription(text: string): Partial<AIMetadata> {
 			chaos: /--chaos\s+(\d+)/i,
 			stylize: /--stylize\s+(\d+)/i,
 			quality: /--quality\s+([\d.]+)/i,
-			seed: /--seed\s+(\d+)/i
+			seed: /--seed\s+(\d+)/i,
 		};
 
 		for (const [key, regex] of Object.entries(params)) {
@@ -484,10 +484,10 @@ function parseMidjourneyDescription(text: string): Partial<AIMetadata> {
 					case 'chaos':
 					case 'stylize':
 					case 'seed':
-						(metadata as any)[key] = parseInt(match[1]);
+						(metadata as any)[key] = Number.parseInt(match[1]);
 						break;
 					case 'quality':
-						(metadata as any)[key] = parseFloat(match[1]);
+						(metadata as any)[key] = Number.parseFloat(match[1]);
 						break;
 					default:
 						(metadata as any)[key] = match[1].trim();
@@ -498,7 +498,7 @@ function parseMidjourneyDescription(text: string): Partial<AIMetadata> {
 		return metadata;
 	} catch (error) {
 		logger.warn('⚠️ PNG PARSER: Error parseando descripción Midjourney', {
-			error: error instanceof Error ? error.message : 'Error desconocido'
+			error: error instanceof Error ? error.message : 'Error desconocido',
 		});
 		return {};
 	}
@@ -514,7 +514,7 @@ function parseGenericAIData(text: string): Partial<AIMetadata> {
 		// Intentar extraer información básica
 		if (text.length > 10) {
 			// Si parece un prompt (texto largo sin estructura), asignarlo como prompt
-			if (!text.includes(':') && !text.includes('{') && text.length > 50) {
+			if (!(text.includes(':') || text.includes('{')) && text.length > 50) {
 				metadata.prompt = text.trim();
 			} else {
 				// Intentar extraer campos comunes
@@ -532,11 +532,11 @@ function parseGenericAIData(text: string): Partial<AIMetadata> {
 						} else if (key.includes('model')) {
 							metadata.model = value;
 						} else if (key.includes('steps')) {
-							metadata.steps = parseInt(value) || undefined;
+							metadata.steps = Number.parseInt(value) || undefined;
 						} else if (key.includes('cfg') || key.includes('scale')) {
-							metadata.cfgScale = parseFloat(value) || undefined;
+							metadata.cfgScale = Number.parseFloat(value) || undefined;
 						} else if (key.includes('seed')) {
-							metadata.seed = parseInt(value) || undefined;
+							metadata.seed = Number.parseInt(value) || undefined;
 						} else if (key.includes('sampler')) {
 							metadata.sampler = value;
 						}
@@ -548,7 +548,7 @@ function parseGenericAIData(text: string): Partial<AIMetadata> {
 		return metadata;
 	} catch (error) {
 		logger.warn('⚠️ PNG PARSER: Error parseando datos genéricos', {
-			error: error instanceof Error ? error.message : 'Error desconocido'
+			error: error instanceof Error ? error.message : 'Error desconocido',
 		});
 		return {};
 	}
@@ -576,18 +576,18 @@ export async function extractPngMetadata(buffer: Buffer): Promise<{
 			textChunks: textChunks.length,
 			detectedEngine,
 			confidence,
-			hasAIMetadata: Object.keys(aiMetadata).length > 0
+			hasAIMetadata: Object.keys(aiMetadata).length > 0,
 		});
 
 		return {
 			aiMetadata,
 			detectedEngine,
 			confidence,
-			textChunks
+			textChunks,
 		};
 	} catch (error) {
 		logger.error('❌ PNG PARSER: Error en extracción completa', {
-			error: error instanceof Error ? error.message : 'Error desconocido'
+			error: error instanceof Error ? error.message : 'Error desconocido',
 		});
 		throw error;
 	}

@@ -67,7 +67,7 @@ export function useSelecto({
 			setIsActive(true);
 
 			// Si no se presiona Ctrl, limpiar selección previa
-			if (!e.inputEvent?.ctrlKey && !e.inputEvent?.metaKey) {
+			if (!(e.inputEvent?.ctrlKey || e.inputEvent?.metaKey)) {
 				const selectedElements = document.querySelectorAll('[data-selected="true"]');
 				selectedElements.forEach((el) => {
 					el.setAttribute('data-selected', 'false');

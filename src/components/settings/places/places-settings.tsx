@@ -145,11 +145,11 @@ export function PlacesSettings() {
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-3">
 						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">Cargando lugares...</p>
+						<p className="text-muted-foreground text-sm">Cargando lugares...</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -158,13 +158,13 @@ export function PlacesSettings() {
 
 	if (error) {
 		return (
-			<Card className="rounded-sm bg-muted/30 border-none">
+			<Card className="rounded-sm border-none bg-muted/30">
 				<CardContent>
 					<EmptyState
+						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
+						description={error instanceof Error ? error.message : 'Error desconocido'}
 						icon={Info}
 						title="Error al cargar lugares"
-						description={error instanceof Error ? error.message : 'Error desconocido'}
-						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
 					/>
 				</CardContent>
 			</Card>
@@ -175,13 +175,13 @@ export function PlacesSettings() {
 		<div className="grid grid-cols-12 gap-3">
 			{/* Panel izquierdo: Lista de lugares */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="space-y-1 py-2 px-3">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-sm flex items-center">
+							<CardTitle className="flex items-center text-sm">
 								Lugares ({filteredPlaces.length})
 								{filteredPlaces.length !== places.length && (
-									<Badge variant="outline" className="ml-2 text-[10px]">
+									<Badge className="ml-2 text-[10px]" variant="outline">
 										Filtrados
 									</Badge>
 								)}
@@ -189,22 +189,22 @@ export function PlacesSettings() {
 							<div className="flex items-center gap-1">
 								<Popover>
 									<PopoverTrigger>
-										<Button size="sm" variant="ghost" className="h-6 w-6 p-0">
+										<Button className="h-6 w-6 p-0" size="sm" variant="ghost">
 											<Filter className="h-3.5 w-3.5" />
 										</Button>
 									</PopoverTrigger>
-									<PopoverContent className="w-72" align="end">
+									<PopoverContent align="end" className="w-72">
 										<div className="space-y-4">
 											<h4 className="font-medium text-sm">Filtrar Lugares</h4>
 
 											<div className="space-y-2">
 												<Label htmlFor="search">Buscar</Label>
 												<Input
+													className="h-8 text-xs"
 													id="search"
+													onChange={(e) => setSearchQuery(e.target.value)}
 													placeholder="Buscar lugares..."
 													value={searchQuery}
-													onChange={(e) => setSearchQuery(e.target.value)}
-													className="h-8 text-xs"
 												/>
 											</div>
 
@@ -212,10 +212,10 @@ export function PlacesSettings() {
 												<Label>Tipos</Label>
 												<div className="grid grid-cols-2 gap-2">
 													{uniqueTypes.map((type) => (
-														<div key={type} className="flex items-center space-x-2">
+														<div className="flex items-center space-x-2" key={type}>
 															<Checkbox
-																id={`type-${type}`}
 																checked={selectedTypes.includes(type)}
+																id={`type-${type}`}
 																onCheckedChange={(checked) => {
 																	if (checked) {
 																		setSelectedTypes((prev) => [...prev, type]);
@@ -224,7 +224,7 @@ export function PlacesSettings() {
 																	}
 																}}
 															/>
-															<Label htmlFor={`type-${type}`} className="text-xs">
+															<Label className="text-xs" htmlFor={`type-${type}`}>
 																{type}
 															</Label>
 														</div>
@@ -236,10 +236,10 @@ export function PlacesSettings() {
 												<Label>Regiones</Label>
 												<div className="grid grid-cols-2 gap-2">
 													{uniqueRegions.map((region) => (
-														<div key={region} className="flex items-center space-x-2">
+														<div className="flex items-center space-x-2" key={region}>
 															<Checkbox
-																id={`region-${region}`}
 																checked={selectedRegions.includes(region)}
+																id={`region-${region}`}
 																onCheckedChange={(checked) => {
 																	if (checked) {
 																		setSelectedRegions((prev) => [...prev, region]);
@@ -248,7 +248,7 @@ export function PlacesSettings() {
 																	}
 																}}
 															/>
-															<Label htmlFor={`region-${region}`} className="text-xs">
+															<Label className="text-xs" htmlFor={`region-${region}`}>
 																{region}
 															</Label>
 														</div>
@@ -258,20 +258,20 @@ export function PlacesSettings() {
 
 											<div className="flex items-center space-x-2">
 												<Checkbox
-													id="favorites"
 													checked={onlyFavorites}
+													id="favorites"
 													onCheckedChange={(checked) => setOnlyFavorites(!!checked)}
 												/>
-												<Label htmlFor="favorites" className="text-xs">
+												<Label className="text-xs" htmlFor="favorites">
 													Solo favoritos
 												</Label>
 											</div>
 
 											<div className="flex justify-between">
-												<Button size="sm" variant="outline" onClick={clearFilters} className="h-8 text-xs">
+												<Button className="h-8 text-xs" onClick={clearFilters} size="sm" variant="outline">
 													Limpiar filtros
 												</Button>
-												<Button size="sm" className="h-8 text-xs">
+												<Button className="h-8 text-xs" size="sm">
 													Aplicar
 												</Button>
 											</div>
@@ -279,19 +279,19 @@ export function PlacesSettings() {
 									</PopoverContent>
 								</Popover>
 								<Button
+									className="h-6 w-6 p-0"
 									onClick={() => {
 										setSelectedPlace(null);
 										setIsEditing(false);
 									}}
 									size="sm"
 									variant="ghost"
-									className="h-6 w-6 p-0"
 								>
 									<PlusCircle className="h-3.5 w-3.5" />
 								</Button>
 							</div>
 						</div>
-						<div className="flex gap-2 text-xs text-muted-foreground">
+						<div className="flex gap-2 text-muted-foreground text-xs">
 							<span>{stats.totalPlaces} lugares</span>
 							<span>•</span>
 							<span>{stats.totalImages} imágenes</span>
@@ -307,43 +307,43 @@ export function PlacesSettings() {
 						<ScrollArea className="h-full max-h-[400px] px-3 pb-3">
 							{filteredPlaces.length === 0 ? (
 								<EmptyState
-									icon={MapPin}
-									title="No hay lugares"
-									description={
-										places.length > 0 ? 'No se encontraron lugares con los filtros aplicados' : 'Crea tu primer lugar'
-									}
-									className="py-6"
 									actions={
 										places.length > 0 && (
-											<Button size="sm" variant="outline" onClick={clearFilters}>
+											<Button onClick={clearFilters} size="sm" variant="outline">
 												Limpiar filtros
 											</Button>
 										)
 									}
+									className="py-6"
+									description={
+										places.length > 0 ? 'No se encontraron lugares con los filtros aplicados' : 'Crea tu primer lugar'
+									}
+									icon={MapPin}
+									title="No hay lugares"
 								/>
 							) : (
 								<div className="space-y-1">
 									{filteredPlaces.map((place) => (
 										<div
+											className={`group/item relative flex w-full items-center gap-2 rounded-md p-1.5 transition-colors hover:bg-muted/50 ${selectedPlace?.id === place.id ? 'bg-muted' : ''}`}
 											key={place.id}
-											className={`relative group/item flex items-center gap-2 p-1.5 rounded-md transition-colors hover:bg-muted/50 w-full ${selectedPlace?.id === place.id ? 'bg-muted' : ''}`}
 										>
 											<button
-												className="flex items-center gap-2 w-full text-left cursor-pointer"
+												aria-pressed={selectedPlace?.id === place.id}
+												className="flex w-full cursor-pointer items-center gap-2 text-left"
 												onClick={() => handleEditPlace(place)}
 												type="button"
-												aria-pressed={selectedPlace?.id === place.id}
 											>
 												<div
-													className="w-6 h-6 flex-shrink-0 rounded-md flex items-center justify-center text-white"
+													className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-white"
 													style={{
 														backgroundColor: place.color || '#888',
 													}}
 												>
 													<span className="text-xs">{place.emoji}</span>
 												</div>
-												<div className="flex-1 min-w-0">
-													<h4 className="text-xs font-medium truncate">{place.name}</h4>
+												<div className="min-w-0 flex-1">
+													<h4 className="truncate font-medium text-xs">{place.name}</h4>
 													<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
 														<span>{place._count?.images || 0} imágenes</span>
 														{place.region && (
@@ -356,14 +356,14 @@ export function PlacesSettings() {
 												</div>
 											</button>
 											<Button
-												variant="ghost"
-												size="icon"
-												type="button"
-												className="h-5 w-5 opacity-0 group-hover/item:opacity-100 absolute right-1"
+												className="absolute right-1 h-5 w-5 opacity-0 group-hover/item:opacity-100"
 												onClick={(e) => {
 													e.stopPropagation();
 													handleDeletePlace(place.id);
 												}}
+												size="icon"
+												type="button"
+												variant="ghost"
 											>
 												<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
 											</Button>
@@ -378,8 +378,8 @@ export function PlacesSettings() {
 
 			{/* Panel derecho: Formulario y Preview */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="rounded-sm bg-muted/30 border-none h-[calc(100vh-8rem)] flex flex-col">
-					<CardHeader className="py-2 px-3">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+					<CardHeader className="px-3 py-2">
 						<div className="flex items-center justify-between">
 							<div>
 								<CardTitle className="text-sm">{isEditing ? 'Editar Lugar' : 'Nuevo Lugar'}</CardTitle>
@@ -392,72 +392,72 @@ export function PlacesSettings() {
 							<div className="flex gap-1">
 								{isEditing && selectedPlace && (
 									<>
-										<Button variant="outline" size="sm" className="h-7 text-xs" onClick={handleReset}>
+										<Button className="h-7 text-xs" onClick={handleReset} size="sm" variant="outline">
 											Cancelar
 										</Button>
 										<Button
-											variant="destructive"
-											size="sm"
 											className="h-7 text-xs"
 											onClick={() => handleDeletePlace(selectedPlace.id)}
+											size="sm"
+											variant="destructive"
 										>
-											<Trash className="h-3 w-3 mr-1" />
+											<Trash className="mr-1 h-3 w-3" />
 											Eliminar
 										</Button>
 									</>
 								)}
-								<Button type="submit" size="sm" className="h-7 text-xs" form="place-form">
-									<Save className="h-3 w-3 mr-1" />
+								<Button className="h-7 text-xs" form="place-form" size="sm" type="submit">
+									<Save className="mr-1 h-3 w-3" />
 									{isEditing ? 'Guardar' : 'Crear'}
 								</Button>
 							</div>
 						</div>
 					</CardHeader>
-					<CardContent className="p-3 flex-1 overflow-hidden">
-						<div className="h-full pr-3 overflow-auto">
-							<div className="grid grid-cols-1 lg:grid-cols-2 gap-4 h-full">
+					<CardContent className="flex-1 overflow-hidden p-3">
+						<div className="h-full overflow-auto pr-3">
+							<div className="grid h-full grid-cols-1 gap-4 lg:grid-cols-2">
 								<div className="space-y-3">
 									<CreatePlaceForm
-										key={selectedPlace?.id || 'new-place'}
-										place={selectedPlace || undefined}
 										isEditing={isEditing}
-										onCreated={handlePlaceCreated}
-										onUpdated={handlePlaceUpdated}
+										key={selectedPlace?.id || 'new-place'}
 										onCancel={handleReset}
+										onCreated={handlePlaceCreated}
 										onPreview={handlePreview}
+										onUpdated={handlePlaceUpdated}
+										place={selectedPlace || undefined}
 									/>
 								</div>
-								<div className="hidden lg:flex flex-col items-center justify-start">
-									<h3 className="text-xs font-medium mb-2">Vista Previa</h3>
+								<div className="hidden flex-col items-center justify-start lg:flex">
+									<h3 className="mb-2 font-medium text-xs">Vista Previa</h3>
 									<div className="w-[220px] transition-all duration-300">
 										{previewData || selectedPlace ? (
-											<div className="flex flex-col p-4 border rounded-lg bg-background">
+											<div className="flex flex-col rounded-lg border bg-background p-4">
 												<div
-													className="w-full aspect-video mb-3 rounded-md flex items-center justify-center"
+													className="mb-3 flex aspect-video w-full items-center justify-center rounded-md"
 													style={{ backgroundColor: previewData?.color || selectedPlace?.color || '#3b82f6' }}
 												>
 													<span className="text-4xl text-white">
 														{previewData?.emoji || selectedPlace?.emoji || '📍'}
 													</span>
 												</div>
-												<h3 className="text-lg font-medium">
+												<h3 className="font-medium text-lg">
 													{previewData?.name || selectedPlace?.name || 'Nuevo Lugar'}
 												</h3>
 
-												<div className="flex flex-wrap gap-2 mt-3">
+												<div className="mt-3 flex flex-wrap gap-2">
 													{(previewData?.type || selectedPlace?.type) && (
-														<Badge variant="secondary" className="text-xs">
+														<Badge className="text-xs" variant="secondary">
 															{previewData?.type || selectedPlace?.type}
 														</Badge>
 													)}
 													{(previewData?.region || selectedPlace?.region) && (
-														<Badge variant="outline" className="text-xs">
+														<Badge className="text-xs" variant="outline">
 															{previewData?.region || selectedPlace?.region}
 														</Badge>
 													)}
 												</div>
 
-												<p className="text-muted-foreground mt-3 text-sm">
+												<p className="mt-3 text-muted-foreground text-sm">
 													{previewData?.description || selectedPlace?.description || 'Sin descripción'}
 												</p>
 
@@ -479,9 +479,9 @@ export function PlacesSettings() {
 												)}
 											</div>
 										) : (
-											<div className="flex flex-col items-center justify-center h-[260px] bg-muted/50 rounded-lg border border-dashed">
+											<div className="flex h-[260px] flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50">
 												<MapPin className="h-7 w-7 text-muted-foreground/50" />
-												<p className="text-[10px] text-muted-foreground mt-2">Vista previa</p>
+												<p className="mt-2 text-[10px] text-muted-foreground">Vista previa</p>
 											</div>
 										)}
 									</div>

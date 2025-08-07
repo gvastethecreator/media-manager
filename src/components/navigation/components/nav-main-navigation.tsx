@@ -1,28 +1,28 @@
 import {
-    Album,
-    Asterisk,
-    Bookmark,
-    Box,
-    Brackets,
-    ChevronDown,
-    ChevronRight,
-    FileStack,
-    Files,
-    FileText,
-    Folder,
-    Globe,
-    Image as ImageIcon,
-    Layers,
-    Lightbulb,
-    MapPin,
-    MessageSquare,
-    Music,
-    Star,
-    Tag,
-    User,
-    Users,
-    Video,
-    Workflow,
+	Album,
+	Asterisk,
+	Bookmark,
+	Box,
+	Brackets,
+	ChevronDown,
+	ChevronRight,
+	FileStack,
+	Files,
+	FileText,
+	Folder,
+	Globe,
+	Image as ImageIcon,
+	Layers,
+	Lightbulb,
+	MapPin,
+	MessageSquare,
+	Music,
+	Star,
+	Tag,
+	User,
+	Users,
+	Video,
+	Workflow,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -242,7 +242,7 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 		});
 	}, []);
 
-	const containerClasses = useMemo(() => cn('pb-1 pt-1', isCollapsed ? 'px-1' : 'px-2'), [isCollapsed]);
+	const containerClasses = useMemo(() => cn('pt-1 pb-1', isCollapsed ? 'px-1' : 'px-2'), [isCollapsed]);
 	const innerContainerClasses = useMemo(() => cn('rounded-md p-0.5 shadow-sm', isCollapsed && 'p-0.5'), [isCollapsed]);
 	const flexContainerClasses = useMemo(() => cn('flex flex-col gap-1'), []);
 
@@ -267,10 +267,11 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 			<div className={innerContainerClasses}>
 				<div className={flexContainerClasses}>
 					{NAVIGATION_CATEGORIES.map((category, _catIdx) => (
-						<div key={category.id} className="mb-1">
+						<div className="mb-1" key={category.id}>
 							<div
+								aria-expanded={expandedCategories.has(category.id)}
 								className={cn(
-									'flex items-center gap-1 mb-0.5 cursor-pointer transition-all duration-300',
+									'mb-0.5 flex cursor-pointer items-center gap-1 transition-all duration-300',
 									isCollapsed ? 'justify-center px-1 py-1' : ''
 								)}
 								onClick={() => toggleCategory(category.id)}
@@ -280,9 +281,8 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 										toggleCategory(category.id);
 									}
 								}}
-								tabIndex={0}
 								role="button"
-								aria-expanded={expandedCategories.has(category.id)}
+								tabIndex={0}
 							>
 								<Tooltip>
 									<TooltipTrigger asChild>
@@ -292,14 +292,14 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 										/>
 									</TooltipTrigger>
 									{isCollapsed && (
-										<TooltipContent side="right" className="text-xs">
+										<TooltipContent className="text-xs" side="right">
 											<p className="font-medium text-amber-400">{category.label}</p>
 										</TooltipContent>
 									)}
 								</Tooltip>
 								{!isCollapsed && (
 									<>
-										<span className="font-semibold text-xs flex-1" style={{ color: category.color }}>
+										<span className="flex-1 font-semibold text-xs" style={{ color: category.color }}>
 											{category.label}
 										</span>
 										{((category.children && category.children.length > 0) || category.showTreeView) &&
@@ -315,14 +315,14 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 								<>
 									{/* TreeView directo para carpetas */}
 									{category.showTreeView && (
-										<div className="ml-2 mt-1">
+										<div className="mt-1 ml-2">
 											<NavCategoryChildren
 												categoryId={category.id}
-												isCollapsed={isCollapsed}
-												selectedChildId={null}
 												currentView={currentView}
+												isCollapsed={isCollapsed}
 												items={[]}
 												onItemClick={handleChildClick}
+												selectedChildId={null}
 											/>
 										</div>
 									)}
@@ -330,18 +330,18 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 									{!category.showTreeView && (
 										<div className="flex flex-col gap-0.5">
 											{(category.children || []).map((child, _idx) => (
-												<div key={child.id} className="flex flex-col">
+												<div className="flex flex-col" key={child.id}>
 													<div
 														className={cn(
-															'justify-between w-full text-xs px-2 py-1 rounded flex items-center transition-all duration-300',
-															'hover:bg-secondary/50 transition-colors',
+															'flex w-full items-center justify-between rounded px-2 py-1 text-xs transition-all duration-300',
+															'transition-colors hover:bg-secondary/50',
 															currentView === child.id && 'bg-secondary font-bold',
 															isCollapsed ? 'justify-center px-1' : ''
 														)}
 													>
 														<div
 															className={cn(
-																'flex items-center flex-1 cursor-pointer',
+																'flex flex-1 cursor-pointer items-center',
 																isCollapsed ? 'justify-center' : ''
 															)}
 															onClick={() => handleNavigate(child.id as ViewType)}
@@ -351,8 +351,8 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 																	handleNavigate(child.id as ViewType);
 																}
 															}}
-															tabIndex={0}
 															role="button"
+															tabIndex={0}
 														>
 															<child.icon className="h-3 w-3" style={{ color: child.color }} />
 															{!isCollapsed && <span className="ml-2">{child.label}</span>}
@@ -360,20 +360,20 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 														{!isCollapsed && (
 															<div className="flex items-center gap-1">
 																{child.count !== undefined && (
-																	<span className="text-[10px] text-muted-foreground tabular-nums min-w-[18px] text-right">
+																	<span className="min-w-[18px] text-right text-[10px] text-muted-foreground tabular-nums">
 																		{child.count}
 																	</span>
 																)}
 																{child.hasChildren && (
 																	<button
-																		type="button"
-																		className="h-5 w-5 p-0.5 hover:bg-secondary/70 rounded-sm flex items-center justify-center border border-border/30 bg-background/50"
+																		aria-expanded={expandedCategories.has(child.id)}
+																		aria-label={`Toggle ${child.label} children`}
+																		className="flex h-5 w-5 items-center justify-center rounded-sm border border-border/30 bg-background/50 p-0.5 hover:bg-secondary/70"
 																		onClick={(e) => {
 																			e.stopPropagation();
 																			toggleCategory(child.id);
 																		}}
-																		aria-expanded={expandedCategories.has(child.id)}
-																		aria-label={`Toggle ${child.label} children`}
+																		type="button"
 																	>
 																		{expandedCategories.has(child.id) ? (
 																			<ChevronDown className="h-3 w-3" />
@@ -386,14 +386,14 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 														)}
 													</div>
 													{child.hasChildren && expandedCategories.has(child.id) && (
-														<div className="ml-4 mt-1 border-l border-border/50 pl-2">
+														<div className="mt-1 ml-4 border-border/50 border-l pl-2">
 															<NavCategoryChildren
 																categoryId={child.id}
-																isCollapsed={isCollapsed}
-																selectedChildId={null}
 																currentView={currentView}
+																isCollapsed={isCollapsed}
 																items={getCategoryItems(child.id as any)}
 																onItemClick={handleChildClick}
+																selectedChildId={null}
 															/>
 														</div>
 													)}

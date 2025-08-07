@@ -17,19 +17,19 @@ export function FavoriteCard({ favorite, onSelect, isSelected, className }: Favo
 	const primaryColor = favorite.entityColor || '#eab308';
 	const content = (
 		<CardContainer
-			primaryColor={primaryColor}
 			className={cn(className, 'transition-colors', isSelected ? 'ring-2 ring-primary' : '')}
+			primaryColor={primaryColor}
 		>
 			<CardHeader
-				title={favorite.entityName || favorite.entityType}
-				subtitle={favorite.entityType}
 				icon={<span>{favorite.entityIcon || '⭐'}</span>}
 				primaryColor={primaryColor}
+				subtitle={favorite.entityType}
+				title={favorite.entityName || favorite.entityType}
 			/>
 		</CardContainer>
 	);
 	return onSelect ? (
-		<button type="button" onClick={onSelect} className="w-full text-left">
+		<button className="w-full text-left" onClick={onSelect} type="button">
 			{content}
 		</button>
 	) : (

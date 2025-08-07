@@ -127,7 +127,7 @@ ViewTransition.displayName = 'ViewTransition';
  */
 export function NavigationTransition({ children, className, ...props }: Omit<ViewTransitionProps, 'type'>) {
 	return (
-		<ViewTransition type="navigation" className={cn('vt-name-navigation', className)} {...props}>
+		<ViewTransition className={cn('vt-name-navigation', className)} type="navigation" {...props}>
 			{children}
 		</ViewTransition>
 	);
@@ -138,7 +138,7 @@ export function NavigationTransition({ children, className, ...props }: Omit<Vie
  */
 export function ModalTransition({ children, className, ...props }: Omit<ViewTransitionProps, 'type'>) {
 	return (
-		<ViewTransition type="modal" className={cn('vt-name-modal', className)} {...props}>
+		<ViewTransition className={cn('vt-name-modal', className)} type="modal" {...props}>
 			{children}
 		</ViewTransition>
 	);
@@ -149,7 +149,7 @@ export function ModalTransition({ children, className, ...props }: Omit<ViewTran
  */
 export function ListTransition({ children, className, ...props }: Omit<ViewTransitionProps, 'type'>) {
 	return (
-		<ViewTransition type="list" className={cn('vt-name-list', className)} {...props}>
+		<ViewTransition className={cn('vt-name-list', className)} type="list" {...props}>
 			{children}
 		</ViewTransition>
 	);
@@ -165,7 +165,7 @@ export function SharedTransition({
 	...props
 }: Omit<ViewTransitionProps, 'type'> & { name: string }) {
 	return (
-		<ViewTransition type="shared" name={name} className={cn('vt-name-shared', className)} {...props}>
+		<ViewTransition className={cn('vt-name-shared', className)} name={name} type="shared" {...props}>
 			{children}
 		</ViewTransition>
 	);

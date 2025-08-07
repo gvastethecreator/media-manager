@@ -98,7 +98,7 @@ export async function getThumbnail(
 		}
 
 		// Validar que la ruta del archivo exista
-		if (!image.path || !existsSync(image.path)) {
+		if (!(image.path && existsSync(image.path))) {
 			const error = `Archivo no encontrado en ruta: ${image.path}`;
 			// Registrar el error en la base de datos
 			await db
@@ -120,7 +120,7 @@ export async function getThumbnail(
 		try {
 			const thumbnail = await generateThumbnail(image.path, { quality: validQuality });
 
-			if (!thumbnail || !thumbnail.buffer) {
+			if (!(thumbnail && thumbnail.buffer)) {
 				throw new Error('No se pudo generar el thumbnail');
 			}
 
@@ -214,7 +214,7 @@ export async function getLastProcessedThumbnails(limit = 9): Promise<LastProcess
 		const imagesData = await db.query.images.findMany({
 			where: not(isNull(images.thumbnail)),
 			orderBy: desc(images.updatedAt),
-			limit: limit,
+			limit,
 			columns: {
 				id: true,
 				path: true,
@@ -279,10 +279,10 @@ export async function getThumbnailStats(): Promise<ThumbnailStats> {
 		return {
 			total: totalFiles,
 			processed: withThumbnail,
-			pending: pending,
+			pending,
 			errors: errors.length,
-			totalFiles: totalFiles,
-			totalSize: totalSize,
+			totalFiles,
+			totalSize,
 		};
 	} catch (error) {
 		thumbLogger.error('❌ Error obteniendo estadísticas:', error);

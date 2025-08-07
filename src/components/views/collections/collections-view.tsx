@@ -56,16 +56,16 @@ export function CollectionsView(_props: ViewProps) {
 	return (
 		<CollectionsContentView
 			collections={collections}
-			isLoading={isLoading}
 			error={error}
-			showForm={showForm}
-			newCollectionName={newCollectionName}
-			newCollectionDescription={newCollectionDescription}
-			setShowForm={setShowForm}
-			setNewCollectionName={setNewCollectionName}
-			setNewCollectionDescription={setNewCollectionDescription}
 			handleCollectionClick={handleCollectionClick}
 			handleCreateCollection={handleCreateCollection}
+			isLoading={isLoading}
+			newCollectionDescription={newCollectionDescription}
+			newCollectionName={newCollectionName}
+			setNewCollectionDescription={setNewCollectionDescription}
+			setNewCollectionName={setNewCollectionName}
+			setShowForm={setShowForm}
+			showForm={showForm}
 		/>
 	);
 }

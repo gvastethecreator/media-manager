@@ -52,34 +52,34 @@ export function UndoRedoToolbar({
 	return (
 		<div className={cn('flex items-center gap-1', compact && 'gap-0.5', className)}>
 			{/* Undo Button */}
-			<UndoButton variant={buttonVariant} size={buttonSize} className={compact ? 'h-7 w-7' : undefined} />
+			<UndoButton className={compact ? 'h-7 w-7' : undefined} size={buttonSize} variant={buttonVariant} />
 
 			{/* Redo Button */}
-			<RedoButton variant={buttonVariant} size={buttonSize} className={compact ? 'h-7 w-7' : undefined} />
+			<RedoButton className={compact ? 'h-7 w-7' : undefined} size={buttonSize} variant={buttonVariant} />
 
 			{/* History Button */}
 			{showHistoryButton && (
-				<Popover open={isHistoryOpen} onOpenChange={setIsHistoryOpen}>
+				<Popover onOpenChange={setIsHistoryOpen} open={isHistoryOpen}>
 					<PopoverTrigger asChild>
 						<Button
-							variant={buttonVariant}
-							size={buttonSize}
+							aria-label="Ver historial de acciones"
 							className={cn('relative', compact && 'h-7 w-7', !hasHistory && 'opacity-50')}
 							disabled={!hasHistory}
-							aria-label="Ver historial de acciones"
+							size={buttonSize}
+							variant={buttonVariant}
 						>
 							<History className="h-4 w-4" />
-							{hasHistory && <ChevronDown className="h-2 w-2 absolute -bottom-0.5 -right-0.5" />}
+							{hasHistory && <ChevronDown className="-bottom-0.5 -right-0.5 absolute h-2 w-2" />}
 						</Button>
 					</PopoverTrigger>
-					<PopoverContent className="w-80 p-0" align="start" side="bottom">
+					<PopoverContent align="start" className="w-80 p-0" side="bottom">
 						<UndoRedoPanel compact={compact} maxHeight="300px" onClose={() => setIsHistoryOpen(false)} />
 					</PopoverContent>
 				</Popover>
 			)}
 
 			{/* Separator */}
-			{showSeparator && children && <Separator orientation="vertical" className="h-6 mx-1" />}
+			{showSeparator && children && <Separator className="mx-1 h-6" orientation="vertical" />}
 
 			{/* Additional content */}
 			{children}
@@ -98,8 +98,8 @@ export function UndoRedoButtonGroup({
 }: Pick<UndoRedoToolbarProps, 'className' | 'buttonVariant' | 'buttonSize' | 'compact'>) {
 	return (
 		<div className={cn('flex items-center gap-1', compact && 'gap-0.5', className)}>
-			<UndoButton variant={buttonVariant} size={buttonSize} className={compact ? 'h-7 w-7' : undefined} />
-			<RedoButton variant={buttonVariant} size={buttonSize} className={compact ? 'h-7 w-7' : undefined} />
+			<UndoButton className={compact ? 'h-7 w-7' : undefined} size={buttonSize} variant={buttonVariant} />
+			<RedoButton className={compact ? 'h-7 w-7' : undefined} size={buttonSize} variant={buttonVariant} />
 		</div>
 	);
 }
@@ -115,7 +115,7 @@ export function UndoRedoStatus({ className }: { className?: string }) {
 	}
 
 	return (
-		<div className={cn('flex items-center gap-2 text-xs text-muted-foreground', className)}>
+		<div className={cn('flex items-center gap-2 text-muted-foreground text-xs', className)}>
 			<span>
 				{state.currentIndex + 1} / {state.totalActions}
 			</span>

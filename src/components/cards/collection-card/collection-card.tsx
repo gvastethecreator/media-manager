@@ -127,92 +127,92 @@ export function CollectionCard({
 	// Render del componente
 	return (
 		<motion.div
+			aria-label={`Colección: ${collection.name}`}
 			className={cn(
 				// Base
 				'relative bg-card',
-				'w-[300px] rounded-[4.75%] overflow-hidden',
+				'w-[300px] overflow-hidden rounded-[4.75%]',
 				compact ? 'h-[220px]' : 'h-[420px]',
 				'border-2 shadow-md',
 				// Textura y efectos
-				'after:content-[""] after:absolute after:inset-0 after:bg-noise-subtle after:opacity-30 after:pointer-events-none after:z-10',
+				'after:pointer-events-none after:absolute after:inset-0 after:z-10 after:bg-noise-subtle after:opacity-30 after:content-[""]',
 				// Interacción
 				'transition-all duration-300 ease-out',
-				'hover:shadow-lg hover:scale-[1.02]',
+				'hover:scale-[1.02] hover:shadow-lg',
 				'active:scale-[0.98]',
 				// Cursor
 				onClick ? 'cursor-pointer' : '',
 				// Clase personalizada
 				className
 			)}
-			whileHover={{ y: -8, transition: { duration: 0.3 } }}
-			whileTap={{ scale: 0.98 }}
+			data-collection-id={collection.id}
 			onClick={onClick}
 			onKeyDown={handleKeyDown}
-			tabIndex={onClick ? 0 : -1}
 			role={onClick ? 'button' : 'article'}
-			aria-label={`Colección: ${collection.name}`}
-			data-collection-id={collection.id}
 			style={cardStyle}
+			tabIndex={onClick ? 0 : -1}
+			whileHover={{ y: -8, transition: { duration: 0.3 } }}
+			whileTap={{ scale: 0.98 }}
 		>
 			{/* Resplandor de borde en hover */}
-			<div className="absolute inset-0 opacity-0 hover:opacity-100 transition-opacity duration-300 pointer-events-none">
-				<div className="absolute inset-0 rounded-[4.75%] blur-md -z-10" style={glowStyle} />
+			<div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-100">
+				<div className="-z-10 absolute inset-0 rounded-[4.75%] blur-md" style={glowStyle} />
 			</div>
 
 			{/* Textura holográfica tipo TCG */}
-			<div className="absolute inset-0 bg-noise-subtle opacity-5 mix-blend-overlay pointer-events-none z-1" />
+			<div className="pointer-events-none absolute inset-0 z-1 bg-noise-subtle opacity-5 mix-blend-overlay" />
 			<div
-				className="absolute inset-0 bg-gradient-to-br opacity-10 pointer-events-none z-1 hover:opacity-20 transition-opacity duration-300"
+				className="pointer-events-none absolute inset-0 z-1 bg-gradient-to-br opacity-10 transition-opacity duration-300 hover:opacity-20"
 				style={{ background: `linear-gradient(45deg, transparent 25%, ${primaryColor}50 50%, transparent 75%)` }}
 			/>
 
 			{/* Marco interior tipo TCG */}
-			<div className="absolute inset-2 rounded-[4%] border border-white/20 pointer-events-none z-0" />
+			<div className="pointer-events-none absolute inset-2 z-0 rounded-[4%] border border-white/20" />
 
 			{/* Esquinas y marcos decorativos estilo TCG */}
 			<div
-				className="absolute top-1 left-1 w-5 h-5 border-t-2 border-l-2 rounded-tl-md z-20"
+				className="absolute top-1 left-1 z-20 h-5 w-5 rounded-tl-md border-t-2 border-l-2"
 				style={{ borderColor: primaryColor }}
 			/>
 			<div
-				className="absolute top-1 right-1 w-5 h-5 border-t-2 border-r-2 rounded-tr-md z-20"
+				className="absolute top-1 right-1 z-20 h-5 w-5 rounded-tr-md border-t-2 border-r-2"
 				style={{ borderColor: primaryColor }}
 			/>
 			<div
-				className="absolute bottom-1 left-1 w-5 h-5 border-b-2 border-l-2 rounded-bl-md z-20"
+				className="absolute bottom-1 left-1 z-20 h-5 w-5 rounded-bl-md border-b-2 border-l-2"
 				style={{ borderColor: primaryColor }}
 			/>
 			<div
-				className="absolute bottom-1 right-1 w-5 h-5 border-b-2 border-r-2 rounded-br-md z-20"
+				className="absolute right-1 bottom-1 z-20 h-5 w-5 rounded-br-md border-r-2 border-b-2"
 				style={{ borderColor: primaryColor }}
 			/>
 
 			{/* Ornamentos decorativos en las esquinas */}
 			<div
-				className="absolute top-3 left-3 w-3 h-3 rounded-full z-20 opacity-70"
+				className="absolute top-3 left-3 z-20 h-3 w-3 rounded-full opacity-70"
 				style={{ backgroundColor: primaryColor }}
 			/>
 			<div
-				className="absolute top-3 right-3 w-3 h-3 rounded-full z-20 opacity-70"
+				className="absolute top-3 right-3 z-20 h-3 w-3 rounded-full opacity-70"
 				style={{ backgroundColor: primaryColor }}
 			/>
 			<div
-				className="absolute bottom-3 left-3 w-3 h-3 rounded-full z-20 opacity-70"
+				className="absolute bottom-3 left-3 z-20 h-3 w-3 rounded-full opacity-70"
 				style={{ backgroundColor: primaryColor }}
 			/>
 			<div
-				className="absolute bottom-3 right-3 w-3 h-3 rounded-full z-20 opacity-70"
+				className="absolute right-3 bottom-3 z-20 h-3 w-3 rounded-full opacity-70"
 				style={{ backgroundColor: primaryColor }}
 			/>
 
 			{/* Contenido estructurado de la tarjeta */}
-			<div className="flex flex-col h-full relative z-1">
+			<div className="relative z-1 flex h-full flex-col">
 				{/* Encabezado de la tarjeta */}
 				<CollectionCardHeader
-					name={collection.name}
-					emoji={collection.emoji ?? '📦'}
-					color={primaryColor}
 					category={collection.category ?? 'Colección'}
+					color={primaryColor}
+					emoji={collection.emoji ?? '📦'}
+					name={collection.name}
 					platform={collection.platform ?? 'General'}
 				/>
 
@@ -229,35 +229,35 @@ export function CollectionCard({
 						{/* Contenido principal */}
 						<CollectionCardContent
 							description={collection.description}
+							editions={collection.editions}
+							featuredImage={collection.featuredImage}
+							network={collection.network}
 							platform={collection.platform}
 							price={collection.price}
-							network={collection.network}
+							primaryColor={primaryColor}
+							sourceImage={collection.sourceImage}
 							tokenId={collection.tokenId}
 							url={collection.url}
-							editions={collection.editions}
-							primaryColor={primaryColor}
-							featuredImage={collection.featuredImage}
-							sourceImage={collection.sourceImage}
 						/>
 					</>
 				)}
 
 				{/* Pie de la tarjeta */}
 				<CollectionCardFooter
+					compact={compact}
 					createdAt={collection.createdAt}
-					updatedAt={collection.updatedAt}
-					imagesCount={showImagesCount ? totalMedia : undefined}
 					entitiesCount={showEntitiesCount ? totalEntities : undefined}
+					imagesCount={showImagesCount ? totalMedia : undefined}
+					isFavorite={collection.isFavorite}
 					primaryColor={primaryColor}
 					secondaryColor={secondaryColor}
-					isFavorite={collection.isFavorite}
-					compact={compact}
+					updatedAt={collection.updatedAt}
 				/>
 
 				{/* Número de rareza estilo TCG */}
 				{!compact && (
 					<div
-						className="absolute bottom-1 right-1/2 transform translate-x-1/2 text-[8px] font-mono opacity-70 z-20"
+						className="absolute right-1/2 bottom-1 z-20 translate-x-1/2 transform font-mono text-[8px] opacity-70"
 						style={{ color: primaryColor }}
 					>
 						{collection.id.substring(0, 6)}/{collection.id.substring(collection.id.length - 6)}

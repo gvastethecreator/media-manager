@@ -80,10 +80,10 @@ export function PlacesView({ isVisible }: ViewProps) {
 	if (error) {
 		return (
 			<EmptyState
+				actions={<Button onClick={handleRetry}>Reintentar</Button>}
+				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
 				icon={MapPin}
 				title="Error al cargar lugares"
-				description={error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
-				actions={<Button onClick={handleRetry}>Reintentar</Button>}
 			/>
 		);
 	}
@@ -91,69 +91,69 @@ export function PlacesView({ isVisible }: ViewProps) {
 	return (
 		<ScrollArea className="flex-1">
 			<div className="p-6">
-				<h2 className="text-xl font-bold mb-4">Vista de Lugares</h2>
+				<h2 className="mb-4 font-bold text-xl">Vista de Lugares</h2>
 
-				<Button onClick={() => setShowForm(!showForm)} className="mb-4">
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
 					{showForm ? 'Cancelar' : 'Crear Lugar'}
 				</Button>
 
 				{showForm && (
-					<div className="mb-6 p-4 border rounded-lg shadow-sm">
-						<h3 className="text-lg font-semibold mb-3">Nuevo Lugar</h3>
-						<div className="grid gap-2 mb-3">
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nuevo Lugar</h3>
+						<div className="mb-3 grid gap-2">
 							<Label htmlFor="placeName">Nombre</Label>
 							<Input
 								id="placeName"
-								value={newPlaceName}
 								onChange={(e) => setNewPlaceName(e.target.value)}
 								placeholder="Nombre del lugar"
+								value={newPlaceName}
 							/>
 						</div>
-						<div className="grid gap-2 mb-4">
+						<div className="mb-4 grid gap-2">
 							<Label htmlFor="placeDescription">Descripción</Label>
 							<Textarea
 								id="placeDescription"
-								value={newPlaceDescription}
 								onChange={(e) => setNewPlaceDescription(e.target.value)}
 								placeholder="Descripción del lugar (opcional)"
+								value={newPlaceDescription}
 							/>
 						</div>
 						<Button onClick={handleCreatePlace}>Guardar Lugar</Button>
 					</div>
 				)}
 
-				{!places.length && !isLoading && !showForm ? (
+				{places.length || isLoading || showForm ? (
+					<motion.div
+						animate={{ opacity: 1, y: 0 }}
+						className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+						initial={{ opacity: 0, y: 20 }}
+						transition={{ duration: 0.3 }}
+					>
+						{places.map((place, index) => (
+							<motion.div
+								animate={{ opacity: 1, y: 0 }}
+								initial={{ opacity: 0, y: 20 }}
+								key={place.id}
+								transition={{ duration: 0.3, delay: index * 0.05 }}
+							>
+								<PlaceCard
+									className={place.id === selectedPlaceId ? 'ring-2 ring-primary' : ''}
+									onClick={() => handlePlaceSelect(place.id)}
+									placeId={place.id}
+								/>
+							</motion.div>
+						))}
+					</motion.div>
+				) : (
 					<EmptyState
-						icon={MapPin}
-						title="Sin lugares"
 						description={
 							localSearch
 								? `No se encontraron lugares que coincidan con "${localSearch}"`
 								: 'No hay lugares disponibles'
 						}
+						icon={MapPin}
+						title="Sin lugares"
 					/>
-				) : (
-					<motion.div
-						className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5 gap-4"
-						initial={{ opacity: 0, y: 20 }}
-						animate={{ opacity: 1, y: 0 }}
-						transition={{ duration: 0.3 }}
-					>
-						{places.map((place, index) => (
-							<motion.div
-								key={place.id}
-								initial={{ opacity: 0, y: 20 }}
-								animate={{ opacity: 1, y: 0 }}
-								transition={{ duration: 0.3, delay: index * 0.05 }}
-							>
-								<PlaceCard
-									placeId={place.id}
-									onClick={() => handlePlaceSelect(place.id)}
-									className={place.id === selectedPlaceId ? 'ring-2 ring-primary' : ''}
-								/>
-							</motion.div>
-						))}
-					</motion.div>
 				)}
 			</div>
 		</ScrollArea>

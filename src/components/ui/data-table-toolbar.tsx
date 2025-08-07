@@ -16,13 +16,13 @@ export function DataTableToolbar<TData>({ table }: DataTableToolbarProps<TData>)
 		<div className="flex items-center justify-between">
 			<div className="flex flex-1 items-center space-x-2">
 				<Input
+					className="h-8 w-[150px] lg:w-[250px]"
+					onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
 					placeholder="Filtrar..."
 					value={(table.getColumn('name')?.getFilterValue() as string) ?? ''}
-					onChange={(event) => table.getColumn('name')?.setFilterValue(event.target.value)}
-					className="h-8 w-[150px] lg:w-[250px]"
 				/>
 				{isFiltered && (
-					<Button type="button" variant="ghost" onClick={() => table.resetColumnFilters()} className="h-8 px-2 lg:px-3">
+					<Button className="h-8 px-2 lg:px-3" onClick={() => table.resetColumnFilters()} type="button" variant="ghost">
 						Limpiar
 						<X className="ml-2 h-4 w-4" />
 					</Button>

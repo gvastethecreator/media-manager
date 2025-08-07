@@ -239,7 +239,7 @@ router.post('/', async (req, res) => {
 				emoji: data.emoji,
 				color: data.color,
 				featuredImage: data.featuredImage,
-				isFavorite: data.isFavorite || false,
+				isFavorite: data.isFavorite,
 				autoReindex: data.autoReindex,
 				totalFiles: 0,
 				totalSize: 0,
@@ -478,7 +478,7 @@ router.get('/:id/stats', async (req, res) => {
 			totalOthers: 0, // TODO: Implementar cuando se agregue tabla de otros archivos
 			totalSize: folderData[0].totalSize,
 			lastActivity: folderData[0].lastIndexed,
-			recentImages: recentImages,
+			recentImages,
 		};
 		res.json(stats);
 	} catch (error) {
@@ -640,7 +640,7 @@ router.patch('/:id/color', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await db.update(folders).set({ color: color }).where(eq(folders.id, id)).returning({
+		const updatedFolder = await db.update(folders).set({ color }).where(eq(folders.id, id)).returning({
 			id: folders.id,
 			name: folders.name,
 			description: folders.description,
@@ -678,7 +678,7 @@ router.patch('/:id/emoji', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await db.update(folders).set({ emoji: emoji }).where(eq(folders.id, id)).returning({
+		const updatedFolder = await db.update(folders).set({ emoji }).where(eq(folders.id, id)).returning({
 			id: folders.id,
 			name: folders.name,
 			description: folders.description,
@@ -716,7 +716,7 @@ router.patch('/:id/favorite', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await db.update(folders).set({ isFavorite: isFavorite }).where(eq(folders.id, id)).returning({
+		const updatedFolder = await db.update(folders).set({ isFavorite }).where(eq(folders.id, id)).returning({
 			id: folders.id,
 			name: folders.name,
 			description: folders.description,
@@ -754,28 +754,24 @@ router.patch('/:id/description', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await db
-			.update(folders)
-			.set({ description: description })
-			.where(eq(folders.id, id))
-			.returning({
-				id: folders.id,
-				name: folders.name,
-				description: folders.description,
-				path: folders.path,
-				emoji: folders.emoji,
-				color: folders.color,
-				featuredImage: folders.featuredImage,
-				isFavorite: folders.isFavorite,
-				totalFiles: folders.totalFiles,
-				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
-				lastIndexed: folders.lastIndexed,
-				createdAt: folders.createdAt,
-				updatedAt: folders.updatedAt,
-				parentId: folders.parentId,
-				presetId: folders.presetId,
-			});
+		const updatedFolder = await db.update(folders).set({ description }).where(eq(folders.id, id)).returning({
+			id: folders.id,
+			name: folders.name,
+			description: folders.description,
+			path: folders.path,
+			emoji: folders.emoji,
+			color: folders.color,
+			featuredImage: folders.featuredImage,
+			isFavorite: folders.isFavorite,
+			totalFiles: folders.totalFiles,
+			totalSize: folders.totalSize,
+			autoReindex: folders.autoReindex,
+			lastIndexed: folders.lastIndexed,
+			createdAt: folders.createdAt,
+			updatedAt: folders.updatedAt,
+			parentId: folders.parentId,
+			presetId: folders.presetId,
+		});
 		res.json(updatedFolder);
 	} catch (error) {
 		console.error('Error al actualizar la descripción de la carpeta:', error);
@@ -796,7 +792,7 @@ router.patch('/:id/name', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await db.update(folders).set({ name: name }).where(eq(folders.id, id)).returning({
+		const updatedFolder = await db.update(folders).set({ name }).where(eq(folders.id, id)).returning({
 			id: folders.id,
 			name: folders.name,
 			description: folders.description,
@@ -834,28 +830,24 @@ router.patch('/:id/auto-reindex', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const updatedFolder = await db
-			.update(folders)
-			.set({ autoReindex: autoReindex })
-			.where(eq(folders.id, id))
-			.returning({
-				id: folders.id,
-				name: folders.name,
-				description: folders.description,
-				path: folders.path,
-				emoji: folders.emoji,
-				color: folders.color,
-				featuredImage: folders.featuredImage,
-				isFavorite: folders.isFavorite,
-				totalFiles: folders.totalFiles,
-				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
-				lastIndexed: folders.lastIndexed,
-				createdAt: folders.createdAt,
-				updatedAt: folders.updatedAt,
-				parentId: folders.parentId,
-				presetId: folders.presetId,
-			});
+		const updatedFolder = await db.update(folders).set({ autoReindex }).where(eq(folders.id, id)).returning({
+			id: folders.id,
+			name: folders.name,
+			description: folders.description,
+			path: folders.path,
+			emoji: folders.emoji,
+			color: folders.color,
+			featuredImage: folders.featuredImage,
+			isFavorite: folders.isFavorite,
+			totalFiles: folders.totalFiles,
+			totalSize: folders.totalSize,
+			autoReindex: folders.autoReindex,
+			lastIndexed: folders.lastIndexed,
+			createdAt: folders.createdAt,
+			updatedAt: folders.updatedAt,
+			parentId: folders.parentId,
+			presetId: folders.presetId,
+		});
 		res.json(updatedFolder);
 	} catch (error) {
 		console.error('Error al actualizar el estado de auto-reindexación de la carpeta:', error);
@@ -970,62 +962,13 @@ router.post('/reindex-all', async (req, res) => {
 			return res.json({ processed: 0, errors: [], syncResult: null });
 		}
 
-		// Importar la función updateFolderStats
+		// Importar funciones necesarias una sola vez
 		const { updateFolderStats } = await import('@/lib/filesystem/folder-stats');
+		const { emit } = await import('@/lib/server/events.server');
 
-		let processed = 0;
-		const errors: string[] = [];
-		let globalSyncResult = null;
+		const result = await reindexAllFoldersProcess(allFolders, enableSync, updateFolderStats, emit);
 
-		// Procesar cada carpeta (solo la primera ejecutará la sincronización global)
-		for (let i = 0; i < allFolders.length; i++) {
-			const folder = allFolders[i];
-			try {
-				console.log(`🔄 Reindexando carpeta: ${folder.name} (${folder.id})`);
-
-				// Emitir progreso global
-				const progress = Math.round(((i + 1) / allFolders.length) * 100);
-				const { emit } = await import('@/lib/server/events.server');
-				await emit({
-					type: 'folder:reindexAll:progress',
-					data: {
-						folderId: null, // Para reindex global, folderId puede ser null
-						isProcessing: i < allFolders.length - 1,
-						progress,
-						totalFiles: allFolders.length,
-						filesProcessed: i + 1,
-						phase: i === allFolders.length - 1 ? 'complete' : 'processing',
-						message: `Reindexando carpetas... ${i + 1}/${allFolders.length} (${folder.name})`,
-						timestamp: Date.now(),
-						currentFolder: folder.name,
-					},
-				});
-
-				// Solo ejecutar sincronización en la primera carpeta para evitar duplicados
-				const shouldSync = enableSync && i === 0;
-				const indexResult = await updateFolderStats(folder.id, new Set(), 10, 0, shouldSync, true);
-
-				// Capturar resultado de sincronización de la primera carpeta
-				if (shouldSync && indexResult.syncResult) {
-					globalSyncResult = indexResult.syncResult;
-				}
-
-				processed++;
-				console.log(`✅ Carpeta reindexada: ${folder.name}`);
-			} catch (error) {
-				const errorMessage = `Error en carpeta ${folder.name}: ${error instanceof Error ? error.message : 'Error desconocido'}`;
-				console.error(`❌ ${errorMessage}`);
-				errors.push(errorMessage);
-			}
-		}
-
-		console.log(`✅ Reindexación global completada: ${processed} carpetas procesadas, ${errors.length} errores`);
-
-		res.json({
-			processed,
-			errors,
-			...(globalSyncResult && { syncResult: globalSyncResult }),
-		});
+		res.json(result);
 	} catch (error) {
 		console.error('Error en reindexación global:', error);
 		res.status(500).json({
@@ -1034,6 +977,104 @@ router.post('/reindex-all', async (req, res) => {
 		});
 	}
 });
+
+// Función auxiliar para el proceso de reindexado global
+async function reindexAllFoldersProcess(
+	allFolders: Array<{ id: string; name: string; path: string }>,
+	enableSync: boolean,
+	updateFolderStats: any,
+	emit: any
+) {
+	let processed = 0;
+	const errors: string[] = [];
+	let globalSyncResult: any = null;
+
+	// Procesar cada carpeta (solo la primera ejecutará la sincronización global)
+	for (let i = 0; i < allFolders.length; i++) {
+		const folder = allFolders[i];
+		try {
+			console.log(`🔄 Reindexando carpeta: ${folder.name} (${folder.id})`);
+
+			// Determinar la fase del proceso
+			const phase = getFolderProcessPhase(i, allFolders.length);
+
+			// Emitir progreso global
+			const progress = Math.round(((i + 1) / allFolders.length) * 100);
+
+			// Crear la promesa de emisión sin await en el loop
+			const emitPromise = emit({
+				type: 'folder:reindexAll:progress',
+				data: {
+					folderId: null, // Para reindex global, folderId puede ser null
+					isProcessing: true, // Siempre true durante el procesamiento
+					progress,
+					totalFiles: allFolders.length,
+					filesProcessed: i + 1,
+					phase,
+					message: `Reindexando carpetas... ${i + 1}/${allFolders.length} (${folder.name})`,
+					timestamp: Date.now(),
+					currentFolder: folder.name,
+				},
+			});
+
+			// Solo ejecutar sincronización en la primera carpeta para evitar duplicados
+			const shouldSync = enableSync && i === 0;
+
+			// Procesar carpeta y emisión en paralelo
+			const [indexResult] = await Promise.all([
+				updateFolderStats(folder.id, new Set(), 10, 0, shouldSync, true),
+				emitPromise,
+			]);
+
+			// Capturar resultado de sincronización de la primera carpeta
+			if (shouldSync && indexResult.syncResult) {
+				globalSyncResult = indexResult.syncResult;
+			}
+
+			processed++;
+			console.log(`✅ Carpeta reindexada: ${folder.name}`);
+		} catch (error) {
+			const errorMessage = `Error en carpeta ${folder.name}: ${error instanceof Error ? error.message : 'Error desconocido'}`;
+			console.error(`❌ ${errorMessage}`);
+			errors.push(errorMessage);
+		}
+	}
+
+	// Emitir evento de finalización
+	await emit({
+		type: 'folder:reindexAll:progress',
+		data: {
+			folderId: null,
+			isProcessing: false, // Proceso terminado
+			progress: 100,
+			totalFiles: allFolders.length,
+			filesProcessed: allFolders.length,
+			phase: 'complete',
+			message: `Reindexación completada: ${processed} carpetas procesadas`,
+			timestamp: Date.now(),
+			currentFolder: null,
+		},
+	});
+
+	console.log(`✅ Reindexación global completada: ${processed} carpetas procesadas, ${errors.length} errores`);
+
+	return {
+		processed,
+		errors,
+		...(globalSyncResult && { syncResult: globalSyncResult }),
+	};
+}
+
+// Función auxiliar para determinar la fase del proceso
+function getFolderProcessPhase(currentIndex: number, totalFolders: number): string {
+	if (currentIndex < totalFolders / 3) {
+		return 'scanning';
+	}
+	if (currentIndex < (totalFolders * 2) / 3) {
+		return 'metadata';
+	}
+	return 'processing';
+}
 
 // POST /api/folders/sync - Sincronizar carpetas con el sistema de archivos
 router.post('/sync', async (req, res) => {
@@ -1096,6 +1137,99 @@ router.get('/sync/status', async (req, res) => {
 		res.json(syncStatus);
 	} catch (error) {
 		console.error('Error verificando estado de sincronización:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// ==============================================
+// RUTAS DE SINCRONIZACIÓN DE ARCHIVOS
+// ==============================================
+
+// POST /api/folders/:id/sync-files - Sincronizar archivos de una carpeta específica
+router.post('/:id/sync-files', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { force = false } = req.body;
+
+		console.log(`🔄 Iniciando sincronización de archivos para carpeta: ${id}`);
+		console.log('🔍 Parámetros recibidos:', { id, force });
+
+		// Importar el servicio de sincronización de archivos
+		console.log('📦 Importando fileSyncService...');
+		const { fileSyncService } = await import('@/lib/filesystem/file-sync.service');
+		console.log('✅ fileSyncService importado exitosamente');
+
+		// Ejecutar sincronización de archivos
+		console.log('🚀 Ejecutando syncFolderFiles...');
+		const syncResult = await fileSyncService.syncFolderFiles(id, { force });
+
+		console.log(`✅ Sincronización de archivos completada para carpeta: ${id}`, syncResult);
+
+		res.json(syncResult);
+	} catch (error) {
+		console.error(`❌ Error sincronizando archivos de carpeta ${req.params.id}:`, error);
+		console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack available');
+		console.error('❌ Error details:', {
+			name: error instanceof Error ? error.name : 'Unknown',
+			message: error instanceof Error ? error.message : String(error),
+			cause: error instanceof Error ? error.cause : undefined,
+		});
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// POST /api/folders/sync-all-files - Sincronizar archivos de todas las carpetas
+router.post('/sync-all-files', async (req, res) => {
+	try {
+		const { force = false, parallelism = 3 } = req.body;
+
+		console.log('🔄 Iniciando sincronización global de archivos');
+
+		// Importar servicios necesarios
+		const { fileSyncService } = await import('@/lib/filesystem/file-sync.service');
+		const { getAllFolders } = await import('@/services/folder/folder.service');
+
+		// Obtener todas las carpetas
+		const allFolders = await getAllFolders();
+		const folderIds = allFolders.map((f: { id: string }) => f.id);
+
+		// Ejecutar sincronización global
+		const syncResult = await fileSyncService.syncMultipleFolders(folderIds, { force, parallelism });
+
+		console.log('✅ Sincronización global de archivos completada', syncResult);
+
+		res.json(syncResult);
+	} catch (error) {
+		console.error('❌ Error en sincronización global de archivos:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// GET /api/folders/:id/sync-status - Verificar estado de sincronización de archivos
+router.get('/:id/sync-status', async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		console.log(`🔍 Verificando estado de sincronización para carpeta: ${id}`);
+
+		// Importar el servicio de sincronización de archivos
+		const { fileSyncService } = await import('@/lib/filesystem/file-sync.service');
+
+		// Verificar estado de sincronización
+		const syncStatus = await fileSyncService.checkSyncStatus(id);
+
+		res.json(syncStatus);
+	} catch (error) {
+		console.error(`❌ Error verificando estado de sincronización de carpeta ${req.params.id}:`, error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',

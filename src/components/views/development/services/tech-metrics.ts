@@ -50,7 +50,7 @@ export async function getTechnicalMetrics(): Promise<{
 			nodeVersion: 'v18.16.0',
 			uptime: Math.floor(Math.random() * 3600 * 24 * 7), // Hasta 7 días en segundos
 			memoryUsage: {
-				total: 16384, // MB
+				total: 16_384, // MB
 				used: 6144 + Math.floor(Math.random() * 2048), // 6-8GB
 				free: 8192 - Math.floor(Math.random() * 2048), // Resto
 			},
@@ -63,7 +63,7 @@ export async function getTechnicalMetrics(): Promise<{
 			connectionPoolSize: 10,
 			activeConnections: Math.floor(Math.random() * 8) + 1,
 			queryResponseTime: Math.random() * 0.5, // 0-500ms
-			totalQueries: 18500 + Math.floor(Math.random() * 1000),
+			totalQueries: 18_500 + Math.floor(Math.random() * 1000),
 			errorRate: Math.random() * 1.5, // 0-1.5%
 		},
 		apiMetrics: {
@@ -71,8 +71,8 @@ export async function getTechnicalMetrics(): Promise<{
 			averageResponseTime: Math.random() * 0.3, // 0-300ms
 			errorRate: Math.random() * 2, // 0-2%
 			topEndpoints: [
-				{ endpoint: '/api/files', hits: Math.floor(Math.random() * 5000) + 15000 },
-				{ endpoint: '/api/images', hits: Math.floor(Math.random() * 3000) + 10000 },
+				{ endpoint: '/api/files', hits: Math.floor(Math.random() * 5000) + 15_000 },
+				{ endpoint: '/api/images', hits: Math.floor(Math.random() * 3000) + 10_000 },
 				{ endpoint: '/api/tags', hits: Math.floor(Math.random() * 2000) + 5000 },
 				{ endpoint: '/api/search', hits: Math.floor(Math.random() * 1500) + 3000 },
 				{ endpoint: '/api/folders', hits: Math.floor(Math.random() * 1000) + 1000 },
@@ -97,7 +97,7 @@ export async function getFileSystemPerformance(): Promise<{
 		readSpeed: Math.floor(Math.random() * 100) + 100, // 100-200 MB/s
 		writeSpeed: Math.floor(Math.random() * 80) + 60, // 60-140 MB/s
 		averageAccessTime: Math.random() * 5 + 1, // 1-6 ms
-		iopsRead: Math.floor(Math.random() * 5000) + 10000, // 10k-15k
+		iopsRead: Math.floor(Math.random() * 5000) + 10_000, // 10k-15k
 		iopsWrite: Math.floor(Math.random() * 2000) + 3000, // 3k-5k
 		currentOperations: Math.floor(Math.random() * 100),
 	};

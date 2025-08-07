@@ -67,7 +67,7 @@ export const createCollectionCoreSlice: StateCreator<
 
 	getSelectedCollection: () => {
 		const { selectedCollectionId, collections } = get();
-		if (!selectedCollectionId) return undefined;
+		if (!selectedCollectionId) return;
 		return collections[selectedCollectionId];
 	},
 
@@ -141,11 +141,11 @@ export const createCollectionCoreSlice: StateCreator<
 				get().addCollection(collection);
 				return collection;
 			}
-			return undefined;
+			return;
 		} catch (error: any) {
 			set({ error: error.message, isLoading: false });
 			console.error('Error fetching collection:', error);
-			return undefined;
+			return;
 		} finally {
 			set({ isLoading: false });
 		}
@@ -175,7 +175,7 @@ export const createCollectionCoreSlice: StateCreator<
 		} catch (error: any) {
 			set({ error: error.message, isLoading: false });
 			console.error('Error creating collection:', error);
-			return undefined;
+			return;
 		} finally {
 			set({ isLoading: false });
 		}
@@ -190,7 +190,7 @@ export const createCollectionCoreSlice: StateCreator<
 		} catch (error: any) {
 			set({ error: error.message, isLoading: false });
 			console.error('Error updating collection:', error);
-			return undefined;
+			return;
 		} finally {
 			set({ isLoading: false });
 		}

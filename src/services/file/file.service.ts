@@ -18,6 +18,7 @@ import {
 	serializeDirectoryContents,
 	serializeFileOperationResult,
 } from '@/transformers/file';
+import type { AnyEntityWithStats } from '@/types/entities';
 import {
 	type FileBase,
 	type FileCopyMoveResult,
@@ -27,7 +28,6 @@ import {
 	type FileOperationResult,
 	FileType,
 } from '@/types/entities/file';
-import type { AnyEntityWithStats } from '@/types/entities';
 import { batchFileOperationsService } from './batch-operations.service';
 
 // Usar tipos de FileBase directamente
@@ -471,11 +471,11 @@ export async function moveFile(
 }
 
 // Export enhanced file operations service
-export { enhancedFileOperationsService, clipboardManager } from './enhanced-file-operations.service';
+export { clipboardManager, enhancedFileOperationsService } from './enhanced-file-operations.service';
 
 /**
  * Batch Operations Convenience Functions
- * 
+ *
  * These functions provide easy access to batch operations
  * from the main file service.
  */
@@ -484,108 +484,108 @@ export { enhancedFileOperationsService, clipboardManager } from './enhanced-file
  * Queue a batch copy operation for multiple files
  */
 export async function batchCopyFiles(
-  items: AnyEntityWithStats[],
-  targetPath: string,
-  options: FileOperationOptions & {
-    priority?: 'low' | 'normal' | 'high' | 'urgent';
-    showProgress?: boolean;
-    continueOnError?: boolean;
-    description?: string;
-  } = {}
+	items: AnyEntityWithStats[],
+	targetPath: string,
+	options: FileOperationOptions & {
+		priority?: 'low' | 'normal' | 'high' | 'urgent';
+		showProgress?: boolean;
+		continueOnError?: boolean;
+		description?: string;
+	} = {}
 ): Promise<string> {
-  logger.info('🔄 Starting batch copy operation:', {
-    itemCount: items.length,
-    targetPath,
-  });
+	logger.info('🔄 Starting batch copy operation:', {
+		itemCount: items.length,
+		targetPath,
+	});
 
-  return batchFileOperationsService.queueCopyOperation(items, targetPath, {
-    overwrite: options.overwrite,
-    preserveTimestamps: options.preserveTimestamps,
-    priority: options.priority || 'normal',
-    showProgress: options.showProgress !== false,
-    continueOnError: options.continueOnError !== false,
-    description: options.description,
-    autoCleanup: true,
-  });
+	return batchFileOperationsService.queueCopyOperation(items, targetPath, {
+		overwrite: options.overwrite,
+		preserveTimestamps: options.preserveTimestamps,
+		priority: options.priority || 'normal',
+		showProgress: options.showProgress !== false,
+		continueOnError: options.continueOnError !== false,
+		description: options.description,
+		autoCleanup: true,
+	});
 }
 
 /**
  * Queue a batch move operation for multiple files
  */
 export async function batchMoveFiles(
-  items: AnyEntityWithStats[],
-  targetPath: string,
-  options: FileOperationOptions & {
-    priority?: 'low' | 'normal' | 'high' | 'urgent';
-    showProgress?: boolean;
-    continueOnError?: boolean;
-    description?: string;
-  } = {}
+	items: AnyEntityWithStats[],
+	targetPath: string,
+	options: FileOperationOptions & {
+		priority?: 'low' | 'normal' | 'high' | 'urgent';
+		showProgress?: boolean;
+		continueOnError?: boolean;
+		description?: string;
+	} = {}
 ): Promise<string> {
-  logger.info('🚚 Starting batch move operation:', {
-    itemCount: items.length,
-    targetPath,
-  });
+	logger.info('🚚 Starting batch move operation:', {
+		itemCount: items.length,
+		targetPath,
+	});
 
-  return batchFileOperationsService.queueMoveOperation(items, targetPath, {
-    overwrite: options.overwrite,
-    preserveTimestamps: options.preserveTimestamps,
-    priority: options.priority || 'normal',
-    showProgress: options.showProgress !== false,
-    continueOnError: options.continueOnError !== false,
-    description: options.description,
-    autoCleanup: true,
-  });
+	return batchFileOperationsService.queueMoveOperation(items, targetPath, {
+		overwrite: options.overwrite,
+		preserveTimestamps: options.preserveTimestamps,
+		priority: options.priority || 'normal',
+		showProgress: options.showProgress !== false,
+		continueOnError: options.continueOnError !== false,
+		description: options.description,
+		autoCleanup: true,
+	});
 }
 
 /**
  * Queue a batch delete operation for multiple files
  */
 export async function batchDeleteFiles(
-  items: AnyEntityWithStats[],
-  options: {
-    priority?: 'low' | 'normal' | 'high' | 'urgent';
-    showProgress?: boolean;
-    continueOnError?: boolean;
-    description?: string;
-    recursive?: boolean;
-  } = {}
+	items: AnyEntityWithStats[],
+	options: {
+		priority?: 'low' | 'normal' | 'high' | 'urgent';
+		showProgress?: boolean;
+		continueOnError?: boolean;
+		description?: string;
+		recursive?: boolean;
+	} = {}
 ): Promise<string> {
-  logger.info('🗑️ Starting batch delete operation:', {
-    itemCount: items.length,
-  });
+	logger.info('🗑️ Starting batch delete operation:', {
+		itemCount: items.length,
+	});
 
-  return batchFileOperationsService.queueDeleteOperation(items, {
-    recursive: options.recursive,
-    priority: options.priority || 'normal',
-    showProgress: options.showProgress !== false,
-    continueOnError: options.continueOnError === true, // More conservative for delete
-    description: options.description,
-    autoCleanup: true,
-  });
+	return batchFileOperationsService.queueDeleteOperation(items, {
+		recursive: options.recursive,
+		priority: options.priority || 'normal',
+		showProgress: options.showProgress !== false,
+		continueOnError: options.continueOnError === true, // More conservative for delete
+		description: options.description,
+		autoCleanup: true,
+	});
 }
 
 /**
  * Check if batch operations are currently running
  */
 export function isBatchProcessing(): boolean {
-  const operations = batchFileOperationsService.getAllOperations();
-  return operations.some(op => op.status === 'running');
+	const operations = batchFileOperationsService.getAllOperations();
+	return operations.some((op) => op.status === 'running');
 }
 
 /**
  * Get summary of all batch operations
  */
 export function getBatchOperationsSummary() {
-  const operations = batchFileOperationsService.getAllOperations();
-  
-  return {
-    total: operations.length,
-    active: operations.filter(op => ['queued', 'running', 'paused'].includes(op.status)).length,
-    completed: operations.filter(op => op.status === 'completed').length,
-    failed: operations.filter(op => op.status === 'failed').length,
-    cancelled: operations.filter(op => op.status === 'cancelled').length,
-  };
+	const operations = batchFileOperationsService.getAllOperations();
+
+	return {
+		total: operations.length,
+		active: operations.filter((op) => ['queued', 'running', 'paused'].includes(op.status)).length,
+		completed: operations.filter((op) => op.status === 'completed').length,
+		failed: operations.filter((op) => op.status === 'failed').length,
+		cancelled: operations.filter((op) => op.status === 'cancelled').length,
+	};
 }
 
 // Re-export batch operations service for direct access

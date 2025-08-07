@@ -135,7 +135,7 @@ router.put('/rename', async (req, res) => {
 	try {
 		const { oldPath, newPath, options } = req.body;
 
-		if (!oldPath || !newPath) {
+		if (!(oldPath && newPath)) {
 			res.status(400).json({ error: 'Rutas oldPath y newPath requeridas' });
 			return;
 		}
@@ -158,7 +158,7 @@ router.post('/copy', async (req, res) => {
 	try {
 		const { sourcePath, destPath, options } = req.body;
 
-		if (!sourcePath || !destPath) {
+		if (!(sourcePath && destPath)) {
 			res.status(400).json({ error: 'Rutas sourcePath y destPath requeridas' });
 			return;
 		}
@@ -181,7 +181,7 @@ router.post('/move', async (req, res) => {
 	try {
 		const { sourcePath, destPath, options } = req.body;
 
-		if (!sourcePath || !destPath) {
+		if (!(sourcePath && destPath)) {
 			res.status(400).json({ error: 'Rutas sourcePath y destPath requeridas' });
 			return;
 		}
