@@ -1,20 +1,18 @@
-import { memo, Suspense, useEffect, useMemo, useState } from 'react';
+import { memo as reactMemo, Suspense, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { DetailsPanelV2 } from '@/components/panels/details-panel';
+import { DetailsPanel } from '@/components/panels/details-panel';
 import { FolderStatsDisplay } from '@/components/panels/stats-panel/folder-stats-display';
 import { SystemStatsDisplay } from '@/components/panels/stats-panel/system-stats-display';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 
-// Carga perezosa del StatsPanel compatible con Vite/React 19
-// const StatsPanel = lazy(() => import('../stats-panel/stats-panel')); // Temporalmente comentado - archivo no existe
-// const FolderStats = lazy(() =>
-// 	import('../stats-panel/components/folder-stats').then((m) => ({ default: m.FolderStats }))
-// ); // Temporalmente comentado - archivo no existe
-
 // Componente para manejar la carga perezosa del StatsPanel
-const LazyStatsPanel = memo(function LazyStatsPanel({ folderId }: { folderId?: string; folderName?: string }) {
+const LazyStatsPanel = reactMemo(function RightPanelLazyStatsPanel({
+	folderId,
+}: {
+	folderId?: string;
+	folderName?: string;
+}) {
 	// Usamos un estado para controlar si el panel ha sido visible por suficiente tiempo
 	const [shouldRender, setShouldRender] = useState(false);
 
@@ -66,7 +64,10 @@ interface RightPanelProps {
  * que se pueden mostrar en el panel lateral derecho de la aplicación.
  * Muestra estadísticas por defecto o detalles de las imágenes seleccionadas.
  */
-export const RightPanel = memo(function RightPanel({ isCollapsed, isAnimating = false }: RightPanelProps) {
+export const RightPanel = reactMemo(function RightPanelComponent({
+	isCollapsed,
+	isAnimating = false,
+}: RightPanelProps) {
 	const { isVisible, selectedItems, showStatsWhenEmpty } = useDetailsPanel();
 	const location = useLocation();
 	const [mounted, setMounted] = useState(false);
@@ -101,7 +102,9 @@ export const RightPanel = memo(function RightPanel({ isCollapsed, isAnimating = 
 	// Efecto para manejar la visibilidad cuando cambia el estado de colapso
 	useEffect(() => {
 		// Solo actuamos si el componente está montado
-		if (!mounted) return;
+		if (!mounted) {
+			return;
+		}
 	}, [mounted]);
 
 	// Determinamos el título según el contenido actual
@@ -115,20 +118,14 @@ export const RightPanel = memo(function RightPanel({ isCollapsed, isAnimating = 
 	return (
 		<div
 			className={cn(
-				'flex h-full flex-col bg-background',
+				'flex h-full w-full bg-background',
 				isAnimating && 'transition-all duration-300',
 				isCollapsed && 'right-panel-collapsed'
 			)}
 		>
-			<div className="flex items-center justify-between border-b p-2">
-				<h3 className="font-medium text-sm">{panelTitle}</h3>
-			</div>
-
 			{!isCollapsed &&
 				(hasSelectedItems ? (
-					<ScrollArea className="flex-1">
-						<DetailsPanelV2 />
-					</ScrollArea>
+					<DetailsPanel selectedItems={selectedItems} />
 				) : (
 					shouldShowStats && (
 						<LazyStatsPanel folderId={currentFolderInfo.folderId} folderName={currentFolderInfo.folderName} />
@@ -137,10 +134,3 @@ export const RightPanel = memo(function RightPanel({ isCollapsed, isAnimating = 
 		</div>
 	);
 });
-
-/**
- * 📝 Actualizado para usar DetailsPanelV2
- * - Usa EntityWithStats desde el store
- * - No requiere casting de tipos
- * - Compatible con el nuevo sistema de tipos
- */
