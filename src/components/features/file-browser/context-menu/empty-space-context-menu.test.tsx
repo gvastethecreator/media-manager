@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it, mock } from 'bun:test';
-import { render, screen } from '@testing-library/react';
+import { render, screen } from '@/test/test-utils';
 import { EmptySpaceContextMenu } from './empty-space-context-menu';
 
 // Mock de las dependencias

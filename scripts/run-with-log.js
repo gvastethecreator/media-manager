@@ -4,6 +4,7 @@ import chalk from 'chalk';
 import { spawn } from 'child_process';
 import { copyFileSync, createWriteStream, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
+import { generatePostExecutionSummary } from './logging-utils.js';
 
 const [, , logName, ...commandArgs] = process.argv;
 
@@ -170,11 +171,21 @@ child.on('close', (code) => {
 
 	if (code === 0) {
 		console.log(chalk.green.bold('✅ Comando ejecutado exitosamente'));
+
+		// Generar resumen automático de errores si es una herramienta de linting/checking
+		if (isLintingCommand || isTestingCommand) {
+			generatePostExecutionSummary(logFilePath, fullCommand);
+		}
+
 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
 	} else if (isTolerantCommand && !hasRealErrors) {
 		const tipo = isLintingCommand ? 'Linting' : isTestingCommand ? 'Testing' : 'Proceso';
 		console.log(chalk.yellow.bold(`⚠️  ${tipo} completado con issues encontrados (Exit code: ${code})`));
 		console.log(chalk.cyan(`🔍 Esto es normal para herramientas de ${tipo.toLowerCase()} cuando encuentran problemas`));
+
+		// Generar resumen automático de errores
+		generatePostExecutionSummary(logFilePath, fullCommand);
+
 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
 		console.log(chalk.green('✅ Script completado exitosamente'));
 		// Para herramientas tolerantes, no tratamos esto como error crítico
@@ -185,6 +196,11 @@ child.on('close', (code) => {
 		try {
 			copyFileSync(logFilePath, errorFilePath);
 			console.log(chalk.yellow(`📄 Detalles del error en: ${chalk.underline(errorFilePath)}`));
+
+			// Generar resumen automático de errores incluso en caso de error
+			if (isLintingCommand || isTestingCommand) {
+				generatePostExecutionSummary(errorFilePath, fullCommand);
+			}
 		} catch (copyError) {
 			console.error(chalk.red.bold(`Error al copiar el archivo de log: ${copyError.message}`));
 		}

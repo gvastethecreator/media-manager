@@ -1,10 +1,19 @@
 /**
  * @file Vista masonry mejorada tipo Pinterest con configuración avanzada
- * @module components/features/file-browser/views/masonry-view
+ * @module components/features					<EntityCard
+						className="h-full w-full"
+						compact={false}
+						entity={layoutItem.item}
+						isSelected={isSelected}
+						layout="vertical"
+						onClick={(e) => onItemClickById(layoutItem.item.id, e)}
+						onDoubleClick={() => onItemDoubleClickById(layoutItem.item.id)}
+						size="md"
+					/>er/views/masonry-view
  */
 
 import { AnimatePresence, motion } from 'motion/react';
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { OptimizedEntityCard } from '@/components/cards/entity-card';
 import { useMasonryViewConfig } from '@/hooks/use-masonry-view-config';
 import { cn } from '@/lib/utils';
@@ -41,7 +50,14 @@ interface MasonryItemProps {
 }
 
 const MasonryItem = memo<MasonryItemProps>(
-	function MasonryItem({ layoutItem, isSelected, itemIndex, onItemClickById, onItemDoubleClickById, masonryConfig }) {
+	function MasonryItemComponent({
+		layoutItem,
+		isSelected,
+		itemIndex,
+		onItemClickById,
+		onItemDoubleClickById,
+		masonryConfig,
+	}) {
 		const style: React.CSSProperties = {
 			position: 'absolute',
 			left: layoutItem.x,
@@ -135,10 +151,9 @@ const MasonryItem = memo<MasonryItemProps>(
 					compact={false}
 					entity={layoutItem.item}
 					isSelected={isSelected}
-					itemId={layoutItem.item.id}
 					layout="vertical"
-					onClickById={onItemClickById}
-					onDoubleClickById={onItemDoubleClickById}
+					onClick={(e) => onItemClickById(layoutItem.item.id, e)}
+					onDoubleClick={() => onItemDoubleClickById(layoutItem.item.id)}
 					size="md"
 				/>
 			</motion.div>
@@ -172,7 +187,7 @@ const MasonryItem = memo<MasonryItemProps>(
 	}
 );
 
-export const MasonryView = memo<MasonryViewProps>(function MasonryView({
+export const MasonryView = memo<MasonryViewProps>(function MasonryViewComponent({
 	items,
 	selectedIds,
 	containerWidth,
@@ -180,7 +195,6 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 	onItemDoubleClick,
 }) {
 	const parentRef = useRef<any>(null);
-	const [containerHeight, setContainerHeight] = useState<number>(600);
 	const { config, calculateLayout } = useMasonryViewConfig();
 
 	// Map optimizado para lookups O(1)
@@ -197,8 +211,12 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 
 	// OPTIMIZACIÓN: Estabilizar handlers con dependencias mínimas usando useRef
 	const stableHandlersRef = useRef({
-		onItemClickById: (_id: string, _e: React.MouseEvent) => {},
-		onItemDoubleClickById: (_id: string) => {},
+		onItemClickById: (_id: string, _e: React.MouseEvent) => {
+			// Placeholder
+		},
+		onItemDoubleClickById: (_id: string) => {
+			// Placeholder
+		},
 	});
 
 	// Actualizar handlers sin cambiar referencia
@@ -286,24 +304,8 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 		[selectedIds.length]
 	);
 
-	// Efecto para medir altura del contenedor
-	useEffect(() => {
-		if (parentRef.current) {
-			const scrollAreaViewport = parentRef.current.closest('[data-radix-scroll-area-viewport]');
-			if (scrollAreaViewport) {
-				const observer = new ResizeObserver((entries) => {
-					for (const entry of entries) {
-						const height = entry.contentRect.height;
-						if (height > 0) {
-							setContainerHeight(height - config.spacing.padding * 2);
-						}
-					}
-				});
-				observer.observe(scrollAreaViewport);
-				return () => observer.disconnect();
-			}
-		}
-	}, [config.spacing.padding]);
+	// Efecto eliminado - usando altura flexible
+	// useEffect eliminado para evitar encogimiento al cargar
 
 	if (!containerWidth || containerWidth <= 0) {
 		return (
@@ -314,14 +316,12 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 	}
 
 	return (
-		<div
-			className="w-full overflow-auto"
+		<section
+			className="h-full w-full"
 			data-testid="masonry-view"
 			data-view-type="masonry"
-			onClick={handleEmptySpaceClick}
 			ref={parentRef}
 			style={{
-				height: `${containerHeight}px`,
 				contain: 'strict',
 				padding: `${config.spacing.padding}px`,
 			}}
@@ -362,7 +362,7 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryView({
 					})}
 				</AnimatePresence>
 			</div>
-		</div>
+		</section>
 	);
 });
 
