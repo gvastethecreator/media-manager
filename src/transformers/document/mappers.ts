@@ -5,7 +5,8 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import type { DocumentBase, DocumentStatistics, DocumentWithStats } from '@/types/entities/document/base';
+import type { DocumentBase, DocumentStatistics, DocumentWithStats } from '@/types/entities/document';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 /** Constante para cálculo de tiempo de lectura (palabras por minuto) */
 const WORDS_PER_MINUTE = 200;
@@ -24,11 +25,11 @@ function calculateDocumentStats(document: DocumentBase): DocumentStatistics {
 	const readingTime = wordCount > 0 ? Math.ceil(wordCount / WORDS_PER_MINUTE) : 0;
 
 	return {
-		wordCount,
+		...createDefaultEntityStats(),
 		charCount,
 		readingTime,
 		versionCount: 0, // Placeholder para futuras implementaciones
-	};
+	} as DocumentStatistics;
 }
 
 /**

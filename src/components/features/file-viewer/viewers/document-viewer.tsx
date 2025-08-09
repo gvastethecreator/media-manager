@@ -27,7 +27,7 @@ interface DocumentViewerProps {
 	onPrevious: () => void;
 }
 
-export function DocumentViewer({ document, onClose, onNext, onPrevious }: DocumentViewerProps) {
+export function DocumentViewer({ document: documentEntity, onClose, onNext, onPrevious }: DocumentViewerProps) {
 	const [currentPage, setCurrentPage] = useState(1);
 	const [totalPages, setTotalPages] = useState(1);
 	const [zoom, setZoom] = useState(100);
@@ -39,8 +39,8 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 	const iframeRef = useRef<HTMLIFrameElement>(null);
 
 	// Document source URL
-	const documentSrc = document.path || `/api/documents/${document.id}/view`;
-	const fileExtension = document.path?.split('.').pop()?.toLowerCase() || '';
+	const documentSrc = documentEntity.path || `/api/documents/${documentEntity.id}/view`;
+	const fileExtension = documentEntity.path?.split('.').pop()?.toLowerCase() || '';
 	const isPDF = fileExtension === 'pdf';
 	const isTextFile = ['txt', 'md', 'json', 'xml', 'csv'].includes(fileExtension);
 	const isOfficeDoc = ['doc', 'docx', 'xls', 'xlsx', 'ppt', 'pptx'].includes(fileExtension);
@@ -50,13 +50,13 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 		const timer = setTimeout(() => {
 			setIsLoading(false);
 			setCanRender(isPDF || isTextFile);
-			if (document.stats?.pageCount) {
-				setTotalPages(document.stats.pageCount);
+			if (documentEntity.pageCount) {
+				setTotalPages(documentEntity.pageCount);
 			}
 		}, 1000);
 
 		return () => clearTimeout(timer);
-	}, [documentSrc, isPDF, isTextFile, document.stats?.pageCount]);
+	}, [documentSrc, isPDF, isTextFile, documentEntity.pageCount]);
 
 	const handleZoomIn = () => {
 		setZoom((prev) => Math.min(prev + 25, 300));
@@ -79,7 +79,7 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 	const handleDownload = () => {
 		const link = document.createElement('a');
 		link.href = documentSrc;
-		link.download = document.name || 'document';
+		link.download = documentEntity.name || 'document';
 		document.body.appendChild(link);
 		link.click();
 		document.body.removeChild(link);
@@ -194,7 +194,7 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 				</div>
 
 				<div className="flex items-center space-x-2">
-					<h2 className="max-w-md truncate font-semibold text-lg">{document.name}</h2>
+					<h2 className="max-w-md truncate font-semibold text-lg">{documentEntity.name}</h2>
 				</div>
 
 				<Button onClick={onClose} size="sm" variant="ghost">
@@ -254,7 +254,6 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 								className="w-48 pl-8"
 								onChange={(e) => setSearchTerm(e.target.value)}
 								placeholder="Buscar en documento..."
-								size="sm"
 								value={searchTerm}
 							/>
 						</div>
@@ -277,34 +276,34 @@ export function DocumentViewer({ document, onClose, onNext, onPrevious }: Docume
 					</div>
 					<div>
 						<span className="font-medium">Tamaño:</span>
-						<span className="ml-2 text-muted-foreground">{formatFileSize(document.size || 0)}</span>
+						<span className="ml-2 text-muted-foreground">{formatFileSize(documentEntity.size || 0)}</span>
 					</div>
-					{document.stats?.pageCount && (
+		    {documentEntity.pageCount && (
 						<div>
 							<span className="font-medium">Páginas:</span>
-							<span className="ml-2 text-muted-foreground">{document.stats.pageCount}</span>
+			    <span className="ml-2 text-muted-foreground">{documentEntity.pageCount}</span>
 						</div>
 					)}
 					<div>
 						<span className="font-medium">Creado:</span>
-						<span className="ml-2 text-muted-foreground">{new Date(document.createdAt).toLocaleDateString()}</span>
+						<span className="ml-2 text-muted-foreground">{new Date(documentEntity.createdAt).toLocaleDateString()}</span>
 					</div>
-					{document.stats?.wordCount && (
+		    {documentEntity.wordCount && (
 						<div>
 							<span className="font-medium">Palabras:</span>
-							<span className="ml-2 text-muted-foreground">{document.stats.wordCount.toLocaleString()}</span>
+			    <span className="ml-2 text-muted-foreground">{documentEntity.wordCount.toLocaleString()}</span>
 						</div>
 					)}
-					{document.stats?.author && (
+		    {documentEntity.author && (
 						<div>
 							<span className="font-medium">Autor:</span>
-							<span className="ml-2 text-muted-foreground">{document.stats.author}</span>
+			    <span className="ml-2 text-muted-foreground">{documentEntity.author}</span>
 						</div>
 					)}
-					{document.description && (
+					{documentEntity.description && (
 						<div className="col-span-2">
 							<span className="font-medium">Descripción:</span>
-							<span className="ml-2 text-muted-foreground">{document.description}</span>
+							<span className="ml-2 text-muted-foreground">{documentEntity.description}</span>
 						</div>
 					)}
 				</div>

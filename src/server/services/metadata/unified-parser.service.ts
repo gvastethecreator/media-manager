@@ -15,7 +15,7 @@ import {
 // Servicios especializados
 import { extractMetadata as extractExifMetadata } from './exifr-parser.service';
 import { detectOrigin, hasAIGenerationData } from './origin-detector.service';
-import { extractPngMetadata } from './png-parser.service';
+import { extractPngTextChunks, extractAIMetadataFromChunks } from './png-parser.service';
 import {
 	extractCommonAIParameters,
 	parseAutomatic1111Metadata,
@@ -246,25 +246,20 @@ async function extractTechnicalMetadata(
 		if (isPNGFile(buffer)) {
 			logger.info('🔧 UNIFIED PARSER: Detectado archivo PNG, extrayendo text chunks...');
 			try {
-				const pngMetadata = await extractPngMetadata(buffer);
+				const { textChunks } = await extractPngTextChunks(buffer);
 				logger.info('🔧 UNIFIED PARSER: PNG text chunks extraídos', {
-					hasMetadata: !!pngMetadata,
-					chunksCount: pngMetadata ? Object.keys(pngMetadata).length : 0,
+					hasMetadata: textChunks.length > 0,
+					chunksCount: textChunks.length,
 				});
 
 				// Combinar metadatos PNG con los existentes
-				if (pngMetadata && result) {
-					// Agregar chunks PNG al resultado existente
-					if (!result.exif) result.exif = {};
-					Object.assign(result.exif, pngMetadata);
-				} else if (pngMetadata && !result) {
-					// Si no hay resultado EXIF pero sí PNG, crear resultado
+				if (textChunks.length > 0 && result) {
+					// Exponer chunks como rawTags y dejar AI para pipeline específico
+					result.rawTags = { ...(result.rawTags || {}), pngTextChunks: textChunks } as any;
+				} else if (textChunks.length > 0 && !result) {
 					return {
-						exif: pngMetadata,
-						iptc: null,
-						xmp: null,
-						rawTags: {},
-					};
+						rawTags: { pngTextChunks: textChunks } as any,
+					} as TechnicalMetadata;
 				}
 			} catch (pngError) {
 				logger.warn('🔧 UNIFIED PARSER: Error extrayendo PNG text chunks', { error: pngError });

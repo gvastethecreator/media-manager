@@ -15,9 +15,5 @@
 export type { GroupBase, GroupComplete, GroupStatistics, GroupWithStats } from './base';
 export { GroupViewMode } from './base';
 export * from './enums';
-export type {
-	CreateGroupInput as GroupCreateInput,
-	GroupViewConfig,
-	UpdateGroupInput as GroupUpdateInput,
-} from './types';
-export * from './types';
+// Exportaciones tipadas principales explícitas (evitar export * para no colisionar)
+export type { GroupCreateInput, GroupUpdateInput, GroupViewConfig, CreateGroupInput, UpdateGroupInput } from './types';

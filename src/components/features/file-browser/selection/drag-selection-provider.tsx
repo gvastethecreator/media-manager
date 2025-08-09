@@ -222,7 +222,8 @@ export const DragSelectionProvider: React.FC<DragSelectionProviderProps> = ({
 			{children}
 			{!disabled && (
 				<SelectionOverlay
-					animation={mergedOverlayConfig.animation}
+					// Se permite objeto de configuración; el componente debe aceptar boolean | config
+					animation={mergedOverlayConfig.animation?.enabled ? mergedOverlayConfig.animation : false}
 					dragSelectionManager={dragSelectionManager}
 					showCoordinates={mergedOverlayConfig.showCoordinates}
 					showCount={mergedOverlayConfig.showCount}

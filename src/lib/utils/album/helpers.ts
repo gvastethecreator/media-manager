@@ -33,8 +33,10 @@ export function generateAlbumThumbnailUrl(album: AlbumWithStats | string, width?
  * @returns Tamaño formateado
  */
 export function formatAlbumSize(album?: AlbumWithStats): string {
-	if (!album || album.stats?.totalSize === undefined) return 'Desconocido';
-	return formatBytes(album.stats.totalSize);
+	// Algunos campos agregados por agregaciones pueden no estar en la interfaz estricta
+	const totalSize = (album as any)?.stats?.totalSize as number | undefined;
+	if (!album || totalSize === undefined) return 'Desconocido';
+	return formatBytes(totalSize);
 }
 
 /**
@@ -65,7 +67,8 @@ export function getAlbumTypeDescription(type: AlbumType): string {
  * @returns true si el álbum está vacío
  */
 export function isAlbumEmpty(album: AlbumWithStats): boolean {
-	return !album.stats || album.stats.totalMedia === 0;
+	const totalMedia = (album as any)?.stats?.totalMedia as number | undefined;
+	return !album.stats || (totalMedia ?? 0) === 0;
 }
 
 /**
@@ -139,8 +142,10 @@ export function calculateAlbumStats(albums: AlbumWithStats[]): {
 		}
 
 		if (album.stats) {
-			totalItems += album.stats.totalMedia || 0;
-			totalSize += album.stats.totalSize || 0;
+			const totalMedia = (album as any)?.stats?.totalMedia as number | undefined;
+			const size = (album as any)?.stats?.totalSize as number | undefined;
+			totalItems += totalMedia || 0;
+			totalSize += size || 0;
 		}
 	}
 

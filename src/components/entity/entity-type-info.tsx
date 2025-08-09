@@ -12,7 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useEntityTypeConfig } from '@/hooks/use-entity-type-config';
 import { cn } from '@/lib/utils';
-import { type AnyEntityWithStats, getEntityStatsType } from '@/types/migration';
+import { type AnyEntityWithStats, EntityStatsType, getEntityStatsType } from '@/types/migration';
 import { EntityTypeBadge } from './entity-type-badge';
 
 interface EntityTypeInfoProps {
@@ -50,9 +50,9 @@ const actionIcons = {
 export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 	({ entity, mode = 'detailed', showActions = false, showStats = true, className, onAction }) => {
 		const entityType = getEntityStatsType(entity);
+		// Llamar hook siempre con fallback para mantener orden de hooks
+		const { config } = useEntityTypeConfig(entityType ?? EntityStatsType.IMAGE);
 		if (!entityType) return null;
-
-		const { config } = useEntityTypeConfig(entityType);
 		if (!config) return null;
 
 		// Renderizar modo compacto
@@ -101,7 +101,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 			if (!showStats) return null;
 
 			// Estadísticas básicas disponibles en todas las entidades
-			const stats = [];
+			const stats: { label: string; value: string }[] = [];
 
 			if ('createdAt' in entity && entity.createdAt) {
 				stats.push({
@@ -128,8 +128,8 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 
 			return (
 				<div className="grid grid-cols-2 gap-2 text-xs">
-					{stats.map((stat, index) => (
-						<div className="flex flex-col" key={index}>
+					{stats.map((stat) => (
+						<div className="flex flex-col" key={`${stat.label}-${stat.value}`}>
 							<span className="text-muted-foreground">{stat.label}</span>
 							<span className="font-medium">{stat.value}</span>
 						</div>
@@ -209,9 +209,8 @@ export const EntityTypeHeader = memo<{
 	className?: string;
 }>(({ entity, className }) => {
 	const entityType = getEntityStatsType(entity);
+	const { config } = useEntityTypeConfig(entityType ?? EntityStatsType.IMAGE);
 	if (!entityType) return null;
-
-	const { config } = useEntityTypeConfig(entityType);
 	if (!config) return null;
 
 	return (

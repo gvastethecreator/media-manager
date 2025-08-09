@@ -6,24 +6,24 @@
  */
 
 import {
-	AudioWaveform,
-	Database,
-	File,
-	FileText,
-	Folder,
-	FolderKanban,
-	Grid2X2,
-	Image as ImageIcon,
-	type LucideIcon,
-	MapPin,
-	MessageSquare,
-	Palette,
-	SquareStack,
-	StickyNote,
-	Tag,
-	Users,
-	Video,
-	WandSparkles,
+    AudioWaveform,
+    Database,
+    File,
+    FileText,
+    Folder,
+    FolderKanban,
+    Grid2X2,
+    Image as ImageIcon,
+    type LucideIcon,
+    MapPin,
+    MessageSquare,
+    Palette,
+    SquareStack,
+    StickyNote,
+    Tag,
+    Users,
+    Video,
+    WandSparkles,
 } from 'lucide-react';
 import type { ContextMenuAction } from '@/components/features/file-browser/context-menu/types';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -468,6 +468,38 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 			hasPreview: true,
 			hasUploadInfo: true,
 			isTemporary: true,
+		},
+	},
+
+	[EntityStatsType.JSON_FILE]: {
+		type: EntityStatsType.JSON_FILE,
+		displayName: 'Archivo JSON',
+		displayNamePlural: 'Archivos JSON',
+		icon: FileText,
+		color: '#0ea5e9', // Azul cielo
+		secondaryColor: '#0284c7',
+		emoji: '🧾',
+		supportedOperations: MEDIA_OPERATIONS,
+		supportedFormats: ['.json'],
+		metadata: {
+			hasTextContent: true,
+			supportsSearch: true,
+		},
+	},
+
+	[EntityStatsType.FILE_3D]: {
+		type: EntityStatsType.FILE_3D,
+		displayName: 'Archivo 3D',
+		displayNamePlural: 'Archivos 3D',
+		icon: File,
+		color: '#06b6d4', // Cian
+		secondaryColor: '#0891b2',
+		emoji: '📦',
+		supportedOperations: MEDIA_OPERATIONS,
+		supportedFormats: ['.obj', '.fbx', '.gltf', '.glb', '.stl'],
+		metadata: {
+			hasPreview: false,
+			supports3D: true,
 		},
 	},
 };

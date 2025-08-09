@@ -12,6 +12,7 @@ export * from './album/index';
 export * from './audio/index';
 export * from './character/index';
 // Servicios del sistema
+// Clipboard centralizado. Evitar re-exportaciones duplicadas desde otros barrels.
 export * from './clipboard/index';
 // Entidades organizacionales
 export * from './collection/index';

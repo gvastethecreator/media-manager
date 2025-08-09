@@ -9,6 +9,7 @@
 
 import type { ThumbnailBase, ThumbnailWithStats } from '../../types/entities/thumbnail';
 import { ThumbnailQuality } from '../../types/entities/thumbnail';
+import { createDefaultEntityStats } from '../../lib/utils';
 import { toThumbnailWithStats } from './mappers';
 import { validateThumbnail } from './validators';
 
@@ -57,11 +58,14 @@ export function transformThumbnail(
 		return {
 			...baseThumb,
 			stats: {
+				...createDefaultEntityStats(),
 				aspectRatio: 0,
 				compressionRatio: 0,
 				qualityScore: 0,
 				usageCount: 0,
 				storageEfficiency: 0,
+				isDirectory: false,
+				isFile: true,
 			},
 		};
 	} catch (error) {

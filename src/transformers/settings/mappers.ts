@@ -58,6 +58,23 @@ export function fromDbToSettings(dbSettings: DbSettings): Settings {
 			devMode: Boolean(parsedData.devMode),
 			experimentalFeatures: Boolean(parsedData.experimentalFeatures),
 		},
+		// Incluir configuración del File Browser con valores mínimos requeridos
+		fileBrowser: {
+			defaultViewType: (parsedData.fileBrowser?.defaultViewType as 'list' | 'grid' | 'cards' | 'masonry') || 'grid',
+			rememberViewPerFolder: Boolean(parsedData.fileBrowser?.rememberViewPerFolder),
+			// Propagar opcionales si existen (sin forzar estructura)
+			listView: parsedData.fileBrowser?.listView,
+			gridView: parsedData.fileBrowser?.gridView,
+			cardsView: parsedData.fileBrowser?.cardsView,
+			masonryView: parsedData.fileBrowser?.masonryView,
+			global: parsedData.fileBrowser?.global,
+			viewConfigurations: parsedData.fileBrowser?.viewConfigurations,
+			customPresets: parsedData.fileBrowser?.customPresets,
+			lastUsedViewType: parsedData.fileBrowser?.lastUsedViewType,
+			folderViewPreferences: parsedData.fileBrowser?.folderViewPreferences,
+			accessibility: parsedData.fileBrowser?.accessibility,
+			performance: parsedData.fileBrowser?.performance,
+		},
 		version: parsedData.version || '1.0.0',
 		lastUpdate: parsedData.lastUpdate ? new Date(parsedData.lastUpdate) : new Date(),
 		system: {
@@ -99,6 +116,8 @@ export function fromSettingsToDbInsert(settings: Settings, profileId: string): O
 		version: settings.version,
 		lastUpdate: settings.lastUpdate.toISOString(),
 		system: settings.system,
+		// Persistir bloque completo de configuración del navegador de archivos
+		fileBrowser: settings.fileBrowser,
 	};
 
 	return {
@@ -196,6 +215,15 @@ export function fromSettingsUpdateToDb(updateData: Partial<Settings>): Partial<O
 			dataObj.experimentalFeatures = updateData.advanced.experimentalFeatures;
 			hasDataChanges = true;
 		}
+	}
+
+	// Bloque de File Browser
+	if (updateData.fileBrowser) {
+		dataObj.fileBrowser = {
+			...(dataObj.fileBrowser || {}),
+			...updateData.fileBrowser,
+		};
+		hasDataChanges = true;
 	}
 
 	// Manejar campos adicionales

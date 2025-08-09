@@ -4,7 +4,7 @@
  * @description Contiene funciones para:
  *              1. Transformar la entrada de la app a tipos locales de Drizzle.
  *              2. Transformar los datos de Drizzle a tipos enriquecidos de la app (WildcardWithStats).
- 
+
  */
 
 import { TransformerError } from '@/lib/errors/transformer-error';
@@ -17,6 +17,7 @@ import type {
 	WildcardWithCounts,
 	WildcardWithStats,
 } from '../../types/entities/wildcard';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 const logger = serverLogger.withContext('WildcardMappers');
 
@@ -42,12 +43,31 @@ export function toWildcardWithStats(wildcard: WildcardWithCounts): WildcardWithS
 	const usageDiversity = relationCounts.filter((count) => count > 0).length;
 
 	const statistics: WildcardStatistics = {
+		...createDefaultEntityStats(),
+		imageCount: _count?.images ?? 0,
+		videoCount: 0, // wildcard no tiene videos directamente
+		albumCount: 0, // wildcard no tiene albums directamente
+		collectionCount: 0, // wildcard no tiene collections directamente
+		tagCount: _count?.tags ?? 0,
+		characterCount: _count?.characters ?? 0,
+		placeCount: _count?.places ?? 0,
+		worldItemCount: 0, // wildcard no tiene worldItems directamente
+		conceptCount: 0, // wildcard no tiene concepts directamente
+		promptCount: 0, // wildcard no tiene prompts directamente
+		noteCount: _count?.notes ?? 0,
+		wildcardCount: _count?.childWildcards ?? 0,
+		propertyCount: 0, // wildcard no tiene properties directamente
+		groupCount: 0, // wildcard no tiene groups directamente
+		totalItems: 0,
+		totalAssociations: popularity,
 		popularity,
 		usageDiversity,
 		completenessScore: calculateCompleteness(completenessFields),
-		// Lógica de adaptabilidad basada en diversidad de uso
 		adaptabilityScore: (usageDiversity / 5) * 100,
-	};
+		lastUpdated: rest.updatedAt || new Date(),
+		isDirectory: false,
+		isFile: true,
+	} as WildcardStatistics;
 
 	const result: WildcardWithStats = {
 		...rest,

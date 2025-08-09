@@ -10,6 +10,7 @@ import { calculateCompleteness } from '../../lib/utils/transformers';
 import type { TagBase, TagStatistics, TagWithStats } from '../../types/entities/tag';
 import { fromStorageTag, normalizeTag, sanitizeTagForClient, toStorageTag } from './serializers';
 import { safeValidateTag, validateTag } from './validators';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 const logger = serverLogger.withContext('TagTransformer');
 
@@ -154,10 +155,12 @@ export function fromDrizzleTag(drizzleTag: Record<string, unknown> | null): TagW
 			const popularity = Math.log1p(totalRelations) * diversityRatio;
 
 			const stats: TagStatistics = {
+				...createDefaultEntityStats(),
 				imageCount: counts.images || 0,
 				videoCount: counts.videos || 0,
 				albumCount: counts.albums || 0,
 				collectionCount: counts.collections || 0,
+				tagCount: 0,
 				characterCount: counts.characters || 0,
 				placeCount: counts.places || 0,
 				worldItemCount: counts.worldItems || 0,
@@ -167,11 +170,16 @@ export function fromDrizzleTag(drizzleTag: Record<string, unknown> | null): TagW
 				wildcardCount: counts.wildcards || 0,
 				propertyCount: counts.properties || 0,
 				groupCount: counts.groups || 0,
+				totalItems: 0,
+				totalAssociations: totalRelations,
 				totalRelations,
 				usageDiversity: diversityRatio,
 				popularity,
 				completenessScore: calculateCompleteness(baseTag, ['name', 'description', 'category']),
-			};
+				lastUpdated: (baseTag as any).updatedAt || new Date(),
+				isDirectory: false,
+				isFile: true,
+			} as TagStatistics;
 
 			return {
 				...baseTag,
@@ -182,10 +190,12 @@ export function fromDrizzleTag(drizzleTag: Record<string, unknown> | null): TagW
 
 		// Sin conteos, crear estadísticas vacías
 		const stats: TagStatistics = {
+			...createDefaultEntityStats(),
 			imageCount: 0,
 			videoCount: 0,
 			albumCount: 0,
 			collectionCount: 0,
+			tagCount: 0,
 			characterCount: 0,
 			placeCount: 0,
 			worldItemCount: 0,
@@ -195,11 +205,16 @@ export function fromDrizzleTag(drizzleTag: Record<string, unknown> | null): TagW
 			wildcardCount: 0,
 			propertyCount: 0,
 			groupCount: 0,
+			totalItems: 0,
+			totalAssociations: 0,
 			totalRelations: 0,
 			usageDiversity: 0,
 			popularity: 0,
 			completenessScore: calculateCompleteness(baseTag, ['name', 'description', 'category']),
-		};
+			lastUpdated: (baseTag as any).updatedAt || new Date(),
+			isDirectory: false,
+			isFile: true,
+		} as TagStatistics;
 
 		return {
 			...baseTag,

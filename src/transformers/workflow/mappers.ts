@@ -3,11 +3,12 @@
  * @module transformers/workflow/mappers
  * @description Contiene funciones para transformar datos de la entidad Workflow,
  *              enfocándose en el cálculo de estadísticas de ejecución.
- 
+
  */
 
 import { safeJsonParse } from '../../lib/utils/safe-json-parse';
 import type { WorkflowBase, WorkflowStatistics, WorkflowWithStats } from '../../types/entities/workflow';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 // Usar WorkflowBase directamente en lugar de tipo local
 type DrizzleWorkflow = WorkflowBase & {
@@ -61,6 +62,7 @@ function calculateWorkflowStats(
 	const successRate = totalExecutions > 0 ? (successfulExecutions / totalExecutions) * 100 : 0;
 
 	return {
+		...createDefaultEntityStats(),
 		totalExecutions,
 		successRate: Number.parseFloat(successRate.toFixed(1)),
 		averageDuration: Math.round(_avg.duration ?? 0),

@@ -116,7 +116,7 @@ export function useGridViewConfig() {
 				return {
 					columns: 1,
 					itemSize: config.minItemSize,
-					itemHeight: config.minItemSize * (config.aspectRatio || 1),
+					itemHeight: config.minItemSize * (typeof config.aspectRatio === 'number' ? config.aspectRatio : 1),
 					gap: 16,
 					padding: 16,
 				};
@@ -153,7 +153,7 @@ export function useGridViewConfig() {
 				columns = Math.max(1, columns);
 			}
 
-			const itemHeight = itemSize * (config.aspectRatio || 1);
+			const itemHeight = itemSize * (typeof config.aspectRatio === 'number' ? config.aspectRatio : 1);
 
 			return {
 				columns,
@@ -188,10 +188,15 @@ export function useGridViewConfig() {
 
 	const getLabelConfig = useMemo(() => {
 		return (): LabelConfig => {
-			const labelConfig = gridConfig?.labelConfig;
+			const rawPosition = (gridConfig as any)?.labelConfig?.position as string | undefined;
+			const normalizedPosition =
+				rawPosition === 'top'
+					? 'tooltip'
+					: (rawPosition as LabelConfig['position'] | undefined);
 			return {
 				...DEFAULT_LABEL_CONFIG,
-				...labelConfig,
+				...(gridConfig?.labelConfig as Partial<LabelConfig> | undefined),
+				position: normalizedPosition ?? DEFAULT_LABEL_CONFIG.position,
 			};
 		};
 	}, [currentConfig]);

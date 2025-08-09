@@ -11,7 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
 import type { ImageWithStats } from '@/types/entities/image';
-import type { AnyEntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats, EntityWithStats } from '@/types/migration';
 import { isImageWithStats } from '@/types/migration';
 import type { ViewProps } from '../types';
 
@@ -27,17 +27,6 @@ interface SearchFilters {
 
 const _PAGE_SIZE = 100;
 
-const getMetadata = (metadata: string | null) => {
-	if (!metadata) {
-		return null;
-	}
-	try {
-		return JSON.parse(metadata);
-	} catch {
-		return null;
-	}
-};
-
 /**
  * ✅ MIGRADO: SearchView ahora usa FileBrowserV2 con EntityWithStats
  * - FileBrowser → FileBrowserV2
@@ -51,15 +40,17 @@ export function SearchView(_props: ViewProps) {
 	});
 
 	// ✅ MIGRADO: Usar store específico de imágenes
-	const { images: imagesRecord, isLoading, getSortedImages, loadImages } = useImageStore();
+	const { isLoading, getSortedImages, loadImages } = useImageStore();
 
 	const { openViewer } = useImageViewer();
 
-	// Convertir el record a array para compatibilidad
-	const items = getSortedImages();
+	// Obtener imágenes tipadas del store
+	const items: ImageWithStats[] = getSortedImages();
 
 	const handleSearch = useCallback(async () => {
-		if (!filters.query) return;
+		if (!filters.query) {
+			return;
+		}
 
 		try {
 			// TODO: Implementar búsqueda con EntityWithStats
@@ -77,53 +68,45 @@ export function SearchView(_props: ViewProps) {
 
 	const handleItemDoubleClick = useCallback(
 		(item: AnyEntityWithStats) => {
-			// ✅ MIGRADO: Usar EntityWithStats en lugar de FileItem
-			if (isImageWithStats(item)) {
-				const image = item as ImageWithStats;
-				const imageItems = (items || []).filter((i: AnyEntityWithStats) => isImageWithStats(i));
-				const currentIndex = imageItems.findIndex((i: AnyEntityWithStats) => i.id === item.id);
+				// ✅ Usar directamente las imágenes tipadas del store con EntityWithStats
+				if (!isImageWithStats(item)) {
+					return;
+				}
 
-				// Convertir EntityWithStats a formato compatible con viewer
-				const viewerItems = imageItems
-					.map((img: AnyEntityWithStats) => {
-						if (isImageWithStats(img)) {
-							const imageItem = img as ImageWithStats;
-							return {
-								id: imageItem.id,
-								name: imageItem.name || '',
-								src: imageItem.fullUrl || `/api/images/${imageItem.id}/content`,
-								alt: imageItem.name || '',
-								width: imageItem.width || 0,
-								height: imageItem.height || 0,
-								thumbnail: imageItem.thumbnailUrl || null,
-								type: 'image',
-								path: '',
-								size: imageItem.size || 0,
-								mimeType: 'image/jpeg', // Default mime type since mimeType is not available in ImageWithStats
-								metadata: null,
-								url: imageItem.fullUrl || `/api/images/${imageItem.id}/content`,
-								parsedMetadata: undefined,
-								// Propiedades requeridas por EntityWithStats
-								entityType: 'image' as const,
-								stats: {
-									totalItems: 1,
-									lastAccessed: new Date(),
-									accessCount: 0,
-								},
-								description: imageItem.description || '',
-								createdAt: imageItem.createdAt,
-								updatedAt: imageItem.updatedAt,
-							};
-						}
-						return null;
-					})
-					.filter((item): item is NonNullable<typeof item> => item !== null);
+				const imageItems: ImageWithStats[] = items;
+				const currentIndex = imageItems.findIndex((i) => i.id === item.id);
 
-				openViewer(viewerItems, currentIndex);
-			}
-		},
+				// openViewer espera EntityWithStats[]; adaptamos a tipo más amplio sin copiar
+				const asEntities = imageItems as unknown as EntityWithStats[];
+				openViewer(asEntities, currentIndex < 0 ? 0 : currentIndex);
+			},
 		[openViewer, items]
 	);
+
+		const renderContent = () => {
+			if (isLoading) {
+				return <LoadingScreen />;
+			}
+			if (items && items.length > 0) {
+				return (
+					<FileBrowser
+						entityType="mixed"
+						onItemDoubleClick={handleItemDoubleClick}
+						onItemSelect={handleItemSelect}
+					/>
+				);
+			}
+			if (filters.query) {
+				return (
+					<EmptyState
+						description="Intenta con otros términos de búsqueda"
+						icon={Search}
+						title="No se encontraron resultados"
+					/>
+				);
+			}
+			return null;
+		};
 
 	return (
 		<div className="flex h-full flex-col">
@@ -214,19 +197,7 @@ export function SearchView(_props: ViewProps) {
 				</CardContent>
 			</Card>
 
-			<div className="flex-1 overflow-auto p-6">
-				{isLoading ? (
-					<LoadingScreen />
-				) : items && items.length > 0 ? (
-					<FileBrowser entityType="mixed" onItemDoubleClick={handleItemDoubleClick} onItemSelect={handleItemSelect} />
-				) : filters.query ? (
-					<EmptyState
-						description="Intenta con otros términos de búsqueda"
-						icon={Search}
-						title="No se encontraron resultados"
-					/>
-				) : null}
-			</div>
+			<div className="flex-1 overflow-auto p-6">{renderContent()}</div>
 		</div>
 	);
 }

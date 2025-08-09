@@ -1,4 +1,5 @@
 import type { FolderExtended, FolderStatistics } from '@/types/entities/folder';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 /**
  * 📁 Extensión del tipo canónico para incluir estado de error temporal
@@ -78,6 +79,30 @@ export interface GlobalProcessingState {
 
 // Usar FolderStatistics del tipo correcto
 export const initialStats: FolderStatistics = {
+	// Base canónica de EntityStats: completa con contadores mínimos
+	...createDefaultEntityStats({ type: 'directory' }),
+	imageCount: 0,
+	videoCount: 0,
+	albumCount: 0,
+	collectionCount: 0,
+	tagCount: 0,
+	characterCount: 0,
+	placeCount: 0,
+	worldItemCount: 0,
+	conceptCount: 0,
+	promptCount: 0,
+	noteCount: 0,
+	wildcardCount: 0,
+	propertyCount: 0,
+	groupCount: 0,
+	viewCount: 0,
+	downloadCount: 0,
+	likeCount: 0,
+	commentCount: 0,
+	totalItems: 0,
+	totalAssociations: 0,
+	lastUpdated: new Date(0),
+
 	// Métricas de jerarquía
 	hierarchyDepth: 0,
 	totalDescendants: 0,
@@ -86,22 +111,24 @@ export const initialStats: FolderStatistics = {
 	// Métricas de contenido
 	contentDiversity: 0,
 	organizationScore: 0,
-	totalItems: 0,
+	folderCount: 0,
+	totalAudio: 0,
+	totalOthers: 0,
+	totalImages: 0,
+	totalVideos: 0,
+	totalDocuments: 0,
 	totalFolders: 0,
+	totalFiles: 0,
+	documentCount: 0,
+	totalRelations: 0,
 
 	// Métricas de uso
 	accessFrequency: 0,
 	lastActivity: null,
 
-	// Distribución de contenido
-	imageCount: 0,
-	videoCount: 0,
-	noteCount: 0,
-	documentCount: 0,
-	folderCount: 0,
-
 	// Métricas de tamaño
 	formattedSize: '0 B',
+	totalSize: 0,
 	averageFileSize: 0,
 	largestFile: 0,
 
@@ -119,19 +146,7 @@ export const initialStats: FolderStatistics = {
 	autoTags: [],
 
 	// Calidad general
-	qualityGrade: 'D' as const,
-
-	// Relaciones
-	totalRelations: 0,
-
-	// Propiedades adicionales para compatibilidad
-	totalFiles: 0,
-	totalSize: 0,
-	totalImages: 0,
-	totalVideos: 0,
-	totalAudio: 0,
-	totalDocuments: 0,
-	totalOthers: 0,
+	qualityGrade: 'D',
 };
 
 export const initialGlobalReindexStatus: GlobalReindexStatus = {

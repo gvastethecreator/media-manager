@@ -6,6 +6,7 @@
  */
 
 import type { CollectionBase, CollectionWithStats } from '../../types/entities/collection';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 /**
  * Convierte un CollectionBase a CollectionWithStats calculando estadísticas.
@@ -22,6 +23,7 @@ export function toCollectionWithStats(
 	const videoCount = counts?.videos || 0;
 
 	const stats = {
+		...createDefaultEntityStats(),
 		imageCount,
 		videoCount,
 		albumCount: counts?.albums || 0,
@@ -35,6 +37,9 @@ export function toCollectionWithStats(
 		wildcardCount: counts?.wildcards || 0,
 		propertyCount: counts?.properties || 0,
 		groupCount: counts?.groups || 0,
+		// Propiedades adicionales de CollectionStatistics
+		isDirectory: false,
+		isFile: true,
 	};
 
 	return {
