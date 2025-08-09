@@ -1,23 +1,27 @@
 import * as crypto from 'node:crypto';
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
+// Usar servicios del servidor para evitar fetch relativo en backend
+import {
+    createVideo as createVideoServer,
+    getVideoByHash as getVideoByHashServer,
+} from '@/server/services/video.server.service';
 import { createAudio, getAudioByHash } from '@/services/audio/audio.service';
 import { createDocument, getDocumentByHash } from '@/services/document/document.service';
 import { createFile3D, getFile3DByHash } from '@/services/file3d/file3d.service';
 import type { CreateImageInput } from '@/services/image/image.service';
 import { ImageService } from '@/services/image/image.service';
 import { MetadataIntegrationService } from '@/services/metadata-integration.service';
-import { createVideo, getVideoByHash } from '@/services/video/video.service';
 import type { DocumentCreateInput } from '@/transformers/document/validators';
 import type { AudioCreateInput } from '@/types/entities/audio';
 import type { File3DCreateInput } from '@/types/entities/file3d';
 import type { VideoCreateInput } from '@/types/entities/video';
 import {
-	ENTITY_TYPE_MAPPING,
-	EntityCreationResult,
-	EntityCreationStats,
-	EntityType,
-	FileInfo,
+    ENTITY_TYPE_MAPPING,
+    EntityCreationResult,
+    EntityCreationStats,
+    EntityType,
+    FileInfo,
 } from '@/types/file-entity-mapper';
 
 export class FileEntityMapperService {
@@ -149,7 +153,7 @@ export class FileEntityMapperService {
 				}
 				case EntityType.VIDEO: {
 					if (!fileInfo.hash) return false;
-					const existingVideo = await getVideoByHash(fileInfo.hash);
+					const existingVideo = await getVideoByHashServer(fileInfo.hash);
 					return !!existingVideo;
 				}
 				case EntityType.AUDIO: {
@@ -322,10 +326,11 @@ export class FileEntityMapperService {
 					size: fileInfo.size,
 					hash: fileInfo.hash,
 					folderId: fileInfo.folderId,
+					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
 					duration: 0, // Will be updated after processing
 					isFavorite: false,
 				};
-				const video = await createVideo(videoData);
+				const video = await createVideoServer(videoData as any);
 				entityId = video.id;
 				break;
 			}

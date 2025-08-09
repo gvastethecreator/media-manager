@@ -1,0 +1,859 @@
+📊 RESUMEN DE ERRORES
+Total de archivos con errores: 50
+Cantidad total de errores: 85
+
+📁 ARCHIVOS AFECTADOS:
+  src/components/features/file-browser/undo-redo/UndoRedoPanel.tsx (líneas: 56, 113, 182)
+  src/components/features/file-viewer/viewers/document-viewer.tsx (líneas: 53, 54, 59, 281, 284, 291, 294, 297, 300)
+  src/components/settings/folders/folder-form.tsx (líneas: 99)
+  src/components/settings/folders/folder-types.ts (líneas: 80)
+  src/components/views/files/files-view-2.tsx (líneas: 165)
+  src/components/views/files/files-view.tsx (líneas: 165)
+  src/components/views/search/search-view.tsx (líneas: 122)
+  src/components/views/uploaded-images/uploaded-images-view.tsx (líneas: 72)
+  src/hooks/use-download-manager.ts (líneas: 139, 148)
+  src/hooks/use-seamless-navigation.ts (líneas: 14)
+  src/hooks/use-tauri-backend.ts (líneas: 103)
+  src/lib/contexts/file-context.tsx (líneas: 286)
+  src/lib/hooks/entities/use-group-filters.ts (líneas: 48)
+  src/lib/utils/prompt/models.ts (líneas: 396)
+  src/server/services/metadata/exifr-parser.service.new.ts (líneas: 53, 103, 132, 193, 248, 273, 277, 281)
+  src/server/services/metadata/origin-detector.service.ts (líneas: 348)
+  src/server/services/metadata/unified-parser.service.ts (líneas: 263, 264, 265)
+  src/services/clipboard/clipboard-manager.ts (líneas: 125, 139, 163, 177, 234, 371)
+  src/services/file/batch-operations.service.ts (líneas: 502, 514, 583)
+  src/services/file/enhanced-file-operations.service.ts (líneas: 267)
+  src/services/image/converter.service.ts (líneas: 200)
+  src/services/index.ts (líneas: 20)
+  src/services/note/note.service.ts (líneas: 473)
+  src/services/undo-redo/undo-redo-manager.ts (líneas: 285, 414)
+  src/store/entities/json-file/json-file.store.ts (líneas: 173)
+  src/transformers/character/transformer.ts (líneas: 138)
+  src/transformers/collection/transformer.ts (líneas: 43)
+  src/transformers/collection/validators.ts (líneas: 47, 63)
+  src/transformers/concept/validators.ts (líneas: 49, 67)
+  src/transformers/favorite/mappers.ts (líneas: 45)
+  src/transformers/file/mappers.ts (líneas: 32)
+  src/transformers/file3d/serializers.ts (líneas: 43)
+  src/transformers/folder/serializers.ts (líneas: 156)
+  src/transformers/folder/transformer.ts (líneas: 123)
+  src/transformers/group/transformer.ts (líneas: 70)
+  src/transformers/image/mappers.ts (líneas: 38, 43)
+  src/transformers/image/serializers.ts (líneas: 49)
+  src/transformers/image/transformer.ts (líneas: 143)
+  src/transformers/json-file/serializers.ts (líneas: 53)
+  src/transformers/note/note-adapter.ts (líneas: 34)
+  src/transformers/note/transformer.ts (líneas: 100)
+  src/transformers/place/mappers.ts (líneas: 146)
+  src/transformers/profile/serializers.ts (líneas: 42, 43, 44)
+  src/transformers/profile/transformer.ts (líneas: 37)
+  src/transformers/prompt/transformer.ts (líneas: 53)
+  src/transformers/property/mappers.ts (líneas: 53)
+  src/transformers/tag/mappers.ts (líneas: 42)
+  src/transformers/thumbnail/mappers.ts (líneas: 20)
+  src/types/entities/group/base.ts (líneas: 36)
+  src/types/entities/place/types.ts (líneas: 92)
+
+📋 DETALLE POR ARCHIVO:
+
+src/components/features/file-browser/undo-redo/UndoRedoPanel.tsx
+  - línea 56 : TS2339
+  - línea 113 : TS2339
+  - línea 182 : TS7006
+
+src/components/features/file-viewer/viewers/document-viewer.tsx
+  - línea 53 : TS2551
+  - línea 54 : TS2551
+  - línea 59 : TS2551
+  - línea 281 : TS2551
+  - línea 284 : TS2551
+  - línea 291 : TS2339
+  - línea 294 : TS2339
+  - línea 297 : TS2339
+  - línea 300 : TS2339
+
+src/components/settings/folders/folder-form.tsx
+  - línea 99 : TS2578
+
+src/components/settings/folders/folder-types.ts
+  - línea 80 : TS2740
+
+src/components/views/files/files-view-2.tsx
+  - línea 165 : TS2322
+
+src/components/views/files/files-view.tsx
+  - línea 165 : TS2322
+
+src/components/views/search/search-view.tsx
+  - línea 122 : TS2345
+
+src/components/views/uploaded-images/uploaded-images-view.tsx
+  - línea 72 : TS2345
+
+src/hooks/use-download-manager.ts
+  - línea 139 : TS2345
+  - línea 148 : TS2345
+
+src/hooks/use-seamless-navigation.ts
+  - línea 14 : TS2578
+
+src/hooks/use-tauri-backend.ts
+  - línea 103 : TS2578
+
+src/lib/contexts/file-context.tsx
+  - línea 286 : TS2352
+
+src/lib/hooks/entities/use-group-filters.ts
+  - línea 48 : TS2322
+
+src/lib/utils/prompt/models.ts
+  - línea 396 : TS2322
+
+src/server/services/metadata/exifr-parser.service.new.ts
+  - línea 53 : TS2345
+  - línea 103 : TS2353
+  - línea 132 : TS2353
+  - línea 193 : TS2353
+  - línea 248 : TS2345
+  - línea 273 : TS2322
+  - línea 277 : TS2322
+  - línea 281 : TS2322
+
+src/server/services/metadata/origin-detector.service.ts
+  - línea 348 : TS7053
+
+src/server/services/metadata/unified-parser.service.ts
+  - línea 263 : TS2559
+  - línea 264 : TS2322
+  - línea 265 : TS2322
+
+src/services/clipboard/clipboard-manager.ts
+  - línea 125 : TS2339
+  - línea 139 : TS2339
+  - línea 163 : TS2339
+  - línea 177 : TS2339
+  - línea 234 : TS2345
+  - línea 371 : TS2339
+
+src/services/file/batch-operations.service.ts
+  - línea 502 : TS2367
+  - línea 514 : TS2339
+  - línea 583 : TS2304
+
+src/services/file/enhanced-file-operations.service.ts
+  - línea 267 : TS2345
+
+src/services/image/converter.service.ts
+  - línea 200 : TS2322
+
+src/services/index.ts
+  - línea 20 : TS2308
+
+src/services/note/note.service.ts
+  - línea 473 : TS2740
+
+src/services/undo-redo/undo-redo-manager.ts
+  - línea 285 : TS2345
+  - línea 414 : TS2322
+
+src/store/entities/json-file/json-file.store.ts
+  - línea 173 : TS2578
+
+src/transformers/character/transformer.ts
+  - línea 138 : TS2740
+
+src/transformers/collection/transformer.ts
+  - línea 43 : TS2740
+
+src/transformers/collection/validators.ts
+  - línea 47 : TS2740
+  - línea 63 : TS2322
+
+src/transformers/concept/validators.ts
+  - línea 49 : TS2740
+  - línea 67 : TS2322
+
+src/transformers/favorite/mappers.ts
+  - línea 45 : TS2740
+
+src/transformers/file/mappers.ts
+  - línea 32 : TS2740
+
+src/transformers/file3d/serializers.ts
+  - línea 43 : TS2740
+
+src/transformers/folder/serializers.ts
+  - línea 156 : TS2740
+
+src/transformers/folder/transformer.ts
+  - línea 123 : TS2740
+
+src/transformers/group/transformer.ts
+  - línea 70 : TS2353
+
+src/transformers/image/mappers.ts
+  - línea 38 : TS2741
+  - línea 43 : TS2353
+
+src/transformers/image/serializers.ts
+  - línea 49 : TS2740
+
+src/transformers/image/transformer.ts
+  - línea 143 : TS2740
+
+src/transformers/json-file/serializers.ts
+  - línea 53 : TS2740
+
+src/transformers/note/note-adapter.ts
+  - línea 34 : TS2740
+
+src/transformers/note/transformer.ts
+  - línea 100 : TS2740
+
+src/transformers/place/mappers.ts
+  - línea 146 : TS2740
+
+src/transformers/profile/serializers.ts
+  - línea 42 : TS2339
+  - línea 43 : TS2339
+  - línea 44 : TS2339
+
+src/transformers/profile/transformer.ts
+  - línea 37 : TS2353
+
+src/transformers/prompt/transformer.ts
+  - línea 53 : TS2353
+
+src/transformers/property/mappers.ts
+  - línea 53 : TS2353
+
+src/transformers/tag/mappers.ts
+  - línea 42 : TS2352
+
+src/transformers/thumbnail/mappers.ts
+  - línea 20 : TS2740
+
+src/types/entities/group/base.ts
+  - línea 36 : TS2430
+
+src/types/entities/place/types.ts
+  - línea 92 : TS2740
+
+════════════════════════════════════════════════════════════════════════════════
+📄 LOG ORIGINAL:
+════════════════════════════════════════════════════════════════════════════════
+
+Comando: bunx tsc --noEmit --pretty
+Fecha: 2025-08-09T18:16:31.956Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+[96msrc/components/features/file-browser/undo-redo/UndoRedoPanel.tsx[0m:[93m56[0m:[93m16[0m - [91merror[0m[90m TS2339: [0mProperty 'metadata' does not exist on type 'UndoableAction'.
+
+[7m56[0m  const { type, metadata } = action;
+[7m  [0m [91m               ~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoPanel.tsx[0m:[93m113[0m:[93m24[0m - [91merror[0m[90m TS2339: [0mProperty 'history' does not exist on type 'UndoRedoState'.
+
+[7m113[0m  const history = state.history;
+[7m   [0m [91m                       ~~~~~~~[0m
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoPanel.tsx[0m:[93m182[0m:[93m22[0m - [91merror[0m[90m TS7006: [0mParameter 'action' implicitly has an 'any' type.
+
+[7m182[0m        {history.map((action, index) => {
+[7m   [0m [91m                     ~~~~~~[0m
+
+[96msrc/components/features/file-browser/undo-redo/UndoRedoPanel.tsx[0m:[93m182[0m:[93m30[0m - [91merror[0m[90m TS7006: [0mParameter 'index' implicitly has an 'any' type.
+
+[7m182[0m        {history.map((action, index) => {
+[7m   [0m [91m                             ~~~~~[0m
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m53[0m:[93m30[0m - [91merror[0m[90m TS2551: [0mProperty 'pageCount' does not exist on type 'DocumentStatistics'. Did you mean 'imageCount'?
+
+[7m53[0m    if (documentEntity.stats?.pageCount) {
+[7m  [0m [91m                             ~~~~~~~~~[0m
+
+  [96msrc/types/entities/entity.types.ts[0m:[93m45[0m:[93m2[0m
+    [7m45[0m  imageCount: number;
+    [7m  [0m [96m ~~~~~~~~~~[0m
+    'imageCount' is declared here.
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m54[0m:[93m40[0m - [91merror[0m[90m TS2551: [0mProperty 'pageCount' does not exist on type 'DocumentStatistics'. Did you mean 'imageCount'?
+
+[7m54[0m     setTotalPages(documentEntity.stats.pageCount);
+[7m  [0m [91m                                       ~~~~~~~~~[0m
+
+  [96msrc/types/entities/entity.types.ts[0m:[93m45[0m:[93m2[0m
+    [7m45[0m  imageCount: number;
+    [7m  [0m [96m ~~~~~~~~~~[0m
+    'imageCount' is declared here.
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m59[0m:[93m60[0m - [91merror[0m[90m TS2551: [0mProperty 'pageCount' does not exist on type 'DocumentStatistics'. Did you mean 'imageCount'?
+
+[7m59[0m  }, [documentSrc, isPDF, isTextFile, documentEntity.stats?.pageCount]);
+[7m  [0m [91m                                                           ~~~~~~~~~[0m
+
+  [96msrc/types/entities/entity.types.ts[0m:[93m45[0m:[93m2[0m
+    [7m45[0m  imageCount: number;
+    [7m  [0m [96m ~~~~~~~~~~[0m
+    'imageCount' is declared here.
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m281[0m:[93m29[0m - [91merror[0m[90m TS2551: [0mProperty 'pageCount' does not exist on type 'DocumentStatistics'. Did you mean 'imageCount'?
+
+[7m281[0m      {documentEntity.stats?.pageCount && (
+[7m   [0m [91m                            ~~~~~~~~~[0m
+
+  [96msrc/types/entities/entity.types.ts[0m:[93m45[0m:[93m2[0m
+    [7m45[0m  imageCount: number;
+    [7m  [0m [96m ~~~~~~~~~~[0m
+    'imageCount' is declared here.
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m284[0m:[93m75[0m - [91merror[0m[90m TS2551: [0mProperty 'pageCount' does not exist on type 'DocumentStatistics'. Did you mean 'imageCount'?
+
+[7m284[0m        <span className="ml-2 text-muted-foreground">{documentEntity.stats.pageCount}</span>
+[7m   [0m [91m                                                                          ~~~~~~~~~[0m
+
+  [96msrc/types/entities/entity.types.ts[0m:[93m45[0m:[93m2[0m
+    [7m45[0m  imageCount: number;
+    [7m  [0m [96m ~~~~~~~~~~[0m
+    'imageCount' is declared here.
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m291[0m:[93m29[0m - [91merror[0m[90m TS2339: [0mProperty 'wordCount' does not exist on type 'DocumentStatistics'.
+
+[7m291[0m      {documentEntity.stats?.wordCount && (
+[7m   [0m [91m                            ~~~~~~~~~[0m
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m294[0m:[93m75[0m - [91merror[0m[90m TS2339: [0mProperty 'wordCount' does not exist on type 'DocumentStatistics'.
+
+[7m294[0m        <span className="ml-2 text-muted-foreground">{documentEntity.stats.wordCount.toLocaleString()}</span>
+[7m   [0m [91m                                                                          ~~~~~~~~~[0m
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m297[0m:[93m29[0m - [91merror[0m[90m TS2339: [0mProperty 'author' does not exist on type 'DocumentStatistics'.
+
+[7m297[0m      {documentEntity.stats?.author && (
+[7m   [0m [91m                            ~~~~~~[0m
+
+[96msrc/components/features/file-viewer/viewers/document-viewer.tsx[0m:[93m300[0m:[93m75[0m - [91merror[0m[90m TS2339: [0mProperty 'author' does not exist on type 'DocumentStatistics'.
+
+[7m300[0m        <span className="ml-2 text-muted-foreground">{documentEntity.stats.author}</span>
+[7m   [0m [91m                                                                          ~~~~~~[0m
+
+[96msrc/components/settings/folders/folder-form.tsx[0m:[93m99[0m:[93m6[0m - [91merror[0m[90m TS2578: [0mUnused '@ts-expect-error' directive.
+
+[7m99[0m      // @ts-expect-error - La API de FileSystemHandle tiene una propiedad _path en algunos navegadores
+[7m  [0m [91m     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/settings/folders/folder-types.ts[0m:[93m80[0m:[93m14[0m - [91merror[0m[90m TS2740: [0mType '{ hierarchyDepth: number; totalDescendants: number; directChildren: number; contentDiversity: number; organizationScore: number; totalItems: number; totalFolders: number; accessFrequency: number; ... 24 more ...; totalOthers: number; }' is missing the following properties from type 'FolderStatistics': albumCount, collectionCount, tagCount, characterCount, and 13 more.
+
+[7m80[0m export const initialStats: FolderStatistics = {
+[7m  [0m [91m             ~~~~~~~~~~~~[0m
+
+[96msrc/components/views/files/files-view-2.tsx[0m:[93m165[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType '"image"' is not assignable to type '"mixed" | EntityStatsType | undefined'.
+
+[7m165[0m     entityType="image"
+[7m   [0m [91m    ~~~~~~~~~~[0m
+
+  [96msrc/components/features/file-browser/types/file-browser.types.ts[0m:[93m12[0m:[93m2[0m
+    [7m12[0m  entityType?: EntityStatsType | 'mixed';
+    [7m  [0m [96m ~~~~~~~~~~[0m
+    The expected type comes from property 'entityType' which is declared here on type 'IntrinsicAttributes & FileBrowserProps'
+
+[96msrc/components/views/files/files-view.tsx[0m:[93m165[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType '"image"' is not assignable to type '"mixed" | EntityStatsType | undefined'.
+
+[7m165[0m     entityType="image"
+[7m   [0m [91m    ~~~~~~~~~~[0m
+
+  [96msrc/components/features/file-browser/types/file-browser.types.ts[0m:[93m12[0m:[93m2[0m
+    [7m12[0m  entityType?: EntityStatsType | 'mixed';
+    [7m  [0m [96m ~~~~~~~~~~[0m
+    The expected type comes from property 'entityType' which is declared here on type 'IntrinsicAttributes & FileBrowserProps'
+
+[96msrc/components/views/search/search-view.tsx[0m:[93m122[0m:[93m16[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ id: string; name: string; src: string; alt: string; width: number; height: number; thumbnail: string | null; type: string; path: string; size: number; mimeType: string; metadata: null; url: string; parsedMetadata: undefined; ... 4 more ...; updatedAt: Date; }[]' is not assignable to parameter of type 'EntityWithStats<EntityStats>[]'.
+  Type '{ id: string; name: string; src: string; alt: string; width: number; height: number; thumbnail: string | null; type: string; path: string; size: number; mimeType: string; metadata: null; url: string; parsedMetadata: undefined; ... 4 more ...; updatedAt: Date; }' is not assignable to type 'EntityWithStats<EntityStats>'.
+    Types of property 'stats' are incompatible.
+      Type '{ totalItems: number; lastAccessed: Date; accessCount: number; }' is missing the following properties from type 'EntityStats': imageCount, videoCount, albumCount, collectionCount, and 16 more.
+
+[7m122[0m     openViewer(viewerItems, currentIndex);
+[7m   [0m [91m               ~~~~~~~~~~~[0m
+
+[96msrc/components/views/uploaded-images/uploaded-images-view.tsx[0m:[93m72[0m:[93m5[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ id: string; name: string; entityType: "uploaded-image"; description: null; createdAt: Date; updatedAt: Date; stats: { totalItems: number; totalAssociations: number; lastUpdated: Date; }; }[]' is not assignable to parameter of type 'SetStateAction<EntityWithStats<EntityStats>[]>'.
+  Type '{ id: string; name: string; entityType: "uploaded-image"; description: null; createdAt: Date; updatedAt: Date; stats: { totalItems: number; totalAssociations: number; lastUpdated: Date; }; }[]' is not assignable to type 'EntityWithStats<EntityStats>[]'.
+    Type '{ id: string; name: string; entityType: "uploaded-image"; description: null; createdAt: Date; updatedAt: Date; stats: { totalItems: number; totalAssociations: number; lastUpdated: Date; }; }' is not assignable to type 'EntityWithStats<EntityStats>'.
+      Types of property 'stats' are incompatible.
+        Type '{ totalItems: number; totalAssociations: number; lastUpdated: Date; }' is missing the following properties from type 'EntityStats': imageCount, videoCount, albumCount, collectionCount, and 14 more.
+
+[7m 72[0m     response.items.map((item) => ({
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m 73[0m      id: item.id,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m 83[0m      },
+[7m   [0m [91m~~~~~~~[0m
+[7m 84[0m     })) || []
+[7m   [0m [91m~~~~~~~~~~~~~[0m
+
+[96msrc/hooks/use-download-manager.ts[0m:[93m139[0m:[93m58[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ id: string; name: string; path: any; }' is not assignable to parameter of type 'DisplayableEntity | FileItem'.
+  Type '{ id: string; name: string; path: any; }' is not assignable to type 'UploadedImageWithStats & { entityType: "uploaded-image"; }'.
+    Type '{ id: string; name: string; path: any; }' is missing the following properties from type 'UploadedImageWithStats': entityType, stats, uploadedAt, dimensions, and 12 more.
+
+[7m139[0m      result = await enhancedDownloadService.downloadFile(downloadFile, downloadItem.options);
+[7m   [0m [91m                                                         ~~~~~~~~~~~~[0m
+
+[96msrc/hooks/use-download-manager.ts[0m:[93m148[0m:[93m67[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ id: string; name: string; path: any; }[]' is not assignable to parameter of type '(DisplayableEntity | FileItem)[]'.
+  Type '{ id: string; name: string; path: any; }' is not assignable to type 'DisplayableEntity | FileItem'.
+    Type '{ id: string; name: string; path: any; }' is not assignable to type 'UploadedImageWithStats & { entityType: "uploaded-image"; }'.
+      Type '{ id: string; name: string; path: any; }' is missing the following properties from type 'UploadedImageWithStats': entityType, stats, uploadedAt, dimensions, and 12 more.
+
+[7m148[0m      result = await enhancedDownloadService.downloadMultipleFiles(downloadFiles, downloadItem.options);
+[7m   [0m [91m                                                                  ~~~~~~~~~~~~~[0m
+
+[96msrc/hooks/use-seamless-navigation.ts[0m:[93m14[0m:[93m5[0m - [91merror[0m[90m TS2578: [0mUnused '@ts-expect-error' directive.
+
+[7m14[0m     // @ts-expect-error - ViewTransition API es experimental
+[7m  [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/hooks/use-tauri-backend.ts[0m:[93m103[0m:[93m5[0m - [91merror[0m[90m TS2578: [0mUnused '@ts-expect-error' directive.
+
+[7m103[0m     // @ts-expect-error - window.__TAURI__ existe en contexto Tauri
+[7m   [0m [91m    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/contexts/file-context.tsx[0m:[93m286[0m:[93m14[0m - [91merror[0m[90m TS2352: [0mConversion of type '{ id: `${string}-${string}-${string}-${string}-${string}`; name: string; description: null; createdAt: Date; updatedAt: Date; entityType: "image"; stats: {}; path: string; size: number; type: string; modified: Date; thumbnail: string; }' to type 'EntityWithStats<EntityStats>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Types of property 'stats' are incompatible.
+    Type '{}' is missing the following properties from type 'EntityStats': imageCount, videoCount, albumCount, collectionCount, and 17 more.
+
+[7m286[0m       return {
+[7m   [0m [91m             ~[0m
+[7m287[0m        id: crypto.randomUUID(),
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m298[0m        thumbnail,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~[0m
+[7m299[0m       } as EntityWithStats;
+[7m   [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/lib/hooks/entities/use-group-filters.ts[0m:[93m48[0m:[93m4[0m - [91merror[0m[90m TS2322: [0mType 'boolean | undefined' is not assignable to type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+
+[7m48[0m    matches =
+[7m  [0m [91m   ~~~~~~~[0m
+
+[96msrc/lib/utils/prompt/models.ts[0m:[93m396[0m:[93m3[0m - [91merror[0m[90m TS2322: [0mType 'boolean | undefined' is not assignable to type 'boolean'.
+  Type 'undefined' is not assignable to type 'boolean'.
+
+[7m396[0m   return model?.supports[feature];
+[7m   [0m [91m  ~~~~~~[0m
+
+[96msrc/server/services/metadata/exifr-parser.service.new.ts[0m:[93m53[0m:[93m46[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ ifd0: boolean; ifd1: true; exif: true; gps: true; interop: true; }' is not assignable to parameter of type 'boolean | Options | Filter | undefined'.
+  Types of property 'ifd0' are incompatible.
+    Type 'boolean' has no properties in common with type 'FormatOptions'.
+
+[7m 53[0m   const exifData = await exifr.parse(buffer, {
+[7m   [0m [91m                                             ~[0m
+[7m 54[0m    // EXIF básico
+[7m   [0m [91m~~~~~~~~~~~~~~~~~[0m
+[7m...[0m 
+[7m 59[0m    interop: true,
+[7m   [0m [91m~~~~~~~~~~~~~~~~~[0m
+[7m 60[0m   });
+[7m   [0m [91m~~~[0m
+
+[96msrc/server/services/metadata/exifr-parser.service.new.ts[0m:[93m103[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'photometricInterpretation' does not exist in type 'ExifData'.
+
+[7m103[0m    photometricInterpretation: exifData.PhotometricInterpretation || undefined,
+[7m   [0m [91m   ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/server/services/metadata/exifr-parser.service.new.ts[0m:[93m132[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'caption' does not exist in type 'IptcData'.
+
+[7m132[0m    caption: iptc.Caption || iptc['Caption-Abstract'] || undefined,
+[7m   [0m [91m   ~~~~~~~[0m
+
+[96msrc/server/services/metadata/exifr-parser.service.new.ts[0m:[93m193[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'marked' does not exist in type 'XmpData'.
+
+[7m193[0m    marked: xmp.marked || xmp['xmpRights:Marked'] || undefined,
+[7m   [0m [91m   ~~~~~~[0m
+
+[96msrc/server/services/metadata/exifr-parser.service.new.ts[0m:[93m248[0m:[93m45[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ ifd0: boolean; exif: true; }' is not assignable to parameter of type 'boolean | Options | Filter | undefined'.
+  Types of property 'ifd0' are incompatible.
+    Type 'boolean' has no properties in common with type 'FormatOptions'.
+
+[7m248[0m   const hasExif = await exifr.parse(buffer, { ifd0: true, exif: true });
+[7m   [0m [91m                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/server/services/metadata/exifr-parser.service.new.ts[0m:[93m273[0m:[93m4[0m - [91merror[0m[90m TS2322: [0mType 'ExifData | null' is not assignable to type 'ExifData | undefined'.
+  Type 'null' is not assignable to type 'ExifData | undefined'.
+
+[7m273[0m    result.exif = await extractExifData(buffer);
+[7m   [0m [91m   ~~~~~~~~~~~[0m
+
+[96msrc/server/services/metadata/exifr-parser.service.new.ts[0m:[93m277[0m:[93m4[0m - [91merror[0m[90m TS2322: [0mType 'IptcData | null' is not assignable to type 'IptcData | undefined'.
+  Type 'null' is not assignable to type 'IptcData | undefined'.
+
+[7m277[0m    result.iptc = await extractIptcData(buffer);
+[7m   [0m [91m   ~~~~~~~~~~~[0m
+
+[96msrc/server/services/metadata/exifr-parser.service.new.ts[0m:[93m281[0m:[93m4[0m - [91merror[0m[90m TS2322: [0mType 'XmpData | null' is not assignable to type 'XmpData | undefined'.
+  Type 'null' is not assignable to type 'XmpData | undefined'.
+
+[7m281[0m    result.xmp = await extractXmpData(buffer);
+[7m   [0m [91m   ~~~~~~~~~~[0m
+
+[96msrc/server/services/metadata/origin-detector.service.ts[0m:[93m348[0m:[93m19[0m - [91merror[0m[90m TS7053: [0mElement implicitly has an 'any' type because expression of type 'AIEngine' can't be used to index type '{ automatic1111: { metadata_keys: string[]; metadata_patterns: RegExp[]; software_patterns: RegExp[]; png_chunk_keys: string[]; png_chunk_patterns: RegExp[]; specific_combinations: string[][]; }; ... 8 more ...; dalle: { ...; }; }'.
+  Property '[AIEngine.UNKNOWN]' does not exist on type '{ automatic1111: { metadata_keys: string[]; metadata_patterns: RegExp[]; software_patterns: RegExp[]; png_chunk_keys: string[]; png_chunk_patterns: RegExp[]; specific_combinations: string[][]; }; ... 8 more ...; dalle: { ...; }; }'.
+
+[7m348[0m  const patterns = ENGINE_PATTERNS[engine];
+[7m   [0m [91m                  ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/server/services/metadata/unified-parser.service.ts[0m:[93m263[0m:[93m7[0m - [91merror[0m[90m TS2559: [0mType '{ aiMetadata: Partial<AIGenerationParameters> & Record<string, unknown>; detectedEngine: AIEngine | null; confidence: number; textChunks: PngTextChunk[]; }' has no properties in common with type 'ExifData'.
+
+[7m263[0m       exif: pngMetadata,
+[7m   [0m [91m      ~~~~[0m
+
+[96msrc/server/services/metadata/unified-parser.service.ts[0m:[93m264[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'null' is not assignable to type 'IptcData | undefined'.
+
+[7m264[0m       iptc: null,
+[7m   [0m [91m      ~~~~[0m
+
+[96msrc/server/services/metadata/unified-parser.service.ts[0m:[93m265[0m:[93m7[0m - [91merror[0m[90m TS2322: [0mType 'null' is not assignable to type 'XmpData | undefined'.
+
+[7m265[0m       xmp: null,
+[7m   [0m [91m      ~~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m125[0m:[93m20[0m - [91merror[0m[90m TS2339: [0mProperty 'INVALID_OPERATION' does not exist on type 'typeof FileErrorCode'.
+
+[7m125[0m      FileErrorCode.INVALID_OPERATION
+[7m   [0m [91m                   ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m139[0m:[93m66[0m - [91merror[0m[90m TS2339: [0mProperty 'id' does not exist on type 'never'.
+
+[7m139[0m      ? `"${'name' in items[0] ? items[0].name : `item-${items[0].id}`}" copiado al portapapeles`
+[7m   [0m [91m                                                                 ~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m163[0m:[93m20[0m - [91merror[0m[90m TS2339: [0mProperty 'INVALID_OPERATION' does not exist on type 'typeof FileErrorCode'.
+
+[7m163[0m      FileErrorCode.INVALID_OPERATION
+[7m   [0m [91m                   ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m177[0m:[93m66[0m - [91merror[0m[90m TS2339: [0mProperty 'id' does not exist on type 'never'.
+
+[7m177[0m      ? `"${'name' in items[0] ? items[0].name : `item-${items[0].id}`}" cortado al portapapeles`
+[7m   [0m [91m                                                                 ~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m234[0m:[93m71[0m - [91merror[0m[90m TS2345: [0mArgument of type 'unknown' is not assignable to parameter of type 'string | undefined'.
+
+[7m234[0m    logger.error('Error generating clipboard data in format:', format, error);
+[7m   [0m [91m                                                                      ~~~~~[0m
+
+[96msrc/services/clipboard/clipboard-manager.ts[0m:[93m371[0m:[93m110[0m - [91merror[0m[90m TS2339: [0mProperty 'id' does not exist on type 'never'.
+
+[7m371[0m      `Moving directories may have restrictions: ${readonlyItems.map((i) => ('name' in i ? i.name : `item-${i.id}`)).join(', ')}`
+[7m   [0m [91m                                                                                                             ~~[0m
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m502[0m:[93m9[0m - [91merror[0m[90m TS2367: [0mThis comparison appears to be unintentional because the types '"running"' and '"cancelled"' have no overlap.
+
+[7m502[0m     if (operation.status === 'cancelled' || operation.status === 'paused') {
+[7m   [0m [91m        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m502[0m:[93m45[0m - [91merror[0m[90m TS2367: [0mThis comparison appears to be unintentional because the types '"running"' and '"paused"' have no overlap.
+
+[7m502[0m     if (operation.status === 'cancelled' || operation.status === 'paused') {
+[7m   [0m [91m                                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m514[0m:[93m91[0m - [91merror[0m[90m TS2339: [0mProperty 'id' does not exist on type 'never'.
+
+[7m514[0m      const itemName = 'name' in item ? item.name : (item as any).fileName || `item-${item.id}`;
+[7m   [0m [91m                                                                                          ~~[0m
+
+[96msrc/services/file/batch-operations.service.ts[0m:[93m583[0m:[93m6[0m - [91merror[0m[90m TS2304: [0mCannot find name 'itemName'.
+
+[7m583[0m      itemName
+[7m   [0m [91m     ~~~~~~~~[0m
+
+[96msrc/services/file/enhanced-file-operations.service.ts[0m:[93m267[0m:[93m55[0m - [91merror[0m[90m TS2345: [0mArgument of type 'string' is not assignable to parameter of type 'DisplayableEntity'.
+
+[7m267[0m     const action = undoRedoManager.createRenameAction(oldPath, newPath);
+[7m   [0m [91m                                                      ~~~~~~~[0m
+
+[96msrc/services/image/converter.service.ts[0m:[93m200[0m:[93m3[0m - [91merror[0m[90m TS2322: [0mType '{ id: string; name: string; description: null; path: string; hash: string; size: number; width: number; height: number; metadata: string | null; thumbnail: string | null; thumbnailSize: number | null; ... 16 more ...; _count: { ...; }; }' is not assignable to type 'ImageWithStats'.
+  Types of property 'stats' are incompatible.
+    Type '{ viewCount: number; downloadCount: number; likeCount: number; commentCount: number; tagCount: number; albumCount: number; collectionCount: number; characterCount: number; placeCount: number; ... 7 more ...; aspectRatio: number; }' is missing the following properties from type 'ImageStatistics': imageCount, videoCount, totalItems, totalAssociations, and 5 more.
+
+[7m200[0m   return imageWithStats;
+[7m   [0m [91m  ~~~~~~[0m
+
+[96msrc/services/index.ts[0m:[93m20[0m:[93m1[0m - [91merror[0m[90m TS2308: [0mModule './clipboard/index' has already exported a member named 'ClipboardData'. Consider explicitly re-exporting to resolve the ambiguity.
+
+[7m20[0m export * from './file/index';
+[7m  [0m [91m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/services/note/note.service.ts[0m:[93m473[0m:[93m4[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; ... 8 more ...; totalAssociations: number; }' is missing the following properties from type 'NoteStatistics': isDirectory, isFile, noteCount, lastUpdated, and 4 more.
+
+[7m473[0m    stats: {
+[7m   [0m [91m   ~~~~~[0m
+
+[96msrc/services/undo-redo/undo-redo-manager.ts[0m:[93m285[0m:[93m34[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ path: string; entityType: "image"; stats: ImageStatistics; thumbnailUrl: string; fullUrl: string; type?: string | undefined; _count?: { albums?: number | undefined; ... 10 more ...; groups?: number | undefined; } | undefined; ... 22 more ...; tags?: TagWithStats[] | undefined; } | ... 18 more ... | { ...; }' is not assignable to parameter of type 'DisplayableEntity'.
+  Object literal may only specify known properties, and 'path' does not exist in type 'AlbumWithStats & { entityType: "album"; }'.
+
+[7m285[0m      copiedItems.push({ ...item, path: targetFilePath });
+[7m   [0m [91m                                 ~~~~[0m
+
+[96msrc/services/undo-redo/undo-redo-manager.ts[0m:[93m414[0m:[93m3[0m - [91merror[0m[90m TS2322: [0mType 'Timeout' is not assignable to type 'number'.
+
+[7m414[0m   this.cleanupTimer = setInterval(() => {
+[7m   [0m [91m  ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/store/entities/json-file/json-file.store.ts[0m:[93m173[0m:[93m7[0m - [91merror[0m[90m TS2578: [0mUnused '@ts-expect-error' directive.
+
+[7m173[0m       // @ts-expect-error TODO: Arreglar el tipo isFavorite cuando se refactoricen las actions
+[7m   [0m [91m      ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/character/transformer.ts[0m:[93m138[0m:[93m9[0m - [91merror[0m[90m TS2740: [0mType '{ totalImages: number; totalVideos: number; totalTags: number; totalGroups: number; totalProperties: number; totalCollections: number; totalAlbums: number; totalPlaces: number; totalWorldItems: number; ... 9 more ...; rarityLevel: "common" | ... 3 more ... | "epic"; }' is missing the following properties from type 'CharacterAssociationStats': size, mtime, birthtime, type, and 2 more.
+
+[7m138[0m   const statistics: CharacterAssociationStats = {
+[7m   [0m [91m        ~~~~~~~~~~[0m
+
+[96msrc/transformers/collection/transformer.ts[0m:[93m43[0m:[93m9[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; noteCount: number; wildcardCount: number; propertyCount: number; groupCount: number; }' is missing the following properties from type 'CollectionStatistics': isDirectory, isFile, collectionCount, totalItems, and 6 more.
+
+[7m43[0m   const stats: CollectionStatistics = {
+[7m  [0m [91m        ~~~~~[0m
+
+[96msrc/transformers/collection/validators.ts[0m:[93m47[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; noteCount: number; albumCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; wildcardCount: number; propertyCount: number; groupCount: number; }' is missing the following properties from type 'CollectionStatistics': isDirectory, isFile, collectionCount, totalItems, and 6 more.
+
+[7m47[0m   return CollectionStatisticsSchema.parse(data);
+[7m  [0m [91m  ~~~~~~[0m
+
+[96msrc/transformers/collection/validators.ts[0m:[93m63[0m:[93m3[0m - [91merror[0m[90m TS2322: [0mType '{ id: string; color: string | null; emoji: string | null; name: string; createdAt: Date; updatedAt: Date; description: string | null; featuredImage: string | null; isFavorite: boolean; ... 16 more ...; sourceImage: string | null; }' is not assignable to type 'CollectionWithStats'.
+  Types of property 'stats' are incompatible.
+    Type '{ imageCount: number; videoCount: number; noteCount: number; albumCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; wildcardCount: number; propertyCount: number; groupCount: number; }' is missing the following properties from type 'CollectionStatistics': isDirectory, isFile, collectionCount, totalItems, and 6 more.
+
+[7m63[0m   return CollectionWithStatsSchema.parse(data);
+[7m  [0m [91m  ~~~~~~[0m
+
+[96msrc/transformers/concept/validators.ts[0m:[93m49[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; noteCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; ... 5 more ...; lastUpdated: Date; }' is missing the following properties from type 'ConceptStatistics': isDirectory, isFile, conceptCount, totalItems, and 4 more.
+
+[7m49[0m   return ConceptStatisticsSchema.parse(data);
+[7m  [0m [91m  ~~~~~~[0m
+
+[96msrc/transformers/concept/validators.ts[0m:[93m67[0m:[93m3[0m - [91merror[0m[90m TS2322: [0mType '{ id: string; content: string; color: string; emoji: string; name: string; type: string | null; createdAt: Date; updatedAt: Date; description: string | null; featuredImage: string | null; ... 13 more ...; _count?: { ...; } | undefined; }' is not assignable to type 'ConceptWithStats'.
+  Types of property 'stats' are incompatible.
+    Type '{ imageCount: number; videoCount: number; noteCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; ... 5 more ...; lastUpdated: Date; }' is missing the following properties from type 'ConceptStatistics': isDirectory, isFile, conceptCount, totalItems, and 4 more.
+
+[7m67[0m   return ConceptWithStatsSchema.parse(transformedData);
+[7m  [0m [91m  ~~~~~~[0m
+
+[96msrc/transformers/favorite/mappers.ts[0m:[93m45[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ entityTypeName: string; formattedCreatedAt: string; daysSinceFavorited: number; isRecent: boolean; isOld: boolean; }' is missing the following properties from type 'FavoriteStatistics': imageCount, videoCount, albumCount, collectionCount, and 17 more.
+
+[7m45[0m  return {
+[7m  [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/file/mappers.ts[0m:[93m32[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ formattedSize: string; typeLabel: FileType; iconName: string; colorCode: string; daysSinceModified: number; daysSinceAccessed: number; isRecent: boolean; isLarge: boolean; formattedModifiedAt: string; childCount: number; shortPath: string; }' is missing the following properties from type 'FileStatistics': checksum, isDirectory, isFile, imageCount, and 20 more.
+
+[7m32[0m  return {
+[7m  [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/file3d/serializers.ts[0m:[93m43[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ polygonCount: number; textureSize: number; format: string; vertexCount: number; materialCount: number; }' is missing the following properties from type 'File3DStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m43[0m   stats: {
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/file3d/base.ts[0m:[93m69[0m:[93m2[0m
+    [7m69[0m  stats: File3DStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'File3DWithStats'
+
+[96msrc/transformers/folder/serializers.ts[0m:[93m156[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ hierarchyDepth: any; totalDescendants: any; directChildren: any; contentDiversity: any; organizationScore: any; totalItems: any; accessFrequency: any; lastActivity: Date | null; ... 24 more ...; totalRelations: any; }' is missing the following properties from type 'FolderStatistics': albumCount, collectionCount, tagCount, characterCount, and 13 more.
+
+[7m156[0m   stats: {
+[7m   [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/folder/types.ts[0m:[93m37[0m:[93m2[0m
+    [7m37[0m  stats: FolderStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'FolderWithStats'
+
+[96msrc/transformers/folder/transformer.ts[0m:[93m123[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ hierarchyDepth: any; totalDescendants: any; directChildren: any; contentDiversity: number; organizationScore: number; totalItems: any; folderCount: any; totalFolders: any; totalImages: any; ... 25 more ...; recentImages: never[]; }' is missing the following properties from type 'FolderStatistics': albumCount, collectionCount, tagCount, characterCount, and 13 more.
+
+[7m123[0m  return {
+[7m   [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/group/transformer.ts[0m:[93m70[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'totalImages' does not exist in type 'GroupStatistics'.
+
+[7m70[0m    totalImages: imageCount,
+[7m  [0m [91m   ~~~~~~~~~~~[0m
+
+[96msrc/transformers/image/mappers.ts[0m:[93m38[0m:[93m3[0m - [91merror[0m[90m TS2741: [0mProperty 'aspectRatio' is missing in type 'EntityStats' but required in type 'ImageStatistics'.
+
+[7m38[0m   stats: createDefaultEntityStats({
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/image/base.ts[0m:[93m48[0m:[93m2[0m
+    [7m48[0m  aspectRatio: number;
+    [7m  [0m [96m ~~~~~~~~~~~[0m
+    'aspectRatio' is declared here.
+  [96msrc/types/entities/image/base.ts[0m:[93m62[0m:[93m2[0m
+    [7m62[0m  stats: ImageStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'ImageWithStats'
+
+[96msrc/transformers/image/mappers.ts[0m:[93m43[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'aspectRatio' does not exist in type 'Partial<EntityStats>'.
+
+[7m43[0m    aspectRatio: image.width && image.height ? Number((image.width / image.height).toFixed(2)) : 0,
+[7m  [0m [91m   ~~~~~~~~~~~[0m
+
+[96msrc/transformers/image/serializers.ts[0m:[93m49[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ viewCount: number; downloadCount: number; likeCount: number; commentCount: number; tagCount: number; albumCount: number; collectionCount: number; characterCount: number; placeCount: number; ... 7 more ...; aspectRatio: number; }' is missing the following properties from type 'ImageStatistics': imageCount, videoCount, totalItems, totalAssociations, and 5 more.
+
+[7m49[0m   stats: {
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/image/base.ts[0m:[93m62[0m:[93m2[0m
+    [7m62[0m  stats: ImageStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'ImageWithStats'
+
+[96msrc/transformers/image/transformer.ts[0m:[93m143[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ viewCount: number; downloadCount: number; likeCount: number; commentCount: number; tagCount: number; albumCount: number; collectionCount: number; characterCount: number; placeCount: number; ... 7 more ...; aspectRatio: number; }' is missing the following properties from type 'ImageStatistics': imageCount, videoCount, totalItems, totalAssociations, and 5 more.
+
+[7m143[0m  return {
+[7m   [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/json-file/serializers.ts[0m:[93m53[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ size: number; nestingDepth: number; isValid: true; keyCount: number; }' is missing the following properties from type 'JsonFileStatistics': imageCount, videoCount, albumCount, collectionCount, and 16 more.
+
+[7m53[0m   stats: {
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/json-file/base.ts[0m:[93m51[0m:[93m2[0m
+    [7m51[0m  stats: JsonFileStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'JsonFileWithStats'
+
+[96msrc/transformers/note/note-adapter.ts[0m:[93m34[0m:[93m8[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; ... 8 more ...; totalAssociations: number; }' is missing the following properties from type 'NoteStatistics': isDirectory, isFile, noteCount, lastUpdated, and 4 more.
+
+[7m34[0m  const statistics: NoteStatistics = {
+[7m  [0m [91m       ~~~~~~~~~~[0m
+
+[96msrc/transformers/note/transformer.ts[0m:[93m100[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; ... 8 more ...; totalAssociations: number; }' is missing the following properties from type 'NoteStatistics': isDirectory, isFile, noteCount, lastUpdated, and 4 more.
+
+[7m100[0m  return {
+[7m   [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/place/mappers.ts[0m:[93m146[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ popularity: number; completenessScore: number; spatialRelevance: number; geoContextLevel: number; }' is missing the following properties from type 'PlaceStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m146[0m   stats: statistics,
+[7m   [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/place/base.ts[0m:[93m86[0m:[93m2[0m
+    [7m86[0m  stats: PlaceStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'PlaceWithStats'
+
+[96msrc/transformers/profile/serializers.ts[0m:[93m42[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'totalImages' does not exist on type 'ProfileStatistics'.
+
+[7m42[0m    totalImages: profile.stats.totalImages,
+[7m  [0m [91m                              ~~~~~~~~~~~[0m
+
+[96msrc/transformers/profile/serializers.ts[0m:[93m43[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'totalVideos' does not exist on type 'ProfileStatistics'.
+
+[7m43[0m    totalVideos: profile.stats.totalVideos,
+[7m  [0m [91m                              ~~~~~~~~~~~[0m
+
+[96msrc/transformers/profile/serializers.ts[0m:[93m44[0m:[93m36[0m - [91merror[0m[90m TS2339: [0mProperty 'totalCollections' does not exist on type 'ProfileStatistics'.
+
+[7m44[0m    totalCollections: profile.stats.totalCollections,
+[7m  [0m [91m                                   ~~~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/profile/transformer.ts[0m:[93m37[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'totalImages' does not exist in type 'ProfileStatistics'.
+
+[7m37[0m    totalImages: _count?.images || 0,
+[7m  [0m [91m   ~~~~~~~~~~~[0m
+
+[96msrc/transformers/prompt/transformer.ts[0m:[93m53[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'totalTags' does not exist in type 'PromptStatistics'.
+
+[7m53[0m    totalTags: _count?.tags || 0,
+[7m  [0m [91m   ~~~~~~~~~[0m
+
+[96msrc/transformers/property/mappers.ts[0m:[93m53[0m:[93m3[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'usageDiversity' does not exist in type 'PropertyStatistics'.
+
+[7m53[0m   usageDiversity: Number.parseFloat(diversityRatio.toFixed(2)),
+[7m  [0m [91m  ~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/tag/mappers.ts[0m:[93m42[0m:[93m50[0m - [91merror[0m[90m TS2352: [0mConversion of type 'TagBase & { _count?: { images?: number | undefined; videos?: number | undefined; albums?: number | undefined; collections?: number | undefined; characters?: number | undefined; ... 7 more ...; groups?: number | undefined; } | undefined; }' to type 'Record<string, unknown>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'TagBase & { _count?: { images?: number | undefined; videos?: number | undefined; albums?: number | undefined; collections?: number | undefined; characters?: number | undefined; ... 7 more ...; groups?: number | undefined; } | undefined; }'.
+
+[7m42[0m  const completenessScore = calculateCompleteness(baseTag as Record<string, unknown>, ['name', 'description', 'category']);
+[7m  [0m [91m                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/thumbnail/mappers.ts[0m:[93m20[0m:[93m8[0m - [91merror[0m[90m TS2740: [0mType '{ aspectRatio: number; compressionRatio: number; qualityScore: number; usageCount: number; storageEfficiency: number; }' is missing the following properties from type 'ThumbnailStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m20[0m  const stats: ThumbnailStatistics = {
+[7m  [0m [91m       ~~~~~[0m
+
+[96msrc/types/entities/group/base.ts[0m:[93m36[0m:[93m18[0m - [91merror[0m[90m TS2430: [0mInterface 'GroupStatistics' incorrectly extends interface 'EntityStats'.
+  Types of property 'lastUpdated' are incompatible.
+    Type 'string' is not assignable to type 'Date'.
+
+[7m36[0m export interface GroupStatistics extends EntityStats {
+[7m  [0m [91m                 ~~~~~~~~~~~~~~~[0m
+
+[96msrc/types/entities/place/types.ts[0m:[93m92[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ spatialRelevance: number; completenessScore: number; geoContextLevel: number; popularity: number; }' is missing the following properties from type 'PlaceStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m92[0m   stats,
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/place/base.ts[0m:[93m86[0m:[93m2[0m
+    [7m86[0m  stats: PlaceStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'PlaceWithStats'
+
+
+Found 85 errors in 50 files.
+
+Errors  Files
+     4  src/components/features/file-browser/undo-redo/UndoRedoPanel.tsx[90m:56[0m
+     9  src/components/features/file-viewer/viewers/document-viewer.tsx[90m:53[0m
+     1  src/components/settings/folders/folder-form.tsx[90m:99[0m
+     1  src/components/settings/folders/folder-types.ts[90m:80[0m
+     1  src/components/views/files/files-view-2.tsx[90m:165[0m
+     1  src/components/views/files/files-view.tsx[90m:165[0m
+     1  src/components/views/search/search-view.tsx[90m:122[0m
+     1  src/components/views/uploaded-images/uploaded-images-view.tsx[90m:72[0m
+     2  src/hooks/use-download-manager.ts[90m:139[0m
+     1  src/hooks/use-seamless-navigation.ts[90m:14[0m
+     1  src/hooks/use-tauri-backend.ts[90m:103[0m
+     1  src/lib/contexts/file-context.tsx[90m:286[0m
+     1  src/lib/hooks/entities/use-group-filters.ts[90m:48[0m
+     1  src/lib/utils/prompt/models.ts[90m:396[0m
+     8  src/server/services/metadata/exifr-parser.service.new.ts[90m:53[0m
+     1  src/server/services/metadata/origin-detector.service.ts[90m:348[0m
+     3  src/server/services/metadata/unified-parser.service.ts[90m:263[0m
+     6  src/services/clipboard/clipboard-manager.ts[90m:125[0m
+     4  src/services/file/batch-operations.service.ts[90m:502[0m
+     1  src/services/file/enhanced-file-operations.service.ts[90m:267[0m
+     1  src/services/image/converter.service.ts[90m:200[0m
+     1  src/services/index.ts[90m:20[0m
+     1  src/services/note/note.service.ts[90m:473[0m
+     2  src/services/undo-redo/undo-redo-manager.ts[90m:285[0m
+     1  src/store/entities/json-file/json-file.store.ts[90m:173[0m
+     1  src/transformers/character/transformer.ts[90m:138[0m
+     1  src/transformers/collection/transformer.ts[90m:43[0m
+     2  src/transformers/collection/validators.ts[90m:47[0m
+     2  src/transformers/concept/validators.ts[90m:49[0m
+     1  src/transformers/favorite/mappers.ts[90m:45[0m
+     1  src/transformers/file/mappers.ts[90m:32[0m
+     1  src/transformers/file3d/serializers.ts[90m:43[0m
+     1  src/transformers/folder/serializers.ts[90m:156[0m
+     1  src/transformers/folder/transformer.ts[90m:123[0m
+     1  src/transformers/group/transformer.ts[90m:70[0m
+     2  src/transformers/image/mappers.ts[90m:38[0m
+     1  src/transformers/image/serializers.ts[90m:49[0m
+     1  src/transformers/image/transformer.ts[90m:143[0m
+     1  src/transformers/json-file/serializers.ts[90m:53[0m
+     1  src/transformers/note/note-adapter.ts[90m:34[0m
+     1  src/transformers/note/transformer.ts[90m:100[0m
+     1  src/transformers/place/mappers.ts[90m:146[0m
+     3  src/transformers/profile/serializers.ts[90m:42[0m
+     1  src/transformers/profile/transformer.ts[90m:37[0m
+     1  src/transformers/prompt/transformer.ts[90m:53[0m
+     1  src/transformers/property/mappers.ts[90m:53[0m
+     1  src/transformers/tag/mappers.ts[90m:42[0m
+     1  src/transformers/thumbnail/mappers.ts[90m:20[0m
+     1  src/types/entities/group/base.ts[90m:36[0m
+     1  src/types/entities/place/types.ts[90m:92[0m

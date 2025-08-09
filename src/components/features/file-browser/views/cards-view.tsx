@@ -5,7 +5,7 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { AnimatePresence, motion } from 'motion/react';
-import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { OptimizedEntityCard } from '@/components/cards/entity-card';
 import { useCardsViewConfig } from '@/hooks/use-cards-view-config';
 import { cn } from '@/lib/utils';
@@ -23,14 +23,22 @@ interface CardsViewProps {
 
 // Componente interno memoizado para cada carta - OPTIMIZADO
 const CardItem = memo<{
-	item: AnyEntityWithStats;
+	entity: AnyEntityWithStats;
 	isSelected: boolean;
 	itemIndex: number;
 	cardWidth: number;
 	cardHeight: number;
 	onItemClickById: (id: string, e: React.MouseEvent) => void;
 	onItemDoubleClickById: (id: string) => void;
-}>(function CardItem({ item, isSelected, itemIndex, cardWidth, cardHeight, onItemClickById, onItemDoubleClickById }) {
+}>(function CardItemComponent({
+	entity,
+	isSelected,
+	itemIndex,
+	cardWidth,
+	cardHeight,
+	onItemClickById,
+	onItemDoubleClickById,
+}) {
 	const { config } = useCardsViewConfig();
 	const [isHovered, setIsHovered] = useState(false);
 	const [hoverTimeout, setHoverTimeout] = useState<NodeJS.Timeout | null>(null);
@@ -72,22 +80,15 @@ const CardItem = memo<{
 		},
 		onClick: (e: React.MouseEvent) => {
 			e.stopPropagation();
-			onItemClickById(item.id, e);
+			onItemClickById(entity.id, e);
 		},
 		onDoubleClick: () => {
-			onItemDoubleClickById(item.id);
+			onItemDoubleClickById(entity.id);
 		},
 	});
 
 	// Actualizar handlers cuando cambien las dependencias
 	useMemo(() => {
-		console.log(
-			'🔧 CardsView.CardItem - Actualizando handlersRef para item:',
-			item.id,
-			'onItemClickById:',
-			!!onItemClickById
-		);
-
 		handlersRef.current.onMouseEnter = () => {
 			if (derivedProps.interactiveEnabled) {
 				const timeout = setTimeout(() => {
@@ -99,13 +100,13 @@ const CardItem = memo<{
 
 		handlersRef.current.onClick = (e: React.MouseEvent) => {
 			e.stopPropagation();
-			onItemClickById(item.id, e);
+			onItemClickById(entity.id, e);
 		};
 
 		handlersRef.current.onDoubleClick = () => {
-			onItemDoubleClickById(item.id);
+			onItemDoubleClickById(entity.id);
 		};
-	}, [derivedProps.interactiveEnabled, derivedProps.hoverDelay, onItemClickById, onItemDoubleClickById, item.id]);
+	}, [derivedProps.interactiveEnabled, derivedProps.hoverDelay, onItemClickById, onItemDoubleClickById, entity.id]);
 
 	// Handlers estables que no cambian entre renders
 	const handleMouseEnter = useCallback(() => {
@@ -116,18 +117,9 @@ const CardItem = memo<{
 		handlersRef.current.onMouseLeave();
 	}, []);
 
-	const handleClick = useCallback(
-		(e: React.MouseEvent) => {
-			console.log(
-				'🔧 CardsView.CardItem - handleClick ejecutado para item:',
-				item.id,
-				'handlersRef.onClick:',
-				!!handlersRef.current.onClick
-			);
-			handlersRef.current.onClick(e);
-		},
-		[item.id]
-	);
+	const handleClick = useCallback((e: React.MouseEvent) => {
+		handlersRef.current.onClick(e);
+	}, []);
 
 	const handleDoubleClick = useCallback(() => {
 		handlersRef.current.onDoubleClick();
@@ -151,8 +143,9 @@ const CardItem = memo<{
 	}, [config, isSelected]);
 
 	const transition = useMemo(() => {
-		if (!config.animationsEnabled) return {};
-
+		if (!config.animationsEnabled) {
+			return {};
+		}
 		return {
 			duration: config.animationDuration / 1000,
 			delay: Math.min(itemIndex * 0.02, 0.3),
@@ -164,7 +157,7 @@ const CardItem = memo<{
 			animate={config.animationsEnabled ? { opacity: 1, y: 0 } : false}
 			className={cardStyleClasses}
 			initial={config.animationsEnabled ? { opacity: 0, y: 20 } : false}
-			key={item.id}
+			key={entity.id}
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
 			style={{
@@ -178,7 +171,7 @@ const CardItem = memo<{
 			<OptimizedEntityCard
 				className="h-full w-full"
 				compact={config.cardStyle === 'compact'}
-				entity={item}
+				entity={entity}
 				isSelected={isSelected}
 				onClick={handleClick}
 				onDoubleClick={handleDoubleClick}
@@ -188,7 +181,7 @@ const CardItem = memo<{
 			{config.interactiveConfig.enabled && config.interactiveConfig.showInfoOverlay && (
 				<CardInfoOverlay
 					animationDuration={config.animationDuration}
-					entity={item}
+					entity={entity}
 					metadataConfig={config.metadataConfig}
 					position={config.interactiveConfig.overlayPosition}
 					visible={isHovered}
@@ -200,7 +193,7 @@ const CardItem = memo<{
 				<CardActionButtons
 					actionButtons={config.interactiveConfig.actionButtons}
 					animationDuration={config.animationDuration}
-					entity={item}
+					entity={entity}
 					visible={isHovered}
 				/>
 			)}
@@ -208,17 +201,13 @@ const CardItem = memo<{
 	);
 });
 
-export const CardsView = memo<CardsViewProps>(function CardsView({
+export const CardsView = memo<CardsViewProps>(function CardsViewComponent({
 	items,
 	selectedIds,
 	containerWidth,
 	onItemClick,
 	onItemDoubleClick,
 }) {
-	console.log('🚀 CARDSVIEW SE ESTÁ RENDERIZANDO!', {
-		onItemClick: typeof onItemClick,
-		itemsLength: items.length,
-	});
 	const parentRef = useRef<any>(null);
 	const { config, calculateLayout } = useCardsViewConfig();
 
@@ -244,13 +233,6 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 	);
 
 	// OPTIMIZACIÓN: Referencias estables con useRef para máximo rendimiento
-	// DEBUG: Verificar qué está llegando como props de handlers
-	console.log('🔍 CardsView - Props de handlers recibidos:', {
-		onItemClick: typeof onItemClick,
-		onItemClickValue: onItemClick && onItemClick.toString().substring(0, 100),
-		onItemDoubleClick: typeof onItemDoubleClick,
-		onItemDoubleClickValue: onItemDoubleClick && onItemDoubleClick.toString().substring(0, 100),
-	});
 
 	const itemsByIdRef = useRef(new Map<string, AnyEntityWithStats>());
 	const selectedIdsSetRef = useRef(new Set<string>());
@@ -338,45 +320,24 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 					target.closest('[data-virtualized-item="true"]')
 				);
 
-			if (isEmptySpaceClick) {
-				// Propagar el evento hacia arriba para que el FileBrowser maneje la deselección
-				// No hacer preventDefault() para permitir que el evento burbujee
-
-				// Feedback visual opcional si hay elementos seleccionados
-				if (derivedProps.hasSelection) {
-					currentTarget.style.transition = 'background-color 0.15s ease';
-					currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
-
-					setTimeout(() => {
-						currentTarget.style.backgroundColor = '';
-						currentTarget.style.transition = '';
-					}, 150);
-				}
+			if (isEmptySpaceClick && derivedProps.hasSelection) {
+				currentTarget.style.transition = 'background-color 0.15s ease';
+				currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
+				setTimeout(() => {
+					currentTarget.style.backgroundColor = '';
+					currentTarget.style.transition = '';
+				}, 150);
 			}
 		},
 		[derivedProps.hasSelection]
 	);
 
-	// Estado para altura del contenedor
-	const [containerHeight, setContainerHeight] = useState<number>(0);
-
-	// Efecto para medir altura del contenedor
-	useEffect(() => {
-		if (parentRef.current) {
-			const scrollAreaViewport = parentRef.current.closest('[data-radix-scroll-area-viewport]');
-			if (scrollAreaViewport) {
-				const height = scrollAreaViewport.clientHeight - layout.padding * 2;
-				setContainerHeight(height);
-			}
-		}
-	}, [layout.padding]);
-
 	// Configurar virtualizador para filas
 	const rowVirtualizer = useVirtualizer({
 		count: layout.rows,
 		getScrollElement: () => {
-			const scrollAreaViewport = parentRef.current?.closest('[data-radix-scroll-area-viewport]');
-			return scrollAreaViewport || parentRef.current?.parentElement || parentRef.current;
+			const scrollAreaViewport = parentRef.current?.closest('[data-slot="scroll-area-viewport"]') as HTMLElement | null;
+			return scrollAreaViewport ?? parentRef.current?.parentElement ?? parentRef.current;
 		},
 		estimateSize: () => layout.cardHeight + layout.gap,
 		overscan: 5,
@@ -392,19 +353,25 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 		[items, layout.columns]
 	);
 
+	const handleEmptySpaceKeyDown = useCallback((e: React.KeyboardEvent) => {
+		if (e.key === 'Escape') {
+			// Permitir burbujeo para que el contenedor principal maneje la deselección
+		}
+	}, []);
+
 	return (
-		<div
-			className="w-full"
+		<button
+			className="w-full cursor-default border-0 bg-transparent p-0 text-left"
 			data-testid="cards-view"
 			data-view-type="cards"
 			onClick={handleEmptySpaceClick}
+			onKeyDown={handleEmptySpaceKeyDown}
 			ref={parentRef}
 			style={{
 				contain: 'layout style',
 				padding: `${layout.padding}px`,
-				height: containerHeight > 0 ? `${containerHeight}px` : '100%',
-				overflow: 'auto',
 			}}
+			type="button"
 		>
 			<div
 				style={{
@@ -445,8 +412,8 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 											<CardItem
 												cardHeight={layout.cardHeight}
 												cardWidth={layout.cardWidth}
+												entity={item}
 												isSelected={isSelected}
-												item={item}
 												itemIndex={itemIndex}
 												key={item.id}
 												onItemClickById={handleItemClickById}
@@ -460,6 +427,6 @@ export const CardsView = memo<CardsViewProps>(function CardsView({
 					})}
 				</AnimatePresence>
 			</div>
-		</div>
+		</button>
 	);
 });

@@ -1,0 +1,30 @@
+Comando: bunx biome check --max-diagnostics=500 .
+Fecha: 2025-08-09T14:04:34.889Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+D:\DEV\image-manager\biome.json:84:3 deserialize ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Found an unknown key `ignore`.
+  
+    82 │       "!**/public/assets/**"
+    83 │   ],
+  > 84 │   "ignore": ["**/.vscode/**"]
+       │   ^^^^^^^^
+    85 │   },
+    86 │   "javascript": {
+  
+  i Known keys:
+  
+  - maxSize
+  - ignoreUnknown
+  - includes
+  - experimentalScannerIgnores
+  
+
+configuration ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Biome exited because the configuration resulted in errors. Please fix them.
+  
+

@@ -28,8 +28,8 @@ interface DragSelectionOverlayProps {
 	dragSelectionManager: DragSelectionManager;
 	showCount?: boolean;
 	showCoordinates?: boolean;
-	theme?: 'light' | 'dark';
-	animation?: boolean;
+	theme?: 'light' | 'dark' | 'auto';
+	animation?: boolean | { enabled: boolean; duration: number; easing: string };
 	className?: string;
 }
 
@@ -114,6 +114,8 @@ const DragSelectionOverlay: React.FC<DragSelectionOverlayProps> = ({
 	const rect = state.selectionRect;
 	const selectedCount = state.selectedElements.size;
 
+	const animationEnabled = typeof animation === 'object' ? animation.enabled : animation;
+
 	return (
 		<div
 			className={cn(
@@ -121,9 +123,10 @@ const DragSelectionOverlay: React.FC<DragSelectionOverlayProps> = ({
 				'border-2 border-blue-500',
 				'bg-blue-500/10 backdrop-blur-sm',
 				'transition-all duration-75 ease-out',
-				animation && 'animate-pulse border-dashed',
-				!animation && 'border-solid',
+				animationEnabled && 'animate-pulse border-dashed',
+				!animationEnabled && 'border-solid',
 				theme === 'dark' && 'border-blue-400 bg-blue-400/10',
+				theme === 'auto' && 'border-blue-500 bg-blue-500/10',
 				className
 			)}
 			style={{

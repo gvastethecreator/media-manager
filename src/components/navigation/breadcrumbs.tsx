@@ -3,11 +3,11 @@ import { motion } from 'motion/react';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-	Breadcrumb,
-	BreadcrumbItem,
-	BreadcrumbList,
-	BreadcrumbPage,
-	BreadcrumbSeparator,
+    Breadcrumb,
+    BreadcrumbItem,
+    BreadcrumbList,
+    BreadcrumbPage,
+    BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { ViewType } from '@/components/views/types';
@@ -37,8 +37,8 @@ interface BreadcrumbConfig {
 	icon?: React.ReactNode;
 }
 
-const BREADCRUMB_CONFIG: Record<ViewType, BreadcrumbConfig> = {
-	dashboard: { label: 'Dashboard', path: '/' },
+const BREADCRUMB_CONFIG: Record<ViewType, BreadcrumbConfig> & Record<string, BreadcrumbConfig> = {
+	'': { label: 'Inicio', path: '/' },
 	settings: { label: 'Ajustes', path: '/settings' },
 	'all-images': { label: 'Galería', path: '/gallery' },
 	'uploaded-images': { label: 'Imágenes Subidas', path: '/uploaded-images' },

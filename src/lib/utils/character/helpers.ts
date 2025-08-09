@@ -49,7 +49,7 @@ export function createNewCharacter(overrides: Partial<CharacterBase> = {}): Char
 		description: overrides.description || null,
 		category: overrides.category || null,
 
-		isFavorite: overrides.isFavorite,
+		isFavorite: overrides.isFavorite ?? false,
 		totalImages: overrides.totalImages || 0,
 		totalVideos: overrides.totalVideos || 0,
 		age: overrides.age || null,

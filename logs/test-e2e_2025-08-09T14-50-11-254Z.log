@@ -1,0 +1,12 @@
+Comando: bunx playwright test
+Fecha: 2025-08-09T14:50:11.258Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Testing
+===============================================
+
+Running 1 test using 1 worker
+
+  ✓  1 [chromium] › tests\e2e\reindex-settings.spec.ts:10:3 › Reindex en Settings › reindex-all refresca UI (cards, nav y stats) (22.9s)
+
+  1 passed (25.8s)

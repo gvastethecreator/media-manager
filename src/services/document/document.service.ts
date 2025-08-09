@@ -17,7 +17,7 @@ import { type EventType, emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toDocumentWithStats } from '@/transformers/document';
 import type { DocumentCreateInput, DocumentUpdateInput } from '@/transformers/document/validators';
-import type { DocumentWithStats } from '@/types/entities/document/base';
+import type { DocumentWithStats } from '@/types/entities/document';
 
 const documentLogger = serverLogger.withContext('DocumentService');
 

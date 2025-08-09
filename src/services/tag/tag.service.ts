@@ -736,6 +736,3 @@ const tagService = {
 };
 
 export default tagService;
-
-// Export types for external use
-export type { GetTagsResult, TagServiceError };

@@ -11,6 +11,7 @@ import {
 	type FavoriteStatistics,
 	type FavoriteWithStats,
 } from '@/types/entities/favorite';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 /**
  * 📊 Calcula las estadísticas de un favorito.
@@ -43,6 +44,13 @@ function calculateFavoriteStats(favorite: FavoriteBase): FavoriteStatistics {
 	};
 
 	return {
+		...createDefaultEntityStats({
+			lastUpdated: favorite.updatedAt,
+			mtime: favorite.updatedAt,
+			birthtime: favorite.createdAt,
+			type: 'favorite',
+			totalItems: 1,
+		}),
 		entityTypeName: entityTypeNames[favorite.entityType],
 		formattedCreatedAt: createdAt.toLocaleDateString('es-ES', {
 			year: 'numeric',

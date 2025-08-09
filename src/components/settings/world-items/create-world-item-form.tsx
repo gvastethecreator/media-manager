@@ -177,7 +177,7 @@ export function CreateWorldItemForm({
 						groups: [],
 					},
 
-					isFavorite: data.isFavorite,
+					isFavorite: data.isFavorite ?? false,
 					totalImages: 0,
 					totalVideos: 0,
 					type: data.type ?? null,
@@ -263,7 +263,7 @@ export function CreateWorldItemForm({
 					color: data.color || null,
 					category: data.category || null,
 
-					isFavorite: data.isFavorite,
+					isFavorite: data.isFavorite ?? false,
 					totalImages: 0,
 					totalVideos: 0,
 					type: data.type || null,

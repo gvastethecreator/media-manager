@@ -94,17 +94,15 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 			});
 
 			if (directoryPicker) {
-				// Intentar obtener la ruta completa del sistema de archivos
-				try {
-					// @ts-expect-error - La API de FileSystemHandle tiene una propiedad _path en algunos navegadores
-					const fullPath = directoryPicker._path || directoryPicker.name;
-					formLogger.info('Carpeta seleccionada:', { path: fullPath });
-					setFolderPath(fullPath);
-					setErrorMessage(null);
-				} catch (error) {
-					formLogger.warn('No se pudo obtener la ruta completa:', error);
-					setFolderPath(directoryPicker.name);
-				}
+				// Intentar obtener la ruta completa del sistema de archivos usando accesos seguros
+				const anyHandle = directoryPicker as Record<string, unknown> | undefined;
+				const maybePath = (anyHandle && typeof anyHandle === 'object' && ('_path' in anyHandle) ? (anyHandle as any)._path : undefined) as
+					| string
+					| undefined;
+				const fullPath = maybePath || directoryPicker.fullPath || directoryPicker.path || directoryPicker.name;
+				formLogger.info('Carpeta seleccionada:', { path: fullPath });
+				setFolderPath(fullPath);
+				setErrorMessage(null);
 			}
 		} catch (error) {
 			formLogger.error('Error al seleccionar carpeta:', error);
@@ -162,6 +160,7 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 					<div className="flex items-start gap-2">
 						<div className="mt-0.5 text-red-400">
 							<svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
+								<title>Icono de error</title>
 								<path
 									clipRule="evenodd"
 									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"

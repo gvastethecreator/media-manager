@@ -9,7 +9,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import type { CardActionButton } from '@/types/file-browser/cards-view-config';
+import { DEFAULT_ACTION_BUTTONS, type CardActionButton } from '@/types/file-browser/cards-view-config';
 import type { AnyEntityWithStats } from '@/types/migration';
 
 interface CardActionButtonsProps {
@@ -17,15 +17,27 @@ interface CardActionButtonsProps {
 	entity: AnyEntityWithStats;
 	/** Si mostrar los botones */
 	visible: boolean;
-	/** Botones de acción a mostrar */
-	actionButtons: CardActionButton[];
+	/** Botones de acción a mostrar (ids o config completa) */
+	actionButtons: (string | CardActionButton)[];
 	/** Duración de la animación */
 	animationDuration?: number;
 }
 
 export function CardActionButtons({ entity, visible, actionButtons, animationDuration = 300 }: CardActionButtonsProps) {
+	// Normalizar: si llega string => buscar definición por id (DEFAULT_ACTION_BUTTONS)
+	const resolvedButtons = React.useMemo(() => {
+		return actionButtons
+			.map((btn) => {
+				if (typeof btn === 'string') {
+					return DEFAULT_ACTION_BUTTONS.find((b) => b.id === btn) || null;
+				}
+				return btn;
+			})
+			.filter(Boolean) as CardActionButton[];
+	}, [actionButtons]);
+
 	// Agrupar botones por posición
-	const buttonsByPosition = actionButtons
+	const buttonsByPosition = resolvedButtons
 		.filter((btn) => btn.visible)
 		.reduce(
 			(acc, button) => {

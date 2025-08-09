@@ -12,6 +12,12 @@ import {
 import { clientEvents } from '@/lib/client/events.client';
 
 import type { EntityWithStats } from '@/types/migration';
+import { createDefaultEntityStats } from '@/lib/utils';
+import { clientLogger } from '@/lib/logger/client-logger';
+
+// Declarar expresiones regulares a nivel superior
+const FILE_NAME_REGEX = /[^/]+$/;
+const fileCtxLogger = clientLogger.withContext('FileContext');
 
 // Re-export EntityWithStats for components that need it
 export type { EntityWithStats };
@@ -111,9 +117,9 @@ export function FileProvider({ children }: { children: ReactNode }) {
 					userId: 'anonymous', // TODO: obtener del contexto de usuario
 					description: `Vista de ${item.name}`,
 				});
-			} catch (error) {
-				console.error('Error registrando actividad:', error);
+			} catch (err) {
 				// No bloquear la UI por errores de logging
+				fileCtxLogger.error('Error registrando actividad', { error: err });
 			}
 		},
 		[selectFiles, logActivity]
@@ -215,7 +221,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 	);
 
 	// Resto de funciones del contexto original
-	const moveFiles = useCallback(async (fileIds: string[], targetPath: string) => {
+	const moveFiles = useCallback((fileIds: string[], targetPath: string) => {
 		try {
 			setLoading(true);
 			// Implementar lógica de movimiento de archivos
@@ -228,14 +234,13 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			);
 		} catch (err) {
 			setError('Error moving files');
-			console.error(err);
 		} finally {
 			setLoading(false);
 		}
 	}, []);
 
 	const copyFiles = useCallback(
-		async (fileIds: string[], targetPath: string) => {
+		(fileIds: string[], targetPath: string) => {
 			try {
 				setLoading(true);
 				// Implementar lógica de copia de archivos
@@ -248,7 +253,6 @@ export function FileProvider({ children }: { children: ReactNode }) {
 				addFiles(copiedFiles);
 			} catch (err) {
 				setError('Error copying files');
-				console.error(err);
 			} finally {
 				setLoading(false);
 			}
@@ -263,7 +267,7 @@ export function FileProvider({ children }: { children: ReactNode }) {
 					? {
 							...file,
 							name: newName,
-							...((file as any).path ? { path: (file as any).path.replace(/[^/]+$/, newName) } : {}),
+							...((file as any).path ? { path: (file as any).path.replace(FILE_NAME_REGEX, newName) } : {}),
 						}
 					: file
 			)
@@ -271,38 +275,46 @@ export function FileProvider({ children }: { children: ReactNode }) {
 	}, []);
 
 	const uploadFiles = useCallback(
-		async (files: File[]) => {
+		async (inputFiles: File[]) => {
 			try {
 				setLoading(true);
 				// Implementar lógica de carga de archivos
 				const newFiles: EntityWithStats[] = await Promise.all(
-					files.map(async (file) => {
+					inputFiles.map(async (file) => {
 						const reader = new FileReader();
 						const thumbnail = await new Promise<string>((resolve) => {
 							reader.onloadend = () => resolve(reader.result as string);
 							reader.readAsDataURL(file);
 						});
 
-						return {
+						const base: EntityWithStats = {
 							id: crypto.randomUUID(),
 							name: file.name,
 							description: null,
 							createdAt: new Date(),
 							updatedAt: new Date(),
-							entityType: 'image' as const,
-							stats: {},
+							entityType: 'image',
+							stats: createDefaultEntityStats({
+								size: file.size,
+								mtime: new Date(file.lastModified),
+								birthtime: new Date(file.lastModified),
+								type: 'file',
+							}),
+						};
+
+						// Devolver con propiedades adicionales no tipadas pero útiles para UI
+						return Object.assign(base, {
 							path: `/uploads/${file.name}`,
 							size: file.size,
 							type: file.type,
 							modified: new Date(file.lastModified),
 							thumbnail,
-						} as EntityWithStats;
+						});
 					})
 				);
 				addFiles(newFiles);
 			} catch (err) {
 				setError('Error uploading files');
-				console.error(err);
 			} finally {
 				setLoading(false);
 			}
@@ -315,30 +327,28 @@ export function FileProvider({ children }: { children: ReactNode }) {
 			try {
 				setLoading(true);
 				const filesToDownload = files.filter((file) => fileIds.includes(file.id));
-				// Implementar lógica de descarga de archivos
-				for (const file of filesToDownload) {
-					const fileAny = file as any;
-					if (!fileAny.thumbnail) continue;
-
-					// Crear un blob con el tipo MIME adecuado
-					const response = await fetch(fileAny.thumbnail);
-					const blob = await response.blob();
-					const url = URL.createObjectURL(blob);
-
-					const link = document.createElement('a');
-					link.href = url;
-					link.download = file.name;
-					link.rel = 'noopener noreferrer';
-					document.body.appendChild(link);
-					link.click();
-					document.body.removeChild(link);
-
-					// Liberar el objeto URL
-					URL.revokeObjectURL(url);
-				}
+				const tasks = filesToDownload
+					.map((file) => ({ file, fileAny: file as any }))
+					.filter(({ fileAny }) => Boolean(fileAny.thumbnail))
+					.map(async ({ file, fileAny }) => {
+						const response = await fetch(fileAny.thumbnail as string);
+						const blob = await response.blob();
+						const url = URL.createObjectURL(blob);
+						try {
+							const link = document.createElement('a');
+							link.href = url;
+							link.download = file.name;
+							link.rel = 'noopener noreferrer';
+							document.body.appendChild(link);
+							link.click();
+							document.body.removeChild(link);
+						} finally {
+							URL.revokeObjectURL(url);
+						}
+					});
+				await Promise.all(tasks);
 			} catch (err) {
 				setError('Error downloading files');
-				console.error(err);
 			} finally {
 				setLoading(false);
 			}

@@ -10,9 +10,9 @@ export function useSeamlessNavigation() {
 	const navigateWithTransition = useCallback(
 		(to: string | number, options?: { replace?: boolean }) => {
 			// Verificar si el navegador soporta ViewTransition API
-			if ('startViewTransition' in document) {
-				// @ts-expect-error - ViewTransition API es experimental
-				document.startViewTransition(() => {
+			const docAny = document as unknown as { startViewTransition?: (cb: () => void) => void };
+			if (typeof docAny.startViewTransition === 'function') {
+				docAny.startViewTransition(() => {
 					if (typeof to === 'number') {
 						navigate(to);
 					} else {

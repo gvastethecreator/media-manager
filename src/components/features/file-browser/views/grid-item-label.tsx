@@ -8,6 +8,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import type { GridLabelConfig } from '@/types/file-browser/grid-view-config';
 import { formatFileSize } from '@/types/file-browser/list-column-config';
 import type { AnyEntityWithStats } from '@/types/migration';
+import { getEntityStatsType } from '@/types/migration';
 
 interface GridItemLabelProps {
 	entity: AnyEntityWithStats;
@@ -26,7 +27,7 @@ export const GridItemLabel = memo<GridItemLabelProps>(({ entity, config, classNa
 
 	const name = entity.name || 'Unknown';
 	const size = 'stats' in entity && entity.stats && 'size' in entity.stats ? Number(entity.stats.size) || 0 : 0;
-	const type = 'type' in entity ? entity.type || 'unknown' : 'unknown';
+	const type = getEntityStatsType(entity) ?? 'unknown';
 
 	// Determinar clases de posicionamiento
 	const getPositionClasses = () => {

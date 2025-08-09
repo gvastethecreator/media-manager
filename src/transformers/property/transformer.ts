@@ -7,6 +7,7 @@
 import { serverLogger } from '../../lib/logger/server-logger';
 import { calculateCompleteness } from '../../lib/utils/stats';
 import type { PropertyBase, PropertyStatistics, PropertyWithStats } from '../../types/entities/property';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 const propertyTransformerLogger = serverLogger.withContext('PropertyTransformer');
 
@@ -40,12 +41,30 @@ export function fromDrizzleProperty(drizzleProperty: any | null): PropertyWithSt
 			const completenessScore = calculateCompleteness(baseProperty, ['name', 'description', 'category']);
 
 			const stats: PropertyStatistics = {
-				totalRelations,
+				...createDefaultEntityStats(),
+				imageCount: _count.images || 0,
+				videoCount: _count.videos || 0,
+				albumCount: _count.albums || 0,
+				collectionCount: _count.collections || 0,
+				tagCount: _count.tags || 0,
+				characterCount: _count.characters || 0,
+				placeCount: _count.places || 0,
+				worldItemCount: _count.worldItems || 0,
+				conceptCount: _count.concepts || 0,
+				promptCount: _count.prompts || 0,
+				noteCount: _count.notes || 0,
+				wildcardCount: _count.wildcards || 0,
+				propertyCount: 0,
+				groupCount: _count.groups || 0,
+				totalItems: 0,
 				totalAssociations: totalRelations,
-				usageDiversity: Number.parseFloat(diversityRatio.toFixed(2)),
+				totalRelations,
 				popularity: Number.parseFloat(popularity.toFixed(2)),
 				completenessScore,
-			};
+				lastUpdated: baseProperty.updatedAt || new Date(),
+				isDirectory: false,
+				isFile: true,
+			} as PropertyStatistics;
 			return {
 				...baseProperty,
 				entityType: 'property',
@@ -58,12 +77,30 @@ export function fromDrizzleProperty(drizzleProperty: any | null): PropertyWithSt
 		const completenessScore = calculateCompleteness(drizzleProperty, ['name', 'description', 'category']);
 
 		const stats: PropertyStatistics = {
-			totalRelations: 0,
+			...createDefaultEntityStats(),
+			imageCount: 0,
+			videoCount: 0,
+			albumCount: 0,
+			collectionCount: 0,
+			tagCount: 0,
+			characterCount: 0,
+			placeCount: 0,
+			worldItemCount: 0,
+			conceptCount: 0,
+			promptCount: 0,
+			noteCount: 0,
+			wildcardCount: 0,
+			propertyCount: 0,
+			groupCount: 0,
+			totalItems: 0,
 			totalAssociations: 0,
-			usageDiversity: 0,
+			totalRelations: 0,
 			popularity: 0,
 			completenessScore,
-		};
+			lastUpdated: drizzleProperty.updatedAt || new Date(),
+			isDirectory: false,
+			isFile: true,
+		} as PropertyStatistics;
 
 		return {
 			...(drizzleProperty as PropertyBase),

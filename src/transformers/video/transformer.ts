@@ -9,6 +9,7 @@
 import { TransformerError } from '../../lib/errors/transformer-error';
 import { serverLogger } from '../../lib/logger/server-logger';
 import { formatFileSize } from '../../lib/utils/format.utils';
+import { createDefaultEntityStats } from '../../lib/utils';
 import type { VideoStatistics } from '../../types/entities/video/base';
 import type { VideoComplete, VideoWithStats } from '../../types/entities/video/types';
 import { VideoQuality } from '../../types/entities/video/types';
@@ -170,6 +171,7 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 
 		// 📊 Estadísticas completas
 		const statistics: VideoStatistics = {
+			...createDefaultEntityStats(),
 			// Conteos de relaciones
 			albumCount: albumsCount,
 			collectionCount: collectionsCount,
@@ -186,6 +188,10 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 			totalRelations,
 			totalAssociations: totalRelations,
 			totalItems: totalRelations,
+			imageCount: 0, // Videos no tienen imágenes
+			videoCount: 1, // Este es un video
+			lastUpdated: new Date(baseData.updatedAt),
+			size: baseData.size,
 
 			// Métricas técnicas
 			durationMinutes,

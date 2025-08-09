@@ -259,6 +259,11 @@ if (typeof window === 'undefined') {
 
 export const db = dbInstance;
 
+// Helper para acceso a cliente SQL subyacente (para SQL raw)
+export function getDbClient() {
+	return client;
+}
+
 // Exportar el schema y relaciones para uso en otros archivos
 export { schema, relations };
 

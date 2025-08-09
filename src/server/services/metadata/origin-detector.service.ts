@@ -9,9 +9,21 @@ import { AIEngine, type OriginDetectionResult, type SupportedEngine } from '@/ty
 const logger = serverLogger.withContext('OriginDetectorService');
 
 /**
+ * Especificación de patrones para detección de engine
+ */
+type EnginePatternSpec = {
+	metadata_keys?: string[];
+	metadata_patterns?: RegExp[];
+	software_patterns?: RegExp[];
+	png_chunk_keys?: string[];
+	png_chunk_patterns?: RegExp[];
+	specific_combinations: string[][];
+};
+
+/**
  * Patrones de detección para cada engine
  */
-const ENGINE_PATTERNS = {
+const ENGINE_PATTERNS: Partial<Record<AIEngine, EnginePatternSpec>> = {
 	[AIEngine.AUTOMATIC1111]: {
 		// Patrones en metadatos (incluyendo PNG chunks)
 		metadata_keys: ['parameters', 'Parameters', 'workflow', 'Software', 'png_parameters', 'png_Parameters'],
@@ -139,8 +151,11 @@ export async function detectOrigin(metadata: Record<string, unknown>): Promise<O
 
 	// Probar cada engine
 	for (const [engineName, patterns] of Object.entries(ENGINE_PATTERNS)) {
+		if (!patterns) {
+			continue;
+		}
 		const engine = engineName as AIEngine;
-		const detection = await analyzeEnginePatterns(metadata, engine, patterns);
+		const detection = analyzeEnginePatterns(metadata, engine, patterns);
 
 		if (detection.confidence > 0) {
 			results.push(detection);
@@ -178,16 +193,16 @@ export async function detectOrigin(metadata: Record<string, unknown>): Promise<O
 /**
  * Analiza patrones específicos para un engine incluyendo PNG chunks
  */
-async function analyzeEnginePatterns(
+function analyzeEnginePatterns(
 	metadata: Record<string, unknown>,
 	engine: AIEngine,
-	patterns: any
-): Promise<{ engine: AIEngine; confidence: number; evidence: string[] }> {
+	patterns: EnginePatternSpec
+): { engine: AIEngine; confidence: number; evidence: string[] } {
 	let confidence = 0;
 	const evidence: string[] = [];
 
 	// 1. Buscar claves de metadata específicas
-	for (const key of patterns.metadata_keys) {
+	for (const key of (patterns.metadata_keys ?? [])) {
 		if (key in metadata) {
 			confidence += 0.2;
 			evidence.push(`Clave encontrada: ${key}`);
@@ -197,7 +212,7 @@ async function analyzeEnginePatterns(
 	// 2. Buscar patrones en valores de metadata
 	for (const [key, value] of Object.entries(metadata)) {
 		if (typeof value === 'string') {
-			for (const pattern of patterns.metadata_patterns) {
+			for (const pattern of (patterns.metadata_patterns ?? [])) {
 				if (pattern.test(value)) {
 					confidence += 0.15;
 					evidence.push(`Patrón encontrado en ${key}: ${pattern.source}`);
@@ -241,7 +256,7 @@ async function analyzeEnginePatterns(
 
 	// 3. Analizar Software EXIF específicamente
 	if (metadata.Software && typeof metadata.Software === 'string') {
-		for (const pattern of patterns.software_patterns || []) {
+		for (const pattern of (patterns.software_patterns ?? [])) {
 			if (pattern.test(metadata.Software)) {
 				confidence += 0.3; // Mayor peso para Software EXIF
 				evidence.push(`Software EXIF coincide: ${metadata.Software}`);
@@ -250,7 +265,7 @@ async function analyzeEnginePatterns(
 	}
 
 	// 4. Buscar combinaciones específicas
-	for (const combination of patterns.specific_combinations) {
+	for (const combination of (patterns.specific_combinations ?? [])) {
 		if (combination.length === 1) {
 			// Buscar clave simple
 			if (combination[0] in metadata) {
@@ -260,7 +275,8 @@ async function analyzeEnginePatterns(
 		} else if (combination.length === 2) {
 			// Buscar clave + patrón
 			const [key, pattern] = combination;
-			if (key in metadata && typeof metadata[key] === 'string' && metadata[key].includes(pattern)) {
+			const value = metadata[key];
+			if (key in metadata && typeof value === 'string' && value.includes(pattern)) {
 				confidence += 0.3;
 				evidence.push(`Combinación encontrada: ${key} contiene "${pattern}"`);
 			}
@@ -282,38 +298,52 @@ async function analyzeEnginePatterns(
 /**
  * Intenta detectar la versión específica del engine
  */
-async function detectEngineVersion(metadata: Record<string, unknown>, engine: AIEngine): Promise<string | undefined> {
+const RE_A1111_VER = /v?(\d+\.\d+\.\d+)/;
+const RE_COMFY_VER = /(\d+\.\d+)/;
+const RE_MJ_VER = /--v\s+(\d+(?:\.\d+)?)/;
+
+function detectEngineVersion(metadata: Record<string, unknown>, engine: AIEngine): string | undefined {
 	switch (engine) {
 		case AIEngine.AUTOMATIC1111:
 			// Buscar versión en Software o parámetros
 			if (metadata.Software && typeof metadata.Software === 'string') {
-				const versionMatch = metadata.Software.match(/v?(\d+\.\d+\.\d+)/);
-				if (versionMatch) return versionMatch[1];
+		const versionMatch = metadata.Software.match(RE_A1111_VER);
+				if (versionMatch) {
+					return versionMatch[1];
+				}
 			}
 			break;
 
 		case AIEngine.COMFYUI:
 			// ComfyUI a veces incluye versión en metadata
 			if (metadata.ComfyUI && typeof metadata.ComfyUI === 'string') {
-				const versionMatch = metadata.ComfyUI.match(/(\d+\.\d+)/);
-				if (versionMatch) return versionMatch[1];
+		const versionMatch = metadata.ComfyUI.match(RE_COMFY_VER);
+				if (versionMatch) {
+					return versionMatch[1];
+				}
 			}
 			break;
 
 		case AIEngine.MIDJOURNEY:
 			// Versión en parámetros --v
 			if (metadata.Description && typeof metadata.Description === 'string') {
-				const versionMatch = metadata.Description.match(/--v\s+(\d+(?:\.\d+)?)/);
-				if (versionMatch) return versionMatch[1];
+		const versionMatch = metadata.Description.match(RE_MJ_VER);
+				if (versionMatch) {
+					return versionMatch[1];
+				}
 			}
 			break;
 
 		case AIEngine.FORGE:
 			// Forge version específica
-			if (metadata.forge_version) return metadata.forge_version as string;
+			if (metadata.forge_version) {
+				return metadata.forge_version as string;
+			}
 			break;
-	}
 
+	default:
+	    break;
+	}
 	return;
 }
 
@@ -365,10 +395,10 @@ export function getEngineInfo(engine: AIEngine): { name: string; description: st
 		name: engine,
 		description: descriptions[engine] || 'Descripción no disponible',
 		patterns: patterns
-			? patterns.metadata_keys.length +
-				patterns.metadata_patterns.length +
-				(patterns.software_patterns?.length || 0) +
-				patterns.specific_combinations.length
+			? (patterns.metadata_keys?.length ?? 0) +
+				(patterns.metadata_patterns?.length ?? 0) +
+				(patterns.software_patterns?.length ?? 0) +
+				(patterns.specific_combinations?.length ?? 0)
 			: 0,
 	};
 }

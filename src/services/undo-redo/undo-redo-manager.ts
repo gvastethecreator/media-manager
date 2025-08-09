@@ -123,7 +123,7 @@ class UndoRedoManager extends EventEmitter {
 	private history: UndoableAction[] = [];
 	private currentIndex = -1;
 	private options: Required<UndoRedoOptions>;
-	private cleanupTimer?: number;
+	private cleanupTimer?: ReturnType<typeof setInterval>;
 
 	constructor(options: UndoRedoOptions = {}) {
 		super();
@@ -270,7 +270,7 @@ class UndoRedoManager extends EventEmitter {
 	 * Create a copy action
 	 */
 	createCopyAction(items: AnyEntityWithStats[], targetPath: string): UndoableAction {
-		const copiedItems: AnyEntityWithStats[] = [];
+		const copiedPaths: string[] = [];
 
 		return {
 			id: this.generateId(),
@@ -282,19 +282,18 @@ class UndoRedoManager extends EventEmitter {
 					const itemPath = getEntityPath(item);
 					const targetFilePath = `${targetPath}/${getEntityName(item)}`;
 					await copyFile(itemPath, targetFilePath);
-					copiedItems.push({ ...item, path: targetFilePath });
+					copiedPaths.push(targetFilePath);
 				}
 			},
 			undo: async () => {
-				for (const item of copiedItems) {
-					const itemPath = getEntityPath(item);
-					await deleteFile(itemPath);
+				for (const p of copiedPaths) {
+					await deleteFile(p);
 				}
-				copiedItems.length = 0;
+				copiedPaths.length = 0;
 			},
-			canUndo: () => copiedItems.length > 0,
+			canUndo: () => copiedPaths.length > 0,
 			originalData: items,
-			targetData: { targetPath, copiedItems },
+			targetData: { targetPath, copiedPaths },
 		};
 	}
 
@@ -370,7 +369,7 @@ class UndoRedoManager extends EventEmitter {
 			},
 			undo: async () => {
 				const itemPath = getEntityPath(item);
-				const newPath = itemPath.replace(getEntityName(item), newName);
+				const newPath = `${itemPath.substring(0, itemPath.lastIndexOf('/'))}/${newName}`;
 				await renameFile(newPath, originalName);
 			},
 			canUndo: () => true,

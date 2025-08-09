@@ -1,0 +1,81 @@
+Comando: bunx playwright test
+Fecha: 2025-08-09T15:48:11.161Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Testing
+===============================================
+
+Running 2 tests using 2 workers
+
+  ✘  1 [chromium] › tests\e2e\file-browser-views.spec.ts:53:3 › File Browser: vistas con scroll e interacción › grid, cards, masonry y list funcionan tras alternar desde toolbar (2.3s)
+  ✘  2 [chromium] › tests\e2e\reindex-settings.spec.ts:10:2 › Reindex en Settings › reindex-all refresca UI (cards, nav y stats) (1.0m)
+
+
+  1) [chromium] › tests\e2e\file-browser-views.spec.ts:53:3 › File Browser: vistas con scroll e interacción › grid, cards, masonry y list funcionan tras alternar desde toolbar 
+
+    Error: expect.toBeVisible: Error: strict mode violation: locator('[data-slot="scroll-area-viewport"]') resolved to 2 elements:
+        1) <div data-slot="scroll-area-viewport" data-radix-scroll-area-viewport="" class="size-full rounded-[inherit] outline-none transition-[color,box-shadow] focus-visible:outline-1 focus-visible:ring-[3px] focus-visible:ring-ring/50">…</div> aka locator('.size-full').first()
+        2) <div data-slot="scroll-area-viewport" data-radix-scroll-area-viewport="" class="size-full rounded-[inherit] outline-none transition-[color,box-shadow] focus-visible:outline-1 focus-visible:ring-[3px] focus-visible:ring-ring/50">…</div> aka locator('.relative.h-full > .size-full')
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 10000ms[22m
+    [2m  - waiting for locator('[data-slot="scroll-area-viewport"]')[22m
+
+
+      55 |
+      56 |     // Asegurar que la vista inicial renderizó algo (cualquiera)
+    > 57 |     await expect(page.locator(scrollViewport)).toBeVisible();
+         |                                                ^
+      58 |
+      59 |     const modes: Array<'grid'|'cards'|'masonry'|'list'> = ['grid', 'cards', 'masonry', 'list'];
+      60 |
+        at D:\DEV\image-manager\tests\e2e\file-browser-views.spec.ts:57:48
+
+    Error Context: test-results\file-browser-views-File-Br-8d3b6-tras-alternar-desde-toolbar-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\file-browser-views-File-Br-8d3b6-tras-alternar-desde-toolbar-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\file-browser-views-File-Br-8d3b6-tras-alternar-desde-toolbar-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests\e2e\reindex-settings.spec.ts:10:2 › Reindex en Settings › reindex-all refresca UI (cards, nav y stats) 
+
+    [31mTest timeout of 60000ms exceeded.[39m
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeHidden[2m()[22m
+
+    Locator: getByTestId('reindex-global-progress')
+    Expected: hidden
+    Received: visible
+    Call log:
+    [2m  - Expect "toBeHidden" with timeout 120000ms[22m
+    [2m  - waiting for getByTestId('reindex-global-progress')[22m
+    [2m    59 × locator resolved to <div data-max="100" aria-valuemin="0" role="progressbar" aria-valuemax="100" data-slot="progress" data-state="indeterminate" data-testid="reindex-global-progress" class="relative w-full overflow-hidden rounded-full bg-primary/20 h-2">…</div>[22m
+    [2m       - unexpected value "visible"[22m
+
+
+      33 |
+      34 | 		// Esperar a que desaparezca el progreso global o el texto de estado
+    > 35 | 		await expect(page.getByTestId('reindex-global-progress')).toBeHidden({ timeout: 120_000 });
+         | 		                                                          ^
+      36 |
+      37 | 		// Validar que Stats estén visibles y actualizados (al menos refetch)
+      38 | 		await expect(page.getByTestId('folders-stats')).toBeVisible();
+        at D:\DEV\image-manager\tests\e2e\reindex-settings.spec.ts:35:61
+
+    Error Context: test-results\reindex-settings-Reindex-e-afe6f-resca-UI-cards-nav-y-stats--chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\reindex-settings-Reindex-e-afe6f-resca-UI-cards-nav-y-stats--chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\reindex-settings-Reindex-e-afe6f-resca-UI-cards-nav-y-stats--chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [chromium] › tests\e2e\file-browser-views.spec.ts:53:3 › File Browser: vistas con scroll e interacción › grid, cards, masonry y list funcionan tras alternar desde toolbar 
+    [chromium] › tests\e2e\reindex-settings.spec.ts:10:2 › Reindex en Settings › reindex-all refresca UI (cards, nav y stats) 

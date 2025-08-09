@@ -1,0 +1,298 @@
+📊 RESUMEN DE ERRORES
+Total de archivos con errores: 22
+Cantidad total de errores: 26
+
+📁 ARCHIVOS AFECTADOS:
+  src/services/image/converter.service.ts (líneas: 200)
+  src/services/note/note.service.ts (líneas: 473)
+  src/transformers/character/transformer.ts (líneas: 138)
+  src/transformers/collection/transformer.ts (líneas: 43)
+  src/transformers/collection/validators.ts (líneas: 47, 63)
+  src/transformers/concept/validators.ts (líneas: 49, 67)
+  src/transformers/favorite/mappers.ts (líneas: 45)
+  src/transformers/file/mappers.ts (líneas: 32)
+  src/transformers/file3d/serializers.ts (líneas: 43)
+  src/transformers/folder/serializers.ts (líneas: 156)
+  src/transformers/folder/transformer.ts (líneas: 123)
+  src/transformers/json-file/serializers.ts (líneas: 53)
+  src/transformers/note/note-adapter.ts (líneas: 34)
+  src/transformers/note/transformer.ts (líneas: 100)
+  src/transformers/place/mappers.ts (líneas: 146)
+  src/transformers/profile/serializers.ts (líneas: 42, 43, 44)
+  src/transformers/profile/transformer.ts (líneas: 37)
+  src/transformers/prompt/transformer.ts (líneas: 53)
+  src/transformers/property/mappers.ts (líneas: 53)
+  src/transformers/tag/mappers.ts (líneas: 42)
+  src/transformers/thumbnail/mappers.ts (líneas: 20)
+  src/types/entities/place/types.ts (líneas: 92)
+
+📋 DETALLE POR ARCHIVO:
+
+src/services/image/converter.service.ts
+  - línea 200 : TS2322
+
+src/services/note/note.service.ts
+  - línea 473 : TS2740
+
+src/transformers/character/transformer.ts
+  - línea 138 : TS2740
+
+src/transformers/collection/transformer.ts
+  - línea 43 : TS2740
+
+src/transformers/collection/validators.ts
+  - línea 47 : TS2740
+  - línea 63 : TS2322
+
+src/transformers/concept/validators.ts
+  - línea 49 : TS2740
+  - línea 67 : TS2322
+
+src/transformers/favorite/mappers.ts
+  - línea 45 : TS2740
+
+src/transformers/file/mappers.ts
+  - línea 32 : TS2740
+
+src/transformers/file3d/serializers.ts
+  - línea 43 : TS2740
+
+src/transformers/folder/serializers.ts
+  - línea 156 : TS2740
+
+src/transformers/folder/transformer.ts
+  - línea 123 : TS2740
+
+src/transformers/json-file/serializers.ts
+  - línea 53 : TS2740
+
+src/transformers/note/note-adapter.ts
+  - línea 34 : TS2740
+
+src/transformers/note/transformer.ts
+  - línea 100 : TS2740
+
+src/transformers/place/mappers.ts
+  - línea 146 : TS2740
+
+src/transformers/profile/serializers.ts
+  - línea 42 : TS2339
+  - línea 43 : TS2339
+  - línea 44 : TS2339
+
+src/transformers/profile/transformer.ts
+  - línea 37 : TS2353
+
+src/transformers/prompt/transformer.ts
+  - línea 53 : TS2353
+
+src/transformers/property/mappers.ts
+  - línea 53 : TS2353
+
+src/transformers/tag/mappers.ts
+  - línea 42 : TS2352
+
+src/transformers/thumbnail/mappers.ts
+  - línea 20 : TS2740
+
+src/types/entities/place/types.ts
+  - línea 92 : TS2740
+
+════════════════════════════════════════════════════════════════════════════════
+📄 LOG ORIGINAL:
+════════════════════════════════════════════════════════════════════════════════
+
+Comando: bunx tsc --noEmit --pretty
+Fecha: 2025-08-09T22:34:20.151Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+[96msrc/services/image/converter.service.ts[0m:[93m200[0m:[93m3[0m - [91merror[0m[90m TS2322: [0mType '{ id: string; name: string; description: null; path: string; hash: string; size: number; width: number; height: number; metadata: string | null; thumbnail: string | null; thumbnailSize: number | null; ... 16 more ...; _count: { ...; }; }' is not assignable to type 'ImageWithStats'.
+  Types of property 'stats' are incompatible.
+    Type '{ viewCount: number; downloadCount: number; likeCount: number; commentCount: number; tagCount: number; albumCount: number; collectionCount: number; characterCount: number; placeCount: number; ... 7 more ...; aspectRatio: number; }' is missing the following properties from type 'ImageStatistics': imageCount, videoCount, totalItems, totalAssociations, and 5 more.
+
+[7m200[0m   return imageWithStats;
+[7m   [0m [91m  ~~~~~~[0m
+
+[96msrc/services/note/note.service.ts[0m:[93m473[0m:[93m4[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; ... 8 more ...; totalAssociations: number; }' is missing the following properties from type 'NoteStatistics': isDirectory, isFile, noteCount, lastUpdated, and 4 more.
+
+[7m473[0m    stats: {
+[7m   [0m [91m   ~~~~~[0m
+
+[96msrc/transformers/character/transformer.ts[0m:[93m138[0m:[93m9[0m - [91merror[0m[90m TS2740: [0mType '{ totalImages: number; totalVideos: number; totalTags: number; totalGroups: number; totalProperties: number; totalCollections: number; totalAlbums: number; totalPlaces: number; totalWorldItems: number; ... 9 more ...; rarityLevel: "common" | ... 3 more ... | "epic"; }' is missing the following properties from type 'CharacterAssociationStats': size, mtime, birthtime, type, and 2 more.
+
+[7m138[0m   const statistics: CharacterAssociationStats = {
+[7m   [0m [91m        ~~~~~~~~~~[0m
+
+[96msrc/transformers/collection/transformer.ts[0m:[93m43[0m:[93m9[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; noteCount: number; wildcardCount: number; propertyCount: number; groupCount: number; }' is missing the following properties from type 'CollectionStatistics': isDirectory, isFile, collectionCount, totalItems, and 6 more.
+
+[7m43[0m   const stats: CollectionStatistics = {
+[7m  [0m [91m        ~~~~~[0m
+
+[96msrc/transformers/collection/validators.ts[0m:[93m47[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; noteCount: number; wildcardCount: number; propertyCount: number; groupCount: number; }' is missing the following properties from type 'CollectionStatistics': isDirectory, isFile, collectionCount, totalItems, and 6 more.
+
+[7m47[0m   return CollectionStatisticsSchema.parse(data);
+[7m  [0m [91m  ~~~~~~[0m
+
+[96msrc/transformers/collection/validators.ts[0m:[93m63[0m:[93m3[0m - [91merror[0m[90m TS2322: [0mType '{ name: string; category: string | null; createdAt: Date; totalSize: number; description: string | null; id: string; isFavorite: boolean; updatedAt: Date; emoji: string | null; ... 16 more ...; sourceImage: string | null; }' is not assignable to type 'CollectionWithStats'.
+  Types of property 'stats' are incompatible.
+    Type '{ imageCount: number; videoCount: number; albumCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; promptCount: number; noteCount: number; wildcardCount: number; propertyCount: number; groupCount: number; }' is missing the following properties from type 'CollectionStatistics': isDirectory, isFile, collectionCount, totalItems, and 6 more.
+
+[7m63[0m   return CollectionWithStatsSchema.parse(data);
+[7m  [0m [91m  ~~~~~~[0m
+
+[96msrc/transformers/concept/validators.ts[0m:[93m49[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; promptCount: number; ... 5 more ...; lastUpdated: Date; }' is missing the following properties from type 'ConceptStatistics': isDirectory, isFile, conceptCount, totalItems, and 4 more.
+
+[7m49[0m   return ConceptStatisticsSchema.parse(data);
+[7m  [0m [91m  ~~~~~~[0m
+
+[96msrc/transformers/concept/validators.ts[0m:[93m67[0m:[93m3[0m - [91merror[0m[90m TS2322: [0mType '{ name: string; category: string | null; createdAt: Date; description: string | null; id: string; isFavorite: boolean; updatedAt: Date; type: string | null; notes: string | null; ... 14 more ...; _count?: { ...; } | undefined; }' is not assignable to type 'ConceptWithStats'.
+  Types of property 'stats' are incompatible.
+    Type '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; promptCount: number; ... 5 more ...; lastUpdated: Date; }' is missing the following properties from type 'ConceptStatistics': isDirectory, isFile, conceptCount, totalItems, and 4 more.
+
+[7m67[0m   return ConceptWithStatsSchema.parse(transformedData);
+[7m  [0m [91m  ~~~~~~[0m
+
+[96msrc/transformers/favorite/mappers.ts[0m:[93m45[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ entityTypeName: string; formattedCreatedAt: string; daysSinceFavorited: number; isRecent: boolean; isOld: boolean; }' is missing the following properties from type 'FavoriteStatistics': imageCount, videoCount, albumCount, collectionCount, and 17 more.
+
+[7m45[0m  return {
+[7m  [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/file/mappers.ts[0m:[93m32[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ formattedSize: string; typeLabel: FileType; iconName: string; colorCode: string; daysSinceModified: number; daysSinceAccessed: number; isRecent: boolean; isLarge: boolean; formattedModifiedAt: string; childCount: number; shortPath: string; }' is missing the following properties from type 'FileStatistics': checksum, isDirectory, isFile, imageCount, and 20 more.
+
+[7m32[0m  return {
+[7m  [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/file3d/serializers.ts[0m:[93m43[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ polygonCount: number; textureSize: number; format: string; vertexCount: number; materialCount: number; }' is missing the following properties from type 'File3DStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m43[0m   stats: {
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/file3d/base.ts[0m:[93m69[0m:[93m2[0m
+    [7m69[0m  stats: File3DStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'File3DWithStats'
+
+[96msrc/transformers/folder/serializers.ts[0m:[93m156[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ hierarchyDepth: any; totalDescendants: any; directChildren: any; contentDiversity: any; organizationScore: any; totalItems: any; accessFrequency: any; lastActivity: Date | null; ... 24 more ...; totalRelations: any; }' is missing the following properties from type 'FolderStatistics': albumCount, collectionCount, tagCount, characterCount, and 13 more.
+
+[7m156[0m   stats: {
+[7m   [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/folder/types.ts[0m:[93m37[0m:[93m2[0m
+    [7m37[0m  stats: FolderStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'FolderWithStats'
+
+[96msrc/transformers/folder/transformer.ts[0m:[93m123[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ hierarchyDepth: any; totalDescendants: any; directChildren: any; contentDiversity: number; organizationScore: number; totalItems: any; folderCount: any; totalFolders: any; totalImages: any; ... 25 more ...; recentImages: never[]; }' is missing the following properties from type 'FolderStatistics': albumCount, collectionCount, tagCount, characterCount, and 13 more.
+
+[7m123[0m  return {
+[7m   [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/json-file/serializers.ts[0m:[93m53[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ size: number; nestingDepth: number; isValid: true; keyCount: number; }' is missing the following properties from type 'JsonFileStatistics': imageCount, videoCount, albumCount, collectionCount, and 16 more.
+
+[7m53[0m   stats: {
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/json-file/base.ts[0m:[93m51[0m:[93m2[0m
+    [7m51[0m  stats: JsonFileStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'JsonFileWithStats'
+
+[96msrc/transformers/note/note-adapter.ts[0m:[93m34[0m:[93m8[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; ... 8 more ...; totalAssociations: number; }' is missing the following properties from type 'NoteStatistics': isDirectory, isFile, noteCount, lastUpdated, and 4 more.
+
+[7m34[0m  const statistics: NoteStatistics = {
+[7m  [0m [91m       ~~~~~~~~~~[0m
+
+[96msrc/transformers/note/transformer.ts[0m:[93m100[0m:[93m2[0m - [91merror[0m[90m TS2740: [0mType '{ imageCount: number; videoCount: number; albumCount: number; collectionCount: number; tagCount: number; characterCount: number; placeCount: number; worldItemCount: number; conceptCount: number; ... 8 more ...; totalAssociations: number; }' is missing the following properties from type 'NoteStatistics': isDirectory, isFile, noteCount, lastUpdated, and 4 more.
+
+[7m100[0m  return {
+[7m   [0m [91m ~~~~~~[0m
+
+[96msrc/transformers/place/mappers.ts[0m:[93m146[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ popularity: number; completenessScore: number; spatialRelevance: number; geoContextLevel: number; }' is missing the following properties from type 'PlaceStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m146[0m   stats: statistics,
+[7m   [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/place/base.ts[0m:[93m86[0m:[93m2[0m
+    [7m86[0m  stats: PlaceStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'PlaceWithStats'
+
+[96msrc/transformers/profile/serializers.ts[0m:[93m42[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'totalImages' does not exist on type 'ProfileStatistics'.
+
+[7m42[0m    totalImages: profile.stats.totalImages,
+[7m  [0m [91m                              ~~~~~~~~~~~[0m
+
+[96msrc/transformers/profile/serializers.ts[0m:[93m43[0m:[93m31[0m - [91merror[0m[90m TS2339: [0mProperty 'totalVideos' does not exist on type 'ProfileStatistics'.
+
+[7m43[0m    totalVideos: profile.stats.totalVideos,
+[7m  [0m [91m                              ~~~~~~~~~~~[0m
+
+[96msrc/transformers/profile/serializers.ts[0m:[93m44[0m:[93m36[0m - [91merror[0m[90m TS2339: [0mProperty 'totalCollections' does not exist on type 'ProfileStatistics'.
+
+[7m44[0m    totalCollections: profile.stats.totalCollections,
+[7m  [0m [91m                                   ~~~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/profile/transformer.ts[0m:[93m37[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'totalImages' does not exist in type 'ProfileStatistics'.
+
+[7m37[0m    totalImages: _count?.images || 0,
+[7m  [0m [91m   ~~~~~~~~~~~[0m
+
+[96msrc/transformers/prompt/transformer.ts[0m:[93m53[0m:[93m4[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'totalTags' does not exist in type 'PromptStatistics'.
+
+[7m53[0m    totalTags: _count?.tags || 0,
+[7m  [0m [91m   ~~~~~~~~~[0m
+
+[96msrc/transformers/property/mappers.ts[0m:[93m53[0m:[93m3[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'usageDiversity' does not exist in type 'PropertyStatistics'.
+
+[7m53[0m   usageDiversity: Number.parseFloat(diversityRatio.toFixed(2)),
+[7m  [0m [91m  ~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/tag/mappers.ts[0m:[93m42[0m:[93m50[0m - [91merror[0m[90m TS2352: [0mConversion of type 'TagBase & { _count?: { images?: number | undefined; videos?: number | undefined; albums?: number | undefined; collections?: number | undefined; characters?: number | undefined; ... 7 more ...; groups?: number | undefined; } | undefined; }' to type 'Record<string, unknown>' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
+  Index signature for type 'string' is missing in type 'TagBase & { _count?: { images?: number | undefined; videos?: number | undefined; albums?: number | undefined; collections?: number | undefined; characters?: number | undefined; ... 7 more ...; groups?: number | undefined; } | undefined; }'.
+
+[7m42[0m  const completenessScore = calculateCompleteness(baseTag as Record<string, unknown>, ['name', 'description', 'category']);
+[7m  [0m [91m                                                 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/transformers/thumbnail/mappers.ts[0m:[93m20[0m:[93m8[0m - [91merror[0m[90m TS2740: [0mType '{ aspectRatio: number; compressionRatio: number; qualityScore: number; usageCount: number; storageEfficiency: number; }' is missing the following properties from type 'ThumbnailStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m20[0m  const stats: ThumbnailStatistics = {
+[7m  [0m [91m       ~~~~~[0m
+
+[96msrc/types/entities/place/types.ts[0m:[93m92[0m:[93m3[0m - [91merror[0m[90m TS2740: [0mType '{ spatialRelevance: number; completenessScore: number; geoContextLevel: number; popularity: number; }' is missing the following properties from type 'PlaceStatistics': isDirectory, isFile, imageCount, videoCount, and 19 more.
+
+[7m92[0m   stats,
+[7m  [0m [91m  ~~~~~[0m
+
+  [96msrc/types/entities/place/base.ts[0m:[93m86[0m:[93m2[0m
+    [7m86[0m  stats: PlaceStatistics;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'stats' which is declared here on type 'PlaceWithStats'
+
+
+Found 26 errors in 22 files.
+
+Errors  Files
+     1  src/services/image/converter.service.ts[90m:200[0m
+     1  src/services/note/note.service.ts[90m:473[0m
+     1  src/transformers/character/transformer.ts[90m:138[0m
+     1  src/transformers/collection/transformer.ts[90m:43[0m
+     2  src/transformers/collection/validators.ts[90m:47[0m
+     2  src/transformers/concept/validators.ts[90m:49[0m
+     1  src/transformers/favorite/mappers.ts[90m:45[0m
+     1  src/transformers/file/mappers.ts[90m:32[0m
+     1  src/transformers/file3d/serializers.ts[90m:43[0m
+     1  src/transformers/folder/serializers.ts[90m:156[0m
+     1  src/transformers/folder/transformer.ts[90m:123[0m
+     1  src/transformers/json-file/serializers.ts[90m:53[0m
+     1  src/transformers/note/note-adapter.ts[90m:34[0m
+     1  src/transformers/note/transformer.ts[90m:100[0m
+     1  src/transformers/place/mappers.ts[90m:146[0m
+     3  src/transformers/profile/serializers.ts[90m:42[0m
+     1  src/transformers/profile/transformer.ts[90m:37[0m
+     1  src/transformers/prompt/transformer.ts[90m:53[0m
+     1  src/transformers/property/mappers.ts[90m:53[0m
+     1  src/transformers/tag/mappers.ts[90m:42[0m
+     1  src/transformers/thumbnail/mappers.ts[90m:20[0m
+     1  src/types/entities/place/types.ts[90m:92[0m
