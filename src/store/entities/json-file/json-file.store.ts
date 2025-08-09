@@ -169,10 +169,7 @@ const useJsonFileStoreBase = create<JsonFileState>()(
 			toggleFavorite: async (id: string) => {
 				const jsonFile = get().getJsonFileById(id);
 				if (jsonFile) {
-					await get().updateJsonFile(id, {
-						// @ts-expect-error TODO: Arreglar el tipo isFavorite cuando se refactoricen las actions
-						isFavorite: !jsonFile.isFavorite,
-					});
+					await get().updateJsonFile(id, { isFavorite: !jsonFile.isFavorite });
 				}
 			},
 		}),

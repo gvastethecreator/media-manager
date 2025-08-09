@@ -129,13 +129,16 @@ export function FoldersSettings() {
 		<div className="space-y-6">
 			{/* Sección de gestión de carpetas */}
 			<Card className="rounded-sm border-none bg-muted/30">
-				<CardHeader className="p-3 pb-2">
+				<CardHeader className="p-3 pb-2" data-testid="folders-settings">
 					<CardTitle className="flex items-center justify-between font-medium text-base text-muted-foreground">
 						<div className="flex items-center gap-2">
 							<FolderIcon className="h-4 w-4 text-primary" />
 							<span>Gestión de Carpetas</span>
 							{(isGloballyProcessing || isProcessing) && (
-								<div className="flex animate-pulse items-center gap-2 text-muted-foreground text-sm">
+								<div
+									className="flex animate-pulse items-center gap-2 text-muted-foreground text-sm"
+									data-testid="reindex-status"
+								>
 									<RefreshCw className="h-4 w-4 animate-spin text-primary" />
 									<span className="font-medium">
 										{processStatus?.message ||
@@ -174,6 +177,7 @@ export function FoldersSettings() {
 
 							<Button
 								className="h-7 cursor-pointer text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
+								data-testid="reindex-all-button"
 								disabled={isLoading || isGloballyProcessing}
 								onClick={() => reindexAll()}
 								size="sm"
@@ -201,8 +205,22 @@ export function FoldersSettings() {
 						{/* Formulario para agregar carpetas */}
 						<FolderForm isLoading={isLoading} isProcessing={isProcessing} onAddFolder={handleAddFolder} />
 
-						{/* Lista de carpetas - diseño mejorado más compacto */}
-						<div className="grid grid-cols-1 gap-3 pr-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+						{/* Lista de carpetas - grid responsiva optimizada para desktop */}
+						<div
+							className={cn(
+								'grid content-start items-stretch pr-3',
+								// Base y tablets
+								'grid-cols-1 gap-3 md:grid-cols-2 md:gap-4',
+								// Desktop amplio: columnas automáticas con tamaño mínimo
+								'lg:gap-4 lg:[grid-template-columns:repeat(auto-fill,minmax(320px,1fr))]',
+								// 1440+
+								'xl:gap-5 xl:[grid-template-columns:repeat(auto-fill,minmax(340px,1fr))]',
+								// 2K+
+								'2xl:gap-6 2xl:[grid-template-columns:repeat(auto-fill,minmax(360px,1fr))]',
+								// Relleno denso para minimizar huecos
+								'auto-rows-fr [grid-auto-flow:row_dense]'
+							)}
+						>
 							{(() => {
 								const sortedFolders = createHierarchicalOrder(folders);
 
@@ -242,7 +260,7 @@ export function FoldersSettings() {
 						{/* Progress bar para reindexado global */}
 						{globalReindexStatus.isProcessing && (
 							<div className="mt-2">
-								<Progress className="h-2" value={globalReindexStatus.progress} />
+								<Progress className="h-2" data-testid="reindex-global-progress" value={globalReindexStatus.progress} />
 								<p className="mt-1 text-center text-muted-foreground text-xs">
 									Reindexando... {Math.round(globalReindexStatus.progress)}%
 								</p>

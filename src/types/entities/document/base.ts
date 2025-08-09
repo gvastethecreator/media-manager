@@ -54,6 +54,9 @@ export interface DocumentBase {
 	// Timestamps del sistema
 	createdAt: Date;
 	updatedAt: Date;
+
+	// Campos adicionales para compatibilidad con DisplayableEntity
+	description?: string | null;
 }
 
 /**

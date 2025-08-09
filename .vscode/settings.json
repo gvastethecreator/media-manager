@@ -25,7 +25,10 @@
     "editor.defaultFormatter": "biomejs.biome"
   },
   "smoothtype.duration": 160,
-  "gitlens.gitCommands.skipConfirmations": ["fetch:command", "switch:command"],
+  "gitlens.gitCommands.skipConfirmations": [
+    "fetch:command",
+    "switch:command"
+  ],
   "files.autoGuessEncoding": true,
   "editor.inlineSuggest.enabled": true,
   "editor.suggest.preview": true,
@@ -122,5 +125,6 @@
     }
   },
   "telemetry.editStats.showDecorations": true,
-  "telemetry.editStats.showStatusBar": true
+  "telemetry.editStats.showStatusBar": true,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

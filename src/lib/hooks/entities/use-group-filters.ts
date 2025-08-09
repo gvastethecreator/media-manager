@@ -46,19 +46,19 @@ export function useGroupFilters({ groups }: UseGroupFiltersProps) {
 		if (filters.searchQuery) {
 			const normalizedQuery = filters.searchQuery.toLowerCase();
 			matches =
-				matches &&
+				Boolean(matches) &&
 				(group.name.toLowerCase().includes(normalizedQuery) ||
-					group.description?.toLowerCase().includes(normalizedQuery));
+					Boolean(group.description?.toLowerCase().includes(normalizedQuery)));
 		}
 
 		// Filtrar por categorías
 		if (filters.selectedCategories.length > 0) {
-			matches = matches && (group.category ? filters.selectedCategories.includes(group.category) : false);
+			matches = Boolean(matches) && (group.category ? filters.selectedCategories.includes(group.category) : false);
 		}
 
 		// Filtrar favoritos
 		if (filters.onlyFavorites) {
-			matches = matches && group.isFavorite === true;
+			matches = Boolean(matches) && (group.isFavorite === true);
 		}
 
 		return matches;

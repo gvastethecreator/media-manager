@@ -111,6 +111,7 @@ export interface VideoCreateInput {
 	description?: string | null;
 	path: string;
 	hash: string;
+	mimeType?: string;
 	size: number;
 	duration: number;
 	width?: number | null;

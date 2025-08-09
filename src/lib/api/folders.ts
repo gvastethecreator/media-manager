@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { navigationKeys } from '@/lib/api/navigation';
 import type { FolderWithStats } from '@/types/entities/folder';
 import type { FolderStatsResponse } from '@/types/folders';
 import {
@@ -184,13 +185,20 @@ export function useReindexFolder() {
 	return useMutation<FolderWithStats, Error, string>({
 		mutationFn: (id) => reindexFolder(id),
 		retry: false, // ✅ Deshabilitar retry automático para evitar loops infinitos
-		onSuccess: () => {
+		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
+			// Actualizar la caché del detalle afectado directamente (evita invalidación global de details)
+			if (data?.id) {
+				queryClient.setQueryData(folderKeys.detail(data.id), data);
+			}
+			// Refrescar estadísticas asociadas
+			queryClient.invalidateQueries({ queryKey: ['folder-stats'] });
+			// ✅ También refrescar panel de navegación (contadores)
+			queryClient.invalidateQueries({ queryKey: navigationKeys.data() });
+			queryClient.invalidateQueries({ queryKey: navigationKeys.stats() });
 		},
-		onError: (error) => {
-			console.error('❌ Error en reindexación de carpeta:', error);
-		},
+		// onError silenciado para evitar console.*; la UI ya refleja estado/progreso
 	});
 }
 
@@ -203,10 +211,13 @@ export function useReindexAllFolders() {
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
 			queryClient.invalidateQueries({ queryKey: folderKeys.tree() });
+			// Refrescar métricas globales
+			queryClient.invalidateQueries({ queryKey: ['folder-stats'] });
+			// ✅ Refrescar datos y estadísticas del panel de navegación
+			queryClient.invalidateQueries({ queryKey: navigationKeys.data() });
+			queryClient.invalidateQueries({ queryKey: navigationKeys.stats() });
 		},
-		onError: (error) => {
-			console.error('❌ Error en reindexación global:', error);
-		},
+		// onError silenciado para evitar console.*; la UI ya refleja estado/progreso
 	});
 }
 

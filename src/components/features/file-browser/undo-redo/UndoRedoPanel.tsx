@@ -5,8 +5,8 @@
  * to jump to specific points in history.
  */
 
-import { Clock, Copy, Edit, Move, RotateCcw, RotateCw, Trash2, X } from 'lucide-react';
 import React, { useState } from 'react';
+import { Clock, Copy, Edit, Move, RotateCcw, RotateCw, Trash2, X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -15,25 +15,17 @@ import { Separator } from '@/components/ui/separator';
 import { useUndoRedo } from '@/hooks/use-undo-redo';
 import { cn } from '@/lib/utils';
 import type { UndoableAction } from '@/services/undo-redo/undo-redo-manager';
+import { toastService } from '@/services/toast/toast.service';
 
 export interface UndoRedoPanelProps {
-	/** Panel className */
 	className?: string;
-	/** Maximum height of the panel */
 	maxHeight?: string;
-	/** Show action timestamps */
 	showTimestamps?: boolean;
-	/** Show action details */
 	showDetails?: boolean;
-	/** Compact mode */
 	compact?: boolean;
-	/** On close callback */
 	onClose?: () => void;
 }
 
-/**
- * Get icon for action type
- */
 function getActionIcon(type: string) {
 	switch (type) {
 		case 'copy':
@@ -49,14 +41,13 @@ function getActionIcon(type: string) {
 	}
 }
 
-/**
- * Get action description
- */
 function getActionDescription(action: UndoableAction): string {
-	const { type, metadata } = action;
-	const itemCount = metadata?.itemCount || 1;
+	const { type, description, originalData } = action;
+	if (description) {
+		return description;
+	}
+	const itemCount = Array.isArray(originalData) ? originalData.length : 1;
 	const itemText = itemCount === 1 ? 'elemento' : 'elementos';
-
 	switch (type) {
 		case 'copy':
 			return `Copiar ${itemCount} ${itemText}`;
@@ -65,40 +56,116 @@ function getActionDescription(action: UndoableAction): string {
 		case 'delete':
 			return `Eliminar ${itemCount} ${itemText}`;
 		case 'rename':
-			return `Renombrar ${metadata?.oldName || 'elemento'}`;
+			return 'Renombrar';
 		default:
 			return `Acción ${type}`;
 	}
 }
 
-/**
- * Format timestamp
- */
 function formatTimestamp(timestamp: number): string {
 	const date = new Date(timestamp);
 	const now = new Date();
 	const diff = now.getTime() - date.getTime();
-
 	if (diff < 60_000) {
-		// Less than 1 minute
 		return 'Hace un momento';
 	}
 	if (diff < 3_600_000) {
-		// Less than 1 hour
-		const minutes = Math.floor(diff / 60_000);
-		return `Hace ${minutes} min`;
+		return `Hace ${Math.floor(diff / 60_000)} min`;
 	}
 	if (diff < 86_400_000) {
-		// Less than 1 day
-		const hours = Math.floor(diff / 3_600_000);
-		return `Hace ${hours} h`;
+		return `Hace ${Math.floor(diff / 3_600_000)} h`;
 	}
 	return date.toLocaleDateString();
 }
 
-/**
- * Undo/Redo panel component
- */
+interface ActionRowProps {
+	action: UndoableAction;
+	index: number;
+	currentIndex: number;
+	compact: boolean;
+	showDetails: boolean;
+	showTimestamps: boolean;
+	onJump: (index: number) => void;
+}
+
+const ActionRow: React.FC<ActionRowProps> = ({
+	action,
+	index,
+	currentIndex,
+	compact,
+	showDetails,
+	showTimestamps,
+	onJump,
+}) => {
+	const Icon = getActionIcon(action.type);
+	const isCurrent = index === currentIndex;
+	const isExecuted = index <= currentIndex;
+	const canJump = index !== currentIndex;
+
+	const onClick = () => {
+		if (canJump) {
+			onJump(index);
+		}
+	};
+
+	const onKeyDown: React.KeyboardEventHandler<HTMLButtonElement> = (e) => {
+		if ((e.key === 'Enter' || e.key === ' ') && canJump) {
+			e.preventDefault();
+			onJump(index);
+		}
+	};
+
+	return (
+		<div>
+			<button
+				type="button"
+				className={cn(
+					'flex w-full items-center gap-3 rounded-md p-2 transition-all duration-200',
+					'cursor-pointer hover:bg-muted/50',
+					isCurrent && 'border border-primary/20 bg-primary/10',
+					!isExecuted && 'opacity-50',
+					compact && 'gap-2 p-1.5'
+				)}
+				onClick={onClick}
+				onKeyDown={onKeyDown}
+			>
+				<div className={cn('flex min-w-0 flex-1 items-center gap-2', compact && 'gap-1.5')}>
+					<Icon className={cn('h-4 w-4 flex-shrink-0', compact && 'h-3 w-3')} />
+					<div className="min-w-0 flex-1 text-left">
+						<p className={cn('truncate font-medium text-sm', compact && 'text-xs')}>{getActionDescription(action)}</p>
+						{showDetails && (action.targetData?.targetPath || action.targetData?.newName) && (
+							<p className={cn('truncate text-muted-foreground text-xs', compact && 'text-[10px]')}>
+								→ {action.targetData?.targetPath ?? action.targetData?.newName}
+							</p>
+						)}
+					</div>
+				</div>
+				<div className="flex flex-shrink-0 items-center gap-2">
+					{showTimestamps && (
+						<span className={cn('text-muted-foreground text-xs', compact && 'text-[10px]')}>
+							{formatTimestamp(action.timestamp)}
+						</span>
+					)}
+					{isCurrent && (
+						<Badge className={cn('px-1.5 py-0.5 text-xs', compact && 'px-1 text-[10px]')} variant="secondary">
+							Actual
+						</Badge>
+					)}
+					{canJump && (
+						<div className="flex items-center">
+							{index < currentIndex ? (
+								<RotateCcw className="h-3 w-3 text-muted-foreground" />
+							) : (
+								<RotateCw className="h-3 w-3 text-muted-foreground" />
+							)}
+						</div>
+					)}
+				</div>
+			</button>
+		</div>
+	);
+};
+
 export function UndoRedoPanel({
 	className,
 	maxHeight = '400px',
@@ -107,13 +174,13 @@ export function UndoRedoPanel({
 	compact = false,
 	onClose,
 }: UndoRedoPanelProps) {
-	const { state, undo, redo, clear } = useUndoRedo();
+	const { state, undo, redo, clear, getHistory } = useUndoRedo();
 	const [isClearing, setIsClearing] = useState(false);
 
-	const history = state.history;
+	const history = getHistory();
 	const currentIndex = state.currentIndex;
 
-	const handleClear = async () => {
+	const handleClear = () => {
 		setIsClearing(true);
 		try {
 			clear();
@@ -122,25 +189,23 @@ export function UndoRedoPanel({
 		}
 	};
 
-	const handleJumpTo = async (targetIndex: number) => {
-		const currentIdx = currentIndex;
-
-		if (targetIndex === currentIdx) return;
-
-		try {
-			if (targetIndex < currentIdx) {
-				// Undo to target
-				for (let i = currentIdx; i > targetIndex; i--) {
-					await undo();
-				}
-			} else {
-				// Redo to target
-				for (let i = currentIdx; i < targetIndex; i++) {
-					await redo();
-				}
+		const handleJumpTo = (targetIndex: number) => {
+			const currentIdx = currentIndex;
+			if (targetIndex === currentIdx) {
+				return;
 			}
-		} catch (error) {
-			console.error('Failed to jump to history point:', error);
+		try {
+			const steps = Math.abs(targetIndex - currentIdx);
+			const goBack = targetIndex < currentIdx;
+			let chain: Promise<unknown> = Promise.resolve();
+			for (let i = 0; i < steps; i++) {
+				chain = chain.then(() => (goBack ? undo() : redo()));
+			}
+			chain.catch(() => {
+				toastService.error('No se pudo cambiar el punto del historial');
+			});
+		} catch (_error) {
+			toastService.error('No se pudo cambiar el punto del historial');
 		}
 	};
 
@@ -169,7 +234,6 @@ export function UndoRedoPanel({
 					</div>
 				)}
 			</CardHeader>
-
 			<CardContent className={cn('pt-0', compact && 'p-3 pt-0')}>
 				{history.length === 0 ? (
 					<div className="py-8 text-center text-muted-foreground">
@@ -179,72 +243,20 @@ export function UndoRedoPanel({
 				) : (
 					<ScrollArea className="h-full" style={{ maxHeight }}>
 						<div className="space-y-1">
-							{history.map((action, index) => {
-								const Icon = getActionIcon(action.type);
-								const isCurrent = index === currentIndex;
-								const isExecuted = index <= currentIndex;
-								const canJump = index !== currentIndex;
-
-								return (
-									<div key={action.id}>
-										<div
-											className={cn(
-												'flex items-center gap-3 rounded-md p-2 transition-all duration-200',
-												'cursor-pointer hover:bg-muted/50',
-												isCurrent && 'border border-primary/20 bg-primary/10',
-												!isExecuted && 'opacity-50',
-												compact && 'gap-2 p-1.5'
-											)}
-											onClick={() => canJump && handleJumpTo(index)}
-										>
-											<div className={cn('flex min-w-0 flex-1 items-center gap-2', compact && 'gap-1.5')}>
-												<Icon className={cn('h-4 w-4 flex-shrink-0', compact && 'h-3 w-3')} />
-
-												<div className="min-w-0 flex-1">
-													<p className={cn('truncate font-medium text-sm', compact && 'text-xs')}>
-														{getActionDescription(action)}
-													</p>
-
-													{showDetails && action.metadata?.targetPath && (
-														<p className={cn('truncate text-muted-foreground text-xs', compact && 'text-[10px]')}>
-															→ {action.metadata.targetPath}
-														</p>
-													)}
-												</div>
-											</div>
-
-											<div className="flex flex-shrink-0 items-center gap-2">
-												{showTimestamps && (
-													<span className={cn('text-muted-foreground text-xs', compact && 'text-[10px]')}>
-														{formatTimestamp(action.timestamp)}
-													</span>
-												)}
-
-												{isCurrent && (
-													<Badge
-														className={cn('px-1.5 py-0.5 text-xs', compact && 'px-1 text-[10px]')}
-														variant="secondary"
-													>
-														Actual
-													</Badge>
-												)}
-
-												{canJump && (
-													<div className="flex items-center">
-														{index < currentIndex ? (
-															<RotateCcw className="h-3 w-3 text-muted-foreground" />
-														) : (
-															<RotateCw className="h-3 w-3 text-muted-foreground" />
-														)}
-													</div>
-												)}
-											</div>
-										</div>
-
-										{index < history.length - 1 && !compact && <Separator className="my-1" />}
-									</div>
-								);
-							})}
+							{history.map((action, index) => (
+								<React.Fragment key={action.id}>
+									<ActionRow
+										action={action}
+										index={index}
+										currentIndex={currentIndex}
+										compact={compact}
+										showDetails={showDetails}
+										showTimestamps={showTimestamps}
+										onJump={handleJumpTo}
+									/>
+									{index < history.length - 1 && !compact && <Separator className="my-1" />}
+								</React.Fragment>
+							))}
 						</div>
 					</ScrollArea>
 				)}

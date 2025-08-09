@@ -128,24 +128,12 @@ export function useDownloadManager(options: UseDownloadManagerOptions = {}): Use
 				let result: DownloadResult | BatchDownloadResult;
 
 				if (downloadItem.files.length === 1) {
-					// Single file download
+					// Descarga de un único archivo: pasar el FileItem completo para cumplir tipos
 					const file = downloadItem.files[0];
-					const downloadFile = {
-						id: file.id,
-						name: file.name,
-						path: 'path' in file ? (file as any).path : '',
-					};
-
-					result = await enhancedDownloadService.downloadFile(downloadFile, downloadItem.options);
+					result = await enhancedDownloadService.downloadFile(file, downloadItem.options);
 				} else {
-					// Multiple files download
-					const downloadFiles = downloadItem.files.map((file) => ({
-						id: file.id,
-						name: file.name,
-						path: 'path' in file ? (file as any).path : '',
-					}));
-
-					result = await enhancedDownloadService.downloadMultipleFiles(downloadFiles, downloadItem.options);
+					// Descarga múltiple: pasar los FileItem completos
+					result = await enhancedDownloadService.downloadMultipleFiles(downloadItem.files, downloadItem.options);
 				}
 
 				// Update queue with success

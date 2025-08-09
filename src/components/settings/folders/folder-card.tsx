@@ -133,7 +133,7 @@ export function FolderCard({
 				opacity: [0, 1],
 				y: [20, 0],
 			}}
-			className={cn('group rounded-lg', selectedFolder === folder.id && 'ring-2 ring-primary')}
+			className={cn('group rounded-lg h-full', selectedFolder === folder.id && 'ring-2 ring-primary')}
 		>
 			<Card
 				className={cn(

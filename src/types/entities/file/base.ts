@@ -104,4 +104,7 @@ export interface FileStatistics extends EntityStats {
  */
 export interface FileWithStats extends FileBase {
 	stats: FileStatistics;
+
+	// Campos opcionales para compatibilidad con DisplayableEntity
+	description?: string | null;
 }

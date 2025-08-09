@@ -35,11 +35,7 @@ import { EntityStats } from '../entity.types';
  */
 export interface GroupStatistics extends EntityStats {
 	completeness: number;
-	lastUpdated: string;
-
-	// File system functions
-	isDirectory: boolean;
-	isFile: boolean;
+	lastUpdated: Date;
 }
 
 /**

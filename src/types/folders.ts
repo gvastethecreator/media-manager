@@ -9,11 +9,11 @@ export interface ProcessStatus {
 	message?: string;
 	error?: string;
 	folderId?: string; // ID de la carpeta siendo procesada
-	phase?: 'starting' | 'scanning' | 'processing' | 'metadata' | 'complete';
+	phase?: "starting" | "scanning" | "processing" | "metadata" | "complete";
 	timestamp?: number;
 	filesProcessed?: number;
 	totalFiles?: number;
-	status?: 'processing' | 'completed' | 'error'; // Estado del proceso
+	status?: "processing" | "completed" | "error"; // Estado del proceso
 }
 
 export interface ErrorResponse {
@@ -36,8 +36,20 @@ export interface FolderResponse {
 	success?: boolean; // Para respuestas de operaciones
 }
 
-// Re-exportar FolderStatistics como FolderStats para compatibilidad
-export type { FolderStatistics as FolderStats } from '@/types/entities/folder/types';
+// Stats generales de carpetas (shape devuelto por /api/stats/folders)
+export interface FolderStats {
+	totalFolders: number;
+	totalFiles: number;
+	totalImages: number;
+	totalVideos: number;
+	totalAudio: number;
+	totalDocuments: number;
+	totalOthers: number;
+	totalSize: number;
+	formattedSize: string;
+	// Compatibilidad: timestamp ISO del último escaneo
+	lastScanned?: string;
+}
 
 // Tipo específico para el hook useFolderStats (más simple)
 export interface FolderStatsResponse {

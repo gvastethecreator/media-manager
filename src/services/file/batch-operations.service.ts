@@ -52,7 +52,6 @@ class EventEmitter {
 	}
 }
 
-import * as path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { progressTrackingService } from '@/services/progress/progress-tracking.service';
 import { toastService } from '@/services/toast/toast.service';
@@ -64,11 +63,27 @@ import {
 	type FileCopyMoveResult,
 	type FileOperationOptions,
 	type FileOperationResult,
-	getFileInfo,
 	moveFile,
 } from './file.service';
 
 const logger = serverLogger.withContext('BatchOperationsService');
+
+// Helpers de path compatibles con navegador
+const SEP_WIN = '\\';
+const SEP_POSIX = '/';
+const detectSep = (p: string): string => (p.includes(SEP_WIN) ? SEP_WIN : SEP_POSIX);
+const joinPaths = (a: string, b: string): string => {
+	const sep = detectSep(a || b);
+	const aTrim = a.endsWith(sep) ? a.slice(0, -1) : a;
+	const bTrim = b.startsWith(sep) ? b.slice(1) : b;
+	if (!aTrim) {
+		return bTrim;
+	}
+	if (!bTrim) {
+		return aTrim;
+	}
+	return `${aTrim}${sep}${bTrim}`;
+};
 
 // Batch operation types
 export interface BatchOperation {
@@ -482,9 +497,19 @@ class BatchFileOperationsService extends EventEmitter {
 			operation.status = 'running';
 			operation.startedAt = Date.now();
 
+			// Map batch operation type to progress tracking type
+			const progressType =
+				operation.type === 'copy'
+					? 'file_copy'
+					: operation.type === 'move'
+						? 'file_move'
+						: operation.type === 'delete'
+							? 'file_delete'
+							: 'batch_operation';
+
 			// Start progress tracking
 			const progressId = `batch-${operationId}`;
-			progressTrackingService.startOperation(progressId, operation.type, operation.items.length, {
+			progressTrackingService.startOperation(progressType, operation.items.length, {
 				showToast: operation.options?.showProgress !== false,
 				description: operation.options?.description || this.getOperationDescription(operation),
 				cancellable: true,
@@ -494,31 +519,32 @@ class BatchFileOperationsService extends EventEmitter {
 
 			// Process items
 			for (let i = 0; i < operation.items.length; i++) {
-				if (operation.status === 'cancelled' || operation.status === 'paused') {
+				// Si la operación fue cancelada/pausada, detener el loop
+				if (operation.status !== 'running') {
 					break;
 				}
 
 				const item = operation.items[i];
 				const startTime = Date.now();
+				const itemName = 'name' in item ? (item as any).name : (item as any).fileName || `item-${i + 1}`;
 
 				try {
 					let result: FileCopyMoveResult | FileOperationResult | undefined;
 
 					// Get file path from entity
-					const itemPath = 'path' in item ? item.path : (item as any).filePath || '';
-					const itemName = 'name' in item ? item.name : (item as any).fileName || `item-${item.id}`;
+					const itemPath = 'path' in item ? (item as any).path : (item as any).filePath || '';
 
 					switch (operation.type) {
 						case 'copy':
 							if (operation.targetPath && itemPath) {
-								const destPath = path.join(operation.targetPath, itemName);
+								const destPath = joinPaths(operation.targetPath, itemName);
 								result = await copyFile(itemPath, destPath, operation.options);
 							}
 							break;
 
 						case 'move':
 							if (operation.targetPath && itemPath) {
-								const destPath = path.join(operation.targetPath, itemName);
+								const destPath = joinPaths(operation.targetPath, itemName);
 								result = await moveFile(itemPath, destPath, operation.options);
 							}
 							break;

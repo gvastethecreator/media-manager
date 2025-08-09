@@ -1,7 +1,12 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "webworker"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -17,15 +22,17 @@
     "forceConsistentCasingInFileNames": true,
     "types": [
       "vite/client",
-      "bun-types",
       "@testing-library/jest-dom",
-      "web",
       "@types/react",
       "@types/react-dom"
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ]
     },
     "strictNullChecks": true
   },
@@ -36,5 +43,15 @@
     "vitest.config.ts",
     "src/**/*.d.ts"
   ],
-  "exclude": ["node_modules", "dist", "build"]
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "src/services/file-entity-mapper/file-entity-mapper.service.backup.ts",
+    "src/services/file-entity-mapper/file-entity-mapper.service.clean.ts"
+    ,
+    "src/**/*.test.ts",
+    "src/**/*.test.tsx",
+    "src/components/features/file-browser/file-browser-backup.tsx"
+  ]
 }

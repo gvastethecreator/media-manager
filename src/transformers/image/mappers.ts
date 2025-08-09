@@ -4,7 +4,7 @@
  */
 
 import { createDefaultEntityStats } from '@/lib/utils';
-import type { ImageBase, ImageWithStats } from '@/types/entities/image/base';
+import type { ImageBase, ImageWithStats, ImageStatistics } from '@/types/entities/image/base';
 
 /**
  * Convierte cualquier objeto plano a ImageWithStats (rellena campos obligatorios)
@@ -35,13 +35,17 @@ export function mapImageToComplete(image: Partial<ImageBase>): ImageWithStats {
 		createdAt: image.createdAt ?? new Date(),
 		updatedAt: image.updatedAt ?? new Date(),
 		entityType: 'image' as const,
-		stats: createDefaultEntityStats({
-			size: image.size ?? 0,
-			mtime: image.updatedAt ?? new Date(),
-			birthtime: image.createdAt ?? new Date(),
-			type: 'image',
-			aspectRatio: image.width && image.height ? Number((image.width / image.height).toFixed(2)) : 0,
-		}),
+		// Construir stats en dos pasos para respetar tipos específicos
+		stats: (() => {
+			const base = createDefaultEntityStats({
+				size: image.size ?? 0,
+				mtime: image.updatedAt ?? new Date(),
+				birthtime: image.createdAt ?? new Date(),
+				type: 'image',
+			});
+			const aspectRatio = image.width && image.height ? Number((image.width / image.height).toFixed(2)) : 0;
+			return { ...base, aspectRatio } as ImageStatistics;
+		})(),
 		thumbnailUrl: image.thumbnail ?? '',
 		fullUrl: image.path ?? '',
 	};

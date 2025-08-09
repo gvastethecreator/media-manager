@@ -86,9 +86,9 @@ const MasonryItem = memo<MasonryItemProps>(
 		const staticMotionProps = useMemo(
 			() => ({
 				layout: masonryConfig.shouldUseAnimations,
-				initial: masonryConfig.shouldUseAnimations ? { opacity: 0, scale: 0.9 } : false,
-				animate: masonryConfig.shouldUseAnimations ? { opacity: 1, scale: 1 } : false,
-				exit: masonryConfig.shouldUseAnimations ? { opacity: 0, scale: 0.8 } : false,
+				initial: masonryConfig.shouldUseAnimations ? { opacity: 0, scale: 0.9 } : undefined,
+				animate: masonryConfig.shouldUseAnimations ? { opacity: 1, scale: 1 } : undefined,
+				exit: masonryConfig.shouldUseAnimations ? { opacity: 0, scale: 0.8 } : undefined,
 				'data-testid': 'file-browser-item',
 				'data-entity-id': layoutItem.item.id,
 				'data-item-index': itemIndex,
@@ -99,7 +99,7 @@ const MasonryItem = memo<MasonryItemProps>(
 		const transition = useMemo(
 			() => ({
 				duration: masonryConfig.animationDuration / 1000,
-				ease: 'easeOut',
+				ease: [0.17, 0.67, 0.83, 0.67] as [number, number, number, number],
 			}),
 			[masonryConfig.animationDuration]
 		);
@@ -113,38 +113,39 @@ const MasonryItem = memo<MasonryItemProps>(
 		// Para elementos no animados, usar div simple
 		if (!masonryConfig.shouldUseAnimations) {
 			return (
-				<div
+				<button
 					className={itemClasses}
 					data-entity-id={layoutItem.item.id}
 					data-item-index={itemIndex}
 					data-testid="file-browser-item"
 					onClick={handleClick}
 					onDoubleClick={handleDoubleClick}
-					style={style}
+					style={style as React.CSSProperties}
+					type="button"
 				>
 					<OptimizedEntityCard
 						className="h-full w-full"
 						compact={false}
 						entity={layoutItem.item}
 						isSelected={isSelected}
-						itemId={layoutItem.item.id}
 						layout="vertical"
-						onClickById={onItemClickById}
-						onDoubleClickById={onItemDoubleClickById}
+						onClick={(e) => onItemClickById(layoutItem.item.id, e)}
+						onDoubleClick={() => onItemDoubleClickById(layoutItem.item.id)}
 						size="md"
 					/>
-				</div>
+				</button>
 			);
 		}
 
 		return (
-			<motion.div
+			<motion.button
 				{...staticMotionProps}
 				className={itemClasses}
 				onClick={handleClick}
 				onDoubleClick={handleDoubleClick}
 				style={style}
 				transition={transition}
+				type="button"
 			>
 				<OptimizedEntityCard
 					className="h-full w-full"
@@ -156,7 +157,7 @@ const MasonryItem = memo<MasonryItemProps>(
 					onDoubleClick={() => onItemDoubleClickById(layoutItem.item.id)}
 					size="md"
 				/>
-			</motion.div>
+			</motion.button>
 		);
 	},
 	(prevProps, nextProps) => {
@@ -322,7 +323,8 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryViewComponent(
 			data-view-type="masonry"
 			ref={parentRef}
 			style={{
-				contain: 'strict',
+				// Evitar contain: 'strict' que limita el cálculo de altura dentro de ScrollArea
+				// y provoca contenedor muy pequeño sin scroll visible
 				padding: `${config.spacing.padding}px`,
 			}}
 		>
@@ -341,6 +343,7 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryViewComponent(
 				style={{
 					position: 'relative',
 					width: '100%',
+					// Altura total del layout para que el viewport pueda hacer scroll
 					height: `${layoutResult.totalHeight}px`,
 				}}
 			>

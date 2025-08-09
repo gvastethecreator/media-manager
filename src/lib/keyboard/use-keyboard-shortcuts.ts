@@ -5,9 +5,9 @@
 
 import { useCallback, useEffect, useRef } from 'react';
 import {
-	type KeyboardShortcutConfig,
-	keyboardShortcutManager,
-	type ShortcutHandler,
+    type KeyboardShortcutConfig,
+    keyboardShortcutManager,
+    type ShortcutHandler,
 } from './keyboard-shortcut-manager';
 
 export interface UseKeyboardShortcutsOptions {
@@ -63,7 +63,14 @@ export const useKeyboardShortcuts = (options: UseKeyboardShortcutsOptions = {}):
 	useEffect(() => {
 		if (!target) return;
 
-		const handleKeyDown = keyboardShortcutManager.handleKeyDown;
+
+		// Adaptar a EventListener tipado
+		const handleKeyDown: EventListener = (evt) => {
+			// Delegate solo si es KeyboardEvent
+			if (evt instanceof KeyboardEvent) {
+				keyboardShortcutManager.handleKeyDown(evt);
+			}
+		};
 
 		target.addEventListener('keydown', handleKeyDown);
 

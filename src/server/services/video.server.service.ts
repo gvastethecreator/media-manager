@@ -16,6 +16,9 @@ const CreateVideoSchema = z.object({
 	size: z.number().int().positive(),
 	mimeType: z.string().max(100),
 
+	// Identificador de integridad
+	hash: z.string().min(1, 'El hash es requerido'),
+
 	// Metadatos de video específicos
 	duration: z.number().positive().optional().nullable(),
 	width: z.number().int().positive().optional().nullable(),
@@ -235,6 +238,7 @@ export async function createVideo(data: z.infer<typeof CreateVideoSchema>) {
 				description: data.description,
 				path: data.path,
 				size: data.size,
+				hash: data.hash,
 				mimeType: data.mimeType,
 				duration: data.duration,
 				width: data.width,
@@ -260,6 +264,74 @@ export async function createVideo(data: z.infer<typeof CreateVideoSchema>) {
 		throw toServiceError(error, {
 			serviceName: SERVICE_NAME,
 			message: 'No se pudo crear el video',
+		});
+	}
+}
+
+export async function getVideoByHash(hash: string) {
+	try {
+		videoLogger.info('Buscando video por hash:', hash);
+
+		const videoResult = await db
+			.select({
+				id: videos.id,
+				name: videos.name,
+				description: videos.description,
+				path: videos.path,
+				hash: videos.hash,
+				size: videos.size,
+				duration: videos.duration,
+				width: videos.width,
+				height: videos.height,
+				metadata: videos.metadata,
+				thumbnail: videos.thumbnail,
+				thumbnailSize: videos.thumbnailSize,
+				thumbnailWidth: videos.thumbnailWidth,
+				thumbnailHeight: videos.thumbnailHeight,
+
+				isFavorite: videos.isFavorite,
+				folderId: videos.folderId,
+				createdAt: videos.createdAt,
+				updatedAt: videos.updatedAt,
+				folder: {
+					id: folders.id,
+					name: folders.name,
+					path: folders.path,
+				},
+			})
+			.from(videos)
+			.leftJoin(folders, eq(videos.folderId, folders.id))
+			.where(eq(videos.hash, hash))
+			.limit(1);
+
+		if (!videoResult.length) {
+			return null;
+		}
+
+		const video = {
+			...videoResult[0],
+			_count: {
+				albums: 0,
+				collections: 0,
+				tags: 0,
+				characters: 0,
+				places: 0,
+				worldItems: 0,
+				concepts: 0,
+				prompts: 0,
+				notes: 0,
+				wildcards: 0,
+				properties: 0,
+				groups: 0,
+			},
+		};
+
+		return video;
+	} catch (error) {
+		videoLogger.error('Error al obtener video por hash:', error);
+		throw toServiceError(error, {
+			serviceName: SERVICE_NAME,
+			message: 'No se pudo obtener el video por hash',
 		});
 	}
 }

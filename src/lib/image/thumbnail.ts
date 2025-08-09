@@ -3,14 +3,15 @@ import { existsSync, promises as fs } from 'fs';
 import { extname, join } from 'path';
 import sharp from 'sharp';
 import { THUMBNAIL_QUALITY_CONFIG, ThumbnailQuality } from '@/lib/config/thumbnail.config';
+import { getThumbDirFor } from '@/config/thumbs';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { ImageFormat } from './image';
 
 const thumbLogger = serverLogger.withContext('Thumbnail');
 
-// Configuración de caché
-const CACHE_DIR = join(process.cwd(), '.image-cache', 'thumbnails');
+// Configuración de caché (centralizada)
+const CACHE_DIR_BASE = join(process.cwd(), '.image-cache', 'thumbnails');
 
 export interface ThumbnailOptions {
 	quality: ThumbnailQuality;
@@ -49,9 +50,10 @@ const MAX_DIMENSION = 2048; // Máxima dimensión permitida
 const MIN_DIMENSION = 16; // Mínima dimensión permitida
 
 // Funciones de caché
-async function ensureCacheDir() {
+async function ensureCacheDir(quality: ThumbnailQuality = ThumbnailQuality.MEDIUM) {
 	try {
-		await fs.mkdir(CACHE_DIR, { recursive: true });
+		const dir = getThumbDirFor(quality);
+		await fs.mkdir(dir, { recursive: true });
 	} catch (error) {
 		thumbLogger.error('Error creando directorio de caché:', error);
 	}
@@ -63,12 +65,12 @@ function getCacheKey(filePath: string, options: Partial<ThumbnailOptions>): stri
 	return hash.digest('hex');
 }
 
-function getCachePath(cacheKey: string): string {
-	return join(CACHE_DIR, `${cacheKey}.webp`);
+function getCachePath(cacheKey: string, quality: ThumbnailQuality = ThumbnailQuality.MEDIUM): string {
+	return join(getThumbDirFor(quality), `${cacheKey}.webp`);
 }
 
-async function getFromCache(cacheKey: string): Promise<ThumbnailResult | null> {
-	const cachePath = getCachePath(cacheKey);
+async function getFromCache(cacheKey: string, quality: ThumbnailQuality): Promise<ThumbnailResult | null> {
+	const cachePath = getCachePath(cacheKey, quality);
 	try {
 		const stats = await fs.stat(cachePath);
 		if (stats.isFile()) {
@@ -93,8 +95,8 @@ async function getFromCache(cacheKey: string): Promise<ThumbnailResult | null> {
 	return null;
 }
 
-async function saveToCache(cacheKey: string, buffer: Buffer): Promise<void> {
-	const cachePath = getCachePath(cacheKey);
+async function saveToCache(cacheKey: string, buffer: Buffer, quality: ThumbnailQuality): Promise<void> {
+	const cachePath = getCachePath(cacheKey, quality);
 	try {
 		await fs.writeFile(cachePath, buffer);
 	} catch (error) {
@@ -213,9 +215,9 @@ export async function generateThumbnail(
 		}
 
 		// Verificar caché
-		await ensureCacheDir();
+		await ensureCacheDir(finalOptions.quality as ThumbnailQuality);
 		const cacheKey = getCacheKey(filePath, finalOptions);
-		const cached = await getFromCache(cacheKey);
+		const cached = await getFromCache(cacheKey, finalOptions.quality as ThumbnailQuality);
 		if (cached) {
 			thumbLogger.debug('Thumbnail recuperado de caché:', {
 				path: filePath,
@@ -318,7 +320,7 @@ export async function generateThumbnail(
 			const { data, info } = await processor.toBuffer({ resolveWithObject: true });
 
 			// Guardar en caché para futuros usos
-			await saveToCache(cacheKey, data);
+			await saveToCache(cacheKey, data, finalOptions.quality as ThumbnailQuality);
 
 			// Para depuración
 			console.log(`Thumbnail generado - Dimensiones: ${info.width}x${info.height}, Tamaño: ${data.length} bytes`);
@@ -349,9 +351,12 @@ export async function generateThumbnail(
  */
 export async function clearThumbnailCache(): Promise<void> {
 	try {
-		await fs.mkdir(CACHE_DIR, { recursive: true }); // Asegurarse de que existe
-		const files = await fs.readdir(CACHE_DIR);
-		await Promise.all(files.map((file) => fs.unlink(join(CACHE_DIR, file))));
+		const dirs = [getThumbDirFor('low' as any), getThumbDirFor('medium' as any), getThumbDirFor('high' as any)];
+		for (const dir of dirs) {
+			await fs.mkdir(dir, { recursive: true }); // Asegurarse de que existe
+			const files = await fs.readdir(dir);
+			await Promise.all(files.map((file) => fs.unlink(join(dir, file))));
+		}
 		thumbLogger.info('Caché de thumbnails limpiada');
 	} catch (error) {
 		thumbLogger.error('Error limpiando caché:', error);

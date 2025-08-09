@@ -63,8 +63,9 @@ export interface EntityStats {
 
 	// Timestamps
 	lastUpdated: Date;
-	lastViewed?: Date;
-	lastModified?: Date;
+	// Permitir null en derivados (compatibilidad con Album/Video)
+	lastViewed?: Date | null;
+	lastModified?: Date | null;
 
 	// Métricas de uso
 	viewCount?: number;

@@ -6,6 +6,7 @@
  */
 
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
+import { createDefaultEntityStats } from '@/lib/utils';
 import type { GroupBase, GroupStatistics, GroupWithStats } from '@/types/entities/group';
 
 /**
@@ -52,6 +53,7 @@ export function toGroupWithStats(group: GroupBase, counts?: Record<string, numbe
 	const popularity = Math.log1p(totalItems);
 
 	const stats: GroupStatistics = {
+		...createDefaultEntityStats(),
 		imageCount,
 		videoCount,
 		albumCount,
@@ -65,10 +67,12 @@ export function toGroupWithStats(group: GroupBase, counts?: Record<string, numbe
 		noteCount,
 		wildcardCount,
 		propertyCount,
+		groupCount: 0, // Los grupos no contienen otros grupos por defecto
 		totalItems,
+		totalAssociations: totalItems,
+		// Propiedades específicas de GroupStatistics
 		completeness: completenessScore,
-		popularity: Number.parseFloat(popularity.toFixed(2)),
-		lastUpdated: new Date().toISOString(),
+		lastUpdated: new Date(),
 	};
 
 	return {

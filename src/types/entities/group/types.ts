@@ -9,7 +9,8 @@ import type { GroupBase } from './base';
 // Re-export GroupBase and GroupWithStats from base file
 export type { GroupBase, GroupStatistics, GroupWithStats } from './base';
 
-export interface CreateGroupInput {
+// Nombre canónico con prefijo Group para evitar ambigüedades en re-exportaciones
+export interface GroupCreateInput {
 	name: string;
 	description?: string;
 	emoji?: string;
@@ -22,7 +23,7 @@ export interface CreateGroupInput {
 	filters?: any;
 }
 
-export interface UpdateGroupInput {
+export interface GroupUpdateInput {
 	name?: string;
 	description?: string;
 	emoji?: string;
@@ -34,6 +35,10 @@ export interface UpdateGroupInput {
 	featuredImage?: string;
 	filters?: any;
 }
+
+// Alias retro‑compatibles (si algún código antiguo usa los nombres sin prefijo)
+export type CreateGroupInput = GroupCreateInput; // TODO: eliminar tras migración completa
+export type UpdateGroupInput = GroupUpdateInput; // TODO: eliminar tras migración completa
 
 export type GroupSortKey = 'name' | 'category' | 'createdAt';
 

@@ -8,7 +8,8 @@
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { VideoCreateInput, VideoFilters, VideoUpdateInput } from '@/types/entities/video/types';
-import type { VideoBase, VideoStatistics, VideoWithStats } from '../../types/entities/video/base';
+import type { VideoBase, VideoWithStats, VideoStatistics } from '@/types/entities/video/base';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 /**
  * 🔄 Transforma un VideoBase a VideoWithStats calculando las estadísticas.
@@ -29,6 +30,7 @@ export function toVideoWithStats(video: VideoBase): VideoWithStats {
 				: `${Math.floor(durationMinutes)}m`;
 
 		const statistics: VideoStatistics = {
+			...createDefaultEntityStats(),
 			// Conteos de relaciones (inicializados en 0)
 			albumCount: 0,
 			collectionCount: 0,
@@ -45,6 +47,10 @@ export function toVideoWithStats(video: VideoBase): VideoWithStats {
 			totalRelations: 0,
 			totalAssociations: 0,
 			totalItems: 0,
+			imageCount: 0,
+			videoCount: 1, // Este es un video
+			lastUpdated: new Date(),
+			size: video.size,
 
 			// Métricas técnicas
 			durationMinutes,
@@ -53,7 +59,7 @@ export function toVideoWithStats(video: VideoBase): VideoWithStats {
 			gigabytes,
 			aspectRatio,
 			resolution,
-			formattedSize,
+			formattedSize: `${megabytes.toFixed(2)} MB`,
 			formattedDuration,
 
 			// Métricas de calidad

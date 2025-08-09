@@ -9,6 +9,7 @@ import { memo } from 'react';
 import type { GridHoverOverlay } from '@/types/file-browser/grid-view-config';
 import { formatDate, formatDuration, formatFileSize } from '@/types/file-browser/list-column-config';
 import type { AnyEntityWithStats } from '@/types/migration';
+import { getEntityStatsType } from '@/types/migration';
 
 interface GridItemOverlayProps {
 	entity: AnyEntityWithStats;
@@ -25,7 +26,7 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({ entity, config, isV
 	const name = entity.name || 'Unknown';
 	const size = entity.stats?.size || 0;
 	const mtime = entity.stats?.mtime;
-	const type = entity.type || 'unknown';
+	const type = getEntityStatsType(entity) ?? 'unknown';
 	const dimensions = (entity as any).dimensions;
 	const duration = (entity as any).duration;
 	const tags = (entity as any).tags || [];

@@ -1,18 +1,21 @@
-import { useQuery } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api/client';
-import type { FolderStats } from '@/types/folders';
+import { useQuery } from "@tanstack/react-query";
+import { apiClient } from "@/lib/api/client";
+import type { FolderStats } from "@/types/folders";
 
 /**
  * Hook para obtener estadísticas generales de carpetas
  */
 export function useFolderStats() {
 	return useQuery({
-		queryKey: ['folder-stats'],
+		queryKey: ["folder-stats"],
 		queryFn: async (): Promise<FolderStats> => {
-			const response = (await apiClient.get('/api/stats/folders')) as { data: FolderStats };
+			// El backend retorna el objeto de estadísticas directamente
+			const response = (await apiClient.get(
+				"/api/stats/folders",
+			)) as FolderStats | null;
 
-			// Si la API retorna null, usar valores por defecto
-			if (!response.data) {
+			// Si la API retorna null/undefined, usar valores por defecto
+			if (!response) {
 				return {
 					totalFolders: 0,
 					totalFiles: 0,
@@ -22,38 +25,12 @@ export function useFolderStats() {
 					totalDocuments: 0,
 					totalOthers: 0,
 					totalSize: 0,
-					formattedSize: '0 B',
-					// directoryCount se mapea a directChildren en FolderStatistics
+					formattedSize: "0 B",
 					lastScanned: new Date().toISOString(),
-					// Propiedades adicionales requeridas por FolderStatistics
-					hierarchyDepth: 0,
-					totalDescendants: 0,
-					directChildren: 0,
-					contentDiversity: 0,
-					organizationScore: 0,
-					totalItems: 0,
-					accessFrequency: 0,
-					lastActivity: null,
-					imageCount: 0,
-					videoCount: 0,
-					noteCount: 0,
-					documentCount: 0,
-					folderCount: 0,
-					averageFileSize: 0,
-					largestFile: 0,
-					hasConsistentNaming: false,
-					hasDeepHierarchy: false,
-					isWellOrganized: false,
-					breadcrumbs: [],
-					fullPath: '',
-					relativePath: '',
-					autoTags: [],
-					qualityGrade: 'D' as const,
-					totalRelations: 0,
 				};
 			}
 
-			return response.data;
+			return response;
 		},
 		refetchInterval: 30_000, // Actualizar cada 30 segundos
 		staleTime: 10_000, // Considerar datos obsoletos después de 10 segundos

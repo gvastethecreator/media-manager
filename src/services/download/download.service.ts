@@ -1,8 +1,16 @@
 /**
  * Enhanced Download Service
  *
- * This service provides enhanced download functionality with progress tracking,
- * multiple format support, compression options, and integration with the browser's
+ * This service provides enhanced download functionality with progress tracking			// Start progress tracking if enabled
+			let operationId: string | undefined;
+			if (options.showProgress !== false) {
+				const progressInfo = progressTrackingService.startOperation('file_download', 1, {
+					showToast: true,
+					description: `Descargando ${itemName}`,
+					cancellable: true,
+				});
+				operationId = `download_${downloadId}`; // Keep original operationId format for consistency
+			}ple format support, compression options, and integration with the browser's
  * download manager.
  */
 
@@ -116,12 +124,12 @@ class EnhancedDownloadService {
 			// Start progress tracking if enabled
 			let operationId: string | undefined;
 			if (options.showProgress !== false) {
-				operationId = `download_${downloadId}`;
-				progressTrackingService.startOperation(operationId, 'download', 1, {
+				const progressInfo = progressTrackingService.startOperation('file_download', 1, {
 					showToast: true,
 					description: `Descargando ${itemName}`,
 					cancellable: true,
 				});
+				operationId = `download_${downloadId}`; // Keep original operationId format for consistency
 			}
 
 			let downloadUrl: string;
@@ -214,7 +222,7 @@ class EnhancedDownloadService {
 		// Start batch progress tracking
 		const operationId = `batch_download_${Date.now()}`;
 		if (options.showProgress !== false) {
-			progressTrackingService.startOperation(operationId, 'download', items.length, {
+			progressTrackingService.startOperation('file_download', items.length, {
 				showToast: true,
 				description: `Descargando ${items.length} archivo${items.length > 1 ? 's' : ''}`,
 				cancellable: true,
@@ -465,6 +473,3 @@ class EnhancedDownloadService {
 
 // Create and export service instance
 export const enhancedDownloadService = new EnhancedDownloadService();
-
-// Export types
-export type { DownloadFormat, DownloadQuality, DownloadOptions, DownloadResult, BatchDownloadResult };

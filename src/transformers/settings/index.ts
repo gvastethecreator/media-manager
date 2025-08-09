@@ -95,6 +95,11 @@ export function mergeSettings(base: Settings, override: Partial<Settings>): Sett
 			...base.advanced,
 			...override.advanced,
 		},
+		// Asegurar bloque requerido por schema
+		fileBrowser: {
+			...(base as any).fileBrowser,
+			...(override as any).fileBrowser,
+		},
 		version: override.version ?? base.version,
 		lastUpdate: override.lastUpdate ?? base.lastUpdate,
 		system: {

@@ -5,9 +5,7 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import type { Stats } from 'fs';
 import { nanoid } from 'nanoid';
-import path from 'path';
 import {
 	getFileExtension,
 	getMimeTypeFromExtension,
@@ -137,33 +135,7 @@ export function generateFileId(filePath?: string): string {
  * @param stats - Stats del filesystem
  * @returns Información del archivo
  */
-export function mapStatsToFileInfo(filePath: string, stats: Stats): FileInfo {
-	const name = path.basename(filePath);
-	const extension = getFileExtension(name);
-	const relativePath = path.relative(process.cwd(), filePath);
-
-	return {
-		id: generateFileId(filePath),
-		name,
-		path: filePath,
-		size: stats.size,
-		hash: '',
-		mimeType: determineMimeType(filePath),
-		extension,
-		type: determineFileType(filePath),
-		isDirectory: stats.isDirectory(),
-		parentPath: path.dirname(filePath),
-		absolutePath: path.resolve(filePath),
-		relativePath,
-		modifiedAt: stats.mtime,
-		accessedAt: stats.atime,
-		folderId: null,
-		isHidden: name.startsWith('.'),
-		isReadonly: false,
-		createdAt: stats.birthtime,
-		updatedAt: stats.mtime,
-	} as FileInfo;
-}
+// mapStatsToFileInfo se movió a utils.server.ts para evitar dependencias Node en cliente
 
 /**
  * Serializa el resultado de una operación de archivo

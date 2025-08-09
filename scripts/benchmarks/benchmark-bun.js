@@ -13,7 +13,7 @@ console.log('================================================');
 console.log('\n📊 Test 1: Tiempo de inicio de scripts');
 const startTime = performance.now();
 
-console.log(`✅ Bun Runtime v${Bun.version}`);
+console.log(`✅ Bun Runtime v${globalThis.Bun ? globalThis.Bun.version : 'unknown (not in Bun)'}`);
 console.log(`🏁 Tiempo de inicio: ${(performance.now() - startTime).toFixed(2)}ms`);
 
 // Test 2: Resolución de módulos

@@ -25,8 +25,10 @@ import type { VideoWithStats } from '@/types/entities/video';
 import type { WildcardWithStats } from '@/types/entities/wildcard';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
 
-// Re-export del tipo principal desde entities.ts para evitar duplicación
-export type { AnyEntityWithStats } from '@/types/entities';
+// Usar el tipo centralizado DisplayableEntity como AnyEntityWithStats para evitar divergencias
+import type { DisplayableEntity as AnyEntityWithStats } from '@/types/entities';
+// Re-exportar el alias para mantener compatibilidad con los imports existentes en componentes
+export type { DisplayableEntity as AnyEntityWithStats } from '@/types/entities';
 export type { AlbumWithStats } from './entities/album';
 export type { AudioWithStats } from './entities/audio';
 export type { CharacterWithStats } from './entities/character';
@@ -246,24 +248,24 @@ export function isUploadedImageWithStats(entity: unknown): entity is UploadedIma
 
 // Función helper para obtener el tipo de estadísticas de una entidad
 export function getEntityStatsType(entity: AnyEntityWithStats): EntityStatsType | null {
-	if (isImageWithStats(entity)) return 'image';
-	if (isVideoWithStats(entity)) return 'video';
-	if (isFolderWithStats(entity)) return 'folder';
-	if (isTagWithStats(entity)) return 'tag';
-	if (isPlaceWithStats(entity)) return 'place';
-	if (isWorldItemWithStats(entity)) return 'world-item';
-	if (isNoteWithStats(entity)) return 'note';
-	if (isPropertyWithStats(entity)) return 'property';
-	if (isWildcardWithStats(entity)) return 'wildcard';
-	if (isAudioWithStats(entity)) return 'audio';
-	if (isDocumentWithStats(entity)) return 'document';
-	if (isCollectionWithStats(entity)) return 'collection';
-	if (isAlbumWithStats(entity)) return 'album';
-	if (isCharacterWithStats(entity)) return 'character';
-	if (isConceptWithStats(entity)) return 'concept';
-	if (isPromptWithStats(entity)) return 'prompt';
-	if (isGroupWithStats(entity)) return 'group';
-	if (isUploadedImageWithStats(entity)) return 'uploadedImage';
+	if (isImageWithStats(entity)) return EntityStatsType.IMAGE;
+	if (isVideoWithStats(entity)) return EntityStatsType.VIDEO;
+	if (isFolderWithStats(entity)) return EntityStatsType.FOLDER;
+	if (isTagWithStats(entity)) return EntityStatsType.TAG;
+	if (isPlaceWithStats(entity)) return EntityStatsType.PLACE;
+	if (isWorldItemWithStats(entity)) return EntityStatsType.WORLD_ITEM;
+	if (isNoteWithStats(entity)) return EntityStatsType.NOTE;
+	if (isPropertyWithStats(entity)) return EntityStatsType.PROPERTY;
+	if (isWildcardWithStats(entity)) return EntityStatsType.WILDCARD;
+	if (isAudioWithStats(entity)) return EntityStatsType.AUDIO;
+	if (isDocumentWithStats(entity)) return EntityStatsType.DOCUMENT;
+	if (isCollectionWithStats(entity)) return EntityStatsType.COLLECTION;
+	if (isAlbumWithStats(entity)) return EntityStatsType.ALBUM;
+	if (isCharacterWithStats(entity)) return EntityStatsType.CHARACTER;
+	if (isConceptWithStats(entity)) return EntityStatsType.CONCEPT;
+	if (isPromptWithStats(entity)) return EntityStatsType.PROMPT;
+	if (isGroupWithStats(entity)) return EntityStatsType.GROUP;
+	if (isUploadedImageWithStats(entity)) return EntityStatsType.UPLOADED_IMAGE;
 	return null;
 }
 
@@ -273,6 +275,6 @@ export function getEntityStatistics(entity: AnyEntityWithStats): unknown {
 		fileCount: 0,
 		size: 0,
 		lastModified: new Date(),
-		entityType: entity.entityType || 'unknown',
+		entityType: (entity as any).entityType || 'unknown',
 	};
 }

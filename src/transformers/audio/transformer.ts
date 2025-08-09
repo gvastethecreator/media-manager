@@ -6,6 +6,7 @@
 
 import { TransformerError } from '../../lib/errors/transformer-error';
 import { serverLogger } from '../../lib/logger/server-logger';
+import { createDefaultEntityStats } from '../../lib/utils';
 import type { AudioBase, AudioWithStats } from '../../types/entities/audio';
 
 const logger = serverLogger.withContext('AudioTransformer');
@@ -25,11 +26,15 @@ export function fromDrizzleAudio(drizzleAudio: AudioBase): AudioWithStats {
 	try {
 		// TODO: Implementar la lógica real para calcular estas estadísticas
 		const audioStats = {
+			...createDefaultEntityStats(),
 			duration: drizzleAudio.duration || 0,
 			format: drizzleAudio.format || 'unknown',
 			bitrate: drizzleAudio.bitrate || 0,
 			volumePeaks: [],
 			sampleRate: drizzleAudio.sampleRate || 0,
+			channels: 2, // Default stereo
+			isDirectory: false,
+			isFile: true,
 		};
 
 		const audioWithStats: AudioWithStats = {

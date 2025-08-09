@@ -5,9 +5,9 @@
  * ✅ Reemplaza server actions de Next.js con API calls estándar
  */
 
-import { clientLogger } from '@/lib/logger/client-logger';
+import { clientLogger } from "@/lib/logger/client-logger";
 
-const apiLogger = clientLogger.withContext('ApiClient');
+const apiLogger = clientLogger.withContext("ApiClient");
 
 export interface ApiResponse<T = unknown> {
 	data?: T;
@@ -21,54 +21,57 @@ export class ApiClient {
 
 	constructor() {
 		// Usar el proxy de Vite en desarrollo y la misma URL base en producción
-		this.baseURL = process.env.NODE_ENV === 'development' ? '' : window.location.origin;
+		this.baseURL =
+			process.env.NODE_ENV === "development" ? "" : window.location.origin;
 	}
 
 	/**
 	 * Realiza una petición GET
 	 */
 	async get<T>(endpoint: string): Promise<T> {
-		return this.request<T>('GET', endpoint);
+		return this.request<T>("GET", endpoint);
 	}
 
 	/**
 	 * Realiza una petición POST
 	 */
 	async post<T>(endpoint: string, data?: unknown): Promise<T> {
-		return this.request<T>('POST', endpoint, data);
+		return this.request<T>("POST", endpoint, data);
 	}
 
 	/**
 	 * Realiza una petición PUT
 	 */
 	async put<T>(endpoint: string, data?: unknown): Promise<T> {
-		return this.request<T>('PUT', endpoint, data);
+		return this.request<T>("PUT", endpoint, data);
 	}
 
 	/**
 	 * Realiza una petición PATCH
 	 */
 	async patch<T>(endpoint: string, data?: unknown): Promise<T> {
-		return this.request<T>('PATCH', endpoint, data);
+		return this.request<T>("PATCH", endpoint, data);
 	}
 
 	/**
 	 * Realiza una petición DELETE
 	 */
 	async delete<T>(endpoint: string): Promise<T> {
-		return this.request<T>('DELETE', endpoint);
+		return this.request<T>("DELETE", endpoint);
 	}
 
 	/**
 	 * Método privado para realizar peticiones HTTP
 	 */
 	private async request<T>(
-		method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE',
+		method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE",
 		endpoint: string,
-		data?: unknown
+		data?: unknown,
 	): Promise<T> {
 		// Agregar prefijo /api si no está presente
-		const apiEndpoint = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
+		const apiEndpoint = endpoint.startsWith("/api")
+			? endpoint
+			: `/api${endpoint}`;
 		const url = `${this.baseURL}${apiEndpoint}`;
 
 		apiLogger.info(`🌐 ${method} ${endpoint}`, { data });
@@ -77,11 +80,16 @@ export class ApiClient {
 			const config: RequestInit = {
 				method,
 				headers: {
-					'Content-Type': 'application/json',
+					"Content-Type": "application/json",
+					// Fuerza a no usar caché del navegador para evitar UIs desactualizadas tras reindex
+					"Cache-Control": "no-cache",
+					Pragma: "no-cache",
 				},
+				// Evita caching del lado del cliente en todos los métodos (especialmente GET)
+				cache: "no-store",
 			};
 
-			if (data && method !== 'GET') {
+			if (data && method !== "GET") {
 				config.body = JSON.stringify(data);
 			}
 
@@ -102,8 +110,11 @@ export class ApiClient {
 
 			return result;
 		} catch (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-			apiLogger.error(`💥 Fallo en ${method} ${endpoint}`, { error: errorMessage });
+			const errorMessage =
+				error instanceof Error ? error.message : "Error desconocido";
+			apiLogger.error(`💥 Fallo en ${method} ${endpoint}`, {
+				error: errorMessage,
+			});
 			throw new Error(`Error en API call: ${errorMessage}`);
 		}
 	}

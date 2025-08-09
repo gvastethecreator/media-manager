@@ -1,11 +1,19 @@
 /**
  * @file Funciones de mapeo para la entidad Note
  * @module transformers/note/mappers
- 
+
  */
 
-import { serverLogger } from '@/lib/logger/server-logger';
-import type { NoteCreateInput, NoteFilters, NoteSearchOptions, NoteUpdateInput } from '@/types/entities/note';
+import { serverLogger } from '../../lib/logger/server-logger';
+import type {
+	NoteBase,
+	NoteCreateInput,
+	NoteFilters,
+	NoteSearchOptions,
+	NoteStatistics,
+	NoteUpdateInput,
+} from '../../types/entities/note';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 const logger = serverLogger.withContext('NoteMappers');
 
@@ -209,6 +217,7 @@ export function toNoteWithStats(note: any): any {
 		const groupCount = counts.groups || 0;
 
 		const statistics = {
+			...createDefaultEntityStats(),
 			imageCount,
 			videoCount,
 			albumCount,
@@ -219,6 +228,7 @@ export function toNoteWithStats(note: any): any {
 			worldItemCount,
 			conceptCount,
 			promptCount,
+			noteCount: 0,
 			wildcardCount,
 			propertyCount,
 			groupCount,
@@ -240,7 +250,10 @@ export function toNoteWithStats(note: any): any {
 				wildcardCount +
 				propertyCount +
 				groupCount,
-		};
+			lastUpdated: note.updatedAt || new Date(),
+			isDirectory: false,
+			isFile: true,
+		} as NoteStatistics;
 
 		// Campos derivados
 		const excerpt =
