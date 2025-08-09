@@ -11,13 +11,8 @@ import { clientLogger } from '../../lib/logger/client-logger';
 const logger = clientLogger.withContext('ImageTransformer');
 
 import { formatFileSize } from '../../lib/utils/format.utils';
-import type {
-	ImageCreateInput,
-	ImageMetadata,
-	ImageStatistics,
-	ImageUpdateInput,
-	ImageWithStats,
-} from '../../types/entities/image';
+import type { ImageCreateInput, ImageMetadata, ImageStatistics, ImageUpdateInput, ImageWithStats } from '../../types/entities/image';
+import { createDefaultEntityStats } from '../../lib/utils';
 import type { DrizzleImageWithCounts } from '../../types/entities/image/base';
 
 /**
@@ -141,23 +136,24 @@ function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageSt
 	const duplicateStatus = determineDuplicateStatus(drizzleImage);
 
 	return {
-		// Conteos de relaciones según ImageStatistics
-		viewCount: views,
-		downloadCount: downloads,
-		likeCount: likes,
-		commentCount: 0, // Por ahora no hay comentarios
-		tagCount: tags,
-		albumCount: albums,
-		collectionCount: collections,
-		characterCount: characters,
-		placeCount: places,
-		worldItemCount: worldItems,
-		conceptCount: concepts,
-		promptCount: prompts,
-		noteCount: notes,
-		wildcardCount: wildcards,
-		propertyCount: properties,
-		groupCount: groups,
+		...createDefaultEntityStats({
+			viewCount: views,
+			downloadCount: downloads,
+			likeCount: likes,
+			commentCount: 0,
+			tagCount: tags,
+			albumCount: albums,
+			collectionCount: collections,
+			characterCount: characters,
+			placeCount: places,
+			worldItemCount: worldItems,
+			conceptCount: concepts,
+			promptCount: prompts,
+			noteCount: notes,
+			wildcardCount: wildcards,
+			propertyCount: properties,
+			groupCount: groups,
+		}),
 		aspectRatio,
 	};
 }

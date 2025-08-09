@@ -14,10 +14,10 @@ import {
 	determineFileType,
 	determineMimeType,
 	generateFileId,
-	mapStatsToFileInfo,
 	serializeDirectoryContents,
 	serializeFileOperationResult,
 } from '@/transformers/file';
+import { mapStatsToFileInfo } from '@/transformers/file/utils.server';
 import type { AnyEntityWithStats } from '@/types/entities';
 import {
 	type FileBase,
@@ -470,8 +470,8 @@ export async function moveFile(
 	}
 }
 
-// Export enhanced file operations service
-export { clipboardManager, enhancedFileOperationsService } from './enhanced-file-operations.service';
+// Export enhanced file operations service (clipboardManager se exporta desde services/clipboard)
+export { enhancedFileOperationsService } from './enhanced-file-operations.service';
 
 /**
  * Batch Operations Convenience Functions

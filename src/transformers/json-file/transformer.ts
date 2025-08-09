@@ -1,11 +1,12 @@
 /**
  * @file Transformador principal para la entidad JsonFile
  * @module transformers/json-file/transformer
- 
+
  */
 
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { createDefaultEntityStats } from '@/lib/utils';
 import type { JsonFileBase, JsonFileWithStats } from '@/types/entities/json-file/base';
 
 const logger = serverLogger.withContext('JsonFileTransformer');
@@ -25,10 +26,13 @@ export function fromDrizzleJsonFile(drizzleJsonFile: JsonFileBase): JsonFileWith
 	try {
 		// Lógica para calcular las estadísticas del contenido JSON
 		const stats = {
+			...createDefaultEntityStats(),
 			size: 0,
 			nestingDepth: 0,
 			isValid: false,
 			keyCount: 0,
+			isDirectory: false,
+			isFile: true,
 		};
 
 		if (drizzleJsonFile.content) {

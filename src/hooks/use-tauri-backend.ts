@@ -100,8 +100,8 @@ export function useTauriContext() {
 		// Verificar si estamos en Tauri
 		const checkTauri = () => {
 			try {
-				// @ts-expect-error - window.__TAURI__ existe en contexto Tauri
-				return typeof window !== 'undefined' && window.__TAURI__ !== undefined;
+				const w = window as unknown as { __TAURI__?: unknown };
+				return typeof window !== 'undefined' && typeof w.__TAURI__ !== 'undefined';
 			} catch {
 				return false;
 			}

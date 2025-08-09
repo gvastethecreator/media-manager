@@ -3,16 +3,16 @@
  * Genera un resumen completo de todos los servicios migrados
  */
 
-import { getAlbum, getAlbums } from '@/services/album/album.service';
-import { getCharacters } from '@/services/character/character.service';
-import { getCollections } from '@/services/collection/collection.service';
-import { ConceptService } from '@/services/concept/concept.service';
-import { getImages } from '@/services/image/image.service';
+import { getAlbum, getAlbums } from '../../src/services/album';
+import { getCharacters } from '../../src/services/character';
+import { getCollections } from '../../src/services/collection';
+import { ConceptService } from '../../src/services/concept';
+import { imageService } from '../../src/services/image';
 // Nuevos servicios migrados
-import { getPlaces } from '@/services/place/place.service';
-import { getActiveProfile, getProfiles } from '@/services/profile/profile.service';
-import { getTag, getTags } from '@/services/tag/tag.service';
-import { getWorldItems } from '@/services/world-item/world-item.service';
+import { getPlaces } from '../../src/services/place';
+import { profileClient } from '../../src/services/profile';
+import { getTag, getTags } from '../../src/services/tag';
+import { getWorldItems } from '../../src/services/world-item';
 
 interface ServiceStatus {
 	name: string;
@@ -42,11 +42,11 @@ async function generateMigrationStatusReport() {
 		const times: number[] = [];
 
 		const start1 = Date.now();
-		await getActiveProfile();
+	await profileClient.getActiveProfile();
 		times.push(Date.now() - start1);
 
 		const start2 = Date.now();
-		await getProfiles({ page: 1, limit: 5 });
+	await profileClient.getProfiles({ page: 1, limit: 5 });
 		times.push(Date.now() - start2);
 
 		profileStatus.avgResponseTime = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
@@ -72,7 +72,7 @@ async function generateMigrationStatusReport() {
 		const times: number[] = [];
 
 		const start1 = Date.now();
-		await getTag('test-id');
+	await getTag('test-id');
 		times.push(Date.now() - start1);
 
 		const start2 = Date.now();
@@ -159,8 +159,9 @@ async function generateMigrationStatusReport() {
 	};
 
 	try {
+		const start = Date.now();
 		const places = await getPlaces({});
-		placeStatus.avgResponseTime = Date.now() - start1;
+		placeStatus.avgResponseTime = Date.now() - start;
 		console.log(`   ✅ PlaceService: ${places.length} places encontrados`);
 	} catch (error) {
 		placeStatus.errors.push(error instanceof Error ? error.message : 'Error desconocido');
@@ -170,7 +171,7 @@ async function generateMigrationStatusReport() {
 	services.push(placeStatus);
 
 	// WorldItemService - COMPLETO
-	console.log('�� Probando WorldItemService...');
+	console.log('\n🗡️ Probando WorldItemService...');
 	const worldItemStatus: ServiceStatus = {
 		name: 'WorldItemService',
 		status: 'COMPLETE',
@@ -180,8 +181,9 @@ async function generateMigrationStatusReport() {
 	};
 
 	try {
+		const start = Date.now();
 		const worldItems = await getWorldItems({});
-		worldItemStatus.avgResponseTime = Date.now() - start1;
+		worldItemStatus.avgResponseTime = Date.now() - start;
 		console.log(`   ✅ WorldItemService: ${worldItems.length} world items encontrados`);
 	} catch (error) {
 		worldItemStatus.errors.push(error instanceof Error ? error.message : 'Error desconocido');
@@ -201,8 +203,9 @@ async function generateMigrationStatusReport() {
 	};
 
 	try {
+		const start = Date.now();
 		const collections = await getCollections();
-		collectionStatus.avgResponseTime = Date.now() - start1;
+		collectionStatus.avgResponseTime = Date.now() - start;
 		console.log(`   ✅ CollectionService: ${collections.length} colecciones encontradas`);
 	} catch (error) {
 		collectionStatus.errors.push(error instanceof Error ? error.message : 'Error desconocido');
@@ -222,8 +225,9 @@ async function generateMigrationStatusReport() {
 	};
 
 	try {
+		const start = Date.now();
 		const charactersResult = await getCharacters({});
-		characterStatus.avgResponseTime = Date.now() - start1;
+		characterStatus.avgResponseTime = Date.now() - start;
 		console.log(`   ✅ CharacterService: ${charactersResult.characters.length} personajes encontrados`);
 	} catch (error) {
 		characterStatus.errors.push(error instanceof Error ? error.message : 'Error desconocido');
@@ -244,7 +248,7 @@ async function generateMigrationStatusReport() {
 
 	try {
 		const start = Date.now();
-		await getImages({ page: 1, limit: 5 });
+	await imageService.getImages({ page: 1, limit: 5 });
 		imageStatus.avgResponseTime = Date.now() - start;
 		console.log(`   ✅ ImageService: ${imageStatus.avgResponseTime}ms`);
 	} catch (error) {

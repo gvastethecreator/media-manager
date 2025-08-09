@@ -29,6 +29,17 @@ const DEFAULT_SETTINGS: Settings = {
 		devMode: false,
 		experimentalFeatures: false,
 	},
+	fileBrowser: {
+		defaultViewType: 'grid',
+		rememberViewPerFolder: false,
+		// legacy slots left undefined intentionally: listView, gridView, cardsView, masonryView, global
+		// unified system placeholders
+		viewConfigurations: undefined,
+		customPresets: undefined,
+		folderViewPreferences: undefined,
+		accessibility: undefined,
+		performance: undefined,
+	},
 	version: '1.0.0',
 	lastUpdate: new Date(),
 	system: {

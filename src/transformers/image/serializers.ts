@@ -7,6 +7,7 @@ import { z } from 'zod';
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { ImageBase, ImageWithStats } from '@/types/entities/image/base';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 const logger = serverLogger.withContext('ImageSerializer');
 
@@ -47,24 +48,9 @@ export function fromDrizzleImage(data: Partial<ImageBase>): ImageWithStats {
 		// Campos requeridos para ImageWithStats
 		entityType: 'image' as const,
 		stats: {
-			viewCount: 0,
-			downloadCount: 0,
-			likeCount: 0,
-			commentCount: 0,
-			tagCount: 0,
-			albumCount: 0,
-			collectionCount: 0,
-			characterCount: 0,
-			placeCount: 0,
-			worldItemCount: 0,
-			conceptCount: 0,
-			promptCount: 0,
-			noteCount: 0,
-			wildcardCount: 0,
-			propertyCount: 0,
-			groupCount: 0,
-			aspectRatio: data.width && data.height ? Number((data.width / data.height).toFixed(2)) : 0,
-		},
+				...createDefaultEntityStats(),
+				aspectRatio: data.width && data.height ? Number((data.width / data.height).toFixed(2)) : 0,
+			},
 		thumbnailUrl: data.thumbnail ?? '',
 		fullUrl: data.path ?? '',
 	};

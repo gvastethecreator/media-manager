@@ -6,6 +6,7 @@
 
 import { TransformerError } from '../../lib/errors/transformer-error';
 import { serverLogger } from '../../lib/logger/server-logger';
+import { createDefaultEntityStats } from '../../lib/utils';
 import type { PlaceBase, PlaceStatistics, PlaceWithStats } from '../../types/entities/place';
 
 const logger = serverLogger.withContext('PlaceTransformer');
@@ -38,11 +39,25 @@ export function fromDrizzlePlace(drizzlePlace: any): PlaceWithStats {
 			(_count?.groups || 0);
 
 		const stats: PlaceStatistics = {
+			...createDefaultEntityStats(),
 			spatialRelevance: Math.min(100, totalRelations * 5), // Relevancia espacial basada en relaciones
 			completenessScore: calculateCompletenessScore(baseData), // Puntuación de completitud
 			geoContextLevel: calculateGeoContextLevel(baseData), // Nivel de contexto geográfico
 			popularity: Math.min(100, totalRelations * 2), // Popularidad basada en relaciones
-		};
+			imageCount: _count?.images || 0,
+			videoCount: _count?.videos || 0,
+			albumCount: _count?.albums || 0,
+			collectionCount: _count?.collections || 0,
+			noteCount: _count?.notes || 0,
+			conceptCount: _count?.concepts || 0,
+			worldItemCount: _count?.worldItems || 0,
+			promptCount: _count?.prompts || 0,
+			wildcardCount: _count?.wildcards || 0,
+			propertyCount: _count?.properties || 0,
+			groupCount: _count?.groups || 0,
+			isDirectory: false,
+			isFile: true,
+		} as PlaceStatistics;
 
 		return {
 			...baseData,

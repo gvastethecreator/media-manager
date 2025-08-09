@@ -8,6 +8,7 @@
  */
 
 import { WorkflowBase, WorkflowStatistics, WorkflowWithStats } from '../../types/entities/workflow';
+import { createDefaultEntityStats } from '../../lib/utils';
 import { validateWorkflow } from './validators';
 
 /**
@@ -59,6 +60,7 @@ export function transformWorkflow(
 		return {
 			...baseWorkflow,
 			stats: {
+				...createDefaultEntityStats(),
 				totalExecutions: 0,
 				successRate: 0,
 				averageDuration: 0,
@@ -122,6 +124,7 @@ function calculateWorkflowStats(
 	const connectionCount = calculateConnectionCount(workflow);
 
 	return {
+		...createDefaultEntityStats(),
 		totalExecutions: workflow.runCount,
 		successRate,
 		averageDuration,

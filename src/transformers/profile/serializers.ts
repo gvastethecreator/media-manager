@@ -39,10 +39,10 @@ export function serializePublicProfile(profile: ProfileWithStats) {
 		location: profile.location,
 		joinDate: profile.stats.joinDate?.toISOString() || new Date().toISOString(),
 		stats: {
-			totalImages: profile.stats.totalImages,
-			totalVideos: profile.stats.totalVideos,
-			totalCollections: profile.stats.totalCollections,
-			isVerified: profile.stats.isVerified,
+			imageCount: profile.stats.imageCount,
+			videoCount: profile.stats.videoCount,
+			collectionCount: profile.stats.collectionCount,
+			isVerified: profile.stats.isVerified ?? false,
 		},
 	};
 }

@@ -1,0 +1,76 @@
+import { expect, test } from '@playwright/test';
+
+// Objetivo: validar scroll e interactividad en todas las vistas del file-browser
+// Ruta base: /folders/cursed-dump (seed existente)
+// Selector toolbar: [data-testid="view-mode-trigger"] y [data-testid="view-mode-<mode>"]
+// Vistas y testids: grid-view, cards-view, masonry-view, listview-container
+
+const scrollViewport = '[data-slot="scroll-area-viewport"]';
+
+function getViewport(page: any) {
+	// Acotamos al contenedor del file-browser para evitar múltiples viewports del layout
+	return page.getByTestId('file-browser-container').locator(scrollViewport);
+}
+
+async function assertScrollable(page: any) {
+	const { clientHeight, scrollHeight } = await getViewport(page).evaluate((el: HTMLElement) => ({
+		clientHeight: el.clientHeight,
+		scrollHeight: el.scrollHeight,
+	}));
+	expect(scrollHeight).toBeGreaterThan(clientHeight);
+}
+
+async function clickFirstItem(page: any, view: 'grid' | 'cards' | 'masonry' | 'list') {
+	if (view === 'list') {
+		// Fila 0
+		const firstRow = page.getByTestId('listview-container').locator('[data-testid^="list-row-"]').first();
+		await firstRow.click();
+		await expect(firstRow).toBeVisible();
+		return;
+	}
+	// Para grid/cards/masonry, usamos el primer entity-card visible
+	const firstCard = page.locator('[data-entity-card]').first();
+	await firstCard.click();
+	await expect(firstCard).toBeVisible();
+}
+
+async function switchView(page: any, mode: 'grid' | 'cards' | 'masonry' | 'list') {
+	await page.getByTestId('view-mode-trigger').click();
+	await page.getByTestId(`view-mode-${mode}`).click();
+}
+
+function viewLocatorFor(mode: 'grid' | 'cards' | 'masonry' | 'list') {
+	switch (mode) {
+		case 'grid':
+			return '[data-testid="grid-view"]';
+		case 'cards':
+			return '[data-testid="cards-view"]';
+		case 'masonry':
+			return '[data-testid="masonry-view"]';
+		case 'list':
+			return '[data-testid="listview-container"]';
+		default:
+			return '[data-testid="grid-view"]';
+	}
+}
+
+test.describe('File Browser: vistas con scroll e interacción', () => {
+	test('grid, cards, masonry y list funcionan tras alternar desde toolbar', async ({ page }) => {
+		await page.goto('/folders/cursed-dump');
+
+		// Asegurar que la vista inicial renderizó algo (cualquiera)
+		await expect(getViewport(page)).toBeVisible();
+
+		const modes: Array<'grid' | 'cards' | 'masonry' | 'list'> = ['grid', 'cards', 'masonry', 'list'];
+
+		// Ejecutar secuencialmente sin await dentro de bucles
+		await modes.reduce(async (prev, mode) => {
+			await prev;
+			await switchView(page, mode);
+			const viewSel = viewLocatorFor(mode);
+			await expect(page.locator(viewSel)).toBeVisible();
+			await assertScrollable(page);
+			await clickFirstItem(page, mode);
+		}, Promise.resolve());
+	});
+});

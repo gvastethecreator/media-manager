@@ -244,7 +244,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 				onItemDoubleClick={handleImageDoubleClick}
 				onItemSelect={handleImageClick}
 				size="md"
-				variant="primary"
+				variant="default"
 			/>
 
 			{/* Footer con información adicional */}

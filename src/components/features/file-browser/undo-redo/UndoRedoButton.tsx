@@ -16,10 +16,10 @@ import { undoRedoManager } from '@/services/undo-redo/undo-redo-manager';
 export interface UndoRedoButtonProps {
 	/** Button type */
 	type: 'undo' | 'redo';
-	/** Button variant */
-	variant?: 'primary' | 'outline' | 'ghost' | 'secondary';
-	/** Button size */
-	size?: 'md' | 'sm' | 'lg' | 'icon';
+	/** Button variant (admite alias 'default' y 'link') */
+	variant?: 'primary' | 'outline' | 'ghost' | 'secondary' | 'default' | 'link';
+	/** Button size (admite alias 'default' que mapea a 'md') */
+	size?: 'md' | 'sm' | 'lg' | 'icon' | 'default';
 	/** Additional CSS classes */
 	className?: string;
 	/** Show keyboard shortcut in tooltip */
@@ -80,6 +80,11 @@ export function UndoRedoButton({
 
 	const Icon = isUndo ? Undo2 : Redo2;
 
+	// Normalización de alias para compatibilidad con <Button />
+	const normalizedSize: 'md' | 'sm' | 'lg' | 'icon' = size === 'default' ? 'md' : size;
+	const normalizedVariant: 'primary' | 'outline' | 'ghost' | 'secondary' | 'link' =
+		variant === 'default' ? 'primary' : (variant as any);
+
 	return (
 		<TooltipProvider>
 			<Tooltip>
@@ -89,8 +94,8 @@ export function UndoRedoButton({
 						className={cn('transition-all duration-200', isDisabled && 'cursor-not-allowed opacity-50', className)}
 						disabled={isDisabled}
 						onClick={handleClick}
-						size={size}
-						variant={variant}
+						size={normalizedSize}
+						variant={normalizedVariant}
 					>
 						<Icon className="h-4 w-4" />
 					</Button>

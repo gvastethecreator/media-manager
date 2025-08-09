@@ -28,8 +28,85 @@ export interface PropertyCardProps {
  */
 export function PropertyCard({ propertyId, onClick, className, showBadges = true }: PropertyCardProps) {
 	const { data: property, isLoading, error } = useProperty(propertyId);
+	// Hooks arriba; estados tempranos abajo
 
-	// Si no hay datos de la propiedad o está cargando, mostrar un esqueleto o un mensaje de error
+	// Calcular colores
+	const primaryColor = useMemo(() => property?.color || '#3b82f6', [property?.color]);
+	const secondaryColor = useMemo(() => {
+		if (!property?.color) return '#2563eb';
+
+		try {
+			// Convertir hex a RGB y oscurecer
+			const r = Number.parseInt(primaryColor.slice(1, 3), 16);
+			const g = Number.parseInt(primaryColor.slice(3, 5), 16);
+			const b = Number.parseInt(primaryColor.slice(5, 7), 16);
+
+			const darkenFactor = 0.7;
+			const darkerR = Math.floor(r * darkenFactor);
+			const darkerG = Math.floor(g * darkenFactor);
+			const darkerB = Math.floor(b * darkenFactor);
+
+			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
+		} catch (_e) {
+			return '#2563eb';
+		}
+	}, [primaryColor, property?.color]);
+
+	// Calcular número total de relaciones desde stats o totalAssociations
+	const totalRelations = property?.stats?.totalRelations ?? 0;
+
+	const handleClick = useCallback(() => {
+		if (onClick && property) {
+			onClick(property);
+		}
+	}, [onClick, property]);
+
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			if (onClick && (e.key === 'Enter' || e.key === ' ') && property) {
+				e.preventDefault();
+				onClick(property);
+			}
+		},
+		[onClick, property]
+	);
+
+	const cardContent = (
+		<CardContainer
+			className={cn('h-[160px] w-full transition-all', className)}
+			primaryColor={primaryColor}
+			secondaryColor={secondaryColor}
+		>
+			{/* Encabezado */}
+			<CardHeader
+				icon={property?.emoji ? <span className="text-lg">{property.emoji}</span> : <Microscope className="h-4 w-4" />}
+				primaryColor={primaryColor}
+				subtitle={property?.category || 'General'}
+				title={property?.name || ''}
+			/>
+
+			{/* Contenido */}
+			<div className="flex flex-1 flex-col p-3">
+				{/* Descripción */}
+				{property?.description && (
+					<p className="mb-2 line-clamp-2 text-muted-foreground text-sm">{property.description}</p>
+				)}
+
+				{/* Estadísticas */}
+				{showBadges && (
+					<div className="mt-auto flex flex-wrap gap-1">
+						{totalRelations > 0 && (
+							<Badge className="text-xs" style={{ borderColor: `${primaryColor}50` }} variant="outline">
+								{totalRelations} relaciones
+							</Badge>
+						)}
+					</div>
+				)}
+			</div>
+		</CardContainer>
+	);
+
+	// Estados tempranos
 	if (isLoading) {
 		return (
 			<div
@@ -55,82 +132,6 @@ export function PropertyCard({ propertyId, onClick, className, showBadges = true
 			</div>
 		);
 	}
-
-	// Calcular colores
-	const primaryColor = useMemo(() => property.color || '#3b82f6', [property.color]);
-	const secondaryColor = useMemo(() => {
-		if (!property.color) return '#2563eb';
-
-		try {
-			// Convertir hex a RGB y oscurecer
-			const r = Number.parseInt(primaryColor.slice(1, 3), 16);
-			const g = Number.parseInt(primaryColor.slice(3, 5), 16);
-			const b = Number.parseInt(primaryColor.slice(5, 7), 16);
-
-			const darkenFactor = 0.7;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
-
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (_e) {
-			return '#2563eb';
-		}
-	}, [primaryColor, property.color]);
-
-	// Calcular número total de relaciones desde stats o totalAssociations
-	const totalRelations = property.stats?.totalRelations ?? 0;
-
-	const handleClick = useCallback(() => {
-		if (onClick) {
-			onClick(property);
-		}
-	}, [onClick, property]);
-
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
-			if (onClick && (e.key === 'Enter' || e.key === ' ')) {
-				e.preventDefault();
-				onClick(property);
-			}
-		},
-		[onClick, property]
-	);
-
-	const cardContent = (
-		<CardContainer
-			className={cn('h-[160px] w-full transition-all', className)}
-			primaryColor={primaryColor}
-			secondaryColor={secondaryColor}
-		>
-			{/* Encabezado */}
-			<CardHeader
-				icon={property.emoji ? <span className="text-lg">{property.emoji}</span> : <Microscope className="h-4 w-4" />}
-				primaryColor={primaryColor}
-				subtitle={property.category || 'General'}
-				title={property.name}
-			/>
-
-			{/* Contenido */}
-			<div className="flex flex-1 flex-col p-3">
-				{/* Descripción */}
-				{property.description && (
-					<p className="mb-2 line-clamp-2 text-muted-foreground text-sm">{property.description}</p>
-				)}
-
-				{/* Estadísticas */}
-				{showBadges && (
-					<div className="mt-auto flex flex-wrap gap-1">
-						{totalRelations > 0 && (
-							<Badge className="text-xs" style={{ borderColor: `${primaryColor}50` }} variant="outline">
-								{totalRelations} relaciones
-							</Badge>
-						)}
-					</div>
-				)}
-			</div>
-		</CardContainer>
-	);
 
 	// Si hay onClick, usamos un botón para mejor accesibilidad
 	if (onClick) {

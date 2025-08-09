@@ -14,18 +14,18 @@ interface CardInfoOverlayProps {
 	entity: AnyEntityWithStats;
 	/** Si mostrar el overlay */
 	visible: boolean;
-	/** Posición del overlay */
-	position: 'top' | 'bottom' | 'center';
-	/** Configuración de metadata a mostrar */
+	/** Posición del overlay (incluye 'auto' que se tratará como 'bottom') */
+	position: 'top' | 'bottom' | 'center' | 'auto';
+	/** Configuración de metadata a mostrar (opcionalidad relajada) */
 	metadataConfig: {
-		showSize: boolean;
-		showDate: boolean;
-		showType: boolean;
-		showDimensions: boolean;
-		showDuration: boolean;
-		showTags: boolean;
-		showCollection: boolean;
-		maxTags: number;
+		showSize?: boolean;
+		showDate?: boolean;
+		showType?: boolean;
+		showDimensions?: boolean;
+		showDuration?: boolean;
+		showTags?: boolean;
+		showCollection?: boolean;
+		maxTags?: number;
 	};
 	/** Duración de la animación */
 	animationDuration?: number;
@@ -120,7 +120,7 @@ export function CardInfoOverlay({
 		}
 
 		const tags = Array.isArray(entity.tags) ? entity.tags : [];
-		return tags.slice(0, metadataConfig.maxTags);
+		return tags.slice(0, metadataConfig.maxTags ?? 5);
 	};
 
 	return (

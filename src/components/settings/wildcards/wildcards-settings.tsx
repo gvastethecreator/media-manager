@@ -8,11 +8,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import {
-	useCreateWildcard,
-	useDeleteWildcard,
-	useRootWildcards,
-	useUpdateWildcard,
-	useWildcards,
+    useCreateWildcard,
+    useDeleteWildcard,
+    useRootWildcards,
+    useUpdateWildcard,
+    useWildcards,
 } from '@/lib/api/wildcards';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
@@ -149,10 +149,9 @@ export function WildcardsSettings() {
 		// Filtrado por búsqueda
 		if (searchQuery) {
 			const normalizedQuery = searchQuery.toLowerCase();
-			matches =
-				matches &&
-				(wildcard.name.toLowerCase().includes(normalizedQuery) ||
-					wildcard.description?.toLowerCase().includes(normalizedQuery));
+			const nameMatches = wildcard.name.toLowerCase().includes(normalizedQuery);
+			const descMatches = wildcard.description ? wildcard.description.toLowerCase().includes(normalizedQuery) : false;
+			matches = matches && (nameMatches || descMatches);
 		}
 
 		// Filtrado por categoría
@@ -162,7 +161,7 @@ export function WildcardsSettings() {
 
 		// Filtrado por favoritos
 		if (onlyFavorites) {
-			matches = matches && wildcard.isFavorite;
+			matches = matches && !!wildcard.isFavorite;
 		}
 
 		return matches;

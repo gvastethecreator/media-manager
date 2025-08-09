@@ -1,11 +1,11 @@
 /**
- * @file Vista de grid optimizada con virtualización simple
+ * @file Vista de cuadrícula optimizada con virtualización simple
  * @module components/features/file-browser/views/grid-view
  */
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { motion } from 'motion/react';
-import { memo, useCallback, useMemo, useRef } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { OptimizedEntityCard } from '@/components/cards/entity-card';
 import { useGridViewConfig } from '@/hooks/use-grid-view-config';
 import { cn } from '@/lib/utils';
@@ -28,9 +28,10 @@ export const GridView = memo<GridViewProps>(function GridViewComponent({
 }) {
 	const parentRef = useRef<HTMLDivElement>(null);
 	const gridRef = useRef<HTMLDivElement>(null);
+	const hasMountedRef = useRef(false);
 
-	// Configuración simplificada
-	const { config, calculateLayout } = useGridViewConfig();
+	// Configuración simplificada (omitimos 'config' no usado)
+	const { calculateLayout } = useGridViewConfig();
 
 	// OPTIMIZACIÓN AVANZADA: Memoización de props derivadas para evitar re-cálculos
 	const derivedProps = useMemo(
@@ -43,26 +44,23 @@ export const GridView = memo<GridViewProps>(function GridViewComponent({
 	);
 
 	// Calcular layout de la grid - Optimizado con dependencias mínimas
-	const layout = useMemo(() => {
-		return calculateLayout(containerWidth, derivedProps.itemCount);
-	}, [calculateLayout, containerWidth, derivedProps.itemCount]);
+	const layout = useMemo(
+		() => calculateLayout(containerWidth, derivedProps.itemCount),
+		[calculateLayout, containerWidth, derivedProps.itemCount]
+	);
 
 	// OPTIMIZACIÓN: Crear Map estable con useRef para máximo rendimiento
 	const itemsByIdRef = useRef(new Map<string, AnyEntityWithStats>());
 	const selectedIdsSetRef = useRef(new Set<string>());
 
 	// Actualizar refs solo cuando sea necesario
-	useMemo(() => {
+	useEffect(() => {
 		const newMap = new Map<string, AnyEntityWithStats>();
 		for (const item of items) {
 			newMap.set(item.id, item);
 		}
 		itemsByIdRef.current = newMap;
-
-		const newSet = new Set(selectedIds);
-		selectedIdsSetRef.current = newSet;
-
-		return { map: newMap, set: newSet };
+		selectedIdsSetRef.current = new Set(selectedIds);
 	}, [items, selectedIds]);
 
 	// Handler para clicks en espacio vacío
@@ -70,7 +68,6 @@ export const GridView = memo<GridViewProps>(function GridViewComponent({
 		(e: React.MouseEvent) => {
 			const target = e.target as HTMLElement;
 			const currentTarget = e.currentTarget as HTMLElement;
-
 			const isEmptySpaceClick =
 				target === currentTarget ||
 				!(
@@ -79,7 +76,6 @@ export const GridView = memo<GridViewProps>(function GridViewComponent({
 					target.closest('button') ||
 					target.closest('[data-testid="file-browser-item"]')
 				);
-
 			if (isEmptySpaceClick && derivedProps.hasSelection) {
 				// Visual feedback
 				currentTarget.style.transition = 'background-color 0.15s ease';
@@ -99,20 +95,16 @@ export const GridView = memo<GridViewProps>(function GridViewComponent({
 			if (!gridRef.current) {
 				return;
 			}
-
 			const focusedElement = document.activeElement as HTMLElement;
 			if (!focusedElement?.closest('[data-item-id]')) {
 				return;
 			}
-
 			const gridItems = Array.from(gridRef.current.querySelectorAll('[data-item-id]')) as HTMLElement[];
 			const currentIndex = gridItems.findIndex((item) => item.contains(focusedElement));
 			if (currentIndex === -1) {
 				return;
 			}
-
 			let nextIndex = currentIndex;
-
 			switch (e.key) {
 				case 'ArrowRight':
 					nextIndex = Math.min(currentIndex + 1, gridItems.length - 1);
@@ -135,7 +127,6 @@ export const GridView = memo<GridViewProps>(function GridViewComponent({
 				default:
 					return;
 			}
-
 			e.preventDefault();
 			gridItems[nextIndex]?.focus();
 		},
@@ -151,22 +142,24 @@ export const GridView = memo<GridViewProps>(function GridViewComponent({
 	// Configurar virtualizador para filas
 	const rowVirtualizer = useVirtualizer({
 		count: rowCount,
-		getScrollElement: () => parentRef.current,
+		getScrollElement: () => {
+			const viewport = parentRef.current?.closest('[data-slot="scroll-area-viewport"]') as HTMLElement | null;
+			return viewport ?? parentRef.current;
+		},
 		estimateSize: () => rowHeight,
-		overscan: 2,
+		overscan: derivedProps.isVirtualized ? 4 : 2,
 	});
 
 	// Función para obtener items de una fila específica - Memoizada
 	const getRowItems = useCallback(
 		(rowIndex: number): AnyEntityWithStats[] => {
 			const startIndex = rowIndex * layout.columns;
-			const endIndex = Math.min(startIndex + layout.columns, items.length);
-			return items.slice(startIndex, endIndex);
+			return items.slice(startIndex, Math.min(startIndex + layout.columns, items.length));
 		},
 		[items, layout.columns]
 	);
 
-	// OPTIMIZACIÓN AVANZADA: Handlers estables con useRef para máximo rendimiento
+	// Handlers estables
 	const handlersRef = useRef({
 		onItemClick: (itemId: string, e: React.MouseEvent) => {
 			const item = itemsByIdRef.current.get(itemId);
@@ -182,7 +175,6 @@ export const GridView = memo<GridViewProps>(function GridViewComponent({
 		},
 	});
 
-	// Actualizar handlers cuando cambien las dependencias
 	useMemo(() => {
 		handlersRef.current.onItemClick = (itemId: string, e: React.MouseEvent) => {
 			const item = itemsByIdRef.current.get(itemId);
@@ -190,7 +182,6 @@ export const GridView = memo<GridViewProps>(function GridViewComponent({
 				onItemClick(item, e);
 			}
 		};
-
 		handlersRef.current.onItemDoubleClick = (itemId: string) => {
 			const item = itemsByIdRef.current.get(itemId);
 			if (item) {
@@ -199,99 +190,145 @@ export const GridView = memo<GridViewProps>(function GridViewComponent({
 		};
 	}, [onItemClick, onItemDoubleClick]);
 
-	// Handlers estables que no cambian entre renders
 	const handleItemClickById = useCallback((itemId: string, e: React.MouseEvent) => {
 		e.stopPropagation();
 		handlersRef.current.onItemClick(itemId, e);
 	}, []);
-
 	const handleItemDoubleClickById = useCallback((itemId: string) => {
 		handlersRef.current.onItemDoubleClick(itemId);
 	}, []);
 
+	// Marcas de rendimiento y control de animación sólo montaje inicial
+	useEffect(() => {
+		if (!hasMountedRef.current) {
+			try {
+				performance.mark('grid-view-initial-render-start');
+				// measure end en microtask
+				queueMicrotask(() => {
+					try {
+						performance.mark('grid-view-initial-render-end');
+						performance.measure(
+							'grid-view-initial-render',
+							'grid-view-initial-render-start',
+							'grid-view-initial-render-end'
+						);
+					} catch (err) {
+						/* noop */
+					}
+				});
+			} catch (err) {
+				/* noop */
+			}
+			hasMountedRef.current = true;
+		}
+	}, []);
+
+	// Estilos base memoizados por tamaño (minimizan nuevas refs al map)
+	const baseItemStyle = useMemo(
+		() => ({ width: `${itemWidth}px`, height: `${itemHeight}px` }),
+		[itemWidth, itemHeight]
+	);
+
 	return (
 		<section
 			aria-label={`Vista de cuadrícula con ${items.length} elementos`}
-			className="h-full w-full overflow-hidden"
+			className="h-full w-full"
 			data-testid="grid-view"
 			data-view-type="grid"
-			onClickCapture={handleEmptySpaceClick}
-			onKeyDown={handleKeyDown}
 			ref={parentRef}
-			style={{
-				position: 'relative',
-				overflowY: 'auto',
-				overflowX: 'hidden',
-			}}
+			style={{ position: 'relative' }}
 		>
 			<div
-				className="relative"
-				ref={gridRef}
-				role="presentation"
-				style={{
-					height: `${rowVirtualizer.getTotalSize()}px`,
-					width: '100%',
-				}}
+				className="h-full w-full cursor-default border-0 bg-transparent p-0 text-left"
+				onClickCapture={handleEmptySpaceClick}
+				role="application"
+				style={{ display: 'block' }}
 			>
-				{rowVirtualizer.getVirtualItems().map((virtualRow) => {
-					const rowItems = getRowItems(virtualRow.index);
-
-					return (
-						<div
-							className="absolute top-0 left-0 w-full"
-							key={virtualRow.key}
-							style={{
-								height: `${rowHeight}px`,
-								transform: `translateY(${virtualRow.start}px)`,
-								padding: `0 ${layout.padding}px`,
-							}}
-						>
+				<div className="relative" ref={gridRef} style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: '100%' }}>
+					{rowVirtualizer.getVirtualItems().map((virtualRow) => {
+						const rowItems = getRowItems(virtualRow.index);
+						return (
 							<div
-								className="grid h-full"
+								className="absolute top-0 left-0 w-full"
+								key={virtualRow.key}
 								style={{
-									gridTemplateColumns: `repeat(${layout.columns}, 1fr)`,
-									gap: `${layout.gap}px`,
-									height: `${itemHeight}px`,
+									height: `${rowHeight}px`,
+									transform: `translateY(${virtualRow.start}px)`,
+									padding: `0 ${layout.padding}px`,
 								}}
 							>
-								{rowItems.map((item, columnIndex) => {
-									const isSelected = selectedIdsSetRef.current.has(item.id);
-									const itemIndex = virtualRow.index * layout.columns + columnIndex;
-
-									return (
-										<motion.div
-											animate={{ opacity: 1, scale: 1 }}
-											className={cn('relative cursor-pointer', isSelected && 'ring-2 ring-primary ring-offset-2')}
-											data-item-id={item.id}
-											data-selectable="true"
-											initial={{ opacity: 0, scale: 0.8 }}
-											key={item.id}
-											style={{
-												width: `${itemWidth}px`,
-												height: `${itemHeight}px`,
-											}}
-											tabIndex={itemIndex === 0 ? 0 : -1}
-											transition={{
-												delay: itemIndex * 0.02,
-												duration: 0.2,
-											}}
-										>
-											<OptimizedEntityCard
-												aria-label={`${item.name || 'Elemento'} - ${(item as any).entityType || 'archivo'}`}
-												className="h-full w-full"
-												compact={true}
-												entity={item}
-												isSelected={isSelected}
-												onClick={(e) => handleItemClickById(item.id, e)}
-												onDoubleClick={() => handleItemDoubleClickById(item.id)}
-											/>
-										</motion.div>
-									);
-								})}
+								<div
+									className="grid h-full"
+									style={{
+										gridTemplateColumns: `repeat(${layout.columns}, 1fr)`,
+										gap: `${layout.gap}px`,
+										height: `${itemHeight}px`,
+									}}
+								>
+									{rowItems.map((item, columnIndex) => {
+										const isSelected = selectedIdsSetRef.current.has(item.id);
+										const itemIndex = virtualRow.index * layout.columns + columnIndex;
+										const disableAnimation = hasMountedRef.current;
+										const commonProps = {
+											className: cn(
+												'relative cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70',
+												isSelected && 'ring-2 ring-primary ring-offset-2'
+											),
+											'aria-selected': isSelected || undefined,
+											'aria-label': `${item.name || 'Elemento'} - ${(item as any).entityType || 'archivo'}`,
+											role: 'gridcell' as const,
+											'aria-colindex': columnIndex + 1,
+											'aria-rowindex': virtualRow.index + 1,
+											'data-item-id': item.id,
+											'data-selectable': 'true',
+											key: item.id,
+											tabIndex: itemIndex === 0 ? 0 : -1,
+											onClick: (e: React.MouseEvent) => {
+												e.stopPropagation();
+												const target = e.target as HTMLElement;
+												if (target.closest('button,[role="button"],a,[data-no-select]')) {
+													return;
+												}
+												handlersRef.current.onItemClick(item.id, e);
+											},
+											onKeyDown: handleKeyDown,
+											onDoubleClick: () => handleItemDoubleClickById(item.id),
+											style: baseItemStyle,
+										};
+										if (disableAnimation) {
+											return (
+												<div {...commonProps} key={item.id}>
+													<OptimizedEntityCard
+														className="h-full w-full"
+														compact={true}
+														entity={item}
+														isSelected={isSelected}
+													/>
+												</div>
+											);
+										}
+										return (
+											<motion.div
+												{...commonProps}
+												animate={{ opacity: 1, scale: 1 }}
+												initial={{ opacity: 0, scale: 0.85 }}
+												key={item.id}
+												transition={{ duration: 0.18 }}
+											>
+												<OptimizedEntityCard
+													className="h-full w-full"
+													compact={true}
+													entity={item}
+													isSelected={isSelected}
+												/>
+											</motion.div>
+										);
+									})}
+								</div>
 							</div>
-						</div>
-					);
-				})}
+						);
+					})}
+				</div>
 			</div>
 		</section>
 	);

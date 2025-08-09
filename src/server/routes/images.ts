@@ -260,10 +260,25 @@ router.get('/:id/thumbnail', async (req, res) => {
 			res.status(404).send('Thumbnail not found');
 			return;
 		}
+
+		// Caching: ETag y Last-Modified simples basados en longitud y fecha
+		const etag = `W/"${buffer.length.toString(16)}-${id}"`;
+		const lastModified = new Date().toUTCString();
+
+		// Validación condicional
+		const ifNoneMatch = req.header('If-None-Match');
+		const ifModifiedSince = req.header('If-Modified-Since');
+		if (ifNoneMatch === etag || (ifModifiedSince && new Date(ifModifiedSince) >= new Date(lastModified))) {
+			res.status(304).end();
+			return;
+		}
+
 		res.set({
 			'Content-Type': 'image/webp', // Asumimos WEBP por defecto, se puede mejorar
 			'Content-Length': buffer.length.toString(),
-			'Cache-Control': 'public, max-age=31536000',
+			'Cache-Control': 'public, max-age=31536000, immutable',
+			ETag: etag,
+			'Last-Modified': lastModified,
 		});
 		res.send(buffer);
 	} catch (error) {

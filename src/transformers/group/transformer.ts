@@ -8,6 +8,7 @@
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { GroupBase, GroupStatistics, GroupWithStats } from '@/types/entities/group';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 const logger = serverLogger.withContext('GroupTransformer');
 
@@ -52,6 +53,7 @@ export function fromDrizzleGroup(drizzleGroup: any): GroupWithStats {
 			propertyCount;
 
 		const stats: GroupStatistics = {
+			...createDefaultEntityStats(),
 			imageCount,
 			videoCount,
 			albumCount,
@@ -65,23 +67,10 @@ export function fromDrizzleGroup(drizzleGroup: any): GroupWithStats {
 			noteCount,
 			wildcardCount,
 			propertyCount,
+			groupCount: 0,
 			totalItems,
-			// Alias para compatibilidad
-			totalImages: imageCount,
-			totalVideos: videoCount,
-			totalAlbums: albumCount,
-			totalCollections: collectionCount,
-			totalTags: tagCount,
-			totalCharacters: characterCount,
-			totalPlaces: placeCount,
-			totalWorldItems: worldItemCount,
-			totalConcepts: conceptCount,
-			totalPrompts: promptCount,
-			totalNotes: noteCount,
-			totalWildcards: wildcardCount,
-			totalProperties: propertyCount,
+			totalAssociations: totalItems,
 			completeness: totalItems > 0 ? Math.min(100, Math.round((totalItems / 10) * 100)) : 0,
-			popularity: Math.round((imageCount + videoCount) * 0.1),
 			lastUpdated: baseData.updatedAt || new Date(),
 		};
 
@@ -89,6 +78,7 @@ export function fromDrizzleGroup(drizzleGroup: any): GroupWithStats {
 			...baseData,
 			entityType: 'group' as const,
 			statistics: stats,
+			stats,
 		};
 	} catch (error) {
 		logger.error('Error transformando grupo desde Drizzle', {

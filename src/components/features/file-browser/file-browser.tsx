@@ -8,7 +8,6 @@
 
 import { FileTextIcon } from 'lucide-react';
 import React, { memo, startTransition, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { OptimizedEntityCard } from '@/components/cards/entity-card';
 import { EmptyState } from '@/components/core/data-display';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
@@ -31,15 +30,14 @@ import { ProgressOverlay } from './progress/progress-overlay';
 import { DragSelectionProvider } from './selection/drag-selection-provider';
 import { StatusBar } from './toolbar/status-bar';
 import type { FileBrowserProps } from './types/file-browser.types';
-import { convertToFileItem } from './utils/file-browser-helpers';
-import { CardsView } from './views/cards-view';
-import { GridView } from './views/grid-view';
-import { ListView } from './views/list-view';
-import { MasonryView } from './views/masonry-view';
 
 // Import CSS for user-select fixes
 import './styles/user-select.css';
 import './selection/selection-styles.css';
+import { CardsView } from './views/cards-view';
+import { GridView } from './views/grid-view';
+import { ListView } from './views/list-view';
+import { MasonryView } from './views/masonry-view';
 
 const logger = clientLogger.withContext('FileBrowser');
 
@@ -201,28 +199,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 		}
 	}, [effectiveSelectedIds, items, setDetailsPanelItems, setDetailsPanelVisible]);
 
-	// Función para renderizar item usando EntityCard
-	const renderItem = useCallback(
-		(item: any, _index: number) => {
-			const clickHandler = (e: React.MouseEvent) => handleItemClickById(item.id, e);
-			return (
-				<OptimizedEntityCard
-					className="h-full w-full"
-					entity={item}
-					key={item.id}
-					layout={layout}
-					onClick={clickHandler}
-					onDoubleClick={() => handleItemDoubleClickById(item.id)}
-					preset={preset}
-					size={size}
-					variant={variant}
-				/>
-			);
-		},
-		[handleItemClickById, handleItemDoubleClickById, layout, preset, variant, size]
-	);
-
-	// Props comunes para las vistas
+	// Props comunes para las vistas (restaurado antes de memo content)
 	const commonViewProps = useMemo(
 		() => ({
 			items,
@@ -232,16 +209,16 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 			onItemClick: handleItemClick,
 			onItemDoubleClick: handleItemDoubleClick,
 			onItemContextMenu: () => {
-				// Implementar si es necesario
+				/* noop */
 			},
 			onContextAction: () => {
-				// Implementar si es necesario
+				/* noop */
 			},
 		}),
 		[items, itemSize, effectiveSelectedIds, containerWidth, handleItemClick, handleItemDoubleClick]
 	);
 
-	// Helper functions para componentes internos
+	// Helper functions para componentes internos (restaurados)
 	const getItemElement = useCallback((itemId: string): HTMLElement | null => {
 		return document.querySelector(`[data-item-id="${itemId}"]`);
 	}, []);
@@ -257,16 +234,10 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 	}, [viewMode]);
 
 	const handlePreviewItem = useCallback(() => {
-		// Implementar previsualización si es necesario
+		/* noop */
 	}, []);
 
-	// fileItems para drag selection
-	const fileItems = useMemo(() => {
-		return items.map(convertToFileItem);
-	}, [items]);
-
-	// Renderizar contenido según el estado
-	const renderContent = () => {
+	const content = useMemo(() => {
 		if (isLoading && items.length === 0) {
 			return (
 				<div className="flex h-full w-full items-center justify-center">
@@ -274,7 +245,6 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 				</div>
 			);
 		}
-
 		if (error) {
 			return (
 				<div className="flex h-full w-full items-center justify-center">
@@ -282,11 +252,9 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 				</div>
 			);
 		}
-
 		if (items.length === 0) {
 			return <EmptyState description="No hay elementos para mostrar." icon={FileTextIcon} title="Sin elementos" />;
 		}
-
 		switch (viewMode) {
 			case 'list':
 				return <ListView {...commonViewProps} />;
@@ -300,7 +268,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 			default:
 				return <CardsView {...commonViewProps} />;
 		}
-	};
+	}, [isLoading, items, error, viewMode, commonViewProps]);
 
 	return (
 		<main
@@ -317,13 +285,13 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 			data-testid="file-browser-container"
 		>
 			{/* Wrapper interactivo para eventos */}
-			<section className="relative h-full w-full">
+			<section className="relative min-h-0 flex-1">
 				<div className="sr-only" id="file-browser-description">
 					Explorador de archivos con {items.length} elementos. Usa las flechas para navegar, Enter para abrir, Espacio
 					para seleccionar.
 				</div>
 
-				<ScrollArea aria-atomic="false" aria-live="polite" className="relative min-h-0 flex-1">
+				<ScrollArea aria-atomic="false" aria-live="polite" className="h-full w-full">
 					<DragSelectionProvider
 						config={{
 							enabled: false,
@@ -347,7 +315,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 						containerRef={containerRef as React.RefObject<HTMLElement>}
 						disabled={true}
 						getItemElement={getItemElement}
-						items={fileItems as any}
+						items={[] as any}
 						onSelectionCancel={() => {
 							// Drag selection cancelled
 						}}
@@ -373,8 +341,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 							},
 						}}
 					>
-						{/* Invisible button wrapper para eventos */}
-						<button
+						{/* Contenedor interactivo para eventos (div para evitar botones anidados) */}
+						<div
 							aria-label="Explorador de archivos"
 							className="file-browser-container relative m-0 h-full w-full cursor-default border-0 bg-transparent p-0 outline-none"
 							onClick={handleContainerClick}
@@ -405,7 +373,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 								}
 							}}
 							ref={containerCallbackRef as any}
-							type="button"
+							role="application"
+							tabIndex={-1}
 						>
 							{/* Navegación por teclado */}
 							<KeyboardNavigation
@@ -417,7 +386,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 								viewType={getViewType()}
 							/>
 
-							{containerWidth > 0 ? renderContent() : <Spinner />}
+							{containerWidth > 0 ? content : <Spinner />}
 
 							{/* Menú contextual personalizado */}
 							<CustomContextMenu
@@ -427,7 +396,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 								position={contextMenuPosition}
 								selectedItems={items.filter((item) => effectiveSelectedIds.includes(item.id))}
 							/>
-						</button>
+						</div>
 					</DragSelectionProvider>
 				</ScrollArea>
 			</section>

@@ -21,12 +21,12 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 	return (
 		<motion.div animate={{ opacity: 1, y: 0 }} className="space-y-3" initial={{ opacity: 0, y: 10 }}>
 			{/* Título compacto */}
-			<div className="flex items-center justify-between">
+			<div className="flex items-center justify-between" data-testid="folders-stats">
 				<h3 className="flex items-center gap-2 font-medium text-muted-foreground text-sm">
 					<HardDrive className="h-4 w-4" />
 					Estadísticas Generales
 				</h3>
-				<div className="flex items-center gap-1 text-muted-foreground text-xs">
+				<div className="flex items-center gap-1 text-muted-foreground text-xs" data-testid="stats-last-scanned">
 					<Clock className="h-3 w-3" />
 					<span>{stats.lastScanned ? new Date(stats.lastScanned).toLocaleString() : 'Nunca'}</span>
 				</div>
@@ -45,14 +45,18 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 										<Folder className="h-5 w-5 text-blue-600" />
 										<div>
 											<div className="text-muted-foreground text-xs">Carpetas</div>
-											<div className="font-semibold text-lg">{stats.totalFolders}</div>
+											<div className="font-semibold text-lg" data-testid="stats-total-folders">
+												{stats.totalFolders}
+											</div>
 										</div>
 									</div>
 									<div className="flex items-center gap-2 rounded bg-background/50 p-2">
 										<File className="h-5 w-5 text-gray-600" />
 										<div>
 											<div className="text-muted-foreground text-xs">Archivos Totales</div>
-											<div className="font-semibold text-lg">{stats.totalFiles}</div>
+											<div className="font-semibold text-lg" data-testid="stats-total-files">
+												{stats.totalFiles}
+											</div>
 										</div>
 									</div>
 								</div>
@@ -63,21 +67,27 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 										<Image className="h-4 w-4 text-green-600" />
 										<div>
 											<div className="text-muted-foreground text-xs">Imágenes</div>
-											<div className="font-medium">{stats.totalImages}</div>
+											<div className="font-medium" data-testid="stats-total-images">
+												{stats.totalImages}
+											</div>
 										</div>
 									</div>
 									<div className="flex items-center gap-2 rounded bg-background/50 p-2">
 										<Video className="h-4 w-4 text-purple-600" />
 										<div>
 											<div className="text-muted-foreground text-xs">Videos</div>
-											<div className="font-medium">{stats.totalVideos}</div>
+											<div className="font-medium" data-testid="stats-total-videos">
+												{stats.totalVideos}
+											</div>
 										</div>
 									</div>
 									<div className="flex items-center gap-2 rounded bg-background/50 p-2">
 										<Music className="h-4 w-4 text-orange-600" />
 										<div>
 											<div className="text-muted-foreground text-xs">Audio</div>
-											<div className="font-medium">{stats.totalAudio}</div>
+											<div className="font-medium" data-testid="stats-total-audio">
+												{stats.totalAudio}
+											</div>
 										</div>
 									</div>
 								</div>
@@ -88,21 +98,27 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 										<FileText className="h-4 w-4 text-red-600" />
 										<div>
 											<div className="text-muted-foreground text-xs">Documentos</div>
-											<div className="font-medium">{stats.totalDocuments}</div>
+											<div className="font-medium" data-testid="stats-total-documents">
+												{stats.totalDocuments}
+											</div>
 										</div>
 									</div>
 									<div className="flex items-center gap-2 rounded bg-background/50 p-2">
 										<File className="h-4 w-4 text-yellow-600" />
 										<div>
 											<div className="text-muted-foreground text-xs">Otros</div>
-											<div className="font-medium">{stats.totalOthers}</div>
+											<div className="font-medium" data-testid="stats-total-others">
+												{stats.totalOthers}
+											</div>
 										</div>
 									</div>
 									<div className="flex items-center gap-2 rounded bg-background/50 p-2">
 										<HardDrive className="h-4 w-4 text-indigo-600" />
 										<div>
 											<div className="text-muted-foreground text-xs">Espacio</div>
-											<div className="font-medium text-sm">{stats.formattedSize}</div>
+											<div className="font-medium text-sm" data-testid="stats-total-size">
+												{stats.formattedSize}
+											</div>
 										</div>
 									</div>
 								</div>

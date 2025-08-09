@@ -5,8 +5,7 @@
  */
 
 import { motion } from 'motion/react';
-import type { ComponentProps } from 'react';
-import { Badge } from '@/components/ui/badge';
+// imports limpios: eliminados ComponentProps y Badge no usados
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEntityTypeConfig } from '@/hooks/use-entity-type-config';
 import { cn } from '@/lib/utils';
@@ -227,6 +226,7 @@ export function EntityTypeSelector({
 						)}
 						key={type}
 						onClick={() => handleTypeToggle(type)}
+						type="button"
 					>
 						<EntityTypeBadge animated showText size={size} type={type} variant={isSelected ? 'solid' : 'outline'} />
 					</button>

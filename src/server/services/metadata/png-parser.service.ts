@@ -4,11 +4,59 @@
  * Soporta Automatic1111, ComfyUI, SwarmUI, Midjourney y otros engines
  */
 
-import { readPngChunks } from 'png-itxt';
+// Reemplazo mínimo: lector interno de chunks PNG para evitar dependencia rota de 'png-itxt'
+function readPngChunks(buffer: Buffer): Array<{ type: string; data: Buffer }> {
+	const chunks: Array<{ type: string; data: Buffer }> = [];
+	try {
+		const PNG_SIGNATURE = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+		if (buffer.length < 8 || !buffer.subarray(0, 8).equals(PNG_SIGNATURE)) {
+			return chunks;
+		}
+
+		let offset = 8; // después de la firma
+		while (offset + 8 <= buffer.length) {
+			const length = buffer.readUInt32BE(offset);
+			offset += 4;
+			const type = buffer.subarray(offset, offset + 4).toString('ascii');
+			offset += 4;
+
+			// Validación de límites
+			if (length < 0 || offset + length + 4 > buffer.length) {
+				break;
+			}
+
+			const data = buffer.subarray(offset, offset + length);
+			offset += length;
+			// CRC (4 bytes) – se ignora para lectura
+			offset += 4;
+
+			chunks.push({ type, data });
+
+			if (type === 'IEND') {
+				break;
+			}
+		}
+	} catch {
+		// En caso de error, retornar los chunks recolectados (posiblemente vacíos)
+		return chunks;
+	}
+	return chunks;
+}
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { AIEngine, AIMetadata } from '@/types/metadata-origin.types';
+import {
+	AIEngine
+} from '@/types/metadata-origin.types';
+import type {
+	Automatic1111Metadata,
+	ComfyUIMetadata,
+	SwarmUIMetadata,
+	MidjourneyMetadata, AIGenerationParameters
+} from '@/types/metadata-origin.types';
 
 const logger = serverLogger.withContext('PNGParser');
+
+// Union type para AIMetadata basado en los tipos existentes
+type AIMetadata = Automatic1111Metadata | ComfyUIMetadata | SwarmUIMetadata | MidjourneyMetadata | AIGenerationParameters;
 
 // Interfaces para PNG chunks
 interface PngTextChunk {
@@ -205,7 +253,7 @@ function parseTextChunk(chunk: any): PngTextChunk | null {
  * Extrae metadatos de IA de los text chunks
  */
 export async function extractAIMetadataFromChunks(textChunks: PngTextChunk[]): Promise<{
-	aiMetadata: Partial<AIMetadata>;
+	aiMetadata: Partial<AIGenerationParameters> & Record<string, unknown>;
 	detectedEngine: AIEngine | null;
 	confidence: number;
 }> {
@@ -214,7 +262,7 @@ export async function extractAIMetadataFromChunks(textChunks: PngTextChunk[]): P
 		keywords: textChunks.map((c) => c.keyword),
 	});
 
-	const aiMetadata: Partial<AIMetadata> = {};
+	const aiMetadata: Partial<AIGenerationParameters> & Record<string, unknown> = {};
 	let detectedEngine: AIEngine | null = null;
 	let confidence = 0;
 
@@ -289,9 +337,9 @@ export async function extractAIMetadataFromChunks(textChunks: PngTextChunk[]): P
 /**
  * Parsea parámetros de Automatic1111/Forge
  */
-function parseAutomatic1111Parameters(text: string): Partial<AIMetadata> {
+function parseAutomatic1111Parameters(text: string): Partial<AIGenerationParameters> & Record<string, unknown> {
 	try {
-		const metadata: Partial<AIMetadata> = {};
+		const metadata: Partial<AIGenerationParameters> & Record<string, unknown> = {};
 
 		// Buscar prompt (todo antes de "Negative prompt:")
 		const negativeIndex = text.indexOf('Negative prompt:');
@@ -302,7 +350,7 @@ function parseAutomatic1111Parameters(text: string): Partial<AIMetadata> {
 			const afterNegative = text.substring(negativeIndex + 16); // "Negative prompt:".length
 			const stepsIndex = afterNegative.search(/\bSteps:/i);
 			if (stepsIndex > 0) {
-				metadata.negativePrompt = afterNegative.substring(0, stepsIndex).trim();
+				metadata.negative_prompt = afterNegative.substring(0, stepsIndex).trim();
 			}
 		} else {
 			// No hay negative prompt, buscar donde empiezan los parámetros
@@ -356,9 +404,9 @@ function parseAutomatic1111Parameters(text: string): Partial<AIMetadata> {
 /**
  * Parsea workflow de ComfyUI
  */
-function parseComfyUIWorkflow(text: string): Partial<AIMetadata> {
+function parseComfyUIWorkflow(text: string): Partial<AIGenerationParameters> & Record<string, unknown> {
 	try {
-		const metadata: Partial<AIMetadata> = {};
+		const metadata: Partial<AIGenerationParameters> & Record<string, unknown> = {};
 
 		// Intentar parsear como JSON
 		let workflow: any;
@@ -380,15 +428,15 @@ function parseComfyUIWorkflow(text: string): Partial<AIMetadata> {
 					if (nodeObj.class_type === 'CLIPTextEncode' && nodeObj.inputs?.text) {
 						if (!metadata.prompt) {
 							metadata.prompt = nodeObj.inputs.text;
-						} else if (!metadata.negativePrompt && nodeObj.inputs.text.toLowerCase().includes('negative')) {
-							metadata.negativePrompt = nodeObj.inputs.text;
+						} else if (!metadata.negative_prompt && nodeObj.inputs.text.toLowerCase().includes('negative')) {
+							metadata.negative_prompt = nodeObj.inputs.text;
 						}
 					}
 
 					// KSampler nodes para parámetros
 					if (nodeObj.class_type === 'KSampler' && nodeObj.inputs) {
 						if (nodeObj.inputs.steps) metadata.steps = Number.parseInt(nodeObj.inputs.steps);
-						if (nodeObj.inputs.cfg) metadata.cfgScale = Number.parseFloat(nodeObj.inputs.cfg);
+						if (nodeObj.inputs.cfg) metadata.cfg_scale = Number.parseFloat(nodeObj.inputs.cfg);
 						if (nodeObj.inputs.sampler_name) metadata.sampler = nodeObj.inputs.sampler_name;
 						if (nodeObj.inputs.scheduler) metadata.scheduler = nodeObj.inputs.scheduler;
 						if (nodeObj.inputs.seed) metadata.seed = Number.parseInt(nodeObj.inputs.seed);
@@ -419,9 +467,9 @@ function parseComfyUIWorkflow(text: string): Partial<AIMetadata> {
 /**
  * Parsea parámetros de SwarmUI
  */
-function parseSwarmUIParameters(text: string): Partial<AIMetadata> {
+function parseSwarmUIParameters(text: string): Partial<AIGenerationParameters> & Record<string, unknown> {
 	try {
-		const metadata: Partial<AIMetadata> = {};
+		const metadata: Partial<AIGenerationParameters> & Record<string, unknown> = {};
 
 		// Intentar parsear como JSON
 		let params: any;
@@ -434,9 +482,9 @@ function parseSwarmUIParameters(text: string): Partial<AIMetadata> {
 		if (params && typeof params === 'object') {
 			// Mapear campos de SwarmUI
 			if (params.prompt) metadata.prompt = params.prompt;
-			if (params.negativeprompt) metadata.negativePrompt = params.negativeprompt;
+			if (params.negative_prompt) metadata.negative_prompt = params.negative_prompt;
 			if (params.steps) metadata.steps = Number.parseInt(params.steps);
-			if (params.cfgscale) metadata.cfgScale = Number.parseFloat(params.cfgscale);
+			if (params.cfg_scale) metadata.cfg_scale = Number.parseFloat(params.cfg_scale);
 			if (params.sampler) metadata.sampler = params.sampler;
 			if (params.scheduler) metadata.scheduler = params.scheduler;
 			if (params.seed) metadata.seed = Number.parseInt(params.seed);
@@ -444,8 +492,8 @@ function parseSwarmUIParameters(text: string): Partial<AIMetadata> {
 			if (params.denoise) metadata.denoise = Number.parseFloat(params.denoise);
 
 			// Timing específico de SwarmUI
-			if (params.generation_time) metadata.generationTime = Number.parseFloat(params.generation_time);
-			if (params.prep_time) metadata.prepTime = Number.parseFloat(params.prep_time);
+			if (params.generation_time) metadata.generation_time = Number.parseFloat(params.generation_time);
+			if (params.prep_time) metadata.prep_time = Number.parseFloat(params.prep_time);
 		}
 
 		return metadata;
@@ -460,9 +508,9 @@ function parseSwarmUIParameters(text: string): Partial<AIMetadata> {
 /**
  * Parsea descripción de Midjourney
  */
-function parseMidjourneyDescription(text: string): Partial<AIMetadata> {
+function parseMidjourneyDescription(text: string): Partial<AIGenerationParameters> & Record<string, unknown> {
 	try {
-		const metadata: Partial<AIMetadata> = {};
+		const metadata: Partial<AIGenerationParameters> & Record<string, unknown> = {};
 
 		// El texto completo es el prompt en Midjourney
 		metadata.prompt = text.trim();
@@ -507,9 +555,9 @@ function parseMidjourneyDescription(text: string): Partial<AIMetadata> {
 /**
  * Parsea datos genéricos de IA
  */
-function parseGenericAIData(text: string): Partial<AIMetadata> {
+function parseGenericAIData(text: string): Partial<AIGenerationParameters> & Record<string, unknown> {
 	try {
-		const metadata: Partial<AIMetadata> = {};
+		const metadata: Partial<AIGenerationParameters> & Record<string, unknown> = {};
 
 		// Intentar extraer información básica
 		if (text.length > 10) {
@@ -528,13 +576,13 @@ function parseGenericAIData(text: string): Partial<AIMetadata> {
 						if (key.includes('prompt') && !key.includes('negative')) {
 							metadata.prompt = value;
 						} else if (key.includes('negative')) {
-							metadata.negativePrompt = value;
+							metadata.negative_prompt = value;
 						} else if (key.includes('model')) {
 							metadata.model = value;
 						} else if (key.includes('steps')) {
 							metadata.steps = Number.parseInt(value) || undefined;
 						} else if (key.includes('cfg') || key.includes('scale')) {
-							metadata.cfgScale = Number.parseFloat(value) || undefined;
+							metadata.cfg_scale = Number.parseFloat(value) || undefined;
 						} else if (key.includes('seed')) {
 							metadata.seed = Number.parseInt(value) || undefined;
 						} else if (key.includes('sampler')) {
@@ -558,7 +606,7 @@ function parseGenericAIData(text: string): Partial<AIMetadata> {
  * Función principal para extraer metadatos completos de PNG
  */
 export async function extractPngMetadata(buffer: Buffer): Promise<{
-	aiMetadata: Partial<AIMetadata>;
+	aiMetadata: Partial<AIGenerationParameters> & Record<string, unknown>;
 	detectedEngine: AIEngine | null;
 	confidence: number;
 	textChunks: PngTextChunk[];

@@ -4,17 +4,10 @@
  * @description Re-exporta los tipos de grupo desde la estructura modular
  */
 
-export type {
-	GroupBase,
-	GroupComplete,
-	GroupSortKey,
-	GroupStatistics,
-	GroupWithStats,
-} from './group/base';
-
+// Barrel legacy (mantener mientras se migra a imports desde './group')
+export type { GroupBase, GroupComplete, GroupSortKey, GroupStatistics, GroupWithStats } from './group/base';
 export { GroupViewMode } from './group/base';
 export * from './group/enums';
-export type {
-	CreateGroupInput,
-	UpdateGroupInput,
-} from './group/types';
+// Exportar tipos de creación/actualización tanto con nombres nuevos como alias legacy
+export type { GroupCreateInput, GroupUpdateInput, GroupViewConfig } from './group/types';
+export type { CreateGroupInput, UpdateGroupInput } from './group/types';

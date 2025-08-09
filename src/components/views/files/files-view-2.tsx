@@ -4,6 +4,7 @@ import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { EntityStatsType } from '@/types/file-browser/entity-stats';
 import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
 import { useImageStore } from '@/store/entities/image';
@@ -162,7 +163,7 @@ export function FilesView(_: ViewProps) {
 	return (
 		<BaseContentView description={`${fileCount} archivos en total`} title="Todos los archivos">
 			<FileBrowser
-				entityType="image"
+				entityType={EntityStatsType.IMAGE}
 				isLoading={isLoading} // Usamos image como base para el FileBrowser
 				items={allFiles}
 				onItemClick={handleFileClick}

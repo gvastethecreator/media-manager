@@ -7,6 +7,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { ConceptBase, ConceptStatistics, ConceptWithStats } from '@/types/entities/concept';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 const logger = serverLogger.withContext('ConceptTransformer');
 
@@ -56,6 +57,7 @@ export function fromDrizzleConcept(
 			counts.groups;
 
 		const stats: ConceptStatistics = {
+			...createDefaultEntityStats(),
 			imageCount: counts.images,
 			videoCount: counts.videos,
 			albumCount: counts.albums,
@@ -69,9 +71,12 @@ export function fromDrizzleConcept(
 			wildcardCount: counts.wildcards,
 			propertyCount: counts.properties,
 			groupCount: counts.groups,
+			conceptCount: 0,
 			totalAssociations,
 			lastUpdated: conceptData.updatedAt,
-		};
+			isDirectory: false,
+			isFile: true,
+		} as ConceptStatistics;
 
 		const _count = {
 			images: counts.images,

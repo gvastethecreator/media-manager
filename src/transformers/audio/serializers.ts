@@ -2,6 +2,7 @@
 
 import type { AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
 import { audioSchema } from '@/types/entities/audio/audio.schema';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 type DrizzleAudio = {
 	id: string;
@@ -44,6 +45,18 @@ export function serializeAudio(data: AudioCreateInput | AudioUpdateInput): Audio
  */
 export function deserializeAudio(drizzleAudio: DrizzleAudio): AudioWithStats {
 	const { duration, format, bitrate, sampleRate, channels, ...baseAudio } = drizzleAudio;
+	const audioStats = {
+		...createDefaultEntityStats(),
+		duration: duration ?? 0,
+		format: format ?? 'mp3',
+		bitrate: bitrate ?? 128,
+		volumePeaks: [],
+		sampleRate: sampleRate ?? 44_100,
+		channels: channels ?? 2,
+		isDirectory: false,
+		isFile: true,
+	};
+
 	return {
 		...baseAudio,
 		duration: duration ?? null,
@@ -52,13 +65,8 @@ export function deserializeAudio(drizzleAudio: DrizzleAudio): AudioWithStats {
 		sampleRate: sampleRate ?? null,
 		channels: channels ?? null,
 		entityType: 'audio' as const,
-		statistics: {
-			duration: duration ?? 0,
-			format: format ?? 'mp3',
-			bitrate: bitrate ?? 128,
-			volumePeaks: [],
-			sampleRate: sampleRate ?? 44_100,
-		},
+		statistics: audioStats,
+		stats: audioStats,
 		path: drizzleAudio.filePath,
 		description: null,
 		hash: '',

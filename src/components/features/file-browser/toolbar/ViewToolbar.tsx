@@ -1,5 +1,5 @@
 import { Columns, Grid, LayoutGrid, List, Settings } from 'lucide-react';
-import React, { useState } from 'react';
+import React, { startTransition, useState } from 'react';
 import { ViewConfigurationPanel } from '@/components/file-browser/view-configuration/ViewConfigurationPanel';
 import { ViewConfigurationSelector } from '@/components/file-browser/view-configuration/ViewConfigurationSelector';
 import { cn } from '@/lib/utils';
@@ -35,7 +35,9 @@ export const ViewToolbar: React.FC<ViewToolbarProps> = ({ className }) => {
 	const [showConfigPanel, setShowConfigPanel] = useState(false);
 
 	const handleViewModeChange = (mode: string) => {
-		setViewMode(mode as any);
+		startTransition(() => {
+			setViewMode(mode as any);
+		});
 	};
 
 	const handleConfigPanelOpen = () => {
@@ -83,7 +85,7 @@ export const ViewToolbar: React.FC<ViewToolbarProps> = ({ className }) => {
 					{/* Selector de modo de vista */}
 					<DropdownMenu>
 						<DropdownMenuTrigger asChild>
-							<Button className="h-8 gap-2" size="sm" variant="outline">
+							<Button className="h-8 gap-2" data-testid="view-mode-trigger" size="sm" variant="outline">
 								{React.createElement(VIEW_MODE_ICONS[currentViewType] || Grid, {
 									className: 'h-4 w-4',
 								})}
@@ -97,6 +99,7 @@ export const ViewToolbar: React.FC<ViewToolbarProps> = ({ className }) => {
 
 								return (
 									<DropdownMenuItem
+										data-testid={`view-mode-${mode}`}
 										className={cn('flex cursor-pointer items-center gap-2', isSelected && 'bg-accent')}
 										key={mode}
 										onClick={() => handleViewModeChange(mode)}

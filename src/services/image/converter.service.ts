@@ -1,5 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { ImageWithStats } from '@/types/entities/image';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 const converterLogger = serverLogger.withContext('ImageConverter');
 
@@ -135,7 +136,7 @@ export const convertServerImageToFileItem = (image: ServerImage): ImageWithStats
 			: null;
 
 		// Crear ImageWithStats compatible
-		const imageWithStats = {
+	const imageWithStats = {
 			id: image.id,
 			name: image.name,
 			description: null,
@@ -161,10 +162,16 @@ export const convertServerImageToFileItem = (image: ServerImage): ImageWithStats
 			addedAt: image.createdAt,
 			entityType: 'image' as const,
 			stats: {
-				viewCount: 0,
-				downloadCount: 0,
-				likeCount: 0,
-				commentCount: 0,
+				...createDefaultEntityStats({
+					size: image.size,
+					lastUpdated: image.updatedAt,
+					mtime: image.updatedAt,
+					birthtime: image.createdAt,
+					type: 'file',
+				}),
+				// Conteos por relación
+				imageCount: 1,
+				videoCount: 0,
 				tagCount: image.tags?.length ?? 0,
 				albumCount: image.albums?.length ?? 0,
 				collectionCount: image.collections?.length ?? 0,
@@ -177,6 +184,22 @@ export const convertServerImageToFileItem = (image: ServerImage): ImageWithStats
 				wildcardCount: image.wildcards?.length ?? 0,
 				propertyCount: image.properties?.length ?? 0,
 				groupCount: image.groups?.length ?? 0,
+				// Totales
+				totalItems: 1,
+				totalAssociations:
+					(image.tags?.length ?? 0) +
+					(image.albums?.length ?? 0) +
+					(image.collections?.length ?? 0) +
+					(image.characters?.length ?? 0) +
+					(image.places?.length ?? 0) +
+					(image.worldItems?.length ?? 0) +
+					(image.concepts?.length ?? 0) +
+					(image.prompts?.length ?? 0) +
+					(image.notes?.length ?? 0) +
+					(image.wildcards?.length ?? 0) +
+					(image.properties?.length ?? 0) +
+					(image.groups?.length ?? 0),
+				// Específico de imagen
 				aspectRatio: image.width && image.height ? image.width / image.height : 1,
 			},
 			thumbnailUrl: thumbnail ? `data:image/jpeg;base64,${thumbnail}` : '',

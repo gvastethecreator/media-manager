@@ -103,7 +103,7 @@ class LRUCache<K, V extends CacheEntry<any>> {
 
 		// Verificar límite de tamaño
 		while (this.cache.size >= this.maxSize) {
-			this.evictLRU();
+			this.evictLeastRecentlyUsed();
 		}
 
 		this.cache.set(key, entry);
@@ -165,7 +165,7 @@ class LRUCache<K, V extends CacheEntry<any>> {
 		return cleaned;
 	}
 
-	private evictLRU(): void {
+	public evictLeastRecentlyUsed(): void {
 		let oldestKey: K | null = null;
 		let oldestTime = Date.now();
 
@@ -361,13 +361,13 @@ export class FileBrowserCacheService {
 
 			// Clear oldest entries by forcing eviction
 			for (let i = 0; i < thumbnailsToRemove; i++) {
-				this.thumbnailCache.evictLRU();
+				this.thumbnailCache.evictLeastRecentlyUsed();
 			}
 			for (let i = 0; i < metadataToRemove; i++) {
-				this.metadataCache.evictLRU();
+				this.metadataCache.evictLeastRecentlyUsed();
 			}
 			for (let i = 0; i < directoriesToRemove; i++) {
-				this.directoryCache.evictLRU();
+				this.directoryCache.evictLeastRecentlyUsed();
 			}
 
 			cacheLogger.info(`🧹 Optimized cache memory usage (was ${totalMemoryMB.toFixed(1)}MB)`);

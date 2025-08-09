@@ -6,6 +6,7 @@
 
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { createDefaultEntityStats } from '@/lib/utils';
 import type {
 	WorldItemComplete,
 	WorldItemCreateInput,
@@ -266,6 +267,7 @@ export function toWorldItemWithStats(worldItem: WorldItemComplete): WorldItemWit
 	) as 'common' | 'uncommon' | 'rare' | 'epic' | 'legendary' | 'mythic' | 'artifact';
 
 	const statistics: WorldItemStatistics = {
+		...createDefaultEntityStats(),
 		// Conteos de relaciones
 		imageCount: _count?.images || 0,
 		videoCount: _count?.videos || 0,

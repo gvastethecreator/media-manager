@@ -126,6 +126,11 @@ export function mergeSettingsData(base: Partial<Settings>, override: Partial<Set
 			devMode: override.advanced?.devMode ?? base.advanced?.devMode ?? false,
 			experimentalFeatures: override.advanced?.experimentalFeatures ?? base.advanced?.experimentalFeatures ?? false,
 		},
+		// Merge superficial del bloque fileBrowser (el validador aplicará defaults)
+		fileBrowser: {
+			...(base as any).fileBrowser,
+			...(override as any).fileBrowser,
+		},
 		version: override.version ?? base.version ?? '1.0.0',
 		lastUpdate: override.lastUpdate ?? base.lastUpdate ?? new Date(),
 		system: {

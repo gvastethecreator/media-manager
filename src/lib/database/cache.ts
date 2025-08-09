@@ -24,8 +24,9 @@ export class CacheManager<T> {
 		this.ttl = options.ttl || 5 * 60 * 1000; // 5 minutes by default
 		this.maxSize = options.maxSize || 1000;
 		this.name = options.name || 'default';
-		this.updateAgeOnGet = options.updateAgeOnGet;
-		this.allowStale = options.allowStale;
+		// Normalizar flags booleanos opcionales
+		this.updateAgeOnGet = options.updateAgeOnGet ?? false;
+		this.allowStale = options.allowStale ?? false;
 	}
 
 	// Función para normalizar las claves para evitar discrepancias

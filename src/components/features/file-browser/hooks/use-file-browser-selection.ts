@@ -96,7 +96,8 @@ export const useFileBrowserSelection = ({
 			setFocusedId(item.id);
 
 			if (onItemClick) {
-				setTimeout(() => onItemClick(item, e), 0);
+				// Llamada directa para evitar latencia perceptible en la UI
+				onItemClick(item, e);
 			}
 		},
 		[toggleSelection, focusedId, items, setSelectedIds, setFocusedId, onItemClick]
@@ -125,7 +126,8 @@ export const useFileBrowserSelection = ({
 			if (onItemClick) {
 				const item = itemsByIdRef.current.get(itemId);
 				if (item) {
-					setTimeout(() => onItemClick(item, e), 0);
+					// Llamada directa para reacción inmediata
+					onItemClick(item, e);
 				}
 			}
 		},

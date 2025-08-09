@@ -5,10 +5,9 @@
  * Extends existing file operations with new functionality required by file browser improvements
  */
 
-import * as path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { createDefaultEntityStats } from '@/lib/utils';
 import { getEntityName, getEntityPath } from '@/lib/utils/entity-properties.utils';
-import { clipboardManager as comprehensiveClipboardManager } from '@/services/clipboard';
 import { toastService } from '@/services/toast';
 import { undoRedoManager } from '@/services/undo-redo/undo-redo-manager';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -16,6 +15,32 @@ import { FileErrorCode } from '@/types/entities/file';
 import { copyFile, deleteFile, getFileInfo, moveFile, renameFile } from './file.service';
 
 const logger = serverLogger.withContext('EnhancedFileOperationsService');
+
+// Helpers de path compatibles con navegador
+const SEP_WIN = '\\';
+const SEP_POSIX = '/';
+const detectSep = (p: string): string => (p.includes(SEP_WIN) ? SEP_WIN : SEP_POSIX);
+const joinPaths = (a: string, b: string): string => {
+	const sep = detectSep(a || b);
+	const aTrim = a.endsWith(sep) ? a.slice(0, -1) : a;
+	const bTrim = b.startsWith(sep) ? b.slice(1) : b;
+	if (!aTrim) {
+		return bTrim;
+	}
+	if (!bTrim) {
+		return aTrim;
+	}
+	return `${aTrim}${sep}${bTrim}`;
+};
+const dirnameCompat = (p: string): string => {
+	if (!p) {
+		return '';
+	}
+	const idxSlash = p.lastIndexOf(SEP_POSIX);
+	const idxBack = p.lastIndexOf(SEP_WIN);
+	const idx = Math.max(idxSlash, idxBack);
+	return idx > 0 ? p.slice(0, idx) : '';
+};
 
 // Función creadora de errores (reutilizada del servicio principal)
 const createFileError = (
@@ -98,22 +123,17 @@ const clipboardManager = new ClipboardManager();
  * Helper function to convert FileInfo to AnyEntityWithStats format
  */
 function convertFileInfoToEntity(fileInfo: any): AnyEntityWithStats {
+	const stats = createDefaultEntityStats({
+		size: Number(fileInfo.size) || 0,
+		mtime: new Date(fileInfo.modifiedAt ?? Date.now()),
+		birthtime: new Date(fileInfo.createdAt ?? fileInfo.modifiedAt ?? Date.now()),
+		type: typeof fileInfo.type === 'string' ? fileInfo.type : 'file',
+	});
+
 	return {
 		...fileInfo,
 		entityType: 'file' as const,
-		stats: {
-			formattedSize: `${fileInfo.size} bytes`,
-			typeLabel: fileInfo.type,
-			iconName: 'file',
-			colorCode: '#666666',
-			daysSinceModified: 0,
-			daysSinceAccessed: 0,
-			isRecent: true,
-			isLarge: fileInfo.size > 100 * 1024 * 1024,
-			formattedModifiedAt: fileInfo.modifiedAt.toLocaleDateString(),
-			childCount: 0,
-			shortPath: fileInfo.relativePath,
-		},
+		stats,
 	} as AnyEntityWithStats;
 }
 
@@ -136,6 +156,7 @@ export class EnhancedFileOperationsService {
 					? `"${getEntityName(items[0])}" copiado al portapapeles`
 					: `${items.length} elementos copiados al portapapeles`;
 			toastService.success(message);
+			await Promise.resolve();
 		} catch (error) {
 			logger.error('❌ Error copying to clipboard:', error);
 			toastService.error('Error al copiar al portapapeles');
@@ -158,6 +179,7 @@ export class EnhancedFileOperationsService {
 					? `"${getEntityName(items[0])}" cortado al portapapeles`
 					: `${items.length} elementos cortados al portapapeles`;
 			toastService.success(message);
+			await Promise.resolve();
 		} catch (error) {
 			logger.error('❌ Error cutting to clipboard:', error);
 			toastService.error('Error al cortar al portapapeles');
@@ -197,59 +219,69 @@ export class EnhancedFileOperationsService {
 				return action.targetData?.copiedItems || [];
 			}
 			// Legacy implementation without undo support
-			const results: AnyEntityWithStats[] = [];
-
-			// Show progress toast for multiple items
-			if (clipboardData.items.length > 1) {
-				const operationText = operation === 'copy' ? 'Copiando' : 'Moviendo';
-				toastService.info(`${operationText} ${clipboardData.items.length} elementos...`);
-			}
-
-			for (const item of clipboardData.items) {
-				const sourcePath = getEntityPath(item);
-				const fileName = getEntityName(item);
-				const destPath = path.join(targetPath, fileName);
-
-				try {
-					if (operation === 'copy') {
-						const result = await copyFile(sourcePath, destPath);
-						if (result.success && result.destInfo) {
-							const entityResult = convertFileInfoToEntity(result.destInfo);
-							results.push(entityResult);
-						}
-					} else if (operation === 'cut') {
-						const result = await moveFile(sourcePath, destPath);
-						if (result.success && result.destInfo) {
-							const entityResult = convertFileInfoToEntity(result.destInfo);
-							results.push(entityResult);
-						}
-					}
-				} catch (itemError) {
-					logger.error(`❌ Error processing item ${fileName}:`, itemError);
-					// Continue with other items, don't fail the entire operation
-				}
-			}
-
-			// Clear clipboard if cut operation was successful
-			if (operation === 'cut' && results.length > 0) {
-				clipboardManager.clear();
-			}
-
-			// Show success toast
-			const operationText = operation === 'copy' ? 'copiados' : 'movidos';
-			const message =
-				results.length === 1
-					? `"${getEntityName(results[0])}" ${operationText.slice(0, -1)} correctamente`
-					: `${results.length} elementos ${operationText} correctamente`;
-			toastService.success(message);
-
-			logger.info('✅ Paste operation completed:', results.length);
-			return results;
+			return await this.legacyPasteWithoutUndo(clipboardData.items, targetPath, operation);
 		} catch (error) {
 			logger.error('❌ Error pasting from clipboard:', error);
 			toastService.error('Error al pegar desde el portapapeles');
 			throw createFileError('No se pudo pegar desde el portapapeles', FileErrorCode.OPERATION_FAILED, error);
 		}
+	}
+
+	private async legacyPasteWithoutUndo(
+		items: AnyEntityWithStats[],
+		targetPath: string,
+		operation: 'copy' | 'cut'
+	): Promise<AnyEntityWithStats[]> {
+		const results: AnyEntityWithStats[] = [];
+
+		if (items.length > 1) {
+			const opText = operation === 'copy' ? 'Copiando' : 'Moviendo';
+			toastService.info(`${opText} ${items.length} elementos...`);
+		}
+
+		const processed = await Promise.all(
+			items.map(async (item) => {
+				const sourcePath = getEntityPath(item);
+				const fileName = getEntityName(item);
+				const destPath = joinPaths(targetPath, fileName);
+				try {
+					if (operation === 'copy') {
+						const result = await copyFile(sourcePath, destPath);
+						if (result.success && result.destInfo) {
+							return convertFileInfoToEntity(result.destInfo);
+						}
+					} else {
+						const result = await moveFile(sourcePath, destPath);
+						if (result.success && result.destInfo) {
+							return convertFileInfoToEntity(result.destInfo);
+						}
+					}
+				} catch (itemError) {
+					logger.error(`❌ Error processing item ${fileName}:`, itemError);
+				}
+				return null;
+			})
+		);
+
+		for (const ent of processed) {
+			if (ent) {
+				results.push(ent);
+			}
+		}
+
+		if (operation === 'cut' && results.length > 0) {
+			clipboardManager.clear();
+		}
+
+		const operationText = operation === 'copy' ? 'copiados' : 'movidos';
+		const message =
+			results.length === 1
+				? `"${getEntityName(results[0])}" ${operationText.slice(0, -1)} correctamente`
+				: `${results.length} elementos ${operationText} correctamente`;
+		toastService.success(message);
+
+		logger.info('✅ Paste operation completed:', results.length);
+		return results;
 	}
 
 	/**
@@ -260,11 +292,11 @@ export class EnhancedFileOperationsService {
 			logger.info('📝 Renaming item:', { from: getEntityName(item), to: newName });
 
 			const oldPath = getEntityPath(item);
-			const newPath = path.join(path.dirname(oldPath), newName);
+			const newPath = joinPaths(dirnameCompat(oldPath), newName);
 
 			if (enableUndo) {
 				// Create and execute undoable action
-				const action = undoRedoManager.createRenameAction(oldPath, newPath);
+				const action = undoRedoManager.createRenameAction(item, newName);
 				await undoRedoManager.execute(action);
 
 				// Return the renamed item data from the action
@@ -321,21 +353,29 @@ export class EnhancedFileOperationsService {
 			const results: AnyEntityWithStats[] = [];
 			const errors: string[] = [];
 
-			for (const item of items) {
-				try {
-					const sourcePath = getEntityPath(item);
-					const fileName = getEntityName(item);
-					const destPath = path.join(targetPath, fileName);
+			const moveResults = await Promise.all(
+				items.map(async (item) => {
+					try {
+						const sourcePath = getEntityPath(item);
+						const fileName = getEntityName(item);
+						const destPath = joinPaths(targetPath, fileName);
 
-					const result = await moveFile(sourcePath, destPath);
+						const result = await moveFile(sourcePath, destPath);
 
-					if (result.success && result.destInfo) {
-						const entityResult = convertFileInfoToEntity(result.destInfo);
-						results.push(entityResult);
+						if (result.success && result.destInfo) {
+							return convertFileInfoToEntity(result.destInfo);
+						}
+					} catch (itemError) {
+						logger.error(`❌ Error moving item ${getEntityName(item)}:`, itemError);
+						errors.push(`Error moviendo "${getEntityName(item)}"`);
 					}
-				} catch (itemError) {
-					logger.error(`❌ Error moving item ${getEntityName(item)}:`, itemError);
-					errors.push(`Error moviendo "${getEntityName(item)}"`);
+					return null;
+				})
+			);
+
+			for (const ent of moveResults) {
+				if (ent) {
+					results.push(ent);
 				}
 			}
 
@@ -382,16 +422,21 @@ export class EnhancedFileOperationsService {
 				const errors: string[] = [];
 				let successCount = 0;
 
-				for (const item of items) {
-					try {
-						const itemPath = getEntityPath(item);
-						await deleteFile(itemPath);
-						successCount++;
-					} catch (itemError) {
-						logger.error(`❌ Error deleting item ${getEntityName(item)}:`, itemError);
-						errors.push(`Error eliminando "${getEntityName(item)}"`);
-					}
-				}
+				const deletions = await Promise.all(
+					items.map(async (item) => {
+						try {
+							const itemPath = getEntityPath(item);
+							await deleteFile(itemPath);
+							return true;
+						} catch (itemError) {
+							logger.error(`❌ Error deleting item ${getEntityName(item)}:`, itemError);
+							errors.push(`Error eliminando "${getEntityName(item)}"`);
+							return false;
+						}
+					})
+				);
+
+				successCount = deletions.filter(Boolean).length;
 
 				// Show results
 				if (successCount > 0) {
@@ -438,19 +483,26 @@ export class EnhancedFileOperationsService {
 				toastService.info(`Copiando ${items.length} elementos...`);
 			}
 
-			for (const item of items) {
-				const sourcePath = getEntityPath(item);
-				const destPath = path.join(targetPath, getEntityName(item));
+			const copyResults = await Promise.all(
+				items.map(async (item) => {
+					const sourcePath = getEntityPath(item);
+					const destPath = joinPaths(targetPath, getEntityName(item));
 
-				try {
-					const result = await copyFile(sourcePath, destPath);
-					if (result.success && result.destInfo) {
-						const entityResult = convertFileInfoToEntity(result.destInfo);
-						results.push(entityResult);
+					try {
+						const result = await copyFile(sourcePath, destPath);
+						if (result.success && result.destInfo) {
+							return convertFileInfoToEntity(result.destInfo);
+						}
+					} catch (itemError) {
+						logger.error(`❌ Error copying item ${getEntityName(item)}:`, itemError);
 					}
-				} catch (itemError) {
-					logger.error(`❌ Error copying item ${getEntityName(item)}:`, itemError);
-					// Continue with other items, don't fail the entire operation
+					return null;
+				})
+			);
+
+			for (const ent of copyResults) {
+				if (ent) {
+					results.push(ent);
 				}
 			}
 
@@ -495,8 +547,5 @@ export class EnhancedFileOperationsService {
 // Create and export enhanced service instance
 export const enhancedFileOperationsService = new EnhancedFileOperationsService();
 
-// Export the comprehensive clipboard manager for external use
-export { comprehensiveClipboardManager as clipboardManager };
-
-// Export types for external use
-export type { ClipboardData };
+// Nota: ClipboardData es interno a este módulo para evitar colisiones con
+// el tipo homónimo exportado por services/clipboard. No exportar aquí ni re-exportar clipboardManager.

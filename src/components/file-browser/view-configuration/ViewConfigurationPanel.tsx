@@ -1,4 +1,4 @@
-import { Columns, Eye, Grid, LayoutGrid, List, Settings, Sliders } from 'lucide-react';
+import { Columns, Grid, LayoutGrid, List, Settings } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
 import { toast } from 'sonner';
 import { useViewConfiguration } from '../../../hooks/use-view-configuration';
@@ -117,7 +117,7 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 		} catch (error) {
 			toast.error('Error al crear el preset');
 		}
-	}, [presetName, presetDescription, currentConfig, createPreset]);
+	}, [presetName, presetDescription, currentConfig, saveAsPreset]);
 
 	const handleExport = useCallback(async () => {
 		try {

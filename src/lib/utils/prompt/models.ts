@@ -295,7 +295,7 @@ export function getModelMetadata(modelId: PromptModel | string): AIModelMetadata
 	try {
 		return AI_MODELS[modelId as PromptModel];
 	} catch (error) {
-		modelsLogger.error('❌ Error al obtener metadatos de modelo:', error);
+			modelsLogger.error('❌ Error al obtener metadatos de modelo:', error);
 		return;
 	}
 }
@@ -308,7 +308,7 @@ export function getAllModels(): AIModelMetadata[] {
 	try {
 		return Object.values(AI_MODELS).sort((a, b) => a.order - b.order);
 	} catch (error) {
-		modelsLogger.error('❌ Error al obtener todos los modelos:', error);
+			modelsLogger.error('❌ Error al obtener todos los modelos:', error);
 		return [];
 	}
 }
@@ -323,7 +323,7 @@ export function getAvailableModels(): AIModelMetadata[] {
 			.filter((model) => model.isAvailable)
 			.sort((a, b) => a.order - b.order);
 	} catch (error) {
-		modelsLogger.error('❌ Error al obtener modelos disponibles:', error);
+			modelsLogger.error('❌ Error al obtener modelos disponibles:', error);
 		return [];
 	}
 }
@@ -339,7 +339,7 @@ export function getModelsByProvider(provider: string): AIModelMetadata[] {
 			.filter((model) => model.provider.toLowerCase() === provider.toLowerCase())
 			.sort((a, b) => a.order - b.order);
 	} catch (error) {
-		modelsLogger.error('❌ Error al obtener modelos por proveedor:', error);
+			modelsLogger.error('❌ Error al obtener modelos por proveedor:', error);
 		return [];
 	}
 }
@@ -353,7 +353,7 @@ export function isValidModel(modelId: string | PromptModel): boolean {
 	try {
 		return Object.values(PromptModel).includes(modelId as PromptModel);
 	} catch (error) {
-		modelsLogger.error('❌ Error al validar modelo:', error);
+			modelsLogger.error('❌ Error al validar modelo:', error);
 		return false;
 	}
 }
@@ -376,7 +376,7 @@ export function getModelName(modelId: string | PromptModel): string {
 		const model = getModelMetadata(modelId);
 		return model?.name || String(modelId);
 	} catch (error) {
-		modelsLogger.error('❌ Error al obtener nombre de modelo:', error);
+			modelsLogger.error('❌ Error al obtener nombre de modelo:', error);
 		return String(modelId);
 	}
 }
@@ -393,9 +393,9 @@ export function modelSupportsFeature(
 ): boolean {
 	try {
 		const model = getModelMetadata(modelId);
-		return model?.supports[feature];
+		return Boolean(model?.supports[feature]);
 	} catch (error) {
-		modelsLogger.error('❌ Error al verificar soporte de característica:', error);
+			modelsLogger.error('❌ Error al verificar soporte de característica:', error);
 		return false;
 	}
 }

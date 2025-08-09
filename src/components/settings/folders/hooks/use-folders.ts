@@ -108,7 +108,7 @@ export function useFolders() {
 				// Asegurarse una vez más que se ha limpiado el estado de procesamiento
 				setIsProcessing(false);
 				setProcessProgress(0);
-			}, 1500); // ⏱️ Reducido el timeout para mayor reactividad
+			}, 1000); // ⏱️ Reducido el timeout para mayor reactividad
 		},
 		[loadFolders, loadStats],
 	);
@@ -275,16 +275,16 @@ export function useFolders() {
 				// Notificar éxito
 				toastService.success("Reindexado global completado correctamente");
 
-				// Recargar datos para reflejar cambios
-				loadFolders().catch((err) => {
+				// Recargar datos para reflejar cambios (carpetas + estadísticas)
+				Promise.all([loadFolders(), loadStats()]).catch((err) => {
 					folderLogger.error(
-						"Error recargando carpetas tras reindexado global:",
+						"Error recargando carpetas/stats tras reindexado global:",
 						err,
 					);
 				});
 			}
 		},
-		[loadFolders],
+		[loadFolders, loadStats],
 	);
 
 	// Función de procesamiento simplificada (sin polling)

@@ -12,6 +12,8 @@ export interface FileBrowserProps {
 	entityType?: EntityStatsType | 'mixed';
 	/** Tipos de entidades específicas a mostrar cuando entityType es 'mixed' */
 	entityTypes?: EntityStatsType[];
+	/** Estado de carga (opcional) */
+	isLoading?: boolean;
 	/** Items específicos a mostrar (para modo manual) */
 	items?: AnyEntityWithStats[];
 	/** Callback cuando se selecciona un item */

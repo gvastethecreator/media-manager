@@ -45,77 +45,42 @@ function PromptCardComponent({
 	const { data: recentImagesData } = useRecentPromptImages(promptId);
 	const [isHovered, setIsHovered] = useState(false);
 
-	// Si no hay datos del prompt o está cargando, mostrar un esqueleto o un mensaje de error
-	if (isLoading) {
-		return (
-			<div
-				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
-					className
-				)}
-			>
-				<p className="text-gray-500">Cargando prompt...</p>
-			</div>
-		);
-	}
+	// Datos base con defaults seguros
+	const name = prompt?.name ?? '';
+	const emoji = prompt?.emoji ?? '🎯';
+	const baseColor = prompt?.color ?? '#0ea5e9';
+	const description = prompt?.description ?? '';
+	const content = prompt?.content ?? '';
+	const category = prompt?.category ?? 'general';
+	const parameters = prompt?.parameters ?? {};
 
-	if (error || !prompt) {
-		return (
-			<div
-				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
-					className
-				)}
-			>
-				<p className="text-red-800">Error: {error?.message || 'Prompt no encontrado'}</p>
-			</div>
-		);
-	}
-
-	// Extraer datos relevantes
-	const {
-		id,
-		name,
-		emoji = '🎯',
-		color = '#0ea5e9',
-		description,
-		content,
-		type, // Usar 'type' en lugar de 'purpose'
-		category = 'general',
-		parameters,
-		isFavorite = false,
-		featuredImage,
-		createdAt,
-		updatedAt,
-	} = prompt;
-
-	// Calcular valores derivados
-	const imagesCount = prompt.stats?.totalImages || 0;
-	const videosCount = prompt.stats?.totalVideos || 0;
-	const collectionsCount = prompt.stats?.totalCollections || 0;
-	const albumsCount = prompt.stats?.totalAlbums || 0;
-	const tagsCount = prompt.stats?.tagsCount || 0;
-	const conceptsCount = prompt.stats?.totalConcepts || 0;
-	const notesCount = prompt.stats?.totalNotes || 0;
-	const charactersCount = prompt.stats?.totalCharacters || 0;
-	const propertiesCount = prompt.stats?.totalProperties || 0;
-	const wildcardsCount = prompt.stats?.totalWildcards || 0;
-	const groupsCount = prompt.stats?.totalGroups || 0;
-	const placesCount = prompt.stats?.totalPlaces || 0;
-	const worldItemsCount = prompt._count?.worldItems || 0;
+	// Calcular valores derivados (seguros si prompt es undefined)
+	const imagesCount = prompt?.stats?.totalImages ?? 0;
+	const videosCount = prompt?.stats?.totalVideos ?? 0;
+	const collectionsCount = prompt?.stats?.totalCollections ?? 0;
+	const albumsCount = prompt?.stats?.totalAlbums ?? 0;
+	const tagsCount = prompt?.stats?.tagsCount ?? 0;
+	const conceptsCount = prompt?.stats?.totalConcepts ?? 0;
+	const notesCount = prompt?.stats?.totalNotes ?? 0;
+	const charactersCount = prompt?.stats?.totalCharacters ?? 0;
+	const propertiesCount = prompt?.stats?.totalProperties ?? 0;
+	const wildcardsCount = prompt?.stats?.totalWildcards ?? 0;
+	const groupsCount = prompt?.stats?.totalGroups ?? 0;
+	const placesCount = prompt?.stats?.totalPlaces ?? 0;
+	const worldItemsCount = prompt?._count?.worldItems ?? 0;
 
 	// Colores para el gradiente
-	const primaryColor = color || '#0ea5e9';
+	const primaryColor = baseColor || '#0ea5e9';
 	const secondaryColor = useMemo(() => {
 		// Si no hay color definido, usar un valor por defecto
-		if (!color) return '#0369a1';
+		if (!baseColor) return '#0369a1';
 
 		// Oscurecer el color primario para el secundario
 		try {
 			// Convertir hex a RGB
-			const r = Number.parseInt(color.slice(1, 3), 16);
-			const g = Number.parseInt(color.slice(3, 5), 16);
-			const b = Number.parseInt(color.slice(5, 7), 16);
+			const r = Number.parseInt(baseColor.slice(1, 3), 16);
+			const g = Number.parseInt(baseColor.slice(3, 5), 16);
+			const b = Number.parseInt(baseColor.slice(5, 7), 16);
 
 			// Oscurecer los componentes
 			const darkenFactor = 0.7;
@@ -129,7 +94,7 @@ function PromptCardComponent({
 			// Si hay algún error, volver al valor por defecto
 			return '#0369a1';
 		}
-	}, [color]);
+	}, [baseColor]);
 
 	// Relaciones para mostrar en el contenido
 	const relationCounts = {
@@ -154,7 +119,7 @@ function PromptCardComponent({
 	);
 
 	// 'parameters' ya es un objeto en PromptWithStats, no necesita parseo manual
-	const parsedParameters = parameters || {};
+	const parsedParameters = parameters;
 
 	// Definir estilos de la tarjeta TCG
 	const cardStyle = useMemo(() => {
@@ -209,6 +174,37 @@ function PromptCardComponent({
 		collectionsCount,
 		tagsCount,
 	]);
+
+	// Render de estados tempranos manteniendo hooks al tope
+	if (isLoading) {
+		return (
+			<div
+				className={cn(
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
+					className
+				)}
+			>
+				<p className="text-gray-500">Cargando prompt...</p>
+			</div>
+		);
+	}
+
+	if (error || !prompt) {
+		return (
+			<div
+				className={cn(
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
+					className
+				)}
+			>
+				<p className="text-red-800">Error: {error?.message || 'Prompt no encontrado'}</p>
+			</div>
+		);
+	}
+
+	// A partir de aquí, prompt está definido
+	const createdAt = prompt.createdAt;
+	const updatedAt = prompt.updatedAt;
 
 	return (
 		<motion.div

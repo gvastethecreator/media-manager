@@ -37,10 +37,12 @@ export {
 	determineFileType,
 	determineMimeType,
 	generateFileId,
-	mapStatsToFileInfo,
 	serializeDirectoryContents,
 	serializeFileOperationResult,
 } from './utils';
+// Server-only helpers (no se deben usar en cliente)
+// Nota: no reexportamos helpers server-only desde el barrel para evitar que código cliente
+// los importe accidentalmente. Importar directamente desde './utils.server' cuando sea necesario en server.
 // --- Validadores y esquemas ---
 export {
 	type FileBase,

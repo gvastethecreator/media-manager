@@ -1,6 +1,6 @@
 import { AlertCircle, Filter, ImageIcon, RefreshCw, SlidersHorizontal, Trash2, UploadCloud } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MemoizedImageCard } from '@/components/cards/image-card';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import {
@@ -23,7 +23,6 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
-import type { BaseContentProps } from '@/components/views/base/types';
 import {
 	deleteUploadedImageFromApi,
 	getUploadedImagesFromApi,
@@ -31,7 +30,7 @@ import {
 } from '@/lib/api/client/uploaded-images.client';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { cn } from '@/lib/utils';
+import { cn, createDefaultEntityStats } from '@/lib/utils';
 import { toastService } from '@/services/toast';
 import { UploadedFileType } from '@/types/entities/uploaded-image/types';
 import type { EntityWithStats } from '@/types/migration';
@@ -46,6 +45,7 @@ export type UploadedImageFilters = {
 };
 
 export function UploadedImagesView() {
+	const containerRef = useRef<HTMLDivElement>(null);
 	const [isLoading, setIsLoading] = useState(true);
 	const [items, setItems] = useState<EntityWithStats[]>([]);
 	const [filters, setFilters] = useState<UploadedImageFilters>({});
@@ -69,25 +69,33 @@ export function UploadedImagesView() {
 			});
 
 			setItems(
-				response.items.map((item) => ({
-					id: item.id,
-					name: item.name,
-					entityType: 'uploaded-image' as const,
-					description: null,
-					createdAt: item.createdAt ? new Date(item.createdAt) : new Date(),
-					updatedAt: item.updatedAt ? new Date(item.updatedAt) : new Date(),
-					stats: {
-						totalItems: 1,
-						totalAssociations: 0,
-						lastUpdated: new Date(),
-					},
-				})) || []
+				response.items.map((item) => {
+					const createdAt = item.createdAt ? new Date(item.createdAt) : new Date();
+					const updatedAt = item.updatedAt ? new Date(item.updatedAt) : createdAt;
+					return {
+						id: item.id,
+						name: item.name,
+						entityType: 'uploaded-image' as const,
+						description: null,
+						createdAt,
+						updatedAt,
+						stats: createDefaultEntityStats({
+							totalItems: 1,
+							totalAssociations: 0,
+							lastUpdated: updatedAt,
+							size: item.size ?? 0,
+							mtime: updatedAt,
+							birthtime: createdAt,
+							type: 'file',
+						}),
+					};
+				}) || []
 			);
 			setTotalItems(response.total || 0);
 			setTotalPages(Math.ceil((response.total || 0) / (response.pageSize || 20)));
 			setIsLoading(false);
-		} catch (error) {
-			viewLogger.error('Error al cargar imágenes:', error);
+		} catch (err) {
+			viewLogger.error('Error al cargar imágenes:', err);
 			toastService.error('No se pudieron cargar las imágenes subidas.');
 			setIsLoading(false);
 		}
@@ -122,8 +130,8 @@ export function UploadedImagesView() {
 				);
 				loadImages(); // Recargamos la lista de imágenes
 				setIsUploading(false);
-			} catch (error) {
-				viewLogger.error('Error al subir imágenes:', error);
+			} catch (err) {
+				viewLogger.error('Error al subir imágenes:', err);
 				toastService.error('No se pudieron subir las imágenes.');
 				setIsUploading(false);
 			}
@@ -139,24 +147,15 @@ export function UploadedImagesView() {
 				toastService.success('La imagen se ha eliminado correctamente.');
 				setSelectedImage(null);
 				loadImages();
-			} catch (error) {
-				viewLogger.error('Error al eliminar imagen:', error);
+			} catch (err) {
+				viewLogger.error('Error al eliminar imagen:', err);
 				toastService.error('No se pudo eliminar la imagen.');
 			}
 		},
 		[loadImages]
 	);
 
-	// Manejador para el evento de arrastrar y soltar
-	const handleDrop = useCallback(
-		(e: React.DragEvent<HTMLDivElement>) => {
-			e.preventDefault();
-			if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-				handleFileUpload(e.dataTransfer.files);
-			}
-		},
-		[handleFileUpload]
-	);
+	// (DnD movido a listeners globales más abajo)
 
 	// Manejador para la entrada de archivos
 	const handleFileInput = useCallback(
@@ -235,21 +234,91 @@ export function UploadedImagesView() {
 		[handleSelectItem]
 	);
 
-	// Props compartidos con el componente base
-	const _contentProps: BaseContentProps = {
-		items: adaptedItems,
-		isLoading,
-		toggleItemSelection: adaptedToggleItemSelection,
-		emptyState: {
-			icon: ImageIcon,
-			title: 'No hay imágenes subidas',
-			description:
-				'No se encontraron imágenes subidas. Sube imágenes haciendo clic en el botón de arriba o arrastra y suelta archivos aquí.',
-		},
+	// Props compartidos con un posible componente base: no utilizados actualmente
+
+	// Mover gestión de DnD a listeners globales limitados al contenedor para evitar a11y en elementos estáticos
+	useEffect(() => {
+		const handleWindowDragOver = (e: DragEvent) => {
+			if (!containerRef.current) {
+				return;
+			}
+			if (e.target && containerRef.current.contains(e.target as Node)) {
+				e.preventDefault();
+			}
+		};
+		const handleWindowDrop = (e: DragEvent) => {
+			if (!containerRef.current) {
+				return;
+			}
+			if (e.target && containerRef.current.contains(e.target as Node)) {
+				e.preventDefault();
+				if (e.dataTransfer?.files?.length) {
+					// Adaptar a FileList usando DataTransfer.files
+					handleFileUpload(e.dataTransfer.files)
+						.then(() => {
+							viewLogger.debug?.('Subida por DnD completada');
+						})
+						.catch((uploadErr) => {
+							viewLogger.error('Error en subida por DnD:', uploadErr);
+						});
+				}
+			}
+		};
+		window.addEventListener('dragover', handleWindowDragOver);
+		window.addEventListener('drop', handleWindowDrop);
+		return () => {
+			window.removeEventListener('dragover', handleWindowDragOver);
+			window.removeEventListener('drop', handleWindowDrop);
+		};
+	}, [handleFileUpload]);
+
+	const renderMainContent = () => {
+		if (isLoading) {
+			return (
+				<div className="flex h-64 items-center justify-center">
+					<RefreshCw className="h-10 w-10 animate-spin text-primary" />
+				</div>
+			);
+		}
+		if (error) {
+			return (
+				<Alert className="m-4" variant="destructive">
+					<AlertCircle className="h-4 w-4" />
+					<AlertTitle>Error</AlertTitle>
+					<AlertDescription>{error}</AlertDescription>
+				</Alert>
+			);
+		}
+		if (adaptedItems.length === 0) {
+			return (
+				<div className="flex h-64 flex-col items-center justify-center p-4">
+					<ImageIcon className="mb-4 h-16 w-16 text-muted-foreground" />
+					<h3 className="mb-2 font-medium text-lg">No hay imágenes subidas</h3>
+					<p className="max-w-md text-center text-muted-foreground text-sm">
+						No se encontraron imágenes subidas. Sube imágenes haciendo clic en el botón de arriba o arrastra y suelta
+						archivos aquí.
+					</p>
+				</div>
+			);
+		}
+		return (
+			<div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+				{adaptedItems.map((image) => (
+					<MemoizedImageCard
+						aspectRatio="square"
+						className={cn(selectedImage === image.id && 'ring-2 ring-primary')}
+						imageId={image.id}
+						key={image.id}
+						onClick={() => handleSelectItem(image)}
+						showTags={true}
+					/>
+				))}
+			</div>
+		);
 	};
 
 	return (
-		<div className="flex h-full w-full flex-col" onDragOver={(e) => e.preventDefault()} onDrop={handleDrop}>
+		<div ref={containerRef} className="flex h-full w-full flex-col">
 			{/* Barra de herramientas */}
 			<div className="flex items-center justify-between border-b p-2">
 				<div className="flex items-center gap-2">
@@ -406,39 +475,7 @@ export function UploadedImagesView() {
 
 			{/* Contenido principal con soporte para arrastrar y soltar */}
 			<div className="relative flex-1">
-				{isLoading ? (
-					<div className="flex h-64 items-center justify-center">
-						<RefreshCw className="h-10 w-10 animate-spin text-primary" />
-					</div>
-				) : error ? (
-					<Alert className="m-4" variant="destructive">
-						<AlertCircle className="h-4 w-4" />
-						<AlertTitle>Error</AlertTitle>
-						<AlertDescription>{error}</AlertDescription>
-					</Alert>
-				) : adaptedItems.length === 0 ? (
-					<div className="flex h-64 flex-col items-center justify-center p-4">
-						<ImageIcon className="mb-4 h-16 w-16 text-muted-foreground" />
-						<h3 className="mb-2 font-medium text-lg">No hay imágenes subidas</h3>
-						<p className="max-w-md text-center text-muted-foreground text-sm">
-							No se encontraron imágenes subidas. Sube imágenes haciendo clic en el botón de arriba o arrastra y suelta
-							archivos aquí.
-						</p>
-					</div>
-				) : (
-					<div className="grid grid-cols-2 gap-4 p-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-						{adaptedItems.map((image) => (
-							<MemoizedImageCard
-								aspectRatio="square"
-								className={cn(selectedImage === image.id && 'ring-2 ring-primary')}
-								imageId={image.id}
-								key={image.id}
-								onClick={() => handleSelectItem(image)}
-								showTags={true}
-							/>
-						))}
-					</div>
-				)}
+				{renderMainContent()}
 
 				{/* Overlay para arrastrar y soltar archivos */}
 				{isUploading && (

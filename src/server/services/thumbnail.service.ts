@@ -1,15 +1,26 @@
 import { count, desc, eq, isNull, not, sql, sum } from 'drizzle-orm';
 import { existsSync } from 'fs';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
+import { thumbsConfig } from '@/config/thumbs';
+import { LRUCache } from 'lru-cache';
+import PQueue from 'p-queue';
 import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
 import { generateThumbnail } from '@/lib/image/thumbnail';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { thumbnailService as baseThumbnailService } from '@/services/thumbnail/index'; // Renombrado para evitar conflicto
+import type { ThumbnailResult as LibThumbResult } from '@/lib/image/thumbnail';
 import type { ThumbnailStats } from '@/types/stats';
 import type { LastProcessedThumbnail, ProcessOptions } from '@/types/thumbnails';
 
 const thumbLogger = serverLogger.withContext('ThumbnailService');
+
+// LRU en memoria para resultados recientes
+const memoryCache = new LRUCache<string, LibThumbResult>({ max: thumbsConfig.memory.maxEntries });
+// Cola para evitar tormenta de solicitudes de la misma imagen
+const queue = new PQueue({ concurrency: thumbsConfig.concurrency });
+// Deduplicación de tareas en vuelo por clave (path+quality)
+const inflight = new Map<string, Promise<LibThumbResult>>();
 
 export interface ThumbnailResponse {
 	thumbnailUrl?: string;
@@ -75,8 +86,8 @@ export async function getThumbnail(
 			});
 		}
 
-		// Si ya tiene thumbnail, devolverlo
-		if (image.thumbnail) {
+	// Si ya tiene thumbnail en DB y el proveedor activo es DB, devolverlo
+	if (image.thumbnail && thumbsConfig.provider === 'db') {
 			// No devolver la base64, sino la URL de la API
 			const thumbnailUrl = `/api/images/${image.id}/thumbnail`;
 
@@ -114,28 +125,67 @@ export async function getThumbnail(
 			};
 		}
 
-		// Si no tiene thumbnail, generarlo
-		thumbLogger.info('🔄 Generando nuevo thumbnail:', { id, path: image.path });
+	// Si el proveedor es disco o no hay thumbnail en DB, generar/servir desde disco
+	thumbLogger.info('🔄 Generando/servidor thumbnail (provider=' + thumbsConfig.provider + '):', { id, path: image.path });
 
 		try {
-			const thumbnail = await generateThumbnail(image.path, { quality: validQuality });
+			// Clave por ruta + calidad para deduplicar y cachear
+			const memKey = `${image.path}:${validQuality}`;
+
+			// Si está en memoria, usarlo
+			const cached = memoryCache.get(memKey);
+			let thumbnail: LibThumbResult;
+			if (cached) {
+				// Actualizar en background si se quisiera: aquí retornamos directo
+				thumbnail = cached;
+			} else {
+				// Si hay una tarea en vuelo, esperarla; si no, crearla a través de la cola
+				const existing = inflight.get(memKey);
+				if (existing) {
+					thumbnail = await existing;
+					inflight.delete(memKey);
+				} else {
+					const newPromise: Promise<LibThumbResult> = queue.add(async (): Promise<LibThumbResult> => {
+						const result = await generateThumbnail(image.path, { quality: validQuality });
+						memoryCache.set(memKey, result);
+						return result;
+					}, { priority: 0, throwOnTimeout: true });
+					inflight.set(memKey, newPromise);
+					thumbnail = await newPromise;
+					inflight.delete(memKey);
+				}
+			}
 
 			if (!(thumbnail && thumbnail.buffer)) {
 				throw new Error('No se pudo generar el thumbnail');
 			}
 
-			// Actualizar la imagen con el nuevo thumbnail
-			await db
-				.update(images)
-				.set({
-					thumbnail: thumbnail.buffer,
-					thumbnailSize: thumbnail.buffer.length,
-					thumbnailWidth: thumbnail.width,
-					thumbnailHeight: thumbnail.height,
-					thumbnailError: null, // Limpiar error previo si existía
-					thumbnailMimeType: `image/${thumbnail.format}`,
-				})
-				.where(eq(images.id, id));
+			// Persistir en DB solo si el proveedor es DB
+			if (thumbsConfig.provider === 'db') {
+				await db
+					.update(images)
+					.set({
+						thumbnail: thumbnail.buffer,
+						thumbnailSize: thumbnail.buffer.length,
+						thumbnailWidth: thumbnail.width,
+						thumbnailHeight: thumbnail.height,
+						thumbnailError: null, // Limpiar error previo si existía
+						thumbnailMimeType: `image/${thumbnail.format}`,
+					})
+					.where(eq(images.id, id));
+			} else {
+				// Registrar metadatos mínimos para estadísticas
+				await db
+					.update(images)
+					.set({
+						thumbnailSize: thumbnail.buffer.length,
+						thumbnailWidth: thumbnail.width,
+						thumbnailHeight: thumbnail.height,
+						thumbnailError: null,
+						thumbnailMimeType: `image/${thumbnail.format}`,
+					})
+					.where(eq(images.id, id));
+			}
 
 			thumbLogger.info('✅ Nuevo thumbnail generado (servido por API):', {
 				id,
@@ -144,6 +194,7 @@ export async function getThumbnail(
 				height: thumbnail.height,
 			});
 
+			// Responder URL consistente; si provider es disk, la ruta sigue siendo la misma
 			return {
 				thumbnailUrl: `/api/images/${id}/thumbnail`,
 				width: thumbnail.width,

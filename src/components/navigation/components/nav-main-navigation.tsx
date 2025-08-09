@@ -360,7 +360,10 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 														{!isCollapsed && (
 															<div className="flex items-center gap-1">
 																{child.count !== undefined && (
-																	<span className="min-w-[18px] text-right text-[10px] text-muted-foreground tabular-nums">
+																	<span
+																		className="min-w-[18px] text-right text-[10px] text-muted-foreground tabular-nums"
+																		data-testid={`nav-count-${child.id}`}
+																	>
 																		{child.count}
 																	</span>
 																)}

@@ -11,6 +11,8 @@ const buttonVariants = cva(
 			variant: {
 				default: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
 				primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
+				// Alias para enlaces estilizados; los componentes que usan variant="link" esperaban un estilo de enlace
+				link: 'bg-transparent text-primary hover:underline underline-offset-4 p-0 h-auto',
 				mono: 'bg-zinc-950 text-white hover:bg-zinc-950/90 data-[state=open]:bg-zinc-950/90 dark:bg-zinc-300 dark:text-black dark:data-[state=open]:bg-zinc-300/90 dark:hover:bg-zinc-300/90',
 				destructive:
 					'bg-destructive text-destructive-foreground hover:bg-destructive/90 data-[state=open]:bg-destructive/90',
@@ -37,6 +39,8 @@ const buttonVariants = cva(
 				dashed: '',
 			},
 			size: {
+				// Alias solicitado por varios componentes legacy que usan size="default"; equivalente a md
+				default: 'h-8.5 gap-1.5 rounded-md px-3 text-[0.8125rem] leading-(--text-sm--line-height) [&_svg:not([class*=size-])]:size-4',
 				lg: 'h-10 gap-1.5 rounded-md px-4 text-sm [&_svg:not([class*=size-])]:size-4',
 				md: 'h-8.5 gap-1.5 rounded-md px-3 text-[0.8125rem] leading-(--text-sm--line-height) [&_svg:not([class*=size-])]:size-4',
 				sm: 'h-7 gap-1.25 rounded-md px-2.5 text-xs [&_svg:not([class*=size-])]:size-3.5',
@@ -55,10 +59,10 @@ const buttonVariants = cva(
 				icon: 'shrink-0 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
 				link: 'h-auto rounded-none bg-transparent p-0 text-primary hover:bg-transparent data-[state=open]:bg-transparent',
 				input: `
-            justify-start font-normal hover:bg-background [&_svg]:transition-colors [&_svg]:hover:text-foreground data-[state=open]:bg-background 
-            focus-visible:border-ring focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-ring/30 
-            [[data-state=open]>&]:border-ring [[data-state=open]>&]:outline-hidden [[data-state=open]>&]:ring-[3px] 
-            [[data-state=open]>&]:ring-ring/30 
+            justify-start font-normal hover:bg-background [&_svg]:transition-colors [&_svg]:hover:text-foreground data-[state=open]:bg-background
+            focus-visible:border-ring focus-visible:outline-hidden focus-visible:ring-[3px] focus-visible:ring-ring/30
+            [[data-state=open]>&]:border-ring [[data-state=open]>&]:outline-hidden [[data-state=open]>&]:ring-[3px]
+            [[data-state=open]>&]:ring-ring/30
             aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10 dark:aria-invalid:border-destructive dark:aria-invalid:ring-destructive/20
             in-data-[invalid=true]:border-destructive/60 in-data-[invalid=true]:ring-destructive/10  dark:in-data-[invalid=true]:border-destructive dark:in-data-[invalid=true]:ring-destructive/20
           `,

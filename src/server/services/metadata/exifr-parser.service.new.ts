@@ -50,14 +50,8 @@ export async function extractMetadata(buffer: Buffer): Promise<TechnicalMetadata
  */
 async function extractExifData(buffer: Buffer): Promise<ExifData | null> {
 	try {
-		const exifData = await exifr.parse(buffer, {
-			// EXIF básico
-			ifd0: true,
-			ifd1: true,
-			exif: true,
-			gps: true,
-			interop: true,
-		});
+		// Obtener todos los tags disponibles y seleccionar los relevantes para nuestro ExifData
+		const exifData = await exifr.parse(buffer);
 
 		if (!exifData) {
 			return null;
@@ -97,10 +91,9 @@ async function extractExifData(buffer: Buffer): Promise<ExifData | null> {
 						}
 					: undefined,
 
-			// Metadatos técnicos adicionales
+			// Metadatos técnicos adicionales compatibles con nuestros tipos
 			colorSpace: exifData.ColorSpace || undefined,
 			compression: exifData.Compression || undefined,
-			photometricInterpretation: exifData.PhotometricInterpretation || undefined,
 			xResolution: exifData.XResolution || undefined,
 			yResolution: exifData.YResolution || undefined,
 			resolutionUnit: exifData.ResolutionUnit || undefined,
@@ -116,20 +109,18 @@ async function extractExifData(buffer: Buffer): Promise<ExifData | null> {
  */
 async function extractIptcData(buffer: Buffer): Promise<IptcData | null> {
 	try {
-		const iptcData = await exifr.parse(buffer, {
-			iptc: true,
-		});
+		const iptcData = await exifr.parse(buffer);
 
-		if (!(iptcData && iptcData.iptc)) {
+		if (!(iptcData && (iptcData as any).iptc)) {
 			return null;
 		}
 
-		const iptc = iptcData.iptc;
+		const iptc = (iptcData as any).iptc;
 
 		return {
-			// Información del objeto
-			headline: iptc.Headline || undefined,
-			caption: iptc.Caption || iptc['Caption-Abstract'] || undefined,
+			// Identificación y contenido
+			title: iptc.ObjectName || iptc['Object Name'] || iptc.Headline || undefined,
+			description: iptc.Caption || iptc['Caption-Abstract'] || undefined,
 			keywords: iptc.Keywords || undefined,
 
 			// Creador
@@ -137,28 +128,20 @@ async function extractIptcData(buffer: Buffer): Promise<IptcData | null> {
 			bylineTitle: iptc.BylineTitle || iptc['By-line Title'] || undefined,
 			credit: iptc.Credit || undefined,
 			source: iptc.Source || undefined,
+			copyright: iptc.CopyrightNotice || iptc['Copyright Notice'] || undefined,
 
-			// Copyright
-			copyrightNotice: iptc.CopyrightNotice || iptc['Copyright Notice'] || undefined,
-
-			// Fechas
+			// Fechas y ubicación
 			dateCreated: iptc.DateCreated || iptc['Date Created'] || undefined,
 			timeCreated: iptc.TimeCreated || iptc['Time Created'] || undefined,
-
-			// Ubicación
 			city: iptc.City || undefined,
-			provinceState: iptc.ProvinceState || iptc['Province-State'] || undefined,
-			countryName: iptc.CountryName || iptc['Country-Primary Location Name'] || undefined,
+			state: iptc.ProvinceState || iptc['Province-State'] || undefined,
+			country: iptc.CountryName || iptc['Country-Primary Location Name'] || undefined,
 			countryCode: iptc.CountryCode || iptc['Country-Primary Location Code'] || undefined,
 
 			// Categorización
 			category: iptc.Category || undefined,
 			supplementalCategories: iptc.SupplementalCategories || iptc['Supplemental Categories'] || undefined,
 			urgency: iptc.Urgency || undefined,
-
-			// Identificación
-			objectName: iptc.ObjectName || iptc['Object Name'] || undefined,
-			specialInstructions: iptc.SpecialInstructions || iptc['Special Instructions'] || undefined,
 		};
 	} catch (error) {
 		logger.debug('Error extrayendo datos IPTC', { error });
@@ -171,17 +154,15 @@ async function extractIptcData(buffer: Buffer): Promise<IptcData | null> {
  */
 async function extractXmpData(buffer: Buffer): Promise<XmpData | null> {
 	try {
-		const xmpData = await exifr.parse(buffer, {
-			xmp: true,
-		});
+		const xmpData = await exifr.parse(buffer);
 
-		if (!(xmpData && xmpData.xmp)) {
+		if (!(xmpData && (xmpData as any).xmp)) {
 			return null;
 		}
 
-		const xmp = xmpData.xmp;
+		const xmp = (xmpData as any).xmp;
 
-		return {
+		const result: XmpData = {
 			// Dublin Core
 			title: xmp.title || xmp['dc:title'] || undefined,
 			description: xmp.description || xmp['dc:description'] || undefined,
@@ -189,22 +170,33 @@ async function extractXmpData(buffer: Buffer): Promise<XmpData | null> {
 			creator: xmp.creator || xmp['dc:creator'] || undefined,
 			rights: xmp.rights || xmp['dc:rights'] || undefined,
 
-			// XMP Rights Management
-			marked: xmp.marked || xmp['xmpRights:Marked'] || undefined,
-			webStatement: xmp.webStatement || xmp['xmpRights:WebStatement'] || undefined,
+			// Adobe XMP
+			creatorTool: xmp['xmp:CreatorTool'] || xmp.creatorTool || undefined,
+			rating: xmp['xmp:Rating'] || xmp.rating || undefined,
+			createDate: xmp['xmp:CreateDate'] || xmp.createDate || undefined,
+			modifyDate: xmp['xmp:ModifyDate'] || xmp.modifyDate || undefined,
 
-			// Photoshop
-			instructions: xmp.instructions || xmp['photoshop:Instructions'] || undefined,
-			headline: xmp.headline || xmp['photoshop:Headline'] || undefined,
-			captionWriter: xmp.captionWriter || xmp['photoshop:CaptionWriter'] || undefined,
+			// Adobe Photoshop
+			photoshopColorMode: xmp['photoshop:ColorMode'] || undefined,
+			photoshopICCProfile: xmp['photoshop:ICCProfile'] || undefined,
+			photoshopHistory: xmp['photoshop:History'] || undefined,
 
 			// Camera Raw
-			rawFileName: xmp.rawFileName || xmp['crs:RawFileName'] || undefined,
-			version: xmp.version || xmp['crs:Version'] || undefined,
+			cameraRawSettings: xmp['crs:Settings'] || undefined,
 
-			// Metadatos específicos de IA (pueden estar en XMP)
-			aiMetadata: extractAIMetadataFromXmp(xmp),
+			// Metadatos personalizados
+			customFields: {},
 		};
+
+		// Campos adicionales no modelados explícitamente
+		const rightsMarked = xmp.marked || xmp['xmpRights:Marked'];
+		const rightsWeb = xmp.webStatement || xmp['xmpRights:WebStatement'];
+		const ai = extractAIMetadataFromXmp(xmp);
+		if (rightsMarked !== undefined) (result.customFields as any).rightsMarked = rightsMarked;
+		if (rightsWeb !== undefined) (result.customFields as any).rightsWebStatement = rightsWeb;
+		if (ai) (result.customFields as any).aiMetadata = ai;
+
+		return result;
 	} catch (error) {
 		logger.debug('Error extrayendo datos XMP', { error });
 		return null;
@@ -245,11 +237,8 @@ function extractAIMetadataFromXmp(xmp: any): Record<string, any> | undefined {
  */
 export async function hasMetadata(buffer: Buffer): Promise<boolean> {
 	try {
-		const hasExif = await exifr.parse(buffer, { ifd0: true, exif: true });
-		const hasIptc = await exifr.parse(buffer, { iptc: true });
-		const hasXmp = await exifr.parse(buffer, { xmp: true });
-
-		return !!(hasExif || hasIptc || hasXmp);
+		const data = await exifr.parse(buffer);
+		return !!(data && (data.Make || (data as any).iptc || (data as any).xmp));
 	} catch {
 		return false;
 	}
@@ -270,15 +259,15 @@ export async function extractSpecificMetadata(
 
 	try {
 		if (options.exif) {
-			result.exif = await extractExifData(buffer);
+			result.exif = (await extractExifData(buffer)) ?? undefined;
 		}
 
 		if (options.iptc) {
-			result.iptc = await extractIptcData(buffer);
+			result.iptc = (await extractIptcData(buffer)) ?? undefined;
 		}
 
 		if (options.xmp) {
-			result.xmp = await extractXmpData(buffer);
+			result.xmp = (await extractXmpData(buffer)) ?? undefined;
 		}
 	} catch (error) {
 		logger.error('Error en extracción específica de metadatos', { error });

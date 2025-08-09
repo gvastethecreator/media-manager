@@ -38,10 +38,9 @@ export function PropertiesSettings() {
 
 			if (searchQuery) {
 				const normalizedQuery = searchQuery.toLowerCase();
-				matches =
-					matches &&
-					(property.name.toLowerCase().includes(normalizedQuery) ||
-						property.description?.toLowerCase().includes(normalizedQuery));
+				const nameMatches = property.name.toLowerCase().includes(normalizedQuery);
+				const descMatches = property.description ? property.description.toLowerCase().includes(normalizedQuery) : false;
+				matches = matches && (nameMatches || descMatches);
 			}
 
 			if (selectedCategories.length > 0) {
@@ -49,7 +48,7 @@ export function PropertiesSettings() {
 			}
 
 			if (onlyFavorites) {
-				matches = matches && property.isFavorite;
+				matches = matches && !!property.isFavorite;
 			}
 
 			return matches;

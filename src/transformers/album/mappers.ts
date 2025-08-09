@@ -3,10 +3,11 @@
  * @module transformers/album/mappers
  * @description Contiene funciones para transformar datos de la entidad Album.
  * ✅ MIGRADO A DRIZZLE - Julio 2025
- 
+
  */
 
 import type { AlbumCreateInput, AlbumStatistics, AlbumWithStats } from '../../types/entities/album/index';
+import { createDefaultEntityStats } from '@/lib/utils';
 
 /**
  * Tipo para datos de álbum que vienen de Drizzle con relaciones
@@ -181,6 +182,7 @@ export function toAlbumWithStats(drizzleAlbum: DrizzleAlbumWithRelations): Album
 	// Calcular estadísticas basadas en las relaciones disponibles
 	// Si las relaciones no están cargadas, usar los valores de los campos directos
 	const stats: AlbumStatistics = {
+		...createDefaultEntityStats(),
 		imageCount: drizzleAlbum.images?.length ?? drizzleAlbum.totalImages ?? 0,
 		videoCount: drizzleAlbum.videos?.length ?? drizzleAlbum.totalVideos ?? 0,
 		collectionCount: drizzleAlbum.collections?.length ?? 0,
@@ -194,7 +196,10 @@ export function toAlbumWithStats(drizzleAlbum: DrizzleAlbumWithRelations): Album
 		wildcardCount: drizzleAlbum.wildcards?.length ?? 0,
 		propertyCount: drizzleAlbum.properties?.length ?? 0,
 		groupCount: drizzleAlbum.groups?.length ?? 0,
-	};
+		// Propiedades adicionales de AlbumStatistics
+		isDirectory: false,
+		isFile: true,
+	} as AlbumStatistics;
 
 	// Crear el objeto AlbumWithStats
 	const albumWithStats: AlbumWithStats = {

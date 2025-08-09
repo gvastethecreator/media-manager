@@ -176,7 +176,10 @@ export const ListView = memo<ListViewProps>(function ListViewComponent({
 	// Navegación por teclado para vista de lista	// Configurar virtualizador
 	const rowVirtualizer = useVirtualizer({
 		count: items.length,
-		getScrollElement: () => parentRef.current,
+		getScrollElement: () => {
+			const viewport = parentRef.current?.closest('[data-slot="scroll-area-viewport"]') as HTMLElement | null;
+			return viewport ?? parentRef.current;
+		},
 		estimateSize: () => config.rowHeight + config.rowGap,
 		overscan: 5,
 	});
@@ -233,19 +236,16 @@ export const ListView = memo<ListViewProps>(function ListViewComponent({
 	return (
 		<div
 			aria-describedby="list-view-instructions"
-			aria-label={`Vista de lista con ${items.length} elementos`}
-			className={cn('w-full overflow-hidden', className)}
+			className={cn('min-h-0 w-full', className)}
 			data-testid="listview-container"
 			data-view-type="list"
-			onKeyDown={handleKeyDown}
-			role="grid"
 		>
 			<div className="sr-only" id="list-view-instructions">
 				Usa las flechas arriba y abajo para navegar, Home y End para ir al inicio o final, PageUp y PageDown para
 				navegar rápidamente.
 			</div>
 			{/* Tabla con header fijo */}
-			<table className="w-full table-fixed" ref={tableRef}>
+			<table className="w-full table-fixed" onKeyDown={handleKeyDown} ref={tableRef}>
 				{/* Header */}
 				{config.showHeader && (
 					<ListViewHeader
@@ -268,9 +268,7 @@ export const ListView = memo<ListViewProps>(function ListViewComponent({
 				className="h-full w-full"
 				onKeyDown={handleEmptySpaceKeyDown}
 				ref={parentRef}
-				style={{
-					contain: 'strict',
-				}}
+				style={{}}
 			>
 				<tbody
 					style={{

@@ -7,7 +7,7 @@ import { toggleVariants } from '@/components/ui/toggle';
 import { cn } from '@/lib/utils';
 
 const ToggleGroupContext = React.createContext<VariantProps<typeof toggleVariants>>({
-	size: 'default',
+	size: 'md', // alias 'default' no existe en toggleVariants; usar 'md'
 	variant: 'default',
 });
 
