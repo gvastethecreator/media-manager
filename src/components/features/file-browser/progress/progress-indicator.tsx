@@ -151,7 +151,7 @@ export function ProgressIndicator({
 							{/* Mini progress bar */}
 							<div className="h-1 w-full rounded-full bg-gray-200 dark:bg-gray-700">
 								<motion.div
-									animate={{ width: `${operation.progress}%` }}
+									animate={{ width: `${operation.progress.percentage}%` }}
 									className={cn('h-1 rounded-full transition-all duration-300', {
 										'bg-blue-500': operation.status === 'running',
 										'bg-green-500': operation.status === 'completed',
@@ -204,7 +204,13 @@ export function ProgressIndicator({
 
 						{/* Progress ring */}
 						<div className="relative">
-							<svg className="-rotate-90 h-4 w-4 transform" viewBox="0 0 16 16">
+							<svg
+								aria-label={`Progreso total ${Math.round(totalProgress)}%`}
+								className="-rotate-90 h-4 w-4 transform"
+								role="img"
+								viewBox="0 0 16 16"
+							>
+								<title>{`Progreso total ${Math.round(totalProgress)}%`}</title>
 								{/* Background circle */}
 								<circle
 									className="text-gray-300 dark:text-gray-600"

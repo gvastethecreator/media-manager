@@ -1,4 +1,5 @@
 import React, { createContext, ReactNode, useCallback, useContext, useEffect, useRef, useState } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useSelectionStore } from '@/store/selection.store';
 import type { AnyEntityWithStats } from '@/types/migration';
 import {
@@ -20,6 +21,7 @@ interface DragSelectionContextValue {
 }
 
 const DragSelectionContext = createContext<DragSelectionContextValue | null>(null);
+const dsLogger = clientLogger.withContext('DragSelectionProvider');
 
 export const useDragSelection = (): DragSelectionContextValue => {
 	const context = useContext(DragSelectionContext);
@@ -87,12 +89,12 @@ export const DragSelectionProvider: React.FC<DragSelectionProviderProps> = ({
 	children,
 	containerRef,
 	items,
-	getItemElement,
+	getItemElement: _getItemElement,
 	config = {},
 	overlayConfig = {},
-	onSelectionStart,
-	onSelectionUpdate,
-	onSelectionEnd,
+	onSelectionStart: _onSelectionStart,
+	onSelectionUpdate: _onSelectionUpdate,
+	onSelectionEnd: _onSelectionEnd,
 	onSelectionCancel,
 	disabled = false,
 }) => {
@@ -101,27 +103,33 @@ export const DragSelectionProvider: React.FC<DragSelectionProviderProps> = ({
 	// Helper functions for multiple item operations
 	const selectItems = useCallback(
 		(ids: string[]) => {
-			ids.forEach((id) => {
-				const item = items.find((item) => item.id === id);
-				if (item) selectItem(item as any);
-			});
+			for (const id of ids) {
+				const item = items.find((it) => it.id === id);
+				if (item) {
+					selectItem(item as any);
+				}
+			}
 		},
 		[items, selectItem]
 	);
 
 	const deselectItems = useCallback(
 		(ids: string[]) => {
-			ids.forEach((id) => deselectItem(id));
+			for (const id of ids) {
+				deselectItem(id);
+			}
 		},
 		[deselectItem]
 	);
 
 	const toggleItems = useCallback(
 		(ids: string[]) => {
-			ids.forEach((id) => {
-				const item = items.find((item) => item.id === id);
-				if (item) toggleSelection(id, item as any);
-			});
+			for (const id of ids) {
+				const item = items.find((it) => it.id === id);
+				if (item) {
+					toggleSelection(id, item as any);
+				}
+			}
 		},
 		[items, toggleSelection]
 	);
@@ -141,7 +149,7 @@ export const DragSelectionProvider: React.FC<DragSelectionProviderProps> = ({
 			try {
 				dragSelectionManager.initialize(containerRef.current);
 			} catch (error) {
-				console.error('Error initializing DragSelectionManager:', error);
+				dsLogger.error('Error initializing DragSelectionManager:', error);
 			}
 		}
 
@@ -149,10 +157,10 @@ export const DragSelectionProvider: React.FC<DragSelectionProviderProps> = ({
 			try {
 				dragSelectionManager?.destroy();
 			} catch (error) {
-				console.error('Error during DragSelectionManager cleanup:', error);
+				dsLogger.error('Error during DragSelectionManager cleanup:', error);
 			}
 		};
-	}, [dragSelectionManager]); // Update config when props change
+	}, [dragSelectionManager, containerRef]); // Reinit si cambia el contenedor o el manager
 	useEffect(() => {
 		const newConfig = {
 			...defaultConfig,
@@ -160,7 +168,7 @@ export const DragSelectionProvider: React.FC<DragSelectionProviderProps> = ({
 		};
 		setCurrentConfig(newConfig);
 		dragSelectionManager.updateConfig(newConfig);
-	}, [config]);
+	}, [config, dragSelectionManager]);
 
 	// Handle disabled state
 	useEffect(() => {
@@ -170,7 +178,7 @@ export const DragSelectionProvider: React.FC<DragSelectionProviderProps> = ({
 		} else {
 			dragSelectionManager.enable();
 		}
-	}, [disabled]);
+	}, [disabled, dragSelectionManager]);
 
 	const updateConfig = (newConfig: Partial<DragSelectionConfig>) => {
 		const updatedConfig = {
@@ -239,13 +247,15 @@ export const useDragSelectionState = () => {
 	const { dragSelectionManager } = useDragSelection();
 	const [state, setState] = useState<DragSelectionState>(() => dragSelectionManager.getState());
 
-	useEffect(() => {
-		const interval = setInterval(() => {
-			setState(dragSelectionManager.getState());
-		}, 16);
-
-		return () => clearInterval(interval);
+	// Extracted updater to reduce cognitive complexity of effect
+	const updateState = useCallback(() => {
+		setState(dragSelectionManager.getState());
 	}, [dragSelectionManager]);
+
+	useEffect(() => {
+		const interval = setInterval(updateState, 16);
+		return () => clearInterval(interval);
+	}, [updateState]);
 
 	return state;
 };
@@ -277,32 +287,43 @@ export const useDragSelectionEvents = ({
 	const { dragSelectionManager } = useDragSelection();
 	const stateRef = useRef<DragSelectionState | null>(null);
 
-	useEffect(() => {
-		const interval = setInterval(() => {
-			const currentState = dragSelectionManager.getState();
-			const prevState = stateRef.current;
+	const handleStateChange = useCallback(
+		(currentState: DragSelectionState, prevState: DragSelectionState | null) => {
+			const becameActive = currentState.isActive && !prevState?.isActive;
+			const stayingActive = currentState.isActive && Boolean(prevState?.isActive);
+			const endedFromActive = !currentState.isActive && Boolean(prevState?.isActive);
 
-			if (currentState.isActive && !prevState?.isActive) {
+			if (becameActive) {
 				onStart?.(currentState);
-			} else if (currentState.isActive && prevState?.isActive) {
+				return;
+			}
+
+			if (stayingActive) {
 				const selectedIds = Array.from(currentState.selectedElements);
 				onUpdate?.(currentState, selectedIds);
-			} else if (!currentState.isActive && prevState?.isActive) {
-				const selectedIds = Array.from(currentState.selectedElements);
+				return;
+			}
 
-				// Since there's no cancelled property, we assume if the selection ends without being active it was cancelled
-				if (selectedIds.length === 0 && prevState.selectedElements.size > 0) {
+			if (endedFromActive) {
+				const selectedIds = Array.from(currentState.selectedElements);
+				if (selectedIds.length === 0 && prevState && prevState.selectedElements.size > 0) {
 					onCancel?.();
 				} else {
 					onEnd?.(currentState, selectedIds);
 				}
 			}
+		},
+		[onStart, onUpdate, onEnd, onCancel]
+	);
 
+	useEffect(() => {
+		const interval = setInterval(() => {
+			const currentState = dragSelectionManager.getState();
+			handleStateChange(currentState, stateRef.current);
 			stateRef.current = currentState;
 		}, 16);
-
 		return () => clearInterval(interval);
-	}, [dragSelectionManager, onStart, onUpdate, onEnd, onCancel]);
+	}, [dragSelectionManager, handleStateChange]);
 };
 
 // Utility hook for keyboard shortcuts

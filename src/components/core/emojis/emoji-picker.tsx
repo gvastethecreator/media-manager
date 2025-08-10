@@ -86,8 +86,12 @@ export function EmojiPicker({
 			setSelectedEmoji(emojiValue);
 
 			// 📢 Notificar a los callbacks
-			if (onEmojiSelect) onEmojiSelect(emojiValue);
-			if (onChange) onChange(emojiValue);
+			if (onEmojiSelect) {
+				onEmojiSelect(emojiValue);
+			}
+			if (onChange) {
+				onChange(emojiValue);
+			}
 
 			// 🎯 Cerrar popover
 			setOpen(false);
@@ -99,8 +103,12 @@ export function EmojiPicker({
 	const handleQuickSelect = useCallback(
 		(emoji: string) => {
 			setSelectedEmoji(emoji);
-			if (onEmojiSelect) onEmojiSelect(emoji);
-			if (onChange) onChange(emoji);
+			if (onEmojiSelect) {
+				onEmojiSelect(emoji);
+			}
+			if (onChange) {
+				onChange(emoji);
+			}
 			setOpen(false);
 		},
 		[onEmojiSelect, onChange]

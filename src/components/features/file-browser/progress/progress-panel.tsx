@@ -50,14 +50,99 @@ import { mapServiceToUIOperationType } from '@/types/progress-tracking/type-mapp
 import { ProgressOperationCard } from './progress-operation-card';
 import type { OperationStatistics } from './types';
 
+// Helpers puros para reducir complejidad en render y memorizar filtrado/ordenación
+function filterOperations(
+	operations: ProgressOperation[],
+	filter: ProgressFilter,
+	showCompleted: boolean
+): ProgressOperation[] {
+	let filtered = [...operations];
+
+	if (filter.searchText) {
+		const searchLower = filter.searchText.toLowerCase();
+		filtered = filtered.filter((op) => {
+			const name = op.name.toLowerCase();
+			const desc = op.description?.toLowerCase() || '';
+			return name.includes(searchLower) || desc.includes(searchLower);
+		});
+	}
+
+	if (filter.statuses && filter.statuses.length > 0) {
+		filtered = filtered.filter((op) => filter.statuses?.includes(op.status));
+	}
+
+	if (filter.operationType) {
+		filtered = filtered.filter((op) => op.type === filter.operationType);
+	}
+
+	if (!showCompleted) {
+		filtered = filtered.filter((op) => op.status !== 'completed');
+	}
+
+	return filtered;
+}
+
+function sortOperations(
+	operations: ProgressOperation[],
+	sortBy: ProgressSortOptions['field'],
+	sortOrder: 'asc' | 'desc'
+): ProgressOperation[] {
+	const accessors: Record<ProgressSortOptions['field'], (op: ProgressOperation) => string | number> = {
+		createdAt: (op) => op.createdAt,
+		updatedAt: (op) => op.updatedAt ?? op.createdAt,
+		name: (op) => op.name.toLowerCase(),
+		progress: (op) => op.progress.percentage,
+		type: (op) => op.type.toLowerCase(),
+		priority: (op) => op.priority ?? 0,
+	};
+
+	const getValue = accessors[sortBy] ?? accessors.createdAt;
+	const sorted = [...operations].sort((a, b) => {
+		const aValue = getValue(a);
+		const bValue = getValue(b);
+		if (aValue < bValue) {
+			return sortOrder === 'asc' ? -1 : 1;
+		}
+		if (aValue > bValue) {
+			return sortOrder === 'asc' ? 1 : -1;
+		}
+		return 0;
+	});
+
+	return sorted;
+}
+
+function computeStatistics(operations: ProgressOperation[]): OperationStatistics {
+	const totalOperations = operations.length;
+	const activeOperations = operations.filter((op) => op.status === 'running').length;
+	const completedOperations = operations.filter((op) => op.status === 'completed').length;
+	const failedOperations = operations.filter((op) => op.status === 'failed').length;
+	const successRate =
+		completedOperations > 0
+			? (completedOperations / (completedOperations + failedOperations)) * 100
+			: 0;
+
+	return {
+		totalOperations,
+		activeOperations,
+		completedOperations,
+		failedOperations,
+		successRate,
+	};
+}
+
 // Simular el hook useProgressNotifications
 const useProgressNotifications = () => {
+	// Stubs locales: el sistema real de notificaciones aún no está cableado
+	const noop = () => {
+		/* no-op intencional */
+	};
 	return {
 		notifications: [],
 		unreadCount: 0,
-		markAsRead: (id: string) => {},
-		removeNotification: (id: string) => {},
-		clearAll: () => {},
+		markAsRead: (_id: string) => noop(),
+		removeNotification: (_id: string) => noop(),
+		clearAll: () => noop(),
 	};
 };
 
@@ -69,7 +154,7 @@ interface ProgressPanelProps {
 	maxHeight?: string;
 }
 
-const statusOptions: { value: ProgressStatus; label: string; icon: React.ComponentType<any> }[] = [
+const statusOptions: { value: ProgressStatus; label: string; icon: React.ComponentType<{ className?: string }> }[] = [
 	{ value: 'pending', label: 'Pendiente', icon: Clock },
 	{ value: 'running', label: 'En progreso', icon: Play },
 	{ value: 'paused', label: 'Pausado', icon: Pause },
@@ -210,76 +295,10 @@ export function ProgressPanel({
 			operationType: typeFilter.length > 0 ? typeFilter[0] : undefined,
 		};
 
-		// Las operaciones ya son de tipo ProgressOperation
-		let filtered = [...operations];
-
-		// Aplicar filtros
-		if (filter.searchText) {
-			const searchLower = filter.searchText.toLowerCase();
-			filtered = filtered.filter((op) => {
-				const name = op.name.toLowerCase();
-				const desc = op.description?.toLowerCase() || '';
-				return name.includes(searchLower) || desc.includes(searchLower);
-			});
-		}
-
-		if (filter.statuses?.length) {
-			filtered = filtered.filter((op) => filter.statuses!.includes(op.status));
-		}
-
-		if (filter.operationType) {
-			filtered = filtered.filter((op) => op.type === filter.operationType);
-		}
-
-		// Filtrar completadas si está deshabilitado
-		if (!showCompleted) {
-			filtered = filtered.filter((op) => op.status !== 'completed');
-		}
-
-		// Ordenar
-		filtered.sort((a, b) => {
-			let aValue: any, bValue: any;
-
-			switch (sortBy) {
-				case 'createdAt':
-					aValue = a.createdAt;
-					bValue = b.createdAt;
-					break;
-				case 'name':
-					aValue = a.name.toLowerCase();
-					bValue = b.name.toLowerCase();
-					break;
-				case 'progress':
-					aValue = a.progress.percentage;
-					bValue = b.progress.percentage;
-					break;
-				case 'type':
-					aValue = a.type.toLowerCase();
-					bValue = b.type.toLowerCase();
-					break;
-			}
-
-			if (aValue < bValue) return sortOrder === 'asc' ? -1 : 1;
-			if (aValue > bValue) return sortOrder === 'asc' ? 1 : -1;
-			return 0;
-		});
-
-		// Actualizar estadísticas
-		const stats = {
-			totalOperations: filtered.length,
-			activeOperations: filtered.filter((op) => op.status === 'running').length,
-			completedOperations: filtered.filter((op) => op.status === 'completed').length,
-			failedOperations: filtered.filter((op) => op.status === 'failed').length,
-			successRate: 0,
-		};
-
-		if (stats.completedOperations > 0) {
-			stats.successRate = (stats.completedOperations / (stats.completedOperations + stats.failedOperations)) * 100;
-		}
-
+		const filtered = filterOperations(operations, filter, showCompleted);
+		const stats = computeStatistics(filtered);
 		setStatistics(stats);
-
-		return filtered;
+		return sortOperations(filtered, sortBy, sortOrder);
 	}, [operations, searchText, statusFilter, typeFilter, sortBy, sortOrder, showCompleted]);
 
 	// Agrupar operaciones por estado
@@ -293,9 +312,9 @@ export function ProgressPanel({
 			cancelled: [],
 		};
 
-		filteredOperations.forEach((op) => {
+		for (const op of filteredOperations) {
 			groups[op.status].push(op);
-		});
+		}
 
 		return groups;
 	}, [filteredOperations]);
@@ -303,7 +322,9 @@ export function ProgressPanel({
 	// Manejar acciones de operaciones
 	const handleOperationAction = (action: string, operationId: string) => {
 		const operation = getOperation(operationId);
-		if (!operation) return;
+		if (!operation) {
+			return;
+		}
 
 		switch (action) {
 			case 'start':
@@ -351,12 +372,16 @@ export function ProgressPanel({
 			case 'details':
 				setSelectedOperation(operationId);
 				break;
+			default:
+				break;
 		}
 	};
 
 	// Renderizar estadísticas
 	const renderStatistics = () => {
-		if (!showStatistics) return null;
+		if (!showStatistics) {
+			return null;
+		}
 
 		return (
 			<Card className="mb-4">
@@ -396,7 +421,9 @@ export function ProgressPanel({
 
 	// Renderizar notificaciones
 	const renderNotifications = () => {
-		if (!showNotifications || notifications.length === 0) return null;
+		if (!showNotifications || notifications.length === 0) {
+			return null;
+		}
 
 		return (
 			<Card className="mb-4">

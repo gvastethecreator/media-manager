@@ -182,16 +182,14 @@ export const CustomContextMenu: React.FC<CustomContextMenuProps> = ({
 						<div className="min-w-[280px] max-w-[320px] rounded-md border border-border bg-popover py-2 shadow-lg">
 							{/* Encabezado con información de selección */}
 							{selectedCount > 0 && (
-								<>
-									<div className="border-border border-b px-3 py-2">
-										<div className="flex items-center gap-2">
-											<Badge className="text-xs" variant="secondary">
-												{selectedCount} {selectedCount === 1 ? 'elemento' : 'elementos'}
-											</Badge>
-											{isMultiSelection && <span className="text-muted-foreground text-xs">seleccionados</span>}
-										</div>
+								<div className="border-border border-b px-3 py-2">
+									<div className="flex items-center gap-2">
+										<Badge className="text-xs" variant="secondary">
+											{selectedCount} {selectedCount === 1 ? 'elemento' : 'elementos'}
+										</Badge>
+										{isMultiSelection && <span className="text-muted-foreground text-xs">seleccionados</span>}
 									</div>
-								</>
+								</div>
 							)}
 
 							<div className="px-1 py-1">

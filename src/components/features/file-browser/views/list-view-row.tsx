@@ -62,7 +62,9 @@ export const ListViewRow = memo<ListViewRowProps>(
 
 		// Obtener ancho de columna
 		const getColumnWidth = (column: ListColumnConfig) => {
-			if (column.width === 'auto') return 'auto';
+			if (column.width === 'auto') {
+				return 'auto';
+			}
 			return `${column.width}px`;
 		};
 

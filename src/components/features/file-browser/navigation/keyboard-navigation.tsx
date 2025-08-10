@@ -1,5 +1,4 @@
 import React, { useCallback, useEffect, useRef } from 'react';
-import { toast } from 'sonner';
 import { useSelectionStore } from '@/store/selection.store';
 import { keyboardShortcutManager } from '../../../../lib/keyboard/keyboard-shortcut-manager';
 import { AnyEntityWithStats } from '../../../../types/entities';
@@ -45,7 +44,9 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
 
 	// Calcular el índice del elemento enfocado basado en focusedId
 	const focusedIndex = React.useMemo(() => {
-		if (!focusedId) return -1;
+		if (!focusedId) {
+			return -1;
+		}
 		return items.findIndex((item) => item.id === focusedId);
 	}, [focusedId, items]);
 
@@ -65,11 +66,46 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
 		[items]
 	);
 
+	// Helper: calcular último índice seleccionado de forma segura (después de definir focusedIndex/getItemIndex)
+	const getLastSelectedIndex = useCallback(
+		(): number => {
+			if (selectedItems.length === 0) {
+				return focusedIndex;
+			}
+			const lastSelectedId = selectedItems.at(-1)?.id;
+			if (!lastSelectedId) {
+				return focusedIndex;
+			}
+			return getItemIndex(lastSelectedId);
+		},
+		[selectedItems, focusedIndex, getItemIndex]
+	);
+
+	// Helper: aplicar selección según navegación
+	const applySelectionOnNavigate = useCallback(
+		(targetIndex: number, targetItemId: string, extend: boolean) => {
+			if (extend && isMultiSelectMode) {
+				const lastSelectedIndex = getLastSelectedIndex();
+				if (lastSelectedIndex !== -1) {
+					const start = Math.min(lastSelectedIndex, targetIndex);
+					const end = Math.max(lastSelectedIndex, targetIndex);
+					const rangeIds = items.slice(start, end + 1).map((it) => it.id);
+					selectRange(rangeIds);
+				}
+				return;
+			}
+			setSelection([targetItemId]);
+		},
+		[isMultiSelectMode, getLastSelectedIndex, items, selectRange, setSelection]
+	);
+
 	// Hacer scroll a un elemento
 	const scrollToItem = useCallback(
 		(itemId: string) => {
 			const element = getItemElement(itemId);
-			if (!(element && containerRef.current)) return;
+			if (!(element && containerRef.current)) {
+				return;
+			}
 
 			const container = containerRef.current;
 			const containerRect = container.getBoundingClientRect();
@@ -96,7 +132,9 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
 	// Función para enfocar un elemento por índice
 	const focusItem = useCallback(
 		(index: number) => {
-			if (index < 0 || index >= items.length) return;
+			if (index < 0 || index >= items.length) {
+				return;
+			}
 
 			const item = items[index];
 			setFocusedId(item.id);
@@ -110,97 +148,77 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
 	// Navegar a un elemento específico
 	const navigateToItem = useCallback(
 		(targetIndex: number, extend = false) => {
-			if (targetIndex < 0 || targetIndex >= items.length) return;
-
-			const targetItem = items[targetIndex];
-			if (!targetItem) return;
-
-			// Actualizar el foco
-			setFocusedId(targetItem.id);
-
-			// Manejar selección
-			if (extend && isMultiSelectMode) {
-				// Selección extendida: desde el último elemento seleccionado hasta el actual
-				const lastSelectedIndex =
-					selectedItems.length > 0 ? getItemIndex(selectedItems[selectedItems.length - 1].id) : focusedIndex;
-
-				if (lastSelectedIndex !== -1) {
-					const start = Math.min(lastSelectedIndex, targetIndex);
-					const end = Math.max(lastSelectedIndex, targetIndex);
-					const rangeIds = items.slice(start, end + 1).map((item) => item.id);
-					selectRange(rangeIds);
-				}
-			} else {
-				// Selección normal: solo el elemento actual
-				setSelection([targetItem.id]);
+			if (targetIndex < 0 || targetIndex >= items.length) {
+				return;
 			}
 
-			// Hacer scroll al elemento si es necesario
+			const targetItem = items[targetIndex];
+			if (!targetItem) {
+				return;
+			}
+
+			setFocusedId(targetItem.id);
+			applySelectionOnNavigate(targetIndex, targetItem.id, extend);
 			scrollToItem(targetItem.id);
 		},
-		[
-			items,
-			getItemIndex,
-			setFocusedId,
-			setSelection,
-			selectRange,
-			scrollToItem,
-			isMultiSelectMode,
-			selectedItems,
-			focusedIndex,
-		]
+		[items, setFocusedId, applySelectionOnNavigate, scrollToItem]
 	);
 
 	// Navegación con flechas
+	// Helper: calcular siguiente índice con baja complejidad
+	const computeNextIndex = useCallback(
+		(currentIndex: number, direction: 'up' | 'down' | 'left' | 'right'): number => {
+			const clamp = (v: number, min: number, max: number) => {
+				if (v < min) {
+					return min;
+				}
+				if (v > max) {
+					return max;
+				}
+				return v;
+			};
+			const maxIndex = items.length - 1;
+			if (currentIndex < 0) {
+				return 0;
+			}
+			if (viewType === 'list') {
+				const listDelta: Record<'up' | 'down' | 'left' | 'right', number> = {
+					up: -1,
+					down: 1,
+					left: 0,
+					right: 0,
+				};
+				return clamp(currentIndex + listDelta[direction], 0, maxIndex);
+			}
+			const gridDelta: Record<'up' | 'down' | 'left' | 'right', number> = {
+				left: -1,
+				right: 1,
+				up: -gridColumns,
+				down: gridColumns,
+			};
+			return clamp(currentIndex + gridDelta[direction], 0, maxIndex);
+		},
+		[items.length, viewType, gridColumns]
+	);
+
 	const handleArrowNavigation = useCallback(
 		(direction: 'up' | 'down' | 'left' | 'right', extend = false) => {
-			if (items.length === 0) return;
-
-			let targetIndex = focusedIndex;
-
-			// Si no hay elemento enfocado, empezar desde el primero
-			if (targetIndex === -1) {
-				targetIndex = 0;
-			} else {
-				// Calcular el siguiente índice basado en el tipo de vista
-				switch (viewType) {
-					case 'list':
-						// En vista de lista, solo up/down
-						if (direction === 'up') targetIndex = Math.max(0, targetIndex - 1);
-						else if (direction === 'down') targetIndex = Math.min(items.length - 1, targetIndex + 1);
-						break;
-
-					case 'grid':
-					case 'cards':
-					case 'masonry':
-						// En vistas de grid, usar gridColumns
-						switch (direction) {
-							case 'left':
-								targetIndex = Math.max(0, targetIndex - 1);
-								break;
-							case 'right':
-								targetIndex = Math.min(items.length - 1, targetIndex + 1);
-								break;
-							case 'up':
-								targetIndex = Math.max(0, targetIndex - gridColumns);
-								break;
-							case 'down':
-								targetIndex = Math.min(items.length - 1, targetIndex + gridColumns);
-								break;
-						}
-						break;
-				}
+			if (items.length === 0) {
+				return;
 			}
-
+			const baseIndex = focusedIndex === -1 ? 0 : focusedIndex;
+			const targetIndex = computeNextIndex(baseIndex, direction);
 			navigateToItem(targetIndex, extend);
 		},
-		[focusedIndex, items.length, viewType, gridColumns, navigateToItem]
+		[items.length, focusedIndex, computeNextIndex, navigateToItem]
 	);
 
 	// Navegación por páginas
 	const handlePageNavigation = useCallback(
 		(direction: 'pageup' | 'pagedown', extend = false) => {
-			if (!containerRef.current || items.length === 0) return;
+			if (!containerRef.current || items.length === 0) {
+				return;
+			}
 
 			const container = containerRef.current;
 			const containerHeight = container.clientHeight;
@@ -228,7 +246,9 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
 	// Ir al inicio o final
 	const handleHomeEnd = useCallback(
 		(direction: 'home' | 'end', extend = false) => {
-			if (items.length === 0) return;
+			if (items.length === 0) {
+				return;
+			}
 
 			const targetIndex = direction === 'home' ? 0 : items.length - 1;
 			navigateToItem(targetIndex, extend);
@@ -475,21 +495,23 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
 				'preview-focused',
 			];
 
-			actions.forEach((action) => {
+			for (const action of actions) {
 				keyboardShortcutManager.unregisterByAction(action);
-			});
+			}
 		};
 	}, [handleArrowNavigation, handlePageNavigation, handleHomeEnd, focusedIndex, items, onOpenItem, onPreviewItem]);
 
 	// Actualizar el último índice seleccionado cuando cambia la selección
 	useEffect(() => {
-		if (selectedIds.length > 0) {
-			const lastSelectedId = selectedIds[selectedIds.length - 1];
-			const index = getItemIndex(lastSelectedId);
-			if (index >= 0) {
-				lastSelectedIndexRef.current = index;
+			if (selectedIds.length > 0) {
+				const lastSelectedId = selectedIds.at(-1);
+				if (lastSelectedId) {
+					const index = getItemIndex(lastSelectedId);
+					if (index >= 0) {
+						lastSelectedIndexRef.current = index;
+					}
+				}
 			}
-		}
 	}, [selectedIds, getItemIndex]);
 
 	// Enfocar el primer elemento si no hay nada seleccionado

@@ -93,8 +93,10 @@ export function useVirtualizedContainer({
 		[containerHeight, containerWidth, isReady, minHeight, paddingTop, paddingBottom]
 	);
 
-	const measureContainer = useCallback(() => {
-		if (!parentRef.current) return;
+    const measureContainer = useCallback(() => {
+	    if (!parentRef.current) {
+		    return;
+	    }
 
 		const element = parentRef.current;
 
@@ -105,8 +107,10 @@ export function useVirtualizedContainer({
 		updateDimensions(targetElement);
 	}, [updateDimensions]);
 
-	useEffect(() => {
-		if (!parentRef.current) return;
+    useEffect(() => {
+	    if (!parentRef.current) {
+		    return;
+	    }
 
 		const element = parentRef.current;
 
@@ -221,7 +225,7 @@ interface VirtualizedContainerProps {
 }
 
 export const VirtualizedContainer = React.forwardRef<HTMLDivElement, VirtualizedContainerProps>(
-	function VirtualizedContainer(
+	function ForwardedVirtualizedContainer(
 		{ children, height, width, padding = 16, className = '', isReady = true, onClick },
 		ref
 	) {
@@ -249,12 +253,40 @@ export const VirtualizedContainer = React.forwardRef<HTMLDivElement, Virtualized
 			);
 		}
 
+			const isInteractive = Boolean(onClick);
+		if (isInteractive) {
+			return (
+				<button
+					className={`relative select-none ${className}`}
+					onClick={onClick}
+					ref={ref as React.Ref<HTMLButtonElement>}
+					style={{
+						height: `${height}px`,
+						width: `${width}px`,
+						minHeight: `${height}px`,
+						maxHeight: `${height}px`,
+						minWidth: `${width}px`,
+						maxWidth: `${width}px`,
+						contain: 'layout style size',
+						padding: `${paddingObj.top}px ${paddingObj.right}px ${paddingObj.bottom}px ${paddingObj.left}px`,
+						overflow: 'hidden',
+						position: 'relative',
+						zIndex: 1,
+						isolation: 'isolate',
+						userSelect: 'none',
+					}}
+					type="button"
+				>
+					{children}
+				</button>
+			);
+		}
+
 		return (
-			<div
-				className={`relative select-none ${className}`}
-				onClick={onClick}
-				ref={ref}
-				style={{
+				<div
+					className={`relative select-none ${className}`}
+					ref={ref}
+					style={{
 					height: `${height}px`,
 					width: `${width}px`,
 					minHeight: `${height}px`,

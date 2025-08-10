@@ -13,7 +13,9 @@ interface ImagePickerProps {
 export function ImagePicker({ value, onChange, className }: ImagePickerProps) {
 	const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
-		if (!file) return;
+		if (!file) {
+			return;
+		}
 
 		// TODO: Implementar lógica de carga de archivo
 		// Por ahora, simularemos una URL local

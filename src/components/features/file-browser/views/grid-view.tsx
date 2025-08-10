@@ -279,6 +279,8 @@ export const GridView = memo<GridViewProps>(function GridViewComponent({
 											role: 'gridcell' as const,
 											'aria-colindex': columnIndex + 1,
 											'aria-rowindex': virtualRow.index + 1,
+											// Atributos de compatibilidad para tests y selección avanzada
+											'data-entity-card': '',
 											'data-item-id': item.id,
 											'data-selectable': 'true',
 											key: item.id,

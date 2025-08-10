@@ -15,7 +15,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigationStats } from '@/lib/api/navigation';
 import { formatFileSize } from '@/lib/utils';
 
-const StatsItem = memo(function StatsItem({
+const StatsItem = memo(function StatsItemComponent({
 	icon: Icon,
 	label,
 	value,
@@ -37,7 +37,7 @@ const StatsItem = memo(function StatsItem({
 	);
 });
 
-const StatsGrid = memo(function StatsGrid({
+const StatsGrid = memo(function StatsGridComponent({
 	title,
 	items,
 }: {
@@ -50,8 +50,8 @@ const StatsGrid = memo(function StatsGrid({
 				<CardTitle className="font-medium text-sm">{title}</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-2">
-				{items.map((item, index) => (
-					<StatsItem key={`${title}-${item.label}-${index}`} {...item} />
+				{items.map((item) => (
+					<StatsItem key={`${title}-${item.label}`} {...item} />
 				))}
 			</CardContent>
 		</Card>
@@ -62,7 +62,7 @@ const StatsGrid = memo(function StatsGrid({
  * Componente para mostrar estadísticas generales del sistema
  * Se muestra cuando no hay ninguna carpeta específica seleccionada
  */
-export const SystemStatsDisplay = memo(function SystemStatsDisplay() {
+export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 	const { data: stats, isLoading, error } = useNavigationStats();
 
 	if (isLoading) {
@@ -72,8 +72,8 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplay() {
 					<Skeleton className="h-4 w-24" />
 					<Skeleton className="h-3 w-32" />
 				</div>
-				{Array.from({ length: 6 }).map((_, i) => (
-					<div className="space-y-2" key={`skeleton-${i}`}>
+				{['a','b','c','d','e','f'].map((id) => (
+					<div className="space-y-2" key={`skeleton-${id}`}>
 						<Skeleton className="h-10 w-full" />
 						<Skeleton className="h-8 w-full" />
 						<Skeleton className="h-8 w-full" />

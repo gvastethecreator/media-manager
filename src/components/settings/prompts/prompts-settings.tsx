@@ -123,8 +123,8 @@ export const PromptSettings = () => {
 			try {
 				await deletePromptMutation.mutateAsync(id);
 				toastService.success('Prompt eliminado correctamente');
-			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				toastService.error('Error al eliminar prompt', {
 					description: errorMessage,
 				});
