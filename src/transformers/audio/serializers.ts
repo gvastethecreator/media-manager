@@ -1,8 +1,8 @@
 // Serializers para Audio
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import type { AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
 import { audioSchema } from '@/types/entities/audio/audio.schema';
-import { createDefaultEntityStats } from '@/lib/utils';
 
 type DrizzleAudio = {
 	id: string;

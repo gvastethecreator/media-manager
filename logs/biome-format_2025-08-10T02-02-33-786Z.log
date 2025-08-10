@@ -1,0 +1,342 @@
+Comando: bunx biome format --write .
+Fecha: 2025-08-10T02:02:33.791Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:56:1 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `public` as an identifier in strict mode
+  
+    54 │ 	 * 🚀 Crea solo la entidad básica sin metadata ni thumbnails (Etapa 1)
+    55 │ 	 */
+  > 56 │ public
+       │ ^^^^^^
+    57 │ async;
+    58 │ createBasicEntityFromFile(filePath: string, folderId: string)
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:58:35 parse ━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+    56 │ public
+    57 │ async;
+  > 58 │ createBasicEntityFromFile(filePath: string, folderId: string)
+       │                                   ^
+    59 │ : Promise<EntityCreationResult>
+    60 │ {
+  
+  i Remove :
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:59:1 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found ': Promise<EntityCreationResult>'.
+  
+    57 │ async;
+    58 │ createBasicEntityFromFile(filePath: string, folderId: string)
+  > 59 │ : Promise<EntityCreationResult>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ {
+    61 │ 	console.log(`🔧 FileEntityMapper: [ETAPA 1] Indexando archivo ${filePath}`);
+  
+  i Expected a statement here.
+  
+    57 │ async;
+    58 │ createBasicEntityFromFile(filePath: string, folderId: string)
+  > 59 │ : Promise<EntityCreationResult>
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ {
+    61 │ 	console.log(`🔧 FileEntityMapper: [ETAPA 1] Indexando archivo ${filePath}`);
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:69:4 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+    67 │ 		// Si es un tipo desconocido, no crear entidad
+    68 │ 		if (entityType === EntityType.UNKNOWN) {
+  > 69 │ 			return {
+       │ 			^^^^^^^^
+  > 70 │ 					success: false,
+  > 71 │ 					entityType,
+  > 72 │ 					error: `Unsupported file type: ${fileInfo.extension}`,
+  > 73 │ 				};
+       │ 				^^
+    74 │ 		}
+    75 │ 
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:80:4 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+    78 │ 		if (exists) {
+    79 │ 			console.log(`!� FileEntityMapper: [ETAPA 1] Entidad ya existe para ${filePath}`);
+  > 80 │ 			return {
+       │ 			^^^^^^^^
+  > 81 │ 					success: true,
+  > 82 │ 					entityType,
+  > 83 │ 					error: 'Entity already exists',
+  > 84 │ 				};
+       │ 				^^
+    85 │ 		}
+    86 │ 
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:90:3 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+    88 │ 		const entityId = await this.createBasicEntity(fileInfo, entityType);
+    89 │ 
+  > 90 │ 		return {
+       │ 		^^^^^^^^
+  > 91 │ 				success: true,
+  > 92 │ 				entityType,
+  > 93 │ 				entityId,
+  > 94 │ 			};
+       │ 			^^
+    95 │ 	} catch (error) {
+    96 │ 		console.error(`Error creating basic entity for ${filePath}:`, error);
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:97:3 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+     95 │ 	} catch (error) {
+     96 │ 		console.error(`Error creating basic entity for ${filePath}:`, error);
+   > 97 │ 		return {
+        │ 		^^^^^^^^
+   > 98 │ 				success: false,
+   > 99 │ 				entityType: EntityType.UNKNOWN,
+  > 100 │ 				error: error instanceof Error ? error.message : 'Unknown error',
+  > 101 │ 			};
+        │ 			^^
+    102 │ 	}
+    103 │ }
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:107:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Illegal use of reserved keyword `public` as an identifier in strict mode
+  
+    105 │  * 🔍 Extrae metadata para una entidad existente (Etapa 2)
+    106 │  */
+  > 107 │ public
+        │ ^^^^^^
+    108 │ async;
+    109 │ extractMetadataForEntity(
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:110:11 parse ━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+    108 │ async;
+    109 │ extractMetadataForEntity(
+  > 110 │ 		filePath: string,
+        │ 		        ^
+    111 │ 		entityId: string,
+    112 │ 		entityType: EntityType
+  
+  i Remove :
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:111:3 parse ━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `entityId`
+  
+    109 │ extractMetadataForEntity(
+    110 │ 		filePath: string,
+  > 111 │ 		entityId: string,
+        │ 		^^^^^^^^
+    112 │ 		entityType: EntityType
+    113 │ 	)
+  
+  i Remove entityId
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:111:11 parse ━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+    109 │ extractMetadataForEntity(
+    110 │ 		filePath: string,
+  > 111 │ 		entityId: string,
+        │ 		        ^
+    112 │ 		entityType: EntityType
+    113 │ 	)
+  
+  i Remove :
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:112:3 parse ━━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `entityType`
+  
+    110 │ 		filePath: string,
+    111 │ 		entityId: string,
+  > 112 │ 		entityType: EntityType
+        │ 		^^^^^^^^^^
+    113 │ 	)
+    114 │ : Promise<
+  
+  i Remove entityType
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:112:13 parse ━━━━━━━━━━━━━━━━━━
+
+  × expected `,` but instead found `:`
+  
+    110 │ 		filePath: string,
+    111 │ 		entityId: string,
+  > 112 │ 		entityType: EntityType
+        │ 		          ^
+    113 │ 	)
+    114 │ : Promise<
+  
+  i Remove :
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:114:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found ': Promise<'.
+  
+    112 │ 		entityType: EntityType
+    113 │ 	)
+  > 114 │ : Promise<
+        │ ^^^^^^^^^^
+    115 │ {
+    116 │ 	success: boolean;
+  
+  i Expected a statement here.
+  
+    112 │ 		entityType: EntityType
+    113 │ 	)
+  > 114 │ : Promise<
+        │ ^^^^^^^^^^
+    115 │ {
+    116 │ 	success: boolean;
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:117:8 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Expected an expression, or an assignment but instead found ':'.
+  
+    115 │ {
+    116 │ 	success: boolean;
+  > 117 │ 	error?: string
+        │ 	      ^
+    118 │ }
+    119 │ >
+  
+  i Expected an expression, or an assignment here.
+  
+    115 │ {
+    116 │ 	success: boolean;
+  > 117 │ 	error?: string
+        │ 	      ^
+    118 │ }
+    119 │ >
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:119:1 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '>'.
+  
+    117 │ 	error?: string
+    118 │ }
+  > 119 │ >
+        │ ^
+    120 │ {
+    121 │ 	console.log(`🔍 FileEntityMapper: [ETAPA 2] Extrayendo metadata para ${filePath}`);
+  
+  i Expected a statement here.
+  
+    117 │ 	error?: string
+    118 │ }
+  > 119 │ >
+        │ ^
+    120 │ {
+    121 │ 	console.log(`🔍 FileEntityMapper: [ETAPA 2] Extrayendo metadata para ${filePath}`);
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.backup.ts:139:4 parse ━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+    137 │ 				errorsCount: metadataResult.errors.length,
+    138 │ 			});
+  > 139 │ 			return { success: true };
+        │ 			^^^^^^^^^^^^^^^^^^^^^^^^^
+    140 │ 		}
+    141 │ 		console.warn(`!� [ETAPA 2] No se pudo extraer metadata de ${filePath}:`, metadataResult.errors);
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.clean.ts:532:1 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}'.
+  
+    530 │ 	}
+    531 │ }
+  > 532 │ }
+        │ ^
+    533 │ 
+    534 │ return stats;
+  
+  i Expected a statement here.
+  
+    530 │ 	}
+    531 │ }
+  > 532 │ }
+        │ ^
+    533 │ 
+    534 │ return stats;
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.clean.ts:534:1 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+    532 │ }
+    The number of diagnostics exceeds the limit allowed. Use --max-diagnostics to increase it.
+Diagnostics not shown: 91.
+Formatted 1609 files in 2s. No fixes applied.
+Found 111 errors.
+533 │ 
+  > 534 │ return stats;
+        │ ^^^^^^^^^^^^^
+    535 │ }
+    536 │ }
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.clean.ts:535:1 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}
+    }'.
+  
+    534 │ return stats;
+  > 535 │ }
+        │ ^
+  > 536 │ }
+        │ ^
+    537 │ 
+  
+  i Expected a statement here.
+  
+    534 │ return stats;
+  > 535 │ }
+        │ ^
+  > 536 │ }
+        │ ^
+    537 │ 
+  
+
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+

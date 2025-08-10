@@ -42,21 +42,26 @@ function readPngChunks(buffer: Buffer): Array<{ type: string; data: Buffer }> {
 	}
 	return chunks;
 }
+
 import { serverLogger } from '@/lib/logger/server-logger';
-import {
-	AIEngine
-} from '@/types/metadata-origin.types';
 import type {
+	AIGenerationParameters,
 	Automatic1111Metadata,
 	ComfyUIMetadata,
+	MidjourneyMetadata,
 	SwarmUIMetadata,
-	MidjourneyMetadata, AIGenerationParameters
 } from '@/types/metadata-origin.types';
+import { AIEngine } from '@/types/metadata-origin.types';
 
 const logger = serverLogger.withContext('PNGParser');
 
 // Union type para AIMetadata basado en los tipos existentes
-type AIMetadata = Automatic1111Metadata | ComfyUIMetadata | SwarmUIMetadata | MidjourneyMetadata | AIGenerationParameters;
+type AIMetadata =
+	| Automatic1111Metadata
+	| ComfyUIMetadata
+	| SwarmUIMetadata
+	| MidjourneyMetadata
+	| AIGenerationParameters;
 
 // Interfaces para PNG chunks
 interface PngTextChunk {

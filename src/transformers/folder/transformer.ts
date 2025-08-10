@@ -4,6 +4,7 @@
  * @description Contiene la lógica para transformar datos de Drizzle a tipos canónicos optimizados.
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import { TransformerError } from '../../lib/errors/transformer-error';
 import { serverLogger } from '../../lib/logger/server-logger';
 import { formatFileSize } from '../../lib/utils/format.utils';
@@ -120,7 +121,9 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
 	// Total de relaciones
 	const totalRelations = imageCount + videoCount + folderCount;
 
+	const base = createDefaultEntityStats({ type: 'folder' });
 	return {
+		...base,
 		// Métricas de jerarquía
 		hierarchyDepth,
 		totalDescendants,
@@ -177,6 +180,10 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
 		// Compatibilidad con componentes
 		lastScanned: lastIndexed?.toISOString(),
 		recentImages: [],
+
+		// FS flags como funciones
+		isDirectory: () => true,
+		isFile: () => false,
 	};
 }
 

@@ -5,6 +5,10 @@ import { toastService } from '@/lib/ui/toast';
 import type { ErrorResponse, FolderResponse, FolderStats, ProcessStatus } from '@/types/folders';
 
 const eventsLogger = clientLogger.withContext('FoldersEvents');
+// Simple rate limit para toasts/logs de progreso
+let lastToastPct = -1;
+let lastToastTime = 0;
+const TOAST_MIN_INTERVAL = 1500; // ms
 
 interface FolderEventsCallbacks {
 	onProgress?: (status: ProcessStatus) => void;
@@ -97,7 +101,7 @@ export function useFoldersEvents({
 			return;
 		}
 
-		eventsLogger.info('📊 Progreso del proceso vía eventos:', status);
+		eventsLogger.debug('📊 Progreso del proceso vía eventos:', status);
 
 		try {
 			// Mostrar notificación de progreso si hay información significativa
@@ -105,12 +109,18 @@ export function useFoldersEvents({
 				const progressMessage = status.message || 'Procesando...';
 				const progressPercent = Math.round(status.progress);
 
-				// Solo mostrar notificación cada 25% para evitar spam
-				if (progressPercent % 25 === 0 || progressPercent >= 90) {
+				// Mostrar notificación cada 25% y con intervalo mínimo para evitar spam
+				const now = Date.now();
+				if (
+					(progressPercent % 25 === 0 || progressPercent >= 95) &&
+					(progressPercent !== lastToastPct || now - lastToastTime > TOAST_MIN_INTERVAL)
+				) {
 					toastService.info(`📊 Progreso: ${progressPercent}%`, {
 						description: progressMessage,
 						duration: 2000,
 					});
+					lastToastPct = progressPercent;
+					lastToastTime = now;
 				}
 			}
 
@@ -180,63 +190,68 @@ export function useFoldersEvents({
 				eventsLogger.info('✅ Conectado a eventos SSE');
 			});
 
-			// Función para procesar eventos - extraída para reducir complejidad
+			// Handlers simplificados para bajar complejidad
+			const onFolderProgress = (d: any) => {
+				handleProgress({
+					isProcessing: true,
+					status: d.status || 'processing',
+					progress: Math.max(0, Math.min(100, d.progress || 0)),
+					totalFiles: d.totalFiles || 0,
+					filesProcessed: d.filesProcessed || 0,
+					message: d.message,
+					folderId: d.folderId,
+					timestamp: d.timestamp || Date.now(),
+				});
+			};
+			const onReindexAllProgressEvt = (d: any) => {
+				eventsLogger.debug('📊 Progreso de reindexado global:', d);
+				handleReindexAllProgress({
+					isProcessing: true,
+					status: d.status || 'processing',
+					phase: d.phase || 'processing',
+					progress: Math.max(0, Math.min(100, d.progress || 0)),
+					totalFiles: d.totalFiles || 0,
+					filesProcessed: d.filesProcessed || 0,
+					message: d.message,
+					folderId: d.folderId,
+					currentFolder: d.currentFolder,
+					timestamp: d.timestamp || Date.now(),
+				});
+			};
+			const onCompleted = (d: any) => handleComplete(d as FolderResponse);
+			const onErrorEvt = (d: any) => handleError(d as ErrorResponse);
+			const onStatsEvt = (d: any) => handleStats(d as FolderStats);
+
 			const processSSEEvent = (eventData: any) => {
-				switch (eventData.type) {
-					case 'folder:progress':
-						if (eventData.data) {
-							handleProgress({
-								isProcessing: true,
-								status: eventData.data.status || 'processing',
-								progress: eventData.data.progress || 0,
-								totalFiles: eventData.data.totalFiles || 0,
-								filesProcessed: eventData.data.filesProcessed || 0,
-								message: eventData.data.message,
-								folderId: eventData.data.folderId,
-								timestamp: eventData.data.timestamp || Date.now(),
-							});
-						}
-						break;
-
-					case 'folder:reindexAll:progress':
-						if (eventData.data) {
-							eventsLogger.info('📊 Progreso de reindexado global:', eventData.data);
-							handleReindexAllProgress({
-								isProcessing: true,
-								status: eventData.data.status || 'processing',
-								phase: eventData.data.phase || 'processing',
-								progress: eventData.data.progress || 0,
-								totalFiles: eventData.data.totalFiles || 0,
-								filesProcessed: eventData.data.filesProcessed || 0,
-								message: eventData.data.message,
-								folderId: eventData.data.folderId,
-								currentFolder: eventData.data.currentFolder,
-								timestamp: eventData.data.timestamp || Date.now(),
-							});
-						}
-						break;
-
-					case 'folder:completed':
-						if (eventData.data) {
-							handleComplete(eventData.data as FolderResponse);
-						}
-						break;
-
-					case 'folder:error':
-						if (eventData.data) {
-							handleError(eventData.data as ErrorResponse);
-						}
-						break;
-
-					case 'folder:stats':
-						if (eventData.data) {
-							handleStats(eventData.data as FolderStats);
-						}
-						break;
-
-					default:
-						eventsLogger.debug('🤷 Evento no manejado:', eventData.type);
+				if (!eventData) {
+					return;
 				}
+				const { type, data } = eventData;
+				if (!data) {
+					eventsLogger.debug('Evento sin data:', type);
+					return;
+				}
+				if (type === 'folder:progress') {
+					onFolderProgress(data);
+					return;
+				}
+				if (type === 'folder:reindexAll:progress') {
+					onReindexAllProgressEvt(data);
+					return;
+				}
+				if (type === 'folder:completed') {
+					onCompleted(data);
+					return;
+				}
+				if (type === 'folder:error') {
+					onErrorEvt(data);
+					return;
+				}
+				if (type === 'folder:stats') {
+					onStatsEvt(data);
+					return;
+				}
+				eventsLogger.debug('🤷 Evento no manejado:', type);
 			};
 
 			// Manejar eventos de folders

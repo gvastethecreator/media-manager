@@ -3,11 +3,11 @@ import { motion } from 'motion/react';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
-    Breadcrumb,
-    BreadcrumbItem,
-    BreadcrumbList,
-    BreadcrumbPage,
-    BreadcrumbSeparator,
+	Breadcrumb,
+	BreadcrumbItem,
+	BreadcrumbList,
+	BreadcrumbPage,
+	BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
 import { ViewType } from '@/components/views/types';

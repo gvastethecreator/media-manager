@@ -4,6 +4,7 @@
  * @description Convierte entre NoteComplete y NoteWithStats para mantener compatibilidad
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import type { NoteComplete, NoteStatistics, NoteWithStats } from '../../types/entities/note';
 import { NoteCategory, NotePriority, NoteStatus } from '../../types/entities/note';
 
@@ -31,7 +32,8 @@ export function adaptNoteCompleteToWithStats(note: NoteComplete): NoteWithStats 
 	// Calcular completion score
 	const completionScore = calculateCompletionScore(note, totalItems);
 
-	const statistics: NoteStatistics = {
+	const base = createDefaultEntityStats({
+		type: 'note',
 		imageCount: counts.images || 0,
 		videoCount: counts.videos || 0,
 		albumCount: counts.albums || 0,
@@ -45,11 +47,19 @@ export function adaptNoteCompleteToWithStats(note: NoteComplete): NoteWithStats 
 		wildcardCount: counts.wildcards || 0,
 		propertyCount: counts.properties || 0,
 		groupCount: counts.groups || 0,
+		totalItems,
+		totalAssociations: totalItems,
+	});
+
+	const statistics: NoteStatistics = {
+		...base,
+		noteCount: 1,
+		lastUpdated: new Date(),
 		wordCount,
 		readingTime,
 		completionScore,
-		totalItems,
-		totalAssociations: totalItems,
+		isDirectory: false,
+		isFile: true,
 	};
 
 	return {

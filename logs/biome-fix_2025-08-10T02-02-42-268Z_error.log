@@ -1,18 +1,17 @@
 📊 RESUMEN DE ERRORES
-Total de archivos con errores: 29
-Cantidad total de errores: 138
+Total de archivos con errores: 31
+Cantidad total de errores: 161
 
 📁 ARCHIVOS AFECTADOS:
   scripts\analysis\dependency-analyzer.js (líneas: 79, 80, 81, 82, 83, 257, 306, 311, 316)
-  scripts\benchmarks\benchmark-bun.js (líneas: 16)
   scripts\benchmarks\performance-comparison-v2.js (líneas: 54, 101, 110, 132, 143, 182, 193, 210, 294)
   scripts\benchmarks\performance-comparison.js (líneas: 48, 88, 97, 125, 136, 177, 188, 209)
-  scripts\check-errors.js (líneas: 3, 6, 52, 71, 80, 87, 94, 143, 179, 186)
+  scripts\check-errors.js (líneas: 3, 6, 52, 71, 80, 179, 186)
   scripts\db\check.js (líneas: 59, 72)
   scripts\db\clean-and-seed.ts (líneas: 38)
   scripts\db\debug-profile-settings.ts (líneas: 10)
   scripts\db\force-create-db.ts (líneas: 5)
-  scripts\db\migration-status-report.ts (líneas: 26, 163, 184, 205, 226, 276)
+  scripts\db\migration-status-report.ts (líneas: 26, 280)
   scripts\db\reset.js (líneas: 137)
   scripts\dev-server-hot.js (líneas: 71)
   scripts\error-parser-new.js (líneas: 12, 289)
@@ -29,9 +28,12 @@ Cantidad total de errores: 138
   src\components\batch-operations\BatchOperationsPanel.tsx (líneas: 9, 24, 38, 171, 348)
   src\components\cards\album-card\album-card-content.tsx (líneas: 26)
   src\components\cards\album-card\album-card-footer.tsx (líneas: 26)
-  src\components\cards\album-card\album-card-images.tsx (líneas: 62)
   src\components\cards\album-card\album-card.tsx (líneas: 44, 76, 155, 156, 157)
-  src\components\cards\audio-card\audio-card.tsx (líneas: 24, 79, 92, 107)
+  src\components\cards\audio-card\audio-card.tsx (líneas: 24, 79, 92, 107, 116, 121)
+  src\components\cards\card-header.tsx (líneas: 18)
+  src\components\cards\character-card\character-card-adapter.ts (líneas: 24, 42)
+  src\components\cards\character-card\character-card-content.tsx (líneas: 34, 55, 56, 57, 58, 62, 64, 65, 66, 67, 68, 69, 70, 71, 84, 85, 86, 87, 88, 89, 95, 100)
+  src\components\cards\character-card\character-card-footer.tsx (líneas: 59, 60, 61, 75, 153)
 
 📋 DETALLE POR ARCHIVO:
 
@@ -45,9 +47,6 @@ scripts\analysis\dependency-analyzer.js
   - línea 306 : lint/style/noNestedTernary
   - línea 311 : lint/nursery/noShadow
   - línea 316 : lint/nursery/noShadow
-
-scripts\benchmarks\benchmark-bun.js
-  - línea 16 : lint/correctness/noUndeclaredVariables
 
 scripts\benchmarks\performance-comparison-v2.js
   - línea 54 : lint/suspicious/useAwait
@@ -72,15 +71,11 @@ scripts\benchmarks\performance-comparison.js
 
 scripts\check-errors.js
   - línea 3 : lint/correctness/noUnusedImports
-  - línea 3 : assist/source/organizeImports
   - línea 6 : lint/correctness/noUnusedImports
   - línea 52 : lint/nursery/noShadow
   - línea 52 : lint/suspicious/useAwait
   - línea 71 : lint/style/useBlockStatements
   - línea 80 : lint/complexity/noExcessiveCognitiveComplexity
-  - línea 87 : lint/style/useConst
-  - línea 94 : lint/style/useConst
-  - línea 143 : lint/style/noUnusedTemplateLiteral
   - línea 179 : lint/style/useBlockStatements
   - línea 186 : lint/nursery/noAwaitInLoop
 
@@ -99,11 +94,7 @@ scripts\db\force-create-db.ts
 
 scripts\db\migration-status-report.ts
   - línea 26 : lint/complexity/noExcessiveCognitiveComplexity
-  - línea 163 : lint/correctness/noUndeclaredVariables
-  - línea 184 : lint/correctness/noUndeclaredVariables
-  - línea 205 : lint/correctness/noUndeclaredVariables
-  - línea 226 : lint/correctness/noUndeclaredVariables
-  - línea 276 : lint/style/noNestedTernary
+  - línea 280 : lint/style/noNestedTernary
 
 scripts\db\reset.js
   - línea 137 : lint/suspicious/useAwait
@@ -149,8 +140,8 @@ scripts\migration\benchmark-current-performance.js
 scripts\run-with-log-tolerant.js
   - línea 53 : lint/style/noNestedTernary
   - línea 65 : lint/style/noNestedTernary
-  - línea 83 : lint/complexity/noExcessiveCognitiveComplexity
   - línea 83 : lint/nursery/noShadow
+  - línea 83 : lint/complexity/noExcessiveCognitiveComplexity
   - línea 108 : lint/style/useBlockStatements
   - línea 109 : lint/style/useBlockStatements
   - línea 121 : lint/performance/useTopLevelRegex
@@ -213,9 +204,6 @@ src\components\cards\album-card\album-card-content.tsx
 src\components\cards\album-card\album-card-footer.tsx
   - línea 26 : lint/style/useBlockStatements
 
-src\components\cards\album-card\album-card-images.tsx
-  - línea 62 : lint/performance/noImgElement
-
 src\components\cards\album-card\album-card.tsx
   - línea 44 : lint/complexity/noExcessiveCognitiveComplexity
   - línea 76 : lint/style/useBlockStatements
@@ -228,73 +216,57 @@ src\components\cards\audio-card\audio-card.tsx
   - línea 79 : lint/style/useBlockStatements
   - línea 92 : lint/style/useBlockStatements
   - línea 107 : lint/style/useBlockStatements
+  - línea 116 : lint/style/useBlockStatements
+  - línea 121 : lint/style/useBlockStatements
+
+src\components\cards\card-header.tsx
+  - línea 18 : lint/correctness/noUnusedFunctionParameters
+
+src\components\cards\character-card\character-card-adapter.ts
+  - línea 24 : lint/style/useBlockStatements
+  - línea 42 : lint/style/noNestedTernary
+
+src\components\cards\character-card\character-card-content.tsx
+  - línea 34 : lint/complexity/noExcessiveCognitiveComplexity
+  - línea 55 : lint/style/useBlockStatements
+  - línea 56 : lint/style/useBlockStatements
+  - línea 57 : lint/style/useBlockStatements
+  - línea 58 : lint/style/useBlockStatements
+  - línea 62 : lint/complexity/noExcessiveCognitiveComplexity
+  - línea 64 : lint/style/useBlockStatements
+  - línea 65 : lint/style/useBlockStatements
+  - línea 66 : lint/style/useBlockStatements
+  - línea 67 : lint/style/useBlockStatements
+  - línea 68 : lint/style/useBlockStatements
+  - línea 69 : lint/style/useBlockStatements
+  - línea 70 : lint/style/useBlockStatements
+  - línea 71 : lint/style/useBlockStatements
+  - línea 84 : lint/style/useBlockStatements
+  - línea 85 : lint/style/useBlockStatements
+  - línea 86 : lint/style/useBlockStatements
+  - línea 87 : lint/style/useBlockStatements
+  - línea 88 : lint/style/useBlockStatements
+  - línea 89 : lint/style/useBlockStatements
+  - línea 95 : lint/style/useBlockStatements
+  - línea 100 : lint/nursery/noShadow
+
+src\components\cards\character-card\character-card-footer.tsx
+  - línea 59 : lint/style/useBlockStatements
+  - línea 60 : lint/style/useBlockStatements
+  - línea 61 : lint/style/useBlockStatements
+  - línea 75 : lint/style/useBlockStatements
+  - línea 153 : lint/style/noNestedTernary
 
 ════════════════════════════════════════════════════════════════════════════════
 📄 LOG ORIGINAL:
 ════════════════════════════════════════════════════════════════════════════════
 
-Comando: bunx biome check --max-diagnostics=500 .
-Fecha: 2025-08-09T02:37:30.628Z
+Comando: bunx biome check --max-diagnostics=500 --write .
+Fecha: 2025-08-10T02:02:42.269Z
 Directorio: D:\DEV\image-manager
 Modo tolerante: SÍ
 Tipo: Linting
 ===============================================
-.vscode\settings.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-     26  26 │     },
-     27  27 │     "smoothtype.duration": 160,
-     28     │ - ··"gitlens.gitCommands.skipConfirmations":·[
-     29     │ - ····"fetch:command",
-     30     │ - ····"switch:command"
-     31     │ - ··],
-         28 │ + ··"gitlens.gitCommands.skipConfirmations":·["fetch:command",·"switch:command"],
-     32  29 │     "files.autoGuessEncoding": true,
-     33  30 │     "editor.inlineSuggest.enabled": true,
-    ······· │ 
-    128 125 │     "telemetry.editStats.showStatusBar": true,
-    129 126 │     "editor.defaultFormatter": "esbenp.prettier-vscode"
-    130     │ - }
-        127 │ + }
-        128 │ + 
-  
-
-biome.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-     25  25 │             "level": "off",
-     26  26 │             "options": {
-     27     │ - ············"allow":·[
-     28     │ - ··············"log"
-     29     │ - ············]
-         27 │ + ············"allow":·["log"]
-     30  28 │             }
-     31  29 │           }
-    ······· │ 
-     99  97 │       "useIgnoreFile": true
-    100  98 │     },
-    101     │ - ··"extends":·[
-    102     │ - ····"ultracite"
-    103     │ - ··]
-    104     │ - }
-         99 │ + ··"extends":·["ultracite"]
-        100 │ + }
-        101 │ + 
-  
-
-package.json format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-    176 176 │       "vite-tsconfig-paths": "^5.1.4"
-    177 177 │     }
-    178     │ - }
-        178 │ + }
-        179 │ + 
-  
-
 scripts\analysis\dependency-analyzer.js:79:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━
 
   × Block statements are preferred in this position.
@@ -448,21 +420,6 @@ scripts\analysis\dependency-analyzer.js:316:62 lint/nursery/noShadow ━━━�
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
   
 
-scripts\benchmarks\benchmark-bun.js:16:31 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━
-
-  × The Bun variable is undeclared.
-  
-    14 │ const startTime = performance.now();
-    15 │ 
-  > 16 │ console.log(`✅ Bun Runtime v${Bun.version}`);
-       │                                ^^^
-    17 │ console.log(`🏁 Tiempo de inicio: ${(performance.now() - startTime).toFixed(2)}ms`);
-    18 │ 
-  
-  i By default, Biome recognizes browser and Node.js globals.
-    You can ignore more globals using the javascript.globals configuration.
-  
-
 scripts\benchmarks\performance-comparison-v2.js:54:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━
 
   × This async function lacks an await expression.
@@ -604,6 +561,20 @@ scripts\benchmarks\performance-comparison-v2.js:294:2 lint/complexity/noExcessiv
   i Please refactor this function to reduce its complexity score from 20 to the max allowed complexity 15.
   
 
+scripts\benchmarks\performance-comparison.js:209:5 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    207 │ 			try {
+    208 │ 				// Limpiar dist antes del build
+  > 209 │ 				await fs.rm('dist', { recursive: true, force: true });
+        │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    210 │ 
+    211 │ 				const start = performance.now();
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
 scripts\benchmarks\performance-comparison.js:48:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This async function lacks an await expression.
@@ -718,19 +689,21 @@ scripts\benchmarks\performance-comparison.js:188:43 lint/suspicious/noEmptyBlock
   i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
   
 
-scripts\benchmarks\performance-comparison.js:209:5 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━━
+scripts\check-errors.js:71:2 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Avoid using await inside loops.
+  × Block statements are preferred in this position.
   
-    207 │ 			try {
-    208 │ 				// Limpiar dist antes del build
-  > 209 │ 				await fs.rm('dist', { recursive: true, force: true });
-        │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    210 │ 
-    211 │ 				const start = performance.now();
+    69 │ 	const stats = await stat(filePath);
+    70 │ 
+  > 71 │ 	if (stats.mtime.getTime() < cutoff) return null;
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ 
+    73 │ 	// Usar el nuevo parser para obtener un resumen estructurado
   
-  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
+    71 │ → if·(stats.mtime.getTime()·<·cutoff)·{·return·null;·}
+       │                                       ++            ++
 
 scripts\check-errors.js:80:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -744,6 +717,35 @@ scripts\check-errors.js:80:10 lint/complexity/noExcessiveCognitiveComplexity ━
     82 │ 		console.log(chalk.green('✅ ¡No se encontraron archivos con errores!'));
   
   i Please refactor this function to reduce its complexity score from 29 to the max allowed complexity 15.
+  
+
+scripts\check-errors.js:179:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    177 │ 		const fileData = await filterRelevantFiles(files, options);
+    178 │ 
+  > 179 │ 		if (!fileData) return;
+        │ 		^^^^^^^^^^^^^^^^^^^^^^
+    180 │ 
+    181 │ 		const { relevantFiles, cutoff } = fileData;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    179 │ → → if·(!fileData)·{·return;·}
+        │                    ++       ++
+
+scripts\check-errors.js:186:20 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    185 │ 		for (const file of relevantFiles) {
+  > 186 │ 			const summary = await extractErrorsFromFile(file, cutoff);
+        │ 			                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    187 │ 
+    188 │ 			if (summary && summary.stats.totalErrors > 0) {
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
   
 
 scripts\check-errors.js:52:43 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -786,14 +788,14 @@ scripts\check-errors.js:3:19 lint/correctness/noUnusedImports  FIXABLE  ━━�
     3 │ import·{·readdir,·readFile,·stat·}·from·'node:fs/promises';
       │                   ----------                               
 
-scripts\check-errors.js:6:48 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+scripts\check-errors.js:6:34 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Several of these imports are unused.
   
     4 │ import chalk from 'chalk';
     5 │ import { join } from 'path';
-  > 6 │ import { parseLogFile, detectToolFromFileName, displaySimpleErrorSummary } from './error-parser.js';
-      │                                                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 6 │ import { detectToolFromFileName, displaySimpleErrorSummary, parseLogFile } from './error-parser.js';
+      │                                  ^^^^^^^^^^^^^^^^^^^^^^^^^
     7 │ 
     8 │ const LOGS_DIR = join(process.cwd(), 'logs');
   
@@ -801,87 +803,8 @@ scripts\check-errors.js:6:48 lint/correctness/noUnusedImports  FIXABLE  ━━�
   
   i Unsafe fix: Remove the unused imports.
   
-    6 │ import·{·parseLogFile,·detectToolFromFileName,·displaySimpleErrorSummary·}·from·'./error-parser.js';
-      │                                                --------------------------                           
-
-scripts\check-errors.js:87:2 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This let declares a variable that is only assigned once.
-  
-    86 │ 	let totalErrors = 0;
-  > 87 │ 	let totalAffectedFiles = new Set();
-       │ 	^^^
-    88 │ 
-    89 │ 	console.log(chalk.cyan.bold('\n📊 RESUMEN CONSOLIDADO DE ERRORES'));
-  
-  i 'totalAffectedFiles' is never reassigned.
-  
-    86 │ 	let totalErrors = 0;
-  > 87 │ 	let totalAffectedFiles = new Set();
-       │ 	    ^^^^^^^^^^^^^^^^^^
-    88 │ 
-    89 │ 	console.log(chalk.cyan.bold('\n📊 RESUMEN CONSOLIDADO DE ERRORES'));
-  
-  i Safe fix: Use const instead.
-  
-     85  85 │   
-     86  86 │   	let totalErrors = 0;
-     87     │ - → let·totalAffectedFiles·=·new·Set();
-         87 │ + → const·totalAffectedFiles·=·new·Set();
-     88  88 │   
-     89  89 │   	console.log(chalk.cyan.bold('\n📊 RESUMEN CONSOLIDADO DE ERRORES'));
-  
-
-scripts\check-errors.js:94:3 lint/style/useConst  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This let declares a variable that is only assigned once.
-  
-    92 │ 	for (const [toolName, summaries] of allSummaries.entries()) {
-    93 │ 		let toolErrors = 0;
-  > 94 │ 		let toolFilesSet = new Set();
-       │ 		^^^
-    95 │ 
-    96 │ 		console.log(chalk.yellow.bold(`\n🔧 ${toolName.toUpperCase()}:`));
-  
-  i 'toolFilesSet' is never reassigned.
-  
-    92 │ 	for (const [toolName, summaries] of allSummaries.entries()) {
-    93 │ 		let toolErrors = 0;
-  > 94 │ 		let toolFilesSet = new Set();
-       │ 		    ^^^^^^^^^^^^
-    95 │ 
-    96 │ 		console.log(chalk.yellow.bold(`\n🔧 ${toolName.toUpperCase()}:`));
-  
-  i Safe fix: Use const instead.
-  
-     92  92 │   	for (const [toolName, summaries] of allSummaries.entries()) {
-     93  93 │   		let toolErrors = 0;
-     94     │ - → → let·toolFilesSet·=·new·Set();
-         94 │ + → → const·toolFilesSet·=·new·Set();
-     95  95 │   
-     96  96 │   		console.log(chalk.yellow.bold(`\n🔧 ${toolName.toUpperCase()}:`));
-  
-
-scripts\check-errors.js:3:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × The imports and exports are not sorted.
-  
-    1 │ #!/usr/bin/env node
-    2 │ 
-  > 3 │ import { readdir, readFile, stat } from 'node:fs/promises';
-      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    4 │ import chalk from 'chalk';
-    5 │ import { join } from 'path';
-  
-  i Safe fix: Organize Imports (Biome)
-  
-      4   4 │   import chalk from 'chalk';
-      5   5 │   import { join } from 'path';
-      6     │ - import·{·parseLogFile,·detectToolFromFileName,·displaySimpleErrorSummary·}·from·'./error-parser.js';
-          6 │ + import·{·detectToolFromFileName,·displaySimpleErrorSummary,·parseLogFile·}·from·'./error-parser.js';
-      7   7 │   
-      8   8 │   const LOGS_DIR = join(process.cwd(), 'logs');
-  
+    6 │ import·{·detectToolFromFileName,·displaySimpleErrorSummary,·parseLogFile·}·from·'./error-parser.js';
+      │                                  ---------------------------                                        
 
 scripts\check-errors.js:52:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -916,69 +839,17 @@ scripts\check-errors.js:52:1 lint/suspicious/useAwait ━━━━━━━━�
   i Async functions without await expressions may not need to be declared async.
   
 
-scripts\check-errors.js:71:2 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+scripts\db\check.js:59:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Block statements are preferred in this position.
+  × Excessive complexity of 25 detected (max: 15).
   
-    69 │ 	const stats = await stat(filePath);
-    70 │ 
-  > 71 │ 	if (stats.mtime.getTime() < cutoff) return null;
-       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    72 │ 
-    73 │ 	// Usar el nuevo parser para obtener un resumen estructurado
+    58 │ // Función principal
+  > 59 │ function checkDatabase() {
+       │          ^^^^^^^^^^^^^
+    60 │ 	log('\n🔍 Verificando estado de la base de datos...', colors.blue);
+    61 │ 	log('=============================================', colors.blue);
   
-  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
-  
-    71 │ → if·(stats.mtime.getTime()·<·cutoff)·{·return·null;·}
-       │                                       ++            ++
-
-scripts\check-errors.js:143:29 lint/style/noUnusedTemplateLiteral  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Do not use template literals if interpolation and special-character handling are not needed.
-  
-    142 │ 	console.log(chalk.gray('═'.repeat(50)));
-  > 143 │ 	console.log(chalk.red.bold(`📊 TOTAL GENERAL:`));
-        │ 	                           ^^^^^^^^^^^^^^^^^^^
-    144 │ 	console.log(chalk.red(`  ❌ Total de errores: ${totalErrors}`));
-    145 │ 	console.log(chalk.blue(`  📁 Total de archivos únicos afectados: ${totalAffectedFiles.size}`));
-  
-  i Safe fix: Replace with string literal
-  
-    141 141 │   
-    142 142 │   	console.log(chalk.gray('═'.repeat(50)));
-    143     │ - → console.log(chalk.red.bold(`📊·TOTAL·GENERAL:`));
-        143 │ + → console.log(chalk.red.bold('📊·TOTAL·GENERAL:'));
-    144 144 │   	console.log(chalk.red(`  ❌ Total de errores: ${totalErrors}`));
-    145 145 │   	console.log(chalk.blue(`  📁 Total de archivos únicos afectados: ${totalAffectedFiles.size}`));
-  
-
-scripts\check-errors.js:179:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Block statements are preferred in this position.
-  
-    177 │ 		const fileData = await filterRelevantFiles(files, options);
-    178 │ 
-  > 179 │ 		if (!fileData) return;
-        │ 		^^^^^^^^^^^^^^^^^^^^^^
-    180 │ 
-    181 │ 		const { relevantFiles, cutoff } = fileData;
-  
-  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
-  
-    179 │ → → if·(!fileData)·{·return;·}
-        │                    ++       ++
-
-scripts\check-errors.js:186:20 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Avoid using await inside loops.
-  
-    185 │ 		for (const file of relevantFiles) {
-  > 186 │ 			const summary = await extractErrorsFromFile(file, cutoff);
-        │ 			                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    187 │ 
-    188 │ 			if (summary && summary.stats.totalErrors > 0) {
-  
-  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  i Please refactor this function to reduce its complexity score from 25 to the max allowed complexity 15.
   
 
 scripts\db\check.js:72:41 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -993,19 +864,6 @@ scripts\db\check.js:72:41 lint/performance/useTopLevelRegex ━━━━━━�
     74 │ 					log(`✅ DATABASE_URL configurada: ${dbUrlMatch[1]}`, colors.green);
   
   i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
-  
-
-scripts\db\check.js:59:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Excessive complexity of 25 detected (max: 15).
-  
-    58 │ // Función principal
-  > 59 │ function checkDatabase() {
-       │          ^^^^^^^^^^^^^
-    60 │ 	log('\n🔍 Verificando estado de la base de datos...', colors.blue);
-    61 │ 	log('=============================================', colors.blue);
-  
-  i Please refactor this function to reduce its complexity score from 25 to the max allowed complexity 15.
   
 
 scripts\db\clean-and-seed.ts:38:4 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1064,79 +922,19 @@ scripts\db\migration-status-report.ts:26:16 lint/complexity/noExcessiveCognitive
   i Please refactor this function to reduce its complexity score from 39 to the max allowed complexity 15.
   
 
-scripts\db\migration-status-report.ts:276:60 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+scripts\db\migration-status-report.ts:280:60 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Do not nest ternary expressions.
   
-    275 │ 	for (const service of services) {
-  > 276 │ 		const statusIcon = service.status === 'COMPLETE' ? '✅' : service.status === 'PARTIAL' ? '🔄' : '❌';
+    279 │ 	for (const service of services) {
+  > 280 │ 		const statusIcon = service.status === 'COMPLETE' ? '✅' : service.status === 'PARTIAL' ? '🔄' : '❌';
         │ 		                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    277 │ 		console.log(`\n${statusIcon} **${service.name}** (${service.status})`);
-    278 │ 		console.log(`   📝 Métodos migrados: ${service.migratedMethods.join(', ')}`);
+    281 │ 		console.log(`\n${statusIcon} **${service.name}** (${service.status})`);
+    282 │ 		console.log(`   📝 Métodos migrados: ${service.migratedMethods.join(', ')}`);
   
   i Nesting ternary expressions can make code more difficult to understand.
   
   i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
-  
-
-scripts\db\migration-status-report.ts:163:46 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━
-
-  × The start1 variable is undeclared.
-  
-    161 │ 	try {
-    162 │ 		const places = await getPlaces({});
-  > 163 │ 		placeStatus.avgResponseTime = Date.now() - start1;
-        │ 		                                           ^^^^^^
-    164 │ 		console.log(`   ✅ PlaceService: ${places.length} places encontrados`);
-    165 │ 	} catch (error) {
-  
-  i By default, Biome recognizes browser and Node.js globals.
-    You can ignore more globals using the javascript.globals configuration.
-  
-
-scripts\db\migration-status-report.ts:184:50 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━
-
-  × The start1 variable is undeclared.
-  
-    182 │ 	try {
-    183 │ 		const worldItems = await getWorldItems({});
-  > 184 │ 		worldItemStatus.avgResponseTime = Date.now() - start1;
-        │ 		                                               ^^^^^^
-    185 │ 		console.log(`   ✅ WorldItemService: ${worldItems.length} world items encontrados`);
-    186 │ 	} catch (error) {
-  
-  i By default, Biome recognizes browser and Node.js globals.
-    You can ignore more globals using the javascript.globals configuration.
-  
-
-scripts\db\migration-status-report.ts:205:51 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━
-
-  × The start1 variable is undeclared.
-  
-    203 │ 	try {
-    204 │ 		const collections = await getCollections();
-  > 205 │ 		collectionStatus.avgResponseTime = Date.now() - start1;
-        │ 		                                                ^^^^^^
-    206 │ 		console.log(`   ✅ CollectionService: ${collections.length} colecciones encontradas`);
-    207 │ 	} catch (error) {
-  
-  i By default, Biome recognizes browser and Node.js globals.
-    You can ignore more globals using the javascript.globals configuration.
-  
-
-scripts\db\migration-status-report.ts:226:50 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━
-
-  × The start1 variable is undeclared.
-  
-    224 │ 	try {
-    225 │ 		const charactersResult = await getCharacters({});
-  > 226 │ 		characterStatus.avgResponseTime = Date.now() - start1;
-        │ 		                                               ^^^^^^
-    227 │ 		console.log(`   ✅ CharacterService: ${charactersResult.characters.length} personajes encontrados`);
-    228 │ 	} catch (error) {
-  
-  i By default, Biome recognizes browser and Node.js globals.
-    You can ignore more globals using the javascript.globals configuration.
   
 
 scripts\db\reset.js:137:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1228,163 +1026,6 @@ scripts\error-parser-new.js:289:17 lint/complexity/noExcessiveCognitiveComplexit
   i Please refactor this function to reduce its complexity score from 19 to the max allowed complexity 15.
   
 
-scripts\error-parser-new.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-      1     │ - #!/usr/bin/env·node␍
-      2     │ - ␍
-      3     │ - /**␍
-      4     │ - ·*·Parser·inteligente·de·errores·para·logs·de·Biome·y·TypeScript␍
-      5     │ - ·*·Genera·resúmenes·simples·y·útiles·con·el·formato·solicitado␍
-      6     │ - ·*/␍
-      7     │ - ␍
-      8     │ - import·{·readFileSync·}·from·'node:fs';␍
-      9     │ - import·chalk·from·'chalk';␍
-     10     │ - ␍
-     11     │ - //·Expresiones·regulares·globales·para·mejor·rendimiento␍
-     12     │ - const·ANSI_REGEX·=·/[\u001B\u009B][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;␍
-     13     │ - const·FORMAT_REGEX·=·/\[(?:7|0|9\d)m/g;␍
-     14     │ - const·TSC_ERROR_REGEX·=·/([^:\s]+\.tsx?):\s*(\d+):\s*(\d+)\s*-\s*error\s*(?:TS(\d+))?\s*[:\s]*(.+)/i;␍
-     15     │ - const·BIOME_ERROR_REGEX·=·/([^:\s]+\.[jt]sx?):(\d+):(\d+)\s+(\w+\/[\w/]+)/;␍
-     16     │ - const·BIOME_NEXT_LINE_REGEX·=·/^[^:\s]+\.[jt]sx?:\d+:\d+/;␍
-     17     │ - const·CONFIG_ERROR_REGEX·=·/Failed·to·resolve.*?from\s+(\w+)/;␍
-     18     │ - ␍
-     19     │ - /**␍
-     20     │ - ·*·Estructura·para·un·error·parseado␍
-     21     │ - ·*/␍
-     22     │ - class·ParsedError·{␍
-     23     │ - → constructor(file,·line,·column,·code,·message,·tool)·{␍
-     24     │ - → → this.file·=·file;␍
-     25     │ - → → this.line·=·line;␍
-     26     │ - → → this.column·=·column;␍
-     27     │ - → → this.code·=·code;␍
-     28     │ - → → this.message·=·message;␍
-     29     │ - → → this.tool·=·tool;␍
-     30     │ - → }␍
-     31     │ - ␍
-     32     │ - → toString()·{␍
-     33     │ - → → return·`${this.file}:${this.line}:${this.column}·-·${this.code}:·${this.message}`;␍
-     34     │ - → }␍
-     35     │ - }␍
-     36     │ - ␍
-     37     │ - /**␍
-     38     │ - ·*·Función·auxiliar·para·limpiar·códigos·ANSI·y·otros·caracteres·de·escape␍
-     39     │ - ·*/␍
-     40     │ - function·cleanAnsiCodes(text)·{␍
-     41     │ - → return·text␍
-     42     │ - → → .replace(ANSI_REGEX,·'')·//·Códigos·ANSI·completos␍
-     43     │ - → → .replace(FORMAT_REGEX,·'')·//·Códigos·específicos·de·formato␍
-     44     │ - → → .trim();␍
-     45     │ - }␍
-     46     │ - ␍
-     47     │ - /**␍
-     48     │ - ·*·Parser·para·errores·de·TypeScript·(tsc)␍
-     49     │ - ·*/␍
-     50     │ - export·function·parseTscErrors(content)·{␍
-     51     │ - → const·errors·=·[];␍
-     52     │ - → const·lines·=·content.split('\n');␍
-     53     │ - ␍
-     54     │ - → for·(const·line·of·lines)·{␍
-     55     │ - → → //·Limpiar·códigos·ANSI·primero␍
-     56     │ - → → const·cleanLine·=·cleanAnsiCodes(line);␍
-     57     │ - ␍
-     58     │ - → → //·Formato·típico·de·TSC:·src/file.ts:123:45·-·error·TS2345:·Message␍
-     59     │ - → → const·tscMatch·=·cleanLine.match(TSC_ERROR_REGEX);␍
-     60     │ - ␍
-     61     │ - → → if·(tscMatch)·{␍
-     62     │ - → → → const·[,·file,·lineNum,·column,·errorCode,·message]·=·tscMatch;␍
-     63     │ - ␍
-     64     │ - → → → if·(file·&&·lineNum·&&·message)·{␍
-     65     │ - → → → → errors.push(␍
-     66     │ - → → → → → new·ParsedError(␍
-     67     │ - → → → → → → file.trim(),␍
-     68     │ - → → → → → → lineNum,␍
-     69     │ - → → → → → → column·||·'0',␍
-     70     │ - → → → → → → errorCode·?·`TS${errorCode}`·:·'TSError',␍
-     71     │ - → → → → → → cleanAnsiCodes(message).trim(),␍
-     72     │ - → → → → → → 'tsc'␍
-     73     │ - → → → → → )␍
-     74     │ - → → → → );␍
-     75     │ - → → → }␍
-     76     │ - → → }␍
-     77     │ - → }␍
-     78     │ - ␍
-     79     │ - → return·errors;␍
-     80     │ - }␍
-     81     │ - ␍
-     82     │ - /**␍
-     83     │ - ·*·Parser·para·errores·de·Biome␍
-     84     │ - ·*/␍
-     85     │ - export·function·parseBiomeErrors(content)·{␍
-     86     │ - → const·errors·=·[];␍
-     87     │ - → const·lines·=·content.split('\n');␍
-     88     │ - ␍
-     89     │ - → for·(let·i·=·0;·i·<·lines.length;·i++)·{␍
-     90     │ - → → const·line·=·lines[i];␍
-     91     │ - ␍
-     92     │ - → → //·Formato·típico·de·Biome:·src/file.ts:123:45·lint/suspicious/noDoubleEquals␍
-     93     │ - → → const·biomeMatch·=·line.match(BIOME_ERROR_REGEX);␍
-     94     │ - ␍
-     95     │ - → → if·(biomeMatch)·{␍
-     96     │ - → → → const·[,·file,·lineNum,·column,·rule]·=·biomeMatch;␍
-     97     │ - ␍
-     98     │ - → → → //·Buscar·la·descripción·del·error·en·las·líneas·siguientes␍
-     99     │ - → → → let·message·=·rule;␍
-    100     │ - → → → const·nextLine·=·lines[i·+·1];␍
-    101     │ - → → → if·(nextLine·&&·!nextLine.match(BIOME_NEXT_LINE_REGEX))·{␍
-    102     │ - → → → → message·=·nextLine.trim()·||·rule;␍
-    103     │ - → → → }␍
-    104     │ - ␍
-    105     │ - → → → //·Limpiar·mensajes·de·códigos·ANSI␍
-    106     │ - → → → const·cleanMessage·=·cleanAnsiCodes(message);␍
-    107     │ - ␍
-    108     │ - → → → errors.push(new·ParsedError(file,·lineNum,·column,·rule,·cleanMessage,·'biome'));␍
-    109     │ - → → }␍
-    110     │ - ␍
-    111     │ - → → //·También·detectar·errores·de·configuración·de·Biome␍
-    112     │ - → → if·(line.includes('Failed·to·resolve')·||·line.includes('Could·not·resolve'))·{␍
-    113     │ - → → → const·configMatch·=·line.match(CONFIG_ERROR_REGEX);␍
-    114     │ - → → → if·(configMatch)·{␍
-    115     │ - → → → → errors.push(new·ParsedError('biome.json',·'1',·'1',·'ConfigError',·cleanAnsiCodes(line),·'biome'));␍
-    116     │ - → → → }␍
-    117     │ - → → }␍
-    118     │ - → }␍
-    119     │ - ␍
-    120     │ - → return·errors;␍
-    121     │ - }␍
-    122     │ - ␍
-    123     │ - /**␍
-    124     │ - ·*·Parser·principal·que·detecta·automáticamente·el·tipo·de·herramienta␍
-    125     │ - ·*/␍
-    126     │ - export·function·parseErrors(content,·toolHint·=·null)·{␍
-    127     │ - → const·errors·=·[];␍
-    128     │ - → let·detectedTool·=·toolHint;␍
-    129     │ - ␍
-    130     │ - → //·Si·no·se·especifica·herramienta,·detectar·automáticamente␍
-    131     │ - → if·(!detectedTool)·{␍
-    132     │ - → → if·(content.includes('error·TS')·||·content.includes('bunx·tsc'))·{␍
-    133     │ - → → → detectedTool·=·'tsc';␍
-    134     │ - → → }·else·if·(content.includes('lint/')·||·content.includes('bunx·biome'))·{␍
-    135     │ - → → → detectedTool·=·'biome';␍
-    136     │ - → → }␍
-    137     │ - → }␍
-    138     │ - ␍
-    139     │ - → switch·(detectedTool)·{␍
-    140     │ - → → case·'tsc':·{␍
-    141     │ - → → → errors.push(...parseTscErrors(content));␍
-    142     │ - → → → break;␍
-    143     │ - → → }␍
-    144     │ - → → case·'biome':·{␍
-    145     │ - → → → errors.push(...parseBiomeErrors(content));␍
-    146     │ - → → → break;␍
-    147     │ - → → }␍
-    148     │ - → → default:·{␍
-    149     │ - → → → //·Intentar·ambos·parsers␍
-    150     │ - → → → errors.push(...parseTscErrors(content));␍
-  589 more lines truncated
-  
-
 scripts\error-parser.js:12:22 lint/suspicious/noControlCharactersInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × Unexpected control character in a regular expression.
@@ -1410,336 +1051,6 @@ scripts\error-parser.js:289:17 lint/complexity/noExcessiveCognitiveComplexity �
     291 │ 		return;
   
   i Please refactor this function to reduce its complexity score from 19 to the max allowed complexity 15.
-  
-
-scripts\error-parser.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-      1     │ - #!/usr/bin/env·node␍
-      2     │ - ␍
-      3     │ - /**␍
-      4     │ - ·*·Parser·inteligente·de·errores·para·logs·de·Biome·y·TypeScript␍
-      5     │ - ·*·Genera·resúmenes·simples·y·útiles·con·el·formato·solicitado␍
-      6     │ - ·*/␍
-      7     │ - ␍
-      8     │ - import·{·readFileSync·}·from·'node:fs';␍
-      9     │ - import·chalk·from·'chalk';␍
-     10     │ - ␍
-     11     │ - //·Expresiones·regulares·globales·para·mejor·rendimiento␍
-     12     │ - const·ANSI_REGEX·=·/[\u001B\u009B][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;␍
-     13     │ - const·FORMAT_REGEX·=·/\[(?:7|0|9\d)m/g;␍
-     14     │ - const·TSC_ERROR_REGEX·=·/([^:\s]+\.tsx?):\s*(\d+):\s*(\d+)\s*-\s*error\s*(?:TS(\d+))?\s*[:\s]*(.+)/i;␍
-     15     │ - const·BIOME_ERROR_REGEX·=·/([^:\s]+\.[jt]sx?):(\d+):(\d+)\s+(\w+\/[\w/]+)/;␍
-     16     │ - const·BIOME_NEXT_LINE_REGEX·=·/^[^:\s]+\.[jt]sx?:\d+:\d+/;␍
-     17     │ - const·CONFIG_ERROR_REGEX·=·/Failed·to·resolve.*?from\s+(\w+)/;␍
-     18     │ - ␍
-     19     │ - /**␍
-     20     │ - ·*·Estructura·para·un·error·parseado␍
-     21     │ - ·*/␍
-     22     │ - class·ParsedError·{␍
-     23     │ - → constructor(file,·line,·column,·code,·message,·tool)·{␍
-     24     │ - → → this.file·=·file;␍
-     25     │ - → → this.line·=·line;␍
-     26     │ - → → this.column·=·column;␍
-     27     │ - → → this.code·=·code;␍
-     28     │ - → → this.message·=·message;␍
-     29     │ - → → this.tool·=·tool;␍
-     30     │ - → }␍
-     31     │ - ␍
-     32     │ - → toString()·{␍
-     33     │ - → → return·`${this.file}:${this.line}:${this.column}·-·${this.code}:·${this.message}`;␍
-     34     │ - → }␍
-     35     │ - }␍
-     36     │ - ␍
-     37     │ - /**␍
-     38     │ - ·*·Función·auxiliar·para·limpiar·códigos·ANSI·y·otros·caracteres·de·escape␍
-     39     │ - ·*/␍
-     40     │ - function·cleanAnsiCodes(text)·{␍
-     41     │ - → return·text␍
-     42     │ - → → .replace(ANSI_REGEX,·'')·//·Códigos·ANSI·completos␍
-     43     │ - → → .replace(FORMAT_REGEX,·'')·//·Códigos·específicos·de·formato␍
-     44     │ - → → .trim();␍
-     45     │ - }␍
-     46     │ - ␍
-     47     │ - /**␍
-     48     │ - ·*·Parser·para·errores·de·TypeScript·(tsc)␍
-     49     │ - ·*/␍
-     50     │ - export·function·parseTscErrors(content)·{␍
-     51     │ - → const·errors·=·[];␍
-     52     │ - → const·lines·=·content.split('\n');␍
-     53     │ - ␍
-     54     │ - → for·(const·line·of·lines)·{␍
-     55     │ - → → //·Limpiar·códigos·ANSI·primero␍
-     56     │ - → → const·cleanLine·=·cleanAnsiCodes(line);␍
-     57     │ - ␍
-     58     │ - → → //·Formato·típico·de·TSC:·src/file.ts:123:45·-·error·TS2345:·Message␍
-     59     │ - → → const·tscMatch·=·cleanLine.match(TSC_ERROR_REGEX);␍
-     60     │ - ␍
-     61     │ - → → if·(tscMatch)·{␍
-     62     │ - → → → const·[,·file,·lineNum,·column,·errorCode,·message]·=·tscMatch;␍
-     63     │ - ␍
-     64     │ - → → → if·(file·&&·lineNum·&&·message)·{␍
-     65     │ - → → → → errors.push(␍
-     66     │ - → → → → → new·ParsedError(␍
-     67     │ - → → → → → → file.trim(),␍
-     68     │ - → → → → → → lineNum,␍
-     69     │ - → → → → → → column·||·'0',␍
-     70     │ - → → → → → → errorCode·?·`TS${errorCode}`·:·'TSError',␍
-     71     │ - → → → → → → cleanAnsiCodes(message).trim(),␍
-     72     │ - → → → → → → 'tsc'␍
-     73     │ - → → → → → )␍
-     74     │ - → → → → );␍
-     75     │ - → → → }␍
-     76     │ - → → }␍
-     77     │ - → }␍
-     78     │ - ␍
-     79     │ - → return·errors;␍
-     80     │ - }␍
-     81     │ - ␍
-     82     │ - /**␍
-     83     │ - ·*·Parser·para·errores·de·Biome␍
-     84     │ - ·*/␍
-     85     │ - export·function·parseBiomeErrors(content)·{␍
-     86     │ - → const·errors·=·[];␍
-     87     │ - → const·lines·=·content.split('\n');␍
-     88     │ - ␍
-     89     │ - → for·(let·i·=·0;·i·<·lines.length;·i++)·{␍
-     90     │ - → → const·line·=·lines[i];␍
-     91     │ - ␍
-     92     │ - → → //·Formato·típico·de·Biome:·src/file.ts:123:45·lint/suspicious/noDoubleEquals␍
-     93     │ - → → const·biomeMatch·=·line.match(BIOME_ERROR_REGEX);␍
-     94     │ - ␍
-     95     │ - → → if·(biomeMatch)·{␍
-     96     │ - → → → const·[,·file,·lineNum,·column,·rule]·=·biomeMatch;␍
-     97     │ - ␍
-     98     │ - → → → //·Buscar·la·descripción·del·error·en·las·líneas·siguientes␍
-     99     │ - → → → let·message·=·rule;␍
-    100     │ - → → → const·nextLine·=·lines[i·+·1];␍
-    101     │ - → → → if·(nextLine·&&·!nextLine.match(BIOME_NEXT_LINE_REGEX))·{␍
-    102     │ - → → → → message·=·nextLine.trim()·||·rule;␍
-    103     │ - → → → }␍
-    104     │ - ␍
-    105     │ - → → → //·Limpiar·mensajes·de·códigos·ANSI␍
-    106     │ - → → → const·cleanMessage·=·cleanAnsiCodes(message);␍
-    107     │ - ␍
-    108     │ - → → → errors.push(new·ParsedError(file,·lineNum,·column,·rule,·cleanMessage,·'biome'));␍
-    109     │ - → → }␍
-    110     │ - ␍
-    111     │ - → → //·También·detectar·errores·de·configuración·de·Biome␍
-    112     │ - → → if·(line.includes('Failed·to·resolve')·||·line.includes('Could·not·resolve'))·{␍
-    113     │ - → → → const·configMatch·=·line.match(CONFIG_ERROR_REGEX);␍
-    114     │ - → → → if·(configMatch)·{␍
-    115     │ - → → → → errors.push(new·ParsedError('biome.json',·'1',·'1',·'ConfigError',·cleanAnsiCodes(line),·'biome'));␍
-    116     │ - → → → }␍
-    117     │ - → → }␍
-    118     │ - → }␍
-    119     │ - ␍
-    120     │ - → return·errors;␍
-    121     │ - }␍
-    122     │ - ␍
-    123     │ - /**␍
-    124     │ - ·*·Parser·principal·que·detecta·automáticamente·el·tipo·de·herramienta␍
-    125     │ - ·*/␍
-    126     │ - export·function·parseErrors(content,·toolHint·=·null)·{␍
-    127     │ - → const·errors·=·[];␍
-    128     │ - → let·detectedTool·=·toolHint;␍
-    129     │ - ␍
-    130     │ - → //·Si·no·se·especifica·herramienta,·detectar·automáticamente␍
-    131     │ - → if·(!detectedTool)·{␍
-    132     │ - → → if·(content.includes('error·TS')·||·content.includes('bunx·tsc'))·{␍
-    133     │ - → → → detectedTool·=·'tsc';␍
-    134     │ - → → }·else·if·(content.includes('lint/')·||·content.includes('bunx·biome'))·{␍
-    135     │ - → → → detectedTool·=·'biome';␍
-    136     │ - → → }␍
-    137     │ - → }␍
-    138     │ - ␍
-    139     │ - → switch·(detectedTool)·{␍
-    140     │ - → → case·'tsc':·{␍
-    141     │ - → → → errors.push(...parseTscErrors(content));␍
-    142     │ - → → → break;␍
-    143     │ - → → }␍
-    144     │ - → → case·'biome':·{␍
-    145     │ - → → → errors.push(...parseBiomeErrors(content));␍
-    146     │ - → → → break;␍
-    147     │ - → → }␍
-    148     │ - → → default:·{␍
-    149     │ - → → → //·Intentar·ambos·parsers␍
-    150     │ - → → → errors.push(...parseTscErrors(content));␍
-  589 more lines truncated
-  
-
-scripts\logging-utils.js:245:2 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Block statements are preferred in this position.
-  
-    243 │ function detectToolFromCommand(command) {
-    244 │ 	if (command.includes('tsc') || command.includes('typescript')) return 'tsc';
-  > 245 │ 	if (command.includes('biome')) return 'biome';
-        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    246 │ 	if (command.includes('eslint')) return 'eslint';
-    247 │ 	return null;
-  
-  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
-  
-    245 │ → if·(command.includes('biome'))·{·return·'biome';·}␍
-        │                                  ++               ++
-
-scripts\logging-utils.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-      1     │ - #!/usr/bin/env·node␍
-      2     │ - ␍
-      3     │ - import·{·execSync·}·from·'node:child_process';␍
-      4     │ - import·{·existsSync,·mkdirSync,·readdirSync,·readFileSync,·statSync,·writeFileSync·}·from·'node:fs';␍
-      5     │ - import·{·readdir,·rm,·stat·}·from·'node:fs/promises';␍
-      6     │ - import·{·dirname,·join·}·from·'node:path';␍
-      7     │ - import·{·fileURLToPath·}·from·'url';␍
-      8     │ - import·{·detectToolFromFileName,·displaySimpleErrorSummary,·generateLogSummary,·parseLogFile·}·from·'./error-parser.js';␍
-      9     │ - ␍
-     10     │ - const·__filename·=·fileURLToPath(import.meta.url);␍
-     11     │ - const·__dirname·=·dirname(__filename);␍
-     12     │ - const·ROOT_DIR·=·join(__dirname,·'..');␍
-     13     │ - const·LOGS_DIR·=·join(ROOT_DIR,·'logs');␍
-     14     │ - ␍
-     15     │ - //·Asegurar·que·la·carpeta·de·logs·existe␍
-     16     │ - if·(!existsSync(LOGS_DIR))·{␍
-     17     │ - → mkdirSync(LOGS_DIR,·{·recursive:·true·});␍
-     18     │ - }␍
-     19     │ - ␍
-     20     │ - //·Función·para·ejecutar·comando·y·guardar·logs␍
-     21     │ - export·function·executeWithLogging(command,·logFileName,·options·=·{})·{␍
-     22     │ - → const·timestamp·=·new·Date().toISOString().replace(/[:.]/g,·'-');␍
-     23     │ - → const·logFile·=·join(LOGS_DIR,·`${logFileName}_${timestamp}.log`);␍
-     24     │ - → const·errorFile·=·join(LOGS_DIR,·`${logFileName}_${timestamp}_error.log`);␍
-     25     │ - ␍
-     26     │ - → console.log(`🚀·Ejecutando:·${command}`);␍
-     27     │ - → console.log(`📄·Logs·en:·${logFile}`);␍
-     28     │ - ␍
-     29     │ - → try·{␍
-     30     │ - → → //·Ejecutar·comando·y·capturar·salida␍
-     31     │ - → → const·output·=·execSync(command,·{␍
-     32     │ - → → → encoding:·'utf8',␍
-     33     │ - → → → stdio:·'pipe',␍
-     34     │ - → → → ...options,␍
-     35     │ - → → });␍
-     36     │ - ␍
-     37     │ - → → //·Guardar·logs·exitosos␍
-     38     │ - → → writeFileSync(logFile,·`Comando:·${command}\nFecha:·${new·Date().toISOString()}\n\n${output}`);␍
-     39     │ - ␍
-     40     │ - → → //·Mostrar·resumen·en·consola␍
-     41     │ - → → console.log('✅·Comando·ejecutado·exitosamente');␍
-     42     │ - ␍
-     43     │ - → → //·Generar·resumen·automático·de·errores·si·el·comando·es·de·linting/checking␍
-     44     │ - → → if·(isLintingTool(command))·{␍
-     45     │ - → → → generatePostExecutionSummary(logFile,·command);␍
-     46     │ - → → }␍
-     47     │ - ␍
-     48     │ - → → //·Si·hay·salida,·mostrar·primeras·líneas␍
-     49     │ - → → if·(output)·{␍
-     50     │ - → → → const·lines·=·output.split('\n').filter((l)·=>·l.trim());␍
-     51     │ - → → → if·(lines.length·>·5)·{␍
-     52     │ - → → → → console.log('\n📊·Resumen·(primeras·5·líneas):');␍
-     53     │ - → → → → for·(const·line·of·lines.slice(0,·5))·{␍
-     54     │ - → → → → → console.log(`··${line}`);␍
-     55     │ - → → → → }␍
-     56     │ - → → → → console.log(`··...·y·${lines.length·-·5}·líneas·más`);␍
-     57     │ - → → → }·else·{␍
-     58     │ - → → → → console.log('\n📊·Salida·completa:');␍
-     59     │ - → → → → for·(const·line·of·lines)·{␍
-     60     │ - → → → → → console.log(`··${line}`);␍
-     61     │ - → → → → }␍
-     62     │ - → → → }␍
-     63     │ - → → }␍
-     64     │ - ␍
-     65     │ - → → return·{·success:·true,·logFile,·output·};␍
-     66     │ - → }·catch·(error)·{␍
-     67     │ - → → //·Guardar·logs·de·error␍
-     68     │ - → → const·errorContent·=·`Comando:·${command}\nFecha:·${new·Date().toISOString()}\n\nError:\n${error.message}\n\nSalida·stderr:\n${error.stderr·||·''}\n\nSalida·stdout:\n${error.stdout·||·''}`;␍
-     69     │ - → → writeFileSync(errorFile,·errorContent);␍
-     70     │ - ␍
-     71     │ - → → console.error('❌·Error·al·ejecutar·comando');␍
-     72     │ - → → console.error(`📄·Detalles·del·error·en:·${errorFile}`);␍
-     73     │ - ␍
-     74     │ - → → //·Generar·resumen·automático·de·errores·si·hay·salida␍
-     75     │ - → → if·(isLintingTool(command)·&&·(error.stdout·||·error.stderr))·{␍
-     76     │ - → → → generatePostExecutionSummary(errorFile,·command);␍
-     77     │ - → → }␍
-     78     │ - ␍
-     79     │ - → → //·Mostrar·resumen·del·error␍
-     80     │ - → → if·(error.stdout·||·error.stderr)·{␍
-     81     │ - → → → const·errorLines·=·(error.stdout·||·error.stderr).split('\n').filter((l)·=>·l.trim());␍
-     82     │ - → → → if·(errorLines.length·>·0)·{␍
-     83     │ - → → → → console.error('\n📊·Primeros·errores·encontrados:');␍
-     84     │ - → → → → for·(const·line·of·errorLines.slice(0,·3))·{␍
-     85     │ - → → → → → console.error(`··${line}`);␍
-     86     │ - → → → → }␍
-     87     │ - → → → }␍
-     88     │ - → → }␍
-     89     │ - ␍
-     90     │ - → → return·{·success:·false,·errorFile,·error·};␍
-     91     │ - → }␍
-     92     │ - }␍
-     93     │ - ␍
-     94     │ - //·Función·para·categorizar·líneas·por·tipo␍
-     95     │ - function·categorizeByType(line,·lowerLine,·categories)·{␍
-     96     │ - → if·(lowerLine.includes('error')·||·lowerLine.includes('✘'))·{␍
-     97     │ - → → categories.errors.push(line);␍
-     98     │ - → }·else·if·(lowerLine.includes('warning')·||·lowerLine.includes('warn'))·{␍
-     99     │ - → → categories.warnings.push(line);␍
-    100     │ - → }·else·if·(lowerLine.includes('info'))·{␍
-    101     │ - → → categories.info.push(line);␍
-    102     │ - → }␍
-    103     │ - }␍
-    104     │ - ␍
-    105     │ - //·Función·para·categorizar·líneas·por·herramienta␍
-    106     │ - function·categorizeByTool(line,·lowerLine,·categories)·{␍
-    107     │ - → if·(line.includes('.ts')·||·line.includes('.tsx')·||·lowerLine.includes('typescript'))·{␍
-    108     │ - → → categories.typescript.push(line);␍
-    109     │ - → }·else·if·(lowerLine.includes('eslint'))·{␍
-    110     │ - → → categories.eslint.push(line);␍
-    111     │ - → }·else·if·(lowerLine.includes('biome'))·{␍
-    112     │ - → → categories.biome.push(line);␍
-    113     │ - → }·else·if·(line.trim())·{␍
-    114     │ - → → categories.other.push(line);␍
-    115     │ - → }␍
-    116     │ - }␍
-    117     │ - ␍
-    118     │ - //·Función·para·parsear·logs·por·categorías␍
-    119     │ - export·function·parseLogsByCategory(logFile)·{␍
-    120     │ - → if·(!existsSync(logFile))·{␍
-    121     │ - → → console.error(`❌·Archivo·de·log·no·encontrado:·${logFile}`);␍
-    122     │ - → → return·null;␍
-    123     │ - → }␍
-    124     │ - ␍
-    125     │ - → const·content·=·readFileSync(logFile,·'utf8');␍
-    126     │ - → const·categories·=·{␍
-    127     │ - → → errors:·[],␍
-    128     │ - → → warnings:·[],␍
-    129     │ - → → info:·[],␍
-    130     │ - → → typescript:·[],␍
-    131     │ - → → eslint:·[],␍
-    132     │ - → → biome:·[],␍
-    133     │ - → → other:·[],␍
-    134     │ - → };␍
-    135     │ - ␍
-    136     │ - → const·lines·=·content.split('\n');␍
-    137     │ - ␍
-    138     │ - → for·(const·line·of·lines)·{␍
-    139     │ - → → const·lowerLine·=·line.toLowerCase();␍
-    140     │ - → → categorizeByType(line,·lowerLine,·categories);␍
-    141     │ - → → categorizeByTool(line,·lowerLine,·categories);␍
-    142     │ - → }␍
-    143     │ - ␍
-    144     │ - → return·categories;␍
-    145     │ - }␍
-    146     │ - ␍
-    147     │ - //·Función·para·mostrar·resumen·de·logs·usando·el·nuevo·parser␍
-    148     │ - export·function·showLogSummary(logFile)·{␍
-    149     │ - → console.log(`\n📄·Analizando:·${logFile}`);␍
-    150     │ - ␍
-  471 more lines truncated
   
 
 scripts\logging-utils.js:21:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━
@@ -1768,12 +1079,12 @@ scripts\logging-utils.js:194:14 lint/style/useTemplate  FIXABLE  ━━━━━
   
   i Unsafe fix: Use a template literal.
   
-    192 192 │    */␍
-    193 193 │   export function generatePostExecutionSummary(logFile, command) {␍
-    194     │ - → console.log('\n'·+·'═'.repeat(60));␍
-        194 │ + → console.log(`\n${'═'.repeat(60)}`);␍
-    195 195 │   	console.log('📊 RESUMEN AUTOMÁTICO DE ERRORES');␍
-    196 196 │   	console.log('═'.repeat(60));␍
+    192 192 │    */
+    193 193 │   export function generatePostExecutionSummary(logFile, command) {
+    194     │ - → console.log('\n'·+·'═'.repeat(60));
+        194 │ + → console.log(`\n${'═'.repeat(60)}`);
+    195 195 │   	console.log('📊 RESUMEN AUTOMÁTICO DE ERRORES');
+    196 196 │   	console.log('═'.repeat(60));
   
 
 scripts\logging-utils.js:201:6 lint/complexity/useOptionalChain  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1789,12 +1100,12 @@ scripts\logging-utils.js:201:6 lint/complexity/useOptionalChain  FIXABLE  ━━
   
   i Unsafe fix: Change to an optional chain.
   
-    199 199 │   	const summary = parseLogFile(logFile, toolHint);␍
-    200 200 │   ␍
-    201     │ - → if·(summary·&&·summary.stats·&&·summary.stats.totalErrors·>·0)·{␍
-        201 │ + → if·(summary?.stats·&&·summary.stats.totalErrors·>·0)·{␍
-    202 202 │   		// Mostrar el resumen completo en consola␍
-    203 203 │   		displaySimpleErrorSummary(summary);␍
+    199 199 │   	const summary = parseLogFile(logFile, toolHint);
+    200 200 │   
+    201     │ - → if·(summary·&&·summary.stats·&&·summary.stats.totalErrors·>·0)·{
+        201 │ + → if·(summary?.stats·&&·summary.stats.totalErrors·>·0)·{
+    202 202 │   		// Mostrar el resumen completo en consola
+    203 203 │   		displaySimpleErrorSummary(summary);
   
 
 scripts\logging-utils.js:244:2 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1810,8 +1121,24 @@ scripts\logging-utils.js:244:2 lint/style/useBlockStatements  FIXABLE  ━━━
   
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
-    244 │ → if·(command.includes('tsc')·||·command.includes('typescript'))·{·return·'tsc';·}␍
+    244 │ → if·(command.includes('tsc')·||·command.includes('typescript'))·{·return·'tsc';·}
         │                                                                  ++             ++
+
+scripts\logging-utils.js:245:2 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    243 │ function detectToolFromCommand(command) {
+    244 │ 	if (command.includes('tsc') || command.includes('typescript')) return 'tsc';
+  > 245 │ 	if (command.includes('biome')) return 'biome';
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    246 │ 	if (command.includes('eslint')) return 'eslint';
+    247 │ 	return null;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    245 │ → if·(command.includes('biome'))·{·return·'biome';·}
+        │                                  ++               ++
 
 scripts\logging-utils.js:246:2 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1826,7 +1153,7 @@ scripts\logging-utils.js:246:2 lint/style/useBlockStatements  FIXABLE  ━━━
   
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
-    246 │ → if·(command.includes('eslint'))·{·return·'eslint';·}␍
+    246 │ → if·(command.includes('eslint'))·{·return·'eslint';·}
         │                                   ++                ++
 
 scripts\logging-utils.js:280:29 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1844,7 +1171,7 @@ scripts\logging-utils.js:280:29 lint/nursery/useParseIntRadix  FIXABLE  ━━�
   
   i Unsafe fix: Add a radix of 10
   
-    280 │ → → → listRecentLogs(args[0]·?·Number.parseInt(args[0],·10)·:·10);␍
+    280 │ → → → listRecentLogs(args[0]·?·Number.parseInt(args[0],·10)·:·10);
         │                                                       ++++        
 
 scripts\logging-utils.js:297:27 lint/nursery/useParseIntRadix  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1862,7 +1189,7 @@ scripts\logging-utils.js:297:27 lint/nursery/useParseIntRadix  FIXABLE  ━━�
   
   i Unsafe fix: Add a radix of 10
   
-    297 │ → → → cleanOldLogs(args[0]·?·Number.parseInt(args[0],·10)·:·7);␍
+    297 │ → → → cleanOldLogs(args[0]·?·Number.parseInt(args[0],·10)·:·7);
         │                                                     ++++       
 
 scripts\logging-utils.js:183:20 lint/correctness/noUndeclaredVariables ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -1879,38 +1206,6 @@ scripts\logging-utils.js:183:20 lint/correctness/noUndeclaredVariables ━━━
   i By default, Biome recognizes browser and Node.js globals.
     You can ignore more globals using the javascript.globals configuration.
   
-
-scripts\migration\analyze-bun-migration.js:117:71 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Do not nest ternary expressions.
-  
-    115 │ 		console.log(`⏰ Estimación: ${metrics.estimatedHours} horas (${Math.ceil(metrics.estimatedHours / 8)} días)`);
-    116 │ 		console.log(
-  > 117 │ 			`🎯 Nivel de riesgo: ${chalk[metrics.riskLevel === 'high' ? 'red' : metrics.riskLevel === 'medium' ? 'yellow' : 'green'](metrics.riskLevel.toUpperCase())}`
-        │ 			                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    118 │ 		);
-    119 │ 
-  
-  i Nesting ternary expressions can make code more difficult to understand.
-  
-  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
-  
-
-scripts\migration\analyze-bun-migration.js:91:8 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━
-
-  × Block statements are preferred in this position.
-  
-    89 │ 		if (blockers > 0) riskLevel = 'high';
-    90 │ 		else if (highComplexity > 2) riskLevel = 'high';
-  > 91 │ 		else if (highComplexity > 0 || mediumComplexity > 3) riskLevel = 'medium';
-       │ 		     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    92 │ 
-    93 │ 		return {
-  
-  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
-  
-    91 │ → → else·if·(highComplexity·>·0·||·mediumComplexity·>·3)·{·riskLevel·=·'medium';·}
-       │                                                          ++                     ++
 
 scripts\migration\analyze-bun-migration.js:89:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━
 
@@ -1930,22 +1225,6 @@ scripts\migration\analyze-bun-migration.js:89:3 lint/style/useBlockStatements  F
     89 │ → → if·(blockers·>·0)·{·riskLevel·=·'high';·}
        │                       ++                   ++
 
-scripts\migration\analyze-bun-migration.js:124:53 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Do not nest ternary expressions.
-  
-    122 │ 		this.dependencies.forEach((dep) => {
-    123 │ 			const complexityColor =
-  > 124 │ 				dep.migrationComplexity === 'blocker' ? 'red' : dep.migrationComplexity === 'high' ? 'yellow' : 'green';
-        │ 				                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    125 │ 
-    126 │ 			console.log(`\n${chalk.bold(dep.name)}`);
-  
-  i Nesting ternary expressions can make code more difficult to understand.
-  
-  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
-  
-
 scripts\migration\analyze-bun-migration.js:90:8 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━
 
   × Block statements are preferred in this position.
@@ -1963,6 +1242,38 @@ scripts\migration\analyze-bun-migration.js:90:8 lint/style/useBlockStatements  F
   
     90 │ → → else·if·(highComplexity·>·2)·{·riskLevel·=·'high';·}
        │                                  ++                   ++
+
+scripts\migration\analyze-bun-migration.js:91:8 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    89 │ 		if (blockers > 0) riskLevel = 'high';
+    90 │ 		else if (highComplexity > 2) riskLevel = 'high';
+  > 91 │ 		else if (highComplexity > 0 || mediumComplexity > 3) riskLevel = 'medium';
+       │ 		     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    92 │ 
+    93 │ 		return {
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    91 │ → → else·if·(highComplexity·>·0·||·mediumComplexity·>·3)·{·riskLevel·=·'medium';·}
+       │                                                          ++                     ++
+
+scripts\migration\analyze-bun-migration.js:117:71 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    115 │ 		console.log(`⏰ Estimación: ${metrics.estimatedHours} horas (${Math.ceil(metrics.estimatedHours / 8)} días)`);
+    116 │ 		console.log(
+  > 117 │ 			`🎯 Nivel de riesgo: ${chalk[metrics.riskLevel === 'high' ? 'red' : metrics.riskLevel === 'medium' ? 'yellow' : 'green'](metrics.riskLevel.toUpperCase())}`
+        │ 			                                                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    118 │ 		);
+    119 │ 
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
 
 scripts\migration\analyze-bun-migration.js:122:3 lint/complexity/noForEach ━━━━━━━━━━━━━━━━━━━━━━━━━
 
@@ -1983,25 +1294,42 @@ scripts\migration\analyze-bun-migration.js:122:3 lint/complexity/noForEach ━�
   i forEach may lead to performance issues when working with large arrays. When combined with functions like filter or map, this causes multiple iterations over the same type.
   
 
-scripts\migration\benchmark-current-performance.js:189:54 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+scripts\migration\analyze-bun-migration.js:124:53 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Template literals are preferred over string concatenation.
+  × Do not nest ternary expressions.
   
-    187 │ 		);
-    188 │ 
-  > 189 │ 		console.log(`📊 Mejora en build time: ${chalk.green(buildImprovement + '%')}`);
-        │ 		                                                    ^^^^^^^^^^^^^^^^^^^^^^
-    190 │ 		console.log(`📊 Mejora en memoria: ${chalk.green(memoryImprovement + '%')}`);
-    191 │ 
+    122 │ 		this.dependencies.forEach((dep) => {
+    123 │ 			const complexityColor =
+  > 124 │ 				dep.migrationComplexity === 'blocker' ? 'red' : dep.migrationComplexity === 'high' ? 'yellow' : 'green';
+        │ 				                                                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    125 │ 
+    126 │ 			console.log(`\n${chalk.bold(dep.name)}`);
   
-  i Unsafe fix: Use a template literal.
+  i Nesting ternary expressions can make code more difficult to understand.
   
-    187 187 │   		);
-    188 188 │   
-    189     │ - → → console.log(`📊·Mejora·en·build·time:·${chalk.green(buildImprovement·+·'%')}`);
-        189 │ + → → console.log(`📊·Mejora·en·build·time:·${chalk.green(`${buildImprovement}%`)}`);
-    190 190 │   		console.log(`📊 Mejora en memoria: ${chalk.green(memoryImprovement + '%')}`);
-    191 191 │   
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+scripts\migration\benchmark-current-performance.js:81:13 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    79 │ 			const calculateDirSize = (dirPath) => {
+    80 │ 				let totalSize = 0;
+  > 81 │ 				const { execSync } = require('child_process');
+       │ 				        ^^^^^^^^
+    82 │ 
+    83 │ 				try {
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+     8 │ import chalk from 'chalk';
+   > 9 │ import { execSync } from 'child_process';
+       │          ^^^^^^^^
+    10 │ import { readFileSync, statSync } from 'fs';
+    11 │ import { join } from 'path';
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
   
 
 scripts\migration\benchmark-current-performance.js:40:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
@@ -2069,6 +1397,27 @@ scripts\migration\benchmark-current-performance.js:91:18 lint/nursery/useParseIn
     91 │ → → → → → totalSize·=·Number.parseInt(result,·10)·||·0;
        │                                             ++++       
 
+scripts\migration\benchmark-current-performance.js:189:54 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
+
+  × Template literals are preferred over string concatenation.
+  
+    187 │ 		);
+    188 │ 
+  > 189 │ 		console.log(`📊 Mejora en build time: ${chalk.green(buildImprovement + '%')}`);
+        │ 		                                                    ^^^^^^^^^^^^^^^^^^^^^^
+    190 │ 		console.log(`📊 Mejora en memoria: ${chalk.green(memoryImprovement + '%')}`);
+    191 │ 
+  
+  i Unsafe fix: Use a template literal.
+  
+    187 187 │   		);
+    188 188 │   
+    189     │ - → → console.log(`📊·Mejora·en·build·time:·${chalk.green(buildImprovement·+·'%')}`);
+        189 │ + → → console.log(`📊·Mejora·en·build·time:·${chalk.green(`${buildImprovement}%`)}`);
+    190 190 │   		console.log(`📊 Mejora en memoria: ${chalk.green(memoryImprovement + '%')}`);
+    191 191 │   
+  
+
 scripts\migration\benchmark-current-performance.js:190:51 lint/style/useTemplate  FIXABLE  ━━━━━━━━━━
 
   × Template literals are preferred over string concatenation.
@@ -2087,129 +1436,6 @@ scripts\migration\benchmark-current-performance.js:190:51 lint/style/useTemplate
         190 │ + → → console.log(`📊·Mejora·en·memoria:·${chalk.green(`${memoryImprovement}%`)}`);
     191 191 │   
     192 192 │   		// Calculamos si vale la pena
-  
-
-scripts\migration\benchmark-current-performance.js:81:13 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━
-
-  × This variable shadows another variable with the same name in the outer scope.
-  
-    79 │ 			const calculateDirSize = (dirPath) => {
-    80 │ 				let totalSize = 0;
-  > 81 │ 				const { execSync } = require('child_process');
-       │ 				        ^^^^^^^^
-    82 │ 
-    83 │ 				try {
-  
-  i This is the shadowed variable, which is now inaccessible in the inner scope.
-  
-     8 │ import chalk from 'chalk';
-   > 9 │ import { execSync } from 'child_process';
-       │          ^^^^^^^^
-    10 │ import { readFileSync, statSync } from 'fs';
-    11 │ import { join } from 'path';
-  
-  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
-  
-
-scripts\run-with-log-tolerant.js:83:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━
-
-  × Excessive complexity of 16 detected (max: 15).
-  
-    82 │ // Función para determinar el color y emoji según el tipo de línea
-  > 83 │ function getLineStyle(line, isError, hasRealErrors, isTolerantCommand) {
-       │          ^^^^^^^^^^^^
-    84 │ 	// Casos de éxito
-    85 │ 	if (line.includes('✓') || line.includes('success') || line.includes('Fixed')) {
-  
-  i Please refactor this function to reduce its complexity score from 16 to the max allowed complexity 15.
-  
-
-scripts\run-with-log-tolerant.js:108:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  × Block statements are preferred in this position.
-  
-    106 │ 	// Salida de error del proceso
-    107 │ 	if (isError) {
-  > 108 │ 		if (hasRealErrors) return { color: chalk.redBright, emoji: '🔴' };
-        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    109 │ 		if (isTolerantCommand) return { color: chalk.cyan, emoji: '🔍' };
-    110 │ 	}
-  
-  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
-  
-    108 │ → → if·(hasRealErrors)·{·return·{·color:·chalk.redBright,·emoji:·'🔴'·};·}␍
-        │                        ++                                               ++
-
-scripts\run-with-log-tolerant.js:109:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
-
-  × Block statements are preferred in this position.
-  
-    107 │ 	if (isError) {
-    108 │ 		if (hasRealErrors) return { color: chalk.redBright, emoji: '🔴' };
-  > 109 │ 		if (isTolerantCommand) return { color: chalk.cyan, emoji: '🔍' };
-        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    110 │ 	}
-    111 │ 
-  
-  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
-  
-    109 │ → → if·(isTolerantCommand)·{·return·{·color:·chalk.cyan,·emoji:·'🔍'·};·}␍
-        │                            ++                                          ++
-
-scripts\run-with-log-tolerant.js:121:6 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
-  
-    119 │ 	const lines = text.split('\n').filter((line) => line.trim());
-    120 │ 
-  > 121 │ 	if (/Cannot find module/.test(text)) {
-        │ 	    ^^^^^^^^^^^^^^^^^^^^
-    122 │ 		missingDep = true;
-    123 │ 		hasRealErrors = true;
-  
-  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
-  
-
-scripts\run-with-log-tolerant.js:127:6 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
-  
-    126 │ 	// Detectar errores críticos reales vs issues de linting/testing
-  > 127 │ 	if (/ENOENT|spawn.*failed|permission denied|command not found|out of memory/i.test(text)) {
-        │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    128 │ 		hasRealErrors = true;
-    129 │ 	}
-  
-  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
-  
-
-scripts\run-with-log-tolerant.js:132:6 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
-  
-    131 │ 	// Detectar errores de dependencias
-  > 132 │ 	if (/MODULE_NOT_FOUND|Error: Cannot resolve module|bun.*ERR/i.test(text)) {
-        │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    133 │ 		hasRealErrors = true;
-    134 │ 	}
-  
-  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
-  
-
-scripts\run-with-log-tolerant.js:170:47 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Do not nest ternary expressions.
-  
-    168 │ 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
-    169 │ 	} else if (isTolerantCommand && !hasRealErrors) {
-  > 170 │ 		const tipo = isLintingCommand ? 'Linting' : isTestingCommand ? 'Testing' : 'Proceso';
-        │ 		                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    171 │ 		console.log(chalk.yellow.bold(`!�  ${tipo} completado con issues encontrados (Exit code: ${code})`));
-    172 │ 		console.log(chalk.cyan(`🔍 Esto es normal para herramientas de ${tipo.toLowerCase()} cuando encuentran problemas`));
-  
-  i Nesting ternary expressions can make code more difficult to understand.
-  
-  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
   
 
 scripts\run-with-log-tolerant.js:83:38 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2255,161 +1481,33 @@ scripts\run-with-log-tolerant.js:83:53 lint/nursery/noShadow ━━━━━━�
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
   
 
-scripts\run-with-log-tolerant.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+scripts\run-with-log-tolerant.js:132:6 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
-  × Formatter would have printed the following content:
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
   
-      1     │ - #!/usr/bin/env·node␍
-      2     │ - ␍
-      3     │ - import·{·spawn·}·from·'node:child_process';␍
-      4     │ - import·{·copyFileSync,·createWriteStream,·existsSync,·mkdirSync·}·from·'node:fs';␍
-      5     │ - import·chalk·from·'chalk';␍
-      6     │ - import·{·join·}·from·'path';␍
-      7     │ - ␍
-      8     │ - const·[,·,·logName,·...commandArgs]·=·process.argv;␍
-      9     │ - ␍
-     10     │ - if·(!logName·||·commandArgs.length·===·0)·{␍
-     11     │ - → console.error('Uso:·node·scripts/run-with-log-tolerant.js·<nombre-log>·<comando-completo>');␍
-     12     │ - → console.error('');␍
-     13     │ - → console.error('Este·script·ejecuta·comandos·con·logging·inteligente·y·tolerancia·a·exit·codes:');␍
-     14     │ - → console.error('-·Linting:·biome,·eslint,·prettier·→·tolerante·a·códigos·1·(issues·encontrados)');␍
-     15     │ - → console.error('-·Testing:·playwright,·test·→·tolerante·a·códigos·1·(tests·fallidos)');␍
-     16     │ - → console.error('-·TypeScript:·tsc·--noEmit·→·tolerante·a·códigos·1·(errores·de·tipo)');␍
-     17     │ - → console.error('-·Build:·otros·comandos·→·estricto·(solo·exit·code·0·es·éxito)');␍
-     18     │ - → process.exit(1);␍
-     19     │ - }␍
-     20     │ - ␍
-     21     │ - //·Unir·todos·los·argumentos·en·un·comando·completo␍
-     22     │ - const·fullCommand·=·commandArgs.join('·');␍
-     23     │ - ␍
-     24     │ - //·Comandos·que·pueden·devolver·exit·code·1·pero·no·son·errores·críticos␍
-     25     │ - const·LINTING_COMMANDS·=·[␍
-     26     │ - → 'biome·check',␍
-     27     │ - → 'biome·format',␍
-     28     │ - → 'biome·ci',␍
-     29     │ - → 'eslint',␍
-     30     │ - → 'prettier',␍
-     31     │ - → 'tsc·--noEmit',·//·TypeScript·check·sin·emit·también·puede·fallar·con·errores·de·tipo␍
-     32     │ - ];␍
-     33     │ - ␍
-     34     │ - //·Comandos·de·testing·que·pueden·fallar·con·tests·fallidos·(no·errores·críticos)␍
-     35     │ - const·TESTING_COMMANDS·=·['playwright',·'test'];␍
-     36     │ - ␍
-     37     │ - const·isLintingCommand·=·LINTING_COMMANDS.some((cmd)·=>·fullCommand.includes(cmd));␍
-     38     │ - const·isTestingCommand·=·TESTING_COMMANDS.some((cmd)·=>·fullCommand.includes(cmd));␍
-     39     │ - const·isTolerantCommand·=·isLintingCommand·||·isTestingCommand;␍
-     40     │ - ␍
-     41     │ - const·logsDir·=·join(process.cwd(),·'logs');␍
-     42     │ - if·(!existsSync(logsDir))·{␍
-     43     │ - → mkdirSync(logsDir,·{·recursive:·true·});␍
-     44     │ - }␍
-     45     │ - ␍
-     46     │ - const·timestamp·=·new·Date().toISOString().replace(/[:.]/g,·'-');␍
-     47     │ - const·logFileName·=·`${logName}_${timestamp}.log`;␍
-     48     │ - const·logFilePath·=·join(logsDir,·logFileName);␍
-     49     │ - ␍
-     50     │ - console.log(chalk.cyan(`🚀·Ejecutando:·${chalk.bold(fullCommand)}`));␍
-     51     │ - console.log(chalk.gray(`📄·Logs·en:·${logFilePath}`));␍
-     52     │ - if·(isTolerantCommand)·{␍
-     53     │ - → const·tipo·=·isLintingCommand·?·'linting'·:·isTestingCommand·?·'testing'·:·'tolerante';␍
-     54     │ - → console.log(chalk.blue(`🔍·Comando·de·${tipo}·detectado·-·tolerando·códigos·de·salida·no-cero`));␍
-     55     │ - }␍
-     56     │ - console.log(chalk.yellow('📺·Salida·en·tiempo·real:'));␍
-     57     │ - console.log(chalk.gray('═'.repeat(50)));␍
-     58     │ - ␍
-     59     │ - const·logStream·=·createWriteStream(logFilePath);␍
-     60     │ - const·logHeader·=·[␍
-     61     │ - → `Comando:·${fullCommand}`,␍
-     62     │ - → `Fecha:·${new·Date().toISOString()}`,␍
-     63     │ - → `Directorio:·${process.cwd()}`,␍
-     64     │ - → `Modo·tolerante:·${isTolerantCommand·?·'SÍ'·:·'NO'}`,␍
-     65     │ - → `Tipo:·${isLintingCommand·?·'Linting'·:·isTestingCommand·?·'Testing'·:·'Normal'}`,␍
-     66     │ - → '===============================================',␍
-     67     │ - → '',␍
-     68     │ - ].join('\n');␍
-     69     │ - ␍
-     70     │ - logStream.write(logHeader);␍
-     71     │ - ␍
-     72     │ - //·Ejecutar·el·comando·completo·a·través·del·shell␍
-     73     │ - const·isWindows·=·process.platform·===·'win32';␍
-     74     │ - ␍
-     75     │ - const·child·=·spawn(isWindows·?·'cmd.exe'·:·'sh',·isWindows·?·['/c',·fullCommand]·:·['-c',·fullCommand],·{␍
-     76     │ - → stdio:·['inherit',·'pipe',·'pipe'],␍
-     77     │ - });␍
-     78     │ - ␍
-     79     │ - let·missingDep·=·false;␍
-     80     │ - let·hasRealErrors·=·false;␍
-     81     │ - ␍
-     82     │ - //·Función·para·determinar·el·color·y·emoji·según·el·tipo·de·línea␍
-     83     │ - function·getLineStyle(line,·isError,·hasRealErrors,·isTolerantCommand)·{␍
-     84     │ - → //·Casos·de·éxito␍
-     85     │ - → if·(line.includes('✓')·||·line.includes('success')·||·line.includes('Fixed'))·{␍
-     86     │ - → → return·{·color:·chalk.green,·emoji:·'✅'·};␍
-     87     │ - → }␍
-     88     │ - ␍
-     89     │ - → //·Warnings␍
-     90     │ - → if·(line.includes('warning')·||·line.includes('warn'))·{␍
-     91     │ - → → return·{·color:·chalk.yellow,·emoji:·'!�·'·};␍
-     92     │ - → }␍
-     93     │ - ␍
-     94     │ - → //·Issues·de·herramientas·(siempre·informativos)␍
-     95     │ - → if·(line.includes('lint/')·||·line.includes('test·')·||·line.includes('spec·'))·{␍
-     96     │ - → → return·{·color:·chalk.cyan,·emoji:·'🔍'·};␍
-     97     │ - → }␍
-     98     │ - ␍
-     99     │ - → //·Errores·-·lógica·simplificada␍
-    100     │ - → const·isErrorLine·=·line.includes('error')·||·line.includes('✘')·||·line.includes('failed');␍
-    101     │ - → if·(isErrorLine)·{␍
-    102     │ - → → const·treatAsError·=·hasRealErrors·||·!isTolerantCommand;␍
-    103     │ - → → return·treatAsError·?·{·color:·chalk.red,·emoji:·'❌'·}·:·{·color:·chalk.cyan,·emoji:·'🔍'·};␍
-    104     │ - → }␍
-    105     │ - ␍
-    106     │ - → //·Salida·de·error·del·proceso␍
-    107     │ - → if·(isError)·{␍
-    108     │ - → → if·(hasRealErrors)·return·{·color:·chalk.redBright,·emoji:·'🔴'·};␍
-    109     │ - → → if·(isTolerantCommand)·return·{·color:·chalk.cyan,·emoji:·'🔍'·};␍
-    110     │ - → }␍
-    111     │ - ␍
-    112     │ - → //·Default␍
-    113     │ - → return·{·color:·chalk.white,·emoji:·'📋'·};␍
-    114     │ - }␍
-    115     │ - ␍
-    116     │ - //·Función·para·procesar·y·mostrar·la·salida·con·colores␍
-    117     │ - function·processOutput(data,·isError·=·false)·{␍
-    118     │ - → const·text·=·data.toString();␍
-    119     │ - → const·lines·=·text.split('\n').filter((line)·=>·line.trim());␍
-    120     │ - ␍
-    121     │ - → if·(/Cannot·find·module/.test(text))·{␍
-    122     │ - → → missingDep·=·true;␍
-    123     │ - → → hasRealErrors·=·true;␍
-    124     │ - → }␍
-    125     │ - ␍
-    126     │ - → //·Detectar·errores·críticos·reales·vs·issues·de·linting/testing␍
-    127     │ - → if·(/ENOENT|spawn.*failed|permission·denied|command·not·found|out·of·memory/i.test(text))·{␍
-    128     │ - → → hasRealErrors·=·true;␍
-    129     │ - → }␍
-    130     │ - ␍
-    131     │ - → //·Detectar·errores·de·dependencias␍
-    132     │ - → if·(/MODULE_NOT_FOUND|Error:·Cannot·resolve·module|bun.*ERR/i.test(text))·{␍
-    133     │ - → → hasRealErrors·=·true;␍
-    134     │ - → }␍
-    135     │ - ␍
-    136     │ - → for·(const·line·of·lines)·{␍
-    137     │ - → → const·{·color,·emoji·}·=·getLineStyle(line,·isError,·hasRealErrors,·isTolerantCommand);␍
-    138     │ - → → console.log(color(`${emoji}·${line}`));␍
-    139     │ - → }␍
-    140     │ - }␍
-    141     │ - ␍
-    142     │ - //·Capturar·y·mostrar·stdout␍
-    143     │ - child.stdout.on('data',·(data)·=>·{␍
-    144     │ - → logStream.write(data);␍
-    145     │ - → processOutput(data,·false);␍
-    146     │ - });␍
-    147     │ - ␍
-    148     │ - //·Capturar·y·mostrar·stderr␍
-    149     │ - child.stderr.on('data',·(data)·=>·{␍
-    150     │ - → logStream.write(data);␍
-  233 more lines truncated
+    131 │ 	// Detectar errores de dependencias
+  > 132 │ 	if (/MODULE_NOT_FOUND|Error: Cannot resolve module|bun.*ERR/i.test(text)) {
+        │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    133 │ 		hasRealErrors = true;
+    134 │ 	}
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\run-with-log-tolerant.js:170:47 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    168 │ 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
+    169 │ 	} else if (isTolerantCommand && !hasRealErrors) {
+  > 170 │ 		const tipo = isLintingCommand ? 'Linting' : isTestingCommand ? 'Testing' : 'Proceso';
+        │ 		                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    171 │ 		console.log(chalk.yellow.bold(`!�  ${tipo} completado con issues encontrados (Exit code: ${code})`));
+    172 │ 		console.log(chalk.cyan(`🔍 Esto es normal para herramientas de ${tipo.toLowerCase()} cuando encuentran problemas`));
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
   
 
 scripts\run-with-log-tolerant.js:53:46 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2444,6 +1542,94 @@ scripts\run-with-log-tolerant.js:65:42 lint/style/noNestedTernary ━━━━�
   i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
   
 
+scripts\run-with-log-tolerant.js:83:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━
+
+  × Excessive complexity of 16 detected (max: 15).
+  
+    82 │ // Función para determinar el color y emoji según el tipo de línea
+  > 83 │ function getLineStyle(line, isError, hasRealErrors, isTolerantCommand) {
+       │          ^^^^^^^^^^^^
+    84 │ 	// Casos de éxito
+    85 │ 	if (line.includes('✓') || line.includes('success') || line.includes('Fixed')) {
+  
+  i Please refactor this function to reduce its complexity score from 16 to the max allowed complexity 15.
+  
+
+scripts\run-with-log-tolerant.js:108:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    106 │ 	// Salida de error del proceso
+    107 │ 	if (isError) {
+  > 108 │ 		if (hasRealErrors) return { color: chalk.redBright, emoji: '🔴' };
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    109 │ 		if (isTolerantCommand) return { color: chalk.cyan, emoji: '🔍' };
+    110 │ 	}
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    108 │ → → if·(hasRealErrors)·{·return·{·color:·chalk.redBright,·emoji:·'🔴'·};·}
+        │                        ++                                               ++
+
+scripts\run-with-log-tolerant.js:109:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    107 │ 	if (isError) {
+    108 │ 		if (hasRealErrors) return { color: chalk.redBright, emoji: '🔴' };
+  > 109 │ 		if (isTolerantCommand) return { color: chalk.cyan, emoji: '🔍' };
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    110 │ 	}
+    111 │ 
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    109 │ → → if·(isTolerantCommand)·{·return·{·color:·chalk.cyan,·emoji:·'🔍'·};·}
+        │                            ++                                          ++
+
+scripts\run-with-log-tolerant.js:127:6 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    126 │ 	// Detectar errores críticos reales vs issues de linting/testing
+  > 127 │ 	if (/ENOENT|spawn.*failed|permission denied|command not found|out of memory/i.test(text)) {
+        │ 	    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    128 │ 		hasRealErrors = true;
+    129 │ 	}
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\run-with-log-tolerant.js:121:6 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    119 │ 	const lines = text.split('\n').filter((line) => line.trim());
+    120 │ 
+  > 121 │ 	if (/Cannot find module/.test(text)) {
+        │ 	    ^^^^^^^^^^^^^^^^^^^^
+    122 │ 		missingDep = true;
+    123 │ 		hasRealErrors = true;
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\run-with-log.js:182:47 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    180 │ 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
+    181 │ 	} else if (isTolerantCommand && !hasRealErrors) {
+  > 182 │ 		const tipo = isLintingCommand ? 'Linting' : isTestingCommand ? 'Testing' : 'Proceso';
+        │ 		                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    183 │ 		console.log(chalk.yellow.bold(`!�  ${tipo} completado con issues encontrados (Exit code: ${code})`));
+    184 │ 		console.log(chalk.cyan(`🔍 Esto es normal para herramientas de ${tipo.toLowerCase()} cuando encuentran problemas`));
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
 scripts\run-with-log.js:89:38 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × This variable shadows another variable with the same name in the outer scope.
@@ -2463,36 +1649,6 @@ scripts\run-with-log.js:89:38 lint/nursery/noShadow ━━━━━━━━━�
     88 │ // Función para determinar el color y emoji según el tipo de línea
   
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
-  
-
-scripts\run-with-log.js:167:26 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━
-
-  × Excessive complexity of 19 detected (max: 15).
-  
-    165 │ });
-    166 │ 
-  > 167 │ child.on('close', (code) => {
-        │                          ^^^
-    168 │ 	logStream.end();
-    169 │ 
-  
-  i Please refactor this function to reduce its complexity score from 19 to the max allowed complexity 15.
-  
-
-scripts\run-with-log.js:182:47 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Do not nest ternary expressions.
-  
-    180 │ 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
-    181 │ 	} else if (isTolerantCommand && !hasRealErrors) {
-  > 182 │ 		const tipo = isLintingCommand ? 'Linting' : isTestingCommand ? 'Testing' : 'Proceso';
-        │ 		                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    183 │ 		console.log(chalk.yellow.bold(`!�  ${tipo} completado con issues encontrados (Exit code: ${code})`));
-    184 │ 		console.log(chalk.cyan(`🔍 Esto es normal para herramientas de ${tipo.toLowerCase()} cuando encuentran problemas`));
-  
-  i Nesting ternary expressions can make code more difficult to understand.
-  
-  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
   
 
 scripts\run-with-log.js:89:53 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2515,163 +1671,6 @@ scripts\run-with-log.js:89:53 lint/nursery/noShadow ━━━━━━━━━�
     47 │ const logsDir = join(process.cwd(), 'logs');
   
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
-  
-
-scripts\run-with-log.js format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × Formatter would have printed the following content:
-  
-      1     │ - #!/usr/bin/env·bun␍
-      2     │ - ␍
-      3     │ - import·chalk·from·'chalk';␍
-      4     │ - import·{·spawn·}·from·'child_process';␍
-      5     │ - import·{·copyFileSync,·createWriteStream,·existsSync,·mkdirSync·}·from·'fs';␍
-      6     │ - import·{·join·}·from·'path';␍
-      7     │ - import·{·generatePostExecutionSummary·}·from·'./logging-utils.js';␍
-      8     │ - ␍
-      9     │ - const·[,·,·logName,·...commandArgs]·=·process.argv;␍
-     10     │ - ␍
-     11     │ - if·(!logName·||·commandArgs.length·===·0)·{␍
-     12     │ - → console.error('Uso:·bun·scripts/run-with-log.js·<nombre-log>·<comando-completo>');␍
-     13     │ - → console.error('');␍
-     14     │ - → console.error('🚀·Script·Universal·de·Logging·con·Tolerancia·Inteligente');␍
-     15     │ - → console.error('');␍
-     16     │ - → console.error('Detección·automática·de·tipos·de·comando:');␍
-     17     │ - → console.error('··📏·Linting:·biome,·eslint,·prettier');␍
-     18     │ - → console.error('··🧪·Testing:·playwright');␍
-     19     │ - → console.error('··📝·TypeScript:·tsc·--noEmit');␍
-     20     │ - → console.error('··🏗�··Build:·otros·comandos·(modo·estricto)');␍
-     21     │ - → console.error('');␍
-     22     │ - → console.error('Los·comandos·de·linting/testing·toleran·exit·code·1·(issues·encontrados)');␍
-     23     │ - → console.error('Los·comandos·de·build·requieren·exit·code·0·(éxito·completo)');␍
-     24     │ - → process.exit(1);␍
-     25     │ - }␍
-     26     │ - ␍
-     27     │ - //·Unir·todos·los·argumentos·en·un·comando·completo␍
-     28     │ - const·fullCommand·=·commandArgs.join('·');␍
-     29     │ - ␍
-     30     │ - //·Comandos·que·pueden·devolver·exit·code·1·pero·no·son·errores·críticos␍
-     31     │ - const·LINTING_COMMANDS·=·[␍
-     32     │ - → 'biome·check',␍
-     33     │ - → 'biome·format',␍
-     34     │ - → 'biome·ci',␍
-     35     │ - → 'eslint',␍
-     36     │ - → 'prettier',␍
-     37     │ - → 'tsc·--noEmit',·//·TypeScript·check·sin·emit·también·puede·fallar·con·errores·de·tipo␍
-     38     │ - ];␍
-     39     │ - ␍
-     40     │ - //·Comandos·de·testing·que·pueden·fallar·con·tests·fallidos·(no·errores·críticos)␍
-     41     │ - const·TESTING_COMMANDS·=·['playwright',·'test'];␍
-     42     │ - ␍
-     43     │ - const·isLintingCommand·=·LINTING_COMMANDS.some((cmd)·=>·fullCommand.includes(cmd));␍
-     44     │ - const·isTestingCommand·=·TESTING_COMMANDS.some((cmd)·=>·fullCommand.includes(cmd));␍
-     45     │ - const·isTolerantCommand·=·isLintingCommand·||·isTestingCommand;␍
-     46     │ - ␍
-     47     │ - const·logsDir·=·join(process.cwd(),·'logs');␍
-     48     │ - if·(!existsSync(logsDir))·{␍
-     49     │ - → mkdirSync(logsDir,·{·recursive:·true·});␍
-     50     │ - }␍
-     51     │ - ␍
-     52     │ - const·timestamp·=·new·Date().toISOString().replace(/[:.]/g,·'-');␍
-     53     │ - const·logFileName·=·`${logName}_${timestamp}.log`;␍
-     54     │ - const·logFilePath·=·join(logsDir,·logFileName);␍
-     55     │ - ␍
-     56     │ - console.log(chalk.cyan(`🚀·Ejecutando:·${chalk.bold(fullCommand)}`));␍
-     57     │ - console.log(chalk.gray(`📄·Logs·en:·${logFilePath}`));␍
-     58     │ - if·(isTolerantCommand)·{␍
-     59     │ - → const·tipo·=·isLintingCommand·?·'linting'·:·isTestingCommand·?·'testing'·:·'tolerante';␍
-     60     │ - → console.log(chalk.blue(`🔍·Comando·de·${tipo}·detectado·-·tolerando·códigos·de·salida·no-cero`));␍
-     61     │ - }␍
-     62     │ - console.log(chalk.yellow('📺·Salida·en·tiempo·real:'));␍
-     63     │ - console.log(chalk.gray('═'.repeat(50)));␍
-     64     │ - ␍
-     65     │ - const·logStream·=·createWriteStream(logFilePath);␍
-     66     │ - const·logHeader·=·[␍
-     67     │ - → `Comando:·${fullCommand}`,␍
-     68     │ - → `Fecha:·${new·Date().toISOString()}`,␍
-     69     │ - → `Directorio:·${process.cwd()}`,␍
-     70     │ - → `Modo·tolerante:·${isTolerantCommand·?·'SÍ'·:·'NO'}`,␍
-     71     │ - → `Tipo:·${isLintingCommand·?·'Linting'·:·isTestingCommand·?·'Testing'·:·'Normal'}`,␍
-     72     │ - → '===============================================',␍
-     73     │ - → '',␍
-     74     │ - ].join('\n');␍
-     75     │ - ␍
-     76     │ - logStream.write(logHeader);␍
-     77     │ - ␍
-     78     │ - //·Ejecutar·el·comando·completo·a·través·del·shell␍
-     79     │ - const·isWindows·=·process.platform·===·'win32';␍
-     80     │ - ␍
-     81     │ - const·child·=·spawn(isWindows·?·'cmd.exe'·:·'sh',·isWindows·?·['/c',·fullCommand]·:·['-c',·fullCommand],·{␍
-     82     │ - → stdio:·['inherit',·'pipe',·'pipe'],␍
-     83     │ - });␍
-     84     │ - ␍
-     85     │ - let·missingDep·=·false;␍
-     86     │ - let·hasRealErrors·=·false;␍
-     87     │ - ␍
-     88     │ - //·Función·para·determinar·el·color·y·emoji·según·el·tipo·de·línea␍
-     89     │ - function·getLineStyle(line,·isError,·hasRealErrors,·isTolerantCommand)·{␍
-     90     │ - → //·Casos·de·éxito␍
-     91     │ - → if·(line.includes('✓')·||·line.includes('success')·||·line.includes('Fixed'))·{␍
-     92     │ - → → return·{·color:·chalk.green,·emoji:·'✅'·};␍
-     93     │ - → }␍
-     94     │ - ␍
-     95     │ - → //·Warnings␍
-     96     │ - → if·(line.includes('warning')·||·line.includes('warn'))·{␍
-     97     │ - → → return·{·color:·chalk.yellow,·emoji:·'!�·'·};␍
-     98     │ - → }␍
-     99     │ - ␍
-    100     │ - → //·Issues·de·herramientas·(siempre·informativos)␍
-    101     │ - → if·(line.includes('lint/')·||·line.includes('test·')·||·line.includes('spec·'))·{␍
-    102     │ - → → return·{·color:·chalk.cyan,·emoji:·'🔍'·};␍
-    103     │ - → }␍
-    104     │ - ␍
-    105     │ - → //·Errores·-·lógica·simplificada␍
-    106     │ - → const·isErrorLine·=·line.includes('error')·||·line.includes('✘')·||·line.includes('failed');␍
-    107     │ - → if·(isErrorLine)·{␍
-    108     │ - → → const·treatAsError·=·hasRealErrors·||·!isTolerantCommand;␍
-    109     │ - → → return·treatAsError·?·{·color:·chalk.red,·emoji:·'❌'·}·:·{·color:·chalk.cyan,·emoji:·'🔍'·};␍
-    110     │ - → }␍
-    111     │ - ␍
-    112     │ - → //·Salida·de·error·del·proceso␍
-    113     │ - → if·(isError)·{␍
-    114     │ - → → if·(hasRealErrors)·return·{·color:·chalk.redBright,·emoji:·'🔴'·};␍
-    115     │ - → → if·(isTolerantCommand)·return·{·color:·chalk.cyan,·emoji:·'🔍'·};␍
-    116     │ - → }␍
-    117     │ - ␍
-    118     │ - → //·Default␍
-    119     │ - → return·{·color:·chalk.white,·emoji:·'📋'·};␍
-    120     │ - }␍
-    121     │ - ␍
-    122     │ - //·Función·para·procesar·y·mostrar·la·salida·con·colores␍
-    123     │ - function·processOutput(data,·isError·=·false)·{␍
-    124     │ - → const·text·=·data.toString();␍
-    125     │ - → const·lines·=·text.split('\n').filter((line)·=>·line.trim());␍
-    126     │ - ␍
-    127     │ - → if·(/Cannot·find·module/.test(text))·{␍
-    128     │ - → → missingDep·=·true;␍
-    129     │ - → → hasRealErrors·=·true;␍
-    130     │ - → }␍
-    131     │ - ␍
-    132     │ - → //·Detectar·errores·críticos·reales·vs·issues·de·linting/testing␍
-    133     │ - → if·(/ENOENT|spawn.*failed|permission·denied|command·not·found|out·of·memory/i.test(text))·{␍
-    134     │ - → → hasRealErrors·=·true;␍
-    135     │ - → }␍
-    136     │ - ␍
-    137     │ - → //·Detectar·errores·de·dependencias␍
-    138     │ - → if·(/MODULE_NOT_FOUND|Error:·Cannot·resolve·module|bun.*ERR/i.test(text))·{␍
-    139     │ - → → hasRealErrors·=·true;␍
-    140     │ - → }␍
-    141     │ - ␍
-    142     │ - → for·(const·line·of·lines)·{␍
-    143     │ - → → const·{·color,·emoji·}·=·getLineStyle(line,·isError,·hasRealErrors,·isTolerantCommand);␍
-    144     │ - → → console.log(color(`${emoji}·${line}`));␍
-    145     │ - → }␍
-    146     │ - }␍
-    147     │ - ␍
-    148     │ - //·Capturar·y·mostrar·stdout␍
-    149     │ - child.stdout.on('data',·(data)·=>·{␍
-    150     │ - → logStream.write(data);␍
-  275 more lines truncated
   
 
 scripts\run-with-log.js:59:46 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2732,7 +1731,7 @@ scripts\run-with-log.js:114:3 lint/style/useBlockStatements  FIXABLE  ━━━�
   
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
-    114 │ → → if·(hasRealErrors)·{·return·{·color:·chalk.redBright,·emoji:·'🔴'·};·}␍
+    114 │ → → if·(hasRealErrors)·{·return·{·color:·chalk.redBright,·emoji:·'🔴'·};·}
         │                        ++                                               ++
 
 scripts\run-with-log.js:115:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2748,7 +1747,7 @@ scripts\run-with-log.js:115:3 lint/style/useBlockStatements  FIXABLE  ━━━�
   
   i Unsafe fix: Wrap the statement with a `JsBlockStatement`
   
-    115 │ → → if·(isTolerantCommand)·{·return·{·color:·chalk.cyan,·emoji:·'🔍'·};·}␍
+    115 │ → → if·(isTolerantCommand)·{·return·{·color:·chalk.cyan,·emoji:·'🔍'·};·}
         │                            ++                                          ++
 
 scripts\run-with-log.js:127:6 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2789,6 +1788,20 @@ scripts\run-with-log.js:138:6 lint/performance/useTopLevelRegex ━━━━━�
     140 │ 	}
   
   i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\run-with-log.js:167:26 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━
+
+  × Excessive complexity of 19 detected (max: 15).
+  
+    165 │ });
+    166 │ 
+  > 167 │ child.on('close', (code) => {
+        │                          ^^^
+    168 │ 	logStream.end();
+    169 │ 
+  
+  i Please refactor this function to reduce its complexity score from 19 to the max allowed complexity 15.
   
 
 scripts\utils\document-component.js:72:36 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2863,6 +1876,29 @@ scripts\utils\document-component.js:68:40 lint/performance/useTopLevelRegex ━�
     70 │ 
   
   i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\utils\playwright-mcp-helper.js:36:45 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    34 │  * Generar test a partir de un escenario
+    35 │  */
+  > 36 │ function generateTestFromScenario(scenario, config) {
+       │                                             ^^^^^^
+    37 │ 	const testName = scenario.name.toLowerCase().replace(/\s+/g, '-');
+    38 │ 	const testContent = `import { test, expect } from '@playwright/test';
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    191 │ }
+    192 │ 
+  > 193 │ const config = loadConfig();
+        │       ^^^^^^
+    194 │ 
+    195 │ switch (command) {
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
   
 
 scripts\utils\playwright-mcp-helper.js:67:33 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -2957,35 +1993,37 @@ scripts\utils\playwright-mcp-helper.js:170:27 lint/nursery/noShadow ━━━━
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
   
 
-scripts\utils\playwright-mcp-helper.js:36:45 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-  × This variable shadows another variable with the same name in the outer scope.
-  
-    34 │  * Generar test a partir de un escenario
-    35 │  */
-  > 36 │ function generateTestFromScenario(scenario, config) {
-       │                                             ^^^^^^
-    37 │ 	const testName = scenario.name.toLowerCase().replace(/\s+/g, '-');
-    38 │ 	const testContent = `import { test, expect } from '@playwright/test';
-  
-  i This is the shadowed variable, which is now inaccessible in the inner scope.
-  
-    191 │ }
-    192 │ 
-  > 193 │ const config = loadConfig();
-        │       ^^^^^^
-    194 │ 
-    195 │ switch (command) {
-  
-  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
-  
-
 src\App.tsx lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
   × The filename should be in kebab-case.
   
   i The filename could be renamed to one of the following names:
     app.tsx
+  
+
+src\components\batch-operations\BatchOperationDialog.tsx:189:60 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
+
+  × Avoid using the index of an array as key property in an element.
+  
+    187 │ 								<div className="max-h-20 space-y-1 overflow-y-auto">
+    188 │ 									{items.slice(0, 5).map((item, index) => (
+  > 189 │ 										<div className="truncate font-mono text-xs" key={index}>
+        │ 										                                                 ^^^^^
+    190 │ 											{item.name}
+    191 │ 										</div>
+  
+  i This is the source of the key value.
+  
+    186 │ 								<div className="mb-1 text-muted-foreground text-xs">Elementos:</div>
+    187 │ 								<div className="max-h-20 space-y-1 overflow-y-auto">
+  > 188 │ 									{items.slice(0, 5).map((item, index) => (
+        │ 									                              ^^^^^
+    189 │ 										<div className="truncate font-mono text-xs" key={index}>
+    190 │ 											{item.name}
+  
+  i The order of the items may change, and this also affects performances and component state.
+  
+  i Check the React documentation. 
   
 
 src\components\batch-operations\BatchOperationDialog.tsx:83:3 lint/style/useDefaultSwitchClause ━━━━━━━━━━
@@ -3080,79 +2118,6 @@ src\components\batch-operations\BatchOperationDialog.tsx:133:34 lint/nursery/noS
   i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
   
 
-src\components\batch-operations\BatchOperationDialog.tsx:189:60 lint/suspicious/noArrayIndexKey ━━━━━━━━━━
-
-  × Avoid using the index of an array as key property in an element.
-  
-    187 │ 								<div className="max-h-20 space-y-1 overflow-y-auto">
-    188 │ 									{items.slice(0, 5).map((item, index) => (
-  > 189 │ 										<div className="truncate font-mono text-xs" key={index}>
-        │ 										                                                 ^^^^^
-    190 │ 											{item.name}
-    191 │ 										</div>
-  
-  i This is the source of the key value.
-  
-    186 │ 								<div className="mb-1 text-muted-foreground text-xs">Elementos:</div>
-    187 │ 								<div className="max-h-20 space-y-1 overflow-y-auto">
-  > 188 │ 									{items.slice(0, 5).map((item, index) => (
-        │ 									                              ^^^^^
-    189 │ 										<div className="truncate font-mono text-xs" key={index}>
-    190 │ 											{item.name}
-  
-  i The order of the items may change, and this also affects performances and component state.
-  
-  i Check the React documentation. 
-  
-
-src\components\batch-operations\BatchOperationsIndicator.tsx:56:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
-
-  × Block statements are preferred in this position.
-  
-    54 │ 		if (summary.paused > 0) return 'paused';
-    55 │ 		if (summary.queued > 0) return 'queued';
-  > 56 │ 		if (summary.completed > 0) return 'completed';
-       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    57 │ 		return 'idle';
-    58 │ 	};
-  
-  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
-  
-    56 │ → → if·(summary.completed·>·0)·{·return·'completed';·}
-       │                                ++                   ++
-
-src\components\batch-operations\BatchOperationsIndicator.tsx:52:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
-
-  × Block statements are preferred in this position.
-  
-    50 │ 	// Get the most relevant status
-    51 │ 	const getIndicatorStatus = () => {
-  > 52 │ 		if (summary.running > 0) return 'running';
-       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    53 │ 		if (summary.failed > 0) return 'failed';
-    54 │ 		if (summary.paused > 0) return 'paused';
-  
-  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
-  
-    52 │ → → if·(summary.running·>·0)·{·return·'running';·}
-       │                              ++                 ++
-
-src\components\batch-operations\BatchOperationsIndicator.tsx:53:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
-
-  × Block statements are preferred in this position.
-  
-    51 │ 	const getIndicatorStatus = () => {
-    52 │ 		if (summary.running > 0) return 'running';
-  > 53 │ 		if (summary.failed > 0) return 'failed';
-       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    54 │ 		if (summary.paused > 0) return 'paused';
-    55 │ 		if (summary.queued > 0) return 'queued';
-  
-  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
-  
-    53 │ → → if·(summary.failed·>·0)·{·return·'failed';·}
-       │                             ++                ++
-
 src\components\batch-operations\BatchOperationsIndicator.tsx:54:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
 
   × Block statements are preferred in this position.
@@ -3185,6 +2150,38 @@ src\components\batch-operations\BatchOperationsIndicator.tsx:55:3 lint/style/use
     55 │ → → if·(summary.queued·>·0)·{·return·'queued';·}
        │                             ++                ++
 
+src\components\batch-operations\BatchOperationsIndicator.tsx:53:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    51 │ 	const getIndicatorStatus = () => {
+    52 │ 		if (summary.running > 0) return 'running';
+  > 53 │ 		if (summary.failed > 0) return 'failed';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    54 │ 		if (summary.paused > 0) return 'paused';
+    55 │ 		if (summary.queued > 0) return 'queued';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    53 │ → → if·(summary.failed·>·0)·{·return·'failed';·}
+       │                             ++                ++
+
+src\components\batch-operations\BatchOperationsIndicator.tsx:56:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    54 │ 		if (summary.paused > 0) return 'paused';
+    55 │ 		if (summary.queued > 0) return 'queued';
+  > 56 │ 		if (summary.completed > 0) return 'completed';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 		return 'idle';
+    58 │ 	};
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    56 │ → → if·(summary.completed·>·0)·{·return·'completed';·}
+       │                                ++                   ++
+
 src\components\batch-operations\BatchOperationsIndicator.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
 
   × The filename should be in kebab-case.
@@ -3214,6 +2211,22 @@ src\components\batch-operations\BatchOperationsIndicator.tsx:13:8 lint/correctne
      14  13 │   import { useBatchOperations } from '@/hooks/useBatchOperations';
      15  14 │   import { cn } from '@/lib/utils';
   
+
+src\components\batch-operations\BatchOperationsIndicator.tsx:52:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    50 │ 	// Get the most relevant status
+    51 │ 	const getIndicatorStatus = () => {
+  > 52 │ 		if (summary.running > 0) return 'running';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    53 │ 		if (summary.failed > 0) return 'failed';
+    54 │ 		if (summary.paused > 0) return 'paused';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    52 │ → → if·(summary.running·>·0)·{·return·'running';·}
+       │                              ++                 ++
 
 src\components\batch-operations\BatchOperationsPanel.tsx:171:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
 
@@ -3359,20 +2372,6 @@ src\components\cards\album-card\album-card-footer.tsx:26:3 lint/style/useBlockSt
     26 │ → → if·(!bytes)·{·return·'0·MB';·}
        │                 ++              ++
 
-src\components\cards\album-card\album-card-images.tsx:62:6 lint/performance/noImgElement ━━━━━━━━━━━
-
-  × Don't use <img> element.
-  
-    60 │ 					key={`album-img-${imgSrc.substring(imgSrc.lastIndexOf('/') + 1)}`}
-    61 │ 				>
-  > 62 │ 					<img alt={`Imagen de álbum ${index + 1}`} className="h-full w-full object-cover" src={imgSrc} />
-       │ 					^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    63 │ 					{/* Indicador de video */}
-    64 │ 					{recentVideos.includes(imgSrc) && (
-  
-  i Using the <img> can lead to slower LCP and higher bandwidth. Consider using <Image /> from next/image to automatically optimize images.
-  
-
 src\components\cards\album-card\album-card.tsx:44:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
 
   × Excessive complexity of 30 detected (max: 15).
@@ -3513,4 +2512,547 @@ src\components\cards\audio-card\audio-card.tsx:107:4 lint/style/useBlockStatemen
     107 │ → → → if·(!audioRef.current)·{·return;·}
         │                              ++       ++
 
-src\components\cards\audio-card\audio-card.tsx:116:
+src\components\cards\audio-card\audio-card.tsx:116:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    115 │ 	const handleTimeUpdate = useCallback(() => {
+  > 116 │ 		if (!audioRef.current) return;
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    117 │ 		setCurrentTime(audioRef.current.currentTime);
+    118 │ 	}, []);
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    116 │ → → if·(!audioRef.current)·{·return;·}
+        │                            ++       ++
+
+src\components\cards\audio-card\audio-card.tsx:121:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    120 │ 	const handleLoadedMetadata = useCallback(() => {
+  > 121 │ 		if (!audioRef.current) return;
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    122 │ 		setDuration(audioRef.current.duration);
+    123 │ 	}, []);
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    121 │ → → if·(!audioRef.current)·{·return;·}
+        │                            ++       ++
+
+src\components\cards\card-header.tsx:18:53 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━
+
+  × This parameter is unused.
+  
+    16 │  * Similar al encabezado de una carta Magic con título, subtítulo e icono
+    17 │  */
+  > 18 │ export function CardHeader({ title, subtitle, icon, emoji, primaryColor, className, compact }: CardHeaderProps) {
+       │                                                     ^^^^^
+    19 │ 	return (
+    20 │ 		<div
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\cards\card-header.tsx:18:85 lint/correctness/noUnusedFunctionParameters ━━━━━━━━━━━━━
+
+  × This parameter is unused.
+  
+    16 │  * Similar al encabezado de una carta Magic con título, subtítulo e icono
+    17 │  */
+  > 18 │ export function CardHeader({ title, subtitle, icon, emoji, primaryColor, className, compact }: CardHeaderProps) {
+       │                                                                                     ^^^^^^^
+    19 │ 	return (
+    20 │ 		<div
+  
+  i Unused parameters might be the result of an incomplete refactoring.
+  
+
+src\components\cards\character-card\character-card-adapter.ts:24:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    23 │ 	const safeJsonParse = <T>(jsonStr: string | null | undefined, fallback: T): T => {
+  > 24 │ 		if (!jsonStr) return fallback;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    25 │ 		try {
+    26 │ 			return JSON.parse(jsonStr) as T;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    24 │ → → if·(!jsonStr)·{·return·fallback;·}
+       │                   ++                ++
+
+src\components\cards\character-card\character-card-adapter.ts:42:7 lint/style/noNestedTernary ━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    40 │ 			typeof character.stats === 'string'
+    41 │ 				? safeJsonParse<CharacterStats>(character.stats, {} as CharacterStats)
+  > 42 │ 				: character.statistics
+       │ 				  ^^^^^^^^^^^^^^^^^^^^
+  > 43 │ 					? ({
+        ...
+  > 50 │ 						} as CharacterStats)
+  > 51 │ 					: ({} as CharacterStats),
+       │ 					^^^^^^^^^^^^^^^^^^^^^^^^
+    52 │ 		parsedRelationships: safeJsonParse<Record<string, any>>(character.relationships, {}),
+    53 │ 		parsedGoals: safeJsonParse<Record<string, any>>(character.goals, {}),
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src\components\cards\character-card\character-card-content.tsx:70:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    68 │ 		if (key.includes('con') || key.includes('armor') || key.includes('stamina')) return <Shield className="h-3 w-3" />;
+    69 │ 		if (key.includes('cha') || key.includes('soc') || key.includes('charisma')) return <User className="h-3 w-3" />;
+  > 70 │ 		if (key.includes('hp') || key.includes('health')) return <Heart className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    71 │ 		if (key.includes('mp') || key.includes('mana')) return <Wand className="h-3 w-3" />;
+    72 │ 		return <Star className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    70 │ → → if·(key.includes('hp')·||·key.includes('health'))·{·return·<Heart·className="h-3·w-3"·/>;·}
+       │                                                       ++                                     ++
+
+src\components\cards\character-card\character-card-content.tsx:100:48 lint/nursery/noShadow ━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+     98 │ 		}
+     99 │ 		// Si es un Record, convertir a array
+  > 100 │ 		return Object.entries(abilities).map(([name, description]) => ({
+        │ 		                                             ^^^^^^^^^^^
+    101 │ 			name,
+    102 │ 			description: typeof description === 'string' ? description : '',
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    34 │ export function CharacterCardContent({
+  > 35 │ 	description,
+       │ 	^^^^^^^^^^^
+    36 │ 	primaryColor = '#8e44ad',
+    37 │ 	secondaryColor = '#6d28d9',
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+src\components\cards\character-card\character-card-content.tsx:34:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 24 detected (max: 15).
+  
+    32 │ }
+    33 │ 
+  > 34 │ export function CharacterCardContent({
+       │                 ^^^^^^^^^^^^^^^^^^^^
+    35 │ 	description,
+    36 │ 	primaryColor = '#8e44ad',
+  
+  i Please refactor this function to reduce its complexity score from 24 to the max allowed complexity 15.
+  
+
+src\components\cards\character-card\character-card-content.tsx:55:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    53 │ 	const getAlignmentColor = () => {
+    54 │ 		const align = alignment?.toLowerCase() ?? 'neutral';
+  > 55 │ 		if (align.includes('evil')) return '#dc2626';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    56 │ 		if (align.includes('good')) return '#16a34a';
+    57 │ 		if (align.includes('lawful')) return '#2563eb';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    55 │ → → if·(align.includes('evil'))·{·return·'#dc2626';·}
+       │                                 ++                 ++
+
+src\components\cards\character-card\character-card-content.tsx:56:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    54 │ 		const align = alignment?.toLowerCase() ?? 'neutral';
+    55 │ 		if (align.includes('evil')) return '#dc2626';
+  > 56 │ 		if (align.includes('good')) return '#16a34a';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    57 │ 		if (align.includes('lawful')) return '#2563eb';
+    58 │ 		if (align.includes('chaotic')) return '#d97706';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    56 │ → → if·(align.includes('good'))·{·return·'#16a34a';·}
+       │                                 ++                 ++
+
+src\components\cards\character-card\character-card-content.tsx:57:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    55 │ 		if (align.includes('evil')) return '#dc2626';
+    56 │ 		if (align.includes('good')) return '#16a34a';
+  > 57 │ 		if (align.includes('lawful')) return '#2563eb';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    58 │ 		if (align.includes('chaotic')) return '#d97706';
+    59 │ 		return '#6b7280';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    57 │ → → if·(align.includes('lawful'))·{·return·'#2563eb';·}
+       │                                   ++                 ++
+
+src\components\cards\character-card\character-card-content.tsx:58:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    56 │ 		if (align.includes('good')) return '#16a34a';
+    57 │ 		if (align.includes('lawful')) return '#2563eb';
+  > 58 │ 		if (align.includes('chaotic')) return '#d97706';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    59 │ 		return '#6b7280';
+    60 │ 	};
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    58 │ → → if·(align.includes('chaotic'))·{·return·'#d97706';·}
+       │                                    ++                 ++
+
+src\components\cards\character-card\character-card-content.tsx:62:40 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 24 detected (max: 15).
+  
+    60 │ 	};
+    61 │ 
+  > 62 │ 	const getStatIcon = (statKey: string) => {
+       │ 	                                      ^^^
+    63 │ 		const key = statKey.toLowerCase();
+    64 │ 		if (key.includes('str') || key.includes('force') || key.includes('power')) return <Swords className="h-3 w-3" />;
+  
+  i Please refactor this function to reduce its complexity score from 24 to the max allowed complexity 15.
+  
+
+src\components\cards\character-card\character-card-content.tsx:64:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    62 │ 	const getStatIcon = (statKey: string) => {
+    63 │ 		const key = statKey.toLowerCase();
+  > 64 │ 		if (key.includes('str') || key.includes('force') || key.includes('power')) return <Swords className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    65 │ 		if (key.includes('int') || key.includes('intellect')) return <Brain className="h-3 w-3" />;
+    66 │ 		if (key.includes('wis') || key.includes('wisdom')) return <Sparkles className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    64 │ → → if·(key.includes('str')·||·key.includes('force')·||·key.includes('power'))·{·return·<Swords·className="h-3·w-3"·/>;·}
+       │                                                                                ++                                      ++
+
+src\components\cards\character-card\character-card-content.tsx:65:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    63 │ 		const key = statKey.toLowerCase();
+    64 │ 		if (key.includes('str') || key.includes('force') || key.includes('power')) return <Swords className="h-3 w-3" />;
+  > 65 │ 		if (key.includes('int') || key.includes('intellect')) return <Brain className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    66 │ 		if (key.includes('wis') || key.includes('wisdom')) return <Sparkles className="h-3 w-3" />;
+    67 │ 		if (key.includes('dex') || key.includes('agility') || key.includes('speed')) return <Zap className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    65 │ → → if·(key.includes('int')·||·key.includes('intellect'))·{·return·<Brain·className="h-3·w-3"·/>;·}
+       │                                                           ++                                     ++
+
+src\components\cards\character-card\character-card-content.tsx:66:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    64 │ 		if (key.includes('str') || key.includes('force') || key.includes('power')) return <Swords className="h-3 w-3" />;
+    65 │ 		if (key.includes('int') || key.includes('intellect')) return <Brain className="h-3 w-3" />;
+  > 66 │ 		if (key.includes('wis') || key.includes('wisdom')) return <Sparkles className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    67 │ 		if (key.includes('dex') || key.includes('agility') || key.includes('speed')) return <Zap className="h-3 w-3" />;
+    68 │ 		if (key.includes('con') || key.includes('armor') || key.includes('stamina')) return <Shield className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    66 │ → → if·(key.includes('wis')·||·key.includes('wisdom'))·{·return·<Sparkles·className="h-3·w-3"·/>;·}
+       │                                                        ++                                        ++
+
+src\components\cards\character-card\character-card-content.tsx:67:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    65 │ 		if (key.includes('int') || key.includes('intellect')) return <Brain className="h-3 w-3" />;
+    66 │ 		if (key.includes('wis') || key.includes('wisdom')) return <Sparkles className="h-3 w-3" />;
+  > 67 │ 		if (key.includes('dex') || key.includes('agility') || key.includes('speed')) return <Zap className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    68 │ 		if (key.includes('con') || key.includes('armor') || key.includes('stamina')) return <Shield className="h-3 w-3" />;
+    69 │ 		if (key.includes('cha') || key.includes('soc') || key.includes('charisma')) return <User className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    67 │ → → if·(key.includes('dex')·||·key.includes('agility')·||·key.includes('speed'))·{·return·<Zap·className="h-3·w-3"·/>;·}
+       │                                                                                  ++                                   ++
+
+src\components\cards\character-card\character-card-content.tsx:68:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    66 │ 		if (key.includes('wis') || key.includes('wisdom')) return <Sparkles className="h-3 w-3" />;
+    67 │ 		if (key.includes('dex') || key.includes('agility') || key.includes('speed')) return <Zap className="h-3 w-3" />;
+  > 68 │ 		if (key.includes('con') || key.includes('armor') || key.includes('stamina')) return <Shield className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    69 │ 		if (key.includes('cha') || key.includes('soc') || key.includes('charisma')) return <User className="h-3 w-3" />;
+    70 │ 		if (key.includes('hp') || key.includes('health')) return <Heart className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    68 │ → → if·(key.includes('con')·||·key.includes('armor')·||·key.includes('stamina'))·{·return·<Shield·className="h-3·w-3"·/>;·}
+       │                                                                                  ++                                      ++
+
+src\components\cards\character-card\character-card-content.tsx:69:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    67 │ 		if (key.includes('dex') || key.includes('agility') || key.includes('speed')) return <Zap className="h-3 w-3" />;
+    68 │ 		if (key.includes('con') || key.includes('armor') || key.includes('stamina')) return <Shield className="h-3 w-3" />;
+  > 69 │ 		if (key.includes('cha') || key.includes('soc') || key.includes('charisma')) return <User className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    70 │ 		if (key.includes('hp') || key.includes('health')) return <Heart className="h-3 w-3" />;
+    71 │ 		if (key.includes('mp') || key.includes('mana')) return <Wand className="h-3 w-3" />;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    69 │ → → if·(key.includes('cha')·||·key.includes('soc')·||·key.includes('charisma'))·{·return·<User·className="h-3·w-3"·/>;·}
+       │                                                                                 ++                                    ++
+
+src\components\cards\character-card\character-card-content.tsx:71:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    69 │ 		if (key.includes('cha') || key.includes('soc') || key.includes('charisma')) return <User className="h-3 w-3" />;
+    70 │ 		if (key.includes('hp') || key.includes('health')) return <Heart className="h-3 w-3" />;
+  > 71 │ 		if (key.includes('mp') || key.includes('mana')) return <Wand className="h-3 w-3" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    72 │ 		return <Star className="h-3 w-3" />;
+    73 │ 	};
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    71 │ → → if·(key.includes('mp')·||·key.includes('mana'))·{·return·<Wand·className="h-3·w-3"·/>;·}
+       │                                                     ++                                    ++
+
+src\components\cards\character-card\character-card-content.tsx:84:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    82 │ 			.join(' ');
+    83 │ 
+  > 84 │ 		if (formatted.toLowerCase().includes('strength')) return 'STR';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    85 │ 		if (formatted.toLowerCase().includes('dexterity')) return 'DEX';
+    86 │ 		if (formatted.toLowerCase().includes('constitution')) return 'CON';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    84 │ → → if·(formatted.toLowerCase().includes('strength'))·{·return·'STR';·}
+       │                                                       ++             ++
+
+src\components\cards\character-card\character-card-content.tsx:85:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    84 │ 		if (formatted.toLowerCase().includes('strength')) return 'STR';
+  > 85 │ 		if (formatted.toLowerCase().includes('dexterity')) return 'DEX';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    86 │ 		if (formatted.toLowerCase().includes('constitution')) return 'CON';
+    87 │ 		if (formatted.toLowerCase().includes('intelligence')) return 'INT';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    85 │ → → if·(formatted.toLowerCase().includes('dexterity'))·{·return·'DEX';·}
+       │                                                        ++             ++
+
+src\components\cards\character-card\character-card-content.tsx:86:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    84 │ 		if (formatted.toLowerCase().includes('strength')) return 'STR';
+    85 │ 		if (formatted.toLowerCase().includes('dexterity')) return 'DEX';
+  > 86 │ 		if (formatted.toLowerCase().includes('constitution')) return 'CON';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    87 │ 		if (formatted.toLowerCase().includes('intelligence')) return 'INT';
+    88 │ 		if (formatted.toLowerCase().includes('wisdom')) return 'WIS';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    86 │ → → if·(formatted.toLowerCase().includes('constitution'))·{·return·'CON';·}
+       │                                                           ++             ++
+
+src\components\cards\character-card\character-card-content.tsx:87:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    85 │ 		if (formatted.toLowerCase().includes('dexterity')) return 'DEX';
+    86 │ 		if (formatted.toLowerCase().includes('constitution')) return 'CON';
+  > 87 │ 		if (formatted.toLowerCase().includes('intelligence')) return 'INT';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    88 │ 		if (formatted.toLowerCase().includes('wisdom')) return 'WIS';
+    89 │ 		if (formatted.toLowerCase().includes('charisma')) return 'CHA';
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    87 │ → → if·(formatted.toLowerCase().includes('intelligence'))·{·return·'INT';·}
+       │                                                           ++             ++
+
+src\components\cards\character-card\character-card-content.tsx:88:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    86 │ 		if (formatted.toLowerCase().includes('constitution')) return 'CON';
+    87 │ 		if (formatted.toLowerCase().includes('intelligence')) return 'INT';
+  > 88 │ 		if (formatted.toLowerCase().includes('wisdom')) return 'WIS';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    89 │ 		if (formatted.toLowerCase().includes('charisma')) return 'CHA';
+    90 │ 
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    88 │ → → if·(formatted.toLowerCase().includes('wisdom'))·{·return·'WIS';·}
+       │                                                     ++             ++
+
+src\components\cards\character-card\character-card-content.tsx:89:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    87 │ 		if (formatted.toLowerCase().includes('intelligence')) return 'INT';
+    88 │ 		if (formatted.toLowerCase().includes('wisdom')) return 'WIS';
+  > 89 │ 		if (formatted.toLowerCase().includes('charisma')) return 'CHA';
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    90 │ 
+    91 │ 		return formatted;
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    89 │ → → if·(formatted.toLowerCase().includes('charisma'))·{·return·'CHA';·}
+       │                                                       ++             ++
+
+src\components\cards\character-card\character-card-content.tsx:95:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    94 │ 	const normalizedAbilities = (() => {
+  > 95 │ 		if (!abilities) return [];
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^
+    96 │ 		if (Array.isArray(abilities)) {
+    97 │ 			return abilities.map((ability) => (typeof ability === 'string' ? { name: ability, description: '' } : ability));
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    95 │ → → if·(!abilities)·{·return·[];·}
+       │                     ++          ++
+
+src\components\cards\character-card\character-card-footer.tsx:60:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    58 │ 	const getRarityColor = (level: number) => {
+    59 │ 		if (level >= 9) return 'rgb(255, 100, 255)'; // Mítico
+  > 60 │ 		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    61 │ 		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
+    62 │ 		if (level >= 3) return 'rgb(0, 112, 221)'; // Raro
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+     58  58 │   	const getRarityColor = (level: number) => {
+     59  59 │   		if (level >= 9) return 'rgb(255, 100, 255)'; // Mítico
+     60     │ - → → if·(level·>=·7)·return·'rgb(255,·128,·0)';·//·Legendario
+         60 │ + → → if·(level·>=·7)·{·return·'rgb(255,·128,·0)';·//·Legendario
+         61 │ + }
+     61  62 │   		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
+     62  63 │   		if (level >= 3) return 'rgb(0, 112, 221)'; // Raro
+  
+
+src\components\cards\character-card\character-card-footer.tsx:75:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    73 │ 		if (lowerAlignment.includes('evil') || lowerAlignment.includes('chaotic'))
+    74 │ 			return <Swords className="h-3.5 w-3.5" />;
+  > 75 │ 		if (lowerAlignment.includes('neutral')) return <Scroll className="h-3.5 w-3.5" />;
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    76 │ 		return <Star className="h-3.5 w-3.5" />;
+    77 │ 	};
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+    75 │ → → if·(lowerAlignment.includes('neutral'))·{·return·<Scroll·className="h-3.5·w-3.5"·/>;·}
+       │                                             ++                                          ++
+
+src\components\cards\character-card\character-card-footer.tsx:59:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    57 │ 	// Determinar el color de rareza
+    58 │ 	const getRarityColor = (level: number) => {
+  > 59 │ 		if (level >= 9) return 'rgb(255, 100, 255)'; // Mítico
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    60 │ 		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
+    61 │ 		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+     57  57 │   	// Determinar el color de rareza
+     58  58 │   	const getRarityColor = (level: number) => {
+     59     │ - → → if·(level·>=·9)·return·'rgb(255,·100,·255)';·//·Mítico
+         59 │ + → → if·(level·>=·9)·{·return·'rgb(255,·100,·255)';·//·Mítico
+         60 │ + }
+     60  61 │   		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
+     61  62 │   		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
+  
+
+src\components\cards\character-card\character-card-footer.tsx:153:10 lint/style/noNestedTernary ━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    151 │ 						{rarityLevel >= 9
+    152 │ 							? 'MYTHIC'
+  > 153 │ 							: rarityLevel >= 7
+        │ 							  ^^^^^^^^^^^^^^^^
+  > 154 │ 								? 'LEGENDARY'
+         ...
+  > 158 │ 										? 'RARE'
+  > 159 │ 										: 'COMMON'}
+        │ 										^^^^^^^^^^
+    160 │ 					</span>
+    161 │ 					{[...Array(rarityStars)].map((_, i) => (
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src\components\cards\character-card\character-card-footer.tsx:61:3 lint/style/useBlockStatements  FIXABLE  ━━━━━━━━━━
+
+  × Block statements are preferred in this position.
+  
+    59 │ 		if (level >= 9) return 'rgb(255, 100, 255)'; // Mítico
+    60 │ 		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
+  > 61 │ 		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
+       │ 		^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    62 │ 		if (level >= 3) return 'rgb(0, 112, 221)'; // Raro
+    63 │ 		return 'rgb(30, 255, 0)'; // Común
+  
+  i Unsafe fix: Wrap the statement with a `JsBlockStatement`
+  
+     59  59 │   		if (level >= 9) return 'rgb(255, 100, 255)'; // Mítico
+     60  60 │   		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
+     61     │ - → → if·(level·>=·5)·return·'rgb(163,·53,·238)';·//·Épico
+         61 │ + → → 

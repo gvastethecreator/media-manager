@@ -1,15 +1,15 @@
 import { count, desc, eq, isNull, not, sql, sum } from 'drizzle-orm';
 import { existsSync } from 'fs';
-import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { thumbsConfig } from '@/config/thumbs';
 import { LRUCache } from 'lru-cache';
 import PQueue from 'p-queue';
+import { thumbsConfig } from '@/config/thumbs';
+import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
+import type { ThumbnailResult as LibThumbResult } from '@/lib/image/thumbnail';
 import { generateThumbnail } from '@/lib/image/thumbnail';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { thumbnailService as baseThumbnailService } from '@/services/thumbnail/index'; // Renombrado para evitar conflicto
-import type { ThumbnailResult as LibThumbResult } from '@/lib/image/thumbnail';
 import type { ThumbnailStats } from '@/types/stats';
 import type { LastProcessedThumbnail, ProcessOptions } from '@/types/thumbnails';
 
@@ -86,8 +86,8 @@ export async function getThumbnail(
 			});
 		}
 
-	// Si ya tiene thumbnail en DB y el proveedor activo es DB, devolverlo
-	if (image.thumbnail && thumbsConfig.provider === 'db') {
+		// Si ya tiene thumbnail en DB y el proveedor activo es DB, devolverlo
+		if (image.thumbnail && thumbsConfig.provider === 'db') {
 			// No devolver la base64, sino la URL de la API
 			const thumbnailUrl = `/api/images/${image.id}/thumbnail`;
 
@@ -125,8 +125,11 @@ export async function getThumbnail(
 			};
 		}
 
-	// Si el proveedor es disco o no hay thumbnail en DB, generar/servir desde disco
-	thumbLogger.info('🔄 Generando/servidor thumbnail (provider=' + thumbsConfig.provider + '):', { id, path: image.path });
+		// Si el proveedor es disco o no hay thumbnail en DB, generar/servir desde disco
+		thumbLogger.info('🔄 Generando/servidor thumbnail (provider=' + thumbsConfig.provider + '):', {
+			id,
+			path: image.path,
+		});
 
 		try {
 			// Clave por ruta + calidad para deduplicar y cachear
@@ -145,11 +148,14 @@ export async function getThumbnail(
 					thumbnail = await existing;
 					inflight.delete(memKey);
 				} else {
-					const newPromise: Promise<LibThumbResult> = queue.add(async (): Promise<LibThumbResult> => {
-						const result = await generateThumbnail(image.path, { quality: validQuality });
-						memoryCache.set(memKey, result);
-						return result;
-					}, { priority: 0, throwOnTimeout: true });
+					const newPromise: Promise<LibThumbResult> = queue.add(
+						async (): Promise<LibThumbResult> => {
+							const result = await generateThumbnail(image.path, { quality: validQuality });
+							memoryCache.set(memKey, result);
+							return result;
+						},
+						{ priority: 0, throwOnTimeout: true }
+					);
 					inflight.set(memKey, newPromise);
 					thumbnail = await newPromise;
 					inflight.delete(memKey);

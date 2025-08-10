@@ -36,23 +36,25 @@ export const ConceptBaseSchema = z.object({
 /**
  * 📊 Esquema Zod para ConceptStatistics.
  */
-export const ConceptStatisticsSchema = z.object({
-	imageCount: z.number().int().min(0).default(0),
-	videoCount: z.number().int().min(0).default(0),
-	albumCount: z.number().int().min(0).default(0),
-	collectionCount: z.number().int().min(0).default(0),
-	tagCount: z.number().int().min(0).default(0),
-	characterCount: z.number().int().min(0).default(0),
-	placeCount: z.number().int().min(0).default(0),
-	worldItemCount: z.number().int().min(0).default(0),
-	promptCount: z.number().int().min(0).default(0),
-	noteCount: z.number().int().min(0).default(0),
-	wildcardCount: z.number().int().min(0).default(0),
-	propertyCount: z.number().int().min(0).default(0),
-	groupCount: z.number().int().min(0).default(0),
-	totalAssociations: z.number().int().min(0).default(0),
-	lastUpdated: z.date(),
-});
+export const ConceptStatisticsSchema = z
+	.object({
+		imageCount: z.number().int().min(0).default(0),
+		videoCount: z.number().int().min(0).default(0),
+		albumCount: z.number().int().min(0).default(0),
+		collectionCount: z.number().int().min(0).default(0),
+		tagCount: z.number().int().min(0).default(0),
+		characterCount: z.number().int().min(0).default(0),
+		placeCount: z.number().int().min(0).default(0),
+		worldItemCount: z.number().int().min(0).default(0),
+		promptCount: z.number().int().min(0).default(0),
+		noteCount: z.number().int().min(0).default(0),
+		wildcardCount: z.number().int().min(0).default(0),
+		propertyCount: z.number().int().min(0).default(0),
+		groupCount: z.number().int().min(0).default(0),
+		totalAssociations: z.number().int().min(0).default(0),
+		lastUpdated: z.date(),
+	})
+	.passthrough();
 
 /**
  * ✨ Esquema Zod para ConceptWithStats (tipo canónico).

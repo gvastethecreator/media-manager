@@ -6,8 +6,8 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { ConceptBase, ConceptStatistics, ConceptWithStats } from '@/types/entities/concept';
 import { createDefaultEntityStats } from '@/lib/utils';
+import type { ConceptBase, ConceptStatistics, ConceptWithStats } from '@/types/entities/concept';
 
 const logger = serverLogger.withContext('ConceptTransformer');
 

@@ -8,11 +8,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import {
-    useCreateWildcard,
-    useDeleteWildcard,
-    useRootWildcards,
-    useUpdateWildcard,
-    useWildcards,
+	useCreateWildcard,
+	useDeleteWildcard,
+	useRootWildcards,
+	useUpdateWildcard,
+	useWildcards,
 } from '@/lib/api/wildcards';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';

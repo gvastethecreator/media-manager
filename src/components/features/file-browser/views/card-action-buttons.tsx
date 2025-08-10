@@ -9,7 +9,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { DEFAULT_ACTION_BUTTONS, type CardActionButton } from '@/types/file-browser/cards-view-config';
+import { type CardActionButton, DEFAULT_ACTION_BUTTONS } from '@/types/file-browser/cards-view-config';
 import type { AnyEntityWithStats } from '@/types/migration';
 
 interface CardActionButtonsProps {

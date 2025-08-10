@@ -4,12 +4,13 @@
  * @description Contiene funciones para:
  *              1. Transformar la entrada de la app (forms, actions) a tipos de Drizzle (create/update).
  *              2. Transformar los datos de Drizzle a tipos enriquecidos de la app (PlaceWithStats).
- 
+
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import { safeJsonParse } from '@/lib/utils/json';
 import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
-import { PlaceCreateInput, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place/base';
+import { PlaceCreateInput, PlaceStatistics, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place/base';
 import type { PlaceSearchOptions } from '@/types/entities/place/types';
 
 // Tipos locales equivalentes a Drizzle
@@ -132,17 +133,28 @@ export function toPlaceWithStats(place: DrizzlePlaceWithCounts): PlaceWithStats 
 		(_count?.collections ?? 0) +
 		(_count?.tags ?? 0);
 
-	const statistics = {
+	const statistics: PlaceStatistics = {
+		...createDefaultEntityStats({
+			imageCount: _count?.images ?? 0,
+			noteCount: _count?.notes ?? 0,
+			tagCount: _count?.tags ?? 0,
+			collectionCount: _count?.collections ?? 0,
+			conceptCount: _count?.concepts ?? 0,
+			placeCount: 1,
+			totalItems: popularity,
+			type: 'place',
+		}),
 		popularity,
 		completenessScore: calculateCompleteness(completenessFields),
 		spatialRelevance: 0,
 		geoContextLevel: 0,
-	};
+		isDirectory: false,
+		isFile: true,
+	} as PlaceStatistics;
 
 	const result: PlaceWithStats = {
 		...rest,
 		entityType: 'place' as const,
-		_stats: statistics,
 		stats: statistics,
 		_count: _count || {},
 		parsedDangers: safeJsonParse(rest.dangers, []),

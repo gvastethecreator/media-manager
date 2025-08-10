@@ -278,26 +278,28 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 						<span className="font-medium">Tamaño:</span>
 						<span className="ml-2 text-muted-foreground">{formatFileSize(documentEntity.size || 0)}</span>
 					</div>
-		    {documentEntity.pageCount && (
+					{documentEntity.pageCount && (
 						<div>
 							<span className="font-medium">Páginas:</span>
-			    <span className="ml-2 text-muted-foreground">{documentEntity.pageCount}</span>
+							<span className="ml-2 text-muted-foreground">{documentEntity.pageCount}</span>
 						</div>
 					)}
 					<div>
 						<span className="font-medium">Creado:</span>
-						<span className="ml-2 text-muted-foreground">{new Date(documentEntity.createdAt).toLocaleDateString()}</span>
+						<span className="ml-2 text-muted-foreground">
+							{new Date(documentEntity.createdAt).toLocaleDateString()}
+						</span>
 					</div>
-		    {documentEntity.wordCount && (
+					{documentEntity.wordCount && (
 						<div>
 							<span className="font-medium">Palabras:</span>
-			    <span className="ml-2 text-muted-foreground">{documentEntity.wordCount.toLocaleString()}</span>
+							<span className="ml-2 text-muted-foreground">{documentEntity.wordCount.toLocaleString()}</span>
 						</div>
 					)}
-		    {documentEntity.author && (
+					{documentEntity.author && (
 						<div>
 							<span className="font-medium">Autor:</span>
-			    <span className="ml-2 text-muted-foreground">{documentEntity.author}</span>
+							<span className="ml-2 text-muted-foreground">{documentEntity.author}</span>
 						</div>
 					)}
 					{documentEntity.description && (

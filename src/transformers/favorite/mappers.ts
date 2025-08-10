@@ -5,13 +5,13 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import {
 	type FavoriteBase,
 	FavoriteEntityType,
 	type FavoriteStatistics,
 	type FavoriteWithStats,
 } from '@/types/entities/favorite';
-import { createDefaultEntityStats } from '@/lib/utils';
 
 /**
  * 📊 Calcula las estadísticas de un favorito.
