@@ -6,6 +6,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { createDefaultEntityStats } from '@/lib/utils';
 import type { CollectionBase, CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
 
 const logger = serverLogger.withContext('CollectionTransformer');
@@ -40,20 +41,42 @@ export function fromDrizzleCollection(
 	}
 
 	try {
+		const totalItems =
+			counts.images +
+			counts.videos +
+			counts.albums +
+			counts.tags +
+			counts.characters +
+			counts.places +
+			counts.worldItems +
+			counts.concepts +
+			counts.prompts +
+			counts.notes +
+			counts.wildcards +
+			counts.properties +
+			counts.groups;
+
 		const stats: CollectionStatistics = {
-			imageCount: counts.images,
-			videoCount: counts.videos,
-			albumCount: counts.albums,
-			tagCount: counts.tags,
-			characterCount: counts.characters,
-			placeCount: counts.places,
-			worldItemCount: counts.worldItems,
-			conceptCount: counts.concepts,
-			promptCount: counts.prompts,
-			noteCount: counts.notes,
-			wildcardCount: counts.wildcards,
-			propertyCount: counts.properties,
-			groupCount: counts.groups,
+			...createDefaultEntityStats({
+				imageCount: counts.images,
+				videoCount: counts.videos,
+				albumCount: counts.albums,
+				// collectionCount no provisto en counts para Collection; mantener en 0 por defecto
+				tagCount: counts.tags,
+				characterCount: counts.characters,
+				placeCount: counts.places,
+				worldItemCount: counts.worldItems,
+				conceptCount: counts.concepts,
+				promptCount: counts.prompts,
+				noteCount: counts.notes,
+				wildcardCount: counts.wildcards,
+				propertyCount: counts.properties,
+				groupCount: counts.groups,
+				totalItems,
+				type: 'collection',
+			}),
+			isDirectory: false,
+			isFile: true,
 		};
 
 		return {

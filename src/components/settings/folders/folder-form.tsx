@@ -96,9 +96,9 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 			if (directoryPicker) {
 				// Intentar obtener la ruta completa del sistema de archivos usando accesos seguros
 				const anyHandle = directoryPicker as Record<string, unknown> | undefined;
-				const maybePath = (anyHandle && typeof anyHandle === 'object' && ('_path' in anyHandle) ? (anyHandle as any)._path : undefined) as
-					| string
-					| undefined;
+				const maybePath = (
+					anyHandle && typeof anyHandle === 'object' && '_path' in anyHandle ? (anyHandle as any)._path : undefined
+				) as string | undefined;
 				const fullPath = maybePath || directoryPicker.fullPath || directoryPicker.path || directoryPicker.name;
 				formLogger.info('Carpeta seleccionada:', { path: fullPath });
 				setFolderPath(fullPath);

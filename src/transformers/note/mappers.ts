@@ -4,6 +4,7 @@
 
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import { serverLogger } from '../../lib/logger/server-logger';
 import type {
 	NoteBase,
@@ -13,7 +14,6 @@ import type {
 	NoteStatistics,
 	NoteUpdateInput,
 } from '../../types/entities/note';
-import { createDefaultEntityStats } from '@/lib/utils';
 
 const logger = serverLogger.withContext('NoteMappers');
 

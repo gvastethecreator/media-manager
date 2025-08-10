@@ -7,9 +7,9 @@
  * @updated 2025-01-27
  */
 
+import { createDefaultEntityStats } from '../../lib/utils';
 import type { ThumbnailBase, ThumbnailWithStats } from '../../types/entities/thumbnail';
 import { ThumbnailQuality } from '../../types/entities/thumbnail';
-import { createDefaultEntityStats } from '../../lib/utils';
 import { toThumbnailWithStats } from './mappers';
 import { validateThumbnail } from './validators';
 

@@ -3,8 +3,8 @@
  */
 
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import { fireEvent, render, screen } from '@/test/test-utils';
 import { useSelectionStore } from '@/store/ui/selection.slice';
+import { fireEvent, render, screen } from '@/test/test-utils';
 import type { AnyEntityWithStats } from '@/types/migration';
 import { EntityStatsType } from '@/types/migration';
 import { FileBrowser } from './file-browser';
@@ -16,7 +16,9 @@ mock.module('@/store/ui/file-viewer.slice', () => ({ useFileViewerStore: mock() 
 mock.module('@/store/details-panel.store', () => ({ useDetailsPanelStore: mock() }));
 mock.module('@/store/entities/image', () => ({ useImageStore: mock() }));
 mock.module('@/lib/keyboard', () => ({ useFileBrowserShortcuts: mock() }));
-mock.module('@/lib/ui/toast', () => ({ toastService: { success: mock(() => {}), error: mock(() => {}), info: mock(() => {}) } }));
+mock.module('@/lib/ui/toast', () => ({
+	toastService: { success: mock(() => {}), error: mock(() => {}), info: mock(() => {}) },
+}));
 
 // Mock data
 const mockItems: AnyEntityWithStats[] = [

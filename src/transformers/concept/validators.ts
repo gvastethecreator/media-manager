@@ -7,6 +7,7 @@
 
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { createDefaultEntityStats } from '@/lib/utils';
 import type { ConceptBase, ConceptStats, ConceptWithStats } from '@/types/entities/concept';
 import {
 	ConceptBaseSchema,
@@ -46,7 +47,15 @@ export function validateConceptBase(data: unknown): ConceptBase {
  */
 export function validateConceptStatistics(data: unknown): ConceptStats {
 	try {
-		return ConceptStatisticsSchema.parse(data);
+		const d = data as any;
+		const withDefaults = {
+			...createDefaultEntityStats({ type: 'concept' }),
+			isDirectory: false,
+			isFile: true,
+			...d,
+		};
+		ConceptStatisticsSchema.parse(withDefaults);
+		return withDefaults as ConceptStats;
 	} catch (error) {
 		logger.error('Error validando ConceptStatistics', { error, data });
 		throw new TransformerError('Los datos de estadísticas de Concept no son válidos');
@@ -64,7 +73,9 @@ export function validateConceptWithStats(data: unknown): ConceptWithStats {
 	try {
 		// Primero transformar los datos para agregar statistics
 		const transformedData = transformConceptWithStats(data);
-		return ConceptWithStatsSchema.parse(transformedData);
+		// El schema valida forma mínima; mantener stats completos hacia fuera
+		const parsed = ConceptWithStatsSchema.parse(transformedData);
+		return { ...(parsed as any), stats: transformedData.stats } as ConceptWithStats;
 	} catch (error) {
 		logger.error('Error validando ConceptWithStats', { error, data });
 		throw new TransformerError('Los datos de Concept con estadísticas no son válidos');
@@ -220,11 +231,20 @@ export function transformConceptWithStats(data: any): ConceptWithStats {
 		lastUpdated: new Date(),
 	};
 
+	const mergedStats = {
+		...createDefaultEntityStats({ type: 'concept' }),
+		isDirectory: false,
+		isFile: true,
+		...conceptStats,
+	} as ConceptStats;
+	// Validar estructura conocida pero permitir extras
+	ConceptStatisticsSchema.parse(mergedStats);
+
 	return {
 		...data,
 		entityType: 'concept' as const,
-		statistics: conceptStats,
-		stats: conceptStats,
+		statistics: mergedStats,
+		stats: mergedStats,
 		_count: data._count || {},
 	};
 }

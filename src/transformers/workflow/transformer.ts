@@ -7,8 +7,8 @@
  * @updated 2025-01-27
  */
 
-import { WorkflowBase, WorkflowStatistics, WorkflowWithStats } from '../../types/entities/workflow';
 import { createDefaultEntityStats } from '../../lib/utils';
+import { WorkflowBase, WorkflowStatistics, WorkflowWithStats } from '../../types/entities/workflow';
 import { validateWorkflow } from './validators';
 
 /**

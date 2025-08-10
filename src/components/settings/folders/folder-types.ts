@@ -1,5 +1,5 @@
-import type { FolderExtended, FolderStatistics } from '@/types/entities/folder';
 import { createDefaultEntityStats } from '@/lib/utils';
+import type { FolderExtended, FolderStatistics } from '@/types/entities/folder';
 
 /**
  * 📁 Extensión del tipo canónico para incluir estado de error temporal

@@ -9,5 +9,10 @@ export type { GroupBase, GroupComplete, GroupSortKey, GroupStatistics, GroupWith
 export { GroupViewMode } from './group/base';
 export * from './group/enums';
 // Exportar tipos de creación/actualización tanto con nombres nuevos como alias legacy
-export type { GroupCreateInput, GroupUpdateInput, GroupViewConfig } from './group/types';
-export type { CreateGroupInput, UpdateGroupInput } from './group/types';
+export type {
+	CreateGroupInput,
+	GroupCreateInput,
+	GroupUpdateInput,
+	GroupViewConfig,
+	UpdateGroupInput,
+} from './group/types';

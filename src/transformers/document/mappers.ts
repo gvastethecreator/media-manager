@@ -5,8 +5,8 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
-import type { DocumentBase, DocumentStatistics, DocumentWithStats } from '@/types/entities/document';
 import { createDefaultEntityStats } from '@/lib/utils';
+import type { DocumentBase, DocumentStatistics, DocumentWithStats } from '@/types/entities/document';
 
 /** Constante para cálculo de tiempo de lectura (palabras por minuto) */
 const WORDS_PER_MINUTE = 200;

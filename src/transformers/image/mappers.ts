@@ -4,7 +4,7 @@
  */
 
 import { createDefaultEntityStats } from '@/lib/utils';
-import type { ImageBase, ImageWithStats, ImageStatistics } from '@/types/entities/image/base';
+import type { ImageBase, ImageStatistics, ImageWithStats } from '@/types/entities/image/base';
 
 /**
  * Convierte cualquier objeto plano a ImageWithStats (rellena campos obligatorios)

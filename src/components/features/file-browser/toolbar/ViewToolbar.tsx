@@ -99,8 +99,8 @@ export const ViewToolbar: React.FC<ViewToolbarProps> = ({ className }) => {
 
 								return (
 									<DropdownMenuItem
-										data-testid={`view-mode-${mode}`}
 										className={cn('flex cursor-pointer items-center gap-2', isSelected && 'bg-accent')}
+										data-testid={`view-mode-${mode}`}
 										key={mode}
 										onClick={() => handleViewModeChange(mode)}
 									>

@@ -53,665 +53,725 @@
 	/**
 	 * 🚀 Crea solo la entidad básica sin metadata ni thumbnails (Etapa 1)
 	 */
-	public async createBasicEntityFromFile(filePath: string, folderId: string): Promise<EntityCreationResult> {
-		console.log(`🔧 FileEntityMapper: [ETAPA 1] Indexando archivo ${filePath}`);
-		try {
-			// Obtener información del archivo
-			const fileInfo = await this.getFileInfo(filePath, folderId);
-			const entityType = this.getEntityTypeFromExtension(fileInfo.extension);
+public
+async;
+createBasicEntityFromFile(filePath: string, folderId: string)
+: Promise<EntityCreationResult>
+{
+	console.log(`🔧 FileEntityMapper: [ETAPA 1] Indexando archivo ${filePath}`);
+	try {
+		// Obtener información del archivo
+		const fileInfo = await this.getFileInfo(filePath, folderId);
+		const entityType = this.getEntityTypeFromExtension(fileInfo.extension);
 
-			// Si es un tipo desconocido, no crear entidad
-			if (entityType === EntityType.UNKNOWN) {
-				return {
+		// Si es un tipo desconocido, no crear entidad
+		if (entityType === EntityType.UNKNOWN) {
+			return {
 					success: false,
 					entityType,
 					error: `Unsupported file type: ${fileInfo.extension}`,
 				};
-			}
+		}
 
-			// Verificar si ya existe una entidad para este archivo
-			const exists = await this.checkExistingEntity(fileInfo, entityType);
-			if (exists) {
-				console.log(`⚠️ FileEntityMapper: [ETAPA 1] Entidad ya existe para ${filePath}`);
-				return {
+		// Verificar si ya existe una entidad para este archivo
+		const exists = await this.checkExistingEntity(fileInfo, entityType);
+		if (exists) {
+			console.log(`⚠️ FileEntityMapper: [ETAPA 1] Entidad ya existe para ${filePath}`);
+			return {
 					success: true,
 					entityType,
 					error: 'Entity already exists',
 				};
-			}
+		}
 
-			// Crear la entidad básica SIN metadata
-			const entityId = await this.createBasicEntity(fileInfo, entityType);
+		// Crear la entidad básica SIN metadata
+		const entityId = await this.createBasicEntity(fileInfo, entityType);
 
-			return {
+		return {
 				success: true,
 				entityType,
 				entityId,
 			};
-		} catch (error) {
-			console.error(`Error creating basic entity for ${filePath}:`, error);
-			return {
+	} catch (error) {
+		console.error(`Error creating basic entity for ${filePath}:`, error);
+		return {
 				success: false,
 				entityType: EntityType.UNKNOWN,
 				error: error instanceof Error ? error.message : 'Unknown error',
 			};
-		}
 	}
-	/**
-	 * 🔍 Extrae metadata para una entidad existente (Etapa 2)
-	 */
-	public async extractMetadataForEntity(
+}
+/**
+ * 🔍 Extrae metadata para una entidad existente (Etapa 2)
+ */
+public
+async;
+extractMetadataForEntity(
 		filePath: string,
 		entityId: string,
 		entityType: EntityType
-	): Promise<{ success: boolean; error?: string }> {
-		console.log(`🔍 FileEntityMapper: [ETAPA 2] Extrayendo metadata para ${filePath}`);
-		try {
-			// Importar el servicio de extracción de metadata unificado
-			const { extractAllMetadata } = await import('@/server/services/metadata/unified-parser.service');
+	)
+: Promise<
+{
+	success: boolean;
+	error?: string
+}
+>
+{
+	console.log(`🔍 FileEntityMapper: [ETAPA 2] Extrayendo metadata para ${filePath}`);
+	try {
+		// Importar el servicio de extracción de metadata unificado
+		const { extractAllMetadata } = await import('@/server/services/metadata/unified-parser.service');
 
-			// Leer el archivo como buffer
-			const fileBuffer = await fs.readFile(filePath);
-			const fileName = path.basename(filePath);
+		// Leer el archivo como buffer
+		const fileBuffer = await fs.readFile(filePath);
+		const fileName = path.basename(filePath);
 
-			// Extraer metadata usando el servicio unificado
-			const metadataResult = await extractAllMetadata(fileBuffer, fileName);
+		// Extraer metadata usando el servicio unificado
+		const metadataResult = await extractAllMetadata(fileBuffer, fileName);
 
-			if (metadataResult.success) {
-				console.log(`✅ [ETAPA 2] Metadata extraída exitosamente para: ${filePath}`, {
-					origin: metadataResult.origin?.engine,
-					hasAI: metadataResult.ai_metadata ? 'Sí' : 'No',
-					errorsCount: metadataResult.errors.length,
-				});
-				return { success: true };
-			}
-			console.warn(`⚠️ [ETAPA 2] No se pudo extraer metadata de ${filePath}:`, metadataResult.errors);
-			return { success: false, error: 'Metadata extraction failed' };
-		} catch (error) {
-			console.warn(`⚠️ [ETAPA 2] Error al extraer metadata de ${filePath}:`, error);
-			return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-		}
-	}
-	/**
-	 * 🖼️ Procesa thumbnail para una entidad existente (Etapa 3)
-	 */
-	public async processThumbnailForEntity(
-		filePath: string,
-		entityId: string,
-		entityType: EntityType
-	): Promise<{ success: boolean; error?: string }> {
-		console.log(`🖼️ FileEntityMapper: [ETAPA 3] Procesando thumbnail para ${filePath}`);
-		try {
-			// Solo procesar thumbnails para tipos que los soportan
-			if (entityType === EntityType.IMAGE || entityType === EntityType.VIDEO) {
-				// TODO: Implementar generación de thumbnails
-				// Por ahora solo simulamos el proceso
-				await new Promise((resolve) => setTimeout(resolve, 100)); // Simular procesamiento
-				console.log(`✅ [ETAPA 3] Thumbnail procesado para: ${filePath}`);
-				return { success: true };
-			}
-			// Para otros tipos, marcar como exitoso sin procesar
+		if (metadataResult.success) {
+			console.log(`✅ [ETAPA 2] Metadata extraída exitosamente para: ${filePath}`, {
+				origin: metadataResult.origin?.engine,
+				hasAI: metadataResult.ai_metadata ? 'Sí' : 'No',
+				errorsCount: metadataResult.errors.length,
+			});
 			return { success: true };
-		} catch (error) {
-			console.warn(`⚠️ [ETAPA 3] Error al procesar thumbnail de ${filePath}:`, error);
-			return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
 		}
+		console.warn(`⚠️ [ETAPA 2] No se pudo extraer metadata de ${filePath}:`, metadataResult.errors);
+		return { success: false, error: 'Metadata extraction failed' };
+	} catch (error) {
+		console.warn(`⚠️ [ETAPA 2] Error al extraer metadata de ${filePath}:`, error);
+		return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
 	}
-	/**
-	 * 🏗️ Método auxiliar para crear entidad básica
-	 */
-	private async createBasicEntity(fileInfo: FileInfo, entityType: EntityType): Promise<string> {
-		let entityId: string;
-
-		switch (entityType) {
-			case EntityType.IMAGE: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for image creation');
-				}
-				const imageData: CreateImageInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					size: fileInfo.size,
-					width: 0, // Will be updated after processing
-					height: 0, // Will be updated after processing
-					hash: fileInfo.hash,
-					folderId: fileInfo.folderId,
-				};
-				const image = await this.imageService.createImage(imageData);
-				entityId = image.id;
-				break;
-			}
-
-			case EntityType.VIDEO: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for video creation');
-				}
-				const videoData: VideoCreateInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					size: fileInfo.size,
-					hash: fileInfo.hash,
-					folderId: fileInfo.folderId,
-					duration: 0, // Will be updated after processing
-					isFavorite: false,
-				};
-				const video = await createVideo(videoData);
-				entityId = video.id;
-				break;
-			}
-
-			case EntityType.AUDIO: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for audio creation');
-				}
-				const audioData: AudioCreateInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					hash: fileInfo.hash,
-					size: fileInfo.size,
-					folderId: fileInfo.folderId,
-					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
-					extension: fileInfo.extension,
-					description: null,
-					isFavorite: false,
-					isArchived: false,
-					duration: null,
-					bitrate: null,
-					sampleRate: null,
-					channels: null,
-					format: null,
-					codec: null,
-					title: null,
-					artist: null,
-					album: null,
-					year: null,
-					genre: null,
-					track: null,
-					disc: null,
-					albumArtist: null,
-					composer: null,
-					comment: null,
-					lyrics: null,
-					bpm: null,
-					key: null,
-					mood: null,
-				};
-				const audio = await createAudio(audioData);
-				entityId = audio.id;
-				break;
-			}
-
-			case EntityType.FILE3D: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for file3d creation');
-				}
-				const file3dData: File3DCreateInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					hash: fileInfo.hash,
-					size: fileInfo.size,
-					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
-					extension: fileInfo.extension,
-					folderId: fileInfo.folderId,
-					isFavorite: false,
-					isArchived: false,
-					format: null,
-					version: null,
-					vertices: null,
-					faces: null,
-					triangles: null,
-					materials: null,
-					textures: null,
-					animations: null,
-					bones: null,
-					scenes: null,
-					cameras: null,
-					lights: null,
-					hasUV: null,
-					hasNormals: null,
-					hasColors: null,
-					boundingBox: null,
-				};
-				const file3d = await createFile3D(file3dData);
-				entityId = file3d.id;
-				break;
-			}
-
-			case EntityType.DOCUMENT: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for document creation');
-				}
-				const documentData: DocumentCreateInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					hash: fileInfo.hash,
-					size: fileInfo.size,
-					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
-					extension: fileInfo.extension,
-					folderId: fileInfo.folderId,
-					isFavorite: false,
-					isArchived: false,
-					pageCount: null,
-					wordCount: null,
-					language: null,
-					title: null,
-					author: null,
-					subject: null,
-					keywords: null,
-					creator: null,
-					producer: null,
-					creationDate: null,
-					modificationDate: null,
-					encrypted: null,
-					version: null,
-					content: null,
-					summary: null,
-				};
-				const document = await createDocument(documentData);
-				entityId = document.id;
-				break;
-			}
-
-			default:
-				throw new Error(`Unsupported entity type: ${entityType}`);
+}
+/**
+ * 🖼️ Procesa thumbnail para una entidad existente (Etapa 3)
+ */
+public
+async;
+processThumbnailForEntity(
+		filePath: string,
+		entityId: string,
+		entityType: EntityType
+	)
+: Promise<
+{
+	success: boolean;
+	error?: string
+}
+>
+{
+	console.log(`🖼️ FileEntityMapper: [ETAPA 3] Procesando thumbnail para ${filePath}`);
+	try {
+		// Solo procesar thumbnails para tipos que los soportan
+		if (entityType === EntityType.IMAGE || entityType === EntityType.VIDEO) {
+			// TODO: Implementar generación de thumbnails
+			// Por ahora solo simulamos el proceso
+			await new Promise((resolve) => setTimeout(resolve, 100)); // Simular procesamiento
+			console.log(`✅ [ETAPA 3] Thumbnail procesado para: ${filePath}`);
+			return { success: true };
 		}
-
-		return entityId;
+		// Para otros tipos, marcar como exitoso sin procesar
+		return { success: true };
+	} catch (error) {
+		console.warn(`⚠️ [ETAPA 3] Error al procesar thumbnail de ${filePath}:`, error);
+		return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
 	}
-	/**
-	 * 🔄 Método original que ahora usa las 3 etapas secuencialmente (para compatibilidad)
-	 */
-	public async createEntityFromFile(filePath: string, folderId: string): Promise<EntityCreationResult> {
-		console.log(`🔧 FileEntityMapper: Procesando archivo completo ${filePath}`);
+}
+/**
+ * 🏗️ Método auxiliar para crear entidad básica
+ */
+private
+async;
+createBasicEntity(fileInfo: FileInfo, entityType: EntityType)
+: Promise<string>
+{
+	let entityId: string;
 
-		// Etapa 1: Crear entidad básica
-		const basicResult = await this.createBasicEntityFromFile(filePath, folderId);
-		if (!basicResult.success) {
-			return basicResult;
+	switch (entityType) {
+		case EntityType.IMAGE: {
+			if (!fileInfo.hash) {
+				throw new Error('File hash is required for image creation');
+			}
+			const imageData: CreateImageInput = {
+				name: fileInfo.name,
+				path: fileInfo.path,
+				size: fileInfo.size,
+				width: 0, // Will be updated after processing
+				height: 0, // Will be updated after processing
+				hash: fileInfo.hash,
+				folderId: fileInfo.folderId,
+			};
+			const image = await this.imageService.createImage(imageData);
+			entityId = image.id;
+			break;
 		}
 
-		// Si la entidad ya existía, no hacer etapas adicionales
-		if (basicResult.error === 'Entity already exists') {
-			return basicResult;
+		case EntityType.VIDEO: {
+			if (!fileInfo.hash) {
+				throw new Error('File hash is required for video creation');
+			}
+			const videoData: VideoCreateInput = {
+				name: fileInfo.name,
+				path: fileInfo.path,
+				size: fileInfo.size,
+				hash: fileInfo.hash,
+				folderId: fileInfo.folderId,
+				duration: 0, // Will be updated after processing
+				isFavorite: false,
+			};
+			const video = await createVideo(videoData);
+			entityId = video.id;
+			break;
 		}
 
-		const entityId = basicResult.entityId!;
-		const entityType = basicResult.entityType;
-
-		// Etapa 2: Extraer metadata
-		const metadataResult = await this.extractMetadataForEntity(filePath, entityId, entityType);
-		if (!metadataResult.success) {
-			console.warn(`⚠️ Metadata extraction failed for ${filePath}: ${metadataResult.error}`);
+		case EntityType.AUDIO: {
+			if (!fileInfo.hash) {
+				throw new Error('File hash is required for audio creation');
+			}
+			const audioData: AudioCreateInput = {
+				name: fileInfo.name,
+				path: fileInfo.path,
+				hash: fileInfo.hash,
+				size: fileInfo.size,
+				folderId: fileInfo.folderId,
+				mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
+				extension: fileInfo.extension,
+				description: null,
+				isFavorite: false,
+				isArchived: false,
+				duration: null,
+				bitrate: null,
+				sampleRate: null,
+				channels: null,
+				format: null,
+				codec: null,
+				title: null,
+				artist: null,
+				album: null,
+				year: null,
+				genre: null,
+				track: null,
+				disc: null,
+				albumArtist: null,
+				composer: null,
+				comment: null,
+				lyrics: null,
+				bpm: null,
+				key: null,
+				mood: null,
+			};
+			const audio = await createAudio(audioData);
+			entityId = audio.id;
+			break;
 		}
 
-		// Etapa 3: Procesar thumbnail
-		const thumbnailResult = await this.processThumbnailForEntity(filePath, entityId, entityType);
-		if (!thumbnailResult.success) {
-			console.warn(`⚠️ Thumbnail processing failed for ${filePath}: ${thumbnailResult.error}`);
+		case EntityType.FILE3D: {
+			if (!fileInfo.hash) {
+				throw new Error('File hash is required for file3d creation');
+			}
+			const file3dData: File3DCreateInput = {
+				name: fileInfo.name,
+				path: fileInfo.path,
+				hash: fileInfo.hash,
+				size: fileInfo.size,
+				mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
+				extension: fileInfo.extension,
+				folderId: fileInfo.folderId,
+				isFavorite: false,
+				isArchived: false,
+				format: null,
+				version: null,
+				vertices: null,
+				faces: null,
+				triangles: null,
+				materials: null,
+				textures: null,
+				animations: null,
+				bones: null,
+				scenes: null,
+				cameras: null,
+				lights: null,
+				hasUV: null,
+				hasNormals: null,
+				hasColors: null,
+				boundingBox: null,
+			};
+			const file3d = await createFile3D(file3dData);
+			entityId = file3d.id;
+			break;
 		}
 
-		return {
+		case EntityType.DOCUMENT: {
+			if (!fileInfo.hash) {
+				throw new Error('File hash is required for document creation');
+			}
+			const documentData: DocumentCreateInput = {
+				name: fileInfo.name,
+				path: fileInfo.path,
+				hash: fileInfo.hash,
+				size: fileInfo.size,
+				mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
+				extension: fileInfo.extension,
+				folderId: fileInfo.folderId,
+				isFavorite: false,
+				isArchived: false,
+				pageCount: null,
+				wordCount: null,
+				language: null,
+				title: null,
+				author: null,
+				subject: null,
+				keywords: null,
+				creator: null,
+				producer: null,
+				creationDate: null,
+				modificationDate: null,
+				encrypted: null,
+				version: null,
+				content: null,
+				summary: null,
+			};
+			const document = await createDocument(documentData);
+			entityId = document.id;
+			break;
+		}
+
+		default:
+			throw new Error(`Unsupported entity type: ${entityType}`);
+	}
+
+	return entityId;
+}
+/**
+ * 🔄 Método original que ahora usa las 3 etapas secuencialmente (para compatibilidad)
+ */
+public
+async;
+createEntityFromFile(filePath: string, folderId: string)
+: Promise<EntityCreationResult>
+{
+	console.log(`🔧 FileEntityMapper: Procesando archivo completo ${filePath}`);
+
+	// Etapa 1: Crear entidad básica
+	const basicResult = await this.createBasicEntityFromFile(filePath, folderId);
+	if (!basicResult.success) {
+		return basicResult;
+	}
+
+	// Si la entidad ya existía, no hacer etapas adicionales
+	if (basicResult.error === 'Entity already exists') {
+		return basicResult;
+	}
+
+	const entityId = basicResult.entityId!;
+	const entityType = basicResult.entityType;
+
+	// Etapa 2: Extraer metadata
+	const metadataResult = await this.extractMetadataForEntity(filePath, entityId, entityType);
+	if (!metadataResult.success) {
+		console.warn(`⚠️ Metadata extraction failed for ${filePath}: ${metadataResult.error}`);
+	}
+
+	// Etapa 3: Procesar thumbnail
+	const thumbnailResult = await this.processThumbnailForEntity(filePath, entityId, entityType);
+	if (!thumbnailResult.success) {
+		console.warn(`⚠️ Thumbnail processing failed for ${filePath}: ${thumbnailResult.error}`);
+	}
+
+	return {
 			success: true,
 			entityType,
 			entityId,
 		};
-	}
-	/**
-	 * Procesa múltiples archivos y crea sus entidades correspondientes
-	 */
-	public async processFiles(filePaths: string[], folderId: string): Promise<EntityCreationStats>
-	{
-		const stats: EntityCreationStats = {
-			totalFiles: filePaths.length,
-			processed: 0,
-			successful: 0,
-			failed: 0,
-			errors: [],
-		};
+}
+/**
+ * Procesa múltiples archivos y crea sus entidades correspondientes
+ */
+public
+async;
+processFiles(filePaths: string[], folderId: string)
+: Promise<EntityCreationStats>
+{
+	const stats: EntityCreationStats = {
+		totalFiles: filePaths.length,
+		processed: 0,
+		successful: 0,
+		failed: 0,
+		errors: [],
+	};
 
-		for (const filePath of filePaths) {
-			try {
-				const result = await this.createEntityFromFile(filePath, folderId);
-				stats.processed++;
+	for (const filePath of filePaths) {
+		try {
+			const result = await this.createEntityFromFile(filePath, folderId);
+			stats.processed++;
 
-				if (result.success) {
-					stats.successful++;
-				} else {
-					stats.failed++;
-					if (result.error && result.error !== 'Entity already exists') {
-						stats.errors.push({
-							file: filePath,
-							error: result.error,
-						});
-					}
-				}
-			} catch (error) {
-				stats.processed++;
+			if (result.success) {
+				stats.successful++;
+			} else {
 				stats.failed++;
-				stats.errors.push({
-					file: filePath,
-					error: error instanceof Error ? error.message : 'Unknown error',
-				});
+				if (result.error && result.error !== 'Entity already exists') {
+					stats.errors.push({
+						file: filePath,
+						error: result.error,
+					});
+				}
 			}
+		} catch (error) {
+			stats.processed++;
+			stats.failed++;
+			stats.errors.push({
+				file: filePath,
+				error: error instanceof Error ? error.message : 'Unknown error',
+			});
 		}
-
-		return stats;
 	}
+
+	return stats;
+}
 }
 
 	/**
 	 * 🚀 Crea solo la entidad básica sin metadata ni thumbnails (Etapa 1)
 	 */
-	public async createBasicEntityFromFile(filePath: string, folderId: string): Promise<EntityCreationResult> {
-		console.log(`🔧 FileEntityMapper: [ETAPA 1] Indexando archivo ${filePath}`);
-		try {
-			// Obtener información del archivo
-			const fileInfo = await this.getFileInfo(filePath, folderId);
-			const entityType = this.getEntityTypeFromExtension(fileInfo.extension);
+	public async createBasicEntityFromFile(filePath: string, folderId: string): Promise<EntityCreationResult>
+{
+	console.log(`🔧 FileEntityMapper: [ETAPA 1] Indexando archivo ${filePath}`);
+	try {
+		// Obtener información del archivo
+		const fileInfo = await this.getFileInfo(filePath, folderId);
+		const entityType = this.getEntityTypeFromExtension(fileInfo.extension);
 
-			// Si es un tipo desconocido, no crear entidad
-			if (entityType === EntityType.UNKNOWN) {
-				return {
+		// Si es un tipo desconocido, no crear entidad
+		if (entityType === EntityType.UNKNOWN) {
+			return {
 					success: false,
 					entityType,
 					error: `Unsupported file type: ${fileInfo.extension}`,
 				};
-			}
+		}
 
-			// Verificar si ya existe una entidad para este archivo
-			const exists = await this.checkExistingEntity(fileInfo, entityType);
-			if (exists) {
-				console.log(`⚠️ FileEntityMapper: [ETAPA 1] Entidad ya existe para ${filePath}`);
-				return {
+		// Verificar si ya existe una entidad para este archivo
+		const exists = await this.checkExistingEntity(fileInfo, entityType);
+		if (exists) {
+			console.log(`⚠️ FileEntityMapper: [ETAPA 1] Entidad ya existe para ${filePath}`);
+			return {
 					success: true,
 					entityType,
 					error: 'Entity already exists',
 				};
-			}
+		}
 
-			// Crear la entidad básica SIN metadata
-			const entityId = await this.createBasicEntity(fileInfo, entityType);
+		// Crear la entidad básica SIN metadata
+		const entityId = await this.createBasicEntity(fileInfo, entityType);
 
-			return {
+		return {
 				success: true,
 				entityType,
 				entityId,
 			};
-		} catch (error) {
-			console.error(`Error creating basic entity for ${filePath}:`, error);
-			return {
+	} catch (error) {
+		console.error(`Error creating basic entity for ${filePath}:`, error);
+		return {
 				success: false,
 				entityType: EntityType.UNKNOWN,
 				error: error instanceof Error ? error.message : 'Unknown error',
 			};
-		}
 	}
+}
 
-	/**
-	 * 🔍 Extrae metadata para una entidad existente (Etapa 2)
-	 */
-	public async extractMetadataForEntity(
+/**
+ * 🔍 Extrae metadata para una entidad existente (Etapa 2)
+ */
+public
+async;
+extractMetadataForEntity(
 		filePath: string,
 		entityId: string,
 		entityType: EntityType
-	): Promise<{ success: boolean; error?: string }> {
-		console.log(`🔍 FileEntityMapper: [ETAPA 2] Extrayendo metadata para ${filePath}`);
-		try {
-			// Importar el servicio de extracción de metadata unificado
-			const { extractAllMetadata } = await import('@/server/services/metadata/unified-parser.service');
+	)
+: Promise<
+{
+	success: boolean;
+	error?: string
+}
+>
+{
+	console.log(`🔍 FileEntityMapper: [ETAPA 2] Extrayendo metadata para ${filePath}`);
+	try {
+		// Importar el servicio de extracción de metadata unificado
+		const { extractAllMetadata } = await import('@/server/services/metadata/unified-parser.service');
 
-			// Leer el archivo como buffer
-			const fileBuffer = await fs.readFile(filePath);
-			const fileName = path.basename(filePath);
+		// Leer el archivo como buffer
+		const fileBuffer = await fs.readFile(filePath);
+		const fileName = path.basename(filePath);
 
-			// Extraer metadata usando el servicio unificado
-			const metadataResult = await extractAllMetadata(fileBuffer, fileName);
+		// Extraer metadata usando el servicio unificado
+		const metadataResult = await extractAllMetadata(fileBuffer, fileName);
 
-			if (metadataResult.success) {
-				console.log(`✅ [ETAPA 2] Metadata extraída exitosamente para: ${filePath}`, {
-					origin: metadataResult.origin?.engine,
-					hasAI: metadataResult.ai_metadata ? 'Sí' : 'No',
-					errorsCount: metadataResult.errors.length,
-				});
-				return { success: true };
-			}
-			console.warn(`⚠️ [ETAPA 2] No se pudo extraer metadata de ${filePath}:`, metadataResult.errors);
-			return { success: false, error: 'Metadata extraction failed' };
-		} catch (error) {
-			console.warn(`⚠️ [ETAPA 2] Error al extraer metadata de ${filePath}:`, error);
-			return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
-		}
-	}
-
-	/**
-	 * 🖼️ Procesa thumbnail para una entidad existente (Etapa 3)
-	 */
-	public async processThumbnailForEntity(
-		filePath: string,
-		entityId: string,
-		entityType: EntityType
-	): Promise<{ success: boolean; error?: string }> {
-		console.log(`🖼️ FileEntityMapper: [ETAPA 3] Procesando thumbnail para ${filePath}`);
-		try {
-			// Solo procesar thumbnails para tipos que los soportan
-			if (entityType === EntityType.IMAGE || entityType === EntityType.VIDEO) {
-				// TODO: Implementar generación de thumbnails
-				// Por ahora solo simulamos el proceso
-				await new Promise((resolve) => setTimeout(resolve, 100)); // Simular procesamiento
-				console.log(`✅ [ETAPA 3] Thumbnail procesado para: ${filePath}`);
-				return { success: true };
-			}
-			// Para otros tipos, marcar como exitoso sin procesar
+		if (metadataResult.success) {
+			console.log(`✅ [ETAPA 2] Metadata extraída exitosamente para: ${filePath}`, {
+				origin: metadataResult.origin?.engine,
+				hasAI: metadataResult.ai_metadata ? 'Sí' : 'No',
+				errorsCount: metadataResult.errors.length,
+			});
 			return { success: true };
-		} catch (error) {
-			console.warn(`⚠️ [ETAPA 3] Error al procesar thumbnail de ${filePath}:`, error);
-			return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
 		}
+		console.warn(`⚠️ [ETAPA 2] No se pudo extraer metadata de ${filePath}:`, metadataResult.errors);
+		return { success: false, error: 'Metadata extraction failed' };
+	} catch (error) {
+		console.warn(`⚠️ [ETAPA 2] Error al extraer metadata de ${filePath}:`, error);
+		return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+	}
+}
+
+/**
+ * 🖼️ Procesa thumbnail para una entidad existente (Etapa 3)
+ */
+public
+async;
+processThumbnailForEntity(
+		filePath: string,
+		entityId: string,
+		entityType: EntityType
+	)
+: Promise<
+{
+	success: boolean;
+	error?: string
+}
+>
+{
+	console.log(`🖼️ FileEntityMapper: [ETAPA 3] Procesando thumbnail para ${filePath}`);
+	try {
+		// Solo procesar thumbnails para tipos que los soportan
+		if (entityType === EntityType.IMAGE || entityType === EntityType.VIDEO) {
+			// TODO: Implementar generación de thumbnails
+			// Por ahora solo simulamos el proceso
+			await new Promise((resolve) => setTimeout(resolve, 100)); // Simular procesamiento
+			console.log(`✅ [ETAPA 3] Thumbnail procesado para: ${filePath}`);
+			return { success: true };
+		}
+		// Para otros tipos, marcar como exitoso sin procesar
+		return { success: true };
+	} catch (error) {
+		console.warn(`⚠️ [ETAPA 3] Error al procesar thumbnail de ${filePath}:`, error);
+		return { success: false, error: error instanceof Error ? error.message : 'Unknown error' };
+	}
+}
+
+/**
+ * 🏗️ Método auxiliar para crear entidad básica
+ */
+private
+async;
+createBasicEntity(fileInfo: FileInfo, entityType: EntityType)
+: Promise<string>
+{
+	let entityId: string;
+
+	switch (entityType) {
+		case EntityType.IMAGE: {
+			if (!fileInfo.hash) {
+				throw new Error('File hash is required for image creation');
+			}
+			const imageData: CreateImageInput = {
+				name: fileInfo.name,
+				path: fileInfo.path,
+				size: fileInfo.size,
+				width: 0, // Will be updated after processing
+				height: 0, // Will be updated after processing
+				hash: fileInfo.hash,
+				folderId: fileInfo.folderId,
+			};
+			const image = await this.imageService.createImage(imageData);
+			entityId = image.id;
+			break;
+		}
+
+		case EntityType.VIDEO: {
+			if (!fileInfo.hash) {
+				throw new Error('File hash is required for video creation');
+			}
+			const videoData: VideoCreateInput = {
+				name: fileInfo.name,
+				path: fileInfo.path,
+				size: fileInfo.size,
+				hash: fileInfo.hash,
+				folderId: fileInfo.folderId,
+				duration: 0, // Will be updated after processing
+				isFavorite: false,
+			};
+			const video = await createVideo(videoData);
+			entityId = video.id;
+			break;
+		}
+
+		case EntityType.AUDIO: {
+			if (!fileInfo.hash) {
+				throw new Error('File hash is required for audio creation');
+			}
+			const audioData: AudioCreateInput = {
+				name: fileInfo.name,
+				path: fileInfo.path,
+				hash: fileInfo.hash,
+				size: fileInfo.size,
+				folderId: fileInfo.folderId,
+				mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
+				extension: fileInfo.extension,
+				description: null,
+				isFavorite: false,
+				isArchived: false,
+				duration: null,
+				bitrate: null,
+				sampleRate: null,
+				channels: null,
+				format: null,
+				codec: null,
+				title: null,
+				artist: null,
+				album: null,
+				year: null,
+				genre: null,
+				track: null,
+				disc: null,
+				albumArtist: null,
+				composer: null,
+				comment: null,
+				lyrics: null,
+				bpm: null,
+				key: null,
+				mood: null,
+			};
+			const audio = await createAudio(audioData);
+			entityId = audio.id;
+			break;
+		}
+
+		case EntityType.FILE3D: {
+			if (!fileInfo.hash) {
+				throw new Error('File hash is required for file3d creation');
+			}
+			const file3dData: File3DCreateInput = {
+				name: fileInfo.name,
+				path: fileInfo.path,
+				hash: fileInfo.hash,
+				size: fileInfo.size,
+				mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
+				extension: fileInfo.extension,
+				folderId: fileInfo.folderId,
+				isFavorite: false,
+				isArchived: false,
+				format: null,
+				version: null,
+				vertices: null,
+				faces: null,
+				triangles: null,
+				materials: null,
+				textures: null,
+				animations: null,
+				bones: null,
+				scenes: null,
+				cameras: null,
+				lights: null,
+				hasUV: null,
+				hasNormals: null,
+				hasColors: null,
+				boundingBox: null,
+			};
+			const file3d = await createFile3D(file3dData);
+			entityId = file3d.id;
+			break;
+		}
+
+		case EntityType.DOCUMENT: {
+			if (!fileInfo.hash) {
+				throw new Error('File hash is required for document creation');
+			}
+			const documentData: DocumentCreateInput = {
+				name: fileInfo.name,
+				path: fileInfo.path,
+				hash: fileInfo.hash,
+				size: fileInfo.size,
+				mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
+				extension: fileInfo.extension,
+				folderId: fileInfo.folderId,
+				isFavorite: false,
+				isArchived: false,
+				pageCount: null,
+				wordCount: null,
+				language: null,
+				title: null,
+				author: null,
+				subject: null,
+				keywords: null,
+				creator: null,
+				producer: null,
+				creationDate: null,
+				modificationDate: null,
+				encrypted: null,
+				version: null,
+				content: null,
+				summary: null,
+			};
+			const document = await createDocument(documentData);
+			entityId = document.id;
+			break;
+		}
+
+		default:
+			throw new Error(`Unsupported entity type: ${entityType}`);
 	}
 
-	/**
-	 * 🏗️ Método auxiliar para crear entidad básica
-	 */
-	private async createBasicEntity(fileInfo: FileInfo, entityType: EntityType): Promise<string> {
-		let entityId: string;
+	return entityId;
+}
 
-		switch (entityType) {
-			case EntityType.IMAGE: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for image creation');
-				}
-				const imageData: CreateImageInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					size: fileInfo.size,
-					width: 0, // Will be updated after processing
-					height: 0, // Will be updated after processing
-					hash: fileInfo.hash,
-					folderId: fileInfo.folderId,
-				};
-				const image = await this.imageService.createImage(imageData);
-				entityId = image.id;
-				break;
-			}
+/**
+ * 🔄 Método original que ahora usa las 3 etapas secuencialmente (para compatibilidad)
+ */
+public
+async;
+createEntityFromFile(filePath: string, folderId: string)
+: Promise<EntityCreationResult>
+{
+	console.log(`🔧 FileEntityMapper: Procesando archivo completo ${filePath}`);
 
-			case EntityType.VIDEO: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for video creation');
-				}
-				const videoData: VideoCreateInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					size: fileInfo.size,
-					hash: fileInfo.hash,
-					folderId: fileInfo.folderId,
-					duration: 0, // Will be updated after processing
-					isFavorite: false,
-				};
-				const video = await createVideo(videoData);
-				entityId = video.id;
-				break;
-			}
-
-			case EntityType.AUDIO: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for audio creation');
-				}
-				const audioData: AudioCreateInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					hash: fileInfo.hash,
-					size: fileInfo.size,
-					folderId: fileInfo.folderId,
-					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
-					extension: fileInfo.extension,
-					description: null,
-					isFavorite: false,
-					isArchived: false,
-					duration: null,
-					bitrate: null,
-					sampleRate: null,
-					channels: null,
-					format: null,
-					codec: null,
-					title: null,
-					artist: null,
-					album: null,
-					year: null,
-					genre: null,
-					track: null,
-					disc: null,
-					albumArtist: null,
-					composer: null,
-					comment: null,
-					lyrics: null,
-					bpm: null,
-					key: null,
-					mood: null,
-				};
-				const audio = await createAudio(audioData);
-				entityId = audio.id;
-				break;
-			}
-
-			case EntityType.FILE3D: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for file3d creation');
-				}
-				const file3dData: File3DCreateInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					hash: fileInfo.hash,
-					size: fileInfo.size,
-					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
-					extension: fileInfo.extension,
-					folderId: fileInfo.folderId,
-					isFavorite: false,
-					isArchived: false,
-					format: null,
-					version: null,
-					vertices: null,
-					faces: null,
-					triangles: null,
-					materials: null,
-					textures: null,
-					animations: null,
-					bones: null,
-					scenes: null,
-					cameras: null,
-					lights: null,
-					hasUV: null,
-					hasNormals: null,
-					hasColors: null,
-					boundingBox: null,
-				};
-				const file3d = await createFile3D(file3dData);
-				entityId = file3d.id;
-				break;
-			}
-
-			case EntityType.DOCUMENT: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for document creation');
-				}
-				const documentData: DocumentCreateInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					hash: fileInfo.hash,
-					size: fileInfo.size,
-					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
-					extension: fileInfo.extension,
-					folderId: fileInfo.folderId,
-					isFavorite: false,
-					isArchived: false,
-					pageCount: null,
-					wordCount: null,
-					language: null,
-					title: null,
-					author: null,
-					subject: null,
-					keywords: null,
-					creator: null,
-					producer: null,
-					creationDate: null,
-					modificationDate: null,
-					encrypted: null,
-					version: null,
-					content: null,
-					summary: null,
-				};
-				const document = await createDocument(documentData);
-				entityId = document.id;
-				break;
-			}
-
-			default:
-				throw new Error(`Unsupported entity type: ${entityType}`);
-		}
-
-		return entityId;
+	// Etapa 1: Crear entidad básica
+	const basicResult = await this.createBasicEntityFromFile(filePath, folderId);
+	if (!basicResult.success) {
+		return basicResult;
 	}
 
-	/**
-	 * 🔄 Método original que ahora usa las 3 etapas secuencialmente (para compatibilidad)
-	 */
-	public async createEntityFromFile(filePath: string, folderId: string): Promise<EntityCreationResult> {
-		console.log(`🔧 FileEntityMapper: Procesando archivo completo ${filePath}`);
+	// Si la entidad ya existía, no hacer etapas adicionales
+	if (basicResult.error === 'Entity already exists') {
+		return basicResult;
+	}
 
-		// Etapa 1: Crear entidad básica
-		const basicResult = await this.createBasicEntityFromFile(filePath, folderId);
-		if (!basicResult.success) {
-			return basicResult;
-		}
+	const entityId = basicResult.entityId!;
+	const entityType = basicResult.entityType;
 
-		// Si la entidad ya existía, no hacer etapas adicionales
-		if (basicResult.error === 'Entity already exists') {
-			return basicResult;
-		}
+	// Etapa 2: Extraer metadata
+	const metadataResult = await this.extractMetadataForEntity(filePath, entityId, entityType);
+	if (!metadataResult.success) {
+		console.warn(`⚠️ Metadata extraction failed for ${filePath}: ${metadataResult.error}`);
+	}
 
-		const entityId = basicResult.entityId!;
-		const entityType = basicResult.entityType;
+	// Etapa 3: Procesar thumbnail
+	const thumbnailResult = await this.processThumbnailForEntity(filePath, entityId, entityType);
+	if (!thumbnailResult.success) {
+		console.warn(`⚠️ Thumbnail processing failed for ${filePath}: ${thumbnailResult.error}`);
+	}
 
-		// Etapa 2: Extraer metadata
-		const metadataResult = await this.extractMetadataForEntity(filePath, entityId, entityType);
-		if (!metadataResult.success) {
-			console.warn(`⚠️ Metadata extraction failed for ${filePath}: ${metadataResult.error}`);
-		}
-
-		// Etapa 3: Procesar thumbnail
-		const thumbnailResult = await this.processThumbnailForEntity(filePath, entityId, entityType);
-		if (!thumbnailResult.success) {
-			console.warn(`⚠️ Thumbnail processing failed for ${filePath}: ${thumbnailResult.error}`);
-		}
-
-		return {
+	return {
 			success: true,
 			entityType,
 			entityId,
 		};
-	}
-	throw;
-	new;
-	Error('File hash is required for audio creation');
+}
+throw;
+new;
+Error('File hash is required for audio creation');
 }
 const audioData: AudioCreateInput = {
 	name: fileInfo.name,

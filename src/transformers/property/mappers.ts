@@ -4,11 +4,12 @@
  * @description Contiene funciones para transformar datos de la entidad Property.
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import { calculateCompleteness } from '../../lib/utils/transformers/calculate-completeness';
 import type { PropertyStatistics, PropertyWithCounts, PropertyWithStats } from '../../types/entities/property';
 
 /**
- 
+
  *
  * @param drizzleProperty El objeto Property de Drizzle, incluyendo los `_count` de sus relaciones.
  * @returns Un objeto PropertyWithStats con las estadísticas calculadas.
@@ -48,11 +49,31 @@ export function toPropertyWithStats(propertyWithCounts: PropertyWithCounts | Pro
 	const completenessScore = calculateCompleteness(baseProperty, ['name', 'description', 'category']);
 
 	const statistics: PropertyStatistics = {
+		...createDefaultEntityStats({
+			tagCount: counts.tags ?? 0,
+			noteCount: counts.notes ?? 0,
+			collectionCount: counts.collections ?? 0,
+			albumCount: counts.albums ?? 0,
+			imageCount: counts.images ?? 0,
+			videoCount: counts.videos ?? 0,
+			characterCount: counts.characters ?? 0,
+			placeCount: counts.places ?? 0,
+			conceptCount: counts.concepts ?? 0,
+			promptCount: counts.prompts ?? 0,
+			wildcardCount: counts.wildcards ?? 0,
+			groupCount: counts.groups ?? 0,
+			propertyCount: 1,
+			totalItems: totalRelations,
+			type: 'property',
+		}),
 		totalRelations,
 		totalAssociations: totalRelations,
-		usageDiversity: Number.parseFloat(diversityRatio.toFixed(2)),
+		valueDiversity: Number.parseFloat(diversityRatio.toFixed(2)),
+		usageCount: totalRelations,
 		popularity: Number.parseFloat(popularity.toFixed(2)),
 		completenessScore,
+		isDirectory: false,
+		isFile: true,
 	};
 
 	return {

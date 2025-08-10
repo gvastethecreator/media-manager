@@ -68,45 +68,41 @@ export function SearchView(_props: ViewProps) {
 
 	const handleItemDoubleClick = useCallback(
 		(item: AnyEntityWithStats) => {
-				// ✅ Usar directamente las imágenes tipadas del store con EntityWithStats
-				if (!isImageWithStats(item)) {
-					return;
-				}
+			// ✅ Usar directamente las imágenes tipadas del store con EntityWithStats
+			if (!isImageWithStats(item)) {
+				return;
+			}
 
-				const imageItems: ImageWithStats[] = items;
-				const currentIndex = imageItems.findIndex((i) => i.id === item.id);
+			const imageItems: ImageWithStats[] = items;
+			const currentIndex = imageItems.findIndex((i) => i.id === item.id);
 
-				// openViewer espera EntityWithStats[]; adaptamos a tipo más amplio sin copiar
-				const asEntities = imageItems as unknown as EntityWithStats[];
-				openViewer(asEntities, currentIndex < 0 ? 0 : currentIndex);
-			},
+			// openViewer espera EntityWithStats[]; adaptamos a tipo más amplio sin copiar
+			const asEntities = imageItems as unknown as EntityWithStats[];
+			openViewer(asEntities, currentIndex < 0 ? 0 : currentIndex);
+		},
 		[openViewer, items]
 	);
 
-		const renderContent = () => {
-			if (isLoading) {
-				return <LoadingScreen />;
-			}
-			if (items && items.length > 0) {
-				return (
-					<FileBrowser
-						entityType="mixed"
-						onItemDoubleClick={handleItemDoubleClick}
-						onItemSelect={handleItemSelect}
-					/>
-				);
-			}
-			if (filters.query) {
-				return (
-					<EmptyState
-						description="Intenta con otros términos de búsqueda"
-						icon={Search}
-						title="No se encontraron resultados"
-					/>
-				);
-			}
-			return null;
-		};
+	const renderContent = () => {
+		if (isLoading) {
+			return <LoadingScreen />;
+		}
+		if (items && items.length > 0) {
+			return (
+				<FileBrowser entityType="mixed" onItemDoubleClick={handleItemDoubleClick} onItemSelect={handleItemSelect} />
+			);
+		}
+		if (filters.query) {
+			return (
+				<EmptyState
+					description="Intenta con otros términos de búsqueda"
+					icon={Search}
+					title="No se encontraron resultados"
+				/>
+			);
+		}
+		return null;
+	};
 
 	return (
 		<div className="flex h-full flex-col">

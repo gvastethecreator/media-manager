@@ -4,11 +4,11 @@ import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { EntityStatsType } from '@/types/file-browser/entity-stats';
 import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
 import { useImageStore } from '@/store/entities/image';
 import { useVideoStore } from '@/store/entities/video';
+import { EntityStatsType } from '@/types/file-browser/entity-stats';
 import type { AnyEntityWithStats } from '@/types/migration';
 import type { ViewProps } from '../types';
 

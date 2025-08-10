@@ -5,6 +5,7 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+import { createDefaultEntityStats, formatFileSize } from '@/lib/utils';
 import { type FileBase, type FileStatistics, FileType, type FileWithStats } from '../../types/entities/file';
 
 /**
@@ -21,15 +22,15 @@ function calculateFileStats(file: FileBase): FileStatistics {
 	const daysSinceModified = Math.floor((now.getTime() - modifiedAt.getTime()) / (1000 * 60 * 60 * 24));
 	const daysSinceAccessed = Math.floor((now.getTime() - accessedAt.getTime()) / (1000 * 60 * 60 * 24));
 
-	const formatFileSize = (bytes: number): string => {
-		if (bytes === 0) return '0 Bytes';
-		const k = 1024;
-		const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-		const i = Math.floor(Math.log(bytes) / Math.log(k));
-		return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
-	};
-
 	return {
+		...createDefaultEntityStats({
+			size: file.size,
+			mtime: modifiedAt,
+			birthtime: file.createdAt,
+			type: file.type,
+			// mapear conteos básicos si proceden
+			totalItems: 1,
+		}),
 		formattedSize: formatFileSize(file.size),
 		typeLabel: file.type,
 		iconName: 'file',
@@ -47,6 +48,9 @@ function calculateFileStats(file: FileBase): FileStatistics {
 		}),
 		childCount: file.isDirectory ? 0 : 0, // Valor por defecto
 		shortPath: file.relativePath || file.name,
+		checksum: file.hash,
+		isDirectory: file.isDirectory,
+		isFile: !file.isDirectory,
 	};
 }
 

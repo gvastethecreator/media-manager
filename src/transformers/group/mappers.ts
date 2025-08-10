@@ -5,8 +5,8 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import { createDefaultEntityStats } from '@/lib/utils';
+import { calculateCompleteness } from '@/lib/utils/transformers/calculate-completeness';
 import type { GroupBase, GroupStatistics, GroupWithStats } from '@/types/entities/group';
 
 /**
