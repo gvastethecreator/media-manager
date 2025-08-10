@@ -12,7 +12,6 @@ import { toastService } from '@/lib/ui/toast';
 import type { PropertyWithStats } from '@/types/entities/property';
 import { CreatePropertyForm } from './create-property-form';
 
-export type { PropertyWithStats }; // Exportamos el tipo para el PropertyPreview
 
 export function PropertiesSettings() {
 	// State local para UI
@@ -121,7 +120,7 @@ export function PropertiesSettings() {
 		}
 	};
 
-	const handleToggleFavorite = async (property: PropertyWithStats) => {
+	const handleToggleFavorite = (property: PropertyWithStats) => {
 		try {
 			// Implementar toggle favorite cuando esté disponible en la API
 			// const updatedProperty = await togglePropertyFavorite(property.id);

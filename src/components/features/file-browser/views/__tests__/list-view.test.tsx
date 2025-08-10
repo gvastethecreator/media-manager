@@ -4,6 +4,9 @@
  */
 
 import { describe, expect, it, mock } from 'bun:test';
+// Regex top-level para accesibilidad y rendimiento en queries
+const RE_NOMBRE = /nombre/i;
+const RE_TAMANO = /tamaño/i;
 import { render, screen } from '@testing-library/react';
 import { ListView } from '@/components/features/file-browser/views/list-view';
 import type { AnyEntityWithStats } from '@/types/migration';
@@ -117,8 +120,8 @@ describe('ListView', () => {
 	] as any;
 
 	const defaultProps = {
-		items: mockItems,
-		selectedIds: [],
+		items: mockItems as AnyEntityWithStats[],
+		selectedIds: [] as string[],
 		containerWidth: 800,
 		onItemClick: mock(),
 		onItemDoubleClick: mock(),
@@ -136,8 +139,8 @@ describe('ListView', () => {
 	it('muestra el header de columnas cuando showHeader es true', () => {
 		render(<ListView {...defaultProps} />);
 
-		expect(screen.getByRole('columnheader', { name: /nombre/i })).toBeInTheDocument();
-		expect(screen.getByRole('columnheader', { name: /tamaño/i })).toBeInTheDocument();
+		expect(screen.getByRole('columnheader', { name: RE_NOMBRE })).toBeInTheDocument();
+		expect(screen.getByRole('columnheader', { name: RE_TAMANO })).toBeInTheDocument();
 	});
 
 	it('aplica data-view-type="list" al contenedor', () => {

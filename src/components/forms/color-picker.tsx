@@ -28,7 +28,7 @@ const presetColors = [
 	'#64748b', // Slate
 ];
 
-export const ColorPicker = memo(function ColorPicker({ value, onChange, className }: ColorPickerProps) {
+export const ColorPicker = memo(function ColorPickerImpl({ value, onChange, className }: ColorPickerProps) {
 	const [open, setOpen] = useState(false);
 
 	// Callback memoizado para manejar selección de color

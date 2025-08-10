@@ -34,7 +34,9 @@ export function useCategoryStats() {
 	const { data: statsData, isLoading: isLoadingStats } = useNavigationStats();
 
 	const categoryDataMap = useMemo(() => {
-		if (!navigationData) return {};
+		if (!navigationData) {
+			return {};
+		}
 
 		return {
 			folders: navigationData.folders || [],
@@ -69,7 +71,9 @@ export function useCategoryStats() {
 	const getImagesForCategory = useCallback(
 		(categoryId: NavigationCategory): number => {
 			const items = categoryDataMap[categoryId as keyof typeof categoryDataMap] as NavItem[] | undefined;
-			if (!(items && Array.isArray(items))) return 0;
+			if (!(items && Array.isArray(items))) {
+				return 0;
+			}
 
 			return items.reduce((sum, item) => {
 				const count = item._count?.images ?? item.imageCount ?? 0;
@@ -82,7 +86,9 @@ export function useCategoryStats() {
 	const getCategoryItems = useCallback(
 		(categoryId: NavigationCategory): CategoryChild[] => {
 			const items = categoryDataMap[categoryId as keyof typeof categoryDataMap] as NavItem[] | undefined;
-			if (!(items && Array.isArray(items))) return [];
+			if (!(items && Array.isArray(items))) {
+				return [];
+			}
 
 			return items.map(
 				(item): CategoryChild => ({

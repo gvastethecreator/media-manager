@@ -5,7 +5,7 @@
  */
 
 import { Download, Maximize2, Minimize2, Pause, Play, RotateCcw, Volume2, VolumeX } from 'lucide-react';
-import React, { useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { type VideoWithStats } from '@/types/entities/video/types';
@@ -25,7 +25,9 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className }) =>
 
 	const handlePlayPause = () => {
 		const vid = videoRef.current;
-		if (!vid) return;
+		if (!vid) {
+			return;
+		}
 		if (vid.paused) {
 			vid.play();
 			setPlaying(true);
@@ -37,14 +39,18 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className }) =>
 
 	const handleMute = () => {
 		const vid = videoRef.current;
-		if (!vid) return;
+		if (!vid) {
+			return;
+		}
 		vid.muted = !vid.muted;
 		setMuted(vid.muted);
 	};
 
 	const handleFullscreen = () => {
 		const vid = videoRef.current;
-		if (!vid) return;
+		if (!vid) {
+			return;
+		}
 		if (fullscreen) {
 			document.exitFullscreen?.();
 			setFullscreen(false);
@@ -56,19 +62,25 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className }) =>
 
 	const handleTimeUpdate = () => {
 		const vid = videoRef.current;
-		if (!vid) return;
+		if (!vid) {
+			return;
+		}
 		setCurrentTime(vid.currentTime);
 	};
 
 	const handleLoadedMetadata = () => {
 		const vid = videoRef.current;
-		if (!vid) return;
+		if (!vid) {
+			return;
+		}
 		setDuration(vid.duration);
 	};
 
 	const handleSeek = (e: React.ChangeEvent<HTMLInputElement>) => {
 		const vid = videoRef.current;
-		if (!vid) return;
+		if (!vid) {
+			return;
+		}
 		const time = Number(e.target.value);
 		vid.currentTime = time;
 		setCurrentTime(time);
@@ -76,7 +88,9 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className }) =>
 
 	const handleRestart = () => {
 		const vid = videoRef.current;
-		if (!vid) return;
+		if (!vid) {
+			return;
+		}
 		vid.currentTime = 0;
 		vid.play();
 		setPlaying(true);

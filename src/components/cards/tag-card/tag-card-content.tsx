@@ -1,19 +1,19 @@
 import {
-	Album,
-	BookOpen,
-	FileImage,
-	FileText,
-	Folder,
-	Image,
-	Keyboard,
-	ListChecks,
-	MapPin,
-	MessageSquare,
-	Package,
-	PanelTop,
-	Tag as TagIcon,
-	UserSquare,
-	Video,
+    Album,
+    BookOpen,
+    FileImage,
+    FileText,
+    Folder,
+    Image,
+    Keyboard,
+    ListChecks,
+    MapPin,
+    MessageSquare,
+    Package,
+    PanelTop,
+    Tag as TagIcon,
+    UserSquare,
+    Video,
 } from 'lucide-react';
 import React from 'react';
 import { cn } from '@/lib/utils';
@@ -93,7 +93,9 @@ export function TagCardContent({
 
 	// Renderizar una barra de stats para TCG mode
 	const renderStatBar = (icon: React.ReactNode, count: number, label: string, color: string = primaryColor) => {
-		if (!tcgMode || count === 0) return null;
+		if (!tcgMode || count === 0) {
+			return null;
+		}
 
 		return (
 			<div className="mb-1 flex items-center gap-1.5 text-xs last:mb-0">

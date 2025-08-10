@@ -10,7 +10,9 @@ import { WorldItemCardImages } from './world-item-card-images';
 
 // Función auxiliar para oscurecer colores
 function darkenColor(color: string): string {
-	if (!color) return '#000000';
+	if (!color) {
+		return '#000000';
+	}
 	// Convertir hex a RGB
 	const hex = color.replace('#', '');
 	const r = Number.parseInt(hex.substr(0, 2), 16);
@@ -62,7 +64,9 @@ export function WorldItemCard({
 
 	// Procesar propiedades si es un string o formato JSON
 	const parsedProperties = useMemo(() => {
-		if (!worldItem?.properties) return [];
+		if (!worldItem?.properties) {
+			return [];
+		}
 		if (typeof worldItem.properties === 'string' && worldItem.properties) {
 			try {
 				return JSON.parse(worldItem.properties);
@@ -75,7 +79,9 @@ export function WorldItemCard({
 
 	// Procesar requerimientos si es un string o formato JSON
 	const parsedRequirements = useMemo(() => {
-		if (!worldItem?.requirements) return [];
+		if (!worldItem?.requirements) {
+			return [];
+		}
 		if (typeof worldItem.requirements === 'string' && worldItem.requirements) {
 			try {
 				return JSON.parse(worldItem.requirements);
@@ -88,7 +94,9 @@ export function WorldItemCard({
 
 	// Procesar atributos si es un string o formato JSON
 	const parsedAttributes = useMemo(() => {
-		if (!worldItem?.attributes) return [];
+		if (!worldItem?.attributes) {
+			return [];
+		}
 		if (typeof worldItem.attributes === 'string' && worldItem.attributes) {
 			try {
 				return JSON.parse(worldItem.attributes);
@@ -101,7 +109,9 @@ export function WorldItemCard({
 
 	// Procesar efectos si es un string o formato JSON
 	const parsedEffects = useMemo(() => {
-		if (!worldItem?.effects) return [];
+		if (!worldItem?.effects) {
+			return [];
+		}
 		if (typeof worldItem.effects === 'string' && worldItem.effects) {
 			try {
 				return JSON.parse(worldItem.effects);
@@ -114,7 +124,9 @@ export function WorldItemCard({
 
 	// Procesar estadísticas si es un string o formato JSON
 	const parsedStats = useMemo(() => {
-		if (!worldItem?.stats) return {};
+		if (!worldItem?.stats) {
+			return {};
+		}
 		if (typeof worldItem.stats === 'string' && worldItem.stats) {
 			try {
 				return JSON.parse(worldItem.stats);
@@ -176,13 +188,13 @@ export function WorldItemCard({
 			legendary: 1.5,
 		};
 
-		const intensityFactor = rarityFactors[worldItem?.rarity?.toLowerCase() || 'common'] || 1;
+		const computedIntensity = rarityFactors[worldItem?.rarity?.toLowerCase() || 'common'] || 1;
 
 		return {
 			primaryColor: primaryCol,
 			secondaryColor: secondaryCol,
 			icon: iconComponent,
-			intensityFactor,
+			intensityFactor: computedIntensity,
 		};
 	}, [worldItem?.color, worldItem?.type, worldItem?.rarity]);
 

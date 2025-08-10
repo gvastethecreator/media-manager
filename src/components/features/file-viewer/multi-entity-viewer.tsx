@@ -4,17 +4,15 @@
  */
 
 import { AnimatePresence, motion } from 'motion/react';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { AnyEntityWithStats } from '@/types/entities';
 import type { AudioWithStats } from '@/types/entities/audio';
 import type { DocumentWithStats } from '@/types/entities/document';
 import type { FileWithStats } from '@/types/entities/file/base';
-import type { ImageWithStats } from '@/types/entities/image';
 import type { VideoWithStats } from '@/types/entities/video';
 import { EntityStatsType } from '@/types/migration';
 
 // Import viewers
-import { FileViewer } from './file-viewer'; // For images
 import { AudioViewer } from './viewers/audio-viewer';
 import { DocumentViewer } from './viewers/document-viewer';
 import { GenericFileViewer } from './viewers/generic-file-viewer';
@@ -34,19 +32,21 @@ export function MultiEntityViewer({ entities, currentIndex, isOpen, onClose, onI
 	const currentEntity = entities[currentIndex];
 
 	// Navigation functions
-	const handleNext = () => {
+	const handleNext = useCallback(() => {
 		const nextIndex = currentIndex < entities.length - 1 ? currentIndex + 1 : 0;
 		onIndexChange(nextIndex);
-	};
+	}, [currentIndex, entities.length, onIndexChange]);
 
-	const handlePrevious = () => {
+	const handlePrevious = useCallback(() => {
 		const prevIndex = currentIndex > 0 ? currentIndex - 1 : entities.length - 1;
 		onIndexChange(prevIndex);
-	};
+	}, [currentIndex, entities.length, onIndexChange]);
 
 	// Keyboard navigation
 	useEffect(() => {
-		if (!isOpen) return;
+		if (!isOpen) {
+			return;
+		}
 
 		const handleKeyDown = (e: KeyboardEvent) => {
 			if (e.key === 'Escape') {
@@ -60,11 +60,13 @@ export function MultiEntityViewer({ entities, currentIndex, isOpen, onClose, onI
 
 		window.addEventListener('keydown', handleKeyDown);
 		return () => window.removeEventListener('keydown', handleKeyDown);
-	}, [isOpen, onClose]);
+	}, [isOpen, onClose, handleNext, handlePrevious]);
 
 	// Determine which viewer to render based on entityType discriminator
 	const renderViewer = () => {
-		if (!currentEntity) return null;
+		if (!currentEntity) {
+			return null;
+		}
 
 		switch (currentEntity.entityType as EntityStatsType) {
 			case EntityStatsType.IMAGE: {

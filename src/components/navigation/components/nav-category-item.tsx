@@ -8,7 +8,7 @@ import { ViewType } from '@/components/views/types';
 import { cn } from '@/lib/utils';
 
 // Componente memoizado para el indicador de colapso
-const CollapseIndicator = memo(function CollapseIndicator({
+const CollapseIndicatorComponent = memo(function CollapseIndicator({
 	isCollapsed,
 	onToggleCollapse,
 	color = '#888888',
@@ -59,7 +59,7 @@ const CollapseIndicator = memo(function CollapseIndicator({
 });
 
 // Componente memoizado para los contadores
-const CategoryCounters = memo(function CategoryCounters({
+const CategoryCountersComponent = memo(function CategoryCounters({
 	itemCount,
 	imageCount,
 	isCollapsed,
@@ -99,7 +99,12 @@ const CategoryCounters = memo(function CategoryCounters({
 						if (e.key === 'Enter' || e.key === ' ') {
 							e.preventDefault();
 							// Simular un click para el manejador que espera MouseEvent
-							const mockEvent = { stopPropagation: () => {} } as React.MouseEvent;
+							const mockEvent = {
+								// no-op para simular MouseEvent sin efectos
+								stopPropagation: () => {
+									/* no-op */
+								},
+							} as React.MouseEvent;
 							handleViewModeToggle(mockEvent);
 						}
 					}}
@@ -129,7 +134,7 @@ interface NavCategoryItemProps {
 	viewMode?: 'list' | 'grid';
 }
 
-export const NavCategoryItem = memo(function NavCategoryItem({
+export const NavCategoryItem = memo(function NavCategoryItemImpl({
 	label,
 	color,
 	icon: Icon,
@@ -195,7 +200,13 @@ export const NavCategoryItem = memo(function NavCategoryItem({
 			}}
 		>
 			{/* Botón específico para colapsar/expandir - solo visible cuando se muestran las etiquetas */}
-			{showLabel && <CollapseIndicator color={color} isCollapsed={isCollapsed} onToggleCollapse={onToggleCollapse} />}
+			{showLabel && (
+				<CollapseIndicatorComponent
+					color={color}
+					isCollapsed={isCollapsed}
+					onToggleCollapse={onToggleCollapse}
+				/>
+			)}
 
 			{/* Botón de categoría */}
 			<Button
@@ -212,7 +223,7 @@ export const NavCategoryItem = memo(function NavCategoryItem({
 					<>
 						<span className="flex-1 truncate text-left font-medium">{label}</span>
 
-						<CategoryCounters
+						<CategoryCountersComponent
 							imageCount={imageCount}
 							isCollapsed={isCollapsed}
 							itemCount={itemCount}

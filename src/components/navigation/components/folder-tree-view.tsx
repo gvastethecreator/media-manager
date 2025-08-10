@@ -50,7 +50,7 @@ function buildFolderTree(folders: CategoryChild[], parentId: string | null = nul
 	});
 }
 
-export const FolderTreeView = memo(function FolderTreeView({
+const FolderTreeViewComponent = memo(function FolderTreeViewImpl({
 	className,
 	parentId = null,
 	selectedFolderId,
@@ -115,4 +115,6 @@ export const FolderTreeView = memo(function FolderTreeView({
 	);
 });
 
-export default FolderTreeView;
+export const FolderTreeView = FolderTreeViewComponent;
+
+export default FolderTreeViewComponent;

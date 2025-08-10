@@ -72,7 +72,9 @@ export function useAccessibility(options: UseAccessibilityOptions = {}) {
 	// Función para anunciar mensajes al lector de pantalla
 	const announce = useCallback(
 		(message: string, priority: 'polite' | 'assertive' = 'polite') => {
-			if (!config.screenReaderAnnouncements) return;
+			if (!config.screenReaderAnnouncements) {
+				return;
+			}
 
 			// Agregar el anuncio a la lista
 			setAnnouncements((prev) => [...prev, message]);
@@ -103,7 +105,9 @@ export function useAccessibility(options: UseAccessibilityOptions = {}) {
 	// Función para enfocar un elemento específico
 	const focusElement = useCallback(
 		(selector: string) => {
-			if (!config.keyboardNavigation) return;
+			if (!config.keyboardNavigation) {
+				return;
+			}
 
 			const container = containerRef?.current || document;
 			const element = container.querySelector(selector) as HTMLElement;
@@ -159,12 +163,16 @@ export function useAccessibility(options: UseAccessibilityOptions = {}) {
 	// Función para manejar navegación por teclado
 	const handleKeyNavigation = useCallback(
 		(event: KeyboardEvent): boolean => {
-			if (!config.keyboardNavigation) return false;
+			if (!config.keyboardNavigation) {
+				return false;
+			}
 
 			const { key, ctrlKey, shiftKey, altKey } = event;
 			const container = containerRef?.current;
 
-			if (!container) return false;
+			if (!container) {
+				return false;
+			}
 
 			// Navegación con flechas
 			if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(key)) {
@@ -189,6 +197,10 @@ export function useAccessibility(options: UseAccessibilityOptions = {}) {
 					case 'ArrowRight':
 						nextIndex = Math.min(items.length - 1, currentIndex + 1);
 						break;
+					default: {
+						// noop
+						break;
+					}
 				}
 
 				if (nextIndex !== currentIndex && items[nextIndex]) {
@@ -267,7 +279,9 @@ export function useAccessibility(options: UseAccessibilityOptions = {}) {
 
 	// Configurar listener de teclado
 	useEffect(() => {
-		if (!(config.keyboardNavigation && containerRef?.current)) return;
+		if (!(config.keyboardNavigation && containerRef?.current)) {
+			return;
+		}
 
 		const container = containerRef.current;
 

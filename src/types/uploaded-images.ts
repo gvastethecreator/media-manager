@@ -11,24 +11,26 @@ import type { MediaMetadata } from './metadata.types';
 /**
  * Estado de carga de archivo
  */
-export enum UploadStatus {
-	PENDING = 'pending',
-	UPLOADING = 'uploading',
-	PROCESSING = 'processing',
-	COMPLETE = 'complete',
-	ERROR = 'error',
-}
+export const UploadStatus = {
+	PENDING: 'pending',
+	UPLOADING: 'uploading',
+	PROCESSING: 'processing',
+	COMPLETE: 'complete',
+	ERROR: 'error',
+} as const;
+export type UploadStatus = (typeof UploadStatus)[keyof typeof UploadStatus];
 
 /**
  * Tipo de archivo subido
  */
-export enum UploadedFileType {
-	IMAGE = 'image',
-	VIDEO = 'video',
-	AUDIO = 'audio',
-	DOCUMENT = 'document',
-	OTHER = 'other',
-}
+export const UploadedFileType = {
+	IMAGE: 'image',
+	VIDEO: 'video',
+	AUDIO: 'audio',
+	DOCUMENT: 'document',
+	OTHER: 'other',
+} as const;
+export type UploadedFileType = (typeof UploadedFileType)[keyof typeof UploadedFileType];
 
 // Re-export the entity type for backwards compatibility
 export type UploadedImageType = EntityUploadedImageType;
@@ -87,8 +89,20 @@ export interface BatchUploadState {
 }
 
 // Validaciones Zod
-export const uploadStatusSchema = z.nativeEnum(UploadStatus);
-export const uploadedFileTypeSchema = z.nativeEnum(UploadedFileType);
+export const uploadStatusSchema = z.enum([
+	UploadStatus.PENDING,
+	UploadStatus.UPLOADING,
+	UploadStatus.PROCESSING,
+	UploadStatus.COMPLETE,
+	UploadStatus.ERROR,
+]);
+export const uploadedFileTypeSchema = z.enum([
+	UploadedFileType.IMAGE,
+	UploadedFileType.VIDEO,
+	UploadedFileType.AUDIO,
+	UploadedFileType.DOCUMENT,
+	UploadedFileType.OTHER,
+]);
 
 export const uploadedFileSchema = z.object({
 	id: z.string(),

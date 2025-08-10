@@ -115,7 +115,10 @@ const MasonryItem = memo<MasonryItemProps>(
 			return (
 				<button
 					className={itemClasses}
+					// Compat E2E/selectores
+					data-entity-card=""
 					data-entity-id={layoutItem.item.id}
+					data-item-id={layoutItem.item.id}
 					data-item-index={itemIndex}
 					data-testid="file-browser-item"
 					onClick={handleClick}
@@ -141,6 +144,9 @@ const MasonryItem = memo<MasonryItemProps>(
 			<motion.button
 				{...staticMotionProps}
 				className={itemClasses}
+				// Compat E2E/selectores
+				data-entity-card=""
+				data-item-id={layoutItem.item.id}
 				onClick={handleClick}
 				onDoubleClick={handleDoubleClick}
 				style={style}

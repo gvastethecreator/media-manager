@@ -52,8 +52,12 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 		const entityType = getEntityStatsType(entity);
 		// Llamar hook siempre con fallback para mantener orden de hooks
 		const { config } = useEntityTypeConfig(entityType ?? EntityStatsType.IMAGE);
-		if (!entityType) return null;
-		if (!config) return null;
+			if (!entityType) {
+				return null;
+			}
+			if (!config) {
+				return null;
+			}
 
 		// Renderizar modo compacto
 		if (mode === 'compact') {
@@ -67,13 +71,17 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 
 		// Renderizar acciones disponibles
 		const renderActions = () => {
-			if (!(showActions && config.supportedOperations)) return null;
+			if (!(showActions && config.supportedOperations)) {
+				return null;
+			}
 
 			return (
 				<div className="flex items-center gap-1">
 					{config.supportedOperations.slice(0, 4).map((action) => {
 						const IconComponent = actionIcons[action as keyof typeof actionIcons];
-						if (!IconComponent) return null;
+						if (!IconComponent) {
+							return null;
+						}
 
 						return (
 							<Button
@@ -98,7 +106,9 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 
 		// Renderizar estadísticas de la entidad
 		const renderStats = () => {
-			if (!showStats) return null;
+			if (!showStats) {
+				return null;
+			}
 
 			// Estadísticas básicas disponibles en todas las entidades
 			const stats: { label: string; value: string }[] = [];
@@ -124,7 +134,9 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 				});
 			}
 
-			if (stats.length === 0) return null;
+			if (stats.length === 0) {
+				return null;
+			}
 
 			return (
 				<div className="grid grid-cols-2 gap-2 text-xs">
@@ -210,8 +222,12 @@ export const EntityTypeHeader = memo<{
 }>(({ entity, className }) => {
 	const entityType = getEntityStatsType(entity);
 	const { config } = useEntityTypeConfig(entityType ?? EntityStatsType.IMAGE);
-	if (!entityType) return null;
-	if (!config) return null;
+	if (!entityType) {
+		return null;
+	}
+	if (!config) {
+		return null;
+	}
 
 	return (
 		<div className={cn('flex items-center gap-2', className)}>
@@ -230,7 +246,9 @@ EntityTypeHeader.displayName = 'EntityTypeHeader';
  * Utilidad para formatear tamaños de archivo
  */
 function formatFileSize(bytes: number): string {
-	if (bytes === 0) return '0 B';
+	if (bytes === 0) {
+		return '0 B';
+	}
 
 	const k = 1024;
 	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];

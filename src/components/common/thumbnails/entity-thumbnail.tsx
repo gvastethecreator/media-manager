@@ -132,7 +132,9 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 
 		// Renderizar overlay con información
 		const renderOverlay = () => {
-			if (!showOverlay) return null;
+			if (!showOverlay) {
+				return null;
+			}
 
 			return (
 				<div className="absolute inset-0 flex items-end bg-black/50 p-2 opacity-0 transition-opacity duration-200 hover:opacity-100">
@@ -170,7 +172,7 @@ EntityThumbnail.displayName = 'EntityThumbnail';
  * Componente compacto de thumbnail para listas densas
  */
 export const EntityThumbnailCompact = memo<Omit<EntityThumbnailProps, 'size' | 'showOverlay' | 'animated'>>(
-	({ entity, className, ...props }) => {
+	({ entity, className, ..._props }) => {
 		const entityType = getEntityStatsType(entity);
 		// Fallback a un tipo seguro existente cuando no haya entityType
 		const { config } = useEntityTypeConfig(entityType ?? EntityStatsType.IMAGE);
