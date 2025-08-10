@@ -5,8 +5,8 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import type { CollectionBase, CollectionWithStats } from '../../types/entities/collection';
 import { createDefaultEntityStats } from '@/lib/utils';
+import type { CollectionBase, CollectionWithStats } from '../../types/entities/collection';
 
 /**
  * Convierte un CollectionBase a CollectionWithStats calculando estadísticas.

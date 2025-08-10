@@ -7,8 +7,8 @@
 
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { GroupBase, GroupStatistics, GroupWithStats } from '@/types/entities/group';
 import { createDefaultEntityStats } from '@/lib/utils';
+import type { GroupBase, GroupStatistics, GroupWithStats } from '@/types/entities/group';
 
 const logger = serverLogger.withContext('GroupTransformer');
 

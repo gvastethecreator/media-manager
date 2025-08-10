@@ -3,8 +3,8 @@ import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 // Usar servicios del servidor para evitar fetch relativo en backend
 import {
-    createVideo as createVideoServer,
-    getVideoByHash as getVideoByHashServer,
+	createVideo as createVideoServer,
+	getVideoByHash as getVideoByHashServer,
 } from '@/server/services/video.server.service';
 import { createAudio, getAudioByHash } from '@/services/audio/audio.service';
 import { createDocument, getDocumentByHash } from '@/services/document/document.service';
@@ -17,11 +17,11 @@ import type { AudioCreateInput } from '@/types/entities/audio';
 import type { File3DCreateInput } from '@/types/entities/file3d';
 import type { VideoCreateInput } from '@/types/entities/video';
 import {
-    ENTITY_TYPE_MAPPING,
-    EntityCreationResult,
-    EntityCreationStats,
-    EntityType,
-    FileInfo,
+	ENTITY_TYPE_MAPPING,
+	EntityCreationResult,
+	EntityCreationStats,
+	EntityType,
+	FileInfo,
 } from '@/types/file-entity-mapper';
 
 export class FileEntityMapperService {

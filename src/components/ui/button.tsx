@@ -12,7 +12,7 @@ const buttonVariants = cva(
 				default: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
 				primary: 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=open]:bg-primary/90',
 				// Alias para enlaces estilizados; los componentes que usan variant="link" esperaban un estilo de enlace
-				link: 'bg-transparent text-primary hover:underline underline-offset-4 p-0 h-auto',
+				link: 'h-auto bg-transparent p-0 text-primary underline-offset-4 hover:underline',
 				mono: 'bg-zinc-950 text-white hover:bg-zinc-950/90 data-[state=open]:bg-zinc-950/90 dark:bg-zinc-300 dark:text-black dark:data-[state=open]:bg-zinc-300/90 dark:hover:bg-zinc-300/90',
 				destructive:
 					'bg-destructive text-destructive-foreground hover:bg-destructive/90 data-[state=open]:bg-destructive/90',
@@ -40,7 +40,8 @@ const buttonVariants = cva(
 			},
 			size: {
 				// Alias solicitado por varios componentes legacy que usan size="default"; equivalente a md
-				default: 'h-8.5 gap-1.5 rounded-md px-3 text-[0.8125rem] leading-(--text-sm--line-height) [&_svg:not([class*=size-])]:size-4',
+				default:
+					'h-8.5 gap-1.5 rounded-md px-3 text-[0.8125rem] leading-(--text-sm--line-height) [&_svg:not([class*=size-])]:size-4',
 				lg: 'h-10 gap-1.5 rounded-md px-4 text-sm [&_svg:not([class*=size-])]:size-4',
 				md: 'h-8.5 gap-1.5 rounded-md px-3 text-[0.8125rem] leading-(--text-sm--line-height) [&_svg:not([class*=size-])]:size-4',
 				sm: 'h-7 gap-1.25 rounded-md px-2.5 text-xs [&_svg:not([class*=size-])]:size-3.5',

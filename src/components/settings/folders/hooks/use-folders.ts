@@ -1,18 +1,83 @@
-import { useCallback, useEffect, useState } from "react";
-import { useReindexAllFolders } from "@/lib/api/folders";
-import { clientLogger } from "@/lib/logger/client-logger";
-import { toastService } from "@/lib/ui/toast";
-import type { FolderWithStats } from "@/types/entities/folder";
-import type { ErrorResponse, ProcessStatus } from "@/types/folders";
-import {
-	type ExtendedProcessStatus,
-	initialGlobalReindexStatus,
-} from "../folder-types";
-import { useFoldersEvents } from "./use-folders-events";
-import { useFoldersOperations } from "./use-folders-operations";
-import { useFoldersState } from "./use-folders-state";
+import { useCallback, useEffect, useRef, useState } from 'react';
 
-const folderLogger = clientLogger.withContext("useFolders");
+// Helpers top-level para reducir complejidad cognitiva en callbacks
+const isStatusComplete = (s: ProcessStatus): boolean =>
+	s.phase === 'complete' || s.progress === 100 || (s.isProcessing === false && (s.progress || 0) > 90);
+
+const shouldIgnoreAsOrphan = (
+	s: ProcessStatus,
+	activeId: string,
+	flags: { isReindexAll: boolean; isProcessing: boolean }
+): boolean => {
+	if (flags.isReindexAll) {
+		return false;
+	}
+	if (flags.isProcessing) {
+		return false;
+	}
+	return activeId !== s.folderId;
+};
+// Extra: encapsular aplicación de estado para reducir complejidad del callback
+function applyLatestStatus(
+	latest: ProcessStatus,
+	ctx: {
+		activeFolderId: string;
+		isReindexAll: boolean;
+		isProcessing: boolean;
+		orphanWarned: Set<string>;
+		setProcessProgress: (n: number) => void;
+		setProcessStatus: (updater: (prev: ExtendedProcessStatus) => ExtendedProcessStatus) => void;
+		setIsProcessing: (v: boolean) => void;
+		onComplete: (folderId: string) => void;
+	}
+) {
+	if (!latest.folderId) {
+		folderLogger.warn('⚠️ Actualización de estado sin folderId, ignorando');
+		return;
+	}
+	const ignoreAsOrphan = shouldIgnoreAsOrphan(latest, ctx.activeFolderId, {
+		isReindexAll: ctx.isReindexAll,
+		isProcessing: ctx.isProcessing,
+	});
+	if (ignoreAsOrphan) {
+		if (!ctx.orphanWarned.has(latest.folderId)) {
+			ctx.orphanWarned.add(latest.folderId);
+			folderLogger.warn('⚠️ Evento SSE huérfano detectado para carpeta no activa, ignorando:', {
+				eventFolderId: latest.folderId,
+				currentFolderId: ctx.activeFolderId,
+				isProcessing: ctx.isProcessing,
+			});
+		}
+		return;
+	}
+	if (typeof latest.progress === 'number') {
+		ctx.setProcessProgress(latest.progress);
+	}
+	ctx.setProcessStatus((prevStatus: ExtendedProcessStatus) => ({
+		...prevStatus,
+		...latest,
+		timestamp: latest.timestamp || Date.now(),
+	}));
+	if (latest.folderId && latest.phase !== 'complete' && latest.progress !== 100) {
+		ctx.setIsProcessing(true);
+	}
+	if (isStatusComplete(latest) && latest.folderId) {
+		ctx.onComplete(latest.folderId);
+		toastService.success('Proceso completado correctamente');
+	}
+}
+
+import { useReindexAllFolders } from '@/lib/api/folders';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { toastService } from '@/lib/ui/toast';
+import type { FolderWithStats } from '@/types/entities/folder';
+import type { ErrorResponse, ProcessStatus } from '@/types/folders';
+import { type ExtendedProcessStatus, initialGlobalReindexStatus } from '../folder-types';
+import { useFoldersEvents } from './use-folders-events';
+import { useFoldersOperations } from './use-folders-operations';
+import { useFoldersState } from './use-folders-state';
+
+const folderLogger = clientLogger.withContext('useFolders');
 
 /**
  * Hook principal para la gestión completa de carpetas
@@ -23,17 +88,22 @@ export function useFolders() {
 	const [isProcessing, setIsProcessing] = useState(false);
 	const [processProgress, setProcessProgress] = useState(0);
 	const [processStatus, setProcessStatus] = useState<ExtendedProcessStatus>({
-		folderId: "",
-		status: "completed",
+		folderId: '',
+		status: 'completed',
 		progress: 0,
 		isProcessing: false,
-		phase: "complete",
+		phase: 'complete',
 		timestamp: Date.now(),
 	});
 	const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
-	const [globalReindexStatus, setGlobalReindexStatus] = useState(
-		initialGlobalReindexStatus,
-	);
+	const [globalReindexStatus, setGlobalReindexStatus] = useState(initialGlobalReindexStatus);
+	// Refs para optimización de eventos y evitar cierres obsoletos
+	const rafIdRef = useRef<number | null>(null);
+	const lastStatusRef = useRef<ProcessStatus | null>(null);
+	const orphanWarnedRef = useRef<Set<string>>(new Set());
+	const isProcessingRef = useRef(false);
+	const processStatusRef = useRef<ExtendedProcessStatus | null>(null);
+	const isReindexAllRef = useRef(false);
 	// Estados de diálogos eliminados - reindexado directo sin confirmación
 
 	// Estado básico
@@ -53,10 +123,23 @@ export function useFolders() {
 	// Check if any process is running
 	const isGloballyProcessing = isProcessing || globalReindexStatus.isProcessing;
 
+	// Mantener refs sincronizadas
+	useEffect(() => {
+		isProcessingRef.current = isProcessing;
+	}, [isProcessing]);
+
+	useEffect(() => {
+		processStatusRef.current = processStatus;
+	}, [processStatus]);
+
+	useEffect(() => {
+		isReindexAllRef.current = globalReindexStatus.isProcessing;
+	}, [globalReindexStatus.isProcessing]);
+
 	// Función para manejar la finalización de un proceso
 	const handleProcessComplete = useCallback(
 		async (folderId: string) => {
-			folderLogger.info("✅ Proceso completado:", { folderId });
+			folderLogger.info('✅ Proceso completado:', { folderId });
 
 			// Limpiar estados INMEDIATAMENTE
 			setIsProcessing(false);
@@ -65,8 +148,8 @@ export function useFolders() {
 			// Actualizar UI para mostrar completado por un momento
 			setProcessStatus((prev: ExtendedProcessStatus) => ({
 				...prev,
-				phase: "complete",
-				status: "completed",
+				phase: 'complete',
+				status: 'completed',
 				progress: 100,
 				folderId,
 			}));
@@ -74,14 +157,9 @@ export function useFolders() {
 			// 🟢 FIX: Forzar recarga inmediata de carpetas y estadísticas tras completar
 			try {
 				await Promise.all([loadFolders(/*forceNoCache*/), loadStats()]);
-				folderLogger.info(
-					"🟢 Carpetas y stats recargadas tras completar proceso",
-				);
+				folderLogger.info('🟢 Carpetas y stats recargadas tras completar proceso');
 			} catch (err) {
-				folderLogger.error(
-					"❌ Error recargando carpetas/stats tras completar:",
-					err,
-				);
+				folderLogger.error('❌ Error recargando carpetas/stats tras completar:', err);
 			}
 
 			// Limpiar estado después de mostrar completado
@@ -89,16 +167,13 @@ export function useFolders() {
 				setProcessStatus((prev: ExtendedProcessStatus) => {
 					// Solo limpiar si el folderId aún coincide (evita limpiar un proceso diferente)
 					if (prev.folderId === folderId) {
-						folderLogger.info(
-							"🧹 Limpiando estado de proceso para carpeta:",
-							folderId,
-						);
+						folderLogger.info('🧹 Limpiando estado de proceso para carpeta:', folderId);
 						return {
-							folderId: "",
-							status: "completed",
+							folderId: '',
+							status: 'completed',
 							progress: 0,
 							isProcessing: false,
-							phase: "complete",
+							phase: 'complete',
 							timestamp: Date.now(),
 						};
 					}
@@ -110,13 +185,13 @@ export function useFolders() {
 				setProcessProgress(0);
 			}, 1000); // ⏱️ Reducido el timeout para mayor reactividad
 		},
-		[loadFolders, loadStats],
+		[loadFolders, loadStats]
 	);
 
 	// Función para manejar los errores de procesamiento
 	const handleProcessError = useCallback(
 		(errorData: ErrorResponse) => {
-			folderLogger.error("❌ Error procesando carpeta:", errorData);
+			folderLogger.error('❌ Error procesando carpeta:', errorData);
 
 			// 🔧 FIX: Limpiar estado inmediatamente al recibir error
 			setIsProcessing(false);
@@ -133,11 +208,11 @@ export function useFolders() {
 				// Si estamos procesando esa carpeta específicamente, limpiar su estado
 				if (processStatus.folderId === errorData.folderId) {
 					setProcessStatus({
-						folderId: "",
-						status: "completed",
+						folderId: '',
+						status: 'completed',
 						progress: 0,
 						isProcessing: false,
-						phase: "complete",
+						phase: 'complete',
 						timestamp: Date.now(),
 					});
 					setProcessProgress(0);
@@ -149,106 +224,55 @@ export function useFolders() {
 				setIsProcessing(false);
 				setProcessProgress(0);
 				setProcessStatus({
-					folderId: "",
-					status: "completed",
+					folderId: '',
+					status: 'completed',
 					progress: 0,
 					isProcessing: false,
-					phase: "complete",
+					phase: 'complete',
 					timestamp: Date.now(),
 				});
 			}, 100);
 
 			// Mostrar notificación de error
-			toastService.error(
-				errorData.message || "Error desconocido al procesar la carpeta",
-			);
+			toastService.error(errorData.message || 'Error desconocido al procesar la carpeta');
 		},
-		[updateFolder, processStatus.folderId],
+		[updateFolder, processStatus.folderId]
 	);
 
 	// Función para manejar las actualizaciones de progreso
 	const handleStatusUpdate = useCallback(
 		(status: ProcessStatus) => {
-			// Añadir log detallado con el estado completo para diagnóstico
-			folderLogger.info(
-				"📊 Actualización de estado recibida (detallada):",
-				JSON.stringify(status),
-			);
-
-			// Si no hay fase o ID, ignorar la actualización
-			if (!status.folderId) {
-				folderLogger.warn("⚠️ Actualización de estado sin folderId, ignorando");
+			// Coalescer múltiples updates por frame para reducir renders
+			lastStatusRef.current = status;
+			if (rafIdRef.current !== null) {
 				return;
 			}
+			rafIdRef.current = requestAnimationFrame(() => {
+				rafIdRef.current = null;
+				const latest = lastStatusRef.current;
+				if (!latest) {
+					return;
+				}
 
-			// 🔧 FIX: Si no hay procesamiento activo para esta carpeta, ignorar eventos huérfanos
-			if (!isProcessing && processStatus.folderId !== status.folderId) {
-				folderLogger.warn(
-					"⚠️ Evento SSE huérfano detectado para carpeta no activa, ignorando:",
-					{
-						eventFolderId: status.folderId,
-						currentFolderId: processStatus.folderId,
-						isProcessing,
-					},
-				);
-				return;
-			}
-
-			// Actualizar progreso general
-			if (typeof status.progress === "number") {
-				setProcessProgress(status.progress);
-			}
-
-			// Actualizar estado del proceso
-			setProcessStatus((prevStatus: ExtendedProcessStatus) => {
-				const updatedStatus = {
-					...prevStatus,
-					...status,
-					timestamp: status.timestamp || Date.now(),
-				};
-				folderLogger.info("🔄 Estado actualizado:", {
-					folderId: updatedStatus.folderId,
-					progress: updatedStatus.progress,
-					phase: updatedStatus.phase,
+				applyLatestStatus(latest, {
+					activeFolderId: processStatusRef.current?.folderId || '',
+					isReindexAll: isReindexAllRef.current,
+					isProcessing: isProcessingRef.current,
+					orphanWarned: orphanWarnedRef.current,
+					setProcessProgress,
+					setProcessStatus,
+					setIsProcessing,
+					onComplete: handleProcessComplete,
 				});
-				return updatedStatus;
 			});
-
-			// Verificar si hay un folderId y actualizar el estado de carpeta específica
-			if (status.folderId) {
-				// Marcar como procesando si no está en fase de finalización
-				if (status.phase !== "complete" && status.progress !== 100) {
-					setIsProcessing(true);
-				}
-			}
-
-			// 🔧 FIX: Lógica mejorada para detectar completado
-			// Un proceso está completo cuando:
-			// 1. La fase es 'complete', O
-			// 2. El progreso llega exactamente al 100%, O
-			// 3. isProcessing es false (desde el servidor)
-			const isComplete =
-				status.phase === "complete" ||
-				status.progress === 100 ||
-				(status.isProcessing === false && (status.progress || 0) > 90);
-
-			if (isComplete) {
-				folderLogger.info("✅ Proceso completado detectado:", status);
-
-				// Si tenemos el ID de la carpeta, marcarla como completada
-				if (status.folderId) {
-					handleProcessComplete(status.folderId);
-					toastService.success("Proceso completado correctamente");
-				}
-			}
 		},
-		[handleProcessComplete, isProcessing, processStatus.folderId],
+		[handleProcessComplete]
 	);
 
 	// Función para manejar el progreso del reindexado global
 	const handleReindexAllProgress = useCallback(
 		(status: ProcessStatus & { currentFolder?: string }) => {
-			folderLogger.info("🌍 Progreso de reindexado global:", status);
+			folderLogger.info('🌍 Progreso de reindexado global:', status);
 
 			setGlobalReindexStatus((prev) => ({
 				...prev,
@@ -262,7 +286,7 @@ export function useFolders() {
 
 			// Si el reindexado global ha terminado (progress 100% Y isProcessing false)
 			if (!status.isProcessing && status.progress === 100) {
-				folderLogger.info("✅ Reindexado global completado");
+				folderLogger.info('✅ Reindexado global completado');
 
 				// Actualizar estado final
 				setGlobalReindexStatus((prev) => ({
@@ -273,18 +297,15 @@ export function useFolders() {
 				}));
 
 				// Notificar éxito
-				toastService.success("Reindexado global completado correctamente");
+				toastService.success('Reindexado global completado correctamente');
 
 				// Recargar datos para reflejar cambios (carpetas + estadísticas)
 				Promise.all([loadFolders(), loadStats()]).catch((err) => {
-					folderLogger.error(
-						"Error recargando carpetas/stats tras reindexado global:",
-						err,
-					);
+					folderLogger.error('Error recargando carpetas/stats tras reindexado global:', err);
 				});
 			}
 		},
-		[loadFolders, loadStats],
+		[loadFolders, loadStats]
 	);
 
 	// Función de procesamiento simplificada (sin polling)
@@ -293,9 +314,9 @@ export function useFolders() {
 		setProcessStatus((prev) => ({
 			...prev,
 			folderId,
-			status: "processing",
+			status: 'processing',
 			progress: 0,
-			phase: "starting",
+			phase: 'starting',
 			startTime: Date.now(),
 			isProcessing: true,
 		}));
@@ -306,7 +327,7 @@ export function useFolders() {
 		(folderId: string, updates: Partial<FolderWithStats>) => {
 			updateFolder(folderId, updates);
 		},
-		[updateFolder],
+		[updateFolder]
 	);
 
 	// Hooks de funcionalidades específicas
@@ -332,15 +353,15 @@ export function useFolders() {
 			setProcessStatus((prev) => ({
 				...prev,
 				folderId,
-				status: "processing",
+				status: 'processing',
 				progress: 0,
 				isProcessing: true,
-				phase: "starting",
+				phase: 'starting',
 				timestamp: Date.now(),
 			}));
 		},
 		onLoadData: loadFolders,
-		onError: (error) => setError(error.toString()),
+		onError: (err) => setError(err.toString()),
 		onReindexAllStart: () => {
 			setGlobalReindexStatus((prev) => ({
 				...prev,
@@ -365,11 +386,11 @@ export function useFolders() {
 	const reindexAll = useCallback(async () => {
 		// 🔧 FIX: Evitar bucle infinito si ya está procesando
 		if (globalReindexStatus.isProcessing) {
-			folderLogger.warn("⚠️ Reindexación global ya en progreso, omitiendo");
+			folderLogger.warn('⚠️ Reindexación global ya en progreso, omitiendo');
 			return;
 		}
 
-		folderLogger.info("🔄 Iniciando reindexación global");
+		folderLogger.info('🔄 Iniciando reindexación global');
 
 		try {
 			setGlobalReindexStatus((prev) => ({
@@ -384,23 +405,19 @@ export function useFolders() {
 			// 🔧 FIX: Usar await para asegurar que no se llame múltiples veces
 			const result = await reindexAllFoldersMutation.mutateAsync();
 
-			folderLogger.info("✅ Reindexación global completada:", result);
+			folderLogger.info('✅ Reindexación global completada:', result);
 
 			if (result.errors.length > 0) {
-				toastService.error(
-					`Reindexación completada con ${result.errors.length} errores`,
-				);
+				toastService.error(`Reindexación completada con ${result.errors.length} errores`);
 			} else {
-				toastService.success(
-					`Reindexación completada correctamente. ${result.processed} carpetas procesadas`,
-				);
+				toastService.success(`Reindexación completada correctamente. ${result.processed} carpetas procesadas`);
 			}
 
 			// Recargar datos solo después de que termine completamente
 			await Promise.all([loadFolders(), loadStats()]);
 		} catch (reindexError) {
-			folderLogger.error("❌ Error en reindexación global:", reindexError);
-			toastService.error("Error en la reindexación global");
+			folderLogger.error('❌ Error en reindexación global:', reindexError);
+			toastService.error('Error en la reindexación global');
 		} finally {
 			// 🔧 FIX: Asegurar que siempre se limpie el estado
 			setGlobalReindexStatus((prev) => ({
@@ -410,25 +427,13 @@ export function useFolders() {
 				endTime: Date.now(),
 			}));
 		}
-	}, [
-		reindexAllFoldersMutation,
-		loadFolders,
-		loadStats,
-		globalReindexStatus.isProcessing,
-	]);
+	}, [reindexAllFoldersMutation, loadFolders, loadStats, globalReindexStatus.isProcessing]);
 
 	// Función para manejar el reindex de una carpeta específica
 	const reindexFolder = useCallback(
 		async (folderId: string) => {
-			if (
-				!folderId ||
-				folderId === "undefined" ||
-				typeof folderId !== "string"
-			) {
-				folderLogger.error(
-					"[useFolders] ❌ Error: Invalid folderId provided to reindexFolder:",
-					folderId,
-				);
+			if (!folderId || folderId === 'undefined' || typeof folderId !== 'string') {
+				folderLogger.error('[useFolders] ❌ Error: Invalid folderId provided to reindexFolder:', folderId);
 				return;
 			}
 
@@ -436,20 +441,17 @@ export function useFolders() {
 
 			try {
 				await foldersOperations.handleReindexFolder(folderId);
-			} catch (error) {
-				folderLogger.error(
-					`❌ Error en reindex de carpeta ${folderId}:`,
-					error,
-				);
+			} catch (err1) {
+				folderLogger.error(`❌ Error en reindex de carpeta ${folderId}:`, err1);
 				handleProcessError({
-					error: error instanceof Error ? error.message : "Error desconocido",
-					message: error instanceof Error ? error.message : "Error desconocido",
+					error: err1 instanceof Error ? err1.message : 'Error desconocido',
+					message: err1 instanceof Error ? err1.message : 'Error desconocido',
 					folderId,
 					timestamp: Date.now(),
 				});
 			}
 		},
-		[foldersOperations, handleProcessError],
+		[foldersOperations, handleProcessError]
 	);
 
 	// Función para manejar click en carpeta (seleccionar o eliminar)
@@ -460,17 +462,17 @@ export function useFolders() {
 				try {
 					await foldersOperations.handleRemoveFolder(folderId);
 					setSelectedFolder(null);
-					toastService.success("Carpeta eliminada correctamente");
-				} catch (error) {
-					folderLogger.error("❌ Error eliminando carpeta:", error);
-					toastService.error("Error al eliminar la carpeta");
+					toastService.success('Carpeta eliminada correctamente');
+				} catch (err2) {
+					folderLogger.error('❌ Error eliminando carpeta:', err2);
+					toastService.error('Error al eliminar la carpeta');
 				}
 			} else {
 				// Si no está seleccionada, seleccionar para eliminar
 				setSelectedFolder(folderId);
 			}
 		},
-		[selectedFolder, foldersOperations],
+		[selectedFolder, foldersOperations]
 	);
 
 	// Función para seleccionar carpeta
@@ -536,11 +538,10 @@ export function useFolders() {
 	};
 }
 
-// Re-export hook específico para operaciones
-export { useReindexAllFolders };
+// Re-export del hook eliminado para evitar exportar imports (regla lint)
 
 // Re-export tipos necesarios
-export type { ExtendedProcessStatus } from "../folder-types";
+export type { ExtendedProcessStatus } from '../folder-types';
 
 /**
  * 🛠️ FIX: Se fuerza la recarga de carpetas y estadísticas tras la finalización de un proceso

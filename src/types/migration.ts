@@ -4,6 +4,8 @@
  * @description Funciones utilitarias para type checking y migración de tipos legacy a EntityWithStats
  */
 
+// Usar el tipo centralizado DisplayableEntity como AnyEntityWithStats para evitar divergencias
+import type { DisplayableEntity as AnyEntityWithStats } from '@/types/entities';
 import type { AlbumWithStats } from '@/types/entities/album';
 // Imports para los tipos re-exportados
 // Re-exportar tipos reales en lugar de definiciones temporales
@@ -25,8 +27,6 @@ import type { VideoWithStats } from '@/types/entities/video';
 import type { WildcardWithStats } from '@/types/entities/wildcard';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
 
-// Usar el tipo centralizado DisplayableEntity como AnyEntityWithStats para evitar divergencias
-import type { DisplayableEntity as AnyEntityWithStats } from '@/types/entities';
 // Re-exportar el alias para mantener compatibilidad con los imports existentes en componentes
 export type { DisplayableEntity as AnyEntityWithStats } from '@/types/entities';
 export type { AlbumWithStats } from './entities/album';

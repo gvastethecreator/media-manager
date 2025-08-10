@@ -5,13 +5,12 @@
  * Mantiene compatibilidad con imports existentes: '@/types/entities/document'
  */
 
-export type {
-	DocumentBase,
-	DocumentStatistics,
-	DocumentWithStats,
-	DocumentCreateInput,
-	DocumentUpdateInput,
-} from './document/index';
-
 // Opcional: exporta también el tipo de búsqueda cuando se necesite
 export type { DocumentSearchInput } from '@/transformers/document/validators';
+export type {
+	DocumentBase,
+	DocumentCreateInput,
+	DocumentStatistics,
+	DocumentUpdateInput,
+	DocumentWithStats,
+} from './document/index';

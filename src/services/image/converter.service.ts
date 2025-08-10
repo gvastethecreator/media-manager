@@ -1,6 +1,6 @@
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { ImageWithStats } from '@/types/entities/image';
 import { createDefaultEntityStats } from '@/lib/utils';
+import type { ImageWithStats } from '@/types/entities/image';
 
 const converterLogger = serverLogger.withContext('ImageConverter');
 
@@ -136,7 +136,7 @@ export const convertServerImageToFileItem = (image: ServerImage): ImageWithStats
 			: null;
 
 		// Crear ImageWithStats compatible
-	const imageWithStats = {
+		const imageWithStats = {
 			id: image.id,
 			name: image.name,
 			description: null,

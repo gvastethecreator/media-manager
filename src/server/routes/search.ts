@@ -1,7 +1,7 @@
+import { like, or, sql } from 'drizzle-orm';
 import express from 'express';
 import { db, getDbClient } from '@/lib/drizzle';
 import { files } from '@/lib/drizzle/schema/index';
-import { like, or, sql } from 'drizzle-orm';
 import { searchImages } from '../services/search.service';
 
 const router = express.Router();
@@ -88,7 +88,7 @@ router.get('/fts', async (req, res) => {
 		try {
 			const client = getDbClient();
 			if (!client || typeof client.execute !== 'function') throw new Error('client.execute no disponible');
-			const match = q.replace(/\"/g, '');
+			const match = q.replace(/"/g, '');
 			const querySql = `
 				SELECT f.id, f.name, f.path, f.tags
 				FROM files_fts ft
@@ -100,7 +100,7 @@ router.get('/fts', async (req, res) => {
 				id: String(r[0]),
 				name: String(r[1]),
 				path: String(r[2]),
-				tags: String((r[3] ?? '[]')),
+				tags: String(r[3] ?? '[]'),
 			}));
 			// total aproximado: contar más resultados puede ser caro; devolvemos page size como proxy y flag
 			total = rows.length + offset;
