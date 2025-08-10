@@ -190,9 +190,7 @@ export function useGridViewConfig() {
 		return (): LabelConfig => {
 			const rawPosition = (gridConfig as any)?.labelConfig?.position as string | undefined;
 			const normalizedPosition =
-				rawPosition === 'top'
-					? 'tooltip'
-					: (rawPosition as LabelConfig['position'] | undefined);
+				rawPosition === 'top' ? 'tooltip' : (rawPosition as LabelConfig['position'] | undefined);
 			return {
 				...DEFAULT_LABEL_CONFIG,
 				...(gridConfig?.labelConfig as Partial<LabelConfig> | undefined),

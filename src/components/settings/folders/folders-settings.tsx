@@ -1,6 +1,6 @@
 import { AlertCircle, EraserIcon, Folder, FolderIcon, Info, RefreshCw } from 'lucide-react';
 import { motion } from 'motion/react';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -75,6 +75,9 @@ export function FoldersSettings() {
 		loadStats,
 		setError,
 	} = useFolders();
+
+	// Memoizar ordenación/derivaciones para evitar trabajo repetido
+	const orderedFolders = useMemo(() => createHierarchicalOrder(folders), [folders]);
 
 	// Funciones para manejar las nuevas características
 	const handleUpdateFolder = (
@@ -221,24 +224,20 @@ export function FoldersSettings() {
 								'auto-rows-fr [grid-auto-flow:row_dense]'
 							)}
 						>
-							{(() => {
-								const sortedFolders = createHierarchicalOrder(folders);
-
-								return sortedFolders.map((folder) => (
-									<FolderCard
-										allFolders={folders}
-										folder={folder}
-										getFolderIndexStatus={getFolderIndexStatus}
-										isGloballyProcessing={isGloballyProcessing}
-										isProcessing={isProcessing}
-										key={folder.id}
-										onFolderClick={handleFolderClick}
-										onReindex={handleReindexFolder}
-										processStatus={processStatus}
-										selectedFolder={selectedFolder}
-									/>
-								));
-							})()}
+							{orderedFolders.map((folder) => (
+								<FolderCard
+									allFolders={folders}
+									folder={folder}
+									getFolderIndexStatus={getFolderIndexStatus}
+									isGloballyProcessing={isGloballyProcessing}
+									isProcessing={isProcessing}
+									key={folder.id}
+									onFolderClick={handleFolderClick}
+									onReindex={handleReindexFolder}
+									processStatus={processStatus}
+									selectedFolder={selectedFolder}
+								/>
+							))}
 
 							{folders.length === 0 && (
 								<motion.div

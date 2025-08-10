@@ -232,7 +232,11 @@ export class ClipboardManager {
 					return null;
 			}
 		} catch (error) {
-			logger.error('Error generating clipboard data in format:', format, error instanceof Error ? error.message : String(error));
+			logger.error(
+				'Error generating clipboard data in format:',
+				format,
+				error instanceof Error ? error.message : String(error)
+			);
 			return null;
 		}
 	}
@@ -283,11 +287,7 @@ export class ClipboardManager {
 	/**
 	 * Create clipboard data with metadata
 	 */
-	private createClipboardData(
-		items: AnyEntityWithStats[],
-		operation: 'copy' | 'cut',
-		source: string
-	): ClipboardData {
+	private createClipboardData(items: AnyEntityWithStats[], operation: 'copy' | 'cut', source: string): ClipboardData {
 		// Calculate metadata
 		const totalSize = items.reduce((sum, item) => sum + getEntitySize(item), 0);
 		const fileTypes = Array.from(
@@ -427,9 +427,7 @@ export class ClipboardManager {
 		}
 	}
 
-	private async buildClipboardItemsForSystem(
-		clipboardData: ClipboardData,
-	): Promise<Record<string, Blob>> {
+	private async buildClipboardItemsForSystem(clipboardData: ClipboardData): Promise<Record<string, Blob>> {
 		const clipboardItems: Record<string, Blob> = {};
 		if (this.systemClipboardOptions.includeText) {
 			const textBlob = this.prepareTextBlob(clipboardData);
@@ -452,9 +450,7 @@ export class ClipboardManager {
 		return clipboardItems;
 	}
 
-	private async writeClipboardItemsToSystem(
-		clipboardItems: Record<string, Blob>,
-	): Promise<void> {
+	private async writeClipboardItemsToSystem(clipboardItems: Record<string, Blob>): Promise<void> {
 		const clipboardItem = new ClipboardItem(clipboardItems);
 		await navigator.clipboard.write([clipboardItem]);
 		logger.info('✅ Data written to system clipboard');

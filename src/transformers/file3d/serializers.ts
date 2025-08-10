@@ -1,5 +1,6 @@
 // Serializers para File3D
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import type { File3DWithStats } from '../../types/entities/file3d';
 
 export function validateFile3D(input: unknown): File3DWithStats {
@@ -41,11 +42,17 @@ export function validateFile3D(input: unknown): File3DWithStats {
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		stats: {
+			...createDefaultEntityStats({
+				size: (data.size as number) || 0,
+				type: 'data',
+			}),
 			polygonCount: 0,
 			textureSize: 0,
 			format: (data.format as string) || 'unknown',
 			vertexCount: 0,
 			materialCount: 0,
+			isDirectory: false,
+			isFile: true,
 		},
 	};
 

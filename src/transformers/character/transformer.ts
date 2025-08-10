@@ -5,6 +5,7 @@
 
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import { serverLogger } from '../../lib/logger/server-logger';
 import type { CharacterAssociationStats, CharacterWithStats } from '../../types/entities/character';
 
@@ -136,6 +137,23 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 
 		// Crear estadísticas
 		const statistics: CharacterAssociationStats = {
+			...createDefaultEntityStats({
+				imageCount: totalImages,
+				videoCount: totalVideos,
+				tagCount: totalTags,
+				groupCount: totalGroups,
+				propertyCount: totalProperties,
+				collectionCount: totalCollections,
+				albumCount: totalAlbums,
+				placeCount: totalPlaces,
+				worldItemCount: totalWorldItems,
+				conceptCount: totalConcepts,
+				promptCount: totalPrompts,
+				noteCount: totalNotes,
+				wildcardCount: totalWildcards,
+				totalItems: totalAssociations,
+				type: 'character',
+			}),
 			totalImages,
 			totalVideos,
 			totalTags,
@@ -155,6 +173,8 @@ export function fromDrizzleCharacter(drizzleCharacter: DrizzleCharacterWithCount
 			lastUpdated: now,
 			powerLevel,
 			rarityLevel,
+			isDirectory: false,
+			isFile: true,
 		};
 
 		const result: CharacterWithStats = {

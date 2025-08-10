@@ -6,9 +6,9 @@
 
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import { safeJsonParse } from '../../lib/utils/safe-json-parse';
 import type { WorkflowBase, WorkflowStatistics, WorkflowWithStats } from '../../types/entities/workflow';
-import { createDefaultEntityStats } from '@/lib/utils';
 
 // Usar WorkflowBase directamente en lugar de tipo local
 type DrizzleWorkflow = WorkflowBase & {

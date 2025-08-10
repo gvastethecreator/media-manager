@@ -4,10 +4,10 @@
  * @description Contiene funciones para convertir objetos Property entre diferentes formatos.
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import { serverLogger } from '../../lib/logger/server-logger';
 import { calculateCompleteness } from '../../lib/utils/stats';
 import type { PropertyBase, PropertyStatistics, PropertyWithStats } from '../../types/entities/property';
-import { createDefaultEntityStats } from '@/lib/utils';
 
 const propertyTransformerLogger = serverLogger.withContext('PropertyTransformer');
 

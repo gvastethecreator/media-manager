@@ -10,9 +10,15 @@ import { clientLogger } from '../../lib/logger/client-logger';
 
 const logger = clientLogger.withContext('ImageTransformer');
 
-import { formatFileSize } from '../../lib/utils/format.utils';
-import type { ImageCreateInput, ImageMetadata, ImageStatistics, ImageUpdateInput, ImageWithStats } from '../../types/entities/image';
 import { createDefaultEntityStats } from '../../lib/utils';
+import { formatFileSize } from '../../lib/utils/format.utils';
+import type {
+	ImageCreateInput,
+	ImageMetadata,
+	ImageStatistics,
+	ImageUpdateInput,
+	ImageWithStats,
+} from '../../types/entities/image';
 import type { DrizzleImageWithCounts } from '../../types/entities/image/base';
 
 /**

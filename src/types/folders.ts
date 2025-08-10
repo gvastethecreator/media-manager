@@ -9,11 +9,11 @@ export interface ProcessStatus {
 	message?: string;
 	error?: string;
 	folderId?: string; // ID de la carpeta siendo procesada
-	phase?: "starting" | "scanning" | "processing" | "metadata" | "complete";
+	phase?: 'starting' | 'scanning' | 'processing' | 'metadata' | 'complete';
 	timestamp?: number;
 	filesProcessed?: number;
 	totalFiles?: number;
-	status?: "processing" | "completed" | "error"; // Estado del proceso
+	status?: 'processing' | 'completed' | 'error'; // Estado del proceso
 }
 
 export interface ErrorResponse {

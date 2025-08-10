@@ -15,7 +15,7 @@ import {
 // Servicios especializados
 import { extractMetadata as extractExifMetadata } from './exifr-parser.service';
 import { detectOrigin, hasAIGenerationData } from './origin-detector.service';
-import { extractPngTextChunks, extractAIMetadataFromChunks } from './png-parser.service';
+import { extractAIMetadataFromChunks, extractPngTextChunks } from './png-parser.service';
 import {
 	extractCommonAIParameters,
 	parseAutomatic1111Metadata,

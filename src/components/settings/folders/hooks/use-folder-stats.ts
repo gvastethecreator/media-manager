@@ -1,18 +1,16 @@
-import { useQuery } from "@tanstack/react-query";
-import { apiClient } from "@/lib/api/client";
-import type { FolderStats } from "@/types/folders";
+import { useQuery } from '@tanstack/react-query';
+import { apiClient } from '@/lib/api/client';
+import type { FolderStats } from '@/types/folders';
 
 /**
  * Hook para obtener estadísticas generales de carpetas
  */
 export function useFolderStats() {
 	return useQuery({
-		queryKey: ["folder-stats"],
+		queryKey: ['folder-stats'],
 		queryFn: async (): Promise<FolderStats> => {
 			// El backend retorna el objeto de estadísticas directamente
-			const response = (await apiClient.get(
-				"/api/stats/folders",
-			)) as FolderStats | null;
+			const response = (await apiClient.get('/api/stats/folders')) as FolderStats | null;
 
 			// Si la API retorna null/undefined, usar valores por defecto
 			if (!response) {
@@ -25,7 +23,7 @@ export function useFolderStats() {
 					totalDocuments: 0,
 					totalOthers: 0,
 					totalSize: 0,
-					formattedSize: "0 B",
+					formattedSize: '0 B',
 					lastScanned: new Date().toISOString(),
 				};
 			}

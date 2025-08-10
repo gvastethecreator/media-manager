@@ -202,7 +202,7 @@ function analyzeEnginePatterns(
 	const evidence: string[] = [];
 
 	// 1. Buscar claves de metadata específicas
-	for (const key of (patterns.metadata_keys ?? [])) {
+	for (const key of patterns.metadata_keys ?? []) {
 		if (key in metadata) {
 			confidence += 0.2;
 			evidence.push(`Clave encontrada: ${key}`);
@@ -212,7 +212,7 @@ function analyzeEnginePatterns(
 	// 2. Buscar patrones en valores de metadata
 	for (const [key, value] of Object.entries(metadata)) {
 		if (typeof value === 'string') {
-			for (const pattern of (patterns.metadata_patterns ?? [])) {
+			for (const pattern of patterns.metadata_patterns ?? []) {
 				if (pattern.test(value)) {
 					confidence += 0.15;
 					evidence.push(`Patrón encontrado en ${key}: ${pattern.source}`);
@@ -256,7 +256,7 @@ function analyzeEnginePatterns(
 
 	// 3. Analizar Software EXIF específicamente
 	if (metadata.Software && typeof metadata.Software === 'string') {
-		for (const pattern of (patterns.software_patterns ?? [])) {
+		for (const pattern of patterns.software_patterns ?? []) {
 			if (pattern.test(metadata.Software)) {
 				confidence += 0.3; // Mayor peso para Software EXIF
 				evidence.push(`Software EXIF coincide: ${metadata.Software}`);
@@ -265,7 +265,7 @@ function analyzeEnginePatterns(
 	}
 
 	// 4. Buscar combinaciones específicas
-	for (const combination of (patterns.specific_combinations ?? [])) {
+	for (const combination of patterns.specific_combinations ?? []) {
 		if (combination.length === 1) {
 			// Buscar clave simple
 			if (combination[0] in metadata) {
@@ -307,7 +307,7 @@ function detectEngineVersion(metadata: Record<string, unknown>, engine: AIEngine
 		case AIEngine.AUTOMATIC1111:
 			// Buscar versión en Software o parámetros
 			if (metadata.Software && typeof metadata.Software === 'string') {
-		const versionMatch = metadata.Software.match(RE_A1111_VER);
+				const versionMatch = metadata.Software.match(RE_A1111_VER);
 				if (versionMatch) {
 					return versionMatch[1];
 				}
@@ -317,7 +317,7 @@ function detectEngineVersion(metadata: Record<string, unknown>, engine: AIEngine
 		case AIEngine.COMFYUI:
 			// ComfyUI a veces incluye versión en metadata
 			if (metadata.ComfyUI && typeof metadata.ComfyUI === 'string') {
-		const versionMatch = metadata.ComfyUI.match(RE_COMFY_VER);
+				const versionMatch = metadata.ComfyUI.match(RE_COMFY_VER);
 				if (versionMatch) {
 					return versionMatch[1];
 				}
@@ -327,7 +327,7 @@ function detectEngineVersion(metadata: Record<string, unknown>, engine: AIEngine
 		case AIEngine.MIDJOURNEY:
 			// Versión en parámetros --v
 			if (metadata.Description && typeof metadata.Description === 'string') {
-		const versionMatch = metadata.Description.match(RE_MJ_VER);
+				const versionMatch = metadata.Description.match(RE_MJ_VER);
 				if (versionMatch) {
 					return versionMatch[1];
 				}
@@ -341,8 +341,8 @@ function detectEngineVersion(metadata: Record<string, unknown>, engine: AIEngine
 			}
 			break;
 
-	default:
-	    break;
+		default:
+			break;
 	}
 	return;
 }

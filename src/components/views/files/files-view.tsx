@@ -8,9 +8,9 @@ import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
 import { useImageStore } from '@/store/entities/image';
 import { useVideoStore } from '@/store/entities/video';
+import { EntityStatsType } from '@/types/file-browser/entity-stats';
 import type { AnyEntityWithStats } from '@/types/migration';
 import type { ViewProps } from '../types';
-import { EntityStatsType } from '@/types/file-browser/entity-stats';
 
 const viewLogger = clientLogger.withContext('FilesView');
 

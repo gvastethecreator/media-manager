@@ -5,8 +5,8 @@
  * to jump to specific points in history.
  */
 
-import React, { useState } from 'react';
 import { Clock, Copy, Edit, Move, RotateCcw, RotateCw, Trash2, X } from 'lucide-react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -14,8 +14,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { useUndoRedo } from '@/hooks/use-undo-redo';
 import { cn } from '@/lib/utils';
-import type { UndoableAction } from '@/services/undo-redo/undo-redo-manager';
 import { toastService } from '@/services/toast/toast.service';
+import type { UndoableAction } from '@/services/undo-redo/undo-redo-manager';
 
 export interface UndoRedoPanelProps {
 	className?: string;
@@ -118,7 +118,6 @@ const ActionRow: React.FC<ActionRowProps> = ({
 	return (
 		<div>
 			<button
-				type="button"
 				className={cn(
 					'flex w-full items-center gap-3 rounded-md p-2 transition-all duration-200',
 					'cursor-pointer hover:bg-muted/50',
@@ -128,6 +127,7 @@ const ActionRow: React.FC<ActionRowProps> = ({
 				)}
 				onClick={onClick}
 				onKeyDown={onKeyDown}
+				type="button"
 			>
 				<div className={cn('flex min-w-0 flex-1 items-center gap-2', compact && 'gap-1.5')}>
 					<Icon className={cn('h-4 w-4 flex-shrink-0', compact && 'h-3 w-3')} />
@@ -189,11 +189,11 @@ export function UndoRedoPanel({
 		}
 	};
 
-		const handleJumpTo = (targetIndex: number) => {
-			const currentIdx = currentIndex;
-			if (targetIndex === currentIdx) {
-				return;
-			}
+	const handleJumpTo = (targetIndex: number) => {
+		const currentIdx = currentIndex;
+		if (targetIndex === currentIdx) {
+			return;
+		}
 		try {
 			const steps = Math.abs(targetIndex - currentIdx);
 			const goBack = targetIndex < currentIdx;
@@ -247,12 +247,12 @@ export function UndoRedoPanel({
 								<React.Fragment key={action.id}>
 									<ActionRow
 										action={action}
-										index={index}
-										currentIndex={currentIndex}
 										compact={compact}
+										currentIndex={currentIndex}
+										index={index}
+										onJump={handleJumpTo}
 										showDetails={showDetails}
 										showTimestamps={showTimestamps}
-										onJump={handleJumpTo}
 									/>
 									{index < history.length - 1 && !compact && <Separator className="my-1" />}
 								</React.Fragment>

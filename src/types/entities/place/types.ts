@@ -3,7 +3,8 @@
  * @module types/entities/place/types
  */
 
-import type { PlaceBase, PlaceWithStats } from './base';
+import { createDefaultEntityStats } from '@/lib/utils';
+import type { PlaceBase, PlaceStatistics, PlaceWithStats } from './base';
 
 export enum PlaceCategory {
 	CITY = 'city',
@@ -78,7 +79,21 @@ export interface PlaceFilters {
  * Función para extender un lugar con información adicional
  */
 export function extendPlace(place: PlaceBase): PlaceWithStats {
-	const stats = {
+	const images = place.totalImages ?? 0;
+	const videos = place.totalVideos ?? 0;
+	const baseStats = createDefaultEntityStats({
+		// FS + tipo entidad
+		type: 'place',
+		// Conteos básicos conocidos
+		imageCount: images,
+		videoCount: videos,
+		totalItems: images + videos,
+	});
+
+	const stats: PlaceStatistics = {
+		...baseStats,
+		isDirectory: false,
+		isFile: true,
 		spatialRelevance: 0,
 		completenessScore: 0,
 		geoContextLevel: 0,
@@ -88,15 +103,15 @@ export function extendPlace(place: PlaceBase): PlaceWithStats {
 	return {
 		...place,
 		entityType: 'place' as const,
-		_stats: stats,
 		stats,
+		statistics: stats,
 		parsedDangers: [],
 		parsedResources: [],
 		parsedStats: {},
 		metadata: {},
 		region: null,
-		images: 0,
-		videos: 0,
+		images,
+		videos,
 		tags: 0,
 		characters: 0,
 		collections: 0,

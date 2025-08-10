@@ -8,8 +8,8 @@
 
 import { TransformerError } from '../../lib/errors/transformer-error';
 import { serverLogger } from '../../lib/logger/server-logger';
-import { formatFileSize } from '../../lib/utils/format.utils';
 import { createDefaultEntityStats } from '../../lib/utils';
+import { formatFileSize } from '../../lib/utils/format.utils';
 import type { VideoStatistics } from '../../types/entities/video/base';
 import type { VideoComplete, VideoWithStats } from '../../types/entities/video/types';
 import { VideoQuality } from '../../types/entities/video/types';

@@ -4,6 +4,7 @@
 
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import { TransformerError } from '../../lib/errors/transformer-error';
 import { serverLogger } from '../../lib/logger/server-logger';
 import type { PromptBase, PromptStatistics, PromptWithStats } from '../../types/entities/prompt/base';
@@ -37,34 +38,48 @@ export function fromDrizzlePrompt(drizzlePrompt: any): PromptWithStats {
 			(_count?.properties || 0) +
 			(_count?.groups || 0);
 		const averageContentLength = baseData.content ? baseData.content.length : 0;
-		const parametersCount = baseData.parameters
-			? typeof baseData.parameters === 'string'
-				? JSON.parse(baseData.parameters).length
-				: Object.keys(baseData.parameters).length
-			: 0;
+		const parametersCount = getParametersCount(baseData.parameters);
 		const tagsCount = _count?.tags || 0;
 
 		const stats: PromptStatistics = {
-			// Conteos de relaciones
-			totalImages: _count?.images || 0,
-			totalVideos: _count?.videos || 0,
-			totalAlbums: _count?.albums || 0,
-			totalCollections: _count?.collections || 0,
-			totalTags: _count?.tags || 0,
-			totalCharacters: _count?.characters || 0,
-			totalPlaces: _count?.places || 0,
-			totalItems: _count?.worldItems || 0,
-			totalConcepts: _count?.concepts || 0,
-			totalNotes: _count?.notes || 0,
-			totalWildcards: _count?.wildcards || 0,
-			totalProperties: _count?.properties || 0,
-			totalGroups: _count?.groups || 0,
+			// Base EntityStats
+			...createDefaultEntityStats({
+				imageCount: _count?.images || 0,
+				videoCount: _count?.videos || 0,
+				albumCount: _count?.albums || 0,
+				collectionCount: _count?.collections || 0,
+				tagCount: _count?.tags || 0,
+				characterCount: _count?.characters || 0,
+				placeCount: _count?.places || 0,
+				worldItemCount: _count?.worldItems || 0,
+				conceptCount: _count?.concepts || 0,
+				promptCount: 0,
+				noteCount: _count?.notes || 0,
+				wildcardCount: _count?.wildcards || 0,
+				propertyCount: _count?.properties || 0,
+				groupCount: _count?.groups || 0,
+				totalItems: totalContentItems,
+				type: 'prompt',
+			}),
 
 			// Métricas de contenido
 			totalContentItems,
 			averageContentLength,
 			parametersCount,
 			tagsCount,
+
+			// Conteos específicos para compatibilidad
+			totalImages: _count?.images || 0,
+			totalVideos: _count?.videos || 0,
+			totalCollections: _count?.collections || 0,
+			totalAlbums: _count?.albums || 0,
+			totalConcepts: _count?.concepts || 0,
+			totalNotes: _count?.notes || 0,
+			totalCharacters: _count?.characters || 0,
+			totalProperties: _count?.properties || 0,
+			totalWildcards: _count?.wildcards || 0,
+			totalGroups: _count?.groups || 0,
+			totalPlaces: _count?.places || 0,
 
 			// Métricas de IA y uso (simuladas por ahora)
 			executionCount: Math.floor(totalContentItems * 2),
@@ -85,9 +100,12 @@ export function fromDrizzlePrompt(drizzlePrompt: any): PromptWithStats {
 			isWellStructured: !!baseData.parameters && tagsCount > 0,
 			qualityGrade: calculateQualityGrade(baseData, totalContentItems),
 			completenessScore: calculateCompletenessScore(baseData),
-			creativityScore: calculateCreativityScore(baseData),
+			creativeScore: calculateCreativityScore(baseData),
 			technicalScore: calculateTechnicalScore(baseData),
 			usabilityScore: calculateUsabilityScore(baseData),
+			// FS flags
+			isDirectory: false,
+			isFile: true,
 		};
 
 		return {
@@ -123,6 +141,24 @@ function isUpdatedThisWeek(updatedAt: Date): boolean {
 	const now = new Date();
 	const weekStart = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
 	return updatedAt >= weekStart;
+}
+
+function getParametersCount(params: unknown): number {
+	if (!params) return 0;
+	if (typeof params === 'string') {
+		try {
+			const parsed = JSON.parse(params);
+			if (Array.isArray(parsed)) return parsed.length;
+			if (parsed && typeof parsed === 'object') return Object.keys(parsed as Record<string, unknown>).length;
+			return 0;
+		} catch {
+			return 0;
+		}
+	}
+	if (typeof params === 'object') {
+		return Object.keys(params as Record<string, unknown>).length;
+	}
+	return 0;
 }
 
 function calculateQualityGrade(prompt: PromptBase, totalContentItems: number): 'A' | 'B' | 'C' | 'D' {

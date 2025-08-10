@@ -318,7 +318,7 @@ export function UploadedImagesView() {
 	};
 
 	return (
-		<div ref={containerRef} className="flex h-full w-full flex-col">
+		<div className="flex h-full w-full flex-col" ref={containerRef}>
 			{/* Barra de herramientas */}
 			<div className="flex items-center justify-between border-b p-2">
 				<div className="flex items-center gap-2">

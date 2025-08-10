@@ -7,6 +7,7 @@
 
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { createDefaultEntityStats } from '@/lib/utils';
 import type { CollectionBase, CollectionStatistics, CollectionWithStats } from '@/types/entities/collection';
 import {
 	CollectionBaseSchema,
@@ -44,7 +45,16 @@ export function validateCollectionBase(data: unknown): CollectionBase {
  */
 export function validateCollectionStatistics(data: unknown): CollectionStatistics {
 	try {
-		return CollectionStatisticsSchema.parse(data);
+		const d = data as any;
+		const withDefaults: CollectionStatistics = {
+			...createDefaultEntityStats({ type: 'collection' }),
+			isDirectory: false,
+			isFile: true,
+			...d,
+		};
+		// Validar pero devolver objeto completo (el schema no tipa FS flags)
+		CollectionStatisticsSchema.parse(withDefaults);
+		return withDefaults;
 	} catch (error) {
 		logger.error('Error validando CollectionStatistics', { error, data });
 		throw new TransformerError('Los datos de estadísticas de Collection no son válidos');
@@ -60,7 +70,16 @@ export function validateCollectionStatistics(data: unknown): CollectionStatistic
  */
 export function validateCollectionWithStats(data: unknown): CollectionWithStats {
 	try {
-		return CollectionWithStatsSchema.parse(data);
+		const d = data as any;
+		const stats: CollectionStatistics = {
+			...createDefaultEntityStats({ type: 'collection' }),
+			isDirectory: false,
+			isFile: true,
+			...(d.stats || {}),
+		};
+		const parsed = CollectionWithStatsSchema.parse({ ...d, stats });
+		// El schema no incluye todas las props de EntityStats; asegurar tipo completo hacia afuera
+		return { ...(parsed as any), stats } as CollectionWithStats;
 	} catch (error) {
 		logger.error('Error validando CollectionWithStats', { error, data });
 		throw new TransformerError('Los datos de Collection con estadísticas no son válidos');

@@ -3,7 +3,7 @@
 import { readdir, readFile, stat } from 'node:fs/promises';
 import chalk from 'chalk';
 import { join } from 'path';
-import { parseLogFile, detectToolFromFileName, displaySimpleErrorSummary } from './error-parser.js';
+import { detectToolFromFileName, displaySimpleErrorSummary, parseLogFile } from './error-parser.js';
 
 const LOGS_DIR = join(process.cwd(), 'logs');
 const [, , ...args] = process.argv;
@@ -84,14 +84,14 @@ function displayResults(allSummaries, totalFiles) {
 	}
 
 	let totalErrors = 0;
-	let totalAffectedFiles = new Set();
+	const totalAffectedFiles = new Set();
 
 	console.log(chalk.cyan.bold('\n📊 RESUMEN CONSOLIDADO DE ERRORES'));
 	console.log(chalk.gray('═'.repeat(50)));
 
 	for (const [toolName, summaries] of allSummaries.entries()) {
 		let toolErrors = 0;
-		let toolFilesSet = new Set();
+		const toolFilesSet = new Set();
 
 		console.log(chalk.yellow.bold(`\n🔧 ${toolName.toUpperCase()}:`));
 
@@ -140,7 +140,7 @@ function displayResults(allSummaries, totalFiles) {
 	}
 
 	console.log(chalk.gray('═'.repeat(50)));
-	console.log(chalk.red.bold(`📊 TOTAL GENERAL:`));
+	console.log(chalk.red.bold('📊 TOTAL GENERAL:'));
 	console.log(chalk.red(`  ❌ Total de errores: ${totalErrors}`));
 	console.log(chalk.blue(`  📁 Total de archivos únicos afectados: ${totalAffectedFiles.size}`));
 }

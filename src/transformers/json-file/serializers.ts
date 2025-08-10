@@ -3,6 +3,7 @@
  * @module transformers/json-file/serializers
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import type { JsonFileWithStats } from '../../types/entities/json-file';
 
 /**
@@ -51,7 +52,10 @@ export function validateAndSerializeJsonFile(input: unknown): JsonFileWithStats 
 		updatedAt: new Date(),
 		// Estadísticas calculadas
 		stats: {
-			size: content.length,
+			...createDefaultEntityStats({
+				size: content.length,
+				type: 'document',
+			}),
 			nestingDepth: calculateNestingDepth(data.content),
 			isValid: true,
 			keyCount: calculateKeyCount(data.content),
@@ -123,11 +127,12 @@ function generateId(): string {
  * Genera un hash simple para el contenido
  */
 function generateHash(content: string): string {
-	let hash = 0;
+	// Hash simple sin operadores bitwise (variante de djb2)
+	let hash = 5381;
+	const MOD = Number.MAX_SAFE_INTEGER;
 	for (let i = 0; i < content.length; i++) {
 		const char = content.charCodeAt(i);
-		hash = (hash << 5) - hash + char;
-		hash = hash & hash; // Convert to 32bit integer
+		hash = (hash * 33 + char) % MOD;
 	}
 	return Math.abs(hash).toString(16);
 }

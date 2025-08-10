@@ -10,10 +10,9 @@ import {
 	useToggleFavorite,
 } from '@/lib/api/files';
 import { clientEvents } from '@/lib/client/events.client';
-
-import type { EntityWithStats } from '@/types/migration';
-import { createDefaultEntityStats } from '@/lib/utils';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { createDefaultEntityStats } from '@/lib/utils';
+import type { EntityWithStats } from '@/types/migration';
 
 // Declarar expresiones regulares a nivel superior
 const FILE_NAME_REGEX = /[^/]+$/;

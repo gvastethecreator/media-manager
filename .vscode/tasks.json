@@ -66,7 +66,6 @@
         "panel": "new"
       }
     },
-    // === TAREAS DE BUILD (PRIORIDAD ALTA) ===
     {
       "label": "🏗️ Build: Completo",
       "type": "shell",
@@ -100,7 +99,6 @@
       "group": "build",
       "problemMatcher": []
     },
-    // === TAREAS DE TESTING (PRIORIDAD ALTA) ===
     {
       "label": "🧪 Test: E2E",
       "type": "shell",
@@ -114,34 +112,112 @@
       }
     },
     {
-      "label": "🧪 Test: E2E UI",
+      "label": "🔍 Lint: Check",
       "type": "shell",
-      "command": "bun run test:ui",
-      "group": "test",
-      "isBackground": true,
-      "problemMatcher": []
-    },
-    {
-      "label": "🧪 Test: E2E Debug",
-      "type": "shell",
-      "command": "bun run test:e2e:debug",
-      "group": "test",
-      "isBackground": true,
-      "problemMatcher": []
-    },
-    // === TAREAS DE CALIDAD DE CÓDIGO (PRIORIDAD MEDIA) ===
-    {
-      "label": "🔧 Fix: Todo",
-      "type": "shell",
-      "command": "bun run fix:all",
+      "command": "bun run lint",
       "group": "build",
-      "problemMatcher": ["$eslint-stylish"],
-      "presentation": {
-        "echo": true,
-        "reveal": "always",
-        "panel": "shared"
-      }
+      "problemMatcher": ["$eslint-stylish"]
     },
+    {
+      "label": "🔧 Lint: Fix",
+      "type": "shell",
+      "command": "bun run lint:fix",
+      "group": "build",
+      "problemMatcher": ["$eslint-stylish"]
+    },
+    {
+      "label": "🎨 Format: Check",
+      "type": "shell",
+      "command": "bun run format:check",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🎨 Format: Fix",
+      "type": "shell",
+      "command": "bun run format",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🔍 Biome: Check",
+      "type": "shell",
+      "command": "bun run biome",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🔧 Biome: Fix",
+      "type": "shell",
+      "command": "bun run biome:fix",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "📝 TypeScript: Check",
+      "type": "shell",
+      "command": "bun run tsc",
+      "group": "build",
+      "problemMatcher": ["$tsc"]
+    },
+    {
+      "label": "🗃️ DB: Studio",
+      "type": "shell",
+      "command": "bun run db:studio",
+      "group": "build",
+      "isBackground": true,
+      "problemMatcher": []
+    },
+    {
+      "label": "🗃️ DB: Check",
+      "type": "shell",
+      "command": "bun run db:check",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🗃️ DB: Reset",
+      "type": "shell",
+      "command": "bun run db:reset",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🔍 Logs: List",
+      "type": "shell",
+      "command": "bun run logs:list",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🧹 Logs: Clean",
+      "type": "shell",
+      "command": "bun run logs:clean",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "⚠️ Check: Errors",
+      "type": "shell",
+      "command": "bun run check:errors",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🎭 Playwright: Install",
+      "type": "shell",
+      "command": "bun run playwright:install",
+      "group": "build",
+      "problemMatcher": []
+    },
+    {
+      "label": "🎭 Playwright: Codegen",
+      "type": "shell",
+      "command": "bun run playwright:codegen",
+      "group": "test",
+      "isBackground": true,
+      "problemMatcher": []
+  },
     {
       "label": "🔍 Lint: Check",
       "type": "shell",

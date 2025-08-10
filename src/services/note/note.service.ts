@@ -9,6 +9,7 @@ import { db } from '@/lib/drizzle';
 import { notes } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
+import { createDefaultEntityStats } from '@/lib/utils';
 import { fromDrizzleNoteWithCounts } from '@/transformers/note/transformer';
 import type { NoteComplete, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 
@@ -470,26 +471,19 @@ export class NoteService {
 			name: note.title,
 			description: note.content,
 			entityType: 'note' as const,
-			stats: {
-				imageCount: 0,
-				videoCount: 0,
-				albumCount: 0,
-				collectionCount: 0,
-				tagCount: 0,
-				characterCount,
-				placeCount: 0,
-				worldItemCount: 0,
-				conceptCount: 0,
-				promptCount: 0,
-				wildcardCount: 0,
-				propertyCount: 0,
-				groupCount: 0,
-				wordCount,
-				readingTime,
-				completionScore,
-				totalItems: 0,
-				totalAssociations: 0,
-			},
+			stats: (() => {
+				const base = createDefaultEntityStats({ type: 'note' });
+				return {
+					...base,
+					noteCount: 1,
+					lastUpdated: new Date(),
+					wordCount,
+					readingTime,
+					completionScore,
+					isDirectory: false,
+					isFile: true,
+				};
+			})(),
 			_count: {
 				images: 0,
 				videos: 0,

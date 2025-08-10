@@ -41,21 +41,24 @@ export const CollectionBaseSchema = z.object({
 /**
  * 📊 Esquema Zod para CollectionStatistics.
  */
-export const CollectionStatisticsSchema = z.object({
-	imageCount: z.number().int().min(0).default(0),
-	videoCount: z.number().int().min(0).default(0),
-	albumCount: z.number().int().min(0).default(0),
-	tagCount: z.number().int().min(0).default(0),
-	characterCount: z.number().int().min(0).default(0),
-	placeCount: z.number().int().min(0).default(0),
-	worldItemCount: z.number().int().min(0).default(0),
-	conceptCount: z.number().int().min(0).default(0),
-	promptCount: z.number().int().min(0).default(0),
-	noteCount: z.number().int().min(0).default(0),
-	wildcardCount: z.number().int().min(0).default(0),
-	propertyCount: z.number().int().min(0).default(0),
-	groupCount: z.number().int().min(0).default(0),
-});
+export const CollectionStatisticsSchema = z
+	.object({
+		imageCount: z.number().int().min(0).default(0),
+		videoCount: z.number().int().min(0).default(0),
+		albumCount: z.number().int().min(0).default(0),
+		collectionCount: z.number().int().min(0).default(0).optional(),
+		tagCount: z.number().int().min(0).default(0),
+		characterCount: z.number().int().min(0).default(0),
+		placeCount: z.number().int().min(0).default(0),
+		worldItemCount: z.number().int().min(0).default(0),
+		conceptCount: z.number().int().min(0).default(0),
+		promptCount: z.number().int().min(0).default(0),
+		noteCount: z.number().int().min(0).default(0),
+		wildcardCount: z.number().int().min(0).default(0),
+		propertyCount: z.number().int().min(0).default(0),
+		groupCount: z.number().int().min(0).default(0),
+	})
+	.passthrough();
 
 /**
  * ✨ Esquema Zod para CollectionWithStats (tipo canónico).

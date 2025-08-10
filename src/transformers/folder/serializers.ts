@@ -5,6 +5,7 @@
  */
 
 import { serverLogger } from '@/lib/logger/server-logger';
+import { createDefaultEntityStats } from '@/lib/utils';
 import type { FolderBase, FolderComplete, FolderWithStats } from '@/types/entities/folder';
 
 const logger = serverLogger.withContext('FolderSerializers');
@@ -90,6 +91,9 @@ export function serializeFolderWithStats(folder: FolderWithStats): Record<string
 
 		// Estadísticas
 		stats: {
+			...createDefaultEntityStats({ type: 'folder' }),
+			isDirectory: () => true,
+			isFile: () => false,
 			hierarchyDepth: folder.stats.hierarchyDepth,
 			totalDescendants: folder.stats.totalDescendants,
 			directChildren: folder.stats.directChildren,
@@ -154,6 +158,9 @@ export function deserializeFolderWithStats(data: Record<string, any>): FolderWit
 		entityType: 'folder' as const,
 
 		stats: {
+			...createDefaultEntityStats({ type: 'folder' }),
+			isDirectory: () => true,
+			isFile: () => false,
 			hierarchyDepth: data.stats.hierarchyDepth,
 			totalDescendants: data.stats.totalDescendants,
 			directChildren: data.stats.directChildren,
@@ -162,13 +169,13 @@ export function deserializeFolderWithStats(data: Record<string, any>): FolderWit
 			totalItems: data.stats.totalItems,
 			accessFrequency: data.stats.accessFrequency,
 			lastActivity: data.stats.lastActivity ? new Date(data.stats.lastActivity) : null,
-			imageCount: data.stats.imageCount,
-			videoCount: data.stats.videoCount,
-			noteCount: data.stats.noteCount,
-			documentCount: data.stats.documentCount,
+			imageCount: data.stats.imageCount ?? 0,
+			videoCount: data.stats.videoCount ?? 0,
+			noteCount: data.stats.noteCount ?? 0,
+			documentCount: data.stats.documentCount ?? 0,
 			totalAudio: data.stats.totalAudio,
 			totalOthers: data.stats.totalOthers,
-			folderCount: data.stats.folderCount,
+			folderCount: data.stats.folderCount ?? 0,
 			totalFolders: data.stats.totalFolders,
 			totalImages: data.stats.totalImages,
 			totalVideos: data.stats.totalVideos,

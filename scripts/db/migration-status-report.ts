@@ -42,11 +42,11 @@ async function generateMigrationStatusReport() {
 		const times: number[] = [];
 
 		const start1 = Date.now();
-	await profileClient.getActiveProfile();
+		await profileClient.getActiveProfile();
 		times.push(Date.now() - start1);
 
 		const start2 = Date.now();
-	await profileClient.getProfiles({ page: 1, limit: 5 });
+		await profileClient.getProfiles({ page: 1, limit: 5 });
 		times.push(Date.now() - start2);
 
 		profileStatus.avgResponseTime = Math.round(times.reduce((a, b) => a + b, 0) / times.length);
@@ -72,7 +72,7 @@ async function generateMigrationStatusReport() {
 		const times: number[] = [];
 
 		const start1 = Date.now();
-	await getTag('test-id');
+		await getTag('test-id');
 		times.push(Date.now() - start1);
 
 		const start2 = Date.now();
@@ -248,7 +248,7 @@ async function generateMigrationStatusReport() {
 
 	try {
 		const start = Date.now();
-	await imageService.getImages({ page: 1, limit: 5 });
+		await imageService.getImages({ page: 1, limit: 5 });
 		imageStatus.avgResponseTime = Date.now() - start;
 		console.log(`   ✅ ImageService: ${imageStatus.avgResponseTime}ms`);
 	} catch (error) {

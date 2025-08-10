@@ -4,9 +4,9 @@
  
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import { TransformerError } from '../../lib/errors/transformer-error';
 import { serverLogger } from '../../lib/logger/server-logger';
-import { createDefaultEntityStats } from '@/lib/utils';
 import type { ProfileStatistics, ProfileWithStats } from '../../types/entities/profile';
 
 const logger = serverLogger.withContext('ProfileTransformer');

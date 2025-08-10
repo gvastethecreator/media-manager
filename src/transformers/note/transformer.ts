@@ -5,6 +5,7 @@
  * 🎯 Patrón: Solo conteos, sin relaciones completas para máximo rendimiento
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import type {
 	NoteComplete,
 	NoteCreateInput,
@@ -97,7 +98,8 @@ function calculateNoteStatistics(data: NoteComplete): NoteStatistics {
 	const readingTime = Math.ceil(wordCount / 200); // ~200 palabras por minuto
 	const completionScore = calculateCompletionScore(data, totalItems);
 
-	return {
+	const base = createDefaultEntityStats({
+		type: 'note',
 		imageCount,
 		videoCount,
 		albumCount,
@@ -111,11 +113,17 @@ function calculateNoteStatistics(data: NoteComplete): NoteStatistics {
 		wildcardCount,
 		propertyCount,
 		groupCount,
+		totalItems,
+		totalAssociations,
+	});
+
+	return {
+		...base,
 		wordCount,
 		readingTime,
 		completionScore,
-		totalItems,
-		totalAssociations,
+		isDirectory: false,
+		isFile: true,
 	};
 }
 

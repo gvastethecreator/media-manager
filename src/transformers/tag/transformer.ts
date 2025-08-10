@@ -4,13 +4,13 @@
  * ✅ MIGRADO A DRIZZLE - Julio 2025
  */
 
+import { createDefaultEntityStats } from '@/lib/utils';
 import { TransformerError } from '../../lib/errors/transformer-error';
 import { serverLogger } from '../../lib/logger/server-logger';
 import { calculateCompleteness } from '../../lib/utils/transformers';
 import type { TagBase, TagStatistics, TagWithStats } from '../../types/entities/tag';
 import { fromStorageTag, normalizeTag, sanitizeTagForClient, toStorageTag } from './serializers';
 import { safeValidateTag, validateTag } from './validators';
-import { createDefaultEntityStats } from '@/lib/utils';
 
 const logger = serverLogger.withContext('TagTransformer');
 
