@@ -71,6 +71,7 @@
       "**/*.js",
       "**/*.jsx",
       "**/*.json",
+      "!src/components/features/file-browser/file-browser-backup.tsx",
       "!**/node_modules/**",
       "!**/dist/**",
       "!**/build/**",

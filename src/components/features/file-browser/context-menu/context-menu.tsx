@@ -30,7 +30,7 @@ import type { ContextMenuAction, FileContextMenuProps } from './types';
  *
  * Versión simplificada que no depende de ContextMenuContent de Shadcn UI
  */
-export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMenu({ file, onAction }) {
+export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMenuInner({ file, onAction }) {
 	// Usar el hook de carga de entidades
 	const { loadingStates, loadEntityData, handleOpenChange } = useEntityLoader();
 	// Estado para controlar la acción en proceso

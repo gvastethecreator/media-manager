@@ -73,18 +73,18 @@ const processNextPreload = () => {
  * Para imágenes locales se usa `<img>` con atributos ajustados;
  * para remotas o blobs se emplea el mismo elemento estándar.
  */
-export const ImageRenderer = React.memo(function ImageRenderer({
+const ImageRendererInner = React.memo(function ImageRendererImpl({
 	src,
 	alt = '',
 	width,
 	height,
 	className,
 	priority = false,
-	quality = 80,
-	placeholder = 'empty',
-	blurDataURL,
-	isLoading,
-	showPlaceholder,
+	quality: _quality = 80,
+	placeholder: _placeholder = 'empty',
+	blurDataURL: _blurDataURL,
+	isLoading: _isLoading,
+	showPlaceholder: _showPlaceholder,
 	...rest
 }: ImageRendererProps) {
 	// Si no tenemos src o src es un objeto (error común), mostramos un placeholder
@@ -148,3 +148,5 @@ export const ImageRenderer = React.memo(function ImageRenderer({
 		/>
 	);
 });
+
+export const ImageRenderer = ImageRendererInner;

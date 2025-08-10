@@ -31,7 +31,7 @@ interface SubmenuProps {
 }
 
 // Componente para el submenú de colecciones
-export const CollectionsSubmenu = memo(function CollectionsSubmenu({
+export const CollectionsSubmenu = memo(function CollectionsSubmenuInner({
 	file,
 	onAction,
 	loadingStates,
@@ -55,42 +55,52 @@ export const CollectionsSubmenu = memo(function CollectionsSubmenu({
 				<span>Colecciones</span>
 			</ContextMenuSubTrigger>
 			<ContextMenuSubContent className="w-48">
-				{loadingStates.collections.loading ? (
-					<ContextMenuItem disabled>
-						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-						<span>Cargando...</span>
-					</ContextMenuItem>
-				) : collections && collections.length > 0 ? (
-					<>
-						{collections.map((collection) => (
-							<ContextMenuItem
-								key={collection.id}
-								onClick={() =>
-									onAction('add-to-collection', file, { collectionId: collection.id, collectionName: collection.name })
-								}
-							>
-								{collection.name}
+				{(() => {
+					if (loadingStates.collections.loading) {
+						return (
+							<ContextMenuItem disabled>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								<span>Cargando...</span>
 							</ContextMenuItem>
-						))}
-						<ContextMenuItem onClick={() => onAction('collection-create', file)}>
-							<span className="text-primary">+ Nueva colección</span>
-						</ContextMenuItem>
-					</>
-				) : (
-					<>
-						<ContextMenuItem disabled>No hay colecciones disponibles</ContextMenuItem>
-						<ContextMenuItem onClick={() => onAction('collection-create', file)}>
-							<span className="text-primary">+ Nueva colección</span>
-						</ContextMenuItem>
-					</>
-				)}
+						);
+					}
+
+					if (collections && collections.length > 0) {
+						return (
+							<>
+								{collections.map((collection) => (
+									<ContextMenuItem
+										key={collection.id}
+										onClick={() =>
+											onAction('add-to-collection', file, { collectionId: collection.id, collectionName: collection.name })
+										}
+									>
+										{collection.name}
+									</ContextMenuItem>
+								))}
+								<ContextMenuItem onClick={() => onAction('collection-create', file)}>
+									<span className="text-primary">+ Nueva colección</span>
+								</ContextMenuItem>
+							</>
+						);
+					}
+
+					return (
+						<>
+							<ContextMenuItem disabled>No hay colecciones disponibles</ContextMenuItem>
+							<ContextMenuItem onClick={() => onAction('collection-create', file)}>
+								<span className="text-primary">+ Nueva colección</span>
+							</ContextMenuItem>
+						</>
+					);
+				})()}
 			</ContextMenuSubContent>
 		</ContextMenuSub>
 	);
 });
 
 // Componente para el submenú de etiquetas
-export const TagsSubmenu = memo(function TagsSubmenu({
+export const TagsSubmenu = memo(function TagsSubmenuInner({
 	file,
 	onAction,
 	loadingStates,
@@ -114,40 +124,50 @@ export const TagsSubmenu = memo(function TagsSubmenu({
 				<span>Etiquetas</span>
 			</ContextMenuSubTrigger>
 			<ContextMenuSubContent className="w-48">
-				{loadingStates.tags.loading ? (
-					<ContextMenuItem disabled>
-						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-						<span>Cargando...</span>
-					</ContextMenuItem>
-				) : tags && tags.length > 0 ? (
-					<>
-						{tags.map((tag) => (
-							<ContextMenuItem
-								key={tag.id}
-								onClick={() => onAction('add-tag', file, { tagId: tag.id, tagName: tag.name })}
-							>
-								{tag.name}
+				{(() => {
+					if (loadingStates.tags.loading) {
+						return (
+							<ContextMenuItem disabled>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								<span>Cargando...</span>
 							</ContextMenuItem>
-						))}
-						<ContextMenuItem onClick={() => onAction('tag-create', file)}>
-							<span className="text-primary">+ Nueva etiqueta</span>
-						</ContextMenuItem>
-					</>
-				) : (
-					<>
-						<ContextMenuItem disabled>No hay etiquetas disponibles</ContextMenuItem>
-						<ContextMenuItem onClick={() => onAction('tag-create', file)}>
-							<span className="text-primary">+ Nueva etiqueta</span>
-						</ContextMenuItem>
-					</>
-				)}
+						);
+					}
+
+					if (tags && tags.length > 0) {
+						return (
+							<>
+								{tags.map((tag) => (
+									<ContextMenuItem
+										key={tag.id}
+										onClick={() => onAction('add-tag', file, { tagId: tag.id, tagName: tag.name })}
+									>
+										{tag.name}
+									</ContextMenuItem>
+								))}
+								<ContextMenuItem onClick={() => onAction('tag-create', file)}>
+									<span className="text-primary">+ Nueva etiqueta</span>
+								</ContextMenuItem>
+							</>
+						);
+					}
+
+					return (
+						<>
+							<ContextMenuItem disabled>No hay etiquetas disponibles</ContextMenuItem>
+							<ContextMenuItem onClick={() => onAction('tag-create', file)}>
+								<span className="text-primary">+ Nueva etiqueta</span>
+							</ContextMenuItem>
+						</>
+					);
+				})()}
 			</ContextMenuSubContent>
 		</ContextMenuSub>
 	);
 });
 
 // Componente para el submenú de álbumes
-export const AlbumsSubmenu = memo(function AlbumsSubmenu({
+export const AlbumsSubmenu = memo(function AlbumsSubmenuInner({
 	file,
 	onAction,
 	loadingStates,
@@ -171,40 +191,50 @@ export const AlbumsSubmenu = memo(function AlbumsSubmenu({
 				<span>Álbumes</span>
 			</ContextMenuSubTrigger>
 			<ContextMenuSubContent className="w-48">
-				{loadingStates.albums.loading ? (
-					<ContextMenuItem disabled>
-						<Loader2 className="mr-2 h-4 w-4 animate-spin" />
-						<span>Cargando...</span>
-					</ContextMenuItem>
-				) : albums && albums.length > 0 ? (
-					<>
-						{albums.map((album) => (
-							<ContextMenuItem
-								key={album.id}
-								onClick={() => onAction('add-to-album', file, { albumId: album.id, albumName: album.name })}
-							>
-								{album.name}
+				{(() => {
+					if (loadingStates.albums.loading) {
+						return (
+							<ContextMenuItem disabled>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								<span>Cargando...</span>
 							</ContextMenuItem>
-						))}
-						<ContextMenuItem onClick={() => onAction('album-create', file)}>
-							<span className="text-primary">+ Nuevo álbum</span>
-						</ContextMenuItem>
-					</>
-				) : (
-					<>
-						<ContextMenuItem disabled>No hay álbumes disponibles</ContextMenuItem>
-						<ContextMenuItem onClick={() => onAction('album-create', file)}>
-							<span className="text-primary">+ Nuevo álbum</span>
-						</ContextMenuItem>
-					</>
-				)}
+						);
+					}
+
+					if (albums && albums.length > 0) {
+						return (
+							<>
+								{albums.map((album) => (
+									<ContextMenuItem
+										key={album.id}
+										onClick={() => onAction('add-to-album', file, { albumId: album.id, albumName: album.name })}
+									>
+										{album.name}
+									</ContextMenuItem>
+								))}
+								<ContextMenuItem onClick={() => onAction('album-create', file)}>
+									<span className="text-primary">+ Nuevo álbum</span>
+								</ContextMenuItem>
+							</>
+						);
+					}
+
+					return (
+						<>
+							<ContextMenuItem disabled>No hay álbumes disponibles</ContextMenuItem>
+							<ContextMenuItem onClick={() => onAction('album-create', file)}>
+								<span className="text-primary">+ Nuevo álbum</span>
+							</ContextMenuItem>
+						</>
+					);
+				})()}
 			</ContextMenuSubContent>
 		</ContextMenuSub>
 	);
 });
 
 // Componente para el submenú de personajes
-export const CharactersSubmenu = memo(function CharactersSubmenu({
+export const CharactersSubmenu = memo(function CharactersSubmenuInner({
 	file,
 	onAction,
 	loadingStates,
@@ -244,7 +274,7 @@ export const CharactersSubmenu = memo(function CharactersSubmenu({
 });
 
 // Componente para el submenú de lugares
-export const PlacesSubmenu = memo(function PlacesSubmenu({
+export const PlacesSubmenu = memo(function PlacesSubmenuInner({
 	file,
 	onAction,
 	loadingStates,
@@ -284,7 +314,7 @@ export const PlacesSubmenu = memo(function PlacesSubmenu({
 });
 
 // Componente para el submenú de objetos del mundo
-export const WorldItemsSubmenu = memo(function WorldItemsSubmenu({
+export const WorldItemsSubmenu = memo(function WorldItemsSubmenuInner({
 	file,
 	onAction,
 	loadingStates,
@@ -324,7 +354,7 @@ export const WorldItemsSubmenu = memo(function WorldItemsSubmenu({
 });
 
 // Componente para el submenú de prompts
-export const PromptsSubmenu = memo(function PromptsSubmenu() {
+export const PromptsSubmenu = memo(function PromptsSubmenuInner() {
 	return (
 		<ContextMenuSub>
 			<ContextMenuSubTrigger>
@@ -339,7 +369,7 @@ export const PromptsSubmenu = memo(function PromptsSubmenu() {
 });
 
 // Componente para el submenú de notas
-export const NotesSubmenu = memo(function NotesSubmenu() {
+export const NotesSubmenu = memo(function NotesSubmenuInner() {
 	return (
 		<ContextMenuSub>
 			<ContextMenuSubTrigger>
@@ -354,7 +384,7 @@ export const NotesSubmenu = memo(function NotesSubmenu() {
 });
 
 // Componente para el submenú de conceptos
-export const ConceptsSubmenu = memo(function ConceptsSubmenu() {
+export const ConceptsSubmenu = memo(function ConceptsSubmenuInner() {
 	return (
 		<ContextMenuSub>
 			<ContextMenuSubTrigger>

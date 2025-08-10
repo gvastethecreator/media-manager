@@ -9,7 +9,9 @@ import { ImageRenderer } from '../image-renderer';
 
 // 🛠️ Utilidad para formatear tamaño de archivo
 const formatFileSize = (bytes: number): string => {
-	if (bytes === 0) return '0 B';
+	if (bytes === 0) {
+		return '0 B';
+	}
 	const k = 1024;
 	const sizes = ['B', 'KB', 'MB', 'GB'];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -37,7 +39,7 @@ interface GridItemProps {
  * - Menú contextual integrado
  * - Animaciones hover/tap
  */
-export const GridItem = memo<GridItemProps>(function GridItem({
+export const GridItem = memo<GridItemProps>(function GridItemInner({
 	item,
 	isSelected,
 	isFavorite,

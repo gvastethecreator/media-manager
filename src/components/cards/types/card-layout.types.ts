@@ -211,9 +211,15 @@ export function resolveLayoutConfig(props: Partial<BaseCardProps>, preset?: stri
 
 	// Aplicar props directas (shortcuts)
 	const directConfig: Partial<CardLayoutConfig> = {};
-	if (props.layout) directConfig.layout = props.layout;
-	if (props.size) directConfig.size = props.size;
-	if (props.variant) directConfig.variant = props.variant;
+	if (props.layout) {
+		directConfig.layout = props.layout;
+	}
+	if (props.size) {
+		directConfig.size = props.size;
+	}
+	if (props.variant) {
+		directConfig.variant = props.variant;
+	}
 
 	// Compatibilidad con props legacy
 	const legacyConfig: Partial<CardLayoutConfig> = {};

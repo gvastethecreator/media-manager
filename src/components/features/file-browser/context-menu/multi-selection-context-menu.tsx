@@ -16,9 +16,8 @@ import { useAlbumStore } from '@/store/entities/album';
 import { useCollectionStore } from '@/store/entities/collection';
 import { useTagStore } from '@/store/entities/tag';
 import type { TagWithStats } from '@/types/entities/tag';
-import type { FileItem } from '@/types/files';
 import { EnhancedSubmenu } from './components/enhanced-submenu';
-import type { ContextMenuAction, MultiSelectionAction, MultiSelectionContextMenuProps } from './types';
+import type { MultiSelectionAction, MultiSelectionContextMenuProps } from './types';
 
 /**
  * Información de operación para mostrar tiempo estimado
@@ -104,10 +103,10 @@ const getOperationInfo = (action: MultiSelectionAction, itemCount: number): Oper
 /**
  * Menú contextual para selección múltiple de archivos
  */
-export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(function MultiSelectionContextMenu({
+export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(function MultiSelectionContextMenuInner({
 	selectedItems,
 	onAction,
-	position,
+	position: _position,
 }) {
 	const [processingAction, setProcessingAction] = useState<MultiSelectionAction | null>(null);
 	const [confirmationDialog, setConfirmationDialog] = useState<{
@@ -284,10 +283,12 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
 						isFavorite: Boolean(c.isFavorite),
 						isRecent: Boolean(c.isRecent),
 					}))}
-					onAction={async (action, file, data) => {
+					onAction={async (action, _file, data) => {
 						await onAction(action as MultiSelectionAction, selectedItems, data);
 					}}
-					onOpenChange={() => {}}
+					onOpenChange={() => {
+						// noop: el componente superior controla el estado de apertura
+					}}
 					title="Colecciones"
 				/>
 
@@ -306,10 +307,12 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
 						isFavorite: false,
 						isRecent: false,
 					}))}
-					onAction={async (action, file, data) => {
+					onAction={async (action, _file, data) => {
 						await onAction(action as MultiSelectionAction, selectedItems, data);
 					}}
-					onOpenChange={() => {}}
+					onOpenChange={() => {
+						// noop: el componente superior controla el estado de apertura
+					}}
 					title="Etiquetas"
 				/>
 
@@ -328,10 +331,12 @@ export const MultiSelectionContextMenu = memo<MultiSelectionContextMenuProps>(fu
 						isFavorite: Boolean(a.isFavorite),
 						isRecent: Boolean(a.isRecent),
 					}))}
-					onAction={async (action, file, data) => {
+					onAction={async (action, _file, data) => {
 						await onAction(action as MultiSelectionAction, selectedItems, data);
 					}}
-					onOpenChange={() => {}}
+					onOpenChange={() => {
+						// noop: el componente superior controla el estado de apertura
+					}}
 					title="Álbumes"
 				/>
 			</div>

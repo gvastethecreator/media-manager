@@ -17,7 +17,17 @@ mock.module('@/store/details-panel.store', () => ({ useDetailsPanelStore: mock()
 mock.module('@/store/entities/image', () => ({ useImageStore: mock() }));
 mock.module('@/lib/keyboard', () => ({ useFileBrowserShortcuts: mock() }));
 mock.module('@/lib/ui/toast', () => ({
-	toastService: { success: mock(() => {}), error: mock(() => {}), info: mock(() => {}) },
+	toastService: {
+		success: mock(() => {
+			/* noop */
+		}),
+		error: mock(() => {
+			/* noop */
+		}),
+		info: mock(() => {
+			/* noop */
+		}),
+	},
 }));
 
 // Mock data
@@ -107,7 +117,7 @@ describe('FileBrowser Click-to-Deselect', () => {
 	it('should work across different view modes', () => {
 		const viewModes = ['list', 'grid', 'cards', 'masonry'];
 
-		viewModes.forEach((viewMode) => {
+		for (const viewMode of viewModes) {
 			mock.restore();
 
 			// Mock the view mode
@@ -126,6 +136,6 @@ describe('FileBrowser Click-to-Deselect', () => {
 			fireEvent.click(container);
 
 			expect(mockClearSelection).toHaveBeenCalled();
-		});
+		}
 	});
 });

@@ -1,30 +1,5 @@
 import { formatDistanceToNow } from 'date-fns';
-import {
-	AlertCircle,
-	BarChart3,
-	Camera,
-	CheckCircle,
-	Clock,
-	Download,
-	Eye,
-	EyeOff,
-	FileText,
-	Filter,
-	FolderOpen,
-	History,
-	Pause,
-	Play,
-	Redo2,
-	RotateCcw,
-	Save,
-	Search,
-	Settings,
-	Trash2,
-	Undo2,
-	Upload,
-	Users,
-	XCircle,
-} from 'lucide-react';
+import { Camera, CheckCircle, Download, FileText, Filter, FolderOpen, History, Redo2, RotateCcw, Search, Trash2, Undo2, Upload } from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useUndoRedo } from '../../../../hooks/use-undo-redo';
 import { toastService } from '../../../../services/toast/toast.service';
@@ -59,6 +34,40 @@ interface SimpleSortOptions {
 	direction: 'asc' | 'desc';
 }
 
+// Comparator factory para ordenar acciones de manera estable y reducir complejidad en el componente
+const makeHistoryComparator = (sortOptions: SimpleSortOptions) => {
+	return (a: UndoableAction, b: UndoableAction) => {
+		let aValue: any;
+		let bValue: any;
+
+		switch (sortOptions.field) {
+			case 'timestamp':
+				aValue = a.timestamp;
+				bValue = b.timestamp;
+				break;
+			case 'description':
+				aValue = a.description;
+				bValue = b.description;
+				break;
+			case 'type':
+				aValue = a.type;
+				bValue = b.type;
+				break;
+			default:
+				aValue = a.timestamp;
+				bValue = b.timestamp;
+		}
+
+		let comparison = 0;
+		if (aValue < bValue) {
+			comparison = -1;
+		} else if (aValue > bValue) {
+			comparison = 1;
+		}
+		return sortOptions.direction === 'desc' ? -comparison : comparison;
+	};
+};
+
 const actionTypeIcons: Record<UndoActionType, React.ComponentType<{ className?: string }>> = {
 	copy: FileText,
 	move: FolderOpen,
@@ -73,12 +82,181 @@ const actionTypeIcons: Record<UndoActionType, React.ComponentType<{ className?: 
 	'remove-tag': FileText,
 };
 
+// Item independiente para evitar componentes anidados
+const ActionItem: React.FC<{ action: UndoableAction; isCurrent: boolean }> = ({ action, isCurrent }) => {
+	const Icon = actionTypeIcons[action.type] || FileText;
+	const isCurrentAction = isCurrent;
+
+	return (
+		<div
+			className={`flex items-center gap-3 rounded-lg border p-3 transition-colors ${
+				isCurrentAction ? 'border-blue-200 bg-blue-50' : 'border-gray-200 bg-white'
+			}`}
+		>
+			<div className="flex-shrink-0">
+				<Icon className="h-4 w-4 text-gray-600" />
+			</div>
+
+			<div className="min-w-0 flex-1">
+				<div className="mb-1 flex items-center gap-2">
+					<span className="truncate font-medium text-sm">{action.description}</span>
+					<Badge className="bg-green-100 text-green-800 text-xs">
+						<CheckCircle className="mr-1 h-3 w-3" />
+						completed
+					</Badge>
+				</div>
+
+				<div className="flex items-center gap-4 text-gray-500 text-xs">
+					<span>{action.type.replace('-', ' ')}</span>
+					<span>{formatDistanceToNow(action.timestamp, { addSuffix: true })}</span>
+				</div>
+			</div>
+		</div>
+	);
+};
+
+interface HistoryTabProps {
+	searchQuery: string;
+	setSearchQuery: (v: string) => void;
+	showFilters: boolean;
+	setShowFilters: (v: boolean) => void;
+	filter: SimpleHistoryFilter;
+	setFilter: React.Dispatch<React.SetStateAction<SimpleHistoryFilter>>;
+	sortOptions: SimpleSortOptions;
+	setSortOptions: React.Dispatch<React.SetStateAction<SimpleSortOptions>>;
+	handleExportHistory: () => void;
+	handleImportHistory: (e: React.ChangeEvent<HTMLInputElement>) => void;
+	filteredHistory: UndoableAction[];
+	currentActionId?: string;
+}
+
+const HistoryTab: React.FC<HistoryTabProps> = ({
+	searchQuery,
+	setSearchQuery,
+	showFilters,
+	setShowFilters,
+	filter,
+	setFilter,
+	sortOptions,
+	setSortOptions,
+	handleExportHistory,
+	handleImportHistory,
+	filteredHistory,
+	currentActionId,
+}) => {
+	return (
+		<>
+			{/* Search and Filters */}
+			<div className="space-y-3">
+				<div className="flex items-center gap-2">
+					<div className="relative flex-1">
+						<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-gray-400" />
+						<Input
+							className="pl-10"
+							onChange={(e) => setSearchQuery(e.target.value)}
+							placeholder="Search actions..."
+							value={searchQuery}
+						/>
+					</div>
+
+					<Button onClick={() => setShowFilters(!showFilters)} size="sm" variant="outline">
+						<Filter className="h-4 w-4" />
+					</Button>
+
+					<Button onClick={handleExportHistory} size="sm" variant="outline">
+						<Download className="h-4 w-4" />
+					</Button>
+
+					<label className="cursor-pointer">
+						<Button asChild size="sm" variant="outline">
+							<span>
+								<Upload className="h-4 w-4" />
+							</span>
+						</Button>
+						<input accept=".json" className="hidden" onChange={handleImportHistory} type="file" />
+					</label>
+				</div>
+
+				{showFilters && (
+					<div className="grid grid-cols-2 gap-3 rounded-lg bg-gray-50 p-3">
+						<div>
+							<Label className="font-medium text-xs">Action Type</Label>
+							<Select
+								onValueChange={(value) =>
+									setFilter((prev) => ({
+										...prev,
+										types: value ? [value as UndoActionType] : undefined,
+									}))
+								}
+								value={filter.types?.[0] || ''}
+							>
+								<SelectTrigger className="h-8">
+									<SelectValue placeholder="All types" />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="">All types</SelectItem>
+									<SelectItem value="copy">Copy</SelectItem>
+									<SelectItem value="move">Move</SelectItem>
+									<SelectItem value="delete">Delete</SelectItem>
+									<SelectItem value="rename">Rename</SelectItem>
+									<SelectItem value="create-folder">Create Folder</SelectItem>
+									<SelectItem value="paste">Paste</SelectItem>
+									<SelectItem value="duplicate">Duplicate</SelectItem>
+									<SelectItem value="add-tag">Add Tag</SelectItem>
+									<SelectItem value="remove-tag">Remove Tag</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+
+						<div>
+							<Label className="font-medium text-xs">Sort By</Label>
+							<Select
+								onValueChange={(value) =>
+									setSortOptions((prev) => ({
+										...prev,
+										field: value as any,
+									}))
+								}
+								value={sortOptions.field}
+							>
+								<SelectTrigger className="h-8">
+									<SelectValue />
+								</SelectTrigger>
+								<SelectContent>
+									<SelectItem value="timestamp">Time</SelectItem>
+									<SelectItem value="description">Description</SelectItem>
+									<SelectItem value="type">Type</SelectItem>
+								</SelectContent>
+							</Select>
+						</div>
+					</div>
+				)}
+			</div>
+
+			{/* Action List */}
+			<ScrollArea className="h-96">
+				<div className="space-y-2">
+					{filteredHistory.length === 0 ? (
+						<div className="py-8 text-center text-gray-500">
+							<History className="mx-auto mb-2 h-8 w-8 opacity-50" />
+							<p>No actions in history</p>
+						</div>
+					) : (
+						filteredHistory.map((action) => (
+							<ActionItem action={action} isCurrent={action.id === currentActionId} key={action.id} />
+						))
+					)}
+				</div>
+			</ScrollArea>
+		</>
+	);
+};
+
 export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 	className = '',
 	compact = false,
 	showStatistics = true,
 	showSnapshots = false, // Disabled since snapshots aren't implemented in hook
-	showGroups = false, // Disabled since groups aren't implemented in hook
 }) => {
 	const { state, undo, redo, clear, canUndo, canRedo, getHistory, actions } = useUndoRedo();
 
@@ -121,37 +299,20 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 
 		// Apply type filter
 		if (filter.types && filter.types.length > 0) {
-			filtered = filtered.filter((action) => filter.types!.includes(action.type));
+			filtered = filtered.filter((action) => filter.types?.includes(action.type));
 		}
 
 		// Apply sorting
-		filtered.sort((a, b) => {
-			let aValue: any, bValue: any;
-
-			switch (sortOptions.field) {
-				case 'timestamp':
-					aValue = a.timestamp;
-					bValue = b.timestamp;
-					break;
-				case 'description':
-					aValue = a.description;
-					bValue = b.description;
-					break;
-				case 'type':
-					aValue = a.type;
-					bValue = b.type;
-					break;
-				default:
-					aValue = a.timestamp;
-					bValue = b.timestamp;
-			}
-
-			const comparison = aValue < bValue ? -1 : aValue > bValue ? 1 : 0;
-			return sortOptions.direction === 'desc' ? -comparison : comparison;
-		});
+		filtered.sort(makeHistoryComparator(sortOptions));
 
 		return filtered;
 	}, [searchQuery, filter, sortOptions, getHistory]);
+
+	// Current action id to highlight
+	const currentActionId = useMemo(() => {
+		const history = getHistory();
+		return history[state.currentIndex]?.id;
+	}, [getHistory, state.currentIndex]);
 
 	// Calculate statistics from current history
 	const statistics = useMemo(() => {
@@ -212,7 +373,7 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 		setSnapshotDescription('');
 	};
 
-	const handleExportHistory = async () => {
+	const handleExportHistory = () => {
 		try {
 			const data = JSON.stringify(
 				{
@@ -235,17 +396,19 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 			URL.revokeObjectURL(url);
 
 			toastService.success('History exported successfully');
-		} catch (error) {
+	} catch (err) {
 			toastService.error('Failed to export history');
 		}
 	};
 
 	const handleImportHistory = (event: React.ChangeEvent<HTMLInputElement>) => {
 		const file = event.target.files?.[0];
-		if (!file) return;
+		if (!file) {
+			return;
+		}
 
 		const reader = new FileReader();
-		reader.onload = async (e) => {
+		reader.onload = (e) => {
 			try {
 				const data = JSON.parse(e.target?.result as string);
 
@@ -260,7 +423,7 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 				} else {
 					throw new Error('Invalid history file format');
 				}
-			} catch (error) {
+			} catch (err) {
 				toastService.error('Failed to import history: Invalid file format');
 			}
 		};
@@ -274,7 +437,7 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 		} catch {
 			return [];
 		}
-	}, [selectedTab]); // Re-read when switching to snapshots tab
+	}, []);
 
 	const handleRestoreSnapshot = (snapshotId: string) => {
 		const snapshot = snapshots.find((s: any) => s.id === snapshotId);
@@ -305,37 +468,7 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 		toastService.info('Configuration updated (local only)');
 	};
 
-	const ActionItem: React.FC<{ action: UndoableAction; index: number }> = ({ action, index }) => {
-		const Icon = actionTypeIcons[action.type] || FileText;
-		const isCurrentAction = index <= state.currentIndex;
-
-		return (
-			<div
-				className={`flex items-center gap-3 rounded-lg border p-3 transition-colors ${
-					isCurrentAction ? 'border-blue-200 bg-blue-50' : 'border-gray-200 bg-white'
-				}`}
-			>
-				<div className="flex-shrink-0">
-					<Icon className="h-4 w-4 text-gray-600" />
-				</div>
-
-				<div className="min-w-0 flex-1">
-					<div className="mb-1 flex items-center gap-2">
-						<span className="truncate font-medium text-sm">{action.description}</span>
-						<Badge className="bg-green-100 text-green-800 text-xs">
-							<CheckCircle className="mr-1 h-3 w-3" />
-							completed
-						</Badge>
-					</div>
-
-					<div className="flex items-center gap-4 text-gray-500 text-xs">
-						<span>{action.type.replace('-', ' ')}</span>
-						<span>{formatDistanceToNow(action.timestamp, { addSuffix: true })}</span>
-					</div>
-				</div>
-			</div>
-		);
-	};
+    
 
 	if (compact) {
 		return (
@@ -420,106 +553,20 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 					</TabsList>
 
 					<TabsContent className="space-y-4" value="history">
-						{/* Search and Filters */}
-						<div className="space-y-3">
-							<div className="flex items-center gap-2">
-								<div className="relative flex-1">
-									<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-gray-400" />
-									<Input
-										className="pl-10"
-										onChange={(e) => setSearchQuery(e.target.value)}
-										placeholder="Search actions..."
-										value={searchQuery}
-									/>
-								</div>
-
-								<Button onClick={() => setShowFilters(!showFilters)} size="sm" variant="outline">
-									<Filter className="h-4 w-4" />
-								</Button>
-
-								<Button onClick={handleExportHistory} size="sm" variant="outline">
-									<Download className="h-4 w-4" />
-								</Button>
-
-								<label className="cursor-pointer">
-									<Button asChild size="sm" variant="outline">
-										<span>
-											<Upload className="h-4 w-4" />
-										</span>
-									</Button>
-									<input accept=".json" className="hidden" onChange={handleImportHistory} type="file" />
-								</label>
-							</div>
-
-							{showFilters && (
-								<div className="grid grid-cols-2 gap-3 rounded-lg bg-gray-50 p-3">
-									<div>
-										<Label className="font-medium text-xs">Action Type</Label>
-										<Select
-											onValueChange={(value) =>
-												setFilter((prev) => ({
-													...prev,
-													types: value ? [value as UndoActionType] : undefined,
-												}))
-											}
-											value={filter.types?.[0] || ''}
-										>
-											<SelectTrigger className="h-8">
-												<SelectValue placeholder="All types" />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="">All types</SelectItem>
-												<SelectItem value="copy">Copy</SelectItem>
-												<SelectItem value="move">Move</SelectItem>
-												<SelectItem value="delete">Delete</SelectItem>
-												<SelectItem value="rename">Rename</SelectItem>
-												<SelectItem value="create-folder">Create Folder</SelectItem>
-												<SelectItem value="paste">Paste</SelectItem>
-												<SelectItem value="duplicate">Duplicate</SelectItem>
-												<SelectItem value="add-tag">Add Tag</SelectItem>
-												<SelectItem value="remove-tag">Remove Tag</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-
-									<div>
-										<Label className="font-medium text-xs">Sort By</Label>
-										<Select
-											onValueChange={(value) =>
-												setSortOptions((prev) => ({
-													...prev,
-													field: value as any,
-												}))
-											}
-											value={sortOptions.field}
-										>
-											<SelectTrigger className="h-8">
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="timestamp">Time</SelectItem>
-												<SelectItem value="description">Description</SelectItem>
-												<SelectItem value="type">Type</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-								</div>
-							)}
-						</div>
-
-						{/* Action List */}
-						<ScrollArea className="h-96">
-							<div className="space-y-2">
-								{filteredHistory.length === 0 ? (
-									<div className="py-8 text-center text-gray-500">
-										<History className="mx-auto mb-2 h-8 w-8 opacity-50" />
-										<p>No actions in history</p>
-									</div>
-								) : (
-									filteredHistory.map((action, index) => <ActionItem action={action} index={index} key={action.id} />)
-								)}
-							</div>
-						</ScrollArea>
+						<HistoryTab
+							currentActionId={currentActionId}
+							filter={filter}
+							filteredHistory={filteredHistory}
+							handleExportHistory={handleExportHistory}
+							handleImportHistory={handleImportHistory}
+							searchQuery={searchQuery}
+							setFilter={setFilter}
+							setSearchQuery={setSearchQuery}
+							setShowFilters={setShowFilters}
+							setSortOptions={setSortOptions}
+							showFilters={showFilters}
+							sortOptions={sortOptions}
+						/>
 					</TabsContent>
 
 					{showStatistics && (
@@ -678,7 +725,7 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 									min="10"
 									onChange={(e) =>
 										updateConfig({
-											history: { ...config.history, maxActions: Number.parseInt(e.target.value) },
+											history: { ...config.history, maxActions: Number.parseInt(e.target.value, 10) },
 										})
 									}
 									type="range"

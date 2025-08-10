@@ -51,7 +51,9 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 	// Manejar cambio de nombre
 	const handleNameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
 		setFormData((prev) => ({ ...prev, name: e.target.value }));
-		if (error) setError(null);
+		if (error) {
+			setError(null);
+		}
 	};
 
 	// Manejar agregar campo opcional
@@ -131,7 +133,9 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 			{/* Renderizar campos opcionales agregados */}
 			{addedFields.map((fieldName) => {
 				const field = optionalFields.find((f) => f.name === fieldName);
-				if (!field) return null;
+				if (!field) {
+					return null;
+				}
 				return (
 					<div className="space-y-2" key={fieldName}>
 						<Label>{field.label}</Label>

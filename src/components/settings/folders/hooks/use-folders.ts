@@ -15,6 +15,14 @@ const shouldIgnoreAsOrphan = (
 	if (flags.isProcessing) {
 		return false;
 	}
+	// No ignorar si no tenemos carpeta activa aún (evita perder el primer SSE)
+	if (!activeId) {
+		return false;
+	}
+	// No ignorar si el propio evento indica que está procesando
+	if ((s as any).isProcessing) {
+		return false;
+	}
 	return activeId !== s.folderId;
 };
 // Extra: encapsular aplicación de estado para reducir complejidad del callback
@@ -29,6 +37,7 @@ function applyLatestStatus(
 		setProcessStatus: (updater: (prev: ExtendedProcessStatus) => ExtendedProcessStatus) => void;
 		setIsProcessing: (v: boolean) => void;
 		onComplete: (folderId: string) => void;
+		setProgressByFolder?: React.Dispatch<React.SetStateAction<Record<string, ExtendedProcessStatus>>>;
 	}
 ) {
 	if (!latest.folderId) {
@@ -58,6 +67,26 @@ function applyLatestStatus(
 		...latest,
 		timestamp: latest.timestamp || Date.now(),
 	}));
+
+	// Actualizar mapa de progreso por carpeta si corresponde
+	if (latest.folderId && ctx.setProgressByFolder) {
+		const key = latest.folderId as string;
+		ctx.setProgressByFolder((prev) => ({
+			...prev,
+			[key]: {
+				isProcessing: latest.isProcessing ?? true,
+				progress: typeof latest.progress === 'number' ? latest.progress : (prev[key]?.progress ?? 0),
+				message: latest.message ?? prev[key]?.message,
+				folderId: key,
+				phase: latest.phase ?? prev[key]?.phase ?? 'processing',
+				timestamp: latest.timestamp || Date.now(),
+				filesProcessed: latest.filesProcessed ?? prev[key]?.filesProcessed,
+				totalFiles: latest.totalFiles ?? prev[key]?.totalFiles,
+				status: (latest as any).status ?? prev[key]?.status ?? 'processing',
+				startTime: prev[key]?.startTime ?? Date.now(),
+			},
+		}));
+	}
 	if (latest.folderId && latest.phase !== 'complete' && latest.progress !== 100) {
 		ctx.setIsProcessing(true);
 	}
@@ -97,6 +126,9 @@ export function useFolders() {
 	});
 	const [selectedFolder, setSelectedFolder] = useState<string | null>(null);
 	const [globalReindexStatus, setGlobalReindexStatus] = useState(initialGlobalReindexStatus);
+	// Progreso por carpeta y orden de reindexado para UI
+	const [progressByFolder, setProgressByFolder] = useState<Record<string, ExtendedProcessStatus>>({});
+	const [reindexOrder, setReindexOrder] = useState<string[]>([]);
 	// Refs para optimización de eventos y evitar cierres obsoletos
 	const rafIdRef = useRef<number | null>(null);
 	const lastStatusRef = useRef<ProcessStatus | null>(null);
@@ -263,6 +295,7 @@ export function useFolders() {
 					setProcessStatus,
 					setIsProcessing,
 					onComplete: handleProcessComplete,
+					setProgressByFolder,
 				});
 			});
 		},
@@ -274,18 +307,46 @@ export function useFolders() {
 		(status: ProcessStatus & { currentFolder?: string }) => {
 			folderLogger.info('🌍 Progreso de reindexado global:', status);
 
+			// Derivar estado de procesamiento de forma robusta
+			const pct = Math.max(0, Math.min(100, status.progress ?? 0));
+			const computedIsProcessing = Boolean(status.isProcessing) || pct < 100;
+			const currentFolderId = status.currentFolder || status.folderId;
+
 			setGlobalReindexStatus((prev) => ({
 				...prev,
-				isProcessing: status.isProcessing,
-				progress: status.progress || 0,
-				currentFolder: status.currentFolder || prev.currentFolder,
+				isProcessing: computedIsProcessing,
+				progress: pct,
+				currentFolder: (currentFolderId as string) || prev.currentFolder,
 				processedFolders: status.filesProcessed || prev.processedFolders,
 				totalFolders: status.totalFiles || prev.totalFolders,
 				lastUpdate: Date.now(),
 			}));
 
-			// Si el reindexado global ha terminado (progress 100% Y isProcessing false)
-			if (!status.isProcessing && status.progress === 100) {
+			// Mantener progreso por carpeta durante reindexado global
+			if (status.folderId) {
+				setProgressByFolder((prev) => ({
+					...prev,
+					[status.folderId as string]: {
+						isProcessing: computedIsProcessing && (currentFolderId === status.folderId || pct < 100),
+						progress: pct ?? prev[status.folderId as string]?.progress ?? 0,
+						folderId: status.folderId,
+						phase: status.phase || 'processing',
+						timestamp: status.timestamp || Date.now(),
+						filesProcessed: status.filesProcessed ?? prev[status.folderId as string]?.filesProcessed,
+						totalFiles: status.totalFiles ?? prev[status.folderId as string]?.totalFiles,
+						status: (status as any).status ?? prev[status.folderId as string]?.status ?? 'processing',
+						startTime: prev[status.folderId as string]?.startTime ?? Date.now(),
+					},
+				}));
+			}
+
+			// Asegurar que la carpeta actual va primero en el orden observado
+			if (currentFolderId) {
+				setReindexOrder((prev) => [currentFolderId as string, ...prev.filter((id) => id !== currentFolderId)]);
+			}
+
+			// Considerar finalizado cuando el progreso llega a 100
+			if (pct === 100) {
 				folderLogger.info('✅ Reindexado global completado');
 
 				// Actualizar estado final
@@ -303,6 +364,10 @@ export function useFolders() {
 				Promise.all([loadFolders(), loadStats()]).catch((err) => {
 					folderLogger.error('Error recargando carpetas/stats tras reindexado global:', err);
 				});
+
+				// Limpiar mapa de progreso y orden al finalizar
+				setProgressByFolder({});
+				setReindexOrder([]);
 			}
 		},
 		[loadFolders, loadStats]
@@ -402,6 +467,10 @@ export function useFolders() {
 				startTime: Date.now(),
 			}));
 
+			// Resetear estructuras de tracking
+			setProgressByFolder({});
+			setReindexOrder([]);
+
 			// 🔧 FIX: Usar await para asegurar que no se llame múltiples veces
 			const result = await reindexAllFoldersMutation.mutateAsync();
 
@@ -498,6 +567,8 @@ export function useFolders() {
 		folders,
 		stats,
 		selectedFolder,
+		progressByFolder,
+		reindexOrder,
 
 		// Estados de carga y error
 		isLoading,

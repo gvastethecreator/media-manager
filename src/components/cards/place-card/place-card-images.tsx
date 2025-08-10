@@ -158,7 +158,7 @@ export function PlaceCardImages({
 				>
 					{/* Imagen del lugar */}
 					<img
-						alt="Place image"
+						alt="Lugar"
 						className={cn(
 							'h-full w-full object-cover',
 							rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'

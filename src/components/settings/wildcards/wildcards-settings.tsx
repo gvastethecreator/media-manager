@@ -8,11 +8,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import {
-	useCreateWildcard,
-	useDeleteWildcard,
-	useRootWildcards,
-	useUpdateWildcard,
-	useWildcards,
+    useCreateWildcard,
+    useDeleteWildcard,
+    useRootWildcards,
+    useUpdateWildcard,
+    useWildcards,
 } from '@/lib/api/wildcards';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
@@ -73,16 +73,16 @@ export function WildcardsSettings() {
 
 	// Manejo de errores
 	const isLoading = isLoadingWildcards || isLoadingRoots;
-	const error = wildcardsError || rootsError;
+	const loadError = wildcardsError || rootsError;
 
 	useEffect(() => {
-		if (error) {
-			const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+		if (loadError) {
+			const errorMessage = loadError instanceof Error ? loadError.message : 'Error desconocido';
 			toastService.error('Error al cargar los comodines', {
 				description: errorMessage,
 			});
 		}
-	}, [error]);
+	}, [loadError]);
 
 	// Convertir los wildcards con las propiedades necesarias
 	const wildcards = (allWildcards?.data || []) as WildcardWithRelations[];
@@ -98,7 +98,9 @@ export function WildcardsSettings() {
 				while (currentWildcard.parent) {
 					breadcrumbPath.unshift(currentWildcard.parent);
 					const parentWildcard = wildcards.find((w) => w.id === currentWildcard.parent?.id);
-					if (!parentWildcard) break;
+					if (!parentWildcard) {
+						break;
+					}
 					currentWildcard = parentWildcard;
 				}
 
@@ -136,36 +138,31 @@ export function WildcardsSettings() {
 		}
 	};
 
-	// Filtrar comodines basados en los criterios seleccionados
-	const filteredWildcards = wildcards.filter((wildcard) => {
-		let matches = true;
-
-		// Filtrado por jerarquía si showOnlyRoots está activado
-		if (showOnlyRoots) {
-			matches =
-				matches && (currentParentId === null ? wildcard.parentId === null : wildcard.parentId === currentParentId);
+	// Predicados de filtrado para reducir complejidad
+	const normalizedQuery = searchQuery.trim().toLowerCase();
+	const matchesHierarchy = (w: WildcardWithRelations) =>
+		!showOnlyRoots || (currentParentId === null ? w.parentId === null : w.parentId === currentParentId);
+	const matchesSearch = (w: WildcardWithRelations) => {
+		if (!normalizedQuery) {
+			return true;
 		}
-
-		// Filtrado por búsqueda
-		if (searchQuery) {
-			const normalizedQuery = searchQuery.toLowerCase();
-			const nameMatches = wildcard.name.toLowerCase().includes(normalizedQuery);
-			const descMatches = wildcard.description ? wildcard.description.toLowerCase().includes(normalizedQuery) : false;
-			matches = matches && (nameMatches || descMatches);
-		}
-
-		// Filtrado por categoría
-		if (selectedCategories.length > 0) {
-			matches = matches && (wildcard.category ? selectedCategories.includes(wildcard.category) : false);
-		}
-
-		// Filtrado por favoritos
+		const inName = w.name.toLowerCase().includes(normalizedQuery);
+		const inDesc = w.description ? w.description.toLowerCase().includes(normalizedQuery) : false;
+		return inName || inDesc;
+	};
+	const matchesCategory = (w: WildcardWithRelations) =>
+		selectedCategories.length === 0 || (w.category ? selectedCategories.includes(w.category) : false);
+	const matchesFavorite = (w: WildcardWithRelations) => {
 		if (onlyFavorites) {
-			matches = matches && !!wildcard.isFavorite;
+			return Boolean(w.isFavorite);
 		}
+		return true;
+	};
 
-		return matches;
-	});
+	// Filtrar comodines basados en los criterios seleccionados
+	const filteredWildcards = wildcards.filter(
+		(w) => matchesHierarchy(w) && matchesSearch(w) && matchesCategory(w) && matchesFavorite(w)
+	);
 
 	// Ordenar comodines
 	const sortedWildcards = [...filteredWildcards].sort((a, b) => {
@@ -217,7 +214,7 @@ export function WildcardsSettings() {
 			await createWildcardMutation.mutateAsync(formattedData);
 			setIsCreateDialogOpen(false);
 			toastService.success('Comodín creado correctamente');
-		} catch (error) {
+		} catch (err) {
 			toastService.error('Error al crear el comodín');
 		}
 	};
@@ -241,7 +238,7 @@ export function WildcardsSettings() {
 			setSelectedWildcard(null);
 			setIsEditMode(false);
 			toastService.success('Comodín actualizado correctamente');
-		} catch (error) {
+	} catch (err) {
 			toastService.error('Error al actualizar el comodín');
 		}
 	};
@@ -251,7 +248,7 @@ export function WildcardsSettings() {
 			await deleteWildcardMutation.mutateAsync(id);
 			setSelectedWildcard(null);
 			toastService.success('Comodín eliminado correctamente');
-		} catch (error) {
+	} catch (err) {
 			toastService.error('Error al eliminar el comodín');
 		}
 	};
@@ -326,11 +323,15 @@ export function WildcardsSettings() {
 
 	// Ruta de navegación (breadcrumbs)
 	const renderBreadcrumbs = () => {
-		if (currentParentId === null) return null;
+		if (currentParentId === null) {
+			return null;
+		}
 
 		// Encontrar el comodín actual
 		const currentWildcard = wildcards.find((w) => w.id === currentParentId);
-		if (!currentWildcard) return null;
+		if (!currentWildcard) {
+			return null;
+		}
 
 		return (
 			<div className="mb-2 flex items-center gap-1 text-muted-foreground text-sm">

@@ -6,7 +6,6 @@
  */
 
 import { Redo2, Undo2 } from 'lucide-react';
-import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUndoRedoState } from '@/hooks/use-undo-redo';
@@ -54,7 +53,9 @@ export function UndoRedoButton({
 			return;
 		}
 
-		if (isDisabled) return;
+		if (isDisabled) {
+			return;
+		}
 
 		try {
 			if (isUndo) {
@@ -62,8 +63,8 @@ export function UndoRedoButton({
 			} else {
 				await undoRedoManager.redo();
 			}
-		} catch (error) {
-			console.error(`Failed to ${type}:`, error);
+		} catch (_error) {
+			// Silenciar logs en UI; el manager ya registra los errores
 		}
 	};
 

@@ -14,7 +14,7 @@ interface FolderStatsDisplayProps {
 	className?: string;
 }
 
-export const FolderStatsDisplay = memo(function FolderStatsDisplay({
+const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 	folderId,
 	folderName,
 	className,
@@ -25,7 +25,9 @@ export const FolderStatsDisplay = memo(function FolderStatsDisplay({
 
 	// Función auxiliar para formatear tamaño de archivo
 	const formatSize = (bytes?: number) => {
-		if (!bytes || bytes === 0) return '0 B';
+		if (!bytes || bytes === 0) {
+			return '0 B';
+		}
 		const k = 1024;
 		const sizes = ['B', 'KB', 'MB', 'GB'];
 		const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -34,7 +36,9 @@ export const FolderStatsDisplay = memo(function FolderStatsDisplay({
 
 	// Función auxiliar para formatear fecha
 	const formatDate = (date?: Date | string) => {
-		if (!date) return 'No disponible';
+		if (!date) {
+			return 'No disponible';
+		}
 		const d = date instanceof Date ? date : new Date(date);
 		return d.toLocaleString('es-ES', {
 			year: 'numeric',
@@ -205,3 +209,5 @@ export const FolderStatsDisplay = memo(function FolderStatsDisplay({
 		</ScrollArea>
 	);
 });
+
+export const FolderStatsDisplay = FolderStatsDisplayComponent;

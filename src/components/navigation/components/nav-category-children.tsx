@@ -14,11 +14,11 @@ interface NavCategoryChildrenProps {
 	onToggleViewMode?: (mode: ViewMode) => void;
 }
 
-export const NavCategoryChildren = memo(function NavCategoryChildren({
+const NavCategoryChildrenComponent = memo(function NavCategoryChildrenImpl({
 	categoryId,
-	isCollapsed,
+	isCollapsed: _isCollapsed,
 	selectedChildId,
-	currentView,
+	currentView: _currentView,
 	items,
 	onItemClick,
 }: NavCategoryChildrenProps) {
@@ -63,4 +63,5 @@ export const NavCategoryChildren = memo(function NavCategoryChildren({
 	);
 });
 
-export default NavCategoryChildren;
+export const NavCategoryChildren = NavCategoryChildrenComponent;
+export default NavCategoryChildrenComponent;

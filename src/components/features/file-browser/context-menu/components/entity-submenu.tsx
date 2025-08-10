@@ -33,7 +33,7 @@ interface EntityWithId {
 }
 
 // Componente de ítem individual memoizado
-const EntityItem = memo(function EntityItem<T>({
+const EntityItem = memo(function EntityItemInner<T>({
 	entity,
 	onSelectAction,
 	renderItemAction,
@@ -50,7 +50,7 @@ const EntityItem = memo(function EntityItem<T>({
 });
 
 // Componente para estado de carga memoizado
-const LoadingState = memo(function LoadingState({ entityName }: { entityName: string }) {
+const LoadingState = memo(function LoadingStateInner({ entityName }: { entityName: string }) {
 	return (
 		<div className="flex items-center justify-center py-2">
 			<LoadingSpinner size={16} />
@@ -60,7 +60,7 @@ const LoadingState = memo(function LoadingState({ entityName }: { entityName: st
 });
 
 // Componente para estado vacío memoizado
-const EmptyState = memo(function EmptyState({ entityName }: { entityName: string }) {
+const EmptyState = memo(function EmptyStateInner({ entityName }: { entityName: string }) {
 	return (
 		<MemoizedContextMenuItem disabled>
 			<span className="text-muted-foreground">No hay {entityName}s disponibles</span>
@@ -69,7 +69,7 @@ const EmptyState = memo(function EmptyState({ entityName }: { entityName: string
 });
 
 // Componente para estado de error memoizado
-const ErrorState = memo(function ErrorState({ entityName }: { entityName: string }) {
+const ErrorState = memo(function ErrorStateInner({ entityName }: { entityName: string }) {
 	return (
 		<MemoizedContextMenuItem className="text-destructive" disabled>
 			<span>Error al cargar {entityName}s</span>
@@ -78,7 +78,13 @@ const ErrorState = memo(function ErrorState({ entityName }: { entityName: string
 });
 
 // Componente para el botón de crear memoizado
-const CreateButton = memo(function CreateButton({ entityName, onClick }: { entityName: string; onClick: () => void }) {
+const CreateButton = memo(function CreateButtonInner({
+	entityName,
+	onClick,
+}: {
+	entityName: string;
+	onClick: () => void;
+}) {
 	const navigate = useNavigate();
 
 	// Mapeo de entidades a sus correspondientes tabs en SettingsView
@@ -126,7 +132,7 @@ const CreateButton = memo(function CreateButton({ entityName, onClick }: { entit
 });
 
 // Componente principal memoizado
-export const EntitySubMenu = memo(function EntitySubMenu({
+export const EntitySubMenu = memo(function EntitySubMenuInner({
 	title,
 	icon,
 	entityName,
@@ -176,15 +182,18 @@ export const EntitySubMenu = memo(function EntitySubMenu({
 		[onSelectAction, entityName]
 	);
 
+	// Claves estables para entidades sin id
+	const keyMapRef = React.useRef<WeakMap<object, string>>(new WeakMap());
+	const keyCounterRef = React.useRef(0);
+
 	// Memoizar la lista de entidades renderizadas
 	const renderedItems = useMemo(() => {
 		if (!entities || entities.length === 0) {
 			return <EmptyState entityName={entityName} />;
 		}
 
-		return entities.map((entity, index) => {
-			// Generar key única para cada entidad
-			let itemKey = `entity-${index}`;
+		return entities.map((entity) => {
+			let itemKey: string | undefined;
 
 			if (
 				entity &&
@@ -193,11 +202,24 @@ export const EntitySubMenu = memo(function EntitySubMenu({
 				(typeof (entity as EntityWithId).id === 'string' || typeof (entity as EntityWithId).id === 'number')
 			) {
 				itemKey = `entity-${String((entity as EntityWithId).id)}`;
+			} else if (entity && typeof entity === 'object') {
+				const obj = entity as object;
+				const existing = keyMapRef.current.get(obj);
+				if (existing) {
+					itemKey = existing;
+				} else {
+					keyCounterRef.current += 1;
+					itemKey = `entity-auto-${keyCounterRef.current}`;
+					keyMapRef.current.set(obj, itemKey);
+				}
+			} else {
+				keyCounterRef.current += 1;
+				itemKey = `entity-primitive-${keyCounterRef.current}`;
 			}
 
 			return (
 				<EntityItem
-					entity={entity}
+					entity={entity as any}
 					key={itemKey}
 					onSelectAction={handleSelectAction}
 					renderItemAction={renderItemAction}
@@ -267,6 +289,6 @@ export const EntitySubMenu = memo(function EntitySubMenu({
 });
 
 // Nuevo componente para mostrar un indicador de error sin bloquear el contenido
-const ErrorIndicator = memo(function ErrorIndicator({ entityName }: { entityName: string }) {
+const ErrorIndicator = memo(function ErrorIndicatorInner({ entityName }: { entityName: string }) {
 	return <div className="px-2 py-1 text-red-500 text-xs italic">Error al cargar todos los {entityName}</div>;
 });

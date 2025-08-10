@@ -15,6 +15,175 @@ import {
 } from '@/components/ui/dropdown-menu';
 import type { ListColumnConfig } from '@/types/file-browser/list-column-config';
 
+function HeaderSortContent({
+	column,
+	isSorted,
+	sortDirection,
+	onSort,
+}: {
+	column: ListColumnConfig;
+	isSorted: boolean;
+	sortDirection: 'asc' | 'desc';
+	onSort?: (columnKey: string) => void;
+}) {
+	if (column.sortable && onSort) {
+			return (
+				<button
+					className="flex min-w-0 flex-1 cursor-pointer items-center gap-1 hover:text-foreground"
+					onClick={() => onSort(column.key)}
+					type="button"
+				>
+					<span className="truncate font-medium text-sm">{column.label}</span>
+					{isSorted ? (sortDirection === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />) : null}
+				</button>
+			);
+	}
+			return (
+				<div className="flex min-w-0 flex-1 items-center gap-1">
+					<span className="truncate font-medium text-sm">{column.label}</span>
+				</div>
+			);
+}
+
+function HeaderResizeHandle({
+	column,
+	currentWidth,
+	min,
+	max,
+	onColumnResize,
+	onMouseDown,
+}: {
+	column: ListColumnConfig;
+	currentWidth: number;
+	min: number;
+	max: number;
+	onColumnResize?: (columnKey: string, width: number) => void;
+	onMouseDown: (e: React.MouseEvent, columnKey: string) => void;
+}) {
+		if (column.resizable === false || !onColumnResize) {
+			return null;
+		}
+	return (
+		<div
+			aria-label={`Ajustar ancho de la columna ${column.label}`}
+			aria-orientation="vertical"
+			aria-valuemax={max}
+			aria-valuemin={min}
+			aria-valuenow={currentWidth}
+					className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize opacity-0 transition-opacity hover:bg-border group-hover:opacity-100"
+			onKeyDown={(ev) => {
+				if (ev.key === 'ArrowLeft') {
+					ev.preventDefault();
+					onColumnResize(column.key, Math.max(min, currentWidth - 10));
+				}
+				if (ev.key === 'ArrowRight') {
+					ev.preventDefault();
+					onColumnResize(column.key, Math.min(max, currentWidth + 10));
+				}
+			}}
+			onMouseDown={(e) => onMouseDown(e, column.key)}
+			role="separator"
+			tabIndex={0}
+		/>
+	);
+}
+
+// Helper puro para renderizar la celda de cabecera y reducir complejidad en el componente principal
+function renderHeaderCell(
+	params: {
+		column: ListColumnConfig;
+		index: number;
+		isResizing: boolean;
+		isDragging: boolean;
+		isDragTarget: boolean;
+		isSorted: boolean;
+		sortDirection: 'asc' | 'desc';
+		getColumnWidth: (column: ListColumnConfig) => string;
+		handleDragOver: (e: React.DragEvent, index: number) => void;
+		handleDragStart: (e: React.DragEvent, index: number) => void;
+		handleDrop: (e: React.DragEvent, index: number) => void;
+		handleMouseDown: (e: React.MouseEvent, columnKey: string) => void;
+		onColumnReorder?: (fromIndex: number, toIndex: number) => void;
+		onSort?: (columnKey: string) => void;
+		onColumnResize?: (columnKey: string, width: number) => void;
+	}
+) {
+	const {
+		column,
+		index,
+		isResizing,
+		isDragging,
+		isDragTarget,
+		isSorted,
+		sortDirection,
+		getColumnWidth,
+		handleDragOver,
+		handleDragStart,
+		handleDrop,
+		handleMouseDown,
+		onColumnReorder,
+		onSort,
+		onColumnResize,
+	} = params;
+
+			let ariaSort: React.AriaAttributes['aria-sort'];
+			if (isSorted) {
+				ariaSort = sortDirection === 'asc' ? 'ascending' : 'descending';
+			} else {
+				ariaSort = undefined;
+			}
+
+		const currentWidth = typeof column.width === 'number' ? column.width : 150;
+		const min = column.minWidth ?? 50;
+		const max = column.maxWidth ?? 1000;
+
+			const content = (
+				<HeaderSortContent column={column} isSorted={isSorted} onSort={onSort} sortDirection={sortDirection} />
+			);
+
+			const resizeHandle = (
+				<HeaderResizeHandle
+					column={column}
+					currentWidth={currentWidth}
+					max={max}
+					min={min}
+					onColumnResize={onColumnResize}
+					onMouseDown={handleMouseDown}
+				/>
+			);
+
+		return (
+			<th
+				aria-sort={ariaSort}
+				className={`group relative select-none border-border/50 border-r last:border-r-0${isDragging ? ' opacity-50' : ''}${
+					isDragTarget ? ' bg-accent' : ''
+				}${isResizing ? ' cursor-col-resize' : ''}`}
+				draggable={!!onColumnReorder}
+				key={column.key}
+				onDragOver={(e) => handleDragOver(e, index)}
+				onDragStart={(e) => handleDragStart(e, index)}
+				onDrop={(e) => handleDrop(e, index)}
+				scope="col"
+				style={{
+					width: getColumnWidth(column),
+					minWidth: column.minWidth ? `${column.minWidth}px` : undefined,
+					maxWidth: column.maxWidth ? `${column.maxWidth}px` : undefined,
+					textAlign: column.align || 'left',
+				}}
+			>
+				  <div className="flex min-h-[40px] items-center gap-2 px-3 py-2">
+					{onColumnReorder && (
+					  <div className="cursor-grab opacity-0 transition-opacity active:cursor-grabbing group-hover:opacity-100">
+							<Grip className="h-3 w-3 text-muted-foreground" />
+						</div>
+					)}
+					{content}
+					{resizeHandle}
+				</div>
+			</th>
+		);
+}
+
 interface ListViewHeaderProps {
 	columns: ListColumnConfig[];
 	sortBy?: string;
@@ -55,7 +224,9 @@ export function ListViewHeader({
 	// Manejo de ordenamiento
 	const handleSort = useCallback(
 		(columnKey: string) => {
-			if (!onSort) return;
+			if (!onSort) {
+				return;
+			}
 
 			if (sortBy === columnKey) {
 				// Cambiar dirección si es la misma columna
@@ -70,15 +241,15 @@ export function ListViewHeader({
 
 	// Manejo de redimensionado
 	const handleMouseDown = useCallback(
-		(e: React.MouseEvent, columnKey: string) => {
-			e.preventDefault();
+		(mouseEvent: React.MouseEvent, columnKey: string) => {
+			mouseEvent.preventDefault();
 			setResizingColumn(columnKey);
 
-			const startX = e.clientX;
-			const startWidth = e.currentTarget.closest('th')?.offsetWidth || 0;
+			const startX = mouseEvent.clientX;
+			const startWidth = mouseEvent.currentTarget.closest('th')?.offsetWidth || 0;
 
-			const handleMouseMove = (e: MouseEvent) => {
-				const newWidth = startWidth + (e.clientX - startX);
+			const handleMouseMove = (moveEvent: MouseEvent) => {
+				const newWidth = startWidth + (moveEvent.clientX - startX);
 				if (newWidth >= 50 && onColumnResize) {
 					// Ancho mínimo
 					onColumnResize(columnKey, newWidth);
@@ -124,14 +295,18 @@ export function ListViewHeader({
 
 	// Renderizar icono de ordenamiento
 	const renderSortIcon = (columnKey: string) => {
-		if (sortBy !== columnKey) return null;
+		if (sortBy !== columnKey) {
+			return null;
+		}
 
 		return sortDirection === 'asc' ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />;
 	};
 
 	// Obtener ancho de columna
 	const getColumnWidth = (column: ListColumnConfig) => {
-		if (column.width === 'auto') return 'auto';
+		if (column.width === 'auto') {
+			return 'auto';
+		}
 		return `${column.width}px`;
 	};
 
@@ -142,53 +317,24 @@ export function ListViewHeader({
 					const isResizing = resizingColumn === column.key;
 					const isDragging = draggedColumn === index;
 					const isDragTarget = dragTarget === index;
-
-					return (
-						<th
-							className={`group relative select-none border-border/50 border-r last:border-r-0${isDragging ? 'opacity-50' : ''}
-								${isDragTarget ? 'bg-accent' : ''}
-								${isResizing ? 'cursor-col-resize' : ''}
-							`}
-							draggable={onColumnReorder ? true : false}
-							key={column.key}
-							onDragOver={(e) => handleDragOver(e, index)}
-							onDragStart={(e) => handleDragStart(e, index)}
-							onDrop={(e) => handleDrop(e, index)}
-							style={{
-								width: getColumnWidth(column),
-								minWidth: column.minWidth ? `${column.minWidth}px` : undefined,
-								maxWidth: column.maxWidth ? `${column.maxWidth}px` : undefined,
-								textAlign: column.align || 'left',
-							}}
-						>
-							<div className="flex min-h-[40px] items-center gap-2 px-3 py-2">
-								{/* Grip para drag and drop */}
-								{onColumnReorder && (
-									<div className="cursor-grab opacity-0 transition-opacity active:cursor-grabbing group-hover:opacity-100">
-										<Grip className="h-3 w-3 text-muted-foreground" />
-									</div>
-								)}
-
-								{/* Contenido de la columna */}
-								<div
-									className={`flex min-w-0 items-center gap-1 flex-1${column.sortable && onSort ? 'cursor-pointer hover:text-foreground' : ''}
-									`}
-									onClick={column.sortable ? () => handleSort(column.key) : undefined}
-								>
-									<span className="truncate font-medium text-sm">{column.label}</span>
-									{renderSortIcon(column.key)}
-								</div>
-
-								{/* Resize handle */}
-								{column.resizable !== false && onColumnResize && (
-									<div
-										className="absolute top-0 right-0 bottom-0 w-1 cursor-col-resize opacity-0 transition-opacity hover:bg-border group-hover:opacity-100"
-										onMouseDown={(e) => handleMouseDown(e, column.key)}
-									/>
-								)}
-							</div>
-						</th>
-					);
+					const isSorted = sortBy === column.key;
+					return renderHeaderCell({
+						column,
+						index,
+						isResizing,
+						isDragging,
+						isDragTarget,
+						isSorted,
+						sortDirection,
+						getColumnWidth,
+						handleDragOver,
+						handleDragStart,
+						handleDrop,
+						handleMouseDown,
+						onColumnReorder,
+						onSort: handleSort,
+						onColumnResize,
+					});
 				})}
 
 				{/* Configuración */}

@@ -119,7 +119,7 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 		}
 	}, [presetName, presetDescription, currentConfig, saveAsPreset]);
 
-	const handleExport = useCallback(async () => {
+	const handleExport = useCallback(() => {
 		try {
 			const exported = exportConfiguration();
 			const blob = new Blob([exported.data], {
@@ -140,7 +140,9 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 	const handleImport = useCallback(
 		(event: React.ChangeEvent<HTMLInputElement>) => {
 			const file = event.target.files?.[0];
-			if (!file) return;
+			if (!file) {
+				return;
+			}
 
 			const reader = new FileReader();
 			reader.onload = async (e) => {

@@ -34,7 +34,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 	};
 
 	getAffectedFiles(stack?: string): Array<{ file: string; line: string }> {
-		if (!stack) return [];
+		if (!stack) {
+			return [];
+		}
 		const regex = /\(?([\w./\\:-]+\.(ts|tsx|js|jsx)):(\d+):(\d+)\)?/g;
 		const files: Array<{ file: string; line: string }> = [];
 		let match: RegExpExecArray | null = regex.exec(stack);
@@ -47,7 +49,9 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
 	render() {
 		if (this.state.hasError) {
-			if (this.props.fallback) return this.props.fallback;
+			if (this.props.fallback) {
+				return this.props.fallback;
+			}
 
 			// Render GlobalErrorFallback if no specific fallback is provided
 			if (this.state.error) {

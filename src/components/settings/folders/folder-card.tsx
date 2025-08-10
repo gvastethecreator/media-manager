@@ -1,5 +1,6 @@
 import { Folder } from 'lucide-react';
 import { motion } from 'motion/react';
+import type { ReactNode } from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { useFolderStats } from '@/lib/api/folders';
@@ -19,12 +20,94 @@ import { useProgressTracking } from './hooks/use-progress-tracking';
 import { ThumbnailGrid } from './thumbnail-grid';
 import { getStatusMessage } from './utils/status-message';
 
+interface CardHeaderSectionProps {
+	folder: ExtendedFolder;
+	indexStatus: IndexStatus;
+	parentFolderName: string | null;
+	statusMessage: ReactNode | null;
+	isEditing: boolean;
+	onSaveEdit: () => void;
+	onCancelEdit: () => void;
+	enterEdit: () => void;
+	isGloballyProcessing: boolean;
+	isExpanded: boolean;
+	isReindexing: boolean;
+	onFolderClick: (folderId: string) => void;
+	onReindex: (folderId: string) => void;
+	onToggleExpanded?: (folderId: string) => void;
+	processStatus: ExtendedProcessStatus;
+	selectedFolder: string | null;
+}
+
+function CardHeaderSection({
+	folder,
+	indexStatus,
+	parentFolderName,
+	statusMessage,
+	isEditing,
+	onSaveEdit,
+	onCancelEdit,
+	enterEdit,
+	isGloballyProcessing,
+	isExpanded,
+	isReindexing,
+	onFolderClick,
+	onReindex,
+	onToggleExpanded,
+	processStatus,
+	selectedFolder,
+}: CardHeaderSectionProps) {
+	return (
+		<div className="flex items-start justify-between">
+			<div className="min-w-0 flex-1">
+				<div className="flex items-center gap-2">
+					<div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-primary/10">
+						{folder.emoji ? (
+							<span className="text-sm">{folder.emoji}</span>
+						) : (
+							<Folder className="h-4 w-4 text-primary" />
+						)}
+					</div>
+					<div className="min-w-0 flex-1">
+						<h3 className="truncate font-medium text-sm">{folder.name}</h3>
+						{parentFolderName && <p className="truncate text-muted-foreground text-xs">en {parentFolderName}</p>}
+					</div>
+				</div>
+				<div className="mt-2 flex items-center gap-2">
+					<FolderIndexStatusBadge lastIndexed={folder.lastIndexed} status={indexStatus} />
+					{statusMessage}
+				</div>
+			</div>
+			<div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+				{isEditing ? (
+					<EditModeControls isDisabled={isGloballyProcessing} onCancel={onCancelEdit} onSave={onSaveEdit} />
+				) : (
+					<NormalModeControls
+						folder={folder}
+						hasChildren={Boolean(folder.children && folder.children.length > 0)}
+						isExpanded={isExpanded}
+						isGloballyProcessing={isGloballyProcessing}
+						isReindexing={isReindexing}
+						onEdit={enterEdit}
+						onFolderClick={onFolderClick}
+						onReindex={onReindex}
+						onToggleExpanded={onToggleExpanded}
+						processStatus={processStatus}
+						selectedFolder={selectedFolder}
+					/>
+				)}
+			</div>
+		</div>
+	);
+}
+
 interface FolderCardProps {
 	folder: ExtendedFolder;
 	selectedFolder: string | null;
 	isProcessing: boolean;
 	processStatus: ExtendedProcessStatus;
 	isGloballyProcessing: boolean;
+	globalCurrentFolderId?: string | null;
 	allFolders?: ExtendedFolder[]; // Para buscar información del padre
 	onReindex: (folderId: string) => void;
 	onFolderClick: (folderId: string) => void;
@@ -40,6 +123,7 @@ export function FolderCard({
 	isProcessing,
 	processStatus,
 	isGloballyProcessing,
+	globalCurrentFolderId,
 	allFolders = [],
 	onReindex,
 	onFolderClick,
@@ -50,7 +134,6 @@ export function FolderCard({
 }: FolderCardProps) {
 	// Estados para edición
 	const [isEditing, setIsEditing] = useState(false);
-	const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 	const [editValues, setEditValues] = useState({
 		emoji: folder.emoji || '',
 		description: folder.description || '',
@@ -66,17 +149,20 @@ export function FolderCard({
 		return allFolders.filter((f) => f.parentId === folder.id);
 	}, [allFolders, folder.id]);
 
-	// Función helper para encontrar el nombre de la carpeta padre
-	const getParentFolderName = useCallback(() => {
-		if (!(folder.parentId && allFolders.length)) {
-			return null;
-		}
-		const parentFolder = allFolders.find((f) => f.id === folder.parentId);
-		return parentFolder?.name || null;
-	}, [folder.parentId, allFolders]);
-
 	// Estado del procesamiento
-	const isReindexing = isProcessing && processStatus?.folderId === folder.id;
+	const isReindexing = useMemo(() => {
+		// Si hay estado por carpeta indicando progreso/processing, úsalo
+		const perFolderActive = Boolean(processStatus?.isProcessing) || (processStatus?.progress ?? 0) > 0;
+		if (perFolderActive && processStatus?.folderId === folder.id) {
+			return true;
+		}
+		// Durante reindex global, marcar como activo la carpeta actual
+		if (isGloballyProcessing) {
+			return globalCurrentFolderId === folder.id;
+		}
+		// Fallback al flag isProcessing
+		return Boolean(isProcessing && processStatus?.folderId === folder.id);
+	}, [isGloballyProcessing, globalCurrentFolderId, isProcessing, processStatus, folder.id]);
 	const isComplete = useIsCompleteStatus(processStatus, folder.id, isProcessing);
 	const indexStatus = useMemo(() => getFolderIndexStatus(folder), [folder, getFolderIndexStatus]);
 
@@ -93,7 +179,6 @@ export function FolderCard({
 			onUpdateFolder(folder.id, editValues);
 		}
 		setIsEditing(false);
-		setShowEmojiPicker(false);
 	}, [onUpdateFolder, folder.id, editValues]);
 
 	const handleCancelEdit = useCallback(() => {
@@ -103,13 +188,7 @@ export function FolderCard({
 			isFavorite: folder.isFavorite,
 		});
 		setIsEditing(false);
-		setShowEmojiPicker(false);
 	}, [folder.emoji, folder.description, folder.isFavorite]);
-
-	const handleEmojiSelect = useCallback((emoji: string) => {
-		setEditValues((prev) => ({ ...prev, emoji }));
-		setShowEmojiPicker(false);
-	}, []);
 
 	const handleEditValuesChange = useCallback((updates: Partial<typeof editValues>) => {
 		setEditValues((prev) => ({ ...prev, ...updates }));
@@ -151,60 +230,25 @@ export function FolderCard({
 
 				<CardContent className="p-4">
 					<div className="space-y-3">
-						{/* Header compacto */}
-						<div className="flex items-start justify-between">
-							<div className="min-w-0 flex-1">
-								<div className="flex items-center gap-2">
-									{/* Emoji o ícono de carpeta */}
-									<div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-primary/10">
-										{folder.emoji ? (
-											<span className="text-sm">{folder.emoji}</span>
-										) : (
-											<Folder className="h-4 w-4 text-primary" />
-										)}
-									</div>
-
-									{/* Información básica */}
-									<div className="min-w-0 flex-1">
-										<h3 className="truncate font-medium text-sm">{folder.name}</h3>
-										{parentFolderName && (
-											<p className="truncate text-muted-foreground text-xs">en {parentFolderName}</p>
-										)}
-									</div>
-								</div>
-
-								{/* Status y mensaje */}
-								<div className="mt-2 flex items-center gap-2">
-									<FolderIndexStatusBadge lastIndexed={folder.lastIndexed} status={indexStatus} />
-									{statusMessage && <span className="text-muted-foreground text-xs">{statusMessage}</span>}
-								</div>
-							</div>
-
-							{/* Controles */}
-							<div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-								{isEditing ? (
-									<EditModeControls
-										isDisabled={isGloballyProcessing}
-										onCancel={handleCancelEdit}
-										onSave={handleSaveEdit}
-									/>
-								) : (
-									<NormalModeControls
-										folder={folder}
-										hasChildren={Boolean(folder.children && folder.children.length > 0)}
-										isExpanded={isExpanded}
-										isGloballyProcessing={isGloballyProcessing}
-										isReindexing={isReindexing}
-										onEdit={() => setIsEditing(true)}
-										onFolderClick={onFolderClick}
-										onReindex={onReindex}
-										onToggleExpanded={onToggleExpanded}
-										processStatus={processStatus}
-										selectedFolder={selectedFolder}
-									/>
-								)}
-							</div>
-						</div>
+						{/* Header compacto extraído */}
+						<CardHeaderSection
+							enterEdit={() => setIsEditing(true)}
+							folder={folder}
+							indexStatus={indexStatus}
+							isEditing={isEditing}
+							isExpanded={isExpanded}
+							isGloballyProcessing={isGloballyProcessing}
+							isReindexing={isReindexing}
+							onCancelEdit={handleCancelEdit}
+							onFolderClick={onFolderClick}
+							onReindex={onReindex}
+							onSaveEdit={handleSaveEdit}
+							onToggleExpanded={onToggleExpanded}
+							parentFolderName={parentFolderName}
+							processStatus={processStatus}
+							selectedFolder={selectedFolder}
+							statusMessage={statusMessage}
+						/>
 
 						{/* Grid de miniaturas y estadísticas */}
 						<div className="flex items-center gap-3">
@@ -234,7 +278,7 @@ export function FolderCard({
 						<FolderErrorDisplay folder={folder} />
 
 						{/* Detalles del proceso */}
-						{isReindexing && (
+						{(isReindexing || (processStatus?.folderId === folder.id && (processStatus?.progress ?? 0) > 0)) && (
 							<FolderProcessingDetails
 								isReindexing={isReindexing}
 								lastProgress={lastProgress}

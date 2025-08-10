@@ -159,7 +159,7 @@ export function CharacterCardImages({
 				>
 					{/* Imagen del personaje */}
 					<img
-						alt="Character image"
+						alt="Personaje"
 						className={cn(
 							'h-full w-full object-cover',
 							rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'

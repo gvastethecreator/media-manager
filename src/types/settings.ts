@@ -3,33 +3,20 @@
  * @module types/settings
  */
 
-import type {
+// Re-export directo de tipos y esquemas para evitar noExportedImports
+export type {
 	AdvancedSettings,
 	AppearanceSettings,
-	Language as LanguageType,
+	Language,
 	NotificationsSettings,
 	PrivacySettings,
-	Settings as SettingsType,
-	ThemeMode as ThemeModeType,
-	UpdateSettings,
+	Settings,
+	ThemeMode,
+	UpdateSettings as SettingsUpdate,
 } from '@/transformers/settings/schema';
-
-// Se importan los esquemas específicamente (no como tipos)
-import { languageSchema, settingsSchema, themeModeSchema, updateSettingsSchema } from '@/transformers/settings/schema';
+export { languageSchema, settingsSchema, themeModeSchema, updateSettingsSchema } from '@/transformers/settings/schema';
 
 /**
  * Modos de visualización disponibles para componentes de vista de archivos
  */
 export type ViewMode = 'grid' | 'list' | 'masonry' | 'cards';
-
-// Re-exportamos los tipos para facilidad de uso
-export type ThemeMode = ThemeModeType;
-export type Language = LanguageType;
-export type Settings = SettingsType;
-export type SettingsUpdate = UpdateSettings;
-
-// Re-exportamos los esquemas
-export { languageSchema, settingsSchema, themeModeSchema, updateSettingsSchema };
-
-// Exportación de tipos internos
-export type { AdvancedSettings, AppearanceSettings, NotificationsSettings, PrivacySettings };

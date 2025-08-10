@@ -14,10 +14,10 @@ import {
 	ZoomIn,
 	ZoomOut,
 } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { cn, formatFileSize } from '@/lib/utils';
+import { formatFileSize } from '@/lib/utils';
 import type { DocumentWithStats } from '@/types/entities/document';
 
 interface DocumentViewerProps {
@@ -153,6 +153,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 							transform: `rotate(${rotation}deg)`,
 							transformOrigin: 'center center',
 						}}
+						title={`Visor PDF: ${documentEntity.name}`}
 					/>
 				</div>
 			);
@@ -172,6 +173,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 							transform: `rotate(${rotation}deg)`,
 							transformOrigin: 'center center',
 						}}
+						title={`Vista texto: ${documentEntity.name}`}
 					/>
 				</div>
 			);

@@ -9,9 +9,9 @@ import type { EmptySpaceAction, EmptySpaceContextMenuProps } from './types';
 /**
  * Menú contextual para espacio vacío en el navegador de archivos
  */
-export const EmptySpaceContextMenu = memo<EmptySpaceContextMenuProps>(function EmptySpaceContextMenu({
+const EmptySpaceContextMenuInner = memo<EmptySpaceContextMenuProps>(function EmptySpaceContextMenuImpl({
 	onAction,
-	position,
+	position: _position,
 	currentPath,
 	canPaste = false,
 	totalItems = 0,
@@ -115,3 +115,5 @@ export const EmptySpaceContextMenu = memo<EmptySpaceContextMenuProps>(function E
 		</div>
 	);
 });
+
+export const EmptySpaceContextMenu = EmptySpaceContextMenuInner;

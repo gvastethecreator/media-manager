@@ -137,8 +137,8 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 									<ResponsiveContainer height="100%" width="100%">
 										<PieChart>
 											<Pie cx="50%" cy="50%" data={pieData} dataKey="value" outerRadius={50}>
-												{pieData.map((entry, index) => (
-													<Cell fill={entry.color} key={`cell-${index}`} />
+												{pieData.map((entry) => (
+													<Cell fill={entry.color} key={`cell-${entry.name}`} />
 												))}
 											</Pie>
 											<Tooltip

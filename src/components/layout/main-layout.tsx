@@ -14,7 +14,7 @@ import { useFolderStore } from '@/store/entities/folder';
 import { useImageStore } from '@/store/entities/image';
 import { useUIStore } from '@/store/ui.store';
 
-export const MainLayout = memo(function MainLayout() {
+const MainLayoutComponent = memo(function MainLayoutImpl() {
 	const location = useLocation();
 	const params = useParams<{ id: string }>();
 	const { isVisible } = useDetailsPanel();
@@ -81,7 +81,9 @@ export const MainLayout = memo(function MainLayout() {
 
 	// Funciones para acciones de carpeta
 	const handleScanFolder = useCallback(async () => {
-		if (!currentFolderId) return;
+		if (!currentFolderId) {
+			return;
+		}
 
 		try {
 			toastService.info('Escaneando carpeta...');
@@ -94,7 +96,9 @@ export const MainLayout = memo(function MainLayout() {
 	}, [currentFolderId, reindexFolderMutation]);
 
 	const handleRefreshFolder = useCallback(async () => {
-		if (!currentFolderId) return;
+		if (!currentFolderId) {
+			return;
+		}
 
 		try {
 			toastService.info('Recargando carpeta...');
@@ -246,3 +250,5 @@ export const MainLayout = memo(function MainLayout() {
 		</div>
 	);
 });
+
+export const MainLayout = MainLayoutComponent;

@@ -73,7 +73,9 @@ function PromptCardComponent({
 	const primaryColor = baseColor || '#0ea5e9';
 	const secondaryColor = useMemo(() => {
 		// Si no hay color definido, usar un valor por defecto
-		if (!baseColor) return '#0369a1';
+		if (!baseColor) {
+			return '#0369a1';
+		}
 
 		// Oscurecer el color primario para el secundario
 		try {

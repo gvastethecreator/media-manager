@@ -13,7 +13,9 @@ import type { PlaceFilters, PlaceWithStats } from '../types/entities/place';
  * @returns Lista de lugares filtrados
  */
 export function filterPlaces(places: PlaceWithStats[], filters: PlaceFilters): PlaceWithStats[] {
-	if (!filters) return places;
+	if (!filters) {
+		return places;
+	}
 
 	return places.filter((place) => {
 		// Filtro por búsqueda de texto
@@ -24,7 +26,9 @@ export function filterPlaces(places: PlaceWithStats[], filters: PlaceFilters): P
 				place.description?.toLowerCase().includes(searchLower) ||
 				place.location?.toLowerCase().includes(searchLower);
 
-			if (!matchesSearch) return false;
+			if (!matchesSearch) {
+				return false;
+			}
 		}
 
 		// Filtro por categoría

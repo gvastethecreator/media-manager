@@ -142,7 +142,9 @@ const _withTimeout = async <T>(promise: Promise<T>, timeoutMs: number, entityNam
 		// @ts-expect-error
 		return [];
 	} finally {
-		if (timeoutId) clearTimeout(timeoutId);
+		if (timeoutId) {
+			clearTimeout(timeoutId);
+		}
 	}
 };
 
@@ -278,7 +280,14 @@ export function useEntityLoader() {
 					case 'concepts':
 						// No hay método de fetch, solo marcar como cargado
 						break;
-					// objects: legacy, no cargar
+					case 'objects':
+						// Legacy: no cargar datos específicos
+						break;
+					default: {
+						// Cubrir entidades no listadas explícitamente
+						entityLoaderLogger.debug(`Entidad no manejada explícitamente: ${String(entity)}`);
+						break;
+					}
 				}
 				updateLoadingState(entity, {
 					loading: false,

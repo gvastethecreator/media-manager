@@ -13,12 +13,12 @@ interface SubmenuSearchProps {
 /**
  * Componente de búsqueda para submenús con botón de limpiar
  */
-export const SubmenuSearch = memo<SubmenuSearchProps>(function SubmenuSearch({
+const SubmenuSearchImpl = memo<SubmenuSearchProps>(({ 
 	searchTerm,
 	onSearchChange,
 	placeholder = 'Buscar...',
 	className,
-}) {
+}) => {
 	// Manejador de cambio de texto
 	const handleChange = useCallback(
 		(e: React.ChangeEvent<HTMLInputElement>) => {
@@ -51,3 +51,5 @@ export const SubmenuSearch = memo<SubmenuSearchProps>(function SubmenuSearch({
 		</div>
 	);
 });
+
+export const SubmenuSearch = SubmenuSearchImpl;

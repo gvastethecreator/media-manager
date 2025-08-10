@@ -72,8 +72,8 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 			try {
 				await deleteTagMutation.mutateAsync(tagId);
 				toastService.success('Etiqueta eliminada correctamente');
-			} catch (error) {
-				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
 				toastService.error('Error al eliminar etiqueta', {
 					description: errorMessage,
 				});

@@ -1,6 +1,6 @@
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { Slot as SlotPrimitive } from 'radix-ui';
-import * as React from 'react';
+import { useMemo } from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -39,17 +39,20 @@ function BreadcrumbLink({
 	);
 }
 
-function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
-	return (
-		<span
-			aria-current="page"
-			aria-disabled="true"
-			className={cn('font-normal text-foreground', className)}
-			data-slot="breadcrumb-page"
-			role="link"
-			{...props}
-		/>
+function BreadcrumbPage({ className, ...props }: React.ComponentProps<'a'>) {
+	// Si viene como span/elemento no interactivo, convertirlo en <a> sin href pero focusable
+	const commonProps = useMemo(
+		() => ({
+			'aria-current': 'page' as const,
+			'aria-disabled': 'true',
+			className: cn('font-normal text-foreground', className),
+			'data-slot': 'breadcrumb-page',
+			tabIndex: 0,
+		}),
+		[className]
 	);
+
+	return <a {...(commonProps as any)} {...props} />;
 }
 
 function BreadcrumbSeparator({ children, className, ...props }: React.ComponentProps<'li'>) {

@@ -40,7 +40,7 @@ interface EnhancedSubmenuProps {
 /**
  * Componente de submenú mejorado con búsqueda y secciones para favoritos y recientes
  */
-export const EnhancedSubmenu = memo<EnhancedSubmenuProps>(function EnhancedSubmenu({
+const EnhancedSubmenuImpl = memo<EnhancedSubmenuProps>(({ 
 	title,
 	icon,
 	items,
@@ -52,7 +52,7 @@ export const EnhancedSubmenu = memo<EnhancedSubmenuProps>(function EnhancedSubme
 	onOpenChange,
 	dataIdField = 'id',
 	dataNameField = 'name',
-}) {
+}) => {
 	// Estados
 	const [isOpen, setIsOpen] = useState(false);
 	const [searchTerm, setSearchTerm] = useState('');
@@ -70,14 +70,14 @@ export const EnhancedSubmenu = memo<EnhancedSubmenuProps>(function EnhancedSubme
 			: items;
 
 		// Agrupar por categorías
-		const favorites = filtered.filter((item) => item.isFavorite);
-		const recents = filtered.filter((item) => !item.isFavorite && item.isRecent);
-		const others = filtered.filter((item) => !(item.isFavorite || item.isRecent));
+		const favs = filtered.filter((item) => item.isFavorite);
+		const recs = filtered.filter((item) => !item.isFavorite && item.isRecent);
+		const rest = filtered.filter((item) => !(item.isFavorite || item.isRecent));
 
 		return {
-			favorites,
-			recents,
-			others,
+			favorites: favs,
+			recents: recs,
+			others: rest,
 			filteredItems: filtered,
 		};
 	}, [items, searchTerm]);
@@ -194,3 +194,5 @@ export const EnhancedSubmenu = memo<EnhancedSubmenuProps>(function EnhancedSubme
 		</ContextMenuSub>
 	);
 });
+
+export const EnhancedSubmenu = EnhancedSubmenuImpl;
