@@ -52,12 +52,11 @@ export type { VideoWithStats } from './entities/video';
 export type { WildcardWithStats } from './entities/wildcard';
 export type { WorldItemWithStats } from './entities/world-item';
 
-// Enum para tipos de entidades
-// Import EntityStatsType from the main definition
-import { EntityStatsType } from './file-browser/entity-stats';
+// Re-exportar EntityStatsType directamente desde su origen para evitar noExportedImports
+export { EntityStatsType } from './file-browser/entity-stats';
 
-// Re-export EntityStatsType for convenience
-export { EntityStatsType };
+import type { EntityStatsType as EntityStatsTypeType } from './file-browser/entity-stats';
+import { EntityStatsType as EntityStatsTypeLocal } from './file-browser/entity-stats';
 
 // Función helper para verificar si es una entidad con el campo entityType
 function hasEntityType(entity: unknown): entity is { entityType: string } {
@@ -247,26 +246,31 @@ export function isUploadedImageWithStats(entity: unknown): entity is UploadedIma
 }
 
 // Función helper para obtener el tipo de estadísticas de una entidad
-export function getEntityStatsType(entity: AnyEntityWithStats): EntityStatsType | null {
-	if (isImageWithStats(entity)) return EntityStatsType.IMAGE;
-	if (isVideoWithStats(entity)) return EntityStatsType.VIDEO;
-	if (isFolderWithStats(entity)) return EntityStatsType.FOLDER;
-	if (isTagWithStats(entity)) return EntityStatsType.TAG;
-	if (isPlaceWithStats(entity)) return EntityStatsType.PLACE;
-	if (isWorldItemWithStats(entity)) return EntityStatsType.WORLD_ITEM;
-	if (isNoteWithStats(entity)) return EntityStatsType.NOTE;
-	if (isPropertyWithStats(entity)) return EntityStatsType.PROPERTY;
-	if (isWildcardWithStats(entity)) return EntityStatsType.WILDCARD;
-	if (isAudioWithStats(entity)) return EntityStatsType.AUDIO;
-	if (isDocumentWithStats(entity)) return EntityStatsType.DOCUMENT;
-	if (isCollectionWithStats(entity)) return EntityStatsType.COLLECTION;
-	if (isAlbumWithStats(entity)) return EntityStatsType.ALBUM;
-	if (isCharacterWithStats(entity)) return EntityStatsType.CHARACTER;
-	if (isConceptWithStats(entity)) return EntityStatsType.CONCEPT;
-	if (isPromptWithStats(entity)) return EntityStatsType.PROMPT;
-	if (isGroupWithStats(entity)) return EntityStatsType.GROUP;
-	if (isUploadedImageWithStats(entity)) return EntityStatsType.UPLOADED_IMAGE;
-	return null;
+export function getEntityStatsType(entity: AnyEntityWithStats): EntityStatsTypeType | null {
+	if (!hasEntityType(entity)) {
+		return null;
+	}
+	const map: Record<string, EntityStatsTypeType> = {
+		image: EntityStatsTypeLocal.IMAGE,
+		video: EntityStatsTypeLocal.VIDEO,
+		folder: EntityStatsTypeLocal.FOLDER,
+		tag: EntityStatsTypeLocal.TAG,
+		place: EntityStatsTypeLocal.PLACE,
+		'world-item': EntityStatsTypeLocal.WORLD_ITEM,
+		note: EntityStatsTypeLocal.NOTE,
+		property: EntityStatsTypeLocal.PROPERTY,
+		wildcard: EntityStatsTypeLocal.WILDCARD,
+		audio: EntityStatsTypeLocal.AUDIO,
+		document: EntityStatsTypeLocal.DOCUMENT,
+		collection: EntityStatsTypeLocal.COLLECTION,
+		album: EntityStatsTypeLocal.ALBUM,
+		character: EntityStatsTypeLocal.CHARACTER,
+		concept: EntityStatsTypeLocal.CONCEPT,
+		prompt: EntityStatsTypeLocal.PROMPT,
+		group: EntityStatsTypeLocal.GROUP,
+		'uploaded-image': EntityStatsTypeLocal.UPLOADED_IMAGE,
+	};
+	return map[entity.entityType] ?? null;
 }
 
 // Función helper para obtener estadísticas de una entidad

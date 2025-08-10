@@ -206,7 +206,8 @@ export function useFoldersEvents({
 			const onReindexAllProgressEvt = (d: any) => {
 				eventsLogger.debug('📊 Progreso de reindexado global:', d);
 				handleReindexAllProgress({
-					isProcessing: true,
+					// Usar el valor real del servidor; no forzar true
+					isProcessing: Boolean(d.isProcessing),
 					status: d.status || 'processing',
 					phase: d.phase || 'processing',
 					progress: Math.max(0, Math.min(100, d.progress || 0)),
@@ -231,27 +232,19 @@ export function useFoldersEvents({
 					eventsLogger.debug('Evento sin data:', type);
 					return;
 				}
-				if (type === 'folder:progress') {
-					onFolderProgress(data);
-					return;
+				const handlers: Record<string, (payload: any) => void> = {
+					'folder:progress': onFolderProgress,
+					'folder:reindexAll:progress': onReindexAllProgressEvt,
+					'folder:completed': onCompleted,
+					'folder:error': onErrorEvt,
+					'folder:stats': onStatsEvt,
+				};
+				const handler = handlers[type as keyof typeof handlers];
+				if (handler) {
+					handler(data);
+				} else {
+					eventsLogger.debug('🤷 Evento no manejado:', type);
 				}
-				if (type === 'folder:reindexAll:progress') {
-					onReindexAllProgressEvt(data);
-					return;
-				}
-				if (type === 'folder:completed') {
-					onCompleted(data);
-					return;
-				}
-				if (type === 'folder:error') {
-					onErrorEvt(data);
-					return;
-				}
-				if (type === 'folder:stats') {
-					onStatsEvt(data);
-					return;
-				}
-				eventsLogger.debug('🤷 Evento no manejado:', type);
 			};
 
 			// Manejar eventos de folders

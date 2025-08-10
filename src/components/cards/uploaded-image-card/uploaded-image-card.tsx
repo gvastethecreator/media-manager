@@ -77,7 +77,9 @@ export function UploadedImageCard({
 
 	// Formatear tamaño de archivo
 	const fileSize = useMemo(() => {
-		if (!uploadedImage.size) return 'N/A';
+		if (!uploadedImage.size) {
+			return 'N/A';
+		}
 		const mb = uploadedImage.size / (1024 * 1024);
 		if (mb < 1) {
 			const kb = uploadedImage.size / 1024;
@@ -88,7 +90,9 @@ export function UploadedImageCard({
 
 	// Dimensiones formateadas
 	const dimensions = useMemo(() => {
-		if (!(uploadedImage.dimensions?.width && uploadedImage.dimensions?.height)) return 'N/A';
+		if (!(uploadedImage.dimensions?.width && uploadedImage.dimensions?.height)) {
+			return 'N/A';
+		}
 		return `${uploadedImage.dimensions.width}×${uploadedImage.dimensions.height}`;
 	}, [uploadedImage.dimensions?.width, uploadedImage.dimensions?.height]);
 

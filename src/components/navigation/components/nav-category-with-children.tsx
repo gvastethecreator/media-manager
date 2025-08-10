@@ -6,7 +6,7 @@ import { NavCategoryChildren } from './nav-category-children';
 
 const MemoizedNavCategoryChildren = memo(NavCategoryChildren);
 
-export const NavCategoryWithChildren = memo(function NavCategoryWithChildren({
+export const NavCategoryWithChildren = memo(function NavCategoryWithChildrenImpl({
 	id,
 	label,
 	color,

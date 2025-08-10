@@ -192,7 +192,7 @@ function convertFileItemToEntity(item: FileItem): AnyEntityWithStats {
 // Implementación del servicio de operaciones de archivos
 const customFileOperationsService = {
 	// Abre la ubicación del archivo en el explorador del sistema
-	openPath: async (path: string) => {
+	openPath: (path: string) => {
 		try {
 			// En navegador web, podemos intentar abrir una ventana nueva
 			// con la ruta en formato file:// (esto funciona en algunos navegadores)
@@ -488,7 +488,7 @@ export const contextActionHandler = {
 		action: ContextMenuAction | MultiSelectionAction | EmptySpaceAction,
 		item?: FileItem,
 		items?: FileItem[],
-		toggleSelection?: ToggleItemSelectionFunction,
+		_toggleSelection?: ToggleItemSelectionFunction,
 		refreshView?: () => void
 	) => {
 		try {
@@ -521,7 +521,7 @@ export const contextActionHandler = {
 
 				// Acciones de portapapeles
 				case 'copy':
-					if (item && item.mimeType?.startsWith('image/')) {
+					if (item?.mimeType?.startsWith('image/')) {
 						await customFileOperationsService.copyFileToClipboard(item.path);
 					} else if (items && items.length > 0) {
 						clipboardManager.copy(items);
@@ -588,9 +588,7 @@ export const contextActionHandler = {
 								.split(',')
 								.map((t) => t.trim())
 								.filter((t) => t);
-							for (const tag of tagList) {
-								await addImageToTag(item.path, tag);
-							}
+							await Promise.all(tagList.map((tag) => addImageToTag(item.path, tag)));
 							toastService.success(`${tagList.length} etiqueta(s) agregada(s)`);
 						}
 					}

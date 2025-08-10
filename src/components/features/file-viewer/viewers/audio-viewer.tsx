@@ -4,10 +4,10 @@
  */
 
 import { Download, Pause, Play, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { cn, formatDuration, formatFileSize } from '@/lib/utils';
+import { formatDuration, formatFileSize } from '@/lib/utils';
 import type { AudioWithStats } from '@/types/entities/audio';
 
 interface AudioViewerProps {
@@ -15,6 +15,53 @@ interface AudioViewerProps {
 	onClose: () => void;
 	onNext: () => void;
 	onPrevious: () => void;
+}
+
+function AudioHeader({ onPrevious, onNext, onClose }: { onPrevious: () => void; onNext: () => void; onClose: () => void }) {
+	return (
+		<div className="flex items-center justify-between border-b p-4">
+			<div className="flex items-center space-x-4">
+				<Button onClick={onPrevious} size="sm" variant="ghost">
+					<SkipBack className="h-4 w-4" />
+				</Button>
+				<Button onClick={onNext} size="sm" variant="ghost">
+					<SkipForward className="h-4 w-4" />
+				</Button>
+			</div>
+			<Button onClick={onClose} size="sm" variant="ghost">
+				✕
+			</Button>
+		</div>
+	);
+}
+
+function MetadataPanel({ audio, renderChannels }: { audio: AudioWithStats; renderChannels: (channels?: number) => string | null }) {
+	return (
+		<div className="border-t p-4">
+			<div className="grid grid-cols-2 gap-4 text-sm">
+				<div>
+					<span className="font-medium">Formato:</span>
+					<span className="ml-2 text-muted-foreground">{audio.path?.split('.').pop()?.toUpperCase() || 'Audio'}</span>
+				</div>
+				{audio.stats?.sampleRate && (
+					<div>
+						<span className="font-medium">Sample Rate:</span>
+						<span className="ml-2 text-muted-foreground">{audio.stats.sampleRate} Hz</span>
+					</div>
+				)}
+				{audio.stats?.channels && (
+					<div>
+						<span className="font-medium">Canales:</span>
+						<span className="ml-2 text-muted-foreground">{renderChannels(audio.stats.channels) ?? ''}</span>
+					</div>
+				)}
+				<div>
+					<span className="font-medium">Creado:</span>
+					<span className="ml-2 text-muted-foreground">{new Date(audio.createdAt).toLocaleDateString()}</span>
+				</div>
+			</div>
+		</div>
+	);
 }
 
 export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerProps) {
@@ -32,7 +79,9 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 
 	useEffect(() => {
 		const audioElement = audioRef.current;
-		if (!audioElement) return;
+		if (!audioElement) {
+			return;
+		}
 
 		const handleLoadedMetadata = () => {
 			setDuration(audioElement.duration);
@@ -70,11 +119,13 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 			audioElement.removeEventListener('error', handleError);
 			audioElement.removeEventListener('canplay', handleCanPlay);
 		};
-	}, [audioSrc]);
+	}, []);
 
 	const togglePlayPause = () => {
 		const audioElement = audioRef.current;
-		if (!audioElement) return;
+		if (!audioElement) {
+			return;
+		}
 
 		if (isPlaying) {
 			audioElement.pause();
@@ -86,7 +137,9 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 
 	const toggleMute = () => {
 		const audioElement = audioRef.current;
-		if (!audioElement) return;
+		if (!audioElement) {
+			return;
+		}
 
 		audioElement.muted = !isMuted;
 		setIsMuted(!isMuted);
@@ -94,7 +147,9 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 
 	const handleSeek = (value: number[]) => {
 		const audioElement = audioRef.current;
-		if (!audioElement) return;
+		if (!audioElement) {
+			return;
+		}
 
 		const newTime = (value[0] / 100) * duration;
 		audioElement.currentTime = newTime;
@@ -103,7 +158,9 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 
 	const handleVolumeChange = (value: number[]) => {
 		const audioElement = audioRef.current;
-		if (!audioElement) return;
+		if (!audioElement) {
+			return;
+		}
 
 		const newVolume = value[0] / 100;
 		audioElement.volume = newVolume;
@@ -121,27 +178,35 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 
 	const progress = duration > 0 ? (currentTime / duration) * 100 : 0;
 
+	const renderChannels = (channels?: number) => {
+		if (!channels) {
+			return null;
+		}
+		if (channels === 1) {
+			return 'Mono';
+		}
+		if (channels === 2) {
+			return 'Estéreo';
+		}
+		return `${channels} canales`;
+	};
+
 	return (
 		<div className="flex h-full flex-col bg-background">
-			{/* Header */}
-			<div className="flex items-center justify-between border-b p-4">
-				<div className="flex items-center space-x-4">
-					<Button onClick={onPrevious} size="sm" variant="ghost">
-						<SkipBack className="h-4 w-4" />
-					</Button>
-					<Button onClick={onNext} size="sm" variant="ghost">
-						<SkipForward className="h-4 w-4" />
-					</Button>
-				</div>
-				<Button onClick={onClose} size="sm" variant="ghost">
-					✕
-				</Button>
-			</div>
+			<AudioHeader onClose={onClose} onNext={onNext} onPrevious={onPrevious} />
 
 			{/* Main Content */}
 			<div className="flex flex-1 flex-col items-center justify-center p-8">
 				{/* Audio Element */}
-				<audio className="hidden" preload="metadata" ref={audioRef} src={audioSrc} />
+				<audio className="hidden" preload="metadata" ref={audioRef} src={audioSrc}>
+					<track
+						default
+						kind="captions"
+						label="Subtítulos (generados)"
+						src="data:text/vtt;charset=utf-8,WEBVTT"
+						srcLang="es"
+					/>
+				</audio>
 
 				{/* Audio Info */}
 				<div className="mb-8 text-center">
@@ -202,38 +267,7 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 					</div>
 				</div>
 			</div>
-
-			{/* Metadata Panel */}
-			<div className="border-t p-4">
-				<div className="grid grid-cols-2 gap-4 text-sm">
-					<div>
-						<span className="font-medium">Formato:</span>
-						<span className="ml-2 text-muted-foreground">{audio.path?.split('.').pop()?.toUpperCase() || 'Audio'}</span>
-					</div>
-					{audio.stats?.sampleRate && (
-						<div>
-							<span className="font-medium">Sample Rate:</span>
-							<span className="ml-2 text-muted-foreground">{audio.stats.sampleRate} Hz</span>
-						</div>
-					)}
-					{audio.stats?.channels && (
-						<div>
-							<span className="font-medium">Canales:</span>
-							<span className="ml-2 text-muted-foreground">
-								{audio.stats.channels === 1
-									? 'Mono'
-									: audio.stats.channels === 2
-										? 'Estéreo'
-										: `${audio.stats.channels} canales`}
-							</span>
-						</div>
-					)}
-					<div>
-						<span className="font-medium">Creado:</span>
-						<span className="ml-2 text-muted-foreground">{new Date(audio.createdAt).toLocaleDateString()}</span>
-					</div>
-				</div>
-			</div>
+			<MetadataPanel audio={audio} renderChannels={renderChannels} />
 		</div>
 	);
 }

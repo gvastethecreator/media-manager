@@ -64,7 +64,7 @@ const isValidSrc = (src: string | null): src is string => {
 };
 
 // Componente de miniaturas memoizado
-const ThumbnailItem = memo(function ThumbnailItem({
+const ThumbnailItem = memo(function ThumbnailItemImpl({
 	image,
 	isActive,
 	onClick,
@@ -164,7 +164,7 @@ const ThumbnailItem = memo(function ThumbnailItem({
 });
 
 // Componente de acciones de la barra de herramientas
-const ToolbarActions = memo(function ToolbarActions({
+const ToolbarActions = memo(function ToolbarActionsImpl({
 	onZoomIn,
 	onZoomOut,
 	onReset,
@@ -207,7 +207,7 @@ const ToolbarActions = memo(function ToolbarActions({
 });
 
 // Componente de navegación de miniaturas
-const ThumbnailNavigation = memo(function ThumbnailNavigation({
+const ThumbnailNavigationImpl = memo(function ThumbnailNavigationInner({
 	images,
 	currentIndex,
 	onSelectImage,
@@ -245,7 +245,7 @@ const ThumbnailNavigation = memo(function ThumbnailNavigation({
 });
 
 // Componente principal del visor de archivos - memoizado
-export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?: React.RefObject<HTMLElement> }) {
+export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { triggerRef?: React.RefObject<HTMLElement> }) {
 	// Usar el store en lugar de props
 	const {
 		isOpen,
@@ -259,7 +259,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 
 	const [urls, setUrls] = useState<Record<string, string>>({});
 	const [isLoading, setIsLoading] = useState(true);
-	const imageContainerRef = useRef<HTMLDivElement>(null);
+	const imageContainerRef = useRef<HTMLFieldSetElement>(null);
 	const closeButtonRef = useRef<HTMLButtonElement>(null);
 	const [scale, setScale] = useState(1);
 	const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -310,7 +310,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 
 	// Validate images and index
 	useEffect(() => {
-		if (!(images && images.length)) {
+		if (!images?.length) {
 			setIsLoading(false);
 			return;
 		}
@@ -319,8 +319,8 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 		}
 	}, [images, currentIndex, setCurrentIndex]);
 
-	// Función memoizada para cargar URL de imagen
-	const loadImageUrl = useCallback(async (imageId: string): Promise<string> => {
+	// Función memoizada para cargar URL de imagen (sin async innecesario)
+	const loadImageUrl = useCallback((imageId: string): string => {
 		try {
 			// Usar el endpoint correcto para imágenes
 			const url = `/api/images/${imageId}`;
@@ -340,7 +340,9 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 
 	// Effect para cargar las URLs iniciales
 	useEffect(() => {
-		if (!isOpen) return;
+		if (!isOpen) {
+			return;
+		}
 
 		const loadInitialUrls = async () => {
 			const imagesToLoad = indicesToLoad.map((idx) => images[idx]).filter((img) => img && !urls[img.id]);
@@ -355,7 +357,9 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 
 				await Promise.all(
 					imagesToLoad.map(async (img) => {
-						if (!img || urls[img.id]) return;
+						if (!img || urls[img.id]) {
+							return;
+						}
 
 						try {
 							const url = await loadImageUrl(img.id);
@@ -405,7 +409,9 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 
 	// Función memoizada para copiar la URL
 	const handleCopy = useCallback(async () => {
-		if (!currentImage) return;
+		if (!currentImage) {
+			return;
+		}
 
 		try {
 			// Si ya tenemos la URL en caché
@@ -431,7 +437,9 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 	// Función memoizada para descargar la imagen
 	const handleDownload = useCallback(async () => {
 		try {
-			if (!currentImage) return;
+			if (!currentImage) {
+				return;
+			}
 
 			// Revisamos si ya tenemos la URL
 			let url = urls[currentImage.id];
@@ -470,7 +478,9 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 
 	// Keyboard navigation
 	useEffect(() => {
-		if (!isOpen) return;
+		if (!isOpen) {
+			return;
+		}
 
 		const handleKeyDown = (e: KeyboardEvent) => {
 			// If Tab is pressed, don't override browser behavior
@@ -553,8 +563,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 			}}
 			open={isOpen}
 		>
-			<div
-				aria-label="Visor de imágenes"
+			<fieldset
 				className="relative flex h-full w-full flex-col items-center justify-center"
 				onClick={(e) => e.stopPropagation()}
 				onDoubleClick={resetView}
@@ -578,7 +587,9 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 				onTouchStart={handleDragStart}
 				onWheel={handleWheel}
 				ref={imageContainerRef}
+				tabIndex={-1}
 			>
+				<legend className="sr-only">Visor de archivos</legend>
 				{/* Toolbar */}
 				<ToolbarActions
 					onClose={onClose}
@@ -647,7 +658,7 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 								}}
 							>
 								<img
-									alt={currentImage?.name || 'Image'}
+									alt={currentImage?.name || 'sin nombre'}
 									className="max-h-full max-w-full object-contain"
 									src={currentImage ? urls[currentImage.id] : ''}
 								/>
@@ -664,14 +675,14 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 				</motion.div>
 
 				{/* Thumbnails */}
-				<ThumbnailNavigation currentIndex={currentIndex} images={images} onSelectImage={handleSelectImage} />
+				<ThumbnailNavigationImpl currentIndex={currentIndex} images={images} onSelectImage={handleSelectImage} />
 
 				{/* Navigation hints */}
 				<div className="pointer-events-none fixed bottom-4 left-4 max-w-[300px] select-none text-muted-foreground/50 text-xs">
 					<p>Flechas: navegar • Rueda: zoom • Arrastrar: mover</p>
 					<p>ESC: cerrar • R: restablecer • +/-: zoom</p>
 				</div>
-			</div>
+			</fieldset>
 		</dialog>
 	);
 
@@ -681,4 +692,4 @@ export const FileViewer = memo(function FileViewer({ triggerRef }: { triggerRef?
 	}
 
 	return viewerContent;
-});
+	});

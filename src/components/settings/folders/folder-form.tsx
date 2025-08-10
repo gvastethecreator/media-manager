@@ -37,10 +37,32 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+	const isPathInvalid = (p: string) => !p?.trim();
+
+	const mapErrorToMessage = (err: unknown, path: string): string => {
+		if (!(err instanceof Error)) {
+			return 'Error al agregar carpeta';
+		}
+		const msg = err.message;
+		if (msg.includes('Ya existe una carpeta')) {
+			return msg;
+		}
+		if (msg.includes('409')) {
+			return `La carpeta '${path}' ya existe en el sistema`;
+		}
+		if (msg.includes('404')) {
+			return 'La ruta especificada no existe o no es accesible';
+		}
+		if (msg.includes('403')) {
+			return 'No tienes permisos para acceder a esta carpeta';
+		}
+		return msg;
+	};
+
 	const handleSubmit = async (e: React.FormEvent) => {
 		e.preventDefault();
 
-		if (!folderPath.trim()) {
+		if (isPathInvalid(folderPath)) {
 			setErrorMessage('Por favor ingresa una ruta de carpeta válida');
 			return;
 		}
@@ -53,26 +75,9 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 			await onAddFolder(folderPath);
 			setFolderPath('');
 			formLogger.info('✅ Carpeta agregada exitosamente');
-		} catch (error) {
-			formLogger.error('Error al agregar carpeta:', error);
-
-			// Manejo específico de errores
-			let userMessage = 'Error al agregar carpeta';
-			if (error instanceof Error) {
-				if (error.message.includes('Ya existe una carpeta')) {
-					userMessage = error.message;
-				} else if (error.message.includes('409')) {
-					userMessage = `La carpeta '${folderPath}' ya existe en el sistema`;
-				} else if (error.message.includes('404')) {
-					userMessage = 'La ruta especificada no existe o no es accesible';
-				} else if (error.message.includes('403')) {
-					userMessage = 'No tienes permisos para acceder a esta carpeta';
-				} else {
-					userMessage = error.message;
-				}
-			}
-
-			setErrorMessage(userMessage);
+		} catch (err) {
+			formLogger.error('Error al agregar carpeta:', err);
+			setErrorMessage(mapErrorToMessage(err, folderPath));
 		} finally {
 			setIsSubmitting(false);
 		}

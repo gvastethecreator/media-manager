@@ -17,12 +17,12 @@ import {
 	File,
 	FileText,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { cn, formatFileSize } from '@/lib/utils';
+import { formatFileSize } from '@/lib/utils';
 import type { FileWithStats } from '@/types/entities/file/base';
 
 interface GenericFileViewerProps {
@@ -135,7 +135,9 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 	const canPreview = isTextFile && fileSize < 1024 * 1024; // Only preview files smaller than 1MB
 
 	const loadFileContent = async () => {
-		if (!(canPreview && file.path)) return;
+		if (!(canPreview && file.path)) {
+			return;
+		}
 
 		setIsLoadingContent(true);
 		setError(null);

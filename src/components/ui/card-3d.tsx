@@ -54,7 +54,9 @@ export function Card3D({
 	// Manejar movimiento del ratón
 	const handleMouseMove = useCallback(
 		(e: MouseEvent<HTMLDivElement>) => {
-			if (!(cardRef.current && enable3DEffect) || isTouchDevice) return;
+			if (!(cardRef.current && enable3DEffect) || isTouchDevice) {
+				return;
+			}
 
 			const rect = cardRef.current.getBoundingClientRect();
 			const width = rect.width;

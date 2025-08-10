@@ -51,7 +51,9 @@ export function useCategoryCollapse() {
 	const expandCategory = useCallback((id: ViewType) => {
 		setCollapsedCategories((prev) => {
 			// Si ya está expandida, no hacemos nada
-			if (prev[id] === false) return prev;
+			if (prev[id] === false) {
+				return prev;
+			}
 
 			const newState = { ...prev };
 			// Colapsamos todas las categorías

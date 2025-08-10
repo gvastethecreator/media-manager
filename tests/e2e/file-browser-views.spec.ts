@@ -24,19 +24,25 @@ async function clickFirstItem(page: any, view: 'grid' | 'cards' | 'masonry' | 'l
 	if (view === 'list') {
 		// Fila 0
 		const firstRow = page.getByTestId('listview-container').locator('[data-testid^="list-row-"]').first();
-		await firstRow.click();
 		await expect(firstRow).toBeVisible();
+		await firstRow.click();
 		return;
 	}
 	// Para grid/cards/masonry, usamos el primer entity-card visible
 	const firstCard = page.locator('[data-entity-card]').first();
-	await firstCard.click();
 	await expect(firstCard).toBeVisible();
+	await firstCard.click();
 }
 
 async function switchView(page: any, mode: 'grid' | 'cards' | 'masonry' | 'list') {
-	await page.getByTestId('view-mode-trigger').click();
-	await page.getByTestId(`view-mode-${mode}`).click();
+	const trigger = page.getByTestId('view-mode-trigger');
+	await expect(trigger).toBeVisible();
+	await expect(trigger).toBeEnabled();
+	await trigger.click();
+
+	const menuItem = page.getByTestId(`view-mode-${mode}`);
+	await expect(menuItem).toBeVisible();
+	await menuItem.click();
 }
 
 function viewLocatorFor(mode: 'grid' | 'cards' | 'masonry' | 'list') {

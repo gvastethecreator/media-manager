@@ -16,15 +16,41 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 	const getStatusIcon = () => {
 		switch (status) {
 			case 'indexed':
-				return <CircleCheckBig className="h-3 w-3 text-green-500" />;
+				return (
+					<CircleCheckBig className="h-3 w-3 text-green-500">
+						<title>Indexado</title>
+					</CircleCheckBig>
+				);
 			case 'outdated':
-				return <TimerReset className="h-3 w-3 text-amber-500" />;
+				return (
+					<TimerReset className="h-3 w-3 text-amber-500">
+						<title>Desactualizado</title>
+					</TimerReset>
+				);
 			case 'pending':
-				return <CircleDashed className="h-3 w-3 text-muted-foreground" />;
+				return (
+					<CircleDashed className="h-3 w-3 text-muted-foreground">
+						<title>Pendiente</title>
+					</CircleDashed>
+				);
 			case 'not_found':
-				return <CircleAlert className="h-3 w-3 text-destructive" />;
+				return (
+					<CircleAlert className="h-3 w-3 text-destructive">
+						<title>No encontrado</title>
+					</CircleAlert>
+				);
 			case 'error':
-				return <AlertCircle className="h-3 w-3 text-destructive" />;
+				return (
+					<AlertCircle className="h-3 w-3 text-destructive">
+						<title>Error</title>
+					</AlertCircle>
+				);
+			default:
+				return (
+					<CircleDashed className="h-3 w-3 text-muted-foreground">
+						<title>Pendiente</title>
+					</CircleDashed>
+				);
 		}
 	};
 
@@ -40,6 +66,8 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 				return 'No encontrado';
 			case 'error':
 				return 'Error';
+			default:
+				return 'Pendiente';
 		}
 	};
 
@@ -63,14 +91,16 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 		return date.toLocaleDateString();
 	};
 
-	const tooltipContent =
-		status === 'not_found'
-			? 'Carpeta no encontrada en el sistema'
-			: status === 'error'
-				? 'Error en la carpeta'
-				: lastIndexed
-					? `Última indexación: ${formatDate(lastIndexed)} (${lastIndexed.toLocaleTimeString()})`
-					: 'Nunca indexado';
+	let tooltipContent: string;
+	if (status === 'not_found') {
+		tooltipContent = 'Carpeta no encontrada en el sistema';
+	} else if (status === 'error') {
+		tooltipContent = 'Error en la carpeta';
+	} else if (lastIndexed) {
+		tooltipContent = `Última indexación: ${formatDate(lastIndexed)} (${lastIndexed.toLocaleTimeString()})`;
+	} else {
+		tooltipContent = 'Nunca indexado';
+	}
 
 	return (
 		<TooltipProvider>

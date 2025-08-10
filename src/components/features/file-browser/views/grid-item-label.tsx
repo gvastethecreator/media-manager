@@ -36,7 +36,6 @@ export const GridItemLabel = memo<GridItemLabelProps>(({ entity, config, classNa
 				return 'absolute top-0 left-0 right-0 z-10';
 			case 'overlay':
 				return 'absolute bottom-0 left-0 right-0 z-10 bg-gradient-to-t from-black/70 to-transparent text-white p-2';
-			case 'bottom':
 			default:
 				return 'mt-2';
 		}
@@ -73,7 +72,7 @@ export const GridItemLabel = memo<GridItemLabelProps>(({ entity, config, classNa
 			return null;
 		}
 
-		const metadata = [];
+		const metadata: string[] = [];
 
 		if (size > 0) {
 			metadata.push(formatFileSize(size));

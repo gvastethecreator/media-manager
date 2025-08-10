@@ -18,13 +18,13 @@ const categories: Array<{ value: PropertyCategory; label: string; icon: string }
 
 export function CategoryPicker({ value, onChange }: CategoryPickerProps) {
 	return (
-		<Select onValueChange={(value: PropertyCategory) => onChange(value)} value={value}>
+		<Select onValueChange={(val: PropertyCategory) => onChange(val)} value={value}>
 			<SelectTrigger>
 				<SelectValue placeholder="Selecciona una categoría" />
 			</SelectTrigger>
 			<SelectContent>
-				{categories.map(({ value, label, icon }) => (
-					<SelectItem key={value} value={value}>
+				{categories.map(({ value: catValue, label, icon }) => (
+					<SelectItem key={catValue} value={catValue}>
 						<div className="flex items-center gap-2">
 							<span aria-label="category icon" role="img">
 								{icon}

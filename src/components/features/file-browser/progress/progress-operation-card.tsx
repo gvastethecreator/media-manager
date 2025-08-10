@@ -17,14 +17,12 @@ import {
 	Folder,
 	Image,
 	MoreHorizontal,
-	Music,
 	Pause,
 	Play,
 	RefreshCw,
 	Square,
 	Trash2,
 	Upload,
-	Video,
 	X,
 	XCircle,
 } from 'lucide-react';
@@ -129,199 +127,207 @@ const priorityColors: Record<string, string> = {
 	urgent: 'bg-red-500',
 };
 
-export function ProgressOperationCard({
-	operation,
-	onStart,
-	onPause,
-	onResume,
-	onCancel,
-	onRemove,
-	onViewDetails,
-	compact = false,
-	showActions = true,
-	className,
-}: ProgressOperationCardProps) {
-	const OperationIcon = operationTypeIcons[operation.type];
-	const statusInfo = statusConfig[operation.status];
-	const StatusIcon = statusInfo.icon;
+function getStepStatusColor(status: string) {
+	if (status === 'completed') {
+		return 'bg-green-500';
+	}
+	if (status === 'running') {
+		return 'bg-blue-500';
+	}
+	if (status === 'failed') {
+		return 'bg-red-500';
+	}
+	return 'bg-gray-300';
+}
 
-	// Calcular duración
-	const duration = operation.progress.endTime
-		? operation.progress.endTime - (operation.progress.startTime || operation.createdAt)
-		: Date.now() - (operation.progress.startTime || operation.createdAt);
+function formatDuration(ms: number) {
+	const seconds = Math.floor(ms / 1000);
+	const minutes = Math.floor(seconds / 60);
+	const hours = Math.floor(minutes / 60);
 
-	// Formatear tiempo
-	const formatDuration = (ms: number) => {
-		const seconds = Math.floor(ms / 1000);
-		const minutes = Math.floor(seconds / 60);
-		const hours = Math.floor(minutes / 60);
+	if (hours > 0) {
+		return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
+	}
+	if (minutes > 0) {
+		return `${minutes}m ${seconds % 60}s`;
+	}
+	return `${seconds}s`;
+}
 
-		if (hours > 0) {
-			return `${hours}h ${minutes % 60}m ${seconds % 60}s`;
-		}
-		if (minutes > 0) {
-			return `${minutes}m ${seconds % 60}s`;
-		}
-		return `${seconds}s`;
-	};
+function calculateETA(operation: ProgressOperation) {
+	if (operation.status !== 'running' || operation.progress.percentage === 0) {
+		return null as Date | null;
+	}
+	if (operation.progress.eta) {
+		return new Date(operation.progress.eta);
+	}
+	const elapsed = Date.now() - (operation.progress.startTime || operation.createdAt);
+	const rate = operation.progress.percentage / elapsed;
+	const remaining = (100 - operation.progress.percentage) / (rate || 1);
+	return new Date(Date.now() + remaining);
+}
 
-	// Calcular ETA si está en progreso
-	const calculateETA = () => {
-		if (operation.status !== 'running' || operation.progress.percentage === 0) return null;
-
-		if (operation.progress.eta) {
-			return new Date(operation.progress.eta);
-		}
-
-		const elapsed = Date.now() - (operation.progress.startTime || operation.createdAt);
-		const rate = operation.progress.percentage / elapsed;
-		const remaining = (100 - operation.progress.percentage) / rate;
-
-		return new Date(Date.now() + remaining);
-	};
-
-	const eta = calculateETA();
-
-	// Renderizar acciones
-	const renderActions = () => {
-		if (!showActions) return null;
-
-		const actions = [];
-
-		// Botón de inicio/pausa/reanudar
-		if (operation.status === 'pending' && onStart) {
-			actions.push(
-				<TooltipProvider key="start">
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button onClick={() => onStart(operation.id)} size="sm" variant="outline">
-								<Play className="h-4 w-4" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>Iniciar operación</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
-			);
-		}
-
-		if (operation.status === 'running' && onPause) {
-			actions.push(
-				<TooltipProvider key="pause">
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button onClick={() => onPause(operation.id)} size="sm" variant="outline">
-								<Pause className="h-4 w-4" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>Pausar operación</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
-			);
-		}
-
-		if (operation.status === 'paused' && onResume) {
-			actions.push(
-				<TooltipProvider key="resume">
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button onClick={() => onResume(operation.id)} size="sm" variant="outline">
-								<Play className="h-4 w-4" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>Reanudar operación</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
-			);
-		}
-
-		// Botón de cancelar
-		if (['pending', 'running'].includes(operation.status) && onCancel) {
-			actions.push(
-				<TooltipProvider key="cancel">
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button onClick={() => onCancel(operation.id)} size="sm" variant="outline">
-								<Square className="h-4 w-4" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>Cancelar operación</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
-			);
-		}
-
-		// Botón de remover
-		if (['completed', 'failed', 'cancelled'].includes(operation.status) && onRemove) {
-			actions.push(
-				<TooltipProvider key="remove">
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button onClick={() => onRemove(operation.id)} size="sm" variant="outline">
-								<X className="h-4 w-4" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>Remover de la lista</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
-			);
-		}
-
-		// Botón de detalles
-		if (onViewDetails) {
-			actions.push(
-				<TooltipProvider key="details">
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Button onClick={() => onViewDetails(operation.id)} size="sm" variant="outline">
-								<MoreHorizontal className="h-4 w-4" />
-							</Button>
-						</TooltipTrigger>
-						<TooltipContent>Ver detalles</TooltipContent>
-					</Tooltip>
-				</TooltipProvider>
-			);
-		}
-
-		return actions.length > 0 ? <div className="flex items-center gap-1">{actions}</div> : null;
-	};
-
-	if (compact) {
-		return (
-			<div className={cn('flex items-center gap-3 rounded-lg border bg-white p-3', className)}>
-				{/* Icono y estado */}
-				<div className="flex items-center gap-2">
-					<div className={cn('rounded-full p-1.5', statusInfo.bgColor)}>
-						<OperationIcon className={cn('h-4 w-4', statusInfo.color)} />
-					</div>
-					<StatusIcon className={cn('h-4 w-4', statusInfo.color)} />
-				</div>
-
-				{/* Información básica */}
-				<div className="min-w-0 flex-1">
-					<div className="flex items-center gap-2">
-						<p className="truncate font-medium text-sm">{operation.name}</p>
-						<Badge className={cn('px-1.5 py-0.5 text-xs', statusInfo.color)} variant="secondary">
-							{statusInfo.label}
-						</Badge>
-					</div>
-
-					{/* Barra de progreso */}
-					{operation.status === 'running' && (
-						<div className="mt-1">
-							<Progress className="h-1.5" value={operation.progress.percentage} />
-							<p className="mt-0.5 text-muted-foreground text-xs">
-								{operation.progress.percentage.toFixed(1)}%{eta && ` • ETA: ${format(eta, 'HH:mm', { locale: es })}`}
-							</p>
-						</div>
-					)}
-				</div>
-
-				{/* Acciones */}
-				{renderActions()}
-			</div>
-		);
+function buildActions(
+	operation: ProgressOperation,
+	callbacks: {
+		onStart?: (id: string) => void;
+		onPause?: (id: string) => void;
+		onResume?: (id: string) => void;
+		onCancel?: (id: string) => void;
+		onRemove?: (id: string) => void;
+		onViewDetails?: (id: string) => void;
+	},
+	showActions: boolean
+) {
+	if (!showActions) {
+		return null as React.ReactNode;
 	}
 
+	const pushAction = (key: string, onClick: () => void, icon: React.ReactNode, title: string) => (
+		<TooltipProvider key={key}>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<Button onClick={onClick} size="sm" variant="outline">
+						{icon}
+					</Button>
+				</TooltipTrigger>
+				<TooltipContent>{title}</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
+	);
+
+	const isPending = operation.status === 'pending';
+	const isRunning = operation.status === 'running';
+	const isPaused = operation.status === 'paused';
+	const canCancel = (isPending || isRunning) && Boolean(callbacks.onCancel);
+	const canRemove =
+		(operation.status === 'completed' || operation.status === 'failed' || operation.status === 'cancelled') &&
+		Boolean(callbacks.onRemove);
+
+	const candidates = [
+		{
+			show: isPending && Boolean(callbacks.onStart),
+			key: 'start',
+			onClick: () => callbacks.onStart?.(operation.id),
+			icon: <Play className="h-4 w-4" />,
+			title: 'Iniciar operación',
+		},
+		{
+			show: isRunning && Boolean(callbacks.onPause),
+			key: 'pause',
+			onClick: () => callbacks.onPause?.(operation.id),
+			icon: <Pause className="h-4 w-4" />,
+			title: 'Pausar operación',
+		},
+		{
+			show: isPaused && Boolean(callbacks.onResume),
+			key: 'resume',
+			onClick: () => callbacks.onResume?.(operation.id),
+			icon: <Play className="h-4 w-4" />,
+			title: 'Reanudar operación',
+		},
+		{
+			show: canCancel,
+			key: 'cancel',
+			onClick: () => callbacks.onCancel?.(operation.id),
+			icon: <Square className="h-4 w-4" />,
+			title: 'Cancelar operación',
+		},
+		{
+			show: canRemove,
+			key: 'remove',
+			onClick: () => callbacks.onRemove?.(operation.id),
+			icon: <X className="h-4 w-4" />,
+			title: 'Remover de la lista',
+		},
+		{
+			show: Boolean(callbacks.onViewDetails),
+			key: 'details',
+			onClick: () => callbacks.onViewDetails?.(operation.id),
+			icon: <MoreHorizontal className="h-4 w-4" />,
+			title: 'Ver detalles',
+		},
+	].filter((c) => c.show);
+
+	if (candidates.length === 0) {
+		return null as React.ReactNode;
+	}
+	return (
+		<div className="flex items-center gap-1">
+			{candidates.map((c) => pushAction(c.key, c.onClick, c.icon, c.title))}
+		</div>
+	);
+}
+
+type OperationIconType = React.ComponentType<any>;
+
+function ProgressOperationCardCompact({
+	operation,
+	OperationIcon,
+	StatusIcon,
+	actionsNode,
+	className,
+	etaTime,
+}: {
+	operation: ProgressOperation;
+	OperationIcon: OperationIconType;
+	StatusIcon: OperationIconType;
+	actionsNode: React.ReactNode;
+	className?: string;
+	etaTime: Date | null;
+}) {
+	const statusInfo = statusConfig[operation.status];
+	return (
+		<div className={cn('flex items-center gap-3 rounded-lg border bg-white p-3', className)}>
+			<div className="flex items-center gap-2">
+				<div className={cn('rounded-full p-1.5', statusInfo.bgColor)}>
+					<OperationIcon className={cn('h-4 w-4', statusInfo.color)} />
+				</div>
+				<StatusIcon className={cn('h-4 w-4', statusInfo.color)} />
+			</div>
+
+			<div className="min-w-0 flex-1">
+				<div className="flex items-center gap-2">
+					<p className="truncate font-medium text-sm">{operation.name}</p>
+					<Badge className={cn('px-1.5 py-0.5 text-xs', statusInfo.color)} variant="secondary">
+						{statusInfo.label}
+					</Badge>
+				</div>
+
+				{operation.status === 'running' && (
+					<div className="mt-1">
+						<Progress className="h-1.5" value={operation.progress.percentage} />
+						<p className="mt-0.5 text-muted-foreground text-xs">
+							{operation.progress.percentage.toFixed(1)}%
+							{etaTime && ` • ETA: ${format(etaTime, 'HH:mm', { locale: es })}`}
+						</p>
+					</div>
+				)}
+			</div>
+
+			{actionsNode}
+		</div>
+	);
+}
+
+function ProgressOperationCardFull({
+	operation,
+	OperationIcon,
+	StatusIcon,
+	actionsNode,
+	className,
+	etaTime,
+	duration,
+}: {
+	operation: ProgressOperation;
+	OperationIcon: OperationIconType;
+	StatusIcon: OperationIconType;
+	actionsNode: React.ReactNode;
+	className?: string;
+	etaTime: Date | null;
+	duration: number;
+}) {
+	const statusInfo = statusConfig[operation.status];
 	return (
 		<Card className={cn('w-full', className)}>
 			<CardHeader className="pb-3">
@@ -338,7 +344,6 @@ export function ProgressOperationCard({
 									{statusInfo.label}
 								</Badge>
 
-								{/* Indicador de prioridad */}
 								<div
 									className={cn('h-2 w-2 rounded-full', priorityColors[operation.priority])}
 									title={`Prioridad: ${operation.priority}`}
@@ -351,44 +356,31 @@ export function ProgressOperationCard({
 
 					<div className="flex items-center gap-2">
 						<StatusIcon className={cn('h-5 w-5', statusInfo.color)} />
-						{renderActions()}
+						{actionsNode}
 					</div>
 				</div>
 			</CardHeader>
 
 			<CardContent className="pt-0">
-				{/* Barra de progreso */}
 				{['running', 'completed'].includes(operation.status) && (
 					<div className="mb-4">
 						<div className="mb-2 flex items-center justify-between">
 							<span className="font-medium text-sm">Progreso: {operation.progress.percentage.toFixed(1)}%</span>
-							{eta && (
-								<span className="text-muted-foreground text-sm">ETA: {format(eta, 'HH:mm', { locale: es })}</span>
+							{etaTime && (
+								<span className="text-muted-foreground text-sm">ETA: {format(etaTime, 'HH:mm', { locale: es })}</span>
 							)}
 						</div>
 						<Progress className="h-2" value={operation.progress.percentage} />
 					</div>
 				)}
 
-				{/* Pasos de la operación */}
 				{operation.steps.length > 0 && (
 					<div className="mb-4">
 						<h4 className="mb-2 font-medium text-sm">Pasos:</h4>
 						<div className="space-y-2">
 							{operation.steps.slice(-3).map((step) => (
 								<div className="flex items-center gap-2 text-sm" key={step.id}>
-									<div
-										className={cn(
-											'h-2 w-2 rounded-full',
-											step.status === 'completed'
-												? 'bg-green-500'
-												: step.status === 'running'
-													? 'bg-blue-500'
-													: step.status === 'failed'
-														? 'bg-red-500'
-														: 'bg-gray-300'
-										)}
-									/>
+									<div className={cn('h-2 w-2 rounded-full', getStepStatusColor(step.status))} />
 									<span className="flex-1 truncate">{step.name}</span>
 									{step.status === 'running' && (
 										<span className="text-muted-foreground text-xs">{step.progress.toFixed(0)}%</span>
@@ -402,7 +394,6 @@ export function ProgressOperationCard({
 					</div>
 				)}
 
-				{/* Información adicional */}
 				<div className="grid grid-cols-2 gap-4 text-sm">
 					<div>
 						<span className="text-muted-foreground">Iniciado:</span>
@@ -436,7 +427,6 @@ export function ProgressOperationCard({
 					)}
 				</div>
 
-				{/* Error si existe */}
 				{operation.error && (
 					<div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3">
 						<div className="flex items-center gap-2 text-red-800">
@@ -447,7 +437,6 @@ export function ProgressOperationCard({
 					</div>
 				)}
 
-				{/* Indicador de pausa */}
 				{operation.paused && (
 					<div className="mt-4 rounded-lg border border-yellow-200 bg-yellow-50 p-3">
 						<div className="flex items-center gap-2 text-yellow-800">
@@ -458,6 +447,62 @@ export function ProgressOperationCard({
 				)}
 			</CardContent>
 		</Card>
+	);
+}
+
+export function ProgressOperationCard({
+	operation,
+	onStart,
+	onPause,
+	onResume,
+	onCancel,
+	onRemove,
+	onViewDetails,
+	compact = false,
+	showActions = true,
+	className,
+}: ProgressOperationCardProps) {
+	const OperationIcon = operationTypeIcons[operation.type];
+	const statusInfo = statusConfig[operation.status];
+	const StatusIcon = statusInfo.icon;
+
+	// Calcular duración
+	const duration = operation.progress.endTime
+		? operation.progress.endTime - (operation.progress.startTime || operation.createdAt)
+		: Date.now() - (operation.progress.startTime || operation.createdAt);
+
+	// Usar helpers de nivel superior
+
+	const etaTime = calculateETA(operation);
+	const actionsNode = buildActions(
+		operation,
+		{ onStart, onPause, onResume, onCancel, onRemove, onViewDetails },
+		showActions
+	);
+
+	if (compact) {
+		return (
+			<ProgressOperationCardCompact
+				actionsNode={actionsNode}
+				className={className}
+				etaTime={etaTime}
+				OperationIcon={OperationIcon}
+				operation={operation}
+				StatusIcon={StatusIcon}
+			/>
+		);
+	}
+
+	return (
+		<ProgressOperationCardFull
+			actionsNode={actionsNode}
+			className={className}
+			duration={duration}
+			etaTime={etaTime}
+			OperationIcon={OperationIcon}
+			operation={operation}
+			StatusIcon={StatusIcon}
+		/>
 	);
 }
 

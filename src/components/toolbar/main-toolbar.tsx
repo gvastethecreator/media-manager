@@ -43,6 +43,12 @@ import { useLocation } from 'react-router-dom';
 import { useDebouncedCallback } from 'use-debounce';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { Separator } from '@/components/ui/separator';
 import { ViewType } from '@/components/views/types';
 import { useDebouncedViewMode } from '@/hooks/use-debounced-view-mode';
@@ -329,7 +335,53 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	);
 
 	const renderViewButtons = () => (
-		<div className="flex items-center gap-0.5 rounded-md bg-accent/10 p-0.5">
+		<div className="flex items-center gap-1 rounded-md bg-accent/10 p-0.5">
+			{/* Menú desplegable con data-testid para Playwright */}
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<Button
+						className="h-7 gap-2"
+						data-testid="view-mode-trigger"
+						size="sm"
+						title="Cambiar vista"
+						variant="outline"
+					>
+						{viewMode === 'list' ? (
+							<List className="h-3.5 w-3.5" />
+						) : viewMode === 'cards' ? (
+							<LayoutGrid className="h-3.5 w-3.5" />
+						) : viewMode === 'masonry' ? (
+							<GalleryHorizontal className="h-3.5 w-3.5" />
+						) : (
+							<Grid className="h-3.5 w-3.5" />
+						)}
+						<span className="hidden text-xs sm:inline">
+							{viewMode === 'list'
+								? 'Lista'
+								: viewMode === 'cards'
+									? 'Tarjetas'
+									: viewMode === 'masonry'
+										? 'Mosaico'
+										: 'Cuadrícula'}
+						</span>
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end">
+					<DropdownMenuItem data-testid="view-mode-grid" onClick={() => setViewMode('grid')}>
+						<Grid className="mr-2 h-3.5 w-3.5" /> Cuadrícula
+					</DropdownMenuItem>
+					<DropdownMenuItem data-testid="view-mode-cards" onClick={() => setViewMode('cards')}>
+						<LayoutGrid className="mr-2 h-3.5 w-3.5" /> Tarjetas
+					</DropdownMenuItem>
+					<DropdownMenuItem data-testid="view-mode-masonry" onClick={() => setViewModeDebounced('masonry')}>
+						<GalleryHorizontal className="mr-2 h-3.5 w-3.5" /> Mosaico
+					</DropdownMenuItem>
+					<DropdownMenuItem data-testid="view-mode-list" onClick={() => setViewMode('list')}>
+						<List className="mr-2 h-3.5 w-3.5" /> Lista
+					</DropdownMenuItem>
+				</DropdownMenuContent>
+			</DropdownMenu>
+
 			<Button
 				className="h-7 w-7 hover:bg-accent"
 				data-active={viewMode === 'grid'}

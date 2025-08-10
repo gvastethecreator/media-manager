@@ -156,6 +156,9 @@ const CardItem = memo<{
 		<motion.div
 			animate={config.animationsEnabled ? { opacity: 1, y: 0 } : false}
 			className={cardStyleClasses}
+			data-entity-card=""
+			data-item-id={entity.id}
+			// Compat: usado por E2E y selección avanzada
 			initial={config.animationsEnabled ? { opacity: 0, y: 20 } : false}
 			key={entity.id}
 			onMouseEnter={handleMouseEnter}
@@ -360,18 +363,18 @@ export const CardsView = memo<CardsViewProps>(function CardsViewComponent({
 	}, []);
 
 	return (
-		<button
+		<div
 			className="w-full cursor-default border-0 bg-transparent p-0 text-left"
 			data-testid="cards-view"
 			data-view-type="cards"
 			onClick={handleEmptySpaceClick}
 			onKeyDown={handleEmptySpaceKeyDown}
 			ref={parentRef}
+			role="application"
 			style={{
 				contain: 'layout style',
 				padding: `${layout.padding}px`,
 			}}
-			type="button"
 		>
 			<div
 				style={{
@@ -427,6 +430,6 @@ export const CardsView = memo<CardsViewProps>(function CardsViewComponent({
 					})}
 				</AnimatePresence>
 			</div>
-		</button>
+		</div>
 	);
 });

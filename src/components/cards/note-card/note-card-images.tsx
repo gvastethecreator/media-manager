@@ -15,7 +15,7 @@ interface NoteCardImagesProps {
  * Componente para mostrar las im?genes recientes de una nota en una tarjeta.
  * Similar a la secci?n de ilustraci?n de una carta TCG.
  */
-export const NoteCardImages = memo(function NoteCardImages({
+export const NoteCardImages = memo(function NoteCardImagesComponent({
 	noteId,
 	primaryColor,
 	secondaryColor,
@@ -62,61 +62,66 @@ export const NoteCardImages = memo(function NoteCardImages({
 				style={backgroundStyle}
 			>
 				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} />}>
-					{isLoading ? (
-						// Mostrar placeholders mientras carga
-						[...Array(6)].map((_, i) => (
-							<ImageLoading backgroundColor={secondaryColor} key={`loading-${renderKey}-position-${i + 1}`} />
-						))
-					) : error ? (
-						// Mostrar mensaje de error
-						<div className="col-span-full row-span-full flex items-center justify-center text-destructive text-sm">
-							<ImageIcon className="mr-2 h-4 w-4" /> Error: {error.message}
-						</div>
-					) : images.length === 0 ? (
-						// Mostrar mensaje si no hay im?genes
-						<div className="col-span-full row-span-full flex flex-col items-center justify-center p-4 text-center">
-							<ImageIcon className="mb-2 h-8 w-8 opacity-30" />
-							<p className="text-sm opacity-70">No hay im?genes</p>
-						</div>
-					) : (
-						// Mostrar las im?genes disponibles
-						<>
-							{images.map((image, index) => (
-								<div
-									className={cn(
-										'relative h-full w-full overflow-hidden',
-										tcgMode &&
-											'transition-all duration-300 hover:z-10 hover:scale-105 hover:transform hover:brightness-110'
-									)}
-									key={image.id}
-								>
-									<img
-										alt={`Imagen ${index + 1}`}
-										className="h-full w-full object-cover"
-										loading="lazy"
-										src={image.thumbnailUrl}
-									/>
-									{/* Degradado inferior para TCG mode */}
-									{tcgMode && (
-										<div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60" />
-									)}
+					{(() => {
+						if (isLoading) {
+							return [...new Array(6)].map((_, i) => (
+								<ImageLoading backgroundColor={secondaryColor} key={`loading-${renderKey}-position-${i + 1}`} />
+							));
+						}
+						if (error) {
+							return (
+								<div className="col-span-full row-span-full flex items-center justify-center text-destructive text-sm">
+									<ImageIcon className="mr-2 h-4 w-4" /> Error: {error.message}
 								</div>
-							))}
-							{/* Rellena con placeholders si hay menos de 6 im?genes */}
-							{images.length < 6 &&
-								[...Array(6 - images.length)].map((_, i) => (
+							);
+						}
+						if (images.length === 0) {
+							return (
+								<div className="col-span-full row-span-full flex flex-col items-center justify-center p-4 text-center">
+									<ImageIcon className="mb-2 h-8 w-8 opacity-30" />
+									<p className="text-sm opacity-70">No hay im?genes</p>
+								</div>
+							);
+						}
+						return (
+							<>
+								{images.map((image, index) => (
 									<div
 										className={cn(
-											'flex h-full w-full items-center justify-center bg-black/20',
-											tcgMode && 'border border-white/10'
+											'relative h-full w-full overflow-hidden',
+											tcgMode &&
+												'transition-all duration-300 hover:z-10 hover:scale-105 hover:transform hover:brightness-110'
 										)}
-										key={`placeholder-${renderKey}-position-${i + 1}`}
+										key={image.id}
 									>
-										<ImageIcon className="h-5 w-5 opacity-20" />
+										<img
+											alt={`Imagen ${index + 1}`}
+											className="h-full w-full object-cover"
+											loading="lazy"
+											src={image.thumbnailUrl}
+										/>
+										{/* Degradado inferior para TCG mode */}
+										{tcgMode && (
+											<div className="absolute inset-0 bg-gradient-to-t from-black/40 to-transparent opacity-60" />
+										)}
 									</div>
 								))}
-						</>
-					)}
+								{/* Rellena con placeholders si hay menos de 6 im?genes */}
+								{images.length < 6 &&
+									[...new Array(6 - images.length)].map((_, i) => (
+										<div
+											className={cn(
+												'flex h-full w-full items-center justify-center bg-black/20',
+												tcgMode && 'border border-white/10'
+											)}
+											key={`placeholder-${renderKey}-position-${i + 1}`}
+										>
+											<ImageIcon className="h-5 w-5 opacity-20" />
+										</div>
+									))}
+							</>
+						);
+					})()}
 				</Suspense>
 			</div>
 

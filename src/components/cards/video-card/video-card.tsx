@@ -41,7 +41,9 @@ export function VideoCard({
 
 	// Calcular colores basados en la calidad técnica
 	const primaryColor = useMemo(() => {
-		if (!video) return '#6b7280';
+		if (!video) {
+			return '#6b7280';
+		}
 		const grade = video.stats?.technicalGrade || 'unknown';
 		switch (grade) {
 			case 'A':
@@ -74,13 +76,25 @@ export function VideoCard({
 
 	// Calcular nivel de rareza basado en quality score
 	const rarityLevel = useMemo(() => {
-		if (!video) return 1;
+		if (!video) {
+			return 1;
+		}
 		const score = video.stats?.qualityScore || 0;
-		if (score >= 90) return 10; // Mítico
-		if (score >= 80) return 9; // Legendario
-		if (score >= 70) return 7; // Épico
-		if (score >= 60) return 5; // Raro
-		if (score >= 50) return 3; // Poco común
+		if (score >= 90) {
+			return 10; // Mítico
+		}
+		if (score >= 80) {
+			return 9; // Legendario
+		}
+		if (score >= 70) {
+			return 7; // Épico
+		}
+		if (score >= 60) {
+			return 5; // Raro
+		}
+		if (score >= 50) {
+			return 3; // Poco común
+		}
 		return 1; // Común
 	}, [video?.stats?.qualityScore, video]);
 

@@ -38,7 +38,6 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({ entity, config, isV
 				return 'top-0 left-0 right-0';
 			case 'center':
 				return 'top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2';
-			case 'bottom':
 			default:
 				return 'bottom-0 left-0 right-0';
 		}
@@ -46,7 +45,7 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({ entity, config, isV
 
 	// Renderizar contenido del overlay
 	const renderContent = () => {
-		const items = [];
+		const items: JSX.Element[] = [];
 
 		if (config.showName) {
 			items.push(
@@ -107,10 +106,10 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({ entity, config, isV
 				<div className="flex items-center gap-1" key="tags">
 					<Tag className="h-3 w-3 flex-shrink-0" />
 					<div className="flex flex-wrap gap-1">
-						{tags.slice(0, 2).map((tag: string, index: number) => (
+						{tags.slice(0, 2).map((tag: string) => (
 							<span
 								className="inline-block rounded bg-secondary/80 px-1 py-0.5 text-secondary-foreground text-xs"
-								key={index}
+								key={tag}
 							>
 								{tag}
 							</span>

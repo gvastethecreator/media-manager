@@ -14,7 +14,39 @@ import { FoldersStats } from './folders-stats';
 import { useFolderStats } from './hooks/use-folder-stats';
 import { useFolders } from './hooks/use-folders';
 
-// Helper functions to reduce component complexity
+function EmptyFoldersState() {
+	return (
+		<motion.div
+			animate={{
+				opacity: [0, 1],
+				y: [20, 0],
+			}}
+			className="col-span-full py-8 text-center"
+		>
+			<Folder className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
+			<p className="text-muted-foreground text-sm">No hay carpetas indexadas</p>
+			<p className="mt-1 text-muted-foreground/75 text-xs">Agrega una carpeta para comenzar a indexar imágenes</p>
+		</motion.div>
+	);
+}
+
+// Subcomponentes auxiliares
+function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void }) {
+	return (
+		<Card className="rounded-sm border-none bg-muted/30">
+			<div className="flex flex-col gap-2 p-3">
+				<div className="flex items-center gap-2 text-destructive">
+					<AlertCircle className="h-4 w-4" />
+					<p className="text-sm">{message}</p>
+				</div>
+				<Button className="mt-1 w-full text-xs" onClick={onRetry} size="sm" variant="outline">
+					Reintentar
+				</Button>
+			</div>
+		</Card>
+	);
+}
+
 function createHierarchicalOrder(folderList: any[]) {
 	const result: any[] = [];
 
@@ -43,16 +75,8 @@ function createHierarchicalOrder(folderList: any[]) {
 	return result;
 }
 
-function getProcessingMessage(processStatus: any, isGloballyProcessing: boolean) {
-	if (processStatus?.message) {
-		return processStatus.message;
-	}
-	return isGloballyProcessing ? 'Reindexando todas las carpetas...' : 'Procesando carpeta...';
-}
-
 export function FoldersSettings() {
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
-	const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
 	// Hook para estadísticas generales de carpetas
 	const { data: generalStats, isLoading: isStatsLoading, error: statsError } = useFolderStats();
@@ -67,6 +91,8 @@ export function FoldersSettings() {
 		processStatus,
 		selectedFolder,
 		globalReindexStatus,
+		progressByFolder,
+		reindexOrder,
 		handleAddFolder,
 		handleReindexFolder,
 		handleFolderClick,
@@ -76,55 +102,47 @@ export function FoldersSettings() {
 		setError,
 	} = useFolders();
 
+	// Derivar nombre de carpeta actual cuando hay reindex global
+	const currentFolderName = useMemo(() => {
+		if (!globalReindexStatus.currentFolder) {
+			return null;
+		}
+		const f = folders.find((x) => x.id === globalReindexStatus.currentFolder);
+		return f?.name ?? null;
+	}, [folders, globalReindexStatus.currentFolder]);
+
 	// Memoizar ordenación/derivaciones para evitar trabajo repetido
-	const orderedFolders = useMemo(() => createHierarchicalOrder(folders), [folders]);
-
-	// Funciones para manejar las nuevas características
-	const handleUpdateFolder = (
-		folderId: string,
-		updates: { emoji?: string; description?: string; isFavorite?: boolean }
-	) => {
-		// TODO: Implementar la actualización de carpetas
-		console.log('Updating folder:', folderId, updates);
-	};
-
-	const handleToggleExpanded = (folderId: string) => {
-		setExpandedFolders((prev) => {
-			const newSet = new Set(prev);
-			if (newSet.has(folderId)) {
-				newSet.delete(folderId);
-			} else {
-				newSet.add(folderId);
-			}
-			return newSet;
-		});
-	};
+	const orderedFolders = useMemo(() => {
+		const base = createHierarchicalOrder(folders);
+		// Si hay reindexado global, priorizar orden dinámico observado
+		if (isGloballyProcessing && reindexOrder && reindexOrder.length > 0) {
+			const orderMap = new Map(reindexOrder.map((id, idx) => [id, idx] as const));
+			return [...base].sort((a, b) => {
+				const ai = orderMap.has(a.id) ? (orderMap.get(a.id) as number) : Number.MAX_SAFE_INTEGER;
+				const bi = orderMap.has(b.id) ? (orderMap.get(b.id) as number) : Number.MAX_SAFE_INTEGER;
+				if (ai !== bi) {
+					return ai - bi;
+				}
+				// Si no están en el orden, mantener alfabético por nombre
+				return a.name.localeCompare(b.name);
+			});
+		}
+		return base;
+	}, [folders, isGloballyProcessing, reindexOrder]);
 
 	// Combinar errores
 	const displayError = errorMessage || error || statsError?.message;
 
 	if (displayError) {
 		return (
-			<Card className="rounded-sm border-none bg-muted/30">
-				<div className="flex flex-col gap-2 p-3">
-					<div className="flex items-center gap-2 text-destructive">
-						<AlertCircle className="h-4 w-4" />
-						<p className="text-sm">{displayError}</p>
-					</div>
-					<Button
-						className="mt-1 w-full text-xs"
-						onClick={() => {
-							setErrorMessage(null);
-							setError(null);
-							loadStats();
-						}}
-						size="sm"
-						variant="outline"
-					>
-						Reintentar
-					</Button>
-				</div>
-			</Card>
+			<ErrorCard
+				message={displayError}
+				onRetry={() => {
+					setErrorMessage(null);
+					setError(null);
+					loadStats();
+				}}
+			/>
 		);
 	}
 
@@ -146,6 +164,7 @@ export function FoldersSettings() {
 									<span className="font-medium">
 										{processStatus?.message ||
 											(isGloballyProcessing ? 'Reindexando todas las carpetas...' : 'Procesando carpeta...')}
+										{isGloballyProcessing && currentFolderName && <span className="ml-1">• {currentFolderName}</span>}
 										{processStatus?.progress !== undefined && (
 											<span className="ml-1">({Math.round(processStatus.progress)}%)</span>
 										)}
@@ -181,7 +200,7 @@ export function FoldersSettings() {
 							<Button
 								className="h-7 cursor-pointer text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
 								data-testid="reindex-all-button"
-								disabled={isLoading || isGloballyProcessing}
+								disabled={globalReindexStatus.isProcessing}
 								onClick={() => reindexAll()}
 								size="sm"
 								type="button"
@@ -194,7 +213,7 @@ export function FoldersSettings() {
 									)}
 								/>
 								{globalReindexStatus.isProcessing
-									? `Reindexando... ${Math.round(globalReindexStatus.progress)}%`
+									? `Reindexando... ${Math.round(globalReindexStatus.progress)}%${currentFolderName ? ` • ${currentFolderName}` : ''}`
 									: 'Reindexar todo'}
 							</Button>
 						</div>
@@ -209,68 +228,97 @@ export function FoldersSettings() {
 						<FolderForm isLoading={isLoading} isProcessing={isProcessing} onAddFolder={handleAddFolder} />
 
 						{/* Lista de carpetas - grid responsiva optimizada para desktop */}
-						<div
-							className={cn(
-								'grid content-start items-stretch pr-3',
-								// Base y tablets
-								'grid-cols-1 gap-3 md:grid-cols-2 md:gap-4',
-								// Desktop amplio: columnas automáticas con tamaño mínimo
-								'lg:gap-4 lg:[grid-template-columns:repeat(auto-fill,minmax(320px,1fr))]',
-								// 1440+
-								'xl:gap-5 xl:[grid-template-columns:repeat(auto-fill,minmax(340px,1fr))]',
-								// 2K+
-								'2xl:gap-6 2xl:[grid-template-columns:repeat(auto-fill,minmax(360px,1fr))]',
-								// Relleno denso para minimizar huecos
-								'auto-rows-fr [grid-auto-flow:row_dense]'
-							)}
-						>
-							{orderedFolders.map((folder) => (
-								<FolderCard
-									allFolders={folders}
-									folder={folder}
-									getFolderIndexStatus={getFolderIndexStatus}
-									isGloballyProcessing={isGloballyProcessing}
-									isProcessing={isProcessing}
-									key={folder.id}
-									onFolderClick={handleFolderClick}
-									onReindex={handleReindexFolder}
-									processStatus={processStatus}
-									selectedFolder={selectedFolder}
-								/>
-							))}
-
-							{folders.length === 0 && (
-								<motion.div
-									animate={{
-										opacity: [0, 1],
-										y: [20, 0],
-									}}
-									className="col-span-full py-8 text-center"
-								>
-									<Folder className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
-									<p className="text-muted-foreground text-sm">No hay carpetas indexadas</p>
-									<p className="mt-1 text-muted-foreground/75 text-xs">
-										Agrega una carpeta para comenzar a indexar imágenes
-									</p>
-								</motion.div>
-							)}
-						</div>
+						<FoldersGrid
+							folders={folders}
+							globalCurrentFolderId={globalReindexStatus.currentFolder}
+							isGloballyProcessing={isGloballyProcessing}
+							isProcessing={isProcessing}
+							onFolderClick={handleFolderClick}
+							onReindex={handleReindexFolder}
+							orderedFolders={orderedFolders}
+							processStatus={processStatus}
+							progressByFolder={progressByFolder}
+							selectedFolder={selectedFolder}
+						/>
 
 						{/* Progress bar para reindexado global */}
-						{globalReindexStatus.isProcessing && (
-							<div className="mt-2">
-								<Progress className="h-2" data-testid="reindex-global-progress" value={globalReindexStatus.progress} />
-								<p className="mt-1 text-center text-muted-foreground text-xs">
-									Reindexando... {Math.round(globalReindexStatus.progress)}%
-								</p>
-							</div>
-						)}
+						<GlobalReindexProgress progress={globalReindexStatus.progress} show={globalReindexStatus.isProcessing} />
 					</div>
 				</CardContent>
 			</Card>
 
 			{/* Estadísticas generales al final */}
 			{generalStats && !isStatsLoading && <FoldersStats stats={generalStats} />}
+		</div>
+	);
+}
+
+function FoldersGrid({
+	orderedFolders,
+	folders,
+	progressByFolder,
+	isGloballyProcessing,
+	globalCurrentFolderId,
+	processStatus,
+	onFolderClick,
+	onReindex,
+	selectedFolder,
+	isProcessing,
+}: {
+	orderedFolders: any[];
+	folders: any[];
+	progressByFolder: Record<string, any>;
+	isGloballyProcessing: boolean;
+	globalCurrentFolderId: string | null | undefined;
+	processStatus: any;
+	onFolderClick: (id: string) => void;
+	onReindex: (id: string) => void;
+	selectedFolder: string | null;
+	isProcessing: boolean;
+}) {
+	return (
+		<div
+			className={cn(
+				'grid content-start items-stretch pr-3',
+				'grid-cols-1 gap-3 md:grid-cols-2 md:gap-4',
+				'lg:gap-4 lg:[grid-template-columns:repeat(auto-fill,minmax(320px,1fr))]',
+				'xl:gap-5 xl:[grid-template-columns:repeat(auto-fill,minmax(340px,1fr))]',
+				'2xl:gap-6 2xl:[grid-template-columns:repeat(auto-fill,minmax(360px,1fr))]',
+				'auto-rows-fr [grid-auto-flow:row_dense]'
+			)}
+		>
+			{orderedFolders.map((folder) => (
+				<FolderCard
+					allFolders={folders}
+					folder={folder}
+					getFolderIndexStatus={getFolderIndexStatus}
+					globalCurrentFolderId={globalCurrentFolderId}
+					isGloballyProcessing={isGloballyProcessing}
+					isProcessing={
+						isGloballyProcessing
+							? globalCurrentFolderId === folder.id || Boolean(progressByFolder[folder.id]?.isProcessing)
+							: isProcessing || Boolean(progressByFolder[folder.id]?.isProcessing)
+					}
+					key={folder.id}
+					onFolderClick={onFolderClick}
+					onReindex={onReindex}
+					processStatus={progressByFolder[folder.id] || processStatus}
+					selectedFolder={selectedFolder}
+				/>
+			))}
+			{folders.length === 0 && <EmptyFoldersState />}
+		</div>
+	);
+}
+
+function GlobalReindexProgress({ show, progress }: { show: boolean; progress: number }) {
+	if (!show) {
+		return null;
+	}
+	return (
+		<div className="mt-2">
+			<Progress className="h-2" data-testid="reindex-global-progress" value={progress} />
+			<p className="mt-1 text-center text-muted-foreground text-xs">Reindexando... {Math.round(progress)}%</p>
 		</div>
 	);
 }

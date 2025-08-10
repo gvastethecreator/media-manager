@@ -76,43 +76,47 @@ export function GroupsSettings() {
 
 	const stats = useMemo(() => {
 		const totalElements = groups.reduce((acc, group) => {
-			const stats = group.stats;
-			if (!stats) return acc;
+			const groupStats = group.stats;
+			if (!groupStats) {
+				return acc;
+			}
 			return (
 				acc +
-				stats.imageCount +
-				stats.videoCount +
-				stats.albumCount +
-				stats.collectionCount +
-				stats.tagCount +
-				stats.characterCount +
-				stats.placeCount +
-				stats.worldItemCount +
-				stats.conceptCount +
-				stats.promptCount +
-				stats.noteCount +
-				stats.wildcardCount +
-				stats.propertyCount
+				groupStats.imageCount +
+				groupStats.videoCount +
+				groupStats.albumCount +
+				groupStats.collectionCount +
+				groupStats.tagCount +
+				groupStats.characterCount +
+				groupStats.placeCount +
+				groupStats.worldItemCount +
+				groupStats.conceptCount +
+				groupStats.promptCount +
+				groupStats.noteCount +
+				groupStats.wildcardCount +
+				groupStats.propertyCount
 			);
 		}, 0);
 
 		const emptyGroups = groups.filter((group) => {
-			const stats = group.stats;
-			if (!stats) return true;
+			const groupStats = group.stats;
+			if (!groupStats) {
+				return true;
+			}
 			return (
-				stats.imageCount +
-					stats.videoCount +
-					stats.albumCount +
-					stats.collectionCount +
-					stats.tagCount +
-					stats.characterCount +
-					stats.placeCount +
-					stats.worldItemCount +
-					stats.conceptCount +
-					stats.promptCount +
-					stats.noteCount +
-					stats.wildcardCount +
-					stats.propertyCount ===
+				groupStats.imageCount +
+					groupStats.videoCount +
+					groupStats.albumCount +
+					groupStats.collectionCount +
+					groupStats.tagCount +
+					groupStats.characterCount +
+					groupStats.placeCount +
+					groupStats.worldItemCount +
+					groupStats.conceptCount +
+					groupStats.promptCount +
+					groupStats.noteCount +
+					groupStats.wildcardCount +
+					groupStats.propertyCount ===
 				0
 			);
 		}).length;

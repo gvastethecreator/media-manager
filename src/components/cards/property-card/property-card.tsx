@@ -33,7 +33,9 @@ export function PropertyCard({ propertyId, onClick, className, showBadges = true
 	// Calcular colores
 	const primaryColor = useMemo(() => property?.color || '#3b82f6', [property?.color]);
 	const secondaryColor = useMemo(() => {
-		if (!property?.color) return '#2563eb';
+		if (!property?.color) {
+			return '#2563eb';
+		}
 
 		try {
 			// Convertir hex a RGB y oscurecer

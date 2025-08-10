@@ -108,7 +108,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 	// Integración de accesibilidad
 	const accessibility = useAccessibility({
 		containerRef: containerRef as React.RefObject<HTMLElement>,
-		onAnnouncement: (message: string) => console.log('Accessibility announcement:', message),
+		onAnnouncement: (message: string) => logger.info('Accessibility announcement:', message),
 	});
 
 	// Hook de sincronización de archivos - Solo activar si hay filterId de carpeta
@@ -231,8 +231,12 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 			containerWidth,
 			onItemClick: handleItemClick,
 			onItemDoubleClick: handleItemDoubleClick,
-			onItemContextMenu: () => {}, // Implementar si es necesario
-			onContextAction: () => {}, // Implementar si es necesario
+			onItemContextMenu: () => {
+				/* no-op: implementar si es necesario */
+			},
+			onContextAction: () => {
+				/* no-op: implementar si es necesario */
+			},
 		}),
 		[items, itemSize, effectiveSelectedIds, containerWidth, handleItemClick, handleItemDoubleClick]
 	);
@@ -243,12 +247,23 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 	}, []);
 
 	const getViewType = useCallback(() => {
-		if (viewMode === 'list') return 'list';
-		if (viewMode === 'grid') return 'grid';
-		return 'cards';
+		switch (viewMode) {
+			case 'list':
+				return 'list';
+			case 'grid':
+				return 'grid';
+			case 'simple-grid':
+				return 'grid';
+			case 'cards':
+				return 'cards';
+			case 'masonry':
+				return 'cards';
+			default:
+				return 'cards';
+		}
 	}, [viewMode]);
 
-	const handlePreviewItem = useCallback((item: any) => {
+	const handlePreviewItem = useCallback((_item: any) => {
 		// Implementar previsualización si es necesario
 	}, []);
 
@@ -340,14 +355,20 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 						disabled={true}
 						getItemElement={getItemElement}
 						items={fileItems as any}
-						onSelectionCancel={() => {}}
+						onSelectionCancel={() => {
+							/* no-op */
+						}}
 						onSelectionEnd={(_state, newSelectedIds) => {
 							if (newSelectedIds.length > 0) {
 								// setSelectedIds(newSelectedIds);
 							}
 						}}
-						onSelectionStart={(_state) => {}}
-						onSelectionUpdate={(_state, _selectedIds) => {}}
+						onSelectionStart={(_state) => {
+							/* no-op */
+						}}
+						onSelectionUpdate={(_state, _selectedIds) => {
+							/* no-op */
+						}}
 						overlayConfig={{
 							showCount: true,
 							showCoordinates: false,

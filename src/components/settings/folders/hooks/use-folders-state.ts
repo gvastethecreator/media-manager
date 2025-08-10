@@ -23,10 +23,10 @@ export function useFoldersState() {
 		try {
 			setIsLoading(true);
 			setError(null);
-			const { data: folders } = await findFolders({});
+			const { data: foldersData } = await findFolders({});
 
 			// Transformar datos de manera segura
-			const transformedFolders = folders.map((folder) => ({
+			const transformedFolders = foldersData.map((folder) => ({
 				...folder,
 				lastIndexed: folder.lastIndexed ? new Date(folder.lastIndexed) : null,
 				createdAt: new Date(folder.createdAt || new Date()),
@@ -74,9 +74,9 @@ export function useFoldersState() {
 				directChildren: transformedFolders.length,
 				lastActivity: new Date(),
 			});
-		} catch (error) {
-			stateLogger.error('❌ Error cargando carpetas:', error);
-			setError(error instanceof Error ? error.message : 'No se pudieron cargar las carpetas');
+		} catch (loadErr) {
+			stateLogger.error('❌ Error cargando carpetas:', loadErr);
+			setError(loadErr instanceof Error ? loadErr.message : 'No se pudieron cargar las carpetas');
 		} finally {
 			setIsLoading(false);
 		}
@@ -91,9 +91,9 @@ export function useFoldersState() {
 			// Las estadísticas se cargan con las carpetas
 			setIsLoading(false);
 			stateLogger.info('✅ Estadísticas cargadas');
-		} catch (error) {
-			stateLogger.error('❌ Error cargando estadísticas:', error);
-			setError(error instanceof Error ? error.message : 'Error cargando estadísticas');
+		} catch (statsErr) {
+			stateLogger.error('❌ Error cargando estadísticas:', statsErr);
+			setError(statsErr instanceof Error ? statsErr.message : 'Error cargando estadísticas');
 			setIsLoading(false);
 		}
 	}, [loadFolders]);

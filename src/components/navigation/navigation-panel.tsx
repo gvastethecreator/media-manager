@@ -9,7 +9,7 @@ import { NavMainNavigation } from './components/nav-main-navigation';
 import { NavPanelHeader } from './components/nav-panel-header';
 import { useCategoryStats } from './hooks';
 
-export const NavPanel = memo(function NavPanel({
+const NavPanelComponent = memo(function NavPanelImpl({
 	isCollapsed = false,
 	onToggleCollapse,
 	isAnimating = false,
@@ -63,3 +63,5 @@ export const NavPanel = memo(function NavPanel({
 		</aside>
 	);
 });
+
+export const NavPanel = NavPanelComponent;

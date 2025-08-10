@@ -5,21 +5,7 @@
  * in a non-intrusive overlay that appears when operations are running.
  */
 
-import {
-	Archive,
-	ChevronDown,
-	ChevronUp,
-	Copy,
-	Download,
-	FolderOpen,
-	Move,
-	Pause,
-	Play,
-	Square,
-	Trash2,
-	Upload,
-	X,
-} from 'lucide-react';
+import { Archive, ChevronDown, ChevronUp, Copy, Download, FolderOpen, Move, Trash2, Upload, X } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
 import React, { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';

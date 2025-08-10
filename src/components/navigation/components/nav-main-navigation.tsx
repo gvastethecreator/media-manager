@@ -38,7 +38,7 @@ interface NavMainNavigationProps {
 	isCollapsed?: boolean;
 }
 
-export const NavMainNavigation = memo(function NavMainNavigation({
+const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 	currentView,
 	onNavigate,
 	isCollapsed = false,
@@ -268,21 +268,14 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 				<div className={flexContainerClasses}>
 					{NAVIGATION_CATEGORIES.map((category, _catIdx) => (
 						<div className="mb-1" key={category.id}>
-							<div
+							<button
 								aria-expanded={expandedCategories.has(category.id)}
 								className={cn(
-									'mb-0.5 flex cursor-pointer items-center gap-1 transition-all duration-300',
+									'mb-0.5 flex items-center gap-1 transition-all duration-300',
 									isCollapsed ? 'justify-center px-1 py-1' : ''
 								)}
 								onClick={() => toggleCategory(category.id)}
-								onKeyDown={(e) => {
-									if (e.key === 'Enter' || e.key === ' ') {
-										e.preventDefault();
-										toggleCategory(category.id);
-									}
-								}}
-								role="button"
-								tabIndex={0}
+								type="button"
 							>
 								<Tooltip>
 									<TooltipTrigger asChild>
@@ -310,7 +303,7 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 											))}
 									</>
 								)}
-							</div>
+							</button>
 							{!isCollapsed && expandedCategories.has(category.id) && (
 								<>
 									{/* TreeView directo para carpetas */}
@@ -339,24 +332,17 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 															isCollapsed ? 'justify-center px-1' : ''
 														)}
 													>
-														<div
+														<button
 															className={cn(
-																'flex flex-1 cursor-pointer items-center',
+																'flex flex-1 items-center',
 																isCollapsed ? 'justify-center' : ''
 															)}
 															onClick={() => handleNavigate(child.id as ViewType)}
-															onKeyDown={(e) => {
-																if (e.key === 'Enter' || e.key === ' ') {
-																	e.preventDefault();
-																	handleNavigate(child.id as ViewType);
-																}
-															}}
-															role="button"
-															tabIndex={0}
+															type="button"
 														>
 															<child.icon className="h-3 w-3" style={{ color: child.color }} />
 															{!isCollapsed && <span className="ml-2">{child.label}</span>}
-														</div>
+														</button>
 														{!isCollapsed && (
 															<div className="flex items-center gap-1">
 																{child.count !== undefined && (
@@ -413,3 +399,5 @@ export const NavMainNavigation = memo(function NavMainNavigation({
 		</div>
 	);
 });
+
+export const NavMainNavigation = NavMainNavigationComponent;

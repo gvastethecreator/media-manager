@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import { render, screen, waitFor } from '@/test/test-utils';
+import { fireEvent, render, screen, waitFor } from '@/test/test-utils';
 import type { FileItem } from '@/types/file-browser/file-item';
 import { MultiSelectionContextMenu } from './multi-selection-context-menu';
 
@@ -41,6 +41,8 @@ mock.module('@/lib/keyboard', () => ({
 		getItemProps: mock(() => ({})),
 	})),
 }));
+
+const TOTAL_SIZE_REGEX = /Tamaño total: 3,072 bytes/;
 
 describe('MultiSelectionContextMenu', () => {
 	const mockSelectedItems: FileItem[] = [
@@ -95,7 +97,7 @@ describe('MultiSelectionContextMenu', () => {
 		);
 
 		expect(screen.getByText('2 elementos seleccionados')).toBeInTheDocument();
-		expect(screen.getByText(/Tamaño total: 3,072 bytes/)).toBeInTheDocument();
+		expect(screen.getByText(TOTAL_SIZE_REGEX)).toBeInTheDocument();
 	});
 
 	it('displays all bulk operation actions', () => {

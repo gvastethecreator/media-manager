@@ -108,7 +108,7 @@ function getThemeIcon(theme: string | undefined) {
 }
 
 // Componente principal memoizado
-export const NavPanelHeader = memo(function NavPanelHeader({
+const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 	isCollapsed = false,
 	onOpenSettings,
 	onOpenDevelopment,
@@ -254,3 +254,5 @@ export const NavPanelHeader = memo(function NavPanelHeader({
 		</motion.div>
 	);
 });
+
+export const NavPanelHeader = NavPanelHeaderComponent;

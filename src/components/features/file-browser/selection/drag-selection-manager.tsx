@@ -61,7 +61,9 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 	const isItemInSelection = useCallback(
 		(itemId: string, rect: SelectionRect) => {
 			const itemBounds = getItemBounds(itemId);
-			if (!(itemBounds && containerRef.current)) return false;
+			if (!(itemBounds && containerRef.current)) {
+				return false;
+			}
 
 			const containerBounds = containerRef.current.getBoundingClientRect();
 			const normalizedRect = getNormalizedRect(rect);
@@ -100,7 +102,7 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 
 			if (modifierKeys.ctrlKey) {
 				// Ctrl+drag: toggle selection of intersecting items
-				intersectingItems.forEach((item) => {
+				for (const item of intersectingItems) {
 					if (dragStartItems.has(item.id)) {
 						// Item was selected at drag start, remove it
 						removeFromSelection(item.id);
@@ -108,12 +110,12 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 						// Item was not selected at drag start, add it
 						addToSelection(item.id);
 					}
-				});
+				}
 			} else if (modifierKeys.shiftKey) {
 				// Shift+drag: add to existing selection
-				intersectingItems.forEach((item) => {
+				for (const item of intersectingItems) {
 					addToSelection(item.id);
-				});
+				}
 			} else {
 				// Normal drag: replace selection
 				setSelection(intersectingItems.map((item) => item.id));
@@ -126,8 +128,10 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 	 * Handle mouse down event
 	 */
 	const handleMouseDown = useCallback(
-		(event: React.MouseEvent) => {
-			if (disabled || event.button !== 0) return; // Only left mouse button
+		(event: MouseEvent) => {
+			if (disabled || event.button !== 0) {
+				return; // Only left mouse button
+			}
 
 			// Don't start selection if clicking on an interactive element
 			const target = event.target as HTMLElement;
@@ -142,7 +146,9 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 			}
 
 			const containerBounds = containerRef.current?.getBoundingClientRect();
-			if (!containerBounds) return;
+			if (!containerBounds) {
+				return;
+			}
 
 			const startX = event.clientX - containerBounds.left;
 			const startY = event.clientY - containerBounds.top;
@@ -157,7 +163,9 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 			if (!(event.ctrlKey || event.shiftKey)) {
 				const clickedItem = items.find((item) => {
 					const bounds = getItemBounds(item.id);
-					if (!bounds) return false;
+					if (!bounds) {
+						return false;
+					}
 
 					return (
 						event.clientX >= bounds.left &&
@@ -182,7 +190,9 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 	 */
 	const handleMouseMove = useCallback(
 		(event: MouseEvent) => {
-			if (!(isMouseDownRef.current && dragStartRef.current && containerRef.current)) return;
+			if (!(isMouseDownRef.current && dragStartRef.current && containerRef.current)) {
+				return;
+			}
 
 			const containerBounds = containerRef.current.getBoundingClientRect();
 			const currentX = event.clientX - containerBounds.left;
@@ -254,8 +264,21 @@ export const DragSelectionManager: React.FC<DragSelectionManagerProps> = ({
 		}
 	}, [isDragging, handleMouseMove, handleMouseUp, handleKeyDown]);
 
+	// Attach mousedown listener imperatively to avoid making a static element interactive
+	useEffect(() => {
+		const el = containerRef.current;
+		if (!el || disabled) {
+			return;
+		}
+		const listener = (e: MouseEvent) => handleMouseDown(e);
+		el.addEventListener('mousedown', listener);
+		return () => {
+			el.removeEventListener('mousedown', listener);
+		};
+	}, [containerRef, disabled, handleMouseDown]);
+
 	return (
-		<div className={`relative ${className}`} onMouseDown={handleMouseDown} style={{ userSelect: 'none' }}>
+		<div className={`relative ${className}`} style={{ userSelect: 'none' }}>
 			{children}
 
 			{isDragging && selectionRect && <SelectionOverlay containerRef={containerRef} rect={selectionRect} />}

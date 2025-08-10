@@ -41,7 +41,7 @@ function isDragSelectionProps(props: SelectionOverlayProps): props is DragSelect
 }
 
 // Legacy component for backward compatibility
-const LegacySelectionOverlay: React.FC<LegacySelectionOverlayProps> = ({ rect, containerRef, className = '' }) => {
+const LegacySelectionOverlay: React.FC<LegacySelectionOverlayProps> = ({ rect, containerRef: _containerRef, className = '' }) => {
 	// Calculate normalized rectangle dimensions
 	const left = Math.min(rect.startX, rect.currentX);
 	const top = Math.min(rect.startY, rect.currentY);
@@ -179,7 +179,7 @@ interface EnhancedSelectionOverlayProps extends LegacySelectionOverlayProps {
 
 export const EnhancedSelectionOverlay: React.FC<EnhancedSelectionOverlayProps> = ({
 	rect,
-	containerRef,
+	containerRef: _containerRef,
 	isActive = true,
 	selectedCount = 0,
 	showCount = true,

@@ -67,7 +67,9 @@ export function TreeView({
 
 	const handleSelection = useCallback(
 		(nodeId: string, ctrlKey = false) => {
-			if (!selectable) return;
+			if (!selectable) {
+				return;
+			}
 
 			let newSelection: string[];
 
@@ -111,7 +113,9 @@ export function TreeView({
 						selectable && 'hover:border-accent-foreground/10'
 					)}
 					onClick={(e) => {
-						if (hasChildren) toggleExpanded(node.id);
+						if (hasChildren) {
+							toggleExpanded(node.id);
+						}
 						handleSelection(node.id, e.ctrlKey || e.metaKey);
 						onNodeClick?.(node);
 					}}
@@ -124,7 +128,7 @@ export function TreeView({
 							{currentPath.map((isLastInPath, pathIndex) => (
 								<div
 									className="absolute top-0 bottom-0 border-border/40 border-l"
-									key={pathIndex}
+									key={`${node.id}-path-${pathIndex}-${level}`}
 									style={{
 										left: pathIndex * indent + 12,
 										display: pathIndex === currentPath.length - 1 && isLastInPath ? 'none' : 'block',

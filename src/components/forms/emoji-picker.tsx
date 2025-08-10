@@ -147,7 +147,7 @@ const emojisByCategory = {
 	],
 };
 
-export const EmojiPicker = memo(function EmojiPicker({ value, onChange, className }: EmojiPickerProps) {
+export const EmojiPicker = memo(function EmojiPickerImpl({ value, onChange, className }: EmojiPickerProps) {
 	const [open, setOpen] = useState(false);
 	const [activeTab, setActiveTab] = useState('activities');
 
