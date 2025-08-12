@@ -67,7 +67,9 @@ export const createCollectionCoreSlice: StateCreator<
 
 	getSelectedCollection: () => {
 		const { selectedCollectionId, collections } = get();
-		if (!selectedCollectionId) return;
+		if (!selectedCollectionId) {
+			return;
+		}
 		return collections[selectedCollectionId];
 	},
 
@@ -95,7 +97,9 @@ export const createCollectionCoreSlice: StateCreator<
 	updateCollection: (id: string, data: Partial<CollectionWithStats>) => {
 		set((state) => {
 			const existingCollection = state.collections[id];
-			if (!existingCollection) return state;
+			if (!existingCollection) {
+				return state;
+			}
 
 			return {
 				collections: {

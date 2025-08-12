@@ -182,7 +182,9 @@ export default function MixedView({ className }: MixedViewProps) {
 
 	// Manejar reintento
 	const handleRetry = useCallback(async () => {
-		if (isRetrying) return;
+		if (isRetrying) {
+			return;
+		}
 
 		setIsRetrying(true);
 		logger.info('🔄 Reintentando carga de todos los archivos');

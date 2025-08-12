@@ -17,7 +17,9 @@ type VideoMetadata = z.infer<typeof VideoMetadataSchema>;
  * @returns Duración formateada como HH:MM:SS o MM:SS
  */
 export function formatVideoDuration(durationSeconds?: number): string {
-	if (!durationSeconds) return '00:00';
+	if (!durationSeconds) {
+		return '00:00';
+	}
 
 	const hours = Math.floor(durationSeconds / 3600);
 	const minutes = Math.floor((durationSeconds % 3600) / 60);
@@ -49,9 +51,15 @@ export function generateVideoThumbnailUrl(
 
 	// Añadir parámetros
 	const params = new URLSearchParams();
-	if (width) params.append('width', width.toString());
-	if (height) params.append('height', height.toString());
-	if (timestamp !== undefined) params.append('timestamp', timestamp.toString());
+	if (width) {
+		params.append('width', width.toString());
+	}
+	if (height) {
+		params.append('height', height.toString());
+	}
+	if (timestamp !== undefined) {
+		params.append('timestamp', timestamp.toString());
+	}
 
 	const queryString = params.toString();
 	return queryString ? `${url}?${queryString}` : url;
@@ -63,7 +71,9 @@ export function generateVideoThumbnailUrl(
  * @returns Tamaño formateado
  */
 export function formatVideoSize(metadata?: VideoMetadata): string {
-	if (!metadata || metadata.size === undefined) return 'Desconocido';
+	if (!metadata || metadata.size === undefined) {
+		return 'Desconocido';
+	}
 	return formatBytes(metadata.size);
 }
 
@@ -74,7 +84,9 @@ export function formatVideoSize(metadata?: VideoMetadata): string {
  * @returns Dimensiones formateadas
  */
 export function formatVideoDimensions(width?: number, height?: number): string {
-	if (!(width && height)) return 'Desconocido';
+	if (!(width && height)) {
+		return 'Desconocido';
+	}
 	return `${width} × ${height}`;
 }
 
@@ -84,7 +96,9 @@ export function formatVideoDimensions(width?: number, height?: number): string {
  * @returns Descripción en español
  */
 export function getVideoFormatDescription(format?: VideoFormat): string {
-	if (!format) return 'Desconocido';
+	if (!format) {
+		return 'Desconocido';
+	}
 
 	switch (format) {
 		case VideoFormat.MP4:
@@ -113,7 +127,9 @@ export function getVideoFormatDescription(format?: VideoFormat): string {
  * @returns Bitrate formateado o undefined
  */
 export function calculateBitrate(size?: number, durationSeconds?: number): string | undefined {
-	if (!(size && durationSeconds)) return;
+	if (!(size && durationSeconds)) {
+		return;
+	}
 
 	// Bitrate en kilobits por segundo (kbps)
 	const bitrateKbps = (size * 8) / (durationSeconds * 1000);
@@ -131,7 +147,9 @@ export function calculateBitrate(size?: number, durationSeconds?: number): strin
  * @returns true si es HD o superior
  */
 export function isHDVideo(height?: number): boolean {
-	if (!height) return false;
+	if (!height) {
+		return false;
+	}
 	return height >= 720;
 }
 
@@ -141,13 +159,25 @@ export function isHDVideo(height?: number): boolean {
  * @returns Etiqueta de calidad
  */
 export function getVideoQualityLabel(height?: number): string {
-	if (!height) return 'Desconocido';
+	if (!height) {
+		return 'Desconocido';
+	}
 
-	if (height >= 2160) return '4K UHD';
-	if (height >= 1440) return '2K QHD';
-	if (height >= 1080) return 'Full HD';
-	if (height >= 720) return 'HD';
-	if (height >= 480) return 'SD';
+	if (height >= 2160) {
+		return '4K UHD';
+	}
+	if (height >= 1440) {
+		return '2K QHD';
+	}
+	if (height >= 1080) {
+		return 'Full HD';
+	}
+	if (height >= 720) {
+		return 'HD';
+	}
+	if (height >= 480) {
+		return 'SD';
+	}
 	return 'Baja resolución';
 }
 
@@ -157,7 +187,9 @@ export function getVideoQualityLabel(height?: number): string {
  * @returns Array de etiquetas sugeridas
  */
 export function extractVideoTagSuggestions(metadata?: VideoMetadata): string[] {
-	if (!metadata) return [];
+	if (!metadata) {
+		return [];
+	}
 
 	const suggestions: string[] = [];
 
@@ -168,9 +200,13 @@ export function extractVideoTagSuggestions(metadata?: VideoMetadata): string[] {
 
 	// Sugerir en base a la duración
 	if (metadata.duration) {
-		if (metadata.duration < 60) suggestions.push('Clip corto');
-		else if (metadata.duration < 600) suggestions.push('Video corto');
-		else if (metadata.duration > 1800) suggestions.push('Video largo');
+		if (metadata.duration < 60) {
+			suggestions.push('Clip corto');
+		} else if (metadata.duration < 600) {
+			suggestions.push('Video corto');
+		} else if (metadata.duration > 1800) {
+			suggestions.push('Video largo');
+		}
 	}
 
 	// Añadir formato como sugerencia
@@ -187,7 +223,9 @@ export function extractVideoTagSuggestions(metadata?: VideoMetadata): string[] {
  * @returns true si tiene metadatos completos
  */
 export function hasCompleteMetadata(video: VideoBase): boolean {
-	if (!video.metadata) return false;
+	if (!video.metadata) {
+		return false;
+	}
 
 	const metadata: VideoMetadata = typeof video.metadata === 'string' ? JSON.parse(video.metadata) : video.metadata;
 
@@ -261,7 +299,9 @@ export function hasVisualConfigChanged(
 	configA?: Partial<Record<string, any>>,
 	configB?: Partial<Record<string, any>>
 ): boolean {
-	if (!(configA && configB)) return true;
+	if (!(configA && configB)) {
+		return true;
+	}
 
 	const keysToCompare = [
 		'enable3DEffect',
@@ -283,7 +323,9 @@ export function hasVisualConfigChanged(
 			const typeA = typeof configA[key];
 			const typeB = typeof configB[key];
 
-			if (typeA !== typeB) return true;
+			if (typeA !== typeB) {
+				return true;
+			}
 
 			// Si ambos son string, comparar como JSON
 			if (typeA === 'string' && typeB === 'string') {
@@ -291,17 +333,25 @@ export function hasVisualConfigChanged(
 					const objA = JSON.parse(configA[key] as string);
 					const objB = JSON.parse(configB[key] as string);
 					// Comparación simple de estructuras JSON
-					if (JSON.stringify(objA) !== JSON.stringify(objB)) return true;
+					if (JSON.stringify(objA) !== JSON.stringify(objB)) {
+						return true;
+					}
 				} catch (_e) {
 					// Si falla el parse, comparar como strings
-					if (configA[key] !== configB[key]) return true;
+					if (configA[key] !== configB[key]) {
+						return true;
+					}
 				}
 			}
 			// Si son objetos, comparar directamente
-			else if (configA[key] !== configB[key]) return true;
+			else if (configA[key] !== configB[key]) {
+				return true;
+			}
 		}
 		// Para campos simples, comparación directa
-		else if (configA[key] !== configB[key]) return true;
+		else if (configA[key] !== configB[key]) {
+			return true;
+		}
 	}
 
 	return false;

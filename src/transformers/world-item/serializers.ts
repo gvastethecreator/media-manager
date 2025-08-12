@@ -33,7 +33,9 @@ const logger = serverLogger.withContext('WorldItemSerializers');
 
 const serializeArray = <T>(data: T[] | string, fieldName: string): string => {
 	try {
-		if (typeof data === 'string') return data;
+		if (typeof data === 'string') {
+			return data;
+		}
 		return data?.length > 0 ? JSON.stringify(data) : '[]';
 	} catch (error) {
 		logger.error(`Error serializando ${fieldName}`, { error });
@@ -42,7 +44,9 @@ const serializeArray = <T>(data: T[] | string, fieldName: string): string => {
 };
 
 const deserializeArray = <T>(jsonString: string | null | undefined, _fieldName: string): T[] => {
-	if (!jsonString) return [];
+	if (!jsonString) {
+		return [];
+	}
 
 	// Si el string no parece JSON válido (no empieza con [ o {), tratarlo como array de strings
 	const trimmed = jsonString.trim();
@@ -95,7 +99,9 @@ export const deserializeTags = (json: string | null): string[] => deserializeArr
  * Extiende un WorldItem con datos adicionales
  */
 export function extendWorldItem(item: Record<string, unknown>): Record<string, unknown> {
-	if (!item) return item;
+	if (!item) {
+		return item;
+	}
 
 	return {
 		...item,
@@ -107,7 +113,9 @@ export function extendWorldItem(item: Record<string, unknown>): Record<string, u
  * Extiende múltiples WorldItems con datos adicionales
  */
 export function extendWorldItems(items: Record<string, unknown>[]): Record<string, unknown>[] {
-	if (!(items && Array.isArray(items))) return [];
+	if (!(items && Array.isArray(items))) {
+		return [];
+	}
 
 	return items.map(extendWorldItem);
 }

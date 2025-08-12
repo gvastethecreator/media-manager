@@ -10,7 +10,6 @@ import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Progress } from '@/components/ui/progress';
 import { useBatchOperations } from '@/hooks/useBatchOperations';
 import { cn } from '@/lib/utils';
 import { BatchOperationsPanel } from './BatchOperationsPanel';
@@ -49,11 +48,21 @@ export function BatchOperationsIndicator({
 
 	// Get the most relevant status
 	const getIndicatorStatus = () => {
-		if (summary.running > 0) return 'running';
-		if (summary.failed > 0) return 'failed';
-		if (summary.paused > 0) return 'paused';
-		if (summary.queued > 0) return 'queued';
-		if (summary.completed > 0) return 'completed';
+		if (summary.running > 0) {
+			return 'running';
+		}
+		if (summary.failed > 0) {
+			return 'failed';
+		}
+		if (summary.paused > 0) {
+			return 'paused';
+		}
+		if (summary.queued > 0) {
+			return 'queued';
+		}
+		if (summary.completed > 0) {
+			return 'completed';
+		}
 		return 'idle';
 	};
 

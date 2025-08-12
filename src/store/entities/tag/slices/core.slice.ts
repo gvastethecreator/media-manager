@@ -92,7 +92,7 @@ export const createTagCoreSlice: StateCreator<TagStore, [], [], TagCoreState & T
 	},
 
 	// 🔄 Vuelve a cargar los tags forzando una nueva petición
-	refreshTags: async () => {
+	refreshTags: () => {
 		set({ tags: {}, isLoading: true, error: null });
 		return get().loadTags();
 	},

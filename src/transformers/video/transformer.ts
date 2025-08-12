@@ -341,18 +341,30 @@ export function getAllVideos(videos: Record<string, VideoWithStats>): VideoWithS
  * 📐 Calcula la relación de aspecto de un video
  */
 function calculateAspectRatio(width: number | null, height: number | null): string {
-	if (!(width && height)) return 'unknown';
+	if (!(width && height)) {
+		return 'unknown';
+	}
 	const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
 	const divisor = gcd(width, height);
 	const aspectWidth = width / divisor;
 	const aspectHeight = height / divisor;
 
 	// Casos comunes
-	if (aspectWidth === 16 && aspectHeight === 9) return '16:9';
-	if (aspectWidth === 4 && aspectHeight === 3) return '4:3';
-	if (aspectWidth === 1 && aspectHeight === 1) return '1:1';
-	if (aspectWidth === 21 && aspectHeight === 9) return '21:9';
-	if (aspectWidth === 3 && aspectHeight === 2) return '3:2';
+	if (aspectWidth === 16 && aspectHeight === 9) {
+		return '16:9';
+	}
+	if (aspectWidth === 4 && aspectHeight === 3) {
+		return '4:3';
+	}
+	if (aspectWidth === 1 && aspectHeight === 1) {
+		return '1:1';
+	}
+	if (aspectWidth === 21 && aspectHeight === 9) {
+		return '21:9';
+	}
+	if (aspectWidth === 3 && aspectHeight === 2) {
+		return '3:2';
+	}
 
 	return `${aspectWidth}:${aspectHeight}`;
 }
@@ -361,7 +373,9 @@ function calculateAspectRatio(width: number | null, height: number | null): stri
  * 📏 Formatea la resolución del video
  */
 function formatResolution(width: number | null, height: number | null): string {
-	if (!(width && height)) return 'unknown';
+	if (!(width && height)) {
+		return 'unknown';
+	}
 	return `${width}x${height}`;
 }
 
@@ -369,14 +383,24 @@ function formatResolution(width: number | null, height: number | null): string {
  * 🏆 Determina el nivel de calidad basado en resolución
  */
 function determineQualityLevel(width: number | null, height: number | null): VideoQualityLocal {
-	if (!(width && height)) return VideoQualityLocal.UNKNOWN;
+	if (!(width && height)) {
+		return VideoQualityLocal.UNKNOWN;
+	}
 
 	const pixels = width * height;
 
-	if (pixels >= 8_294_400) return VideoQualityLocal.ULTRA; // 3840x2160 (4K)
-	if (pixels >= 2_073_600) return VideoQualityLocal.HIGH; // 1920x1080 (2K/FHD)
-	if (pixels >= 921_600) return VideoQualityLocal.MEDIUM; // 1280x720 (HD)
-	if (pixels >= 307_200) return VideoQualityLocal.MEDIUM; // 640x480 (SD)
+	if (pixels >= 8_294_400) {
+		return VideoQualityLocal.ULTRA; // 3840x2160 (4K)
+	}
+	if (pixels >= 2_073_600) {
+		return VideoQualityLocal.HIGH; // 1920x1080 (2K/FHD)
+	}
+	if (pixels >= 921_600) {
+		return VideoQualityLocal.MEDIUM; // 1280x720 (HD)
+	}
+	if (pixels >= 307_200) {
+		return VideoQualityLocal.MEDIUM; // 640x480 (SD)
+	}
 
 	return VideoQualityLocal.LOW;
 }
@@ -397,45 +421,55 @@ function calculateQualityScore(params: {
 
 	// Resolución (40 puntos máximo)
 	const pixels = (params.width || 0) * (params.height || 0);
-	if (pixels >= 8_294_400)
+	if (pixels >= 8_294_400) {
 		score += 40; // 4K
-	else if (pixels >= 2_073_600)
+	} else if (pixels >= 2_073_600) {
 		score += 35; // 2K
-	else if (pixels >= 921_600)
+	} else if (pixels >= 921_600) {
 		score += 30; // HD
-	else if (pixels >= 307_200)
+	} else if (pixels >= 307_200) {
 		score += 20; // SD
-	else score += 10; // Low
+	} else {
+		score += 10; // Low
+	}
 
 	// Duración (20 puntos máximo)
 	const minutes = params.duration / 60;
-	if (minutes >= 60)
+	if (minutes >= 60) {
 		score += 20; // Película
-	else if (minutes >= 30)
+	} else if (minutes >= 30) {
 		score += 18; // Episodio largo
-	else if (minutes >= 10)
+	} else if (minutes >= 10) {
 		score += 15; // Episodio corto
-	else if (minutes >= 3)
+	} else if (minutes >= 3) {
 		score += 12; // Clip largo
-	else if (minutes >= 1)
+	} else if (minutes >= 1) {
 		score += 8; // Clip corto
-	else score += 3; // Muy corto
+	} else {
+		score += 3; // Muy corto
+	}
 
 	// Tamaño vs calidad (15 puntos máximo)
 	const mbPerMinute = params.size / (1024 * 1024) / Math.max(minutes, 0.1);
-	if (mbPerMinute >= 50)
+	if (mbPerMinute >= 50) {
 		score += 15; // Alta calidad
-	else if (mbPerMinute >= 20)
+	} else if (mbPerMinute >= 20) {
 		score += 12; // Buena calidad
-	else if (mbPerMinute >= 10)
+	} else if (mbPerMinute >= 10) {
 		score += 8; // Calidad media
-	else if (mbPerMinute >= 5)
+	} else if (mbPerMinute >= 5) {
 		score += 5; // Baja calidad
-	else score += 2; // Muy baja calidad
+	} else {
+		score += 2; // Muy baja calidad
+	}
 
 	// Metadatos (10 puntos máximo)
-	if (params.hasMetadata) score += 5;
-	if (params.hasThumbnail) score += 5;
+	if (params.hasMetadata) {
+		score += 5;
+	}
+	if (params.hasThumbnail) {
+		score += 5;
+	}
 
 	// Relaciones (15 puntos máximo)
 	score += Math.min(params.totalRelations, 15);
@@ -451,9 +485,15 @@ function determineTechnicalGrade(
 	qualityLevel: VideoQuality,
 	_megabytes: number
 ): 'A' | 'B' | 'C' | 'D' {
-	if (qualityScore >= 80 && qualityLevel === VideoQuality.ULTRA) return 'A';
-	if (qualityScore >= 60 && qualityLevel === VideoQuality.HIGH) return 'B';
-	if (qualityScore >= 40 && qualityLevel === VideoQuality.MEDIUM) return 'C';
+	if (qualityScore >= 80 && qualityLevel === VideoQuality.ULTRA) {
+		return 'A';
+	}
+	if (qualityScore >= 60 && qualityLevel === VideoQuality.HIGH) {
+		return 'B';
+	}
+	if (qualityScore >= 40 && qualityLevel === VideoQuality.MEDIUM) {
+		return 'C';
+	}
 	return 'D';
 }
 
@@ -461,7 +501,9 @@ function determineTechnicalGrade(
  * 🤖 Parsea metadatos del video
  */
 function parseVideoMetadata(metadataStr: string | null): Record<string, unknown> {
-	if (!metadataStr) return {};
+	if (!metadataStr) {
+		return {};
+	}
 
 	try {
 		return JSON.parse(metadataStr);
@@ -484,32 +526,56 @@ function generateAutoTags(params: {
 	const tags: string[] = [];
 
 	// Tags de calidad
-	if (params.qualityLevel === VideoQuality.ULTRA) tags.push('4K', 'Ultra HD');
-	else if (params.qualityLevel === VideoQuality.HIGH) tags.push('2K', 'Full HD');
-	else if (params.qualityLevel === VideoQuality.MEDIUM) tags.push('HD');
-	else if (params.qualityLevel === VideoQuality.LOW) tags.push('SD');
+	if (params.qualityLevel === VideoQuality.ULTRA) {
+		tags.push('4K', 'Ultra HD');
+	} else if (params.qualityLevel === VideoQuality.HIGH) {
+		tags.push('2K', 'Full HD');
+	} else if (params.qualityLevel === VideoQuality.MEDIUM) {
+		tags.push('HD');
+	} else if (params.qualityLevel === VideoQuality.LOW) {
+		tags.push('SD');
+	}
 
 	// Tags de duración
-	if (params.durationMinutes >= 90) tags.push('Película', 'Largo');
-	else if (params.durationMinutes >= 45) tags.push('Episodio');
-	else if (params.durationMinutes >= 10) tags.push('Corto');
-	else if (params.durationMinutes >= 1) tags.push('Clip');
-	else tags.push('Micro');
+	if (params.durationMinutes >= 90) {
+		tags.push('Película', 'Largo');
+	} else if (params.durationMinutes >= 45) {
+		tags.push('Episodio');
+	} else if (params.durationMinutes >= 10) {
+		tags.push('Corto');
+	} else if (params.durationMinutes >= 1) {
+		tags.push('Clip');
+	} else {
+		tags.push('Micro');
+	}
 
 	// Tags de características
-	if (!params.hasAudio) tags.push('Sin Audio');
-	if (params.hasSubtitles) tags.push('Subtítulos');
+	if (!params.hasAudio) {
+		tags.push('Sin Audio');
+	}
+	if (params.hasSubtitles) {
+		tags.push('Subtítulos');
+	}
 
 	// Tags de aspecto
-	if (params.aspectRatio === '16:9') tags.push('Widescreen');
-	else if (params.aspectRatio === '4:3') tags.push('Clásico');
-	else if (params.aspectRatio === '1:1') tags.push('Cuadrado');
-	else if (params.aspectRatio === '21:9') tags.push('Ultrawide');
+	if (params.aspectRatio === '16:9') {
+		tags.push('Widescreen');
+	} else if (params.aspectRatio === '4:3') {
+		tags.push('Clásico');
+	} else if (params.aspectRatio === '1:1') {
+		tags.push('Cuadrado');
+	} else if (params.aspectRatio === '21:9') {
+		tags.push('Ultrawide');
+	}
 
 	// Tags de tamaño
-	if (params.megabytes >= 1000) tags.push('Gran Tamaño');
-	else if (params.megabytes >= 100) tags.push('Tamaño Medio');
-	else tags.push('Compacto');
+	if (params.megabytes >= 1000) {
+		tags.push('Gran Tamaño');
+	} else if (params.megabytes >= 100) {
+		tags.push('Tamaño Medio');
+	} else {
+		tags.push('Compacto');
+	}
 
 	return tags;
 }

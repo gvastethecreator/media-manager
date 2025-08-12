@@ -47,7 +47,9 @@ const isFilterActive = (filters: FavoriteFilters): boolean => {
 };
 
 const applyFilters = (favorites: FavoriteExtended[], filters: FavoriteFilters): FavoriteExtended[] => {
-	if (!isFilterActive(filters)) return favorites;
+	if (!isFilterActive(filters)) {
+		return favorites;
+	}
 
 	return favorites.filter((favorite) => {
 		// Filtro por tipo de entidad

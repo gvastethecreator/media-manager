@@ -10,14 +10,26 @@ const API_BASE_PATH = '/api/places';
 
 export async function getPlacesFromApi(options: PlaceSearchOptions = {}): Promise<PlaceWithStats[]> {
 	const params = new URLSearchParams();
-	if (options.query) params.append('search', options.query);
-	if (options.limit) params.append('limit', String(options.limit));
-	if (options.offset) params.append('offset', String(options.offset));
-	if (options.sortBy) params.append('sortBy', options.sortBy);
-	if (options.sortOrder) params.append('sortOrder', options.sortOrder);
+	if (options.query) {
+		params.append('search', options.query);
+	}
+	if (options.limit) {
+		params.append('limit', String(options.limit));
+	}
+	if (options.offset) {
+		params.append('offset', String(options.offset));
+	}
+	if (options.sortBy) {
+		params.append('sortBy', options.sortBy);
+	}
+	if (options.sortOrder) {
+		params.append('sortOrder', options.sortOrder);
+	}
 
 	const response = await fetch(`${API_BASE_PATH}?${params.toString()}`);
-	if (!response.ok) throw new Error('Error al obtener lugares');
+	if (!response.ok) {
+		throw new Error('Error al obtener lugares');
+	}
 	const { data } = await response.json();
 	return data as PlaceWithStats[];
 }

@@ -93,10 +93,10 @@ export function useVirtualizedContainer({
 		[containerHeight, containerWidth, isReady, minHeight, paddingTop, paddingBottom]
 	);
 
-    const measureContainer = useCallback(() => {
-	    if (!parentRef.current) {
-		    return;
-	    }
+	const measureContainer = useCallback(() => {
+		if (!parentRef.current) {
+			return;
+		}
 
 		const element = parentRef.current;
 
@@ -107,10 +107,10 @@ export function useVirtualizedContainer({
 		updateDimensions(targetElement);
 	}, [updateDimensions]);
 
-    useEffect(() => {
-	    if (!parentRef.current) {
-		    return;
-	    }
+	useEffect(() => {
+		if (!parentRef.current) {
+			return;
+		}
 
 		const element = parentRef.current;
 
@@ -253,7 +253,7 @@ export const VirtualizedContainer = React.forwardRef<HTMLDivElement, Virtualized
 			);
 		}
 
-			const isInteractive = Boolean(onClick);
+		const isInteractive = Boolean(onClick);
 		if (isInteractive) {
 			return (
 				<button
@@ -283,10 +283,10 @@ export const VirtualizedContainer = React.forwardRef<HTMLDivElement, Virtualized
 		}
 
 		return (
-				<div
-					className={`relative select-none ${className}`}
-					ref={ref}
-					style={{
+			<div
+				className={`relative select-none ${className}`}
+				ref={ref}
+				style={{
 					height: `${height}px`,
 					width: `${width}px`,
 					minHeight: `${height}px`,

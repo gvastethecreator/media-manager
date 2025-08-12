@@ -23,7 +23,6 @@ import {
 export class FileEntityMapperService {
 	private static instance: FileEntityMapperService;
 	private imageService: ImageService;
-	private metadataService: MetadataIntegrationService;
 
 	private constructor() {
 		this.imageService = ImageService.getInstance();
@@ -143,27 +142,37 @@ export class FileEntityMapperService {
 		try {
 			switch (entityType) {
 				case EntityType.IMAGE: {
-					if (!fileInfo.hash) return false;
+					if (!fileInfo.hash) {
+						return false;
+					}
 					const existingImage = await this.imageService.getImageByHash(fileInfo.hash);
 					return !!existingImage;
 				}
 				case EntityType.VIDEO: {
-					if (!fileInfo.hash) return false;
+					if (!fileInfo.hash) {
+						return false;
+					}
 					const existingVideo = await getVideoByHash(fileInfo.hash);
 					return !!existingVideo;
 				}
 				case EntityType.AUDIO: {
-					if (!fileInfo.hash) return false;
+					if (!fileInfo.hash) {
+						return false;
+					}
 					const existingAudio = await getAudioByHash(fileInfo.hash);
 					return !!existingAudio;
 				}
 				case EntityType.FILE3D: {
-					if (!fileInfo.hash) return false;
+					if (!fileInfo.hash) {
+						return false;
+					}
 					const existingFile3D = await getFile3DByHash(fileInfo.hash);
 					return !!existingFile3D;
 				}
 				case EntityType.DOCUMENT: {
-					if (!fileInfo.hash) return false;
+					if (!fileInfo.hash) {
+						return false;
+					}
 					const existingDocument = await getDocumentByHash(fileInfo.hash);
 					return !!existingDocument;
 				}
@@ -230,8 +239,8 @@ export class FileEntityMapperService {
 	 */
 	public async extractMetadataForEntity(
 		filePath: string,
-		entityId: string,
-		entityType: EntityType
+		_entityId: string,
+		_entityType: EntityType
 	): Promise<{ success: boolean; error?: string }> {
 		console.log(`🔍 FileEntityMapper: [ETAPA 2] Extrayendo metadata para ${filePath}`);
 		try {
@@ -266,7 +275,7 @@ export class FileEntityMapperService {
 	 */
 	public async processThumbnailForEntity(
 		filePath: string,
-		entityId: string,
+		_entityId: string,
 		entityType: EntityType
 	): Promise<{ success: boolean; error?: string }> {
 		console.log(`🖼️ FileEntityMapper: [ETAPA 3] Procesando thumbnail para ${filePath}`);

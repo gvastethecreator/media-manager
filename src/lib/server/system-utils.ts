@@ -98,10 +98,18 @@ export function formatUptime(seconds: number): string {
 	const secs = Math.floor(seconds % 60);
 
 	const parts = [];
-	if (days > 0) parts.push(`${days}d`);
-	if (hours > 0) parts.push(`${hours}h`);
-	if (minutes > 0) parts.push(`${minutes}m`);
-	if (secs > 0 || parts.length === 0) parts.push(`${secs}s`);
+	if (days > 0) {
+		parts.push(`${days}d`);
+	}
+	if (hours > 0) {
+		parts.push(`${hours}h`);
+	}
+	if (minutes > 0) {
+		parts.push(`${minutes}m`);
+	}
+	if (secs > 0 || parts.length === 0) {
+		parts.push(`${secs}s`);
+	}
 
 	return parts.join(' ');
 }

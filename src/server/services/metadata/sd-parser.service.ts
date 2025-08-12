@@ -110,7 +110,9 @@ export async function parseAutomatic1111Metadata(parametersText: string): Promis
 function parseA1111Parameters(parametersLine: string): Partial<Automatic1111Metadata> {
 	const params: Partial<Automatic1111Metadata> = {};
 
-	if (!parametersLine) return params;
+	if (!parametersLine) {
+		return params;
+	}
 
 	// Patrones de extracción para parámetros comunes
 	const patterns = {
@@ -189,19 +191,37 @@ function calculateA1111Confidence(metadata: Automatic1111Metadata): number {
 	let confidence = 0;
 
 	// Presencia de elementos clave
-	if (metadata.prompt) confidence += 0.2;
-	if (metadata.steps) confidence += 0.2;
-	if (metadata.cfg_scale) confidence += 0.2;
-	if (metadata.sampler) confidence += 0.15;
-	if (metadata.seed) confidence += 0.1;
-	if (metadata.model) confidence += 0.1;
+	if (metadata.prompt) {
+		confidence += 0.2;
+	}
+	if (metadata.steps) {
+		confidence += 0.2;
+	}
+	if (metadata.cfg_scale) {
+		confidence += 0.2;
+	}
+	if (metadata.sampler) {
+		confidence += 0.15;
+	}
+	if (metadata.seed) {
+		confidence += 0.1;
+	}
+	if (metadata.model) {
+		confidence += 0.1;
+	}
 
 	// Bonificación por parámetros A1111 específicos
-	if (metadata.restore_faces || metadata.tiling) confidence += 0.1;
-	if (metadata.hires_upscaler) confidence += 0.1;
+	if (metadata.restore_faces || metadata.tiling) {
+		confidence += 0.1;
+	}
+	if (metadata.hires_upscaler) {
+		confidence += 0.1;
+	}
 
 	// Bonificación por parámetros Forge
-	if (metadata.forge_attention || metadata.forge_memory) confidence += 0.15;
+	if (metadata.forge_attention || metadata.forge_memory) {
+		confidence += 0.15;
+	}
 
 	return Math.min(confidence, 1.0);
 }
@@ -306,14 +326,26 @@ function calculateComfyUIConfidence(metadata: ComfyUIMetadata): number {
 	let confidence = 0;
 
 	// Presencia de workflow
-	if (metadata.workflow) confidence += 0.3;
-	if (metadata.workflow_json) confidence += 0.2;
+	if (metadata.workflow) {
+		confidence += 0.3;
+	}
+	if (metadata.workflow_json) {
+		confidence += 0.2;
+	}
 
 	// Parámetros extraídos
-	if (metadata.prompt) confidence += 0.2;
-	if (metadata.steps) confidence += 0.1;
-	if (metadata.cfg_scale) confidence += 0.1;
-	if (metadata.sampler) confidence += 0.1;
+	if (metadata.prompt) {
+		confidence += 0.2;
+	}
+	if (metadata.steps) {
+		confidence += 0.1;
+	}
+	if (metadata.cfg_scale) {
+		confidence += 0.1;
+	}
+	if (metadata.sampler) {
+		confidence += 0.1;
+	}
 
 	return Math.min(confidence, 1.0);
 }
@@ -382,14 +414,26 @@ function calculateSwarmUIConfidence(metadata: SwarmUIMetadata): number {
 	let confidence = 0;
 
 	// Campos específicos de SwarmUI
-	if (metadata.generation_time) confidence += 0.3;
-	if (metadata.prep_time) confidence += 0.2;
-	if (metadata.aspect_ratio) confidence += 0.2;
+	if (metadata.generation_time) {
+		confidence += 0.3;
+	}
+	if (metadata.prep_time) {
+		confidence += 0.2;
+	}
+	if (metadata.aspect_ratio) {
+		confidence += 0.2;
+	}
 
 	// Campos comunes
-	if (metadata.prompt) confidence += 0.15;
-	if (metadata.steps) confidence += 0.1;
-	if (metadata.cfg_scale) confidence += 0.05;
+	if (metadata.prompt) {
+		confidence += 0.15;
+	}
+	if (metadata.steps) {
+		confidence += 0.1;
+	}
+	if (metadata.cfg_scale) {
+		confidence += 0.05;
+	}
 
 	return Math.min(confidence, 1.0);
 }

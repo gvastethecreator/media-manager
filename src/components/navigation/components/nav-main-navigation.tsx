@@ -333,10 +333,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 														)}
 													>
 														<button
-															className={cn(
-																'flex flex-1 items-center',
-																isCollapsed ? 'justify-center' : ''
-															)}
+															className={cn('flex flex-1 items-center', isCollapsed ? 'justify-center' : '')}
 															onClick={() => handleNavigate(child.id as ViewType)}
 															type="button"
 														>

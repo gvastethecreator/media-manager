@@ -14,14 +14,14 @@ export interface GetCharactersOptions {
 /**
  * Obtiene los datos de un personaje para mostrar en una tarjeta
  */
-export async function getCharacterCardData(characterId: string): Promise<CharacterCardData> {
+export function getCharacterCardData(characterId: string): Promise<CharacterCardData> {
 	return apiClient.get<CharacterCardData>(`/characters/${characterId}/card-data`);
 }
 
 /**
  * Obtiene una lista de personajes para mostrar en una galería de tarjetas
  */
-export async function getCharactersForCards(options: GetCharactersOptions = {}): Promise<CharacterCardData[]> {
+export function getCharactersForCards(options: GetCharactersOptions = {}): Promise<CharacterCardData[]> {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(options)) {
 		if (value !== undefined) {
@@ -35,9 +35,7 @@ export async function getCharactersForCards(options: GetCharactersOptions = {}):
 /**
  * Busca personajes con filtros avanzados
  */
-export async function searchCharacters(
-	options: GetCharactersOptions & { searchTerm: string }
-): Promise<CharacterCardData[]> {
+export function searchCharacters(options: GetCharactersOptions & { searchTerm: string }): Promise<CharacterCardData[]> {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(options)) {
 		if (value !== undefined) {

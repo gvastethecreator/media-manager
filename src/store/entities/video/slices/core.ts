@@ -102,7 +102,9 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 					const searchLower = filters.search.toLowerCase();
 					const matchesName = video.name.toLowerCase().includes(searchLower);
 					const matchesDescription = video.description?.toLowerCase().includes(searchLower);
-					if (!(matchesName || matchesDescription)) return false;
+					if (!(matchesName || matchesDescription)) {
+						return false;
+					}
 				}
 
 				// Filtro de favoritos
@@ -113,28 +115,48 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 				// Filtro de público/privado
 
 				// Filtros de duración
-				if (filters.minDuration && video.duration < filters.minDuration) return false;
-				if (filters.maxDuration && video.duration > filters.maxDuration) return false;
+				if (filters.minDuration && video.duration < filters.minDuration) {
+					return false;
+				}
+				if (filters.maxDuration && video.duration > filters.maxDuration) {
+					return false;
+				}
 
 				// Filtros de tamaño
-				if (filters.minSize && video.size < filters.minSize) return false;
-				if (filters.maxSize && video.size > filters.maxSize) return false;
+				if (filters.minSize && video.size < filters.minSize) {
+					return false;
+				}
+				if (filters.maxSize && video.size > filters.maxSize) {
+					return false;
+				}
 
 				// Filtros de resolución
-				if (filters.minWidth && (!video.width || video.width < filters.minWidth)) return false;
-				if (filters.maxWidth && (!video.width || video.width > filters.maxWidth)) return false;
-				if (filters.minHeight && (!video.height || video.height < filters.minHeight)) return false;
-				if (filters.maxHeight && (!video.height || video.height > filters.maxHeight)) return false;
+				if (filters.minWidth && (!video.width || video.width < filters.minWidth)) {
+					return false;
+				}
+				if (filters.maxWidth && (!video.width || video.width > filters.maxWidth)) {
+					return false;
+				}
+				if (filters.minHeight && (!video.height || video.height < filters.minHeight)) {
+					return false;
+				}
+				if (filters.maxHeight && (!video.height || video.height > filters.maxHeight)) {
+					return false;
+				}
 
 				// Filtros técnicos
 				if (filters.hasMetadata !== undefined) {
 					const hasMetadata = !!video.metadata;
-					if (hasMetadata !== filters.hasMetadata) return false;
+					if (hasMetadata !== filters.hasMetadata) {
+						return false;
+					}
 				}
 
 				if (filters.hasThumbnail !== undefined) {
 					const hasThumbnail = !!video.thumbnail;
-					if (hasThumbnail !== filters.hasThumbnail) return false;
+					if (hasThumbnail !== filters.hasThumbnail) {
+						return false;
+					}
 				}
 
 				return true;
@@ -149,12 +171,22 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 				const bVal = b[sortBy];
 
 				// Handle null/undefined values
-				if (aVal == null && bVal == null) return 0;
-				if (aVal == null) return sortDirection === 'asc' ? 1 : -1;
-				if (bVal == null) return sortDirection === 'asc' ? -1 : 1;
+				if (aVal == null && bVal == null) {
+					return 0;
+				}
+				if (aVal == null) {
+					return sortDirection === 'asc' ? 1 : -1;
+				}
+				if (bVal == null) {
+					return sortDirection === 'asc' ? -1 : 1;
+				}
 
-				if (aVal < bVal) return sortDirection === 'asc' ? -1 : 1;
-				if (aVal > bVal) return sortDirection === 'asc' ? 1 : -1;
+				if (aVal < bVal) {
+					return sortDirection === 'asc' ? -1 : 1;
+				}
+				if (aVal > bVal) {
+					return sortDirection === 'asc' ? 1 : -1;
+				}
 				return 0;
 			});
 		}
@@ -215,7 +247,9 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 	updateVideo: (id, data) => {
 		set((state) => {
 			const existingVideo = state.videos[id];
-			if (!existingVideo) return state;
+			if (!existingVideo) {
+				return state;
+			}
 
 			const updatedVideo = { ...existingVideo, ...data };
 
@@ -232,7 +266,9 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 	deleteVideo: (id) => {
 		set((state) => {
 			const video = state.videos[id];
-			if (!video) return state;
+			if (!video) {
+				return state;
+			}
 
 			// Eliminar del Record principal
 			const { [id]: _, ...remainingVideos } = state.videos;

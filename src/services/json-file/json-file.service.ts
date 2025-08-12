@@ -221,21 +221,51 @@ export async function updateJsonFile(
 			updatedAt: new Date(),
 		};
 
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.path !== undefined) updateData.path = data.path;
-		if (data.size !== undefined) updateData.size = data.size;
-		if (data.hash !== undefined) updateData.hash = data.hash;
-		if (data.mimeType !== undefined) updateData.mimeType = data.mimeType;
-		if (data.extension !== undefined) updateData.extension = data.extension;
-		if (data.folderId !== undefined) updateData.folderId = data.folderId;
-		if (data.isFavorite !== undefined) updateData.isFavorite = Boolean(data.isFavorite);
-		if (data.isArchived !== undefined) updateData.isArchived = Boolean(data.isArchived);
-		if (data.isValid !== undefined) updateData.isValid = Boolean(data.isValid);
-		if (data.schema !== undefined) updateData.schema = data.schema;
-		if (data.validationErrors !== undefined) updateData.validationErrors = data.validationErrors;
-		if (data.keyCount !== undefined) updateData.keyCount = Number(data.keyCount) || 0;
-		if (data.depth !== undefined) updateData.depth = Number(data.depth) || 0;
-		if (data.content !== undefined) updateData.content = data.content;
+		if (data.name !== undefined) {
+			updateData.name = data.name;
+		}
+		if (data.path !== undefined) {
+			updateData.path = data.path;
+		}
+		if (data.size !== undefined) {
+			updateData.size = data.size;
+		}
+		if (data.hash !== undefined) {
+			updateData.hash = data.hash;
+		}
+		if (data.mimeType !== undefined) {
+			updateData.mimeType = data.mimeType;
+		}
+		if (data.extension !== undefined) {
+			updateData.extension = data.extension;
+		}
+		if (data.folderId !== undefined) {
+			updateData.folderId = data.folderId;
+		}
+		if (data.isFavorite !== undefined) {
+			updateData.isFavorite = Boolean(data.isFavorite);
+		}
+		if (data.isArchived !== undefined) {
+			updateData.isArchived = Boolean(data.isArchived);
+		}
+		if (data.isValid !== undefined) {
+			updateData.isValid = Boolean(data.isValid);
+		}
+		if (data.schema !== undefined) {
+			updateData.schema = data.schema;
+		}
+		if (data.validationErrors !== undefined) {
+			updateData.validationErrors = data.validationErrors;
+		}
+		if (data.keyCount !== undefined) {
+			updateData.keyCount = Number(data.keyCount) || 0;
+		}
+		if (data.depth !== undefined) {
+			updateData.depth = Number(data.depth) || 0;
+		}
+		if (data.content !== undefined) {
+			updateData.content = data.content;
+		}
 
 		const result = await db.update(jsonFiles).set(updateData).where(eq(jsonFiles.id, id)).returning();
 

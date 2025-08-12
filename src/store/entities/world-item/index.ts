@@ -34,7 +34,7 @@ export const useWorldItemStore = create<WorldItemStore>()(
 		{
 			name: 'world-item-store',
 			storage: createJSONStorage(() => localStorage),
-			version: Number.parseInt(VERSIONING.STORE),
+			version: Number.parseInt(VERSIONING.STORE, 10),
 			// Solo persistir el estado de UI y filtros
 			partialize: (state) => ({
 				ui: state.ui,

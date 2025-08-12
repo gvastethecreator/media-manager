@@ -75,7 +75,9 @@ export function WildcardsView({ isVisible }: ViewProps) {
 		refetch();
 	}, [refetch]);
 
-	if (!isVisible) return null;
+	if (!isVisible) {
+		return null;
+	}
 
 	if (isLoading) {
 		return <LoadingScreen message="Cargando wildcards..." />;

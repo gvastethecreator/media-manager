@@ -68,7 +68,9 @@ export function CollectionCard({
 	const primaryColor = useMemo(() => collection.color || '#10b981', [collection.color]);
 	const secondaryColor = useMemo(() => {
 		// Si no hay color definido, usar un valor por defecto
-		if (!collection.color) return '#059669';
+		if (!collection.color) {
+			return '#059669';
+		}
 
 		// Oscurecer el color primario para el secundario
 		try {

@@ -31,7 +31,9 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 		const images = Object.values(imagesRecord || {});
 
 		// Solo crear nuevo array si hay imágenes
-		if (images.length === 0) return [];
+		if (images.length === 0) {
+			return [];
+		}
 
 		// Ordenar sin mutar el array original
 		return images.slice().sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());

@@ -117,7 +117,7 @@ export const ViewConfigurationPanel: React.FC<ViewConfigurationPanelProps> = ({
 		} catch (error) {
 			toast.error('Error al crear el preset');
 		}
-	}, [presetName, presetDescription, currentConfig, saveAsPreset]);
+	}, [presetName, presetDescription, saveAsPreset]);
 
 	const handleExport = useCallback(() => {
 		try {

@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import * as React from 'react';
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
@@ -120,11 +120,7 @@ const TagList = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivEle
 		return (
 			<div className={cn('flex flex-wrap gap-2', className)} ref={ref} {...props}>
 				{tags.map((tag, index) => (
-					<Badge
-						className={cn('px-2 py-1 text-xs', disabled && 'opacity-50')}
-						key={`tag-${tag}-${index}`}
-						variant="secondary"
-					>
+					<Badge className={cn('px-2 py-1 text-xs', disabled && 'opacity-50')} key={`tag-${tag}`} variant="secondary">
 						{tag}
 						{!disabled && (
 							<button

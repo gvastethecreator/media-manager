@@ -14,7 +14,9 @@ import { fromDrizzleMetadata, mapCreateInputToDrizzle, mapUpdateInputToDrizzle }
  * @returns Metadata con propiedades adicionales
  */
 export const transformMetadata = (metadata: MetadataBase | null): MetadataExtended | null => {
-	if (!metadata) return null;
+	if (!metadata) {
+		return null;
+	}
 
 	try {
 		return fromDrizzleMetadata(metadata as any);
@@ -30,7 +32,9 @@ export const transformMetadata = (metadata: MetadataBase | null): MetadataExtend
  * @returns Array de metadata con propiedades adicionales
  */
 export const transformMetadatas = (metadataArray: MetadataBase[] | null): MetadataExtended[] => {
-	if (!(metadataArray && Array.isArray(metadataArray))) return [];
+	if (!(metadataArray && Array.isArray(metadataArray))) {
+		return [];
+	}
 
 	return metadataArray
 		.map((metadata) => transformMetadata(metadata))

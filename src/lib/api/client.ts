@@ -27,35 +27,35 @@ export class ApiClient {
 	/**
 	 * Realiza una petición GET
 	 */
-	async get<T>(endpoint: string): Promise<T> {
+	get<T>(endpoint: string): Promise<T> {
 		return this.request<T>('GET', endpoint);
 	}
 
 	/**
 	 * Realiza una petición POST
 	 */
-	async post<T>(endpoint: string, data?: unknown): Promise<T> {
+	post<T>(endpoint: string, data?: unknown): Promise<T> {
 		return this.request<T>('POST', endpoint, data);
 	}
 
 	/**
 	 * Realiza una petición PUT
 	 */
-	async put<T>(endpoint: string, data?: unknown): Promise<T> {
+	put<T>(endpoint: string, data?: unknown): Promise<T> {
 		return this.request<T>('PUT', endpoint, data);
 	}
 
 	/**
 	 * Realiza una petición PATCH
 	 */
-	async patch<T>(endpoint: string, data?: unknown): Promise<T> {
+	patch<T>(endpoint: string, data?: unknown): Promise<T> {
 		return this.request<T>('PATCH', endpoint, data);
 	}
 
 	/**
 	 * Realiza una petición DELETE
 	 */
-	async delete<T>(endpoint: string): Promise<T> {
+	delete<T>(endpoint: string): Promise<T> {
 		return this.request<T>('DELETE', endpoint);
 	}
 

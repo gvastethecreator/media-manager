@@ -85,7 +85,9 @@ export function calculateConceptsStats(concepts: ConceptBase[]): {
 			byCategory[category] = (byCategory[category] || 0) + 1;
 
 			// Otros conteos
-			if (concept.isFavorite) favorites++;
+			if (concept.isFavorite) {
+				favorites++;
+			}
 
 			// Si hay recuento disponible
 			if ('_count' in concept && concept._count) {
@@ -150,7 +152,9 @@ export function findRelatedConcepts(
 		const otherConcepts = allConcepts.filter((c) => c.id !== concept.id);
 
 		// Si no hay otros conceptos para comparar
-		if (otherConcepts.length === 0) return [];
+		if (otherConcepts.length === 0) {
+			return [];
+		}
 
 		const conceptCategory = concept.category || '';
 
@@ -218,7 +222,9 @@ export function findRelatedConcepts(
  */
 export function suggestTagsFromText(text: string, existingTags: string[] = [], maxSuggestions = 5): string[] {
 	try {
-		if (!text) return [];
+		if (!text) {
+			return [];
+		}
 
 		// Palabras a ignorar (stopwords)
 		const stopwords = new Set([

@@ -107,7 +107,9 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 
 	// OPTIMIZACIÓN: Memoizar datos derivados de imageData
 	const derivedData = useMemo(() => {
-		if (!imageData) return null;
+		if (!imageData) {
+			return null;
+		}
 
 		const primaryColor =
 			imageData.tags && imageData.tags.length > 0 ? imageData.tags[0]?.color || '#3b82f6' : '#3b82f6';
@@ -142,7 +144,9 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 	// OPTIMIZACIÓN: Carga de datos con useEffect estable
 	useEffect(() => {
 		const loadImageData = async () => {
-			if (!imageId) return;
+			if (!imageId) {
+				return;
+			}
 
 			try {
 				setIsLoading(true);
@@ -207,7 +211,9 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 	}
 
 	// Obtener datos derivados
-	if (!derivedData) return null;
+	if (!derivedData) {
+		return null;
+	}
 	const { primaryColor, dimensions, cameraInfo, totalRelations, imageFormat } = derivedData;
 
 	// Contenido de la tarjeta

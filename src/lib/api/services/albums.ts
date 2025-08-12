@@ -84,14 +84,14 @@ export interface AlbumStats {
 /**
  * Obtiene los datos de un álbum para mostrar en una tarjeta
  */
-export async function getAlbumCardData(albumId: string): Promise<AlbumCardData> {
+export function getAlbumCardData(albumId: string): Promise<AlbumCardData> {
 	return apiClient.get<AlbumCardData>(`/albums/${albumId}/card-data`);
 }
 
 /**
  * Obtiene una lista de álbumes para mostrar en una galería de tarjetas
  */
-export async function getAlbumsForCards(options: GetAlbumsOptions = {}): Promise<AlbumCardData[]> {
+export function getAlbumsForCards(options: GetAlbumsOptions = {}): Promise<AlbumCardData[]> {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(options)) {
 		if (value !== undefined) {
@@ -105,21 +105,21 @@ export async function getAlbumsForCards(options: GetAlbumsOptions = {}): Promise
 /**
  * Obtiene medios recientes de un álbum
  */
-export async function getRecentAlbumMedia(albumId: string, limit = 6): Promise<ThumbnailImage[]> {
+export function getRecentAlbumMedia(albumId: string, limit = 6): Promise<ThumbnailImage[]> {
 	return apiClient.get<ThumbnailImage[]>(`/albums/${albumId}/recent-media?limit=${limit}`);
 }
 
 /**
  * Obtiene estadísticas de un álbum
  */
-export async function getAlbumStats(albumId: string): Promise<AlbumStats> {
+export function getAlbumStats(albumId: string): Promise<AlbumStats> {
 	return apiClient.get<AlbumStats>(`/albums/${albumId}/stats`);
 }
 
 /**
  * Busca álbumes con filtros avanzados
  */
-export async function searchAlbums(options: SearchAlbumsOptions): Promise<AlbumCardData[]> {
+export function searchAlbums(options: SearchAlbumsOptions): Promise<AlbumCardData[]> {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(options)) {
 		if (value !== undefined) {

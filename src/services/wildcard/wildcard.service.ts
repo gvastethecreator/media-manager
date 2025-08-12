@@ -193,7 +193,7 @@ export async function getWildcards(options: GetWildcardsOptions = {}): Promise<G
 		logger.info('🔍 Obteniendo wildcards', { options });
 
 		// Construir filtros dinámicamente
-		const conditions: Array<any> = [];
+		const conditions: any[] = [];
 
 		if (onlyFavorites) {
 			conditions.push(eq(wildcards.isFavorite, true));
@@ -430,16 +430,36 @@ export async function updateWildcard(id: string, data: WildcardUpdateInput): Pro
 			updatedAt: new Date(),
 		};
 
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.description !== undefined) updateData.description = data.description;
-		if (data.emoji !== undefined) updateData.emoji = data.emoji;
-		if (data.color !== undefined) updateData.color = data.color;
-		if (data.category !== undefined) updateData.category = data.category;
-		if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
-		if (data.children !== undefined) updateData.children = data.children;
-		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-		if (data.isFavorite !== undefined) updateData.isFavorite = Boolean(data.isFavorite);
-		if (data.parentId !== undefined) updateData.parentId = data.parentId;
+		if (data.name !== undefined) {
+			updateData.name = data.name;
+		}
+		if (data.description !== undefined) {
+			updateData.description = data.description;
+		}
+		if (data.emoji !== undefined) {
+			updateData.emoji = data.emoji;
+		}
+		if (data.color !== undefined) {
+			updateData.color = data.color;
+		}
+		if (data.category !== undefined) {
+			updateData.category = data.category;
+		}
+		if (data.shortcut !== undefined) {
+			updateData.shortcut = data.shortcut;
+		}
+		if (data.children !== undefined) {
+			updateData.children = data.children;
+		}
+		if (data.featuredImage !== undefined) {
+			updateData.featuredImage = data.featuredImage;
+		}
+		if (data.isFavorite !== undefined) {
+			updateData.isFavorite = Boolean(data.isFavorite);
+		}
+		if (data.parentId !== undefined) {
+			updateData.parentId = data.parentId;
+		}
 
 		const [updatedWildcard] = await db.update(wildcards).set(updateData).where(eq(wildcards.id, id)).returning();
 

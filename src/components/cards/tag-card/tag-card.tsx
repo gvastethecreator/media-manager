@@ -78,10 +78,18 @@ export function TagCard({
 
 	// Determinar rareza basada en relaciones
 	const determineRarity = (): TagRarity => {
-		if (totalRelations > 200) return TagRarity.LEGENDARY;
-		if (totalRelations > 100) return TagRarity.VERY_RARE;
-		if (totalRelations > 50) return TagRarity.RARE;
-		if (totalRelations > 10) return TagRarity.UNCOMMON;
+		if (totalRelations > 200) {
+			return TagRarity.LEGENDARY;
+		}
+		if (totalRelations > 100) {
+			return TagRarity.VERY_RARE;
+		}
+		if (totalRelations > 50) {
+			return TagRarity.RARE;
+		}
+		if (totalRelations > 10) {
+			return TagRarity.UNCOMMON;
+		}
 		return TagRarity.COMMON;
 	};
 
@@ -114,7 +122,9 @@ export function TagCard({
 	const cardColor = useMemo(() => color || rarityColor, [color, rarityColor]);
 	const secondaryColor = useMemo(() => {
 		// Si no hay color definido, usar un valor por defecto
-		if (!color) return '#be185d';
+		if (!color) {
+			return '#be185d';
+		}
 
 		// Oscurecer el color primario para el secundario
 		try {

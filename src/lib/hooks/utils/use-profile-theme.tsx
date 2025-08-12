@@ -29,7 +29,9 @@ export function useProfileTheme() {
 	};
 
 	const toggleTheme = () => {
-		if (!profile) return;
+		if (!profile) {
+			return;
+		}
 
 		if ((profile as any).theme === ThemeMode.DARK) {
 			setTheme(ThemeMode.LIGHT);

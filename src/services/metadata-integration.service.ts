@@ -87,13 +87,16 @@ export class MetadataIntegrationService {
 			formatted.technical = [];
 
 			const base = metadata.base;
-			if (base.file?.format) formatted.technical.push({ key: 'Formato', value: base.file.format, category: 'técnico' });
-			if (base.file?.size)
+			if (base.file?.format) {
+				formatted.technical.push({ key: 'Formato', value: base.file.format, category: 'técnico' });
+			}
+			if (base.file?.size) {
 				formatted.technical.push({
 					key: 'Tamaño archivo',
 					value: this.formatFileSize(base.file.size),
 					category: 'técnico',
 				});
+			}
 			if (base.dimensions?.width && base.dimensions?.height) {
 				formatted.technical.push({
 					key: 'Dimensiones',
@@ -101,18 +104,22 @@ export class MetadataIntegrationService {
 					category: 'técnico',
 				});
 			}
-			if (base.dimensions?.aspectRatio)
+			if (base.dimensions?.aspectRatio) {
 				formatted.technical.push({ key: 'Aspect Ratio', value: base.dimensions.aspectRatio, category: 'técnico' });
-			if (base.color?.colorType)
+			}
+			if (base.color?.colorType) {
 				formatted.technical.push({ key: 'Tipo Color', value: base.color.colorType, category: 'técnico' });
-			if (base.color?.bitDepth)
+			}
+			if (base.color?.bitDepth) {
 				formatted.technical.push({
 					key: 'Profundidad Bits',
 					value: `${base.color.bitDepth} bits`,
 					category: 'técnico',
 				});
-			if (base.color?.compression)
+			}
+			if (base.color?.compression) {
 				formatted.technical.push({ key: 'Compresión', value: base.color.compression, category: 'técnico' });
+			}
 		}
 
 		// === Metadatos EXIF ===
@@ -124,24 +131,32 @@ export class MetadataIntegrationService {
 			// Información de cámara
 			if (exif.Make || exif.Model) {
 				const camera = `${exif.Make || ''} ${exif.Model || ''}`.trim();
-				if (camera) formatted.exif.push({ key: 'Cámara', value: camera, category: 'exif' });
+				if (camera) {
+					formatted.exif.push({ key: 'Cámara', value: camera, category: 'exif' });
+				}
 			}
 
 			// Configuración de captura
 			if (exif.ISOSpeedRatings || exif.ISO) {
 				formatted.exif.push({ key: 'ISO', value: (exif.ISOSpeedRatings || exif.ISO).toString(), category: 'exif' });
 			}
-			if (exif.FNumber) formatted.exif.push({ key: 'Apertura', value: `f/${exif.FNumber}`, category: 'exif' });
-			if (exif.ExposureTime)
+			if (exif.FNumber) {
+				formatted.exif.push({ key: 'Apertura', value: `f/${exif.FNumber}`, category: 'exif' });
+			}
+			if (exif.ExposureTime) {
 				formatted.exif.push({ key: 'Velocidad', value: exif.ExposureTime.toString(), category: 'exif' });
-			if (exif.FocalLength)
+			}
+			if (exif.FocalLength) {
 				formatted.exif.push({ key: 'Distancia Focal', value: `${exif.FocalLength}mm`, category: 'exif' });
+			}
 
 			// Fechas
-			if (exif.DateTimeOriginal)
+			if (exif.DateTimeOriginal) {
 				formatted.exif.push({ key: 'Fecha Captura', value: exif.DateTimeOriginal.toString(), category: 'exif' });
-			if (exif.DateTime)
+			}
+			if (exif.DateTime) {
 				formatted.exif.push({ key: 'Fecha Modificación', value: exif.DateTime.toString(), category: 'exif' });
+			}
 
 			// GPS
 			if (exif.GPSLatitude && exif.GPSLongitude) {
@@ -157,8 +172,9 @@ export class MetadataIntegrationService {
 				// Solo mostrar si no hay metadatos IA
 				formatted.exif.push({ key: 'Software', value: exif.Software.toString(), category: 'exif' });
 			}
-			if (exif.ColorSpace)
+			if (exif.ColorSpace) {
 				formatted.exif.push({ key: 'Espacio Color', value: exif.ColorSpace.toString(), category: 'exif' });
+			}
 		}
 
 		// === Metadatos IPTC ===
@@ -166,8 +182,12 @@ export class MetadataIntegrationService {
 			formatted.iptc = [];
 
 			const iptc = metadata.iptc as Record<string, any>;
-			if (iptc.Headline) formatted.iptc.push({ key: 'Título', value: iptc.Headline.toString(), category: 'iptc' });
-			if (iptc.Caption) formatted.iptc.push({ key: 'Descripción', value: iptc.Caption.toString(), category: 'iptc' });
+			if (iptc.Headline) {
+				formatted.iptc.push({ key: 'Título', value: iptc.Headline.toString(), category: 'iptc' });
+			}
+			if (iptc.Caption) {
+				formatted.iptc.push({ key: 'Descripción', value: iptc.Caption.toString(), category: 'iptc' });
+			}
 			if (iptc.Keywords && Array.isArray(iptc.Keywords)) {
 				formatted.iptc.push({
 					key: 'Palabras Clave',
@@ -175,10 +195,18 @@ export class MetadataIntegrationService {
 					category: 'iptc',
 				});
 			}
-			if (iptc.Copyright) formatted.iptc.push({ key: 'Copyright', value: iptc.Copyright.toString(), category: 'iptc' });
-			if (iptc.ByLine) formatted.iptc.push({ key: 'Autor', value: iptc.ByLine.toString(), category: 'iptc' });
-			if (iptc.City) formatted.iptc.push({ key: 'Ciudad', value: iptc.City.toString(), category: 'iptc' });
-			if (iptc.Country) formatted.iptc.push({ key: 'País', value: iptc.Country.toString(), category: 'iptc' });
+			if (iptc.Copyright) {
+				formatted.iptc.push({ key: 'Copyright', value: iptc.Copyright.toString(), category: 'iptc' });
+			}
+			if (iptc.ByLine) {
+				formatted.iptc.push({ key: 'Autor', value: iptc.ByLine.toString(), category: 'iptc' });
+			}
+			if (iptc.City) {
+				formatted.iptc.push({ key: 'Ciudad', value: iptc.City.toString(), category: 'iptc' });
+			}
+			if (iptc.Country) {
+				formatted.iptc.push({ key: 'País', value: iptc.Country.toString(), category: 'iptc' });
+			}
 		}
 
 		// === Metadatos XMP ===
@@ -186,12 +214,18 @@ export class MetadataIntegrationService {
 			formatted.xmp = [];
 
 			const xmp = metadata.xmp as Record<string, any>;
-			if (xmp.Title) formatted.xmp.push({ key: 'Título XMP', value: xmp.Title.toString(), category: 'xmp' });
-			if (xmp.Description)
+			if (xmp.Title) {
+				formatted.xmp.push({ key: 'Título XMP', value: xmp.Title.toString(), category: 'xmp' });
+			}
+			if (xmp.Description) {
 				formatted.xmp.push({ key: 'Descripción XMP', value: xmp.Description.toString(), category: 'xmp' });
-			if (xmp.Rating) formatted.xmp.push({ key: 'Calificación', value: `${xmp.Rating}/5`, category: 'xmp' });
-			if (xmp.CreatorTool)
+			}
+			if (xmp.Rating) {
+				formatted.xmp.push({ key: 'Calificación', value: `${xmp.Rating}/5`, category: 'xmp' });
+			}
+			if (xmp.CreatorTool) {
 				formatted.xmp.push({ key: 'Herramienta', value: xmp.CreatorTool.toString(), category: 'xmp' });
+			}
 		}
 
 		// === Metadatos de IA ===
@@ -215,31 +249,64 @@ export class MetadataIntegrationService {
 			}
 
 			// Configuración
-			if (ai.model) formatted.ai.push({ key: 'Modelo', value: ai.model.toString(), category: 'ia' });
-			if (ai.checkpoint) formatted.ai.push({ key: 'Checkpoint', value: ai.checkpoint.toString(), category: 'ia' });
-			if (ai.steps) formatted.ai.push({ key: 'Pasos', value: ai.steps.toString(), category: 'ia' });
-			if (ai.cfg_scale || ai.cfg)
+			if (ai.model) {
+				formatted.ai.push({ key: 'Modelo', value: ai.model.toString(), category: 'ia' });
+			}
+			if (ai.checkpoint) {
+				formatted.ai.push({ key: 'Checkpoint', value: ai.checkpoint.toString(), category: 'ia' });
+			}
+			if (ai.steps) {
+				formatted.ai.push({ key: 'Pasos', value: ai.steps.toString(), category: 'ia' });
+			}
+			if (ai.cfg_scale || ai.cfg) {
 				formatted.ai.push({ key: 'CFG Scale', value: (ai.cfg_scale || ai.cfg).toString(), category: 'ia' });
-			if (ai.seed) formatted.ai.push({ key: 'Seed', value: ai.seed.toString(), category: 'ia' });
-			if (ai.sampler) formatted.ai.push({ key: 'Sampler', value: ai.sampler.toString(), category: 'ia' });
-			if (ai.scheduler) formatted.ai.push({ key: 'Scheduler', value: ai.scheduler.toString(), category: 'ia' });
+			}
+			if (ai.seed) {
+				formatted.ai.push({ key: 'Seed', value: ai.seed.toString(), category: 'ia' });
+			}
+			if (ai.sampler) {
+				formatted.ai.push({ key: 'Sampler', value: ai.sampler.toString(), category: 'ia' });
+			}
+			if (ai.scheduler) {
+				formatted.ai.push({ key: 'Scheduler', value: ai.scheduler.toString(), category: 'ia' });
+			}
 
 			// Parámetros avanzados
-			if (ai.clip_skip) formatted.ai.push({ key: 'Clip Skip', value: ai.clip_skip.toString(), category: 'ia' });
-			if (ai.denoise) formatted.ai.push({ key: 'Denoising', value: ai.denoise.toString(), category: 'ia' });
+			if (ai.clip_skip) {
+				formatted.ai.push({ key: 'Clip Skip', value: ai.clip_skip.toString(), category: 'ia' });
+			}
+			if (ai.denoise) {
+				formatted.ai.push({ key: 'Denoising', value: ai.denoise.toString(), category: 'ia' });
+			}
 
 			// Engine específicos
-			if (ai.hires_upscaler)
+			if (ai.hires_upscaler) {
 				formatted.ai.push({ key: 'Hires Upscaler', value: ai.hires_upscaler.toString(), category: 'ia' });
-			if (ai.restore_faces) formatted.ai.push({ key: 'Restore Faces', value: 'Sí', category: 'ia' });
-			if (ai.generation_time)
+			}
+			if (ai.restore_faces) {
+				formatted.ai.push({ key: 'Restore Faces', value: 'Sí', category: 'ia' });
+			}
+			if (ai.generation_time) {
 				formatted.ai.push({ key: 'Tiempo Generación', value: `${ai.generation_time}s`, category: 'ia' });
-			if (ai.prep_time) formatted.ai.push({ key: 'Tiempo Prep', value: `${ai.prep_time}s`, category: 'ia' });
-			if (ai.chaos) formatted.ai.push({ key: 'Chaos', value: ai.chaos.toString(), category: 'ia' });
-			if (ai.quality) formatted.ai.push({ key: 'Quality', value: ai.quality.toString(), category: 'ia' });
-			if (ai.stylize) formatted.ai.push({ key: 'Stylize', value: ai.stylize.toString(), category: 'ia' });
-			if (ai.version) formatted.ai.push({ key: 'Versión', value: ai.version.toString(), category: 'ia' });
-			if (ai.job_id) formatted.ai.push({ key: 'Job ID', value: ai.job_id.toString(), category: 'ia' });
+			}
+			if (ai.prep_time) {
+				formatted.ai.push({ key: 'Tiempo Prep', value: `${ai.prep_time}s`, category: 'ia' });
+			}
+			if (ai.chaos) {
+				formatted.ai.push({ key: 'Chaos', value: ai.chaos.toString(), category: 'ia' });
+			}
+			if (ai.quality) {
+				formatted.ai.push({ key: 'Quality', value: ai.quality.toString(), category: 'ia' });
+			}
+			if (ai.stylize) {
+				formatted.ai.push({ key: 'Stylize', value: ai.stylize.toString(), category: 'ia' });
+			}
+			if (ai.version) {
+				formatted.ai.push({ key: 'Versión', value: ai.version.toString(), category: 'ia' });
+			}
+			if (ai.job_id) {
+				formatted.ai.push({ key: 'Job ID', value: ai.job_id.toString(), category: 'ia' });
+			}
 		}
 
 		// === Metadatos de video ===
@@ -247,14 +314,21 @@ export class MetadataIntegrationService {
 			formatted.video = [];
 
 			const video = metadata.video_metadata as Record<string, any>;
-			if (video.duration)
+			if (video.duration) {
 				formatted.video.push({ key: 'Duración', value: this.formatDuration(video.duration), category: 'video' });
-			if (video.framerate) formatted.video.push({ key: 'FPS', value: video.framerate.toString(), category: 'video' });
-			if (video.bitrate)
+			}
+			if (video.framerate) {
+				formatted.video.push({ key: 'FPS', value: video.framerate.toString(), category: 'video' });
+			}
+			if (video.bitrate) {
 				formatted.video.push({ key: 'Bitrate', value: this.formatBitrate(video.bitrate), category: 'video' });
-			if (video.codec) formatted.video.push({ key: 'Codec', value: video.codec.toString(), category: 'video' });
-			if (video.format)
+			}
+			if (video.codec) {
+				formatted.video.push({ key: 'Codec', value: video.codec.toString(), category: 'video' });
+			}
+			if (video.format) {
 				formatted.video.push({ key: 'Formato Video', value: video.format.toString(), category: 'video' });
+			}
 		}
 
 		return formatted;
@@ -285,12 +359,24 @@ export class MetadataIntegrationService {
 		}
 
 		// Agregar cada categoría
-		if (formatted.ai) result.push(...formatted.ai);
-		if (formatted.exif) result.push(...formatted.exif);
-		if (formatted.iptc) result.push(...formatted.iptc);
-		if (formatted.xmp) result.push(...formatted.xmp);
-		if (formatted.technical) result.push(...formatted.technical);
-		if (formatted.video) result.push(...formatted.video);
+		if (formatted.ai) {
+			result.push(...formatted.ai);
+		}
+		if (formatted.exif) {
+			result.push(...formatted.exif);
+		}
+		if (formatted.iptc) {
+			result.push(...formatted.iptc);
+		}
+		if (formatted.xmp) {
+			result.push(...formatted.xmp);
+		}
+		if (formatted.technical) {
+			result.push(...formatted.technical);
+		}
+		if (formatted.video) {
+			result.push(...formatted.video);
+		}
 
 		return result;
 	}

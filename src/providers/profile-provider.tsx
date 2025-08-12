@@ -96,7 +96,9 @@ export function ProfileProvider({ children }: { children: ReactNode }) {
 	// EFECTO: Escuchar cambios en la preferencia del sistema cuando el tema es SYSTEM
 	useEffect(() => {
 		const currentProfile = activeProfile || storeProfile;
-		if (!currentProfile || currentProfile.theme !== ThemeMode.SYSTEM) return;
+		if (!currentProfile || currentProfile.theme !== ThemeMode.SYSTEM) {
+			return;
+		}
 
 		const handleSystemThemeChange = (e: MediaQueryListEvent) => {
 			if (e.matches) {

@@ -1,5 +1,19 @@
 import { formatDistanceToNow } from 'date-fns';
-import { Camera, CheckCircle, Download, FileText, Filter, FolderOpen, History, Redo2, RotateCcw, Search, Trash2, Undo2, Upload } from 'lucide-react';
+import {
+	Camera,
+	CheckCircle,
+	Download,
+	FileText,
+	Filter,
+	FolderOpen,
+	History,
+	Redo2,
+	RotateCcw,
+	Search,
+	Trash2,
+	Undo2,
+	Upload,
+} from 'lucide-react';
 import React, { useMemo, useState } from 'react';
 import { useUndoRedo } from '../../../../hooks/use-undo-redo';
 import { toastService } from '../../../../services/toast/toast.service';
@@ -396,7 +410,7 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 			URL.revokeObjectURL(url);
 
 			toastService.success('History exported successfully');
-	} catch (err) {
+		} catch (err) {
 			toastService.error('Failed to export history');
 		}
 	};
@@ -467,8 +481,6 @@ export const UndoRedoPanel: React.FC<UndoRedoPanelProps> = ({
 		// In a real implementation, this would update the manager configuration
 		toastService.info('Configuration updated (local only)');
 	};
-
-    
 
 	if (compact) {
 		return (

@@ -152,7 +152,9 @@ function parseTextChunk(chunk: any): PngTextChunk | null {
 			// tEXt: keyword\0text
 			const data = chunk.data.toString('latin1');
 			const nullIndex = data.indexOf('\0');
-			if (nullIndex === -1) return null;
+			if (nullIndex === -1) {
+				return null;
+			}
 
 			return {
 				type: 'tEXt',
@@ -168,7 +170,9 @@ function parseTextChunk(chunk: any): PngTextChunk | null {
 
 			// Encontrar keyword (hasta el primer null)
 			const nullIndex = data.indexOf(0, offset);
-			if (nullIndex === -1) return null;
+			if (nullIndex === -1) {
+				return null;
+			}
 			const keyword = data.subarray(offset, nullIndex).toString('latin1');
 			offset = nullIndex + 1;
 
@@ -198,7 +202,9 @@ function parseTextChunk(chunk: any): PngTextChunk | null {
 
 			// Keyword
 			let nullIndex = data.indexOf(0, offset);
-			if (nullIndex === -1) return null;
+			if (nullIndex === -1) {
+				return null;
+			}
 			const keyword = data.subarray(offset, nullIndex).toString('latin1');
 			offset = nullIndex + 1;
 
@@ -212,13 +218,17 @@ function parseTextChunk(chunk: any): PngTextChunk | null {
 
 			// Language tag
 			nullIndex = data.indexOf(0, offset);
-			if (nullIndex === -1) return null;
+			if (nullIndex === -1) {
+				return null;
+			}
 			const language = data.subarray(offset, nullIndex).toString('latin1');
 			offset = nullIndex + 1;
 
 			// Translated keyword
 			nullIndex = data.indexOf(0, offset);
-			if (nullIndex === -1) return null;
+			if (nullIndex === -1) {
+				return null;
+			}
 			const translatedKeyword = data.subarray(offset, nullIndex).toString('utf8');
 			offset = nullIndex + 1;
 
@@ -385,7 +395,7 @@ function parseAutomatic1111Parameters(text: string): Partial<AIGenerationParamet
 					case 'steps':
 					case 'seed':
 					case 'clipSkip':
-						(metadata as any)[key] = Number.parseInt(match[1]);
+						(metadata as any)[key] = Number.parseInt(match[1], 10);
 						break;
 					case 'cfgScale':
 					case 'denoise':
@@ -440,12 +450,24 @@ function parseComfyUIWorkflow(text: string): Partial<AIGenerationParameters> & R
 
 					// KSampler nodes para parámetros
 					if (nodeObj.class_type === 'KSampler' && nodeObj.inputs) {
-						if (nodeObj.inputs.steps) metadata.steps = Number.parseInt(nodeObj.inputs.steps);
-						if (nodeObj.inputs.cfg) metadata.cfg_scale = Number.parseFloat(nodeObj.inputs.cfg);
-						if (nodeObj.inputs.sampler_name) metadata.sampler = nodeObj.inputs.sampler_name;
-						if (nodeObj.inputs.scheduler) metadata.scheduler = nodeObj.inputs.scheduler;
-						if (nodeObj.inputs.seed) metadata.seed = Number.parseInt(nodeObj.inputs.seed);
-						if (nodeObj.inputs.denoise) metadata.denoise = Number.parseFloat(nodeObj.inputs.denoise);
+						if (nodeObj.inputs.steps) {
+							metadata.steps = Number.parseInt(nodeObj.inputs.steps, 10);
+						}
+						if (nodeObj.inputs.cfg) {
+							metadata.cfg_scale = Number.parseFloat(nodeObj.inputs.cfg);
+						}
+						if (nodeObj.inputs.sampler_name) {
+							metadata.sampler = nodeObj.inputs.sampler_name;
+						}
+						if (nodeObj.inputs.scheduler) {
+							metadata.scheduler = nodeObj.inputs.scheduler;
+						}
+						if (nodeObj.inputs.seed) {
+							metadata.seed = Number.parseInt(nodeObj.inputs.seed, 10);
+						}
+						if (nodeObj.inputs.denoise) {
+							metadata.denoise = Number.parseFloat(nodeObj.inputs.denoise);
+						}
 					}
 
 					// CheckpointLoaderSimple para modelo
@@ -486,19 +508,41 @@ function parseSwarmUIParameters(text: string): Partial<AIGenerationParameters> &
 
 		if (params && typeof params === 'object') {
 			// Mapear campos de SwarmUI
-			if (params.prompt) metadata.prompt = params.prompt;
-			if (params.negative_prompt) metadata.negative_prompt = params.negative_prompt;
-			if (params.steps) metadata.steps = Number.parseInt(params.steps);
-			if (params.cfg_scale) metadata.cfg_scale = Number.parseFloat(params.cfg_scale);
-			if (params.sampler) metadata.sampler = params.sampler;
-			if (params.scheduler) metadata.scheduler = params.scheduler;
-			if (params.seed) metadata.seed = Number.parseInt(params.seed);
-			if (params.model) metadata.model = params.model;
-			if (params.denoise) metadata.denoise = Number.parseFloat(params.denoise);
+			if (params.prompt) {
+				metadata.prompt = params.prompt;
+			}
+			if (params.negative_prompt) {
+				metadata.negative_prompt = params.negative_prompt;
+			}
+			if (params.steps) {
+				metadata.steps = Number.parseInt(params.steps, 10);
+			}
+			if (params.cfg_scale) {
+				metadata.cfg_scale = Number.parseFloat(params.cfg_scale);
+			}
+			if (params.sampler) {
+				metadata.sampler = params.sampler;
+			}
+			if (params.scheduler) {
+				metadata.scheduler = params.scheduler;
+			}
+			if (params.seed) {
+				metadata.seed = Number.parseInt(params.seed, 10);
+			}
+			if (params.model) {
+				metadata.model = params.model;
+			}
+			if (params.denoise) {
+				metadata.denoise = Number.parseFloat(params.denoise);
+			}
 
 			// Timing específico de SwarmUI
-			if (params.generation_time) metadata.generation_time = Number.parseFloat(params.generation_time);
-			if (params.prep_time) metadata.prep_time = Number.parseFloat(params.prep_time);
+			if (params.generation_time) {
+				metadata.generation_time = Number.parseFloat(params.generation_time);
+			}
+			if (params.prep_time) {
+				metadata.prep_time = Number.parseFloat(params.prep_time);
+			}
 		}
 
 		return metadata;
@@ -537,7 +581,7 @@ function parseMidjourneyDescription(text: string): Partial<AIGenerationParameter
 					case 'chaos':
 					case 'stylize':
 					case 'seed':
-						(metadata as any)[key] = Number.parseInt(match[1]);
+						(metadata as any)[key] = Number.parseInt(match[1], 10);
 						break;
 					case 'quality':
 						(metadata as any)[key] = Number.parseFloat(match[1]);
@@ -585,11 +629,11 @@ function parseGenericAIData(text: string): Partial<AIGenerationParameters> & Rec
 						} else if (key.includes('model')) {
 							metadata.model = value;
 						} else if (key.includes('steps')) {
-							metadata.steps = Number.parseInt(value) || undefined;
+							metadata.steps = Number.parseInt(value, 10) || undefined;
 						} else if (key.includes('cfg') || key.includes('scale')) {
 							metadata.cfg_scale = Number.parseFloat(value) || undefined;
 						} else if (key.includes('seed')) {
-							metadata.seed = Number.parseInt(value) || undefined;
+							metadata.seed = Number.parseInt(value, 10) || undefined;
 						} else if (key.includes('sampler')) {
 							metadata.sampler = value;
 						}

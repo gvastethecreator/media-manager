@@ -142,12 +142,16 @@ export const useWorldItem = (id: string | null) => {
 		item,
 		update: useCallback(
 			(data: WorldItemUpdateData) => {
-				if (id) updateWorldItem(id, data);
+				if (id) {
+					updateWorldItem(id, data);
+				}
 			},
 			[id, updateWorldItem]
 		),
 		remove: useCallback(() => {
-			if (id) deleteWorldItem(id);
+			if (id) {
+				deleteWorldItem(id);
+			}
 		}, [id, deleteWorldItem]),
 	};
 };

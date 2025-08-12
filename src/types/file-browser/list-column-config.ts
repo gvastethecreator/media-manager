@@ -4,10 +4,12 @@
  */
 
 import type { ListColumnConfig as BaseListColumnConfig, ListViewConfig } from '@/transformers/settings/schema';
+
+export type { ListViewConfig } from '@/transformers/settings/schema';
+
 import type { AnyEntityWithStats } from '@/types/entities';
 
-// Re-exportamos el tipo de configuración de ListView
-export type { ListViewConfig };
+// Re-exportamos el tipo de configuración de ListView desde el módulo fuente
 
 /**
  * Configuración extendida de columna con renderer personalizado
@@ -452,7 +454,9 @@ export function getColumnsForEntityType(entityType: string): ListColumnConfig[] 
  * Helper function para formatear tamaño de archivo
  */
 export function formatFileSize(bytes: number): string {
-	if (bytes === 0) return '0 B';
+	if (bytes === 0) {
+		return '0 B';
+	}
 	const k = 1024;
 	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
 	const i = Math.floor(Math.log(bytes) / Math.log(k));

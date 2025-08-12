@@ -73,7 +73,9 @@ export function AlbumCard({
 	const primaryColor = useMemo(() => album.color || '#8b5cf6', [album.color]);
 	const secondaryColor = useMemo(() => {
 		// Si no hay color definido, usar un valor por defecto
-		if (!album.color) return '#6d28d9';
+		if (!album.color) {
+			return '#6d28d9';
+		}
 
 		// Oscurecer el color primario para el secundario
 		try {
@@ -152,9 +154,15 @@ export function AlbumCard({
 	// Calcular nivel de rareza basado en la cantidad total de media y entidades
 	const rarityLevel = useMemo(() => {
 		const total = totalMedia + totalEntities;
-		if (total > 200) return 'Mítica';
-		if (total > 100) return 'Rara';
-		if (total > 50) return 'Poco común';
+		if (total > 200) {
+			return 'Mítica';
+		}
+		if (total > 100) {
+			return 'Rara';
+		}
+		if (total > 50) {
+			return 'Poco común';
+		}
 		return 'Común';
 	}, [totalMedia, totalEntities]);
 

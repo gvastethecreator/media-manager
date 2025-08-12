@@ -46,7 +46,9 @@ export const createAlbumCoreSlice: StateCreator<
 	},
 
 	loadAlbums: async () => {
-		if (get().isLoading) return;
+		if (get().isLoading) {
+			return;
+		}
 		set((state) => {
 			state.isLoading = true;
 			state.error = null;

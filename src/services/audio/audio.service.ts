@@ -243,35 +243,93 @@ export async function updateAudio(id: string, data: AudioUpdateInput): Promise<A
 		};
 
 		// Solo actualizar campos que se envían
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.path !== undefined) updateData.path = data.path;
-		if (data.size !== undefined) updateData.size = data.size;
-		if (data.hash !== undefined) updateData.hash = data.hash;
-		if (data.mimeType !== undefined) updateData.mimeType = data.mimeType;
-		if (data.extension !== undefined) updateData.extension = data.extension;
-		if (data.folderId !== undefined) updateData.folderId = data.folderId;
-		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-		if (data.isArchived !== undefined) updateData.isArchived = data.isArchived;
-		if (data.duration !== undefined) updateData.duration = data.duration;
-		if (data.bitrate !== undefined) updateData.bitrate = data.bitrate;
-		if (data.sampleRate !== undefined) updateData.sampleRate = data.sampleRate;
-		if (data.channels !== undefined) updateData.channels = data.channels;
-		if (data.format !== undefined) updateData.format = data.format;
-		if (data.codec !== undefined) updateData.codec = data.codec;
-		if (data.title !== undefined) updateData.title = data.title;
-		if (data.artist !== undefined) updateData.artist = data.artist;
-		if (data.album !== undefined) updateData.album = data.album;
-		if (data.year !== undefined) updateData.year = data.year;
-		if (data.genre !== undefined) updateData.genre = data.genre;
-		if (data.track !== undefined) updateData.track = data.track;
-		if (data.disc !== undefined) updateData.disc = data.disc;
-		if (data.albumArtist !== undefined) updateData.albumArtist = data.albumArtist;
-		if (data.composer !== undefined) updateData.composer = data.composer;
-		if (data.comment !== undefined) updateData.comment = data.comment;
-		if (data.lyrics !== undefined) updateData.lyrics = data.lyrics;
-		if (data.bpm !== undefined) updateData.bpm = data.bpm;
-		if (data.key !== undefined) updateData.key = data.key;
-		if (data.mood !== undefined) updateData.mood = data.mood;
+		if (data.name !== undefined) {
+			updateData.name = data.name;
+		}
+		if (data.path !== undefined) {
+			updateData.path = data.path;
+		}
+		if (data.size !== undefined) {
+			updateData.size = data.size;
+		}
+		if (data.hash !== undefined) {
+			updateData.hash = data.hash;
+		}
+		if (data.mimeType !== undefined) {
+			updateData.mimeType = data.mimeType;
+		}
+		if (data.extension !== undefined) {
+			updateData.extension = data.extension;
+		}
+		if (data.folderId !== undefined) {
+			updateData.folderId = data.folderId;
+		}
+		if (data.isFavorite !== undefined) {
+			updateData.isFavorite = data.isFavorite;
+		}
+		if (data.isArchived !== undefined) {
+			updateData.isArchived = data.isArchived;
+		}
+		if (data.duration !== undefined) {
+			updateData.duration = data.duration;
+		}
+		if (data.bitrate !== undefined) {
+			updateData.bitrate = data.bitrate;
+		}
+		if (data.sampleRate !== undefined) {
+			updateData.sampleRate = data.sampleRate;
+		}
+		if (data.channels !== undefined) {
+			updateData.channels = data.channels;
+		}
+		if (data.format !== undefined) {
+			updateData.format = data.format;
+		}
+		if (data.codec !== undefined) {
+			updateData.codec = data.codec;
+		}
+		if (data.title !== undefined) {
+			updateData.title = data.title;
+		}
+		if (data.artist !== undefined) {
+			updateData.artist = data.artist;
+		}
+		if (data.album !== undefined) {
+			updateData.album = data.album;
+		}
+		if (data.year !== undefined) {
+			updateData.year = data.year;
+		}
+		if (data.genre !== undefined) {
+			updateData.genre = data.genre;
+		}
+		if (data.track !== undefined) {
+			updateData.track = data.track;
+		}
+		if (data.disc !== undefined) {
+			updateData.disc = data.disc;
+		}
+		if (data.albumArtist !== undefined) {
+			updateData.albumArtist = data.albumArtist;
+		}
+		if (data.composer !== undefined) {
+			updateData.composer = data.composer;
+		}
+		if (data.comment !== undefined) {
+			updateData.comment = data.comment;
+		}
+		if (data.lyrics !== undefined) {
+			updateData.lyrics = data.lyrics;
+		}
+		if (data.bpm !== undefined) {
+			updateData.bpm = data.bpm;
+		}
+		if (data.key !== undefined) {
+			updateData.key = data.key;
+		}
+		if (data.mood !== undefined) {
+			updateData.mood = data.mood;
+		}
 
 		await db.update(audios).set(updateData).where(eq(audios.id, id));
 

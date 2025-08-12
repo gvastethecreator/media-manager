@@ -1,5 +1,5 @@
 import { Plus, Search, Star, Trash2 } from 'lucide-react';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog } from '@/components/ui/dialog';
@@ -11,7 +11,6 @@ import { useCreateProperty, useDeleteProperty, useProperties, useUpdateProperty 
 import { toastService } from '@/lib/ui/toast';
 import type { PropertyWithStats } from '@/types/entities/property';
 import { CreatePropertyForm } from './create-property-form';
-
 
 export function PropertiesSettings() {
 	// State local para UI
@@ -30,29 +29,21 @@ export function PropertiesSettings() {
 
 	const properties = propertiesResponse?.data || [];
 
-	// Filtrar propiedades basadas en los criterios
+	// Filtrar propiedades basadas en los criterios (baja complejidad)
 	const filteredProperties = useMemo(() => {
+		const normalizedQuery = searchQuery.trim().toLowerCase();
+		const hasQuery = normalizedQuery.length > 0;
+		const hasCategories = selectedCategories.length > 0;
 		return properties.filter((property) => {
-			let matches = true;
-
-			if (searchQuery) {
-				const normalizedQuery = searchQuery.toLowerCase();
-				const nameMatches = property.name.toLowerCase().includes(normalizedQuery);
-				const descMatches = property.description ? property.description.toLowerCase().includes(normalizedQuery) : false;
-				matches = matches && (nameMatches || descMatches);
-			}
-
-			if (selectedCategories.length > 0) {
-				matches = matches && (property.type ? selectedCategories.includes(property.type) : false);
-			}
-
-			if (onlyFavorites) {
-				matches = matches && !!property.isFavorite;
-			}
-
-			return matches;
+			const nameLower = property.name.toLowerCase();
+			const descLower = typeof property.description === 'string' ? property.description.toLowerCase() : '';
+			const queryMatches =
+				!hasQuery || nameLower.includes(normalizedQuery) || (descLower !== '' && descLower.includes(normalizedQuery));
+			const categoryMatches = !hasCategories || (!!property.type && selectedCategories.includes(property.type));
+			const favoriteMatches = !onlyFavorites || Boolean(property.isFavorite);
+			return queryMatches && categoryMatches && favoriteMatches;
 		});
-	}, [properties, searchQuery, selectedCategories, onlyFavorites]);
+	}, [onlyFavorites, properties, searchQuery, selectedCategories]);
 
 	// Ordenar propiedades por nombre
 	const sortedProperties = useMemo(() => {
@@ -90,6 +81,95 @@ export function PropertiesSettings() {
 			});
 		}
 	};
+
+	// Callback estable para eliminar propiedad
+	const onDelete = useCallback(
+		async (id: string) => {
+			try {
+				await deletePropertyMutation.mutateAsync(id);
+				if (selectedProperty?.id === id) {
+					setSelectedProperty(null);
+				}
+				toastService.success('Propiedad eliminada correctamente');
+			} catch (err) {
+				const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
+				toastService.error('Error al eliminar la propiedad', {
+					description: errorMessage,
+				});
+			}
+		},
+		[deletePropertyMutation, selectedProperty]
+	);
+
+	// Panel derecho memoizado para evitar ternarios anidados
+	const rightPanel = useMemo(() => {
+		if (selectedProperty && !isEditMode) {
+			return (
+				<Card className="h-[calc(100vh-8rem)] rounded-sm border-none bg-muted/30">
+					<CardHeader>
+						<div className="flex items-center justify-between">
+							<CardTitle>{selectedProperty.name}</CardTitle>
+							<div className="flex gap-2">
+								<Button onClick={() => setIsEditMode(true)} size="sm" variant="outline">
+									Editar
+								</Button>
+								<Button onClick={() => onDelete(selectedProperty.id)} size="sm" variant="destructive">
+									Eliminar
+								</Button>
+							</div>
+						</div>
+					</CardHeader>
+					<CardContent>
+						<div className="space-y-4">
+							<div>
+								<h4 className="mb-2 font-medium">Valor</h4>
+								<p className="text-muted-foreground text-sm">{selectedProperty.value}</p>
+							</div>
+							{selectedProperty.description && (
+								<div>
+									<h4 className="mb-2 font-medium">Descripción</h4>
+									<p className="text-muted-foreground text-sm">{selectedProperty.description}</p>
+								</div>
+							)}
+							<div>
+								<h4 className="mb-2 font-medium">Estadísticas</h4>
+								<p className="text-muted-foreground text-sm">
+									{selectedProperty.stats?.totalAssociations || 0} asociaciones totales
+								</p>
+							</div>
+						</div>
+					</CardContent>
+				</Card>
+			);
+		}
+
+		if (isEditMode && selectedProperty) {
+			return (
+				<CreatePropertyForm
+					isEditing
+					onCancel={() => setIsEditMode(false)}
+					onCreated={() => {
+						// no-op: creación manejada por mutateAsync arriba
+					}}
+					onUpdated={(data) => {
+						setIsEditMode(false);
+						setSelectedProperty(data);
+					}}
+					property={selectedProperty}
+				/>
+			);
+		}
+
+		return (
+			<Card className="flex h-[calc(100vh-8rem)] flex-col items-center justify-center rounded-sm border-none bg-muted/30">
+				<div className="text-center">
+					<Plus className="mx-auto h-12 w-12 text-gray-400" />
+					<h3 className="mt-2 font-medium text-gray-900 text-sm dark:text-gray-100">Selecciona una propiedad</h3>
+					<p className="mt-1 text-gray-500 text-sm">O crea una nueva para empezar</p>
+				</div>
+			</Card>
+		);
+	}, [isEditMode, onDelete, selectedProperty]);
 
 	const handleUpdateProperty = async (id: string, data: PropertyUpdateInput) => {
 		try {
@@ -229,7 +309,7 @@ export function PropertiesSettings() {
 												className="absolute top-1 right-1 h-10 w-10 opacity-0 group-hover/item:opacity-100"
 												onClick={(e: React.MouseEvent<HTMLButtonElement>) => {
 													e.stopPropagation();
-													handleDeleteProperty(property.id);
+													onDelete(property.id);
 												}}
 												size="icon"
 												variant="ghost"
@@ -245,64 +325,7 @@ export function PropertiesSettings() {
 				</div>
 
 				{/* Panel derecho: Detalles o creación */}
-				<div className="col-span-12 md:col-span-7 lg:col-span-8">
-					{selectedProperty && !isEditMode ? (
-						<Card className="h-[calc(100vh-8rem)] rounded-sm border-none bg-muted/30">
-							<CardHeader>
-								<div className="flex items-center justify-between">
-									<CardTitle>{selectedProperty.name}</CardTitle>
-									<div className="flex gap-2">
-										<Button onClick={() => setIsEditMode(true)} size="sm" variant="outline">
-											Editar
-										</Button>
-										<Button onClick={() => handleDeleteProperty(selectedProperty.id)} size="sm" variant="destructive">
-											Eliminar
-										</Button>
-									</div>
-								</div>
-							</CardHeader>
-							<CardContent>
-								<div className="space-y-4">
-									<div>
-										<h4 className="mb-2 font-medium">Valor</h4>
-										<p className="text-muted-foreground text-sm">{selectedProperty.value}</p>
-									</div>
-									{selectedProperty.description && (
-										<div>
-											<h4 className="mb-2 font-medium">Descripción</h4>
-											<p className="text-muted-foreground text-sm">{selectedProperty.description}</p>
-										</div>
-									)}
-									<div>
-										<h4 className="mb-2 font-medium">Estadísticas</h4>
-										<p className="text-muted-foreground text-sm">
-											{selectedProperty.stats?.totalAssociations || 0} asociaciones totales
-										</p>
-									</div>
-								</div>
-							</CardContent>
-						</Card>
-					) : isEditMode && selectedProperty ? (
-						<CreatePropertyForm
-							isEditing
-							onCancel={() => setIsEditMode(false)}
-							onCreated={() => {}}
-							onUpdated={(data) => {
-								setIsEditMode(false);
-								setSelectedProperty(data);
-							}}
-							property={selectedProperty}
-						/>
-					) : (
-						<Card className="flex h-[calc(100vh-8rem)] flex-col items-center justify-center rounded-sm border-none bg-muted/30">
-							<div className="text-center">
-								<Plus className="mx-auto h-12 w-12 text-gray-400" />
-								<h3 className="mt-2 font-medium text-gray-900 text-sm dark:text-gray-100">Selecciona una propiedad</h3>
-								<p className="mt-1 text-gray-500 text-sm">O crea una nueva para empezar</p>
-							</div>
-						</Card>
-					)}
-				</div>
+				<div className="col-span-12 md:col-span-7 lg:col-span-8">{rightPanel}</div>
 
 				<Dialog onOpenChange={setIsCreateDialogOpen} open={isCreateDialogOpen}>
 					<CreatePropertyForm
@@ -311,7 +334,9 @@ export function PropertiesSettings() {
 							setIsCreateDialogOpen(false);
 							toastService.success('Propiedad creada correctamente');
 						}}
-						onUpdated={() => {}}
+						onUpdated={(_data) => {
+							// no-op: no se actualiza en diálogo de creación
+						}}
 					/>
 				</Dialog>
 			</div>

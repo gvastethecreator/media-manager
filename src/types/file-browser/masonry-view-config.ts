@@ -113,7 +113,7 @@ export const DEFAULT_MASONRY_CONFIG: MasonryViewConfig = {
 			video: 0.5625, // 16:9
 			folder: 1.0,
 			audio: 2.0,
-			document: 1.414, // A4 ratio
+			document: Math.SQRT2, // A4 ratio
 			default: 1.2,
 		},
 	},
@@ -186,7 +186,7 @@ export const MASONRY_PRESETS: Record<string, Partial<MasonryViewConfig>> = {
 				video: 0.5625,
 				folder: 1.2,
 				audio: 2.5,
-				document: 1.414,
+				document: Math.SQRT2,
 				default: 1.3,
 			},
 		},

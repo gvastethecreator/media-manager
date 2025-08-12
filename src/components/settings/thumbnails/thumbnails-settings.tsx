@@ -1,7 +1,6 @@
 import { AlertCircle, Settings2, Trash2, Zap } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import * as React from 'react';
-import { useId } from 'react';
+import React, { useId } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';

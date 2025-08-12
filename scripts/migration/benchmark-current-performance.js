@@ -37,7 +37,9 @@ class PerformanceBenchmark {
 	}
 
 	formatTime(ms) {
-		if (ms < 1000) return `${ms.toFixed(0)}ms`;
+		if (ms < 1000) {
+			return `${ms.toFixed(0)}ms`;
+		}
 		return `${(ms / 1000).toFixed(2)}s`;
 	}
 
@@ -88,7 +90,7 @@ class PerformanceBenchmark {
 							: `du -sb "${dirPath}" | cut -f1`;
 
 					const result = execSync(command, { encoding: 'utf8' }).trim();
-					totalSize = Number.parseInt(result) || 0;
+					totalSize = Number.parseInt(result, 10) || 0;
 				} catch (error) {
 					console.log(chalk.yellow('⚠️ No se pudo calcular tamaño exacto'));
 					totalSize = 1024 * 1024; // Estimación de 1MB
@@ -186,8 +188,8 @@ class PerformanceBenchmark {
 			1
 		);
 
-		console.log(`📊 Mejora en build time: ${chalk.green(buildImprovement + '%')}`);
-		console.log(`📊 Mejora en memoria: ${chalk.green(memoryImprovement + '%')}`);
+		console.log(`📊 Mejora en build time: ${chalk.green(`${buildImprovement}%`)}`);
+		console.log(`📊 Mejora en memoria: ${chalk.green(`${memoryImprovement}%`)}`);
 
 		// Calculamos si vale la pena
 		const worthIt = this.results.bundleTime > 10_000 || this.results.memoryUsage > 500 * 1024 * 1024;

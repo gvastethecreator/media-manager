@@ -4,10 +4,13 @@
 
 import type { DirectoryInfo, FileInfo } from '@/lib/filesystem/folder-scanner';
 import type { FileBase } from './base';
+
+export type { DirectoryInfo, FileInfo } from '@/lib/filesystem/folder-scanner';
+export type { FileBase } from './base';
+
 import { FileType } from './base';
 
 // Re-exportar tipos importados para que estén disponibles
-export type { DirectoryInfo, FileInfo, FileBase };
 
 export type FileRelations = Record<string, never>;
 

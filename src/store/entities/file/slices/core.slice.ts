@@ -93,7 +93,9 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 		const { files, fileCount, directoryCount, totalSize } = get();
 		const fileToRemove = files.find((file) => file.id === id);
 
-		if (!fileToRemove) return;
+		if (!fileToRemove) {
+			return;
+		}
 
 		// Actualizar estadísticas
 		const newFileCount = fileToRemove.isDirectory ? fileCount : fileCount - 1;
@@ -137,7 +139,7 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 			let newParents: string[] = [];
 
 			if (parentDirectories.length > 0) {
-				targetPath = parentDirectories[parentDirectories.length - 1];
+				targetPath = parentDirectories.at(-1);
 				newParents = parentDirectories.slice(0, -1);
 			}
 

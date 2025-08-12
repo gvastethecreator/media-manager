@@ -4,32 +4,42 @@
  */
 
 import { FileImage, Image as ImageIcon } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface ImageThumbnailProps {
-	path: string;
+	path: string; // Puede ser ruta o id; preferimos id cuando venga
 	name: string;
 	size?: number;
 	className?: string;
 	fallbackIcon?: React.ReactNode;
+	id?: string; // opcional: id explícito de imagen
+	thumbnailUrl?: string; // opcional: si ya viene resuelto
 }
 
 /**
  * Componente de thumbnail de imagen con carga lazy
  */
-export function ImageThumbnail({ path, name, size = 48, className = '', fallbackIcon }: ImageThumbnailProps) {
+export function ImageThumbnail({
+	path,
+	name,
+	size = 48,
+	className = '',
+	fallbackIcon,
+	id,
+	thumbnailUrl,
+}: ImageThumbnailProps) {
 	const [isLoading, setIsLoading] = useState(true);
 	const [hasError, setHasError] = useState(false);
-	const [imageSrc, setImageSrc] = useState<string>('');
 
-	useEffect(() => {
-		// Generar URL del thumbnail basado en el path
-		const thumbnailUrl = `/api/thumbnails/${encodeURIComponent(path)}`;
-		setImageSrc(thumbnailUrl);
-		setIsLoading(true);
-		setHasError(false);
-	}, [path]);
+	// Calcular URL final sin usar estado para evitar src vacíos en el primer render
+	const finalUrl = useMemo(() => {
+		return (
+			(thumbnailUrl && typeof thumbnailUrl === 'string' && thumbnailUrl) ||
+			(id ? `/api/images/${encodeURIComponent(id)}/thumbnail` : undefined) ||
+			`/api/thumbnails/${encodeURIComponent(path)}`
+		);
+	}, [path, id, thumbnailUrl]);
 
 	const handleLoad = () => {
 		setIsLoading(false);
@@ -75,7 +85,7 @@ export function ImageThumbnail({ path, name, size = 48, className = '', fallback
 				loading="lazy"
 				onError={handleError}
 				onLoad={handleLoad}
-				src={imageSrc}
+				src={finalUrl}
 			/>
 		</div>
 	);

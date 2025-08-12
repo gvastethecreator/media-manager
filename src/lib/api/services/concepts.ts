@@ -82,14 +82,14 @@ export interface GetConceptsOptions {
 /**
  * Obtiene los datos de un concepto para mostrar en una tarjeta
  */
-export async function getConceptCardData(conceptId: string): Promise<ConceptCardData> {
+export function getConceptCardData(conceptId: string): Promise<ConceptCardData> {
 	return apiClient.get<ConceptCardData>(`/concepts/${conceptId}/card-data`);
 }
 
 /**
  * Obtiene una lista de conceptos para mostrar en una galería de tarjetas
  */
-export async function getConceptsForCards(options: GetConceptsOptions = {}): Promise<ConceptCardData[]> {
+export function getConceptsForCards(options: GetConceptsOptions = {}): Promise<ConceptCardData[]> {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(options)) {
 		if (value !== undefined) {
@@ -103,7 +103,7 @@ export async function getConceptsForCards(options: GetConceptsOptions = {}): Pro
 /**
  * Busca conceptos con filtros avanzados
  */
-export async function searchConcepts(options: GetConceptsOptions & { searchTerm: string }): Promise<ConceptCardData[]> {
+export function searchConcepts(options: GetConceptsOptions & { searchTerm: string }): Promise<ConceptCardData[]> {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(options)) {
 		if (value !== undefined) {

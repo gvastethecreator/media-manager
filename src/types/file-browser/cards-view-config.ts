@@ -198,7 +198,9 @@ export const DEFAULT_ACTION_BUTTONS: CardActionButton[] = [
 		id: 'quick-view',
 		icon: 'Eye',
 		tooltip: 'Vista rápida',
-		action: () => {},
+		action: () => {
+			// noop: se configurará desde la UI
+		},
 		visible: true,
 		position: 'top-right',
 	},
@@ -206,7 +208,9 @@ export const DEFAULT_ACTION_BUTTONS: CardActionButton[] = [
 		id: 'favorite',
 		icon: 'Heart',
 		tooltip: 'Agregar a favoritos',
-		action: () => {},
+		action: () => {
+			// noop: se configurará desde la UI
+		},
 		visible: true,
 		position: 'top-left',
 	},
@@ -214,7 +218,9 @@ export const DEFAULT_ACTION_BUTTONS: CardActionButton[] = [
 		id: 'share',
 		icon: 'Share2',
 		tooltip: 'Compartir',
-		action: () => {},
+		action: () => {
+			// noop: se configurará desde la UI
+		},
 		visible: false,
 		position: 'bottom-right',
 	},
@@ -222,7 +228,9 @@ export const DEFAULT_ACTION_BUTTONS: CardActionButton[] = [
 		id: 'download',
 		icon: 'Download',
 		tooltip: 'Descargar',
-		action: () => {},
+		action: () => {
+			// noop: se configurará desde la UI
+		},
 		visible: false,
 		position: 'bottom-left',
 	},

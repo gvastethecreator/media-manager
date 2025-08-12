@@ -86,9 +86,13 @@ class BunMigrationAnalyzer {
 			this.dependencies.filter((d) => d.migrationComplexity === 'low').length * 2;
 
 		let riskLevel = 'low';
-		if (blockers > 0) riskLevel = 'high';
-		else if (highComplexity > 2) riskLevel = 'high';
-		else if (highComplexity > 0 || mediumComplexity > 3) riskLevel = 'medium';
+		if (blockers > 0) {
+			riskLevel = 'high';
+		} else if (highComplexity > 2) {
+			riskLevel = 'high';
+		} else if (highComplexity > 0 || mediumComplexity > 3) {
+			riskLevel = 'medium';
+		}
 
 		return {
 			totalDeps: this.dependencies.length,

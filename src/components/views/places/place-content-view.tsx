@@ -10,7 +10,7 @@ import { ContentViewProvider } from '../base/content-view-provider';
 
 const viewLogger = clientLogger.withContext('PlaceContentView');
 
-export const PlaceContentView = memo(function PlaceContentView() {
+export const PlaceContentView = memo(function PlaceContentViewInner() {
 	const selectedPlaceId = usePlaceStore((state) => state.selectedPlaceId);
 	const selectedPlace = usePlaceStore((state) => (selectedPlaceId ? state.getPlaceById(selectedPlaceId) : null));
 
@@ -21,8 +21,10 @@ export const PlaceContentView = memo(function PlaceContentView() {
 
 	const { data: placeImages, isLoading: isLoadingImages, error: placeError } = usePlaceImages(currentPlaceId || '');
 
-	const loadPlaceImages = useCallback(async () => {
-		if (!currentPlaceId) return;
+	const loadPlaceImages = useCallback((): Promise<void> => {
+		if (!currentPlaceId) {
+			return Promise.resolve();
+		}
 
 		try {
 			setError(null);
@@ -39,6 +41,8 @@ export const PlaceContentView = memo(function PlaceContentView() {
 		} finally {
 			setIsLoading(false);
 		}
+
+		return Promise.resolve();
 	}, [currentPlaceId, placeImages]);
 
 	useEffect(() => {
@@ -46,7 +50,7 @@ export const PlaceContentView = memo(function PlaceContentView() {
 	}, [loadPlaceImages]);
 
 	const handleItemSelection = useCallback((item: EntityWithStats) => {
-		console.log('Item seleccionado:', item.name);
+		viewLogger.info('🖱️ Item seleccionado:', item.name);
 	}, []);
 
 	const emptyStateConfig = useMemo(

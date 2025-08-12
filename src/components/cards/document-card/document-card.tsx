@@ -73,7 +73,9 @@ export function DocumentCard({
 
 	// Estadísticas del documento
 	const fileSize = useMemo(() => {
-		if (!document.size) return 'N/A';
+		if (!document.size) {
+			return 'N/A';
+		}
 		const mb = document.size / (1024 * 1024);
 		if (mb < 1) {
 			const kb = document.size / 1024;

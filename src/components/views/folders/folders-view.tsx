@@ -30,7 +30,9 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 
 	// Manejar creación de carpeta
 	const handleCreateFolder = async () => {
-		if (!(newFolderName.trim() && newFolderPath.trim())) return;
+		if (!(newFolderName.trim() && newFolderPath.trim())) {
+			return;
+		}
 
 		try {
 			await createFolder({

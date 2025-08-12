@@ -113,7 +113,7 @@ const MasonryItem = memo<MasonryItemProps>(
 		// Para elementos no animados, usar div simple
 		if (!masonryConfig.shouldUseAnimations) {
 			return (
-				<button
+				<div
 					className={itemClasses}
 					// Compat E2E/selectores
 					data-entity-card=""
@@ -121,10 +121,7 @@ const MasonryItem = memo<MasonryItemProps>(
 					data-item-id={layoutItem.item.id}
 					data-item-index={itemIndex}
 					data-testid="file-browser-item"
-					onClick={handleClick}
-					onDoubleClick={handleDoubleClick}
 					style={style as React.CSSProperties}
-					type="button"
 				>
 					<OptimizedEntityCard
 						className="h-full w-full"
@@ -136,22 +133,19 @@ const MasonryItem = memo<MasonryItemProps>(
 						onDoubleClick={() => onItemDoubleClickById(layoutItem.item.id)}
 						size="md"
 					/>
-				</button>
+				</div>
 			);
 		}
 
 		return (
-			<motion.button
+			<motion.div
 				{...staticMotionProps}
 				className={itemClasses}
 				// Compat E2E/selectores
 				data-entity-card=""
 				data-item-id={layoutItem.item.id}
-				onClick={handleClick}
-				onDoubleClick={handleDoubleClick}
 				style={style}
 				transition={transition}
-				type="button"
 			>
 				<OptimizedEntityCard
 					className="h-full w-full"
@@ -163,7 +157,7 @@ const MasonryItem = memo<MasonryItemProps>(
 					onDoubleClick={() => onItemDoubleClickById(layoutItem.item.id)}
 					size="md"
 				/>
-			</motion.button>
+			</motion.div>
 		);
 	},
 	(prevProps, nextProps) => {

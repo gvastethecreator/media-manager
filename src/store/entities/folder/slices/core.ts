@@ -3,9 +3,10 @@
  * @module store/entities/folder/slices/core
  */
 
-import type { StateCreator } from 'zustand';
+import { getAllFolders as apiGetAllFolders } from '@/lib/api/services/folders';
 import { foldersToRecord, getFolderById } from '@/transformers/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
+import type { StateCreator } from 'zustand';
 import type { CompleteFolderStore, FolderStore } from '../types';
 
 // Estado inicial
@@ -60,7 +61,9 @@ function buildTreeIndex(folders: Record<string, FolderWithStats>): Record<string
 
 	// Función recursiva para obtener todos los descendientes
 	function getDescendants(folderId: string, visited = new Set<string>()): string[] {
-		if (visited.has(folderId)) return []; // Evitar ciclos
+		if (visited.has(folderId)) {
+			return []; // Evitar ciclos
+		}
 		visited.add(folderId);
 
 		const directChildren = Object.values(folders)
@@ -160,7 +163,9 @@ export const createFolderCoreSlice: StateCreator<CompleteFolderStore, [], [], Fo
 		const { folders } = get();
 		const existingFolder = folders[id];
 
-		if (!existingFolder) return;
+		if (!existingFolder) {
+			return;
+		}
 
 		const updatedFolder = { ...existingFolder, ...updates };
 		const updatedFolders = { ...folders, [id]: updatedFolder };
@@ -246,12 +251,10 @@ export const createFolderCoreSlice: StateCreator<CompleteFolderStore, [], [], Fo
 		set({ isLoading: true, error: null });
 
 		try {
-			// Aquí se llamaría a la server action para recargar datos
-			// Por ahora solo actualizamos el timestamp
-			set({
-				isLoading: false,
-				lastUpdated: new Date(),
-			});
+			const folders = await apiGetAllFolders();
+			// Hidratar estado con índices
+			get().setFolders(folders);
+			set({ isLoading: false, lastUpdated: new Date() });
 		} catch (error) {
 			set({
 				isLoading: false,
@@ -262,6 +265,6 @@ export const createFolderCoreSlice: StateCreator<CompleteFolderStore, [], [], Fo
 
 	// Alias para refresh para compatibilidad
 	fetchFolders: async () => {
-		return get().refresh();
+		await get().refresh();
 	},
 });

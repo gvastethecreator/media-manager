@@ -94,10 +94,18 @@ export function FilesView(_: ViewProps) {
 			const hasAudios = (audiosArray || []).length > 0;
 			const hasDocuments = Object.keys(documentsRecord || {}).length > 0;
 
-			if (!hasImages) loadImages();
-			if (!hasVideos) fetchVideos();
-			if (!hasAudios) fetchAudios();
-			if (!hasDocuments) fetchDocuments();
+			if (!hasImages) {
+				loadImages();
+			}
+			if (!hasVideos) {
+				fetchVideos();
+			}
+			if (!hasAudios) {
+				fetchAudios();
+			}
+			if (!hasDocuments) {
+				fetchDocuments();
+			}
 		}
 	}, [imagesRecord, videosRecord, audiosArray, documentsRecord, loadImages, fetchVideos, fetchAudios, fetchDocuments]);
 

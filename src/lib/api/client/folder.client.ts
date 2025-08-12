@@ -30,8 +30,12 @@ export async function getFolderImagesFromApi(
 ): Promise<FolderImagesResponse> {
 	const params = new URLSearchParams();
 	params.append('folderId', folderId);
-	if (options.take) params.append('limit', String(options.take));
-	if (options.skip) params.append('offset', String(options.skip));
+	if (options.take) {
+		params.append('limit', String(options.take));
+	}
+	if (options.skip) {
+		params.append('offset', String(options.skip));
+	}
 
 	const response = await fetch(`${API_BASE_PATH}?${params.toString()}`);
 

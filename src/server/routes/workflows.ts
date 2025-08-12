@@ -105,26 +105,64 @@ router.put('/:id', async (req, res) => {
 		const rawData = WorkflowUpdateSchema.parse(req.body);
 		// Normalizar tipos para Update (nullable vs undefined)
 		const validatedData: any = {};
-		if (rawData.name !== undefined) validatedData.name = rawData.name;
-		if (rawData.description !== undefined) validatedData.description = rawData.description ?? null;
-		if (rawData.emoji !== undefined) validatedData.emoji = rawData.emoji ?? null;
-		if (rawData.color !== undefined) validatedData.color = rawData.color ?? null;
-		if (rawData.category !== undefined) validatedData.category = rawData.category ?? null;
-		if (rawData.version !== undefined) validatedData.version = rawData.version || '';
-		if (rawData.config !== undefined) validatedData.config = rawData.config ?? null;
-		if (rawData.steps !== undefined) validatedData.steps = rawData.steps ?? null;
-		if (rawData.triggers !== undefined) validatedData.triggers = rawData.triggers ?? null;
-		if (rawData.conditions !== undefined) validatedData.conditions = rawData.conditions ?? null;
-		if (rawData.actions !== undefined) validatedData.actions = rawData.actions ?? null;
-		if (rawData.schedule !== undefined) validatedData.schedule = rawData.schedule ?? null;
-		if (rawData.lastRun !== undefined) validatedData.lastRun = rawData.lastRun ?? null;
-		if (rawData.nextRun !== undefined) validatedData.nextRun = rawData.nextRun ?? null;
+		if (rawData.name !== undefined) {
+			validatedData.name = rawData.name;
+		}
+		if (rawData.description !== undefined) {
+			validatedData.description = rawData.description ?? null;
+		}
+		if (rawData.emoji !== undefined) {
+			validatedData.emoji = rawData.emoji ?? null;
+		}
+		if (rawData.color !== undefined) {
+			validatedData.color = rawData.color ?? null;
+		}
+		if (rawData.category !== undefined) {
+			validatedData.category = rawData.category ?? null;
+		}
+		if (rawData.version !== undefined) {
+			validatedData.version = rawData.version || '';
+		}
+		if (rawData.config !== undefined) {
+			validatedData.config = rawData.config ?? null;
+		}
+		if (rawData.steps !== undefined) {
+			validatedData.steps = rawData.steps ?? null;
+		}
+		if (rawData.triggers !== undefined) {
+			validatedData.triggers = rawData.triggers ?? null;
+		}
+		if (rawData.conditions !== undefined) {
+			validatedData.conditions = rawData.conditions ?? null;
+		}
+		if (rawData.actions !== undefined) {
+			validatedData.actions = rawData.actions ?? null;
+		}
+		if (rawData.schedule !== undefined) {
+			validatedData.schedule = rawData.schedule ?? null;
+		}
+		if (rawData.lastRun !== undefined) {
+			validatedData.lastRun = rawData.lastRun ?? null;
+		}
+		if (rawData.nextRun !== undefined) {
+			validatedData.nextRun = rawData.nextRun ?? null;
+		}
 
-		if (rawData.isFavorite !== undefined) validatedData.isFavorite = rawData.isFavorite;
-		if (rawData.isActive !== undefined) validatedData.isActive = rawData.isActive;
-		if (rawData.runCount !== undefined) validatedData.runCount = rawData.runCount;
-		if (rawData.successCount !== undefined) validatedData.successCount = rawData.successCount;
-		if (rawData.errorCount !== undefined) validatedData.errorCount = rawData.errorCount;
+		if (rawData.isFavorite !== undefined) {
+			validatedData.isFavorite = rawData.isFavorite;
+		}
+		if (rawData.isActive !== undefined) {
+			validatedData.isActive = rawData.isActive;
+		}
+		if (rawData.runCount !== undefined) {
+			validatedData.runCount = rawData.runCount;
+		}
+		if (rawData.successCount !== undefined) {
+			validatedData.successCount = rawData.successCount;
+		}
+		if (rawData.errorCount !== undefined) {
+			validatedData.errorCount = rawData.errorCount;
+		}
 
 		const updatedWorkflow = await updateWorkflow(id, validatedData);
 		return res.json(updatedWorkflow);

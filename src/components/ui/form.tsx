@@ -1,8 +1,7 @@
 'use client';
 
 import { Label as LabelPrimitive, Slot as SlotPrimitive } from 'radix-ui';
-import * as React from 'react';
-
+import React from 'react';
 import {
 	Controller,
 	type ControllerProps,
@@ -134,4 +133,4 @@ function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
 	);
 }
 
-export { useFormField, Form, FormItem, FormLabel, FormControl, FormDescription, FormMessage, FormField };
+export { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage, useFormField };

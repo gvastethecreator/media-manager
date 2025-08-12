@@ -8,9 +8,6 @@
 
 import { useCallback, useMemo } from 'react';
 import { useSettingsStore } from '@/store/settings.store';
-import { CardsViewConfig } from '@/types/file-browser/cards-view-config';
-import { GridViewConfig } from '@/types/file-browser/grid-view-config';
-import { MasonryViewConfig } from '@/types/file-browser/masonry-view-config';
 import {
 	CommonViewSettings,
 	cloneViewConfiguration,
@@ -371,6 +368,7 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
 
 	const resetConfiguration = useCallback(async (): Promise<boolean> => {
 		try {
+			await Promise.resolve();
 			resetToDefault();
 			return true;
 		} catch {
@@ -381,6 +379,7 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
 	const applyPresetAsync = useCallback(
 		async (presetId: string): Promise<boolean> => {
 			try {
+				await Promise.resolve();
 				const preset = availablePresets.find((p) => p.id === presetId);
 				if (preset) {
 					updateConfiguration(preset.configuration);
@@ -399,7 +398,7 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
 	}, [availablePresets]);
 
 	const exportConfigurationWithOptions = useCallback(
-		(options?: any) => {
+		(_options?: any) => {
 			const data = exportConfiguration();
 			return {
 				data,
@@ -410,8 +409,9 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
 	);
 
 	const importConfigurationAsync = useCallback(
-		async (configJson: string, options?: any): Promise<{ success: boolean; errors: string[] }> => {
+		async (configJson: string, _options?: any): Promise<{ success: boolean; errors: string[] }> => {
 			try {
+				await Promise.resolve();
 				const success = importConfiguration(configJson);
 				return {
 					success,

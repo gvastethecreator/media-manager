@@ -1,5 +1,5 @@
 // Inspired by react-hot-toast library
-import * as React from 'react';
+import React from 'react';
 
 import type { ToastActionElement, ToastProps } from '@/components/ui/toast';
 
@@ -25,7 +25,7 @@ const actionTypes = {
 let count = 0;
 
 function genId() {
-	count = (count + 1) % Number.MAX_VALUE;
+	count = (count + 1) % Number.MAX_SAFE_INTEGER;
 	return count.toString();
 }
 
@@ -93,8 +93,8 @@ export const reducer = (state: State, action: Action): State => {
 			if (toastId) {
 				addToRemoveQueue(toastId);
 			} else {
-				for (const toast of state.toasts) {
-					addToRemoveQueue(toast.id);
+				for (const item of state.toasts) {
+					addToRemoveQueue(item.id);
 				}
 			}
 
@@ -121,6 +121,8 @@ export const reducer = (state: State, action: Action): State => {
 				...state,
 				toasts: state.toasts.filter((t) => t.id !== action.toastId),
 			};
+		default:
+			return state;
 	}
 };
 
@@ -137,20 +139,20 @@ function dispatch(action: Action) {
 
 type Toast = Omit<ToasterToast, 'id'>;
 
-function toast({ ...props }: Toast) {
+function toast({ ...toastProps }: Toast) {
 	const id = genId();
 
-	const update = (props: ToasterToast) =>
+	const updateToast = (p: ToasterToast) =>
 		dispatch({
 			type: 'UPDATE_TOAST',
-			toast: { ...props, id },
+			toast: { ...p, id },
 		});
 	const dismiss = () => dispatch({ type: 'DISMISS_TOAST', toastId: id });
 
 	dispatch({
 		type: 'ADD_TOAST',
 		toast: {
-			...props,
+			...toastProps,
 			id,
 			open: true,
 			onOpenChange: (open: boolean) => {
@@ -164,7 +166,7 @@ function toast({ ...props }: Toast) {
 	return {
 		id,
 		dismiss,
-		update,
+		update: updateToast,
 	};
 }
 
@@ -188,4 +190,4 @@ function useToast() {
 	};
 }
 
-export { useToast, toast };
+export { toast, useToast };

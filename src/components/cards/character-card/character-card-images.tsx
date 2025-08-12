@@ -52,7 +52,9 @@ export function CharacterCardImages({
 
 	// Determinar los efectos holográficos basados en la rareza
 	const getHolographicEffects = () => {
-		if (!(tcgMode && holographicEffect)) return {};
+		if (!(tcgMode && holographicEffect)) {
+			return {};
+		}
 
 		// A mayor rareza, más pronunciados son los efectos
 		if (rarityLevel >= 9) {
@@ -86,7 +88,9 @@ export function CharacterCardImages({
 
 	// Manejar el efecto holográfico en movimiento
 	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-		if (!(tcgMode && holographicEffect)) return;
+		if (!(tcgMode && holographicEffect)) {
+			return;
+		}
 
 		const el = e.currentTarget;
 		const rect = el.getBoundingClientRect();

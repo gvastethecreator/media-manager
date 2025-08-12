@@ -281,27 +281,65 @@ export async function updatePlace(id: string, input: PlaceUpdateInput): Promise<
 		};
 
 		// Solo actualizar campos que existen en el schema
-		if (input.name !== undefined) updateData.name = input.name;
-		if (input.description !== undefined) updateData.description = input.description;
-		if (input.emoji !== undefined) updateData.emoji = input.emoji;
-		if (input.color !== undefined) updateData.color = input.color;
-		if (input.category !== undefined) updateData.category = input.category;
-		if (input.location !== undefined) updateData.location = input.location;
-		if (input.climate !== undefined) updateData.climate = input.climate;
-		if (input.population !== undefined) updateData.population = input.population;
-		if (input.government !== undefined) updateData.government = input.government;
-		if (input.economy !== undefined) updateData.economy = input.economy;
-		if (input.culture !== undefined) updateData.culture = input.culture;
-		if (input.history !== undefined) updateData.history = input.history;
-		if (input.geography !== undefined) updateData.geography = input.geography;
-		if (input.landmarks !== undefined) updateData.landmarks = input.landmarks;
+		if (input.name !== undefined) {
+			updateData.name = input.name;
+		}
+		if (input.description !== undefined) {
+			updateData.description = input.description;
+		}
+		if (input.emoji !== undefined) {
+			updateData.emoji = input.emoji;
+		}
+		if (input.color !== undefined) {
+			updateData.color = input.color;
+		}
+		if (input.category !== undefined) {
+			updateData.category = input.category;
+		}
+		if (input.location !== undefined) {
+			updateData.location = input.location;
+		}
+		if (input.climate !== undefined) {
+			updateData.climate = input.climate;
+		}
+		if (input.population !== undefined) {
+			updateData.population = input.population;
+		}
+		if (input.government !== undefined) {
+			updateData.government = input.government;
+		}
+		if (input.economy !== undefined) {
+			updateData.economy = input.economy;
+		}
+		if (input.culture !== undefined) {
+			updateData.culture = input.culture;
+		}
+		if (input.history !== undefined) {
+			updateData.history = input.history;
+		}
+		if (input.geography !== undefined) {
+			updateData.geography = input.geography;
+		}
+		if (input.landmarks !== undefined) {
+			updateData.landmarks = input.landmarks;
+		}
 		// resources y dangers no existen en PlaceUpdateInput
-		if (input.notes !== undefined) updateData.notes = input.notes;
-		if (input.featuredImage !== undefined) updateData.featuredImage = input.featuredImage;
-		if (input.parentId !== undefined) updateData.parentId = input.parentId;
-		if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
+		if (input.notes !== undefined) {
+			updateData.notes = input.notes;
+		}
+		if (input.featuredImage !== undefined) {
+			updateData.featuredImage = input.featuredImage;
+		}
+		if (input.parentId !== undefined) {
+			updateData.parentId = input.parentId;
+		}
+		if (input.isFavorite !== undefined) {
+			updateData.isFavorite = input.isFavorite;
+		}
 
-		if (input.type !== undefined) updateData.type = input.type;
+		if (input.type !== undefined) {
+			updateData.type = input.type;
+		}
 
 		await db.update(places).set(updateData).where(eq(places.id, id));
 

@@ -67,7 +67,9 @@ class LRUCache<K, V extends CacheEntry<any>> {
 
 	get(key: K): V['data'] | null {
 		const entry = this.cache.get(key);
-		if (!entry) return null;
+		if (!entry) {
+			return null;
+		}
 
 		// Verificar TTL
 		if (Date.now() - entry.timestamp > this.ttl) {
@@ -111,7 +113,9 @@ class LRUCache<K, V extends CacheEntry<any>> {
 
 	has(key: K): boolean {
 		const entry = this.cache.get(key);
-		if (!entry) return false;
+		if (!entry) {
+			return false;
+		}
 
 		// Verificar TTL
 		if (Date.now() - entry.timestamp > this.ttl) {

@@ -198,7 +198,9 @@ export function EntityTypeSelector({
 	const types = availableTypes || Object.values(EntityStatsType);
 
 	const handleTypeToggle = (type: EntityStatsType) => {
-		if (!onSelectionChange) return;
+		if (!onSelectionChange) {
+			return;
+		}
 
 		if (!multiple) {
 			onSelectionChange([type]);

@@ -144,14 +144,30 @@ export function getActivityColor(type: string): string {
  * @returns Categoría
  */
 export function getActivityCategory(type: string): string {
-	if (type.startsWith('image_')) return ActivityCategory.IMAGES;
-	if (type.startsWith('video_')) return ActivityCategory.VIDEOS;
-	if (type.startsWith('folder_')) return ActivityCategory.FOLDERS;
-	if (type.startsWith('album_')) return ActivityCategory.ALBUMS;
-	if (type.startsWith('collection_')) return ActivityCategory.COLLECTIONS;
-	if (type.startsWith('system_')) return ActivityCategory.SYSTEM;
-	if (type.startsWith('user_')) return ActivityCategory.USER;
-	if (type.startsWith('search_')) return ActivityCategory.SEARCH;
+	if (type.startsWith('image_')) {
+		return ActivityCategory.IMAGES;
+	}
+	if (type.startsWith('video_')) {
+		return ActivityCategory.VIDEOS;
+	}
+	if (type.startsWith('folder_')) {
+		return ActivityCategory.FOLDERS;
+	}
+	if (type.startsWith('album_')) {
+		return ActivityCategory.ALBUMS;
+	}
+	if (type.startsWith('collection_')) {
+		return ActivityCategory.COLLECTIONS;
+	}
+	if (type.startsWith('system_')) {
+		return ActivityCategory.SYSTEM;
+	}
+	if (type.startsWith('user_')) {
+		return ActivityCategory.USER;
+	}
+	if (type.startsWith('search_')) {
+		return ActivityCategory.SEARCH;
+	}
 	return ActivityCategory.OTHER;
 }
 
@@ -161,7 +177,9 @@ export function getActivityCategory(type: string): string {
  * @returns Objeto de metadatos o undefined
  */
 export function parseActivityMetadata(metadata: string | object | undefined): ActivityMetadata | undefined {
-	if (!metadata) return;
+	if (!metadata) {
+		return;
+	}
 
 	if (typeof metadata === 'string') {
 		try {
@@ -181,7 +199,9 @@ export function parseActivityMetadata(metadata: string | object | undefined): Ac
  * @returns String serializado o undefined
  */
 export function serializeActivityMetadata(metadata?: ActivityMetadata): string | undefined {
-	if (!metadata) return;
+	if (!metadata) {
+		return;
+	}
 
 	try {
 		return JSON.stringify(metadata);
@@ -217,14 +237,30 @@ export function serializeActivity(activity: Activity): Record<string, any> {
 		};
 
 		// Añadir campos opcionales si existen
-		if (validData.metadata) serialized.metadata = validData.metadata;
-		if (validData.ipAddress) serialized.ipAddress = validData.ipAddress;
-		if (validData.userAgent) serialized.userAgent = validData.userAgent;
-		if (validData.sessionId) serialized.sessionId = validData.sessionId;
-		if (validData.image) serialized.image = validData.image;
-		if (validData.iconEmoji) serialized.iconEmoji = validData.iconEmoji;
-		if (validData.iconColor) serialized.iconColor = validData.iconColor;
-		if (validData.category) serialized.category = validData.category;
+		if (validData.metadata) {
+			serialized.metadata = validData.metadata;
+		}
+		if (validData.ipAddress) {
+			serialized.ipAddress = validData.ipAddress;
+		}
+		if (validData.userAgent) {
+			serialized.userAgent = validData.userAgent;
+		}
+		if (validData.sessionId) {
+			serialized.sessionId = validData.sessionId;
+		}
+		if (validData.image) {
+			serialized.image = validData.image;
+		}
+		if (validData.iconEmoji) {
+			serialized.iconEmoji = validData.iconEmoji;
+		}
+		if (validData.iconColor) {
+			serialized.iconColor = validData.iconColor;
+		}
+		if (validData.category) {
+			serialized.category = validData.category;
+		}
 
 		return serialized;
 	} catch (error) {
@@ -355,11 +391,21 @@ export function serializeActivityFilters(filters: Record<string, any>): Record<s
 	const serialized: Record<string, any> = {};
 
 	// Añadir campos solo si tienen valor
-	if (normalizedFilters.types?.length) serialized.types = normalizedFilters.types;
-	if (normalizedFilters.searchQuery) serialized.q = normalizedFilters.searchQuery;
-	if (normalizedFilters.limit) serialized.limit = normalizedFilters.limit;
-	if (normalizedFilters.offset) serialized.offset = normalizedFilters.offset;
-	if (normalizedFilters.imageId) serialized.imageId = normalizedFilters.imageId;
+	if (normalizedFilters.types?.length) {
+		serialized.types = normalizedFilters.types;
+	}
+	if (normalizedFilters.searchQuery) {
+		serialized.q = normalizedFilters.searchQuery;
+	}
+	if (normalizedFilters.limit) {
+		serialized.limit = normalizedFilters.limit;
+	}
+	if (normalizedFilters.offset) {
+		serialized.offset = normalizedFilters.offset;
+	}
+	if (normalizedFilters.imageId) {
+		serialized.imageId = normalizedFilters.imageId;
+	}
 
 	// Formatear fechas para API
 	if (normalizedFilters.startDate) {

@@ -69,7 +69,9 @@ export function JsonFileCard({
 
 	// Color basado en la validez del JSON
 	const primaryColor = useMemo(() => {
-		if (!jsonFile) return '#6b7280';
+		if (!jsonFile) {
+			return '#6b7280';
+		}
 		// Intentar parsear el contenido para determinar si es válido
 		try {
 			if (jsonFile.content) {
@@ -93,9 +95,13 @@ export function JsonFileCard({
 
 	// Estadísticas del JSON
 	const jsonStats = useMemo(() => {
-		if (!jsonFile) return { isValid: false, keys: 0, size: 0 };
+		if (!jsonFile) {
+			return { isValid: false, keys: 0, size: 0 };
+		}
 		try {
-			if (!jsonFile.content) return { isValid: false, keys: 0, size: 0 };
+			if (!jsonFile.content) {
+				return { isValid: false, keys: 0, size: 0 };
+			}
 
 			const parsed = JSON.parse(jsonFile.content);
 			const keys = typeof parsed === 'object' && parsed !== null ? Object.keys(parsed).length : 0;
@@ -118,7 +124,9 @@ export function JsonFileCard({
 
 	// Preview del JSON formateado
 	const jsonPreview = useMemo(() => {
-		if (!jsonFile?.content) return '';
+		if (!jsonFile?.content) {
+			return '';
+		}
 		try {
 			return JSON.stringify(JSON.parse(jsonFile.content), null, 2);
 		} catch {

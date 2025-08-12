@@ -18,7 +18,9 @@ export function cn(...inputs: ClassValue[]): string {
  * @returns Formatted duration string (e.g., "1:23", "1:23:45")
  */
 export function formatDuration(seconds: number): string {
-	if (seconds < 0) return '0:00';
+	if (seconds < 0) {
+		return '0:00';
+	}
 
 	const hours = Math.floor(seconds / 3600);
 	const minutes = Math.floor((seconds % 3600) / 60);
@@ -37,7 +39,9 @@ export function formatDuration(seconds: number): string {
  * @returns Formatted file size string (e.g., "1.23 MB")
  */
 export function formatFileSize(bytes: number, decimals = 2): string {
-	if (bytes === 0) return '0 Bytes';
+	if (bytes === 0) {
+		return '0 Bytes';
+	}
 
 	const k = 1024;
 	const dm = decimals < 0 ? 0 : decimals;

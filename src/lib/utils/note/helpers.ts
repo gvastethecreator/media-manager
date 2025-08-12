@@ -137,7 +137,9 @@ export function getNoteStats(note: NoteWithStats) {
  * 🔍 Busca notas que coincidan con un término de búsqueda
  */
 export function searchNotes(notes: NoteWithStats[], searchTerm: string): NoteWithStats[] {
-	if (!searchTerm.trim()) return notes;
+	if (!searchTerm.trim()) {
+		return notes;
+	}
 
 	const term = searchTerm.toLowerCase();
 
@@ -179,7 +181,9 @@ export function getNotesAggregateStats(notes: NoteWithStats[]) {
 			acc.totalCompletionScore += note.stats.completionScore;
 			acc.totalRelations += note.stats.totalItems;
 
-			if (note.isFavorite) acc.favoriteCount++;
+			if (note.isFavorite) {
+				acc.favoriteCount++;
+			}
 
 			// Conteos por categoría
 			acc.categoryCounts[note.category] = (acc.categoryCounts[note.category] || 0) + 1;
@@ -248,7 +252,9 @@ export function compareNotes(noteA: NoteWithStats, noteB: NoteWithStats) {
  * 🎯 Encuentra notas relacionadas basándose en contenido y categorías
  */
 export function findRelatedNotes(targetNote: NoteWithStats, allNotes: NoteWithStats[], limit = 5): NoteWithStats[] {
-	if (allNotes.length <= 1) return [];
+	if (allNotes.length <= 1) {
+		return [];
+	}
 
 	const otherNotes = allNotes.filter((note) => note.id !== targetNote.id);
 
@@ -257,13 +263,19 @@ export function findRelatedNotes(targetNote: NoteWithStats, allNotes: NoteWithSt
 		let score = 0;
 
 		// Misma categoría (+30 puntos)
-		if (note.category === targetNote.category) score += 30;
+		if (note.category === targetNote.category) {
+			score += 30;
+		}
 
 		// Misma prioridad (+20 puntos)
-		if (note.priority === targetNote.priority) score += 20;
+		if (note.priority === targetNote.priority) {
+			score += 20;
+		}
 
 		// Mismo estado (+15 puntos)
-		if (note.status === targetNote.status) score += 15;
+		if (note.status === targetNote.status) {
+			score += 15;
+		}
 
 		// Similitud en título (hasta 25 puntos)
 		const titleWords = targetNote.title.toLowerCase().split(/\s+/);

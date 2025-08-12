@@ -106,13 +106,21 @@ export function calculateRarityLevel(
 	usageCount: number,
 	totalItems: number
 ): 'common' | 'uncommon' | 'rare' | 'legendary' {
-	if (totalItems === 0) return 'common';
+	if (totalItems === 0) {
+		return 'common';
+	}
 
 	const usagePercentile = (usageCount / totalItems) * 100;
 
-	if (usagePercentile >= 75) return 'legendary';
-	if (usagePercentile >= 50) return 'rare';
-	if (usagePercentile >= 25) return 'uncommon';
+	if (usagePercentile >= 75) {
+		return 'legendary';
+	}
+	if (usagePercentile >= 50) {
+		return 'rare';
+	}
+	if (usagePercentile >= 25) {
+		return 'uncommon';
+	}
 	return 'common';
 }
 
@@ -123,7 +131,9 @@ export function calculateRarityLevel(
  * @returns Porcentaje de eficiencia (0-100)
  */
 export function calculateStorageEfficiency(originalSize: number, compressedSize: number): number {
-	if (originalSize === 0) return 0;
+	if (originalSize === 0) {
+		return 0;
+	}
 	const savings = (originalSize - compressedSize) / originalSize;
 	return Math.round(Math.max(0, savings) * 100);
 }

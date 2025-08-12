@@ -13,7 +13,9 @@ import type { CharacterCreateInput, CharacterUpdateInput, CharacterWithStats } f
  * @returns true si es válido, false si no lo es
  */
 export function isValidCharacter(character: unknown): character is CharacterWithStats {
-	if (!character || typeof character !== 'object') return false;
+	if (!character || typeof character !== 'object') {
+		return false;
+	}
 
 	const characterObj = character as Record<string, unknown>;
 

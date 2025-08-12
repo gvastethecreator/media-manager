@@ -23,7 +23,9 @@ export const ConceptContentView = memo(function ConceptContentView() {
 	} = useConceptImages(currentConceptId || '');
 
 	const loadConceptImages = useCallback(async () => {
-		if (!currentConceptId) return;
+		if (!currentConceptId) {
+			return;
+		}
 
 		try {
 			setError(null);

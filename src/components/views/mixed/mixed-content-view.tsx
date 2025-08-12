@@ -64,8 +64,10 @@ export function MixedContentView({ filterType, filterId }: MixedContentViewProps
 		[openViewer]
 	);
 
-	const handleForceRefresh = useCallback(async () => {
-		if (isRetrying) return;
+	const handleForceRefresh = useCallback(() => {
+		if (isRetrying) {
+			return;
+		}
 
 		setIsRetrying(true);
 		logger.info('🔄 Forzando recarga del contenido mixto');

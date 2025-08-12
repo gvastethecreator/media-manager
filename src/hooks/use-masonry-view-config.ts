@@ -125,7 +125,9 @@ export function useMasonryViewConfig() {
 	// Calculate number of columns based on container width
 	const calculateColumns = useMemo(() => {
 		return (containerWidth: number): number => {
-			if (!containerWidth || containerWidth <= 0) return config.minColumns;
+			if (!containerWidth || containerWidth <= 0) {
+				return config.minColumns;
+			}
 
 			const availableWidth = containerWidth - config.spacing.padding * 2;
 			const columnsFromWidth = Math.floor(availableWidth / (config.columnWidth + config.spacing.gap));
@@ -150,7 +152,7 @@ export function useMasonryViewConfig() {
 
 	// Generate aspect ratio for an item
 	const getItemAspectRatio = useMemo(() => {
-		return (item: AnyEntityWithStats, index: number): number => {
+		return (item: AnyEntityWithStats, _index: number): number => {
 			if (!config.aspectRatioVariation.enabled) {
 				return 1.2; // Default aspect ratio
 			}
@@ -189,7 +191,6 @@ export function useMasonryViewConfig() {
 					case 'random':
 						columnIndex = Math.floor(Math.random() * columns);
 						break;
-					case 'balanced':
 					default:
 						// Find the column that would result in the best balance
 						columnIndex = findBestColumn(columnHeights, itemHeight, config.optimization.maxHeightDifference);

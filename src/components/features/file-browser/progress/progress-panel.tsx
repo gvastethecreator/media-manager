@@ -118,9 +118,7 @@ function computeStatistics(operations: ProgressOperation[]): OperationStatistics
 	const completedOperations = operations.filter((op) => op.status === 'completed').length;
 	const failedOperations = operations.filter((op) => op.status === 'failed').length;
 	const successRate =
-		completedOperations > 0
-			? (completedOperations / (completedOperations + failedOperations)) * 100
-			: 0;
+		completedOperations > 0 ? (completedOperations / (completedOperations + failedOperations)) * 100 : 0;
 
 	return {
 		totalOperations,

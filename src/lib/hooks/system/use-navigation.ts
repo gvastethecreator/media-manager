@@ -111,7 +111,9 @@ export const useNavigation = () => {
 		// 🍞 Breadcrumb helpers
 		getBreadcrumbs: () => {
 			const contextInfo = store.currentContext;
-			if (!contextInfo) return [];
+			if (!contextInfo) {
+				return [];
+			}
 
 			const breadcrumbs = [{ name: 'Inicio', path: '/', isActive: false }];
 

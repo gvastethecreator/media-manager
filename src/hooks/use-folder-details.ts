@@ -9,7 +9,9 @@ export function useFolderDetails(folderId?: string) {
 	return useQuery({
 		queryKey: ['folder-details', folderId],
 		queryFn: async (): Promise<FolderComplete | null> => {
-			if (!folderId) return null;
+			if (!folderId) {
+				return null;
+			}
 			return await getFolder(folderId);
 		},
 		enabled: !!folderId,

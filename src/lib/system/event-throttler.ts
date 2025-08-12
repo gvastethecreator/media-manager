@@ -93,7 +93,9 @@ export function throttleEvent<T extends (...args: any[]) => Promise<any>>(
 		// Ejecutar después del delay
 		setTimeout(async () => {
 			const eventData = pendingEvents.get(key);
-			if (!eventData) return;
+			if (!eventData) {
+				return;
+			}
 
 			try {
 				throttlerLogger.info('🚀 Ejecutando evento throttled:', { key });

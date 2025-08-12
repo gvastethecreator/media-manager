@@ -121,7 +121,7 @@ export const masonryHeightConfigSchema = z.object({
 		video: 0.5625,
 		folder: 1.0,
 		audio: 2.0,
-		document: 1.414,
+		document: Math.SQRT2,
 		default: 1.2,
 	}),
 });

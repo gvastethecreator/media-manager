@@ -240,30 +240,78 @@ export async function updateDocument(id: string, data: DocumentUpdateInput): Pro
 			updatedAt: new Date(),
 		};
 
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.path !== undefined) updateData.path = data.path;
-		if (data.size !== undefined) updateData.size = data.size;
-		if (data.hash !== undefined) updateData.hash = data.hash;
-		if (data.mimeType !== undefined) updateData.mimeType = data.mimeType;
-		if (data.extension !== undefined) updateData.extension = data.extension;
-		if (data.folderId !== undefined) updateData.folderId = data.folderId;
-		if (data.isFavorite !== undefined) updateData.isFavorite = Boolean(data.isFavorite);
-		if (data.isArchived !== undefined) updateData.isArchived = Boolean(data.isArchived);
-		if (data.pageCount !== undefined) updateData.pageCount = data.pageCount;
-		if (data.wordCount !== undefined) updateData.wordCount = data.wordCount;
-		if (data.language !== undefined) updateData.language = data.language;
-		if (data.title !== undefined) updateData.title = data.title;
-		if (data.author !== undefined) updateData.author = data.author;
-		if (data.subject !== undefined) updateData.subject = data.subject;
-		if (data.keywords !== undefined) updateData.keywords = data.keywords;
-		if (data.creator !== undefined) updateData.creator = data.creator;
-		if (data.producer !== undefined) updateData.producer = data.producer;
-		if (data.creationDate !== undefined) updateData.creationDate = data.creationDate;
-		if (data.modificationDate !== undefined) updateData.modificationDate = data.modificationDate;
-		if (data.encrypted !== undefined) updateData.encrypted = Boolean(data.encrypted);
-		if (data.version !== undefined) updateData.version = data.version;
-		if (data.content !== undefined) updateData.content = data.content;
-		if (data.summary !== undefined) updateData.summary = data.summary;
+		if (data.name !== undefined) {
+			updateData.name = data.name;
+		}
+		if (data.path !== undefined) {
+			updateData.path = data.path;
+		}
+		if (data.size !== undefined) {
+			updateData.size = data.size;
+		}
+		if (data.hash !== undefined) {
+			updateData.hash = data.hash;
+		}
+		if (data.mimeType !== undefined) {
+			updateData.mimeType = data.mimeType;
+		}
+		if (data.extension !== undefined) {
+			updateData.extension = data.extension;
+		}
+		if (data.folderId !== undefined) {
+			updateData.folderId = data.folderId;
+		}
+		if (data.isFavorite !== undefined) {
+			updateData.isFavorite = Boolean(data.isFavorite);
+		}
+		if (data.isArchived !== undefined) {
+			updateData.isArchived = Boolean(data.isArchived);
+		}
+		if (data.pageCount !== undefined) {
+			updateData.pageCount = data.pageCount;
+		}
+		if (data.wordCount !== undefined) {
+			updateData.wordCount = data.wordCount;
+		}
+		if (data.language !== undefined) {
+			updateData.language = data.language;
+		}
+		if (data.title !== undefined) {
+			updateData.title = data.title;
+		}
+		if (data.author !== undefined) {
+			updateData.author = data.author;
+		}
+		if (data.subject !== undefined) {
+			updateData.subject = data.subject;
+		}
+		if (data.keywords !== undefined) {
+			updateData.keywords = data.keywords;
+		}
+		if (data.creator !== undefined) {
+			updateData.creator = data.creator;
+		}
+		if (data.producer !== undefined) {
+			updateData.producer = data.producer;
+		}
+		if (data.creationDate !== undefined) {
+			updateData.creationDate = data.creationDate;
+		}
+		if (data.modificationDate !== undefined) {
+			updateData.modificationDate = data.modificationDate;
+		}
+		if (data.encrypted !== undefined) {
+			updateData.encrypted = Boolean(data.encrypted);
+		}
+		if (data.version !== undefined) {
+			updateData.version = data.version;
+		}
+		if (data.content !== undefined) {
+			updateData.content = data.content;
+		}
+		if (data.summary !== undefined) {
+			updateData.summary = data.summary;
+		}
 
 		const result = await db.update(documents).set(updateData).where(eq(documents.id, id)).returning();
 

@@ -35,7 +35,9 @@ export const createWorkflowCoreSlice: StateCreator<
 	...initialState,
 
 	loadWorkflows: async () => {
-		if (get().isLoading) return;
+		if (get().isLoading) {
+			return;
+		}
 		set((state) => {
 			state.isLoading = true;
 			state.error = null;

@@ -34,11 +34,11 @@ export function getDbConfig(): DbConfig {
 	try {
 		return dbConfigSchema.parse({
 			url: process.env.DATABASE_URL || 'file:./db.sqlite',
-			maxConnections: process.env.DB_MAX_CONNECTIONS ? Number.parseInt(process.env.DB_MAX_CONNECTIONS) : undefined,
+			maxConnections: process.env.DB_MAX_CONNECTIONS ? Number.parseInt(process.env.DB_MAX_CONNECTIONS, 10) : undefined,
 			connectionTimeout: process.env.DB_CONNECTION_TIMEOUT
-				? Number.parseInt(process.env.DB_CONNECTION_TIMEOUT)
+				? Number.parseInt(process.env.DB_CONNECTION_TIMEOUT, 10)
 				: undefined,
-			queryTimeout: process.env.DB_QUERY_TIMEOUT ? Number.parseInt(process.env.DB_QUERY_TIMEOUT) : undefined,
+			queryTimeout: process.env.DB_QUERY_TIMEOUT ? Number.parseInt(process.env.DB_QUERY_TIMEOUT, 10) : undefined,
 			logLevel: process.env.DB_LOG_LEVEL,
 			enableLogging: process.env.DB_ENABLE_LOGGING === 'true',
 		});

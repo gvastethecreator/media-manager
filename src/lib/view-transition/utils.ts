@@ -11,7 +11,9 @@ import { type ViewTransitionEasing, type ViewTransitionPolyfill } from '@/types/
  */
 export function isViewTransitionSupported(): boolean {
 	// Verificar soporte nativo del browser
-	if (typeof window === 'undefined') return false;
+	if (typeof window === 'undefined') {
+		return false;
+	}
 
 	// ViewTransition API nativo del browser
 	if ('startViewTransition' in document) {
@@ -155,7 +157,9 @@ export function removeTransitionName(element: HTMLElement): void {
  * Verificar si debe reducir movimiento basado en preferencias del usuario
  */
 export function shouldReduceMotion(): boolean {
-	if (typeof window === 'undefined') return false;
+	if (typeof window === 'undefined') {
+		return false;
+	}
 
 	return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
@@ -219,7 +223,9 @@ export function injectViewTransitionStyles(css: string, id = 'view-transition-st
  * Configuración de debugging para ViewTransition
  */
 export function enableViewTransitionDebug(): void {
-	if (typeof window === 'undefined') return;
+	if (typeof window === 'undefined') {
+		return;
+	}
 
 	// Agregar clase de debug al document
 	document.documentElement.classList.add('view-transition-debug');

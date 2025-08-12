@@ -191,14 +191,14 @@ export function listRecentLogs(limit = 10) {
  * Genera el resumen de errores al final de la ejecución y lo agrega al principio del log
  */
 export function generatePostExecutionSummary(logFile, command) {
-	console.log('\n' + '═'.repeat(60));
+	console.log(`\n${'═'.repeat(60)}`);
 	console.log('📊 RESUMEN AUTOMÁTICO DE ERRORES');
 	console.log('═'.repeat(60));
 
 	const toolHint = detectToolFromFileName(logFile) || detectToolFromCommand(command);
 	const summary = parseLogFile(logFile, toolHint);
 
-	if (summary && summary.stats && summary.stats.totalErrors > 0) {
+	if (summary?.stats && summary.stats.totalErrors > 0) {
 		// Mostrar el resumen completo en consola
 		displaySimpleErrorSummary(summary);
 
@@ -241,9 +241,15 @@ function isLintingTool(command) {
 
 // Función auxiliar para detectar herramienta desde el comando
 function detectToolFromCommand(command) {
-	if (command.includes('tsc') || command.includes('typescript')) return 'tsc';
-	if (command.includes('biome')) return 'biome';
-	if (command.includes('eslint')) return 'eslint';
+	if (command.includes('tsc') || command.includes('typescript')) {
+		return 'tsc';
+	}
+	if (command.includes('biome')) {
+		return 'biome';
+	}
+	if (command.includes('eslint')) {
+		return 'eslint';
+	}
 	return null;
 }
 export async function cleanOldLogs(days = 7) {
@@ -277,7 +283,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 
 	switch (action) {
 		case 'list':
-			listRecentLogs(args[0] ? Number.parseInt(args[0]) : 10);
+			listRecentLogs(args[0] ? Number.parseInt(args[0], 10) : 10);
 			break;
 		case 'parse':
 			if (!args[0]) {
@@ -294,7 +300,7 @@ if (process.argv[1] === fileURLToPath(import.meta.url)) {
 			executeWithLogging(args.slice(1).join(' '), args[0]);
 			break;
 		case 'clean':
-			cleanOldLogs(args[0] ? Number.parseInt(args[0]) : 7);
+			cleanOldLogs(args[0] ? Number.parseInt(args[0], 10) : 7);
 			break;
 		default:
 			console.log(`

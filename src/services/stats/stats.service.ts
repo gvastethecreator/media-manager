@@ -93,7 +93,6 @@ export const statsEventEmitter = {
 // Versión migrada del servicio que usa API calls
 export class StatsService {
 	private static instance: StatsService;
-	private isUpdating = false;
 
 	private constructor() {
 		statsLogger.info('🚀 Inicializando StatsService');

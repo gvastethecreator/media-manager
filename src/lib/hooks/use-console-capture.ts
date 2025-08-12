@@ -35,7 +35,9 @@ export function useConsoleCapture() {
 	}, []);
 
 	const startCapturing = useCallback(() => {
-		if (isCapturing) return;
+		if (isCapturing) {
+			return;
+		}
 
 		console.log = (...args: any[]) => {
 			originalConsole.log(...args);
@@ -68,7 +70,9 @@ export function useConsoleCapture() {
 	]);
 
 	const stopCapturing = useCallback(() => {
-		if (!isCapturing) return;
+		if (!isCapturing) {
+			return;
+		}
 
 		console.log = originalConsole.log;
 		console.warn = originalConsole.warn;

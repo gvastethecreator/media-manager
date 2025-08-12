@@ -6,7 +6,13 @@
 
 import express from 'express';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { copyFile, createDirectory, getDirectoryInfo, moveFile, renameFile } from '@/services/file/file.service';
+import {
+	copyFile,
+	createDirectory,
+	getDirectoryInfoConcurrent,
+	moveFile,
+	renameFile,
+} from '@/services/file/file.service';
 
 const router = express.Router();
 const logger = serverLogger.withContext('FilesAPI');
@@ -48,7 +54,7 @@ router.get('/directory/:path', async (req, res) => {
 
 		// Decodificar la ruta URL-encoded
 		const decodedPath = decodeURIComponent(dirPath);
-		const directoryInfo = await getDirectoryInfo(decodedPath);
+		const directoryInfo = await getDirectoryInfoConcurrent(decodedPath);
 		res.json({ success: true, data: directoryInfo });
 	} catch (error) {
 		logger.error('Error obteniendo contenido del directorio:', error);

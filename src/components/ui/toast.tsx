@@ -2,7 +2,7 @@
 
 import { cva, type VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
-import * as React from 'react';
+import React from 'react';
 import { toast as sonnerToast } from 'sonner';
 
 import { cn } from '@/lib/utils';
@@ -132,14 +132,14 @@ function ToastProvider({ children }: { children: React.ReactNode }) {
 }
 
 export {
-	type ToastProps,
-	type ToastActionElement,
-	ToastProvider,
-	ToastViewport,
 	Toast,
-	ToastTitle,
-	ToastDescription,
-	ToastClose,
 	ToastAction,
+	ToastClose,
+	ToastDescription,
+	ToastProvider,
+	ToastTitle,
+	ToastViewport,
 	useToast,
+	type ToastActionElement,
+	type ToastProps,
 };

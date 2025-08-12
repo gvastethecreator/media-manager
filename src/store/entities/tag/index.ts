@@ -28,7 +28,7 @@ export const useTagStore = create<TagStore>()(
 		{
 			name: 'tag-store',
 			storage: createJSONStorage(() => localStorage),
-			version: Number.parseInt(VERSIONING.STORE),
+			version: Number.parseInt(VERSIONING.STORE, 10),
 			// Solo persistir ciertos elementos del estado
 			partialize: (state) => ({
 				// Mantener filtros y configuración de UI pero no los datos

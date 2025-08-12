@@ -49,10 +49,12 @@ function hexToRgb(hexValue: string): number[] {
 			.join('');
 	}
 
-	const hexInt = Number.parseInt(formattedHex, 16);
-	const red = (hexInt >> 16) & 255;
-	const green = (hexInt >> 8) & 255;
-	const blue = hexInt & 255;
+	const rHex = formattedHex.substring(0, 2);
+	const gHex = formattedHex.substring(2, 4);
+	const bHex = formattedHex.substring(4, 6);
+	const red = Number.parseInt(rHex, 16);
+	const green = Number.parseInt(gHex, 16);
+	const blue = Number.parseInt(bHex, 16);
 	return [red, green, blue];
 }
 

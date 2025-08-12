@@ -25,7 +25,9 @@ export function GroupCard({
 	const primaryColor = useMemo(() => group?.color || '#3b82f6', [group?.color]);
 	const secondaryColor = useMemo(() => {
 		// Si no hay color definido, usar un valor por defecto
-		if (!group?.color) return '#2563eb';
+		if (!group?.color) {
+			return '#2563eb';
+		}
 
 		// Oscurecer el color primario para el secundario
 		try {

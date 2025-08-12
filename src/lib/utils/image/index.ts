@@ -75,10 +75,15 @@ export function groupImages(
 				break;
 			case 'size': {
 				const sizeMB = image.size / (1024 * 1024);
-				if (sizeMB < 1) groupKey = 'Pequeña (<1MB)';
-				else if (sizeMB < 5) groupKey = 'Mediana (1-5MB)';
-				else if (sizeMB < 10) groupKey = 'Grande (5-10MB)';
-				else groupKey = 'Muy grande (>10MB)';
+				if (sizeMB < 1) {
+					groupKey = 'Pequeña (<1MB)';
+				} else if (sizeMB < 5) {
+					groupKey = 'Mediana (1-5MB)';
+				} else if (sizeMB < 10) {
+					groupKey = 'Grande (5-10MB)';
+				} else {
+					groupKey = 'Muy grande (>10MB)';
+				}
 				break;
 			}
 			default:

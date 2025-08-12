@@ -111,7 +111,7 @@ export function getEntityName(entity: AnyEntityWithStats): string {
 	const path = getEntityPath(entity);
 	if (path) {
 		const parts = path.split(/[\\/]/);
-		return parts[parts.length - 1] || '';
+		return parts.at(-1) || '';
 	}
 
 	// Fallback genérico

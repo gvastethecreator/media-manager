@@ -24,7 +24,9 @@ export function sortBy<T>(array: T[], field: keyof T, direction: SortDirection =
 		const aValue = a[field];
 		const bValue = b[field];
 
-		if (aValue === bValue) return 0;
+		if (aValue === bValue) {
+			return 0;
+		}
 
 		let comparison = 0;
 
@@ -51,7 +53,9 @@ export function sortByMultiple<T>(array: T[], sortConfigs: SortConfig<keyof T>[]
 			const aValue = a[config.field];
 			const bValue = b[config.field];
 
-			if (aValue === bValue) continue;
+			if (aValue === bValue) {
+				continue;
+			}
 
 			let comparison = 0;
 

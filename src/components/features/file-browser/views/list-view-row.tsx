@@ -23,6 +23,13 @@ interface ListViewRowProps {
 	onDoubleClick?: (item: AnyEntityWithStats) => void;
 	onContextMenu?: (event: React.MouseEvent, item: AnyEntityWithStats) => void;
 	className?: string;
+	// Props de virtualización y atributos adicionales controlados
+	virtualStyle?: React.CSSProperties;
+	tabIndexOverride?: number;
+	ariaRowIndex?: number;
+	ariaSetSize?: number;
+	dataItemId?: string;
+	dataSelectable?: boolean;
 }
 
 /**
@@ -44,7 +51,31 @@ export const ListViewRow = memo<ListViewRowProps>(
 		onDoubleClick,
 		onContextMenu,
 		className = '',
+		virtualStyle,
+		tabIndexOverride,
+		ariaRowIndex,
+		ariaSetSize,
+		dataItemId,
+		dataSelectable,
 	}) => {
+		// Extraer timestamps para testeo/a11y (sin afectar UI)
+		const getDateISO = (value: unknown): string | undefined => {
+			if (!value) {
+				return;
+			}
+			try {
+				const d = typeof value === 'string' || typeof value === 'number' ? new Date(value) : (value as Date);
+				if (Number.isNaN(d.getTime())) {
+					return;
+				}
+				return d.toISOString();
+			} catch {
+				return;
+			}
+		};
+
+		const modifiedISO = getDateISO((item as any).updatedAt ?? (item as any).modifiedAt ?? undefined);
+		const createdISO = getDateISO((item as any).createdAt ?? undefined);
 		// Columnas visibles ordenadas
 		const visibleColumns = columns.filter((col) => col.visible).sort((a, b) => (a.order || 0) - (b.order || 0));
 
@@ -76,9 +107,11 @@ export const ListViewRow = memo<ListViewRowProps>(
 					<div className="flex items-center justify-center">
 						<ImageThumbnail
 							className="rounded"
+							id={item.id}
 							name={item.name}
-							path={('path' in item ? item.path : '') || item.id || ''}
+							path={('path' in item ? (item as any).path : '') || item.id || ''}
 							size={getThumbnailSize()}
+							thumbnailUrl={(item as any).thumbnailUrl}
 						/>
 					</div>
 				);
@@ -112,15 +145,23 @@ export const ListViewRow = memo<ListViewRowProps>(
 
 		return (
 			<tr
-				className={`group cursor-pointer transition-colors duration-150${isSelected ? 'bg-accent text-accent-foreground' : ''}
-				${showZebraStripes && isEven && !isSelected ? 'bg-muted/30' : ''}hover:bg-accent/50${className}
-			`}
+				aria-rowindex={ariaRowIndex}
+				aria-setsize={ariaSetSize}
+				className={`group cursor-pointer transition-colors duration-150 ${
+					isSelected ? 'bg-accent text-accent-foreground' : ''
+				} ${showZebraStripes && isEven && !isSelected ? 'bg-muted/30' : ''} hover:bg-accent/50 ${className}`}
+				data-created={createdISO}
+				data-item-id={dataItemId}
+				data-modified={modifiedISO}
 				data-path={('path' in item ? item.path : '') || item.id || ''}
+				data-selectable={dataSelectable ? 'true' : undefined}
 				data-testid={`list-row-${index}`}
 				onClick={handleClick}
+				// Altura fija por configuración + permitir virtualización con props extra
 				onContextMenu={handleContextMenu}
 				onDoubleClick={handleDoubleClick}
-				style={{ height: `${rowHeight}px` }}
+				style={{ height: `${rowHeight}px`, ...(virtualStyle || {}) }}
+				tabIndex={tabIndexOverride ?? (index === 0 ? 0 : -1)}
 			>
 				{visibleColumns.map((column) => (
 					<td

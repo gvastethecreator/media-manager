@@ -203,7 +203,6 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 									isLeftPanelCollapsed={isLeftCollapsed}
 									isRetrying={reindexFolderMutation.isPending}
 									isRightPanelCollapsed={isRightCollapsed}
-									isRightPanelVisible={true}
 									onRefreshFolder={handleRefreshFolder}
 									onScanFolder={handleScanFolder}
 									toggleLeftPanelCollapse={toggleLeftPanel}

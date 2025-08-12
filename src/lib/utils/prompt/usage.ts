@@ -47,7 +47,9 @@ const CHARS_PER_TOKEN = 4;
  */
 export function estimateTokenCount(text: string): number {
 	try {
-		if (!text) return 0;
+		if (!text) {
+			return 0;
+		}
 		return Math.ceil(text.length / CHARS_PER_TOKEN);
 	} catch (error) {
 		usageLogger.error('❌ Error al estimar tokens:', error);

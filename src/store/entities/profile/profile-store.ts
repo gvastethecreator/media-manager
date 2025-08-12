@@ -207,7 +207,9 @@ export const useProfileStore = create<ProfileStore>()(
 				},
 
 				updatePreference: <K extends keyof ProfilePreferences>(key: K, value: ProfilePreferences[K]) => {
-					if (!get().activeProfile) return;
+					if (!get().activeProfile) {
+						return;
+					}
 
 					set((state) => {
 						if (state.activeProfile) {
@@ -305,8 +307,12 @@ export const selectActiveProfileInfo = (state: ProfileStore) => ({
 export const selectIsDarkMode = (state: ProfileStore) => {
 	const theme = state.activeProfile?.theme || ThemeMode.SYSTEM;
 
-	if (theme === ThemeMode.DARK) return true;
-	if (theme === ThemeMode.LIGHT) return false;
+	if (theme === ThemeMode.DARK) {
+		return true;
+	}
+	if (theme === ThemeMode.LIGHT) {
+		return false;
+	}
 
 	// Si es SYSTEM, verificar preferencia del sistema
 	if (typeof window !== 'undefined') {

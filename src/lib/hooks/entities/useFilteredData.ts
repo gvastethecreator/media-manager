@@ -32,7 +32,9 @@ export function useFilteredData<T extends FilterableData>(
 			filteredData = filteredData.filter((item) => {
 				return filterOptions.every((filter) => {
 					const value = item[filter.field];
-					if (value === undefined) return false;
+					if (value === undefined) {
+						return false;
+					}
 
 					switch (filter.operator) {
 						case 'eq':
@@ -95,10 +97,16 @@ export function useFilteredData<T extends FilterableData>(
 					const aValue = a[sort.field];
 					const bValue = b[sort.field];
 
-					if (aValue === bValue) continue;
+					if (aValue === bValue) {
+						continue;
+					}
 
-					if (aValue === undefined) return 1;
-					if (bValue === undefined) return -1;
+					if (aValue === undefined) {
+						return 1;
+					}
+					if (bValue === undefined) {
+						return -1;
+					}
 
 					const direction = sort.direction === 'asc' ? 1 : -1;
 

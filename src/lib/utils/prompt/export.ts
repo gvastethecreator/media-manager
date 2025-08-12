@@ -442,7 +442,9 @@ export function downloadPrompt(exportResult: PromptExportResult): void {
 	try {
 		// Generar URL para descargar
 		const url = generateDownloadURL(exportResult);
-		if (!url) return;
+		if (!url) {
+			return;
+		}
 
 		// Crear elemento <a> para descargar
 		const link = document.createElement('a');

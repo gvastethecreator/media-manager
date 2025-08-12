@@ -139,7 +139,9 @@ function calculateWorkflowStats(
  */
 function calculateNodeCount(workflow: WorkflowBase): number {
 	try {
-		if (!workflow.steps) return 0;
+		if (!workflow.steps) {
+			return 0;
+		}
 		const steps = JSON.parse(workflow.steps);
 		return Array.isArray(steps) ? steps.length : 0;
 	} catch {
@@ -152,9 +154,13 @@ function calculateNodeCount(workflow: WorkflowBase): number {
  */
 function calculateConnectionCount(workflow: WorkflowBase): number {
 	try {
-		if (!workflow.steps) return 0;
+		if (!workflow.steps) {
+			return 0;
+		}
 		const steps = JSON.parse(workflow.steps);
-		if (!Array.isArray(steps)) return 0;
+		if (!Array.isArray(steps)) {
+			return 0;
+		}
 		// Estimación simple: cada paso (excepto el primero) tiene al menos una conexión
 		return Math.max(0, steps.length - 1);
 	} catch {
@@ -166,7 +172,11 @@ function calculateConnectionCount(workflow: WorkflowBase): number {
  * Normaliza fechas desde diferentes formatos
  */
 function normalizeDate(date?: Date | string | null): Date {
-	if (!date) return new Date();
-	if (date instanceof Date) return date;
+	if (!date) {
+		return new Date();
+	}
+	if (date instanceof Date) {
+		return date;
+	}
 	return new Date(date);
 }

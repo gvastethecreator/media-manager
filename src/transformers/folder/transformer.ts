@@ -47,17 +47,29 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
 	let organizationScore = 50; // Base score
 
 	// Bonus por estructura
-	if (hierarchyDepth <= 3 && hierarchyDepth >= 1) organizationScore += 20;
-	if (folderCount > 0 && folderCount <= 10) organizationScore += 15;
-	if (totalItems > 0 && totalItems <= 100) organizationScore += 10;
+	if (hierarchyDepth <= 3 && hierarchyDepth >= 1) {
+		organizationScore += 20;
+	}
+	if (folderCount > 0 && folderCount <= 10) {
+		organizationScore += 15;
+	}
+	if (totalItems > 0 && totalItems <= 100) {
+		organizationScore += 10;
+	}
 
 	// Bonus por naming consistency
 	const hasConsistentNaming = name.length > 2 && !name.includes('untitled');
-	if (hasConsistentNaming) organizationScore += 15;
+	if (hasConsistentNaming) {
+		organizationScore += 15;
+	}
 
 	// Penalty por desorganización
-	if (totalItems > 200) organizationScore -= 20;
-	if (hierarchyDepth > 5) organizationScore -= 15;
+	if (totalItems > 200) {
+		organizationScore -= 20;
+	}
+	if (hierarchyDepth > 5) {
+		organizationScore -= 15;
+	}
 
 	organizationScore = Math.max(0, Math.min(100, organizationScore));
 
@@ -82,34 +94,69 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
 	const autoTags: string[] = [];
 
 	// Tags de jerarquía
-	if (hierarchyDepth === 1) autoTags.push('root');
-	if (hierarchyDepth > 4) autoTags.push('deep');
-	if (folderCount === 0) autoTags.push('leaf');
+	if (hierarchyDepth === 1) {
+		autoTags.push('root');
+	}
+	if (hierarchyDepth > 4) {
+		autoTags.push('deep');
+	}
+	if (folderCount === 0) {
+		autoTags.push('leaf');
+	}
 
 	// Tags de contenido
-	if (imageCount > videoCount && imageCount > 0) autoTags.push('images');
-	if (videoCount > imageCount && videoCount > 0) autoTags.push('videos');
-	if (imageCount > 0 && videoCount > 0) autoTags.push('multimedia');
-	if (totalItems === 0) autoTags.push('empty');
-	if (totalItems > 50) autoTags.push('large');
-	if (totalItems > 200) autoTags.push('massive');
+	if (imageCount > videoCount && imageCount > 0) {
+		autoTags.push('images');
+	}
+	if (videoCount > imageCount && videoCount > 0) {
+		autoTags.push('videos');
+	}
+	if (imageCount > 0 && videoCount > 0) {
+		autoTags.push('multimedia');
+	}
+	if (totalItems === 0) {
+		autoTags.push('empty');
+	}
+	if (totalItems > 50) {
+		autoTags.push('large');
+	}
+	if (totalItems > 200) {
+		autoTags.push('massive');
+	}
 
 	// Tags de organización
-	if (organizationScore >= 85) autoTags.push('well-organized');
-	if (organizationScore >= 70) autoTags.push('organized');
-	if (organizationScore < 50) autoTags.push('needs-organization');
-	if (hasConsistentNaming) autoTags.push('consistent-naming');
+	if (organizationScore >= 85) {
+		autoTags.push('well-organized');
+	}
+	if (organizationScore >= 70) {
+		autoTags.push('organized');
+	}
+	if (organizationScore < 50) {
+		autoTags.push('needs-organization');
+	}
+	if (hasConsistentNaming) {
+		autoTags.push('consistent-naming');
+	}
 
 	// Tags de tamaño
-	if (totalSize && totalSize > 1024 * 1024 * 1024) autoTags.push('large-files'); // >1GB
-	if (totalSize && totalSize > 10 * 1024 * 1024 * 1024) autoTags.push('huge-files'); // >10GB
+	if (totalSize && totalSize > 1024 * 1024 * 1024) {
+		autoTags.push('large-files'); // >1GB
+	}
+	if (totalSize && totalSize > 10 * 1024 * 1024 * 1024) {
+		autoTags.push('huge-files'); // >10GB
+	}
 
 	// Determinar grade de calidad
 	let qualityGrade: 'A' | 'B' | 'C' | 'D';
-	if (organizationScore >= 85) qualityGrade = 'A';
-	else if (organizationScore >= 70) qualityGrade = 'B';
-	else if (organizationScore >= 50) qualityGrade = 'C';
-	else qualityGrade = 'D';
+	if (organizationScore >= 85) {
+		qualityGrade = 'A';
+	} else if (organizationScore >= 70) {
+		qualityGrade = 'B';
+	} else if (organizationScore >= 50) {
+		qualityGrade = 'C';
+	} else {
+		qualityGrade = 'D';
+	}
 
 	// Calcular total de descendientes (simplificado)
 	const totalDescendants = children?.length || 0;
@@ -191,7 +238,9 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
  * 🔄 Transforma un objeto Folder de Drizzle a FolderWithStats (FUNCIÓN PRINCIPAL)
  */
 export function fromDrizzleFolderWithCounts(folderFromDrizzle: any | null, allFolders?: any[]): FolderWithStats | null {
-	if (!folderFromDrizzle) return null;
+	if (!folderFromDrizzle) {
+		return null;
+	}
 
 	try {
 		const { _count, children, parent, ...baseData } = folderFromDrizzle;
@@ -297,7 +346,9 @@ export function buildFolderTree(folders: FolderWithStats[]): FolderWithStats[] {
  * 🔄 Transforma un objeto Folder de Drizzle a FolderComplete (LEGACY)
  */
 export function fromDrizzleFolder(folderFromDrizzle: any | null): FolderComplete | null {
-	if (!folderFromDrizzle) return null;
+	if (!folderFromDrizzle) {
+		return null;
+	}
 
 	try {
 		const { _count, ...baseData } = folderFromDrizzle;

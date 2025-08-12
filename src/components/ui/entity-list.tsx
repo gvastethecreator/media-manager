@@ -252,7 +252,9 @@ export function EntityList({
 
 	// Items para la página actual
 	const paginatedItems = useMemo(() => {
-		if (!pagination) return filteredItems;
+		if (!pagination) {
+			return filteredItems;
+		}
 
 		const startIndex = (currentPage - 1) * itemsPerPage;
 		return filteredItems.slice(startIndex, startIndex + itemsPerPage);

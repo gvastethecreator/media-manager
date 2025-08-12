@@ -106,16 +106,36 @@ export function fromDrizzlePlaces(drizzlePlaces: any[]): PlaceWithStats[] {
  */
 function calculateCompletenessScore(place: PlaceBase): number {
 	let score = 0;
-	if (place.name) score += 20;
-	if (place.description) score += 20;
-	if (place.location) score += 15;
-	if (place.climate) score += 10;
-	if (place.population) score += 10;
-	if (place.government) score += 5;
-	if (place.economy) score += 5;
-	if (place.culture) score += 5;
-	if (place.history) score += 5;
-	if (place.geography) score += 5;
+	if (place.name) {
+		score += 20;
+	}
+	if (place.description) {
+		score += 20;
+	}
+	if (place.location) {
+		score += 15;
+	}
+	if (place.climate) {
+		score += 10;
+	}
+	if (place.population) {
+		score += 10;
+	}
+	if (place.government) {
+		score += 5;
+	}
+	if (place.economy) {
+		score += 5;
+	}
+	if (place.culture) {
+		score += 5;
+	}
+	if (place.history) {
+		score += 5;
+	}
+	if (place.geography) {
+		score += 5;
+	}
 	return Math.min(100, score);
 }
 
@@ -124,11 +144,21 @@ function calculateCompletenessScore(place: PlaceBase): number {
  */
 function calculateGeoContextLevel(place: PlaceBase): number {
 	let level = 0;
-	if (place.location) level += 30;
-	if (place.geography) level += 25;
-	if (place.climate) level += 20;
-	if (place.landmarks) level += 15;
-	if (place.resources) level += 10;
+	if (place.location) {
+		level += 30;
+	}
+	if (place.geography) {
+		level += 25;
+	}
+	if (place.climate) {
+		level += 20;
+	}
+	if (place.landmarks) {
+		level += 15;
+	}
+	if (place.resources) {
+		level += 10;
+	}
 	return Math.min(100, level);
 }
 
@@ -136,7 +166,9 @@ function calculateGeoContextLevel(place: PlaceBase): number {
  * Parsea campos JSON de forma segura
  */
 function parseJsonField(field: string | null): unknown[] {
-	if (!field) return [];
+	if (!field) {
+		return [];
+	}
 	try {
 		return JSON.parse(field);
 	} catch {

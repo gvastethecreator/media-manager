@@ -18,7 +18,9 @@ const logger = serverLogger.withContext('FolderSerializers');
  * @returns Path normalizado.
  */
 export function normalizeFolderPath(path: string): string {
-	if (!path) return '/';
+	if (!path) {
+		return '/';
+	}
 	try {
 		let normalizedPath = path.trim().replace(/\\/g, '/');
 

@@ -7,7 +7,6 @@
 import { createDefaultEntityStats } from '@/lib/utils';
 import { serverLogger } from '../../lib/logger/server-logger';
 import type {
-	NoteBase,
 	NoteCreateInput,
 	NoteFilters,
 	NoteSearchOptions,
@@ -192,13 +191,27 @@ export function toNoteWithStats(note: any): any {
 
 		// Calcular puntuación de completitud
 		let completenessScore = 0;
-		if (note.title) completenessScore += 20;
-		if (note.content) completenessScore += 30;
-		if (note.summary) completenessScore += 15;
-		if (note.category) completenessScore += 10;
-		if (note.priority !== null && note.priority !== undefined) completenessScore += 10;
-		if (note.status) completenessScore += 10;
-		if (note.featuredImage) completenessScore += 5;
+		if (note.title) {
+			completenessScore += 20;
+		}
+		if (note.content) {
+			completenessScore += 30;
+		}
+		if (note.summary) {
+			completenessScore += 15;
+		}
+		if (note.category) {
+			completenessScore += 10;
+		}
+		if (note.priority !== null && note.priority !== undefined) {
+			completenessScore += 10;
+		}
+		if (note.status) {
+			completenessScore += 10;
+		}
+		if (note.featuredImage) {
+			completenessScore += 5;
+		}
 
 		// Extraer conteos de relaciones
 		const counts = note._count || {};

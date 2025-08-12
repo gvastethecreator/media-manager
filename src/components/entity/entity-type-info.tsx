@@ -52,12 +52,12 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 		const entityType = getEntityStatsType(entity);
 		// Llamar hook siempre con fallback para mantener orden de hooks
 		const { config } = useEntityTypeConfig(entityType ?? EntityStatsType.IMAGE);
-			if (!entityType) {
-				return null;
-			}
-			if (!config) {
-				return null;
-			}
+		if (!entityType) {
+			return null;
+		}
+		if (!config) {
+			return null;
+		}
 
 		// Renderizar modo compacto
 		if (mode === 'compact') {

@@ -461,16 +461,28 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 		);
 
 		// Actualizar campos relevantes
-		if (sharpMeta.width) metadata.width = sharpMeta.width;
-		if (sharpMeta.height) metadata.height = sharpMeta.height;
+		if (sharpMeta.width) {
+			metadata.width = sharpMeta.width;
+		}
+		if (sharpMeta.height) {
+			metadata.height = sharpMeta.height;
+		}
 		if (sharpMeta.format) {
 			metadata.format = sharpMeta.format;
 			metadata.mimeType = `image/${sharpMeta.format}`;
 		}
-		if (sharpMeta.density) metadata.density = sharpMeta.density;
-		if (sharpMeta.hasAlpha !== undefined) metadata.hasAlpha = sharpMeta.hasAlpha;
-		if (sharpMeta.orientation) metadata.orientation = sharpMeta.orientation;
-		if (sharpMeta.space) metadata.colorSpace = sharpMeta.space;
+		if (sharpMeta.density) {
+			metadata.density = sharpMeta.density;
+		}
+		if (sharpMeta.hasAlpha !== undefined) {
+			metadata.hasAlpha = sharpMeta.hasAlpha;
+		}
+		if (sharpMeta.orientation) {
+			metadata.orientation = sharpMeta.orientation;
+		}
+		if (sharpMeta.space) {
+			metadata.colorSpace = sharpMeta.space;
+		}
 	} catch (sharpError) {
 		metadataLogger.warn('Error al extraer metadatos con Sharp:', {
 			path,
@@ -479,8 +491,12 @@ export async function extractMetadata(path: string, options?: MetadataOptions): 
 	}
 
 	// Valores por defecto si no se pudieron obtener
-	if (!metadata.width) metadata.width = 800;
-	if (!metadata.height) metadata.height = 600;
+	if (!metadata.width) {
+		metadata.width = 800;
+	}
+	if (!metadata.height) {
+		metadata.height = 600;
+	}
 
 	// Extraer metadatos adicionales si no están deshabilitados
 	if (!options?.skipExif) {
