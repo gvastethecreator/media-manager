@@ -111,7 +111,9 @@ export function useBatchOperations(options: UseBatchOperationsOptions = {}): Use
 
 	// Auto-cleanup completed operations
 	useEffect(() => {
-		if (!autoCleanup) return;
+		if (!autoCleanup) {
+			return;
+		}
 
 		const cleanupInterval = setInterval(() => {
 			const now = Date.now();
@@ -165,7 +167,9 @@ export function useBatchOperations(options: UseBatchOperationsOptions = {}): Use
 
 	// Auto-refresh interval
 	useEffect(() => {
-		if (refreshInterval <= 0) return;
+		if (refreshInterval <= 0) {
+			return;
+		}
 
 		const interval = setInterval(refresh, refreshInterval);
 		return () => clearInterval(interval);

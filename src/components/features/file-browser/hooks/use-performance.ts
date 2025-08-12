@@ -102,20 +102,22 @@ export function usePerformance(options: UsePerformanceOptions = {}) {
 	const fpsHistoryRef = useRef<number[]>([]);
 
 	// Config predeterminada
-	const config = settings?.fileBrowser?.performance || {
-		maxRenderItems: 1000,
-		virtualization: true,
-		virtualizationBuffer: 5,
-		lazyThumbnails: true,
-		thumbnailQuality: 'medium' as const,
-		cache: { thumbnails: true, maxSize: 100, ttl: 3_600_000 },
-		debounce: { search: 300, scroll: 16, resize: 100 },
-	} satisfies PerformanceConfig as PerformanceConfig;
+	const config =
+		settings?.fileBrowser?.performance ||
+		({
+			maxRenderItems: 1000,
+			virtualization: true,
+			virtualizationBuffer: 5,
+			lazyThumbnails: true,
+			thumbnailQuality: 'medium' as const,
+			cache: { thumbnails: true, maxSize: 100, ttl: 3_600_000 },
+			debounce: { search: 300, scroll: 16, resize: 100 },
+		} satisfies PerformanceConfig as PerformanceConfig);
 
 	const debouncedSearchTerm = useDebounce(searchTerm || '', config.debounce.search);
 
 	// Medición de tiempo
-	const measureTime = useCallback(<T,>(fn: () => T): { result: T; time: number } => {
+	const measureTime = useCallback(<T>(fn: () => T): { result: T; time: number } => {
 		const start = performance.now();
 		const result = fn();
 		const time = performance.now() - start;
@@ -123,36 +125,30 @@ export function usePerformance(options: UsePerformanceOptions = {}) {
 	}, []);
 
 	// Filtrado
-	const filteredData = useAdvancedMemo(
-		() => {
-			if (!(filterFn || debouncedSearchTerm)) {
-				return data;
+	const filteredData = useAdvancedMemo(() => {
+		if (!(filterFn || debouncedSearchTerm)) {
+			return data;
+		}
+		return measureTime(() => {
+			let result = data;
+			if (filterFn) {
+				result = result.filter(filterFn);
 			}
-			return measureTime(() => {
-				let result = data;
-				if (filterFn) {
-					result = result.filter(filterFn);
-				}
-				if (debouncedSearchTerm) {
-					const search = debouncedSearchTerm.toLowerCase();
-					result = result.filter((item) => (item?.name || '').toLowerCase().includes(search));
-				}
-				return result;
-			}).result;
-		},
-		[data, filterFn, debouncedSearchTerm, measureTime]
-	);
+			if (debouncedSearchTerm) {
+				const search = debouncedSearchTerm.toLowerCase();
+				result = result.filter((item) => (item?.name || '').toLowerCase().includes(search));
+			}
+			return result;
+		}).result;
+	}, [data, filterFn, debouncedSearchTerm, measureTime]);
 
 	// Ordenamiento
-	const sortedData = useAdvancedMemo(
-		() => {
-			if (!sortFn) {
-				return filteredData;
-			}
-			return measureTime(() => [...filteredData].sort(sortFn)).result;
-		},
-		[filteredData, sortFn, measureTime]
-	);
+	const sortedData = useAdvancedMemo(() => {
+		if (!sortFn) {
+			return filteredData;
+		}
+		return measureTime(() => [...filteredData].sort(sortFn)).result;
+	}, [filteredData, sortFn, measureTime]);
 
 	// Límite
 	const processedData = useMemo(() => {
@@ -181,7 +177,9 @@ export function usePerformance(options: UsePerformanceOptions = {}) {
 		const itemSize = 0.001; // ~1KB por item
 		const thumbnailSize = 0.05; // ~50KB por thumbnail
 		const baseUsage = processedData.length * itemSize;
-		const thumbnailUsage = config.lazyThumbnails ? processedData.length * 0.1 * thumbnailSize : processedData.length * thumbnailSize;
+		const thumbnailUsage = config.lazyThumbnails
+			? processedData.length * 0.1 * thumbnailSize
+			: processedData.length * thumbnailSize;
 		return baseUsage + thumbnailUsage;
 	}, [processedData.length, config.lazyThumbnails]);
 
@@ -190,7 +188,10 @@ export function usePerformance(options: UsePerformanceOptions = {}) {
 			return;
 		}
 		const now = performance.now();
-		const averageFPS = fpsHistoryRef.current.length > 0 ? fpsHistoryRef.current.reduce((a, b) => a + b, 0) / fpsHistoryRef.current.length : 60;
+		const averageFPS =
+			fpsHistoryRef.current.length > 0
+				? fpsHistoryRef.current.reduce((a, b) => a + b, 0) / fpsHistoryRef.current.length
+				: 60;
 		const newMetrics: PerformanceMetrics = {
 			renderTime: 0,
 			filterTime: 0,
@@ -259,4 +260,3 @@ export function usePerformance(options: UsePerformanceOptions = {}) {
 
 export type { PerformanceMetrics, PerformanceState, PerformanceActions, UsePerformanceOptions };
 export { useDebounce, useAdvancedMemo };
-

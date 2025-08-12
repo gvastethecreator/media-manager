@@ -129,7 +129,9 @@ export function calculateTotalValue(collections: CollectionWithStats[]): number 
  * @returns Booleano indicando si es válida
  */
 export function isValidCollectionUrl(url: string): boolean {
-	if (!url) return true; // URLs vacías son válidas (opcionales)
+	if (!url) {
+		return true; // URLs vacías son válidas (opcionales)
+	}
 
 	try {
 		new URL(url);

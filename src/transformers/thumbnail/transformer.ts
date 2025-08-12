@@ -96,8 +96,12 @@ function normalizeThumbnailData(data: ThumbnailInputData): ThumbnailBase {
  * Normaliza fechas desde diferentes formatos
  */
 function normalizeDate(date?: Date | string | null): Date {
-	if (!date) return new Date();
-	if (date instanceof Date) return date;
+	if (!date) {
+		return new Date();
+	}
+	if (date instanceof Date) {
+		return date;
+	}
 	return new Date(date);
 }
 

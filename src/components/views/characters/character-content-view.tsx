@@ -30,7 +30,9 @@ export const CharacterContentView = memo(function CharacterContentView() {
 	const [optimisticItems, _addEvent] = clientEvents.useEvents<EntityWithStats[]>(items);
 
 	const loadCharacterImages = useCallback(async () => {
-		if (!currentCharacterId) return;
+		if (!currentCharacterId) {
+			return;
+		}
 
 		try {
 			setError(null);

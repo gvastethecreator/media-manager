@@ -114,23 +114,55 @@ export const ConceptService = {
 				updatedAt: new Date(),
 			};
 
-			if (data.name !== undefined) updateData.name = data.name;
-			if (data.description !== undefined) updateData.description = data.description;
-			if (data.emoji !== undefined) updateData.emoji = data.emoji;
-			if (data.color !== undefined) updateData.color = data.color;
-			if (data.category !== undefined) updateData.category = data.category;
+			if (data.name !== undefined) {
+				updateData.name = data.name;
+			}
+			if (data.description !== undefined) {
+				updateData.description = data.description;
+			}
+			if (data.emoji !== undefined) {
+				updateData.emoji = data.emoji;
+			}
+			if (data.color !== undefined) {
+				updateData.color = data.color;
+			}
+			if (data.category !== undefined) {
+				updateData.category = data.category;
+			}
 
-			if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-			if (data.totalImages !== undefined) updateData.totalImages = data.totalImages;
-			if (data.totalVideos !== undefined) updateData.totalVideos = data.totalVideos;
-			if (data.type !== undefined) updateData.type = data.type;
-			if (data.complexity !== undefined) updateData.complexity = data.complexity;
-			if (data.applications !== undefined) updateData.applications = data.applications;
-			if (data.examples !== undefined) updateData.examples = data.examples;
-			if (data.relatedConcepts !== undefined) updateData.relatedConcepts = data.relatedConcepts;
-			if (data.notes !== undefined) updateData.notes = data.notes;
-			if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-			if (data.parentId !== undefined) updateData.parentId = data.parentId;
+			if (data.isFavorite !== undefined) {
+				updateData.isFavorite = data.isFavorite;
+			}
+			if (data.totalImages !== undefined) {
+				updateData.totalImages = data.totalImages;
+			}
+			if (data.totalVideos !== undefined) {
+				updateData.totalVideos = data.totalVideos;
+			}
+			if (data.type !== undefined) {
+				updateData.type = data.type;
+			}
+			if (data.complexity !== undefined) {
+				updateData.complexity = data.complexity;
+			}
+			if (data.applications !== undefined) {
+				updateData.applications = data.applications;
+			}
+			if (data.examples !== undefined) {
+				updateData.examples = data.examples;
+			}
+			if (data.relatedConcepts !== undefined) {
+				updateData.relatedConcepts = data.relatedConcepts;
+			}
+			if (data.notes !== undefined) {
+				updateData.notes = data.notes;
+			}
+			if (data.featuredImage !== undefined) {
+				updateData.featuredImage = data.featuredImage;
+			}
+			if (data.parentId !== undefined) {
+				updateData.parentId = data.parentId;
+			}
 
 			const result = await db.update(concepts).set(updateData).where(eq(concepts.id, id)).returning();
 

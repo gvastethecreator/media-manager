@@ -90,83 +90,83 @@ const RELATIONAL_OPERATIONS: ContextMenuAction[] = ['open', 'delete', 'copy', 'f
 /**
  * 🖼️ Generador de thumbnail para imágenes
  */
-async function generateImageThumbnail(item: AnyEntityWithStats): Promise<string> {
+function generateImageThumbnail(item: AnyEntityWithStats): Promise<string> {
 	// Verificar si es una imagen
 	if (item.entityType !== 'image') {
-		return '';
+		return Promise.resolve('');
 	}
 
 	// Si ya tiene thumbnailUrl, usarlo
 	if ('thumbnailUrl' in item && typeof item.thumbnailUrl === 'string') {
-		return item.thumbnailUrl;
+		return Promise.resolve(item.thumbnailUrl);
 	}
 
 	// Si tiene id, generar URL de API
 	if (item.id) {
-		return `/api/images/${item.id}/thumbnail`;
+		return Promise.resolve(`/api/images/${item.id}/thumbnail`);
 	}
 
-	return '';
+	return Promise.resolve('');
 }
 
 /**
  * 🎬 Generador de thumbnail para videos
  */
-async function generateVideoThumbnail(item: AnyEntityWithStats): Promise<string> {
+function generateVideoThumbnail(item: AnyEntityWithStats): Promise<string> {
 	// Verificar si es un video
 	if (item.entityType !== 'video') {
-		return '';
+		return Promise.resolve('');
 	}
 
 	// Si ya tiene thumbnail, usarlo
 	if ('thumbnail' in item && item.thumbnail) {
-		return `/api/videos/${item.id}/thumbnail`;
+		return Promise.resolve(`/api/videos/${item.id}/thumbnail`);
 	}
 
 	// Si tiene id, generar URL de API
 	if (item.id) {
-		return `/api/videos/${item.id}/thumbnail`;
+		return Promise.resolve(`/api/videos/${item.id}/thumbnail`);
 	}
 
-	return '';
+	return Promise.resolve('');
 }
 
 /**
  * 🎵 Generador de thumbnail para audio
  */
-async function generateAudioThumbnail(item: AnyEntityWithStats): Promise<string> {
+function generateAudioThumbnail(item: AnyEntityWithStats): Promise<string> {
 	// Para audio, generar un thumbnail visual basado en waveform o usar icono
 	if (item.entityType !== 'audio') {
-		return '';
+		return Promise.resolve('');
 	}
 
 	// Placeholder para generación de waveform
-	return `/api/audio/${item.id}/waveform`;
+	return Promise.resolve(`/api/audio/${item.id}/waveform`);
 }
 
 /**
  * 📄 Generador de thumbnail para documentos
  */
-async function generateDocumentThumbnail(item: AnyEntityWithStats): Promise<string> {
+function generateDocumentThumbnail(item: AnyEntityWithStats): Promise<string> {
 	// Para documentos, generar preview de primera página
 	if (item.entityType !== 'document') {
-		return '';
+		return Promise.resolve('');
 	}
 
-	return `/api/documents/${item.id}/thumbnail`;
+	return Promise.resolve(`/api/documents/${item.id}/thumbnail`);
 }
 
 /**
  * 📁 Generador de thumbnail para carpetas
  */
-async function generateFolderThumbnail(item: AnyEntityWithStats): Promise<string> {
+function generateFolderThumbnail(item: AnyEntityWithStats): Promise<string> {
 	// Para carpetas, mostrar preview de contenido o icono
 	if (item.entityType !== 'folder') {
-		return '';
+		return Promise.resolve('');
 	}
 
 	// Thumbnail compuesto de archivos dentro
-	return `/api/folders/${item.id}/preview`;
+	return Promise.resolve(`/api/folders/${item.id}/preview`);
 }
 
 /**
@@ -532,7 +532,9 @@ export function getEntityTypeIcon(type: EntityStatsType): LucideIcon {
  */
 export function getEntityTypeDisplayName(type: EntityStatsType, plural = false): string {
 	const config = getEntityTypeConfig(type);
-	if (!config) return plural ? 'Elementos' : 'Elemento';
+	if (!config) {
+		return plural ? 'Elementos' : 'Elemento';
+	}
 	return plural ? config.displayNamePlural : config.displayName;
 }
 
@@ -575,7 +577,9 @@ export async function generateEntityThumbnail(item: AnyEntityWithStats): Promise
  */
 export function isFormatSupported(type: EntityStatsType, format: string): boolean {
 	const config = getEntityTypeConfig(type);
-	if (!config?.supportedFormats) return false;
+	if (!config?.supportedFormats) {
+		return false;
+	}
 
 	const normalizedFormat = format.toLowerCase();
 	return config.supportedFormats.some((supportedFormat) => normalizedFormat.endsWith(supportedFormat.toLowerCase()));
@@ -586,7 +590,9 @@ export function isFormatSupported(type: EntityStatsType, format: string): boolea
  */
 export function detectEntityTypeFromExtension(filename: string): EntityStatsType | null {
 	const extension = filename.toLowerCase().split('.').pop();
-	if (!extension) return null;
+	if (!extension) {
+		return null;
+	}
 
 	const extensionWithDot = `.${extension}`;
 

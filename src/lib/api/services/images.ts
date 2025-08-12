@@ -73,14 +73,14 @@ export interface ImageStats {
 /**
  * Obtiene los datos de una imagen para mostrar en una tarjeta
  */
-export async function getImageCardData(imageId: string): Promise<ImageCardData> {
+export function getImageCardData(imageId: string): Promise<ImageCardData> {
 	return apiClient.get<ImageCardData>(`/images/${imageId}/card-data`);
 }
 
 /**
  * Obtiene una lista de imágenes para mostrar en una galería de tarjetas
  */
-export async function getImagesForCards(options: GetImagesOptions = {}): Promise<ImageCardData[]> {
+export function getImagesForCards(options: GetImagesOptions = {}): Promise<ImageCardData[]> {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(options)) {
 		if (value !== undefined) {
@@ -100,7 +100,7 @@ export async function getImagesForCards(options: GetImagesOptions = {}): Promise
 /**
  * Obtiene estadísticas de imágenes
  */
-export async function getImageStats(options: { albumId?: string; collectionId?: string } = {}): Promise<ImageStats> {
+export function getImageStats(options: { albumId?: string; collectionId?: string } = {}): Promise<ImageStats> {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(options)) {
 		if (value !== undefined) {
@@ -114,7 +114,7 @@ export async function getImageStats(options: { albumId?: string; collectionId?: 
 /**
  * Busca imágenes con filtros avanzados
  */
-export async function searchImages(options: GetImagesOptions & { searchTerm: string }): Promise<ImageCardData[]> {
+export function searchImages(options: GetImagesOptions & { searchTerm: string }): Promise<ImageCardData[]> {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(options)) {
 		if (value !== undefined) {

@@ -67,19 +67,16 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
 	);
 
 	// Helper: calcular último índice seleccionado de forma segura (después de definir focusedIndex/getItemIndex)
-	const getLastSelectedIndex = useCallback(
-		(): number => {
-			if (selectedItems.length === 0) {
-				return focusedIndex;
-			}
-			const lastSelectedId = selectedItems.at(-1)?.id;
-			if (!lastSelectedId) {
-				return focusedIndex;
-			}
-			return getItemIndex(lastSelectedId);
-		},
-		[selectedItems, focusedIndex, getItemIndex]
-	);
+	const getLastSelectedIndex = useCallback((): number => {
+		if (selectedItems.length === 0) {
+			return focusedIndex;
+		}
+		const lastSelectedId = selectedItems.at(-1)?.id;
+		if (!lastSelectedId) {
+			return focusedIndex;
+		}
+		return getItemIndex(lastSelectedId);
+	}, [selectedItems, focusedIndex, getItemIndex]);
 
 	// Helper: aplicar selección según navegación
 	const applySelectionOnNavigate = useCallback(
@@ -503,15 +500,15 @@ export const KeyboardNavigation: React.FC<KeyboardNavigationProps> = ({
 
 	// Actualizar el último índice seleccionado cuando cambia la selección
 	useEffect(() => {
-			if (selectedIds.length > 0) {
-				const lastSelectedId = selectedIds.at(-1);
-				if (lastSelectedId) {
-					const index = getItemIndex(lastSelectedId);
-					if (index >= 0) {
-						lastSelectedIndexRef.current = index;
-					}
+		if (selectedIds.length > 0) {
+			const lastSelectedId = selectedIds.at(-1);
+			if (lastSelectedId) {
+				const index = getItemIndex(lastSelectedId);
+				if (index >= 0) {
+					lastSelectedIndexRef.current = index;
 				}
 			}
+		}
 	}, [selectedIds, getItemIndex]);
 
 	// Enfocar el primer elemento si no hay nada seleccionado

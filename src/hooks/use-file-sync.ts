@@ -283,7 +283,7 @@ export function useFileSync(folderId?: string, options: UseFileSyncOptions = {})
 
 			return () => clearTimeout(timeout);
 		}
-	}, [folderId, autoSync]); // Eliminar syncMutation de las dependencias
+	}, [folderId, autoSync, syncMutation.mutate]); // Eliminar syncMutation de las dependencias
 
 	return {
 		status,

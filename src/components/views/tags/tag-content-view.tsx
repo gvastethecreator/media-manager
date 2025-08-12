@@ -26,7 +26,9 @@ export function TagContentView() {
 	}, []);
 
 	useEffect(() => {
-		if (!selectedId) return;
+		if (!selectedId) {
+			return;
+		}
 		const fetchImages = async () => {
 			setIsLoading(true);
 			// const images = await getTagImages(currentTag.id);

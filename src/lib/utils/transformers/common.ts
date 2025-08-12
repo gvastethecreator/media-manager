@@ -9,7 +9,9 @@ const logger = serverLogger.withContext('TransformerUtils');
  * @returns String JSON serializado
  */
 export function serializeJsonField<T>(field: T | null | undefined, defaultValue = '[]'): string {
-	if (!field) return defaultValue;
+	if (!field) {
+		return defaultValue;
+	}
 	try {
 		return JSON.stringify(field);
 	} catch (error) {
@@ -25,7 +27,9 @@ export function serializeJsonField<T>(field: T | null | undefined, defaultValue 
  * @returns Objeto deserializado del tipo T
  */
 export function deserializeJsonField<T>(field: string | null | undefined, defaultValue: T): T {
-	if (!field || field === '[]' || field === '{}') return defaultValue;
+	if (!field || field === '[]' || field === '{}') {
+		return defaultValue;
+	}
 	try {
 		return JSON.parse(field) as T;
 	} catch (error) {

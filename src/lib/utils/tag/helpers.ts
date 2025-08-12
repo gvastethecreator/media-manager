@@ -24,7 +24,9 @@ type TagWithCount = TagBase & {
  */
 export function searchTags(tags: TagBase[], searchTerm: string): TagBase[] {
 	const normalizedTerm = searchTerm.toLowerCase().trim();
-	if (!normalizedTerm) return tags;
+	if (!normalizedTerm) {
+		return tags;
+	}
 
 	return tags.filter(
 		(tag) => tag.name.toLowerCase().includes(normalizedTerm) || tag.description?.toLowerCase().includes(normalizedTerm)
@@ -112,7 +114,9 @@ export function getMostUsedTags(tags: TagWithCount[], limit = 10): TagWithCount[
  * @returns Verdadero si la etiqueta es válida
  */
 export function isValidTagName(name: string, existingTags: TagBase[] = []): boolean {
-	if (!name || name.trim().length < 2) return false;
+	if (!name || name.trim().length < 2) {
+		return false;
+	}
 
 	// Verificar que no exista una etiqueta con el mismo nombre
 	return !existingTags.some((tag) => tag.name.toLowerCase() === name.toLowerCase());
@@ -148,7 +152,9 @@ export function createTemporaryTag(name: string, category?: string): TagBase {
  * @returns Array de nombres de etiquetas
  */
 export function parseTagNamesFromText(text: string): string[] {
-	if (!text) return [];
+	if (!text) {
+		return [];
+	}
 
 	// Buscar hashtags (ej: #tag1 #tag2)
 	const hashtagRegex = /#(\w+)/g;

@@ -52,9 +52,15 @@ export function ConceptCardFooter({
 
 	// Calcular rareza basado en relaciones totales
 	const getRarity = () => {
-		if (totalRelations > 50) return 'Mítico';
-		if (totalRelations > 25) return 'Raro';
-		if (totalRelations > 10) return 'Infrecuente';
+		if (totalRelations > 50) {
+			return 'Mítico';
+		}
+		if (totalRelations > 25) {
+			return 'Raro';
+		}
+		if (totalRelations > 10) {
+			return 'Infrecuente';
+		}
 		return 'Común';
 	};
 

@@ -34,7 +34,15 @@ const getAspectRatioClass = (aspectRatio: AspectRatio = 'auto'): string => {
 };
 
 // Partes pequeñas para Overlay
-const NonTcgTitle = ({ name, isFavorite, effectiveTcgMode }: { name?: string | null; isFavorite?: boolean; effectiveTcgMode: boolean }) => {
+const NonTcgTitle = ({
+	name,
+	isFavorite,
+	effectiveTcgMode,
+}: {
+	name?: string | null;
+	isFavorite?: boolean;
+	effectiveTcgMode: boolean;
+}) => {
 	if (effectiveTcgMode) {
 		return null;
 	}
@@ -46,7 +54,15 @@ const NonTcgTitle = ({ name, isFavorite, effectiveTcgMode }: { name?: string | n
 	);
 };
 
-const TechInfo = ({ humanDimensions, createdAt, cameraInfo }: { humanDimensions: string; createdAt?: string | Date | null; cameraInfo: string | null }) => (
+const TechInfo = ({
+	humanDimensions,
+	createdAt,
+	cameraInfo,
+}: {
+	humanDimensions: string;
+	createdAt?: string | Date | null;
+	cameraInfo: string | null;
+}) => (
 	<div className="flex flex-col gap-1 text-gray-200 text-xs">
 		<div className="flex items-center gap-1.5">
 			<Info className="h-3 w-3" />
@@ -67,7 +83,17 @@ const TechInfo = ({ humanDimensions, createdAt, cameraInfo }: { humanDimensions:
 	</div>
 );
 
-const TcgMetaBadges = ({ effectiveTcgMode, metadataFormatUpper, size, hash }: { effectiveTcgMode: boolean; metadataFormatUpper: string | null; size?: number | null; hash?: string | null }) => {
+const TcgMetaBadges = ({
+	effectiveTcgMode,
+	metadataFormatUpper,
+	size,
+	hash,
+}: {
+	effectiveTcgMode: boolean;
+	metadataFormatUpper: string | null;
+	size?: number | null;
+	hash?: string | null;
+}) => {
 	if (!effectiveTcgMode) {
 		return null;
 	}
@@ -93,7 +119,17 @@ const TcgMetaBadges = ({ effectiveTcgMode, metadataFormatUpper, size, hash }: { 
 	);
 };
 
-const RelationsBadges = ({ show, stats, totalRelations, visible }: { show: boolean; stats?: ImageWithStats['stats']; totalRelations: number; visible: boolean }) => {
+const RelationsBadges = ({
+	show,
+	stats,
+	totalRelations,
+	visible,
+}: {
+	show: boolean;
+	stats?: ImageWithStats['stats'];
+	totalRelations: number;
+	visible: boolean;
+}) => {
 	if (!(show && visible)) {
 		return null;
 	}
@@ -232,7 +268,9 @@ const TcgChrome = ({ primaryColor, imageName, metadataFormatUpper }: TcgChromePr
 				<span className="max-w-[70%] truncate font-medium text-white text-xs">{imageName || 'Sin título'}</span>
 				<div className="flex items-center gap-1">
 					{metadataFormatUpper ? (
-						<span className="rounded bg-black/30 px-1.5 py-0.5 text-[10px] text-white/90 uppercase">{metadataFormatUpper}</span>
+						<span className="rounded bg-black/30 px-1.5 py-0.5 text-[10px] text-white/90 uppercase">
+							{metadataFormatUpper}
+						</span>
 					) : null}
 				</div>
 			</div>
@@ -290,7 +328,12 @@ interface ThumbnailAreaProps {
 	setThumbnailLoading: (v: boolean) => void;
 }
 
-const ThumbnailArea = ({ displayThumbnailUrl, shouldShowThumbnailLoading, effectiveTcgMode, setThumbnailLoading }: ThumbnailAreaProps) => (
+const ThumbnailArea = ({
+	displayThumbnailUrl,
+	shouldShowThumbnailLoading,
+	effectiveTcgMode,
+	setThumbnailLoading,
+}: ThumbnailAreaProps) => (
 	<div className="relative h-full w-full">
 		{shouldShowThumbnailLoading ? (
 			<div className={cn('absolute inset-0 z-10', effectiveTcgMode && 'pt-8')}>
@@ -301,7 +344,11 @@ const ThumbnailArea = ({ displayThumbnailUrl, shouldShowThumbnailLoading, effect
 		{displayThumbnailUrl ? (
 			<img
 				alt="imagen"
-				className={cn('h-full w-full object-cover', effectiveTcgMode && 'pt-8', shouldShowThumbnailLoading && 'opacity-0')}
+				className={cn(
+					'h-full w-full object-cover',
+					effectiveTcgMode && 'pt-8',
+					shouldShowThumbnailLoading && 'opacity-0'
+				)}
 				loading="lazy"
 				onError={(e) => {
 					const imgElement = e.currentTarget as HTMLImageElement;
@@ -324,7 +371,12 @@ const ThumbnailArea = ({ displayThumbnailUrl, shouldShowThumbnailLoading, effect
 				src={displayThumbnailUrl}
 			/>
 		) : (
-			<div className={cn('flex h-full w-full items-center justify-center bg-gray-100 dark:bg-gray-900', effectiveTcgMode && 'pt-8')}>
+			<div
+				className={cn(
+					'flex h-full w-full items-center justify-center bg-gray-100 dark:bg-gray-900',
+					effectiveTcgMode && 'pt-8'
+				)}
+			>
 				<ImageIcon className="h-10 w-10 text-gray-400" />
 			</div>
 		)}
@@ -343,18 +395,43 @@ interface DetailsOverlayProps {
 	totalRelations: number;
 }
 
-const DetailsOverlay = ({ showDetails, effectiveTcgMode, isHovered, imageData, humanDimensions, cameraInfo, metadataFormatUpper, showRelations, totalRelations }: DetailsOverlayProps) => {
+const DetailsOverlay = ({
+	showDetails,
+	effectiveTcgMode,
+	isHovered,
+	imageData,
+	humanDimensions,
+	cameraInfo,
+	metadataFormatUpper,
+	showRelations,
+	totalRelations,
+}: DetailsOverlayProps) => {
 	if (!showDetails) {
 		return null;
 	}
 	const visible = effectiveTcgMode || isHovered;
 	return (
-		<div className={cn('absolute inset-0 bg-gradient-to-t from-black/70 to-transparent transition-opacity', computeOverlayOpacityClass(effectiveTcgMode, isHovered))}>
+		<div
+			className={cn(
+				'absolute inset-0 bg-gradient-to-t from-black/70 to-transparent transition-opacity',
+				computeOverlayOpacityClass(effectiveTcgMode, isHovered)
+			)}
+		>
 			<div className="absolute right-0 bottom-0 left-0 p-3">
-				<NonTcgTitle name={imageData.name} isFavorite={imageData.isFavorite} effectiveTcgMode={effectiveTcgMode} />
-				<TechInfo humanDimensions={humanDimensions} createdAt={imageData.createdAt} cameraInfo={cameraInfo} />
-				<TcgMetaBadges effectiveTcgMode={effectiveTcgMode} metadataFormatUpper={metadataFormatUpper} size={imageData.size} hash={imageData.hash} />
-				<RelationsBadges show={showRelations} stats={imageData.stats} totalRelations={totalRelations} visible={visible} />
+				<NonTcgTitle effectiveTcgMode={effectiveTcgMode} isFavorite={imageData.isFavorite} name={imageData.name} />
+				<TechInfo cameraInfo={cameraInfo} createdAt={imageData.createdAt} humanDimensions={humanDimensions} />
+				<TcgMetaBadges
+					effectiveTcgMode={effectiveTcgMode}
+					hash={imageData.hash}
+					metadataFormatUpper={metadataFormatUpper}
+					size={imageData.size}
+				/>
+				<RelationsBadges
+					show={showRelations}
+					stats={imageData.stats}
+					totalRelations={totalRelations}
+					visible={visible}
+				/>
 			</div>
 		</div>
 	);
@@ -478,46 +555,82 @@ interface CardContentProps {
 	primaryColor: string;
 }
 
-const CardContent = ({ ariaDescribedBy, ariaLabel, aspectRatio, variant, isHovered, setIsHovered, className, dataItemId, disabled, onClick, onContextMenu, onDoubleClick, onKeyDown, role, tabIndex, effectiveTcgMode, displayThumbnailUrl, shouldShowThumbnailLoading, setThumbnailLoading, showDetails, imageData, humanDimensions, cameraInfo, metadataFormatUpper, showRelations, totalRelations, showTags, primaryColor }: CardContentProps) => (
+const CardContent = ({
+	ariaDescribedBy,
+	ariaLabel,
+	aspectRatio,
+	variant,
+	isHovered,
+	setIsHovered,
+	className,
+	dataItemId,
+	disabled,
+	onClick,
+	onContextMenu,
+	onDoubleClick,
+	onKeyDown,
+	role,
+	tabIndex,
+	effectiveTcgMode,
+	displayThumbnailUrl,
+	shouldShowThumbnailLoading,
+	setThumbnailLoading,
+	showDetails,
+	imageData,
+	humanDimensions,
+	cameraInfo,
+	metadataFormatUpper,
+	showRelations,
+	totalRelations,
+	showTags,
+	primaryColor,
+}: CardContentProps) => (
 	<CardButton
 		ariaDescribedBy={ariaDescribedBy}
 		ariaLabel={ariaLabel}
 		aspectRatio={aspectRatio}
-		variant={variant}
-		isHovered={isHovered}
-		setIsHovered={setIsHovered}
 		className={className}
 		dataItemId={dataItemId}
 		disabled={disabled}
+		isHovered={isHovered}
 		onClick={onClick}
 		onContextMenu={onContextMenu}
 		onDoubleClick={onDoubleClick}
 		onKeyDown={onKeyDown}
 		role={role}
+		setIsHovered={setIsHovered}
 		tabIndex={tabIndex}
+		variant={variant}
 	>
-		{effectiveTcgMode ? <TcgChrome primaryColor={primaryColor} imageName={imageData.name} metadataFormatUpper={metadataFormatUpper} /> : null}
+		{effectiveTcgMode ? (
+			<TcgChrome imageName={imageData.name} metadataFormatUpper={metadataFormatUpper} primaryColor={primaryColor} />
+		) : null}
 		<ThumbnailArea
 			displayThumbnailUrl={displayThumbnailUrl}
-			shouldShowThumbnailLoading={shouldShowThumbnailLoading}
 			effectiveTcgMode={effectiveTcgMode}
 			setThumbnailLoading={setThumbnailLoading}
+			shouldShowThumbnailLoading={shouldShowThumbnailLoading}
 		/>
 		{showDetails ? (
 			<DetailsOverlay
-				showDetails={showDetails}
-				effectiveTcgMode={effectiveTcgMode}
-				isHovered={isHovered}
-				imageData={imageData}
-				humanDimensions={humanDimensions}
 				cameraInfo={cameraInfo}
+				effectiveTcgMode={effectiveTcgMode}
+				humanDimensions={humanDimensions}
+				imageData={imageData}
+				isHovered={isHovered}
 				metadataFormatUpper={metadataFormatUpper}
+				showDetails={showDetails}
 				showRelations={showRelations}
 				totalRelations={totalRelations}
 			/>
 		) : null}
 		<TcgStyleBlock effectiveTcgMode={effectiveTcgMode} imageData={imageData} showTags={showTags} />
-		<StandardTagsBlock showTags={showTags} imageData={imageData} isHovered={isHovered} effectiveTcgMode={effectiveTcgMode} />
+		<StandardTagsBlock
+			effectiveTcgMode={effectiveTcgMode}
+			imageData={imageData}
+			isHovered={isHovered}
+			showTags={showTags}
+		/>
 	</CardButton>
 );
 
@@ -541,7 +654,24 @@ interface CardButtonProps {
 	children: React.ReactNode;
 }
 
-const CardButton = ({ ariaDescribedBy, ariaLabel, aspectRatio, variant, isHovered, setIsHovered, className, dataItemId, disabled, onClick, onContextMenu, onDoubleClick, onKeyDown, role, tabIndex, children }: CardButtonProps) => (
+const CardButton = ({
+	ariaDescribedBy,
+	ariaLabel,
+	aspectRatio,
+	variant,
+	isHovered,
+	setIsHovered,
+	className,
+	dataItemId,
+	disabled,
+	onClick,
+	onContextMenu,
+	onDoubleClick,
+	onKeyDown,
+	role,
+	tabIndex,
+	children,
+}: CardButtonProps) => (
 	<button
 		aria-describedby={ariaDescribedBy}
 		aria-label={ariaLabel}
@@ -614,7 +744,7 @@ export const ImageCard = memo(
 		tabIndex,
 		'aria-label': ariaLabel,
 		'aria-describedby': ariaDescribedBy,
-		onKeyDown
+		onKeyDown,
 	}: ImageCardProps) {
 		const { data: imageData, isLoading, error } = useImage(imageId);
 		const [isHovered, setIsHovered] = useState(false);
@@ -624,8 +754,8 @@ export const ImageCard = memo(
 		// Hook para manejar recursos de imagen (thumbnails)
 		const { getThumbnail, isLoading: isResourceLoading } = useImageResources();
 
-	// Si variant es tcg, forzar modo TCG efectivo sin modificar la prop
-	const effectiveTcgMode = tcgMode || variant === 'tcg';
+		// Si variant es tcg, forzar modo TCG efectivo sin modificar la prop
+		const effectiveTcgMode = tcgMode || variant === 'tcg';
 
 		// Cargar thumbnail usando useImageResources
 		useEffect(() => {
@@ -664,12 +794,12 @@ export const ImageCard = memo(
 
 		// Renderizar cargando
 		if (isLoading) {
-			return <LoadingCard aspectRatio={aspectRatio} variant={variant} className={className} />;
+			return <LoadingCard aspectRatio={aspectRatio} className={className} variant={variant} />;
 		}
 
 		// Renderizar error
 		if (error || !imageData) {
-			return <ErrorCard aspectRatio={aspectRatio} variant={variant} className={className} message={error?.message} />;
+			return <ErrorCard aspectRatio={aspectRatio} className={className} message={error?.message} variant={variant} />;
 		}
 
 		// Determinar la URL del thumbnail a usar
@@ -683,38 +813,36 @@ export const ImageCard = memo(
 		const humanDimensions = getHumanReadableDimensionsFromImage(imageData);
 		const totalRelations = getTotalRelationsCountFromStats(imageData.stats);
 
-
-
 		const cardContent = (
 			<CardContent
 				ariaDescribedBy={ariaDescribedBy}
 				ariaLabel={ariaLabel}
 				aspectRatio={aspectRatio}
-				variant={variant}
-				isHovered={isHovered}
-				setIsHovered={setIsHovered}
+				cameraInfo={cameraInfo}
 				className={className}
 				dataItemId={dataItemId}
 				disabled={!(onClick || onDoubleClick)}
+				displayThumbnailUrl={displayThumbnailUrl}
+				effectiveTcgMode={effectiveTcgMode}
+				humanDimensions={humanDimensions}
+				imageData={imageData}
+				isHovered={isHovered}
+				metadataFormatUpper={metadataFormatUpper}
 				onClick={handleClick}
 				onContextMenu={onContextMenu}
 				onDoubleClick={handleDoubleClick}
 				onKeyDown={onKeyDown}
-				role={role}
-				tabIndex={tabIndex}
-				effectiveTcgMode={effectiveTcgMode}
-				displayThumbnailUrl={displayThumbnailUrl}
-				shouldShowThumbnailLoading={shouldShowThumbnailLoading}
-				setThumbnailLoading={setThumbnailLoading}
-				showDetails={showDetails}
-				imageData={imageData}
-				humanDimensions={humanDimensions}
-				cameraInfo={cameraInfo}
-				metadataFormatUpper={metadataFormatUpper}
-				showRelations={showRelations}
-				totalRelations={totalRelations}
-				showTags={showTags}
 				primaryColor={primaryColor}
+				role={role}
+				setIsHovered={setIsHovered}
+				setThumbnailLoading={setThumbnailLoading}
+				shouldShowThumbnailLoading={shouldShowThumbnailLoading}
+				showDetails={showDetails}
+				showRelations={showRelations}
+				showTags={showTags}
+				tabIndex={tabIndex}
+				totalRelations={totalRelations}
+				variant={variant}
 			/>
 		);
 

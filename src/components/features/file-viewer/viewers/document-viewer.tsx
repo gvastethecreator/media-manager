@@ -56,7 +56,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 		}, 1000);
 
 		return () => clearTimeout(timer);
-	}, [documentSrc, isPDF, isTextFile, documentEntity.pageCount]);
+	}, [isPDF, isTextFile, documentEntity.pageCount]);
 
 	const handleZoomIn = () => {
 		setZoom((prev) => Math.min(prev + 25, 300));

@@ -11,7 +11,6 @@ import type {
 	CreateUploadedImageParams,
 	GetUploadedImagesParams,
 	UpdateUploadedImageParams,
-	UploadedImageDimensions,
 	UploadedImageEvents,
 	UploadedImageMetadata,
 	UploadedImageProcessingOptions,
@@ -574,60 +573,6 @@ class UploadedImagesService {
 		}
 	}
 
-	// Calcular dimensiones con proporción de aspecto
-	private calculateDimensions(
-		width: number,
-		height: number,
-		targetDimensions?: UploadedImageDimensions
-	): UploadedImageDimensions {
-		// Calcular la proporción de aspecto
-		const aspectRatio = width / height;
-
-		// Si no hay dimensiones objetivo, devolver las dimensiones originales
-		if (!targetDimensions) {
-			return {
-				width,
-				height,
-				aspectRatio,
-			};
-		}
-
-		const { width: targetWidth, height: targetHeight } = targetDimensions;
-
-		// Si solo se especifica una dimensión, calcular la otra manteniendo la proporción
-		if (targetWidth && !targetHeight) {
-			return {
-				width: targetWidth,
-				height: Math.round(targetWidth / aspectRatio),
-				aspectRatio,
-			};
-		}
-
-		if (targetHeight && !targetWidth) {
-			return {
-				width: Math.round(targetHeight * aspectRatio),
-				height: targetHeight,
-				aspectRatio,
-			};
-		}
-
-		// Si se especifican ambas dimensiones, devolver esas dimensiones
-		if (targetWidth && targetHeight) {
-			return {
-				width: targetWidth,
-				height: targetHeight,
-				aspectRatio: targetWidth / targetHeight,
-			};
-		}
-
-		// Caso por defecto: devolver las dimensiones originales
-		return {
-			width,
-			height,
-			aspectRatio,
-		};
-	}
-
 	// Procesar imagen
 	private async processImage(
 		path: string,
@@ -664,17 +609,6 @@ class UploadedImagesService {
 				serviceName: SERVICE_NAME,
 			});
 		}
-	}
-
-	// Obtener URL de imagen
-	private getImageUrl(path: string): string {
-		// En una implementación real, esto podría ser una URL completa a un CDN o servidor de archivos
-		return `/api/images/${encodeURIComponent(path)}`;
-	}
-
-	// Obtener URL de miniatura
-	private getThumbnailUrl(path: string): string {
-		return `/api/images/thumbnails/${encodeURIComponent(path)}`;
 	}
 }
 

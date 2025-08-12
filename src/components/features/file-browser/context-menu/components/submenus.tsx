@@ -72,7 +72,10 @@ export const CollectionsSubmenu = memo(function CollectionsSubmenuInner({
 									<ContextMenuItem
 										key={collection.id}
 										onClick={() =>
-											onAction('add-to-collection', file, { collectionId: collection.id, collectionName: collection.name })
+											onAction('add-to-collection', file, {
+												collectionId: collection.id,
+												collectionName: collection.name,
+											})
 										}
 									>
 										{collection.name}

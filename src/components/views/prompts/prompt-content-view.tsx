@@ -20,9 +20,9 @@ export function PromptContentView() {
 		viewLogger.info('🔄 Toggle selección de item:', item?.id);
 	}, []);
 
-	const handleRefresh = useCallback(async () => {
+	const handleRefresh = useCallback((): Promise<void> => {
 		viewLogger.info('🔄 Refrescando imágenes del prompt:', selectedPrompt?.id);
-		await loadPromptImages();
+		return loadPromptImages().then(() => Promise.resolve());
 	}, [loadPromptImages, selectedPrompt?.id]);
 
 	const contentProps: BaseContentProps = {
@@ -32,7 +32,7 @@ export function PromptContentView() {
 		toggleItemSelection,
 		currentContainerId: selectedPrompt?.id ?? null,
 		containerName: selectedPrompt?.name ?? null,
-		setCurrentContainer: async (_id: string) => {}, // No es necesario en el nuevo enfoque
+		setCurrentContainer: (_id: string) => Promise.resolve(), // No es necesario en el nuevo enfoque
 		emptyState: {
 			icon: Terminal,
 			title: 'Prompt vacío',

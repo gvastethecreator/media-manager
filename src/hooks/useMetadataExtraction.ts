@@ -82,11 +82,21 @@ export const useMetadataFormatter = () => {
 					const promptText = ai.prompt.length > 150 ? `${ai.prompt.substring(0, 150)}...` : ai.prompt;
 					legacyResult.push({ key: 'Prompt', value: promptText, category: 'ia' });
 				}
-				if (ai.model) legacyResult.push({ key: 'Modelo', value: ai.model, category: 'ia' });
-				if (ai.steps) legacyResult.push({ key: 'Pasos', value: ai.steps.toString(), category: 'ia' });
-				if (ai.cfg) legacyResult.push({ key: 'CFG Scale', value: ai.cfg.toString(), category: 'ia' });
-				if (ai.seed) legacyResult.push({ key: 'Seed', value: ai.seed.toString(), category: 'ia' });
-				if (ai.sampler) legacyResult.push({ key: 'Sampler', value: ai.sampler, category: 'ia' });
+				if (ai.model) {
+					legacyResult.push({ key: 'Modelo', value: ai.model, category: 'ia' });
+				}
+				if (ai.steps) {
+					legacyResult.push({ key: 'Pasos', value: ai.steps.toString(), category: 'ia' });
+				}
+				if (ai.cfg) {
+					legacyResult.push({ key: 'CFG Scale', value: ai.cfg.toString(), category: 'ia' });
+				}
+				if (ai.seed) {
+					legacyResult.push({ key: 'Seed', value: ai.seed.toString(), category: 'ia' });
+				}
+				if (ai.sampler) {
+					legacyResult.push({ key: 'Sampler', value: ai.sampler, category: 'ia' });
+				}
 			}
 
 			// EXIF legacy
@@ -94,27 +104,45 @@ export const useMetadataFormatter = () => {
 				const exif = parsed.exif;
 				if (exif.make || exif.model) {
 					const camera = `${exif.make || ''} ${exif.model || ''}`.trim();
-					if (camera) legacyResult.push({ key: 'Cámara', value: camera, category: 'exif' });
+					if (camera) {
+						legacyResult.push({ key: 'Cámara', value: camera, category: 'exif' });
+					}
 				}
-				if (exif.iso) legacyResult.push({ key: 'ISO', value: exif.iso.toString(), category: 'exif' });
-				if (exif.fNumber) legacyResult.push({ key: 'Apertura', value: `f/${exif.fNumber}`, category: 'exif' });
-				if (exif.dateTimeOriginal)
+				if (exif.iso) {
+					legacyResult.push({ key: 'ISO', value: exif.iso.toString(), category: 'exif' });
+				}
+				if (exif.fNumber) {
+					legacyResult.push({ key: 'Apertura', value: `f/${exif.fNumber}`, category: 'exif' });
+				}
+				if (exif.dateTimeOriginal) {
 					legacyResult.push({ key: 'Fecha Captura', value: exif.dateTimeOriginal, category: 'exif' });
+				}
 			}
 
 			// IPTC legacy
 			if (parsed.iptc) {
 				const iptc = parsed.iptc;
-				if (iptc.headline) legacyResult.push({ key: 'Título', value: iptc.headline, category: 'iptc' });
-				if (iptc.caption) legacyResult.push({ key: 'Descripción', value: iptc.caption, category: 'iptc' });
-				if (iptc.keywords) legacyResult.push({ key: 'Palabras Clave', value: iptc.keywords, category: 'iptc' });
+				if (iptc.headline) {
+					legacyResult.push({ key: 'Título', value: iptc.headline, category: 'iptc' });
+				}
+				if (iptc.caption) {
+					legacyResult.push({ key: 'Descripción', value: iptc.caption, category: 'iptc' });
+				}
+				if (iptc.keywords) {
+					legacyResult.push({ key: 'Palabras Clave', value: iptc.keywords, category: 'iptc' });
+				}
 			}
 
 			// Metadatos técnicos
-			if (parsed.format) legacyResult.push({ key: 'Formato', value: parsed.format, category: 'técnico' });
-			if (parsed.compression) legacyResult.push({ key: 'Compresión', value: parsed.compression, category: 'técnico' });
-			if (parsed.bitDepth)
+			if (parsed.format) {
+				legacyResult.push({ key: 'Formato', value: parsed.format, category: 'técnico' });
+			}
+			if (parsed.compression) {
+				legacyResult.push({ key: 'Compresión', value: parsed.compression, category: 'técnico' });
+			}
+			if (parsed.bitDepth) {
 				legacyResult.push({ key: 'Profundidad Bits', value: `${parsed.bitDepth} bits`, category: 'técnico' });
+			}
 
 			return legacyResult;
 		} catch {

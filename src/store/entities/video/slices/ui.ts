@@ -99,10 +99,14 @@ export const createVideoUISlice: StateCreator<VideoStore, [], [], VideoUISlice> 
 	nextVideo: () => {
 		const { videos, currentVideoId } = get();
 		const videoArray = Object.values(videos);
-		if (videoArray.length === 0 || !currentVideoId) return;
+		if (videoArray.length === 0 || !currentVideoId) {
+			return;
+		}
 
 		const currentIndex = videoArray.findIndex((vid) => vid.id === currentVideoId);
-		if (currentIndex === -1) return;
+		if (currentIndex === -1) {
+			return;
+		}
 
 		const nextIndex = (currentIndex + 1) % videoArray.length;
 		set({ currentVideoId: videoArray[nextIndex].id });
@@ -111,10 +115,14 @@ export const createVideoUISlice: StateCreator<VideoStore, [], [], VideoUISlice> 
 	previousVideo: () => {
 		const { videos, currentVideoId } = get();
 		const videoArray = Object.values(videos);
-		if (videoArray.length === 0 || !currentVideoId) return;
+		if (videoArray.length === 0 || !currentVideoId) {
+			return;
+		}
 
 		const currentIndex = videoArray.findIndex((vid) => vid.id === currentVideoId);
-		if (currentIndex === -1) return;
+		if (currentIndex === -1) {
+			return;
+		}
 
 		const prevIndex = (currentIndex - 1 + videoArray.length) % videoArray.length;
 		set({ currentVideoId: videoArray[prevIndex].id });

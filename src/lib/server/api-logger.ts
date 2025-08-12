@@ -34,7 +34,9 @@ export const apiLogger = {
 
 		// Función para filtrar campos sensibles
 		const filterSensitiveData = (obj: Record<string, unknown>, sensitiveFields: string[]): Record<string, unknown> => {
-			if (!obj || typeof obj !== 'object') return obj;
+			if (!obj || typeof obj !== 'object') {
+				return obj;
+			}
 
 			const result = { ...obj };
 			for (const key of Object.keys(result)) {

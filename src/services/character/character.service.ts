@@ -354,25 +354,61 @@ export async function updateCharacter(id: string, data: CharacterUpdateInput): P
 		};
 
 		// Solo actualizar campos que se envían
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.description !== undefined) updateData.description = data.description;
-		if (data.emoji !== undefined) updateData.emoji = data.emoji;
-		if (data.color !== undefined) updateData.color = data.color;
-		if (data.category !== undefined) updateData.category = data.category;
-		if (data.age !== undefined) updateData.age = data.age;
-		if (data.gender !== undefined) updateData.gender = data.gender;
-		if (data.species !== undefined) updateData.species = data.species;
-		if (data.occupation !== undefined) updateData.occupation = data.occupation;
-		if (data.personality !== undefined) updateData.personality = data.personality;
-		if (data.background !== undefined) updateData.background = data.background;
-		if (data.relationships !== undefined) updateData.relationships = data.relationships;
-		if (data.skills !== undefined) updateData.skills = data.skills;
-		if (data.equipment !== undefined) updateData.equipment = data.equipment;
-		if (data.notes !== undefined) updateData.notes = data.notes;
-		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-		if (data.parentId !== undefined) updateData.parentId = data.parentId;
+		if (data.name !== undefined) {
+			updateData.name = data.name;
+		}
+		if (data.description !== undefined) {
+			updateData.description = data.description;
+		}
+		if (data.emoji !== undefined) {
+			updateData.emoji = data.emoji;
+		}
+		if (data.color !== undefined) {
+			updateData.color = data.color;
+		}
+		if (data.category !== undefined) {
+			updateData.category = data.category;
+		}
+		if (data.age !== undefined) {
+			updateData.age = data.age;
+		}
+		if (data.gender !== undefined) {
+			updateData.gender = data.gender;
+		}
+		if (data.species !== undefined) {
+			updateData.species = data.species;
+		}
+		if (data.occupation !== undefined) {
+			updateData.occupation = data.occupation;
+		}
+		if (data.personality !== undefined) {
+			updateData.personality = data.personality;
+		}
+		if (data.background !== undefined) {
+			updateData.background = data.background;
+		}
+		if (data.relationships !== undefined) {
+			updateData.relationships = data.relationships;
+		}
+		if (data.skills !== undefined) {
+			updateData.skills = data.skills;
+		}
+		if (data.equipment !== undefined) {
+			updateData.equipment = data.equipment;
+		}
+		if (data.notes !== undefined) {
+			updateData.notes = data.notes;
+		}
+		if (data.featuredImage !== undefined) {
+			updateData.featuredImage = data.featuredImage;
+		}
+		if (data.parentId !== undefined) {
+			updateData.parentId = data.parentId;
+		}
 
-		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+		if (data.isFavorite !== undefined) {
+			updateData.isFavorite = data.isFavorite;
+		}
 
 		await db.update(characters).set(updateData).where(eq(characters.id, id));
 

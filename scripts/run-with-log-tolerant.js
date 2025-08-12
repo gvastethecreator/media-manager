@@ -105,8 +105,12 @@ function getLineStyle(line, isError, hasRealErrors, isTolerantCommand) {
 
 	// Salida de error del proceso
 	if (isError) {
-		if (hasRealErrors) return { color: chalk.redBright, emoji: '🔴' };
-		if (isTolerantCommand) return { color: chalk.cyan, emoji: '🔍' };
+		if (hasRealErrors) {
+			return { color: chalk.redBright, emoji: '🔴' };
+		}
+		if (isTolerantCommand) {
+			return { color: chalk.cyan, emoji: '🔍' };
+		}
 	}
 
 	// Default

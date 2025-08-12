@@ -1,12 +1,12 @@
 // Drizzle imports
 // @ts-nocheck - Temporary suppression for Express handler parameter types
 
-import { asc, count, desc, eq } from 'drizzle-orm';
-import { Router } from 'express';
-import { z } from 'zod';
 import { db } from '@/lib/drizzle';
 import { folders, images, videos } from '@/lib/drizzle/schema/index';
 import { generateFolderIdFromName, isValidFolderId } from '@/lib/utils/folder-id-generator';
+import { asc, count, desc, eq, sql } from 'drizzle-orm';
+import { Router } from 'express';
+import { z } from 'zod';
 
 const router = Router() as any;
 
@@ -32,9 +32,11 @@ const CreateFolderSchema = z.object({
 const UpdateFolderSchema = CreateFolderSchema.partial().omit({ path: true });
 
 // GET /api/folders - Obtener todas las carpetas
-router.get('/', async (_req, res) => {
+router.get('/', async (req, res) => {
 	try {
-		const drizzleFolders = await db
+		const { parentId } = req.query as { parentId?: string };
+
+		const baseSelect = db
 			.select({
 				id: folders.id,
 				name: folders.name,
@@ -52,35 +54,52 @@ router.get('/', async (_req, res) => {
 				updatedAt: folders.updatedAt,
 				parentId: folders.parentId,
 				presetId: folders.presetId,
+				imagesCount: sql<number>`(SELECT COUNT(1) FROM Image WHERE Image.folderId = ${folders.id})`,
+				videosCount: sql<number>`(SELECT COUNT(1) FROM Video WHERE Video.folderId = ${folders.id})`,
+				childrenCount: sql<number>`(SELECT COUNT(1) FROM Folder WHERE Folder.parentId = ${folders.id})`,
 			})
-			.from(folders)
-			.orderBy(asc(folders.name));
+			.from(folders);
+
+		const drizzleFolders = await (parentId
+			? baseSelect.where(eq(folders.parentId, parentId)).orderBy(asc(folders.name))
+			: baseSelect.orderBy(asc(folders.name)));
 
 		// Transformar a formato compatible
-		const transformedFolders = drizzleFolders.map((folder: any) => ({
-			...folder,
+		const withCounts = drizzleFolders.map((folder: any) => ({
+			id: folder.id,
+			name: folder.name,
+			description: folder.description,
+			path: folder.path,
+			emoji: folder.emoji,
+			color: folder.color,
+			featuredImage: folder.featuredImage,
 			isFavorite: Boolean(folder.isFavorite),
+			totalFiles: folder.totalFiles,
+			totalSize: folder.totalSize,
 			autoReindex: Boolean(folder.autoReindex),
-			// Relaciones vacías por ahora (TODO: implementar JOINs)
+			lastIndexed: folder.lastIndexed,
+			createdAt: folder.createdAt,
+			updatedAt: folder.updatedAt,
+			parentId: folder.parentId,
+			presetId: folder.presetId,
 			preset: null,
 			parent: null,
 			children: [],
-			// Counts vacíos por ahora (TODO: implementar subqueries)
 			_count: {
-				images: 0,
-				videos: 0,
-				documents: 0,
-				file3Ds: 0,
-				jsonFiles: 0,
-				audios: 0,
+				images: Number(folder.imagesCount) || 0,
+				videos: Number(folder.videosCount) || 0,
+				children: Number(folder.childrenCount) || 0,
 			},
 		}));
 
+		const { fromDrizzleFoldersWithCounts } = await import('@/transformers/folder');
+		const enriched = fromDrizzleFoldersWithCounts(withCounts);
+
 		// Devolver estructura compatible con FoldersResponse
 		res.json({
-			data: transformedFolders,
+			data: enriched,
 			pagination: {
-				total: transformedFolders.length,
+				total: enriched.length,
 				limit: 100, // Default limit
 				offset: 0,
 				hasNext: false,
@@ -89,6 +108,157 @@ router.get('/', async (_req, res) => {
 		});
 	} catch (error) {
 		console.error('❌ Error al obtener carpetas:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// GET /api/folders/tree - Obtener todas las carpetas con conteos y estadísticas
+router.get('/tree', async (_req, res) => {
+	try {
+		const rows = await db
+			.select({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				autoReindex: folders.autoReindex,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+				imagesCount: sql<number>`(SELECT COUNT(1) FROM Image WHERE Image.folderId = ${folders.id})`,
+				videosCount: sql<number>`(SELECT COUNT(1) FROM Video WHERE Video.folderId = ${folders.id})`,
+				childrenCount: sql<number>`(SELECT COUNT(1) FROM Folder WHERE Folder.parentId = ${folders.id})`,
+			})
+			.from(folders)
+			.orderBy(asc(folders.name));
+
+		const withCounts = rows.map((f: any) => ({
+			...f,
+			_count: {
+				images: Number(f.imagesCount) || 0,
+				videos: Number(f.videosCount) || 0,
+				children: Number(f.childrenCount) || 0,
+			},
+		}));
+
+		const { fromDrizzleFoldersWithCounts } = await import('@/transformers/folder');
+		const transformed = fromDrizzleFoldersWithCounts(withCounts);
+		res.json(transformed);
+	} catch (error) {
+		console.error('Error al obtener árbol de carpetas:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// GET /api/folders/root-id - Obtener ID de carpeta raíz
+router.get('/root-id', async (_req, res) => {
+	try {
+		const root = await db.select({ id: folders.id }).from(folders).where(eq(folders.path, '/')).limit(1);
+		if (!root.length) {
+			return res.status(404).json({ error: 'Carpeta raíz no encontrada' });
+		}
+		res.json({ id: root[0].id });
+	} catch (error) {
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// POST /api/folders/:id/toggle-favorite - Alternar favorito
+router.post('/:id/toggle-favorite', async (req, res) => {
+	try {
+		const { id } = req.params;
+		if (!isValidFolderId(id)) {
+			return res.status(400).json({ error: 'ID de carpeta inválido' });
+		}
+
+		const current = await db
+			.select({ isFavorite: folders.isFavorite })
+			.from(folders)
+			.where(eq(folders.id, id))
+			.limit(1);
+		if (!current.length) {
+			return res.status(404).json({ error: 'Carpeta no encontrada' });
+		}
+		const updated = await db
+			.update(folders)
+			.set({ isFavorite: !current[0].isFavorite })
+			.where(eq(folders.id, id))
+			.returning({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				autoReindex: folders.autoReindex,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			});
+		res.json(updated[0]);
+	} catch (error) {
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// POST /api/folders/:id/move - Mover carpeta (cambiar parentId)
+router.post('/:id/move', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const { newParentId } = req.body as { newParentId: string | null };
+		if (!isValidFolderId(id)) {
+			return res.status(400).json({ error: 'ID de carpeta inválido' });
+		}
+		const updated = await db
+			.update(folders)
+			.set({ parentId: newParentId ?? null })
+			.where(eq(folders.id, id))
+			.returning({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				autoReindex: folders.autoReindex,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			});
+		res.json(updated[0]);
+	} catch (error) {
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -989,24 +1159,21 @@ async function reindexAllFoldersProcess(
 	const errors: string[] = [];
 	let globalSyncResult: any = null;
 
-	// Procesar cada carpeta (solo la primera ejecutará la sincronización global)
-	for (let i = 0; i < allFolders.length; i++) {
+	// Procesamiento recursivo para evitar await en bucles
+	const processAt = async (i: number): Promise<void> => {
+		if (i >= allFolders.length) {
+			return;
+		}
 		const folder = allFolders[i];
+		const phase = getFolderProcessPhase(i, allFolders.length);
+		const progress = Math.round(((i + 1) / allFolders.length) * 100);
+		const shouldSync = enableSync && i === 0;
 		try {
-			console.log(`🔄 Reindexando carpeta: ${folder.name} (${folder.id})`);
-
-			// Determinar la fase del proceso
-			const phase = getFolderProcessPhase(i, allFolders.length);
-
-			// Emitir progreso global
-			const progress = Math.round(((i + 1) / allFolders.length) * 100);
-
-			// Crear la promesa de emisión sin await en el loop
-			const emitPromise = emit({
+			await emit({
 				type: 'folder:reindexAll:progress',
 				data: {
-					folderId: null, // Para reindex global, folderId puede ser null
-					isProcessing: true, // Siempre true durante el procesamiento
+					folderId: null,
+					isProcessing: true,
 					progress,
 					totalFiles: allFolders.length,
 					filesProcessed: i + 1,
@@ -1016,21 +1183,10 @@ async function reindexAllFoldersProcess(
 					currentFolder: folder.name,
 				},
 			});
-
-			// Solo ejecutar sincronización en la primera carpeta para evitar duplicados
-			const shouldSync = enableSync && i === 0;
-
-			// Procesar carpeta y emisión en paralelo
-			const [indexResult] = await Promise.all([
-				updateFolderStats(folder.id, new Set(), 10, 0, shouldSync, true),
-				emitPromise,
-			]);
-
-			// Capturar resultado de sincronización de la primera carpeta
-			if (shouldSync && indexResult.syncResult) {
+			const indexResult = await updateFolderStats(folder.id, new Set(), 10, 0, shouldSync, true);
+			if (shouldSync && indexResult?.syncResult) {
 				globalSyncResult = indexResult.syncResult;
 			}
-
 			processed++;
 			console.log(`✅ Carpeta reindexada: ${folder.name}`);
 		} catch (error) {
@@ -1038,7 +1194,10 @@ async function reindexAllFoldersProcess(
 			console.error(`❌ ${errorMessage}`);
 			errors.push(errorMessage);
 		}
-	}
+		await processAt(i + 1);
+	};
+
+	await processAt(0);
 
 	// Emitir evento de finalización
 	await emit({

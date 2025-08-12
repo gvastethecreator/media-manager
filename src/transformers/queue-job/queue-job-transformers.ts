@@ -38,7 +38,9 @@ const logger = serverLogger.withContext('QueueJobTransformer');
  * @returns Fecha formateada
  */
 export function formatQueueJobDate(date: Date | null): string | undefined {
-	if (!date) return;
+	if (!date) {
+		return;
+	}
 	return formatDistanceToNow(date, { addSuffix: true, locale: es });
 }
 
@@ -50,7 +52,9 @@ export function formatQueueJobDate(date: Date | null): string | undefined {
  * @returns Duración formateada
  */
 export function calculateDuration(start: Date | null, end: Date | null): string | undefined {
-	if (!start) return;
+	if (!start) {
+		return;
+	}
 	const endDate = end || new Date();
 	const duration = intervalToDuration({ start, end: endDate });
 	return formatDuration(duration, { locale: es });
@@ -63,7 +67,9 @@ export function calculateDuration(start: Date | null, end: Date | null): string 
  * @returns Metadata serializada como string JSON
  */
 export function serializeQueueJobMetadata(metadata: QueueJobMetadata | undefined): string | undefined {
-	if (!metadata) return;
+	if (!metadata) {
+		return;
+	}
 	return serializeJsonField(metadata, undefined);
 }
 
@@ -74,7 +80,9 @@ export function serializeQueueJobMetadata(metadata: QueueJobMetadata | undefined
  * @returns Metadata validada
  */
 export function parseQueueJobMetadata(job: DrizzleQueueJob): QueueJobMetadata | undefined {
-	if (!job.metadata) return;
+	if (!job.metadata) {
+		return;
+	}
 
 	try {
 		return deserializeJsonField(job.metadata, {});
@@ -161,7 +169,9 @@ export function transformQueueJobs(jobs: DrizzleQueueJob[]): QueueJobExtended[] 
  * @returns Tiempo restante estimado formateado
  */
 function calculateEstimatedTimeRemaining(job: DrizzleQueueJob): string | undefined {
-	if (!job.startedAt || job.progress <= 0) return;
+	if (!job.startedAt || job.progress <= 0) {
+		return;
+	}
 
 	const elapsedMs = Date.now() - job.startedAt.getTime();
 	const progressPercent = job.progress / 100;

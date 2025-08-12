@@ -105,7 +105,9 @@ const getActivityStats: ExpressHandler = async (req, res) => {
 	try {
 		const type = req.query.type as string;
 		const filters: ActivityFilters = {};
-		if (type) filters.types = [type];
+		if (type) {
+			filters.types = [type];
+		}
 
 		const recentActivities = await activityService.list(filters);
 

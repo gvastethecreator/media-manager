@@ -52,7 +52,9 @@ export function useUndoRedo(options: UseUndoRedoOptions = {}): UseUndoRedoReturn
 
 	// Update state when manager state changes
 	useEffect(() => {
-		if (!autoUpdate) return;
+		if (!autoUpdate) {
+			return;
+		}
 
 		const handleStateChange = (newState: UndoRedoState) => {
 			setState(newState);
@@ -67,7 +69,9 @@ export function useUndoRedo(options: UseUndoRedoOptions = {}): UseUndoRedoReturn
 
 	// Keyboard shortcuts
 	useEffect(() => {
-		if (!enableKeyboardShortcuts) return;
+		if (!enableKeyboardShortcuts) {
+			return;
+		}
 
 		const handleKeyDown = (event: KeyboardEvent) => {
 			// Ctrl+Z for undo
@@ -90,7 +94,7 @@ export function useUndoRedo(options: UseUndoRedoOptions = {}): UseUndoRedoReturn
 		return () => {
 			document.removeEventListener('keydown', handleKeyDown);
 		};
-	}, [enableKeyboardShortcuts]);
+	}, [enableKeyboardShortcuts, redo, undo]);
 
 	// Execute an undoable action
 	const execute = useCallback(

@@ -18,10 +18,10 @@ export function NoteContentView() {
 	// React Query hook must be at top level
 	const { data: noteImages, isLoading: isLoadingImages, error: noteError } = useNoteImages(selectedNote?.id || '');
 
-	const loadNoteImages = useCallback(async () => {
+	const loadNoteImages = useCallback((): Promise<void> => {
 		if (!selectedNote) {
 			setItems([]);
-			return;
+			return Promise.resolve();
 		}
 
 		try {
@@ -39,6 +39,7 @@ export function NoteContentView() {
 		} finally {
 			setIsLoading(false);
 		}
+		return Promise.resolve();
 	}, [selectedNote, noteImages]);
 
 	useEffect(() => {
@@ -71,7 +72,7 @@ export function NoteContentView() {
 		toggleItemSelection,
 		currentContainerId: selectedNote?.id ?? null,
 		containerName: selectedNote?.title ?? selectedNote?.name ?? null,
-		setCurrentContainer: async (_id: string) => {}, // No es necesario en el nuevo enfoque
+		setCurrentContainer: (_id: string) => Promise.resolve(),
 		emptyState: {
 			icon: ScrollText,
 			title: 'Nota vacía',

@@ -41,7 +41,9 @@ type RelationInput = (string | RelationObject)[];
  * @returns Un array de objetos con la propiedad id.
  */
 function normalizeRelation(relation: RelationInput | undefined): RelationObject[] {
-	if (!relation) return [];
+	if (!relation) {
+		return [];
+	}
 	return relation.map((item) => (typeof item === 'string' ? { id: item } : { id: item.id }));
 }
 
@@ -257,8 +259,12 @@ export function sortPrompts(
 				break;
 		}
 
-		if (aValue < bValue) return isAsc ? -1 : 1;
-		if (aValue > bValue) return isAsc ? 1 : -1;
+		if (aValue < bValue) {
+			return isAsc ? -1 : 1;
+		}
+		if (aValue > bValue) {
+			return isAsc ? 1 : -1;
+		}
 		return 0;
 	});
 }
@@ -420,26 +426,36 @@ function calculateQualityGrade(prompt: PromptComplete): 'A' | 'B' | 'C' | 'D' {
 
 	// Nombre (obligatorio)
 	maxScore += 20;
-	if (prompt.name && prompt.name.length > 3) score += 20;
+	if (prompt.name && prompt.name.length > 3) {
+		score += 20;
+	}
 
 	// Descripción
 	maxScore += 20;
-	if (prompt.description && prompt.description.length > 10) score += 20;
+	if (prompt.description && prompt.description.length > 10) {
+		score += 20;
+	}
 
 	// Contenido
 	maxScore += 20;
-	if (prompt.content && prompt.content.length > 20) score += 20;
+	if (prompt.content && prompt.content.length > 20) {
+		score += 20;
+	}
 
 	// Tags
 	maxScore += 15;
-	if (Array.isArray(prompt.tags) && prompt.tags.length > 0) score += 15;
+	if (Array.isArray(prompt.tags) && prompt.tags.length > 0) {
+		score += 15;
+	}
 
 	// Parámetros
 	maxScore += 15;
 	if (prompt.parameters) {
 		try {
 			const params = JSON.parse(prompt.parameters);
-			if (Object.keys(params).length > 0) score += 15;
+			if (Object.keys(params).length > 0) {
+				score += 15;
+			}
 		} catch {
 			// Parámetros inválidos
 		}
@@ -447,11 +463,19 @@ function calculateQualityGrade(prompt: PromptComplete): 'A' | 'B' | 'C' | 'D' {
 
 	// Imagen destacada
 	maxScore += 10;
-	if (prompt.featuredImage) score += 10;
+	if (prompt.featuredImage) {
+		score += 10;
+	}
 
 	const percentage = Math.round((score / maxScore) * 100);
-	if (percentage >= 90) return 'A';
-	if (percentage >= 75) return 'B';
-	if (percentage >= 60) return 'C';
+	if (percentage >= 90) {
+		return 'A';
+	}
+	if (percentage >= 75) {
+		return 'B';
+	}
+	if (percentage >= 60) {
+		return 'C';
+	}
 	return 'D';
 }

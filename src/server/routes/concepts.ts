@@ -31,7 +31,9 @@ const getConceptsHandler = async (req: Request, res: Response) => {
 		const conditions = [];
 
 		// Construir condiciones WHERE
-		if (filters.category) conditions.push(eq(concepts.category, filters.category));
+		if (filters.category) {
+			conditions.push(eq(concepts.category, filters.category));
+		}
 
 		// Búsqueda por texto
 		if (filters.search) {

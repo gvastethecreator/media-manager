@@ -408,25 +408,61 @@ export const updatePromptService = async (id: string, data: PromptUpdateInput): 
 			updatedAt: new Date(),
 		};
 
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.description !== undefined) updateData.description = data.description;
-		if (data.emoji !== undefined) updateData.emoji = data.emoji;
-		if (data.color !== undefined) updateData.color = data.color;
-		if (data.category !== undefined) updateData.category = data.category;
+		if (data.name !== undefined) {
+			updateData.name = data.name;
+		}
+		if (data.description !== undefined) {
+			updateData.description = data.description;
+		}
+		if (data.emoji !== undefined) {
+			updateData.emoji = data.emoji;
+		}
+		if (data.color !== undefined) {
+			updateData.color = data.color;
+		}
+		if (data.category !== undefined) {
+			updateData.category = data.category;
+		}
 
-		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-		if (data.type !== undefined) updateData.type = data.type;
-		if (data.content !== undefined) updateData.content = data.content;
-		if (data.parameters !== undefined) updateData.parameters = data.parameters;
-		if (data.style !== undefined) updateData.style = data.style;
-		if (data.mood !== undefined) updateData.mood = data.mood;
-		if (data.lighting !== undefined) updateData.lighting = data.lighting;
-		if (data.composition !== undefined) updateData.composition = data.composition;
-		if (data.technique !== undefined) updateData.technique = data.technique;
-		if (data.inspiration !== undefined) updateData.inspiration = data.inspiration;
-		if (data.notes !== undefined) updateData.notes = data.notes;
-		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-		if (data.parentId !== undefined) updateData.parentId = data.parentId;
+		if (data.isFavorite !== undefined) {
+			updateData.isFavorite = data.isFavorite;
+		}
+		if (data.type !== undefined) {
+			updateData.type = data.type;
+		}
+		if (data.content !== undefined) {
+			updateData.content = data.content;
+		}
+		if (data.parameters !== undefined) {
+			updateData.parameters = data.parameters;
+		}
+		if (data.style !== undefined) {
+			updateData.style = data.style;
+		}
+		if (data.mood !== undefined) {
+			updateData.mood = data.mood;
+		}
+		if (data.lighting !== undefined) {
+			updateData.lighting = data.lighting;
+		}
+		if (data.composition !== undefined) {
+			updateData.composition = data.composition;
+		}
+		if (data.technique !== undefined) {
+			updateData.technique = data.technique;
+		}
+		if (data.inspiration !== undefined) {
+			updateData.inspiration = data.inspiration;
+		}
+		if (data.notes !== undefined) {
+			updateData.notes = data.notes;
+		}
+		if (data.featuredImage !== undefined) {
+			updateData.featuredImage = data.featuredImage;
+		}
+		if (data.parentId !== undefined) {
+			updateData.parentId = data.parentId;
+		}
 
 		// Actualizar prompt usando Drizzle
 		const updatedPrompt = await db.update(prompts).set(updateData).where(eq(prompts.id, id)).returning();

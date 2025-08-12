@@ -25,7 +25,9 @@ const FOLDER_DEFAULT_EMOJIS = {
  * @returns Tamaño formateado (ej: "1.5 MB")
  */
 export function formatFolderSize(bytes: number | undefined, decimals = 2): string {
-	if (bytes === undefined || bytes === 0) return '0 Bytes';
+	if (bytes === undefined || bytes === 0) {
+		return '0 Bytes';
+	}
 
 	const k = 1024;
 	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB'];
@@ -40,7 +42,9 @@ export function formatFolderSize(bytes: number | undefined, decimals = 2): strin
  * @returns Fecha formateada o texto indicando que nunca fue indexada
  */
 export function formatLastIndexed(date: Date | string | null | undefined): string {
-	if (!date) return 'Nunca';
+	if (!date) {
+		return 'Nunca';
+	}
 
 	const dateObj = typeof date === 'string' ? new Date(date) : date;
 	return dateObj.toLocaleDateString('es-ES', {
@@ -85,7 +89,9 @@ export function generateSafeFolderPath(name: string, parentPath?: string): strin
  * @returns Color para la carpeta
  */
 export function getFolderColor(folder: Partial<FolderExtended>): string {
-	if (folder.color) return folder.color;
+	if (folder.color) {
+		return folder.color;
+	}
 
 	// Si la ruta sugiere que es una carpeta del sistema
 	if (folder.path && (folder.path.startsWith('/system') || folder.path.includes('/config/'))) {
@@ -101,7 +107,9 @@ export function getFolderColor(folder: Partial<FolderExtended>): string {
  * @returns Emoji para la carpeta
  */
 export function getFolderEmoji(folder: Partial<FolderExtended>): string {
-	if (folder.emoji) return folder.emoji;
+	if (folder.emoji) {
+		return folder.emoji;
+	}
 
 	// Detectar carpetas especiales por su nombre o ruta
 	const name = folder.name?.toLowerCase() || '';
@@ -134,11 +142,17 @@ export function isFolderAncestor(
 	folder: FolderExtended,
 	allFolders: FolderExtended[]
 ): boolean {
-	if (!folder.parentId) return false;
-	if (folder.parentId === possibleAncestor.id) return true;
+	if (!folder.parentId) {
+		return false;
+	}
+	if (folder.parentId === possibleAncestor.id) {
+		return true;
+	}
 
 	const parent = allFolders.find((f) => f.id === folder.parentId);
-	if (!parent) return false;
+	if (!parent) {
+		return false;
+	}
 
 	return isFolderAncestor(possibleAncestor, parent, allFolders);
 }

@@ -226,7 +226,9 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 
 	// Configurar verificación automática por intervalo
 	useEffect(() => {
-		if (!autoStart) return;
+		if (!autoStart) {
+			return;
+		}
 
 		const intervalId = setInterval(() => {
 			logger.debug('🔍 Verificando carpetas para indexación automática...');

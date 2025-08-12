@@ -9,7 +9,9 @@
  * @returns URL formateada para acceso web
  */
 export function pathToUrl(path: string): string {
-	if (!path) return '';
+	if (!path) {
+		return '';
+	}
 
 	// Normalizar separadores de ruta a formato web
 	const normalizedPath = path.replace(/\\/g, '/');
@@ -50,7 +52,9 @@ export function pathToUrl(path: string): string {
  * @returns true si es una URL válida, false en caso contrario
  */
 export function isValidUrl(url: string): boolean {
-	if (!url) return false;
+	if (!url) {
+		return false;
+	}
 
 	try {
 		new URL(url);

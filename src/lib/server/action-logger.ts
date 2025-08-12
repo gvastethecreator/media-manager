@@ -29,7 +29,9 @@ export const actionLogger = {
 
 		// Función para filtrar campos sensibles
 		const filterSensitiveData = (obj: unknown, sensitiveFields: string[]): unknown => {
-			if (!obj || typeof obj !== 'object') return obj;
+			if (!obj || typeof obj !== 'object') {
+				return obj;
+			}
 
 			if (Array.isArray(obj)) {
 				return obj.map((item) => filterSensitiveData(item, sensitiveFields));

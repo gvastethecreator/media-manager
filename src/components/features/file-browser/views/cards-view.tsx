@@ -343,7 +343,7 @@ export const CardsView = memo<CardsViewProps>(function CardsViewComponent({
 			return scrollAreaViewport ?? parentRef.current?.parentElement ?? parentRef.current;
 		},
 		estimateSize: () => layout.cardHeight + layout.gap,
-		overscan: 5,
+		overscan: layout.rows > 50 ? 3 : 2,
 	});
 
 	// Función para obtener items de una fila específica
@@ -372,7 +372,7 @@ export const CardsView = memo<CardsViewProps>(function CardsViewComponent({
 			ref={parentRef}
 			role="application"
 			style={{
-				contain: 'layout style',
+				contain: 'content paint style layout',
 				padding: `${layout.padding}px`,
 			}}
 		>

@@ -87,10 +87,14 @@ export function ImageGallery({
 
 	// Filtrar imágenes según el término de búsqueda
 	const filteredImages = useMemo(() => {
-		if (!searchTerm) return images;
+		if (!searchTerm) {
+			return images;
+		}
 
 		return images.filter((image) => {
-			if (typeof image === 'string') return true; // No podemos filtrar IDs sin datos
+			if (typeof image === 'string') {
+				return true; // No podemos filtrar IDs sin datos
+			}
 
 			return (
 				image.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -102,7 +106,9 @@ export function ImageGallery({
 
 	// Ordenar imágenes
 	const sortedImages = useMemo(() => {
-		if (typeof filteredImages[0] === 'string') return filteredImages; // No podemos ordenar IDs sin datos
+		if (typeof filteredImages[0] === 'string') {
+			return filteredImages; // No podemos ordenar IDs sin datos
+		}
 
 		const sorted = [...(filteredImages as ImageWithStats[])].sort((a, b) => {
 			let comparison = 0;
@@ -136,7 +142,9 @@ export function ImageGallery({
 	// Manejar selección de imagen
 	const handleImageSelect = useCallback(
 		(image: ImageCardData) => {
-			if (!selectable) return;
+			if (!selectable) {
+				return;
+			}
 
 			setSelectedImages((prev) => {
 				const imageId = image.id;
@@ -172,7 +180,9 @@ export function ImageGallery({
 
 	// Cargar más imágenes
 	const handleLoadMore = useCallback(async () => {
-		if (!onLoadMore || isLoadingMore) return;
+		if (!onLoadMore || isLoadingMore) {
+			return;
+		}
 
 		setIsLoadingMore(true);
 		await onLoadMore();

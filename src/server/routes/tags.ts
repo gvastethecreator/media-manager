@@ -12,8 +12,8 @@ router.get('/', async (req, res) => {
 
 		const filters = {
 			search: search as string,
-			limit: Number.parseInt(limit as string),
-			offset: Number.parseInt(offset as string),
+			limit: Number.parseInt(limit as string, 10),
+			offset: Number.parseInt(offset as string, 10),
 			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
 			sortOrder: sortOrder as 'asc' | 'desc',
 		};

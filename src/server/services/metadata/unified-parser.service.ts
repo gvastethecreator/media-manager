@@ -15,7 +15,7 @@ import {
 // Servicios especializados
 import { extractMetadata as extractExifMetadata } from './exifr-parser.service';
 import { detectOrigin, hasAIGenerationData } from './origin-detector.service';
-import { extractAIMetadataFromChunks, extractPngTextChunks } from './png-parser.service';
+import { extractPngTextChunks } from './png-parser.service';
 import {
 	extractCommonAIParameters,
 	parseAutomatic1111Metadata,
@@ -288,17 +288,27 @@ function createCombinedMetadata(result: MetadataExtractionResult): Record<string
 	if (result.iptc) {
 		Object.assign(combined, result.iptc);
 		// Mapear campos IPTC comunes
-		if (result.iptc.description) combined.Description = result.iptc.description;
-		if (result.iptc.title) combined.Title = result.iptc.title;
-		if (result.iptc.keywords) combined.Keywords = result.iptc.keywords;
+		if (result.iptc.description) {
+			combined.Description = result.iptc.description;
+		}
+		if (result.iptc.title) {
+			combined.Title = result.iptc.title;
+		}
+		if (result.iptc.keywords) {
+			combined.Keywords = result.iptc.keywords;
+		}
 	}
 
 	// Agregar XMP
 	if (result.xmp) {
 		Object.assign(combined, result.xmp);
 		// Mapear campos XMP comunes
-		if (result.xmp.description) combined.Description = result.xmp.description;
-		if (result.xmp.title) combined.Title = result.xmp.title;
+		if (result.xmp.description) {
+			combined.Description = result.xmp.description;
+		}
+		if (result.xmp.title) {
+			combined.Title = result.xmp.title;
+		}
 	}
 
 	// Buscar en campos comunes donde suelen estar los metadatos de IA
@@ -426,7 +436,9 @@ function isImageFile(filename: string): boolean {
  */
 function isPNGFile(buffer: Buffer): boolean {
 	// PNG signature: 89 50 4E 47 0D 0A 1A 0A
-	if (buffer.length < 8) return false;
+	if (buffer.length < 8) {
+		return false;
+	}
 	return (
 		buffer[0] === 0x89 &&
 		buffer[1] === 0x50 &&

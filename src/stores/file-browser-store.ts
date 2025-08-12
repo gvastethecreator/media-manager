@@ -26,7 +26,7 @@ type FileBrowserStore = FileBrowserState & FileBrowserActions;
 
 export const useFileBrowserStore = create<FileBrowserStore>()(
 	devtools(
-		immer((set, get) => ({
+		immer((set, _get) => ({
 			// State
 			currentViewType: 'grid',
 			viewConfigurations: {} as Record<FileBrowserViewType, ViewConfiguration>,

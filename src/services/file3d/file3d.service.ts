@@ -218,31 +218,81 @@ export async function updateFile3D(id: string, data: File3DUpdateInput): Promise
 		};
 
 		// Solo actualizar campos que se envían
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.path !== undefined) updateData.path = data.path;
-		if (data.size !== undefined) updateData.size = data.size;
-		if (data.hash !== undefined) updateData.hash = data.hash;
-		if (data.mimeType !== undefined) updateData.mimeType = data.mimeType;
-		if (data.extension !== undefined) updateData.extension = data.extension;
-		if (data.folderId !== undefined) updateData.folderId = data.folderId;
-		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-		if (data.isArchived !== undefined) updateData.isArchived = data.isArchived;
-		if (data.format !== undefined) updateData.format = data.format;
-		if (data.version !== undefined) updateData.version = data.version;
-		if (data.vertices !== undefined) updateData.vertices = data.vertices;
-		if (data.faces !== undefined) updateData.faces = data.faces;
-		if (data.triangles !== undefined) updateData.triangles = data.triangles;
-		if (data.materials !== undefined) updateData.materials = data.materials;
-		if (data.textures !== undefined) updateData.textures = data.textures;
-		if (data.animations !== undefined) updateData.animations = data.animations;
-		if (data.bones !== undefined) updateData.bones = data.bones;
-		if (data.scenes !== undefined) updateData.scenes = data.scenes;
-		if (data.cameras !== undefined) updateData.cameras = data.cameras;
-		if (data.lights !== undefined) updateData.lights = data.lights;
-		if (data.hasUV !== undefined) updateData.hasUV = data.hasUV;
-		if (data.hasNormals !== undefined) updateData.hasNormals = data.hasNormals;
-		if (data.hasColors !== undefined) updateData.hasColors = data.hasColors;
-		if (data.boundingBox !== undefined) updateData.boundingBox = data.boundingBox;
+		if (data.name !== undefined) {
+			updateData.name = data.name;
+		}
+		if (data.path !== undefined) {
+			updateData.path = data.path;
+		}
+		if (data.size !== undefined) {
+			updateData.size = data.size;
+		}
+		if (data.hash !== undefined) {
+			updateData.hash = data.hash;
+		}
+		if (data.mimeType !== undefined) {
+			updateData.mimeType = data.mimeType;
+		}
+		if (data.extension !== undefined) {
+			updateData.extension = data.extension;
+		}
+		if (data.folderId !== undefined) {
+			updateData.folderId = data.folderId;
+		}
+		if (data.isFavorite !== undefined) {
+			updateData.isFavorite = data.isFavorite;
+		}
+		if (data.isArchived !== undefined) {
+			updateData.isArchived = data.isArchived;
+		}
+		if (data.format !== undefined) {
+			updateData.format = data.format;
+		}
+		if (data.version !== undefined) {
+			updateData.version = data.version;
+		}
+		if (data.vertices !== undefined) {
+			updateData.vertices = data.vertices;
+		}
+		if (data.faces !== undefined) {
+			updateData.faces = data.faces;
+		}
+		if (data.triangles !== undefined) {
+			updateData.triangles = data.triangles;
+		}
+		if (data.materials !== undefined) {
+			updateData.materials = data.materials;
+		}
+		if (data.textures !== undefined) {
+			updateData.textures = data.textures;
+		}
+		if (data.animations !== undefined) {
+			updateData.animations = data.animations;
+		}
+		if (data.bones !== undefined) {
+			updateData.bones = data.bones;
+		}
+		if (data.scenes !== undefined) {
+			updateData.scenes = data.scenes;
+		}
+		if (data.cameras !== undefined) {
+			updateData.cameras = data.cameras;
+		}
+		if (data.lights !== undefined) {
+			updateData.lights = data.lights;
+		}
+		if (data.hasUV !== undefined) {
+			updateData.hasUV = data.hasUV;
+		}
+		if (data.hasNormals !== undefined) {
+			updateData.hasNormals = data.hasNormals;
+		}
+		if (data.hasColors !== undefined) {
+			updateData.hasColors = data.hasColors;
+		}
+		if (data.boundingBox !== undefined) {
+			updateData.boundingBox = data.boundingBox;
+		}
 
 		await db.update(file3Ds).set(updateData).where(eq(file3Ds.id, id));
 

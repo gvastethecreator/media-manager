@@ -56,10 +56,18 @@ export function CharacterCardFooter({
 
 	// Determinar el color de rareza
 	const getRarityColor = (level: number) => {
-		if (level >= 9) return 'rgb(255, 100, 255)'; // Mítico
-		if (level >= 7) return 'rgb(255, 128, 0)'; // Legendario
-		if (level >= 5) return 'rgb(163, 53, 238)'; // Épico
-		if (level >= 3) return 'rgb(0, 112, 221)'; // Raro
+		if (level >= 9) {
+			return 'rgb(255, 100, 255)'; // Mítico
+		}
+		if (level >= 7) {
+			return 'rgb(255, 128, 0)'; // Legendario
+		}
+		if (level >= 5) {
+			return 'rgb(163, 53, 238)'; // Épico
+		}
+		if (level >= 3) {
+			return 'rgb(0, 112, 221)'; // Raro
+		}
 		return 'rgb(30, 255, 0)'; // Común
 	};
 
@@ -69,10 +77,15 @@ export function CharacterCardFooter({
 	// Simplificar la alineación para el ícono
 	const getAlignmentIcon = () => {
 		const lowerAlignment = alignment.toLowerCase();
-		if (lowerAlignment.includes('good') || lowerAlignment.includes('lawful')) return <Shield className="h-3.5 w-3.5" />;
-		if (lowerAlignment.includes('evil') || lowerAlignment.includes('chaotic'))
+		if (lowerAlignment.includes('good') || lowerAlignment.includes('lawful')) {
+			return <Shield className="h-3.5 w-3.5" />;
+		}
+		if (lowerAlignment.includes('evil') || lowerAlignment.includes('chaotic')) {
 			return <Swords className="h-3.5 w-3.5" />;
-		if (lowerAlignment.includes('neutral')) return <Scroll className="h-3.5 w-3.5" />;
+		}
+		if (lowerAlignment.includes('neutral')) {
+			return <Scroll className="h-3.5 w-3.5" />;
+		}
 		return <Star className="h-3.5 w-3.5" />;
 	};
 
@@ -158,7 +171,7 @@ export function CharacterCardFooter({
 										? 'RARE'
 										: 'COMMON'}
 					</span>
-					{[...Array(rarityStars)].map((_, i) => (
+					{[...new Array(rarityStars)].map((_, i) => (
 						<Star className="h-3 w-3 fill-current" key={`rarity-star-${renderKey}-${i + 1}`} />
 					))}
 				</div>

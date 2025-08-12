@@ -52,23 +52,47 @@ export function CharacterCardContent({
 
 	const getAlignmentColor = () => {
 		const align = alignment?.toLowerCase() ?? 'neutral';
-		if (align.includes('evil')) return '#dc2626';
-		if (align.includes('good')) return '#16a34a';
-		if (align.includes('lawful')) return '#2563eb';
-		if (align.includes('chaotic')) return '#d97706';
+		if (align.includes('evil')) {
+			return '#dc2626';
+		}
+		if (align.includes('good')) {
+			return '#16a34a';
+		}
+		if (align.includes('lawful')) {
+			return '#2563eb';
+		}
+		if (align.includes('chaotic')) {
+			return '#d97706';
+		}
 		return '#6b7280';
 	};
 
 	const getStatIcon = (statKey: string) => {
 		const key = statKey.toLowerCase();
-		if (key.includes('str') || key.includes('force') || key.includes('power')) return <Swords className="h-3 w-3" />;
-		if (key.includes('int') || key.includes('intellect')) return <Brain className="h-3 w-3" />;
-		if (key.includes('wis') || key.includes('wisdom')) return <Sparkles className="h-3 w-3" />;
-		if (key.includes('dex') || key.includes('agility') || key.includes('speed')) return <Zap className="h-3 w-3" />;
-		if (key.includes('con') || key.includes('armor') || key.includes('stamina')) return <Shield className="h-3 w-3" />;
-		if (key.includes('cha') || key.includes('soc') || key.includes('charisma')) return <User className="h-3 w-3" />;
-		if (key.includes('hp') || key.includes('health')) return <Heart className="h-3 w-3" />;
-		if (key.includes('mp') || key.includes('mana')) return <Wand className="h-3 w-3" />;
+		if (key.includes('str') || key.includes('force') || key.includes('power')) {
+			return <Swords className="h-3 w-3" />;
+		}
+		if (key.includes('int') || key.includes('intellect')) {
+			return <Brain className="h-3 w-3" />;
+		}
+		if (key.includes('wis') || key.includes('wisdom')) {
+			return <Sparkles className="h-3 w-3" />;
+		}
+		if (key.includes('dex') || key.includes('agility') || key.includes('speed')) {
+			return <Zap className="h-3 w-3" />;
+		}
+		if (key.includes('con') || key.includes('armor') || key.includes('stamina')) {
+			return <Shield className="h-3 w-3" />;
+		}
+		if (key.includes('cha') || key.includes('soc') || key.includes('charisma')) {
+			return <User className="h-3 w-3" />;
+		}
+		if (key.includes('hp') || key.includes('health')) {
+			return <Heart className="h-3 w-3" />;
+		}
+		if (key.includes('mp') || key.includes('mana')) {
+			return <Wand className="h-3 w-3" />;
+		}
 		return <Star className="h-3 w-3" />;
 	};
 
@@ -81,18 +105,32 @@ export function CharacterCardContent({
 			.map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
 			.join(' ');
 
-		if (formatted.toLowerCase().includes('strength')) return 'STR';
-		if (formatted.toLowerCase().includes('dexterity')) return 'DEX';
-		if (formatted.toLowerCase().includes('constitution')) return 'CON';
-		if (formatted.toLowerCase().includes('intelligence')) return 'INT';
-		if (formatted.toLowerCase().includes('wisdom')) return 'WIS';
-		if (formatted.toLowerCase().includes('charisma')) return 'CHA';
+		if (formatted.toLowerCase().includes('strength')) {
+			return 'STR';
+		}
+		if (formatted.toLowerCase().includes('dexterity')) {
+			return 'DEX';
+		}
+		if (formatted.toLowerCase().includes('constitution')) {
+			return 'CON';
+		}
+		if (formatted.toLowerCase().includes('intelligence')) {
+			return 'INT';
+		}
+		if (formatted.toLowerCase().includes('wisdom')) {
+			return 'WIS';
+		}
+		if (formatted.toLowerCase().includes('charisma')) {
+			return 'CHA';
+		}
 
 		return formatted;
 	};
 
 	const normalizedAbilities = (() => {
-		if (!abilities) return [];
+		if (!abilities) {
+			return [];
+		}
 		if (Array.isArray(abilities)) {
 			return abilities.map((ability) => (typeof ability === 'string' ? { name: ability, description: '' } : ability));
 		}

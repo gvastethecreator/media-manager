@@ -193,9 +193,7 @@ export function LogViewer({
 
 			<CardFooter className="flex justify-between py-2">
 				<div className="text-muted-foreground text-xs">
-					{logs.length > 0
-						? `Último log: ${new Date(logs[logs.length - 1].timestamp).toLocaleTimeString()}`
-						: 'No hay logs'}
+					{logs.length > 0 ? `Último log: ${new Date(logs.at(-1).timestamp).toLocaleTimeString()}` : 'No hay logs'}
 				</div>
 				<div className="flex gap-1">
 					{Object.entries(logCounts).map(([level, count]) => (

@@ -4,9 +4,11 @@
  */
 
 import { describe, expect, it, mock } from 'bun:test';
+
 // Regex top-level para accesibilidad y rendimiento en queries
 const RE_NOMBRE = /nombre/i;
 const RE_TAMANO = /tamaño/i;
+
 import { render, screen } from '@testing-library/react';
 import { ListView } from '@/components/features/file-browser/views/list-view';
 import type { AnyEntityWithStats } from '@/types/migration';

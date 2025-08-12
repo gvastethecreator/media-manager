@@ -167,7 +167,9 @@ export const useImageResources = create<ImageResourcesState>((set, get) => {
 
 		getOriginalUrl: async (id: string) => {
 			// Lógica similar para la URL original
-			if (!id) return;
+			if (!id) {
+				return;
+			}
 			const originalUrl = getImageUrl(id, 'original');
 
 			const existingResource = get().resources.get(id);

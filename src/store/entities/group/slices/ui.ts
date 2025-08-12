@@ -159,7 +159,9 @@ export const createGroupUISlice: StateCreator<GroupStore, [], [], GroupUISlice> 
 
 	getCurrentGroup: () => {
 		const currentGroupId = get().currentGroupId;
-		if (!currentGroupId) return null;
+		if (!currentGroupId) {
+			return null;
+		}
 		const groups = get().groups;
 		return groups.find((group) => group.id === currentGroupId) || null;
 	},

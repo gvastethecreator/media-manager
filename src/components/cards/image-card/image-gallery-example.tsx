@@ -32,14 +32,12 @@ export default function ImageGalleryExample() {
 	const [selectedVariant, _setSelectedVariant] = useState<string>('default');
 
 	// Simulación de carga de más imágenes
-	const handleLoadMore = async () => {
-		// Simular una carga asíncrona
-		return new Promise<void>((resolve) => {
+	const handleLoadMore = () =>
+		new Promise<void>((resolve) => {
 			setTimeout(() => {
 				resolve();
 			}, 1500);
 		});
-	};
 
 	return (
 		<div className="container mx-auto space-y-8 py-6">
