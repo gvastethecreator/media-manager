@@ -171,11 +171,13 @@ export const useFileBrowserData = ({
 	// Crear comparador de ordenamiento
 	const createSortComparator = useCallback(
 		(sortOptionsParam: any[]) => {
+			// Prioridad: la última opción es la primaria (coherente con el UI y activeSort)
+			const prioritized = [...sortOptionsParam].reverse();
 			return (a: AnyEntityWithStats, b: AnyEntityWithStats) => {
 				const aValues = getSortingValues(a);
 				const bValues = getSortingValues(b);
 
-				for (const sortOption of sortOptionsParam) {
+				for (const sortOption of prioritized) {
 					const { field, direction } = sortOption;
 					const result = compareByField(aValues, bValues, field);
 

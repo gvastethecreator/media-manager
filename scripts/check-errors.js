@@ -1,9 +1,9 @@
 #!/usr/bin/env node
 
-import { readdir, readFile, stat } from 'node:fs/promises';
+import { readdir, stat } from 'node:fs/promises';
 import chalk from 'chalk';
 import { join } from 'path';
-import { detectToolFromFileName, displaySimpleErrorSummary, parseLogFile } from './error-parser.js';
+import { detectToolFromFileName, parseLogFile } from './error-parser.js';
 
 const LOGS_DIR = join(process.cwd(), 'logs');
 const [, , ...args] = process.argv;
@@ -68,7 +68,9 @@ async function extractErrorsFromFile(file, cutoff) {
 	const filePath = join(LOGS_DIR, file);
 	const stats = await stat(filePath);
 
-	if (stats.mtime.getTime() < cutoff) return null;
+	if (stats.mtime.getTime() < cutoff) {
+		return null;
+	}
 
 	// Usar el nuevo parser para obtener un resumen estructurado
 	const toolHint = detectToolFromFileName(file);
@@ -176,7 +178,9 @@ async function checkErrors() {
 		const files = await readdir(LOGS_DIR);
 		const fileData = await filterRelevantFiles(files, options);
 
-		if (!fileData) return;
+		if (!fileData) {
+			return;
+		}
 
 		const { relevantFiles, cutoff } = fileData;
 		const allSummaries = new Map();

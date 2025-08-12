@@ -59,7 +59,9 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 	const primaryColor = useMemo(() => color || '#ec4899', [color]);
 	const secondaryColor = useMemo(() => {
 		// Si no hay color definido, usar un valor por defecto
-		if (!color) return '#db2777';
+		if (!color) {
+			return '#db2777';
+		}
 
 		// Oscurecer el color primario para el secundario
 		try {

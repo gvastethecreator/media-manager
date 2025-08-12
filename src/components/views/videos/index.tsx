@@ -5,7 +5,9 @@ import VideosView from './videos-view';
 const viewLogger = clientLogger.withContext('VideosViewContainer');
 
 export function VideosViewContainer({ isVisible }: ViewProps) {
-	if (!isVisible) return null;
+	if (!isVisible) {
+		return null;
+	}
 
 	return <VideosView className="h-full" />;
 }

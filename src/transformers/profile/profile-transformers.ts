@@ -76,7 +76,9 @@ export function getLanguageText(language: Language): string {
  * @returns Fecha formateada
  */
 export function formatProfileDate(date: Date): string {
-	if (!date) return '';
+	if (!date) {
+		return '';
+	}
 	return format(new Date(date), 'PPP', { locale: es });
 }
 

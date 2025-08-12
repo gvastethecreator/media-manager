@@ -56,8 +56,12 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 		const result: UseCardLayoutReturn['dimensions'] = {};
 
 		// Ancho y alto específicos tienen prioridad
-		if (config.width) result.width = config.width;
-		if (config.height) result.height = config.height;
+		if (config.width) {
+			result.width = config.width;
+		}
+		if (config.height) {
+			result.height = config.height;
+		}
 
 		// Si no hay dimensiones específicas, usar el tamaño
 		if (!(result.width || result.height)) {

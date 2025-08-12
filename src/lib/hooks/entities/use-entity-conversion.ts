@@ -181,7 +181,9 @@ export function useEntityConversion() {
 				// Detectar tipo usando type guards (temporalmente usando propiedades)
 				const type = entity.entityType || 'unknown';
 
-				if (!grouped[type]) grouped[type] = [];
+				if (!grouped[type]) {
+					grouped[type] = [];
+				}
 				grouped[type].push(entity);
 			}
 
@@ -200,9 +202,17 @@ export function useEntityConversion() {
 // formatFileSize se ha movido a @/lib/utils/format.utils.ts para evitar duplicación
 
 function getAspectRatioLabel(aspectRatio: number): string {
-	if (aspectRatio >= 0.9 && aspectRatio <= 1.1) return '1:1';
-	if (aspectRatio >= 1.3 && aspectRatio <= 1.4) return '4:3';
-	if (aspectRatio >= 1.7 && aspectRatio <= 1.8) return '16:9';
-	if (aspectRatio >= 2.3 && aspectRatio <= 2.4) return '21:9';
+	if (aspectRatio >= 0.9 && aspectRatio <= 1.1) {
+		return '1:1';
+	}
+	if (aspectRatio >= 1.3 && aspectRatio <= 1.4) {
+		return '4:3';
+	}
+	if (aspectRatio >= 1.7 && aspectRatio <= 1.8) {
+		return '16:9';
+	}
+	if (aspectRatio >= 2.3 && aspectRatio <= 2.4) {
+		return '21:9';
+	}
 	return `${aspectRatio.toFixed(2)}:1`;
 }

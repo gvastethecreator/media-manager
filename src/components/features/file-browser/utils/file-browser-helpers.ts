@@ -146,6 +146,10 @@ export const compareByField = (aValues: any, bValues: any, field: string): numbe
 			return aValues.modifiedTime - bValues.modifiedTime;
 		case 'createdAt':
 			return aValues.createdTime - bValues.createdTime;
+		case 'modifiedTime':
+			return aValues.modifiedTime - bValues.modifiedTime;
+		case 'createdTime':
+			return aValues.createdTime - bValues.createdTime;
 		default:
 			return 0;
 	}

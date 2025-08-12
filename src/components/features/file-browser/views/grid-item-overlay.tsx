@@ -5,7 +5,7 @@
 
 import { Calendar, Clock, FileText, Image, Tag } from 'lucide-react';
 import { AnimatePresence, motion } from 'motion/react';
-import { memo } from 'react';
+import { memo, type ReactElement } from 'react';
 import type { GridHoverOverlay } from '@/types/file-browser/grid-view-config';
 import { formatDate, formatDuration, formatFileSize } from '@/types/file-browser/list-column-config';
 import type { AnyEntityWithStats } from '@/types/migration';
@@ -45,7 +45,7 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({ entity, config, isV
 
 	// Renderizar contenido del overlay
 	const renderContent = () => {
-		const items: JSX.Element[] = [];
+		const items: ReactElement[] = [];
 
 		if (config.showName) {
 			items.push(
@@ -135,7 +135,7 @@ export const GridItemOverlay = memo<GridItemOverlayProps>(({ entity, config, isV
 			{isVisible && (
 				<motion.div
 					animate={{ opacity: 1, scale: 1 }}
-					className={`absolute z-10 pointer-events-none${getPositionClasses()}
+					className={`pointer-events-none absolute z-10 ${getPositionClasses()}
 						${className}
 					`}
 					exit={{ opacity: 0, scale: 0.95 }}

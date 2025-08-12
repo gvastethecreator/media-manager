@@ -28,7 +28,7 @@ export function determineGeneratorType(generation?: AIGenerationInfo): {
 	className: string;
 	fullName: string;
 } {
-	if (!(generation && generation.type)) {
+	if (!generation?.type) {
 		return {
 			type: 'unknown',
 			className: 'bg-gray-500/10 text-gray-500',

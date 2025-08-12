@@ -241,9 +241,9 @@ const a1111Parser: AIGenerationParserModule = {
 			type: 'Automatic1111',
 			prompt: promptMatch ? promptMatch[1].trim() : undefined,
 			negative_prompt: negativePromptMatch ? negativePromptMatch[1].trim() : undefined,
-			steps: stepsMatch ? Number.parseInt(stepsMatch[1]) : undefined,
+			steps: stepsMatch ? Number.parseInt(stepsMatch[1], 10) : undefined,
 			cfg_scale: cfgScaleMatch ? Number.parseFloat(cfgScaleMatch[1]) : undefined,
-			seed: seedMatch ? Number.parseInt(seedMatch[1]) : undefined,
+			seed: seedMatch ? Number.parseInt(seedMatch[1], 10) : undefined,
 			sampler: samplerMatch ? samplerMatch[1].trim() : undefined,
 			model: modelMatch ? modelMatch[1].trim() : undefined,
 		};
@@ -267,7 +267,9 @@ const comfyuiParser: AIGenerationParserModule = {
 		for (const nodeId in promptData) {
 			const node = promptData[nodeId];
 			if (node.class_type === 'CLIPTextEncode' && node.inputs.text) {
-				if (prompt) negative_prompt = node.inputs.text; // Asume el segundo es el negativo else
+				if (prompt) {
+					negative_prompt = node.inputs.text; // Asume el segundo es el negativo else
+				}
 				prompt = node.inputs.text; // Asume el segundo es el negativo
 			}
 		}
@@ -321,9 +323,9 @@ const novelaiParser: AIGenerationParserModule = {
 			type: 'NovelAI',
 			prompt: promptMatch ? promptMatch[1].trim() : undefined,
 			negative_prompt: negativePromptMatch ? negativePromptMatch[1].trim() : undefined,
-			steps: stepsMatch ? Number.parseInt(stepsMatch[1]) : undefined,
+			steps: stepsMatch ? Number.parseInt(stepsMatch[1], 10) : undefined,
 			cfg_scale: scaleMatch ? Number.parseFloat(scaleMatch[1]) : undefined,
-			seed: seedMatch ? Number.parseInt(seedMatch[1]) : undefined,
+			seed: seedMatch ? Number.parseInt(seedMatch[1], 10) : undefined,
 			sampler: samplerMatch ? samplerMatch[1].trim() : undefined,
 		};
 	},

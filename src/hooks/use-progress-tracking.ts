@@ -103,9 +103,11 @@ class ProgressTrackingServiceImpl {
 		return id;
 	}
 
-	updateProgress(operationId: string, progress: ProgressInfo, stepId?: string): void {
+	updateProgress(operationId: string, progress: ProgressInfo, _stepId?: string): void {
 		const operation = this.operations.get(operationId);
-		if (!operation) return;
+		if (!operation) {
+			return;
+		}
 
 		const updatedOperation: ProgressOperation = {
 			...operation,
@@ -120,7 +122,9 @@ class ProgressTrackingServiceImpl {
 
 	completeOperation(operationId: string): void {
 		const operation = this.operations.get(operationId);
-		if (!operation) return;
+		if (!operation) {
+			return;
+		}
 
 		const updatedOperation: ProgressOperation = {
 			...operation,
@@ -139,7 +143,9 @@ class ProgressTrackingServiceImpl {
 
 	failOperation(operationId: string, error: string): void {
 		const operation = this.operations.get(operationId);
-		if (!operation) return;
+		if (!operation) {
+			return;
+		}
 
 		const updatedOperation: ProgressOperation = {
 			...operation,
@@ -154,7 +160,9 @@ class ProgressTrackingServiceImpl {
 
 	cancelOperation(operationId: string): void {
 		const operation = this.operations.get(operationId);
-		if (!operation) return;
+		if (!operation) {
+			return;
+		}
 
 		const updatedOperation: ProgressOperation = {
 			...operation,
@@ -186,7 +194,7 @@ class ProgressTrackingServiceImpl {
 		if (!this.eventListeners.has(event)) {
 			this.eventListeners.set(event, []);
 		}
-		this.eventListeners.get(event)!.push(listener);
+		this.eventListeners.get(event)?.push(listener);
 	}
 
 	off(event: string, listener: (operation: ProgressOperation) => void): void {
@@ -227,7 +235,7 @@ export function useProgressTracking(options: UseProgressTrackingOptions = {}): U
 
 		// Filter by operation types if specified
 		const filteredOps = options.operationTypes
-			? activeOps.filter((op) => options.operationTypes!.includes(op.type))
+			? activeOps.filter((op) => options.operationTypes?.includes(op.type))
 			: activeOps;
 
 		setOperations(filteredOps);
@@ -244,7 +252,7 @@ export function useProgressTracking(options: UseProgressTrackingOptions = {}): U
 			optionsRef.current.onOperationStart?.(operation);
 		};
 
-		const handleProgressUpdate = (operation: ProgressOperation) => {
+		const handleProgressUpdate = (_operation: ProgressOperation) => {
 			updateOperations();
 		};
 
@@ -402,7 +410,7 @@ export function useBatchOperation() {
 		[]
 	);
 
-	const updateBatchProgress = useCallback((operationId: string, processedCount: number, currentItem?: string) => {
+	const updateBatchProgress = useCallback((operationId: string, processedCount: number, _currentItem?: string) => {
 		const operation = progressService.getOperation(operationId);
 		if (operation) {
 			const progress: ProgressInfo = {

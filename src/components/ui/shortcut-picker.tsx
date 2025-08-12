@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { cn } from '@/lib/utils';
 import { Input } from './input';
 
@@ -26,7 +26,7 @@ export function ShortcutPicker({ name, defaultValue = '', onChange, className }:
 			return;
 		}
 
-		const modifiers = [];
+		const modifiers: string[] = [];
 		if (ctrlKey) {
 			modifiers.push('Ctrl');
 		}

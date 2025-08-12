@@ -79,8 +79,8 @@ export function createPaginatedResult<T>(
  * Extrae parámetros de paginación de query params
  */
 export function extractPaginationFromQuery(searchParams: URLSearchParams): PaginationParams {
-	const page = Number.parseInt(searchParams.get('page') || '1');
-	const limit = Number.parseInt(searchParams.get('limit') || '10');
+	const page = Number.parseInt(searchParams.get('page') || '1', 10);
+	const limit = Number.parseInt(searchParams.get('limit') || '10', 10);
 
 	return calculatePagination(page, limit);
 }

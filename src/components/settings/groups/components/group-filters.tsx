@@ -21,10 +21,14 @@ interface GroupFiltersProps {
 
 export function GroupFilters({ filtersString }: GroupFiltersProps) {
 	const parseFilters = (filtersStr: string): GroupFilter[] => {
-		if (filtersStr === 'empty_array') return [];
+		if (filtersStr === 'empty_array') {
+			return [];
+		}
 		try {
 			const parsed = JSON.parse(filtersStr);
-			if (!Array.isArray(parsed)) return [];
+			if (!Array.isArray(parsed)) {
+				return [];
+			}
 
 			// Validar cada filtro con zod
 			return parsed.filter((filter) => {
@@ -44,7 +48,9 @@ export function GroupFilters({ filtersString }: GroupFiltersProps) {
 
 	const filters = parseFilters(filtersString);
 
-	if (filters.length === 0) return null;
+	if (filters.length === 0) {
+		return null;
+	}
 
 	return (
 		<div className="space-y-2">

@@ -10,7 +10,9 @@
  * @returns Array de strings con las tags
  */
 export function deserializeTags(jsonString: string | undefined | null): string[] {
-	if (!jsonString) return [];
+	if (!jsonString) {
+		return [];
+	}
 
 	try {
 		const parsed = JSON.parse(jsonString);

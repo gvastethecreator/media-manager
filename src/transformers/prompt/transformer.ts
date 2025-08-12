@@ -144,12 +144,18 @@ function isUpdatedThisWeek(updatedAt: Date): boolean {
 }
 
 function getParametersCount(params: unknown): number {
-	if (!params) return 0;
+	if (!params) {
+		return 0;
+	}
 	if (typeof params === 'string') {
 		try {
 			const parsed = JSON.parse(params);
-			if (Array.isArray(parsed)) return parsed.length;
-			if (parsed && typeof parsed === 'object') return Object.keys(parsed as Record<string, unknown>).length;
+			if (Array.isArray(parsed)) {
+				return parsed.length;
+			}
+			if (parsed && typeof parsed === 'object') {
+				return Object.keys(parsed as Record<string, unknown>).length;
+			}
 			return 0;
 		} catch {
 			return 0;
@@ -163,53 +169,105 @@ function getParametersCount(params: unknown): number {
 
 function calculateQualityGrade(prompt: PromptBase, totalContentItems: number): 'A' | 'B' | 'C' | 'D' {
 	let score = 0;
-	if (prompt.description) score += 25;
-	if (prompt.content && prompt.content.length > 50) score += 25;
-	if (prompt.parameters) score += 25;
-	if (totalContentItems > 5) score += 25;
+	if (prompt.description) {
+		score += 25;
+	}
+	if (prompt.content && prompt.content.length > 50) {
+		score += 25;
+	}
+	if (prompt.parameters) {
+		score += 25;
+	}
+	if (totalContentItems > 5) {
+		score += 25;
+	}
 
-	if (score >= 90) return 'A';
-	if (score >= 70) return 'B';
-	if (score >= 50) return 'C';
+	if (score >= 90) {
+		return 'A';
+	}
+	if (score >= 70) {
+		return 'B';
+	}
+	if (score >= 50) {
+		return 'C';
+	}
 	return 'D';
 }
 
 function calculateCompletenessScore(prompt: PromptBase): number {
 	let score = 0;
-	if (prompt.name) score += 20;
-	if (prompt.description) score += 20;
-	if (prompt.content) score += 20;
-	if (prompt.parameters) score += 15;
-	if (prompt.category) score += 10;
-	if (prompt.style) score += 5;
-	if (prompt.mood) score += 5;
-	if (prompt.featuredImage) score += 5;
+	if (prompt.name) {
+		score += 20;
+	}
+	if (prompt.description) {
+		score += 20;
+	}
+	if (prompt.content) {
+		score += 20;
+	}
+	if (prompt.parameters) {
+		score += 15;
+	}
+	if (prompt.category) {
+		score += 10;
+	}
+	if (prompt.style) {
+		score += 5;
+	}
+	if (prompt.mood) {
+		score += 5;
+	}
+	if (prompt.featuredImage) {
+		score += 5;
+	}
 	return Math.min(100, score);
 }
 
 function calculateCreativityScore(prompt: PromptBase): number {
 	let score = 50; // Base score
-	if (prompt.style) score += 15;
-	if (prompt.mood) score += 15;
-	if (prompt.inspiration) score += 10;
-	if (prompt.technique) score += 10;
+	if (prompt.style) {
+		score += 15;
+	}
+	if (prompt.mood) {
+		score += 15;
+	}
+	if (prompt.inspiration) {
+		score += 10;
+	}
+	if (prompt.technique) {
+		score += 10;
+	}
 	return Math.min(100, score);
 }
 
 function calculateTechnicalScore(prompt: PromptBase): number {
 	let score = 40; // Base score
-	if (prompt.parameters) score += 30;
-	if (prompt.lighting) score += 10;
-	if (prompt.composition) score += 10;
-	if (prompt.technique) score += 10;
+	if (prompt.parameters) {
+		score += 30;
+	}
+	if (prompt.lighting) {
+		score += 10;
+	}
+	if (prompt.composition) {
+		score += 10;
+	}
+	if (prompt.technique) {
+		score += 10;
+	}
 	return Math.min(100, score);
 }
 
 function calculateUsabilityScore(prompt: PromptBase): number {
 	let score = 30; // Base score
-	if (prompt.description && prompt.description.length > 20) score += 25;
-	if (prompt.category) score += 15;
-	if (prompt.notes) score += 15;
+	if (prompt.description && prompt.description.length > 20) {
+		score += 25;
+	}
+	if (prompt.category) {
+		score += 15;
+	}
+	if (prompt.notes) {
+		score += 15;
+	}
 
 	return Math.min(100, score);
 }

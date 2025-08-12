@@ -65,7 +65,7 @@ type SystemStats = {
 	totalViews: number;
 	totalDownloads: number;
 	topTags: Array<{ id: string; name: string; count: number }>;
-	recentActivity: Array<unknown>;
+	recentActivity: unknown[];
 };
 
 export interface NavigationData {

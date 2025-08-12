@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { useViewConfiguration } from './use-view-configuration';
 
 export interface GridLayout {
@@ -96,6 +97,7 @@ const DEFAULT_LABEL_CONFIG: LabelConfig = {
 
 export function useGridViewConfig() {
 	const { currentConfig } = useViewConfiguration('grid');
+	const preferredItemSize = useViewOptionsStore((s) => s.itemSize);
 
 	// Extract grid config first
 	const gridConfig = useMemo(() => {
@@ -111,7 +113,7 @@ export function useGridViewConfig() {
 	}, [gridConfig]);
 
 	const calculateLayout = useMemo(() => {
-		return (containerWidth: number, itemCount: number): GridLayout => {
+		return (containerWidth: number, _itemCount: number): GridLayout => {
 			if (!containerWidth || containerWidth <= 0) {
 				return {
 					columns: 1,
@@ -130,25 +132,21 @@ export function useGridViewConfig() {
 			let itemSize = config.minItemSize;
 			let columns = 1;
 
+			// Preferencia del usuario desde el store (clamp entre min/max)
+			const targetSize = Math.max(config.minItemSize, Math.min(preferredItemSize, config.maxItemSize));
+
 			if (config.adaptiveColumns) {
 				// Calculate columns based on breakpoints and available width
-				if (containerWidth >= config.responsiveBreakpoints.xl) {
-					columns = Math.floor(availableWidth / (config.minItemSize + gap));
-				} else if (containerWidth >= config.responsiveBreakpoints.lg) {
-					columns = Math.floor(availableWidth / (config.minItemSize * 1.2 + gap));
-				} else if (containerWidth >= config.responsiveBreakpoints.md) {
-					columns = Math.floor(availableWidth / (config.minItemSize * 1.4 + gap));
-				} else {
-					columns = Math.floor(availableWidth / (config.minItemSize * 1.6 + gap));
-				}
+				// Primero estimar columnas en base al tamaño objetivo del usuario
+				columns = Math.max(1, Math.floor((availableWidth + gap) / (targetSize + gap)));
+				columns = Math.min(columns, 8);
 
-				columns = Math.max(1, Math.min(columns, 8)); // Limit between 1 and 8 columns
-
-				// Calculate actual item size based on columns
+				// Calcular tamaño resultante con ese número de columnas (clamp a min/max)
 				itemSize = (availableWidth - gap * (columns - 1)) / columns;
 				itemSize = Math.max(config.minItemSize, Math.min(itemSize, config.maxItemSize));
 			} else {
 				// Fixed item size, calculate columns
+				itemSize = targetSize;
 				columns = Math.floor(availableWidth / (itemSize + gap));
 				columns = Math.max(1, columns);
 			}
@@ -163,7 +161,7 @@ export function useGridViewConfig() {
 				padding,
 			};
 		};
-	}, [config]);
+	}, [config, preferredItemSize]);
 
 	const calculateItemDimensions = useMemo(() => {
 		return (layout: GridLayout) => {
@@ -176,15 +174,16 @@ export function useGridViewConfig() {
 
 	const getHoverOverlayConfig = useMemo(() => {
 		return (): HoverOverlayConfig | null => {
-			if (!config.hoverEffects) return null;
-
+			if (!config.hoverEffects) {
+				return null;
+			}
 			const overlayConfig = gridConfig?.hoverOverlay;
 			return {
 				...DEFAULT_HOVER_OVERLAY_CONFIG,
 				...overlayConfig,
 			};
 		};
-	}, [config.hoverEffects, currentConfig]);
+	}, [config.hoverEffects, gridConfig?.hoverOverlay]);
 
 	const getLabelConfig = useMemo(() => {
 		return (): LabelConfig => {
@@ -197,7 +196,7 @@ export function useGridViewConfig() {
 				position: normalizedPosition ?? DEFAULT_LABEL_CONFIG.position,
 			};
 		};
-	}, [currentConfig]);
+	}, [gridConfig, gridConfig?.labelConfig]);
 
 	const shouldShowAnimation = useMemo(() => {
 		return (itemIndex: number): boolean => {

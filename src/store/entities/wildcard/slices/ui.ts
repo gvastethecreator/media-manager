@@ -66,7 +66,9 @@ export const createWildcardUISlice: StateCreator<
 		uiLogger.info('✅ Seleccionando comodín:', id);
 		set((state) => {
 			const currentSelectedIds = state.ui.selectedIds || [];
-			if (currentSelectedIds.includes(id)) return state;
+			if (currentSelectedIds.includes(id)) {
+				return state;
+			}
 
 			return {
 				ui: {
@@ -251,7 +253,9 @@ export const createWildcardUISlice: StateCreator<
 		uiLogger.info('📂 Expandiendo comodín:', id);
 		set((state) => {
 			const currentExpandedIds = state.ui.expandedIds || [];
-			if (currentExpandedIds.includes(id)) return state;
+			if (currentExpandedIds.includes(id)) {
+				return state;
+			}
 
 			return {
 				ui: {

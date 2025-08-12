@@ -76,7 +76,9 @@ export function AudioCard({
 
 	// Formatear tamaño de archivo
 	const fileSize = useMemo(() => {
-		if (!audio.size) return 'N/A';
+		if (!audio.size) {
+			return 'N/A';
+		}
 		const mb = audio.size / (1024 * 1024);
 		if (mb < 1) {
 			const kb = audio.size / 1024;
@@ -89,7 +91,9 @@ export function AudioCard({
 	const togglePlay = useCallback(
 		(e: React.MouseEvent) => {
 			e.stopPropagation();
-			if (!audioRef.current) return;
+			if (!audioRef.current) {
+				return;
+			}
 
 			if (isPlaying) {
 				audioRef.current.pause();
@@ -104,7 +108,9 @@ export function AudioCard({
 	const toggleMute = useCallback(
 		(e: React.MouseEvent) => {
 			e.stopPropagation();
-			if (!audioRef.current) return;
+			if (!audioRef.current) {
+				return;
+			}
 
 			audioRef.current.muted = !isMuted;
 			setIsMuted(!isMuted);
@@ -113,12 +119,16 @@ export function AudioCard({
 	);
 
 	const handleTimeUpdate = useCallback(() => {
-		if (!audioRef.current) return;
+		if (!audioRef.current) {
+			return;
+		}
 		setCurrentTime(audioRef.current.currentTime);
 	}, []);
 
 	const handleLoadedMetadata = useCallback(() => {
-		if (!audioRef.current) return;
+		if (!audioRef.current) {
+			return;
+		}
 		setDuration(audioRef.current.duration);
 	}, []);
 

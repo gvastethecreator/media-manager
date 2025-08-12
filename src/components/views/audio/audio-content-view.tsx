@@ -225,7 +225,9 @@ const AudioPlayer = ({ audio, onClose }: { audio: AudioWithStats; onClose: () =>
 
 	useEffect(() => {
 		const audioElement = audioRef.current;
-		if (!audioElement) return;
+		if (!audioElement) {
+			return;
+		}
 
 		const handleTimeUpdate = () => setCurrentTime(audioElement.currentTime);
 		const handleDurationChange = () => setDuration(audioElement.duration);

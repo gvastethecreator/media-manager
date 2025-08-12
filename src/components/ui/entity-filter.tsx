@@ -189,10 +189,18 @@ export function EntityFilter({
 
 	// Contar filtros activos (excluyendo la búsqueda rápida)
 	const activeFiltersCount = Object.entries(filterValues).filter(([key, value]) => {
-		if (key === 'quickSearch') return false;
-		if (value === undefined || value === null) return false;
-		if (Array.isArray(value) && value.length === 0) return false;
-		if (value === '') return false;
+		if (key === 'quickSearch') {
+			return false;
+		}
+		if (value === undefined || value === null) {
+			return false;
+		}
+		if (Array.isArray(value) && value.length === 0) {
+			return false;
+		}
+		if (value === '') {
+			return false;
+		}
 		return true;
 	}).length;
 
@@ -234,7 +242,9 @@ export function EntityFilter({
 
 	// Guardar filtro actual
 	const saveCurrentFilter = () => {
-		if (!(filterName.trim() && onSaveFilter)) return;
+		if (!(filterName.trim() && onSaveFilter)) {
+			return;
+		}
 
 		const newFilter: SavedFilter = {
 			name: filterName.trim(),
@@ -537,7 +547,9 @@ export function EntityFilter({
 
 							// Buscar la definición de filtro correspondiente
 							const filterDef = filters.find((f) => f.id === key);
-							if (!filterDef) return null;
+							if (!filterDef) {
+								return null;
+							}
 
 							// Formatear el valor para mostrar
 							let displayValue = '';

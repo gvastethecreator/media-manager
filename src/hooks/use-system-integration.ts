@@ -72,7 +72,7 @@ interface UseSystemIntegrationReturn {
 	unregisterFileHandler: (extension: string) => boolean;
 }
 
-export const useSystemIntegration = (options: SystemIntegrationOptions = {}): UseSystemIntegrationReturn => {
+export const useSystemIntegration = (_options: SystemIntegrationOptions = {}): UseSystemIntegrationReturn => {
 	const [capabilities, setCapabilities] = useState<SystemCapabilities>({
 		hasFileSystemAccess: false,
 		hasClipboardAccess: false,
@@ -89,6 +89,7 @@ export const useSystemIntegration = (options: SystemIntegrationOptions = {}): Us
 	 * Check system capabilities
 	 */
 	const checkCapabilities = useCallback(async () => {
+		await Promise.resolve();
 		const newCapabilities: SystemCapabilities = {
 			hasFileSystemAccess: 'showDirectoryPicker' in window,
 			hasClipboardAccess: 'navigator' in window && 'clipboard' in navigator,
@@ -111,6 +112,7 @@ export const useSystemIntegration = (options: SystemIntegrationOptions = {}): Us
 	 */
 	const openInExplorer = useCallback(async (path: string): Promise<boolean> => {
 		try {
+			await Promise.resolve();
 			// For web applications, we can't directly open the system explorer
 			// This would typically be handled by an Electron app or browser extension
 
@@ -141,6 +143,7 @@ export const useSystemIntegration = (options: SystemIntegrationOptions = {}): Us
 	 */
 	const selectInExplorer = useCallback(
 		async (path: string): Promise<boolean> => {
+			await Promise.resolve();
 			// Similar to openInExplorer, but would select the specific file
 			return openInExplorer(path);
 		},
@@ -152,6 +155,7 @@ export const useSystemIntegration = (options: SystemIntegrationOptions = {}): Us
 	 */
 	const openWithDefaultApp = useCallback(async (path: string): Promise<boolean> => {
 		try {
+			await Promise.resolve();
 			if (path.startsWith('http')) {
 				window.open(path, '_blank');
 				return true;
@@ -290,17 +294,16 @@ export const useSystemIntegration = (options: SystemIntegrationOptions = {}): Us
 
 		try {
 			const clipboardItems = await navigator.clipboard.read();
-			const files: File[] = [];
-
-			for (const item of clipboardItems) {
-				for (const type of item.types) {
-					if (type.startsWith('image/') || type.startsWith('text/') || type.startsWith('application/')) {
-						const blob = await item.getType(type);
-						const file = new File([blob], `clipboard-${Date.now()}`, { type });
-						files.push(file);
-					}
-				}
-			}
+			const filesArrays = await Promise.all(
+				clipboardItems.map(async (item) => {
+					const validTypes = item.types.filter(
+						(type) => type.startsWith('image/') || type.startsWith('text/') || type.startsWith('application/')
+					);
+					const blobs = await Promise.all(validTypes.map((t) => item.getType(t)));
+					return blobs.map((blob, idx) => new File([blob], `clipboard-${Date.now()}`, { type: validTypes[idx] }));
+				})
+			);
+			const files: File[] = filesArrays.flat();
 
 			if (files.length > 0) {
 				logger.info(`Pasted ${files.length} files from clipboard`);
@@ -397,13 +400,14 @@ export const useSystemIntegration = (options: SystemIntegrationOptions = {}): Us
 		const handleFileInput = (event: Event) => {
 			const input = event.target as HTMLInputElement;
 			if (input.files) {
-				Array.from(input.files).forEach((file) => {
+				const selectedFiles = Array.from(input.files);
+				for (const file of selectedFiles) {
 					const extension = file.name.split('.').pop()?.toLowerCase();
 					if (extension && fileHandlers.has(extension)) {
 						const handler = fileHandlers.get(extension);
 						handler?.(file);
 					}
-				});
+				}
 			}
 		};
 

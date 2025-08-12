@@ -41,7 +41,9 @@ export const createPropertyCoreSlice: StateCreator<
 	...initialState,
 
 	loadProperties: async () => {
-		if (get().isLoading) return [];
+		if (get().isLoading) {
+			return [];
+		}
 		set(
 			produce((draft) => {
 				draft.isLoading = true;
@@ -84,7 +86,9 @@ export const createPropertyCoreSlice: StateCreator<
 	},
 
 	createProperty: async (data) => {
-		if (get().isLoading) return null;
+		if (get().isLoading) {
+			return null;
+		}
 		set(
 			produce((draft) => {
 				draft.isLoading = true;
@@ -148,7 +152,9 @@ export const createPropertyCoreSlice: StateCreator<
 
 	deleteProperty: async (id) => {
 		const propertyToDelete = get().properties[id];
-		if (!propertyToDelete) return;
+		if (!propertyToDelete) {
+			return;
+		}
 
 		set(
 			produce((draft) => {

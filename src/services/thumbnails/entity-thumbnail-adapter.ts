@@ -109,7 +109,7 @@ class EntityThumbnailAdapter {
 	/**
 	 * Genera thumbnail para imágenes usando el servicio existente
 	 */
-	private async generateImageThumbnail(entity: AnyEntityWithStats, options: EntityThumbnailOptions): Promise<string> {
+	private async generateImageThumbnail(entity: AnyEntityWithStats, _options: EntityThumbnailOptions): Promise<string> {
 		// Usar el servicio existente de imágenes
 		await imageService.generateThumbnail(entity.id);
 

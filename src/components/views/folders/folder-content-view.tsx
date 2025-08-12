@@ -122,7 +122,9 @@ export function FolderContentView({
 	);
 
 	const handleForceRefresh = useCallback(async () => {
-		if (!currentFolderId || isRetrying) return;
+		if (!currentFolderId || isRetrying) {
+			return;
+		}
 
 		// Usar función externa si está disponible
 		if (externalOnRefreshFolder) {

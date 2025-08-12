@@ -201,11 +201,7 @@ export const NavCategoryItem = memo(function NavCategoryItemImpl({
 		>
 			{/* Botón específico para colapsar/expandir - solo visible cuando se muestran las etiquetas */}
 			{showLabel && (
-				<CollapseIndicatorComponent
-					color={color}
-					isCollapsed={isCollapsed}
-					onToggleCollapse={onToggleCollapse}
-				/>
+				<CollapseIndicatorComponent color={color} isCollapsed={isCollapsed} onToggleCollapse={onToggleCollapse} />
 			)}
 
 			{/* Botón de categoría */}

@@ -4,7 +4,6 @@
  */
 
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { motion } from 'motion/react';
 import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { useListViewConfig } from '@/hooks/use-list-view-config';
 import { cn } from '@/lib/utils';
@@ -22,6 +21,8 @@ interface ListViewProps {
 	onSort?: (columnKey: string, direction: 'asc' | 'desc') => void;
 	entityType?: string;
 	className?: string;
+	/** Tamaño global de ítems desde la toolbar; se mapea a altura de fila/thumbnail */
+	itemSize?: number;
 }
 
 export const ListView = memo<ListViewProps>(function ListViewComponent({
@@ -34,6 +35,7 @@ export const ListView = memo<ListViewProps>(function ListViewComponent({
 	onSort,
 	entityType = 'default',
 	className = '',
+	itemSize,
 }) {
 	const parentRef = useRef<HTMLTableElement>(null);
 	const tableRef = useRef<HTMLTableElement>(null);
@@ -76,6 +78,35 @@ export const ListView = memo<ListViewProps>(function ListViewComponent({
 	const columnsWithRenderers = useMemo(() => {
 		return getColumnsWithRenderers(entityType);
 	}, [getColumnsWithRenderers, entityType]);
+
+	// Derivar altura de fila y tamaño de thumbnail a partir de itemSize (toolbar)
+	const derivedSizing = useMemo(() => {
+		const MIN_ROW = 40;
+		const MAX_ROW = 120;
+		if (!itemSize || Number.isNaN(itemSize)) {
+			// Usar rowHeight actual y un thumbnailSize válido (nunca 'none')
+			const fallbackThumb: 'small' | 'medium' | 'large' =
+				config.thumbnailSize === 'small' || config.thumbnailSize === 'medium' || config.thumbnailSize === 'large'
+					? config.thumbnailSize
+					: 'medium';
+			return {
+				rowHeight: config.rowHeight,
+				thumbSize: fallbackThumb,
+			} as const;
+		}
+		const clamped = Math.max(50, Math.min(300, Math.round(itemSize)));
+		const t = (clamped - 50) / (300 - 50);
+		const rowHeight = Math.round(MIN_ROW + t * (MAX_ROW - MIN_ROW));
+		let thumbSize: 'small' | 'medium' | 'large';
+		if (clamped < 110) {
+			thumbSize = 'small';
+		} else if (clamped < 200) {
+			thumbSize = 'medium';
+		} else {
+			thumbSize = 'large';
+		}
+		return { rowHeight, thumbSize } as const;
+	}, [itemSize, config.rowHeight, config.thumbnailSize]);
 
 	// Handler para clicks en espacio vacío
 	const handleEmptySpaceClick = useCallback(
@@ -180,7 +211,7 @@ export const ListView = memo<ListViewProps>(function ListViewComponent({
 			const viewport = parentRef.current?.closest('[data-slot="scroll-area-viewport"]') as HTMLElement | null;
 			return viewport ?? parentRef.current;
 		},
-		estimateSize: () => config.rowHeight + config.rowGap,
+		estimateSize: () => derivedSizing.rowHeight + config.rowGap,
 		overscan: 5,
 	});
 
@@ -265,10 +296,9 @@ export const ListView = memo<ListViewProps>(function ListViewComponent({
 			<table
 				aria-busy={false}
 				aria-live="polite"
-				className="h-full w-full"
+				className="h-full w-full table-fixed"
 				onKeyDown={handleEmptySpaceKeyDown}
 				ref={parentRef}
-				style={{}}
 			>
 				<tbody
 					style={{
@@ -283,47 +313,33 @@ export const ListView = memo<ListViewProps>(function ListViewComponent({
 						const isEven = virtualItem.index % 2 === 0;
 
 						return (
-							<motion.tr
-								animate={{ opacity: 1, y: 0 }}
-								aria-rowindex={virtualItem.index + 1}
-								aria-setsize={items.length}
-								data-item-id={item.id}
-								data-selectable="true"
-								initial={{ opacity: 0, y: 10 }}
+							<ListViewRow
+								ariaRowIndex={virtualItem.index + 1}
+								ariaSetSize={items.length}
+								cellPadding={config.cellPadding}
+								columns={columnsWithRenderers}
+								dataItemId={item.id}
+								dataSelectable
+								index={virtualItem.index}
+								isEven={isEven}
+								isSelected={isSelected}
+								item={item}
 								key={item.id}
-								style={{
+								onClick={stableOnItemClick}
+								onDoubleClick={stableOnItemDoubleClick}
+								rowHeight={derivedSizing.rowHeight}
+								showThumbnails={config.showThumbnails}
+								showZebraStripes={config.showZebraStripes}
+								tabIndexOverride={virtualItem.index === 0 ? 0 : -1}
+								thumbnailSize={derivedSizing.thumbSize}
+								virtualStyle={{
 									position: 'absolute',
 									top: `${virtualItem.start}px`,
 									left: 0,
 									width: '100%',
 									height: `${virtualItem.size}px`,
 								}}
-								tabIndex={virtualItem.index === 0 ? 0 : -1}
-								transition={{
-									delay: Math.min(virtualItem.index * 0.005, 0.2),
-									duration: 0.2,
-								}}
-							>
-								{/* Menú contextual deshabilitado para optimizar performance */}
-								<table className="w-full table-fixed">
-									<tbody>
-										<ListViewRow
-											cellPadding={config.cellPadding}
-											columns={columnsWithRenderers}
-											index={virtualItem.index}
-											isEven={isEven}
-											isSelected={isSelected}
-											item={item}
-											onClick={stableOnItemClick}
-											onDoubleClick={stableOnItemDoubleClick}
-											rowHeight={config.rowHeight}
-											showThumbnails={config.showThumbnails}
-											showZebraStripes={config.showZebraStripes}
-											thumbnailSize={config.thumbnailSize === 'none' ? undefined : config.thumbnailSize}
-										/>
-									</tbody>
-								</table>
-							</motion.tr>
+							/>
 						);
 					})}
 				</tbody>

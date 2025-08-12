@@ -121,18 +121,29 @@ export function CreateCollectionForm({
 			form.setValue('color', color);
 			form.setValue('emoji', emoji);
 		} else if (name.length > 1) {
-			// Generar color basado en el nombre
+			// Generar color basado en el nombre (sin operadores bitwise)
+			const hslToHex = (h: number, s: number, l: number) => {
+				// h: 0-360, s/l: 0-100
+				const s1 = s / 100;
+				const l1 = l / 100;
+				const k = (n: number) => (n + h / 30) % 12;
+				const a = s1 * Math.min(l1, 1 - l1);
+				const f = (n: number) => l1 - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+				const toHex = (v: number) =>
+					Math.round(255 * v)
+						.toString(16)
+						.padStart(2, '0');
+				return `#${toHex(f(0))}${toHex(f(8))}${toHex(f(4))}`;
+			};
+
 			const stringToColor = (str: string) => {
-				let hash = 0;
+				// Mapear determinísticamente a un tono usando suma de charCodes
+				let sum = 0;
 				for (let i = 0; i < str.length; i++) {
-					hash = str.charCodeAt(i) + ((hash << 5) - hash);
+					sum += str.charCodeAt(i);
 				}
-				let color = '#';
-				for (let i = 0; i < 3; i++) {
-					const value = (hash >> (i * 8)) & 0xff;
-					color += `00${value.toString(16)}`.substr(-2);
-				}
-				return color;
+				const hue = sum % 360;
+				return hslToHex(hue, 70, 50);
 			};
 
 			form.setValue('color', stringToColor(name));

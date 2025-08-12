@@ -87,10 +87,15 @@ export function groupCollections(
 			case 'rarity': {
 				// Determinar rareza basada en el número de elementos
 				const totalItems = (collection.stats?.imageCount || 0) + (collection.stats?.videoCount || 0);
-				if (totalItems > 100) groupKey = 'Mítica';
-				else if (totalItems > 50) groupKey = 'Rara';
-				else if (totalItems > 20) groupKey = 'Poco común';
-				else groupKey = 'Común';
+				if (totalItems > 100) {
+					groupKey = 'Mítica';
+				} else if (totalItems > 50) {
+					groupKey = 'Rara';
+				} else if (totalItems > 20) {
+					groupKey = 'Poco común';
+				} else {
+					groupKey = 'Común';
+				}
 				break;
 			}
 			default:

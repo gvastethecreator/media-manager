@@ -76,11 +76,21 @@ class DependencyAnalyzer {
 	}
 
 	categorizeDependency(name) {
-		if (name.includes('vite') || name.includes('rollup')) return 'bundler';
-		if (name.includes('react')) return 'framework';
-		if (name.includes('@types/') || name === 'typescript') return 'types';
-		if (name.includes('tailwind') || name.includes('postcss')) return 'css';
-		if (name.includes('plugin')) return 'plugin';
+		if (name.includes('vite') || name.includes('rollup')) {
+			return 'bundler';
+		}
+		if (name.includes('react')) {
+			return 'framework';
+		}
+		if (name.includes('@types/') || name === 'typescript') {
+			return 'types';
+		}
+		if (name.includes('tailwind') || name.includes('postcss')) {
+			return 'css';
+		}
+		if (name.includes('plugin')) {
+			return 'plugin';
+		}
 		return 'library';
 	}
 
@@ -254,7 +264,9 @@ class DependencyAnalyzer {
 		// Cargar package.json
 		console.log(chalk.yellow('\n📦 Cargando información de dependencias...'));
 		const packageJson = await this.loadPackageJson();
-		if (!packageJson) return;
+		if (!packageJson) {
+			return;
+		}
 
 		// Analizar dependencias críticas
 		console.log(chalk.yellow('\n🔍 Analizando dependencias críticas...'));

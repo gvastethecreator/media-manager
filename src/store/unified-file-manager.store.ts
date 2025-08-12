@@ -93,7 +93,9 @@ class OperationQueue {
 	}
 
 	private async processQueue() {
-		if (this.isProcessing || this.queue.length === 0) return;
+		if (this.isProcessing || this.queue.length === 0) {
+			return;
+		}
 
 		this.isProcessing = true;
 
@@ -535,7 +537,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 		set({
 			selectedItems: [...state.displayedItems],
 			selectedItem: state.displayedItems[0] || null,
-			lastSelectedItem: state.displayedItems[state.displayedItems.length - 1] || null,
+			lastSelectedItem: state.displayedItems.at(-1) || null,
 			lastUpdate: Date.now(),
 		});
 	},
@@ -571,7 +573,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 		const folder = state.folders.find((f) => f.id === id);
 		// Si no se encuentra la carpeta o no tiene información completa, intentar obtenerla
 		let folderWithDetails = folder;
-		if (!(folder && folder.count)) {
+		if (!folder?.count) {
 			try {
 				// TODO: Implementar obtención de detalles de carpeta cuando la función esté disponible
 				fileManagerLogger.debug('📊 Usando información básica de carpeta');
@@ -839,7 +841,9 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 
 	refreshCurrentContext: async () => {
 		const state = get();
-		if (!state.currentContext) return;
+		if (!state.currentContext) {
+			return;
+		}
 
 		fileManagerLogger.info('🔄 Refrescando contexto actual:', state.currentContext);
 
@@ -879,14 +883,28 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 
 	// 🔄 Nuevas utilidades para EntityWithStats
 	getEntityType: (entity: EntityWithStats): EntityStatsType => {
-		if (isImageWithStats(entity)) return EntityStatsType.IMAGE;
-		if (isVideoWithStats(entity)) return EntityStatsType.VIDEO;
-		if (isFolderWithStats(entity)) return EntityStatsType.FOLDER;
+		if (isImageWithStats(entity)) {
+			return EntityStatsType.IMAGE;
+		}
+		if (isVideoWithStats(entity)) {
+			return EntityStatsType.VIDEO;
+		}
+		if (isFolderWithStats(entity)) {
+			return EntityStatsType.FOLDER;
+		}
 		// Detectar otros tipos basándose en propiedades
-		if ('color' in entity && !('emoji' in entity)) return EntityStatsType.TAG;
-		if ('gender' in entity) return EntityStatsType.CHARACTER;
-		if ('conceptType' in entity) return EntityStatsType.CONCEPT;
-		if ('category' in entity && !('path' in entity)) return EntityStatsType.COLLECTION;
+		if ('color' in entity && !('emoji' in entity)) {
+			return EntityStatsType.TAG;
+		}
+		if ('gender' in entity) {
+			return EntityStatsType.CHARACTER;
+		}
+		if ('conceptType' in entity) {
+			return EntityStatsType.CONCEPT;
+		}
+		if ('category' in entity && !('path' in entity)) {
+			return EntityStatsType.COLLECTION;
+		}
 		// Fallback genérico
 		return EntityStatsType.IMAGE; // Por defecto asumimos imagen
 	},

@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
 		// TODO: Expandir para videos, audio, etc.
 		let items: any[] = [];
 		if (type === 'images' || type === 'all') {
-			items = await searchImages(query, Number.parseInt(limit as string));
+			items = await searchImages(query, Number.parseInt(limit as string, 10));
 		}
 
 		const took = Date.now() - startTime;
@@ -50,7 +50,7 @@ router.get('/images', async (req, res) => {
 		}
 
 		const startTime = Date.now();
-		const items = await searchImages(query, Number.parseInt(limit as string));
+		const items = await searchImages(query, Number.parseInt(limit as string, 10));
 		const took = Date.now() - startTime;
 
 		res.json({
@@ -87,7 +87,9 @@ router.get('/fts', async (req, res) => {
 		let used = 'fts5';
 		try {
 			const client = getDbClient();
-			if (!client || typeof client.execute !== 'function') throw new Error('client.execute no disponible');
+			if (!client || typeof client.execute !== 'function') {
+				throw new Error('client.execute no disponible');
+			}
 			const match = q.replace(/"/g, '');
 			const querySql = `
 				SELECT f.id, f.name, f.path, f.tags

@@ -21,7 +21,9 @@ export function adaptCharacterWithStats(character: CharacterWithStats): Characte
 	};
 
 	const safeJsonParse = <T>(jsonStr: string | null | undefined, fallback: T): T => {
-		if (!jsonStr) return fallback;
+		if (!jsonStr) {
+			return fallback;
+		}
 		try {
 			return JSON.parse(jsonStr) as T;
 		} catch {

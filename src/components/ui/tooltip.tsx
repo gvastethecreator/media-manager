@@ -1,24 +1,29 @@
 'use client';
 
+import {
+	Content as TooltipContentPrimitive,
+	Provider as TooltipProviderPrimitive,
+	Root as TooltipRoot,
+	Trigger as TooltipTriggerPrimitive,
+} from '@radix-ui/react-tooltip';
 import { cva, type VariantProps } from 'class-variance-authority';
-import { Tooltip as TooltipPrimitive } from 'radix-ui';
-import * as React from 'react';
+import React from 'react';
 import { cn } from '@/lib/utils';
 
-function TooltipProvider({ delayDuration = 0, ...props }: React.ComponentProps<typeof TooltipPrimitive.Provider>) {
-	return <TooltipPrimitive.Provider data-slot="tooltip-provider" delayDuration={delayDuration} {...props} />;
+function TooltipProvider({ delayDuration = 0, ...props }: React.ComponentProps<typeof TooltipProviderPrimitive>) {
+	return <TooltipProviderPrimitive data-slot="tooltip-provider" delayDuration={delayDuration} {...props} />;
 }
 
-function Tooltip({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Root>) {
+function Tooltip({ ...props }: React.ComponentProps<typeof TooltipRoot>) {
 	return (
 		<TooltipProvider>
-			<TooltipPrimitive.Root data-slot="tooltip" {...props} />
+			<TooltipRoot data-slot="tooltip" {...props} />
 		</TooltipProvider>
 	);
 }
 
-function TooltipTrigger({ ...props }: React.ComponentProps<typeof TooltipPrimitive.Trigger>) {
-	return <TooltipPrimitive.Trigger data-slot="tooltip-trigger" {...props} />;
+function TooltipTrigger({ ...props }: React.ComponentProps<typeof TooltipTriggerPrimitive>) {
+	return <TooltipTriggerPrimitive data-slot="tooltip-trigger" {...props} />;
 }
 
 const tooltipVariants = cva(
@@ -41,9 +46,9 @@ function TooltipContent({
 	sideOffset = 4,
 	variant,
 	...props
-}: React.ComponentProps<typeof TooltipPrimitive.Content> & VariantProps<typeof tooltipVariants>) {
+}: React.ComponentProps<typeof TooltipContentPrimitive> & VariantProps<typeof tooltipVariants>) {
 	return (
-		<TooltipPrimitive.Content
+		<TooltipContentPrimitive
 			className={cn(tooltipVariants({ variant }), className)}
 			data-slot="tooltip-content"
 			sideOffset={sideOffset}

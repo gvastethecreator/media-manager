@@ -80,7 +80,9 @@ export const useContextMenuNavigation = (
 
 	// Configurar shortcuts cuando el menú está habilitado
 	useEffect(() => {
-		if (!enabled) return;
+		if (!enabled) {
+			return;
+		}
 
 		setContext('context-menu');
 

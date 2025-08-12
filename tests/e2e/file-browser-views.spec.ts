@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test';
 
 // Objetivo: validar scroll e interactividad en todas las vistas del file-browser
 // Ruta base: /folders/cursed-dump (seed existente)
-// Selector toolbar: [data-testid="view-mode-trigger"] y [data-testid="view-mode-<mode>"]
+// Selector toolbar: botones con [data-testid="view-mode-<mode>-btn"]
 // Vistas y testids: grid-view, cards-view, masonry-view, listview-container
 
 const scrollViewport = '[data-slot="scroll-area-viewport"]';
@@ -35,14 +35,10 @@ async function clickFirstItem(page: any, view: 'grid' | 'cards' | 'masonry' | 'l
 }
 
 async function switchView(page: any, mode: 'grid' | 'cards' | 'masonry' | 'list') {
-	const trigger = page.getByTestId('view-mode-trigger');
-	await expect(trigger).toBeVisible();
-	await expect(trigger).toBeEnabled();
-	await trigger.click();
-
-	const menuItem = page.getByTestId(`view-mode-${mode}`);
-	await expect(menuItem).toBeVisible();
-	await menuItem.click();
+	const button = page.getByTestId(`view-mode-${mode}-btn`);
+	await expect(button).toBeVisible();
+	await expect(button).toBeEnabled();
+	await button.click();
 }
 
 function viewLocatorFor(mode: 'grid' | 'cards' | 'masonry' | 'list') {

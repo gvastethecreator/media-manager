@@ -72,7 +72,7 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 					<Skeleton className="h-4 w-24" />
 					<Skeleton className="h-3 w-32" />
 				</div>
-				{['a','b','c','d','e','f'].map((id) => (
+				{['a', 'b', 'c', 'd', 'e', 'f'].map((id) => (
 					<div className="space-y-2" key={`skeleton-${id}`}>
 						<Skeleton className="h-10 w-full" />
 						<Skeleton className="h-8 w-full" />

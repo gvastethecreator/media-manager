@@ -6,7 +6,6 @@
  */
 
 import {
-	AlertCircle,
 	CheckCircle,
 	ChevronDown,
 	ChevronRight,
@@ -21,7 +20,7 @@ import {
 	X,
 	XCircle,
 } from 'lucide-react';
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
@@ -35,7 +34,6 @@ import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { formatDuration } from '@/lib/utils/format';
-import { formatBytes } from '@/lib/utils/format.utils';
 import {
 	type BatchOperation,
 	type BatchOperationStatus,
@@ -168,7 +166,9 @@ export function BatchOperationsPanel({ className, maxHeight = '400px' }: BatchOp
 	};
 
 	const getElapsedTime = (operation: BatchOperation) => {
-		if (!operation.startedAt) return null;
+		if (!operation.startedAt) {
+			return null;
+		}
 
 		const endTime = operation.completedAt || Date.now();
 		const elapsed = endTime - operation.startedAt;

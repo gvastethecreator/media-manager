@@ -63,7 +63,9 @@ type DrizzleWorldItemFromDrizzle = {
  * @returns Un objeto WorldItemComplete.
  */
 export function fromDrizzleWorldItem(worldItem: DrizzleWorldItemFromDrizzle | null): WorldItemComplete | null {
-	if (!worldItem) return null;
+	if (!worldItem) {
+		return null;
+	}
 
 	const { _count, tags: relationTags, properties: relationProperties, ...baseData } = worldItem;
 

@@ -128,14 +128,30 @@ router.get('/', async (req, res) => {
 		const conditions = [];
 
 		// Construir condiciones WHERE
-		if (filters.folderId) conditions.push(eq(images.folderId, filters.folderId));
-		if (filters.isFavorite !== undefined) conditions.push(eq(images.isFavorite, filters.isFavorite));
-		if (filters.minWidth) conditions.push(gte(images.width, filters.minWidth));
-		if (filters.maxWidth) conditions.push(lte(images.width, filters.maxWidth));
-		if (filters.minHeight) conditions.push(gte(images.height, filters.minHeight));
-		if (filters.maxHeight) conditions.push(lte(images.height, filters.maxHeight));
-		if (filters.minSize) conditions.push(gte(images.size, filters.minSize));
-		if (filters.maxSize) conditions.push(lte(images.size, filters.maxSize));
+		if (filters.folderId) {
+			conditions.push(eq(images.folderId, filters.folderId));
+		}
+		if (filters.isFavorite !== undefined) {
+			conditions.push(eq(images.isFavorite, filters.isFavorite));
+		}
+		if (filters.minWidth) {
+			conditions.push(gte(images.width, filters.minWidth));
+		}
+		if (filters.maxWidth) {
+			conditions.push(lte(images.width, filters.maxWidth));
+		}
+		if (filters.minHeight) {
+			conditions.push(gte(images.height, filters.minHeight));
+		}
+		if (filters.maxHeight) {
+			conditions.push(lte(images.height, filters.maxHeight));
+		}
+		if (filters.minSize) {
+			conditions.push(gte(images.size, filters.minSize));
+		}
+		if (filters.maxSize) {
+			conditions.push(lte(images.size, filters.maxSize));
+		}
 
 		// Búsqueda por texto
 		if (filters.search) {

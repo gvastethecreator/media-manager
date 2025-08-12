@@ -4,6 +4,7 @@
  * @description Centralized exports for file service functionality
  */
 
+export { batchFileOperationsService } from './batch-operations.service';
 // Export enhanced file operations service (sin re-exportar clipboardManager para evitar colisiones)
 export { enhancedFileOperationsService } from './enhanced-file-operations.service';
 // Export all existing file operations

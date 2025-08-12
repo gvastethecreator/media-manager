@@ -10,7 +10,9 @@
  * @returns Relación de aspecto como string en formato "16:9"
  */
 export function calculateAspectRatio(width: number, height: number): string {
-	if (!(width && height)) return '1:1';
+	if (!(width && height)) {
+		return '1:1';
+	}
 
 	// Encontrar el máximo común divisor (MCD)
 	const gcd = (a: number, b: number): number => (b === 0 ? a : gcd(b, a % b));
@@ -21,10 +23,18 @@ export function calculateAspectRatio(width: number, height: number): string {
 	const aspectHeight = height / divisor;
 
 	// Usar ratios comunes si están muy cerca
-	if (Math.abs(aspectWidth / aspectHeight - 16 / 9) < 0.01) return '16:9';
-	if (Math.abs(aspectWidth / aspectHeight - 4 / 3) < 0.01) return '4:3';
-	if (Math.abs(aspectWidth / aspectHeight - 3 / 2) < 0.01) return '3:2';
-	if (Math.abs(aspectWidth / aspectHeight - 1) < 0.01) return '1:1';
+	if (Math.abs(aspectWidth / aspectHeight - 16 / 9) < 0.01) {
+		return '16:9';
+	}
+	if (Math.abs(aspectWidth / aspectHeight - 4 / 3) < 0.01) {
+		return '4:3';
+	}
+	if (Math.abs(aspectWidth / aspectHeight - 3 / 2) < 0.01) {
+		return '3:2';
+	}
+	if (Math.abs(aspectWidth / aspectHeight - 1) < 0.01) {
+		return '1:1';
+	}
 
 	// Devolver la relación calculada si no coincide con ninguna común
 	return `${Math.round(aspectWidth)}:${Math.round(aspectHeight)}`;
@@ -56,8 +66,12 @@ export function generateThumbnailUrl(imageId: string, width?: number | string, h
 	// Añadir parámetros de tamaño si se especifican
 	if (widthNum || height) {
 		const params = new URLSearchParams();
-		if (widthNum) params.append('width', widthNum.toString());
-		if (height) params.append('height', height.toString());
+		if (widthNum) {
+			params.append('width', widthNum.toString());
+		}
+		if (height) {
+			params.append('height', height.toString());
+		}
 		url += `?${params.toString()}`;
 	}
 

@@ -52,7 +52,7 @@ export function TagsView() {
 	// Manejar el clic en una etiqueta
 	const handleTagClick = useCallback(
 		(tag: TagWithStats) => {
-			if (!(tag && tag.id)) {
+			if (!tag?.id) {
 				console.error('❌ Error: Intento de seleccionar una etiqueta inválida', tag);
 				return;
 			}

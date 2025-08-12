@@ -2,7 +2,9 @@
 // Proporciona tanto export default como exports nombrados para evitar errores
 
 const emptyObject = {};
-const emptyFunction = () => {};
+const emptyFunction = () => {
+	// No-op intencional
+};
 const emptyPromise = Promise.resolve();
 
 // Para compatibilidad con http - STATUS_CODES como propiedad del objeto principal
@@ -38,7 +40,7 @@ const httpModule = {
 };
 
 export default httpModule;
-export { emptyObject, emptyFunction, emptyPromise };
+export { emptyFunction, emptyObject, emptyPromise };
 
 // Exportaciones adicionales comunes que podrían ser requeridas
 export const readFile = emptyFunction;

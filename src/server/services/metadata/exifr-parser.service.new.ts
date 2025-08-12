@@ -192,9 +192,15 @@ async function extractXmpData(buffer: Buffer): Promise<XmpData | null> {
 		const rightsMarked = xmp.marked || xmp['xmpRights:Marked'];
 		const rightsWeb = xmp.webStatement || xmp['xmpRights:WebStatement'];
 		const ai = extractAIMetadataFromXmp(xmp);
-		if (rightsMarked !== undefined) (result.customFields as any).rightsMarked = rightsMarked;
-		if (rightsWeb !== undefined) (result.customFields as any).rightsWebStatement = rightsWeb;
-		if (ai) (result.customFields as any).aiMetadata = ai;
+		if (rightsMarked !== undefined) {
+			(result.customFields as any).rightsMarked = rightsMarked;
+		}
+		if (rightsWeb !== undefined) {
+			(result.customFields as any).rightsWebStatement = rightsWeb;
+		}
+		if (ai) {
+			(result.customFields as any).aiMetadata = ai;
+		}
 
 		return result;
 	} catch (error) {

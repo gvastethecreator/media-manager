@@ -29,7 +29,7 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 	// Cargar videos al montar el componente solo una vez
 	useEffect(() => {
 		fetchVideos();
-	}, []);
+	}, [fetchVideos]);
 
 	// Manejar clic en video - navegar a la vista de contenido
 	const handleVideoClick = useCallback(
@@ -42,7 +42,9 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 
 	// Manejar creación de video
 	const handleCreateVideo = async () => {
-		if (!(newVideoName.trim() && newVideoPath.trim())) return;
+		if (!(newVideoName.trim() && newVideoPath.trim())) {
+			return;
+		}
 
 		try {
 			await createVideo({

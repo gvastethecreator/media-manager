@@ -212,7 +212,9 @@ export function useEntityTypeColors() {
 			getColorForType: (type: EntityStatsType) => getEntityTypeColor(type),
 			getGradientForType: (type: EntityStatsType) => {
 				const config = getEntityTypeConfig(type);
-				if (!config) return `linear-gradient(135deg, ${getEntityTypeColor(type)}, #6b7280)`;
+				if (!config) {
+					return `linear-gradient(135deg, ${getEntityTypeColor(type)}, #6b7280)`;
+				}
 
 				const primary = config.color;
 				const secondary = config.secondaryColor || primary;

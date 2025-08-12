@@ -80,6 +80,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
 	// Cargar configuraciones básicas
 	const loadSettings = useCallback(async () => {
+		// no-op para cumplir reglas de async/await y permitir futuras operaciones asíncronas
+		await Promise.resolve();
 		try {
 			setIsLoading(true);
 			// Cargar configuración desde localStorage
@@ -150,8 +152,8 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 				profiles,
 				activeProfile: activeProfile?.id || null,
 			}));
-		} catch (error) {
-			console.error('Error cargando perfiles:', error);
+		} catch (err) {
+			console.error('Error cargando perfiles:', err);
 			toastService.error('No se pudieron cargar los perfiles');
 		}
 	}, []);
@@ -189,13 +191,15 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 
 	// Actualizar configuraciones
 	const updateSettings = async (newSettings: Partial<Settings>) => {
+		// no-op para cumplir reglas de async/await
+		await Promise.resolve();
 		try {
 			setSettings((prev) => ({ ...prev, ...newSettings }));
 			return Promise.resolve();
-		} catch (error) {
-			console.error('Error updating settings:', error);
+		} catch (err) {
+			console.error('Error updating settings:', err);
 			toastService.error('No se pudieron actualizar las configuraciones');
-			return Promise.reject(error);
+			return Promise.reject(err);
 		}
 	};
 
@@ -216,10 +220,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			// Recargar los perfiles para obtener la lista actualizada
 			await loadProfiles();
 			toastService.success('Perfil actualizado correctamente');
-		} catch (error) {
-			console.error('Error updating profile:', error);
+		} catch (err) {
+			console.error('Error updating profile:', err);
 			toastService.error('No se pudo actualizar el perfil');
-			throw error;
+			throw err;
 		}
 	};
 
@@ -229,10 +233,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			await profileClient.setActiveProfile(id);
 			await loadProfiles();
 			toastService.success('Perfil activo actualizado correctamente');
-		} catch (error) {
-			console.error('Error setting active profile:', error);
+		} catch (err) {
+			console.error('Error setting active profile:', err);
 			toastService.error('No se pudo establecer el perfil activo');
-			throw error;
+			throw err;
 		}
 	};
 
@@ -242,10 +246,10 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 			await profileClient.deleteProfile(id);
 			await loadProfiles();
 			toastService.success('Perfil eliminado correctamente');
-		} catch (error) {
-			console.error('Error deleting profile:', error);
+		} catch (err) {
+			console.error('Error deleting profile:', err);
 			toastService.error('No se pudo eliminar el perfil');
-			throw error;
+			throw err;
 		}
 	};
 

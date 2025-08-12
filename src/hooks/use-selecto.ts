@@ -37,14 +37,18 @@ export function useSelecto({
 
 	// Inicializar Selecto
 	useEffect(() => {
-		if (!enabled) return;
+		if (!enabled) {
+			return;
+		}
 
 		const containerElement =
 			typeof container === 'string'
 				? (document.querySelector(container) as HTMLElement)
 				: (container as HTMLElement) || document.body;
 
-		if (!containerElement) return;
+		if (!containerElement) {
+			return;
+		}
 
 		const selecto = new Selecto({
 			container: containerElement,
@@ -128,7 +132,9 @@ export function useSelecto({
 
 	// Métodos para controlar la selección programáticamente
 	const selectAll = useCallback(() => {
-		if (!selectoRef.current) return;
+		if (!selectoRef.current) {
+			return;
+		}
 
 		const allElements = document.querySelectorAll(selectableTargets.join(', '));
 		allElements.forEach((el) => {

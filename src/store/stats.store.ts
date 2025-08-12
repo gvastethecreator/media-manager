@@ -130,7 +130,9 @@ type StatsUpdate = Partial<StatsData>;
 const getStats = async () => {
 	try {
 		const data = await getSystemStatsFromApi();
-		if (!data) throw new Error('No se pudieron obtener las estadísticas');
+		if (!data) {
+			throw new Error('No se pudieron obtener las estadísticas');
+		}
 		return [
 			{
 				id: 'stats',
@@ -148,7 +150,9 @@ const updateStats = async (_id: string, _data: StatsUpdate) => {
 	try {
 		await invalidateStatsInApi();
 		const data = await getSystemStatsFromApi();
-		if (!data) throw new Error('Error al actualizar estadísticas');
+		if (!data) {
+			throw new Error('Error al actualizar estadísticas');
+		}
 		return {
 			id: 'stats',
 			name: 'Estadísticas',
@@ -175,7 +179,9 @@ export const useStatsBaseStore = create<{
 		set({ loading: true, error: null });
 		try {
 			const data = await getSystemStatsFromApi();
-			if (!data) throw new Error('No se pudieron obtener las estadísticas');
+			if (!data) {
+				throw new Error('No se pudieron obtener las estadísticas');
+			}
 			set({
 				stats: {
 					id: 'stats',
@@ -220,7 +226,9 @@ export const useStatsBaseStore = create<{
 		try {
 			await invalidateStatsInApi();
 			const updatedData = await getSystemStatsFromApi();
-			if (!updatedData) throw new Error('Error al actualizar estadísticas');
+			if (!updatedData) {
+				throw new Error('Error al actualizar estadísticas');
+			}
 			set({
 				stats: {
 					id: 'stats',

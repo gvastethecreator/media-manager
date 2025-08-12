@@ -47,7 +47,9 @@ export const useUpdateTheme = () => {
 
 			// Actualizar el estado de forma optimista
 			queryClient.setQueryData(['activeProfile'], (old: any) => {
-				if (!old) return null;
+				if (!old) {
+					return null;
+				}
 				return { ...old, theme: newTheme };
 			});
 

@@ -123,7 +123,7 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
 						{optimisticGroups.map((group, index) => {
 							// Verificar que el grupo tenga un id válido
-							if (!(group && group.id)) {
+							if (!group?.id) {
 								console.error('Grupo sin id válido:', group);
 								return null;
 							}

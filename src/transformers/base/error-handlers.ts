@@ -6,17 +6,15 @@
 
 import {
 	handleTransformerError,
-	MappingError,
-	MetadataError,
 	RelationError,
-	SearchError,
 	SerializationError,
-	TransformerError,
 	TransformerErrorContext,
 	TypeMismatchError,
-	UIError,
 	ValidationError,
 } from '@/lib/errors/transformer-error';
+
+export { MappingError, MetadataError, SearchError, TransformerError, UIError } from '@/lib/errors/transformer-error';
+
 import { serverLogger } from '@/lib/logger/server-logger';
 
 const logger = serverLogger.withContext('TransformerErrorHandlers');
@@ -28,7 +26,7 @@ const logger = serverLogger.withContext('TransformerErrorHandlers');
  * @param descriptor Descriptor del método
  */
 export function handleTransformerErrors(
-	target: any,
+	_target: any,
 	propertyKey: string,
 	descriptor: PropertyDescriptor
 ): PropertyDescriptor {
@@ -82,12 +80,12 @@ export function validateEntityType(actualType: string, expectedType: string, con
  * 🔄 Manejo seguro de operación async con log
  */
 export async function safeTransform<T, R>(
-	operation: (data: T) => Promise<R>,
+	transformFn: (data: T) => Promise<R>,
 	data: T,
 	context: TransformerErrorContext
 ): Promise<R> {
 	try {
-		return await operation(data);
+		return await transformFn(data);
 	} catch (error) {
 		logger.error('Error en transformación', { error, context });
 		throw handleTransformerError(error, context);
@@ -130,14 +128,4 @@ export function validateRelation<T>(
 	}
 }
 
-export {
-	MappingError,
-	MetadataError,
-	RelationError,
-	SearchError,
-	SerializationError,
-	TransformerError,
-	TypeMismatchError,
-	UIError,
-	ValidationError,
-};
+// Re-export selectivo de tipos comunes

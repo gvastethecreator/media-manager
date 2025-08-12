@@ -157,10 +157,14 @@ export const createImageUISlice: StateCreator<ImageState, [], [], ImageUISlice> 
 	nextImage: () => {
 		const state = get();
 		const images = Object.values(state.core.images);
-		if (images.length === 0 || !state.ui.currentImageId) return;
+		if (images.length === 0 || !state.ui.currentImageId) {
+			return;
+		}
 
 		const currentIndex = images.findIndex((img) => img.id === state.ui.currentImageId);
-		if (currentIndex === -1) return;
+		if (currentIndex === -1) {
+			return;
+		}
 
 		const nextIndex = (currentIndex + 1) % images.length;
 		set((state) => ({
@@ -174,10 +178,14 @@ export const createImageUISlice: StateCreator<ImageState, [], [], ImageUISlice> 
 	previousImage: () => {
 		const state = get();
 		const images = Object.values(state.core.images);
-		if (images.length === 0 || !state.ui.currentImageId) return;
+		if (images.length === 0 || !state.ui.currentImageId) {
+			return;
+		}
 
 		const currentIndex = images.findIndex((img) => img.id === state.ui.currentImageId);
-		if (currentIndex === -1) return;
+		if (currentIndex === -1) {
+			return;
+		}
 
 		const prevIndex = (currentIndex - 1 + images.length) % images.length;
 		set((state) => ({

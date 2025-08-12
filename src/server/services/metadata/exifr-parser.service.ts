@@ -143,7 +143,7 @@ function extractExifData(rawMetadata: any): Partial<ExifData> {
 			if (pngChunks[field]) {
 				(data as any)[field] = pngChunks[field];
 				logger.info(`🔧 EXIFR PARSER: PNG chunk encontrado: ${field}`, {
-					value: typeof pngChunks[field] === 'string' ? pngChunks[field].substring(0, 100) + '...' : pngChunks[field],
+					value: typeof pngChunks[field] === 'string' ? `${pngChunks[field].substring(0, 100)}...` : pngChunks[field],
 				});
 			}
 		}
@@ -157,33 +157,71 @@ function extractExifData(rawMetadata: any): Partial<ExifData> {
 	}
 
 	// Información básica de la imagen
-	if (rawMetadata.ImageWidth) data.imageWidth = rawMetadata.ImageWidth;
-	if (rawMetadata.ExifImageWidth) data.imageWidth = rawMetadata.ExifImageWidth;
-	if (rawMetadata.ImageHeight) data.imageHeight = rawMetadata.ImageHeight;
-	if (rawMetadata.ExifImageHeight) data.imageHeight = rawMetadata.ExifImageHeight;
-	if (rawMetadata.Orientation) data.orientation = rawMetadata.Orientation;
+	if (rawMetadata.ImageWidth) {
+		data.imageWidth = rawMetadata.ImageWidth;
+	}
+	if (rawMetadata.ExifImageWidth) {
+		data.imageWidth = rawMetadata.ExifImageWidth;
+	}
+	if (rawMetadata.ImageHeight) {
+		data.imageHeight = rawMetadata.ImageHeight;
+	}
+	if (rawMetadata.ExifImageHeight) {
+		data.imageHeight = rawMetadata.ExifImageHeight;
+	}
+	if (rawMetadata.Orientation) {
+		data.orientation = rawMetadata.Orientation;
+	}
 
 	// Información de la cámara
-	if (rawMetadata.Make) data.make = rawMetadata.Make;
-	if (rawMetadata.Model) data.model = rawMetadata.Model;
-	if (rawMetadata.Software) data.software = rawMetadata.Software;
+	if (rawMetadata.Make) {
+		data.make = rawMetadata.Make;
+	}
+	if (rawMetadata.Model) {
+		data.model = rawMetadata.Model;
+	}
+	if (rawMetadata.Software) {
+		data.software = rawMetadata.Software;
+	}
 
 	// Configuración de captura
-	if (rawMetadata.ExposureTime) data.exposureTime = rawMetadata.ExposureTime;
-	if (rawMetadata.FNumber) data.fNumber = rawMetadata.FNumber;
-	if (rawMetadata.ISO || rawMetadata.ISOSpeedRatings) data.iso = rawMetadata.ISO || rawMetadata.ISOSpeedRatings;
-	if (rawMetadata.FocalLength) data.focalLength = rawMetadata.FocalLength;
+	if (rawMetadata.ExposureTime) {
+		data.exposureTime = rawMetadata.ExposureTime;
+	}
+	if (rawMetadata.FNumber) {
+		data.fNumber = rawMetadata.FNumber;
+	}
+	if (rawMetadata.ISO || rawMetadata.ISOSpeedRatings) {
+		data.iso = rawMetadata.ISO || rawMetadata.ISOSpeedRatings;
+	}
+	if (rawMetadata.FocalLength) {
+		data.focalLength = rawMetadata.FocalLength;
+	}
 
 	// Fechas
-	if (rawMetadata.DateTime) data.dateTime = rawMetadata.DateTime;
-	if (rawMetadata.DateTimeOriginal) data.dateTimeOriginal = rawMetadata.DateTimeOriginal;
-	if (rawMetadata.DateTimeDigitized) data.dateTimeDigitized = rawMetadata.DateTimeDigitized;
+	if (rawMetadata.DateTime) {
+		data.dateTime = rawMetadata.DateTime;
+	}
+	if (rawMetadata.DateTimeOriginal) {
+		data.dateTimeOriginal = rawMetadata.DateTimeOriginal;
+	}
+	if (rawMetadata.DateTimeDigitized) {
+		data.dateTimeDigitized = rawMetadata.DateTimeDigitized;
+	}
 
 	// Información técnica
-	if (rawMetadata.ColorSpace) data.colorSpace = rawMetadata.ColorSpace;
-	if (rawMetadata.WhiteBalance) data.whiteBalance = rawMetadata.WhiteBalance;
-	if (rawMetadata.Flash) data.flash = rawMetadata.Flash;
-	if (rawMetadata.MeteringMode) data.meteringMode = rawMetadata.MeteringMode;
+	if (rawMetadata.ColorSpace) {
+		data.colorSpace = rawMetadata.ColorSpace;
+	}
+	if (rawMetadata.WhiteBalance) {
+		data.whiteBalance = rawMetadata.WhiteBalance;
+	}
+	if (rawMetadata.Flash) {
+		data.flash = rawMetadata.Flash;
+	}
+	if (rawMetadata.MeteringMode) {
+		data.meteringMode = rawMetadata.MeteringMode;
+	}
 
 	// GPS si está disponible
 	if (rawMetadata.latitude && rawMetadata.longitude) {
@@ -200,10 +238,18 @@ function extractExifData(rawMetadata: any): Partial<ExifData> {
 	}
 
 	// Información de archivo
-	if (rawMetadata.Compression) data.compression = rawMetadata.Compression;
-	if (rawMetadata.XResolution) data.xResolution = rawMetadata.XResolution;
-	if (rawMetadata.YResolution) data.yResolution = rawMetadata.YResolution;
-	if (rawMetadata.ResolutionUnit) data.resolutionUnit = rawMetadata.ResolutionUnit;
+	if (rawMetadata.Compression) {
+		data.compression = rawMetadata.Compression;
+	}
+	if (rawMetadata.XResolution) {
+		data.xResolution = rawMetadata.XResolution;
+	}
+	if (rawMetadata.YResolution) {
+		data.yResolution = rawMetadata.YResolution;
+	}
+	if (rawMetadata.ResolutionUnit) {
+		data.resolutionUnit = rawMetadata.ResolutionUnit;
+	}
 
 	return data;
 }
@@ -216,23 +262,43 @@ function extractIptcData(rawMetadata: any): Partial<IptcData> {
 	const iptc = rawMetadata.iptc || rawMetadata;
 
 	// Información de identificación
-	if (iptc.ObjectName || iptc.Title) data.title = iptc.ObjectName || iptc.Title;
-	if (iptc.Caption || iptc.Description) data.description = iptc.Caption || iptc.Description;
+	if (iptc.ObjectName || iptc.Title) {
+		data.title = iptc.ObjectName || iptc.Title;
+	}
+	if (iptc.Caption || iptc.Description) {
+		data.description = iptc.Caption || iptc.Description;
+	}
 	if (iptc.Keywords) {
 		data.keywords = Array.isArray(iptc.Keywords) ? iptc.Keywords : [iptc.Keywords];
 	}
 
 	// Información de autoría
-	if (iptc.Byline || iptc.Author) data.byline = iptc.Byline || iptc.Author;
-	if (iptc.BylineTitle) data.bylineTitle = iptc.BylineTitle;
-	if (iptc.Credit) data.credit = iptc.Credit;
-	if (iptc.Source) data.source = iptc.Source;
-	if (iptc.Copyright || iptc.CopyrightNotice) data.copyright = iptc.Copyright || iptc.CopyrightNotice;
+	if (iptc.Byline || iptc.Author) {
+		data.byline = iptc.Byline || iptc.Author;
+	}
+	if (iptc.BylineTitle) {
+		data.bylineTitle = iptc.BylineTitle;
+	}
+	if (iptc.Credit) {
+		data.credit = iptc.Credit;
+	}
+	if (iptc.Source) {
+		data.source = iptc.Source;
+	}
+	if (iptc.Copyright || iptc.CopyrightNotice) {
+		data.copyright = iptc.Copyright || iptc.CopyrightNotice;
+	}
 
 	// Información editorial
-	if (iptc.Headline) data.headline = iptc.Headline;
-	if (iptc.Urgency) data.urgency = iptc.Urgency;
-	if (iptc.Category) data.category = iptc.Category;
+	if (iptc.Headline) {
+		data.headline = iptc.Headline;
+	}
+	if (iptc.Urgency) {
+		data.urgency = iptc.Urgency;
+	}
+	if (iptc.Category) {
+		data.category = iptc.Category;
+	}
 	if (iptc.SupplementalCategories) {
 		data.supplementalCategories = Array.isArray(iptc.SupplementalCategories)
 			? iptc.SupplementalCategories
@@ -240,12 +306,24 @@ function extractIptcData(rawMetadata: any): Partial<IptcData> {
 	}
 
 	// Información de fecha y ubicación
-	if (iptc.DateCreated) data.dateCreated = iptc.DateCreated;
-	if (iptc.TimeCreated) data.timeCreated = iptc.TimeCreated;
-	if (iptc.City) data.city = iptc.City;
-	if (iptc.State || iptc.Province) data.state = iptc.State || iptc.Province;
-	if (iptc.Country) data.country = iptc.Country;
-	if (iptc.CountryCode) data.countryCode = iptc.CountryCode;
+	if (iptc.DateCreated) {
+		data.dateCreated = iptc.DateCreated;
+	}
+	if (iptc.TimeCreated) {
+		data.timeCreated = iptc.TimeCreated;
+	}
+	if (iptc.City) {
+		data.city = iptc.City;
+	}
+	if (iptc.State || iptc.Province) {
+		data.state = iptc.State || iptc.Province;
+	}
+	if (iptc.Country) {
+		data.country = iptc.Country;
+	}
+	if (iptc.CountryCode) {
+		data.countryCode = iptc.CountryCode;
+	}
 
 	return data;
 }
@@ -258,8 +336,12 @@ function extractXmpData(rawMetadata: any): Partial<XmpData> {
 	const xmp = rawMetadata.xmp || rawMetadata;
 
 	// Dublin Core
-	if (xmp.title || xmp.Title) data.title = xmp.title || xmp.Title;
-	if (xmp.description || xmp.Description) data.description = xmp.description || xmp.Description;
+	if (xmp.title || xmp.Title) {
+		data.title = xmp.title || xmp.Title;
+	}
+	if (xmp.description || xmp.Description) {
+		data.description = xmp.description || xmp.Description;
+	}
 	if (xmp.subject || xmp.Subject) {
 		data.subject = Array.isArray(xmp.subject || xmp.Subject)
 			? xmp.subject || xmp.Subject
@@ -270,18 +352,34 @@ function extractXmpData(rawMetadata: any): Partial<XmpData> {
 			? xmp.creator || xmp.Creator
 			: [xmp.creator || xmp.Creator];
 	}
-	if (xmp.rights || xmp.Rights) data.rights = xmp.rights || xmp.Rights;
+	if (xmp.rights || xmp.Rights) {
+		data.rights = xmp.rights || xmp.Rights;
+	}
 
 	// Adobe XMP
-	if (xmp.Rating) data.rating = xmp.Rating;
-	if (xmp.CreateDate) data.createDate = xmp.CreateDate;
-	if (xmp.ModifyDate) data.modifyDate = xmp.ModifyDate;
-	if (xmp.CreatorTool) data.creatorTool = xmp.CreatorTool;
+	if (xmp.Rating) {
+		data.rating = xmp.Rating;
+	}
+	if (xmp.CreateDate) {
+		data.createDate = xmp.CreateDate;
+	}
+	if (xmp.ModifyDate) {
+		data.modifyDate = xmp.ModifyDate;
+	}
+	if (xmp.CreatorTool) {
+		data.creatorTool = xmp.CreatorTool;
+	}
 
 	// Adobe Photoshop
-	if (xmp.ColorMode) data.photoshopColorMode = xmp.ColorMode;
-	if (xmp.ICCProfile) data.photoshopICCProfile = xmp.ICCProfile;
-	if (xmp.History) data.photoshopHistory = xmp.History;
+	if (xmp.ColorMode) {
+		data.photoshopColorMode = xmp.ColorMode;
+	}
+	if (xmp.ICCProfile) {
+		data.photoshopICCProfile = xmp.ICCProfile;
+	}
+	if (xmp.History) {
+		data.photoshopHistory = xmp.History;
+	}
 
 	// Metadatos personalizados (incluyendo posibles metadatos de IA)
 	const customFields: Record<string, any> = {};

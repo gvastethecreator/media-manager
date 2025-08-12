@@ -382,7 +382,9 @@ export class CacheManager {
 
 		try {
 			const stored = localStorage.getItem('cache-manager-data');
-			if (!stored) return false;
+			if (!stored) {
+				return false;
+			}
 
 			const data = JSON.parse(stored);
 
@@ -455,7 +457,7 @@ export class CacheManager {
 		for (let i = 0; i < str.length; i++) {
 			const char = str.charCodeAt(i);
 			hash = (hash << 5) - hash + char;
-			hash = hash & hash; // Convert to 32-bit integer
+			hash &= hash; // Convert to 32-bit integer
 		}
 		return hash.toString(36);
 	}

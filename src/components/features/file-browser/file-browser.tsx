@@ -32,8 +32,8 @@ import { StatusBar } from './toolbar/status-bar';
 import type { FileBrowserProps } from './types/file-browser.types';
 
 // Import CSS for user-select fixes
-import './styles/user-select.css';
 import './selection/selection-styles.css';
+import './styles/user-select.css';
 import { CardsView } from './views/cards-view';
 import { GridView } from './views/grid-view';
 import { ListView } from './views/list-view';
@@ -62,6 +62,8 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 	// Estados globales del store
 	const viewMode = useViewOptionsStore((state) => state.viewMode);
 	const itemSize = useViewOptionsStore((state) => state.itemSize);
+	const sortOptions = useViewOptionsStore((state) => state.sortOptions);
+	const addSortOption = useViewOptionsStore((state) => state.addSortOption);
 
 	// Panel de detalles
 	const { setVisible: setDetailsPanelVisible, setSelectedItems: setDetailsPanelItems } = useDetailsPanel();
@@ -237,6 +239,22 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 		/* noop */
 	}, []);
 
+	// Sort activo (última opción como primaria)
+	const activeSort = useMemo(() => {
+		if (!sortOptions || sortOptions.length === 0) {
+			return { field: undefined as string | undefined, direction: 'asc' as const };
+		}
+		return sortOptions.at(-1) ?? { field: undefined, direction: 'asc' as const };
+	}, [sortOptions]);
+
+	// Handler para ordenar desde el header de ListView
+	const handleListSort = useCallback(
+		(columnKey: string, direction: 'asc' | 'desc') => {
+			addSortOption({ field: columnKey, direction });
+		},
+		[addSortOption]
+	);
+
 	const content = useMemo(() => {
 		if (isLoading && items.length === 0) {
 			return (
@@ -257,7 +275,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 		}
 		switch (viewMode) {
 			case 'list':
-				return <ListView {...commonViewProps} />;
+				return (
+					<ListView
+						{...commonViewProps}
+						onSort={handleListSort}
+						sortBy={activeSort.field}
+						sortDirection={(activeSort.direction as 'asc' | 'desc') ?? 'asc'}
+					/>
+				);
 			case 'grid':
 			case 'simple-grid':
 				return <GridView {...commonViewProps} />;
@@ -268,7 +293,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 			default:
 				return <CardsView {...commonViewProps} />;
 		}
-	}, [isLoading, items, error, viewMode, commonViewProps]);
+	}, [isLoading, items, error, viewMode, commonViewProps, activeSort.field, activeSort.direction, handleListSort]);
 
 	return (
 		<main
