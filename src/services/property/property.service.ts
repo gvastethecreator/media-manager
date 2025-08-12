@@ -369,14 +369,30 @@ export async function updateProperty(id: string, data: PropertyUpdateInput): Pro
 
 		const updateData: any = {};
 
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.description !== undefined) updateData.description = data.description;
-		if (data.emoji !== undefined) updateData.emoji = data.emoji;
-		if (data.color !== undefined) updateData.color = data.color;
-		if (data.category !== undefined) updateData.category = data.category;
-		if (data.shortcut !== undefined) updateData.shortcut = data.shortcut;
-		if (data.featuredImage !== undefined) updateData.featuredImage = data.featuredImage;
-		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+		if (data.name !== undefined) {
+			updateData.name = data.name;
+		}
+		if (data.description !== undefined) {
+			updateData.description = data.description;
+		}
+		if (data.emoji !== undefined) {
+			updateData.emoji = data.emoji;
+		}
+		if (data.color !== undefined) {
+			updateData.color = data.color;
+		}
+		if (data.category !== undefined) {
+			updateData.category = data.category;
+		}
+		if (data.shortcut !== undefined) {
+			updateData.shortcut = data.shortcut;
+		}
+		if (data.featuredImage !== undefined) {
+			updateData.featuredImage = data.featuredImage;
+		}
+		if (data.isFavorite !== undefined) {
+			updateData.isFavorite = data.isFavorite;
+		}
 
 		const [updatedProperty] = await db.update(properties).set(updateData).where(eq(properties.id, id)).returning();
 

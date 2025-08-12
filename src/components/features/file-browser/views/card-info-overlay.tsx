@@ -75,7 +75,9 @@ export function CardInfoOverlay({
 	};
 
 	const renderMetadataItem = (key: string, value: string | number | null | undefined) => {
-		if (!value) return null;
+		if (!value) {
+			return null;
+		}
 
 		return (
 			<div className="flex items-center justify-between text-xs" key={key}>

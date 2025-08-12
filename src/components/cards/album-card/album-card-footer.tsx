@@ -23,7 +23,9 @@ export function AlbumCardFooter({
 }: AlbumCardFooterProps) {
 	// Formatear el tamaño en MB
 	const formatSize = (bytes?: number): string => {
-		if (!bytes) return '0 MB';
+		if (!bytes) {
+			return '0 MB';
+		}
 		const mb = bytes / (1024 * 1024);
 		return `${mb.toFixed(1)} MB`;
 	};

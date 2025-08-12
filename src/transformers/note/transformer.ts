@@ -134,24 +134,48 @@ function calculateCompletionScore(data: NoteComplete, totalItems: number): numbe
 	let score = 0;
 
 	// Contenido base (40 puntos)
-	if (data.title && data.title.length > 0) score += 10;
-	if (data.content && data.content.length > 50) score += 20;
-	if (data.content && data.content.length > 200) score += 10;
+	if (data.title && data.title.length > 0) {
+		score += 10;
+	}
+	if (data.content && data.content.length > 50) {
+		score += 20;
+	}
+	if (data.content && data.content.length > 200) {
+		score += 10;
+	}
 
 	// Categorización (20 puntos)
-	if (data.category && data.category !== 'general') score += 10;
-	if (data.priority && data.priority > 0) score += 5;
-	if (data.status && data.status !== 'draft') score += 5;
+	if (data.category && data.category !== 'general') {
+		score += 10;
+	}
+	if (data.priority && data.priority > 0) {
+		score += 5;
+	}
+	if (data.status && data.status !== 'draft') {
+		score += 5;
+	}
 
 	// Metadatos (20 puntos)
-	if (data.featuredImage) score += 10;
-	if (data.color) score += 5;
-	if (data.emoji) score += 5;
+	if (data.featuredImage) {
+		score += 10;
+	}
+	if (data.color) {
+		score += 5;
+	}
+	if (data.emoji) {
+		score += 5;
+	}
 
 	// Relaciones (20 puntos)
-	if (totalItems > 0) score += 10;
-	if (totalItems > 5) score += 5;
-	if (totalItems > 10) score += 5;
+	if (totalItems > 0) {
+		score += 10;
+	}
+	if (totalItems > 5) {
+		score += 5;
+	}
+	if (totalItems > 10) {
+		score += 5;
+	}
 
 	return Math.min(score, 100);
 }
@@ -160,10 +184,14 @@ function calculateCompletionScore(data: NoteComplete, totalItems: number): numbe
  * 📝 Genera excerpt automático del contenido
  */
 function generateExcerpt(content: string | null, maxLength = 150): string {
-	if (!content) return '';
+	if (!content) {
+		return '';
+	}
 
 	const cleaned = content.replace(/[#*_`]/g, '').trim();
-	if (cleaned.length <= maxLength) return cleaned;
+	if (cleaned.length <= maxLength) {
+		return cleaned;
+	}
 
 	const truncated = cleaned.substring(0, maxLength);
 	const lastSpace = truncated.lastIndexOf(' ');
@@ -179,10 +207,18 @@ function formatDate(date: Date): string {
 	const diffMs = now.getTime() - date.getTime();
 	const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-	if (diffDays === 0) return 'Hoy';
-	if (diffDays === 1) return 'Ayer';
-	if (diffDays < 7) return `Hace ${diffDays} días`;
-	if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
+	if (diffDays === 0) {
+		return 'Hoy';
+	}
+	if (diffDays === 1) {
+		return 'Ayer';
+	}
+	if (diffDays < 7) {
+		return `Hace ${diffDays} días`;
+	}
+	if (diffDays < 30) {
+		return `Hace ${Math.floor(diffDays / 7)} semanas`;
+	}
 
 	return date.toLocaleDateString('es-ES', {
 		year: 'numeric',
@@ -195,7 +231,9 @@ function formatDate(date: Date): string {
  * 🏷️ Obtiene etiqueta legible de prioridad
  */
 function getPriorityLabel(priority: number | null): string {
-	if (priority === null || priority === undefined) return 'Sin definir';
+	if (priority === null || priority === undefined) {
+		return 'Sin definir';
+	}
 
 	switch (priority) {
 		case NotePriority.HIGHEST:
@@ -217,7 +255,9 @@ function getPriorityLabel(priority: number | null): string {
  * 📊 Obtiene etiqueta legible de estado
  */
 function getStatusLabel(status: string | null): string {
-	if (!status) return 'Sin estado';
+	if (!status) {
+		return 'Sin estado';
+	}
 
 	switch (status) {
 		case NoteStatus.ACTIVE:
@@ -239,7 +279,9 @@ function getStatusLabel(status: string | null): string {
  * 📂 Obtiene etiqueta legible de categoría
  */
 function getCategoryLabel(category: string | null): string {
-	if (!category) return 'Sin categoría';
+	if (!category) {
+		return 'Sin categoría';
+	}
 
 	switch (category) {
 		case NoteCategory.GENERAL:
@@ -271,7 +313,9 @@ function getCategoryLabel(category: string | null): string {
  * 📊 Calcula número de palabras en el contenido
  */
 function calculateWordCount(content: string | null): number {
-	if (!content) return 0;
+	if (!content) {
+		return 0;
+	}
 	return content
 		.trim()
 		.split(/\s+/)
@@ -303,16 +347,36 @@ export function toDrizzleNoteCreate(input: NoteCreateInput) {
 export function toDrizzleNoteUpdate(input: NoteUpdateInput) {
 	const updateData: Record<string, any> = {};
 
-	if (input.title !== undefined) updateData.title = input.title;
-	if (input.content !== undefined) updateData.content = input.content;
-	if (input.category !== undefined) updateData.category = input.category;
-	if (input.priority !== undefined) updateData.priority = input.priority;
-	if (input.status !== undefined) updateData.status = input.status;
-	if (input.color !== undefined) updateData.color = input.color;
-	if (input.emoji !== undefined) updateData.emoji = input.emoji;
-	if (input.featuredImage !== undefined) updateData.featuredImage = input.featuredImage;
-	if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
-	if (input.presetId !== undefined) updateData.presetId = input.presetId;
+	if (input.title !== undefined) {
+		updateData.title = input.title;
+	}
+	if (input.content !== undefined) {
+		updateData.content = input.content;
+	}
+	if (input.category !== undefined) {
+		updateData.category = input.category;
+	}
+	if (input.priority !== undefined) {
+		updateData.priority = input.priority;
+	}
+	if (input.status !== undefined) {
+		updateData.status = input.status;
+	}
+	if (input.color !== undefined) {
+		updateData.color = input.color;
+	}
+	if (input.emoji !== undefined) {
+		updateData.emoji = input.emoji;
+	}
+	if (input.featuredImage !== undefined) {
+		updateData.featuredImage = input.featuredImage;
+	}
+	if (input.isFavorite !== undefined) {
+		updateData.isFavorite = input.isFavorite;
+	}
+	if (input.presetId !== undefined) {
+		updateData.presetId = input.presetId;
+	}
 
 	return updateData;
 }

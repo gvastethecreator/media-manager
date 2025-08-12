@@ -12,7 +12,7 @@ import {
 	useReactTable,
 	type VisibilityState,
 } from '@tanstack/react-table';
-import * as React from 'react';
+import React from 'react';
 
 import { DataTablePagination } from '@/components/ui/data-table-pagination';
 import { DataTableToolbar } from '@/components/ui/data-table-toolbar';

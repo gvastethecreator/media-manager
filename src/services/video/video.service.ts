@@ -21,7 +21,9 @@ import type {
 export async function getVideo(id: string): Promise<VideoWithStats | null> {
 	const response = await fetch(`/api/videos/${id}`);
 	if (!response.ok) {
-		if (response.status === 404) return null;
+		if (response.status === 404) {
+			return null;
+		}
 		throw new Error('No se pudo obtener el video.');
 	}
 	return response.json();
@@ -40,26 +42,62 @@ export async function findVideos(
 	// Construir query parameters
 	const params = new URLSearchParams();
 
-	if (filters.search) params.append('search', filters.search);
-	if (filters.folders?.length) params.append('folders', filters.folders.join(','));
-	if (filters.isFavorite !== undefined) params.append('isFavorite', filters.isFavorite.toString());
+	if (filters.search) {
+		params.append('search', filters.search);
+	}
+	if (filters.folders?.length) {
+		params.append('folders', filters.folders.join(','));
+	}
+	if (filters.isFavorite !== undefined) {
+		params.append('isFavorite', filters.isFavorite.toString());
+	}
 
-	if (filters.minDuration) params.append('minDuration', filters.minDuration.toString());
-	if (filters.maxDuration) params.append('maxDuration', filters.maxDuration.toString());
-	if (filters.minSize) params.append('minSize', filters.minSize.toString());
-	if (filters.maxSize) params.append('maxSize', filters.maxSize.toString());
-	if (filters.minWidth) params.append('minWidth', filters.minWidth.toString());
-	if (filters.maxWidth) params.append('maxWidth', filters.maxWidth.toString());
-	if (filters.minHeight) params.append('minHeight', filters.minHeight.toString());
-	if (filters.maxHeight) params.append('maxHeight', filters.maxHeight.toString());
-	if (filters.hasMetadata !== undefined) params.append('hasMetadata', filters.hasMetadata.toString());
-	if (filters.hasThumbnail !== undefined) params.append('hasThumbnail', filters.hasThumbnail.toString());
-	if (filters.dateRange?.start) params.append('dateStart', filters.dateRange.start.toISOString());
-	if (filters.dateRange?.end) params.append('dateEnd', filters.dateRange.end.toISOString());
+	if (filters.minDuration) {
+		params.append('minDuration', filters.minDuration.toString());
+	}
+	if (filters.maxDuration) {
+		params.append('maxDuration', filters.maxDuration.toString());
+	}
+	if (filters.minSize) {
+		params.append('minSize', filters.minSize.toString());
+	}
+	if (filters.maxSize) {
+		params.append('maxSize', filters.maxSize.toString());
+	}
+	if (filters.minWidth) {
+		params.append('minWidth', filters.minWidth.toString());
+	}
+	if (filters.maxWidth) {
+		params.append('maxWidth', filters.maxWidth.toString());
+	}
+	if (filters.minHeight) {
+		params.append('minHeight', filters.minHeight.toString());
+	}
+	if (filters.maxHeight) {
+		params.append('maxHeight', filters.maxHeight.toString());
+	}
+	if (filters.hasMetadata !== undefined) {
+		params.append('hasMetadata', filters.hasMetadata.toString());
+	}
+	if (filters.hasThumbnail !== undefined) {
+		params.append('hasThumbnail', filters.hasThumbnail.toString());
+	}
+	if (filters.dateRange?.start) {
+		params.append('dateStart', filters.dateRange.start.toISOString());
+	}
+	if (filters.dateRange?.end) {
+		params.append('dateEnd', filters.dateRange.end.toISOString());
+	}
 
-	if (pagination.sortBy) params.append('sortBy', pagination.sortBy);
-	if (pagination.limit) params.append('limit', pagination.limit.toString());
-	if (pagination.page) params.append('page', pagination.page.toString());
+	if (pagination.sortBy) {
+		params.append('sortBy', pagination.sortBy);
+	}
+	if (pagination.limit) {
+		params.append('limit', pagination.limit.toString());
+	}
+	if (pagination.page) {
+		params.append('page', pagination.page.toString());
+	}
 
 	const response = await fetch(`/api/videos?${params.toString()}`);
 	if (!response.ok) {
@@ -174,7 +212,9 @@ export async function getVideoStats(): Promise<VideoStats> {
 export async function getVideoByHash(hash: string): Promise<VideoWithStats | null> {
 	const response = await fetch(`/api/videos/hash/${hash}`);
 	if (!response.ok) {
-		if (response.status === 404) return null;
+		if (response.status === 404) {
+			return null;
+		}
 		throw new Error('No se pudo obtener el video por hash.');
 	}
 	return response.json();

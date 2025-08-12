@@ -40,7 +40,9 @@ export function useConsoleCapture(
 
 	// Iniciar captura
 	const startCapture = useCallback(() => {
-		if (isCapturingRef.current) return;
+		if (isCapturingRef.current) {
+			return;
+		}
 
 		// Guardar las funciones originales
 		for (const method of methods) {
@@ -91,7 +93,9 @@ export function useConsoleCapture(
 
 	// Detener captura
 	const stopCapture = useCallback(() => {
-		if (!isCapturingRef.current) return;
+		if (!isCapturingRef.current) {
+			return;
+		}
 
 		// Restaurar funciones originales
 		for (const method of methods) {

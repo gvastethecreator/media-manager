@@ -60,12 +60,12 @@ export const THUMBNAIL_CONFIGS: Record<string, ThumbnailConfig> = {
 /**
  * 🖼️ Generador avanzado de thumbnail para imágenes
  */
-export async function generateAdvancedImageThumbnail(
+export function generateAdvancedImageThumbnail(
 	item: DisplayableEntity,
 	quality: ThumbnailQuality = ThumbnailQuality.MEDIUM
 ): Promise<string> {
 	if (item.entityType !== 'image') {
-		return '';
+		return Promise.resolve('');
 	}
 
 	// Prioridad de fuentes de thumbnail
@@ -79,22 +79,22 @@ export async function generateAdvancedImageThumbnail(
 	for (const source of sources) {
 		const url = source();
 		if (url && typeof url === 'string') {
-			return url;
+			return Promise.resolve(url);
 		}
 	}
 
-	return '';
+	return Promise.resolve('');
 }
 
 /**
  * 🎬 Generador avanzado de thumbnail para videos
  */
-export async function generateAdvancedVideoThumbnail(
+export function generateAdvancedVideoThumbnail(
 	item: DisplayableEntity,
 	options: { timeOffset?: number; quality?: ThumbnailQuality } = {}
 ): Promise<string> {
 	if (item.entityType !== 'video') {
-		return '';
+		return Promise.resolve('');
 	}
 
 	const { timeOffset = 5, quality = ThumbnailQuality.MEDIUM } = options;
@@ -113,29 +113,29 @@ export async function generateAdvancedVideoThumbnail(
 	for (const source of sources) {
 		const url = source();
 		if (url && typeof url === 'string') {
-			return url;
+			return Promise.resolve(url);
 		}
 	}
 
-	return '';
+	return Promise.resolve('');
 }
 
 /**
  * 🎵 Generador de waveform para audio
  */
-export async function generateAudioWaveform(
+export function generateAudioWaveform(
 	item: DisplayableEntity,
 	options: { width?: number; height?: number; color?: string } = {}
 ): Promise<string> {
 	if (item.entityType !== 'audio') {
-		return '';
+		return Promise.resolve('');
 	}
 
 	const { width = 300, height = 100, color = '#3b82f6' } = options;
 
 	// Si ya tiene waveform generado
 	if ((item as any).waveformUrl) {
-		return (item as any).waveformUrl;
+		return Promise.resolve((item as any).waveformUrl);
 	}
 
 	// Generar waveform via API
@@ -145,57 +145,57 @@ export async function generateAudioWaveform(
 		color: color.replace('#', ''),
 	});
 
-	return `/api/audio/${item.id}/waveform?${params.toString()}`;
+	return Promise.resolve(`/api/audio/${item.id}/waveform?${params.toString()}`);
 }
 
 /**
  * 📄 Generador de preview para documentos
  */
-export async function generateDocumentPreview(
+export function generateDocumentPreview(
 	item: DisplayableEntity,
 	options: { page?: number; quality?: ThumbnailQuality } = {}
 ): Promise<string> {
 	if (item.entityType !== 'document') {
-		return '';
+		return Promise.resolve('');
 	}
 
 	const { page = 1, quality = ThumbnailQuality.MEDIUM } = options;
 
 	// Si ya tiene preview
 	if ((item as any).previewUrl) {
-		return (item as any).previewUrl;
+		return Promise.resolve((item as any).previewUrl);
 	}
 
 	// Generar preview via API
-	return `/api/documents/${item.id}/preview?page=${page}&quality=${quality}`;
+	return Promise.resolve(`/api/documents/${item.id}/preview?page=${page}&quality=${quality}`);
 }
 
 /**
  * 📁 Generador de preview compuesto para carpetas
  */
-export async function generateFolderPreview(
+export function generateFolderPreview(
 	item: DisplayableEntity,
 	options: { maxItems?: number; layout?: 'grid' | 'stack' } = {}
 ): Promise<string> {
 	if (item.entityType !== 'folder') {
-		return '';
+		return Promise.resolve('');
 	}
 
 	const { maxItems = 4, layout = 'grid' } = options;
 
 	// Si ya tiene preview
 	if ((item as any).previewUrl) {
-		return (item as any).previewUrl;
+		return Promise.resolve((item as any).previewUrl);
 	}
 
 	// Generar preview compuesto via API
-	return `/api/folders/${item.id}/preview?max=${maxItems}&layout=${layout}`;
+	return Promise.resolve(`/api/folders/${item.id}/preview?max=${maxItems}&layout=${layout}`);
 }
 
 /**
  * 🎨 Generador de avatar para entidades relacionales
  */
-export async function generateEntityAvatar(
+export function generateEntityAvatar(
 	item: DisplayableEntity,
 	options: { size?: number; style?: 'geometric' | 'identicon' | 'initial' } = {}
 ): Promise<string> {
@@ -205,26 +205,23 @@ export async function generateEntityAvatar(
 	const avatarTypes = ['character', 'place', 'concept', 'group'];
 
 	if (!avatarTypes.includes(item.entityType)) {
-		return '';
+		return Promise.resolve('');
 	}
 
 	// Si ya tiene avatar personalizado
 	if ((item as any).avatarUrl) {
-		return (item as any).avatarUrl;
+		return Promise.resolve((item as any).avatarUrl);
 	}
 
 	// Generar avatar basado en nombre/ID
 	const seed = item.name || item.id;
-	return `/api/avatars/generate?seed=${encodeURIComponent(seed)}&size=${size}&style=${style}`;
+	return Promise.resolve(`/api/avatars/generate?seed=${encodeURIComponent(seed)}&size=${size}&style=${style}`);
 }
 
 /**
  * 🔧 Función unificada para generar thumbnail según el tipo
  */
-export async function generateThumbnailByType(
-	item: DisplayableEntity,
-	options: Record<string, any> = {}
-): Promise<string> {
+export function generateThumbnailByType(item: DisplayableEntity, options: Record<string, any> = {}): Promise<string> {
 	switch (item.entityType) {
 		case 'image':
 			return generateAdvancedImageThumbnail(item, options.quality);
@@ -256,12 +253,12 @@ export async function generateThumbnailByType(
 /**
  * 📄 Generador de thumbnail genérico
  */
-export async function generateGenericThumbnail(item: DisplayableEntity): Promise<string> {
+export function generateGenericThumbnail(item: DisplayableEntity): Promise<string> {
 	// Usar servicio de iconos SVG generados dinámicamente
 	const entityType = item.entityType;
 	const name = item.name || 'Item';
 
-	return `/api/thumbnails/generic?type=${entityType}&name=${encodeURIComponent(name)}`;
+	return Promise.resolve(`/api/thumbnails/generic?type=${entityType}&name=${encodeURIComponent(name)}`);
 }
 
 /**
@@ -315,11 +312,21 @@ export function buildThumbnailUrl(
 ): string {
 	const params = new URLSearchParams();
 
-	if (options.width) params.set('w', options.width.toString());
-	if (options.height) params.set('h', options.height.toString());
-	if (options.quality) params.set('q', options.quality);
-	if (options.format) params.set('f', options.format);
-	if (options.fit) params.set('fit', options.fit);
+	if (options.width) {
+		params.set('w', options.width.toString());
+	}
+	if (options.height) {
+		params.set('h', options.height.toString());
+	}
+	if (options.quality) {
+		params.set('q', options.quality);
+	}
+	if (options.format) {
+		params.set('f', options.format);
+	}
+	if (options.fit) {
+		params.set('fit', options.fit);
+	}
 
 	const queryString = params.toString();
 	return queryString ? `${baseUrl}?${queryString}` : baseUrl;

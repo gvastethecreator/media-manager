@@ -57,6 +57,6 @@ export function setValueByPath<T extends Record<string, any>>(obj: T, path: stri
 		current = current[part];
 	}
 
-	current[parts[parts.length - 1]] = value;
+	current[parts.at(-1)] = value;
 	return result;
 }

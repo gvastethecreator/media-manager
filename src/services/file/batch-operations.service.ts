@@ -434,7 +434,9 @@ class BatchFileOperationsService extends EventEmitter {
 	 */
 	private addToQueue(operationId: string): void {
 		const operation = this.operations.get(operationId);
-		if (!operation) return;
+		if (!operation) {
+			return;
+		}
 
 		// Insert based on priority
 		const priorityOrder = { urgent: 0, high: 1, normal: 2, low: 3 };
@@ -456,7 +458,9 @@ class BatchFileOperationsService extends EventEmitter {
 	 * Start queue processor
 	 */
 	private startQueueProcessor(): void {
-		if (this.isProcessing) return;
+		if (this.isProcessing) {
+			return;
+		}
 
 		this.isProcessing = true;
 		this.processQueue();
@@ -474,10 +478,14 @@ class BatchFileOperationsService extends EventEmitter {
 			}
 
 			const operationId = this.queue.shift();
-			if (!operationId) continue;
+			if (!operationId) {
+				continue;
+			}
 
 			const operation = this.operations.get(operationId);
-			if (!operation || operation.status !== 'queued') continue;
+			if (!operation || operation.status !== 'queued') {
+				continue;
+			}
 
 			this.running.add(operationId);
 			this.executeOperation(operationId).finally(() => {
@@ -491,7 +499,9 @@ class BatchFileOperationsService extends EventEmitter {
 	 */
 	private async executeOperation(operationId: string): Promise<void> {
 		const operation = this.operations.get(operationId);
-		if (!operation) return;
+		if (!operation) {
+			return;
+		}
 
 		try {
 			operation.status = 'running';

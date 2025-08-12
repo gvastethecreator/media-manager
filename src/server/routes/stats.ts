@@ -44,7 +44,7 @@ router.get('/activity', async (req, res) => {
 	try {
 		const { limit = '50' } = req.query;
 		const stats = await getSystemStats();
-		const activity = stats?.recentActivity?.slice(0, Number.parseInt(limit as string)) || [];
+		const activity = stats?.recentActivity?.slice(0, Number.parseInt(limit as string, 10)) || [];
 		res.json(activity);
 	} catch (error) {
 		console.error('Error getting recent activity:', error);
@@ -57,7 +57,7 @@ router.get('/top-tags', async (req, res) => {
 	try {
 		const { limit = '10' } = req.query;
 		const stats = await getSystemStats();
-		const topTags = stats?.topTags?.slice(0, Number.parseInt(limit as string)) || [];
+		const topTags = stats?.topTags?.slice(0, Number.parseInt(limit as string, 10)) || [];
 		res.json(topTags);
 	} catch (error) {
 		console.error('Error getting top tags:', error);

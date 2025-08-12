@@ -1,8 +1,7 @@
 'use client';
 
 import { OTPInput, OTPInputContext } from 'input-otp';
-import { MinusIcon } from 'lucide-react';
-import * as React from 'react';
+import React from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -57,12 +56,8 @@ function InputOTPSlot({
 	);
 }
 
-function InputOTPSeparator({ ...props }: React.ComponentProps<'div'>) {
-	return (
-		<div data-slot="input-otp-separator" role="separator" {...props}>
-			<MinusIcon />
-		</div>
-	);
+function InputOTPSeparator({ className, ...props }: React.ComponentProps<'hr'>) {
+	return <hr className={cn('mx-2 h-4 w-px bg-border', className)} data-slot="input-otp-separator" {...props} />;
 }
 
-export { InputOTP, InputOTPGroup, InputOTPSlot, InputOTPSeparator };
+export { InputOTP, InputOTPGroup, InputOTPSeparator, InputOTPSlot };

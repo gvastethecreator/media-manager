@@ -17,7 +17,15 @@ interface AudioViewerProps {
 	onPrevious: () => void;
 }
 
-function AudioHeader({ onPrevious, onNext, onClose }: { onPrevious: () => void; onNext: () => void; onClose: () => void }) {
+function AudioHeader({
+	onPrevious,
+	onNext,
+	onClose,
+}: {
+	onPrevious: () => void;
+	onNext: () => void;
+	onClose: () => void;
+}) {
 	return (
 		<div className="flex items-center justify-between border-b p-4">
 			<div className="flex items-center space-x-4">
@@ -35,7 +43,13 @@ function AudioHeader({ onPrevious, onNext, onClose }: { onPrevious: () => void; 
 	);
 }
 
-function MetadataPanel({ audio, renderChannels }: { audio: AudioWithStats; renderChannels: (channels?: number) => string | null }) {
+function MetadataPanel({
+	audio,
+	renderChannels,
+}: {
+	audio: AudioWithStats;
+	renderChannels: (channels?: number) => string | null;
+}) {
 	return (
 		<div className="border-t p-4">
 			<div className="grid grid-cols-2 gap-4 text-sm">

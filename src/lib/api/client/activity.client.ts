@@ -24,17 +24,33 @@ export async function getActivityFromApi(id: string): Promise<Activity> {
 
 export async function getActivitiesFromApi(filters: ActivityFilters = {}): Promise<ActivityListResponse> {
 	const params = new URLSearchParams();
-	if (filters.types) params.append('type', filters.types.join(','));
-	if (filters.startDate) params.append('startDate', filters.startDate.toISOString());
-	if (filters.endDate) params.append('endDate', filters.endDate.toISOString());
-	if (filters.imageId) params.append('imageId', filters.imageId);
-	if (filters.searchQuery) params.append('searchQuery', filters.searchQuery);
-	if (filters.limit) params.append('limit', String(filters.limit));
-	if (filters.offset) params.append('offset', String(filters.offset));
+	if (filters.types) {
+		params.append('type', filters.types.join(','));
+	}
+	if (filters.startDate) {
+		params.append('startDate', filters.startDate.toISOString());
+	}
+	if (filters.endDate) {
+		params.append('endDate', filters.endDate.toISOString());
+	}
+	if (filters.imageId) {
+		params.append('imageId', filters.imageId);
+	}
+	if (filters.searchQuery) {
+		params.append('searchQuery', filters.searchQuery);
+	}
+	if (filters.limit) {
+		params.append('limit', String(filters.limit));
+	}
+	if (filters.offset) {
+		params.append('offset', String(filters.offset));
+	}
 
 	const query = params.toString();
 	const response = await fetch(query ? `${API_BASE_PATH}?${query}` : API_BASE_PATH);
-	if (!response.ok) throw new Error('Error al obtener actividades');
+	if (!response.ok) {
+		throw new Error('Error al obtener actividades');
+	}
 	const result = await response.json();
 	// El endpoint devuelve datos y paginación; adaptamos a la estructura del store
 	return {
@@ -50,12 +66,16 @@ export async function createActivityInApi(data: CreateActivityData): Promise<Act
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(data),
 	});
-	if (!response.ok) throw new Error('Error al crear actividad');
+	if (!response.ok) {
+		throw new Error('Error al crear actividad');
+	}
 	const result = await response.json();
 	return result.data ?? result;
 }
 
 export async function deleteActivityFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
-	if (!response.ok) throw new Error('Error al eliminar actividad');
+	if (!response.ok) {
+		throw new Error('Error al eliminar actividad');
+	}
 }

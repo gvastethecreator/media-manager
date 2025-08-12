@@ -16,8 +16,12 @@ const logger = serverLogger.withContext('ImageSerializer');
  * @param data Objeto plano compatible con ImageBase
  */
 export function fromDrizzleImage(data: Partial<ImageBase>): ImageWithStats {
-	if (!data.id) throw new Error('El campo id es obligatorio en ImageWithStats');
-	if (!data.folderId) throw new Error('El campo folderId es obligatorio en ImageWithStats');
+	if (!data.id) {
+		throw new Error('El campo id es obligatorio en ImageWithStats');
+	}
+	if (!data.folderId) {
+		throw new Error('El campo folderId es obligatorio en ImageWithStats');
+	}
 	return {
 		id: data.id,
 		name: data.name ?? '',

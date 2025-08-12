@@ -211,7 +211,10 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 	video: renderVideo,
 	album: renderAlbum,
 	collection: (ctx) => (
-		<div className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`} data-item-id={(ctx.entity as any).id}>
+		<div
+			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
+			data-item-id={(ctx.entity as any).id}
+		>
 			<CollectionCard
 				className={ctx.className}
 				collection={ctx.entity as any}
@@ -231,7 +234,10 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 		</div>
 	),
 	folder: (ctx) => (
-		<div className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`} data-item-id={(ctx.entity as any).id}>
+		<div
+			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
+			data-item-id={(ctx.entity as any).id}
+		>
 			<FolderCard
 				className={ctx.className}
 				folder={ctx.entity as any}
@@ -241,18 +247,39 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 		</div>
 	),
 	audio: (ctx) => (
-		<div className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`} data-item-id={(ctx.entity as any).id}>
-			<AudioCard audio={ctx.entity as any} className={ctx.className} onClick={createSyntheticClickHandler(ctx.finalOnClick)} />
+		<div
+			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
+			data-item-id={(ctx.entity as any).id}
+		>
+			<AudioCard
+				audio={ctx.entity as any}
+				className={ctx.className}
+				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+			/>
 		</div>
 	),
 	document: (ctx) => (
-		<div className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`} data-item-id={(ctx.entity as any).id}>
-			<DocumentCard className={ctx.className} document={ctx.entity as any} onClick={createSyntheticClickHandler(ctx.finalOnClick)} />
+		<div
+			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
+			data-item-id={(ctx.entity as any).id}
+		>
+			<DocumentCard
+				className={ctx.className}
+				document={ctx.entity as any}
+				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+			/>
 		</div>
 	),
 	tag: (ctx) => (
-		<div className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`} data-item-id={(ctx.entity as any).id}>
-			<TagCard className={ctx.className} onClick={createSyntheticClickHandler(ctx.finalOnClick)} tag={ctx.entity as any} />
+		<div
+			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
+			data-item-id={(ctx.entity as any).id}
+		>
+			<TagCard
+				className={ctx.className}
+				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				tag={ctx.entity as any}
+			/>
 		</div>
 	),
 	note: (ctx) => (
@@ -264,38 +291,87 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 		</div>
 	),
 	place: (ctx) => (
-		<div className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`} data-item-id={(ctx.entity as any).id}>
-			<PlaceCard className={ctx.className} onClick={createSyntheticClickHandler(ctx.finalOnClick)} placeId={(ctx.entity as any).id} />
+		<div
+			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
+			data-item-id={(ctx.entity as any).id}
+		>
+			<PlaceCard
+				className={ctx.className}
+				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				placeId={(ctx.entity as any).id}
+			/>
 		</div>
 	),
 	'world-item': (ctx) => (
-		<div className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`} data-item-id={(ctx.entity as any).id}>
-			<WorldItemCard className={ctx.className} onClick={createSyntheticClickHandler(ctx.finalOnClick)} worldItemId={(ctx.entity as any).id} />
+		<div
+			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
+			data-item-id={(ctx.entity as any).id}
+		>
+			<WorldItemCard
+				className={ctx.className}
+				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				worldItemId={(ctx.entity as any).id}
+			/>
 		</div>
 	),
 	concept: (ctx) => (
-		<div className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`} data-item-id={(ctx.entity as any).id}>
-			<ConceptCard className={ctx.className} conceptId={(ctx.entity as any).id} onClick={createSyntheticClickHandler(ctx.finalOnClick)} />
+		<div
+			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
+			data-item-id={(ctx.entity as any).id}
+		>
+			<ConceptCard
+				className={ctx.className}
+				conceptId={(ctx.entity as any).id}
+				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+			/>
 		</div>
 	),
 	prompt: (ctx) => (
-		<div className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`} data-item-id={(ctx.entity as any).id}>
-			<PromptCard className={ctx.className} onClick={createSyntheticClickHandler(ctx.finalOnClick)} promptId={(ctx.entity as any).id} />
+		<div
+			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
+			data-item-id={(ctx.entity as any).id}
+		>
+			<PromptCard
+				className={ctx.className}
+				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				promptId={(ctx.entity as any).id}
+			/>
 		</div>
 	),
 	property: (ctx) => (
-		<div className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`} data-item-id={(ctx.entity as any).id}>
-			<PropertyCard className={ctx.className} onClick={createSyntheticClickHandler(ctx.finalOnClick)} propertyId={(ctx.entity as any).id} />
+		<div
+			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
+			data-item-id={(ctx.entity as any).id}
+		>
+			<PropertyCard
+				className={ctx.className}
+				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				propertyId={(ctx.entity as any).id}
+			/>
 		</div>
 	),
 	group: (ctx) => (
-		<div className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`} data-item-id={(ctx.entity as any).id}>
-			<GroupCard className={ctx.className} groupId={(ctx.entity as any).id} onClick={createSyntheticClickHandler(ctx.finalOnClick)} />
+		<div
+			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
+			data-item-id={(ctx.entity as any).id}
+		>
+			<GroupCard
+				className={ctx.className}
+				groupId={(ctx.entity as any).id}
+				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+			/>
 		</div>
 	),
 	wildcard: (ctx) => (
-		<div className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`} data-item-id={(ctx.entity as any).id}>
-			<WildcardCard className={ctx.className} onClick={createSyntheticClickHandler(ctx.finalOnClick)} wildcard={ctx.entity as any} />
+		<div
+			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
+			data-item-id={(ctx.entity as any).id}
+		>
+			<WildcardCard
+				className={ctx.className}
+				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				wildcard={ctx.entity as any}
+			/>
 		</div>
 	),
 };

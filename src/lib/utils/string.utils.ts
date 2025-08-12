@@ -10,7 +10,9 @@
  * @returns Un código de color en formato hexadecimal.
  */
 export function generateTagColor(name: string): string {
-	if (!name) return '#3b82f6'; // Color por defecto
+	if (!name) {
+		return '#3b82f6'; // Color por defecto
+	}
 
 	let hash = 0;
 	for (let i = 0; i < name.length; i++) {
@@ -35,7 +37,9 @@ export function generateTagColor(name: string): string {
  */
 export function generateTagEmoji(name: string, _category?: string): string {
 	// Lógica simple por ahora, se puede expandir
-	if (!name) return '🏷️';
+	if (!name) {
+		return '🏷️';
+	}
 
 	const emojis = ['🎨', '💡', '🚀', '⭐', '🔧', '📁', '👤', '🌍', '📚', '⚙️'];
 	const charCodeSum = name.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);

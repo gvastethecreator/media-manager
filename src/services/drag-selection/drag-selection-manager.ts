@@ -1,6 +1,5 @@
 import type { SelectionState } from '@/store/selection.store';
 import { useSelectionStore } from '@/store/selection.store';
-import type { EntityWithStats } from '../../types/migration';
 
 export interface DragSelectionConfig {
 	enabled: boolean;
@@ -126,7 +125,9 @@ export class DragSelectionManager {
 
 	// Update the list of selectable elements
 	updateSelectableElements(): void {
-		if (!this.container) return;
+		if (!this.container) {
+			return;
+		}
 
 		this.selectableElements.clear();
 
@@ -161,13 +162,19 @@ export class DragSelectionManager {
 
 	// Mouse event handlers
 	private handleMouseDown(event: MouseEvent): void {
-		if (!(this.config.enabled && this.container)) return;
+		if (!(this.config.enabled && this.container)) {
+			return;
+		}
 
 		// Only handle left mouse button
-		if (event.button !== 0) return;
+		if (event.button !== 0) {
+			return;
+		}
 
 		// Check if click is within container
-		if (!this.container.contains(event.target as Node)) return;
+		if (!this.container.contains(event.target as Node)) {
+			return;
+		}
 
 		// Check if click is on a selectable element or empty space
 		const target = event.target as HTMLElement;
@@ -199,14 +206,18 @@ export class DragSelectionManager {
 	}
 
 	private handleMouseMove(event: MouseEvent): void {
-		if (!this.state.isActive) return;
+		if (!this.state.isActive) {
+			return;
+		}
 
 		this.updateSelection(event);
 		this.handleAutoScroll(event);
 	}
 
 	private handleMouseUp(event: MouseEvent): void {
-		if (!this.state.isActive) return;
+		if (!this.state.isActive) {
+			return;
+		}
 
 		this.endSelection(event);
 	}
@@ -231,7 +242,7 @@ export class DragSelectionManager {
 		}
 	}
 
-	private handleContextMenu(event: MouseEvent): void {
+	private handleContextMenu(_event: MouseEvent): void {
 		// Cancel selection on right click
 		if (this.state.isActive) {
 			this.cancelSelection();
@@ -240,7 +251,7 @@ export class DragSelectionManager {
 
 	// Selection logic
 	private startSelection(event: MouseEvent): void {
-		const rect = this.container!.getBoundingClientRect();
+		const rect = this.container?.getBoundingClientRect();
 
 		this.state.isActive = true;
 		this.state.startPoint = {
@@ -260,14 +271,16 @@ export class DragSelectionManager {
 
 		// Add visual feedback class to container
 		if (this.config.visualFeedback) {
-			this.container!.classList.add('drag-selecting');
+			this.container?.classList.add('drag-selecting');
 		}
 
 		this.events.onSelectionStart?.(this.state);
 	}
 
 	private updateSelection(event: MouseEvent): void {
-		if (!(this.state.startPoint && this.container)) return;
+		if (!(this.state.startPoint && this.container)) {
+			return;
+		}
 
 		const rect = this.container.getBoundingClientRect();
 		this.state.currentPoint = {
@@ -281,7 +294,9 @@ export class DragSelectionManager {
 				(this.state.currentPoint.y - this.state.startPoint.y) ** 2
 		);
 
-		if (distance < this.config.threshold) return;
+		if (distance < this.config.threshold) {
+			return;
+		}
 
 		// Calculate selection rectangle
 		this.updateSelectionRect();
@@ -295,8 +310,10 @@ export class DragSelectionManager {
 		this.events.onSelectionUpdate?.(this.state, Array.from(this.state.selectedElements));
 	}
 
-	private endSelection(event: MouseEvent): void {
-		if (!this.state.isActive) return;
+	private endSelection(_event: MouseEvent): void {
+		if (!this.state.isActive) {
+			return;
+		}
 
 		// Apply final selection
 		const selectedIds = Array.from(this.state.selectedElements);
@@ -323,7 +340,9 @@ export class DragSelectionManager {
 	}
 
 	private cancelSelection(): void {
-		if (!this.state.isActive) return;
+		if (!this.state.isActive) {
+			return;
+		}
 
 		this.events.onSelectionCancel?.(this.state);
 		this.resetState();
@@ -385,7 +404,9 @@ export class DragSelectionManager {
 	}
 
 	private updateSelectionRect(): void {
-		if (!(this.state.startPoint && this.state.currentPoint)) return;
+		if (!(this.state.startPoint && this.state.currentPoint)) {
+			return;
+		}
 
 		const left = Math.min(this.state.startPoint.x, this.state.currentPoint.x);
 		const top = Math.min(this.state.startPoint.y, this.state.currentPoint.y);
@@ -396,7 +417,9 @@ export class DragSelectionManager {
 	}
 
 	private findIntersectingElements(): string[] {
-		if (!(this.state.selectionRect && this.container)) return [];
+		if (!(this.state.selectionRect && this.container)) {
+			return [];
+		}
 
 		const containerRect = this.container.getBoundingClientRect();
 		const intersectingIds: string[] = [];
@@ -462,7 +485,9 @@ export class DragSelectionManager {
 
 	// Auto-scroll functionality
 	private handleAutoScroll(event: MouseEvent): void {
-		if (!this.container) return;
+		if (!this.container) {
+			return;
+		}
 
 		const containerRect = this.container.getBoundingClientRect();
 		const scrollThreshold = this.config.scrollThreshold ?? 50;

@@ -127,12 +127,10 @@ export class ServerLogger {
 		this.showMemoryUsage = options.showMemoryUsage ?? false;
 	}
 
-	private getTimestamp(): string {
-		return new Date().toISOString();
-	}
-
 	private getMemoryUsage(): string {
-		if (!this.showMemoryUsage) return '';
+		if (!this.showMemoryUsage) {
+			return '';
+		}
 
 		const memoryUsage = process.memoryUsage();
 		return `[Mem: ${Math.round(memoryUsage.heapUsed / 1024 / 1024)}MB/${Math.round(memoryUsage.heapTotal / 1024 / 1024)}MB]`;

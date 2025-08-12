@@ -186,11 +186,21 @@ export async function updateWorkflow(id: string, data: WorkflowUpdateInput): Pro
 		workflowLogger.info(`🔄 Actualizando workflow: ${id}`);
 
 		const updateData: any = {};
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.description !== undefined) updateData.description = data.description;
-		if (data.config !== undefined) updateData.config = data.config;
-		if (data.steps !== undefined) updateData.steps = data.steps;
-		if (data.isActive !== undefined) updateData.isActive = data.isActive;
+		if (data.name !== undefined) {
+			updateData.name = data.name;
+		}
+		if (data.description !== undefined) {
+			updateData.description = data.description;
+		}
+		if (data.config !== undefined) {
+			updateData.config = data.config;
+		}
+		if (data.steps !== undefined) {
+			updateData.steps = data.steps;
+		}
+		if (data.isActive !== undefined) {
+			updateData.isActive = data.isActive;
+		}
 
 		const [updatedWorkflow] = await db.update(workflows).set(updateData).where(eq(workflows.id, id)).returning({
 			id: workflows.id,

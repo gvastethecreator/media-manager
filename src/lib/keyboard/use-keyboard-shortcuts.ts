@@ -61,7 +61,9 @@ export const useKeyboardShortcuts = (options: UseKeyboardShortcutsOptions = {}):
 
 	// Configurar event listeners
 	useEffect(() => {
-		if (!target) return;
+		if (!target) {
+			return;
+		}
 
 		// Adaptar a EventListener tipado
 		const handleKeyDown: EventListener = (evt) => {

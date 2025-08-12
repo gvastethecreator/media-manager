@@ -167,7 +167,9 @@ export class ActivityServiceImpl implements ActivityService {
 				.where(eq(activities.id, id))
 				.limit(1);
 
-			if (result.length === 0) return null;
+			if (result.length === 0) {
+				return null;
+			}
 
 			return this.transformActivityResponse(result[0]);
 		} catch (error) {
@@ -326,11 +328,21 @@ export class ActivityServiceImpl implements ActivityService {
 	 */
 	private getColorForActivityType(type: string): string {
 		// Podemos identificar categorías principales
-		if (type.startsWith('image_')) return '#3b82f6';
-		if (type.startsWith('video_')) return '#ec4899';
-		if (type.startsWith('album_')) return '#f59e0b';
-		if (type.startsWith('tag_')) return '#10b981';
-		if (type.startsWith('user_')) return '#8b5cf6';
+		if (type.startsWith('image_')) {
+			return '#3b82f6';
+		}
+		if (type.startsWith('video_')) {
+			return '#ec4899';
+		}
+		if (type.startsWith('album_')) {
+			return '#f59e0b';
+		}
+		if (type.startsWith('tag_')) {
+			return '#10b981';
+		}
+		if (type.startsWith('user_')) {
+			return '#8b5cf6';
+		}
 
 		// Default
 		return '#6b7280';
@@ -342,11 +354,21 @@ export class ActivityServiceImpl implements ActivityService {
 	 * @returns Categoría correspondiente
 	 */
 	private getCategoryForActivityType(type: string): string {
-		if (type.startsWith('image_')) return 'Imágenes';
-		if (type.startsWith('video_')) return 'Videos';
-		if (type.startsWith('album_')) return 'Álbumes';
-		if (type.startsWith('tag_')) return 'Etiquetas';
-		if (type.startsWith('user_')) return 'Usuarios';
+		if (type.startsWith('image_')) {
+			return 'Imágenes';
+		}
+		if (type.startsWith('video_')) {
+			return 'Videos';
+		}
+		if (type.startsWith('album_')) {
+			return 'Álbumes';
+		}
+		if (type.startsWith('tag_')) {
+			return 'Etiquetas';
+		}
+		if (type.startsWith('user_')) {
+			return 'Usuarios';
+		}
 
 		// Default
 		return 'General';

@@ -90,7 +90,9 @@ export const useCache = (options: UseCacheOptions = {}): CacheHookResult => {
 
 	// Update statistics periodically
 	useEffect(() => {
-		if (!enableStatistics) return;
+		if (!enableStatistics) {
+			return;
+		}
 
 		const updateStats = () => {
 			try {

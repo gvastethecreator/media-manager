@@ -50,12 +50,16 @@ export function formatImageInfo(width?: number, height?: number, size?: number, 
  * Formatea un path de archivo para mostrar
  */
 export function formatPath(path: string, maxLength = 50): string {
-	if (path.length <= maxLength) return path;
+	if (path.length <= maxLength) {
+		return path;
+	}
 
 	const parts = path.split(/[/\\]/);
-	if (parts.length <= 2) return path;
+	if (parts.length <= 2) {
+		return path;
+	}
 
-	const fileName = parts[parts.length - 1];
+	const fileName = parts.at(-1);
 	const firstDir = parts[0];
 
 	return `${firstDir}/.../${fileName}`;
@@ -75,7 +79,9 @@ export function formatProcessStatus(processed: number, total: number, errors = 0
  * Formatea tags para mostrar
  */
 export function formatTags(tags: string[], maxTags = 3): string {
-	if (tags.length === 0) return 'Sin tags';
+	if (tags.length === 0) {
+		return 'Sin tags';
+	}
 
 	if (tags.length <= maxTags) {
 		return tags.join(', ');

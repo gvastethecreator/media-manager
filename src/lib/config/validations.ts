@@ -17,6 +17,9 @@ import {
 	worldItems,
 } from '@/lib/drizzle/schema';
 
+// Regex top-level para validar nombres: letras, números, espacios y guiones
+const VALID_NAME_REGEX = /^[a-zA-Z0-9\s-]+$/;
+
 const entityTableMap = {
 	album: albums,
 	character: characters,
@@ -54,7 +57,7 @@ export async function validateName(entityType: keyof typeof entityTableMap, name
 	}
 
 	// Verificar caracteres válidos (letras, números, espacios y guiones)
-	if (!/^[a-zA-Z0-9\s-]+$/.test(normalizedName)) {
+	if (!VALID_NAME_REGEX.test(normalizedName)) {
 		throw new Error('El nombre solo puede contener letras, números, espacios y guiones');
 	}
 

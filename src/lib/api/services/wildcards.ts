@@ -51,12 +51,24 @@ export const wildcardsApi = {
 	getForCards: (options: GetWildcardsOptions = {}): Promise<WildcardCardData[]> => {
 		const params = new URLSearchParams();
 
-		if (options.limit) params.append('limit', options.limit.toString());
-		if (options.category) params.append('category', options.category);
-		if (options.parentId !== undefined) params.append('parentId', options.parentId || '');
-		if (options.searchTerm) params.append('searchTerm', options.searchTerm);
-		if (options.orderBy) params.append('orderBy', options.orderBy);
-		if (options.orderDir) params.append('orderDir', options.orderDir);
+		if (options.limit) {
+			params.append('limit', options.limit.toString());
+		}
+		if (options.category) {
+			params.append('category', options.category);
+		}
+		if (options.parentId !== undefined) {
+			params.append('parentId', options.parentId || '');
+		}
+		if (options.searchTerm) {
+			params.append('searchTerm', options.searchTerm);
+		}
+		if (options.orderBy) {
+			params.append('orderBy', options.orderBy);
+		}
+		if (options.orderDir) {
+			params.append('orderDir', options.orderDir);
+		}
 
 		const queryString = params.toString();
 		const endpoint = `/api/wildcards/cards${queryString ? `?${queryString}` : ''}`;

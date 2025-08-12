@@ -41,7 +41,9 @@ export const createFolderNavigationSlice: StateCreator<CompleteFolderStore, [], 
 	navigateUp: () => {
 		const { currentFolderId, getFolder } = get();
 
-		if (!currentFolderId) return;
+		if (!currentFolderId) {
+			return;
+		}
 
 		const currentFolder = getFolder(currentFolderId);
 		if (currentFolder?.parentId) {

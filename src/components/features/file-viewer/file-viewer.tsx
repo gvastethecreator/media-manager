@@ -299,14 +299,13 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 		setPosition({ x: 0, y: 0 });
 	}, []);
 
-	// Reset state when opening viewer
+	// Reset state when opening viewer (respetar índice actual del store)
 	useEffect(() => {
 		if (isOpen) {
-			setCurrentIndex(0);
 			resetView();
 			setIsLoading(true);
 		}
-	}, [isOpen, setCurrentIndex, resetView]);
+	}, [isOpen, resetView]);
 
 	// Validate images and index
 	useEffect(() => {
@@ -322,8 +321,8 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	// Función memoizada para cargar URL de imagen (sin async innecesario)
 	const loadImageUrl = useCallback((imageId: string): string => {
 		try {
-			// Usar el endpoint correcto para imágenes
-			const url = `/api/images/${imageId}`;
+			// Usar el endpoint de contenido completo
+			const url = `/api/images/${imageId}/content`;
 			return url;
 		} catch (error) {
 			console.error(`Error cargando URL para ${imageId}:`, error);
@@ -476,47 +475,67 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 		}
 	}, [currentImage, urls, loadImageUrl]);
 
-	// Keyboard navigation
+	// Keyboard navigation (complejidad reducida)
+	const announce = useCallback(
+		(index: number) => {
+			const item = images[index];
+			if (item) {
+				setAnnounceMessage(`Imagen ${index + 1} de ${images.length}: ${item.name}`);
+			}
+		},
+		[images]
+	);
+
+	const onEscape = useCallback(() => onClose(), [onClose]);
+	const onArrowLeft = useCallback(() => {
+		previousItem();
+		announce(Math.max(0, currentIndex - 1));
+	}, [previousItem, announce, currentIndex]);
+	const onArrowRight = useCallback(() => {
+		nextItem();
+		announce(Math.min(images.length - 1, currentIndex + 1));
+	}, [nextItem, announce, images.length, currentIndex]);
+	const onReset = useCallback(() => {
+		resetView();
+		setAnnounceMessage('Vista restablecida');
+	}, [resetView]);
+	const onZoomInKey = useCallback(() => {
+		handleZoom(0.2);
+		setAnnounceMessage('Zoom aumentado');
+	}, [handleZoom]);
+	const onZoomOutKey = useCallback(() => {
+		handleZoom(-0.2);
+		setAnnounceMessage('Zoom reducido');
+	}, [handleZoom]);
+
 	useEffect(() => {
 		if (!isOpen) {
 			return;
 		}
 
+		const keyMap: Record<string, () => void> = {
+			Escape: onEscape,
+			ArrowLeft: onArrowLeft,
+			ArrowRight: onArrowRight,
+			r: onReset,
+			'+': onZoomInKey,
+			'-': onZoomOutKey,
+			'0': onReset,
+		};
+
 		const handleKeyDown = (e: KeyboardEvent) => {
-			// If Tab is pressed, don't override browser behavior
 			if (e.key === 'Tab') {
 				return;
 			}
-
-			if (e.key === 'Escape') {
-				onClose();
-			} else if (e.key === 'ArrowLeft') {
-				previousItem();
-				// Anunciar para lectores de pantalla
-				if (images[currentIndex - 1]) {
-					setAnnounceMessage(`Imagen ${currentIndex} de ${images.length}: ${images[currentIndex - 1].name}`);
-				}
-			} else if (e.key === 'ArrowRight') {
-				nextItem();
-				// Anunciar para lectores de pantalla
-				if (images[currentIndex + 1]) {
-					setAnnounceMessage(`Imagen ${currentIndex + 2} de ${images.length}: ${images[currentIndex + 1].name}`);
-				}
-			} else if (e.key === '0' || e.key === 'r') {
-				resetView();
-				setAnnounceMessage('Vista restablecida');
-			} else if (e.key === '+') {
-				handleZoom(0.2);
-				setAnnounceMessage('Zoom aumentado');
-			} else if (e.key === '-') {
-				handleZoom(-0.2);
-				setAnnounceMessage('Zoom reducido');
+			const fn = keyMap[e.key];
+			if (fn) {
+				fn();
 			}
 		};
 
 		window.addEventListener('keydown', handleKeyDown);
 		return () => window.removeEventListener('keydown', handleKeyDown);
-	}, [isOpen, images, onClose, resetView, handleZoom, previousItem, nextItem, currentIndex]);
+	}, [isOpen, onEscape, onArrowLeft, onArrowRight, onReset, onZoomInKey, onZoomOutKey]);
 
 	// Resetear posición y escala cuando cambia la imagen seleccionada
 	useEffect(() => {
@@ -692,4 +711,4 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	}
 
 	return viewerContent;
-	});
+});

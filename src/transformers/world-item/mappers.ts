@@ -108,26 +108,48 @@ export function mapUpdateWorldItemDataToDrizzle(input: WorldItemUpdateInput): Dr
 	try {
 		const drizzleData: DrizzleWorldItemUpdateInput = {};
 
-		if (input.name !== undefined) drizzleData.name = input.name;
-		if (input.description !== undefined) drizzleData.description = input.description;
-		if (input.type !== undefined) drizzleData.type = input.type || undefined;
-		if (input.category !== undefined) drizzleData.category = input.category || undefined;
-		if (input.rarity !== undefined) drizzleData.rarity = input.rarity || undefined;
-		if (input.value !== undefined) drizzleData.value = typeof input.value === 'number' ? input.value : null;
-		if (input.weight !== undefined) drizzleData.weight = typeof input.weight === 'number' ? input.weight : null;
-		if (input.featuredImage !== undefined) drizzleData.featuredImage = input.featuredImage;
-		if (input.attributes !== undefined)
+		if (input.name !== undefined) {
+			drizzleData.name = input.name;
+		}
+		if (input.description !== undefined) {
+			drizzleData.description = input.description;
+		}
+		if (input.type !== undefined) {
+			drizzleData.type = input.type || undefined;
+		}
+		if (input.category !== undefined) {
+			drizzleData.category = input.category || undefined;
+		}
+		if (input.rarity !== undefined) {
+			drizzleData.rarity = input.rarity || undefined;
+		}
+		if (input.value !== undefined) {
+			drizzleData.value = typeof input.value === 'number' ? input.value : null;
+		}
+		if (input.weight !== undefined) {
+			drizzleData.weight = typeof input.weight === 'number' ? input.weight : null;
+		}
+		if (input.featuredImage !== undefined) {
+			drizzleData.featuredImage = input.featuredImage;
+		}
+		if (input.attributes !== undefined) {
 			drizzleData.attributes =
 				typeof input.attributes === 'string' ? input.attributes : JSON.stringify(input.attributes);
-		if (input.effects !== undefined)
+		}
+		if (input.effects !== undefined) {
 			drizzleData.effects = typeof input.effects === 'string' ? input.effects : JSON.stringify(input.effects);
-		if (input.requirements !== undefined)
+		}
+		if (input.requirements !== undefined) {
 			drizzleData.requirements =
 				typeof input.requirements === 'string' ? input.requirements : JSON.stringify(input.requirements);
-		if (input.properties !== undefined)
+		}
+		if (input.properties !== undefined) {
 			drizzleData.properties =
 				typeof input.properties === 'string' ? input.properties : JSON.stringify(input.properties);
-		if (input.isFavorite !== undefined) drizzleData.isFavorite = input.isFavorite;
+		}
+		if (input.isFavorite !== undefined) {
+			drizzleData.isFavorite = input.isFavorite;
+		}
 
 		return drizzleData;
 	} catch (error) {
@@ -155,11 +177,18 @@ function mapWorldItemFiltersToDrizzle(filters: WorldItemFilters): DrizzleWorldIt
 	if (filters.query) {
 		where.OR = [{ name: { contains: filters.query } }, { description: { contains: filters.query } }];
 	}
-	if (filters.type && Array.isArray(filters.type) && filters.type.length) where.type = { in: filters.type };
-	if (filters.category && Array.isArray(filters.category) && filters.category.length)
+	if (filters.type && Array.isArray(filters.type) && filters.type.length) {
+		where.type = { in: filters.type };
+	}
+	if (filters.category && Array.isArray(filters.category) && filters.category.length) {
 		where.category = { in: filters.category };
-	if (filters.rarity && Array.isArray(filters.rarity) && filters.rarity.length) where.rarity = { in: filters.rarity };
-	if (filters.isFavorite !== undefined) where.isFavorite = filters.isFavorite;
+	}
+	if (filters.rarity && Array.isArray(filters.rarity) && filters.rarity.length) {
+		where.rarity = { in: filters.rarity };
+	}
+	if (filters.isFavorite !== undefined) {
+		where.isFavorite = filters.isFavorite;
+	}
 	if (filters.hasImage !== undefined) {
 		where.images = filters.hasImage ? { some: {} } : { none: {} };
 	}
@@ -167,7 +196,9 @@ function mapWorldItemFiltersToDrizzle(filters: WorldItemFilters): DrizzleWorldIt
 }
 
 function mapSortByToDrizzle(sortBy?: string): DrizzleWorldItemOrderByInput {
-	if (!sortBy) return { updatedAt: 'desc' };
+	if (!sortBy) {
+		return { updatedAt: 'desc' };
+	}
 
 	const [field, order = 'desc'] = sortBy.split(':');
 	const validOrders = ['asc', 'desc'] as const;

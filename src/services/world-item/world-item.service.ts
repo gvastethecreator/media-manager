@@ -267,27 +267,67 @@ export async function updateWorldItem(id: string, input: WorldItemUpdateInput): 
 		};
 
 		// Mapear campos opcionales
-		if (input.name !== undefined) updateData.name = input.name;
-		if (input.description !== undefined) updateData.description = input.description;
-		if (input.emoji !== undefined) updateData.emoji = input.emoji;
-		if (input.color !== undefined) updateData.color = input.color;
-		if (input.category !== undefined) updateData.category = input.category;
+		if (input.name !== undefined) {
+			updateData.name = input.name;
+		}
+		if (input.description !== undefined) {
+			updateData.description = input.description;
+		}
+		if (input.emoji !== undefined) {
+			updateData.emoji = input.emoji;
+		}
+		if (input.color !== undefined) {
+			updateData.color = input.color;
+		}
+		if (input.category !== undefined) {
+			updateData.category = input.category;
+		}
 
-		if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
-		if (input.totalImages !== undefined) updateData.totalImages = input.totalImages;
-		if (input.totalVideos !== undefined) updateData.totalVideos = input.totalVideos;
-		if (input.type !== undefined) updateData.type = input.type;
-		if (input.rarity !== undefined) updateData.rarity = input.rarity;
-		if (input.value !== undefined) updateData.value = input.value;
-		if (input.weight !== undefined) updateData.weight = input.weight;
-		if (input.materials !== undefined) updateData.materials = input.materials;
-		if (input.origin !== undefined) updateData.origin = input.origin;
-		if (input.properties !== undefined) updateData.properties = input.properties;
-		if (input.uses !== undefined) updateData.uses = input.uses;
-		if (input.history !== undefined) updateData.history = input.history;
-		if (input.notes !== undefined) updateData.notes = input.notes;
-		if (input.featuredImage !== undefined) updateData.featuredImage = input.featuredImage;
-		if (input.parentId !== undefined) updateData.parentId = input.parentId;
+		if (input.isFavorite !== undefined) {
+			updateData.isFavorite = input.isFavorite;
+		}
+		if (input.totalImages !== undefined) {
+			updateData.totalImages = input.totalImages;
+		}
+		if (input.totalVideos !== undefined) {
+			updateData.totalVideos = input.totalVideos;
+		}
+		if (input.type !== undefined) {
+			updateData.type = input.type;
+		}
+		if (input.rarity !== undefined) {
+			updateData.rarity = input.rarity;
+		}
+		if (input.value !== undefined) {
+			updateData.value = input.value;
+		}
+		if (input.weight !== undefined) {
+			updateData.weight = input.weight;
+		}
+		if (input.materials !== undefined) {
+			updateData.materials = input.materials;
+		}
+		if (input.origin !== undefined) {
+			updateData.origin = input.origin;
+		}
+		if (input.properties !== undefined) {
+			updateData.properties = input.properties;
+		}
+		if (input.uses !== undefined) {
+			updateData.uses = input.uses;
+		}
+		if (input.history !== undefined) {
+			updateData.history = input.history;
+		}
+		if (input.notes !== undefined) {
+			updateData.notes = input.notes;
+		}
+		if (input.featuredImage !== undefined) {
+			updateData.featuredImage = input.featuredImage;
+		}
+		if (input.parentId !== undefined) {
+			updateData.parentId = input.parentId;
+		}
 
 		const result = await db.update(worldItems).set(updateData).where(eq(worldItems.id, id)).returning();
 
@@ -513,7 +553,9 @@ export class WorldItemService {
 
 	async getWorldItemById(id: string): Promise<WorldItemWithStats | null> {
 		const worldItem = await getWorldItemById(id);
-		if (!worldItem) return null;
+		if (!worldItem) {
+			return null;
+		}
 		return toWorldItemWithStats(worldItem);
 	}
 

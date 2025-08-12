@@ -150,7 +150,9 @@ export function validateVideoChapters(chapters: unknown[]): boolean {
 	// Validar cada capítulo individualmente
 	for (const chapter of chapters) {
 		const result = videoChapterSchema.safeParse(chapter);
-		if (!result.success) return false;
+		if (!result.success) {
+			return false;
+		}
 	}
 
 	// Validar que no haya solapamiento entre capítulos

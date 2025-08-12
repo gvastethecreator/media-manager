@@ -6,6 +6,8 @@
 
 // Tipos corregidos para FileBase
 
+import { Effect, Schedule } from 'effect';
+import type { Dirent } from 'fs';
 import fs, { stat } from 'fs/promises';
 import path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -41,6 +43,9 @@ interface DirectoryReadResult {
 
 const logger = serverLogger.withContext('FileService');
 
+// Regex a nivel superior para sanitizar rutas
+const PATH_SANITIZE_REGEX = /^(\.\.(\/|\\|$))+/;
+
 /**
  * Interfaz para respuesta de Data URL
  */
@@ -67,7 +72,7 @@ const createFileError = (
  */
 function validateAndSanitizePath(filePath: string): string {
 	// Normalizar la ruta y eliminar intentos de navegar fuera del directorio permitido
-	const normalizedPath = path.normalize(filePath).replace(/^(\.\.(\/|\\|$))+/, '');
+	const normalizedPath = path.normalize(filePath).replace(PATH_SANITIZE_REGEX, '');
 
 	// Verificar que la ruta existe y es un archivo válido
 	return normalizedPath;
@@ -151,37 +156,35 @@ export async function getDirectoryInfo(dirPath: string): Promise<DirectoryReadRe
 		// Leer contenido del directorio
 		const items = await fs.readdir(normalizedPath, { withFileTypes: true });
 
-		// Procesar cada elemento
-		const processedItems: FileBase[] = [];
-		for (const item of items) {
-			const itemPath = path.join(normalizedPath, item.name);
-			const itemStats = await stat(itemPath);
-
-			// Usar transformers para crear el objeto FileBase
-			const fileBase: FileBase = {
-				id: generateFileId(itemPath),
-				name: item.name,
-				path: itemPath,
-				size: itemStats.size,
-				hash: '',
-				mimeType: item.isDirectory() ? 'directory' : determineMimeType(item.name),
-				extension: item.isDirectory() ? '' : path.extname(item.name),
-				type: item.isDirectory() ? FileType.DIRECTORY : determineFileType(item.name),
-				isDirectory: item.isDirectory(),
-				parentPath: path.dirname(itemPath),
-				absolutePath: path.resolve(itemPath),
-				relativePath: path.relative(process.cwd(), itemPath),
-				modifiedAt: itemStats.mtime,
-				accessedAt: itemStats.atime,
-				folderId: null,
-				isHidden: item.name.startsWith('.'),
-				isReadonly: false,
-				createdAt: itemStats.birthtime,
-				updatedAt: itemStats.mtime,
-			};
-
-			processedItems.push(fileBase);
-		}
+		// Procesar cada elemento (sin await en bucles)
+		const processedItems: FileBase[] = await Promise.all(
+			items.map(async (item) => {
+				const itemPath = path.join(normalizedPath, item.name);
+				const itemStats = await stat(itemPath);
+				const fileBase: FileBase = {
+					id: generateFileId(itemPath),
+					name: item.name,
+					path: itemPath,
+					size: itemStats.size,
+					hash: '',
+					mimeType: item.isDirectory() ? 'directory' : determineMimeType(item.name),
+					extension: item.isDirectory() ? '' : path.extname(item.name),
+					type: item.isDirectory() ? FileType.DIRECTORY : determineFileType(item.name),
+					isDirectory: item.isDirectory(),
+					parentPath: path.dirname(itemPath),
+					absolutePath: path.resolve(itemPath),
+					relativePath: path.relative(process.cwd(), itemPath),
+					modifiedAt: itemStats.mtime,
+					accessedAt: itemStats.atime,
+					folderId: null,
+					isHidden: item.name.startsWith('.'),
+					isReadonly: false,
+					createdAt: itemStats.birthtime,
+					updatedAt: itemStats.mtime,
+				};
+				return fileBase;
+			})
+		);
 
 		// Usar transformer para serializar el resultado
 		const result = serializeDirectoryContents(normalizedPath, processedItems);
@@ -197,6 +200,85 @@ export async function getDirectoryInfo(dirPath: string): Promise<DirectoryReadRe
 			throw error;
 		}
 		logger.error('❌ Error al obtener contenido del directorio:', error);
+		throw createFileError('No se pudo obtener el contenido del directorio', FileErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * Lee un directorio con concurrencia controlada y reintentos usando Effect
+ * - Límite de concurrencia configurable (por ahora fijo a 8)
+ * - Reintentos con backoff para lecturas de stat intermitentes
+ * - Timeout por item para evitar bloqueos
+ */
+export async function getDirectoryInfoConcurrent(dirPath: string): Promise<DirectoryReadResult> {
+	logger.info('📁 (Effect) Obteniendo contenido del directorio con concurrencia:', dirPath);
+
+	// Validación básica y listado
+	const normalizedPath = validateAndSanitizePath(dirPath);
+	const dirStats = await stat(normalizedPath);
+	if (!dirStats.isDirectory()) {
+		throw createFileError('La ruta especificada no es un directorio válido', FileErrorCode.NOT_A_DIRECTORY);
+	}
+
+	const dirents = await fs.readdir(normalizedPath, { withFileTypes: true });
+
+	// Efecto para procesar un item
+	const processItem = (item: Dirent) => {
+		const itemPath = path.join(normalizedPath, item.name);
+
+		const eff = Effect.tryPromise({
+			try: () => stat(itemPath),
+			catch: (err) => createFileError(`stat falló para ${itemPath}`, FileErrorCode.OPERATION_FAILED, err),
+		}).pipe(
+			Effect.map((itemStats) => {
+				const fileBase: FileBase = {
+					id: generateFileId(itemPath),
+					name: item.name,
+					path: itemPath,
+					size: itemStats.size,
+					hash: '',
+					mimeType: item.isDirectory() ? 'directory' : determineMimeType(item.name),
+					extension: item.isDirectory() ? '' : path.extname(item.name),
+					type: item.isDirectory() ? FileType.DIRECTORY : determineFileType(item.name),
+					isDirectory: item.isDirectory(),
+					parentPath: path.dirname(itemPath),
+					absolutePath: path.resolve(itemPath),
+					relativePath: path.relative(process.cwd(), itemPath),
+					modifiedAt: itemStats.mtime,
+					accessedAt: itemStats.atime,
+					folderId: null,
+					isHidden: item.name.startsWith('.'),
+					isReadonly: false,
+					createdAt: itemStats.birthtime,
+					updatedAt: itemStats.mtime,
+				};
+				return fileBase;
+			}),
+			// timeout por item
+			Effect.timeout('10 seconds'),
+			// reintentos con backoff corto (3 intentos)
+			Effect.retry(Schedule.addDelay(Schedule.recurs(2), () => '150 millis'))
+		);
+
+		return eff;
+	};
+
+	// Ejecutar con concurrencia limitada
+	const effectAll = Effect.all(dirents.map(processItem), { concurrency: 8, mode: 'validate' as const });
+
+	try {
+		const processedItems = await Effect.runPromise(effectAll);
+		const result = serializeDirectoryContents(normalizedPath, processedItems);
+		logger.info('✅ (Effect) Contenido del directorio obtenido:', {
+			path: normalizedPath,
+			itemCount: processedItems.length,
+		});
+		return result;
+	} catch (error) {
+		logger.error('❌ (Effect) Error al obtener contenido del directorio:', error);
+		if (error instanceof Error && (error as any).name === 'FileError') {
+			throw error;
+		}
 		throw createFileError('No se pudo obtener el contenido del directorio', FileErrorCode.OPERATION_FAILED, error);
 	}
 }
@@ -483,7 +565,7 @@ export { enhancedFileOperationsService } from './enhanced-file-operations.servic
 /**
  * Queue a batch copy operation for multiple files
  */
-export async function batchCopyFiles(
+export function batchCopyFiles(
 	items: AnyEntityWithStats[],
 	targetPath: string,
 	options: FileOperationOptions & {
@@ -512,7 +594,7 @@ export async function batchCopyFiles(
 /**
  * Queue a batch move operation for multiple files
  */
-export async function batchMoveFiles(
+export function batchMoveFiles(
 	items: AnyEntityWithStats[],
 	targetPath: string,
 	options: FileOperationOptions & {
@@ -541,7 +623,7 @@ export async function batchMoveFiles(
 /**
  * Queue a batch delete operation for multiple files
  */
-export async function batchDeleteFiles(
+export function batchDeleteFiles(
 	items: AnyEntityWithStats[],
 	options: {
 		priority?: 'low' | 'normal' | 'high' | 'urgent';
@@ -588,15 +670,13 @@ export function getBatchOperationsSummary() {
 	};
 }
 
-// Re-export batch operations service for direct access
-export { batchFileOperationsService };
-
-// Mantener compatibilidad con nombres anteriores
+// Compatibilidad legacy: solo alias, sin re-export
+/** Alias legacy para compatibilidad con API anterior */
 export const readDirectory = getDirectoryInfo;
 export const deleteFileOrDirectory = deleteFile;
 export const copyFileOrDirectory = copyFile;
 export const moveFileOrDirectory = moveFile;
 export const renameFileOrDirectory = renameFile;
 
-// Export types for external use
-export type { FileCopyMoveResult, FileOperationResult, FileOperationOptions };
+// Exportar tipos solo vía export-from (no export de import)
+export type { FileCopyMoveResult, FileOperationOptions, FileOperationResult } from '@/types/entities/file';

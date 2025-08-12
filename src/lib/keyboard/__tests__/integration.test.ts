@@ -89,12 +89,12 @@ describe('Keyboard Shortcuts Integration', () => {
 	});
 
 	it('should enable/disable functionality', () => {
-		expect(manager['isEnabled']).toBe(true);
+		expect(manager.isEnabled).toBe(true);
 
 		manager.setEnabled(false);
-		expect(manager['isEnabled']).toBe(false);
+		expect(manager.isEnabled).toBe(false);
 
 		manager.setEnabled(true);
-		expect(manager['isEnabled']).toBe(true);
+		expect(manager.isEnabled).toBe(true);
 	});
 });

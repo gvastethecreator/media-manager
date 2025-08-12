@@ -71,16 +71,36 @@ export async function getVideos(filters: z.infer<typeof VideoFiltersSchema>) {
 		const conditions = [];
 
 		// Construir condiciones WHERE
-		if (filters.folderId) conditions.push(eq(videos.folderId, filters.folderId));
-		if (filters.isFavorite !== undefined) conditions.push(eq(videos.isFavorite, filters.isFavorite));
-		if (filters.minDuration) conditions.push(gte(videos.duration, filters.minDuration));
-		if (filters.maxDuration) conditions.push(lte(videos.duration, filters.maxDuration));
-		if (filters.minWidth && videos.width) conditions.push(gte(videos.width, filters.minWidth));
-		if (filters.maxWidth && videos.width) conditions.push(lte(videos.width, filters.maxWidth));
-		if (filters.minHeight && videos.height) conditions.push(gte(videos.height, filters.minHeight));
-		if (filters.maxHeight && videos.height) conditions.push(lte(videos.height, filters.maxHeight));
-		if (filters.minSize) conditions.push(gte(videos.size, filters.minSize));
-		if (filters.maxSize) conditions.push(lte(videos.size, filters.maxSize));
+		if (filters.folderId) {
+			conditions.push(eq(videos.folderId, filters.folderId));
+		}
+		if (filters.isFavorite !== undefined) {
+			conditions.push(eq(videos.isFavorite, filters.isFavorite));
+		}
+		if (filters.minDuration) {
+			conditions.push(gte(videos.duration, filters.minDuration));
+		}
+		if (filters.maxDuration) {
+			conditions.push(lte(videos.duration, filters.maxDuration));
+		}
+		if (filters.minWidth && videos.width) {
+			conditions.push(gte(videos.width, filters.minWidth));
+		}
+		if (filters.maxWidth && videos.width) {
+			conditions.push(lte(videos.width, filters.maxWidth));
+		}
+		if (filters.minHeight && videos.height) {
+			conditions.push(gte(videos.height, filters.minHeight));
+		}
+		if (filters.maxHeight && videos.height) {
+			conditions.push(lte(videos.height, filters.maxHeight));
+		}
+		if (filters.minSize) {
+			conditions.push(gte(videos.size, filters.minSize));
+		}
+		if (filters.maxSize) {
+			conditions.push(lte(videos.size, filters.maxSize));
+		}
 
 		// Búsqueda por texto
 		if (filters.search) {

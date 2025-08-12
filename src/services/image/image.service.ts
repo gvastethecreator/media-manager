@@ -40,7 +40,6 @@
  * permitiendo redimensionar, cambiar formato y optimizar imágenes.
  */
 
-import { createHash } from 'crypto';
 import { and, asc, count, desc, eq, isNotNull, like, or, sum } from 'drizzle-orm';
 import { promises as fs } from 'fs';
 import sharp from 'sharp';
@@ -141,7 +140,6 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 
 class ImageService {
 	private static instance: ImageService;
-	private readonly SUPPORTED_FORMATS = imageConfig.processing.supportedFormats;
 	private readonly CACHE_DIR = '.image-cache';
 
 	private constructor() {
@@ -178,12 +176,6 @@ class ImageService {
 				serviceName: SERVICE_NAME,
 			});
 		}
-	}
-
-	private getCacheKey(filePath: string, options: ImageProcessingOptions): string {
-		const hash = createHash('md5');
-		hash.update(filePath + JSON.stringify(options));
-		return hash.digest('hex');
 	}
 
 	private async processImage(
@@ -691,7 +683,7 @@ class ImageService {
 
 			await this.generateThumbnail(imageId);
 			const updatedImage = await this.getImage(imageId);
-			if (!(updatedImage && updatedImage.thumbnail)) {
+			if (!updatedImage?.thumbnail) {
 				throw createFileNotFoundError(`Miniatura para la imagen ${imageId} no encontrada después de la generación`);
 			}
 			// Convertir string base64 a Buffer

@@ -61,10 +61,15 @@ export function groupWildcards(
 					break;
 				case 'usage': {
 					const usage = wildcard._count?.childWildcards || 0;
-					if (usage === 0) key = 'Sin uso';
-					else if (usage < 10) key = 'Poco usado';
-					else if (usage < 50) key = 'Uso moderado';
-					else key = 'Muy usado';
+					if (usage === 0) {
+						key = 'Sin uso';
+					} else if (usage < 10) {
+						key = 'Poco usado';
+					} else if (usage < 50) {
+						key = 'Uso moderado';
+					} else {
+						key = 'Muy usado';
+					}
 					break;
 				}
 				default:
@@ -88,7 +93,9 @@ export function groupWildcards(
  * @returns Lista filtrada de Wildcards
  */
 export function filterWildcardsBySearch(wildcards: WildcardComplete[], searchQuery: string): WildcardComplete[] {
-	if (!searchQuery.trim()) return wildcards;
+	if (!searchQuery.trim()) {
+		return wildcards;
+	}
 
 	const query = searchQuery.toLowerCase();
 	return wildcards.filter(
@@ -143,13 +150,19 @@ export function calculateMaxDepth(wildcards: WildcardComplete[]): number {
 	const wildcardMap = new Map(wildcards.map((w) => [w.id, w]));
 
 	const getDepth = (wildcard: WildcardComplete, visited = new Set<string>()): number => {
-		if (visited.has(wildcard.id)) return 0; // Evitar ciclos
+		if (visited.has(wildcard.id)) {
+			return 0; // Evitar ciclos
+		}
 		visited.add(wildcard.id);
 
-		if (!wildcard.parentId) return 1;
+		if (!wildcard.parentId) {
+			return 1;
+		}
 
 		const parent = wildcardMap.get(wildcard.parentId);
-		if (!parent) return 1;
+		if (!parent) {
+			return 1;
+		}
 
 		return 1 + getDepth(parent, visited);
 	};
@@ -212,7 +225,9 @@ export function applyWildcardFilters(wildcards: WildcardComplete[], filters: Wil
 		// Filtro por búsqueda
 		if (filters.searchQuery) {
 			const matchesSearch = filterWildcardsBySearch([wildcard], filters.searchQuery).length > 0;
-			if (!matchesSearch) return false;
+			if (!matchesSearch) {
+				return false;
+			}
 		}
 
 		// Filtro por categorías
@@ -281,7 +296,9 @@ function calculateDepthFromRoot(wildcard: WildcardComplete, wildcardMap: Map<str
 
 	while (current.parentId) {
 		const parent = wildcardMap.get(current.parentId);
-		if (!parent) break;
+		if (!parent) {
+			break;
+		}
 		current = parent;
 		depth++;
 	}

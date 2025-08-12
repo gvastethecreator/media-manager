@@ -75,7 +75,9 @@ export function FavoritesView({ isVisible }: ViewProps) {
 		refetch();
 	}, [refetch]);
 
-	if (!isVisible) return null;
+	if (!isVisible) {
+		return null;
+	}
 
 	return (
 		<FavoritesContentView

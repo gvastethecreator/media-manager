@@ -78,7 +78,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} tcgMode={tcgMode} />}>
 					{isLoading ? (
 						// Mostrar placeholders mientras carga
-						[...Array(6)].map((_, i) => (
+						[...new Array(6)].map((_, i) => (
 							<ImageLoading
 								backgroundColor={secondaryColor}
 								key={`loading-${renderKey}-star-${i + 1}`}
@@ -139,7 +139,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 							))}
 							{/* Rellena con placeholders si hay menos de 6 imágenes */}
 							{images.length < 6 &&
-								[...Array(6 - images.length)].map((_, i) => (
+								[...new Array(6 - images.length)].map((_, i) => (
 									<div
 										className={cn(
 											'flex h-full w-full items-center justify-center',

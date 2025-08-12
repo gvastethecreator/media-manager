@@ -127,7 +127,9 @@ export const usePlaceStore = create<PlaceStore>()(
 				})),
 			getFilteredPlaces: () => {
 				const { places, filters, searchQuery } = get();
-				if (!(filters || searchQuery)) return places;
+				if (!(filters || searchQuery)) {
+					return places;
+				}
 
 				return places.filter((place) => {
 					if (searchQuery && !place.name.toLowerCase().includes(searchQuery.toLowerCase())) {
@@ -149,9 +151,15 @@ export const usePlaceStore = create<PlaceStore>()(
 					const valA = a[key];
 					const valB = b[key];
 
-					if (valA === valB) return 0;
-					if (valA === null || valA === undefined) return 1;
-					if (valB === null || valB === undefined) return -1;
+					if (valA === valB) {
+						return 0;
+					}
+					if (valA === null || valA === undefined) {
+						return 1;
+					}
+					if (valB === null || valB === undefined) {
+						return -1;
+					}
 
 					if (typeof valA === 'string' && typeof valB === 'string') {
 						return sortOrder === 'asc' ? valA.localeCompare(valB) : valB.localeCompare(valA);

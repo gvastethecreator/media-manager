@@ -22,8 +22,12 @@ export function sortPlaces(places: PlaceWithStats[], sortBy = 'name_asc'): Place
 		const valueB = b[sortProperty];
 
 		// Manejar valores nulos o indefinidos
-		if (valueA === null || valueA === undefined) return 1;
-		if (valueB === null || valueB === undefined) return -1;
+		if (valueA === null || valueA === undefined) {
+			return 1;
+		}
+		if (valueB === null || valueB === undefined) {
+			return -1;
+		}
 
 		// Comparar según tipo de valor
 		if (typeof valueA === 'string' && typeof valueB === 'string') {
@@ -74,7 +78,9 @@ export function filterPlaces(places: PlaceWithStats[], filters: PlaceFilters): P
 			]
 				.filter(Boolean)
 				.join(' ');
-			if (!searchRegex.test(searchableText)) return false;
+			if (!searchRegex.test(searchableText)) {
+				return false;
+			}
 		}
 
 		// Filtrar por categoría
@@ -183,7 +189,9 @@ function countByProperty(places: PlaceWithStats[], property: keyof PlaceWithStat
 
 function calculateAveragePopulation(places: PlaceWithStats[]): number {
 	const populatedPlaces = places.filter((p) => typeof p.population === 'number');
-	if (populatedPlaces.length === 0) return 0;
+	if (populatedPlaces.length === 0) {
+		return 0;
+	}
 	const totalPopulation = populatedPlaces.reduce((sum, p) => {
 		const population = typeof p.population === 'number' ? p.population : 0;
 		return sum + population;

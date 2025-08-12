@@ -126,14 +126,20 @@ export abstract class BaseEntityTransformer<TEntity extends EntityBase, TStats e
 		let score = 0;
 
 		// Puntos por tener campos básicos
-		if (entity.name) score += 20;
-		if (entity.description) score += 20;
+		if (entity.name) {
+			score += 20;
+		}
+		if (entity.description) {
+			score += 20;
+		}
 
 		// Puntos por tener campos opcionales comunes
 		// Las clases hijas deben extender esto para campos específicos
 		const optionalFields = ['thumbnailUrl', 'category', 'metadata'];
 		for (const field of optionalFields) {
-			if (field in entity) score += 10;
+			if (field in entity) {
+				score += 10;
+			}
 		}
 
 		return Math.min(score, 100);
@@ -161,9 +167,13 @@ export abstract class BaseEntityTransformer<TEntity extends EntityBase, TStats e
 
 		// Puntos por actualización reciente
 		const daysSinceUpdate = this.daysBetween(entity.updatedAt);
-		if (daysSinceUpdate < 7) score += 20;
-		else if (daysSinceUpdate < 30) score += 10;
-		else if (daysSinceUpdate < 90) score += 5;
+		if (daysSinceUpdate < 7) {
+			score += 20;
+		} else if (daysSinceUpdate < 30) {
+			score += 10;
+		} else if (daysSinceUpdate < 90) {
+			score += 5;
+		}
 
 		return Math.min(score, 100);
 	}

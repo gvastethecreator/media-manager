@@ -6,7 +6,7 @@
  *   El tipo canónico para usar en la aplicación es **`WorkflowWithStats`**.
  *
  *   - `WorkflowBase`: Tipo base de Drizzle.
- *   *   - `WorkflowWithStats`: Tipo enriquecido con estadísticas de ejecución.
+ *   - `WorkflowWithStats`: Tipo enriquecido con estadísticas de ejecución.
  *
  * @see /src/types/entities/workflow/base.ts
  * @updated 2025-01-27

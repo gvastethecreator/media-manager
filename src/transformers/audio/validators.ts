@@ -13,7 +13,9 @@ import type { AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types
  * @returns true si es válido, false si no lo es
  */
 export function isValidAudio(audio: unknown): audio is AudioWithStats {
-	if (!audio || typeof audio !== 'object') return false;
+	if (!audio || typeof audio !== 'object') {
+		return false;
+	}
 
 	const audioObj = audio as Record<string, unknown>;
 

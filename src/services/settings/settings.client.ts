@@ -55,7 +55,9 @@ export class SettingsClient {
 	async getProfileSettings(profileId: string): Promise<Settings | null> {
 		const response = await fetch(`/api/settings/profile/${profileId}`);
 		if (!response.ok) {
-			if (response.status === 404) return null;
+			if (response.status === 404) {
+				return null;
+			}
 			throw new Error('Error al obtener configuración del perfil');
 		}
 		return response.json();

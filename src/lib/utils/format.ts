@@ -7,7 +7,9 @@
  * Formatea un número de bytes a una cadena legible
  */
 export function formatBytes(bytes: number, decimals = 2): string {
-	if (bytes === 0) return '0 Bytes';
+	if (bytes === 0) {
+		return '0 Bytes';
+	}
 
 	const k = 1024;
 	const dm = decimals < 0 ? 0 : decimals;
@@ -50,11 +52,21 @@ export function formatRelativeTime(date: Date | string): string {
 	const now = new Date();
 	const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000);
 
-	if (diffInSeconds < 60) return 'hace unos segundos';
-	if (diffInSeconds < 3600) return `hace ${Math.floor(diffInSeconds / 60)} minutos`;
-	if (diffInSeconds < 86_400) return `hace ${Math.floor(diffInSeconds / 3600)} horas`;
-	if (diffInSeconds < 2_592_000) return `hace ${Math.floor(diffInSeconds / 86_400)} días`;
-	if (diffInSeconds < 31_536_000) return `hace ${Math.floor(diffInSeconds / 2_592_000)} meses`;
+	if (diffInSeconds < 60) {
+		return 'hace unos segundos';
+	}
+	if (diffInSeconds < 3600) {
+		return `hace ${Math.floor(diffInSeconds / 60)} minutos`;
+	}
+	if (diffInSeconds < 86_400) {
+		return `hace ${Math.floor(diffInSeconds / 3600)} horas`;
+	}
+	if (diffInSeconds < 2_592_000) {
+		return `hace ${Math.floor(diffInSeconds / 86_400)} días`;
+	}
+	if (diffInSeconds < 31_536_000) {
+		return `hace ${Math.floor(diffInSeconds / 2_592_000)} meses`;
+	}
 
 	return `hace ${Math.floor(diffInSeconds / 31_536_000)} años`;
 }
@@ -63,7 +75,9 @@ export function formatRelativeTime(date: Date | string): string {
  * Formatea un porcentaje
  */
 export function formatPercentage(value: number, total: number, decimals = 1): string {
-	if (total === 0) return '0%';
+	if (total === 0) {
+		return '0%';
+	}
 	const percentage = (value / total) * 100;
 	return `${percentage.toFixed(decimals)}%`;
 }
@@ -72,7 +86,9 @@ export function formatPercentage(value: number, total: number, decimals = 1): st
  * Formatea un nombre de archivo para mostrar
  */
 export function formatFileName(fileName: string, maxLength = 30): string {
-	if (fileName.length <= maxLength) return fileName;
+	if (fileName.length <= maxLength) {
+		return fileName;
+	}
 
 	const extension = fileName.split('.').pop() || '';
 	const nameWithoutExt = fileName.replace(`.${extension}`, '');

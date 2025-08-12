@@ -38,8 +38,8 @@ router.get('/', async (req, res) => {
 	const { limit, offset, category, searchTerm, orderBy, orderDir } = req.query;
 
 	const filters = {
-		limit: limit ? Number.parseInt(limit as string) : undefined,
-		offset: offset ? Number.parseInt(offset as string) : undefined,
+		limit: limit ? Number.parseInt(limit as string, 10) : undefined,
+		offset: offset ? Number.parseInt(offset as string, 10) : undefined,
 		category: category as string,
 		search: searchTerm as string,
 		sortBy: orderBy as any,

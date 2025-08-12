@@ -31,10 +31,18 @@ const colors = {
 
 // Función para obtener color según status code
 function getStatusColor(status: number): string {
-	if (status >= 500) return colors.red;
-	if (status >= 400) return colors.yellow;
-	if (status >= 300) return colors.cyan;
-	if (status >= 200) return colors.green;
+	if (status >= 500) {
+		return colors.red;
+	}
+	if (status >= 400) {
+		return colors.yellow;
+	}
+	if (status >= 300) {
+		return colors.cyan;
+	}
+	if (status >= 200) {
+		return colors.green;
+	}
 	return colors.white;
 }
 

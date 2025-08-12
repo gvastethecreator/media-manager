@@ -771,7 +771,7 @@ createEntityFromFile(filePath: string, folderId: string)
 }
 throw;
 new;
-Error('File hash is required for audio creation');
+new Error('File hash is required for audio creation');
 }
 const audioData: AudioCreateInput = {
 	name: fileInfo.name,

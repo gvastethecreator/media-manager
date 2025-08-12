@@ -1,39 +1,39 @@
 import {
-    FileSpreadsheet,
-    Filter,
-    FolderUp,
-    Grid3X3,
-    ImagePlus,
-    ImportIcon,
-    Plus,
-    RefreshCw,
-    SlidersHorizontal,
-    Trash2,
-    UploadCloud,
-    X,
+	FileSpreadsheet,
+	Filter,
+	FolderUp,
+	Grid3X3,
+	ImagePlus,
+	ImportIcon,
+	Plus,
+	RefreshCw,
+	SlidersHorizontal,
+	Trash2,
+	UploadCloud,
+	X,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import type * as React from 'react';
 import { useCallback, useId, useState } from 'react';
 import {
-    AlertDialog,
-    AlertDialogAction,
-    AlertDialogCancel,
-    AlertDialogContent,
-    AlertDialogDescription,
-    AlertDialogFooter,
-    AlertDialogHeader,
-    AlertDialogTitle,
-    AlertDialogTrigger,
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuTrigger,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';

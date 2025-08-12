@@ -96,8 +96,6 @@ export interface BatchDownloadResult {
  */
 class EnhancedDownloadService {
 	private activeDownloads = new Map<string, AbortController>();
-	private downloadQueue: Array<() => Promise<void>> = [];
-	private isProcessingQueue = false;
 	private maxConcurrentDownloads = 3;
 
 	/**
@@ -342,7 +340,7 @@ class EnhancedDownloadService {
 	/**
 	 * Download file in original format
 	 */
-	private async downloadOriginal(filePath: string, options: DownloadOptions, signal: AbortSignal): Promise<Blob> {
+	private async downloadOriginal(filePath: string, _options: DownloadOptions, signal: AbortSignal): Promise<Blob> {
 		// Try to get file as data URL first (for images)
 		try {
 			const { dataUrl } = await getFileAsDataUrl(filePath);
@@ -365,7 +363,7 @@ class EnhancedDownloadService {
 	/**
 	 * Download file as ZIP
 	 */
-	private async downloadAsZip(filePath: string, filename: string, signal: AbortSignal): Promise<Blob> {
+	private async downloadAsZip(filePath: string, _filename: string, signal: AbortSignal): Promise<Blob> {
 		// For now, we'll use a simple approach
 		// In a real implementation, you'd use a library like JSZip
 		const originalBlob = await this.downloadOriginal(filePath, {}, signal);
@@ -378,7 +376,7 @@ class EnhancedDownloadService {
 	/**
 	 * Download image as PDF
 	 */
-	private async downloadAsPdf(filePath: string, filename: string, signal: AbortSignal): Promise<Blob> {
+	private async downloadAsPdf(filePath: string, _filename: string, signal: AbortSignal): Promise<Blob> {
 		// For now, return original blob
 		// In a real implementation, you'd convert image to PDF
 		const originalBlob = await this.downloadOriginal(filePath, {}, signal);

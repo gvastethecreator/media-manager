@@ -11,10 +11,10 @@ import { ServiceStatus } from '../cards/service-card';
  * Obtiene la lista de features
  * Compatible con Vite + React
  */
-export async function getFeatures(): Promise<Feature[]> {
+export function getFeatures(): Promise<Feature[]> {
 	// Simulación de obtención de datos desde BD
 	// En una implementación real, esto sería una llamada a la base de datos
-	return [
+	return Promise.resolve([
 		{
 			name: 'Procesamiento por lotes',
 			description: 'Permitir procesar múltiples imágenes simultáneamente',
@@ -45,16 +45,16 @@ export async function getFeatures(): Promise<Feature[]> {
 			status: 'pending',
 			progress: 5,
 		},
-	];
+	]);
 }
 
 /**
  * Obtiene la lista de issues
  * Compatible con Vite + React
  */
-export async function getIssues(): Promise<Issue[]> {
+export function getIssues(): Promise<Issue[]> {
 	// Simulación de obtención de datos desde BD
-	return [
+	return Promise.resolve([
 		{
 			id: 'issue-1',
 			title: 'Error en carga de imágenes HEIF',
@@ -83,16 +83,16 @@ export async function getIssues(): Promise<Issue[]> {
 			status: 'resolved',
 			severity: 'critical',
 		},
-	];
+	]);
 }
 
 /**
  * Obtiene el estado de los servicios
  * Compatible con Vite + React
  */
-export async function getServices(): Promise<Omit<ServiceStatus, 'icon'>[]> {
+export function getServices(): Promise<Omit<ServiceStatus, 'icon'>[]> {
 	// Simulación de obtención de datos desde BD
-	return [
+	return Promise.resolve([
 		{
 			name: 'Indexación de Archivos',
 			status: 'online',
@@ -133,5 +133,5 @@ export async function getServices(): Promise<Omit<ServiceStatus, 'icon'>[]> {
 			status: 'offline',
 			description: 'Servicio de sincronización con dispositivos',
 		},
-	];
+	]);
 }

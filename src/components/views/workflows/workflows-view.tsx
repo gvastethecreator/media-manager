@@ -26,7 +26,9 @@ export function WorkflowsView() {
 	const [newWorkflowDescription, setNewWorkflowDescription] = useState('');
 
 	const loadWorkflows = useCallback(async () => {
-		if (isLoading) return;
+		if (isLoading) {
+			return;
+		}
 		setIsLoading(true);
 		setError(null);
 		try {
@@ -40,11 +42,11 @@ export function WorkflowsView() {
 		} finally {
 			setIsLoading(false);
 		}
-	}, []); // Sin dependencias para evitar recreaciones innecesarias
+	}, [isLoading]); // Sin dependencias para evitar recreaciones innecesarias
 
 	useEffect(() => {
 		loadWorkflows();
-	}, []); // Solo ejecutar al montar el componente
+	}, [loadWorkflows]); // Solo ejecutar al montar el componente
 
 	const { toast } = useToast();
 	const handleCreateWorkflow = useCallback(async () => {

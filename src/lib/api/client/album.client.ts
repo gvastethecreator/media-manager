@@ -8,7 +8,9 @@ const API_BASE_PATH = '/api/albums';
 
 export async function getAlbumsFromApi(): Promise<AlbumWithStats[]> {
 	const response = await fetch(API_BASE_PATH);
-	if (!response.ok) throw new Error('Error al obtener álbumes');
+	if (!response.ok) {
+		throw new Error('Error al obtener álbumes');
+	}
 	return response.json();
 }
 
@@ -18,7 +20,9 @@ export async function createAlbumInApi(data: AlbumCreateInput): Promise<AlbumWit
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(data),
 	});
-	if (!response.ok) throw new Error('Error al crear álbum');
+	if (!response.ok) {
+		throw new Error('Error al crear álbum');
+	}
 	return response.json();
 }
 
@@ -28,11 +32,15 @@ export async function updateAlbumInApi(id: string, data: AlbumUpdateInput): Prom
 		headers: { 'Content-Type': 'application/json' },
 		body: JSON.stringify(data),
 	});
-	if (!response.ok) throw new Error('Error al actualizar álbum');
+	if (!response.ok) {
+		throw new Error('Error al actualizar álbum');
+	}
 	return response.json();
 }
 
 export async function deleteAlbumFromApi(id: string): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, { method: 'DELETE' });
-	if (!response.ok) throw new Error('Error al eliminar álbum');
+	if (!response.ok) {
+		throw new Error('Error al eliminar álbum');
+	}
 }

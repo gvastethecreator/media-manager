@@ -17,14 +17,27 @@ const API_BASE_PATH = '/api/images';
  */
 export async function getImagesFromApi(options: GetImagesOptions = {}): Promise<GetImagesResult> {
 	const params = new URLSearchParams();
-	if (options.folderId) params.append('folderId', options.folderId);
+	if (options.folderId) {
+		params.append('folderId', options.folderId);
+	}
 	// Por defecto solicitar 100 imágenes (máximo permitido por el servidor)
-	if (options.limit) params.append('limit', String(options.limit));
-	else params.append('limit', '100'); // Límite máximo permitido por el servidor
-	if (options.offset) params.append('offset', String(options.offset));
-	if (options.search) params.append('search', options.search);
-	if (options.sortBy) params.append('sortBy', options.sortBy);
-	if (options.sortOrder) params.append('sortOrder', options.sortOrder);
+	if (options.limit) {
+		params.append('limit', String(options.limit));
+	} else {
+		params.append('limit', '100'); // Límite máximo permitido por el servidor
+	}
+	if (options.offset) {
+		params.append('offset', String(options.offset));
+	}
+	if (options.search) {
+		params.append('search', options.search);
+	}
+	if (options.sortBy) {
+		params.append('sortBy', options.sortBy);
+	}
+	if (options.sortOrder) {
+		params.append('sortOrder', options.sortOrder);
+	}
 
 	const response = await fetch(`${API_BASE_PATH}?${params.toString()}`);
 

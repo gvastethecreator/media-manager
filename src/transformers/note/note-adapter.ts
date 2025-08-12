@@ -115,24 +115,48 @@ function calculateCompletionScore(note: NoteComplete, totalItems: number): numbe
 	let score = 0;
 
 	// Contenido base (40 puntos)
-	if (note.title && note.title.length > 0) score += 10;
-	if (note.content && note.content.length > 50) score += 20;
-	if (note.content && note.content.length > 200) score += 10;
+	if (note.title && note.title.length > 0) {
+		score += 10;
+	}
+	if (note.content && note.content.length > 50) {
+		score += 20;
+	}
+	if (note.content && note.content.length > 200) {
+		score += 10;
+	}
 
 	// Categorización (20 puntos)
-	if (note.category && note.category !== 'general') score += 10;
-	if (note.priority && note.priority > 0) score += 5;
-	if (note.status && note.status !== 'draft') score += 5;
+	if (note.category && note.category !== 'general') {
+		score += 10;
+	}
+	if (note.priority && note.priority > 0) {
+		score += 5;
+	}
+	if (note.status && note.status !== 'draft') {
+		score += 5;
+	}
 
 	// Metadatos (20 puntos)
-	if (note.featuredImage) score += 10;
-	if (note.color) score += 5;
-	if (note.emoji) score += 5;
+	if (note.featuredImage) {
+		score += 10;
+	}
+	if (note.color) {
+		score += 5;
+	}
+	if (note.emoji) {
+		score += 5;
+	}
 
 	// Relaciones (20 puntos)
-	if (totalItems > 0) score += 10;
-	if (totalItems > 5) score += 5;
-	if (totalItems > 10) score += 5;
+	if (totalItems > 0) {
+		score += 10;
+	}
+	if (totalItems > 5) {
+		score += 5;
+	}
+	if (totalItems > 10) {
+		score += 5;
+	}
 
 	return Math.min(score, 100);
 }
@@ -141,10 +165,14 @@ function calculateCompletionScore(note: NoteComplete, totalItems: number): numbe
  * 📝 Genera excerpt automático del contenido
  */
 function generateExcerpt(content: string, maxLength = 150): string {
-	if (!content) return '';
+	if (!content) {
+		return '';
+	}
 
 	const cleaned = content.replace(/[#*_`]/g, '').trim();
-	if (cleaned.length <= maxLength) return cleaned;
+	if (cleaned.length <= maxLength) {
+		return cleaned;
+	}
 
 	const truncated = cleaned.substring(0, maxLength);
 	const lastSpace = truncated.lastIndexOf(' ');
@@ -160,10 +188,18 @@ function formatDate(date: Date): string {
 	const diffMs = now.getTime() - date.getTime();
 	const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
 
-	if (diffDays === 0) return 'Hoy';
-	if (diffDays === 1) return 'Ayer';
-	if (diffDays < 7) return `Hace ${diffDays} días`;
-	if (diffDays < 30) return `Hace ${Math.floor(diffDays / 7)} semanas`;
+	if (diffDays === 0) {
+		return 'Hoy';
+	}
+	if (diffDays === 1) {
+		return 'Ayer';
+	}
+	if (diffDays < 7) {
+		return `Hace ${diffDays} días`;
+	}
+	if (diffDays < 30) {
+		return `Hace ${Math.floor(diffDays / 7)} semanas`;
+	}
 
 	return date.toLocaleDateString('es-ES', {
 		year: 'numeric',

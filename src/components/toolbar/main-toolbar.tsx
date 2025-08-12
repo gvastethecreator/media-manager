@@ -43,12 +43,7 @@ import { useLocation } from 'react-router-dom';
 import { useDebouncedCallback } from 'use-debounce';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+// Eliminado dropdown de cambio de vista (no debe existir)
 import { Separator } from '@/components/ui/separator';
 import { ViewType } from '@/components/views/types';
 import { useDebouncedViewMode } from '@/hooks/use-debounced-view-mode';
@@ -63,7 +58,6 @@ import { ViewBreadcrumbs } from '../navigation/breadcrumbs';
 export interface ViewToolbarProps {
 	isRightPanelCollapsed?: boolean;
 	toggleRightPanelCollapse?: () => void;
-	isRightPanelVisible?: boolean;
 	isLeftPanelCollapsed?: boolean;
 	toggleLeftPanelCollapse?: () => void;
 	allItemIds?: string[]; // IDs de todos los elementos disponibles para selección
@@ -74,10 +68,12 @@ export interface ViewToolbarProps {
 	isRetrying?: boolean;
 }
 
-export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
+// Regex a nivel superior para rendimiento
+const SLASH_REGEX = /\//;
+
+export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	isRightPanelCollapsed,
 	toggleRightPanelCollapse,
-	isRightPanelVisible,
 	isLeftPanelCollapsed,
 	toggleLeftPanelCollapse,
 	allItemIds = [],
@@ -139,10 +135,12 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 		}
 		toastService.info(`Eliminando ${selectedIds.length} archivo(s)...`);
 		try {
-			for (const id of selectedIds) {
-				// Asumimos que el id del item es la ruta del archivo por ahora
-				await deleteFile(id);
-			}
+			await Promise.all(
+				selectedIds.map(async (id: string) => {
+					// Asumimos que el id del item es la ruta del archivo por ahora
+					await deleteFile(id);
+				})
+			);
 			toastService.success(`${selectedIds.length} archivo(s) eliminado(s) correctamente.`);
 			clearSelection();
 		} catch (error) {
@@ -157,10 +155,15 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 		}
 		toastService.info(`Descargando ${selectedIds.length} archivo(s)...`);
 		try {
-			for (const id of selectedIds) {
-				// Asumimos que el id del item es la ruta del archivo por ahora
-				const { dataUrl, mimeType } = await getFileAsDataUrl(id);
-				const filename = id.split(/[/]/).pop() || 'download';
+			const fileDatas = await Promise.all(
+				selectedIds.map(async (id: string) => {
+					const { dataUrl } = await getFileAsDataUrl(id);
+					return { id, dataUrl };
+				})
+			);
+
+			for (const { id, dataUrl } of fileDatas) {
+				const filename = id.split(SLASH_REGEX).pop() || 'download';
 				const a = document.createElement('a');
 				a.href = dataUrl;
 				a.download = filename;
@@ -194,21 +197,12 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	// 🔄 Manejador de ordenación
 	const handleSort = useCallback(
 		(field: string) => {
-			console.log('🔧 Toolbar - handleSort llamado:', { field, currentSortOptions: sortOptions });
-			const currentSortOption = sortOptions.find((option: any) => option.field === field);
-			if (currentSortOption) {
-				// Cambiar dirección si ya existe
-				const newOption = {
-					field,
-					direction: currentSortOption.direction === 'asc' ? 'desc' : 'asc',
-				};
-				console.log('🔧 Toolbar - Cambiando dirección:', newOption);
-				addSortOption(newOption);
+			// Usar nombres públicos; el comparador soporta alias (modifiedAt/createdAt)
+			const current = sortOptions.find((option: any) => option.field === field);
+			if (current) {
+				addSortOption({ field, direction: current.direction === 'asc' ? 'desc' : 'asc' });
 			} else {
-				// Añadir nueva opción de ordenación
-				const newOption = { field, direction: 'asc' };
-				console.log('🔧 Toolbar - Añadiendo nueva opción:', newOption);
-				addSortOption(newOption);
+				addSortOption({ field, direction: 'asc' });
 			}
 		},
 		[sortOptions, addSortOption]
@@ -242,149 +236,73 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 		[itemSize, setItemSize, debouncedSizeChange]
 	);
 
-	const renderSortButtons = () => (
-		<div className="flex items-center gap-0.5">
-			<Button
-				className={cn(
-					'h-7 hover:bg-accent',
-					sortOptions.some((opt: any) => opt.field === 'name') ? 'w-10 bg-accent/50' : 'w-7'
-				)}
-				data-active={sortOptions.some((opt: any) => opt.field === 'name')}
-				onClick={() => handleSort('name')}
-				size="icon"
-				title="Ordenar por nombre"
-				variant="ghost"
-			>
-				<div className="flex items-center justify-center gap-0.5">
-					<FileText
-						className={cn(
-							'h-3.5 w-3.5',
-							sortOptions.some((opt: any) => opt.field === 'name') ? 'text-primary' : 'text-muted-foreground'
-						)}
-					/>
-					{sortOptions.some((opt: any) => opt.field === 'name') && (
-						<div className="flex items-center">
-							{sortOptions.find((opt: any) => opt.field === 'name')?.direction === 'asc' ? (
-								<ArrowUp className="h-2.5 w-2.5 text-primary" />
-							) : (
-								<ArrowDown className="h-2.5 w-2.5 text-primary" />
-							)}
-						</div>
-					)}
-				</div>
-			</Button>
-			<Button
-				className={cn(
-					'h-7 hover:bg-accent',
-					sortOptions.some((opt: any) => opt.field === 'modifiedAt') ? 'w-10 bg-accent/50' : 'w-7'
-				)}
-				data-active={sortOptions.some((opt: any) => opt.field === 'modifiedAt')}
-				onClick={() => handleSort('modifiedAt')}
-				size="icon"
-				title="Ordenar por fecha de modificación"
-				variant="ghost"
-			>
-				<div className="flex items-center justify-center gap-0.5">
-					<Clock
-						className={cn(
-							'h-3.5 w-3.5',
-							sortOptions.some((opt: any) => opt.field === 'modifiedAt') ? 'text-primary' : 'text-muted-foreground'
-						)}
-					/>
-					{sortOptions.some((opt: any) => opt.field === 'modifiedAt') && (
-						<div className="flex items-center">
-							{sortOptions.find((opt: any) => opt.field === 'modifiedAt')?.direction === 'asc' ? (
-								<ArrowUp className="h-2.5 w-2.5 text-primary" />
-							) : (
-								<ArrowDown className="h-2.5 w-2.5 text-primary" />
-							)}
-						</div>
-					)}
-				</div>
-			</Button>
-			<Button
-				className={cn(
-					'h-7 hover:bg-accent',
-					sortOptions.some((opt: any) => opt.field === 'createdAt') ? 'w-10 bg-accent/50' : 'w-7'
-				)}
-				data-active={sortOptions.some((opt: any) => opt.field === 'createdAt')}
-				onClick={() => handleSort('createdAt')}
-				size="icon"
-				title="Ordenar por fecha de creación"
-				variant="ghost"
-			>
-				<div className="flex items-center justify-center gap-0.5">
-					<Calendar
-						className={cn(
-							'h-3.5 w-3.5',
-							sortOptions.some((opt: any) => opt.field === 'createdAt') ? 'text-primary' : 'text-muted-foreground'
-						)}
-					/>
-					{sortOptions.some((opt: any) => opt.field === 'createdAt') && (
-						<div className="flex items-center">
-							{sortOptions.find((opt: any) => opt.field === 'createdAt')?.direction === 'asc' ? (
-								<ArrowUp className="h-2.5 w-2.5 text-primary" />
-							) : (
-								<ArrowDown className="h-2.5 w-2.5 text-primary" />
-							)}
-						</div>
-					)}
-				</div>
-			</Button>
-		</div>
-	);
+	const renderSortButtons = () => {
+		const isNameActive = sortOptions.some((opt: any) => opt.field === 'name');
+		const nameOpt = sortOptions.find((opt: any) => opt.field === 'name');
+		const modifiedOpt = sortOptions.find((opt: any) => opt.field === 'modifiedAt' || opt.field === 'modifiedTime');
+		const createdOpt = sortOptions.find((opt: any) => opt.field === 'createdAt' || opt.field === 'createdTime');
+
+		const btnClass = (active: boolean) => cn('h-7 hover:bg-accent', active ? 'w-10 bg-accent/50' : 'w-7');
+		const dirIcon = (dir?: 'asc' | 'desc') =>
+			dir ? (
+				dir === 'asc' ? (
+					<ArrowUp className="h-2.5 w-2.5 text-primary" />
+				) : (
+					<ArrowDown className="h-2.5 w-2.5 text-primary" />
+				)
+			) : null;
+
+		return (
+			<div className="flex items-center gap-0.5">
+				<Button
+					className={btnClass(isNameActive)}
+					data-active={isNameActive}
+					onClick={() => handleSort('name')}
+					size="icon"
+					title="Ordenar por nombre"
+					variant="ghost"
+				>
+					<div className="flex items-center justify-center gap-0.5">
+						<FileText className={cn('h-3.5 w-3.5', isNameActive ? 'text-primary' : 'text-muted-foreground')} />
+						{dirIcon(nameOpt?.direction)}
+					</div>
+				</Button>
+				<Button
+					className={btnClass(!!modifiedOpt)}
+					data-active={!!modifiedOpt}
+					onClick={() => handleSort('modifiedAt')}
+					size="icon"
+					title="Ordenar por fecha de modificación"
+					variant="ghost"
+				>
+					<div className="flex items-center justify-center gap-0.5">
+						<Clock className={cn('h-3.5 w-3.5', modifiedOpt ? 'text-primary' : 'text-muted-foreground')} />
+						{dirIcon(modifiedOpt?.direction)}
+					</div>
+				</Button>
+				<Button
+					className={btnClass(!!createdOpt)}
+					data-active={!!createdOpt}
+					onClick={() => handleSort('createdAt')}
+					size="icon"
+					title="Ordenar por fecha de creación"
+					variant="ghost"
+				>
+					<div className="flex items-center justify-center gap-0.5">
+						<Calendar className={cn('h-3.5 w-3.5', createdOpt ? 'text-primary' : 'text-muted-foreground')} />
+						{dirIcon(createdOpt?.direction)}
+					</div>
+				</Button>
+			</div>
+		);
+	};
 
 	const renderViewButtons = () => (
 		<div className="flex items-center gap-1 rounded-md bg-accent/10 p-0.5">
-			{/* Menú desplegable con data-testid para Playwright */}
-			<DropdownMenu>
-				<DropdownMenuTrigger asChild>
-					<Button
-						className="h-7 gap-2"
-						data-testid="view-mode-trigger"
-						size="sm"
-						title="Cambiar vista"
-						variant="outline"
-					>
-						{viewMode === 'list' ? (
-							<List className="h-3.5 w-3.5" />
-						) : viewMode === 'cards' ? (
-							<LayoutGrid className="h-3.5 w-3.5" />
-						) : viewMode === 'masonry' ? (
-							<GalleryHorizontal className="h-3.5 w-3.5" />
-						) : (
-							<Grid className="h-3.5 w-3.5" />
-						)}
-						<span className="hidden text-xs sm:inline">
-							{viewMode === 'list'
-								? 'Lista'
-								: viewMode === 'cards'
-									? 'Tarjetas'
-									: viewMode === 'masonry'
-										? 'Mosaico'
-										: 'Cuadrícula'}
-						</span>
-					</Button>
-				</DropdownMenuTrigger>
-				<DropdownMenuContent align="end">
-					<DropdownMenuItem data-testid="view-mode-grid" onClick={() => setViewMode('grid')}>
-						<Grid className="mr-2 h-3.5 w-3.5" /> Cuadrícula
-					</DropdownMenuItem>
-					<DropdownMenuItem data-testid="view-mode-cards" onClick={() => setViewMode('cards')}>
-						<LayoutGrid className="mr-2 h-3.5 w-3.5" /> Tarjetas
-					</DropdownMenuItem>
-					<DropdownMenuItem data-testid="view-mode-masonry" onClick={() => setViewModeDebounced('masonry')}>
-						<GalleryHorizontal className="mr-2 h-3.5 w-3.5" /> Mosaico
-					</DropdownMenuItem>
-					<DropdownMenuItem data-testid="view-mode-list" onClick={() => setViewMode('list')}>
-						<List className="mr-2 h-3.5 w-3.5" /> Lista
-					</DropdownMenuItem>
-				</DropdownMenuContent>
-			</DropdownMenu>
-
 			<Button
 				className="h-7 w-7 hover:bg-accent"
 				data-active={viewMode === 'grid'}
+				data-testid="view-mode-grid-btn"
 				onClick={() => setViewMode('grid')}
 				size="icon"
 				title="Vista de cuadrícula"
@@ -395,6 +313,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 			<Button
 				className="h-7 w-7 hover:bg-accent"
 				data-active={viewMode === 'cards'}
+				data-testid="view-mode-cards-btn"
 				onClick={() => setViewMode('cards')}
 				size="icon"
 				title="Vista de tarjetas"
@@ -405,6 +324,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 			<Button
 				className="h-7 w-7 hover:bg-accent"
 				data-active={viewMode === 'masonry'}
+				data-testid="view-mode-masonry-btn"
 				onClick={() => setViewModeDebounced('masonry')}
 				size="icon"
 				title="Vista de mosaico"
@@ -415,6 +335,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 			<Button
 				className="h-7 w-7 hover:bg-accent"
 				data-active={viewMode === 'list'}
+				data-testid="view-mode-list-btn"
 				onClick={() => setViewMode('list')}
 				size="icon"
 				title="Vista de lista"
@@ -426,8 +347,9 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 	);
 
 	const renderSelectionActions = () => {
-		if (selectedIds.length === 0) return null;
-
+		if (selectedIds.length === 0) {
+			return null;
+		}
 		return (
 			<motion.div
 				animate={{ opacity: 1, y: 0 }}
@@ -438,16 +360,9 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 				<Badge className="h-5 px-1.5" variant="secondary">
 					{selectedIds.length} {selectedIds.length === 1 ? 'seleccionado' : 'seleccionados'}
 				</Badge>
-				<Button
-					className="h-6 w-6 hover:bg-accent"
-					onClick={clearSelection}
-					size="icon"
-					title="Limpiar selección"
-					variant="ghost"
-				>
+				<Button className="h-6 w-6 hover:bg-accent" onClick={clearSelection} size="icon" variant="ghost">
 					<X className="h-3.5 w-3.5" />
 				</Button>
-				<Separator className="mx-1 h-4" orientation="vertical" />
 				<Button
 					className="h-6 w-6 hover:bg-accent"
 					onClick={handleSelectAll}
@@ -507,7 +422,6 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbar({
 		);
 	};
 
-	// 🔄 Añadir controles de tamaño
 	const renderSizeControls = () => (
 		<div className="flex items-center gap-0.5">
 			<Button

@@ -6,7 +6,7 @@
  */
 
 import type { StateCreator } from 'zustand';
-import * as ImageApi from '@/lib/api/client/image.client';
+import { deleteImageFromApi, getImageFromApi, getImagesFromApi, updateImageInApi } from '@/lib/api/client/image.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
 import type { ImageWithStats } from '@/types/entities/image';
@@ -61,7 +61,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 
 	// --- Operaciones síncronas ---
 	addImage: (image) => {
-		if (!(image && image.id)) {
+		if (!image?.id) {
 			imageLogger.warn('Intento de agregar una imagen inválida', { image });
 			return;
 		}
@@ -114,7 +114,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 	fetchImage: async (id) => {
 		set({ isLoading: true, error: null });
 		try {
-			const image = await ImageApi.getImageFromApi(id);
+			const image = await getImageFromApi(id);
 			get().addImage(image);
 			return image;
 		} catch (e: unknown) {
@@ -163,9 +163,11 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 				};
 
 				// Agregar solo parámetros válidos del esquema del servidor si están presentes
-				if (options.folderId) apiOptions.folderId = options.folderId;
+				if (options.folderId) {
+					apiOptions.folderId = options.folderId;
+				}
 
-				const result = await ImageApi.getImagesFromApi(apiOptions);
+				const result = await getImagesFromApi(apiOptions);
 				console.log(`📡 DEBUG Store: Respuesta de API (página ${Math.floor(offset / limit) + 1}):`, result);
 
 				// Verificar el formato de la respuesta y adaptarse
@@ -237,7 +239,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 				processedData.tags = tags;
 			}
 
-			const updatedImage = await ImageApi.updateImageInApi(id, processedData);
+			const updatedImage = await updateImageInApi(id, processedData);
 			get().addImage(updatedImage);
 			toastService.success('Imagen actualizada');
 			return updatedImage;
@@ -254,7 +256,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 	removeImage: async (id) => {
 		set({ isLoading: true, error: null });
 		try {
-			await ImageApi.deleteImageFromApi(id);
+			await deleteImageFromApi(id);
 			get().deleteImage(id);
 			toastService.success('Imagen eliminada');
 			return true;

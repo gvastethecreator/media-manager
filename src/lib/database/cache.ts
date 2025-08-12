@@ -3,6 +3,15 @@ import type { FileMetadata } from '@/types/metadata';
 
 const cacheLogger = serverLogger.withContext('Cache');
 
+// Regex top-level para evitar recreación por llamada
+const BACKSLASH_REGEX = /\\/g; // Reemplazar barras invertidas por normales
+const DRIVE_REGEX = /([a-z]):\/+?/i; // Normalizar formato de unidad Windows (C:/)
+const MULTI_SLASH_REGEX = /\/+?/g; // Eliminar barras duplicadas
+const OUTPUTS_U_REGEX = /outpu+ts/gi; // Variaciones de 'outputs' con múltiples 'u'
+const OUTPUTS_P_REGEX = /outp+uts/gi; // Variaciones con múltiples 'p'
+const SDMATRIX_REGEX = /s+dmatrix/gi; // Variaciones de 'sdmatrix'
+const OUTPUTS_PATH_REGEX = /(.*)\/?#outputs\/?(.*)/; // Normalizar segmento #outputs
+
 interface CacheOptions {
 	ttl?: number; // Time to live in milliseconds
 	maxSize?: number; // Maximum number of items in cache
@@ -40,22 +49,22 @@ export class CacheManager<T> {
 
 		// 1. Normalizar separadores y eliminar duplicados
 		let normalizedKey = key
-			.replace(/\\/g, '/') // Reemplazar todas las barras invertidas por barras normales
-			.replace(/([a-z]):\/+/i, '$1:/') // Normalizar el formato de unidad Windows (C:/ o C:\)
-			.replace(/\/+/g, '/'); // Eliminar barras duplicadas
+			.replace(BACKSLASH_REGEX, '/') // Reemplazar todas las barras invertidas por barras normales
+			.replace(DRIVE_REGEX, '$1:/') // Normalizar el formato de unidad Windows (C:/ o C:\)
+			.replace(MULTI_SLASH_REGEX, '/'); // Eliminar barras duplicadas
 
 		// 2. Convertir a minúsculas para comparación consistente
 		normalizedKey = normalizedKey.toLowerCase();
 
 		// 3. Corregir variaciones específicas observadas
 		normalizedKey = normalizedKey
-			.replace(/outpu+ts/gi, 'outputs') // Corregir cualquier variación de 'outputs' con múltiples 'u'
-			.replace(/outp+uts/gi, 'outputs') // Corregir variaciones con múltiples 'p'
-			.replace(/s+dmatrix/gi, 'sdmatrix'); // Corregir cualquier variación de 'sdmatrix'
+			.replace(OUTPUTS_U_REGEX, 'outputs') // Corregir cualquier variación de 'outputs' con múltiples 'u'
+			.replace(OUTPUTS_P_REGEX, 'outputs') // Corregir variaciones con múltiples 'p'
+			.replace(SDMATRIX_REGEX, 'sdmatrix'); // Corregir cualquier variación de 'sdmatrix'
 
 		// 4. Asegurar estructura consistente para #outputs
 		if (normalizedKey.includes('#outputs') && !normalizedKey.includes('/#outputs/')) {
-			normalizedKey = normalizedKey.replace(/(.*)\/?#outputs\/?(.*)/, '$1/#outputs/$2');
+			normalizedKey = normalizedKey.replace(OUTPUTS_PATH_REGEX, '$1/#outputs/$2');
 		}
 
 		if (originalKey !== normalizedKey) {
@@ -69,6 +78,7 @@ export class CacheManager<T> {
 	}
 
 	async set(key: string, value: T, _customTtl?: number): Promise<void> {
+		await Promise.resolve();
 		const normalizedKey = this.normalizeKey(key);
 
 		if (this.cache.size >= this.maxSize) {
@@ -84,6 +94,7 @@ export class CacheManager<T> {
 	}
 
 	async get(key: string): Promise<T | undefined> {
+		await Promise.resolve();
 		const normalizedKey = this.normalizeKey(key);
 		const item = this.cache.get(normalizedKey);
 
@@ -108,12 +119,14 @@ export class CacheManager<T> {
 	}
 
 	async delete(key: string): Promise<void> {
+		await Promise.resolve();
 		const normalizedKey = this.normalizeKey(key);
 		this.cache.delete(normalizedKey);
 		cacheLogger.debug(`🗑️ Cache ${this.name}: Elemento eliminado`, { key: normalizedKey });
 	}
 
 	async clear(): Promise<void> {
+		await Promise.resolve();
 		this.cache.clear();
 		cacheLogger.info(`🧹 Cache ${this.name}: Limpiado completo`);
 	}
@@ -133,6 +146,7 @@ export class CacheManager<T> {
 
 	// Método para depuración y diagnóstico del caché
 	async diagnose(): Promise<{ total: number; keys: string[] }> {
+		await Promise.resolve();
 		const keys = Array.from(this.cache.keys());
 		cacheLogger.info(`📊 Cache ${this.name}: Diagnóstico - ${keys.length} elementos`);
 		return {

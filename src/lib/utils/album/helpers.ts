@@ -20,8 +20,12 @@ export function generateAlbumThumbnailUrl(album: AlbumWithStats | string, width?
 
 	// Añadir parámetros
 	const params = new URLSearchParams();
-	if (width) params.append('width', width.toString());
-	if (height) params.append('height', height.toString());
+	if (width) {
+		params.append('width', width.toString());
+	}
+	if (height) {
+		params.append('height', height.toString());
+	}
 
 	const queryString = params.toString();
 	return queryString ? `${url}?${queryString}` : url;
@@ -35,7 +39,9 @@ export function generateAlbumThumbnailUrl(album: AlbumWithStats | string, width?
 export function formatAlbumSize(album?: AlbumWithStats): string {
 	// Algunos campos agregados por agregaciones pueden no estar en la interfaz estricta
 	const totalSize = (album as any)?.stats?.totalSize as number | undefined;
-	if (!album || totalSize === undefined) return 'Desconocido';
+	if (!album || totalSize === undefined) {
+		return 'Desconocido';
+	}
 	return formatBytes(totalSize);
 }
 

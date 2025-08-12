@@ -340,11 +340,21 @@ export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWi
 			updatedAt: new Date(),
 		};
 
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.description !== undefined) updateData.description = data.description;
-		if (data.color !== undefined) updateData.color = data.color;
-		if (data.emoji !== undefined) updateData.emoji = data.emoji;
-		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
+		if (data.name !== undefined) {
+			updateData.name = data.name;
+		}
+		if (data.description !== undefined) {
+			updateData.description = data.description;
+		}
+		if (data.color !== undefined) {
+			updateData.color = data.color;
+		}
+		if (data.emoji !== undefined) {
+			updateData.emoji = data.emoji;
+		}
+		if (data.isFavorite !== undefined) {
+			updateData.isFavorite = data.isFavorite;
+		}
 
 		const result = await db.update(tags).set(updateData).where(eq(tags.id, id)).returning();
 

@@ -67,7 +67,9 @@ const useSettingsStoreBase = create<SettingsStore>()(
 				// Inicializa la configuración
 				initialize: async () => {
 					// Si ya está inicializada, no hacer nada
-					if (get().isInitialized) return;
+					if (get().isInitialized) {
+						return;
+					}
 
 					// Cargar configuración global
 					await get().loadSystemSettings();
@@ -213,7 +215,9 @@ const useSettingsStoreBase = create<SettingsStore>()(
 				// Establece el perfil activo
 				setActiveProfile: (profileId: string | null) => {
 					// Si ya está usando el mismo perfil, no hacer nada
-					if (profileId === get().activeProfileId) return;
+					if (profileId === get().activeProfileId) {
+						return;
+					}
 
 					// Actualizar el perfil activo
 					set((state) => {

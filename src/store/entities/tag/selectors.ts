@@ -14,7 +14,9 @@ export const useAllTags = () => {
 
 export const useSelectedTag = () => {
 	const { tags, selectedId } = useTagStore();
-	if (!selectedId) return null;
+	if (!selectedId) {
+		return null;
+	}
 	return tags[selectedId] || null;
 };
 
@@ -27,7 +29,9 @@ export const useViewMode = () => useTagStore((state) => state.viewMode);
  * Filtra tags por término de búsqueda
  */
 const filterBySearchTerm = (tags: TagWithStats[], searchTerm: string) => {
-	if (!searchTerm) return tags;
+	if (!searchTerm) {
+		return tags;
+	}
 	const lowerCaseSearchTerm = searchTerm.toLowerCase();
 	return tags.filter(
 		(tag) =>
@@ -40,7 +44,9 @@ const filterBySearchTerm = (tags: TagWithStats[], searchTerm: string) => {
  * Filtra tags por categoría
  */
 const filterByCategory = (tags: TagWithStats[], category: string | null) => {
-	if (!category) return tags;
+	if (!category) {
+		return tags;
+	}
 	return tags.filter((tag) => tag.category === category);
 };
 

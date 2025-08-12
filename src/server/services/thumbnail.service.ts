@@ -126,7 +126,7 @@ export async function getThumbnail(
 		}
 
 		// Si el proveedor es disco o no hay thumbnail en DB, generar/servir desde disco
-		thumbLogger.info('🔄 Generando/servidor thumbnail (provider=' + thumbsConfig.provider + '):', {
+		thumbLogger.info(`🔄 Generando/servidor thumbnail (provider=${thumbsConfig.provider}):`, {
 			id,
 			path: image.path,
 		});
@@ -162,7 +162,7 @@ export async function getThumbnail(
 				}
 			}
 
-			if (!(thumbnail && thumbnail.buffer)) {
+			if (!thumbnail?.buffer) {
 				throw new Error('No se pudo generar el thumbnail');
 			}
 

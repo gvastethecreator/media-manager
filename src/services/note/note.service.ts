@@ -457,7 +457,9 @@ export class NoteService {
 
 	async getNoteById(id: string): Promise<NoteWithStats | null> {
 		const note = await NoteServiceImpl.getNote(id);
-		if (!note) return null;
+		if (!note) {
+			return null;
+		}
 
 		// Convertir a NoteWithStats
 		const content = note.content || '';

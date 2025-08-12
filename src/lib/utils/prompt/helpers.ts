@@ -23,7 +23,9 @@ export function generateExampleContent(params: Record<string, any>): string {
 		for (const [key, value] of paramEntries) {
 			// Mostrar el tipo esperado de valor
 			let valueType = typeof value === 'object' ? 'objeto' : typeof value;
-			if (Array.isArray(value)) valueType = 'array';
+			if (Array.isArray(value)) {
+				valueType = 'array';
+			}
 
 			template += `- {{${key}}}: ${valueType}\n`;
 		}

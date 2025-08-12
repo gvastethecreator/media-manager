@@ -105,7 +105,7 @@ router.get('/', async (req, res) => {
 			const summary = Array.from(eventStore.entries()).map(([eventType, events]) => ({
 				type: eventType,
 				count: events.length,
-				lastEvent: events[events.length - 1]?.timestamp || null,
+				lastEvent: events.at(-1)?.timestamp || null,
 			}));
 
 			res.json({

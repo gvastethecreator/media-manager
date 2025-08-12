@@ -124,7 +124,9 @@ export const createWildcardCoreSlice: StateCreator<WildcardState & WildcardCoreS
 	addItemToWildcard: (wildcardId, itemId, itemType) => {
 		set((state) => {
 			const items = state.core.wildcardItems[wildcardId] || [];
-			if (items.some((item) => item.id === itemId)) return state;
+			if (items.some((item) => item.id === itemId)) {
+				return state;
+			}
 			return {
 				core: {
 					...state.core,

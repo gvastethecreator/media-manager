@@ -36,7 +36,7 @@ router.get('/cards', async (req, res) => {
 		const { wildcards } = await getWildcards(options);
 
 		// Limitar resultados según el parámetro limit
-		const limitNum = Number.parseInt(limit as string);
+		const limitNum = Number.parseInt(limit as string, 10);
 		const limitedWildcards = wildcards.slice(0, limitNum);
 
 		res.json(limitedWildcards);
@@ -60,8 +60,8 @@ router.get('/', async (req, res) => {
 		const { wildcards, total } = await getWildcards(options);
 
 		// Aplicar paginación manual
-		const limitNum = Number.parseInt(limit as string);
-		const offsetNum = Number.parseInt(offset as string);
+		const limitNum = Number.parseInt(limit as string, 10);
+		const offsetNum = Number.parseInt(offset as string, 10);
 		const paginatedWildcards = wildcards.slice(offsetNum, offsetNum + limitNum);
 
 		res.json({

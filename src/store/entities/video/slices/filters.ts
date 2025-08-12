@@ -122,19 +122,32 @@ export const createVideoFiltersSlice: StateCreator<VideoStore, [], [], VideoFilt
 			if (filterByResolution && video.height) {
 				switch (filterByResolution) {
 					case '4k':
-						if (video.height < 2160) return false;
+						if (video.height < 2160) {
+							return false;
+						}
 						break;
 					case '2k':
-						if (video.height < 1440 || video.height >= 2160) return false;
+						if (video.height < 1440 || video.height >= 2160) {
+							return false;
+						}
 						break;
 					case 'fullhd':
-						if (video.height < 1080 || video.height >= 1440) return false;
+						if (video.height < 1080 || video.height >= 1440) {
+							return false;
+						}
 						break;
 					case 'hd':
-						if (video.height < 720 || video.height >= 1080) return false;
+						if (video.height < 720 || video.height >= 1080) {
+							return false;
+						}
 						break;
 					case 'sd':
-						if (video.height >= 720) return false;
+						if (video.height >= 720) {
+							return false;
+						}
+						break;
+					default:
+						// Resolución desconocida: no filtrar adicionalmente
 						break;
 				}
 			}
@@ -159,7 +172,9 @@ export const createVideoFiltersSlice: StateCreator<VideoStore, [], [], VideoFilt
 
 	applySort: (videos: VideoWithStats[]) => {
 		const { sortBy } = get();
-		if (!sortBy) return videos;
+		if (!sortBy) {
+			return videos;
+		}
 
 		return [...videos].sort((a, b) => {
 			switch (sortBy) {

@@ -88,7 +88,9 @@ export function PromptsView({ isVisible }: ViewProps) {
 		refetch();
 	}, [refetch]);
 
-	if (!isVisible) return null;
+	if (!isVisible) {
+		return null;
+	}
 
 	if (isLoading) {
 		return (
@@ -109,7 +111,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 					<AlertTitle>Error al cargar prompts</AlertTitle>
 					<AlertDescription>
 						{error instanceof Error ? error.message : 'Ha ocurrido un error inesperado'}
-						<button className="ml-2 underline hover:no-underline" onClick={handleRetry}>
+						<button className="ml-2 underline hover:no-underline" onClick={handleRetry} type="button">
 							Reintentar
 						</button>
 					</AlertDescription>

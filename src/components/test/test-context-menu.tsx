@@ -22,16 +22,16 @@ export function TestContextMenu() {
 
 	return (
 		<div className="p-8">
-			<div
+			<button
 				aria-label="Área de prueba del menú contextual"
 				className="flex h-96 w-full cursor-default items-center justify-center rounded-lg border border-border bg-muted"
 				onContextMenu={handleContextMenu}
 				onKeyDown={handleKeyDown}
-				role="button"
 				tabIndex={0}
+				type="button"
 			>
 				<p className="text-lg text-muted-foreground">Haz click derecho aquí para ver el menú contextual</p>
-			</div>
+			</button>
 
 			<CustomContextMenu
 				isOpen={isOpen}

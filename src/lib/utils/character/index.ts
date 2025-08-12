@@ -86,11 +86,17 @@ export function groupCharacters(
 				break;
 			case 'level': {
 				const level = character.level || 0;
-				if (level <= 5) groupKey = 'Novato (1-5)';
-				else if (level <= 10) groupKey = 'Intermedio (6-10)';
-				else if (level <= 15) groupKey = 'Avanzado (11-15)';
-				else if (level <= 20) groupKey = 'Experto (16-20)';
-				else groupKey = 'Legendario (20+)';
+				if (level <= 5) {
+					groupKey = 'Novato (1-5)';
+				} else if (level <= 10) {
+					groupKey = 'Intermedio (6-10)';
+				} else if (level <= 15) {
+					groupKey = 'Avanzado (11-15)';
+				} else if (level <= 20) {
+					groupKey = 'Experto (16-20)';
+				} else {
+					groupKey = 'Legendario (20+)';
+				}
 				break;
 			}
 			default:
@@ -164,11 +170,17 @@ export function getCharacterStats(characters: CharacterWithStats[]) {
 
 	for (const character of characters) {
 		const level = character.level || 0;
-		if (level <= 5) levelRanges['1-5']++;
-		else if (level <= 10) levelRanges['6-10']++;
-		else if (level <= 15) levelRanges['11-15']++;
-		else if (level <= 20) levelRanges['16-20']++;
-		else levelRanges['20+']++;
+		if (level <= 5) {
+			levelRanges['1-5']++;
+		} else if (level <= 10) {
+			levelRanges['6-10']++;
+		} else if (level <= 15) {
+			levelRanges['11-15']++;
+		} else if (level <= 20) {
+			levelRanges['16-20']++;
+		} else {
+			levelRanges['20+']++;
+		}
 	}
 
 	// Estadísticas de asociaciones usando las estadísticas pre-calculadas

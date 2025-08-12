@@ -172,47 +172,70 @@ function calculateQualityScore(image: DrizzleImageWithCounts, totalAssociations:
 
 	// Resolución (30 puntos)
 	const megapixels = (image.width * image.height) / 1_000_000;
-	if (megapixels >= 12) score += 30;
-	else if (megapixels >= 8) score += 25;
-	else if (megapixels >= 5) score += 20;
-	else if (megapixels >= 2) score += 15;
-	else score += 10;
+	if (megapixels >= 12) {
+		score += 30;
+	} else if (megapixels >= 8) {
+		score += 25;
+	} else if (megapixels >= 5) {
+		score += 20;
+	} else if (megapixels >= 2) {
+		score += 15;
+	} else {
+		score += 10;
+	}
 
 	// Relación de aspecto (15 puntos)
 	const aspectRatio = image.width / image.height;
-	if (aspectRatio >= 0.8 && aspectRatio <= 1.25)
+	if (aspectRatio >= 0.8 && aspectRatio <= 1.25) {
 		score += 15; // Cuadrado
-	else if (aspectRatio >= 1.3 && aspectRatio <= 1.8)
+	} else if (aspectRatio >= 1.3 && aspectRatio <= 1.8) {
 		score += 12; // 16:9, 4:3
-	else if (aspectRatio >= 2.0 && aspectRatio <= 2.5)
+	} else if (aspectRatio >= 2.0 && aspectRatio <= 2.5) {
 		score += 10; // Panorámico
-	else score += 8;
+	} else {
+		score += 8;
+	}
 
 	// Tamaño de archivo (15 puntos)
 	const fileSizeMB = image.size / (1024 * 1024);
-	if (fileSizeMB >= 5 && fileSizeMB <= 20)
+	if (fileSizeMB >= 5 && fileSizeMB <= 20) {
 		score += 15; // Óptimo
-	else if (fileSizeMB >= 2 && fileSizeMB <= 30) score += 12;
-	else if (fileSizeMB >= 1) score += 10;
-	else score += 5;
+	} else if (fileSizeMB >= 2 && fileSizeMB <= 30) {
+		score += 12;
+	} else if (fileSizeMB >= 1) {
+		score += 10;
+	} else {
+		score += 5;
+	}
 
 	// Metadatos (20 puntos)
 	if (image.metadata) {
 		try {
 			const metadata = JSON.parse(image.metadata);
-			if (metadata.exif) score += 10;
-			if (metadata.ai) score += 5;
-			if (metadata.analysis) score += 5;
+			if (metadata.exif) {
+				score += 10;
+			}
+			if (metadata.ai) {
+				score += 5;
+			}
+			if (metadata.analysis) {
+				score += 5;
+			}
 		} catch {
 			score += 5; // Al menos tiene metadatos
 		}
 	}
 
 	// Asociaciones (20 puntos)
-	if (totalAssociations >= 20) score += 20;
-	else if (totalAssociations >= 10) score += 15;
-	else if (totalAssociations >= 5) score += 10;
-	else if (totalAssociations >= 1) score += 5;
+	if (totalAssociations >= 20) {
+		score += 20;
+	} else if (totalAssociations >= 10) {
+		score += 15;
+	} else if (totalAssociations >= 5) {
+		score += 10;
+	} else if (totalAssociations >= 1) {
+		score += 5;
+	}
 
 	return Math.min(100, Math.max(0, score));
 }
@@ -225,9 +248,15 @@ function determineTechnicalGrade(
 	megapixels: number,
 	_aspectRatio: number
 ): 'A' | 'B' | 'C' | 'D' {
-	if (qualityScore >= 85 && megapixels >= 8) return 'A';
-	if (qualityScore >= 70 && megapixels >= 5) return 'B';
-	if (qualityScore >= 50 && megapixels >= 2) return 'C';
+	if (qualityScore >= 85 && megapixels >= 8) {
+		return 'A';
+	}
+	if (qualityScore >= 70 && megapixels >= 5) {
+		return 'B';
+	}
+	if (qualityScore >= 50 && megapixels >= 2) {
+		return 'C';
+	}
 	return 'D';
 }
 
@@ -239,8 +268,12 @@ function determineColorTemperature(image: DrizzleImageWithCounts): 'warm' | 'neu
 	const hash = image.hash;
 	const hashSum = hash.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
 
-	if (hashSum % 3 === 0) return 'warm';
-	if (hashSum % 3 === 1) return 'cool';
+	if (hashSum % 3 === 0) {
+		return 'warm';
+	}
+	if (hashSum % 3 === 1) {
+		return 'cool';
+	}
 	return 'neutral';
 }
 
@@ -248,7 +281,9 @@ function determineColorTemperature(image: DrizzleImageWithCounts): 'warm' | 'neu
  * 🤖 Calcula confianza de AI (0-100)
  */
 function calculateAIConfidence(image: DrizzleImageWithCounts): number {
-	if (!image.metadata) return 0;
+	if (!image.metadata) {
+		return 0;
+	}
 
 	try {
 		const metadata = JSON.parse(image.metadata);
@@ -275,19 +310,31 @@ function generateAutoTags(image: DrizzleImageWithCounts, totalAssociations: numb
 
 	// Tags basados en dimensiones
 	const aspectRatio = image.width / image.height;
-	if (aspectRatio > 1.5) tags.push('landscape');
-	else if (aspectRatio < 0.8) tags.push('portrait');
-	else tags.push('square');
+	if (aspectRatio > 1.5) {
+		tags.push('landscape');
+	} else if (aspectRatio < 0.8) {
+		tags.push('portrait');
+	} else {
+		tags.push('square');
+	}
 
 	// Tags basados en resolución
 	const megapixels = (image.width * image.height) / 1_000_000;
-	if (megapixels >= 12) tags.push('high-resolution');
-	else if (megapixels >= 5) tags.push('medium-resolution');
-	else tags.push('low-resolution');
+	if (megapixels >= 12) {
+		tags.push('high-resolution');
+	} else if (megapixels >= 5) {
+		tags.push('medium-resolution');
+	} else {
+		tags.push('low-resolution');
+	}
 
 	// Tags basados en uso
-	if (totalAssociations >= 10) tags.push('popular');
-	if (image.isFavorite) tags.push('favorite');
+	if (totalAssociations >= 10) {
+		tags.push('popular');
+	}
+	if (image.isFavorite) {
+		tags.push('favorite');
+	}
 
 	return tags;
 }
@@ -300,8 +347,12 @@ function determineDuplicateStatus(image: DrizzleImageWithCounts): 'unique' | 'du
 	const hash = image.hash;
 	const hashSum = hash.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
 
-	if (hashSum % 10 === 0) return 'duplicate';
-	if (hashSum % 5 === 0) return 'similar';
+	if (hashSum % 10 === 0) {
+		return 'duplicate';
+	}
+	if (hashSum % 5 === 0) {
+		return 'similar';
+	}
 	return 'unique';
 }
 
@@ -325,12 +376,24 @@ function calculateDerivedFields(image: DrizzleImageWithCounts, statistics: Image
  * 📐 Obtiene etiqueta de relación de aspecto
  */
 function getAspectRatioLabel(aspectRatio: number): string {
-	if (aspectRatio >= 0.9 && aspectRatio <= 1.1) return '1:1 (Square)';
-	if (aspectRatio >= 1.3 && aspectRatio <= 1.4) return '4:3';
-	if (aspectRatio >= 1.7 && aspectRatio <= 1.8) return '16:9';
-	if (aspectRatio >= 2.3 && aspectRatio <= 2.4) return '21:9';
-	if (aspectRatio >= 0.7 && aspectRatio <= 0.8) return '4:5';
-	if (aspectRatio >= 0.5 && aspectRatio <= 0.6) return '9:16';
+	if (aspectRatio >= 0.9 && aspectRatio <= 1.1) {
+		return '1:1 (Square)';
+	}
+	if (aspectRatio >= 1.3 && aspectRatio <= 1.4) {
+		return '4:3';
+	}
+	if (aspectRatio >= 1.7 && aspectRatio <= 1.8) {
+		return '16:9';
+	}
+	if (aspectRatio >= 2.3 && aspectRatio <= 2.4) {
+		return '21:9';
+	}
+	if (aspectRatio >= 0.7 && aspectRatio <= 0.8) {
+		return '4:5';
+	}
+	if (aspectRatio >= 0.5 && aspectRatio <= 0.6) {
+		return '9:16';
+	}
 	return `${aspectRatio.toFixed(2)}:1`;
 }
 
@@ -338,7 +401,9 @@ function getAspectRatioLabel(aspectRatio: number): string {
  * 🔍 Parsea metadatos de imagen
  */
 function parseImageMetadata(metadataString: string | null | undefined): ImageMetadata | null {
-	if (!metadataString) return null;
+	if (!metadataString) {
+		return null;
+	}
 
 	try {
 		return JSON.parse(metadataString) as ImageMetadata;
@@ -377,12 +442,24 @@ export function toDrizzleImageCreate(input: ImageCreateInput): any {
 export function toDrizzleImageUpdate(input: ImageUpdateInput): any {
 	const updateData: any = {};
 
-	if (input.name !== undefined) updateData.name = input.name;
-	if (input.description !== undefined) updateData.description = input.description;
-	if (input.isFavorite !== undefined) updateData.isFavorite = input.isFavorite;
-	if (input.folderId !== undefined) updateData.folderId = input.folderId;
-	if (input.metadata !== undefined) updateData.metadata = input.metadata;
-	if (input.tags !== undefined) updateData.tags = input.tags ? JSON.stringify(input.tags) : null;
+	if (input.name !== undefined) {
+		updateData.name = input.name;
+	}
+	if (input.description !== undefined) {
+		updateData.description = input.description;
+	}
+	if (input.isFavorite !== undefined) {
+		updateData.isFavorite = input.isFavorite;
+	}
+	if (input.folderId !== undefined) {
+		updateData.folderId = input.folderId;
+	}
+	if (input.metadata !== undefined) {
+		updateData.metadata = input.metadata;
+	}
+	if (input.tags !== undefined) {
+		updateData.tags = input.tags ? JSON.stringify(input.tags) : null;
+	}
 
 	return updateData;
 }

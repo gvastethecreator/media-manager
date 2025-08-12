@@ -44,8 +44,12 @@ export function generateThumbnailUrl(image: Image | string, width?: number, heig
 	// Añadir parámetros de tamaño si se especifican
 	if (width || height) {
 		const params = new URLSearchParams();
-		if (width) params.append('width', width.toString());
-		if (height) params.append('height', height.toString());
+		if (width) {
+			params.append('width', width.toString());
+		}
+		if (height) {
+			params.append('height', height.toString());
+		}
 		url += `?${params.toString()}`;
 	}
 
@@ -59,7 +63,9 @@ export function generateThumbnailUrl(image: Image | string, width?: number, heig
  */
 export function getImageFormatFromPath(path: string): ImageFormat | undefined {
 	const extension = path.split('.').pop()?.toLowerCase();
-	if (!extension) return;
+	if (!extension) {
+		return;
+	}
 
 	return isValidImageFormat(extension) ? (extension as ImageFormat) : undefined;
 }
@@ -70,7 +76,7 @@ export function getImageFormatFromPath(path: string): ImageFormat | undefined {
  * @returns Objeto con los datos más relevantes para mostrar
  */
 export function getExifSummary(metadata?: ImageMetadata): Record<string, string> {
-	if (!(metadata && metadata.exif)) {
+	if (!metadata?.exif) {
 		return {};
 	}
 
@@ -78,14 +84,26 @@ export function getExifSummary(metadata?: ImageMetadata): Record<string, string>
 	const summary: Record<string, string> = {};
 
 	// Datos de cámara
-	if (exif.make) summary.Cámara = `${exif.make}${exif.model ? ` ${exif.model}` : ''}`;
-	if (exif.lensModel) summary.Lente = exif.lensModel as string;
+	if (exif.make) {
+		summary.Cámara = `${exif.make}${exif.model ? ` ${exif.model}` : ''}`;
+	}
+	if (exif.lensModel) {
+		summary.Lente = exif.lensModel as string;
+	}
 
 	// Configuración de disparo
-	if (exif.exposureTime) summary.Exposición = exif.exposureTime as string;
-	if (exif.fNumber) summary.Apertura = `f/${exif.fNumber}`;
-	if (exif.iso) summary.ISO = `ISO ${exif.iso}`;
-	if (exif.focalLength) summary['Distancia focal'] = exif.focalLength as string;
+	if (exif.exposureTime) {
+		summary.Exposición = exif.exposureTime as string;
+	}
+	if (exif.fNumber) {
+		summary.Apertura = `f/${exif.fNumber}`;
+	}
+	if (exif.iso) {
+		summary.ISO = `ISO ${exif.iso}`;
+	}
+	if (exif.focalLength) {
+		summary['Distancia focal'] = exif.focalLength as string;
+	}
 
 	// Fecha
 	if (exif.dateTimeOriginal) {
@@ -102,7 +120,9 @@ export function getExifSummary(metadata?: ImageMetadata): Record<string, string>
  * @returns Array de etiquetas sugeridas
  */
 export function extractTagSuggestions(metadata?: ImageMetadata): string[] {
-	if (!metadata) return [];
+	if (!metadata) {
+		return [];
+	}
 
 	const suggestions: string[] = [];
 
@@ -133,7 +153,9 @@ export function extractTagSuggestions(metadata?: ImageMetadata): string[] {
  * @returns true si la imagen tiene metadatos EXIF o AI, false en caso contrario
  */
 export function hasCompleteMetadata(image: Image): boolean {
-	if (!image.metadata) return false;
+	if (!image.metadata) {
+		return false;
+	}
 
 	// Si metadata es string, parsearlo
 	const metadata = typeof image.metadata === 'string' ? (JSON.parse(image.metadata) as ImageMetadata) : image.metadata;
@@ -154,10 +176,15 @@ export function bytesToBase64Image(buffer: Uint8Array, format: string): string {
 	// Determinar el tipo MIME según el formato
 	let mimeType = 'image/jpeg'; // Valor por defecto
 
-	if (format === 'png') mimeType = 'image/png';
-	else if (format === 'webp') mimeType = 'image/webp';
-	else if (format === 'gif') mimeType = 'image/gif';
-	else if (format === 'svg') mimeType = 'image/svg+xml';
+	if (format === 'png') {
+		mimeType = 'image/png';
+	} else if (format === 'webp') {
+		mimeType = 'image/webp';
+	} else if (format === 'gif') {
+		mimeType = 'image/gif';
+	} else if (format === 'svg') {
+		mimeType = 'image/svg+xml';
+	}
 
 	// Devolver la cadena completa para usar en src de imágenes
 	return `data:${mimeType};base64,${base64}`;

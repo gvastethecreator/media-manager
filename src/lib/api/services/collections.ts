@@ -115,14 +115,14 @@ export interface CollectionStats {
 /**
  * Obtiene los datos de una colección para mostrar en una tarjeta
  */
-export async function getCollectionCardData(collectionId: string): Promise<CollectionCardData> {
+export function getCollectionCardData(collectionId: string): Promise<CollectionCardData> {
 	return apiClient.get<CollectionCardData>(`/collections/${collectionId}/card-data`);
 }
 
 /**
  * Obtiene una lista de colecciones para mostrar en una galería de tarjetas
  */
-export async function getCollectionsForCards(options: GetCollectionsOptions = {}): Promise<CollectionCardData[]> {
+export function getCollectionsForCards(options: GetCollectionsOptions = {}): Promise<CollectionCardData[]> {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(options)) {
 		if (value !== undefined) {
@@ -136,7 +136,7 @@ export async function getCollectionsForCards(options: GetCollectionsOptions = {}
 /**
  * Obtiene estadísticas de colecciones
  */
-export async function getCollectionStats(options: { userId?: string } = {}): Promise<CollectionStats> {
+export function getCollectionStats(options: { userId?: string } = {}): Promise<CollectionStats> {
 	const params = new URLSearchParams();
 	for (const [key, value] of Object.entries(options)) {
 		if (value !== undefined) {
@@ -150,7 +150,7 @@ export async function getCollectionStats(options: { userId?: string } = {}): Pro
 /**
  * Busca colecciones con filtros avanzados
  */
-export async function searchCollections(
+export function searchCollections(
 	options: GetCollectionsOptions & { searchTerm: string }
 ): Promise<CollectionCardData[]> {
 	const params = new URLSearchParams();
@@ -166,7 +166,7 @@ export async function searchCollections(
 /**
  * Obtiene elementos recientes de una colección
  */
-export async function getCollectionRecentItems(
+export function getCollectionRecentItems(
 	collectionId: string,
 	limit = 6
 ): Promise<

@@ -1,5 +1,5 @@
 import { Calendar, ChevronRight, Folder, HardDrive, Hash, Image as ImageIcon, Loader2 } from 'lucide-react';
-import * as React from 'react';
+import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';

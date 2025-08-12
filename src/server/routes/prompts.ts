@@ -48,9 +48,13 @@ router.get('/', async (req, res) => {
 		const conditions = [];
 
 		// Construir condiciones WHERE
-		if (filters.category) conditions.push(eq(prompts.category, filters.category));
+		if (filters.category) {
+			conditions.push(eq(prompts.category, filters.category));
+		}
 
-		if (filters.isFavorite !== undefined) conditions.push(eq(prompts.isFavorite, filters.isFavorite));
+		if (filters.isFavorite !== undefined) {
+			conditions.push(eq(prompts.isFavorite, filters.isFavorite));
+		}
 
 		// Búsqueda por texto
 		if (filters.search) {

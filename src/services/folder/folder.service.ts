@@ -28,7 +28,9 @@ export async function getFolders(parentId?: string): Promise<FolderComplete[]> {
 export async function getFolder(id: string): Promise<FolderComplete | null> {
 	const response = await fetch(`/api/folders/${id}`);
 	if (!response.ok) {
-		if (response.status === 404) return null;
+		if (response.status === 404) {
+			return null;
+		}
 		throw new Error('No se pudo obtener la carpeta.');
 	}
 	return response.json();

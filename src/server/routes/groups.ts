@@ -174,8 +174,8 @@ router.get('/:id/images', async (req, res) => {
 		const { limit = '50', offset = '0', sortBy = 'createdAt', sortOrder = 'desc' } = req.query;
 
 		const filters = {
-			limit: Number.parseInt(limit as string),
-			offset: Number.parseInt(offset as string),
+			limit: Number.parseInt(limit as string, 10),
+			offset: Number.parseInt(offset as string, 10),
 			sortBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
 			sortOrder: sortOrder as 'asc' | 'desc',
 		};

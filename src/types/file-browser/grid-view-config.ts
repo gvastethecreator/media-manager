@@ -232,7 +232,6 @@ export function getAspectRatioValue(config: GridViewConfig): number {
 			return 16 / 9;
 		case 'custom':
 			return config.customAspectRatio ? config.customAspectRatio.width / config.customAspectRatio.height : 1;
-		case 'auto':
 		default:
 			return 0; // 0 significa usar aspect ratio natural del contenido
 	}

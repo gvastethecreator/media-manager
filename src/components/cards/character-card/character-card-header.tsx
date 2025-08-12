@@ -26,9 +26,15 @@ export function CharacterCardHeader({
 }: CharacterCardHeaderProps) {
 	const classIcon = () => {
 		const lowerCaseClass = characterClass?.toLowerCase();
-		if (lowerCaseClass?.includes('warrior')) return <Sword className="h-3.5 w-3.5" />;
-		if (lowerCaseClass?.includes('mage')) return <Wand className="h-3.5 w-3.5" />;
-		if (lowerCaseClass?.includes('tank')) return <Shield className="h-3.5 w-3.5" />;
+		if (lowerCaseClass?.includes('warrior')) {
+			return <Sword className="h-3.5 w-3.5" />;
+		}
+		if (lowerCaseClass?.includes('mage')) {
+			return <Wand className="h-3.5 w-3.5" />;
+		}
+		if (lowerCaseClass?.includes('tank')) {
+			return <Shield className="h-3.5 w-3.5" />;
+		}
 		return null;
 	};
 

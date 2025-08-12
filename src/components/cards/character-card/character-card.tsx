@@ -13,7 +13,12 @@ import { CharacterCardImages } from './character-card-images';
 
 function LoadingPlaceholder({ className }: { className?: string }) {
 	return (
-		<div className={cn('flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900', className)}>
+		<div
+			className={cn(
+				'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
+				className
+			)}
+		>
 			<p className="text-gray-500">Cargando personaje...</p>
 		</div>
 	);
@@ -21,27 +26,32 @@ function LoadingPlaceholder({ className }: { className?: string }) {
 
 function ErrorPlaceholder({ className, message }: { className?: string; message?: string }) {
 	return (
-		<div className={cn('flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900', className)}>
+		<div
+			className={cn(
+				'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
+				className
+			)}
+		>
 			<p className="text-red-800">Error: {message || 'Personaje no encontrado'}</p>
 		</div>
 	);
 }
 
 function TcgVisualOverlays({
-		tcgMode,
-		primaryColor,
-		secondaryColor,
-		rarityLevel,
-		power,
-		isFavorite,
-	}: {
-		tcgMode: boolean;
-		primaryColor: string;
-		secondaryColor: string;
-		rarityLevel?: string | null;
-		power?: number | null;
-		isFavorite: boolean;
-	}) {
+	tcgMode,
+	primaryColor,
+	secondaryColor,
+	rarityLevel,
+	power,
+	isFavorite,
+}: {
+	tcgMode: boolean;
+	primaryColor: string;
+	secondaryColor: string;
+	rarityLevel?: string | null;
+	power?: number | null;
+	isFavorite: boolean;
+}) {
 	if (!tcgMode) {
 		return null;
 	}
@@ -73,7 +83,10 @@ function TcgVisualOverlays({
 				/>
 			</div>
 			<div className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/3 left-1/2 z-1 h-20 w-20 opacity-10">
-				<div className="flex h-full w-full items-center justify-center rounded-full border-2 border-dashed" style={{ borderColor: primaryColor }}>
+				<div
+					className="flex h-full w-full items-center justify-center rounded-full border-2 border-dashed"
+					style={{ borderColor: primaryColor }}
+				>
 					<div className="font-bold text-xs" style={{ color: primaryColor }}>
 						POWER
 						<br />
@@ -182,7 +195,11 @@ function CardShell({
 			whileTap={!disabled && onClick ? { scale: 0.98 } : {}}
 		>
 			<CardContainer
-				className={cn('transition-all duration-300', isHovered && 'scale-[1.02]', isSelected && 'ring-4 ring-primary/60')}
+				className={cn(
+					'transition-all duration-300',
+					isHovered && 'scale-[1.02]',
+					isSelected && 'ring-4 ring-primary/60'
+				)}
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
 			>
@@ -234,21 +251,21 @@ function CharacterCardBody({
 			ariaLabel={`Character: ${character.name}`}
 			className={className}
 			compact={compact}
-			tcgMode={tcgMode}
 			disabled={disabled}
 			isSelected={isSelected}
 			onClick={onClick ? () => onClick(character) : undefined}
 			primaryColor={primaryColor}
 			secondaryColor={secondaryColor}
+			tcgMode={tcgMode}
 		>
-		<div className="relative z-1 flex h-full flex-col">
+			<div className="relative z-1 flex h-full flex-col">
 				<TcgVisualOverlays
-					tcgMode={tcgMode}
-					primaryColor={primaryColor}
-					secondaryColor={secondaryColor}
-					rarityLevel={character.metadata?.rarityLevel}
-					power={character.metadata?.power}
 					isFavorite={character.isFavorite}
+					power={character.metadata?.power}
+					primaryColor={primaryColor}
+					rarityLevel={character.metadata?.rarityLevel}
+					secondaryColor={secondaryColor}
+					tcgMode={tcgMode}
 				/>
 				<CharacterCardHeader
 					class={character.class}
@@ -283,7 +300,11 @@ function CharacterCardBody({
 					id={character.id}
 					level={character.level}
 					primaryColor={primaryColor}
-					rarityLevel={character.metadata?.rarityLevel ? ({ Common: 1, Uncommon: 2, Rare: 3, Mythic: 4 }[character.metadata.rarityLevel] ?? 1) : 1}
+					rarityLevel={
+						character.metadata?.rarityLevel
+							? ({ Common: 1, Uncommon: 2, Rare: 3, Mythic: 4 }[character.metadata.rarityLevel] ?? 1)
+							: 1
+					}
 				/>
 			</div>
 		</CardShell>
@@ -326,6 +347,4 @@ export function CharacterCard({
 			tcgMode={tcgMode}
 		/>
 	);
-
 }
-

@@ -95,7 +95,9 @@ export function groupWorldItems(
  * @returns Lista filtrada de WorldItems
  */
 export function filterWorldItemsBySearch(worldItems: WorldItemExtended[], searchQuery: string): WorldItemExtended[] {
-	if (!searchQuery.trim()) return worldItems;
+	if (!searchQuery.trim()) {
+		return worldItems;
+	}
 
 	const query = searchQuery.toLowerCase();
 	return worldItems.filter(
@@ -204,7 +206,9 @@ export function applyWorldItemFilters(worldItems: WorldItemExtended[], filters: 
 			const searchTerm = filters.searchTerm || filters.query;
 			if (searchTerm) {
 				const matchesSearch = filterWorldItemsBySearch([item], searchTerm).length > 0;
-				if (!matchesSearch) return false;
+				if (!matchesSearch) {
+					return false;
+				}
 			}
 		}
 

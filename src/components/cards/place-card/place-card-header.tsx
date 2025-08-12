@@ -40,21 +40,39 @@ export function PlaceCardHeader({
 	// Determinar icono según el tipo de lugar
 	const getTypeIcon = () => {
 		const typeLC = type.toLowerCase();
-		if (typeLC.includes('city') || typeLC.includes('ciudad')) return <Building2 className="h-3.5 w-3.5" />;
-		if (typeLC.includes('forest') || typeLC.includes('bosque')) return <Trees className="h-3.5 w-3.5" />;
-		if (typeLC.includes('mountain') || typeLC.includes('montaña')) return <Mountain className="h-3.5 w-3.5" />;
-		if (typeLC.includes('desert') || typeLC.includes('desierto')) return <Palmtree className="h-3.5 w-3.5" />;
+		if (typeLC.includes('city') || typeLC.includes('ciudad')) {
+			return <Building2 className="h-3.5 w-3.5" />;
+		}
+		if (typeLC.includes('forest') || typeLC.includes('bosque')) {
+			return <Trees className="h-3.5 w-3.5" />;
+		}
+		if (typeLC.includes('mountain') || typeLC.includes('montaña')) {
+			return <Mountain className="h-3.5 w-3.5" />;
+		}
+		if (typeLC.includes('desert') || typeLC.includes('desierto')) {
+			return <Palmtree className="h-3.5 w-3.5" />;
+		}
 		return <Compass className="h-3.5 w-3.5" />;
 	};
 
 	// Determinar icono según el clima
 	const getClimateIcon = () => {
 		const climateLC = climate.toLowerCase();
-		if (climateLC.includes('tropical')) return <Palmtree className="h-3.5 w-3.5" />;
-		if (climateLC.includes('desert') || climateLC.includes('desierto')) return <Palmtree className="h-3.5 w-3.5" />;
-		if (climateLC.includes('cold') || climateLC.includes('frío')) return <Cloud className="h-3.5 w-3.5" />;
-		if (climateLC.includes('rain') || climateLC.includes('lluvia')) return <Droplets className="h-3.5 w-3.5" />;
-		if (climateLC.includes('forest') || climateLC.includes('bosque')) return <Sprout className="h-3.5 w-3.5" />;
+		if (climateLC.includes('tropical')) {
+			return <Palmtree className="h-3.5 w-3.5" />;
+		}
+		if (climateLC.includes('desert') || climateLC.includes('desierto')) {
+			return <Palmtree className="h-3.5 w-3.5" />;
+		}
+		if (climateLC.includes('cold') || climateLC.includes('frío')) {
+			return <Cloud className="h-3.5 w-3.5" />;
+		}
+		if (climateLC.includes('rain') || climateLC.includes('lluvia')) {
+			return <Droplets className="h-3.5 w-3.5" />;
+		}
+		if (climateLC.includes('forest') || climateLC.includes('bosque')) {
+			return <Sprout className="h-3.5 w-3.5" />;
+		}
 		return <Cloud className="h-3.5 w-3.5" />;
 	};
 

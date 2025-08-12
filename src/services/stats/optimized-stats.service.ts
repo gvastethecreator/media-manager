@@ -122,7 +122,9 @@ export class OptimizedStatsService {
 	 * ✅ MIGRADO A DRIZZLE
 	 */
 	getBatchAlbumStats = async (albumIds: string[]): Promise<Record<string, any>> => {
-		if (albumIds.length === 0) return {};
+		if (albumIds.length === 0) {
+			return {};
+		}
 
 		this.logger.debug(`📊 Obteniendo estadísticas por lotes para ${albumIds.length} álbumes`);
 

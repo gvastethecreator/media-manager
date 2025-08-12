@@ -78,7 +78,9 @@ export function File3DCard({
 
 	// Formatear tamaño de archivo
 	const fileSize = useMemo(() => {
-		if (!file3d.size) return 'N/A';
+		if (!file3d.size) {
+			return 'N/A';
+		}
 		const mb = file3d.size / (1024 * 1024);
 		if (mb < 1) {
 			const kb = file3d.size / 1024;
@@ -89,11 +91,19 @@ export function File3DCard({
 
 	// Complejidad del modelo basada en el tamaño
 	const complexity = useMemo(() => {
-		if (!file3d.size) return 'Desconocida';
+		if (!file3d.size) {
+			return 'Desconocida';
+		}
 		const mb = file3d.size / (1024 * 1024);
-		if (mb < 1) return 'Baja';
-		if (mb < 10) return 'Media';
-		if (mb < 50) return 'Alta';
+		if (mb < 1) {
+			return 'Baja';
+		}
+		if (mb < 10) {
+			return 'Media';
+		}
+		if (mb < 50) {
+			return 'Alta';
+		}
 		return 'Muy Alta';
 	}, [file3d.size]);
 

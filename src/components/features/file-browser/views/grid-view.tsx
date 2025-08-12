@@ -147,7 +147,7 @@ export const GridView = memo<GridViewProps>(function GridViewComponent({
 			return viewport ?? parentRef.current;
 		},
 		estimateSize: () => rowHeight,
-		overscan: derivedProps.isVirtualized ? 4 : 2,
+		overscan: rowCount > 50 ? 3 : 2,
 	});
 
 	// Función para obtener items de una fila específica - Memoizada
@@ -236,7 +236,7 @@ export const GridView = memo<GridViewProps>(function GridViewComponent({
 			data-testid="grid-view"
 			data-view-type="grid"
 			ref={parentRef}
-			style={{ position: 'relative' }}
+			style={{ position: 'relative', contain: 'content paint style layout' }}
 		>
 			<div
 				className="h-full w-full cursor-default border-0 bg-transparent p-0 text-left"

@@ -410,11 +410,21 @@ export const updateGroupService = async (id: string, data: UpdateGroupInput): Pr
 			updatedAt: new Date(),
 		};
 
-		if (data.name !== undefined) updateData.name = data.name;
-		if (data.description !== undefined) updateData.description = data.description;
-		if (data.isFavorite !== undefined) updateData.isFavorite = data.isFavorite;
-		if (data.category !== undefined) updateData.category = data.category;
-		if (data.filters !== undefined) updateData.filters = data.filters;
+		if (data.name !== undefined) {
+			updateData.name = data.name;
+		}
+		if (data.description !== undefined) {
+			updateData.description = data.description;
+		}
+		if (data.isFavorite !== undefined) {
+			updateData.isFavorite = data.isFavorite;
+		}
+		if (data.category !== undefined) {
+			updateData.category = data.category;
+		}
+		if (data.filters !== undefined) {
+			updateData.filters = data.filters;
+		}
 		// if (data.isActive !== undefined) updateData.isActive = data.isActive; // campo no existe en el esquema
 
 		// Actualizar grupo usando Drizzle
@@ -894,9 +904,13 @@ function calculateRarityLevel(totalEntities: number, filtersCount: number): numb
 
 	// Factores que aumentan rareza:
 	// 1. Gran cantidad de entidades
-	if (totalEntities > 100) rarityScore += 3;
-	else if (totalEntities > 50) rarityScore += 2;
-	else if (totalEntities > 20) rarityScore += 1;
+	if (totalEntities > 100) {
+		rarityScore += 3;
+	} else if (totalEntities > 50) {
+		rarityScore += 2;
+	} else if (totalEntities > 20) {
+		rarityScore += 1;
+	}
 
 	// 2. Filtros complejos
 	rarityScore += Math.min(3, Math.floor(filtersCount / 2));
@@ -918,7 +932,9 @@ function calculateGroupPower(group: any, totalEntities: number, filtersCount: nu
 	power += filtersCount * 10;
 
 	// Bonificación por ser favorito
-	if (group.isFavorite) power += 25;
+	if (group.isFavorite) {
+		power += 25;
+	}
 
 	// Limitar el poder máximo
 	return Math.min(999, power);
@@ -977,7 +993,9 @@ function calculateOrganizationLevel(counts: any): number {
 	const totalAlbumCollections = counts.albums + counts.collections;
 	const totalItems = counts.images + counts.videos;
 
-	if (totalItems === 0) return 1;
+	if (totalItems === 0) {
+		return 1;
+	}
 
 	// Relación de organización: cuántos contenedores (albums/colecciones) por item
 	const ratio = totalAlbumCollections / totalItems;
@@ -997,10 +1015,18 @@ function determineOrganizationType(counts: any): string {
 
 	const max = Math.max(media, collections, worldBuilding, utility);
 
-	if (max === media) return 'Archivo';
-	if (max === collections) return 'Colección';
-	if (max === worldBuilding) return 'Mundo';
-	if (max === utility) return 'Utilidad';
+	if (max === media) {
+		return 'Archivo';
+	}
+	if (max === collections) {
+		return 'Colección';
+	}
+	if (max === worldBuilding) {
+		return 'Mundo';
+	}
+	if (max === utility) {
+		return 'Utilidad';
+	}
 
 	return 'Mixto';
 }
@@ -1010,7 +1036,9 @@ function determineOrganizationType(counts: any): string {
  */
 function calculateFlexibilityScore(filters: any[]): number {
 	// Escala 1-10
-	if (!filters.length) return 1;
+	if (!filters.length) {
+		return 1;
+	}
 
 	// Complejidad basada en número de filtros
 	const baseScore = Math.min(10, filters.length + 1);

@@ -8,11 +8,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
 import {
-    useCreateWildcard,
-    useDeleteWildcard,
-    useRootWildcards,
-    useUpdateWildcard,
-    useWildcards,
+	useCreateWildcard,
+	useDeleteWildcard,
+	useRootWildcards,
+	useUpdateWildcard,
+	useWildcards,
 } from '@/lib/api/wildcards';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
@@ -238,7 +238,7 @@ export function WildcardsSettings() {
 			setSelectedWildcard(null);
 			setIsEditMode(false);
 			toastService.success('Comodín actualizado correctamente');
-	} catch (err) {
+		} catch (err) {
 			toastService.error('Error al actualizar el comodín');
 		}
 	};
@@ -248,7 +248,7 @@ export function WildcardsSettings() {
 			await deleteWildcardMutation.mutateAsync(id);
 			setSelectedWildcard(null);
 			toastService.success('Comodín eliminado correctamente');
-	} catch (err) {
+		} catch (err) {
 			toastService.error('Error al eliminar el comodín');
 		}
 	};

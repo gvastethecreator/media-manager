@@ -47,7 +47,9 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 	const primaryColor = useMemo(() => concept?.color || '#3b82f6', [concept?.color]);
 	const secondaryColor = useMemo(() => {
 		// Si no hay color definido, usar un valor por defecto
-		if (!concept?.color) return '#1e40af';
+		if (!concept?.color) {
+			return '#1e40af';
+		}
 
 		// Oscurecer el color primario para el secundario
 		try {

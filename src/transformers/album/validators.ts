@@ -53,7 +53,9 @@ export function validateUpdateAlbumData(
  * @returns true si es válido, false si no lo es
  */
 export function isValidAlbum(album: unknown): album is Album {
-	if (!album || typeof album !== 'object') return false;
+	if (!album || typeof album !== 'object') {
+		return false;
+	}
 
 	const albumObj = album as Record<string, unknown>;
 

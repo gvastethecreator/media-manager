@@ -8,13 +8,17 @@ const API_BASE_PATH = '/api/stats';
 
 export async function getSystemStatsFromApi(): Promise<SystemStats> {
 	const response = await fetch(API_BASE_PATH);
-	if (!response.ok) throw new Error('Error al obtener estadísticas');
+	if (!response.ok) {
+		throw new Error('Error al obtener estadísticas');
+	}
 	return response.json();
 }
 
 export async function invalidateStatsInApi(): Promise<void> {
 	const response = await fetch(`${API_BASE_PATH}/invalidate`, { method: 'POST' });
-	if (!response.ok) throw new Error('Error al invalidar estadísticas');
+	if (!response.ok) {
+		throw new Error('Error al invalidar estadísticas');
+	}
 }
 
 /**
@@ -23,7 +27,9 @@ export async function invalidateStatsInApi(): Promise<void> {
  */
 export async function getImageStatsFromApi(imageId: string): Promise<ImageStatistics> {
 	const response = await fetch(`/api/images/${imageId}/stats`);
-	if (!response.ok) throw new Error('Error al obtener estadísticas de imagen');
+	if (!response.ok) {
+		throw new Error('Error al obtener estadísticas de imagen');
+	}
 	return response.json();
 }
 
@@ -32,7 +38,9 @@ export async function getImageStatsFromApi(imageId: string): Promise<ImageStatis
  */
 export async function incrementImageViewInApi(imageId: string): Promise<ImageStatistics> {
 	const response = await fetch(`/api/images/${imageId}/view`, { method: 'POST' });
-	if (!response.ok) throw new Error('Error al incrementar vistas');
+	if (!response.ok) {
+		throw new Error('Error al incrementar vistas');
+	}
 	return response.json();
 }
 
@@ -41,6 +49,8 @@ export async function incrementImageViewInApi(imageId: string): Promise<ImageSta
  */
 export async function incrementImageDownloadInApi(imageId: string): Promise<ImageStatistics> {
 	const response = await fetch(`/api/images/${imageId}/download`, { method: 'POST' });
-	if (!response.ok) throw new Error('Error al incrementar descargas');
+	if (!response.ok) {
+		throw new Error('Error al incrementar descargas');
+	}
 	return response.json();
 }

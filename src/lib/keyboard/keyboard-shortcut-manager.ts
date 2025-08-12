@@ -163,10 +163,18 @@ export class KeyboardShortcutManager {
 	private generateKeyFromEvent(event: KeyboardEvent): string {
 		const modifiers: string[] = [];
 
-		if (event.ctrlKey) modifiers.push('ctrl');
-		if (event.shiftKey) modifiers.push('shift');
-		if (event.altKey) modifiers.push('alt');
-		if (event.metaKey) modifiers.push('meta');
+		if (event.ctrlKey) {
+			modifiers.push('ctrl');
+		}
+		if (event.shiftKey) {
+			modifiers.push('shift');
+		}
+		if (event.altKey) {
+			modifiers.push('alt');
+		}
+		if (event.metaKey) {
+			modifiers.push('meta');
+		}
 
 		modifiers.sort();
 

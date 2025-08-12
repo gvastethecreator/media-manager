@@ -75,11 +75,17 @@ export function EmojiPicker({
 			setSelectedEmoji(emojiValue);
 
 			// 📢 Notificar cambios a los callbacks
-			if (onEmojiSelect) onEmojiSelect(emojiValue);
-			if (onChange) onChange(emojiValue);
+			if (onEmojiSelect) {
+				onEmojiSelect(emojiValue);
+			}
+			if (onChange) {
+				onChange(emojiValue);
+			}
 
 			// 🎯 Cerrar popover en modo compacto
-			if (compact) setOpen(false);
+			if (compact) {
+				setOpen(false);
+			}
 		},
 		[onEmojiSelect, compact, onChange]
 	);
@@ -88,9 +94,15 @@ export function EmojiPicker({
 	const handleQuickSelect = useCallback(
 		(emoji: string) => {
 			setSelectedEmoji(emoji);
-			if (onEmojiSelect) onEmojiSelect(emoji);
-			if (onChange) onChange(emoji);
-			if (compact) setOpen(false);
+			if (onEmojiSelect) {
+				onEmojiSelect(emoji);
+			}
+			if (onChange) {
+				onChange(emoji);
+			}
+			if (compact) {
+				setOpen(false);
+			}
 		},
 		[onEmojiSelect, compact, onChange]
 	);

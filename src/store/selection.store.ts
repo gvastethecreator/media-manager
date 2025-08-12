@@ -202,7 +202,7 @@ export const useSelectionStore = create<SelectionState>()(
 				set({
 					selectedItems: items,
 					selectedIds: allIds,
-					lastSelectedItem: items.length > 0 ? items[items.length - 1] : null,
+					lastSelectedItem: items.length > 0 ? items.at(-1) : null,
 					isMultiSelectMode: items.length > 1,
 				});
 				selectionLogger.debug('🎯 Seleccionados todos los items:', `${items.length} items`);

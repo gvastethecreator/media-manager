@@ -89,7 +89,9 @@ export function ThemeProvider({
 
 	// Detectar preferencia del sistema
 	const getSystemTheme = (): (typeof customThemes)[number] => {
-		if (typeof window === 'undefined') return 'light';
+		if (typeof window === 'undefined') {
+			return 'light';
+		}
 		return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 	};
 

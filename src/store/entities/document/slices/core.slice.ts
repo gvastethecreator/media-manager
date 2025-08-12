@@ -35,7 +35,9 @@ export const createDocumentCoreSlice: StateCreator<
 	...initialState,
 
 	loadDocuments: async () => {
-		if (get().isLoading) return;
+		if (get().isLoading) {
+			return;
+		}
 		set((state) => {
 			state.isLoading = true;
 			state.error = null;

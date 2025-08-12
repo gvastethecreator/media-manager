@@ -67,13 +67,27 @@ export function formatActivityDate(date: Date | string): string {
 	const diffHours = Math.floor(diffMins / 60);
 	const diffDays = Math.floor(diffHours / 24);
 
-	if (diffSecs < 60) return 'hace unos segundos';
-	if (diffMins === 1) return 'hace 1 minuto';
-	if (diffMins < 60) return `hace ${diffMins} minutos`;
-	if (diffHours === 1) return 'hace 1 hora';
-	if (diffHours < 24) return `hace ${diffHours} horas`;
-	if (diffDays === 1) return 'ayer';
-	if (diffDays < 7) return `hace ${diffDays} días`;
+	if (diffSecs < 60) {
+		return 'hace unos segundos';
+	}
+	if (diffMins === 1) {
+		return 'hace 1 minuto';
+	}
+	if (diffMins < 60) {
+		return `hace ${diffMins} minutos`;
+	}
+	if (diffHours === 1) {
+		return 'hace 1 hora';
+	}
+	if (diffHours < 24) {
+		return `hace ${diffHours} horas`;
+	}
+	if (diffDays === 1) {
+		return 'ayer';
+	}
+	if (diffDays < 7) {
+		return `hace ${diffDays} días`;
+	}
 
 	// Formatear fecha completa para actividades más antiguas
 	const options: Intl.DateTimeFormatOptions = {
@@ -153,8 +167,14 @@ export function isAlertActivity(activity: Activity): boolean {
  * @returns Nivel de severidad o null si no es alerta
  */
 export function getActivityAlertLevel(activity: Activity): 'error' | 'warning' | 'info' | null {
-	if (activity.type === ActivityType.SYSTEM_ERROR) return 'error';
-	if (activity.type === ActivityType.SYSTEM_WARNING) return 'warning';
-	if (activity.type === ActivityType.SYSTEM_INFO) return 'info';
+	if (activity.type === ActivityType.SYSTEM_ERROR) {
+		return 'error';
+	}
+	if (activity.type === ActivityType.SYSTEM_WARNING) {
+		return 'warning';
+	}
+	if (activity.type === ActivityType.SYSTEM_INFO) {
+		return 'info';
+	}
 	return null;
 }

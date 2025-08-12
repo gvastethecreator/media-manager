@@ -35,7 +35,9 @@ class SimpleEventEmitter {
 	}
 
 	off(event: string, listener: Function): void {
-		if (!this.events[event]) return;
+		if (!this.events[event]) {
+			return;
+		}
 		const index = this.events[event].indexOf(listener);
 		if (index > -1) {
 			this.events[event].splice(index, 1);
@@ -43,7 +45,9 @@ class SimpleEventEmitter {
 	}
 
 	emit(event: string, ...args: any[]): void {
-		if (!this.events[event]) return;
+		if (!this.events[event]) {
+			return;
+		}
 		this.events[event].forEach((listener) => listener(...args));
 	}
 
@@ -173,7 +177,7 @@ class ProgressTrackingService extends SimpleEventEmitter {
 	/**
 	 * Update operation progress
 	 */
-	updateProgress(operationId: string, progressValue: number, currentItem?: string): void {
+	updateProgress(operationId: string, progressValue: number, _currentItem?: string): void {
 		const operation = this.operations.get(operationId);
 		if (!operation || operation.status === 'cancelled') {
 			return;
@@ -482,7 +486,6 @@ class ProgressTrackingService extends SimpleEventEmitter {
 				return `Sincronizando ${totalItems} ${itemText}`;
 			case 'batch_operation':
 				return `Operación en lote: ${totalItems} ${itemText}`;
-			case 'custom':
 			default:
 				return `Procesando ${totalItems} ${itemText}`;
 		}

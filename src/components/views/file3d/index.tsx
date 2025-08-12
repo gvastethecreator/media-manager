@@ -5,7 +5,9 @@ import { File3DView } from './file3d-view';
 const viewLogger = clientLogger.withContext('File3DViewContainer');
 
 export function File3DViewContainer({ isVisible }: ViewProps) {
-	if (!isVisible) return null;
+	if (!isVisible) {
+		return null;
+	}
 
 	return <File3DView isVisible={isVisible} />;
 }

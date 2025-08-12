@@ -69,7 +69,9 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 
 	const handleVideoDoubleClick = useCallback(
 		(video: AnyEntityWithStats) => {
-			if (!isVideoWithStats(video)) return;
+			if (!isVideoWithStats(video)) {
+				return;
+			}
 
 			const videoItem = video as VideoWithStats;
 			logger.info('🖱️ Doble click en video:', videoItem.name);
@@ -100,7 +102,9 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 	);
 
 	const handleForceRefresh = useCallback(async () => {
-		if (!currentVideoId || isRetrying) return;
+		if (!currentVideoId || isRetrying) {
+			return;
+		}
 
 		setIsRetrying(true);
 		logger.info('🔄 Forzando recarga del video');

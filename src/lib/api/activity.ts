@@ -104,14 +104,30 @@ const activityApi = {
 	async getActivities(params: GetActivitiesParams = {}): Promise<ActivitiesResponse> {
 		const searchParams = new URLSearchParams();
 
-		if (params.page) searchParams.set('page', params.page.toString());
-		if (params.limit) searchParams.set('limit', params.limit.toString());
-		if (params.type) searchParams.set('type', params.type);
-		if (params.imageId) searchParams.set('imageId', params.imageId);
-		if (params.albumId) searchParams.set('albumId', params.albumId);
-		if (params.folderId) searchParams.set('folderId', params.folderId);
-		if (params.characterId) searchParams.set('characterId', params.characterId);
-		if (params.collectionId) searchParams.set('collectionId', params.collectionId);
+		if (params.page) {
+			searchParams.set('page', params.page.toString());
+		}
+		if (params.limit) {
+			searchParams.set('limit', params.limit.toString());
+		}
+		if (params.type) {
+			searchParams.set('type', params.type);
+		}
+		if (params.imageId) {
+			searchParams.set('imageId', params.imageId);
+		}
+		if (params.albumId) {
+			searchParams.set('albumId', params.albumId);
+		}
+		if (params.folderId) {
+			searchParams.set('folderId', params.folderId);
+		}
+		if (params.characterId) {
+			searchParams.set('characterId', params.characterId);
+		}
+		if (params.collectionId) {
+			searchParams.set('collectionId', params.collectionId);
+		}
 
 		const response = await fetch(`/api/activity?${searchParams.toString()}`);
 
@@ -125,8 +141,12 @@ const activityApi = {
 	async getActivityStats(params: ActivityStatsParams = {}): Promise<ActivityStats> {
 		const searchParams = new URLSearchParams();
 
-		if (params.days) searchParams.set('days', params.days.toString());
-		if (params.type) searchParams.set('type', params.type);
+		if (params.days) {
+			searchParams.set('days', params.days.toString());
+		}
+		if (params.type) {
+			searchParams.set('type', params.type);
+		}
 
 		const response = await fetch(`/api/activity/stats?${searchParams.toString()}`);
 

@@ -4,6 +4,7 @@
  */
 
 import { useMemo } from 'react';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { useViewConfiguration } from './use-view-configuration';
 
 export interface CardsLayout {
@@ -91,6 +92,7 @@ const DEFAULT_CONFIG: CardsViewConfig = {
 
 export function useCardsViewConfig() {
 	const { currentConfig } = useViewConfiguration('cards');
+	const preferredItemSize = useViewOptionsStore((s) => s.itemSize);
 
 	// Merge with current configuration if available
 	const config = useMemo(() => {
@@ -129,25 +131,21 @@ export function useCardsViewConfig() {
 			let cardWidth = config.minCardWidth;
 			let columns = 1;
 
+			// Tamaño objetivo desde la barra (clamp entre min/max)
+			const targetWidth = Math.max(config.minCardWidth, Math.min(preferredItemSize, config.maxCardWidth));
+
 			if (config.adaptiveColumns) {
 				// Calculate optimal number of columns based on container width
-				if (containerWidth >= config.responsiveBreakpoints.xl) {
-					columns = Math.floor(availableWidth / (config.minCardWidth + gap));
-				} else if (containerWidth >= config.responsiveBreakpoints.lg) {
-					columns = Math.floor(availableWidth / (config.minCardWidth * 1.1 + gap));
-				} else if (containerWidth >= config.responsiveBreakpoints.md) {
-					columns = Math.floor(availableWidth / (config.minCardWidth * 1.2 + gap));
-				} else {
-					columns = Math.floor(availableWidth / (config.minCardWidth * 1.3 + gap));
-				}
+				// Estimar columnas a partir del tamaño objetivo del usuario
+				columns = Math.max(1, Math.floor((availableWidth + gap) / (targetWidth + gap)));
+				columns = Math.min(columns, 6);
 
-				columns = Math.max(1, Math.min(columns, 6)); // Limit between 1 and 6 columns
-
-				// Calculate actual card width based on columns
+				// Calcular ancho real con ese número de columnas
 				cardWidth = (availableWidth - gap * (columns - 1)) / columns;
 				cardWidth = Math.max(config.minCardWidth, Math.min(cardWidth, config.maxCardWidth));
 			} else {
 				// Fixed card width, calculate columns
+				cardWidth = targetWidth;
 				columns = Math.floor(availableWidth / (cardWidth + gap));
 				columns = Math.max(1, columns);
 			}
@@ -164,7 +162,7 @@ export function useCardsViewConfig() {
 				padding,
 			};
 		};
-	}, [config]);
+	}, [config, preferredItemSize]);
 
 	const getCardDimensions = useMemo(() => {
 		return (layout: CardsLayout) => {

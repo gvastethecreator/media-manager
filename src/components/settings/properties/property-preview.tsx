@@ -1,7 +1,7 @@
 import { PencilIcon, StarIcon, TrashIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import type { PropertyWithStats } from './properties-settings';
+import type { PropertyWithStats } from '@/types/entities/property';
 
 interface PropertyPreviewProps {
 	property: PropertyWithStats;
@@ -25,7 +25,7 @@ export function PropertyPreview({
 			<CardHeader className="px-6 pb-4">
 				<div className="flex items-center justify-between">
 					<CardTitle className="flex items-center gap-2 font-bold text-xl">
-						<span aria-label="emoji" role="img">
+						<span aria-label="emoji" role="img" title={property.name}>
 							{property.emoji}
 						</span>
 						{property.name}
@@ -83,9 +83,9 @@ export function PropertyPreview({
 							<h4 className="mb-2 font-medium text-sm">Elementos asociados</h4>
 							<dl className="space-y-2 text-sm">
 								{property._count &&
-									Object.entries(property._count).map(
+									Object.entries(property._count as Record<string, number>).map(
 										([key, count]) =>
-											count &&
+											typeof count === 'number' &&
 											count > 0 && (
 												<div className="flex justify-between" key={key}>
 													<dt className="text-muted-foreground capitalize">

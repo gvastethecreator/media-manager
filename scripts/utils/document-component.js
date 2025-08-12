@@ -79,9 +79,15 @@ function analyzeComponent(filePath) {
 
 		// Detectar imports importantes
 		const imports = [];
-		if (content.includes('lucide-react')) imports.push('lucide-react');
-		if (content.includes('sonner')) imports.push('sonner (toasts)');
-		if (content.includes('zustand')) imports.push('zustand (estado)');
+		if (content.includes('lucide-react')) {
+			imports.push('lucide-react');
+		}
+		if (content.includes('sonner')) {
+			imports.push('sonner (toasts)');
+		}
+		if (content.includes('zustand')) {
+			imports.push('zustand (estado)');
+		}
 
 		return {
 			componentName,
