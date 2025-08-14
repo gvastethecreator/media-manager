@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { AnyEntityWithStats } from '@/types/entities';
 import {
 	extractAIMetadata,
@@ -34,19 +34,13 @@ const addHashMetadata = (item: AnyEntityWithStats, metadata: MetadataField[]): v
 /**
  * Realiza la llamada a la API de extracción de metadatos
  */
-const fetchMetadataFromAPI = async (
-	filePath: string,
-	options: EnhancedMetadataOptions
-): Promise<EnhancedMetadataResult> => {
+const fetchMetadataFromAPI = async (filePath: string, options: EnhancedMetadataOptions): Promise<any> => {
 	const response = await fetch('/api/metadata-advanced/extract-from-path', {
 		method: 'POST',
 		headers: {
 			'Content-Type': 'application/json',
 		},
-		body: JSON.stringify({
-			filePath,
-			options,
-		}),
+		body: JSON.stringify({ filePath, options }),
 	});
 
 	if (!response.ok) {
@@ -55,6 +49,108 @@ const fetchMetadataFromAPI = async (
 
 	return response.json();
 };
+
+/**
+ * Normaliza la respuesta del backend (unified parser) al formato EnhancedMetadataResult esperado por los extractores
+ */
+// Helpers de normalización
+const safeKeys = (obj: any): string[] => (obj && typeof obj === 'object' ? Object.keys(obj) : []);
+
+const normalizeAI = (aiSrc: any) => {
+	if (!aiSrc) {
+		return null;
+	}
+	const ai = { ...aiSrc };
+	const mappings: Record<string, string> = {
+		negative_prompt: 'negativePrompt',
+		cfg_scale: 'cfgScale',
+		workflow_id: 'workflowId',
+		node_count: 'nodeCount',
+		sampler_name: 'sampler',
+		scheduler_type: 'scheduler',
+		model_name: 'model',
+	};
+	for (const [from, to] of Object.entries(mappings)) {
+		if (from in ai && !(to in ai)) {
+			(ai as any)[to] = ai[from];
+		}
+	}
+	return ai;
+};
+
+const normalizeEXIF = (exifSrc: any) => {
+	if (!exifSrc) {
+		return null;
+	}
+	const exif = { ...exifSrc };
+	const mappings: Record<string, string> = {
+		exposure_time: 'exposureTime',
+		focal_length: 'focalLength',
+		f_number: 'fNumber',
+	};
+	for (const [from, to] of Object.entries(mappings)) {
+		if (from in exif && !(to in exif)) {
+			(exif as any)[to] = exif[from];
+		}
+	}
+	if (typeof exif.iso === 'string') {
+		const isoParsed = Number.parseInt(exif.iso, 10);
+		if (!Number.isNaN(isoParsed)) {
+			exif.iso = isoParsed;
+		}
+	}
+	return exif;
+};
+
+// Pipeline resumen:
+// 1. fetchMetadataFromAPI -> POST /api/metadata-advanced/extract-from-path
+// 2. normalizeMetadataResponse -> adapta snake_case backend a camelCase esperado (ai/exif/iptc/xmp + origin)
+// 3. processMetadataResult -> aplica extractores (AI, EXIF, IPTC, XMP) y agrega hash técnico
+// 4. Hook expone enhancedMetadata listo para UI; si falla => [] y panel usa fallback sintético
+// Logs solo en modo DEV para evitar ruido en producción.
+function normalizeMetadataResponse(raw: any): EnhancedMetadataResult {
+	const backend = raw?.metadata || raw;
+
+	if (import.meta.env?.DEV) {
+		// eslint-disable-next-line no-console
+		console.debug('[useEnhancedMetadata] claves payload', {
+			success: raw?.success,
+			ai: safeKeys(backend?.ai_metadata || backend?.aiMetadata).length,
+			exif: safeKeys(backend?.exif || backend?.exifData).length,
+			iptc: safeKeys(backend?.iptc || backend?.iptcData).length,
+			xmp: safeKeys(backend?.xmp || backend?.xmpData).length,
+		});
+	}
+
+	const ai = normalizeAI(backend?.ai_metadata || backend?.aiMetadata);
+	const exif = normalizeEXIF(backend?.exif || backend?.exifData);
+	const iptc = backend?.iptc || backend?.iptcData || null;
+	const xmp = backend?.xmp || backend?.xmpData || null;
+
+	const normalized: EnhancedMetadataResult = {
+		success: Boolean(raw?.success),
+		metadata: {
+			aiMetadata: ai,
+			exifData: exif,
+			iptcData: iptc,
+			xmpData: xmp,
+			origin: backend?.origin || null,
+		},
+	};
+
+	if (import.meta.env?.DEV) {
+		// eslint-disable-next-line no-console
+		console.debug('[useEnhancedMetadata] normalizado', {
+			ai: safeKeys(normalized.metadata?.aiMetadata).length,
+			exif: safeKeys(normalized.metadata?.exifData).length,
+			iptc: safeKeys(normalized.metadata?.iptcData).length,
+			xmp: safeKeys(normalized.metadata?.xmpData).length,
+			origin: normalized.metadata?.origin,
+		});
+	}
+
+	return normalized;
+}
 
 /**
  * Procesa el resultado de la API y extrae todos los metadatos
@@ -80,63 +176,61 @@ const processMetadataResult = (result: EnhancedMetadataResult, item: AnyEntityWi
 export const useEnhancedMetadata = (item?: AnyEntityWithStats) => {
 	const [enhancedMetadata, setEnhancedMetadata] = useState<MetadataField[]>([]);
 	const [isLoadingMetadata, setIsLoadingMetadata] = useState(false);
+	const [error, setError] = useState<string | null>(null);
+
+	const loadEnhancedMetadata = useCallback(async () => {
+		// Solo procesar imágenes
+		if (!item || item.entityType !== 'image') {
+			setEnhancedMetadata([]);
+			return;
+		}
+
+		const filePath = getFilePath(item);
+		if (!filePath) {
+			console.warn('❌ No se encontró la ruta del archivo en item.path');
+			setEnhancedMetadata([]);
+			return;
+		}
+		setError(null);
+		setIsLoadingMetadata(true);
+		try {
+			const options: EnhancedMetadataOptions = {
+				includeExif: true,
+				includeIptc: true,
+				includeXmp: true,
+				detectAIOrigin: true,
+			};
+			const raw = await fetchMetadataFromAPI(filePath, options);
+			const normalized = normalizeMetadataResponse(raw);
+			if (!normalized.success) {
+				console.warn('⚠️ Extracción de metadatos no exitosa', raw);
+				setEnhancedMetadata([]);
+				setError('Extracción no exitosa');
+				return;
+			}
+			const metadata = processMetadataResult(normalized, item);
+			setEnhancedMetadata(metadata);
+		} catch (e) {
+			console.error('Error al obtener metadatos mejorados:', e);
+			setEnhancedMetadata([]);
+			setError(e instanceof Error ? e.message : 'Error desconocido');
+		} finally {
+			setIsLoadingMetadata(false);
+		}
+	}, [item]);
 
 	useEffect(() => {
-		const loadEnhancedMetadata = async () => {
-			// Solo procesar imágenes
-			if (!item || item.entityType !== 'image') {
-				setEnhancedMetadata([]);
-				return;
-			}
-
-			const filePath = getFilePath(item);
-			if (!filePath) {
-				console.warn('❌ No se encontró la ruta del archivo en item.path');
-				setEnhancedMetadata([]);
-				return;
-			}
-
-			setIsLoadingMetadata(true);
-
-			try {
-				console.log('📁 Usando ruta del archivo:', filePath);
-
-				const options: EnhancedMetadataOptions = {
-					includeExif: true,
-					includeIptc: true,
-					includeXmp: true,
-					detectAIOrigin: true,
-				};
-
-				const result = await fetchMetadataFromAPI(filePath, options);
-
-				if (!result.success) {
-					console.error('Error en la extracción de metadatos:', result.error);
-					setEnhancedMetadata([]);
-					return;
-				}
-
-				const metadata = processMetadataResult(result, item);
-
-				console.log('✅ Metadatos extraídos exitosamente:', metadata.length, 'campos');
-				setEnhancedMetadata(metadata);
-			} catch (error) {
-				console.error('Error al obtener metadatos mejorados:', error);
-				setEnhancedMetadata([]);
-			} finally {
-				setIsLoadingMetadata(false);
-			}
-		};
-
 		if (item?.entityType === 'image') {
 			loadEnhancedMetadata();
 		} else {
 			setEnhancedMetadata([]);
 		}
-	}, [item]);
+	}, [item, loadEnhancedMetadata]);
 
 	return {
 		enhancedMetadata,
 		isLoadingMetadata,
+		error,
+		refetch: loadEnhancedMetadata,
 	};
 };

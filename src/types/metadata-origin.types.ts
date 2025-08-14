@@ -329,6 +329,7 @@ export interface MetadataExtractionResult {
 
 	// Metadata de IA específico por engine
 	ai_metadata?:
+		| StructuredAIMetadata
 		| Automatic1111Metadata
 		| ComfyUIMetadata
 		| SwarmUIMetadata
@@ -386,6 +387,35 @@ export interface MetadataParser {
 	engine: AIEngine;
 	canParse(metadata: Record<string, unknown>): Promise<boolean>;
 	parse(metadata: Record<string, unknown>): Promise<ParserResult>;
+}
+
+// ===== Interfaz Modular de Parsers de Engine =====
+export interface AIEngineParser {
+	name: string;
+	engines: AIEngine[];
+	priority?: number;
+	matches(metadata: Record<string, unknown>): Promise<boolean> | boolean;
+	parse(metadata: Record<string, unknown>): Promise<StructuredAIMetadata | null>;
+}
+
+// ===== Metadata Estructurado Unificado =====
+export interface StructuredAIMetadataCommon extends AIGenerationParameters {
+	engine: AIEngine;
+	confidence?: number;
+	evidence?: string[];
+}
+
+export interface StructuredAIMetadata {
+	engine: AIEngine;
+	common: StructuredAIMetadataCommon;
+	automatic1111?: Automatic1111Metadata;
+	comfyui?: ComfyUIMetadata;
+	swarmui?: SwarmUIMetadata;
+	midjourney?: MidjourneyMetadata;
+	ideogram?: IdeogramMetadata;
+	legacy_flat: AIGenerationParameters;
+	errors?: string[];
+	warnings?: string[];
 }
 
 // ===== Exportaciones de Utilidad =====

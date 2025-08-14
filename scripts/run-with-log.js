@@ -6,6 +6,31 @@ import { copyFileSync, createWriteStream, existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { generatePostExecutionSummary } from './logging-utils.js';
 
+// Regex extraídos a nivel superior (performance + lint)
+const RE_CANNOT_FIND_MODULE = /Cannot find module/;
+const RE_CRITICAL_ERRORS = /ENOENT|spawn.*failed|permission denied|command not found|out of memory/i;
+const RE_DEP_ERRORS = /MODULE_NOT_FOUND|Error: Cannot resolve module|bun.*ERR/i;
+
+function resolveCommandTypeLower(isLint, isTest) {
+	if (isLint) {
+		return 'linting';
+	}
+	if (isTest) {
+		return 'testing';
+	}
+	return 'tolerante';
+}
+
+function resolveCommandTypeHeader(isLint, isTest) {
+	if (isLint) {
+		return 'Linting';
+	}
+	if (isTest) {
+		return 'Testing';
+	}
+	return 'Normal';
+}
+
 const [, , logName, ...commandArgs] = process.argv;
 
 if (!logName || commandArgs.length === 0) {
@@ -56,7 +81,7 @@ const logFilePath = join(logsDir, logFileName);
 console.log(chalk.cyan(`🚀 Ejecutando: ${chalk.bold(fullCommand)}`));
 console.log(chalk.gray(`📄 Logs en: ${logFilePath}`));
 if (isTolerantCommand) {
-	const tipo = isLintingCommand ? 'linting' : isTestingCommand ? 'testing' : 'tolerante';
+	const tipo = resolveCommandTypeLower(isLintingCommand, isTestingCommand);
 	console.log(chalk.blue(`🔍 Comando de ${tipo} detectado - tolerando códigos de salida no-cero`));
 }
 console.log(chalk.yellow('📺 Salida en tiempo real:'));
@@ -68,7 +93,7 @@ const logHeader = [
 	`Fecha: ${new Date().toISOString()}`,
 	`Directorio: ${process.cwd()}`,
 	`Modo tolerante: ${isTolerantCommand ? 'SÍ' : 'NO'}`,
-	`Tipo: ${isLintingCommand ? 'Linting' : isTestingCommand ? 'Testing' : 'Normal'}`,
+	`Tipo: ${resolveCommandTypeHeader(isLintingCommand, isTestingCommand)}`,
 	'===============================================',
 	'',
 ].join('\n');
@@ -86,30 +111,32 @@ let missingDep = false;
 let hasRealErrors = false;
 
 // Función para determinar el color y emoji según el tipo de línea
-function getLineStyle(line, isError, hasRealErrors, isTolerantCommand) {
-	// Casos de éxito
-	if (line.includes('✓') || line.includes('success') || line.includes('Fixed')) {
+function isSuccessLine(line) {
+	return line.includes('✓') || line.includes('success') || line.includes('Fixed');
+}
+function isWarningLine(line) {
+	return line.includes('warning') || line.includes('warn');
+}
+function isToolInfo(line) {
+	return line.includes('lint/') || line.includes('test ') || line.includes('spec ');
+}
+function isErrorToken(line) {
+	return line.includes('error') || line.includes('✘') || line.includes('failed');
+}
+function getLineStyle(line, isError) {
+	if (isSuccessLine(line)) {
 		return { color: chalk.green, emoji: '✅' };
 	}
-
-	// Warnings
-	if (line.includes('warning') || line.includes('warn')) {
+	if (isWarningLine(line)) {
 		return { color: chalk.yellow, emoji: '⚠️ ' };
 	}
-
-	// Issues de herramientas (siempre informativos)
-	if (line.includes('lint/') || line.includes('test ') || line.includes('spec ')) {
+	if (isToolInfo(line)) {
 		return { color: chalk.cyan, emoji: '🔍' };
 	}
-
-	// Errores - lógica simplificada
-	const isErrorLine = line.includes('error') || line.includes('✘') || line.includes('failed');
-	if (isErrorLine) {
+	if (isErrorToken(line)) {
 		const treatAsError = hasRealErrors || !isTolerantCommand;
 		return treatAsError ? { color: chalk.red, emoji: '❌' } : { color: chalk.cyan, emoji: '🔍' };
 	}
-
-	// Salida de error del proceso
 	if (isError) {
 		if (hasRealErrors) {
 			return { color: chalk.redBright, emoji: '🔴' };
@@ -118,8 +145,6 @@ function getLineStyle(line, isError, hasRealErrors, isTolerantCommand) {
 			return { color: chalk.cyan, emoji: '🔍' };
 		}
 	}
-
-	// Default
 	return { color: chalk.white, emoji: '📋' };
 }
 
@@ -128,18 +153,16 @@ function processOutput(data, isError = false) {
 	const text = data.toString();
 	const lines = text.split('\n').filter((line) => line.trim());
 
-	if (/Cannot find module/.test(text)) {
+	if (RE_CANNOT_FIND_MODULE.test(text)) {
 		missingDep = true;
 		hasRealErrors = true;
 	}
 
-	// Detectar errores críticos reales vs issues de linting/testing
-	if (/ENOENT|spawn.*failed|permission denied|command not found|out of memory/i.test(text)) {
+	if (RE_CRITICAL_ERRORS.test(text)) {
 		hasRealErrors = true;
 	}
 
-	// Detectar errores de dependencias
-	if (/MODULE_NOT_FOUND|Error: Cannot resolve module|bun.*ERR/i.test(text)) {
+	if (RE_DEP_ERRORS.test(text)) {
 		hasRealErrors = true;
 	}
 
@@ -168,6 +191,16 @@ child.on('error', (error) => {
 	process.exit(1);
 });
 
+function logTolerantOutcome(exitCode) {
+	const tipo = resolveCommandTypeHeader(isLintingCommand, isTestingCommand);
+	console.log(chalk.yellow.bold(`⚠️  ${tipo} completado con issues encontrados (Exit code: ${exitCode})`));
+	console.log(chalk.cyan(`🔍 Esto es normal para herramientas de ${tipo.toLowerCase()} cuando encuentran problemas`));
+	generatePostExecutionSummary(logFilePath, fullCommand);
+	console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
+	console.log(chalk.green('✅ Script completado exitosamente'));
+	process.exit(0);
+}
+
 child.on('close', (code) => {
 	logStream.end();
 
@@ -183,17 +216,7 @@ child.on('close', (code) => {
 
 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
 	} else if (isTolerantCommand && !hasRealErrors) {
-		const tipo = isLintingCommand ? 'Linting' : isTestingCommand ? 'Testing' : 'Proceso';
-		console.log(chalk.yellow.bold(`⚠️  ${tipo} completado con issues encontrados (Exit code: ${code})`));
-		console.log(chalk.cyan(`🔍 Esto es normal para herramientas de ${tipo.toLowerCase()} cuando encuentran problemas`));
-
-		// Generar resumen automático de errores
-		generatePostExecutionSummary(logFilePath, fullCommand);
-
-		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
-		console.log(chalk.green('✅ Script completado exitosamente'));
-		// Para herramientas tolerantes, no tratamos esto como error crítico
-		process.exit(0);
+		logTolerantOutcome(code);
 	} else {
 		console.error(chalk.red.bold(`❌ Error al ejecutar comando (Exit code: ${code})`));
 		const errorFilePath = logFilePath.replace('.log', '_error.log');

@@ -11,17 +11,12 @@ import {
 	type MetadataExtractionResult,
 	type TechnicalMetadata,
 } from '@/types/metadata-origin.types';
-
+import { runParsers } from './engine-parsers/engine-parser-registry';
 // Servicios especializados
 import { extractMetadata as extractExifMetadata } from './exifr-parser.service';
 import { detectOrigin, hasAIGenerationData } from './origin-detector.service';
 import { extractPngTextChunks } from './png-parser.service';
-import {
-	extractCommonAIParameters,
-	parseAutomatic1111Metadata,
-	parseComfyUIMetadata,
-	parseSwarmUIMetadata,
-} from './sd-parser.service';
+import { extractCommonAIParameters } from './sd-parser.service';
 
 const logger = serverLogger.withContext('UnifiedParserService');
 
@@ -85,6 +80,10 @@ export async function extractAllMetadata(
 				result.exif = technicalMetadata.exif as any;
 				result.iptc = technicalMetadata.iptc as any;
 				result.xmp = technicalMetadata.xmp as any;
+				// Propagar rawTags (incluye pngTextChunks) para que createCombinedMetadata pueda integrarlos
+				if ((technicalMetadata as any).rawTags) {
+					(result as any).rawTags = (technicalMetadata as any).rawTags;
+				}
 
 				logger.info('🔧 UNIFIED PARSER: Asignando metadatos al resultado', {
 					resultHasExif: !!result.exif,
@@ -319,51 +318,49 @@ function createCombinedMetadata(result: MetadataExtractionResult): Record<string
 		}
 	}
 
+	// Incluir PNG text chunks (parameters, workflow, etc.) si existen en rawTags
+	try {
+		const rawTags: any = (result as any).raw_exif_tags || (result as any).rawTags;
+		const pngTextChunks = rawTags?.pngTextChunks as Array<{ keyword: string; text: string }> | undefined;
+		if (pngTextChunks && pngTextChunks.length) {
+			for (const chunk of pngTextChunks) {
+				const key = chunk.keyword?.toLowerCase();
+				if (!(key && chunk.text)) continue;
+				// Mapear keywords comunes a campos esperados por findParametersText / findWorkflowData
+				if (key.includes('param')) {
+					combined.parameters = chunk.text;
+				} else if (key === 'comment' || key === 'description') {
+					combined.Comment = chunk.text;
+				} else if (key.includes('prompt')) {
+					combined.prompt = chunk.text;
+				} else if (key.includes('workflow')) {
+					combined.workflow = chunk.text;
+				}
+			}
+		}
+	} catch (e) {
+		logger.warn('No se pudieron integrar PNG text chunks en combinedMetadata', { error: e });
+	}
+
 	return combined;
 }
 
 /**
  * Extrae metadatos específicos de IA basado en el engine detectado
  */
-async function extractAIMetadata(metadata: Record<string, unknown>, engine: AIEngine): Promise<any> {
+async function extractAIMetadata(metadata: Record<string, unknown>, engine: AIEngine) {
 	try {
-		switch (engine) {
-			case AIEngine.AUTOMATIC1111:
-			case AIEngine.FORGE: {
-				// Buscar parámetros en campos comunes
-				const parametersText = findParametersText(metadata);
-				if (parametersText) {
-					const result = await parseAutomatic1111Metadata(parametersText);
-					return result.detected ? result.data : null;
-				}
-				break;
-			}
-
-			case AIEngine.COMFYUI: {
-				// Buscar workflow en campos comunes
-				const workflowData = findWorkflowData(metadata);
-				if (workflowData) {
-					const result = await parseComfyUIMetadata(workflowData);
-					return result.detected ? result.data : null;
-				}
-				break;
-			}
-
-			case AIEngine.SWARMUI: {
-				// SwarmUI almacena metadatos de forma más estructurada
-				const result = await parseSwarmUIMetadata(metadata);
-				return result.detected ? result.data : null;
-			}
-
-			default:
-				// Para engines no específicos, extraer parámetros comunes
-				return await extractCommonAIParameters(metadata);
+		// Intentar parsers modulares primero
+		const structured = await runParsers(metadata, engine);
+		if (structured) {
+			return structured; // Ya incluye legacy_flat
 		}
+		// Fallback genérico
+		return await extractCommonAIParameters(metadata);
 	} catch (error) {
-		logger.warn('Error extrayendo metadatos específicos de IA', { engine, error });
+		logger.warn('Error extrayendo metadatos específicos de IA (registry)', { engine, error });
+		return null;
 	}
-
-	return null;
 }
 
 /**
@@ -380,15 +377,46 @@ function findParametersText(metadata: Record<string, unknown>): string | null {
 		'ImageDescription',
 	];
 
-	for (const field of possibleFields) {
-		if (field in metadata) {
-			const value = metadata[field];
-			if (typeof value === 'string' && value.includes('Steps:')) {
-				return value;
+	const indicatorTokens = [
+		'Steps:',
+		'Sampler:',
+		'CFG scale',
+		'CFG Scale',
+		'Seed:',
+		'Model:',
+		'Clip skip',
+		'Scheduler:',
+		'Negative prompt:',
+	];
+
+	const isParameterLike = (value: string): boolean => {
+		if (value.includes('Steps:')) {
+			return true;
+		}
+		let hits = 0;
+		for (const token of indicatorTokens) {
+			if (value.includes(token)) {
+				hits++;
+				if (hits >= 2) {
+					return true;
+				}
 			}
 		}
-	}
+		return false;
+	};
 
+	for (const field of possibleFields) {
+		if (!(field in metadata)) {
+			continue;
+		}
+		const value = metadata[field];
+		if (typeof value !== 'string') {
+			continue;
+		}
+		if (isParameterLike(value)) {
+			return value;
+		}
+	}
 	return null;
 }
 

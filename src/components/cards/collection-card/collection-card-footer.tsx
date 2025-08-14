@@ -27,6 +27,12 @@ export function CollectionCardFooter({
 	isFavorite,
 	compact = false,
 }: CollectionCardFooterProps) {
+	// Helper function para mostrar el conteo de items
+	const getItemsText = (): string => {
+		const count = imagesCount ?? 0;
+		return count > 0 ? `${count} items` : 'Sin items';
+	};
+
 	// Formatear fechas
 	const formattedCreated = format(new Date(createdAt), 'dd/MM/yy', { locale: es });
 	const formattedUpdated = format(new Date(updatedAt), 'dd/MM/yy', { locale: es });
@@ -113,7 +119,7 @@ export function CollectionCardFooter({
 							textShadow: `0 0 5px ${primaryColor}30`,
 						}}
 					>
-						♦ Colección digital ♦ {(imagesCount ?? 0 > 0) ? `${imagesCount} items` : 'Sin items'}
+						♦ Colección digital ♦ {getItemsText()}
 					</div>
 				</>
 			)}

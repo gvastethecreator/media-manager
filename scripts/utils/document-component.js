@@ -11,6 +11,9 @@ const fs = require('fs');
 const path = require('path');
 
 const DOCS_PATH = 'docs/components-documentation.md';
+// Regex hoisted para rendimiento y lint
+const RE_EXPORT_FUNCTION = /export function (\w+)/;
+const RE_INTERFACE_PROPS = /interface (\w+Props)[^}]+}/;
 
 /**
  * Generar template de documentación para un componente
@@ -65,11 +68,11 @@ function analyzeComponent(filePath) {
 		const content = fs.readFileSync(filePath, 'utf8');
 
 		// Extraer nombre del componente
-		const componentMatch = content.match(/export function (\w+)/);
+		const componentMatch = content.match(RE_EXPORT_FUNCTION);
 		const componentName = componentMatch ? componentMatch[1] : 'UnknownComponent';
 
 		// Extraer props interface
-		const propsMatch = content.match(/interface (\w+Props)[^}]+}/);
+		const propsMatch = content.match(RE_INTERFACE_PROPS);
 		const propsInterface = propsMatch ? propsMatch[0] : null;
 
 		// Detectar hooks utilizados

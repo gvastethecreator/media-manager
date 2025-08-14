@@ -344,12 +344,17 @@ export function BatchOperationsPanel({ className, maxHeight = '400px' }: BatchOp
 											<div className="mt-3">
 												<h5 className="mb-2 font-medium text-red-600 text-xs">Errores ({operation.errors.length}):</h5>
 												<div className="max-h-20 space-y-1 overflow-y-auto">
-													{operation.errors.slice(0, 3).map((error, index) => (
-														<div className="text-muted-foreground text-xs" key={index}>
-															<span className="font-medium">{error.item.name}:</span>
-															<span className="ml-1">{error.message}</span>
-														</div>
-													))}
+													{operation.errors.slice(0, 3).map((error) => {
+														const stableKey = error.item?.id
+															? `err-${error.item.id}`
+															: `err-${error.item?.name ?? 'unknown'}-${error.message}`;
+														return (
+															<div className="text-muted-foreground text-xs" key={stableKey}>
+																<span className="font-medium">{error.item.name}:</span>
+																<span className="ml-1">{error.message}</span>
+															</div>
+														);
+													})}
 													{operation.errors.length > 3 && (
 														<div className="text-muted-foreground text-xs">
 															... y {operation.errors.length - 3} errores más

@@ -1,4 +1,7 @@
 // @ts-nocheck - Temporary suppression for implicit any parameter types and type mismatches
+
+import { randomUUID } from 'crypto';
+import { eq, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import {
 	albums,
@@ -27,8 +30,6 @@ import {
 } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
-import { randomUUID } from 'crypto';
-import { eq, sql } from 'drizzle-orm';
 
 // Constantes para caché
 const STATS_CACHE_TAG = 'stats';

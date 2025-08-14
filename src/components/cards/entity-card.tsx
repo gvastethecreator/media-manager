@@ -49,21 +49,8 @@ const mapToImageCardVariant = (cardVariant: CardVariant): 'default' | 'minimal' 
 	}
 };
 
-const createSyntheticClickHandler = (originalOnClick?: (e: React.MouseEvent) => void) => {
-	if (!originalOnClick) {
-		return;
-	}
-	return (..._args: unknown[]) => {
-		const syntheticEvent = {
-			// no-op handlers necesarios para cumplir contratos de MouseEvent
-			preventDefault: noop,
-			stopPropagation: noop,
-			currentTarget: null,
-			target: null,
-		} as unknown as React.MouseEvent;
-		originalOnClick(syntheticEvent);
-	};
-};
+// Eliminado synthetic wrapper: ahora se pasa el handler real directamente para reducir overhead
+// (se mantiene noop por compatibilidad potencial)
 
 // Contexto para renderers
 type RenderCtx = {
@@ -73,12 +60,19 @@ type RenderCtx = {
 	config: ReturnType<typeof useCardLayout>['config'];
 	finalOnClick?: (e: React.MouseEvent) => void;
 	finalOnDoubleClick?: () => void;
+	thumbnailQuality?: 'low' | 'medium' | 'high';
 };
 
 // Renderers por tipo
-const renderImage = ({ entity, isSelected, className, config, finalOnClick, finalOnDoubleClick }: RenderCtx) => {
-	const imageClickHandler = createSyntheticClickHandler(finalOnClick);
-	const imageDoubleClickHandler = finalOnDoubleClick ? () => finalOnDoubleClick() : undefined;
+const renderImage = ({
+	entity,
+	isSelected,
+	className,
+	config,
+	finalOnClick,
+	finalOnDoubleClick,
+	thumbnailQuality,
+}: RenderCtx) => {
 	return (
 		<ImageCard
 			aria-describedby={`entity-${(entity as any).id}-description`}
@@ -87,8 +81,8 @@ const renderImage = ({ entity, isSelected, className, config, finalOnClick, fina
 			className={`entity-card ${isSelected ? 'entity-card--selected' : ''} ${className || ''}`}
 			data-item-id={(entity as any).id}
 			imageId={(entity as any).id}
-			onClick={imageClickHandler}
-			onDoubleClick={imageDoubleClickHandler}
+			onClick={finalOnClick as any}
+			onDoubleClick={finalOnDoubleClick}
 			onKeyDown={(e) => {
 				if (e.key === 'Enter' || e.key === ' ') {
 					e.preventDefault();
@@ -112,6 +106,7 @@ const renderImage = ({ entity, isSelected, className, config, finalOnClick, fina
 			showTags={config.showTags}
 			tabIndex={0}
 			tcgMode={config.variant === 'tcg'}
+			thumbnailQuality={thumbnailQuality}
 			variant={mapToImageCardVariant(config.variant)}
 		/>
 	);
@@ -148,7 +143,7 @@ const renderVideo = ({ entity, isSelected, className, config, finalOnClick }: Re
 			className={className}
 			compact={config.layout === 'compact' || config.size === 'sm'}
 			isSelected={isSelected}
-			onClick={createSyntheticClickHandler(finalOnClick)}
+			onClick={finalOnClick ? () => (finalOnClick as any)({} as any) : undefined}
 			tcgMode={config.variant === 'tcg'}
 			videoId={(entity as any).id}
 		/>
@@ -189,7 +184,7 @@ const renderAlbum = ({ entity, isSelected, className, config, finalOnClick }: Re
 			album={entity as any}
 			className={className}
 			compact={config.layout === 'compact' || config.size === 'sm'}
-			onClick={createSyntheticClickHandler(finalOnClick)}
+			onClick={finalOnClick ? () => (finalOnClick as any)({} as any) : undefined}
 		/>
 		<div className="sr-only" id={`entity-${(entity as any).id}-description`}>
 			{`Álbum ${(entity as any).name || 'sin nombre'}. ${isSelected ? 'Seleccionado.' : ''} Presiona Enter para abrir, Espacio para seleccionar.`}
@@ -219,7 +214,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 				className={ctx.className}
 				collection={ctx.entity as any}
 				compact={ctx.config.layout === 'compact' || ctx.config.size === 'sm'}
-				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
 				showEntitiesCount={ctx.config.showStats}
 				showImagesCount={ctx.config.showStats}
 			/>
@@ -242,7 +237,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 				className={ctx.className}
 				folder={ctx.entity as any}
 				interactive={!!ctx.finalOnClick}
-				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
 			/>
 		</div>
 	),
@@ -254,7 +249,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 			<AudioCard
 				audio={ctx.entity as any}
 				className={ctx.className}
-				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
 			/>
 		</div>
 	),
@@ -266,7 +261,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 			<DocumentCard
 				className={ctx.className}
 				document={ctx.entity as any}
-				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
 			/>
 		</div>
 	),
@@ -277,7 +272,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 		>
 			<TagCard
 				className={ctx.className}
-				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
 				tag={ctx.entity as any}
 			/>
 		</div>
@@ -297,7 +292,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 		>
 			<PlaceCard
 				className={ctx.className}
-				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
 				placeId={(ctx.entity as any).id}
 			/>
 		</div>
@@ -309,7 +304,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 		>
 			<WorldItemCard
 				className={ctx.className}
-				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
 				worldItemId={(ctx.entity as any).id}
 			/>
 		</div>
@@ -322,7 +317,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 			<ConceptCard
 				className={ctx.className}
 				conceptId={(ctx.entity as any).id}
-				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
 			/>
 		</div>
 	),
@@ -333,7 +328,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 		>
 			<PromptCard
 				className={ctx.className}
-				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
 				promptId={(ctx.entity as any).id}
 			/>
 		</div>
@@ -345,7 +340,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 		>
 			<PropertyCard
 				className={ctx.className}
-				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
 				propertyId={(ctx.entity as any).id}
 			/>
 		</div>
@@ -358,7 +353,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 			<GroupCard
 				className={ctx.className}
 				groupId={(ctx.entity as any).id}
-				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
 			/>
 		</div>
 	),
@@ -369,7 +364,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 		>
 			<WildcardCard
 				className={ctx.className}
-				onClick={createSyntheticClickHandler(ctx.finalOnClick)}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
 				wildcard={ctx.entity as any}
 			/>
 		</div>
@@ -401,6 +396,7 @@ export const EntityCard: FC<EntityCardProps> = memo(
 		size,
 		variant,
 		preset,
+		thumbnailQuality,
 		// Props legacy para compatibilidad
 		compact,
 		tcgMode,
@@ -446,6 +442,7 @@ export const EntityCard: FC<EntityCardProps> = memo(
 			config,
 			finalOnClick,
 			finalOnDoubleClick,
+			thumbnailQuality,
 		});
 	}
 );

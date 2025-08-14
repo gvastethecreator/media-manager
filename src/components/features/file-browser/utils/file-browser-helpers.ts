@@ -150,6 +150,8 @@ export const compareByField = (aValues: any, bValues: any, field: string): numbe
 			return aValues.modifiedTime - bValues.modifiedTime;
 		case 'createdTime':
 			return aValues.createdTime - bValues.createdTime;
+		case 'updatedAt': // alias adicional para claridad (frontend puede usar updatedAt)
+			return aValues.modifiedTime - bValues.modifiedTime;
 		default:
 			return 0;
 	}
