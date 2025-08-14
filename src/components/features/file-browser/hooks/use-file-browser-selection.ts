@@ -4,13 +4,13 @@
  * @description Hook que maneja toda la lógica de selección, eventos y atajos de teclado
  */
 
-import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useUndoRedo } from '@/hooks/use-undo-redo';
 import { useFileBrowserShortcuts } from '@/lib/keyboard';
 import { toastService } from '@/lib/ui/toast';
 import { useSelectionStore } from '@/store/selection.store';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { type AnyEntityWithStats } from '@/types/migration';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import {
 	convertItemToViewerFormat,
 	handleCopyAction,

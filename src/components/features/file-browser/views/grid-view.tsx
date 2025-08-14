@@ -7,10 +7,10 @@
  * - Sin virtualización avanzada (se puede reintroducir luego si >200 items).
  */
 
-import React, { useCallback, useMemo } from 'react';
 import { OptimizedEntityCard } from '@/components/cards/entity-card';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
+import React, { useCallback, useMemo } from 'react';
 
 export interface GridViewProps {
 	items: AnyEntityWithStats[];
@@ -85,6 +85,7 @@ export const GridView: React.FC<GridViewProps> = React.memo(
 					const isSelected = selectedSet.has(item.id);
 					return (
 						<button
+							aria-pressed={isSelected}
 							className={cn(
 								'group relative cursor-pointer overflow-hidden border bg-background/40 p-0 text-left outline-none',
 								interfaceConfig?.global?.animations && !interfaceConfig?.global?.ultra
@@ -94,6 +95,7 @@ export const GridView: React.FC<GridViewProps> = React.memo(
 								interfaceConfig?.global?.ultra && 'hover:bg-accent/40'
 							)}
 							data-item-id={item.id}
+							data-selected={isSelected ? 'true' : 'false'}
 							key={item.id}
 							onClick={handleClick}
 							onDoubleClick={handleDoubleClick}
