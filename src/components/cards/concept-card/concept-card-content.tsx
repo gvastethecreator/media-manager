@@ -1,9 +1,8 @@
+import { cn } from '@/lib/utils';
+import { ConceptService } from '@/services/concept/concept.service';
 import { BookText, Globe, Image, MessageSquare, Package, Tag, UserSquare, VideoIcon } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
-import { cn } from '@/lib/utils';
-
-import { ConceptService } from '@/services/concept/concept.service';
 
 const { getConceptCounts } = ConceptService;
 
@@ -62,8 +61,16 @@ export function ConceptCardContent({
 	// Calcular total relaciones para efectos visuales
 	const totalRelations = Object.values(relationCounts).reduce((sum, count) => sum + count, 0);
 
-	// Parsear tags si es un string
-	const parsedTags = typeof tags === 'string' ? (tags ? JSON.parse(tags) : []) : tags || [];
+	// Parsear tags si es un string con lookup table pattern
+	const parseTagsString = (tagsInput: string | string[]): string[] => {
+		if (typeof tagsInput === 'string') {
+			return tagsInput ? JSON.parse(tagsInput) : [];
+		}
+		return tagsInput || [];
+	};
+
+	// Guard contra null para cumplir firma de parseTagsString
+	const parsedTags = tags ? parseTagsString(tags) : [];
 
 	// Cargar recuentos de relaciones al montar el componente
 	useEffect(() => {
@@ -79,9 +86,22 @@ export function ConceptCardContent({
 		loadCounts();
 	}, [conceptId]);
 
-	// Extracto del contenido si existe
-	const contentPreview =
-		content && content.length > 0 ? content.substring(0, 120) + (content.length > 120 ? '...' : '') : null;
+	// Extracto del contenido con helper function
+	const generateContentPreview = (inputContent: string | null | undefined): string | null => {
+		if (!inputContent || inputContent.length === 0) {
+			return null;
+		}
+
+		const CONTENT_LIMIT = 120;
+
+		if (inputContent.length > CONTENT_LIMIT) {
+			return `${inputContent.substring(0, CONTENT_LIMIT)}...`;
+		}
+
+		return inputContent;
+	};
+
+	const contentPreview = generateContentPreview(content);
 
 	// Color secundario si no viene como prop
 	const secColor = secondaryColor || `${primaryColor}90`;
@@ -134,7 +154,15 @@ export function ConceptCardContent({
 									border: `1px solid ${primaryColor}50`,
 								}}
 							>
-								{totalRelations > 50 ? 'RARO' : totalRelations > 20 ? 'POCO COMÚN' : 'COMÚN'}
+								{(() => {
+									if (totalRelations > 50) {
+										return 'RARO';
+									}
+									if (totalRelations > 20) {
+										return 'POCO COMÚN';
+									}
+									return 'COMÚN';
+								})()}
 							</span>
 						)}
 					</div>
@@ -150,13 +178,15 @@ export function ConceptCardContent({
 					boxShadow: tcgMode ? `inset 0 0 5px ${primaryColor}20` : 'none',
 				}}
 			>
-				{description ? (
-					<div className="line-clamp-3 overflow-hidden">{description}</div>
-				) : contentPreview ? (
-					<div className="line-clamp-2 overflow-hidden italic">{contentPreview}</div>
-				) : (
-					<div className="py-1 text-center italic opacity-70">Sin descripción</div>
-				)}
+				{(() => {
+					if (description) {
+						return <div className="line-clamp-3 overflow-hidden">{description}</div>;
+					}
+					if (contentPreview) {
+						return <div className="line-clamp-2 overflow-hidden italic">{contentPreview}</div>;
+					}
+					return <div className="py-1 text-center italic opacity-70">Sin descripción</div>;
+				})()}
 			</div>
 
 			{/* Etiquetas del concepto (si hay) */}

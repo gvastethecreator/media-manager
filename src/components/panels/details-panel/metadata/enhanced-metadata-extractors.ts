@@ -4,14 +4,8 @@ import type { EnhancedMetadataResult, MetadataField } from '../types';
  * Extrae metadatos de IA del resultado de la API
  */
 export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: MetadataField[]): void => {
-	if (!result.metadata?.aiMetadata) {
-		return;
-	}
-
-	const ai = result.metadata.aiMetadata;
-
-	// Información del engine
-	if (result.metadata.origin?.engine) {
+	// Información del engine (mostrar aunque no haya aiMetadata detallado)
+	if (result.metadata?.origin?.engine) {
 		const engineNames: Record<string, string> = {
 			automatic1111: 'Automatic1111',
 			forge: 'Forge',
@@ -35,6 +29,12 @@ export const extractAIMetadata = (result: EnhancedMetadataResult, metadata: Meta
 			category: 'ia',
 		});
 	}
+
+	if (!result.metadata?.aiMetadata) {
+		return; // no más campos
+	}
+
+	const ai = result.metadata.aiMetadata;
 
 	// Parámetros de generación básicos
 	const basicParams = [

@@ -1,21 +1,12 @@
 /**
  * @file Vista masonry mejorada tipo Pinterest con configuración avanzada
- * @module components/features					<EntityCard
-						className="h-full w-full"
-						compact={false}
-						entity={layoutItem.item}
-						isSelected={isSelected}
-						layout="vertical"
-						onClick={(e) => onItemClickById(layoutItem.item.id, e)}
-						onDoubleClick={() => onItemDoubleClickById(layoutItem.item.id)}
-						size="md"
-					/>er/views/masonry-view
+ * @module components/features/file-browser/views/masonry-view
  */
 
 import { AnimatePresence, motion } from 'motion/react';
 import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
 import { OptimizedEntityCard } from '@/components/cards/entity-card';
-import { useMasonryViewConfig } from '@/hooks/use-masonry-view-config';
+import { type MasonryLayoutItem, useMasonryViewConfig } from '@/hooks/use-masonry-view-config';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
 
@@ -23,30 +14,31 @@ interface MasonryViewProps {
 	items: AnyEntityWithStats[];
 	selectedIds: string[];
 	containerWidth: number;
+	itemSize?: number; // nuevo: controla ancho base de columnas
 	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
 	onItemDoubleClick: (item: AnyEntityWithStats) => void;
+	interfaceConfig?: any;
+}
+
+interface MasonryConfigObject {
+	shouldUseAnimations: boolean;
+	animationDuration: number;
+	hoverEffects: boolean;
+	showShadows: boolean;
+	roundedCorners: boolean;
+	showSelectionIndicators: boolean;
+	ultra: boolean;
 }
 
 interface MasonryItemProps {
-	layoutItem: {
-		item: AnyEntityWithStats;
-		x: number;
-		y: number;
-		width: number;
-		height: number;
-	};
-	isSelected: boolean;
+	layoutItem: MasonryLayoutItem;
 	itemIndex: number;
-	onItemClickById: (id: string, e: React.MouseEvent) => void;
-	onItemDoubleClickById: (id: string) => void;
-	masonryConfig: {
-		shouldUseAnimations: boolean;
-		animationDuration: number;
-		hoverEffects: boolean;
-		showShadows: boolean;
-		roundedCorners: boolean;
-		showSelectionIndicators: boolean;
-	};
+	isSelected: boolean;
+	masonryConfig: MasonryConfigObject;
+	onItemClick: (id: string, event: React.MouseEvent<HTMLButtonElement>) => void;
+	onItemDoubleClick: (id: string, event: React.MouseEvent<HTMLButtonElement>) => void;
+	thumbnailQuality?: 'low' | 'medium' | 'high';
+	borderRadiusPx?: number;
 }
 
 const MasonryItem = memo<MasonryItemProps>(
@@ -54,9 +46,11 @@ const MasonryItem = memo<MasonryItemProps>(
 		layoutItem,
 		isSelected,
 		itemIndex,
-		onItemClickById,
-		onItemDoubleClickById,
+		onItemClick,
+		onItemDoubleClick,
 		masonryConfig,
+		thumbnailQuality,
+		borderRadiusPx,
 	}) {
 		const style: React.CSSProperties = {
 			position: 'absolute',
@@ -67,19 +61,19 @@ const MasonryItem = memo<MasonryItemProps>(
 		};
 
 		const handleClick = useCallback(
-			(e: React.MouseEvent) => {
+			(e: React.MouseEvent<HTMLButtonElement>) => {
 				e.stopPropagation();
-				onItemClickById(layoutItem.item.id, e);
+				onItemClick(layoutItem.item.id, e);
 			},
-			[layoutItem.item.id, onItemClickById]
+			[layoutItem.item.id, onItemClick]
 		);
 
 		const handleDoubleClick = useCallback(
-			(e: React.MouseEvent) => {
+			(e: React.MouseEvent<HTMLButtonElement>) => {
 				e.stopPropagation();
-				onItemDoubleClickById(layoutItem.item.id);
+				onItemDoubleClick(layoutItem.item.id, e);
 			},
-			[layoutItem.item.id, onItemDoubleClickById]
+			[layoutItem.item.id, onItemDoubleClick]
 		);
 
 		// OPTIMIZACIÓN: Propiedades de motion estables que no cambian entre renders
@@ -104,60 +98,69 @@ const MasonryItem = memo<MasonryItemProps>(
 			[masonryConfig.animationDuration]
 		);
 
-		const itemClasses = cn('cursor-pointer select-none overflow-hidden', {
-			'rounded-lg': masonryConfig.roundedCorners,
-			'shadow-sm transition-shadow duration-200 hover:shadow-md': masonryConfig.showShadows,
-			'ring-2 ring-primary ring-offset-2': isSelected && masonryConfig.showSelectionIndicators,
-		});
+		const itemClasses = cn(
+			'group relative cursor-pointer select-none overflow-hidden border bg-background/40 outline-none',
+			{
+				'transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary':
+					!masonryConfig.ultra && masonryConfig.shouldUseAnimations,
+				'rounded-lg': masonryConfig.roundedCorners && !borderRadiusPx,
+				'shadow-sm transition-shadow duration-200 hover:shadow-md': masonryConfig.showShadows && !masonryConfig.ultra,
+				'ring-2 ring-primary': isSelected && masonryConfig.showSelectionIndicators,
+			}
+		);
 
 		// Para elementos no animados, usar div simple
 		if (!masonryConfig.shouldUseAnimations) {
 			return (
-				<div
+				<button
 					className={itemClasses}
-					// Compat E2E/selectores
 					data-entity-card=""
 					data-entity-id={layoutItem.item.id}
 					data-item-id={layoutItem.item.id}
 					data-item-index={itemIndex}
 					data-testid="file-browser-item"
-					style={style as React.CSSProperties}
+					onClick={handleClick}
+					onDoubleClick={handleDoubleClick}
+					style={{
+						...(style as React.CSSProperties),
+						borderRadius: borderRadiusPx ? `${borderRadiusPx}px` : undefined,
+					}}
+					type="button"
 				>
 					<OptimizedEntityCard
 						className="h-full w-full"
-						compact={false}
+						compact
 						entity={layoutItem.item}
 						isSelected={isSelected}
-						layout="vertical"
-						onClick={(e) => onItemClickById(layoutItem.item.id, e)}
-						onDoubleClick={() => onItemDoubleClickById(layoutItem.item.id)}
-						size="md"
+						onClick={() => {}}
+						onDoubleClick={() => {}}
+						thumbnailQuality={thumbnailQuality}
 					/>
-				</div>
+				</button>
 			);
 		}
 
 		return (
-			<motion.div
+			<motion.button
 				{...staticMotionProps}
 				className={itemClasses}
-				// Compat E2E/selectores
 				data-entity-card=""
 				data-item-id={layoutItem.item.id}
-				style={style}
+				onClick={handleClick}
+				onDoubleClick={handleDoubleClick}
+				style={{ ...style, borderRadius: borderRadiusPx ? `${borderRadiusPx}px` : undefined }}
 				transition={transition}
+				type="button"
 			>
 				<OptimizedEntityCard
 					className="h-full w-full"
-					compact={false}
+					compact
 					entity={layoutItem.item}
 					isSelected={isSelected}
-					layout="vertical"
-					onClick={(e) => onItemClickById(layoutItem.item.id, e)}
-					onDoubleClick={() => onItemDoubleClickById(layoutItem.item.id)}
-					size="md"
+					onClick={() => {}}
+					onDoubleClick={() => {}}
 				/>
-			</motion.div>
+			</motion.button>
 		);
 	},
 	(prevProps, nextProps) => {
@@ -192,8 +195,10 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryViewComponent(
 	items,
 	selectedIds,
 	containerWidth,
+	itemSize = 160,
 	onItemClick,
 	onItemDoubleClick,
+	interfaceConfig,
 }) {
 	const parentRef = useRef<any>(null);
 	const { config, calculateLayout } = useMasonryViewConfig();
@@ -249,14 +254,21 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryViewComponent(
 	// OPTIMIZACIÓN: Configuración estable de masonry para evitar cambios de props
 	const masonryConfig = useMemo(
 		() => ({
-			shouldUseAnimations: config.animationsEnabled && items.length < 100,
+			shouldUseAnimations:
+				interfaceConfig?.global?.animations &&
+				config.animationsEnabled &&
+				items.length < 100 &&
+				!interfaceConfig?.global?.ultra,
 			animationDuration: config.animationDuration,
 			hoverEffects: config.hoverEffects,
 			showShadows: config.showShadows,
 			roundedCorners: config.roundedCorners,
 			showSelectionIndicators: config.showSelectionIndicators,
+			ultra: Boolean(interfaceConfig?.global?.ultra),
 		}),
 		[
+			interfaceConfig?.global?.animations,
+			interfaceConfig?.global?.ultra,
 			config.animationsEnabled,
 			config.animationDuration,
 			config.hoverEffects,
@@ -267,10 +279,14 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryViewComponent(
 		]
 	);
 
-	// Calcular layout usando el nuevo algoritmo
-	const layoutResult = useMemo(() => {
-		return calculateLayout(items, containerWidth);
-	}, [calculateLayout, items, containerWidth]);
+	// Derivar ancho de columna desde itemSize (clamp 120-320) sin mutar config original
+	const effectiveColumnWidth = Math.max(120, Math.min(itemSize, 320));
+
+	// Calcular layout usando el nuevo algoritmo con override temporal de columnWidth
+	const layoutResult = useMemo(
+		() => calculateLayout(items, containerWidth, effectiveColumnWidth),
+		[calculateLayout, items, containerWidth, effectiveColumnWidth]
+	);
 
 	// Handler para clicks en espacio vacío
 	const handleEmptySpaceClick = useCallback(
@@ -328,42 +344,39 @@ export const MasonryView = memo<MasonryViewProps>(function MasonryViewComponent(
 				padding: `${config.spacing.padding}px`,
 			}}
 		>
-			{/* Información de debug del layout (opcional) */}
-			{process.env.NODE_ENV === 'development' && (
-				<div className="fixed top-2 right-2 z-50 rounded border bg-background/90 p-2 font-mono text-xs backdrop-blur-sm">
-					<div>Columns: {layoutResult.columns}</div>
-					<div>Algorithm: {config.optimization.algorithm}</div>
-					<div>Balance: {(layoutResult.balance.balanceFactor * 100).toFixed(1)}%</div>
-					<div>Height diff: {layoutResult.balance.heightDifference.toFixed(0)}px</div>
-				</div>
-			)}
-
-			{/* Contenedor de items con posicionamiento absoluto */}
 			<div
-				style={{
-					position: 'relative',
-					width: '100%',
-					// Altura total del layout para que el viewport pueda hacer scroll
-					height: `${layoutResult.totalHeight}px`,
-				}}
+				className={cn('file-browser-view')}
+				style={{ fontFamily: 'var(--app-font-family)', fontSize: 'var(--app-font-size)' }}
 			>
-				<AnimatePresence initial={false}>
-					{layoutResult.items.map((layoutItem, index) => {
-						const isSelected = selectedIdsSet.has(layoutItem.item.id);
+				{/* Contenedor de items con posicionamiento absoluto */}
+				<div
+					style={{
+						position: 'relative',
+						width: '100%',
+						// Altura total del layout para que el viewport pueda hacer scroll
+						height: `${layoutResult.totalHeight}px`,
+					}}
+				>
+					<AnimatePresence initial={false}>
+						{layoutResult.items.map((layoutItem, index) => {
+							const isSelected = selectedIdsSet.has(layoutItem.item.id);
 
-						return (
-							<MasonryItem
-								isSelected={isSelected}
-								itemIndex={index}
-								key={layoutItem.item.id}
-								layoutItem={layoutItem}
-								masonryConfig={masonryConfig}
-								onItemClickById={handleItemClickById}
-								onItemDoubleClickById={handleItemDoubleClickById}
-							/>
-						);
-					})}
-				</AnimatePresence>
+							return (
+								<MasonryItem
+									borderRadiusPx={interfaceConfig?.global?.borderRadius?.mosaic}
+									isSelected={isSelected}
+									itemIndex={index}
+									key={layoutItem.item.id}
+									layoutItem={layoutItem}
+									masonryConfig={masonryConfig}
+									onItemClick={handleItemClickById}
+									onItemDoubleClick={handleItemDoubleClickById}
+									thumbnailQuality={interfaceConfig?.performance?.thumbnailQuality}
+								/>
+							);
+						})}
+					</AnimatePresence>
+				</div>
 			</div>
 		</section>
 	);

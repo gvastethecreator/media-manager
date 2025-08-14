@@ -1,10 +1,13 @@
-import { memo as reactMemo, Suspense, useEffect, useMemo, useState } from 'react';
+import { lazy, memo as reactMemo, Suspense, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { DetailsPanel } from '@/components/panels/details-panel';
 import { FolderStatsDisplay } from '@/components/panels/stats-panel/folder-stats-display';
 import { SystemStatsDisplay } from '@/components/panels/stats-panel/system-stats-display';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
+
+// Lazy load InterfaceSection para no impactar bundle inicial
+const InterfaceSection = lazy(() => import('@/components/settings/interface-section'));
 
 // Componente para manejar la carga perezosa del StatsPanel
 const LazyStatsPanel = reactMemo(function RightPanelLazyStatsPanel({
@@ -68,7 +71,7 @@ export const RightPanel = reactMemo(function RightPanelComponent({
 	isCollapsed,
 	isAnimating = false,
 }: RightPanelProps) {
-	const { isVisible, selectedItems, showStatsWhenEmpty } = useDetailsPanel();
+	const { isVisible, selectedItems, showStatsWhenEmpty, showInterfaceSettings } = useDetailsPanel();
 	const location = useLocation();
 	const [mounted, setMounted] = useState(false);
 	const hasSelectedItems = selectedItems && selectedItems.length > 0;
@@ -88,10 +91,11 @@ export const RightPanel = reactMemo(function RightPanelComponent({
 		return { folderId: undefined, folderName: undefined };
 	}, [location.pathname]);
 
-	// Determina si debemos mostrar el panel - siempre mostrar en views con contenido
-	const shouldShowPanel = !isInSettingsView && (isVisible || hasSelectedItems || showStatsWhenEmpty);
-	// Determina si debemos mostrar las estadísticas - mostrar cuando no hay items seleccionados
-	const shouldShowStats = !(isInSettingsView || hasSelectedItems);
+	// Nueva lógica: si el usuario ha marcado el panel como visible (isVisible), siempre se muestra (incluye EmptyPanel).
+	// Cuando no hay selección y el panel está visible, mostrar estadísticas solo si showStatsWhenEmpty es true; de lo contrario mostrar EmptyPanel.
+	const shouldShowPanel =
+		!isInSettingsView && (isVisible || hasSelectedItems || showStatsWhenEmpty || showInterfaceSettings);
+	const shouldShowStats = !(isInSettingsView || hasSelectedItems) && showStatsWhenEmpty && !showInterfaceSettings;
 
 	// Al montar el componente, marcamos que estamos listos para renderizar
 	useEffect(() => {
@@ -108,7 +112,7 @@ export const RightPanel = reactMemo(function RightPanelComponent({
 	}, [mounted]);
 
 	// Determinamos el título según el contenido actual
-	const panelTitle = hasSelectedItems ? 'Detalles' : 'Estadísticas';
+	const panelTitle = showInterfaceSettings ? 'Configuración' : hasSelectedItems ? 'Detalles' : 'Panel';
 
 	// No mostramos nada si no hay razón para mostrar el panel
 	if (!shouldShowPanel) {
@@ -124,12 +128,18 @@ export const RightPanel = reactMemo(function RightPanelComponent({
 			)}
 		>
 			{!isCollapsed &&
-				(hasSelectedItems ? (
+				(showInterfaceSettings ? (
+					<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando configuración...</div>}>
+						<div className="w-full overflow-y-auto p-2 pr-3">
+							<InterfaceSection />
+						</div>
+					</Suspense>
+				) : hasSelectedItems ? (
 					<DetailsPanel selectedItems={selectedItems} />
+				) : shouldShowStats ? (
+					<LazyStatsPanel folderId={currentFolderInfo.folderId} folderName={currentFolderInfo.folderName} />
 				) : (
-					shouldShowStats && (
-						<LazyStatsPanel folderId={currentFolderInfo.folderId} folderName={currentFolderInfo.folderName} />
-					)
+					<DetailsPanel selectedItems={[]} />
 				))}
 		</div>
 	);

@@ -101,17 +101,17 @@ export function usePerformance(options: UsePerformanceOptions = {}) {
 	const lastFrameTimeRef = useRef(performance.now());
 	const fpsHistoryRef = useRef<number[]>([]);
 
-	// Config predeterminada
+	// Config predeterminada mejorada para mejor rendimiento
 	const config =
 		settings?.fileBrowser?.performance ||
 		({
 			maxRenderItems: 1000,
 			virtualization: true,
-			virtualizationBuffer: 5,
+			virtualizationBuffer: 8, // 🚀 Optimización: Buffer aumentado para scroll suave
 			lazyThumbnails: true,
 			thumbnailQuality: 'medium' as const,
-			cache: { thumbnails: true, maxSize: 100, ttl: 3_600_000 },
-			debounce: { search: 300, scroll: 16, resize: 100 },
+			cache: { thumbnails: true, maxSize: 150, ttl: 7_200_000 }, // 🚀 Cache más grande y duradero
+			debounce: { search: 250, scroll: 16, resize: 100 }, // 🚀 Tiempos de debounce optimizados
 		} satisfies PerformanceConfig as PerformanceConfig);
 
 	const debouncedSearchTerm = useDebounce(searchTerm || '', config.debounce.search);

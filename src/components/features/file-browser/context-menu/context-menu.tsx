@@ -14,7 +14,7 @@ import {
 	Tag,
 	Trash,
 } from 'lucide-react';
-import { memo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { useEntityLoader } from '@/components/features/file-browser/context-menu/hooks/use-entity-loader';
 import { Separator } from '@/components/ui/separator';
 import { useContextMenuNavigation } from '@/lib/keyboard';
@@ -36,12 +36,21 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 	// Estado para controlar la acción en proceso
 	const [processingAction, setProcessingAction] = useState<ContextMenuAction | null>(null);
 
-	// Definir las acciones del menú en orden
-	const menuActions: Array<{ action: ContextMenuAction; label: string; icon: React.ReactNode; destructive?: boolean }> =
-		[
-			{ action: 'preview', label: 'Vista previa', icon: <ExternalLink className="mr-2 h-4 w-4" /> },
+	// Obtener datos de los stores - Memoizados para evitar re-renderizados
+	const collections = useCollectionStore((state) => Object.values(state.collections));
+	const tags = useTagStore((state) => state.getTags());
+	const albums = useAlbumStore((state) => Object.values(state.albums));
+
+	// Memoizar las acciones del menú para evitar recreaciones
+	const menuActions = useMemo(
+		() => [
 			{
-				action: 'favorite-toggle',
+				action: 'preview' as ContextMenuAction,
+				label: 'Vista previa',
+				icon: <ExternalLink className="mr-2 h-4 w-4" />,
+			},
+			{
+				action: 'favorite-toggle' as ContextMenuAction,
 				label: 'isFavorite' in file && file.isFavorite ? 'Quitar de favoritos' : 'Añadir a favoritos',
 				icon:
 					'isFavorite' in file && file.isFavorite ? (
@@ -50,17 +59,49 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 						<Heart className="mr-2 h-4 w-4" />
 					),
 			},
-			{ action: 'mark-toggle', label: 'Marcar/Desmarcar', icon: <Star className="mr-2 h-4 w-4" /> },
-			{ action: 'open', label: 'Abrir ubicación', icon: <ExternalLink className="mr-2 h-4 w-4" /> },
-			{ action: 'download', label: 'Descargar', icon: <Download className="mr-2 h-4 w-4" /> },
-			{ action: 'copy', label: 'Copiar al portapapeles', icon: <Copy className="mr-2 h-4 w-4" /> },
-			{ action: 'paste', label: 'Pegar', icon: <Copy className="mr-2 h-4 w-4" /> },
-			{ action: 'rename', label: 'Renombrar', icon: <Edit3 className="mr-2 h-4 w-4" /> },
-			{ action: 'move', label: 'Mover', icon: <Move3D className="mr-2 h-4 w-4" /> },
-			{ action: 'open-in-explorer', label: 'Ver en explorador', icon: <FolderOpen className="mr-2 h-4 w-4" /> },
-			{ action: 'copy-path', label: 'Copiar ruta', icon: <Copy className="mr-2 h-4 w-4" /> },
-			{ action: 'delete', label: 'Eliminar', icon: <Trash className="mr-2 h-4 w-4" />, destructive: true },
-		];
+			{
+				action: 'mark-toggle' as ContextMenuAction,
+				label: 'Marcar/Desmarcar',
+				icon: <Star className="mr-2 h-4 w-4" />,
+			},
+			{
+				action: 'open' as ContextMenuAction,
+				label: 'Abrir ubicación',
+				icon: <ExternalLink className="mr-2 h-4 w-4" />,
+			},
+			{ action: 'download' as ContextMenuAction, label: 'Descargar', icon: <Download className="mr-2 h-4 w-4" /> },
+			{ action: 'copy' as ContextMenuAction, label: 'Copiar al portapapeles', icon: <Copy className="mr-2 h-4 w-4" /> },
+			{ action: 'paste' as ContextMenuAction, label: 'Pegar', icon: <Copy className="mr-2 h-4 w-4" /> },
+			{ action: 'rename' as ContextMenuAction, label: 'Renombrar', icon: <Edit3 className="mr-2 h-4 w-4" /> },
+			{ action: 'move' as ContextMenuAction, label: 'Mover', icon: <Move3D className="mr-2 h-4 w-4" /> },
+			{
+				action: 'open-in-explorer' as ContextMenuAction,
+				label: 'Ver en explorador',
+				icon: <FolderOpen className="mr-2 h-4 w-4" />,
+			},
+			{ action: 'copy-path' as ContextMenuAction, label: 'Copiar ruta', icon: <Copy className="mr-2 h-4 w-4" /> },
+			{
+				action: 'delete' as ContextMenuAction,
+				label: 'Eliminar',
+				icon: <Trash className="mr-2 h-4 w-4" />,
+				destructive: true,
+			},
+		],
+		[file]
+	);
+
+	// Manejador de acciones optimizado con useCallback
+	const handleAction = useCallback(
+		async (action: ContextMenuAction, data?: Record<string, unknown>) => {
+			setProcessingAction(action);
+			try {
+				await onAction(action, file, data);
+			} finally {
+				setProcessingAction(null);
+			}
+		},
+		[onAction, file]
+	);
 
 	// Configurar navegación por teclado
 	const { selectedIndex, getItemProps } = useContextMenuNavigation(menuActions.length, {
@@ -76,21 +117,42 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 		},
 	});
 
-	// Obtener datos de los stores - Ahora esto solo ocurre una vez por renderizado del GridView
-	// en lugar de una vez por cada elemento de la cuadrícula
-	const collections = useCollectionStore((state) => Object.values(state.collections));
-	const tags = useTagStore((state) => state.getTags());
-	const albums = useAlbumStore((state) => Object.values(state.albums));
+	// Memoizar elementos transformados para submenús
+	const memoizedCollections = useMemo(
+		() =>
+			collections.map((c) => ({
+				...c,
+				emoji: c.emoji ?? undefined,
+				color: c.color || undefined,
+				isFavorite: Boolean(c.isFavorite),
+				isRecent: Boolean(c.isRecent),
+			})),
+		[collections]
+	);
 
-	// Manejador de acciones con indicador de carga
-	const handleAction = async (action: ContextMenuAction, data?: Record<string, unknown>) => {
-		setProcessingAction(action);
-		try {
-			await onAction(action, file, data);
-		} finally {
-			setProcessingAction(null);
-		}
-	};
+	const memoizedTags = useMemo(
+		() =>
+			tags.map((t: TagWithStats) => ({
+				id: t.id,
+				name: t.name,
+				emoji: t.emoji || undefined,
+				isFavorite: false,
+				isRecent: false,
+			})),
+		[tags]
+	);
+
+	const memoizedAlbums = useMemo(
+		() =>
+			albums.map((a) => ({
+				...a,
+				emoji: a.emoji ?? undefined,
+				color: a.color || undefined,
+				isFavorite: Boolean(a.isFavorite),
+				isRecent: Boolean(a.isRecent),
+			})),
+		[albums]
+	);
 
 	// Estilo para los elementos del menú
 	const menuItemStyle =
@@ -117,20 +179,14 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 
 			<Separator className="my-1" />
 
-			{/* Submenús mejorados para entidades */}
+			{/* Submenús optimizados para entidades */}
 			<EnhancedSubmenu
 				actionType="add-to-collection"
 				createActionType="collection-create"
 				file={file}
 				icon={<BookImage className="h-4 w-4" />}
 				isLoading={loadingStates.collections.loading}
-				items={collections.map((c) => ({
-					...c,
-					emoji: c.emoji ?? undefined,
-					color: c.color || undefined,
-					isFavorite: Boolean(c.isFavorite),
-					isRecent: Boolean(c.isRecent),
-				}))}
+				items={memoizedCollections}
 				onAction={onAction}
 				onOpenChange={(isOpen) => handleOpenChange('collections', isOpen)}
 				title="Colecciones"
@@ -144,13 +200,7 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 				file={file}
 				icon={<Tag className="h-4 w-4" />}
 				isLoading={loadingStates.tags.loading}
-				items={tags.map((t: TagWithStats) => ({
-					id: t.id,
-					name: t.name,
-					emoji: t.emoji || undefined,
-					isFavorite: false,
-					isRecent: false,
-				}))}
+				items={memoizedTags}
 				onAction={onAction}
 				onOpenChange={(isOpen) => handleOpenChange('tags', isOpen)}
 				title="Etiquetas"
@@ -164,13 +214,7 @@ export const FileContextMenu = memo<FileContextMenuProps>(function FileContextMe
 				file={file}
 				icon={<Album className="h-4 w-4" />}
 				isLoading={loadingStates.albums.loading}
-				items={albums.map((a) => ({
-					...a,
-					emoji: a.emoji ?? undefined,
-					color: a.color || undefined,
-					isFavorite: Boolean(a.isFavorite),
-					isRecent: Boolean(a.isRecent),
-				}))}
+				items={memoizedAlbums}
 				onAction={onAction}
 				onOpenChange={(isOpen) => handleOpenChange('albums', isOpen)}
 				title="Álbumes"

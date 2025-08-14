@@ -182,11 +182,41 @@ export interface FileBrowserConfig {
  */
 export interface InterfacePreferences {
 	/** Familia tipográfica seleccionada */
-	fontFamily: 'system' | 'serif' | 'mono' | 'rounded';
-	/** Tamaño base de fuente */
-	fontSize: 'sm' | 'md' | 'lg';
-	/** Tema visual */
-	theme: 'light' | 'dark' | 'system';
+	fontFamily:
+		| 'system'
+		| 'inter'
+		| 'roboto'
+		| 'open-sans'
+		| 'lato'
+		| 'montserrat'
+		| 'poppins'
+		| 'source-sans'
+		| 'serif'
+		| 'georgia'
+		| 'playfair'
+		| 'merriweather'
+		| 'mono'
+		| 'jetbrains-mono'
+		| 'fira-code'
+		| 'ubuntu-mono'
+		| 'rounded';
+	/** Tamaño base de fuente (escala extendida) */
+	fontSize: 'xs' | 'sm' | 'base' | 'md' | 'lg' | 'xl' | '2xl' | '3xl' | '4xl';
+	/** Tema visual (sincronizado con useTheme + system) */
+	theme:
+		| 'light'
+		| 'dark'
+		| 'cafe'
+		| 'violeta'
+		| 'madera'
+		| 'nocturno'
+		| 'verde'
+		| 'atardecer'
+		| 'corporativo'
+		| 'carbon'
+		| 'teal'
+		| 'citrico'
+		| 'system';
 	/** Animaciones habilitadas */
 	animations: boolean;
 	/** Respetar aspect ratio en modo grilla */

@@ -9,7 +9,7 @@ import { useDebouncedCallback } from 'use-debounce';
 import { useReindexFolder } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
-import { useViewOptionsStore } from '@/store/ui/view-options.slice';
+import { type SortOption, useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { type AnyEntityWithStats, EntityStatsType } from '@/types/migration';
 import { DEBOUNCE_DELAY } from '../config/file-browser.config';
 import type { FileBrowserDataState, SortingValues } from '../types/file-browser.types';
@@ -80,6 +80,15 @@ export const useFileBrowserData = ({
 				// Ejecutar reindexado en background
 				await reindexFolderMutation.mutateAsync(folderId);
 
+				// ✅ Forzar recarga inmediata de imágenes de la carpeta reindexada para reflejar cambios
+				try {
+					const { loadImages } = useImageStore.getState();
+					await loadImages({ folderId, refresh: true });
+					logger.info(`📁 Imágenes recargadas tras auto-reindex de carpeta: ${folderId}`);
+				} catch (refreshErr) {
+					logger.warn(`⚠️ Falló recarga post auto-reindex carpeta ${folderId}:`, refreshErr);
+				}
+
 				logger.info(`✅ Auto-reindexado completado para carpeta: ${folderId}`);
 			} catch (autoReindexError) {
 				logger.error(`❌ Error en auto-reindexado de carpeta ${folderId}:`, autoReindexError);
@@ -137,20 +146,26 @@ export const useFileBrowserData = ({
 		return getItemsByType(entityType, filterId, filterType, getImagesByFolder, getSortedImages);
 	}, [entityType, entityTypes, filterId, filterType, mode, manualItems, getSortedImages, getImagesByFolder]);
 
+	// Limpiar cache de sorting cuando cambia sortVersion (invalidación explícita)
+	// Invalidación manual de cache de ordenamiento basada en referencia de sortOptions
+	const prevSortRef = useRef<SortOption[] | null>(null as any);
+	if (prevSortRef.current !== sortOptions) {
+		sortingCache.current.clear();
+		prevSortRef.current = sortOptions;
+	}
+
 	// Función para obtener valores de ordenamiento con cache
 	const getSortingValues = useCallback((entity: AnyEntityWithStats): SortingValues => {
 		const cached = sortingCache.current.get(entity.id);
 		if (cached) {
 			return cached;
 		}
-
 		const values: SortingValues = {
 			name: extractEntityName(entity).toLowerCase(),
 			path: extractEntityPath(entity).toLowerCase(),
 			modifiedTime: new Date((entity as any).updatedAt || (entity as any).modifiedAt || 0).getTime(),
 			createdTime: new Date((entity as any).createdAt || 0).getTime(),
 		};
-
 		sortingCache.current.set(entity.id, values);
 		return values;
 	}, []);

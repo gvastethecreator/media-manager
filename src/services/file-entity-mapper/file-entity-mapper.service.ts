@@ -1,6 +1,6 @@
-import * as crypto from 'node:crypto';
-import * as fs from 'node:fs/promises';
-import * as path from 'node:path';
+import { createHash } from 'node:crypto';
+import { readFile, stat } from 'node:fs/promises';
+import { basename, extname } from 'node:path';
 // Usar servicios del servidor para evitar fetch relativo en backend
 import {
 	createVideo as createVideoServer,
@@ -11,7 +11,6 @@ import { createDocument, getDocumentByHash } from '@/services/document/document.
 import { createFile3D, getFile3DByHash } from '@/services/file3d/file3d.service';
 import type { CreateImageInput } from '@/services/image/image.service';
 import { ImageService } from '@/services/image/image.service';
-import { MetadataIntegrationService } from '@/services/metadata-integration.service';
 import type { DocumentCreateInput } from '@/transformers/document/validators';
 import type { AudioCreateInput } from '@/types/entities/audio';
 import type { File3DCreateInput } from '@/types/entities/file3d';
@@ -30,10 +29,9 @@ export class FileEntityMapperService {
 
 	private constructor() {
 		this.imageService = ImageService.getInstance();
-		this.metadataService = MetadataIntegrationService.getInstance();
 	}
 
-	public static getInstance(): FileEntityMapperService {
+	static getInstance(): FileEntityMapperService {
 		if (!FileEntityMapperService.instance) {
 			FileEntityMapperService.instance = new FileEntityMapperService();
 		}
@@ -43,7 +41,7 @@ export class FileEntityMapperService {
 	/**
 	 * Determina el tipo de entidad basado en la extensión del archivo
 	 */
-	public getEntityTypeFromExtension(extension: string): EntityType {
+	getEntityTypeFromExtension(extension: string): EntityType {
 		if (!extension) {
 			return EntityType.UNKNOWN;
 		}
@@ -72,8 +70,8 @@ export class FileEntityMapperService {
 	 */
 	private async calculateFileHash(filePath: string): Promise<string> {
 		try {
-			const fileBuffer = await fs.readFile(filePath);
-			return crypto.createHash('md5').update(fileBuffer).digest('hex');
+			const fileBuffer = await readFile(filePath);
+			return createHash('md5').update(fileBuffer).digest('hex');
 		} catch (error) {
 			console.error(`Error calculating hash for ${filePath}:`, error);
 			throw error;
@@ -85,9 +83,9 @@ export class FileEntityMapperService {
 	 */
 	private async getFileInfo(filePath: string, folderId: string): Promise<FileInfo> {
 		try {
-			const stats = await fs.stat(filePath);
-			const extension = path.extname(filePath).toLowerCase();
-			const name = path.basename(filePath, extension);
+			const stats = await stat(filePath);
+			const extension = extname(filePath).toLowerCase();
+			const name = basename(filePath, extension);
 			const hash = await this.calculateFileHash(filePath);
 
 			return {
@@ -193,7 +191,7 @@ export class FileEntityMapperService {
 	/**
 	 * 🚀 Crea solo la entidad básica sin metadata ni thumbnails (Etapa 1)
 	 */
-	public async createBasicEntityFromFile(filePath: string, folderId: string): Promise<EntityCreationResult> {
+	async createBasicEntityFromFile(filePath: string, folderId: string): Promise<EntityCreationResult> {
 		console.log(`🔧 FileEntityMapper: [ETAPA 1] Indexando archivo ${filePath}`);
 		try {
 			// Obtener información del archivo
@@ -241,7 +239,7 @@ export class FileEntityMapperService {
 	/**
 	 * 🔍 Extrae metadata para una entidad existente (Etapa 2)
 	 */
-	public async extractMetadataForEntity(
+	async extractMetadataForEntity(
 		filePath: string,
 		_entityId: string,
 		_entityType: EntityType
@@ -250,10 +248,14 @@ export class FileEntityMapperService {
 		try {
 			// Importar el servicio de extracción de metadata unificado
 			const { extractAllMetadata } = await import('@/server/services/metadata/unified-parser.service');
+			// Importar dependencias necesarias para persistir
+			const { images } = await import('@/lib/drizzle/schema');
+			const { db } = await import('@/lib/drizzle');
+			const { eq } = await import('drizzle-orm');
 
 			// Leer el archivo como buffer
-			const fileBuffer = await fs.readFile(filePath);
-			const fileName = path.basename(filePath);
+			const fileBuffer = await readFile(filePath);
+			const fileName = basename(filePath);
 
 			// Extraer metadata usando el servicio unificado
 			const metadataResult = await extractAllMetadata(fileBuffer, fileName);
@@ -264,6 +266,54 @@ export class FileEntityMapperService {
 					hasAI: metadataResult.ai_metadata ? 'Sí' : 'No',
 					errorsCount: metadataResult.errors.length,
 				});
+
+				// Construir objeto a persistir combinando partes relevantes.
+				// Mantener compatibilidad con legacy (campos exif/iptc/xmp + ai_metadata + origin)
+				const persistedMetadata: Record<string, any> = {
+					parser: metadataResult.parser_used,
+					processingTime: metadataResult.processing_time,
+					origin: metadataResult.origin,
+					ai_metadata: metadataResult.ai_metadata,
+					exif: metadataResult.exif,
+					iptc: metadataResult.iptc,
+					xmp: metadataResult.xmp,
+					base: metadataResult.base,
+					errors: metadataResult.errors,
+					warnings: metadataResult.warnings,
+				};
+
+				// Retrocompatibilidad: si es metadata estructurada con legacy_flat, aplanar también top-level
+				try {
+					const aiMeta: any = metadataResult.ai_metadata;
+					if (aiMeta && aiMeta.legacy_flat && typeof aiMeta.legacy_flat === 'object') {
+						for (const [k, v] of Object.entries(aiMeta.legacy_flat)) {
+							if (v !== undefined && v !== null && !(k in persistedMetadata)) {
+								(persistedMetadata as any)[k] = v;
+							}
+						}
+					}
+				} catch (e) {
+					console.warn('⚠️ [ETAPA 2] No se pudo aplanar legacy_flat:', e);
+				}
+
+				// Actualizar dimensiones si la entidad fue creada con width/height = 0
+				const widthUpdate = metadataResult.base?.dimensions?.width || 0;
+				const heightUpdate = metadataResult.base?.dimensions?.height || 0;
+
+				try {
+					await db
+						.update(images)
+						.set({
+							metadata: JSON.stringify(persistedMetadata),
+							// Sólo actualizar dimensiones si son válidas (>0)
+							...(widthUpdate > 0 && heightUpdate > 0 ? { width: widthUpdate, height: heightUpdate } : {}),
+							updatedAt: new Date(),
+						})
+						.where(eq(images.id, _entityId));
+					console.log('💾 [ETAPA 2] Metadata persistida en DB para', _entityId);
+				} catch (persistError) {
+					console.warn('⚠️ [ETAPA 2] No se pudo persistir metadata en DB:', persistError);
+				}
 				return { success: true };
 			}
 			console.warn(`⚠️ [ETAPA 2] No se pudo extraer metadata de ${filePath}:`, metadataResult.errors);
@@ -277,7 +327,7 @@ export class FileEntityMapperService {
 	/**
 	 * 🖼️ Procesa thumbnail para una entidad existente (Etapa 3)
 	 */
-	public async processThumbnailForEntity(
+	async processThumbnailForEntity(
 		filePath: string,
 		_entityId: string,
 		entityType: EntityType
@@ -466,7 +516,7 @@ export class FileEntityMapperService {
 	/**
 	 * 🔄 Método original que ahora usa las 3 etapas secuencialmente (para compatibilidad)
 	 */
-	public async createEntityFromFile(filePath: string, folderId: string): Promise<EntityCreationResult> {
+	async createEntityFromFile(filePath: string, folderId: string): Promise<EntityCreationResult> {
 		console.log(`🔧 FileEntityMapper: Procesando archivo completo ${filePath}`);
 
 		// Etapa 1: Crear entidad básica
@@ -477,11 +527,40 @@ export class FileEntityMapperService {
 
 		// Si la entidad ya existía, no hacer etapas adicionales
 		if (basicResult.error === 'Entity already exists') {
+			// Intentar extracción diferida si es imagen y carece de metadata persistida
+			try {
+				if (basicResult.entityType === EntityType.IMAGE) {
+					const { db } = await import('@/lib/drizzle');
+					const { images } = await import('@/lib/drizzle/schema');
+					const { eq } = await import('drizzle-orm');
+					// Buscar registro existente
+					const existing = await db
+						.select({ id: images.id, metadata: images.metadata, width: images.width, height: images.height })
+						.from(images)
+						.where(eq(images.path, filePath))
+						.limit(1);
+					if (existing.length === 1) {
+						const metaRaw = existing[0].metadata ? JSON.parse(existing[0].metadata) : null;
+						const hasAIMetadata = Boolean(metaRaw?.ai_metadata || metaRaw?.aiMetadata);
+						if (hasAIMetadata) {
+							console.log('ℹ️ Imagen ya posee metadata persistida, se omite re-extracción:', filePath);
+						} else {
+							console.log('🔄 Extracción diferida de metadata para imagen existente sin AI metadata:', filePath);
+							await this.extractMetadataForEntity(filePath, existing[0].id, basicResult.entityType);
+						}
+					}
+				}
+			} catch (deferredError) {
+				console.warn('⚠️ Error en extracción diferida de metadata:', deferredError);
+			}
 			return basicResult;
 		}
 
-		const entityId = basicResult.entityId!;
 		const entityType = basicResult.entityType;
+		const entityId = basicResult.entityId;
+		if (!entityId) {
+			return { success: false, entityType, error: 'Missing entityId after basic creation' };
+		}
 
 		// Etapa 2: Extraer metadata
 		const metadataResult = await this.extractMetadataForEntity(filePath, entityId, entityType);
@@ -505,7 +584,7 @@ export class FileEntityMapperService {
 	/**
 	 * Procesa múltiples archivos y crea sus entidades correspondientes
 	 */
-	public async processFiles(filePaths: string[], folderId: string): Promise<EntityCreationStats> {
+	async processFiles(filePaths: string[], folderId: string): Promise<EntityCreationStats> {
 		const stats: EntityCreationStats = {
 			totalFiles: filePaths.length,
 			processed: 0,
@@ -514,20 +593,16 @@ export class FileEntityMapperService {
 			errors: [],
 		};
 
-		for (const filePath of filePaths) {
+		const promises = filePaths.map(async (filePath) => {
 			try {
 				const result = await this.createEntityFromFile(filePath, folderId);
 				stats.processed++;
-
 				if (result.success) {
 					stats.successful++;
 				} else {
 					stats.failed++;
 					if (result.error && result.error !== 'Entity already exists') {
-						stats.errors.push({
-							file: filePath,
-							error: result.error,
-						});
+						stats.errors.push({ file: filePath, error: result.error });
 					}
 				}
 			} catch (error) {
@@ -538,8 +613,8 @@ export class FileEntityMapperService {
 					error: error instanceof Error ? error.message : 'Unknown error',
 				});
 			}
-		}
-
+		});
+		await Promise.all(promises);
 		return stats;
 	}
 }

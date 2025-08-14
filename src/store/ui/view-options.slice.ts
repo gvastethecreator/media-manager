@@ -18,6 +18,7 @@ export interface ViewOptionsState {
 	viewMode: ViewMode;
 	itemSize: number;
 	sortOptions: SortOption[];
+	sortVersion: number; // Incrementa en cada cambio de sortOptions para invalidar caches derivados
 	filterOptions: FilterOption[];
 	searchQuery: string;
 	setViewMode: (mode: ViewMode) => void;
@@ -37,6 +38,7 @@ const DEFAULT_STATE = {
 	viewMode: 'grid' as ViewMode,
 	itemSize: 150,
 	sortOptions: [{ field: 'createdAt', direction: 'desc' as const }],
+	sortVersion: 0,
 	filterOptions: [],
 	searchQuery: '',
 };
@@ -52,23 +54,24 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 
 			setItemSize: (size) => set({ itemSize: size }),
 
-			setSortOptions: (options) => set({ sortOptions: options }),
+			setSortOptions: (options) => set((state) => ({ sortOptions: options, sortVersion: state.sortVersion + 1 })),
 
 			addSortOption: (option) =>
 				set((state) => {
-					// Replace if exists, otherwise add
 					const exists = state.sortOptions.some((o) => o.field === option.field);
 					if (exists) {
 						return {
 							sortOptions: state.sortOptions.map((o) => (o.field === option.field ? option : o)),
+							sortVersion: state.sortVersion + 1,
 						};
 					}
-					return { sortOptions: [...state.sortOptions, option] };
+					return { sortOptions: [...state.sortOptions, option], sortVersion: state.sortVersion + 1 };
 				}),
 
 			removeSortOption: (field) =>
 				set((state) => ({
 					sortOptions: state.sortOptions.filter((o) => o.field !== field),
+					sortVersion: state.sortVersion + 1,
 				})),
 
 			setFilterOptions: (options) => set({ filterOptions: options }),

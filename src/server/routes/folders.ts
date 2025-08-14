@@ -1,12 +1,12 @@
 // Drizzle imports
 // @ts-nocheck - Temporary suppression for Express handler parameter types
 
-import { db } from '@/lib/drizzle';
-import { folders, images, videos } from '@/lib/drizzle/schema/index';
-import { generateFolderIdFromName, isValidFolderId } from '@/lib/utils/folder-id-generator';
 import { asc, count, desc, eq, sql } from 'drizzle-orm';
 import { Router } from 'express';
 import { z } from 'zod';
+import { db } from '@/lib/drizzle';
+import { folders, images, videos } from '@/lib/drizzle/schema/index';
+import { generateFolderIdFromName, isValidFolderId } from '@/lib/utils/folder-id-generator';
 
 const router = Router() as any;
 

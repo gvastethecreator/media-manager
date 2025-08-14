@@ -100,11 +100,53 @@ const fileBrowserConfigSchema = z.object({
 /**
  * Esquema de validación para InterfacePreferences
  */
+// Ampliamos familias y tamaños de fuente para mayor variedad (Google Fonts + categorías comunes)
+const FONT_FAMILIES = [
+	'system',
+	'inter',
+	'roboto',
+	'open-sans',
+	'lato',
+	'montserrat',
+	'poppins',
+	'source-sans',
+	'serif',
+	'georgia',
+	'playfair',
+	'merriweather',
+	'mono',
+	'jetbrains-mono',
+	'fira-code',
+	'ubuntu-mono',
+	'rounded',
+] as const;
+
+// Escalas de tamaño extendidas
+// Escalas de tamaño extendidas (mayor variedad solicitada)
+const FONT_SIZES = ['xs', 'sm', 'base', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'] as const;
+
+// Temas custom deben sincronizarse con hooks/use-theme.ts (mantener orden y nombres)
+const THEME_VALUES = [
+	'light',
+	'dark',
+	'cafe',
+	'violeta',
+	'madera',
+	'nocturno',
+	'verde',
+	'atardecer',
+	'corporativo',
+	'carbon',
+	'teal',
+	'citrico',
+	'system',
+] as const;
+
 export const interfacePreferencesSchema = z
 	.object({
-		fontFamily: z.enum(['system', 'serif', 'mono', 'rounded']),
-		fontSize: z.enum(['sm', 'md', 'lg']),
-		theme: z.enum(['light', 'dark', 'system']),
+		fontFamily: z.enum(FONT_FAMILIES),
+		fontSize: z.enum(FONT_SIZES),
+		theme: z.enum(THEME_VALUES),
 		animations: z.boolean(),
 		thumbnailsRespectAspectRatio: z.boolean(),
 		thumbnailsBorderRadius: z.object({

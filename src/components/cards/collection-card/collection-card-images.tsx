@@ -19,10 +19,21 @@ export function CollectionCardImages({ collectionId, primaryColor, secondaryColo
 	// Calcular color secundario derivado si no se proporciona
 	const derivedSecondaryColor = secondaryColor || `${primaryColor}90`;
 
-	// Ordenamos para mostrar primero las imágenes
-	const sortedThumbnails = thumbnails
-		? [...thumbnails].sort((a, b) => (a.isVideo === b.isVideo ? 0 : a.isVideo ? 1 : -1))
-		: [];
+	// Función para ordenar thumbnails priorizando imágenes sobre videos
+	const sortThumbnails = (items: typeof thumbnails) => {
+		if (!items) {
+			return [];
+		}
+
+		return [...items].sort((a, b) => {
+			if (a.isVideo === b.isVideo) {
+				return 0;
+			}
+			return a.isVideo ? 1 : -1;
+		});
+	};
+
+	const sortedThumbnails = sortThumbnails(thumbnails);
 
 	// Placeholder para mostrar cuando no hay imágenes
 	const renderPlaceholder = () => (

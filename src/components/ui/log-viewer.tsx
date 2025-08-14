@@ -52,6 +52,30 @@ const renderLogData = (data: unknown): ReactNode => {
 	}
 };
 
+function renderEntry(log: LogEntry, showTimestamp: boolean) {
+	let logDataText: string | null = null;
+	if (log.data) {
+		if (typeof log.data === 'string') {
+			logDataText = log.data;
+		} else {
+			try {
+				logDataText = JSON.stringify(log.data, null, 2) || String(log.data);
+			} catch {
+				logDataText = String(log.data);
+			}
+		}
+	}
+	return (
+		<div className={cn('break-all rounded p-2 font-mono text-sm', LOG_COLORS[log.level])} key={log.id}>
+			{showTimestamp && <span className="mr-2 opacity-70">[{log.timestamp}]</span>}
+			<span className="mr-1">{LOG_ICONS[log.level]}</span>
+			{log.context && <span className="mr-1 font-semibold">[{log.context}]</span>}
+			<span>{log.message}</span>
+			{logDataText && <pre className="mt-1 overflow-x-auto text-xs">{logDataText}</pre>}
+		</div>
+	);
+}
+
 export function LogViewer({
 	title = 'Logs',
 	logs = [],
@@ -168,32 +192,23 @@ export function LogViewer({
 					{filteredLogs.length === 0 ? (
 						<div className="flex h-20 items-center justify-center text-muted-foreground">No hay logs para mostrar</div>
 					) : (
-						<div className="space-y-1 p-2">
-							{filteredLogs.map((log) => {
-								const logDataText = log.data
-									? typeof log.data === 'string'
-										? log.data
-										: JSON.stringify(log.data, null, 2) || String(log.data)
-									: null;
-
-								return (
-									<div className={cn('break-all rounded p-2 font-mono text-sm', LOG_COLORS[log.level])} key={log.id}>
-										{showTimestamp && <span className="mr-2 opacity-70">[{log.timestamp}]</span>}
-										<span className="mr-1">{LOG_ICONS[log.level]}</span>
-										{log.context && <span className="mr-1 font-semibold">[{log.context}]</span>}
-										<span>{log.message}</span>
-										{logDataText && <pre className="mt-1 overflow-x-auto text-xs">{logDataText}</pre>}
-									</div>
-								);
-							})}
-						</div>
+						<div className="space-y-1 p-2">{filteredLogs.map((log) => renderEntry(log, showTimestamp))}</div>
 					)}
 				</ScrollArea>
 			</CardContent>
 
 			<CardFooter className="flex justify-between py-2">
 				<div className="text-muted-foreground text-xs">
-					{logs.length > 0 ? `Último log: ${new Date(logs.at(-1).timestamp).toLocaleTimeString()}` : 'No hay logs'}
+					{(() => {
+						if (logs.length === 0) {
+							return 'No hay logs';
+						}
+						const last = logs.at(-1);
+						if (!last) {
+							return 'No hay logs';
+						}
+						return `Último log: ${new Date(last.timestamp).toLocaleTimeString()}`;
+					})()}
 				</div>
 				<div className="flex gap-1">
 					{Object.entries(logCounts).map(([level, count]) => (

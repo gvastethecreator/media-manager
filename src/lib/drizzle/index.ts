@@ -1,6 +1,6 @@
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
-import * as relations from './relations.js';
+import { ensureFts5Ready } from './fts5';
 import {
 	activities,
 	albums,
@@ -29,9 +29,9 @@ import {
 	imagePlaces,
 	imagePrompts,
 	imageProperties,
+	images,
 	// Content
 	imageStats,
-	images,
 	imageTags,
 	imageWildcards,
 	imageWorldItems,
@@ -152,7 +152,7 @@ const schema = {
 
 // Combinar schema y relaciones para Drizzle
 // Temporalmente sin relaciones para debugging
-const fullSchema = { ...schema }; // ...relations.allRelations };
+const fullSchema = { ...schema };
 
 // Obtener la URL de la base de datos desde las variables de entorno
 // En el servidor (Node.js) usa process.env.DATABASE_URL directamente
@@ -160,7 +160,8 @@ const fullSchema = { ...schema }; // ...relations.allRelations };
 const databaseUrl = typeof window === 'undefined' ? process.env.DATABASE_URL || 'file:./db.sqlite' : 'file:./db.sqlite'; // Fallback para el cliente, aunque no se usará realmente
 
 let client: ReturnType<typeof createClient> | null = null;
-let dbInstance;
+// eslint-disable-next-line @typescript-eslint/no-explicit-any -- instancia dinámica mock o drizzle
+let dbInstance: any;
 
 if (typeof window === 'undefined') {
 	client = createClient({
@@ -169,6 +170,13 @@ if (typeof window === 'undefined') {
 	dbInstance = drizzle(client, {
 		schema: fullSchema,
 		logger: process.env.NODE_ENV === 'development',
+	});
+	// Inicializar FTS5 de forma asíncrona (no bloquear arranque)
+	// Lanzar inicialización FTS5 sin bloquear; ignorar promesa
+	ensureFts5Ready().catch((e) => {
+		if (process.env.NODE_ENV === 'development') {
+			console.warn('FTS5 init error', e);
+		}
 	});
 } else {
 	dbInstance = {
@@ -186,7 +194,6 @@ if (typeof window === 'undefined') {
 				groupBy: () => mockQuery,
 				having: () => mockQuery,
 				execute: () => Promise.resolve([]),
-				then: (onResolve: any) => Promise.resolve([]).then(onResolve),
 			};
 			return mockQuery;
 		},
@@ -264,13 +271,12 @@ export function getDbClient() {
 	return client;
 }
 
-// Exportar el schema y relaciones para uso en otros archivos
-export { schema, relations };
+// Exportar solo el schema (relaciones ya incluidas donde se definen)
+export { schema };
 
 // Exportar tipos útiles
 export type DrizzleDatabase = typeof db;
 export type Schema = typeof schema;
-export type Relations = typeof relations;
 
 // Tipos inferidos de Drizzle para reemplazar tipos de Prisma
 export type Profile = typeof schema.profiles.$inferSelect;

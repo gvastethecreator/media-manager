@@ -27,21 +27,40 @@ export function FolderCardHeader({
 	// Determinar si es una carpeta raíz basado en la ruta
 	const isRootFolder = path === '/' || !path?.includes('/') || path === '';
 
-	// Analizar el tipo de carpeta basado en componentes del path
-	let folderType = 'Folder';
-	if (path?.includes('system')) {
-		folderType = 'System';
-	} else if (path?.includes('media')) {
-		folderType = 'Media';
-	} else if (isRootFolder) {
-		folderType = 'Root';
-	} else if (path?.includes('archive')) {
-		folderType = 'Archive';
-	} else if (path?.includes('backups')) {
-		folderType = 'Backup';
-	} else if (path && path.split('/').length > 3) {
-		folderType = 'Deep';
-	}
+	// Helper function para determinar el código del tipo de carpeta
+	const getFolderTypeCode = (): string => {
+		const FOLDER_TYPE_CODES = {
+			root: 'ROOT',
+			sub: 'SUB',
+			standard: 'STD',
+		} as const;
+
+		if (path) {
+			return isRootFolder ? FOLDER_TYPE_CODES.root : FOLDER_TYPE_CODES.sub;
+		}
+		return FOLDER_TYPE_CODES.standard;
+	};
+
+	// Determinar tipo de carpeta (extraído para bajar complejidad)
+	const folderType = (() => {
+		if (!path) {
+			return 'Folder';
+		}
+		const mappings: Array<{ test: (p: string) => boolean; label: string }> = [
+			{ test: () => isRootFolder, label: 'Root' },
+			{ test: (p) => p.includes('system'), label: 'System' },
+			{ test: (p) => p.includes('media'), label: 'Media' },
+			{ test: (p) => p.includes('archive'), label: 'Archive' },
+			{ test: (p) => p.includes('backups'), label: 'Backup' },
+			{ test: (p) => p.split('/').length > 3, label: 'Deep' },
+		];
+		for (const m of mappings) {
+			if (m.test(path)) {
+				return m.label;
+			}
+		}
+		return 'Folder';
+	})();
 
 	return (
 		<div className="relative">
@@ -135,7 +154,7 @@ export function FolderCardHeader({
 							className="rounded-sm bg-black/30 px-1.5 py-0.5 text-[10px] opacity-80"
 							style={{ border: `1px solid ${primaryColor}40` }}
 						>
-							{path ? (isRootFolder ? 'ROOT' : 'SUB') : 'STD'}-{name.substring(0, 3).toUpperCase()}
+							{getFolderTypeCode()}-{name.substring(0, 3).toUpperCase()}
 						</span>
 					</div>
 				</div>

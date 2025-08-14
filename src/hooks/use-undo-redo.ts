@@ -50,6 +50,21 @@ export function useUndoRedo(options: UseUndoRedoOptions = {}): UseUndoRedoReturn
 
 	const [state, setState] = useState<UndoRedoState>(() => undoRedoManager.getState());
 
+	// Declarar undo/redo antes de efectos que los referencian
+	const undo = useCallback(async () => {
+		await undoRedoManager.undo();
+		if (!autoUpdate) {
+			setState(undoRedoManager.getState());
+		}
+	}, [autoUpdate]);
+
+	const redo = useCallback(async () => {
+		await undoRedoManager.redo();
+		if (!autoUpdate) {
+			setState(undoRedoManager.getState());
+		}
+	}, [autoUpdate]);
+
 	// Update state when manager state changes
 	useEffect(() => {
 		if (!autoUpdate) {
@@ -107,21 +122,7 @@ export function useUndoRedo(options: UseUndoRedoOptions = {}): UseUndoRedoReturn
 		[autoUpdate]
 	);
 
-	// Undo the last action
-	const undo = useCallback(async () => {
-		await undoRedoManager.undo();
-		if (!autoUpdate) {
-			setState(undoRedoManager.getState());
-		}
-	}, [autoUpdate]);
-
-	// Redo the next action
-	const redo = useCallback(async () => {
-		await undoRedoManager.redo();
-		if (!autoUpdate) {
-			setState(undoRedoManager.getState());
-		}
-	}, [autoUpdate]);
+	// (undo/redo ya declarados arriba)
 
 	// Clear all history
 	const clear = useCallback(() => {

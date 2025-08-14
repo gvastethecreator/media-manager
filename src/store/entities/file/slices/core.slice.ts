@@ -139,7 +139,7 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 			let newParents: string[] = [];
 
 			if (parentDirectories.length > 0) {
-				targetPath = parentDirectories.at(-1);
+				targetPath = parentDirectories.at(-1) ?? null;
 				newParents = parentDirectories.slice(0, -1);
 			}
 

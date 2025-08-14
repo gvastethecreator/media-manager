@@ -7,12 +7,16 @@ interface DetailsPanelState {
 	isFixed: boolean;
 	showStatsWhenEmpty: boolean;
 	selectedItems: AnyEntityWithStats[];
+	// Nuevo: mostrar sección de configuración de interfaz dentro del RightPanel
+	showInterfaceSettings: boolean;
 	toggleVisibility: () => void;
 	toggleFixed: () => void;
 	toggleShowStatsWhenEmpty: () => void;
+	toggleInterfaceSettings: () => void;
 	setVisible: (visible: boolean) => void;
 	setFixed: (fixed: boolean) => void;
 	setShowStatsWhenEmpty: (show: boolean) => void;
+	setShowInterfaceSettings: (show: boolean) => void;
 	setSelectedItems: (items: AnyEntityWithStats[]) => void;
 }
 
@@ -23,9 +27,12 @@ export const useDetailsPanel = create<DetailsPanelState>()(
 			isFixed: false,
 			showStatsWhenEmpty: true,
 			selectedItems: [],
+			showInterfaceSettings: false,
 			toggleVisibility: () => set((state) => ({ isVisible: !state.isVisible })),
 			toggleFixed: () => set((state) => ({ isFixed: !state.isFixed })),
 			toggleShowStatsWhenEmpty: () => set((state) => ({ showStatsWhenEmpty: !state.showStatsWhenEmpty })),
+			toggleInterfaceSettings: () =>
+				set((state) => ({ showInterfaceSettings: !state.showInterfaceSettings, isVisible: true })),
 			setVisible: (visible: boolean) => {
 				if (get().isVisible !== visible) {
 					set({ isVisible: visible });
@@ -39,6 +46,11 @@ export const useDetailsPanel = create<DetailsPanelState>()(
 			setShowStatsWhenEmpty: (show: boolean) => {
 				if (get().showStatsWhenEmpty !== show) {
 					set({ showStatsWhenEmpty: show });
+				}
+			},
+			setShowInterfaceSettings: (show: boolean) => {
+				if (get().showInterfaceSettings !== show) {
+					set({ showInterfaceSettings: show, isVisible: true });
 				}
 			},
 			setSelectedItems: (items: AnyEntityWithStats[]) => {
@@ -63,6 +75,7 @@ export const useDetailsPanel = create<DetailsPanelState>()(
 				isVisible: state.isVisible,
 				isFixed: state.isFixed,
 				showStatsWhenEmpty: state.showStatsWhenEmpty,
+				showInterfaceSettings: state.showInterfaceSettings,
 			}),
 			// Merge function to ensure isVisible defaults to true
 			merge: (persistedState: any, currentState: DetailsPanelState) => ({

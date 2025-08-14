@@ -17,7 +17,6 @@ export const useCustomContextMenu = () => {
 	});
 
 	const openMenu = useCallback((x: number, y: number) => {
-		console.log('🎯 useCustomContextMenu - openMenu llamado', { x, y });
 		setState({
 			isOpen: true,
 			position: { x, y },
@@ -33,12 +32,6 @@ export const useCustomContextMenu = () => {
 
 	const handleContextMenu = useCallback(
 		(event: React.MouseEvent) => {
-			console.log('🎯 useCustomContextMenu - handleContextMenu llamado', {
-				clientX: event.clientX,
-				clientY: event.clientY,
-				target: event.target,
-			});
-
 			event.preventDefault();
 			event.stopPropagation();
 

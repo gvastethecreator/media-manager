@@ -139,11 +139,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 	}, []);
 
 	return (
-		<motion.div
-			animate={{ opacity: 1 }}
-			className="relative border-border/20 border-b bg-gradient-to-b from-background/90 to-transparent py-2 shadow-sm"
-			initial={{ opacity: 1 }}
-		>
+		<div className="relative border-border/20 border-b bg-gradient-to-b from-background/90 to-transparent py-2 shadow-sm">
 			{/* 📋 Layout responsivo */}
 			<div
 				className={cn(
@@ -159,9 +155,6 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 						{!isCollapsed && (
 							<div className="flex flex-col">
 								<div className="flex items-center gap-2">
-									<span className="font-medium text-foreground/80 text-xs leading-tight">
-										{activeProfileData?.name}
-									</span>
 									<span className="font-medium text-foreground/80 text-xs leading-tight">
 										{activeProfileData?.name}
 									</span>
@@ -251,7 +244,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 					</div>
 				)}
 			</div>
-		</motion.div>
+		</div>
 	);
 });
 
