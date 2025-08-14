@@ -1,11 +1,13 @@
-export enum EntityType {
-	IMAGE = 'IMAGE',
-	VIDEO = 'VIDEO',
-	AUDIO = 'AUDIO',
-	FILE3D = 'FILE3D',
-	DOCUMENT = 'DOCUMENT',
-	UNKNOWN = 'UNKNOWN',
-}
+export const EntityType = {
+	IMAGE: 'IMAGE',
+	VIDEO: 'VIDEO',
+	AUDIO: 'AUDIO',
+	FILE3D: 'FILE3D',
+	DOCUMENT: 'DOCUMENT',
+	UNKNOWN: 'UNKNOWN',
+} as const;
+
+export type EntityType = (typeof EntityType)[keyof typeof EntityType];
 
 export interface FileInfo {
 	name: string;

@@ -5,11 +5,10 @@ import { expect, test } from '@playwright/test';
 // Selector toolbar: botones con [data-testid="view-mode-<mode>-btn"]
 // Vistas y testids: grid-view, cards-view, masonry-view, listview-container
 
-const scrollViewport = '[data-slot="scroll-area-viewport"]';
-
 function getViewport(page: any) {
-	// Acotamos al contenedor del file-browser para evitar múltiples viewports del layout
-	return page.getByTestId('file-browser-container').locator(scrollViewport);
+	// El ScrollArea en FileBrowser se monta con data-testid="file-browser-scroll-area"
+	// El viewport hereda sufijo -viewport => file-browser-scroll-area-viewport
+	return page.getByTestId('file-browser-scroll-area-viewport');
 }
 
 async function assertScrollable(page: any) {
@@ -62,6 +61,8 @@ test.describe('File Browser: vistas con scroll e interacción', () => {
 
 		// Asegurar que la vista inicial renderizó algo (cualquiera)
 		await expect(getViewport(page)).toBeVisible();
+		await page.waitForSelector('[data-testid="file-browser"]', { state: 'attached' });
+		await page.waitForSelector('[data-testid="view-mode-grid-btn"]', { state: 'visible' });
 
 		const modes: Array<'grid' | 'cards' | 'masonry' | 'list'> = ['grid', 'cards', 'masonry', 'list'];
 

@@ -8,7 +8,6 @@ import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { useListViewConfig } from '@/hooks/use-list-view-config';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
-import { ListViewHeader } from './list-view-header';
 import { ListViewRow } from './list-view-row';
 
 interface ListViewProps {
@@ -23,6 +22,7 @@ interface ListViewProps {
 	className?: string;
 	/** Tamaño global de ítems desde la toolbar; se mapea a altura de fila/thumbnail */
 	itemSize?: number;
+	interfaceConfig?: any;
 }
 
 export const ListView = memo<ListViewProps>(function ListViewComponent({
@@ -36,6 +36,7 @@ export const ListView = memo<ListViewProps>(function ListViewComponent({
 	entityType = 'default',
 	className = '',
 	itemSize,
+	interfaceConfig,
 }) {
 	const parentRef = useRef<HTMLTableElement>(null);
 	const tableRef = useRef<HTMLTableElement>(null);
@@ -45,7 +46,7 @@ export const ListView = memo<ListViewProps>(function ListViewComponent({
 		() => ({
 			hasSelection: selectedIds.length > 0,
 			itemCount: items.length,
-			isVirtualized: items.length > 50,
+			isVirtualized: items.length > 20,
 			hasSort: Boolean(sortBy),
 			sortConfig: { field: sortBy, direction: sortDirection },
 		}),
@@ -204,32 +205,26 @@ export const ListView = memo<ListViewProps>(function ListViewComponent({
 		rows[nextIndex]?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 	}, []);
 
-	// Navegación por teclado para vista de lista	// Configurar virtualizador
+	// 🚀 Optimización: Virtualización mejorada con configuraciones optimizadas
+	const getScrollElement = useCallback(() => {
+		const viewport = parentRef.current?.closest('[data-slot="scroll-area-viewport"]') as HTMLElement | null;
+		return viewport ?? parentRef.current;
+	}, []);
+
+	const estimateSize = useCallback(
+		() => derivedSizing.rowHeight + config.rowGap,
+		[derivedSizing.rowHeight, config.rowGap]
+	);
+
+	const virtualizationEnabled = interfaceConfig?.performance?.virtualization !== false;
+	const overscan = interfaceConfig?.performance?.overscan ?? 5;
 	const rowVirtualizer = useVirtualizer({
 		count: items.length,
-		getScrollElement: () => {
-			const viewport = parentRef.current?.closest('[data-slot="scroll-area-viewport"]') as HTMLElement | null;
-			return viewport ?? parentRef.current;
-		},
-		estimateSize: () => derivedSizing.rowHeight + config.rowGap,
-		overscan: 5,
+		getScrollElement,
+		estimateSize,
+		enabled: virtualizationEnabled,
+		overscan,
 	});
-
-	// Handlers para funcionalidades del header - Optimizados con memoización
-	const headerHandlers = useMemo(
-		() => ({
-			onColumnResize: async (columnKey: string, width: number) => {
-				await updateColumn(columnKey, { width });
-			},
-			onColumnReorder: async (fromIndex: number, toIndex: number) => {
-				await reorderColumns(fromIndex, toIndex);
-			},
-			onColumnToggle: async (columnKey: string) => {
-				await toggleColumnVisibility(columnKey);
-			},
-		}),
-		[updateColumn, reorderColumns, toggleColumnVisibility]
-	);
 
 	// OPTIMIZACIÓN AVANZADA: Handlers estables con useRef para máximo rendimiento
 	const handlersRef = useRef({
@@ -261,37 +256,13 @@ export const ListView = memo<ListViewProps>(function ListViewComponent({
 		handlersRef.current.onItemDoubleClick(item);
 	}, []);
 
-	// Calcular altura de header
-	const headerHeight = config.showHeader ? 40 : 0;
-
 	return (
 		<div
-			aria-describedby="list-view-instructions"
 			className={cn('min-h-0 w-full', className)}
 			data-testid="listview-container"
 			data-view-type="list"
+			style={{ fontFamily: 'var(--app-font-family)', fontSize: 'var(--app-font-size)' }}
 		>
-			<div className="sr-only" id="list-view-instructions">
-				Usa las flechas arriba y abajo para navegar, Home y End para ir al inicio o final, PageUp y PageDown para
-				navegar rápidamente.
-			</div>
-			{/* Tabla con header fijo */}
-			<table className="w-full table-fixed" onKeyDown={handleKeyDown} ref={tableRef}>
-				{/* Header */}
-				{config.showHeader && (
-					<ListViewHeader
-						columns={columnsWithRenderers}
-						onColumnReorder={headerHandlers.onColumnReorder}
-						onColumnResize={headerHandlers.onColumnResize}
-						onColumnToggle={headerHandlers.onColumnToggle}
-						onSort={onSort}
-						showSettings={true}
-						sortBy={sortBy}
-						sortDirection={sortDirection}
-					/>
-				)}
-			</table>
-
 			{/* Contenedor virtualizado */}
 			<table
 				aria-busy={false}
@@ -307,7 +278,18 @@ export const ListView = memo<ListViewProps>(function ListViewComponent({
 						position: 'relative',
 					}}
 				>
-					{rowVirtualizer.getVirtualItems().map((virtualItem) => {
+					{(virtualizationEnabled
+						? rowVirtualizer.getVirtualItems()
+						: items.map(
+								(_, i) =>
+									({
+										index: i,
+										key: items[i].id,
+										start: i * (derivedSizing.rowHeight + config.rowGap),
+										size: derivedSizing.rowHeight + config.rowGap,
+									}) as any
+							)
+					).map((virtualItem: any) => {
 						const item = items[virtualItem.index];
 						const isSelected = selectedIdsSetRef.current.has(item.id);
 						const isEven = virtualItem.index % 2 === 0;

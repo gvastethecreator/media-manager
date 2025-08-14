@@ -9,38 +9,44 @@ import type { JSONString } from '@/lib/utils/types/utility-types';
 /**
  * Estados de proceso
  */
-export enum ProcessStatus {
-	PENDING = 'pending',
-	RUNNING = 'running',
-	COMPLETED = 'completed',
-	FAILED = 'failed',
-	CANCELLED = 'cancelled',
-}
+export const ProcessStatus = {
+	PENDING: 'pending',
+	RUNNING: 'running',
+	COMPLETED: 'completed',
+	FAILED: 'failed',
+	CANCELLED: 'cancelled',
+} as const;
+
+export type ProcessStatus = (typeof ProcessStatus)[keyof typeof ProcessStatus];
 
 /**
  * Tipos de proceso
  */
-export enum ProcessType {
-	FILE_UPLOAD = 'file-upload',
-	FILE_PROCESSING = 'file-processing',
-	METADATA_EXTRACTION = 'metadata-extraction',
-	THUMBNAIL_GENERATION = 'thumbnail-generation',
-	BATCH_OPERATION = 'batch-operation',
-	IMPORT = 'import',
-	EXPORT = 'export',
-	BACKUP = 'backup',
-	RESTORE = 'restore',
-}
+export const ProcessType = {
+	FILE_UPLOAD: 'file-upload',
+	FILE_PROCESSING: 'file-processing',
+	METADATA_EXTRACTION: 'metadata-extraction',
+	THUMBNAIL_GENERATION: 'thumbnail-generation',
+	BATCH_OPERATION: 'batch-operation',
+	IMPORT: 'import',
+	EXPORT: 'export',
+	BACKUP: 'backup',
+	RESTORE: 'restore',
+} as const;
+
+export type ProcessType = (typeof ProcessType)[keyof typeof ProcessType];
 
 /**
  * Niveles de prioridad
  */
-export enum ProcessPriority {
-	LOW = 'low',
-	NORMAL = 'normal',
-	HIGH = 'high',
-	CRITICAL = 'critical',
-}
+export const ProcessPriority = {
+	LOW: 'low',
+	NORMAL: 'normal',
+	HIGH: 'high',
+	CRITICAL: 'critical',
+} as const;
+
+export type ProcessPriority = (typeof ProcessPriority)[keyof typeof ProcessPriority];
 
 /**
  * Interfaz base para procesos

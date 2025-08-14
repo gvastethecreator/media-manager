@@ -88,6 +88,8 @@ export interface BaseCardProps {
 	onDoubleClick?: () => void;
 	/** Callback de menú contextual */
 	onContextMenu?: (e: React.MouseEvent) => void;
+	/** Calidad de thumbnail preferida */
+	thumbnailQuality?: 'low' | 'medium' | 'high';
 	/** Props legacy para compatibilidad */
 	compact?: boolean;
 	tcgMode?: boolean;

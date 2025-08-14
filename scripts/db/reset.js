@@ -133,8 +133,8 @@ function ensureEnvFile() {
 	return true;
 }
 
-// Función principal para resetear la base de datos con Drizzle
-async function resetDatabase() {
+// Función principal para resetear la base de datos con Drizzle (no async necesario)
+function resetDatabase() {
 	log('Iniciando reset de la base de datos con Drizzle...', 'info');
 
 	const rootDir = path.resolve(__dirname, '../..');
@@ -191,9 +191,8 @@ async function resetDatabase() {
 }
 
 // Ejecutar la función principal
-resetDatabase().then((success) => {
-	if (!success) {
-		log('El proceso de reset falló', 'error');
-		process.exit(1);
-	}
-});
+const success = resetDatabase();
+if (!success) {
+	log('El proceso de reset falló', 'error');
+	process.exit(1);
+}

@@ -5,10 +5,112 @@ import { toastService } from '@/lib/ui/toast';
 import type { ErrorResponse, FolderResponse, FolderStats, ProcessStatus } from '@/types/folders';
 
 const eventsLogger = clientLogger.withContext('FoldersEvents');
+// ⛑️ OPTIMIZACIÓN: Throttle de logs para evitar saturar consola y bloquear UI
+const lastFolderProgressRef: { current: { progress: number; phase?: string } } = { current: { progress: -1 } };
+const lastGlobalProgressRef: { current: { progress: number; phase?: string } } = { current: { progress: -1 } };
+
+// Helper para decidir si loggear
+const folderProgressUtil = {
+	should(prev: { progress: number; phase?: string }, progress?: number, phase?: string) {
+		if (progress === undefined) {
+			return false;
+		}
+		if (phase !== prev.phase || prev.progress === -1 || progress === 100) {
+			return true;
+		}
+		return progress - prev.progress >= 5;
+	},
+	log(status: ProcessStatus) {
+		eventsLogger.debug('📊 Progreso carpeta:', {
+			p: status.progress,
+			phase: status.phase,
+			files: `${status.filesProcessed}/${status.totalFiles}`,
+			folder: status.folderId,
+		});
+	},
+};
+
+function toastProgress(status: ProcessStatus) {
+	if (status.progress === undefined || status.progress <= 0) {
+		return;
+	}
+	const progressMessage = status.message || 'Procesando...';
+	const progressPercent = Math.round(status.progress);
+	const now = Date.now();
+	if (
+		(progressPercent % 25 === 0 || progressPercent >= 95) &&
+		(progressPercent !== lastToastPct || now - lastToastTime > TOAST_MIN_INTERVAL)
+	) {
+		toastService.info(`📊 Progreso: ${progressPercent}%`, {
+			description: progressMessage,
+			duration: 2000,
+		});
+		lastToastPct = progressPercent;
+		lastToastTime = now;
+	}
+}
 // Simple rate limit para toasts/logs de progreso
 let lastToastPct = -1;
 let lastToastTime = 0;
 const TOAST_MIN_INTERVAL = 1500; // ms
+
+// 🆕 Batching de eventos folder:progress
+interface BufferedFolderProgress {
+	status: ProcessStatus;
+	lastUpdate: number;
+}
+const FOLDER_FLUSH_INTERVAL = 150; // ms ventana de coalescencia
+const folderBufferRef: { current: Map<string, BufferedFolderProgress> } = { current: new Map() };
+const flushScheduledRef = { current: false };
+const lastFlushTimeRef = { current: 0 };
+
+function scheduleFlush(cb: (batch: ProcessStatus[]) => void) {
+	if (flushScheduledRef.current) {
+		return;
+	}
+	flushScheduledRef.current = true;
+	setTimeout(() => {
+		flushScheduledRef.current = false;
+		const now = Date.now();
+		lastFlushTimeRef.current = now;
+		const batch: ProcessStatus[] = [];
+		for (const [key, entry] of folderBufferRef.current.entries()) {
+			// Solo emitir si hay cambio significativo desde el último log global de carpeta
+			batch.push(entry.status);
+		}
+		folderBufferRef.current.clear();
+		if (batch.length) {
+			cb(batch);
+		}
+	}, FOLDER_FLUSH_INTERVAL);
+}
+
+// Heurística de cambio mínimo para registrar en buffer (evita llenar buffer con pasos minúsculos)
+function hasMeaningfulChange(prev: ProcessStatus | undefined, next: ProcessStatus): boolean {
+	if (!prev) {
+		return true;
+	}
+	if (next.phase && next.phase !== prev.phase) {
+		return true;
+	}
+	const pPrev = prev.progress ?? -1;
+	const pNext = next.progress ?? -1;
+	if (pNext === 100 && pPrev !== 100) {
+		return true;
+	}
+	return pNext - pPrev >= 2; // granularidad más fina que logs (5) pero evita spam
+}
+
+// Utilidad para insertar en buffer
+function bufferFolderProgress(status: ProcessStatus) {
+	// folderId puede venir undefined: usar 'unknown' para agrupar
+	const key = status.folderId ?? 'unknown';
+	const existing = folderBufferRef.current.get(key)?.status;
+	if (!hasMeaningfulChange(existing, status)) {
+		return;
+	}
+	folderBufferRef.current.set(key, { status, lastUpdate: Date.now() });
+}
 
 interface FolderEventsCallbacks {
 	onProgress?: (status: ProcessStatus) => void;
@@ -100,35 +202,24 @@ export function useFoldersEvents({
 		if (!status) {
 			return;
 		}
-
-		eventsLogger.debug('📊 Progreso del proceso vía eventos:', status);
-
-		try {
-			// Mostrar notificación de progreso si hay información significativa
-			if (status.progress !== undefined && status.progress > 0) {
-				const progressMessage = status.message || 'Procesando...';
-				const progressPercent = Math.round(status.progress);
-
-				// Mostrar notificación cada 25% y con intervalo mínimo para evitar spam
-				const now = Date.now();
-				if (
-					(progressPercent % 25 === 0 || progressPercent >= 95) &&
-					(progressPercent !== lastToastPct || now - lastToastTime > TOAST_MIN_INTERVAL)
-				) {
-					toastService.info(`📊 Progreso: ${progressPercent}%`, {
-						description: progressMessage,
-						duration: 2000,
-					});
-					lastToastPct = progressPercent;
-					lastToastTime = now;
+		// Bufferizamos eventos de carpeta para flush periódico
+		bufferFolderProgress(status);
+		scheduleFlush((batch) => {
+			// Emitir una sola vez por batch hacia el callback externo
+			for (const s of batch) {
+				const prev = lastFolderProgressRef.current;
+				if (folderProgressUtil.should(prev, s.progress, s.phase)) {
+					folderProgressUtil.log(s);
+					lastFolderProgressRef.current = { progress: s.progress ?? prev.progress, phase: s.phase };
+				}
+				try {
+					toastProgress(s);
+					callbacksRef.current.onProgress(s);
+				} catch (error) {
+					eventsLogger.error('Error procesando evento de progreso (batch):', error);
 				}
 			}
-
-			// Usar callback desde ref para evitar dependencias
-			callbacksRef.current.onProgress(status);
-		} catch (error) {
-			eventsLogger.error('Error procesando evento de progreso:', error);
-		}
+		});
 	}, []);
 
 	// Manejador de errores estable
@@ -167,7 +258,15 @@ export function useFoldersEvents({
 
 	// Manejador de reindex all estable
 	const handleReindexAllProgress = useCallback((status: ProcessStatus & { currentFolder?: string }) => {
-		eventsLogger.info('📊 Progreso de reindexado global:', status);
+		const prev = lastGlobalProgressRef.current;
+		if (folderProgressUtil.should(prev, status.progress, status.phase)) {
+			eventsLogger.debug('🌍 Progreso global:', {
+				p: status.progress,
+				phase: status.phase,
+				currentFolder: status.currentFolder,
+			});
+			lastGlobalProgressRef.current = { progress: status.progress ?? prev.progress, phase: status.phase };
+		}
 		callbacksRef.current.onReindexAllProgress(status);
 	}, []);
 
@@ -192,9 +291,11 @@ export function useFoldersEvents({
 
 			// Handlers simplificados para bajar complejidad
 			const onFolderProgress = (d: any) => {
+				// Construimos el status sin forzar logs inmediatos; se procesará vía batch
 				handleProgress({
 					isProcessing: true,
 					status: d.status || 'processing',
+					phase: d.phase || 'processing',
 					progress: Math.max(0, Math.min(100, d.progress || 0)),
 					totalFiles: d.totalFiles || 0,
 					filesProcessed: d.filesProcessed || 0,
@@ -247,11 +348,12 @@ export function useFoldersEvents({
 				}
 			};
 
-			// Manejar eventos de folders
+			// Manejar eventos de folders (log reducido)
 			eventSource.addEventListener('event', (event: any) => {
 				try {
 					const eventData = JSON.parse(event.data);
-					eventsLogger.info('📨 Evento SSE recibido:', eventData);
+					// Log mínimo por evento
+					eventsLogger.debug('evt', eventData.type);
 					processSSEEvent(eventData);
 				} catch (error) {
 					eventsLogger.error('❌ Error procesando evento SSE:', error);
@@ -290,6 +392,20 @@ export function useFoldersEvents({
 		emitManualComplete: (data: FolderResponse) => {
 			eventsLogger.info('🧪 Emitiendo evento de finalización manual:', data);
 			handleComplete(data);
+		},
+		flushManual: () => {
+			// Forzar flush inmediato (útil en tests)
+			if (folderBufferRef.current.size === 0) {
+				return;
+			}
+			const batch: ProcessStatus[] = [];
+			for (const v of folderBufferRef.current.values()) {
+				batch.push(v.status);
+			}
+			folderBufferRef.current.clear();
+			for (const s of batch) {
+				callbacksRef.current.onProgress(s);
+			}
 		},
 	};
 }

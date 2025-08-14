@@ -24,7 +24,6 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
-import { RedoButton, UndoButton } from '../undo-redo/UndoRedoButton';
 
 interface CustomContextMenuProps {
 	/** Si el menú está visible */
@@ -193,10 +192,8 @@ export const CustomContextMenu: React.FC<CustomContextMenuProps> = ({
 							)}
 
 							<div className="px-1 py-1">
-								{/* Acciones de Undo/Redo */}
+								{/* Configuración (Undo/Redo eliminado) */}
 								<div className="flex items-center gap-1 px-2 py-1">
-									<UndoButton className="h-7" size="sm" variant="ghost" />
-									<RedoButton className="h-7" size="sm" variant="ghost" />
 									<Button className="h-7" onClick={() => handleAction('configure')} size="sm" variant="ghost">
 										<Settings className="h-3.5 w-3.5" />
 									</Button>

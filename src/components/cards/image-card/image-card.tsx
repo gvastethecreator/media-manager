@@ -1,5 +1,5 @@
 import { CalendarIcon, CameraIcon, FolderIcon, HashIcon, Image as ImageIcon, Info, Star, TagIcon } from 'lucide-react';
-import { memo, useEffect, useState } from 'react';
+import { memo, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -54,7 +54,8 @@ const NonTcgTitle = ({
 	);
 };
 
-const TechInfo = ({
+// Memoizado: evita re-render cuando las props no cambian.
+const TechInfo = memo(function TechInfoComponent({
 	humanDimensions,
 	createdAt,
 	cameraInfo,
@@ -62,26 +63,28 @@ const TechInfo = ({
 	humanDimensions: string;
 	createdAt?: string | Date | null;
 	cameraInfo: string | null;
-}) => (
-	<div className="flex flex-col gap-1 text-gray-200 text-xs">
-		<div className="flex items-center gap-1.5">
-			<Info className="h-3 w-3" />
-			<span>{humanDimensions}</span>
+}) {
+	return (
+		<div className="flex flex-col gap-1 text-gray-200 text-xs">
+			<div className="flex items-center gap-1.5">
+				<Info className="h-3 w-3" />
+				<span>{humanDimensions}</span>
+			</div>
+			{createdAt ? (
+				<div className="flex items-center gap-1.5">
+					<CalendarIcon className="h-3 w-3" />
+					<span>{formatDate(createdAt)}</span>
+				</div>
+			) : null}
+			{cameraInfo ? (
+				<div className="flex items-center gap-1.5">
+					<CameraIcon className="h-3 w-3" />
+					<span className="max-w-[180px] truncate">{cameraInfo}</span>
+				</div>
+			) : null}
 		</div>
-		{createdAt ? (
-			<div className="flex items-center gap-1.5">
-				<CalendarIcon className="h-3 w-3" />
-				<span>{formatDate(createdAt)}</span>
-			</div>
-		) : null}
-		{cameraInfo ? (
-			<div className="flex items-center gap-1.5">
-				<CameraIcon className="h-3 w-3" />
-				<span className="max-w-[180px] truncate">{cameraInfo}</span>
-			</div>
-		) : null}
-	</div>
-);
+	);
+});
 
 const TcgMetaBadges = ({
 	effectiveTcgMode,
@@ -395,7 +398,7 @@ interface DetailsOverlayProps {
 	totalRelations: number;
 }
 
-const DetailsOverlay = ({
+const DetailsOverlay = memo(function DetailsOverlayComponent({
 	showDetails,
 	effectiveTcgMode,
 	isHovered,
@@ -405,7 +408,7 @@ const DetailsOverlay = ({
 	metadataFormatUpper,
 	showRelations,
 	totalRelations,
-}: DetailsOverlayProps) => {
+}: DetailsOverlayProps) {
 	if (!showDetails) {
 		return null;
 	}
@@ -435,7 +438,7 @@ const DetailsOverlay = ({
 			</div>
 		</div>
 	);
-};
+});
 
 interface TcgStyleBlockProps {
 	effectiveTcgMode: boolean;
@@ -652,6 +655,8 @@ interface CardButtonProps {
 	role?: string;
 	tabIndex?: number;
 	children: React.ReactNode;
+	/** Indica si debe exponerse como elemento interactivo (role=button, tabIndex=0). Evita nested buttons. */
+	interactive?: boolean;
 }
 
 const CardButton = ({
@@ -669,35 +674,58 @@ const CardButton = ({
 	onDoubleClick,
 	onKeyDown,
 	role,
-	tabIndex,
 	children,
-}: CardButtonProps) => (
-	<button
-		aria-describedby={ariaDescribedBy}
-		aria-label={ariaLabel}
-		className={cn(
-			'group relative h-full w-full overflow-hidden rounded-lg border-0 bg-transparent p-0 transition-all duration-300',
-			getAspectRatioClass(aspectRatio),
-			getVariantClasses(variant),
-			isHovered ? 'scale-[1.02] shadow-lg' : 'hover:scale-[1.02] hover:shadow-lg',
-			(onClick || onDoubleClick) && 'cursor-pointer',
-			className
-		)}
-		data-item-id={dataItemId}
-		disabled={disabled}
-		onClick={onClick}
-		onContextMenu={onContextMenu}
-		onDoubleClick={onDoubleClick}
-		onKeyDown={onKeyDown}
-		onMouseEnter={() => setIsHovered(true)}
-		onMouseLeave={() => setIsHovered(false)}
-		role={role}
-		tabIndex={tabIndex}
-		type="button"
-	>
-		{children}
-	</button>
-);
+	interactive = true,
+}: CardButtonProps) => {
+	const isInteractive = interactive && !disabled && (onClick || onDoubleClick);
+	// Cuando es interactivo usamos un button semántico (evita necesidad de role/teclado custom)
+	if (isInteractive) {
+		return (
+			<button
+				aria-describedby={ariaDescribedBy}
+				type="button"
+				// aria-label solo si se provee (button lo soporta). Evitar aria-label vacío.
+				{...(ariaLabel ? { 'aria-label': ariaLabel } : {})}
+				className={cn(
+					'group relative h-full w-full overflow-hidden rounded-lg border-0 bg-transparent p-0 transition-all duration-300',
+					getAspectRatioClass(aspectRatio),
+					getVariantClasses(variant),
+					isHovered ? 'scale-[1.02] shadow-lg' : 'hover:scale-[1.02] hover:shadow-lg',
+					'cursor-pointer',
+					className
+				)}
+				data-item-id={dataItemId}
+				disabled={disabled}
+				onClick={onClick}
+				onContextMenu={onContextMenu}
+				onDoubleClick={onDoubleClick}
+				onKeyDown={onKeyDown}
+				onMouseEnter={() => setIsHovered(true)}
+				onMouseLeave={() => setIsHovered(false)}
+			>
+				{children}
+			</button>
+		);
+	}
+
+	// No interactivo: contenedor de grupo (sin role button ni aria-label que cause advertencias)
+	return (
+		<div
+			aria-describedby={ariaDescribedBy}
+			className={cn(
+				'group relative h-full w-full select-none overflow-hidden rounded-lg border-0 bg-transparent p-0 transition-all duration-300',
+				getAspectRatioClass(aspectRatio),
+				getVariantClasses(variant),
+				isHovered ? 'scale-[1.02] shadow-lg' : 'hover:scale-[1.02] hover:shadow-lg',
+				className
+			)}
+			data-item-id={dataItemId}
+			role={role || 'group'}
+		>
+			{children}
+		</div>
+	);
+};
 
 interface ImageCardProps {
 	imageId: string;
@@ -711,6 +739,8 @@ interface ImageCardProps {
 	variant?: 'default' | 'minimal' | 'polaroid' | 'tcg';
 	tcgMode?: boolean;
 	showRelations?: boolean;
+	/** Calidad de thumbnail preferida */
+	thumbnailQuality?: 'low' | 'medium' | 'high';
 	// Props adicionales para accesibilidad y funcionalidad
 	'data-item-id'?: string;
 	role?: string;
@@ -792,6 +822,27 @@ export const ImageCard = memo(
 			}
 		};
 
+		// Hooks (useMemo) deben ejecutarse SIEMPRE antes de cualquier return temprano
+		// para mantener orden de hooks estable entre renders (evita error "Rendered more hooks...")
+		const primaryColor = useMemo(
+			() => getPrimaryColorFromTags(imageData?.tags),
+			// Dependemos del array de tags (o undefined)
+			[imageData?.tags]
+		);
+		const cameraInfo = useMemo(() => (imageData ? getCameraInfoFromMetadata(imageData.metadata) : null), [imageData]);
+		const metadataFormatUpper = useMemo(
+			() => (imageData ? getMetadataFormatUpper(imageData.metadata) : null),
+			[imageData]
+		);
+		const humanDimensions = useMemo(
+			() => (imageData ? getHumanReadableDimensionsFromImage(imageData) : ''),
+			[imageData]
+		);
+		const totalRelations = useMemo(
+			() => (imageData ? getTotalRelationsCountFromStats(imageData.stats) : 0),
+			[imageData]
+		);
+
 		// Renderizar cargando
 		if (isLoading) {
 			return <LoadingCard aspectRatio={aspectRatio} className={className} variant={variant} />;
@@ -802,16 +853,9 @@ export const ImageCard = memo(
 			return <ErrorCard aspectRatio={aspectRatio} className={className} message={error?.message} variant={variant} />;
 		}
 
-		// Determinar la URL del thumbnail a usar
+		// Determinar la URL del thumbnail a usar (seguro: imageData definido tras return anterior)
 		const displayThumbnailUrl = thumbnailUrl || imageData.thumbnailUrl || `/api/images/${imageData.id}/thumbnail`;
 		const shouldShowThumbnailLoading = thumbnailLoading || isResourceLoading(imageId);
-
-		// Derivados seguros y reutilizables
-		const primaryColor = getPrimaryColorFromTags(imageData.tags);
-		const cameraInfo = getCameraInfoFromMetadata(imageData.metadata);
-		const metadataFormatUpper = getMetadataFormatUpper(imageData.metadata);
-		const humanDimensions = getHumanReadableDimensionsFromImage(imageData);
-		const totalRelations = getTotalRelationsCountFromStats(imageData.stats);
 
 		const cardContent = (
 			<CardContent

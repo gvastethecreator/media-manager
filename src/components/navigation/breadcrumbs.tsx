@@ -125,7 +125,6 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 							variant="ghost"
 						>
 							<Home className="h-3 w-3" />
-							<span className="text-xs">Inicio</span>
 						</Button>
 					</BreadcrumbItem>
 				</BreadcrumbList>
@@ -150,7 +149,6 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 							variant="ghost"
 						>
 							<Home className="h-3 w-3" />
-							<span className="text-xs">Inicio</span>
 						</Button>
 					</BreadcrumbItem>
 

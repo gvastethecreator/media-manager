@@ -1,4 +1,4 @@
-import { cn } from '../utils';
+export { cn } from '../utils';
 
 export * from './activity';
 // Re-exportar utilidades de entidades específicas
@@ -42,8 +42,6 @@ export {
 export * from './wildcard';
 export * from './world-item';
 
-export { cn };
-
 /**
  * Extrae el ID de una tarjeta desde una URL o devuelve el ID tal cual si no es una URL
  * @param urlOrId URL o ID de la tarjeta
@@ -57,7 +55,7 @@ export function getCardIdFromUrl(urlOrId: string): string {
 	// Si es una URL, extraer el último segmento
 	if (urlOrId.includes('/')) {
 		const segments = urlOrId.split('/');
-		return segments.at(-1);
+		return segments.at(-1) ?? '';
 	}
 
 	// Si no es una URL, devolver el ID tal cual

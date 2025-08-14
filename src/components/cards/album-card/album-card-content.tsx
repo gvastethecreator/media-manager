@@ -20,12 +20,18 @@ export function AlbumCardContent({
 	tcgMode = false,
 }: AlbumCardContentProps) {
 	// Parsear los filtros si están almacenados como JSON string
-	const filters =
-		album.filters === 'empty_array'
-			? []
-			: typeof album.filters === 'string'
-				? JSON.parse(album.filters)
-				: album.filters || [];
+	let filters: any[] = [];
+	if (album.filters === 'empty_array') {
+		filters = [];
+	} else if (typeof album.filters === 'string') {
+		try {
+			filters = JSON.parse(album.filters) || [];
+		} catch {
+			filters = [];
+		}
+	} else if (Array.isArray(album.filters)) {
+		filters = album.filters;
+	}
 
 	return (
 		<div className="flex-shrink-0 px-3 py-2">

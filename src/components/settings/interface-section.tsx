@@ -1,9 +1,8 @@
 // src/components/settings/interface-section.tsx
-// Sección de interfaz para controlar tipografía, tema, animaciones y otros aspectos visuales
-// 🛠️ Cumple con los lineamientos de arquitectura y stack del proyecto
+// Configuración de interfaz unificada (apilada) con aplicación inmediata
 
-import { Columns, Eye, Grid, LayoutGrid, List, Settings, Zap } from 'lucide-react';
-import React, { useId, useState } from 'react';
+import { Settings } from 'lucide-react';
+import React, { useId } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -11,41 +10,66 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useTheme } from '@/hooks/use-theme';
 import { useInterfaceSettingsStore } from '@/store/entities/settings/store';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 
-/**
- * InterfaceSection
- * Sección de configuración de interfaz de usuario (tipografía, tema, animaciones, FileBrowser, etc)
- */
+// Opciones de Google Fonts (preview en menú) + sistema
+const FONT_OPTIONS = [
+	{ value: 'system', label: 'System', sample: 'Sistema rápido' },
+	{ value: 'inter', label: 'Inter', sample: 'Inter versátil' },
+	{ value: 'roboto', label: 'Roboto', sample: 'Roboto legible' },
+	{ value: 'open-sans', label: 'Open Sans', sample: 'Open Sans limpio' },
+	{ value: 'lato', label: 'Lato', sample: 'Lato moderno' },
+	{ value: 'montserrat', label: 'Montserrat', sample: 'Montserrat elegante' },
+	{ value: 'poppins', label: 'Poppins', sample: 'Poppins redondeada' },
+	{ value: 'source-sans', label: 'Source Sans', sample: 'Source Sans neutra' },
+	{ value: 'serif', label: 'Serif', sample: 'Serif clásica' },
+	{ value: 'georgia', label: 'Georgia', sample: 'Georgia editorial' },
+	{ value: 'playfair', label: 'Playfair', sample: 'Playfair display' },
+	{ value: 'merriweather', label: 'Merriweather', sample: 'Merriweather lectura' },
+	{ value: 'mono', label: 'Monospace', sample: 'Fuente código' },
+	{ value: 'jetbrains-mono', label: 'JetBrains Mono', sample: 'JetBrains code' },
+	{ value: 'fira-code', label: 'Fira Code', sample: 'Fira ligaduras' },
+	{ value: 'ubuntu-mono', label: 'Ubuntu Mono', sample: 'Ubuntu legible' },
+	{ value: 'rounded', label: 'Rounded', sample: 'Texto amable' },
+];
+
+// Escala ampliada solicitada
+const FONT_SIZE_OPTIONS = ['xs', 'sm', 'base', 'md', 'lg', 'xl', '2xl', '3xl', '4xl'];
+
+// Temas unificados con navegación (useTheme) + opción system
+const mapThemeLabel = (t: string) => {
+	if (t === 'system') return 'Sistema';
+	return t.charAt(0).toUpperCase() + t.slice(1);
+};
+
 const InterfaceSection: React.FC = () => {
-	// Acceso a preferencias y setter desde Zustand
 	const preferences = useInterfaceSettingsStore((s) => s.preferences);
 	const setPreferences = useInterfaceSettingsStore((s: any) => (s.setPreferences ? s.setPreferences : () => {}));
+	// Tema unificado
+	const { theme, setTheme, themes } = useTheme();
+	// Estado de vista para sincronizar default view si cambia
+	const viewMode = useViewOptionsStore((s) => s.viewMode);
+	const setViewMode = useViewOptionsStore((s) => s.setViewMode);
 
-	// Estado para el tab activo del FileBrowser
-	const [activeFileBrowserTab, setActiveFileBrowserTab] = useState('general');
-
-	// IDs únicos para los componentes
 	const animationsId = useId();
 	const thumbnailsRespectAspectRatioId = useId();
 	const thumbnailsAnimationsId = useId();
 	const thumbnailsUltraPerformanceId = useId();
 
-	// Helper para actualizar configuración del FileBrowser
-	const updateFileBrowserConfig = (section: string, key: string, value: any) => {
+	const updateFileBrowserConfig = (section: 'general' | 'performance', key: string, value: any) => {
 		setPreferences({
 			fileBrowser: {
 				...preferences.fileBrowser,
 				[section]: {
-					...preferences.fileBrowser[section as keyof typeof preferences.fileBrowser],
+					...preferences.fileBrowser[section],
 					[key]: value,
 				},
 			},
 		});
 	};
 
-	// Helper para actualizar configuración de vista específica
 	const updateViewConfig = (viewType: 'grid' | 'cards' | 'masonry' | 'list', key: string, value: any) => {
 		setPreferences({
 			fileBrowser: {
@@ -61,7 +85,6 @@ const InterfaceSection: React.FC = () => {
 		});
 	};
 
-	// Helper para actualizar columnas visibles en vista lista
 	const updateListColumn = (column: string, visible: boolean) => {
 		setPreferences({
 			fileBrowser: {
@@ -80,9 +103,61 @@ const InterfaceSection: React.FC = () => {
 		});
 	};
 
+	// Aplicar tipografía y tamaño de fuente al DOM de forma reactiva
+	React.useEffect(() => {
+		const root = document.documentElement;
+		// Google Fonts: cargar dinámicamente si no es 'system'
+		if (preferences.fontFamily && preferences.fontFamily !== 'system') {
+			const fontUrl = `https://fonts.googleapis.com/css2?family=${preferences.fontFamily.replace(/-/g, '+')}:wght@400;700&display=swap`;
+			let fontLink = document.getElementById('dynamic-font-link') as HTMLLinkElement | null;
+			if (!fontLink) {
+				fontLink = document.createElement('link');
+				fontLink.id = 'dynamic-font-link';
+				fontLink.rel = 'stylesheet';
+				document.head.appendChild(fontLink);
+			}
+			fontLink.href = fontUrl;
+			root.style.setProperty('--app-font-family', `'${preferences.fontFamily.replace(/-/g, ' ')}, sans-serif'`);
+		} else {
+			root.style.setProperty('--app-font-family', 'inherit');
+		}
+		// Tamaño de fuente
+		const fontSizeMap: Record<string, string> = {
+			xs: '0.70rem',
+			sm: '0.8rem',
+			base: '0.9rem',
+			md: '1rem',
+			lg: '1.1rem',
+			xl: '1.25rem',
+			'2xl': '1.4rem',
+			'3xl': '1.6rem',
+			'4xl': '1.8rem',
+		};
+		root.style.setProperty('--app-font-size', fontSizeMap[preferences.fontSize] || '1rem');
+	}, [preferences.fontFamily, preferences.fontSize]);
+
+	// Sincronizar cambio de tema desde preferencias hacia hook y viceversa
+	React.useEffect(() => {
+		if (preferences.theme !== theme) {
+			setPreferences({ theme });
+		}
+	}, [preferences.theme, theme, setPreferences]);
+
+	const handleThemeChange = (v: string) => {
+		setPreferences({ theme: v });
+		setTheme(v as any);
+	};
+
+	// Aplicar vista por defecto al cargar si difiere
+	React.useEffect(() => {
+		const def = preferences.fileBrowser.general.defaultViewMode;
+		if (viewMode !== def) {
+			setViewMode(def as any);
+		}
+	}, [preferences.fileBrowser.general.defaultViewMode, viewMode, setViewMode]);
+
 	return (
 		<div className="space-y-6">
-			{/* Configuración General de Interfaz */}
 			<Card className="rounded-sm border-none bg-muted/30">
 				<CardHeader className="p-3 pb-2">
 					<CardTitle className="flex items-center gap-2 font-medium text-base text-muted-foreground">
@@ -92,80 +167,106 @@ const InterfaceSection: React.FC = () => {
 				</CardHeader>
 				<Separator className="my-0" />
 				<CardContent className="p-3">
-					<div className="flex flex-col gap-4">
-						{/* Selector de tipografía */}
-						<div className="flex flex-col gap-1">
-							<Label htmlFor="fontFamily">Tipografía</Label>
+					<div className="grid grid-cols-3 gap-4">
+						<div className="col-span-1 flex flex-col gap-1">
+							<Label>Tipografía</Label>
 							<Select onValueChange={(v) => setPreferences({ fontFamily: v })} value={preferences.fontFamily}>
 								<SelectTrigger className="w-full">
-									<SelectValue />
+									<SelectValue placeholder="Fuente" />
 								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="system">Sistema</SelectItem>
-									<SelectItem value="serif">Serif</SelectItem>
-									<SelectItem value="mono">Monoespaciada</SelectItem>
-									<SelectItem value="rounded">Redondeada</SelectItem>
+								<SelectContent className="max-h-96">
+									{FONT_OPTIONS.map((f) => (
+										<SelectItem key={f.value} value={f.value}>
+											<span
+												className="flex flex-col"
+												style={{ fontFamily: f.value.startsWith('system') ? 'inherit' : undefined }}
+											>
+												<span className="font-medium text-xs">{f.label}</span>
+												<span className="text-[10px] opacity-70">{f.sample}</span>
+											</span>
+										</SelectItem>
+									))}
 								</SelectContent>
 							</Select>
 						</div>
-
-						{/* Selector de tamaño de fuente */}
-						<div className="flex flex-col gap-1">
-							<Label htmlFor="fontSize">Tamaño de fuente</Label>
+						<div className="col-span-1 flex flex-col gap-1">
+							<Label>Tamaño fuente</Label>
 							<Select onValueChange={(v) => setPreferences({ fontSize: v })} value={preferences.fontSize}>
 								<SelectTrigger className="w-full">
-									<SelectValue />
+									<SelectValue placeholder="Tamaño" />
 								</SelectTrigger>
 								<SelectContent>
-									<SelectItem value="sm">Pequeño</SelectItem>
-									<SelectItem value="md">Mediano</SelectItem>
-									<SelectItem value="lg">Grande</SelectItem>
+									{FONT_SIZE_OPTIONS.map((o) => (
+										<SelectItem key={o} value={o}>
+											{o.toUpperCase()}
+										</SelectItem>
+									))}
 								</SelectContent>
 							</Select>
 						</div>
-
-						{/* Selector de tema */}
-						<div className="flex flex-col gap-1">
-							<Label htmlFor="theme">Tema</Label>
-							<Select onValueChange={(v) => setPreferences({ theme: v })} value={preferences.theme}>
+						<div className="col-span-1 flex flex-col gap-1">
+							<Label>Tema</Label>
+							<Select onValueChange={handleThemeChange} value={preferences.theme}>
 								<SelectTrigger className="w-full">
-									<SelectValue />
+									<SelectValue placeholder="Tema" />
 								</SelectTrigger>
-								<SelectContent>
-									<SelectItem value="system">Sistema</SelectItem>
-									<SelectItem value="light">Claro</SelectItem>
-									<SelectItem value="dark">Oscuro</SelectItem>
+								<SelectContent className="max-h-80">
+									{[...themes, 'system'].map((t) => (
+										<SelectItem key={t} value={t}>
+											{mapThemeLabel(t)}
+										</SelectItem>
+									))}
 								</SelectContent>
 							</Select>
 						</div>
-
-						{/* Switch de animaciones */}
-						<div className="flex items-center gap-3">
-							<Label htmlFor={animationsId}>Animaciones</Label>
-							<Switch
-								checked={preferences.animations}
-								id={animationsId}
-								onCheckedChange={(v) => setPreferences({ animations: v })}
-							/>
+						<div className="col-span-3 grid grid-cols-4 gap-4 pt-2">
+							<div className="flex items-center gap-2 text-xs">
+								<Switch
+									checked={preferences.animations}
+									id={animationsId}
+									onCheckedChange={(v) => setPreferences({ animations: v })}
+								/>
+								<Label className="cursor-pointer" htmlFor={animationsId}>
+									Animaciones
+								</Label>
+							</div>
+							<div className="flex items-center gap-2 text-xs">
+								<Switch
+									checked={preferences.thumbnailsRespectAspectRatio}
+									id={thumbnailsRespectAspectRatioId}
+									onCheckedChange={(v) => setPreferences({ thumbnailsRespectAspectRatio: v })}
+								/>
+								<Label className="cursor-pointer" htmlFor={thumbnailsRespectAspectRatioId}>
+									Aspect Ratio Grilla
+								</Label>
+							</div>
+							<div className="flex items-center gap-2 text-xs">
+								<Switch
+									checked={preferences.thumbnailsAnimations}
+									id={thumbnailsAnimationsId}
+									onCheckedChange={(v) => setPreferences({ thumbnailsAnimations: v })}
+								/>
+								<Label className="cursor-pointer" htmlFor={thumbnailsAnimationsId}>
+									Animaciones Thumbs
+								</Label>
+							</div>
+							<div className="flex items-center gap-2 text-xs">
+								<Switch
+									checked={preferences.thumbnailsUltraPerformance}
+									id={thumbnailsUltraPerformanceId}
+									onCheckedChange={(v) => setPreferences({ thumbnailsUltraPerformance: v })}
+								/>
+								<Label className="cursor-pointer" htmlFor={thumbnailsUltraPerformanceId}>
+									Ultra Performance
+								</Label>
+							</div>
 						</div>
-
-						{/* Thumbnails: Respetar aspect ratio en grilla */}
-						<div className="flex items-center gap-3">
-							<Label htmlFor={thumbnailsRespectAspectRatioId}>Respetar aspect ratio (grilla)</Label>
-							<Switch
-								checked={preferences.thumbnailsRespectAspectRatio}
-								id={thumbnailsRespectAspectRatioId}
-								onCheckedChange={(v) => setPreferences({ thumbnailsRespectAspectRatio: v })}
-							/>
-						</div>
-
-						{/* Thumbnails: Bordes redondeados por modo */}
-						<div className="flex flex-col gap-1">
-							<Label>Borde redondeado thumbnails</Label>
-							<div className="flex items-center gap-2">
-								<span className="w-12 text-muted-foreground text-xs">Grilla</span>
+						<div className="col-span-3 flex flex-col gap-2 pt-2">
+							<Label className="text-xs">Borde thumbnails</Label>
+							<div className="grid grid-cols-6 items-center gap-2 text-xs">
+								<span className="opacity-60">Grid</span>
 								<Input
-									className="w-16"
+									className="w-20"
 									max={32}
 									min={0}
 									onChange={(e) =>
@@ -176,9 +277,9 @@ const InterfaceSection: React.FC = () => {
 									type="number"
 									value={preferences.thumbnailsBorderRadius.grid}
 								/>
-								<span className="w-12 text-muted-foreground text-xs">Card</span>
+								<span className="opacity-60">Card</span>
 								<Input
-									className="w-16"
+									className="w-20"
 									max={32}
 									min={0}
 									onChange={(e) =>
@@ -189,9 +290,9 @@ const InterfaceSection: React.FC = () => {
 									type="number"
 									value={preferences.thumbnailsBorderRadius.card}
 								/>
-								<span className="w-12 text-muted-foreground text-xs">Mosaico</span>
+								<span className="opacity-60">Mosaico</span>
 								<Input
-									className="w-16"
+									className="w-20"
 									max={32}
 									min={0}
 									onChange={(e) =>
@@ -204,36 +305,14 @@ const InterfaceSection: React.FC = () => {
 								/>
 							</div>
 						</div>
-
-						{/* Thumbnails: Animaciones */}
-						<div className="flex items-center gap-3">
-							<Label htmlFor={thumbnailsAnimationsId}>Animaciones de thumbnails</Label>
-							<Switch
-								checked={preferences.thumbnailsAnimations}
-								id={thumbnailsAnimationsId}
-								onCheckedChange={(v) => setPreferences({ thumbnailsAnimations: v })}
-							/>
-						</div>
-
-						{/* Thumbnails: Ultra performance */}
-						<div className="flex items-center gap-3">
-							<Label htmlFor={thumbnailsUltraPerformanceId}>Modo ultra performance</Label>
-							<Switch
-								checked={preferences.thumbnailsUltraPerformance}
-								id={thumbnailsUltraPerformanceId}
-								onCheckedChange={(v) => setPreferences({ thumbnailsUltraPerformance: v })}
-							/>
-						</div>
 					</div>
 				</CardContent>
 			</Card>
 
-			{/* Configuración específica del FileBrowser */}
 			<Card className="rounded-sm border-none bg-muted/30">
 				<CardHeader className="p-3 pb-2">
 					<CardTitle className="flex items-center gap-2 font-medium text-base text-muted-foreground">
-						<Eye className="h-4 w-4" />
-						<span>Visor de Archivos</span>
+						<span>Opciones del visor de archivos</span>
 						<Badge className="text-xs" variant="secondary">
 							FileBrowser
 						</Badge>
@@ -241,577 +320,92 @@ const InterfaceSection: React.FC = () => {
 				</CardHeader>
 				<Separator className="my-0" />
 				<CardContent className="p-3">
-					<Tabs onValueChange={setActiveFileBrowserTab} value={activeFileBrowserTab}>
-						<TabsList className="grid w-full grid-cols-6">
-							<TabsTrigger className="text-xs" value="general">
-								<Settings className="mr-1 h-3 w-3" />
-								General
-							</TabsTrigger>
-							<TabsTrigger className="text-xs" value="grid">
-								<Grid className="mr-1 h-3 w-3" />
-								Grid
-							</TabsTrigger>
-							<TabsTrigger className="text-xs" value="cards">
-								<LayoutGrid className="mr-1 h-3 w-3" />
-								Cards
-							</TabsTrigger>
-							<TabsTrigger className="text-xs" value="masonry">
-								<Columns className="mr-1 h-3 w-3" />
-								Mosaico
-							</TabsTrigger>
-							<TabsTrigger className="text-xs" value="list">
-								<List className="mr-1 h-3 w-3" />
-								Lista
-							</TabsTrigger>
-							<TabsTrigger className="text-xs" value="performance">
-								<Zap className="mr-1 h-3 w-3" />
-								Rendimiento
-							</TabsTrigger>
-						</TabsList>
-
-						{/* Tab General */}
-						<TabsContent className="mt-4 space-y-4" value="general">
-							<div className="flex flex-col gap-3">
-								<div className="flex flex-col gap-1">
-									<Label>Vista por defecto</Label>
-									<Select
-										onValueChange={(v) => updateFileBrowserConfig('general', 'defaultViewMode', v)}
-										value={preferences.fileBrowser.general.defaultViewMode}
-									>
-										<SelectTrigger>
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="grid">Grid</SelectItem>
-											<SelectItem value="cards">Cards</SelectItem>
-											<SelectItem value="masonry">Mosaico</SelectItem>
-											<SelectItem value="list">Lista</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-
-								<div className="flex flex-col gap-1">
-									<Label>Elementos por lote</Label>
-									<Input
-										max={200}
-										min={10}
-										onChange={(e) => updateFileBrowserConfig('general', 'itemsPerBatch', Number(e.target.value))}
-										type="number"
-										value={preferences.fileBrowser.general.itemsPerBatch}
-									/>
-								</div>
-
-								<div className="space-y-2">
-									<div className="flex items-center gap-3">
-										<Label>Carga progresiva</Label>
-										<Switch
-											checked={preferences.fileBrowser.general.enableProgressiveLoading}
-											onCheckedChange={(v) => updateFileBrowserConfig('general', 'enableProgressiveLoading', v)}
-										/>
-									</div>
-
-									<div className="flex items-center gap-3">
-										<Label>Transiciones entre vistas</Label>
-										<Switch
-											checked={preferences.fileBrowser.general.enableViewTransitions}
-											onCheckedChange={(v) => updateFileBrowserConfig('general', 'enableViewTransitions', v)}
-										/>
-									</div>
-
-									<div className="flex items-center gap-3">
-										<Label>Selección múltiple</Label>
-										<Switch
-											checked={preferences.fileBrowser.general.enableMultiSelect}
-											onCheckedChange={(v) => updateFileBrowserConfig('general', 'enableMultiSelect', v)}
-										/>
-									</div>
-
-									<div className="flex items-center gap-3">
-										<Label>Arrastrar y soltar</Label>
-										<Switch
-											checked={preferences.fileBrowser.general.enableDragAndDrop}
-											onCheckedChange={(v) => updateFileBrowserConfig('general', 'enableDragAndDrop', v)}
-										/>
-									</div>
-
-									<div className="flex items-center gap-3">
-										<Label>Mostrar contador</Label>
-										<Switch
-											checked={preferences.fileBrowser.general.showItemCount}
-											onCheckedChange={(v) => updateFileBrowserConfig('general', 'showItemCount', v)}
-										/>
-									</div>
-
-									<div className="flex items-center gap-3">
-										<Label>Mostrar tamaño total</Label>
-										<Switch
-											checked={preferences.fileBrowser.general.showTotalSize}
-											onCheckedChange={(v) => updateFileBrowserConfig('general', 'showTotalSize', v)}
-										/>
-									</div>
-								</div>
-							</div>
-						</TabsContent>
-
-						{/* Tab Grid */}
-						<TabsContent className="mt-4 space-y-4" value="grid">
-							<div className="space-y-3">
-								<div className="grid grid-cols-2 gap-3">
-									<div className="flex flex-col gap-1">
-										<Label>Min. columnas</Label>
-										<Input
-											max={10}
-											min={1}
-											onChange={(e) => updateViewConfig('grid', 'minColumns', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.grid.minColumns}
-										/>
-									</div>
-									<div className="flex flex-col gap-1">
-										<Label>Max. columnas</Label>
-										<Input
-											max={12}
-											min={2}
-											onChange={(e) => updateViewConfig('grid', 'maxColumns', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.grid.maxColumns}
-										/>
-									</div>
-								</div>
-
-								<div className="grid grid-cols-2 gap-3">
-									<div className="flex flex-col gap-1">
-										<Label>Tamaño elemento</Label>
-										<Input
-											max={400}
-											min={80}
-											onChange={(e) => updateViewConfig('grid', 'itemSize', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.grid.itemSize}
-										/>
-									</div>
-									<div className="flex flex-col gap-1">
-										<Label>Espaciado</Label>
-										<Input
-											max={32}
-											min={0}
-											onChange={(e) => updateViewConfig('grid', 'gap', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.grid.gap}
-										/>
-									</div>
-								</div>
-
-								<div className="flex flex-col gap-1">
-									<Label>Relación de aspecto</Label>
-									<Input
-										max={3}
-										min={0.5}
-										onChange={(e) => updateViewConfig('grid', 'aspectRatio', Number(e.target.value))}
-										step={0.1}
-										type="number"
-										value={preferences.fileBrowser.views.grid.aspectRatio}
-									/>
-								</div>
-
-								<div className="space-y-2">
-									<div className="flex items-center gap-3">
-										<Label>Info al pasar mouse</Label>
-										<Switch
-											checked={preferences.fileBrowser.views.grid.showInfoOnHover}
-											onCheckedChange={(v) => updateViewConfig('grid', 'showInfoOnHover', v)}
-										/>
-									</div>
-
-									<div className="flex items-center gap-3">
-										<Label>Animaciones hover</Label>
-										<Switch
-											checked={preferences.fileBrowser.views.grid.enableHoverAnimations}
-											onCheckedChange={(v) => updateViewConfig('grid', 'enableHoverAnimations', v)}
-										/>
-									</div>
-								</div>
-							</div>
-						</TabsContent>
-
-						{/* Tab Cards */}
-						<TabsContent className="mt-4 space-y-4" value="cards">
-							<div className="space-y-3">
-								<div className="grid grid-cols-2 gap-3">
-									<div className="flex flex-col gap-1">
-										<Label>Min. columnas</Label>
-										<Input
-											max={6}
-											min={1}
-											onChange={(e) => updateViewConfig('cards', 'minColumns', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.cards.minColumns}
-										/>
-									</div>
-									<div className="flex flex-col gap-1">
-										<Label>Max. columnas</Label>
-										<Input
-											max={8}
-											min={2}
-											onChange={(e) => updateViewConfig('cards', 'maxColumns', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.cards.maxColumns}
-										/>
-									</div>
-								</div>
-
-								<div className="grid grid-cols-2 gap-3">
-									<div className="flex flex-col gap-1">
-										<Label>Ancho tarjeta</Label>
-										<Input
-											max={600}
-											min={200}
-											onChange={(e) => updateViewConfig('cards', 'cardWidth', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.cards.cardWidth}
-										/>
-									</div>
-									<div className="flex flex-col gap-1">
-										<Label>Alto tarjeta</Label>
-										<Input
-											max={800}
-											min={250}
-											onChange={(e) => updateViewConfig('cards', 'cardHeight', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.cards.cardHeight}
-										/>
-									</div>
-								</div>
-
-								<div className="grid grid-cols-2 gap-3">
-									<div className="flex flex-col gap-1">
-										<Label>Espaciado</Label>
-										<Input
-											max={48}
-											min={8}
-											onChange={(e) => updateViewConfig('cards', 'gap', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.cards.gap}
-										/>
-									</div>
-									<div className="flex flex-col gap-1">
-										<Label>Tamaño preview</Label>
-										<Select
-											onValueChange={(v) => updateViewConfig('cards', 'previewSize', v)}
-											value={preferences.fileBrowser.views.cards.previewSize}
-										>
-											<SelectTrigger>
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="small">Pequeño</SelectItem>
-												<SelectItem value="medium">Mediano</SelectItem>
-												<SelectItem value="large">Grande</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-								</div>
-
-								<div className="space-y-2">
-									<div className="flex items-center gap-3">
-										<Label>Mostrar metadatos</Label>
-										<Switch
-											checked={preferences.fileBrowser.views.cards.showMetadata}
-											onCheckedChange={(v) => updateViewConfig('cards', 'showMetadata', v)}
-										/>
-									</div>
-
-									<div className="flex items-center gap-3">
-										<Label>Info técnica</Label>
-										<Switch
-											checked={preferences.fileBrowser.views.cards.showTechnicalInfo}
-											onCheckedChange={(v) => updateViewConfig('cards', 'showTechnicalInfo', v)}
-										/>
-									</div>
-
-									<div className="flex items-center gap-3">
-										<Label>Mostrar badges</Label>
-										<Switch
-											checked={preferences.fileBrowser.views.cards.showBadges}
-											onCheckedChange={(v) => updateViewConfig('cards', 'showBadges', v)}
-										/>
-									</div>
-								</div>
-							</div>
-						</TabsContent>
-
-						{/* Tab Masonry */}
-						<TabsContent className="mt-4 space-y-4" value="masonry">
-							<div className="space-y-3">
-								<div className="grid grid-cols-2 gap-3">
-									<div className="flex flex-col gap-1">
-										<Label>Min. columnas</Label>
-										<Input
-											max={8}
-											min={2}
-											onChange={(e) => updateViewConfig('masonry', 'minColumns', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.masonry.minColumns}
-										/>
-									</div>
-									<div className="flex flex-col gap-1">
-										<Label>Max. columnas</Label>
-										<Input
-											max={12}
-											min={3}
-											onChange={(e) => updateViewConfig('masonry', 'maxColumns', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.masonry.maxColumns}
-										/>
-									</div>
-								</div>
-
-								<div className="grid grid-cols-2 gap-3">
-									<div className="flex flex-col gap-1">
-										<Label>Ancho columna</Label>
-										<Input
-											max={400}
-											min={120}
-											onChange={(e) => updateViewConfig('masonry', 'columnWidth', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.masonry.columnWidth}
-										/>
-									</div>
-									<div className="flex flex-col gap-1">
-										<Label>Gap columnas</Label>
-										<Input
-											max={24}
-											min={2}
-											onChange={(e) => updateViewConfig('masonry', 'columnGap', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.masonry.columnGap}
-										/>
-									</div>
-								</div>
-
-								<div className="grid grid-cols-2 gap-3">
-									<div className="flex flex-col gap-1">
-										<Label>Gap filas</Label>
-										<Input
-											max={24}
-											min={2}
-											onChange={(e) => updateViewConfig('masonry', 'rowGap', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.masonry.rowGap}
-										/>
-									</div>
-									<div className="flex flex-col gap-1">
-										<Label>Alt. máxima</Label>
-										<Input
-											max={800}
-											min={200}
-											onChange={(e) => updateViewConfig('masonry', 'maxItemHeight', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.masonry.maxItemHeight}
-										/>
-									</div>
-								</div>
-
-								<div className="flex flex-col gap-1">
-									<Label>Altura mínima</Label>
-									<Input
-										max={300}
-										min={80}
-										onChange={(e) => updateViewConfig('masonry', 'minItemHeight', Number(e.target.value))}
-										type="number"
-										value={preferences.fileBrowser.views.masonry.minItemHeight}
-									/>
-								</div>
-
-								<div className="space-y-2">
-									<div className="flex items-center gap-3">
-										<Label>Respetar aspect ratio</Label>
-										<Switch
-											checked={preferences.fileBrowser.views.masonry.respectAspectRatio}
-											onCheckedChange={(v) => updateViewConfig('masonry', 'respectAspectRatio', v)}
-										/>
-									</div>
-
-									<div className="flex items-center gap-3">
-										<Label>Balanceo automático</Label>
-										<Switch
-											checked={preferences.fileBrowser.views.masonry.autoBalance}
-											onCheckedChange={(v) => updateViewConfig('masonry', 'autoBalance', v)}
-										/>
-									</div>
-								</div>
-							</div>
-						</TabsContent>
-
-						{/* Tab List */}
-						<TabsContent className="mt-4 space-y-4" value="list">
-							<div className="space-y-3">
-								<div className="grid grid-cols-2 gap-3">
-									<div className="flex flex-col gap-1">
-										<Label>Altura fila</Label>
-										<Input
-											max={120}
-											min={40}
-											onChange={(e) => updateViewConfig('list', 'rowHeight', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.list.rowHeight}
-										/>
-									</div>
-									<div className="flex flex-col gap-1">
-										<Label>Gap filas</Label>
-										<Input
-											max={16}
-											min={0}
-											onChange={(e) => updateViewConfig('list', 'rowGap', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.views.list.rowGap}
-										/>
-									</div>
-								</div>
-
-								<div className="grid grid-cols-2 gap-3">
-									<div className="flex flex-col gap-1">
-										<Label>Tamaño thumbnails</Label>
-										<Select
-											onValueChange={(v) => updateViewConfig('list', 'thumbnailSize', v)}
-											value={preferences.fileBrowser.views.list.thumbnailSize}
-										>
-											<SelectTrigger>
-												<SelectValue />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="small">Pequeño</SelectItem>
-												<SelectItem value="medium">Mediano</SelectItem>
-												<SelectItem value="large">Grande</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-									<div className="mt-6 flex items-center gap-3">
-										<Label>Mostrar thumbnails</Label>
-										<Switch
-											checked={preferences.fileBrowser.views.list.showThumbnails}
-											onCheckedChange={(v) => updateViewConfig('list', 'showThumbnails', v)}
-										/>
-									</div>
-								</div>
-
-								<div className="space-y-2">
-									<Label className="font-medium text-sm">Columnas visibles</Label>
-									<div className="grid grid-cols-2 gap-2">
-										{Object.entries(preferences.fileBrowser.views.list.visibleColumns).map(([column, visible]) => (
-											<div className="flex items-center gap-2" key={column}>
-												<Switch
-													checked={visible}
-													id={`column-${column}`}
-													onCheckedChange={(v) => updateListColumn(column, v)}
-												/>
-												<Label className="text-xs capitalize" htmlFor={`column-${column}`}>
-													{column === 'dateModified'
-														? 'Fecha Mod.'
-														: column === 'dateCreated'
-															? 'Fecha Creación'
-															: column === 'name'
-																? 'Nombre'
-																: column === 'size'
-																	? 'Tamaño'
-																	: column === 'type'
-																		? 'Tipo'
-																		: column === 'dimensions'
-																			? 'Dimensiones'
-																			: column === 'tags'
-																				? 'Etiquetas'
-																				: column}
-												</Label>
-											</div>
-										))}
-									</div>
-								</div>
-
-								<div className="space-y-2">
-									<div className="flex items-center gap-3">
-										<Label>Líneas zebra</Label>
-										<Switch
-											checked={preferences.fileBrowser.views.list.showZebraStripes}
-											onCheckedChange={(v) => updateViewConfig('list', 'showZebraStripes', v)}
-										/>
-									</div>
-
-									<div className="flex items-center gap-3">
-										<Label>Modo compacto</Label>
-										<Switch
-											checked={preferences.fileBrowser.views.list.compactMode}
-											onCheckedChange={(v) => updateViewConfig('list', 'compactMode', v)}
-										/>
-									</div>
-								</div>
-							</div>
-						</TabsContent>
-
-						{/* Tab Performance */}
-						<TabsContent className="mt-4 space-y-4" value="performance">
-							<div className="space-y-3">
-								<div className="grid grid-cols-2 gap-3">
-									<div className="flex flex-col gap-1">
-										<Label>Elementos pre-carga</Label>
-										<Input
-											max={100}
-											min={5}
-											onChange={(e) => updateFileBrowserConfig('performance', 'overscanCount', Number(e.target.value))}
-											type="number"
-											value={preferences.fileBrowser.performance.overscanCount}
-										/>
-									</div>
-									<div className="flex flex-col gap-1">
-										<Label>Límite cache</Label>
-										<Input
-											max={1000}
-											min={50}
-											onChange={(e) =>
-												updateFileBrowserConfig('performance', 'thumbnailCacheLimit', Number(e.target.value))
-											}
-											type="number"
-											value={preferences.fileBrowser.performance.thumbnailCacheLimit}
-										/>
-									</div>
-								</div>
-
-								<div className="flex flex-col gap-1">
-									<Label>Calidad thumbnails</Label>
-									<Select
-										onValueChange={(v) => updateFileBrowserConfig('performance', 'thumbnailQuality', v)}
-										value={preferences.fileBrowser.performance.thumbnailQuality}
-									>
-										<SelectTrigger>
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="low">Baja</SelectItem>
-											<SelectItem value="medium">Media</SelectItem>
-											<SelectItem value="high">Alta</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
-
-								<div className="space-y-2">
-									<div className="flex items-center gap-3">
-										<Label>Virtualización</Label>
-										<Switch
-											checked={preferences.fileBrowser.performance.enableVirtualization}
-											onCheckedChange={(v) => updateFileBrowserConfig('performance', 'enableVirtualization', v)}
-										/>
-									</div>
-
-									<div className="flex items-center gap-3">
-										<Label>Cache thumbnails</Label>
-										<Switch
-											checked={preferences.fileBrowser.performance.enableThumbnailCache}
-											onCheckedChange={(v) => updateFileBrowserConfig('performance', 'enableThumbnailCache', v)}
-										/>
-									</div>
-								</div>
-							</div>
-						</TabsContent>
-					</Tabs>
+					{/* Opciones apiladas, no tabs */}
+					<div className="flex flex-col gap-4">
+						{/* General */}
+						<div className="flex flex-col gap-1">
+							<Label>Vista por defecto</Label>
+							<Select
+								onValueChange={(v) =>
+									setPreferences({
+										fileBrowser: {
+											...preferences.fileBrowser,
+											general: { ...preferences.fileBrowser.general, defaultViewMode: v },
+										},
+									})
+								}
+								value={preferences.fileBrowser.general.defaultViewMode}
+							>
+								<SelectTrigger className="w-full">
+									<SelectValue placeholder="Vista" />
+								</SelectTrigger>
+								<SelectContent>
+									{['grid', 'cards', 'masonry', 'list'].map((v) => (
+										<SelectItem key={v} value={v}>
+											{v.charAt(0).toUpperCase() + v.slice(1)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+						<div className="flex flex-col gap-1">
+							<Label>Elementos por lote</Label>
+							<Input
+								max={200}
+								min={10}
+								onChange={(e) =>
+									setPreferences({
+										fileBrowser: {
+											...preferences.fileBrowser,
+											general: { ...preferences.fileBrowser.general, itemsPerBatch: Number(e.target.value) },
+										},
+									})
+								}
+								type="number"
+								value={preferences.fileBrowser.general.itemsPerBatch}
+							/>
+						</div>
+						{/* Performance */}
+						<div className="flex flex-col gap-1">
+							<Label>Virtualización</Label>
+							<Switch
+								checked={preferences.fileBrowser.performance.enableVirtualization}
+								onCheckedChange={(v) =>
+									setPreferences({
+										fileBrowser: {
+											...preferences.fileBrowser,
+											performance: { ...preferences.fileBrowser.performance, enableVirtualization: v },
+										},
+									})
+								}
+							/>
+						</div>
+						<div className="flex flex-col gap-1">
+							<Label>Calidad de thumbnails</Label>
+							<Select
+								onValueChange={(v) =>
+									setPreferences({
+										fileBrowser: {
+											...preferences.fileBrowser,
+											performance: { ...preferences.fileBrowser.performance, thumbnailQuality: v },
+										},
+									})
+								}
+								value={preferences.fileBrowser.performance.thumbnailQuality}
+							>
+								<SelectTrigger className="w-full">
+									<SelectValue placeholder="Calidad" />
+								</SelectTrigger>
+								<SelectContent>
+									{['low', 'medium', 'high'].map((q) => (
+										<SelectItem key={q} value={q}>
+											{q.charAt(0).toUpperCase() + q.slice(1)}
+										</SelectItem>
+									))}
+								</SelectContent>
+							</Select>
+						</div>
+					</div>
 				</CardContent>
 			</Card>
 		</div>

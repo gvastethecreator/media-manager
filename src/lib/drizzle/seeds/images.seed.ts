@@ -73,6 +73,41 @@ export async function seedImages(db: LibSQLDatabase<Record<string, never>>) {
 			},
 		];
 
+		// 📦 Generar imágenes adicionales para la carpeta 'cursed-dump' (asegurar scroll en tests)
+		for (let i = 1; i <= 30; i++) {
+			// Reutilizamos las mismas claves que los ejemplos para mantener consistencia con el esquema actual
+			sampleImages.push({
+				id: `cursed-img-${i}`,
+				name: `cursed-${i}.jpg`,
+				path: `/examples/images/cursed/${i}.jpg`,
+				hash: `sha256:cursed${i.toString().padStart(2, '0')}abcdef1234567890`,
+				size: (800 + i) * 1000,
+				mimeType: 'image/jpeg',
+				extension: 'jpg',
+				width: 1024,
+				height: 768,
+				aspectRatio: 1.33,
+				colorSpace: 'sRGB',
+				hasAlpha: false,
+				bitDepth: 8,
+				compression: 'JPEG',
+				quality: 85,
+				checksum: `cursed-${i}`,
+				blurHash: 'LKO2?U%2Tw=w]~RBVZRi};RPxuwH',
+				dominantColor: '#888888',
+				palette: JSON.stringify(['#888888', '#222222', '#bbbbbb']),
+				exifData: JSON.stringify({ camera: 'TestCam', iso: 100 + i }),
+				location: null,
+				tags: JSON.stringify(['cursed', 'dump']),
+				folderId: 'cursed-dump',
+				isProcessed: true,
+				processingStatus: 'completed',
+				isFavorite: false,
+				isPublic: false,
+				rating: (i % 5) + 1,
+			});
+		}
+
 		await db.insert(images).values(sampleImages);
 		seedLogger.success(`✅ ${sampleImages.length} imágenes de ejemplo creadas`);
 	} catch (error) {

@@ -38,19 +38,22 @@ export function adaptCharacterWithStats(character: CharacterWithStats): Characte
 		recentImages: [],
 		recentVideos: [],
 		totalSize: character.statistics?.totalAssociations ?? 0,
-		stats:
-			typeof character.stats === 'string'
-				? safeJsonParse<CharacterStats>(character.stats, {} as CharacterStats)
-				: character.statistics
-					? ({
-							strength: undefined,
-							dexterity: undefined,
-							constitution: undefined,
-							intelligence: undefined,
-							wisdom: undefined,
-							charisma: undefined,
-						} as CharacterStats)
-					: ({} as CharacterStats),
+		stats: (() => {
+			if (typeof character.stats === 'string') {
+				return safeJsonParse<CharacterStats>(character.stats, {} as CharacterStats);
+			}
+			if (character.statistics) {
+				return {
+					strength: undefined,
+					dexterity: undefined,
+					constitution: undefined,
+					intelligence: undefined,
+					wisdom: undefined,
+					charisma: undefined,
+				} as CharacterStats;
+			}
+			return {} as CharacterStats;
+		})(),
 		parsedRelationships: safeJsonParse<Record<string, any>>(character.relationships, {}),
 		parsedGoals: safeJsonParse<Record<string, any>>(character.goals, {}),
 		parsedFears: safeJsonParse<Record<string, any>>(character.fears, {}),

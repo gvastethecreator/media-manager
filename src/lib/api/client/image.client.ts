@@ -20,11 +20,17 @@ export async function getImagesFromApi(options: GetImagesOptions = {}): Promise<
 	if (options.folderId) {
 		params.append('folderId', options.folderId);
 	}
-	// Por defecto solicitar 100 imágenes (máximo permitido por el servidor)
+	// Compatibilidad: limit/offset o page/pageSize
+	if (options.pageSize) {
+		params.append('pageSize', String(options.pageSize));
+	}
+	if (options.page) {
+		params.append('page', String(options.page));
+	}
 	if (options.limit) {
 		params.append('limit', String(options.limit));
-	} else {
-		params.append('limit', '100'); // Límite máximo permitido por el servidor
+	} else if (!options.pageSize) {
+		params.append('limit', '100');
 	}
 	if (options.offset) {
 		params.append('offset', String(options.offset));

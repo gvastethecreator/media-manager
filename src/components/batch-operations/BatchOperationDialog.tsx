@@ -87,6 +87,8 @@ export function BatchOperationDialog({
 				return <Move className="h-5 w-5 text-orange-500" />;
 			case 'delete':
 				return <Trash2 className="h-5 w-5 text-red-500" />;
+			default:
+				return null;
 		}
 	};
 
@@ -101,6 +103,8 @@ export function BatchOperationDialog({
 				return `Mover ${itemCount} ${itemText}`;
 			case 'delete':
 				return `Eliminar ${itemCount} ${itemText}`;
+			default:
+				return '';
 		}
 	};
 
@@ -112,6 +116,8 @@ export function BatchOperationDialog({
 				return 'Los archivos se moverán al destino especificado eliminándolos de su ubicación actual.';
 			case 'delete':
 				return 'Los archivos se eliminarán permanentemente. Esta acción no se puede deshacer.';
+			default:
+				return '';
 		}
 	};
 
@@ -130,8 +136,8 @@ export function BatchOperationDialog({
 		return items.length > 0 && targetPath.trim().length > 0;
 	};
 
-	const getPriorityDescription = (priority: string) => {
-		switch (priority) {
+	const getPriorityDescription = (p: string) => {
+		switch (p) {
 			case 'urgent':
 				return 'Se ejecutará inmediatamente';
 			case 'high':
@@ -185,8 +191,8 @@ export function BatchOperationDialog({
 							<div className="mt-3">
 								<div className="mb-1 text-muted-foreground text-xs">Elementos:</div>
 								<div className="max-h-20 space-y-1 overflow-y-auto">
-									{items.slice(0, 5).map((item, index) => (
-										<div className="truncate font-mono text-xs" key={index}>
+									{items.slice(0, 5).map((item) => (
+										<div className="truncate font-mono text-xs" key={item.id}>
 											{item.name}
 										</div>
 									))}
