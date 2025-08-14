@@ -1,11 +1,12 @@
-import { Folder } from 'lucide-react';
-import { motion } from 'motion/react';
-import type { ReactNode } from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { computeIsReindexing } from '@/components/settings/folders/utils/is-reindexing';
 import { Card, CardContent } from '@/components/ui/card';
 import { useFolderStats } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
 import type { FolderStatsResponse } from '@/types/folders';
+import { Folder } from 'lucide-react';
+import { motion } from 'motion/react';
+import type { ReactNode } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { ExpandedSubfolders } from './expanded-subfolders';
 import { NormalModeControls } from './folder-card-action-controls';
 import { EditModeControls } from './folder-card-edit-controls';
@@ -151,18 +152,17 @@ export function FolderCard({
 
 	// Estado del procesamiento
 	const isReindexing = useMemo(() => {
-		// Si hay estado por carpeta indicando progreso/processing, úsalo
-		const perFolderActive = Boolean(processStatus?.isProcessing) || (processStatus?.progress ?? 0) > 0;
-		if (perFolderActive && processStatus?.folderId === folder.id) {
-			return true;
+		if (!folder.id) {
+			return false;
 		}
-		// Durante reindex global, marcar como activo la carpeta actual
-		if (isGloballyProcessing) {
-			return globalCurrentFolderId === folder.id;
-		}
-		// Fallback al flag isProcessing
-		return Boolean(isProcessing && processStatus?.folderId === folder.id);
-	}, [isGloballyProcessing, globalCurrentFolderId, isProcessing, processStatus, folder.id]);
+		return computeIsReindexing({
+			folderId: folder.id,
+			processStatus,
+			isGloballyProcessing,
+			globalCurrentFolderId,
+			isProcessingFlag: isProcessing,
+		});
+	}, [folder.id, processStatus, isGloballyProcessing, globalCurrentFolderId, isProcessing]);
 	const isComplete = useIsCompleteStatus(processStatus, folder.id, isProcessing);
 	const indexStatus = useMemo(() => getFolderIndexStatus(folder), [folder, getFolderIndexStatus]);
 

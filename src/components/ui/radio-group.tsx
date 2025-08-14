@@ -1,34 +1,99 @@
 'use client';
 
-import {
-	Indicator as RadioGroupIndicator,
-	Item as RadioGroupItemPrimitive,
-	Root as RadioGroupRoot,
-} from '@radix-ui/react-radio-group';
-import { CircleIcon } from 'lucide-react';
-import React from 'react';
-
+import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { cva, VariantProps } from 'class-variance-authority';
+import { Circle } from 'lucide-react';
+import { RadioGroup as RadioGroupPrimitive } from 'radix-ui';
 
-function RadioGroup({ className, ...props }: React.ComponentProps<typeof RadioGroupRoot>) {
-	return <RadioGroupRoot className={cn('grid gap-3', className)} data-slot="radio-group" {...props} />;
+type RadioVariant = 'primary' | 'mono';
+type RadioSize = 'sm' | 'md' | 'lg';
+
+// Define a cva function for the RadioGroup root.
+const radioGroupVariants = cva('grid gap-2.5', {
+  variants: {
+    variant: {
+      primary: '',
+      mono: '',
+    },
+    size: {
+      sm: '',
+      md: '',
+      lg: '',
+    },
+  },
+  defaultVariants: {
+    variant: 'primary',
+    size: 'md',
+  },
+});
+
+// Create a context to pass the variant and size down to items.
+const RadioGroupContext = React.createContext<{
+  variant: RadioVariant;
+  size: RadioSize;
+}>({ variant: 'primary', size: 'md' });
+
+function RadioGroup({
+  className,
+  variant,
+  size,
+  ...props
+}: React.ComponentProps<typeof RadioGroupPrimitive.Root> & VariantProps<typeof radioGroupVariants>) {
+  return (
+    <RadioGroupContext.Provider value={{ variant: variant ?? 'primary', size: size ?? 'md' }}>
+      <RadioGroupPrimitive.Root
+        data-slot="radio-group"
+        className={cn(radioGroupVariants({ variant, size }), className)}
+        {...props}
+      />
+    </RadioGroupContext.Provider>
+  );
 }
 
-function RadioGroupItem({ className, ...props }: React.ComponentProps<typeof RadioGroupItemPrimitive>) {
-	return (
-		<RadioGroupItemPrimitive
-			className={cn(
-				'aspect-square size-4 shrink-0 rounded-full border border-input text-primary shadow-xs outline-none transition-[color,box-shadow] focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 disabled:cursor-not-allowed disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:bg-input/30 dark:aria-invalid:ring-destructive/40',
-				className
-			)}
-			data-slot="radio-group-item"
-			{...props}
-		>
-			<RadioGroupIndicator className="relative flex items-center justify-center" data-slot="radio-group-indicator">
-				<CircleIcon className="-translate-x-1/2 -translate-y-1/2 absolute top-1/2 left-1/2 size-2 fill-primary" />
-			</RadioGroupIndicator>
-		</RadioGroupItemPrimitive>
-	);
+// Define variants for the RadioGroupItem using cva.
+const radioItemVariants = cva(
+  `
+    peer aspect-square rounded-full border outline-hidden ring-offset-background focus:outline-none focus-visible:ring-2 
+    focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50
+    aria-invalid:border-destructive/60 aria-invalid:ring-destructive/10 dark:aria-invalid:border-destructive dark:aria-invalid:ring-destructive/20
+    [[data-invalid=true]_&]:border-destructive/60 [[data-invalid=true]_&]:ring-destructive/10  dark:[[data-invalid=true]_&]:border-destructive dark:[[data-invalid=true]_&]:ring-destructive/20
+    border-input text-primary data-[state=checked]:bg-primary data-[state=checked]:border-primary data-[state=checked]:text-primary-foreground  
+  `,
+  {
+    variants: {
+      size: {
+        sm: 'size-4.5 [&_svg]:size-2',
+        md: 'size-5 [&_svg]:size-2.5',
+        lg: 'size-5.5 [&_svg]:size-3',
+      },
+    },
+    defaultVariants: {
+      size: 'md',
+    },
+  },
+);
+
+function RadioGroupItem({
+  className,
+  size,
+  ...props
+}: React.ComponentProps<typeof RadioGroupPrimitive.Item> & VariantProps<typeof radioItemVariants>) {
+  // Use the variant and size from context if not provided at the item level.
+  const { size: contextSize } = React.useContext(RadioGroupContext);
+  const effectiveSize = size ?? contextSize;
+
+  return (
+    <RadioGroupPrimitive.Item
+      data-slot="radio-group-item"
+      className={cn(radioItemVariants({ size: effectiveSize }), className)}
+      {...props}
+    >
+      <RadioGroupPrimitive.Indicator data-slot="radio-group-indicator" className="flex items-center justify-center">
+        <Circle className="fill-current text-current" />
+      </RadioGroupPrimitive.Indicator>
+    </RadioGroupPrimitive.Item>
+  );
 }
 
 export { RadioGroup, RadioGroupItem };

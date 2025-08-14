@@ -5,11 +5,15 @@
  * Genera resúmenes simples y útiles con el formato solicitado
  */
 
-import { readFileSync } from 'node:fs';
 import chalk from 'chalk';
+import { readFileSync } from 'node:fs';
 
 // Expresiones regulares globales para mejor rendimiento
-const ANSI_REGEX = /[\u001B\u009B][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+// Regex ANSI simplificada para eliminar secuencias de escape
+// Regex mínima para secuencias ESC[...m
+// Eliminamos secuencias ANSI básicas construyendo regex por partes para evitar control char literal
+const ANSI_ESC = '\\u001B[';
+const ANSI_REGEX = new RegExp(`${ANSI_ESC}[0-9;]*[A-Za-z]`, 'g');
 const FORMAT_REGEX = /\[(?:7|0|9\d)m/g;
 const TSC_ERROR_REGEX = /([^:\s]+\.tsx?):\s*(\d+):\s*(\d+)\s*-\s*error\s*(?:TS(\d+))?\s*[:\s]*(.+)/i;
 const BIOME_ERROR_REGEX = /([^:\s]+\.[jt]sx?):(\d+):(\d+)\s+(\w+\/[\w/]+)/;
@@ -20,13 +24,14 @@ const CONFIG_ERROR_REGEX = /Failed to resolve.*?from\s+(\w+)/;
  * Estructura para un error parseado
  */
 class ParsedError {
-	constructor(file, line, column, code, message, tool) {
+	constructor(file, line, column, code, message, tool, severity = 'error') {
 		this.file = file;
 		this.line = line;
 		this.column = column;
 		this.code = code;
 		this.message = message;
 		this.tool = tool;
+		this.severity = severity; // 'error' | 'warning'
 	}
 
 	toString() {
@@ -38,10 +43,11 @@ class ParsedError {
  * Función auxiliar para limpiar códigos ANSI y otros caracteres de escape
  */
 function cleanAnsiCodes(text) {
-	return text
-		.replace(ANSI_REGEX, '') // Códigos ANSI completos
-		.replace(FORMAT_REGEX, '') // Códigos específicos de formato
-		.trim();
+	try {
+		return text.replace(ANSI_REGEX, '').replace(FORMAT_REGEX, '').trim();
+	} catch {
+		return text.trim();
+	}
 }
 
 /**
@@ -62,6 +68,7 @@ export function parseTscErrors(content) {
 			const [, file, lineNum, column, errorCode, message] = tscMatch;
 
 			if (file && lineNum && message) {
+				const sev = 'error';
 				errors.push(
 					new ParsedError(
 						file.trim(),
@@ -69,7 +76,8 @@ export function parseTscErrors(content) {
 						column || '0',
 						errorCode ? `TS${errorCode}` : 'TSError',
 						cleanAnsiCodes(message).trim(),
-						'tsc'
+						'tsc',
+						sev
 					)
 				);
 			}
@@ -82,41 +90,37 @@ export function parseTscErrors(content) {
 /**
  * Parser para errores de Biome
  */
+function deriveBiomeMessage(rule, lines, index) {
+	let message = rule;
+	const nextLine = lines[index + 1];
+	if (nextLine && !nextLine.match(BIOME_NEXT_LINE_REGEX)) {
+		message = nextLine.trim() || rule;
+	}
+	return cleanAnsiCodes(message);
+}
+
+function severityFromRule(rule) {
+	return rule.includes('/no-') || rule.includes('/no') ? 'error' : 'warning';
+}
+
 export function parseBiomeErrors(content) {
 	const errors = [];
 	const lines = content.split('\n');
-
 	for (let i = 0; i < lines.length; i++) {
 		const line = lines[i];
-
-		// Formato típico de Biome: src/file.ts:123:45 lint/suspicious/noDoubleEquals
 		const biomeMatch = line.match(BIOME_ERROR_REGEX);
-
 		if (biomeMatch) {
 			const [, file, lineNum, column, rule] = biomeMatch;
-
-			// Buscar la descripción del error en las líneas siguientes
-			let message = rule;
-			const nextLine = lines[i + 1];
-			if (nextLine && !nextLine.match(BIOME_NEXT_LINE_REGEX)) {
-				message = nextLine.trim() || rule;
-			}
-
-			// Limpiar mensajes de códigos ANSI
-			const cleanMessage = cleanAnsiCodes(message);
-
-			errors.push(new ParsedError(file, lineNum, column, rule, cleanMessage, 'biome'));
+			const cleanMessage = deriveBiomeMessage(rule, lines, i);
+			errors.push(new ParsedError(file, lineNum, column, rule, cleanMessage, 'biome', severityFromRule(rule)));
 		}
-
-		// También detectar errores de configuración de Biome
 		if (line.includes('Failed to resolve') || line.includes('Could not resolve')) {
 			const configMatch = line.match(CONFIG_ERROR_REGEX);
 			if (configMatch) {
-				errors.push(new ParsedError('biome.json', '1', '1', 'ConfigError', cleanAnsiCodes(line), 'biome'));
+				errors.push(new ParsedError('biome.json', '1', '1', 'ConfigError', cleanAnsiCodes(line), 'biome', 'error'));
 			}
 		}
 	}
-
 	return errors;
 }
 
@@ -286,13 +290,8 @@ export function detectToolFromFileName(fileName) {
 /**
  * Formatea y muestra el resumen simple
  */
-export function displaySimpleErrorSummary(summary) {
-	if (!summary) {
-		return;
-	}
-
-	// Mostrar header
-	for (const line of summary.header) {
+function logHeaderLines(lines) {
+	for (const line of lines) {
 		if (line.startsWith('✅')) {
 			console.log(chalk.green(line));
 		} else if (line.startsWith('📊')) {
@@ -303,14 +302,16 @@ export function displaySimpleErrorSummary(summary) {
 			console.log(line);
 		}
 	}
+}
 
-	// Mostrar lista de archivos
-	for (const line of summary.fileList) {
+function logFileList(lines) {
+	for (const line of lines) {
 		console.log(chalk.blue(line));
 	}
+}
 
-	// Mostrar detalle
-	for (const line of summary.detailedList) {
+function logDetails(lines) {
+	for (const line of lines) {
 		if (line.startsWith('📋')) {
 			console.log(chalk.yellow.bold(line));
 		} else if (line.startsWith('  - línea')) {
@@ -321,6 +322,15 @@ export function displaySimpleErrorSummary(summary) {
 			console.log(line);
 		}
 	}
+}
+
+export function displaySimpleErrorSummary(summary) {
+	if (!summary) {
+		return;
+	}
+	logHeaderLines(summary.header);
+	logFileList(summary.fileList);
+	logDetails(summary.detailedList);
 }
 
 /**

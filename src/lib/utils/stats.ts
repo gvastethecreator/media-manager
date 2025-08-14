@@ -1,6 +1,7 @@
 /**
  * Utilidades para cálculo de estadísticas y completitud
  */
+import type { EntityStats } from '@/types/entities/entity.types';
 
 /**
  * Calcula el porcentaje de completitud de un objeto basado en campos requeridos
@@ -66,9 +67,9 @@ export function calculateUsageDiversity(counts: Record<string, number>): number 
 
 	// Calcula el índice de Shannon para diversidad
 	const total = values.reduce((sum, count) => sum + count, 0);
-	const entropy = values.reduce((entropy, count) => {
+	const entropy = values.reduce((accEntropy, count) => {
 		const probability = count / total;
-		return entropy - probability * Math.log2(probability);
+		return accEntropy - probability * Math.log2(probability);
 	}, 0);
 
 	// Normaliza a escala 0-100
@@ -168,4 +169,80 @@ export function calculateQualityScore(factors: {
 	}
 
 	return totalWeight > 0 ? Math.round(totalScore / totalWeight) : 0;
+}
+
+/**
+ * Crea un objeto EntityStats con valores por defecto, permitiendo overrides parciales.
+ * Diseñado para uso transversal en transformers/servicios.
+ */
+export function createDefaultEntityStats(overrides: Partial<EntityStats> = {}): EntityStats {
+	const now = new Date();
+
+	const defaults: EntityStats = {
+		// Conteos de relaciones
+		imageCount: 0,
+		videoCount: 0,
+		albumCount: 0,
+		collectionCount: 0,
+		tagCount: 0,
+		characterCount: 0,
+		placeCount: 0,
+		worldItemCount: 0,
+		conceptCount: 0,
+		promptCount: 0,
+		noteCount: 0,
+		wildcardCount: 0,
+		propertyCount: 0,
+		groupCount: 0,
+
+		// Métricas globales
+		totalItems: 0,
+		totalAssociations: 0,
+
+		// Timestamps
+		lastUpdated: now,
+		lastViewed: null,
+		lastModified: null,
+
+		// Métricas de uso
+		viewCount: 0,
+		downloadCount: 0,
+		likeCount: 0,
+		commentCount: 0,
+
+		// Métricas de calidad
+		qualityScore: 0,
+		completenessScore: 0,
+
+		// Estado
+		isDuplicate: false,
+		isOrphaned: false,
+		needsAttention: false,
+
+		// Propiedades del sistema de archivos
+		size: 0,
+		mtime: now,
+		birthtime: now,
+		type: 'generic',
+	};
+
+	// Asegurar que fechas numéricas se transformen si alguien pasa timestamps
+	const normalized: Partial<EntityStats> = { ...overrides };
+	if (overrides.mtime && !(overrides.mtime instanceof Date)) {
+		normalized.mtime = new Date(overrides.mtime as unknown as number);
+	}
+	if (overrides.birthtime && !(overrides.birthtime instanceof Date)) {
+		normalized.birthtime = new Date(overrides.birthtime as unknown as number);
+	}
+	if (overrides.lastUpdated && !(overrides.lastUpdated instanceof Date)) {
+		normalized.lastUpdated = new Date(overrides.lastUpdated as unknown as number);
+	}
+	if (overrides.lastViewed && !(overrides.lastViewed instanceof Date)) {
+		normalized.lastViewed = overrides.lastViewed ? new Date(overrides.lastViewed as unknown as number) : null;
+	}
+	if (overrides.lastModified && !(overrides.lastModified instanceof Date)) {
+		normalized.lastModified = overrides.lastModified ? new Date(overrides.lastModified as unknown as number) : null;
+	}
+
+	return { ...defaults, ...normalized };
 }

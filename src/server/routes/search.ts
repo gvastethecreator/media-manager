@@ -1,8 +1,9 @@
-import { like, or, sql } from 'drizzle-orm';
-import express from 'express';
 import { db, getDbClient } from '@/lib/drizzle';
+import { isFts5Enabled } from '@/lib/drizzle/fts5';
 import { files } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { like, or, sql } from 'drizzle-orm';
+import express from 'express';
 import { searchImages } from '../services/search.service';
 
 const logger = serverLogger.withContext('SearchRoute');
@@ -88,6 +89,9 @@ router.get('/fts', async (req, res) => {
 		let engine: 'fts5' | 'like' = 'fts5';
 
 		try {
+			if (!isFts5Enabled()) {
+				throw new Error('fts5-disabled');
+			}
 			const client = getDbClient();
 			if (!client || typeof client.execute !== 'function') {
 				throw new Error('client.execute no disponible');
@@ -107,7 +111,7 @@ router.get('/fts', async (req, res) => {
 			}));
 			total = rows.length + offset; // estimación
 			logger.debug('search.fts', { q, rows: rows.length, ms: Math.round(execMs * 100) / 100 });
-		} catch (e) {
+		} catch (e: any) {
 			// Si se exige FTS (flag) devolver 503
 			if (process.env.SEARCH_FTS_REQUIRE === '1') {
 				logger.error('FTS requerido pero no disponible', e);
@@ -130,7 +134,8 @@ router.get('/fts', async (req, res) => {
 				.where(or(like(files.name, likeTerm), like(files.path, likeTerm)));
 			total = Number(countResult?.[0]?.c ?? rows.length);
 			const execMs = performance.now() - execStart;
-			logger.info('search.like.fallback', { q, rows: rows.length, ms: Math.round(execMs * 100) / 100 });
+			const reason = e?.message === 'fts5-disabled' ? 'disabled' : 'error';
+			logger.info('search.like.fallback', { q, reason, rows: rows.length, ms: Math.round(execMs * 100) / 100 });
 		}
 
 		const took = performance.now() - started;

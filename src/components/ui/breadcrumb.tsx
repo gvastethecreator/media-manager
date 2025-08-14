@@ -1,95 +1,88 @@
+import * as React from 'react';
+import { cn } from '@/lib/utils';
 import { ChevronRight, MoreHorizontal } from 'lucide-react';
 import { Slot as SlotPrimitive } from 'radix-ui';
-import { useMemo } from 'react';
 
-import { cn } from '@/lib/utils';
-
-function Breadcrumb({ ...props }: React.ComponentProps<'nav'>) {
-	return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />;
+function Breadcrumb({
+  ...props
+}: React.ComponentProps<'nav'> & {
+  separator?: React.ReactNode;
+}) {
+  return <nav data-slot="breadcrumb" aria-label="breadcrumb" {...props} />;
 }
 
 function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
-	return (
-		<ol
-			className={cn(
-				'flex flex-wrap items-center gap-0.5 break-words text-muted-foreground text-sm sm:gap-0.5',
-				className
-			)}
-			data-slot="breadcrumb-list"
-			{...props}
-		/>
-	);
+  return (
+    <ol
+      data-slot="breadcrumb-list"
+      className={cn('flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground', className)}
+      {...props}
+    />
+  );
 }
 
 function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
-	return <li className={cn('inline-flex items-center gap-0.5', className)} data-slot="breadcrumb-item" {...props} />;
+  return <li data-slot="breadcrumb-item" className={cn('inline-flex items-center gap-1.5', className)} {...props} />;
 }
 
 function BreadcrumbLink({
-	asChild,
-	className,
-	...props
+  asChild,
+  className,
+  ...props
 }: React.ComponentProps<'a'> & {
-	asChild?: boolean;
+  asChild?: boolean;
 }) {
-	const Comp = asChild ? SlotPrimitive.Slot : 'a';
+  const Comp = asChild ? SlotPrimitive.Slot : 'a';
 
-	return (
-		<Comp className={cn('transition-colors hover:text-foreground', className)} data-slot="breadcrumb-link" {...props} />
-	);
+  return (
+    <Comp data-slot="breadcrumb-link" className={cn('transition-colors hover:text-foreground', className)} {...props} />
+  );
 }
 
-function BreadcrumbPage({ className, ...props }: React.ComponentProps<'a'>) {
-	// Si viene como span/elemento no interactivo, convertirlo en <a> sin href pero focusable
-	const commonProps = useMemo(
-		() => ({
-			'aria-current': 'page' as const,
-			'aria-disabled': 'true',
-			className: cn('font-normal text-foreground', className),
-			'data-slot': 'breadcrumb-page',
-			tabIndex: 0,
-		}),
-		[className]
-	);
-
-	return <a {...(commonProps as any)} {...props} />;
+function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
+  return (
+    <span
+      data-slot="breadcrumb-page"
+      role="link"
+      aria-disabled="true"
+      aria-current="page"
+      className={cn('font-normal text-foreground', className)}
+      {...props}
+    />
+  );
 }
 
-function BreadcrumbSeparator({ children, className, ...props }: React.ComponentProps<'li'>) {
-	return (
-		<li
-			aria-hidden="true"
-			className={cn('[&>svg]:size-3.5', className)}
-			data-slot="breadcrumb-separator"
-			role="presentation"
-			{...props}
-		>
-			{children ?? <ChevronRight />}
-		</li>
-	);
-}
+const BreadcrumbSeparator = ({ children, className, ...props }: React.ComponentProps<'li'>) => (
+  <li
+    data-slot="breadcrumb-separator"
+    role="presentation"
+    aria-hidden="true"
+    className={cn('[&>svg]:w-3.5 [&>svg]:h-3.5', className)}
+    {...props}
+  >
+    {children ?? <ChevronRight className="rtl:rotate-180" />}
+  </li>
+);
 
-function BreadcrumbEllipsis({ className, ...props }: React.ComponentProps<'span'>) {
-	return (
-		<span
-			aria-hidden="true"
-			className={cn('flex size-9 items-center justify-center', className)}
-			data-slot="breadcrumb-ellipsis"
-			role="presentation"
-			{...props}
-		>
-			<MoreHorizontal className="size-4" />
-			<span className="sr-only">More</span>
-		</span>
-	);
-}
+const BreadcrumbEllipsis = ({ className, ...props }: React.ComponentProps<'span'>) => (
+  <span
+    data-slot="breadcrumb-ellipsis"
+    role="presentation"
+    aria-hidden="true"
+    className={cn('flex h-9 w-9 items-center justify-center', className)}
+    {...props}
+  >
+    <MoreHorizontal className="h-4 w-4" />
+    <span className="sr-only">More</span>
+  </span>
+);
 
 export {
-	Breadcrumb,
-	BreadcrumbList,
-	BreadcrumbItem,
-	BreadcrumbLink,
-	BreadcrumbPage,
-	BreadcrumbSeparator,
-	BreadcrumbEllipsis,
+  Breadcrumb,
+  BreadcrumbEllipsis,
+  BreadcrumbItem,
+  BreadcrumbLink,
+  BreadcrumbList,
+  BreadcrumbPage,
+  BreadcrumbSeparator,
 };

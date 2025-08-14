@@ -1,4 +1,10 @@
-export { cn } from '../utils';
+import { type ClassValue, clsx } from 'clsx';
+import { twMerge } from 'tailwind-merge';
+
+// Utilidad de clases para Tailwind
+export function cn(...inputs: ClassValue[]): string {
+	return twMerge(clsx(inputs));
+}
 
 export * from './activity';
 // Re-exportar utilidades de entidades específicas
@@ -24,6 +30,9 @@ export * from './object-utils';
 export * from './place';
 export * from './prompt';
 export * from './server-events.utils';
+// Nota: No re-exportamos todo de './stats' para evitar colisiones con
+// utils/transformers/calculate-completeness. Exportar explícitos donde se necesite.
+export { createDefaultEntityStats } from './stats';
 // export * from './store'; // TODO: Directorio no existe
 export * from './store-selectors.utils';
 export * from './string.utils';

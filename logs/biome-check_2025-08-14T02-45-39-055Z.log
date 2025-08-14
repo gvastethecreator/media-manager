@@ -1,0 +1,1716 @@
+📊 RESUMEN DE ERRORES
+Total de archivos con errores: 38
+Cantidad total de errores: 82
+
+📁 ARCHIVOS AFECTADOS:
+  src\components\features\file-browser\hooks\use-progressive-loading.ts (líneas: 86)
+  src\components\ui\particles.tsx (líneas: 224)
+  src\components\ui\theme-provider.tsx (líneas: 106)
+  src\components\views\favorites\favorites-view.tsx (líneas: 53)
+  src\hooks\use-download-manager.ts (líneas: 179)
+  src\hooks\use-masonry-view-config.ts (líneas: 170)
+  src\lib\contexts\theme-provider.tsx (líneas: 150)
+  scripts\analysis\dependency-analyzer.js (líneas: 318, 323, 328)
+  scripts\benchmarks\performance-comparison-v2.js (líneas: 54, 101, 110, 132, 143, 182, 193, 210, 294)
+  scripts\benchmarks\performance-comparison.js (líneas: 48, 88, 97, 125, 136, 177, 188, 209)
+  scripts\check-errors.js (líneas: 52, 82, 190)
+  scripts\db\check.js (líneas: 59, 72)
+  scripts\db\clean-and-seed.ts (líneas: 38)
+  scripts\db\debug-profile-settings.ts (líneas: 10)
+  scripts\db\force-create-db.ts (líneas: 5)
+  scripts\db\migration-status-report.ts (líneas: 26, 280)
+  scripts\dev-server-hot.js (líneas: 71)
+  scripts\error-parser-new.js (líneas: 12, 289)
+  scripts\error-parser.js (líneas: 12, 289)
+  scripts\utils\playwright-mcp-helper.js (líneas: 36, 67, 130, 144, 170)
+  src\components\cards\album-card\album-card.tsx (líneas: 44)
+  src\components\cards\audio-card\audio-card.tsx (líneas: 24)
+  src\components\cards\character-card\character-card-content.tsx (líneas: 1)
+  src\components\cards\character-card\character-card-images.tsx (líneas: 1)
+  src\components\cards\collection-card\collection-card-content.tsx (líneas: 1)
+  src\components\cards\concept-card\concept-card-content.tsx (líneas: 1)
+  src\components\cards\concept-card\concept-card-footer.tsx (líneas: 25)
+  src\components\cards\concept-card\concept-card-images.tsx (líneas: 21, 88, 93)
+  src\components\cards\concept-card\concept-card.tsx (líneas: 11, 253)
+  src\components\cards\file3d-card\file3d-card.tsx (líneas: 35)
+  src\components\cards\folder-card\folder-card-content.tsx (líneas: 20)
+  src\components\cards\folder-card\folder-card.tsx (líneas: 18)
+  src\components\cards\group-card\group-card-content.tsx (líneas: 34)
+  src\components\cards\group-card\group-card-images.tsx (líneas: 1)
+  src\components\cards\group-card\group-card.tsx (líneas: 12)
+  src\components\cards\hooks\use-card-layout.ts (líneas: 55, 68, 113, 137, 195, 226, 228, 255)
+  src\components\cards\image-card\image-card-example.tsx (líneas: 171, 173, 175)
+  src\components\cards\image-card\image-card-improved.tsx (líneas: 45, 109, 114)
+
+📋 DETALLE POR ARCHIVO:
+
+src\components\features\file-browser\hooks\use-progressive-loading.ts
+  - línea 86 : lint/correctness/useExhaustiveDependencies
+
+src\components\ui\particles.tsx
+  - línea 224 : lint/correctness/useExhaustiveDependencies
+
+src\components\ui\theme-provider.tsx
+  - línea 106 : lint/correctness/useExhaustiveDependencies
+
+src\components\views\favorites\favorites-view.tsx
+  - línea 53 : lint/correctness/useExhaustiveDependencies
+
+src\hooks\use-download-manager.ts
+  - línea 179 : suppressions/unused
+
+src\hooks\use-masonry-view-config.ts
+  - línea 170 : lint/correctness/useExhaustiveDependencies
+
+src\lib\contexts\theme-provider.tsx
+  - línea 150 : lint/correctness/useExhaustiveDependencies
+
+scripts\analysis\dependency-analyzer.js
+  - línea 318 : lint/style/noNestedTernary
+  - línea 323 : lint/nursery/noShadow
+  - línea 328 : lint/nursery/noShadow
+
+scripts\benchmarks\performance-comparison-v2.js
+  - línea 54 : lint/suspicious/useAwait
+  - línea 101 : lint/nursery/noAwaitInLoop
+  - línea 110 : lint/suspicious/noEmptyBlockStatements
+  - línea 132 : lint/nursery/noAwaitInLoop
+  - línea 143 : lint/suspicious/noEmptyBlockStatements
+  - línea 182 : lint/nursery/noAwaitInLoop
+  - línea 193 : lint/suspicious/noEmptyBlockStatements
+  - línea 210 : lint/nursery/noAwaitInLoop
+  - línea 294 : lint/complexity/noExcessiveCognitiveComplexity
+
+scripts\benchmarks\performance-comparison.js
+  - línea 48 : lint/suspicious/useAwait
+  - línea 88 : lint/nursery/noAwaitInLoop
+  - línea 97 : lint/suspicious/noEmptyBlockStatements
+  - línea 125 : lint/nursery/noAwaitInLoop
+  - línea 136 : lint/suspicious/noEmptyBlockStatements
+  - línea 177 : lint/nursery/noAwaitInLoop
+  - línea 188 : lint/suspicious/noEmptyBlockStatements
+  - línea 209 : lint/nursery/noAwaitInLoop
+
+scripts\check-errors.js
+  - línea 52 : lint/suspicious/useAwait
+  - línea 52 : lint/nursery/noShadow
+  - línea 82 : lint/complexity/noExcessiveCognitiveComplexity
+  - línea 190 : lint/nursery/noAwaitInLoop
+
+scripts\db\check.js
+  - línea 59 : lint/complexity/noExcessiveCognitiveComplexity
+  - línea 72 : lint/performance/useTopLevelRegex
+
+scripts\db\clean-and-seed.ts
+  - línea 38 : lint/nursery/noAwaitInLoop
+
+scripts\db\debug-profile-settings.ts
+  - línea 10 : lint/complexity/noExcessiveCognitiveComplexity
+
+scripts\db\force-create-db.ts
+  - línea 5 : lint/performance/noNamespaceImport
+
+scripts\db\migration-status-report.ts
+  - línea 26 : lint/complexity/noExcessiveCognitiveComplexity
+  - línea 280 : lint/style/noNestedTernary
+
+scripts\dev-server-hot.js
+  - línea 71 : lint/suspicious/useAwait
+
+scripts\error-parser-new.js
+  - línea 12 : lint/suspicious/noControlCharactersInRegex
+  - línea 289 : lint/complexity/noExcessiveCognitiveComplexity
+
+scripts\error-parser.js
+  - línea 12 : lint/suspicious/noControlCharactersInRegex
+  - línea 289 : lint/complexity/noExcessiveCognitiveComplexity
+
+scripts\utils\playwright-mcp-helper.js
+  - línea 36 : lint/nursery/noShadow
+  - línea 67 : lint/nursery/noShadow
+  - línea 130 : lint/nursery/noShadow
+  - línea 144 : lint/nursery/noShadow
+  - línea 170 : lint/nursery/noShadow
+
+src\components\cards\album-card\album-card.tsx
+  - línea 44 : lint/complexity/noExcessiveCognitiveComplexity
+
+src\components\cards\audio-card\audio-card.tsx
+  - línea 24 : lint/complexity/noExcessiveCognitiveComplexity
+
+src\components\cards\character-card\character-card-content.tsx
+  - línea 1 : assist/source/organizeImports
+
+src\components\cards\character-card\character-card-images.tsx
+  - línea 1 : assist/source/organizeImports
+
+src\components\cards\collection-card\collection-card-content.tsx
+  - línea 1 : assist/source/organizeImports
+
+src\components\cards\concept-card\concept-card-content.tsx
+  - línea 1 : assist/source/organizeImports
+
+src\components\cards\concept-card\concept-card-footer.tsx
+  - línea 25 : lint/complexity/noExcessiveCognitiveComplexity
+
+src\components\cards\concept-card\concept-card-images.tsx
+  - línea 21 : lint/complexity/noExcessiveCognitiveComplexity
+  - línea 88 : lint/style/noNestedTernary
+  - línea 93 : lint/style/noNestedTernary
+
+src\components\cards\concept-card\concept-card.tsx
+  - línea 11 : lint/complexity/noExcessiveCognitiveComplexity
+  - línea 253 : lint/style/noNestedTernary
+
+src\components\cards\file3d-card\file3d-card.tsx
+  - línea 35 : lint/complexity/noExcessiveCognitiveComplexity
+
+src\components\cards\folder-card\folder-card-content.tsx
+  - línea 20 : lint/complexity/noExcessiveCognitiveComplexity
+
+src\components\cards\folder-card\folder-card.tsx
+  - línea 18 : lint/nursery/noShadow
+
+src\components\cards\group-card\group-card-content.tsx
+  - línea 34 : lint/complexity/noExcessiveCognitiveComplexity
+
+src\components\cards\group-card\group-card-images.tsx
+  - línea 1 : assist/source/organizeImports
+
+src\components\cards\group-card\group-card.tsx
+  - línea 12 : lint/complexity/noExcessiveCognitiveComplexity
+
+src\components\cards\hooks\use-card-layout.ts
+  - línea 55 : lint/complexity/noExcessiveCognitiveComplexity
+  - línea 68 : lint/style/useDefaultSwitchClause
+  - línea 113 : lint/style/useDefaultSwitchClause
+  - línea 137 : lint/style/useDefaultSwitchClause
+  - línea 195 : lint/style/useDefaultSwitchClause
+  - línea 226 : lint/suspicious/noEvolvingTypes
+  - línea 228 : lint/style/useDefaultSwitchClause
+  - línea 255 : lint/style/useDefaultSwitchClause
+
+src\components\cards\image-card\image-card-example.tsx
+  - línea 171 : lint/style/noNestedTernary
+  - línea 173 : lint/style/noNestedTernary
+  - línea 175 : lint/style/noNestedTernary
+
+src\components\cards\image-card\image-card-improved.tsx
+  - línea 45 : lint/complexity/noExcessiveCognitiveComplexity
+  - línea 45 : lint/nursery/noShadow
+  - línea 109 : lint/complexity/noExcessiveCognitiveComplexity
+  - línea 114 : lint/nursery/noShadow
+
+════════════════════════════════════════════════════════════════════════════════
+📄 LOG ORIGINAL:
+════════════════════════════════════════════════════════════════════════════════
+
+Comando: bunx biome check --max-diagnostics=500 .
+Fecha: 2025-08-14T02:45:39.057Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+src\components\features\file-browser\hooks\use-progressive-loading.ts:86:2 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: items
+  
+    85 │ 	// Reset batch when items change
+  > 86 │ 	useEffect(() => {
+       │ 	^^^^^^^^^
+    87 │ 		setCurrentBatch(1);
+    88 │ 		setIsLoadingMore(false);
+  
+  i Outer scope values aren't valid dependencies because mutating them doesn't re-render the component.
+  
+    93 │ 			loadingTimeoutRef.current = null;
+    94 │ 		}
+  > 95 │ 	}, [items]);
+       │ 	    ^^^^^
+    96 │ 
+    97 │ 	// Cleanup on unmount
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    95 │ → },·[items]);
+       │       -----   
+
+src\components\ui\particles.tsx:224:71 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━━━━━
+
+  ! remapValue changes on every re-render and should not be used as a hook dependency.
+  
+    222 │ 		}
+    223 │ 		rafID.current = window.requestAnimationFrame(animate);
+  > 224 │ 	}, [circleParams, clearContext, drawCircle, ease, staticity, vx, vy, remapValue]);
+        │ 	                                                                     ^^^^^^^^^^
+    225 │ 
+    226 │ 	const onMouseMove = useCallback(() => {
+  
+  i To fix this, wrap the definition of remapValue in its own useCallback() hook.
+  
+
+src\components\ui\theme-provider.tsx:106:4 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━
+
+  ! getSystemTheme changes on every re-render and should not be used as a hook dependency.
+  
+    104 │ 			return currentTheme as (typeof customThemes)[number];
+    105 │ 		},
+  > 106 │ 		[getSystemTheme]
+        │ 		 ^^^^^^^^^^^^^^
+    107 │ 	);
+    108 │ 
+  
+  i To fix this, wrap the definition of getSystemTheme in its own useCallback() hook.
+  
+
+src\components\views\favorites\favorites-view.tsx:53:4 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━
+
+  ! setSelectedFavoriteId changes on every re-render and should not be used as a hook dependency.
+  
+    51 │ 			clientEvents.emit('favorite:selected', { favoriteId });
+    52 │ 		},
+  > 53 │ 		[setSelectedFavoriteId]
+       │ 		 ^^^^^^^^^^^^^^^^^^^^^
+    54 │ 	);
+    55 │ 
+  
+  i To fix this, wrap the definition of setSelectedFavoriteId in its own useCallback() hook.
+  
+
+src\hooks\use-download-manager.ts:179:2 suppressions/unused ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  ! Suppression comment has no effect. Remove the suppression or make sure you are suppressing the correct rule.
+  
+    178 │ 	// Añadir dependencia ahora que está definida
+  > 179 │ 	// biome-ignore lint/correctness/useExhaustiveDependencies: dependencia añadida manualmente
+        │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    180 │ 	(processQueue as unknown as any).deps = [executeDownload];
+    181 │ 
+  
+
+src\hooks\use-masonry-view-config.ts:170:26 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook specifies more dependencies than necessary: calculateColumns
+  
+    169 │ 	// Calculate layout using the specified algorithm (agrega override opcional columnWidthOverride)
+  > 170 │ 	const calculateLayout = useMemo(() => {
+        │ 	                        ^^^^^^^
+    171 │ 		return (items: AnyEntityWithStats[], containerWidth: number, columnWidthOverride?: number): MasonryLayoutResult => {
+    172 │ 			// Si se provee override, crear versión derivada de config para cálculo de columnas
+  
+  i This dependency can be removed from the list.
+  
+    246 │ 			};
+    247 │ 		};
+  > 248 │ 	}, [config, calculateColumns, getItemAspectRatio]);
+        │ 	            ^^^^^^^^^^^^^^^^
+    249 │ 
+    250 │ 	return {
+  
+  i Unsafe fix: Remove the extra dependencies from the list.
+  
+    248 │ → },·[config,·calculateColumns,·getItemAspectRatio]);
+        │               ------------------                     
+
+src\lib\contexts\theme-provider.tsx:150:39 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━
+
+  ! resolveTheme changes on every re-render and should not be used as a hook dependency.
+  
+    148 │ 			return () => mediaQuery.removeEventListener('change', handleChange);
+    149 │ 		}
+  > 150 │ 	}, [theme, enableSystem, applyTheme, resolveTheme]);
+        │ 	                                     ^^^^^^^^^^^^
+    151 │ 
+    152 │ 	// Función para cambiar tema
+  
+  i To fix this, wrap the definition of resolveTheme in its own useCallback() hook.
+  
+
+src\lib\contexts\theme-provider.tsx:150:27 lint/correctness/useExhaustiveDependencies ━━━━━━━━━━━━━━
+
+  ! applyTheme changes on every re-render and should not be used as a hook dependency.
+  
+    148 │ 			return () => mediaQuery.removeEventListener('change', handleChange);
+    149 │ 		}
+  > 150 │ 	}, [theme, enableSystem, applyTheme, resolveTheme]);
+        │ 	                         ^^^^^^^^^^
+    151 │ 
+    152 │ 	// Función para cambiar tema
+  
+  i To fix this, wrap the definition of applyTheme in its own useCallback() hook.
+  
+
+scripts\analysis\dependency-analyzer.js:318:51 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    316 │ 		for (const plugin of this.analysis.vite_plugins) {
+    317 │ 			const complexity =
+  > 318 │ 				plugin.migration_complexity === 'low' ? '🟢' : plugin.migration_complexity === 'medium' ? '🟡' : '🔴';
+        │ 				                                               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    319 │ 			console.log(`   ${complexity} ${plugin.name} - ${plugin.purpose}`);
+    320 │ 		}
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+scripts\analysis\dependency-analyzer.js:323:63 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    322 │ 		console.log(chalk.yellow('\n🔄 MIGRACIONES CRÍTICAS:'));
+  > 323 │ 		for (const item of this.analysis.requires_migration.filter((item) => item.priority === 'critical')) {
+        │ 		                                                            ^^^^
+    324 │ 			console.log(`   🔴 ${item.name} - ${item.reason}`);
+    325 │ 		}
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    322 │ 		console.log(chalk.yellow('\n🔄 MIGRACIONES CRÍTICAS:'));
+  > 323 │ 		for (const item of this.analysis.requires_migration.filter((item) => item.priority === 'critical')) {
+        │ 		           ^^^^
+    324 │ 			console.log(`   🔴 ${item.name} - ${item.reason}`);
+    325 │ 		}
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\analysis\dependency-analyzer.js:328:62 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    327 │ 		console.log(chalk.red('\n!�  PRINCIPALES DESAFÍOS:'));
+  > 328 │ 		for (const issue of this.analysis.potential_issues.filter((issue) => issue.impact === 'high')) {
+        │ 		                                                           ^^^^^
+    329 │ 			console.log(`   🔴 ${issue.category}: ${issue.description}`);
+    330 │ 		}
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    327 │ 		console.log(chalk.red('\n!�  PRINCIPALES DESAFÍOS:'));
+  > 328 │ 		for (const issue of this.analysis.potential_issues.filter((issue) => issue.impact === 'high')) {
+        │ 		           ^^^^^
+    329 │ 			console.log(`   🔴 ${issue.category}: ${issue.description}`);
+    330 │ 		}
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:210:6 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    209 │ 				if (runtime === 'bun') {
+  > 210 │ 					await this.runCommand('bun', ['install', '--dry-run']);
+        │ 					^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    211 │ 				} else {
+    212 │ 					await this.runCommand('npm', ['list', '--depth=0']);
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:143:43 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━
+
+  × Unexpected empty block.
+  
+    142 │ 		// Limpiar archivo temporal
+  > 143 │ 		await fs.unlink(tempScript).catch(() => {});
+        │ 		                                        ^^
+    144 │ 
+    145 │ 		return this.calculateStats(times);
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:182:20 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    180 │ 		for (let i = 0; i < ITERATIONS; i++) {
+    181 │ 			try {
+  > 182 │ 				const result = await this.runCommand(command, [tempScript]);
+        │ 				               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    183 │ 				const time = Number.parseFloat(result.trim());
+    184 │ 				if (!Number.isNaN(time)) {
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:193:43 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━
+
+  × Unexpected empty block.
+  
+    192 │ 		// Limpiar archivo temporal
+  > 193 │ 		await fs.unlink(tempScript).catch(() => {});
+        │ 		                                        ^^
+    194 │ 
+    195 │ 		return this.calculateStats(times);
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:294:2 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 20 detected (max: 15).
+  
+    292 │ 	}
+    293 │ 
+  > 294 │ 	printSummary() {
+        │ 	^^^^^^^^^^^^
+    295 │ 		console.log(chalk.blue.bold('\n📊 RESUMEN DE RESULTADOS V2'));
+    296 │ 		console.log('='.repeat(70));
+  
+  i Please refactor this function to reduce its complexity score from 20 to the max allowed complexity 15.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:54:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    52 │ 	}
+    53 │ 
+  > 54 │ 	async runCommand(command, args = [], options = {}) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 55 │ 		return new Promise((resolve, reject) => {
+        ...
+  > 80 │ 		});
+  > 81 │ 	}
+       │ 	^
+    82 │ 
+    83 │ 	async createTempScript(filename, content, isESModule = true) {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    52 │ 	}
+    53 │ 
+  > 54 │ 	async runCommand(command, args = [], options = {}) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 55 │ 		return new Promise((resolve, reject) => {
+        ...
+  > 80 │ 		});
+  > 81 │ 	}
+       │ 	^
+    82 │ 
+    83 │ 	async createTempScript(filename, content, isESModule = true) {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:101:5 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+     99 │ 			const start = performance.now();
+    100 │ 			try {
+  > 101 │ 				await this.runCommand(command, [tempScript]);
+        │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    102 │ 				const end = performance.now();
+    103 │ 				times.push(end - start);
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:110:43 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━
+
+  × Unexpected empty block.
+  
+    109 │ 		// Limpiar archivo temporal
+  > 110 │ 		await fs.unlink(tempScript).catch(() => {});
+        │ 		                                        ^^
+    111 │ 
+    112 │ 		return this.calculateStats(times);
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+scripts\benchmarks\performance-comparison-v2.js:132:20 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    130 │ 		for (let i = 0; i < ITERATIONS; i++) {
+    131 │ 			try {
+  > 132 │ 				const result = await this.runCommand(command, [tempScript]);
+        │ 				               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    133 │ 				const time = Number.parseFloat(result.trim());
+    134 │ 				if (!Number.isNaN(time)) {
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison.js:48:2 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    46 │ 	}
+    47 │ 
+  > 48 │ 	async runCommand(command, args = [], options = {}) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 49 │ 		return new Promise((resolve, reject) => {
+        ...
+  > 74 │ 		});
+  > 75 │ 	}
+       │ 	^
+    76 │ 
+    77 │ 	async benchmarkStartupTime(runtime) {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    46 │ 	}
+    47 │ 
+  > 48 │ 	async runCommand(command, args = [], options = {}) {
+       │ 	^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 49 │ 		return new Promise((resolve, reject) => {
+        ...
+  > 74 │ 		});
+  > 75 │ 	}
+       │ 	^
+    76 │ 
+    77 │ 	async benchmarkStartupTime(runtime) {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+scripts\benchmarks\performance-comparison.js:88:5 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    86 │ 			const start = performance.now();
+    87 │ 			try {
+  > 88 │ 				await this.runCommand(command, [tempScript]);
+       │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    89 │ 				const end = performance.now();
+    90 │ 				times.push(end - start);
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison.js:97:43 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━
+
+  × Unexpected empty block.
+  
+    96 │ 		// Limpiar archivo temporal
+  > 97 │ 		await fs.unlink(tempScript).catch(() => {});
+       │ 		                                        ^^
+    98 │ 
+    99 │ 		return {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+scripts\benchmarks\performance-comparison.js:125:20 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    123 │ 		for (let i = 0; i < ITERATIONS; i++) {
+    124 │ 			try {
+  > 125 │ 				const result = await this.runCommand(command, [tempScript]);
+        │ 				               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    126 │ 				const time = Number.parseFloat(result.trim());
+    127 │ 				if (!Number.isNaN(time)) {
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison.js:136:43 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━
+
+  × Unexpected empty block.
+  
+    135 │ 		// Limpiar archivo temporal
+  > 136 │ 		await fs.unlink(tempScript).catch(() => {});
+        │ 		                                        ^^
+    137 │ 
+    138 │ 		return {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+scripts\benchmarks\performance-comparison.js:177:20 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    175 │ 		for (let i = 0; i < ITERATIONS; i++) {
+    176 │ 			try {
+  > 177 │ 				const result = await this.runCommand(command, [tempScript]);
+        │ 				               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    178 │ 				const time = Number.parseFloat(result.trim());
+    179 │ 				if (!Number.isNaN(time)) {
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\benchmarks\performance-comparison.js:188:43 lint/suspicious/noEmptyBlockStatements ━━━━━━━━━━
+
+  × Unexpected empty block.
+  
+    187 │ 		// Limpiar archivo temporal
+  > 188 │ 		await fs.unlink(tempScript).catch(() => {});
+        │ 		                                        ^^
+    189 │ 
+    190 │ 		return {
+  
+  i Empty blocks are usually the result of an incomplete refactoring. Remove the empty block or add a comment inside it if it is intentional.
+  
+
+scripts\benchmarks\performance-comparison.js:209:5 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    207 │ 			try {
+    208 │ 				// Limpiar dist antes del build
+  > 209 │ 				await fs.rm('dist', { recursive: true, force: true });
+        │ 				^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    210 │ 
+    211 │ 				const start = performance.now();
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\check-errors.js:52:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    50 │ }
+    51 │ 
+  > 52 │ async function filterRelevantFiles(files, options) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 53 │ 	const now = new Date();
+        ...
+  > 64 │ 	return { relevantFiles, cutoff };
+  > 65 │ }
+       │ ^
+    66 │ 
+    67 │ async function extractErrorsFromFile(file, cutoff) {
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    50 │ }
+    51 │ 
+  > 52 │ async function filterRelevantFiles(files, options) {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 53 │ 	const now = new Date();
+        ...
+  > 64 │ 	return { relevantFiles, cutoff };
+  > 65 │ }
+       │ ^
+    66 │ 
+    67 │ async function extractErrorsFromFile(file, cutoff) {
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+scripts\check-errors.js:82:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Excessive complexity of 29 detected (max: 15).
+  
+    80 │ }
+    81 │ 
+  > 82 │ function displayResults(allSummaries, totalFiles) {
+       │          ^^^^^^^^^^^^^^
+    83 │ 	if (totalFiles === 0) {
+    84 │ 		console.log(chalk.green('✅ ¡No se encontraron archivos con errores!'));
+  
+  i Please refactor this function to reduce its complexity score from 29 to the max allowed complexity 15.
+  
+
+scripts\check-errors.js:190:20 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    189 │ 		for (const file of relevantFiles) {
+  > 190 │ 			const summary = await extractErrorsFromFile(file, cutoff);
+        │ 			                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    191 │ 
+    192 │ 			if (summary && summary.stats.totalErrors > 0) {
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\check-errors.js:52:43 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    50 │ }
+    51 │ 
+  > 52 │ async function filterRelevantFiles(files, options) {
+       │                                           ^^^^^^^
+    53 │ 	const now = new Date();
+    54 │ 	const cutoff = now.setDate(now.getDate() - options.days);
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    11 │ // Parser de argumentos simple
+  > 12 │ const options = {
+       │       ^^^^^^^
+    13 │ 	tool: 'all',
+    14 │ 	days: 1,
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\db\check.js:72:41 lint/performance/useTopLevelRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This regex literal is not defined in the top level scope. This can lead to performance issues if this function is called frequently.
+  
+    70 │ 			const envContent = fs.readFileSync(envPath, 'utf8');
+    71 │ 			if (envContent.includes('DATABASE_URL=')) {
+  > 72 │ 				const dbUrlMatch = envContent.match(/DATABASE_URL=["']?(.*?)["']?$/m);
+       │ 				                                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    73 │ 				if (dbUrlMatch?.[1]) {
+    74 │ 					log(`✅ DATABASE_URL configurada: ${dbUrlMatch[1]}`, colors.green);
+  
+  i Move the regex literal outside of this scope, and place it at the top level of this module, as a constant.
+  
+
+scripts\db\check.js:59:10 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Excessive complexity of 25 detected (max: 15).
+  
+    58 │ // Función principal
+  > 59 │ function checkDatabase() {
+       │          ^^^^^^^^^^^^^
+    60 │ 	log('\n🔍 Verificando estado de la base de datos...', colors.blue);
+    61 │ 	log('=============================================', colors.blue);
+  
+  i Please refactor this function to reduce its complexity score from 25 to the max allowed complexity 15.
+  
+
+scripts\db\clean-and-seed.ts:38:4 lint/nursery/noAwaitInLoop ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid using await inside loops.
+  
+    36 │ 			const tableName = table.name;
+    37 │ 			console.log(`🗑� Limpiando tabla: ${tableName}`);
+  > 38 │ 			await db.run(sql.raw(`DELETE FROM "${tableName}"`));
+       │ 			^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    39 │ 		}
+    40 │ 
+  
+  i Using await inside loops might cause performance issues or unintended sequential execution, consider use Promise.all() instead.
+  
+
+scripts\db\debug-profile-settings.ts:10:16 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 25 detected (max: 15).
+  
+     8 │  */
+     9 │ 
+  > 10 │ async function debugProfileSettings() {
+       │                ^^^^^^^^^^^^^^^^^^^^
+    11 │ 	console.log('🔍 Investigando relación Profile-Settings...\n');
+    12 │ 
+  
+  i Please refactor this function to reduce its complexity score from 25 to the max allowed complexity 15.
+  
+
+scripts\db\force-create-db.ts:5:8 lint/performance/noNamespaceImport ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Avoid namespace imports, it can prevent efficient tree shaking and increase bundle size.
+  
+    3 │ import { sql } from 'drizzle-orm';
+    4 │ import { drizzle } from 'drizzle-orm/libsql';
+  > 5 │ import * as schema from '../../src/lib/drizzle/schema/index.js';
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ 
+    7 │ console.log('🔧 Forzando creación de base de datos...');
+  
+  i Use named imports instead.
+  
+
+scripts\db\migration-status-report.ts:26:16 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 39 detected (max: 15).
+  
+    24 │ }
+    25 │ 
+  > 26 │ async function generateMigrationStatusReport() {
+       │                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    27 │ 	console.log('📊 === REPORTE DE ESTADO DE MIGRACIÓN DRIZZLE ===\n');
+    28 │ 
+  
+  i Please refactor this function to reduce its complexity score from 39 to the max allowed complexity 15.
+  
+
+scripts\db\migration-status-report.ts:280:60 lint/style/noNestedTernary ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    279 │ 	for (const service of services) {
+  > 280 │ 		const statusIcon = service.status === 'COMPLETE' ? '✅' : service.status === 'PARTIAL' ? '🔄' : '❌';
+        │ 		                                                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    281 │ 		console.log(`\n${statusIcon} **${service.name}** (${service.status})`);
+    282 │ 		console.log(`   📝 Métodos migrados: ${service.migratedMethods.join(', ')}`);
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+scripts\dev-server-hot.js:71:1 lint/suspicious/useAwait ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This async function lacks an await expression.
+  
+    70 │ // Función para compilar el servidor con Bun
+  > 71 │ async function buildServer() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 72 │ 	console.log(chalk.blue('🔨 Compilando servidor con Bun...'));
+        ...
+  > 94 │ 	}
+  > 95 │ }
+       │ ^
+    96 │ 
+    97 │ // Función para iniciar el servidor
+  
+  i Remove this async modifier, or add an await expression in the function.
+  
+    70 │ // Función para compilar el servidor con Bun
+  > 71 │ async function buildServer() {
+       │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 72 │ 	console.log(chalk.blue('🔨 Compilando servidor con Bun...'));
+        ...
+  > 94 │ 	}
+  > 95 │ }
+       │ ^
+    96 │ 
+    97 │ // Función para iniciar el servidor
+  
+  i Async functions without await expressions may not need to be declared async.
+  
+
+scripts\error-parser-new.js:12:22 lint/suspicious/noControlCharactersInRegex ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected control character in a regular expression.
+  
+    11 │ // Expresiones regulares globales para mejor rendimiento
+  > 12 │ const ANSI_REGEX = /[\u001B\u009B][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+       │                      ^^^^^^
+    13 │ const FORMAT_REGEX = /\[(?:7|0|9\d)m/g;
+    14 │ const TSC_ERROR_REGEX = /([^:\s]+\.tsx?):\s*(\d+):\s*(\d+)\s*-\s*error\s*(?:TS(\d+))?\s*[:\s]*(.+)/i;
+  
+  i Control characters are unusual and potentially incorrect inputs, so they are disallowed.
+  
+
+scripts\error-parser-new.js:289:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━
+
+  × Excessive complexity of 19 detected (max: 15).
+  
+    287 │  * Formatea y muestra el resumen simple
+    288 │  */
+  > 289 │ export function displaySimpleErrorSummary(summary) {
+        │                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+    290 │ 	if (!summary) {
+    291 │ 		return;
+  
+  i Please refactor this function to reduce its complexity score from 19 to the max allowed complexity 15.
+  
+
+scripts\error-parser.js:289:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━━━━━━━━━━━━━
+
+  × Excessive complexity of 19 detected (max: 15).
+  
+    287 │  * Formatea y muestra el resumen simple
+    288 │  */
+  > 289 │ export function displaySimpleErrorSummary(summary) {
+        │                 ^^^^^^^^^^^^^^^^^^^^^^^^^
+    290 │ 	if (!summary) {
+    291 │ 		return;
+  
+  i Please refactor this function to reduce its complexity score from 19 to the max allowed complexity 15.
+  
+
+scripts\error-parser.js:12:22 lint/suspicious/noControlCharactersInRegex ━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Unexpected control character in a regular expression.
+  
+    11 │ // Expresiones regulares globales para mejor rendimiento
+  > 12 │ const ANSI_REGEX = /[\u001B\u009B][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
+       │                      ^^^^^^
+    13 │ const FORMAT_REGEX = /\[(?:7|0|9\d)m/g;
+    14 │ const TSC_ERROR_REGEX = /([^:\s]+\.tsx?):\s*(\d+):\s*(\d+)\s*-\s*error\s*(?:TS(\d+))?\s*[:\s]*(.+)/i;
+  
+  i Control characters are unusual and potentially incorrect inputs, so they are disallowed.
+  
+
+scripts\utils\playwright-mcp-helper.js:144:25 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    142 │  * Validar configuración
+    143 │  */
+  > 144 │ function validateConfig(config) {
+        │                         ^^^^^^
+    145 │ 	console.log(chalk.blue('🔍 Validando configuración...\n'));
+    146 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    191 │ }
+    192 │ 
+  > 193 │ const config = loadConfig();
+        │       ^^^^^^
+    194 │ 
+    195 │ switch (command) {
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\utils\playwright-mcp-helper.js:36:45 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    34 │  * Generar test a partir de un escenario
+    35 │  */
+  > 36 │ function generateTestFromScenario(scenario, config) {
+       │                                             ^^^^^^
+    37 │ 	const testName = scenario.name.toLowerCase().replace(/\s+/g, '-');
+    38 │ 	const testContent = `import { test, expect } from '@playwright/test';
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    191 │ }
+    192 │ 
+  > 193 │ const config = loadConfig();
+        │       ^^^^^^
+    194 │ 
+    195 │ switch (command) {
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\utils\playwright-mcp-helper.js:67:33 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    65 │  * Generar código para un paso específico
+    66 │  */
+  > 67 │ function generateStepCode(step, config) {
+       │                                 ^^^^^^
+    68 │ 	const stepLower = step.toLowerCase();
+    69 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    191 │ }
+    192 │ 
+  > 193 │ const config = loadConfig();
+        │       ^^^^^^
+    194 │ 
+    195 │ switch (command) {
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\utils\playwright-mcp-helper.js:130:24 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    128 │  * Listar escenarios disponibles
+    129 │  */
+  > 130 │ function listScenarios(config) {
+        │                        ^^^^^^
+    131 │ 	console.log(chalk.blue('\n📋 Escenarios disponibles:\n'));
+    132 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    191 │ }
+    192 │ 
+  > 193 │ const config = loadConfig();
+        │       ^^^^^^
+    194 │ 
+    195 │ switch (command) {
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+scripts\utils\playwright-mcp-helper.js:170:27 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    168 │  * Generar todos los tests
+    169 │  */
+  > 170 │ function generateAllTests(config) {
+        │                           ^^^^^^
+    171 │ 	console.log(chalk.blue('🚀 Generando tests automáticamente...\n'));
+    172 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    191 │ }
+    192 │ 
+  > 193 │ const config = loadConfig();
+        │       ^^^^^^
+    194 │ 
+    195 │ switch (command) {
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+src\App.tsx lint/style/useFilenamingConvention ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    app.tsx
+  
+
+src\components\batch-operations\BatchOperationDialog.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    batch-operation-dialog.tsx
+  
+
+src\components\batch-operations\BatchOperationsIndicator.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    batch-operations-indicator.tsx
+  
+
+src\components\batch-operations\BatchOperationsPanel.tsx lint/style/useFilenamingConvention ━━━━━━━━━━
+
+  × The filename should be in kebab-case.
+  
+  i The filename could be renamed to one of the following names:
+    batch-operations-panel.tsx
+  
+
+src\components\cards\album-card\album-card.tsx:44:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 30 detected (max: 15).
+  
+    42 │  * secciones que muestran datos y miniaturas de las imágenes contenidas.
+    43 │  */
+  > 44 │ export function AlbumCard({
+       │                 ^^^^^^^^^
+    45 │ 	album,
+    46 │ 	onClick,
+  
+  i Please refactor this function to reduce its complexity score from 30 to the max allowed complexity 15.
+  
+
+src\components\cards\audio-card\audio-card.tsx:24:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 19 detected (max: 15).
+  
+    22 │  * AudioCard - Componente de tarjeta para archivos de audio con player integrado
+    23 │  */
+  > 24 │ export function AudioCard({
+       │                 ^^^^^^^^^
+    25 │ 	audio,
+    26 │ 	compact = false,
+  
+  i Please refactor this function to reduce its complexity score from 19 to the max allowed complexity 15.
+  
+
+src\components\cards\character-card\character-card-content.tsx:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━
+
+  × The imports and exports are not sorted.
+  
+  > 1 │ import { Progress } from '@/components/ui/progress';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import { ArrowUpRight, Brain, Heart, Shield, Sparkles, Star, Swords, User, Wand, Zap } from 'lucide-react';
+    3 │ import { motion } from 'motion/react';
+  
+  i Safe fix: Organize Imports (Biome)
+  
+      1     │ - import·{·Progress·}·from·'@/components/ui/progress';
+      2     │ - import·{·ArrowUpRight,·Brain,·Heart,·Shield,·Sparkles,·Star,·Swords,·User,·Wand,·Zap·}·from·'lucide-react';
+      3     │ - import·{·motion·}·from·'motion/react';
+          1 │ + import·{·ArrowUpRight,·Brain,·Heart,·Shield,·Sparkles,·Star,·Swords,·User,·Wand,·Zap·}·from·'lucide-react';
+          2 │ + import·{·motion·}·from·'motion/react';
+          3 │ + import·{·Progress·}·from·'@/components/ui/progress';
+      4   4 │   
+      5   5 │   import type { CharacterStats } from '@/types/entities/character';
+  
+
+src\components\cards\character-card\character-card-images.tsx:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━
+
+  × The imports and exports are not sorted.
+  
+  > 1 │ import {
+      │ ^^^^^^^^
+  > 2 │ 	buildHolographicStyle,
+  > 3 │ 	computeRarityVisualConfig,
+  > 4 │ 	rarityAccessibilityLabel,
+  > 5 │ } from '@/components/cards/shared/rarity-style';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ import { cn } from '@/lib/utils';
+    7 │ import { motion } from 'motion/react';
+  
+  i Safe fix: Organize Imports (Biome)
+  
+      1     │ - import·{
+      2     │ - → buildHolographicStyle,
+      3     │ - → computeRarityVisualConfig,
+      4     │ - → rarityAccessibilityLabel,
+      5     │ - }·from·'@/components/cards/shared/rarity-style';
+      6     │ - import·{·cn·}·from·'@/lib/utils';
+      7     │ - import·{·motion·}·from·'motion/react';
+      8     │ - import·React,·{·useState·}·from·'react';
+          1 │ + import·{·motion·}·from·'motion/react';
+          2 │ + import·React,·{·useState·}·from·'react';
+          3 │ + import·{
+          4 │ + → buildHolographicStyle,
+          5 │ + → computeRarityVisualConfig,
+          6 │ + → rarityAccessibilityLabel,
+          7 │ + }·from·'@/components/cards/shared/rarity-style';
+          8 │ + import·{·cn·}·from·'@/lib/utils';
+      9   9 │   
+     10  10 │   // Imágenes con thumbnails para el componente de galería
+  
+
+src\components\cards\collection-card\collection-card-content.tsx:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━
+
+  × The imports and exports are not sorted.
+  
+  > 1 │ import { Badge } from '@/components/ui/badge';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import type { CollectionEdition } from '@/types/entities/collection';
+    3 │ import { Bookmark, Calendar, Currency, Diamond, Globe, Link, Tag } from 'lucide-react';
+  
+  i Safe fix: Organize Imports (Biome)
+  
+      1     │ - import·{·Badge·}·from·'@/components/ui/badge';
+      2     │ - import·type·{·CollectionEdition·}·from·'@/types/entities/collection';
+      3     │ - import·{·Bookmark,·Calendar,·Currency,·Diamond,·Globe,·Link,·Tag·}·from·'lucide-react';
+      4     │ - import·{·motion·}·from·'motion/react';
+      5     │ - import·{·useMemo·}·from·'react';
+          1 │ + import·{·Bookmark,·Calendar,·Currency,·Diamond,·Globe,·Link,·Tag·}·from·'lucide-react';
+          2 │ + import·{·motion·}·from·'motion/react';
+          3 │ + import·{·useMemo·}·from·'react';
+          4 │ + import·{·Badge·}·from·'@/components/ui/badge';
+          5 │ + import·type·{·CollectionEdition·}·from·'@/types/entities/collection';
+      6   6 │   
+      7   7 │   // Regex para limpiar URLs (extraído a nivel superior para mejor performance)
+  
+
+src\components\cards\concept-card\concept-card-content.tsx:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━
+
+  × The imports and exports are not sorted.
+  
+  > 1 │ import { cn } from '@/lib/utils';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    2 │ import { ConceptService } from '@/services/concept/concept.service';
+    3 │ import { BookText, Globe, Image, MessageSquare, Package, Tag, UserSquare, VideoIcon } from 'lucide-react';
+  
+  i Safe fix: Organize Imports (Biome)
+  
+      1     │ - import·{·cn·}·from·'@/lib/utils';
+      2     │ - import·{·ConceptService·}·from·'@/services/concept/concept.service';
+      3     │ - import·{·BookText,·Globe,·Image,·MessageSquare,·Package,·Tag,·UserSquare,·VideoIcon·}·from·'lucide-react';
+      4     │ - import·{·nanoid·}·from·'nanoid';
+      5     │ - import·React,·{·useEffect,·useState·}·from·'react';
+          1 │ + import·{·BookText,·Globe,·Image,·MessageSquare,·Package,·Tag,·UserSquare,·VideoIcon·}·from·'lucide-react';
+          2 │ + import·{·nanoid·}·from·'nanoid';
+          3 │ + import·React,·{·useEffect,·useState·}·from·'react';
+          4 │ + import·{·cn·}·from·'@/lib/utils';
+          5 │ + import·{·ConceptService·}·from·'@/services/concept/concept.service';
+      6   6 │   
+      7   7 │   const { getConceptCounts } = ConceptService;
+  
+
+src\components\cards\concept-card\concept-card-footer.tsx:25:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 24 detected (max: 15).
+  
+    23 │  * Diseñado para imitar la información de créditos y copyright de una carta TCG.
+    24 │  */
+  > 25 │ export function ConceptCardFooter({
+       │                 ^^^^^^^^^^^^^^^^^
+    26 │ 	createdAt,
+    27 │ 	updatedAt,
+  
+  i Please refactor this function to reduce its complexity score from 24 to the max allowed complexity 15.
+  
+
+src\components\cards\concept-card\concept-card-images.tsx:93:10 lint/style/noNestedTernary ━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+     91 │ 							<ImageIcon className="mr-2 h-4 w-4" /> Error: {error}
+     92 │ 						</div>
+   > 93 │ 					) : images.length === 0 ? (
+        │ 					    ^^^^^^^^^^^^^^^^^^^^^^^
+   > 94 │ 						// Mostrar mensaje si no hay imágenes
+         ...
+  > 153 │ 						</>
+  > 154 │ 					)}
+        │ 					^
+    155 │ 				</Suspense>
+    156 │ 			</div>
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src\components\cards\concept-card\concept-card-images.tsx:21:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 21 detected (max: 15).
+  
+    19 │  * Diseñado para parecer la ilustración de una carta TCG con efectos visuales.
+    20 │  */
+  > 21 │ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcgMode = true }: ConceptCardImagesProps) {
+       │                 ^^^^^^^^^^^^^^^^^
+    22 │ 	const [images, setImages] = useState<{ id: string; thumbnailUrl: string }[]>([]);
+    23 │ 	const [isLoading, setIsLoading] = useState(true);
+  
+  i Please refactor this function to reduce its complexity score from 21 to the max allowed complexity 15.
+  
+
+src\components\cards\concept-card\concept-card-images.tsx:88:10 lint/style/noNestedTernary ━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+     86 │ 							/>
+     87 │ 						))
+   > 88 │ 					) : error ? (
+        │ 					    ^^^^^^^^^
+   > 89 │ 						// Mostrar mensaje de error
+         ...
+  > 153 │ 						</>
+  > 154 │ 					)}
+        │ 					^
+    155 │ 				</Suspense>
+    156 │ 			</div>
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src\components\cards\concept-card\concept-card.tsx:11:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 25 detected (max: 15).
+  
+     9 │ import { ConceptCardFooter } from './concept-card-footer';
+    10 │ 
+  > 11 │ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
+       │                 ^^^^^^^^^^^
+    12 │ 	const { data: concept, isLoading, error } = useConcept(conceptId);
+    13 │ 	const { data: conceptCounts } = useConceptCounts(conceptId);
+  
+  i Please refactor this function to reduce its complexity score from 25 to the max allowed complexity 15.
+  
+
+src\components\cards\concept-card\concept-card.tsx:253:10 lint/style/noNestedTernary ━━━━━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    251 │ 					concept.emoji ? (
+    252 │ 						<span className="text-lg">{concept.emoji}</span>
+  > 253 │ 					) : tcgMode ? (
+        │ 					    ^^^^^^^^^^^
+  > 254 │ 						<BrainCircuitIcon className="h-4 w-4" />
+  > 255 │ 					) : (
+  > 256 │ 						<LightbulbIcon className="h-4 w-4" />
+  > 257 │ 					)
+        │ 					^
+    258 │ 				}
+    259 │ 				primaryColor={primaryColor}
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src\components\cards\file3d-card\file3d-card.tsx:35:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 19 detected (max: 15).
+  
+    33 │  * File3DCard - Componente de tarjeta para archivos 3D con viewer integrado
+    34 │  */
+  > 35 │ export function File3DCard({
+       │                 ^^^^^^^^^^
+    36 │ 	file3d,
+    37 │ 	compact = false,
+  
+  i Please refactor this function to reduce its complexity score from 19 to the max allowed complexity 15.
+  
+
+src\components\cards\folder-card\folder-card-content.tsx:20:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 28 detected (max: 15).
+  
+    18 │  * Diseñado con estilo de cuadro de texto de carta TCG.
+    19 │  */
+  > 20 │ export function FolderCardContent({
+       │                 ^^^^^^^^^^^^^^^^^
+    21 │ 	description,
+    22 │ 	totalFiles,
+  
+  i Please refactor this function to reduce its complexity score from 28 to the max allowed complexity 15.
+  
+
+src\components\cards\folder-card\folder-card.tsx:18:41 lint/nursery/noShadow ━━━━━━━━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    16 │ }
+    17 │ 
+  > 18 │ export const FolderCard = memo(function FolderCard({
+       │                                         ^^^^^^^^^^
+    19 │ 	folder,
+    20 │ 	onClick,
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    16 │ }
+    17 │ 
+  > 18 │ export const FolderCard = memo(function FolderCard({
+       │              ^^^^^^^^^^
+    19 │ 	folder,
+    20 │ 	onClick,
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+src\components\cards\group-card\group-card-content.tsx:34:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 34 detected (max: 15).
+  
+    32 │  * Componente para mostrar el contenido principal de una tarjeta de grupo
+    33 │  */
+  > 34 │ export function GroupCardContent({
+       │                 ^^^^^^^^^^^^^^^^
+    35 │ 	description,
+    36 │ 	category = 'General',
+  
+  i Please refactor this function to reduce its complexity score from 34 to the max allowed complexity 15.
+  
+
+src\components\cards\group-card\group-card-images.tsx:1:1 assist/source/organizeImports  FIXABLE  ━━━━━━━━━━
+
+  × The imports and exports are not sorted.
+  
+  > 1 │ import {
+      │ ^^^^^^^^
+  > 2 │ 	buildHolographicStyle,
+  > 3 │ 	computeRarityVisualConfig,
+  > 4 │ 	rarityAccessibilityLabel,
+  > 5 │ } from '@/components/cards/shared/rarity-style';
+      │ ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    6 │ import { cn } from '@/lib/utils';
+    7 │ import { FolderIcon } from 'lucide-react';
+  
+  i Safe fix: Organize Imports (Biome)
+  
+      1     │ - import·{
+      2     │ - → buildHolographicStyle,
+      3     │ - → computeRarityVisualConfig,
+      4     │ - → rarityAccessibilityLabel,
+      5     │ - }·from·'@/components/cards/shared/rarity-style';
+      6     │ - import·{·cn·}·from·'@/lib/utils';
+      7     │ - import·{·FolderIcon·}·from·'lucide-react';
+      8     │ - import·{·motion·}·from·'motion/react';
+      9     │ - import·React,·{·useState·}·from·'react';
+          1 │ + import·{·FolderIcon·}·from·'lucide-react';
+          2 │ + import·{·motion·}·from·'motion/react';
+          3 │ + import·React,·{·useState·}·from·'react';
+          4 │ + import·{
+          5 │ + → buildHolographicStyle,
+          6 │ + → computeRarityVisualConfig,
+          7 │ + → rarityAccessibilityLabel,
+          8 │ + }·from·'@/components/cards/shared/rarity-style';
+          9 │ + import·{·cn·}·from·'@/lib/utils';
+     10  10 │   
+     11  11 │   interface GroupCardImagesProps {
+  
+
+src\components\cards\group-card\group-card.tsx:12:17 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 36 detected (max: 15).
+  
+    10 │ import { GroupCardImages } from './group-card-images';
+    11 │ 
+  > 12 │ export function GroupCard({
+       │                 ^^^^^^^^^
+    13 │ 	groupId,
+    14 │ 	onClick,
+  
+  i Please refactor this function to reduce its complexity score from 36 to the max allowed complexity 15.
+  
+
+src\components\cards\hooks\use-card-layout.ts:113:3 lint/style/useDefaultSwitchClause ━━━━━━━━━━━━━━
+
+  × Expected a default switch clause.
+  
+    112 │ 		// Layout específico
+  > 113 │ 		switch (config.layout) {
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^
+  > 114 │ 			case 'minimal':
+         ...
+  > 133 │ 				break;
+  > 134 │ 		}
+        │ 		^
+    135 │ 
+    136 │ 		// Variante visual
+  
+  i The lack of a default clause can be a possible omission.
+  
+  i Consider adding a default clause.
+  
+
+src\components\cards\hooks\use-card-layout.ts:55:32 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 16 detected (max: 15).
+  
+    54 │ 	// Resolver dimensiones
+  > 55 │ 	const dimensions = useMemo(() => {
+       │ 	                              ^^^
+    56 │ 		const result: UseCardLayoutReturn['dimensions'] = {};
+    57 │ 
+  
+  i Please refactor this function to reduce its complexity score from 16 to the max allowed complexity 15.
+  
+
+src\components\cards\hooks\use-card-layout.ts:68:4 lint/style/useDefaultSwitchClause ━━━━━━━━━━━━━━━
+
+  × Expected a default switch clause.
+  
+    66 │ 		// Si no hay dimensiones específicas, usar el tamaño
+    67 │ 		if (!(result.width || result.height)) {
+  > 68 │ 			switch (config.size) {
+       │ 			^^^^^^^^^^^^^^^^^^^^^^
+  > 69 │ 				case 'xs':
+        ...
+  > 92 │ 					break;
+  > 93 │ 			}
+       │ 			^
+    94 │ 		}
+    95 │ 
+  
+  i The lack of a default clause can be a possible omission.
+  
+  i Consider adding a default clause.
+  
+
+src\components\cards\hooks\use-card-layout.ts:137:3 lint/style/useDefaultSwitchClause ━━━━━━━━━━━━━━
+
+  × Expected a default switch clause.
+  
+    136 │ 		// Variante visual
+  > 137 │ 		switch (config.variant) {
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 138 │ 			case 'default':
+         ...
+  > 158 │ 				break;
+  > 159 │ 		}
+        │ 		^
+    160 │ 
+    161 │ 		// Estados
+  
+  i The lack of a default clause can be a possible omission.
+  
+  i Consider adding a default clause.
+  
+
+src\components\cards\hooks\use-card-layout.ts:195:3 lint/style/useDefaultSwitchClause ━━━━━━━━━━━━━━
+
+  × Expected a default switch clause.
+  
+    193 │ 		const classes = ['object-cover'];
+    194 │ 
+  > 195 │ 		switch (config.layout) {
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^
+  > 196 │ 			case 'minimal':
+         ...
+  > 213 │ 				break;
+  > 214 │ 		}
+        │ 		^
+    215 │ 
+    216 │ 		// Variantes específicas para imágenes
+  
+  i The lack of a default clause can be a possible omission.
+  
+  i Consider adding a default clause.
+  
+
+src\components\cards\hooks\use-card-layout.ts:226:9 lint/suspicious/noEvolvingTypes ━━━━━━━━━━━━━━━━
+
+  × The type of this variable may evolve implicitly to any type, including the any type.
+  
+    224 │ 	// Generar clases para el texto
+    225 │ 	const textClasses = useMemo(() => {
+  > 226 │ 		const classes = [];
+        │ 		      ^^^^^^^
+    227 │ 
+    228 │ 		switch (config.density) {
+  
+  i Add an explicit type or initialization to avoid implicit type evolution.
+  
+
+src\components\cards\hooks\use-card-layout.ts:228:3 lint/style/useDefaultSwitchClause ━━━━━━━━━━━━━━
+
+  × Expected a default switch clause.
+  
+    226 │ 		const classes = [];
+    227 │ 
+  > 228 │ 		switch (config.density) {
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^^
+  > 229 │ 			case 'low':
+         ...
+  > 237 │ 				break;
+  > 238 │ 		}
+        │ 		^
+    239 │ 
+    240 │ 		if (config.layout === 'horizontal' || config.layout === 'list') {
+  
+  i The lack of a default clause can be a possible omission.
+  
+  i Consider adding a default clause.
+  
+
+src\components\cards\hooks\use-card-layout.ts:255:3 lint/style/useDefaultSwitchClause ━━━━━━━━━━━━━━
+
+  × Expected a default switch clause.
+  
+    253 │ 		}
+    254 │ 
+  > 255 │ 		switch (config.layout) {
+        │ 		^^^^^^^^^^^^^^^^^^^^^^^^
+  > 256 │ 			case 'minimal':
+         ...
+  > 268 │ 				break;
+  > 269 │ 		}
+        │ 		^
+    270 │ 
+    271 │ 		return cn(classes);
+  
+  i The lack of a default clause can be a possible omission.
+  
+  i Consider adding a default clause.
+  
+
+src\components\cards\image-card\image-card-example.tsx:173:13 lint/style/noNestedTernary ━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    171 │ 									: index % 5 === 1
+    172 │ 										? 'minimal'
+  > 173 │ 										: index % 5 === 2
+        │ 										  ^^^^^^^^^^^^^^^
+  > 174 │ 											? 'polaroid'
+  > 175 │ 											: index % 5 === 3
+  > 176 │ 												? 'tcg'
+  > 177 │ 												: 'gallery'
+        │ 												^^^^^^^^^^^
+    178 │ 							}
+    179 │ 						/>
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src\components\cards\image-card\image-card-example.tsx:175:14 lint/style/noNestedTernary ━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    173 │ 										: index % 5 === 2
+    174 │ 											? 'polaroid'
+  > 175 │ 											: index % 5 === 3
+        │ 											  ^^^^^^^^^^^^^^^
+  > 176 │ 												? 'tcg'
+  > 177 │ 												: 'gallery'
+        │ 												^^^^^^^^^^^
+    178 │ 							}
+    179 │ 						/>
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src\components\cards\image-card\image-card-example.tsx:171:12 lint/style/noNestedTernary ━━━━━━━━━━━
+
+  × Do not nest ternary expressions.
+  
+    169 │ 								index % 5 === 0
+    170 │ 									? 'default'
+  > 171 │ 									: index % 5 === 1
+        │ 									  ^^^^^^^^^^^^^^^
+  > 172 │ 										? 'minimal'
+         ...
+  > 176 │ 												? 'tcg'
+  > 177 │ 												: 'gallery'
+        │ 												^^^^^^^^^^^
+    178 │ 							}
+    179 │ 						/>
+  
+  i Nesting ternary expressions can make code more difficult to understand.
+  
+  i Convert nested ternary expression into if-else statements or separate the conditions to make the logic easier to understand.
+  
+
+src\components\cards\image-card\image-card-improved.tsx:45:48 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 32 detected (max: 15).
+  
+    43 │  * - Estado de selección visual
+    44 │  */
+  > 45 │ export const ImageCardImproved = memo(function ImageCardImproved({
+       │                                                ^^^^^^^^^^^^^^^^^
+    46 │ 	imageId,
+    47 │ 	onClick,
+  
+  i Please refactor this function to reduce its complexity score from 32 to the max allowed complexity 15.
+  
+
+src\components\cards\image-card\image-card-improved.tsx:109:33 lint/complexity/noExcessiveCognitiveComplexity ━━━━━━━━━━
+
+  × Excessive complexity of 25 detected (max: 15).
+  
+    108 │ 	// OPTIMIZACIÓN: Memoizar datos derivados de imageData
+  > 109 │ 	const derivedData = useMemo(() => {
+        │ 	                               ^^^
+    110 │ 		if (!imageData) {
+    111 │ 			return null;
+  
+  i Please refactor this function to reduce its complexity score from 25 to the max allowed complexity 15.
+  
+
+src\components\cards\image-card\image-card-improved.tsx:45:48 lint/nursery/noShadow ━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    43 │  * - Estado de selección visual
+    44 │  */
+  > 45 │ export const ImageCardImproved = memo(function ImageCardImproved({
+       │                                                ^^^^^^^^^^^^^^^^^
+    46 │ 	imageId,
+    47 │ 	onClick,
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    43 │  * - Estado de selección visual
+    44 │  */
+  > 45 │ export const ImageCardImproved = memo(function ImageCardImproved({
+       │              ^^^^^^^^^^^^^^^^^
+    46 │ 	imageId,
+    47 │ 	onClick,
+  
+  i Consider renaming this variable. It's easy to confuse the origin of variables if they share the same name.
+  
+
+src\components\cards\image-card\image-card-improved.tsx:114:9 lint/nursery/noShadow ━━━━━━━━━━━━━━━━
+
+  × This variable shadows another variable with the same name in the outer scope.
+  
+    112 │ 		}
+    113 │ 
+  > 114 │ 		const primaryColor =
+        │ 		      ^^^^^^^^^^^^
+    115 │ 			imageData.tags && imageData.tags.length > 0 ? imageData.tags[0]?.color || '#3b82f6' : '#3b82f6';
+    116 │ 
+  
+  i This is the shadowed variable, which is now inaccessible in the inner scope.
+  
+    215 │ 		return null;
+    216 │ 	}
+  > 217 │ 	const { primaryCo

@@ -1,7 +1,12 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext",
+      "webworker"
+    ],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -20,10 +25,15 @@
       "@testing-library/jest-dom",
       "@types/react",
       "@types/react-dom"
+      /* Nota: tipos bun no incluidos porque 'bun-types' no está instalado. Añadir si se requiere autocompletado específico. */
     ],
     "paths": {
-      "@/*": ["./src/*"],
-      "@components/*": ["./src/components/*"]
+      "@/*": [
+        "./src/*"
+      ],
+      "@components/*": [
+        "./src/components/*"
+      ]
     },
     "strictNullChecks": true
   },
