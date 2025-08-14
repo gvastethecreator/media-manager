@@ -3,10 +3,10 @@
  * @module store/entities/folder/slices/core
  */
 
+import type { StateCreator } from 'zustand';
 import { getAllFolders as apiGetAllFolders } from '@/lib/api/services/folders';
 import { foldersToRecord, getFolderById } from '@/transformers/folder';
 import type { FolderWithStats } from '@/types/entities/folder';
-import type { StateCreator } from 'zustand';
 import type { CompleteFolderStore, FolderStore } from '../types';
 
 // Estado inicial

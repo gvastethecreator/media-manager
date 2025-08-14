@@ -16,6 +16,8 @@ import { useFileSync } from '@/hooks/use-file-sync';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
+// Import CSS for user-select fixes
+import { useInterfaceSettingsStore } from '@/store/entities/settings/store';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { EntityStatsType } from '@/types/migration';
 // Imports de módulos refactorizados
@@ -25,15 +27,14 @@ import { useAccessibility } from './hooks/use-accessibility';
 import { useFileBrowserData } from './hooks/use-file-browser-data';
 import { useFileBrowserSelection } from './hooks/use-file-browser-selection';
 import { usePerformance } from './hooks/use-performance';
+import { useProgressiveLoading } from './hooks/use-progressive-loading';
 import { KeyboardNavigation } from './navigation/keyboard-navigation';
 import { ProgressOverlay } from './progress/progress-overlay';
 import { DragSelectionProvider } from './selection/drag-selection-provider';
-import { StatusBar } from './toolbar/status-bar';
-import type { FileBrowserProps } from './types/file-browser.types';
-
-// Import CSS for user-select fixes
 import './selection/selection-styles.css';
 import './styles/user-select.css';
+import { StatusBar } from './toolbar/status-bar';
+import type { FileBrowserProps } from './types/file-browser.types';
 import { CardsView } from './views/cards-view';
 import { GridView } from './views/grid-view';
 import { ListView } from './views/list-view';
@@ -65,6 +66,36 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 	const sortOptions = useViewOptionsStore((state) => state.sortOptions);
 	const addSortOption = useViewOptionsStore((state) => state.addSortOption);
 
+	// Preferencias de interfaz (se leerán una vez y se derivan banderas usadas en vistas)
+	const interfacePrefs = useInterfaceSettingsStore((s) => s.preferences);
+
+	// Derivar config consolidado para pasar a vistas sin acoplarlas al store global directamente
+	const derivedInterfaceConfig = useMemo(() => {
+		const fb = interfacePrefs.fileBrowser;
+		return {
+			global: {
+				animations:
+					interfacePrefs.animations &&
+					interfacePrefs.thumbnailsAnimations &&
+					!interfacePrefs.thumbnailsUltraPerformance,
+				respectAspect: interfacePrefs.thumbnailsRespectAspectRatio,
+				ultra: interfacePrefs.thumbnailsUltraPerformance,
+				borderRadius: interfacePrefs.thumbnailsBorderRadius,
+				viewTransitions: fb.general.enableViewTransitions,
+			},
+			performance: {
+				virtualization: fb.performance.enableVirtualization,
+				overscan: fb.performance.overscanCount,
+				thumbnailQuality: fb.performance.thumbnailQuality,
+			},
+			progressive: {
+				enabled: fb.general.enableProgressiveLoading,
+				itemsPerBatch: fb.general.itemsPerBatch,
+			},
+			views: fb.views,
+		};
+	}, [interfacePrefs]);
+
 	// Panel de detalles
 	const { setVisible: setDetailsPanelVisible, setSelectedItems: setDetailsPanelItems } = useDetailsPanel();
 
@@ -82,6 +113,12 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 		filterType,
 	});
 
+	// Hook de progressive loading
+	const { displayedItems, canLoadMore, loadMore, isLoadingMore } = useProgressiveLoading({
+		items,
+		interfaceConfig: derivedInterfaceConfig,
+	});
+
 	// Hook de selección (eventos, shortcuts, acciones)
 	const {
 		effectiveSelectedIds,
@@ -91,7 +128,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 		handleItemDoubleClickById,
 		handleContextMenuAction,
 	} = useFileBrowserSelection({
-		items,
+		items: displayedItems,
 		selectedIds: [...selectedIds],
 		onItemClick,
 		onItemDoubleClick,
@@ -128,16 +165,25 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 
 	const measureContainer = useCallback(
 		(element: HTMLElement) => {
+			if (!element) {
+				return;
+			}
 			if (measurementInProgressRef.current) {
 				return;
 			}
 			measurementInProgressRef.current = true;
-
-			const width = element?.clientWidth || element?.offsetWidth || FALLBACK_WIDTH;
-			if (width > 0 && Math.abs(width - containerWidth) > 10) {
+			// Preferir getBoundingClientRect para incluir padding y evitar 0 en ciertos layouts
+			const rect = element.getBoundingClientRect();
+			// Intentar detectar viewport real de ScrollArea si existe (Radix agrega un wrapper)
+			const viewport = element.querySelector('[data-radix-scroll-area-viewport]') as HTMLElement | null;
+			const target = viewport ?? element;
+			const targetRect = target.getBoundingClientRect();
+			const scrollbarCompensation = target.offsetWidth - target.clientWidth; // quitar scrollbar horizontal si aparece
+			const width = Math.max(0, targetRect.width - scrollbarCompensation) || rect.width || FALLBACK_WIDTH;
+			// Reducimos threshold de cambio a 2px para reaccionar a panel lateral
+			if (width > 0 && Math.abs(width - containerWidth) > 2) {
 				setContainerWidth(width);
 			}
-
 			measurementInProgressRef.current = false;
 		},
 		[containerWidth]
@@ -148,25 +194,17 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 			if (!element || containerRef.current === element) {
 				return;
 			}
-
 			containerRef.current = element;
 			measureContainer(element);
-
-			// ResizeObserver simple sin debounce costoso
-			const resizeObserver = new ResizeObserver((entries) => {
-				const entry = entries[0];
-				if (entry) {
-					const width = entry.contentRect.width;
-					if (width > 0 && Math.abs(width - containerWidth) > 10) {
-						setContainerWidth(width);
-					}
+			const resizeObserver = new ResizeObserver(() => {
+				if (containerRef.current) {
+					measureContainer(containerRef.current);
 				}
 			});
-
 			resizeObserver.observe(element);
 			return () => resizeObserver.disconnect();
 		},
-		[measureContainer, containerWidth]
+		[measureContainer]
 	);
 
 	// Handlers para el menú contextual
@@ -182,34 +220,41 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 		(action: string, _data?: any) => {
 			closeContextMenu();
 			setTimeout(() => {
-				startTransition(() => {
+				if (derivedInterfaceConfig.global.viewTransitions) {
+					startTransition(() => {
+						handleContextMenuAction(action);
+					});
+				} else {
 					handleContextMenuAction(action);
-				});
+				}
 			}, 0);
 		},
-		[handleContextMenuAction, closeContextMenu]
+		[handleContextMenuAction, closeContextMenu, derivedInterfaceConfig.global.viewTransitions]
 	);
 
 	// Actualizar panel de detalles cuando cambia la selección
 	useEffect(() => {
-		if (effectiveSelectedIds.length > 0) {
-			const selectedItems = items.filter((item) => effectiveSelectedIds.includes(item.id));
+		const hasSelection = effectiveSelectedIds.length > 0;
+		if (hasSelection) {
+			const idSet = new Set(effectiveSelectedIds);
+			const selectedItems = items.filter((it) => idSet.has(it.id));
 			setDetailsPanelItems(selectedItems);
 			setDetailsPanelVisible(true);
 		} else {
-			setDetailsPanelVisible(false);
+			setDetailsPanelItems([]);
 		}
 	}, [effectiveSelectedIds, items, setDetailsPanelItems, setDetailsPanelVisible]);
 
 	// Props comunes para las vistas (restaurado antes de memo content)
 	const commonViewProps = useMemo(
 		() => ({
-			items,
+			items: displayedItems,
 			itemSize,
 			selectedIds: effectiveSelectedIds,
 			containerWidth,
 			onItemClick: handleItemClick,
 			onItemDoubleClick: handleItemDoubleClick,
+			interfaceConfig: derivedInterfaceConfig,
 			onItemContextMenu: () => {
 				/* noop */
 			},
@@ -217,7 +262,15 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 				/* noop */
 			},
 		}),
-		[items, itemSize, effectiveSelectedIds, containerWidth, handleItemClick, handleItemDoubleClick]
+		[
+			displayedItems,
+			itemSize,
+			effectiveSelectedIds,
+			containerWidth,
+			handleItemClick,
+			handleItemDoubleClick,
+			derivedInterfaceConfig,
+		]
 	);
 
 	// Helper functions para componentes internos (restaurados)
@@ -296,157 +349,178 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 	}, [isLoading, items, error, viewMode, commonViewProps, activeSort.field, activeSort.direction, handleListSort]);
 
 	return (
-		<main
-			aria-describedby="file-browser-description"
-			className={cn(
-				'flex h-full w-full flex-col overflow-hidden bg-background',
-				{
-					'accessibility-high-contrast': accessibility.config.highContrast,
-					'accessibility-large-fonts': accessibility.config.largeFonts,
-					'accessibility-reduced-motion': accessibility.config.reduceMotion,
-				},
-				className
-			)}
-			data-testid="file-browser-container"
-		>
-			{/* Wrapper interactivo para eventos */}
-			<section className="relative min-h-0 flex-1">
-				<div className="sr-only" id="file-browser-description">
-					Explorador de archivos con {items.length} elementos. Usa las flechas para navegar, Enter para abrir, Espacio
-					para seleccionar.
-				</div>
+		<div className="flex h-full w-full min-w-0 flex-col overflow-hidden" data-testid="file-browser">
+			<main
+				aria-describedby="file-browser-description"
+				className={cn(
+					'flex h-full w-full flex-col overflow-hidden bg-background',
+					{
+						'accessibility-high-contrast': accessibility.config.highContrast,
+						'accessibility-large-fonts': accessibility.config.largeFonts,
+						'accessibility-reduced-motion': accessibility.config.reduceMotion,
+					},
+					className
+				)}
+				data-testid="file-browser-container"
+			>
+				{/* Wrapper interactivo para eventos */}
+				<section className="relative flex min-h-0 min-w-0 flex-1 flex-col">
+					<div className="sr-only" id="file-browser-description">
+						Explorador de archivos con {items.length} elementos. Usa las flechas para navegar, Enter para abrir, Espacio
+						para seleccionar.
+					</div>
 
-				<ScrollArea aria-atomic="false" aria-live="polite" className="h-full w-full">
-					<DragSelectionProvider
-						config={{
-							enabled: false,
-							threshold: 5,
-							autoScroll: {
-								enabled: true,
-								speed: 50,
-								threshold: 50,
-								maxSpeed: 200,
-							},
-							modifiers: {
-								add: 'ctrl',
-								subtract: 'alt',
-								toggle: 'shift',
-							},
-							selectableClass: 'entity-card',
-							selectedClass: 'entity-card--selected',
-							selectingClass: 'entity-card--selecting',
-							containerClass: 'file-browser-container',
-						}}
-						containerRef={containerRef as React.RefObject<HTMLElement>}
-						disabled={true}
-						getItemElement={getItemElement}
-						items={[] as any}
-						onSelectionCancel={() => {
-							// Drag selection cancelled
-						}}
-						onSelectionEnd={(_state, newSelectedIds) => {
-							if (newSelectedIds.length > 0) {
-								// setSelectedIds(newSelectedIds);
-							}
-						}}
-						onSelectionStart={(_state) => {
-							// Drag selection started
-						}}
-						onSelectionUpdate={(_state, _selectedIds) => {
-							// Drag selection updated
-						}}
-						overlayConfig={{
-							showCount: true,
-							showCoordinates: false,
-							theme: 'auto',
-							animation: {
-								enabled: true,
-								duration: 150,
-								easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
-							},
-						}}
+					<ScrollArea
+						aria-atomic="false"
+						aria-live="polite"
+						className="h-full w-full min-w-0"
+						data-testid="file-browser-scroll-area"
 					>
-						{/* Contenedor interactivo para eventos (div para evitar botones anidados) */}
-						<div
-							aria-label="Explorador de archivos"
-							className="file-browser-container relative m-0 h-full w-full cursor-default border-0 bg-transparent p-0 outline-none"
-							onClick={handleContainerClick}
-							onContextMenuCapture={handleContextMenu}
-							onKeyDown={(e) => {
-								if (accessibility.isKeyboardNavigation) {
-									switch (e.key) {
-										case 'ArrowUp':
-										case 'ArrowDown':
-										case 'ArrowLeft':
-										case 'ArrowRight':
-											e.preventDefault();
-											if (effectiveSelectedIds.length > 0) {
-												accessibility.focusElement(`[data-item-id="${effectiveSelectedIds[0]}"]`);
-											}
-											break;
-										case 'Home':
-											e.preventDefault();
-											accessibility.focusFirst();
-											break;
-										case 'End':
-											e.preventDefault();
-											accessibility.focusLast();
-											break;
-										default:
-											break;
-									}
+						<DragSelectionProvider
+							config={{
+								enabled: false,
+								threshold: 5,
+								autoScroll: {
+									enabled: true,
+									speed: 50,
+									threshold: 50,
+									maxSpeed: 200,
+								},
+								modifiers: {
+									add: 'ctrl',
+									subtract: 'alt',
+									toggle: 'shift',
+								},
+								selectableClass: 'entity-card',
+								selectedClass: 'entity-card--selected',
+								selectingClass: 'entity-card--selecting',
+								containerClass: 'file-browser-container',
+							}}
+							containerRef={containerRef as React.RefObject<HTMLElement>}
+							disabled={true}
+							getItemElement={getItemElement}
+							items={[] as any}
+							onSelectionCancel={() => {
+								// Drag selection cancelled
+							}}
+							onSelectionEnd={(_state, newSelectedIds) => {
+								if (newSelectedIds.length > 0) {
+									// setSelectedIds(newSelectedIds);
 								}
 							}}
-							ref={containerCallbackRef as any}
-							role="application"
-							tabIndex={-1}
+							onSelectionStart={(_state) => {
+								// Drag selection started
+							}}
+							onSelectionUpdate={(_state, _selectedIds) => {
+								// Drag selection updated
+							}}
+							overlayConfig={{
+								showCount: true,
+								showCoordinates: false,
+								theme: 'auto',
+								animation: {
+									enabled: true,
+									duration: 150,
+									easing: 'cubic-bezier(0.4, 0, 0.2, 1)',
+								},
+							}}
 						>
-							{/* Navegación por teclado */}
-							<KeyboardNavigation
-								containerRef={containerRef as React.RefObject<HTMLElement>}
-								getItemElement={getItemElement}
-								items={items}
-								onOpenItem={onItemDoubleClick}
-								onPreviewItem={handlePreviewItem}
-								viewType={getViewType()}
-							/>
+							{/* Contenedor interactivo para eventos (div para evitar botones anidados) */}
+							<div
+								aria-label="Explorador de archivos"
+								className="file-browser-container relative m-0 h-full w-full min-w-0 flex-1 cursor-default border-0 bg-transparent p-0 outline-none"
+								onClick={handleContainerClick}
+								onContextMenuCapture={handleContextMenu}
+								onKeyDown={(e) => {
+									if (accessibility.isKeyboardNavigation) {
+										switch (e.key) {
+											case 'ArrowUp':
+											case 'ArrowDown':
+											case 'ArrowLeft':
+											case 'ArrowRight':
+												e.preventDefault();
+												if (effectiveSelectedIds.length > 0) {
+													accessibility.focusElement(`[data-item-id="${effectiveSelectedIds[0]}"]`);
+												}
+												break;
+											case 'Home':
+												e.preventDefault();
+												accessibility.focusFirst();
+												break;
+											case 'End':
+												e.preventDefault();
+												accessibility.focusLast();
+												break;
+											default:
+												break;
+										}
+									}
+								}}
+								ref={containerCallbackRef as any}
+								role="application"
+								tabIndex={-1}
+							>
+								{/* Navegación por teclado */}
+								<KeyboardNavigation
+									containerRef={containerRef as React.RefObject<HTMLElement>}
+									getItemElement={getItemElement}
+									items={displayedItems}
+									onOpenItem={onItemDoubleClick}
+									onPreviewItem={handlePreviewItem}
+									viewType={getViewType()}
+								/>
 
-							{containerWidth > 0 ? content : <Spinner />}
+								{containerWidth > 0 ? content : <Spinner />}
 
-							{/* Menú contextual personalizado */}
-							<CustomContextMenu
-								isOpen={contextMenuOpen}
-								onAction={handleCustomContextMenuAction}
-								onClose={closeContextMenu}
-								position={contextMenuPosition}
-								selectedItems={items.filter((item) => effectiveSelectedIds.includes(item.id))}
-							/>
-						</div>
-					</DragSelectionProvider>
-				</ScrollArea>
-			</section>
+								{/* Botón Cargar Más */}
+								{canLoadMore && (
+									<div className="flex justify-center p-4">
+										<button
+											className="rounded bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90 disabled:opacity-50"
+											disabled={isLoadingMore}
+											onClick={loadMore}
+											type="button"
+										>
+											{isLoadingMore ? 'Cargando...' : 'Cargar más'}
+										</button>
+									</div>
+								)}
 
-			<StatusBar
-				entityType={entityType === 'mixed' ? EntityStatsType.IMAGE : (entityType as EntityStatsType)}
-				selectedCount={effectiveSelectedIds.length}
-				totalItems={items.length}
-			/>
+								{/* Menú contextual personalizado */}
+								<CustomContextMenu
+									isOpen={contextMenuOpen}
+									onAction={handleCustomContextMenuAction}
+									onClose={closeContextMenu}
+									position={contextMenuPosition}
+									selectedItems={items.filter((item) => effectiveSelectedIds.includes(item.id))}
+								/>
+							</div>
+						</DragSelectionProvider>
+					</ScrollArea>
+				</section>
 
-			{/* Progress Overlay */}
-			<ProgressOverlay />
+				<StatusBar
+					entityType={entityType === 'mixed' ? EntityStatsType.IMAGE : (entityType as EntityStatsType)}
+					selectedCount={effectiveSelectedIds.length}
+					totalItems={items.length}
+				/>
 
-			{/* Región para anuncios de lectores de pantalla */}
-			<div aria-atomic="true" aria-live="assertive" className="sr-only" id="screen-reader-announcements" />
+				{/* Progress Overlay */}
+				<ProgressOverlay />
 
-			{/* Información de rendimiento (solo en desarrollo) */}
-			{process.env.NODE_ENV === 'development' && performance.isMonitoring && (
-				<div className="fixed right-4 bottom-4 rounded bg-black/80 p-2 font-mono text-white text-xs">
-					<div>FPS: {performance.metrics?.averageFPS ?? 'N/A'}</div>
-					<div>Memory: {performance.metrics?.memoryUsage ?? 'N/A'}MB</div>
-					<div>Entities: {items.length}</div>
-				</div>
-			)}
-		</main>
+				{/* Región para anuncios de lectores de pantalla */}
+				<div aria-atomic="true" aria-live="assertive" className="sr-only" id="screen-reader-announcements" />
+
+				{/* Información de rendimiento (solo en desarrollo) */}
+				{process.env.NODE_ENV === 'development' && performance.isMonitoring && (
+					<div className="fixed right-4 bottom-4 rounded bg-black/80 p-2 font-mono text-white text-xs">
+						<div>FPS: {performance.metrics?.averageFPS ?? 'N/A'}</div>
+						<div>Memory: {performance.metrics?.memoryUsage ?? 'N/A'}MB</div>
+						<div>Entities: {items.length}</div>
+					</div>
+				)}
+			</main>
+		</div>
 	);
 });
 

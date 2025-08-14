@@ -43,19 +43,15 @@ const StatusBarImpl = memo<StatusBarProps>(function StatusBarComponent({ totalIt
 		return names[entityType] || { singular: 'elemento', plural: 'elementos' };
 	}, [entityType]);
 
-	const isFiltered = !!searchQuery;
 	const itemsLabel = totalItems === 1 ? entityName.singular : entityName.plural;
 
 	return (
-		<div className="flex justify-between border-t bg-background p-2 text-muted-foreground text-xs">
+		<div className="flex justify-between border-2 border-background border-t bg-secondary p-2 text-muted-foreground text-xs">
 			<div>
-				{isFiltered ? 'Filtrado: ' : 'Total: '}
 				{totalItems} {itemsLabel}
 			</div>
 
 			{selectedCount > 0 && <div>Seleccionados: {selectedCount}</div>}
-
-			<div>{new Date().toLocaleTimeString()}</div>
 		</div>
 	);
 });

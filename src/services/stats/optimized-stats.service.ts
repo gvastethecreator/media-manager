@@ -3,6 +3,8 @@
 
 import { sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
+import { buildInList } from '@/lib/drizzle/helpers/in-list';
+import { instrumentedAll } from '@/lib/drizzle/instrumentation';
 import { serverLogger } from '@/lib/logger/server-logger';
 
 /**
@@ -17,7 +19,22 @@ export class OptimizedStatsService {
 		// Constructor vacío - ya no necesitamos PrismaClient
 	}
 
-	public static getInstance(): OptimizedStatsService {
+	private buildAlbumBreakdown(raw: any): Record<string, number> {
+		return {
+			collections: Number(raw.collectionsCount) || 0,
+			tags: Number(raw.tagsCount) || 0,
+			characters: Number(raw.charactersCount) || 0,
+			places: Number(raw.placesCount) || 0,
+			worldItems: Number(raw.worldItemsCount) || 0,
+			concepts: Number(raw.conceptsCount) || 0,
+			prompts: Number(raw.promptsCount) || 0,
+			notes: Number(raw.notesCount) || 0,
+			wildcards: Number(raw.wildcardsCount) || 0,
+			properties: Number(raw.propertiesCount) || 0,
+			groups: Number(raw.groupsCount) || 0,
+		};
+	}
+	static getInstance(): OptimizedStatsService {
 		if (!OptimizedStatsService.instance) {
 			OptimizedStatsService.instance = new OptimizedStatsService();
 		}
@@ -90,25 +107,13 @@ export class OptimizedStatsService {
 
 			const stats = statsQuery[0] as any;
 
-			const breakdown = {
-				collections: Number(stats.collectionsCount) || 0,
-				tags: Number(stats.tagsCount) || 0,
-				characters: Number(stats.charactersCount) || 0,
-				places: Number(stats.placesCount) || 0,
-				worldItems: Number(stats.worldItemsCount) || 0,
-				concepts: Number(stats.conceptsCount) || 0,
-				prompts: Number(stats.promptsCount) || 0,
-				notes: Number(stats.notesCount) || 0,
-				wildcards: Number(stats.wildcardsCount) || 0,
-				properties: Number(stats.propertiesCount) || 0,
-				groups: Number(stats.groupsCount) || 0,
-			};
+			const breakdown = this.buildAlbumBreakdown(stats);
 
 			return {
 				imageCount: Number(stats.imageCount) || 0,
 				videoCount: Number(stats.videoCount) || 0,
 				totalSize: (Number(stats.imageTotalSize) || 0) + (Number(stats.videoTotalSize) || 0),
-				entitiesCount: Object.values(breakdown).reduce((sum, count) => sum + count, 0),
+				entitiesCount: Object.values(breakdown).reduce<number>((sum, count) => sum + (count as number), 0),
 				breakdown,
 			};
 		} catch (error) {
@@ -129,25 +134,29 @@ export class OptimizedStatsService {
 		this.logger.debug(`📊 Obteniendo estadísticas por lotes para ${albumIds.length} álbumes`);
 
 		try {
-			// 🚀 Una consulta para todos los álbumes en lugar de N consultas separadas
-			const batchStatsQuery = await db.all(sql`
-					SELECT
-						a.id as albumId,
-						a.name as albumName,
-						COUNT(DISTINCT i.id) as imageCount,
-						COUNT(DISTINCT v.id) as videoCount,
-						COALESCE(SUM(i.size), 0) as imageTotalSize,
-						COALESCE(SUM(v.size), 0) as videoTotalSize,
-						COUNT(DISTINCT CASE WHEN i.isFavorite = true THEN i.id END) as favoriteImagesCount,
-						COUNT(DISTINCT CASE WHEN v.isFavorite = true THEN v.id END) as favoriteVideosCount
-					FROM Album a
-					LEFT JOIN _AlbumToImage ai ON a.id = ai.A
-					LEFT JOIN Image i ON ai.B = i.id
-					LEFT JOIN _AlbumToVideo av ON a.id = av.A
-					LEFT JOIN Video v ON av.B = v.id
-					WHERE a.id IN (${albumIds.map((id) => `'${id}'`).join(',')})
-					GROUP BY a.id, a.name
-				`);
+			// 🚀 Consulta agregada con parámetros seguros usando helper buildInList
+			const { clause: inClause } = buildInList(sql`a.id`, albumIds);
+			const batchStatsQuery = await instrumentedAll(
+				'stats.batch.albums',
+				sql`
+				SELECT
+					a.id as albumId,
+					a.name as albumName,
+					COUNT(DISTINCT i.id) as imageCount,
+					COUNT(DISTINCT v.id) as videoCount,
+					COALESCE(SUM(i.size), 0) as imageTotalSize,
+					COALESCE(SUM(v.size), 0) as videoTotalSize,
+					COUNT(DISTINCT CASE WHEN i.isFavorite = true THEN i.id END) as favoriteImagesCount,
+					COUNT(DISTINCT CASE WHEN v.isFavorite = true THEN v.id END) as favoriteVideosCount
+				FROM Album a
+				LEFT JOIN _AlbumToImage ai ON a.id = ai.A
+				LEFT JOIN Image i ON ai.B = i.id
+				LEFT JOIN _AlbumToVideo av ON a.id = av.A
+				LEFT JOIN Video v ON av.B = v.id
+				WHERE ${inClause}
+				GROUP BY a.id, a.name
+			`
+			);
 
 			return (batchStatsQuery as any[]).reduce(
 				(acc, stats) => {
@@ -193,8 +202,10 @@ export class OptimizedStatsService {
 		this.logger.debug('📊 Obteniendo estadísticas globales optimizadas');
 
 		try {
-			// 🚀 Una sola consulta SQL para todos los conteos globales usando Drizzle
-			const globalStatsQuery = await db.all(sql`
+			// 🚀 Una sola consulta SQL para todos los conteos globales usando Drizzle (instrumentada)
+			const globalStatsQuery = await instrumentedAll(
+				'stats.global',
+				sql`
 					SELECT
 						(SELECT COUNT(*) FROM Image) as totalImages,
 						(SELECT COUNT(*) FROM Video) as totalVideos,
@@ -210,7 +221,8 @@ export class OptimizedStatsService {
 						(SELECT COALESCE(SUM(size), 0) FROM Video) as totalVideosSize,
 						(SELECT COUNT(*) FROM Image WHERE isFavorite = true) as totalFavoriteImages,
 						(SELECT COUNT(*) FROM Video WHERE isFavorite = true) as totalFavoriteVideos
-				`);
+				`
+			);
 
 			const stats = globalStatsQuery[0] as any;
 
@@ -258,8 +270,10 @@ export class OptimizedStatsService {
 		this.logger.debug(`📊 Obteniendo estadísticas optimizadas para grupo: ${groupId}`);
 
 		try {
-			// 🚀 Una sola consulta SQL raw en lugar de múltiples count() separadas usando Drizzle
-			const groupStatsQuery = await db.all(sql`
+			// 🚀 Una sola consulta SQL raw en lugar de múltiples count() separadas usando Drizzle (instrumentada)
+			const groupStatsQuery = await instrumentedAll(
+				'stats.group',
+				sql`
 					SELECT
 						COUNT(DISTINCT gti.B) as imageCount,
 						COUNT(DISTINCT gtv.B) as videoCount,
@@ -275,7 +289,8 @@ export class OptimizedStatsService {
 					LEFT JOIN _GroupToAlbum gta ON g.id = gta.A
 					LEFT JOIN _GroupToTag gtt ON g.id = gtt.A
 					WHERE g.id = ${groupId}
-				`);
+				`
+			);
 
 			const stats = groupStatsQuery[0] as any;
 
@@ -311,10 +326,13 @@ export class OptimizedStatsService {
 		this.logger.debug('📊 Obteniendo estadísticas por lotes para tags');
 
 		try {
-			// Si no se proporcionan IDs, obtener todos los tags
-			const batchTagStatsQuery =
+			// Si no se proporcionan IDs, obtener todos los tags; instrumentar siempre
+			const batchTagStatsQuery = await instrumentedAll(
+				tagIds && tagIds.length > 0 ? 'stats.batch.tags.filtered' : 'stats.batch.tags.all',
 				tagIds && tagIds.length > 0
-					? await db.all(sql`
+					? (() => {
+							const { clause } = buildInList(sql`t.id`, tagIds);
+							return sql`
 						SELECT
 							t.id as tagId,
 							t.name,
@@ -333,10 +351,11 @@ export class OptimizedStatsService {
 						LEFT JOIN Property p ON pt.A = p.id
 						LEFT JOIN _TagToWildcard tw ON t.id = tw.A
 						LEFT JOIN Wildcard w ON tw.B = w.id
-						WHERE t.id IN (${tagIds.map((id) => `'${id}'`).join(',')})
+						WHERE ${clause}
 						GROUP BY t.id, t.name, t.color
-					`)
-					: await db.all(sql`
+					`;
+						})()
+					: sql`
 						SELECT
 							t.id as tagId,
 							t.name,
@@ -356,7 +375,8 @@ export class OptimizedStatsService {
 						LEFT JOIN _TagToWildcard tw ON t.id = tw.A
 						LEFT JOIN Wildcard w ON tw.B = w.id
 						GROUP BY t.id, t.name, t.color
-					`);
+					`
+			);
 
 			// Convertir array de resultados a objeto con clave tagId
 			const statsArray = Array.isArray(batchTagStatsQuery) ? batchTagStatsQuery : [batchTagStatsQuery];
@@ -411,9 +431,12 @@ export class OptimizedStatsService {
 		this.logger.debug('📊 Obteniendo estadísticas por lotes para colecciones');
 
 		try {
-			const batchCollectionStatsQuery =
+			const batchCollectionStatsQuery = await instrumentedAll(
+				collectionIds && collectionIds.length > 0 ? 'stats.batch.collections.filtered' : 'stats.batch.collections.all',
 				collectionIds && collectionIds.length > 0
-					? await db.all(sql`
+					? (() => {
+							const { clause } = buildInList(sql`c.id`, collectionIds);
+							return sql`
 						SELECT
 							c.id as collectionId,
 							c.name,
@@ -431,10 +454,11 @@ export class OptimizedStatsService {
 						LEFT JOIN Property p ON cp.B = p.id
 						LEFT JOIN _CollectionToWildcard cw ON c.id = cw.A
 						LEFT JOIN Wildcard w ON cw.B = w.id
-						WHERE c.id IN (${collectionIds.map((id) => `'${id}'`).join(',')})
+						WHERE ${clause}
 						GROUP BY c.id, c.name
-					`)
-					: await db.all(sql`
+					`;
+						})()
+					: sql`
 						SELECT
 							c.id as collectionId,
 							c.name,
@@ -453,7 +477,8 @@ export class OptimizedStatsService {
 						LEFT JOIN _CollectionToWildcard cw ON c.id = cw.A
 						LEFT JOIN Wildcard w ON cw.B = w.id
 						GROUP BY c.id, c.name
-					`);
+					`
+			);
 
 			const statsArray = Array.isArray(batchCollectionStatsQuery)
 				? batchCollectionStatsQuery
@@ -512,8 +537,10 @@ export class OptimizedStatsService {
 		this.logger.debug('📊 Obteniendo estadísticas de favoritos optimizadas');
 
 		try {
-			// 🚀 Una sola consulta SQL para todos los conteos de favoritos usando Drizzle
-			const favoriteStatsQuery = await db.all(sql`
+			// 🚀 Una sola consulta SQL para todos los conteos de favoritos usando Drizzle (instrumentada)
+			const favoriteStatsQuery = await instrumentedAll(
+				'stats.favorites',
+				sql`
 					SELECT
 						(SELECT COUNT(*) FROM Character WHERE isFavorite = true) as characterCount,
 						(SELECT COUNT(*) FROM Place WHERE isFavorite = true) as placeCount,
@@ -522,7 +549,8 @@ export class OptimizedStatsService {
 						(SELECT COUNT(*) FROM Concept WHERE isFavorite = true) as conceptCount,
 						(SELECT COUNT(*) FROM Prompt WHERE isFavorite = true) as promptCount,
 						(SELECT COUNT(*) FROM Note WHERE isFavorite = true) as noteCount
-				`);
+				`
+			);
 
 			const stats = favoriteStatsQuery[0] as {
 				characterCount: number;
@@ -582,8 +610,17 @@ export class OptimizedStatsService {
 		this.logger.debug(`📊 Obteniendo top ${limit} tags optimizado`);
 
 		try {
-			// 🚀 Una consulta optimizada para obtener tags con conteos usando Drizzle
-			const topTagsQuery = await db.all(sql`
+			// 🚀 Una consulta optimizada para obtener tags con conteos usando Drizzle (instrumentada)
+			const topTagsQuery = await instrumentedAll<{
+				id: string;
+				name: string;
+				color: string | null;
+				imageCount: number;
+				videoCount: number;
+				totalCount: number;
+			}>(
+				'stats.topTags',
+				sql`
 					SELECT
 						t.id,
 						t.name,
@@ -598,18 +635,10 @@ export class OptimizedStatsService {
 					HAVING totalCount > 0
 					ORDER BY totalCount DESC
 					LIMIT ${limit}
-				`);
+				`
+			);
 
-			return (
-				topTagsQuery as Array<{
-					id: string;
-					name: string;
-					color: string;
-					imageCount: number;
-					videoCount: number;
-					totalCount: number;
-				}>
-			).map((tag: (typeof topTagsQuery)[0]) => ({
+			return topTagsQuery.map((tag) => ({
 				id: tag.id,
 				name: tag.name,
 				color: tag.color || '#6B7280',

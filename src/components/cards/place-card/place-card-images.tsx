@@ -49,6 +49,17 @@ export function PlaceCardImages({
 	// Si no hay imagen, mostrar un placeholder
 	const hasImage = Boolean(displayImage);
 
+	// Helper function para generar aria-label
+	const getImageAriaLabel = (): string => {
+		if (!hasImage) {
+			return 'Lugar sin imagen disponible';
+		}
+
+		const baseLabel = 'Imagen de lugar';
+		const specialEffects = rarityLevel >= 5 ? ' con efectos especiales' : '';
+		return `${baseLabel}${specialEffects}`;
+	};
+
 	// Determinar los efectos holográficos basados en la rareza
 	const getHolographicEffects = () => {
 		if (!(tcgMode && holographicEffect)) {
@@ -113,9 +124,13 @@ export function PlaceCardImages({
 
 	return (
 		<div
+			aria-label={getImageAriaLabel()}
 			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-48', tcgMode && 'border-white/10 border-b')}
+			onBlur={handleMouseLeave}
+			onFocus={handleMouseLeave}
 			onMouseLeave={handleMouseLeave}
 			onMouseMove={handleMouseMove}
+			role="img"
 		>
 			{/* Fondo decorativo para cartas TCG */}
 			{tcgMode && (

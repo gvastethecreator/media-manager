@@ -19,75 +19,86 @@ if (!existsSync(LOGS_DIR)) {
 
 // Función para ejecutar comando y guardar logs
 export function executeWithLogging(command, logFileName, options = {}) {
-	const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
-	const logFile = join(LOGS_DIR, `${logFileName}_${timestamp}.log`);
-	const errorFile = join(LOGS_DIR, `${logFileName}_${timestamp}_error.log`);
-
-	console.log(`🚀 Ejecutando: ${command}`);
-	console.log(`📄 Logs en: ${logFile}`);
-
+	const { logFile, errorFile } = buildLogPaths(logFileName);
+	announceExecution(command, logFile);
 	try {
-		// Ejecutar comando y capturar salida
-		const output = execSync(command, {
-			encoding: 'utf8',
-			stdio: 'pipe',
-			...options,
-		});
-
-		// Guardar logs exitosos
-		writeFileSync(logFile, `Comando: ${command}\nFecha: ${new Date().toISOString()}\n\n${output}`);
-
-		// Mostrar resumen en consola
-		console.log('✅ Comando ejecutado exitosamente');
-
-		// Generar resumen automático de errores si el comando es de linting/checking
-		if (isLintingTool(command)) {
-			generatePostExecutionSummary(logFile, command);
-		}
-
-		// Si hay salida, mostrar primeras líneas
-		if (output) {
-			const lines = output.split('\n').filter((l) => l.trim());
-			if (lines.length > 5) {
-				console.log('\n📊 Resumen (primeras 5 líneas):');
-				for (const line of lines.slice(0, 5)) {
-					console.log(`  ${line}`);
-				}
-				console.log(`  ... y ${lines.length - 5} líneas más`);
-			} else {
-				console.log('\n📊 Salida completa:');
-				for (const line of lines) {
-					console.log(`  ${line}`);
-				}
-			}
-		}
-
+		const output = runCommand(command, options);
+		persistOutput(logFile, command, output);
+		postSuccessActions(command, logFile);
+		summarizeOutput(output);
 		return { success: true, logFile, output };
 	} catch (error) {
-		// Guardar logs de error
-		const errorContent = `Comando: ${command}\nFecha: ${new Date().toISOString()}\n\nError:\n${error.message}\n\nSalida stderr:\n${error.stderr || ''}\n\nSalida stdout:\n${error.stdout || ''}`;
-		writeFileSync(errorFile, errorContent);
-
-		console.error('❌ Error al ejecutar comando');
-		console.error(`📄 Detalles del error en: ${errorFile}`);
-
-		// Generar resumen automático de errores si hay salida
+		handleExecutionError({ command, error, errorFile });
 		if (isLintingTool(command) && (error.stdout || error.stderr)) {
 			generatePostExecutionSummary(errorFile, command);
 		}
-
-		// Mostrar resumen del error
-		if (error.stdout || error.stderr) {
-			const errorLines = (error.stdout || error.stderr).split('\n').filter((l) => l.trim());
-			if (errorLines.length > 0) {
-				console.error('\n📊 Primeros errores encontrados:');
-				for (const line of errorLines.slice(0, 3)) {
-					console.error(`  ${line}`);
-				}
-			}
-		}
-
+		logErrorSummary(error);
 		return { success: false, errorFile, error };
+	}
+}
+
+// --- Helpers extracción ---
+function buildLogPaths(logFileName) {
+	const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+	return {
+		logFile: join(LOGS_DIR, `${logFileName}_${timestamp}.log`),
+		errorFile: join(LOGS_DIR, `${logFileName}_${timestamp}_error.log`),
+	};
+}
+function announceExecution(command, logFile) {
+	console.log(`🚀 Ejecutando: ${command}`);
+	console.log(`📄 Logs en: ${logFile}`);
+}
+function runCommand(command, options) {
+	return execSync(command, { encoding: 'utf8', stdio: 'pipe', ...options });
+}
+function persistOutput(logFile, command, output) {
+	writeFileSync(logFile, `Comando: ${command}\nFecha: ${new Date().toISOString()}\n\n${output}`);
+}
+function postSuccessActions(command, logFile) {
+	console.log('✅ Comando ejecutado exitosamente');
+	if (isLintingTool(command)) {
+		generatePostExecutionSummary(logFile, command);
+	}
+}
+function summarizeOutput(output) {
+	if (!output) {
+		return;
+	}
+	const lines = output.split('\n').filter((l) => l.trim());
+	if (lines.length === 0) {
+		return;
+	}
+	if (lines.length > 5) {
+		console.log('\n📊 Resumen (primeras 5 líneas):');
+		for (const line of lines.slice(0, 5)) {
+			console.log(`  ${line}`);
+		}
+		console.log(`  ... y ${lines.length - 5} líneas más`);
+	} else {
+		console.log('\n📊 Salida completa:');
+		for (const line of lines) {
+			console.log(`  ${line}`);
+		}
+	}
+}
+function handleExecutionError({ command, error, errorFile }) {
+	const errorContent = `Comando: ${command}\nFecha: ${new Date().toISOString()}\n\nError:\n${error.message}\n\nSalida stderr:\n${error.stderr || ''}\n\nSalida stdout:\n${error.stdout || ''}`;
+	writeFileSync(errorFile, errorContent);
+	console.error('❌ Error al ejecutar comando');
+	console.error(`📄 Detalles del error en: ${errorFile}`);
+}
+function logErrorSummary(error) {
+	if (!(error.stdout || error.stderr)) {
+		return;
+	}
+	const errorLines = (error.stdout || error.stderr).split('\n').filter((l) => l.trim());
+	if (errorLines.length === 0) {
+		return;
+	}
+	console.error('\n📊 Primeros errores encontrados:');
+	for (const line of errorLines.slice(0, 3)) {
+		console.error(`  ${line}`);
 	}
 }
 
@@ -177,10 +188,12 @@ export function listRecentLogs(limit = 10) {
 		.slice(0, limit);
 
 	console.log(`\n📄 Últimos ${limit} logs:`);
+	let counter = 1;
 	for (const file of files) {
 		const isError = file.name.includes('_error');
 		const icon = isError ? '❌' : '✅';
-		console.log(`  ${index + 1}. ${icon} ${file.name} (${new Date(file.stats.mtime).toLocaleString()})`);
+		console.log(`  ${counter}. ${icon} ${file.name} (${new Date(file.stats.mtime).toLocaleString()})`);
+		counter++;
 	}
 
 	return files;

@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { getAlbums } from '@/services/album/album.service';
 import { getCharacters } from '@/services/character/character.service';
@@ -233,62 +233,72 @@ export function useEntityLoader() {
 		}));
 	}, []);
 
+	// Mapeo de cargadores de entidades para reducir complejidad
+	const entityLoaders = useMemo(
+		() => ({
+			collections: async () => {
+				if ('fetchCollections' in collectionStore) {
+					await collectionStore.fetchCollections();
+				}
+			},
+			tags: async () => {
+				if ('loadTags' in tagStore && typeof tagStore.loadTags === 'function') {
+					await tagStore.loadTags();
+				}
+			},
+			albums: async () => {
+				if ('loadAlbums' in albumStore) {
+					await albumStore.loadAlbums();
+				}
+			},
+			places: async () => {
+				if ('loadPlaces' in placeStore) {
+					await placeStore.loadPlaces();
+				}
+			},
+			worldItems: async () => {
+				if ('loadWorldItems' in worldItemStore) {
+					await worldItemStore.loadWorldItems();
+				}
+			},
+			characters: async () => {
+				// No hay método de fetch, solo marcar como cargado
+			},
+			prompts: async () => {
+				// No hay método de fetch, solo marcar como cargado
+			},
+			notes: async () => {
+				// No hay método de fetch, solo marcar como cargado
+			},
+			concepts: async () => {
+				// No hay método de fetch, solo marcar como cargado
+			},
+			objects: async () => {
+				// Legacy: no cargar datos específicos
+			},
+		}),
+		[collectionStore, tagStore, albumStore, placeStore, worldItemStore]
+	);
+
 	// Función para cargar datos de una entidad específica
 	const loadEntityData = useCallback(
 		async (entity: keyof LoadingStates) => {
 			if (loadingStates[entity].loading || loadingStates[entity].loaded) {
 				return;
 			}
+
 			updateLoadingState(entity, { loading: true });
+
 			try {
 				entityLoaderLogger.info(`🔄 Cargando datos para ${entity}...`);
-				switch (entity) {
-					case 'collections':
-						if ('fetchCollections' in collectionStore) {
-							await collectionStore.fetchCollections();
-						}
-						break;
-					case 'tags':
-						if ('loadTags' in tagStore && typeof tagStore.loadTags === 'function') {
-							await tagStore.loadTags();
-						}
-						break;
-					case 'albums':
-						if ('loadAlbums' in albumStore) {
-							await albumStore.loadAlbums();
-						}
-						break;
-					case 'characters':
-						// No hay método de fetch, solo marcar como cargado
-						break;
-					case 'places':
-						if ('loadPlaces' in placeStore) {
-							await placeStore.loadPlaces();
-						}
-						break;
-					case 'worldItems':
-						if ('loadWorldItems' in worldItemStore) {
-							await worldItemStore.loadWorldItems();
-						}
-						break;
-					case 'prompts':
-						// No hay método de fetch, solo marcar como cargado
-						break;
-					case 'notes':
-						// No hay método de fetch, solo marcar como cargado
-						break;
-					case 'concepts':
-						// No hay método de fetch, solo marcar como cargado
-						break;
-					case 'objects':
-						// Legacy: no cargar datos específicos
-						break;
-					default: {
-						// Cubrir entidades no listadas explícitamente
-						entityLoaderLogger.debug(`Entidad no manejada explícitamente: ${String(entity)}`);
-						break;
-					}
+
+				const loader = entityLoaders[entity];
+				if (loader) {
+					await loader();
+				} else {
+					entityLoaderLogger.debug(`Entidad no manejada explícitamente: ${String(entity)}`);
 				}
+
 				updateLoadingState(entity, {
 					loading: false,
 					loaded: true,
@@ -302,14 +312,47 @@ export function useEntityLoader() {
 				});
 			}
 		},
-		[loadingStates, updateLoadingState, collectionStore, tagStore, albumStore, placeStore, worldItemStore]
+		[loadingStates, updateLoadingState, entityLoaders]
 	);
 
-	// Función para manejar el cambio de estado abierto/cerrado de un submenú
+	// Precargar entidades críticas al inicializar el hook
+	const preloadCriticalEntities = useCallback(async () => {
+		if (_preloadExecutedRef.current) {
+			return;
+		}
+
+		_preloadExecutedRef.current = true;
+		entityLoaderLogger.info('🚀 Iniciando precarga de entidades críticas...');
+
+		// Precargar las entidades más comunes en paralelo
+		const criticalEntities: (keyof LoadingStates)[] = ['tags', 'collections', 'albums'];
+
+		const preloadPromises = criticalEntities.map(async (entity) => {
+			try {
+				await loadEntityData(entity);
+				entityLoaderLogger.debug(`✅ Precargado: ${entity}`);
+			} catch (error) {
+				entityLoaderLogger.warn(`⚠️ Error precargando ${entity}:`, error);
+			}
+		});
+
+		// Ejecutar precargas en paralelo con timeout
+		await Promise.allSettled(preloadPromises);
+		entityLoaderLogger.info('✅ Precarga de entidades críticas completada');
+	}, [loadEntityData]);
+
+	// Ejecutar precarga al montar el hook
+	useEffect(() => {
+		// Delay mínimo para no bloquear el renderizado inicial
+		const timer = setTimeout(preloadCriticalEntities, 50);
+		return () => clearTimeout(timer);
+	}, [preloadCriticalEntities]);
+
+	// Función optimizada para manejar el cambio de estado abierto/cerrado de un submenú
 	const handleOpenChange = useCallback(
 		(entity: keyof LoadingStates, isOpen: boolean) => {
-			// Si se abre y no se ha cargado, cargar los datos
-			if (isOpen && !loadingStates[entity].loaded) {
+			// Si se abre y no se ha cargado, cargar los datos (ahora debería ser instantáneo para entidades críticas)
+			if (isOpen && !loadingStates[entity].loaded && !loadingStates[entity].loading) {
 				loadEntityData(entity);
 			}
 		},

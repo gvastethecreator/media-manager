@@ -172,6 +172,26 @@ button,
   cursor: pointer;
 }
 
+/* Pointer-events management: priorizar click en wrapper para selección */
+.entity-card *:not(button):not(a):not([role="button"]):not(input):not(textarea),
+[data-entity-card] *:not(button):not(a):not([role="button"]):not(input):not(textarea) {
+  pointer-events: none;
+}
+
+/* Rehabilitar pointer-events en elementos explícitamente interactivos */
+.entity-card button,
+.entity-card a,
+[data-entity-card] button,
+[data-entity-card] a,
+[data-entity-card] [role="button"],
+.entity-card [role="button"],
+.entity-card input,
+[data-entity-card] input,
+.entity-card textarea,
+[data-entity-card] textarea {
+  pointer-events: auto;
+}
+
 /* Empty space click feedback */
 .empty-space-click-feedback {
   transition: background-color 0.15s ease;

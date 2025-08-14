@@ -3,6 +3,58 @@ import { useTagThumbnails } from '@/lib/api/tags';
 import { cn } from '@/lib/utils';
 import { TagRarity } from '@/store/entities/tag/types';
 
+// Componente para placeholder cuando no hay imágenes
+function ImagePlaceholder({ primaryColor, error }: { primaryColor: string; error?: Error | null }) {
+	return (
+		<div className="flex h-full flex-col items-center justify-center">
+			<ImageIcon className="mb-2 text-muted-foreground" style={{ color: `${primaryColor}70` }} />
+			<p className="text-center text-muted-foreground text-xs" style={{ color: `${primaryColor}90` }}>
+				{error?.message || 'No hay imágenes con esta etiqueta'}
+			</p>
+		</div>
+	);
+}
+
+// Componente para estado de carga
+function LoadingState({
+	compact,
+	primaryColor,
+	secondaryColor,
+	tcgMode,
+}: {
+	compact: boolean;
+	primaryColor: string;
+	secondaryColor: string;
+	tcgMode: boolean;
+}) {
+	return (
+		<div
+			className={cn('flex flex-shrink-0 items-center justify-center bg-black/5', compact ? 'h-[120px]' : 'h-[140px]')}
+			style={{
+				borderBottom: `1px solid ${primaryColor}20`,
+				background: tcgMode ? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)` : `${primaryColor}05`,
+			}}
+		>
+			<div
+				className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
+				style={{ borderColor: `${primaryColor}80 transparent ${primaryColor}30 ${primaryColor}30` }}
+			/>
+		</div>
+	);
+}
+
+// Componente para esquinas decorativas TCG
+function TCGCorners() {
+	return (
+		<div className="pointer-events-none absolute inset-0 z-10">
+			<div className="absolute top-0 left-0 h-4 w-4 border-white/20 border-t border-l" />
+			<div className="absolute top-0 right-0 h-4 w-4 border-white/20 border-t border-r" />
+			<div className="absolute bottom-0 left-0 h-4 w-4 border-white/20 border-b border-l" />
+			<div className="absolute right-0 bottom-0 h-4 w-4 border-white/20 border-r border-b" />
+		</div>
+	);
+}
+
 interface TagCardImagesProps {
 	tagId: string;
 	primaryColor: string;
@@ -29,49 +81,51 @@ export function TagCardImages({
 }: TagCardImagesProps) {
 	const { data: fetchedImages, isLoading: loading, error } = useTagThumbnails(tagId);
 
+	// Helper function para generar efectos de filtro
+	const getFilterEffects = (index: number): string => {
+		if (!tcgMode) {
+			return 'none';
+		}
+
+		const contrast = 'contrast(1.05)';
+		const saturation = index % 2 === 0 ? 'saturate(1.1)' : 'saturate(0.9)';
+		return `${contrast} ${saturation}`;
+	};
+
+	// Calcular imágenes prioritizando imagen destacada
+	const computeImages = () => {
+		if (!fetchedImages) {
+			return [];
+		}
+
+		if (featuredImage && fetchedImages.length > 0) {
+			return [featuredImage, ...fetchedImages.filter((img) => img.id !== featuredImage.id)];
+		}
+
+		return fetchedImages;
+	};
+
+	// Obtener configuración de brillo por rareza
+	const getRarityBrightness = () => {
+		const rarityBrightnessMap = {
+			[TagRarity.COMMON]: 1,
+			[TagRarity.UNCOMMON]: 1.2,
+			[TagRarity.RARE]: 1.5,
+			[TagRarity.VERY_RARE]: 1.8,
+			[TagRarity.LEGENDARY]: 2.2,
+		} as const;
+
+		return rarityBrightnessMap[rarity as keyof typeof rarityBrightnessMap] || 1;
+	};
+
 	// Estado para almacenar las imágenes
-	const images = fetchedImages
-		? featuredImage && fetchedImages.length > 0
-			? [featuredImage, ...fetchedImages.filter((img) => img.id !== featuredImage.id)]
-			: fetchedImages
-		: [];
-
-	// Conseguir un factor de brillo basado en la rareza para efectos visuales
-	const rarityBrightnessMap = {
-		[TagRarity.COMMON]: 1,
-		[TagRarity.UNCOMMON]: 1.2,
-		[TagRarity.RARE]: 1.5,
-		[TagRarity.VERY_RARE]: 1.8,
-		[TagRarity.LEGENDARY]: 2.2,
-	} as const;
-
-	const rarityBrightness: number = rarityBrightnessMap[rarity as keyof typeof rarityBrightnessMap] || 1;
-
-	// Elemento placeholder para cuando no hay imágenes
-	const renderPlaceholder = () => (
-		<div className="flex h-full flex-col items-center justify-center">
-			<ImageIcon className="mb-2 text-muted-foreground" style={{ color: `${primaryColor}70` }} />
-			<p className="text-center text-muted-foreground text-xs" style={{ color: `${primaryColor}90` }}>
-				{error?.message || 'No hay imágenes con esta etiqueta'}
-			</p>
-		</div>
-	);
+	const images = computeImages();
+	const rarityBrightness = getRarityBrightness();
 
 	// Renderizar loading
 	if (loading) {
 		return (
-			<div
-				className={cn('flex flex-shrink-0 items-center justify-center bg-black/5', compact ? 'h-[120px]' : 'h-[140px]')}
-				style={{
-					borderBottom: `1px solid ${primaryColor}20`,
-					background: tcgMode ? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)` : `${primaryColor}05`,
-				}}
-			>
-				<div
-					className="h-6 w-6 animate-spin rounded-full border-2 border-t-transparent"
-					style={{ borderColor: `${primaryColor}80 transparent ${primaryColor}30 ${primaryColor}30` }}
-				/>
-			</div>
+			<LoadingState compact={compact} primaryColor={primaryColor} secondaryColor={secondaryColor} tcgMode={tcgMode} />
 		);
 	}
 
@@ -85,7 +139,7 @@ export function TagCardImages({
 					background: tcgMode ? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)` : `${primaryColor}05`,
 				}}
 			>
-				{renderPlaceholder()}
+				<ImagePlaceholder error={error} primaryColor={primaryColor} />
 			</div>
 		);
 	}
@@ -107,14 +161,7 @@ export function TagCardImages({
 			/>
 
 			{/* Esquinas TCG decorativas para imágenes */}
-			{tcgMode && (
-				<div className="pointer-events-none absolute inset-0 z-10">
-					<div className="absolute top-0 left-0 h-4 w-4 border-white/20 border-t border-l" />
-					<div className="absolute top-0 right-0 h-4 w-4 border-white/20 border-t border-r" />
-					<div className="absolute bottom-0 left-0 h-4 w-4 border-white/20 border-b border-l" />
-					<div className="absolute right-0 bottom-0 h-4 w-4 border-white/20 border-r border-b" />
-				</div>
-			)}
+			{tcgMode && <TCGCorners />}
 
 			{/* Grid de imágenes con efecto de mosaico etiquetado */}
 			<div className="grid h-full grid-cols-3 grid-rows-2 gap-px">
@@ -129,7 +176,7 @@ export function TagCardImages({
 							style={{
 								opacity: tcgMode ? 0.9 : 1,
 								// Efectos específicos de etiqueta: borde sutil y tratamiento de imágen
-								filter: tcgMode ? `contrast(1.05) ${index % 2 === 0 ? 'saturate(1.1)' : 'saturate(0.9)'}` : 'none',
+								filter: getFilterEffects(index),
 							}}
 						/>
 

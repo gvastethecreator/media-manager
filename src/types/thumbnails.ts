@@ -9,38 +9,44 @@ import type { JSONString } from '@/lib/utils/types/utility-types';
 /**
  * Calidad de thumbnail
  */
-export enum ThumbnailQuality {
-	COMPRESSED = 'compressed',
-	LOW = 'low',
-	MEDIUM = 'medium',
-	HIGH = 'high',
-}
+export const ThumbnailQuality = {
+	COMPRESSED: 'compressed',
+	LOW: 'low',
+	MEDIUM: 'medium',
+	HIGH: 'high',
+} as const;
+
+export type ThumbnailQuality = (typeof ThumbnailQuality)[keyof typeof ThumbnailQuality];
 
 /**
  * Modo de ajuste de thumbnail
  */
-export enum ThumbnailFit {
-	CONTAIN = 'contain',
-	COVER = 'cover',
-	FILL = 'fill',
-	INSIDE = 'inside',
-	OUTSIDE = 'outside',
-}
+export const ThumbnailFit = {
+	CONTAIN: 'contain',
+	COVER: 'cover',
+	FILL: 'fill',
+	INSIDE: 'inside',
+	OUTSIDE: 'outside',
+} as const;
+
+export type ThumbnailFit = (typeof ThumbnailFit)[keyof typeof ThumbnailFit];
 
 /**
  * Posición de thumbnail
  */
-export enum ThumbnailPosition {
-	TOP = 'top',
-	RIGHT_TOP = 'right-top',
-	RIGHT = 'right',
-	RIGHT_BOTTOM = 'right-bottom',
-	BOTTOM = 'bottom',
-	LEFT_BOTTOM = 'left-bottom',
-	LEFT = 'left',
-	LEFT_TOP = 'left-top',
-	CENTER = 'center',
-}
+export const ThumbnailPosition = {
+	TOP: 'top',
+	RIGHT_TOP: 'right-top',
+	RIGHT: 'right',
+	RIGHT_BOTTOM: 'right-bottom',
+	BOTTOM: 'bottom',
+	LEFT_BOTTOM: 'left-bottom',
+	LEFT: 'left',
+	LEFT_TOP: 'left-top',
+	CENTER: 'center',
+} as const;
+
+export type ThumbnailPosition = (typeof ThumbnailPosition)[keyof typeof ThumbnailPosition];
 
 /**
  * Opciones de generación de thumbnail
@@ -134,12 +140,14 @@ export interface ProcessStatus {
 /**
  * Estados de procesamiento
  */
-export enum ProcessState {
-	PENDING = 'pending',
-	PROCESSING = 'processing',
-	COMPLETED = 'completed',
-	FAILED = 'failed',
-}
+export const ProcessState = {
+	PENDING: 'pending',
+	PROCESSING: 'processing',
+	COMPLETED: 'completed',
+	FAILED: 'failed',
+} as const;
+
+export type ProcessState = (typeof ProcessState)[keyof typeof ProcessState];
 
 /**
  * Error de thumbnail

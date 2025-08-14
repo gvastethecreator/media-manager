@@ -5,6 +5,33 @@ import { copyFileSync, createWriteStream, existsSync, mkdirSync } from 'node:fs'
 import chalk from 'chalk';
 import { join } from 'path';
 
+// Regex top-level
+const RE_CANNOT_FIND_MODULE = /Cannot find module/;
+const RE_CRITICAL_ERRORS = /ENOENT|spawn.*failed|permission denied|command not found|out of memory/i;
+const RE_DEP_ERRORS = /MODULE_NOT_FOUND|Error: Cannot resolve module|bun.*ERR/i;
+const RE_INFO_TOOL = /(lint\/|test |spec )/;
+const RE_ERR_TOKEN = /(error|✘|failed)/;
+
+function resolveCommandTypeLower(isLint, isTest) {
+	if (isLint) {
+		return 'linting';
+	}
+	if (isTest) {
+		return 'testing';
+	}
+	return 'tolerante';
+}
+
+function resolveCommandTypeHeader(isLint, isTest) {
+	if (isLint) {
+		return 'Linting';
+	}
+	if (isTest) {
+		return 'Testing';
+	}
+	return 'Normal';
+}
+
 const [, , logName, ...commandArgs] = process.argv;
 
 if (!logName || commandArgs.length === 0) {
@@ -50,7 +77,7 @@ const logFilePath = join(logsDir, logFileName);
 console.log(chalk.cyan(`🚀 Ejecutando: ${chalk.bold(fullCommand)}`));
 console.log(chalk.gray(`📄 Logs en: ${logFilePath}`));
 if (isTolerantCommand) {
-	const tipo = isLintingCommand ? 'linting' : isTestingCommand ? 'testing' : 'tolerante';
+	const tipo = resolveCommandTypeLower(isLintingCommand, isTestingCommand);
 	console.log(chalk.blue(`🔍 Comando de ${tipo} detectado - tolerando códigos de salida no-cero`));
 }
 console.log(chalk.yellow('📺 Salida en tiempo real:'));
@@ -62,7 +89,7 @@ const logHeader = [
 	`Fecha: ${new Date().toISOString()}`,
 	`Directorio: ${process.cwd()}`,
 	`Modo tolerante: ${isTolerantCommand ? 'SÍ' : 'NO'}`,
-	`Tipo: ${isLintingCommand ? 'Linting' : isTestingCommand ? 'Testing' : 'Normal'}`,
+	`Tipo: ${resolveCommandTypeHeader(isLintingCommand, isTestingCommand)}`,
 	'===============================================',
 	'',
 ].join('\n');
@@ -80,30 +107,24 @@ let missingDep = false;
 let hasRealErrors = false;
 
 // Función para determinar el color y emoji según el tipo de línea
-function getLineStyle(line, isError, hasRealErrors, isTolerantCommand) {
-	// Casos de éxito
-	if (line.includes('✓') || line.includes('success') || line.includes('Fixed')) {
+function getLineStyle(line, isError) {
+	const success = line.includes('✓') || line.includes('success') || line.includes('Fixed');
+	if (success) {
 		return { color: chalk.green, emoji: '✅' };
 	}
-
-	// Warnings
-	if (line.includes('warning') || line.includes('warn')) {
+	const warn = line.includes('warning') || line.includes('warn');
+	if (warn) {
 		return { color: chalk.yellow, emoji: '⚠️ ' };
 	}
-
-	// Issues de herramientas (siempre informativos)
-	if (line.includes('lint/') || line.includes('test ') || line.includes('spec ')) {
+	const infoTool = RE_INFO_TOOL.test(line);
+	if (infoTool) {
 		return { color: chalk.cyan, emoji: '🔍' };
 	}
-
-	// Errores - lógica simplificada
-	const isErrorLine = line.includes('error') || line.includes('✘') || line.includes('failed');
-	if (isErrorLine) {
-		const treatAsError = hasRealErrors || !isTolerantCommand;
-		return treatAsError ? { color: chalk.red, emoji: '❌' } : { color: chalk.cyan, emoji: '🔍' };
+	const errTok = RE_ERR_TOKEN.test(line);
+	if (errTok) {
+		const treat = hasRealErrors || !isTolerantCommand;
+		return treat ? { color: chalk.red, emoji: '❌' } : { color: chalk.cyan, emoji: '🔍' };
 	}
-
-	// Salida de error del proceso
 	if (isError) {
 		if (hasRealErrors) {
 			return { color: chalk.redBright, emoji: '🔴' };
@@ -112,8 +133,6 @@ function getLineStyle(line, isError, hasRealErrors, isTolerantCommand) {
 			return { color: chalk.cyan, emoji: '🔍' };
 		}
 	}
-
-	// Default
 	return { color: chalk.white, emoji: '📋' };
 }
 
@@ -122,23 +141,21 @@ function processOutput(data, isError = false) {
 	const text = data.toString();
 	const lines = text.split('\n').filter((line) => line.trim());
 
-	if (/Cannot find module/.test(text)) {
+	if (RE_CANNOT_FIND_MODULE.test(text)) {
 		missingDep = true;
 		hasRealErrors = true;
 	}
 
-	// Detectar errores críticos reales vs issues de linting/testing
-	if (/ENOENT|spawn.*failed|permission denied|command not found|out of memory/i.test(text)) {
+	if (RE_CRITICAL_ERRORS.test(text)) {
 		hasRealErrors = true;
 	}
 
-	// Detectar errores de dependencias
-	if (/MODULE_NOT_FOUND|Error: Cannot resolve module|bun.*ERR/i.test(text)) {
+	if (RE_DEP_ERRORS.test(text)) {
 		hasRealErrors = true;
 	}
 
 	for (const line of lines) {
-		const { color, emoji } = getLineStyle(line, isError, hasRealErrors, isTolerantCommand);
+		const { color, emoji } = getLineStyle(line, isError);
 		console.log(color(`${emoji} ${line}`));
 	}
 }
@@ -171,12 +188,11 @@ child.on('close', (code) => {
 		console.log(chalk.green.bold('✅ Comando ejecutado exitosamente'));
 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
 	} else if (isTolerantCommand && !hasRealErrors) {
-		const tipo = isLintingCommand ? 'Linting' : isTestingCommand ? 'Testing' : 'Proceso';
+		const tipo = resolveCommandTypeHeader(isLintingCommand, isTestingCommand);
 		console.log(chalk.yellow.bold(`⚠️  ${tipo} completado con issues encontrados (Exit code: ${code})`));
 		console.log(chalk.cyan(`🔍 Esto es normal para herramientas de ${tipo.toLowerCase()} cuando encuentran problemas`));
 		console.log(chalk.gray(`📄 Log completo guardado en: ${logFilePath}`));
 		console.log(chalk.green('✅ Script completado exitosamente'));
-		// Para herramientas tolerantes, no tratamos esto como error crítico
 		process.exit(0);
 	} else {
 		console.error(chalk.red.bold(`❌ Error al ejecutar comando (Exit code: ${code})`));

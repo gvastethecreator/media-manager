@@ -1,337 +1,129 @@
 /**
- * @file Vista de cuadrícula optimizada con virtualización simple
- * @module components/features/file-browser/views/grid-view
+ * GridView mínima reconstruida.
+ * Requisitos actuales:
+ * - Renderizar items en grid responsive.
+ * - Resaltar selección.
+ * - Delegar eventos click / double click al FileBrowser.
+ * - Sin virtualización avanzada (se puede reintroducir luego si >200 items).
  */
 
-import { useVirtualizer } from '@tanstack/react-virtual';
-import { motion } from 'motion/react';
-import { memo, useCallback, useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { OptimizedEntityCard } from '@/components/cards/entity-card';
-import { useGridViewConfig } from '@/hooks/use-grid-view-config';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
 
-interface GridViewProps {
+export interface GridViewProps {
 	items: AnyEntityWithStats[];
 	selectedIds: string[];
 	containerWidth: number;
-	onItemClick: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
-	onItemDoubleClick: (item: AnyEntityWithStats) => void;
+	itemSize?: number;
+	interfaceConfig?: any; // objeto derivado de FileBrowser
+	onItemClick?: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
+	onItemDoubleClick?: (item: AnyEntityWithStats, e: React.MouseEvent) => void;
 }
 
-export const GridView = memo<GridViewProps>(function GridViewComponent({
-	items,
-	selectedIds,
-	containerWidth,
-	onItemClick,
-	onItemDoubleClick,
-}) {
-	const parentRef = useRef<HTMLDivElement>(null);
-	const gridRef = useRef<HTMLDivElement>(null);
-	const hasMountedRef = useRef(false);
+export const GridView: React.FC<GridViewProps> = React.memo(
+	({ items, selectedIds, containerWidth, itemSize = 160, interfaceConfig, onItemClick, onItemDoubleClick }) => {
+		const selectedSet = useMemo(() => new Set(selectedIds), [selectedIds]);
 
-	// Configuración simplificada (omitimos 'config' no usado)
-	const { calculateLayout } = useGridViewConfig();
-
-	// OPTIMIZACIÓN AVANZADA: Memoización de props derivadas para evitar re-cálculos
-	const derivedProps = useMemo(
-		() => ({
-			hasSelection: selectedIds.length > 0,
-			itemCount: items.length,
-			isVirtualized: items.length > 100,
-		}),
-		[selectedIds.length, items.length]
-	);
-
-	// Calcular layout de la grid - Optimizado con dependencias mínimas
-	const layout = useMemo(
-		() => calculateLayout(containerWidth, derivedProps.itemCount),
-		[calculateLayout, containerWidth, derivedProps.itemCount]
-	);
-
-	// OPTIMIZACIÓN: Crear Map estable con useRef para máximo rendimiento
-	const itemsByIdRef = useRef(new Map<string, AnyEntityWithStats>());
-	const selectedIdsSetRef = useRef(new Set<string>());
-
-	// Actualizar refs solo cuando sea necesario
-	useEffect(() => {
-		const newMap = new Map<string, AnyEntityWithStats>();
-		for (const item of items) {
-			newMap.set(item.id, item);
+		// Mejora: cálculo robusto de columnas minimizando rounding drift
+		const minWidth = 120;
+		const maxWidth = 320;
+		const baseWidth = Math.max(minWidth, Math.min(itemSize, maxWidth));
+		const gap = interfaceConfig?.views?.grid?.gap ?? 8; // permitir personalización (px)
+		const innerWidth = Math.max(0, containerWidth - gap);
+		let columns = Math.max(1, Math.floor((innerWidth + gap) / (baseWidth + gap)));
+		if (columns * baseWidth + (columns - 1) * gap > containerWidth && columns > 1) {
+			columns -= 1; // ajuste fino si nos pasamos por rounding
 		}
-		itemsByIdRef.current = newMap;
-		selectedIdsSetRef.current = new Set(selectedIds);
-	}, [items, selectedIds]);
+		// Evitar cambios agresivos de columnas si containerWidth varía poco: (omitido por simplicidad ahora)
 
-	// Handler para clicks en espacio vacío
-	const handleEmptySpaceClick = useCallback(
-		(e: React.MouseEvent) => {
-			const target = e.target as HTMLElement;
-			const currentTarget = e.currentTarget as HTMLElement;
-			const isEmptySpaceClick =
-				target === currentTarget ||
-				!(
-					target.closest('.entity-card') ||
-					target.closest('[data-entity-card]') ||
-					target.closest('button') ||
-					target.closest('[data-testid="file-browser-item"]')
-				);
-			if (isEmptySpaceClick && derivedProps.hasSelection) {
-				// Visual feedback
-				currentTarget.style.transition = 'background-color 0.15s ease';
-				currentTarget.style.backgroundColor = 'rgba(var(--primary), 0.08)';
-				setTimeout(() => {
-					currentTarget.style.backgroundColor = '';
-					currentTarget.style.transition = '';
-				}, 150);
-			}
-		},
-		[derivedProps.hasSelection]
-	);
-
-	// Navegación por teclado
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
-			if (!gridRef.current) {
-				return;
-			}
-			const focusedElement = document.activeElement as HTMLElement;
-			if (!focusedElement?.closest('[data-item-id]')) {
-				return;
-			}
-			const gridItems = Array.from(gridRef.current.querySelectorAll('[data-item-id]')) as HTMLElement[];
-			const currentIndex = gridItems.findIndex((item) => item.contains(focusedElement));
-			if (currentIndex === -1) {
-				return;
-			}
-			let nextIndex = currentIndex;
-			switch (e.key) {
-				case 'ArrowRight':
-					nextIndex = Math.min(currentIndex + 1, gridItems.length - 1);
-					break;
-				case 'ArrowLeft':
-					nextIndex = Math.max(currentIndex - 1, 0);
-					break;
-				case 'ArrowDown':
-					nextIndex = Math.min(currentIndex + layout.columns, gridItems.length - 1);
-					break;
-				case 'ArrowUp':
-					nextIndex = Math.max(currentIndex - layout.columns, 0);
-					break;
-				case 'Home':
-					nextIndex = 0;
-					break;
-				case 'End':
-					nextIndex = gridItems.length - 1;
-					break;
-				default:
+		// Handlers estables (un solo closure) reducen creación masiva por item
+		const handleClick = useCallback(
+			(e: React.MouseEvent) => {
+				const id = (e.currentTarget as HTMLElement).dataset.itemId;
+				if (!id) {
 					return;
-			}
-			e.preventDefault();
-			gridItems[nextIndex]?.focus();
-		},
-		[layout.columns]
-	);
+				}
+				const entity = items.find((it) => it.id === id);
+				if (entity) {
+					onItemClick?.(entity, e);
+				}
+			},
+			[items, onItemClick]
+		);
 
-	// Calcular dimensiones de items y filas para virtualización
-	const itemWidth = layout.itemSize;
-	const itemHeight = layout.itemHeight;
-	const rowCount = Math.ceil(items.length / layout.columns);
-	const rowHeight = itemHeight + layout.gap;
+		const handleDoubleClick = useCallback(
+			(e: React.MouseEvent) => {
+				const id = (e.currentTarget as HTMLElement).dataset.itemId;
+				if (!id) {
+					return;
+				}
+				const entity = items.find((it) => it.id === id);
+				if (entity) {
+					onItemDoubleClick?.(entity, e);
+				}
+			},
+			[items, onItemDoubleClick]
+		);
 
-	// Configurar virtualizador para filas
-	const rowVirtualizer = useVirtualizer({
-		count: rowCount,
-		getScrollElement: () => {
-			const viewport = parentRef.current?.closest('[data-slot="scroll-area-viewport"]') as HTMLElement | null;
-			return viewport ?? parentRef.current;
-		},
-		estimateSize: () => rowHeight,
-		overscan: rowCount > 50 ? 3 : 2,
-	});
-
-	// Función para obtener items de una fila específica - Memoizada
-	const getRowItems = useCallback(
-		(rowIndex: number): AnyEntityWithStats[] => {
-			const startIndex = rowIndex * layout.columns;
-			return items.slice(startIndex, Math.min(startIndex + layout.columns, items.length));
-		},
-		[items, layout.columns]
-	);
-
-	// Handlers estables
-	const handlersRef = useRef({
-		onItemClick: (itemId: string, e: React.MouseEvent) => {
-			const item = itemsByIdRef.current.get(itemId);
-			if (item) {
-				onItemClick(item, e);
-			}
-		},
-		onItemDoubleClick: (itemId: string) => {
-			const item = itemsByIdRef.current.get(itemId);
-			if (item) {
-				onItemDoubleClick(item);
-			}
-		},
-	});
-
-	useMemo(() => {
-		handlersRef.current.onItemClick = (itemId: string, e: React.MouseEvent) => {
-			const item = itemsByIdRef.current.get(itemId);
-			if (item) {
-				onItemClick(item, e);
-			}
-		};
-		handlersRef.current.onItemDoubleClick = (itemId: string) => {
-			const item = itemsByIdRef.current.get(itemId);
-			if (item) {
-				onItemDoubleClick(item);
-			}
-		};
-	}, [onItemClick, onItemDoubleClick]);
-
-	const handleItemClickById = useCallback((itemId: string, e: React.MouseEvent) => {
-		e.stopPropagation();
-		handlersRef.current.onItemClick(itemId, e);
-	}, []);
-	const handleItemDoubleClickById = useCallback((itemId: string) => {
-		handlersRef.current.onItemDoubleClick(itemId);
-	}, []);
-
-	// Marcas de rendimiento y control de animación sólo montaje inicial
-	useEffect(() => {
-		if (!hasMountedRef.current) {
-			try {
-				performance.mark('grid-view-initial-render-start');
-				// measure end en microtask
-				queueMicrotask(() => {
-					try {
-						performance.mark('grid-view-initial-render-end');
-						performance.measure(
-							'grid-view-initial-render',
-							'grid-view-initial-render-start',
-							'grid-view-initial-render-end'
-						);
-					} catch (err) {
-						/* noop */
-					}
-				});
-			} catch (err) {
-				/* noop */
-			}
-			hasMountedRef.current = true;
-		}
-	}, []);
-
-	// Estilos base memoizados por tamaño (minimizan nuevas refs al map)
-	const baseItemStyle = useMemo(
-		() => ({ width: `${itemWidth}px`, height: `${itemHeight}px` }),
-		[itemWidth, itemHeight]
-	);
-
-	return (
-		<section
-			aria-label={`Vista de cuadrícula con ${items.length} elementos`}
-			className="h-full w-full"
-			data-testid="grid-view"
-			data-view-type="grid"
-			ref={parentRef}
-			style={{ position: 'relative', contain: 'content paint style layout' }}
-		>
+		return (
 			<div
-				className="h-full w-full cursor-default border-0 bg-transparent p-0 text-left"
-				onClickCapture={handleEmptySpaceClick}
-				role="application"
-				style={{ display: 'block' }}
+				className="grid w-full p-1" // padding ligero para evitar que el primer item pegue al borde
+				data-testid="grid-view"
+				style={{
+					gridTemplateColumns: `repeat(${columns}, minmax(${baseWidth}px, 1fr))`,
+					gap: `${gap}px`,
+					alignItems: 'stretch',
+					justifyItems: 'stretch',
+					// Fuerza layout estable incluso con alturas distintas
+					fontFamily: 'var(--app-font-family)',
+					fontSize: 'var(--app-font-size)',
+				}}
 			>
-				<div className="relative" ref={gridRef} style={{ height: `${rowVirtualizer.getTotalSize()}px`, width: '100%' }}>
-					{rowVirtualizer.getVirtualItems().map((virtualRow) => {
-						const rowItems = getRowItems(virtualRow.index);
-						return (
+				{items.map((item) => {
+					const isSelected = selectedSet.has(item.id);
+					return (
+						<button
+							className={cn(
+								'group relative cursor-pointer overflow-hidden border bg-background/40 p-0 text-left outline-none',
+								interfaceConfig?.global?.animations && !interfaceConfig?.global?.ultra
+									? 'transition-colors hover:bg-accent focus-visible:ring-2 focus-visible:ring-primary'
+									: 'focus-visible:ring-2 focus-visible:ring-primary',
+								isSelected && 'ring-2 ring-primary',
+								interfaceConfig?.global?.ultra && 'hover:bg-accent/40'
+							)}
+							data-item-id={item.id}
+							key={item.id}
+							onClick={handleClick}
+							onDoubleClick={handleDoubleClick}
+							style={{
+								borderRadius: interfaceConfig?.global?.borderRadius?.grid
+									? `${interfaceConfig.global.borderRadius.grid}px`
+									: undefined,
+							}}
+							type="button"
+						>
 							<div
-								className="absolute top-0 left-0 w-full"
-								key={virtualRow.key}
+								className={cn('w-full', interfaceConfig?.global?.respectAspect ? 'aspect-auto' : 'aspect-square')}
 								style={{
-									height: `${rowHeight}px`,
-									transform: `translateY(${virtualRow.start}px)`,
-									padding: `0 ${layout.padding}px`,
+									objectFit: interfaceConfig?.global?.respectAspect ? 'contain' : 'cover',
 								}}
 							>
-								<div
-									className="grid h-full"
-									style={{
-										gridTemplateColumns: `repeat(${layout.columns}, 1fr)`,
-										gap: `${layout.gap}px`,
-										height: `${itemHeight}px`,
-									}}
-								>
-									{rowItems.map((item, columnIndex) => {
-										const isSelected = selectedIdsSetRef.current.has(item.id);
-										const itemIndex = virtualRow.index * layout.columns + columnIndex;
-										const disableAnimation = hasMountedRef.current;
-										const commonProps = {
-											className: cn(
-												'relative cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-primary/70',
-												isSelected && 'ring-2 ring-primary ring-offset-2'
-											),
-											'aria-selected': isSelected || undefined,
-											'aria-label': `${item.name || 'Elemento'} - ${(item as any).entityType || 'archivo'}`,
-											role: 'gridcell' as const,
-											'aria-colindex': columnIndex + 1,
-											'aria-rowindex': virtualRow.index + 1,
-											// Atributos de compatibilidad para tests y selección avanzada
-											'data-entity-card': '',
-											'data-item-id': item.id,
-											'data-selectable': 'true',
-											key: item.id,
-											tabIndex: itemIndex === 0 ? 0 : -1,
-											onClick: (e: React.MouseEvent) => {
-												e.stopPropagation();
-												const target = e.target as HTMLElement;
-												if (target.closest('button,[role="button"],a,[data-no-select]')) {
-													return;
-												}
-												handlersRef.current.onItemClick(item.id, e);
-											},
-											onKeyDown: handleKeyDown,
-											onDoubleClick: () => handleItemDoubleClickById(item.id),
-											style: baseItemStyle,
-										};
-										if (disableAnimation) {
-											return (
-												<div {...commonProps} key={item.id}>
-													<OptimizedEntityCard
-														className="h-full w-full"
-														compact={true}
-														entity={item}
-														isSelected={isSelected}
-													/>
-												</div>
-											);
-										}
-										return (
-											<motion.div
-												{...commonProps}
-												animate={{ opacity: 1, scale: 1 }}
-												initial={{ opacity: 0, scale: 0.85 }}
-												key={item.id}
-												transition={{ duration: 0.18 }}
-											>
-												<OptimizedEntityCard
-													className="h-full w-full"
-													compact={true}
-													entity={item}
-													isSelected={isSelected}
-												/>
-											</motion.div>
-										);
-									})}
-								</div>
+								<OptimizedEntityCard
+									className="h-full w-full"
+									compact
+									entity={item as any}
+									isSelected={isSelected}
+									thumbnailQuality={interfaceConfig?.performance?.thumbnailQuality}
+								/>
 							</div>
-						);
-					})}
-				</div>
+						</button>
+					);
+				})}
 			</div>
-		</section>
-	);
-});
+		);
+	}
+);
+
+export default GridView;

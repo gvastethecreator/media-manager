@@ -1,8 +1,10 @@
-import { motion } from 'motion/react';
-import React, { useCallback, useMemo, useState } from 'react';
+import { getRarityGradient } from '@/components/cards/shared/rarity-gradients';
+import { darkenHex } from '@/components/cards/shared/rarity-style';
 import { usePlace, useRecentPlaceMedia } from '@/lib/api/places';
 import { cn } from '@/lib/utils';
 import { PlaceWithStats } from '@/types/entities/place';
+import { motion } from 'motion/react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { CardContainer } from '../card-container';
 import { PlaceCardContent } from './place-card-content';
 import { PlaceCardFooter } from './place-card-footer';
@@ -30,72 +32,42 @@ export interface PlaceCardProps {
  * Componente de tarjeta de lugar inspirado en cartas TCG
  * Muestra información detallada de un lugar con elementos visuales de Trading Card Game
  */
-export function PlaceCard({
-	placeId,
-	compact = false,
-	tcgMode = true,
-	disabled = false,
-	className,
-	onClick,
-	isSelected = false,
-}: PlaceCardProps) {
-	const { data: place, isLoading, error } = usePlace(placeId);
-	const { data: recentMediaData } = useRecentPlaceMedia(placeId);
-	const [isHovered, setIsHovered] = useState(false);
+// --- Helpers & constantes extraídas para reducir complejidad del componente principal ---
 
-	// Si no hay datos del lugar o está cargando, mostrar un esqueleto o un mensaje de error
-	if (isLoading) {
-		return (
-			<div
-				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
-					className
-				)}
-			>
-				<p className="text-gray-500">Cargando lugar...</p>
-			</div>
-		);
+const TYPE_COLORS: Record<string, string> = {
+	city: '#2563eb',
+	forest: '#047857',
+	mountain: '#b91c1c',
+	desert: '#d97706',
+};
+
+// darkenHex centralizado en shared/rarity-style
+
+function computeSecondaryColor(color: string | undefined, type: string | undefined): string {
+	if (!color) {
+		return TYPE_COLORS[type ?? ''] || '#064e3b';
 	}
+	return darkenHex(color, 0.7);
+}
 
-	if (error || !place) {
-		return (
-			<div
-				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
-					className
-				)}
-			>
-				<p className="text-red-800">Error: {error?.message || 'Lugar no encontrado'}</p>
-			</div>
-		);
-	}
+interface DerivedPlaceData {
+	primaryColor: string;
+	secondaryColor: string;
+	rarityLevel: number;
+	power: number;
+	healthPoints: number;
+	valueLevel: number;
+	cardId: string;
+	imagesCount: number;
+	videosCount: number;
+	cardMedia: Array<{ id: string; name: string; thumbnailUrl: string; url: string; type: string; isVideo: boolean }>;
+	parsedResources: { name: string; abundance: number; description?: string }[];
+	parsedDangers: { type: string; level: number; description?: string }[];
+	parsedStats: Record<string, number>;
+	population: number;
+}
 
-	// Extraer datos del lugar
-	const {
-		id,
-		name,
-		emoji = '📍',
-		color = '#10b981',
-		description,
-		region = 'desconocido',
-		type,
-		climate = 'templado',
-		population: rawPopulation = 0, // Renombrar para evitar conflicto
-		government = 'desconocido',
-		createdAt,
-		updatedAt,
-		isFavorite = false,
-		_count,
-		parsedDangers = [],
-		parsedResources = [],
-		parsedStats = {},
-		metadata,
-	} = place;
-
-	// Asegurar que population sea un número
-	const population = typeof rawPopulation === 'string' ? Number.parseInt(rawPopulation, 10) : rawPopulation;
-
-	// Corregir tipos de campos parseados
+function normalizeArrays(parsedResources: unknown, parsedDangers: unknown, parsedStats: unknown) {
 	const safeParsedResources = Array.isArray(parsedResources)
 		? (parsedResources as { name: string; abundance: number; description?: string }[])
 		: [];
@@ -103,73 +75,166 @@ export function PlaceCard({
 		? (parsedDangers as { type: string; level: number; description?: string }[])
 		: [];
 	const safeParsedStats = parsedStats && typeof parsedStats === 'object' ? (parsedStats as Record<string, number>) : {};
+	return { safeParsedResources, safeParsedDangers, safeParsedStats };
+}
 
-	// Preparar los medios para el componente de galería
-	const cardMedia = useMemo(() => {
-		return (recentMediaData || []).map((media) => ({
-			id: media.id,
-			name: media.name,
-			thumbnailUrl: media.thumbnailUrl,
-			url: media.url,
-			type: media.type,
-			isVideo: media.type === 'video',
-		}));
-	}, [recentMediaData]);
+function buildCardMedia(recentMediaData: any[] | undefined) {
+	return (recentMediaData || []).map((media) => ({
+		id: media.id,
+		name: media.name,
+		thumbnailUrl: media.thumbnailUrl || '',
+		url: media.url || '',
+		type: media.type,
+		isVideo: media.type === 'video',
+	}));
+}
 
-	// Asegurar que population sea un número
-	const numericPopulation = typeof population === 'string' ? Number.parseInt(population, 10) : population;
-
-	// Calcular colores para la tarjeta TCG
-	const primaryColor = color || '#10b981';
-	const secondaryColor = useMemo(() => {
-		// Si no hay color definido, usar color predeterminado basado en el tipo
-		if (!color) {
-			return type === 'city'
-				? '#2563eb'
-				: type === 'forest'
-					? '#047857'
-					: type === 'mountain'
-						? '#b91c1c'
-						: type === 'desert'
-							? '#d97706'
-							: '#064e3b';
-		}
-
-		// Oscurecer el color primario para el secundario
-		try {
-			// Convertir hex a RGB
-			const r = Number.parseInt(color.slice(1, 3), 16);
-			const g = Number.parseInt(color.slice(3, 5), 16);
-			const b = Number.parseInt(color.slice(5, 7), 16);
-
-			// Oscurecer los componentes
-			const darkenFactor = 0.7;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
-
-			// Convertir de vuelta a hex
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (_e) {
-			// Si hay algún error, volver al valor por defecto
-			return '#064e3b';
-		}
-	}, [color, type]);
-
-	// Datos de rareza y poder para el diseño TCG
+function extractMetadata(metadata: unknown, id: string) {
 	const parsedMetadata = metadata && typeof metadata === 'object' ? (metadata as Record<string, unknown>) : {};
-	const rarityLevel = (parsedMetadata.rarityLevel as number) || 1;
-	const power = (parsedMetadata.power as number) || 1;
-	const healthPoints = (parsedMetadata.healthPoints as number) || 100;
-	const valueLevel = (parsedMetadata.valueLevel as number) || 1;
-	const cardId = (parsedMetadata.cardId as string) || `P${id.substring(0, 6)}`;
+	return {
+		rarityLevel: (parsedMetadata.rarityLevel as number) || 1,
+		power: (parsedMetadata.power as number) || 1,
+		healthPoints: (parsedMetadata.healthPoints as number) || 100,
+		valueLevel: (parsedMetadata.valueLevel as number) || 1,
+		cardId: (parsedMetadata.cardId as string) || `P${String(id).substring(0, 6)}`,
+	};
+}
 
-	// Imágenes y videos para la tarjeta
-	const imagesCount = _count?.images || 0;
-	const videosCount = _count?.videos || 0;
+function preparePlaceDerivedData(place: PlaceWithStats, recentMediaData: any[] | undefined): DerivedPlaceData {
+	const {
+		color = '#10b981',
+		type,
+		parsedResources = [],
+		parsedDangers = [],
+		parsedStats = {},
+		metadata,
+		_count,
+		population: rawPopulation = 0,
+		id,
+	} = place as any;
+	const population = typeof rawPopulation === 'string' ? Number.parseInt(rawPopulation, 10) : rawPopulation;
+	const primaryColor = color || '#10b981';
+	const secondaryColor = computeSecondaryColor(color, type);
+	const { safeParsedResources, safeParsedDangers, safeParsedStats } = normalizeArrays(
+		parsedResources,
+		parsedDangers,
+		parsedStats
+	);
+	const cardMedia = buildCardMedia(recentMediaData);
+	const { rarityLevel, power, healthPoints, valueLevel, cardId } = extractMetadata(metadata, String(id));
+	return {
+		primaryColor,
+		secondaryColor,
+		rarityLevel,
+		power,
+		healthPoints,
+		valueLevel,
+		cardId,
+		imagesCount: _count?.images || 0,
+		videosCount: _count?.videos || 0,
+		cardMedia,
+		parsedResources: safeParsedResources,
+		parsedDangers: safeParsedDangers,
+		parsedStats: safeParsedStats,
+		population: typeof population === 'string' ? Number.parseInt(population, 10) : population,
+	};
+}
 
-	// Manejar eventos de teclado para accesibilidad
-	const handleKeyDown = useCallback(
+// --- Componentes de presentación auxiliares ---
+
+const PlaceCardLoading: React.FC<{ className?: string }> = ({ className }) => (
+	<div
+		className={cn(
+			'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
+			className
+		)}
+	>
+		<p className="text-gray-500">Cargando lugar...</p>
+	</div>
+);
+
+const PlaceCardError: React.FC<{ className?: string; message: string }> = ({ className, message }) => (
+	<div
+		className={cn(
+			'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
+			className
+		)}
+	>
+		<p className="text-red-800">Error: {message}</p>
+	</div>
+);
+
+interface PlaceCardViewProps extends Omit<PlaceCardProps, 'placeId'> {
+	place: PlaceWithStats;
+	derived: DerivedPlaceData;
+}
+
+const TCGEffects: React.FC<{
+	tcgMode: boolean;
+	isFavorite: boolean;
+	primaryColor: string;
+	secondaryColor: string;
+	rarityLevel: number;
+	valueLevel: number;
+}> = ({ tcgMode, isFavorite, primaryColor, secondaryColor, rarityLevel, valueLevel }) => {
+	if (!tcgMode) {
+		return null;
+	}
+	return (
+		<>
+			<div
+				className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-30"
+				style={{
+					backgroundImage: `linear-gradient(125deg,transparent 0%,${primaryColor}30 25%,${secondaryColor}30 50%,${primaryColor}30 75%,transparent 100%)`,
+					backgroundSize: '200% 200%',
+					animation: 'gradient-shift 3s ease infinite',
+				}}
+			/>
+			<div className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-20">
+				<div
+					className="absolute inset-0"
+					style={{
+						background: getRarityGradient({ level: rarityLevel, primary: primaryColor, secondary: secondaryColor }),
+						backgroundSize: '300% 300%',
+						animation: 'shine 6s linear infinite',
+					}}
+				/>
+			</div>
+			<div className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/3 left-1/2 z-1 h-20 w-20 opacity-10">
+				<div
+					className="flex h-full w-full items-center justify-center rounded-full border-2 border-dashed"
+					style={{ borderColor: primaryColor }}
+				>
+					<div className="font-bold text-xs" style={{ color: primaryColor }}>
+						VALOR
+						<br />
+						{valueLevel}
+					</div>
+				</div>
+			</div>
+			{isFavorite && (
+				<div className="pointer-events-none absolute top-0 right-0 z-30 h-24 w-24 overflow-hidden">
+					<div
+						className="-translate-y-8 absolute top-0 right-0 h-24 w-24 translate-x-12 rotate-45 opacity-70"
+						style={{
+							background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
+							backgroundSize: '600% 600%',
+							animation: 'shine 3s linear infinite',
+						}}
+					/>
+				</div>
+			)}
+		</>
+	);
+};
+
+// Reducir complejidad: dividir extracción de props y render
+function usePlaceCardViewKeyboard(
+	disabled: boolean,
+	onClick: ((p: PlaceWithStats) => void) | undefined,
+	place: PlaceWithStats
+) {
+	return useCallback(
 		(e: React.KeyboardEvent) => {
 			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick) {
 				e.preventDefault();
@@ -178,6 +243,87 @@ export function PlaceCard({
 		},
 		[onClick, disabled, place]
 	);
+}
+
+const PlaceCardView: React.FC<PlaceCardViewProps> = ({
+	place,
+	derived,
+	compact = false,
+	tcgMode = true,
+	disabled = false,
+	className,
+	onClick,
+	isSelected = false,
+}) => {
+	const [isHovered, setIsHovered] = useState(false);
+	const {
+		name,
+		emoji = '📍',
+		climate = 'templado',
+		region = 'desconocido',
+		type = 'desconocido',
+		description,
+		government,
+		isFavorite = false,
+		createdAt,
+	} = place as any;
+	const {
+		primaryColor,
+		secondaryColor,
+		rarityLevel,
+		valueLevel,
+		cardId,
+		healthPoints,
+		power,
+		imagesCount,
+		videosCount,
+		cardMedia,
+		parsedResources,
+		parsedDangers,
+		parsedStats,
+		population,
+	} = derived;
+
+	const handleKeyDown = usePlaceCardViewKeyboard(disabled, onClick, place);
+
+	const renderMediaAndContent = () => {
+		if (compact) {
+			return null;
+		}
+		return (
+			<>
+				<PlaceCardImages
+					compact={false}
+					images={cardMedia}
+					mainImage={cardMedia[0]}
+					primaryColor={primaryColor}
+					rarityLevel={rarityLevel}
+					tcgMode={tcgMode}
+				/>
+				<PlaceCardContent
+					climate={climate || undefined}
+					description={description || undefined}
+					government={government || undefined}
+					parsedDangers={parsedDangers}
+					parsedResources={parsedResources}
+					parsedStats={parsedStats}
+					population={population || 0}
+				/>
+				<PlaceCardFooter
+					cardId={cardId}
+					compact={compact}
+					createdAt={createdAt}
+					healthPoints={healthPoints}
+					imagesCount={imagesCount}
+					power={power}
+					primaryColor={primaryColor}
+					secondaryColor={secondaryColor}
+					tcgMode={tcgMode}
+					videosCount={videosCount}
+				/>
+			</>
+		);
+	};
 
 	return (
 		<motion.div
@@ -207,131 +353,64 @@ export function PlaceCard({
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
 			>
-				{/* Efectos holográficos especiales para el modo TCG */}
-				{tcgMode && (
-					<>
-						{/* Efecto holográfico de resplandor que se mueve con hover */}
-						<div
-							className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-30"
-							style={{
-								backgroundImage: `
-									linear-gradient(125deg,
-									transparent 0%,
-									${primaryColor}30 25%,
-									${secondaryColor}30 50%,
-									${primaryColor}30 75%,
-									transparent 100%)
-								`,
-								backgroundSize: '200% 200%',
-								animation: 'gradient-shift 3s ease infinite',
-							}}
-						/>
-
-						{/* Efecto holográfico de rareza */}
-						<div className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-20">
-							<div
-								className="absolute inset-0"
-								style={{
-									background:
-										rarityLevel >= 9
-											? `linear-gradient(45deg, transparent, ${primaryColor}70, gold, ${primaryColor}70, transparent)`
-											: rarityLevel >= 7
-												? `linear-gradient(45deg, transparent, ${primaryColor}70, silver, ${primaryColor}70, transparent)`
-												: rarityLevel >= 5
-													? `linear-gradient(45deg, transparent, ${primaryColor}70, ${secondaryColor}70, transparent)`
-													: `linear-gradient(45deg, transparent, ${primaryColor}40, transparent)`,
-									backgroundSize: '300% 300%',
-									animation: 'shine 6s linear infinite',
-								}}
-							/>
-						</div>
-
-						{/* Sello de valor estratégico en el modo TCG */}
-						<div className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/3 left-1/2 z-1 h-20 w-20 opacity-10">
-							<div
-								className="flex h-full w-full items-center justify-center rounded-full border-2 border-dashed"
-								style={{ borderColor: primaryColor }}
-							>
-								<div className="font-bold text-xs" style={{ color: primaryColor }}>
-									VALOR
-									<br />
-									{valueLevel}
-								</div>
-							</div>
-						</div>
-
-						{/* Sello de rareza holográfico cuando es favorito */}
-						{isFavorite && (
-							<div className="pointer-events-none absolute top-0 right-0 z-30 h-24 w-24 overflow-hidden">
-								<div
-									className="-translate-y-8 absolute top-0 right-0 h-24 w-24 translate-x-12 rotate-45 opacity-70"
-									style={{
-										background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
-										backgroundSize: '600% 600%',
-										animation: 'shine 3s linear infinite',
-									}}
-								/>
-							</div>
-						)}
-					</>
-				)}
-
-				{/* Contenedor principal */}
+				<TCGEffects
+					isFavorite={isFavorite}
+					primaryColor={primaryColor}
+					rarityLevel={rarityLevel}
+					secondaryColor={secondaryColor}
+					tcgMode={tcgMode}
+					valueLevel={valueLevel}
+				/>
 				<div className="relative z-1 flex h-full flex-col">
-					{/* Cabecera con nombre, emoji, región y tipo */}
 					<PlaceCardHeader
-						climate={climate || 'templado'}
+						climate={climate}
 						color={primaryColor}
 						compact={compact}
-						emoji={emoji || '📍'}
+						emoji={emoji}
 						isFavorite={isFavorite}
 						name={name}
-						region={region || 'desconocido'}
+						region={region}
 						tcgMode={tcgMode}
-						type={type || 'desconocido'}
+						type={type}
 					/>
-
-					{/* En modo compacto solo mostrar header y footer */}
-					{!compact && (
-						<>
-							{/* Galería de imágenes */}
-							<PlaceCardImages
-								compact={false}
-								images={cardMedia}
-								mainImage={cardMedia[0]}
-								primaryColor={primaryColor}
-								rarityLevel={rarityLevel}
-								tcgMode={tcgMode}
-							/>
-
-							{/* Contenido principal con descripción, recursos y estadísticas */}
-							<PlaceCardContent
-								climate={climate || undefined}
-								description={description || undefined}
-								government={government || undefined}
-								parsedDangers={safeParsedDangers}
-								parsedResources={safeParsedResources}
-								parsedStats={safeParsedStats}
-								population={population || 0}
-							/>
-
-							{/* Pie de carta con conteos y valores TCG */}
-							<PlaceCardFooter
-								cardId={cardId}
-								compact={compact}
-								createdAt={createdAt}
-								healthPoints={healthPoints}
-								imagesCount={imagesCount}
-								power={power}
-								primaryColor={primaryColor}
-								secondaryColor={secondaryColor}
-								tcgMode={tcgMode}
-								videosCount={videosCount}
-							/>
-						</>
-					)}
+					{renderMediaAndContent()}
 				</div>
 			</CardContainer>
 		</motion.div>
+	);
+};
+
+export function PlaceCard({
+	placeId,
+	compact = false,
+	tcgMode = true,
+	disabled = false,
+	className,
+	onClick,
+	isSelected = false,
+}: PlaceCardProps) {
+	const { data: place, isLoading, error } = usePlace(placeId);
+	const { data: recentMediaData } = useRecentPlaceMedia(placeId);
+
+	if (isLoading) {
+		return <PlaceCardLoading className={className} />;
+	}
+	if (error || !place) {
+		return <PlaceCardError className={className} message={error?.message || 'Lugar no encontrado'} />;
+	}
+
+	const derived = useMemo(() => preparePlaceDerivedData(place, recentMediaData), [place, recentMediaData]);
+
+	return (
+		<PlaceCardView
+			className={className}
+			compact={compact}
+			derived={derived}
+			disabled={disabled}
+			isSelected={isSelected}
+			onClick={onClick}
+			place={place}
+			tcgMode={tcgMode}
+		/>
 	);
 }

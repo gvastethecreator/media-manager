@@ -192,10 +192,10 @@ React 19 + TypeScript + Vite (temporal)
 
 ```
 Express.js + TypeScript + Bun Runtime
-├── ORM: Drizzle ORM (principal) ✅
+├── ORM: Drizzle ORM (único) ✅
 ├── Base de Datos: SQLite/Turso
 ├── API: REST + Server-Sent Events
-└── Legacy: Prisma (solo StatsService) ⚠️
+└── Observabilidad: Instrumentación custom (labels stats.*) ✅
 ```
 
 ### **Herramientas de Desarrollo**
@@ -300,31 +300,11 @@ bun run biome:errors     # Analizar errores en logs
 
 ---
 
-## 📊 **Estado de Migración Drizzle**
+## 📊 **Estado Drizzle**
 
-### **✅ Completado (96%)**
+El proyecto opera 100% sobre Drizzle ORM (todas las entidades y agregados). Cualquier referencia a Prisma se ha archivado.
 
-- **24/25 servicios** migrados a Drizzle ORM
-- **Limpieza masiva** de dependencias Prisma
-- **Tipos unificados** en toda la aplicación
-- **Sistema productivo** con datos reales
-
-### **📋 Servicios Migrados**
-
-```
-✅ ImageService      ✅ TagService        ✅ AlbumService
-✅ FolderService     ✅ ConceptService    ✅ CharacterService
-✅ DocumentService   ✅ AudioService      ✅ File3DService
-✅ JsonFileService   ✅ VideoService      ✅ NoteService
-✅ ProfileService    ✅ PlaceService      ✅ WorldItemService
-✅ CollectionService ✅ PropertyService   ✅ WildcardService
-✅ PromptService     ✅ GroupService      ✅ SearchService
-✅ SettingsService   ✅ WorkflowService   ✅ UploadedImagesService
-```
-
-### **⏳ Pendiente**
-
-- **StatsService** (usa OptimizedStatsService con SQL raw complejo)
+Referencias históricas: ver `docs/history/prisma-legacy.md`.
 
 ---
 
@@ -567,23 +547,13 @@ Este proyecto está bajo la licencia MIT. Ver [LICENSE](LICENSE) para más detal
 
 ---
 
-## 🏆 **Logros de la Migración**
+## 🏆 **Beneficios Arquitectura Actual**
 
-### **Estadísticas**
-
-- **96% migración completada** Prisma → Drizzle
-- **4 archivos Prisma eliminados** de dependencias core
-- **8+ transformadores migrados** a tipos locales
-- **3+ stores Zustand limpiados** de tipos legacy
-- **Sistema 100% productivo** con datos reales
-
-### **Beneficios**
-
-- ✅ **Mejor performance** sin overhead de validación dual
-- ✅ **Código más limpio** con imports directos de Drizzle
-- ✅ **Tipos consistentes** en toda la aplicación
-- ✅ **Mantenibilidad mejorada** sin duplicación de lógica
-- ✅ **Arquitectura moderna** preparada para el futuro
+- ✅ Performance consistente (consultas agregadas instrumentadas)
+- ✅ Código limpio con imports directos Drizzle + helpers sql tagged
+- ✅ Tipos inferidos homogéneos
+- ✅ Mantenibilidad mejorada (helpers IN, instrumentedAll)
+- ✅ Arquitectura enfocada en observabilidad y rendimiento
 
 ---
 

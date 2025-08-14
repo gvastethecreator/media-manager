@@ -29,27 +29,31 @@ export type ViewType = 'grid' | 'list' | 'masonry' | 'cards';
 /**
  * Tipos de archivo
  */
-export enum FileType {
-	IMAGE = 'image',
-	VIDEO = 'video',
-	AUDIO = 'audio',
-	DOCUMENT = 'document',
-	ARCHIVE = 'archive',
-	DIRECTORY = 'directory',
-	FILE = 'file',
-	OTHER = 'other',
-}
+export const FileType = {
+	IMAGE: 'image',
+	VIDEO: 'video',
+	AUDIO: 'audio',
+	DOCUMENT: 'document',
+	ARCHIVE: 'archive',
+	DIRECTORY: 'directory',
+	FILE: 'file',
+	OTHER: 'other',
+} as const;
+
+export type FileType = (typeof FileType)[keyof typeof FileType];
 
 /**
  * Estados de procesamiento de archivos
  */
-export enum FileProcessingStatus {
-	PENDING = 'pending',
-	PROCESSING = 'processing',
-	COMPLETED = 'completed',
-	FAILED = 'failed',
-	CANCELLED = 'cancelled',
-}
+export const FileProcessingStatus = {
+	PENDING: 'pending',
+	PROCESSING: 'processing',
+	COMPLETED: 'completed',
+	FAILED: 'failed',
+	CANCELLED: 'cancelled',
+} as const;
+
+export type FileProcessingStatus = (typeof FileProcessingStatus)[keyof typeof FileProcessingStatus];
 
 /**
  * Propiedades base comunes que todos los FileItem deben tener para funcionar en los componentes

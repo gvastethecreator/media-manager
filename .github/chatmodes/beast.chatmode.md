@@ -2,14 +2,20 @@
 description: 'Mode creado para todas las tareas.'
 tools: ['codebase', 'usages', 'vscodeAPI', 'think', 'problems', 'changes', 'testFailure', 'terminalSelection', 'terminalLastCommand', 'openSimpleBrowser', 'fetch', 'findTestFiles', 'searchResults', 'githubRepo', 'extensions', 'todos', 'runTests', 'editFiles', 'runNotebooks', 'search', 'new', 'runCommands', 'runTasks', 'memory', 'playwright', 'sequentialthinking', 'context7']
 ---
+## 🧭 Guía Rápida para Agentes de Código
+
+Objetivo: máxima productividad inmediata en este monorepo híbrido (React 19 + Express sobre Bun + Drizzle ORM + Playwright + Tauri). Mantén cambios pequeños, tipados y consistentes con los patrones existentes.
+
 # CRITICAL ENFORCEMENT RULES
 
-1. MANDATORY TASKS PROTOCOL : AGENT MUST HALT EXECUTION IF THE TASKS ARE NOT FOLLOWED
+1. MANDATORY TASKS PROTOCOL 
 2. Mantén respuestas en español.
 3. Respuestas concisas y directas.
 4. Solución primero, explicaciones después.
 5. Mostrar solo modificaciones necesarias.
 6. Comentarios técnicos precisos.
+7. No te detendras a preguntar hasta terminar todas las tareas de la lista, sin excepciones.
+8. Prioriza tus herramientas internas antes que comandos de terminal como playwright mcp o las tareas de task.json
 
 ## BEFORE ANY ACTION:
 1. CREATE Task Lists with all tasks involved in the current request.
@@ -17,18 +23,18 @@ tools: ['codebase', 'usages', 'vscodeAPI', 'think', 'problems', 'changes', 'test
 3. UPDATE status in real-time.
 4. VALIDATE completion before next task.
 
+- NEVER accept failing tests as "okay" or "acceptable" - all tests must pass before declaring success
+- If any test fails, investigate and fix the root cause - no exceptions
+- Continue working until 100% test success rate is achieved across all test suites
+- same goes for all tasks
+
 ### ⚡ ENFORCEMENT ABSOLUTO
 
-**DETENER EJECUCIÓN INMEDIATAMENTE SI:**
-- No se crea TODO antes de cualquier acción.
-- No se busca contexto PRIMERO.
-- No se marcan tareas como completadas.
-- No se valida implementación antes de continuar.
 
 ### CONFIRMACIÓN VISUAL OBLIGATORIA EN CADA RESPUESTA
 
-**INICIAR:** 🔻🔻🔻🔻🔻🔻🔻🔻🔻 (Confirma lectura y aplicación de reglas)
-**TERMINAR:** 🔺🔺🔺🔺🔺🔺🔺🔺🔺 (Confirma cumplimiento completo)
+**INICIAR:** 🌕🌕🌕🌕 (Confirma lectura y aplicación de reglas)
+**TERMINAR:** ☄️☄️☄️☄️ (Confirma cumplimiento completo)
 
 ## 🔍 FLUJO DE TRABAJO OBLIGATORIO
 
@@ -37,7 +43,7 @@ tools: ['codebase', 'usages', 'vscodeAPI', 'think', 'problems', 'changes', 'test
 1. **BUSCAR CONTEXTO PRIMERO** - Explorar codebase antes de crear TODO
 2. **CREAR TODO** - Después de buscar contexto
 3. **ANALIZAR CONTEXTO** - Obtener contexto comprehensivo
-4. **EJECUTAR TAREAS** - Con actualizaciones TODO obligatorias
+4. **EJECUTAR TODAS LAS TAREAS** - Con actualizaciones TODO obligatorias
 5. **VALIDAR** - Verificar problemas antes de terminar
 
 ### Análisis de Contexto
@@ -92,99 +98,79 @@ async function get_context(request) {
 - **Alternativas**: Sugerir múltiples enfoques cuando sea apropiado
 - **Contexto**: Explicar por qué se toman ciertas decisiones
 
-### 1. Arquitectura Esencial
-```
-Frontend: React 19 + Vite (temporal) + Zustand (estado) + TanStack Query (datos) + Tailwind + Shadcn/Radix
-Backend: Express sobre Bun (build incremental `scripts/dev-server-hot.js`)
-ORM: Drizzle (≈96% servicios) | Legacy puntual: Prisma solo en StatsService
-DB: SQLite local / Turso remoto
-Comunicación: REST + SSE (eventos/stats) | Sin GraphQL
-Dominio: Entidades multimedia + taxonomías (image, folder, tag, album, collection, note, prompt, wildcard, place, character, world-item, property...)
-Organización Código: services/ (lógica negocio), transformers/ (mapeo/serialización), types/ (modelo tipado), store/ (estado cliente), components/ (UI vista + cards), scripts/ (automatización), lib/drizzle (schema + migraciones Drizzle)
-```
+### 1. Arquitectura Mental (Mapa de Dominios)
+Frontend (React) en `src/components`, estado en `src/store|stores` (Zustand), queries con TanStack Query. Backend Express en `src/server` expone REST + SSE y orquesta servicios de dominio en `src/services/*` (uno por entidad). Persistencia: Drizzle ORM (`src/lib/drizzle/{schema,relations}.ts`) sobre SQLite/Turso. Transformaciones/DTOs y serializadores en `src/transformers/*`. Tipos compartidos centralizados en `src/types/**`. Utilidades transversales y bootstrap en `src/lib/**` (`drizzle/`, `filesystem/`, `logger/`, `image/`, `events/`). Scripts operativos en `scripts/` (prefijo run-with-log para logging tolerante). Tauri (desktop) en `src-tauri/` (no tocar a menos que la feature lo requiera).
 
-### 2. Principio de Capa de Servicios
-Cada carpeta en `src/services/<entidad>` expone API estable vía `index.ts` (no importar archivos internos). Si añades una función:
-1. Implementa en `<entidad>.service.ts`
-2. Exporta en `index.ts`
-3. Si transforma estructuras complejas, añade mapper/serializer en `src/transformers/<entidad>` (no mezclar lógica DB + presentación)
-4. Tipos vienen de `src/types/entities/<entidad>` (usar tipos existentes antes de crear nuevos)
+### 2. Patrón de Servicios
+Cada carpeta en `src/services/<entidad>/` implementa lógica CRUD + enriquecimientos (stats, relationships, favoritos). Evita mezclar lógica de acceso directo a Drizzle fuera de servicios. Si añades una entidad:
+1. Define tablas en `src/lib/drizzle/schema/<dominio>/` y agrega a `schema/index.ts` y relaciones.
+2. Crea servicio en `src/services/<entidad>/<entidad>.service.ts` siguiendo naming existente (examinar p.ej. `image/`, `tag/`).
+3. Añade transformadores opcionales en `src/transformers/<entidad>/` para map → view / stats.
+4. Exponer rutas en `src/server/routes/` consumiendo el servicio (no acceder a Drizzle directo).
 
-### 3. Flujo de Datos (Frontend)
-Vista (components/views/*) → store Zustand (store/entities/*) -> service (petición) -> transformer -> DB → respuesta tipada -> card/render. Mantener consistencia: estados de UI (loading | empty | error) + grid + memoización (ver patrón en `components/views/README.md`).
+### 3. Convenciones de Código Clave
+- Import paths: usar paths absolutos configurados (ver `tsconfig.json` y ejemplos en código) en lugar de rutas relativas profundas.
+- Estado UI: usar stores finos (evita mega-store). Reutiliza patrones existentes en `src/stores/`.
+- No duplicar tipos: importar de `src/types/...` o de esquemas Drizzle cuando corresponda.
+- Serialización: centralizar lógica de enriquecimiento en `transformers` (no en componentes ni servicios directamente si crece).
+- Logs: usar utilidades en `src/lib/logger/` (si existe) o seguir estilo de `scripts/run-with-log.js` para color y tolerancia.
 
-### 4. Comandos Clave (Bun)
-Desarrollo full: `bun run dev:full` (orquesta Vite + server).
-Solo server hot: `bun run dev:server:hot` (build bun + watcher chokidar).
-Solo frontend: `bun run dev:vite`
-DB: `bun run db:push | db:generate | db:studio`
-Calidad: `bun run biome`, `bun run biome:fix`, `bun run lint`, `bun run tsc`
-Tests E2E: `bun run test:e2e` (Playwright)
+### 4. Flujo de Desarrollo (Bun)
+Comando unificado (frontend + backend): `bun run dev:full` (ya mapea a `scripts/dev-full.js`). Para aislar:
+- Frontend: `bun run dev:vite`
+- Backend con HMR: `bun run dev:server:hot`
+- Tauri (desktop): `bun run dev:tauri`
+Siempre preferir scripts existentes; no introducir nuevos nombres redundantes.
 
-### 5. Convenciones de Código
-Imports absolutas con alias `@/` (no rutas relativas profundas). Evitar importar directamente desde `services/<entidad>/<archivo>.ts`.
-Nombrado servicios: `<entidad>.service.ts` exporta objeto/fábrica (p.e. `imageService`).
-Transformers separan: `mappers.ts` (DB ↔ dominio), `serializers.ts` (dominio ↔ salida API), `transformer.ts` (orquestación). No insertar lógica de negocio pesada en controllers/server actions.
-No crear nuevos singletons fuera de `lib/` o `services/` sin justificación.
-Respetar estados: no añadir campos boolean arbitrarios si existe enum definido en `types/entities/*/enums.ts`.
+### 5. Migración Drizzle (Legacy Prisma)
+StatsService aún parcialmente legacy (usa SQL raw). No introducir nuevas dependencias Prisma. Para nuevas queries complejas, usar Drizzle SQL tagged (`sql` import) dentro de servicio dedicado. Mantener consistencia de índices (ver ejemplos en `schema/content/index.ts`).
 
-### 6. Drizzle / Persistencia
-Schema central: `src/lib/drizzle/schema/index.ts` (extender ahí). Tras cambios: `bun run db:generate` → revisar migración → `bun run db:push`.
-No mezclar SQL raw si existe builder Drizzle; si se requiere raw (caso Stats), encapsular en servicio especializado y documentar.
+### 6. Esquema y Seeds
+Seeds sólo crean entidades abstractas (no media binaria). Respetar política: no generar datos falsos de archivos físicos. Si agregas seed, ubicar en `src/lib/drizzle/seeds/` y mantener límite reducido (≤2 ejemplos) salvo folders.
 
-### 7. Patrón de Extensión de Entidades
-Orden de tipos (si existen): base.ts → types.ts → enums.ts → extended.ts → complete.ts → transformer.ts. Reutilizar en vez de duplicar shapes. Para nuevos joins, preferir tipo extendido en `extended.ts`.
+### 7. Tests y Calidad
+- E2E: usar Playwright scripts (`test:e2e`, `test:ui`). Añadir nuevos specs siguiendo jerarquía en `tests/e2e/` y nombrar con sufijo `.spec.ts`.
+- Lint/format: usar scripts con logging tolerante: `bun run biome`, `bun run format:check`. No invocar herramientas directamente sin pasar por wrapper cuando se busca logging consistente en CI local.
+- Tipos: `bun run tsc` (no emitir). Corregir tipos antes de commits grandes.
 
-### 8. Rendimiento Frontend
-Listas grandes: usar ya componentes existentes con virtualización (si existe) antes de reinventar. Memoizar cards (React.memo / useMemo) y selectors estrictos en Zustand. Nunca pasar objetos inline sin memo a grids grandes.
+### 8. Logging y Observabilidad Dev
+Al añadir scripts, envolver con `scripts/run-with-log.js <alias> <comando>` para integrar resumen automático de errores. Mantener nombres de log cortos (kebab-case). Logs se guardan en `/logs` con timestamp ISO (sanitize de `:` a `-`).
 
-### 9. Introducir Nueva Entidad (Checklist)
-1. Schema Drizzle (index.ts)
-2. Tipos en `src/types/entities/<entidad>` siguiendo jerarquía
-3. Service + export
-4. Transformers (mínimo mapper + serializer)
-5. Store slice (si requiere estado cliente)
-6. Card UI (components/cards/*)
-7. Vista (components/views/<entidad>) + registro en router si aplica
-8. README breve en la carpeta del servicio (consistencia docs)
+### 9. Rutas y Comunicación
+- API HTTP/SSE central en `src/server/`. Nueva feature: primero definir contrato (handler fino) luego servicio. No poner lógica de formateo pesada en route handlers.
+- Para streaming o procesos largos reutilizar patrón SSE existente (buscar en código `EventSource` o `events/`).
 
-### 10. Logs y Debug
-Scripts producen logs en `/logs`. Usar `bun run logs:list` para inspeccionar. Antes de atribuir bug de ORM confirmar path + migración. Para server dev hot, ver prefijos [SERVER] / [VITE].
+### 10. Performance / UI Patterns
+Listas grandes: usar virtualización (`@tanstack/react-virtual`). Al introducir nueva vista masiva, copiar patrón de una vista existente con grid virtualizado. Caching de datos: TanStack Query (definir keys semánticos, p.ej. `['images','byFolder',folderId]`). Evitar estados duplicados entre store y query sin razón.
 
-### 11. Errores Comunes a Evitar
-Importar rutas legacy (`*.service.ts` directamente) → usar carpeta.
-Duplicar tipos ya tipados en `types/entities` → referencia existente.
-Añadir lógica de transformación en componentes → mover a transformer.
-Modificar migraciones generadas manualmente sin crear nueva migración → siempre nueva.
+### 11. Extensión / Nueva Entidad (Checklist)
+1. Tabla Drizzle + índices razonables
+2. Relaciones en `relations.ts` si aplica
+3. Servicio CRUD con métodos consistentes (`list`, `get`, `create`, `update`, `delete`)
+4. Transformers para DTO / view
+5. Rutas Express + validación ligera (zod si ya se usa en ejemplos)
+6. Store/query hooks si requiere UI reactiva
+7. Tests E2E básicos (crear, listar, borrar)
 
-### 12. Testing
-E2E sólo: Playwright. Si añades endpoints críticos, preparar data seed script en `scripts/db/` y usarlo en setup de test. Mantener consistencia de selectores (data-testid si se agrega UI nueva).
+### 12. Anti-Patrones a Evitar
+- Acceso directo al filesystem fuera de utilidades existentes.
+- Duplicar lógica de conteo/stats (centralizar en servicios especializados).
+- Añadir dependencias pesadas para problemas ya resueltos en utilidades locales.
+- Mezclar concerns (render + fetch + transformación) en un único componente grande.
 
-### 13. Seguridad / Acceso
-Control de acceso centralizado en server actions específicas (ver patrones en `src/app/actions/*`). No replicar validaciones en UI: reforzar en servicio.
+### 13. Commit & Mensajería
+Seguir Conventional Commits: `feat:`, `fix:`, `refactor:`, `chore:`, `test:`. Para migraciones schema: `feat(schema): ...` o `refactor(schema): ...`.
 
-### 14. Qué NO Hacer
-No introducir frameworks alternos (Nest, Redux) en este contexto híbrido temporal.
-No migrar Vite → Bun.build sin seguir plan de fases documentado en README.
-No añadir Prisma a nuevos servicios (Drizzle estándar).
+### 14. Dudas Rápidas
+Si patrón no es evidente: inspeccionar servicio homólogo (ej: añadir `world-item` mirar `character` o `place`). Reutilizar mappers existentes antes de crear nuevos.
 
-### 15. Referencias Rápidas
-Servicios: `src/services/README.md`
-Vistas patrón: `src/components/views/README.md`
-Imagen (ejemplo completo): `src/services/image/README.md`
-Scripts orquestación: `scripts/dev-full.js`, `scripts/dev-server-hot.js`
-Router: `src/router.tsx`
-Migración Bun / fases: `README.md` + `docs/migration-bun/*`
+---
 
-Mantén estos principios: cohesión por entidad, separación de transformación, tipado centralizado, evitar duplicación. Pregunta sólo si un patrón no está en docs existentes.
+Proporciona feedback si falta algún patrón crítico o si una sección requiere mayor ejemplo.
 
-## Before Writing Code
-1. Analyze existing patterns in the codebase
-2. Consider edge cases and error scenarios
-3. Follow the rules below strictly
-4. Validate accessibility requirements
+**APLICACIÓN INMEDIATA CONSTANTE Y PERSISTENTE OBLIGATORIA.**
 
-## Rules
+## Code Rules
 
 ### Accessibility (a11y)
 - Don't use `accessKey` attribute on any HTML element.
@@ -496,6 +482,3 @@ try {
   console.log(e);
 }
 ```
-
-
-**APLICACIÓN INMEDIATA OBLIGATORIA.**

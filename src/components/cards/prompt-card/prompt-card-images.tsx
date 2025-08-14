@@ -54,79 +54,87 @@ export function PromptCardImages({
 				}}
 			>
 				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} />}>
-					{isLoading ? (
-						<ImageLoading backgroundColor={secondaryColor} />
-					) : displayImages.length === 0 ? (
-						// Mostrar mensaje si no hay im?genes
-						<div className="flex h-full flex-col items-center justify-center p-4 text-center">
-							<ImageIcon className="mb-2 h-8 w-8 opacity-30" />
-							<p className="text-sm opacity-70">Sin im?genes</p>
+					{(() => {
+						if (isLoading) {
+							return <ImageLoading backgroundColor={secondaryColor} />;
+						}
 
-							{tcgMode && (
-								<div
-									className="pointer-events-none absolute inset-0 opacity-20"
-									style={{
-										background: `repeating-linear-gradient(45deg, transparent, transparent 10px, ${primaryColor}20 10px, ${primaryColor}20 20px)`,
-									}}
-								/>
-							)}
-						</div>
-					) : (
-						// Mostrar imagen activa
-						<div className="relative h-full w-full overflow-hidden">
-							{/* Imagen Principal */}
-							{activeImage && (
-								<div className="relative h-full w-full overflow-hidden">
-									<img
-										alt="Imagen destacada"
-										className={cn(
-											'h-full w-full object-cover',
-											tcgMode && 'transition-transform duration-700 hover:scale-110'
-										)}
-										loading="lazy"
-										onError={() => setIsLoading(false)}
-										onLoad={() => setIsLoading(false)}
-										src={activeImage}
-									/>
+						if (displayImages.length === 0) {
+							// Mostrar mensaje si no hay im?genes
+							return (
+								<div className="flex h-full flex-col items-center justify-center p-4 text-center">
+									<ImageIcon className="mb-2 h-8 w-8 opacity-30" />
+									<p className="text-sm opacity-70">Sin im?genes</p>
 
-									{/* Efectos hologr?ficos en modo TCG */}
 									{tcgMode && (
-										<>
-											<div
-												className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-20"
-												style={{
-													background: `linear-gradient(45deg, transparent 0%, ${primaryColor}80 45%, white 50%, ${primaryColor}80 55%, transparent 100%)`,
-													backgroundSize: '200% 200%',
-													animation: 'shine 5s ease-in-out infinite',
-												}}
-											/>
-											<div className="absolute bottom-0 left-0 h-1/4 w-full bg-gradient-to-t from-black/40 to-transparent" />
-										</>
+										<div
+											className="pointer-events-none absolute inset-0 opacity-20"
+											style={{
+												background: `repeating-linear-gradient(45deg, transparent, transparent 10px, ${primaryColor}20 10px, ${primaryColor}20 20px)`,
+											}}
+										/>
 									)}
 								</div>
-							)}
+							);
+						}
 
-							{/* Miniaturas inferiores */}
-							{displayImages.length > 1 && (
-								<div className="-translate-x-1/2 absolute bottom-2 left-1/2 z-10 flex transform items-center justify-center gap-1">
-									{displayImages.map((img, idx) => (
-										<button
-											aria-label={`Ver imagen ${idx + 1}`}
+						// Mostrar imagen activa
+						return (
+							<div className="relative h-full w-full overflow-hidden">
+								{/* Imagen Principal */}
+								{activeImage && (
+									<div className="relative h-full w-full overflow-hidden">
+										<img
+											alt="Imagen destacada"
 											className={cn(
-												'h-2 w-2 rounded-full transition-all',
-												activeImage === img ? 'scale-125 bg-white shadow-lg' : 'bg-white/50 hover:bg-white/80',
-												tcgMode && 'outline outline-1 outline-offset-1'
+												'h-full w-full object-cover',
+												tcgMode && 'transition-transform duration-700 hover:scale-110'
 											)}
-											key={`thumb-${img.substring(0, 8)}-${idx + 1}`}
-											onClick={() => setActiveImage(img)}
-											style={{ outlineColor: activeImage === img ? primaryColor : 'transparent' }}
-											type="button"
+											loading="lazy"
+											onError={() => setIsLoading(false)}
+											onLoad={() => setIsLoading(false)}
+											src={activeImage}
 										/>
-									))}
-								</div>
-							)}
-						</div>
-					)}
+
+										{/* Efectos hologr?ficos en modo TCG */}
+										{tcgMode && (
+											<>
+												<div
+													className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-20"
+													style={{
+														background: `linear-gradient(45deg, transparent 0%, ${primaryColor}80 45%, white 50%, ${primaryColor}80 55%, transparent 100%)`,
+														backgroundSize: '200% 200%',
+														animation: 'shine 5s ease-in-out infinite',
+													}}
+												/>
+												<div className="absolute bottom-0 left-0 h-1/4 w-full bg-gradient-to-t from-black/40 to-transparent" />
+											</>
+										)}
+									</div>
+								)}
+
+								{/* Miniaturas inferiores */}
+								{displayImages.length > 1 && (
+									<div className="-translate-x-1/2 absolute bottom-2 left-1/2 z-10 flex transform items-center justify-center gap-1">
+										{displayImages.map((img, idx) => (
+											<button
+												aria-label={`Ver imagen ${idx + 1}`}
+												className={cn(
+													'h-2 w-2 rounded-full transition-all',
+													activeImage === img ? 'scale-125 bg-white shadow-lg' : 'bg-white/50 hover:bg-white/80',
+													tcgMode && 'outline-1 outline-offset-1'
+												)}
+												key={`thumb-${img.substring(0, 8)}-${idx + 1}`}
+												onClick={() => setActiveImage(img)}
+												style={{ outlineColor: activeImage === img ? primaryColor : 'transparent' }}
+												type="button"
+											/>
+										))}
+									</div>
+								)}
+							</div>
+						);
+					})()}
 				</Suspense>
 			</div>
 		</div>

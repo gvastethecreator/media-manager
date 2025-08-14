@@ -2,9 +2,127 @@ import type { FolderCreateInput, FolderFilters, FoldersResponse, FolderUpdateInp
 import type { FolderWithStats } from '@/types/entities/folder';
 import { apiClient } from '../client';
 
+// Helper: generar objeto stats mínimo (solo campos definidos en FolderStatistics)
+const buildMinimalStats = (): FolderWithStats['stats'] => {
+	const baseEntityStats = {
+		imageCount: 0,
+		videoCount: 0,
+		albumCount: 0,
+		collectionCount: 0,
+		tagCount: 0,
+		characterCount: 0,
+		placeCount: 0,
+		worldItemCount: 0,
+		conceptCount: 0,
+		promptCount: 0,
+		noteCount: 0,
+		wildcardCount: 0,
+		propertyCount: 0,
+		groupCount: 0,
+		totalItems: 0,
+		totalAssociations: 0,
+		lastUpdated: new Date(),
+		size: 0,
+		mtime: new Date(),
+		birthtime: new Date(),
+		type: 'folder',
+	};
+	const folderSpecific = {
+		hierarchyDepth: 0,
+		totalDescendants: 0,
+		directChildren: 0,
+		contentDiversity: 0,
+		organizationScore: 0,
+		folderCount: 0,
+		totalAudio: 0,
+		totalOthers: 0,
+		totalImages: 0,
+		totalVideos: 0,
+		totalDocuments: 0,
+		totalFolders: 0,
+		totalFiles: 0,
+		documentCount: 0,
+		totalRelations: 0,
+		accessFrequency: 0,
+		lastActivity: null,
+		formattedSize: '0 B',
+		totalSize: 0,
+		averageFileSize: 0,
+		largestFile: 0,
+		hasConsistentNaming: false,
+		hasDeepHierarchy: false,
+		isWellOrganized: false,
+		breadcrumbs: [],
+		fullPath: '',
+		relativePath: '',
+		autoTags: [],
+		qualityGrade: 'C' as const,
+	};
+	return { ...(baseEntityStats as any), ...folderSpecific } as FolderWithStats['stats'];
+};
+
+// Construye los campos base comunes
+const buildBaseFolder = (raw: any) => ({
+	id: raw.id,
+	name: raw.name || '',
+	description: raw.description ?? null,
+	path: raw.path || '',
+	emoji: raw.emoji ?? null,
+	color: raw.color ?? null,
+	featuredImage: raw.featuredImage ?? null,
+	isFavorite: Boolean(raw.isFavorite),
+	totalFiles: raw.totalFiles ?? 0,
+	totalSize: raw.totalSize ?? 0,
+	autoReindex: raw.autoReindex ?? false,
+	lastIndexed: raw.lastIndexed ?? null,
+	parentId: raw.parentId ?? null,
+	presetId: raw.presetId ?? null,
+	createdAt: raw.createdAt || new Date().toISOString(),
+	updatedAt: raw.updatedAt || new Date().toISOString(),
+});
+
+// Normaliza una carpeta cruda del backend (que puede no incluir stats) a FolderWithStats
+const normalizeFolder = (raw: any): FolderWithStats => {
+	if (!raw) {
+		throw new Error('Folder no encontrada');
+	}
+	const base = buildBaseFolder(raw);
+	const counts = raw._count || {
+		images: raw.imagesCount ?? 0,
+		videos: raw.videosCount ?? 0,
+		children: raw.childrenCount ?? 0,
+	};
+	return {
+		...base,
+		entityType: 'folder',
+		stats: raw.stats || buildMinimalStats(),
+		type: 'folder',
+		children: raw.children || [],
+		recentImages: raw.recentImages || [],
+		_count: counts,
+	} as FolderWithStats;
+};
+
 export const findFolders = async (_filters: FolderFilters): Promise<FoldersResponse> => {
-	const response = await apiClient.get<FoldersResponse>('/folders');
-	return response;
+	const response = await apiClient.get<any>('/folders');
+	// Backend actual retorna array simple; mantener compatibilidad si en el futuro retorna {data, pagination}
+	let rawArray: any[] = [];
+	if (Array.isArray(response)) {
+		rawArray = response;
+	} else if (response && Array.isArray(response.data)) {
+		rawArray = response.data;
+	}
+	const normalized = rawArray.map(normalizeFolder);
+	return {
+		data: normalized,
+		pagination: {
+			total: normalized.length,
+			limit: normalized.length,
+			offset: 0,
+			hasNext: false,
+			hasPrev: false,
+		},
+	};
 };
 
 export const getAllFolders = async (): Promise<FolderWithStats[]> => {
@@ -13,12 +131,12 @@ export const getAllFolders = async (): Promise<FolderWithStats[]> => {
 };
 
 export const getFolder = async (id: string): Promise<FolderWithStats> => {
-	const response = await apiClient.get<FolderWithStats[]>(`/folders/${id}`);
-	// La API retorna un array con un elemento, así que tomamos el primero
-	if (!response || response.length === 0) {
+	const response = await apiClient.get<any>(`/folders/${id}`);
+	const raw = Array.isArray(response) ? response[0] : response;
+	if (!raw) {
 		throw new Error(`Folder with id "${id}" not found`);
 	}
-	return response[0];
+	return normalizeFolder(raw);
 };
 
 export const createFolder = async (data: FolderCreateInput): Promise<FolderWithStats> => {

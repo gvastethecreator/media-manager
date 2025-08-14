@@ -133,12 +133,12 @@ export class DragSelectionManager {
 
 		// Find all selectable elements (elements with data-entity-id)
 		const elements = this.container.querySelectorAll('[data-entity-id]');
-		elements.forEach((element) => {
+		for (const element of elements) {
 			const entityId = element.getAttribute('data-entity-id');
 			if (entityId && element instanceof HTMLElement) {
 				this.selectableElements.set(entityId, element);
 			}
-		});
+		}
 	}
 
 	// Event binding
@@ -252,6 +252,9 @@ export class DragSelectionManager {
 	// Selection logic
 	private startSelection(event: MouseEvent): void {
 		const rect = this.container?.getBoundingClientRect();
+		if (!rect) {
+			return; // no container bounds
+		}
 
 		this.state.isActive = true;
 		this.state.startPoint = {
@@ -283,6 +286,9 @@ export class DragSelectionManager {
 		}
 
 		const rect = this.container.getBoundingClientRect();
+		if (!rect) {
+			return;
+		}
 		this.state.currentPoint = {
 			x: event.clientX - rect.left,
 			y: event.clientY - rect.top,
@@ -321,18 +327,31 @@ export class DragSelectionManager {
 		// Update the selection store
 		const selectionStore = this.getSelectionStore();
 		switch (this.state.mode) {
-			case 'select':
+			case 'select': {
 				selectionStore.setSelection(selectedIds);
 				break;
-			case 'add':
-				selectedIds.forEach((id: string) => selectionStore.addToSelection(id));
+			}
+			case 'add': {
+				for (const id of selectedIds) {
+					selectionStore.addToSelection(id);
+				}
 				break;
-			case 'subtract':
-				selectedIds.forEach((id: string) => selectionStore.removeFromSelection(id));
+			}
+			case 'subtract': {
+				for (const id of selectedIds) {
+					selectionStore.removeFromSelection(id);
+				}
 				break;
-			case 'toggle':
-				selectedIds.forEach((id: string) => selectionStore.toggleSelection(id));
+			}
+			case 'toggle': {
+				for (const id of selectedIds) {
+					selectionStore.toggleSelection(id);
+				}
 				break;
+			}
+			default: {
+				break;
+			}
 		}
 
 		this.events.onSelectionEnd?.(this.state, selectedIds);
@@ -424,22 +443,18 @@ export class DragSelectionManager {
 		const containerRect = this.container.getBoundingClientRect();
 		const intersectingIds: string[] = [];
 
-		this.selectableElements.forEach((element, entityId) => {
+		for (const [entityId, element] of this.selectableElements) {
 			const elementRect = element.getBoundingClientRect();
-
-			// Convert to container-relative coordinates
 			const relativeRect = {
 				left: elementRect.left - containerRect.left,
 				top: elementRect.top - containerRect.top,
 				right: elementRect.right - containerRect.left,
 				bottom: elementRect.bottom - containerRect.top,
 			};
-
-			// Check intersection
 			if (this.state.selectionRect && this.rectsIntersect(this.state.selectionRect, relativeRect)) {
 				intersectingIds.push(entityId);
 			}
-		});
+		}
 
 		return intersectingIds;
 	}
@@ -450,36 +465,62 @@ export class DragSelectionManager {
 
 	private applySelection(intersectingIds: string[]): void {
 		this.state.selectedElements.clear();
-
 		switch (this.state.mode) {
-			case 'select':
-				intersectingIds.forEach((id) => this.state.selectedElements.add(id));
+			case 'select': {
+				this.applySelect(intersectingIds);
 				break;
-			case 'add':
-				// Add current selection + intersecting elements
-				this.getSelectionStore().selectedIds.forEach((id: string) => this.state.selectedElements.add(id));
-				intersectingIds.forEach((id) => this.state.selectedElements.add(id));
+			}
+			case 'add': {
+				this.applyAdd(intersectingIds);
 				break;
-			case 'subtract':
-				// Current selection - intersecting elements
-				this.getSelectionStore().selectedIds.forEach((id: string) => {
-					if (!intersectingIds.includes(id)) {
-						this.state.selectedElements.add(id);
-					}
-				});
+			}
+			case 'subtract': {
+				this.applySubtract(intersectingIds);
 				break;
-			case 'toggle':
-				// Start with current selection
-				this.getSelectionStore().selectedIds.forEach((id: string) => this.state.selectedElements.add(id));
-				// Toggle intersecting elements
-				intersectingIds.forEach((id) => {
-					if (this.state.selectedElements.has(id)) {
-						this.state.selectedElements.delete(id);
-					} else {
-						this.state.selectedElements.add(id);
-					}
-				});
+			}
+			case 'toggle': {
+				this.applyToggle(intersectingIds);
 				break;
+			}
+			default: {
+				break;
+			}
+		}
+	}
+
+	private applySelect(ids: string[]): void {
+		for (const id of ids) {
+			this.state.selectedElements.add(id);
+		}
+	}
+
+	private applyAdd(ids: string[]): void {
+		for (const id of this.getSelectionStore().selectedIds) {
+			this.state.selectedElements.add(id);
+		}
+		for (const id of ids) {
+			this.state.selectedElements.add(id);
+		}
+	}
+
+	private applySubtract(ids: string[]): void {
+		for (const id of this.getSelectionStore().selectedIds) {
+			if (!ids.includes(id)) {
+				this.state.selectedElements.add(id);
+			}
+		}
+	}
+
+	private applyToggle(ids: string[]): void {
+		for (const id of this.getSelectionStore().selectedIds) {
+			this.state.selectedElements.add(id);
+		}
+		for (const id of ids) {
+			if (this.state.selectedElements.has(id)) {
+				this.state.selectedElements.delete(id);
+			} else {
+				this.state.selectedElements.add(id);
+			}
 		}
 	}
 

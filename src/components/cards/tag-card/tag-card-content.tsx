@@ -19,6 +19,56 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { TagRarity } from '@/store/entities/tag/types';
 
+// Componente para renderizar la descripción principal
+function DescriptionSection({
+	description,
+	tcgMode,
+	primaryColor,
+	rarityBrightness,
+}: {
+	description?: string;
+	tcgMode: boolean;
+	primaryColor: string;
+	rarityBrightness: number;
+}) {
+	return (
+		<div
+			className={cn(
+				'mb-3 text-xs',
+				tcgMode ? 'rounded border border-white/5 bg-black/10 p-2' : 'text-muted-foreground'
+			)}
+			style={{
+				lineHeight: '1.25rem',
+				color: tcgMode ? 'white' : `${primaryColor}DD`,
+				boxShadow: tcgMode ? `inset 0 0 ${rarityBrightness * 5}px ${primaryColor}20` : 'none',
+			}}
+		>
+			{description ? (
+				<p className={tcgMode ? '' : 'italic'}>{description}</p>
+			) : (
+				<p className="text-center italic opacity-70">Sin descripción</p>
+			)}
+		</div>
+	);
+}
+
+// Componente para el icono decorativo TCG
+function DecorativeIcon({ tcgMode, primaryColor }: { tcgMode: boolean; primaryColor: string }) {
+	if (!tcgMode) {
+		return null;
+	}
+
+	return (
+		<div className="mb-2 flex items-center gap-1">
+			<TagIcon className="h-4 w-4 opacity-70" style={{ color: primaryColor }} />
+			<div
+				className="h-px flex-grow"
+				style={{ background: `linear-gradient(to right, ${primaryColor}70, transparent)` }}
+			/>
+		</div>
+	);
+}
+
 interface TagCardContentProps {
 	description?: string | null;
 	shortcut?: string | null;
@@ -66,30 +116,35 @@ export function TagCardContent({
 	propertiesCount = 0,
 	groupsCount = 0,
 }: TagCardContentProps) {
-	// Determinar si mostrar los contadores de relaciones (solo si hay al menos uno con valor)
-	const hasRelationships =
-		albumsCount > 0 ||
-		collectionsCount > 0 ||
-		charactersCount > 0 ||
-		placesCount > 0 ||
-		worldItemsCount > 0 ||
-		conceptsCount > 0 ||
-		promptsCount > 0 ||
-		notesCount > 0 ||
-		wildcardsCount > 0 ||
-		propertiesCount > 0 ||
-		groupsCount > 0;
+	// Extraer lógica de verificación de relaciones
+	const hasRelationships = (() => {
+		return (
+			albumsCount > 0 ||
+			collectionsCount > 0 ||
+			charactersCount > 0 ||
+			placesCount > 0 ||
+			worldItemsCount > 0 ||
+			conceptsCount > 0 ||
+			promptsCount > 0 ||
+			notesCount > 0 ||
+			wildcardsCount > 0 ||
+			propertiesCount > 0 ||
+			groupsCount > 0
+		);
+	})();
 
-	// Conseguir un factor de brillo basado en la rareza para efectos visuales
-	const rarityBrightnessMap = {
-		[TagRarity.COMMON]: 1,
-		[TagRarity.UNCOMMON]: 1.2,
-		[TagRarity.RARE]: 1.5,
-		[TagRarity.VERY_RARE]: 1.8,
-		[TagRarity.LEGENDARY]: 2.2,
-	} as const;
+	// Calcular brillo basado en la rareza
+	const rarityBrightness = (() => {
+		const rarityBrightnessMap = {
+			[TagRarity.COMMON]: 1,
+			[TagRarity.UNCOMMON]: 1.2,
+			[TagRarity.RARE]: 1.5,
+			[TagRarity.VERY_RARE]: 1.8,
+			[TagRarity.LEGENDARY]: 2.2,
+		} as const;
 
-	const rarityBrightness: number = rarityBrightnessMap[rarity as keyof typeof rarityBrightnessMap] || 1;
+		return rarityBrightnessMap[rarity as keyof typeof rarityBrightnessMap] || 1;
+	})();
 
 	// Renderizar una barra de stats para TCG mode
 	const renderStatBar = (icon: React.ReactNode, count: number, label: string, color: string = primaryColor) => {
@@ -137,34 +192,15 @@ export function TagCardContent({
 				}}
 			>
 				{/* Icono decorativo de etiqueta */}
-				{tcgMode && (
-					<div className="mb-2 flex items-center gap-1">
-						<TagIcon className="h-4 w-4 opacity-70" style={{ color: primaryColor }} />
-						<div
-							className="h-px flex-grow"
-							style={{ background: `linear-gradient(to right, ${primaryColor}70, transparent)` }}
-						/>
-					</div>
-				)}
+				<DecorativeIcon primaryColor={primaryColor} tcgMode={tcgMode} />
 
 				{/* Descripción principal */}
-				<div
-					className={cn(
-						'mb-3 text-xs',
-						tcgMode ? 'rounded border border-white/5 bg-black/10 p-2' : 'text-muted-foreground'
-					)}
-					style={{
-						lineHeight: '1.25rem',
-						color: tcgMode ? 'white' : `${primaryColor}DD`,
-						boxShadow: tcgMode ? `inset 0 0 ${rarityBrightness * 5}px ${primaryColor}20` : 'none',
-					}}
-				>
-					{description ? (
-						<p className={tcgMode ? '' : 'italic'}>{description}</p>
-					) : (
-						<p className="text-center italic opacity-70">Sin descripción</p>
-					)}
-				</div>
+				<DescriptionSection
+					description={description || undefined}
+					primaryColor={primaryColor}
+					rarityBrightness={rarityBrightness}
+					tcgMode={tcgMode}
+				/>
 
 				{/* Contadores de relaciones en modo TCG */}
 				{tcgMode && hasRelationships && (

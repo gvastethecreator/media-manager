@@ -166,10 +166,26 @@ export function useMasonryViewConfig() {
 		};
 	}, [config.aspectRatioVariation]);
 
-	// Calculate layout using the specified algorithm
+	// Calculate layout using the specified algorithm (agrega override opcional columnWidthOverride)
 	const calculateLayout = useMemo(() => {
-		return (items: AnyEntityWithStats[], containerWidth: number): MasonryLayoutResult => {
-			const columns = calculateColumns(containerWidth);
+		return (items: AnyEntityWithStats[], containerWidth: number, columnWidthOverride?: number): MasonryLayoutResult => {
+			// Si se provee override, crear versión derivada de config para cálculo de columnas
+			const baseColumnWidth = columnWidthOverride ? columnWidthOverride : config.columnWidth;
+			const columnsCalc = (containerW: number) => {
+				if (!containerW || containerW <= 0) return config.minColumns;
+				const available = containerW - config.spacing.padding * 2;
+				const colsFromWidth = Math.floor(available / (baseColumnWidth + config.spacing.gap));
+				let cols = Math.max(config.minColumns, colsFromWidth);
+				cols = Math.min(cols, config.maxColumns);
+				if (config.adaptiveColumns) {
+					if (containerW < config.responsiveBreakpoints.sm) cols = Math.min(cols, 1);
+					else if (containerW < config.responsiveBreakpoints.md) cols = Math.min(cols, 2);
+					else if (containerW < config.responsiveBreakpoints.lg) cols = Math.min(cols, 4);
+				}
+				return cols;
+			};
+
+			const columns = columnsCalc(containerWidth);
 			const availableWidth = containerWidth - config.spacing.padding * 2;
 			const itemWidth = (availableWidth - config.spacing.gap * (columns - 1)) / columns;
 

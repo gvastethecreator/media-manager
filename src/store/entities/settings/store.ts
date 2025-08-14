@@ -9,9 +9,9 @@ import type { InterfacePreferences, InterfaceSettingsState } from '@/types/ui/ty
 
 // Estado inicial por defecto
 const defaultPreferences: InterfacePreferences = {
-	fontFamily: 'system',
-	fontSize: 'md',
-	theme: 'system',
+	fontFamily: 'inter',
+	fontSize: 'base',
+	theme: 'system', // soporta también temas custom declarados en schema
 	animations: true,
 	thumbnailsRespectAspectRatio: true,
 	thumbnailsBorderRadius: {

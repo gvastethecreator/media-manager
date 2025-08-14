@@ -43,7 +43,7 @@ class PerformanceBenchmark {
 		return `${(ms / 1000).toFixed(2)}s`;
 	}
 
-	async measureBundleTime() {
+	measureBundleTime() {
 		console.log(chalk.yellow('📦 Midiendo tiempo de build...'));
 
 		const startTime = performance.now();
@@ -80,7 +80,7 @@ class PerformanceBenchmark {
 			// Calcular tamaño total del directorio dist
 			const calculateDirSize = (dirPath) => {
 				let totalSize = 0;
-				const { execSync } = require('child_process');
+				const { execSync: execSyncLocal } = require('child_process');
 
 				try {
 					// En Windows usar dir, en Unix usar du
@@ -89,7 +89,7 @@ class PerformanceBenchmark {
 							? `powershell -Command "Get-ChildItem -Path '${dirPath}' -Recurse | Measure-Object -Property Length -Sum | Select-Object -ExpandProperty Sum"`
 							: `du -sb "${dirPath}" | cut -f1`;
 
-					const result = execSync(command, { encoding: 'utf8' }).trim();
+					const result = execSyncLocal(command, { encoding: 'utf8' }).trim();
 					totalSize = Number.parseInt(result, 10) || 0;
 				} catch (error) {
 					console.log(chalk.yellow('⚠️ No se pudo calcular tamaño exacto'));
@@ -210,14 +210,14 @@ class PerformanceBenchmark {
 		console.log(chalk.green('\n✅ BENCHMARK COMPLETADO\n'));
 	}
 
-	async runBenchmarks() {
+	runBenchmarks() {
 		console.log(chalk.blue.bold('🚀 INICIANDO BENCHMARKS DE RENDIMIENTO'));
 		console.log('='.repeat(60));
 
 		this.measureMemoryUsage();
 		this.countDependencies();
 		this.measureStartupTime();
-		await this.measureBundleTime();
+		this.measureBundleTime();
 
 		if (this.results.buildSuccess) {
 			this.measureBundleSize();
@@ -229,4 +229,4 @@ class PerformanceBenchmark {
 
 // Ejecutar benchmarks
 const benchmark = new PerformanceBenchmark();
-benchmark.runBenchmarks().catch(console.error);
+benchmark.runBenchmarks();

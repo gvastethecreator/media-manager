@@ -18,6 +18,7 @@ export interface ImageCoreState {
 	images: Record<string, ImageWithStats>;
 	isLoading: boolean;
 	error: string | null;
+	folderLoadState?: Record<string, { loading: boolean; loaded: boolean; lastLoadedAt?: number }>;
 
 	// Getters
 	getImage: (id: string) => ImageWithStats | undefined;
@@ -47,6 +48,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 	images: {},
 	isLoading: false,
 	error: null,
+	folderLoadState: {},
 
 	// --- Getters ---
 	getImage: (id) => get().images[id],
@@ -127,86 +129,65 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 		}
 	},
 	fetchImages: async (options: { folderId?: string; refresh?: boolean } = {}) => {
-		console.log('🔍 DEBUG Store: fetchImages llamado con opciones:', options);
-		console.log('🔍 DEBUG Store: Estado actual:', {
-			isLoading: get().isLoading,
-			totalImages: Object.keys(get().images).length,
-		});
-
-		if (get().isLoading && !options.refresh) {
-			console.log('⚠️ DEBUG Store: Saltando carga - isLoading=true y refresh=false');
-			return Object.values(get().images);
+		const { folderId, refresh } = options;
+		console.log('[ImageStore] fetchImages', options);
+		if (get().isLoading && !refresh) {
+			return get().getImages();
 		}
-
-		set({ isLoading: true, error: null });
-		console.log('🚀 DEBUG Store: Iniciando carga de imágenes...');
-
+		set((state) => ({
+			isLoading: true,
+			error: null,
+			folderLoadState: folderId
+				? {
+						...state.folderLoadState,
+						[folderId]: {
+							loading: true,
+							loaded: state.folderLoadState?.[folderId]?.loaded ?? false,
+							lastLoadedAt: state.folderLoadState?.[folderId]?.lastLoadedAt,
+						},
+					}
+				: state.folderLoadState,
+		}));
+		if (refresh) {
+			get().clearImages();
+		}
 		try {
-			if (options.refresh) {
-				console.log('🧹 DEBUG Store: Limpiando imágenes existentes (refresh=true)');
-				get().clearImages();
-			}
-
-			// Implementar paginación automática para obtener todas las imágenes
-			let allImages: any[] = [];
-			let offset = 0;
-			const limit = 100; // Máximo permitido por el servidor
-			let hasMore = true;
-
-			while (hasMore) {
-				console.log(`📡 DEBUG Store: Llamando a ImageApi.getImagesFromApi con: offset=${offset}, limit=${limit}`);
-
-				// Solo pasar parámetros que están permitidos por ImageFiltersSchema en el servidor
-				const apiOptions: any = {
-					limit,
-					offset,
-				};
-
-				// Agregar solo parámetros válidos del esquema del servidor si están presentes
-				if (options.folderId) {
-					apiOptions.folderId = options.folderId;
+			const limit = 100;
+			async function loadBatch(offset: number, acc: ImageWithStats[]): Promise<ImageWithStats[]> {
+				const apiOptions: any = { limit, offset };
+				if (folderId) {
+					apiOptions.folderId = folderId;
 				}
-
 				const result = await getImagesFromApi(apiOptions);
-				console.log(`📡 DEBUG Store: Respuesta de API (página ${Math.floor(offset / limit) + 1}):`, result);
-
-				// Verificar el formato de la respuesta y adaptarse
-				const images = result?.images || (result as any)?.data || [];
-				console.log(`✅ DEBUG Store: Imágenes recibidas en esta página: ${images.length}`);
-
-				if (images.length > 0) {
-					allImages = allImages.concat(images);
-					offset += limit;
-					// Si recibimos menos imágenes que el límite, ya no hay más páginas
-					hasMore = images.length === limit;
-				} else {
-					hasMore = false;
+				const batch = (result as any).images as ImageWithStats[] | undefined;
+				if (batch?.length) {
+					for (const img of batch) {
+						acc.push(img);
+					}
 				}
-
-				console.log(`🔍 DEBUG Store: Total acumulado: ${allImages.length}, hasMore: ${hasMore}`);
+				if (!batch || batch.length < limit) {
+					return acc;
+				}
+				return loadBatch(offset + limit, acc);
 			}
-
-			console.log('🔍 DEBUG Store: Total de imágenes obtenidas:', allImages.length);
-			const validImages = Array.isArray(allImages) ? allImages.filter((img) => img?.id) : [];
-			console.log('✅ DEBUG Store: Imágenes válidas encontradas:', validImages.length);
-			console.log('🔍 DEBUG Store: Imágenes descartadas:', allImages.length - validImages.length);
-
-			get().addImages(validImages);
-			console.log('💾 DEBUG Store: Imágenes añadidas al store. Total en store:', Object.keys(get().images).length);
-
-			return validImages;
+			const all = await loadBatch(0, []);
+			get().addImages(all);
+			return get().getImages();
 		} catch (e: unknown) {
-			const errorMessage = e instanceof Error ? e.message : 'Failed to fetch images';
-			console.error('❌ DEBUG Store: Error en fetchImages:', e);
-			imageLogger.error(errorMessage, { error: e, options });
-			set({ error: errorMessage });
-			return [];
+			const msg = e instanceof Error ? e.message : 'Failed to fetch images';
+			imageLogger.error(msg, { error: e });
+			set({ error: msg });
+			return get().getImages();
 		} finally {
-			set({ isLoading: false });
-			console.log('🏁 DEBUG Store: fetchImages completado. Estado final:', {
+			set((state) => ({
 				isLoading: false,
-				totalImages: Object.keys(get().images).length,
-			});
+				folderLoadState: folderId
+					? {
+							...state.folderLoadState,
+							[folderId]: { loading: false, loaded: true, lastLoadedAt: Date.now() },
+						}
+					: state.folderLoadState,
+			}));
 		}
 	},
 	loadImages: (options: { folderId?: string; refresh?: boolean } = {}) => get().fetchImages(options),

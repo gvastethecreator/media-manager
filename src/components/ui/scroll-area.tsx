@@ -5,12 +5,27 @@ import React from 'react';
 
 import { cn } from '@/lib/utils';
 
-function ScrollArea({ className, children, ...props }: React.ComponentProps<typeof Root>) {
+interface ScrollAreaProps extends React.ComponentProps<typeof Root> {
+	/** test id base para el scroll area (usado en viewport también) */
+	dataTestId?: string;
+}
+
+function ScrollArea({ className, children, dataTestId, ...props }: ScrollAreaProps) {
 	return (
-		<Root className={cn('relative', className)} data-slot="scroll-area" {...props}>
+		<Root
+			className={cn('relative', className)}
+			data-slot="scroll-area"
+			{...props}
+			data-testid={dataTestId ?? (props as any)['data-testid'] /* fallback si alguien pasa data-testid */}
+		>
 			<Viewport
 				className="size-full rounded-[inherit] outline-none transition-[color,box-shadow] focus-visible:outline-1 focus-visible:ring-[3px] focus-visible:ring-ring/50"
 				data-slot="scroll-area-viewport"
+				data-testid={
+					(dataTestId ?? (props as any)['data-testid'])
+						? `${dataTestId ?? (props as any)['data-testid']}-viewport`
+						: 'file-browser-viewport'
+				}
 			>
 				{children}
 			</Viewport>

@@ -54,6 +54,22 @@ export function CharacterCardFooter({
 	// Obtener ID del personaje de la URL si es necesario
 	const characterId = getCardIdFromUrl(id);
 
+	// Lookup table para nombres de rareza
+	const RARITY_NAMES = {
+		9: 'MYTHIC',
+		7: 'LEGENDARY',
+		5: 'EPIC',
+		3: 'RARE',
+		0: 'COMMON',
+	} as const;
+
+	// Determinar rareza basada en nivel
+	const getRarityName = (level: number): string => {
+		const thresholds = [9, 7, 5, 3, 0] as const;
+		const threshold = thresholds.find((t) => level >= t) ?? 0;
+		return RARITY_NAMES[threshold];
+	};
+
 	// Determinar el color de rareza
 	const getRarityColor = (level: number) => {
 		if (level >= 9) {
@@ -160,17 +176,7 @@ export function CharacterCardFooter({
 
 				{/* Indicador de rareza con estrellas */}
 				<div className="flex items-center gap-0.5" style={{ color: getRarityColor(rarityLevel) }}>
-					<span className="mr-1 font-semibold text-[10px]">
-						{rarityLevel >= 9
-							? 'MYTHIC'
-							: rarityLevel >= 7
-								? 'LEGENDARY'
-								: rarityLevel >= 5
-									? 'EPIC'
-									: rarityLevel >= 3
-										? 'RARE'
-										: 'COMMON'}
-					</span>
+					<span className="mr-1 font-semibold text-[10px]">{getRarityName(rarityLevel)}</span>
 					{[...new Array(rarityStars)].map((_, i) => (
 						<Star className="h-3 w-3 fill-current" key={`rarity-star-${renderKey}-${i + 1}`} />
 					))}

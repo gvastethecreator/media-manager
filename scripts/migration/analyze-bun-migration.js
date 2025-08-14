@@ -118,21 +118,33 @@ class BunMigrationAnalyzer {
 		console.log(`⚠️  Alta complejidad: ${metrics.complexMigrations}`);
 		console.log(`⏰ Estimación: ${metrics.estimatedHours} horas (${Math.ceil(metrics.estimatedHours / 8)} días)`);
 		console.log(
-			`🎯 Nivel de riesgo: ${chalk[metrics.riskLevel === 'high' ? 'red' : metrics.riskLevel === 'medium' ? 'yellow' : 'green'](metrics.riskLevel.toUpperCase())}`
+			(() => {
+				let riskColor = 'green';
+				if (metrics.riskLevel === 'high') {
+					riskColor = 'red';
+				} else if (metrics.riskLevel === 'medium') {
+					riskColor = 'yellow';
+				}
+				return `🎯 Nivel de riesgo: ${chalk[riskColor](metrics.riskLevel.toUpperCase())}`;
+			})()
 		);
 
 		// Análisis detallado por dependencia
 		console.log(chalk.yellow('\n🔧 ANÁLISIS DETALLADO DE DEPENDENCIAS'));
-		this.dependencies.forEach((dep) => {
-			const complexityColor =
-				dep.migrationComplexity === 'blocker' ? 'red' : dep.migrationComplexity === 'high' ? 'yellow' : 'green';
+		for (const dep of this.dependencies) {
+			let complexityColor = 'green';
+			if (dep.migrationComplexity === 'blocker') {
+				complexityColor = 'red';
+			} else if (dep.migrationComplexity === 'high') {
+				complexityColor = 'yellow';
+			}
 
 			console.log(`\n${chalk.bold(dep.name)}`);
 			console.log(`  Categoría: ${dep.category}`);
 			console.log(`  Alternativa Bun: ${dep.bunAlternative || 'N/A'}`);
 			console.log(`  Complejidad: ${chalk[complexityColor](dep.migrationComplexity.toUpperCase())}`);
 			console.log(`  Notas: ${dep.notes}`);
-		});
+		}
 
 		// Benchmarks de rendimiento estimados
 		console.log(chalk.yellow('\n📈 BENCHMARKS ESTIMADOS'));

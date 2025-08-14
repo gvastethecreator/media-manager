@@ -1,7 +1,12 @@
+import {
+	buildHolographicStyle,
+	computeRarityVisualConfig,
+	rarityAccessibilityLabel,
+} from '@/components/cards/shared/rarity-style';
+import { cn } from '@/lib/utils';
 import { FolderIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { useState } from 'react';
-import { cn } from '@/lib/utils';
 
 interface GroupCardImagesProps {
 	/** Imágenes a mostrar (rutas) */
@@ -45,41 +50,10 @@ export function GroupCardImages({
 	// Si no hay media, mostrar un placeholder
 	const hasMedia = allMedia.length > 0;
 
-	// Determinar los efectos holográficos basados en la rareza
-	const getHolographicEffects = () => {
-		if (!(tcgMode && holographicEffect)) {
-			return {};
-		}
-
-		// A mayor rareza, más pronunciados son los efectos
-		if (rarityLevel >= 9) {
-			return {
-				// Efecto iridiscente para grupos míticos
-				filter: 'hue-rotate(45deg) saturate(1.5)',
-				animation: 'var(--animate-iridescent)',
-			};
-		}
-
-		if (rarityLevel >= 7) {
-			return {
-				// Efecto brillante para grupos raros
-				filter: 'brightness(1.1) contrast(1.1)',
-				animation: 'var(--animate-shine-effect)',
-			};
-		}
-
-		if (rarityLevel >= 5) {
-			return {
-				// Efecto de cambio de gradiente para grupos poco comunes
-				background: `linear-gradient(45deg, ${primaryColor}40, ${primaryColor}90, ${primaryColor}40)`,
-				backgroundSize: '200% 200%',
-				animation: 'var(--animate-gradient-shift)',
-			};
-		}
-
-		// Para grupos comunes, sin efectos especiales
-		return {};
-	};
+	// Configuración centralizada de rareza
+	const rarityConfig = computeRarityVisualConfig({ level: rarityLevel });
+	const active = tcgMode && holographicEffect;
+	const holographicStyle = buildHolographicStyle(primaryColor, rarityConfig, active);
 
 	// Manejar el efecto holográfico en movimiento
 	const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -104,14 +78,23 @@ export function GroupCardImages({
 		setViewAngle({ x: 0, y: 0 });
 	};
 
-	// Aplicar los efectos holográficos basados en la rareza
-	const holographicStyle = getHolographicEffects();
+	// aria-label accesible usando helper central
+	const ariaLabel = hasMedia
+		? rarityAccessibilityLabel(
+				`Galería de grupo con ${allMedia.length} ${allMedia.length === 1 ? 'elemento' : 'elementos'}`,
+				rarityConfig
+			)
+		: 'Grupo sin imágenes disponibles';
 
 	return (
 		<div
+			aria-label={ariaLabel}
 			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-40', tcgMode && 'border-white/10 border-b')}
+			onBlur={handleMouseLeave}
+			onFocus={handleMouseLeave}
 			onMouseLeave={handleMouseLeave}
 			onMouseMove={handleMouseMove}
+			role="img"
 		>
 			{/* Fondo decorativo para cartas TCG */}
 			{tcgMode && (
@@ -165,7 +148,7 @@ export function GroupCardImages({
 							key={`media-${index}-${media.substring(media.lastIndexOf('/') + 1)}`}
 						>
 							<img
-								alt={`Group content ${index + 1}`}
+								alt={`Contenido grupo ${index + 1}`}
 								className={cn(
 									'absolute inset-0 h-full w-full object-cover',
 									rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'

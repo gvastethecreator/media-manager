@@ -8,7 +8,9 @@ import type { DetailsPanelProps } from './types';
 export function DetailsPanel({ selectedItems, className = '' }: DetailsPanelProps) {
 	const store = useUIStore();
 
-	const { enhancedMetadata, isLoadingMetadata } = useEnhancedMetadata();
+	// Pasar explícitamente el item seleccionado (si existe) al hook de metadata mejorada
+	const singleItem = selectedItems.length === 1 ? selectedItems[0] : undefined;
+	const { enhancedMetadata, isLoadingMetadata } = useEnhancedMetadata(singleItem);
 
 	const renderContent = () => {
 		switch (selectedItems.length) {

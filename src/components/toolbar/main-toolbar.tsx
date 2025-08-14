@@ -13,22 +13,19 @@ import {
 	Edit,
 	FileText,
 	FolderIcon,
-	FolderSearch,
 	GalleryHorizontal,
 	Grid,
 	ImageIcon,
 	Info,
 	LayoutGrid,
-	List,
+	List as ListIcon,
 	MapPin,
 	PanelLeftClose,
 	PanelLeftOpen,
 	PanelRightClose,
 	PanelRightOpen,
 	Plus,
-	RefreshCw,
-	Search,
-	Share2,
+	Settings,
 	Star,
 	TagIcon,
 	Trash2,
@@ -77,10 +74,6 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	isLeftPanelCollapsed,
 	toggleLeftPanelCollapse,
 	allItemIds = [],
-	currentFolderId,
-	onScanFolder,
-	onRefreshFolder,
-	isRetrying = false,
 }) {
 	const location = useLocation();
 	const currentView = location.pathname.split('/')[1] || 'gallery';
@@ -89,7 +82,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	const viewMode = useViewOptionsStore((state: any) => state.viewMode);
 	const setViewMode = useViewOptionsStore((state: any) => state.setViewMode);
 	const sortOptions = useViewOptionsStore((state: any) => state.sortOptions);
-	const addSortOption = useViewOptionsStore((state: any) => state.addSortOption);
+	const setSortOptions = useViewOptionsStore((state: any) => state.setSortOptions);
 	const searchQuery = useViewOptionsStore((state: any) => state.searchQuery);
 	const setSearchQuery = useViewOptionsStore((state: any) => state.setSearchQuery);
 	const itemSize = useViewOptionsStore((state: any) => state.itemSize);
@@ -104,7 +97,8 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	const selectAll = useSelectionStore((state: any) => state.selectAll);
 	const invertSelection = useSelectionStore((state: any) => state.invertSelection);
 
-	const { isVisible, toggleVisibility } = useDetailsPanel();
+	const { isVisible, toggleVisibility, showInterfaceSettings, setShowInterfaceSettings, setVisible } =
+		useDetailsPanel() as any;
 
 	// Lista de vistas que requieren el panel de detalles - memoizada
 	const viewsWithDetails = useMemo(
@@ -194,18 +188,24 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 		// TODO: Implementar server action para copiar archivos
 	}, [selectedIds]);
 
-	// 🔄 Manejador de ordenación
+	// 🔄 Manejador de ordenación exclusiva (solo uno activo a la vez)
 	const handleSort = useCallback(
 		(field: string) => {
-			// Usar nombres públicos; el comparador soporta alias (modifiedAt/createdAt)
+			// Verificar si ya existe un ordenamiento por este campo
 			const current = sortOptions.find((option: any) => option.field === field);
+
 			if (current) {
-				addSortOption({ field, direction: current.direction === 'asc' ? 'desc' : 'asc' });
+				// Si existe, cambiar la dirección (asc/desc)
+				const newDirection = current.direction === 'asc' ? 'desc' : 'asc';
+				// Usar setSortOptions para reemplazar TODA la lista con solo este ordenamiento
+				setSortOptions([{ field, direction: newDirection }]);
 			} else {
-				addSortOption({ field, direction: 'asc' });
+				// Si no existe, crear nuevo ordenamiento exclusivo
+				// Usar setSortOptions para reemplazar TODA la lista con solo este ordenamiento
+				setSortOptions([{ field, direction: 'asc' }]);
 			}
 		},
-		[sortOptions, addSortOption]
+		[sortOptions, setSortOptions]
 	);
 
 	// 🔄 Manejador de selección
@@ -245,15 +245,31 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 		const btnClass = (active: boolean) => cn('h-7 hover:bg-accent', active ? 'w-10 bg-accent/50' : 'w-7');
 		const dirIcon = (dir?: 'asc' | 'desc') =>
 			dir ? (
-				dir === 'asc' ? (
-					<ArrowUp className="h-2.5 w-2.5 text-primary" />
-				) : (
-					<ArrowDown className="h-2.5 w-2.5 text-primary" />
-				)
+				<span
+					style={{
+						position: 'absolute',
+						bottom: 0,
+						right: 0,
+						width: '14px',
+						height: '14px',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						pointerEvents: 'none',
+					}}
+				>
+					{dir === 'asc' ? (
+						<ArrowUp className="h-2.5 w-2.5 text-primary" />
+					) : (
+						<ArrowDown className="h-2.5 w-2.5 text-primary" />
+					)}
+				</span>
 			) : null;
 
+		const iconContainerClass = 'relative flex items-center justify-center';
+
 		return (
-			<div className="flex items-center gap-0.5">
+			<div className="flex items-center gap-0.5 p-2">
 				<Button
 					className={btnClass(isNameActive)}
 					data-active={isNameActive}
@@ -262,7 +278,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					title="Ordenar por nombre"
 					variant="ghost"
 				>
-					<div className="flex items-center justify-center gap-0.5">
+					<div className={iconContainerClass} style={{ width: 22, height: 22 }}>
 						<FileText className={cn('h-3.5 w-3.5', isNameActive ? 'text-primary' : 'text-muted-foreground')} />
 						{dirIcon(nameOpt?.direction)}
 					</div>
@@ -275,7 +291,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					title="Ordenar por fecha de modificación"
 					variant="ghost"
 				>
-					<div className="flex items-center justify-center gap-0.5">
+					<div className={iconContainerClass} style={{ width: 22, height: 22 }}>
 						<Clock className={cn('h-3.5 w-3.5', modifiedOpt ? 'text-primary' : 'text-muted-foreground')} />
 						{dirIcon(modifiedOpt?.direction)}
 					</div>
@@ -288,7 +304,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					title="Ordenar por fecha de creación"
 					variant="ghost"
 				>
-					<div className="flex items-center justify-center gap-0.5">
+					<div className={iconContainerClass} style={{ width: 22, height: 22 }}>
 						<Calendar className={cn('h-3.5 w-3.5', createdOpt ? 'text-primary' : 'text-muted-foreground')} />
 						{dirIcon(createdOpt?.direction)}
 					</div>
@@ -297,54 +313,57 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 		);
 	};
 
-	const renderViewButtons = () => (
-		<div className="flex items-center gap-1 rounded-md bg-accent/10 p-0.5">
-			<Button
-				className="h-7 w-7 hover:bg-accent"
-				data-active={viewMode === 'grid'}
-				data-testid="view-mode-grid-btn"
-				onClick={() => setViewMode('grid')}
-				size="icon"
-				title="Vista de cuadrícula"
-				variant="ghost"
-			>
-				<Grid className={cn('h-3.5 w-3.5', viewMode === 'grid' && 'font-bold text-primary')} />
-			</Button>
-			<Button
-				className="h-7 w-7 hover:bg-accent"
-				data-active={viewMode === 'cards'}
-				data-testid="view-mode-cards-btn"
-				onClick={() => setViewMode('cards')}
-				size="icon"
-				title="Vista de tarjetas"
-				variant="ghost"
-			>
-				<LayoutGrid className={cn('h-3.5 w-3.5', viewMode === 'cards' && 'font-bold text-primary')} />
-			</Button>
-			<Button
-				className="h-7 w-7 hover:bg-accent"
-				data-active={viewMode === 'masonry'}
-				data-testid="view-mode-masonry-btn"
-				onClick={() => setViewModeDebounced('masonry')}
-				size="icon"
-				title="Vista de mosaico"
-				variant="ghost"
-			>
-				<GalleryHorizontal className={cn('h-3.5 w-3.5', viewMode === 'masonry' && 'font-bold text-primary')} />
-			</Button>
-			<Button
-				className="h-7 w-7 hover:bg-accent"
-				data-active={viewMode === 'list'}
-				data-testid="view-mode-list-btn"
-				onClick={() => setViewMode('list')}
-				size="icon"
-				title="Vista de lista"
-				variant="ghost"
-			>
-				<List className={cn('h-3.5 w-3.5', viewMode === 'list' && 'font-bold text-primary')} />
-			</Button>
-		</div>
-	);
+	const renderViewButtons = () => {
+		return (
+			<div className="flex items-center gap-0.5">
+				{/* Botones directos para tests E2E (evita timeouts por dropdown) */}
+				<Button
+					aria-label="Vista Grid"
+					data-active={viewMode === 'grid'}
+					data-testid="view-mode-grid-btn"
+					onClick={() => setViewMode('grid')}
+					size="icon"
+					title="Vista Grid"
+					variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
+				>
+					<Grid className="h-4 w-4" />
+				</Button>
+				<Button
+					aria-label="Vista Cards"
+					data-active={viewMode === 'cards'}
+					data-testid="view-mode-cards-btn"
+					onClick={() => setViewMode('cards')}
+					size="icon"
+					title="Vista Cards"
+					variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
+				>
+					<LayoutGrid className="h-4 w-4" />
+				</Button>
+				<Button
+					aria-label="Vista Masonry"
+					data-active={viewMode === 'masonry'}
+					data-testid="view-mode-masonry-btn"
+					onClick={() => setViewModeDebounced('masonry')}
+					size="icon"
+					title="Vista Masonry"
+					variant={viewMode === 'masonry' ? 'secondary' : 'ghost'}
+				>
+					<GalleryHorizontal className="h-4 w-4" />
+				</Button>
+				<Button
+					aria-label="Vista Lista"
+					data-active={viewMode === 'list'}
+					data-testid="view-mode-list-btn"
+					onClick={() => setViewMode('list')}
+					size="icon"
+					title="Vista Lista"
+					variant={viewMode === 'list' ? 'secondary' : 'ghost'}
+				>
+					<ListIcon className="h-4 w-4" />
+				</Button>
+			</div>
+		);
+	};
 
 	const renderSelectionActions = () => {
 		if (selectedIds.length === 0) {
@@ -447,11 +466,10 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 
 	// 🔄 Añadir campo de búsqueda
 	const renderSearchInput = () => (
-		<div className="ml-2 flex items-center gap-1">
+		<div className="ml-0 flex items-center gap-1">
 			<div className="relative">
-				<Search className="-translate-y-1/2 absolute top-1/2 left-2 h-3.5 w-3.5 transform text-muted-foreground" />
 				<input
-					className="h-7 rounded-md border-none bg-accent/10 pr-2 pl-7 text-sm focus:ring-1 focus:ring-primary"
+					className="h-5 rounded-xs border-none bg-background p-1 pr-2 pl-2 text-xs"
 					onChange={(e) => setSearchQuery(e.target.value)}
 					placeholder="Buscar..."
 					type="text"
@@ -478,60 +496,12 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 				return (
 					<div className="flex items-center gap-0.5">
 						<Button className="h-7 px-2 hover:bg-accent" size="sm" variant="ghost">
-							<Plus className="mr-1 h-3.5 w-3.5" />
-							<span className="text-xs">Añadir imágenes</span>
-						</Button>
-						<Button className="h-7 px-2 hover:bg-accent" size="sm" variant="ghost">
 							<Edit className="mr-1 h-3.5 w-3.5" />
-							<span className="text-xs">Editar colección</span>
-						</Button>
-						<Button className="h-7 px-2 hover:bg-accent" size="sm" variant="ghost">
-							<Share2 className="mr-1 h-3.5 w-3.5" />
-							<span className="text-xs">Compartir</span>
 						</Button>
 					</div>
 				);
 			case 'folder-content':
-				return (
-					<div className="flex items-center gap-0.5">
-						{/* Botones de escanear y recargar carpeta */}
-						{currentFolderId && onScanFolder && (
-							<Button
-								className="h-7 px-2 hover:bg-accent"
-								disabled={isRetrying}
-								onClick={onScanFolder}
-								size="sm"
-								variant="ghost"
-							>
-								<FolderSearch className="mr-1 h-3.5 w-3.5" />
-								<span className="text-xs">{isRetrying ? 'Escaneando...' : 'Escanear'}</span>
-							</Button>
-						)}
-						{currentFolderId && onRefreshFolder && (
-							<Button
-								className="h-7 px-2 hover:bg-accent"
-								disabled={isRetrying}
-								onClick={onRefreshFolder}
-								size="sm"
-								variant="ghost"
-							>
-								<RefreshCw className={`mr-1 h-3.5 w-3.5 ${isRetrying ? 'animate-spin' : ''}`} />
-								<span className="text-xs">{isRetrying ? 'Recargando...' : 'Recargar'}</span>
-							</Button>
-						)}
-						{currentFolderId && (onScanFolder || onRefreshFolder) && (
-							<Separator className="mx-1 h-4" orientation="vertical" />
-						)}
-						<Button className="h-7 px-2 hover:bg-accent" size="sm" variant="ghost">
-							<Plus className="mr-1 h-3.5 w-3.5" />
-							<span className="text-xs">Nueva carpeta</span>
-						</Button>
-						<Button className="h-7 px-2 hover:bg-accent" size="sm" variant="ghost">
-							<ImageIcon className="mr-1 h-3.5 w-3.5" />
-							<span className="text-xs">Subir imágenes</span>
-						</Button>
-					</div>
-				);
+				return null;
 			default:
 				return null;
 		}
@@ -563,7 +533,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	};
 
 	return (
-		<div className="flex h-10 items-center justify-between border-b px-2">
+		<div className="flex h-10 items-center justify-between border-2 border-background bg-secondary p-2">
 			{/* Lado izquierdo: Botón colapsar panel izquierdo + breadcrumbs + selecciones */}
 			<div className="flex items-center gap-2">
 				{/* Botón de colapsar panel izquierdo */}
@@ -592,13 +562,46 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 				{!isInSettingsView && renderSearchInput()}
 				{!isInSettingsView && renderSortButtons()}
 				{!isInSettingsView && renderViewButtons()}
-				{!isInSettingsView && renderSizeControls()}
 				{!isInSettingsView && renderContextActions()}
+
+				{/* Botón abrir configuraciones de vista dentro del panel derecho */}
+				{!isInSettingsView && (
+					<Button
+						className={cn('h-7 w-7 hover:bg-accent', showInterfaceSettings && 'bg-accent')}
+						onClick={() => {
+							// Activar panel si está oculto y mostrar configuraciones
+							if (!isVisible) {
+								setVisible(true);
+							}
+							// Si el panel derecho está colapsado, intentar expandirlo si hay handler
+							if (isRightPanelCollapsed && toggleRightPanelCollapse) {
+								try {
+									toggleRightPanelCollapse();
+								} catch {
+									/* noop */
+								}
+							}
+							// Si ya está activo, cerrar; si no, abrir y ocultar detalles
+							setShowInterfaceSettings(!showInterfaceSettings);
+						}}
+						size="icon"
+						title={showInterfaceSettings ? 'Ocultar configuración de vistas' : 'Mostrar configuración de vistas'}
+						variant="ghost"
+					>
+						<Settings className="h-3.5 w-3.5" />
+					</Button>
+				)}
 
 				{!isInSettingsView && showDetailsButton && (
 					<Button
-						className={cn('h-7 w-7 hover:bg-accent', isVisible && 'bg-accent')}
-						onClick={toggleVisibility}
+						className={cn('h-7 w-7 hover:bg-accent', isVisible && !showInterfaceSettings && 'bg-accent')}
+						onClick={() => {
+							// Si estamos mostrando configuraciones, desactivarlas al alternar detalles
+							if (showInterfaceSettings) {
+								setShowInterfaceSettings(false);
+							}
+							toggleVisibility();
+						}}
 						size="icon"
 						title={isVisible ? 'Ocultar detalles' : 'Mostrar detalles'}
 						variant="ghost"

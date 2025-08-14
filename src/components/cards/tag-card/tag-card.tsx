@@ -1,14 +1,208 @@
+import { cn } from '@/lib/utils';
+import { type TagCategory, TagRarity } from '@/store/entities/tag/types';
+import type { TagWithStats } from '@/types/entities/tag';
 import { Sparkles, Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
-import { cn } from '@/lib/utils';
-import { type TagCategory, TagRarity } from '@/store/entities/tag/types';
-import type { TagWithStats } from '@/types/entities/tag';
 import { TagCardContent } from './tag-card-content';
 import { TagCardFooter } from './tag-card-footer';
 import { TagCardHeader } from './tag-card-header';
 import { TagCardImages } from './tag-card-images';
+
+// Helper function para determinar rareza basada en relaciones
+function calculateTagRarity(totalRelations: number): TagRarity {
+	if (totalRelations > 200) {
+		return TagRarity.LEGENDARY;
+	}
+	if (totalRelations > 100) {
+		return TagRarity.VERY_RARE;
+	}
+	if (totalRelations > 50) {
+		return TagRarity.RARE;
+	}
+	if (totalRelations > 10) {
+		return TagRarity.UNCOMMON;
+	}
+	return TagRarity.COMMON;
+}
+
+// Helper function para generar color secundario
+function generateSecondaryColor(color?: string): string {
+	// Si no hay color definido, usar un valor por defecto
+	if (!color) {
+		return '#be185d';
+	}
+
+	// Oscurecer el color primario para el secundario
+	try {
+		// Convertir hex a RGB
+		const r = Number.parseInt(color.slice(1, 3), 16);
+		const g = Number.parseInt(color.slice(3, 5), 16);
+		const b = Number.parseInt(color.slice(5, 7), 16);
+
+		// Oscurecer los componentes
+		const darkenFactor = 0.7;
+		const darkerR = Math.floor(r * darkenFactor);
+		const darkerG = Math.floor(g * darkenFactor);
+		const darkerB = Math.floor(b * darkenFactor);
+
+		// Convertir de vuelta a hex
+		return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
+	} catch (_e) {
+		// Si hay algún error, volver al valor por defecto
+		return '#be185d';
+	}
+}
+
+// Helper function para obtener configuración de rareza
+function getRarityConfig(rarity: TagRarity) {
+	const rarityColorMap: Record<string, string> = {
+		[TagRarity.COMMON]: '#6b7280',
+		[TagRarity.UNCOMMON]: '#22c55e',
+		[TagRarity.RARE]: '#3b82f6',
+		[TagRarity.VERY_RARE]: '#8b5cf6',
+		[TagRarity.LEGENDARY]: '#f59e0b',
+	};
+
+	const rarityGlowMap: Record<string, number> = {
+		[TagRarity.COMMON]: 0,
+		[TagRarity.UNCOMMON]: 5,
+		[TagRarity.RARE]: 10,
+		[TagRarity.VERY_RARE]: 15,
+		[TagRarity.LEGENDARY]: 20,
+	};
+
+	return {
+		color: rarityColorMap[rarity] || rarityColorMap[TagRarity.COMMON],
+		glow: rarityGlowMap[rarity] || 0,
+	};
+}
+
+// Custom hook para manejar datos del tag
+function useTagCardData(tag: TagWithStats) {
+	return useMemo(() => {
+		const counts = {
+			imagesCount: tag._count?.images || 0,
+			videosCount: tag._count?.videos || 0,
+			albumsCount: tag._count?.albums || 0,
+			collectionsCount: tag._count?.collections || 0,
+			charactersCount: tag._count?.characters || 0,
+			placesCount: tag._count?.places || 0,
+			worldItemsCount: tag._count?.worldItems || 0,
+			conceptsCount: tag._count?.concepts || 0,
+			promptsCount: tag._count?.prompts || 0,
+			notesCount: tag._count?.notes || 0,
+			wildcardsCount: tag._count?.wildcards || 0,
+			propertiesCount: tag._count?.properties || 0,
+			groupsCount: tag._count?.groups || 0,
+		};
+
+		const totalRelations = tag.stats?.totalRelations ?? 0;
+		const calculatedRarity = calculateTagRarity(totalRelations);
+		const rarityConfig = getRarityConfig(calculatedRarity);
+
+		return {
+			...counts,
+			totalRelations,
+			calculatedRarity,
+			rarityConfig,
+		};
+	}, [tag]);
+}
+
+// Componente para efectos TCG
+function TCGEffects({
+	tcgMode,
+	cardColor,
+	rarityColor,
+	calculatedRarity,
+}: {
+	tcgMode: boolean;
+	cardColor: string;
+	rarityColor: string;
+	calculatedRarity: TagRarity;
+}) {
+	if (!tcgMode) {
+		return null;
+	}
+
+	return (
+		<>
+			<div
+				className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-30"
+				style={{
+					backgroundImage: `
+						linear-gradient(125deg,
+						transparent 0%,
+						${cardColor}30 25%,
+						${rarityColor}30 50%,
+						${cardColor}30 75%,
+						transparent 100%)
+					`,
+					backgroundSize: '200% 200%',
+					animation: 'gradient-shift 3s ease infinite',
+				}}
+			/>
+
+			{/* Sello de rareza */}
+			<div
+				className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/4 left-1/2 h-24 w-24 opacity-10"
+				style={{
+					background: `radial-gradient(circle, ${rarityColor}50 0%, transparent 70%)`,
+				}}
+			>
+				<div className="flex h-full w-full items-center justify-center">
+					<Tag className="h-10 w-10" style={{ color: rarityColor }} />
+				</div>
+			</div>
+
+			{/* Indicador visual de rareza */}
+			{calculatedRarity !== TagRarity.COMMON && (
+				<div className="absolute top-2 right-2 z-10">
+					<div
+						className={cn('rounded-full p-1', calculatedRarity === TagRarity.LEGENDARY && 'animate-pulse')}
+						style={{ backgroundColor: `${rarityColor}30` }}
+					>
+						<Sparkles className="h-4 w-4" style={{ color: rarityColor }} />
+					</div>
+				</div>
+			)}
+		</>
+	);
+}
+
+// Custom hook para manejar colores y estilos
+function useTagCardStyles(tagData: ReturnType<typeof useTagCardData>, color?: string | null) {
+	const cardColor = useMemo(() => color || tagData.rarityConfig.color, [color, tagData.rarityConfig.color]);
+	const secondaryColor = useMemo(() => generateSecondaryColor(color || undefined), [color]);
+
+	return {
+		cardColor,
+		secondaryColor,
+	};
+}
+
+// Custom hook para manejar interacciones
+function useTagCardInteractions(onClick?: () => void, disabled?: boolean) {
+	const [isHovered, setIsHovered] = useState(false);
+
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent<HTMLDivElement>) => {
+			if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ')) {
+				e.preventDefault();
+				onClick();
+			}
+		},
+		[onClick, disabled]
+	);
+
+	return {
+		isHovered,
+		setIsHovered,
+		handleKeyDown,
+	};
+}
 
 export interface TagCardProps {
 	tag: TagWithStats;
@@ -22,8 +216,216 @@ export interface TagCardProps {
 	interactive?: boolean;
 }
 
+// Componente interior para el contenido de la tarjeta
+interface TagCardInnerContentProps {
+	tagData: any;
+	cardColor: string;
+	secondaryColor: string;
+	tcgMode: boolean;
+	isHovered: boolean;
+	category: string | null;
+	compact: boolean;
+	emoji: string | null;
+	isFavorite: boolean;
+	name: string;
+	processedFeaturedImage: any;
+	id: string;
+	description?: string | null;
+	shortcut?: string | null;
+	createdAt: Date;
+	updatedAt: Date;
+}
+
+function TagCardInnerContent(props: TagCardInnerContentProps) {
+	const {
+		tagData,
+		cardColor,
+		secondaryColor,
+		tcgMode,
+		isHovered,
+		category,
+		compact,
+		emoji,
+		isFavorite,
+		name,
+		processedFeaturedImage,
+		id,
+		description,
+		shortcut,
+		createdAt,
+		updatedAt,
+	} = props;
+	return (
+		<div
+			className={cn(
+				'h-full w-full overflow-hidden rounded-xl transition-all duration-300 ease-out',
+				tcgMode && 'shadow-md',
+				isHovered && tcgMode && 'scale-[1.01]'
+			)}
+			style={{ background: `linear-gradient(135deg, ${cardColor}15, ${cardColor}05)` }}
+		>
+			<TCGEffects
+				calculatedRarity={tagData.calculatedRarity}
+				cardColor={cardColor}
+				rarityColor={tagData.rarityConfig.color}
+				tcgMode={tcgMode}
+			/>
+			<div className="flex h-full flex-col">
+				<TagCardHeader
+					category={(category || 'general') as TagCategory}
+					color={cardColor}
+					compact={compact}
+					emoji={emoji ?? '🏷️'}
+					isFavorite={isFavorite}
+					name={name}
+					rarity={tagData.calculatedRarity}
+					tcgMode={tcgMode}
+				/>
+				<TagCardImages
+					compact={compact}
+					featuredImage={processedFeaturedImage}
+					primaryColor={cardColor}
+					rarity={tagData.calculatedRarity}
+					secondaryColor={secondaryColor}
+					tagId={id}
+					tcgMode={tcgMode}
+				/>
+				<TagCardContent
+					albumsCount={tagData.albumsCount}
+					charactersCount={tagData.charactersCount}
+					collectionsCount={tagData.collectionsCount}
+					conceptsCount={tagData.conceptsCount}
+					description={description}
+					groupsCount={tagData.groupsCount}
+					imagesCount={tagData.imagesCount}
+					notesCount={tagData.notesCount}
+					placesCount={tagData.placesCount}
+					primaryColor={cardColor}
+					promptsCount={tagData.promptsCount}
+					propertiesCount={tagData.propertiesCount}
+					rarity={tagData.calculatedRarity}
+					secondaryColor={secondaryColor}
+					shortcut={shortcut}
+					tcgMode={tcgMode}
+					videosCount={tagData.videosCount}
+					wildcardsCount={tagData.wildcardsCount}
+					worldItemsCount={tagData.worldItemsCount}
+				/>
+				<TagCardFooter
+					compact={compact}
+					createdAt={createdAt}
+					imagesCount={tagData.imagesCount}
+					isFavorite={isFavorite}
+					primaryColor={cardColor}
+					rarity={tagData.calculatedRarity}
+					secondaryColor={secondaryColor}
+					tcgMode={tcgMode}
+					updatedAt={updatedAt}
+					videosCount={tagData.videosCount}
+				/>
+			</div>
+		</div>
+	);
+}
+
+// Helper para calcular estilos de contenedor
+function getContainerStyles(cardColor: string, tcgMode: boolean, compact?: boolean, style?: React.CSSProperties) {
+	let minHeight: string;
+	if (compact) {
+		minHeight = '200px';
+	} else if (tcgMode) {
+		minHeight = '420px';
+	} else {
+		minHeight = 'auto';
+	}
+
+	return {
+		background: 'rgba(0, 0, 0, 0.05)',
+		borderRadius: tcgMode ? '12px' : '8px',
+		border: tcgMode ? `2px solid ${cardColor}40` : '1px solid rgba(255, 255, 255, 0.1)',
+		transition: 'all 0.3s ease',
+		backdropFilter: 'blur(10px)',
+		boxShadow: tcgMode
+			? `0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px ${cardColor}30, inset 0 1px 0 rgba(255, 255, 255, 0.1)`
+			: '0 4px 8px rgba(0, 0, 0, 0.1)',
+		minHeight,
+		width: compact ? '180px' : '280px',
+		transformStyle: 'preserve-3d' as const,
+		perspective: '1000px',
+		...style,
+	};
+}
+
+// Helper para calcular clases de contenedor
+function getContainerClasses(disabled?: boolean, interactive?: boolean, className?: string) {
+	return cn(
+		'group relative flex cursor-pointer flex-col overflow-hidden',
+		disabled && 'cursor-not-allowed opacity-50',
+		!interactive && 'cursor-default',
+		className
+	);
+}
+
+// Helper para obtener configuración completa del componente
+function getTagCardConfiguration(tagObj: any, onClick?: (tag: any) => void, disabled?: boolean) {
+	const tagData = useTagCardData(tagObj);
+	const { cardColor, secondaryColor } = useTagCardStyles(tagData, tagObj.color);
+
+	// Crear handler compatible con el hook
+	const handleClick = useCallback(() => {
+		if (onClick) {
+			onClick(tagObj);
+		}
+	}, [onClick, tagObj]);
+
+	const { isHovered, setIsHovered, handleKeyDown } = useTagCardInteractions(handleClick, disabled);
+	const tagProps = extractTagProperties(tagObj);
+
+	return {
+		tagData,
+		cardColor,
+		secondaryColor,
+		isHovered,
+		setIsHovered,
+		handleKeyDown,
+		...tagProps,
+	};
+}
+
+// Helper para extraer propiedades del tag
+function extractTagProperties(tag: TagWithStats) {
+	const {
+		id,
+		name,
+		emoji = '🏷️',
+		category,
+		description,
+		shortcut,
+		createdAt,
+		updatedAt,
+		isFavorite = false,
+		featuredImage,
+	} = tag;
+
+	// Procesar la imagen destacada para asegurarnos de que tiene el formato correcto
+	const processedFeaturedImage = featuredImage && typeof featuredImage === 'object' ? featuredImage : null;
+
+	return {
+		id,
+		name,
+		emoji,
+		category,
+		description,
+		shortcut,
+		createdAt,
+		updatedAt,
+		isFavorite,
+		processedFeaturedImage,
+	};
+}
+
 /**
- * TagCard - Componente de tarjeta para etiquetas inspirado en el diseño de cartas TCG
+ * TagCard - Tarjeta para mostrar etiquetas con estilo TCG
  *
  * Este componente muestra información detallada de una etiqueta en un formato
  * tipo cartas de colección, con efectos visuales y presentación de datos
@@ -41,274 +443,44 @@ export function TagCard({
 	interactive = true,
 	...rest
 }: TagCardProps) {
-	const [isHovered, setIsHovered] = useState(false);
+	// Obtener configuración usando helper simplificado
+	const config = getTagCardConfiguration(tag, onClick, disabled);
 
-	// Extraer propiedades básicas del tag
-	const {
-		id,
-		name,
-		emoji = '🏷️',
-		color,
-		category,
-		description,
-		shortcut,
-		createdAt,
-		updatedAt,
-		isFavorite = false,
-		featuredImage,
-	} = tag;
-
-	// Calcular valores derivados
-	const imagesCount = tag._count?.images || 0;
-	const videosCount = tag._count?.videos || 0;
-	const albumsCount = tag._count?.albums || 0;
-	const collectionsCount = tag._count?.collections || 0;
-	const charactersCount = tag._count?.characters || 0;
-	const placesCount = tag._count?.places || 0;
-	const worldItemsCount = tag._count?.worldItems || 0;
-	const conceptsCount = tag._count?.concepts || 0;
-	const promptsCount = tag._count?.prompts || 0;
-	const notesCount = tag._count?.notes || 0;
-	const wildcardsCount = tag._count?.wildcards || 0;
-	const propertiesCount = tag._count?.properties || 0;
-	const groupsCount = tag._count?.groups || 0;
-
-	// Calcular total de relaciones para mostrar la rareza
-	const totalRelations = tag.stats?.totalRelations ?? 0;
-
-	// Determinar rareza basada en relaciones
-	const determineRarity = (): TagRarity => {
-		if (totalRelations > 200) {
-			return TagRarity.LEGENDARY;
-		}
-		if (totalRelations > 100) {
-			return TagRarity.VERY_RARE;
-		}
-		if (totalRelations > 50) {
-			return TagRarity.RARE;
-		}
-		if (totalRelations > 10) {
-			return TagRarity.UNCOMMON;
-		}
-		return TagRarity.COMMON;
-	};
-
-	const calculatedRarity = determineRarity();
-
-	// Colores basados en rareza para el efecto TCG
-	const rarityColorMap: Record<string, string> = {
-		[TagRarity.COMMON]: '#6b7280',
-		[TagRarity.UNCOMMON]: '#22c55e',
-		[TagRarity.RARE]: '#3b82f6',
-		[TagRarity.VERY_RARE]: '#8b5cf6',
-		[TagRarity.LEGENDARY]: '#f59e0b',
-	};
-
-	// Color de efecto basado en rareza
-	const rarityColor = rarityColorMap[calculatedRarity] || rarityColorMap[TagRarity.COMMON];
-
-	// Nivel de brillo basado en rareza para efectos
-	const rarityGlowMap: Record<string, number> = {
-		[TagRarity.COMMON]: 0,
-		[TagRarity.UNCOMMON]: 5,
-		[TagRarity.RARE]: 10,
-		[TagRarity.VERY_RARE]: 15,
-		[TagRarity.LEGENDARY]: 20,
-	};
-
-	const rarityGlow = rarityGlowMap[calculatedRarity] || 0;
-
-	// Calcular color primario y secundario
-	const cardColor = useMemo(() => color || rarityColor, [color, rarityColor]);
-	const secondaryColor = useMemo(() => {
-		// Si no hay color definido, usar un valor por defecto
-		if (!color) {
-			return '#be185d';
-		}
-
-		// Oscurecer el color primario para el secundario
-		try {
-			// Convertir hex a RGB
-			const r = Number.parseInt(color.slice(1, 3), 16);
-			const g = Number.parseInt(color.slice(3, 5), 16);
-			const b = Number.parseInt(color.slice(5, 7), 16);
-
-			// Oscurecer los componentes
-			const darkenFactor = 0.7;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
-
-			// Convertir de vuelta a hex
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (_e) {
-			// Si hay algún error, volver al valor por defecto
-			return '#be185d';
-		}
-	}, [color]);
-
-	// Manejar eventos de teclado para accesibilidad
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent<HTMLDivElement>) => {
-			if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ')) {
-				e.preventDefault();
-				onClick();
-			}
-		},
-		[onClick, disabled]
-	);
-
-	// Procesar la imagen destacada para asegurarnos de que tiene el formato correcto
-	const processedFeaturedImage = featuredImage && typeof featuredImage === 'object' ? featuredImage : null;
-
-	// Render
 	return (
 		<motion.article
-			aria-label={`Etiqueta: ${name}`}
-			className={cn(
-				'relative z-0 flex flex-col overflow-hidden border-border',
-				disabled && 'pointer-events-none opacity-70',
-				interactive && !disabled && 'cursor-pointer transition-shadow duration-300 hover:shadow-lg',
-				className
-			)}
-			data-tag-id={id}
+			aria-label={`Etiqueta: ${config.name}`}
+			className={getContainerClasses(disabled, interactive, className)}
+			data-tag-id={config.id}
 			onClick={disabled || !interactive ? undefined : onClick}
-			onKeyDown={handleKeyDown}
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
+			onKeyDown={config.handleKeyDown}
+			onMouseEnter={() => config.setIsHovered(true)}
+			onMouseLeave={() => config.setIsHovered(false)}
 			role={onClick && interactive ? 'button' : 'article'}
-			style={{
-				background: 'rgba(0, 0, 0, 0.05)',
-				border: tcgMode ? `1px solid ${cardColor}60` : undefined,
-				borderRadius: tcgMode ? '8px' : undefined,
-				maxWidth: compact ? 300 : undefined,
-				boxShadow: tcgMode ? `0 0 ${rarityGlow}px ${cardColor}30` : undefined,
-				...style,
-			}}
+			style={getContainerStyles(config.cardColor, tcgMode, compact, style)}
 			tabIndex={disabled || !interactive || !onClick ? -1 : 0}
 			whileHover={!disabled && interactive ? { y: -5 } : {}}
 			whileTap={!disabled && interactive && onClick ? { scale: 0.98 } : {}}
 			{...rest}
 		>
 			{/* Card Container con efecto TCG */}
-			<div
-				className={cn(
-					'h-full w-full overflow-hidden rounded-xl transition-all duration-300 ease-out',
-					tcgMode && 'shadow-md',
-					isHovered && tcgMode && 'scale-[1.01]'
-				)}
-				style={{
-					background: `linear-gradient(135deg, ${cardColor}15, ${cardColor}05)`,
-				}}
-			>
-				{/* Efectos TCG */}
-				{tcgMode && (
-					<>
-						<div
-							className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-30"
-							style={{
-								backgroundImage: `
-									linear-gradient(125deg,
-									transparent 0%,
-									${cardColor}30 25%,
-									${rarityColor}30 50%,
-									${cardColor}30 75%,
-									transparent 100%)
-								`,
-								backgroundSize: '200% 200%',
-								animation: 'gradient-shift 3s ease infinite',
-							}}
-						/>
-
-						{/* Sello de rareza */}
-						<div
-							className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/4 left-1/2 h-24 w-24 opacity-10"
-							style={{
-								background: `radial-gradient(circle, ${rarityColor}50 0%, transparent 70%)`,
-							}}
-						>
-							<div className="flex h-full w-full items-center justify-center">
-								<Tag className="h-10 w-10" style={{ color: rarityColor }} />
-							</div>
-						</div>
-
-						{/* Indicador visual de rareza */}
-						{calculatedRarity !== TagRarity.COMMON && (
-							<div className="absolute top-2 right-2 z-10">
-								<div
-									className={cn('rounded-full p-1', calculatedRarity === TagRarity.LEGENDARY && 'animate-pulse')}
-									style={{ backgroundColor: `${rarityColor}30` }}
-								>
-									<Sparkles className="h-4 w-4" style={{ color: rarityColor }} />
-								</div>
-							</div>
-						)}
-					</>
-				)}
-
-				{/* Estructura principal de la tarjeta */}
-				<div className="flex h-full flex-col">
-					{/* Cabecera con nombre e icono */}
-					<TagCardHeader
-						category={category as TagCategory}
-						color={cardColor}
-						compact={compact}
-						emoji={emoji ?? '🏷️'}
-						isFavorite={isFavorite}
-						name={name}
-						rarity={calculatedRarity}
-						tcgMode={tcgMode}
-					/>
-
-					{/* Sección de imágenes */}
-					<TagCardImages
-						compact={compact}
-						featuredImage={processedFeaturedImage}
-						primaryColor={cardColor}
-						rarity={calculatedRarity}
-						secondaryColor={secondaryColor}
-						tagId={id}
-						tcgMode={tcgMode}
-					/>
-
-					{/* Contenido principal */}
-					<TagCardContent
-						albumsCount={albumsCount}
-						charactersCount={charactersCount}
-						collectionsCount={collectionsCount}
-						conceptsCount={conceptsCount}
-						description={description}
-						groupsCount={groupsCount}
-						imagesCount={imagesCount}
-						notesCount={notesCount}
-						placesCount={placesCount}
-						primaryColor={cardColor}
-						promptsCount={promptsCount}
-						propertiesCount={propertiesCount}
-						rarity={calculatedRarity}
-						secondaryColor={secondaryColor}
-						shortcut={shortcut}
-						tcgMode={tcgMode}
-						videosCount={videosCount}
-						wildcardsCount={wildcardsCount}
-						worldItemsCount={worldItemsCount}
-					/>
-
-					{/* Pie de tarjeta */}
-					<TagCardFooter
-						compact={compact}
-						createdAt={createdAt}
-						imagesCount={imagesCount}
-						isFavorite={isFavorite}
-						primaryColor={cardColor}
-						rarity={calculatedRarity}
-						secondaryColor={secondaryColor}
-						tcgMode={tcgMode}
-						updatedAt={updatedAt}
-						videosCount={videosCount}
-					/>
-				</div>
-			</div>
+			<TagCardInnerContent
+				cardColor={config.cardColor}
+				category={config.category}
+				compact={compact}
+				createdAt={config.createdAt}
+				description={config.description}
+				emoji={config.emoji}
+				id={config.id}
+				isFavorite={config.isFavorite}
+				isHovered={config.isHovered}
+				name={config.name}
+				processedFeaturedImage={config.processedFeaturedImage}
+				secondaryColor={config.secondaryColor}
+				shortcut={config.shortcut}
+				tagData={config.tagData}
+				tcgMode={tcgMode}
+				updatedAt={config.updatedAt}
+			/>
 		</motion.article>
 	);
 }

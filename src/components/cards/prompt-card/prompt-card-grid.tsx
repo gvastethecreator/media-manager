@@ -121,14 +121,20 @@ export function PromptCardGrid({
 				className="grid grid-cols-1 justify-items-center gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
 				ref={containerRef}
 			>
-				{loading ? (
-					renderSkeletons()
-				) : prompts.length === 0 ? (
-					<div className="col-span-full py-12 text-center">
-						<p className="text-muted-foreground">No se encontraron prompts</p>
-					</div>
-				) : (
-					prompts.map((prompt) => (
+				{(() => {
+					if (loading) {
+						return renderSkeletons();
+					}
+
+					if (prompts.length === 0) {
+						return (
+							<div className="col-span-full py-12 text-center">
+								<p className="text-muted-foreground">No se encontraron prompts</p>
+							</div>
+						);
+					}
+
+					return prompts.map((prompt) => (
 						<PromptCard
 							compact={compact}
 							isSelected={selectedPromptId === prompt.id}
@@ -137,8 +143,8 @@ export function PromptCardGrid({
 							promptId={prompt.id}
 							tcgMode={tcgMode}
 						/>
-					))
-				)}
+					));
+				})()}
 			</div>
 		</div>
 	);

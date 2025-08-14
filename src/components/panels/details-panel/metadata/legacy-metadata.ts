@@ -162,14 +162,48 @@ const addFallbackMetadata = (metadata: MetadataField[]): void => {
 /**
  * Obtiene metadatos detallados usando el sistema legacy o metadatos mejorados
  */
+function mergeLegacyAIIfMissing(item: AnyEntityWithStats, enhanced: MetadataField[]): MetadataField[] | null {
+	const hasAI = enhanced.some((m) => m.category === 'ia');
+	if (hasAI) {
+		return null; // No se requiere fusión
+	}
+	if (!('metadata' in item) || typeof item.metadata !== 'string' || !item.metadata) {
+		return null;
+	}
+	try {
+		const parsed = JSON.parse(item.metadata);
+		if (!(parsed?.ai_metadata || parsed?.ai)) {
+			return null;
+		}
+		const merged = [...enhanced];
+		processAIMetadata(parsed, merged);
+		const dedup: MetadataField[] = [];
+		const seen = new Set<string>();
+		for (const m of merged) {
+			const keySig = `${m.category}|${m.key}|${m.value}`;
+			if (seen.has(keySig)) {
+				continue;
+			}
+			seen.add(keySig);
+			dedup.push(m);
+		}
+		return dedup;
+	} catch {
+		return null;
+	}
+}
+
 export const getDetailedMetadata = (item: AnyEntityWithStats, enhancedMetadata: MetadataField[]): MetadataField[] => {
-	// Si tenemos metadatos mejorados, devolverlos directamente
 	if (enhancedMetadata.length > 0) {
+		const merged = mergeLegacyAIIfMissing(item, enhancedMetadata);
+		if (merged) {
+			console.log('📊 Usando metadatos mejorados + IA legacy fusionada:', merged.length, 'campos');
+			return merged;
+		}
 		console.log('📊 Usando metadatos mejorados:', enhancedMetadata.length, 'campos');
 		return enhancedMetadata;
 	}
-
-	console.log('📊 Usando sistema legacy de metadatos');
+	console.log('📊 Usando sistema legacy de metadatos (sin enhanced)');
 	// Continuar con el sistema legacy si el nuevo no está disponible
 	const metadata: MetadataField[] = [];
 
