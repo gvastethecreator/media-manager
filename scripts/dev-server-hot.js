@@ -64,11 +64,12 @@ console.log();
 const SERVER_SRC = 'src/server/index.ts';
 const SERVER_DIST = 'dist/server/index.js';
 const SERVER_DIR = 'src/server';
+const REQUIRED_DEPS = ['music-metadata', 'ffprobe-static'];
 
 let serverProcess = null;
 
 // Función para compilar el servidor con Bun
-async function buildServer() {
+function buildServer() {
 	console.log(chalk.blue('🔨 Compilando servidor con Bun...'));
 
 	try {
@@ -92,6 +93,22 @@ async function buildServer() {
 		console.error(chalk.red('❌ Error compilando servidor:'), error);
 		throw error;
 	}
+}
+
+function checkRequiredDependencies() {
+	const missing = [];
+	for (const dep of REQUIRED_DEPS) {
+		// Verifica existencia del directorio del paquete en node_modules
+		if (!existsSync(join(rootDir, 'node_modules', dep))) {
+			missing.push(dep);
+		}
+	}
+	if (missing.length > 0) {
+		console.log(chalk.red('❌ Dependencias faltantes detectadas:'), missing.join(', '));
+		console.log(chalk.yellow('👉 Ejecuta: bun install')); 
+		return false;
+	}
+	return true;
 }
 
 // Función para iniciar el servidor
@@ -130,6 +147,9 @@ async function main() {
 	console.log(chalk.cyan('🌟 Iniciando desarrollo del servidor con Bun hot reload'));
 
 	try {
+		if (!checkRequiredDependencies()) {
+			process.exit(1);
+		}
 		// Build inicial
 		await buildServer();
 		startServer();

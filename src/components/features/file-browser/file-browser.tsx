@@ -145,7 +145,9 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 	// Integración de accesibilidad
 	const accessibility = useAccessibility({
 		containerRef: containerRef as React.RefObject<HTMLElement>,
-		onAnnouncement: (message: string) => console.log('Accessibility announcement:', message),
+		onAnnouncement: (message: string) => {
+			logger.debug('Accessibility announcement', { message });
+		},
 	});
 
 	// Hook de sincronización de archivos - Solo activar si hay filterId de carpeta
@@ -308,7 +310,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 		[addSortOption]
 	);
 
-	const content = useMemo(() => {
+	const renderContent = useCallback(() => {
 		if (isLoading && items.length === 0) {
 			return (
 				<div className="flex h-full w-full items-center justify-center">
@@ -317,36 +319,48 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 			);
 		}
 		if (error) {
+			let errMsg = 'Error desconocido';
+			if (typeof error === 'string') {
+				errMsg = error;
+			} else if (error instanceof Error) {
+				errMsg = error.message;
+			}
 			return (
-				<div className="flex h-full w-full items-center justify-center">
-					<p className="text-destructive">Error: {error}</p>
+				<div aria-live="assertive" className="flex h-full w-full items-center justify-center" role="alert">
+					<p className="text-destructive">Error: {errMsg}</p>
 				</div>
 			);
 		}
 		if (items.length === 0) {
 			return <EmptyState description="No hay elementos para mostrar." icon={FileTextIcon} title="Sin elementos" />;
 		}
-		switch (viewMode) {
-			case 'list':
-				return (
-					<ListView
-						{...commonViewProps}
-						onSort={handleListSort}
-						sortBy={activeSort.field}
-						sortDirection={(activeSort.direction as 'asc' | 'desc') ?? 'asc'}
-					/>
-				);
-			case 'grid':
-			case 'simple-grid':
-				return <GridView {...commonViewProps} />;
-			case 'cards':
-				return <CardsView {...commonViewProps} />;
-			case 'masonry':
-				return <MasonryView {...commonViewProps} />;
-			default:
-				return <CardsView {...commonViewProps} />;
+		if (viewMode === 'list') {
+			return (
+				<ListView
+					{...commonViewProps}
+					onSort={handleListSort}
+					sortBy={activeSort.field}
+					sortDirection={(activeSort.direction as 'asc' | 'desc') ?? 'asc'}
+				/>
+			);
 		}
-	}, [isLoading, items, error, viewMode, commonViewProps, activeSort.field, activeSort.direction, handleListSort]);
+		if (viewMode === 'grid' || viewMode === 'simple-grid') {
+			return <GridView {...commonViewProps} />;
+		}
+		if (viewMode === 'masonry') {
+			return <MasonryView {...commonViewProps} />;
+		}
+		return <CardsView {...commonViewProps} />;
+	}, [
+		isLoading,
+		items.length,
+		error,
+		viewMode,
+		commonViewProps,
+		handleListSort,
+		activeSort.field,
+		activeSort.direction,
+	]);
 
 	return (
 		<div className="flex h-full w-full min-w-0 flex-col overflow-hidden" data-testid="file-browser">
@@ -426,7 +440,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 							}}
 						>
 							{/* Contenedor interactivo para eventos (div para evitar botones anidados) */}
-							<div
+							<button
 								aria-label="Explorador de archivos"
 								className="file-browser-container relative m-0 h-full w-full min-w-0 flex-1 cursor-default border-0 bg-transparent p-0 outline-none"
 								onClick={handleContainerClick}
@@ -457,9 +471,10 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 									}
 								}}
 								ref={containerCallbackRef as any}
-								role="application"
 								tabIndex={-1}
+								type="button"
 							>
+								<span className="sr-only">Explorador de archivos</span>
 								{/* Navegación por teclado */}
 								<KeyboardNavigation
 									containerRef={containerRef as React.RefObject<HTMLElement>}
@@ -470,7 +485,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 									viewType={getViewType()}
 								/>
 
-								{containerWidth > 0 ? content : <Spinner />}
+								{containerWidth > 0 ? renderContent() : <Spinner />}
 
 								{/* Botón Cargar Más */}
 								{canLoadMore && (
@@ -494,7 +509,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 									position={contextMenuPosition}
 									selectedItems={items.filter((item) => effectiveSelectedIds.includes(item.id))}
 								/>
-							</div>
+							</button>
 						</DragSelectionProvider>
 					</ScrollArea>
 				</section>
@@ -561,4 +576,26 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
  *   mode="manual"
  *   items={customEntityList}
  * />
+ */
+*
+ * // Modo manual con items específicos
+ * <FileBrowser
+ *   entityType="mixed"
+ *   mode="manual"
+ *   items=
+{
+	customEntityList;
+}
+* />
+ */
+ *
+ * // Modo manual con items específicos
+ * <FileBrowser
+ *   entityType="mixed"
+ *   mode="manual"
+ *   items=
+{
+	customEntityList;
+}
+* />
  */
