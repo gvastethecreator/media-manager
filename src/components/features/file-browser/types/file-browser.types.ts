@@ -47,7 +47,7 @@ export interface FileBrowserDataState {
 	filteredItems: AnyEntityWithStats[];
 	items: AnyEntityWithStats[];
 	isLoading: boolean;
-	error: any;
+	error: unknown;
 }
 
 export interface FileBrowserSelectionState {

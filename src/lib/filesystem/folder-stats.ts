@@ -1,11 +1,11 @@
-import { randomUUID } from 'crypto';
-import { eq } from 'drizzle-orm';
-import path from 'path';
 import { db } from '@/lib/drizzle';
 import { folders } from '@/lib/drizzle/schema/index';
 import { emitProgress } from '@/lib/server/events.server';
 import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
 import type { EntityCreationStats } from '@/types/file-entity-mapper';
+import { randomUUID } from 'crypto';
+import { eq } from 'drizzle-orm';
+import path from 'path';
 import type { DirectoryInfo } from './folder-scanner';
 import { scanFolder } from './folder-scanner';
 import { type FolderSyncResult, syncFoldersWithFileSystem } from './folder-sync';
@@ -95,14 +95,49 @@ export async function updateFolderStats(
 		emitProgressEvents && currentDepth === 0
 	);
 
-	// 🆕 PROCESAR SUBCARPETAS: Crear carpetas para directorios encontrados
+	// 🆕 PROCESAR SUBCARPETAS: Crear carpetas para directorios encontrados (con progreso heartbeat)
+	let subfolderCompleted = 0;
+	const totalSubfolders = scanResult.directories.length;
 	const subfolderStats = await processSubfolders(
 		scanResult.directories,
 		folderId,
 		processedPaths,
 		maxDepth,
-		currentDepth + 1
+		currentDepth + 1,
+		async () => {
+			subfolderCompleted++;
+			if (emitProgressEvents && currentDepth === 0) {
+				// Mantener progreso en 99 pero actualizar mensaje para evitar percepción de cuelgue
+				await emitProgress('folder:progress', {
+					folderId,
+					status: 'processing',
+					isProcessing: true,
+					progress: 99,
+					totalFiles: filePaths.length,
+					filesProcessed: filePaths.length,
+					message: `Procesando subcarpetas (${subfolderCompleted}/${totalSubfolders})...`,
+					// phase adicional no existente en tipo; reutilizamos 'processing'
+					phase: 'processing',
+					timestamp: Date.now(),
+				});
+			}
+		}
 	);
+
+	// Emitir evento final de completado SOLO después de procesar subcarpetas
+	if (emitProgressEvents && currentDepth === 0) {
+		await emitProgress('folder:progress', {
+			folderId,
+			status: 'completed',
+			isProcessing: false,
+			progress: 100,
+			totalFiles: filePaths.length,
+			filesProcessed: filePaths.length,
+			message: 'Reindexado completado (archivos y subcarpetas)',
+			phase: 'complete',
+			timestamp: Date.now(),
+		});
+	}
 
 	// Actualizar con los mismos valores que usa el reindexado
 	await db
@@ -149,209 +184,228 @@ export async function getFolderStats(folderId: string) {
 }
 
 /**
- * 🆕 Procesa archivos con progreso detallado en 3 etapas
+ * Procesa archivos emitiendo progreso en 3 etapas con concurrencia limitada.
+ *
+ * Etapas:
+ *  1. createBasicEntityFromFile ("scanning")
+ *  2. extractMetadataForEntity ("metadata")
+ *  3. processThumbnailForEntity ("processing")
+ *
+ * Mapeo de progreso global (reservando el 100% para subcarpetas externas):
+ *  - Stage 1: 0   – 33
+ *  - Stage 2: 33  – 66
+ *  - Stage 3: 66  – 99 (el 99% se mantiene mientras se procesan subcarpetas)
+ *  - 100% lo emite updateFolderStats sólo tras finalizar subcarpetas.
+ *
+ * Concurrencia:
+ *  - runLimited() implementa un pequeño pool evitando await secuencial sobre cada ítem.
+ *  - Default concurrency = 4 (ajustable via options.concurrency).
+ *
+ * Diseño / Razones del refactor:
+ *  - Reducir complejidad ciclomática eliminando bucles anidados + lógica de batches.
+ *  - Unificar cálculo de progreso y permitir inyección de un progressEmitter para tests.
+ *  - Asegurar que nunca se emite 100 antes de subcarpetas -> UI no aparenta "cuelgue" al 99.
+ *
+ * Testabilidad:
+ *  - options.progressEmitter permite capturar eventos sin mockear emitProgress global.
+ *  - Casos edge (0 y 1 archivo) verificados en tests unitarios.
+ *
+ * Errores / resiliencia:
+ *  - Errores de metadata / thumbnail no detienen el pipeline (se loguean y continúan).
+ *  - Timeout defensivo de 5s por operación de metadata/thumbnail (withTimeout).
+ *
+ * @param filePaths Lista de paths absolutos o relativos a procesar
+ * @param folderId ID de carpeta para asociar eventos
+ * @param fileEntityMapper Servicio de mapeo ya singleton
+ * @param emitEvents Habilita/deshabilita emisión (optimización para subcarpetas)
+ * @param options.concurrency Concurrencia limitada (>=1)
+ * @param options.progressEmitter Callback opcional para capturar eventos de progreso (tests)
  */
-async function processFilesWithProgress(
+// Exportado solo para tests internos (prefijo _internal) – no usar directamente fuera de casos de prueba
+export async function processFilesWithProgress(
 	filePaths: string[],
 	folderId: string,
 	fileEntityMapper: FileEntityMapperService,
-	emitEvents: boolean
+	emitEvents: boolean,
+	options: { concurrency?: number; progressEmitter?: (payload: any) => Promise<void> | void } = {}
 ): Promise<EntityCreationStats> {
 	const totalFiles = filePaths.length;
-	const stats: EntityCreationStats = {
-		totalFiles: filePaths.length,
-		processed: 0,
-		successful: 0,
-		failed: 0,
-		errors: [],
-	};
-
+	const stats: EntityCreationStats = { totalFiles, processed: 0, successful: 0, failed: 0, errors: [] };
 	if (totalFiles === 0) {
 		return stats;
 	}
 
-	const batchSize = 10;
-	const progressUpdateInterval = Math.max(1, Math.floor(totalFiles / 20)); // Actualizar progreso cada 5%
+	const concurrency = Math.max(1, options.concurrency ?? 4);
+	const progressUpdateInterval = Math.max(1, Math.floor(totalFiles / 20)); // ~5%
 	const startTime = Date.now();
 
-	// Emitir progreso inicial
-	if (emitEvents) {
-		await emitProgress('folder:progress', {
+	const progressEmitter = options.progressEmitter;
+	const emitStageProgress = async (progress: number, processedCount: number, message: string, phase: string) => {
+		if (!emitEvents) {
+			return;
+		}
+		const payload = {
 			folderId,
 			status: 'processing',
 			isProcessing: true,
-			progress: 0,
+			progress,
 			totalFiles,
-			filesProcessed: 0,
-			message: 'Iniciando reindexado en 3 etapas...',
-			phase: 'starting',
+			filesProcessed: processedCount,
+			message,
+			phase: phase as any,
 			timestamp: Date.now(),
-		});
+		} as const;
+		if (progressEmitter) {
+			await progressEmitter(payload);
+		} else {
+			await emitProgress('folder:progress', payload);
+		}
+	};
+
+	await emitStageProgress(0, 0, 'Iniciando reindexado en 3 etapas...', 'starting');
+
+	interface IndexedItem {
+		path: string;
+		entityId: string;
+		entityType: string;
+	}
+	const indexedItems: IndexedItem[] = [];
+
+	// Generic limited concurrency runner
+	async function runLimited<T>(items: T[], worker: (item: T, index: number) => Promise<void>) {
+		let idx = 0;
+		const workers: Promise<void>[] = [];
+		const launch = (): Promise<void> => {
+			if (idx >= items.length) {
+				return Promise.resolve();
+			}
+			const currentIndex = idx++;
+			const p = worker(items[currentIndex], currentIndex)
+				.catch(() => {
+					/* errores ya registrados */
+				})
+				.then(launch);
+			return p;
+		};
+		for (let i = 0; i < Math.min(concurrency, items.length); i++) {
+			workers.push(launch());
+		}
+		await Promise.all(workers);
 	}
 
-	// ETAPA 1: Indexación de archivos y creación de entidades básicas (0-33%)
-	console.log('🔧 [ETAPA 1/3] Iniciando indexación de archivos...');
-	const entityIds: string[] = [];
-	let stage1ProcessedFiles = 0;
+	// Stage helper progress mapping
+	const mapStageProgress = (stage: 1 | 2 | 3, processed: number): number => {
+		const pct = processed / totalFiles;
+		if (stage === 1) {
+			return Math.max(0, Math.min(33, Math.round(pct * 33)));
+		}
+		if (stage === 2) {
+			return Math.max(33, Math.min(66, Math.round(33 + pct * 33)));
+		}
+		// stage 3
+		return Math.max(66, Math.min(99, Math.round(66 + pct * 33))); // 99 reserva subcarpetas
+	};
 
-	for (let i = 0; i < filePaths.length; i += batchSize) {
-		const batch = filePaths.slice(i, i + batchSize);
-
-		for (const filePath of batch) {
-			try {
-				const result = await fileEntityMapper.createBasicEntityFromFile(filePath, folderId);
-				stats.processed++;
-
-				if (result.success) {
-					stats.successful++;
-					if (result.entityId) {
-						entityIds.push(result.entityId);
-					}
-				} else if (result.error !== 'Entity already exists') {
-					stats.failed++;
-					stats.errors.push({ file: filePath, error: result.error || 'Unknown error' });
-				} else {
-					stats.successful++;
+	// =============== STAGE 1 ===============
+	console.log('🔧 [ETAPA 1/3] (concurrency=%d) Indexando archivos...', concurrency);
+	let stage1Processed = 0;
+	await runLimited(filePaths, async (filePath) => {
+		try {
+			const result = await fileEntityMapper.createBasicEntityFromFile(filePath, folderId);
+			stats.processed++;
+			if (result.success) {
+				stats.successful++;
+				if (result.entityId) {
+					indexedItems.push({ path: filePath, entityId: result.entityId, entityType: result.entityType });
 				}
-			} catch (error) {
+			} else if (result.error !== 'Entity already exists') {
 				stats.failed++;
-				stats.errors.push({ file: filePath, error: (error as Error).message || 'Unknown error' });
-				stats.processed++;
+				stats.errors.push({ file: filePath, error: result.error || 'Unknown error' });
+			} else {
+				stats.successful++;
 			}
-
-			stage1ProcessedFiles++;
-
-			// Emitir progreso de etapa 1 (0-33%)
-			if (emitEvents && (stage1ProcessedFiles % progressUpdateInterval === 0 || stage1ProcessedFiles === totalFiles)) {
-				const stageProgress = Math.round((stage1ProcessedFiles / totalFiles) * 100);
-				const overallProgress = Math.round(stageProgress / 3);
-
-				await emitProgress('folder:progress', {
-					folderId,
-					status: 'processing',
-					isProcessing: true,
-					progress: overallProgress,
-					totalFiles,
-					filesProcessed: stage1ProcessedFiles,
-					message: `Etapa 1/3: Indexando archivos... ${stage1ProcessedFiles}/${totalFiles}`,
-					phase: 'scanning',
-					timestamp: Date.now(),
-				});
+		} catch (err) {
+			stats.failed++;
+			stats.errors.push({ file: filePath, error: (err as Error).message || 'Unknown error' });
+			stats.processed++;
+		} finally {
+			stage1Processed++;
+			if (stage1Processed % progressUpdateInterval === 0 || stage1Processed === totalFiles) {
+				await emitStageProgress(
+					mapStageProgress(1, stage1Processed),
+					stage1Processed,
+					`Etapa 1/3: Indexando archivos... ${stage1Processed}/${totalFiles}`,
+					'scanning'
+				);
 			}
 		}
+	});
 
-		// Pequeña pausa entre lotes
-		if (i + batchSize < filePaths.length) {
-			await new Promise((resolve) => setTimeout(resolve, 10));
-		}
-	}
-
-	// ETAPA 2: Extracción de metadata (33-66%)
+	const stage2Start = Date.now();
 	console.log('🔍 [ETAPA 2/3] Iniciando extracción de metadata...');
-	let stage2ProcessedFiles = 0;
-
-	for (let i = 0; i < filePaths.length; i += batchSize) {
-		const batch = filePaths.slice(i, i + batchSize);
-
-		for (let j = 0; j < batch.length; j++) {
-			const filePath = batch[j];
-			const entityId = entityIds[i + j];
-
-			if (entityId) {
-				try {
-					const entityType = fileEntityMapper.getEntityTypeFromExtension(path.extname(filePath));
-					await fileEntityMapper.extractMetadataForEntity(filePath, entityId, entityType);
-				} catch (error) {
-					console.warn(`⚠️ [ETAPA 2] Error extrayendo metadata de ${filePath}:`, error);
-				}
-			}
-
-			stage2ProcessedFiles++;
-
-			// Emitir progreso de etapa 2 (33-66%)
-			if (emitEvents && (stage2ProcessedFiles % progressUpdateInterval === 0 || stage2ProcessedFiles === totalFiles)) {
-				const stageProgress = Math.round((stage2ProcessedFiles / totalFiles) * 100);
-				const overallProgress = Math.round(33 + stageProgress / 3);
-
-				await emitProgress('folder:progress', {
-					folderId,
-					status: 'processing',
-					isProcessing: true,
-					progress: overallProgress,
-					totalFiles,
-					filesProcessed: stage2ProcessedFiles,
-					message: `Etapa 2/3: Extrayendo metadata... ${stage2ProcessedFiles}/${totalFiles}`,
-					phase: 'metadata',
-					timestamp: Date.now(),
-				});
+	let stage2Processed = 0;
+	await runLimited(indexedItems, async (item) => {
+		try {
+			const entityType = fileEntityMapper.getEntityTypeFromExtension(path.extname(item.path));
+			await withTimeout(
+				fileEntityMapper.extractMetadataForEntity(item.path, item.entityId, entityType),
+				5000,
+				`Metadata timeout (${item.path})`
+			);
+		} catch (err) {
+			console.warn(`⚠️ [ETAPA 2] Error extrayendo metadata de ${item.path}:`, err);
+		} finally {
+			stage2Processed++;
+			if (stage2Processed % progressUpdateInterval === 0 || stage2Processed === totalFiles) {
+				await emitStageProgress(
+					mapStageProgress(2, stage2Processed),
+					stage2Processed,
+					`Etapa 2/3: Extrayendo metadata... ${stage2Processed}/${totalFiles}`,
+					'metadata'
+				);
 			}
 		}
+	});
 
-		// Pequeña pausa entre lotes
-		if (i + batchSize < filePaths.length) {
-			await new Promise((resolve) => setTimeout(resolve, 10));
-		}
-	}
-
-	// ETAPA 3: Procesamiento de thumbnails (66-100%)
+	const stage3Start = Date.now();
 	console.log('🖼️ [ETAPA 3/3] Iniciando procesamiento de thumbnails...');
-	let stage3ProcessedFiles = 0;
-
-	for (let i = 0; i < filePaths.length; i += batchSize) {
-		const batch = filePaths.slice(i, i + batchSize);
-
-		for (let j = 0; j < batch.length; j++) {
-			const filePath = batch[j];
-			const entityId = entityIds[i + j];
-
-			if (entityId) {
-				try {
-					const entityType = fileEntityMapper.getEntityTypeFromExtension(path.extname(filePath));
-					await fileEntityMapper.processThumbnailForEntity(filePath, entityId, entityType);
-				} catch (error) {
-					console.warn(`⚠️ [ETAPA 3] Error procesando thumbnail de ${filePath}:`, error);
-				}
-			}
-
-			stage3ProcessedFiles++;
-
-			// Emitir progreso de etapa 3 (66-100%)
-			if (emitEvents && (stage3ProcessedFiles % progressUpdateInterval === 0 || stage3ProcessedFiles === totalFiles)) {
-				const stageProgress = Math.round((stage3ProcessedFiles / totalFiles) * 100);
-				const overallProgress = Math.round(66 + stageProgress / 3);
-
-				await emitProgress('folder:progress', {
-					folderId,
-					status: stage3ProcessedFiles === totalFiles ? 'completed' : 'processing',
-					isProcessing: stage3ProcessedFiles < totalFiles,
-					progress: overallProgress,
-					totalFiles,
-					filesProcessed: stage3ProcessedFiles,
-					message:
-						stage3ProcessedFiles === totalFiles
-							? 'Reindexado completado en 3 etapas'
-							: `Etapa 3/3: Procesando thumbnails... ${stage3ProcessedFiles}/${totalFiles}`,
-					phase: stage3ProcessedFiles === totalFiles ? 'complete' : 'processing',
-					timestamp: Date.now(),
-				});
+	let stage3Processed = 0;
+	await runLimited(indexedItems, async (item) => {
+		try {
+			const entityType = fileEntityMapper.getEntityTypeFromExtension(path.extname(item.path));
+			await withTimeout(
+				fileEntityMapper.processThumbnailForEntity(item.path, item.entityId, entityType),
+				5000,
+				`Thumbnail timeout (${item.path})`
+			);
+		} catch (err) {
+			console.warn(`⚠️ [ETAPA 3] Error procesando thumbnail de ${item.path}:`, err);
+		} finally {
+			stage3Processed++;
+			if (stage3Processed % progressUpdateInterval === 0 || stage3Processed === totalFiles) {
+				const mapped = mapStageProgress(3, stage3Processed);
+				const message =
+					stage3Processed === totalFiles
+						? 'Archivos procesados. Procesando subcarpetas...'
+						: `Etapa 3/3: Procesando thumbnails... ${stage3Processed}/${totalFiles}`;
+				await emitStageProgress(mapped, stage3Processed, message, 'processing');
 			}
 		}
-
-		// Pequeña pausa entre lotes
-		if (i + batchSize < filePaths.length) {
-			await new Promise((resolve) => setTimeout(resolve, 10));
-		}
-	}
+	});
 
 	const endTime = Date.now();
-	const duration = endTime - startTime;
-	console.log(`✅ Reindexado completado en ${duration}ms. Estadísticas:`, {
+	console.log('⏱️ Duraciones por etapa (ms):', {
+		stage1: stage2Start - startTime,
+		stage2: stage3Start - stage2Start,
+		stage3: endTime - stage3Start,
+		full: endTime - startTime,
+	});
+	console.log('✅ Reindexado completado (stages) Stats:', {
 		totalFiles: stats.totalFiles,
 		successful: stats.successful,
 		failed: stats.failed,
 		processed: stats.processed,
 	});
-
 	return stats;
 }
 
@@ -364,7 +418,8 @@ async function processSubfolders(
 	parentFolderId: string,
 	processedPaths: Set<string>,
 	maxDepth: number,
-	currentDepth: number
+	currentDepth: number,
+	onSubfolderComplete?: () => Promise<void> | void
 ): Promise<EntityCreationStats> {
 	const totalStats: EntityCreationStats = { totalFiles: 0, processed: 0, successful: 0, failed: 0, errors: [] };
 
@@ -410,6 +465,11 @@ async function processSubfolders(
 					false // No emitir eventos de progreso en subcarpetas
 				);
 
+				// Notificar avance al root
+				if (onSubfolderComplete) {
+					await onSubfolderComplete();
+				}
+
 				return {
 					success: true,
 					stats: subfolderStats,
@@ -447,6 +507,23 @@ async function processSubfolders(
 	}
 
 	return totalStats;
+}
+
+// Helper timeout
+async function withTimeout<T>(promise: Promise<T>, ms: number, label: string): Promise<T> {
+	let timeoutId: NodeJS.Timeout | undefined;
+	const timeoutPromise = new Promise<never>((_, reject) => {
+		timeoutId = setTimeout(() => {
+			reject(new Error(label));
+		}, ms);
+	});
+	try {
+		return await Promise.race([promise, timeoutPromise]);
+	} finally {
+		if (timeoutId) {
+			clearTimeout(timeoutId);
+		}
+	}
 }
 
 export async function updateAllFolderStats() {

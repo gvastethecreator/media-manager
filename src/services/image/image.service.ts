@@ -40,23 +40,23 @@
  * permitiendo redimensionar, cambiar formato y optimizar imágenes.
  */
 
-import { and, asc, count, desc, eq, isNotNull, like, or, sum } from 'drizzle-orm';
-import { promises as fs } from 'fs';
-import sharp from 'sharp';
 import { imageConfig } from '@/lib/config';
 import { db } from '@/lib/drizzle';
 import { folders, imageStats, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import {
+	ServiceErrorCode,
 	createEntityNotFoundError,
 	createFileNotFoundError,
 	createServiceError,
-	ServiceErrorCode,
 	toServiceError,
 } from '@/lib/utils/errors/service-errors';
 import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
-import type { ThumbnailQuality, ThumbnailStats } from '@/types/thumbnails';
+import type { ThumbnailStats } from '@/types/thumbnails';
+import { and, asc, count, desc, eq, isNotNull, like, or, sum } from 'drizzle-orm';
+import { promises as fs } from 'fs';
+import sharp from 'sharp';
 // Tipos movidos a types locales
 export interface GetImagesOptions {
 	folderId?: string;
@@ -85,12 +85,37 @@ export interface GetImagesResult {
 	};
 }
 
-import * as crypto from 'crypto';
+// Evitar import directo de 'crypto' (Node) para compatibilidad en bundle frontend.
+// Utilizar Web Crypto si existe; fallback a generador UUID v4 no-criptográfico.
+const randomId = (): string => {
+	try {
+		const g: any = globalThis as any;
+		const rndUUID = g?.crypto?.randomUUID;
+		if (typeof rndUUID === 'function') {
+			return rndUUID.call(g.crypto);
+		}
+	} catch {
+		// ignorar y usar fallback
+	}
+	// Fallback sin operaciones bitwise; generar 32 hex + guiones formateados
+	const hex = Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
+	// xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
+	// Version (4) fija y variante simulada sin bitwise: tomar valor 0-15 => map a 8-11
+	const variantSource = Number.parseInt(hex.slice(16, 17), 16) % 4; // 0..3
+	const variantNibble = (8 + variantSource).toString(16); // 8..b
+	return [
+		hex.slice(0, 8),
+		hex.slice(8, 12),
+		`4${hex.slice(13, 16)}`,
+		`${variantNibble}${hex.slice(17, 20)}`,
+		hex.slice(20, 32),
+	].join('-');
+};
 
 const SERVICE_NAME = 'ImageService';
 const imageLogger = serverLogger.withContext(SERVICE_NAME);
 
-export type { ThumbnailQuality };
+// Re-export eliminado para cumplir regla de estilo
 export const THUMBNAIL_QUALITY_CONFIG = imageConfig.thumbnail.qualities;
 
 export type CreateImageInput = {
@@ -146,7 +171,7 @@ class ImageService {
 		this.ensureCacheDir();
 	}
 
-	public static getInstance(): ImageService {
+	static getInstance(): ImageService {
 		if (!ImageService.instance) {
 			ImageService.instance = new ImageService();
 		}
@@ -184,47 +209,9 @@ class ImageService {
 	): Promise<{ buffer: Buffer; metadata: sharp.OutputInfo }> {
 		try {
 			let pipeline = sharp(inputPath);
-			const metadata = await pipeline.metadata();
-
-			// Verificar que los valores de ancho y alto existen antes de usarlos
-			const width = metadata.width ?? 0;
-			const height = metadata.height ?? 0;
-
-			if (options.width || options.height) {
-				const aspectRatio = width > 0 && height > 0 ? width / height : 1;
-				let targetWidth = options.width;
-				let targetHeight = options.height;
-
-				if (aspectRatio > 1 && targetWidth) {
-					targetHeight = Math.round(targetWidth / aspectRatio);
-				} else if (targetHeight) {
-					targetWidth = Math.round(targetHeight * aspectRatio);
-				}
-
-				pipeline = pipeline.resize(targetWidth, targetHeight, {
-					fit: options.fit || 'cover',
-					withoutEnlargement: true,
-				});
-			}
-
-			if (options.format === 'webp') {
-				pipeline = pipeline.webp({
-					quality: options.quality || 80,
-					effort: 4,
-					nearLossless: true,
-				});
-			} else if (options.format === 'jpeg') {
-				pipeline = pipeline.jpeg({
-					quality: options.quality || 80,
-					progressive: true,
-				});
-			} else if (options.format === 'png') {
-				pipeline = pipeline.png({
-					progressive: true,
-					compressionLevel: 9,
-				});
-			}
-
+			const meta = await pipeline.metadata();
+			pipeline = this.applyResize(pipeline, meta, options);
+			pipeline = this.applyFormat(pipeline, options);
 			const { data, info } = await pipeline.toBuffer({ resolveWithObject: true });
 			return { buffer: data, metadata: info };
 		} catch (error) {
@@ -237,12 +224,46 @@ class ImageService {
 		}
 	}
 
+	private applyResize(pipeline: sharp.Sharp, metadata: sharp.Metadata, options: ImageProcessingOptions): sharp.Sharp {
+		const width = metadata.width ?? 0;
+		const height = metadata.height ?? 0;
+		const hasResize = Boolean(options.width) || Boolean(options.height);
+		if (!hasResize) {
+			return pipeline;
+		}
+		const aspectRatio = width > 0 && height > 0 ? width / height : 1;
+		let targetWidth = options.width;
+		let targetHeight = options.height;
+		if (aspectRatio > 1 && targetWidth) {
+			targetHeight = Math.round(targetWidth / aspectRatio);
+		} else if (targetHeight) {
+			targetWidth = Math.round(targetHeight * aspectRatio);
+		}
+		return pipeline.resize(targetWidth, targetHeight, {
+			fit: options.fit || 'cover',
+			withoutEnlargement: true,
+		});
+	}
+
+	private applyFormat(pipeline: sharp.Sharp, options: ImageProcessingOptions): sharp.Sharp {
+		switch (options.format) {
+			case 'webp':
+				return pipeline.webp({ quality: options.quality || 80, effort: 4, nearLossless: true });
+			case 'jpeg':
+				return pipeline.jpeg({ quality: options.quality || 80, progressive: true });
+			case 'png':
+				return pipeline.png({ progressive: true, compressionLevel: 9 });
+			default:
+				return pipeline;
+		}
+	}
+
 	async createImage(data: CreateImageInput): Promise<ImageWithStats> {
 		try {
 			const [newImage] = await db
 				.insert(images)
 				.values({
-					id: crypto.randomUUID(),
+					id: randomId(),
 					name: data.name,
 					path: data.path,
 					size: data.size,
@@ -260,7 +281,7 @@ class ImageService {
 
 			// Crear estadísticas iniciales
 			await db.insert(imageStats).values({
-				id: crypto.randomUUID(),
+				id: randomId(),
 				imageId: newImage.id,
 				views: 0,
 			});
@@ -599,6 +620,14 @@ class ImageService {
 	}
 
 	async generateThumbnail(imageId: string): Promise<void> {
+		// Logging defensivo para diagnosticar posibles caídas en reindex masivo
+		const startHr = process.hrtime.bigint();
+		const memBefore = process.memoryUsage();
+		imageLogger.info('[thumbnail] ▶️ start', {
+			imageId,
+			memRssMB: (memBefore.rss / 1024 / 1024).toFixed(1),
+			memHeapUsedMB: (memBefore.heapUsed / 1024 / 1024).toFixed(1),
+		});
 		try {
 			const image = await db.query.images.findFirst({
 				where: eq(images.id, imageId),
@@ -632,26 +661,48 @@ class ImageService {
 			// Procesar la imagen para crear el thumbnail
 			const { buffer, metadata } = await this.processImage(image.path, config);
 
-			// Actualizar la imagen con el thumbnail generado
-			await db
-				.update(images)
-				.set({
-					thumbnail: buffer.toString('base64'), // Convertir Buffer a string base64
-					thumbnailSize: buffer.length,
-					thumbnailWidth: metadata.width ?? config.width,
-					thumbnailHeight: metadata.height ?? config.height,
-					thumbnailMimeType: 'image/webp',
-					thumbnailError: null,
-					thumbnailErrorAt: null,
-					thumbnailOptimizedAt: new Date(),
-				})
-				.where(eq(images.id, imageId));
+			// Guardar resultado (try separado para capturar posibles errores DB sin perder métricas)
+			try {
+				await db
+					.update(images)
+					.set({
+						thumbnail: buffer.toString('base64'), // Convertir Buffer a string base64
+						thumbnailSize: buffer.length,
+						thumbnailWidth: metadata.width ?? config.width,
+						thumbnailHeight: metadata.height ?? config.height,
+						thumbnailMimeType: 'image/webp',
+						thumbnailError: null,
+						thumbnailErrorAt: null,
+						thumbnailOptimizedAt: new Date(),
+					})
+					.where(eq(images.id, imageId));
+			} catch (dbErr) {
+				imageLogger.error('[thumbnail] 💥 DB update failed', {
+					imageId,
+					error: dbErr instanceof Error ? dbErr.message : String(dbErr),
+				});
+				throw dbErr;
+			}
 
 			// Emitir evento de thumbnail generado
 			await this.emitEvent(IMAGE_EVENTS.THUMBNAIL_GENERATED, { imageId });
+
+			const memAfter = process.memoryUsage();
+			const durationMs = Number((process.hrtime.bigint() - startHr) / 1000000n);
+			imageLogger.info('[thumbnail] ✅ done', {
+				imageId,
+				durationMs,
+				bufferKB: (buffer.length / 1024).toFixed(1),
+				memHeapDeltaMB: ((memAfter.heapUsed - memBefore.heapUsed) / 1024 / 1024).toFixed(2),
+				memRssMB: (memAfter.rss / 1024 / 1024).toFixed(1),
+			});
 		} catch (error: any) {
 			await this.emitEvent(IMAGE_EVENTS.ERROR, {
 				message: 'Error al generar thumbnail',
+				imageId,
+				error: error instanceof Error ? error.message : String(error),
+			});
+			imageLogger.error('[thumbnail] ❌ failed', {
 				imageId,
 				error: error instanceof Error ? error.message : String(error),
 			});
