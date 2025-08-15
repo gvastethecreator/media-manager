@@ -3,17 +3,17 @@
  */
 
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import { useSelectionStore } from '@/store/ui/selection.slice';
-import { fireEvent, render, screen } from '@/test/test-utils';
+import { fireEvent, render } from '@/test/test-utils';
 import type { AnyEntityWithStats } from '@/types/migration';
 import { EntityStatsType } from '@/types/migration';
-import { FileBrowser } from './file-browser';
+let FileBrowserCmp: any;
 
 // Mock the stores and dependencies
-mock.module('@/store/ui/selection.slice', () => ({ useSelectionStore: mock() }));
+mock.module('@/store/selection.store', () => ({ useSelectionStore: mock() }));
 mock.module('@/store/ui/view-options.slice', () => ({ useViewOptionsStore: mock() }));
 mock.module('@/store/ui/file-viewer.slice', () => ({ useFileViewerStore: mock() }));
-mock.module('@/store/details-panel.store', () => ({ useDetailsPanelStore: mock() }));
+mock.module('@/store/entities/settings/store', () => ({ useInterfaceSettingsStore: mock() }));
+mock.module('@/store/details-panel.store', () => ({ useDetailsPanel: mock() }));
 mock.module('@/store/entities/image', () => ({ useImageStore: mock() }));
 mock.module('@/lib/keyboard', () => ({ useFileBrowserShortcuts: mock() }));
 mock.module('@/lib/ui/toast', () => ({
@@ -50,26 +50,91 @@ describe('FileBrowser Click-to-Deselect', () => {
 	const mockClearSelection = mock();
 	const mockSetSelectedIds = mock();
 
-	beforeEach(() => {
+		beforeEach(async () => {
+			// Resetear contadores de mocks compartidos entre tests
+			mockClearSelection.mockReset();
+			mockSetSelectedIds.mockReset();
 		mock.restore();
 
-		// Mock useSelectionStore
-		(useSelectionStore as any).mockReturnValue({
-			selectedIds: ['1'],
-			clearSelection: mockClearSelection,
-			setSelectedIds: mockSetSelectedIds,
-			selectAll: mock(),
-		});
+			// Mock useSelectionStore compatible con selectores de Zustand
+			mock.module('@/store/selection.store', () => {
+				const baseState = {
+					selectedIds: ['1'],
+					focusedId: null,
+					clearSelection: mockClearSelection,
+					setSelectedIds: mockSetSelectedIds,
+					selectAll: mock(),
+					toggleSelection: mock(),
+					setFocusedId: mock(),
+				};
+				return {
+					useSelectionStore: mock((selector?: any) => (typeof selector === 'function' ? selector(baseState) : baseState)),
+				};
+			});
 
 		// Mock other stores
-		mock.module('@/store/ui/view-options.slice', () => ({
-			useViewOptionsStore: mock(() => ({
-				viewMode: 'cards',
-				itemSize: 200,
-				searchQuery: '',
-				sortOptions: [],
-			})),
-		}));
+			mock.module('@/store/ui/view-options.slice', () => {
+				const baseState = {
+					viewMode: 'cards',
+					itemSize: 200,
+					searchQuery: '',
+					sortOptions: [] as any[],
+					addSortOption: mock(),
+				};
+				return {
+					useViewOptionsStore: mock((selector?: any) => (typeof selector === 'function' ? selector(baseState) : baseState)),
+				};
+			});
+
+			// Mock interface settings store usado por FileBrowser
+			mock.module('@/store/entities/settings/store', () => {
+				const prefs = {
+					animations: false,
+					thumbnailsAnimations: false,
+					thumbnailsUltraPerformance: true,
+					thumbnailsRespectAspectRatio: true,
+					thumbnailsBorderRadius: 4,
+					fileBrowser: {
+						general: { enableViewTransitions: false, enableProgressiveLoading: false, itemsPerBatch: 50 },
+						performance: { enableVirtualization: false, overscanCount: 3, thumbnailQuality: 'high' },
+						views: {},
+					},
+				};
+				return {
+					useInterfaceSettingsStore: mock((selector?: any) => (typeof selector === 'function' ? selector({ preferences: prefs }) : { preferences: prefs })),
+				};
+			});
+
+			// Mock details panel store para evitar desestructuración de undefined
+			mock.module('@/store/details-panel.store', () => {
+				const baseState = {
+					isVisible: true,
+					isFixed: false,
+					showStatsWhenEmpty: true,
+					selectedItems: [],
+					showInterfaceSettings: false,
+					setVisible: mock(),
+					setSelectedItems: mock(),
+					toggleVisibility: mock(),
+					toggleFixed: mock(),
+					toggleShowStatsWhenEmpty: mock(),
+					toggleInterfaceSettings: mock(),
+					setFixed: mock(),
+					setShowStatsWhenEmpty: mock(),
+					setShowInterfaceSettings: mock(),
+				};
+				return {
+					useDetailsPanel: mock((selector?: any) => (typeof selector === 'function' ? selector(baseState) : baseState)),
+				};
+			});
+
+			// Mock file viewer store mínimo
+			mock.module('@/store/ui/file-viewer.slice', () => {
+				const baseState = { open: false, openWith: mock(), preview: mock(), close: mock() };
+				return {
+					useFileViewerStore: mock((selector?: any) => (typeof selector === 'function' ? selector(baseState) : baseState)),
+				};
+			});
 
 		mock.module('@/store/entities/image', () => ({
 			useImageStore: mock(() => ({
@@ -88,12 +153,15 @@ describe('FileBrowser Click-to-Deselect', () => {
 				setContext: mock(),
 			}),
 		}));
+
+		// Importar el componente después de registrar todos los mocks
+		FileBrowserCmp = (await import('./file-browser')).FileBrowser;
 	});
 
 	it('should call clearSelection when clicking on empty space in main container', () => {
-		render(<FileBrowser entityType={EntityStatsType.IMAGE} items={mockItems} mode="manual" />);
+		const { getByTestId } = render(<FileBrowserCmp entityType={EntityStatsType.IMAGE} items={mockItems} mode="manual" />);
 
-		const container = screen.getByTestId('file-browser-container');
+		const container = getByTestId('file-browser-container');
 
 		// Simulate click on empty space (the container itself)
 		fireEvent.click(container);
@@ -102,12 +170,12 @@ describe('FileBrowser Click-to-Deselect', () => {
 	});
 
 	it('should not call clearSelection when clicking on an item', () => {
-		render(<FileBrowser entityType={EntityStatsType.IMAGE} items={mockItems} mode="manual" />);
+		const { container } = render(<FileBrowserCmp entityType={EntityStatsType.IMAGE} items={mockItems} mode="manual" />);
 
-		// Find an entity card (this might need adjustment based on actual DOM structure)
-		const entityCards = screen.getAllByRole('button');
-		if (entityCards.length > 0) {
-			fireEvent.click(entityCards[0]);
+		// Seleccionar un card real por atributo data-item-id
+		const firstCard = container.querySelector('[data-item-id]') as HTMLElement | null;
+		if (firstCard) {
+			fireEvent.click(firstCard);
 
 			// clearSelection should not be called when clicking on items
 			expect(mockClearSelection).not.toHaveBeenCalled();
@@ -118,24 +186,27 @@ describe('FileBrowser Click-to-Deselect', () => {
 		const viewModes = ['list', 'grid', 'cards', 'masonry'];
 
 		for (const viewMode of viewModes) {
-			mock.restore();
-
-			// Mock the view mode
-			mock.module('@/store/ui/view-options.slice', () => ({
-				useViewOptionsStore: mock(() => ({
+			// Re-mock only the view options slice without restoring everything
+			mock.module('@/store/ui/view-options.slice', () => {
+				const baseState = {
 					viewMode,
 					itemSize: 200,
 					searchQuery: '',
-					sortOptions: [],
-				})),
-			}));
+					sortOptions: [] as any[],
+					addSortOption: mock(),
+				};
+				return {
+					useViewOptionsStore: mock((selector?: any) => (typeof selector === 'function' ? selector(baseState) : baseState)),
+				};
+			});
 
-			render(<FileBrowser entityType={EntityStatsType.IMAGE} items={mockItems} mode="manual" />);
+	const { getByTestId, unmount } = render(<FileBrowserCmp entityType={EntityStatsType.IMAGE} items={mockItems} mode="manual" />);
 
-			const container = screen.getByTestId('file-browser-container');
+			const container = getByTestId('file-browser-container');
 			fireEvent.click(container);
 
-			expect(mockClearSelection).toHaveBeenCalled();
+		expect(mockClearSelection).toHaveBeenCalled();
+		unmount();
 		}
 	});
 });

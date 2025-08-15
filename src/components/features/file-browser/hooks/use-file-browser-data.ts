@@ -170,13 +170,14 @@ export const useFileBrowserData = ({
 		return values;
 	}, []);
 
-	// Filtrar items
+	// Filtrar items (normaliza searchQuery por robustez en tests/mocks)
 	const filteredItems = useMemo(() => {
-		if (!searchQuery?.trim()) {
+		const q = typeof searchQuery === 'string' ? searchQuery : '';
+		if (!q.trim()) {
 			return rawItems;
 		}
 
-		const query = searchQuery.toLowerCase().trim();
+		const query = q.toLowerCase().trim();
 		return rawItems.filter((item) => {
 			const values = getSortingValues(item);
 			return values.name.includes(query) || values.path.includes(query);

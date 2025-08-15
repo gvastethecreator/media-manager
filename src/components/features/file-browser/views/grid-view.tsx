@@ -10,7 +10,7 @@
 import { OptimizedEntityCard } from '@/components/cards/entity-card';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export interface GridViewProps {
 	items: AnyEntityWithStats[];
@@ -37,6 +37,45 @@ export const GridView: React.FC<GridViewProps> = React.memo(
 			columns -= 1; // ajuste fino si nos pasamos por rounding
 		}
 		// Evitar cambios agresivos de columnas si containerWidth varía poco: (omitido por simplicidad ahora)
+
+		// Virtualización opcional simple por filas
+		const virtualizationEnabled: boolean = Boolean(interfaceConfig?.performance?.virtualization);
+		const threshold = Number(interfaceConfig?.views?.grid?.virtualizeAt ?? 200);
+		const shouldVirtualize = virtualizationEnabled && items.length > threshold;
+		const viewportRef = useRef<HTMLDivElement | null>(null);
+		const [scrollTop, setScrollTop] = useState(0);
+		const [viewportHeight, setViewportHeight] = useState(0);
+
+		useEffect(() => {
+			if (!shouldVirtualize) {
+				return;
+			}
+			const el = viewportRef.current?.closest('[data-radix-scroll-area-viewport]') as HTMLElement | null;
+			if (!el) {
+				return;
+			}
+			const onScroll = () => setScrollTop(el.scrollTop);
+			const ro = new ResizeObserver(() => setViewportHeight(el.clientHeight));
+			setViewportHeight(el.clientHeight);
+			el.addEventListener('scroll', onScroll, { passive: true });
+			ro.observe(el);
+			return () => {
+				el.removeEventListener('scroll', onScroll);
+				ro.disconnect();
+			};
+		}, [shouldVirtualize]);
+
+		const rowHeight = (interfaceConfig?.views?.grid?.rowHeight as number) ?? Math.max(baseWidth, 160);
+		const overscan = Number(interfaceConfig?.performance?.overscan ?? 4);
+		const totalRows = Math.max(1, Math.ceil(items.length / columns));
+	const firstVisibleRow = shouldVirtualize ? Math.max(0, Math.floor(scrollTop / rowHeight) - overscan) : 0;
+	const visibleRowCount = shouldVirtualize ? Math.ceil(viewportHeight / rowHeight) + overscan * 2 : totalRows;
+	const lastVisibleRow = shouldVirtualize ? Math.min(totalRows - 1, firstVisibleRow + visibleRowCount) : totalRows - 1;
+	const startIndex = firstVisibleRow * columns;
+	const endIndex = Math.min(items.length, (lastVisibleRow + 1) * columns);
+	const visibleItems = shouldVirtualize ? items.slice(startIndex, endIndex) : items;
+
+	const spacerStyle = (h: number) => ({ gridColumn: '1 / -1', height: `${h}px` });
 
 		// Handlers estables (un solo closure) reducen creación masiva por item
 		const handleClick = useCallback(
@@ -71,6 +110,7 @@ export const GridView: React.FC<GridViewProps> = React.memo(
 			<div
 				className="grid w-full p-1" // padding ligero para evitar que el primer item pegue al borde
 				data-testid="grid-view"
+				ref={viewportRef}
 				style={{
 					gridTemplateColumns: `repeat(${columns}, minmax(${baseWidth}px, 1fr))`,
 					gap: `${gap}px`,
@@ -79,9 +119,16 @@ export const GridView: React.FC<GridViewProps> = React.memo(
 					// Fuerza layout estable incluso con alturas distintas
 					fontFamily: 'var(--app-font-family)',
 					fontSize: 'var(--app-font-size)',
+					position: 'relative',
+					minHeight: shouldVirtualize ? `${totalRows * rowHeight}px` : undefined,
 				}}
 			>
-				{items.map((item) => {
+				{/* Spacer superior */}
+				{shouldVirtualize && firstVisibleRow > 0 ? (
+					<div style={spacerStyle(firstVisibleRow * rowHeight)} />
+				) : null}
+
+				{visibleItems.map((item) => {
 					const isSelected = selectedSet.has(item.id);
 					return (
 						<button
@@ -103,6 +150,7 @@ export const GridView: React.FC<GridViewProps> = React.memo(
 								borderRadius: interfaceConfig?.global?.borderRadius?.grid
 									? `${interfaceConfig.global.borderRadius.grid}px`
 									: undefined,
+								height: `${rowHeight}px`,
 							}}
 							type="button"
 						>
@@ -123,6 +171,10 @@ export const GridView: React.FC<GridViewProps> = React.memo(
 						</button>
 					);
 				})}
+				{/* Spacer inferior */}
+				{shouldVirtualize && lastVisibleRow < totalRows - 1 ? (
+					<div style={spacerStyle((totalRows - 1 - lastVisibleRow) * rowHeight)} />
+				) : null}
 			</div>
 		);
 	}
