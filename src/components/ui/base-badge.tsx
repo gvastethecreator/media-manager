@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { cn } from '@/lib/utils';
 import { mergeProps } from '@base-ui-components/react/merge-props';
 import { useRender } from '@base-ui-components/react/use-render';
@@ -226,7 +226,7 @@ function BadgeButton({ render, asChild = false, children, className, variant, ..
   const renderElement =
     asChild && React.isValidElement(children)
       ? (children as React.ReactElement<Record<string, unknown>, string | React.JSXElementConstructor<unknown>>)
-      : render || <button />;
+      : render || <button type="button" />;
 
   // When using asChild, children becomes the element props, otherwise use children normally
   const finalProps =

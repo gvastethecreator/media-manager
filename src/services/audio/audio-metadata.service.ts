@@ -1,5 +1,5 @@
-import { IAudioMetadata, parseStream } from 'music-metadata';
-import { createReadStream } from 'node:fs';
+import { type IAudioMetadata, parseBuffer } from 'music-metadata';
+import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 
 export interface AudioMetadataExtract {
@@ -25,8 +25,8 @@ export class AudioMetadataService {
 
 	async extract(filePath: string): Promise<AudioMetadataExtract> {
 		try {
-			const stream = createReadStream(filePath);
-			const metadata: IAudioMetadata = await parseStream(stream, undefined, { duration: true });
+			const buffer = await readFile(filePath);
+			const metadata: IAudioMetadata = await parseBuffer(buffer, { path: filePath }, { duration: true });
 			const f = metadata.format;
 			const common = metadata.common || {};
 			return {
