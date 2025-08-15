@@ -1,4 +1,4 @@
-import * as React from 'react';
+import React from 'react';
 import { cn } from '@/lib/utils';
 import { mergeProps } from '@base-ui-components/react/merge-props';
 import { useRender } from '@base-ui-components/react/use-render';
@@ -9,21 +9,21 @@ export interface BreadcrumbLinkProps extends useRender.ComponentProps<'a'> {
 }
 
 function Breadcrumb(props: React.ComponentProps<'nav'>) {
-  return <nav data-slot="breadcrumb" aria-label="breadcrumb" {...props} />;
+  return <nav aria-label="breadcrumb" data-slot="breadcrumb" {...props} />;
 }
 
 function BreadcrumbList({ className, ...props }: React.ComponentProps<'ol'>) {
   return (
     <ol
+      className={cn('flex flex-wrap items-center gap-1.5 break-words text-muted-foreground text-sm', className)}
       data-slot="breadcrumb-list"
-      className={cn('flex flex-wrap items-center gap-1.5 break-words text-sm text-muted-foreground', className)}
       {...props}
     />
   );
 }
 
 function BreadcrumbItem({ className, ...props }: React.ComponentProps<'li'>) {
-  return <li data-slot="breadcrumb-item" className={cn('inline-flex items-center gap-1.5', className)} {...props} />;
+  return <li className={cn('inline-flex items-center gap-1.5', className)} data-slot="breadcrumb-item" {...props} />;
 }
 
 function BreadcrumbLink({ render, asChild = false, children, className, ...props }: BreadcrumbLinkProps) {
@@ -36,7 +36,11 @@ function BreadcrumbLink({ render, asChild = false, children, className, ...props
   const renderElement =
     asChild && React.isValidElement(children)
       ? (children as React.ReactElement<Record<string, unknown>, string | React.JSXElementConstructor<unknown>>)
-      : render || <a />;
+      : render || (
+          <a href="/" >
+            {children ?? 'Link'}
+          </a>
+        );
 
   // When using asChild, children becomes the element props, otherwise use children normally
   const finalProps =
@@ -55,11 +59,9 @@ function BreadcrumbLink({ render, asChild = false, children, className, ...props
 function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
   return (
     <span
-      data-slot="breadcrumb-page"
-      role="link"
-      aria-disabled="true"
       aria-current="page"
       className={cn('font-normal text-foreground', className)}
+      data-slot="breadcrumb-page"
       {...props}
     />
   );
@@ -68,10 +70,10 @@ function BreadcrumbPage({ className, ...props }: React.ComponentProps<'span'>) {
 function BreadcrumbSeparator({ children, className, ...props }: React.ComponentProps<'li'>) {
   return (
     <li
+      aria-hidden="true"
+      className={cn('[&>svg]:h-3.5 [&>svg]:w-3.5', className)}
       data-slot="breadcrumb-separator"
       role="presentation"
-      aria-hidden="true"
-      className={cn('[&>svg]:w-3.5 [&>svg]:h-3.5', className)}
       {...props}
     >
       {children ?? <ChevronRight className="rtl:rotate-180" />}
@@ -89,10 +91,10 @@ function BreadcrumbEllipsis({ children, className, ...props }: React.ComponentPr
 
   return (
     <span
-      data-slot="breadcrumb-ellipsis"
-      role="presentation"
       aria-hidden="true"
       className={cn('flex h-9 w-9 items-center justify-center', className)}
+      data-slot="breadcrumb-ellipsis"
+      role="presentation"
       {...props}
     >
       {content}

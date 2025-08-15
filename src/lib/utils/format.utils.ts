@@ -2,6 +2,9 @@
  * Utilidades de formateo para la aplicación
  */
 
+// Regex de extensión de archivo (declarada a nivel superior para rendimiento)
+const FILE_EXTENSION_REGEX = /\.[^/.]+$/;
+
 /**
  * Formatea un tamaño en bytes a una representación legible
  * @param bytes - Tamaño en bytes
@@ -95,12 +98,21 @@ export function formatDuration(ms: number): string {
 }
 
 /**
+ * Formatea una duración expresada en segundos.
+ * @param seconds - Duración en segundos
+ * @returns Duración formateada (ej: "2h 30m" o "45s")
+ */
+export function formatDurationSeconds(seconds: number): string {
+	return formatDuration(Math.max(0, Math.floor(seconds * 1000)));
+}
+
+/**
  * Extrae el nombre de un archivo sin su extensión
  * @param name - Nombre del archivo con extensión
  * @returns Nombre sin extensión
  */
 export function formatFileName(name: string): string {
-	return name.replace(/\.[^/.]+$/, '');
+	return name.replace(FILE_EXTENSION_REGEX, '');
 }
 
 /**

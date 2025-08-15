@@ -106,7 +106,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 	// Hook de datos (carga, filtrado, ordenamiento)
 	const { items, isLoading, error } = useFileBrowserData({
 		entityType: entityType as EntityStatsType | 'mixed',
-		entityTypes: [...entityTypes],
+		entityTypes: Array.isArray(entityTypes) ? entityTypes.slice() : [],
 		mode,
 		manualItems,
 		filterId,
@@ -127,9 +127,10 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 		handleItemDoubleClick,
 		handleItemDoubleClickById,
 		handleContextMenuAction,
+		clearSelection,
 	} = useFileBrowserSelection({
 		items: displayedItems,
-		selectedIds: [...selectedIds],
+		selectedIds: Array.isArray(selectedIds) ? selectedIds.slice() : [],
 		onItemClick,
 		onItemDoubleClick,
 	});
@@ -214,8 +215,15 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 		(e: React.MouseEvent) => {
 			e.stopPropagation();
 			closeContextMenu();
+			// Si el click fue en el espacio vacío (no sobre un item), limpiar selección
+			const target = e.target as HTMLElement | null;
+			const current = e.currentTarget as HTMLElement | null;
+			const clickedOnEmpty = !target || !target.closest('[data-item-id]') || target === current;
+			if (clickedOnEmpty) {
+				clearSelection();
+			}
 		},
-		[closeContextMenu]
+		[closeContextMenu, clearSelection]
 	);
 
 	const handleCustomContextMenuAction = useCallback(
@@ -310,30 +318,35 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 		[addSortOption]
 	);
 
-	const renderContent = useCallback(() => {
-		if (isLoading && items.length === 0) {
-			return (
-				<div className="flex h-full w-full items-center justify-center">
-					<Spinner />
-				</div>
-			);
+	// Helpers de renderizado para reducir complejidad cognitiva
+	const renderLoading = useCallback(() => (
+		<div className="flex h-full w-full items-center justify-center">
+			<Spinner />
+		</div>
+	), []);
+
+	const renderError = useCallback(() => {
+		let errMsg = 'Error desconocido';
+		if (typeof error === 'string') {
+			errMsg = error;
+		} else if (error instanceof Error) {
+			errMsg = error.message;
 		}
-		if (error) {
-			let errMsg = 'Error desconocido';
-			if (typeof error === 'string') {
-				errMsg = error;
-			} else if (error instanceof Error) {
-				errMsg = error.message;
-			}
-			return (
-				<div aria-live="assertive" className="flex h-full w-full items-center justify-center" role="alert">
-					<p className="text-destructive">Error: {errMsg}</p>
-				</div>
-			);
-		}
-		if (items.length === 0) {
-			return <EmptyState description="No hay elementos para mostrar." icon={FileTextIcon} title="Sin elementos" />;
-		}
+		return (
+			<div aria-live="assertive" className="flex h-full w-full items-center justify-center" role="alert">
+				<p className="text-destructive">Error: {errMsg}</p>
+			</div>
+		);
+	}, [error]);
+
+	const renderEmpty = useCallback(
+		() => (
+			<EmptyState description="No hay elementos para mostrar." icon={FileTextIcon} title="Sin elementos" />
+		),
+		[]
+	);
+
+	const renderView = useCallback(() => {
 		if (viewMode === 'list') {
 			return (
 				<ListView
@@ -351,16 +364,20 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 			return <MasonryView {...commonViewProps} />;
 		}
 		return <CardsView {...commonViewProps} />;
-	}, [
-		isLoading,
-		items.length,
-		error,
-		viewMode,
-		commonViewProps,
-		handleListSort,
-		activeSort.field,
-		activeSort.direction,
-	]);
+	}, [viewMode, commonViewProps, handleListSort, activeSort.field, activeSort.direction]);
+
+	const renderContent = useCallback(() => {
+		if (isLoading && items.length === 0) {
+			return renderLoading();
+		}
+		if (error) {
+			return renderError();
+		}
+		if (items.length === 0) {
+			return renderEmpty();
+		}
+		return renderView();
+	}, [isLoading, items.length, error, renderLoading, renderError, renderEmpty, renderView]);
 
 	return (
 		<div className="flex h-full w-full min-w-0 flex-col overflow-hidden" data-testid="file-browser">
@@ -376,6 +393,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 					className
 				)}
 				data-testid="file-browser-container"
+				onClick={handleContainerClick}
 			>
 				{/* Wrapper interactivo para eventos */}
 				<section className="relative flex min-h-0 min-w-0 flex-1 flex-col">
@@ -440,7 +458,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 							}}
 						>
 							{/* Contenedor interactivo para eventos (div para evitar botones anidados) */}
-							<button
+							<section
 								aria-label="Explorador de archivos"
 								className="file-browser-container relative m-0 h-full w-full min-w-0 flex-1 cursor-default border-0 bg-transparent p-0 outline-none"
 								onClick={handleContainerClick}
@@ -471,8 +489,6 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 									}
 								}}
 								ref={containerCallbackRef as any}
-								tabIndex={-1}
-								type="button"
 							>
 								<span className="sr-only">Explorador de archivos</span>
 								{/* Navegación por teclado */}
@@ -509,7 +525,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 									position={contextMenuPosition}
 									selectedItems={items.filter((item) => effectiveSelectedIds.includes(item.id))}
 								/>
-							</button>
+							</section>
 						</DragSelectionProvider>
 					</ScrollArea>
 				</section>
@@ -576,26 +592,4 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
  *   mode="manual"
  *   items={customEntityList}
  * />
- */
-*
- * // Modo manual con items específicos
- * <FileBrowser
- *   entityType="mixed"
- *   mode="manual"
- *   items=
-{
-	customEntityList;
-}
-* />
- */
- *
- * // Modo manual con items específicos
- * <FileBrowser
- *   entityType="mixed"
- *   mode="manual"
- *   items=
-{
-	customEntityList;
-}
-* />
  */
