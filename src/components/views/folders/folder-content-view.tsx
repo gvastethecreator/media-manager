@@ -2,7 +2,7 @@ import { Folder, Images } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { PerformanceMetricsPanel } from '@/components/debug/performance-metrics-panel';
-import { FileBrowser2 } from '@/components/features/file-browser-2/file-browser-2';
+import { FileBrowser } from '@/components/features/file-browser';
 import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { useFolder, useReindexFolder } from '@/lib/api/folders';
@@ -48,7 +48,7 @@ function buildEmptySelectionState() {
 	);
 }
 
-// (estado de carga visual no usado: FileBrowser2 se monta también en loading)
+// (estado de carga visual no usado: FileBrowser se monta también en loading)
 
 function buildErrorState() {
 	return (
@@ -301,7 +301,7 @@ export function FolderContentView({
 	} else if (isFolderLoading) {
 		// Montar FileBrowser ya en loading para exponer toolbar/testids; mostrará spinner interno
 		content = (
-			<FileBrowser2
+			<FileBrowser
 				entityType="image"
 				filterId={currentFolderId}
 				filterType="folder"
@@ -326,7 +326,7 @@ export function FolderContentView({
 			showFileBrowser = false; // Estado vacío dedicado
 		} else {
 			content = (
-				<FileBrowser2
+				<FileBrowser
 					entityType="image"
 					filterId={currentFolderId}
 					filterType="folder"

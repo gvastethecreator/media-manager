@@ -243,17 +243,20 @@ async function identifyFoldersToRemove(
 	for (const dbFolder of dbFolders) {
 		const normalizedPath = normalizePath(dbFolder.path);
 
-		// Si la carpeta no existe en el sistema de archivos, marcarla para eliminación
-		if (!fileSystemPaths.has(normalizedPath)) {
-			// Verificar una vez más que realmente no existe
-			if (!(await folderExists(normalizedPath))) {
-				foldersToRemove.push({
-					id: dbFolder.id,
-					path: dbFolder.path,
-					name: dbFolder.name,
-				});
-				syncLogger.info(`🗑️ Carpeta marcada para eliminación: ${dbFolder.name} (${dbFolder.path})`);
-			}
+		// Si ya está presente en el escaneo del FS, continuar
+		if (fileSystemPaths.has(normalizedPath)) {
+			continue;
+		}
+
+		// Verificar una vez más que realmente no existe en disco
+		const existsOnDisk = await folderExists(normalizedPath);
+		if (!existsOnDisk) {
+			foldersToRemove.push({
+				id: dbFolder.id,
+				path: dbFolder.path,
+				name: dbFolder.name,
+			});
+			syncLogger.info(`🗑️ Carpeta marcada para eliminación: ${dbFolder.name} (${dbFolder.path})`);
 		}
 	}
 

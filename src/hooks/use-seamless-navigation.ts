@@ -19,13 +19,11 @@ export function useSeamlessNavigation() {
 						navigate(to, options);
 					}
 				});
-			} else {
+			} else if (typeof to === 'number') {
 				// Fallback para navegadores que no soportan ViewTransition
-				if (typeof to === 'number') {
-					navigate(to);
-				} else {
-					navigate(to, options);
-				}
+				navigate(to);
+			} else {
+				navigate(to, options);
 			}
 		},
 		[navigate]

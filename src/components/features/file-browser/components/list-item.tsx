@@ -1,6 +1,6 @@
-import type { ImageWithStats } from '@/types/entities/image';
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/format.utils';
+import type { ImageWithStats } from '@/types/entities/image';
 
 interface ListItemProps {
 	item: ImageWithStats;
@@ -20,18 +20,18 @@ export function ListItem({ item, selected = false, onClick, onDoubleClick }: Lis
 
 	return (
 		<button
-			type="button"
 			aria-pressed={selected}
+			className={cn('flex items-center gap-4 rounded-md p-2 hover:bg-accent', selected && 'bg-accent')}
 			onClick={handleClick}
 			onDoubleClick={handleDoubleClick}
 			onKeyDown={handleKeyDown}
-			className={cn('flex items-center gap-4 rounded-md p-2 hover:bg-accent', selected && 'bg-accent')}
+			type="button"
 		>
 			<div className="relative h-10 w-10 shrink-0">
 				<img
 					alt={item.name}
-					src={`/api/images/${item.id}/thumbnail`}
 					className="h-full w-full rounded-sm object-cover"
+					src={`/api/images/${item.id}/thumbnail`}
 				/>
 			</div>
 			<div className="flex-1 truncate">
