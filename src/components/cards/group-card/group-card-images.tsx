@@ -1,12 +1,12 @@
+import { FolderIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import React, { useState } from 'react';
 import {
 	buildHolographicStyle,
 	computeRarityVisualConfig,
 	rarityAccessibilityLabel,
 } from '@/components/cards/shared/rarity-style';
 import { cn } from '@/lib/utils';
-import { FolderIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import React, { useState } from 'react';
 
 interface GroupCardImagesProps {
 	/** Imágenes a mostrar (rutas) */

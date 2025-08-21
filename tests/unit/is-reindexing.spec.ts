@@ -1,5 +1,5 @@
-import { computeIsReindexing } from '@/components/settings/folders/utils/is-reindexing';
 import { describe, expect, it } from 'bun:test';
+import { computeIsReindexing } from '@/components/settings/folders/utils/is-reindexing';
 
 const base = {
 	processStatus: undefined as any,

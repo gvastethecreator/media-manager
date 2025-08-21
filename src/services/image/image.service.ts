@@ -40,23 +40,23 @@
  * permitiendo redimensionar, cambiar formato y optimizar imágenes.
  */
 
+import { and, asc, count, desc, eq, isNotNull, like, or, sum } from 'drizzle-orm';
+import { promises as fs } from 'fs';
+import sharp from 'sharp';
 import { imageConfig } from '@/lib/config';
 import { db } from '@/lib/drizzle';
 import { folders, imageStats, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import {
-	ServiceErrorCode,
 	createEntityNotFoundError,
 	createFileNotFoundError,
 	createServiceError,
+	ServiceErrorCode,
 	toServiceError,
 } from '@/lib/utils/errors/service-errors';
 import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
 import type { ThumbnailStats } from '@/types/thumbnails';
-import { and, asc, count, desc, eq, isNotNull, like, or, sum } from 'drizzle-orm';
-import { promises as fs } from 'fs';
-import sharp from 'sharp';
 // Tipos movidos a types locales
 export interface GetImagesOptions {
 	folderId?: string;

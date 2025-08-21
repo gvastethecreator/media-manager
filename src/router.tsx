@@ -25,6 +25,7 @@ import { WildcardsView } from '@/components/views/wildcards/wildcards-view';
 import { WorkflowContentView } from '@/components/views/workflows/workflow-content-view';
 import { WorkflowsView } from '@/components/views/workflows/workflows-view';
 import { WorldItemsView } from '@/components/views/world-items/world-items-view';
+import ReindexLogsViewer from '@/components/system/ReindexLogsViewer';
 
 // Wrapper components para pasar el parámetro de la URL
 const FolderContentWrapper = () => {
@@ -285,6 +286,10 @@ export const router = createBrowserRouter([
 			{
 				path: 'file-3d-content',
 				element: <File3DDetailView />,
+			},
+			{
+				path: 'admin/reindex',
+				element: <ReindexLogsViewer />,
 			},
 		],
 	},

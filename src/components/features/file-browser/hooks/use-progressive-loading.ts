@@ -4,8 +4,8 @@
  * @description Manages progressive rendering of items respecting itemsPerBatch and enableProgressiveLoading config
  */
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { AnyEntityWithStats } from '@/types/migration';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 interface ProgressiveConfig {
 	enabled: boolean;
@@ -66,7 +66,9 @@ export function useProgressiveLoading({
 
 	// Load more function
 	const loadMore = useCallback(() => {
-		if (!canLoadMore || isLoadingMore) return;
+		if (!canLoadMore || isLoadingMore) {
+			return;
+		}
 
 		setIsLoadingMore(true);
 
@@ -92,6 +94,7 @@ export function useProgressiveLoading({
 			clearTimeout(loadingTimeoutRef.current);
 			loadingTimeoutRef.current = null;
 		}
+		// Dependemos de items para resetear; Biome puede sugerir menos deps pero es correcto incluirlo
 	}, [items]);
 
 	// Cleanup on unmount

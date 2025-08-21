@@ -218,7 +218,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 			// Si el click fue en el espacio vacío (no sobre un item), limpiar selección
 			const target = e.target as HTMLElement | null;
 			const current = e.currentTarget as HTMLElement | null;
-			const clickedOnEmpty = !target || !target.closest('[data-item-id]') || target === current;
+			const clickedOnEmpty = !(target && target.closest('[data-item-id]')) || target === current;
 			if (clickedOnEmpty) {
 				clearSelection();
 			}
@@ -319,11 +319,14 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 	);
 
 	// Helpers de renderizado para reducir complejidad cognitiva
-	const renderLoading = useCallback(() => (
-		<div className="flex h-full w-full items-center justify-center">
-			<Spinner />
-		</div>
-	), []);
+	const renderLoading = useCallback(
+		() => (
+			<div className="flex h-full w-full items-center justify-center">
+				<Spinner />
+			</div>
+		),
+		[]
+	);
 
 	const renderError = useCallback(() => {
 		let errMsg = 'Error desconocido';
@@ -340,9 +343,7 @@ export const FileBrowser = memo<FileBrowserProps>(function FileBrowserInner(prop
 	}, [error]);
 
 	const renderEmpty = useCallback(
-		() => (
-			<EmptyState description="No hay elementos para mostrar." icon={FileTextIcon} title="Sin elementos" />
-		),
+		() => <EmptyState description="No hay elementos para mostrar." icon={FileTextIcon} title="Sin elementos" />,
 		[]
 	);
 

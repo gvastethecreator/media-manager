@@ -55,7 +55,17 @@ export const useFileBrowserData = ({
 	const lastLoadParamsRef = useRef<string>('');
 	const isLoadingRef = useRef<boolean>(false);
 	const sortingCache = useRef(new Map<string, SortingValues>());
-	const autoReindexExecutedRef = useRef<Set<string>>(new Set()); // Para evitar múltiples reindexados
+
+	// 🔧 MEJORADO: Control de auto-reindexado con cooldown y límite de intentos
+	interface AutoReindexState {
+		lastAttempt: number;
+		attempts: number;
+		maxAttempts: number;
+		cooldownPeriod: number;
+	}
+	const autoReindexState = useRef<Map<string, AutoReindexState>>(new Map());
+	const COOLDOWN_PERIOD = 5 * 60 * 1000; // 5 minutos
+	const MAX_ATTEMPTS_PER_SESSION = 3;
 
 	// Hook para reindexar carpetas automáticamente
 	const reindexFolderMutation = useReindexFolder();
@@ -63,19 +73,45 @@ export const useFileBrowserData = ({
 	// Función de auto-reindexado cuando se navega a una carpeta
 	const checkAndAutoReindex = useCallback(
 		async (folderId: string) => {
-			// Solo auto-reindexar si:
-			// 1. Es modo automático (no manual)
-			// 2. Hay un filterId de carpeta
-			// 3. No se ha ejecutado ya para esta carpeta en esta sesión
-			if (mode !== 'auto' || filterType !== 'folder' || !folderId || autoReindexExecutedRef.current.has(folderId)) {
+			// Verificaciones básicas
+			if (mode !== 'auto' || filterType !== 'folder' || !folderId) {
+				return;
+			}
+
+			// 🔧 Verificar estado de auto-reindexado con cooldown
+			const now = Date.now();
+			const folderState = autoReindexState.current.get(folderId) || {
+				lastAttempt: 0,
+				attempts: 0,
+				maxAttempts: MAX_ATTEMPTS_PER_SESSION,
+				cooldownPeriod: COOLDOWN_PERIOD,
+			};
+
+			// Verificar si estamos en cooldown period
+			const timeSinceLastAttempt = now - folderState.lastAttempt;
+			if (timeSinceLastAttempt < folderState.cooldownPeriod) {
+				const remainingTime = Math.ceil((folderState.cooldownPeriod - timeSinceLastAttempt) / 1000);
+				logger.debug(`🕒 Auto-reindex en cooldown para ${folderId}. Reintentar en ${remainingTime}s`);
+				return;
+			}
+
+			// Verificar si se excedió el límite de intentos
+			if (folderState.attempts >= folderState.maxAttempts) {
+				logger.warn(
+					`🚫 Límite de intentos alcanzado para auto-reindex de ${folderId} (${folderState.attempts}/${folderState.maxAttempts})`
+				);
 				return;
 			}
 
 			try {
-				logger.info(`🔄 Auto-reindexando carpeta al navegar: ${folderId}`);
+				logger.info(
+					`🔄 Auto-reindexando carpeta al navegar: ${folderId} (intento ${folderState.attempts + 1}/${folderState.maxAttempts})`
+				);
 
-				// Marcar como ejecutado para evitar múltiples llamadas
-				autoReindexExecutedRef.current.add(folderId);
+				// Actualizar estado antes del intento
+				folderState.lastAttempt = now;
+				folderState.attempts++;
+				autoReindexState.current.set(folderId, folderState);
 
 				// Ejecutar reindexado en background
 				await reindexFolderMutation.mutateAsync(folderId);
@@ -90,10 +126,19 @@ export const useFileBrowserData = ({
 				}
 
 				logger.info(`✅ Auto-reindexado completado para carpeta: ${folderId}`);
+
+				// Reset attempts en caso de éxito
+				folderState.attempts = 0;
+				autoReindexState.current.set(folderId, folderState);
 			} catch (autoReindexError) {
-				logger.error(`❌ Error en auto-reindexado de carpeta ${folderId}:`, autoReindexError);
-				// En caso de error, remover de la lista para permitir retry manual
-				autoReindexExecutedRef.current.delete(folderId);
+				logger.error(
+					`❌ Error en auto-reindexado de carpeta ${folderId} (intento ${folderState.attempts}):`,
+					autoReindexError
+				);
+
+				// Incrementar el cooldown period en caso de error para evitar spam
+				folderState.cooldownPeriod = Math.min(folderState.cooldownPeriod * 1.5, 30 * 60 * 1000); // Máximo 30 minutos
+				autoReindexState.current.set(folderId, folderState);
 			}
 		},
 		[mode, filterType, reindexFolderMutation]

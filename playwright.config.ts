@@ -9,6 +9,12 @@ export default defineConfig({
 	retries: process.env.CI ? 2 : 0,
 	workers: process.env.CI ? 2 : undefined,
 	reporter: [['list']],
+	webServer: {
+		command: 'bun run dev:full',
+		url: 'http://localhost:5173',
+		reuseExistingServer: true,
+		timeout: 120_000,
+	},
 	use: {
 		baseURL: 'http://localhost:5173',
 		trace: 'retain-on-failure',

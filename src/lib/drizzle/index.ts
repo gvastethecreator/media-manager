@@ -29,9 +29,9 @@ import {
 	imagePlaces,
 	imagePrompts,
 	imageProperties,
-	images,
 	// Content
 	imageStats,
+	images,
 	imageTags,
 	imageWildcards,
 	imageWorldItems,
