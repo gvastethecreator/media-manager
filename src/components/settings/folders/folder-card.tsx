@@ -1,12 +1,12 @@
+import { Folder } from 'lucide-react';
+import { motion } from 'motion/react';
+import type { ReactNode } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { computeIsReindexing } from '@/components/settings/folders/utils/is-reindexing';
 import { Card, CardContent } from '@/components/ui/card';
 import { useFolderStats } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
 import type { FolderStatsResponse } from '@/types/folders';
-import { Folder } from 'lucide-react';
-import { motion } from 'motion/react';
-import type { ReactNode } from 'react';
-import { useCallback, useMemo, useState } from 'react';
 import { ExpandedSubfolders } from './expanded-subfolders';
 import { NormalModeControls } from './folder-card-action-controls';
 import { EditModeControls } from './folder-card-edit-controls';

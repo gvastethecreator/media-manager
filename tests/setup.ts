@@ -1,6 +1,7 @@
-import { afterEach } from 'bun:test';
-import { cleanup } from '@testing-library/react';
 import '@testing-library/jest-dom';
+import { cleanup } from '@testing-library/react';
+import { afterEach } from 'bun:test';
+// @ts-expect-error faltan tipos de jsdom en entorno Bun; solo se usa en tests
 import { JSDOM } from 'jsdom';
 
 // Configurar jsdom como entorno DOM para pruebas
@@ -15,13 +16,20 @@ const globalAny: any = globalThis as any;
 globalAny.window = dom.window;
 globalAny.document = dom.window.document;
 globalAny.navigator = { userAgent: 'node.js' };
-globalAny.requestAnimationFrame = (cb: FrameRequestCallback) => setTimeout(() => cb(Date.now()), 0) as unknown as number;
+globalAny.requestAnimationFrame = (cb: FrameRequestCallback) =>
+	setTimeout(() => cb(Date.now()), 0) as unknown as number;
 globalAny.cancelAnimationFrame = (id: number) => clearTimeout(id);
 // Polyfill sencillo de ResizeObserver para jsdom
 class RO {
-	observe() {/* noop */}
-	unobserve() {/* noop */}
-	disconnect() {/* noop */}
+	observe() {
+		/* noop */
+	}
+	unobserve() {
+		/* noop */
+	}
+	disconnect() {
+		/* noop */
+	}
 }
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 globalAny.ResizeObserver = RO as any;

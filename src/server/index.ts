@@ -2,7 +2,10 @@
 
 import express from 'express';
 import path from 'path';
+import { reindexMonitor } from '@/lib/system/reindex-monitor';
+import { initializeFileLogging } from '@/lib/logger/init-file-logging';
 import { errorLogger, logError, logInfo, requestLogger } from './middleware/logging';
+import { reindexLogsRouter } from './routes/api/reindex-logs.js';
 import activityRouter from './routes/activity';
 import { albumsRouter } from './routes/albums.js';
 import { audioRouter } from './routes/audio.js';
@@ -108,6 +111,7 @@ app.use('/api/queue', queueRouter);
 
 // API Routes - Sistema y utilidades
 app.use('/api/system', systemRouter);
+app.use('/api/reindex-logs', reindexLogsRouter);
 app.use('/api/search', searchRouter);
 app.use('/api/metadata', metadataRouter);
 app.use('/api/metadata-advanced', metadataAdvancedRouter);
@@ -169,6 +173,16 @@ app.listen(PORT, '0.0.0.0', () => {
 	console.log(`   📈 Activity: http://localhost:${PORT}/api/activity`);
 
 	console.log(`\n🩺 Health check: http://localhost:${PORT}/health`);
+
+	// 🔍 Inicializar monitor de reindexado
+	console.log('\n🔍 Iniciando sistema de monitoreo...');
+	reindexMonitor.start();
+	console.log('✅ Monitor de reindexado activo');
+
+	// 📝 Inicializar sistema de logging de archivos
+	console.log('\n📝 Inicializando sistema de logging de archivos...');
+	initializeFileLogging();
+	console.log('✅ Sistema de logging de archivos activo');
 });
 
 export default app;

@@ -11,7 +11,6 @@ export function cn(...inputs: ClassValue[]): string {
 	return twMerge(clsx(inputs));
 }
 
-export { formatFileSize } from './utils/format.utils';
-export { formatDuration, formatDurationSeconds } from './utils/format.utils';
+export { formatDuration, formatDurationSeconds, formatFileSize } from './utils/format.utils';
 // Re-exportes clave para compatibilidad con import '@/lib/utils'
 export { createDefaultEntityStats } from './utils/stats';

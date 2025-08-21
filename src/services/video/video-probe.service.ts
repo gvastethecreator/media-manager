@@ -1,7 +1,7 @@
-import ffprobeStatic from 'ffprobe-static';
 import { execFile } from 'node:child_process';
 import { basename } from 'node:path';
 import { promisify } from 'node:util';
+import ffprobeStatic from 'ffprobe-static';
 
 const execFileAsync = promisify(execFile);
 

@@ -1,0 +1,916 @@
+[2025-08-21T01:20:58.586Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-08-21T01:20:58.587Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-08-21T01:20:58.587Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-08-21T01:20:58.587Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-08-21.log
+[2025-08-21T01:20:59.188Z] [INFO] ℹ️  📁 Archivos estáticos configurados: /uploads -> D:\DEV\image-manager\public\uploads
+[2025-08-21T01:20:59.188Z] [INFO] ℹ️  🔧 Middleware de logging configurado
+[2025-08-21T01:21:24.078Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:24.077Z] GET /api/system/navigation - IP: 127.0.0.1 - START
+[2025-08-21T01:21:24.142Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:24.142Z] GET /api/system/navigation - 200 - 65ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:24.145Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:24.145Z] GET /api/stats/system - IP: 127.0.0.1 - START
+[2025-08-21T01:21:24.167Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:24.167Z] GET /api/stats/system - 200 - 22ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:24.168Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:24.168Z] GET /api/system/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:24.176Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:24.176Z] GET /api/system/stats - 200 - 8ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:24.178Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:24.177Z] GET /api/stats/extended - IP: 127.0.0.1 - START
+[2025-08-21T01:21:24.191Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:24.191Z] GET /api/stats/extended - 200 - 14ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:24.192Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:24.192Z] GET /api/stats/general - IP: 127.0.0.1 - START
+[2025-08-21T01:21:24.204Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:24.204Z] GET /api/stats/general - 200 - 12ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:24.206Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:24.205Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-21T01:21:24.212Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:24.212Z] GET /api/stats/folders - 200 - 7ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:24.214Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:24.213Z] GET /api/stats/activity?limit=5 - IP: 127.0.0.1 - START
+[2025-08-21T01:21:24.224Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:24.223Z] GET /api/stats/activity?limit=5 - 200 - 10ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:24.225Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:24.224Z] GET /api/stats/top-tags?limit=6 - IP: 127.0.0.1 - START
+[2025-08-21T01:21:24.237Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:24.237Z] GET /api/stats/top-tags?limit=6 - 200 - 13ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:32.585Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:32.584Z] GET /api/events/stream - IP: 127.0.0.1 - START
+[2025-08-21T01:21:32.587Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:32.587Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.175Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.175Z] GET /api/folders - 200 - 588ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.181Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.180Z] GET /api/events/stream - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.182Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.182Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.241Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.240Z] GET /api/folders - 200 - 58ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.354Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.354Z] GET /api/folders/cartoons/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.380Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.379Z] GET /api/folders/cartoons/stats - 200 - 25ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.381Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.380Z] GET /api/folders/cursed-dump/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.404Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.404Z] GET /api/folders/cursed-dump/stats - 200 - 24ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.405Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.405Z] GET /api/folders/output/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.468Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.468Z] GET /api/folders/output/stats - 200 - 63ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.469Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.469Z] GET /api/folders/9238e1a8-c7b7-4b5b-83ee-3f5ec85ec689/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.480Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.480Z] GET /api/folders/9238e1a8-c7b7-4b5b-83ee-3f5ec85ec689/stats - 200 - 11ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.481Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.481Z] GET /api/folders/8184a0d3-5bfd-4cc9-9158-0c876c9c1041/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.484Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.484Z] GET /api/folders/8184a0d3-5bfd-4cc9-9158-0c876c9c1041/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.485Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.485Z] GET /api/folders/1baba492-8e4a-4e04-9785-d40ee5f1833b/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.488Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.488Z] GET /api/folders/1baba492-8e4a-4e04-9785-d40ee5f1833b/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.489Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.489Z] GET /api/folders/07027c4c-b4f3-44c9-8787-586f40b795aa/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.492Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.492Z] GET /api/folders/07027c4c-b4f3-44c9-8787-586f40b795aa/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.493Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.492Z] GET /api/folders/2c783dae-ef23-4427-8cb8-b49f0b8d338c/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.495Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.495Z] GET /api/folders/2c783dae-ef23-4427-8cb8-b49f0b8d338c/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.496Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.496Z] GET /api/folders/f7e19489-9a0b-47f6-a0f3-df9b89abd175/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.498Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.498Z] GET /api/folders/f7e19489-9a0b-47f6-a0f3-df9b89abd175/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.499Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.499Z] GET /api/folders/2191b8d1-b7a7-4766-b232-18460dac76e6/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.502Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.501Z] GET /api/folders/2191b8d1-b7a7-4766-b232-18460dac76e6/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.502Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.502Z] GET /api/folders/90cd3b78-114e-431a-ab91-02545c110acc/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.504Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.504Z] GET /api/folders/90cd3b78-114e-431a-ab91-02545c110acc/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.505Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.505Z] GET /api/folders/94c93140-650f-4139-9ea7-10d262b45d62/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.507Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.507Z] GET /api/folders/94c93140-650f-4139-9ea7-10d262b45d62/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.508Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.507Z] GET /api/folders/b0bdb034-b923-4ee4-8188-def29ced7f4d/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.510Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.509Z] GET /api/folders/b0bdb034-b923-4ee4-8188-def29ced7f4d/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.511Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.510Z] GET /api/folders/feeb62b9-0c9f-40bc-860b-92279c46b763/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.514Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.513Z] GET /api/folders/feeb62b9-0c9f-40bc-860b-92279c46b763/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.515Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.515Z] GET /api/folders/7bf03eaf-e738-4347-9d6a-fa84e871289d/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.517Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.517Z] GET /api/folders/7bf03eaf-e738-4347-9d6a-fa84e871289d/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.518Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.518Z] GET /api/folders/7298a7af-8d52-4d64-8d1f-8170609b6137/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.520Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.520Z] GET /api/folders/7298a7af-8d52-4d64-8d1f-8170609b6137/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.520Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.520Z] GET /api/folders/ab16b3a6-1df1-444d-ab2c-6f0398b72e67/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.522Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.522Z] GET /api/folders/ab16b3a6-1df1-444d-ab2c-6f0398b72e67/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.523Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.523Z] GET /api/folders/photography/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.525Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.525Z] GET /api/folders/photography/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:33.526Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:33.525Z] GET /api/folders/wallpapers/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:21:33.528Z] [INFO] ℹ️  ✅ [2025-08-21T01:21:33.528Z] GET /api/folders/wallpapers/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T01:21:36.726Z] [INFO] ℹ️  🌐 [2025-08-21T01:21:36.726Z] POST /api/folders/reindex-all - IP: 127.0.0.1 - START
+[2025-08-21T01:22:01.759Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:01.759Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-21T01:22:01.764Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:01.764Z] GET /api/stats/folders - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:07.165Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:07.164Z] POST /api/folders/reindex-all - IP: 127.0.0.1 - START
+[2025-08-21T01:22:17.064Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:17.064Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-21T01:22:17.067Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:17.067Z] GET /api/stats/folders - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:37.687Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:37.687Z] POST /api/folders/reindex-all - IP: 127.0.0.1 - START
+[2025-08-21T01:22:48.068Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:48.068Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-21T01:22:48.071Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:48.071Z] GET /api/stats/folders - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:48.072Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:48.072Z] GET /api/folders/cartoons/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:48.100Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:48.100Z] GET /api/folders/cartoons/stats - 200 - 28ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:48.101Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:48.101Z] GET /api/folders/cursed-dump/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:48.131Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:48.131Z] GET /api/folders/cursed-dump/stats - 200 - 30ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:48.132Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:48.132Z] GET /api/folders/output/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:48.385Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:48.384Z] GET /api/folders/output/stats - 200 - 252ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:49.493Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:49.492Z] GET /api/folders/9238e1a8-c7b7-4b5b-83ee-3f5ec85ec689/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:49.506Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:49.506Z] GET /api/folders/9238e1a8-c7b7-4b5b-83ee-3f5ec85ec689/stats - 200 - 14ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:49.507Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:49.507Z] GET /api/folders/8184a0d3-5bfd-4cc9-9158-0c876c9c1041/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:49.509Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:49.509Z] GET /api/folders/8184a0d3-5bfd-4cc9-9158-0c876c9c1041/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:49.510Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:49.510Z] GET /api/folders/1baba492-8e4a-4e04-9785-d40ee5f1833b/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:49.513Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:49.513Z] GET /api/folders/1baba492-8e4a-4e04-9785-d40ee5f1833b/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:49.514Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:49.513Z] GET /api/folders/07027c4c-b4f3-44c9-8787-586f40b795aa/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:49.515Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:49.515Z] GET /api/folders/07027c4c-b4f3-44c9-8787-586f40b795aa/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:49.618Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:49.618Z] GET /api/folders/2c783dae-ef23-4427-8cb8-b49f0b8d338c/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:49.620Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:49.620Z] GET /api/folders/2c783dae-ef23-4427-8cb8-b49f0b8d338c/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:49.621Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:49.621Z] GET /api/folders/f7e19489-9a0b-47f6-a0f3-df9b89abd175/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:49.623Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:49.623Z] GET /api/folders/f7e19489-9a0b-47f6-a0f3-df9b89abd175/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:49.624Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:49.624Z] GET /api/folders/2191b8d1-b7a7-4766-b232-18460dac76e6/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:49.625Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:49.625Z] GET /api/folders/2191b8d1-b7a7-4766-b232-18460dac76e6/stats - 200 - 1ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:49.626Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:49.626Z] GET /api/folders/90cd3b78-114e-431a-ab91-02545c110acc/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:49.628Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:49.628Z] GET /api/folders/90cd3b78-114e-431a-ab91-02545c110acc/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:50.747Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:50.747Z] GET /api/folders/94c93140-650f-4139-9ea7-10d262b45d62/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:50.753Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:50.752Z] GET /api/folders/94c93140-650f-4139-9ea7-10d262b45d62/stats - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:50.757Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:50.757Z] GET /api/folders/b0bdb034-b923-4ee4-8188-def29ced7f4d/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:50.760Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:50.760Z] GET /api/folders/b0bdb034-b923-4ee4-8188-def29ced7f4d/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:50.761Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:50.761Z] GET /api/folders/feeb62b9-0c9f-40bc-860b-92279c46b763/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:50.763Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:50.763Z] GET /api/folders/feeb62b9-0c9f-40bc-860b-92279c46b763/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:50.764Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:50.764Z] GET /api/folders/7bf03eaf-e738-4347-9d6a-fa84e871289d/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:50.766Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:50.766Z] GET /api/folders/7bf03eaf-e738-4347-9d6a-fa84e871289d/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:50.839Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:50.839Z] GET /api/folders/7298a7af-8d52-4d64-8d1f-8170609b6137/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:50.841Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:50.841Z] GET /api/folders/7298a7af-8d52-4d64-8d1f-8170609b6137/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:50.842Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:50.842Z] GET /api/folders/ab16b3a6-1df1-444d-ab2c-6f0398b72e67/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:50.843Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:50.843Z] GET /api/folders/ab16b3a6-1df1-444d-ab2c-6f0398b72e67/stats - 200 - 1ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:50.844Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:50.844Z] GET /api/folders/photography/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:50.847Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:50.847Z] GET /api/folders/photography/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T01:22:50.848Z] [INFO] ℹ️  🌐 [2025-08-21T01:22:50.847Z] GET /api/folders/wallpapers/stats - IP: 127.0.0.1 - START
+[2025-08-21T01:22:50.850Z] [INFO] ℹ️  ✅ [2025-08-21T01:22:50.850Z] GET /api/folders/wallpapers/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T01:23:11.411Z] [INFO] ℹ️  🌐 [2025-08-21T01:23:11.411Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-21T01:23:11.415Z] [INFO] ℹ️  ✅ [2025-08-21T01:23:11.415Z] GET /api/stats/folders - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T01:23:27.023Z] [INFO] ℹ️  🌐 [2025-08-21T01:23:27.023Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-21T01:23:27.026Z] [INFO] ℹ️  ✅ [2025-08-21T01:23:27.026Z] GET /api/stats/folders - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:23.327Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-08-21T02:13:23.328Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-08-21T02:13:23.329Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-08-21T02:13:23.329Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-08-21.log
+[2025-08-21T02:13:23.486Z] [INFO] ℹ️  📁 Archivos estáticos configurados: /uploads -> D:\DEV\image-manager\public\uploads
+[2025-08-21T02:13:23.486Z] [INFO] ℹ️  🔧 Middleware de logging configurado
+[2025-08-21T02:13:26.404Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-08-21T02:13:26.405Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-08-21T02:13:26.405Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-08-21T02:13:26.405Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-08-21.log
+[2025-08-21T02:13:26.530Z] [INFO] ℹ️  📁 Archivos estáticos configurados: /uploads -> D:\DEV\image-manager\public\uploads
+[2025-08-21T02:13:26.530Z] [INFO] ℹ️  🔧 Middleware de logging configurado
+[2025-08-21T02:13:28.094Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:28.093Z] GET /api/events/stream - IP: 127.0.0.1 - START
+[2025-08-21T02:13:39.625Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:39.625Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-21T02:13:39.644Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:39.644Z] GET /api/stats/folders - 200 - 19ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:40.015Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:40.015Z] GET /api/folders/cartoons/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:40.045Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:40.045Z] GET /api/folders/cartoons/stats - 200 - 30ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:40.046Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:40.046Z] GET /api/folders/9238e1a8-c7b7-4b5b-83ee-3f5ec85ec689/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:40.058Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:40.058Z] GET /api/folders/9238e1a8-c7b7-4b5b-83ee-3f5ec85ec689/stats - 200 - 12ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:40.059Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:40.059Z] GET /api/folders/8184a0d3-5bfd-4cc9-9158-0c876c9c1041/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:40.061Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:40.061Z] GET /api/folders/8184a0d3-5bfd-4cc9-9158-0c876c9c1041/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:40.062Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:40.062Z] GET /api/folders/1baba492-8e4a-4e04-9785-d40ee5f1833b/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:40.065Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:40.065Z] GET /api/folders/1baba492-8e4a-4e04-9785-d40ee5f1833b/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:40.066Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:40.066Z] GET /api/folders/07027c4c-b4f3-44c9-8787-586f40b795aa/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:40.069Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:40.069Z] GET /api/folders/07027c4c-b4f3-44c9-8787-586f40b795aa/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:40.103Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:40.103Z] GET /api/folders/cursed-dump/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:40.130Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:40.130Z] GET /api/folders/cursed-dump/stats - 200 - 27ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:40.131Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:40.131Z] GET /api/folders/2c783dae-ef23-4427-8cb8-b49f0b8d338c/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:40.134Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:40.134Z] GET /api/folders/2c783dae-ef23-4427-8cb8-b49f0b8d338c/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:40.136Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:40.135Z] GET /api/folders/f7e19489-9a0b-47f6-a0f3-df9b89abd175/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:40.139Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:40.139Z] GET /api/folders/f7e19489-9a0b-47f6-a0f3-df9b89abd175/stats - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:40.178Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:40.178Z] GET /api/folders/2191b8d1-b7a7-4766-b232-18460dac76e6/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:40.182Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:40.181Z] GET /api/folders/2191b8d1-b7a7-4766-b232-18460dac76e6/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:40.182Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:40.182Z] GET /api/folders/90cd3b78-114e-431a-ab91-02545c110acc/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:40.185Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:40.185Z] GET /api/folders/90cd3b78-114e-431a-ab91-02545c110acc/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:50.332Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:50.331Z] GET /api/system/navigation - IP: 127.0.0.1 - START
+[2025-08-21T02:13:50.377Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:50.377Z] GET /api/system/navigation - 200 - 46ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:50.385Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:50.384Z] GET /api/stats/system - IP: 127.0.0.1 - START
+[2025-08-21T02:13:50.405Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:50.405Z] GET /api/stats/system - 200 - 21ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:50.407Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:50.407Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-21T02:13:50.412Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:50.412Z] GET /api/stats/folders - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:50.414Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:50.414Z] GET /api/events/stream - IP: 127.0.0.1 - START
+[2025-08-21T02:13:50.417Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:50.417Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T02:13:50.809Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:50.809Z] GET /api/folders - 200 - 392ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:50.811Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:50.811Z] GET /api/events/stream - IP: 127.0.0.1 - START
+[2025-08-21T02:13:50.813Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:50.813Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.183Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.183Z] GET /api/folders - 200 - 370ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.190Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.189Z] GET /api/folders/cartoons/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.231Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.230Z] GET /api/folders/cartoons/stats - 200 - 41ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.232Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.232Z] GET /api/folders/cursed-dump/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.319Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.319Z] GET /api/folders/cursed-dump/stats - 200 - 87ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.321Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.321Z] GET /api/folders/output/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.918Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.918Z] GET /api/folders/output/stats - 200 - 597ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.919Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.919Z] GET /api/folders/9238e1a8-c7b7-4b5b-83ee-3f5ec85ec689/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.934Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.933Z] GET /api/folders/9238e1a8-c7b7-4b5b-83ee-3f5ec85ec689/stats - 200 - 14ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.935Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.935Z] GET /api/folders/8184a0d3-5bfd-4cc9-9158-0c876c9c1041/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.938Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.938Z] GET /api/folders/8184a0d3-5bfd-4cc9-9158-0c876c9c1041/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.944Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.944Z] GET /api/folders/1baba492-8e4a-4e04-9785-d40ee5f1833b/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.948Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.948Z] GET /api/folders/1baba492-8e4a-4e04-9785-d40ee5f1833b/stats - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.949Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.949Z] GET /api/folders/07027c4c-b4f3-44c9-8787-586f40b795aa/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.952Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.952Z] GET /api/folders/07027c4c-b4f3-44c9-8787-586f40b795aa/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.953Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.953Z] GET /api/folders/2c783dae-ef23-4427-8cb8-b49f0b8d338c/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.955Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.955Z] GET /api/folders/2c783dae-ef23-4427-8cb8-b49f0b8d338c/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.956Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.956Z] GET /api/folders/f7e19489-9a0b-47f6-a0f3-df9b89abd175/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.959Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.959Z] GET /api/folders/f7e19489-9a0b-47f6-a0f3-df9b89abd175/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.960Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.960Z] GET /api/folders/2191b8d1-b7a7-4766-b232-18460dac76e6/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.962Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.962Z] GET /api/folders/2191b8d1-b7a7-4766-b232-18460dac76e6/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.963Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.963Z] GET /api/folders/90cd3b78-114e-431a-ab91-02545c110acc/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.966Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.966Z] GET /api/folders/90cd3b78-114e-431a-ab91-02545c110acc/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.967Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.967Z] GET /api/folders/94c93140-650f-4139-9ea7-10d262b45d62/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.970Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.970Z] GET /api/folders/94c93140-650f-4139-9ea7-10d262b45d62/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.971Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.971Z] GET /api/folders/b0bdb034-b923-4ee4-8188-def29ced7f4d/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.974Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.974Z] GET /api/folders/b0bdb034-b923-4ee4-8188-def29ced7f4d/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.975Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.975Z] GET /api/folders/feeb62b9-0c9f-40bc-860b-92279c46b763/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.978Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.977Z] GET /api/folders/feeb62b9-0c9f-40bc-860b-92279c46b763/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.979Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.979Z] GET /api/folders/7bf03eaf-e738-4347-9d6a-fa84e871289d/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.983Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.983Z] GET /api/folders/7bf03eaf-e738-4347-9d6a-fa84e871289d/stats - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.984Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.983Z] GET /api/folders/7298a7af-8d52-4d64-8d1f-8170609b6137/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.987Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.987Z] GET /api/folders/7298a7af-8d52-4d64-8d1f-8170609b6137/stats - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.989Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.988Z] GET /api/folders/ab16b3a6-1df1-444d-ab2c-6f0398b72e67/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.992Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.992Z] GET /api/folders/ab16b3a6-1df1-444d-ab2c-6f0398b72e67/stats - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.993Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.992Z] GET /api/folders/photography/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.995Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.995Z] GET /api/folders/photography/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T02:13:51.997Z] [INFO] ℹ️  🌐 [2025-08-21T02:13:51.997Z] GET /api/folders/wallpapers/stats - IP: 127.0.0.1 - START
+[2025-08-21T02:13:51.999Z] [INFO] ℹ️  ✅ [2025-08-21T02:13:51.999Z] GET /api/folders/wallpapers/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:24:57.388Z] [INFO] ℹ️  🔧 Sistema de logging inicializado
+[2025-08-21T03:24:57.388Z] [INFO] ℹ️  📁 Logs a archivo: HABILITADO
+[2025-08-21T03:24:57.389Z] [INFO] ℹ️  🖥️  Logs a consola: HABILITADO
+[2025-08-21T03:24:57.389Z] [INFO] ℹ️  📄 Archivo de log: D:\DEV\image-manager\logs\server-2025-08-21.log
+[2025-08-21T03:24:57.526Z] [INFO] ℹ️  📁 Archivos estáticos configurados: /uploads -> D:\DEV\image-manager\public\uploads
+[2025-08-21T03:24:57.526Z] [INFO] ℹ️  🔧 Middleware de logging configurado
+[2025-08-21T03:24:57.755Z] [INFO] ℹ️  🌐 [2025-08-21T03:24:57.754Z] GET /api/events/stream - IP: 127.0.0.1 - START
+[2025-08-21T03:25:34.899Z] [INFO] ℹ️  🌐 [2025-08-21T03:25:34.899Z] GET /api/system/navigation - IP: 127.0.0.1 - START
+[2025-08-21T03:25:34.938Z] [INFO] ℹ️  ✅ [2025-08-21T03:25:34.938Z] GET /api/system/navigation - 200 - 39ms - IP: 127.0.0.1 - END
+[2025-08-21T03:25:34.940Z] [INFO] ℹ️  🌐 [2025-08-21T03:25:34.940Z] GET /api/stats/system - IP: 127.0.0.1 - START
+[2025-08-21T03:25:34.955Z] [INFO] ℹ️  ✅ [2025-08-21T03:25:34.955Z] GET /api/stats/system - 200 - 15ms - IP: 127.0.0.1 - END
+[2025-08-21T03:25:34.956Z] [INFO] ℹ️  🌐 [2025-08-21T03:25:34.956Z] GET /api/system/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:25:34.964Z] [INFO] ℹ️  ✅ [2025-08-21T03:25:34.964Z] GET /api/system/stats - 200 - 8ms - IP: 127.0.0.1 - END
+[2025-08-21T03:25:34.965Z] [INFO] ℹ️  🌐 [2025-08-21T03:25:34.965Z] GET /api/stats/extended - IP: 127.0.0.1 - START
+[2025-08-21T03:25:34.976Z] [INFO] ℹ️  ✅ [2025-08-21T03:25:34.976Z] GET /api/stats/extended - 200 - 11ms - IP: 127.0.0.1 - END
+[2025-08-21T03:25:34.977Z] [INFO] ℹ️  🌐 [2025-08-21T03:25:34.977Z] GET /api/stats/general - IP: 127.0.0.1 - START
+[2025-08-21T03:25:34.989Z] [INFO] ℹ️  ✅ [2025-08-21T03:25:34.989Z] GET /api/stats/general - 200 - 12ms - IP: 127.0.0.1 - END
+[2025-08-21T03:25:34.990Z] [INFO] ℹ️  🌐 [2025-08-21T03:25:34.990Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:25:34.995Z] [INFO] ℹ️  ✅ [2025-08-21T03:25:34.995Z] GET /api/stats/folders - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:25:34.996Z] [INFO] ℹ️  🌐 [2025-08-21T03:25:34.996Z] GET /api/stats/activity?limit=5 - IP: 127.0.0.1 - START
+[2025-08-21T03:25:35.006Z] [INFO] ℹ️  ✅ [2025-08-21T03:25:35.006Z] GET /api/stats/activity?limit=5 - 200 - 10ms - IP: 127.0.0.1 - END
+[2025-08-21T03:25:35.007Z] [INFO] ℹ️  🌐 [2025-08-21T03:25:35.007Z] GET /api/stats/top-tags?limit=6 - IP: 127.0.0.1 - START
+[2025-08-21T03:25:35.017Z] [INFO] ℹ️  ✅ [2025-08-21T03:25:35.017Z] GET /api/stats/top-tags?limit=6 - 200 - 10ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:27.365Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:27.365Z] GET /api/system/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:27:27.368Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:27.368Z] GET /api/system/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:27.369Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:27.369Z] GET /api/stats/extended - IP: 127.0.0.1 - START
+[2025-08-21T03:27:27.378Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:27.378Z] GET /api/stats/extended - 200 - 9ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:27.381Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:27.381Z] GET /api/stats/general - IP: 127.0.0.1 - START
+[2025-08-21T03:27:27.392Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:27.392Z] GET /api/stats/general - 200 - 11ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:27.393Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:27.393Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:27:27.397Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:27.397Z] GET /api/stats/folders - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:27.399Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:27.399Z] GET /api/stats/activity?limit=5 - IP: 127.0.0.1 - START
+[2025-08-21T03:27:27.408Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:27.408Z] GET /api/stats/activity?limit=5 - 200 - 9ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:29.522Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:29.522Z] GET /api/events/stream - IP: 127.0.0.1 - START
+[2025-08-21T03:27:29.524Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:29.524Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:27:29.537Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:29.537Z] GET /api/folders - 200 - 13ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:29.539Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:29.539Z] GET /api/events/stream - IP: 127.0.0.1 - START
+[2025-08-21T03:27:29.540Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:29.540Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:27:29.542Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:29.542Z] GET /api/folders - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:29.661Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:29.661Z] GET /api/folders/cartoons/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:27:29.665Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:29.665Z] GET /api/folders/cartoons/stats - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:29.666Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:29.666Z] GET /api/folders/silenthill/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:27:29.669Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:29.669Z] GET /api/folders/silenthill/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:29.670Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:29.670Z] GET /api/folders/cursed-dump/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:27:29.673Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:29.673Z] GET /api/folders/cursed-dump/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:29.674Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:29.674Z] GET /api/folders/output/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:27:29.677Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:29.677Z] GET /api/folders/output/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:29.679Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:29.678Z] GET /api/folders/photography/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:27:29.681Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:29.681Z] GET /api/folders/photography/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:29.682Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:29.682Z] GET /api/folders/aesthethic/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:27:29.685Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:29.685Z] GET /api/folders/aesthethic/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:29.686Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:29.686Z] GET /api/folders/nature-photos/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:27:29.689Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:29.689Z] GET /api/folders/nature-photos/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:29.690Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:29.690Z] GET /api/folders/wallpapers/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:27:29.692Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:29.692Z] GET /api/folders/wallpapers/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:27:30.897Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:30.897Z] POST /api/folders/reindex-all - IP: 127.0.0.1 - START
+[2025-08-21T03:27:49.907Z] [INFO] ℹ️  🌐 [2025-08-21T03:27:49.907Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:27:49.910Z] [INFO] ℹ️  ✅ [2025-08-21T03:27:49.910Z] GET /api/stats/folders - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:00.906Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:00.906Z] POST /api/folders/reindex-all - IP: 127.0.0.1 - START
+[2025-08-21T03:28:14.539Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:14.539Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:28:14.589Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:14.589Z] GET /api/folders - 200 - 50ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:14.591Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:14.590Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:28:14.639Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:14.639Z] GET /api/folders - 200 - 49ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:14.823Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:14.822Z] GET /api/folders/b6367dfe-60c0-4892-8b6e-87371f18805a/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:14.850Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:14.849Z] GET /api/folders/b6367dfe-60c0-4892-8b6e-87371f18805a/stats - 200 - 27ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:15.584Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:15.584Z] GET /api/folders/39e53d70-b444-4844-9b28-64c09feebe64/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:15.586Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:15.586Z] GET /api/folders/39e53d70-b444-4844-9b28-64c09feebe64/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:15.796Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:15.795Z] GET /api/folders/c49e7a59-ee81-40d2-acdc-6a287018350b/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:15.799Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:15.799Z] GET /api/folders/c49e7a59-ee81-40d2-acdc-6a287018350b/stats - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:15.801Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:15.800Z] GET /api/folders/b491a092-9c79-4ba5-912a-9782ba53a077/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:15.803Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:15.803Z] GET /api/folders/b491a092-9c79-4ba5-912a-9782ba53a077/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:15.805Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:15.804Z] GET /api/folders/07e04448-cdfc-4698-9a90-4ca3b0b25664/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:15.806Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:15.806Z] GET /api/folders/07e04448-cdfc-4698-9a90-4ca3b0b25664/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:15.808Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:15.808Z] GET /api/folders/3a718b6c-da3a-4b20-babc-d51541ca347d/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:15.811Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:15.810Z] GET /api/folders/3a718b6c-da3a-4b20-babc-d51541ca347d/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:15.812Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:15.812Z] GET /api/folders/55d0713f-c88c-4621-acdd-86d3d4cc81a2/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:15.823Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:15.823Z] GET /api/folders/55d0713f-c88c-4621-acdd-86d3d4cc81a2/stats - 200 - 11ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:15.828Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:15.827Z] GET /api/folders/1bf27d6f-76ad-4f7d-afce-c8ad6287cca2/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:15.840Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:15.840Z] GET /api/folders/1bf27d6f-76ad-4f7d-afce-c8ad6287cca2/stats - 200 - 13ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:15.843Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:15.843Z] GET /api/folders/f23c1709-b66d-4d81-8f82-fca9dc3c981a/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:15.847Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:15.847Z] GET /api/folders/f23c1709-b66d-4d81-8f82-fca9dc3c981a/stats - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:15.849Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:15.849Z] GET /api/folders/8c40bb24-3db5-49f9-a2c2-b9f1070764df/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:15.854Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:15.854Z] GET /api/folders/8c40bb24-3db5-49f9-a2c2-b9f1070764df/stats - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:15.855Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:15.855Z] GET /api/folders/084e776e-43c4-49fe-bc85-db33e2e60443/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:15.857Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:15.857Z] GET /api/folders/084e776e-43c4-49fe-bc85-db33e2e60443/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:15.858Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:15.858Z] GET /api/folders/706cda53-5bb8-40ce-8597-c2bc4c09674a/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:15.860Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:15.860Z] GET /api/folders/706cda53-5bb8-40ce-8597-c2bc4c09674a/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:15.861Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:15.861Z] GET /api/folders/f00afa48-0c2b-45c5-9065-33d84c0476c1/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:15.863Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:15.863Z] GET /api/folders/f00afa48-0c2b-45c5-9065-33d84c0476c1/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:15.864Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:15.864Z] GET /api/folders/2813c34b-c898-4f97-adc2-6e4258349382/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:28:15.868Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:15.868Z] GET /api/folders/2813c34b-c898-4f97-adc2-6e4258349382/stats - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:22.741Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:22.741Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:28:22.799Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:22.798Z] GET /api/folders - 200 - 57ms - IP: 127.0.0.1 - END
+[2025-08-21T03:28:22.800Z] [INFO] ℹ️  🌐 [2025-08-21T03:28:22.800Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:28:22.852Z] [INFO] ℹ️  ✅ [2025-08-21T03:28:22.852Z] GET /api/folders - 200 - 52ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:10.300Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:10.300Z] GET /api/events/stream - IP: 127.0.0.1 - START
+[2025-08-21T03:32:18.775Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:18.775Z] GET /api/folders/cursed-dump/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:18.818Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:18.817Z] GET /api/folders/cursed-dump/stats - 200 - 42ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:18.819Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:18.819Z] GET /api/folders/output/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:19.359Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:19.359Z] GET /api/folders/output/stats - 200 - 540ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:19.360Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:19.360Z] GET /api/folders/f23c1709-b66d-4d81-8f82-fca9dc3c981a/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:19.362Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:19.362Z] GET /api/folders/f23c1709-b66d-4d81-8f82-fca9dc3c981a/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:19.363Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:19.363Z] GET /api/folders/8c40bb24-3db5-49f9-a2c2-b9f1070764df/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:19.366Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:19.366Z] GET /api/folders/8c40bb24-3db5-49f9-a2c2-b9f1070764df/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:19.367Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:19.366Z] GET /api/folders/084e776e-43c4-49fe-bc85-db33e2e60443/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:19.369Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:19.369Z] GET /api/folders/084e776e-43c4-49fe-bc85-db33e2e60443/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:19.386Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:19.385Z] GET /api/folders/706cda53-5bb8-40ce-8597-c2bc4c09674a/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:19.388Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:19.388Z] GET /api/folders/706cda53-5bb8-40ce-8597-c2bc4c09674a/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:19.389Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:19.389Z] GET /api/folders/f00afa48-0c2b-45c5-9065-33d84c0476c1/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:19.391Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:19.391Z] GET /api/folders/f00afa48-0c2b-45c5-9065-33d84c0476c1/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:19.391Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:19.391Z] GET /api/folders/2813c34b-c898-4f97-adc2-6e4258349382/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:19.394Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:19.394Z] GET /api/folders/2813c34b-c898-4f97-adc2-6e4258349382/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:20.854Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:20.854Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:32:21.220Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:21.220Z] GET /api/folders - 200 - 366ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:21.221Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:21.221Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:32:21.583Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:21.583Z] GET /api/folders - 200 - 362ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:21.592Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:21.592Z] GET /api/folders/b6367dfe-60c0-4892-8b6e-87371f18805a/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:21.604Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:21.604Z] GET /api/folders/b6367dfe-60c0-4892-8b6e-87371f18805a/stats - 200 - 12ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:21.605Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:21.605Z] GET /api/folders/39e53d70-b444-4844-9b28-64c09feebe64/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:21.608Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:21.608Z] GET /api/folders/39e53d70-b444-4844-9b28-64c09feebe64/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:21.609Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:21.608Z] GET /api/folders/c49e7a59-ee81-40d2-acdc-6a287018350b/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:21.611Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:21.611Z] GET /api/folders/c49e7a59-ee81-40d2-acdc-6a287018350b/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:21.612Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:21.612Z] GET /api/folders/b491a092-9c79-4ba5-912a-9782ba53a077/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:21.614Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:21.614Z] GET /api/folders/b491a092-9c79-4ba5-912a-9782ba53a077/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:21.615Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:21.615Z] GET /api/folders/07e04448-cdfc-4698-9a90-4ca3b0b25664/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:21.617Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:21.617Z] GET /api/folders/07e04448-cdfc-4698-9a90-4ca3b0b25664/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:21.625Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:21.625Z] GET /api/folders/3a718b6c-da3a-4b20-babc-d51541ca347d/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:21.628Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:21.628Z] GET /api/folders/3a718b6c-da3a-4b20-babc-d51541ca347d/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:21.628Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:21.628Z] GET /api/folders/55d0713f-c88c-4621-acdd-86d3d4cc81a2/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:21.631Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:21.631Z] GET /api/folders/55d0713f-c88c-4621-acdd-86d3d4cc81a2/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:21.632Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:21.632Z] GET /api/folders/1bf27d6f-76ad-4f7d-afce-c8ad6287cca2/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:21.635Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:21.635Z] GET /api/folders/1bf27d6f-76ad-4f7d-afce-c8ad6287cca2/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:21.635Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:21.635Z] GET /api/folders/photography/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:21.643Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:21.643Z] GET /api/folders/photography/stats - 200 - 8ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:21.644Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:21.644Z] GET /api/folders/wallpapers/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:32:21.655Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:21.655Z] GET /api/folders/wallpapers/stats - 200 - 11ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:21.804Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:21.804Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:32:22.189Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:22.189Z] GET /api/folders - 200 - 385ms - IP: 127.0.0.1 - END
+[2025-08-21T03:32:22.190Z] [INFO] ℹ️  🌐 [2025-08-21T03:32:22.189Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:32:22.586Z] [INFO] ℹ️  ✅ [2025-08-21T03:32:22.586Z] GET /api/folders - 200 - 397ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:03.647Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:03.647Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:35:03.654Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:03.654Z] GET /api/stats/folders - 200 - 7ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:03.657Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:03.657Z] GET /api/folders/cartoons/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:03.701Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:03.701Z] GET /api/folders/cartoons/stats - 200 - 44ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:03.702Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:03.702Z] GET /api/folders/cursed-dump/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:03.733Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:03.733Z] GET /api/folders/cursed-dump/stats - 200 - 31ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:03.735Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:03.734Z] GET /api/folders/output/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.536Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.536Z] GET /api/folders/output/stats - 200 - 802ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.537Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.537Z] GET /api/folders/photography/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.545Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.545Z] GET /api/folders/photography/stats - 200 - 8ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.552Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.551Z] GET /api/folders/wallpapers/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.566Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.566Z] GET /api/folders/wallpapers/stats - 200 - 15ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.567Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.567Z] GET /api/folders/b6367dfe-60c0-4892-8b6e-87371f18805a/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.580Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.580Z] GET /api/folders/b6367dfe-60c0-4892-8b6e-87371f18805a/stats - 200 - 13ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.581Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.581Z] GET /api/folders/39e53d70-b444-4844-9b28-64c09feebe64/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.584Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.584Z] GET /api/folders/39e53d70-b444-4844-9b28-64c09feebe64/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.585Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.585Z] GET /api/folders/c49e7a59-ee81-40d2-acdc-6a287018350b/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.587Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.587Z] GET /api/folders/c49e7a59-ee81-40d2-acdc-6a287018350b/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.588Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.587Z] GET /api/folders/b491a092-9c79-4ba5-912a-9782ba53a077/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.589Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.589Z] GET /api/folders/b491a092-9c79-4ba5-912a-9782ba53a077/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.590Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.590Z] GET /api/folders/07e04448-cdfc-4698-9a90-4ca3b0b25664/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.592Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.592Z] GET /api/folders/07e04448-cdfc-4698-9a90-4ca3b0b25664/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.593Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.593Z] GET /api/folders/3a718b6c-da3a-4b20-babc-d51541ca347d/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.594Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.594Z] GET /api/folders/3a718b6c-da3a-4b20-babc-d51541ca347d/stats - 200 - 1ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.595Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.595Z] GET /api/folders/55d0713f-c88c-4621-acdd-86d3d4cc81a2/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.598Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.598Z] GET /api/folders/55d0713f-c88c-4621-acdd-86d3d4cc81a2/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.599Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.599Z] GET /api/folders/1bf27d6f-76ad-4f7d-afce-c8ad6287cca2/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.601Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.601Z] GET /api/folders/1bf27d6f-76ad-4f7d-afce-c8ad6287cca2/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.602Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.602Z] GET /api/folders/f23c1709-b66d-4d81-8f82-fca9dc3c981a/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.604Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.603Z] GET /api/folders/f23c1709-b66d-4d81-8f82-fca9dc3c981a/stats - 200 - 1ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.604Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.604Z] GET /api/folders/8c40bb24-3db5-49f9-a2c2-b9f1070764df/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.608Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.608Z] GET /api/folders/8c40bb24-3db5-49f9-a2c2-b9f1070764df/stats - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.609Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.609Z] GET /api/folders/084e776e-43c4-49fe-bc85-db33e2e60443/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.612Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.612Z] GET /api/folders/084e776e-43c4-49fe-bc85-db33e2e60443/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.614Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.613Z] GET /api/folders/706cda53-5bb8-40ce-8597-c2bc4c09674a/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.617Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.617Z] GET /api/folders/706cda53-5bb8-40ce-8597-c2bc4c09674a/stats - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.618Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.618Z] GET /api/folders/f00afa48-0c2b-45c5-9065-33d84c0476c1/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.620Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.620Z] GET /api/folders/f00afa48-0c2b-45c5-9065-33d84c0476c1/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.621Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.621Z] GET /api/folders/2813c34b-c898-4f97-adc2-6e4258349382/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:04.623Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:04.623Z] GET /api/folders/2813c34b-c898-4f97-adc2-6e4258349382/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:04.624Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:04.624Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:35:05.001Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:05.001Z] GET /api/folders - 200 - 377ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:05.002Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:05.002Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:35:05.370Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:05.370Z] GET /api/folders - 200 - 367ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:09.622Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:09.621Z] GET /api/system/navigation - IP: 127.0.0.1 - START
+[2025-08-21T03:35:09.653Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:09.653Z] GET /api/system/navigation - 200 - 32ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:09.654Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:09.654Z] GET /api/stats/system - IP: 127.0.0.1 - START
+[2025-08-21T03:35:09.663Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:09.663Z] GET /api/stats/system - 200 - 9ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:09.666Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:09.665Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:35:09.670Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:09.670Z] GET /api/stats/folders - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:09.671Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:09.671Z] GET /api/events/stream - IP: 127.0.0.1 - START
+[2025-08-21T03:35:09.672Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:09.672Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:35:10.058Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:10.058Z] GET /api/folders - 200 - 386ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:10.060Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:10.060Z] GET /api/events/stream - IP: 127.0.0.1 - START
+[2025-08-21T03:35:10.061Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:10.061Z] GET /api/folders - IP: 127.0.0.1 - START
+[2025-08-21T03:35:10.401Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:10.401Z] GET /api/folders - 200 - 340ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:10.403Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:10.403Z] GET /api/folders/cartoons/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:10.435Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:10.434Z] GET /api/folders/cartoons/stats - 200 - 31ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:10.436Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:10.436Z] GET /api/folders/cursed-dump/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:10.465Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:10.465Z] GET /api/folders/cursed-dump/stats - 200 - 29ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:10.466Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:10.466Z] GET /api/folders/output/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.005Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.004Z] GET /api/folders/output/stats - 200 - 538ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.006Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.005Z] GET /api/folders/b6367dfe-60c0-4892-8b6e-87371f18805a/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.018Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.018Z] GET /api/folders/b6367dfe-60c0-4892-8b6e-87371f18805a/stats - 200 - 13ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.024Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.024Z] GET /api/folders/39e53d70-b444-4844-9b28-64c09feebe64/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.027Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.026Z] GET /api/folders/39e53d70-b444-4844-9b28-64c09feebe64/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.027Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.027Z] GET /api/folders/c49e7a59-ee81-40d2-acdc-6a287018350b/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.029Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.029Z] GET /api/folders/c49e7a59-ee81-40d2-acdc-6a287018350b/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.030Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.030Z] GET /api/folders/b491a092-9c79-4ba5-912a-9782ba53a077/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.032Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.032Z] GET /api/folders/b491a092-9c79-4ba5-912a-9782ba53a077/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.032Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.032Z] GET /api/folders/07e04448-cdfc-4698-9a90-4ca3b0b25664/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.034Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.034Z] GET /api/folders/07e04448-cdfc-4698-9a90-4ca3b0b25664/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.036Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.036Z] GET /api/folders/3a718b6c-da3a-4b20-babc-d51541ca347d/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.039Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.039Z] GET /api/folders/3a718b6c-da3a-4b20-babc-d51541ca347d/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.040Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.039Z] GET /api/folders/55d0713f-c88c-4621-acdd-86d3d4cc81a2/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.042Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.042Z] GET /api/folders/55d0713f-c88c-4621-acdd-86d3d4cc81a2/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.042Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.042Z] GET /api/folders/1bf27d6f-76ad-4f7d-afce-c8ad6287cca2/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.044Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.044Z] GET /api/folders/1bf27d6f-76ad-4f7d-afce-c8ad6287cca2/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.045Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.045Z] GET /api/folders/f23c1709-b66d-4d81-8f82-fca9dc3c981a/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.048Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.048Z] GET /api/folders/f23c1709-b66d-4d81-8f82-fca9dc3c981a/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.049Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.049Z] GET /api/folders/8c40bb24-3db5-49f9-a2c2-b9f1070764df/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.051Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.051Z] GET /api/folders/8c40bb24-3db5-49f9-a2c2-b9f1070764df/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.052Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.052Z] GET /api/folders/084e776e-43c4-49fe-bc85-db33e2e60443/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.054Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.054Z] GET /api/folders/084e776e-43c4-49fe-bc85-db33e2e60443/stats - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.055Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.055Z] GET /api/folders/706cda53-5bb8-40ce-8597-c2bc4c09674a/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.058Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.058Z] GET /api/folders/706cda53-5bb8-40ce-8597-c2bc4c09674a/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.060Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.060Z] GET /api/folders/f00afa48-0c2b-45c5-9065-33d84c0476c1/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.063Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.063Z] GET /api/folders/f00afa48-0c2b-45c5-9065-33d84c0476c1/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.064Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.064Z] GET /api/folders/2813c34b-c898-4f97-adc2-6e4258349382/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.067Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.067Z] GET /api/folders/2813c34b-c898-4f97-adc2-6e4258349382/stats - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.067Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.067Z] GET /api/folders/photography/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.075Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.075Z] GET /api/folders/photography/stats - 200 - 8ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:11.076Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:11.075Z] GET /api/folders/wallpapers/stats - IP: 127.0.0.1 - START
+[2025-08-21T03:35:11.087Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:11.086Z] GET /api/folders/wallpapers/stats - 200 - 11ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:14.006Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:14.005Z] POST /api/folders/cursed-dump/sync-files - IP: 127.0.0.1 - START
+[2025-08-21T03:35:14.011Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:14.010Z] GET /api/folders/cursed-dump - IP: 127.0.0.1 - START
+[2025-08-21T03:35:14.013Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:14.013Z] GET /api/folders/cursed-dump - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:14.063Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:14.063Z] POST /api/folders/cursed-dump/sync-files - 200 - 58ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:14.070Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:14.069Z] POST /api/folders/cursed-dump/reindex - IP: 127.0.0.1 - START
+[2025-08-21T03:35:14.075Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:14.075Z] GET /api/images?folderId=cursed-dump&limit=100 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:14.285Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:14.285Z] GET /api/images?folderId=cursed-dump&limit=100 - 200 - 210ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:14.377Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:14.377Z] GET /api/folders/cursed-dump - IP: 127.0.0.1 - START
+[2025-08-21T03:35:14.381Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:14.381Z] GET /api/folders/cursed-dump - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:14.538Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:14.538Z] GET /api/images?folderId=cursed-dump&limit=100&offset=100 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:14.637Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:14.637Z] GET /api/images?folderId=cursed-dump&limit=100&offset=100 - 200 - 99ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.272Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.272Z] GET /api/images/bcba4cd3-f8cc-45e8-9658-c37a68496d11 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.277Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.277Z] GET /api/images/bcba4cd3-f8cc-45e8-9658-c37a68496d11 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.278Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.278Z] GET /api/images/d0c5c41d-b510-40a4-acfe-9a7e2122011e - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.282Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.282Z] GET /api/images/d0c5c41d-b510-40a4-acfe-9a7e2122011e - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.283Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.283Z] GET /api/images/98317b5d-0e13-4870-b4b4-4f225741f5ae - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.287Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.287Z] GET /api/images/98317b5d-0e13-4870-b4b4-4f225741f5ae - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.288Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.288Z] GET /api/images/349a9c04-3027-4274-97d3-e00af7ad1762 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.293Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.293Z] GET /api/images/349a9c04-3027-4274-97d3-e00af7ad1762 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.295Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.294Z] GET /api/images/7d558714-6d30-48a4-807c-3a87a717b72f - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.300Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.300Z] GET /api/images/7d558714-6d30-48a4-807c-3a87a717b72f - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.302Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.302Z] GET /api/images/2b3c70a4-20bf-48bd-b594-698f76c0b3a9 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.307Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.307Z] GET /api/images/2b3c70a4-20bf-48bd-b594-698f76c0b3a9 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.308Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.308Z] GET /api/images/e2ab20ac-6dbd-44a1-8b8a-97876a4c7004 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.312Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.312Z] GET /api/images/e2ab20ac-6dbd-44a1-8b8a-97876a4c7004 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.313Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.313Z] GET /api/images/d984febd-a975-4279-b700-f987f6d82758 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.318Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.318Z] GET /api/images/d984febd-a975-4279-b700-f987f6d82758 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.319Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.319Z] GET /api/images/9f44ef05-ecd6-4f2f-a317-dd32264aa33e - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.323Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.323Z] GET /api/images/9f44ef05-ecd6-4f2f-a317-dd32264aa33e - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.347Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.347Z] GET /api/images/d036e3b3-1846-40a5-9d85-4401abfde34a - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.351Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.351Z] GET /api/images/d036e3b3-1846-40a5-9d85-4401abfde34a - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.352Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.352Z] GET /api/images/da8ddd5b-338d-446a-8bf8-c1bed016c3f7 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.358Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.358Z] GET /api/images/da8ddd5b-338d-446a-8bf8-c1bed016c3f7 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.360Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.359Z] GET /api/images/db7b673f-e9e7-4711-afe9-7ed32086cfe2 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.365Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.364Z] GET /api/images/db7b673f-e9e7-4711-afe9-7ed32086cfe2 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.366Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.365Z] GET /api/images/b2ac8a38-84e0-4c95-88ae-dc65b911371b - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.371Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.371Z] GET /api/images/b2ac8a38-84e0-4c95-88ae-dc65b911371b - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.372Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.372Z] GET /api/images/37edcaab-e78e-44b8-a5e4-1020b46c29ba - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.376Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.376Z] GET /api/images/37edcaab-e78e-44b8-a5e4-1020b46c29ba - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.378Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.377Z] GET /api/images/27e1fc5c-e509-42ae-806b-4adb1485f55e - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.383Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.382Z] GET /api/images/27e1fc5c-e509-42ae-806b-4adb1485f55e - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.384Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.383Z] GET /api/images/76206b74-d40b-4da0-a04d-7ed2e147475f - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.389Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.389Z] GET /api/images/76206b74-d40b-4da0-a04d-7ed2e147475f - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.390Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.390Z] GET /api/images/2cc27911-016f-4cf8-966f-7d370be28cbc - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.394Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.394Z] GET /api/images/2cc27911-016f-4cf8-966f-7d370be28cbc - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.394Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.394Z] GET /api/images/e2fd9307-2cb9-466a-8b24-02887646d462 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.401Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.400Z] GET /api/images/e2fd9307-2cb9-466a-8b24-02887646d462 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.402Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.402Z] GET /api/images/a0837c07-ad16-48e2-8301-42f24f06474e - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.407Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.407Z] GET /api/images/a0837c07-ad16-48e2-8301-42f24f06474e - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.409Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.408Z] GET /api/images/6a275835-2a7a-43cc-957b-88f2adf24ab9 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.414Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.413Z] GET /api/images/6a275835-2a7a-43cc-957b-88f2adf24ab9 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.417Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.416Z] GET /api/images/cf818de3-5801-421a-a411-7b7ad8a385e4 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.423Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.423Z] GET /api/images/cf818de3-5801-421a-a411-7b7ad8a385e4 - 200 - 7ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.424Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.424Z] GET /api/images/55a5b886-c719-41dc-8b2e-35d26b3a7b84 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.429Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.428Z] GET /api/images/55a5b886-c719-41dc-8b2e-35d26b3a7b84 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.453Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.452Z] GET /api/images/e8131c62-6702-4beb-9ff8-e2dd8ef163c7 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.457Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.457Z] GET /api/images/e8131c62-6702-4beb-9ff8-e2dd8ef163c7 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.458Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.457Z] GET /api/images/e7695a32-b2a0-49e0-a027-9d3c5cf7d129 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.462Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.462Z] GET /api/images/e7695a32-b2a0-49e0-a027-9d3c5cf7d129 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.463Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.463Z] GET /api/images/27292223-5c11-432c-b537-dab4af04f83f - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.468Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.468Z] GET /api/images/27292223-5c11-432c-b537-dab4af04f83f - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.469Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.468Z] GET /api/images/81084c55-0457-4370-954a-00d3e1513bcb - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.474Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.474Z] GET /api/images/81084c55-0457-4370-954a-00d3e1513bcb - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.476Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.475Z] GET /api/images/a50957b9-b877-4343-8e77-d4f2dd498b71 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.486Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.485Z] GET /api/images/a50957b9-b877-4343-8e77-d4f2dd498b71 - 200 - 10ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.488Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.488Z] GET /api/images/a72927a5-14b3-460f-bdc4-dff783191a55 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.492Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.492Z] GET /api/images/a72927a5-14b3-460f-bdc4-dff783191a55 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.494Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.493Z] GET /api/images/575ab298-e2df-4a87-81ea-48f42245a960 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.500Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.500Z] GET /api/images/575ab298-e2df-4a87-81ea-48f42245a960 - 200 - 7ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.501Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.501Z] GET /api/images/262d5081-f09b-4782-9fc1-cdcd5e95e418 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.505Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.504Z] GET /api/images/262d5081-f09b-4782-9fc1-cdcd5e95e418 - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.505Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.505Z] GET /api/images/ed2c21d2-9edc-4eab-a2b3-f8422326c583 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.509Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.509Z] GET /api/images/ed2c21d2-9edc-4eab-a2b3-f8422326c583 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.511Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.510Z] GET /api/images/540f99d4-6147-48bd-9686-eeb63ac904d4 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.516Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.516Z] GET /api/images/540f99d4-6147-48bd-9686-eeb63ac904d4 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.530Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.530Z] GET /api/images/b7db4087-a0f8-4d3a-8eb2-5adb8ea78782 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.534Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.533Z] GET /api/images/b7db4087-a0f8-4d3a-8eb2-5adb8ea78782 - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.534Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.534Z] GET /api/images/79053834-450c-4213-bac8-944f646b5bf5 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.540Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.539Z] GET /api/images/79053834-450c-4213-bac8-944f646b5bf5 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.542Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.541Z] GET /api/images/cc00db55-a94d-4afa-b7e9-3cc6bd823692 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.547Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.547Z] GET /api/images/cc00db55-a94d-4afa-b7e9-3cc6bd823692 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.550Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.550Z] GET /api/images/7f22898b-e476-4108-8ad7-c372b0a0c377 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.555Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.555Z] GET /api/images/7f22898b-e476-4108-8ad7-c372b0a0c377 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.556Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.556Z] GET /api/images/8276e257-37cc-4152-9784-1b06516ec4d4 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.561Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.561Z] GET /api/images/8276e257-37cc-4152-9784-1b06516ec4d4 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.563Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.563Z] GET /api/images/e5f2937d-d79c-4ad6-85df-a25f6bb15f73 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.568Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.568Z] GET /api/images/e5f2937d-d79c-4ad6-85df-a25f6bb15f73 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.569Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.568Z] GET /api/images/b65fb025-7508-48f3-86fd-dcb7425bf9d8 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.572Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.572Z] GET /api/images/b65fb025-7508-48f3-86fd-dcb7425bf9d8 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.574Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.573Z] GET /api/images/7990d417-9d59-4e39-805e-3b11e3385527 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.578Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.578Z] GET /api/images/7990d417-9d59-4e39-805e-3b11e3385527 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.579Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.579Z] GET /api/images/dc5ba449-9ef3-4cc5-8735-4293c5672eeb - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.584Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.584Z] GET /api/images/dc5ba449-9ef3-4cc5-8735-4293c5672eeb - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.602Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.602Z] GET /api/images/118b43c3-5137-4ce4-ab09-55d5b2620ff7 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.606Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.606Z] GET /api/images/118b43c3-5137-4ce4-ab09-55d5b2620ff7 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.607Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.607Z] GET /api/images/f1061719-2e88-4a1b-a491-35e15674515b - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.612Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.612Z] GET /api/images/f1061719-2e88-4a1b-a491-35e15674515b - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.613Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.613Z] GET /api/images/22c73b45-30f8-40d0-85b9-a5177b616e80 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.618Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.618Z] GET /api/images/22c73b45-30f8-40d0-85b9-a5177b616e80 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.619Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.619Z] GET /api/images/5d26a654-9095-46f4-9a94-0187d2e6d587 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.623Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.623Z] GET /api/images/5d26a654-9095-46f4-9a94-0187d2e6d587 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.625Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.624Z] GET /api/images/b21cd20c-cca8-4ddb-a3ea-246b1a8b9bc1 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.629Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.629Z] GET /api/images/b21cd20c-cca8-4ddb-a3ea-246b1a8b9bc1 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.631Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.631Z] GET /api/images/71e20249-1f7b-43f0-97f3-dceba7091bc1 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.636Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.636Z] GET /api/images/71e20249-1f7b-43f0-97f3-dceba7091bc1 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.637Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.637Z] GET /api/images/e865edad-65e3-4739-a7eb-61720fa0678a - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.642Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.642Z] GET /api/images/e865edad-65e3-4739-a7eb-61720fa0678a - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.643Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.643Z] GET /api/images/afae1811-7be1-4009-8b84-77e0a1331317 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.648Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.648Z] GET /api/images/afae1811-7be1-4009-8b84-77e0a1331317 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.649Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.649Z] GET /api/images/556725de-f40e-495f-bb7a-080d13413940 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.655Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.655Z] GET /api/images/556725de-f40e-495f-bb7a-080d13413940 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.683Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.683Z] GET /api/images/e544665f-7545-47e5-8761-bf88ae8b77a8 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.687Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.687Z] GET /api/images/e544665f-7545-47e5-8761-bf88ae8b77a8 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.688Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.688Z] GET /api/images/f9049e15-8bae-4da7-859f-6f71a21bee76 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.692Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.691Z] GET /api/images/f9049e15-8bae-4da7-859f-6f71a21bee76 - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.692Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.692Z] GET /api/images/c990d0a9-cab1-4a2e-8999-9b1266cc5126 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.698Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.698Z] GET /api/images/c990d0a9-cab1-4a2e-8999-9b1266cc5126 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.699Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.699Z] GET /api/images/61f7543f-93df-45ce-8f80-6d877a266448 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.703Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.703Z] GET /api/images/61f7543f-93df-45ce-8f80-6d877a266448 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.704Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.704Z] GET /api/images/682d0ee7-467b-4d27-bee0-2571f6ca78b9 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.708Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.708Z] GET /api/images/682d0ee7-467b-4d27-bee0-2571f6ca78b9 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.710Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.710Z] GET /api/images/b0ed9ce5-5d00-4623-8ffe-4ef0cc9c2a9d - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.716Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.716Z] GET /api/images/b0ed9ce5-5d00-4623-8ffe-4ef0cc9c2a9d - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.719Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.718Z] GET /api/images/167401e8-5911-44c9-8964-5487b2017de4 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.724Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.724Z] GET /api/images/167401e8-5911-44c9-8964-5487b2017de4 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.725Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.725Z] GET /api/images/f67c5f19-0f86-48bf-a402-4a676fe822a4 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.731Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.731Z] GET /api/images/f67c5f19-0f86-48bf-a402-4a676fe822a4 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.733Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.732Z] GET /api/images/51d9575b-6382-41c8-86cc-f25a3f4331e0 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.737Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.737Z] GET /api/images/51d9575b-6382-41c8-86cc-f25a3f4331e0 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.738Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.738Z] GET /api/images/8e5ea5ac-c6fd-40bb-bc17-3b7f40713fe0 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.742Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.742Z] GET /api/images/8e5ea5ac-c6fd-40bb-bc17-3b7f40713fe0 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.743Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.742Z] GET /api/images/3636402f-fd2c-4e36-8507-9af6eec5106a - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.747Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.747Z] GET /api/images/3636402f-fd2c-4e36-8507-9af6eec5106a - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.749Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.748Z] GET /api/images/8a2a904c-fe65-4d5b-9dbf-e601ecd40b23 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.752Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.752Z] GET /api/images/8a2a904c-fe65-4d5b-9dbf-e601ecd40b23 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.753Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.753Z] GET /api/images/a918f4f1-1318-4b93-8738-6a6ced3cfad1 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.757Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.757Z] GET /api/images/a918f4f1-1318-4b93-8738-6a6ced3cfad1 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.776Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.775Z] GET /api/images/3728c2ff-0717-4468-950d-eed0afde6228 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.785Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.785Z] GET /api/images/3728c2ff-0717-4468-950d-eed0afde6228 - 200 - 10ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.787Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.787Z] GET /api/images/b17c6997-69e4-4231-b19a-c401bdeca92d - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.794Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.794Z] GET /api/images/b17c6997-69e4-4231-b19a-c401bdeca92d - 200 - 7ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.797Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.796Z] GET /api/images/ae2f6886-3c28-4d85-8192-10b531612340 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.803Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.803Z] GET /api/images/ae2f6886-3c28-4d85-8192-10b531612340 - 200 - 7ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.805Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.805Z] GET /api/images/af8955fa-a65f-4df6-b38c-72c76b0cfc2c - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.811Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.811Z] GET /api/images/af8955fa-a65f-4df6-b38c-72c76b0cfc2c - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.812Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.812Z] GET /api/images/747b4d2f-9cd2-4895-a196-3b521f5ab7e8 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.817Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.817Z] GET /api/images/747b4d2f-9cd2-4895-a196-3b521f5ab7e8 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.819Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.819Z] GET /api/images/70a31cda-0205-4f25-abaf-72f04b4d01d4 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.825Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.825Z] GET /api/images/70a31cda-0205-4f25-abaf-72f04b4d01d4 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.826Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.826Z] GET /api/images/b3b5cd39-145d-4f97-bbf9-f1546b659f48 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.832Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.832Z] GET /api/images/b3b5cd39-145d-4f97-bbf9-f1546b659f48 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.833Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.833Z] GET /api/images/664b07a7-2f2b-4005-8e27-0e0d351c2d2b - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.839Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.839Z] GET /api/images/664b07a7-2f2b-4005-8e27-0e0d351c2d2b - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.840Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.840Z] GET /api/images/e65f6968-7714-45ce-8512-6e1c9c955766 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.846Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.846Z] GET /api/images/e65f6968-7714-45ce-8512-6e1c9c955766 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.865Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.865Z] GET /api/images/db61f061-5c1e-450f-89c9-c13543fd490b - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.869Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.869Z] GET /api/images/db61f061-5c1e-450f-89c9-c13543fd490b - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.870Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.870Z] GET /api/images/40e8a8e3-d774-4f1f-bf12-e3878caf797e - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.874Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.874Z] GET /api/images/40e8a8e3-d774-4f1f-bf12-e3878caf797e - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.875Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.875Z] GET /api/images/344188d1-a615-4423-b869-39575cc4c3a6 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.879Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.879Z] GET /api/images/344188d1-a615-4423-b869-39575cc4c3a6 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.880Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.880Z] GET /api/images/cedeb4e4-2045-41e9-8558-2b35b72ec267 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.885Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.885Z] GET /api/images/cedeb4e4-2045-41e9-8558-2b35b72ec267 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.886Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.886Z] GET /api/images/595fe115-01e0-4b14-884f-a594ab70e4ef - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.890Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.890Z] GET /api/images/595fe115-01e0-4b14-884f-a594ab70e4ef - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.891Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.891Z] GET /api/images/07517170-2b81-4eea-9555-c8340b7d011d - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.895Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.895Z] GET /api/images/07517170-2b81-4eea-9555-c8340b7d011d - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.897Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.896Z] GET /api/images/7b56bd8d-aacf-48b8-963a-7c5df88b41d6 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.901Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.901Z] GET /api/images/7b56bd8d-aacf-48b8-963a-7c5df88b41d6 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.902Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.902Z] GET /api/images/899a9190-4298-4a54-a1d2-958244adfc67 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.906Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.906Z] GET /api/images/899a9190-4298-4a54-a1d2-958244adfc67 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.907Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.907Z] GET /api/images/a70b8b41-1fbd-4485-8cbc-cd3d5d82adf7 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.911Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.911Z] GET /api/images/a70b8b41-1fbd-4485-8cbc-cd3d5d82adf7 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.913Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.912Z] GET /api/images/27071304-dfe2-46ff-ac10-023114d2e611 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.918Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.918Z] GET /api/images/27071304-dfe2-46ff-ac10-023114d2e611 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.919Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.919Z] GET /api/images/57eaf7f0-c538-4952-858d-2ba3b5b483c6 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.923Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.923Z] GET /api/images/57eaf7f0-c538-4952-858d-2ba3b5b483c6 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.923Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.923Z] GET /api/images/97ce6c80-cc4d-4c99-84a2-0436ff1a6919 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.927Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.926Z] GET /api/images/97ce6c80-cc4d-4c99-84a2-0436ff1a6919 - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.927Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.927Z] GET /api/images/680bd4f3-b357-4b45-90ab-3f6083d8ae2b - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.931Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.931Z] GET /api/images/680bd4f3-b357-4b45-90ab-3f6083d8ae2b - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.945Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.945Z] GET /api/images/35fc28c5-eb89-4db9-a8a2-9db8a9976291 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.948Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.948Z] GET /api/images/35fc28c5-eb89-4db9-a8a2-9db8a9976291 - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.950Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.949Z] GET /api/images/b7a0e1bc-937e-4c7a-aa67-e2a01eba74a9 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.954Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.953Z] GET /api/images/b7a0e1bc-937e-4c7a-aa67-e2a01eba74a9 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.955Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.955Z] GET /api/images/e394cbad-0e15-4c06-b3b4-1a19a5421ef4 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.959Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.959Z] GET /api/images/e394cbad-0e15-4c06-b3b4-1a19a5421ef4 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.960Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.960Z] GET /api/images/f79e2540-4445-4007-a23c-eeaa7f412329 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.965Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.965Z] GET /api/images/f79e2540-4445-4007-a23c-eeaa7f412329 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.966Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.966Z] GET /api/images/a98bfb1f-b274-4094-8e66-7bc3574a86bf - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.970Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.970Z] GET /api/images/a98bfb1f-b274-4094-8e66-7bc3574a86bf - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.972Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.971Z] GET /api/images/11174698-af64-46c7-b70f-bfcb872de3cd - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.975Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.975Z] GET /api/images/11174698-af64-46c7-b70f-bfcb872de3cd - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.976Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.976Z] GET /api/images/4627b799-ca92-4f8e-bdd1-dcba3bc03dd4 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.980Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.980Z] GET /api/images/4627b799-ca92-4f8e-bdd1-dcba3bc03dd4 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.982Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.981Z] GET /api/images/61356e56-d23b-4e9c-b669-df8dff180a3b - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.986Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.986Z] GET /api/images/61356e56-d23b-4e9c-b669-df8dff180a3b - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:15.987Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:15.987Z] GET /api/images/fdb7dfe4-6e45-4f42-970e-fa347a0c7e45 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:15.992Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:15.991Z] GET /api/images/fdb7dfe4-6e45-4f42-970e-fa347a0c7e45 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.008Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.008Z] GET /api/images/be1d9564-7845-4072-9229-7281098803b5 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.011Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.011Z] GET /api/images/be1d9564-7845-4072-9229-7281098803b5 - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.012Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.012Z] GET /api/images/af477e7f-99ee-4480-aa2d-64c7730f9cfd - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.017Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.017Z] GET /api/images/af477e7f-99ee-4480-aa2d-64c7730f9cfd - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.020Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.020Z] GET /api/images/5399488f-0e7e-4fd7-be8a-9623c8ab192d - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.026Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.025Z] GET /api/images/5399488f-0e7e-4fd7-be8a-9623c8ab192d - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.027Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.026Z] GET /api/images/3691228d-594e-44a3-8d28-41a25c6a39b9 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.033Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.032Z] GET /api/images/3691228d-594e-44a3-8d28-41a25c6a39b9 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.034Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.034Z] GET /api/images/1edd86c2-c401-4cfa-9d06-0614497a4fe8 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.038Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.038Z] GET /api/images/1edd86c2-c401-4cfa-9d06-0614497a4fe8 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.039Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.039Z] GET /api/images/fbdf51dc-86e7-4750-a79e-1b5f4b5f82ea - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.044Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.044Z] GET /api/images/fbdf51dc-86e7-4750-a79e-1b5f4b5f82ea - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.045Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.044Z] GET /api/images/8a9d4296-7aef-4c56-8a8b-8c47aff4f677 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.050Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.050Z] GET /api/images/8a9d4296-7aef-4c56-8a8b-8c47aff4f677 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.051Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.050Z] GET /api/images/f30f7b74-b669-4fe0-a35b-44bfb4c5f925 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.055Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.055Z] GET /api/images/f30f7b74-b669-4fe0-a35b-44bfb4c5f925 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.061Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.060Z] GET /api/images/42a16771-4865-4dca-97c1-6d30f68d459c - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.065Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.065Z] GET /api/images/42a16771-4865-4dca-97c1-6d30f68d459c - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.066Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.066Z] GET /api/images/33da1b8c-162d-4bb4-93c7-27debac8187a - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.070Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.070Z] GET /api/images/33da1b8c-162d-4bb4-93c7-27debac8187a - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.071Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.071Z] GET /api/images/e618a435-55b7-40c9-83d9-0497f9542fde - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.076Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.076Z] GET /api/images/e618a435-55b7-40c9-83d9-0497f9542fde - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.077Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.077Z] GET /api/images/4a809373-8809-4db5-b16b-a3505050a553 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.083Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.083Z] GET /api/images/4a809373-8809-4db5-b16b-a3505050a553 - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.106Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.106Z] GET /api/images/73576ff5-1f49-49e1-ad79-99d63a4704eb - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.109Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.109Z] GET /api/images/73576ff5-1f49-49e1-ad79-99d63a4704eb - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.110Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.110Z] GET /api/images/ad93dea8-159c-4050-b761-a0201b30e2b5 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.114Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.114Z] GET /api/images/ad93dea8-159c-4050-b761-a0201b30e2b5 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.115Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.115Z] GET /api/images/77a92751-ed7d-4fb0-b7a8-d5af85e07cf2 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.119Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.119Z] GET /api/images/77a92751-ed7d-4fb0-b7a8-d5af85e07cf2 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.120Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.120Z] GET /api/images/0f7b21ea-100c-4ba8-b3f0-b10d2542ec87 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.125Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.125Z] GET /api/images/0f7b21ea-100c-4ba8-b3f0-b10d2542ec87 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.126Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.126Z] GET /api/images/e37ba9d4-6a8d-4ea3-b1b4-a93c11403653 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.130Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.130Z] GET /api/images/e37ba9d4-6a8d-4ea3-b1b4-a93c11403653 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.133Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.132Z] GET /api/images/a3e3d2d9-e839-4cc6-a585-9a57b2198a3a - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.138Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.138Z] GET /api/images/a3e3d2d9-e839-4cc6-a585-9a57b2198a3a - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.139Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.139Z] GET /api/images/d778da7f-ceea-4dca-9d7e-5c11fd9413d9 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.143Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.143Z] GET /api/images/d778da7f-ceea-4dca-9d7e-5c11fd9413d9 - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.144Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.143Z] GET /api/images/86266f61-336f-4791-b135-a9249136a501 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.148Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.148Z] GET /api/images/86266f61-336f-4791-b135-a9249136a501 - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.285Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.285Z] POST /api/folders/cursed-dump/reindex - 200 - 2216ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:16.588Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:16.588Z] POST /api/folders/cursed-dump/sync-files - IP: 127.0.0.1 - START
+[2025-08-21T03:35:16.631Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:16.631Z] POST /api/folders/cursed-dump/sync-files - 200 - 43ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:17.657Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:17.657Z] GET /api/system/navigation - IP: 127.0.0.1 - START
+[2025-08-21T03:35:17.704Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:17.704Z] GET /api/system/navigation - 200 - 47ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:17.707Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:17.706Z] GET /api/stats/system - IP: 127.0.0.1 - START
+[2025-08-21T03:35:17.720Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:17.720Z] GET /api/stats/system - 200 - 14ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:17.723Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:17.722Z] GET /api/images?folderId=cursed-dump&limit=100 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:18.052Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:18.052Z] GET /api/images?folderId=cursed-dump&limit=100 - 200 - 330ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:18.054Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:18.054Z] GET /api/folders/cursed-dump - IP: 127.0.0.1 - START
+[2025-08-21T03:35:18.056Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:18.056Z] GET /api/folders/cursed-dump - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:18.222Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:18.221Z] GET /api/images?folderId=cursed-dump&limit=100&offset=100 - IP: 127.0.0.1 - START
+[2025-08-21T03:35:18.318Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:18.318Z] GET /api/images?folderId=cursed-dump&limit=100&offset=100 - 200 - 97ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.646Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.646Z] GET /api/images/bcba4cd3-f8cc-45e8-9658-c37a68496d11/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.650Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.650Z] GET /api/images/bcba4cd3-f8cc-45e8-9658-c37a68496d11/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.651Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.651Z] GET /api/images/d0c5c41d-b510-40a4-acfe-9a7e2122011e/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.655Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.655Z] GET /api/images/d0c5c41d-b510-40a4-acfe-9a7e2122011e/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.656Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.656Z] GET /api/images/98317b5d-0e13-4870-b4b4-4f225741f5ae/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.660Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.660Z] GET /api/images/98317b5d-0e13-4870-b4b4-4f225741f5ae/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.661Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.661Z] GET /api/images/349a9c04-3027-4274-97d3-e00af7ad1762/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.664Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.664Z] GET /api/images/349a9c04-3027-4274-97d3-e00af7ad1762/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.665Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.665Z] GET /api/images/7d558714-6d30-48a4-807c-3a87a717b72f/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.668Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.668Z] GET /api/images/7d558714-6d30-48a4-807c-3a87a717b72f/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.668Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.668Z] GET /api/images/2b3c70a4-20bf-48bd-b594-698f76c0b3a9/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.671Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.671Z] GET /api/images/2b3c70a4-20bf-48bd-b594-698f76c0b3a9/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.672Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.672Z] GET /api/images/e2ab20ac-6dbd-44a1-8b8a-97876a4c7004/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.675Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.675Z] GET /api/images/e2ab20ac-6dbd-44a1-8b8a-97876a4c7004/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.676Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.676Z] GET /api/images/d984febd-a975-4279-b700-f987f6d82758/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.679Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.678Z] GET /api/images/d984febd-a975-4279-b700-f987f6d82758/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.679Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.679Z] GET /api/images/9f44ef05-ecd6-4f2f-a317-dd32264aa33e/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.682Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.682Z] GET /api/images/9f44ef05-ecd6-4f2f-a317-dd32264aa33e/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.683Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.683Z] GET /api/images/d036e3b3-1846-40a5-9d85-4401abfde34a/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.686Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.685Z] GET /api/images/d036e3b3-1846-40a5-9d85-4401abfde34a/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.686Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.686Z] GET /api/images/da8ddd5b-338d-446a-8bf8-c1bed016c3f7/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.689Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.689Z] GET /api/images/da8ddd5b-338d-446a-8bf8-c1bed016c3f7/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.690Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.690Z] GET /api/images/db7b673f-e9e7-4711-afe9-7ed32086cfe2/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.693Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.693Z] GET /api/images/db7b673f-e9e7-4711-afe9-7ed32086cfe2/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.694Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.694Z] GET /api/images/b2ac8a38-84e0-4c95-88ae-dc65b911371b/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.698Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.698Z] GET /api/images/b2ac8a38-84e0-4c95-88ae-dc65b911371b/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.699Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.698Z] GET /api/images/37edcaab-e78e-44b8-a5e4-1020b46c29ba/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.702Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.702Z] GET /api/images/37edcaab-e78e-44b8-a5e4-1020b46c29ba/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.703Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.702Z] GET /api/images/27e1fc5c-e509-42ae-806b-4adb1485f55e/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.706Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.706Z] GET /api/images/27e1fc5c-e509-42ae-806b-4adb1485f55e/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.707Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.707Z] GET /api/images/76206b74-d40b-4da0-a04d-7ed2e147475f/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.711Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.711Z] GET /api/images/76206b74-d40b-4da0-a04d-7ed2e147475f/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.712Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.712Z] GET /api/images/2cc27911-016f-4cf8-966f-7d370be28cbc/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.717Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.717Z] GET /api/images/2cc27911-016f-4cf8-966f-7d370be28cbc/thumbnail - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.719Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.718Z] GET /api/images/e2fd9307-2cb9-466a-8b24-02887646d462/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.722Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.722Z] GET /api/images/e2fd9307-2cb9-466a-8b24-02887646d462/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.723Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.723Z] GET /api/images/a0837c07-ad16-48e2-8301-42f24f06474e/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.727Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.726Z] GET /api/images/a0837c07-ad16-48e2-8301-42f24f06474e/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.727Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.727Z] GET /api/images/1edd86c2-c401-4cfa-9d06-0614497a4fe8/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.731Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.731Z] GET /api/images/1edd86c2-c401-4cfa-9d06-0614497a4fe8/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.733Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.732Z] GET /api/images/8a2a904c-fe65-4d5b-9dbf-e601ecd40b23/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.735Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.735Z] GET /api/images/8a2a904c-fe65-4d5b-9dbf-e601ecd40b23/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.736Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.736Z] GET /api/images/3691228d-594e-44a3-8d28-41a25c6a39b9/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.740Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.740Z] GET /api/images/3691228d-594e-44a3-8d28-41a25c6a39b9/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.741Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.741Z] GET /api/images/ae2f6886-3c28-4d85-8192-10b531612340/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.743Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.743Z] GET /api/images/ae2f6886-3c28-4d85-8192-10b531612340/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.744Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.744Z] GET /api/images/7f22898b-e476-4108-8ad7-c372b0a0c377/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.747Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.747Z] GET /api/images/7f22898b-e476-4108-8ad7-c372b0a0c377/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.748Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.747Z] GET /api/images/a72927a5-14b3-460f-bdc4-dff783191a55/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.751Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.750Z] GET /api/images/a72927a5-14b3-460f-bdc4-dff783191a55/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.752Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.752Z] GET /api/images/344188d1-a615-4423-b869-39575cc4c3a6/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.756Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.755Z] GET /api/images/344188d1-a615-4423-b869-39575cc4c3a6/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.757Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.756Z] GET /api/images/8a9d4296-7aef-4c56-8a8b-8c47aff4f677/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.760Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.760Z] GET /api/images/8a9d4296-7aef-4c56-8a8b-8c47aff4f677/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.761Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.761Z] GET /api/images/fdb7dfe4-6e45-4f42-970e-fa347a0c7e45/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.765Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.765Z] GET /api/images/fdb7dfe4-6e45-4f42-970e-fa347a0c7e45/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.766Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.766Z] GET /api/images/a918f4f1-1318-4b93-8738-6a6ced3cfad1/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.770Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.770Z] GET /api/images/a918f4f1-1318-4b93-8738-6a6ced3cfad1/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.772Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.772Z] GET /api/images/e7695a32-b2a0-49e0-a027-9d3c5cf7d129/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.777Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.777Z] GET /api/images/e7695a32-b2a0-49e0-a027-9d3c5cf7d129/thumbnail - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.779Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.778Z] GET /api/images/db61f061-5c1e-450f-89c9-c13543fd490b/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.784Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.784Z] GET /api/images/db61f061-5c1e-450f-89c9-c13543fd490b/thumbnail - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.786Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.785Z] GET /api/images/682d0ee7-467b-4d27-bee0-2571f6ca78b9/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.789Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.789Z] GET /api/images/682d0ee7-467b-4d27-bee0-2571f6ca78b9/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.790Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.790Z] GET /api/images/77a92751-ed7d-4fb0-b7a8-d5af85e07cf2/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.794Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.794Z] GET /api/images/77a92751-ed7d-4fb0-b7a8-d5af85e07cf2/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.795Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.794Z] GET /api/images/11174698-af64-46c7-b70f-bfcb872de3cd/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.799Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.799Z] GET /api/images/11174698-af64-46c7-b70f-bfcb872de3cd/thumbnail - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.800Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.800Z] GET /api/images/747b4d2f-9cd2-4895-a196-3b521f5ab7e8/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.802Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.802Z] GET /api/images/747b4d2f-9cd2-4895-a196-3b521f5ab7e8/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.803Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.803Z] GET /api/images/899a9190-4298-4a54-a1d2-958244adfc67/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.806Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.805Z] GET /api/images/899a9190-4298-4a54-a1d2-958244adfc67/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.806Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.806Z] GET /api/images/71e20249-1f7b-43f0-97f3-dceba7091bc1/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.809Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.809Z] GET /api/images/71e20249-1f7b-43f0-97f3-dceba7091bc1/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.810Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.810Z] GET /api/images/b17c6997-69e4-4231-b19a-c401bdeca92d/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.814Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.814Z] GET /api/images/b17c6997-69e4-4231-b19a-c401bdeca92d/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.815Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.815Z] GET /api/images/fbdf51dc-86e7-4750-a79e-1b5f4b5f82ea/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.819Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.819Z] GET /api/images/fbdf51dc-86e7-4750-a79e-1b5f4b5f82ea/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.820Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.820Z] GET /api/images/61356e56-d23b-4e9c-b669-df8dff180a3b/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.823Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.823Z] GET /api/images/61356e56-d23b-4e9c-b669-df8dff180a3b/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.824Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.824Z] GET /api/images/556725de-f40e-495f-bb7a-080d13413940/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.827Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.827Z] GET /api/images/556725de-f40e-495f-bb7a-080d13413940/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.828Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.828Z] GET /api/images/e544665f-7545-47e5-8761-bf88ae8b77a8/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.832Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.832Z] GET /api/images/e544665f-7545-47e5-8761-bf88ae8b77a8/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.833Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.833Z] GET /api/images/e394cbad-0e15-4c06-b3b4-1a19a5421ef4/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.837Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.837Z] GET /api/images/e394cbad-0e15-4c06-b3b4-1a19a5421ef4/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.838Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.838Z] GET /api/images/af477e7f-99ee-4480-aa2d-64c7730f9cfd/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.841Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.841Z] GET /api/images/af477e7f-99ee-4480-aa2d-64c7730f9cfd/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.842Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.842Z] GET /api/images/27071304-dfe2-46ff-ac10-023114d2e611/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.847Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.847Z] GET /api/images/27071304-dfe2-46ff-ac10-023114d2e611/thumbnail - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.848Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.848Z] GET /api/images/e37ba9d4-6a8d-4ea3-b1b4-a93c11403653/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.851Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.851Z] GET /api/images/e37ba9d4-6a8d-4ea3-b1b4-a93c11403653/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.852Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.852Z] GET /api/images/167401e8-5911-44c9-8964-5487b2017de4/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.855Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.854Z] GET /api/images/167401e8-5911-44c9-8964-5487b2017de4/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.856Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.855Z] GET /api/images/6a275835-2a7a-43cc-957b-88f2adf24ab9/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.858Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.858Z] GET /api/images/6a275835-2a7a-43cc-957b-88f2adf24ab9/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.859Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.859Z] GET /api/images/e5f2937d-d79c-4ad6-85df-a25f6bb15f73/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.862Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.862Z] GET /api/images/e5f2937d-d79c-4ad6-85df-a25f6bb15f73/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.863Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.863Z] GET /api/images/07517170-2b81-4eea-9555-c8340b7d011d/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.867Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.867Z] GET /api/images/07517170-2b81-4eea-9555-c8340b7d011d/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.868Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.868Z] GET /api/images/a98bfb1f-b274-4094-8e66-7bc3574a86bf/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.870Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.870Z] GET /api/images/a98bfb1f-b274-4094-8e66-7bc3574a86bf/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.871Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.871Z] GET /api/images/0f7b21ea-100c-4ba8-b3f0-b10d2542ec87/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.874Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.874Z] GET /api/images/0f7b21ea-100c-4ba8-b3f0-b10d2542ec87/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.875Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.875Z] GET /api/images/51d9575b-6382-41c8-86cc-f25a3f4331e0/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.878Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.878Z] GET /api/images/51d9575b-6382-41c8-86cc-f25a3f4331e0/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.879Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.878Z] GET /api/images/c990d0a9-cab1-4a2e-8999-9b1266cc5126/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.882Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.882Z] GET /api/images/c990d0a9-cab1-4a2e-8999-9b1266cc5126/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.883Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.883Z] GET /api/images/8e5ea5ac-c6fd-40bb-bc17-3b7f40713fe0/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.886Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.886Z] GET /api/images/8e5ea5ac-c6fd-40bb-bc17-3b7f40713fe0/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.886Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.886Z] GET /api/images/4a809373-8809-4db5-b16b-a3505050a553/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.889Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.889Z] GET /api/images/4a809373-8809-4db5-b16b-a3505050a553/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.891Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.891Z] GET /api/images/3636402f-fd2c-4e36-8507-9af6eec5106a/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.895Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.895Z] GET /api/images/3636402f-fd2c-4e36-8507-9af6eec5106a/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.897Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.897Z] GET /api/images/a50957b9-b877-4343-8e77-d4f2dd498b71/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.900Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.900Z] GET /api/images/a50957b9-b877-4343-8e77-d4f2dd498b71/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.901Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.901Z] GET /api/images/79053834-450c-4213-bac8-944f646b5bf5/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.905Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.904Z] GET /api/images/79053834-450c-4213-bac8-944f646b5bf5/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.906Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.905Z] GET /api/images/be1d9564-7845-4072-9229-7281098803b5/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.908Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.908Z] GET /api/images/be1d9564-7845-4072-9229-7281098803b5/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.909Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.909Z] GET /api/images/27292223-5c11-432c-b537-dab4af04f83f/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.912Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.912Z] GET /api/images/27292223-5c11-432c-b537-dab4af04f83f/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.913Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.913Z] GET /api/images/b65fb025-7508-48f3-86fd-dcb7425bf9d8/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.916Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.916Z] GET /api/images/b65fb025-7508-48f3-86fd-dcb7425bf9d8/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.917Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.917Z] GET /api/images/57eaf7f0-c538-4952-858d-2ba3b5b483c6/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.919Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.919Z] GET /api/images/57eaf7f0-c538-4952-858d-2ba3b5b483c6/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.920Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.920Z] GET /api/images/d778da7f-ceea-4dca-9d7e-5c11fd9413d9/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.922Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.922Z] GET /api/images/d778da7f-ceea-4dca-9d7e-5c11fd9413d9/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.923Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.923Z] GET /api/images/61f7543f-93df-45ce-8f80-6d877a266448/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.925Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.925Z] GET /api/images/61f7543f-93df-45ce-8f80-6d877a266448/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.926Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.926Z] GET /api/images/b7db4087-a0f8-4d3a-8eb2-5adb8ea78782/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.928Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.928Z] GET /api/images/b7db4087-a0f8-4d3a-8eb2-5adb8ea78782/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.929Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.929Z] GET /api/images/ad93dea8-159c-4050-b761-a0201b30e2b5/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.932Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.932Z] GET /api/images/ad93dea8-159c-4050-b761-a0201b30e2b5/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.933Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.933Z] GET /api/images/f1061719-2e88-4a1b-a491-35e15674515b/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.936Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.936Z] GET /api/images/f1061719-2e88-4a1b-a491-35e15674515b/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.937Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.937Z] GET /api/images/97ce6c80-cc4d-4c99-84a2-0436ff1a6919/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.939Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.939Z] GET /api/images/97ce6c80-cc4d-4c99-84a2-0436ff1a6919/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.940Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.939Z] GET /api/images/e865edad-65e3-4739-a7eb-61720fa0678a/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.942Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.942Z] GET /api/images/e865edad-65e3-4739-a7eb-61720fa0678a/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.943Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.943Z] GET /api/images/680bd4f3-b357-4b45-90ab-3f6083d8ae2b/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.946Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.946Z] GET /api/images/680bd4f3-b357-4b45-90ab-3f6083d8ae2b/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.947Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.947Z] GET /api/images/a70b8b41-1fbd-4485-8cbc-cd3d5d82adf7/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.954Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.954Z] GET /api/images/a70b8b41-1fbd-4485-8cbc-cd3d5d82adf7/thumbnail - 200 - 7ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.955Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.955Z] GET /api/images/540f99d4-6147-48bd-9686-eeb63ac904d4/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.958Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.958Z] GET /api/images/540f99d4-6147-48bd-9686-eeb63ac904d4/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.959Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.959Z] GET /api/images/595fe115-01e0-4b14-884f-a594ab70e4ef/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.963Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.962Z] GET /api/images/595fe115-01e0-4b14-884f-a594ab70e4ef/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.964Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.963Z] GET /api/images/e8131c62-6702-4beb-9ff8-e2dd8ef163c7/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.967Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.967Z] GET /api/images/e8131c62-6702-4beb-9ff8-e2dd8ef163c7/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.969Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.968Z] GET /api/images/55a5b886-c719-41dc-8b2e-35d26b3a7b84/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.972Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.972Z] GET /api/images/55a5b886-c719-41dc-8b2e-35d26b3a7b84/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.973Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.973Z] GET /api/images/f9049e15-8bae-4da7-859f-6f71a21bee76/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.976Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.976Z] GET /api/images/f9049e15-8bae-4da7-859f-6f71a21bee76/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.977Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.976Z] GET /api/images/f67c5f19-0f86-48bf-a402-4a676fe822a4/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.980Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.980Z] GET /api/images/f67c5f19-0f86-48bf-a402-4a676fe822a4/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.982Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.981Z] GET /api/images/3728c2ff-0717-4468-950d-eed0afde6228/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.986Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.985Z] GET /api/images/3728c2ff-0717-4468-950d-eed0afde6228/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.987Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.987Z] GET /api/images/575ab298-e2df-4a87-81ea-48f42245a960/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.990Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.990Z] GET /api/images/575ab298-e2df-4a87-81ea-48f42245a960/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.990Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.990Z] GET /api/images/f30f7b74-b669-4fe0-a35b-44bfb4c5f925/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.993Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.993Z] GET /api/images/f30f7b74-b669-4fe0-a35b-44bfb4c5f925/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:19.994Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:19.994Z] GET /api/images/cf818de3-5801-421a-a411-7b7ad8a385e4/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:19.999Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:19.999Z] GET /api/images/cf818de3-5801-421a-a411-7b7ad8a385e4/thumbnail - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.000Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.000Z] GET /api/images/cedeb4e4-2045-41e9-8558-2b35b72ec267/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.005Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.005Z] GET /api/images/cedeb4e4-2045-41e9-8558-2b35b72ec267/thumbnail - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.006Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.006Z] GET /api/images/73576ff5-1f49-49e1-ad79-99d63a4704eb/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.009Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.009Z] GET /api/images/73576ff5-1f49-49e1-ad79-99d63a4704eb/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.010Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.010Z] GET /api/images/262d5081-f09b-4782-9fc1-cdcd5e95e418/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.015Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.014Z] GET /api/images/262d5081-f09b-4782-9fc1-cdcd5e95e418/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.017Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.016Z] GET /api/images/b21cd20c-cca8-4ddb-a3ea-246b1a8b9bc1/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.021Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.021Z] GET /api/images/b21cd20c-cca8-4ddb-a3ea-246b1a8b9bc1/thumbnail - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.022Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.022Z] GET /api/images/afae1811-7be1-4009-8b84-77e0a1331317/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.027Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.026Z] GET /api/images/afae1811-7be1-4009-8b84-77e0a1331317/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.028Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.027Z] GET /api/images/dc5ba449-9ef3-4cc5-8735-4293c5672eeb/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.032Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.032Z] GET /api/images/dc5ba449-9ef3-4cc5-8735-4293c5672eeb/thumbnail - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.034Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.033Z] GET /api/images/ed2c21d2-9edc-4eab-a2b3-f8422326c583/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.038Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.038Z] GET /api/images/ed2c21d2-9edc-4eab-a2b3-f8422326c583/thumbnail - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.038Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.038Z] GET /api/images/35fc28c5-eb89-4db9-a8a2-9db8a9976291/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.041Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.041Z] GET /api/images/35fc28c5-eb89-4db9-a8a2-9db8a9976291/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.042Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.042Z] GET /api/images/cc00db55-a94d-4afa-b7e9-3cc6bd823692/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.046Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.046Z] GET /api/images/cc00db55-a94d-4afa-b7e9-3cc6bd823692/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.047Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.047Z] GET /api/images/664b07a7-2f2b-4005-8e27-0e0d351c2d2b/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.051Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.051Z] GET /api/images/664b07a7-2f2b-4005-8e27-0e0d351c2d2b/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.052Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.052Z] GET /api/images/118b43c3-5137-4ce4-ab09-55d5b2620ff7/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.055Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.055Z] GET /api/images/118b43c3-5137-4ce4-ab09-55d5b2620ff7/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.056Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.056Z] GET /api/images/5d26a654-9095-46f4-9a94-0187d2e6d587/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.059Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.059Z] GET /api/images/5d26a654-9095-46f4-9a94-0187d2e6d587/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.060Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.060Z] GET /api/images/22c73b45-30f8-40d0-85b9-a5177b616e80/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.064Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.064Z] GET /api/images/22c73b45-30f8-40d0-85b9-a5177b616e80/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.066Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.065Z] GET /api/images/b3b5cd39-145d-4f97-bbf9-f1546b659f48/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.069Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.069Z] GET /api/images/b3b5cd39-145d-4f97-bbf9-f1546b659f48/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.070Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.070Z] GET /api/images/42a16771-4865-4dca-97c1-6d30f68d459c/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.074Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.074Z] GET /api/images/42a16771-4865-4dca-97c1-6d30f68d459c/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.075Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.075Z] GET /api/images/5399488f-0e7e-4fd7-be8a-9623c8ab192d/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.080Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.080Z] GET /api/images/5399488f-0e7e-4fd7-be8a-9623c8ab192d/thumbnail - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.081Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.081Z] GET /api/images/e618a435-55b7-40c9-83d9-0497f9542fde/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.087Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.087Z] GET /api/images/e618a435-55b7-40c9-83d9-0497f9542fde/thumbnail - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.089Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.089Z] GET /api/images/b7a0e1bc-937e-4c7a-aa67-e2a01eba74a9/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.094Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.093Z] GET /api/images/b7a0e1bc-937e-4c7a-aa67-e2a01eba74a9/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.094Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.094Z] GET /api/images/8276e257-37cc-4152-9784-1b06516ec4d4/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.100Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.100Z] GET /api/images/8276e257-37cc-4152-9784-1b06516ec4d4/thumbnail - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.101Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.101Z] GET /api/images/a3e3d2d9-e839-4cc6-a585-9a57b2198a3a/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.105Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.105Z] GET /api/images/a3e3d2d9-e839-4cc6-a585-9a57b2198a3a/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.106Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.106Z] GET /api/images/81084c55-0457-4370-954a-00d3e1513bcb/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.110Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.110Z] GET /api/images/81084c55-0457-4370-954a-00d3e1513bcb/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.112Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.112Z] GET /api/images/f79e2540-4445-4007-a23c-eeaa7f412329/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.117Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.117Z] GET /api/images/f79e2540-4445-4007-a23c-eeaa7f412329/thumbnail - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.118Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.118Z] GET /api/images/b0ed9ce5-5d00-4623-8ffe-4ef0cc9c2a9d/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.121Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.121Z] GET /api/images/b0ed9ce5-5d00-4623-8ffe-4ef0cc9c2a9d/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.122Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.122Z] GET /api/images/4627b799-ca92-4f8e-bdd1-dcba3bc03dd4/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.125Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.125Z] GET /api/images/4627b799-ca92-4f8e-bdd1-dcba3bc03dd4/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.131Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.131Z] GET /api/images/33da1b8c-162d-4bb4-93c7-27debac8187a/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.156Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.155Z] GET /api/images/33da1b8c-162d-4bb4-93c7-27debac8187a/thumbnail - 200 - 24ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.157Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.157Z] GET /api/images/40e8a8e3-d774-4f1f-bf12-e3878caf797e/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.160Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.159Z] GET /api/images/40e8a8e3-d774-4f1f-bf12-e3878caf797e/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.160Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.160Z] GET /api/images/7b56bd8d-aacf-48b8-963a-7c5df88b41d6/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.164Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.164Z] GET /api/images/7b56bd8d-aacf-48b8-963a-7c5df88b41d6/thumbnail - 200 - 4ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.165Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.165Z] GET /api/images/86266f61-336f-4791-b135-a9249136a501/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.168Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.168Z] GET /api/images/86266f61-336f-4791-b135-a9249136a501/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.169Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.169Z] GET /api/images/af8955fa-a65f-4df6-b38c-72c76b0cfc2c/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.172Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.172Z] GET /api/images/af8955fa-a65f-4df6-b38c-72c76b0cfc2c/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.175Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.174Z] GET /api/images/70a31cda-0205-4f25-abaf-72f04b4d01d4/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.177Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.177Z] GET /api/images/70a31cda-0205-4f25-abaf-72f04b4d01d4/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.178Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.178Z] GET /api/images/e65f6968-7714-45ce-8512-6e1c9c955766/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.180Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.180Z] GET /api/images/e65f6968-7714-45ce-8512-6e1c9c955766/thumbnail - 200 - 2ms - IP: 127.0.0.1 - END
+[2025-08-21T03:35:20.181Z] [INFO] ℹ️  🌐 [2025-08-21T03:35:20.181Z] GET /api/images/7990d417-9d59-4e39-805e-3b11e3385527/thumbnail - IP: 127.0.0.1 - START
+[2025-08-21T03:35:20.184Z] [INFO] ℹ️  ✅ [2025-08-21T03:35:20.184Z] GET /api/images/7990d417-9d59-4e39-805e-3b11e3385527/thumbnail - 200 - 3ms - IP: 127.0.0.1 - END

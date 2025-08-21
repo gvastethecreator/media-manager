@@ -1,11 +1,11 @@
+import { motion } from 'motion/react';
+import React, { useState } from 'react';
 import {
 	buildHolographicStyle,
 	computeRarityVisualConfig,
 	rarityAccessibilityLabel,
 } from '@/components/cards/shared/rarity-style';
 import { cn } from '@/lib/utils';
-import { motion } from 'motion/react';
-import React, { useState } from 'react';
 
 // Imágenes con thumbnails para el componente de galería
 export interface ThumbnailImage {
