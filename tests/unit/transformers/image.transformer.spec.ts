@@ -1,6 +1,6 @@
+import { describe, expect, it } from 'bun:test';
 import { mapImageToComplete, mapToImageSummaries, mapToImageSummary } from '@/transformers/image/mappers';
 import type { ImageWithStats } from '@/types/entities/image/base';
-import { describe, expect, it } from 'bun:test';
 
 describe('Image transformers', () => {
 	it('mapImageToComplete rellena campos y stats', () => {
