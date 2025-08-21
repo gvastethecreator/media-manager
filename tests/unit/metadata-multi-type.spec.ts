@@ -1,6 +1,6 @@
+import { describe, expect, it } from 'bun:test';
 import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
 import { EntityType } from '@/types/file-entity-mapper';
-import { describe, expect, it } from 'bun:test';
 
 // Creamos una instancia aislada usando el prototipo para poder parchear métodos privados.
 function buildSpyMapper() {

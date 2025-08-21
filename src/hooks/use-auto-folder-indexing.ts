@@ -4,9 +4,11 @@
  * @description Hook que detecta carpetas vacías o no indexadas y las indexa automáticamente
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { useFolders, useReindexFolder } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { autoIndexingLogger } from '@/lib/logger/reindex-file-logger';
+import { getAutoIndexCircuitBreaker } from '@/lib/system/circuit-breaker';
 import { toastService } from '@/lib/ui/toast';
 import type { FolderWithStats } from '@/types/entities/folder';
 
@@ -56,6 +58,12 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 		errors: [],
 	});
 
+	// Referencias para prevenir condiciones de carrera
+	const isIndexingRef = useRef(false);
+	const intervalRef = useRef<NodeJS.Timeout | null>(null);
+	const isUnmountedRef = useRef(false);
+	const circuitBreaker = useRef(getAutoIndexCircuitBreaker());
+
 	const { data: foldersResponse } = useFolders();
 	const reindexFolderMutation = useReindexFolder();
 
@@ -98,14 +106,41 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 	 */
 	const indexFolder = useCallback(
 		async (folder: FolderWithStats): Promise<{ success: boolean; error?: string }> => {
+			// Verificar si podemos ejecutar la operación con circuit breaker
+			if (!circuitBreaker.current.isAvailable()) {
+				const state = circuitBreaker.current.getState();
+				return {
+					success: false,
+					error: `Auto-indexing temporalmente deshabilitado (fallos: ${state.failureCount})`,
+				};
+			}
+
 			try {
 				logger.info(`🔄 Indexando carpeta: ${folder.name} (${folder.id})`);
-				await reindexFolderMutation.mutateAsync(folder.id);
+
+				// Ejecutar con protección de circuit breaker
+				await circuitBreaker.current.execute(`folder-${folder.id}`, async () => {
+					await reindexFolderMutation.mutateAsync(folder.id);
+				});
+
 				logger.info(`✅ Carpeta indexada correctamente: ${folder.name}`);
 				return { success: true };
 			} catch (error) {
 				const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
 				logger.error(`❌ Error indexando carpeta ${folder.name}:`, error);
+
+				// Log auto-indexing errors to file
+				autoIndexingLogger.logError(`Error en auto-indexación de carpeta: ${folder.name}`, {
+					folderId: folder.id,
+					folderPath: folder.path,
+					context: {
+						folderName: folder.name,
+						hasStats: folder.totalFiles != null,
+						totalFiles: folder.totalFiles,
+					},
+					error: error instanceof Error ? error : new Error(String(error)),
+				});
+
 				return { success: false, error: errorMessage };
 			}
 		},
@@ -116,7 +151,14 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 	 * Ejecuta el proceso de indexación automática
 	 */
 	const runAutoIndexing = useCallback(async () => {
-		if (!foldersResponse?.data || status.isIndexing) {
+		// Verificar referencias para evitar condiciones de carrera
+		if (!foldersResponse?.data || isIndexingRef.current || isUnmountedRef.current) {
+			return;
+		}
+
+		// Verificar circuit breaker
+		if (!circuitBreaker.current.isAvailable()) {
+			logger.debug('🔓 Circuit breaker abierto, saltando auto-indexing');
 			return;
 		}
 
@@ -129,6 +171,9 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 		}
 
 		logger.info(`🔍 Detectadas ${foldersNeedingIndexing.length} carpetas que necesitan indexación`);
+
+		// Marcar como en progreso
+		isIndexingRef.current = true;
 
 		// Limitar la cantidad de carpetas a procesar
 		const foldersToProcess = foldersNeedingIndexing.slice(0, maxFoldersPerBatch);
@@ -147,6 +192,12 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 		let indexedCount = 0;
 
 		for (const folder of foldersToProcess) {
+			// Verificar si el componente se desmontó durante el procesamiento
+			if (isUnmountedRef.current) {
+				logger.info('🛑 Componente desmontado, cancelando indexación');
+				break;
+			}
+
 			setStatus((prev) => ({
 				...prev,
 				currentFolder: folder.name,
@@ -175,7 +226,9 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 			onProgress?.(currentStatus);
 
 			// Pequeña pausa entre indexaciones para no sobrecargar
-			await new Promise((resolve) => setTimeout(resolve, 1000));
+			if (!isUnmountedRef.current) {
+				await new Promise((resolve) => setTimeout(resolve, 1000));
+			}
 		}
 
 		const finalStatus: AutoIndexingStatus = {
@@ -186,20 +239,39 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 			errors,
 		};
 
-		setStatus(finalStatus);
-		onIndexingComplete?.(finalStatus);
+		// Finalizar solo si no se desmontó el componente
+		if (!isUnmountedRef.current) {
+			setStatus(finalStatus);
+			onIndexingComplete?.(finalStatus);
 
-		// Mostrar resultados
-		if (errors.length === 0) {
-			toastService.success(`✅ ${indexedCount} carpetas indexadas automáticamente`);
-			logger.info(`✅ Indexación automática completada: ${indexedCount} carpetas procesadas`);
-		} else {
-			toastService.warning(`⚠️ Indexación completada con errores: ${indexedCount} exitosas, ${errors.length} errores`);
-			logger.warn(`⚠️ Indexación con errores: ${indexedCount} exitosas, ${errors.length} errores`);
+			// Mostrar resultados
+			if (errors.length === 0) {
+				toastService.success(`✅ ${indexedCount} carpetas indexadas automáticamente`);
+				logger.info(`✅ Indexación automática completada: ${indexedCount} carpetas procesadas`);
+			} else {
+				toastService.warning(`⚠️ Indexación completada con errores: ${indexedCount} exitosas, ${errors.length} errores`);
+				logger.warn(`⚠️ Indexación con errores: ${indexedCount} exitosas, ${errors.length} errores`);
+
+				// Log batch completion with errors
+				autoIndexingLogger.logWarning(
+					`Auto-indexación completada con errores: ${indexedCount} exitosas, ${errors.length} errores`,
+					{
+						context: {
+							indexedCount,
+							totalErrors: errors.length,
+							foldersToProcess: foldersNeedingIndexing.length,
+							batchSize: maxFoldersPerBatch,
+							errors: errors.slice(0, 5), // Solo primeros 5 errores para evitar logs muy grandes
+						},
+					}
+				);
+			}
 		}
+
+		// Limpiar flag de en progreso
+		isIndexingRef.current = false;
 	}, [
 		foldersResponse,
-		status.isIndexing,
 		detectFoldersNeedingIndexing,
 		maxFoldersPerBatch,
 		indexFolder,
@@ -221,6 +293,16 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 	 */
 	const stopIndexing = useCallback(() => {
 		logger.info('⏹️ Deteniendo indexación automática');
+
+		// Marcar como desmontado para cancelar operaciones en curso
+		isIndexingRef.current = false;
+
+		// Limpiar interval si existe
+		if (intervalRef.current) {
+			clearInterval(intervalRef.current);
+			intervalRef.current = null;
+		}
+
 		setStatus((prev) => ({ ...prev, isIndexing: false }));
 	}, []);
 
@@ -230,22 +312,42 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 			return;
 		}
 
-		const intervalId = setInterval(() => {
+		// Limpiar interval anterior si existe
+		if (intervalRef.current) {
+			clearInterval(intervalRef.current);
+		}
+
+		intervalRef.current = setInterval(() => {
 			logger.debug('🔍 Verificando carpetas para indexación automática...');
 			runAutoIndexing();
 		}, checkInterval);
 
 		// Ejecutar una verificación inicial
 		const initialTimeout = setTimeout(() => {
-			logger.info('🔍 Ejecutando verificación inicial de indexación');
-			runAutoIndexing();
+			if (!isUnmountedRef.current) {
+				logger.info('🔍 Ejecutando verificación inicial de indexación');
+				runAutoIndexing();
+			}
 		}, 5000); // 5 segundos después del montaje
 
 		return () => {
-			clearInterval(intervalId);
+			// Cleanup al desmontar
+			isUnmountedRef.current = true;
+
+			if (intervalRef.current) {
+				clearInterval(intervalRef.current);
+			}
 			clearTimeout(initialTimeout);
 		};
 	}, [autoStart, checkInterval, runAutoIndexing]);
+
+	// Cleanup adicional al desmontar
+	useEffect(() => {
+		return () => {
+			isUnmountedRef.current = true;
+			isIndexingRef.current = false;
+		};
+	}, []);
 
 	return {
 		status,
