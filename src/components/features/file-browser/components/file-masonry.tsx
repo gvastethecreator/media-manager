@@ -1,6 +1,17 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { ImageWithStats } from '@/types/entities/image';
 
+// CONFIG local de la vista Masonry
+const CONFIG = {
+	gap: 16,
+	padding: 16,
+	smCols: 2,
+	mdCols: 3,
+	lgCols: 4,
+	xlCols: 5,
+	increaseViewportBy: { top: 200, bottom: 800 } as { top: number; bottom: number },
+};
+
 interface FileMasonryProps {
 	items: ImageWithStats[];
 	selectedIds?: string[];
@@ -44,19 +55,19 @@ function MasonryTile({
 
 	return (
 		<button
-			type="button"
 			aria-pressed={selected}
+			className="group relative w-full overflow-hidden rounded-md border bg-card text-left focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 			data-selected={selected}
 			onClick={handleClick}
 			onDoubleClick={handleDoubleClick}
 			onKeyDown={handleKeyDown}
-			className="group relative w-full overflow-hidden rounded-md border bg-card text-left focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+			type="button"
 		>
-			<img alt={item.name} src={thumbnailUrl} className="h-auto w-full object-cover" />
+			<img alt={item.name} className="h-auto w-full object-cover" src={thumbnailUrl} />
 			<div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/70 to-transparent p-2">
 				<p className="truncate font-medium text-white text-xs">{item.name}</p>
 			</div>
-			{selected ? <span className="absolute inset-0 ring-2 ring-primary ring-offset-2" aria-hidden="true" /> : null}
+			{selected ? <span aria-hidden="true" className="absolute inset-0 ring-2 ring-primary ring-offset-2" /> : null}
 		</button>
 	);
 }
@@ -68,10 +79,10 @@ export function FileMasonry({ items, selectedIds = [], onItemClick, onItemDouble
 
 	// Columnas responsivas similares a las usadas antes (sm/md/lg)
 	const columnCount = useMemo(() => {
-		if (width < 640) return 2; // sm
-		if (width < 1024) return 3; // md
-		if (width < 1280) return 4; // lg
-		return 5; // xl+
+		if (width < 640) return CONFIG.smCols; // sm
+		if (width < 1024) return CONFIG.mdCols; // md
+		if (width < 1280) return CONFIG.lgCols; // lg
+		return CONFIG.xlCols; // xl+
 	}, [width]);
 
 	useEffect(() => {
@@ -96,24 +107,24 @@ export function FileMasonry({ items, selectedIds = [], onItemClick, onItemDouble
 		return (
 			<div className="h-full">
 				<VirtuosoMasonryComp
-					// estilo alto completo para usar el contenedor como viewport
-					style={{ height: '100%' }}
-					data={items}
 					columnCount={columnCount}
+					computeItemKey={({ data }: { data: ImageWithStats }) => data.id}
+					data={items}
 					ItemContent={function ItemContentComp({ data }: { data: ImageWithStats }) {
 						return (
-							<div style={{ padding: '8px' }}>
+							<div style={{ padding: `${CONFIG.gap / 2}px` }}>
 								<MasonryTile
-									item={data}
-									selected={selectedIds.includes(data.id)}
 									onClick={onItemClick}
 									onDoubleClick={onItemDoubleClick}
+									item={data}
+									selected={selectedIds.includes(data.id)}
 								/>
 							</div>
 						);
 					}}
-					computeItemKey={({ data }: { data: ImageWithStats }) => data.id}
 					initialItemCount={Math.min(50, items.length)}
+					increaseViewportBy={CONFIG.increaseViewportBy}
+					style={{ height: '100%' }}
 					useWindowScroll={false}
 				/>
 			</div>
@@ -122,14 +133,14 @@ export function FileMasonry({ items, selectedIds = [], onItemClick, onItemDouble
 
 	// Fallback: CSS columns (previa implementación)
 	return (
-		<div className="columns-1 gap-4 p-4 sm:columns-2 md:columns-3 lg:columns-4">
+		<div className="columns-1" style={{ gap: CONFIG.gap, padding: CONFIG.padding }}>
 			{items.map((item) => (
-				<div key={item.id} className="mb-4 break-inside-avoid">
+				<div key={item.id} className="mb-4 break-inside-avoid" style={{ marginBottom: CONFIG.gap }}>
 					<MasonryTile
-						item={item}
-						selected={selectedIds.includes(item.id)}
 						onClick={onItemClick}
 						onDoubleClick={onItemDoubleClick}
+						item={item}
+						selected={selectedIds.includes(item.id)}
 					/>
 				</div>
 			))}

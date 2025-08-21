@@ -346,6 +346,17 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 				>
 					<TableIcon className="h-4 w-4" />
 				</Button>
+				<Button
+					aria-label="Vista Single"
+					data-active={viewMode === 'single'}
+					data-testid="view-mode-single-btn"
+					onClick={() => setViewMode('single')}
+					size="icon"
+					title="Vista Single"
+					variant={viewMode === 'single' ? 'secondary' : 'ghost'}
+				>
+					<FileText className="h-4 w-4" />
+				</Button>
 			</div>
 		);
 	};

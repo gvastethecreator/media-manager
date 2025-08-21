@@ -13,10 +13,10 @@ const logger = clientLogger.withContext('MixedContentView');
 
 interface MixedContentViewProps {
 	filterType?: string;
-	filterId?: string;
+	filterId?: string | null;
 }
 
-export function MixedContentView({ filterType, filterId }: MixedContentViewProps = {}) {
+export function MixedContentView(_props: MixedContentViewProps = {}) {
 	// Estados globales para panel de detalles y visor
 	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 	const { openViewer } = useFileViewerStore();
@@ -92,9 +92,7 @@ export function MixedContentView({ filterType, filterId }: MixedContentViewProps
 		>
 			<FileBrowser
 				className="h-full"
-				entityType={'mixed'}
-				filterId={filterId}
-				filterType={(filterType as 'folder' | 'collection' | 'tag' | 'album' | 'video') || 'folder'}
+				items={[]}
 				onItemClick={handleItemSelect}
 				onItemDoubleClick={handleItemDoubleClick}
 			/>

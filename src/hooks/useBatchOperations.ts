@@ -85,7 +85,6 @@ export function useBatchOperations(options: UseBatchOperationsOptions = {}): Use
 	const { refreshInterval = 1000, statusFilter, typeFilter, maxOperations = 100, autoCleanup = true } = options;
 
 	const [operations, setOperations] = useState<BatchOperation[]>([]);
-	const [lastUpdate, setLastUpdate] = useState(Date.now());
 
 	// Refresh operations from service
 	const refresh = useCallback(() => {
@@ -106,7 +105,6 @@ export function useBatchOperations(options: UseBatchOperationsOptions = {}): Use
 		}
 
 		setOperations(allOperations);
-		setLastUpdate(Date.now());
 	}, [statusFilter, typeFilter, maxOperations]);
 
 	// Auto-cleanup completed operations
@@ -151,17 +149,17 @@ export function useBatchOperations(options: UseBatchOperationsOptions = {}): Use
 			'operationResumed',
 		];
 
-		events.forEach((event) => {
+		for (const event of events) {
 			batchFileOperationsService.on(event, handleOperationUpdate);
-		});
+		}
 
 		// Initial load
 		refresh();
 
 		return () => {
-			events.forEach((event) => {
+			for (const event of events) {
 				batchFileOperationsService.removeListener(event, handleOperationUpdate);
-			});
+			}
 		};
 	}, [refresh]);
 

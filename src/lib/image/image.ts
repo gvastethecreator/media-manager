@@ -99,6 +99,14 @@ export async function processImage(imagePath: string, options: ProcessImageOptio
 					compressionLevel: 9,
 				});
 				break;
+			default:
+				// Mantener configuración por defecto (webp)
+				processor = processor.webp({
+					quality: finalOptions.quality,
+					effort: 4,
+					lossless: finalOptions.quality >= 100,
+				});
+				break;
 		}
 
 		const buffer = await processor.toBuffer();

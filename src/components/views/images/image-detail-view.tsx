@@ -167,16 +167,22 @@ export function ImageDetailView() {
 		>
 			<div className="flex h-full w-full items-center justify-center p-4">
 				<div className="max-h-full max-w-full">
-					<img
-						alt={image.name || 'Imagen'}
-						className="max-h-full max-w-full cursor-pointer rounded-lg object-contain shadow-lg"
+					<button
+						aria-label="Abrir visor de imagen"
+						className="max-h-full max-w-full cursor-pointer rounded-lg"
 						onClick={handleOpenViewer}
-						src={image.thumbnailUrl || `/api/images/${image.id}/content`}
-						style={{
-							maxHeight: 'calc(100vh - 200px)',
-							maxWidth: 'calc(100vw - 100px)',
-						}}
-					/>
+						type="button"
+					>
+						<img
+							alt={image.name || ''}
+							className="max-h-full max-w-full rounded-lg object-contain shadow-lg"
+							src={image.thumbnailUrl || `/api/images/${image.id}/content`}
+							style={{
+								maxHeight: 'calc(100vh - 200px)',
+								maxWidth: 'calc(100vw - 100px)',
+							}}
+						/>
+					</button>
 				</div>
 			</div>
 		</BaseContentView>
