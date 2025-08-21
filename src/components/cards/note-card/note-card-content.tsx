@@ -1,6 +1,3 @@
-import { Badge } from '@/components/ui/badge';
-import { useNoteCounts } from '@/lib/api/notes';
-import { cn } from '@/lib/utils';
 import {
 	BarChart4,
 	BookMarked,
@@ -17,6 +14,9 @@ import {
 } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React from 'react';
+import { Badge } from '@/components/ui/badge';
+import { useNoteCounts } from '@/lib/api/notes';
+import { cn } from '@/lib/utils';
 
 interface NoteCardContentProps {
 	content?: string | null;

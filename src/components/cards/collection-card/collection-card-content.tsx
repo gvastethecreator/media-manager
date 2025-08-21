@@ -1,8 +1,8 @@
-import { Badge } from '@/components/ui/badge';
-import type { CollectionEdition } from '@/types/entities/collection';
 import { Bookmark, Calendar, Currency, Diamond, Globe, Link, Tag } from 'lucide-react';
 import { motion } from 'motion/react';
 import { useMemo } from 'react';
+import { Badge } from '@/components/ui/badge';
+import type { CollectionEdition } from '@/types/entities/collection';
 
 // Regex para limpiar URLs (extraído a nivel superior para mejor performance)
 const URL_PROTOCOL_REGEX = /https?:\/\/(www\.)?/;

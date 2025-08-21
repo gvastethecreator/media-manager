@@ -1,4 +1,6 @@
 import express from 'express';
+import { circuitBreakerRegistry } from '@/lib/system/circuit-breaker';
+import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { getDatabaseInfo } from '@/lib/drizzle';
 import {
 	createDefaultSettingsData,
@@ -204,6 +206,66 @@ router.post('/settings/default', async (_req, res) => {
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudo crear la configuración por defecto',
+		});
+	}
+});
+
+// GET /api/system/health - Estado general del sistema de reindexado
+router.get('/health', async (_req, res) => {
+	try {
+		const systemHealth = reindexMonitor.getSystemHealth();
+		const operationsMetrics = reindexMonitor.getOperationsMetrics();
+		const circuitBreakers = circuitBreakerRegistry.getStats();
+
+		res.json({
+			status: 'ok',
+			timestamp: Date.now(),
+			health: systemHealth,
+			operations: operationsMetrics,
+			circuitBreakers,
+		});
+	} catch (error) {
+		console.error('Error obteniendo health del sistema:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: 'No se pudo obtener el estado del sistema',
+		});
+	}
+});
+
+// POST /api/system/reindex/reset - Reset del sistema de reindexado
+router.post('/reindex/reset', async (_req, res) => {
+	try {
+		reindexMonitor.reset();
+		circuitBreakerRegistry.resetAll();
+
+		res.json({
+			message: 'Sistema de reindexado reseteado correctamente',
+			timestamp: Date.now(),
+		});
+	} catch (error) {
+		console.error('Error reseteando sistema:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: 'No se pudo resetear el sistema',
+		});
+	}
+});
+
+// POST /api/system/reindex/cancel - Cancelar operaciones activas
+router.post('/reindex/cancel', async (_req, res) => {
+	try {
+		reindexMonitor.cancelAllActiveOperations();
+
+		res.json({
+			message: 'Operaciones activas canceladas',
+			timestamp: Date.now(),
+		});
+	} catch (error) {
+		console.error('Error cancelando operaciones:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: 'No se pudieron cancelar las operaciones',
 		});
 	}
 });

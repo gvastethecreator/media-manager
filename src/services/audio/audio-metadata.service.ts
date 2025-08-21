@@ -1,6 +1,6 @@
-import { type IAudioMetadata, parseBuffer } from 'music-metadata';
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
+import { type IAudioMetadata, parseBuffer } from 'music-metadata';
 
 export interface AudioMetadataExtract {
 	duration: number | null;

@@ -34,7 +34,7 @@ describe('processFilesWithProgress', () => {
 		const events: any[] = [];
 		const stats = await processFilesWithProgress(filePaths, 'folder-test', mapper as any, true, {
 			concurrency: 3,
-			progressEmitter: (p) => {
+			progressEmitter: (p: any): void => {
 				events.push(p);
 			},
 		});
@@ -65,7 +65,9 @@ describe('processFilesWithProgress', () => {
 		const mapper = new StubMapper();
 		const events: any[] = [];
 		const stats = await processFilesWithProgress([], 'folder-test', mapper as any, true, {
-			progressEmitter: (p) => events.push(p),
+			progressEmitter: (p: any): void => {
+				events.push(p);
+			},
 		});
 		expect(stats.totalFiles).toBe(0);
 		expect(stats.processed).toBe(0);
@@ -78,7 +80,9 @@ describe('processFilesWithProgress', () => {
 		const events: any[] = [];
 		const stats = await processFilesWithProgress(['single.png'], 'folder-test', mapper as any, true, {
 			concurrency: 2,
-			progressEmitter: (p) => events.push(p),
+			progressEmitter: (p: any): void => {
+				events.push(p);
+			},
 		});
 		expect(stats.totalFiles).toBe(1);
 		expect(stats.successful).toBe(1);

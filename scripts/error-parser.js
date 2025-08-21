@@ -5,8 +5,8 @@
  * Genera resúmenes simples y útiles con el formato solicitado
  */
 
-import chalk from 'chalk';
 import { readFileSync } from 'node:fs';
+import chalk from 'chalk';
 
 // Expresiones regulares globales para mejor rendimiento
 // Regex ANSI simplificada para eliminar secuencias de escape

@@ -1,11 +1,11 @@
+import { CheckIcon, DownloadIcon, EyeIcon, FileJsonIcon, XIcon } from 'lucide-react';
+import { motion } from 'motion/react';
+import { useCallback, useMemo, useState } from 'react';
 import { darkenHex } from '@/components/cards/shared/rarity-style';
 import { useJsonFile } from '@/lib/api/json-files';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format'; // Importar formatBytes
 import type { JsonFileWithStats } from '@/types/entities/json-file';
-import { CheckIcon, DownloadIcon, EyeIcon, FileJsonIcon, XIcon } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useCallback, useMemo, useState } from 'react';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 

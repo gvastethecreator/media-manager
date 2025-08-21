@@ -7,10 +7,10 @@
  * - Sin virtualización avanzada (se puede reintroducir luego si >200 items).
  */
 
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { OptimizedEntityCard } from '@/components/cards/entity-card';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/migration';
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 export interface GridViewProps {
 	items: AnyEntityWithStats[];
@@ -68,14 +68,16 @@ export const GridView: React.FC<GridViewProps> = React.memo(
 		const rowHeight = (interfaceConfig?.views?.grid?.rowHeight as number) ?? Math.max(baseWidth, 160);
 		const overscan = Number(interfaceConfig?.performance?.overscan ?? 4);
 		const totalRows = Math.max(1, Math.ceil(items.length / columns));
-	const firstVisibleRow = shouldVirtualize ? Math.max(0, Math.floor(scrollTop / rowHeight) - overscan) : 0;
-	const visibleRowCount = shouldVirtualize ? Math.ceil(viewportHeight / rowHeight) + overscan * 2 : totalRows;
-	const lastVisibleRow = shouldVirtualize ? Math.min(totalRows - 1, firstVisibleRow + visibleRowCount) : totalRows - 1;
-	const startIndex = firstVisibleRow * columns;
-	const endIndex = Math.min(items.length, (lastVisibleRow + 1) * columns);
-	const visibleItems = shouldVirtualize ? items.slice(startIndex, endIndex) : items;
+		const firstVisibleRow = shouldVirtualize ? Math.max(0, Math.floor(scrollTop / rowHeight) - overscan) : 0;
+		const visibleRowCount = shouldVirtualize ? Math.ceil(viewportHeight / rowHeight) + overscan * 2 : totalRows;
+		const lastVisibleRow = shouldVirtualize
+			? Math.min(totalRows - 1, firstVisibleRow + visibleRowCount)
+			: totalRows - 1;
+		const startIndex = firstVisibleRow * columns;
+		const endIndex = Math.min(items.length, (lastVisibleRow + 1) * columns);
+		const visibleItems = shouldVirtualize ? items.slice(startIndex, endIndex) : items;
 
-	const spacerStyle = (h: number) => ({ gridColumn: '1 / -1', height: `${h}px` });
+		const spacerStyle = (h: number) => ({ gridColumn: '1 / -1', height: `${h}px` });
 
 		// Handlers estables (un solo closure) reducen creación masiva por item
 		const handleClick = useCallback(
@@ -124,9 +126,7 @@ export const GridView: React.FC<GridViewProps> = React.memo(
 				}}
 			>
 				{/* Spacer superior */}
-				{shouldVirtualize && firstVisibleRow > 0 ? (
-					<div style={spacerStyle(firstVisibleRow * rowHeight)} />
-				) : null}
+				{shouldVirtualize && firstVisibleRow > 0 ? <div style={spacerStyle(firstVisibleRow * rowHeight)} /> : null}
 
 				{visibleItems.map((item) => {
 					const isSelected = selectedSet.has(item.id);

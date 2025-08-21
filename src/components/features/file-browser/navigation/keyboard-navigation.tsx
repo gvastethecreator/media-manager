@@ -1,7 +1,7 @@
+import React, { useCallback, useEffect, useRef } from 'react';
 import { keyboardShortcutManager } from '@/lib/keyboard/keyboard-shortcut-manager';
 import { useSelectionStore } from '@/store/selection.store';
 import type { AnyEntityWithStats } from '@/types/migration';
-import React, { useCallback, useEffect, useRef } from 'react';
 
 interface KeyboardNavigationProps {
 	items: AnyEntityWithStats[];

@@ -1,3 +1,8 @@
+import { createHash } from 'node:crypto';
+import { readFile, stat } from 'node:fs/promises';
+import { basename, extname } from 'node:path';
+import { LRUCache } from 'lru-cache';
+import PQueue from 'p-queue';
 import { mediaProcessingLimits, shouldSkipImageBySize } from '@/config/media-processing';
 import {
 	createVideo as createVideoServer,
@@ -19,11 +24,6 @@ import {
 	EntityType,
 	FileInfo,
 } from '@/types/file-entity-mapper';
-import { LRUCache } from 'lru-cache';
-import { createHash } from 'node:crypto';
-import { readFile, stat } from 'node:fs/promises';
-import { basename, extname } from 'node:path';
-import PQueue from 'p-queue';
 
 // Regex reutilizables top-level para evitar recreación frecuente
 const WORD_SPLIT_REGEX = /\s+/g;

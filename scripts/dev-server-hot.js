@@ -105,7 +105,7 @@ function checkRequiredDependencies() {
 	}
 	if (missing.length > 0) {
 		console.log(chalk.red('❌ Dependencias faltantes detectadas:'), missing.join(', '));
-		console.log(chalk.yellow('👉 Ejecuta: bun install')); 
+		console.log(chalk.yellow('👉 Ejecuta: bun install'));
 		return false;
 	}
 	return true;

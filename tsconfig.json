@@ -1,12 +1,7 @@
 {
   "compilerOptions": {
     "target": "esnext",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext",
-      "webworker"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext", "webworker"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
@@ -28,12 +23,8 @@
       /* Nota: tipos bun no incluidos porque 'bun-types' no está instalado. Añadir si se requiere autocompletado específico. */
     ],
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@components/*": [
-        "./src/components/*"
-      ]
+      "@/*": ["./src/*"],
+      "@components/*": ["./src/components/*"]
     },
     "strictNullChecks": true
   },
@@ -42,7 +33,10 @@
     "src/**/*.tsx",
     "vite.config.ts",
     "vitest.config.ts",
-    "src/**/*.d.ts"
+    "src/**/*.d.ts",
+    "tests/**/*.ts",
+    "tests/**/*.tsx",
+    "tests/types/**/*.d.ts"
   ],
   "exclude": [
     "node_modules",

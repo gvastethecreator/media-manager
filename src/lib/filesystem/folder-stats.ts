@@ -1,11 +1,14 @@
-import { db } from '@/lib/drizzle';
-import { folders } from '@/lib/drizzle/schema/index';
-import { emitProgress } from '@/lib/server/events.server';
-import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
-import type { EntityCreationStats } from '@/types/file-entity-mapper';
 import { randomUUID } from 'crypto';
 import { eq } from 'drizzle-orm';
 import path from 'path';
+import { db } from '@/lib/drizzle';
+import { folders } from '@/lib/drizzle/schema/index';
+import { folderStatsLogger } from '@/lib/logger/reindex-file-logger';
+import { emitProgress } from '@/lib/server/events.server';
+import { getFolderReindexCircuitBreaker } from '@/lib/system/circuit-breaker';
+import { generateOperationId, withOperationMonitoring } from '@/lib/system/reindex-monitor';
+import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
+import type { EntityCreationStats } from '@/types/file-entity-mapper';
 import type { DirectoryInfo } from './folder-scanner';
 import { scanFolder } from './folder-scanner';
 import { type FolderSyncResult, syncFoldersWithFileSystem } from './folder-sync';
@@ -15,8 +18,51 @@ import { type FolderSyncResult, syncFoldersWithFileSystem } from './folder-sync'
  * Ahora usa scanFolder() para obtener totalFiles y totalSize reales del sistema de archivos,
  * crea entidades correspondientes para cada archivo encontrado y agrega subcarpetas a la BD
  * 🆕 NUEVA FUNCIONALIDAD: Sincronización automática de carpetas con el sistema de archivos
+ * 🛡️ PROTECCIÓN: Circuit breaker para prevenir loops infinitos y operaciones fallidas
  */
 export async function updateFolderStats(
+	folderId: string,
+	processedPaths: Set<string> = new Set(),
+	maxDepth = 10,
+	currentDepth = 0,
+	enableSync = true,
+	emitProgressEvents = true
+): Promise<EntityCreationStats & { syncResult?: FolderSyncResult }> {
+	// 🛡️ Proteger con circuit breaker solo en el nivel raíz
+	if (currentDepth === 0) {
+		const circuitBreaker = getFolderReindexCircuitBreaker();
+		const operationId = generateOperationId('folder-reindex', folderId);
+
+		return withOperationMonitoring(
+			operationId,
+			{
+				folderId,
+				folderPath: 'unknown', // Se determinará dentro de la operación
+				type: 'single-folder',
+			},
+			async () => {
+				return circuitBreaker.execute(`folder-reindex-${folderId}`, async () => {
+					return await executeUpdateFolderStats(
+						folderId,
+						processedPaths,
+						maxDepth,
+						currentDepth,
+						enableSync,
+						emitProgressEvents
+					);
+				});
+			}
+		);
+	}
+
+	// Llamadas recursivas no usan circuit breaker para evitar overhead
+	return executeUpdateFolderStats(folderId, processedPaths, maxDepth, currentDepth, enableSync, emitProgressEvents);
+}
+
+/**
+ * Implementación interna de updateFolderStats sin circuit breaker
+ */
+async function executeUpdateFolderStats(
 	folderId: string,
 	processedPaths: Set<string> = new Set(),
 	maxDepth = 10,
@@ -41,6 +87,14 @@ export async function updateFolderStats(
 			});
 		} catch (error) {
 			console.warn('⚠️ Error en sincronización automática:', error);
+
+			// Log error to file for tracking
+			folderStatsLogger.logError('Error en sincronización automática de carpetas', {
+				folderId,
+				context: { currentDepth, enableSync },
+				error: error instanceof Error ? error : new Error(String(error)),
+			});
+
 			// Continuar con el indexado aunque falle la sincronización
 		}
 	}
@@ -64,6 +118,9 @@ export async function updateFolderStats(
 
 	// Evitar procesamiento duplicado y bucles infinitos
 	if (processedPaths.has(folder.path) || currentDepth >= maxDepth) {
+		console.warn(
+			`⚠️ Evitando reindexado: path=${folder.path}, processed=${processedPaths.has(folder.path)}, depth=${currentDepth}/${maxDepth}`
+		);
 		return { totalFiles: 0, processed: 0, successful: 0, failed: 0, errors: [] };
 	}
 	processedPaths.add(folder.path);
@@ -354,6 +411,15 @@ export async function processFilesWithProgress(
 			);
 		} catch (err) {
 			console.warn(`⚠️ [ETAPA 2] Error extrayendo metadata de ${item.path}:`, err);
+
+			// Log metadata extraction errors
+			folderStatsLogger.logWarning('Error extrayendo metadata de archivo', {
+				folderId,
+				context: {
+					filePath: item.path,
+					stage: 2,
+				},
+			});
 		} finally {
 			stage2Processed++;
 			if (stage2Processed % progressUpdateInterval === 0 || stage2Processed === totalFiles) {
@@ -380,6 +446,16 @@ export async function processFilesWithProgress(
 			);
 		} catch (err) {
 			console.warn(`⚠️ [ETAPA 3] Error procesando thumbnail de ${item.path}:`, err);
+
+			// Log thumbnail processing errors
+			folderStatsLogger.logWarning('Error procesando thumbnail de archivo', {
+				folderId,
+				context: {
+					filePath: item.path,
+					stage: 3,
+					entityId: item.entityId,
+				},
+			});
 		} finally {
 			stage3Processed++;
 			if (stage3Processed % progressUpdateInterval === 0 || stage3Processed === totalFiles) {

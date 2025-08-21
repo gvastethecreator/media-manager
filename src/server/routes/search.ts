@@ -1,9 +1,9 @@
+import { like, or, sql } from 'drizzle-orm';
+import express from 'express';
 import { db, getDbClient } from '@/lib/drizzle';
 import { isFts5Enabled } from '@/lib/drizzle/fts5';
 import { files } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { like, or, sql } from 'drizzle-orm';
-import express from 'express';
 import { searchImages } from '../services/search.service';
 
 const logger = serverLogger.withContext('SearchRoute');
