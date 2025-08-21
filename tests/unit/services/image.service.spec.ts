@@ -1,7 +1,7 @@
+import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 import { db } from '@/lib/drizzle';
 import { getEventStore } from '@/lib/server/events.server';
 import { imageService } from '@/services/image/image.service';
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
 
 // Utilidad simple para crear una imagen fake
 const fakeImage = (overrides: Partial<any> = {}) => ({

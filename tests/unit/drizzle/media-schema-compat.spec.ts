@@ -1,5 +1,5 @@
-import type { ImageBase } from '@/types/entities/image/base';
 import { describe, expect, it } from 'bun:test';
+import type { ImageBase } from '@/types/entities/image/base';
 
 // Nota: Este test no toca DB; solo verifica correspondencia de shape entre
 // el schema Drizzle y el tipo canónico ImageBase a nivel de claves fundamentales.

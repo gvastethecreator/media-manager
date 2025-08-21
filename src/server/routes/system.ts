@@ -1,7 +1,7 @@
 import express from 'express';
+import { getDatabaseInfo } from '@/lib/drizzle';
 import { circuitBreakerRegistry } from '@/lib/system/circuit-breaker';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
-import { getDatabaseInfo } from '@/lib/drizzle';
 import {
 	createDefaultSettingsData,
 	getNavigationData,
