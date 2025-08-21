@@ -12,15 +12,15 @@
     "rules": {
       "recommended": true,
       "complexity": {
-  "noForEach": "error",
-  "noExcessiveCognitiveComplexity": "off"
+        "noForEach": "error",
+        "noExcessiveCognitiveComplexity": "off"
       },
       "correctness": {
         "useExhaustiveDependencies": "warn",
         "noNodejsModules": "off",
         "noUnusedVariables": "off",
-  "useHookAtTopLevel": "off",
-  "noUnusedFunctionParameters": "off"
+        "useHookAtTopLevel": "off",
+        "noUnusedFunctionParameters": "off"
       },
       "suspicious": {
         "noExplicitAny": "off",
@@ -29,16 +29,16 @@
           "options": {
             "allow": ["log"]
           }
-  },
-  "noArrayIndexKey": "off",
-  "noEmptyBlockStatements": "off",
-  "useAwait": "off",
-  "noEvolvingTypes": "off"
+        },
+        "noArrayIndexKey": "off",
+        "noEmptyBlockStatements": "off",
+        "useAwait": "off",
+        "noEvolvingTypes": "off"
       },
       "nursery": {
-  "noNoninteractiveElementInteractions": "off",
-  "noShadow": "off",
-  "noAwaitInLoop": "off"
+        "noNoninteractiveElementInteractions": "off",
+        "noShadow": "off",
+        "noAwaitInLoop": "off"
       },
       "a11y": {
         "useAltText": "error",
@@ -49,7 +49,7 @@
         "useTemplate": "error",
         "useNodejsImportProtocol": "off",
         "useImportType": "off",
-  "noParameterAssign": "error",
+        "noParameterAssign": "error",
         "useAsConstAssertion": "error",
         "useDefaultParameterLast": "error",
         "useEnumInitializers": "error",
@@ -58,20 +58,20 @@
         "noUnusedTemplateLiteral": "error",
         "useNumberNamespace": "error",
         "noInferrableTypes": "error",
-  "noUselessElse": "error",
-  "noNestedTernary": "off",
-  "useFilenamingConvention": "off",
-  "noParameterProperties": "off",
-  "useConsistentMemberAccessibility": "off",
-  "noEnum": "off",
-  "noExportedImports": "off",
-  "useBlockStatements": "off"
+        "noUselessElse": "error",
+        "noNestedTernary": "off",
+        "useFilenamingConvention": "off",
+        "noParameterProperties": "off",
+        "useConsistentMemberAccessibility": "off",
+        "noEnum": "off",
+        "noExportedImports": "off",
+        "useBlockStatements": "off"
       },
       "performance": {
         "noDelete": "error",
-  "noImgElement": "off",
-  "noNamespaceImport": "off",
-  "useTopLevelRegex": "off"
+        "noImgElement": "off",
+        "noNamespaceImport": "off",
+        "useTopLevelRegex": "off"
       }
     }
   },
@@ -89,7 +89,7 @@
       "**/*.jsx",
       "**/*.json",
       "!src/components/features/file-browser/file-browser-backup.tsx",
-  "!**/*.backup.*",
+      "!**/*.backup.*",
       "!**/node_modules/**",
       "!**/dist/**",
       "!**/build/**",

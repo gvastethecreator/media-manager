@@ -1,5 +1,5 @@
-import { processFilesWithProgress } from '@/lib/filesystem/folder-stats';
 import { describe, expect, it } from 'bun:test';
+import { processFilesWithProgress } from '@/lib/filesystem/folder-stats';
 
 // Stub minimal del mapper con delays controlados
 class StubMapper {

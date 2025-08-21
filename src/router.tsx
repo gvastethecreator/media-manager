@@ -1,5 +1,6 @@
 import { createBrowserRouter, useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/main-layout';
+import ReindexLogsViewer from '@/components/system/ReindexLogsViewer';
 // Importar todas las vistas
 import { AllImagesView } from '@/components/views/all-images/all-images-view';
 import Dashboard from '@/components/views/dashboard/dashboard';
@@ -25,7 +26,6 @@ import { WildcardsView } from '@/components/views/wildcards/wildcards-view';
 import { WorkflowContentView } from '@/components/views/workflows/workflow-content-view';
 import { WorkflowsView } from '@/components/views/workflows/workflows-view';
 import { WorldItemsView } from '@/components/views/world-items/world-items-view';
-import ReindexLogsViewer from '@/components/system/ReindexLogsViewer';
 
 // Wrapper components para pasar el parámetro de la URL
 const FolderContentWrapper = () => {

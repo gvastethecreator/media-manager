@@ -2,12 +2,12 @@
 
 import express from 'express';
 import path from 'path';
-import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { initializeFileLogging } from '@/lib/logger/init-file-logging';
+import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { errorLogger, logError, logInfo, requestLogger } from './middleware/logging';
-import { reindexLogsRouter } from './routes/api/reindex-logs.js';
 import activityRouter from './routes/activity';
 import { albumsRouter } from './routes/albums.js';
+import { reindexLogsRouter } from './routes/api/reindex-logs.js';
 import { audioRouter } from './routes/audio.js';
 import charactersRouter from './routes/characters';
 import collectionsRouter from './routes/collections';
