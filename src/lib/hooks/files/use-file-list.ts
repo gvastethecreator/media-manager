@@ -44,6 +44,9 @@ export function useFileList() {
 				case 'size':
 					comparison = ((a as any).size || 0) - ((b as any).size || 0);
 					break;
+				default:
+					comparison = 0;
+					break;
 			}
 			return sortOrder === 'asc' ? comparison : -comparison;
 		});

@@ -9,7 +9,7 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useVideoStore } from '@/store/entities/video';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { VideoWithStats } from '@/types/entities/video';
-import { type AnyEntityWithStats, EntityStatsType, isVideoWithStats } from '@/types/migration';
+import { type AnyEntityWithStats, isVideoWithStats } from '@/types/migration';
 
 // Logger para depuración
 const logger = clientLogger.withContext('VideoContentView');
@@ -189,9 +189,8 @@ export function VideoContentView({ videoId: propVideoId }: VideoContentViewProps
 		>
 			<FileBrowser
 				className="h-full"
-				entityType={EntityStatsType.VIDEO}
-				filterId={currentVideoId}
-				filterType="video"
+				isLoading={isLoading}
+				items={getVideos() as unknown as AnyEntityWithStats[]}
 				onItemClick={handleVideoSelect}
 				onItemDoubleClick={handleVideoDoubleClick}
 			/>

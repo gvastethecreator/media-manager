@@ -17,10 +17,6 @@ interface UseSelectoProps {
 	onDeselect?: (elements: Element[]) => void;
 	/** Si la selección está habilitada */
 	enabled?: boolean;
-	/** Color del área de selección */
-	selectColor?: string;
-	/** Opacidad del área de selección */
-	selectOpacity?: number;
 }
 
 export function useSelecto({
@@ -29,8 +25,6 @@ export function useSelecto({
 	onSelect,
 	onDeselect,
 	enabled = true,
-	selectColor = '#3b82f6',
-	selectOpacity = 0.1,
 }: UseSelectoProps = {}) {
 	const selectoRef = useRef<Selecto | null>(null);
 	const [isActive, setIsActive] = useState(false);
@@ -73,10 +67,10 @@ export function useSelecto({
 			// Si no se presiona Ctrl, limpiar selección previa
 			if (!(e.inputEvent?.ctrlKey || e.inputEvent?.metaKey)) {
 				const selectedElements = document.querySelectorAll('[data-selected="true"]');
-				selectedElements.forEach((el) => {
+				for (const el of selectedElements) {
 					el.setAttribute('data-selected', 'false');
 					el.classList.remove('selecto-selected');
-				});
+				}
 				onDeselect?.(Array.from(selectedElements));
 			}
 		});
@@ -84,18 +78,22 @@ export function useSelecto({
 		selecto.on('selectEnd', (e: any) => {
 			setIsActive(false);
 
-			const { selected, added, removed } = e;
+			const { added, removed } = e;
 
 			// Actualizar clases y atributos de elementos seleccionados
-			added?.forEach((el: Element) => {
-				el.setAttribute('data-selected', 'true');
-				el.classList.add('selecto-selected');
-			});
+			if (added) {
+				for (const el of added as Element[]) {
+					el.setAttribute('data-selected', 'true');
+					el.classList.add('selecto-selected');
+				}
+			}
 
-			removed?.forEach((el: Element) => {
-				el.setAttribute('data-selected', 'false');
-				el.classList.remove('selecto-selected');
-			});
+			if (removed) {
+				for (const el of removed as Element[]) {
+					el.setAttribute('data-selected', 'false');
+					el.classList.remove('selecto-selected');
+				}
+			}
 
 			// Llamar callbacks
 			if (added?.length > 0) {
@@ -110,15 +108,19 @@ export function useSelecto({
 			// Optimización: actualizar solo elementos visibles
 			const { added, removed } = e;
 
-			added?.forEach((el: Element) => {
-				if (!el.classList.contains('selecto-selecting')) {
-					el.classList.add('selecto-selecting');
+			if (added) {
+				for (const el of added as Element[]) {
+					if (!el.classList.contains('selecto-selecting')) {
+						el.classList.add('selecto-selecting');
+					}
 				}
-			});
+			}
 
-			removed?.forEach((el: Element) => {
-				el.classList.remove('selecto-selecting');
-			});
+			if (removed) {
+				for (const el of removed as Element[]) {
+					el.classList.remove('selecto-selecting');
+				}
+			}
 		});
 
 		selectoRef.current = selecto;
@@ -137,19 +139,19 @@ export function useSelecto({
 		}
 
 		const allElements = document.querySelectorAll(selectableTargets.join(', '));
-		allElements.forEach((el) => {
+		for (const el of allElements) {
 			el.setAttribute('data-selected', 'true');
 			el.classList.add('selecto-selected');
-		});
+		}
 		onSelect?.(Array.from(allElements));
 	}, [selectableTargets, onSelect]);
 
 	const clearSelection = useCallback(() => {
 		const selectedElements = document.querySelectorAll('[data-selected="true"]');
-		selectedElements.forEach((el) => {
+		for (const el of selectedElements) {
 			el.setAttribute('data-selected', 'false');
 			el.classList.remove('selecto-selected', 'selecto-selecting');
-		});
+		}
 		onDeselect?.(Array.from(selectedElements));
 	}, [onDeselect]);
 
