@@ -3,41 +3,30 @@ import {
 	ArrowDown,
 	ArrowRight,
 	ArrowUp,
-	BookImage,
-	Box,
 	Calendar,
-	Camera,
 	Clock,
 	Copy,
 	Download,
 	Edit,
 	FileText,
-	FolderIcon,
 	GalleryHorizontal,
 	Grid,
-	ImageIcon,
 	Info,
 	LayoutGrid,
 	List as ListIcon,
-	MapPin,
+	Table as TableIcon,
 	PanelLeftClose,
 	PanelLeftOpen,
 	PanelRightClose,
 	PanelRightOpen,
 	Plus,
 	Settings,
-	Star,
-	TagIcon,
 	Trash2,
-	User2,
 	X,
-	ZoomIn,
-	ZoomOut,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
-import { useDebouncedCallback } from 'use-debounce';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 // Eliminado dropdown de cambio de vista (no debe existir)
@@ -85,8 +74,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	const setSortOptions = useViewOptionsStore((state: any) => state.setSortOptions);
 	const searchQuery = useViewOptionsStore((state: any) => state.searchQuery);
 	const setSearchQuery = useViewOptionsStore((state: any) => state.setSearchQuery);
-	const itemSize = useViewOptionsStore((state: any) => state.itemSize);
-	const setItemSize = useViewOptionsStore((state: any) => state.setItemSize);
+	// tamaño de item no utilizado en esta toolbar
 
 	// Crear versión debounced del setViewMode para mejorar performance
 	const { setViewMode: setViewModeDebounced } = useDebouncedViewMode();
@@ -218,23 +206,9 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	}, [invertSelection, allItemIds]);
 
 	// 🔄 Manejador de cambio de tamaño optimizado con debounce
-	const debouncedSizeChange = useDebouncedCallback(
-		(newSize: number) => {
-			setItemSize(newSize);
-		},
-		100 // Debounce de 100ms para evitar renders excesivos
-	);
+	// sin debounce de tamaño
 
-	const handleSizeChange = useCallback(
-		(delta: number) => {
-			const newSize = Math.max(50, Math.min(300, itemSize + delta));
-			// Actualizar inmediatamente el estado local para feedback visual rápido
-			setItemSize(newSize);
-			// También aplicar el debounce por si el usuario hace múltiples clicks rápidos
-			debouncedSizeChange(newSize);
-		},
-		[itemSize, setItemSize, debouncedSizeChange]
-	);
+	// controles de tamaño no usados en esta toolbar minimal
 
 	const renderSortButtons = () => {
 		const isNameActive = sortOptions.some((opt: any) => opt.field === 'name');
@@ -361,6 +335,17 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 				>
 					<ListIcon className="h-4 w-4" />
 				</Button>
+				<Button
+					aria-label="Vista Tabla"
+					data-active={viewMode === 'table'}
+					data-testid="view-mode-table-btn"
+					onClick={() => setViewMode('table')}
+					size="icon"
+					title="Vista Tabla"
+					variant={viewMode === 'table' ? 'secondary' : 'ghost'}
+				>
+					<TableIcon className="h-4 w-4" />
+				</Button>
 			</div>
 		);
 	};
@@ -441,29 +426,6 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 		);
 	};
 
-	const renderSizeControls = () => (
-		<div className="flex items-center gap-0.5">
-			<Button
-				className="h-7 w-7 hover:bg-accent"
-				onClick={() => handleSizeChange(-10)}
-				size="icon"
-				title="Reducir tamaño de miniaturas"
-				variant="ghost"
-			>
-				<ZoomOut className="h-3.5 w-3.5" />
-			</Button>
-			<Button
-				className="h-7 w-7 hover:bg-accent"
-				onClick={() => handleSizeChange(10)}
-				size="icon"
-				title="Aumentar tamaño de miniaturas"
-				variant="ghost"
-			>
-				<ZoomIn className="h-3.5 w-3.5" />
-			</Button>
-		</div>
-	);
-
 	// 🔄 Añadir campo de búsqueda
 	const renderSearchInput = () => (
 		<div className="ml-0 flex items-center gap-1">
@@ -502,31 +464,6 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 				);
 			case 'folder-content':
 				return null;
-			default:
-				return null;
-		}
-	};
-
-	const _renderIcon = () => {
-		switch (currentView) {
-			case 'all-images':
-				return <ImageIcon className="mr-2 h-4 w-4 text-primary" />;
-			case 'favorites':
-				return <Star className="mr-2 h-4 w-4 text-yellow-500" />;
-			case 'collection-content':
-				return <BookImage className="mr-2 h-4 w-4 text-blue-500" />;
-			case 'folder-content':
-				return <FolderIcon className="mr-2 h-4 w-4 text-yellow-500" />;
-			case 'tag-content':
-				return <TagIcon className="mr-2 h-4 w-4 text-green-500" />;
-			case 'album-content':
-				return <Camera className="mr-2 h-4 w-4 text-purple-500" />;
-			case 'character-content':
-				return <User2 className="mr-2 h-4 w-4 text-red-500" />;
-			case 'place-content':
-				return <MapPin className="mr-2 h-4 w-4 text-cyan-500" />;
-			case 'world-item-content':
-				return <Box className="mr-2 h-4 w-4 text-orange-500" />;
 			default:
 				return null;
 		}

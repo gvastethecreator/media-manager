@@ -1,8 +1,8 @@
-import { Folder, Images, RefreshCw } from 'lucide-react';
+import { Folder, Images } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { PerformanceMetricsPanel } from '@/components/debug/performance-metrics-panel';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { FileBrowser2 } from '@/components/features/file-browser-2/file-browser-2';
 import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { useFolder, useReindexFolder } from '@/lib/api/folders';
@@ -12,12 +12,11 @@ import { useImageStore } from '@/store/entities/image';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useUIStore } from '@/store/ui.store';
 import type { ImageWithStats } from '@/types/entities/image';
-import { type AnyEntityWithStats, EntityStatsType } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');
 
-// Función auxiliar para convertir ImageWithStats a ImageItem
 // Función auxiliar para convertir ImageWithStats a ImageItem
 const imageWithStatsToImageItem = (img: ImageWithStats): ImageItem => ({
 	id: img.id,
@@ -49,13 +48,7 @@ function buildEmptySelectionState() {
 	);
 }
 
-function buildLoadingState() {
-	return (
-		<div className="flex h-full flex-col items-center justify-center gap-4">
-			<EmptyState description="Obteniendo información de la carpeta." icon={RefreshCw} title="Cargando carpeta..." />
-		</div>
-	);
-}
+// (estado de carga visual no usado: FileBrowser2 se monta también en loading)
 
 function buildErrorState() {
 	return (
@@ -140,18 +133,10 @@ export function FolderContentView({
 	// 📂 Obtener información de la carpeta actual desde props
 	const currentFolderId = propFolderId || null;
 
-	// 🔄 Cargar información de la carpeta desde la API
-	const { data: folderData, isLoading: isFolderLoading, error: folderError } = useFolder(currentFolderId || '');
+	// Estado de carpeta (loading/error) desde React Query
+	const { isLoading: isFolderLoading, error: folderError } = useFolder(currentFolderId || '');
 
-	console.log('🔍 FolderContentView - Debug data:', {
-		currentFolderId,
-		folderData,
-		isFolderLoading,
-		folderError: folderError?.message || folderError,
-	});
-
-	// Estados globales para panel de detalles y visor
-	const { isVisible, setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
+	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 	const { openViewer } = useFileViewerStore();
 	const { getImagesByFolder, folderLoadState, fetchImages } = useImageStore();
 
@@ -316,9 +301,8 @@ export function FolderContentView({
 	} else if (isFolderLoading) {
 		// Montar FileBrowser ya en loading para exponer toolbar/testids; mostrará spinner interno
 		content = (
-			<FileBrowser
-				className="h-full"
-				entityType={EntityStatsType.IMAGE}
+			<FileBrowser2
+				entityType="image"
 				filterId={currentFolderId}
 				filterType="folder"
 				onItemClick={handleImageSelect}
@@ -342,9 +326,8 @@ export function FolderContentView({
 			showFileBrowser = false; // Estado vacío dedicado
 		} else {
 			content = (
-				<FileBrowser
-					className="h-full"
-					entityType={EntityStatsType.IMAGE}
+				<FileBrowser2
+					entityType="image"
 					filterId={currentFolderId}
 					filterType="folder"
 					onItemClick={handleImageSelect}
