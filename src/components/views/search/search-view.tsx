@@ -25,7 +25,7 @@ interface SearchFilters {
 	folders?: string[];
 }
 
-const _PAGE_SIZE = 100;
+// const _PAGE_SIZE = 100; // No usado por ahora
 
 /**
  * ✅ MIGRADO: SearchView ahora usa FileBrowserV2 con EntityWithStats
@@ -89,7 +89,12 @@ export function SearchView(_props: ViewProps) {
 		}
 		if (items && items.length > 0) {
 			return (
-				<FileBrowser entityType="mixed" onItemDoubleClick={handleItemDoubleClick} onItemSelect={handleItemSelect} />
+				<FileBrowser
+					isLoading={isLoading}
+					items={items as unknown as AnyEntityWithStats[]}
+					onItemClick={handleItemSelect}
+					onItemDoubleClick={handleItemDoubleClick}
+				/>
 			);
 		}
 		if (filters.query) {

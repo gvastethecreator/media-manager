@@ -15,7 +15,6 @@ import { useToast } from '@/components/ui/use-toast';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import type { ImageWithStats } from '@/types/entities/image';
 import type { AnyEntityWithStats } from '@/types/migration';
-import { EntityStatsType } from '@/types/migration';
 
 interface AllImagesContentViewProps {
 	images: ImageWithStats[];
@@ -238,13 +237,10 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 			{/* FileBrowser para mostrar todas las imágenes */}
 			<FileBrowser
 				className="min-h-[600px]"
-				entityType={EntityStatsType.IMAGE}
-				layout="vertical"
-				mode="auto"
+				isLoading={isLoading}
+				items={images as unknown as AnyEntityWithStats[]}
+				onItemClick={handleImageClick}
 				onItemDoubleClick={handleImageDoubleClick}
-				onItemSelect={handleImageClick}
-				size="md"
-				variant="default"
 			/>
 
 			{/* Footer con información adicional */}

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
-export type ViewMode = 'grid' | 'list' | 'cards' | 'masonry' | 'simple-grid' | 'table';
+export type ViewMode = 'grid' | 'list' | 'cards' | 'masonry' | 'simple-grid' | 'table' | 'single';
 
 export type SortOption = {
 	field: string;

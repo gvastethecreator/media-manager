@@ -51,7 +51,7 @@ class ProgressTrackingServiceImpl {
 	private eventListeners = new Map<string, ((operation: ProgressOperation) => void)[]>();
 
 	generateId(): string {
-		return `op_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
+		return `op_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;
 	}
 
 	startOperation(type: OperationType, options: Partial<ProgressOperation>): string {
@@ -210,7 +210,9 @@ class ProgressTrackingServiceImpl {
 	private emit(event: string, operation: ProgressOperation): void {
 		const listeners = this.eventListeners.get(event);
 		if (listeners) {
-			listeners.forEach((listener) => listener(operation));
+			for (const listener of listeners) {
+				listener(operation);
+			}
 		}
 	}
 }

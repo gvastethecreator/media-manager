@@ -175,6 +175,8 @@ export const useNavigation = () => {
 				case 'all':
 					breadcrumbs.push({ name: 'Todas las imágenes', path: '/images/all', isActive: true });
 					break;
+				default:
+					break;
 			}
 
 			return breadcrumbs;

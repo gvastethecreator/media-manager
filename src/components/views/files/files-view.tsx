@@ -8,7 +8,6 @@ import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
 import { useImageStore } from '@/store/entities/image';
 import { useVideoStore } from '@/store/entities/video';
-import { EntityStatsType } from '@/types/file-browser/entity-stats';
 import type { AnyEntityWithStats } from '@/types/migration';
 import type { ViewProps } from '../types';
 
@@ -160,6 +159,7 @@ export function FilesView(_: ViewProps) {
 							fetchAudios();
 							fetchDocuments();
 						}}
+						type="button"
 					>
 						Intentar de nuevo
 					</button>
@@ -171,8 +171,7 @@ export function FilesView(_: ViewProps) {
 	return (
 		<BaseContentView description={`${fileCount} archivos en total`} title="Todos los archivos">
 			<FileBrowser
-				entityType={EntityStatsType.IMAGE}
-				isLoading={isLoading} // Usamos image como base para el FileBrowser
+				isLoading={isLoading}
 				items={allFiles}
 				onItemClick={handleFileClick}
 				onItemDoubleClick={handleFileDoubleClick}

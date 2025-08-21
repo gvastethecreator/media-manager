@@ -6,7 +6,7 @@
  * - Click derecho: selección contextual
  */
 
-import { startTransition, useCallback, useMemo, useRef, useState } from 'react';
+import { startTransition, useCallback, useMemo, useRef } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useSelectionStore } from '@/store/selection.store';
 import type { AnyEntityWithStats } from '@/types/migration';
@@ -44,14 +44,11 @@ export function useAdvancedSelection({
 		setSelectedIds,
 		addToSelection,
 		removeFromSelection,
-		toggleSelection,
 		clearSelection,
-		selectRange,
 		isItemSelected,
 	} = useSelectionStore();
 
-	// Estado optimista para respuesta inmediata de UI
-	const [optimisticSelection, setOptimisticSelection] = useState<string[]>([]);
+	// Estado optimista eliminado: no se consumía en la UI
 
 	// Ref para rastrear el último índice seleccionado para el rango
 	const lastSelectedIndexRef = useRef<number>(-1);
@@ -118,8 +115,6 @@ export function useAdvancedSelection({
 		onSelect: handleSelectoSelect,
 		onDeselect: handleSelectoDeselect,
 		enabled: enableDragSelection,
-		selectColor: '#3b82f6',
-		selectOpacity: 0.1,
 	});
 
 	// Función auxiliar para obtener items en un rango
@@ -142,16 +137,7 @@ export function useAdvancedSelection({
 			const isCtrlClick = e.ctrlKey || e.metaKey;
 			const isCurrentlySelected = isItemSelected(item.id);
 
-			// Respuesta visual inmediata con estado optimista
-			if (!(isShiftClick || isCtrlClick)) {
-				// Para click simple, mostrar inmediatamente la selección
-				setOptimisticSelection([item.id]);
-			} else if (isCtrlClick) {
-				// Para Ctrl+click, actualizar inmediatamente
-				setOptimisticSelection((prev) =>
-					isCurrentlySelected ? prev.filter((id) => id !== item.id) : [...prev, item.id]
-				);
-			}
+			// Respuesta visual inmediata: usamos el store directamente
 
 			// Logging asíncrono para no bloquear
 			asyncLog('debug', '🖱️ Click detectado:', {
@@ -201,8 +187,7 @@ export function useAdvancedSelection({
 					asyncLog('debug', '🎯 Selección simple:', item.id);
 				}
 
-				// Limpiar estado optimista después de actualizar el store
-				setOptimisticSelection([]);
+				// Sin estado optimista: el store refleja la selección actual
 			});
 
 			// Callbacks diferidos para no bloquear la UI

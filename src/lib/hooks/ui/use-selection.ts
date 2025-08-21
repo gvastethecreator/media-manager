@@ -114,6 +114,8 @@ export const useSelectionKeyboard = () => {
 						selectionLogger.info('⌨️ Delete - Borrar seleccionados (TODO)');
 					}
 					break;
+				default:
+					break;
 			}
 		},
 		[store]
