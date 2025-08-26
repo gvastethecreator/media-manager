@@ -1,6 +1,7 @@
 'use client';
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
+import { ensureDefaultProfile } from '@/lib/utils/profile/profile-utils';
 import { type CreateProfileInput, type ProfileExtended, type UpdateProfileInput } from '@/services/profile';
 import { profileClient } from '@/services/profile/client';
 import { toastService } from '@/services/toast/toast.service';
@@ -104,48 +105,14 @@ export function SettingsProvider({ children }: { children: ReactNode }) {
 	// Cargar perfiles
 	const loadProfiles = useCallback(async () => {
 		try {
+			// Asegurar que existe al menos un perfil por defecto
+			await ensureDefaultProfile();
+
+			// Cargar perfiles después de asegurar que existe al menos uno
 			const profiles = await profileClient.getProfiles();
 
-			// Si no hay perfiles, crear uno por defecto
-			if (profiles.length === 0) {
-				const _defaultProfile = await profileClient.createProfile({
-					name: 'Default',
-					emoji: '🐸',
-					color: '#10b981', // esmeralda
-					isActive: true,
-				});
-
-				// Recargar los perfiles
-				const updatedProfiles = await profileClient.getProfiles();
-				// Buscar el perfil activo por una propiedad diferente (presumiblemente existe una propiedad id)
-				const activeProfile = updatedProfiles.find((p) => p.id === _defaultProfile.id);
-
-				setSettings((prev) => ({
-					...prev,
-					profiles: updatedProfiles,
-					activeProfile: activeProfile?.id || null,
-				}));
-				return;
-			}
-
-			// Aquí asumimos que el primer perfil es el activo si no hay información específica
-			const activeProfile = profiles[0];
-
-			// Si no hay perfil activo, activar el primero
-			if (!activeProfile && profiles.length > 0) {
-				await profileClient.setActiveProfile(profiles[0].id);
-
-				// Recargar los perfiles
-				const updatedProfiles = await profileClient.getProfiles();
-				const newActiveProfile = updatedProfiles[0]; // El primer perfil después de establecerlo como activo
-
-				setSettings((prev) => ({
-					...prev,
-					profiles: updatedProfiles,
-					activeProfile: newActiveProfile?.id || null,
-				}));
-				return;
-			}
+			// Encontrar el perfil activo (debería existir al menos uno)
+			const activeProfile = profiles.find((p) => p.isActive) || profiles[0];
 
 			setSettings((prev) => ({
 				...prev,

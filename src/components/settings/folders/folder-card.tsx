@@ -59,27 +59,35 @@ function CardHeaderSection({
 	selectedFolder,
 }: CardHeaderSectionProps) {
 	return (
-		<div className="flex items-start justify-between">
+		<header className="flex items-start justify-between" data-density="compact">
 			<div className="min-w-0 flex-1">
-				<div className="flex items-center gap-2">
-					<div className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-md bg-primary/10">
+				{/* Breadcrumb compacto */}
+				{parentFolderName && (
+					<div className="mb-0.5 flex items-center text-[10px] text-muted-foreground">
+						<span className="truncate">{parentFolderName}</span>
+						<span className="mx-1">/</span>
+					</div>
+				)}
+
+				<div className="flex items-center gap-1.5">
+					<div className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded bg-primary/10">
 						{folder.emoji ? (
-							<span className="text-sm">{folder.emoji}</span>
+							<span className="text-[10px]">{folder.emoji}</span>
 						) : (
-							<Folder className="h-4 w-4 text-primary" />
+							<Folder className="h-2.5 w-2.5 text-primary" />
 						)}
 					</div>
 					<div className="min-w-0 flex-1">
-						<h3 className="truncate font-medium text-sm">{folder.name}</h3>
-						{parentFolderName && <p className="truncate text-muted-foreground text-xs">en {parentFolderName}</p>}
+						<h3 className="truncate font-medium text-[12px] leading-tight">{folder.name}</h3>
 					</div>
 				</div>
-				<div className="mt-2 flex items-center gap-2">
+
+				<div className="mt-1 flex items-center gap-1">
 					<FolderIndexStatusBadge lastIndexed={folder.lastIndexed} status={indexStatus} />
 					{statusMessage}
 				</div>
 			</div>
-			<div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
+			<div className="flex items-center gap-0.5 opacity-0 transition-opacity group-hover:opacity-100">
 				{isEditing ? (
 					<EditModeControls isDisabled={isGloballyProcessing} onCancel={onCancelEdit} onSave={onSaveEdit} />
 				) : (
@@ -98,7 +106,7 @@ function CardHeaderSection({
 					/>
 				)}
 			</div>
-		</div>
+		</header>
 	);
 }
 
@@ -216,10 +224,12 @@ export function FolderCard({
 		>
 			<Card
 				className={cn(
-					'h-full overflow-hidden border transition-all hover:shadow-md',
+					'@container/card h-full max-h-48 overflow-hidden border transition-all hover:shadow-md',
+					'[&[data-density="compact"]]:max-h-44',
 					isReindexing && 'ring-2 ring-primary/20',
 					showCompleteAnimation && 'ring-2 ring-emerald-400/20'
 				)}
+				data-density="compact"
 			>
 				{/* Indicador visual de procesamiento */}
 				<FolderProgressIndicator
@@ -228,9 +238,12 @@ export function FolderCard({
 					showCompleteAnimation={showCompleteAnimation}
 				/>
 
-				<CardContent className="p-4">
-					<div className="space-y-3">
-						{/* Header compacto extraído */}
+				<CardContent
+					className="@container/content p-2.5 [&[data-density='compact']]:p-2 [&[data-density='compact']]:text-[13px]"
+					data-density="compact"
+				>
+					<div className="space-y-1.5 [&[data-density='compact']]:space-y-1" data-density="compact">
+						{/* Header con breadcrumb y controles */}
 						<CardHeaderSection
 							enterEdit={() => setIsEditing(true)}
 							folder={folder}
@@ -250,41 +263,44 @@ export function FolderCard({
 							statusMessage={statusMessage}
 						/>
 
-						{/* Grid de miniaturas y estadísticas */}
-						<div className="flex items-center gap-3">
-							{/* Thumbnail grid más pequeño */}
+						{/* Main content section */}
+						<section className="@[300px]:gap-3 flex items-center gap-2" data-density="compact">
+							{/* Thumbnail micro */}
 							<div className="flex-shrink-0">
 								{folderStats?.recentImages && folderStats.recentImages.length > 0 ? (
-									<div className="relative h-12 w-12">
+									<div className="relative h-8 w-8 @[280px]:h-10 @[280px]:w-10">
 										<ThumbnailGrid
 											images={folderStats.recentImages.slice(0, 4)}
 											totalImages={folderStats.totalImages || 0}
+											showCount={false}
 										/>
 									</div>
 								) : (
-									<div className="flex h-12 w-12 items-center justify-center rounded-md border-2 border-muted-foreground/20 border-dashed bg-muted/30">
-										<Folder className="h-5 w-5 text-muted-foreground/50" />
+									<div className="@[280px]:h-10 @[280px]:w-10 flex h-8 w-8 items-center justify-center rounded border border-dashed bg-muted/30 border-muted-foreground/20">
+										<Folder className="h-3 w-3 text-muted-foreground/50" />
 									</div>
 								)}
 							</div>
 
-							{/* Estadísticas compactas */}
+							{/* Metrics compactos */}
 							<div className="min-w-0 flex-1">
 								<FolderStatsDisplay folder={folder} folderStats={folderStats} />
 							</div>
-						</div>
+						</section>
 
-						{/* Error display si existe */}
+						{/* Error display */}
 						<FolderErrorDisplay folder={folder} />
 
-						{/* Detalles del proceso */}
+						{/* Footer con detalles del proceso */}
 						{(isReindexing || (processStatus?.folderId === folder.id && (processStatus?.progress ?? 0) > 0)) && (
-							<FolderProcessingDetails
-								isReindexing={isReindexing}
-								lastProgress={lastProgress}
-								processStatus={processStatus}
-								subfolders={subfolders}
-							/>
+							<footer className="border-border border-t pt-1.5" data-density="compact">
+								<FolderProcessingDetails
+									isReindexing={isReindexing}
+									lastProgress={lastProgress}
+									processStatus={processStatus}
+									subfolders={subfolders}
+								/>
+							</footer>
 						)}
 					</div>
 				</CardContent>

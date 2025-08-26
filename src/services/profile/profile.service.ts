@@ -113,16 +113,9 @@ class ProfileServiceImpl {
 			const queryWithPagination = query.limit(limit).offset((page - 1) * limit);
 
 			// 5. Ejecutar consulta
-			console.log('[ProfileService] Debug queryWithPagination type:', typeof queryWithPagination);
-			console.log('[ProfileService] Debug queryWithPagination constructor:', queryWithPagination?.constructor?.name);
-			console.log('[ProfileService] Debug queryWithPagination keys:', Object.keys(queryWithPagination));
-
 			const drizzleProfiles = await queryWithPagination;
 
-			console.log('[ProfileService] Debug drizzleProfiles type:', typeof drizzleProfiles);
-			console.log('[ProfileService] Debug drizzleProfiles is array:', Array.isArray(drizzleProfiles));
-			console.log('[ProfileService] Debug drizzleProfiles length:', drizzleProfiles?.length);
-			console.log('[ProfileService] Debug drizzleProfiles constructor:', drizzleProfiles?.constructor?.name); // 6. Restructurar resultados para compatibilidad con el tipo ProfileExtended
+			// 6. Restructurar resultados para compatibilidad con el tipo ProfileExtended
 			const drizzleResults = drizzleProfiles.map((raw: any) => ({
 				id: raw.id,
 				name: raw.name,
