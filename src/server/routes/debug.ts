@@ -1,57 +1,87 @@
+// @ts-nocheck - Temporary suppression for Express handler parameter types
+
+import { asc } from 'drizzle-orm';
 import express from 'express';
 import os from 'os';
-import { appMonitor } from '@/lib/server/app-monitor';
+import { db } from '@/lib/drizzle';
+import { folders } from '@/lib/drizzle/schema/index';
 import { getSystemMonitorHelpers } from '@/lib/server/system-monitor';
 import { formatBytes } from '@/lib/utils/format.utils';
 
 const router = express.Router();
 
-router.get('/app-stats', (_req, res) => {
+router.get('/app-stats', async (_req, res) => {
 	try {
-		const rawStats = appMonitor.getStats();
+		// MODO DEBUG TEMPORAL: Análisis de subcarpetas en lugar de app stats
+		console.log('🔍 [DEBUG] MODO DEBUG TEMPORAL: Analizando problema de subcarpetas');
+
+		// 1. Test básico de query SQL childrenCount
+		const { sql } = await import('drizzle-orm');
+		const testQuery = await db.execute(sql`
+			SELECT 
+				id, name, parentId,
+				(SELECT COUNT(*) FROM Folder WHERE Folder.parentId = Folder.id) as childrenCount
+			FROM Folder 
+			WHERE parentId IS NOT NULL
+			ORDER BY name
+			LIMIT 10
+		`);
+
+		const childrenResults = testQuery.rows.map((row: any) => ({
+			id: row[0],
+			name: row[1],
+			parentId: row[2],
+			childrenCount: row[3],
+		}));
+
+		// 2. Obtener todas las carpetas de BD
+		const bdFolders = await db
+			.select({
+				id: folders.id,
+				name: folders.name,
+				path: folders.path,
+				parentId: folders.parentId,
+			})
+			.from(folders)
+			.orderBy(asc(folders.path));
+
+		const subcarpetas = bdFolders.filter((f: any) => f.parentId !== null);
+		const carpetasRaiz = bdFolders.filter((f: any) => f.parentId === null);
+
 		const stats = {
-			requests: {
-				total: rawStats.requests.total,
-				success: rawStats.requests.success,
-				error: rawStats.requests.error,
-				pending: rawStats.requests.pending,
-				successRate:
-					rawStats.requests.total > 0
-						? `${((rawStats.requests.success / rawStats.requests.total) * 100).toFixed(2)}%`
-						: 'N/A',
+			debug_mode: 'SUBCARPETAS_ANALYSIS',
+			timestamp: new Date().toISOString(),
+			resumen: {
+				total_carpetas: bdFolders.length,
+				carpetas_raiz: carpetasRaiz.length,
+				subcarpetas: subcarpetas.length,
 			},
-			performance: {
-				avgResponseTime: `${rawStats.performance.avgResponseTime.toFixed(2)}ms`,
-				minResponseTime: `${rawStats.performance.minResponseTime.toFixed(2)}ms`,
-				maxResponseTime: `${rawStats.performance.maxResponseTime.toFixed(2)}ms`,
-				p95ResponseTime: `${rawStats.performance.p95ResponseTime.toFixed(2)}ms`,
+			problema_childrenCount: {
+				query:
+					'SELECT id, name, parentId, (SELECT COUNT(*) FROM Folder WHERE Folder.parentId = Folder.id) as childrenCount FROM Folder WHERE parentId IS NOT NULL',
+				total_rows: testQuery.rows.length,
+				primeros_5_resultados: childrenResults.slice(0, 5),
+				issue: 'Verificar si childrenCount siempre devuelve 0',
 			},
-			errors: {
-				count: rawStats.errors.count,
-				byType: rawStats.errors.byType,
-				last: rawStats.errors.lastError
-					? {
-							mensaje: rawStats.errors.lastError.message,
-							tipo: rawStats.errors.lastError.name,
-						}
-					: undefined,
-			},
-			database: {
-				queries: rawStats.database.queries,
-				avgQueryTime: `${rawStats.database.avgQueryTime.toFixed(2)}ms`,
-				slowQueries: rawStats.database.slowQueries,
-			},
-			cache: {
-				hits: rawStats.cache.hits,
-				misses: rawStats.cache.misses,
-				ratio: `${(rawStats.cache.ratio * 100).toFixed(2)}%`,
-			},
+			carpetas_con_parent: subcarpetas.slice(0, 10).map((f: any) => ({
+				id: f.id,
+				name: f.name,
+				parentId: f.parentId,
+				path: f.path,
+			})),
+			carpetas_raiz_muestra: carpetasRaiz.slice(0, 5).map((f: any) => ({
+				id: f.id,
+				name: f.name,
+				path: f.path,
+			})),
 		};
 
+		console.log('✅ [DEBUG] Análisis temporal completado');
 		res.json(stats);
 	} catch (error) {
+		console.error('❌ Error en análisis temporal de subcarpetas:', error);
 		res.status(500).json({
-			error: 'Error al obtener estadísticas de la aplicación',
+			error: 'Error en análisis temporal',
 			message: error instanceof Error ? error.message : String(error),
 		});
 	}
@@ -129,5 +159,226 @@ function formatNetworkInterfaces() {
 	}
 	return result;
 }
+
+// DEBUG Endpoint para investigar subcarpetas
+router.get('/folder-children-test', async (_req, res) => {
+	try {
+		const { db } = await import('@/lib/drizzle');
+		const { sql } = await import('drizzle-orm');
+
+		// Test directo de la query problemática
+		const testQuery = await db.execute(sql`
+			SELECT 
+				id, name, parentId,
+				(SELECT COUNT(*) FROM Folder WHERE Folder.parentId = Folder.id) as childrenCount
+			FROM Folder 
+			ORDER BY name
+		`);
+
+		res.json({
+			message: 'Test de conteo de hijos directo desde SQL',
+			totalFolders: testQuery.rows.length,
+			folders: testQuery.rows.map((row: any) => ({
+				id: row[0],
+				name: row[1],
+				parentId: row[2],
+				childrenCount: row[3],
+			})),
+		});
+	} catch (error) {
+		console.error('❌ Error en test de folder children:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+router.get('/subcarpetas', async (_req, res) => {
+	try {
+		console.log('🔍 [DEBUG] Iniciando depuración de subcarpetas BD vs FS');
+
+		// Importar servicios necesarios
+		const { syncFoldersWithFileSystem } = await import('@/lib/filesystem/folder-sync');
+
+		// 1. Obtener carpetas desde BD
+		const carpetasBD = await db
+			.select({
+				id: folders.id,
+				name: folders.name,
+				path: folders.path,
+				parentId: folders.parentId,
+			})
+			.from(folders)
+			.orderBy(asc(folders.path));
+
+		console.log(`📊 [DEBUG] Carpetas en BD: ${carpetasBD.length}`);
+
+		// 2. Realizar sincronización con dry-run para obtener estadísticas
+		console.log('🔍 [DEBUG] Ejecutando análisis de sincronización...');
+		const syncResult = await syncFoldersWithFileSystem({ dryRun: true });
+
+		console.log(
+			`📊 [DEBUG] Resultado sincronización - Agregar: ${syncResult.added.length}, Eliminar: ${syncResult.removed.length}`
+		);
+
+		// 3. Análisis de diferencias
+		const pathsBD = new Set(carpetasBD.map((c: any) => c.path));
+		const pathsFS = new Set(syncResult.added.map((c: any) => c.path)); // Rutas que faltan en BD
+
+		// Carpetas solo en FS (faltantes en BD)
+		const soloEnFS = syncResult.added;
+
+		// Carpetas solo en BD (órfanas/eliminadas)
+		const soloEnBD = syncResult.removed;
+
+		// 4. Análisis de relaciones padre-hijo
+		const relacionesProblematicas = carpetasBD.filter((carpeta: any) => {
+			if (!carpeta.parentId) return false;
+
+			const padre = carpetasBD.find((p: any) => p.id === carpeta.parentId);
+			if (!padre) {
+				console.warn(`⚠️ [DEBUG] Carpeta ${carpeta.name} tiene parentId ${carpeta.parentId} que no existe`);
+				return true;
+			}
+
+			return false;
+		});
+
+		const respuesta = {
+			resumen: {
+				carpetasBD: carpetasBD.length,
+				carpetasFaltantesEnBD: soloEnFS.length,
+				carpetasOrfanasEnBD: soloEnBD.length,
+				relacionesProblematicas: relacionesProblematicas.length,
+			},
+			diferencias: {
+				faltantesEnBD: soloEnFS.slice(0, 20), // Limitar para evitar respuestas muy grandes
+				orfanasEnBD: soloEnBD.slice(0, 20),
+				relacionesProblematicas: relacionesProblematicas.slice(0, 10),
+			},
+			estadisticas: {
+				carpetasRaiz: carpetasBD.filter((c: any) => !c.parentId).length,
+				subcarpetas: carpetasBD.filter((c: any) => c.parentId).length,
+			},
+			syncResult: {
+				duration: syncResult.stats.duration,
+				errors: syncResult.errors.slice(0, 5), // Primeros 5 errores
+				totalProcessed: syncResult.stats.totalProcessed,
+			},
+			muestrasBD: carpetasBD.slice(0, 10), // Muestra de carpetas en BD
+		};
+
+		console.log('✅ [DEBUG] Análisis de subcarpetas completado');
+		res.json(respuesta);
+	} catch (error) {
+		console.error('❌ Error en debug de subcarpetas:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// DEBUG ESPECIAL: Investigación completa de subcarpetas BD vs FS
+router.get('/subcarpetas-full-analysis', async (_req, res) => {
+	try {
+		console.log('🔍 [DEBUG] Iniciando análisis completo de subcarpetas BD vs FS');
+
+		// Test simple primero - sin imports dinámicos
+		res.json({
+			message: 'DEBUG ENDPOINT FUNCIONANDO',
+			timestamp: new Date().toISOString(),
+			status: 'ACTIVE',
+			next_step: 'Implementar lógica completa',
+		});
+	} catch (error) {
+		console.error('❌ Error en análisis completo de subcarpetas:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// NEW TEST ENDPOINT
+router.get('/test-hot-reload', async (_req, res) => {
+	try {
+		console.log('🔥 [DEBUG] HOT RELOAD TEST ENDPOINT WORKING!');
+
+		res.json({
+			message: 'HOT RELOAD IS WORKING!',
+			timestamp: new Date().toISOString(),
+			server_time: Date.now(),
+			status: 'ACTIVE_NEW_ENDPOINT',
+		});
+	} catch (error) {
+		console.error('❌ Error en test hot reload:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// CLEANUP ENDPOINT - Eliminar imágenes fantasma cursed-img-*
+router.get('/cleanup-phantom-images', async (_req, res) => {
+	try {
+		console.log('🔥 [CLEANUP] Iniciando limpieza de imágenes fantasma...');
+
+		// Importar base de datos
+		const { sql } = await import('drizzle-orm');
+		const { images } = await import('@/lib/drizzle/schema/index');
+
+		// 1. Contar imágenes cursed-img-*
+		const cursedQuery = await db.execute(sql`
+			SELECT id, name, path 
+			FROM ${images} 
+			WHERE id LIKE 'cursed-img-%' 
+			ORDER BY id
+		`);
+
+		const cursedCount = cursedQuery.rows.length;
+		console.log(`📊 Imágenes cursed-img-* encontradas: ${cursedCount}`);
+
+		if (cursedCount === 0) {
+			return res.json({
+				success: true,
+				message: 'No se encontraron imágenes fantasma cursed-img-*',
+				deleted: 0,
+				timestamp: new Date().toISOString(),
+			});
+		}
+
+		// 2. Eliminar imágenes cursed-img-*
+		console.log(`🗑️ Eliminando ${cursedCount} imágenes fantasma...`);
+		const deleteResult = await db.execute(sql`
+			DELETE FROM ${images} WHERE id LIKE 'cursed-img-%'
+		`);
+
+		// 3. Verificar estado final
+		const finalCountResult = await db.execute(sql`SELECT COUNT(*) as count FROM ${images}`);
+		const finalCount = finalCountResult.rows[0]?.[0] || 0;
+
+		console.log(`✅ Eliminadas: ${cursedCount} imágenes fantasma`);
+		console.log(`📊 Imágenes restantes en BD: ${finalCount}`);
+
+		res.json({
+			success: true,
+			message: '¡Limpieza completada con éxito!',
+			deleted: cursedCount,
+			remaining: finalCount,
+			timestamp: new Date().toISOString(),
+			note: 'Los errores ServiceError file_not_found deberían desaparecer ahora.',
+		});
+	} catch (error) {
+		console.error('❌ Error en cleanup de imágenes fantasma:', error);
+		res.status(500).json({
+			success: false,
+			error: 'Error durante la limpieza',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
 
 export default router;

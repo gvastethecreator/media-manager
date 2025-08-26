@@ -61,7 +61,7 @@ const buildMinimalStats = (): FolderWithStats['stats'] => {
 	return { ...(baseEntityStats as any), ...folderSpecific } as FolderWithStats['stats'];
 };
 
-// Construye los campos base comunes
+// Construye los campos base comunes (con fallbacks robustos)
 const buildBaseFolder = (raw: any) => ({
 	id: raw.id,
 	name: raw.name || '',
@@ -71,8 +71,9 @@ const buildBaseFolder = (raw: any) => ({
 	color: raw.color ?? null,
 	featuredImage: raw.featuredImage ?? null,
 	isFavorite: Boolean(raw.isFavorite),
-	totalFiles: raw.totalFiles ?? 0,
-	totalSize: raw.totalSize ?? 0,
+	// Si el backend no trae los agregados en top-level, tomar de stats cuando existan
+	totalFiles: (raw.totalFiles ?? raw.stats?.totalFiles ?? raw._count?.images ?? 0) as number,
+	totalSize: (raw.totalSize ?? raw.stats?.totalSize ?? 0) as number,
 	autoReindex: raw.autoReindex ?? false,
 	lastIndexed: raw.lastIndexed ?? null,
 	parentId: raw.parentId ?? null,

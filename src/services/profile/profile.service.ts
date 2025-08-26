@@ -57,23 +57,8 @@ class ProfileServiceImpl {
 			const { search, isActive, theme, language } = validatedFilters;
 			const { page = 1, limit = 50, sortBy = 'name', sortDirection = 'asc' } = validatedPagination;
 
-			// 1. Consulta principal con Drizzle (incluir settings con LEFT JOIN)
-			let query = db
-				.select({
-					// Campos del perfil
-					id: profiles.id,
-					name: profiles.name,
-					emoji: profiles.emoji,
-					color: profiles.color,
-					description: profiles.description,
-					isActive: profiles.isActive,
-					createdAt: profiles.createdAt,
-					updatedAt: profiles.updatedAt,
-					settingsId: profiles.settingsId,
-					imageId: profiles.imageId,
-				})
-				.from(profiles)
-				.leftJoin(settings, eq(settings.profileId, profiles.id));
+			// 1. Consulta principal con Drizzle (consulta simple sin JOIN para debug)
+			let query = db.select().from(profiles);
 
 			// 2. Construir filtros dinámicos
 			const conditions = [];
@@ -102,7 +87,7 @@ class ProfileServiceImpl {
 			}
 
 			// 3. Aplicar ordenamiento dinámico
-			let orderColumn;
+			let orderColumn: any;
 			switch (sortBy) {
 				case 'name':
 					orderColumn = profiles.name;
@@ -125,13 +110,20 @@ class ProfileServiceImpl {
 			query = query.orderBy(orderDirection);
 
 			// 4. Aplicar paginación
-			query = query.limit(limit).offset((page - 1) * limit);
+			const queryWithPagination = query.limit(limit).offset((page - 1) * limit);
 
 			// 5. Ejecutar consulta
-			const drizzleProfiles = await query;
+			console.log('[ProfileService] Debug queryWithPagination type:', typeof queryWithPagination);
+			console.log('[ProfileService] Debug queryWithPagination constructor:', queryWithPagination?.constructor?.name);
+			console.log('[ProfileService] Debug queryWithPagination keys:', Object.keys(queryWithPagination));
 
-			// 6. Restructurar resultados para compatibilidad con el tipo ProfileExtended
-			const drizzleResults = drizzleProfiles.map((raw: (typeof drizzleProfiles)[0]) => ({
+			const drizzleProfiles = await queryWithPagination;
+
+			console.log('[ProfileService] Debug drizzleProfiles type:', typeof drizzleProfiles);
+			console.log('[ProfileService] Debug drizzleProfiles is array:', Array.isArray(drizzleProfiles));
+			console.log('[ProfileService] Debug drizzleProfiles length:', drizzleProfiles?.length);
+			console.log('[ProfileService] Debug drizzleProfiles constructor:', drizzleProfiles?.constructor?.name); // 6. Restructurar resultados para compatibilidad con el tipo ProfileExtended
+			const drizzleResults = drizzleProfiles.map((raw: any) => ({
 				id: raw.id,
 				name: raw.name,
 				emoji: raw.emoji,
@@ -142,15 +134,7 @@ class ProfileServiceImpl {
 				updatedAt: raw.updatedAt,
 				settingsId: raw.settingsId,
 				imageId: raw.imageId,
-				settings: raw.settingsRealId
-					? {
-							id: raw.settingsRealId,
-							theme: raw.settingsTheme,
-							language: raw.settingsLanguage,
-							data: raw.settingsData,
-							profileId: raw.id,
-						}
-					: null,
+				settings: null, // Simplificar por ahora
 			}));
 
 			// 7. Retornar resultados de Drizzle

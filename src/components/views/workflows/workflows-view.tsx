@@ -3,50 +3,36 @@ import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { WorkflowCard } from '@/components/entities/workflow/workflow-card';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { MultiEntityViewer } from '@/components/features/file-viewer/multi-entity-viewer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
-import { createWorkflowInApi, getWorkflowsFromApi } from '@/lib/api/client/workflow.client';
+import { useWorkflows, useCreateWorkflow } from '@/lib/api/workflows';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { WorkflowCreateInput, WorkflowWithStats } from '@/types/entities/workflow';
+import { useMultiEntityViewerStore } from '@/stores/multi-entity-viewer.store';
+import type { WorkflowWithStats, WorkflowCreateInput } from '@/types/entities/workflow';
+import type { AnyEntityWithStats } from '@/types/migration';
 
 const viewLogger = clientLogger.withContext('WorkflowsView');
 
 export function WorkflowsView() {
-	const [workflows, setWorkflows] = useState<WorkflowWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(false);
-	const [error, setError] = useState<string | null>(null);
+	const { data: workflows, isLoading, error } = useWorkflows();
+	const { mutate: createWorkflow } = useCreateWorkflow();
+	const { isOpen, entities, currentIndex, openViewer, closeViewer, setCurrentIndex } = useMultiEntityViewerStore();
 
 	const [showForm, setShowForm] = useState(false);
 	const [newWorkflowName, setNewWorkflowName] = useState('');
 	const [newWorkflowDescription, setNewWorkflowDescription] = useState('');
 
-	const loadWorkflows = useCallback(async () => {
-		if (isLoading) {
-			return;
-		}
-		setIsLoading(true);
-		setError(null);
-		try {
-			const data = await getWorkflowsFromApi();
-			setWorkflows(data);
-			viewLogger.info(`✅ ${data.length} workflows cargados.`);
-		} catch (err) {
-			const errorMsg = '❌ Error al cargar los workflows.';
-			viewLogger.error(errorMsg, err);
-			setError(errorMsg);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [isLoading]); // Sin dependencias para evitar recreaciones innecesarias
-
 	useEffect(() => {
-		loadWorkflows();
-	}, [loadWorkflows]); // Solo ejecutar al montar el componente
+		if (workflows && workflows.length > 0) {
+			viewLogger.info(`✅ ${workflows.length} workflows cargados.`);
+		}
+	}, [workflows]);
 
 	const { toast } = useToast();
 	const handleCreateWorkflow = useCallback(async () => {
@@ -65,7 +51,6 @@ export function WorkflowsView() {
 				emoji: null,
 				color: null,
 				category: null,
-
 				isFavorite: false,
 				isActive: true,
 				version: '1.0.0',
@@ -81,8 +66,7 @@ export function WorkflowsView() {
 				successCount: 0,
 				errorCount: 0,
 			};
-			const newWorkflow = await createWorkflowInApi(workflowData);
-			setWorkflows((prev) => [...prev, newWorkflow]);
+			createWorkflow(workflowData);
 			toast({
 				title: '✅ Éxito',
 				description: `Workflow "${newWorkflowName}" creado.`,
@@ -97,12 +81,31 @@ export function WorkflowsView() {
 				variant: 'destructive',
 			});
 		}
-	}, [newWorkflowName, newWorkflowDescription, toast]);
+	}, [newWorkflowName, newWorkflowDescription, toast, createWorkflow]);
+
+	const handleWorkflowClick = useCallback((item: AnyEntityWithStats) => {
+		const workflow = item as unknown as WorkflowWithStats;
+		viewLogger.info('🖱️ Click en workflow:', workflow.name);
+		// TODO: Implementar navegación a detalle de workflow
+	}, []);
+
+	const handleWorkflowDoubleClick = useCallback(
+		(item: AnyEntityWithStats) => {
+			const workflow = item as unknown as WorkflowWithStats;
+			viewLogger.info('🖱️ Doble click en workflow:', workflow.name);
+
+			// Abrir MultiEntityViewer con todos los workflows
+			const workflowItems = (workflows || []) as unknown as AnyEntityWithStats[];
+			const currentIndex = workflowItems.findIndex((w) => w.id === workflow.id);
+			openViewer(workflowItems, currentIndex >= 0 ? currentIndex : 0);
+		},
+		[workflows, openViewer]
+	);
 
 	if (error) {
 		return (
 			<div className="flex h-full items-center justify-center">
-				<p className="text-destructive">Error: {error}</p>
+				<p className="text-destructive">Error: {error.message}</p>
 			</div>
 		);
 	}
@@ -111,62 +114,74 @@ export function WorkflowsView() {
 		return <LoadingScreen />;
 	}
 
+	const workflowItems = (workflows || []) as unknown as AnyEntityWithStats[];
+
 	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Workflows</h2>
+		<>
+			<ScrollArea className="h-full">
+				<div className="container mx-auto p-6">
+					<h2 className="mb-4 font-bold text-xl">Vista de Workflows</h2>
 
-				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Crear Workflow'}
-				</Button>
+					<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
+						{showForm ? 'Cancelar' : 'Crear Workflow'}
+					</Button>
 
-				{showForm && (
-					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Workflow</h3>
-						<div className="mb-3 grid gap-2">
-							<Label htmlFor="workflowName">Nombre</Label>
-							<Input
-								id="workflowName"
-								onChange={(e) => setNewWorkflowName(e.target.value)}
-								placeholder="Nombre del workflow"
-								value={newWorkflowName}
+					{showForm && (
+						<motion.div
+							initial={{ opacity: 0, y: -20 }}
+							animate={{ opacity: 1, y: 0 }}
+							className="mb-6 rounded-lg border p-4 shadow-sm"
+						>
+							<h3 className="mb-3 font-semibold text-lg">Nuevo Workflow</h3>
+							<div className="mb-3 grid gap-2">
+								<Label htmlFor="workflowName">Nombre</Label>
+								<Input
+									id="workflowName"
+									onChange={(e) => setNewWorkflowName(e.target.value)}
+									placeholder="Nombre del workflow"
+									value={newWorkflowName}
+								/>
+							</div>
+							<div className="mb-4 grid gap-2">
+								<Label htmlFor="workflowDescription">Descripción</Label>
+								<Textarea
+									id="workflowDescription"
+									onChange={(e) => setNewWorkflowDescription(e.target.value)}
+									placeholder="Descripción del workflow (opcional)"
+									value={newWorkflowDescription}
+								/>
+							</div>
+							<Button onClick={handleCreateWorkflow}>Guardar Workflow</Button>
+						</motion.div>
+					)}
+
+					{(!workflowItems || workflowItems.length === 0) && !isLoading && !showForm ? (
+						<EmptyState
+							description="Crea un workflow para automatizar tareas."
+							icon={Workflow}
+							title="No hay workflows creados"
+						/>
+					) : (
+						<div className="h-[calc(100vh-200px)]">
+							<FileBrowser
+								items={workflowItems}
+								isLoading={isLoading}
+								onItemClick={handleWorkflowClick}
+								onItemDoubleClick={handleWorkflowDoubleClick}
 							/>
 						</div>
-						<div className="mb-4 grid gap-2">
-							<Label htmlFor="workflowDescription">Descripción</Label>
-							<Textarea
-								id="workflowDescription"
-								onChange={(e) => setNewWorkflowDescription(e.target.value)}
-								placeholder="Descripción del workflow (opcional)"
-								value={newWorkflowDescription}
-							/>
-						</div>
-						<Button onClick={handleCreateWorkflow}>Guardar Workflow</Button>
-					</div>
-				)}
+					)}
+				</div>
+			</ScrollArea>
 
-				{(!workflows || workflows.length === 0) && !isLoading && !showForm ? (
-					<EmptyState
-						description="Crea un workflow para automatizar tareas."
-						icon={Workflow}
-						title="No hay workflows creados"
-					/>
-				) : (
-					<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-						{workflows?.map((wf, index) => (
-							<motion.div
-								animate={{ opacity: 1, y: 0 }}
-								className="perspective-1000"
-								initial={{ opacity: 0, y: 20 }}
-								key={wf.id}
-								transition={{ delay: index * 0.1 }}
-							>
-								<WorkflowCard key={wf.id} name={wf.name} />
-							</motion.div>
-						))}
-					</div>
-				)}
-			</div>
-		</ScrollArea>
+			{/* MultiEntityViewer */}
+			<MultiEntityViewer
+				currentIndex={currentIndex}
+				entities={entities}
+				isOpen={isOpen}
+				onClose={closeViewer}
+				onIndexChange={setCurrentIndex}
+			/>
+		</>
 	);
 }

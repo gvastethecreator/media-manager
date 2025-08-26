@@ -1,136 +1,151 @@
-import { FileText } from 'lucide-react';
-import { motion } from 'motion/react';
-import React from 'react';
-import { DocumentCard } from '@/components/cards/document-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { FileText, RefreshCw } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/components/ui/use-toast';
+import { EmptyState } from '@/components/ui/empty-state';
+import { BaseContentView } from '@/components/views/base/base-content-view';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { useDetailsPanel } from '@/store/details-panel.store';
+import { useDocumentStore } from '@/store/entities/document';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { DocumentWithStats } from '@/types/entities/document';
+import type { AnyEntityWithStats } from '@/types/entities';
+
+// Logger para depuración
+const logger = clientLogger.withContext('DocumentsContentView');
 
 interface DocumentsContentViewProps {
-	documents: DocumentWithStats[];
-	isLoading: boolean;
-	error: string | null;
-	showForm: boolean;
-	newDocumentName: string;
-	newDocumentFile: File | null;
-	setShowForm: (show: boolean) => void;
-	setNewDocumentName: (name: string) => void;
-	setNewDocumentFile: (file: File | null) => void;
-	handleDocumentClick: (document: DocumentWithStats) => void;
-	handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-	handleCreateDocument: () => Promise<void>;
+	className?: string;
 }
 
-const MemoizedDocumentCard = React.memo(
-	({ document, onDocumentClick }: { document: DocumentWithStats; onDocumentClick: () => void }) => (
-		<DocumentCard className="h-full" document={document} onClick={onDocumentClick} />
-	),
-	(prevProps, nextProps) =>
-		prevProps.document.id === nextProps.document.id &&
-		prevProps.document.name === nextProps.document.name &&
-		prevProps.document.updatedAt === nextProps.document.updatedAt
-);
-MemoizedDocumentCard.displayName = 'MemoizedDocumentCard';
+export function DocumentsContentView({ className }: DocumentsContentViewProps) {
+	// Estados globales para panel de detalles y visor
+	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
+	const { openViewer } = useFileViewerStore();
+	const { documents, isLoading, error, fetchDocuments } = useDocumentStore();
 
-const DocumentsContentView: React.FC<DocumentsContentViewProps> = ({
-	documents,
-	isLoading,
-	error,
-	showForm,
-	newDocumentName,
-	newDocumentFile,
-	setShowForm,
-	setNewDocumentName,
-	setNewDocumentFile,
-	handleDocumentClick,
-	handleFileChange,
-	handleCreateDocument,
-}) => {
-	const { toast } = useToast();
+	// Convertir el objeto documents a array para compatibilidad con FileBrowser
+	const documentsArray = Object.values(documents);
 
+	// Estado local para controlar operaciones
+	const [isRefreshing, setIsRefreshing] = useState(false);
+
+	const handleDocumentSelect = useCallback(
+		(document: AnyEntityWithStats) => {
+			logger.info('🖱️ Documento seleccionado:', document.name);
+
+			// Mostrar panel de detalles con el documento seleccionado
+			setSelectedItems([document]);
+			setDetailsPanelVisible(true);
+		},
+		[setSelectedItems, setDetailsPanelVisible]
+	);
+
+	const handleDocumentDoubleClick = useCallback(
+		(document: AnyEntityWithStats) => {
+			const docItem = document as DocumentWithStats;
+			logger.info('🖱️ Doble click en documento:', docItem.name);
+
+			// TODO: Implementar visor compatible con documentos
+			// Obtener todos los documentos para el visor
+			// const allDocuments = documentsArray;
+
+			// Convertir a formato compatible con el visor
+			// const docItems = allDocuments.map((d: DocumentWithStats) => ({
+			//	id: d.id,
+			//	name: d.name,
+			//	type: 'document' as const,
+			//	path: d.path,
+			//	size: d.size || 0,
+			// }));
+
+			// const currentIndex = docItems.findIndex((item: any) => item.id === docItem.id);
+
+			// Abrir el visor con todos los documentos
+			// openViewer(docItems, Math.max(0, currentIndex));
+		},
+		[documentsArray, openViewer]
+	);
+
+	const handleRefresh = useCallback(async () => {
+		if (isRefreshing) return;
+
+		setIsRefreshing(true);
+		logger.info('🔄 Refrescando documentos');
+		try {
+			await fetchDocuments();
+		} catch (refreshError) {
+			logger.error('❌ Error al refrescar documentos:', refreshError);
+		} finally {
+			setIsRefreshing(false);
+		}
+	}, [isRefreshing, fetchDocuments]);
+
+	// ❌ Mostrar error si hay problemas
 	if (error) {
 		return (
-			<div className="flex h-full items-center justify-center">
-				<p className="text-destructive">Error: {error}</p>
+			<div className="flex h-full flex-col items-center justify-center gap-4">
+				<EmptyState
+					actions={
+						<Button onClick={handleRefresh} variant="outline">
+							Reintentar
+						</Button>
+					}
+					description="Error al cargar los documentos. Inténtalo de nuevo."
+					icon={FileText}
+					title="Error al cargar documentos"
+				/>
 			</div>
 		);
 	}
 
-	if (isLoading && (!documents || documents.length === 0)) {
-		return <LoadingScreen />;
-	}
-
-	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Documentos</h2>
-
-				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Subir Documento'}
-				</Button>
-
-				{showForm && (
-					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Documento</h3>
-						<div className="mb-3 grid gap-2">
-							<Label htmlFor="documentName">Nombre</Label>
-							<Input
-								id="documentName"
-								onChange={(e) => setNewDocumentName(e.target.value)}
-								placeholder="Nombre del documento"
-								value={newDocumentName}
-							/>
-						</div>
-						<div className="mb-4 grid gap-2">
-							<Label htmlFor="documentFile">Archivo de Documento</Label>
-							<Input
-								accept=".pdf,.doc,.docx,.txt,.md"
-								id="documentFile"
-								onChange={handleFileChange} // Aceptar tipos de documentos comunes
-								type="file"
-							/>
-						</div>
-						<Button onClick={handleCreateDocument}>Guardar Documento</Button>
-					</div>
-				)}
-
-				{(!documents || documents.length === 0) && !isLoading && !showForm ? (
+	// 🎯 Mostrar empty state si no hay documentos
+	if (!isLoading && documentsArray.length === 0) {
+		return (
+			<BaseContentView
+				className={className}
+				description="Explora y gestiona tus documentos"
+				headerControls={
+					<Button disabled={isRefreshing} onClick={handleRefresh} size="sm" variant="outline">
+						<RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+						{isRefreshing ? 'Refrescando...' : 'Refrescar'}
+					</Button>
+				}
+				title="Documentos"
+			>
+				<div className="flex h-full items-center justify-center">
 					<EmptyState
 						description="Sube documentos para comenzar a usar el visor y editor."
 						icon={FileText}
 						title="No hay documentos"
 					/>
-				) : (
-					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-						{documents?.map((document: DocumentWithStats, index: number) => {
-							const onDocumentClick = () => handleDocumentClick(document);
-							return (
-								<motion.div
-									animate={{ opacity: 1, y: 0 }}
-									className="perspective-1000"
-									initial={{ opacity: 0, y: 20 }}
-									key={document.id}
-									transition={{ delay: index * 0.1 }}
-								>
-									<div
-										className="h-full w-full transition-all duration-300 ease-in-out hover:z-10 hover:scale-[1.03] active:scale-[0.98]"
-										data-document-id={document.id}
-									>
-										<MemoizedDocumentCard document={document} onDocumentClick={onDocumentClick} />
-									</div>
-								</motion.div>
-							);
-						})}
-					</div>
-				)}
-			</div>
-		</ScrollArea>
+				</div>
+			</BaseContentView>
+		);
+	}
+
+	// Renderizar vista de documentos usando BaseContentView y FileBrowser
+	return (
+		<BaseContentView
+			className={className}
+			description="Explora y gestiona tus documentos"
+			headerControls={
+				<Button disabled={isRefreshing} onClick={handleRefresh} size="sm" variant="outline">
+					<RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+					{isRefreshing ? 'Refrescando...' : 'Refrescar'}
+				</Button>
+			}
+			title="Documentos"
+		>
+			<FileBrowser
+				className="h-full"
+				isLoading={isLoading}
+				items={documentsArray as unknown as AnyEntityWithStats[]}
+				onItemClick={handleDocumentSelect}
+				onItemDoubleClick={handleDocumentDoubleClick}
+			/>
+		</BaseContentView>
 	);
-};
+}
 
 export default DocumentsContentView;

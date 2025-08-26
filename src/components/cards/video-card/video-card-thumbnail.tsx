@@ -24,7 +24,9 @@ export function VideoCardThumbnail({
 	compact = false,
 }: VideoCardThumbnailProps) {
 	const { thumbnailUrl } = video;
-	const { resolution, hasAudio, formattedSize } = video.stats;
+	const resolution = video.stats?.resolution ?? 'unknown';
+	const hasAudio = video.stats?.hasAudio ?? true;
+	const formattedSize = video.stats?.formattedSize ?? '';
 
 	// Placeholder si no hay thumbnail
 	const placeholderGradient = `linear-gradient(135deg, ${primaryColor}40, ${primaryColor}80)`;

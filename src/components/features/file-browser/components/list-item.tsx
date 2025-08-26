@@ -1,12 +1,13 @@
 import { cn } from '@/lib/utils';
 import { formatDate } from '@/lib/utils/format.utils';
-import type { ImageWithStats } from '@/types/entities/image';
+import type { MediaItem } from './media-thumbnail';
+import { MediaThumbnail } from './media-thumbnail';
 
 interface ListItemProps {
-	item: ImageWithStats;
+	item: MediaItem;
 	selected?: boolean;
-	onClick?: (item: ImageWithStats) => void;
-	onDoubleClick?: (item: ImageWithStats) => void;
+	onClick?: (item: MediaItem) => void;
+	onDoubleClick?: (item: MediaItem) => void;
 }
 
 export function ListItem({ item, selected = false, onClick, onDoubleClick }: ListItemProps) {
@@ -28,11 +29,7 @@ export function ListItem({ item, selected = false, onClick, onDoubleClick }: Lis
 			type="button"
 		>
 			<div className="relative h-10 w-10 shrink-0">
-				<img
-					alt={item.name}
-					className="h-full w-full rounded-sm object-cover"
-					src={`/api/images/${item.id}/thumbnail`}
-				/>
+				<MediaThumbnail className="h-full w-full rounded-sm" item={item} style={{ objectFit: 'cover' }} />
 			</div>
 			<div className="flex-1 truncate">
 				<p className="truncate font-medium">{item.name}</p>
