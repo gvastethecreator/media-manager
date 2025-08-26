@@ -1,46 +1,100 @@
+import { Hash } from 'lucide-react';
 import { AlertCircle, Check, Edit3, Filter, Globe, Hash, Plus, Search, Star, Trash2, X } from 'lucide-react';
+
+import { memo } from 'react';
 import { motion } from 'motion/react';
+
+import { EmptyState } from '@/components/ui/empty-state';
 import { useState } from 'react';
+
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+
+interface WildcardContentViewProps {import { Button }
+from;
+('@/components/ui/button');
+
+className?: string;
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
+wildcardId?: string;
 import { Input } from '@/components/ui/input';
+
+}
 import { Textarea } from '@/components/ui/textarea';
 
-// 🎯 Mock data para wildcards - en implementación real vendría del store
-const mockWildcards = [
-	{
-		id: 'wc001',
-		pattern: '*.jpg',
-		description: 'Archivos de imagen JPEG',
-		matchCount: 1247,
-		isActive: true,
-		category: 'images',
-		priority: 1,
-		createdAt: '2024-01-15T10:30:00Z',
-		lastUsed: '2024-01-20T14:45:00Z',
-	},
-	{
-		id: 'wc002',
-		pattern: 'temp_*',
-		description: 'Archivos temporales del sistema',
-		matchCount: 89,
-		isActive: false,
-		category: 'system',
+/**/ / 🎯 Mock data para wildcards - en implementación real vendría del store
+
+ * 🎯
+Vista;
+de;
+contenido;
+de;
+wildcards / patronesconst;
+mockWildcards = [
+
+ * Sistema para gestión de patrones de búsqueda y filtrado	{
+
+ */		id: 'wc001',
+
+export const WildcardContentView = memo(function WildcardContentView({ 		pattern: '*.jpg',
+
+	className,		description: 'Archivos de imagen JPEG',
+
+	wildcardId 		matchCount: 1247,
+
+}: WildcardContentViewProps) {		isActive: true,
+
+	// Estado de no selección		category: 'images',
+
+	if (!wildcardId) {		priority: 1,
+
+		return (		createdAt: '2024-01-15T10:30:00Z',
+
+			<div className={className}>		lastUsed: '2024-01-20T14:45:00Z',
+
+				<EmptyState	},
+
+					description="Selecciona un wildcard desde la vista de wildcards para ver su contenido."	{
+
+					icon={Hash}		id: 'wc002',
+
+					title="No hay wildcard seleccionado"		pattern: 'temp_*',
+
+				/>		description: 'Archivos temporales del sistema',
+
+			</div>		matchCount: 89,
+
+		);		isActive: false,
+
+	}		category: 'system',
+
 		priority: 3,
-		createdAt: '2024-01-10T09:15:00Z',
-		lastUsed: '2024-01-18T16:20:00Z',
-	},
-	{
-		id: 'wc003',
-		pattern: 'backup_*.zip',
-		description: 'Archivos de respaldo comprimidos',
-		matchCount: 23,
-		isActive: true,
-		category: 'backup',
-		priority: 2,
+
+	// Estado de funcionalidad no implementada		createdAt: '2024-01-10T09:15:00Z',
+
+	return (		lastUsed: '2024-01-18T16:20:00Z',
+
+		<div className={className}>	},
+
+			<EmptyState	{
+
+				description="El sistema de wildcards se implementará en futuras versiones. Incluirá patrones de búsqueda, filtros avanzados y reglas de clasificación automática."		id: 'wc003',
+
+				icon={Hash}		pattern: 'backup_*.zip',
+
+				title="Sistema de wildcards no implementado"		description: 'Archivos de respaldo comprimidos',
+
+			/>		matchCount: 23,
+
+		</div>		isActive: true,
+
+	);		category: 'backup',
+
+});		priority: 2,
+
 		createdAt: '2024-01-08T11:45:00Z',
-		lastUsed: '2024-01-19T13:30:00Z',
+
+WildcardContentView.displayName = 'WildcardContentView';		lastUsed: '2024-01-19T13:30:00Z',
 	},
 ];
 

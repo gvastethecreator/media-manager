@@ -122,6 +122,7 @@ interface FolderEventsCallbacks {
 			currentFolder?: string;
 		}
 	) => void;
+	onDirectoryDeleted?: (payload: { folderId?: string; path?: string }) => void;
 }
 
 /**
@@ -134,6 +135,7 @@ export function useFoldersEvents({
 	onComplete,
 	onStats,
 	onReindexAllProgress,
+	onDirectoryDeleted,
 }: FolderEventsCallbacks) {
 	const eventSourceRef = useRef<EventSourcePolyfill | null>(null);
 
@@ -161,6 +163,11 @@ export function useFoldersEvents({
 			}),
 		onReindexAllProgress:
 			onReindexAllProgress ||
+			(() => {
+				/* no-op */
+			}),
+		onDirectoryDeleted:
+			onDirectoryDeleted ||
 			(() => {
 				/* no-op */
 			}),
@@ -194,8 +201,13 @@ export function useFoldersEvents({
 				(() => {
 					/* no-op */
 				}),
+			onDirectoryDeleted:
+				onDirectoryDeleted ||
+				(() => {
+					/* no-op */
+				}),
 		};
-	}, [onProgress, onError, onComplete, onStats, onReindexAllProgress]);
+	}, [onProgress, onError, onComplete, onStats, onReindexAllProgress, onDirectoryDeleted]);
 
 	// Manejador de progreso estable
 	const handleProgress = useCallback((status: ProcessStatus) => {
@@ -323,6 +335,15 @@ export function useFoldersEvents({
 			const onCompleted = (d: any) => handleComplete(d as FolderResponse);
 			const onErrorEvt = (d: any) => handleError(d as ErrorResponse);
 			const onStatsEvt = (d: any) => handleStats(d as FolderStats);
+			const onReindexAllStartEvt = (d: any) => onReindexAllProgressEvt(d);
+			const onReindexAllCompleteEvt = (d: any) => onReindexAllProgressEvt({ ...d, isProcessing: false, progress: 100 });
+			const onDirectoryDeletedEvt = (d: any) => {
+				try {
+					callbacksRef.current.onDirectoryDeleted({ folderId: d.folderId, path: d.path });
+				} catch (err) {
+					eventsLogger.error('Error al manejar directory:deleted:', err);
+				}
+			};
 
 			const processSSEEvent = (eventData: any) => {
 				if (!eventData) {
@@ -336,9 +357,12 @@ export function useFoldersEvents({
 				const handlers: Record<string, (payload: any) => void> = {
 					'folder:progress': onFolderProgress,
 					'folder:reindexAll:progress': onReindexAllProgressEvt,
-					'folder:completed': onCompleted,
+					'folder:complete': onCompleted,
+					'folder:reindexAll:start': onReindexAllStartEvt,
+					'folder:reindexAll:complete': onReindexAllCompleteEvt,
 					'folder:error': onErrorEvt,
 					'folder:stats': onStatsEvt,
+					'directory:deleted': onDirectoryDeletedEvt,
 				};
 				const handler = handlers[type as keyof typeof handlers];
 				if (handler) {

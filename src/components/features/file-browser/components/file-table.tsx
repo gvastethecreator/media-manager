@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { ImageWithStats } from '@/types/entities/image';
+import type { MediaItem } from './media-thumbnail';
+import { MediaThumbnail } from './media-thumbnail';
 
 // CONFIG local de la vista Table
 const CONFIG = {
@@ -10,10 +11,10 @@ const CONFIG = {
 };
 
 interface FileTableProps {
-	items: ImageWithStats[];
+	items: MediaItem[];
 	selectedIds?: string[];
-	onItemClick?: (item: ImageWithStats) => void;
-	onItemDoubleClick?: (item: ImageWithStats) => void;
+	onItemClick?: (item: MediaItem) => void;
+	onItemDoubleClick?: (item: MediaItem) => void;
 }
 
 export function FileTable({ items, selectedIds = [], onItemClick, onItemDoubleClick }: FileTableProps) {
@@ -53,21 +54,23 @@ export function FileTable({ items, selectedIds = [], onItemClick, onItemDoubleCl
 					fixedHeaderContent={() => (
 						<tr className={CONFIG.headerClass}>
 							{columns.map((c) => (
-								<th key={c.key} className={CONFIG.cellPaddingClass}>
+								<th className={CONFIG.cellPaddingClass} key={c.key}>
 									{c.header}
 								</th>
 							))}
 						</tr>
 					)}
-					itemContent={(index: number, item: ImageWithStats) => (
+					increaseViewportBy={CONFIG.increaseViewportBy}
+					itemContent={(index: number, item: MediaItem) => (
 						<>
 							<td className={CONFIG.cellPaddingClass}>
 								<div className="flex items-center gap-2">
-									<img
-										alt={item.name}
-										className="rounded object-cover"
-										style={{ width: CONFIG.thumbSize, height: CONFIG.thumbSize }}
-										src={`/api/images/${item.id}/thumbnail`}
+									<MediaThumbnail
+										className="rounded"
+										height={CONFIG.thumbSize}
+										item={item}
+										style={{ objectFit: 'cover' }}
+										width={CONFIG.thumbSize}
 									/>
 									<button
 										className={
@@ -95,7 +98,6 @@ export function FileTable({ items, selectedIds = [], onItemClick, onItemDoubleCl
 							</td>
 						</>
 					)}
-					increaseViewportBy={CONFIG.increaseViewportBy}
 					style={{ height: '100%' }}
 				/>
 			</div>
@@ -122,17 +124,18 @@ export function FileTable({ items, selectedIds = [], onItemClick, onItemDoubleCl
 									? 'cursor-pointer border-b bg-accent'
 									: 'cursor-pointer border-b hover:bg-accent'
 							}
+							key={item.id}
 							onClick={() => onItemClick?.(item)}
 							onDoubleClick={() => onItemDoubleClick?.(item)}
-							key={item.id}
 						>
 							<td className={CONFIG.cellPaddingClass}>
 								<div className="flex items-center gap-2">
-									<img
-										alt={item.name}
-										className="rounded object-cover"
-										style={{ width: CONFIG.thumbSize, height: CONFIG.thumbSize }}
-										src={`/api/images/${item.id}/thumbnail`}
+									<MediaThumbnail
+										className="rounded"
+										height={CONFIG.thumbSize}
+										item={item}
+										style={{ objectFit: 'cover' }}
+										width={CONFIG.thumbSize}
 									/>
 									<span className="truncate">{item.name}</span>
 								</div>

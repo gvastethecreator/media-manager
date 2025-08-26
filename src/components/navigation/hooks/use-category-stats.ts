@@ -56,6 +56,7 @@ export function useCategoryStats() {
 			documents: navigationData.documents || [],
 			jsonFiles: navigationData.jsonFiles || [],
 			file3ds: navigationData.file3ds || [],
+			videos: navigationData.videos || [],
 			workflows: navigationData.workflows || [],
 		};
 	}, [navigationData]);
@@ -117,6 +118,31 @@ export function useCategoryStats() {
 		[categoryDataMap]
 	);
 
+	// Totales derivados por si el backend no provee algunos contadores aún
+	const derivedTotals = useMemo(() => {
+		const totals = {
+			totalImages: 0,
+			totalVideos: 0,
+			totalAudio: 0,
+			totalDocuments: 0,
+			totalJsonFiles: 0,
+			totalFile3D: 0,
+			totalWorkflows: 0,
+		};
+		const getLen = (k: keyof typeof categoryDataMap) => {
+			const arr = categoryDataMap[k] as unknown[] | undefined;
+			return Array.isArray(arr) ? arr.length : 0;
+		};
+		totals.totalImages = getLen('folders') > -1 ? 0 : 0; // images no viene en navigationData
+		totals.totalVideos = getLen('videos');
+		totals.totalAudio = getLen('audios');
+		totals.totalDocuments = getLen('documents');
+		totals.totalJsonFiles = getLen('jsonFiles');
+		totals.totalFile3D = getLen('file3ds');
+		totals.totalWorkflows = getLen('workflows');
+		return totals;
+	}, [categoryDataMap]);
+
 	const stats = useMemo(
 		() => ({
 			totalImages: statsData?.totalImages || navigationData?.stats?.totalImages || 0,
@@ -132,8 +158,18 @@ export function useCategoryStats() {
 			totalSize: statsData?.totalSize || navigationData?.stats?.totalSize || 0,
 			totalViews: statsData?.totalViews || navigationData?.stats?.totalViews || 0,
 			totalDownloads: statsData?.totalDownloads || navigationData?.stats?.totalDownloads || 0,
+			// Adicionales con fallback a derivados
+			totalVideos: statsData?.totalVideos ?? navigationData?.stats?.totalVideos ?? derivedTotals.totalVideos,
+			totalAudio: statsData?.totalAudio ?? navigationData?.stats?.totalAudio ?? derivedTotals.totalAudio,
+			totalDocuments:
+				statsData?.totalDocuments ?? navigationData?.stats?.totalDocuments ?? derivedTotals.totalDocuments,
+			totalJsonFiles:
+				statsData?.totalJsonFiles ?? navigationData?.stats?.totalJsonFiles ?? derivedTotals.totalJsonFiles,
+			totalFile3D: statsData?.totalFile3D ?? navigationData?.stats?.totalFile3D ?? derivedTotals.totalFile3D,
+			totalWorkflows:
+				statsData?.totalWorkflows ?? navigationData?.stats?.totalWorkflows ?? derivedTotals.totalWorkflows,
 		}),
-		[statsData, navigationData]
+		[statsData, navigationData, derivedTotals]
 	);
 
 	return {

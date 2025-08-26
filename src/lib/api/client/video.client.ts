@@ -19,22 +19,42 @@ export async function getVideoFromApi(id: string): Promise<VideoWithStats | null
 
 export interface FindVideosOptions {
 	filters?: Partial<VideoFilters>;
+	folderId?: string;
 	folderIds?: string[];
 }
 
 export async function findVideosInApi(options: FindVideosOptions = {}): Promise<VideoWithStats[]> {
 	const params = new URLSearchParams();
-	if (options.folderIds) {
+
+	// Backend actual valida 'folderId' simple; mantenemos compatibilidad con múltiples
+	if (options.folderId) {
+		params.append('folderId', options.folderId);
+	} else if (options.folderIds && options.folderIds.length === 1) {
+		params.append('folderId', options.folderIds[0]);
+	} else if (options.folderIds && options.folderIds.length > 1) {
+		// Si en futuro el backend soporta arrays, enviar 'folderIds'
 		params.append('folderIds', options.folderIds.join(','));
 	}
+
 	if (options.filters?.search) {
 		params.append('search', options.filters.search);
 	}
-	const response = await fetch(`${API_BASE_PATH}?${params.toString()}`);
+	if (options.filters?.isFavorite !== undefined) {
+		params.append('isFavorite', String(options.filters.isFavorite));
+	}
+
+	const url = `${API_BASE_PATH}?${params.toString()}`;
+	const response = await fetch(url);
 	if (!response.ok) {
 		throw new Error('Error al buscar videos');
 	}
-	return response.json();
+	// El backend retorna { data, pagination }
+	const payload = await response.json();
+	if (Array.isArray(payload)) {
+		// Compat por si alguna ruta legacy devuelve lista directamente
+		return payload as VideoWithStats[];
+	}
+	return (payload?.data as VideoWithStats[]) || [];
 }
 
 export async function createVideoInApi(data: VideoCreateInput): Promise<VideoWithStats> {

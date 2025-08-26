@@ -11,10 +11,12 @@ import {
 import { createAudio, getAudioByHash } from '@/services/audio/audio.service';
 import { createDocument, getDocumentByHash } from '@/services/document/document.service';
 import { createFile3D, getFile3DByHash } from '@/services/file3d/file3d.service';
+import { createJsonFile, getJsonFileByHash } from '@/services/json-file/json-file.service';
 import type { CreateImageInput } from '@/services/image/image.service';
 import { ImageService } from '@/services/image/image.service';
 import type { DocumentCreateInput } from '@/transformers/document/validators';
 import type { AudioCreateInput } from '@/types/entities/audio';
+import type { JsonFileCreateInput } from '@/types/entities/json-file';
 import type { File3DCreateInput } from '@/types/entities/file3d';
 import type { VideoCreateInput } from '@/types/entities/video';
 import {
@@ -144,6 +146,11 @@ export class FileEntityMapperService {
 			'.xml': 'application/xml',
 			'.yaml': 'text/yaml',
 			'.yml': 'text/yaml',
+			// 3D
+			'.gltf': 'model/gltf+json',
+			'.glb': 'model/gltf-binary',
+			'.obj': 'model/obj',
+			'.stl': 'model/stl',
 		};
 		return mimeTypes[extension.toLowerCase()] || 'application/octet-stream';
 	}
@@ -185,6 +192,13 @@ export class FileEntityMapperService {
 					}
 					const existingDocument = await getDocumentByHash(fileInfo.hash);
 					return !!existingDocument;
+				}
+				case EntityType.JSON: {
+					if (!fileInfo.hash) {
+						return false;
+					}
+					const existingJson = await getJsonFileByHash(fileInfo.hash);
+					return !!existingJson;
 				}
 				default:
 					return false;
@@ -349,6 +363,31 @@ export class FileEntityMapperService {
 				entityId = file3d.id;
 				break;
 			}
+			case EntityType.JSON: {
+				if (!fileInfo.hash) {
+					throw new Error('File hash is required for json creation');
+				}
+				const jsonData: JsonFileCreateInput = {
+					name: fileInfo.name,
+					path: fileInfo.path,
+					size: fileInfo.size,
+					hash: fileInfo.hash,
+					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
+					extension: fileInfo.extension,
+					folderId: fileInfo.folderId,
+					isFavorite: false,
+					isArchived: false,
+					content: null,
+					schema: null as any,
+					isValid: true as any,
+					validationErrors: null as any,
+					keyCount: null as any,
+					depth: null as any,
+				};
+				const json = await createJsonFile(jsonData as any);
+				entityId = json.id as string;
+				break;
+			}
 			case EntityType.DOCUMENT: {
 				if (!fileInfo.hash) {
 					throw new Error('File hash is required for document creation');
@@ -424,6 +463,12 @@ export class FileEntityMapperService {
 				const t = Date.now();
 				const r = await this.handleFile3DMetadata(filePath, entityId);
 				this.recordPhase('metadata_file3d', t);
+				return r;
+			}
+			if (entityType === EntityType.JSON) {
+				const t = Date.now();
+				const r = await this.handleJsonMetadata(filePath, entityId);
+				this.recordPhase('metadata_json', t);
 				return r;
 			}
 			return { success: true };
@@ -617,37 +662,113 @@ export class FileEntityMapperService {
 		try {
 			const ext = extname(filePath).toLowerCase();
 			const { db } = await import('@/lib/drizzle');
-			// Nombre de tabla 3D: intentar file3d(s). Ajustar según schema real.
-			const schema = await import('@/lib/drizzle/schema');
-			const table = (schema as any).file3d || (schema as any).files3d;
-			if (!table) {
-				return { success: false, error: '3D table missing in schema' };
-			}
+			const { file3Ds } = await import('@/lib/drizzle/schema');
 			const { eq } = await import('drizzle-orm');
 			let format: string | null = null;
 			let rawInfo: Record<string, any> | null = null;
+			let version: string | null = null;
 			if (ext === '.gltf' || ext === '.glb') {
 				format = 'gltf';
 				if (ext === '.gltf') {
 					const parsed = await this.parseGltf(filePath);
 					rawInfo = parsed;
+				} else {
+					// GLB: leer cabecera para versión (bytes 0-3 magic, 4-7 version LE)
+					try {
+						const buf = await readFile(filePath);
+						if (buf.length >= 8 && buf.toString('ascii', 0, 4) === 'glTF') {
+							const ver = buf.readUInt32LE(4);
+							version = String(ver);
+						}
+					} catch {
+						// ignore
+					}
 				}
 			} else if (ext === '.obj') {
 				format = 'obj';
 				rawInfo = await this.parseObj(filePath);
 			}
 			await db
-				.update(table)
+				.update(file3Ds)
 				.set({
 					format,
-					metadata: rawInfo ? JSON.stringify(rawInfo) : null,
+					vertices: (rawInfo as any)?.vertices ?? null,
+					faces: (rawInfo as any)?.faces ?? null,
+					version,
 					updatedAt: new Date(),
 				})
-				.where(eq(table.id, entityId));
+				.where(eq(file3Ds.id, entityId));
 			return { success: true };
 		} catch {
 			return { success: false, error: '3D metadata extraction failed' };
 		}
+	}
+
+	private async handleJsonMetadata(filePath: string, entityId: string) {
+		try {
+			const { db } = await import('@/lib/drizzle');
+			const { jsonFiles } = await import('@/lib/drizzle/schema');
+			const { eq } = await import('drizzle-orm');
+			let contentText: string | null = null;
+			try {
+				const buf = await readFile(filePath);
+				contentText = buf.toString('utf8');
+			} catch {
+				contentText = null;
+			}
+
+			let isValid = false;
+			let validationErrors: string | null = null;
+			let keyCount: number | null = null;
+			let depth: number | null = null;
+			let parsed: any = null;
+			if (contentText && contentText.trim().length > 0) {
+				try {
+					parsed = JSON.parse(contentText);
+					isValid = true;
+					keyCount = this.countJsonKeys(parsed);
+					depth = this.computeJsonDepth(parsed);
+				} catch (e) {
+					isValid = false;
+					validationErrors = (e as Error).message;
+				}
+			}
+
+			await db
+				.update(jsonFiles)
+				.set({
+					content: contentText,
+					isValid,
+					validationErrors,
+					keyCount,
+					depth,
+					updatedAt: new Date(),
+				})
+				.where(eq(jsonFiles.id, entityId));
+			return { success: true };
+		} catch (e) {
+			return { success: false, error: 'JSON metadata extraction failed' };
+		}
+	}
+
+	private computeJsonDepth(obj: any): number {
+		if (obj === null || typeof obj !== 'object') return 0;
+		let max = 0;
+		for (const v of Object.values(obj)) {
+			const d = this.computeJsonDepth(v);
+			if (d > max) max = d;
+		}
+		return max + 1;
+	}
+
+	private countJsonKeys(obj: any): number {
+		if (obj === null || typeof obj !== 'object') return 0;
+		let count = 0;
+		for (const [_, v] of Object.entries(obj)) {
+			count += 1;
+			count += this.countJsonKeys(v);
+		}
+		return count;
 	}
 
 	private async parseGltf(filePath: string) {
@@ -749,7 +870,7 @@ export class FileEntityMapperService {
 
 	private async generateVideoThumbnail(_filePath: string, _entityId: string) {
 		try {
-			const { spawn } = await import('node:child_process');
+			const { generateAnimatedVideoThumbnail } = await import('@/lib/utils/video/helpers');
 			const { db } = await import('@/lib/drizzle');
 			const schema = await import('@/lib/drizzle/schema');
 			const { eq } = await import('drizzle-orm');
@@ -757,41 +878,50 @@ export class FileEntityMapperService {
 			if (!videos) {
 				return;
 			}
-			// Generar frame medio (segundo 1) a JPEG buffer en memoria: usamos salida a stdout si ffmpeg soporta.
-			// Fallback: no error si ffmpeg no disponible.
-			const args = ['-ss', '1', '-i', _filePath, '-frames:v', '1', '-f', 'mjpeg', '-q:v', '4', 'pipe:1'];
-			const proc = spawn('ffmpeg', args, { stdio: ['ignore', 'pipe', 'ignore'] });
-			const chunks: Buffer[] = [];
-			await new Promise<void>((resolve) => {
-				proc.stdout?.on('data', (c) => chunks.push(c));
-				proc.on('close', () => resolve());
-				proc.on('error', () => resolve());
+
+			// Generar WebP animado de alta calidad para almacenar en DB
+			const animatedWebpBuffer = await generateAnimatedVideoThumbnail(_filePath, {
+				time: 5, // Segundo 5 para evitar logos/intros
+				quality: 'high',
+				frames: 12,
+				duration: 2,
 			});
-			if (chunks.length === 0) {
+
+			if (!animatedWebpBuffer || animatedWebpBuffer.length === 0) {
+				console.warn('No se pudo generar thumbnail WebP animado para:', _filePath);
 				return;
 			}
-			const b64 = Buffer.concat(chunks).toString('base64');
-			// Leer metadata existente y fusionar thumbnail
-			const existing = await db
-				.select({ metadata: videos.metadata })
-				.from(videos)
-				.where(eq(videos.id, _entityId))
-				.limit(1);
-			let metaObj: any = {};
-			if (existing.length === 1 && existing[0].metadata) {
-				try {
-					metaObj = JSON.parse(existing[0].metadata);
-				} catch {
-					/* ignore */
-				}
+
+			// Convertir a base64 para almacenar en DB
+			const b64 = animatedWebpBuffer.toString('base64');
+
+			// Obtener dimensiones del thumbnail usando Sharp (primer frame)
+			let thumbnailWidth: number | null = null;
+			let thumbnailHeight: number | null = null;
+
+			try {
+				const sharp = await import('sharp');
+				const metadata = await sharp.default(animatedWebpBuffer).metadata();
+				thumbnailWidth = metadata.width || null;
+				thumbnailHeight = metadata.height || null;
+			} catch (e) {
+				console.warn('No se pudieron obtener dimensiones del thumbnail:', e);
 			}
-			metaObj.thumbnail = { format: 'jpeg', width: null, data: b64 };
+
+			// Actualizar video con thumbnail pre-generado
 			await db
 				.update(videos)
-				.set({ metadata: JSON.stringify(metaObj), updatedAt: new Date() })
+				.set({
+					thumbnail: b64,
+					thumbnailSize: animatedWebpBuffer.length,
+					thumbnailWidth,
+					thumbnailHeight,
+					thumbnailMimeType: 'image/webp',
+					updatedAt: new Date(),
+				})
 				.where(eq(videos.id, _entityId));
-		} catch {
-			// silencioso
+		} catch (e) {
+			console.warn('Error generando thumbnail WebP animado para video:', _filePath, e);
 		}
 	}
 

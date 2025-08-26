@@ -1,37 +1,129 @@
-// Drizzle imports
+// Drizzle imports - CAMBIO PARA FORZAR RELOAD
 // @ts-nocheck - Temporary suppression for Express handler parameter types
 
-import { asc, count, desc, eq, sql } from 'drizzle-orm';
+import { asc, count, desc, eq, isNull, sql } from 'drizzle-orm';
 import { Router } from 'express';
-import { z } from 'zod';
 import { db } from '@/lib/drizzle';
 import { folders, images, videos } from '@/lib/drizzle/schema/index';
 import { generateFolderIdFromName, isValidFolderId } from '@/lib/utils/folder-id-generator';
+import { CreateFolderSchema } from '@/types/entities/folder/schema';
+import { serverLogger } from '@/lib/logger/server-logger';
 
-const router = Router() as any;
+const router = Router();
+const logger = serverLogger.withContext('FoldersRoutes');
 
-// Schema de validación para crear carpeta
-const CreateFolderSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido').max(255),
-	description: z.string().max(1000).optional().nullable(),
-	path: z.string().min(1, 'La ruta es requerida').max(500),
-	emoji: z.string().max(10).optional().nullable(),
-	color: z
-		.string()
-		.regex(/^#[0-9A-Fa-f]{6}$/)
-		.optional()
-		.nullable(),
-	featuredImage: z.string().url().optional().nullable(),
-	isFavorite: z.boolean().default(false).optional(),
-	autoReindex: z.boolean().default(true),
-	parentId: z.string().min(1).optional().nullable(),
-	presetId: z.string().min(1).optional().nullable(),
+// DEBUG-ROUTES - Rutas especiales de debug que deben ir ANTES que /:id
+router.get('/_debug_', async (_req, res) => {
+	try {
+		logger.debug('Endpoint debug simple alcanzado - FUNCIONA AHORA');
+
+		// Test directo de la query problemática
+		const testResults = await db.execute(sql`
+			SELECT 
+				id, name, parentId,
+				(SELECT COUNT(*) FROM Folder WHERE Folder.parentId = Folder.id) as childrenCount
+			FROM Folder 
+			ORDER BY name
+		`);
+
+		res.json({
+			message: 'Test de conteo de hijos directo desde SQL',
+			totalFolders: testResults.length,
+			query:
+				'SELECT id, name, parentId, (SELECT COUNT(*) FROM Folder WHERE Folder.parentId = Folder.id) as childrenCount FROM Folder',
+			results: testResults,
+		});
+	} catch (error) {
+		logger.error('Error en debug simple', { error });
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
 });
 
-// Schema de validación para actualizar carpeta
-const UpdateFolderSchema = CreateFolderSchema.partial().omit({ path: true });
+// DEBUG AVANZADO - Endpoint de debug para subcarpetas completo
+router.get('/debug-subcarpetas-analysis', async (_req, res) => {
+	try {
+		logger.info('Iniciando depuración de subcarpetas BD vs FS');
 
-// GET /api/folders - Obtener todas las carpetas
+		// Importar servicios necesarios
+		const { syncFoldersWithFileSystem } = await import('@/lib/filesystem/folder-sync');
+
+		// 1. Obtener todas las carpetas de la BD
+		const bdFolders = await db
+			.select({
+				id: folders.id,
+				name: folders.name,
+				path: folders.path,
+				parentId: folders.parentId,
+			})
+			.from(folders)
+			.orderBy(asc(folders.path));
+
+		logger.info(`BD: ${bdFolders.length} carpetas encontradas`);
+
+		// 2. Usar sincronización para obtener diferencias
+		const syncResult = await syncFoldersWithFileSystem({ dryRun: true });
+
+		// 3. Análisis de subcarpetas
+		const subcarpetasBD = bdFolders.filter((f) => f.parentId !== null);
+
+		// 4. Buscar relaciones problemáticas
+		const bdById = new Map(bdFolders.map((c) => [c.id, c]));
+		const relacionesProblematicas = bdFolders.filter((carpeta: any) => {
+			if (!carpeta.parentId) return false;
+
+			const padre = bdById.get(carpeta.parentId);
+			if (!padre) {
+				logger.warn(`Carpeta ${carpeta.name} tiene parentId ${carpeta.parentId} que no existe`);
+				return true;
+			}
+
+			return false;
+		});
+
+		// 5. Respuesta detallada
+		const respuesta = {
+			resumen: {
+				carpetasBD: bdFolders.length,
+				carpetasFaltantesEnBD: syncResult.added.length,
+				carpetasOrfanasEnBD: syncResult.removed.length,
+				relacionesProblematicas: relacionesProblematicas.length,
+			},
+			diferencias: {
+				solo_en_fs: syncResult.added.slice(0, 20),
+				solo_en_bd: syncResult.removed.slice(0, 20),
+			},
+			subcarpetas: {
+				bd: subcarpetasBD.slice(0, 10).map((f) => ({
+					id: f.id,
+					name: f.name,
+					path: f.path,
+					parent: f.parentId ? bdById.get(f.parentId)?.name || 'PARENT_NOT_FOUND' : 'NO_PARENT',
+				})),
+				fs: syncResult.added.slice(0, 10).map((d) => ({
+					name: d.name,
+					path: d.path,
+					parent_path: d.path.substring(0, d.path.lastIndexOf('/')) || '/',
+				})),
+			},
+			sync_analysis: syncResult,
+		};
+
+		logger.success('Análisis de subcarpetas completado');
+		res.json(respuesta);
+	} catch (error) {
+		logger.error('Error en debug de subcarpetas', { error });
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// ===== REWRITE [BEGIN]: folders core endpoints =====
+// GET /api/folders - Listado de carpetas (alias top-level cuando parentId == rootId)
 router.get('/', async (req, res) => {
 	try {
 		const { parentId } = req.query as { parentId?: string };
@@ -54,60 +146,297 @@ router.get('/', async (req, res) => {
 				updatedAt: folders.updatedAt,
 				parentId: folders.parentId,
 				presetId: folders.presetId,
-				imagesCount: sql<number>`(SELECT COUNT(1) FROM Image WHERE Image.folderId = ${folders.id})`,
-				videosCount: sql<number>`(SELECT COUNT(1) FROM Video WHERE Video.folderId = ${folders.id})`,
-				childrenCount: sql<number>`(SELECT COUNT(1) FROM Folder WHERE Folder.parentId = ${folders.id})`,
 			})
-			.from(folders);
+			.from(folders)
+			.orderBy(asc(folders.name));
 
-		const drizzleFolders = await (parentId
-			? baseSelect.where(eq(folders.parentId, parentId)).orderBy(asc(folders.name))
-			: baseSelect.orderBy(asc(folders.name)));
+		if (parentId) {
+			const rootRow = await db.select({ id: folders.id }).from(folders).where(eq(folders.path, '/')).limit(1);
+			if (rootRow.length && rootRow[0].id === parentId) {
+				const rows = await baseSelect.where(isNull(folders.parentId));
+				return res.json(rows);
+			}
+			const rows = await baseSelect.where(eq(folders.parentId, parentId));
+			return res.json(rows);
+		}
 
-		// Transformar a formato compatible
-		const withCounts = drizzleFolders.map((folder: any) => ({
-			id: folder.id,
-			name: folder.name,
-			description: folder.description,
-			path: folder.path,
-			emoji: folder.emoji,
-			color: folder.color,
-			featuredImage: folder.featuredImage,
-			isFavorite: Boolean(folder.isFavorite),
-			totalFiles: folder.totalFiles,
-			totalSize: folder.totalSize,
-			autoReindex: Boolean(folder.autoReindex),
-			lastIndexed: folder.lastIndexed,
-			createdAt: folder.createdAt,
-			updatedAt: folder.updatedAt,
-			parentId: folder.parentId,
-			presetId: folder.presetId,
-			preset: null,
-			parent: null,
-			children: [],
-			_count: {
-				images: Number(folder.imagesCount) || 0,
-				videos: Number(folder.videosCount) || 0,
-				children: Number(folder.childrenCount) || 0,
-			},
-		}));
-
-		const { fromDrizzleFoldersWithCounts } = await import('@/transformers/folder');
-		const enriched = fromDrizzleFoldersWithCounts(withCounts);
-
-		// Devolver estructura compatible con FoldersResponse
-		res.json({
-			data: enriched,
-			pagination: {
-				total: enriched.length,
-				limit: 100, // Default limit
-				offset: 0,
-				hasNext: false,
-				hasPrevious: false,
-			},
-		});
+		const rows = await baseSelect;
+		return res.json(rows);
 	} catch (error) {
-		console.error('❌ Error al obtener carpetas:', error);
+		logger.error('Error al obtener carpetas', { error });
+		return res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// GET /api/folders/root-id - ID de la raíz (auto-crear si falta)
+router.get('/root-id', async (_req, res) => {
+	try {
+		let root = await db.select({ id: folders.id }).from(folders).where(eq(folders.path, '/')).limit(1);
+		if (!root.length) {
+			const folderId = await generateFolderIdFromName('Root');
+			const inserted = await db
+				.insert(folders)
+				.values({
+					id: folderId,
+					name: 'Root',
+					description: null,
+					path: '/',
+					emoji: null,
+					color: null,
+					featuredImage: null,
+					isFavorite: false,
+					autoReindex: true,
+					totalFiles: 0,
+					totalSize: 0,
+					parentId: null,
+					presetId: null,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				})
+				.returning({ id: folders.id });
+			root = inserted;
+		}
+		return res.json({ id: root[0].id });
+	} catch (error) {
+		return res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// GET /api/folders/root - Carpeta raíz (auto-crear si falta)
+router.get('/root', async (_req, res) => {
+	try {
+		let rootFolder = await db
+			.select({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				autoReindex: folders.autoReindex,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			})
+			.from(folders)
+			.where(eq(folders.path, '/'))
+			.limit(1);
+
+		if (rootFolder.length === 0) {
+			const folderId = await generateFolderIdFromName('Root');
+			const inserted = await db
+				.insert(folders)
+				.values({
+					id: folderId,
+					name: 'Root',
+					description: null,
+					path: '/',
+					emoji: null,
+					color: null,
+					featuredImage: null,
+					isFavorite: false,
+					autoReindex: true,
+					totalFiles: 0,
+					totalSize: 0,
+					parentId: null,
+					presetId: null,
+					createdAt: new Date(),
+					updatedAt: new Date(),
+				})
+				.returning({
+					id: folders.id,
+					name: folders.name,
+					description: folders.description,
+					path: folders.path,
+					emoji: folders.emoji,
+					color: folders.color,
+					featuredImage: folders.featuredImage,
+					isFavorite: folders.isFavorite,
+					totalFiles: folders.totalFiles,
+					totalSize: folders.totalSize,
+					autoReindex: folders.autoReindex,
+					lastIndexed: folders.lastIndexed,
+					createdAt: folders.createdAt,
+					updatedAt: folders.updatedAt,
+					parentId: folders.parentId,
+					presetId: folders.presetId,
+				});
+			rootFolder = inserted;
+		}
+		return res.json(rootFolder[0]);
+	} catch (error) {
+		logger.error('Error al obtener/crear la carpeta raíz', { error });
+		return res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// POST /api/folders - Crear carpeta
+router.post('/', async (req, res) => {
+	try {
+		const validationResult = CreateFolderSchema.safeParse(req.body);
+		if (!validationResult.success) {
+			return res.status(400).json({
+				error: 'Datos de entrada inválidos',
+				details: validationResult.error.errors,
+			});
+		}
+
+		const data = validationResult.data;
+		const existingFolder = await db.select({ id: folders.id }).from(folders).where(eq(folders.path, data.path));
+		if (existingFolder.length > 0) {
+			return res.status(409).json({ error: 'Ya existe una carpeta con esa ruta' });
+		}
+
+		const folderId = await generateFolderIdFromName(data.name);
+		const newFolder = await db
+			.insert(folders)
+			.values({
+				id: folderId,
+				name: data.name,
+				description: data.description ?? null,
+				path: data.path,
+				emoji: data.emoji ?? null,
+				color: data.color ?? null,
+				featuredImage: data.featuredImage ?? null,
+				isFavorite: data.isFavorite ?? false,
+				autoReindex: data.autoReindex ?? true,
+				totalFiles: 0,
+				totalSize: 0,
+				parentId: data.parentId ?? null,
+				presetId: data.presetId ?? null,
+				createdAt: new Date(),
+				updatedAt: new Date(),
+			})
+			.returning({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				autoReindex: folders.autoReindex,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			});
+
+		return res.status(201).json(newFolder[0]);
+	} catch (error) {
+		logger.error('Error al crear carpeta', { error });
+		return res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+// DEBUG AVANZADO - Endpoint de debug para subcarpetas completo
+router.get('/_debug_subcarpetas', async (_req, res) => {
+	try {
+		logger.info('Iniciando depuración de subcarpetas BD vs FS');
+
+		// Importar servicios necesarios
+		const { scanFileSystemFromRoot } = await import('@/lib/filesystem/folder-sync');
+
+		// 1. Obtener carpetas desde BD
+		const carpetasBD = await db
+			.select({
+				id: folders.id,
+				name: folders.name,
+				path: folders.path,
+				parentId: folders.parentId,
+			})
+			.from(folders)
+			.orderBy(asc(folders.path));
+
+		logger.info(`Carpetas en BD: ${carpetasBD.length}`);
+
+		// 2. Escanear sistema de archivos
+		const { syncFoldersWithFileSystem } = await import('@/lib/filesystem/folder-sync');
+		const syncResult = await syncFoldersWithFileSystem({ dryRun: true });
+
+		// 3. Crear mapas para comparación rápida
+		const bdPaths = new Set(carpetasBD.map((c) => c.path));
+		const fsPaths = new Set(); // Vacío ya que usamos syncResult.added
+
+		// 4. Análisis de diferencias - usar resultado de sincronización
+		const soloEnBD = syncResult.removed; // Carpetas que están en BD pero no en FS
+		const soloEnFS = syncResult.added; // Carpetas que están en FS pero no en BD
+
+		// 5. Análisis de subcarpetas
+		const subcarpetasBD = carpetasBD.filter((c) => c.parentId);
+		const subcarpetasFS = syncResult.discovered
+			.filter((path) => path.includes('/') || path.includes('\\'))
+			.map((path) => ({
+				name: path.split(/[/\\]/).pop() || 'unknown',
+				path,
+			}));
+
+		// 6. Buscar relaciones problemáticas
+		const bdById = new Map(carpetasBD.map((c) => [c.id, c]));
+		const relacionesProblematicas = carpetasBD.filter((carpeta: any) => {
+			if (!carpeta.parentId) return false;
+
+			const padre = bdById.get(carpeta.parentId);
+			if (!padre) {
+				console.warn(`⚠️ [DEBUG] Carpeta ${carpeta.name} tiene parentId ${carpeta.parentId} que no existe`);
+				return true;
+			}
+
+			return false;
+		});
+
+		const respuesta = {
+			resumen: {
+				carpetasBD: carpetasBD.length,
+				carpetasFaltantesEnBD: soloEnFS.length,
+				carpetasOrfanasEnBD: soloEnBD.length,
+				relacionesProblematicas: relacionesProblematicas.length,
+			},
+			diferencias: {
+				solo_en_fs: soloEnFS.slice(0, 20),
+				solo_en_bd: soloEnBD.slice(0, 20),
+			},
+			subcarpetas: {
+				bd: subcarpetasBD.slice(0, 10).map((f) => ({
+					id: f.id,
+					name: f.name,
+					path: f.path,
+					parent: f.parentId ? bdById.get(f.parentId)?.name || 'PARENT_NOT_FOUND' : 'NO_PARENT',
+				})),
+				fs: subcarpetasFS.slice(0, 10).map((d) => ({
+					name: d.name,
+					path: d.path,
+					parent_path: d.path.substring(0, d.path.lastIndexOf('/')) || '/',
+				})),
+			},
+			sync_analysis: syncResult,
+		};
+
+		logger.success('Análisis de subcarpetas completado');
+		res.json(respuesta);
+	} catch (error) {
+		logger.error('Error en debug de subcarpetas', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -118,6 +447,7 @@ router.get('/', async (req, res) => {
 // GET /api/folders/tree - Obtener todas las carpetas con conteos y estadísticas
 router.get('/tree', async (_req, res) => {
 	try {
+		logger.debug('[TREE] ENDPOINT');
 		const rows = await db
 			.select({
 				id: folders.id,
@@ -138,7 +468,7 @@ router.get('/tree', async (_req, res) => {
 				presetId: folders.presetId,
 				imagesCount: sql<number>`(SELECT COUNT(1) FROM Image WHERE Image.folderId = ${folders.id})`,
 				videosCount: sql<number>`(SELECT COUNT(1) FROM Video WHERE Video.folderId = ${folders.id})`,
-				childrenCount: sql<number>`(SELECT COUNT(1) FROM Folder WHERE Folder.parentId = ${folders.id})`,
+				childrenCount: sql<number>`(SELECT COUNT(*) FROM Folder WHERE Folder.parentId = ${folders.id})`,
 			})
 			.from(folders)
 			.orderBy(asc(folders.name));
@@ -152,11 +482,16 @@ router.get('/tree', async (_req, res) => {
 			},
 		}));
 
+		// Debug ligero
+		for (const f of withCounts.slice(0, 1)) {
+			logger.debug(`childrenCount sample -> ${f.name}: ${f.childrenCount}`);
+		}
+
 		const { fromDrizzleFoldersWithCounts } = await import('@/transformers/folder');
 		const transformed = fromDrizzleFoldersWithCounts(withCounts);
 		res.json(transformed);
 	} catch (error) {
-		console.error('Error al obtener árbol de carpetas:', error);
+		logger.error('Error al obtener árbol de carpetas', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -164,16 +499,91 @@ router.get('/tree', async (_req, res) => {
 	}
 });
 
-// GET /api/folders/root-id - Obtener ID de carpeta raíz
-router.get('/root-id', async (_req, res) => {
+// DEBUG-ROUTES - Rutas especiales de debug que deben ir antes de /:id
+router.get('/_debug_', async (_req, res) => {
 	try {
-		const root = await db.select({ id: folders.id }).from(folders).where(eq(folders.path, '/')).limit(1);
-		if (!root.length) {
-			return res.status(404).json({ error: 'Carpeta raíz no encontrada' });
-		}
-		res.json({ id: root[0].id });
+		console.log('🔍 [DEBUG] Endpoint debug simple alcanzado - FUNCIONA AHORA');
+
+		// TEST DE QUERY SQL DIRECTA PARA CHILDRENCOUNT
+		const testQuery = await db.execute(sql`
+			SELECT 
+				id, name, parentId,
+				(SELECT COUNT(*) FROM Folder WHERE Folder.parentId = Folder.id) as childrenCount
+			FROM Folder 
+			WHERE name IN ('Photography', 'Cartoons', 'Aesthethic', 'SilentHill', 'Nature')
+			ORDER BY name
+		`);
+
+		const testResults = testQuery.rows.map((row: any) => ({
+			id: row[0],
+			name: row[1],
+			parentId: row[2],
+			childrenCount: row[3],
+		}));
+
+		res.json({
+			success: true,
+			message: 'Debug endpoint funcionando correctamente',
+			timestamp: new Date().toISOString(),
+			server_time: Date.now(),
+			hot_reload_working: true,
+			sqlTest: {
+				query:
+					'SELECT id, name, parentId, (SELECT COUNT(*) FROM Folder WHERE Folder.parentId = Folder.id) as childrenCount FROM Folder',
+				results: testResults,
+			},
+		});
 	} catch (error) {
+		console.error('❌ Error en debug simple:', error);
 		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// DEBUG AVANZADO - Endpoint de debug para subcarpetas completo
+// (El endpoint '/debug-subcarpetas-analysis' ya está definido arriba)
+
+// GET /api/folders/:id - Obtener una carpeta por ID
+router.get('/:id', async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		if (!isValidFolderId(id)) {
+			return res.status(400).json({ error: 'ID de carpeta inválido' });
+		}
+
+		const folder = await db
+			.select({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				autoReindex: folders.autoReindex,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			})
+			.from(folders)
+			.where(eq(folders.id, id));
+
+		if (folder.length === 0) {
+			return res.status(404).json({ error: 'Carpeta no encontrada' });
+		}
+
+		return res.json(folder);
+	} catch (error) {
+		logger.error('Error al obtener carpeta', { error });
+		return res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});
@@ -267,298 +677,7 @@ router.post('/:id/move', async (req, res) => {
 });
 
 // GET /api/folders/by-path - Obtener el ID de una carpeta por su ruta
-router.get('/by-path', async (req, res) => {
-	try {
-		const folderPath = req.query.path as string;
-
-		if (!folderPath) {
-			return res.status(400).json({ error: 'La ruta es requerida' });
-		}
-
-		const folder = await db.select({ id: folders.id }).from(folders).where(eq(folders.path, folderPath));
-
-		if (!folder || folder.length === 0) {
-			return res.status(404).json({ error: 'Carpeta no encontrada para la ruta proporcionada' });
-		}
-		return res.json({ id: folder[0].id });
-	} catch (error) {
-		console.error('Error al obtener el ID de la carpeta por ruta:', error);
-		return res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
-
-// GET /api/folders/root - Obtener carpeta raíz
-router.get('/root', async (_req, res) => {
-	try {
-		const rootFolder = await db
-			.select({
-				id: folders.id,
-				name: folders.name,
-				description: folders.description,
-				path: folders.path,
-				emoji: folders.emoji,
-				color: folders.color,
-				featuredImage: folders.featuredImage,
-				isFavorite: folders.isFavorite,
-				totalFiles: folders.totalFiles,
-				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
-				lastIndexed: folders.lastIndexed,
-				createdAt: folders.createdAt,
-				updatedAt: folders.updatedAt,
-				parentId: folders.parentId,
-				presetId: folders.presetId,
-			})
-			.from(folders)
-			.where(eq(folders.path, '/'));
-
-		if (rootFolder.length === 0) {
-			return res.status(404).json({ error: 'Carpeta raíz no encontrada' });
-		}
-		return res.json(rootFolder[0]);
-	} catch (error) {
-		console.error('Error al obtener la carpeta raíz:', error);
-		return res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
-
-// GET /api/folders/:id - Obtener una carpeta por ID
-router.get('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-
-		if (!isValidFolderId(id)) {
-			return res.status(400).json({ error: 'ID de carpeta inválido' });
-		}
-
-		const folder = await db
-			.select({
-				id: folders.id,
-				name: folders.name,
-				description: folders.description,
-				path: folders.path,
-				emoji: folders.emoji,
-				color: folders.color,
-				featuredImage: folders.featuredImage,
-				isFavorite: folders.isFavorite,
-				totalFiles: folders.totalFiles,
-				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
-				lastIndexed: folders.lastIndexed,
-				createdAt: folders.createdAt,
-				updatedAt: folders.updatedAt,
-				parentId: folders.parentId,
-				presetId: folders.presetId,
-			})
-			.from(folders)
-			.where(eq(folders.id, id));
-
-		if (folder.length === 0) {
-			return res.status(404).json({ error: 'Carpeta no encontrada' });
-		}
-
-		return res.json(folder);
-	} catch (error) {
-		console.error('Error al obtener carpeta:', error);
-		return res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
-
-// POST /api/folders - Crear nueva carpeta
-router.post('/', async (req, res) => {
-	try {
-		const validationResult = CreateFolderSchema.safeParse(req.body);
-
-		if (!validationResult.success) {
-			return res.status(400).json({
-				error: 'Datos de entrada inválidos',
-				details: validationResult.error.errors,
-			});
-		}
-
-		const data = validationResult.data;
-
-		// Verificar que no exista una carpeta con la misma ruta
-		const existingFolder = await db.select({ id: folders.id }).from(folders).where(eq(folders.path, data.path));
-
-		if (existingFolder.length > 0) {
-			return res.status(409).json({
-				error: 'Ya existe una carpeta con esa ruta',
-			});
-		}
-
-		// Generar ID basado en el nombre de la carpeta
-		const folderId = await generateFolderIdFromName(data.name);
-
-		const newFolder = await db
-			.insert(folders)
-			.values({
-				id: folderId,
-				name: data.name,
-				description: data.description,
-				path: data.path,
-				emoji: data.emoji,
-				color: data.color,
-				featuredImage: data.featuredImage,
-				isFavorite: data.isFavorite,
-				autoReindex: data.autoReindex,
-				totalFiles: 0,
-				totalSize: 0,
-				parentId: data.parentId,
-				presetId: data.presetId,
-				createdAt: new Date(),
-				updatedAt: new Date(),
-			})
-			.returning({
-				id: folders.id,
-				name: folders.name,
-				description: folders.description,
-				path: folders.path,
-				emoji: folders.emoji,
-				color: folders.color,
-				featuredImage: folders.featuredImage,
-				isFavorite: folders.isFavorite,
-				totalFiles: folders.totalFiles,
-				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
-				lastIndexed: folders.lastIndexed,
-				createdAt: folders.createdAt,
-				updatedAt: folders.updatedAt,
-				parentId: folders.parentId,
-				presetId: folders.presetId,
-			});
-
-		// Retornar el primer elemento del array ya que .returning() retorna un array
-		res.status(201).json(newFolder[0]);
-	} catch (error) {
-		console.error('Error al crear carpeta:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
-
-// PUT /api/folders/:id - Actualizar carpeta
-router.put('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-
-		if (!isValidFolderId(id)) {
-			return res.status(400).json({ error: 'ID de carpeta inválido' });
-		}
-
-		const validationResult = UpdateFolderSchema.safeParse(req.body);
-
-		if (!validationResult.success) {
-			return res.status(400).json({
-				error: 'Datos de entrada inválidos',
-				details: validationResult.error.errors,
-			});
-		}
-
-		const data = validationResult.data;
-
-		// Verificar que la carpeta existe
-		const existingFolder = await db.select({ id: folders.id }).from(folders).where(eq(folders.id, id));
-
-		if (existingFolder.length === 0) {
-			return res.status(404).json({ error: 'Carpeta no encontrada' });
-		}
-
-		const updatedFolder = await db
-			.update(folders)
-			.set({
-				...(data.name && { name: data.name }),
-				...(data.description !== undefined && { description: data.description }),
-				...(data.emoji !== undefined && { emoji: data.emoji }),
-				...(data.color !== undefined && { color: data.color }),
-				...(data.featuredImage !== undefined && { featuredImage: data.featuredImage }),
-				...(data.isFavorite !== undefined && { isFavorite: data.isFavorite }),
-				...(data.parentId !== undefined && { parentId: data.parentId }),
-				...(data.presetId !== undefined && { presetId: data.presetId }),
-			})
-			.where(eq(folders.id, id))
-			.returning({
-				id: folders.id,
-				name: folders.name,
-				description: folders.description,
-				path: folders.path,
-				emoji: folders.emoji,
-				color: folders.color,
-				featuredImage: folders.featuredImage,
-				isFavorite: folders.isFavorite,
-				totalFiles: folders.totalFiles,
-				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
-				lastIndexed: folders.lastIndexed,
-				createdAt: folders.createdAt,
-				updatedAt: folders.updatedAt,
-				parentId: folders.parentId,
-				presetId: folders.presetId,
-			});
-
-		// Retornar el primer elemento del array ya que .returning() retorna un array
-		res.json(updatedFolder[0]);
-	} catch (error) {
-		console.error('Error al actualizar carpeta:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
-
-// DELETE /api/folders/:id - Eliminar carpeta
-router.delete('/:id', async (req, res) => {
-	try {
-		const { id } = req.params;
-
-		if (!isValidFolderId(id)) {
-			return res.status(400).json({ error: 'ID de carpeta inválido' });
-		}
-
-		// Verificar que la carpeta existe
-		const existingFolder = await db.select({ id: folders.id }).from(folders).where(eq(folders.id, id));
-
-		if (existingFolder.length === 0) {
-			return res.status(404).json({ error: 'Carpeta no encontrada' });
-		}
-
-		// Verificar que la carpeta no tiene archivos asociados
-		const totalFiles = await db.select({ totalFiles: folders.totalFiles }).from(folders).where(eq(folders.id, id));
-
-		if (totalFiles.length > 0 && totalFiles[0].totalFiles > 0) {
-			return res.status(409).json({
-				error: 'No se puede eliminar la carpeta porque contiene archivos',
-				details: `La carpeta contiene ${totalFiles[0].totalFiles} archivos`,
-			});
-		}
-
-		await db.delete(folders).where(eq(folders.id, id));
-
-		res.json({
-			success: true,
-			message: 'Carpeta eliminada correctamente',
-			deletedId: id,
-		});
-	} catch (error) {
-		console.error('Error al eliminar carpeta:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
+// (Endpoint '/by-path' definido más abajo, se elimina duplicado)
 
 // GET /api/folders/:id/recent-images - Obtener imágenes recientes de una carpeta
 router.get('/:id/recent-images', async (req, res) => {
@@ -582,7 +701,7 @@ router.get('/:id/recent-images', async (req, res) => {
 			.filter((url: any): url is string => url !== null);
 		res.json(imageUrls);
 	} catch (error) {
-		console.error('Error al obtener imágenes recientes de la carpeta:', error);
+		logger.error('Error al obtener imágenes recientes de la carpeta', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -652,7 +771,7 @@ router.get('/:id/stats', async (req, res) => {
 		};
 		res.json(stats);
 	} catch (error) {
-		console.error('Error al obtener estadísticas de la carpeta:', error);
+		logger.error('Error al obtener estadísticas de la carpeta', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -676,7 +795,7 @@ router.get('/:id/path', async (req, res) => {
 		}
 		res.json({ path: folder[0].path });
 	} catch (error) {
-		console.error('Error al obtener la ruta de la carpeta:', error);
+		logger.error('Error al obtener la ruta de la carpeta', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -700,7 +819,7 @@ router.get('/:id/name', async (req, res) => {
 		}
 		res.json({ name: folder[0].name });
 	} catch (error) {
-		console.error('Error al obtener el nombre de la carpeta:', error);
+		logger.error('Error al obtener el nombre de la carpeta', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -712,10 +831,10 @@ router.get('/:id/name', async (req, res) => {
 router.get('/by-path', async (req, res) => {
 	try {
 		const folderPath = req.query.path as string;
-		console.log('🔍 [BY-PATH] Parámetros recibidos:', { query: req.query, path: folderPath });
+		logger.debug('[BY-PATH] Parámetros recibidos', { query: req.query, path: folderPath });
 
 		if (!folderPath) {
-			console.log('❌ [BY-PATH] Error: La ruta es requerida');
+			logger.warn('[BY-PATH] Error: La ruta es requerida');
 			return res.status(400).json({ error: 'La ruta es requerida' });
 		}
 
@@ -726,7 +845,7 @@ router.get('/by-path', async (req, res) => {
 		}
 		res.json({ id: folder[0].id });
 	} catch (error) {
-		console.error('Error al obtener el ID de la carpeta por ruta:', error);
+		logger.error('Error al obtener el ID de la carpeta por ruta', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -750,7 +869,7 @@ router.get('/:id/parent-id', async (req, res) => {
 		}
 		res.json({ parentFolderId: folder[0].parentId });
 	} catch (error) {
-		console.error('Error al obtener el ID de la carpeta padre:', error);
+		logger.error('Error al obtener el ID de la carpeta padre', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -792,7 +911,7 @@ router.patch('/:id/featured-image', async (req, res) => {
 			});
 		res.json(updatedFolder);
 	} catch (error) {
-		console.error('Error al actualizar la imagen destacada de la carpeta:', error);
+		logger.error('Error al actualizar la imagen destacada de la carpeta', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -830,7 +949,7 @@ router.patch('/:id/color', async (req, res) => {
 		});
 		res.json(updatedFolder);
 	} catch (error) {
-		console.error('Error al actualizar el color de la carpeta:', error);
+		logger.error('Error al actualizar el color de la carpeta', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -868,7 +987,7 @@ router.patch('/:id/emoji', async (req, res) => {
 		});
 		res.json(updatedFolder);
 	} catch (error) {
-		console.error('Error al actualizar el emoji de la carpeta:', error);
+		logger.error('Error al actualizar el emoji de la carpeta', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -906,7 +1025,7 @@ router.patch('/:id/favorite', async (req, res) => {
 		});
 		res.json(updatedFolder);
 	} catch (error) {
-		console.error('Error al actualizar el estado de favorito de la carpeta:', error);
+		logger.error('Error al actualizar el estado de favorito de la carpeta', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -944,7 +1063,7 @@ router.patch('/:id/description', async (req, res) => {
 		});
 		res.json(updatedFolder);
 	} catch (error) {
-		console.error('Error al actualizar la descripción de la carpeta:', error);
+		logger.error('Error al actualizar la descripción de la carpeta', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -982,7 +1101,7 @@ router.patch('/:id/name', async (req, res) => {
 		});
 		res.json(updatedFolder);
 	} catch (error) {
-		console.error('Error al actualizar el nombre de la carpeta:', error);
+		logger.error('Error al actualizar el nombre de la carpeta', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -1020,7 +1139,7 @@ router.patch('/:id/auto-reindex', async (req, res) => {
 		});
 		res.json(updatedFolder);
 	} catch (error) {
-		console.error('Error al actualizar el estado de auto-reindexación de la carpeta:', error);
+		logger.error('Error al actualizar el estado de auto-reindexación de la carpeta', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -1038,7 +1157,7 @@ router.post('/:id/reindex', async (req, res) => {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		console.log(`🔄 Iniciando reindexación de carpeta: ${id}`, { enableSync });
+		logger.info(`Iniciando reindexación de carpeta: ${id}`, { enableSync });
 
 		// Obtener la carpeta para verificar que existe
 		const folder = await db
@@ -1063,7 +1182,7 @@ router.post('/:id/reindex', async (req, res) => {
 		// Ejecutar la reindexación con sincronización automática y eventos de progreso
 		const indexResult = await updateFolderStats(id, new Set(), 10, 0, enableSync, true);
 
-		console.log(`✅ Reindexación completada para carpeta: ${targetFolder.name}`, {
+		logger.success(`Reindexación completada para carpeta: ${targetFolder.name}`, {
 			entitiesCreated: indexResult.successful,
 			entitiesUpdated: indexResult.processed - indexResult.successful,
 			syncResult: indexResult.syncResult,
@@ -1104,7 +1223,7 @@ router.post('/:id/reindex', async (req, res) => {
 			...(indexResult.syncResult && { syncResult: indexResult.syncResult }),
 		});
 	} catch (error) {
-		console.error('Error al reindexar la carpeta:', error);
+		logger.error('Error al reindexar la carpeta', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -1116,7 +1235,7 @@ router.post('/:id/reindex', async (req, res) => {
 router.post('/reindex-all', async (req, res) => {
 	try {
 		const { enableSync = true } = req.body; // Permitir deshabilitar sincronización
-		console.log('🔄 Iniciando reindexación global de todas las carpetas', { enableSync });
+		logger.info('Iniciando reindexación global de todas las carpetas', { enableSync });
 
 		// Obtener todas las carpetas
 		const allFolders = await db
@@ -1148,22 +1267,26 @@ router.post('/reindex-all', async (req, res) => {
 	}
 });
 
-// Función auxiliar para el proceso de reindexado global
+// REWRITE: helper limpio para reindexado global
 async function reindexAllFoldersProcess(
 	allFolders: Array<{ id: string; name: string; path: string }>,
 	enableSync: boolean,
-	updateFolderStats: any,
-	emit: any
+	updateFolderStats: (
+		folderId: string,
+		visited: Set<string>,
+		batchSize: number,
+		depth: number,
+		enableSync: boolean,
+		emitProgress: boolean
+	) => Promise<{ processed: number; successful: number; errors: string[]; syncResult?: unknown }>,
+	emit: (evt: { type: string; data: Record<string, unknown> }) => Promise<void>
 ) {
 	let processed = 0;
 	const errors: string[] = [];
-	let globalSyncResult: any = null;
+	let globalSyncResult: unknown = null;
 
-	// Procesamiento recursivo para evitar await en bucles
 	const processAt = async (i: number): Promise<void> => {
-		if (i >= allFolders.length) {
-			return;
-		}
+		if (i >= allFolders.length) return;
 		const folder = allFolders[i];
 		const phase = getFolderProcessPhase(i, allFolders.length);
 		const progress = Math.round(((i + 1) / allFolders.length) * 100);
@@ -1172,7 +1295,7 @@ async function reindexAllFoldersProcess(
 			await emit({
 				type: 'folder:reindexAll:progress',
 				data: {
-					folderId: null,
+					folderId: folder.id,
 					isProcessing: true,
 					progress,
 					totalFiles: allFolders.length,
@@ -1183,14 +1306,16 @@ async function reindexAllFoldersProcess(
 					currentFolder: folder.name,
 				},
 			});
+
 			const indexResult = await updateFolderStats(folder.id, new Set(), 10, 0, shouldSync, true);
 			if (shouldSync && indexResult?.syncResult) {
 				globalSyncResult = indexResult.syncResult;
 			}
-			processed++;
-			console.log(`✅ Carpeta reindexada: ${folder.name}`);
-		} catch (error) {
-			const errorMessage = `Error en carpeta ${folder.name}: ${error instanceof Error ? error.message : 'Error desconocido'}`;
+			processed += 1;
+			logger.success(`Carpeta reindexada: ${folder.name}`);
+		} catch (err) {
+			const message = err instanceof Error ? err.message : 'Error desconocido';
+			const errorMessage = `Error en carpeta ${folder.name}: ${message}`;
 			console.error(`❌ ${errorMessage}`);
 			errors.push(errorMessage);
 		}
@@ -1199,12 +1324,11 @@ async function reindexAllFoldersProcess(
 
 	await processAt(0);
 
-	// Emitir evento de finalización
 	await emit({
 		type: 'folder:reindexAll:progress',
 		data: {
 			folderId: null,
-			isProcessing: false, // Proceso terminado
+			isProcessing: false,
 			progress: 100,
 			totalFiles: allFolders.length,
 			filesProcessed: allFolders.length,
@@ -1212,15 +1336,16 @@ async function reindexAllFoldersProcess(
 			message: `Reindexación completada: ${processed} carpetas procesadas`,
 			timestamp: Date.now(),
 			currentFolder: null,
+			...(globalSyncResult ? { syncResult: globalSyncResult } : {}),
 		},
 	});
 
-	console.log(`✅ Reindexación global completada: ${processed} carpetas procesadas, ${errors.length} errores`);
+	logger.success(`Reindexación global completada: ${processed} carpetas procesadas, ${errors.length} errores`);
 
 	return {
 		processed,
 		errors,
-		...(globalSyncResult && { syncResult: globalSyncResult }),
+		...(globalSyncResult ? { syncResult: globalSyncResult } : {}),
 	};
 }
 
@@ -1239,7 +1364,7 @@ function getFolderProcessPhase(currentIndex: number, totalFolders: number): stri
 router.post('/sync', async (req, res) => {
 	try {
 		const { dryRun = false, maxDepth = 10, includeHidden = false } = req.body;
-		console.log('🔄 Iniciando sincronización de carpetas', { dryRun, maxDepth, includeHidden });
+		logger.info('Iniciando sincronización de carpetas', { dryRun, maxDepth, includeHidden });
 
 		// Importar la función de sincronización
 		const { syncFoldersWithFileSystem } = await import('@/lib/filesystem/folder-sync');
@@ -1252,7 +1377,7 @@ router.post('/sync', async (req, res) => {
 			forceSync: true,
 		});
 
-		console.log('✅ Sincronización completada:', {
+		logger.success('Sincronización completada', {
 			added: syncResult.added.length,
 			removed: syncResult.removed.length,
 			updated: syncResult.updated.length,
@@ -1263,7 +1388,7 @@ router.post('/sync', async (req, res) => {
 
 		res.json(syncResult);
 	} catch (error) {
-		console.error('Error en sincronización de carpetas:', error);
+		logger.error('Error en sincronización de carpetas', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -1275,7 +1400,7 @@ router.post('/sync', async (req, res) => {
 router.get('/sync/status', async (req, res) => {
 	try {
 		const { maxDepth = 10, includeHidden = false } = req.query;
-		console.log('🔍 Verificando estado de sincronización');
+		logger.info('Verificando estado de sincronización');
 
 		// Importar la función de verificación
 		const { checkSyncStatus } = await import('@/lib/filesystem/folder-sync');
@@ -1286,7 +1411,7 @@ router.get('/sync/status', async (req, res) => {
 			includeHidden: includeHidden === 'true',
 		});
 
-		console.log('✅ Verificación completada:', {
+		logger.success('Verificación completada', {
 			toAdd: syncStatus.added.length,
 			toRemove: syncStatus.removed.length,
 			toUpdate: syncStatus.updated.length,
@@ -1295,7 +1420,7 @@ router.get('/sync/status', async (req, res) => {
 
 		res.json(syncStatus);
 	} catch (error) {
-		console.error('Error verificando estado de sincronización:', error);
+		logger.error('Error verificando estado de sincronización', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -1313,28 +1438,30 @@ router.post('/:id/sync-files', async (req, res) => {
 		const { id } = req.params;
 		const { force = false } = req.body;
 
-		console.log(`🔄 Iniciando sincronización de archivos para carpeta: ${id}`);
-		console.log('🔍 Parámetros recibidos:', { id, force });
+		logger.info(`Iniciando sincronización de archivos para carpeta: ${id}`);
+		logger.debug('Parámetros recibidos', { id, force });
 
 		// Importar el servicio de sincronización de archivos
-		console.log('📦 Importando fileSyncService...');
+		logger.debug('Importando fileSyncService...');
 		const { fileSyncService } = await import('@/lib/filesystem/file-sync.service');
-		console.log('✅ fileSyncService importado exitosamente');
+		logger.success('fileSyncService importado exitosamente');
 
 		// Ejecutar sincronización de archivos
-		console.log('🚀 Ejecutando syncFolderFiles...');
+		logger.debug('Ejecutando syncFolderFiles...');
 		const syncResult = await fileSyncService.syncFolderFiles(id, { force });
 
-		console.log(`✅ Sincronización de archivos completada para carpeta: ${id}`, syncResult);
+		logger.success(`Sincronización de archivos completada para carpeta: ${id}`, syncResult);
 
 		res.json(syncResult);
 	} catch (error) {
-		console.error(`❌ Error sincronizando archivos de carpeta ${req.params.id}:`, error);
-		console.error('❌ Stack trace:', error instanceof Error ? error.stack : 'No stack available');
-		console.error('❌ Error details:', {
-			name: error instanceof Error ? error.name : 'Unknown',
-			message: error instanceof Error ? error.message : String(error),
-			cause: error instanceof Error ? error.cause : undefined,
+		logger.error(`Error sincronizando archivos de carpeta ${req.params.id}`, {
+			error,
+			stack: error instanceof Error ? error.stack : 'No stack',
+			details: {
+				name: error instanceof Error ? error.name : 'Unknown',
+				message: error instanceof Error ? error.message : String(error),
+				cause: error instanceof Error ? (error as any).cause : undefined,
+			},
 		});
 		res.status(500).json({
 			error: 'Error interno del servidor',
@@ -1348,7 +1475,7 @@ router.post('/sync-all-files', async (req, res) => {
 	try {
 		const { force = false, parallelism = 3 } = req.body;
 
-		console.log('🔄 Iniciando sincronización global de archivos');
+		logger.info('Iniciando sincronización global de archivos');
 
 		// Importar servicios necesarios
 		const { fileSyncService } = await import('@/lib/filesystem/file-sync.service');
@@ -1361,11 +1488,11 @@ router.post('/sync-all-files', async (req, res) => {
 		// Ejecutar sincronización global
 		const syncResult = await fileSyncService.syncMultipleFolders(folderIds, { force, parallelism });
 
-		console.log('✅ Sincronización global de archivos completada', syncResult);
+		logger.success('Sincronización global de archivos completada', syncResult);
 
 		res.json(syncResult);
 	} catch (error) {
-		console.error('❌ Error en sincronización global de archivos:', error);
+		logger.error('Error en sincronización global de archivos', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -1378,7 +1505,7 @@ router.get('/:id/sync-status', async (req, res) => {
 	try {
 		const { id } = req.params;
 
-		console.log(`🔍 Verificando estado de sincronización para carpeta: ${id}`);
+		logger.info(`Verificando estado de sincronización para carpeta: ${id}`);
 
 		// Importar el servicio de sincronización de archivos
 		const { fileSyncService } = await import('@/lib/filesystem/file-sync.service');
@@ -1388,7 +1515,7 @@ router.get('/:id/sync-status', async (req, res) => {
 
 		res.json(syncStatus);
 	} catch (error) {
-		console.error(`❌ Error verificando estado de sincronización de carpeta ${req.params.id}:`, error);
+		logger.error(`Error verificando estado de sincroncronización de carpeta ${req.params.id}`, { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',

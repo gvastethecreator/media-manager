@@ -1,23 +1,33 @@
-import { Play, RefreshCw } from 'lucide-react';
+import { Play, Video } from 'lucide-react';
+import { motion } from 'motion/react';
 import { useCallback, useEffect, useState } from 'react';
-import { VideoCard } from '@/components/cards/video-card';
+import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { MultiEntityViewer } from '@/components/features/file-viewer/multi-entity-viewer';
 import { Button } from '@/components/ui/button';
-import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/components/ui/use-toast';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useMultiEntityViewerStore } from '@/stores/multi-entity-viewer.store';
 import { useVideoStore } from '@/store/entities/video';
 import type { VideoWithStats } from '@/types/entities/video';
+import type { AnyEntityWithStats } from '@/types/migration';
+import type { ViewProps } from '../types';
 
-interface VideosViewProps {
+const viewLogger = clientLogger.withContext('VideosView');
+
+interface VideosViewProps extends ViewProps {
 	className?: string;
 }
 
 export default function VideosView({ className = '' }: VideosViewProps) {
 	const { navigateWithTransition } = useSeamlessNavigation();
 	const { getVideos, fetchVideos, createVideo, isLoading, error, setError } = useVideoStore();
+	const { isOpen, entities, currentIndex, openViewer, closeViewer, setCurrentIndex } = useMultiEntityViewerStore();
+	const { toast } = useToast();
 
 	const videos = getVideos();
 
@@ -31,18 +41,36 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 		fetchVideos();
 	}, [fetchVideos]);
 
-	// Manejar clic en video - navegar a la vista de contenido
 	const handleVideoClick = useCallback(
-		(video: VideoWithStats) => {
-			clientLogger.info('🖱️ Video seleccionado:', video.name);
+		(item: AnyEntityWithStats) => {
+			const video = item as unknown as VideoWithStats;
+			viewLogger.info('🖱️ Click en video:', video.name);
 			navigateWithTransition(`/videos/${video.id}`);
 		},
 		[navigateWithTransition]
 	);
 
+	const handleVideoDoubleClick = useCallback(
+		(item: AnyEntityWithStats) => {
+			const video = item as unknown as VideoWithStats;
+			viewLogger.info('🖱️ Doble click en video:', video.name);
+
+			// Abrir MultiEntityViewer con todos los videos
+			const videoItems = videos as unknown as AnyEntityWithStats[];
+			const currentIndex = videoItems.findIndex((v) => v.id === video.id);
+			openViewer(videoItems, currentIndex >= 0 ? currentIndex : 0);
+		},
+		[videos, openViewer]
+	);
+
 	// Manejar creación de video
 	const handleCreateVideo = async () => {
 		if (!(newVideoName.trim() && newVideoPath.trim())) {
+			toast({
+				title: '❌ Error',
+				description: 'El nombre y la ruta del video son requeridos.',
+				variant: 'destructive',
+			});
 			return;
 		}
 
@@ -50,148 +78,141 @@ export default function VideosView({ className = '' }: VideosViewProps) {
 			await createVideo({
 				name: newVideoName.trim(),
 				path: newVideoPath.trim(),
-				hash: '', // TODO: Calcular hash del archivo
-				size: 0, // TODO: Obtener tamaño del archivo
-				duration: 0, // TODO: Obtener duración del video
-				folderId: '', // TODO: Obtener folderId del contexto
+				hash: crypto.randomUUID(),
+				size: 0,
+				duration: 0,
+				folderId: 'default',
 			});
 
-			// Limpiar formulario y cerrarlo
+			toast({
+				title: '✅ Éxito',
+				description: `Video "${newVideoName}" creado exitosamente.`,
+			});
+
 			setNewVideoName('');
 			setNewVideoPath('');
 			setShowForm(false);
 		} catch (error) {
 			console.error('Error creating video:', error);
+			toast({
+				title: '❌ Error',
+				description: 'No se pudo crear el video.',
+				variant: 'destructive',
+			});
 		}
 	};
 
-	// Manejar reintento manual
-	const handleManualRetry = () => {
-		setError(null);
-		fetchVideos();
-	};
+	// Estados de carga y error
+	if (error) {
+		return (
+			<div className="flex h-full items-center justify-center">
+				<p className="text-destructive">Error: {error}</p>
+			</div>
+		);
+	}
 
 	if (isLoading && videos.length === 0) {
 		return <LoadingScreen message="Cargando videos..." />;
 	}
 
-	if (error) {
-		return (
-			<div className="flex h-full flex-col items-center justify-center space-y-4">
-				<div className="text-center">
-					<h3 className="font-semibold text-destructive text-lg">Error al cargar videos</h3>
-					<p className="text-muted-foreground text-sm">{error}</p>
-				</div>
-				<Button onClick={handleManualRetry} variant="outline">
-					<RefreshCw className="mr-2 h-4 w-4" />
-					Reintentar
-				</Button>
-			</div>
-		);
-	}
-
-	// Mostrar estado vacío si no hay videos
-	if (videos.length === 0) {
-		return (
-			<div className={`flex h-full flex-col ${className}`}>
-				<div className="flex items-center justify-between border-b p-6">
-					<h2 className="font-bold text-2xl">Videos</h2>
-					<Button onClick={() => setShowForm(true)}>
-						<Play className="mr-2 h-4 w-4" />
-						Subir Video
-					</Button>
-				</div>
-
-				{showForm && (
-					<div className="border-b bg-muted/50 p-6">
-						<div className="max-w-md space-y-4">
-							<Input
-								onChange={(e) => setNewVideoName(e.target.value)}
-								placeholder="Nombre del video"
-								value={newVideoName}
-							/>
-							<Input
-								onChange={(e) => setNewVideoPath(e.target.value)}
-								placeholder="Ruta del archivo"
-								value={newVideoPath}
-							/>
-							<div className="flex gap-2">
-								<Button disabled={!(newVideoName.trim() && newVideoPath.trim())} onClick={handleCreateVideo}>
-									Crear Video
-								</Button>
-								<Button onClick={() => setShowForm(false)} variant="outline">
-									Cancelar
-								</Button>
-							</div>
-						</div>
-					</div>
-				)}
-
-				<div className="flex flex-1 items-center justify-center">
-					<EmptyState
-						actions={
-							<Button onClick={() => setShowForm(true)}>
-								<Play className="mr-2 h-4 w-4" />
-								Subir Video
-							</Button>
-						}
-						description="No hay videos disponibles. Sube tu primer video para comenzar."
-						icon={Play}
-						title="Sin videos"
-					/>
-				</div>
-			</div>
-		);
-	}
+	const videoItems = videos as unknown as AnyEntityWithStats[];
 
 	return (
-		<div className={`m-0 flex h-full flex-col p-0 ${className}`}>
+		<motion.div
+			animate={{ opacity: 1, y: 0 }}
+			className={`flex h-full flex-col ${className}`}
+			exit={{ opacity: 0, y: -20 }}
+			initial={{ opacity: 0, y: 20 }}
+			transition={{ duration: 0.3 }}
+		>
+			{/* Header */}
 			<div className="flex items-center justify-between border-b p-6">
-				<h2 className="font-bold text-2xl">Videos ({videos.length})</h2>
-				<Button onClick={() => setShowForm(true)}>
+				<h2 className="flex items-center font-bold text-2xl">
+					<Video className="mr-2 h-6 w-6" />
+					Videos ({videos.length})
+				</h2>
+				<Button onClick={() => setShowForm(!showForm)}>
 					<Play className="mr-2 h-4 w-4" />
-					Subir Video
+					{showForm ? 'Cancelar' : 'Subir Video'}
 				</Button>
 			</div>
 
+			{/* Formulario de creación */}
 			{showForm && (
-				<div className="border-b bg-muted/50 p-6">
+				<motion.div
+					animate={{ opacity: 1, y: 0 }}
+					className="border-b bg-muted/50 p-6"
+					initial={{ opacity: 0, y: -20 }}
+				>
 					<div className="max-w-md space-y-4">
-						<Input
-							onChange={(e) => setNewVideoName(e.target.value)}
-							placeholder="Nombre del video"
-							value={newVideoName}
-						/>
-						<Input
-							onChange={(e) => setNewVideoPath(e.target.value)}
-							placeholder="Ruta del archivo"
-							value={newVideoPath}
-						/>
+						<div className="grid gap-2">
+							<Label htmlFor="videoName">Nombre del video</Label>
+							<Input
+								id="videoName"
+								onChange={(e) => setNewVideoName(e.target.value)}
+								placeholder="video.mp4"
+								value={newVideoName}
+							/>
+						</div>
+						<div className="grid gap-2">
+							<Label htmlFor="videoPath">Ruta del archivo</Label>
+							<Input
+								id="videoPath"
+								onChange={(e) => setNewVideoPath(e.target.value)}
+								placeholder="/path/to/video.mp4"
+								value={newVideoPath}
+							/>
+						</div>
 						<div className="flex gap-2">
-							<Button disabled={!(newVideoName.trim() && newVideoPath.trim())} onClick={handleCreateVideo}>
-								Crear Video
-							</Button>
+							<Button onClick={handleCreateVideo}>Crear Video</Button>
 							<Button onClick={() => setShowForm(false)} variant="outline">
 								Cancelar
 							</Button>
 						</div>
 					</div>
-				</div>
+				</motion.div>
 			)}
 
-			<ScrollArea className="flex-1">
-				<div className="grid grid-cols-4 gap-2 p-6">
-					{videos.map((video) => (
-						<VideoCard
-							className="h-full cursor-pointer"
-							key={video.id}
-							onClick={() => handleVideoClick(video)}
-							tcgMode={true}
-							videoId={video.id}
+			{/* Contenido principal */}
+			<div className="flex-1">
+				{(!videoItems || videoItems.length === 0) && !isLoading && !showForm ? (
+					<div className="flex h-full items-center justify-center">
+						<div className="text-center">
+							<EmptyState
+								description="No hay videos disponibles. Sube tu primer video para comenzar."
+								icon={Video}
+								title="Sin videos"
+							/>
+							<div className="mt-4">
+								<Button onClick={() => setShowForm(true)}>
+									<Play className="mr-2 h-4 w-4" />
+									Subir Video
+								</Button>
+							</div>
+						</div>
+					</div>
+				) : (
+					<div className="h-full">
+						<FileBrowser
+							isLoading={isLoading}
+							items={videoItems}
+							onItemClick={handleVideoClick}
+							onItemDoubleClick={handleVideoDoubleClick}
 						/>
-					))}
-				</div>
-			</ScrollArea>
-		</div>
+					</div>
+				)}
+			</div>
+
+			{/* MultiEntityViewer */}
+			{isOpen && (
+				<MultiEntityViewer
+					currentIndex={currentIndex}
+					entities={entities}
+					isOpen={isOpen}
+					onClose={closeViewer}
+					onIndexChange={setCurrentIndex}
+				/>
+			)}
+		</motion.div>
 	);
 }

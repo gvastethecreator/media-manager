@@ -280,7 +280,7 @@ function FoldersGrid({
 		<div
 			className={cn(
 				'grid content-start items-stretch pr-3',
-				'grid-cols-1 gap-3 md:grid-cols-2 md:gap-4',
+				'grid-cols-2 gap-3 md:grid-cols-2 md:gap-4',
 				'lg:gap-4 lg:[grid-template-columns:repeat(auto-fill,minmax(320px,1fr))]',
 				'xl:gap-5 xl:[grid-template-columns:repeat(auto-fill,minmax(340px,1fr))]',
 				'2xl:gap-6 2xl:[grid-template-columns:repeat(auto-fill,minmax(360px,1fr))]',

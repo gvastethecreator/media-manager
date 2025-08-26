@@ -44,7 +44,7 @@ export function VideoCard({
 		if (!video) {
 			return '#6b7280';
 		}
-		const grade = video.stats?.technicalGrade || 'unknown';
+		const grade = video.stats?.technicalGrade || 'D';
 		switch (grade) {
 			case 'A':
 				return '#10b981'; // Verde esmeralda - Ultra calidad
@@ -79,7 +79,7 @@ export function VideoCard({
 		if (!video) {
 			return 1;
 		}
-		const score = video.stats?.qualityScore || 0;
+		const score = video.stats?.qualityScore ?? 0;
 		if (score >= 90) {
 			return 10; // Mítico
 		}
@@ -149,7 +149,7 @@ export function VideoCard({
 	const cardId = `V${id.substring(0, 6).toUpperCase()}`;
 
 	// Conteos de relaciones - usar stats en lugar de acceso directo
-	const totalRelations = video.stats?.totalRelations || 0;
+	const totalRelations = video.stats?.totalRelations ?? 0;
 
 	return (
 		<motion.button

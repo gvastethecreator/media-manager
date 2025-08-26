@@ -10,6 +10,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('📁 Creando carpetas por defecto...');
 
 	try {
+		const allowDemoSeeds = process.env.SEED_DEMO === '1' || process.env.NODE_ENV === 'test';
 		// Definir carpetas padre y subcarpetas de ejemplo para demostrar la jerarquía visual
 		const sampleFolders = [
 			// Carpetas padre
@@ -44,11 +45,12 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				parentId: null,
 				presetId: null,
 			},
+
 			{
-				id: 'output',
-				name: 'Output',
+				id: 'comfy',
+				name: 'comfy',
 				description: 'Memes divertidos',
-				path: 'A:\\StabilityMatrix\\Data\\Packages\\Comfy\\output',
+				path: 'B:\\#OUTPUTS\\COMFY',
 				emoji: '😂',
 				totalFiles: 0,
 				totalSize: 0,

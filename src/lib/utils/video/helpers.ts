@@ -3,6 +3,8 @@
  * @module utils/video/helpers
  */
 
+import { spawn } from 'node:child_process';
+import sharp from 'sharp';
 import { z } from 'zod';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { type VideoBase } from '@/types/entities/video';
@@ -139,6 +141,230 @@ export function calculateBitrate(size?: number, durationSeconds?: number): strin
 	}
 
 	return `${Math.round(bitrateKbps)} kbps`;
+}
+
+/**
+ * Genera un thumbnail animado de un video con 12 frames en formato WebP
+ * @param videoPath Ruta del archivo de video
+ * @param options Opciones de generación
+ * @returns Buffer con el WebP animado
+ */
+export async function generateAnimatedVideoThumbnail(
+	videoPath: string,
+	options: {
+		time?: number;
+		quality?: string;
+		frames?: number;
+		duration?: number;
+	} = {}
+): Promise<Buffer | null> {
+	const { time = 5, quality = 'medium', frames = 12, duration = 2 } = options;
+
+	try {
+		// 0. Validar que el archivo sea un video válido y obtener metadatos clave
+		const streamInfo = await probeVideoStream(videoPath);
+		if (!streamInfo) {
+			console.warn(`Archivo no es un video válido: ${videoPath}`);
+			return null;
+		}
+
+		// Evitar timestamps fuera de rango o exactamente 0 que a veces falla con ciertos contenedores
+		const safeStart = (() => {
+			const maxStart = Math.max(0, (streamInfo.duration || 0) - Math.max(duration, 0.1));
+			const requested = Number.isFinite(time) ? Math.max(0, time) : 0;
+			// Evitar exactamente 0 (algunos vídeos con time base negativo pueden fallar). Usar 0.05s
+			const clamped = Math.min(requested, maxStart);
+			return clamped === 0 ? 0.05 : clamped;
+		})();
+
+		// 1. Extraer frames individuales usando FFmpeg (secuencial para evitar saturación y errores en Windows)
+		const frameInterval = duration / frames;
+		const frameBuffers: Buffer[] = [];
+		for (let i = 0; i < frames; i++) {
+			// Evitar pedir un frame fuera del vídeo
+			const timestamp = Math.min(safeStart + i * frameInterval, (streamInfo.duration || safeStart) - 0.001);
+			try {
+				const frame = await extractSingleFrame(videoPath, timestamp);
+				if (frame?.length) frameBuffers.push(frame);
+			} catch (e) {
+				// Reintento ligero moviendo 0.1s hacia atrás si falla
+				try {
+					const retryTs = Math.max(0.05, timestamp - 0.1);
+					const frame = await extractSingleFrame(videoPath, retryTs);
+					if (frame?.length) {
+						frameBuffers.push(frame);
+					}
+				} catch {}
+			}
+		}
+
+		// 2. Crear WebP animado con Sharp
+		if (frameBuffers.length === 0) {
+			return null;
+		}
+
+		// Redimensionar y optimizar frames
+		const resizedFrames = await Promise.all(
+			frameBuffers.map(async (buffer) => {
+				const resized = await sharp(buffer)
+					.resize(320, 240, { fit: 'cover', position: 'center' })
+					.webp({ quality: quality === 'high' ? 90 : quality === 'low' ? 60 : 75 })
+					.toBuffer();
+				return resized;
+			})
+		);
+
+		// 3. Combinar frames en animación
+		const animatedWebp = await sharp(resizedFrames[0], { animated: true })
+			.webp({
+				quality: quality === 'high' ? 90 : quality === 'low' ? 60 : 75,
+				effort: 4,
+				loop: 0,
+				delay: Math.max(10, Math.round(1000 / (frames / duration))),
+			})
+			.toBuffer();
+
+		return animatedWebp;
+	} catch (error) {
+		console.error('Error generando thumbnail animado:', error);
+		return null;
+	}
+}
+
+/**
+ * Valida si un archivo es un video válido usando FFprobe
+ * @param videoPath Ruta del video
+ * @returns true si es un video válido
+ */
+async function probeVideoStream(
+	videoPath: string
+): Promise<{ width: number; height: number; duration: number } | null> {
+	return new Promise((resolve) => {
+		const args = [
+			'-v',
+			'error',
+			'-select_streams',
+			'v:0',
+			'-show_entries',
+			'stream=codec_type,duration,width,height',
+			'-print_format',
+			'json',
+			videoPath,
+		];
+
+		const proc = spawn('ffprobe', args, { stdio: ['ignore', 'pipe', 'pipe'] });
+
+		let output = '';
+		let stderrOut = '';
+
+		proc.stdout?.on('data', (chunk) => {
+			output += chunk.toString();
+		});
+
+		proc.stderr?.on('data', (chunk) => {
+			stderrOut += chunk.toString();
+		});
+
+		proc.on('close', (_code) => {
+			try {
+				const metadata = JSON.parse(output);
+				if (!metadata.streams || metadata.streams.length === 0) {
+					resolve(null);
+					return;
+				}
+				const videoStream = metadata.streams[0];
+				if (videoStream.codec_type !== 'video') {
+					resolve(null);
+					return;
+				}
+				const width = Number(videoStream.width || 0);
+				const height = Number(videoStream.height || 0);
+				const duration = Number.parseFloat(videoStream.duration || '0');
+				if (width > 0 && height > 0 && duration >= 0) {
+					resolve({ width, height, duration });
+				} else {
+					resolve(null);
+				}
+			} catch (_e) {
+				// Para depuración
+				if (stderrOut) {
+					console.warn('ffprobe stderr:', stderrOut);
+				}
+				resolve(null);
+			}
+		});
+
+		proc.on('error', () => resolve(null));
+	});
+}
+
+/**
+ * Extrae un frame único de un video en un timestamp específico
+ * @param videoPath Ruta del video
+ * @param timestamp Tiempo en segundos
+ * @returns Buffer del frame como JPEG
+ */
+async function extractSingleFrame(videoPath: string, timestamp: number): Promise<Buffer> {
+	const TIMEOUT_MS = 5_000;
+	// Estrategia con reintento: primero -ss antes de -i (rápido), si falla reintentar con -ss después de -i (más compatible)
+	const runOnce = (placeSsAfterInput: boolean) =>
+		new Promise<Buffer>((resolve, reject) => {
+			const commonArgs = [
+				'-hide_banner',
+				'-loglevel',
+				'error',
+				'-nostdin',
+				...(placeSsAfterInput ? [] : ['-ss', String(Math.max(0.001, timestamp))]),
+				'-i',
+				videoPath,
+				...(placeSsAfterInput ? ['-ss', String(Math.max(0.001, timestamp))] : []),
+				'-an',
+				'-frames:v',
+				'1',
+				'-vf',
+				'scale=320:240:force_original_aspect_ratio=increase,crop=320:240',
+				'-q:v',
+				'3',
+				'-f',
+				'mjpeg',
+				'pipe:1',
+			];
+
+			const proc = spawn('ffmpeg', commonArgs, { stdio: ['ignore', 'pipe', 'pipe'] });
+			const chunks: Buffer[] = [];
+			let stderrOut = '';
+			const timer = setTimeout(() => {
+				try {
+					proc.kill('SIGKILL');
+				} catch {}
+			}, TIMEOUT_MS);
+
+			proc.stdout?.on('data', (chunk) => chunks.push(chunk as Buffer));
+			proc.stderr?.on('data', (chunk) => {
+				stderrOut += chunk.toString();
+			});
+
+			proc.on('close', (code) => {
+				clearTimeout(timer);
+				if (code === 0 && chunks.length > 0) {
+					resolve(Buffer.concat(chunks));
+				} else {
+					reject(new Error(`FFmpeg failed with code ${code}${stderrOut ? `: ${stderrOut.trim()}` : ''}`));
+				}
+			});
+
+			proc.on('error', (error) => {
+				clearTimeout(timer);
+				reject(error);
+			});
+		});
+
+	try {
+		return await runOnce(false);
+	} catch (_e) {
+		// Reintento con -ss después de -i
+		return await runOnce(true);
+	}
 }
 
 /**

@@ -236,11 +236,33 @@ router.get('/', async (req, res) => {
 			},
 		}));
 
+		// Respuesta principal
 		res.json({
 			images: formattedImages,
 			total: totalCount,
 			hasMore: (filters.offset || 0) + (filters.limit || 20) < totalCount,
 		});
+
+		// Reintento de thumbnails en background si se lista por carpeta (primera página)
+		try {
+			const isFirstPage = !filters.offset || filters.offset === 0;
+			if (filters.folderId && isFirstPage && Array.isArray(imageResults) && imageResults.length > 0) {
+				const { imageService } = await import('@/services/image/image.service');
+				// Política: solo reintentar si no hay thumbnail o hay error, y último error fue hace > 60s
+				const now = Date.now();
+				const COOL_DOWN_MS = 60_000;
+				for (const img of imageResults as any[]) {
+					const shouldRetry =
+						!img.thumbnail || (img.thumbnailErrorAt && now - new Date(img.thumbnailErrorAt).getTime() > COOL_DOWN_MS);
+					if (shouldRetry) {
+						// Fire-and-forget para no bloquear la respuesta
+						imageService.generateThumbnailSafe(img.id).catch(() => {});
+					}
+				}
+			}
+		} catch {
+			// silencioso
+		}
 	} catch (error) {
 		console.error('Error al obtener imágenes:', error);
 		res.status(500).json({
@@ -261,7 +283,13 @@ router.get('/:id/content', async (req, res) => {
 			'Cache-Control': 'public, max-age=31536000',
 		});
 		res.send(buffer);
-	} catch (error) {
+	} catch (error: any) {
+		const { serviceErrorToResponse, isServiceError } = await import('@/lib/utils/errors/service-errors');
+		if (isServiceError(error)) {
+			const payload = serviceErrorToResponse(error);
+			res.status(payload.httpStatus).json(payload);
+			return;
+		}
 		console.error('Error serving image:', error);
 		res.status(500).send('Error serving image');
 	}
@@ -271,7 +299,16 @@ router.get('/:id/content', async (req, res) => {
 router.get('/:id/thumbnail', async (req, res) => {
 	try {
 		const { id } = req.params;
+		// Obtener thumbnail y metadatos mínimos para MIME
 		const buffer = await imageService.getThumbnail(id);
+		// Intentar leer mimeType desde DB para cabecera correcta
+		let mimeType: string | undefined;
+		try {
+			const rec = await db.select({ mt: images.thumbnailMimeType }).from(images).where(eq(images.id, id)).limit(1);
+			mimeType = rec[0]?.mt ?? undefined;
+		} catch {
+			mimeType = undefined;
+		}
 		if (!buffer) {
 			res.status(404).send('Thumbnail not found');
 			return;
@@ -290,14 +327,20 @@ router.get('/:id/thumbnail', async (req, res) => {
 		}
 
 		res.set({
-			'Content-Type': 'image/webp', // Asumimos WEBP por defecto, se puede mejorar
+			'Content-Type': mimeType || 'image/webp',
 			'Content-Length': buffer.length.toString(),
 			'Cache-Control': 'public, max-age=31536000, immutable',
 			ETag: etag,
 			'Last-Modified': lastModified,
 		});
 		res.send(buffer);
-	} catch (error) {
+	} catch (error: any) {
+		const { serviceErrorToResponse, isServiceError } = await import('@/lib/utils/errors/service-errors');
+		if (isServiceError(error)) {
+			const payload = serviceErrorToResponse(error);
+			res.status(payload.httpStatus).json(payload);
+			return;
+		}
 		console.error('Error serving thumbnail:', error);
 		res.status(500).send('Error serving thumbnail');
 	}

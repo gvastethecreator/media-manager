@@ -1,6 +1,6 @@
 import { Copy, Download, Eye, FolderOpen, Pencil, Star, Tag, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { CustomContextMenuProps, ContextMenuAction } from './types';
+import type { ContextMenuAction, CustomContextMenuProps } from './types';
 
 interface MenuItemProps {
 	icon: React.ReactNode;
@@ -43,8 +43,8 @@ export function CustomContextMenu<T>({
 	return (
 		<div
 			className="fixed z-50 min-w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
-			style={{ left: position.x, top: position.y }}
 			role="menu"
+			style={{ left: position.x, top: position.y }}
 		>
 			<div className="grid grid-cols-1">
 				<MenuItem action="open" icon={<FolderOpen className="h-4 w-4" />} label="Abrir" onSelect={handleSelect} />

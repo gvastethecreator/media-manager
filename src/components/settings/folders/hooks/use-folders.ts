@@ -410,6 +410,21 @@ export function useFolders() {
 			// Callback vacío para stats
 		},
 		onReindexAllProgress: handleReindexAllProgress,
+		onDirectoryDeleted: ({ folderId }) => {
+			if (folderId) {
+				// Remover carpeta de estado y refrescar estadísticas
+				setProgressByFolder((prev) => {
+					const copy = { ...prev };
+					delete copy[folderId];
+					return copy;
+				});
+				setReindexOrder((prev) => prev.filter((id) => id !== folderId));
+				// Recargar desde API para reflejar eliminación
+				Promise.all([loadFolders(), loadStats()]).catch((err) =>
+					folderLogger.error('Error recargando tras directory:deleted:', err)
+				);
+			}
+		},
 	});
 
 	const foldersOperations = useFoldersOperations({

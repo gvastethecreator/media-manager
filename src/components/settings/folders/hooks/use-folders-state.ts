@@ -34,8 +34,11 @@ export function useFoldersState() {
 				_count: {
 					images: folder._count?.images || 0,
 				},
-				totalSize: Number(folder.totalSize || 0),
-				totalFiles: Number(folder.totalFiles || folder._count?.images || 0),
+				// Fallbacks robustos: usar stats si top-level no viene poblado aún
+				totalSize: Number((folder.totalSize ?? (folder as any).stats?.totalSize ?? 0) as number),
+				totalFiles: Number(
+					(folder.totalFiles ?? (folder as any).stats?.totalFiles ?? folder._count?.images ?? 0) as number
+				),
 				autoReindex: folder.autoReindex,
 				recentImages: folder.recentImages?.filter((img: any): img is string => img !== null) || [],
 			}));

@@ -13,13 +13,13 @@ import { useCreateTag, useUpdateTag } from '@/lib/api/tags';
 import { generateTagColor } from '@/lib/utils/string.utils';
 import { createTagSchema, type ValidatedCreateTagData } from '@/lib/utils/tag/validators';
 import { toastService } from '@/services/toast/toast.service';
-import { TagCategory, TagComplete } from '@/types/entities/tag';
+import { TagCategory, TagWithStats } from '@/types/entities/tag';
 
 interface CreateTagFormProps {
-	tag?: TagComplete | null;
+	tag?: TagWithStats | null;
 	isEditing?: boolean;
-	onCreated?: (tag: TagComplete) => void;
-	onUpdated?: (tag: TagComplete) => void;
+	onCreated?: (tag: TagWithStats) => void;
+	onUpdated?: (tag: TagWithStats) => void;
 	onCancel?: () => void;
 	onPreview?: (data: any) => void;
 }
@@ -79,12 +79,12 @@ export function CreateTagForm({
 			// Crear o actualizar etiqueta
 			if (isEditing && tag) {
 				const updated = await updateTagMutation.mutateAsync({ id: tag.id, data: tagData });
-				onUpdated?.(updated as unknown as TagComplete);
+				onUpdated?.(updated);
 				onPreview?.(updated);
 				toastService.success('Etiqueta actualizada correctamente');
 			} else {
 				const created = await createTagMutation.mutateAsync(tagData);
-				onCreated?.(created as unknown as TagComplete);
+				onCreated?.(created);
 				onPreview?.(created);
 				form.reset();
 				toastService.success('Etiqueta creada correctamente');
