@@ -34,10 +34,12 @@ async function clickFirstItem(page: any, view: 'grid' | 'cards' | 'masonry' | 'l
 }
 
 async function switchView(page: any, mode: 'grid' | 'cards' | 'masonry' | 'list') {
-	const button = page.getByTestId(`view-mode-${mode}-btn`);
-	await expect(button).toBeVisible();
-	await expect(button).toBeEnabled();
-	await button.click();
+	const trigger = page.getByTestId('view-mode-dropdown-trigger');
+	await expect(trigger).toBeVisible();
+	await trigger.click();
+	const item = page.getByTestId(`view-mode-${mode}-btn`);
+	await expect(item).toBeVisible();
+	await item.click();
 }
 
 function viewLocatorFor(mode: 'grid' | 'cards' | 'masonry' | 'list') {
@@ -62,7 +64,7 @@ test.describe('File Browser: vistas con scroll e interacción', () => {
 		// Asegurar que la vista inicial renderizó algo (cualquiera)
 		await expect(getViewport(page)).toBeVisible();
 		await page.waitForSelector('[data-testid="file-browser"]', { state: 'attached' });
-		await page.waitForSelector('[data-testid="view-mode-grid-btn"]', { state: 'visible' });
+		await page.waitForSelector('[data-testid="view-mode-dropdown-trigger"]', { state: 'visible' });
 
 		const modes: Array<'grid' | 'cards' | 'masonry' | 'list'> = ['grid', 'cards', 'masonry', 'list'];
 

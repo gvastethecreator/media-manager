@@ -31,9 +31,8 @@ test.describe('File Browser: accesibilidad y foco', () => {
 		await page.goto('/folders/cursed-dump');
 		// Forzar modo grid si no lo está
 		await page.waitForSelector('[data-testid="file-browser"]', { state: 'attached' });
-		await page.waitForSelector('[data-testid="view-mode-grid-btn"]', { state: 'visible' });
-		const gridBtn = page.getByTestId('view-mode-grid-btn');
-		await gridBtn.click();
+		await page.getByTestId('view-mode-dropdown-trigger').click();
+		await page.getByTestId('view-mode-grid-btn').click();
 
 		const first = await focusFirstEntity(page);
 
@@ -49,6 +48,7 @@ test.describe('File Browser: accesibilidad y foco', () => {
 
 	test('Enter y Space activan selección', async ({ page }) => {
 		await page.goto('/folders/cursed-dump');
+		await page.getByTestId('view-mode-dropdown-trigger').click();
 		await page.getByTestId('view-mode-grid-btn').click();
 		await focusFirstEntity(page);
 		await pressAndAssertSelection(page, 'Enter');
@@ -56,6 +56,7 @@ test.describe('File Browser: accesibilidad y foco', () => {
 
 	test('Overlay / botones visibles en hover', async ({ page }) => {
 		await page.goto('/folders/cursed-dump');
+		await page.getByTestId('view-mode-dropdown-trigger').click();
 		await page.getByTestId('view-mode-cards-btn').click();
 		const first = page.locator('[data-entity-card]').first();
 		await first.hover();

@@ -209,7 +209,18 @@ export const getFolderStats = async (
 			thumbnailUrl?: string;
 		}>;
 	}>(`/folders/${folderId}/stats`);
-	return response;
+
+	// Normalizar para asegurar thumbnailUrl presente aunque el backend envíe 'thumbnail'
+	const normalized = {
+		...response,
+		recentImages: response.recentImages?.map((img: any) => ({
+			id: img.id,
+			name: img.name,
+			// Preferir thumbnailUrl, fallback a thumbnail
+			thumbnailUrl: img.thumbnailUrl ?? img.thumbnail ?? undefined,
+		})),
+	};
+	return normalized;
 };
 
 export const getRootFolderId = async (): Promise<string> => {

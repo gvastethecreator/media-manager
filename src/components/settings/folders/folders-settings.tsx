@@ -279,13 +279,11 @@ function FoldersGrid({
 	return (
 		<div
 			className={cn(
-				'grid content-start items-stretch pr-3',
-				'grid-cols-2 gap-3 md:grid-cols-2 md:gap-4',
-				'lg:gap-4 lg:[grid-template-columns:repeat(auto-fill,minmax(320px,1fr))]',
-				'xl:gap-5 xl:[grid-template-columns:repeat(auto-fill,minmax(340px,1fr))]',
-				'2xl:gap-6 2xl:[grid-template-columns:repeat(auto-fill,minmax(360px,1fr))]',
-				'auto-rows-fr [grid-auto-flow:row_dense]'
+				'grid content-start items-stretch',
+				'grid-cols-[repeat(auto-fill,minmax(280px,1fr))]',
+				'auto-rows-fr gap-3 [grid-auto-flow:row_dense]'
 			)}
+			data-density="compact"
 		>
 			{orderedFolders.map((folder) => (
 				<FolderCard
