@@ -4,25 +4,25 @@ import { EmptyState } from '@/components/core/data-display';
 import { cn } from '@/lib/utils';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import type { ImageWithStats } from '@/types/entities/image';
 import type { AnyEntityWithStats } from '@/types/migration';
+import { FileCards } from './components/file-cards';
 import { FileGrid } from './components/file-grid';
 import { FileList } from './components/file-list';
 import { FileListHeader } from './components/file-list-header';
 import { FileMasonry } from './components/file-masonry';
-import { FileTable } from './components/file-table';
 import { FileSingle } from './components/file-single';
-import { FileCards } from './components/file-cards';
+import { FileTable } from './components/file-table';
+import type { MediaItem } from './components/media-thumbnail';
 import { useFolderFiles } from './hooks/use-folder-files';
 import type { FileBrowser2Props } from './types/file-browser.types';
 
-function applySearch(items: ImageWithStats[], query: string) {
+function applySearch(items: MediaItem[], query: string) {
 	if (!query) return items;
 	const q = query.toLowerCase();
-	return items.filter((it) => it.name?.toLowerCase().includes(q));
+	return items.filter((it) => (it.name || '').toLowerCase().includes(q));
 }
 
-function applySort(items: ImageWithStats[], sortOptions: { field: string; direction: 'asc' | 'desc' }[]) {
+function applySort(items: MediaItem[], sortOptions: { field: string; direction: 'asc' | 'desc' }[]) {
 	if (!sortOptions || sortOptions.length === 0) return items;
 	const [{ field, direction }] = sortOptions; // exclusivo por toolbar
 	const dir = direction === 'asc' ? 1 : -1;
@@ -39,14 +39,44 @@ function applySort(items: ImageWithStats[], sortOptions: { field: string; direct
 	return copy;
 }
 
+function groupByEntityType(items: MediaItem[]): Array<{ key: string; items: MediaItem[]; displayName: string }> {
+	const map = new Map<string, MediaItem[]>();
+	const displayNames = {
+		image: 'Imágenes',
+		video: 'Videos',
+		audio: 'Audio',
+		document: 'Documentos',
+		json: 'Archivos JSON',
+		file3d: 'Archivos 3D',
+	};
+
+	for (const item of items) {
+		const type = item.entityType;
+		const arr = map.get(type) ?? [];
+		arr.push(item);
+		map.set(type, arr);
+	}
+
+	// Orden específico para los tipos
+	const typeOrder = ['image', 'video', 'audio', 'document', 'json', 'file3d'];
+
+	return typeOrder
+		.filter((type) => map.has(type))
+		.map((type) => ({
+			key: type,
+			items: map.get(type) ?? [],
+			displayName: displayNames[type as keyof typeof displayNames] || type,
+		}));
+}
 export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileBrowser2Props) {
-	const { images, isLoading, error } = useFolderFiles(filterId);
+	const { items, isLoading, error } = useFolderFiles(filterId);
 
 	// View options (modo, tamaño, sort, búsqueda)
 	const viewMode = useViewOptionsStore((s) => s.viewMode);
 	const itemSize = useViewOptionsStore((s) => s.itemSize);
 	const sortOptions = useViewOptionsStore((s) => s.sortOptions);
 	const searchQuery = useViewOptionsStore((s) => s.searchQuery);
+	const groupByType = useViewOptionsStore((s) => s.groupByEntityType);
 
 	// Selección
 	const selectedIds = useSelectionStore((s) => s.selectedIds);
@@ -54,10 +84,15 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 	const setActiveId = useSelectionStore((s) => s.setActiveId);
 
 	const processedItems = useMemo(() => {
-		const searched = applySearch(images, searchQuery);
+		const searched = applySearch(items as MediaItem[], searchQuery);
 		const sorted = applySort(searched, sortOptions);
 		return sorted;
-	}, [images, searchQuery, sortOptions]);
+	}, [items, searchQuery, sortOptions]);
+
+	const grouped = useMemo(
+		() => (groupByType ? groupByEntityType(processedItems as MediaItem[]) : null),
+		[groupByType, processedItems]
+	);
 
 	if (isLoading) {
 		return (
@@ -75,14 +110,14 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 		);
 	}
 
-	const handleItemClick = (item: ImageWithStats) => {
+	const handleItemClick = (item: MediaItem) => {
 		toggleSelectedId(item.id);
 		setActiveId(item.id);
-		onItemClick?.(item as any);
+		onItemClick?.(item as unknown as AnyEntityWithStats);
 	};
 
-	const handleItemDoubleClick = (item: ImageWithStats) => {
-		onItemDoubleClick?.(item as any);
+	const handleItemDoubleClick = (item: MediaItem) => {
+		onItemDoubleClick?.(item as unknown as AnyEntityWithStats);
 	};
 
 	// Estilos de grid dependientes del tamaño (cards usa tamaño un poco mayor por defecto)
@@ -99,62 +134,157 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 				{viewMode === 'list' ? (
 					<div className="flex h-full min-h-0 flex-col">
 						<FileListHeader />
-						<div className="min-h-0 flex-1">
-							<FileList
-								items={processedItems}
-								selectedIds={selectedIds}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-							/>
+						<div className="min-h-0 flex-1 overflow-auto">
+							{grouped ? (
+								<div className="flex flex-col gap-2">
+									{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
+										<div key={g.key} className="flex flex-col">
+											<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
+												{g.displayName}
+											</div>
+											<FileList
+												items={g.items as MediaItem[]}
+												onItemClick={handleItemClick}
+												onItemDoubleClick={handleItemDoubleClick}
+												selectedIds={selectedIds}
+											/>
+										</div>
+									))}
+								</div>
+							) : (
+								<FileList
+									items={processedItems as MediaItem[]}
+									onItemClick={handleItemClick}
+									onItemDoubleClick={handleItemDoubleClick}
+									selectedIds={selectedIds}
+								/>
+							)}
 						</div>
 					</div>
 				) : viewMode === 'single' ? (
 					<div className="h-full min-h-0">
 						<FileSingle
-							items={processedItems}
-							selectedIds={selectedIds}
+							items={processedItems as MediaItem[]}
 							onItemClick={handleItemClick}
 							onItemDoubleClick={handleItemDoubleClick}
+							selectedIds={selectedIds}
 						/>
 					</div>
 				) : viewMode === 'masonry' ? (
 					<div className="h-full min-h-0">
-						<FileMasonry
-							items={processedItems}
-							selectedIds={selectedIds}
-							onItemClick={handleItemClick}
-							onItemDoubleClick={handleItemDoubleClick}
-						/>
+						{grouped ? (
+							<div className="flex h-full min-h-0 flex-col gap-2 overflow-auto">
+								{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
+									<div key={g.key} className="flex flex-col">
+										<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
+											{g.displayName}
+										</div>
+										<FileMasonry
+											items={g.items as MediaItem[]}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											selectedIds={selectedIds}
+										/>
+									</div>
+								))}
+							</div>
+						) : (
+							<FileMasonry
+								items={processedItems as MediaItem[]}
+								onItemClick={handleItemClick}
+								onItemDoubleClick={handleItemDoubleClick}
+								selectedIds={selectedIds}
+							/>
+						)}
 					</div>
 				) : viewMode === 'table' ? (
 					<div className="h-full min-h-0">
-						<FileTable
-							items={processedItems}
-							selectedIds={selectedIds}
-							onItemClick={handleItemClick}
-							onItemDoubleClick={handleItemDoubleClick}
-						/>
+						{grouped ? (
+							<div className="flex flex-col gap-2">
+								{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
+									<div key={g.key} className="flex flex-col">
+										<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
+											{g.displayName}
+										</div>
+										<FileTable
+											items={g.items as MediaItem[]}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											selectedIds={selectedIds}
+										/>
+									</div>
+								))}
+							</div>
+						) : (
+							<FileTable
+								items={processedItems as MediaItem[]}
+								onItemClick={handleItemClick}
+								onItemDoubleClick={handleItemDoubleClick}
+								selectedIds={selectedIds}
+							/>
+						)}
 					</div>
 				) : viewMode === 'cards' ? (
 					<div className="h-full min-h-0">
-						<FileCards
-							items={processedItems}
-							selectedIds={selectedIds}
-							onItemClick={handleItemClick}
-							onItemDoubleClick={handleItemDoubleClick}
-						/>
+						{grouped ? (
+							<div className="flex flex-col gap-2">
+								{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
+									<div key={g.key} className="flex flex-col">
+										<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
+											{g.displayName}
+										</div>
+										<FileCards
+											items={g.items as MediaItem[]}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											selectedIds={selectedIds}
+										/>
+									</div>
+								))}
+							</div>
+						) : (
+							<FileCards
+								items={processedItems as MediaItem[]}
+								onItemClick={handleItemClick}
+								onItemDoubleClick={handleItemDoubleClick}
+								selectedIds={selectedIds}
+							/>
+						)}
 					</div>
 				) : (
 					<div className="h-full min-h-0">
-						<FileGrid
-							itemSize={effectiveItemSize}
-							items={processedItems}
-							onItemClick={handleItemClick}
-							onItemDoubleClick={handleItemDoubleClick}
-							selectedIds={selectedIds}
-							style={gridStyle}
-							viewMode={viewMode}
-						/>
+						{grouped ? (
+							<div className="flex h-full min-h-0 w-full flex-col gap-2 overflow-auto">
+								{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
+									<div key={g.key} className="flex min-h-96 w-full flex-col">
+										<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
+											{g.displayName}
+										</div>
+										<div className="min-h-0 w-full flex-1">
+											<FileGrid
+												itemSize={effectiveItemSize}
+												items={g.items as MediaItem[]}
+												onItemClick={handleItemClick}
+												onItemDoubleClick={handleItemDoubleClick}
+												selectedIds={selectedIds}
+												style={gridStyle}
+												viewMode={viewMode}
+											/>
+										</div>
+									</div>
+								))}
+							</div>
+						) : (
+							<FileGrid
+								itemSize={effectiveItemSize}
+								items={processedItems as MediaItem[]}
+								onItemClick={handleItemClick}
+								onItemDoubleClick={handleItemDoubleClick}
+								selectedIds={selectedIds}
+								style={gridStyle}
+								viewMode={viewMode}
+							/>
+						)}
 					</div>
 				)}
 			</div>
@@ -178,8 +308,8 @@ function renderFromItems({
 	onItemClick,
 	onItemDoubleClick,
 }: FileBrowserDataProps) {
-	// Solo soportamos imágenes por ahora: filtrar
-	const imageItems = items.filter((it) => (it as any).entityType === 'image') as unknown[] as ImageWithStats[];
+	// Admitir mezcla de imágenes y videos
+	const mediaItems = items as unknown as MediaItem[];
 
 	const viewMode = useViewOptionsStore((s) => s.viewMode);
 	const itemSize = useViewOptionsStore((s) => s.itemSize);
@@ -191,10 +321,10 @@ function renderFromItems({
 	const setActiveId = useSelectionStore((s) => s.setActiveId);
 
 	const processedItems = useMemo(() => {
-		const searched = applySearch(imageItems, searchQuery);
+		const searched = applySearch(mediaItems, searchQuery);
 		const sorted = applySort(searched, sortOptions);
 		return sorted;
-	}, [imageItems, searchQuery, sortOptions]);
+	}, [mediaItems, searchQuery, sortOptions]);
 
 	if (isLoading) {
 		return (
@@ -207,13 +337,13 @@ function renderFromItems({
 		);
 	}
 
-	const handleItemClick = (item: ImageWithStats) => {
+	const handleItemClick = (item: MediaItem) => {
 		toggleSelectedId(item.id);
 		setActiveId(item.id);
 		onItemClick?.(item as unknown as AnyEntityWithStats);
 	};
 
-	const handleItemDoubleClick = (item: ImageWithStats) => {
+	const handleItemDoubleClick = (item: MediaItem) => {
 		onItemDoubleClick?.(item as unknown as AnyEntityWithStats);
 	};
 
@@ -231,7 +361,7 @@ function renderFromItems({
 						<FileListHeader />
 						<div className="min-h-0 flex-1">
 							<FileList
-								items={processedItems}
+								items={processedItems as MediaItem[]}
 								onItemClick={handleItemClick}
 								onItemDoubleClick={handleItemDoubleClick}
 								selectedIds={selectedIds}
@@ -241,7 +371,7 @@ function renderFromItems({
 				) : viewMode === 'single' ? (
 					<div className="h-full min-h-0">
 						<FileSingle
-							items={processedItems}
+							items={processedItems as MediaItem[]}
 							onItemClick={handleItemClick}
 							onItemDoubleClick={handleItemDoubleClick}
 							selectedIds={selectedIds}
@@ -250,7 +380,7 @@ function renderFromItems({
 				) : viewMode === 'masonry' ? (
 					<div className="h-full min-h-0">
 						<FileMasonry
-							items={processedItems}
+							items={processedItems as MediaItem[]}
 							onItemClick={handleItemClick}
 							onItemDoubleClick={handleItemDoubleClick}
 							selectedIds={selectedIds}
@@ -259,7 +389,7 @@ function renderFromItems({
 				) : viewMode === 'table' ? (
 					<div className="h-full min-h-0">
 						<FileTable
-							items={processedItems}
+							items={processedItems as MediaItem[]}
 							onItemClick={handleItemClick}
 							onItemDoubleClick={handleItemDoubleClick}
 							selectedIds={selectedIds}
@@ -268,7 +398,7 @@ function renderFromItems({
 				) : viewMode === 'cards' ? (
 					<div className="h-full min-h-0">
 						<FileCards
-							items={processedItems}
+							items={processedItems as MediaItem[]}
 							onItemClick={handleItemClick}
 							onItemDoubleClick={handleItemDoubleClick}
 							selectedIds={selectedIds}
@@ -278,7 +408,7 @@ function renderFromItems({
 					<div className="h-full min-h-0">
 						<FileGrid
 							itemSize={effectiveItemSize}
-							items={processedItems}
+							items={processedItems as MediaItem[]}
 							onItemClick={handleItemClick}
 							onItemDoubleClick={handleItemDoubleClick}
 							selectedIds={selectedIds}

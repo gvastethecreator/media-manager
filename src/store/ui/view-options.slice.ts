@@ -21,6 +21,7 @@ export interface ViewOptionsState {
 	sortVersion: number; // Incrementa en cada cambio de sortOptions para invalidar caches derivados
 	filterOptions: FilterOption[];
 	searchQuery: string;
+	groupByEntityType: boolean;
 	setViewMode: (mode: ViewMode) => void;
 	setItemSize: (size: number) => void;
 	setSortOptions: (options: SortOption[]) => void;
@@ -30,6 +31,8 @@ export interface ViewOptionsState {
 	addFilterOption: (option: FilterOption) => void;
 	removeFilterOption: (field: string) => void;
 	setSearchQuery: (query: string) => void;
+	setGroupByEntityType: (enabled: boolean) => void;
+	toggleGroupByEntityType: () => void;
 	resetFilters: () => void;
 	resetAll: () => void;
 }
@@ -41,6 +44,7 @@ const DEFAULT_STATE = {
 	sortVersion: 0,
 	filterOptions: [],
 	searchQuery: '',
+	groupByEntityType: false,
 };
 
 export type ViewOptionsStore = ViewOptionsState;
@@ -94,6 +98,9 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 				})),
 
 			setSearchQuery: (query) => set({ searchQuery: query }),
+
+			setGroupByEntityType: (enabled: boolean) => set({ groupByEntityType: enabled }),
+			toggleGroupByEntityType: () => set((state) => ({ groupByEntityType: !state.groupByEntityType })),
 
 			resetFilters: () =>
 				set({

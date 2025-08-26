@@ -5,10 +5,49 @@
  */
 
 import { randomUUID } from 'crypto';
-import { eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray } from 'drizzle-orm';
 import path from 'path';
 import { db } from '@/lib/drizzle';
-import { folders } from '@/lib/drizzle/schema/index';
+import type { DrizzleDatabase } from '@/lib/drizzle';
+import {
+	folders,
+	images,
+	videos,
+	audios,
+	documents,
+	file3Ds,
+	jsonFiles,
+	uploadedImages,
+	imageStats,
+	metadatas,
+	thumbnails,
+	favorites,
+	// Relaciones m2m
+	imageAlbums,
+	videoAlbums,
+	imageCollections,
+	videoCollections,
+	imageTags,
+	videoTags,
+	imageProperties,
+	videoProperties,
+	imageWildcards,
+	videoWildcards,
+	imageCharacters,
+	videoCharacters,
+	imagePlaces,
+	videoPlaces,
+	imageWorldItems,
+	videoWorldItems,
+	imageConcepts,
+	videoConcepts,
+	imagePrompts,
+	videoPrompts,
+	imageNotes,
+	videoNotes,
+	groupImages,
+	groupVideos,
+} from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { folderExists, scanFolder } from './folder-scanner';
 import { normalizePath } from './path-utils';
@@ -206,11 +245,21 @@ async function scanFileSystemFromRoot(
 
 			// Verificar si la carpeta debe ser ignorada
 			if (shouldIgnoreFolder(directory.name, options.ignorePatterns)) {
+				syncLogger.debug(`🚫 Carpeta ignorada: ${directory.name}`);
 				continue;
 			}
 
 			fileSystemPaths.add(normalizedPath);
+			syncLogger.debug(`📁 Subcarpeta detectada: ${directory.name} → ${normalizedPath}`);
 		}
+
+		syncLogger.info(`✅ Escaneo completado desde ${normalizedRootPath}:`, {
+			totalCarpetas: scanResult.directories.length,
+			carpetasAgregadas: scanResult.directories.filter((d) => !shouldIgnoreFolder(d.name, options.ignorePatterns))
+				.length,
+			archivos: scanResult.files.length,
+			profundidad: options.maxDepth,
+		});
 	} catch (error) {
 		syncLogger.error(`Error escaneando ${normalizedRootPath}:`, error);
 		throw error;
@@ -273,22 +322,36 @@ async function identifyFoldersToAdd(
 	const foldersToAdd: Array<{ id: string; path: string; name: string }> = [];
 	const dbPaths = new Set(dbFolders.map((f) => normalizePath(f.path)));
 
+	syncLogger.info(`🔍 Comparando rutas - FS: ${fileSystemPaths.size}, BD: ${dbPaths.size}`);
+
+	// Debug: mostrar algunas rutas para comparación
+	const fsPathsArray = Array.from(fileSystemPaths);
+	const dbPathsArray = Array.from(dbPaths);
+
+	syncLogger.debug('📂 Primeras 5 rutas en FS:', fsPathsArray.slice(0, 5));
+	syncLogger.debug('📂 Primeras 5 rutas en BD:', dbPathsArray.slice(0, 5));
+
 	for (const fsPath of fileSystemPaths) {
-		// Si la carpeta existe en el sistema de archivos pero no en la BD
-		if (!dbPaths.has(fsPath)) {
-			const folderName = path.basename(fsPath);
-			const newId = randomUUID();
-
-			foldersToAdd.push({
-				id: newId,
-				path: fsPath,
-				name: folderName,
-			});
-
-			syncLogger.info(`➕ Carpeta marcada para agregar: ${folderName} (${fsPath})`);
+		// Si la carpeta ya existe en la BD, continuar
+		if (dbPaths.has(fsPath)) {
+			syncLogger.debug(`✅ Carpeta ya existe en BD: ${path.basename(fsPath)} (${fsPath})`);
+			continue;
 		}
+
+		// Carpeta nueva para agregar
+		const folderName = path.basename(fsPath);
+		const newId = randomUUID();
+
+		foldersToAdd.push({
+			id: newId,
+			path: fsPath,
+			name: folderName,
+		});
+
+		syncLogger.info(`➕ Carpeta marcada para agregar: ${folderName} (${fsPath})`);
 	}
 
+	syncLogger.info(`📊 Resultado: ${foldersToAdd.length} nuevas carpetas para agregar`);
 	return foldersToAdd;
 }
 
@@ -297,16 +360,181 @@ async function identifyFoldersToAdd(
  */
 async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 	try {
-		// 1. Eliminar carpetas que ya no existen
+		// 1. Eliminar contenidos y relaciones de carpetas que ya no existen
 		if (result.removed.length > 0) {
-			const idsToRemove = result.removed.map((f) => f.id);
+			const folderIds = result.removed.map((f) => f.id);
 
-			syncLogger.info(`🗑️ Eliminando ${result.removed.length} carpetas de la BD`);
+			syncLogger.info(`🗑️ Limpieza en cascada para ${folderIds.length} carpetas eliminadas`);
 
-			// Eliminar en orden inverso para manejar dependencias padre-hijo
-			await db.delete(folders).where(inArray(folders.id, idsToRemove));
+			// Utilidad para procesar lotes y evitar límites de SQLite
+			const chunk = <T>(arr: T[], size: number) => {
+				const out: T[][] = [];
+				for (let i = 0; i < arr.length; i += size) out.push(arr.slice(i, i + size));
+				return out;
+			};
 
-			syncLogger.info(`✅ Eliminadas ${result.removed.length} carpetas`);
+			await db.transaction(async (tx: DrizzleDatabase) => {
+				// Recopilar IDs por entidad dentro de las carpetas a eliminar
+				const [imageRows, videoRows, audioRows, documentRows, file3DRows, jsonFileRows] = await Promise.all([
+					tx.select({ id: images.id }).from(images).where(inArray(images.folderId, folderIds)),
+					tx.select({ id: videos.id }).from(videos).where(inArray(videos.folderId, folderIds)),
+					tx.select({ id: audios.id }).from(audios).where(inArray(audios.folderId, folderIds)),
+					tx.select({ id: documents.id }).from(documents).where(inArray(documents.folderId, folderIds)),
+					tx.select({ id: file3Ds.id }).from(file3Ds).where(inArray(file3Ds.folderId, folderIds)),
+					tx.select({ id: jsonFiles.id }).from(jsonFiles).where(inArray(jsonFiles.folderId, folderIds)),
+				]);
+
+				const imageIds: string[] = imageRows.map((r: { id: string }) => r.id);
+				const videoIds: string[] = videoRows.map((r: { id: string }) => r.id);
+				const audioIds: string[] = audioRows.map((r: { id: string }) => r.id);
+				const documentIds: string[] = documentRows.map((r: { id: string }) => r.id);
+				const file3DIds: string[] = file3DRows.map((r: { id: string }) => r.id);
+				const jsonIds: string[] = jsonFileRows.map((r: { id: string }) => r.id);
+
+				// 1.1 Borrar relaciones m2m de imágenes
+				if (imageIds.length > 0) {
+					for (const ids of chunk(imageIds, 800)) {
+						await Promise.all([
+							tx.delete(imageAlbums).where(inArray(imageAlbums.A, ids)),
+							tx.delete(imageCollections).where(inArray(imageCollections.A, ids)),
+							tx.delete(imageTags).where(inArray(imageTags.A, ids)),
+							tx.delete(imageProperties).where(inArray(imageProperties.A, ids)),
+							tx.delete(imageWildcards).where(inArray(imageWildcards.A, ids)),
+							tx.delete(imageCharacters).where(inArray(imageCharacters.A, ids)),
+							tx.delete(imagePlaces).where(inArray(imagePlaces.A, ids)),
+							tx.delete(imageWorldItems).where(inArray(imageWorldItems.A, ids)),
+							tx.delete(imageConcepts).where(inArray(imageConcepts.A, ids)),
+							tx.delete(imagePrompts).where(inArray(imagePrompts.A, ids)),
+							tx.delete(imageNotes).where(inArray(imageNotes.A, ids)),
+							tx.delete(groupImages).where(inArray(groupImages.imageId, ids)),
+						]);
+					}
+				}
+
+				// 1.2 Borrar relaciones m2m de videos
+				if (videoIds.length > 0) {
+					for (const ids of chunk(videoIds, 800)) {
+						await Promise.all([
+							tx.delete(videoAlbums).where(inArray(videoAlbums.A, ids)),
+							tx.delete(videoCollections).where(inArray(videoCollections.A, ids)),
+							tx.delete(videoTags).where(inArray(videoTags.A, ids)),
+							tx.delete(videoProperties).where(inArray(videoProperties.A, ids)),
+							tx.delete(videoWildcards).where(inArray(videoWildcards.A, ids)),
+							tx.delete(videoCharacters).where(inArray(videoCharacters.A, ids)),
+							tx.delete(videoPlaces).where(inArray(videoPlaces.A, ids)),
+							tx.delete(videoWorldItems).where(inArray(videoWorldItems.A, ids)),
+							tx.delete(videoConcepts).where(inArray(videoConcepts.A, ids)),
+							tx.delete(videoPrompts).where(inArray(videoPrompts.A, ids)),
+							tx.delete(videoNotes).where(inArray(videoNotes.A, ids)),
+							tx.delete(groupVideos).where(inArray(groupVideos.videoId, ids)),
+						]);
+					}
+				}
+
+				// 1.3 Eliminar dependientes genéricos (metadatos, thumbnails, favoritos, stats, uploads)
+				if (imageIds.length > 0) {
+					for (const ids of chunk(imageIds, 800)) {
+						await Promise.all([
+							tx.delete(metadatas).where(and(inArray(metadatas.entityId, ids), eq(metadatas.entityType, 'image'))),
+							tx.delete(thumbnails).where(and(inArray(thumbnails.entityId, ids), eq(thumbnails.entityType, 'image'))),
+							tx.delete(favorites).where(and(inArray(favorites.entityId, ids), eq(favorites.entityType, 'image'))),
+							tx.delete(uploadedImages).where(inArray(uploadedImages.imageId, ids)),
+							tx.delete(imageStats).where(inArray(imageStats.imageId, ids)),
+						]);
+					}
+				}
+
+				if (videoIds.length > 0) {
+					for (const ids of chunk(videoIds, 800)) {
+						await Promise.all([
+							tx.delete(metadatas).where(and(inArray(metadatas.entityId, ids), eq(metadatas.entityType, 'video'))),
+							tx.delete(thumbnails).where(and(inArray(thumbnails.entityId, ids), eq(thumbnails.entityType, 'video'))),
+							tx.delete(favorites).where(and(inArray(favorites.entityId, ids), eq(favorites.entityType, 'video'))),
+						]);
+					}
+				}
+
+				if (audioIds.length > 0) {
+					for (const ids of chunk(audioIds, 800)) {
+						await Promise.all([
+							tx.delete(metadatas).where(and(inArray(metadatas.entityId, ids), eq(metadatas.entityType, 'audio'))),
+							tx.delete(thumbnails).where(and(inArray(thumbnails.entityId, ids), eq(thumbnails.entityType, 'audio'))),
+							tx.delete(favorites).where(and(inArray(favorites.entityId, ids), eq(favorites.entityType, 'audio'))),
+						]);
+					}
+				}
+
+				if (documentIds.length > 0) {
+					for (const ids of chunk(documentIds, 800)) {
+						await Promise.all([
+							tx.delete(metadatas).where(and(inArray(metadatas.entityId, ids), eq(metadatas.entityType, 'document'))),
+							tx
+								.delete(thumbnails)
+								.where(and(inArray(thumbnails.entityId, ids), eq(thumbnails.entityType, 'document'))),
+							tx.delete(favorites).where(and(inArray(favorites.entityId, ids), eq(favorites.entityType, 'document'))),
+						]);
+					}
+				}
+
+				if (file3DIds.length > 0) {
+					for (const ids of chunk(file3DIds, 800)) {
+						await Promise.all([
+							tx.delete(metadatas).where(and(inArray(metadatas.entityId, ids), eq(metadatas.entityType, 'file3d'))),
+							tx.delete(thumbnails).where(and(inArray(thumbnails.entityId, ids), eq(thumbnails.entityType, 'file3d'))),
+							tx.delete(favorites).where(and(inArray(favorites.entityId, ids), eq(favorites.entityType, 'file3d'))),
+						]);
+					}
+				}
+
+				if (jsonIds.length > 0) {
+					for (const ids of chunk(jsonIds, 800)) {
+						await Promise.all([
+							tx.delete(metadatas).where(and(inArray(metadatas.entityId, ids), eq(metadatas.entityType, 'json'))),
+							tx.delete(thumbnails).where(and(inArray(thumbnails.entityId, ids), eq(thumbnails.entityType, 'json'))),
+							tx.delete(favorites).where(and(inArray(favorites.entityId, ids), eq(favorites.entityType, 'json'))),
+						]);
+					}
+				}
+
+				// 1.4 Eliminar entidades base
+				if (imageIds.length > 0) {
+					for (const ids of chunk(imageIds, 800)) {
+						await tx.delete(images).where(inArray(images.id, ids));
+					}
+				}
+				if (videoIds.length > 0) {
+					for (const ids of chunk(videoIds, 800)) {
+						await tx.delete(videos).where(inArray(videos.id, ids));
+					}
+				}
+				if (audioIds.length > 0) {
+					for (const ids of chunk(audioIds, 800)) {
+						await tx.delete(audios).where(inArray(audios.id, ids));
+					}
+				}
+				if (documentIds.length > 0) {
+					for (const ids of chunk(documentIds, 800)) {
+						await tx.delete(documents).where(inArray(documents.id, ids));
+					}
+				}
+				if (file3DIds.length > 0) {
+					for (const ids of chunk(file3DIds, 800)) {
+						await tx.delete(file3Ds).where(inArray(file3Ds.id, ids));
+					}
+				}
+				if (jsonIds.length > 0) {
+					for (const ids of chunk(jsonIds, 800)) {
+						await tx.delete(jsonFiles).where(inArray(jsonFiles.id, ids));
+					}
+				}
+
+				// 1.5 Finalmente, eliminar las carpetas
+				for (const ids of chunk(folderIds, 800)) {
+					await tx.delete(folders).where(inArray(folders.id, ids));
+				}
+			});
+
+			syncLogger.info(`✅ Limpieza en cascada completada y carpetas eliminadas: ${result.removed.length}`);
 		}
 
 		// 2. Agregar nuevas carpetas
@@ -314,21 +542,34 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 			syncLogger.info(`➕ Agregando ${result.added.length} carpetas a la BD`);
 
 			// Ordenar por profundidad para crear padres antes que hijos
-			const sortedToAdd = result.added.sort((a, b) => {
-				const depthA = a.path.split(path.sep).length;
-				const depthB = b.path.split(path.sep).length;
-				return depthA - depthB;
-			});
+			// Calcular profundidad de forma consistente en cualquier SO
+			const getDepth = (p: string) => {
+				const norm = normalizePath(p).replace(/\\/g, '/');
+				return norm.split('/').filter(Boolean).length;
+			};
+			const sortedToAdd = result.added.sort((a, b) => getDepth(a.path) - getDepth(b.path));
 
 			for (const folder of sortedToAdd) {
 				try {
-					// Determinar carpeta padre
-					const parentPath = path.dirname(folder.path);
-					const parentFolder = await db
+					// Determinar carpeta padre (normalizado)
+					const parentPath = normalizePath(path.dirname(folder.path));
+					// Buscar por variantes para tolerar diferentes estilos de almacenamiento de ruta
+					const parentPathVariants = [parentPath, parentPath.replace(/\\/g, '/'), parentPath.replace(/\//g, '\\')];
+					let parentFolder = await db
 						.select({ id: folders.id })
 						.from(folders)
-						.where(eq(folders.path, parentPath))
+						.where(inArray(folders.path, parentPathVariants))
 						.limit(1);
+
+					// Intento adicional: comparación insensible a mayúsculas
+					if (parentFolder.length === 0) {
+						const { sql } = await import('drizzle-orm');
+						parentFolder = await db
+							.select({ id: folders.id })
+							.from(folders)
+							.where(sql`LOWER(${folders.path}) = LOWER(${parentPath})`)
+							.limit(1);
+					}
 
 					const parentId = parentFolder.length > 0 ? parentFolder[0].id : null;
 
@@ -349,6 +590,43 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 					const errorMsg = `Error agregando carpeta ${folder.name}: ${error instanceof Error ? error.message : String(error)}`;
 					syncLogger.error(errorMsg);
 					result.errors.push(errorMsg);
+				}
+			}
+
+			// Reconciliación: asegurar parentId correcto para todas las agregadas (por si el orden no garantizó padres primero)
+			for (const folder of result.added) {
+				try {
+					const expectedParentPath = normalizePath(path.dirname(folder.path));
+					const parentPathVariants = [
+						expectedParentPath,
+						expectedParentPath.replace(/\\/g, '/'),
+						expectedParentPath.replace(/\//g, '\\'),
+					];
+					let parent = await db
+						.select({ id: folders.id })
+						.from(folders)
+						.where(inArray(folders.path, parentPathVariants))
+						.limit(1);
+
+					if (parent.length === 0) {
+						const { sql } = await import('drizzle-orm');
+						parent = await db
+							.select({ id: folders.id })
+							.from(folders)
+							.where(sql`LOWER(${folders.path}) = LOWER(${expectedParentPath})`)
+							.limit(1);
+					}
+
+					if (parent.length > 0) {
+						await db
+							.update(folders)
+							.set({ parentId: parent[0].id })
+							// Actualizar por id recién insertado para evitar discrepancias de formato de path
+							.where(eq(folders.id, folder.id));
+					}
+				} catch (error) {
+					const errorMsg = `Error reconciliando parentId para ${folder.name}: ${error instanceof Error ? error.message : String(error)}`;
+					syncLogger.warn(errorMsg);
 				}
 			}
 		}

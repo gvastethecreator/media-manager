@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { ImageWithStats } from '@/types/entities/image';
+import type { MediaItem } from './media-thumbnail';
+import { MediaThumbnail } from './media-thumbnail';
 
 // CONFIG local de la vista Masonry
 const CONFIG = {
@@ -13,10 +14,10 @@ const CONFIG = {
 };
 
 interface FileMasonryProps {
-	items: ImageWithStats[];
+	items: MediaItem[];
 	selectedIds?: string[];
-	onItemClick?: (item: ImageWithStats) => void;
-	onItemDoubleClick?: (item: ImageWithStats) => void;
+	onItemClick?: (item: MediaItem) => void;
+	onItemDoubleClick?: (item: MediaItem) => void;
 }
 
 // Hook simple para width de ventana (breakpoints tipo Tailwind)
@@ -38,13 +39,11 @@ function MasonryTile({
 	onClick,
 	onDoubleClick,
 }: {
-	item: ImageWithStats;
+	item: MediaItem;
 	selected: boolean;
-	onClick?: (item: ImageWithStats) => void;
-	onDoubleClick?: (item: ImageWithStats) => void;
+	onClick?: (item: MediaItem) => void;
+	onDoubleClick?: (item: MediaItem) => void;
 }) {
-	const thumbnailUrl = `/api/images/${item.id}/thumbnail`;
-
 	const handleClick = () => onClick?.(item);
 	const handleDoubleClick = () => onDoubleClick?.(item);
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
@@ -56,14 +55,14 @@ function MasonryTile({
 	return (
 		<button
 			aria-pressed={selected}
-			className="group relative w-full overflow-hidden rounded-md border bg-card text-left focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+			className="group relative w-full overflow-hidden rounded-md border-none bg-card text-left focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 			data-selected={selected}
 			onClick={handleClick}
 			onDoubleClick={handleDoubleClick}
 			onKeyDown={handleKeyDown}
 			type="button"
 		>
-			<img alt={item.name} className="h-auto w-full object-cover" src={thumbnailUrl} />
+			<MediaThumbnail className="h-auto w-full" item={item} style={{ objectFit: 'cover' }} />
 			<div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/70 to-transparent p-2">
 				<p className="truncate font-medium text-white text-xs">{item.name}</p>
 			</div>
@@ -108,22 +107,22 @@ export function FileMasonry({ items, selectedIds = [], onItemClick, onItemDouble
 			<div className="h-full">
 				<VirtuosoMasonryComp
 					columnCount={columnCount}
-					computeItemKey={({ data }: { data: ImageWithStats }) => data.id}
+					computeItemKey={({ data }: { data: MediaItem }) => data.id}
 					data={items}
-					ItemContent={function ItemContentComp({ data }: { data: ImageWithStats }) {
+					ItemContent={function ItemContentComp({ data }: { data: MediaItem }) {
 						return (
 							<div style={{ padding: `${CONFIG.gap / 2}px` }}>
 								<MasonryTile
+									item={data}
 									onClick={onItemClick}
 									onDoubleClick={onItemDoubleClick}
-									item={data}
 									selected={selectedIds.includes(data.id)}
 								/>
 							</div>
 						);
 					}}
-					initialItemCount={Math.min(50, items.length)}
 					increaseViewportBy={CONFIG.increaseViewportBy}
+					initialItemCount={Math.min(50, items.length)}
 					style={{ height: '100%' }}
 					useWindowScroll={false}
 				/>
@@ -135,11 +134,11 @@ export function FileMasonry({ items, selectedIds = [], onItemClick, onItemDouble
 	return (
 		<div className="columns-1" style={{ gap: CONFIG.gap, padding: CONFIG.padding }}>
 			{items.map((item) => (
-				<div key={item.id} className="mb-4 break-inside-avoid" style={{ marginBottom: CONFIG.gap }}>
+				<div className="mb-4 break-inside-avoid" key={item.id} style={{ marginBottom: CONFIG.gap }}>
 					<MasonryTile
+						item={item}
 						onClick={onItemClick}
 						onDoubleClick={onItemDoubleClick}
-						item={item}
 						selected={selectedIds.includes(item.id)}
 					/>
 				</div>

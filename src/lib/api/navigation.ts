@@ -16,6 +16,13 @@ export interface SystemStats {
 	totalSize: number;
 	totalViews: number;
 	totalDownloads: number;
+	// Totales adicionales (opcionales) provenientes de /stats/system
+	totalVideos?: number;
+	totalAudio?: number;
+	totalDocuments?: number;
+	totalJsonFiles?: number;
+	totalFile3D?: number;
+	totalWorkflows?: number;
 	topTags: Array<{ id: string; name: string; count: number }>;
 	recentActivity: unknown[];
 }
@@ -38,6 +45,7 @@ export interface NavigationData {
 	documents: Array<{ id: string; name: string; type?: string }>;
 	jsonFiles: Array<{ id: string; name: string; size?: number }>;
 	file3ds: Array<{ id: string; name: string; format?: string }>;
+	videos: Array<{ id: string; name: string; duration?: number }>;
 	workflows: Array<{ id: string; name: string; status?: string }>;
 	stats: SystemStats;
 }

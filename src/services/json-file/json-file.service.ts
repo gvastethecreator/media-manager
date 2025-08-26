@@ -8,12 +8,11 @@
 
 import * as crypto from 'crypto';
 import { asc, count, eq } from 'drizzle-orm';
-// Drizzle imports
 import { db } from '@/lib/drizzle';
 import { jsonFiles } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { type EventType, emit } from '@/lib/server/events.server';
+import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromDrizzleJsonFile, fromDrizzleJsonFiles } from '@/transformers/json-file/transformer';
 import type { JsonFileCreateInput, JsonFileUpdateInput, JsonFileWithStats } from '@/types/entities/json-file';
@@ -29,21 +28,7 @@ const createJsonFileError = (
 	return createEntityErrorObject('JsonFileError', message, code, cause);
 };
 
-// Constantes para los tipos de eventos
-const EVENTS = {
-	JSON_FILE_CREATED: 'json-file:created',
-	JSON_FILE_UPDATED: 'json-file:updated',
-	JSON_FILE_DELETED: 'json-file:deleted',
-	JSON_FILES_CHANGED: 'json-files:changed',
-};
-
-// Mapeo de eventos a EventType - usar eventos existentes
-const EVENT_TYPE_MAPPING: Record<string, EventType> = {
-	[EVENTS.JSON_FILE_CREATED]: 'create',
-	[EVENTS.JSON_FILE_UPDATED]: 'update',
-	[EVENTS.JSON_FILE_DELETED]: 'delete',
-	[EVENTS.JSON_FILES_CHANGED]: 'update',
-};
+// (Eventos específicos no usados actualmente; se emite 'files:modified' y STATS_EVENTS)
 
 /**
  * Obtiene todos los archivos JSON con sus estadísticas
@@ -346,5 +331,17 @@ export async function getJsonFileCount(): Promise<number> {
 	} catch (error) {
 		jsonFileLogger.error('❌ Error obteniendo conteo de archivos JSON:', error);
 		throw createJsonFileError('No se pudo obtener el conteo de archivos JSON', EntityErrorCode.OPERATION_FAILED, error);
+	}
+}
+
+/**
+ * Busca un archivo JSON por su hash
+ */
+export async function getJsonFileByHash(hash: string): Promise<JsonFileWithStats | null> {
+	try {
+		const result = await db.select().from(jsonFiles).where(eq(jsonFiles.hash, hash)).limit(1);
+		return result[0] ? (fromDrizzleJsonFile(result[0] as any) as JsonFileWithStats) : null;
+	} catch (error) {
+		return null;
 	}
 }

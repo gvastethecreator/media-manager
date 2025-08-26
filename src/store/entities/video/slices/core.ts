@@ -315,7 +315,9 @@ export const createVideoCoreSlice: StateCreator<VideoStore, [], [], VideoCoreSli
 	fetchVideos: async (folderIds) => {
 		get().setLoading(true);
 		try {
-			const videos = await findVideosInApi({ folderIds });
+			const videos = await findVideosInApi(
+				Array.isArray(folderIds) && folderIds.length === 1 ? { folderId: folderIds[0] } : { folderIds }
+			);
 			if (videos && videos.length > 0) {
 				get().addVideos(videos);
 			}

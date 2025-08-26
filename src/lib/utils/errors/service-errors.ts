@@ -172,7 +172,27 @@ export function createServiceError(options: CreateServiceErrorOptions): ServiceE
 	const category = ErrorCodeCategoryMap[code] || ServiceErrorCategory.UNEXPECTED;
 
 	// Determinar el status HTTP correspondiente
-	const httpStatus = ErrorHttpStatusMap[category];
+	let httpStatus = ErrorHttpStatusMap[category];
+	// Overrides por código para precisión HTTP
+	switch (code) {
+		case ServiceErrorCode.FILE_NOT_FOUND:
+		case ServiceErrorCode.ENTITY_NOT_FOUND:
+			httpStatus = 404;
+			break;
+		case ServiceErrorCode.FILE_ACCESS_DENIED:
+		case ServiceErrorCode.UNAUTHORIZED:
+		case ServiceErrorCode.FORBIDDEN:
+			httpStatus = 403;
+			break;
+		case ServiceErrorCode.REQUEST_TIMEOUT:
+			httpStatus = 408;
+			break;
+		case ServiceErrorCode.EXTERNAL_SERVICE_TIMEOUT:
+			httpStatus = 504;
+			break;
+		default:
+			break;
+	}
 
 	// Crear el objeto de error
 	const error = new Error(message) as ServiceError;

@@ -167,9 +167,12 @@ if (typeof window === 'undefined') {
 	client = createClient({
 		url: databaseUrl,
 	});
+	// Evitar logs masivos de consultas (base64 de thumbnails) => logger desactivado por defecto.
+	// Si se requiere, activar con DRIZZLE_LOG=1 explícitamente.
+	const enableDrizzleLogger = process.env.DRIZZLE_LOG === '1';
 	dbInstance = drizzle(client, {
 		schema: fullSchema,
-		logger: process.env.NODE_ENV === 'development',
+		logger: enableDrizzleLogger,
 	});
 	// Inicializar FTS5 de forma asíncrona (no bloquear arranque)
 	// Lanzar inicialización FTS5 sin bloquear; ignorar promesa

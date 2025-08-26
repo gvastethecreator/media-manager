@@ -1,0 +1,4 @@
+[2025-08-26T00:51:48.464Z] [INFO] ℹ️  🌐 [2025-08-26T00:51:48.463Z] GET /api/folders/cursed-dump - IP: 127.0.0.1 - START
+[2025-08-26T00:51:48.468Z] [INFO] ℹ️  ✅ [2025-08-26T00:51:48.468Z] GET /api/folders/cursed-dump - 200 - 5ms - IP: 127.0.0.1 - END
+[2025-08-26T00:51:48.470Z] [INFO] ℹ️  🌐 [2025-08-26T00:51:48.470Z] GET /api/folders/cursed-dump/name - IP: 127.0.0.1 - START
+[2025-08-26T00:51:48.472Z] [INFO] ℹ️  ✅ [2025-08-26T00:51:48.472Z] GET /api/folders/cursed-dump/name - 200 - 2ms - IP: 127.0.0.1 - END
