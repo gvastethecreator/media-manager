@@ -20,6 +20,8 @@ import {
 	PanelRightOpen,
 	Plus,
 	Settings,
+	SortAsc,
+	Tags,
 	Table as TableIcon,
 	Trash2,
 	X,
@@ -29,7 +31,16 @@ import { memo, useCallback, useMemo } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-// Eliminado dropdown de cambio de vista (no debe existir)
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuLabel,
+	DropdownMenuRadioGroup,
+	DropdownMenuRadioItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+// Reintroducido: dropdown para cambio de vista (compacta espacio en toolbar)
 import { Separator } from '@/components/ui/separator';
 import { ViewType } from '@/components/views/types';
 import { useDebouncedViewMode } from '@/hooks/use-debounced-view-mode';
@@ -241,83 +252,143 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	// controles de tamaño no usados en esta toolbar minimal
 
 	const renderSortButtons = () => {
-		const isNameActive = sortOptions.some((opt: any) => opt.field === 'name');
-		const nameOpt = sortOptions.find((opt: any) => opt.field === 'name');
-		const modifiedOpt = sortOptions.find((opt: any) => opt.field === 'modifiedAt' || opt.field === 'modifiedTime');
-		const createdOpt = sortOptions.find((opt: any) => opt.field === 'createdAt' || opt.field === 'createdTime');
+		const sortOptions_any = sortOptions as Array<{ field: string; direction: 'asc' | 'desc' }>;
+		const nameOpt = sortOptions_any.find((opt) => opt.field === 'name');
+		const modifiedOpt = sortOptions_any.find((opt) => opt.field === 'modifiedAt' || opt.field === 'modifiedTime');
+		const createdOpt = sortOptions_any.find((opt) => opt.field === 'createdAt' || opt.field === 'createdTime');
+		const typeOpt = sortOptions_any.find((opt) => opt.field === 'type' || opt.field === 'entityType');
 
-		const btnClass = (active: boolean) => cn('h-7 hover:bg-accent', active ? 'w-10 bg-accent/50' : 'w-7');
-		const dirIcon = (dir?: 'asc' | 'desc') =>
-			dir ? (
-				<span
-					style={{
-						position: 'absolute',
-						bottom: 0,
-						right: 0,
-						width: '14px',
-						height: '14px',
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-						pointerEvents: 'none',
-					}}
-				>
-					{dir === 'asc' ? (
-						<ArrowUp className="h-2.5 w-2.5 text-primary" />
-					) : (
-						<ArrowDown className="h-2.5 w-2.5 text-primary" />
-					)}
-				</span>
-			) : null;
+		const getCurrentSort = () => {
+			if (nameOpt) return { field: 'name', direction: nameOpt.direction };
+			if (modifiedOpt) return { field: 'modifiedAt', direction: modifiedOpt.direction };
+			if (createdOpt) return { field: 'createdAt', direction: createdOpt.direction };
+			if (typeOpt) return { field: 'type', direction: typeOpt.direction };
+			return null;
+		};
 
-		const iconContainerClass = 'relative flex items-center justify-center';
+		const currentSort = getCurrentSort();
+
+		const getSortLabel = () => {
+			if (!currentSort) return 'Ordenar';
+			const labels = {
+				name: 'Nombre',
+				modifiedAt: 'Modificado',
+				createdAt: 'Creado',
+				type: 'Tipo',
+			};
+			const label = labels[currentSort.field as keyof typeof labels] || 'Ordenar';
+			return `${label} ${currentSort.direction === 'asc' ? '↑' : '↓'}`;
+		};
 
 		return (
-			<div className="flex items-center gap-0.5 p-2">
-				<Button
-					className={btnClass(isNameActive)}
-					data-active={isNameActive}
-					onClick={() => handleSort('name')}
-					size="icon"
-					title="Ordenar por nombre"
-					variant="ghost"
-				>
-					<div className={iconContainerClass} style={{ width: 22, height: 22 }}>
-						<FileText className={cn('h-3.5 w-3.5', isNameActive ? 'text-primary' : 'text-muted-foreground')} />
-						{dirIcon(nameOpt?.direction)}
-					</div>
-				</Button>
-				<Button
-					className={btnClass(!!modifiedOpt)}
-					data-active={!!modifiedOpt}
-					onClick={() => handleSort('modifiedAt')}
-					size="icon"
-					title="Ordenar por fecha de modificación"
-					variant="ghost"
-				>
-					<div className={iconContainerClass} style={{ width: 22, height: 22 }}>
-						<Clock className={cn('h-3.5 w-3.5', modifiedOpt ? 'text-primary' : 'text-muted-foreground')} />
-						{dirIcon(modifiedOpt?.direction)}
-					</div>
-				</Button>
-				<Button
-					className={btnClass(!!createdOpt)}
-					data-active={!!createdOpt}
-					onClick={() => handleSort('createdAt')}
-					size="icon"
-					title="Ordenar por fecha de creación"
-					variant="ghost"
-				>
-					<div className={iconContainerClass} style={{ width: 22, height: 22 }}>
-						<Calendar className={cn('h-3.5 w-3.5', createdOpt ? 'text-primary' : 'text-muted-foreground')} />
-						{dirIcon(createdOpt?.direction)}
-					</div>
-				</Button>
-			</div>
+			<DropdownMenu>
+				<DropdownMenuTrigger asChild>
+					<Button
+						className="h-7 px-2 hover:bg-accent"
+						data-testid="sort-dropdown-trigger"
+						variant="ghost"
+						title="Ordenar archivos"
+					>
+						<SortAsc className="mr-1 h-3.5 w-3.5" />
+						<span className="text-xs">{getSortLabel()}</span>
+					</Button>
+				</DropdownMenuTrigger>
+				<DropdownMenuContent align="end" className="w-48">
+					<DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
+					<DropdownMenuSeparator />
+					<DropdownMenuRadioGroup
+						value={currentSort ? `${currentSort.field}-${currentSort.direction}` : ''}
+						onValueChange={(value) => {
+							const [field, direction] = value.split('-');
+							handleSort(field);
+						}}
+					>
+						<DropdownMenuRadioItem value={`name-${nameOpt?.direction || 'asc'}`}>
+							<div className="flex items-center gap-2">
+								<FileText className="h-4 w-4" />
+								<span>Nombre</span>
+								{nameOpt && (
+									<span className="ml-auto">
+										{nameOpt.direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+									</span>
+								)}
+							</div>
+						</DropdownMenuRadioItem>
+						<DropdownMenuRadioItem value={`modifiedAt-${modifiedOpt?.direction || 'asc'}`}>
+							<div className="flex items-center gap-2">
+								<Clock className="h-4 w-4" />
+								<span>Fecha modificación</span>
+								{modifiedOpt && (
+									<span className="ml-auto">
+										{modifiedOpt.direction === 'asc' ? (
+											<ArrowUp className="h-3 w-3" />
+										) : (
+											<ArrowDown className="h-3 w-3" />
+										)}
+									</span>
+								)}
+							</div>
+						</DropdownMenuRadioItem>
+						<DropdownMenuRadioItem value={`createdAt-${createdOpt?.direction || 'asc'}`}>
+							<div className="flex items-center gap-2">
+								<Calendar className="h-4 w-4" />
+								<span>Fecha creación</span>
+								{createdOpt && (
+									<span className="ml-auto">
+										{createdOpt.direction === 'asc' ? (
+											<ArrowUp className="h-3 w-3" />
+										) : (
+											<ArrowDown className="h-3 w-3" />
+										)}
+									</span>
+								)}
+							</div>
+						</DropdownMenuRadioItem>
+						<DropdownMenuRadioItem value={`type-${typeOpt?.direction || 'asc'}`}>
+							<div className="flex items-center gap-2">
+								<Tags className="h-4 w-4" />
+								<span>Tipo de archivo</span>
+								{typeOpt && (
+									<span className="ml-auto">
+										{typeOpt.direction === 'asc' ? <ArrowUp className="h-3 w-3" /> : <ArrowDown className="h-3 w-3" />}
+									</span>
+								)}
+							</div>
+						</DropdownMenuRadioItem>
+					</DropdownMenuRadioGroup>
+				</DropdownMenuContent>
+			</DropdownMenu>
 		);
 	};
 
 	const renderViewButtons = () => {
+		const viewIcon = () => {
+			switch (viewMode) {
+				case 'grid':
+					return <Grid className="h-4 w-4" />;
+				case 'cards':
+					return <LayoutGrid className="h-4 w-4" />;
+				case 'masonry':
+					return <GalleryHorizontal className="h-4 w-4" />;
+				case 'list':
+					return <ListIcon className="h-4 w-4" />;
+				case 'table':
+					return <TableIcon className="h-4 w-4" />;
+				case 'single':
+					return <FileText className="h-4 w-4" />;
+				default:
+					return <Grid className="h-4 w-4" />;
+			}
+		};
+
+		const handleChangeView = (mode: string) => {
+			if (mode === 'masonry') {
+				setViewModeDebounced('masonry');
+				return;
+			}
+			setViewMode(mode as any);
+		};
+
 		return (
 			<div className="flex items-center gap-0.5">
 				<Button
@@ -328,77 +399,60 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					size="icon"
 					title="Agrupar por tipo de archivo"
 					variant={groupByEntityType ? 'secondary' : 'ghost'}
+					aria-pressed={groupByEntityType}
 				>
-					{/* Usamos iconos de tabla para representar agrupado */}
-					<TableIcon className="h-4 w-4" />
+					<Tags className="h-4 w-4" />
 				</Button>
-				{/* Botones directos para tests E2E (evita timeouts por dropdown) */}
-				<Button
-					aria-label="Vista Grid"
-					data-active={viewMode === 'grid'}
-					data-testid="view-mode-grid-btn"
-					onClick={() => setViewMode('grid')}
-					size="icon"
-					title="Vista Grid"
-					variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-				>
-					<Grid className="h-4 w-4" />
-				</Button>
-				<Button
-					aria-label="Vista Cards"
-					data-active={viewMode === 'cards'}
-					data-testid="view-mode-cards-btn"
-					onClick={() => setViewMode('cards')}
-					size="icon"
-					title="Vista Cards"
-					variant={viewMode === 'cards' ? 'secondary' : 'ghost'}
-				>
-					<LayoutGrid className="h-4 w-4" />
-				</Button>
-				<Button
-					aria-label="Vista Masonry"
-					data-active={viewMode === 'masonry'}
-					data-testid="view-mode-masonry-btn"
-					onClick={() => setViewModeDebounced('masonry')}
-					size="icon"
-					title="Vista Masonry"
-					variant={viewMode === 'masonry' ? 'secondary' : 'ghost'}
-				>
-					<GalleryHorizontal className="h-4 w-4" />
-				</Button>
-				<Button
-					aria-label="Vista Lista"
-					data-active={viewMode === 'list'}
-					data-testid="view-mode-list-btn"
-					onClick={() => setViewMode('list')}
-					size="icon"
-					title="Vista Lista"
-					variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-				>
-					<ListIcon className="h-4 w-4" />
-				</Button>
-				<Button
-					aria-label="Vista Tabla"
-					data-active={viewMode === 'table'}
-					data-testid="view-mode-table-btn"
-					onClick={() => setViewMode('table')}
-					size="icon"
-					title="Vista Tabla"
-					variant={viewMode === 'table' ? 'secondary' : 'ghost'}
-				>
-					<TableIcon className="h-4 w-4" />
-				</Button>
-				<Button
-					aria-label="Vista Single"
-					data-active={viewMode === 'single'}
-					data-testid="view-mode-single-btn"
-					onClick={() => setViewMode('single')}
-					size="icon"
-					title="Vista Single"
-					variant={viewMode === 'single' ? 'secondary' : 'ghost'}
-				>
-					<FileText className="h-4 w-4" />
-				</Button>
+
+				<DropdownMenu>
+					<DropdownMenuTrigger asChild>
+						<Button className="h-7 px-2" data-testid="view-mode-dropdown-trigger" variant="ghost" title="Cambiar vista">
+							{viewIcon()}
+						</Button>
+					</DropdownMenuTrigger>
+					<DropdownMenuContent align="end" className="w-40">
+						<DropdownMenuLabel>Modo de vista</DropdownMenuLabel>
+						<DropdownMenuSeparator />
+						<DropdownMenuRadioGroup value={viewMode} onValueChange={handleChangeView}>
+							<DropdownMenuRadioItem value="grid" data-testid="view-mode-grid-btn">
+								<div className="flex items-center gap-2">
+									<Grid className="h-4 w-4" />
+									<span>Grid</span>
+								</div>
+							</DropdownMenuRadioItem>
+							<DropdownMenuRadioItem value="cards" data-testid="view-mode-cards-btn">
+								<div className="flex items-center gap-2">
+									<LayoutGrid className="h-4 w-4" />
+									<span>Cards</span>
+								</div>
+							</DropdownMenuRadioItem>
+							<DropdownMenuRadioItem value="masonry" data-testid="view-mode-masonry-btn">
+								<div className="flex items-center gap-2">
+									<GalleryHorizontal className="h-4 w-4" />
+									<span>Masonry</span>
+								</div>
+							</DropdownMenuRadioItem>
+							<DropdownMenuRadioItem value="list" data-testid="view-mode-list-btn">
+								<div className="flex items-center gap-2">
+									<ListIcon className="h-4 w-4" />
+									<span>Lista</span>
+								</div>
+							</DropdownMenuRadioItem>
+							<DropdownMenuRadioItem value="table" data-testid="view-mode-table-btn">
+								<div className="flex items-center gap-2">
+									<TableIcon className="h-4 w-4" />
+									<span>Tabla</span>
+								</div>
+							</DropdownMenuRadioItem>
+							<DropdownMenuRadioItem value="single" data-testid="view-mode-single-btn">
+								<div className="flex items-center gap-2">
+									<FileText className="h-4 w-4" />
+									<span>Single</span>
+								</div>
+							</DropdownMenuRadioItem>
+						</DropdownMenuRadioGroup>
+					</DropdownMenuContent>
+				</DropdownMenu>
 			</div>
 		);
 	};
@@ -523,7 +577,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	};
 
 	return (
-		<div className="flex h-10 items-center justify-between border-2 border-background bg-secondary p-2">
+		<div className="flex h-10 items-center justify-between whitespace-nowrap border-2 border-background bg-secondary p-2">
 			{/* Lado izquierdo: Botón colapsar panel izquierdo + breadcrumbs + selecciones */}
 			<div className="flex items-center gap-2">
 				{/* Botón de colapsar panel izquierdo */}
