@@ -1,136 +1,148 @@
-import { Box } from 'lucide-react';
-import { motion } from 'motion/react';
-import React from 'react';
-import { File3DCard } from '@/components/cards/file3d-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { Box, RefreshCw } from 'lucide-react';
+import { useCallback, useState } from 'react';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/components/ui/use-toast';
+import { EmptyState } from '@/components/ui/empty-state';
+import { BaseContentView } from '@/components/views/base/base-content-view';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { useDetailsPanel } from '@/store/details-panel.store';
+import { useFile3DStore } from '@/store/entities/file3d';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { File3DWithStats } from '@/types/entities/file3d';
+import type { AnyEntityWithStats } from '@/types/entities';
+
+// Logger para depuración
+const logger = clientLogger.withContext('File3DContentView');
 
 interface File3DContentViewProps {
-	file3ds: File3DWithStats[];
-	isLoading: boolean;
-	error: string | null;
-	showForm: boolean;
-	newFile3DName: string;
-	newFile3DFile: File | null;
-	setShowForm: (show: boolean) => void;
-	setNewFile3DName: (name: string) => void;
-	setNewFile3DFile: (file: File | null) => void;
-	handleFile3DClick: (file3d: File3DWithStats) => void;
-	handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-	handleCreateFile3D: () => Promise<void>;
+	className?: string;
 }
 
-const MemoizedFile3DCard = React.memo(
-	({ file3d, onFile3DClick }: { file3d: File3DWithStats; onFile3DClick: () => void }) => (
-		<File3DCard className="h-full" file3d={file3d} onClick={onFile3DClick} />
-	),
-	(prevProps, nextProps) =>
-		prevProps.file3d.id === nextProps.file3d.id &&
-		prevProps.file3d.name === nextProps.file3d.name &&
-		prevProps.file3d.updatedAt === nextProps.file3d.updatedAt
-);
-MemoizedFile3DCard.displayName = 'MemoizedFile3DCard';
+export function File3DContentView({ className }: File3DContentViewProps) {
+	// Estados globales para panel de detalles y visor
+	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
+	const { openViewer } = useFileViewerStore();
+	const { file3ds, loading, error, fetchFile3Ds } = useFile3DStore();
 
-const File3DContentView: React.FC<File3DContentViewProps> = ({
-	file3ds,
-	isLoading,
-	error,
-	showForm,
-	newFile3DName,
-	newFile3DFile,
-	setShowForm,
-	setNewFile3DName,
-	setNewFile3DFile,
-	handleFile3DClick,
-	handleFileChange,
-	handleCreateFile3D,
-}) => {
-	const { toast } = useToast();
+	// Estado local para controlar operaciones
+	const [isRefreshing, setIsRefreshing] = useState(false);
 
+	const handleFile3DSelect = useCallback(
+		(file3d: AnyEntityWithStats) => {
+			logger.info('🖱️ Archivo 3D seleccionado:', file3d.name);
+
+			// Mostrar panel de detalles con el archivo 3D seleccionado
+			setSelectedItems([file3d]);
+			setDetailsPanelVisible(true);
+		},
+		[setSelectedItems, setDetailsPanelVisible]
+	);
+
+	const handleFile3DDoubleClick = useCallback(
+		(file3d: AnyEntityWithStats) => {
+			const file3dItem = file3d as File3DWithStats;
+			logger.info('🖱️ Doble click en archivo 3D:', file3dItem.name);
+
+			// TODO: Implementar visor compatible con archivos 3D
+			// Obtener todos los archivos 3D para el visor
+			// const allFile3Ds = file3ds;
+
+			// Convertir a formato compatible con el visor
+			// const file3dItems = allFile3Ds.map((f: File3DWithStats) => ({
+			//	id: f.id,
+			//	name: f.name,
+			//	type: 'file3d' as const,
+			//	path: f.path,
+			//	size: f.size || 0,
+			// }));
+
+			// const currentIndex = file3dItems.findIndex((item: any) => item.id === file3dItem.id);
+
+			// Abrir el visor con todos los archivos 3D
+			// openViewer(file3dItems, Math.max(0, currentIndex));
+		},
+		[file3ds, openViewer]
+	);
+
+	const handleRefresh = useCallback(async () => {
+		if (isRefreshing) return;
+
+		setIsRefreshing(true);
+		logger.info('🔄 Refrescando archivos 3D');
+		try {
+			await fetchFile3Ds();
+		} catch (refreshError) {
+			logger.error('❌ Error al refrescar archivos 3D:', refreshError);
+		} finally {
+			setIsRefreshing(false);
+		}
+	}, [isRefreshing, fetchFile3Ds]);
+
+	// ❌ Mostrar error si hay problemas
 	if (error) {
 		return (
-			<div className="flex h-full items-center justify-center">
-				<p className="text-destructive">Error: {error}</p>
+			<div className="flex h-full flex-col items-center justify-center gap-4">
+				<EmptyState
+					actions={
+						<Button onClick={handleRefresh} variant="outline">
+							Reintentar
+						</Button>
+					}
+					description="Error al cargar los archivos 3D. Inténtalo de nuevo."
+					icon={Box}
+					title="Error al cargar archivos 3D"
+				/>
 			</div>
 		);
 	}
 
-	if (isLoading && (!file3ds || file3ds.length === 0)) {
-		return <LoadingScreen />;
-	}
-
-	return (
-		<ScrollArea className="h-full">
-			<div className="container mx-auto p-6">
-				<h2 className="mb-4 font-bold text-xl">Vista de Archivos 3D</h2>
-
-				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-					{showForm ? 'Cancelar' : 'Subir Archivo 3D'}
-				</Button>
-
-				{showForm && (
-					<div className="mb-6 rounded-lg border p-4 shadow-sm">
-						<h3 className="mb-3 font-semibold text-lg">Nuevo Archivo 3D</h3>
-						<div className="mb-3 grid gap-2">
-							<Label htmlFor="file3dName">Nombre</Label>
-							<Input
-								id="file3dName"
-								onChange={(e) => setNewFile3DName(e.target.value)}
-								placeholder="Nombre del archivo 3D"
-								value={newFile3DName}
-							/>
-						</div>
-						<div className="mb-4 grid gap-2">
-							<Label htmlFor="file3dFile">Archivo 3D</Label>
-							<Input
-								accept=".glb,.gltf,.obj,.fbx"
-								id="file3dFile"
-								onChange={handleFileChange} // Aceptar tipos de archivos 3D comunes
-								type="file"
-							/>
-						</div>
-						<Button onClick={handleCreateFile3D}>Guardar Archivo 3D</Button>
-					</div>
-				)}
-
-				{(!file3ds || file3ds.length === 0) && !isLoading && !showForm ? (
+	// 🎯 Mostrar empty state si no hay archivos 3D
+	if (!loading && file3ds.length === 0) {
+		return (
+			<BaseContentView
+				className={className}
+				description="Explora y visualiza tus archivos 3D"
+				headerControls={
+					<Button disabled={isRefreshing} onClick={handleRefresh} size="sm" variant="outline">
+						<RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+						{isRefreshing ? 'Refrescando...' : 'Refrescar'}
+					</Button>
+				}
+				title="Archivos 3D"
+			>
+				<div className="flex h-full items-center justify-center">
 					<EmptyState
 						description="Sube archivos 3D para comenzar a usar el visor."
 						icon={Box}
 						title="No hay archivos 3D"
 					/>
-				) : (
-					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-						{file3ds?.map((file3d, index) => {
-							const onFile3DClick = () => handleFile3DClick(file3d);
-							return (
-								<motion.div
-									animate={{ opacity: 1, y: 0 }}
-									className="perspective-1000"
-									initial={{ opacity: 0, y: 20 }}
-									key={file3d.id}
-									transition={{ delay: index * 0.1 }}
-								>
-									<div
-										className="h-full w-full transition-all duration-300 ease-in-out hover:z-10 hover:scale-[1.03] active:scale-[0.98]"
-										data-file3d-id={file3d.id}
-									>
-										<MemoizedFile3DCard file3d={file3d} onFile3DClick={onFile3DClick} />
-									</div>
-								</motion.div>
-							);
-						})}
-					</div>
-				)}
-			</div>
-		</ScrollArea>
+				</div>
+			</BaseContentView>
+		);
+	}
+
+	// Renderizar vista de archivos 3D usando BaseContentView y FileBrowser
+	return (
+		<BaseContentView
+			className={className}
+			description="Explora y visualiza tus archivos 3D"
+			headerControls={
+				<Button disabled={isRefreshing} onClick={handleRefresh} size="sm" variant="outline">
+					<RefreshCw className={`mr-2 h-4 w-4 ${isRefreshing ? 'animate-spin' : ''}`} />
+					{isRefreshing ? 'Refrescando...' : 'Refrescar'}
+				</Button>
+			}
+			title="Archivos 3D"
+		>
+			<FileBrowser
+				className="h-full"
+				isLoading={loading}
+				items={file3ds as unknown as AnyEntityWithStats[]}
+				onItemClick={handleFile3DSelect}
+				onItemDoubleClick={handleFile3DDoubleClick}
+			/>
+		</BaseContentView>
 	);
-};
+}
 
 export default File3DContentView;

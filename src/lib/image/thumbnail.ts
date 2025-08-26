@@ -177,28 +177,32 @@ export async function generateThumbnail(
 	options: Partial<ThumbnailOptions> = {}
 ): Promise<ThumbnailResult> {
 	try {
-		// 🟡 Logging detallado para depuración de acceso a archivos y permisos
+		// 🟡 Logging de diagnóstico: primero existencia, luego permisos
 		thumbLogger.info('🔍 Verificando acceso al archivo para thumbnail:', filePath);
-		thumbLogger.info('🟡 existsSync:', existsSync(filePath));
-		try {
-			await fs.access(filePath, fs.constants.R_OK);
-			thumbLogger.info('🟢 Permiso de lectura OK para:', filePath);
-		} catch (permError) {
-			thumbLogger.error(
-				'🔴 Sin permiso de lectura para:',
-				filePath,
-				permError instanceof Error ? permError.message : String(permError)
-			);
-		}
-		thumbLogger.info(
-			'🟡 Usuario proceso:',
-			process.env.USERNAME || process.env.USER || (typeof process.getuid === 'function' ? process.getuid() : 'N/A')
-		);
-
-		if (!existsSync(filePath)) {
+		const exists = existsSync(filePath);
+		thumbLogger.info('🟡 existsSync:', exists);
+		if (!exists) {
 			thumbLogger.error(`Archivo no encontrado: ${filePath}`);
 			throw new Error(`Archivo no encontrado: ${filePath}`);
 		}
+		try {
+			await fs.access(filePath, fs.constants.R_OK);
+			thumbLogger.info('🟢 Permiso de lectura OK para:', filePath);
+		} catch (permError: any) {
+			const code = permError?.code;
+			if (code === 'EACCES' || code === 'EPERM') {
+				thumbLogger.error('🔴 Permiso denegado al leer:', { path: filePath, code, message: permError.message });
+				throw new Error(`Permiso denegado: ${filePath}`);
+			}
+			// Otros errores inesperados de access
+			thumbLogger.error('🔴 Error comprobando acceso de lectura:', {
+				path: filePath,
+				code,
+				message: permError instanceof Error ? permError.message : String(permError),
+			});
+			throw permError;
+		}
+		thumbLogger.info('🟡 Usuario proceso:', process.env.USERNAME || process.env.USER || 'N/A');
 
 		const ext = extname(filePath).toLowerCase();
 		if (!SUPPORTED_FORMATS.has(ext)) {
@@ -233,8 +237,7 @@ export async function generateThumbnail(
 			config,
 		});
 
-		// Para depuración
-		console.log(`Generando thumbnail para: ${filePath}`);
+		// Nota: logs de depuración de consola eliminados; usar thumbLogger si es necesario
 
 		// Inicializar sharp
 		const image = sharp(filePath, {
@@ -322,8 +325,7 @@ export async function generateThumbnail(
 			// Guardar en caché para futuros usos
 			await saveToCache(cacheKey, data, finalOptions.quality as ThumbnailQuality);
 
-			// Para depuración
-			console.log(`Thumbnail generado - Dimensiones: ${info.width}x${info.height}, Tamaño: ${data.length} bytes`);
+			// Nota: logs de depuración de consola eliminados; usar thumbLogger.debug si se requiere
 
 			// Devolver resultado
 			return {

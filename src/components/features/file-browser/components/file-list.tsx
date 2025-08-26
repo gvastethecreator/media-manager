@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { ImageWithStats } from '@/types/entities/image';
 import { ListItem } from './list-item';
+import type { MediaItem } from './media-thumbnail';
 
 // CONFIG local de la vista List
 const CONFIG = {
@@ -10,10 +10,10 @@ const CONFIG = {
 };
 
 interface FileListProps {
-	items: ImageWithStats[];
+	items: MediaItem[];
 	selectedIds?: string[];
-	onItemClick?: (item: ImageWithStats) => void;
-	onItemDoubleClick?: (item: ImageWithStats) => void;
+	onItemClick?: (item: MediaItem) => void;
+	onItemDoubleClick?: (item: MediaItem) => void;
 }
 
 export function FileList({ items, selectedIds = [], onItemClick, onItemDoubleClick }: FileListProps) {
@@ -40,7 +40,8 @@ export function FileList({ items, selectedIds = [], onItemClick, onItemDoubleCli
 			<div style={{ height: '100%' }}>
 				<VirtuosoComp
 					data={items}
-					itemContent={(index: number, item: ImageWithStats) => (
+					increaseViewportBy={CONFIG.increaseViewportBy}
+					itemContent={(index: number, item: MediaItem) => (
 						<div data-index={index} style={{ padding: `${CONFIG.rowPaddingY}px ${CONFIG.rowPaddingX}px` }}>
 							<ListItem
 								item={item}
@@ -50,7 +51,6 @@ export function FileList({ items, selectedIds = [], onItemClick, onItemDoubleCli
 							/>
 						</div>
 					)}
-					increaseViewportBy={CONFIG.increaseViewportBy}
 					style={{ height: '100%' }}
 					useWindowScroll={false}
 				/>

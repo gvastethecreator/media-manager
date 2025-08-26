@@ -1,21 +1,22 @@
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
-import { seedActivities } from './activities.seed';
-import { seedAlbums } from './albums.seed';
-import { seedAudios } from './audios.seed';
+// Contenido/organización no esencial y tipos de archivo deshabilitados para base de datos limpia
+// import { seedActivities } from './activities.seed';
+// import { seedAlbums } from './albums.seed';
+// import { seedAudios } from './audios.seed';
 import { seedCharacters } from './characters.seed';
-import { seedCollections } from './collections.seed';
+// import { seedCollections } from './collections.seed';
 import { seedConcepts } from './concepts.seed';
-import { seedDocuments } from './documents.seed';
-import { seedFavorites } from './favorites.seed';
-import { seedFile3Ds } from './file3Ds.seed';
-import { seedFiles } from './files.seed';
+// import { seedDocuments } from './documents.seed';
+// import { seedFavorites } from './favorites.seed';
+// import { seedFile3Ds } from './file3Ds.seed';
+// import { seedFiles } from './files.seed';
 import { seedFolders } from './folders.seed';
-import { seedGroups } from './groups.seed';
-import { seedImageStats } from './imageStats.seed';
-import { seedImages } from './images.seed';
-import { seedJsonFiles } from './jsonFiles.seed';
-import { seedMetadatas } from './metadatas.seed';
+// import { seedGroups } from './groups.seed';
+// import { seedImageStats } from './imageStats.seed';
+// import { seedImages } from './images.seed';
+// import { seedJsonFiles } from './jsonFiles.seed';
+// import { seedMetadatas } from './metadatas.seed';
 import { seedNotes } from './notes.seed';
 import { seedPlaces } from './places.seed';
 import { seedProfiles } from './profiles.seed';
@@ -24,21 +25,20 @@ import { seedProperties } from './properties.seed';
 import { seedQueueJobs } from './queueJobs.seed';
 import { seedSettings } from './settings.seed';
 import { seedTags } from './tags.seed';
-import { seedThumbnails } from './thumbnails.seed';
-import { seedUploadedImages } from './uploadedImages.seed';
-import { seedVideos } from './videos.seed';
+// import { seedThumbnails } from './thumbnails.seed';
+// import { seedUploadedImages } from './uploadedImages.seed';
+// import { seedVideos } from './videos.seed';
 import { seedWildcards } from './wildcards.seed';
-import { seedWorkflows } from './workflows.seed';
+// import { seedWorkflows } from './workflows.seed';
 import { seedWorldItems } from './worldItems.seed';
 
 /**
  * =================================================================================
  * SISTEMA DE SEEDS PARA DRIZZLE ORM
  * =================================================================================
- * Sistema completo de seeds para verificación del funcionamiento del sistema.
- * Incluye todas las entidades del esquema con datos de ejemplo.
- * Todas las entidades tienen máximo 2 elementos excepto folders que mantiene la estructura original.
- * Los archivos multimedia son referencias de ejemplo, no archivos reales.
+ * Modo limpio: solo carpetas + entidades de categorización (taxonomía).
+ * No se insertan archivos/mockups (imágenes, videos, audios, ficheros, documentos, 3D, etc.).
+ * Se mantienen entidades core mínimas (profiles, settings, queueJobs) para operar.
  * =================================================================================
  */
 
@@ -69,19 +69,8 @@ export async function runSeeds() {
 		await seedQueueJobs(db);
 		await seedSettings(db);
 
-		// Media entities
+		// Carpetas (estructura de almacenamiento)
 		await seedFolders(db);
-		await seedImages(db);
-		await seedVideos(db);
-		await seedAudios(db);
-		await seedUploadedImages(db);
-
-		// Organization entities
-		await seedAlbums(db);
-		await seedCollections(db);
-		await seedGroups(db);
-		await seedFavorites(db);
-		await seedFiles(db);
 
 		// Taxonomy entities
 		await seedTags(db);
@@ -94,15 +83,7 @@ export async function runSeeds() {
 		await seedPlaces(db);
 		await seedWorldItems(db);
 
-		// Content entities
-		await seedWorkflows(db);
-		await seedActivities(db);
-		await seedDocuments(db);
-		await seedFile3Ds(db);
-		await seedJsonFiles(db);
-		await seedImageStats(db);
-		await seedMetadatas(db);
-		await seedThumbnails(db);
+		// Content y tipos de archivo deshabilitados en modo limpio
 
 		seedLogger.success('🎉 Seeds completadas exitosamente');
 	} catch (error) {

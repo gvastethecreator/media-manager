@@ -1,25 +1,49 @@
-import { useEffect, useState } from 'react';
+import { forwardRef, useEffect, useState, useMemo } from 'react';
 import type { ViewMode } from '@/store/ui/view-options.slice';
-import type { ImageWithStats } from '@/types/entities/image';
 import { GridItem } from './grid-item';
+import type { MediaItem } from './media-thumbnail';
 
 // CONFIG local de la vista Grid
 const CONFIG = {
-	gap: 16, // px
-	padding: 16, // px
+	gap: 8, // px
+	padding: 8, // px
 	baseItemSize: 150,
 	increaseViewportBy: { top: 200, bottom: 600 } as { top: number; bottom: number },
 };
 
 interface FileGridProps {
-	items: ImageWithStats[];
+	items: MediaItem[];
 	selectedIds?: string[];
 	viewMode?: ViewMode;
-	onItemClick?: (item: ImageWithStats) => void;
-	onItemDoubleClick?: (item: ImageWithStats) => void;
+	onItemClick?: (item: MediaItem) => void;
+	onItemDoubleClick?: (item: MediaItem) => void;
 	style?: React.CSSProperties;
 	itemSize?: number;
 }
+
+// Componente de lista para VirtuosoGrid (hoisted para evitar definir componentes dentro de otros)
+const GridList = forwardRef<
+	HTMLDivElement,
+	React.HTMLAttributes<HTMLDivElement> & { itemSize?: number; gridStyle?: React.CSSProperties }
+>(({ className, style, itemSize = CONFIG.baseItemSize, gridStyle, ...props }, ref) => {
+	// Usar gridStyle si se proporciona, de lo contrario usar el estilo por defecto basado en itemSize
+	const finalGridTemplateColumns =
+		gridStyle?.gridTemplateColumns || `repeat(auto-fill, minmax(${Math.max(80, itemSize)}px, 1fr))`;
+
+	return (
+		<div
+			ref={ref}
+			className={`grid${className ? ` ${className}` : ''}`}
+			style={{
+				gap: CONFIG.gap,
+				padding: CONFIG.padding,
+				gridTemplateColumns: finalGridTemplateColumns,
+				...(style || {}),
+			}}
+			{...props}
+		/>
+	);
+});
 
 export function FileGrid({
 	items,
@@ -30,6 +54,15 @@ export function FileGrid({
 	itemSize = CONFIG.baseItemSize,
 }: FileGridProps) {
 	const [VirtuosoGridComp, setVirtuosoGridComp] = useState<any>(null);
+
+	// Crear el componente List memoizado con itemSize
+	const GridListWithSize = useMemo(
+		() =>
+			forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>((props, ref) => (
+				<GridList {...props} ref={ref} itemSize={itemSize} gridStyle={style} />
+			)),
+		[itemSize, style]
+	);
 
 	useEffect(() => {
 		let mounted = true;
@@ -52,7 +85,8 @@ export function FileGrid({
 			<div style={{ height: '100%' }}>
 				<VirtuosoGridComp
 					data={items}
-					itemContent={(index: number, item: ImageWithStats) => (
+					increaseViewportBy={CONFIG.increaseViewportBy}
+					itemContent={(index: number, item: MediaItem) => (
 						<div data-index={index}>
 							<GridItem
 								item={item}
@@ -63,11 +97,9 @@ export function FileGrid({
 							/>
 						</div>
 					)}
+					// Estilos del contenedor de la lista (grid): usar components.List para evitar props no válidas
 					listClassName="grid"
-					// Estilos del contenedor de la lista (grid): aquí debe ir gridTemplateColumns
-					// para que VirtuosoGrid distribuya correctamente las columnas.
-					listStyle={{ gap: CONFIG.gap, padding: CONFIG.padding, ...style }}
-					increaseViewportBy={CONFIG.increaseViewportBy}
+					components={{ List: GridListWithSize }}
 					// Estilos del contenedor externo del virtuoso (altura)
 					style={{ height: '100%' }}
 				/>

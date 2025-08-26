@@ -168,10 +168,11 @@ export async function getThumbnail(
 
 			// Persistir en DB solo si el proveedor es DB
 			if (thumbsConfig.provider === 'db') {
+				// Normalizar almacenamiento: columna TEXT espera base64
 				await db
 					.update(images)
 					.set({
-						thumbnail: thumbnail.buffer,
+						thumbnail: thumbnail.buffer.toString('base64'),
 						thumbnailSize: thumbnail.buffer.length,
 						thumbnailWidth: thumbnail.width,
 						thumbnailHeight: thumbnail.height,

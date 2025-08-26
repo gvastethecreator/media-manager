@@ -18,7 +18,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { index, integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 // Modelo para estadísticas de imágenes
 export const imageStats = sqliteTable(
@@ -343,5 +343,62 @@ export const workflows = sqliteTable(
 	},
 	(table) => ({
 		nameIdx: uniqueIndex('Workflow_name_key').on(table.name),
+	})
+);
+
+// Modelo específico para workflows ComfyUI
+export const comfyUIWorkflows = sqliteTable(
+	'ComfyUIWorkflow',
+	{
+		id: text('id').primaryKey(),
+		fileName: text('fileName').notNull(),
+		filePath: text('filePath').notNull().unique(),
+		workflowJson: text('workflowJson').notNull(), // JSON completo del workflow
+
+		// Metadatos extraídos del workflow
+		workflowName: text('workflowName'),
+		workflowDescription: text('workflowDescription'),
+		workflowAuthor: text('workflowAuthor'),
+		workflowVersion: text('workflowVersion'),
+		workflowSoftware: text('workflowSoftware'),
+
+		// Estadísticas del workflow
+		nodeCount: integer('nodeCount').notNull().default(0),
+		linkCount: integer('linkCount').notNull().default(0),
+		groupCount: integer('groupCount').notNull().default(0),
+		modelCount: integer('modelCount').notNull().default(0),
+
+		// Información de archivo
+		fileSize: integer('fileSize').notNull().default(0),
+		fileHash: text('fileHash'), // Para detectar cambios
+
+		// Análisis de complejidad
+		complexityScore: real('complexityScore').notNull().default(0),
+		complexityLevel: text('complexityLevel').notNull().default('simple'), // simple|medium|complex|advanced
+
+		// Validación
+		isValid: integer('isValid', { mode: 'boolean' }).notNull().default(true),
+		validationErrors: text('validationErrors'), // JSON array de errores
+		validationWarnings: text('validationWarnings'), // JSON array de warnings
+
+		// Modelos requeridos
+		requiredModels: text('requiredModels'), // JSON array de modelos
+
+		// Estado de la aplicación
+		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
+		tags: text('tags'), // JSON array de tags
+
+		// Timestamps
+		fileCreatedAt: integer('fileCreatedAt', { mode: 'timestamp_ms' }),
+		fileModifiedAt: integer('fileModifiedAt', { mode: 'timestamp_ms' }),
+		importedAt: integer('importedAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
+		lastAccessedAt: integer('lastAccessedAt', { mode: 'timestamp_ms' }),
+	},
+	(table) => ({
+		filePathIdx: index('ComfyUIWorkflow_filePath_idx').on(table.filePath),
+		nameIdx: index('ComfyUIWorkflow_workflowName_idx').on(table.workflowName),
+		complexityIdx: index('ComfyUIWorkflow_complexity_idx').on(table.complexityLevel),
+		validIdx: index('ComfyUIWorkflow_isValid_idx').on(table.isValid),
+		favoriteIdx: index('ComfyUIWorkflow_isFavorite_idx').on(table.isFavorite),
 	})
 );

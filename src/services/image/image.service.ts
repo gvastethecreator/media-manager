@@ -113,6 +113,7 @@ const randomId = (): string => {
 };
 
 const SERVICE_NAME = 'ImageService';
+const MAX_THUMBNAIL_SIZE_BYTES = 300 * 1024; // 300KB tope para almacenar en TEXT base64 con holgura
 const imageLogger = serverLogger.withContext(SERVICE_NAME);
 
 // Re-export eliminado para cumplir regla de estilo
@@ -248,9 +249,10 @@ class ImageService {
 	private applyFormat(pipeline: sharp.Sharp, options: ImageProcessingOptions): sharp.Sharp {
 		switch (options.format) {
 			case 'webp':
-				return pipeline.webp({ quality: options.quality || 80, effort: 4, nearLossless: true });
+				// nearLossless genera archivos mayores; preferimos calidad moderada con esfuerzo razonable.
+				return pipeline.webp({ quality: options.quality || 75, effort: 4 });
 			case 'jpeg':
-				return pipeline.jpeg({ quality: options.quality || 80, progressive: true });
+				return pipeline.jpeg({ quality: options.quality || 75, progressive: true, mozjpeg: true });
 			case 'png':
 				return pipeline.png({ progressive: true, compressionLevel: 9 });
 			default:
@@ -300,8 +302,8 @@ class ImageService {
 			}
 
 			// Emitir evento de creación
-			await this.emitEvent(IMAGE_EVENTS.IMAGE_CREATED, result);
-			await this.emitEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'create', image: result });
+			await this.emitEvent(IMAGE_EVENTS.IMAGE_CREATED, { id: newImage.id });
+			await this.emitEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'create', imageId: newImage.id });
 
 			return result;
 		} catch (error: any) {
@@ -400,8 +402,8 @@ class ImageService {
 				throw createEntityNotFoundError('Image', id, 'después de actualizar');
 			}
 
-			await this.emitEvent(IMAGE_EVENTS.IMAGE_UPDATED, { id, changes: data });
-			await this.emitEvent(IMAGE_EVENTS.IMAGES_CHANGED, {});
+			await this.emitEvent(IMAGE_EVENTS.IMAGE_UPDATED, { id });
+			await this.emitEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'update', imageId: id });
 
 			return imageWithStats;
 		} catch (error) {
@@ -646,20 +648,70 @@ class ImageService {
 				fit: 'cover',
 			};
 
-			// Verificar acceso al archivo
+			// Verificar existencia y permisos del archivo
 			try {
 				await fs.access(image.path, fs.constants.R_OK);
 			} catch (permError: any) {
-				imageLogger.error(
-					'🔴 Sin permiso de lectura para:',
-					image.path,
-					permError instanceof Error ? permError.message : String(permError)
-				);
-				throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
+				const code = permError?.code;
+				if (code === 'ENOENT' || code === 'ENOTDIR') {
+					imageLogger.error('[thumbnail] Archivo no encontrado:', { path: image.path, code });
+					throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
+				}
+				if (code === 'EACCES' || code === 'EPERM') {
+					imageLogger.error('[thumbnail] Permiso denegado al leer:', {
+						path: image.path,
+						code,
+						message: permError.message,
+					});
+					throw toServiceError(permError, {
+						code: ServiceErrorCode.FILE_ACCESS_DENIED,
+						message: `Permiso denegado: ${image.path}`,
+						serviceName: SERVICE_NAME,
+						context: { imageId, path: image.path },
+					});
+				}
+				imageLogger.error('[thumbnail] Error comprobando acceso:', {
+					path: image.path,
+					code,
+					message: permError instanceof Error ? permError.message : String(permError),
+				});
+				throw toServiceError(permError, {
+					code: ServiceErrorCode.FILE_READ_ERROR,
+					message: `No se pudo acceder al archivo: ${image.path}`,
+					serviceName: SERVICE_NAME,
+					context: { imageId, path: image.path },
+				});
 			}
 
-			// Procesar la imagen para crear el thumbnail
-			const { buffer, metadata } = await this.processImage(image.path, config);
+			// Procesar la imagen para crear el thumbnail (primero en WebP)
+			let { buffer, metadata } = await this.processImage(image.path, config);
+
+			// Si el resultado supera el tope, recomprimir con ajustes más fuertes
+			let mime = 'image/webp';
+			if (buffer.length > MAX_THUMBNAIL_SIZE_BYTES) {
+				imageLogger.info('[thumbnail] buffer grande, recomprimiendo', {
+					imageId,
+					sizeKB: (buffer.length / 1024).toFixed(1),
+				});
+				try {
+					// Intento 1: WebP con menor calidad
+					const webpRetry = await sharp(buffer).webp({ quality: 60, effort: 5 }).toBuffer({
+						resolveWithObject: true,
+					});
+					buffer = webpRetry.data;
+					metadata = webpRetry.info;
+					mime = 'image/webp';
+				} catch {
+					// Intento 2: JPEG como fallback
+					const jpegRetry = await sharp(image.path)
+						.resize(config.width, config.height, { fit: config.fit || 'cover', withoutEnlargement: true })
+						.jpeg({ quality: 75, progressive: true, mozjpeg: true })
+						.toBuffer({ resolveWithObject: true });
+					buffer = jpegRetry.data;
+					metadata = jpegRetry.info;
+					mime = 'image/jpeg';
+				}
+			}
 
 			// Guardar resultado (try separado para capturar posibles errores DB sin perder métricas)
 			try {
@@ -670,7 +722,7 @@ class ImageService {
 						thumbnailSize: buffer.length,
 						thumbnailWidth: metadata.width ?? config.width,
 						thumbnailHeight: metadata.height ?? config.height,
-						thumbnailMimeType: 'image/webp',
+						thumbnailMimeType: mime,
 						thumbnailError: null,
 						thumbnailErrorAt: null,
 						thumbnailOptimizedAt: new Date(),
@@ -697,6 +749,21 @@ class ImageService {
 				memRssMB: (memAfter.rss / 1024 / 1024).toFixed(1),
 			});
 		} catch (error: any) {
+			// Registrar error en columnas dedicadas para permitir reintentos controlados
+			try {
+				await db
+					.update(images)
+					.set({
+						thumbnailError: error instanceof Error ? error.message : String(error),
+						thumbnailErrorAt: new Date(),
+					})
+					.where(eq(images.id, imageId));
+			} catch (e) {
+				imageLogger.warn('[thumbnail] No se pudo registrar thumbnailError', {
+					imageId,
+					error: e instanceof Error ? e.message : String(e),
+				});
+			}
 			await this.emitEvent(IMAGE_EVENTS.ERROR, {
 				message: 'Error al generar thumbnail',
 				imageId,
@@ -716,6 +783,29 @@ class ImageService {
 	}
 
 	/**
+	 * Variante segura: intenta generar thumbnail y NO lanza excepción.
+	 * Devuelve true si se generó con éxito, false en caso contrario (registrando thumbnailError/thumbnailErrorAt).
+	 */
+	async generateThumbnailSafe(imageId: string): Promise<boolean> {
+		try {
+			await this.generateThumbnail(imageId);
+			return true;
+		} catch (err: any) {
+			// Asegurar registro de error ya fue hecho en generateThumbnail catch; redundancia defensiva
+			try {
+				await db
+					.update(images)
+					.set({
+						thumbnailError: err instanceof Error ? err.message : String(err),
+						thumbnailErrorAt: new Date(),
+					})
+					.where(eq(images.id, imageId));
+			} catch {}
+			return false;
+		}
+	}
+
+	/**
 	 * Obtiene el thumbnail de una imagen (buffer). Si no existe, lo genera en caliente y lo cachea.
 	 * @param imageId ID de la imagen
 	 * @returns Buffer del thumbnail
@@ -728,8 +818,21 @@ class ImageService {
 			}
 
 			if (image.thumbnail) {
-				// Convertir string base64 a Buffer
-				return Buffer.from(image.thumbnail, 'base64');
+				// Intentar convertir base64 -> Buffer y validar que sea una imagen legible
+				try {
+					const buf = Buffer.from(image.thumbnail, 'base64');
+					// Validación ligera con sharp: obtener metadata; si falla, regenerar
+					await sharp(buf).metadata();
+					return buf;
+				} catch (_e) {
+					// Thumbnail corrupto o no válido: regenerar
+					await this.generateThumbnail(imageId);
+					const refreshed = await this.getImage(imageId);
+					if (refreshed?.thumbnail) {
+						return Buffer.from(refreshed.thumbnail, 'base64');
+					}
+					throw createFileNotFoundError(`Miniatura corrupta reparada pero no disponible para la imagen ${imageId}`);
+				}
 			}
 
 			await this.generateThumbnail(imageId);

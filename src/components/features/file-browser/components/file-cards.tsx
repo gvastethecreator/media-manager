@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
-import type { ImageWithStats } from '@/types/entities/image';
+import type { MediaItem } from './media-thumbnail';
+import { MediaThumbnail } from './media-thumbnail';
 
 // CONFIG local de la vista Cards
 const CONFIG = {
@@ -11,13 +12,13 @@ const CONFIG = {
 };
 
 interface FileCardsProps {
-	items: ImageWithStats[];
+	items: MediaItem[];
 	selectedIds?: string[];
-	onItemClick?: (item: ImageWithStats) => void;
-	onItemDoubleClick?: (item: ImageWithStats) => void;
+	onItemClick?: (item: MediaItem) => void;
+	onItemDoubleClick?: (item: MediaItem) => void;
 }
 
-function getExtLabel(item: ImageWithStats): string {
+function getExtLabel(item: MediaItem): string {
 	const n = (item.name || '').toLowerCase();
 	const ext = n.includes('.') ? n.slice(n.lastIndexOf('.') + 1) : '';
 	return ext || 'image';
@@ -29,10 +30,10 @@ function CardRow({
 	onItemClick,
 	onItemDoubleClick,
 }: {
-	item: ImageWithStats;
+	item: MediaItem;
 	selected: boolean;
-	onItemClick?: (item: ImageWithStats) => void;
-	onItemDoubleClick?: (item: ImageWithStats) => void;
+	onItemClick?: (item: MediaItem) => void;
+	onItemDoubleClick?: (item: MediaItem) => void;
 }) {
 	const handleClick = () => onItemClick?.(item);
 	const handleDoubleClick = () => onItemDoubleClick?.(item);
@@ -44,17 +45,17 @@ function CardRow({
 
 	return (
 		<div className="w-full p-3" style={{ padding: CONFIG.rowPadding }}>
-			<div className="flex gap-4 rounded-md border bg-card p-3" style={{ padding: CONFIG.cardPadding }}>
+			<div className="flex gap-4 rounded-md border-none bg-card p-3" style={{ padding: CONFIG.cardPadding }}>
 				<button
-					type="button"
 					aria-pressed={selected}
+					className="shrink-0 overflow-hidden rounded-md border focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 					onClick={handleClick}
 					onDoubleClick={handleDoubleClick}
 					onKeyDown={handleKeyDown}
-					className="shrink-0 overflow-hidden rounded-md border focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 					style={{ width: CONFIG.thumbSize, height: CONFIG.thumbSize }}
+					type="button"
 				>
-					<img src={`/api/images/${item.id}/thumbnail`} alt={item.name} className="h-full w-full object-cover" />
+					<MediaThumbnail className="h-full w-full" item={item} style={{ objectFit: 'cover' }} />
 				</button>
 				<div className="min-w-0 flex-1 self-stretch">
 					<div className="mb-2 flex items-start justify-between gap-2">
@@ -112,17 +113,17 @@ export function FileCards({ items, selectedIds = [], onItemClick, onItemDoubleCl
 			<div style={{ height: '100%' }}>
 				<VirtuosoComp
 					data={items}
-					itemContent={(index: number, item: ImageWithStats) => (
+					increaseViewportBy={CONFIG.increaseViewportBy}
+					itemContent={(index: number, item: MediaItem) => (
 						<div data-index={index}>
 							<CardRow
 								item={item}
-								selected={selectedIds.includes(item.id)}
 								onItemClick={onItemClick}
 								onItemDoubleClick={onItemDoubleClick}
+								selected={selectedIds.includes(item.id)}
 							/>
 						</div>
 					)}
-					increaseViewportBy={CONFIG.increaseViewportBy}
 					style={{ height: '100%' }}
 					useWindowScroll={false}
 				/>
@@ -135,11 +136,11 @@ export function FileCards({ items, selectedIds = [], onItemClick, onItemDoubleCl
 		<div className="h-full overflow-auto">
 			{items.map((item) => (
 				<CardRow
-					key={item.id}
 					item={item}
-					selected={selectedIds.includes(item.id)}
+					key={item.id}
 					onItemClick={onItemClick}
 					onItemDoubleClick={onItemDoubleClick}
+					selected={selectedIds.includes(item.id)}
 				/>
 			))}
 		</div>

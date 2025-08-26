@@ -1,4 +1,4 @@
-import { Filter, Loader2, PlusCircle, TagIcon, Trash } from 'lucide-react';
+import { Edit2, Filter, Loader2, PlusCircle, TagIcon, Trash } from 'lucide-react';
 import { useCallback, useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,6 +8,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDeleteTag, useTags } from '@/lib/api/tags';
 import { toastService } from '@/lib/ui/toast';
@@ -24,6 +25,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 	const [selectedCategory, setSelectedCategory] = useState<TagCategory | null>(null);
 	const [showOnlyFavorites, setShowOnlyFavorites] = useState(false);
 	const [showCreateForm, setShowCreateForm] = useState(false);
+	const [editingTag, setEditingTag] = useState<UITag | null>(null);
 
 	const formId = useId();
 
@@ -86,6 +88,11 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 	const handleTagCreated = useCallback((_newTag: UITag) => {
 		setShowCreateForm(false);
 		toastService.success('Etiqueta creada correctamente');
+	}, []);
+
+	const handleTagUpdated = useCallback((_updated: UITag) => {
+		setEditingTag(null);
+		toastService.success('Etiqueta actualizada correctamente');
 	}, []);
 
 	// Estado de carga
@@ -266,6 +273,15 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 													</Badge>
 												)}
 												<Button
+													className="h-8 w-8 p-0 text-muted-foreground"
+													onClick={() => setEditingTag(tag)}
+													size="sm"
+													variant="ghost"
+													title="Editar etiqueta"
+												>
+													<Edit2 className="h-4 w-4" />
+												</Button>
+												<Button
 													className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
 													onClick={() => handleDeleteTag(tag.id)}
 													size="sm"
@@ -300,6 +316,24 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 
 				{/* 📝 Formulario de creación */}
 				{showCreateForm && <CreateTagForm onCancel={() => setShowCreateForm(false)} onCreated={handleTagCreated} />}
+
+				<Dialog open={Boolean(editingTag)} onOpenChange={(open) => !open && setEditingTag(null)}>
+					<DialogContent className="max-w-xl p-0">
+						<DialogHeader className="px-6 pt-6">
+							<DialogTitle>Editar etiqueta</DialogTitle>
+						</DialogHeader>
+						{editingTag && (
+							<div className="px-6 pb-6">
+								<CreateTagForm
+									isEditing
+									onCancel={() => setEditingTag(null)}
+									onUpdated={handleTagUpdated}
+									tag={editingTag as any}
+								/>
+							</div>
+						)}
+					</DialogContent>
+				</Dialog>
 			</div>
 		</ScrollArea>
 	);

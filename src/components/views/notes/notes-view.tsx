@@ -1,5 +1,5 @@
 import { Edit, Trash2 } from 'lucide-react';
-import { memo, useCallback, useState } from 'react';
+import { memo, useCallback, useEffect, useState } from 'react';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -19,22 +19,32 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { ViewProps } from '@/components/views/types';
-// ViewContainer removido - obsoleto
-import { useCategoryData } from '@/lib/api/navigation';
-import { useCreateNote, useDeleteNote, useUpdateNote } from '@/lib/api/notes'; // Importar los hooks de mutación
+import { useNotes, useCreateNote, useDeleteNote, useUpdateNote } from '@/lib/api/notes';
+import { clientLogger } from '@/lib/logger/client-logger';
+import type { NoteWithStats } from '@/types/entities/note';
+
+const viewLogger = clientLogger.withContext('NotesView');
 
 export const NotesView = memo(function NotesView({ className }: ViewProps) {
-	const { data: notes, isLoading } = useCategoryData<any>('notes');
+	const { data: notesResponse, isLoading, error } = useNotes();
 	const { mutate: createNote } = useCreateNote();
 	const { mutate: updateNote } = useUpdateNote();
 	const { mutate: deleteNote } = useDeleteNote();
 
 	const [showForm, setShowForm] = useState(false);
-	const [editingNote, setEditingNote] = useState<any | null>(null);
+	const [editingNote, setEditingNote] = useState<NoteWithStats | null>(null);
 	const [noteTitle, setNoteTitle] = useState('');
 	const [noteContent, setNoteContent] = useState('');
 
-	const handleEditNote = useCallback((note: any) => {
+	const notes = notesResponse?.data || [];
+
+	useEffect(() => {
+		if (notes.length === 0) {
+			viewLogger.info('Cargando notas desde el servidor...');
+		}
+	}, [notes.length]);
+
+	const handleEditNote = useCallback((note: NoteWithStats) => {
 		setEditingNote(note);
 		setNoteTitle(note.title);
 		setNoteContent(note.content || '');
@@ -62,13 +72,30 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 		if (editingNote) {
 			updateNote({ id: editingNote.id, data: { title: noteTitle, content: noteContent } });
 		} else {
-			createNote({ title: noteTitle, content: noteContent });
+			createNote({
+				title: noteTitle,
+				content: noteContent,
+				category: null,
+				priority: 1,
+				status: null,
+				featuredImage: null,
+				isFavorite: false,
+				presetId: null,
+			});
 		}
 		setNoteTitle('');
 		setNoteContent('');
 		setEditingNote(null);
 		setShowForm(false);
 	}, [noteTitle, noteContent, editingNote, createNote, updateNote, toast]);
+
+	if (error) {
+		return (
+			<div className="flex h-full items-center justify-center">
+				<p className="text-destructive">Error: {error.message}</p>
+			</div>
+		);
+	}
 
 	return (
 		<div className={className}>
@@ -117,7 +144,7 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 				) : notes && notes.length > 0 ? (
 					<ScrollArea className="h-[calc(100vh-200px)]">
 						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-							{notes.map((note: any) => (
+							{notes.map((note: NoteWithStats) => (
 								<Card key={note.id}>
 									<CardHeader>
 										<CardTitle>{note.title}</CardTitle>

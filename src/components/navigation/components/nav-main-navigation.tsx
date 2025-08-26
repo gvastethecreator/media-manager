@@ -67,34 +67,42 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						id: 'files',
 						label: 'Todos los archivos',
 						icon: FileStack,
-						count: stats.totalImages || 0,
+						// Total de archivos = imágenes + videos (otros tipos opcionales se suman si están)
+						count:
+							(stats.totalImages || 0) +
+							(stats.totalVideos || 0) +
+							(stats.totalAudio || 0) +
+							(stats.totalDocuments || 0) +
+							(stats.totalJsonFiles || 0) +
+							(stats.totalFile3D || 0) +
+							(stats.totalWorkflows || 0),
 						color: '#6B7280',
 					},
 					{ id: 'all-images', label: 'Imágenes', icon: ImageIcon, count: stats.totalImages || 0, color: '#10B981' },
-					{ id: 'videos', label: 'Videos', icon: Video, count: getCategoryItemCount('videos'), color: '#EF4444' },
-					{ id: 'audios', label: 'Audio', icon: Music, count: getCategoryItemCount('audios'), color: '#8B5CF6' },
+					{ id: 'videos', label: 'Videos', icon: Video, count: stats.totalVideos || 0, color: '#EF4444' },
+					{ id: 'audios', label: 'Audio', icon: Music, count: stats.totalAudio || 0, color: '#8B5CF6' },
 					{
 						id: 'documents',
 						label: 'Documentos',
 						icon: FileText,
-						count: getCategoryItemCount('documents'),
+						count: stats.totalDocuments || 0,
 						color: '#F97316',
 					},
 					{
 						id: 'json-files',
 						label: 'JSON',
 						icon: Brackets,
-						count: getCategoryItemCount('jsonFiles'),
+						count: stats.totalJsonFiles || 0,
 						color: '#06B6D4',
 					},
 					{
 						id: 'workflows',
 						label: 'Workflows',
 						icon: Workflow,
-						count: getCategoryItemCount('workflows'),
+						count: stats.totalWorkflows || 0,
 						color: '#84CC16',
 					},
-					{ id: 'file-3ds', label: '3D', icon: Box, count: getCategoryItemCount('file3ds'), color: '#EC4899' },
+					{ id: 'file-3ds', label: '3D', icon: Box, count: stats.totalFile3D || 0, color: '#EC4899' },
 				],
 			},
 			{

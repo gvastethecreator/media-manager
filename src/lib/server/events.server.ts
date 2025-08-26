@@ -1,3 +1,4 @@
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { ProcessStatus } from '@/types/folders';
 
 // Mapa de rutas a revalidar por tipo de evento (conservado para compatibilidad)
@@ -115,6 +116,58 @@ export interface EventData<T = unknown> {
 // Store para eventos en memoria (compartido con el endpoint)
 const eventStore = new Map<string, EventData[]>();
 const eventSubscribers = new Set<(event: EventData) => void>();
+const logger = serverLogger.withContext('Events');
+
+// Campos potencialmente pesados a omitir
+const HEAVY_KEYS = new Set(['thumbnail', 'buffer', 'content', 'data', 'metadata']);
+
+function truncateString(value: string, max = 256): string {
+	if (value.length <= max) return value;
+	return `${value.slice(0, max)}…(+${value.length - max})`;
+}
+
+function sanitizeObject(input: unknown, depth = 0): unknown {
+	if (depth > 3) return '[depth-limit]';
+	if (input == null) return input;
+	if (typeof input === 'string') return truncateString(input, 256);
+	if (typeof input !== 'object') return input;
+	if (Array.isArray(input)) return input.slice(0, 20).map((v) => sanitizeObject(v, depth + 1));
+	const obj = input as Record<string, unknown>;
+	const out: Record<string, unknown> = {};
+	for (const [k, v] of Object.entries(obj)) {
+		if (HEAVY_KEYS.has(k)) {
+			if (typeof v === 'string') {
+				out[k] = `[omitted:${v.length} chars]`;
+			} else if (v && typeof (v as any).length === 'number') {
+				out[k] = `[omitted:${(v as any).length} bytes]`;
+			} else {
+				out[k] = '[omitted]';
+			}
+			continue;
+		}
+		out[k] = sanitizeObject(v, depth + 1);
+	}
+	return out;
+}
+
+function sanitizeEventForStore(event: EventData): EventData {
+	const data = sanitizeObject(event.data);
+	return { ...event, data };
+}
+
+function eventLogPreview(event: EventData): Record<string, unknown> {
+	const preview: Record<string, unknown> = { type: event.type };
+	if (event.id) preview.id = event.id;
+	if (event.imageId) preview.imageId = event.imageId;
+	if (event.objectId) preview.objectId = event.objectId;
+	if (event.data && typeof event.data === 'object') {
+		const keys = Object.keys(event.data as Record<string, unknown>);
+		preview.dataKeys = keys.slice(0, 10);
+	} else if (typeof event.data === 'string') {
+		preview.data = truncateString(event.data, 128);
+	}
+	return preview;
+}
 
 /**
  * Obtener el store de eventos (para uso compartido)
@@ -134,15 +187,16 @@ export function getEventSubscribers() {
  * Emite un evento directamente en el servidor (sin HTTP)
  */
 function emitDirect(event: EventData) {
-	console.log('🚀 Emitiendo evento (servidor directo):', event);
+	logger.info('🚀 Emitiendo evento (servidor directo):', eventLogPreview(event));
 
 	// Almacenar evento
 	const eventKey = event.type;
 	if (!eventStore.has(eventKey)) {
 		eventStore.set(eventKey, []);
 	}
+	const sanitized = sanitizeEventForStore(event);
 	eventStore.get(eventKey)?.push({
-		...event,
+		...sanitized,
 		timestamp: Date.now(),
 	});
 
@@ -157,7 +211,7 @@ function emitDirect(event: EventData) {
 		try {
 			subscriber(event);
 		} catch (error) {
-			console.error('Error notificando suscriptor:', error);
+			logger.error('Error notificando suscriptor:', error);
 		}
 	}
 }
@@ -175,7 +229,7 @@ export async function emit(event: EventData) {
 			emitDirect(event);
 		} else {
 			// En el cliente, usar HTTP
-			console.log('🚀 Emitiendo evento (cliente HTTP):', event);
+			logger.info('🚀 Emitiendo evento (cliente HTTP):', eventLogPreview(event));
 			const response = await fetch('/api/events', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
@@ -183,11 +237,11 @@ export async function emit(event: EventData) {
 			});
 
 			if (!response.ok) {
-				console.warn('❌ Error al emitir evento:', response.statusText);
+				logger.warn('❌ Error al emitir evento:', response.statusText);
 			}
 		}
 	} catch (error) {
-		console.warn('❌ Error al emitir evento:', error);
+		logger.warn('❌ Error al emitir evento:', error);
 		// En modo desarrollo, no fallar por errores de eventos
 	}
 }

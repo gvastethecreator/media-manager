@@ -14,25 +14,26 @@ import {
 	Info,
 	LayoutGrid,
 	List as ListIcon,
-	Table as TableIcon,
 	PanelLeftClose,
 	PanelLeftOpen,
 	PanelRightClose,
 	PanelRightOpen,
 	Plus,
 	Settings,
+	Table as TableIcon,
 	Trash2,
 	X,
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { memo, useCallback, useMemo } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 // Eliminado dropdown de cambio de vista (no debe existir)
 import { Separator } from '@/components/ui/separator';
 import { ViewType } from '@/components/views/types';
 import { useDebouncedViewMode } from '@/hooks/use-debounced-view-mode';
+import { useFolder, useFolderName } from '@/lib/api/folders';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import { deleteFile, getFileAsDataUrl } from '@/services/file/file.service';
@@ -65,7 +66,34 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	allItemIds = [],
 }) {
 	const location = useLocation();
+	const params = useParams<{ id: string }>();
 	const currentView = location.pathname.split('/')[1] || 'gallery';
+
+	// Obtener el folderId de los parámetros de la URL cuando estamos en una vista de carpeta
+	const folderId = params.id;
+
+	// Obtener información de la carpeta si estamos en folder-content view
+	const { data: folderData } = useFolder(folderId || '');
+	const { data: folderName } = useFolderName(folderId || '');
+
+	// Preparar currentItem para el breadcrumb
+	const currentItem = useMemo(() => {
+		if (currentView === 'folders' && folderId && folderData) {
+			return {
+				id: folderData.id,
+				name: folderName || folderData.name,
+				path: folderData.path,
+				description: folderData.description || undefined,
+				emoji: folderData.emoji || undefined,
+				color: folderData.color || undefined,
+				totalSize: folderData.totalSize,
+				lastIndexed: folderData.lastIndexed ? new Date(folderData.lastIndexed) : undefined,
+				createdAt: folderData.createdAt ? new Date(folderData.createdAt) : undefined,
+				_count: { images: folderData.totalFiles || 0 },
+			};
+		}
+		return;
+	}, [currentView, folderId, folderData, folderName]);
 
 	// 🔄 Usar los nuevos stores de Zustand
 	const viewMode = useViewOptionsStore((state: any) => state.viewMode);
@@ -74,6 +102,8 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	const setSortOptions = useViewOptionsStore((state: any) => state.setSortOptions);
 	const searchQuery = useViewOptionsStore((state: any) => state.searchQuery);
 	const setSearchQuery = useViewOptionsStore((state: any) => state.setSearchQuery);
+	const groupByEntityType = useViewOptionsStore((state: any) => state.groupByEntityType);
+	const toggleGroupByEntityType = useViewOptionsStore((state: any) => state.toggleGroupByEntityType);
 	// tamaño de item no utilizado en esta toolbar
 
 	// Crear versión debounced del setViewMode para mejorar performance
@@ -290,6 +320,18 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	const renderViewButtons = () => {
 		return (
 			<div className="flex items-center gap-0.5">
+				<Button
+					aria-label="Agrupar por tipo de archivo"
+					data-active={groupByEntityType}
+					data-testid="toggle-group-type-btn"
+					onClick={toggleGroupByEntityType}
+					size="icon"
+					title="Agrupar por tipo de archivo"
+					variant={groupByEntityType ? 'secondary' : 'ghost'}
+				>
+					{/* Usamos iconos de tabla para representar agrupado */}
+					<TableIcon className="h-4 w-4" />
+				</Button>
 				{/* Botones directos para tests E2E (evita timeouts por dropdown) */}
 				<Button
 					aria-label="Vista Grid"
@@ -501,7 +543,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					</Button>
 				)}
 
-				<ViewBreadcrumbs currentView={currentView as ViewType} />
+				<ViewBreadcrumbs currentView={currentView as ViewType} currentItem={currentItem} />
 				{renderSelectionActions()}
 			</div>
 

@@ -8,7 +8,10 @@ import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
 import { useImageStore } from '@/store/entities/image';
 import { useVideoStore } from '@/store/entities/video';
+import { useImageViewer } from '@/store/image-viewer.store';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { AnyEntityWithStats } from '@/types/migration';
+import { isImageWithStats, isVideoWithStats } from '@/types/migration';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('FilesView');
@@ -108,6 +111,9 @@ export function FilesView(_: ViewProps) {
 		}
 	}, [imagesRecord, videosRecord, audiosArray, documentsRecord, loadImages, fetchVideos, fetchAudios, fetchDocuments]);
 
+	const { openViewer: openImageViewer } = useImageViewer();
+	const { openViewer: openFileViewer } = useFileViewerStore();
+
 	const handleFileClick = useCallback(
 		(file: AnyEntityWithStats) => {
 			viewLogger.info('🖱️ Click en archivo:', file.name);
@@ -136,10 +142,47 @@ export function FilesView(_: ViewProps) {
 	const handleFileDoubleClick = useCallback(
 		(file: AnyEntityWithStats) => {
 			viewLogger.info('🖱️ Doble click en archivo:', file.name);
-			// Igual que el click simple por ahora
+			viewLogger.info('🔍 Debug - entityType:', file.entityType);
+			viewLogger.info('🔍 Debug - isImageWithStats:', isImageWithStats(file));
+			viewLogger.info('🔍 Debug - isVideoWithStats:', isVideoWithStats(file));
+
+			// Manejar imágenes con el image viewer
+			if (isImageWithStats(file)) {
+				viewLogger.info('📸 Abriendo imagen en image viewer');
+				const imageEntities = allFiles.filter((item) => isImageWithStats(item));
+				const currentIndex = imageEntities.findIndex((img) => img.id === file.id);
+				openImageViewer(imageEntities, currentIndex);
+				return;
+			}
+
+			// Manejar videos con el file viewer
+			if (isVideoWithStats(file)) {
+				viewLogger.info('🎬 Abriendo video en file viewer');
+				const videoItems = allFiles
+					.filter((item) => isVideoWithStats(item))
+					.map((video) => ({
+						id: video.id,
+						name: video.name,
+						type: 'video' as const,
+						path: video.path,
+						size: video.size || 0,
+						width: video.width,
+						height: video.height,
+						thumbnail: video.thumbnail || `/api/videos/${video.id}/thumbnail`,
+						thumbnailUrl: video.thumbnailUrl || `/api/videos/${video.id}/thumbnail`,
+						metadata: video.metadata,
+					}));
+
+				const currentIndex = videoItems.findIndex((item) => item.id === file.id);
+				openFileViewer(videoItems, Math.max(0, currentIndex));
+				return;
+			}
+
+			// Para otros tipos de archivos, usar comportamiento anterior (navegar)
+			viewLogger.info('📁 Tipo de archivo no soportado, navegando');
 			handleFileClick(file);
 		},
-		[handleFileClick]
+		[allFiles, openImageViewer, openFileViewer, handleFileClick]
 	);
 
 	if (isLoading && allFiles.length === 0) {
