@@ -6,9 +6,10 @@ interface ThumbnailGridProps {
 	images: Array<{ id: string; name: string; thumbnailUrl?: string }>;
 	totalImages: number;
 	className?: string;
+	showCount?: boolean;
 }
 
-export function ThumbnailGrid({ images, totalImages, className }: ThumbnailGridProps) {
+export function ThumbnailGrid({ images, totalImages, className, showCount = true }: ThumbnailGridProps) {
 	// Mostrar máximo 4 thumbnails (2x2)
 	const displayImages = images.slice(0, 4);
 	const remainingCount = Math.max(0, totalImages - displayImages.length);
@@ -19,9 +20,9 @@ export function ThumbnailGrid({ images, totalImages, className }: ThumbnailGridP
 	}
 
 	return (
-		<div className={cn('w-16', className)}>
-			{/* Grilla fija 2x2 */}
-			<div className="grid grid-cols-2 grid-rows-2 gap-0.5">
+		<div className={cn('h-full w-full', className)}>
+			{/* Grilla fija 2x2 que ocupa todo el contenedor */}
+			<div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-0.5">
 				{/* Mostrar imágenes disponibles */}
 				{Array.from({ length: 4 }).map((_, index) => {
 					const image = displayImages[index];
@@ -29,7 +30,7 @@ export function ThumbnailGrid({ images, totalImages, className }: ThumbnailGridP
 					return (
 						<motion.div
 							animate={{ opacity: 1, scale: 1 }}
-							className="aspect-square overflow-hidden rounded-sm border bg-muted"
+							className="overflow-hidden rounded-sm border bg-muted"
 							initial={{ opacity: 0, scale: 0.8 }}
 							key={image?.id || `slot-${index}`}
 							transition={{ duration: 0.2, delay: index * 0.02 }}
@@ -46,14 +47,14 @@ export function ThumbnailGrid({ images, totalImages, className }: ThumbnailGridP
 									<ImageIcon className="h-2 w-2 text-muted-foreground" />
 								</div>
 							)}
-							{!image && <div className="h-full w-full border-muted-foreground/20 border-dashed bg-muted/30" />}
+							{!image && <div className="h-full w-full border border-dashed border-muted-foreground/20 bg-muted/30" />}
 						</motion.div>
 					);
 				})}
 			</div>
 
 			{/* Contador de imágenes restantes */}
-			{remainingCount > 0 && (
+			{showCount && remainingCount > 0 && (
 				<motion.div animate={{ opacity: 1 }} className="mt-1 text-center" initial={{ opacity: 0 }}>
 					<span className="font-medium text-[9px] text-muted-foreground">+{remainingCount} más</span>
 				</motion.div>
