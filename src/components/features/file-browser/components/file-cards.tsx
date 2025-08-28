@@ -16,6 +16,10 @@ interface FileCardsProps {
 	selectedIds?: string[];
 	onItemClick?: (item: MediaItem) => void;
 	onItemDoubleClick?: (item: MediaItem) => void;
+	// Permite usar un contenedor de scroll externo
+	scrollParent?: HTMLElement | null;
+	// Key para forzar remount del componente Virtuoso
+	virtuosoKey?: string;
 }
 
 function getExtLabel(item: MediaItem): string {
@@ -47,6 +51,8 @@ function CardRow({
 		<div className="w-full p-3" style={{ padding: CONFIG.rowPadding }}>
 			<div className="flex gap-4 rounded-md border-none bg-card p-3" style={{ padding: CONFIG.cardPadding }}>
 				<button
+					data-entity-card
+					data-entity-type={item.entityType}
 					aria-pressed={selected}
 					className="shrink-0 overflow-hidden rounded-md border focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 					onClick={handleClick}
@@ -89,7 +95,14 @@ function CardRow({
 	);
 }
 
-export function FileCards({ items, selectedIds = [], onItemClick, onItemDoubleClick }: FileCardsProps) {
+export function FileCards({
+	items,
+	selectedIds = [],
+	onItemClick,
+	onItemDoubleClick,
+	scrollParent,
+	virtuosoKey,
+}: FileCardsProps) {
 	const [VirtuosoComp, setVirtuosoComp] = useState<any>(null);
 
 	useEffect(() => {
@@ -110,10 +123,13 @@ export function FileCards({ items, selectedIds = [], onItemClick, onItemDoubleCl
 
 	if (VirtuosoComp) {
 		return (
-			<div style={{ height: '100%' }}>
+			<div style={{ height: scrollParent ? 'auto' : '100%' }} data-testid="cards-view">
 				<VirtuosoComp
+					key={virtuosoKey} // Key para forzar remount
 					data={items}
+					computeItemKey={(index: number, item: MediaItem) => item.id}
 					increaseViewportBy={CONFIG.increaseViewportBy}
+					initialItemCount={Math.min(50, items.length)}
 					itemContent={(index: number, item: MediaItem) => (
 						<div data-index={index}>
 							<CardRow
@@ -124,8 +140,9 @@ export function FileCards({ items, selectedIds = [], onItemClick, onItemDoubleCl
 							/>
 						</div>
 					)}
-					style={{ height: '100%' }}
+					style={{ height: scrollParent ? 'auto' : '100%' }}
 					useWindowScroll={false}
+					customScrollParent={scrollParent ?? undefined}
 				/>
 			</div>
 		);
@@ -133,7 +150,7 @@ export function FileCards({ items, selectedIds = [], onItemClick, onItemDoubleCl
 
 	// Fallback no virtualizado
 	return (
-		<div className="h-full overflow-auto">
+		<div className="h-full overflow-auto" data-testid="cards-view">
 			{items.map((item) => (
 				<CardRow
 					item={item}

@@ -1,3 +1,0 @@
-{"timestamp":"2025-08-23T17:35:04.132Z","level":"WARN","source":"monitor","message":"Sistema de logging de archivos inicializado correctamente","context":{"timestamp":"2025-08-23T17:35:04.132Z","logDirectory":"logs/reindex","initializationTest":true}}
-{"timestamp":"2025-08-23T18:23:08.646Z","level":"WARN","source":"monitor","message":"Sistema de logging de archivos inicializado correctamente","context":{"timestamp":"2025-08-23T18:23:08.646Z","logDirectory":"logs/reindex","initializationTest":true}}
-{"timestamp":"2025-08-23T21:46:32.022Z","level":"WARN","source":"monitor","message":"Sistema de logging de archivos inicializado correctamente","context":{"timestamp":"2025-08-23T21:46:32.022Z","logDirectory":"logs/reindex","initializationTest":true}}

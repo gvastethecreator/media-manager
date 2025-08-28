@@ -56,6 +56,8 @@ function MasonryTile({
 		<button
 			aria-pressed={selected}
 			className="group relative w-full overflow-hidden rounded-md border-none bg-card text-left focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+			data-entity-card
+			data-entity-type={item.entityType}
 			data-selected={selected}
 			onClick={handleClick}
 			onDoubleClick={handleDoubleClick}
@@ -104,7 +106,7 @@ export function FileMasonry({ items, selectedIds = [], onItemClick, onItemDouble
 
 	if (VirtuosoMasonryComp) {
 		return (
-			<div className="h-full">
+			<div className="h-full" data-testid="masonry-view">
 				<VirtuosoMasonryComp
 					columnCount={columnCount}
 					computeItemKey={({ data }: { data: MediaItem }) => data.id}
@@ -132,17 +134,19 @@ export function FileMasonry({ items, selectedIds = [], onItemClick, onItemDouble
 
 	// Fallback: CSS columns (previa implementación)
 	return (
-		<div className="columns-1" style={{ gap: CONFIG.gap, padding: CONFIG.padding }}>
-			{items.map((item) => (
-				<div className="mb-4 break-inside-avoid" key={item.id} style={{ marginBottom: CONFIG.gap }}>
-					<MasonryTile
-						item={item}
-						onClick={onItemClick}
-						onDoubleClick={onItemDoubleClick}
-						selected={selectedIds.includes(item.id)}
-					/>
-				</div>
-			))}
+		<div className="h-full overflow-auto" data-testid="masonry-view">
+			<div className="columns-1" style={{ gap: CONFIG.gap, padding: CONFIG.padding }}>
+				{items.map((item) => (
+					<div className="mb-4 break-inside-avoid" key={item.id} style={{ marginBottom: CONFIG.gap }}>
+						<MasonryTile
+							item={item}
+							onClick={onItemClick}
+							onDoubleClick={onItemDoubleClick}
+							selected={selectedIds.includes(item.id)}
+						/>
+					</div>
+				))}
+			</div>
 		</div>
 	);
 }

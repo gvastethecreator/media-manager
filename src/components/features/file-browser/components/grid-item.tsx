@@ -54,6 +54,8 @@ export function GridItem({ item, onClick, onDoubleClick, size = 150, selected = 
 		<button
 			aria-pressed={selected}
 			className="group relative overflow-hidden rounded-md border bg-card focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
+			data-entity-card
+			data-entity-type={item.entityType}
 			data-selected={selected}
 			onClick={handleClick}
 			onDoubleClick={handleDoubleClick}
