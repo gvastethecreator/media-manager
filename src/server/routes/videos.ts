@@ -108,6 +108,11 @@ router.get('/', async (req, res) => {
 				})
 			: result?.data;
 
+		// Compatibilidad: si el alias es /videos (sin /api), devolver arreglo directo
+		if (req.baseUrl === '/videos') {
+			return res.json(Array.isArray(transformed) ? transformed : (result?.data ?? []));
+		}
+
 		res.json({
 			...result,
 			data: transformed,

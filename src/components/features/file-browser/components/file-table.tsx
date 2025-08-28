@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { MediaItem } from './media-thumbnail';
 import { MediaThumbnail } from './media-thumbnail';
-import { FileIcon, ImageIcon, VideoIcon } from 'lucide-react';
 
 // Utilidad para formatear el tamaño del archivo
 function formatFileSize(bytes: number | null | undefined): string {
@@ -23,20 +22,6 @@ function getFileExtension(filename: string): string {
 	return 'N/A';
 }
 
-// Utilidad para obtener el icono según el tipo
-function getEntityTypeIcon(
-	entityType: MediaItem['entityType']
-): React.ComponentType<{ size: number; className?: string }> {
-	switch (entityType) {
-		case 'image':
-			return ImageIcon;
-		case 'video':
-			return VideoIcon;
-		default:
-			return FileIcon;
-	}
-}
-
 // CONFIG local de la vista Table
 const CONFIG = {
 	headerClass: 'border-b text-muted-foreground text-left',
@@ -50,9 +35,20 @@ interface FileTableProps {
 	selectedIds?: string[];
 	onItemClick?: (item: MediaItem) => void;
 	onItemDoubleClick?: (item: MediaItem) => void;
+	// Contenedor de scroll externo opcional
+	scrollParent?: HTMLElement | null;
+	// Key para forzar remount del componente Virtuoso
+	virtuosoKey?: string;
 }
 
-export function FileTable({ items, selectedIds = [], onItemClick, onItemDoubleClick }: FileTableProps) {
+export function FileTable({
+	items,
+	selectedIds = [],
+	onItemClick,
+	onItemDoubleClick,
+	scrollParent,
+	virtuosoKey,
+}: FileTableProps) {
 	const [TableVirtuosoComp, setTableVirtuosoComp] = useState<any>(null);
 
 	useEffect(() => {
@@ -85,9 +81,11 @@ export function FileTable({ items, selectedIds = [], onItemClick, onItemDoubleCl
 
 	if (TableVirtuosoComp) {
 		return (
-			<div style={{ height: '100%' }}>
+			<div className="h-full" style={{ height: scrollParent ? 'auto' : '100%' }}>
 				<TableVirtuosoComp
+					key={virtuosoKey} // Key para forzar remount
 					data={items}
+					computeItemKey={(index: number, item: MediaItem) => item.id}
 					fixedHeaderContent={() => (
 						<tr className={CONFIG.headerClass}>
 							{columns.map((c) => (
@@ -98,32 +96,28 @@ export function FileTable({ items, selectedIds = [], onItemClick, onItemDoubleCl
 						</tr>
 					)}
 					increaseViewportBy={CONFIG.increaseViewportBy}
+					initialItemCount={Math.min(50, items.length)}
 					itemContent={(index: number, item: MediaItem) => {
-						const IconComponent = getEntityTypeIcon(item.entityType);
-
 						return (
 							<>
-								{/* Columna Nombre con thumbnail/icono */}
+								{/* Columna Nombre con thumbnail */}
 								<td className={CONFIG.cellPaddingClass}>
 									<div className="flex items-center gap-2">
-										{item.entityType === 'image' || item.entityType === 'video' ? (
-											<MediaThumbnail
-												className="flex-shrink-0 rounded border"
-												height={CONFIG.thumbSize}
-												item={item}
-												style={{
-													objectFit: 'cover',
-													minWidth: CONFIG.thumbSize,
-													minHeight: CONFIG.thumbSize,
-													maxWidth: CONFIG.thumbSize,
-													maxHeight: CONFIG.thumbSize,
-												}}
-												width={CONFIG.thumbSize}
-											/>
-										) : (
-											<IconComponent size={CONFIG.thumbSize} className="flex-shrink-0 text-muted-foreground" />
-										)}
+										<MediaThumbnail
+											className="flex-shrink-0 rounded border"
+											height={CONFIG.thumbSize}
+											item={item}
+											style={{
+												objectFit: 'cover',
+												minWidth: CONFIG.thumbSize,
+												minHeight: CONFIG.thumbSize,
+												maxWidth: CONFIG.thumbSize,
+												maxHeight: CONFIG.thumbSize,
+											}}
+											width={CONFIG.thumbSize}
+										/>
 										<button
+											data-entity-card
 											className={`flex-1 truncate text-left font-medium text-sm ${
 												selectedIds.includes(item.id) ? 'text-primary' : 'hover:text-primary'
 											}`}
@@ -166,15 +160,17 @@ export function FileTable({ items, selectedIds = [], onItemClick, onItemDoubleCl
 							</>
 						);
 					}}
-					style={{ height: '100%' }}
+					useWindowScroll={false}
+					customScrollParent={scrollParent ?? undefined}
+					style={{ height: scrollParent ? 'auto' : '100%' }}
 				/>
 			</div>
 		);
 	}
 
-	// Fallback no virtualizado
+	// Fallback no virtualizado con scroll
 	return (
-		<div className="w-full overflow-auto p-2">
+		<div className="h-full overflow-auto">
 			<table className="w-full text-left text-sm">
 				<thead>
 					<tr className={CONFIG.headerClass}>
@@ -187,8 +183,6 @@ export function FileTable({ items, selectedIds = [], onItemClick, onItemDoubleCl
 				</thead>
 				<tbody>
 					{items.map((item) => {
-						const IconComponent = getEntityTypeIcon(item.entityType);
-
 						return (
 							<tr
 								className={
@@ -203,26 +197,30 @@ export function FileTable({ items, selectedIds = [], onItemClick, onItemDoubleCl
 								{/* Columna Nombre */}
 								<td className={CONFIG.cellPaddingClass}>
 									<div className="flex items-center gap-2">
-										{item.entityType === 'image' || item.entityType === 'video' ? (
-											<MediaThumbnail
-												className="flex-shrink-0 rounded border"
-												height={CONFIG.thumbSize}
-												item={item}
-												style={{
-													objectFit: 'cover',
-													minWidth: CONFIG.thumbSize,
-													minHeight: CONFIG.thumbSize,
-													maxWidth: CONFIG.thumbSize,
-													maxHeight: CONFIG.thumbSize,
-												}}
-												width={CONFIG.thumbSize}
-											/>
-										) : (
-											<IconComponent size={CONFIG.thumbSize} className="flex-shrink-0 text-muted-foreground" />
-										)}
-										<span className="truncate font-medium text-sm" title={item.name}>
+										<MediaThumbnail
+											className="flex-shrink-0 rounded border"
+											height={CONFIG.thumbSize}
+											item={item}
+											style={{
+												objectFit: 'cover',
+												minWidth: CONFIG.thumbSize,
+												minHeight: CONFIG.thumbSize,
+												maxWidth: CONFIG.thumbSize,
+												maxHeight: CONFIG.thumbSize,
+											}}
+											width={CONFIG.thumbSize}
+										/>
+										<button
+											className={`flex-1 truncate text-left font-medium text-sm ${
+												selectedIds.includes(item.id) ? 'text-primary' : 'hover:text-primary'
+											}`}
+											onClick={() => onItemClick?.(item)}
+											onDoubleClick={() => onItemDoubleClick?.(item)}
+											type="button"
+											title={item.name}
+										>
 											{item.name}
-										</span>
+										</button>
 									</div>
 								</td>
 
