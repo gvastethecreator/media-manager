@@ -82,7 +82,7 @@ export function validateTag(data: unknown): TagBase {
 	} catch (error) {
 		logger.error('❌ Error validando Tag:', error);
 		throw new Error(
-			`Datos de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+			`Datos de Tag inválidos: ${error instanceof z.ZodError ? error.issues.map((e) => e.message).join(', ') : String(error)}`
 		);
 	}
 }
@@ -100,7 +100,7 @@ export function validateTagCreate(data: unknown): TagCreateInput {
 	} catch (error) {
 		logger.error('❌ Error validando datos de creación de Tag:', error);
 		throw new Error(
-			`Datos de creación de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+			`Datos de creación de Tag inválidos: ${error instanceof z.ZodError ? error.issues.map((e) => e.message).join(', ') : String(error)}`
 		);
 	}
 }
@@ -118,7 +118,7 @@ export function validateTagUpdate(data: unknown): TagUpdateInput {
 	} catch (error) {
 		logger.error('❌ Error validando datos de actualización de Tag:', error);
 		throw new Error(
-			`Datos de actualización de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+			`Datos de actualización de Tag inválidos: ${error instanceof z.ZodError ? error.issues.map((e) => e.message).join(', ') : String(error)}`
 		);
 	}
 }

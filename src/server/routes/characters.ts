@@ -22,7 +22,7 @@ const CharacterFiltersSchema = z.object({
 const getCharactersHandler: ExpressHandler = async (req, res) => {
 	const parse = CharacterFiltersSchema.safeParse(req.query);
 	if (!parse.success) {
-		res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
+		res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.issues });
 		return;
 	}
 

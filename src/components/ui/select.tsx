@@ -6,7 +6,10 @@ import { CheckIcon, ChevronDownIcon, ChevronUpIcon } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
-function Select({ ...props }: React.ComponentProps<typeof SelectPrimitive.Root>) {
+function Select({
+	indicatorPosition,
+	...props
+}: React.ComponentProps<typeof SelectPrimitive.Root> & { indicatorPosition?: 'left' | 'right' }) {
 	return <SelectPrimitive.Root data-slot="select" {...props} />;
 }
 
@@ -25,6 +28,7 @@ function SelectTrigger({
 	...props
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
 	size?: 'sm' | 'default';
+	indicatorPosition?: 'left' | 'right';
 }) {
 	return (
 		<SelectPrimitive.Trigger

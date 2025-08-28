@@ -34,7 +34,7 @@ export const queueJobMetadataSchema = z
 		target: z.string().optional(),
 		processId: z.string().optional(),
 		tags: z.array(z.string()).optional(),
-		customData: z.record(z.unknown()).optional(),
+		customData: z.record(z.string(), z.unknown()).optional(),
 	})
 	.optional();
 

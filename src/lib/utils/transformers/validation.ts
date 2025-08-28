@@ -13,8 +13,8 @@ export function validateBaseEntity(data: unknown) {
 		return BaseEntitySchema.parse(data);
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			logger.error('Error validando campos base:', { error: error.errors });
-			throw new Error(`Error de validación: ${error.errors.map((e) => e.message).join(', ')}`);
+			logger.error('Error validando campos base:', { error: error.issues });
+			throw new Error(`Error de validación: ${error.issues.map((e) => e.message).join(', ')}`);
 		}
 		throw error;
 	}
@@ -28,8 +28,8 @@ export function validateUIFields(data: unknown) {
 		return UIFieldsSchema.parse(data);
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			logger.error('Error validando campos UI:', { error: error.errors });
-			throw new Error(`Error de validación UI: ${error.errors.map((e) => e.message).join(', ')}`);
+			logger.error('Error validando campos UI:', { error: error.issues });
+			throw new Error(`Error de validación UI: ${error.issues.map((e) => e.message).join(', ')}`);
 		}
 		throw error;
 	}
@@ -43,8 +43,8 @@ export function validateMetadataFields(data: unknown) {
 		return MetadataFieldsSchema.parse(data);
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			logger.error('Error validando campos de metadata:', { error: error.errors });
-			throw new Error(`Error de validación metadata: ${error.errors.map((e) => e.message).join(', ')}`);
+			logger.error('Error validando campos de metadata:', { error: error.issues });
+			throw new Error(`Error de validación metadata: ${error.issues.map((e) => e.message).join(', ')}`);
 		}
 		throw error;
 	}
@@ -113,8 +113,8 @@ export function validateSearchFilters(filters: unknown) {
 		return searchFilterSchema.parse(filters);
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			logger.error('Error validando filtros de búsqueda:', { error: error.errors });
-			throw new Error(`Error de validación de filtros: ${error.errors.map((e) => e.message).join(', ')}`);
+			logger.error('Error validando filtros de búsqueda:', { error: error.issues });
+			throw new Error(`Error de validación de filtros: ${error.issues.map((e) => e.message).join(', ')}`);
 		}
 		throw error;
 	}
@@ -127,17 +127,17 @@ export function validateSearchOptions(options: unknown) {
 	const searchOptionsSchema = z.object({
 		skip: z.number().int().min(0).optional(),
 		take: z.number().int().min(1).optional(),
-		orderBy: z.record(z.enum(['asc', 'desc'])).optional(),
-		where: z.record(z.unknown()).optional(),
-		include: z.record(z.boolean()).optional(),
+		orderBy: z.record(z.string(), z.enum(['asc', 'desc'])).optional(),
+		where: z.record(z.string(), z.unknown()).optional(),
+		include: z.record(z.string(), z.boolean()).optional(),
 	});
 
 	try {
 		return searchOptionsSchema.parse(options);
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			logger.error('Error validando opciones de búsqueda:', { error: error.errors });
-			throw new Error(`Error de validación de opciones: ${error.errors.map((e) => e.message).join(', ')}`);
+			logger.error('Error validando opciones de búsqueda:', { error: error.issues });
+			throw new Error(`Error de validación de opciones: ${error.issues.map((e) => e.message).join(', ')}`);
 		}
 		throw error;
 	}

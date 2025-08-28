@@ -6,7 +6,7 @@ import { EmptyState } from '@/components/ui/empty-state';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
-import { useFile3DStore } from '@/store/entities/file3d';
+import { useFile3DStore } from '@/store/entities/file-3d';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { File3DWithStats } from '@/types/entities/file3d';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -22,7 +22,7 @@ export function File3DContentView({ className }: File3DContentViewProps) {
 	// Estados globales para panel de detalles y visor
 	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 	const { openViewer } = useFileViewerStore();
-	const { file3ds, loading, error, fetchFile3Ds } = useFile3DStore();
+	const { file3Ds, loading, error, fetchFile3Ds } = useFile3DStore();
 
 	// Estado local para controlar operaciones
 	const [isRefreshing, setIsRefreshing] = useState(false);
@@ -38,31 +38,28 @@ export function File3DContentView({ className }: File3DContentViewProps) {
 		[setSelectedItems, setDetailsPanelVisible]
 	);
 
-	const handleFile3DDoubleClick = useCallback(
-		(file3d: AnyEntityWithStats) => {
-			const file3dItem = file3d as File3DWithStats;
-			logger.info('🖱️ Doble click en archivo 3D:', file3dItem.name);
+	const handleFile3DDoubleClick = useCallback((file3d: AnyEntityWithStats) => {
+		const file3dItem = file3d as File3DWithStats;
+		logger.info('🖱️ Doble click en archivo 3D:', file3dItem.name);
 
-			// TODO: Implementar visor compatible con archivos 3D
-			// Obtener todos los archivos 3D para el visor
-			// const allFile3Ds = file3ds;
+		// TODO: Implementar visor compatible con archivos 3D
+		// Obtener todos los archivos 3D para el visor
+		// const allFile3Ds = file3Ds;
 
-			// Convertir a formato compatible con el visor
-			// const file3dItems = allFile3Ds.map((f: File3DWithStats) => ({
-			//	id: f.id,
-			//	name: f.name,
-			//	type: 'file3d' as const,
-			//	path: f.path,
-			//	size: f.size || 0,
-			// }));
+		// Convertir a formato compatible con el visor
+		// const file3dItems = allFile3Ds.map((f: File3DWithStats) => ({
+		//	id: f.id,
+		//	name: f.name,
+		//	type: 'file3d' as const,
+		//	path: f.path,
+		//	size: f.size || 0,
+		// }));
 
-			// const currentIndex = file3dItems.findIndex((item: any) => item.id === file3dItem.id);
+		// const currentIndex = file3dItems.findIndex((item: any) => item.id === file3dItem.id);
 
-			// Abrir el visor con todos los archivos 3D
-			// openViewer(file3dItems, Math.max(0, currentIndex));
-		},
-		[file3ds, openViewer]
-	);
+		// Abrir el visor con todos los archivos 3D
+		// openViewer(file3dItems, Math.max(0, currentIndex));
+	}, []);
 
 	const handleRefresh = useCallback(async () => {
 		if (isRefreshing) return;
@@ -97,7 +94,7 @@ export function File3DContentView({ className }: File3DContentViewProps) {
 	}
 
 	// 🎯 Mostrar empty state si no hay archivos 3D
-	if (!loading && file3ds.length === 0) {
+	if (!loading && file3Ds.length === 0) {
 		return (
 			<BaseContentView
 				className={className}
@@ -137,7 +134,7 @@ export function File3DContentView({ className }: File3DContentViewProps) {
 			<FileBrowser
 				className="h-full"
 				isLoading={loading}
-				items={file3ds as unknown as AnyEntityWithStats[]}
+				items={file3Ds as unknown as AnyEntityWithStats[]}
 				onItemClick={handleFile3DSelect}
 				onItemDoubleClick={handleFile3DDoubleClick}
 			/>

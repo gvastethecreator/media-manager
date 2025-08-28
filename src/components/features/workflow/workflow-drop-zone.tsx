@@ -111,7 +111,7 @@ export const WorkflowDropZone = memo(function WorkflowDropZone({
 
 			{/* Mensajes de resultado */}
 			{message && (
-				<Alert variant={message.type === 'error' ? 'destructive' : 'success'}>
+				<Alert variant={message.type === 'error' ? 'destructive' : 'default'}>
 					{message.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
 					<AlertDescription>{message.text}</AlertDescription>
 				</Alert>
