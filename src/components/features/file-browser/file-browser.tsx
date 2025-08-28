@@ -1,12 +1,12 @@
 import { RefreshCw } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { cn } from '@/lib/utils';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { AnyEntityWithStats } from '@/types/migration';
 import { FileCards } from './components/file-cards';
-import { FileGrid } from './components/file-grid';
+import FileGrid from './components/file-grid';
 import { FileList } from './components/file-list';
 import { FileListHeader } from './components/file-list-header';
 import { FileMasonry } from './components/file-masonry';
@@ -94,18 +94,38 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 		[groupByType, processedItems]
 	);
 
+	// Scroll parents como callback refs para asegurar elemento real
+	const [listScrollEl, setListScrollEl] = useState<HTMLDivElement | null>(null);
+	const [gridScrollEl, setGridScrollEl] = useState<HTMLDivElement | null>(null);
+	const [tableScrollEl, setTableScrollEl] = useState<HTMLDivElement | null>(null);
+	const [cardsScrollEl, setCardsScrollEl] = useState<HTMLDivElement | null>(null);
+
 	if (isLoading) {
+		// Mantener estructura y viewport estable para los tests incluso en loading
 		return (
-			<div className="flex h-full flex-col items-center justify-center gap-4" data-testid="file-browser">
-				<EmptyState description="Cargando archivos..." icon={RefreshCw} title="Cargando" />
+			<div className={cn('flex h-full min-h-0 flex-col overflow-hidden')} data-testid="file-browser">
+				<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container">
+					<div className="min-h-0 flex-1 overflow-auto" data-testid="file-browser-scroll-area-viewport">
+						<div className="flex h-full flex-col items-center justify-center gap-4">
+							<EmptyState description="Cargando archivos..." icon={RefreshCw} title="Cargando" />
+						</div>
+					</div>
+				</div>
 			</div>
 		);
 	}
 
 	if (error) {
+		// Mantener viewport aunque haya error
 		return (
-			<div className="flex h-full flex-col items-center justify-center gap-4" data-testid="file-browser">
-				<EmptyState description="Ocurrió un error al cargar los archivos." icon={RefreshCw} title="Error" />
+			<div className={cn('flex h-full min-h-0 flex-col overflow-hidden')} data-testid="file-browser">
+				<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container">
+					<div className="min-h-0 flex-1 overflow-auto" data-testid="file-browser-scroll-area-viewport">
+						<div className="flex h-full flex-col items-center justify-center gap-4">
+							<EmptyState description="Ocurrió un error al cargar los archivos." icon={RefreshCw} title="Error" />
+						</div>
+					</div>
+				</div>
 			</div>
 		);
 	}
@@ -134,7 +154,11 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 				{viewMode === 'list' ? (
 					<div className="flex h-full min-h-0 flex-col">
 						<FileListHeader />
-						<div className="min-h-0 flex-1 overflow-auto">
+						<div
+							className="min-h-0 flex-1 overflow-auto"
+							ref={setListScrollEl}
+							data-testid="file-browser-scroll-area-viewport"
+						>
 							{grouped ? (
 								<div className="flex flex-col gap-2">
 									{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
@@ -143,6 +167,9 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 												{g.displayName}
 											</div>
 											<FileList
+												key={`list-grouped-${g.key}`}
+												virtuosoKey={`list-grouped-${g.key}-${Boolean(listScrollEl)}`}
+												scrollParent={listScrollEl ?? undefined}
 												items={g.items as MediaItem[]}
 												onItemClick={handleItemClick}
 												onItemDoubleClick={handleItemDoubleClick}
@@ -153,6 +180,9 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 								</div>
 							) : (
 								<FileList
+									key="list-normal"
+									virtuosoKey={`list-normal-${Boolean(listScrollEl)}`}
+									scrollParent={listScrollEl ?? undefined}
 									items={processedItems as MediaItem[]}
 									onItemClick={handleItemClick}
 									onItemDoubleClick={handleItemDoubleClick}
@@ -173,95 +203,143 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 				) : viewMode === 'masonry' ? (
 					<div className="h-full min-h-0">
 						{grouped ? (
-							<div className="flex h-full min-h-0 flex-col gap-2 overflow-auto">
-								{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
-									<div key={g.key} className="flex flex-col">
-										<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
-											{g.displayName}
+							<div className="h-full overflow-auto" data-testid="file-browser-scroll-area-viewport">
+								<div className="flex flex-col gap-2">
+									{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
+										<div key={g.key} className="flex flex-col">
+											<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
+												{g.displayName}
+											</div>
+											<FileMasonry
+												key={`masonry-grouped-${g.key}`}
+												items={g.items as MediaItem[]}
+												onItemClick={handleItemClick}
+												onItemDoubleClick={handleItemDoubleClick}
+												selectedIds={selectedIds}
+											/>
 										</div>
-										<FileMasonry
-											items={g.items as MediaItem[]}
-											onItemClick={handleItemClick}
-											onItemDoubleClick={handleItemDoubleClick}
-											selectedIds={selectedIds}
-										/>
-									</div>
-								))}
+									))}
+								</div>
 							</div>
 						) : (
-							<FileMasonry
-								items={processedItems as MediaItem[]}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-								selectedIds={selectedIds}
-							/>
+							<div className="h-full overflow-auto" data-testid="file-browser-scroll-area-viewport">
+								<FileMasonry
+									key="masonry-normal"
+									items={processedItems as MediaItem[]}
+									onItemClick={handleItemClick}
+									onItemDoubleClick={handleItemDoubleClick}
+									selectedIds={selectedIds}
+								/>
+							</div>
 						)}
 					</div>
 				) : viewMode === 'table' ? (
 					<div className="h-full min-h-0">
 						{grouped ? (
-							<div className="flex flex-col gap-2">
-								{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
-									<div key={g.key} className="flex flex-col">
-										<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
-											{g.displayName}
+							<div
+								className="h-full overflow-auto"
+								ref={setTableScrollEl}
+								data-testid="file-browser-scroll-area-viewport"
+							>
+								<div className="flex flex-col gap-2">
+									{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
+										<div key={g.key} className="flex flex-col">
+											<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
+												{g.displayName}
+											</div>
+											<FileTable
+												key={`table-grouped-${g.key}`}
+												virtuosoKey={`table-grouped-${g.key}-${Boolean(tableScrollEl)}`}
+												scrollParent={tableScrollEl ?? undefined}
+												items={g.items as MediaItem[]}
+												onItemClick={handleItemClick}
+												onItemDoubleClick={handleItemDoubleClick}
+												selectedIds={selectedIds}
+											/>
 										</div>
-										<FileTable
-											items={g.items as MediaItem[]}
-											onItemClick={handleItemClick}
-											onItemDoubleClick={handleItemDoubleClick}
-											selectedIds={selectedIds}
-										/>
-									</div>
-								))}
+									))}
+								</div>
 							</div>
 						) : (
-							<FileTable
-								items={processedItems as MediaItem[]}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-								selectedIds={selectedIds}
-							/>
+							<div
+								className="h-full overflow-auto"
+								ref={setTableScrollEl}
+								data-testid="file-browser-scroll-area-viewport"
+							>
+								<FileTable
+									key="table-normal"
+									virtuosoKey={`table-normal-${Boolean(tableScrollEl)}`}
+									scrollParent={tableScrollEl ?? undefined}
+									items={processedItems as MediaItem[]}
+									onItemClick={handleItemClick}
+									onItemDoubleClick={handleItemDoubleClick}
+									selectedIds={selectedIds}
+								/>
+							</div>
 						)}
 					</div>
 				) : viewMode === 'cards' ? (
 					<div className="h-full min-h-0">
 						{grouped ? (
-							<div className="flex flex-col gap-2">
-								{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
-									<div key={g.key} className="flex flex-col">
-										<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
-											{g.displayName}
+							<div
+								className="h-full overflow-auto"
+								ref={setCardsScrollEl}
+								data-testid="file-browser-scroll-area-viewport"
+							>
+								<div className="flex flex-col gap-2">
+									{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
+										<div key={g.key} className="flex flex-col">
+											<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
+												{g.displayName}
+											</div>
+											<FileCards
+												key={`cards-grouped-${g.key}`}
+												virtuosoKey={`cards-grouped-${g.key}-${Boolean(cardsScrollEl)}`}
+												scrollParent={cardsScrollEl ?? undefined}
+												items={g.items as MediaItem[]}
+												onItemClick={handleItemClick}
+												onItemDoubleClick={handleItemDoubleClick}
+												selectedIds={selectedIds}
+											/>
 										</div>
-										<FileCards
-											items={g.items as MediaItem[]}
-											onItemClick={handleItemClick}
-											onItemDoubleClick={handleItemDoubleClick}
-											selectedIds={selectedIds}
-										/>
-									</div>
-								))}
+									))}
+								</div>
 							</div>
 						) : (
-							<FileCards
-								items={processedItems as MediaItem[]}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-								selectedIds={selectedIds}
-							/>
+							<div
+								className="h-full overflow-auto"
+								ref={setCardsScrollEl}
+								data-testid="file-browser-scroll-area-viewport"
+							>
+								<FileCards
+									key="cards-normal"
+									virtuosoKey={`cards-normal-${Boolean(cardsScrollEl)}`}
+									scrollParent={cardsScrollEl ?? undefined}
+									items={processedItems as MediaItem[]}
+									onItemClick={handleItemClick}
+									onItemDoubleClick={handleItemDoubleClick}
+									selectedIds={selectedIds}
+								/>
+							</div>
 						)}
 					</div>
 				) : (
 					<div className="h-full min-h-0">
 						{grouped ? (
-							<div className="flex h-full min-h-0 w-full flex-col gap-2 overflow-auto">
-								{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
-									<div key={g.key} className="flex min-h-96 w-full flex-col">
-										<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
-											{g.displayName}
-										</div>
-										<div className="min-h-0 w-full flex-1">
+							<div
+								className="h-full overflow-auto"
+								ref={setGridScrollEl}
+								data-testid="file-browser-scroll-area-viewport"
+							>
+								<div className="flex flex-col gap-2">
+									{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
+										<div key={g.key} className="flex flex-col">
+											<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
+												{g.displayName}
+											</div>
 											<FileGrid
+												key={`grid-grouped-${g.key}`}
+												virtuosoKey={`grid-grouped-${g.key}-${Boolean(gridScrollEl)}`}
 												itemSize={effectiveItemSize}
 												items={g.items as MediaItem[]}
 												onItemClick={handleItemClick}
@@ -269,21 +347,31 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 												selectedIds={selectedIds}
 												style={gridStyle}
 												viewMode={viewMode}
+												scrollParent={gridScrollEl ?? undefined}
 											/>
 										</div>
-									</div>
-								))}
+									))}
+								</div>
 							</div>
 						) : (
-							<FileGrid
-								itemSize={effectiveItemSize}
-								items={processedItems as MediaItem[]}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-								selectedIds={selectedIds}
-								style={gridStyle}
-								viewMode={viewMode}
-							/>
+							<div
+								className="h-full overflow-auto"
+								ref={setGridScrollEl}
+								data-testid="file-browser-scroll-area-viewport"
+							>
+								<FileGrid
+									key="grid-normal"
+									virtuosoKey={`grid-normal-${Boolean(gridScrollEl)}`}
+									itemSize={effectiveItemSize}
+									items={processedItems as MediaItem[]}
+									onItemClick={handleItemClick}
+									onItemDoubleClick={handleItemDoubleClick}
+									selectedIds={selectedIds}
+									style={gridStyle}
+									viewMode={viewMode}
+									scrollParent={gridScrollEl ?? undefined}
+								/>
+							</div>
 						)}
 					</div>
 				)}

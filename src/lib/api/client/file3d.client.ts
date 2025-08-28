@@ -3,7 +3,7 @@
  */
 import type { File3DCreateInput, File3DUpdateInput, File3DWithStats } from '@/types/entities/file3d';
 
-const API_BASE_PATH = '/api/file3d';
+const API_BASE_PATH = '/api/file3ds';
 
 export async function getFile3DsFromApi(): Promise<File3DWithStats[]> {
 	const response = await fetch(API_BASE_PATH);

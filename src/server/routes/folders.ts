@@ -122,6 +122,74 @@ router.get('/debug-subcarpetas-analysis', async (_req, res) => {
 	}
 });
 
+// DEBUG SCANNER - Test específico del scanner de archivos
+router.get('/debug-scanner/:folderId', async (req, res) => {
+	try {
+		const { folderId } = req.params;
+		logger.info('🔍 [DEBUG] Testing scanner for folder:', folderId);
+
+		// Obtener carpeta de la BD
+		const [folder] = await db.select().from(folders).where(eq(folders.id, folderId)).limit(1);
+
+		if (!folder) {
+			return res.status(404).json({ error: 'Folder not found' });
+		}
+
+		logger.info('🔍 [DEBUG] Found folder:', folder.path);
+
+		// Usar el scanner directamente
+		const { scanFolder } = await import('@/lib/filesystem/folder-scanner');
+		const scanResult = await scanFolder(folder.path, {
+			recursive: false,
+			includeHidden: false,
+		});
+
+		logger.info('🔍 [DEBUG] Scanner result:', {
+			totalFiles: scanResult.totalFiles,
+			filesFound: scanResult.files.length,
+		});
+
+		res.json({
+			folder: {
+				id: folder.id,
+				path: folder.path,
+				name: folder.name,
+			},
+			scanResult: {
+				totalFiles: scanResult.totalFiles,
+				totalSize: scanResult.totalSize,
+				files: scanResult.files.map((f) => ({
+					name: f.name,
+					extension: f.extension,
+					size: f.size,
+				})),
+				classification: {
+					images: scanResult.images.length,
+					videos: scanResult.videos.length,
+					audios: scanResult.audios.length,
+					documents: scanResult.documents.length,
+					jsonFiles: scanResult.jsonFiles.length,
+					file3Ds: scanResult.file3Ds.length,
+					others: scanResult.others.length,
+				},
+				imageFiles: scanResult.images.map((f) => f.name),
+				videoFiles: scanResult.videos.map((f) => f.name),
+				audioFiles: scanResult.audios.map((f) => f.name),
+				documentFiles: scanResult.documents.map((f) => f.name),
+				jsonFilesList: scanResult.jsonFiles.map((f) => f.name),
+				file3DsList: scanResult.file3Ds.map((f) => f.name),
+				otherFiles: scanResult.others.map((f) => f.name),
+			},
+		});
+	} catch (error) {
+		logger.error('Error testing scanner', { error });
+		res.status(500).json({
+			error: 'Error testing scanner',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
 // ===== REWRITE [BEGIN]: folders core endpoints =====
 // GET /api/folders - Listado de carpetas (alias top-level cuando parentId == rootId)
 router.get('/', async (req, res) => {
@@ -544,6 +612,32 @@ router.get('/_debug_', async (_req, res) => {
 
 // DEBUG AVANZADO - Endpoint de debug para subcarpetas completo
 // (El endpoint '/debug-subcarpetas-analysis' ya está definido arriba)
+
+// TEMPORARY: Endpoint para diagnosticar mapeo de tipos de archivo
+router.post('/test-entity-types', async (req, res) => {
+	try {
+		const { extensions } = req.body;
+		if (!Array.isArray(extensions)) {
+			return res.status(400).json({ error: 'extensions debe ser un array' });
+		}
+
+		const { FileEntityMapperService } = await import('@/services/file-entity-mapper/file-entity-mapper.service');
+		const mapper = FileEntityMapperService.getInstance();
+
+		const results = {};
+		for (const ext of extensions) {
+			results[ext] = mapper.getEntityTypeFromExtension(ext);
+		}
+
+		res.json({ results });
+	} catch (error) {
+		console.error('Error testing entity types:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
 
 // GET /api/folders/:id - Obtener una carpeta por ID
 router.get('/:id', async (req, res) => {

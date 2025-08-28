@@ -12,7 +12,7 @@ import { normalizePath } from './path-utils';
 // Logger específico para el scanner de carpetas
 const scannerLogger = serverLogger.withContext('FolderScanner');
 
-// Extensiones de archivos admitidas por defecto (imágenes, videos)
+// Extensiones de archivos admitidas por defecto (todas las soportadas por el sistema)
 const DEFAULT_SUPPORTED_EXTENSIONS = [
 	// Imágenes
 	'.jpg',
@@ -25,6 +25,7 @@ const DEFAULT_SUPPORTED_EXTENSIONS = [
 	'.tiff',
 	'.tif',
 	'.svg',
+	'.ico',
 	// Videos
 	'.mp4',
 	'.webm',
@@ -34,11 +35,87 @@ const DEFAULT_SUPPORTED_EXTENSIONS = [
 	'.flv',
 	'.wmv',
 	'.m4v',
+	'.mpg',
+	'.mpeg',
+	'.3gp',
+	// Audio
+	'.mp3',
+	'.wav',
+	'.flac',
+	'.aac',
+	'.ogg',
+	'.wma',
+	'.m4a',
+	'.opus',
+	'.aiff',
+	// Documentos
+	'.pdf',
+	'.doc',
+	'.docx',
+	'.txt',
+	'.md',
+	'.rtf',
+	'.odt',
+	'.pages',
+	'.epub',
+	'.mobi',
+	// JSON
+	'.json',
+	// Archivos 3D
+	'.obj',
+	'.fbx',
+	'.gltf',
+	'.glb',
+	'.dae',
+	'.3ds',
+	'.blend',
+	'.stl',
+	'.ply',
+	'.x3d',
 ];
 
 // 🚀 Extensiones para clasificación rápida
-const IMAGE_EXTENSIONS = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif', '.bmp', '.tiff', '.tif', '.svg']);
-const VIDEO_EXTENSIONS = new Set(['.mp4', '.webm', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.m4v']);
+const IMAGE_EXTENSIONS = new Set([
+	'.jpg',
+	'.jpeg',
+	'.png',
+	'.gif',
+	'.webp',
+	'.avif',
+	'.bmp',
+	'.tiff',
+	'.tif',
+	'.svg',
+	'.ico',
+]);
+const VIDEO_EXTENSIONS = new Set([
+	'.mp4',
+	'.webm',
+	'.avi',
+	'.mov',
+	'.mkv',
+	'.flv',
+	'.wmv',
+	'.m4v',
+	'.mpg',
+	'.mpeg',
+	'.3gp',
+]);
+const AUDIO_EXTENSIONS = new Set(['.mp3', '.wav', '.flac', '.aac', '.ogg', '.wma', '.m4a', '.opus', '.aiff']);
+const DOCUMENT_EXTENSIONS = new Set([
+	'.pdf',
+	'.doc',
+	'.docx',
+	'.txt',
+	'.md',
+	'.rtf',
+	'.odt',
+	'.pages',
+	'.epub',
+	'.mobi',
+]);
+const JSON_EXTENSIONS = new Set(['.json']);
+const FILE3D_EXTENSIONS = new Set(['.obj', '.fbx', '.gltf', '.glb', '.dae', '.3ds', '.blend', '.stl', '.ply', '.x3d']);
 
 /**
  * Interfaz para los resultados del escaneo de carpetas - OPTIMIZADA ⚡
@@ -52,9 +129,13 @@ export interface FolderScanResult {
 	totalSize: number; // Tamaño total en bytes
 	scannedAt: Date; // Fecha y hora del escaneo
 	error?: string; // Error si ocurrió alguno
-	// 🚀 PROPIEDADES OPTIMIZADAS
+	// 🚀 PROPIEDADES OPTIMIZADAS - MULTI-FORMATO
 	images: FileInfo[]; // Archivos de imagen (acceso directo)
 	videos: FileInfo[]; // Archivos de video (acceso directo)
+	audios: FileInfo[]; // Archivos de audio (acceso directo)
+	documents: FileInfo[]; // Archivos de documento (acceso directo)
+	jsonFiles: FileInfo[]; // Archivos JSON (acceso directo)
+	file3Ds: FileInfo[]; // Archivos 3D (acceso directo)
 	others: FileInfo[]; // Otros archivos (acceso directo)
 	stats?: ScanStats; // Estadísticas del escaneo
 }
@@ -128,9 +209,13 @@ export async function scanFolder(folderPath: string, options: ScanFolderOptions 
 		totalDirectories: 0,
 		totalSize: 0,
 		scannedAt: new Date(),
-		// 🚀 Inicializar nuevas propiedades optimizadas
+		// 🚀 Inicializar nuevas propiedades optimizadas - MULTI-FORMATO
 		images: [],
 		videos: [],
+		audios: [],
+		documents: [],
+		jsonFiles: [],
+		file3Ds: [],
 		others: [],
 	};
 
@@ -165,6 +250,10 @@ export async function scanFolder(folderPath: string, options: ScanFolderOptions 
 			totalSize: result.totalSize,
 			images: result.images.length,
 			videos: result.videos.length,
+			audios: result.audios.length,
+			documents: result.documents.length,
+			jsonFiles: result.jsonFiles.length,
+			file3Ds: result.file3Ds.length,
 			others: result.others.length,
 		});
 
@@ -395,11 +484,19 @@ async function processFileEntry(
 			result.totalFiles++;
 			result.totalSize += stats.size;
 
-			// 🚀 OPTIMIZACIÓN: Clasificar archivos durante el escaneo
+			// 🚀 OPTIMIZACIÓN: Clasificar archivos durante el escaneo - MULTI-FORMATO
 			if (IMAGE_EXTENSIONS.has(extension)) {
 				result.images.push(fileInfo);
 			} else if (VIDEO_EXTENSIONS.has(extension)) {
 				result.videos.push(fileInfo);
+			} else if (AUDIO_EXTENSIONS.has(extension)) {
+				result.audios.push(fileInfo);
+			} else if (DOCUMENT_EXTENSIONS.has(extension)) {
+				result.documents.push(fileInfo);
+			} else if (JSON_EXTENSIONS.has(extension)) {
+				result.jsonFiles.push(fileInfo);
+			} else if (FILE3D_EXTENSIONS.has(extension)) {
+				result.file3Ds.push(fileInfo);
 			} else {
 				result.others.push(fileInfo);
 			}

@@ -33,9 +33,11 @@ router.get('/', async (req, res) => {
 
 		res.json({
 			items,
+			results: items,
 			total: items.length,
 			query,
 			took,
+			engine: 'like',
 		});
 	} catch (error) {
 		console.error('Error in search:', error);
@@ -59,17 +61,17 @@ router.get('/images', async (req, res) => {
 
 		res.json({
 			items,
+			results: items,
 			total: items.length,
 			query,
 			took,
+			engine: 'like',
 		});
 	} catch (error) {
 		console.error('Error in image search:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
-
-export default router;
 
 // GET /search/fts - Búsqueda FTS5 sobre File
 router.get('/fts', async (req, res) => {
@@ -139,9 +141,11 @@ router.get('/fts', async (req, res) => {
 		}
 
 		const took = performance.now() - started;
-		res.json({ items: rows, total, query: q, took: Math.round(took * 100) / 100, engine });
+		res.json({ items: rows, results: rows, total, query: q, took: Math.round(took * 100) / 100, engine });
 	} catch (error) {
 		logger.error('Error en /search/fts', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
+
+export default router;

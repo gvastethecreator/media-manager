@@ -163,8 +163,7 @@ export function FolderContentView({
 
 	const handleImageSelect = useCallback(
 		(item: AnyEntityWithStats) => {
-			const selectedImage = item as ImageWithStats;
-			logger.info('🖱️ Imagen seleccionada:', selectedImage.name);
+			logger.info(`🖱️ Entidad seleccionada: ${item.name} (tipo: ${item.entityType})`);
 			setSelectedItems([item]);
 			setDetailsPanelVisible(true);
 		},
@@ -173,15 +172,23 @@ export function FolderContentView({
 
 	const handleImageDoubleClick = useCallback(
 		(item: AnyEntityWithStats) => {
-			const dblImage = item as ImageWithStats;
-			logger.info('🖱️ Doble click en imagen:', dblImage.name);
+			logger.info(`🖱️ Doble click en entidad: ${item.name} (tipo: ${item.entityType})`);
 			if (!currentFolderId) {
 				return;
 			}
-			const folderImages = getImagesByFolder(currentFolderId);
-			const imageItems = folderImages.map(imageWithStatsToImageItem);
-			const viewerIndex = imageItems.findIndex((it: ImageItem) => it.id === dblImage.id);
-			openViewer(imageItems, Math.max(0, viewerIndex));
+
+			// Solo abrir viewer para imágenes (por ahora el viewer solo soporta imágenes)
+			if (item.entityType === 'image') {
+				const dblImage = item as ImageWithStats;
+				const folderImages = getImagesByFolder(currentFolderId);
+				const imageItems = folderImages.map(imageWithStatsToImageItem);
+				const viewerIndex = imageItems.findIndex((it: ImageItem) => it.id === dblImage.id);
+				openViewer(imageItems, Math.max(0, viewerIndex));
+			} else {
+				// Para otros tipos, por ahora solo loguear
+				// TODO: Implementar viewers específicos para video, audio, documentos, etc.
+				logger.info(`📋 Entidad ${item.entityType} seleccionada: ${item.name}`);
+			}
 		},
 		[currentFolderId, getImagesByFolder, openViewer]
 	);
@@ -302,7 +309,7 @@ export function FolderContentView({
 		// Montar FileBrowser ya en loading para exponer toolbar/testids; mostrará spinner interno
 		content = (
 			<FileBrowser
-				entityType="image"
+				entityType="any"
 				filterId={currentFolderId}
 				filterType="folder"
 				onItemClick={handleImageSelect}
@@ -315,26 +322,17 @@ export function FolderContentView({
 		content = buildErrorState();
 		showFileBrowser = false;
 	} else {
-		const isFolderEmpty = shouldRenderEmptyFolder({
-			isFolderLoading: isFolderLoading || folderCurrentlyLoading,
-			folderError,
-			folderLoaded,
-			getFolderImages: () => (currentFolderId ? getImagesByFolder(currentFolderId) : []),
-		});
-		if (isFolderEmpty) {
-			content = buildEmptyFolderState(handleScanFolder, handleForceRefresh);
-			showFileBrowser = false; // Estado vacío dedicado
-		} else {
-			content = (
-				<FileBrowser
-					entityType="image"
-					filterId={currentFolderId}
-					filterType="folder"
-					onItemClick={handleImageSelect}
-					onItemDoubleClick={handleImageDoubleClick}
-				/>
-			);
-		}
+		// Siempre mostrar FileBrowser, que maneja sus propios estados de loading/empty
+		content = (
+			<FileBrowser
+				entityType="any"
+				filterId={currentFolderId}
+				filterType="folder"
+				onItemClick={handleImageSelect}
+				onItemDoubleClick={handleImageDoubleClick}
+			/>
+		);
+		showFileBrowser = true;
 	}
 
 	const showPerfPanel = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debugPerf');

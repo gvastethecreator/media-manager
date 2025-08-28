@@ -1,14 +1,21 @@
 import React from 'react';
-import { generateAdvancedImageThumbnail, generateAdvancedVideoThumbnail } from '@/config/thumbnail-generators';
+import {
+	generateAdvancedImageThumbnail,
+	generateAdvancedVideoThumbnail,
+	generateJsonPreview,
+	generate3DModelThumbnail,
+	generateAudioWaveform,
+} from '@/config/thumbnail-generators';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSettings } from '@/lib/contexts';
 import { cn } from '@/lib/utils';
+import { useVideoViewport } from '@/hooks/use-in-viewport';
 
 // Tipo unificado utilizado por las vistas del FileBrowser
 export type MediaItem = {
 	id: string;
 	name: string;
-	entityType: 'image' | 'video' | 'audio' | 'document' | 'json' | 'file3d';
+	entityType: 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d';
 	mimeType?: string | null;
 	thumbnailUrl?: string | null;
 	// Metacampos opcionales utilizados por distintas vistas/columnas
@@ -27,8 +34,19 @@ interface MediaThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> 
 	videoCycleDurationMs?: number; // por defecto 800ms
 }
 
-// Cache simple en memoria de frames de video por id
+// Cache simple en memoria de frames de video por id con límite de tamaño
 const videoFramesCache = new Map<string, string[]>();
+const MAX_CACHE_SIZE = 50; // Límite para evitar exceso de memoria
+
+// Función para limpiar el cache cuando excede el límite
+function cleanupCache() {
+	if (videoFramesCache.size > MAX_CACHE_SIZE) {
+		const keysToDelete = Array.from(videoFramesCache.keys()).slice(0, 10);
+		for (const key of keysToDelete) {
+			videoFramesCache.delete(key);
+		}
+	}
+}
 
 export function MediaThumbnail({
 	item,
@@ -47,6 +65,103 @@ export function MediaThumbnail({
 	const [src, setSrc] = React.useState<string>('');
 	const [error, setError] = React.useState<string | null>(null);
 	const [hovered, setHovered] = React.useState(false);
+
+	// Estado para animación inicial en viewport
+	const [hasPlayedInitialAnimation, setHasPlayedInitialAnimation] = React.useState(false);
+
+	// Función para animar frames una sola vez (inicial)
+	const animateFramesOnce = React.useCallback(
+		(frames: string[]) => {
+			if (!frames.length) return;
+
+			let currentFrame = 0;
+			const totalFrames = frames.length;
+			const frameInterval = Math.max(60, Math.floor(videoCycleDurationMs / totalFrames));
+
+			const animateOnce = () => {
+				if (currentFrame < totalFrames) {
+					setSrc(frames[currentFrame]);
+					currentFrame++;
+					setTimeout(animateOnce, frameInterval);
+				}
+				// Al terminar, volver al frame inicial (poster)
+				else {
+					setSrc(frames[0]);
+				}
+			};
+
+			animateOnce();
+		},
+		[videoCycleDurationMs]
+	);
+
+	// Función para cargar y reproducir frames iniciales una sola vez
+	const playInitialAnimation = React.useCallback(async () => {
+		if (hasPlayedInitialAnimation || !isVideo || !allowVideoAnimation) return;
+
+		const cacheKey = item.id;
+		let frames = videoFramesCache.get(cacheKey);
+
+		// Si no están en cache, generarlos
+		if (!frames?.length) {
+			const controller = new AbortController();
+			abortRef.current = controller;
+
+			try {
+				const count = Math.max(1, videoFramesCount);
+				const offsets = Array.from({ length: count }, (_, i) => i / count);
+				const urls: string[] = [];
+
+				for (const t of offsets) {
+					if (controller.signal.aborted) return;
+					const u = await generateAdvancedVideoThumbnail(item as any, { timeOffset: t });
+					urls.push(u);
+				}
+
+				if (controller.signal.aborted) return;
+
+				// Cleanup cache antes de agregar nuevos frames
+				cleanupCache();
+				videoFramesCache.set(cacheKey, urls);
+				frames = urls;
+			} catch {
+				return; // Mantener poster estático si falla
+			}
+		}
+
+		// Reproducir una sola vez
+		framesRef.current = frames;
+		setHasPlayedInitialAnimation(true);
+		animateFramesOnce(frames);
+	}, [hasPlayedInitialAnimation, isVideo, allowVideoAnimation, item, videoFramesCount, animateFramesOnce]);
+
+	// Función para animación continua en hover (refactorizada del código existente)
+	const startContinuousAnimation = React.useCallback(() => {
+		const frames = framesRef.current;
+		if (!frames || frames.length === 0) return;
+
+		const perFrame = Math.max(60, Math.floor(videoCycleDurationMs / frames.length));
+		let last = performance.now();
+
+		const tick = (now: number) => {
+			if (!framesRef.current) return;
+			if (!hovered) return;
+
+			const delta = now - last;
+			if (delta >= perFrame) {
+				last = now;
+				frameIndexRef.current = (frameIndexRef.current + 1) % frames.length;
+				setSrc(frames[frameIndexRef.current]);
+			}
+			rafRef.current = requestAnimationFrame(tick);
+		};
+
+		if (rafRef.current) cancelAnimationFrame(rafRef.current);
+		rafRef.current = requestAnimationFrame(tick);
+	}, [hovered, videoCycleDurationMs]);
+
+	// Hook para detectar entrada al viewport (solo para videos)
+	const viewportHook = useVideoViewport(isVideo && allowVideoAnimation ? playInitialAnimation : undefined);
 
 	// Refs para animación de video
 	const rafRef = React.useRef<number | null>(null);
@@ -73,6 +188,15 @@ export function MediaThumbnail({
 				} else if (item.entityType === 'video') {
 					const url = await generateAdvancedVideoThumbnail(item as any, { timeOffset: 0 });
 					if (alive) setSrc(url || item.thumbnailUrl || '');
+				} else if (item.entityType === 'jsonFile') {
+					const url = await generateJsonPreview(item as any);
+					if (alive) setSrc(url || getFallbackIcon(item.entityType));
+				} else if (item.entityType === 'file3d') {
+					const url = await generate3DModelThumbnail(item as any);
+					if (alive) setSrc(url || getFallbackIcon(item.entityType));
+				} else if (item.entityType === 'audio') {
+					const url = await generateAudioWaveform(item as any);
+					if (alive) setSrc(url || getFallbackIcon(item.entityType));
 				} else {
 					// Tipos no soportados por generadores: usar icono genérico según tipo
 					const fallback = getFallbackIcon(item.entityType);
@@ -87,88 +211,76 @@ export function MediaThumbnail({
 		};
 	}, [item]);
 
-	// Animación de preview para video al hover
+	// Animación de preview para video al hover (refactorizada)
 	React.useEffect(() => {
-		if (!isVideo) return;
-		if (!allowVideoAnimation) return;
-
-		if (!hovered) {
-			if (rafRef.current) cancelAnimationFrame(rafRef.current);
-			rafRef.current = null;
+		const shouldAnimate = isVideo && allowVideoAnimation && hovered;
+		if (!shouldAnimate) {
+			if (rafRef.current) {
+				cancelAnimationFrame(rafRef.current);
+				rafRef.current = null;
+			}
 			frameIndexRef.current = 0;
 			return;
 		}
 
 		const cacheKey = item.id;
 		const cached = videoFramesCache.get(cacheKey);
+
 		if (cached?.length) {
 			framesRef.current = cached;
-			startAnimation();
+			startContinuousAnimation();
 			return;
 		}
 
-		const controller = new AbortController();
-		abortRef.current = controller;
-		let alive = true;
+		// Si no están en cache y no se ha reproducido la animación inicial, generarlos
+		if (!hasPlayedInitialAnimation) {
+			const controller = new AbortController();
+			abortRef.current = controller;
+			let alive = true;
 
-		const count = Math.max(1, videoFramesCount);
-		const offsets = Array.from({ length: count }, (_, i) => i / count);
+			const count = Math.max(1, videoFramesCount);
+			const offsets = Array.from({ length: count }, (_, i) => i / count);
 
-		(async () => {
-			try {
-				const urls: string[] = [];
-				for (const t of offsets) {
+			(async () => {
+				try {
+					const urls: string[] = [];
+					for (const t of offsets) {
+						if (!alive || controller.signal.aborted) return;
+						const u = await generateAdvancedVideoThumbnail(item as any, { timeOffset: t });
+						urls.push(u);
+					}
 					if (!alive || controller.signal.aborted) return;
-					const u = await generateAdvancedVideoThumbnail(item as any, { timeOffset: t });
-					urls.push(u);
-				}
-				if (!alive || controller.signal.aborted) return;
-				videoFramesCache.set(cacheKey, urls);
-				framesRef.current = urls;
-				startAnimation();
-			} catch {
-				// Mantener poster estático si falla
-			}
-		})();
 
-		function startAnimation() {
-			const frames = framesRef.current;
-			if (!frames || frames.length === 0) return;
-			const perFrame = Math.max(60, Math.floor(videoCycleDurationMs / frames.length));
-			let last = performance.now();
-			const tick = (now: number) => {
-				if (!framesRef.current) return;
-				if (!hovered) return;
-				const delta = now - last;
-				if (delta >= perFrame) {
-					last = now;
-					frameIndexRef.current = (frameIndexRef.current + 1) % frames.length;
-					setSrc(frames[frameIndexRef.current]);
+					// Cleanup cache antes de agregar
+					cleanupCache();
+					videoFramesCache.set(cacheKey, urls);
+					framesRef.current = urls;
+					startContinuousAnimation();
+				} catch {
+					// Mantener poster estático si falla
 				}
-				rafRef.current = requestAnimationFrame(tick);
+			})();
+			return () => {
+				alive = false;
+				if (rafRef.current) cancelAnimationFrame(rafRef.current);
+				rafRef.current = null;
+				if (abortRef.current) abortRef.current.abort();
+				abortRef.current = null;
 			};
-			if (rafRef.current) cancelAnimationFrame(rafRef.current);
-			rafRef.current = requestAnimationFrame(tick);
 		}
-
-		return () => {
-			alive = false;
-			if (rafRef.current) cancelAnimationFrame(rafRef.current);
-			rafRef.current = null;
-			if (abortRef.current) abortRef.current.abort();
-			abortRef.current = null;
-		};
-	}, [hovered, isVideo, allowVideoAnimation, item, videoFramesCount, videoCycleDurationMs]);
+	}, [
+		hovered,
+		isVideo,
+		allowVideoAnimation,
+		item,
+		videoFramesCount,
+		hasPlayedInitialAnimation,
+		startContinuousAnimation,
+	]);
 
 	const baseClass = cn('block h-full w-full', className);
 	const baseStyle: React.CSSProperties = React.useMemo(() => ({ objectFit: 'cover', ...style }), [style]);
 	const validSrc = src || item.thumbnailUrl;
-
-	// Extraer extensión del archivo para badge
-	const getFileExtension = (filename: string): string => {
-		const ext = filename.split('.').pop()?.toUpperCase();
-		return ext || '';
-	};
 
 	if (error) {
 		return (
@@ -202,11 +314,13 @@ export function MediaThumbnail({
 		);
 	}
 
-	// Videos: renderizar con badge de extensión
+	// Videos: renderizar con badge VID
 	if (isVideo) {
-		const extension = getFileExtension(item.name);
+		const badgeInfo = getBadgeInfo(item.entityType);
+		const badgeClasses = getBadgeClasses(imgProps.width as number, imgProps.height as number);
+
 		return (
-			<div className={cn(baseClass, 'relative')} style={style}>
+			<div ref={viewportHook.ref} className={cn(baseClass, 'relative')} style={style}>
 				<img
 					alt={item.name}
 					className="h-full w-full"
@@ -220,31 +334,42 @@ export function MediaThumbnail({
 					style={baseStyle}
 					{...imgProps}
 				/>
-				{/* Badge de extensión para videos */}
-				{extension && (
-					<div className="absolute right-1 bottom-1 rounded bg-black/70 px-1.5 py-0.5 font-medium text-white text-xs backdrop-blur-sm">
-						{extension}
+				{/* Badge VID para videos */}
+				{badgeInfo && (
+					<div className={cn(badgeClasses.container, badgeInfo.bg)} title={badgeInfo.title}>
+						<span className={badgeClasses.text}>{badgeInfo.text}</span>
 					</div>
 				)}
 			</div>
 		);
 	}
 
-	// Otros tipos de archivo (imágenes, etc.)
+	// Otros tipos de archivo (imágenes, audio, JSON, 3D, etc.)
+	const badgeInfo = getBadgeInfo(item.entityType);
+	const badgeClasses = getBadgeClasses(imgProps.width as number, imgProps.height as number);
+
 	return (
-		<img
-			alt={item.name}
-			className={baseClass}
-			draggable={false}
-			loading="lazy"
-			onBlur={() => setHovered(false)}
-			onFocus={() => setHovered(true)}
-			onMouseEnter={() => setHovered(true)}
-			onMouseLeave={() => setHovered(false)}
-			src={validSrc}
-			style={baseStyle}
-			{...imgProps}
-		/>
+		<div className={cn(baseClass, 'relative')} style={style}>
+			<img
+				alt={item.name}
+				className="h-full w-full"
+				draggable={false}
+				loading="lazy"
+				onBlur={() => setHovered(false)}
+				onFocus={() => setHovered(true)}
+				onMouseEnter={() => setHovered(true)}
+				onMouseLeave={() => setHovered(false)}
+				src={validSrc}
+				style={baseStyle}
+				{...imgProps}
+			/>
+			{/* Badge para tipos especiales con tamaño adaptativo */}
+			{badgeInfo && (
+				<div className={cn(badgeClasses.container, badgeInfo.bg)} title={badgeInfo.title}>
+					<span className={badgeClasses.text}>{badgeInfo.text}</span>
+				</div>
+			)}
+		</div>
 	);
 }
 
@@ -254,11 +379,54 @@ function getFallbackIcon(entityType: MediaItem['entityType']): string {
 			return '/file.svg';
 		case 'document':
 			return '/file.svg';
-		case 'json':
+		case 'jsonFile':
 			return '/file.svg';
 		case 'file3d':
 			return '/file.svg';
 		default:
 			return '/file.svg';
+	}
+}
+
+function getBadgeInfo(entityType: MediaItem['entityType']) {
+	switch (entityType) {
+		case 'video':
+			return { text: 'VID', bg: 'bg-blue-600/90', title: 'Video File' };
+		case 'audio':
+			return { text: 'AUD', bg: 'bg-orange-600/90', title: 'Audio File' };
+		case 'document':
+			return { text: 'PDF', bg: 'bg-red-600/90', title: 'Document File' };
+		case 'jsonFile':
+			return { text: 'JSON', bg: 'bg-green-600/90', title: 'JSON File' };
+		case 'file3d':
+			return { text: '3D', bg: 'bg-purple-600/90', title: '3D Model' };
+		default:
+			return null;
+	}
+}
+
+// Get badge classes based on thumbnail size
+function getBadgeClasses(width?: number, height?: number) {
+	const minDimension = Math.min(width || 150, height || 150);
+
+	if (minDimension <= 30) {
+		// Very small thumbnails (table view ~20px)
+		return {
+			container:
+				'absolute right-0 bottom-0 rounded px-0.5 py-0 font-bold text-white text-[7px] backdrop-blur-sm leading-none min-w-0',
+			text: 'truncate',
+		};
+	} else if (minDimension <= 100) {
+		// Medium thumbnails (list view ~90px)
+		return {
+			container: 'absolute right-1 bottom-1 rounded px-1 py-0.5 font-medium text-white text-[9px] backdrop-blur-sm',
+			text: '',
+		};
+	} else {
+		// Large thumbnails (grid, cards, etc.)
+		return {
+			container: 'absolute right-1 bottom-1 rounded px-1.5 py-0.5 font-medium text-white text-xs backdrop-blur-sm',
+			text: '',
+		};
 	}
 }

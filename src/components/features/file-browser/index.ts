@@ -1,7 +1,7 @@
 // Barrel del nuevo FileBrowser (renombrado desde file-browser-2)
 
 // Subcomponentes y vistas
-export { FileGrid } from './components/file-grid';
+export { default as FileGrid } from './components/file-grid';
 export { FileList } from './components/file-list';
 export { FileListHeader } from './components/file-list-header';
 export { FileMasonry } from './components/file-masonry';

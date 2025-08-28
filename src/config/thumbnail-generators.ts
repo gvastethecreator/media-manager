@@ -49,6 +49,18 @@ export const THUMBNAIL_CONFIGS: Record<string, ThumbnailConfig> = {
 		outputFormat: 'jpeg',
 		supportsAnimation: false,
 	},
+	json: {
+		defaultQuality: ThumbnailQuality.MEDIUM,
+		preferredSize: { width: 300, height: 400 }, // JSON structure
+		outputFormat: 'png',
+		supportsAnimation: false,
+	},
+	'3d': {
+		defaultQuality: ThumbnailQuality.MEDIUM,
+		preferredSize: { width: 300, height: 300 }, // Square for 3D model
+		outputFormat: 'png',
+		supportsAnimation: false,
+	},
 	folder: {
 		defaultQuality: ThumbnailQuality.LOW,
 		preferredSize: { width: 200, height: 200 },
@@ -171,6 +183,87 @@ export function generateDocumentPreview(
 }
 
 /**
+ * 📝 Generador de preview para archivos JSON
+ */
+export function generateJsonPreview(
+	item: DisplayableEntity,
+	options: {
+		maxLines?: number;
+		width?: number;
+		height?: number;
+		theme?: 'light' | 'dark';
+		showLineNumbers?: boolean;
+	} = {}
+): Promise<string> {
+	if (item.entityType !== 'jsonFile') {
+		return Promise.resolve('');
+	}
+
+	const { maxLines = 20, width = 300, height = 400, theme = 'light', showLineNumbers = true } = options;
+
+	// Si ya tiene preview generado
+	if ((item as any).previewUrl) {
+		return Promise.resolve((item as any).previewUrl);
+	}
+
+	// Generar preview via API
+	const params = new URLSearchParams({
+		maxLines: maxLines.toString(),
+		width: width.toString(),
+		height: height.toString(),
+		theme,
+		showLineNumbers: showLineNumbers.toString(),
+	});
+
+	return Promise.resolve(`/api/json/${item.id}/preview?${params.toString()}`);
+}
+
+/**
+ * 🎲 Generador de thumbnail para modelos 3D
+ */
+export function generate3DModelThumbnail(
+	item: DisplayableEntity,
+	options: {
+		angle?: number;
+		lightIntensity?: number;
+		backgroundColor?: string;
+		width?: number;
+		height?: number;
+		wireframe?: boolean;
+	} = {}
+): Promise<string> {
+	if (item.entityType !== 'file3d') {
+		return Promise.resolve('');
+	}
+
+	const {
+		angle = 45,
+		lightIntensity = 1.5,
+		backgroundColor = '#ffffff',
+		width = 300,
+		height = 300,
+		wireframe = false,
+	} = options;
+
+	// Si ya tiene thumbnail generado
+	if ((item as any).thumbnailUrl) {
+		return Promise.resolve((item as any).thumbnailUrl);
+	}
+
+	// Generar thumbnail via API usando three.js headless
+	const params = new URLSearchParams({
+		angle: angle.toString(),
+		lightIntensity: lightIntensity.toString(),
+		backgroundColor: backgroundColor.replace('#', ''),
+		width: width.toString(),
+		height: height.toString(),
+		wireframe: wireframe.toString(),
+	});
+
+	return Promise.resolve(`/api/3d/${item.id}/thumbnail?${params.toString()}`);
+}
+
+/**
  * 📁 Generador de preview compuesto para carpetas
  */
 export function generateFolderPreview(
@@ -234,6 +327,12 @@ export function generateThumbnailByType(item: DisplayableEntity, options: Record
 
 		case 'document':
 			return generateDocumentPreview(item, options);
+
+		case 'jsonFile':
+			return generateJsonPreview(item, options);
+
+		case 'file3d':
+			return generate3DModelThumbnail(item, options);
 
 		case 'folder':
 			return generateFolderPreview(item, options);
