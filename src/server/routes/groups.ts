@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
 	try {
 		const filtersResult = GroupFiltersSchema.safeParse(req.query);
 		if (!filtersResult.success) {
-			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.issues });
 			return;
 		}
 
@@ -37,7 +37,7 @@ router.get('/', async (req, res) => {
 		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
 		// Determinar orden - solo campos válidos del esquema
-		let orderByClause;
+		let orderByClause: ReturnType<typeof asc>;
 		const sortBy = filters.sortBy || 'name';
 
 		if (filters.sortOrder === 'desc') {

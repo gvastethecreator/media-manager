@@ -211,7 +211,7 @@ albumsRouter.get('/:id/images', getAlbumImagesHandler);
 const createAlbumHandler = async (req: Request, res: Response) => {
 	const parse = AlbumCreateSchema.safeParse(req.body);
 	if (!parse.success) {
-		res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
+		res.status(400).json({ error: 'Datos inválidos', details: parse.error.issues });
 		return;
 	}
 
@@ -263,7 +263,7 @@ const updateAlbumHandler = async (req: Request, res: Response) => {
 	const parse = AlbumUpdateSchema.safeParse(req.body);
 
 	if (!parse.success) {
-		res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
+		res.status(400).json({ error: 'Datos inválidos', details: parse.error.issues });
 		return;
 	}
 

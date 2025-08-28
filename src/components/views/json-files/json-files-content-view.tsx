@@ -46,14 +46,18 @@ export function JsonFilesContentView({ className }: JsonFilesContentViewProps) {
 			// Obtener todos los archivos JSON para el visor
 			const allJsons = jsonFiles;
 
-			// Convertir a formato compatible con el visor
+			// Convertir a formato compatible con el visor (tipo ImageItem requerido por el store)
 			const jsonItems = allJsons.map((j: JsonFileWithStats) => ({
 				id: j.id,
 				name: j.name,
 				type: 'json' as const,
 				path: j.path,
 				size: j.size || 0,
-			}));
+				width: null,
+				height: null,
+				thumbnail: null,
+				metadata: null,
+			})) as any; // el visor opera con ImageItem; campos no aplicables se rellenan con null
 
 			const currentIndex = jsonItems.findIndex((item: any) => item.id === jsonItem.id);
 

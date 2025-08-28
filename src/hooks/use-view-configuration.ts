@@ -190,15 +190,13 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
 		(updates: Partial<ViewConfiguration>) => {
 			const newConfig = mergeViewConfigurations(currentConfiguration, updates);
 
-			updateSettings({
-				fileBrowser: {
-					...settings?.fileBrowser,
-					viewConfigurations: {
-						...settings?.fileBrowser?.viewConfigurations,
-						[viewType]: newConfig,
-					},
-				},
-			});
+			// Construcción imperativa para evitar inferencia de tipos estricta
+			const fileBrowser: any = {};
+			if (settings?.fileBrowser) Object.assign(fileBrowser, settings.fileBrowser);
+			if (!fileBrowser.viewConfigurations) fileBrowser.viewConfigurations = {};
+			fileBrowser.viewConfigurations[viewType] = newConfig as any;
+			const payload: any = { fileBrowser };
+			(updateSettings as any)(payload);
 		},
 		[currentConfiguration, settings?.fileBrowser, updateSettings, viewType]
 	);
@@ -241,8 +239,9 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
 	// Get available presets
 	const availablePresets = useMemo(() => {
 		const defaultPresets = DEFAULT_PRESETS[viewType] || [];
-		const customPresets = settings?.fileBrowser?.customPresets?.[viewType] || [];
-		return [...defaultPresets, ...customPresets] as ViewPreset[];
+		const customPresetsRecord = (settings?.fileBrowser?.customPresets ?? {}) as Partial<Record<ViewType, ViewPreset[]>>;
+		const customPresetsForView = customPresetsRecord[viewType] ?? [];
+		return [...defaultPresets, ...customPresetsForView] as ViewPreset[];
 	}, [settings?.fileBrowser?.customPresets, viewType]);
 
 	// Apply preset
@@ -268,18 +267,14 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
 				configuration: cloneViewConfiguration(currentConfiguration),
 			};
 
-			const customPresets = settings?.fileBrowser?.customPresets || {};
+			const customPresets = (settings?.fileBrowser?.customPresets || {}) as Partial<Record<ViewType, ViewPreset[]>>;
 			const viewPresets = customPresets[viewType] || [];
 
-			updateSettings({
-				fileBrowser: {
-					...settings?.fileBrowser,
-					customPresets: {
-						...customPresets,
-						[viewType]: [...viewPresets, preset],
-					},
-				},
-			});
+			const fileBrowser: any = {};
+			if (settings?.fileBrowser) Object.assign(fileBrowser, settings.fileBrowser);
+			fileBrowser.customPresets = { ...((customPresets as any) ?? {}), [viewType]: [...viewPresets, preset] };
+			const payload: any = { fileBrowser };
+			(updateSettings as any)(payload);
 		},
 		[currentConfiguration, settings?.fileBrowser, updateSettings, viewType]
 	);
@@ -287,19 +282,15 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
 	// Delete custom preset
 	const deletePreset = useCallback(
 		(presetId: string) => {
-			const customPresets = settings?.fileBrowser?.customPresets || {};
+			const customPresets = (settings?.fileBrowser?.customPresets || {}) as Partial<Record<ViewType, ViewPreset[]>>;
 			const viewPresets = customPresets[viewType] || [];
-			const filteredPresets = viewPresets.filter((p) => p.id !== presetId);
+			const filteredPresets = viewPresets.filter((p: ViewPreset) => p.id !== presetId);
 
-			updateSettings({
-				fileBrowser: {
-					...settings?.fileBrowser,
-					customPresets: {
-						...customPresets,
-						[viewType]: filteredPresets,
-					},
-				},
-			});
+			const fileBrowser: any = {};
+			if (settings?.fileBrowser) Object.assign(fileBrowser, settings.fileBrowser);
+			fileBrowser.customPresets = { ...((customPresets as any) ?? {}), [viewType]: filteredPresets };
+			const payload: any = { fileBrowser };
+			(updateSettings as any)(payload);
 		},
 		[settings?.fileBrowser, updateSettings, viewType]
 	);

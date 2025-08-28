@@ -23,7 +23,7 @@ const getConceptsHandler = async (req: Request, res: Response) => {
 	try {
 		const filtersResult = ConceptFiltersSchema.safeParse(req.query);
 		if (!filtersResult.success) {
-			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.issues });
 			return;
 		}
 

@@ -404,7 +404,7 @@ function Button({
 	const renderElement =
 		asChild && React.isValidElement(children)
 			? (children as React.ReactElement<Record<string, unknown>, string | React.JSXElementConstructor<unknown>>)
-			: render || <button />;
+			: render || <button type="button" />;
 
 	// When using asChild, children becomes the element props, otherwise use children normally
 	const finalProps =

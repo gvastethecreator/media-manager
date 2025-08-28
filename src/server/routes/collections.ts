@@ -19,7 +19,7 @@ const CollectionFiltersSchema = z.object({
 const getCollectionsHandler = async (req: Request, res: Response) => {
 	const parse = CollectionFiltersSchema.safeParse(req.query);
 	if (!parse.success) {
-		res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
+		res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.issues });
 		return;
 	}
 

@@ -21,7 +21,7 @@ const PlaceFiltersSchema = z.object({
 router.get('/', async (req, res) => {
 	const parse = PlaceFiltersSchema.safeParse(req.query);
 	if (!parse.success) {
-		res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
+		res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.issues });
 		return;
 	}
 

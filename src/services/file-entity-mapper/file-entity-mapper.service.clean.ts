@@ -23,6 +23,7 @@ import {
 export class FileEntityMapperService {
 	private static instance: FileEntityMapperService;
 	private imageService: ImageService;
+	private metadataService: MetadataIntegrationService;
 
 	private constructor() {
 		this.imageService = ImageService.getInstance();
@@ -537,9 +538,4 @@ export class FileEntityMapperService {
 
 		return stats;
 	}
-}
-}
-
-return stats;
-}
 }

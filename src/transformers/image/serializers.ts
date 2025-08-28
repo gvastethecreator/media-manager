@@ -144,10 +144,10 @@ export function parseImageFilters(filters: unknown): Record<string, unknown> {
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			logger.error('Error de validación en filtros de imagen', {
-				error: error.errors,
+				error: error.issues,
 				filters,
 			});
-			throw new Error(`Filtros inválidos: ${error.errors.map((e) => e.message).join(', ')}`);
+			throw new Error(`Filtros inválidos: ${error.issues.map((e) => e.message).join(', ')}`);
 		}
 		throw TransformerError.wrap(error as Error, {
 			operation: 'parseImageFilters',

@@ -14,9 +14,7 @@ import { FavoriteEntityType } from '../../types/entities/favorite';
 export const favoriteBaseSchema = z.object({
 	id: z.string().uuid('ID debe ser un UUID válido'),
 	entityId: z.string().uuid('ID de entidad debe ser UUID válido'),
-	entityType: z.nativeEnum(FavoriteEntityType, {
-		errorMap: () => ({ message: 'Tipo de entidad no válido' }),
-	}),
+	entityType: z.nativeEnum(FavoriteEntityType),
 	userId: z.string().uuid().nullable(),
 	profileId: z.string().uuid().nullable(),
 	createdAt: z.date(),

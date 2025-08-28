@@ -89,8 +89,8 @@ export const cardsViewConfigSchema = z.object({
 	aspectRatio: z.number().min(0.5).max(3).default(1.25),
 	gap: z.number().min(0).max(50).default(16),
 	padding: z.number().min(0).max(50).default(24),
-	metadataConfig: cardMetadataConfigSchema.default({}),
-	interactiveConfig: cardInteractiveConfigSchema.default({}),
+	metadataConfig: cardMetadataConfigSchema.default(cardMetadataConfigSchema.parse({})),
+	interactiveConfig: cardInteractiveConfigSchema.default(cardInteractiveConfigSchema.parse({})),
 	showShadows: z.boolean().default(true),
 	roundedCorners: z.boolean().default(true),
 	animationsEnabled: z.boolean().default(true),
@@ -138,9 +138,9 @@ export const masonryOptimizationConfigSchema = z.object({
 
 // Esquema completo para configuración de MasonryView
 export const masonryViewConfigSchema = z.object({
-	spacing: masonrySpacingConfigSchema.default({}),
-	height: masonryHeightConfigSchema.default({}),
-	optimization: masonryOptimizationConfigSchema.default({}),
+	spacing: masonrySpacingConfigSchema.default(masonrySpacingConfigSchema.parse({})),
+	height: masonryHeightConfigSchema.default(masonryHeightConfigSchema.parse({})),
+	optimization: masonryOptimizationConfigSchema.default(masonryOptimizationConfigSchema.parse({})),
 	animationsEnabled: z.boolean().default(true),
 	animationDuration: z.number().min(50).max(1000).default(300),
 	hoverEffects: z.boolean().default(true),
@@ -209,29 +209,36 @@ export const animationConfigSchema = z.object({
 					duration: z.number().min(0).max(1000).default(150),
 					scale: z.number().min(1).max(1.5).default(1.05),
 				})
-				.default({}),
+				.default(z.object({ enabled: z.boolean(), duration: z.number(), scale: z.number() }).parse({})),
 			selection: z
 				.object({
 					enabled: z.boolean().default(true),
 					duration: z.number().min(0).max(1000).default(200),
 					highlightColor: z.string().default('#3b82f6'),
 				})
-				.default({}),
+				.default(z.object({ enabled: z.boolean(), duration: z.number(), highlightColor: z.string() }).parse({})),
 			loading: z
 				.object({
 					enabled: z.boolean().default(true),
 					type: z.enum(['spinner', 'skeleton', 'pulse']).default('skeleton'),
 				})
-				.default({}),
+				.default(z.object({ enabled: z.boolean(), type: z.enum(['spinner', 'skeleton', 'pulse']) }).parse({})),
 			viewTransition: z
 				.object({
 					enabled: z.boolean().default(true),
 					duration: z.number().min(0).max(1000).default(300),
 					type: z.enum(['fade', 'slide', 'scale']).default('fade'),
 				})
-				.default({}),
+				.default(
+					z.object({ enabled: z.boolean(), duration: z.number(), type: z.enum(['fade', 'slide', 'scale']) }).parse({})
+				),
 		})
-		.default({}),
+		.default({
+			hover: { enabled: true, duration: 150, scale: 1.05 },
+			selection: { enabled: true, duration: 200, highlightColor: '#3b82f6' },
+			loading: { enabled: true, type: 'skeleton' },
+			viewTransition: { enabled: true, duration: 300, type: 'fade' },
+		}),
 });
 
 // Esquema para configuración de accesibilidad
@@ -247,7 +254,9 @@ export const accessibilityConfigSchema = z.object({
 			indicatorColor: z.string().default('#3b82f6'),
 			indicatorWidth: z.number().min(1).max(5).default(2),
 		})
-		.default({}),
+		.default(
+			z.object({ showIndicators: z.boolean(), indicatorColor: z.string(), indicatorWidth: z.number() }).parse({})
+		),
 });
 
 // Esquema para configuración de rendimiento
@@ -263,20 +272,20 @@ export const performanceConfigSchema = z.object({
 			maxSize: z.number().min(10).max(1000).default(100),
 			ttl: z.number().min(60_000).max(86_400_000).default(3_600_000),
 		})
-		.default({}),
+		.default(z.object({ thumbnails: z.boolean(), maxSize: z.number(), ttl: z.number() }).parse({})),
 	debounce: z
 		.object({
 			search: z.number().min(0).max(2000).default(300),
 			scroll: z.number().min(0).max(100).default(16),
 			resize: z.number().min(0).max(500).default(100),
 		})
-		.default({}),
+		.default(z.object({ search: z.number(), scroll: z.number(), resize: z.number() }).parse({})),
 });
 
 // Esquema para configuración por tipo de entidad
 export const entityViewConfigSchema = z.object({
 	preferredView: z.enum(['list', 'grid', 'cards', 'masonry']).default('grid'),
-	viewConfigs: z.record(z.enum(['list', 'grid', 'cards', 'masonry']), z.any()).default({}),
+	viewConfigs: z.record(z.enum(['list', 'grid', 'cards', 'masonry']), z.any()).optional(),
 	defaultMetadata: z.array(z.string()).default([]),
 	availableActions: z.array(z.string()).default([]),
 });
@@ -284,20 +293,18 @@ export const entityViewConfigSchema = z.object({
 // Esquema para configuración global de vistas
 export const globalViewConfigSchema = z.object({
 	defaultViewMode: z.enum(['list', 'grid', 'cards', 'masonry']).default('grid'),
-	entityTypeConfigs: z.record(z.string(), entityViewConfigSchema).default({}),
-	animations: animationConfigSchema.default({}),
-	accessibility: accessibilityConfigSchema.default({}),
-	performance: performanceConfigSchema.default({}),
+	entityTypeConfigs: z
+		.record(z.string(), entityViewConfigSchema)
+		.default({} as Record<string, z.infer<typeof entityViewConfigSchema>>),
+	animations: animationConfigSchema.default(animationConfigSchema.parse({})),
+	accessibility: accessibilityConfigSchema.default(accessibilityConfigSchema.parse({})),
+	performance: performanceConfigSchema.default(performanceConfigSchema.parse({})),
 });
 
 // Esquema para configuración completa de vistas
 // Helper para crear un schema por defecto
-const createDefaultSchema = (schema: any) => {
-	try {
-		return schema.parse(undefined);
-	} catch (error) {
-		return {};
-	}
+const createDefaultSchema = <S extends z.ZodTypeAny>(schema: S): z.infer<S> => {
+	return schema.parse({});
 };
 
 export const viewConfigurationSchema = z
@@ -428,7 +435,7 @@ export const settingsSchema = z.object({
 	notifications: notificationsSchema,
 	privacy: privacySchema,
 	advanced: advancedSchema,
-	fileBrowser: fileBrowserConfigSchema.default({}),
+	fileBrowser: fileBrowserConfigSchema.default(fileBrowserConfigSchema.parse({})),
 	version: z.string().default('1.0.0'),
 	lastUpdate: z.date().default(() => new Date()),
 	system: z
@@ -436,7 +443,7 @@ export const settingsSchema = z.object({
 			platform: z.string().default('web'),
 			version: z.string().default('1.0.0'),
 		})
-		.default({}),
+		.default({ platform: 'web', version: '1.0.0' }),
 });
 
 // Esquema para actualizaciones parciales
