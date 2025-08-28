@@ -131,7 +131,7 @@ export const GroupRelationsSchema = z.object({
 export const GroupSearchOptionsSchema = z.object({
 	skip: z.number().optional(),
 	take: z.number().optional(),
-	orderBy: z.record(z.enum(['asc', 'desc'])).optional(),
+	orderBy: z.record(z.string(), z.enum(['asc', 'desc'])).optional(),
 	where: GroupFiltersSchema.optional(),
-	include: z.record(z.boolean()).optional(),
+	include: z.record(z.string(), z.boolean()).optional(),
 });

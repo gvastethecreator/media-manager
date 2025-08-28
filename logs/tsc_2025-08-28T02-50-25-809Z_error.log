@@ -1,0 +1,1429 @@
+📊 RESUMEN DE ERRORES
+Total de archivos con errores: 48
+Cantidad total de errores: 127
+
+📁 ARCHIVOS AFECTADOS:
+  src/components/batch-operations/BatchOperationDialog.tsx (líneas: 351)
+  src/components/batch-operations/BatchOperationsPanel.tsx (líneas: 227, 314)
+  src/components/cards/image-card/image-gallery.tsx (líneas: 300)
+  src/components/core/emojis/emoji-picker.tsx (líneas: 126)
+  src/components/core/global-error-handler.tsx (líneas: 28)
+  src/components/entities/profile/ProfileCard.tsx (líneas: 60)
+  src/components/features/file-browser/components/list-item.tsx (líneas: 38)
+  src/components/features/workflow/workflow-drop-zone.tsx (líneas: 114)
+  src/components/ui/code.tsx (líneas: 56)
+  src/components/ui/data-grid-column-header.tsx (líneas: 135)
+  src/components/ui/data-grid-pagination.tsx (líneas: 71, 93, 111, 138, 170, 188)
+  src/components/ui/data-grid-table-dnd-rows.tsx (líneas: 41)
+  src/components/ui/data-grid-table-dnd.tsx (líneas: 60)
+  src/components/ui/data-grid-table.tsx (líneas: 393, 409)
+  src/components/ui/entity-form.tsx (líneas: 406, 435, 455, 495, 518, 524, 530, 550)
+  src/components/ui/tauri-backend-status.tsx (líneas: 36)
+  src/components/views/all-images/all-images-content-view.tsx (líneas: 265)
+  src/components/views/audio/audio-view.tsx (líneas: 109)
+  src/components/views/development/debug-console.tsx (líneas: 96, 111)
+  src/components/views/file3d/file3d-content-view.tsx (líneas: 9)
+  src/components/views/file3d/file3d-view.tsx (líneas: 103)
+  src/components/views/files/files-content-view.tsx (líneas: 190)
+  src/components/views/index.ts (líneas: 45)
+  src/components/views/json-files/json-files-content-view.tsx (líneas: 61)
+  src/components/views/uploaded-images/uploaded-images-view.tsx (líneas: 397)
+  src/hooks/use-view-configuration.ts (líneas: 196, 272, 277, 291, 292, 297)
+  src/lib/utils/image/validators.ts (líneas: 29, 57, 58, 59)
+  src/lib/utils/transformers/validation.ts (líneas: 16, 17, 31, 32, 46, 47, 116, 117, 130, 131, 132, 139, 140)
+  src/lib/utils/world-item/validators.ts (líneas: 46)
+  src/server/routes/activity.ts (líneas: 28)
+  src/server/routes/albums.ts (líneas: 214, 266)
+  src/server/routes/characters.ts (líneas: 25)
+  src/server/routes/collections.ts (líneas: 22)
+  src/server/routes/concepts.ts (líneas: 26)
+  src/server/routes/groups.ts (líneas: 25)
+  src/server/routes/images.ts (líneas: 123)
+  src/server/routes/places.ts (líneas: 24)
+  src/server/routes/prompts.ts (líneas: 43)
+  src/server/services/system-simple.service.ts (líneas: 13)
+  src/transformers/favorite/validators.ts (líneas: 18)
+  src/transformers/file/validators.ts (líneas: 23)
+  src/transformers/image/serializers.ts (líneas: 147, 150)
+  src/transformers/settings/schema.ts (líneas: 92, 93, 141, 142, 143, 212, 219, 225, 232, 234, 250, 266, 273, 279, 288, 289, 290, 431, 439)
+  src/transformers/settings/validators.ts (líneas: 27, 45, 71, 96, 120, 144)
+  src/transformers/tag/validators.ts (líneas: 85, 103, 121)
+  src/types/entities/group/schema.ts (líneas: 134, 136)
+  src/types/entities/queue-job/schema.ts (líneas: 37)
+  src/types/entities/thumbnail/extended.ts (líneas: 79, 80)
+
+📋 DETALLE POR ARCHIVO:
+
+src/components/batch-operations/BatchOperationDialog.tsx
+  - línea 351 : TS2322
+
+src/components/batch-operations/BatchOperationsPanel.tsx
+  - línea 227 : TS2322
+  - línea 314 : TS2322
+
+src/components/cards/image-card/image-gallery.tsx
+  - línea 300 : TS2322
+
+src/components/core/emojis/emoji-picker.tsx
+  - línea 126 : TS2322
+
+src/components/core/global-error-handler.tsx
+  - línea 28 : TS2322
+
+src/components/entities/profile/ProfileCard.tsx
+  - línea 60 : TS2322
+
+src/components/features/file-browser/components/list-item.tsx
+  - línea 38 : TS2345
+
+src/components/features/workflow/workflow-drop-zone.tsx
+  - línea 114 : TS2322
+
+src/components/ui/code.tsx
+  - línea 56 : TS2322
+
+src/components/ui/data-grid-column-header.tsx
+  - línea 135 : TS2322
+
+src/components/ui/data-grid-pagination.tsx
+  - línea 71 : TS2322
+  - línea 93 : TS2322
+  - línea 111 : TS2322
+  - línea 138 : TS2322
+  - línea 170 : TS2322
+  - línea 188 : TS2322
+
+src/components/ui/data-grid-table-dnd-rows.tsx
+  - línea 41 : TS2322
+
+src/components/ui/data-grid-table-dnd.tsx
+  - línea 60 : TS2322
+
+src/components/ui/data-grid-table.tsx
+  - línea 393 : TS2322
+  - línea 409 : TS2322
+
+src/components/ui/entity-form.tsx
+  - línea 406 : TS2322
+  - línea 435 : TS2322
+  - línea 455 : TS2322
+  - línea 495 : TS2322
+  - línea 518 : TS2322
+  - línea 524 : TS2322
+  - línea 530 : TS2322
+  - línea 550 : TS2322
+
+src/components/ui/tauri-backend-status.tsx
+  - línea 36 : TS2322
+
+src/components/views/all-images/all-images-content-view.tsx
+  - línea 265 : TS2322
+
+src/components/views/audio/audio-view.tsx
+  - línea 109 : TS2322
+
+src/components/views/development/debug-console.tsx
+  - línea 96 : TS2322
+  - línea 111 : TS2322
+
+src/components/views/file3d/file3d-content-view.tsx
+  - línea 9 : TS2307
+
+src/components/views/file3d/file3d-view.tsx
+  - línea 103 : TS2322
+
+src/components/views/files/files-content-view.tsx
+  - línea 190 : TS2322
+
+src/components/views/index.ts
+  - línea 45 : TS2307
+
+src/components/views/json-files/json-files-content-view.tsx
+  - línea 61 : TS2345
+
+src/components/views/uploaded-images/uploaded-images-view.tsx
+  - línea 397 : TS2322
+
+src/hooks/use-view-configuration.ts
+  - línea 196 : TS2322
+  - línea 272 : TS7053
+  - línea 277 : TS2739
+  - línea 291 : TS7053
+  - línea 292 : TS7006
+  - línea 297 : TS2739
+
+src/lib/utils/image/validators.ts
+  - línea 29 : TS2554
+  - línea 57 : TS2554
+  - línea 58 : TS2554
+  - línea 59 : TS2554
+
+src/lib/utils/transformers/validation.ts
+  - línea 16 : TS2339
+  - línea 17 : TS2339
+  - línea 17 : TS7006
+  - línea 31 : TS2339
+  - línea 32 : TS2339
+  - línea 32 : TS7006
+  - línea 46 : TS2339
+  - línea 47 : TS2339
+  - línea 47 : TS7006
+  - línea 116 : TS2339
+  - línea 117 : TS2339
+  - línea 117 : TS7006
+  - línea 130 : TS2554
+  - línea 131 : TS2554
+  - línea 132 : TS2554
+  - línea 139 : TS2339
+  - línea 140 : TS2339
+  - línea 140 : TS7006
+
+src/lib/utils/world-item/validators.ts
+  - línea 46 : TS2554
+
+src/server/routes/activity.ts
+  - línea 28 : TS2339
+
+src/server/routes/albums.ts
+  - línea 214 : TS2339
+  - línea 266 : TS2339
+
+src/server/routes/characters.ts
+  - línea 25 : TS2339
+
+src/server/routes/collections.ts
+  - línea 22 : TS2339
+
+src/server/routes/concepts.ts
+  - línea 26 : TS2339
+
+src/server/routes/groups.ts
+  - línea 25 : TS2339
+
+src/server/routes/images.ts
+  - línea 123 : TS2339
+
+src/server/routes/places.ts
+  - línea 24 : TS2339
+
+src/server/routes/prompts.ts
+  - línea 43 : TS2339
+
+src/server/services/system-simple.service.ts
+  - línea 13 : TS2741
+
+src/transformers/favorite/validators.ts
+  - línea 18 : TS2353
+
+src/transformers/file/validators.ts
+  - línea 23 : TS2353
+
+src/transformers/image/serializers.ts
+  - línea 147 : TS2339
+  - línea 150 : TS2339
+  - línea 150 : TS7006
+
+src/transformers/settings/schema.ts
+  - línea 92 : TS2769
+  - línea 93 : TS2769
+  - línea 141 : TS2769
+  - línea 142 : TS2769
+  - línea 143 : TS2769
+  - línea 212 : TS2769
+  - línea 219 : TS2769
+  - línea 225 : TS2769
+  - línea 232 : TS2769
+  - línea 234 : TS2769
+  - línea 250 : TS2769
+  - línea 266 : TS2769
+  - línea 273 : TS2769
+  - línea 279 : TS2769
+  - línea 288 : TS2769
+  - línea 289 : TS2769
+  - línea 290 : TS2769
+  - línea 431 : TS2769
+  - línea 439 : TS2769
+
+src/transformers/settings/validators.ts
+  - línea 27 : TS2339
+  - línea 27 : TS7006
+  - línea 45 : TS2339
+  - línea 45 : TS7006
+  - línea 71 : TS2339
+  - línea 71 : TS7006
+  - línea 96 : TS2339
+  - línea 96 : TS7006
+  - línea 120 : TS2339
+  - línea 120 : TS7006
+  - línea 144 : TS2339
+  - línea 144 : TS7006
+
+src/transformers/tag/validators.ts
+  - línea 85 : TS2339
+  - línea 85 : TS7006
+  - línea 103 : TS2339
+  - línea 103 : TS7006
+  - línea 121 : TS2339
+  - línea 121 : TS7006
+
+src/types/entities/group/schema.ts
+  - línea 134 : TS2554
+  - línea 136 : TS2554
+
+src/types/entities/queue-job/schema.ts
+  - línea 37 : TS2554
+
+src/types/entities/thumbnail/extended.ts
+  - línea 79 : TS2554
+  - línea 80 : TS2554
+
+════════════════════════════════════════════════════════════════════════════════
+📄 LOG ORIGINAL:
+════════════════════════════════════════════════════════════════════════════════
+
+Comando: bunx tsc --noEmit --pretty
+Fecha: 2025-08-28T02:50:25.813Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+[96msrc/components/batch-operations/BatchOperationDialog.tsx[0m:[93m351[0m:[93m60[0m - [91merror[0m[90m TS2322: [0mType '"destructive" | "primary"' is not assignable to type '"link" | "default" | "secondary" | "destructive" | "outline" | "ghost" | null | undefined'.
+  Type '"primary"' is not assignable to type '"link" | "default" | "secondary" | "destructive" | "outline" | "ghost" | null | undefined'.
+
+[7m351[0m      <Button disabled={!isValid()} onClick={handleConfirm} variant={type === 'delete' ? 'destructive' : 'primary'}>
+[7m   [0m [91m                                                           ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 19[0m     link: 'text-primary underline-offset-4 hover:underline',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 20[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/batch-operations/BatchOperationsPanel.tsx[0m:[93m227[0m:[93m17[0m - [91merror[0m[90m TS2322: [0mType '"secondary" | "destructive" | "outline" | "primary"' is not assignable to type '"default" | "secondary" | "destructive" | "outline" | null | undefined'.
+  Type '"primary"' is not assignable to type '"default" | "secondary" | "destructive" | "outline" | null | undefined'.
+
+[7m227[0m          <Badge variant={getStatusBadgeVariant(operation.status)}>
+[7m   [0m [91m                ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 16[0m     outline: 'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 17[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/batch-operations/BatchOperationsPanel.tsx[0m:[93m314[0m:[93m18[0m - [91merror[0m[90m TS2322: [0mType '"secondary" | "destructive" | "outline" | "primary"' is not assignable to type '"default" | "secondary" | "destructive" | "outline" | null | undefined'.
+  Type '"primary"' is not assignable to type '"default" | "secondary" | "destructive" | "outline" | null | undefined'.
+
+[7m314[0m           <Badge variant={getStatusBadgeVariant(operation.status)}>
+[7m   [0m [91m                 ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 16[0m     outline: 'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 17[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/cards/image-card/image-gallery.tsx[0m:[93m300[0m:[93m68[0m - [91merror[0m[90m TS2322: [0mType '"primary"' is not assignable to type '"link" | "default" | "secondary" | "destructive" | "outline" | "ghost" | null | undefined'.
+
+[7m300[0m         <Button className="h-9" onClick={clearSelection} size="sm" variant="primary">
+[7m   [0m [91m                                                                   ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 19[0m     link: 'text-primary underline-offset-4 hover:underline',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 20[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/core/emojis/emoji-picker.tsx[0m:[93m126[0m:[93m6[0m - [91merror[0m[90m TS2322: [0mType '"sm" | "md"' is not assignable to type '"default" | "sm" | "lg" | "icon" | null | undefined'.
+  Type '"md"' is not assignable to type '"default" | "sm" | "lg" | "icon" | null | undefined'.
+
+[7m126[0m      size={compact ? 'sm' : 'md'}
+[7m   [0m [91m     ~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m21[0m:[93m4[0m
+    [7m 21[0m    size: {
+    [7m   [0m [96m   ~~~~~~~[0m
+    [7m 22[0m     default: 'h-9 px-4 py-2 has-[>svg]:px-3',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 25[0m     icon: 'size-9',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~[0m
+    [7m 26[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'size' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/core/global-error-handler.tsx[0m:[93m28[0m:[93m65[0m - [91merror[0m[90m TS2322: [0mType '"primary"' is not assignable to type '"link" | "default" | "secondary" | "destructive" | "outline" | "ghost" | null | undefined'.
+
+[7m28[0m      <Button className="flex items-center" onClick={resetError} variant="primary">
+[7m  [0m [91m                                                                ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 19[0m     link: 'text-primary underline-offset-4 hover:underline',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 20[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/entities/profile/ProfileCard.tsx[0m:[93m60[0m:[93m14[0m - [91merror[0m[90m TS2322: [0mType '"secondary" | "primary"' is not assignable to type '"default" | "secondary" | "destructive" | "outline" | null | undefined'.
+  Type '"primary"' is not assignable to type '"default" | "secondary" | "destructive" | "outline" | null | undefined'.
+
+[7m60[0m       <Badge variant={isActive ? 'primary' : 'secondary'}>{isActive ? 'Activo' : 'Inactivo'}</Badge>
+[7m  [0m [91m             ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 16[0m     outline: 'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 17[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/features/file-browser/components/list-item.tsx[0m:[93m38[0m:[93m17[0m - [91merror[0m[90m TS2345: [0mArgument of type 'string | number | Date | undefined' is not assignable to parameter of type 'string | number | Date'.
+  Type 'undefined' is not assignable to type 'string | number | Date'.
+
+[7m38[0m     {formatDate(item.createdAt, { day: '2-digit', month: '2-digit', year: 'numeric' })}
+[7m  [0m [91m                ~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/workflow/workflow-drop-zone.tsx[0m:[93m114[0m:[93m12[0m - [91merror[0m[90m TS2322: [0mType '"destructive" | "success"' is not assignable to type '"default" | "destructive" | null | undefined'.
+  Type '"success"' is not assignable to type '"default" | "destructive" | null | undefined'.
+
+[7m114[0m     <Alert variant={message.type === 'error' ? 'destructive' : 'success'}>
+[7m   [0m [91m           ~~~~~~~[0m
+
+  [96msrc/components/ui/alert.tsx[0m:[93m10[0m:[93m4[0m
+    [7m 10[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 11[0m     default: 'bg-card text-card-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 13[0m      'text-destructive bg-card [&>svg]:text-current *:data-[slot=alert-description]:text-destructive/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 14[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLDivElement> & HTMLAttributes<HTMLDivElement> & VariantProps<...>'
+
+[96msrc/components/ui/code.tsx[0m:[93m56[0m:[93m6[0m - [91merror[0m[90m TS2322: [0mType '{ children: Element; className: string; mode: string; onClick: () => void; size: "sm"; variant: "ghost"; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'mode' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+
+[7m56[0m      mode="icon"
+[7m  [0m [91m     ~~~~[0m
+
+[96msrc/components/ui/data-grid-column-header.tsx[0m:[93m135[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType '{ children: Element; "aria-label": string; className: string; mode: string; onClick: () => void; size: "sm"; title: string; variant: "ghost"; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'mode' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+
+[7m135[0m     mode="icon"
+[7m   [0m [91m    ~~~~[0m
+
+[96msrc/components/ui/data-grid-pagination.tsx[0m:[93m71[0m:[93m6[0m - [91merror[0m[90m TS2322: [0mType '{ children: number; className: string; key: number; mode: string; onClick: () => void; size: "sm"; variant: "ghost"; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'mode' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+
+[7m71[0m      mode="icon"
+[7m  [0m [91m     ~~~~[0m
+
+[96msrc/components/ui/data-grid-pagination.tsx[0m:[93m93[0m:[93m6[0m - [91merror[0m[90m TS2322: [0mType '{ children: string; className: string; mode: string; onClick: () => void; size: "sm"; variant: "ghost"; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'mode' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+
+[7m93[0m      mode="icon"
+[7m  [0m [91m     ~~~~[0m
+
+[96msrc/components/ui/data-grid-pagination.tsx[0m:[93m111[0m:[93m6[0m - [91merror[0m[90m TS2322: [0mType '{ children: string; className: string; mode: string; onClick: () => void; size: "sm"; variant: "ghost"; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'mode' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+
+[7m111[0m      mode="icon"
+[7m   [0m [91m     ~~~~[0m
+
+[96msrc/components/ui/data-grid-pagination.tsx[0m:[93m138[0m:[93m8[0m - [91merror[0m[90m TS2322: [0mType '{ children: Element[]; indicatorPosition: string; onValueChange: (value: string) => void; value: string; }' is not assignable to type 'IntrinsicAttributes & SelectSharedProps & { value?: string | undefined; defaultValue?: string | undefined; onValueChange?(value: string): void; }'.
+  Property 'indicatorPosition' does not exist on type 'IntrinsicAttributes & SelectSharedProps & { value?: string | undefined; defaultValue?: string | undefined; onValueChange?(value: string): void; }'.
+
+[7m138[0m        indicatorPosition="right"
+[7m   [0m [91m       ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/ui/data-grid-pagination.tsx[0m:[93m170[0m:[93m10[0m - [91merror[0m[90m TS2322: [0mType '{ children: Element[]; className: string; disabled: boolean; mode: string; onClick: () => void; size: "sm"; variant: "ghost"; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'mode' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+
+[7m170[0m          mode="icon"
+[7m   [0m [91m         ~~~~[0m
+
+[96msrc/components/ui/data-grid-pagination.tsx[0m:[93m188[0m:[93m10[0m - [91merror[0m[90m TS2322: [0mType '{ children: Element[]; className: string; disabled: boolean; mode: string; onClick: () => void; size: "sm"; variant: "ghost"; }' is not assignable to type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+  Property 'mode' does not exist on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'.
+
+[7m188[0m          mode="icon"
+[7m   [0m [91m         ~~~~[0m
+
+[96msrc/components/ui/data-grid-table-dnd-rows.tsx[0m:[93m41[0m:[93m40[0m - [91merror[0m[90m TS2322: [0mType '"dim"' is not assignable to type '"link" | "default" | "secondary" | "destructive" | "outline" | "ghost" | null | undefined'.
+
+[7m41[0m   <Button className="size-7" size="sm" variant="dim" {...attributes} {...listeners}>
+[7m  [0m [91m                                       ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 19[0m     link: 'text-primary underline-offset-4 hover:underline',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 20[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/data-grid-table-dnd.tsx[0m:[93m60[0m:[93m6[0m - [91merror[0m[90m TS2322: [0mType '"dim"' is not assignable to type '"link" | "default" | "secondary" | "destructive" | "outline" | "ghost" | null | undefined'.
+
+[7m60[0m      variant="dim"
+[7m  [0m [91m     ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 19[0m     link: 'text-primary underline-offset-4 hover:underline',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 20[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/ui/data-grid-table.tsx[0m:[93m393[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType '{ "aria-label": string; checked: boolean; className: string; onCheckedChange: (value: CheckedState) => void; size: "sm" | "lg" | "md"; }' is not assignable to type 'IntrinsicAttributes & CheckboxProps & RefAttributes<HTMLButtonElement>'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & CheckboxProps & RefAttributes<HTMLButtonElement>'.
+
+[7m393[0m     size={size ?? 'sm'}
+[7m   [0m [91m    ~~~~[0m
+
+[96msrc/components/ui/data-grid-table.tsx[0m:[93m409[0m:[93m4[0m - [91merror[0m[90m TS2322: [0mType '{ "aria-label": string; checked: boolean | "indeterminate"; className: string; disabled: boolean; onCheckedChange: (value: CheckedState) => void; size: "sm" | "lg" | "md" | undefined; }' is not assignable to type 'IntrinsicAttributes & CheckboxProps & RefAttributes<HTMLButtonElement>'.
+  Property 'size' does not exist on type 'IntrinsicAttributes & CheckboxProps & RefAttributes<HTMLButtonElement>'.
+
+[7m409[0m    size={size}
+[7m   [0m [91m   ~~~~[0m
+
+[96msrc/components/ui/entity-form.tsx[0m:[93m406[0m:[93m11[0m - [91merror[0m[90m TS2322: [0mType '{ className: string; onChange: (...event: any[]) => void; onBlur: Noop; value: unknown; disabled?: boolean | undefined; name: string; ref: RefCallBack; placeholder: string | undefined; }' is not assignable to type 'InputHTMLAttributes<HTMLInputElement>'.
+  Types of property 'value' are incompatible.
+    Type 'unknown' is not assignable to type 'string | number | readonly string[] | undefined'.
+
+[7m406[0m          <Input
+[7m   [0m [91m          ~~~~~[0m
+
+[96msrc/components/ui/entity-form.tsx[0m:[93m435[0m:[93m11[0m - [91merror[0m[90m TS2322: [0mType '{}' is not assignable to type 'string | number | readonly string[] | undefined'.
+
+[7m435[0m           value={formField.value || ''}
+[7m   [0m [91m          ~~~~~[0m
+
+  [96mnode_modules/@types/react/index.d.ts[0m:[93m3434[0m:[93m9[0m
+    [7m3434[0m         value?: string | readonly string[] | number | undefined;
+    [7m    [0m [96m        ~~~~~[0m
+    The expected type comes from property 'value' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLTextAreaElement> & TextareaHTMLAttributes<HTMLTextAreaElement>'
+
+[96msrc/components/ui/entity-form.tsx[0m:[93m455[0m:[93m17[0m - [91merror[0m[90m TS2322: [0mType 'unknown' is not assignable to type 'string | undefined'.
+
+[7m455[0m         <Select defaultValue={formField.value} onValueChange={formField.onChange}>
+[7m   [0m [91m                ~~~~~~~~~~~~[0m
+
+  [96mnode_modules/@radix-ui/react-select/dist/index.d.mts[0m:[93m25[0m:[93m5[0m
+    [7m25[0m     defaultValue?: string;
+    [7m  [0m [96m    ~~~~~~~~~~~~[0m
+    The expected type comes from property 'defaultValue' which is declared here on type 'IntrinsicAttributes & SelectSharedProps & { value?: string | undefined; defaultValue?: string | undefined; onValueChange?(value: string): void; }'
+
+[96msrc/components/ui/entity-form.tsx[0m:[93m495[0m:[93m18[0m - [91merror[0m[90m TS2322: [0mType 'unknown' is not assignable to type 'boolean | undefined'.
+
+[7m495[0m          <Switch checked={formField.value} onCheckedChange={formField.onChange} {...field.props} />
+[7m   [0m [91m                 ~~~~~~~[0m
+
+  [96mnode_modules/@radix-ui/react-switch/dist/index.d.mts[0m:[93m8[0m:[93m5[0m
+    [7m8[0m     checked?: boolean;
+    [7m [0m [96m    ~~~~~~~[0m
+    The expected type comes from property 'checked' which is declared here on type 'IntrinsicAttributes & SwitchProps & RefAttributes<HTMLButtonElement>'
+
+[96msrc/components/ui/entity-form.tsx[0m:[93m518[0m:[93m23[0m - [91merror[0m[90m TS2322: [0mType 'unknown' is not assignable to type 'BackgroundColor | undefined'.
+
+[7m518[0m              style={{ backgroundColor: formField.value }}
+[7m   [0m [91m                      ~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/ui/entity-form.tsx[0m:[93m524[0m:[93m14[0m - [91merror[0m[90m TS2322: [0mType 'unknown' is not assignable to type 'string | number | readonly string[] | undefined'.
+
+[7m524[0m              value={formField.value}
+[7m   [0m [91m             ~~~~~[0m
+
+  [96mnode_modules/@types/react/index.d.ts[0m:[93m3217[0m:[93m9[0m
+    [7m3217[0m         value?: string | readonly string[] | number | undefined;
+    [7m    [0m [96m        ~~~~~[0m
+    The expected type comes from property 'value' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLInputElement> & InputHTMLAttributes<HTMLInputElement>'
+
+[96msrc/components/ui/entity-form.tsx[0m:[93m530[0m:[93m27[0m - [91merror[0m[90m TS2322: [0mType 'unknown' is not assignable to type 'string | undefined'.
+
+[7m530[0m           <HexColorPicker color={formField.value} onChange={formField.onChange} />
+[7m   [0m [91m                          ~~~~~[0m
+
+  [96mnode_modules/react-colorful/dist/types.d.ts[0m:[93m36[0m:[93m5[0m
+    [7m36[0m     color: T;
+    [7m  [0m [96m    ~~~~~[0m
+    The expected type comes from property 'color' which is declared here on type 'IntrinsicAttributes & Partial<ColorPickerBaseProps<string>>'
+
+[96msrc/components/ui/entity-form.tsx[0m:[93m550[0m:[93m53[0m - [91merror[0m[90m TS2322: [0mType 'unknown' is not assignable to type 'string | undefined'.
+
+[7m550[0m          <EmojiPicker onChange={formField.onChange} value={formField.value} />
+[7m   [0m [91m                                                    ~~~~~[0m
+
+  [96msrc/components/ui/emoji-picker.tsx[0m:[93m11[0m:[93m2[0m
+    [7m11[0m  value?: string;
+    [7m  [0m [96m ~~~~~[0m
+    The expected type comes from property 'value' which is declared here on type 'IntrinsicAttributes & EmojiPickerProps'
+
+[96msrc/components/ui/tauri-backend-status.tsx[0m:[93m36[0m:[93m37[0m - [91merror[0m[90m TS2322: [0mType '"primary"' is not assignable to type '"default" | "secondary" | "destructive" | "outline" | null | undefined'.
+
+[7m36[0m     <Badge className="bg-green-500" variant="primary">
+[7m  [0m [91m                                    ~~~~~~~[0m
+
+  [96msrc/components/ui/badge.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'border-transparent bg-primary text-primary-foreground [a&]:hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 16[0m     outline: 'text-foreground [a&]:hover:bg-accent [a&]:hover:text-accent-foreground',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 17[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLSpanElement> & HTMLAttributes<HTMLSpanElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/views/all-images/all-images-content-view.tsx[0m:[93m265[0m:[93m98[0m - [91merror[0m[90m TS2322: [0mType '"primary"' is not assignable to type '"link" | "default" | "secondary" | "destructive" | "outline" | "ghost" | null | undefined'.
+
+[7m265[0m      <Button className="fixed right-4 bottom-4 z-50" onClick={() => setIsUploadDialogOpen(true)} variant="primary">
+[7m   [0m [91m                                                                                                 ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 19[0m     link: 'text-primary underline-offset-4 hover:underline',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 20[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/views/audio/audio-view.tsx[0m:[93m109[0m:[93m4[0m - [91merror[0m[90m TS2322: [0mType '{ audios: AudioWithStats[]; currentAudio: AudioWithStats | null; editingAudio: AudioWithStats | null; error: string | null; handleAudioClick: (audio: AudioWithStats) => void; ... 12 more ...; showForm: boolean; }' is not assignable to type 'IntrinsicAttributes & AudioContentViewProps'.
+  Property 'audios' does not exist on type 'IntrinsicAttributes & AudioContentViewProps'.
+
+[7m109[0m    audios={sortedAudios}
+[7m   [0m [91m   ~~~~~~[0m
+
+[96msrc/components/views/development/debug-console.tsx[0m:[93m96[0m:[93m59[0m - [91merror[0m[90m TS2322: [0mType '"primary"' is not assignable to type '"link" | "default" | "secondary" | "destructive" | "outline" | "ghost" | null | undefined'.
+
+[7m96[0m       <Button onClick={generateExampleLogs} type="button" variant="primary">
+[7m  [0m [91m                                                          ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 19[0m     link: 'text-primary underline-offset-4 hover:underline',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 20[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/views/development/debug-console.tsx[0m:[93m111[0m:[93m8[0m - [91merror[0m[90m TS2322: [0mType '"outline" | "primary"' is not assignable to type '"link" | "default" | "secondary" | "destructive" | "outline" | "ghost" | null | undefined'.
+  Type '"primary"' is not assignable to type '"link" | "default" | "secondary" | "destructive" | "outline" | "ghost" | null | undefined'.
+
+[7m111[0m        variant={isCapturing ? 'primary' : 'outline'}
+[7m   [0m [91m       ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 19[0m     link: 'text-primary underline-offset-4 hover:underline',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 20[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/views/file3d/file3d-content-view.tsx[0m:[93m9[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module '@/store/entities/file3d' or its corresponding type declarations.
+
+[7m9[0m import { useFile3DStore } from '@/store/entities/file3d';
+[7m [0m [91m                               ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/views/file3d/file3d-view.tsx[0m:[93m103[0m:[93m4[0m - [91merror[0m[90m TS2322: [0mType '{ error: string | null; file3ds: File3DWithStats[]; handleCreateFile3D: () => Promise<void>; handleFile3DClick: (file3d: File3DWithStats) => void; ... 7 more ...; showForm: boolean; }' is not assignable to type 'IntrinsicAttributes & File3DContentViewProps'.
+  Property 'error' does not exist on type 'IntrinsicAttributes & File3DContentViewProps'.
+
+[7m103[0m    error={error}
+[7m   [0m [91m   ~~~~~[0m
+
+[96msrc/components/views/files/files-content-view.tsx[0m:[93m190[0m:[93m9[0m - [91merror[0m[90m TS2322: [0mType '"primary"' is not assignable to type '"link" | "default" | "secondary" | "destructive" | "outline" | "ghost" | null | undefined'.
+
+[7m190[0m         variant="primary"
+[7m   [0m [91m        ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 19[0m     link: 'text-primary underline-offset-4 hover:underline',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 20[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/components/views/index.ts[0m:[93m45[0m:[93m15[0m - [91merror[0m[90m TS2307: [0mCannot find module './view-container' or its corresponding type declarations.
+
+[7m45[0m export * from './view-container';
+[7m  [0m [91m              ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/views/json-files/json-files-content-view.tsx[0m:[93m61[0m:[93m15[0m - [91merror[0m[90m TS2345: [0mArgument of type '{ id: string; name: string; type: "json"; path: string; size: number; }[]' is not assignable to parameter of type 'ImageItem[]'.
+  Type '{ id: string; name: string; type: "json"; path: string; size: number; }' is missing the following properties from type 'ImageItem': width, height, thumbnail, metadata
+
+[7m61[0m    openViewer(jsonItems, Math.max(0, currentIndex));
+[7m  [0m [91m              ~~~~~~~~~[0m
+
+[96msrc/components/views/uploaded-images/uploaded-images-view.tsx[0m:[93m397[0m:[93m8[0m - [91merror[0m[90m TS2322: [0mType '"primary"' is not assignable to type '"link" | "default" | "secondary" | "destructive" | "outline" | "ghost" | null | undefined'.
+
+[7m397[0m        variant="primary"
+[7m   [0m [91m       ~~~~~~~[0m
+
+  [96msrc/components/ui/button.tsx[0m:[93m11[0m:[93m4[0m
+    [7m 11[0m    variant: {
+    [7m   [0m [96m   ~~~~~~~~~~[0m
+    [7m 12[0m     default: 'bg-primary text-primary-foreground shadow-xs hover:bg-primary/90',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m...[0m 
+    [7m 19[0m     link: 'text-primary underline-offset-4 hover:underline',
+    [7m   [0m [96m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+    [7m 20[0m    },
+    [7m   [0m [96m~~~~[0m
+    The expected type comes from property 'variant' which is declared here on type 'IntrinsicAttributes & ClassAttributes<HTMLButtonElement> & ButtonHTMLAttributes<HTMLButtonElement> & VariantProps<...> & { ...; }'
+
+[96msrc/hooks/use-view-configuration.ts[0m:[93m196[0m:[93m6[0m - [91merror[0m[90m TS2322: [0mType '{ grid?: WritableDraft<{ type: "grid" | "list" | "cards" | "masonry"; common: { showThumbnails: boolean; showMetadata: boolean; showTags: boolean; showStats: boolean; sortBy: string; sortDirection: "asc" | "desc"; enableAnimations: boolean; animationDuration: number; showHiddenFiles: boolean; enableHoverEffects: boo...' is not assignable to type 'Record<"grid" | "list" | "cards" | "masonry", { type: "grid" | "list" | "cards" | "masonry"; common: { showThumbnails: boolean; showMetadata: boolean; showTags: boolean; showStats: boolean; ... 5 more ...; enableHoverEffects: boolean; }; specific: { ...; } | ... 2 more ... | { ...; }; metadata: { ...; }; }>'.
+  Types of property 'grid' are incompatible.
+    Type 'WritableDraft<{ type: "grid" | "list" | "cards" | "masonry"; common: { showThumbnails: boolean; showMetadata: boolean; showTags: boolean; showStats: boolean; sortBy: string; sortDirection: "asc" | "desc"; enableAnimations: boolean; animationDuration: number; showHiddenFiles: boolean; enableHoverEffects: boolean; }; ...' is not assignable to type '{ type: "grid" | "list" | "cards" | "masonry"; common: { showThumbnails: boolean; showMetadata: boolean; showTags: boolean; showStats: boolean; sortBy: string; sortDirection: "asc" | "desc"; enableAnimations: boolean; animationDuration: number; showHiddenFiles: boolean; enableHoverEffects: boolean; }; specific: { .....'.
+      Type 'undefined' is not assignable to type '{ type: "grid" | "list" | "cards" | "masonry"; common: { showThumbnails: boolean; showMetadata: boolean; showTags: boolean; showStats: boolean; sortBy: string; sortDirection: "asc" | "desc"; enableAnimations: boolean; animationDuration: number; showHiddenFiles: boolean; enableHoverEffects: boolean; }; specific: { .....'.
+
+[7m196[0m      viewConfigurations: {
+[7m   [0m [91m     ~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/hooks/use-view-configuration.ts[0m:[93m272[0m:[93m24[0m - [91merror[0m[90m TS7053: [0mElement implicitly has an 'any' type because expression of type 'FileBrowserViewType' can't be used to index type '{}'.
+  Property 'grid' does not exist on type '{}'.
+
+[7m272[0m    const viewPresets = customPresets[viewType] || [];
+[7m   [0m [91m                       ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/hooks/use-view-configuration.ts[0m:[93m277[0m:[93m6[0m - [91merror[0m[90m TS2739: [0mType '{}' is missing the following properties from type 'Record<"grid" | "list" | "cards" | "masonry", { id: string; name: string; description: string; category: "default" | "compact" | "custom" | "detailed"; configuration: { type: "grid" | "list" | "cards" | "masonry"; common: { ...; }; specific: { ...; } | ... 2 more ... | { ...; }; metadata: { ...; }; }; supportedEntit...': grid, list, cards, masonry
+
+[7m277[0m      customPresets: {
+[7m   [0m [91m     ~~~~~~~~~~~~~[0m
+
+[96msrc/hooks/use-view-configuration.ts[0m:[93m291[0m:[93m24[0m - [91merror[0m[90m TS7053: [0mElement implicitly has an 'any' type because expression of type 'FileBrowserViewType' can't be used to index type '{}'.
+  Property 'grid' does not exist on type '{}'.
+
+[7m291[0m    const viewPresets = customPresets[viewType] || [];
+[7m   [0m [91m                       ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/hooks/use-view-configuration.ts[0m:[93m292[0m:[93m48[0m - [91merror[0m[90m TS7006: [0mParameter 'p' implicitly has an 'any' type.
+
+[7m292[0m    const filteredPresets = viewPresets.filter((p) => p.id !== presetId);
+[7m   [0m [91m                                               ~[0m
+
+[96msrc/hooks/use-view-configuration.ts[0m:[93m297[0m:[93m6[0m - [91merror[0m[90m TS2739: [0mType '{}' is missing the following properties from type 'Record<"grid" | "list" | "cards" | "masonry", { id: string; name: string; description: string; category: "default" | "compact" | "custom" | "detailed"; configuration: { type: "grid" | "list" | "cards" | "masonry"; common: { ...; }; specific: { ...; } | ... 2 more ... | { ...; }; metadata: { ...; }; }; supportedEntit...': grid, list, cards, masonry
+
+[7m297[0m      customPresets: {
+[7m   [0m [91m     ~~~~~~~~~~~~~[0m
+
+[96msrc/lib/utils/image/validators.ts[0m:[93m29[0m:[93m21[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 1.
+
+[7m29[0m  extraParameters: z.record(z.unknown()).optional(),
+[7m  [0m [91m                    ~~~~~~[0m
+
+  [96mnode_modules/zod/v4/classic/schemas.d.cts[0m:[93m482[0m:[93m107[0m
+    [7m482[0m export declare function record<Key extends core.$ZodRecordKey, Value extends core.SomeType>(keyType: Key, valueType: Value, params?: string | core.$ZodRecordParams): ZodRecord<Key, Value>;
+    [7m   [0m [96m                                                                                                          ~~~~~~~~~~~~~~~~[0m
+    An argument for 'valueType' was not provided.
+
+[96msrc/lib/utils/image/validators.ts[0m:[93m57[0m:[93m10[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 1.
+
+[7m57[0m  iptc: z.record(z.unknown()).optional(),
+[7m  [0m [91m         ~~~~~~[0m
+
+  [96mnode_modules/zod/v4/classic/schemas.d.cts[0m:[93m482[0m:[93m107[0m
+    [7m482[0m export declare function record<Key extends core.$ZodRecordKey, Value extends core.SomeType>(keyType: Key, valueType: Value, params?: string | core.$ZodRecordParams): ZodRecord<Key, Value>;
+    [7m   [0m [96m                                                                                                          ~~~~~~~~~~~~~~~~[0m
+    An argument for 'valueType' was not provided.
+
+[96msrc/lib/utils/image/validators.ts[0m:[93m58[0m:[93m9[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 1.
+
+[7m58[0m  xmp: z.record(z.unknown()).optional(),
+[7m  [0m [91m        ~~~~~~[0m
+
+  [96mnode_modules/zod/v4/classic/schemas.d.cts[0m:[93m482[0m:[93m107[0m
+    [7m482[0m export declare function record<Key extends core.$ZodRecordKey, Value extends core.SomeType>(keyType: Key, valueType: Value, params?: string | core.$ZodRecordParams): ZodRecord<Key, Value>;
+    [7m   [0m [96m                                                                                                          ~~~~~~~~~~~~~~~~[0m
+    An argument for 'valueType' was not provided.
+
+[96msrc/lib/utils/image/validators.ts[0m:[93m59[0m:[93m9[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 1.
+
+[7m59[0m  icc: z.record(z.unknown()).optional(),
+[7m  [0m [91m        ~~~~~~[0m
+
+  [96mnode_modules/zod/v4/classic/schemas.d.cts[0m:[93m482[0m:[93m107[0m
+    [7m482[0m export declare function record<Key extends core.$ZodRecordKey, Value extends core.SomeType>(keyType: Key, valueType: Value, params?: string | core.$ZodRecordParams): ZodRecord<Key, Value>;
+    [7m   [0m [96m                                                                                                          ~~~~~~~~~~~~~~~~[0m
+    An argument for 'valueType' was not provided.
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m16[0m:[93m64[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m16[0m    logger.error('Error validando campos base:', { error: error.errors });
+[7m  [0m [91m                                                               ~~~~~~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m17[0m:[93m50[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m17[0m    throw new Error(`Error de validación: ${error.errors.map((e) => e.message).join(', ')}`);
+[7m  [0m [91m                                                 ~~~~~~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m17[0m:[93m62[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m17[0m    throw new Error(`Error de validación: ${error.errors.map((e) => e.message).join(', ')}`);
+[7m  [0m [91m                                                             ~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m31[0m:[93m62[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m31[0m    logger.error('Error validando campos UI:', { error: error.errors });
+[7m  [0m [91m                                                             ~~~~~~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m32[0m:[93m53[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m32[0m    throw new Error(`Error de validación UI: ${error.errors.map((e) => e.message).join(', ')}`);
+[7m  [0m [91m                                                    ~~~~~~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m32[0m:[93m65[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m32[0m    throw new Error(`Error de validación UI: ${error.errors.map((e) => e.message).join(', ')}`);
+[7m  [0m [91m                                                                ~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m46[0m:[93m71[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m46[0m    logger.error('Error validando campos de metadata:', { error: error.errors });
+[7m  [0m [91m                                                                      ~~~~~~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m47[0m:[93m59[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m47[0m    throw new Error(`Error de validación metadata: ${error.errors.map((e) => e.message).join(', ')}`);
+[7m  [0m [91m                                                          ~~~~~~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m47[0m:[93m71[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m47[0m    throw new Error(`Error de validación metadata: ${error.errors.map((e) => e.message).join(', ')}`);
+[7m  [0m [91m                                                                      ~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m116[0m:[93m72[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m116[0m    logger.error('Error validando filtros de búsqueda:', { error: error.errors });
+[7m   [0m [91m                                                                       ~~~~~~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m117[0m:[93m61[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m117[0m    throw new Error(`Error de validación de filtros: ${error.errors.map((e) => e.message).join(', ')}`);
+[7m   [0m [91m                                                            ~~~~~~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m117[0m:[93m73[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m117[0m    throw new Error(`Error de validación de filtros: ${error.errors.map((e) => e.message).join(', ')}`);
+[7m   [0m [91m                                                                        ~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m130[0m:[93m14[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 1.
+
+[7m130[0m   orderBy: z.record(z.enum(['asc', 'desc'])).optional(),
+[7m   [0m [91m             ~~~~~~[0m
+
+  [96mnode_modules/zod/v4/classic/schemas.d.cts[0m:[93m482[0m:[93m107[0m
+    [7m482[0m export declare function record<Key extends core.$ZodRecordKey, Value extends core.SomeType>(keyType: Key, valueType: Value, params?: string | core.$ZodRecordParams): ZodRecord<Key, Value>;
+    [7m   [0m [96m                                                                                                          ~~~~~~~~~~~~~~~~[0m
+    An argument for 'valueType' was not provided.
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m131[0m:[93m12[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 1.
+
+[7m131[0m   where: z.record(z.unknown()).optional(),
+[7m   [0m [91m           ~~~~~~[0m
+
+  [96mnode_modules/zod/v4/classic/schemas.d.cts[0m:[93m482[0m:[93m107[0m
+    [7m482[0m export declare function record<Key extends core.$ZodRecordKey, Value extends core.SomeType>(keyType: Key, valueType: Value, params?: string | core.$ZodRecordParams): ZodRecord<Key, Value>;
+    [7m   [0m [96m                                                                                                          ~~~~~~~~~~~~~~~~[0m
+    An argument for 'valueType' was not provided.
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m132[0m:[93m14[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 1.
+
+[7m132[0m   include: z.record(z.boolean()).optional(),
+[7m   [0m [91m             ~~~~~~[0m
+
+  [96mnode_modules/zod/v4/classic/schemas.d.cts[0m:[93m482[0m:[93m107[0m
+    [7m482[0m export declare function record<Key extends core.$ZodRecordKey, Value extends core.SomeType>(keyType: Key, valueType: Value, params?: string | core.$ZodRecordParams): ZodRecord<Key, Value>;
+    [7m   [0m [96m                                                                                                          ~~~~~~~~~~~~~~~~[0m
+    An argument for 'valueType' was not provided.
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m139[0m:[93m73[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m139[0m    logger.error('Error validando opciones de búsqueda:', { error: error.errors });
+[7m   [0m [91m                                                                        ~~~~~~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m140[0m:[93m62[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m140[0m    throw new Error(`Error de validación de opciones: ${error.errors.map((e) => e.message).join(', ')}`);
+[7m   [0m [91m                                                             ~~~~~~[0m
+
+[96msrc/lib/utils/transformers/validation.ts[0m:[93m140[0m:[93m74[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m140[0m    throw new Error(`Error de validación de opciones: ${error.errors.map((e) => e.message).join(', ')}`);
+[7m   [0m [91m                                                                         ~[0m
+
+[96msrc/lib/utils/world-item/validators.ts[0m:[93m46[0m:[93m17[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 1.
+
+[7m46[0m  customStats: z.record(z.union([z.string(), z.number()])).optional(),
+[7m  [0m [91m                ~~~~~~[0m
+
+  [96mnode_modules/zod/v4/classic/schemas.d.cts[0m:[93m482[0m:[93m107[0m
+    [7m482[0m export declare function record<Key extends core.$ZodRecordKey, Value extends core.SomeType>(keyType: Key, valueType: Value, params?: string | core.$ZodRecordParams): ZodRecord<Key, Value>;
+    [7m   [0m [96m                                                                                                          ~~~~~~~~~~~~~~~~[0m
+    An argument for 'valueType' was not provided.
+
+[96msrc/server/routes/activity.ts[0m:[93m28[0m:[93m35[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<{ type: string; message: string; imageId?: string | undefined; albumId?: string | undefined; folderId?: string | undefined; characterId?: string | undefined; collectionId?: string | undefined; metadata?: Record<...> | undefined; }>'.
+
+[7m28[0m    details: validatedResult.error.errors,
+[7m  [0m [91m                                  ~~~~~~[0m
+
+[96msrc/server/routes/albums.ts[0m:[93m214[0m:[93m73[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<{ name: string; isFavorite: boolean; totalImages: number; totalVideos: number; totalSize: number; description?: string | null | undefined; emoji?: string | null | undefined; color?: string | null | undefined; ... 7 more ...; parentId?: string | ... 1 more ... | undefined; }>'.
+
+[7m214[0m   res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
+[7m   [0m [91m                                                                        ~~~~~~[0m
+
+[96msrc/server/routes/albums.ts[0m:[93m266[0m:[93m73[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<{ name?: string | undefined; description?: string | null | undefined; emoji?: string | null | undefined; color?: string | null | undefined; featuredImage?: string | null | undefined; ... 10 more ...; parentId?: string | ... 1 more ... | undefined; }>'.
+
+[7m266[0m   res.status(400).json({ error: 'Datos inválidos', details: parse.error.errors });
+[7m   [0m [91m                                                                        ~~~~~~[0m
+
+[96msrc/server/routes/characters.ts[0m:[93m25[0m:[93m78[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<{ limit: number; offset: number; sortBy: "name" | "createdAt" | "updatedAt"; sortOrder: "asc" | "desc"; search?: string | undefined; category?: string | undefined; isFavorite?: boolean | undefined; }>'.
+
+[7m25[0m   res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
+[7m  [0m [91m                                                                             ~~~~~~[0m
+
+[96msrc/server/routes/collections.ts[0m:[93m22[0m:[93m78[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<{ limit: number; offset: number; sortBy: "name" | "createdAt" | "updatedAt"; sortOrder: "asc" | "desc"; search?: string | undefined; }>'.
+
+[7m22[0m   res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
+[7m  [0m [91m                                                                             ~~~~~~[0m
+
+[96msrc/server/routes/concepts.ts[0m:[93m26[0m:[93m97[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<{ search?: string | undefined; category?: string | undefined; limit?: number | undefined; offset?: number | undefined; sortBy?: "name" | "type" | "createdAt" | "updatedAt" | "category" | "totalImages" | "totalVideos" | "complexity" | undefined; sortOrder?: "asc" | ... 1 more ... | undefined; }>'.
+
+[7m26[0m    res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+[7m  [0m [91m                                                                                                ~~~~~~[0m
+
+[96msrc/server/routes/groups.ts[0m:[93m25[0m:[93m97[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<{ search?: string | undefined; limit?: number | undefined; offset?: number | undefined; sortBy?: "name" | "createdAt" | "updatedAt" | "totalImages" | "totalVideos" | undefined; sortOrder?: "asc" | ... 1 more ... | undefined; }>'.
+
+[7m25[0m    res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+[7m  [0m [91m                                                                                                ~~~~~~[0m
+
+[96msrc/server/routes/images.ts[0m:[93m123[0m:[93m97[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<{ folderId?: string | undefined; isFavorite?: boolean | undefined; minWidth?: number | undefined; maxWidth?: number | undefined; minHeight?: number | undefined; maxHeight?: number | undefined; ... 6 more ...; sortOrder?: "asc" | ... 1 more ... | undefined; }>'.
+
+[7m123[0m    res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+[7m   [0m [91m                                                                                                ~~~~~~[0m
+
+[96msrc/server/routes/places.ts[0m:[93m24[0m:[93m78[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<{ limit: number; offset: number; sortBy: "name" | "createdAt" | "updatedAt"; sortOrder: "asc" | "desc"; search?: string | undefined; category?: string | undefined; isFavorite?: boolean | undefined; }>'.
+
+[7m24[0m   res.status(400).json({ error: 'Parámetros inválidos', details: parse.error.errors });
+[7m  [0m [91m                                                                             ~~~~~~[0m
+
+[96msrc/server/routes/prompts.ts[0m:[93m43[0m:[93m97[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<{ search?: string | undefined; category?: string | null | undefined; isFavorite?: boolean | undefined; limit?: number | undefined; offset?: number | undefined; sortBy?: "name" | "type" | ... 7 more ... | undefined; sortOrder?: "asc" | ... 1 more ... | undefined; }>'.
+
+[7m43[0m    res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+[7m  [0m [91m                                                                                                ~~~~~~[0m
+
+[96msrc/server/services/system-simple.service.ts[0m:[93m13[0m:[93m2[0m - [91merror[0m[90m TS2741: [0mProperty 'videos' is missing in type '{ folders: never[]; collections: never[]; tags: never[]; albums: never[]; characters: never[]; places: never[]; worldItems: never[]; concepts: never[]; prompts: never[]; notes: never[]; groups: never[]; properties: never[]; ... 6 more ...; stats: any; }' but required in type 'NavigationData'.
+
+[7m13[0m  return {
+[7m  [0m [91m ~~~~~~[0m
+
+  [96msrc/lib/api/navigation.ts[0m:[93m48[0m:[93m2[0m
+    [7m48[0m  videos: Array<{ id: string; name: string; duration?: number }>;
+    [7m  [0m [96m ~~~~~~[0m
+    'videos' is declared here.
+
+[96msrc/transformers/favorite/validators.ts[0m:[93m18[0m:[93m3[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'errorMap' does not exist in type '{ error?: string | $ZodErrorMap<$ZodIssueInvalidValue<unknown>> | undefined; message?: string | undefined; }'.
+
+[7m18[0m   errorMap: () => ({ message: 'Tipo de entidad no válido' }),
+[7m  [0m [91m  ~~~~~~~~[0m
+
+[96msrc/transformers/file/validators.ts[0m:[93m23[0m:[93m3[0m - [91merror[0m[90m TS2353: [0mObject literal may only specify known properties, and 'errorMap' does not exist in type '{ error?: string | $ZodErrorMap<$ZodIssueInvalidValue<unknown>> | undefined; message?: string | undefined; }'.
+
+[7m23[0m   errorMap: () => ({ message: 'Tipo de archivo no válido' }),
+[7m  [0m [91m  ~~~~~~~~[0m
+
+[96msrc/transformers/image/serializers.ts[0m:[93m147[0m:[93m18[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m147[0m     error: error.errors,
+[7m   [0m [91m                 ~~~~~~[0m
+
+[96msrc/transformers/image/serializers.ts[0m:[93m150[0m:[93m48[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m150[0m    throw new Error(`Filtros inválidos: ${error.errors.map((e) => e.message).join(', ')}`);
+[7m   [0m [91m                                               ~~~~~~[0m
+
+[96msrc/transformers/image/serializers.ts[0m:[93m150[0m:[93m60[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m150[0m    throw new Error(`Filtros inválidos: ${error.errors.map((e) => e.message).join(', ')}`);
+[7m   [0m [91m                                                           ~[0m
+
+[96msrc/transformers/settings/schema.ts[0m:[93m92[0m:[93m51[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { showSize: boolean; showDate: boolean; showType: boolean; showDimensions: boolean; showDuration: boolean; showTags: boolean; showCollection: boolean; maxTags: number; }): ZodDefault<ZodObject<{ showSize: ZodDefault<...>; ... 6 more ...; maxTags: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ showSize: boolean; showDate: boolean; showType: boolean; showDimensions: boolean; showDuration: boolean; showTags: boolean; showCollection: boolean; maxTags: number; }'.
+      Type '{}' is missing the following properties from type '{ showSize: boolean; showDate: boolean; showType: boolean; showDimensions: boolean; showDuration: boolean; showTags: boolean; showCollection: boolean; maxTags: number; }': showSize, showDate, showType, showDimensions, and 4 more.
+  Overload 2 of 2, '(def: () => { showSize: boolean; showDate: boolean; showType: boolean; showDimensions: boolean; showDuration: boolean; showTags: boolean; showCollection: boolean; maxTags: number; }): ZodDefault<ZodObject<{ showSize: ZodDefault<...>; ... 6 more ...; maxTags: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { showSize: boolean; showDate: boolean; showType: boolean; showDimensions: boolean; showDuration: boolean; showTags: boolean; showCollection: boolean; maxTags: number; }'.
+      Type '{}' provides no match for the signature '(): { showSize: boolean; showDate: boolean; showType: boolean; showDimensions: boolean; showDuration: boolean; showTags: boolean; showCollection: boolean; maxTags: number; }'.
+
+[7m92[0m  metadataConfig: cardMetadataConfigSchema.default({}),
+[7m  [0m [91m                                                  ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m93[0m:[93m57[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { enabled: boolean; showActionButtons: boolean; actionButtons: { id: string; icon: string; tooltip: string; visible: boolean; position: "top-left" | "top-right" | "bottom-left" | "bottom-right"; }[]; showInfoOverlay: boolean; overlayPosition: "center" | ... 1 more ... | "top"; showQuickPreview: boolean; hoverDelay: number; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ enabled: boolean; showActionButtons: boolean; actionButtons: { id: string; icon: string; tooltip: string; visible: boolean; position: "top-left" | "top-right" | "bottom-left" | "bottom-right"; }[]; showInfoOverlay: boolean; overlayPosition: "center" | ... 1 more ... | "top"; showQuickPreview: boolean; hoverDelay: ...'.
+      Type '{}' is missing the following properties from type '{ enabled: boolean; showActionButtons: boolean; actionButtons: { id: string; icon: string; tooltip: string; visible: boolean; position: "top-left" | "top-right" | "bottom-left" | "bottom-right"; }[]; showInfoOverlay: boolean; overlayPosition: "center" | ... 1 more ... | "top"; showQuickPreview: boolean; hoverDelay: ...': enabled, showActionButtons, actionButtons, showInfoOverlay, and 3 more.
+  Overload 2 of 2, '(def: () => { enabled: boolean; showActionButtons: boolean; actionButtons: { id: string; icon: string; tooltip: string; visible: boolean; position: "top-left" | "top-right" | "bottom-left" | "bottom-right"; }[]; showInfoOverlay: boolean; overlayPosition: "center" | ... 1 more ... | "top"; showQuickPreview: boolean; hoverDelay: number; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { enabled: boolean; showActionButtons: boolean; actionButtons: { id: string; icon: string; tooltip: string; visible: boolean; position: "top-left" | "top-right" | "bottom-left" | "bottom-right"; }[]; showInfoOverlay: boolean; overlayPosition: "center" | ... 1 more ... | "top"; showQuickPreview: boolean; hoverD...'.
+      Type '{}' provides no match for the signature '(): { enabled: boolean; showActionButtons: boolean; actionButtons: { id: string; icon: string; tooltip: string; visible: boolean; position: "top-left" | "top-right" | "bottom-left" | "bottom-right"; }[]; showInfoOverlay: boolean; overlayPosition: "center" | ... 1 more ... | "top"; showQuickPreview: boolean; hoverDelay: number; }'.
+
+[7m93[0m  interactiveConfig: cardInteractiveConfigSchema.default({}),
+[7m  [0m [91m                                                        ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m141[0m:[93m46[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { gap: number; padding: number; minColumnWidth: number; maxColumnWidth: number; minColumns: number; maxColumns: number; }): ZodDefault<ZodObject<{ gap: ZodDefault<ZodNumber>; ... 4 more ...; maxColumns: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ gap: number; padding: number; minColumnWidth: number; maxColumnWidth: number; minColumns: number; maxColumns: number; }'.
+      Type '{}' is missing the following properties from type '{ gap: number; padding: number; minColumnWidth: number; maxColumnWidth: number; minColumns: number; maxColumns: number; }': gap, padding, minColumnWidth, maxColumnWidth, and 2 more.
+  Overload 2 of 2, '(def: () => { gap: number; padding: number; minColumnWidth: number; maxColumnWidth: number; minColumns: number; maxColumns: number; }): ZodDefault<ZodObject<{ gap: ZodDefault<ZodNumber>; ... 4 more ...; maxColumns: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { gap: number; padding: number; minColumnWidth: number; maxColumnWidth: number; minColumns: number; maxColumns: number; }'.
+      Type '{}' provides no match for the signature '(): { gap: number; padding: number; minColumnWidth: number; maxColumnWidth: number; minColumns: number; maxColumns: number; }'.
+
+[7m141[0m  spacing: masonrySpacingConfigSchema.default({}),
+[7m   [0m [91m                                             ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m142[0m:[93m44[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { baseHeight: number; minHeight: number; maxHeight: number; useRealDimensions: boolean; variationFactor: number; defaultAspectRatios: Record<string, number>; }): ZodDefault<ZodObject<{ ...; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ baseHeight: number; minHeight: number; maxHeight: number; useRealDimensions: boolean; variationFactor: number; defaultAspectRatios: Record<string, number>; }'.
+      Type '{}' is missing the following properties from type '{ baseHeight: number; minHeight: number; maxHeight: number; useRealDimensions: boolean; variationFactor: number; defaultAspectRatios: Record<string, number>; }': baseHeight, minHeight, maxHeight, useRealDimensions, and 2 more.
+  Overload 2 of 2, '(def: () => { baseHeight: number; minHeight: number; maxHeight: number; useRealDimensions: boolean; variationFactor: number; defaultAspectRatios: Record<string, number>; }): ZodDefault<ZodObject<...>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { baseHeight: number; minHeight: number; maxHeight: number; useRealDimensions: boolean; variationFactor: number; defaultAspectRatios: Record<string, number>; }'.
+      Type '{}' provides no match for the signature '(): { baseHeight: number; minHeight: number; maxHeight: number; useRealDimensions: boolean; variationFactor: number; defaultAspectRatios: Record<string, number>; }'.
+
+[7m142[0m  height: masonryHeightConfigSchema.default({}),
+[7m   [0m [91m                                           ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m143[0m:[93m56[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { algorithm: "shortest-column" | "balanced" | "left-to-right"; autoRebalance: boolean; minimizeGaps: boolean; respectAspectRatio: boolean; batchSize: number; recalculateDebounce: number; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ algorithm: "shortest-column" | "balanced" | "left-to-right"; autoRebalance: boolean; minimizeGaps: boolean; respectAspectRatio: boolean; batchSize: number; recalculateDebounce: number; }'.
+      Type '{}' is missing the following properties from type '{ algorithm: "shortest-column" | "balanced" | "left-to-right"; autoRebalance: boolean; minimizeGaps: boolean; respectAspectRatio: boolean; batchSize: number; recalculateDebounce: number; }': algorithm, autoRebalance, minimizeGaps, respectAspectRatio, and 2 more.
+  Overload 2 of 2, '(def: () => { algorithm: "shortest-column" | "balanced" | "left-to-right"; autoRebalance: boolean; minimizeGaps: boolean; respectAspectRatio: boolean; batchSize: number; recalculateDebounce: number; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { algorithm: "shortest-column" | "balanced" | "left-to-right"; autoRebalance: boolean; minimizeGaps: boolean; respectAspectRatio: boolean; batchSize: number; recalculateDebounce: number; }'.
+      Type '{}' provides no match for the signature '(): { algorithm: "shortest-column" | "balanced" | "left-to-right"; autoRebalance: boolean; minimizeGaps: boolean; respectAspectRatio: boolean; batchSize: number; recalculateDebounce: number; }'.
+
+[7m143[0m  optimization: masonryOptimizationConfigSchema.default({}),
+[7m   [0m [91m                                                       ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m212[0m:[93m14[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { enabled: boolean; duration: number; scale: number; }): ZodDefault<ZodObject<{ enabled: ZodDefault<ZodBoolean>; duration: ZodDefault<ZodNumber>; scale: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ enabled: boolean; duration: number; scale: number; }'.
+      Type '{}' is missing the following properties from type '{ enabled: boolean; duration: number; scale: number; }': enabled, duration, scale
+  Overload 2 of 2, '(def: () => { enabled: boolean; duration: number; scale: number; }): ZodDefault<ZodObject<{ enabled: ZodDefault<ZodBoolean>; duration: ZodDefault<ZodNumber>; scale: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { enabled: boolean; duration: number; scale: number; }'.
+      Type '{}' provides no match for the signature '(): { enabled: boolean; duration: number; scale: number; }'.
+
+[7m212[0m     .default({}),
+[7m   [0m [91m             ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m219[0m:[93m14[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { enabled: boolean; duration: number; highlightColor: string; }): ZodDefault<ZodObject<{ enabled: ZodDefault<ZodBoolean>; duration: ZodDefault<ZodNumber>; highlightColor: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ enabled: boolean; duration: number; highlightColor: string; }'.
+      Type '{}' is missing the following properties from type '{ enabled: boolean; duration: number; highlightColor: string; }': enabled, duration, highlightColor
+  Overload 2 of 2, '(def: () => { enabled: boolean; duration: number; highlightColor: string; }): ZodDefault<ZodObject<{ enabled: ZodDefault<ZodBoolean>; duration: ZodDefault<ZodNumber>; highlightColor: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { enabled: boolean; duration: number; highlightColor: string; }'.
+      Type '{}' provides no match for the signature '(): { enabled: boolean; duration: number; highlightColor: string; }'.
+
+[7m219[0m     .default({}),
+[7m   [0m [91m             ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m225[0m:[93m14[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { enabled: boolean; type: "skeleton" | "spinner" | "pulse"; }): ZodDefault<ZodObject<{ enabled: ZodDefault<ZodBoolean>; type: ZodDefault<ZodEnum<{ skeleton: "skeleton"; spinner: "spinner"; pulse: "pulse"; }>>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ enabled: boolean; type: "skeleton" | "spinner" | "pulse"; }'.
+      Type '{}' is missing the following properties from type '{ enabled: boolean; type: "skeleton" | "spinner" | "pulse"; }': enabled, type
+  Overload 2 of 2, '(def: () => { enabled: boolean; type: "skeleton" | "spinner" | "pulse"; }): ZodDefault<ZodObject<{ enabled: ZodDefault<ZodBoolean>; type: ZodDefault<ZodEnum<{ skeleton: "skeleton"; spinner: "spinner"; pulse: "pulse"; }>>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { enabled: boolean; type: "skeleton" | "spinner" | "pulse"; }'.
+      Type '{}' provides no match for the signature '(): { enabled: boolean; type: "skeleton" | "spinner" | "pulse"; }'.
+
+[7m225[0m     .default({}),
+[7m   [0m [91m             ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m232[0m:[93m14[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { enabled: boolean; duration: number; type: "scale" | "slide" | "fade"; }): ZodDefault<ZodObject<{ enabled: ZodDefault<ZodBoolean>; duration: ZodDefault<ZodNumber>; type: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ enabled: boolean; duration: number; type: "scale" | "slide" | "fade"; }'.
+      Type '{}' is missing the following properties from type '{ enabled: boolean; duration: number; type: "scale" | "slide" | "fade"; }': enabled, duration, type
+  Overload 2 of 2, '(def: () => { enabled: boolean; duration: number; type: "scale" | "slide" | "fade"; }): ZodDefault<ZodObject<{ enabled: ZodDefault<ZodBoolean>; duration: ZodDefault<ZodNumber>; type: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { enabled: boolean; duration: number; type: "scale" | "slide" | "fade"; }'.
+      Type '{}' provides no match for the signature '(): { enabled: boolean; duration: number; type: "scale" | "slide" | "fade"; }'.
+
+[7m232[0m     .default({}),
+[7m   [0m [91m             ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m234[0m:[93m12[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { hover: { enabled: boolean; duration: number; scale: number; }; selection: { enabled: boolean; duration: number; highlightColor: string; }; loading: { enabled: boolean; type: "skeleton" | "spinner" | "pulse"; }; viewTransition: { ...; }; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ hover: { enabled: boolean; duration: number; scale: number; }; selection: { enabled: boolean; duration: number; highlightColor: string; }; loading: { enabled: boolean; type: "skeleton" | "spinner" | "pulse"; }; viewTransition: { ...; }; }'.
+      Type '{}' is missing the following properties from type '{ hover: { enabled: boolean; duration: number; scale: number; }; selection: { enabled: boolean; duration: number; highlightColor: string; }; loading: { enabled: boolean; type: "skeleton" | "spinner" | "pulse"; }; viewTransition: { ...; }; }': hover, selection, loading, viewTransition
+  Overload 2 of 2, '(def: () => { hover: { enabled: boolean; duration: number; scale: number; }; selection: { enabled: boolean; duration: number; highlightColor: string; }; loading: { enabled: boolean; type: "skeleton" | "spinner" | "pulse"; }; viewTransition: { ...; }; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { hover: { enabled: boolean; duration: number; scale: number; }; selection: { enabled: boolean; duration: number; highlightColor: string; }; loading: { enabled: boolean; type: "skeleton" | "spinner" | "pulse"; }; viewTransition: { ...; }; }'.
+      Type '{}' provides no match for the signature '(): { hover: { enabled: boolean; duration: number; scale: number; }; selection: { enabled: boolean; duration: number; highlightColor: string; }; loading: { enabled: boolean; type: "skeleton" | "spinner" | "pulse"; }; viewTransition: { ...; }; }'.
+
+[7m234[0m   .default({}),
+[7m   [0m [91m           ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m250[0m:[93m12[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { showIndicators: boolean; indicatorColor: string; indicatorWidth: number; }): ZodDefault<ZodObject<{ showIndicators: ZodDefault<ZodBoolean>; indicatorColor: ZodDefault<ZodString>; indicatorWidth: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ showIndicators: boolean; indicatorColor: string; indicatorWidth: number; }'.
+      Type '{}' is missing the following properties from type '{ showIndicators: boolean; indicatorColor: string; indicatorWidth: number; }': showIndicators, indicatorColor, indicatorWidth
+  Overload 2 of 2, '(def: () => { showIndicators: boolean; indicatorColor: string; indicatorWidth: number; }): ZodDefault<ZodObject<{ showIndicators: ZodDefault<ZodBoolean>; indicatorColor: ZodDefault<ZodString>; indicatorWidth: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { showIndicators: boolean; indicatorColor: string; indicatorWidth: number; }'.
+      Type '{}' provides no match for the signature '(): { showIndicators: boolean; indicatorColor: string; indicatorWidth: number; }'.
+
+[7m250[0m   .default({}),
+[7m   [0m [91m           ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m266[0m:[93m12[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { thumbnails: boolean; maxSize: number; ttl: number; }): ZodDefault<ZodObject<{ thumbnails: ZodDefault<ZodBoolean>; maxSize: ZodDefault<ZodNumber>; ttl: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ thumbnails: boolean; maxSize: number; ttl: number; }'.
+      Type '{}' is missing the following properties from type '{ thumbnails: boolean; maxSize: number; ttl: number; }': thumbnails, maxSize, ttl
+  Overload 2 of 2, '(def: () => { thumbnails: boolean; maxSize: number; ttl: number; }): ZodDefault<ZodObject<{ thumbnails: ZodDefault<ZodBoolean>; maxSize: ZodDefault<ZodNumber>; ttl: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { thumbnails: boolean; maxSize: number; ttl: number; }'.
+      Type '{}' provides no match for the signature '(): { thumbnails: boolean; maxSize: number; ttl: number; }'.
+
+[7m266[0m   .default({}),
+[7m   [0m [91m           ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m273[0m:[93m12[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { search: number; scroll: number; resize: number; }): ZodDefault<ZodObject<{ search: ZodDefault<ZodNumber>; scroll: ZodDefault<ZodNumber>; resize: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ search: number; scroll: number; resize: number; }'.
+      Type '{}' is missing the following properties from type '{ search: number; scroll: number; resize: number; }': search, scroll, resize
+  Overload 2 of 2, '(def: () => { search: number; scroll: number; resize: number; }): ZodDefault<ZodObject<{ search: ZodDefault<ZodNumber>; scroll: ZodDefault<ZodNumber>; resize: ZodDefault<...>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { search: number; scroll: number; resize: number; }'.
+      Type '{}' provides no match for the signature '(): { search: number; scroll: number; resize: number; }'.
+
+[7m273[0m   .default({}),
+[7m   [0m [91m           ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m279[0m:[93m87[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: Record<"grid" | "list" | "cards" | "masonry", any>): ZodDefault<ZodRecord<ZodEnum<{ grid: "grid"; list: "list"; cards: "cards"; masonry: "masonry"; }>, ZodAny>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type 'Record<"grid" | "list" | "cards" | "masonry", any>'.
+      Type '{}' is missing the following properties from type 'Record<"grid" | "list" | "cards" | "masonry", any>': grid, list, cards, masonry
+  Overload 2 of 2, '(def: () => Record<"grid" | "list" | "cards" | "masonry", any>): ZodDefault<ZodRecord<ZodEnum<{ grid: "grid"; list: "list"; cards: "cards"; masonry: "masonry"; }>, ZodAny>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => Record<"grid" | "list" | "cards" | "masonry", any>'.
+      Type '{}' provides no match for the signature '(): Record<"grid" | "list" | "cards" | "masonry", any>'.
+
+[7m279[0m  viewConfigs: z.record(z.enum(['list', 'grid', 'cards', 'masonry']), z.any()).default({}),
+[7m   [0m [91m                                                                                      ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m288[0m:[93m44[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { enabled: boolean; duration: number; easing: "ease" | "ease-in" | "ease-in-out" | "ease-out" | "linear"; types: { hover: { enabled: boolean; duration: number; scale: number; }; selection: { ...; }; loading: { ...; }; viewTransition: { ...; }; }; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ enabled: boolean; duration: number; easing: "ease" | "ease-in" | "ease-in-out" | "ease-out" | "linear"; types: { hover: { enabled: boolean; duration: number; scale: number; }; selection: { enabled: boolean; duration: number; highlightColor: string; }; loading: { ...; }; viewTransition: { ...; }; }; }'.
+      Type '{}' is missing the following properties from type '{ enabled: boolean; duration: number; easing: "ease" | "ease-in" | "ease-in-out" | "ease-out" | "linear"; types: { hover: { enabled: boolean; duration: number; scale: number; }; selection: { enabled: boolean; duration: number; highlightColor: string; }; loading: { ...; }; viewTransition: { ...; }; }; }': enabled, duration, easing, types
+  Overload 2 of 2, '(def: () => { enabled: boolean; duration: number; easing: "ease" | "ease-in" | "ease-in-out" | "ease-out" | "linear"; types: { hover: { enabled: boolean; duration: number; scale: number; }; selection: { ...; }; loading: { ...; }; viewTransition: { ...; }; }; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { enabled: boolean; duration: number; easing: "ease" | "ease-in" | "ease-in-out" | "ease-out" | "linear"; types: { hover: { enabled: boolean; duration: number; scale: number; }; selection: { ...; }; loading: { ...; }; viewTransition: { ...; }; }; }'.
+      Type '{}' provides no match for the signature '(): { enabled: boolean; duration: number; easing: "ease" | "ease-in" | "ease-in-out" | "ease-out" | "linear"; types: { hover: { enabled: boolean; duration: number; scale: number; }; selection: { ...; }; loading: { ...; }; viewTransition: { ...; }; }; }'.
+
+[7m288[0m  animations: animationConfigSchema.default({}),
+[7m   [0m [91m                                           ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m289[0m:[93m51[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { keyboardNavigation: boolean; screenReaderAnnouncements: boolean; highContrast: boolean; reduceMotion: boolean; largeFonts: boolean; focus: { showIndicators: boolean; indicatorColor: string; indicatorWidth: number; }; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ keyboardNavigation: boolean; screenReaderAnnouncements: boolean; highContrast: boolean; reduceMotion: boolean; largeFonts: boolean; focus: { showIndicators: boolean; indicatorColor: string; indicatorWidth: number; }; }'.
+      Type '{}' is missing the following properties from type '{ keyboardNavigation: boolean; screenReaderAnnouncements: boolean; highContrast: boolean; reduceMotion: boolean; largeFonts: boolean; focus: { showIndicators: boolean; indicatorColor: string; indicatorWidth: number; }; }': keyboardNavigation, screenReaderAnnouncements, highContrast, reduceMotion, and 2 more.
+  Overload 2 of 2, '(def: () => { keyboardNavigation: boolean; screenReaderAnnouncements: boolean; highContrast: boolean; reduceMotion: boolean; largeFonts: boolean; focus: { showIndicators: boolean; indicatorColor: string; indicatorWidth: number; }; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { keyboardNavigation: boolean; screenReaderAnnouncements: boolean; highContrast: boolean; reduceMotion: boolean; largeFonts: boolean; focus: { showIndicators: boolean; indicatorColor: string; indicatorWidth: number; }; }'.
+      Type '{}' provides no match for the signature '(): { keyboardNavigation: boolean; screenReaderAnnouncements: boolean; highContrast: boolean; reduceMotion: boolean; largeFonts: boolean; focus: { showIndicators: boolean; indicatorColor: string; indicatorWidth: number; }; }'.
+
+[7m289[0m  accessibility: accessibilityConfigSchema.default({}),
+[7m   [0m [91m                                                  ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m290[0m:[93m47[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { maxRenderItems: number; virtualization: boolean; virtualizationBuffer: number; lazyThumbnails: boolean; thumbnailQuality: "high" | "low" | "medium"; cache: { thumbnails: boolean; maxSize: number; ttl: number; }; debounce: { ...; }; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ maxRenderItems: number; virtualization: boolean; virtualizationBuffer: number; lazyThumbnails: boolean; thumbnailQuality: "high" | "low" | "medium"; cache: { thumbnails: boolean; maxSize: number; ttl: number; }; debounce: { ...; }; }'.
+      Type '{}' is missing the following properties from type '{ maxRenderItems: number; virtualization: boolean; virtualizationBuffer: number; lazyThumbnails: boolean; thumbnailQuality: "high" | "low" | "medium"; cache: { thumbnails: boolean; maxSize: number; ttl: number; }; debounce: { ...; }; }': maxRenderItems, virtualization, virtualizationBuffer, lazyThumbnails, and 3 more.
+  Overload 2 of 2, '(def: () => { maxRenderItems: number; virtualization: boolean; virtualizationBuffer: number; lazyThumbnails: boolean; thumbnailQuality: "high" | "low" | "medium"; cache: { thumbnails: boolean; maxSize: number; ttl: number; }; debounce: { ...; }; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { maxRenderItems: number; virtualization: boolean; virtualizationBuffer: number; lazyThumbnails: boolean; thumbnailQuality: "high" | "low" | "medium"; cache: { thumbnails: boolean; maxSize: number; ttl: number; }; debounce: { ...; }; }'.
+      Type '{}' provides no match for the signature '(): { maxRenderItems: number; virtualization: boolean; virtualizationBuffer: number; lazyThumbnails: boolean; thumbnailQuality: "high" | "low" | "medium"; cache: { thumbnails: boolean; maxSize: number; ttl: number; }; debounce: { ...; }; }'.
+
+[7m290[0m  performance: performanceConfigSchema.default({}),
+[7m   [0m [91m                                              ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m431[0m:[93m47[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { defaultViewType: "grid" | "list" | "cards" | "masonry"; rememberViewPerFolder: boolean; listView?: { columns: { key: string; label: string; width: number | "auto"; sortable: boolean; ... 5 more ...; order?: number | undefined; }[]; ... 8 more ...; cellPadding: number; } | undefined; ... 9 more ...; performance?: { ...; } | undefined; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ defaultViewType: "grid" | "list" | "cards" | "masonry"; rememberViewPerFolder: boolean; listView?: { columns: { key: string; label: string; width: number | "auto"; sortable: boolean; visible: boolean; ... 4 more ...; order?: number | undefined; }[]; ... 8 more ...; cellPadding: number; } | undefined; ... 9 more .....'.
+      Type '{}' is missing the following properties from type '{ defaultViewType: "grid" | "list" | "cards" | "masonry"; rememberViewPerFolder: boolean; listView?: { columns: { key: string; label: string; width: number | "auto"; sortable: boolean; visible: boolean; ... 4 more ...; order?: number | undefined; }[]; ... 8 more ...; cellPadding: number; } | undefined; ... 9 more .....': defaultViewType, rememberViewPerFolder
+  Overload 2 of 2, '(def: () => { defaultViewType: "grid" | "list" | "cards" | "masonry"; rememberViewPerFolder: boolean; listView?: { columns: { key: string; label: string; width: number | "auto"; sortable: boolean; ... 5 more ...; order?: number | undefined; }[]; ... 8 more ...; cellPadding: number; } | undefined; ... 9 more ...; performance?: { ...; } | undefined; }): ZodDefault<...>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { defaultViewType: "grid" | "list" | "cards" | "masonry"; rememberViewPerFolder: boolean; listView?: { columns: { key: string; label: string; width: number | "auto"; sortable: boolean; ... 5 more ...; order?: number | undefined; }[]; ... 8 more ...; cellPadding: number; } | undefined; ... 9 more ...; performan...'.
+      Type '{}' provides no match for the signature '(): { defaultViewType: "grid" | "list" | "cards" | "masonry"; rememberViewPerFolder: boolean; listView?: { columns: { key: string; label: string; width: number | "auto"; sortable: boolean; ... 5 more ...; order?: number | undefined; }[]; ... 8 more ...; cellPadding: number; } | undefined; ... 9 more ...; performance?: { ...; } | undefined; }'.
+
+[7m431[0m  fileBrowser: fileBrowserConfigSchema.default({}),
+[7m   [0m [91m                                              ~~[0m
+
+
+[96msrc/transformers/settings/schema.ts[0m:[93m439[0m:[93m12[0m - [91merror[0m[90m TS2769: [0mNo overload matches this call.
+  Overload 1 of 2, '(def: { platform: string; version: string; }): ZodDefault<ZodObject<{ platform: ZodDefault<ZodString>; version: ZodDefault<ZodString>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '{ platform: string; version: string; }'.
+      Type '{}' is missing the following properties from type '{ platform: string; version: string; }': platform, version
+  Overload 2 of 2, '(def: () => { platform: string; version: string; }): ZodDefault<ZodObject<{ platform: ZodDefault<ZodString>; version: ZodDefault<ZodString>; }, $strip>>', gave the following error.
+    Argument of type '{}' is not assignable to parameter of type '() => { platform: string; version: string; }'.
+      Type '{}' provides no match for the signature '(): { platform: string; version: string; }'.
+
+[7m439[0m   .default({}),
+[7m   [0m [91m           ~~[0m
+
+
+[96msrc/transformers/settings/validators.ts[0m:[93m27[0m:[93m77[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m27[0m    `Datos de configuración inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m  [0m [91m                                                                            ~~~~~~[0m
+
+[96msrc/transformers/settings/validators.ts[0m:[93m27[0m:[93m89[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m27[0m    `Datos de configuración inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m  [0m [91m                                                                                        ~[0m
+
+[96msrc/transformers/settings/validators.ts[0m:[93m45[0m:[93m94[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m45[0m    `Datos de actualización de configuración inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m  [0m [91m                                                                                             ~~~~~~[0m
+
+[96msrc/transformers/settings/validators.ts[0m:[93m45[0m:[93m106[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m45[0m    `Datos de actualización de configuración inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m  [0m [91m                                                                                                         ~[0m
+
+[96msrc/transformers/settings/validators.ts[0m:[93m71[0m:[93m81[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m71[0m    `Configuración de apariencia inválida: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m  [0m [91m                                                                                ~~~~~~[0m
+
+[96msrc/transformers/settings/validators.ts[0m:[93m71[0m:[93m93[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m71[0m    `Configuración de apariencia inválida: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m  [0m [91m                                                                                            ~[0m
+
+[96msrc/transformers/settings/validators.ts[0m:[93m96[0m:[93m85[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m96[0m    `Configuración de notificaciones inválida: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m  [0m [91m                                                                                    ~~~~~~[0m
+
+[96msrc/transformers/settings/validators.ts[0m:[93m96[0m:[93m97[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m96[0m    `Configuración de notificaciones inválida: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m  [0m [91m                                                                                                ~[0m
+
+[96msrc/transformers/settings/validators.ts[0m:[93m120[0m:[93m81[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m120[0m    `Configuración de privacidad inválida: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m   [0m [91m                                                                                ~~~~~~[0m
+
+[96msrc/transformers/settings/validators.ts[0m:[93m120[0m:[93m93[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m120[0m    `Configuración de privacidad inválida: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m   [0m [91m                                                                                            ~[0m
+
+[96msrc/transformers/settings/validators.ts[0m:[93m144[0m:[93m76[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m144[0m    `Configuración avanzada inválida: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m   [0m [91m                                                                           ~~~~~~[0m
+
+[96msrc/transformers/settings/validators.ts[0m:[93m144[0m:[93m88[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m144[0m    `Configuración avanzada inválida: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m   [0m [91m                                                                                       ~[0m
+
+[96msrc/transformers/tag/validators.ts[0m:[93m85[0m:[93m67[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m85[0m    `Datos de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m  [0m [91m                                                                  ~~~~~~[0m
+
+[96msrc/transformers/tag/validators.ts[0m:[93m85[0m:[93m79[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m85[0m    `Datos de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m  [0m [91m                                                                              ~[0m
+
+[96msrc/transformers/tag/validators.ts[0m:[93m103[0m:[93m79[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m103[0m    `Datos de creación de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m   [0m [91m                                                                              ~~~~~~[0m
+
+[96msrc/transformers/tag/validators.ts[0m:[93m103[0m:[93m91[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m103[0m    `Datos de creación de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m   [0m [91m                                                                                          ~[0m
+
+[96msrc/transformers/tag/validators.ts[0m:[93m121[0m:[93m84[0m - [91merror[0m[90m TS2339: [0mProperty 'errors' does not exist on type 'ZodError<unknown>'.
+
+[7m121[0m    `Datos de actualización de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m   [0m [91m                                                                                   ~~~~~~[0m
+
+[96msrc/transformers/tag/validators.ts[0m:[93m121[0m:[93m96[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m121[0m    `Datos de actualización de Tag inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+[7m   [0m [91m                                                                                               ~[0m
+
+[96msrc/types/entities/group/schema.ts[0m:[93m134[0m:[93m13[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 1.
+
+[7m134[0m  orderBy: z.record(z.enum(['asc', 'desc'])).optional(),
+[7m   [0m [91m            ~~~~~~[0m
+
+  [96mnode_modules/zod/v4/classic/schemas.d.cts[0m:[93m482[0m:[93m107[0m
+    [7m482[0m export declare function record<Key extends core.$ZodRecordKey, Value extends core.SomeType>(keyType: Key, valueType: Value, params?: string | core.$ZodRecordParams): ZodRecord<Key, Value>;
+    [7m   [0m [96m                                                                                                          ~~~~~~~~~~~~~~~~[0m
+    An argument for 'valueType' was not provided.
+
+[96msrc/types/entities/group/schema.ts[0m:[93m136[0m:[93m13[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 1.
+
+[7m136[0m  include: z.record(z.boolean()).optional(),
+[7m   [0m [91m            ~~~~~~[0m
+
+  [96mnode_modules/zod/v4/classic/schemas.d.cts[0m:[93m482[0m:[93m107[0m
+    [7m482[0m export declare function record<Key extends core.$ZodRecordKey, Value extends core.SomeType>(keyType: Key, valueType: Value, params?: string | core.$ZodRecordParams): ZodRecord<Key, Value>;
+    [7m   [0m [96m                                                                                                          ~~~~~~~~~~~~~~~~[0m
+    An argument for 'valueType' was not provided.
+
+[96msrc/types/entities/queue-job/schema.ts[0m:[93m37[0m:[93m17[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 1.
+
+[7m37[0m   customData: z.record(z.unknown()).optional(),
+[7m  [0m [91m                ~~~~~~[0m
+
+  [96mnode_modules/zod/v4/classic/schemas.d.cts[0m:[93m482[0m:[93m107[0m
+    [7m482[0m export declare function record<Key extends core.$ZodRecordKey, Value extends core.SomeType>(keyType: Key, valueType: Value, params?: string | core.$ZodRecordParams): ZodRecord<Key, Value>;
+    [7m   [0m [96m                                                                                                          ~~~~~~~~~~~~~~~~[0m
+    An argument for 'valueType' was not provided.
+
+[96msrc/types/entities/thumbnail/extended.ts[0m:[93m79[0m:[93m25[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 1.
+
+[7m79[0m  formatsDistribution: z.record(z.number()),
+[7m  [0m [91m                        ~~~~~~[0m
+
+  [96mnode_modules/zod/v4/classic/schemas.d.cts[0m:[93m482[0m:[93m107[0m
+    [7m482[0m export declare function record<Key extends core.$ZodRecordKey, Value extends core.SomeType>(keyType: Key, valueType: Value, params?: string | core.$ZodRecordParams): ZodRecord<Key, Value>;
+    [7m   [0m [96m                                                                                                          ~~~~~~~~~~~~~~~~[0m
+    An argument for 'valueType' was not provided.
+
+[96msrc/types/entities/thumbnail/extended.ts[0m:[93m80[0m:[93m25[0m - [91merror[0m[90m TS2554: [0mExpected 2-3 arguments, but got 1.
+
+[7m80[0m  qualityDistribution: z.record(z.number()),
+[7m  [0m [91m                        ~~~~~~[0m
+
+  [96mnode_modules/zod/v4/classic/schemas.d.cts[0m:[93m482[0m:[93m107[0m
+    [7m482[0m export declare function record<Key extends core.$ZodRecordKey, Value extends core.SomeType>(keyType: Key, valueType: Value, params?: string | core.$ZodRecordParams): ZodRecord<Key, Value>;
+    [7m   [0m [96m                                                                                                          ~~~~~~~~~~~~~~~~[0m
+    An argument for 'valueType' was not provided.
+
+
+Found 127 errors in 48 files.
+
+Errors  Files
+     1  src/components/batch-operations/BatchOperationDialog.tsx[90m:351[0m
+     2  src/components/batch-operations/BatchOperationsPanel.tsx[90m:227[0m
+     1  src/components/cards/image-card/image-gallery.tsx[90m:300[0m
+     1  src/components/core/emojis/emoji-picker.tsx[90m:126[0m
+     1  src/components/core/global-error-handler.tsx[90m:28[0m
+     1  src/components/entities/profile/ProfileCard.tsx[90m:60[0m
+     1  src/components/features/file-browser/components/list-item.tsx[90m:38[0m
+     1  src/components/features/workflow/workflow-drop-zone.tsx[90m:114[0m
+     1  src/components/ui/code.tsx[90m:56[0m
+     1  src/components/ui/data-grid-column-header.tsx[90m:135[0m
+     6  src/components/ui/data-grid-pagination.tsx[90m:71[0m
+     1  src/components/ui/data-grid-table-dnd-rows.tsx[90m:41[0m
+     1  src/components/ui/data-grid-table-dnd.tsx[90m:60[0m
+     2  src/components/ui/data-grid-table.tsx[90m:393[0m
+     8  src/components/ui/entity-form.tsx[90m:406[0m
+     1  src/components/ui/tauri-backend-status.tsx[90m:36[0m
+     1  src/components/views/all-images/all-images-content-view.tsx[90m:265[0m
+     1  src/components/views/audio/audio-view.tsx[90m:109[0m
+     2  src/components/views/development/debug-console.tsx[90m:96[0m
+     1  src/components/views/file3d/file3d-content-view.tsx[90m:9[0m
+     1  src/components/views/file3d/file3d-view.tsx[90m:103[0m
+     1  src/components/views/files/files-content-view.tsx[90m:190[0m
+     1  src/components/views/index.ts[90m:45[0m
+     1  src/components/views/json-files/json-files-content-view.tsx[90m:61[0m
+     1  src/components/views/uploaded-images/uploaded-images-view.tsx[90m:397[0m
+     6  src/hooks/use-view-configuration.ts[90m:196[0m
+     4  src/lib/utils/image/validators.ts[90m:29[0m
+    18  src/lib/utils/transformers/validation.ts[90m:16[0m
+     1  src/lib/utils/world-item/validators.ts[90m:46[0m
+     1  src/server/routes/activity.ts[90m:28[0m
+     2  src/server/routes/albums.ts[90m:214[0m
+     1  src/server/routes/characters.ts[90m:25[0m
+     1  src/server/routes/collections.ts[90m:22[0m
+     1  src/server/routes/concepts.ts[90m:26[0m
+     1  src/server/routes/groups.ts[90m:25[0m
+     1  src/server/routes/images.ts[90m:123[0m
+     1  src/server/routes/places.ts[90m:24[0m
+     1  src/server/routes/prompts.ts[90m:43[0m
+     1  src/server/services/system-simple.service.ts[90m:13[0m
+     1  src/transformers/favorite/validators.ts[90m:18[0m
+     1  src/transformers/file/validators.ts[90m:23[0m
+     3  src/transformers/image/serializers.ts[90m:147[0m
+    19  src/transformers/settings/schema.ts[90m:92[0m
+    12  src/transformers/settings/validators.ts[90m:27[0m
+     6  src/transformers/tag/validators.ts[90m:85[0m
+     2  src/types/entities/group/schema.ts[90m:134[0m
+     1  src/types/entities/queue-job/schema.ts[90m:37[0m
+     2  src/types/entities/thumbnail/extended.ts[90m:79[0m

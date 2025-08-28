@@ -13,7 +13,7 @@ const toggleFavoriteSchema = z.object({
 router.post('/toggle', async (req, res) => {
 	const validation = toggleFavoriteSchema.safeParse(req.body);
 	if (!validation.success) {
-		return res.status(400).json({ error: 'Datos inválidos', details: validation.error.errors });
+		return res.status(400).json({ error: 'Datos inválidos', details: validation.error.issues });
 	}
 
 	const { entityType, entityId } = validation.data;

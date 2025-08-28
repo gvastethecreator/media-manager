@@ -26,7 +26,7 @@ export const imageAIMetadataSchema = z.object({
 	samplingSteps: z.number().int().positive().optional(),
 	cfgScale: z.number().positive().optional(),
 	samplingMethod: z.string().optional(),
-	extraParameters: z.record(z.unknown()).optional(),
+	extraParameters: z.record(z.string(), z.unknown()).optional(),
 });
 
 /**
@@ -54,9 +54,9 @@ export const exifMetadataSchema = z
 export const imageMetadataSchema = z.object({
 	format: z.string().optional(),
 	exif: exifMetadataSchema.optional(),
-	iptc: z.record(z.unknown()).optional(),
-	xmp: z.record(z.unknown()).optional(),
-	icc: z.record(z.unknown()).optional(),
+	iptc: z.record(z.string(), z.unknown()).optional(),
+	xmp: z.record(z.string(), z.unknown()).optional(),
+	icc: z.record(z.string(), z.unknown()).optional(),
 	ai: imageAIMetadataSchema.optional(),
 });
 

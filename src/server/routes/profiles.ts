@@ -98,7 +98,7 @@ router.post('/', async (req, res) => {
 		if (error instanceof z.ZodError) {
 			return res.status(400).json({
 				error: 'Datos de entrada inválidos',
-				details: error.errors,
+				details: error.issues,
 				timestamp: new Date().toISOString(),
 			});
 		}
@@ -145,7 +145,7 @@ router.put('/:id', async (req, res) => {
 		if (error instanceof z.ZodError) {
 			return res.status(400).json({
 				error: 'Datos de entrada inválidos',
-				details: error.errors,
+				details: error.issues,
 				timestamp: new Date().toISOString(),
 			});
 		}

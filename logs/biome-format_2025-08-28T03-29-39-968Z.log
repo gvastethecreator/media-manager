@@ -1,0 +1,68 @@
+Comando: bunx biome format --write .
+Fecha: 2025-08-28T03:29:39.969Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+src\services\file-enFormatted 1679 files in 2s. No fixes applied.
+Found 3 errors.
+tity-mapper\file-entity-mapper.service.clean.ts:541:1 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}'.
+  
+    539 │ 	}
+    540 │ }
+  > 541 │ }
+        │ ^
+    542 │ 
+    543 │ return stats;
+  
+  i Expected a statement here.
+  
+    539 │ 	}
+    540 │ }
+  > 541 │ }
+        │ ^
+    542 │ 
+    543 │ return stats;
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.clean.ts:543:1 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × Illegal return statement outside of a function
+  
+    541 │ }
+    542 │ 
+  > 543 │ return stats;
+        │ ^^^^^^^^^^^^^
+    544 │ }
+    545 │ }
+  
+
+src\services\file-entity-mapper\file-entity-mapper.service.clean.ts:544:1 parse ━━━━━━━━━━━━━━━━━━━━
+
+  × Expected a statement but instead found '}
+    }'.
+  
+    543 │ return stats;
+  > 544 │ }
+        │ ^
+  > 545 │ }
+        │ ^
+    546 │ 
+  
+  i Expected a statement here.
+  
+    543 │ return stats;
+  > 544 │ }
+        │ ^
+  > 545 │ }
+        │ ^
+    546 │ 
+  
+
+format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+
