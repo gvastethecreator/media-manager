@@ -18,7 +18,7 @@ type MediaUnion =
 	| (VideoWithStats & { entityType: 'video' })
 	| (AudioWithStats & { entityType: 'audio' })
 	| (DocumentWithStats & { entityType: 'document' })
-	| (JsonFileWithStats & { entityType: 'json' })
+	| (JsonFileWithStats & { entityType: 'jsonFile' })
 	| (File3DWithStats & { entityType: 'file3d' });
 
 export function useFolderFiles(folderId: string | null) {
@@ -53,6 +53,16 @@ export function useFolderFiles(folderId: string | null) {
 	}, [folderId, imageFolderState, fetchImages, fetchVideos, fetchAudios, fetchDocuments, fetchJsonFiles, fetchFile3Ds]);
 
 	const items: MediaItem[] = useMemo(() => {
+		console.log('[useFolderFiles] Computing items:', {
+			folderId,
+			images: images.length,
+			videos: videos.length,
+			audios: audios.length,
+			documents: Object.keys(documents || {}).length,
+			jsonFiles: (jsonFiles || []).length,
+			file3Ds: (file3Ds || []).length,
+		});
+
 		const result: MediaItem[] = [];
 		// Images
 		for (const img of images) {
@@ -115,7 +125,7 @@ export function useFolderFiles(folderId: string | null) {
 				result.push({
 					id: j.id,
 					name: j.name,
-					entityType: 'json',
+					entityType: 'jsonFile',
 					mimeType: j.mimeType ?? null,
 					createdAt: (j as any).createdAt,
 					size: (j as any).size,
@@ -135,6 +145,18 @@ export function useFolderFiles(folderId: string | null) {
 				});
 			}
 		}
+
+		console.log('[useFolderFiles] Final result:', {
+			totalItems: result.length,
+			itemsByType: result.reduce(
+				(acc, item) => {
+					acc[item.entityType] = (acc[item.entityType] || 0) + 1;
+					return acc;
+				},
+				{} as Record<string, number>
+			),
+		});
+
 		return result;
 	}, [images, videos, audios, documents, jsonFiles, file3Ds, folderId]);
 

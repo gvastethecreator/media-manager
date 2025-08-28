@@ -19,6 +19,10 @@ interface FileGridProps {
 	onItemDoubleClick?: (item: MediaItem) => void;
 	style?: React.CSSProperties;
 	itemSize?: number;
+	// Contenedor de scroll externo opcional
+	scrollParent?: HTMLElement | null;
+	// Key para forzar remount del componente Virtuoso
+	virtuosoKey?: string;
 }
 
 // Componente de lista para VirtuosoGrid (hoisted para evitar definir componentes dentro de otros)
@@ -45,14 +49,20 @@ const GridList = forwardRef<
 	);
 });
 
-export function FileGrid({
+export default function FileGrid({
 	items,
 	selectedIds = [],
 	onItemClick,
 	onItemDoubleClick,
+	viewMode,
 	style,
 	itemSize = CONFIG.baseItemSize,
+	scrollParent,
+	virtuosoKey,
 }: FileGridProps) {
+	console.log('[FileGrid] Rendering with items:', items.length);
+
+	const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 	const [VirtuosoGridComp, setVirtuosoGridComp] = useState<any>(null);
 
 	// Crear el componente List memoizado con itemSize
@@ -82,10 +92,13 @@ export function FileGrid({
 
 	if (VirtuosoGridComp) {
 		return (
-			<div style={{ height: '100%' }}>
+			<div style={{ height: scrollParent ? 'auto' : '100%' }} data-testid="grid-view">
 				<VirtuosoGridComp
+					key={virtuosoKey} // Key para forzar remount
 					data={items}
+					computeItemKey={(index: number, item: MediaItem) => item.id}
 					increaseViewportBy={CONFIG.increaseViewportBy}
+					initialItemCount={Math.min(50, items.length)}
 					itemContent={(index: number, item: MediaItem) => (
 						<div data-index={index}>
 							<GridItem
@@ -97,37 +110,40 @@ export function FileGrid({
 							/>
 						</div>
 					)}
-					// Estilos del contenedor de la lista (grid): usar components.List para evitar props no válidas
-					listClassName="grid"
+					// Usar components.List para el contenedor del grid
 					components={{ List: GridListWithSize }}
 					// Estilos del contenedor externo del virtuoso (altura)
-					style={{ height: '100%' }}
+					style={{ height: scrollParent ? 'auto' : '100%' }}
+					useWindowScroll={false}
+					customScrollParent={scrollParent ?? undefined}
 				/>
 			</div>
 		);
 	}
 
-	// Fallback no virtualizado
+	// Fallback no virtualizado con scroll
 	return (
-		<div
-			className="grid"
-			style={{
-				gap: CONFIG.gap,
-				padding: CONFIG.padding,
-				gridTemplateColumns: `repeat(auto-fill, minmax(${Math.max(80, itemSize)}px, 1fr))`,
-				...style,
-			}}
-		>
-			{items.map((item) => (
-				<GridItem
-					item={item}
-					key={item.id}
-					onClick={onItemClick}
-					onDoubleClick={onItemDoubleClick}
-					selected={selectedIds.includes(item.id)}
-					size={itemSize}
-				/>
-			))}
+		<div className="h-full overflow-auto" data-testid="grid-view">
+			<div
+				className="grid"
+				style={{
+					gap: CONFIG.gap,
+					padding: CONFIG.padding,
+					gridTemplateColumns: `repeat(auto-fill, minmax(${Math.max(80, itemSize)}px, 1fr))`,
+					...style,
+				}}
+			>
+				{items.map((item) => (
+					<GridItem
+						item={item}
+						key={item.id}
+						onClick={onItemClick}
+						onDoubleClick={onItemDoubleClick}
+						selected={selectedIds.includes(item.id)}
+						size={itemSize}
+					/>
+				))}
+			</div>
 		</div>
 	);
 }

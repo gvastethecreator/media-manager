@@ -13,6 +13,7 @@ import charactersRouter from './routes/characters';
 import collectionsRouter from './routes/collections';
 import conceptsRouter from './routes/concepts';
 import debugRouter from './routes/debug.js';
+import debugEntityTypesRouter from './routes/debug-entity-types.js';
 import documentsRouter from './routes/documents.js';
 import downloadRouter from './routes/download.js';
 import eventsRouter from './routes/events';
@@ -39,6 +40,9 @@ import systemRouter from './routes/system';
 import tagsRouter from './routes/tags';
 import testCharactersRouter from './routes/test-characters';
 import thumbnailsRouter from './routes/thumbnails';
+import jsonThumbnailsRouter from './routes/json-thumbnails';
+import threeDThumbnailsRouter from './routes/3d-thumbnails';
+import audioWaveformsRouter from './routes/audio-waveforms';
 import uploadedImagesRouter from './routes/uploaded-images';
 import { videosRouter } from './routes/videos.js';
 import wildcardsRouter from './routes/wildcards';
@@ -109,7 +113,12 @@ app.use('/api/favorites', favoritesRouter);
 app.use('/api/json-files', jsonFilesRouter);
 app.use('/api/local-files', localFilesRouter);
 app.use('/api/debug', debugRouter);
+app.use('/api/debug-entity-types', debugEntityTypesRouter);
 app.use('/api/queue', queueRouter);
+
+// Alias sin prefijo para compatibilidad con pruebas y clientes legacy
+app.use('/videos', videosRouter);
+app.use('/search', searchRouter);
 
 // API Routes - Sistema y utilidades
 app.use('/api/system', systemRouter);
@@ -119,6 +128,9 @@ app.use('/api/metadata', metadataRouter);
 app.use('/api/metadata-advanced', metadataAdvancedRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/thumbnails', thumbnailsRouter);
+app.use('/api/json', jsonThumbnailsRouter);
+app.use('/api/3d', threeDThumbnailsRouter);
+app.use('/api/audio', audioWaveformsRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/profiles', profilesRouter);
 app.use('/api/activity', activityRouter);

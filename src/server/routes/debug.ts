@@ -10,6 +10,10 @@ import { formatBytes } from '@/lib/utils/format.utils';
 
 const router = express.Router();
 
+// Importar el servicio para el endpoint de test de tipos de entidad
+import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
+const fileEntityMapperService = FileEntityMapperService.getInstance();
+
 router.get('/app-stats', async (_req, res) => {
 	try {
 		// MODO DEBUG TEMPORAL: Análisis de subcarpetas en lugar de app stats
@@ -377,6 +381,47 @@ router.get('/cleanup-phantom-images', async (_req, res) => {
 			success: false,
 			error: 'Error durante la limpieza',
 			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+/**
+ * Endpoint de diagnóstico para validar mapeo de tipos de entidad
+ * POST /api/debug/test-entity-types
+ */
+router.post('/test-entity-types', async (req, res) => {
+	try {
+		const { extensions } = req.body;
+
+		if (!extensions || !Array.isArray(extensions)) {
+			return res.status(400).json({
+				error: 'Se requiere un array de extensiones en el body',
+			});
+		}
+
+		const results = extensions.map((ext: string) => {
+			const entityType = fileEntityMapperService.getEntityTypeFromExtension(ext);
+			return {
+				extension: ext,
+				entityType,
+				isSupported: entityType !== 'UNKNOWN',
+			};
+		});
+
+		res.json({
+			success: true,
+			results,
+			summary: {
+				total: results.length,
+				supported: results.filter((r) => r.isSupported).length,
+				unsupported: results.filter((r) => !r.isSupported).length,
+			},
+		});
+	} catch (error) {
+		console.error('Error en test de mapeo de tipos:', error);
+		res.status(500).json({
+			error: 'Error interno del servidor',
+			details: error instanceof Error ? error.message : String(error),
 		});
 	}
 });
