@@ -406,6 +406,11 @@ export function EntityForm({
 									<Input
 										placeholder={field.placeholder}
 										{...formField}
+										value={
+											typeof formField.value === 'string' || typeof formField.value === 'number'
+												? String(formField.value)
+												: ''
+										}
 										className={cn(form.formState.errors[field.name] && 'border-destructive')}
 										{...field.props}
 									/>
@@ -432,7 +437,11 @@ export function EntityForm({
 										{...formField}
 										className={cn(form.formState.errors[field.name] && 'border-destructive')}
 										rows={field.props?.rows || 3}
-										value={formField.value || ''}
+										value={
+											typeof formField.value === 'string' || typeof formField.value === 'number'
+												? String(formField.value)
+												: ''
+										}
 										{...field.props}
 									/>
 								</FormControl>
@@ -452,7 +461,10 @@ export function EntityForm({
 						render={({ field: formField }) => (
 							<FormItem className={cn('space-y-2', field.fullWidth ? 'col-span-2' : '')}>
 								<FormLabel>{field.label}</FormLabel>
-								<Select defaultValue={formField.value} onValueChange={formField.onChange}>
+								<Select
+									defaultValue={typeof formField.value === 'string' ? formField.value : undefined}
+									onValueChange={formField.onChange}
+								>
 									<FormControl>
 										<SelectTrigger>
 											<SelectValue placeholder={field.placeholder || `Seleccionar ${field.label.toLowerCase()}`} />
@@ -492,7 +504,7 @@ export function EntityForm({
 									{field.description && <FormDescription>{field.description}</FormDescription>}
 								</div>
 								<FormControl>
-									<Switch checked={formField.value} onCheckedChange={formField.onChange} {...field.props} />
+									<Switch checked={Boolean(formField.value)} onCheckedChange={formField.onChange} {...field.props} />
 								</FormControl>
 								<FormMessage />
 							</FormItem>
@@ -515,19 +527,25 @@ export function EntityForm({
 											<div className="flex items-center gap-2">
 												<div
 													className="h-5 w-5 cursor-pointer rounded-md border"
-													style={{ backgroundColor: formField.value }}
+													style={{
+														backgroundColor:
+															typeof formField.value === 'string' ? (formField.value as string) : undefined,
+													}}
 												/>
 												<Input
 													className="w-20 font-mono"
 													onChange={formField.onChange}
 													placeholder="#RRGGBB"
-													value={formField.value}
+													value={typeof formField.value === 'string' ? formField.value : ''}
 												/>
 											</div>
 										</FormControl>
 									</PopoverTrigger>
 									<PopoverContent className="w-auto p-3">
-										<HexColorPicker color={formField.value} onChange={formField.onChange} />
+										<HexColorPicker
+											color={typeof formField.value === 'string' ? formField.value : '#000000'}
+											onChange={formField.onChange}
+										/>
 									</PopoverContent>
 								</Popover>
 								{field.description && <FormDescription>{field.description}</FormDescription>}
@@ -547,7 +565,10 @@ export function EntityForm({
 							<FormItem className={cn('space-y-2', field.fullWidth ? 'col-span-2' : '')}>
 								<FormLabel>{field.label}</FormLabel>
 								<FormControl>
-									<EmojiPicker onChange={formField.onChange} value={formField.value} />
+									<EmojiPicker
+										onChange={formField.onChange}
+										value={typeof formField.value === 'string' ? formField.value : undefined}
+									/>
 								</FormControl>
 								{field.description && <FormDescription>{field.description}</FormDescription>}
 								<FormMessage />

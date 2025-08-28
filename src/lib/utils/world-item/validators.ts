@@ -43,7 +43,7 @@ export const worldItemStatsSchema = z.object({
 	accuracy: z.number().nonnegative().optional(),
 	speed: z.number().nonnegative().optional(),
 	effects: z.array(worldItemEffectSchema).optional(),
-	customStats: z.record(z.union([z.string(), z.number()])).optional(),
+	customStats: z.record(z.string(), z.union([z.string(), z.number()])).optional(),
 });
 
 // Esquema para validar datos al crear un objeto

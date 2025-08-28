@@ -120,7 +120,7 @@ router.get('/', async (req, res) => {
 	try {
 		const filtersResult = ImageFiltersSchema.safeParse(req.query);
 		if (!filtersResult.success) {
-			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.errors });
+			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.issues });
 			return;
 		}
 

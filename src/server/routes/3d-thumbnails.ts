@@ -87,8 +87,8 @@ async function analyze3DModel(modelPath: string): Promise<Model3DInfo | null> {
 		// TODO: Implementar análisis real con Three.js cuando esté disponible
 		// Por ahora, simulamos información básica
 		return {
-			vertices: Math.floor(Math.random() * 10000) + 1000,
-			faces: Math.floor(Math.random() * 5000) + 500,
+			vertices: Math.floor(Math.random() * 1e4) + 1e3,
+			faces: Math.floor(Math.random() * 5e3) + 500,
 			materials: Math.floor(Math.random() * 5) + 1,
 			boundingBox: {
 				min: [-1, -1, -1],

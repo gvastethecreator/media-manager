@@ -24,6 +24,7 @@ export async function getNavigationDataSimple(): Promise<NavigationData> {
 		groups: [],
 		properties: [],
 		wildcards: [],
+		videos: [],
 		audios: [],
 		documents: [],
 		jsonFiles: [],

@@ -19,9 +19,7 @@ export const fileBaseSchema = z.object({
 	hash: z.string().min(1, 'Hash es requerido'),
 	mimeType: z.string().min(1, 'Tipo MIME es requerido'),
 	extension: z.string(),
-	type: z.nativeEnum(FileType, {
-		errorMap: () => ({ message: 'Tipo de archivo no válido' }),
-	}),
+	type: z.nativeEnum(FileType),
 	isDirectory: z.boolean(),
 	parentPath: z.string(),
 	absolutePath: z.string(),

@@ -78,7 +78,7 @@ function generateWaveformSVG(waveformData: number[], options: AudioWaveformOptio
 	}
 
 	switch (style) {
-		case 'bars':
+		case 'bars': {
 			// Estilo barras verticales
 			for (let i = 0; i < waveformData.length; i++) {
 				const x = i * barWidth;
@@ -88,8 +88,9 @@ function generateWaveformSVG(waveformData: number[], options: AudioWaveformOptio
 				elements += `<rect x="${x}" y="${centerY - barHeight}" width="${barWidth * 0.8}" height="${barHeight * 2}" fill="${color}" opacity="0.8"/>`;
 			}
 			break;
+		}
 
-		case 'filled':
+		case 'filled': {
 			// Estilo área rellena
 			pathData = `M 0 ${centerY}`;
 
@@ -111,9 +112,9 @@ function generateWaveformSVG(waveformData: number[], options: AudioWaveformOptio
 			}
 			elements += `<path d="${topPath}" stroke="${color}" stroke-width="2" fill="none"/>`;
 			break;
+		}
 
-		case 'curve':
-		default:
+		default: {
 			// Estilo curva suave
 			pathData = `M 0 ${centerY - waveformData[0] * centerY * 0.8}`;
 
@@ -125,6 +126,7 @@ function generateWaveformSVG(waveformData: number[], options: AudioWaveformOptio
 
 			elements += `<path d="${pathData}" stroke="${color}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
 			break;
+		}
 	}
 
 	return `
@@ -194,7 +196,7 @@ async function analyzeAudioFile(audioPath: string): Promise<AudioInfo | null> {
 		// Por ahora, simulamos información básica
 		return {
 			duration: Math.random() * 300 + 30, // 30-330 segundos
-			sampleRate: Math.random() > 0.5 ? 44100 : 48000,
+			sampleRate: Math.random() > 0.5 ? 44_100 : 48_000,
 			channels: Math.random() > 0.7 ? 1 : 2,
 			format: extension.slice(1).toUpperCase(),
 			bitRate: Math.floor(Math.random() * 192) + 128, // 128-320 kbps

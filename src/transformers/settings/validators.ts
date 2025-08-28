@@ -24,7 +24,7 @@ export function validateSettings(data: unknown): Settings {
 	} catch (error) {
 		logger.error('❌ Error validando configuración:', error);
 		throw new Error(
-			`Datos de configuración inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+			`Datos de configuración inválidos: ${error instanceof z.ZodError ? error.issues.map((e) => e.message).join(', ') : String(error)}`
 		);
 	}
 }
@@ -42,7 +42,7 @@ export function validateSettingsUpdate(data: unknown): UpdateSettings {
 	} catch (error) {
 		logger.error('❌ Error validando actualización de configuración:', error);
 		throw new Error(
-			`Datos de actualización de configuración inválidos: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+			`Datos de actualización de configuración inválidos: ${error instanceof z.ZodError ? error.issues.map((e) => e.message).join(', ') : String(error)}`
 		);
 	}
 }
@@ -68,7 +68,7 @@ export function validateAppearanceSettings(data: unknown): Settings['appearance'
 	} catch (error) {
 		logger.error('❌ Error validando configuración de apariencia:', error);
 		throw new Error(
-			`Configuración de apariencia inválida: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+			`Configuración de apariencia inválida: ${error instanceof z.ZodError ? error.issues.map((e) => e.message).join(', ') : String(error)}`
 		);
 	}
 }
@@ -93,7 +93,7 @@ export function validateNotificationsSettings(data: unknown): Settings['notifica
 	} catch (error) {
 		logger.error('❌ Error validando configuración de notificaciones:', error);
 		throw new Error(
-			`Configuración de notificaciones inválida: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+			`Configuración de notificaciones inválida: ${error instanceof z.ZodError ? error.issues.map((e) => e.message).join(', ') : String(error)}`
 		);
 	}
 }
@@ -117,7 +117,7 @@ export function validatePrivacySettings(data: unknown): Settings['privacy'] {
 	} catch (error) {
 		logger.error('❌ Error validando configuración de privacidad:', error);
 		throw new Error(
-			`Configuración de privacidad inválida: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+			`Configuración de privacidad inválida: ${error instanceof z.ZodError ? error.issues.map((e) => e.message).join(', ') : String(error)}`
 		);
 	}
 }
@@ -141,7 +141,7 @@ export function validateAdvancedSettings(data: unknown): Settings['advanced'] {
 	} catch (error) {
 		logger.error('❌ Error validando configuración avanzada:', error);
 		throw new Error(
-			`Configuración avanzada inválida: ${error instanceof z.ZodError ? error.errors.map((e) => e.message).join(', ') : String(error)}`
+			`Configuración avanzada inválida: ${error instanceof z.ZodError ? error.issues.map((e) => e.message).join(', ') : String(error)}`
 		);
 	}
 }

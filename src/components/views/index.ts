@@ -42,7 +42,6 @@ export * from './types';
 export * from './uploaded-images/uploaded-images-view';
 export * from './videos/videos-view';
 export { default as VideosView } from './videos/videos-view';
-export * from './view-container';
 export * from './wildcards/wildcard-content-view';
 export * from './wildcards/wildcards-view';
 export * from './workflows/workflows-view';
