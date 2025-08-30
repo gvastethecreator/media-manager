@@ -1,8 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSelectionStore } from '@/store/ui/selection.slice';
-import type { ClickModifiers } from '../../types/file-browser.types';
 import type { MediaItem } from '../../components/media-thumbnail';
+import type { ClickModifiers } from '../../types/file-browser.types';
 import { generateThumbnailUrl, getFallbackIcon, useImageCache } from '../../views/canvas-common';
 import { CanvasRenderConfig } from '../../views/canvas-config';
 
@@ -312,7 +312,6 @@ export function FileCanvas({
 		cellSize,
 		get,
 		isSelected,
-		localScrollTop,
 		viewport.scrollLeft,
 		hoverIndex,
 		dragStart,
@@ -488,13 +487,13 @@ export function FileCanvas({
 	return (
 		<div
 			className={useExternal ? 'relative w-full' : 'relative h-full w-full overflow-auto'}
+			data-testid="file-canvas"
 			onPointerDown={handlePointerDown}
 			onPointerLeave={handlePointerLeave}
 			onPointerMove={handlePointerMove}
 			onPointerUp={handlePointerUp}
 			ref={containerRef}
 			style={useExternal ? { height: viewport.height } : undefined}
-			data-testid="file-canvas"
 		>
 			{/* Espaciador para representar la altura total del contenido y permitir scroll */}
 			<div style={{ height: totalHeight }} />

@@ -1,8 +1,8 @@
-import { useRef, useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { MediaItem } from '../components/media-thumbnail';
 import type { ClickModifiers } from '../types/file-browser.types';
-import { Single } from './single';
 import { CanvasRenderConfig } from './canvas-config';
+import { Single } from './single';
 
 export interface FileCanvasSingleGroupedProps {
 	groups: Array<{ key: string; items: MediaItem[]; displayName: string }>;
@@ -68,11 +68,7 @@ export function FileCanvasSingleGrouped({ groups, onItemClick, onItemDoubleClick
 							{g.displayName}
 						</div>
 						<div style={{ height: '300px' }}>
-							<Single
-								items={g.items}
-								onItemClick={onItemClick}
-								onItemDoubleClick={onItemDoubleClick}
-							/>
+							<Single items={g.items} onItemClick={onItemClick} onItemDoubleClick={onItemDoubleClick} />
 						</div>
 					</div>
 				))}
