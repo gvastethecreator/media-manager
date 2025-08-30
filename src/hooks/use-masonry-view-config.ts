@@ -193,7 +193,8 @@ export function useMasonryViewConfig() {
 			const columnHeights = new Array(columns).fill(0);
 			const layoutItems: MasonryLayoutItem[] = [];
 
-			items.forEach((item, index) => {
+			for (let index = 0; index < items.length; index++) {
+				const item = items[index];
 				const aspectRatio = getItemAspectRatio(item, index);
 				const itemHeight = itemWidth / aspectRatio;
 
@@ -227,7 +228,7 @@ export function useMasonryViewConfig() {
 
 				// Update column height
 				columnHeights[columnIndex] += itemHeight + config.spacing.gap;
-			});
+			}
 
 			// Calculate balance metrics
 			const maxHeight = Math.max(...columnHeights);
@@ -245,7 +246,7 @@ export function useMasonryViewConfig() {
 				},
 			};
 		};
-	}, [config, calculateColumns, getItemAspectRatio]);
+	}, [config, getItemAspectRatio]);
 
 	return {
 		config,

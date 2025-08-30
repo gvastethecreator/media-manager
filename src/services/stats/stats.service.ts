@@ -78,8 +78,8 @@ export const statsEventEmitter = {
 		// Esta es una implementación mínima para mantener compatibilidad
 	},
 	emit: (event: string, ...args: unknown[]) => {
-		// Usamos serverEvents.emit en el fondo
-		void emit({
+		// Usamos serverEvents.emit en el fondo (promesa intencionalmente no esperada)
+		emit({
 			type: (EVENT_TYPE_MAPPING[event] || 'update') as EventType,
 			data: args.length === 1 ? args[0] : args,
 		});

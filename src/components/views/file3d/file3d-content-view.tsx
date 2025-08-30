@@ -8,8 +8,8 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFile3DStore } from '@/store/entities/file-3d';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import type { File3DWithStats } from '@/types/entities/file3d';
 import type { AnyEntityWithStats } from '@/types/entities';
+import type { File3DWithStats } from '@/types/entities/file3d';
 
 // Logger para depuración
 const logger = clientLogger.withContext('File3DContentView');

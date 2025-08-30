@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { uploadedImages } from '@/lib/drizzle/schema/index';
@@ -6,7 +7,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { createEntityNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
 import { fromDB } from '@/transformers/uploaded-image';
-import { UploadedImageType } from '@/types/entities/uploaded-image';
+import type { UploadedImageType } from '@/types/entities/uploaded-image';
 import type {
 	CreateUploadedImageParams,
 	GetUploadedImagesParams,
@@ -376,7 +377,11 @@ class UploadedImagesService {
 				.where(whereCondition);
 
 			// Determinar el orden
-			let orderByColumn;
+			let orderByColumn:
+				| typeof uploadedImages.name
+				| typeof uploadedImages.size
+				| typeof uploadedImages.type
+				| typeof uploadedImages.createdAt;
 			switch (sortBy) {
 				case 'name':
 					orderByColumn = uploadedImages.name;

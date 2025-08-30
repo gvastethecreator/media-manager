@@ -222,7 +222,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 											{categoryNames[category as keyof typeof categoryNames] || category}
 										</h4>
 										<div className="space-y-3 pl-1">
-											{category === 'ia' && !metaLoading && !metaError && groupedMetadata['ia']?.length === 0 && (
+											{category === 'ia' && !metaLoading && !metaError && groupedMetadata.ia?.length === 0 && (
 												<div className="flex flex-col gap-1 rounded border border-dashed p-2 text-muted-foreground text-xs">
 													<span>No se encontraron metadatos de IA.</span>
 													<Button className="self-start" onClick={() => refetch()} size="sm" variant="outline">

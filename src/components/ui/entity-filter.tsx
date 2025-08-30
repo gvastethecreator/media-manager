@@ -535,15 +535,9 @@ export function EntityFilter({
 					{Object.entries(filterValues)
 						.filter(([key]) => key !== 'quickSearch')
 						.map(([key, value]) => {
-							// Omitir valores vacíos
-							if (
-								value === undefined ||
-								value === null ||
-								value === '' ||
-								(Array.isArray(value) && value.length === 0)
-							) {
-								return null;
-							}
+							// Omitir valores vacíos temprano
+							const isEmptyArray = Array.isArray(value) && value.length === 0;
+							if (value === undefined || value === null || value === '' || isEmptyArray) return null;
 
 							// Buscar la definición de filtro correspondiente
 							const filterDef = filters.find((f) => f.id === key);
@@ -573,15 +567,12 @@ export function EntityFilter({
 							} else if (typeof value === 'object' && value !== null) {
 								// Para objetos, convertir a JSON
 								displayValue = JSON.stringify(value);
+							} else if (filterDef.options) {
+								// Si hay opciones definidas, buscar la etiqueta correspondiente
+								displayValue =
+									filterDef.options.find((opt) => String(opt.value) === String(value))?.label || String(value);
 							} else {
-								// Para valores simples como strings o números
-								if (filterDef.options) {
-									// Si hay opciones definidas, buscar la etiqueta correspondiente
-									displayValue =
-										filterDef.options.find((opt) => String(opt.value) === String(value))?.label || String(value);
-								} else {
-									displayValue = String(value);
-								}
+								displayValue = String(value);
 							}
 
 							return (

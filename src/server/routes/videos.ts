@@ -7,6 +7,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateAnimatedVideoThumbnail } from '@/lib/utils/video/helpers';
+import { fromDrizzleVideoWithCounts } from '@/transformers/video/transformer';
 import {
 	deleteVideo,
 	getVideoById,
@@ -14,7 +15,6 @@ import {
 	getVideos,
 	updateVideo,
 } from '../services/video.server.service';
-import { fromDrizzleVideoWithCounts } from '@/transformers/video/transformer';
 
 const router = Router() as any;
 

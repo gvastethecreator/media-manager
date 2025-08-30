@@ -23,7 +23,7 @@ export interface AlbumUIState {
 	currentAlbumId: string | null;
 }
 
-export type AlbumFilterState = {};
+export type AlbumFilterState = Record<never, never>;
 
 // --- Acciones del Slice ---
 
@@ -40,7 +40,7 @@ export interface AlbumUIActions {
 	setCurrentAlbumId: (id: string | null) => void;
 }
 
-export type AlbumFilterActions = {};
+export type AlbumFilterActions = Record<never, never>;
 
 // --- Store Completo ---
 

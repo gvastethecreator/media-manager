@@ -148,12 +148,12 @@ function extractExifData(rawMetadata: any): Partial<ExifData> {
 			}
 		}
 
-		// Agregar todos los chunks PNG como campos adicionales
-		Object.keys(pngChunks).forEach((key) => {
+		// Agregar todos los chunks PNG como campos adicionales (evitar forEach)
+		for (const key of Object.keys(pngChunks)) {
 			if (!aiFields.includes(key)) {
-				(data as any)[`png_${key}`] = pngChunks[key];
+				(data as any)[`png_${key}`] = (pngChunks as any)[key];
 			}
-		});
+		}
 	}
 
 	// Información básica de la imagen

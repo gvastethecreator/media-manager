@@ -388,6 +388,8 @@ export async function getQueueStats(): Promise<QueueStats> {
 				case QueueJobStatus.PAUSED:
 					stats.paused = count;
 					break;
+				default:
+					break;
 			}
 		}
 
@@ -570,6 +572,8 @@ export async function getQueueStatsByQueue(queue: string): Promise<QueueStats> {
 					break;
 				case QueueJobStatus.PAUSED:
 					stats.paused = count;
+					break;
+				default:
 					break;
 			}
 		}

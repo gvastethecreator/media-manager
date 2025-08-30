@@ -24,38 +24,58 @@ export type {
 } from '@/types/file-browser/progress-tracking';
 
 // Simple EventEmitter implementation for browser compatibility
-class SimpleEventEmitter {
-	private events: Record<string, Function[]> = {};
+type ProgressEvents =
+	| { type: 'operationStarted'; payload: ProgressOperation }
+	| { type: 'progressUpdated'; payload: ProgressOperation }
+	| { type: 'operationCompleted'; payload: ProgressOperation }
+	| { type: 'operationFailed'; payload: ProgressOperation }
+	| { type: 'operationCancelled'; payload: ProgressOperation };
 
-	on(event: string, listener: Function): void {
-		if (!this.events[event]) {
-			this.events[event] = [];
-		}
-		this.events[event].push(listener);
+type Listener<T> = (payload: T) => void;
+
+class TypedEventEmitter {
+	private events: Map<string, Set<Listener<any>>> = new Map();
+
+	on<TEvent extends ProgressEvents['type']>(
+		event: TEvent,
+		listener: Listener<Extract<ProgressEvents, { type: TEvent }>['payload']>
+	): void {
+		const set = this.events.get(event) ?? new Set();
+		set.add(listener as Listener<any>);
+		this.events.set(event, set);
 	}
 
-	off(event: string, listener: Function): void {
-		if (!this.events[event]) {
-			return;
-		}
-		const index = this.events[event].indexOf(listener);
-		if (index > -1) {
-			this.events[event].splice(index, 1);
+	off<TEvent extends ProgressEvents['type']>(
+		event: TEvent,
+		listener: Listener<Extract<ProgressEvents, { type: TEvent }>['payload']>
+	): void {
+		const set = this.events.get(event);
+		if (!set) return;
+		set.delete(listener as Listener<any>);
+		if (set.size === 0) this.events.delete(event);
+	}
+
+	emit<TEvent extends ProgressEvents['type']>(
+		event: TEvent,
+		payload: Extract<ProgressEvents, { type: TEvent }>['payload']
+	): void {
+		const set = this.events.get(event);
+		if (!set) return;
+		for (const listener of set) {
+			try {
+				(listener as Listener<typeof payload>)(payload);
+			} catch (err) {
+				// eslint-disable-next-line no-console
+				console.error('[ProgressTracking] listener error', err);
+			}
 		}
 	}
 
-	emit(event: string, ...args: any[]): void {
-		if (!this.events[event]) {
-			return;
-		}
-		this.events[event].forEach((listener) => listener(...args));
-	}
-
-	removeAllListeners(event?: string): void {
+	removeAllListeners(event?: ProgressEvents['type']): void {
 		if (event) {
-			delete this.events[event];
+			this.events.delete(event);
 		} else {
-			this.events = {};
+			this.events.clear();
 		}
 	}
 }
@@ -85,7 +105,7 @@ export type ProgressCallback = (operation: ProgressOperation) => void;
  * Progress Tracking Service
  * Manages progress tracking for long-running file operations
  */
-class ProgressTrackingService extends SimpleEventEmitter {
+class ProgressTrackingService extends TypedEventEmitter {
 	private operations = new Map<string, ProgressOperation>();
 	private callbacks = new Map<string, ProgressCallback[]>();
 	private toastIds = new Map<string, string | number>();
@@ -243,7 +263,7 @@ class ProgressTrackingService extends SimpleEventEmitter {
 
 		// Notify callbacks
 		const callbacks = this.callbacks.get(operationId) || [];
-		callbacks.forEach((callback) => callback(updatedOperation));
+		for (const callback of callbacks) callback(updatedOperation);
 
 		this.emit('progressUpdated', updatedOperation);
 
@@ -287,7 +307,7 @@ class ProgressTrackingService extends SimpleEventEmitter {
 
 		// Notify callbacks
 		const callbacks = this.callbacks.get(operationId) || [];
-		callbacks.forEach((callback) => callback(completedOperation));
+		for (const callback of callbacks) callback(completedOperation);
 
 		this.emit('operationCompleted', completedOperation);
 
@@ -324,7 +344,7 @@ class ProgressTrackingService extends SimpleEventEmitter {
 
 		// Notify callbacks
 		const callbacks = this.callbacks.get(operationId) || [];
-		callbacks.forEach((callback) => callback(failedOperation));
+		for (const callback of callbacks) callback(failedOperation);
 
 		this.emit('operationFailed', failedOperation);
 
@@ -360,7 +380,7 @@ class ProgressTrackingService extends SimpleEventEmitter {
 
 		// Notify callbacks
 		const callbacks = this.callbacks.get(operationId) || [];
-		callbacks.forEach((callback) => callback(cancelledOperation));
+		for (const callback of callbacks) callback(cancelledOperation);
 
 		this.emit('operationCancelled', cancelledOperation);
 

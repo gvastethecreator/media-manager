@@ -4,7 +4,8 @@ import { EmptyState } from '@/components/core/data-display';
 import { cn } from '@/lib/utils';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import type { AnyEntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
+import { FileCanvas } from './components/canvas/file-canvas';
 import { FileCards } from './components/file-cards';
 import FileGrid from './components/file-grid';
 import { FileList } from './components/file-list';
@@ -14,7 +15,7 @@ import { FileSingle } from './components/file-single';
 import { FileTable } from './components/file-table';
 import type { MediaItem } from './components/media-thumbnail';
 import { useFolderFiles } from './hooks/use-folder-files';
-import type { FileBrowser2Props } from './types/file-browser.types';
+import type { ClickModifiers, FileBrowser2Props } from './types/file-browser.types';
 
 function applySearch(items: MediaItem[], query: string) {
 	if (!query) return items;
@@ -79,9 +80,9 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 	const groupByType = useViewOptionsStore((s) => s.groupByEntityType);
 
 	// Selección
-	const selectedIds = useSelectionStore((s) => s.selectedIds);
 	const toggleSelectedId = useSelectionStore((s) => s.toggleSelectedId);
 	const setActiveId = useSelectionStore((s) => s.setActiveId);
+	const setSelectedIds = useSelectionStore((s) => s.setSelectedIds);
 
 	const processedItems = useMemo(() => {
 		const searched = applySearch(items as MediaItem[], searchQuery);
@@ -100,39 +101,39 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 	const [tableScrollEl, setTableScrollEl] = useState<HTMLDivElement | null>(null);
 	const [cardsScrollEl, setCardsScrollEl] = useState<HTMLDivElement | null>(null);
 
-	if (isLoading) {
-		// Mantener estructura y viewport estable para los tests incluso en loading
-		return (
-			<div className={cn('flex h-full min-h-0 flex-col overflow-hidden')} data-testid="file-browser">
-				<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container">
-					<div className="min-h-0 flex-1 overflow-auto" data-testid="file-browser-scroll-area-viewport">
-						<div className="flex h-full flex-col items-center justify-center gap-4">
-							<EmptyState description="Cargando archivos..." icon={RefreshCw} title="Cargando" />
-						</div>
-					</div>
-				</div>
-			</div>
-		);
-	}
+	// Nota importante:
+	// En lugar de devolver temprano en loading/error, renderizamos siempre la estructura de vistas
+	// para garantizar la presencia de los contenedores con data-testid (grid-view/cards-view/etc.).
+	// Esto hace que los tests E2E puedan esperar de forma determinista a que aparezcan los ítems,
+	// mientras el store termina de poblarse. Mostramos un overlay discreto si hay loading/error.
 
-	if (error) {
-		// Mantener viewport aunque haya error
-		return (
-			<div className={cn('flex h-full min-h-0 flex-col overflow-hidden')} data-testid="file-browser">
-				<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container">
-					<div className="min-h-0 flex-1 overflow-auto" data-testid="file-browser-scroll-area-viewport">
-						<div className="flex h-full flex-col items-center justify-center gap-4">
-							<EmptyState description="Ocurrió un error al cargar los archivos." icon={RefreshCw} title="Error" />
-						</div>
-					</div>
-				</div>
-			</div>
-		);
-	}
-
-	const handleItemClick = (item: MediaItem) => {
-		toggleSelectedId(item.id);
-		setActiveId(item.id);
+	const handleItemClick = (item: MediaItem, modifiers?: ClickModifiers) => {
+		const mods = modifiers ?? { ctrlKey: false, metaKey: false, shiftKey: false };
+		const isToggle = mods.ctrlKey || mods.metaKey;
+		const isRange = mods.shiftKey;
+		const allIds = (grouped ? grouped.flatMap((g) => g.items) : processedItems).map((it) => it.id);
+		const { selectedIds: currentSelectedIds, activeId: storeActive } = useSelectionStore.getState();
+		if (isRange && currentSelectedIds.length > 0 && storeActive) {
+			const activeId = storeActive as string;
+			const start = allIds.indexOf(activeId);
+			const end = allIds.indexOf(item.id);
+			if (start !== -1 && end !== -1) {
+				const [from, to] = start <= end ? [start, end] : [end, start];
+				const rangeIds = allIds.slice(from, to + 1);
+				setSelectedIds(rangeIds);
+				setActiveId(item.id);
+			} else {
+				setSelectedIds([item.id]);
+				setActiveId(item.id);
+			}
+		} else if (isToggle) {
+			toggleSelectedId(item.id);
+			setActiveId(item.id);
+		} else {
+			// click simple: selección única
+			setSelectedIds([item.id]);
+			setActiveId(item.id);
+		}
 		onItemClick?.(item as unknown as AnyEntityWithStats);
 	};
 
@@ -142,51 +143,63 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 
 	// Estilos de grid dependientes del tamaño (cards usa tamaño un poco mayor por defecto)
 	const effectiveItemSize = viewMode === 'cards' ? Math.max(120, itemSize) : itemSize;
-	// Grid: mínimo 4 columnas; Cards se maneja con su propio componente
-	const gridStyle: React.CSSProperties =
-		viewMode === 'grid'
-			? { gridTemplateColumns: 'repeat(4, 1fr)' }
-			: { gridTemplateColumns: `repeat(auto-fill, minmax(${Math.max(80, effectiveItemSize)}px, 1fr))` };
+	// Grid: mínimo 4 columnas; Cards se maneja con su propio componente - MEMOIZADO
+	const gridStyle: React.CSSProperties = useMemo(
+		() =>
+			viewMode === 'grid'
+				? { gridTemplateColumns: 'repeat(4, 1fr)' }
+				: { gridTemplateColumns: `repeat(auto-fill, minmax(${Math.max(80, effectiveItemSize)}px, 1fr))` },
+		[viewMode, effectiveItemSize]
+	);
 
 	return (
-		<div className={cn('flex h-full min-h-0 flex-col overflow-hidden')} data-testid="file-browser">
+		<div
+			className={cn('flex h-full min-h-0 flex-col overflow-hidden')}
+			data-testid="file-browser"
+			data-view-mode={viewMode}
+		>
 			<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container">
+				{/* Overlays no bloqueantes para loading/error */}
+				{(isLoading || error) && (
+					<div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center p-2">
+						<div className="rounded-md bg-secondary/80 px-2 py-1 text-muted-foreground text-xs">
+							{error ? 'Error cargando datos' : 'Cargando…'}
+						</div>
+					</div>
+				)}
 				{viewMode === 'list' ? (
 					<div className="flex h-full min-h-0 flex-col">
 						<FileListHeader />
 						<div
 							className="min-h-0 flex-1 overflow-auto"
-							ref={setListScrollEl}
 							data-testid="file-browser-scroll-area-viewport"
+							ref={setListScrollEl}
 						>
 							{grouped ? (
 								<div className="flex flex-col gap-2">
 									{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
-										<div key={g.key} className="flex flex-col">
+										<div className="flex flex-col" key={g.key}>
 											<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
 												{g.displayName}
 											</div>
 											<FileList
-												key={`list-grouped-${g.key}`}
-												virtuosoKey={`list-grouped-${g.key}-${Boolean(listScrollEl)}`}
-												scrollParent={listScrollEl ?? undefined}
 												items={g.items as MediaItem[]}
+												key={`list-grouped-${g.key}`}
 												onItemClick={handleItemClick}
 												onItemDoubleClick={handleItemDoubleClick}
-												selectedIds={selectedIds}
+												scrollParent={listScrollEl ?? undefined}
 											/>
 										</div>
 									))}
 								</div>
 							) : (
 								<FileList
-									key="list-normal"
-									virtuosoKey={`list-normal-${Boolean(listScrollEl)}`}
-									scrollParent={listScrollEl ?? undefined}
 									items={processedItems as MediaItem[]}
+									key="list-normal"
 									onItemClick={handleItemClick}
 									onItemDoubleClick={handleItemDoubleClick}
-									selectedIds={selectedIds}
+									scrollParent={listScrollEl ?? undefined}
+									virtuosoKey={`list-normal-${Boolean(listScrollEl)}`}
 								/>
 							)}
 						</div>
@@ -197,7 +210,6 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 							items={processedItems as MediaItem[]}
 							onItemClick={handleItemClick}
 							onItemDoubleClick={handleItemDoubleClick}
-							selectedIds={selectedIds}
 						/>
 					</div>
 				) : viewMode === 'masonry' ? (
@@ -206,16 +218,15 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 							<div className="h-full overflow-auto" data-testid="file-browser-scroll-area-viewport">
 								<div className="flex flex-col gap-2">
 									{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
-										<div key={g.key} className="flex flex-col">
+										<div className="flex flex-col" key={g.key}>
 											<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
 												{g.displayName}
 											</div>
 											<FileMasonry
-												key={`masonry-grouped-${g.key}`}
 												items={g.items as MediaItem[]}
+												key={`masonry-grouped-${g.key}`}
 												onItemClick={handleItemClick}
 												onItemDoubleClick={handleItemDoubleClick}
-												selectedIds={selectedIds}
 											/>
 										</div>
 									))}
@@ -224,11 +235,10 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 						) : (
 							<div className="h-full overflow-auto" data-testid="file-browser-scroll-area-viewport">
 								<FileMasonry
-									key="masonry-normal"
 									items={processedItems as MediaItem[]}
+									key="masonry-normal"
 									onItemClick={handleItemClick}
 									onItemDoubleClick={handleItemDoubleClick}
-									selectedIds={selectedIds}
 								/>
 							</div>
 						)}
@@ -238,23 +248,22 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 						{grouped ? (
 							<div
 								className="h-full overflow-auto"
-								ref={setTableScrollEl}
 								data-testid="file-browser-scroll-area-viewport"
+								ref={setTableScrollEl}
 							>
 								<div className="flex flex-col gap-2">
 									{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
-										<div key={g.key} className="flex flex-col">
+										<div className="flex flex-col" key={g.key}>
 											<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
 												{g.displayName}
 											</div>
 											<FileTable
-												key={`table-grouped-${g.key}`}
-												virtuosoKey={`table-grouped-${g.key}-${Boolean(tableScrollEl)}`}
-												scrollParent={tableScrollEl ?? undefined}
 												items={g.items as MediaItem[]}
+												key={`table-grouped-${g.key}`}
 												onItemClick={handleItemClick}
 												onItemDoubleClick={handleItemDoubleClick}
-												selectedIds={selectedIds}
+												scrollParent={tableScrollEl ?? undefined}
+												virtuosoKey={`table-grouped-${g.key}-${Boolean(tableScrollEl)}`}
 											/>
 										</div>
 									))}
@@ -263,17 +272,16 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 						) : (
 							<div
 								className="h-full overflow-auto"
-								ref={setTableScrollEl}
 								data-testid="file-browser-scroll-area-viewport"
+								ref={setTableScrollEl}
 							>
 								<FileTable
-									key="table-normal"
-									virtuosoKey={`table-normal-${Boolean(tableScrollEl)}`}
-									scrollParent={tableScrollEl ?? undefined}
 									items={processedItems as MediaItem[]}
+									key="table-normal"
 									onItemClick={handleItemClick}
 									onItemDoubleClick={handleItemDoubleClick}
-									selectedIds={selectedIds}
+									scrollParent={tableScrollEl ?? undefined}
+									virtuosoKey={`table-normal-${Boolean(tableScrollEl)}`}
 								/>
 							</div>
 						)}
@@ -283,23 +291,22 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 						{grouped ? (
 							<div
 								className="h-full overflow-auto"
-								ref={setCardsScrollEl}
 								data-testid="file-browser-scroll-area-viewport"
+								ref={setCardsScrollEl}
 							>
 								<div className="flex flex-col gap-2">
 									{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
-										<div key={g.key} className="flex flex-col">
+										<div className="flex flex-col" key={g.key}>
 											<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
 												{g.displayName}
 											</div>
 											<FileCards
-												key={`cards-grouped-${g.key}`}
-												virtuosoKey={`cards-grouped-${g.key}-${Boolean(cardsScrollEl)}`}
-												scrollParent={cardsScrollEl ?? undefined}
 												items={g.items as MediaItem[]}
+												key={`cards-grouped-${g.key}`}
 												onItemClick={handleItemClick}
 												onItemDoubleClick={handleItemDoubleClick}
-												selectedIds={selectedIds}
+												scrollParent={cardsScrollEl ?? undefined}
+												virtuosoKey={`cards-grouped-${g.key}-${Boolean(cardsScrollEl)}`}
 											/>
 										</div>
 									))}
@@ -308,46 +315,53 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 						) : (
 							<div
 								className="h-full overflow-auto"
-								ref={setCardsScrollEl}
 								data-testid="file-browser-scroll-area-viewport"
+								ref={setCardsScrollEl}
 							>
 								<FileCards
-									key="cards-normal"
-									virtuosoKey={`cards-normal-${Boolean(cardsScrollEl)}`}
-									scrollParent={cardsScrollEl ?? undefined}
 									items={processedItems as MediaItem[]}
+									key="cards-normal"
 									onItemClick={handleItemClick}
 									onItemDoubleClick={handleItemDoubleClick}
-									selectedIds={selectedIds}
+									scrollParent={cardsScrollEl ?? undefined}
+									virtuosoKey={`cards-normal-${Boolean(cardsScrollEl)}`}
 								/>
 							</div>
 						)}
+					</div>
+				) : viewMode === 'canvas' ? (
+					<div className="h-full min-h-0">
+						<FileCanvas
+							itemSize={itemSize}
+							items={processedItems as MediaItem[]}
+							onItemClick={handleItemClick}
+							onItemDoubleClick={handleItemDoubleClick}
+						/>
 					</div>
 				) : (
 					<div className="h-full min-h-0">
 						{grouped ? (
 							<div
 								className="h-full overflow-auto"
-								ref={setGridScrollEl}
 								data-testid="file-browser-scroll-area-viewport"
+								ref={setGridScrollEl}
 							>
 								<div className="flex flex-col gap-2">
 									{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
-										<div key={g.key} className="flex flex-col">
+										<div className="flex flex-col" key={g.key}>
 											<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
 												{g.displayName}
 											</div>
 											<FileGrid
-												key={`grid-grouped-${g.key}`}
-												virtuosoKey={`grid-grouped-${g.key}-${Boolean(gridScrollEl)}`}
 												itemSize={effectiveItemSize}
 												items={g.items as MediaItem[]}
+												key={`grid-grouped-${g.key}`}
 												onItemClick={handleItemClick}
 												onItemDoubleClick={handleItemDoubleClick}
-												selectedIds={selectedIds}
+												scrollParent={gridScrollEl ?? undefined}
 												style={gridStyle}
 												viewMode={viewMode}
-												scrollParent={gridScrollEl ?? undefined}
+												virtuosoKey={`grid-grouped-${g.key}`}
 											/>
 										</div>
 									))}
@@ -356,20 +370,19 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 						) : (
 							<div
 								className="h-full overflow-auto"
-								ref={setGridScrollEl}
 								data-testid="file-browser-scroll-area-viewport"
+								ref={setGridScrollEl}
 							>
 								<FileGrid
-									key="grid-normal"
-									virtuosoKey={`grid-normal-${Boolean(gridScrollEl)}`}
 									itemSize={effectiveItemSize}
 									items={processedItems as MediaItem[]}
+									key="grid-normal"
 									onItemClick={handleItemClick}
 									onItemDoubleClick={handleItemDoubleClick}
-									selectedIds={selectedIds}
+									scrollParent={gridScrollEl ?? undefined}
 									style={gridStyle}
 									viewMode={viewMode}
-									scrollParent={gridScrollEl ?? undefined}
+									virtuosoKey="grid-normal"
 								/>
 							</div>
 						)}
@@ -404,9 +417,9 @@ function renderFromItems({
 	const sortOptions = useViewOptionsStore((s) => s.sortOptions);
 	const searchQuery = useViewOptionsStore((s) => s.searchQuery);
 
-	const selectedIds = useSelectionStore((s) => s.selectedIds);
 	const toggleSelectedId = useSelectionStore((s) => s.toggleSelectedId);
 	const setActiveId = useSelectionStore((s) => s.setActiveId);
+	const setSelectedIds = useSelectionStore((s) => s.setSelectedIds);
 
 	const processedItems = useMemo(() => {
 		const searched = applySearch(mediaItems, searchQuery);
@@ -425,9 +438,31 @@ function renderFromItems({
 		);
 	}
 
-	const handleItemClick = (item: MediaItem) => {
-		toggleSelectedId(item.id);
-		setActiveId(item.id);
+	const handleItemClick = (item: MediaItem, modifiers?: ClickModifiers) => {
+		const mods = modifiers ?? { ctrlKey: false, metaKey: false, shiftKey: false };
+		const isToggle = mods.ctrlKey || mods.metaKey;
+		const isRange = mods.shiftKey;
+		const allIds = processedItems.map((it) => it.id);
+		const { selectedIds: currentSelectedIds, activeId } = useSelectionStore.getState();
+		if (isRange && currentSelectedIds.length > 0 && activeId) {
+			const start = allIds.indexOf(activeId as string);
+			const end = allIds.indexOf(item.id);
+			if (start !== -1 && end !== -1) {
+				const [from, to] = start <= end ? [start, end] : [end, start];
+				const rangeIds = allIds.slice(from, to + 1);
+				setSelectedIds(rangeIds);
+				setActiveId(item.id);
+			} else {
+				setSelectedIds([item.id]);
+				setActiveId(item.id);
+			}
+		} else if (isToggle) {
+			toggleSelectedId(item.id);
+			setActiveId(item.id);
+		} else {
+			setSelectedIds([item.id]);
+			setActiveId(item.id);
+		}
 		onItemClick?.(item as unknown as AnyEntityWithStats);
 	};
 
@@ -436,13 +471,20 @@ function renderFromItems({
 	};
 
 	const effectiveItemSize = viewMode === 'cards' ? Math.max(120, itemSize) : itemSize;
-	const gridStyle: React.CSSProperties =
-		viewMode === 'grid'
-			? { gridTemplateColumns: 'repeat(4, 1fr)' }
-			: { gridTemplateColumns: `repeat(auto-fill, minmax(${Math.max(80, effectiveItemSize)}px, 1fr))` };
+	const gridStyle: React.CSSProperties = useMemo(
+		() =>
+			viewMode === 'grid'
+				? { gridTemplateColumns: 'repeat(4, 1fr)' }
+				: { gridTemplateColumns: `repeat(auto-fill, minmax(${Math.max(80, effectiveItemSize)}px, 1fr))` },
+		[viewMode, effectiveItemSize]
+	);
 
 	return (
-		<div className={cn('flex h-full min-h-0 flex-col overflow-hidden', className)} data-testid="file-browser">
+		<div
+			className={cn('flex h-full min-h-0 flex-col overflow-hidden', className)}
+			data-testid="file-browser"
+			data-view-mode={viewMode}
+		>
 			<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container">
 				{viewMode === 'list' ? (
 					<div className="flex h-full min-h-0 flex-col">
@@ -452,7 +494,6 @@ function renderFromItems({
 								items={processedItems as MediaItem[]}
 								onItemClick={handleItemClick}
 								onItemDoubleClick={handleItemDoubleClick}
-								selectedIds={selectedIds}
 							/>
 						</div>
 					</div>
@@ -462,7 +503,6 @@ function renderFromItems({
 							items={processedItems as MediaItem[]}
 							onItemClick={handleItemClick}
 							onItemDoubleClick={handleItemDoubleClick}
-							selectedIds={selectedIds}
 						/>
 					</div>
 				) : viewMode === 'masonry' ? (
@@ -471,7 +511,6 @@ function renderFromItems({
 							items={processedItems as MediaItem[]}
 							onItemClick={handleItemClick}
 							onItemDoubleClick={handleItemDoubleClick}
-							selectedIds={selectedIds}
 						/>
 					</div>
 				) : viewMode === 'table' ? (
@@ -480,7 +519,6 @@ function renderFromItems({
 							items={processedItems as MediaItem[]}
 							onItemClick={handleItemClick}
 							onItemDoubleClick={handleItemDoubleClick}
-							selectedIds={selectedIds}
 						/>
 					</div>
 				) : viewMode === 'cards' ? (
@@ -489,7 +527,15 @@ function renderFromItems({
 							items={processedItems as MediaItem[]}
 							onItemClick={handleItemClick}
 							onItemDoubleClick={handleItemDoubleClick}
-							selectedIds={selectedIds}
+						/>
+					</div>
+				) : viewMode === 'canvas' ? (
+					<div className="h-full min-h-0">
+						<FileCanvas
+							itemSize={itemSize}
+							items={processedItems as MediaItem[]}
+							onItemClick={handleItemClick}
+							onItemDoubleClick={handleItemDoubleClick}
 						/>
 					</div>
 				) : (
@@ -499,7 +545,6 @@ function renderFromItems({
 							items={processedItems as MediaItem[]}
 							onItemClick={handleItemClick}
 							onItemDoubleClick={handleItemDoubleClick}
-							selectedIds={selectedIds}
 							style={gridStyle}
 							viewMode={viewMode}
 						/>

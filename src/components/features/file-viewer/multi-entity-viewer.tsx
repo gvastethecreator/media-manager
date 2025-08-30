@@ -10,7 +10,7 @@ import type { AudioWithStats } from '@/types/entities/audio';
 import type { DocumentWithStats } from '@/types/entities/document';
 import type { FileWithStats } from '@/types/entities/file/base';
 import type { VideoWithStats } from '@/types/entities/video';
-import { EntityStatsType } from '@/types/migration';
+import { EntityStatsType } from '@/types/file-browser/entity-stats';
 
 // Import viewers
 import { AudioViewer } from './viewers/audio-viewer';

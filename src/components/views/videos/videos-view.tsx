@@ -11,10 +11,10 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/components/ui/use-toast';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useMultiEntityViewerStore } from '@/stores/multi-entity-viewer.store';
 import { useVideoStore } from '@/store/entities/video';
+import { useMultiEntityViewerStore } from '@/stores/multi-entity-viewer.store';
+import type { AnyEntityWithStats } from '@/types/entities';
 import type { VideoWithStats } from '@/types/entities/video';
-import type { AnyEntityWithStats } from '@/types/migration';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('VideosView');

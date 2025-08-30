@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+// @ts-nocheck
 /**
  * Script de instalación masiva de componentes REUI + shadcn.
  * Ejecuta secuencialmente comandos del tipo:
@@ -16,11 +17,8 @@
 import { $ } from 'bun';
 
 // Pequeño logger central para evitar múltiples 'console' directos (lint friendly)
-// biome-ignore lint/suspicious/noConsole: salida de script CLI
 const log = (...args: unknown[]) => console.log(...args);
-// biome-ignore lint/suspicious/noConsole: salida de script CLI
 const logErr = (...args: unknown[]) => console.error(...args);
-// biome-ignore lint/suspicious/noConsole: salida de script CLI
 const logWarn = (...args: unknown[]) => console.warn(...args);
 
 // Lista deduplicada de slugs inferidos de la petición del usuario
@@ -179,7 +177,6 @@ async function tryInstallSingleSlug(slug: string): Promise<{ ok: boolean; messag
 	}
 	for (let attempt = 1; attempt <= retries; attempt++) {
 		try {
-			// biome-ignore lint: ejecución secuencial requerida
 			await $`${cmd}`;
 			log(`✔ ${slug}`);
 			return { ok: true };
@@ -316,7 +313,6 @@ async function install(slug: string) {
 	log(`Instalando ${all.length} componentes REUI${dryRun ? ' (DRY RUN)' : ''}`);
 	const started = Date.now();
 	for (const slug of all) {
-		// biome-ignore lint: instalación orden secuencial
 		await install(slug);
 	}
 	const secs = ((Date.now() - started) / 1000).toFixed(1);

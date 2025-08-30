@@ -264,19 +264,19 @@ export function FolderCard({
 						/>
 
 						{/* Main content section */}
-						<section className="@[300px]:gap-3 flex items-center gap-2" data-density="compact">
+						<section className="flex items-center @[300px]:gap-3 gap-2" data-density="compact">
 							{/* Thumbnail micro */}
 							<div className="flex-shrink-0">
 								{folderStats?.recentImages && folderStats.recentImages.length > 0 ? (
-									<div className="relative h-8 w-8 @[280px]:h-10 @[280px]:w-10">
+									<div className="relative @[280px]:h-10 h-8 @[280px]:w-10 w-8">
 										<ThumbnailGrid
 											images={folderStats.recentImages.slice(0, 4)}
-											totalImages={folderStats.totalImages || 0}
 											showCount={false}
+											totalImages={folderStats.totalImages || 0}
 										/>
 									</div>
 								) : (
-									<div className="@[280px]:h-10 @[280px]:w-10 flex h-8 w-8 items-center justify-center rounded border border-dashed bg-muted/30 border-muted-foreground/20">
+									<div className="flex @[280px]:h-10 h-8 @[280px]:w-10 w-8 items-center justify-center rounded border border-muted-foreground/20 border-dashed bg-muted/30">
 										<Folder className="h-3 w-3 text-muted-foreground/50" />
 									</div>
 								)}

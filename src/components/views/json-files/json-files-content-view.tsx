@@ -8,8 +8,8 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useJsonFileStore } from '@/store/entities/json-file';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import type { JsonFileWithStats } from '@/types/entities/json-file';
 import type { AnyEntityWithStats } from '@/types/entities';
+import type { JsonFileWithStats } from '@/types/entities/json-file';
 
 // Logger para depuración
 const logger = clientLogger.withContext('JsonFilesContentView');

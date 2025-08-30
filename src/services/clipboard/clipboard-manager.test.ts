@@ -5,12 +5,12 @@
  */
 
 import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import type { AnyEntityWithStats } from '@/types/entities';
-import { FileType } from '@/types/entities/file';
+import type { AnyEntityWithStats } from '../../types/entities';
+import { FileType } from '../../types/entities/file';
 import { ClipboardFormat, ClipboardManager } from './clipboard-manager';
 
 // Mock dependencies
-mock.module('@/lib/logger/server-logger', () => ({
+mock.module('../../lib/logger/server-logger', () => ({
 	serverLogger: {
 		withContext: () => ({
 			info: mock(),
@@ -20,7 +20,7 @@ mock.module('@/lib/logger/server-logger', () => ({
 	},
 }));
 
-mock.module('@/services/toast', () => ({
+mock.module('../toast', () => ({
 	toastService: {
 		success: mock(),
 		error: mock(),
@@ -28,7 +28,7 @@ mock.module('@/services/toast', () => ({
 	},
 }));
 
-mock.module('@/services/file/file.service', () => ({
+mock.module('../file/file.service', () => ({
 	getFileAsDataUrl: mock().mockResolvedValue({
 		dataUrl:
 			'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChAI9jU77zgAAAABJRU5ErkJggg==',
@@ -52,16 +52,35 @@ Object.defineProperty(global, 'navigator', {
 });
 
 // Mock ClipboardItem
-global.ClipboardItem = mock().mockImplementation((data) => ({ data }));
+global.ClipboardItem = mock().mockImplementation((data: Record<string, Blob>) => ({ data }));
 
 // Mock Blob
-global.Blob = mock().mockImplementation((content, options) => ({
+global.Blob = mock().mockImplementation((content: any, options?: { type?: string }) => ({
 	content,
 	type: options?.type || 'text/plain',
 }));
 
 // Mock atob
-global.atob = mock().mockImplementation((str) => str);
+global.atob = mock().mockImplementation((str: string) => str);
+
+// Helper para crear entidades mínimas para las utilidades usadas por ClipboardManager
+function mkEntity(partial: {
+	id?: string;
+	name?: string;
+	path?: string;
+	size?: number;
+	entityType: 'image' | 'document';
+}): AnyEntityWithStats {
+	const base = {
+		id: partial.id ?? crypto.randomUUID?.() ?? Math.random().toString(36).slice(2),
+		name: partial.name ?? 'unnamed',
+		path: partial.path ?? '/path/to/unnamed',
+		size: partial.size ?? 1024,
+		entityType: partial.entityType,
+	};
+	// Castear desde unknown para no requerir todos los campos del tipo canónico
+	return base as unknown as AnyEntityWithStats;
+}
 
 describe('ClipboardManager', () => {
 	let clipboardManager: ClipboardManager;
@@ -71,46 +90,10 @@ describe('ClipboardManager', () => {
 		clipboardManager = new ClipboardManager();
 		mock.restore();
 
-		// Create mock items
+		// Crear entidades mínimas que cumplen con las utilidades usadas
 		mockItems = [
-			{
-				id: '1',
-				fileName: 'test-image.png',
-				filePath: '/path/to/test-image.png',
-				entityType: 'image',
-				stats: {
-					formattedSize: '1 KB',
-					typeLabel: 'Image',
-					iconName: 'image',
-					colorCode: '#3b82f6',
-					daysSinceModified: 0,
-					daysSinceAccessed: 0,
-					isRecent: true,
-					isLarge: false,
-					formattedModifiedAt: '2025-01-27',
-					childCount: 0,
-					shortPath: 'test-image.png',
-				},
-			} as AnyEntityWithStats,
-			{
-				id: '2',
-				fileName: 'document.pdf',
-				filePath: '/path/to/document.pdf',
-				entityType: 'document',
-				stats: {
-					formattedSize: '2 KB',
-					typeLabel: 'Document',
-					iconName: 'document',
-					colorCode: '#ef4444',
-					daysSinceModified: 1,
-					daysSinceAccessed: 1,
-					isRecent: true,
-					isLarge: false,
-					formattedModifiedAt: '2025-01-26',
-					childCount: 0,
-					shortPath: 'document.pdf',
-				},
-			} as AnyEntityWithStats,
+			mkEntity({ id: '1', name: 'test-image.png', path: '/path/to/test-image.png', size: 1024, entityType: 'image' }),
+			mkEntity({ id: '2', name: 'document.pdf', path: '/path/to/document.pdf', size: 2048, entityType: 'document' }),
 		];
 	});
 
@@ -122,7 +105,7 @@ describe('ClipboardManager', () => {
 			expect(clipboardData).not.toBeNull();
 			expect(clipboardData?.operation).toBe('copy');
 			expect(clipboardData?.items).toHaveLength(2);
-			expect(clipboardData?.items[0].fileName || clipboardData?.items[0].name).toBe('test-image.png');
+			expect(clipboardData?.items[0].name).toBe('test-image.png');
 		});
 
 		it('should integrate with system clipboard', async () => {
@@ -141,14 +124,7 @@ describe('ClipboardManager', () => {
 		});
 
 		it('should validate items before copying', async () => {
-			const invalidItems = [
-				{
-					id: '',
-					fileName: 'invalid-item',
-					filePath: '',
-					entityType: 'file',
-				} as AnyEntityWithStats,
-			];
+			const invalidItems = [mkEntity({ id: '', name: 'invalid-item', path: '', entityType: 'document' })];
 
 			await expect(clipboardManager.copy(invalidItems)).rejects.toThrow();
 		});
@@ -227,7 +203,7 @@ describe('ClipboardManager', () => {
 		it('should generate JSON representation', async () => {
 			const jsonData = await clipboardManager.getClipboardDataInFormat(ClipboardFormat.JSON);
 			expect(jsonData).toBeTruthy();
-			const parsed = JSON.parse(jsonData!);
+			const parsed = JSON.parse(jsonData as string);
 			expect(parsed.items).toHaveLength(2);
 			expect(parsed.operation).toBe('copy');
 		});

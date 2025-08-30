@@ -164,11 +164,7 @@ export function AvatarGroupItem({
 	const selectedVariant = animationVariants[animation];
 
 	return (
-		<div
-			className={cn('group relative', className)}
-			onMouseEnter={() => setHoveredIndex(true)}
-			onMouseLeave={() => setHoveredIndex(false)}
-		>
+		<div className={cn('group relative', className)}>
 			<AnimatePresence mode="wait">
 				{hoveredIndex && tooltipContent && (
 					<motion.div
@@ -205,19 +201,24 @@ export function AvatarGroupItem({
 				)}
 			</AnimatePresence>
 
-			<motion.div
+			<motion.button
 				className="relative cursor-pointer"
+				onBlur={() => setHoveredIndex(false)}
+				onFocus={() => setHoveredIndex(true)}
+				onMouseEnter={() => setHoveredIndex(true)}
+				onMouseLeave={() => setHoveredIndex(false)}
 				onMouseMove={handleMouseMove}
 				transition={{
 					duration: 0.5,
 				}}
+				type="button"
 				whileHover={{
 					zIndex: 30,
 				}}
 				whileTap={{ scale: 0.95 }}
 			>
 				{otherChildren}
-			</motion.div>
+			</motion.button>
 		</div>
 	);
 }

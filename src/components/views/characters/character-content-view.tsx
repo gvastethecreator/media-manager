@@ -111,14 +111,15 @@ export const CharacterContentView = memo(function CharacterContentView() {
 				<div className="p-4">
 					<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
 						{items.map((item) => (
-							<div
-								className="cursor-pointer rounded-lg border p-4 hover:bg-accent"
+							<button
+								className="cursor-pointer rounded-lg border p-4 text-left hover:bg-accent"
 								key={item.id}
 								onClick={() => handleItemSelection(item)}
+								type="button"
 							>
 								<h3 className="font-medium">{item.name}</h3>
 								<p className="text-muted-foreground text-sm">{item.entityType}</p>
-							</div>
+							</button>
 						))}
 					</div>
 				</div>

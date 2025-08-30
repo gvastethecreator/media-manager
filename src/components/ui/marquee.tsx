@@ -1,7 +1,7 @@
 import React, { ComponentPropsWithoutRef, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
-interface MarqueeProps extends ComponentPropsWithoutRef<'div'> {
+interface MarqueeProps extends ComponentPropsWithoutRef<'section'> {
 	/**
 	 * Optional CSS class name to apply custom styles
 	 */
@@ -34,18 +34,10 @@ interface MarqueeProps extends ComponentPropsWithoutRef<'div'> {
 	 * If true, automatically repeats children enough to fill the visible area
 	 */
 	autoFill?: boolean;
-	/**
-	 * ARIA label for accessibility
-	 */
+	/** Optional accessible name; defaults to 'Marquesina' */
 	ariaLabel?: string;
-	/**
-	 * ARIA live region politeness
-	 */
+	/** ARIA live politeness; avoid announcing by default */
 	ariaLive?: 'off' | 'polite' | 'assertive';
-	/**
-	 * ARIA role
-	 */
-	ariaRole?: string;
 }
 
 export function Marquee({
@@ -57,15 +49,14 @@ export function Marquee({
 	repeat = 4,
 	ariaLabel,
 	ariaLive = 'off',
-	ariaRole = 'marquee',
 	...props
 }: MarqueeProps) {
-	const marqueeRef = useRef<HTMLDivElement>(null);
+	const marqueeRef = useRef<HTMLElement>(null);
 
 	return (
-		<div
+		<section
 			{...props}
-			aria-label={ariaLabel}
+			aria-label={ariaLabel || 'Marquesina'}
 			aria-live={ariaLive}
 			className={cn(
 				'group flex overflow-hidden p-2 [--duration:40s] [--gap:1rem] [gap:var(--gap)]',
@@ -77,8 +68,6 @@ export function Marquee({
 			)}
 			data-slot="marquee"
 			ref={marqueeRef}
-			role={ariaRole}
-			tabIndex={0}
 		>
 			{React.useMemo(
 				() => (
@@ -102,6 +91,6 @@ export function Marquee({
 				),
 				[repeat, children, vertical, pauseOnHover, reverse]
 			)}
-		</div>
+		</section>
 	);
 }

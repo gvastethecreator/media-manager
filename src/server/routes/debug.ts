@@ -12,6 +12,7 @@ const router = express.Router();
 
 // Importar el servicio para el endpoint de test de tipos de entidad
 import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
+
 const fileEntityMapperService = FileEntityMapperService.getInstance();
 
 router.get('/app-stats', async (_req, res) => {
@@ -393,7 +394,7 @@ router.post('/test-entity-types', async (req, res) => {
 	try {
 		const { extensions } = req.body;
 
-		if (!extensions || !Array.isArray(extensions)) {
+		if (!(extensions && Array.isArray(extensions))) {
 			return res.status(400).json({
 				error: 'Se requiere un array de extensiones en el body',
 			});

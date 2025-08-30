@@ -337,6 +337,9 @@ export function prepareInitialStats(characterClass: CharacterClass): string {
 			modifiedStats.hp = 22;
 			modifiedStats.maxHp = 22;
 			break;
+		default:
+			// Sin cambios para clases desconocidas
+			break;
 	}
 
 	return JSON.stringify(modifiedStats);

@@ -12,7 +12,7 @@ import {
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { createDefaultEntityStats } from '@/lib/utils';
-import type { EntityWithStats } from '@/types/migration';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 
 // Declarar expresiones regulares a nivel superior
 const FILE_NAME_REGEX = /[^/]+$/;

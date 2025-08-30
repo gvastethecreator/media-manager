@@ -301,7 +301,7 @@ const NoteServiceImpl = {
 			const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
 			// Determinar orden
-			let orderByClause;
+			let orderByClause: ReturnType<typeof desc> | ReturnType<typeof asc>;
 			switch (sortBy) {
 				case 'title':
 					orderByClause = sortOrder === 'desc' ? desc(notes.title) : asc(notes.title);

@@ -175,9 +175,8 @@ export function useDownloadManager(options: UseDownloadManagerOptions = {}): Use
 		maxConcurrent, // Start download (don't await to allow concurrent downloads)
 	]);
 
-	// Añadir dependencia ahora que está definida
-	// biome-ignore lint/correctness/useExhaustiveDependencies: dependencia añadida manualmente
-	(processQueue as unknown as any).deps = [executeDownload];
+	// Añadir dependencia ahora que está definida (marcador interno para tooling propio)
+	(processQueue as unknown as any).deps = [executeDownload]; // Removed suppression without effect
 
 	/**
 	 * Add download to queue

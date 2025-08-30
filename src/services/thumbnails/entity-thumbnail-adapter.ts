@@ -7,7 +7,9 @@
 import { ENTITY_TYPE_CONFIGS } from '@/config/entity-type-configs';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { imageService } from '@/services/image';
-import { type AnyEntityWithStats, EntityStatsType, getEntityStatsType, isImageWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
+import { getEntityStatsType, isImageWithStats } from '@/types/entity-guards';
+import { EntityStatsType } from '@/types/file-browser/entity-stats';
 
 /**
  * Opciones para la generación de thumbnails

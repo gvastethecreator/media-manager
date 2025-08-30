@@ -305,7 +305,7 @@ async function probeVideoStream(
  * @returns Buffer del frame como JPEG
  */
 async function extractSingleFrame(videoPath: string, timestamp: number): Promise<Buffer> {
-	const TIMEOUT_MS = 5_000;
+	const TIMEOUT_MS = 5000;
 	// Estrategia con reintento: primero -ss antes de -i (rápido), si falla reintentar con -ss después de -i (más compatible)
 	const runOnce = (placeSsAfterInput: boolean) =>
 		new Promise<Buffer>((resolve, reject) => {

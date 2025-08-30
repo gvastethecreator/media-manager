@@ -6,48 +6,58 @@
  */
 
 // Browser-compatible EventEmitter implementation
-class EventEmitter {
-	private events: { [key: string]: Function[] } = {};
+type BatchEvents =
+	| { type: 'operationStarted'; payload: BatchOperation }
+	| { type: 'operationProgress'; payload: BatchOperation }
+	| { type: 'operationCompleted'; payload: BatchOperation }
+	| { type: 'operationFailed'; payload: { operation: BatchOperation; error: unknown } }
+	| { type: 'operationCancelled'; payload: BatchOperation }
+	| { type: 'operationPaused'; payload: BatchOperation }
+	| { type: 'operationResumed'; payload: BatchOperation };
 
-	on(event: string, listener: Function): this {
-		if (!this.events[event]) {
-			this.events[event] = [];
-		}
-		this.events[event].push(listener);
+type BatchListener<T> = (payload: T) => void;
+
+class EventEmitter {
+	private events = new Map<string, Set<BatchListener<any>>>();
+
+	on<TEvent extends BatchEvents['type']>(
+		event: TEvent,
+		listener: BatchListener<Extract<BatchEvents, { type: TEvent }>['payload']>
+	): this {
+		const set = this.events.get(event) ?? new Set();
+		set.add(listener as BatchListener<any>);
+		this.events.set(event, set);
 		return this;
 	}
 
-	emit(event: string, ...args: any[]): boolean {
-		if (!this.events[event]) {
-			return false;
-		}
-		this.events[event].forEach((listener) => {
+	emit<TEvent extends BatchEvents['type']>(
+		event: TEvent,
+		payload: Extract<BatchEvents, { type: TEvent }>['payload']
+	): boolean {
+		const set = this.events.get(event);
+		if (!set) return false;
+		for (const listener of set) {
 			try {
-				listener(...args);
+				(listener as BatchListener<typeof payload>)(payload);
 			} catch (error) {
 				console.error('Error in event listener:', error);
 			}
-		});
+		}
 		return true;
 	}
 
-	removeListener(event: string, listener: Function): this {
-		if (!this.events[event]) {
-			return this;
-		}
-		const index = this.events[event].indexOf(listener);
-		if (index > -1) {
-			this.events[event].splice(index, 1);
-		}
+	removeListener<TEvent extends BatchEvents['type']>(
+		event: TEvent,
+		listener: BatchListener<Extract<BatchEvents, { type: TEvent }>['payload']>
+	): this {
+		const set = this.events.get(event);
+		if (set) set.delete(listener as BatchListener<any>);
 		return this;
 	}
 
-	removeAllListeners(event?: string): this {
-		if (event) {
-			delete this.events[event];
-		} else {
-			this.events = {};
-		}
+	removeAllListeners(event?: BatchEvents['type']): this {
+		if (event) this.events.delete(event);
+		else this.events.clear();
 		return this;
 	}
 }
@@ -422,9 +432,9 @@ class BatchFileOperationsService extends EventEmitter {
 			}
 		}
 
-		completedIds.forEach((id) => {
+		for (const id of completedIds) {
 			this.operations.delete(id);
-		});
+		}
 
 		logger.info('🧹 Cleared completed operations:', completedIds.length);
 	}
@@ -564,6 +574,10 @@ class BatchFileOperationsService extends EventEmitter {
 								result = await deleteFile(itemPath);
 							}
 							break;
+
+						default:
+							// No-op for unknown operation types
+							break;
 					}
 
 					const processingTime = Date.now() - startTime;
@@ -653,7 +667,7 @@ class BatchFileOperationsService extends EventEmitter {
 			const errorMessage = error instanceof Error ? error.message : 'Unknown error';
 			logger.error('❌ Batch operation failed:', { operationId, error: errorMessage });
 
-			this.emit('operationFailed', operation, error);
+			this.emit('operationFailed', { operation, error });
 
 			if (operation.options?.showProgress !== false) {
 				toastService.error(`${this.getOperationDescription(operation)} falló: ${errorMessage}`);

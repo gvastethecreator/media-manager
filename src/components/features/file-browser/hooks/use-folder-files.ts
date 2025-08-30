@@ -1,16 +1,16 @@
 import { useEffect, useMemo } from 'react';
-import { useImageStore } from '@/store/entities/image';
-import { useVideoStore } from '@/store/entities/video';
 import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
-import { useJsonFileStore } from '@/store/entities/json-file/json-file.store';
 import { useFile3DStore } from '@/store/entities/file-3d';
-import type { ImageWithStats } from '@/types/entities/image';
-import type { VideoWithStats } from '@/types/entities/video/types';
+import { useImageStore } from '@/store/entities/image';
+import { useJsonFileStore } from '@/store/entities/json-file/json-file.store';
+import { useVideoStore } from '@/store/entities/video';
 import type { AudioWithStats } from '@/types/entities/audio';
 import type { DocumentWithStats } from '@/types/entities/document';
-import type { JsonFileWithStats } from '@/types/entities/json-file';
 import type { File3DWithStats } from '@/types/entities/file3d';
+import type { ImageWithStats } from '@/types/entities/image';
+import type { JsonFileWithStats } from '@/types/entities/json-file';
+import type { VideoWithStats } from '@/types/entities/video/types';
 import type { MediaItem } from '../components/media-thumbnail';
 
 type MediaUnion =

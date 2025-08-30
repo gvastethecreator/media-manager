@@ -1,12 +1,10 @@
-import { Upload, FileText, AlertCircle, CheckCircle } from 'lucide-react';
+import { AlertCircle, CheckCircle, FileText, Upload } from 'lucide-react';
 import { memo, useState } from 'react';
-import { cn } from '@/lib/utils';
-
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { useWorkflowDrop } from '@/hooks/use-workflow-drop';
+import { cn } from '@/lib/utils';
 
 interface WorkflowDropZoneProps {
 	className?: string;
@@ -53,25 +51,25 @@ export const WorkflowDropZone = memo(function WorkflowDropZone({
 				className={cn(
 					'border-2 border-dashed transition-colors duration-200',
 					isDragging && !disabled && 'border-primary bg-primary/5',
-					disabled && 'opacity-50 cursor-not-allowed',
+					disabled && 'cursor-not-allowed opacity-50',
 					!disabled && 'hover:border-primary/50 hover:bg-muted/50'
 				)}
-				{...(!disabled ? dropZoneProps : {})}
+				{...(disabled ? {} : dropZoneProps)}
 			>
-				<CardContent className="flex flex-col items-center justify-center p-8 text-center space-y-4">
+				<CardContent className="flex flex-col items-center justify-center space-y-4 p-8 text-center">
 					{isProcessing ? (
 						<>
-							<div className="animate-spin h-8 w-8 border-2 border-primary border-t-transparent rounded-full" />
+							<div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
 							<div className="space-y-2">
 								<p className="font-medium text-sm">Procesando workflows...</p>
-								<p className="text-xs text-muted-foreground">Validando y importando archivos JSON</p>
+								<p className="text-muted-foreground text-xs">Validando y importando archivos JSON</p>
 							</div>
 						</>
 					) : (
 						<>
 							<div
 								className={cn(
-									'h-12 w-12 rounded-full flex items-center justify-center',
+									'flex h-12 w-12 items-center justify-center rounded-full',
 									isDragging && !disabled ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
 								)}
 							>
@@ -81,26 +79,26 @@ export const WorkflowDropZone = memo(function WorkflowDropZone({
 								<p className="font-medium">
 									{isDragging && !disabled ? 'Suelta los archivos aquí' : 'Arrastra workflows ComfyUI aquí'}
 								</p>
-								<p className="text-sm text-muted-foreground">Archivos JSON de workflows ComfyUI (formato v1.0)</p>
+								<p className="text-muted-foreground text-sm">Archivos JSON de workflows ComfyUI (formato v1.0)</p>
 							</div>
-							<div className="flex items-center gap-2 text-xs text-muted-foreground">
+							<div className="flex items-center gap-2 text-muted-foreground text-xs">
 								<FileText className="h-4 w-4" />
 								<span>Soporta múltiples archivos</span>
 							</div>
 						</>
 					)}
 
-					{!disabled && !isProcessing && (
+					{!(disabled || isProcessing) && (
 						<div className="pt-2">
-							<Button variant="outline" size="sm" asChild>
+							<Button asChild size="sm" variant="outline">
 								<label className="cursor-pointer">
 									Seleccionar archivos
 									<input
-										type="file"
-										multiple
 										accept=".json,application/json"
 										className="hidden"
+										multiple
 										onChange={handleFileInput}
+										type="file"
 									/>
 								</label>
 							</Button>
@@ -121,11 +119,11 @@ export const WorkflowDropZone = memo(function WorkflowDropZone({
 			<Card className="bg-muted/30">
 				<CardContent className="p-4">
 					<div className="space-y-2">
-						<h4 className="font-medium text-sm flex items-center gap-2">
+						<h4 className="flex items-center gap-2 font-medium text-sm">
 							<FileText className="h-4 w-4" />
 							Formato Soportado
 						</h4>
-						<div className="text-xs text-muted-foreground space-y-1">
+						<div className="space-y-1 text-muted-foreground text-xs">
 							<p>• Archivos JSON de workflows ComfyUI v1.0</p>
 							<p>• Debe contener nodos, conexiones y metadatos válidos</p>
 							<p>• Se validará la estructura antes de importar</p>

@@ -1,4 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuLabel,
+	ContextMenuSeparator,
+	ContextMenuTrigger,
+} from '@/components/ui/context-menu';
+import { useSelectionStore } from '@/store/ui/selection.slice';
+import type { ClickModifiers } from '../types/file-browser.types';
+import { AddToEntityMenu } from './add-to-entity-menu';
 import type { MediaItem } from './media-thumbnail';
 import { MediaThumbnail } from './media-thumbnail';
 
@@ -10,13 +21,14 @@ const CONFIG = {
 	mdCols: 3,
 	lgCols: 4,
 	xlCols: 5,
-	increaseViewportBy: { top: 200, bottom: 800 } as { top: number; bottom: number },
+	// Overscan mayor para masonry (items variables)
+	increaseViewportBy: { top: 800, bottom: 1600 } as { top: number; bottom: number },
 };
 
 interface FileMasonryProps {
 	items: MediaItem[];
 	selectedIds?: string[];
-	onItemClick?: (item: MediaItem) => void;
+	onItemClick?: (item: MediaItem, modifiers?: ClickModifiers) => void;
 	onItemDoubleClick?: (item: MediaItem) => void;
 }
 
@@ -41,10 +53,13 @@ function MasonryTile({
 }: {
 	item: MediaItem;
 	selected: boolean;
-	onClick?: (item: MediaItem) => void;
+	onClick?: (item: MediaItem, modifiers?: ClickModifiers) => void;
 	onDoubleClick?: (item: MediaItem) => void;
 }) {
-	const handleClick = () => onClick?.(item);
+	const isSelected = useSelectionStore((s) => s.isSelected(item.id));
+	const selectedState = typeof selected === 'boolean' ? selected : isSelected;
+	const handleClick = (e: React.MouseEvent<HTMLButtonElement>) =>
+		onClick?.(item, { ctrlKey: e.ctrlKey, metaKey: e.metaKey, shiftKey: e.shiftKey });
 	const handleDoubleClick = () => onDoubleClick?.(item);
 	const handleKeyDown = (e: React.KeyboardEvent<HTMLButtonElement>) => {
 		if (e.key === 'Enter' || e.key === ' ') {
@@ -54,17 +69,24 @@ function MasonryTile({
 
 	return (
 		<button
-			aria-pressed={selected}
+			aria-pressed={selectedState}
 			className="group relative w-full overflow-hidden rounded-md border-none bg-card text-left focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2"
 			data-entity-card
 			data-entity-type={item.entityType}
-			data-selected={selected}
+			data-selected={selectedState}
 			onClick={handleClick}
 			onDoubleClick={handleDoubleClick}
 			onKeyDown={handleKeyDown}
 			type="button"
 		>
-			<MediaThumbnail className="h-auto w-full" item={item} style={{ objectFit: 'cover' }} />
+			<MediaThumbnail
+				className="h-auto w-full"
+				item={item}
+				lockAspectRatio
+				predictedAspectRatio={1}
+				preloadMargin="800px"
+				style={{ objectFit: 'cover' }}
+			/>
 			<div className="absolute right-0 bottom-0 left-0 bg-gradient-to-t from-black/70 to-transparent p-2">
 				<p className="truncate font-medium text-white text-xs">{item.name}</p>
 			</div>
@@ -114,17 +136,32 @@ export function FileMasonry({ items, selectedIds = [], onItemClick, onItemDouble
 					ItemContent={function ItemContentComp({ data }: { data: MediaItem }) {
 						return (
 							<div style={{ padding: `${CONFIG.gap / 2}px` }}>
-								<MasonryTile
-									item={data}
-									onClick={onItemClick}
-									onDoubleClick={onItemDoubleClick}
-									selected={selectedIds.includes(data.id)}
-								/>
+								<ContextMenu>
+									<ContextMenuTrigger asChild>
+										<div>
+											<MasonryTile
+												item={data}
+												onClick={onItemClick}
+												onDoubleClick={onItemDoubleClick}
+												selected={selectedIds.includes(data.id)}
+											/>
+										</div>
+									</ContextMenuTrigger>
+									<ContextMenuContent>
+										<ContextMenuLabel>Acciones</ContextMenuLabel>
+										<ContextMenuItem onSelect={() => onItemClick?.(data)}>Abrir</ContextMenuItem>
+										<ContextMenuItem>Mostrar en carpeta</ContextMenuItem>
+										<ContextMenuSeparator />
+										<AddToEntityMenu entityType={data.entityType} itemId={data.id} />
+										<ContextMenuSeparator />
+										<ContextMenuItem variant="destructive">Eliminar</ContextMenuItem>
+									</ContextMenuContent>
+								</ContextMenu>
 							</div>
 						);
 					}}
 					increaseViewportBy={CONFIG.increaseViewportBy}
-					initialItemCount={Math.min(50, items.length)}
+					initialItemCount={Math.min(80, items.length)}
 					style={{ height: '100%' }}
 					useWindowScroll={false}
 				/>
@@ -138,12 +175,27 @@ export function FileMasonry({ items, selectedIds = [], onItemClick, onItemDouble
 			<div className="columns-1" style={{ gap: CONFIG.gap, padding: CONFIG.padding }}>
 				{items.map((item) => (
 					<div className="mb-4 break-inside-avoid" key={item.id} style={{ marginBottom: CONFIG.gap }}>
-						<MasonryTile
-							item={item}
-							onClick={onItemClick}
-							onDoubleClick={onItemDoubleClick}
-							selected={selectedIds.includes(item.id)}
-						/>
+						<ContextMenu>
+							<ContextMenuTrigger asChild>
+								<div>
+									<MasonryTile
+										item={item}
+										onClick={onItemClick}
+										onDoubleClick={onItemDoubleClick}
+										selected={selectedIds.includes(item.id)}
+									/>
+								</div>
+							</ContextMenuTrigger>
+							<ContextMenuContent>
+								<ContextMenuLabel>Acciones</ContextMenuLabel>
+								<ContextMenuItem onSelect={() => onItemClick?.(item)}>Abrir</ContextMenuItem>
+								<ContextMenuItem>Mostrar en carpeta</ContextMenuItem>
+								<ContextMenuSeparator />
+								<AddToEntityMenu entityType={item.entityType} itemId={item.id} />
+								<ContextMenuSeparator />
+								<ContextMenuItem variant="destructive">Eliminar</ContextMenuItem>
+							</ContextMenuContent>
+						</ContextMenu>
 					</div>
 				))}
 			</div>

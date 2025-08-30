@@ -8,9 +8,36 @@
 import { readFileSync } from 'node:fs';
 import chalk from 'chalk';
 
-// Expresiones regulares globales para mejor rendimiento
-const ANSI_REGEX = /[\u001B\u009B][[()#;?]*(?:[0-9]{1,4}(?:;[0-9]{0,4})*)?[0-9A-ORZcf-nqry=><]/g;
-const FORMAT_REGEX = /\[(?:7|0|9\d)m/g;
+// Utilidad para limpiar códigos ANSI sin usar literales con caracteres de control
+function stripAnsi(input) {
+	let i = 0;
+	let out = '';
+	const len = input.length;
+	while (i < len) {
+		const code = input.charCodeAt(i);
+		// ESC (27) or CSI (155)
+		if (code === 27 || code === 155) {
+			i++;
+			// Opcional: saltar '[' tras ESC
+			if (i < len && input[i] === '[') {
+				i++;
+			}
+			// Consumir hasta letra terminadora típica de SGR/CSI
+			while (i < len) {
+				const ch = input[i];
+				if ((ch >= 'A' && ch <= 'Z') || (ch >= 'a' && ch <= 'z')) {
+					i++;
+					break;
+				}
+				i++;
+			}
+			continue;
+		}
+		out += input[i];
+		i++;
+	}
+	return out;
+}
 const TSC_ERROR_REGEX = /([^:\s]+\.tsx?):\s*(\d+):\s*(\d+)\s*-\s*error\s*(?:TS(\d+))?\s*[:\s]*(.+)/i;
 const BIOME_ERROR_REGEX = /([^:\s]+\.[jt]sx?):(\d+):(\d+)\s+(\w+\/[\w/]+)/;
 const BIOME_NEXT_LINE_REGEX = /^[^:\s]+\.[jt]sx?:\d+:\d+/;
@@ -38,10 +65,7 @@ class ParsedError {
  * Función auxiliar para limpiar códigos ANSI y otros caracteres de escape
  */
 function cleanAnsiCodes(text) {
-	return text
-		.replace(ANSI_REGEX, '') // Códigos ANSI completos
-		.replace(FORMAT_REGEX, '') // Códigos específicos de formato
-		.trim();
+	return stripAnsi(text).trim();
 }
 
 /**

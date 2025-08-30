@@ -4,9 +4,10 @@ import { useNavigate } from 'react-router-dom';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
+import type { AnyEntityWithStats } from '@/types/entities';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { ImageWithStats } from '@/types/entities/image';
-import type { AnyEntityWithStats, EntityWithStats } from '@/types/migration';
-import { isImageWithStats } from '@/types/migration';
+import { isImageWithStats } from '@/types/entity-guards';
 import type { ViewProps } from '../types';
 import AllImagesContentView from './all-images-content-view';
 

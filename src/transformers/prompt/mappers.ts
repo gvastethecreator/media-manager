@@ -373,15 +373,17 @@ export function toPromptWithStats(prompt: PromptComplete): PromptWithStats {
 		// Métricas de contenido
 		totalContentItems: 0,
 		averageContentLength: prompt.content?.length || 0,
-		parametersCount: prompt.parameters
-			? (() => {
-					try {
-						return Object.keys(JSON.parse(prompt.parameters!)).length;
-					} catch {
-						return 0;
-					}
-				})()
-			: 0,
+		parametersCount:
+			typeof prompt.parameters === 'string'
+				? (() => {
+						try {
+							const parsed = JSON.parse(prompt.parameters as string);
+							return parsed && typeof parsed === 'object' ? Object.keys(parsed).length : 0;
+						} catch {
+							return 0;
+						}
+					})()
+				: 0,
 		tagsCount: Array.isArray(prompt.tags) ? prompt.tags.length : 0,
 
 		// Métricas de IA y uso

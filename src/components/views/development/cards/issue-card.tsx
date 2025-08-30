@@ -21,6 +21,8 @@ export function IssueCard({ issue }: { issue: Issue }) {
 				return <Info className="h-4 w-4 text-yellow-500" />;
 			case 'low':
 				return <CheckCircle2 className="h-4 w-4 text-green-500" />;
+			default:
+				return <Info className="h-4 w-4 text-muted-foreground" />;
 		}
 	};
 

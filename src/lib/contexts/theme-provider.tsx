@@ -5,7 +5,7 @@
  * @updated 2025-01-27 - Migrado de Next.js a React nativo
  */
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 // Definimos los temas personalizados (mantenidos de la versión original)
 const customThemes = [
@@ -88,38 +88,44 @@ export function ThemeProvider({
 	const [resolvedTheme, setResolvedTheme] = useState<(typeof customThemes)[number]>('light');
 
 	// Detectar preferencia del sistema
-	const getSystemTheme = (): (typeof customThemes)[number] => {
+	const getSystemTheme = useCallback((): (typeof customThemes)[number] => {
 		if (typeof window === 'undefined') {
 			return 'light';
 		}
 		return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-	};
+	}, []);
 
 	// Resolver tema actual
-	const resolveTheme = (currentTheme: Theme): (typeof customThemes)[number] => {
-		if (currentTheme === 'system') {
-			return getSystemTheme();
-		}
-		return currentTheme as (typeof customThemes)[number];
-	};
+	const resolveTheme = useCallback(
+		(currentTheme: Theme): (typeof customThemes)[number] => {
+			if (currentTheme === 'system') {
+				return getSystemTheme();
+			}
+			return currentTheme as (typeof customThemes)[number];
+		},
+		[getSystemTheme]
+	);
 
 	// Aplicar tema al DOM
-	const applyTheme = (themeToApply: (typeof customThemes)[number]) => {
-		const root = document.documentElement;
+	const applyTheme = useCallback(
+		(themeToApply: (typeof customThemes)[number]) => {
+			const root = document.documentElement;
 
-		// Remover todas las clases de tema anteriores
-		for (const t of customThemes) {
-			root.classList.remove(t);
-		}
+			// Remover todas las clases de tema anteriores
+			for (const t of customThemes) {
+				root.classList.remove(t);
+			}
 
-		// Aplicar nueva clase de tema
-		root.classList.add(themeToApply);
+			// Aplicar nueva clase de tema
+			root.classList.add(themeToApply);
 
-		// Aplicar atributo data-theme
-		if (attribute) {
-			root.setAttribute(attribute, themeToApply);
-		}
-	};
+			// Aplicar atributo data-theme
+			if (attribute) {
+				root.setAttribute(attribute, themeToApply);
+			}
+		},
+		[attribute]
+	);
 
 	// Inicializar tema desde localStorage
 	useEffect(() => {

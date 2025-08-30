@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { EntityWithStats } from '@/types/migration';
-import { isImageWithStats } from '@/types/migration';
+import type { EntityWithStats } from '@/types/entities/entity.types';
+import { isImageWithStats } from '@/types/entity-guards';
 
 const viewerLogger = clientLogger.withContext('ImageViewer');
 
