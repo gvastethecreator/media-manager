@@ -1,0 +1,48 @@
+📊 RESUMEN DE ERRORES
+Total de archivos con errores: 1
+Cantidad total de errores: 1
+
+📁 ARCHIVOS AFECTADOS:
+  s\file-browser\components\canvas\file-canvas-cards.tsx (líneas: 1)
+
+📋 DETALLE POR ARCHIVO:
+
+s\file-browser\components\canvas\file-canvas-cards.tsx
+  - línea 1 : lint/correctness/noUnusedImports
+
+════════════════════════════════════════════════════════════════════════════════
+📄 LOG ORIGINAL:
+════════════════════════════════════════════════════════════════════════════════
+
+Comando: bunx biome check --max-diagnostics=500 --write .
+Fecha: 2025-08-30T03:37:19.360Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+src\components\featureSkipped 1 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --write --unsafe
+
+Checked 1714 files in 2s. Fixed 22 files.
+Found 1 error.
+s\file-browser\components\canvas\file-canvas-cards.tsx:1:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  × This import is unused.
+  
+  > 1 │ import React from 'react';
+      │        ^^^^^
+    2 │ import type { ClickModifiers } from '../../types/file-browser.types';
+    3 │ import type { MediaItem } from '../media-thumbnail';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+    1 │ import·React·from·'react';␍
+      │ --------------------------
+
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while applying fixes.
+  
+

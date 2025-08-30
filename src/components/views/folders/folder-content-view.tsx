@@ -309,9 +309,7 @@ export function FolderContentView({
 		// Montar FileBrowser ya en loading para exponer toolbar/testids; mostrará spinner interno
 		content = (
 			<FileBrowser
-				entityType="any"
 				filterId={currentFolderId}
-				filterType="folder"
 				onItemClick={handleImageSelect}
 				onItemDoubleClick={handleImageDoubleClick}
 			/>
@@ -325,9 +323,7 @@ export function FolderContentView({
 		// Siempre mostrar FileBrowser, que maneja sus propios estados de loading/empty
 		content = (
 			<FileBrowser
-				entityType="any"
 				filterId={currentFolderId}
-				filterType="folder"
 				onItemClick={handleImageSelect}
 				onItemDoubleClick={handleImageDoubleClick}
 			/>

@@ -1,0 +1,7 @@
+Comando: bunx biome check --max-diagnostics=500 .
+Fecha: 2025-08-30T04:05:10.462Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+Checked 1714 files in 2s. No fixes applied.

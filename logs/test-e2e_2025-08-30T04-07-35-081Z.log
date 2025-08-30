@@ -1,0 +1,108 @@
+Comando: bunx playwright test
+Fecha: 2025-08-30T04:07:35.084Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Testing
+===============================================
+
+Running 17 tests using 12 workers
+
+  ✓   8 [chromium] › tests\e2e\file-browser-accessibility.spec.ts:116:2 › File Browser: accesibilidad y foco › Panel métricas aparece con debugPerf (11.5s)
+🔄 Probando thumbnails en vista: grid
+  -   4 [chromium] › tests\e2e\file-browser-accessibility.spec.ts:63:2 › File Browser: accesibilidad y foco › Enter y Space activan selección
+  -   6 [chromium] › tests\e2e\file-browser-accessibility.spec.ts:84:2 › File Browser: accesibilidad y foco › Overlay / botones visibles en hover
+  -   5 [chromium] › tests\e2e\file-browser-accessibility.spec.ts:33:2 › File Browser: accesibilidad y foco › navegación por flechas en grid
+🔄 Probando thumbnails en vista: cards
+⚠️ No se encontraron videos para probar thumbnails
+  ✓  11 [chromium] › tests\e2e\file-browser-views.spec.ts:127:2 › Video Thumbnails WebP Animados › thumbnails de video se muestran en grid view (16.8s)
+🎬 Testing video: 003414_OG_00001
+  -   3 [chromium] › tests\e2e\context-menu-performance.spec.ts:102:2 › Context Menu Performance › menú contextual debería aparecer rápidamente
+  ✓  14 [chromium] › tests\e2e\search-fts-disable-env.spec.ts:15:2 › Search FTS5 (deshabilitable) › engine consistente con DISABLE_FTS5 (3.1s)
+  ✓  10 [chromium] › tests\e2e\file-browser-views.spec.ts:221:2 › Video Thumbnails WebP Animados › performance de carga de thumbnails (18.6s)
+✅ WebP animado generado: [33m10748[39m bytes
+  ✓   9 [chromium] › tests\e2e\file-browser-views.spec.ts:155:2 › Video Thumbnails WebP Animados › API devuelve thumbnails WebP animados (18.8s)
+  ✓  16 [chromium] › tests\e2e\search-fts-require-flag.spec.ts:22:2 › Search FTS5 require flag › maneja flag SEARCH_FTS_REQUIRE (2.6s)
+  ✓  15 [chromium] › tests\e2e\search-fts-fallback.spec.ts:17:2 › Search FTS5 fallback › devuelve engine fts5 cuando tabla existe (2.9s)
+  ✓  17 [chromium] › tests\e2e\search-fts-score.spec.ts:14:2 › Search FTS5 score › incluye score cuando engine = fts5 (2.3s)
+🔄 Probando thumbnails en vista: masonry
+  ✘   1 [chromium] › tests\e2e\context-menu-performance.spec.ts:157:2 › Context Menu Performance › entidades críticas deberían estar precargadas (21.0s)
+✅ Todos los thumbnails cargaron sin errores
+  ✓  12 [chromium] › tests\e2e\file-browser-views.spec.ts:184:2 › Video Thumbnails WebP Animados › thumbnails cargan sin errores en diferentes vistas (24.5s)
+  ✓   7 [chromium] › tests\e2e\file-browser-views.spec.ts:95:2 › File Browser: vistas con scroll e interacción › grid, cards, masonry y list funcionan tras alternar desde toolbar (26.0s)
+  ✘   2 [chromium] › tests\e2e\context-menu-performance.spec.ts:127:2 › Context Menu Performance › submenús deberían cargarse rápidamente (24.7s)
+  ✓  13 [chromium] › tests\e2e\reindex-settings.spec.ts:13:2 › Reindex en Settings › reindex-all refresca UI (cards, nav y stats) (28.6s)
+
+
+  1) [chromium] › tests\e2e\context-menu-performance.spec.ts:127:2 › Context Menu Performance › submenús deberían cargarse rápidamente 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  locator('[data-slot="context-menu-content"][data-state="open"]')
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  2000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 2000ms[22m
+    [2m  - waiting for locator('[data-slot="context-menu-content"][data-state="open"]')[22m
+
+
+      65 | 		// Último chequeo ampliado
+      66 | 		if (!appeared) {
+    > 67 | 			await expect(contextMenu).toBeVisible({ timeout: 2000 });
+         | 			                          ^
+      68 | 		}
+      69 | 	}
+      70 | }
+        at openContextMenuRobusto (D:\DEV\image-manager\tests\e2e\context-menu-performance.spec.ts:67:30)
+        at D:\DEV\image-manager\tests\e2e\context-menu-performance.spec.ts:136:3
+
+    Error Context: test-results\context-menu-performance-C-9bf9d-berían-cargarse-rápidamente-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\context-menu-performance-C-9bf9d-berían-cargarse-rápidamente-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\context-menu-performance-C-9bf9d-berían-cargarse-rápidamente-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2) [chromium] › tests\e2e\context-menu-performance.spec.ts:157:2 › Context Menu Performance › entidades críticas deberían estar precargadas 
+
+    Error: [2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m failed
+
+    Locator:  locator('[data-slot="context-menu-content"][data-state="open"]')
+    Expected: visible
+    Received: <element(s) not found>
+    Timeout:  2000ms
+
+    Call log:
+    [2m  - Expect "toBeVisible" with timeout 2000ms[22m
+    [2m  - waiting for locator('[data-slot="context-menu-content"][data-state="open"]')[22m
+
+
+      65 | 		// Último chequeo ampliado
+      66 | 		if (!appeared) {
+    > 67 | 			await expect(contextMenu).toBeVisible({ timeout: 2000 });
+         | 			                          ^
+      68 | 		}
+      69 | 	}
+      70 | }
+        at openContextMenuRobusto (D:\DEV\image-manager\tests\e2e\context-menu-performance.spec.ts:67:30)
+        at D:\DEV\image-manager\tests\e2e\context-menu-performance.spec.ts:177:3
+
+    Error Context: test-results\context-menu-performance-C-abb9e--deberían-estar-precargadas-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\context-menu-performance-C-abb9e--deberían-estar-precargadas-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\context-menu-performance-C-abb9e--deberían-estar-precargadas-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  2 failed
+    [chromium] › tests\e2e\context-menu-performance.spec.ts:127:2 › Context Menu Performance › submenús deberían cargarse rápidamente 
+    [chromium] › tests\e2e\context-menu-performance.spec.ts:157:2 › Context Menu Performance › entidades críticas deberían estar precargadas 
+  4 skipped
+  11 passed (44.3s)

@@ -1,0 +1,42 @@
+📊 RESUMEN DE ERRORES
+Total de archivos con errores: 2
+Cantidad total de errores: 2
+
+📁 ARCHIVOS AFECTADOS:
+  src/components/features/file-browser/views/list-grouped-view.tsx (líneas: 30)
+  src/components/features/file-browser/views/table-grouped-view.tsx (líneas: 29)
+
+📋 DETALLE POR ARCHIVO:
+
+src/components/features/file-browser/views/list-grouped-view.tsx
+  - línea 30 : TS2578
+
+src/components/features/file-browser/views/table-grouped-view.tsx
+  - línea 29 : TS2578
+
+════════════════════════════════════════════════════════════════════════════════
+📄 LOG ORIGINAL:
+════════════════════════════════════════════════════════════════════════════════
+
+Comando: bunx tsc --noEmit --pretty
+Fecha: 2025-08-30T07:30:00.461Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+[96msrc/components/features/file-browser/views/list-grouped-view.tsx[0m:[93m30[0m:[93m8[0m - [91merror[0m[90m TS2578: [0mUnused '@ts-expect-error' directive.
+
+[7m30[0m        // @ts-expect-error: prop opcional en implementación extendida
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/table-grouped-view.tsx[0m:[93m29[0m:[93m8[0m - [91merror[0m[90m TS2578: [0mUnused '@ts-expect-error' directive.
+
+[7m29[0m        // @ts-expect-error: prop opcional en implementación extendida (reutiliza lista)
+[7m  [0m [91m       ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+Found 2 errors in 2 files.
+
+Errors  Files
+     1  src/components/features/file-browser/views/list-grouped-view.tsx[90m:30[0m
+     1  src/components/features/file-browser/views/table-grouped-view.tsx[90m:29[0m

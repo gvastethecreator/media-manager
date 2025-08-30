@@ -1,0 +1,488 @@
+📊 RESUMEN DE ERRORES
+Total de archivos con errores: 17
+Cantidad total de errores: 66
+
+📁 ARCHIVOS AFECTADOS:
+  src/components/features/file-browser/index.ts (líneas: 4, 5, 6, 7, 8)
+  src/components/features/file-browser/views/cards-view.tsx (líneas: 2)
+  src/components/features/file-browser/views/grid-grouped-view.tsx (líneas: 1, 2, 3, 4)
+  src/components/features/file-browser/views/grid-view.tsx (líneas: 4, 5, 6, 7)
+  src/components/features/file-browser/views/legacy/file-cards.tsx (líneas: 11, 12, 13, 14)
+  src/components/features/file-browser/views/legacy/file-grid.tsx (líneas: 11, 12, 13, 14, 118, 205)
+  src/components/features/file-browser/views/legacy/file-list.tsx (líneas: 10, 11, 12, 13)
+  src/components/features/file-browser/views/legacy/file-masonry.tsx (líneas: 11, 12, 13, 14)
+  src/components/features/file-browser/views/legacy/file-single.tsx (líneas: 11, 12, 13, 14)
+  src/components/features/file-browser/views/legacy/file-table.tsx (líneas: 11, 12, 13, 14)
+  src/components/features/file-browser/views/list-grouped-view.tsx (líneas: 1, 2, 3, 4)
+  src/components/features/file-browser/views/list-view.tsx (líneas: 3, 5, 6, 7)
+  src/components/features/file-browser/views/masonry-grouped-view.tsx (líneas: 1, 2, 3, 4)
+  src/components/features/file-browser/views/masonry-view.tsx (líneas: 3, 5, 6, 7)
+  src/components/features/file-browser/views/single-view.tsx (líneas: 4, 5, 6, 7)
+  src/components/features/file-browser/views/table-view.tsx (líneas: 1, 2, 3, 4)
+  src/components/views/folders/folder-content-view.tsx (líneas: 312, 328)
+
+📋 DETALLE POR ARCHIVO:
+
+src/components/features/file-browser/index.ts
+  - línea 4 : TS2307
+  - línea 5 : TS2307
+  - línea 6 : TS2307
+  - línea 7 : TS2307
+  - línea 8 : TS2307
+
+src/components/features/file-browser/views/cards-view.tsx
+  - línea 2 : TS2307
+
+src/components/features/file-browser/views/grid-grouped-view.tsx
+  - línea 1 : TS2307
+  - línea 2 : TS2307
+  - línea 3 : TS2307
+  - línea 4 : TS2307
+
+src/components/features/file-browser/views/grid-view.tsx
+  - línea 4 : TS2307
+  - línea 5 : TS2307
+  - línea 6 : TS2307
+  - línea 7 : TS2307
+
+src/components/features/file-browser/views/legacy/file-cards.tsx
+  - línea 11 : TS2307
+  - línea 12 : TS2307
+  - línea 13 : TS2307
+  - línea 14 : TS2307
+
+src/components/features/file-browser/views/legacy/file-grid.tsx
+  - línea 11 : TS2307
+  - línea 12 : TS2307
+  - línea 13 : TS2307
+  - línea 14 : TS2307
+  - línea 118 : TS7006
+  - línea 205 : TS7006
+
+src/components/features/file-browser/views/legacy/file-list.tsx
+  - línea 10 : TS2307
+  - línea 11 : TS2307
+  - línea 12 : TS2307
+  - línea 13 : TS2307
+
+src/components/features/file-browser/views/legacy/file-masonry.tsx
+  - línea 11 : TS2307
+  - línea 12 : TS2307
+  - línea 13 : TS2307
+  - línea 14 : TS2307
+
+src/components/features/file-browser/views/legacy/file-single.tsx
+  - línea 11 : TS2307
+  - línea 12 : TS2307
+  - línea 13 : TS2307
+  - línea 14 : TS2307
+
+src/components/features/file-browser/views/legacy/file-table.tsx
+  - línea 11 : TS2307
+  - línea 12 : TS2307
+  - línea 13 : TS2307
+  - línea 14 : TS2307
+
+src/components/features/file-browser/views/list-grouped-view.tsx
+  - línea 1 : TS2307
+  - línea 2 : TS2307
+  - línea 3 : TS2307
+  - línea 4 : TS2307
+
+src/components/features/file-browser/views/list-view.tsx
+  - línea 3 : TS2307
+  - línea 5 : TS2307
+  - línea 6 : TS2307
+  - línea 7 : TS2307
+
+src/components/features/file-browser/views/masonry-grouped-view.tsx
+  - línea 1 : TS2307
+  - línea 2 : TS2307
+  - línea 3 : TS2307
+  - línea 4 : TS2307
+
+src/components/features/file-browser/views/masonry-view.tsx
+  - línea 3 : TS2307
+  - línea 5 : TS2307
+  - línea 6 : TS2307
+  - línea 7 : TS2307
+
+src/components/features/file-browser/views/single-view.tsx
+  - línea 4 : TS2307
+  - línea 5 : TS2307
+  - línea 6 : TS2307
+  - línea 7 : TS2307
+
+src/components/features/file-browser/views/table-view.tsx
+  - línea 1 : TS2307
+  - línea 2 : TS2307
+  - línea 3 : TS2307
+  - línea 4 : TS2307
+
+src/components/views/folders/folder-content-view.tsx
+  - línea 312 : TS2322
+  - línea 328 : TS2322
+
+════════════════════════════════════════════════════════════════════════════════
+📄 LOG ORIGINAL:
+════════════════════════════════════════════════════════════════════════════════
+
+Comando: bunx tsc --noEmit --pretty
+Fecha: 2025-08-30T04:40:18.106Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+[96msrc/components/features/file-browser/index.ts[0m:[93m4[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module './components/file-grid' or its corresponding type declarations.
+
+[7m4[0m export { default as FileGrid } from './components/file-grid';
+[7m [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/index.ts[0m:[93m5[0m:[93m26[0m - [91merror[0m[90m TS2307: [0mCannot find module './components/file-list' or its corresponding type declarations.
+
+[7m5[0m export { FileList } from './components/file-list';
+[7m [0m [91m                         ~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/index.ts[0m:[93m6[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './components/file-list-header' or its corresponding type declarations.
+
+[7m6[0m export { FileListHeader } from './components/file-list-header';
+[7m [0m [91m                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/index.ts[0m:[93m7[0m:[93m29[0m - [91merror[0m[90m TS2307: [0mCannot find module './components/file-masonry' or its corresponding type declarations.
+
+[7m7[0m export { FileMasonry } from './components/file-masonry';
+[7m [0m [91m                            ~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/index.ts[0m:[93m8[0m:[93m27[0m - [91merror[0m[90m TS2307: [0mCannot find module './components/file-table' or its corresponding type declarations.
+
+[7m8[0m export { FileTable } from './components/file-table';
+[7m [0m [91m                          ~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/cards-view.tsx[0m:[93m2[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module '../media-thumbnail' or its corresponding type declarations.
+
+[7m2[0m import type { MediaItem } from '../media-thumbnail';
+[7m [0m [91m                               ~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/grid-grouped-view.tsx[0m:[93m1[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module '../media-thumbnail' or its corresponding type declarations.
+
+[7m1[0m import type { MediaItem } from '../media-thumbnail';
+[7m [0m [91m                               ~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/grid-grouped-view.tsx[0m:[93m2[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../types/file-browser.types' or its corresponding type declarations.
+
+[7m2[0m import type { ClickModifiers } from '../../types/file-browser.types';
+[7m [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/grid-grouped-view.tsx[0m:[93m3[0m:[93m28[0m - [91merror[0m[90m TS2307: [0mCannot find module './file-canvas' or its corresponding type declarations.
+
+[7m3[0m import { FileCanvas } from './file-canvas';
+[7m [0m [91m                           ~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/grid-grouped-view.tsx[0m:[93m4[0m:[93m36[0m - [91merror[0m[90m TS2307: [0mCannot find module './canvas-config' or its corresponding type declarations.
+
+[7m4[0m import { CanvasRenderConfig } from './canvas-config';
+[7m [0m [91m                                   ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/grid-view.tsx[0m:[93m4[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../types/file-browser.types' or its corresponding type declarations.
+
+[7m4[0m import type { ClickModifiers } from '../../types/file-browser.types';
+[7m [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/grid-view.tsx[0m:[93m5[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module '../media-thumbnail' or its corresponding type declarations.
+
+[7m5[0m import type { MediaItem } from '../media-thumbnail';
+[7m [0m [91m                               ~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/grid-view.tsx[0m:[93m6[0m:[93m70[0m - [91merror[0m[90m TS2307: [0mCannot find module './canvas-common' or its corresponding type declarations.
+
+[7m6[0m import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
+[7m [0m [91m                                                                     ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/grid-view.tsx[0m:[93m7[0m:[93m36[0m - [91merror[0m[90m TS2307: [0mCannot find module './canvas-config' or its corresponding type declarations.
+
+[7m7[0m import { CanvasRenderConfig } from './canvas-config';
+[7m [0m [91m                                   ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-cards.tsx[0m:[93m11[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../types/file-browser.types' or its corresponding type declarations.
+
+[7m11[0m import type { ClickModifiers } from '../types/file-browser.types';
+[7m  [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-cards.tsx[0m:[93m12[0m:[93m33[0m - [91merror[0m[90m TS2307: [0mCannot find module './add-to-entity-menu' or its corresponding type declarations.
+
+[7m12[0m import { AddToEntityMenu } from './add-to-entity-menu';
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-cards.tsx[0m:[93m13[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './media-thumbnail' or its corresponding type declarations.
+
+[7m13[0m import type { MediaItem } from './media-thumbnail';
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-cards.tsx[0m:[93m14[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './media-thumbnail' or its corresponding type declarations.
+
+[7m14[0m import { MediaThumbnail } from './media-thumbnail';
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-grid.tsx[0m:[93m11[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../types/file-browser.types' or its corresponding type declarations.
+
+[7m11[0m import type { ClickModifiers } from '../types/file-browser.types';
+[7m  [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-grid.tsx[0m:[93m12[0m:[93m33[0m - [91merror[0m[90m TS2307: [0mCannot find module './add-to-entity-menu' or its corresponding type declarations.
+
+[7m12[0m import { AddToEntityMenu } from './add-to-entity-menu';
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-grid.tsx[0m:[93m13[0m:[93m26[0m - [91merror[0m[90m TS2307: [0mCannot find module './grid-item' or its corresponding type declarations.
+
+[7m13[0m import { GridItem } from './grid-item';
+[7m  [0m [91m                         ~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-grid.tsx[0m:[93m14[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './media-thumbnail' or its corresponding type declarations.
+
+[7m14[0m import type { MediaItem } from './media-thumbnail';
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-grid.tsx[0m:[93m118[0m:[93m31[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m118[0m        onContextMenuCapture={(e) => {
+[7m   [0m [91m                              ~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-grid.tsx[0m:[93m205[0m:[93m32[0m - [91merror[0m[90m TS7006: [0mParameter 'e' implicitly has an 'any' type.
+
+[7m205[0m         onContextMenuCapture={(e) => {
+[7m   [0m [91m                               ~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-list.tsx[0m:[93m10[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../types/file-browser.types' or its corresponding type declarations.
+
+[7m10[0m import type { ClickModifiers } from '../types/file-browser.types';
+[7m  [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-list.tsx[0m:[93m11[0m:[93m33[0m - [91merror[0m[90m TS2307: [0mCannot find module './add-to-entity-menu' or its corresponding type declarations.
+
+[7m11[0m import { AddToEntityMenu } from './add-to-entity-menu';
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-list.tsx[0m:[93m12[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './media-thumbnail' or its corresponding type declarations.
+
+[7m12[0m import type { MediaItem } from './media-thumbnail';
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-list.tsx[0m:[93m13[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './media-thumbnail' or its corresponding type declarations.
+
+[7m13[0m import { MediaThumbnail } from './media-thumbnail';
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-masonry.tsx[0m:[93m11[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../types/file-browser.types' or its corresponding type declarations.
+
+[7m11[0m import type { ClickModifiers } from '../types/file-browser.types';
+[7m  [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-masonry.tsx[0m:[93m12[0m:[93m33[0m - [91merror[0m[90m TS2307: [0mCannot find module './add-to-entity-menu' or its corresponding type declarations.
+
+[7m12[0m import { AddToEntityMenu } from './add-to-entity-menu';
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-masonry.tsx[0m:[93m13[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './media-thumbnail' or its corresponding type declarations.
+
+[7m13[0m import type { MediaItem } from './media-thumbnail';
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-masonry.tsx[0m:[93m14[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './media-thumbnail' or its corresponding type declarations.
+
+[7m14[0m import { MediaThumbnail } from './media-thumbnail';
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-single.tsx[0m:[93m11[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../types/file-browser.types' or its corresponding type declarations.
+
+[7m11[0m import type { ClickModifiers } from '../types/file-browser.types';
+[7m  [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-single.tsx[0m:[93m12[0m:[93m33[0m - [91merror[0m[90m TS2307: [0mCannot find module './add-to-entity-menu' or its corresponding type declarations.
+
+[7m12[0m import { AddToEntityMenu } from './add-to-entity-menu';
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-single.tsx[0m:[93m13[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './media-thumbnail' or its corresponding type declarations.
+
+[7m13[0m import type { MediaItem } from './media-thumbnail';
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-single.tsx[0m:[93m14[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './media-thumbnail' or its corresponding type declarations.
+
+[7m14[0m import { MediaThumbnail } from './media-thumbnail';
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-table.tsx[0m:[93m11[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../types/file-browser.types' or its corresponding type declarations.
+
+[7m11[0m import type { ClickModifiers } from '../types/file-browser.types';
+[7m  [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-table.tsx[0m:[93m12[0m:[93m33[0m - [91merror[0m[90m TS2307: [0mCannot find module './add-to-entity-menu' or its corresponding type declarations.
+
+[7m12[0m import { AddToEntityMenu } from './add-to-entity-menu';
+[7m  [0m [91m                                ~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-table.tsx[0m:[93m13[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './media-thumbnail' or its corresponding type declarations.
+
+[7m13[0m import type { MediaItem } from './media-thumbnail';
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/legacy/file-table.tsx[0m:[93m14[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './media-thumbnail' or its corresponding type declarations.
+
+[7m14[0m import { MediaThumbnail } from './media-thumbnail';
+[7m  [0m [91m                               ~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/list-grouped-view.tsx[0m:[93m1[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module '../media-thumbnail' or its corresponding type declarations.
+
+[7m1[0m import type { MediaItem } from '../media-thumbnail';
+[7m [0m [91m                               ~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/list-grouped-view.tsx[0m:[93m2[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../types/file-browser.types' or its corresponding type declarations.
+
+[7m2[0m import type { ClickModifiers } from '../../types/file-browser.types';
+[7m [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/list-grouped-view.tsx[0m:[93m3[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './file-canvas-list' or its corresponding type declarations.
+
+[7m3[0m import { FileCanvasList } from './file-canvas-list';
+[7m [0m [91m                               ~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/list-grouped-view.tsx[0m:[93m4[0m:[93m36[0m - [91merror[0m[90m TS2307: [0mCannot find module './canvas-config' or its corresponding type declarations.
+
+[7m4[0m import { CanvasRenderConfig } from './canvas-config';
+[7m [0m [91m                                   ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/list-view.tsx[0m:[93m3[0m:[93m36[0m - [91merror[0m[90m TS2307: [0mCannot find module './canvas-config' or its corresponding type declarations.
+
+[7m3[0m import { CanvasRenderConfig } from './canvas-config';
+[7m [0m [91m                                   ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/list-view.tsx[0m:[93m5[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../types/file-browser.types' or its corresponding type declarations.
+
+[7m5[0m import type { ClickModifiers } from '../../types/file-browser.types';
+[7m [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/list-view.tsx[0m:[93m6[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module '../media-thumbnail' or its corresponding type declarations.
+
+[7m6[0m import type { MediaItem } from '../media-thumbnail';
+[7m [0m [91m                               ~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/list-view.tsx[0m:[93m7[0m:[93m70[0m - [91merror[0m[90m TS2307: [0mCannot find module './canvas-common' or its corresponding type declarations.
+
+[7m7[0m import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
+[7m [0m [91m                                                                     ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/masonry-grouped-view.tsx[0m:[93m1[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module '../media-thumbnail' or its corresponding type declarations.
+
+[7m1[0m import type { MediaItem } from '../media-thumbnail';
+[7m [0m [91m                               ~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/masonry-grouped-view.tsx[0m:[93m2[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../types/file-browser.types' or its corresponding type declarations.
+
+[7m2[0m import type { ClickModifiers } from '../../types/file-browser.types';
+[7m [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/masonry-grouped-view.tsx[0m:[93m3[0m:[93m35[0m - [91merror[0m[90m TS2307: [0mCannot find module './file-canvas-masonry' or its corresponding type declarations.
+
+[7m3[0m import { FileCanvasMasonry } from './file-canvas-masonry';
+[7m [0m [91m                                  ~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/masonry-grouped-view.tsx[0m:[93m4[0m:[93m36[0m - [91merror[0m[90m TS2307: [0mCannot find module './canvas-config' or its corresponding type declarations.
+
+[7m4[0m import { CanvasRenderConfig } from './canvas-config';
+[7m [0m [91m                                   ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/masonry-view.tsx[0m:[93m3[0m:[93m36[0m - [91merror[0m[90m TS2307: [0mCannot find module './canvas-config' or its corresponding type declarations.
+
+[7m3[0m import { CanvasRenderConfig } from './canvas-config';
+[7m [0m [91m                                   ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/masonry-view.tsx[0m:[93m5[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../types/file-browser.types' or its corresponding type declarations.
+
+[7m5[0m import type { ClickModifiers } from '../../types/file-browser.types';
+[7m [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/masonry-view.tsx[0m:[93m6[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module '../media-thumbnail' or its corresponding type declarations.
+
+[7m6[0m import type { MediaItem } from '../media-thumbnail';
+[7m [0m [91m                               ~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/masonry-view.tsx[0m:[93m7[0m:[93m70[0m - [91merror[0m[90m TS2307: [0mCannot find module './canvas-common' or its corresponding type declarations.
+
+[7m7[0m import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
+[7m [0m [91m                                                                     ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/single-view.tsx[0m:[93m4[0m:[93m36[0m - [91merror[0m[90m TS2307: [0mCannot find module './canvas-config' or its corresponding type declarations.
+
+[7m4[0m import { CanvasRenderConfig } from './canvas-config';
+[7m [0m [91m                                   ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/single-view.tsx[0m:[93m5[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../types/file-browser.types' or its corresponding type declarations.
+
+[7m5[0m import type { ClickModifiers } from '../../types/file-browser.types';
+[7m [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/single-view.tsx[0m:[93m6[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module '../media-thumbnail' or its corresponding type declarations.
+
+[7m6[0m import type { MediaItem } from '../media-thumbnail';
+[7m [0m [91m                               ~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/single-view.tsx[0m:[93m7[0m:[93m70[0m - [91merror[0m[90m TS2307: [0mCannot find module './canvas-common' or its corresponding type declarations.
+
+[7m7[0m import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
+[7m [0m [91m                                                                     ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/table-view.tsx[0m:[93m1[0m:[93m37[0m - [91merror[0m[90m TS2307: [0mCannot find module '../../types/file-browser.types' or its corresponding type declarations.
+
+[7m1[0m import type { ClickModifiers } from '../../types/file-browser.types';
+[7m [0m [91m                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/table-view.tsx[0m:[93m2[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module '../media-thumbnail' or its corresponding type declarations.
+
+[7m2[0m import type { MediaItem } from '../media-thumbnail';
+[7m [0m [91m                               ~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/table-view.tsx[0m:[93m3[0m:[93m32[0m - [91merror[0m[90m TS2307: [0mCannot find module './file-canvas-list' or its corresponding type declarations.
+
+[7m3[0m import { FileCanvasList } from './file-canvas-list';
+[7m [0m [91m                               ~~~~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/features/file-browser/views/table-view.tsx[0m:[93m4[0m:[93m36[0m - [91merror[0m[90m TS2307: [0mCannot find module './canvas-config' or its corresponding type declarations.
+
+[7m4[0m import { CanvasRenderConfig } from './canvas-config';
+[7m [0m [91m                                   ~~~~~~~~~~~~~~~~~[0m
+
+[96msrc/components/views/folders/folder-content-view.tsx[0m:[93m312[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType '{ entityType: string; filterId: string; filterType: string; onItemClick: (item: DisplayableEntity) => void; onItemDoubleClick: (item: DisplayableEntity) => void; }' is not assignable to type 'IntrinsicAttributes & (FileBrowserProps | FileBrowserDataProps)'.
+  Property 'entityType' does not exist on type 'IntrinsicAttributes & (FileBrowserProps | FileBrowserDataProps)'.
+
+[7m312[0m     entityType="any"
+[7m   [0m [91m    ~~~~~~~~~~[0m
+
+[96msrc/components/views/folders/folder-content-view.tsx[0m:[93m328[0m:[93m5[0m - [91merror[0m[90m TS2322: [0mType '{ entityType: string; filterId: string; filterType: string; onItemClick: (item: DisplayableEntity) => void; onItemDoubleClick: (item: DisplayableEntity) => void; }' is not assignable to type 'IntrinsicAttributes & (FileBrowserProps | FileBrowserDataProps)'.
+  Property 'entityType' does not exist on type 'IntrinsicAttributes & (FileBrowserProps | FileBrowserDataProps)'.
+
+[7m328[0m     entityType="any"
+[7m   [0m [91m    ~~~~~~~~~~[0m
+
+
+Found 66 errors in 17 files.
+
+Errors  Files
+     5  src/components/features/file-browser/index.ts[90m:4[0m
+     1  src/components/features/file-browser/views/cards-view.tsx[90m:2[0m
+     4  src/components/features/file-browser/views/grid-grouped-view.tsx[90m:1[0m
+     4  src/components/features/file-browser/views/grid-view.tsx[90m:4[0m
+     4  src/components/features/file-browser/views/legacy/file-cards.tsx[90m:11[0m
+     6  src/components/features/file-browser/views/legacy/file-grid.tsx[90m:11[0m
+     4  src/components/features/file-browser/views/legacy/file-list.tsx[90m:10[0m
+     4  src/components/features/file-browser/views/legacy/file-masonry.tsx[90m:11[0m
+     4  src/components/features/file-browser/views/legacy/file-single.tsx[90m:11[0m
+     4  src/components/features/file-browser/views/legacy/file-table.tsx[90m:11[0m
+     4  src/components/features/file-browser/views/list-grouped-view.tsx[90m:1[0m
+     4  src/components/features/file-browser/views/list-view.tsx[90m:3[0m
+     4  src/components/features/file-browser/views/masonry-grouped-view.tsx[90m:1[0m
+     4  src/components/features/file-browser/views/masonry-view.tsx[90m:3[0m
+     4  src/components/features/file-browser/views/single-view.tsx[90m:4[0m
+     4  src/components/features/file-browser/views/table-view.tsx[90m:1[0m
+     2  src/components/views/folders/folder-content-view.tsx[90m:312[0m

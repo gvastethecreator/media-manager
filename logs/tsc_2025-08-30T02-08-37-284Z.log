@@ -1,0 +1,31 @@
+📊 RESUMEN DE ERRORES
+Total de archivos con errores: 1
+Cantidad total de errores: 1
+
+📁 ARCHIVOS AFECTADOS:
+  src/lib/fumadocs/source.ts (líneas: 4)
+
+📋 DETALLE POR ARCHIVO:
+
+src/lib/fumadocs/source.ts
+  - línea 4 : TS2345
+
+════════════════════════════════════════════════════════════════════════════════
+📄 LOG ORIGINAL:
+════════════════════════════════════════════════════════════════════════════════
+
+Comando: bunx tsc --noEmit --pretty
+Fecha: 2025-08-30T02:08:37.288Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+[96msrc/lib/fumadocs/source.ts[0m:[93m4[0m:[93m32[0m - [91merror[0m[90m TS2345: [0mArgument of type 'DocCollection<ZodObject<{ title: ZodString; description: ZodOptional<ZodString>; icon: ZodOptional<ZodString>; full: ZodOptional<ZodBoolean>; _openapi: ZodOptional<...>; }, $strip>, false>' is not assignable to parameter of type '(PageData & BaseCollectionEntry)[]'.
+  Type 'DocCollection<ZodObject<{ title: ZodString; description: ZodOptional<ZodString>; icon: ZodOptional<ZodString>; full: ZodOptional<ZodBoolean>; _openapi: ZodOptional<...>; }, $strip>, false>' is missing the following properties from type '(PageData & BaseCollectionEntry)[]': length, pop, push, concat, and 35 more.
+
+[7m4[0m const source = createMDXSource(docs, meta);
+[7m [0m [91m                               ~~~~[0m
+
+
+Found 1 error in src/lib/fumadocs/source.ts[90m:4[0m
+

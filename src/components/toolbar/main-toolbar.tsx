@@ -370,8 +370,6 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					return <LayoutGrid className="h-4 w-4" />;
 				case 'masonry':
 					return <GalleryHorizontal className="h-4 w-4" />;
-				case 'canvas':
-					return <Grid className="h-4 w-4" />;
 				case 'list':
 					return <ListIcon className="h-4 w-4" />;
 				case 'table':
@@ -384,10 +382,6 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 		};
 
 		const handleChangeView = (mode: string) => {
-			if (mode === 'masonry') {
-				setViewModeDebounced('masonry');
-				return;
-			}
 			setViewMode(mode as any);
 		};
 
@@ -420,12 +414,6 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 								<div className="flex items-center gap-2">
 									<Grid className="h-4 w-4" />
 									<span>Grid</span>
-								</div>
-							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem data-testid="view-mode-canvas-btn" value="canvas">
-								<div className="flex items-center gap-2">
-									<Grid className="h-4 w-4" />
-									<span>Canvas</span>
 								</div>
 							</DropdownMenuRadioItem>
 							<DropdownMenuRadioItem data-testid="view-mode-cards-btn" value="cards">

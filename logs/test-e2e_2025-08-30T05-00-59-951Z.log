@@ -1,0 +1,10 @@
+Comando: bunx playwright test --grep=file-browser
+Fecha: 2025-08-30T05:00:59.955Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Testing
+===============================================
+
+Running 9 tests using 9 workers
+
+  ✓  2 [chromium] › tests\e2e\file-browser-accessibility.spec.ts:116:2 › File Browser: accesibilidad y foco › Panel métricas aparece con debugPerf (5.9s)
