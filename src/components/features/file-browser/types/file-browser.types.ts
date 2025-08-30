@@ -6,11 +6,8 @@ export interface ClickModifiers {
 	shiftKey: boolean;
 }
 
-export interface FileBrowser2Props {
-	className?: string;
-	filterId: string | null;
-	filterType: 'folder'; // Por ahora solo carpetas
-	entityType?: 'image' | 'video' | 'any'; // Mixto permitido
-	onItemClick?: (item: AnyEntityWithStats) => void;
-	onItemDoubleClick?: (item: AnyEntityWithStats) => void;
+export interface FileBrowserProps {
+	filterId?: string | null;
+	onItemClick?: (entity: AnyEntityWithStats, modifiers?: ClickModifiers) => void;
+	onItemDoubleClick?: (entity: AnyEntityWithStats, modifiers?: ClickModifiers) => void;
 }

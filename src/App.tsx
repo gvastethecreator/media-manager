@@ -5,7 +5,6 @@
 
 import React from 'react';
 import { RouterProvider } from 'react-router-dom';
-import { ReactRouterProvider } from 'fumadocs-core/framework/react-router';
 import { useNavigationRefresh } from '@/hooks/use-navigation-refresh';
 import { useEntityCatalogStore } from '@/stores/entity-catalog-store';
 import { ErrorBoundary } from './components/core/error-boundary';
@@ -33,13 +32,11 @@ export function App() {
 		<ThemeProvider defaultTheme="system" storageKey="theme">
 			<ViewTransitionProvider>
 				<ReactScanProvider>
-					<ReactRouterProvider>
-						<ErrorBoundary lastLogContent={lastLogContent}>
-							<SSENavigationRefresher />
-							<EntityCatalogBootstrapper />
-							<RouterProvider router={router} />
-						</ErrorBoundary>
-					</ReactRouterProvider>
+					<ErrorBoundary lastLogContent={lastLogContent}>
+						<SSENavigationRefresher />
+						<EntityCatalogBootstrapper />
+						<RouterProvider router={router} />
+					</ErrorBoundary>
 				</ReactScanProvider>
 			</ViewTransitionProvider>
 		</ThemeProvider>

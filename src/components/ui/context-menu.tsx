@@ -84,6 +84,8 @@ function ContextMenuContent({ className, ...props }: React.ComponentProps<typeof
 			<ContextMenuPrimitive.Content
 				className={cn(CONTENT_CLASSES, className)}
 				data-slot="context-menu-content"
+				// Montaje estable para tooling/E2E
+				forceMount
 				{...props}
 			/>
 		</ContextMenuPrimitive.Portal>
