@@ -11,8 +11,8 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useImageStore } from '@/store/entities/image';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useUIStore } from '@/store/ui.store';
+import type { AnyEntityWithStats } from '@/types/entities';
 import type { ImageWithStats } from '@/types/entities/image';
-import type { AnyEntityWithStats } from '@/types/migration';
 
 // Logger para depuración
 const logger = clientLogger.withContext('FolderContentView');

@@ -3,8 +3,6 @@
  * @module hooks/use-entity-conversion
  * @description Facilita la migración gradual de FileItem a EntityWithStats
  */
-
-import { useCallback } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { AnyEntityWithStats } from '@/types/entities';
 import type { AlbumWithStats } from '@/types/entities/album';
@@ -42,7 +40,7 @@ import {
 	isVideoWithStats,
 	isWildcardWithStats,
 	isWorldItemWithStats,
-} from '@/types/migration';
+} from '@/types/entity-guards';
 
 const logger = clientLogger.withContext('useEntityConversion');
 
@@ -60,49 +58,18 @@ export function useEntityConversion() {
 	 * Convierte un FileItem a EntityWithStats
 	 * NOTA: Esta es una conversión temporal hasta que se actualicen los server actions
 	 */
-	const convertSingleItem = useCallback((fileItem: any): AnyEntityWithStats | null => {
+	const convertSingleItem = (fileItem: any): AnyEntityWithStats | null => {
 		try {
-			// Usar type guards para determinar el tipo específico y acceder a sus propiedades
+			// Usar type guards para determinar el tipo específico y tipar la entidad
 			if (isImageWithStats(fileItem)) {
-				return {
-					...fileItem,
-					entityType: 'image',
-					stats: fileItem.stats || {
-						viewCount: 0,
-						downloadCount: 0,
-						likeCount: 0,
-						commentCount: 0,
-						tagCount: fileItem._count?.tags || 0,
-						albumCount: fileItem._count?.albums || 0,
-						collectionCount: fileItem._count?.collections || 0,
-						characterCount: fileItem._count?.characters || 0,
-						placeCount: fileItem._count?.places || 0,
-						worldItemCount: fileItem._count?.worldItems || 0,
-						conceptCount: fileItem._count?.concepts || 0,
-						promptCount: fileItem._count?.prompts || 0,
-						noteCount: fileItem._count?.notes || 0,
-						wildcardCount: fileItem._count?.wildcards || 0,
-						propertyCount: fileItem._count?.properties || 0,
-						groupCount: fileItem._count?.groups || 0,
-						totalAssociations: fileItem._count
-							? Object.values(fileItem._count).reduce((sum, count) => sum + count, 0)
-							: 0,
-					},
-					thumbnailUrl: fileItem.thumbnailUrl || `/api/images/${fileItem.id}/thumbnail`,
-					fullUrl: `/api/images/${fileItem.id}/full`,
-				} as ImageWithStats;
+				return { ...fileItem, entityType: 'image' } as ImageWithStats;
 			}
 			if (isVideoWithStats(fileItem)) {
 				return {
 					...fileItem,
 					entityType: 'video',
-					stats: fileItem.stats || {
-						duration: (fileItem as any).duration || 0,
-						fps: (fileItem as any).fps || 30,
-						codec: (fileItem as any).codec || 'unknown',
-						resolution: `${fileItem.width || 0}x${fileItem.height || 0}`,
-						// ... otros campos de video
-					},
+					// Mantener stats existentes si vienen de servidor; no calcular aquí
+					stats: (fileItem as any).stats,
 				} as VideoWithStats;
 			}
 			if (isFolderWithStats(fileItem)) {
@@ -151,46 +118,45 @@ export function useEntityConversion() {
 				return { ...fileItem, entityType: 'group' } as GroupWithStats;
 			}
 
-			logger.warn('Tipo de FileItem no reconocido, usando conversión genérica', fileItem);
-			return fileItem as AnyEntityWithStats;
+			// Si ya tiene entityType, asumir que es una entidad válida
+			if (typeof fileItem === 'object' && fileItem !== null && 'entityType' in (fileItem as any)) {
+				return fileItem as AnyEntityWithStats;
+			}
+
+			logger.warn('Tipo de FileItem no reconocido; conversión nula', fileItem);
+			return null;
 		} catch (error) {
 			logger.error('Error convirtiendo FileItem:', error);
 			return null;
 		}
-	}, []);
+	};
 
 	/**
 	 * Convierte un array de FileItems a EntityWithStats[]
 	 */
-	const convertFileItems = useCallback(
-		(fileItems: AnyEntityWithStats[]): AnyEntityWithStats[] => {
-			return fileItems.map(convertSingleItem).filter((entity): entity is AnyEntityWithStats => entity !== null);
-		},
-		[convertSingleItem]
-	);
+	const convertFileItems = (fileItems: AnyEntityWithStats[]): AnyEntityWithStats[] => {
+		return fileItems.map(convertSingleItem).filter((entity): entity is AnyEntityWithStats => entity !== null);
+	};
 
 	/**
 	 * Convierte y agrupa por tipo
 	 */
-	const convertAndGroupByType = useCallback(
-		(fileItems: AnyEntityWithStats[]) => {
-			const entities = convertFileItems(fileItems);
-			const grouped: Record<string, AnyEntityWithStats[]> = {};
+	const convertAndGroupByType = (fileItems: AnyEntityWithStats[]) => {
+		const entities = convertFileItems(fileItems);
+		const grouped: Record<string, AnyEntityWithStats[]> = {};
 
-			for (const entity of entities) {
-				// Detectar tipo usando type guards (temporalmente usando propiedades)
-				const type = entity.entityType || 'unknown';
+		for (const entity of entities) {
+			// Detectar tipo usando type guards (temporalmente usando propiedades)
+			const type = entity.entityType || 'unknown';
 
-				if (!grouped[type]) {
-					grouped[type] = [];
-				}
-				grouped[type].push(entity);
+			if (!grouped[type]) {
+				grouped[type] = [];
 			}
+			grouped[type].push(entity);
+		}
 
-			return grouped;
-		},
-		[convertFileItems]
-	);
+		return grouped;
+	};
 
 	return {
 		convertSingleItem,

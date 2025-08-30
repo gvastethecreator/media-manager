@@ -86,9 +86,9 @@ function AccordionMenu({
 		const mapping: Record<string, string | string[]> = {};
 		if (trimmedChain.length > 0) {
 			if (props.type === 'multiple') {
-				mapping['root'] = trimmedChain;
+				mapping.root = trimmedChain;
 			} else {
-				mapping['root'] = trimmedChain[0];
+				mapping.root = trimmedChain[0];
 				for (let i = 0; i < trimmedChain.length - 1; i++) {
 					mapping[trimmedChain[i]] = trimmedChain[i + 1];
 				}
@@ -99,13 +99,13 @@ function AccordionMenu({
 
 	const [nestedStates, setNestedStates] = React.useState<Record<string, string | string[]>>(initialNestedStates);
 	const multipleValue = (
-		Array.isArray(nestedStates['root'])
-			? nestedStates['root']
-			: typeof nestedStates['root'] === 'string'
-				? [nestedStates['root']]
+		Array.isArray(nestedStates.root)
+			? nestedStates.root
+			: typeof nestedStates.root === 'string'
+				? [nestedStates.root]
 				: []
 	) as string[];
-	const singleValue = (nestedStates['root'] ?? '') as string;
+	const singleValue = (nestedStates.root ?? '') as string;
 
 	return (
 		<AccordionMenuContext.Provider
@@ -146,19 +146,14 @@ function AccordionMenu({
 	);
 }
 
-type AccordionMenuGroupProps = React.ComponentPropsWithoutRef<'div'>;
+type AccordionMenuGroupProps = React.ComponentPropsWithoutRef<'fieldset'>;
 
 function AccordionMenuGroup({ children, className, ...props }: AccordionMenuGroupProps) {
 	const { classNames } = React.useContext(AccordionMenuContext);
 	return (
-		<div
-			className={cn('space-y-0.5', classNames?.group, className)}
-			data-slot="accordion-menu-group"
-			role="group"
-			{...props}
-		>
+		<fieldset className={cn('space-y-0.5', classNames?.group, className)} data-slot="accordion-menu-group" {...props}>
 			{children}
-		</div>
+		</fieldset>
 	);
 }
 
@@ -179,15 +174,14 @@ function AccordionMenuLabel({ children, className, ...props }: AccordionMenuLabe
 	);
 }
 
-type AccordionMenuSeparatorProps = React.ComponentPropsWithoutRef<'div'>;
+type AccordionMenuSeparatorProps = React.ComponentPropsWithoutRef<'hr'>;
 
 function AccordionMenuSeparator({ className, ...props }: AccordionMenuSeparatorProps) {
 	const { classNames } = React.useContext(AccordionMenuContext);
 	return (
-		<div
-			className={cn('my-1 h-px bg-border', classNames?.separator, className)}
+		<hr
+			className={cn('my-1 h-px border-0 bg-border', classNames?.separator, className)}
 			data-slot="accordion-menu-separator"
-			role="separator"
 			{...props}
 		/>
 	);
@@ -285,15 +279,13 @@ function AccordionMenuSubTrigger({
 				)}
 				data-slot="accordion-menu-sub-trigger"
 			>
-				<>
-					{children}
-					<ChevronDown
-						className={cn(
-							'[[data-state=open]>&]:-rotate-180 ms-auto size-3.5! shrink-0 text-muted-foreground transition-transform duration-200'
-						)}
-						data-slot="accordion-menu-sub-indicator"
-					/>
-				</>
+				{children}
+				<ChevronDown
+					className={cn(
+						'[[data-state=open]>&]:-rotate-180 ms-auto size-3.5! shrink-0 text-muted-foreground transition-transform duration-200'
+					)}
+					data-slot="accordion-menu-sub-indicator"
+				/>
 			</AccordionPrimitive.Trigger>
 		</AccordionPrimitive.Header>
 	);
@@ -324,7 +316,7 @@ function AccordionMenuSubContent({
 	...props
 }: AccordionMenuSubContentProps) {
 	const { nestedStates, setNestedStates, classNames } = React.useContext(AccordionMenuContext);
-	let currentValue;
+	let currentValue: string | string[];
 	if (type === 'multiple') {
 		const stateValue = nestedStates[parentValue];
 		if (Array.isArray(stateValue)) {

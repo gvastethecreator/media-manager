@@ -13,8 +13,8 @@ import { Progress } from '@/components/ui/progress';
 
 import { useToast } from '@/components/ui/use-toast';
 import { BaseContentView } from '@/components/views/base/base-content-view';
+import type { AnyEntityWithStats } from '@/types/entities';
 import type { ImageWithStats } from '@/types/entities/image';
-import type { AnyEntityWithStats } from '@/types/migration';
 
 interface AllImagesContentViewProps {
 	images: ImageWithStats[];

@@ -6,7 +6,7 @@ import { BaseContentView } from '@/components/views/base/base-content-view';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import { type AnyEntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
 
 // Logger para depuración
 const logger = clientLogger.withContext('MixedContentView');

@@ -1,14 +1,13 @@
+import { AlertTriangle, Calendar, CheckCircle, Clock, FileText, Info, Network, Play, User } from 'lucide-react';
 import { memo, useMemo } from 'react';
-import { Network, Play, AlertTriangle, CheckCircle, Info, Clock, FileText, User, Calendar } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Separator } from '@/components/ui/separator';
 
 import { ComfyUIWorkflowService } from '@/services/workflow/comfyui.service';
-import { ComfyNodeCategory } from '@/types/workflow';
 import type { WorkflowWithStats } from '@/types/workflow';
+import { ComfyNodeCategory } from '@/types/workflow';
 
 interface WorkflowViewerProps {
 	workflow: WorkflowWithStats;
@@ -84,11 +83,11 @@ export const WorkflowViewer = memo(function WorkflowViewer({ workflow, className
 						)}
 					</CardTitle>
 					{workflow.extra?.info?.description && (
-						<p className="text-sm text-muted-foreground">{workflow.extra.info.description}</p>
+						<p className="text-muted-foreground text-sm">{workflow.extra.info.description}</p>
 					)}
 				</CardHeader>
 				<CardContent className="pt-0">
-					<div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+					<div className="grid grid-cols-2 gap-4 text-sm md:grid-cols-4">
 						<div className="flex items-center gap-2">
 							<div className="h-2 w-2 rounded-full bg-blue-500" />
 							<span className="text-muted-foreground">Nodos:</span>
@@ -114,12 +113,12 @@ export const WorkflowViewer = memo(function WorkflowViewer({ workflow, className
 			</Card>
 
 			{/* Grid con información detallada */}
-			<div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+			<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
 				{/* Metadatos del workflow */}
 				{workflow.extra?.info && (
 					<Card>
 						<CardHeader>
-							<CardTitle className="text-sm flex items-center gap-2">
+							<CardTitle className="flex items-center gap-2 text-sm">
 								<Info className="h-4 w-4" />
 								Información del Workflow
 							</CardTitle>
@@ -160,7 +159,7 @@ export const WorkflowViewer = memo(function WorkflowViewer({ workflow, className
 				{/* Validación */}
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-sm flex items-center gap-2">
+						<CardTitle className="flex items-center gap-2 text-sm">
 							{workflowInfo.validation.isValid ? (
 								<CheckCircle className="h-4 w-4 text-green-600" />
 							) : (
@@ -178,10 +177,10 @@ export const WorkflowViewer = memo(function WorkflowViewer({ workflow, className
 
 						{workflowInfo.validation.errors.length > 0 && (
 							<div className="space-y-2">
-								<p className="text-sm font-medium text-red-600">Errores:</p>
-								<ul className="text-xs text-red-600 space-y-1">
+								<p className="font-medium text-red-600 text-sm">Errores:</p>
+								<ul className="space-y-1 text-red-600 text-xs">
 									{workflowInfo.validation.errors.map((error, index) => (
-										<li key={index} className="flex items-start gap-2">
+										<li className="flex items-start gap-2" key={index}>
 											<span className="text-red-500">•</span>
 											<span>{error}</span>
 										</li>
@@ -192,10 +191,10 @@ export const WorkflowViewer = memo(function WorkflowViewer({ workflow, className
 
 						{workflowInfo.validation.warnings.length > 0 && (
 							<div className="space-y-2">
-								<p className="text-sm font-medium text-yellow-600">Advertencias:</p>
-								<ul className="text-xs text-yellow-600 space-y-1">
+								<p className="font-medium text-sm text-yellow-600">Advertencias:</p>
+								<ul className="space-y-1 text-xs text-yellow-600">
 									{workflowInfo.validation.warnings.map((warning, index) => (
-										<li key={index} className="flex items-start gap-2">
+										<li className="flex items-start gap-2" key={index}>
 											<span className="text-yellow-500">•</span>
 											<span>{warning}</span>
 										</li>
@@ -210,7 +209,7 @@ export const WorkflowViewer = memo(function WorkflowViewer({ workflow, className
 			{/* Nodos por categoría */}
 			<Card>
 				<CardHeader>
-					<CardTitle className="text-sm flex items-center gap-2">
+					<CardTitle className="flex items-center gap-2 text-sm">
 						<Network className="h-4 w-4" />
 						Nodos por Categoría
 					</CardTitle>
@@ -222,28 +221,28 @@ export const WorkflowViewer = memo(function WorkflowViewer({ workflow, className
 								.filter(([, nodes]) => nodes.length > 0)
 								.map(([category, nodes]) => (
 									<div key={category}>
-										<div className="flex items-center gap-2 mb-2">
+										<div className="mb-2 flex items-center gap-2">
 											<div
 												className="h-3 w-3 rounded-full"
 												style={{ backgroundColor: getCategoryColor(category as ComfyNodeCategory) }}
 											/>
 											<span className="font-medium text-sm capitalize">{category}</span>
-											<Badge variant="outline" className="text-xs">
+											<Badge className="text-xs" variant="outline">
 												{nodes.length}
 											</Badge>
 										</div>
-										<div className="pl-5 space-y-1">
+										<div className="space-y-1 pl-5">
 											{nodes.slice(0, 5).map((node) => {
 												const typeInfo = ComfyUIWorkflowService.getNodeTypeInfo(node.type);
 												return (
-													<div key={node.id} className="flex items-center gap-2 text-xs text-muted-foreground">
-														<span className="font-mono bg-muted px-1 rounded">{node.id}</span>
+													<div className="flex items-center gap-2 text-muted-foreground text-xs" key={node.id}>
+														<span className="rounded bg-muted px-1 font-mono">{node.id}</span>
 														<span>{typeInfo.displayName}</span>
 													</div>
 												);
 											})}
 											{nodes.length > 5 && (
-												<p className="text-xs text-muted-foreground pl-2">... y {nodes.length - 5} más</p>
+												<p className="pl-2 text-muted-foreground text-xs">... y {nodes.length - 5} más</p>
 											)}
 										</div>
 									</div>
@@ -257,7 +256,7 @@ export const WorkflowViewer = memo(function WorkflowViewer({ workflow, className
 			{workflowInfo.requiredModels.length > 0 && (
 				<Card>
 					<CardHeader>
-						<CardTitle className="text-sm flex items-center gap-2">
+						<CardTitle className="flex items-center gap-2 text-sm">
 							<Play className="h-4 w-4" />
 							Modelos Requeridos
 						</CardTitle>
@@ -265,7 +264,7 @@ export const WorkflowViewer = memo(function WorkflowViewer({ workflow, className
 					<CardContent>
 						<div className="flex flex-wrap gap-2">
 							{workflowInfo.requiredModels.map((model, index) => (
-								<Badge key={index} variant="outline" className="text-xs">
+								<Badge className="text-xs" key={index} variant="outline">
 									{model}
 								</Badge>
 							))}

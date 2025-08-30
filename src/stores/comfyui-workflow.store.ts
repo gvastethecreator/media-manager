@@ -2,7 +2,7 @@ import { create } from 'zustand';
 import { subscribeWithSelector } from 'zustand/middleware';
 
 import { ComfyUIWorkflowService } from '@/services/workflow/comfyui.service';
-import type { WorkflowWithStats, WorkflowExecutionContext } from '@/types/workflow';
+import type { WorkflowExecutionContext, WorkflowWithStats } from '@/types/workflow';
 
 type FilterBy = 'all' | 'favorite' | 'valid' | 'invalid';
 type SortBy = 'name' | 'date' | 'complexity' | 'nodeCount';

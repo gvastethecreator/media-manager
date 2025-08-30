@@ -27,7 +27,7 @@ import {
 } from 'lucide-react';
 import type { ContextMenuAction } from '@/components/features/file-browser/context-menu/types';
 import type { AnyEntityWithStats } from '@/types/entities';
-import { EntityStatsType } from '@/types/migration';
+import { EntityStatsType } from '@/types/file-browser/entity-stats';
 
 /**
  * 🎨 Configuración completa para cada tipo de entidad

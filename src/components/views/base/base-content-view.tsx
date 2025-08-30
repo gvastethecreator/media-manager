@@ -34,11 +34,11 @@ const BaseContentView: React.FC<BaseContentViewProps> = ({
 					{/* Header compacto y minimalista */}
 					<div className="border-border border-b bg-background/40 px-3 py-2 backdrop-blur-sm">
 						<div className="flex items-center justify-between gap-3">
-							<div className="flex items-center gap-3 min-w-0">
-								{icon && <span className="text-lg leading-none flex-shrink-0">{icon}</span>}
+							<div className="flex min-w-0 items-center gap-3">
+								{icon && <span className="flex-shrink-0 text-lg leading-none">{icon}</span>}
 								<div className="min-w-0">
-									{title && <h2 className="truncate text-sm font-semibold text-foreground leading-tight">{title}</h2>}
-									{description && <p className="truncate text-xs text-muted-foreground leading-tight">{description}</p>}
+									{title && <h2 className="truncate font-semibold text-foreground text-sm leading-tight">{title}</h2>}
+									{description && <p className="truncate text-muted-foreground text-xs leading-tight">{description}</p>}
 								</div>
 							</div>
 							{headerControls && <div className="flex items-center gap-2">{headerControls}</div>}

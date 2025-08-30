@@ -8,6 +8,7 @@ import type { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { settings } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { Settings } from '@/types/settings';
+import { fileBrowserConfigSchema } from './schema';
 
 const logger = serverLogger.withContext('SettingsMappers');
 
@@ -34,6 +35,9 @@ export function fromDbToSettings(dbSettings: DbSettings): Settings {
 		parsedData = {};
 	}
 
+	// Normalizar bloque fileBrowser aplicando defaults del esquema para evitar undefineds profundos
+	const safeFileBrowser = fileBrowserConfigSchema.parse(parsedData.fileBrowser ?? {});
+
 	return {
 		appearance: {
 			theme: (dbSettings.theme as 'light' | 'dark' | 'system') || 'system',
@@ -58,23 +62,8 @@ export function fromDbToSettings(dbSettings: DbSettings): Settings {
 			devMode: Boolean(parsedData.devMode),
 			experimentalFeatures: Boolean(parsedData.experimentalFeatures),
 		},
-		// Incluir configuración del File Browser con valores mínimos requeridos
-		fileBrowser: {
-			defaultViewType: (parsedData.fileBrowser?.defaultViewType as 'list' | 'grid' | 'cards' | 'masonry') || 'grid',
-			rememberViewPerFolder: Boolean(parsedData.fileBrowser?.rememberViewPerFolder),
-			// Propagar opcionales si existen (sin forzar estructura)
-			listView: parsedData.fileBrowser?.listView,
-			gridView: parsedData.fileBrowser?.gridView,
-			cardsView: parsedData.fileBrowser?.cardsView,
-			masonryView: parsedData.fileBrowser?.masonryView,
-			global: parsedData.fileBrowser?.global,
-			viewConfigurations: parsedData.fileBrowser?.viewConfigurations,
-			customPresets: parsedData.fileBrowser?.customPresets,
-			lastUsedViewType: parsedData.fileBrowser?.lastUsedViewType,
-			folderViewPreferences: parsedData.fileBrowser?.folderViewPreferences,
-			accessibility: parsedData.fileBrowser?.accessibility,
-			performance: parsedData.fileBrowser?.performance,
-		},
+		// Configuración del File Browser normalizada por esquema
+		fileBrowser: safeFileBrowser,
 		version: parsedData.version || '1.0.0',
 		lastUpdate: parsedData.lastUpdate ? new Date(parsedData.lastUpdate) : new Date(),
 		system: {

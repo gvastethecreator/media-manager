@@ -53,7 +53,7 @@ export type FavoriteCreateInput = Omit<FavoriteBase, 'id' | 'createdAt' | 'updat
  * ⭐ Relaciones de un favorito.
  * Por ahora, un favorito no tiene relaciones directas complejas.
  */
-export type FavoriteRelations = {};
+export type FavoriteRelations = Record<never, never>;
 
 /**
  * ⭐ Tipo completo de un favorito con sus relaciones.

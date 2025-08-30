@@ -4,7 +4,7 @@ import { EmptyState } from '@/components/core/data-display';
 import { cn } from '@/lib/utils';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import type { AnyEntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
 import { FileCards } from './components/file-cards';
 import FileGrid from './components/file-grid';
 import { FileList } from './components/file-list';
@@ -58,7 +58,10 @@ function groupByEntityType(items: MediaItem[]): Array<{ key: string; items: Medi
 		if (!groups.has(type)) {
 			groups.set(type, []);
 		}
-		groups.get(type)!.push(item);
+		const arr = groups.get(type);
+		if (arr) {
+			arr.push(item);
+		}
 	}
 
 	return Array.from(groups.entries()).map(([key, items]) => ({
@@ -144,7 +147,7 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 							{grouped ? (
 								<div className="flex h-full min-h-0 flex-col gap-2 overflow-auto">
 									{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
-										<div key={g.key} className="flex flex-col">
+										<div className="flex flex-col" key={g.key}>
 											<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
 												{g.displayName}
 											</div>
@@ -181,7 +184,7 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 						{grouped ? (
 							<div className="flex h-full min-h-0 flex-col gap-2 overflow-auto">
 								{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
-									<div key={g.key} className="flex flex-col">
+									<div className="flex flex-col" key={g.key}>
 										<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
 											{g.displayName}
 										</div>
@@ -208,7 +211,7 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 						{grouped ? (
 							<div className="flex h-full min-h-0 flex-col gap-2 overflow-auto">
 								{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
-									<div key={g.key} className="flex flex-col">
+									<div className="flex flex-col" key={g.key}>
 										<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
 											{g.displayName}
 										</div>
@@ -235,7 +238,7 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 						{grouped ? (
 							<div className="flex h-full min-h-0 flex-col gap-2 overflow-auto">
 								{grouped.map((g: { key: string; items: MediaItem[]; displayName: string }) => (
-									<div key={g.key} className="flex flex-col">
+									<div className="flex flex-col" key={g.key}>
 										<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
 											{g.displayName}
 										</div>
@@ -269,7 +272,7 @@ export function FileBrowser2({ filterId, onItemClick, onItemDoubleClick }: FileB
 										items: g.items.slice(0, 3).map((i) => ({ id: i.id, name: i.name, entityType: i.entityType })),
 									});
 									return (
-										<div key={g.key} className="flex w-full flex-col">
+										<div className="flex w-full flex-col" key={g.key}>
 											<div className="sticky top-0 z-10 bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60">
 												{g.displayName}
 											</div>

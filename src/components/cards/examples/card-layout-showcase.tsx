@@ -18,7 +18,7 @@
 
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
-import type { AnyEntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
 import { EntityCard } from '../entity-card';
 import type { CardLayout, CardSize, CardVariant } from '../types/card-layout.types';
 import { LAYOUT_PRESETS } from '../types/card-layout.types';

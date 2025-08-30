@@ -10,11 +10,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
-import { useDocuments, useCreateDocument } from '@/lib/api/documents';
+import { useCreateDocument, useDocuments } from '@/lib/api/documents';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useMultiEntityViewerStore } from '@/stores/multi-entity-viewer.store';
+import type { AnyEntityWithStats } from '@/types/entities';
 import type { DocumentWithStats } from '@/types/entities/document';
-import type { AnyEntityWithStats } from '@/types/migration';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('DocumentsView');
@@ -142,9 +142,9 @@ export function DocumentsView(_props: ViewProps) {
 
 					{showForm && (
 						<motion.div
-							initial={{ opacity: 0, y: -20 }}
 							animate={{ opacity: 1, y: 0 }}
 							className="mb-6 rounded-lg border p-4 shadow-sm"
+							initial={{ opacity: 0, y: -20 }}
 						>
 							<h3 className="mb-3 font-semibold text-lg">Nuevo Documento</h3>
 							<div className="mb-3 grid gap-2">
@@ -176,8 +176,8 @@ export function DocumentsView(_props: ViewProps) {
 					) : (
 						<div className="h-[calc(100vh-200px)]">
 							<FileBrowser
-								items={documentItems}
 								isLoading={isLoading}
+								items={documentItems}
 								onItemClick={handleDocumentClick}
 								onItemDoubleClick={handleDocumentDoubleClick}
 							/>

@@ -1,14 +1,12 @@
 import { memo, useMemo } from 'react';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { WorkflowDropZone } from '@/components/features/workflow/workflow-drop-zone';
+import { WorkflowViewer } from '@/components/features/workflow/workflow-viewer';
 import { cn } from '@/lib/utils';
 
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
-import { WorkflowViewer } from '@/components/features/workflow/workflow-viewer';
-import { WorkflowDropZone } from '@/components/features/workflow/workflow-drop-zone';
-
 import { useComfyUIWorkflowStore } from '@/stores/comfyui-workflow.store';
-
-import type { ViewProps } from '../types';
 import type { WorkflowWithStats } from '@/types/workflow';
+import type { ViewProps } from '../types';
 
 interface WorkflowContentViewProps extends ViewProps {
 	workflowId?: string;
@@ -55,8 +53,8 @@ export const WorkflowContentView = memo(function WorkflowContentView({ className
 			<div className="flex-1 overflow-hidden">
 				<FileBrowser
 					className="h-full"
-					items={items as unknown as any[]}
 					isLoading={isLoading}
+					items={items as unknown as any[]}
 					onItemDoubleClick={handleOpenItem}
 				/>
 			</div>

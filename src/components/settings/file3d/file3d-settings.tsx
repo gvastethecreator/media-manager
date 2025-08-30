@@ -1,13 +1,13 @@
+import { Box, Edit2, Loader2, PlusCircle, Trash } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Loader2, Box, PlusCircle, Trash, Edit2 } from 'lucide-react';
-import { useFile3Ds, useCreateFile3D, useDeleteFile3D, useUpdateFile3D } from '@/lib/api/file3ds';
-import type { File3DWithStats, File3DCreateInput } from '@/types/entities/file3d';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCreateFile3D, useDeleteFile3D, useFile3Ds, useUpdateFile3D } from '@/lib/api/file3ds';
 import { toastService } from '@/lib/ui/toast';
+import type { File3DCreateInput, File3DWithStats } from '@/types/entities/file3d';
 
 export function File3DSettings() {
 	const { data, isLoading, error } = useFile3Ds();
@@ -106,8 +106,8 @@ export function File3DSettings() {
 				</CardHeader>
 				<CardContent className="p-3">
 					<div className="mb-3 flex items-center gap-2">
-						<Input placeholder="Buscar archivos 3D..." value={search} onChange={(e) => setSearch(e.target.value)} />
-						<Button size="sm" onClick={() => setShowCreate(true)}>
+						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Buscar archivos 3D..." value={search} />
+						<Button onClick={() => setShowCreate(true)} size="sm">
 							<PlusCircle className="mr-2 h-4 w-4" /> Nuevo
 						</Button>
 					</div>
@@ -121,7 +121,7 @@ export function File3DSettings() {
 					) : (
 						<div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
 							{filtered.map((f: File3DWithStats) => (
-								<Card key={f.id} className="p-3">
+								<Card className="p-3" key={f.id}>
 									<div className="flex items-start justify-between">
 										<div>
 											<div className="font-medium text-sm">{f.name}</div>
@@ -138,23 +138,23 @@ export function File3DSettings() {
 										</div>
 										<div className="flex items-center gap-1">
 											<Button
-												size="icon"
-												variant="ghost"
 												className="h-8 w-8"
-												title="Editar"
 												onClick={() => {
 													setEditing(f);
 													setNameInput(f.name);
 												}}
+												size="icon"
+												title="Editar"
+												variant="ghost"
 											>
 												<Edit2 className="h-4 w-4" />
 											</Button>
 											<Button
-												size="icon"
-												variant="ghost"
 												className="h-8 w-8 hover:text-destructive"
-												title="Eliminar"
 												onClick={() => handleDelete(f.id)}
+												size="icon"
+												title="Eliminar"
+												variant="ghost"
 											>
 												<Trash className="h-4 w-4" />
 											</Button>
@@ -168,27 +168,27 @@ export function File3DSettings() {
 			</Card>
 
 			<Dialog
-				open={showCreate}
 				onOpenChange={(o) => {
 					if (!o) {
 						setShowCreate(false);
 						setNameInput('');
 					}
 				}}
+				open={showCreate}
 			>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
 						<DialogTitle>Nuevo archivo 3D</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-3">
-						<Input placeholder="Nombre" value={nameInput} onChange={(e) => setNameInput(e.target.value)} />
+						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
 						<div className="flex justify-end gap-2">
 							<Button
-								variant="outline"
 								onClick={() => {
 									setShowCreate(false);
 									setNameInput('');
 								}}
+								variant="outline"
 							>
 								Cancelar
 							</Button>
@@ -199,27 +199,27 @@ export function File3DSettings() {
 			</Dialog>
 
 			<Dialog
-				open={Boolean(editing)}
 				onOpenChange={(o) => {
 					if (!o) {
 						setEditing(null);
 						setNameInput('');
 					}
 				}}
+				open={Boolean(editing)}
 			>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
 						<DialogTitle>Editar archivo 3D</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-3">
-						<Input placeholder="Nombre" value={nameInput} onChange={(e) => setNameInput(e.target.value)} />
+						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
 						<div className="flex justify-end gap-2">
 							<Button
-								variant="outline"
 								onClick={() => {
 									setEditing(null);
 									setNameInput('');
 								}}
+								variant="outline"
 							>
 								Cancelar
 							</Button>

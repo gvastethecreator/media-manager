@@ -30,7 +30,7 @@ function MicroProgressBar({ label, count, icon: Icon, total, color }: MicroProgr
 					/>
 				</div>
 			</div>
-			<div className="absolute -top-8 left-1/2 z-10 -translate-x-1/2 rounded bg-popover px-2 py-1 text-[10px] text-popover-foreground opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+			<div className="-top-8 -translate-x-1/2 absolute left-1/2 z-10 rounded bg-popover px-2 py-1 text-[10px] text-popover-foreground opacity-0 shadow-md transition-opacity group-hover:opacity-100">
 				<Icon className="mr-1 inline h-2.5 w-2.5" />
 				{count} {label}
 			</div>
@@ -85,10 +85,10 @@ function FileTypeProgressBars({ folderStats }: { folderStats?: FolderStatsRespon
 		<div className="grid @container/content:grid-cols-3 grid-cols-2 gap-1">
 			{stats.slice(0, 3).map((stat) => (
 				<MicroProgressBar
-					key={stat.label}
-					count={stat.count}
 					color={stat.color}
+					count={stat.count}
 					icon={stat.icon}
+					key={stat.label}
 					label={stat.label}
 					total={totalFiles}
 				/>

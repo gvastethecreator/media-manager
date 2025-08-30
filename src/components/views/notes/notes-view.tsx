@@ -19,7 +19,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
 import { ViewProps } from '@/components/views/types';
-import { useNotes, useCreateNote, useDeleteNote, useUpdateNote } from '@/lib/api/notes';
+import { useCreateNote, useDeleteNote, useNotes, useUpdateNote } from '@/lib/api/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
 import type { NoteWithStats } from '@/types/entities/note';
 

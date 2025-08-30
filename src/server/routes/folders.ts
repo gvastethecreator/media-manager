@@ -5,9 +5,9 @@ import { asc, count, desc, eq, isNull, sql } from 'drizzle-orm';
 import { Router } from 'express';
 import { db } from '@/lib/drizzle';
 import { folders, images, videos } from '@/lib/drizzle/schema/index';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { generateFolderIdFromName, isValidFolderId } from '@/lib/utils/folder-id-generator';
 import { CreateFolderSchema } from '@/types/entities/folder/schema';
-import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = Router();
 const logger = serverLogger.withContext('FoldersRoutes');

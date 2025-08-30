@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { DocumentWithStats, DocumentCreateInput, DocumentUpdateInput } from '@/types/entities/document';
+import type { DocumentCreateInput, DocumentUpdateInput, DocumentWithStats } from '@/types/entities/document';
 import { apiClient } from './client';
 
 export const documentKeys = {

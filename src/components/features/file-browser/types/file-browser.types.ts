@@ -1,4 +1,10 @@
-import type { AnyEntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
+
+export interface ClickModifiers {
+	ctrlKey: boolean;
+	metaKey: boolean;
+	shiftKey: boolean;
+}
 
 export interface FileBrowser2Props {
 	className?: string;

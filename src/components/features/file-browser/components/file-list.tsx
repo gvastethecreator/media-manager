@@ -1,12 +1,23 @@
-import { useEffect, useState } from 'react';
-import { MediaThumbnail } from './media-thumbnail';
+import { useEffect, useMemo, useState } from 'react';
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuLabel,
+	ContextMenuSeparator,
+	ContextMenuTrigger,
+} from '@/components/ui/context-menu';
+import type { ClickModifiers } from '../types/file-browser.types';
+import { AddToEntityMenu } from './add-to-entity-menu';
 import type { MediaItem } from './media-thumbnail';
+import { MediaThumbnail } from './media-thumbnail';
 
 // CONFIG local de la vista List (compacta y minimalista)
 const CONFIG = {
 	rowHeight: 90, // Altura máxima para acomodar thumbnails de 90px
 	thumbnailSize: 90, // Thumbnail máximo 90x90px respetando aspect ratio
-	increaseViewportBy: { top: 200, bottom: 600 } as { top: number; bottom: number },
+	// Overscan mayor para lista compacta
+	increaseViewportBy: { top: 600, bottom: 1400 } as { top: number; bottom: number },
 };
 
 // Componente compacto para cada item de la lista
@@ -18,32 +29,33 @@ function CompactListItem({
 }: {
 	item: MediaItem;
 	selected: boolean;
-	onClick?: (item: MediaItem) => void;
+	onClick?: (item: MediaItem, modifiers?: ClickModifiers) => void;
 	onDoubleClick?: (item: MediaItem) => void;
 }) {
 	return (
 		<button
-			type="button"
 			className={`flex w-full cursor-pointer items-center gap-3 rounded-md px-3 py-2.5 text-left text-sm transition-colors hover:bg-accent ${selected ? 'bg-accent font-medium' : ''}`}
-			style={{ maxHeight: '90px', height: `${CONFIG.rowHeight}px` }}
 			data-entity-card
 			data-entity-type={item.entityType}
-			onClick={() => onClick?.(item)}
+			onClick={(e) => onClick?.(item, { ctrlKey: e.ctrlKey, metaKey: e.metaKey, shiftKey: e.shiftKey })}
 			onDoubleClick={() => onDoubleClick?.(item)}
+			style={{ maxHeight: '90px', height: `${CONFIG.rowHeight}px` }}
+			type="button"
 		>
 			{/* MediaThumbnail para todos los tipos */}
 			<MediaThumbnail
-				item={item}
-				width={CONFIG.thumbnailSize}
-				height={CONFIG.thumbnailSize}
 				className="flex-shrink-0 rounded border"
+				height={CONFIG.thumbnailSize}
+				item={item}
+				preloadMargin="600px"
 				style={{
 					objectFit: 'cover',
-					maxWidth: `${CONFIG.thumbnailSize}px`,
 					maxHeight: `${CONFIG.thumbnailSize}px`,
-					width: `${CONFIG.thumbnailSize}px`,
+					maxWidth: `${CONFIG.thumbnailSize}px`,
 					height: `${CONFIG.thumbnailSize}px`,
+					width: `${CONFIG.thumbnailSize}px`,
 				}}
+				width={CONFIG.thumbnailSize}
 			/>
 
 			{/* Nombre del archivo truncado */}
@@ -62,7 +74,7 @@ function CompactListItem({
 interface FileListProps {
 	items: MediaItem[];
 	selectedIds?: string[];
-	onItemClick?: (item: MediaItem) => void;
+	onItemClick?: (item: MediaItem, modifiers?: ClickModifiers) => void;
 	onItemDoubleClick?: (item: MediaItem) => void;
 	// Permite usar un contenedor de scroll externo (react-virtuoso: customScrollParent)
 	scrollParent?: HTMLElement | null;
@@ -79,6 +91,35 @@ export function FileList({
 	virtuosoKey,
 }: FileListProps) {
 	const [VirtuosoComp, setVirtuosoComp] = useState<any>(null);
+
+	// Definir itemContent de forma incondicional para mantener un orden de hooks estable
+	const itemContent = useMemo(
+		() => (index: number, item: MediaItem) => (
+			<div data-testid={`list-row-${index}`}>
+				<ContextMenu>
+					<ContextMenuTrigger asChild>
+						<CompactListItem
+							item={item}
+							key={item.id}
+							onClick={onItemClick}
+							onDoubleClick={onItemDoubleClick}
+							selected={selectedIds.includes(item.id)}
+						/>
+					</ContextMenuTrigger>
+					<ContextMenuContent>
+						<ContextMenuLabel>Acciones</ContextMenuLabel>
+						<ContextMenuItem onSelect={() => onItemClick?.(item)}>Abrir</ContextMenuItem>
+						<ContextMenuItem>Mostrar en carpeta</ContextMenuItem>
+						<ContextMenuSeparator />
+						<AddToEntityMenu entityType={item.entityType} itemId={item.id} />
+						<ContextMenuSeparator />
+						<ContextMenuItem variant="destructive">Eliminar</ContextMenuItem>
+					</ContextMenuContent>
+				</ContextMenu>
+			</div>
+		),
+		[onItemClick, onItemDoubleClick, selectedIds]
+	);
 
 	useEffect(() => {
 		let mounted = true;
@@ -98,29 +139,19 @@ export function FileList({
 
 	if (VirtuosoComp) {
 		return (
-			<div style={{ height: scrollParent ? 'auto' : '100%' }} data-testid="listview-container">
+			<div data-testid="listview-container" style={{ height: scrollParent ? 'auto' : '100%' }}>
 				<VirtuosoComp
-					key={virtuosoKey} // Key para forzar remount
-					data={items}
-					computeItemKey={(index: number, item: MediaItem) => item.id}
-					increaseViewportBy={CONFIG.increaseViewportBy}
-					initialItemCount={Math.min(50, items.length)}
-					itemContent={(index: number, item: MediaItem) => (
-						<div data-testid={`list-row-${index}`}>
-							<CompactListItem
-								key={item.id}
-								item={item}
-								selected={selectedIds.includes(item.id)}
-								onClick={onItemClick}
-								onDoubleClick={onItemDoubleClick}
-							/>
-						</div>
-					)}
-					style={{ height: scrollParent ? 'auto' : '100%' }}
-					useWindowScroll={false}
-					fixedItemSize={CONFIG.rowHeight}
-					// Usar contenedor de scroll externo cuando se proporciona
+					computeItemKey={(index: number, item: MediaItem) => item.id} // Key para forzar remount
 					customScrollParent={scrollParent ?? undefined}
+					data={items}
+					fixedItemSize={CONFIG.rowHeight}
+					increaseViewportBy={CONFIG.increaseViewportBy}
+					initialItemCount={Math.min(30, items.length)}
+					itemContent={itemContent}
+					key={virtuosoKey}
+					style={{ height: scrollParent ? 'auto' : '100%' }}
+					// Usar contenedor de scroll externo cuando se proporciona
+					useWindowScroll={false}
 				/>
 			</div>
 		);
@@ -130,13 +161,8 @@ export function FileList({
 	return (
 		<div className="flex flex-col gap-1 p-2" data-testid="listview-container">
 			{items.map((item, index) => (
-				<div key={item.id} data-testid={`list-row-${index}`}>
-					<CompactListItem
-						item={item}
-						selected={selectedIds.includes(item.id)}
-						onClick={onItemClick}
-						onDoubleClick={onItemDoubleClick}
-					/>
+				<div data-testid={`list-row-${index}`} key={item.id}>
+					{itemContent(index, item)}
 				</div>
 			))}
 		</div>

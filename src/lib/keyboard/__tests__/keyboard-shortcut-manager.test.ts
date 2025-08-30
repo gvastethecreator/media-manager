@@ -8,7 +8,7 @@ import { KeyboardShortcutManager } from '../keyboard-shortcut-manager';
 
 describe('KeyboardShortcutManager', () => {
 	let manager: KeyboardShortcutManager;
-	let mockHandler: ReturnType<typeof mock.fn>;
+	let mockHandler: ReturnType<typeof mock>;
 
 	beforeEach(() => {
 		manager = new KeyboardShortcutManager();
@@ -25,12 +25,12 @@ describe('KeyboardShortcutManager', () => {
 
 		manager.register(shortcut, mockHandler);
 
-		// Simular evento de teclado
+		// Simular evento de teclado con target asignado posteriormente (KeyboardEventInit no acepta target)
 		const event = new KeyboardEvent('keydown', {
 			key: 'a',
 			ctrlKey: true,
-			target: document.body, // Añadir un target válido
 		});
+		Object.defineProperty(event, 'target', { value: document.body, writable: false });
 
 		const handled = manager.handleKeyDown(event);
 
@@ -95,10 +95,8 @@ describe('KeyboardShortcutManager', () => {
 		manager.register(shortcut, mockHandler);
 		manager.setContext('any-context');
 
-		const event = new KeyboardEvent('keydown', {
-			key: 'escape',
-			target: document.body, // Añadir un target válido
-		});
+		const event = new KeyboardEvent('keydown', { key: 'escape' });
+		Object.defineProperty(event, 'target', { value: document.body, writable: false });
 
 		const handled = manager.handleKeyDown(event);
 
