@@ -1,7 +1,7 @@
 import type { MediaItem } from '../components/media-thumbnail';
 import type { ClickModifiers } from '../types/file-browser.types';
-import { Table } from './table';
 import { CanvasRenderConfig } from './canvas-config';
+import { Table } from './table';
 
 export interface FileCanvasTableGroupedProps {
 	groups: Array<{ key: string; items: MediaItem[]; displayName: string }>;
@@ -22,11 +22,7 @@ export function FileCanvasTableGrouped({ groups, onItemClick, onItemDoubleClick 
 						>
 							{g.displayName}
 						</div>
-						<Table
-							items={g.items}
-							onItemClick={onItemClick}
-							onItemDoubleClick={onItemDoubleClick}
-						/>
+						<Table items={g.items} onItemClick={onItemClick} onItemDoubleClick={onItemDoubleClick} />
 					</div>
 				))}
 			</div>

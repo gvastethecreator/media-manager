@@ -88,13 +88,13 @@ const GridItemInner = React.forwardRef<HTMLButtonElement, GridItemProps>(
 				className={`group relative overflow-hidden rounded-md border bg-card focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 ${selectedState ? 'ring-2 ring-primary ring-offset-2' : ''} ${className ? className : ''}`}
 				data-entity-card
 				data-entity-type={item.entityType}
-				data-selected={selectedState}
 				data-item-index={itemIndex}
+				data-selected={selectedState}
 				onClick={(e) => handleClick(e)}
 				onDoubleClick={handleDoubleClick}
 				onKeyDown={handleKeyDown}
-				style={{ aspectRatio: '1 / 1', width: '100%', minWidth: size, minHeight: size }}
 				ref={ref}
+				style={{ aspectRatio: '1 / 1', width: '100%', minWidth: size, minHeight: size }}
 				{...rest}
 				type="button"
 			>

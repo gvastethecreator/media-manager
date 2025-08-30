@@ -1,22 +1,22 @@
 import { RefreshCw } from 'lucide-react';
-import { useMemo, useState, useRef } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
-import { Grid } from '@/components/features/file-browser/views/grid';
 import { Cards } from '@/components/features/file-browser/views/cards';
-import { List } from '@/components/features/file-browser/views/list';
-import { Masonry } from '@/components/features/file-browser/views/masonry';
-import { Single } from '@/components/features/file-browser/views/single';
-import { Table } from '@/components/features/file-browser/views/table';
-import { FileCanvasListGrouped } from '@/components/features/file-browser/views/list-grouped';
+import { Grid } from '@/components/features/file-browser/views/grid';
 import { FileCanvasGridGrouped } from '@/components/features/file-browser/views/grid-grouped';
+import { List } from '@/components/features/file-browser/views/list';
+import { FileCanvasListGrouped } from '@/components/features/file-browser/views/list-grouped';
+import { Masonry } from '@/components/features/file-browser/views/masonry';
 import { FileCanvasMasonryGrouped } from '@/components/features/file-browser/views/masonry-grouped';
+import { Single } from '@/components/features/file-browser/views/single';
 import { FileCanvasSingleGrouped } from '@/components/features/file-browser/views/single-grouped';
+import { Table } from '@/components/features/file-browser/views/table';
 import { FileCanvasTableGrouped } from '@/components/features/file-browser/views/table-grouped';
-import { FileListHeader } from './components/file-list-header';
 import { cn } from '@/lib/utils';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { AnyEntityWithStats } from '@/types/entities';
+import { FileListHeader } from './components/file-list-header';
 import type { MediaItem } from './components/media-thumbnail';
 import { useFolderFiles } from './hooks/use-folder-files';
 import { useKeyboardNavigation } from './navigation/keyboard-navigation';
@@ -173,12 +173,12 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 
 	return (
 		<section
-			ref={containerRef}
+			aria-label="Explorador de archivos - use las flechas para navegar, Enter para abrir, Escape para cerrar"
 			className={cn('flex h-full min-h-0 flex-col overflow-hidden')}
 			data-testid="file-browser"
 			data-view-mode={viewMode}
-			tabIndex={-1} // Focusable programáticamente pero no por tab
-			aria-label="Explorador de archivos - use las flechas para navegar, Enter para abrir, Escape para cerrar"
+			ref={containerRef} // Focusable programáticamente pero no por tab
+			tabIndex={-1}
 		>
 			<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container">
 				{/* Overlays no bloqueantes para loading/error */}
@@ -395,11 +395,11 @@ function renderFromItems({
 
 	return (
 		<section
+			aria-label="Explorador de archivos"
 			className={cn('flex h-full min-h-0 flex-col overflow-hidden', className)}
 			data-testid="file-browser"
 			data-view-mode={viewMode}
 			tabIndex={-1}
-			aria-label="Explorador de archivos"
 		>
 			<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container">
 				{viewMode === 'list' ? (

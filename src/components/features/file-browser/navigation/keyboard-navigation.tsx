@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
-import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
+import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { MediaItem } from '../components/media-thumbnail';
 
 export interface UseKeyboardNavigationOptions {
@@ -546,11 +546,11 @@ export function KeyboardNavigationWrapper({
 
 	return (
 		<div
-			ref={containerRef}
 			className={className}
-			data-keyboard-navigation="true"
 			data-focused-index={focusedIndex}
 			data-keyboard-focused={isKeyboardFocused}
+			data-keyboard-navigation="true"
+			ref={containerRef}
 		>
 			{children}
 		</div>
