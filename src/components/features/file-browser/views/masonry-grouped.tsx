@@ -1,7 +1,7 @@
 import type { MediaItem } from '../components/media-thumbnail';
 import type { ClickModifiers } from '../types/file-browser.types';
-import { Masonry } from './masonry';
 import { CanvasRenderConfig } from './canvas-config';
+import { Masonry } from './masonry';
 
 export interface FileCanvasMasonryGroupedProps {
 	groups: Array<{ key: string; items: MediaItem[]; displayName: string }>;
@@ -22,11 +22,7 @@ export function FileCanvasMasonryGrouped({ groups, onItemClick, onItemDoubleClic
 						>
 							{g.displayName}
 						</div>
-						<Masonry
-							items={g.items}
-							onItemClick={onItemClick}
-							onItemDoubleClick={onItemDoubleClick}
-						/>
+						<Masonry items={g.items} onItemClick={onItemClick} onItemDoubleClick={onItemDoubleClick} />
 					</div>
 				))}
 			</div>

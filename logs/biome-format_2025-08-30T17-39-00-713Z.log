@@ -1,0 +1,7 @@
+Comando: bunx biome format --write .
+Fecha: 2025-08-30T17:39:00.714Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+Formatted 1708 files in 2s. Fixed 15 files.

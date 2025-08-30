@@ -1,0 +1,71 @@
+Comando: bunx playwright test
+Fecha: 2025-08-30T17:32:23.822Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Testing
+===============================================
+
+Running 18 tests using 12 workers
+
+🔄 Probando thumbnails en vista: grid
+  ✓  11 [chromium] › tests\e2e\file-browser-views.spec.ts:135:2 › File Browser: vistas con scroll e interacción › rueda de scroll incrementa scrollTop del viewport (14.4s)
+  -   2 [chromium] › tests\e2e\context-menu-performance.spec.ts:102:2 › Context Menu Performance › menú contextual debería aparecer rápidamente
+  ✓   7 [chromium] › tests\e2e\file-browser-accessibility.spec.ts:116:2 › File Browser: accesibilidad y foco › Panel métricas aparece con debugPerf (18.3s)
+  -   3 [chromium] › tests\e2e\file-browser-accessibility.spec.ts:33:2 › File Browser: accesibilidad y foco › navegación por flechas en grid
+  -  10 [chromium] › tests\e2e\file-browser-accessibility.spec.ts:84:2 › File Browser: accesibilidad y foco › Overlay / botones visibles en hover
+  -   1 [chromium] › tests\e2e\context-menu-performance.spec.ts:157:2 › Context Menu Performance › entidades críticas deberían estar precargadas
+🔄 Probando thumbnails en vista: cards
+  -   5 [chromium] › tests\e2e\file-browser-accessibility.spec.ts:63:2 › File Browser: accesibilidad y foco › Enter y Space activan selección
+🎬 Testing video: 003414_OG_00001
+✅ WebP animado generado: [33m10748[39m bytes
+  ✓  15 [chromium] › tests\e2e\search-fts-disable-env.spec.ts:15:2 › Search FTS5 (deshabilitable) › engine consistente con DISABLE_FTS5 (2.8s)
+  ✓  12 [chromium] › tests\e2e\file-browser-views.spec.ts:192:2 › Video Thumbnails WebP Animados › API devuelve thumbnails WebP animados (21.6s)
+  ✓  16 [chromium] › tests\e2e\search-fts-fallback.spec.ts:17:2 › Search FTS5 fallback › devuelve engine fts5 cuando tabla existe (2.7s)
+  -   4 [chromium] › tests\e2e\context-menu-performance.spec.ts:127:2 › Context Menu Performance › submenús deberían cargarse rápidamente
+  ✓  17 [chromium] › tests\e2e\search-fts-require-flag.spec.ts:22:2 › Search FTS5 require flag › maneja flag SEARCH_FTS_REQUIRE (2.5s)
+  ✓  18 [chromium] › tests\e2e\search-fts-score.spec.ts:14:2 › Search FTS5 score › incluye score cuando engine = fts5 (2.5s)
+⚠️ No se encontraron videos para probar thumbnails
+  ✓   8 [chromium] › tests\e2e\file-browser-views.spec.ts:164:2 › Video Thumbnails WebP Animados › thumbnails de video se muestran en grid view (22.1s)
+🔄 Probando thumbnails en vista: masonry
+✅ Todos los thumbnails cargaron sin errores
+  ✓   9 [chromium] › tests\e2e\file-browser-views.spec.ts:221:2 › Video Thumbnails WebP Animados › thumbnails cargan sin errores en diferentes vistas (28.4s)
+  ✘   6 [chromium] › tests\e2e\file-browser-views.spec.ts:116:2 › File Browser: vistas con scroll e interacción › grid, cards, masonry y list funcionan tras alternar desde toolbar (29.3s)
+  ✓  13 [chromium] › tests\e2e\file-browser-views.spec.ts:258:2 › Video Thumbnails WebP Animados › performance de carga de thumbnails (16.5s)
+  ✓  14 [chromium] › tests\e2e\reindex-settings.spec.ts:13:2 › Reindex en Settings › reindex-all refresca UI (cards, nav y stats) (26.5s)
+
+
+  1) [chromium] › tests\e2e\file-browser-views.spec.ts:116:2 › File Browser: vistas con scroll e interacción › grid, cards, masonry y list funcionan tras alternar desde toolbar 
+
+    TimeoutError: locator.boundingBox: Timeout 10000ms exceeded.
+    Call log:
+    [2m  - waiting for locator('[data-testid="grid-view"]')[22m
+
+
+      51 | 	// Fallback: localizar el contenedor de la vista y hacer clic dentro
+      52 | 	const selector = viewLocatorFor(view);
+    > 53 | 	const box = await page.locator(selector).boundingBox();
+         | 	                                         ^
+      54 | 	if (box) {
+      55 | 		await page.mouse.move(box.x + 20, box.y + 20);
+      56 | 		await page.mouse.down();
+        at clickFirstItem (D:\DEV\image-manager\tests\e2e\file-browser-views.spec.ts:53:43)
+        at D:\DEV\image-manager\tests\e2e\file-browser-views.spec.ts:131:4
+        at D:\DEV\image-manager\tests\e2e\file-browser-views.spec.ts:128:4
+        at D:\DEV\image-manager\tests\e2e\file-browser-views.spec.ts:128:4
+        at D:\DEV\image-manager\tests\e2e\file-browser-views.spec.ts:128:4
+        at D:\DEV\image-manager\tests\e2e\file-browser-views.spec.ts:127:3
+
+    Error Context: test-results\file-browser-views-File-Br-8d3b6-tras-alternar-desde-toolbar-chromium\error-context.md
+
+    attachment #2: trace (application/zip) ─────────────────────────────────────────────────────────
+    test-results\file-browser-views-File-Br-8d3b6-tras-alternar-desde-toolbar-chromium\trace.zip
+    Usage:
+
+        npx playwright show-trace test-results\file-browser-views-File-Br-8d3b6-tras-alternar-desde-toolbar-chromium\trace.zip
+
+    ────────────────────────────────────────────────────────────────────────────────────────────────
+
+  1 failed
+    [chromium] › tests\e2e\file-browser-views.spec.ts:116:2 › File Browser: vistas con scroll e interacción › grid, cards, masonry y list funcionan tras alternar desde toolbar 
+  6 skipped
+  11 passed (46.5s)

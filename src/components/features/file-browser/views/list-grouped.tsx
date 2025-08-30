@@ -1,7 +1,7 @@
 import type { MediaItem } from '../components/media-thumbnail';
 import type { ClickModifiers } from '../types/file-browser.types';
-import { List } from './list';
 import { CanvasRenderConfig } from './canvas-config';
+import { List } from './list';
 
 export interface FileCanvasListGroupedProps {
 	groups: Array<{ key: string; items: MediaItem[]; displayName: string }>;
@@ -23,11 +23,7 @@ export function FileCanvasListGrouped({ groups, onItemClick, onItemDoubleClick }
 						>
 							{g.displayName}
 						</div>
-						<List
-							items={g.items}
-							onItemClick={onItemClick}
-							onItemDoubleClick={onItemDoubleClick}
-						/>
+						<List items={g.items} onItemClick={onItemClick} onItemDoubleClick={onItemDoubleClick} />
 					</div>
 				))}
 			</div>

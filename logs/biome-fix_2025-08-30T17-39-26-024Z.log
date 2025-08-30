@@ -1,0 +1,136 @@
+📊 RESUMEN DE ERRORES
+Total de archivos con errores: 1
+Cantidad total de errores: 3
+
+📁 ARCHIVOS AFECTADOS:
+  src\components\features\file-browser\navigation\keyboard-navigation.tsx (líneas: 55, 185, 186)
+
+📋 DETALLE POR ARCHIVO:
+
+src\components\features\file-browser\navigation\keyboard-navigation.tsx
+  - línea 55 : lint/correctness/useExhaustiveDependencies
+  - línea 185 : lint/complexity/noUselessSwitchCase
+  - línea 186 : lint/complexity/noUselessSwitchCase
+
+════════════════════════════════════════════════════════════════════════════════
+📄 LOG ORIGINAL:
+════════════════════════════════════════════════════════════════════════════════
+
+Comando: bunx biome check --max-diagnostics=500 --write .
+Fecha: 2025-08-30T17:39:26.025Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+src\components\features\file-browser\navigation\keyboard-navigation.tsx:55:23 lint/correctness/useExhaustiveDependencies  FIXABLE  ━━━━━━━━━━
+
+  ! This hook does not specify its dependency on scrollToCanvasItem.
+  
+    54 │ 	// Scroll para mantener el item visible - mejorado para diferentes vistas
+  > 55 │ 	const scrollToItem = useCallback(
+       │ 	                     ^^^^^^^^^^^
+    56 │ 		(index: number) => {
+    57 │ 			if (!containerRef?.current || index < 0 || index >= items.length) return;
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    106 │ 			} else {
+    107 │ 				// Fallback: scroll general basado en la vista
+  > 108 │ 				scrollToCanvasItem(container, index, viewMode);
+        │ 				^^^^^^^^^^^^^^^^^^
+    109 │ 			}
+    110 │ 		},
+  
+  i This dependency is being used here, but is not specified in the hook dependency list.
+  
+    76 │ 				if (selector === 'canvas' && elements.length > 0) {
+    77 │ 					// Para vistas canvas, calcular posición y hacer scroll manual
+  > 78 │ 					scrollToCanvasItem(container, index, viewMode);
+       │ 					^^^^^^^^^^^^^^^^^^
+    79 │ 					return;
+    80 │ 				}
+  
+  i Unsafe fix: Add the missing dependency to the list.
+  
+    109 109 │   			}
+    110 110 │   		},
+    111     │ - → → [containerRef,·items.length,·viewMode]
+        111 │ + → → [containerRef,·items.length,·viewMode,·//·Fallback:·scroll·general·basado·en·la·vista
+        112 │ + → → → → scrollToCanvasItem]
+    112 113 │   	);
+    113 114 │   
+  
+
+src\components\features\file-browser\navigation\keyboard-navigation.tsx:185:7 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━
+
+  × Useless case clause.
+  
+    183 │ 						case 'down':
+    184 │ 							return Math.min(itemCount - 1, currentIndex + 1);
+  > 185 │ 						case 'left':
+        │ 						^^^^^^^^^^^^
+    186 │ 						case 'right':
+    187 │ 						default:
+  
+  i because the default clause is present:
+  
+    185 │ 						case 'left':
+    186 │ 						case 'right':
+  > 187 │ 						default:
+        │ 						^^^^^^^^
+  > 188 │ 							return currentIndex; // No cambio en modo lista
+        │ 							^^^^^^^^^^^^^^^^^^^^
+    189 │ 					}
+    190 │ 				}
+  
+  i Unsafe fix: Remove the useless case.
+  
+    183 183 │   						case 'down':
+    184 184 │   							return Math.min(itemCount - 1, currentIndex + 1);
+    185     │ - → → → → → → case·'left':
+    186 185 │   						case 'right':
+    187 Skipped 5 suggested fixes.
+If you wish to apply the suggested (unsafe) fixes, use the command biome check --write --unsafe
+
+Checked 1708 files in 2s. Fixed 16 files.
+Found 2 errors.
+Found 1 warning.
+186 │   						default:
+  
+
+src\components\features\file-browser\navigation\keyboard-navigation.tsx:186:7 lint/complexity/noUselessSwitchCase  FIXABLE  ━━━━━━━━━━
+
+  × Useless case clause.
+  
+    184 │ 							return Math.min(itemCount - 1, currentIndex + 1);
+    185 │ 						case 'left':
+  > 186 │ 						case 'right':
+        │ 						^^^^^^^^^^^^^
+    187 │ 						default:
+    188 │ 							return currentIndex; // No cambio en modo lista
+  
+  i because the default clause is present:
+  
+    185 │ 						case 'left':
+    186 │ 						case 'right':
+  > 187 │ 						default:
+        │ 						^^^^^^^^
+  > 188 │ 							return currentIndex; // No cambio en modo lista
+        │ 							^^^^^^^^^^^^^^^^^^^^
+    189 │ 					}
+    190 │ 				}
+  
+  i Unsafe fix: Remove the useless case.
+  
+    184 184 │   							return Math.min(itemCount - 1, currentIndex + 1);
+    185 185 │   						case 'left':
+    186     │ - → → → → → → case·'right':
+    187 186 │   						default:
+    188 187 │   							return currentIndex; // No cambio en modo lista
+  
+
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while applying fixes.
+  
+
