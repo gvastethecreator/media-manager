@@ -56,6 +56,33 @@ export const extname = (path: string) => {
 	const index = name.lastIndexOf('.');
 	return index > 0 ? name.slice(index) : '';
 };
+export const normalize = (p: string) => p.replace(/\\/g, '/');
+export const isAbsolute = (p: string) => /^\//.test(p);
+export const relative = (from: string, to: string) => {
+	const a = normalize(from).split('/').filter(Boolean);
+	const b = normalize(to).split('/').filter(Boolean);
+	while (a.length && b.length && a[0] === b[0]) {
+		a.shift();
+		b.shift();
+	}
+	return [...new Array(a.length).fill('..'), ...b].join('/') || '';
+};
+export const sep = '/';
+export const delimiter = ':';
+
+// Compatibilidad con import { posix } from 'path'
+export const posix = {
+	sep,
+	delimiter,
+	join,
+	resolve,
+	dirname,
+	basename,
+	extname,
+	normalize,
+	isAbsolute,
+	relative,
+} as const;
 
 // Para compatibilidad con sharp y crypto
 export const sharp = emptyFunction;

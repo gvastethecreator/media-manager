@@ -22,6 +22,9 @@ export interface ViewOptionsState {
 	filterOptions: FilterOption[];
 	searchQuery: string;
 	groupByEntityType: boolean;
+	useCanvasRendering: boolean;
+	setUseCanvasRendering: (enabled: boolean) => void;
+	toggleUseCanvasRendering: () => void;
 	setViewMode: (mode: ViewMode) => void;
 	setItemSize: (size: number) => void;
 	setSortOptions: (options: SortOption[]) => void;
@@ -45,6 +48,7 @@ const DEFAULT_STATE = {
 	filterOptions: [],
 	searchQuery: '',
 	groupByEntityType: false,
+	useCanvasRendering: false,
 };
 
 export type ViewOptionsStore = ViewOptionsState;
@@ -53,6 +57,9 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 	persist(
 		(set) => ({
 			...DEFAULT_STATE,
+
+			setUseCanvasRendering: (enabled: boolean) => set({ useCanvasRendering: enabled }),
+			toggleUseCanvasRendering: () => set((state) => ({ useCanvasRendering: !state.useCanvasRendering })),
 
 			setViewMode: (mode) => set({ viewMode: mode }),
 

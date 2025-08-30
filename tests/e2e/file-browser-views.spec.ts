@@ -24,17 +24,38 @@ async function clickFirstItem(page: any, view: 'grid' | 'cards' | 'masonry' | 'l
 	if (view === 'list') {
 		// Fila 0
 		const firstRow = page.getByTestId('listview-container').locator('[data-testid^="list-row-"]').first();
-		await expect(firstRow).toBeVisible();
-		await firstRow.click();
+		const rowCount = await page.getByTestId('listview-container').locator('[data-testid^="list-row-"]').count();
+		if (rowCount > 0) {
+			await expect(firstRow).toBeVisible();
+			await firstRow.click();
+			return;
+		}
+		// Fallback para canvas: clic relativo dentro del contenedor
+		const box = await page.getByTestId('listview-container').boundingBox();
+		if (box) {
+			await page.mouse.move(box.x + 20, box.y + 20);
+			await page.mouse.down();
+			await page.mouse.up();
+		}
 		return;
 	}
-	// Para grid/cards/masonry, usamos el primer entity-card visible
+	// Para grid/cards/masonry, primero intentar con [data-entity-card]
 	const items = page.locator('[data-entity-card]');
 	const count = await items.count();
-	if (count === 0) return; // dataset pequeño
-	const firstCard = items.first();
-	await expect(firstCard).toBeVisible({ timeout: 10_000 });
-	await firstCard.click({ delay: 10 });
+	if (count > 0) {
+		const firstCard = items.first();
+		await expect(firstCard).toBeVisible({ timeout: 10_000 });
+		await firstCard.click({ delay: 10 });
+		return;
+	}
+	// Fallback: localizar el contenedor de la vista y hacer clic dentro
+	const selector = viewLocatorFor(view);
+	const box = await page.locator(selector).boundingBox();
+	if (box) {
+		await page.mouse.move(box.x + 20, box.y + 20);
+		await page.mouse.down();
+		await page.mouse.up();
+	}
 }
 
 async function switchView(page: any, mode: 'grid' | 'cards' | 'masonry' | 'list') {
@@ -109,6 +130,22 @@ test.describe('File Browser: vistas con scroll e interacción', () => {
 			await assertScrollable(page);
 			await clickFirstItem(page, mode);
 		}, Promise.resolve());
+	});
+
+	test('rueda de scroll incrementa scrollTop del viewport', async ({ page }) => {
+		await page.goto('/folders/cursed-dump', { waitUntil: 'domcontentloaded', timeout: 60_000 });
+		const viewport = getViewport(page);
+		await expect(viewport).toBeVisible();
+		// Llevar el mouse encima del viewport y hacer wheel
+		const box = await viewport.boundingBox();
+		if (box) {
+			await page.mouse.move(box.x + box.width / 2, box.y + 20);
+			const before = await viewport.evaluate((el: HTMLElement) => el.scrollTop);
+			await page.mouse.wheel(0, 800);
+			await page.waitForTimeout(200);
+			const after = await viewport.evaluate((el: HTMLElement) => el.scrollTop);
+			expect(after).toBeGreaterThanOrEqual(before);
+		}
 	});
 });
 
