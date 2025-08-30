@@ -9,7 +9,7 @@ import { motion } from 'motion/react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEntityTypeConfig } from '@/hooks/use-entity-type-config';
 import { cn } from '@/lib/utils';
-import { EntityStatsType } from '@/types/migration';
+import { EntityStatsType } from '@/types/file-browser/entity-stats';
 
 /**
  * 🏷️ Props para EntityTypeBadge

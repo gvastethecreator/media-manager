@@ -7,48 +7,50 @@
  */
 
 // Browser-compatible EventEmitter implementation
-class EventEmitter {
-	private events: { [key: string]: Function[] } = {};
+type UndoRedoEvents = { type: 'stateChanged'; payload: UndoRedoState };
+type URListener<T> = (payload: T) => void;
 
-	on(event: string, listener: Function): this {
-		if (!this.events[event]) {
-			this.events[event] = [];
-		}
-		this.events[event].push(listener);
+class EventEmitter {
+	private events = new Map<string, Set<URListener<any>>>();
+
+	on<TEvent extends UndoRedoEvents['type']>(
+		event: TEvent,
+		listener: URListener<Extract<UndoRedoEvents, { type: TEvent }>['payload']>
+	): this {
+		const set = this.events.get(event) ?? new Set();
+		set.add(listener as URListener<any>);
+		this.events.set(event, set);
 		return this;
 	}
 
-	emit(event: string, ...args: any[]): boolean {
-		if (!this.events[event]) {
-			return false;
-		}
-		this.events[event].forEach((listener) => {
+	emit<TEvent extends UndoRedoEvents['type']>(
+		event: TEvent,
+		payload: Extract<UndoRedoEvents, { type: TEvent }>['payload']
+	): boolean {
+		const set = this.events.get(event);
+		if (!set) return false;
+		for (const listener of set) {
 			try {
-				listener(...args);
+				(listener as URListener<typeof payload>)(payload);
 			} catch (error) {
 				console.error('Error in event listener:', error);
 			}
-		});
+		}
 		return true;
 	}
 
-	removeListener(event: string, listener: Function): this {
-		if (!this.events[event]) {
-			return this;
-		}
-		const index = this.events[event].indexOf(listener);
-		if (index > -1) {
-			this.events[event].splice(index, 1);
-		}
+	removeListener<TEvent extends UndoRedoEvents['type']>(
+		event: TEvent,
+		listener: URListener<Extract<UndoRedoEvents, { type: TEvent }>['payload']>
+	): this {
+		const set = this.events.get(event);
+		if (set) set.delete(listener as URListener<any>);
 		return this;
 	}
 
-	removeAllListeners(event?: string): this {
-		if (event) {
-			delete this.events[event];
-		} else {
-			this.events = {};
-		}
+	removeAllListeners(event?: UndoRedoEvents['type']): this {
+		if (event) this.events.delete(event);
+		else this.events.clear();
 		return this;
 	}
 }

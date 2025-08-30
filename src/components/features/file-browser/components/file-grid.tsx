@@ -1,5 +1,15 @@
-import { forwardRef, useEffect, useState, useMemo } from 'react';
+import { forwardRef, useEffect, useMemo, useState } from 'react';
+import {
+	ContextMenu,
+	ContextMenuContent,
+	ContextMenuItem,
+	ContextMenuLabel,
+	ContextMenuSeparator,
+	ContextMenuTrigger,
+} from '@/components/ui/context-menu';
 import type { ViewMode } from '@/store/ui/view-options.slice';
+import type { ClickModifiers } from '../types/file-browser.types';
+import { AddToEntityMenu } from './add-to-entity-menu';
 import { GridItem } from './grid-item';
 import type { MediaItem } from './media-thumbnail';
 
@@ -8,17 +18,19 @@ const CONFIG = {
 	gap: 8, // px
 	padding: 8, // px
 	baseItemSize: 150,
-	increaseViewportBy: { top: 200, bottom: 600 } as { top: number; bottom: number },
+	// Overscan mayor para suavizar scroll en grid
+	increaseViewportBy: { top: 700, bottom: 1400 } as { top: number; bottom: number },
 };
 
 interface FileGridProps {
 	items: MediaItem[];
-	selectedIds?: string[];
 	viewMode?: ViewMode;
-	onItemClick?: (item: MediaItem) => void;
+	onItemClick?: (item: MediaItem, modifiers?: ClickModifiers) => void;
 	onItemDoubleClick?: (item: MediaItem) => void;
 	style?: React.CSSProperties;
 	itemSize?: number;
+	// Lista opcional de IDs seleccionados (usada por controladores externos)
+	selectedIds?: string[];
 	// Contenedor de scroll externo opcional
 	scrollParent?: HTMLElement | null;
 	// Key para forzar remount del componente Virtuoso
@@ -36,8 +48,8 @@ const GridList = forwardRef<
 
 	return (
 		<div
-			ref={ref}
 			className={`grid${className ? ` ${className}` : ''}`}
+			ref={ref}
 			style={{
 				gap: CONFIG.gap,
 				padding: CONFIG.padding,
@@ -51,7 +63,6 @@ const GridList = forwardRef<
 
 export default function FileGrid({
 	items,
-	selectedIds = [],
 	onItemClick,
 	onItemDoubleClick,
 	viewMode,
@@ -60,18 +71,61 @@ export default function FileGrid({
 	scrollParent,
 	virtuosoKey,
 }: FileGridProps) {
-	console.log('[FileGrid] Rendering with items:', items.length);
-
 	const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 	const [VirtuosoGridComp, setVirtuosoGridComp] = useState<any>(null);
+
+	const handleKeyDownCapture = (e: React.KeyboardEvent<HTMLDivElement>) => {
+		const target = e.target as HTMLElement | null;
+		if (!target) return;
+		if (target.getAttribute('data-entity-card') == null) return; // solo cuando el foco está en una card
+		if (e.key !== 'ArrowRight' && e.key !== 'ArrowLeft') return;
+		e.preventDefault();
+		e.stopPropagation();
+		const container = e.currentTarget as HTMLElement;
+		const cards = Array.from(container.querySelectorAll<HTMLElement>('[data-entity-card]'));
+		const idx = cards.indexOf(target);
+		if (idx === -1) return;
+		const nextIdx = e.key === 'ArrowRight' ? idx + 1 : idx - 1;
+		const next = cards[nextIdx];
+		if (next) {
+			next.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+			next.focus();
+		}
+	};
 
 	// Crear el componente List memoizado con itemSize
 	const GridListWithSize = useMemo(
 		() =>
 			forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>((props, ref) => (
-				<GridList {...props} ref={ref} itemSize={itemSize} gridStyle={style} />
+				<GridList {...props} gridStyle={style} itemSize={itemSize} ref={ref} />
 			)),
 		[itemSize, style]
+	);
+
+	// Estabilizar el objeto components para VirtuosoGrid y evitar remounts innecesarios
+	const components = useMemo(() => ({ List: GridListWithSize }), [GridListWithSize]);
+
+	// Estabilizar itemContent para no crear nueva función en cada render
+	const renderItemContent = useMemo(
+		() => (index: number, item: MediaItem) => (
+			<div data-index={index}>
+				<ContextMenu>
+					<ContextMenuTrigger asChild>
+						<GridItem item={item} onClick={onItemClick} onDoubleClick={onItemDoubleClick} size={itemSize} />
+					</ContextMenuTrigger>
+					<ContextMenuContent>
+						<ContextMenuLabel>Acciones</ContextMenuLabel>
+						<ContextMenuItem onSelect={() => onItemClick?.(item)}>Abrir</ContextMenuItem>
+						<ContextMenuItem>Mostrar en carpeta</ContextMenuItem>
+						<ContextMenuSeparator />
+						<AddToEntityMenu entityType={item.entityType} itemId={item.id} />
+						<ContextMenuSeparator />
+						<ContextMenuItem variant="destructive">Eliminar</ContextMenuItem>
+					</ContextMenuContent>
+				</ContextMenu>
+			</div>
+		),
+		[onItemClick, onItemDoubleClick, itemSize]
 	);
 
 	useEffect(() => {
@@ -92,30 +146,24 @@ export default function FileGrid({
 
 	if (VirtuosoGridComp) {
 		return (
-			<div style={{ height: scrollParent ? 'auto' : '100%' }} data-testid="grid-view">
+			<div
+				data-testid="grid-view"
+				onKeyDownCapture={handleKeyDownCapture}
+				style={{ height: scrollParent ? 'auto' : '100%', minHeight: 200 }}
+			>
 				<VirtuosoGridComp
-					key={virtuosoKey} // Key para forzar remount
-					data={items}
+					components={components} // Estable para evitar remounts
 					computeItemKey={(index: number, item: MediaItem) => item.id}
-					increaseViewportBy={CONFIG.increaseViewportBy}
-					initialItemCount={Math.min(50, items.length)}
-					itemContent={(index: number, item: MediaItem) => (
-						<div data-index={index}>
-							<GridItem
-								item={item}
-								onClick={onItemClick}
-								onDoubleClick={onItemDoubleClick}
-								selected={selectedIds.includes(item.id)}
-								size={itemSize}
-							/>
-						</div>
-					)}
-					// Usar components.List para el contenedor del grid
-					components={{ List: GridListWithSize }}
-					// Estilos del contenedor externo del virtuoso (altura)
-					style={{ height: scrollParent ? 'auto' : '100%' }}
-					useWindowScroll={false}
 					customScrollParent={scrollParent ?? undefined}
+					data={items}
+					increaseViewportBy={CONFIG.increaseViewportBy}
+					initialItemCount={Math.min(30, items.length)}
+					// Usar components.List para el contenedor del grid
+					itemContent={renderItemContent}
+					// Estilos del contenedor externo del virtuoso (altura)
+					key={virtuosoKey}
+					style={{ height: scrollParent ? 'auto' : '100%', minHeight: 200 }}
+					useWindowScroll={false}
 				/>
 			</div>
 		);
@@ -123,7 +171,12 @@ export default function FileGrid({
 
 	// Fallback no virtualizado con scroll
 	return (
-		<div className="h-full overflow-auto" data-testid="grid-view">
+		<div
+			className="h-full overflow-auto"
+			data-testid="grid-view"
+			onKeyDownCapture={handleKeyDownCapture}
+			style={{ minHeight: 200 }}
+		>
 			<div
 				className="grid"
 				style={{
@@ -134,14 +187,20 @@ export default function FileGrid({
 				}}
 			>
 				{items.map((item) => (
-					<GridItem
-						item={item}
-						key={item.id}
-						onClick={onItemClick}
-						onDoubleClick={onItemDoubleClick}
-						selected={selectedIds.includes(item.id)}
-						size={itemSize}
-					/>
+					<ContextMenu key={item.id}>
+						<ContextMenuTrigger asChild>
+							<GridItem item={item} onClick={onItemClick} onDoubleClick={onItemDoubleClick} size={itemSize} />
+						</ContextMenuTrigger>
+						<ContextMenuContent>
+							<ContextMenuLabel>Acciones</ContextMenuLabel>
+							<ContextMenuItem onSelect={() => onItemClick?.(item)}>Abrir</ContextMenuItem>
+							<ContextMenuItem>Mostrar en carpeta</ContextMenuItem>
+							<ContextMenuSeparator />
+							<AddToEntityMenu entityType={item.entityType} itemId={item.id} />
+							<ContextMenuSeparator />
+							<ContextMenuItem variant="destructive">Eliminar</ContextMenuItem>
+						</ContextMenuContent>
+					</ContextMenu>
 				))}
 			</div>
 		</div>

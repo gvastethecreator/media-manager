@@ -47,7 +47,7 @@ export function ThumbnailGrid({ images, totalImages, className, showCount = true
 									<ImageIcon className="h-2 w-2 text-muted-foreground" />
 								</div>
 							)}
-							{!image && <div className="h-full w-full border border-dashed border-muted-foreground/20 bg-muted/30" />}
+							{!image && <div className="h-full w-full border border-muted-foreground/20 border-dashed bg-muted/30" />}
 						</motion.div>
 					);
 				})}

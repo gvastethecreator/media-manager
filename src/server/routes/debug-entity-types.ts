@@ -13,7 +13,7 @@ router.post('/test', (async (req, res) => {
 	try {
 		const { extensions } = req.body;
 
-		if (!extensions || !Array.isArray(extensions)) {
+		if (!(extensions && Array.isArray(extensions))) {
 			return res.status(400).json({
 				error: 'Se requiere un array de extensiones en el body',
 			});

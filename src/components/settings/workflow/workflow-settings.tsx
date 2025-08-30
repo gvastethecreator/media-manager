@@ -1,13 +1,13 @@
+import { Edit2, Loader2, PlusCircle, Settings2, Trash } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Loader2, Settings2, PlusCircle, Trash, Edit2 } from 'lucide-react';
-import { useWorkflows, useCreateWorkflow, useDeleteWorkflow, useUpdateWorkflow } from '@/lib/api/workflows';
-import type { WorkflowWithStats, WorkflowCreateInput } from '@/types/entities/workflow';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCreateWorkflow, useDeleteWorkflow, useUpdateWorkflow, useWorkflows } from '@/lib/api/workflows';
 import { toastService } from '@/lib/ui/toast';
+import type { WorkflowCreateInput, WorkflowWithStats } from '@/types/entities/workflow';
 
 export function WorkflowSettings() {
 	const { data, isLoading, error } = useWorkflows();
@@ -109,8 +109,8 @@ export function WorkflowSettings() {
 				</CardHeader>
 				<CardContent className="p-3">
 					<div className="mb-3 flex items-center gap-2">
-						<Input placeholder="Buscar workflows..." value={search} onChange={(e) => setSearch(e.target.value)} />
-						<Button size="sm" onClick={() => setShowCreate(true)}>
+						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Buscar workflows..." value={search} />
+						<Button onClick={() => setShowCreate(true)} size="sm">
 							<PlusCircle className="mr-2 h-4 w-4" /> Nuevo
 						</Button>
 					</div>
@@ -124,11 +124,11 @@ export function WorkflowSettings() {
 					) : (
 						<div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
 							{filtered.map((w: WorkflowWithStats) => (
-								<Card key={w.id} className="p-3">
+								<Card className="p-3" key={w.id}>
 									<div className="flex items-start justify-between">
 										<div>
 											<div className="font-medium text-sm">{w.name}</div>
-											{w.description && <div className="text-muted-foreground mt-1 text-xs">{w.description}</div>}
+											{w.description && <div className="mt-1 text-muted-foreground text-xs">{w.description}</div>}
 											<div className="mt-1 flex items-center gap-2">
 												<div
 													className={`rounded px-1.5 py-0.5 text-xs ${
@@ -144,24 +144,24 @@ export function WorkflowSettings() {
 										</div>
 										<div className="flex items-center gap-1">
 											<Button
-												size="icon"
-												variant="ghost"
 												className="h-8 w-8"
-												title="Editar"
 												onClick={() => {
 													setEditing(w);
 													setNameInput(w.name);
 													setDescriptionInput(w.description || '');
 												}}
+												size="icon"
+												title="Editar"
+												variant="ghost"
 											>
 												<Edit2 className="h-4 w-4" />
 											</Button>
 											<Button
-												size="icon"
-												variant="ghost"
 												className="h-8 w-8 hover:text-destructive"
-												title="Eliminar"
 												onClick={() => handleDelete(w.id)}
+												size="icon"
+												title="Eliminar"
+												variant="ghost"
 											>
 												<Trash className="h-4 w-4" />
 											</Button>
@@ -175,7 +175,6 @@ export function WorkflowSettings() {
 			</Card>
 
 			<Dialog
-				open={showCreate}
 				onOpenChange={(o) => {
 					if (!o) {
 						setShowCreate(false);
@@ -183,26 +182,27 @@ export function WorkflowSettings() {
 						setDescriptionInput('');
 					}
 				}}
+				open={showCreate}
 			>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
 						<DialogTitle>Nuevo workflow</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-3">
-						<Input placeholder="Nombre" value={nameInput} onChange={(e) => setNameInput(e.target.value)} />
+						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
 						<Input
+							onChange={(e) => setDescriptionInput(e.target.value)}
 							placeholder="Descripción (opcional)"
 							value={descriptionInput}
-							onChange={(e) => setDescriptionInput(e.target.value)}
 						/>
 						<div className="flex justify-end gap-2">
 							<Button
-								variant="outline"
 								onClick={() => {
 									setShowCreate(false);
 									setNameInput('');
 									setDescriptionInput('');
 								}}
+								variant="outline"
 							>
 								Cancelar
 							</Button>
@@ -213,7 +213,6 @@ export function WorkflowSettings() {
 			</Dialog>
 
 			<Dialog
-				open={Boolean(editing)}
 				onOpenChange={(o) => {
 					if (!o) {
 						setEditing(null);
@@ -221,26 +220,27 @@ export function WorkflowSettings() {
 						setDescriptionInput('');
 					}
 				}}
+				open={Boolean(editing)}
 			>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
 						<DialogTitle>Editar workflow</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-3">
-						<Input placeholder="Nombre" value={nameInput} onChange={(e) => setNameInput(e.target.value)} />
+						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
 						<Input
+							onChange={(e) => setDescriptionInput(e.target.value)}
 							placeholder="Descripción (opcional)"
 							value={descriptionInput}
-							onChange={(e) => setDescriptionInput(e.target.value)}
 						/>
 						<div className="flex justify-end gap-2">
 							<Button
-								variant="outline"
 								onClick={() => {
 									setEditing(null);
 									setNameInput('');
 									setDescriptionInput('');
 								}}
+								variant="outline"
 							>
 								Cancelar
 							</Button>

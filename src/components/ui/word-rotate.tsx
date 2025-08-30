@@ -1,7 +1,7 @@
 'use client';
 
 import { MotionProps, motion, UseInViewOptions, useInView, Variants } from 'motion/react';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 interface WordRotateProps extends Omit<MotionProps, 'children'> {

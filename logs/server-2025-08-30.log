@@ -1,0 +1,4 @@
+[2025-08-30T01:59:37.517Z] [INFO] ℹ️  🌐 [2025-08-30T01:59:37.517Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-30T01:59:37.523Z] [INFO] ℹ️  ✅ [2025-08-30T01:59:37.523Z] GET /api/stats/folders - 200 - 6ms - IP: 127.0.0.1 - END
+[2025-08-30T02:00:07.538Z] [INFO] ℹ️  🌐 [2025-08-30T02:00:07.538Z] GET /api/stats/folders - IP: 127.0.0.1 - START
+[2025-08-30T02:00:07.540Z] [INFO] ℹ️  ✅ [2025-08-30T02:00:07.540Z] GET /api/stats/folders - 200 - 2ms - IP: 127.0.0.1 - END

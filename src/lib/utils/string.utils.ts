@@ -14,19 +14,21 @@ export function generateTagColor(name: string): string {
 		return '#3b82f6'; // Color por defecto
 	}
 
-	let hash = 0;
+	// Hash sin bitwise: acumulación multiplicativa con módulo de 2^32
+	let hash = 2_166_136_261; // offset basis FNV-like
 	for (let i = 0; i < name.length; i++) {
-		hash = name.charCodeAt(i) + ((hash << 5) - hash);
-		hash |= 0; // Convertir a 32bit integer
+		const code = name.charCodeAt(i);
+		hash = (hash * 16_777_619) % 4_294_967_296; // 2^32
+		hash = (hash + code) % 4_294_967_296;
 	}
 
-	let color = '#';
-	for (let i = 0; i < 3; i++) {
-		const value = (hash >> (i * 8)) & 0xff;
-		color += `00${value.toString(16)}`.substr(-2);
-	}
+	// Derivar 3 bytes del hash usando divisiones/módulos
+	const b1 = Math.floor(hash % 256);
+	const b2 = Math.floor((hash / 256) % 256);
+	const b3 = Math.floor((hash / 65_536) % 256);
 
-	return color;
+	const toHex = (n: number) => n.toString(16).padStart(2, '0');
+	return `#${toHex(b1)}${toHex(b2)}${toHex(b3)}`;
 }
 
 /**

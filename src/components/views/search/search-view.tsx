@@ -10,9 +10,10 @@ import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
+import type { AnyEntityWithStats } from '@/types/entities';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { ImageWithStats } from '@/types/entities/image';
-import type { AnyEntityWithStats, EntityWithStats } from '@/types/migration';
-import { isImageWithStats } from '@/types/migration';
+import { isImageWithStats } from '@/types/entity-guards';
 import type { ViewProps } from '../types';
 
 interface SearchFilters {

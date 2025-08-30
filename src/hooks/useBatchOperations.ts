@@ -138,8 +138,11 @@ export function useBatchOperations(options: UseBatchOperationsOptions = {}): Use
 			refresh();
 		};
 
-		// Listen to all operation events
-		const events = [
+		// Derivar tipo de nombre de evento desde la API del servicio
+		type BatchEventName = Parameters<typeof batchFileOperationsService.on>[0];
+
+		// Listen to all operation events (tipado explícito evita ensanchado a string)
+		const events: readonly BatchEventName[] = [
 			'operationStarted',
 			'operationProgress',
 			'operationCompleted',
@@ -147,7 +150,7 @@ export function useBatchOperations(options: UseBatchOperationsOptions = {}): Use
 			'operationCancelled',
 			'operationPaused',
 			'operationResumed',
-		];
+		] as const;
 
 		for (const event of events) {
 			batchFileOperationsService.on(event, handleOperationUpdate);

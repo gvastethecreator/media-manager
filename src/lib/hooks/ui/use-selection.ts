@@ -9,7 +9,7 @@ import React from 'react';
 import { useCallback, useEffect } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useUnifiedFileManager } from '@/store/unified-file-manager.store';
-import type { EntityWithStats } from '@/types/migration';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 
 const selectionLogger = clientLogger.withContext('SelectionHooks');
 

@@ -1,5 +1,8 @@
 import { createBrowserRouter, useParams } from 'react-router-dom';
+import { RootProvider } from 'fumadocs-ui/provider/base';
 import { MainLayout } from '@/components/layout/main-layout';
+import { DocsLayoutComponent } from '@/components/docs/docs-layout';
+import { DocsPageComponent } from '@/components/docs/docs-page';
 import ReindexLogsViewer from '@/components/system/ReindexLogsViewer';
 // Importar todas las vistas
 import { AllImagesView } from '@/components/views/all-images/all-images-view';
@@ -33,7 +36,18 @@ const FolderContentWrapper = () => {
 	return <FolderContentView folderId={id} />;
 };
 
-// Importar las vistas de contenido específico
+import { Outlet } from 'react-router-dom';
+
+// Wrapper para las rutas de documentación
+const DocsWrapper = () => {
+	return (
+		<RootProvider>
+			<DocsLayoutComponent>
+				<Outlet />
+			</DocsLayoutComponent>
+		</RootProvider>
+	);
+};
 // Importar stores para los wrappers
 
 // Wrapper para CharactersView
@@ -290,6 +304,58 @@ export const router = createBrowserRouter([
 			{
 				path: 'admin/reindex',
 				element: <ReindexLogsViewer />,
+			},
+		],
+	},
+	// Rutas de Documentación - Layout independiente
+	{
+		path: '/docs',
+		element: <DocsWrapper />,
+		children: [
+			{
+				index: true,
+				element: (
+					<DocsPageComponent
+						title="Bienvenido a Image Manager"
+						description="Gestor avanzado de imágenes con capacidades de organización y metadatos"
+					>
+						<div className="prose dark:prose-invert max-w-none">
+							<h1>Bienvenido a Image Manager</h1>
+							<p>
+								Image Manager es un gestor avanzado de imágenes diseñado para fotógrafos, diseñadores y creadores de
+								contenido.
+							</p>
+						</div>
+					</DocsPageComponent>
+				),
+			},
+			{
+				path: 'quick-start',
+				element: (
+					<DocsPageComponent
+						title="Guía de Inicio Rápido"
+						description="Aprende a configurar y usar Image Manager en pocos pasos"
+					>
+						<div className="prose dark:prose-invert max-w-none">
+							<h1>Guía de Inicio Rápido</h1>
+							<p>Esta guía te ayudará a configurar Image Manager y comenzar a organizar tu colección de imágenes.</p>
+						</div>
+					</DocsPageComponent>
+				),
+			},
+			{
+				path: 'features/file-management',
+				element: (
+					<DocsPageComponent
+						title="Gestión de Archivos y Carpetas"
+						description="Aprende a organizar y navegar por tu colección de archivos"
+					>
+						<div className="prose dark:prose-invert max-w-none">
+							<h1>Gestión de Archivos y Carpetas</h1>
+							<p>Image Manager proporciona herramientas poderosas para organizar tu colección.</p>
+						</div>
+					</DocsPageComponent>
+				),
 			},
 		],
 	},

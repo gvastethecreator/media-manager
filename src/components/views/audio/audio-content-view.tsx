@@ -8,8 +8,8 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useAudioStore } from '@/store/entities/audio';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import type { AudioWithStats } from '@/types/entities/audio';
 import type { AnyEntityWithStats } from '@/types/entities';
+import type { AudioWithStats } from '@/types/entities/audio';
 
 // Logger para depuración
 const logger = clientLogger.withContext('AudioContentView');
@@ -38,31 +38,28 @@ export function AudioContentView({ className }: AudioContentViewProps) {
 		[setSelectedItems, setDetailsPanelVisible]
 	);
 
-	const handleAudioDoubleClick = useCallback(
-		(audio: AnyEntityWithStats) => {
-			const audioItem = audio as AudioWithStats;
-			logger.info('🖱️ Doble click en audio:', audioItem.name);
+	const handleAudioDoubleClick = useCallback((audio: AnyEntityWithStats) => {
+		const audioItem = audio as AudioWithStats;
+		logger.info('🖱️ Doble click en audio:', audioItem.name);
 
-			// TODO: Implementar visor compatible with audio files
-			// Obtener todos los audios para el visor
-			// const allAudios = audios;
+		// TODO: Implementar visor compatible with audio files
+		// Obtener todos los audios para el visor
+		// const allAudios = audios;
 
-			// Convertir a formato compatible con el visor
-			// const audioItems = allAudios.map((a: AudioWithStats) => ({
-			//	id: a.id,
-			//	name: a.name,
-			//	type: 'audio' as const,
-			//	path: a.path,
-			//	size: a.size || 0,
-			// }));
+		// Convertir a formato compatible con el visor
+		// const audioItems = allAudios.map((a: AudioWithStats) => ({
+		//	id: a.id,
+		//	name: a.name,
+		//	type: 'audio' as const,
+		//	path: a.path,
+		//	size: a.size || 0,
+		// }));
 
-			// const currentIndex = audioItems.findIndex((item: any) => item.id === audioItem.id);
+		// const currentIndex = audioItems.findIndex((item: any) => item.id === audioItem.id);
 
-			// Abrir el visor con todos los audios
-			// openViewer(audioItems, Math.max(0, currentIndex));
-		},
-		[audios, openViewer]
-	);
+		// Abrir el visor con todos los audios
+		// openViewer(audioItems, Math.max(0, currentIndex));
+	}, []);
 
 	const handleRefresh = useCallback(async () => {
 		if (isRefreshing) return;

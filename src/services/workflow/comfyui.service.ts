@@ -1,9 +1,9 @@
 import type {
-	ComfyWorkflow,
-	WorkflowWithStats,
-	WorkflowStats,
 	ComfyNodeTypeInfo,
+	ComfyWorkflow,
 	WorkflowExecutionContext,
+	WorkflowStats,
+	WorkflowWithStats,
 } from '@/types/workflow';
 import { ComfyNodeCategory } from '@/types/workflow';
 

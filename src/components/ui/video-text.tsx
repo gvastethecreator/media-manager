@@ -197,9 +197,9 @@ export function VideoText({
 				}}
 			/>
 
-			{/* Hidden text for measuring and accessibility */}
+			{/* Hidden text for measuring only (not exposed to a11y tree) */}
 			<div
-				aria-label={content}
+				aria-hidden="true"
 				className="pointer-events-none absolute font-bold opacity-0"
 				ref={textRef}
 				style={{

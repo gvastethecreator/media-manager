@@ -16,13 +16,16 @@ export function FavoritesView({ isVisible }: ViewProps) {
 
 	// Obtener el primer favorito seleccionado como selectedFavoriteId
 	const selectedFavoriteId = selectedIds.length > 0 ? selectedIds[0] : null;
-	const setSelectedFavoriteId = (id: string) => {
-		if (selectedIds.includes(id)) {
-			deselectFavorite(id);
-		} else {
-			selectFavorite(id);
-		}
-	};
+	const setSelectedFavoriteId = useCallback(
+		(id: string) => {
+			if (selectedIds.includes(id)) {
+				deselectFavorite(id);
+			} else {
+				selectFavorite(id);
+			}
+		},
+		[selectedIds, selectFavorite, deselectFavorite]
+	);
 	const { mutate: createFavorite } = useCreateFavorite();
 
 	const [localSearch, setLocalSearch] = useState('');

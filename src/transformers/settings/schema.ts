@@ -23,7 +23,7 @@ export const listColumnConfigSchema = z.object({
 // Esquema para configuración de ListView
 export const listViewConfigSchema = z
 	.object({
-		columns: z.array(listColumnConfigSchema),
+		columns: z.array(listColumnConfigSchema).default([]),
 		rowHeight: z.number().min(40).max(120).default(40),
 		showZebraStripes: z.boolean().default(false),
 		showHeader: z.boolean().default(true),
@@ -197,89 +197,87 @@ export const gridViewConfigSchema = z
 	});
 
 // Esquema para configuración de animaciones globales
+// Sub-esquemas para tipos de animación con defaults consistentes
+const hoverAnimationSchema = z.object({
+	enabled: z.boolean().default(true),
+	duration: z.number().min(0).max(1000).default(150),
+	scale: z.number().min(1).max(1.5).default(1.05),
+});
+
+const selectionAnimationSchema = z.object({
+	enabled: z.boolean().default(true),
+	duration: z.number().min(0).max(1000).default(200),
+	highlightColor: z.string().default('#3b82f6'),
+});
+
+const loadingAnimationSchema = z.object({
+	enabled: z.boolean().default(true),
+	type: z.enum(['spinner', 'skeleton', 'pulse']).default('skeleton'),
+});
+
+const viewTransitionAnimationSchema = z.object({
+	enabled: z.boolean().default(true),
+	duration: z.number().min(0).max(1000).default(300),
+	type: z.enum(['fade', 'slide', 'scale']).default('fade'),
+});
+
 export const animationConfigSchema = z.object({
 	enabled: z.boolean().default(true),
 	duration: z.number().min(0).max(2000).default(200),
 	easing: z.enum(['linear', 'ease', 'ease-in', 'ease-out', 'ease-in-out']).default('ease-out'),
 	types: z
 		.object({
-			hover: z
-				.object({
-					enabled: z.boolean().default(true),
-					duration: z.number().min(0).max(1000).default(150),
-					scale: z.number().min(1).max(1.5).default(1.05),
-				})
-				.default(z.object({ enabled: z.boolean(), duration: z.number(), scale: z.number() }).parse({})),
-			selection: z
-				.object({
-					enabled: z.boolean().default(true),
-					duration: z.number().min(0).max(1000).default(200),
-					highlightColor: z.string().default('#3b82f6'),
-				})
-				.default(z.object({ enabled: z.boolean(), duration: z.number(), highlightColor: z.string() }).parse({})),
-			loading: z
-				.object({
-					enabled: z.boolean().default(true),
-					type: z.enum(['spinner', 'skeleton', 'pulse']).default('skeleton'),
-				})
-				.default(z.object({ enabled: z.boolean(), type: z.enum(['spinner', 'skeleton', 'pulse']) }).parse({})),
-			viewTransition: z
-				.object({
-					enabled: z.boolean().default(true),
-					duration: z.number().min(0).max(1000).default(300),
-					type: z.enum(['fade', 'slide', 'scale']).default('fade'),
-				})
-				.default(
-					z.object({ enabled: z.boolean(), duration: z.number(), type: z.enum(['fade', 'slide', 'scale']) }).parse({})
-				),
+			hover: hoverAnimationSchema.default(hoverAnimationSchema.parse({})),
+			selection: selectionAnimationSchema.default(selectionAnimationSchema.parse({})),
+			loading: loadingAnimationSchema.default(loadingAnimationSchema.parse({})),
+			viewTransition: viewTransitionAnimationSchema.default(viewTransitionAnimationSchema.parse({})),
 		})
 		.default({
-			hover: { enabled: true, duration: 150, scale: 1.05 },
-			selection: { enabled: true, duration: 200, highlightColor: '#3b82f6' },
-			loading: { enabled: true, type: 'skeleton' },
-			viewTransition: { enabled: true, duration: 300, type: 'fade' },
+			hover: hoverAnimationSchema.parse({}),
+			selection: selectionAnimationSchema.parse({}),
+			loading: loadingAnimationSchema.parse({}),
+			viewTransition: viewTransitionAnimationSchema.parse({}),
 		}),
 });
 
 // Esquema para configuración de accesibilidad
+
+const accessibilityFocusSchema = z.object({
+	showIndicators: z.boolean().default(true),
+	indicatorColor: z.string().default('#3b82f6'),
+	indicatorWidth: z.number().min(1).max(5).default(2),
+});
+
 export const accessibilityConfigSchema = z.object({
 	keyboardNavigation: z.boolean().default(true),
 	screenReaderAnnouncements: z.boolean().default(true),
 	highContrast: z.boolean().default(false),
 	reduceMotion: z.boolean().default(false),
 	largeFonts: z.boolean().default(false),
-	focus: z
-		.object({
-			showIndicators: z.boolean().default(true),
-			indicatorColor: z.string().default('#3b82f6'),
-			indicatorWidth: z.number().min(1).max(5).default(2),
-		})
-		.default(
-			z.object({ showIndicators: z.boolean(), indicatorColor: z.string(), indicatorWidth: z.number() }).parse({})
-		),
+	focus: accessibilityFocusSchema.default(accessibilityFocusSchema.parse({})),
 });
 
 // Esquema para configuración de rendimiento
+const performanceCacheSchema = z.object({
+	thumbnails: z.boolean().default(true),
+	maxSize: z.number().min(10).max(1000).default(100),
+	ttl: z.number().min(60_000).max(86_400_000).default(3_600_000),
+});
+
+const performanceDebounceSchema = z.object({
+	search: z.number().min(0).max(2000).default(300),
+	scroll: z.number().min(0).max(100).default(16),
+	resize: z.number().min(0).max(500).default(100),
+});
+
 export const performanceConfigSchema = z.object({
 	maxRenderItems: z.number().min(10).max(10_000).default(1000),
 	virtualization: z.boolean().default(true),
 	virtualizationBuffer: z.number().min(1).max(20).default(5),
 	lazyThumbnails: z.boolean().default(true),
 	thumbnailQuality: z.enum(['low', 'medium', 'high']).default('medium'),
-	cache: z
-		.object({
-			thumbnails: z.boolean().default(true),
-			maxSize: z.number().min(10).max(1000).default(100),
-			ttl: z.number().min(60_000).max(86_400_000).default(3_600_000),
-		})
-		.default(z.object({ thumbnails: z.boolean(), maxSize: z.number(), ttl: z.number() }).parse({})),
-	debounce: z
-		.object({
-			search: z.number().min(0).max(2000).default(300),
-			scroll: z.number().min(0).max(100).default(16),
-			resize: z.number().min(0).max(500).default(100),
-		})
-		.default(z.object({ search: z.number(), scroll: z.number(), resize: z.number() }).parse({})),
+	cache: performanceCacheSchema.default(performanceCacheSchema.parse({})),
+	debounce: performanceDebounceSchema.default(performanceDebounceSchema.parse({})),
 });
 
 // Esquema para configuración por tipo de entidad

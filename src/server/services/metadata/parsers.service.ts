@@ -264,8 +264,8 @@ const comfyuiParser: AIGenerationParserModule = {
 		let prompt: string | undefined;
 		let negative_prompt: string | undefined;
 
-		for (const nodeId in promptData) {
-			const node = promptData[nodeId];
+		for (const nodeId of Object.keys(promptData)) {
+			const node = (promptData as Record<string, any>)[nodeId];
 			if (node.class_type === 'CLIPTextEncode' && node.inputs.text) {
 				if (prompt) {
 					negative_prompt = node.inputs.text; // Asume el segundo es el negativo else

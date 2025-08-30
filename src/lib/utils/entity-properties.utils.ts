@@ -4,7 +4,7 @@
  * @description Helper functions para obtener propiedades comunes de diferentes tipos de entidades
  */
 
-import type { AnyEntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
 
 /**
  * Obtiene el tamaño de una entidad en bytes

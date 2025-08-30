@@ -1,8 +1,5 @@
-import { ArrowLeft, Database, Edit, Trash2 } from 'lucide-react';
+import { Database } from 'lucide-react';
 import { memo, useEffect, useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
 import { clientLogger } from '@/lib/logger/client-logger';
 

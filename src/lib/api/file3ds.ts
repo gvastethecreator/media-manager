@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { File3DWithStats, File3DCreateInput, File3DUpdateInput } from '@/types/entities/file3d';
+import type { File3DCreateInput, File3DUpdateInput, File3DWithStats } from '@/types/entities/file3d';
 import { apiClient } from './client';
 
 export const file3dKeys = {

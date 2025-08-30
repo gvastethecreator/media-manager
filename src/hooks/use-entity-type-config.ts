@@ -20,7 +20,7 @@ import {
 } from '@/config/entity-type-configs';
 import { getCachedThumbnail } from '@/config/thumbnail-generators';
 import type { AnyEntityWithStats } from '@/types/entities';
-import { EntityStatsType } from '@/types/migration';
+import { EntityStatsType } from '@/types/file-browser/entity-stats';
 
 /**
  * 🎯 Resultado del hook useEntityTypeConfig

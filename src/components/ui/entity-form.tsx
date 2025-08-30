@@ -406,12 +406,12 @@ export function EntityForm({
 									<Input
 										placeholder={field.placeholder}
 										{...formField}
+										className={cn(form.formState.errors[field.name] && 'border-destructive')}
 										value={
 											typeof formField.value === 'string' || typeof formField.value === 'number'
 												? String(formField.value)
 												: ''
 										}
-										className={cn(form.formState.errors[field.name] && 'border-destructive')}
 										{...field.props}
 									/>
 								</FormControl>

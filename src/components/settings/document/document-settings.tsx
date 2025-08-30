@@ -1,13 +1,13 @@
+import { Edit2, FileText, Loader2, PlusCircle, Trash } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Loader2, FileText, PlusCircle, Trash, Edit2 } from 'lucide-react';
-import { useDocuments, useCreateDocument, useDeleteDocument, useUpdateDocument } from '@/lib/api/documents';
-import type { DocumentWithStats, DocumentCreateInput } from '@/types/entities/document';
+import { Input } from '@/components/ui/input';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { useCreateDocument, useDeleteDocument, useDocuments, useUpdateDocument } from '@/lib/api/documents';
 import { toastService } from '@/lib/ui/toast';
+import type { DocumentCreateInput, DocumentWithStats } from '@/types/entities/document';
 
 export function DocumentSettings() {
 	const { data, isLoading, error } = useDocuments();
@@ -106,8 +106,8 @@ export function DocumentSettings() {
 				</CardHeader>
 				<CardContent className="p-3">
 					<div className="mb-3 flex items-center gap-2">
-						<Input placeholder="Buscar documentos..." value={search} onChange={(e) => setSearch(e.target.value)} />
-						<Button size="sm" onClick={() => setShowCreate(true)}>
+						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Buscar documentos..." value={search} />
+						<Button onClick={() => setShowCreate(true)} size="sm">
 							<PlusCircle className="mr-2 h-4 w-4" /> Nuevo
 						</Button>
 					</div>
@@ -121,7 +121,7 @@ export function DocumentSettings() {
 					) : (
 						<div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
 							{filtered.map((d: DocumentWithStats) => (
-								<Card key={d.id} className="p-3">
+								<Card className="p-3" key={d.id}>
 									<div className="flex items-start justify-between">
 										<div>
 											<div className="font-medium text-sm">{d.name}</div>
@@ -133,23 +133,23 @@ export function DocumentSettings() {
 										</div>
 										<div className="flex items-center gap-1">
 											<Button
-												size="icon"
-												variant="ghost"
 												className="h-8 w-8"
-												title="Editar"
 												onClick={() => {
 													setEditing(d);
 													setNameInput(d.name);
 												}}
+												size="icon"
+												title="Editar"
+												variant="ghost"
 											>
 												<Edit2 className="h-4 w-4" />
 											</Button>
 											<Button
-												size="icon"
-												variant="ghost"
 												className="h-8 w-8 hover:text-destructive"
-												title="Eliminar"
 												onClick={() => handleDelete(d.id)}
+												size="icon"
+												title="Eliminar"
+												variant="ghost"
 											>
 												<Trash className="h-4 w-4" />
 											</Button>
@@ -163,27 +163,27 @@ export function DocumentSettings() {
 			</Card>
 
 			<Dialog
-				open={showCreate}
 				onOpenChange={(o) => {
 					if (!o) {
 						setShowCreate(false);
 						setNameInput('');
 					}
 				}}
+				open={showCreate}
 			>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
 						<DialogTitle>Nuevo documento</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-3">
-						<Input placeholder="Nombre" value={nameInput} onChange={(e) => setNameInput(e.target.value)} />
+						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
 						<div className="flex justify-end gap-2">
 							<Button
-								variant="outline"
 								onClick={() => {
 									setShowCreate(false);
 									setNameInput('');
 								}}
+								variant="outline"
 							>
 								Cancelar
 							</Button>
@@ -194,27 +194,27 @@ export function DocumentSettings() {
 			</Dialog>
 
 			<Dialog
-				open={Boolean(editing)}
 				onOpenChange={(o) => {
 					if (!o) {
 						setEditing(null);
 						setNameInput('');
 					}
 				}}
+				open={Boolean(editing)}
 			>
 				<DialogContent className="max-w-md">
 					<DialogHeader>
 						<DialogTitle>Editar documento</DialogTitle>
 					</DialogHeader>
 					<div className="space-y-3">
-						<Input placeholder="Nombre" value={nameInput} onChange={(e) => setNameInput(e.target.value)} />
+						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
 						<div className="flex justify-end gap-2">
 							<Button
-								variant="outline"
 								onClick={() => {
 									setEditing(null);
 									setNameInput('');
 								}}
+								variant="outline"
 							>
 								Cancelar
 							</Button>
