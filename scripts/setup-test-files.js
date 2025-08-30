@@ -1,11 +1,11 @@
 #!/usr/bin/env node
+
 // Script para configurar archivos de prueba y ejecutar reindexación
 
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 import { db } from '../src/lib/drizzle/index.js';
 import { folders } from '../src/lib/drizzle/schema/index.js';
-import path from 'path';
-import { fileURLToPath } from 'url';
-import { dirname } from 'path';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);

@@ -32,8 +32,8 @@ import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn, createDefaultEntityStats } from '@/lib/utils';
 import { toastService } from '@/services/toast';
+import type { EntityWithStats } from '@/types/entities/entity.types';
 import { UploadedFileType } from '@/types/entities/uploaded-image/types';
-import type { EntityWithStats } from '@/types/migration';
 
 const viewLogger = clientLogger.withContext('UploadedImagesView');
 

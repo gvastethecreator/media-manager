@@ -10,8 +10,8 @@ import { useImageStore } from '@/store/entities/image';
 import { useVideoStore } from '@/store/entities/video';
 import { useImageViewer } from '@/store/image-viewer.store';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import type { AnyEntityWithStats } from '@/types/migration';
-import { isImageWithStats, isVideoWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
+import { isImageWithStats, isVideoWithStats } from '@/types/entity-guards';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('FilesView');

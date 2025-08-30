@@ -134,6 +134,13 @@ export class KeyboardShortcutManager {
 	}
 
 	/**
+	 * Estado actual (solo lectura)
+	 */
+	getEnabled(): boolean {
+		return this.isEnabled;
+	}
+
+	/**
 	 * Obtiene shortcuts para un contexto específico
 	 */
 	getShortcutsForContext(context: string): KeyboardShortcutConfig[] {
@@ -310,14 +317,14 @@ export class KeyboardShortcutManager {
 			},
 		];
 
-		// Registrar shortcuts con acciones por defecto
-		[...defaultShortcuts, ...contextMenuShortcuts].forEach((shortcut) => {
+		// Registrar shortcuts con acciones por defecto (evitar forEach)
+		for (const shortcut of [...defaultShortcuts, ...contextMenuShortcuts]) {
 			const action = this.generateActionFromShortcut(shortcut);
 			this.shortcuts.set(this.generateShortcutKey({ ...shortcut, action }), {
 				...shortcut,
 				action,
 			});
-		});
+		}
 	}
 
 	/**

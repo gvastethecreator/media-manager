@@ -1,7 +1,7 @@
-import { useEffect, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
-import { clientLogger } from '@/lib/logger/client-logger';
+import { useEffect, useRef } from 'react';
 import { navigationKeys } from '@/lib/api/navigation';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 const logger = clientLogger.withContext('NavigationRefresh');
 

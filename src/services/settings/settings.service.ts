@@ -8,8 +8,13 @@ import { db } from '@/lib/drizzle';
 import { profiles, settings } from '@/lib/drizzle/schema/index';
 import { createSettingsError } from '@/lib/errors/settings';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { deserializeSettings, mergeSettings, serializeSettings } from '@/transformers/settings';
-import { settingsSchema } from '@/transformers/settings/schema';
+import {
+	merge as mergeSettingsNew,
+	normalize as normalizeSettingsNew,
+	fromDatabase as settingsFromDatabase,
+	toDatabase as settingsToDatabase,
+} from '@/transformers/settings';
+import { fileBrowserConfigSchema, settingsSchema } from '@/transformers/settings/schema';
 import type { Settings } from '@/types/settings';
 
 // Logger específico para el servicio de configuración
@@ -61,6 +66,8 @@ function toJsonString(data: Record<string, unknown>): string {
  * Crea el objeto de datos predeterminados para la configuración
  */
 async function createDefaultSettingsData(): Promise<Record<string, unknown>> {
+	// Incluir bloque fileBrowser normalizado para evitar ZodError por campos faltantes
+	const fileBrowser = fileBrowserConfigSchema.parse({});
 	return {
 		appearance: {
 			theme: 'system',
@@ -85,6 +92,7 @@ async function createDefaultSettingsData(): Promise<Record<string, unknown>> {
 			devMode: false,
 			experimentalFeatures: false,
 		},
+		fileBrowser,
 	};
 }
 
@@ -115,27 +123,30 @@ async function createDefaultSettings(): Promise<Settings> {
 		const existingSettings = await db.select().from(settings).where(eq(settings.id, 'default')).limit(1);
 
 		if (existingSettings.length > 0) {
-			// Actualizar configuración existente
+			// Actualizar configuración existente con datos normalizados
+			const normalized = normalizeSettingsNew(defaultData as any);
+			const dbData = settingsToDatabase(normalized, profileId);
 			await db
 				.update(settings)
 				.set({
-					data: toJsonString(defaultData),
-					profileId,
+					data: dbData.data,
+					profileId: dbData.profileId,
+					theme: dbData.theme,
+					language: dbData.language,
 				})
 				.where(eq(settings.id, 'default'));
 		} else {
-			// Crear nueva configuración
+			// Crear nueva configuración con datos normalizados
+			const normalized = normalizeSettingsNew(defaultData as any);
+			const dbData = settingsToDatabase(normalized, profileId);
 			await db.insert(settings).values({
 				id: 'default',
-				data: toJsonString(defaultData),
-				profileId,
-				theme: 'system',
-				language: 'es',
+				...dbData,
 			});
 		}
 
-		// Deserializar y devolver
-		return deserializeSettings(defaultData);
+		// Devolver configuración normalizada
+		return normalizeSettingsNew(defaultData as any);
 	} catch (error) {
 		logger.error('❌ Error al crear configuración predeterminada:', error);
 
@@ -169,9 +180,8 @@ export const settingsService: SettingsService = {
 				return createDefaultSettings();
 			}
 
-			// Deserializar configuración al formato de la aplicación
-			const settingsData = JSON.parse(settingsResult[0].data) as Record<string, unknown>;
-			return deserializeSettings(settingsData);
+			// Transformar desde la fila de DB al formato de la aplicación
+			return settingsFromDatabase(settingsResult[0]);
 		} catch (error) {
 			logger.error('❌ Error al obtener la configuración global:', error);
 			throw createSettingsError('No se pudo obtener la configuración del sistema', 'GET_FAILED', error);
@@ -188,8 +198,8 @@ export const settingsService: SettingsService = {
 			// Obtener configuración actual
 			const currentSettings = await this.getSystemSettings();
 
-			// Fusionar con los nuevos datos
-			const updatedSettings = mergeSettings(currentSettings, data);
+			// Fusionar con los nuevos datos usando transformer moderno
+			const updatedSettings = mergeSettingsNew(currentSettings, data);
 
 			// Validar la configuración actualizada
 			const validationResult = settingsSchema.safeParse(updatedSettings);
@@ -198,9 +208,6 @@ export const settingsService: SettingsService = {
 				logger.error('❌ Datos de configuración inválidos:', validationResult.error);
 				throw createSettingsError('Datos de configuración inválidos', 'VALIDATION_FAILED', validationResult.error);
 			}
-
-			// Serializar para almacenamiento
-			const serializedData = serializeSettings(validationResult.data);
 
 			// Obtener el perfil activo o usar un valor por defecto
 			let profileId = 'default-profile';
@@ -217,23 +224,23 @@ export const settingsService: SettingsService = {
 			// Verificar si ya existe la configuración
 			const existingSettings = await db.select().from(settings).where(eq(settings.id, 'default')).limit(1);
 
+			const dbData = settingsToDatabase(validationResult.data, profileId);
 			if (existingSettings.length > 0) {
 				// Actualizar configuración existente
 				await db
 					.update(settings)
 					.set({
-						data: toJsonString(serializedData),
-						profileId,
+						data: dbData.data,
+						profileId: dbData.profileId,
+						theme: dbData.theme,
+						language: dbData.language,
 					})
 					.where(eq(settings.id, 'default'));
 			} else {
 				// Crear nueva configuración
 				await db.insert(settings).values({
 					id: 'default',
-					data: toJsonString(serializedData),
-					profileId,
-					theme: 'system',
-					language: 'es',
+					...dbData,
 				});
 			}
 
@@ -270,29 +277,31 @@ export const settingsService: SettingsService = {
 			// Verificar si ya existe la configuración
 			const existingSettings = await db.select().from(settings).where(eq(settings.id, 'default')).limit(1);
 
+			const normalized = normalizeSettingsNew(defaultData as any);
+			const dbData = settingsToDatabase(normalized, profileId);
+
 			if (existingSettings.length > 0) {
 				// Actualizar configuración existente
 				await db
 					.update(settings)
 					.set({
-						data: toJsonString(defaultData),
-						profileId,
+						data: dbData.data,
+						profileId: dbData.profileId,
+						theme: dbData.theme,
+						language: dbData.language,
 					})
 					.where(eq(settings.id, 'default'));
 			} else {
 				// Crear nueva configuración
 				await db.insert(settings).values({
 					id: 'default',
-					data: toJsonString(defaultData),
-					profileId,
-					theme: 'system',
-					language: 'es',
+					...dbData,
 				});
 			}
 
 			logger.info('✅ Configuración global reseteada exitosamente');
 
-			return deserializeSettings(defaultData);
+			return normalized;
 		} catch (error) {
 			logger.error('❌ Error al resetear la configuración global:', error);
 			throw createSettingsError('No se pudo resetear la configuración del sistema', 'RESET_FAILED', error);
@@ -322,8 +331,7 @@ export const settingsService: SettingsService = {
 				return await this.getSystemSettings();
 			}
 
-			const settingsData = JSON.parse(profileSettings[0].data) as Record<string, unknown>;
-			return deserializeSettings(settingsData);
+			return settingsFromDatabase(profileSettings[0]);
 		} catch (error) {
 			logger.error(`❌ Error al obtener configuración del perfil ${profileId}:`, error);
 			throw createSettingsError('No se pudo obtener la configuración del perfil', 'GET_PROFILE_FAILED', error);
@@ -348,7 +356,7 @@ export const settingsService: SettingsService = {
 			const currentSettings = (await this.getProfileSettings(profileId)) || (await this.getSystemSettings());
 
 			// Fusionar con los nuevos datos
-			const updatedSettings = mergeSettings(currentSettings, data);
+			const updatedSettings = mergeSettingsNew(currentSettings, data);
 
 			// Validar la configuración actualizada
 			const validationResult = settingsSchema.safeParse(updatedSettings);
@@ -358,8 +366,7 @@ export const settingsService: SettingsService = {
 				throw createSettingsError('Datos de configuración inválidos', 'VALIDATION_FAILED', validationResult.error);
 			}
 
-			// Serializar para almacenamiento
-			const serializedData = serializeSettings(validationResult.data);
+			const dbData = settingsToDatabase(validationResult.data, profileId);
 
 			// Verificar si ya existe configuración para este perfil
 			const existingProfileSettings = await db
@@ -373,17 +380,16 @@ export const settingsService: SettingsService = {
 				await db
 					.update(settings)
 					.set({
-						data: toJsonString(serializedData),
+						data: dbData.data,
+						theme: dbData.theme,
+						language: dbData.language,
 					})
 					.where(eq(settings.profileId, profileId));
 			} else {
 				// Crear nueva configuración específica del perfil
 				await db.insert(settings).values({
 					id: `profile-${profileId}`,
-					data: toJsonString(serializedData),
-					profileId,
-					theme: 'system',
-					language: 'es',
+					...dbData,
 				});
 			}
 

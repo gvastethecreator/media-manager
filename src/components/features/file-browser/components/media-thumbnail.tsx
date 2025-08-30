@@ -1,15 +1,15 @@
 import React from 'react';
 import {
+	generate3DModelThumbnail,
 	generateAdvancedImageThumbnail,
 	generateAdvancedVideoThumbnail,
-	generateJsonPreview,
-	generate3DModelThumbnail,
 	generateAudioWaveform,
+	generateJsonPreview,
 } from '@/config/thumbnail-generators';
+import { useInViewport, useVideoViewport } from '@/hooks/use-in-viewport';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSettings } from '@/lib/contexts';
 import { cn } from '@/lib/utils';
-import { useVideoViewport } from '@/hooks/use-in-viewport';
 
 // Tipo unificado utilizado por las vistas del FileBrowser
 export type MediaItem = {
@@ -32,6 +32,23 @@ interface MediaThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> 
 	animateVideoOnHover?: boolean; // Respeta settings.videoThumbnailAnimation
 	videoFramesCount?: number; // por defecto 8
 	videoCycleDurationMs?: number; // por defecto 800ms
+	/**
+	 * Margen de precarga para el IntersectionObserver (rootMargin),
+	 * permite iniciar generación/carga de thumbnails antes de entrar a viewport.
+	 * Ej.: "800px".
+	 */
+	preloadMargin?: string;
+	/**
+	 * Bloquea el tamaño inicial usando aspect-ratio para evitar rebotes de layout
+	 * al cargar la imagen. Si no hay dimensiones del item, se puede proveer
+	 * un `predictedAspectRatio`.
+	 */
+	lockAspectRatio?: boolean;
+	/**
+	 * Relación de aspecto prevista (ancho/alto) cuando el item no tiene width/height.
+	 * Ej.: 1.333 para 4:3, 1.777 para 16:9.
+	 */
+	predictedAspectRatio?: number;
 }
 
 // Cache simple en memoria de frames de video por id con límite de tamaño
@@ -48,7 +65,26 @@ function cleanupCache() {
 	}
 }
 
-export function MediaThumbnail({
+// Cache de thumbnails estáticos (imagenes, video poster, json, 3d, audio)
+const thumbnailCache = new Map<string, string>();
+const MAX_THUMB_CACHE = 1000;
+
+function cleanupThumbCache() {
+	if (thumbnailCache.size > MAX_THUMB_CACHE) {
+		const keysToDelete = Array.from(thumbnailCache.keys()).slice(0, 50);
+		for (const k of keysToDelete) thumbnailCache.delete(k);
+	}
+}
+
+function cacheKeyFor(
+	item: MediaItem,
+	kind: 'image' | 'videoPoster' | 'json' | 'audio' | 'file3d' | 'other',
+	quality: ThumbnailQuality
+) {
+	return `${kind}:${item.id}:q${quality}`;
+}
+
+function MediaThumbnailInner({
 	item,
 	quality = ThumbnailQuality.MEDIUM,
 	animateVideoOnHover = true,
@@ -56,6 +92,9 @@ export function MediaThumbnail({
 	videoCycleDurationMs = 800,
 	className,
 	style,
+	preloadMargin,
+	lockAspectRatio,
+	predictedAspectRatio,
 	...imgProps
 }: MediaThumbnailProps) {
 	const { settings } = useSettings();
@@ -160,8 +199,10 @@ export function MediaThumbnail({
 		rafRef.current = requestAnimationFrame(tick);
 	}, [hovered, videoCycleDurationMs]);
 
-	// Hook para detectar entrada al viewport (solo para videos)
+	// Hook para detectar entrada al viewport (solo para videos) y base para gating de generación
 	const viewportHook = useVideoViewport(isVideo && allowVideoAnimation ? playInitialAnimation : undefined);
+	// Gating general para evitar generar thumbnails cuando el ítem aún no está en viewport
+	const baseViewport = useInViewport({ rootMargin: preloadMargin ?? '200px', threshold: 0.01, once: true });
 
 	// Refs para animación de video
 	const rafRef = React.useRef<number | null>(null);
@@ -176,26 +217,71 @@ export function MediaThumbnail({
 		return n.endsWith('.gif') || mt.includes('gif');
 	}, [item.name, item.mimeType]);
 
-	// Resolver thumbnail base (imagen estática o frame inicial de video)
+	// Resolver thumbnail base (imagen estática o frame inicial de video) sólo cuando entra a viewport
 	React.useEffect(() => {
+		// Evitar trabajo pesado si no ha entrado al viewport aún
+		if (!(baseViewport.inViewport || baseViewport.hasBeenInViewport)) {
+			return;
+		}
 		let alive = true;
 		setError(null);
 		(async () => {
 			try {
+				let url = '';
 				if (item.entityType === 'image') {
-					const url = await generateAdvancedImageThumbnail(item as any);
+					const key = cacheKeyFor(item, 'image', quality);
+					url = thumbnailCache.get(key) || '';
+					if (!url) {
+						url = await generateAdvancedImageThumbnail(item as any);
+						if (url) {
+							cleanupThumbCache();
+							thumbnailCache.set(key, url);
+						}
+					}
 					if (alive) setSrc(url || item.thumbnailUrl || '');
 				} else if (item.entityType === 'video') {
-					const url = await generateAdvancedVideoThumbnail(item as any, { timeOffset: 0 });
+					const key = cacheKeyFor(item, 'videoPoster', quality);
+					url = thumbnailCache.get(key) || '';
+					if (!url) {
+						url = await generateAdvancedVideoThumbnail(item as any, { timeOffset: 0 });
+						if (url) {
+							cleanupThumbCache();
+							thumbnailCache.set(key, url);
+						}
+					}
 					if (alive) setSrc(url || item.thumbnailUrl || '');
 				} else if (item.entityType === 'jsonFile') {
-					const url = await generateJsonPreview(item as any);
+					const key = cacheKeyFor(item, 'json', quality);
+					url = thumbnailCache.get(key) || '';
+					if (!url) {
+						url = await generateJsonPreview(item as any);
+						if (url) {
+							cleanupThumbCache();
+							thumbnailCache.set(key, url);
+						}
+					}
 					if (alive) setSrc(url || getFallbackIcon(item.entityType));
 				} else if (item.entityType === 'file3d') {
-					const url = await generate3DModelThumbnail(item as any);
+					const key = cacheKeyFor(item, 'file3d', quality);
+					url = thumbnailCache.get(key) || '';
+					if (!url) {
+						url = await generate3DModelThumbnail(item as any);
+						if (url) {
+							cleanupThumbCache();
+							thumbnailCache.set(key, url);
+						}
+					}
 					if (alive) setSrc(url || getFallbackIcon(item.entityType));
 				} else if (item.entityType === 'audio') {
-					const url = await generateAudioWaveform(item as any);
+					const key = cacheKeyFor(item, 'audio', quality);
+					url = thumbnailCache.get(key) || '';
+					if (!url) {
+						url = await generateAudioWaveform(item as any);
+						if (url) {
+							cleanupThumbCache();
+							thumbnailCache.set(key, url);
+						}
+					}
 					if (alive) setSrc(url || getFallbackIcon(item.entityType));
 				} else {
 					// Tipos no soportados por generadores: usar icono genérico según tipo
@@ -209,7 +295,7 @@ export function MediaThumbnail({
 		return () => {
 			alive = false;
 		};
-	}, [item]);
+	}, [item, quality, baseViewport.inViewport, baseViewport.hasBeenInViewport]);
 
 	// Animación de preview para video al hover (refactorizada)
 	React.useEffect(() => {
@@ -279,8 +365,36 @@ export function MediaThumbnail({
 	]);
 
 	const baseClass = cn('block h-full w-full', className);
-	const baseStyle: React.CSSProperties = React.useMemo(() => ({ objectFit: 'cover', ...style }), [style]);
+	// Calcular aspect-ratio efectivo cuando se solicita bloqueo
+	const aspectStyle = React.useMemo(() => {
+		if (!lockAspectRatio) return {} as React.CSSProperties;
+		const w = item.width;
+		const h = item.height;
+		if (w && h && w > 0 && h > 0) {
+			return { aspectRatio: `${w} / ${h}` } as React.CSSProperties;
+		}
+		if (predictedAspectRatio && predictedAspectRatio > 0) {
+			// CSS aspect-ratio como w/h; si tenemos ratio = w/h, usar `${ratio} / 1`
+			return { aspectRatio: `${predictedAspectRatio} / 1` } as React.CSSProperties;
+		}
+		return {} as React.CSSProperties;
+	}, [lockAspectRatio, item.width, item.height, predictedAspectRatio]);
+
+	const baseStyle: React.CSSProperties = React.useMemo(() => {
+		const sizing: React.CSSProperties = lockAspectRatio ? { width: '100%', height: 'auto' } : {};
+		return { objectFit: 'cover', ...aspectStyle, ...sizing, ...style };
+	}, [style, aspectStyle, lockAspectRatio]);
 	const validSrc = src || item.thumbnailUrl;
+
+	// Cleanup global al desmontar para evitar fugas de RAF/Abort
+	React.useEffect(() => {
+		return () => {
+			if (rafRef.current) cancelAnimationFrame(rafRef.current);
+			rafRef.current = null;
+			if (abortRef.current) abortRef.current.abort();
+			abortRef.current = null;
+		};
+	}, []);
 
 	if (error) {
 		return (
@@ -308,7 +422,11 @@ export function MediaThumbnail({
 	// No renderizar si no hay src válido
 	if (!validSrc) {
 		return (
-			<div className={cn(baseClass, 'flex items-center justify-center bg-muted text-muted-foreground')}>
+			<div
+				className={cn(baseClass, 'flex items-center justify-center bg-muted text-muted-foreground')}
+				ref={baseViewport.ref}
+				style={baseStyle}
+			>
 				<div className="text-xs">Sin thumbnail</div>
 			</div>
 		);
@@ -319,8 +437,18 @@ export function MediaThumbnail({
 		const badgeInfo = getBadgeInfo(item.entityType);
 		const badgeClasses = getBadgeClasses(imgProps.width as number, imgProps.height as number);
 
+		// Combinar refs para observar el mismo elemento con ambos observadores
+		const setCombinedRef = React.useCallback(
+			(el: HTMLDivElement | null) => {
+				(viewportHook.ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
+				(baseViewport.ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
+			},
+			[viewportHook.ref, baseViewport.ref]
+		);
+
+		// Aplicar aspectStyle al contenedor para reservar el espacio
 		return (
-			<div ref={viewportHook.ref} className={cn(baseClass, 'relative')} style={style}>
+			<div className={cn(baseClass, 'relative')} ref={setCombinedRef} style={{ ...aspectStyle, ...style }}>
 				<img
 					alt={item.name}
 					className="h-full w-full"
@@ -348,8 +476,9 @@ export function MediaThumbnail({
 	const badgeInfo = getBadgeInfo(item.entityType);
 	const badgeClasses = getBadgeClasses(imgProps.width as number, imgProps.height as number);
 
+	// Otros tipos
 	return (
-		<div className={cn(baseClass, 'relative')} style={style}>
+		<div className={cn(baseClass, 'relative')} ref={baseViewport.ref} style={{ ...aspectStyle, ...style }}>
 			<img
 				alt={item.name}
 				className="h-full w-full"
@@ -372,6 +501,25 @@ export function MediaThumbnail({
 		</div>
 	);
 }
+
+export const MediaThumbnail = React.memo(MediaThumbnailInner, (prev, next) => {
+	const a = prev.item;
+	const b = next.item;
+	return (
+		a.id === b.id &&
+		a.entityType === b.entityType &&
+		(a.thumbnailUrl || '') === (b.thumbnailUrl || '') &&
+		(a.mimeType || '') === (b.mimeType || '') &&
+		(a.name || '') === (b.name || '') &&
+		prev.quality === next.quality &&
+		prev.className === next.className &&
+		JSON.stringify(prev.style) === JSON.stringify(next.style) &&
+		prev.animateVideoOnHover === next.animateVideoOnHover &&
+		prev.videoFramesCount === next.videoFramesCount &&
+		prev.videoCycleDurationMs === next.videoCycleDurationMs &&
+		prev.preloadMargin === next.preloadMargin
+	);
+});
 
 function getFallbackIcon(entityType: MediaItem['entityType']): string {
 	switch (entityType) {
@@ -416,17 +564,17 @@ function getBadgeClasses(width?: number, height?: number) {
 				'absolute right-0 bottom-0 rounded px-0.5 py-0 font-bold text-white text-[7px] backdrop-blur-sm leading-none min-w-0',
 			text: 'truncate',
 		};
-	} else if (minDimension <= 100) {
+	}
+	if (minDimension <= 100) {
 		// Medium thumbnails (list view ~90px)
 		return {
 			container: 'absolute right-1 bottom-1 rounded px-1 py-0.5 font-medium text-white text-[9px] backdrop-blur-sm',
 			text: '',
 		};
-	} else {
-		// Large thumbnails (grid, cards, etc.)
-		return {
-			container: 'absolute right-1 bottom-1 rounded px-1.5 py-0.5 font-medium text-white text-xs backdrop-blur-sm',
-			text: '',
-		};
 	}
+	// Large thumbnails (grid, cards, etc.)
+	return {
+		container: 'absolute right-1 bottom-1 rounded px-1.5 py-0.5 font-medium text-white text-xs backdrop-blur-sm',
+		text: '',
+	};
 }

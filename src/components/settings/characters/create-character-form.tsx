@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateCharacter, useUpdateCharacter } from '@/lib/api/characters';
 import { toastService } from '@/lib/ui/toast';
+import { generateTagColor } from '@/lib/utils/string.utils';
 import {
 	CHARACTER_CLASS_COLORS,
 	CHARACTER_CLASS_EMOJIS,
@@ -120,21 +121,8 @@ export function CreateCharacterForm({
 			form.setValue('color', color);
 			form.setValue('emoji', emoji);
 		} else if (name.length > 1) {
-			// Generar color basado en el nombre
-			const stringToColor = (str: string) => {
-				let hash = 0;
-				for (let i = 0; i < str.length; i++) {
-					hash = str.charCodeAt(i) + ((hash << 5) - hash);
-				}
-				let color = '#';
-				for (let i = 0; i < 3; i++) {
-					const value = (hash >> (i * 8)) & 0xff;
-					color += `00${value.toString(16)}`.substr(-2);
-				}
-				return color;
-			};
-
-			form.setValue('color', stringToColor(name));
+			// Generar color basado en el nombre utilizando util central (sin bitwise)
+			form.setValue('color', generateTagColor(name));
 
 			// Intentar asignar un emoji relevante basado en palabras clave
 			const keywords: Record<string, string> = {

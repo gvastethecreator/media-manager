@@ -21,8 +21,8 @@ import {
 	Plus,
 	Settings,
 	SortAsc,
-	Tags,
 	Table as TableIcon,
+	Tags,
 	Trash2,
 	X,
 } from 'lucide-react';
@@ -286,8 +286,8 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					<Button
 						className="h-7 px-2 hover:bg-accent"
 						data-testid="sort-dropdown-trigger"
-						variant="ghost"
 						title="Ordenar archivos"
+						variant="ghost"
 					>
 						<SortAsc className="mr-1 h-3.5 w-3.5" />
 						<span className="text-xs">{getSortLabel()}</span>
@@ -297,11 +297,11 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					<DropdownMenuLabel>Ordenar por</DropdownMenuLabel>
 					<DropdownMenuSeparator />
 					<DropdownMenuRadioGroup
-						value={currentSort ? `${currentSort.field}-${currentSort.direction}` : ''}
 						onValueChange={(value) => {
 							const [field, direction] = value.split('-');
 							handleSort(field);
 						}}
+						value={currentSort ? `${currentSort.field}-${currentSort.direction}` : ''}
 					>
 						<DropdownMenuRadioItem value={`name-${nameOpt?.direction || 'asc'}`}>
 							<div className="flex items-center gap-2">
@@ -370,6 +370,8 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					return <LayoutGrid className="h-4 w-4" />;
 				case 'masonry':
 					return <GalleryHorizontal className="h-4 w-4" />;
+				case 'canvas':
+					return <Grid className="h-4 w-4" />;
 				case 'list':
 					return <ListIcon className="h-4 w-4" />;
 				case 'table':
@@ -393,58 +395,64 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 			<div className="flex items-center gap-0.5">
 				<Button
 					aria-label="Agrupar por tipo de archivo"
+					aria-pressed={groupByEntityType}
 					data-active={groupByEntityType}
 					data-testid="toggle-group-type-btn"
 					onClick={toggleGroupByEntityType}
 					size="icon"
 					title="Agrupar por tipo de archivo"
 					variant={groupByEntityType ? 'secondary' : 'ghost'}
-					aria-pressed={groupByEntityType}
 				>
 					<Tags className="h-4 w-4" />
 				</Button>
 
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<Button className="h-7 px-2" data-testid="view-mode-dropdown-trigger" variant="ghost" title="Cambiar vista">
+						<Button className="h-7 px-2" data-testid="view-mode-dropdown-trigger" title="Cambiar vista" variant="ghost">
 							{viewIcon()}
 						</Button>
 					</DropdownMenuTrigger>
 					<DropdownMenuContent align="end" className="w-40">
 						<DropdownMenuLabel>Modo de vista</DropdownMenuLabel>
 						<DropdownMenuSeparator />
-						<DropdownMenuRadioGroup value={viewMode} onValueChange={handleChangeView}>
-							<DropdownMenuRadioItem value="grid" data-testid="view-mode-grid-btn">
+						<DropdownMenuRadioGroup onValueChange={handleChangeView} value={viewMode}>
+							<DropdownMenuRadioItem data-testid="view-mode-grid-btn" value="grid">
 								<div className="flex items-center gap-2">
 									<Grid className="h-4 w-4" />
 									<span>Grid</span>
 								</div>
 							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem value="cards" data-testid="view-mode-cards-btn">
+							<DropdownMenuRadioItem data-testid="view-mode-canvas-btn" value="canvas">
+								<div className="flex items-center gap-2">
+									<Grid className="h-4 w-4" />
+									<span>Canvas</span>
+								</div>
+							</DropdownMenuRadioItem>
+							<DropdownMenuRadioItem data-testid="view-mode-cards-btn" value="cards">
 								<div className="flex items-center gap-2">
 									<LayoutGrid className="h-4 w-4" />
 									<span>Cards</span>
 								</div>
 							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem value="masonry" data-testid="view-mode-masonry-btn">
+							<DropdownMenuRadioItem data-testid="view-mode-masonry-btn" value="masonry">
 								<div className="flex items-center gap-2">
 									<GalleryHorizontal className="h-4 w-4" />
 									<span>Masonry</span>
 								</div>
 							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem value="list" data-testid="view-mode-list-btn">
+							<DropdownMenuRadioItem data-testid="view-mode-list-btn" value="list">
 								<div className="flex items-center gap-2">
 									<ListIcon className="h-4 w-4" />
 									<span>Lista</span>
 								</div>
 							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem value="table" data-testid="view-mode-table-btn">
+							<DropdownMenuRadioItem data-testid="view-mode-table-btn" value="table">
 								<div className="flex items-center gap-2">
 									<TableIcon className="h-4 w-4" />
 									<span>Tabla</span>
 								</div>
 							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem value="single" data-testid="view-mode-single-btn">
+							<DropdownMenuRadioItem data-testid="view-mode-single-btn" value="single">
 								<div className="flex items-center gap-2">
 									<FileText className="h-4 w-4" />
 									<span>Single</span>
@@ -597,7 +605,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					</Button>
 				)}
 
-				<ViewBreadcrumbs currentView={currentView as ViewType} currentItem={currentItem} />
+				<ViewBreadcrumbs currentItem={currentItem} currentView={currentView as ViewType} />
 				{renderSelectionActions()}
 			</div>
 

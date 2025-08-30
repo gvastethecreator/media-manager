@@ -12,7 +12,9 @@
  * @returns La extensión del archivo sin el punto
  */
 export function getFileExtension(filename: string): string {
-	return filename.slice(((filename.lastIndexOf('.') - 1) >>> 0) + 2);
+	const idx = filename.lastIndexOf('.');
+	if (idx <= 0 || idx === filename.length - 1) return '';
+	return filename.slice(idx + 1);
 }
 
 /**

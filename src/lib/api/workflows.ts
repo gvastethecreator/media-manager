@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import type { WorkflowWithStats, WorkflowCreateInput, WorkflowUpdateInput } from '@/types/entities/workflow';
+import type { WorkflowCreateInput, WorkflowUpdateInput, WorkflowWithStats } from '@/types/entities/workflow';
 import { apiClient } from './client';
 
 export const workflowKeys = {

@@ -5,8 +5,8 @@
 
 import type { FC } from 'react';
 import React, { memo } from 'react';
-import type { AnyEntityWithStats } from '@/types/migration';
-import { getEntityStatsType } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
+import { getEntityStatsType } from '@/types/entity-guards';
 // Importar componentes de tarjetas
 import { AlbumCard } from './album-card/album-card';
 import { AudioCard } from './audio-card/audio-card';

@@ -4,11 +4,11 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDeleteTag, useTags } from '@/lib/api/tags';
 import { toastService } from '@/lib/ui/toast';
@@ -276,8 +276,8 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 													className="h-8 w-8 p-0 text-muted-foreground"
 													onClick={() => setEditingTag(tag)}
 													size="sm"
-													variant="ghost"
 													title="Editar etiqueta"
+													variant="ghost"
 												>
 													<Edit2 className="h-4 w-4" />
 												</Button>
@@ -317,7 +317,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 				{/* 📝 Formulario de creación */}
 				{showCreateForm && <CreateTagForm onCancel={() => setShowCreateForm(false)} onCreated={handleTagCreated} />}
 
-				<Dialog open={Boolean(editingTag)} onOpenChange={(open) => !open && setEditingTag(null)}>
+				<Dialog onOpenChange={(open) => !open && setEditingTag(null)} open={Boolean(editingTag)}>
 					<DialogContent className="max-w-xl p-0">
 						<DialogHeader className="px-6 pt-6">
 							<DialogTitle>Editar etiqueta</DialogTitle>

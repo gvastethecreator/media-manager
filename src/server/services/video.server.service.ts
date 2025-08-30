@@ -446,14 +446,18 @@ export async function getVideoFormatStats() {
 		const validDurations = allVideos.filter((v: any) => v.duration && v.duration > 0);
 		const avgDuration =
 			validDurations.length > 0
-				? validDurations.reduce((sum: number, v: any) => sum + v.duration!, 0) / validDurations.length
+				? validDurations.reduce((sum: number, v: any) => sum + (v.duration ?? 0), 0) / validDurations.length
 				: 0;
 
 		const validSizes = allVideos.filter((v: any) => v.width && v.height);
 		const avgWidth =
-			validSizes.length > 0 ? validSizes.reduce((sum: number, v: any) => sum + v.width!, 0) / validSizes.length : 0;
+			validSizes.length > 0
+				? validSizes.reduce((sum: number, v: any) => sum + (v.width ?? 0), 0) / validSizes.length
+				: 0;
 		const avgHeight =
-			validSizes.length > 0 ? validSizes.reduce((sum: number, v: any) => sum + v.height!, 0) / validSizes.length : 0;
+			validSizes.length > 0
+				? validSizes.reduce((sum: number, v: any) => sum + (v.height ?? 0), 0) / validSizes.length
+				: 0;
 
 		return [
 			{

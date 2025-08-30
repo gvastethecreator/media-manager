@@ -322,7 +322,7 @@ function createCombinedMetadata(result: MetadataExtractionResult): Record<string
 	try {
 		const rawTags: any = (result as any).raw_exif_tags || (result as any).rawTags;
 		const pngTextChunks = rawTags?.pngTextChunks as Array<{ keyword: string; text: string }> | undefined;
-		if (pngTextChunks && pngTextChunks.length) {
+		if (pngTextChunks?.length) {
 			for (const chunk of pngTextChunks) {
 				const key = chunk.keyword?.toLowerCase();
 				if (!(key && chunk.text)) continue;

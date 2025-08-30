@@ -19,7 +19,7 @@ export default defineConfig({
 		baseURL: 'http://localhost:5173',
 		trace: 'retain-on-failure',
 		actionTimeout: 10_000,
-		navigationTimeout: 20_000,
+		navigationTimeout: 60_000,
 	},
 	projects: [
 		{

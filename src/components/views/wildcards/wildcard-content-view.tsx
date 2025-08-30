@@ -1,6 +1,6 @@
+import { Hash } from 'lucide-react';
 import { memo } from 'react';
 import { EmptyState } from '@/components/ui/empty-state';
-import { Hash } from 'lucide-react';
 
 export interface WildcardContentViewProps {
 	className?: string;

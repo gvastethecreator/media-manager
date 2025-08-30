@@ -5,7 +5,7 @@
  * @updated 2025-01-27 - Migrado de next-themes a React nativo
  */
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
 
 // Definimos los temas personalizados (mantenidos de la versión original)
 const customThemes = [
@@ -88,12 +88,12 @@ export function ThemeProvider({
 	const [resolvedTheme, setResolvedTheme] = useState<(typeof customThemes)[number]>('light');
 
 	// Detectar preferencia del sistema
-	const getSystemTheme = (): (typeof customThemes)[number] => {
+	const getSystemTheme = useCallback((): (typeof customThemes)[number] => {
 		if (typeof window === 'undefined') {
 			return 'light';
 		}
 		return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-	};
+	}, []);
 
 	// Resolver tema actual
 	const resolveTheme = React.useCallback(

@@ -1,5 +1,5 @@
 // MIGRADO PARA VITE - Arreglado sistema de theming
-import { Bug, Eye, Home, IdCard, Moon, Palette, Settings2, Sun } from 'lucide-react';
+import { BookOpen, Bug, Eye, Home, IdCard, Moon, Palette, Settings2, Sun } from 'lucide-react';
 import { motion } from 'motion/react';
 import React, { memo, useCallback, useMemo } from 'react';
 
@@ -187,6 +187,13 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 							tooltipContent="Accede a herramientas de desarrollo y depuración"
 							tooltipNote="Solo para administradores"
 							tooltipTitle="Modo Desarrollador"
+						/>
+
+						<MemoizedHeaderButton
+							icon={<BookOpen className="h-3.5 w-3.5" />}
+							onClick={() => window.open('/docs', '_blank')}
+							tooltipContent="Abre la documentación de la aplicación"
+							tooltipTitle="Documentación"
 						/>
 
 						{/* 🧘 Botón de modo zen */}

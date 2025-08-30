@@ -9,7 +9,7 @@
 import { startTransition, useCallback, useMemo, useRef } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useSelectionStore } from '@/store/selection.store';
-import type { AnyEntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
 import { useSelecto } from './use-selecto';
 
 const logger = clientLogger.withContext('AdvancedSelection');
@@ -56,9 +56,9 @@ export function useAdvancedSelection({
 	// Mapa de índices para búsquedas O(1) en lugar de O(n)
 	const itemIndexMap = useMemo(() => {
 		const map = new Map<string, number>();
-		items.forEach((item, index) => {
-			map.set(item.id, index);
-		});
+		for (let index = 0; index < items.length; index++) {
+			map.set(items[index].id, index);
+		}
 		return map;
 	}, [items]);
 

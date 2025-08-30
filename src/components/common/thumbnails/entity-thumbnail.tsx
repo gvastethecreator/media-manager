@@ -9,7 +9,9 @@ import { motion, type Transition } from 'motion/react';
 import { memo } from 'react';
 import { useEntityThumbnails, useEntityTypeConfig } from '@/hooks/use-entity-type-config';
 import { cn } from '@/lib/utils';
-import { type AnyEntityWithStats, EntityStatsType, getEntityStatsType } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
+import { getEntityStatsType } from '@/types/entity-guards';
+import { EntityStatsType } from '@/types/file-browser/entity-stats';
 import { ImageThumbnail } from './image-thumbnail';
 
 interface EntityThumbnailProps {

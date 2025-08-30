@@ -72,7 +72,7 @@ export function SvgText({
 		resizeObserver.observe(textRef.current);
 
 		return () => resizeObserver.disconnect();
-	}, [content, fontSize, fontWeight]);
+	}, []);
 
 	return (
 		<Component className={cn('relative inline-block', className)}>
@@ -101,6 +101,7 @@ export function SvgText({
 				viewBox={`0 0 ${textDimensions.width} ${textDimensions.height}`}
 				width={textDimensions.width}
 			>
+				<title>Texto con máscara SVG</title>
 				<defs>
 					<mask id={maskId}>
 						<rect fill="black" height="100%" width="100%" />

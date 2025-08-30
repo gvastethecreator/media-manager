@@ -8,8 +8,8 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useDocumentStore } from '@/store/entities/document';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import type { DocumentWithStats } from '@/types/entities/document';
 import type { AnyEntityWithStats } from '@/types/entities';
+import type { DocumentWithStats } from '@/types/entities/document';
 
 // Logger para depuración
 const logger = clientLogger.withContext('DocumentsContentView');
@@ -41,31 +41,28 @@ export function DocumentsContentView({ className }: DocumentsContentViewProps) {
 		[setSelectedItems, setDetailsPanelVisible]
 	);
 
-	const handleDocumentDoubleClick = useCallback(
-		(document: AnyEntityWithStats) => {
-			const docItem = document as DocumentWithStats;
-			logger.info('🖱️ Doble click en documento:', docItem.name);
+	const handleDocumentDoubleClick = useCallback((document: AnyEntityWithStats) => {
+		const docItem = document as DocumentWithStats;
+		logger.info('🖱️ Doble click en documento:', docItem.name);
 
-			// TODO: Implementar visor compatible con documentos
-			// Obtener todos los documentos para el visor
-			// const allDocuments = documentsArray;
+		// TODO: Implementar visor compatible con documentos
+		// Obtener todos los documentos para el visor
+		// const allDocuments = documentsArray;
 
-			// Convertir a formato compatible con el visor
-			// const docItems = allDocuments.map((d: DocumentWithStats) => ({
-			//	id: d.id,
-			//	name: d.name,
-			//	type: 'document' as const,
-			//	path: d.path,
-			//	size: d.size || 0,
-			// }));
+		// Convertir a formato compatible con el visor
+		// const docItems = allDocuments.map((d: DocumentWithStats) => ({
+		//	id: d.id,
+		//	name: d.name,
+		//	type: 'document' as const,
+		//	path: d.path,
+		//	size: d.size || 0,
+		// }));
 
-			// const currentIndex = docItems.findIndex((item: any) => item.id === docItem.id);
+		// const currentIndex = docItems.findIndex((item: any) => item.id === docItem.id);
 
-			// Abrir el visor con todos los documentos
-			// openViewer(docItems, Math.max(0, currentIndex));
-		},
-		[documentsArray, openViewer]
-	);
+		// Abrir el visor con todos los documentos
+		// openViewer(docItems, Math.max(0, currentIndex));
+	}, []);
 
 	const handleRefresh = useCallback(async () => {
 		if (isRefreshing) return;

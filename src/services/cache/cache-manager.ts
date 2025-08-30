@@ -49,7 +49,7 @@ export class CacheManager {
 	private config: CacheConfig;
 	private statistics: CacheStatistics;
 	private events: CacheEvents;
-	private cleanupTimer: number | null = null;
+	private cleanupTimer: ReturnType<typeof setInterval> | null = null;
 	private accessTimes: number[] = [];
 
 	constructor(config: Partial<CacheConfig> = {}, events: CacheEvents = {}) {
@@ -139,8 +139,10 @@ export class CacheManager {
 
 			// Remove existing entry if it exists
 			if (this.cache.has(key)) {
-				const oldEntry = this.cache.get(key)!;
-				this.statistics.totalSize -= oldEntry.size;
+				const oldEntry = this.cache.get(key);
+				if (oldEntry) {
+					this.statistics.totalSize -= oldEntry.size;
+				}
 			}
 
 			this.cache.set(key, entry);
@@ -453,17 +455,18 @@ export class CacheManager {
 	}
 
 	private hashString(str: string): string {
-		let hash = 0;
+		// Hash sin bitwise: rolling multiplicative hash en módulo 2^32
+		let hash = 2_166_136_261; // base
 		for (let i = 0; i < str.length; i++) {
-			const char = str.charCodeAt(i);
-			hash = (hash << 5) - hash + char;
-			hash &= hash; // Convert to 32-bit integer
+			const code = str.charCodeAt(i);
+			hash = (hash * 16_777_619) % 4_294_967_296;
+			hash = (hash + code) % 4_294_967_296;
 		}
-		return hash.toString(36);
+		return Math.floor(hash).toString(36);
 	}
 
 	private startCleanupTimer(): void {
-		this.cleanupTimer = window.setInterval(() => {
+		this.cleanupTimer = setInterval(() => {
 			this.cleanup();
 			if (this.config.persistToDisk) {
 				this.saveToDisk();

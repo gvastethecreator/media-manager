@@ -90,9 +90,10 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 					result.width = '100%';
 					result.height = 'auto';
 					break;
+				default:
+					break;
 			}
 		}
-
 		// Aplicar aspect ratio
 		if (config.aspectRatio) {
 			if (typeof config.aspectRatio === 'number') {
@@ -131,6 +132,8 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 			case 'masonry':
 				classes.push('flex flex-col break-inside-avoid');
 				break;
+			default:
+				break;
 		}
 
 		// Variante visual
@@ -155,6 +158,8 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 				break;
 			case 'glass':
 				classes.push('bg-white/10 backdrop-blur-md border border-white/20 rounded-lg');
+				break;
+			default:
 				break;
 		}
 
@@ -211,6 +216,8 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 			case 'masonry':
 				classes.push('w-full rounded-t-lg');
 				break;
+			default:
+				break;
 		}
 
 		// Variantes específicas para imágenes
@@ -234,6 +241,8 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 				break;
 			case 'high':
 				classes.push('space-y-3');
+				break;
+			default:
 				break;
 		}
 
@@ -265,6 +274,8 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 			case 'horizontal':
 			case 'list':
 				classes.push('truncate');
+				break;
+			default:
 				break;
 		}
 

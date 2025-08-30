@@ -286,11 +286,16 @@ export function CollectionsSettings() {
 								)}
 								{filteredCollections.map((collection: CollectionWithStats) => (
 									<div
-										className={`flex cursor-pointer items-center justify-between rounded-md p-2 transition-colors${selectedCollection?.id === collection.id ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'}`}
+										className={`flex items-center justify-between rounded-md p-2 transition-colors${
+											selectedCollection?.id === collection.id ? ' bg-accent text-accent-foreground' : ' hover:bg-muted'
+										}`}
 										key={collection.id}
-										onClick={() => handleEditCollection(collection)}
 									>
-										<div className="flex items-center gap-2">
+										<button
+											className="flex flex-1 items-center gap-2 text-left"
+											onClick={() => handleEditCollection(collection)}
+											type="button"
+										>
 											<span className="text-lg">
 												{COLLECTION_CATEGORY_EMOJIS[collection.category as CollectionCategory] || '📚'}
 											</span>
@@ -300,7 +305,7 @@ export function CollectionsSettings() {
 													{collection.stats?.imageCount || 0} imágenes
 												</span>
 											</div>
-										</div>
+										</button>
 										<Button
 											onClick={(e) => {
 												e.stopPropagation();

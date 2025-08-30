@@ -3,17 +3,28 @@
  * @module App
  */
 
+import React from 'react';
 import { RouterProvider } from 'react-router-dom';
+import { ReactRouterProvider } from 'fumadocs-core/framework/react-router';
+import { useNavigationRefresh } from '@/hooks/use-navigation-refresh';
+import { useEntityCatalogStore } from '@/stores/entity-catalog-store';
 import { ErrorBoundary } from './components/core/error-boundary';
 import { ThemeProvider } from './components/ui/theme-provider';
 import { ReactScanProvider } from './lib/dev/react-scan';
 import lastLogContent from './logs/last-log.json' with { type: 'json' };
 import { ViewTransitionProvider } from './providers/ViewTransitionProvider';
 import { router } from './router';
-import { useNavigationRefresh } from '@/hooks/use-navigation-refresh';
 
 function SSENavigationRefresher() {
 	useNavigationRefresh();
+	return null;
+}
+
+function EntityCatalogBootstrapper() {
+	const preload = useEntityCatalogStore((s) => s.preload);
+	React.useEffect(() => {
+		preload();
+	}, [preload]);
 	return null;
 }
 
@@ -22,10 +33,13 @@ export function App() {
 		<ThemeProvider defaultTheme="system" storageKey="theme">
 			<ViewTransitionProvider>
 				<ReactScanProvider>
-					<ErrorBoundary lastLogContent={lastLogContent}>
-						<SSENavigationRefresher />
-						<RouterProvider router={router} />
-					</ErrorBoundary>
+					<ReactRouterProvider>
+						<ErrorBoundary lastLogContent={lastLogContent}>
+							<SSENavigationRefresher />
+							<EntityCatalogBootstrapper />
+							<RouterProvider router={router} />
+						</ErrorBoundary>
+					</ReactRouterProvider>
 				</ReactScanProvider>
 			</ViewTransitionProvider>
 		</ThemeProvider>

@@ -266,7 +266,7 @@ function DataGridTableBodyRow<TData>({
 				props.tableClassNames?.bodyRow
 			)}
 			data-state={table.options.enableRowSelection && row.getIsSelected() ? 'selected' : undefined}
-			onClick={() => props.onRowClick && props.onRowClick(row.original)}
+			onClick={() => props.onRowClick?.(row.original)}
 			ref={dndRef}
 			style={{ ...(dndStyle ? dndStyle : null) }}
 		>
@@ -366,6 +366,7 @@ function DataGridTableLoader() {
 					viewBox="0 0 24 24"
 					xmlns="http://www.w3.org/2000/svg"
 				>
+					<title>Cargando</title>
 					<circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="3" />
 					<path
 						className="opacity-75"

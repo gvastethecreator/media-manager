@@ -9,7 +9,7 @@ import CharactersContentView from './characters-content-view';
 
 const viewLogger = clientLogger.withContext('CharactersView');
 
-export function CharactersView({}: ViewProps) {
+export function CharactersView(_props: ViewProps) {
 	const { selectedCharacterId, selectCharacter } = useCharacterStore();
 	const { mutate: createCharacter } = useCreateCharacter();
 

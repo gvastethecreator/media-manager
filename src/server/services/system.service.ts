@@ -31,6 +31,7 @@ import {
 import { createSettingsError, isSettingsError } from '@/lib/errors/settings';
 import { createSystemError } from '@/lib/errors/system';
 import { settingsService } from '@/services/settings/settings.service';
+import { fileBrowserConfigSchema } from '@/transformers/settings/schema';
 import type { Settings } from '@/types/settings';
 
 // Loggers simplificados para evitar problemas
@@ -342,7 +343,9 @@ export async function getSystemStats(): Promise<SystemRuntimeStats> {
 
 		for (const cpu of cpus) {
 			for (const type in cpu.times) {
-				totalTick += cpu.times[type as keyof typeof cpu.times];
+				if (Object.hasOwn(cpu.times, type)) {
+					totalTick += cpu.times[type as keyof typeof cpu.times];
+				}
 			}
 			totalIdle += cpu.times.idle;
 		}
@@ -623,6 +626,7 @@ export async function createDefaultSettingsData(): Promise<Settings> {
 				devMode: false,
 				experimentalFeatures: false,
 			},
+			fileBrowser: fileBrowserConfigSchema.parse({}),
 		};
 
 		return defaultSettings;

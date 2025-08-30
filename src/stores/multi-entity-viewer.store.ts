@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import type { AnyEntityWithStats } from '@/types/migration';
+import type { AnyEntityWithStats } from '@/types/entities';
 
 const viewerLogger = clientLogger.withContext('MultiEntityViewer');
 
