@@ -1,8 +1,8 @@
-import { createBrowserRouter, useParams } from 'react-router-dom';
+import { ReactRouterProvider } from 'fumadocs-core/framework/react-router';
 import { RootProvider } from 'fumadocs-ui/provider/base';
+import { lazy, Suspense } from 'react';
+import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/main-layout';
-import { DocsLayoutComponent } from '@/components/docs/docs-layout';
-import { DocsPageComponent } from '@/components/docs/docs-page';
 import ReindexLogsViewer from '@/components/system/ReindexLogsViewer';
 // Importar todas las vistas
 import { AllImagesView } from '@/components/views/all-images/all-images-view';
@@ -36,18 +36,26 @@ const FolderContentWrapper = () => {
 	return <FolderContentView folderId={id} />;
 };
 
-import { Outlet } from 'react-router-dom';
+// Lazy-load de componentes de documentación para evitar importar Fumadocs en el arranque
+const LazyDocsLayout = lazy(async () =>
+	import('@/components/docs/docs-layout').then((m) => ({ default: m.DocsLayoutComponent }))
+);
+const LazyDocsDynamicPage = lazy(async () =>
+	import('@/components/docs/docs-dynamic-page').then((m) => ({ default: m.DocsDynamicPage }))
+);
 
-// Wrapper para las rutas de documentación
-const DocsWrapper = () => {
-	return (
-		<RootProvider>
-			<DocsLayoutComponent>
-				<Outlet />
-			</DocsLayoutComponent>
-		</RootProvider>
-	);
-};
+// Wrapper para las rutas de documentación (con Suspense)
+const DocsWrapper = () => (
+	<RootProvider>
+		<ReactRouterProvider>
+			<Suspense fallback={<div />}>
+				<LazyDocsLayout>
+					<Outlet />
+				</LazyDocsLayout>
+			</Suspense>
+		</ReactRouterProvider>
+	</RootProvider>
+);
 // Importar stores para los wrappers
 
 // Wrapper para CharactersView
@@ -315,46 +323,17 @@ export const router = createBrowserRouter([
 			{
 				index: true,
 				element: (
-					<DocsPageComponent
-						title="Bienvenido a Image Manager"
-						description="Gestor avanzado de imágenes con capacidades de organización y metadatos"
-					>
-						<div className="prose dark:prose-invert max-w-none">
-							<h1>Bienvenido a Image Manager</h1>
-							<p>
-								Image Manager es un gestor avanzado de imágenes diseñado para fotógrafos, diseñadores y creadores de
-								contenido.
-							</p>
-						</div>
-					</DocsPageComponent>
+					<Suspense fallback={<div />}>
+						<LazyDocsDynamicPage />
+					</Suspense>
 				),
 			},
 			{
-				path: 'quick-start',
+				path: '*',
 				element: (
-					<DocsPageComponent
-						title="Guía de Inicio Rápido"
-						description="Aprende a configurar y usar Image Manager en pocos pasos"
-					>
-						<div className="prose dark:prose-invert max-w-none">
-							<h1>Guía de Inicio Rápido</h1>
-							<p>Esta guía te ayudará a configurar Image Manager y comenzar a organizar tu colección de imágenes.</p>
-						</div>
-					</DocsPageComponent>
-				),
-			},
-			{
-				path: 'features/file-management',
-				element: (
-					<DocsPageComponent
-						title="Gestión de Archivos y Carpetas"
-						description="Aprende a organizar y navegar por tu colección de archivos"
-					>
-						<div className="prose dark:prose-invert max-w-none">
-							<h1>Gestión de Archivos y Carpetas</h1>
-							<p>Image Manager proporciona herramientas poderosas para organizar tu colección.</p>
-						</div>
-					</DocsPageComponent>
+					<Suspense fallback={<div />}>
+						<LazyDocsDynamicPage />
+					</Suspense>
 				),
 			},
 		],

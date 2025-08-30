@@ -1,4 +1,4 @@
-import { DocsPage, DocsBody, DocsTitle, DocsDescription } from 'fumadocs-ui/page';
+import { DocsBody, DocsDescription, DocsPage, DocsTitle } from 'fumadocs-ui/page';
 import type { ReactNode } from 'react';
 
 export interface DocsPageProps {

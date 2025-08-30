@@ -1,230 +1,45 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { ClickModifiers } from '../../types/file-browser.types';
-import type { MediaItem } from '../media-thumbnail';
-import {
-	generate3DModelThumbnail,
-	generateAdvancedImageThumbnail,
-	generateAdvancedVideoThumbnail,
-	generateAudioWaveform,
-	generateJsonPreview,
-} from '@/config/thumbnail-generators';
-import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
+import type { MediaItem } from '../../components/media-thumbnail';
+import { generateThumbnailUrl, getFallbackIcon, useImageCache } from '../../views/canvas-common';
+import { CanvasRenderConfig } from '../../views/canvas-config';
 
 // Renderiza todos los items en un solo <canvas> para minimizar el overhead de DOM.
 // Estrategia: layout en celdas (grid) con tamaño fijo, prefetch de imágenes con Intersection-like
 // (calculado por posición/scroll), overscan, y caché en memoria de ImageBitmap/Image.
 
-// Cache similar al de MediaThumbnail
-const thumbnailCache = new Map<string, string>();
-const CACHE_MAX_SIZE = 200; // limitar para evitar consumo excesivo de memoria
-
-const cacheKeyFor = (item: MediaItem, type: string, quality: ThumbnailQuality) =>
-	`${item.id || item.name}-${type}-${quality}`;
-
-const getFallbackIcon = (entityType: string) => {
-	switch (entityType) {
-		case 'image':
-			return '🖼️';
-		case 'video':
-			return '🎥';
-		case 'audio':
-			return '🎵';
-		case 'document':
-			return '📄';
-		case 'jsonFile':
-			return '📋';
-		case 'file3d':
-			return '🎲';
-		default:
-			return '📁';
-	}
-};
-
-const cleanupThumbCache = () => {
-	if (thumbnailCache.size > CACHE_MAX_SIZE) {
-		const entries = Array.from(thumbnailCache.entries());
-		const toDelete = entries.slice(0, Math.floor(CACHE_MAX_SIZE * 0.3));
-		for (const [key] of toDelete) {
-			thumbnailCache.delete(key);
-		}
-	}
-};
-
-// Generar thumbnail usando la misma lógica que MediaThumbnail
-const generateThumbnailUrl = async (
-	item: MediaItem,
-	quality: ThumbnailQuality = ThumbnailQuality.MEDIUM
-): Promise<string> => {
-	let url = '';
-	try {
-		if (item.entityType === 'image') {
-			const key = cacheKeyFor(item, 'image', quality);
-			url = thumbnailCache.get(key) || '';
-			if (!url) {
-				url = await generateAdvancedImageThumbnail(item as any);
-				if (url) {
-					cleanupThumbCache();
-					thumbnailCache.set(key, url);
-				}
-			}
-			return url || item.thumbnailUrl || getFallbackIcon(item.entityType);
-		}
-
-		if (item.entityType === 'video') {
-			const key = cacheKeyFor(item, 'videoPoster', quality);
-			url = thumbnailCache.get(key) || '';
-			if (!url) {
-				url = await generateAdvancedVideoThumbnail(item as any, { timeOffset: 0 });
-				if (url) {
-					cleanupThumbCache();
-					thumbnailCache.set(key, url);
-				}
-			}
-			return url || item.thumbnailUrl || getFallbackIcon(item.entityType);
-		}
-
-		if (item.entityType === 'jsonFile') {
-			const key = cacheKeyFor(item, 'json', quality);
-			url = thumbnailCache.get(key) || '';
-			if (!url) {
-				url = await generateJsonPreview(item as any);
-				if (url) {
-					cleanupThumbCache();
-					thumbnailCache.set(key, url);
-				}
-			}
-			return url || getFallbackIcon(item.entityType);
-		}
-
-		if (item.entityType === 'file3d') {
-			const key = cacheKeyFor(item, 'file3d', quality);
-			url = thumbnailCache.get(key) || '';
-			if (!url) {
-				url = await generate3DModelThumbnail(item as any);
-				if (url) {
-					cleanupThumbCache();
-					thumbnailCache.set(key, url);
-				}
-			}
-			return url || getFallbackIcon(item.entityType);
-		}
-
-		if (item.entityType === 'audio') {
-			const key = cacheKeyFor(item, 'audio', quality);
-			url = thumbnailCache.get(key) || '';
-			if (!url) {
-				url = await generateAudioWaveform(item as any);
-				if (url) {
-					cleanupThumbCache();
-					thumbnailCache.set(key, url);
-				}
-			}
-			return url || getFallbackIcon(item.entityType);
-		}
-
-		// Tipos no soportados: usar icono genérico
-		return getFallbackIcon(item.entityType);
-	} catch (error) {
-		console.error('Error generating thumbnail:', error);
-		return getFallbackIcon(item.entityType);
-	}
-};
-
+// Props y defaults
 export interface FileCanvasProps {
 	items: MediaItem[];
-	itemSize?: number; // tamaño de celda (cuadrada)
+	itemSize?: number;
 	gap?: number;
 	overscanRows?: number;
+	/** Contenedor de scroll externo (p.ej., en vistas agrupadas) */
+	scrollContainer?: HTMLElement | null;
 	onItemClick?: (item: MediaItem, modifiers?: ClickModifiers) => void;
 	onItemDoubleClick?: (item: MediaItem) => void;
 }
 
 const DEFAULTS = {
-	itemSize: 160,
-	gap: 8,
-	overscanRows: 4,
+	itemSize: CanvasRenderConfig.grid.itemSize,
+	gap: CanvasRenderConfig.grid.gap,
+	overscanRows: CanvasRenderConfig.grid.overscanRows,
 };
-
-type CacheEntry = {
-	status: 'loading' | 'ready' | 'error';
-	image?: ImageBitmap | HTMLImageElement;
-	fallbackIcon?: string; // Para emojis/iconos de fallback
-};
-
-function useImageCache() {
-	const cache = useRef<Map<string, CacheEntry>>(new Map());
-	const pending = useRef<Map<string, Promise<void>>>(new Map());
-
-	const load = (key: string, src: string) => {
-		if (!key) return;
-		if (!src) return;
-		if (cache.current.has(key) || pending.current.has(key)) return;
-
-		console.log('Starting image load:', { key, src });
-		cache.current.set(key, { status: 'loading' });
-
-		const p = (async () => {
-			try {
-				// Intentar crear ImageBitmap (más eficiente para canvas) si está disponible
-				// Fallback a HTMLImageElement
-				const imgEl = new Image();
-				imgEl.decoding = 'async';
-				imgEl.loading = 'eager';
-				imgEl.crossOrigin = 'anonymous';
-				imgEl.src = src;
-
-				await new Promise((resolve, reject) => {
-					imgEl.onload = resolve;
-					imgEl.onerror = reject;
-					// Timeout fallback
-					setTimeout(() => reject(new Error('Timeout')), 10_000);
-				});
-
-				console.log('Image loaded successfully:', { key, width: imgEl.naturalWidth, height: imgEl.naturalHeight });
-
-				let bmp: ImageBitmap | HTMLImageElement;
-				if ('createImageBitmap' in window) {
-					try {
-						bmp = await createImageBitmap(imgEl);
-						console.log('Created ImageBitmap for:', key);
-					} catch {
-						bmp = imgEl;
-						console.log('Fallback to HTMLImageElement for:', key);
-					}
-				} else {
-					bmp = imgEl;
-					console.log('Using HTMLImageElement (no createImageBitmap):', key);
-				}
-				cache.current.set(key, { status: 'ready', image: bmp });
-			} catch (error) {
-				console.error('Image load failed:', { key, src, error });
-				cache.current.set(key, { status: 'error' });
-			} finally {
-				pending.current.delete(key);
-			}
-		})();
-
-		pending.current.set(key, p);
-	};
-
-	const get = (key: string) => cache.current.get(key);
-	const set = (key: string, entry: CacheEntry) => cache.current.set(key, entry);
-
-	return { load, get, set } as const;
-}
 
 export function FileCanvas({
 	items,
 	itemSize = DEFAULTS.itemSize,
 	gap = DEFAULTS.gap,
 	overscanRows = DEFAULTS.overscanRows,
+	scrollContainer = null,
 	onItemClick,
 	onItemDoubleClick,
 }: FileCanvasProps) {
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
-	const [viewport, setViewport] = useState({ width: 0, height: 0, scrollTop: 0, scrollLeft: 0 });
+	const [viewport, setViewport] = useState({ width: 0, height: 0, scrollTop: 0, scrollLeft: 0, offsetTop: 0 });
 	const { load, get, set } = useImageCache();
 	const isSelected = useSelectionStore((s) => s.isSelected);
 	const selectedIds = useSelectionStore((s) => s.selectedIds);
@@ -236,17 +51,20 @@ export function FileCanvas({
 	const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
 	const [dragCurrent, setDragCurrent] = useState<{ x: number; y: number } | null>(null);
 
-	// Layout: número de columnas basado en ancho del contenedor
-	const columns = Math.max(1, Math.floor((viewport.width + gap) / (itemSize + gap)));
-	const rowHeight = itemSize + gap;
+	// Layout: columnas basado en ancho y ajuste dinámico de tamaño de celda para usar todo el ancho
+	const columns = Math.max(1, Math.floor(Math.max(0, viewport.width - gap) / (itemSize + gap)));
+	const cellSize =
+		columns > 0 ? Math.max(20, Math.floor(Math.max(0, viewport.width - (columns + 1) * gap) / columns)) : itemSize;
+	const rowHeight = cellSize + gap;
 	const totalRows = Math.ceil(items.length / columns);
 	const totalHeight = totalRows * rowHeight + gap;
 
-	// Visible rows con overscan
-	const firstVisibleRow = Math.max(0, Math.floor(viewport.scrollTop / rowHeight) - overscanRows);
+	// Visible rows con overscan (usar scroll local cuando hay contenedor externo)
+	const localScrollTop = Math.max(0, viewport.scrollTop - (scrollContainer ? viewport.offsetTop : 0));
+	const firstVisibleRow = Math.max(0, Math.floor(localScrollTop / rowHeight) - overscanRows);
 	const lastVisibleRow = Math.min(
 		totalRows - 1,
-		Math.floor((viewport.scrollTop + viewport.height) / rowHeight) + overscanRows
+		Math.floor((localScrollTop + viewport.height) / rowHeight) + overscanRows
 	);
 
 	const visibleRange = useMemo(() => ({ firstVisibleRow, lastVisibleRow }), [firstVisibleRow, lastVisibleRow]);
@@ -257,13 +75,14 @@ export function FileCanvas({
 		if (!container) return { x: 0, y: 0 };
 		const rect = container.getBoundingClientRect();
 		const x = e.clientX - rect.left + viewport.scrollLeft;
-		const y = e.clientY - rect.top + viewport.scrollTop;
+		let y = e.clientY - rect.top + viewport.scrollTop;
+		if (scrollContainer) y -= viewport.offsetTop; // normalizar a coords locales del grupo
 		return { x, y };
 	};
 
 	const indexFromCoords = (x: number, y: number) => {
-		const col = Math.floor((x - gap) / (itemSize + gap));
-		const row = Math.floor((y - gap) / (itemSize + gap));
+		const col = Math.floor((x - gap) / (cellSize + gap));
+		const row = Math.floor((y - gap) / (cellSize + gap));
 		if (col < 0 || row < 0) return -1;
 		const idx = row * columns + col;
 		if (idx < 0 || idx >= items.length) return -1;
@@ -275,10 +94,10 @@ export function FileCanvas({
 		const maxX = Math.max(a.x, b.x);
 		const minY = Math.min(a.y, b.y);
 		const maxY = Math.max(a.y, b.y);
-		const firstCol = Math.max(0, Math.floor((minX - gap) / (itemSize + gap)));
-		const lastCol = Math.floor((maxX - gap) / (itemSize + gap));
-		const firstRow = Math.max(0, Math.floor((minY - gap) / (itemSize + gap)));
-		const lastRow = Math.floor((maxY - gap) / (itemSize + gap));
+		const firstCol = Math.max(0, Math.floor((minX - gap) / (cellSize + gap)));
+		const lastCol = Math.floor((maxX - gap) / (cellSize + gap));
+		const firstRow = Math.max(0, Math.floor((minY - gap) / (cellSize + gap)));
+		const lastRow = Math.floor((maxY - gap) / (cellSize + gap));
 		const ids: string[] = [];
 		for (let row = firstRow; row <= lastRow; row++) {
 			for (let col = firstCol; col <= lastCol; col++) {
@@ -346,8 +165,9 @@ export function FileCanvas({
 		if (!container) return;
 
 		const dpr = Math.max(1, Math.floor(window.devicePixelRatio || 1));
-		const w = Math.floor(container.clientWidth);
-		const h = Math.floor(container.clientHeight);
+		const host = (scrollContainer ?? container) as HTMLElement;
+		const w = Math.floor(host.clientWidth);
+		const h = Math.floor(host.clientHeight);
 		if (canvas.width !== w * dpr || canvas.height !== h * dpr) {
 			canvas.width = w * dpr;
 			canvas.height = h * dpr;
@@ -382,16 +202,17 @@ export function FileCanvas({
 			if (!it) continue;
 			const col = i % columns;
 			const row = Math.floor(i / columns);
-			const x = col * (itemSize + gap) + gap;
-			const y = row * (itemSize + gap) + gap - viewport.scrollTop;
+			const x = col * (cellSize + gap) + gap;
+			// CORREGIDO: No restar localScrollTop - las posiciones deben ser relativas al viewport
+			const y = (row - visibleRange.firstVisibleRow) * (cellSize + gap) + gap;
 
 			// Background y borde de selección
 			ctx.fillStyle = '#111827'; // bg-card aproximado (tailwind slate-900)
-			ctx.fillRect(x, y, itemSize, itemSize);
+			ctx.fillRect(x, y, cellSize, cellSize);
 			if (isSelected(it.id)) {
 				ctx.strokeStyle = '#3b82f6';
-				ctx.lineWidth = 2;
-				ctx.strokeRect(x + 1, y + 1, itemSize - 2, itemSize - 2);
+				ctx.lineWidth = CanvasRenderConfig.grid.borderWidth;
+				ctx.strokeRect(x + 1, y + 1, cellSize - 2, cellSize - 2);
 			}
 
 			const entry = get(it.id);
@@ -399,11 +220,11 @@ export function FileCanvas({
 			const pad = 2; // pequeño padding visual
 			ctx.save();
 			ctx.beginPath();
-			ctx.rect(x + pad, y + pad, itemSize - pad * 2, itemSize - pad * 2);
+			ctx.rect(x + pad, y + pad, cellSize - pad * 2, cellSize - pad * 2);
 			ctx.clip();
 
 			// Mejora de calidad de reescalado
-			ctx.imageSmoothingEnabled = true;
+			ctx.imageSmoothingEnabled = CanvasRenderConfig.visuals.enableSmoothing;
 			// imageSmoothingQuality puede no estar tipeado, pero la mayoría de navegadores lo soportan
 			(ctx as any).imageSmoothingQuality = 'high';
 
@@ -413,35 +234,43 @@ export function FileCanvas({
 				const iw = (img.naturalWidth ?? img.width) as number;
 				const ih = (img.naturalHeight ?? img.height) as number;
 				if (iw > 0 && ih > 0) {
-					const scale = Math.max((itemSize - pad * 2) / iw, (itemSize - pad * 2) / ih);
+					// Fade-in suave en primeros ~220ms desde readyAt
+					const now = performance.now();
+					const t0 = entry.readyAt ?? now;
+					const dt = Math.max(0, now - t0);
+					const alpha = Math.min(1, dt / 220);
+					const prevAlpha = ctx.globalAlpha;
+					ctx.globalAlpha = alpha;
+					const scale = Math.max((cellSize - pad * 2) / iw, (cellSize - pad * 2) / ih);
 					const dw = Math.ceil(iw * scale);
 					const dh = Math.ceil(ih * scale);
 					// centrado dentro del área recortada
-					const dx = x + pad + Math.floor((itemSize - pad * 2 - dw) / 2);
-					const dy = y + pad + Math.floor((itemSize - pad * 2 - dh) / 2);
+					const dx = x + pad + Math.floor((cellSize - pad * 2 - dw) / 2);
+					const dy = y + pad + Math.floor((cellSize - pad * 2 - dh) / 2);
 					ctx.drawImage(img, dx, dy, dw, dh);
+					ctx.globalAlpha = prevAlpha;
 				}
 			} else if (entry?.status === 'ready' && entry.fallbackIcon) {
 				// Renderizar fallback icon (emoji) centrado y recortado
 				ctx.fillStyle = '#374151';
-				ctx.fillRect(x + pad, y + pad, itemSize - pad * 2, itemSize - pad * 2);
+				ctx.fillRect(x + pad, y + pad, cellSize - pad * 2, cellSize - pad * 2);
 				ctx.fillStyle = '#e5e7eb';
-				ctx.font = `${Math.floor(itemSize * 0.45)}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
+				ctx.font = `${Math.floor(cellSize * 0.45)}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
 				ctx.textAlign = 'center';
 				ctx.textBaseline = 'middle';
-				ctx.fillText(entry.fallbackIcon, x + itemSize / 2, y + itemSize / 2);
+				ctx.fillText(entry.fallbackIcon, x + cellSize / 2, y + cellSize / 2);
 				ctx.textAlign = 'left';
 				ctx.textBaseline = 'alphabetic';
 			} else {
 				// placeholder con información del estado, recortado a la celda
 				ctx.fillStyle = entry?.status === 'loading' ? '#6b7280' : '#374151';
-				ctx.fillRect(x + pad, y + pad, itemSize - pad * 2, itemSize - pad * 2);
+				ctx.fillRect(x + pad, y + pad, cellSize - pad * 2, cellSize - pad * 2);
 				// Texto de debug del estado
 				ctx.fillStyle = '#ffffff';
 				ctx.font = '10px monospace';
 				ctx.textAlign = 'center';
 				const statusText = entry?.status || (it.thumbnailUrl ? 'no-cache' : 'no-url');
-				ctx.fillText(statusText, x + itemSize / 2, y + itemSize / 2);
+				ctx.fillText(statusText, x + cellSize / 2, y + cellSize / 2);
 				ctx.textAlign = 'left';
 			}
 
@@ -452,19 +281,21 @@ export function FileCanvas({
 		if (hoverIndex !== null && hoverIndex >= startIndex && hoverIndex <= endIndex) {
 			const col = hoverIndex % columns;
 			const row = Math.floor(hoverIndex / columns);
-			const x = col * (itemSize + gap) + gap;
-			const y = row * (itemSize + gap) + gap - viewport.scrollTop;
+			const x = col * (cellSize + gap) + gap;
+			const y = (row - visibleRange.firstVisibleRow) * (cellSize + gap) + gap;
 			ctx.strokeStyle = '#f59e0b';
 			ctx.lineWidth = 2;
 			ctx.setLineDash([4, 3]);
-			ctx.strokeRect(x + 2, y + 2, itemSize - 4, itemSize - 4);
+			ctx.strokeRect(x + 2, y + 2, cellSize - 4, cellSize - 4);
 			ctx.setLineDash([]);
 		}
 
 		// Overlay de selección por arrastre (rectángulo)
 		if (dragStart && dragCurrent) {
 			const rx = Math.min(dragStart.x, dragCurrent.x) - viewport.scrollLeft;
-			const ry = Math.min(dragStart.y, dragCurrent.y) - viewport.scrollTop;
+			// CORREGIDO: Calcular posición Y relativa al viewport actual
+			const firstRowY = visibleRange.firstVisibleRow * (cellSize + gap) + gap;
+			const ry = Math.min(dragStart.y, dragCurrent.y) - firstRowY;
 			const rw = Math.abs(dragCurrent.x - dragStart.x);
 			const rh = Math.abs(dragCurrent.y - dragStart.y);
 			ctx.fillStyle = 'rgba(59, 130, 246, 0.15)';
@@ -478,47 +309,115 @@ export function FileCanvas({
 		visibleRange,
 		columns,
 		gap,
-		itemSize,
+		cellSize,
 		get,
 		isSelected,
-		viewport.scrollTop,
+		localScrollTop,
 		viewport.scrollLeft,
 		hoverIndex,
 		dragStart,
 		dragCurrent,
+		scrollContainer,
 	]);
 
-	// Observa tamaño del contenedor y scroll
+	// Observa tamaño del contenedor, scroll y offsetTop relativo al host
 	useEffect(() => {
-		const container = containerRef.current;
-		if (!container) return;
+		const internal = containerRef.current;
+		if (!internal) return;
+
+		// Mejorar la detección del scroll container
+		let host: HTMLElement | null = null;
+
+		if (scrollContainer) {
+			host = scrollContainer;
+		} else {
+			// En modo sin agrupar, el scroll está en el contenedor interno
+			// Asegurar que el elemento tiene overflow-auto aplicado
+			const computedStyle = window.getComputedStyle(internal);
+			if (computedStyle.overflow === 'auto' || computedStyle.overflowY === 'auto') {
+				host = internal;
+			} else {
+				// Fallback: buscar el padre con scroll
+				let parent = internal.parentElement;
+				while (parent) {
+					const style = window.getComputedStyle(parent);
+					if (style.overflow === 'auto' || style.overflowY === 'auto') {
+						host = parent;
+						break;
+					}
+					parent = parent.parentElement;
+				}
+				// Si no encontramos un padre con scroll, usar internal
+				host = host || internal;
+			}
+		}
+
+		if (!host) return;
+
+		// Debug logging para identificar el elemento correcto
+		console.log('🔍 FileCanvas scroll setup:', {
+			hasScrollContainer: !!scrollContainer,
+			hostElement: host.tagName,
+			hostClasses: host.className,
+			hostScrollHeight: host.scrollHeight,
+			hostClientHeight: host.clientHeight,
+			canScroll: host.scrollHeight > host.clientHeight,
+		});
+
+		const computeOffsetTop = () => {
+			if (!host) return 0;
+			const hostRect = host.getBoundingClientRect();
+			const selfRect = internal.getBoundingClientRect();
+			return host.scrollTop + (selfRect.top - hostRect.top);
+		};
 
 		const onScroll = () => {
-			setViewport((v) => ({ ...v, scrollTop: container.scrollTop, scrollLeft: container.scrollLeft }));
-		};
-		container.addEventListener('scroll', onScroll, { passive: true });
+			if (!host) return;
+			console.log('📜 Scroll event detected:', {
+				scrollTop: host.scrollTop,
+				scrollLeft: host.scrollLeft,
+				hasScrollContainer: !!scrollContainer,
+			});
 
-		const ro = new ResizeObserver((entries) => {
-			for (const entry of entries) {
-				const cr = entry.contentRect;
-				setViewport((v) => ({ ...v, width: Math.floor(cr.width), height: Math.floor(cr.height) }));
-			}
+			setViewport((v) => ({
+				...v,
+				scrollTop: host.scrollTop,
+				scrollLeft: host.scrollLeft,
+				offsetTop: scrollContainer ? computeOffsetTop() : 0,
+			}));
+		};
+
+		host.addEventListener('scroll', onScroll, { passive: true });
+
+		const ro = new ResizeObserver(() => {
+			if (!host) return;
+			setViewport((v) => ({
+				...v,
+				width: Math.floor(host.clientWidth),
+				height: Math.floor(host.clientHeight),
+				offsetTop: scrollContainer ? computeOffsetTop() : 0,
+			}));
 		});
-		ro.observe(container);
+		ro.observe(host);
+		ro.observe(internal);
 
 		// init values
-		setViewport({
-			width: container.clientWidth,
-			height: container.clientHeight,
-			scrollTop: container.scrollTop,
-			scrollLeft: container.scrollLeft,
-		});
+		const initialViewport = {
+			width: host.clientWidth,
+			height: host.clientHeight,
+			scrollTop: host.scrollTop,
+			scrollLeft: host.scrollLeft,
+			offsetTop: scrollContainer ? computeOffsetTop() : 0,
+		};
+
+		console.log('🚀 FileCanvas initial viewport:', initialViewport);
+		setViewport(initialViewport);
 
 		return () => {
 			ro.disconnect();
-			container.removeEventListener('scroll', onScroll);
+			host.removeEventListener('scroll', onScroll);
 		};
-	}, []);
+	}, [scrollContainer]);
 
 	// Handlers de puntero para selección por arrastre y hover
 	const handlePointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
@@ -585,18 +484,22 @@ export function FileCanvas({
 		}
 	};
 
+	const useExternal = !!scrollContainer;
 	return (
 		<div
-			className="h-full overflow-auto"
+			className={useExternal ? 'relative w-full' : 'relative h-full w-full overflow-auto'}
 			onPointerDown={handlePointerDown}
 			onPointerLeave={handlePointerLeave}
 			onPointerMove={handlePointerMove}
 			onPointerUp={handlePointerUp}
 			ref={containerRef}
+			style={useExternal ? { height: viewport.height } : undefined}
+			data-testid="file-canvas"
 		>
-			<div style={{ height: totalHeight, position: 'relative' }}>
-				<canvas ref={canvasRef} style={{ position: 'sticky', top: 0, left: 0, width: '100%', height: '100%' }} />
-			</div>
+			{/* Espaciador para representar la altura total del contenido y permitir scroll */}
+			<div style={{ height: totalHeight }} />
+			{/* Canvas como overlay del viewport; el dibujo compensa el scroll interno */}
+			<canvas className="pointer-events-none absolute inset-0" ref={canvasRef} />
 		</div>
 	);
 }

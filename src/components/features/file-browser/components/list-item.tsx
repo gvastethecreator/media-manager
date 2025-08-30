@@ -10,9 +10,10 @@ interface ListItemProps {
 	selected?: boolean;
 	onClick?: (item: MediaItem, modifiers?: ClickModifiers) => void;
 	onDoubleClick?: (item: MediaItem) => void;
+	itemIndex?: number; // Para navegación por teclado
 }
 
-function ListItemInner({ item, selected = false, onClick, onDoubleClick }: ListItemProps) {
+function ListItemInner({ item, selected = false, onClick, onDoubleClick, itemIndex }: ListItemProps) {
 	const handleClick = (e: React.MouseEvent<HTMLButtonElement>) =>
 		onClick?.(item, { ctrlKey: e.ctrlKey, metaKey: e.metaKey, shiftKey: e.shiftKey });
 	const handleDoubleClick = () => onDoubleClick?.(item);
@@ -26,6 +27,7 @@ function ListItemInner({ item, selected = false, onClick, onDoubleClick }: ListI
 		<button
 			aria-pressed={selected}
 			className={cn('flex items-center gap-4 rounded-md p-2 hover:bg-accent', selected && 'bg-accent')}
+			data-item-index={itemIndex}
 			onClick={handleClick}
 			onDoubleClick={handleDoubleClick}
 			onKeyDown={handleKeyDown}
@@ -59,6 +61,7 @@ export const ListItem = React.memo(ListItemInner, (prev, next) => {
 	return (
 		prev.item.id === next.item.id &&
 		prev.selected === next.selected &&
+		prev.itemIndex === next.itemIndex &&
 		prev.onClick === next.onClick &&
 		prev.onDoubleClick === next.onDoubleClick
 	);
