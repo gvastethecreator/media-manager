@@ -1,0 +1,360 @@
+📊 RESUMEN DE ERRORES
+Total de archivos con errores: 2
+Cantidad total de errores: 9
+
+📁 ARCHIVOS AFECTADOS:
+  src\components\cards\folder-card\folder-card-images.tsx (líneas: 35, 96)
+  src\components\settings\folders\folder-card.tsx (líneas: 7, 86, 89, 96, 306, 327)
+
+📋 DETALLE POR ARCHIVO:
+
+src\components\cards\folder-card\folder-card-images.tsx
+  - línea 35 : assist/source/useSortedAttributes
+  - línea 96 : assist/source/useSortedAttributes
+
+src\components\settings\folders\folder-card.tsx
+  - línea 7 : lint/correctness/noUnusedImports
+  - línea 86 : lint/nursery/useSortedClasses
+  - línea 89 : lint/nursery/useSortedClasses
+  - línea 96 : lint/nursery/useSortedClasses
+  - línea 306 : lint/a11y/useKeyWithClickEvents
+  - línea 306 : lint/a11y/noStaticElementInteractions
+  - línea 327 : lint/nursery/useSortedClasses
+
+════════════════════════════════════════════════════════════════════════════════
+📄 LOG ORIGINAL:
+════════════════════════════════════════════════════════════════════════════════
+
+Comando: bunx biome check --max-diagnostics=500 .
+Fecha: 2025-08-31T19:56:49.050Z
+Directorio: D:\DEV\image-manager
+Modo tolerante: SÍ
+Tipo: Linting
+===============================================
+src\components\cards\folder-card\folder-card-images.tsx:35:6 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━
+
+  × The attributes are not sorted. 
+  
+    33 │ 				{/* Imagen principal */}
+    34 │ 				{!isLargeDataUrl(featuredImage) && (
+  > 35 │ 					<img
+       │ 					^^^^
+  > 36 │ 						alt="Imagen destacada"
+        ...
+  > 43 │ 						}}
+  > 44 │ 					/>
+       │ 					^^
+    45 │ 				)}
+    46 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+     36  36 │   						alt="Imagen destacada"
+     37  37 │   						className="h-full w-full object-cover"
+     38     │ - → → → → → → src={featuredImage}
+     39     │ - → → → → → → onError={(e)·=>·{
+     40     │ - → → → → → → → //·fallback:·ocultar·img·si·falla·y·usar·fondo·liso
+     41     │ - → → → → → → → const·el·=·e.currentTarget·as·HTMLImageElement;
+     42     │ - → → → → → → → el.style.display·=·'none';
+     43     │ - → → → → → → }}
+         38 │ + → → → → → → onError={(e)·=>·{
+         39 │ + → → → → → → → //·fallback:·ocultar·img·si·falla·y·usar·fondo·liso
+         40 │ + → → → → → → → const·el·=·e.currentTarget·as·HTMLImageElement;
+         41 │ + → → → → → → → el.style.display·=·'none';
+         42 │ + → → → → → → }}
+         43 │ + → → → → → → src={featuredImage}
+     44  44 │   					/>
+     45  45 │   				)}
+  
+
+src\components\cards\folder-card\folder-card-images.tsx:96:8 assist/source/useSortedAttributes  FIXABLE  ━━━━━━━━━━
+
+  × The attributes are not sorted. 
+  
+     94 │ 					>
+     95 │ 						{!isLargeDataUrl(image) && (
+   > 96 │ 							<img
+        │ 							^^^^
+   > 97 │ 								alt={`Imagen reciente ${index + 1}`}
+         ...
+  > 103 │ 								}}
+  > 104 │ 							/>
+        │ 							^^
+    105 │ 						)}
+    106 │ 
+  
+  i Safe fix: Sort the JSX props.
+  
+     97  97 │   								alt={`Imagen reciente ${index + 1}`}
+     98  98 │   								className="h-full w-full object-cover"
+     99     │ - → → → → → → → → src={image}
+    100     │ - → → → → → → → → onError={(e)·=>·{
+    101     │ - → → → → → → → → → const·el·=·e.currentTarget·as·HTMLImageElement;
+    102     │ - → → → → → → → → → el.style.display·=·'none';
+    103     │ - → → → → → → → → }}
+         99 │ + → → → → → → → → onError={(e)·=>·{
+        100 │ + → → → → → → → → → const·el·=·e.currentTarget·as·HTMLImageElement;
+        101 │ + → → → → → → → → → el.style.display·=·'none';
+        102 │ + → → → → → → → → }}
+        103 │ + → → → → → → → → src={image}
+    104 104 │   							/>
+    105 105 │   						)}
+  
+
+src\components\cards\folder-card\folder-card-images.tsx format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+     29  29 │   			<div
+     30  30 │   				className={cn('relative h-40 w-full overflow-hidden', tcgMode ? 'border-white/10 border-b' : '')}
+     31     │ - → → → → style={isLargeDataUrl(featuredImage)·?·{·backgroundImage:·`url(${featuredImage})`,·backgroundSize:·'cover',·backgroundPosition:·'center'·}·:·undefined}
+         31 │ + → → → → style={
+         32 │ + → → → → → isLargeDataUrl(featuredImage)
+         33 │ + → → → → → → ?·{·backgroundImage:·`url(${featuredImage})`,·backgroundSize:·'cover',·backgroundPosition:·'center'·}
+         34 │ + → → → → → → :·undefined
+         35 │ + → → → → }
+     32  36 │   			>
+     33  37 │   				{/* Imagen principal */}
+    ······· │ 
+     91  95 │   						className="relative overflow-hidden"
+     92  96 │   						key={`recent-image-${generateImageKey(image, index)}`}
+     93     │ - → → → → → → style={isLargeDataUrl(image)·?·{·backgroundImage:·`url(${image})`,·backgroundSize:·'cover',·backgroundPosition:·'center'·}·:·undefined}
+         97 │ + → → → → → → style={
+         98 │ + → → → → → → → isLargeDataUrl(image)
+         99 │ + → → → → → → → → ?·{·backgroundImage:·`url(${image})`,·backgroundSize:·'cover',·backgroundPosition:·'center'·}
+        100 │ + → → → → → → → → :·undefined
+        101 │ + → → → → → → }
+     94 102 │   					>
+     95 103 │   						{!isLargeDataUrl(image) && (
+    ······· │ 
+    154 162 │   				tcgMode
+    155 163 │   					? {
+    156     │ - → → → → → → backgroundImage:·`radial-gradient(circle·at·70%·30%,·${primaryColor}30·0%,·transparent·50%)`,
+    157     │ - → → → → → }
+        164 │ + → → → → → → → backgroundImage:·`radial-gradient(circle·at·70%·30%,·${primaryColor}30·0%,·transparent·50%)`,
+        165 │ + → → → → → → }
+    158 166 │   					: {}
+    159 167 │   			}
+  
+
+src\components\cards\folder-card\folder-card.tsx format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter would have printed the following content:
+  
+     39  39 │   			// Normalizamos thumbnails: aceptar `thumbnailUrl` (que puede venir con base64 crudo)
+     40  40 │   			// o `thumbnail` y convertir a data URL si es necesario
+     41     │ - → → → recentImageUrls:
+     42     │ - → → → → (folder.recentImages·||·[])
+     43     │ - → → → → → .map((img:·any)·=>·{
+     44     │ - → → → → → → const·raw:·unknown·=·img?.thumbnailUrl·??·img?.thumbnail·??·null;
+     45     │ - → → → → → → if·(typeof·raw·!==·'string'·||·raw.length·===·0)·return·null;
+     46     │ - → → → → → → const·trimmed·=·raw.trim();
+     47     │ - → → → → → → //·Si·ya·es·data·URL,·devolver·tal·cual
+     48     │ - → → → → → → if·(trimmed.startsWith('data:'))·return·trimmed;
+     49     │ - → → → → → → //·Si·parece·una·URL/route·(http(s),·blob:,·file:,·/),·dejarla·como·está
+     50     │ - → → → → → → if·(/^(https?:|blob:|file:|\/)/i.test(trimmed))·return·trimmed;
+     51     │ - → → → → → → //·Caso·contrario,·asumimos·base64·crudo·(posible·con·saltos·de·línea)·→·data·URL·webp
+     52     │ - → → → → → → const·base64·=·trimmed.replace(/\s+/g,·'');
+     53     │ - → → → → → → return·`data:image/webp;base64,${base64}`;
+     54     │ - → → → → → })
+     55     │ - → → → → → .filter(Boolean)·as·string[],
+         41 │ + → → → recentImageUrls:·(folder.recentImages·||·[])
+         42 │ + → → → → .map((img:·any)·=>·{
+         43 │ + → → → → → const·raw:·unknown·=·img?.thumbnailUrl·??·img?.thumbnail·??·null;
+         44 │ + → → → → → if·(typeof·raw·!==·'string'·||·raw.length·===·0)·return·null;
+         45 │ + → → → → → const·trimmed·=·raw.trim();
+         46 │ + → → → → → //·Si·ya·es·data·URL,·devolver·tal·cual
+         47 │ + → → → → → if·(trimmed.startsWith('data:'))·return·trimmed;
+         48 │ + → → → → → //·Si·parece·una·URL/route·(http(s),·blob:,·file:,·/),·dejarla·como·está
+         49 │ + → → → → → if·(/^(https?:|blob:|file:|\/)/i.test(trimmed))·return·trimmed;
+         50 │ + → → → → → //·Caso·contrario,·asumimos·base64·crudo·(posible·con·saltos·de·línea)·→·data·URL·webp
+         51 │ + → → → → → const·base64·=·trimmed.replace(/\s+/g,·'');
+         52 │ + → → → → → return·`data:image/webp;base64,${base64}`;
+         53 │ + → → → → })
+         54 │ + → → → → .filter(Boolean)·as·string[],
+     56  55 │   			childrenCount: folder.stats?.folderCount ?? 0,
+     57  56 │   			lastIndexed: folder.lastIndexed ?? null,
+    ······· │ 
+     88  87 │   				tcgMode
+     89  88 │   					? {
+     90     │ - → → → → → → boxShadow:·`0·10px·15px·-3px·${primaryColor}20,·0·4px·6px·-4px·${primaryColor}30`,
+     91     │ - → → → → → }
+         89 │ + → → → → → → → boxShadow:·`0·10px·15px·-3px·${primaryColor}20,·0·4px·6px·-4px·${primaryColor}30`,
+         90 │ + → → → → → → }
+     92  91 │   					: {}
+     93  92 │   			}
+  
+
+src\components\settings\folders\folder-card.tsx:86:17 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+    85 │ const FolderMetadata = memo(({ folder, parentFolderName, indexStatus, statusMessage }: FolderMetadataProps) => (
+  > 86 │ 	<div className="min-w-0 flex-1 space-y-1 grid grid-cols-2 content-start">
+       │ 	               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    87 │ 		{/* Breadcrumb */}
+    88 │ 		{parentFolderName && (
+  
+  i Safe fix: Sort the classes.
+  
+     84  84 │   
+     85  85 │   const FolderMetadata = memo(({ folder, parentFolderName, indexStatus, statusMessage }: FolderMetadataProps) => (
+     86     │ - → <div·className="min-w-0·flex-1·space-y-1·grid·grid-cols-2·content-start">
+         86 │ + → <div·className="grid·min-w-0·flex-1·grid-cols-2·content-start·space-y-1">
+     87  87 │   		{/* Breadcrumb */}
+     88  88 │   		{parentFolderName && (
+  
+
+src\components\settings\folders\folder-card.tsx:89:19 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+    87 │ 		{/* Breadcrumb */}
+    88 │ 		{parentFolderName && (
+  > 89 │ 			<div className="flex items-center text-muted-foreground/70 text-xs inline-block">
+       │ 			               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    90 │ 				<span className="truncate">{parentFolderName}</span>
+    91 │ 				<span className="font-medium">/</span>
+  
+  i Safe fix: Sort the classes.
+  
+     87  87 │   		{/* Breadcrumb */}
+     88  88 │   		{parentFolderName && (
+     89     │ - → → → <div·className="flex·items-center·text-muted-foreground/70·text-xs·inline-block">
+         89 │ + → → → <div·className="inline-block·flex·items-center·text-muted-foreground/70·text-xs">
+     90  90 │   				<span className="truncate">{parentFolderName}</span>
+     91  91 │   				<span className="font-medium">/</span>
+  
+
+src\components\settings\folders\folder-card.tsx:96:19 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+    95 │ 		{/* Folder Name */}
+  > 96 │ 		<span className="truncate inline-block font-semibold text-foreground text-md leading-tight">{folder.name}</span>
+       │ 		                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    97 │ 
+    98 │ 		{/* Status Row */}
+  
+  i Safe fix: Sort the classes.
+  
+     94  94 │   
+     95  95 │   		{/* Folder Name */}
+     96     │ - → → <span·className="truncate·inline-block·font-semibold·text-foreground·text-md·leading-tight">{folder.name}</span>
+         96 │ + → → <span·className="inline-block·truncate·font-semibold·text-foreground·text-md·leading-tight">{folder.name}</span>
+     97  97 │   
+     98  98 │   		{/* Status Row */}
+  
+
+src\components\settings\folders\folder-card.tsx:306:5 lint/a11y/useKeyWithClickEvents ━━━━━━━━━━━━━━
+
+  × Enforce to have the onClick mouse event with the onKeyUp, the onKeyDown, or the onKeyPress keyboard event.
+  
+    304 │ 				transition={{ duration: 0.2 }}
+    305 │ 			>
+  > 306 │ 				<div
+        │ 				^^^^
+  > 307 │ 					className={cn(
+         ...
+  > 318 │ 					onClick={handleCardClick}
+  > 319 │ 				>
+        │ 				^
+    320 │ 					{/* Processing Progress Indicator */}
+    321 │ 					<FolderProgressIndicator
+  
+  i Actions triggered using mouse events should have corresponding keyboard events to account for keyboard-only navigation.
+  
+
+src\components\settings\folders\folder-card.tsx:306:5 lint/a11y/noStaticElementInteractions ━━━━━━━━━━
+
+  × Static Elements should not be interactive.
+  
+    304 │ 				transition={{ duration: 0.2 }}
+    305 │ 			>
+  > 306 │ 				<div
+        │ 				^^^^
+  > 307 │ 					className={cn(
+         ...
+  > 318 │ 					onClick={handleCardClick}
+  > 319 │ 				>
+        │ 				^
+    320 │ 					{/* Processing Progress Indicator */}
+    321 │ 					<FolderProgressIndicator
+  
+  i To add interactivity such as a mouse or key event listener to a static element, give the element an appropriate role value.
+  
+
+src\components\settings\folders\folder-card.tsx:327:21 lint/nursery/useSortedClasses  FIXABLE  ━━━━━━━━━━
+
+  × These CSS classes should be sorted.
+  
+    325 │ 					/>
+    326 │ 
+  > 327 │ 					<div className="p-1 relative">
+        │ 					               ^^^^^^^^^^^^^^
+    328 │ 						<div className="flex items-start justify-between gap-3">
+    329 │ 							{/* Left Section: Icon + Metadata */}
+  
+  i Safe fix: Sort the classes.
+  
+    325 325 │   					/>
+    326 326 │   
+    327     │ - → → → → → <div·className="p-1·relative">
+        327 │ + → → → → → <div·className="relative·p-1">
+    328 328 │   						<div className="flex items-start justify-between gap-3">
+    329 329 │   							{/* Left Section: Icon + Metadata */}
+  
+
+src\components\settings\folders\folder-card.tsx:7:8 lint/correctness/noUnusedImports  FIXABLE  ━━━━━━━━━━
+
+  × This import is unused.
+  
+    5 │ import { computeIsReindexing } from '@/components/settings/folders/utils/is-reindexing';
+    6 │ import { Badge } from '@/components/ui/badge';
+  > 7 │ import { Card, CardContent, CardHeader } from '@/components/ui/card';
+      │        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    8 │ import { useFolderStats } from '@/lib/api/folders';
+    9 │ import { cn } from '@/lib/utils';
+  
+  i Unused imports might be the result of an incomplete refactoring.
+  
+  i Unsafe fix: Remove the unused imports.
+  
+      5   5 │   import { computeIsReindexing } from '@/components/settings/folders/utils/is-reindexing';
+      6   6 │   import { Badge } from '@/components/ui/badge';
+      7     │ - import·{·Card,·CardContent,·CardHeader·}·from·'@/components/ui/card';
+      8   7 │   import { useFolderStats } from '@/lib/api/folders';
+      9   8 │   import { cn } from '@/lib/utils';
+  
+
+src\components\settings\folders\folders-settings.tsx format ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Formatter woChecked 1715 files in 2s. No fixes applied.
+Found 12 errors.
+uld have printed the following content:
+  
+    148 148 │   							<span>Gestión de Carpetas</span>
+    149 149 │   							{(isGloballyProcessing || isProcessing) && (
+    150     │ - → → → → → → → → <div
+    151     │ - → → → → → → → → → className="flex·items-center·gap-2·text-muted-foreground·text-sm"
+    152     │ - → → → → → → → → → data-testid="reindex-status"
+    153     │ - → → → → → → → → >
+        150 │ + → → → → → → → → <div·className="flex·items-center·gap-2·text-muted-foreground·text-sm"·data-testid="reindex-status">
+    154 151 │   									<RefreshCw className="h-4 w-4 text-primary" />
+    155 152 │   									<span className="font-medium">
+    ······· │ 
+    198 195 │   								variant="outline"
+    199 196 │   							>
+    200     │ - → → → → → → → → <RefreshCw
+    201     │ - → → → → → → → → → className={cn('mr-1·h-3.5·w-3.5·transition-transform')}
+    202     │ - → → → → → → → → />
+        197 │ + → → → → → → → → <RefreshCw·className={cn('mr-1·h-3.5·w-3.5·transition-transform')}·/>
+    203 198 │   								{globalReindexStatus.isProcessing
+    204 199 │   									? `Reindexando... ${Math.round(globalReindexStatus.progress)}%${currentFolderName ? ` • ${currentFolderName}` : ''}`
+  
+
+check ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+  × Some errors were emitted while running checks.
+  
+

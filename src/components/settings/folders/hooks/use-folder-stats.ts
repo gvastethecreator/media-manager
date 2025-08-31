@@ -30,9 +30,9 @@ export function useFolderStats() {
 
 			return response;
 		},
-		refetchInterval: 30_000, // Actualizar cada 30 segundos
-		staleTime: 10_000, // Considerar datos obsoletos después de 10 segundos
-		retry: 3,
-		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 30_000),
+		refetchInterval: 60_000, // Optimización: reducir de 30s a 60s para menos requests
+		staleTime: 30_000, // Optimización: aumentar de 10s a 30s para más estabilidad
+		retry: 2, // Optimización: reducir intentos de 3 a 2
+		retryDelay: (attemptIndex) => Math.min(1000 * 2 ** attemptIndex, 15_000), // Reducir delay máximo
 	});
 }

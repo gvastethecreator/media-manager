@@ -374,8 +374,6 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					return <ListIcon className="h-4 w-4" />;
 				case 'table':
 					return <TableIcon className="h-4 w-4" />;
-				case 'single':
-					return <FileText className="h-4 w-4" />;
 				default:
 					return <Grid className="h-4 w-4" />;
 			}
@@ -438,12 +436,6 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 								<div className="flex items-center gap-2">
 									<TableIcon className="h-4 w-4" />
 									<span>Tabla</span>
-								</div>
-							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem data-testid="view-mode-single-btn" value="single">
-								<div className="flex items-center gap-2">
-									<FileText className="h-4 w-4" />
-									<span>Single</span>
 								</div>
 							</DropdownMenuRadioItem>
 						</DropdownMenuRadioGroup>

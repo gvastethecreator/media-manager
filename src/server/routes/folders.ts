@@ -861,7 +861,11 @@ router.get('/:id/stats', async (req, res) => {
 			totalOthers: 0, // TODO: Implementar cuando se agregue tabla de otros archivos
 			totalSize: folderData[0].totalSize,
 			lastActivity: folderData[0].lastIndexed,
-			recentImages,
+			recentImages: recentImages.map((image) => ({
+				id: image.id,
+				name: image.name,
+				thumbnailUrl: image.thumbnail, // Mapear thumbnail a thumbnailUrl
+			})),
 		};
 		res.json(stats);
 	} catch (error) {
