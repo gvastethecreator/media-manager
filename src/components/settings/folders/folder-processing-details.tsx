@@ -38,7 +38,8 @@ export function FolderProcessingDetails({
 			{subfolders.length > 0 && (
 				<motion.div
 					animate={{ opacity: 1, height: 'auto' }}
-					className="mt-2 rounded-md bg-muted/20 p-2"
+					className="mt-2 p-2"
+					exit={{ opacity: 0, height: 0 }}
 					initial={{ opacity: 0, height: 0 }}
 					transition={{ duration: 0.3 }}
 				>

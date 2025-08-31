@@ -19,12 +19,30 @@ export function FolderCardImages({
 	secondaryColor = primaryColor,
 	tcgMode = false,
 }: FolderCardImagesProps) {
+	// Helper para decidir si usar <img> o background-image
+	const isDataUrl = (src?: string | null) => (src ? src.startsWith('data:') : false);
+	const isLargeDataUrl = (src?: string | null) => (isDataUrl(src) ? (src?.length || 0) > 200_000 : false);
+
 	// Si hay una imagen destacada, la mostramos como principal
 	if (featuredImage) {
 		return (
-			<div className={cn('relative h-40 w-full overflow-hidden', tcgMode ? 'border-white/10 border-b' : '')}>
+			<div
+				className={cn('relative h-40 w-full overflow-hidden', tcgMode ? 'border-white/10 border-b' : '')}
+				style={isLargeDataUrl(featuredImage) ? { backgroundImage: `url(${featuredImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+			>
 				{/* Imagen principal */}
-				<img alt="Imagen destacada" className="h-full w-full object-cover" src={featuredImage} />
+				{!isLargeDataUrl(featuredImage) && (
+					<img
+						alt="Imagen destacada"
+						className="h-full w-full object-cover"
+						src={featuredImage}
+						onError={(e) => {
+							// fallback: ocultar img si falla y usar fondo liso
+							const el = e.currentTarget as HTMLImageElement;
+							el.style.display = 'none';
+						}}
+					/>
+				)}
 
 				{/* Overlay para TCG mode */}
 				{tcgMode && (
@@ -69,8 +87,22 @@ export function FolderCardImages({
 				)}
 			>
 				{images.map((image, index) => (
-					<div className="relative overflow-hidden" key={`recent-image-${generateImageKey(image, index)}`}>
-						<img alt={`Imagen reciente ${index + 1}`} className="h-full w-full object-cover" src={image} />
+					<div
+						className="relative overflow-hidden"
+						key={`recent-image-${generateImageKey(image, index)}`}
+						style={isLargeDataUrl(image) ? { backgroundImage: `url(${image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+					>
+						{!isLargeDataUrl(image) && (
+							<img
+								alt={`Imagen reciente ${index + 1}`}
+								className="h-full w-full object-cover"
+								src={image}
+								onError={(e) => {
+									const el = e.currentTarget as HTMLImageElement;
+									el.style.display = 'none';
+								}}
+							/>
+						)}
 
 						{/* Overlay para TCG mode */}
 						{tcgMode && (
@@ -121,8 +153,8 @@ export function FolderCardImages({
 			style={
 				tcgMode
 					? {
-							backgroundImage: `radial-gradient(circle at 70% 30%, ${primaryColor}30 0%, transparent 50%)`,
-						}
+						backgroundImage: `radial-gradient(circle at 70% 30%, ${primaryColor}30 0%, transparent 50%)`,
+					}
 					: {}
 			}
 		>

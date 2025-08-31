@@ -26,11 +26,6 @@ export const CanvasRenderConfig = {
 		overscanPadding: 400,
 		borderWidth: 2,
 	},
-	// Single
-	single: {
-		padding: 8,
-		borderWidth: 0,
-	},
 	// Group headers (shared)
 	group: {
 		headerHeight: 28,

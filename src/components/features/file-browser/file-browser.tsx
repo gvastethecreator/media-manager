@@ -8,8 +8,6 @@ import { List } from '@/components/features/file-browser/views/list';
 import { FileCanvasListGrouped } from '@/components/features/file-browser/views/list-grouped';
 import { Masonry } from '@/components/features/file-browser/views/masonry';
 import { FileCanvasMasonryGrouped } from '@/components/features/file-browser/views/masonry-grouped';
-import { Single } from '@/components/features/file-browser/views/single';
-import { FileCanvasSingleGrouped } from '@/components/features/file-browser/views/single-grouped';
 import { Table } from '@/components/features/file-browser/views/table';
 import { FileCanvasTableGrouped } from '@/components/features/file-browser/views/table-grouped';
 import { cn } from '@/lib/utils';
@@ -18,6 +16,7 @@ import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { FileListHeader } from './components/file-list-header';
 import type { MediaItem } from './components/media-thumbnail';
+import { StatusBar } from './components/status-bar';
 import { useFolderFiles } from './hooks/use-folder-files';
 import { useKeyboardNavigation } from './navigation/keyboard-navigation';
 import type { ClickModifiers, FileBrowserProps } from './types/file-browser.types';
@@ -212,22 +211,6 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 							)}
 						</div>
 					</div>
-				) : viewMode === 'single' ? (
-					<div className="h-full min-h-0 overflow-hidden">
-						{grouped ? (
-							<FileCanvasSingleGrouped
-								groups={grouped as any}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-							/>
-						) : (
-							<Single
-								items={processedItems as MediaItem[]}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-							/>
-						)}
-					</div>
 				) : viewMode === 'masonry' ? (
 					<div className="h-full min-h-0 overflow-hidden">
 						{grouped ? (
@@ -304,6 +287,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 					</div>
 				)}
 			</div>
+			<StatusBar items={processedItems as MediaItem[]} />
 		</section>
 	);
 }
@@ -413,14 +397,6 @@ function renderFromItems({
 							/>
 						</div>
 					</div>
-				) : viewMode === 'single' ? (
-					<div className="h-full min-h-0 overflow-hidden">
-						<Single
-							items={processedItems as MediaItem[]}
-							onItemClick={handleItemClick}
-							onItemDoubleClick={handleItemDoubleClick}
-						/>
-					</div>
 				) : viewMode === 'masonry' ? (
 					<div className="h-full min-h-0 overflow-hidden">
 						<Masonry
@@ -465,6 +441,7 @@ function renderFromItems({
 					</div>
 				)}
 			</div>
+			<StatusBar items={processedItems as MediaItem[]} />
 		</section>
 	);
 }

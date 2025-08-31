@@ -34,28 +34,14 @@ export interface ImageItem {
 	};
 }
 
-interface FileViewerProps {
-	images: ImageItem[];
-	initialIndex?: number;
-	isOpen: boolean;
-	onClose: () => void;
-	triggerRef?: React.RefObject<HTMLElement>;
-}
-
-// Constantes memoizadas para animaciones y tamaños
-const THUMBNAIL_SIZES = {
-	normal: {
-		width: 60,
-		height: 40,
-	},
-	active: {
-		width: 80,
-		height: 50,
-	},
-};
-
 const THUMBNAIL_ANIMATION = {
 	duration: 0.2,
+};
+
+// Tamaños para thumbnails (normal y activo)
+const THUMBNAIL_SIZES = {
+	normal: { width: 56, height: 56 },
+	active: { width: 64, height: 64 },
 };
 
 // Función auxiliar memoizada
@@ -171,6 +157,7 @@ const ToolbarActions = memo(function ToolbarActionsImpl({
 	onCopy,
 	onDownload,
 	onClose,
+	closeButtonRef,
 }: {
 	onZoomIn: () => void;
 	onZoomOut: () => void;
@@ -178,6 +165,7 @@ const ToolbarActions = memo(function ToolbarActionsImpl({
 	onCopy: () => void;
 	onDownload: () => void;
 	onClose: () => void;
+	closeButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
 	return (
 		<div className="fixed inset-x-4 top-4 z-[9999] flex items-center justify-between">
@@ -199,7 +187,7 @@ const ToolbarActions = memo(function ToolbarActionsImpl({
 				</Button>
 			</div>
 
-			<Button onClick={onClose} size="icon" title="Cerrar" variant="outline">
+			<Button onClick={onClose} ref={closeButtonRef} size="icon" title="Cerrar" variant="outline">
 				<X className="h-4 w-4" />
 			</Button>
 		</div>
@@ -216,20 +204,27 @@ const ThumbnailNavigationImpl = memo(function ThumbnailNavigationInner({
 	currentIndex: number;
 	onSelectImage: (index: number) => void;
 }) {
-	// Calcular la sección visible de miniaturas - memoizado
+	// Calcular hasta 10 miniaturas alrededor de la actual con wrap-around sin duplicados
 	const visibleThumbnails = useMemo(() => {
-		const startIndex = Math.max(0, currentIndex - 3);
-		const endIndex = Math.min(images.length, currentIndex + 4);
-		return images.slice(startIndex, endIndex).map((image, i) => ({
-			image,
-			isActive: i + startIndex === currentIndex,
-			index: i + startIndex,
-		}));
+		if (!images.length) return [] as { image: ImageItem; isActive: boolean; index: number }[];
+		const maxThumbs = Math.min(10, images.length);
+		const half = Math.floor(maxThumbs / 2);
+		const result: { image: ImageItem; isActive: boolean; index: number }[] = [];
+		for (let offset = -half; offset < maxThumbs - half; offset++) {
+			let idx = (currentIndex + offset) % images.length;
+			if (idx < 0) idx += images.length;
+			const img = images[idx];
+			if (!img) continue;
+			if (!result.some((r) => r.index === idx)) {
+				result.push({ image: img, isActive: idx === currentIndex, index: idx });
+			}
+		}
+		return result;
 	}, [images, currentIndex]);
 
 	return (
 		<div className="-translate-x-1/2 fixed bottom-6 left-1/2 z-[9999] flex items-center justify-center">
-			<div className="flex items-center rounded-lg bg-background/5 px-2 py-1 backdrop-blur-xs">
+			<div className="flex items-center rounded-lg bg-background/10 px-2 py-1 backdrop-blur-sm">
 				{visibleThumbnails.map(({ image, isActive, index }) => (
 					<ThumbnailItem
 						image={image}
@@ -260,6 +255,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	const [urls, setUrls] = useState<Record<string, string>>({});
 	const [isLoading, setIsLoading] = useState(true);
 	const imageContainerRef = useRef<HTMLFieldSetElement>(null);
+	const constraintsRef = useRef<HTMLDivElement>(null);
 	const closeButtonRef = useRef<HTMLButtonElement>(null);
 	const [scale, setScale] = useState(1);
 	const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -330,12 +326,17 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 		}
 	}, []);
 
-	// Determinar qué imágenes cargar inicialmente - Mover fuera de la función asíncrona
+	// Determinar qué imágenes cargar inicialmente - carga todas en modo multi-layer
 	const indicesToLoad = useMemo(() => {
+		if (images.length > 1) {
+			// Modo multi-capa: cargar todas las imágenes para mostrar todos los layers
+			return images.map((_, idx) => idx);
+		}
+		// Modo una sola imagen: precargar actual, siguiente y anterior
 		const nextIndex = (currentIndex + 1) % images.length;
 		const prevIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
 		return [currentIndex, nextIndex, prevIndex];
-	}, [currentIndex, images.length]);
+	}, [currentIndex, images]);
 
 	// Effect para cargar las URLs iniciales
 	useEffect(() => {
@@ -383,7 +384,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 		loadInitialUrls();
 	}, [isOpen, images, urls, loadImageUrl, indicesToLoad]);
 
-	// Manejar zoom con la rueda
+	// Manejar zoom con la rueda (modo de 1 imagen)
 	const handleWheel = useCallback(
 		(e: React.WheelEvent) => {
 			e.preventDefault();
@@ -546,7 +547,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	const dialogClassName = useMemo(
 		() =>
 			cn(
-				'fixed inset-0 z-[9999] m-0 flex h-full w-full flex-col items-center justify-center bg-black/90 p-0 backdrop-blur-sm',
+				'fixed inset-0 z-[9999] m-0 flex h-full w-full flex-col items-center justify-center bg-black/90 p-0 backdrop-blur-md',
 				isOpen ? 'flex' : 'hidden'
 			),
 		[isOpen]
@@ -562,9 +563,170 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	);
 
 	// Función vacía para drag (placeholder)
-	const handleDragStart = () => {
-		// TODO: Implementar drag si es necesario
-	};
+	const onMainDrag = useCallback((_e: any, info: { delta: { x: number; y: number } }) => {
+		setPosition((prev) => {
+			const next = { x: prev.x + info.delta.x, y: prev.y + info.delta.y };
+			// Clamp aproximado: no dejar que el centro se vaya demasiado lejos; mantiene dentro del viewport a nivel visual
+			const container = imageContainerRef.current?.getBoundingClientRect();
+			if (container) {
+				const maxX = container.width / 2;
+				const maxY = container.height / 2;
+				next.x = Math.max(-maxX, Math.min(maxX, next.x));
+				next.y = Math.max(-maxY, Math.min(maxY, next.y));
+			}
+			return next;
+		});
+	}, []);
+
+	// -------- MODO MULTI-LAYER (capas superpuestas) --------
+	type PaneState = { scale: number; x: number; y: number };
+	const [paneOrder, setPaneOrder] = useState<string[]>([]);
+	const [paneState, setPaneState] = useState<Record<string, PaneState>>({});
+	const canvasRef = useRef<HTMLDivElement>(null);
+
+	// Inicializar orden y estado por capa cuando cambia la lista de imágenes
+	useEffect(() => {
+		const ids = images.map((img) => img.id);
+		setPaneOrder(ids);
+		setPaneState((prev) => {
+			const nextState: Record<string, PaneState> = { ...prev };
+			const centerOffset = (ids.length - 1) / 2;
+			ids.forEach((id, idx) => {
+				if (!nextState[id]) {
+					nextState[id] = { scale: 1, x: (idx - centerOffset) * 60, y: 0 };
+				}
+			});
+			// Limpiar ids que ya no están
+			for (const key of Object.keys(nextState)) {
+				if (!ids.includes(key)) delete nextState[key];
+			}
+			return nextState;
+		});
+	}, [images]);
+
+	// Wheel zoom por capa
+	const handlePaneWheel = useCallback((id: string, e: React.WheelEvent) => {
+		e.preventDefault();
+		const zoomFactor = 0.1;
+		setPaneState((prev) => {
+			const cur = prev[id] || { scale: 1, x: 0, y: 0 };
+			const newScale = Math.min(Math.max(0.1, cur.scale * (1 - Math.sign(e.deltaY) * zoomFactor)), 8);
+			return { ...prev, [id]: { ...cur, scale: newScale } };
+		});
+	}, []);
+
+	// Pan por capa (drag de la imagen)
+	const onPaneDrag = useCallback((id: string, _event: any, info: { delta: { x: number; y: number } }) => {
+		setPaneState((prev) => {
+			const cur = prev[id] || { scale: 1, x: 0, y: 0 };
+			const next = { ...cur, x: cur.x + info.delta.x, y: cur.y + info.delta.y };
+			// Clamp suave a los límites del canvas
+			const rect = canvasRef.current?.getBoundingClientRect();
+			if (rect) {
+				const maxX = rect.width / 2;
+				const maxY = rect.height / 2;
+				next.x = Math.max(-maxX, Math.min(maxX, next.x));
+				next.y = Math.max(-maxY, Math.min(maxY, next.y));
+			}
+			return { ...prev, [id]: next };
+		});
+	}, []);
+
+	const resetPane = useCallback((id: string) => {
+		setPaneState((prev) => ({ ...prev, [id]: { scale: 1, x: 0, y: 0 } }));
+	}, []);
+
+	const MultiPaneOverlay = (
+		<div
+			aria-modal="true"
+			className={cn(
+				'fixed inset-0 z-[9999] m-0 flex h-full w-full flex-col bg-black/90 p-3 backdrop-blur-md',
+				isOpen ? 'flex' : 'hidden'
+			)}
+			onClick={(e) => {
+				if (e.target === e.currentTarget) onClose();
+			}}
+			onKeyDown={(e) => {
+				if ((e.key === 'Enter' || e.key === ' ') && e.target === e.currentTarget) {
+					onClose();
+				}
+			}}
+			role="dialog"
+		>
+			{/* Controles superiores consistentes */}
+			<ToolbarActions
+				closeButtonRef={closeButtonRef}
+				onClose={onClose}
+				onCopy={handleCopy}
+				onDownload={handleDownload}
+				onReset={() =>
+					setPaneState((prev) => {
+						const next: Record<string, { scale: number; x: number; y: number }> = { ...prev };
+						for (const id of Object.keys(next)) {
+							next[id] = { scale: 1, x: 0, y: 0 };
+						}
+						return next;
+					})
+				}
+				onZoomIn={() =>
+					setPaneState((prev) => {
+						const next: Record<string, { scale: number; x: number; y: number }> = { ...prev };
+						for (const id of Object.keys(next)) {
+							next[id] = { ...next[id], scale: Math.min(8, (next[id]?.scale ?? 1) + 0.2) };
+						}
+						return next;
+					})
+				}
+				onZoomOut={() =>
+					setPaneState((prev) => {
+						const next: Record<string, { scale: number; x: number; y: number }> = { ...prev };
+						for (const id of Object.keys(next)) {
+							next[id] = { ...next[id], scale: Math.max(0.1, (next[id]?.scale ?? 1) - 0.2) };
+						}
+						return next;
+					})
+				}
+			/>
+
+			{/* Canvas central de capas */}
+			<div className="relative w-full flex-1">
+				<div className="absolute inset-0 overflow-hidden" ref={canvasRef}>
+					{paneOrder.map((id, z) => {
+						const img = images.find((p) => p.id === id);
+						if (!img) return null;
+						const st = paneState[id] || { scale: 1, x: 0, y: 0 };
+						const url = urls[id];
+						return (
+							<motion.div
+								animate={{ opacity: 1 }}
+								className="absolute inset-0 flex items-center justify-center"
+								drag
+								dragConstraints={canvasRef}
+								dragElastic={0}
+								dragMomentum={false}
+								key={id}
+								onDoubleClick={() => resetPane(id)}
+								onDrag={(e, info) => onPaneDrag(id, e, info)}
+								onWheel={(e) => handlePaneWheel(id, e)}
+								style={{ x: st.x, y: st.y, scale: st.scale, zIndex: z + 1 }}
+								transition={{ type: 'spring', stiffness: 300, damping: 30 }}
+							>
+								<img alt={img.name} className="max-h-full max-w-full object-contain" src={url} />
+							</motion.div>
+						);
+					})}
+				</div>
+			</div>
+
+			{/* Sugerencias de navegación */}
+			<div className="pointer-events-none absolute bottom-4 left-4 max-w-[300px] select-none text-muted-foreground/50 text-xs">
+				<p>Rueda: zoom • Arrastrar: mover • Doble clic: reset capa</p>
+				<p>ESC: cerrar</p>
+			</div>
+		</div>
+	);
+
+	// -------- FIN MODO MULTI-PANEL --------
 
 	const viewerContent = (
 		<dialog
@@ -602,8 +764,8 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 						setAnnounceMessage('Vista restablecida');
 					}
 				}}
-				onMouseDown={handleDragStart}
-				onTouchStart={handleDragStart}
+				onMouseDown={() => {}}
+				onTouchStart={() => {}}
 				onWheel={handleWheel}
 				ref={imageContainerRef}
 				tabIndex={-1}
@@ -611,6 +773,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 				<legend className="sr-only">Visor de archivos</legend>
 				{/* Toolbar */}
 				<ToolbarActions
+					closeButtonRef={closeButtonRef}
 					onClose={onClose}
 					onCopy={handleCopy}
 					onDownload={handleDownload}
@@ -628,7 +791,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 					key={currentImage?.id || 'no-image'}
 					transition={{ duration: 0.3 }}
 				>
-					<div className="relative flex h-full w-full items-center justify-center overflow-hidden">
+					<div className="relative flex h-full w-full items-center justify-center overflow-hidden" ref={constraintsRef}>
 						<AnimatePresence mode="wait">
 							{isLoading && (
 								<motion.div
@@ -670,6 +833,11 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 						{!isLoading && currentImage && urls[currentImage.id] && (
 							<motion.div
 								className="absolute inset-0 flex items-center justify-center"
+								drag
+								dragConstraints={constraintsRef}
+								dragElastic={0}
+								dragMomentum={false}
+								onDrag={(_e, info) => onMainDrag(_e, info as any)}
 								style={{
 									scale,
 									x: position.x,
@@ -706,9 +874,22 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	);
 
 	// No renderizar nada si no hay imágenes o el visor está cerrado
-	if (!(isOpen && images?.length && currentImage)) {
+	if (!(isOpen && images?.length)) {
 		return null;
 	}
 
+	// Si hay más de 1 imagen, usar el overlay multi-panel
+	if (images.length > 1) {
+		return MultiPaneOverlay;
+	}
+
+	// Para modo de una sola imagen, verificar que currentImage esté disponible
+	if (!currentImage) {
+		return null;
+	}
+
+	// Modo de una sola imagen (visor clásico)
 	return viewerContent;
 });
+
+// (Pane eliminado: usamos capas superpuestas en el canvas)

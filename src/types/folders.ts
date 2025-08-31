@@ -64,5 +64,7 @@ export interface FolderStatsResponse {
 		id: string;
 		name: string;
 		thumbnailUrl?: string;
+		// Algunos endpoints devuelven `thumbnail` (base64) en lugar de `thumbnailUrl`
+		thumbnail?: string;
 	}>;
 }

@@ -1,7 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { useAddTags, useAddToCollection, useToggleFavorite } from '@/lib/api/files';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { MediaItem } from '../../components/media-thumbnail';
+import { ExtendedContextMenu, type ExtendedContextMenuAction } from '../../context-menu/extended-context-menu';
 import type { ClickModifiers } from '../../types/file-browser.types';
 import { generateThumbnailUrl, getFallbackIcon, useImageCache } from '../../views/canvas-common';
 import { CanvasRenderConfig } from '../../views/canvas-config';
@@ -45,11 +48,27 @@ export function FileCanvas({
 	const selectedIds = useSelectionStore((s) => s.selectedIds);
 	const setSelectedIds = useSelectionStore((s) => s.setSelectedIds);
 	const setActiveId = useSelectionStore((s) => s.setActiveId);
+	const { openViewer } = useFileViewerStore();
+	// Mutations API
+	const toggleFavorite = useToggleFavorite();
+	const addToCollection = useAddToCollection();
+	const addTags = useAddTags();
 
 	// Estados de interacción (hover y selección por arrastre)
 	const [hoverIndex, setHoverIndex] = useState<number | null>(null);
 	const [dragStart, setDragStart] = useState<{ x: number; y: number } | null>(null);
 	const [dragCurrent, setDragCurrent] = useState<{ x: number; y: number } | null>(null);
+
+	// Estado del menú contextual
+	const [contextMenu, setContextMenu] = useState<{
+		isOpen: boolean;
+		position: { x: number; y: number } | null;
+		selectedItems: MediaItem[];
+	}>({
+		isOpen: false,
+		position: null,
+		selectedItems: [],
+	});
 
 	// Layout: columnas basado en ancho y ajuste dinámico de tamaño de celda para usar todo el ancho
 	const columns = Math.max(1, Math.floor(Math.max(0, viewport.width - gap) / (itemSize + gap)));
@@ -113,16 +132,6 @@ export function FileCanvas({
 		const startIndex = visibleRange.firstVisibleRow * columns;
 		const endIndex = Math.min(items.length - 1, (visibleRange.lastVisibleRow + 1) * columns - 1);
 
-		// Debug: log items para ver qué thumbnailUrl tienen
-		console.log('FileCanvas prefetch debug:', {
-			startIndex,
-			endIndex,
-			totalItems: items.length,
-			sampleItems: items
-				.slice(0, 3)
-				.map((it) => ({ id: it.id, thumbnailUrl: it.thumbnailUrl, name: it.name, entityType: it.entityType })),
-		});
-
 		// Generar thumbnails de manera asíncrona para los items visibles
 		const loadThumbnails = async () => {
 			for (let i = startIndex; i <= endIndex; i++) {
@@ -136,18 +145,16 @@ export function FileCanvas({
 				try {
 					// Generar thumbnail usando la misma lógica que MediaThumbnail
 					const src = await generateThumbnailUrl(it, ThumbnailQuality.MEDIUM);
-					console.log('Generated thumbnail URL for:', { key, src, entityType: it.entityType });
 
 					if (src && !src.startsWith('🎵') && !src.startsWith('🖼️') && !src.startsWith('🎥')) {
 						// Solo cargar si es una URL real (no un emoji)
 						load(key, src);
 					} else {
 						// Para fallback icons (emojis), crear un placeholder entry
-						console.log('Using fallback icon for:', { key, src, entityType: it.entityType });
 						set(key, { status: 'ready', fallbackIcon: src });
 					}
 				} catch (error) {
-					console.error('Error generating thumbnail for item:', { key, error });
+					// Silenciar errores frecuentes de generación de thumbnails para rendimiento
 					const fallback = getFallbackIcon(it.entityType);
 					set(key, { status: 'ready', fallbackIcon: fallback });
 				}
@@ -185,17 +192,7 @@ export function FileCanvas({
 		const startIndex = visibleRange.firstVisibleRow * columns;
 		const endIndex = Math.min(items.length - 1, (visibleRange.lastVisibleRow + 1) * columns - 1);
 
-		console.log('Canvas render debug:', {
-			visibleRange,
-			startIndex,
-			endIndex,
-			cacheStatus: items.slice(startIndex, Math.min(startIndex + 5, endIndex + 1)).map((it) => ({
-				id: it.id,
-				name: it.name,
-				hasThumbUrl: !!it.thumbnailUrl,
-				cacheEntry: get(it.id)?.status,
-			})),
-		});
+		// Logs de render eliminados por rendimiento
 
 		for (let i = startIndex; i <= endIndex; i++) {
 			const it = items[i];
@@ -353,15 +350,7 @@ export function FileCanvas({
 
 		if (!host) return;
 
-		// Debug logging para identificar el elemento correcto
-		console.log('🔍 FileCanvas scroll setup:', {
-			hasScrollContainer: !!scrollContainer,
-			hostElement: host.tagName,
-			hostClasses: host.className,
-			hostScrollHeight: host.scrollHeight,
-			hostClientHeight: host.clientHeight,
-			canScroll: host.scrollHeight > host.clientHeight,
-		});
+		// Eliminar logs de setup por rendimiento
 
 		const computeOffsetTop = () => {
 			if (!host) return 0;
@@ -370,32 +359,35 @@ export function FileCanvas({
 			return host.scrollTop + (selfRect.top - hostRect.top);
 		};
 
+		let rafId: number | null = null;
 		const onScroll = () => {
 			if (!host) return;
-			console.log('📜 Scroll event detected:', {
-				scrollTop: host.scrollTop,
-				scrollLeft: host.scrollLeft,
-				hasScrollContainer: !!scrollContainer,
+			if (rafId != null) return;
+			rafId = requestAnimationFrame(() => {
+				rafId = null;
+				setViewport((v) => ({
+					...v,
+					scrollTop: host.scrollTop,
+					scrollLeft: host.scrollLeft,
+					offsetTop: scrollContainer ? computeOffsetTop() : 0,
+				}));
 			});
-
-			setViewport((v) => ({
-				...v,
-				scrollTop: host.scrollTop,
-				scrollLeft: host.scrollLeft,
-				offsetTop: scrollContainer ? computeOffsetTop() : 0,
-			}));
 		};
 
 		host.addEventListener('scroll', onScroll, { passive: true });
 
 		const ro = new ResizeObserver(() => {
 			if (!host) return;
-			setViewport((v) => ({
-				...v,
-				width: Math.floor(host.clientWidth),
-				height: Math.floor(host.clientHeight),
-				offsetTop: scrollContainer ? computeOffsetTop() : 0,
-			}));
+			if (rafId != null) return;
+			rafId = requestAnimationFrame(() => {
+				rafId = null;
+				setViewport((v) => ({
+					...v,
+					width: Math.floor(host.clientWidth),
+					height: Math.floor(host.clientHeight),
+					offsetTop: scrollContainer ? computeOffsetTop() : 0,
+				}));
+			});
 		});
 		ro.observe(host);
 		ro.observe(internal);
@@ -415,6 +407,7 @@ export function FileCanvas({
 		return () => {
 			ro.disconnect();
 			host.removeEventListener('scroll', onScroll);
+			if (rafId != null) cancelAnimationFrame(rafId);
 		};
 	}, [scrollContainer]);
 
@@ -470,35 +463,193 @@ export function FileCanvas({
 			return;
 		}
 
-		// Click simple o doble click
+		// Click simple - solo manejar selección aquí
 		const idx = indexFromCoords(pos.x, pos.y);
 		if (idx === -1) return;
 		const item = items[idx];
 		if (!item) return;
 		const modifiers: ClickModifiers = { ctrlKey: e.ctrlKey, metaKey: e.metaKey, shiftKey: e.shiftKey };
-		if (e.detail >= 2) {
-			onItemDoubleClick?.(item);
-		} else {
-			onItemClick?.(item, modifiers);
+
+		// Solo manejar click simple, doble-click se maneja por separado
+		onItemClick?.(item, modifiers);
+	};
+
+	// Handler del menú contextual
+	const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
+		e.preventDefault();
+		e.stopPropagation();
+
+		const pos = getContentCoords(e);
+		const idx = indexFromCoords(pos.x, pos.y);
+
+		// Si hay click sobre un item
+		if (idx !== -1 && items[idx]) {
+			const clickedItem = items[idx];
+
+			// Si el item no está seleccionado, seleccionarlo
+			if (!selectedIds.includes(clickedItem.id)) {
+				setSelectedIds([clickedItem.id]);
+				setActiveId(clickedItem.id);
+			}
+
+			// Obtener items seleccionados actuales
+			const currentSelectedItems = items.filter((item) =>
+				(selectedIds.includes(clickedItem.id) ? selectedIds : [clickedItem.id]).includes(item.id)
+			);
+
+			setContextMenu({
+				isOpen: true,
+				position: { x: e.clientX, y: e.clientY },
+				selectedItems: currentSelectedItems,
+			});
+		} else if (contextMenu.isOpen) {
+			// Click en área vacía - cerrar menú si está abierto
+			setContextMenu({
+				isOpen: false,
+				position: null,
+				selectedItems: [],
+			});
 		}
+	};
+
+	// Cerrar menú contextual
+	const closeContextMenu = () => {
+		setContextMenu({
+			isOpen: false,
+			position: null,
+			selectedItems: [],
+		});
+	};
+
+	// Handler de acciones del menú contextual
+	const handleContextMenuAction = (
+		action: ExtendedContextMenuAction,
+		payload: { selected: MediaItem[]; targetId?: string }
+	) => {
+		const selected = payload.selected ?? [];
+		if (selected.length === 0) return;
+		switch (action) {
+			case 'open': {
+				// Abrir visor con solo el primer elemento seleccionado (modo single-image)
+				const first = selected[0];
+				if (first && first.entityType === 'image') {
+					const singleImageItem = {
+						id: first.id,
+						name: first.name,
+						type: first.entityType,
+						path: first.path || '',
+						size: first.size || 0,
+						width: (first as any).width ?? null,
+						height: (first as any).height ?? null,
+						thumbnail: null,
+						metadata: null,
+					};
+					console.log('🖱️ Abriendo visor desde menú contextual:', first.name);
+					// Abrir en modo single-image pasando solo este elemento
+					openViewer([singleImageItem] as any, 0);
+				}
+				break;
+			}
+			case 'add-to-favorites': {
+				// Toggle favorito para cada seleccionado (secuencial)
+				(async () => {
+					for (const it of selected) {
+						try {
+							await toggleFavorite.mutateAsync(it.id);
+						} catch {}
+					}
+				})();
+				break;
+			}
+			case 'add-to-collection': {
+				const targetId = payload.targetId;
+				if (!targetId) return;
+				(async () => {
+					for (const it of selected) {
+						try {
+							await addToCollection.mutateAsync({ fileId: it.id, collectionId: targetId });
+						} catch {}
+					}
+				})();
+				break;
+			}
+			case 'add-to-tag': {
+				const targetId = payload.targetId;
+				if (!targetId) return;
+				(async () => {
+					for (const it of selected) {
+						try {
+							await addTags.mutateAsync({ fileId: it.id, tags: [targetId] });
+						} catch {}
+					}
+				})();
+				break;
+			}
+			default:
+				break;
+		}
+	};
+
+	// Handler específico para doble-click
+	const handleDoubleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+		const pos = getContentCoords(e as any);
+		const idx = indexFromCoords(pos.x, pos.y);
+		if (idx === -1) return;
+		const item = items[idx];
+		if (!item) return;
+
+		console.log('🖱️ Doble-click detectado en:', item.name);
+
+		// Para doble-click, abrir SOLO la imagen seleccionada, no toda la colección
+		if (item.entityType === 'image') {
+			const imageItem = {
+				id: item.id,
+				name: item.name,
+				type: item.entityType,
+				path: item.path || '',
+				size: item.size || 0,
+				width: (item as any).width ?? null,
+				height: (item as any).height ?? null,
+				thumbnail: null,
+				metadata: null,
+			};
+			// Abrir en modo single-image pasando solo este elemento
+			openViewer([imageItem] as any, 0);
+		}
+
+		onItemDoubleClick?.(item);
 	};
 
 	const useExternal = !!scrollContainer;
 	return (
-		<div
-			className={useExternal ? 'relative w-full' : 'relative h-full w-full overflow-auto'}
-			data-testid="file-canvas"
-			onPointerDown={handlePointerDown}
-			onPointerLeave={handlePointerLeave}
-			onPointerMove={handlePointerMove}
-			onPointerUp={handlePointerUp}
-			ref={containerRef}
-			style={useExternal ? { height: viewport.height } : undefined}
-		>
-			{/* Espaciador para representar la altura total del contenido y permitir scroll */}
-			<div style={{ height: totalHeight }} />
-			{/* Canvas como overlay del viewport; el dibujo compensa el scroll interno */}
-			<canvas className="pointer-events-none absolute inset-0" ref={canvasRef} />
-		</div>
+		<>
+			<div
+				className={useExternal ? 'relative w-full' : 'relative h-full w-full overflow-auto'}
+				data-testid="file-canvas"
+				onContextMenu={handleContextMenu}
+				onDoubleClick={handleDoubleClick}
+				onPointerDown={handlePointerDown}
+				onPointerLeave={handlePointerLeave}
+				onPointerMove={handlePointerMove}
+				onPointerUp={handlePointerUp}
+				ref={containerRef}
+				role="application"
+				style={useExternal ? { height: viewport.height } : undefined}
+			>
+				{/* Espaciador para representar la altura total del contenido y permitir scroll */}
+				<div style={{ height: totalHeight }} />
+				{/* Canvas como overlay del viewport; el dibujo compensa el scroll interno */}
+				<canvas className="pointer-events-none absolute inset-0" ref={canvasRef} />
+			</div>
+
+			{/* Menú contextual */}
+			<ExtendedContextMenu
+				isOpen={contextMenu.isOpen}
+				onAction={handleContextMenuAction}
+				onClose={closeContextMenu}
+				position={contextMenu.position}
+				selectedItems={contextMenu.selectedItems}
+			/>
+		</>
 	);
 }
