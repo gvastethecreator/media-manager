@@ -38,21 +38,20 @@ export const FolderCard = memo(function FolderCard({
 			totalSize: folder.stats?.totalSize ?? folder.totalSize ?? 0,
 			// Normalizamos thumbnails: aceptar `thumbnailUrl` (que puede venir con base64 crudo)
 			// o `thumbnail` y convertir a data URL si es necesario
-			recentImageUrls:
-				(folder.recentImages || [])
-					.map((img: any) => {
-						const raw: unknown = img?.thumbnailUrl ?? img?.thumbnail ?? null;
-						if (typeof raw !== 'string' || raw.length === 0) return null;
-						const trimmed = raw.trim();
-						// Si ya es data URL, devolver tal cual
-						if (trimmed.startsWith('data:')) return trimmed;
-						// Si parece una URL/route (http(s), blob:, file:, /), dejarla como está
-						if (/^(https?:|blob:|file:|\/)/i.test(trimmed)) return trimmed;
-						// Caso contrario, asumimos base64 crudo (posible con saltos de línea) → data URL webp
-						const base64 = trimmed.replace(/\s+/g, '');
-						return `data:image/webp;base64,${base64}`;
-					})
-					.filter(Boolean) as string[],
+			recentImageUrls: (folder.recentImages || [])
+				.map((img: any) => {
+					const raw: unknown = img?.thumbnailUrl ?? img?.thumbnail ?? null;
+					if (typeof raw !== 'string' || raw.length === 0) return null;
+					const trimmed = raw.trim();
+					// Si ya es data URL, devolver tal cual
+					if (trimmed.startsWith('data:')) return trimmed;
+					// Si parece una URL/route (http(s), blob:, file:, /), dejarla como está
+					if (/^(https?:|blob:|file:|\/)/i.test(trimmed)) return trimmed;
+					// Caso contrario, asumimos base64 crudo (posible con saltos de línea) → data URL webp
+					const base64 = trimmed.replace(/\s+/g, '');
+					return `data:image/webp;base64,${base64}`;
+				})
+				.filter(Boolean) as string[],
 			childrenCount: folder.stats?.folderCount ?? 0,
 			lastIndexed: folder.lastIndexed ?? null,
 		};
@@ -87,8 +86,8 @@ export const FolderCard = memo(function FolderCard({
 			style={
 				tcgMode
 					? {
-						boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
-					}
+							boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
+						}
 					: {}
 			}
 		>
