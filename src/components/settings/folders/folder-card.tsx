@@ -4,7 +4,6 @@ import type { ReactNode } from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { computeIsReindexing } from '@/components/settings/folders/utils/is-reindexing';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader } from '@/components/ui/card';
 import { useFolderStats } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
 import type { FolderStatsResponse } from '@/types/folders';
@@ -46,20 +45,20 @@ interface FolderIconProps {
 const FolderIcon = memo(({ folder, size = 'md' }: FolderIconProps) => {
 	const sizeClasses = {
 		sm: 'h-4 w-4',
-		md: 'h-5 w-5',
-		lg: 'h-6 w-6',
+		md: 'h-8 w-8',
+		lg: 'h-8 w-8',
 	};
 
 	const containerClasses = {
 		sm: 'h-6 w-6',
-		md: 'h-8 w-8',
-		lg: 'h-10 w-10',
+		md: 'h-10 w-10',
+		lg: 'h-12 w-12',
 	};
 
 	return (
 		<div
 			className={cn(
-				'flex items-center justify-center rounded-lg bg-gradient-to-br from-primary/10 to-primary/5 ring-1 ring-primary/10',
+				'flex items-center justify-center ring-1 ring-primary/10',
 				containerClasses[size]
 			)}
 		>
@@ -83,20 +82,20 @@ interface FolderMetadataProps {
 }
 
 const FolderMetadata = memo(({ folder, parentFolderName, indexStatus, statusMessage }: FolderMetadataProps) => (
-	<div className="min-w-0 flex-1 space-y-1 grid grid-cols-2 content-start">
+	<div className="flex min-w-0 flex-1 align-middle content-start space-y-0">
 		{/* Breadcrumb */}
 		{parentFolderName && (
-			<div className="flex items-center text-muted-foreground/70 text-xs inline-block">
+			<div className="inline-block flex items-center text-muted-foreground/70 text-xs">
 				<span className="truncate">{parentFolderName}</span>
 				<span className="font-medium">/</span>
 			</div>
 		)}
 
 		{/* Folder Name */}
-		<span className="truncate inline-block font-semibold text-foreground text-md leading-tight">{folder.name}</span>
+		<h4 className="inline-block truncate font-semibold text-foreground text-md leading-tight">{folder.name}</h4>
 
 		{/* Status Row */}
-		<div className="flex items-center gap-2">
+		<div className="flex items-center gap-2 absolute bottom-0 right-0">
 			<FolderIndexStatusBadge lastIndexed={folder.lastIndexed} status={indexStatus} />
 
 			{/* Favorite indicator */}
@@ -138,7 +137,7 @@ const FolderThumbnail = memo(({ folderStats, isCompact = false, isLoading = fals
 		return (
 			<div className={cn('relative flex-shrink-0 overflow-hidden', size)}>
 				<ThumbnailGrid
-					images={folderStats.recentImages.slice(0, 4)}
+					images={folderStats.recentImages.slice(0, 12)}
 					showCount={false}
 					totalImages={folderStats.totalImages || 0}
 				/>
@@ -324,10 +323,11 @@ export const FolderCard = memo(
 						showCompleteAnimation={showCompleteAnimation}
 					/>
 
-					<div className="p-1 relative">
+					<div className="relative p-1">
 						<div className="flex items-start justify-between gap-3">
 							{/* Left Section: Icon + Metadata */}
 							<div className="flex min-w-0 flex-1 items-start gap-3">
+								<FolderThumbnail folderStats={folderStats} isCompact isLoading={childStatsQuery.isLoading} />
 								<FolderIcon folder={folder} size="md" />
 								<FolderMetadata
 									folder={folder}
@@ -367,7 +367,7 @@ export const FolderCard = memo(
 					<div className="space-y-3 pt-0">
 						{/* Content Section */}
 						<div className="flex items-center gap-3">
-							<FolderThumbnail folderStats={folderStats} isCompact isLoading={childStatsQuery.isLoading} />
+
 							<FolderStatsSummary folder={folder} folderStats={folderStats} isCompact />
 						</div>
 

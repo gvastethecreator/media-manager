@@ -43,7 +43,7 @@ const MemoizedErrorWrapper = memo(function MemoizedErrorWrapper({
 	displayError,
 	setErrorMessage,
 	setError,
-	loadStats
+	loadStats,
 }: {
 	displayError: string;
 	setErrorMessage: (msg: string | null) => void;
@@ -166,10 +166,7 @@ export function FoldersSettings() {
 							<FolderIcon className="h-4 w-4 text-primary" />
 							<span>Gestión de Carpetas</span>
 							{(isGloballyProcessing || isProcessing) && (
-								<div
-									className="flex items-center gap-2 text-muted-foreground text-sm"
-									data-testid="reindex-status"
-								>
+								<div className="flex items-center gap-2 text-muted-foreground text-sm" data-testid="reindex-status">
 									<RefreshCw className="h-4 w-4 animate-spin text-primary motion-reduce:animate-none" />
 									<span className="font-medium">
 										{processStatus?.message ||
@@ -233,7 +230,7 @@ export function FoldersSettings() {
 				<Separator className="my-0" />
 
 				<div className="p-3">
-					<div className="space-y-3">
+					<div className="space-y-2">
 						{/* Formulario para agregar carpetas */}
 						<FolderForm isLoading={isLoading} isProcessing={isProcessing} onAddFolder={handleAddFolder} />
 
@@ -290,7 +287,7 @@ const FoldersGrid = memo(function FoldersGrid({
 		<div
 			className={cn(
 				'grid content-start items-stretch',
-				'grid-cols-[repeat(auto-fill,minmax(280px,1fr))]',
+				'grid-cols-[repeat(auto-fill,minmax(330px,1fr))]',
 				'auto-rows-fr gap-3 [grid-auto-flow:row_dense]'
 			)}
 			data-density="compact"

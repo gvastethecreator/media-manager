@@ -28,7 +28,11 @@ export function FolderCardImages({
 		return (
 			<div
 				className={cn('relative h-40 w-full overflow-hidden', tcgMode ? 'border-white/10 border-b' : '')}
-				style={isLargeDataUrl(featuredImage) ? { backgroundImage: `url(${featuredImage})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+				style={
+					isLargeDataUrl(featuredImage)
+						? { backgroundImage: `url(${featuredImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+						: undefined
+				}
 			>
 				{/* Imagen principal */}
 				{!isLargeDataUrl(featuredImage) && (
@@ -90,7 +94,11 @@ export function FolderCardImages({
 					<div
 						className="relative overflow-hidden"
 						key={`recent-image-${generateImageKey(image, index)}`}
-						style={isLargeDataUrl(image) ? { backgroundImage: `url(${image})`, backgroundSize: 'cover', backgroundPosition: 'center' } : undefined}
+						style={
+							isLargeDataUrl(image)
+								? { backgroundImage: `url(${image})`, backgroundSize: 'cover', backgroundPosition: 'center' }
+								: undefined
+						}
 					>
 						{!isLargeDataUrl(image) && (
 							<img
@@ -153,8 +161,8 @@ export function FolderCardImages({
 			style={
 				tcgMode
 					? {
-						backgroundImage: `radial-gradient(circle at 70% 30%, ${primaryColor}30 0%, transparent 50%)`,
-					}
+							backgroundImage: `radial-gradient(circle at 70% 30%, ${primaryColor}30 0%, transparent 50%)`,
+						}
 					: {}
 			}
 		>
