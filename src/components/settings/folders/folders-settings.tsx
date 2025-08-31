@@ -1,8 +1,6 @@
 import { AlertCircle, EraserIcon, Folder, FolderIcon, Info, RefreshCw } from 'lucide-react';
-import { motion } from 'motion/react';
-import { useMemo, useState } from 'react';
+import { memo, useMemo, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -14,26 +12,19 @@ import { FoldersStats } from './folders-stats';
 import { useFolderStats } from './hooks/use-folder-stats';
 import { useFolders } from './hooks/use-folders';
 
-function EmptyFoldersState() {
+const EmptyFoldersState = memo(function EmptyFoldersState() {
 	return (
-		<motion.div
-			animate={{
-				opacity: [0, 1],
-				y: [20, 0],
-			}}
-			className="col-span-full py-8 text-center"
-		>
+		<div className="col-span-full py-8 text-center">
 			<Folder className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
 			<p className="text-muted-foreground text-sm">No hay carpetas indexadas</p>
 			<p className="mt-1 text-muted-foreground/75 text-xs">Agrega una carpeta para comenzar a indexar imágenes</p>
-		</motion.div>
+		</div>
 	);
-}
+});
 
-// Subcomponentes auxiliares
-function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void }) {
+const ErrorCard = memo(function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void }) {
 	return (
-		<Card className="rounded-sm border-none bg-muted/30">
+		<div className="rounded-sm border-none bg-muted/30">
 			<div className="flex flex-col gap-2 p-3">
 				<div className="flex items-center gap-2 text-destructive">
 					<AlertCircle className="h-4 w-4" />
@@ -43,11 +34,33 @@ function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void 
 					Reintentar
 				</Button>
 			</div>
-		</Card>
+		</div>
 	);
-}
+});
 
-function createHierarchicalOrder(folderList: any[]) {
+// Optimización adicional: memoizar el callback de retry para evitar re-renders del ErrorCard
+const MemoizedErrorWrapper = memo(function MemoizedErrorWrapper({
+	displayError,
+	setErrorMessage,
+	setError,
+	loadStats
+}: {
+	displayError: string;
+	setErrorMessage: (msg: string | null) => void;
+	setError: (err: string | null) => void;
+	loadStats: () => void;
+}) {
+	const handleRetry = useCallback(() => {
+		setErrorMessage(null);
+		setError(null);
+		loadStats();
+	}, [setErrorMessage, setError, loadStats]);
+
+	return <ErrorCard message={displayError} onRetry={handleRetry} />;
+});
+
+// Optimización: función memoizada para la ordenación jerárquica
+const createHierarchicalOrder = (folderList: any[]) => {
 	const result: any[] = [];
 
 	// Obtener carpetas padre (sin parentId) y ordenarlas alfabéticamente
@@ -73,13 +86,14 @@ function createHierarchicalOrder(folderList: any[]) {
 	result.push(...orphanFolders);
 
 	return result;
-}
+};
 
 export function FoldersSettings() {
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-	// Hook para estadísticas generales de carpetas
-	const { data: generalStats, isLoading: isStatsLoading, error: statsError } = useFolderStats();
+	// Hook para estadísticas generales de carpetas (memoizado para evitar re-renders)
+	const memoizedStatsQuery = useFolderStats();
+	const { data: generalStats, isLoading: isStatsLoading, error: statsError } = memoizedStatsQuery;
 
 	const {
 		folders,
@@ -102,14 +116,12 @@ export function FoldersSettings() {
 		setError,
 	} = useFolders();
 
-	// Derivar nombre de carpeta actual cuando hay reindex global
+	// Derivar nombre de carpeta actual cuando hay reindex global (optimizado)
 	const currentFolderName = useMemo(() => {
-		if (!globalReindexStatus.currentFolder) {
-			return null;
-		}
+		if (!globalReindexStatus.currentFolder) return null;
 		const f = folders.find((x) => x.id === globalReindexStatus.currentFolder);
 		return f?.name ?? null;
-	}, [folders, globalReindexStatus.currentFolder]);
+	}, [globalReindexStatus.currentFolder, folders]);
 
 	// Memoizar ordenación/derivaciones para evitar trabajo repetido
 	const orderedFolders = useMemo(() => {
@@ -135,32 +147,30 @@ export function FoldersSettings() {
 
 	if (displayError) {
 		return (
-			<ErrorCard
-				message={displayError}
-				onRetry={() => {
-					setErrorMessage(null);
-					setError(null);
-					loadStats();
-				}}
+			<MemoizedErrorWrapper
+				displayError={displayError}
+				setErrorMessage={setErrorMessage}
+				setError={setError}
+				loadStats={loadStats}
 			/>
 		);
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-1">
 			{/* Sección de gestión de carpetas */}
-			<Card className="rounded-sm border-none bg-muted/30">
-				<CardHeader className="p-3 pb-2" data-testid="folders-settings">
-					<CardTitle className="flex items-center justify-between font-medium text-base text-muted-foreground">
+			<div className="border-none bg-muted/30">
+				<div className="p-4 pb-2" data-testid="folders-settings">
+					<div className="flex items-center justify-between font-medium text-base text-muted-foreground">
 						<div className="flex items-center gap-2">
 							<FolderIcon className="h-4 w-4 text-primary" />
 							<span>Gestión de Carpetas</span>
 							{(isGloballyProcessing || isProcessing) && (
 								<div
-									className="flex animate-pulse items-center gap-2 text-muted-foreground text-sm"
+									className="flex items-center gap-2 text-muted-foreground text-sm"
 									data-testid="reindex-status"
 								>
-									<RefreshCw className="h-4 w-4 animate-spin text-primary" />
+									<RefreshCw className="h-4 w-4 animate-spin text-primary motion-reduce:animate-none" />
 									<span className="font-medium">
 										{processStatus?.message ||
 											(isGloballyProcessing ? 'Reindexando todas las carpetas...' : 'Procesando carpeta...')}
@@ -217,12 +227,12 @@ export function FoldersSettings() {
 									: 'Reindexar todo'}
 							</Button>
 						</div>
-					</CardTitle>
-				</CardHeader>
+					</div>
+				</div>
 
 				<Separator className="my-0" />
 
-				<CardContent className="p-3">
+				<div className="p-3">
 					<div className="space-y-3">
 						{/* Formulario para agregar carpetas */}
 						<FolderForm isLoading={isLoading} isProcessing={isProcessing} onAddFolder={handleAddFolder} />
@@ -244,8 +254,8 @@ export function FoldersSettings() {
 						{/* Progress bar para reindexado global */}
 						<GlobalReindexProgress progress={globalReindexStatus.progress} show={globalReindexStatus.isProcessing} />
 					</div>
-				</CardContent>
-			</Card>
+				</div>
+			</div>
 
 			{/* Estadísticas generales al final */}
 			{generalStats && !isStatsLoading && <FoldersStats stats={generalStats} />}
@@ -253,7 +263,7 @@ export function FoldersSettings() {
 	);
 }
 
-function FoldersGrid({
+const FoldersGrid = memo(function FoldersGrid({
 	orderedFolders,
 	folders,
 	progressByFolder,
@@ -307,7 +317,7 @@ function FoldersGrid({
 			{folders.length === 0 && <EmptyFoldersState />}
 		</div>
 	);
-}
+});
 
 function GlobalReindexProgress({ show, progress }: { show: boolean; progress: number }) {
 	if (!show) {
