@@ -1,7 +1,7 @@
-Comando: bunx tsc --noEmit --pretty
-Fecha: 2025-08-31T18:36:51.053Z
+Comando: bunx biome format --write .
+Fecha: 2025-08-31T21:11:42.082Z
 Directorio: D:\DEV\image-manager
 Modo tolerante: SÍ
 Tipo: Linting
 ===============================================
-^C
+Formatted 1715 files in 2s. Fixed 3 files.
