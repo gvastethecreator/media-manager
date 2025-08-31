@@ -33,25 +33,37 @@ export function useImageCache() {
 				const imgEl = new Image();
 				imgEl.decoding = 'async';
 				imgEl.loading = 'eager';
-				imgEl.crossOrigin = 'anonymous';
+
+				// Solo configurar crossOrigin si la imagen es de otro dominio
+				if (src.startsWith('http') && !src.startsWith(window.location.origin)) {
+					imgEl.crossOrigin = 'anonymous';
+				}
+
 				imgEl.src = src;
 				await new Promise((resolve, reject) => {
 					imgEl.onload = resolve;
-					imgEl.onerror = reject;
-					setTimeout(() => reject(new Error('Timeout')), 10_000);
+					imgEl.onerror = (error) => {
+						console.warn(`Failed to load image: ${src}`, error);
+						reject(error);
+					};
+					// Timeout más generoso para imágenes grandes
+					setTimeout(() => reject(new Error('Image load timeout')), 15_000);
 				});
+
 				let bmp: ImageBitmap | HTMLImageElement;
 				if ('createImageBitmap' in window) {
 					try {
 						bmp = await createImageBitmap(imgEl);
-					} catch {
+					} catch (error) {
+						console.warn(`Failed to create ImageBitmap for ${src}, using HTMLImageElement`, error);
 						bmp = imgEl;
 					}
 				} else {
 					bmp = imgEl;
 				}
 				cache.current.set(key, { status: 'ready', image: bmp, readyAt: performance.now() });
-			} catch {
+			} catch (error) {
+				console.warn(`Failed to load image ${src}:`, error);
 				cache.current.set(key, { status: 'error' });
 			} finally {
 				pending.current.delete(key);
@@ -119,64 +131,80 @@ export const generateThumbnailUrl = async (
 			url = thumbnailCache.get(key) || '';
 			if (!url) {
 				url = await generateAdvancedImageThumbnail(item as any);
-				if (url) {
+				if (url && !url.startsWith('🖼️')) {
 					cleanupThumbCache();
 					thumbnailCache.set(key, url);
 				}
 			}
-			return url || item.thumbnailUrl || getFallbackIcon(item.entityType);
+			// Si no se pudo generar una URL válida, usar fallback
+			if (!url || url.startsWith('🖼️')) {
+				return getFallbackIcon(item.entityType);
+			}
+			return url;
 		}
 		if (item.entityType === 'video') {
 			const key = cacheKeyFor(item, 'videoPoster', quality);
 			url = thumbnailCache.get(key) || '';
 			if (!url) {
 				url = await generateAdvancedVideoThumbnail(item as any, { timeOffset: 0 });
-				if (url) {
+				if (url && !url.startsWith('🎥')) {
 					cleanupThumbCache();
 					thumbnailCache.set(key, url);
 				}
 			}
-			return url || item.thumbnailUrl || getFallbackIcon(item.entityType);
+			if (!url || url.startsWith('🎥')) {
+				return getFallbackIcon(item.entityType);
+			}
+			return url;
 		}
 		if (item.entityType === 'jsonFile') {
 			const key = cacheKeyFor(item, 'json', quality);
 			url = thumbnailCache.get(key) || '';
 			if (!url) {
 				url = await generateJsonPreview(item as any);
-				if (url) {
+				if (url && !url.startsWith('📋')) {
 					cleanupThumbCache();
 					thumbnailCache.set(key, url);
 				}
 			}
-			return url || getFallbackIcon(item.entityType);
+			if (!url || url.startsWith('📋')) {
+				return getFallbackIcon(item.entityType);
+			}
+			return url;
 		}
 		if (item.entityType === 'file3d') {
 			const key = cacheKeyFor(item, 'file3d', quality);
 			url = thumbnailCache.get(key) || '';
 			if (!url) {
 				url = await generate3DModelThumbnail(item as any);
-				if (url) {
+				if (url && !url.startsWith('🎲')) {
 					cleanupThumbCache();
 					thumbnailCache.set(key, url);
 				}
 			}
-			return url || getFallbackIcon(item.entityType);
+			if (!url || url.startsWith('🎲')) {
+				return getFallbackIcon(item.entityType);
+			}
+			return url;
 		}
 		if (item.entityType === 'audio') {
 			const key = cacheKeyFor(item, 'audio', quality);
 			url = thumbnailCache.get(key) || '';
 			if (!url) {
 				url = await generateAudioWaveform(item as any);
-				if (url) {
+				if (url && !url.startsWith('🎵')) {
 					cleanupThumbCache();
 					thumbnailCache.set(key, url);
 				}
 			}
-			return url || getFallbackIcon(item.entityType);
+			if (!url || url.startsWith('🎵')) {
+				return getFallbackIcon(item.entityType);
+			}
+			return url;
 		}
 		return getFallbackIcon(item.entityType);
 	} catch (error) {
-		console.error('Error generating thumbnail:', error);
+		console.error('Error generating thumbnail for item:', item.name || item.id, error);
 		return getFallbackIcon(item.entityType);
 	}
 };

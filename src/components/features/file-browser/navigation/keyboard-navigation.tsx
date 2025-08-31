@@ -51,6 +51,62 @@ export function useKeyboardNavigation({
 		return 0;
 	}, [activeId, selectedIds, items]);
 
+	// Helper para scroll en vistas canvas
+	const scrollToCanvasItem = useCallback((container: HTMLElement, index: number, viewMode: string) => {
+		if (!container) return;
+
+		const containerHeight = container.clientHeight;
+		const containerWidth = container.clientWidth;
+
+		let targetY = 0;
+
+		switch (viewMode) {
+			case 'list':
+			case 'table': {
+				const rowHeight = 60; // altura estimada de fila
+				targetY = index * rowHeight;
+				break;
+			}
+			case 'grid':
+			case 'cards': {
+				const itemSize = viewMode === 'cards' ? 180 : 120;
+				const gap = 8;
+				const columns = Math.max(1, Math.floor((containerWidth + gap) / (itemSize + gap)));
+				const row = Math.floor(index / columns);
+				const rowHeight = itemSize + gap;
+				targetY = row * rowHeight;
+				break;
+			}
+			case 'masonry': {
+				// Para masonry es más complejo, usar scroll aproximado
+				const columnWidth = 200;
+				const columns = Math.max(1, Math.floor(containerWidth / columnWidth));
+				const approxRowHeight = 250; // altura promedio
+				const row = Math.floor(index / columns);
+				targetY = row * approxRowHeight;
+				break;
+			}
+			case 'single': {
+				// Single view no necesita scroll vertical
+				return;
+			}
+			default: {
+				const itemSize = 120;
+				const columns = Math.max(1, Math.floor(containerWidth / itemSize));
+				const row = Math.floor(index / columns);
+				targetY = row * itemSize;
+				break;
+			}
+		}
+
+		// Centrar el item en la vista
+		const centerY = targetY - containerHeight / 2;
+		container.scrollTo({
+			top: Math.max(0, centerY),
+			behavior: 'smooth',
+		});
+	}, []);
+
 	// Scroll para mantener el item visible - mejorado para diferentes vistas
 	const scrollToItem = useCallback(
 		(index: number) => {
@@ -108,64 +164,8 @@ export function useKeyboardNavigation({
 				scrollToCanvasItem(container, index, viewMode);
 			}
 		},
-		[containerRef, items.length, viewMode]
+		[containerRef, items.length, viewMode, scrollToCanvasItem]
 	);
-
-	// Helper para scroll en vistas canvas
-	const scrollToCanvasItem = useCallback((container: HTMLElement, index: number, viewMode: string) => {
-		if (!container) return;
-
-		const containerHeight = container.clientHeight;
-		const containerWidth = container.clientWidth;
-
-		let targetY = 0;
-
-		switch (viewMode) {
-			case 'list':
-			case 'table': {
-				const rowHeight = 60; // altura estimada de fila
-				targetY = index * rowHeight;
-				break;
-			}
-			case 'grid':
-			case 'cards': {
-				const itemSize = viewMode === 'cards' ? 180 : 120;
-				const gap = 8;
-				const columns = Math.max(1, Math.floor((containerWidth + gap) / (itemSize + gap)));
-				const row = Math.floor(index / columns);
-				const rowHeight = itemSize + gap;
-				targetY = row * rowHeight;
-				break;
-			}
-			case 'masonry': {
-				// Para masonry es más complejo, usar scroll aproximado
-				const columnWidth = 200;
-				const columns = Math.max(1, Math.floor(containerWidth / columnWidth));
-				const approxRowHeight = 250; // altura promedio
-				const row = Math.floor(index / columns);
-				targetY = row * approxRowHeight;
-				break;
-			}
-			case 'single': {
-				// Single view no necesita scroll vertical
-				return;
-			}
-			default: {
-				const itemSize = 120;
-				const columns = Math.max(1, Math.floor(containerWidth / itemSize));
-				const row = Math.floor(index / columns);
-				targetY = row * itemSize;
-				break;
-			}
-		}
-
-		// Centrar el item en la vista
-		const centerY = targetY - containerHeight / 2;
-		container.scrollTo({
-			top: Math.max(0, centerY),
-			behavior: 'smooth',
-		});
-	}, []);
 
 	// Calcular navegación basada en el view mode - mejorado
 	const getNavigationIndices = useCallback(
@@ -182,8 +182,6 @@ export function useKeyboardNavigation({
 							return Math.max(0, currentIndex - 1);
 						case 'down':
 							return Math.min(itemCount - 1, currentIndex + 1);
-						case 'left':
-						case 'right':
 						default:
 							return currentIndex; // No cambio en modo lista
 					}

@@ -3,7 +3,7 @@ import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
 
 interface ThumbnailGridProps {
-	images: Array<{ id: string; name: string; thumbnailUrl?: string }>;
+	images: Array<{ id: string; name: string; thumbnailUrl?: string; thumbnail?: string }>;
 	totalImages: number;
 	className?: string;
 	showCount?: boolean;
@@ -26,28 +26,35 @@ export function ThumbnailGrid({ images, totalImages, className, showCount = true
 				{/* Mostrar imágenes disponibles */}
 				{Array.from({ length: 4 }).map((_, index) => {
 					const image = displayImages[index];
+					const rawThumb = image?.thumbnailUrl || image?.thumbnail;
+					// Normaliza a data URL si parece base64 sin prefijo
+					const normalizedUrl = rawThumb
+						? rawThumb.startsWith('data:') || rawThumb.startsWith('http') || rawThumb.startsWith('/')
+							? rawThumb
+							: `data:image/webp;base64,${rawThumb}`
+						: undefined;
 
 					return (
 						<motion.div
 							animate={{ opacity: 1, scale: 1 }}
-							className="overflow-hidden rounded-sm border bg-muted"
+							className="overflow-hidden border-1 border-muted bg-muted"
 							initial={{ opacity: 0, scale: 0.8 }}
 							key={image?.id || `slot-${index}`}
 							transition={{ duration: 0.2, delay: index * 0.02 }}
 						>
-							{image?.thumbnailUrl && (
+							{normalizedUrl ? (
 								<div
 									className="h-full w-full bg-center bg-cover transition-transform hover:scale-110"
-									style={{ backgroundImage: `url(${image.thumbnailUrl})` }}
-									title={image.name}
+									style={{ backgroundImage: `url(${normalizedUrl})` }}
+									title={image?.name}
 								/>
-							)}
-							{image && !image.thumbnailUrl && (
-								<div className="flex h-full w-full items-center justify-center">
-									<ImageIcon className="h-2 w-2 text-muted-foreground" />
+							) : image ? (
+								<div className="flex h-full w-full items-center justify-center bg-muted/50">
+									<ImageIcon className="h-3 w-3 text-muted-foreground/60" />
 								</div>
+							) : (
+								<div className="h-full w-full border-2 border-muted-foreground/20 border-dashed bg-muted/30" />
 							)}
-							{!image && <div className="h-full w-full border border-muted-foreground/20 border-dashed bg-muted/30" />}
 						</motion.div>
 					);
 				})}
