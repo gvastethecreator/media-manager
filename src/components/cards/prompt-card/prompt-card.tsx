@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { motion } from '@/components/ui/motion-shim';
-import { usePrompt, useRecentPromptImages } from '@/lib/api/prompts';
+import { useRecentPromptImages } from '@/lib/api/prompts';
 import { cn } from '@/lib/utils';
 import type { PromptWithStats } from '@/types/entities/prompt';
 import { CardContainer } from '../card-container';
@@ -9,8 +9,8 @@ import { PromptCardFooter } from './prompt-card-footer';
 import { PromptCardImages } from './prompt-card-images';
 
 export interface PromptCardProps {
-	/** ID del prompt */
-	promptId: string;
+	/** Prompt a mostrar */
+	prompt: PromptWithStats;
 	/** Si está en modo TCG con efectos visuales especiales */
 	tcgMode?: boolean;
 	/** Si está en modo compacto con menos información */
@@ -18,7 +18,7 @@ export interface PromptCardProps {
 	/** Deshabilitar interacciones con la tarjeta */
 	disabled?: boolean;
 	/** Función a ejecutar al hacer clic */
-	onClick?: (promptData: PromptWithStats) => void;
+	onClick?: () => void;
 	/** Si la tarjeta está seleccionada */
 	isSelected?: boolean;
 	/** Clases CSS adicionales */
@@ -125,59 +125,25 @@ function PromptCardErrorState({ error, className }: { error: any; className?: st
 	);
 }
 
-// Hook personalizado para manejar la lógica del prompt
-function usePromptCardData(promptId: string) {
-	const { data: prompt, isLoading, error } = usePrompt(promptId);
-	const { data: recentImagesData } = useRecentPromptImages(promptId);
-
-	const promptData = useMemo(() => {
-		if (!prompt) {
-			return null;
-		}
-
-		return {
-			name: prompt.name ?? '',
-			emoji: prompt.emoji ?? '🎯',
-			baseColor: prompt.color ?? '#0ea5e9',
-			description: prompt.description ?? '',
-			content: prompt.content ?? '',
-			category: prompt.category ?? 'general',
-			parameters: prompt.parameters ?? {},
-			stats: prompt.stats,
-			count: prompt._count,
-			createdAt: prompt.createdAt,
-			updatedAt: prompt.updatedAt,
-		};
-	}, [prompt]);
-
-	return {
-		prompt,
-		promptData,
-		recentImagesData,
-		isLoading,
-		error,
-	};
-}
-
 // Hook para manejar interacciones
-function usePromptCardInteractions(prompt: any, onClickHandler?: (promptData: any) => void, disabled?: boolean) {
+function usePromptCardInteractions(prompt: any, onClickHandler?: () => void, disabled?: boolean) {
 	const [isHovered, setIsHovered] = useState(false);
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
-			if (onClickHandler && (e.key === 'Enter' || e.key === ' ') && prompt) {
+			if (onClickHandler && (e.key === 'Enter' || e.key === ' ')) {
 				e.preventDefault();
-				onClickHandler(prompt);
+				onClickHandler();
 			}
 		},
-		[onClickHandler, prompt]
+		[onClickHandler]
 	);
 
 	const handleClick = useCallback(() => {
-		if (!disabled && onClickHandler && prompt) {
-			onClickHandler(prompt);
+		if (!disabled && onClickHandler) {
+			onClickHandler();
 		}
-	}, [disabled, onClickHandler, prompt]);
+	}, [disabled, onClickHandler]);
 
 	const handleMouseEnter = useCallback(() => setIsHovered(true), []);
 	const handleMouseLeave = useCallback(() => setIsHovered(false), []);
@@ -233,7 +199,7 @@ function usePromptCardCounts(promptData: any) {
  * Incluye efectos visuales, soporte para relaciones y parámetros.
  */
 function PromptCardComponent({
-	promptId,
+	prompt,
 	tcgMode = true,
 	compact = false,
 	disabled = false,
@@ -242,29 +208,26 @@ function PromptCardComponent({
 	className,
 	style,
 }: PromptCardProps) {
-	const { prompt, promptData, recentImagesData, isLoading, error } = usePromptCardData(promptId);
+	// Cargar imágenes recientes para el prompt
+	const { data: recentImagesData } = useRecentPromptImages(prompt.id);
 	const { isHovered, handleKeyDown, handleClick, handleMouseEnter, handleMouseLeave } = usePromptCardInteractions(
 		prompt,
 		onClick,
 		disabled
 	);
-	const { imagesCount, videosCount, tagsCount, relationCounts, totalRelations } = usePromptCardCounts(promptData);
+	const { imagesCount, videosCount, tagsCount, relationCounts, totalRelations } = usePromptCardCounts(prompt);
 
-	// Estados tempranos
-	if (isLoading) {
-		return <PromptCardLoadingState className={className} />;
-	}
-
-	if (error || !prompt || !promptData) {
-		return <PromptCardErrorState className={className} error={error} />;
+	// Validación simple de prompt requerido
+	if (!prompt) {
+		return <PromptCardErrorState className={className} error="Prompt no encontrado" />;
 	}
 
 	// Calcular propiedades usando helper
-	const { primaryColor, secondaryColor, cardStyle } = calculateCardProps(promptData, tcgMode, totalRelations, style);
+	const { primaryColor, secondaryColor, cardStyle } = calculateCardProps(prompt, tcgMode, totalRelations, style);
 
 	return (
 		<motion.div
-			aria-label={`Prompt: ${promptData.name}`}
+			aria-label={`Prompt: ${prompt.name}`}
 			className={cn(
 				'w-[300px] md:w-[320px]',
 				tcgMode ? 'h-[470px]' : 'h-auto',
@@ -300,25 +263,25 @@ function PromptCardComponent({
 						/>
 					)}
 					<PromptCardContent
-						category={promptData.category}
+						category={prompt.category || undefined}
 						compact={compact}
-						content={promptData.content}
-						description={promptData.description}
-						emoji={promptData.emoji}
-						name={promptData.name}
-						parameters={promptData.parameters}
+						content={prompt.content || undefined}
+						description={prompt.description}
+						emoji={prompt.emoji}
+						name={prompt.name}
+						parameters={prompt.parameters || undefined}
 						primaryColor={primaryColor}
 						relationCounts={relationCounts}
 						tcgMode={tcgMode}
 					/>
 					<PromptCardFooter
-						createdAt={promptData.createdAt}
+						createdAt={prompt.createdAt}
 						imagesCount={imagesCount}
 						primaryColor={primaryColor}
 						secondaryColor={secondaryColor}
 						tagsCount={tagsCount}
 						tcgMode={tcgMode}
-						updatedAt={promptData.updatedAt}
+						updatedAt={prompt.updatedAt}
 						videosCount={videosCount}
 					/>
 				</div>

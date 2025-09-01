@@ -23,6 +23,7 @@ import { PropertyCard } from './property-card/property-card';
 import { TagCard } from './tag-card/tag-card';
 // Importar el nuevo sistema de layouts
 import type { BaseCardProps, CardVariant } from './types/card-layout.types';
+import { UploadedImageCard } from './uploaded-image-card';
 import { VideoCard } from './video-card/video-card';
 import { WildcardCard } from './wildcard-card/wildcard-card';
 import { WorldItemCard } from './world-item-card/world-item-card';
@@ -145,7 +146,7 @@ const renderVideo = ({ entity, isSelected, className, config, finalOnClick }: Re
 			isSelected={isSelected}
 			onClick={finalOnClick ? () => (finalOnClick as any)({} as any) : undefined}
 			tcgMode={config.variant === 'tcg'}
-			videoId={(entity as any).id}
+			video={entity as any}
 		/>
 		<div className="sr-only" id={`entity-${(entity as any).id}-description`}>
 			{`Video ${(entity as any).name || 'sin nombre'}. ${isSelected ? 'Seleccionado.' : ''} Presiona Enter para abrir, Espacio para seleccionar.`}
@@ -261,7 +262,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 			<DocumentCard
 				className={ctx.className}
 				document={ctx.entity as any}
-				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)() : undefined}
 			/>
 		</div>
 	),
@@ -293,7 +294,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 			<PlaceCard
 				className={ctx.className}
 				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
-				placeId={(ctx.entity as any).id}
+				place={ctx.entity as any}
 			/>
 		</div>
 	),
@@ -309,6 +310,14 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 			/>
 		</div>
 	),
+	'uploaded-image': (ctx) => (
+		<div
+			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
+			data-item-id={(ctx.entity as any).id}
+		>
+			<UploadedImageCard className={ctx.className} uploadedImage={ctx.entity as any} />
+		</div>
+	),
 	concept: (ctx) => (
 		<div
 			className={`entity-card ${ctx.isSelected ? 'entity-card--selected' : ''}`}
@@ -316,8 +325,8 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 		>
 			<ConceptCard
 				className={ctx.className}
-				conceptId={(ctx.entity as any).id}
-				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
+				concept={ctx.entity as any}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)() : undefined}
 			/>
 		</div>
 	),
@@ -329,7 +338,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 			<PromptCard
 				className={ctx.className}
 				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
-				promptId={(ctx.entity as any).id}
+				prompt={ctx.entity as any}
 			/>
 		</div>
 	),
@@ -341,7 +350,7 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 			<PropertyCard
 				className={ctx.className}
 				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
-				propertyId={(ctx.entity as any).id}
+				property={ctx.entity as any}
 			/>
 		</div>
 	),
@@ -352,8 +361,8 @@ const RENDERERS: Record<string, (ctx: RenderCtx) => React.ReactElement> = {
 		>
 			<GroupCard
 				className={ctx.className}
-				groupId={(ctx.entity as any).id}
-				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)({} as any) : undefined}
+				group={ctx.entity as any}
+				onClick={ctx.finalOnClick ? () => (ctx.finalOnClick as any)() : undefined}
 			/>
 		</div>
 	),
@@ -419,21 +428,19 @@ export const EntityCard: FC<EntityCardProps> = memo(
 		const { config } = useCardLayout(
 			{
 				Config,
-				,
-			size,
-			variant,
-			className,
-			isSelected,
-			isActive,
-			onClick: finalOnClick,
-			onDoubleClick: finalOnDoubleClick,
-			compact,
-			tcgMode,
+				layout,
+				size,
+				variant,
+				className,
+				isSelected,
+				isActive,
+				onClick: finalOnClick,
+				onDoubleClick: finalOnDoubleClick,
+				compact,
+				tcgMode,
 			},
-	preset
-);
-
-		// Render genérico por tipo
+			preset
+		); // Render genérico por tipo
 		const type = getEntityStatsType(entity as any) ?? 'unknown';
 		return renderEntityByType(type as string, {
 			entity,

@@ -1,4 +1,5 @@
 import { FolderTreeIcon, Star } from 'lucide-react';
+import { memo, useMemo } from 'react';
 
 interface FolderCardHeaderProps {
 	name: string;
@@ -11,19 +12,29 @@ interface FolderCardHeaderProps {
 }
 
 /**
- * Encabezado para tarjeta de carpeta con estilo TCG
- *
- * Muestra el nombre de la carpeta, un emoji personalizado y metadatos
- * sobre la ubicación y tipo de carpeta.
+ * Componente para el header/encabezado de la tarjeta de carpeta.
+ * Diseñado con estilos de carta TCG con efectos holográficos.
  */
-export function FolderCardHeader({
+export const FolderCardHeader = memo(function FolderCardHeader({
 	name,
-	emoji = '📁',
+	emoji,
 	primaryColor,
+	secondaryColor,
 	path,
-	tcgMode = true,
+	tcgMode = false,
 	isFavorite = false,
 }: FolderCardHeaderProps) {
+	// Memoize computed styles to prevent recalculation
+	const headerStyles = useMemo(() => {
+		const gradientColors = tcgMode
+			? `linear-gradient(135deg, ${primaryColor}20 0%, ${primaryColor}50 50%, ${secondaryColor || primaryColor}30 100%)`
+			: undefined;
+
+		return {
+			background: gradientColors,
+			borderColor: tcgMode ? `${primaryColor}40` : 'transparent',
+		};
+	}, [primaryColor, secondaryColor, tcgMode]);
 	// Determinar si es una carpeta raíz basado en la ruta
 	const isRootFolder = path === '/' || !path?.includes('/') || path === '';
 
@@ -161,4 +172,4 @@ export function FolderCardHeader({
 			)}
 		</div>
 	);
-}
+});

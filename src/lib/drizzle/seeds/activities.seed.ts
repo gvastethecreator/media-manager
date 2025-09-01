@@ -1,6 +1,4 @@
-import { sql } from 'drizzle-orm';
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
-import { activities } from '../schema';
 import { seedLogger } from './index';
 
 /**

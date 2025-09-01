@@ -1,4 +1,5 @@
 import { File, FileText, Folder, Image, Music, Video } from 'lucide-react';
+import { memo, useMemo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import type { FolderStatsResponse } from '@/types/folders';
@@ -40,12 +41,17 @@ interface TotalFilesBadgeProps {
 	size?: 'micro' | 'small' | 'normal';
 }
 
-// ===== COMPONENTES DE BADGE =====
+// ===== COMPONENTES DE BADGE MEMOIZADOS =====
 
 /**
  * Badge para mostrar conteos por tipo de archivo
  */
-export function FileTypeBadge({ type, count, variant = 'secondary', size = 'micro' }: FileTypeBadgeProps) {
+export const FileTypeBadge = memo(function FileTypeBadge({
+	type,
+	count,
+	variant = 'secondary',
+	size = 'micro',
+}: FileTypeBadgeProps) {
 	const Icon = FILE_TYPE_ICONS[type];
 	const sizeClass = COMPONENT_SIZES.badge[size];
 
@@ -55,12 +61,16 @@ export function FileTypeBadge({ type, count, variant = 'secondary', size = 'micr
 			{count}
 		</Badge>
 	);
-}
+});
 
 /**
  * Badge para mostrar conteo de subcarpetas
  */
-export function FolderBadge({ count, variant = 'secondary', size = 'micro' }: FolderBadgeProps) {
+export const FolderBadge = memo(function FolderBadge({
+	count,
+	variant = 'secondary',
+	size = 'micro',
+}: FolderBadgeProps) {
 	const sizeClass = COMPONENT_SIZES.badge[size];
 
 	return (
@@ -69,27 +79,36 @@ export function FolderBadge({ count, variant = 'secondary', size = 'micro' }: Fo
 			{count}
 		</Badge>
 	);
-}
+});
 
 /**
  * Badge para mostrar tamaño en bytes
  */
-export function SizeBadge({ bytes, variant = 'secondary', size = 'micro' }: SizeBadgeProps) {
+export const SizeBadge = memo(function SizeBadge({ bytes, variant = 'secondary', size = 'micro' }: SizeBadgeProps) {
 	const sizeClass = COMPONENT_SIZES.badge[size];
+
+	// Memoizar el formateo de bytes para evitar recálculos
+	const formattedSize = useMemo(() => formatBytes(bytes), [bytes]);
 
 	return (
 		<Badge className={cn('px-1', sizeClass)} variant={variant}>
-			{formatBytes(bytes)}
+			{formattedSize}
 		</Badge>
 	);
-}
+});
 
 /**
  * Badge que muestra el total de archivos (suma de todos los tipos)
  */
-export function TotalFilesBadge({ folderStats, variant = 'secondary', size = 'micro' }: TotalFilesBadgeProps) {
-	const totalFiles = getTotalFilesCount(folderStats);
+export const TotalFilesBadge = memo(function TotalFilesBadge({
+	folderStats,
+	variant = 'secondary',
+	size = 'micro',
+}: TotalFilesBadgeProps) {
 	const sizeClass = COMPONENT_SIZES.badge[size];
+
+	// Memoizar el cálculo del total de archivos
+	const totalFiles = useMemo(() => getTotalFilesCount(folderStats), [folderStats]);
 
 	if (totalFiles === 0) return null;
 
@@ -99,4 +118,4 @@ export function TotalFilesBadge({ folderStats, variant = 'secondary', size = 'mi
 			{totalFiles} archivos
 		</Badge>
 	);
-}
+});

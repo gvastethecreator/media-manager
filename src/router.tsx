@@ -1,7 +1,7 @@
-import { lazy, Suspense } from 'react';
+import { Suspense } from 'react';
 import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/main-layout';
-import ReindexLogsViewer from '@/components/system/ReindexLogsViewer';
+import ReindexLogsViewer from '@/components/settings/folders/reindex-logs-viewer';
 // Importar todas las vistas
 import { AllImagesView } from '@/components/views/all-images/all-images-view';
 import Dashboard from '@/components/views/dashboard/dashboard';

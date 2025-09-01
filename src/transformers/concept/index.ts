@@ -5,6 +5,13 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+// 🎯 Adaptadores - Para componentes de lista estandarizados
+export {
+	adaptConceptsWithStats,
+	adaptConceptWithStats,
+	defaultConceptStats,
+} from './adapter';
+
 // 🗺️ Mappers - Transformaciones básicas entre tipos
 export {
 	createFilterDrizzle,
