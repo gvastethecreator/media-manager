@@ -1,8 +1,9 @@
 import { AlertCircle, CircleAlert, CircleCheckBig, CircleDashed, TimerReset } from 'lucide-react';
 
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { SimpleTooltip } from './common/simple-tooltip';
+import { formatRelativeDate } from './utils/folder-helpers';
 
 export type IndexStatus = 'indexed' | 'outdated' | 'pending' | 'not_found' | 'error';
 
@@ -71,25 +72,7 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 		}
 	};
 
-	const formatDate = (date: Date) => {
-		const now = new Date();
-		const diffMs = now.getTime() - date.getTime();
-		const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-
-		if (diffDays === 0) {
-			return 'Hoy';
-		}
-
-		if (diffDays === 1) {
-			return 'Ayer';
-		}
-
-		if (diffDays < 7) {
-			return `Hace ${diffDays} días`;
-		}
-
-		return date.toLocaleDateString();
-	};
+	const formatDate = (date: Date) => formatRelativeDate(date);
 
 	let tooltipContent: string;
 	if (status === 'not_found') {
@@ -103,29 +86,21 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 	}
 
 	return (
-		<TooltipProvider>
-			<Tooltip>
-				<TooltipTrigger asChild>
-					<Badge
-						className={cn(
-							'flex h-4 items-center gap-1 px-2 text-[10px]',
-							status === 'indexed' && 'border-green-200 bg-green-50/30 text-green-600',
-							status === 'outdated' && 'border-amber-200 bg-amber-50/30 text-amber-600',
-							status === 'pending' && 'border-muted bg-muted/30 text-muted-foreground',
-							(status === 'not_found' || status === 'error') &&
-								'border-destructive/30 bg-destructive/10 text-destructive',
-							className
-						)}
-						variant="outline"
-					>
-						{getStatusIcon()}
-						{getStatusLabel()}
-					</Badge>
-				</TooltipTrigger>
-				<TooltipContent align="center" className="text-xs" side="top">
-					{tooltipContent}
-				</TooltipContent>
-			</Tooltip>
-		</TooltipProvider>
+		<SimpleTooltip align="center" className="text-xs" content={tooltipContent} side="top">
+			<Badge
+				className={cn(
+					'flex h-4 items-center gap-1 px-2 text-[10px]',
+					status === 'indexed' && 'border-green-200 bg-green-50/30 text-green-600',
+					status === 'outdated' && 'border-amber-200 bg-amber-50/30 text-amber-600',
+					status === 'pending' && 'border-muted bg-muted/30 text-muted-foreground',
+					(status === 'not_found' || status === 'error') && 'border-destructive/30 bg-destructive/10 text-destructive',
+					className
+				)}
+				variant="outline"
+			>
+				{getStatusIcon()}
+				{getStatusLabel()}
+			</Badge>
+		</SimpleTooltip>
 	);
 }

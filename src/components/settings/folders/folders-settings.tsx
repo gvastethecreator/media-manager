@@ -1,5 +1,5 @@
 import { AlertCircle, EraserIcon, Folder, FolderIcon, Info, RefreshCw } from 'lucide-react';
-import { memo, useMemo, useState, useCallback } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { Separator } from '@/components/ui/separator';
@@ -149,9 +149,9 @@ export function FoldersSettings() {
 		return (
 			<MemoizedErrorWrapper
 				displayError={displayError}
-				setErrorMessage={setErrorMessage}
-				setError={setError}
 				loadStats={loadStats}
+				setError={setError}
+				setErrorMessage={setErrorMessage}
 			/>
 		);
 	}
@@ -162,7 +162,7 @@ export function FoldersSettings() {
 			<div className="border-none bg-muted/30">
 				<div className="p-4 pb-2" data-testid="folders-settings">
 					<div className="flex items-center justify-between font-medium text-base text-muted-foreground">
-						<div className="flex items-center gap-2">
+						<div className="flex flex-1 items-center gap-2">
 							<FolderIcon className="h-4 w-4 text-primary" />
 							<span>Gestión de Carpetas</span>
 							{(isGloballyProcessing || isProcessing) && (
@@ -192,6 +192,8 @@ export function FoldersSettings() {
 						</div>
 
 						<div className="flex items-center gap-1.5">
+							{/* Formulario para agregar carpetas */}
+							<FolderForm isLoading={isLoading} isProcessing={isProcessing} onAddFolder={handleAddFolder} />
 							<Button
 								className="h-7 cursor-pointer text-xs transition-colors hover:bg-destructive/10 hover:text-destructive"
 								disabled={isLoading || isProcessing}
@@ -231,9 +233,6 @@ export function FoldersSettings() {
 
 				<div className="p-3">
 					<div className="space-y-2">
-						{/* Formulario para agregar carpetas */}
-						<FolderForm isLoading={isLoading} isProcessing={isProcessing} onAddFolder={handleAddFolder} />
-
 						{/* Lista de carpetas - grid responsiva optimizada para desktop */}
 						<FoldersGrid
 							folders={folders}

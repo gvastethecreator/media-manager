@@ -565,19 +565,31 @@ export class FileEntityMapperService {
 			const { db } = await import('@/lib/drizzle');
 			const { videos } = await import('@/lib/drizzle/schema');
 			const { eq } = await import('drizzle-orm');
+
+			// Obtener datos básicos de probe
 			const probe = await videoProbeService.probe(filePath);
+
+			// Crear enhanced metadata usando nuestro formato
+			const enhancedMetadata = {
+				videoData: {
+					duration: probe.duration,
+					width: probe.width,
+					height: probe.height,
+					resolution: probe.width && probe.height ? `${probe.width}x${probe.height}` : null,
+					bitRate: probe.bitRate,
+					codec: probe.codec,
+					format: probe.format,
+				},
+				raw: probe.raw,
+			};
+
 			await db
 				.update(videos)
 				.set({
 					duration: probe.duration ? Math.round(probe.duration * 1000) : 0,
 					width: probe.width ?? null,
 					height: probe.height ?? null,
-					metadata: JSON.stringify({
-						codec: probe.codec,
-						format: probe.format,
-						bitRate: probe.bitRate,
-						raw: probe.raw,
-					}),
+					metadata: JSON.stringify(enhancedMetadata),
 					updatedAt: new Date(),
 				})
 				.where(eq(videos.id, entityId));
@@ -593,15 +605,36 @@ export class FileEntityMapperService {
 			const { db } = await import('@/lib/drizzle');
 			const { audios } = await import('@/lib/drizzle/schema');
 			const { eq } = await import('drizzle-orm');
+
+			// Obtener datos básicos del archivo de audio
 			const meta = await audioMetadataService.extract(filePath);
 			const baseFields = this.mapAudioTechnical(meta);
 			const tagFields = this.mapAudioTags(meta.tags);
+
+			// Crear enhanced metadata usando nuestro formato
+			const enhancedMetadata = {
+				audioData: {
+					duration: meta.duration,
+					bitrate: meta.bitrate,
+					channels: meta.channels,
+					sampleRate: meta.sampleRate,
+					format: meta.format,
+					codec: meta.format,
+					title: meta.tags?.title,
+					artist: meta.tags?.artist,
+					album: meta.tags?.album,
+					year: meta.tags?.year,
+					genre: meta.tags?.genre,
+				},
+				raw: meta.raw,
+			};
+
 			await db
 				.update(audios)
 				.set({
 					...baseFields,
 					...tagFields,
-					metadata: JSON.stringify({ raw: meta.raw }),
+					metadata: JSON.stringify(enhancedMetadata),
 					updatedAt: new Date(),
 				})
 				.where(eq(audios.id, entityId));
@@ -647,28 +680,52 @@ export class FileEntityMapperService {
 			const { db } = await import('@/lib/drizzle');
 			const { documents } = await import('@/lib/drizzle/schema');
 			const { eq } = await import('drizzle-orm');
+
 			let pageCount: number | null = null;
 			let wordCount: number | null = null;
 			let contentPreview: string | null = null;
+			let hasFrontmatter = false;
+			let documentType = 'unknown';
+
 			if (ext === '.pdf') {
+				documentType = 'pdf';
 				// Heurística simple: contar ocurrencias de '/Type /Page'
 				const buf = await readFile(filePath);
 				const text = buf.toString('latin1');
 				const matches = text.match(/\/Type\s*\/Page/g);
 				pageCount = matches ? matches.length : null;
 			} else if (ext === '.txt' || ext === '.md') {
+				documentType = ext === '.md' ? 'markdown' : 'text';
 				const buf = await readFile(filePath);
 				const text = buf.toString('utf8');
 				const words = text.trim().split(WORD_SPLIT_REGEX).filter(Boolean);
 				wordCount = words.length;
 				contentPreview = text.slice(0, 800);
+
+				// Detectar frontmatter en archivos markdown
+				if (ext === '.md') {
+					hasFrontmatter = text.startsWith('---\n') || text.startsWith('+++\n');
+				}
 			}
+
+			// Crear enhanced metadata usando nuestro formato
+			const enhancedMetadata = {
+				documentData: {
+					type: documentType,
+					wordCount,
+					pageCount,
+					hasFrontmatter,
+					encoding: 'utf8',
+				},
+				preview: contentPreview,
+			};
+
 			await db
 				.update(documents)
 				.set({
 					pageCount,
 					wordCount,
-					metadata: JSON.stringify({ preview: contentPreview }),
+					metadata: JSON.stringify(enhancedMetadata),
 					updatedAt: new Date(),
 				})
 				.where(eq(documents.id, entityId));
@@ -729,6 +786,8 @@ export class FileEntityMapperService {
 			const { db } = await import('@/lib/drizzle');
 			const { jsonFiles } = await import('@/lib/drizzle/schema');
 			const { eq } = await import('drizzle-orm');
+			const { basename } = await import('path');
+
 			let contentText: string | null = null;
 			try {
 				const buf = await readFile(filePath);
@@ -742,17 +801,44 @@ export class FileEntityMapperService {
 			let keyCount: number | null = null;
 			let depth: number | null = null;
 			let parsed: any = null;
+			let jsonType = 'generic';
+
 			if (contentText && contentText.trim().length > 0) {
 				try {
 					parsed = JSON.parse(contentText);
 					isValid = true;
 					keyCount = this.countJsonKeys(parsed);
 					depth = this.computeJsonDepth(parsed);
+
+					// Detectar tipo de JSON especial
+					const fileName = basename(filePath).toLowerCase();
+					if (fileName === 'package.json') {
+						jsonType = 'package';
+					} else if (fileName === 'tsconfig.json') {
+						jsonType = 'tsconfig';
+					} else if (parsed.configurations || parsed.launch) {
+						jsonType = 'vscode';
+					}
 				} catch (e) {
 					isValid = false;
 					validationErrors = (e as Error).message;
 				}
 			}
+
+			// Crear enhanced metadata usando nuestro formato
+			const enhancedMetadata = {
+				jsonData: {
+					type: jsonType,
+					keyCount,
+					depth,
+					size: contentText?.length || 0,
+					isValid,
+					validationErrors,
+					hasNestedObjects: depth !== null && depth > 1,
+					isPackageJson: jsonType === 'package',
+				},
+				content: contentText && contentText.length < 50_000 ? contentText : null, // Limitar contenido muy grande
+			};
 
 			await db
 				.update(jsonFiles)
@@ -762,6 +848,7 @@ export class FileEntityMapperService {
 					validationErrors,
 					keyCount,
 					depth,
+					metadata: JSON.stringify(enhancedMetadata),
 					updatedAt: new Date(),
 				})
 				.where(eq(jsonFiles.id, entityId));
