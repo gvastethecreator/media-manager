@@ -19,10 +19,6 @@ export function FolderProcessingDetails({
 }: FolderProcessingDetailsProps) {
 	return (
 		<div className="mt-1 space-y-2">
-			{/* Barra de progreso animada */}
-			<motion.div animate={{ opacity: 1 }} initial={{ opacity: 0 }}>
-				<Progress className="h-1.5" value={lastProgress} />
-			</motion.div>
 
 			{/* Indicador de etapas */}
 			<FolderStageIndicator
