@@ -1,5 +1,4 @@
 import { Image as ImageIcon } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import { normalizeThumbailUrl } from './utils/folder-helpers';
 
@@ -32,16 +31,13 @@ export function ThumbnailGrid({ images, totalImages, className, showCount = true
 					const normalizedUrl = normalizeThumbailUrl(rawThumb);
 
 					return (
-						<motion.div
-							animate={{ opacity: 1, scale: 1 }}
+						<div
 							className="overflow-hidden border-1 border-muted bg-muted"
-							initial={{ opacity: 0, scale: 0.8 }}
 							key={image?.id || `slot-${index}`}
-							transition={{ duration: 0.2, delay: index * 0.02 }}
 						>
 							{normalizedUrl ? (
 								<div
-									className="h-full w-full bg-center bg-cover transition-transform hover:scale-110"
+									className="h-full w-full bg-center bg-cover hover:scale-110"
 									style={{ backgroundImage: `url(${normalizedUrl})` }}
 									title={image?.name}
 								/>
@@ -52,16 +48,16 @@ export function ThumbnailGrid({ images, totalImages, className, showCount = true
 							) : (
 								<div className="h-full w-full border-2 border-muted-foreground/20 border-dashed bg-muted/30" />
 							)}
-						</motion.div>
+						</div>
 					);
 				})}
 			</div>
 
 			{/* Contador de imágenes restantes */}
 			{showCount && remainingCount > 0 && (
-				<motion.div animate={{ opacity: 1 }} className="mt-1 text-center" initial={{ opacity: 0 }}>
+				<div className="mt-1 text-center">
 					<span className="font-medium text-[9px] text-muted-foreground">+{remainingCount} más</span>
-				</motion.div>
+				</div>
 			)}
 		</div>
 	);

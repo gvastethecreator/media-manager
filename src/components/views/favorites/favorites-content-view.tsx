@@ -1,5 +1,4 @@
 import { Heart } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import React from 'react';
 import { FavoriteCard } from '@/components/cards/favorite-card';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -7,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import type { FavoriteWithStats } from '@/types/entities/favorite/base';

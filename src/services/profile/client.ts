@@ -5,21 +5,21 @@
  * @module services/profile/client
  */
 
+import { ensureDefaultProfile } from '@/lib/utils/profile/profile-utils';
 import {
 	activateProfile,
+	type CreateProfileInput,
 	createProfile,
 	deleteProfile,
 	getActiveProfile,
 	getProfile,
 	getProfiles,
-	updateProfile,
-	type CreateProfileInput,
 	type ProfileExtended,
 	type ProfileFilters,
 	type ProfilePaginationOptions,
 	type UpdateProfileInput,
+	updateProfile,
 } from './profile.service';
-import { ensureDefaultProfile } from '@/lib/utils/profile/profile-utils';
 
 /**
  * Cliente para consumir funcionalidades de perfiles desde componentes de cliente

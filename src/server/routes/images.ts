@@ -161,7 +161,7 @@ router.get('/', async (req, res) => {
 		if (filters.search) {
 			conditions.push(or(like(images.name, `%${filters.search}%`), like(images.description, `%${filters.search}%`)));
 		}
-		
+
 		// AI Metadata filters
 		if (filters.aiEngine) {
 			conditions.push(eq(images.aiEngine, filters.aiEngine));

@@ -1,11 +1,11 @@
 import { FolderIcon } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import React, { useState } from 'react';
 import {
 	buildHolographicStyle,
 	computeRarityVisualConfig,
 	rarityAccessibilityLabel,
 } from '@/components/cards/shared/rarity-style';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 interface GroupCardImagesProps {

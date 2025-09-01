@@ -1,8 +1,8 @@
-import { NextFunction, Request, Response } from 'express'; // request-logger with requestId
 import { randomUUID } from 'crypto';
+import { NextFunction, Request, Response } from 'express'; // request-logger with requestId
 import fs from 'fs';
 import path from 'path';
-import { serverLogger, type ServerLogger } from '../../lib/logger/server-logger';
+import { type ServerLogger, serverLogger } from '../../lib/logger/server-logger';
 
 /**
  * Interfaz para el logger contextual por-request

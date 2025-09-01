@@ -115,7 +115,7 @@ function TreeItemLabel<T = any>({ item: propItem, children, className, ...props 
 	return (
 		<span
 			className={cn(
-				'flex items-center gap-1 rounded-sm bg-background in-data-[ in-data-[search-match=true]:bg-blue-50! in-data-[selected=true]:bg-accent px-2 py-1.5 not-in-data-[folder=true]:ps-7 in-data-[selected=true]:text-accent-foreground text-sm in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 transition-colors hover:bg-accent [&_svg]:pointer-events-none [&_svg]:shrink-0',
+				'in-data-[ flex items-center gap-1 rounded-sm bg-background in-data-[search-match=true]:bg-blue-50! in-data-[selected=true]:bg-accent px-2 py-1.5 not-in-data-[folder=true]:ps-7 in-data-[selected=true]:text-accent-foreground text-sm in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 transition-colors hover:bg-accent [&_svg]:pointer-events-none [&_svg]:shrink-0',
 				className
 			)}
 			data-slot="tree-item-label"

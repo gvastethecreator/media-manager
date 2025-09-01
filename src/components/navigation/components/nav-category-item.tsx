@@ -1,8 +1,8 @@
 import { ChevronRight, Grid, List, type LucideIcon } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import type React from 'react';
 import { memo, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { motion } from '@/components/ui/motion-shim';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ViewType } from '@/components/views/types';
 import { cn } from '@/lib/utils';

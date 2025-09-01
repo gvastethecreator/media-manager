@@ -20,12 +20,12 @@ import React from 'react';
  */
 
 import { ChevronLeft, ChevronRight, LayoutGrid, List as ListIcon, Rows, Search, SlidersHorizontal } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import { useMemo, useState } from 'react';
 import { EntityCard, type EntityCardProps } from '@/components/cards/entity-card';
 import type { BaseCardProps } from '@/components/cards/types/card-.types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { motion } from '@/components/ui/motion-shim';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/entities';

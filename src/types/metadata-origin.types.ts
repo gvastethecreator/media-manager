@@ -296,13 +296,13 @@ export interface VideoMetadata extends BaseMetadata {
 	filename?: string;
 	format?: string;
 	size?: number;
-	
+
 	// Propiedades de video
 	duration?: number;
 	frame_rate?: number;
 	frameRate?: number; // Alias para compatibilidad
 	bitrate?: number;
-	
+
 	// Dimensiones
 	width?: number;
 	height?: number;

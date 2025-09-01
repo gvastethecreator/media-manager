@@ -24,7 +24,7 @@ export function FileCanvasGridGrouped({
 			<div className="flex flex-col gap-2">
 				{groups.map((g) => (
 					<div className="flex flex-col" key={g.key}>
-						<h2 className="sticky top-0 z-10 h-9 border-b border-border/50 bg-background/80 px-2 py-1 text-lg font-semibold uppercase text-muted-foreground shadow-xs backdrop-blur supports-[backdrop-filter]:bg-background/60">
+						<h2 className="sticky top-0 z-10 h-9 border-border/50 border-b bg-background/80 px-2 py-1 font-semibold text-lg text-muted-foreground uppercase shadow-xs backdrop-blur supports-[backdrop-filter]:bg-background/60">
 							{g.displayName}
 						</h2>
 						<div className="relative">

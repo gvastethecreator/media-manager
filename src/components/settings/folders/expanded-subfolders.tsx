@@ -1,4 +1,3 @@
-import { motion } from '@/components/ui/motion-shim';
 import { Badge } from '@/components/ui/badge';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { ExtendedFolder } from './folder-types';
@@ -9,13 +8,7 @@ interface ExpandedSubfoldersProps {
 
 export function ExpandedSubfolders({ folders }: ExpandedSubfoldersProps) {
 	return (
-		<motion.div
-			animate={{ opacity: 1, height: 'auto' }}
-			className="mt-1 space-y-1 border-border border-l-2 pl-4"
-			exit={{ opacity: 0, height: 0 }}
-			initial={{ opacity: 0, height: 0 }}
-			transition={{ duration: 0.2 }}
-		>
+		<div className="mt-1 space-y-1 border-border border-l-2 pl-4">
 			{folders.map((child) => (
 				<div className="flex items-center justify-between rounded-md bg-muted/30 p-2" key={child.id}>
 					<div className="flex items-center gap-2">
@@ -35,6 +28,6 @@ export function ExpandedSubfolders({ folders }: ExpandedSubfoldersProps) {
 					</div>
 				</div>
 			))}
-		</motion.div>
+		</div>
 	);
 }

@@ -1,6 +1,6 @@
 import { Beaker, BookOpenText, Box, GemIcon, Sparkles, StoreIcon, Sword } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import React, { useCallback, useMemo, useState } from 'react';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import { WorldItemRarity, WorldItemType, WorldItemWithStats } from '@/types/entities/world-item';
 import { CardHeader } from '../card-header';

@@ -1,9 +1,9 @@
 'use client';
 
-import { AlertCircle, CheckCircle, Upload } from 'lucide-react';
-import { useCallback, useRef, useState } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { AlertCircle, CheckCircle, Upload } from 'lucide-react';
+import { useCallback, useRef, useState } from 'react';
 
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Card, CardContent } from '@/components/ui/card';
@@ -74,7 +74,7 @@ export function WorkflowDropZone({
 	// Message animation
 	useGSAP(
 		() => {
-			if (!message || !containerRef.current) return;
+			if (!(message && containerRef.current)) return;
 
 			const messageElement = containerRef.current.querySelector('[data-message]');
 			if (messageElement) {
@@ -172,9 +172,8 @@ export function WorkflowDropZone({
 	);
 
 	return (
-		<div ref={containerRef} className={cn('space-y-4', className)}>
+		<div className={cn('space-y-4', className)} ref={containerRef}>
 			<Card
-				ref={cardRef}
 				className={cn(
 					'border-2 border-dashed transition-colors duration-200',
 					isDragging && !disabled && 'border-primary bg-primary/5',
@@ -185,6 +184,7 @@ export function WorkflowDropZone({
 				onDragLeave={handleDragLeave}
 				onDragOver={handleDragOver}
 				onDrop={handleDrop}
+				ref={cardRef}
 			>
 				<CardContent className="flex flex-col items-center justify-center p-8 text-center">
 					<Upload
@@ -195,7 +195,7 @@ export function WorkflowDropZone({
 					/>
 					<div className="mt-4 space-y-2">
 						<h3 className="font-medium">{isDragging ? 'Suelta los archivos aquí' : 'Arrastra archivos aquí'}</h3>
-						<p className="text-sm text-muted-foreground">
+						<p className="text-muted-foreground text-sm">
 							{accept !== '*' ? `Archivos permitidos: ${accept}` : 'Cualquier tipo de archivo'}
 							{multiple && ' (múltiples archivos permitidos)'}
 						</p>

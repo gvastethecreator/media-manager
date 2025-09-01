@@ -1,8 +1,8 @@
-import { TableCanvas } from './canvas/table-canvas';
+import { useState } from 'react';
 import type { MediaItem } from '../components/media-thumbnail';
 import type { ClickModifiers } from '../types/file-browser.types';
 import { CanvasRenderConfig } from './canvas/canvas-config';
-import { useState } from 'react';
+import { TableCanvas } from './canvas/table-canvas';
 
 export interface TableProps {
 	items: MediaItem[];
@@ -30,10 +30,10 @@ export function Table({
 			<div className="relative" data-testid="file-browser-scroll-area-viewport">
 				<TableCanvas
 					items={items}
-					rowHeight={rowHeight}
-					scrollContainer={effectiveScrollContainer}
 					onItemClick={onItemClick}
 					onItemDoubleClick={onItemDoubleClick}
+					rowHeight={rowHeight}
+					scrollContainer={effectiveScrollContainer}
 				/>
 			</div>
 		</div>

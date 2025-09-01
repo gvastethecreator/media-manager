@@ -1,6 +1,4 @@
 import { Check, Code, Eye, Image as ImageIcon } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
-import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
 interface StageInfo {
@@ -120,29 +118,18 @@ export function FolderStageIndicator({
 		<div className={cn('absolute right-2 bottom-2 w-fit space-y-2', className)}>
 			{/* Indicador de etapa actual */}
 			<div className="flex items-center justify-between">
-				<motion.div
-					animate={{ opacity: isProcessing ? [1, 0.95, 1] : 1 }}
+				<div
 					className={cn(
-						'flex items-center gap-2 rounded-sm border-2 border-background/50 px-2 py-1 shadow-xs backdrop-blur-lg transition-all'
+						'flex items-center gap-2 rounded-sm border-2 border-background/50 px-2 py-1 shadow-xs backdrop-blur-lg'
 					)}
-					transition={{ duration: 2, repeat: isProcessing ? Number.POSITIVE_INFINITY : 0 }}
 				>
-					<motion.div
-						animate={{ rotate: isProcessing && !isComplete ? 360 : 0 }}
-						transition={{
-							duration: 2,
-							repeat: isProcessing && !isComplete ? Number.POSITIVE_INFINITY : 0,
-							ease: 'linear',
-						}}
-					>
-						{currentStage.icon}
-					</motion.div>
+					<div>{currentStage.icon}</div>
 					<div className="flex flex-col">
 						<span className={cn('font-medium text-sm', currentStage.color.text)}>{currentStage.name}</span>
 						<span className="text-[10px] text-muted-foreground">{currentStage.description}</span>
 						{/* Contador de archivos */}
 					</div>
-				</motion.div>
+				</div>
 			</div>
 
 			{/* Barra de progreso de etapas */}
@@ -159,28 +146,26 @@ export function FolderStageIndicator({
 							<div className="flex-1" key={stageNum}>
 								<div
 									className={cn(
-										'h-1.5 overflow-hidden rounded-full transition-all duration-300',
+										'h-1.5 overflow-hidden rounded-full',
 										stageConfig ? stageConfig.color.bg : 'bg-muted',
 										isCurrentStage && 'ring-1',
 										isCurrentStage && stageConfig ? stageConfig.color.ring : ''
 									)}
 								>
-									<motion.div
-										animate={{ width: `${stageProgress}%` }}
+									<div
 										className={cn(
-											'h-full transition-all duration-500 ease-out',
+											'h-full',
 											stageConfig ? stageConfig.color.text.replace('text-', 'bg-') : 'bg-muted-foreground',
 											isCompleted && 'bg-emerald-500'
 										)}
-										initial={{ width: 0 }}
-										transition={{ duration: 0.5, ease: 'easeOut' }}
+										style={{ width: `${stageProgress}%` }}
 									/>
 								</div>
 								{stageConfig && (
 									<div className="mt-0.5 text-center">
 										<span
 											className={cn(
-												'font-medium text-[9px] transition-colors',
+												'font-medium text-[9px]',
 												isCurrentStage ? stageConfig.color.text : 'text-muted-foreground',
 												isCompleted && 'text-emerald-600'
 											)}
@@ -196,11 +181,7 @@ export function FolderStageIndicator({
 			</div>
 
 			{/* Mensaje detallado */}
-			{message && (
-				<motion.div animate={{ opacity: 1 }} className="text-[10px] text-muted-foreground" initial={{ opacity: 0 }}>
-					{message}
-				</motion.div>
-			)}
+			{message && <div className="text-[10px] text-muted-foreground">{message}</div>}
 		</div>
 	);
 }

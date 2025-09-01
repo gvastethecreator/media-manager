@@ -1278,56 +1278,55 @@ router.post('/:id/reindex', async (req, res) => {
 				reindexResult: result,
 				mode: 'structured',
 			});
-		} else {
-			// ===== FLUJO LEGACY =====
-			logger.info('📁 Usando flujo legacy de reindexado');
-
-			const { updateFolderStats } = await import('@/lib/filesystem/folder-stats');
-
-			// Ejecutar la reindexación con sincronización automática y eventos de progreso
-			const indexResult = await updateFolderStats(id, new Set(), 10, 0, enableSync, true);
-
-			logger.success(`Reindexación legacy completada para carpeta: ${targetFolder.name}`, {
-				entitiesCreated: indexResult.successful,
-				entitiesUpdated: indexResult.processed - indexResult.successful,
-				syncResult: indexResult.syncResult,
-			});
-
-			// Obtener la carpeta actualizada para devolverla
-			const updatedFolder = await db
-				.select({
-					id: folders.id,
-					name: folders.name,
-					description: folders.description,
-					path: folders.path,
-					emoji: folders.emoji,
-					color: folders.color,
-					featuredImage: folders.featuredImage,
-					isFavorite: folders.isFavorite,
-					totalFiles: folders.totalFiles,
-					totalSize: folders.totalSize,
-					lastIndexed: folders.lastIndexed,
-					createdAt: folders.createdAt,
-					updatedAt: folders.updatedAt,
-					parentId: folders.parentId,
-					presetId: folders.presetId,
-				})
-				.from(folders)
-				.where(eq(folders.id, id))
-				.limit(1);
-
-			// Incluir información de sincronización en la respuesta
-			return res.json({
-				folder: updatedFolder[0],
-				indexResult: {
-					created: indexResult.successful,
-					updated: indexResult.processed - indexResult.successful,
-					errors: indexResult.errors,
-				},
-				...(indexResult.syncResult && { syncResult: indexResult.syncResult }),
-				mode: 'legacy',
-			});
 		}
+		// ===== FLUJO LEGACY =====
+		logger.info('📁 Usando flujo legacy de reindexado');
+
+		const { updateFolderStats } = await import('@/lib/filesystem/folder-stats');
+
+		// Ejecutar la reindexación con sincronización automática y eventos de progreso
+		const indexResult = await updateFolderStats(id, new Set(), 10, 0, enableSync, true);
+
+		logger.success(`Reindexación legacy completada para carpeta: ${targetFolder.name}`, {
+			entitiesCreated: indexResult.successful,
+			entitiesUpdated: indexResult.processed - indexResult.successful,
+			syncResult: indexResult.syncResult,
+		});
+
+		// Obtener la carpeta actualizada para devolverla
+		const updatedFolder = await db
+			.select({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			})
+			.from(folders)
+			.where(eq(folders.id, id))
+			.limit(1);
+
+		// Incluir información de sincronización en la respuesta
+		return res.json({
+			folder: updatedFolder[0],
+			indexResult: {
+				created: indexResult.successful,
+				updated: indexResult.processed - indexResult.successful,
+				errors: indexResult.errors,
+			},
+			...(indexResult.syncResult && { syncResult: indexResult.syncResult }),
+			mode: 'legacy',
+		});
 	} catch (error) {
 		logger.error('Error al reindexar la carpeta', { error });
 		res.status(500).json({
@@ -1395,21 +1394,20 @@ router.post('/reindex-all', async (req, res) => {
 				result,
 				mode: 'structured',
 			});
-		} else {
-			// ===== FLUJO LEGACY =====
-			logger.info('📁 Usando flujo legacy de reindexado para todas las carpetas');
-
-			// Importar funciones necesarias una sola vez
-			const { updateFolderStats } = await import('@/lib/filesystem/folder-stats');
-			const { emit } = await import('@/lib/server/events.server');
-
-			const result = await reindexAllFoldersProcess(allFolders, enableSync, updateFolderStats, emit);
-
-			return res.json({
-				...result,
-				mode: 'legacy',
-			});
 		}
+		// ===== FLUJO LEGACY =====
+		logger.info('📁 Usando flujo legacy de reindexado para todas las carpetas');
+
+		// Importar funciones necesarias una sola vez
+		const { updateFolderStats } = await import('@/lib/filesystem/folder-stats');
+		const { emit } = await import('@/lib/server/events.server');
+
+		const result = await reindexAllFoldersProcess(allFolders, enableSync, updateFolderStats, emit);
+
+		return res.json({
+			...result,
+			mode: 'legacy',
+		});
 	} catch (error) {
 		console.error('Error en reindexación global:', error);
 		res.status(500).json({

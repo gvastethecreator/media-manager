@@ -1,8 +1,8 @@
-import { GridCanvas } from './canvas/grid-canvas';
+import { useState } from 'react';
 import type { MediaItem } from '../components/media-thumbnail';
 import type { ClickModifiers } from '../types/file-browser.types';
 import { CanvasRenderConfig } from './canvas/canvas-config';
-import { useState } from 'react';
+import { GridCanvas } from './canvas/grid-canvas';
 
 export interface GridProps {
 	items: MediaItem[];

@@ -1,7 +1,7 @@
-import { motion } from '@/components/ui/motion-shim';
 import React, { useCallback, useMemo, useState } from 'react';
 import { getRarityGradient } from '@/components/cards/shared/rarity-gradients';
 import { darkenHex } from '@/components/cards/shared/rarity-style';
+import { motion } from '@/components/ui/motion-shim';
 import { usePlace, useRecentPlaceMedia } from '@/lib/api/places';
 import { cn } from '@/lib/utils';
 import { PlaceWithStats } from '@/types/entities/place';

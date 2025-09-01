@@ -18,10 +18,10 @@ import {
 	FileText,
 } from 'lucide-react';
 import { useState } from 'react';
-import { toastService } from '@/lib/ui/toast';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { toastService } from '@/lib/ui/toast';
 import { formatFileSize } from '@/lib/utils';
 import type { FileWithStats } from '@/types/entities/file/base';
 

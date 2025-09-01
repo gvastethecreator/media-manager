@@ -1,5 +1,4 @@
 import { Folder, Heart } from 'lucide-react';
-import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import type { ReactNode } from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { computeIsReindexing } from '@/components/settings/folders/utils/is-reindexing';
@@ -79,15 +78,15 @@ interface FolderMetadataProps {
 const FolderMetadata = memo(({ folder, parentFolderName, indexStatus, statusMessage }: FolderMetadataProps) => (
 	<div className="flex min-w-0 flex-1 flex-col space-y-1">
 		{/* Folder Name */}
-		<span className="font-semibold text-foreground text-sm align-bottom truncate">
+		<span className="truncate align-bottom font-semibold text-foreground text-sm">
 			{/* Breadcrumb */}
-			{parentFolderName && <span className="truncate text-xs text-primary/50">{parentFolderName} / </span>}
+			{parentFolderName && <span className="truncate text-primary/50 text-xs">{parentFolderName} / </span>}
 
 			{folder.name}
 		</span>
 
 		{/* Status Row */}
-		<div className="flex items-center gap-2 absolute top-2 right-2">
+		<div className="absolute top-2 right-2 flex items-center gap-2">
 			<FolderIndexStatusBadge lastIndexed={folder.lastIndexed} status={indexStatus} />
 
 			{/* Favorite indicator */}
@@ -162,7 +161,7 @@ interface FolderStatsSummaryProps {
 const FolderStatsSummary = memo(function FolderStatsSummary({
 	folder,
 	folderStats,
-	isCompact = false
+	isCompact = false,
 }: FolderStatsSummaryProps) {
 	return <FolderStatsDisplay folder={folder} folderStats={folderStats} />;
 });
@@ -298,9 +297,8 @@ export const FolderCard = memo(
 			<div>
 				<div
 					className={cn(
-						'group relative h-full overflow-hidden border-2 p-2 transition-all duration-200',
+						'group relative h-full overflow-hidden border-2 p-2',
 						'border-border/60 bg-gradient-to-br from-card to-card/95',
-						'hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5',
 						{
 							'border-primary/20 ring-2 ring-primary/30': isSelected,
 							'border-emerald-400/20 ring-2 ring-emerald-400/30': showCompleteAnimation,
@@ -331,11 +329,11 @@ export const FolderCard = memo(
 					</div>
 
 					{/* Controls Section - Positioned absolutely to avoid click conflicts */}
-					<div className="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:opacity-60 sm:group-hover:opacity-100">
+					<div className="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-60 group-hover:opacity-100">
 						<div
+							aria-label="Controles de carpeta"
 							className="flex items-center gap-1 rounded-md border border-border/20 bg-background/90 p-1 shadow-sm backdrop-blur-sm"
 							role="toolbar"
-							aria-label="Controles de carpeta"
 						>
 							{isEditing ? (
 								<EditModeControls

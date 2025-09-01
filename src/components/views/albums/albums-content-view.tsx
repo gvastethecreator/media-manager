@@ -1,5 +1,4 @@
 import { Album as AlbumIcon, Edit, Trash2 } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import React from 'react';
 import { AlbumCard } from '@/components/cards/album-card';
 import { EmptyState } from '@/components/core/data-display';
@@ -18,6 +17,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import type { AlbumWithStats } from '@/types/entities/album';

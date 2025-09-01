@@ -120,11 +120,11 @@ export class FolderReindexService {
 
 			// ===== FASE 6: THUMBNAILS =====
 			let thumbnailsResult: ReindexPhaseResult = { success: true, processed: 0, failed: 0, errors: [], duration: 0 };
-			if (!options.skipThumbnails) {
+			if (options.skipThumbnails) {
+				this.logger.info('⏭️ FASE 6: Saltando generación de thumbnails (skipThumbnails=true)');
+			} else {
 				this.logger.info('🖼️ FASE 6: Generación de thumbnails');
 				thumbnailsResult = await this.phase6_generateThumbnails(analysisResult, options);
-			} else {
-				this.logger.info('⏭️ FASE 6: Saltando generación de thumbnails (skipThumbnails=true)');
 			}
 			phases.thumbnails = thumbnailsResult;
 
@@ -134,11 +134,11 @@ export class FolderReindexService {
 
 			// ===== FASE 7: METADATA =====
 			let metadataResult: ReindexPhaseResult = { success: true, processed: 0, failed: 0, errors: [], duration: 0 };
-			if (!options.skipMetadata) {
+			if (options.skipMetadata) {
+				this.logger.info('⏭️ FASE 7: Saltando extracción de metadata (skipMetadata=true)');
+			} else {
 				this.logger.info('📊 FASE 7: Extracción de metadata');
 				metadataResult = await this.phase7_extractMetadata(analysisResult, options);
-			} else {
-				this.logger.info('⏭️ FASE 7: Saltando extracción de metadata (skipMetadata=true)');
 			}
 			phases.metadata = metadataResult;
 
@@ -232,7 +232,7 @@ export class FolderReindexService {
 						const { scanFolder } = await import('@/lib/filesystem/folder-scanner');
 						const scan = await scanFolder(folder.path, {
 							recursive: true,
-							includeHidden: options.includeHidden || false,
+							includeHidden: options.includeHidden,
 							limit: 0,
 						});
 
@@ -260,7 +260,7 @@ export class FolderReindexService {
 					const { scanFolder } = await import('@/lib/filesystem/folder-scanner');
 					const scan = await scanFolder(folder.path, {
 						recursive: false,
-						includeHidden: options.includeHidden || false,
+						includeHidden: options.includeHidden,
 						limit: 0,
 					});
 					totalFiles += scan.files?.length || 0;
@@ -589,7 +589,7 @@ export class FolderReindexService {
 					let entitiesQuery;
 
 					switch (entityType) {
-						case 'image':
+						case 'image': {
 							const { images } = await import('@/lib/drizzle/schema/index');
 							const { isNull, inArray } = await import('drizzle-orm');
 							entitiesQuery = db
@@ -602,6 +602,7 @@ export class FolderReindexService {
 									)
 								);
 							break;
+						}
 						// Agregar casos para video, document, etc.
 						default:
 							continue;

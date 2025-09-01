@@ -2,8 +2,8 @@
 
 import express from 'express';
 import path from 'path';
-import { initializeFileLogging } from '@/lib/logger/init-file-logging';
 import { serverLogger } from '@/lib/logger';
+import { initializeFileLogging } from '@/lib/logger/init-file-logging';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { errorLogger, logError, logInfo, requestLogger } from './middleware/logging';
 import threeDThumbnailsRouter from './routes/3d-thumbnails';

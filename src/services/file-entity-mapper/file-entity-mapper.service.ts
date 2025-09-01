@@ -97,7 +97,7 @@ export class FileEntityMapperService {
 			return cached;
 		}
 		const fileBuffer = await readFile(filePath);
-		const hash = createHash('md5').update(fileBuffer).digest('hex');
+		const hash = createHash('sha256').update(fileBuffer).digest('hex');
 		this.hashCache.set(cacheKey, hash);
 		return hash;
 	}
@@ -277,12 +277,28 @@ export class FileEntityMapperService {
 				if (!fileInfo.hash) {
 					throw new Error('File hash is required for image creation');
 				}
+
+				// Extraer dimensiones básicas de la imagen para evitar la violación de la restricción CHECK
+				let width = 1; // Valor mínimo válido por defecto
+				let height = 1; // Valor mínimo válido por defecto
+
+				try {
+					// Importar sharp dinámicamente para obtener las dimensiones
+					const sharp = (await import('sharp')).default;
+					const metadata = await sharp(fileInfo.path).metadata();
+					width = metadata.width || 1;
+					height = metadata.height || 1;
+				} catch (error) {
+					// Si no se pueden obtener las dimensiones reales, usar valores por defecto válidos
+					console.warn(`No se pudieron obtener dimensiones para ${fileInfo.path}, usando valores por defecto:`, error);
+				}
+
 				const imageData: CreateImageInput = {
 					name: fileInfo.name,
 					path: fileInfo.path,
 					size: fileInfo.size,
-					width: 0,
-					height: 0,
+					width,
+					height,
 					hash: fileInfo.hash,
 					folderId: fileInfo.folderId,
 				};

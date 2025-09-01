@@ -1,5 +1,4 @@
 import { Play, Video } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import { useCallback, useEffect, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -8,6 +7,7 @@ import { MultiEntityViewer } from '@/components/features/file-viewer/multi-entit
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { useToast } from '@/components/ui/use-toast';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { clientLogger } from '@/lib/logger/client-logger';

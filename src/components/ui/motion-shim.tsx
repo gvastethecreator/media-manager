@@ -1,9 +1,9 @@
 'use client';
 
-import { useRef, type CSSProperties, type ReactNode, useEffect, useState, createContext, useContext } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import type { JSX } from 'react';
+import { type CSSProperties, createContext, type ReactNode, useContext, useEffect, useRef, useState } from 'react';
 
 // Register GSAP plugin
 gsap.registerPlugin(useGSAP);
@@ -246,16 +246,16 @@ function createMotionComponent(tag: keyof JSX.IntrinsicElements) {
 
 		return (
 			<Component
-				ref={elementRef}
 				className={className}
-				style={style}
+				onBlur={onBlur}
 				onClick={handleClick}
+				onFocus={onFocus}
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 				onMouseMove={onMouseMove}
-				onBlur={onBlur}
-				onFocus={onFocus}
 				onWheel={onWheel}
+				ref={elementRef}
+				style={style}
 				{...restProps}
 			>
 				{children}

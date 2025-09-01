@@ -1,5 +1,4 @@
 import { AlertTriangle, FolderSync, Upload } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import { useCallback, useState } from 'react';
 import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
@@ -9,6 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { Progress } from '@/components/ui/progress';
 
 import { useToast } from '@/components/ui/use-toast';

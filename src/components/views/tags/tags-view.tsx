@@ -1,5 +1,4 @@
 import { Tag } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import { memo, useCallback, useState } from 'react';
 import { TagCard } from '@/components/cards/tag-card/tag-card';
 import { EmptyState } from '@/components/core/data-display';
@@ -7,6 +6,7 @@ import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';

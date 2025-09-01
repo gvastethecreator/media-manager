@@ -23,7 +23,7 @@ export function FileCanvasMasonryGrouped({
 				{groups.map((g) => (
 					<div className="flex flex-col" key={g.key}>
 						<h2
-							className="sticky top-0 z-10 border-b border-border/50 bg-background/80 p-2 text-xs font-semibold uppercase text-muted-foreground backdrop-blur supports-[backdrop-filter]:bg-background/60"
+							className="sticky top-0 z-10 border-border/50 border-b bg-background/80 p-2 font-semibold text-muted-foreground text-xs uppercase backdrop-blur supports-[backdrop-filter]:bg-background/60"
 							style={{ height: headerH }}
 						>
 							{g.displayName}

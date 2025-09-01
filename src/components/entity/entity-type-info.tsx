@@ -6,10 +6,10 @@
  */
 
 import { Download, Edit3, ExternalLink, Eye, MoreHorizontal, Share2, Star, Trash2 } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { motion } from '@/components/ui/motion-shim';
 import { useEntityTypeConfig } from '@/hooks/use-entity-type-config';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/entities';

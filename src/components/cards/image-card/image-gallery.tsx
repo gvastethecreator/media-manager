@@ -1,5 +1,4 @@
 import { Grid2X2Icon, Grid3X3Icon, ListIcon, RefreshCw, SortAsc, SortDesc } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -9,6 +8,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Input } from '@/components/ui/input';
+import { motion } from '@/components/ui/motion-shim';
 import type { ImageCardData } from '@/lib/api/services/images';
 import { cn } from '@/lib/utils';
 import type { ImageWithStats } from '@/types/entities/image/base';

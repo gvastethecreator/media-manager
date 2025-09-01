@@ -1,10 +1,10 @@
 import { ArrowLeft, Box, Download, Edit, Eye, RotateCcw, Share2, Trash2 } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';

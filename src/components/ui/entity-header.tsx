@@ -1,5 +1,4 @@
 import { ChevronLeft, MoreHorizontal, PencilIcon, StarIcon, TrashIcon } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import React from 'react';
 import {
 	Breadcrumb,
@@ -16,6 +15,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { EntityStats, StatItem } from '@/components/ui/entity-stats';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 export interface EntityHeaderAction {

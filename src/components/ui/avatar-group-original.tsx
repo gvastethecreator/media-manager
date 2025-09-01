@@ -1,7 +1,7 @@
 'use client';
 
-import { AnimatePresence, Easing, motion, useMotionValue, useSpring, useTransform } from '@/components/ui/motion-shim';
 import * as React from 'react';
+import { AnimatePresence, Easing, motion, useMotionValue, useSpring, useTransform } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 type AnimationVariantType = 'spring' | 'tween' | 'inertia' | 'decay' | 'keyframes';
