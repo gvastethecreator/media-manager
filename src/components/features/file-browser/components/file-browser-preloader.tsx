@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
-import { Box, Database, FileAudio, FileText, Image, Loader2, Video } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import gsap from 'gsap';
+import { Box, Database, FileAudio, FileText, Image, Loader2, Video } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
+import { cn } from '@/lib/utils';
+
 // Skeletons inline (se eliminaron componentes legacy)
 type SkeletonProps = { count?: number; itemSize?: number; className?: string };
 
@@ -280,56 +281,56 @@ export function FileBrowserPreloader({
 
 		switch (viewMode) {
 			case 'list':
-				return <SkeletonList count={8} className="flex-1" />;
+				return <SkeletonList className="flex-1" count={8} />;
 			case 'table':
-				return <SkeletonTable count={10} className="flex-1" />;
+				return <SkeletonTable className="flex-1" count={10} />;
 			default:
 				// grid, cards, masonry, canvas all use grid
-				return <SkeletonGrid count={12} itemSize={itemSize} className="flex-1" />;
+				return <SkeletonGrid className="flex-1" count={12} itemSize={itemSize} />;
 		}
 	};
 
 	// Si estamos en loading inicial o con pocos items, mostrar preloader completo
 	if (progress.stage === 'initial' || displayedCount < 5) {
 		return (
-			<div ref={rootRef} className={cn('flex h-full flex-col items-center justify-center gap-6 p-8', className)}>
+			<div className={cn('flex h-full flex-col items-center justify-center gap-6 p-8', className)} ref={rootRef}>
 				{/* Spinner sofisticado con múltiples capas */}
 				<div className="relative">
 					{/* Spinner principal */}
 					<div className={cn('relative h-16 w-16')}>
 						{/* Anillo exterior - rotación lenta */}
 						<div
-							data-ring="outer"
 							className="absolute inset-0 rounded-full border-2 border-transparent border-t-primary/30"
+							data-ring="outer"
 						/>
 
 						{/* Anillo intermedio - rotación media */}
 						<div
-							data-ring="mid"
 							className="absolute inset-2 rounded-full border-2 border-transparent border-r-primary/50"
+							data-ring="mid"
 						/>
 
 						{/* Anillo interior - rotación rápida */}
 						<div
-							data-ring="inner"
 							className="absolute inset-4 rounded-full border-2 border-transparent border-b-primary"
+							data-ring="inner"
 						/>
 
 						{/* Centro pulsante */}
-						<div data-center className="absolute inset-6 rounded-full bg-primary/20" />
+						<div className="absolute inset-6 rounded-full bg-primary/20" data-center />
 
 						{/* Icono de estado */}
 						<div className="absolute inset-0 flex items-center justify-center">
 							{progress.stage === 'initial' && <Loader2 className="h-4 w-4 text-primary" />}
 							{progress.stage === 'loading' && <Database className="h-4 w-4 text-primary" />}
-							{progress.stage === 'finalizing' && <Box data-stage-icon="finalizing" className="h-4 w-4 text-primary" />}
+							{progress.stage === 'finalizing' && <Box className="h-4 w-4 text-primary" data-stage-icon="finalizing" />}
 						</div>
 					</div>
 
 					{/* Efecto de éxito */}
 					{progress.stage === 'complete' && (
 						<div className="absolute inset-0 flex items-center justify-center">
-							<div data-success className={cn('h-12 w-12 rounded-full border-2 border-green-500 bg-green-500/10')}>
+							<div className={cn('h-12 w-12 rounded-full border-2 border-green-500 bg-green-500/10')} data-success>
 								<div className="absolute inset-2 rounded-full bg-green-500/20" />
 							</div>
 						</div>
@@ -351,7 +352,7 @@ export function FileBrowserPreloader({
 					{/* Barra de progreso visual controlada por GSAP */}
 					{progress.stage === 'loading' && itemCount > 0 && (
 						<div className="h-1 w-48 overflow-hidden rounded-full bg-muted">
-							<div ref={initialProgressRef} className="h-full bg-primary" style={{ width: '0%' }} />
+							<div className="h-full bg-primary" ref={initialProgressRef} style={{ width: '0%' }} />
 						</div>
 					)}
 				</div>
@@ -360,7 +361,7 @@ export function FileBrowserPreloader({
 				{showSkeletons && progress.stage !== 'complete' && (
 					<div className="flex gap-4 opacity-30">
 						{Object.entries(ENTITY_ICONS).map(([type, Icon]) => (
-							<div key={type} data-skel-type className="flex flex-col items-center gap-1">
+							<div className="flex flex-col items-center gap-1" data-skel-type key={type}>
 								<Icon className="h-5 w-5 text-muted-foreground/50" />
 								<div className="h-2 w-8 rounded bg-muted-foreground/20" />
 							</div>
@@ -373,12 +374,12 @@ export function FileBrowserPreloader({
 					<div className="flex max-w-md flex-wrap justify-center gap-2">
 						{Object.entries(ENTITY_ICONS).map(([type, Icon]) => (
 							<div
-								key={type}
 								className={cn(
 									'flex items-center gap-1 rounded-md px-2 py-1 text-xs',
 									'bg-muted/50 text-muted-foreground transition-all duration-300',
 									'hover:bg-muted/80'
 								)}
+								key={type}
 							>
 								<Icon className="h-3 w-3" />
 								<span className="capitalize">{type === 'jsonFile' ? 'JSON' : type}</span>
@@ -402,7 +403,7 @@ export function FileBrowserPreloader({
 
 				{/* Mini progress bar */}
 				<div className="h-2 w-24 overflow-hidden rounded-full bg-muted">
-					<div ref={headerProgressRef} className="h-full bg-primary" style={{ width: '0%' }} />
+					<div className="h-full bg-primary" ref={headerProgressRef} style={{ width: '0%' }} />
 				</div>
 			</div>
 

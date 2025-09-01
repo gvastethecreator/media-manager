@@ -1,5 +1,4 @@
 import { ChevronRight, CornerDownRight, Home } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
@@ -10,6 +9,7 @@ import {
 	BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
+import { motion } from '@/components/ui/motion-shim';
 import { ViewType } from '@/components/views/types';
 
 interface BreadcrumbsProps {

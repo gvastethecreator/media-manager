@@ -262,6 +262,13 @@ class ImageService {
 
 	async createImage(data: CreateImageInput): Promise<ImageWithStats> {
 		try {
+			// Verificar si ya existe una imagen con el mismo path y folderId
+			const existingImage = await this.getImageByPathAndFolder(data.path, data.folderId);
+			if (existingImage) {
+				imageLogger.info(`🔄 Imagen ya existe, devolviendo existente: ${data.path}`);
+				return existingImage;
+			}
+
 			const [newImage] = await db
 				.insert(images)
 				.values({
@@ -973,6 +980,73 @@ class ImageService {
 				code: ServiceErrorCode.DATABASE_ERROR,
 				message: 'Error al buscar imagen por hash',
 				context: { hash },
+				serviceName: SERVICE_NAME,
+			});
+		}
+	}
+
+	/**
+	 * Busca una imagen por path y folderId para evitar duplicados
+	 * @param path - Ruta del archivo
+	 * @param folderId - ID de la carpeta
+	 * @returns Imagen con estadísticas o null si no se encuentra
+	 */
+	async getImageByPathAndFolder(path: string, folderId: string): Promise<ImageWithStats | null> {
+		try {
+			imageLogger.info('🔍 Buscando imagen por path y folderId:', { path, folderId });
+
+			const result = await db
+				.select()
+				.from(images)
+				.where(and(eq(images.path, path), eq(images.folderId, folderId)))
+				.limit(1);
+
+			if (result.length === 0) {
+				imageLogger.info('Imagen no encontrada por path y folderId');
+				return null;
+			}
+
+			const image = result[0];
+
+			// Obtener estadísticas de la imagen
+			const statsResult = await db.select().from(imageStats).where(eq(imageStats.imageId, image.id)).limit(1);
+
+			const stats = statsResult[0] || { views: 0 };
+
+			// Convertir a ImageWithStats
+			const imageWithStats: ImageWithStats = {
+				...image,
+				isFavorite: Boolean(image.isFavorite),
+				entityType: 'image',
+				stats: {
+					viewCount: stats.views,
+					downloadCount: 0,
+					likeCount: 0,
+					commentCount: 0,
+					tagCount: 0,
+					albumCount: 0,
+					collectionCount: 0,
+					characterCount: 0,
+					placeCount: 0,
+					worldItemCount: 0,
+					conceptCount: 0,
+					promptCount: 0,
+					noteCount: 0,
+					wildcardCount: 0,
+					propertyCount: 0,
+					groupCount: 0,
+				},
+				thumbnailUrl: `/api/images/${image.id}/thumbnail`,
+				fullUrl: `/api/images/${image.id}/original`,
+			};
+
+			return imageWithStats;
+		} catch (error) {
+			imageLogger.error('❌ Error al buscar imagen por path y folderId:', error);
+			throw toServiceError(error, {
+				code: ServiceErrorCode.DATABASE_ERROR,
+				message: 'Error al buscar imagen por path y folderId',
+				context: { path, folderId },
 				serviceName: SERVICE_NAME,
 			});
 		}

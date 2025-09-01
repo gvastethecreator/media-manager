@@ -8,10 +8,10 @@ import {
 	StarIcon,
 	ZoomInIcon,
 } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
+import { motion } from '@/components/ui/motion-shim';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getImageCardData, type ImageCardData } from '@/lib/api/services/images';
 import { cn } from '@/lib/utils';

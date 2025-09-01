@@ -1,6 +1,6 @@
 import { MusicIcon, PauseIcon, PlayIcon, Volume2Icon, VolumeXIcon } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import React, { useCallback, useMemo, useRef, useState } from 'react';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import type { AudioWithStats } from '@/types/entities/audio';
 import { CardContainer } from '../card-container';

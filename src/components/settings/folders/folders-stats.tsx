@@ -1,5 +1,4 @@
 import { Clock, File, FileText, Folder, HardDrive, Image, Music, Video } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import type { FolderStats } from '@/types/folders';
@@ -37,7 +36,7 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 				{/* Estadísticas organizadas en 3 filas */}
 				<div className="lg:col-span-3">
 					<Card className="rounded-sm border-none bg-muted/30">
-						<CardContent className="p-4 grid grid-cols-2">
+						<CardContent className="grid grid-cols-2 p-4">
 							<div className="space-y-3">
 								{/* Primera fila: Carpetas y Archivos totales */}
 								<div className="grid grid-cols-2 gap-4">

@@ -7,8 +7,8 @@
  */
 
 import fs from 'fs';
-import path from 'path';
 import { glob } from 'glob';
+import path from 'path';
 
 // Configuración
 const SRC_DIR = path.join(process.cwd(), 'src');

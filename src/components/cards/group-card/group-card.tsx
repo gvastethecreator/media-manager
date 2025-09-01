@@ -1,6 +1,6 @@
-import { motion } from '@/components/ui/motion-shim';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { motion } from '@/components/ui/motion-shim';
 import { useGroupCardData } from '@/lib/api/groups';
 import { cn } from '@/lib/utils';
 import type { GroupCardProps } from './group-card.types';
