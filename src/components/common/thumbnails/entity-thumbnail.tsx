@@ -5,7 +5,7 @@
  * thumbnails apropiados para cualquier tipo de entidad
  */
 
-import { motion, type Transition } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { memo } from 'react';
 import { useEntityThumbnails, useEntityTypeConfig } from '@/hooks/use-entity-type-config';
 import { cn } from '@/lib/utils';

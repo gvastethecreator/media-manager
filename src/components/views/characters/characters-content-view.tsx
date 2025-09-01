@@ -1,5 +1,5 @@
 import { Users } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React from 'react';
 
 import { CharacterCard } from '@/components/cards/character-card';

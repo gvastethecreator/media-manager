@@ -7,7 +7,7 @@ import {
 	generateJsonPreview,
 } from '@/config/thumbnail-generators';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import type { MediaItem } from '../components/media-thumbnail';
+import type { MediaItem } from '../../components/media-thumbnail';
 
 export type CacheEntry = {
 	status: 'loading' | 'ready' | 'error';

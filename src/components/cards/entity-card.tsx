@@ -378,7 +378,7 @@ const renderEntityByType = (type: string, ctx: RenderCtx) => {
 
 export interface EntityCardProps extends BaseCardProps {
 	entity: AnyEntityWithStats;
-	/** Preset de layout específico para el contexto */
+	/** Preset de  específico para el contexto */
 	preset?: string;
 }
 
@@ -391,7 +391,7 @@ export const EntityCard: FC<EntityCardProps> = memo(
 		isActive,
 		className,
 		// Props del nuevo sistema de layouts
-		layoutConfig,
+		Config,
 		layout,
 		size,
 		variant,
@@ -415,23 +415,23 @@ export const EntityCard: FC<EntityCardProps> = memo(
 		// debug: estado final de handlers (se removió console por reglas de estilo)
 
 		// debug: estado final de handlers (removido console por reglas de estilo)
-		// Usar el hook de layout para obtener la configuración
+		// Usar el hook de  para obtener la configuración
 		const { config } = useCardLayout(
 			{
-				layoutConfig,
-				layout,
-				size,
-				variant,
-				className,
-				isSelected,
-				isActive,
-				onClick: finalOnClick,
-				onDoubleClick: finalOnDoubleClick,
-				compact,
-				tcgMode,
+				Config,
+				,
+			size,
+			variant,
+			className,
+			isSelected,
+			isActive,
+			onClick: finalOnClick,
+			onDoubleClick: finalOnDoubleClick,
+			compact,
+			tcgMode,
 			},
-			preset
-		);
+	preset
+);
 
 		// Render genérico por tipo
 		const type = getEntityStatsType(entity as any) ?? 'unknown';

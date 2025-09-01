@@ -1,5 +1,5 @@
 import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { useCallback, useMemo } from 'react';
 import { CardHeader } from '@/components/cards/card-header';
 import { useConcept, useConceptCounts } from '@/lib/api/concepts';

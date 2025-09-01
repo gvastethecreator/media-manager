@@ -1,5 +1,5 @@
 import { MapPin } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { useCallback, useState } from 'react';
 import { PlaceCard } from '@/components/cards/place-card';
 import { LoadingScreen } from '@/components/core/feedback';

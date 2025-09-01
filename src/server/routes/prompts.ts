@@ -16,8 +16,8 @@ const PromptFiltersSchema = z.object({
 	category: z.string().nullable().optional(),
 
 	isFavorite: z.boolean().optional(),
-	limit: z.number().int().positive().max(100).default(50).optional(),
-	offset: z.number().int().min(0).default(0).optional(),
+	limit: z.coerce.number().int().positive().max(100).default(50).optional(),
+	offset: z.coerce.number().int().min(0).default(0).optional(),
 	sortBy: z
 		.enum([
 			'name',

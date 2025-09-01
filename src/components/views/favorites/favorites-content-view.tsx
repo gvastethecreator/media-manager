@@ -1,5 +1,5 @@
 import { Heart } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React from 'react';
 import { FavoriteCard } from '@/components/cards/favorite-card';
 import { LoadingScreen } from '@/components/core/feedback';

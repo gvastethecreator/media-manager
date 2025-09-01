@@ -3,7 +3,7 @@
  * @module components/entities/profile/ProfileList
  */
 
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import { useCallback } from 'react';
 import { useProfileStore } from '@/store/entities/profile';
 import type { ProfileExtended } from '@/types/entities/profile';
@@ -44,7 +44,7 @@ export function ProfileList({ className }: ProfileListProps) {
 
 	return (
 		<div className={className}>
-			<motion.div className={`grid ${gridCols} gap-4`} layout>
+			<motion.div className={`grid ${gridCols} gap-4`}>
 				<AnimatePresence>
 					{profiles.map((profile) => (
 						<ProfileCard

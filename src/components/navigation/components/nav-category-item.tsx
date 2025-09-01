@@ -1,5 +1,5 @@
 import { ChevronRight, Grid, List, type LucideIcon } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import type React from 'react';
 import { memo, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
