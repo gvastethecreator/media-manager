@@ -45,6 +45,10 @@ export interface EnhancedMetadataResult {
 		exifData?: any;
 		iptcData?: any;
 		xmpData?: any;
+		videoData?: any; // Metadatos de video (duración, resolución, códec, etc.)
+		audioData?: any; // Metadatos de audio (duración, bitrate, artista, álbum, etc.)
+		jsonData?: any; // Metadatos de JSON (estructura, contenido, tipo, etc.)
+		documentData?: any; // Metadatos de documentos (palabras, líneas, frontmatter, etc.)
 		origin?: {
 			engine: string;
 			confidence?: number;

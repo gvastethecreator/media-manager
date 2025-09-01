@@ -39,12 +39,12 @@ export function FolderCardImages({
 					<img
 						alt="Imagen destacada"
 						className="h-full w-full object-cover"
-						src={featuredImage}
 						onError={(e) => {
 							// fallback: ocultar img si falla y usar fondo liso
 							const el = e.currentTarget as HTMLImageElement;
 							el.style.display = 'none';
 						}}
+						src={featuredImage}
 					/>
 				)}
 
@@ -104,11 +104,11 @@ export function FolderCardImages({
 							<img
 								alt={`Imagen reciente ${index + 1}`}
 								className="h-full w-full object-cover"
-								src={image}
 								onError={(e) => {
 									const el = e.currentTarget as HTMLImageElement;
 									el.style.display = 'none';
 								}}
+								src={image}
 							/>
 						)}
 

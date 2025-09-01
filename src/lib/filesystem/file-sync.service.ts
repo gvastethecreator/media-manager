@@ -135,7 +135,7 @@ export class FileSyncService {
 
 			// 4. Ejecutar cambios si no es dry run
 			if (!dryRun) {
-				await this.executeFileSyncChanges(result);
+				await this.executeFileSyncChanges(result, folderId);
 			}
 
 			result.stats.totalChecked = filesystemPaths.size;
@@ -332,11 +332,52 @@ export class FileSyncService {
 	/**
 	 * Ejecuta los cambios de sincronización (eliminar archivos que ya no existen)
 	 */
-	private async executeFileSyncChanges(result: FileSyncResult): Promise<void> {
-		if (result.removedFiles.length === 0) {
+	private async executeFileSyncChanges(result: FileSyncResult, folderId: string): Promise<void> {
+		// 1. Procesar archivos nuevos (crear entidades con metadata)
+		if (result.newFiles.length > 0) {
+			await this.processNewFiles(result, folderId);
+		}
+
+		// 2. Eliminar archivos que ya no existen
+		if (result.removedFiles.length > 0) {
+			await this.removeDeletedFiles(result);
+		}
+	}
+
+	private async processNewFiles(result: FileSyncResult, folderId: string): Promise<void> {
+		if (result.newFiles.length === 0) {
 			return;
 		}
 
+		syncLogger.info(`➕ Procesando ${result.newFiles.length} archivos nuevos con extracción de metadata`);
+
+		try {
+			const { FileEntityMapperService } = await import('@/services/file-entity-mapper/file-entity-mapper.service');
+			const mapper = FileEntityMapperService.getInstance();
+
+			// Procesar archivos nuevos con extracción de metadata completa
+			const filePaths = result.newFiles.map((f) => f.path);
+			const processingStats = await mapper.processFiles(filePaths, folderId);
+
+			syncLogger.info('✅ Procesamiento de archivos nuevos completado:', {
+				total: processingStats.totalFiles,
+				exitosos: processingStats.successful,
+				fallidos: processingStats.failed,
+				errores: processingStats.errors.length,
+			});
+
+			// Agregar errores al resultado de sincronización
+			if (processingStats.errors.length > 0) {
+				result.errors.push(...processingStats.errors.map((e) => `${e.file}: ${e.error}`));
+			}
+		} catch (error) {
+			const errorMsg = `Error procesando archivos nuevos: ${error instanceof Error ? error.message : String(error)}`;
+			syncLogger.error(errorMsg);
+			result.errors.push(errorMsg);
+		}
+	}
+
+	private async removeDeletedFiles(result: FileSyncResult): Promise<void> {
 		syncLogger.info(`🗑️ Eliminando ${result.removedFiles.length} archivos de la BD`);
 
 		// Agrupar por tipo de entidad para eliminar en lotes

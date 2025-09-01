@@ -123,7 +123,7 @@ export const RightPanel = reactMemo(function RightPanelComponent({
 		<div
 			className={cn(
 				'flex h-full w-full bg-background',
-				isAnimating && 'transition-all duration-300',
+				isAnimating && 'transition-all duration-50',
 				isCollapsed && 'right-panel-collapsed'
 			)}
 		>

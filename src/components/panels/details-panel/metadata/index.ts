@@ -2,8 +2,12 @@
 
 export {
 	extractAIMetadata,
+	extractAudioMetadata,
+	extractDocumentMetadata,
 	extractEXIFMetadata,
 	extractIPTCMetadata,
+	extractJSONMetadata,
+	extractVideoMetadata,
 	extractXMPMetadata,
 } from './enhanced-metadata-extractors';
 export { getDetailedMetadata } from './legacy-metadata';

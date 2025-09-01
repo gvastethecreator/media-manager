@@ -1,6 +1,7 @@
 import { Image as ImageIcon } from 'lucide-react';
 import { motion } from 'motion/react';
 import { cn } from '@/lib/utils';
+import { normalizeThumbailUrl } from './utils/folder-helpers';
 
 interface ThumbnailGridProps {
 	images: Array<{ id: string; name: string; thumbnailUrl?: string; thumbnail?: string }>;
@@ -28,11 +29,7 @@ export function ThumbnailGrid({ images, totalImages, className, showCount = true
 					const image = displayImages[index];
 					const rawThumb = image?.thumbnailUrl || image?.thumbnail;
 					// Normaliza a data URL si parece base64 sin prefijo
-					const normalizedUrl = rawThumb
-						? rawThumb.startsWith('data:') || rawThumb.startsWith('http') || rawThumb.startsWith('/')
-							? rawThumb
-							: `data:image/webp;base64,${rawThumb}`
-						: undefined;
+					const normalizedUrl = normalizeThumbailUrl(rawThumb);
 
 					return (
 						<motion.div
