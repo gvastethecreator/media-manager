@@ -117,16 +117,13 @@ export function FolderStageIndicator({
 	};
 
 	return (
-		<div className={cn('space-y-2', className)}>
+		<div className={cn('absolute right-2 bottom-2 w-fit space-y-2', className)}>
 			{/* Indicador de etapa actual */}
 			<div className="flex items-center justify-between">
 				<motion.div
-					animate={{ scale: isProcessing ? [1, 1.05, 1] : 1 }}
+					animate={{ opacity: isProcessing ? [1, 0.95, 1] : 1 }}
 					className={cn(
-						'flex items-center gap-2 rounded-md px-2 py-1 transition-all',
-						currentStage.color.bg,
-						currentStage.color.border,
-						'border'
+						'flex items-center gap-2 rounded-sm border-2 border-background/50 px-2 py-1 shadow-xs backdrop-blur-lg transition-all'
 					)}
 					transition={{ duration: 2, repeat: isProcessing ? Number.POSITIVE_INFINITY : 0 }}
 				>
@@ -141,17 +138,11 @@ export function FolderStageIndicator({
 						{currentStage.icon}
 					</motion.div>
 					<div className="flex flex-col">
-						<span className={cn('font-medium text-xs', currentStage.color.text)}>{currentStage.name}</span>
+						<span className={cn('font-medium text-sm', currentStage.color.text)}>{currentStage.name}</span>
 						<span className="text-[10px] text-muted-foreground">{currentStage.description}</span>
+						{/* Contador de archivos */}
 					</div>
 				</motion.div>
-
-				{/* Contador de archivos */}
-				{filesProcessed !== undefined && totalFiles !== undefined && (
-					<Badge className="h-5 text-[10px]" variant="outline">
-						{filesProcessed}/{totalFiles}
-					</Badge>
-				)}
 			</div>
 
 			{/* Barra de progreso de etapas */}

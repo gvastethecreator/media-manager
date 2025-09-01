@@ -45,12 +45,12 @@ interface TotalFilesBadgeProps {
 /**
  * Badge para mostrar conteos por tipo de archivo
  */
-export function FileTypeBadge({ type, count, variant = 'outline', size = 'micro' }: FileTypeBadgeProps) {
+export function FileTypeBadge({ type, count, variant = 'secondary', size = 'micro' }: FileTypeBadgeProps) {
 	const Icon = FILE_TYPE_ICONS[type];
 	const sizeClass = COMPONENT_SIZES.badge[size];
 
 	return (
-		<Badge className={cn('flex items-center gap-1 px-1', sizeClass)} variant={variant}>
+		<Badge className={cn('flex items-center gap-1 px-2', sizeClass)} variant={variant}>
 			<Icon className={COMPONENT_SIZES.icon.micro} />
 			{count}
 		</Badge>
@@ -60,11 +60,11 @@ export function FileTypeBadge({ type, count, variant = 'outline', size = 'micro'
 /**
  * Badge para mostrar conteo de subcarpetas
  */
-export function FolderBadge({ count, variant = 'outline', size = 'micro' }: FolderBadgeProps) {
+export function FolderBadge({ count, variant = 'secondary', size = 'micro' }: FolderBadgeProps) {
 	const sizeClass = COMPONENT_SIZES.badge[size];
 
 	return (
-		<Badge className={cn('flex items-center gap-1 px-1', sizeClass)} variant={variant}>
+		<Badge className={cn('flex items-center gap-1 px-2', sizeClass)} variant={variant}>
 			<Folder className={COMPONENT_SIZES.icon.micro} />
 			{count}
 		</Badge>
@@ -87,14 +87,14 @@ export function SizeBadge({ bytes, variant = 'secondary', size = 'micro' }: Size
 /**
  * Badge que muestra el total de archivos (suma de todos los tipos)
  */
-export function TotalFilesBadge({ folderStats, variant = 'outline', size = 'micro' }: TotalFilesBadgeProps) {
+export function TotalFilesBadge({ folderStats, variant = 'secondary', size = 'micro' }: TotalFilesBadgeProps) {
 	const totalFiles = getTotalFilesCount(folderStats);
 	const sizeClass = COMPONENT_SIZES.badge[size];
 
 	if (totalFiles === 0) return null;
 
 	return (
-		<Badge className={cn('flex items-center gap-1 px-1', sizeClass)} variant={variant}>
+		<Badge className={cn('flex items-center gap-1 px-2', sizeClass)} variant={variant}>
 			<File className={COMPONENT_SIZES.icon.micro} />
 			{totalFiles} archivos
 		</Badge>

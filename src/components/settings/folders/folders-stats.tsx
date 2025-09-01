@@ -19,7 +19,7 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 	].filter((item) => item.value > 0);
 
 	return (
-		<motion.div animate={{ opacity: 1, y: 0 }} className="space-y-3" initial={{ opacity: 0, y: 10 }}>
+		<div className="space-y-3 p-4">
 			{/* Título compacto */}
 			<div className="flex items-center justify-between" data-testid="folders-stats">
 				<h3 className="flex items-center gap-2 font-medium text-muted-foreground text-sm">
@@ -37,7 +37,7 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 				{/* Estadísticas organizadas en 3 filas */}
 				<div className="lg:col-span-3">
 					<Card className="rounded-sm border-none bg-muted/30">
-						<CardContent className="p-4">
+						<CardContent className="p-4 grid grid-cols-2">
 							<div className="space-y-3">
 								{/* Primera fila: Carpetas y Archivos totales */}
 								<div className="grid grid-cols-2 gap-4">
@@ -122,18 +122,10 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 										</div>
 									</div>
 								</div>
-							</div>
-						</CardContent>
-					</Card>
-				</div>
 
-				{/* Gráfico de pie */}
-				<div className="lg:col-span-1">
-					<Card className="h-full rounded-sm border-none bg-muted/30">
-						<CardContent className="p-3">
-							<div className="mb-2 text-center font-medium text-muted-foreground text-xs">Distribución</div>
+							</div>
 							{pieData.length > 0 ? (
-								<div className="h-32">
+								<div>
 									<ResponsiveContainer height="100%" width="100%">
 										<PieChart>
 											<Pie cx="50%" cy="50%" data={pieData} dataKey="value" outerRadius={50}>
@@ -155,7 +147,8 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 						</CardContent>
 					</Card>
 				</div>
+
 			</div>
-		</motion.div>
+		</div>
 	);
 }
