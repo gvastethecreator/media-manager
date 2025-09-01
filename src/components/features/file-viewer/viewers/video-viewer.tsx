@@ -141,9 +141,9 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className, onNe
 				controls={false}
 				muted={muted}
 				onClick={handlePlayPause}
+				onError={() => setError('Error al cargar el video')}
 				onLoadedMetadata={handleLoadedMetadata}
 				onTimeUpdate={handleTimeUpdate}
-				onError={() => setError('Error al cargar el video')}
 				poster={video.thumbnail || undefined}
 				ref={videoRef}
 				src={video.path}

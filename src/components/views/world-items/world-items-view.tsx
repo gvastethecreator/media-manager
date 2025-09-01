@@ -1,9 +1,9 @@
 import { Box } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import { useCallback } from 'react';
 import { WorldItemCard } from '@/components/cards/world-item-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { useWorldItems } from '@/lib/api/world-items';

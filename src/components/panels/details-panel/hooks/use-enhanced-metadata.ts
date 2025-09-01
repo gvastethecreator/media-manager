@@ -266,54 +266,56 @@ export const useEnhancedMetadata = (item?: AnyEntityWithStats) => {
 	}, [item, loadEnhancedMetadata]);
 
 	// Función para exportar metadatos
-	const exportMetadata = useCallback((format: 'json' | 'csv' = 'json') => {
-		if (!item) return null;
-		
-		const exportData = {
-			filename: 'name' in item ? item.name : 'unknown',
-			entityType: item.entityType,
-			extractedAt: new Date().toISOString(),
-			metadata: enhancedMetadata.reduce((acc, meta) => {
-				acc[meta.key] = meta.value;
-				if (meta.category) {
-					acc[`${meta.key}_category`] = meta.category;
-				}
-				return acc;
-			}, {} as Record<string, string>),
-			itemDetails: {
-				id: item.id,
-				path: 'path' in item ? item.path : undefined,
-				hash: 'hash' in item ? item.hash : undefined,
-			}
-		};
+	const exportMetadata = useCallback(
+		(format: 'json' | 'csv' = 'json') => {
+			if (!item) return null;
 
-		if (format === 'json') {
-			const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = `${exportData.filename}_metadata.json`;
-			a.click();
-			URL.revokeObjectURL(url);
-		} else if (format === 'csv') {
-			const headers = ['Key', 'Value', 'Category'];
-			const rows = enhancedMetadata.map(meta => [
-				`"${meta.key}"`,
-				`"${meta.value}"`,
-				`"${meta.category || ''}"`
-			]);
-			const csvContent = [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
-			const blob = new Blob([csvContent], { type: 'text/csv' });
-			const url = URL.createObjectURL(blob);
-			const a = document.createElement('a');
-			a.href = url;
-			a.download = `${exportData.filename}_metadata.csv`;
-			a.click();
-			URL.revokeObjectURL(url);
-		}
-		
-		return exportData;
-	}, [item, enhancedMetadata]);
+			const exportData = {
+				filename: 'name' in item ? item.name : 'unknown',
+				entityType: item.entityType,
+				extractedAt: new Date().toISOString(),
+				metadata: enhancedMetadata.reduce(
+					(acc, meta) => {
+						acc[meta.key] = meta.value;
+						if (meta.category) {
+							acc[`${meta.key}_category`] = meta.category;
+						}
+						return acc;
+					},
+					{} as Record<string, string>
+				),
+				itemDetails: {
+					id: item.id,
+					path: 'path' in item ? item.path : undefined,
+					hash: 'hash' in item ? item.hash : undefined,
+				},
+			};
+
+			if (format === 'json') {
+				const blob = new Blob([JSON.stringify(exportData, null, 2)], { type: 'application/json' });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = `${exportData.filename}_metadata.json`;
+				a.click();
+				URL.revokeObjectURL(url);
+			} else if (format === 'csv') {
+				const headers = ['Key', 'Value', 'Category'];
+				const rows = enhancedMetadata.map((meta) => [`"${meta.key}"`, `"${meta.value}"`, `"${meta.category || ''}"`]);
+				const csvContent = [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+				const blob = new Blob([csvContent], { type: 'text/csv' });
+				const url = URL.createObjectURL(blob);
+				const a = document.createElement('a');
+				a.href = url;
+				a.download = `${exportData.filename}_metadata.csv`;
+				a.click();
+				URL.revokeObjectURL(url);
+			}
+
+			return exportData;
+		},
+		[item, enhancedMetadata]
+	);
 
 	return {
 		enhancedMetadata,

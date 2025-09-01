@@ -1,6 +1,6 @@
 import { DownloadIcon, EyeIcon, FileTextIcon } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import { useCallback, useMemo, useState } from 'react';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import type { DocumentWithStats } from '@/types/entities/document';
 import { CardContainer } from '../card-container';

@@ -35,7 +35,7 @@ export const EasingFunctions = {
 	linear: (t: number) => t,
 	easeOut: (t: number) => 1 - (1 - t) ** 3,
 	easeIn: (t: number) => t * t * t,
-	easeInOut: (t: number) => t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2,
+	easeInOut: (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - (-2 * t + 2) ** 3 / 2),
 	bounceOut: (t: number) => {
 		const n1 = 7.5625;
 		const d1 = 2.75;
@@ -148,17 +148,17 @@ export function createTooltipAnimation(isEntering: boolean, delay = 0): TooltipA
 	const startTime = performance.now() + (isEntering ? delay : 0);
 
 	return {
-		alpha: { 
-			...createAnimation(alpha.from, alpha.to, config.duration, config.easing), 
-			startTime 
+		alpha: {
+			...createAnimation(alpha.from, alpha.to, config.duration, config.easing),
+			startTime,
 		},
-		scale: { 
-			...createAnimation(scale.from, scale.to, config.duration, EasingFunctions.bounceOut), 
-			startTime 
+		scale: {
+			...createAnimation(scale.from, scale.to, config.duration, EasingFunctions.bounceOut),
+			startTime,
 		},
-		offsetY: { 
-			...createAnimation(offsetY.from, offsetY.to, config.duration, config.easing), 
-			startTime 
+		offsetY: {
+			...createAnimation(offsetY.from, offsetY.to, config.duration, config.easing),
+			startTime,
 		},
 	};
 }
@@ -248,7 +248,7 @@ export class CanvasAnimationManager {
 		// Actualizar animaciones de hover
 		for (const [itemIndex, hoverState] of this.hoverAnimations) {
 			const isActive = updateHoverAnimation(hoverState, currentTime);
-			
+
 			if (isActive) {
 				hasActiveAnimations = true;
 			} else if (hoverState.scale.toValue === AnimationConfig.hover.scale.from) {
@@ -260,7 +260,7 @@ export class CanvasAnimationManager {
 		// Actualizar animación de tooltip
 		if (this.tooltipAnimation) {
 			const isActive = updateTooltipAnimation(this.tooltipAnimation, currentTime);
-			
+
 			if (!isActive && this.tooltipAnimation.alpha.toValue === AnimationConfig.tooltip.alpha.from) {
 				// Tooltip fade out completado
 				this.tooltipAnimation = null;

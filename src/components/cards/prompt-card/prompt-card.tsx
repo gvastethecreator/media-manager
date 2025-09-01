@@ -1,5 +1,5 @@
-import { motion } from '@/components/ui/motion-shim';
 import React, { memo, useCallback, useMemo, useState } from 'react';
+import { motion } from '@/components/ui/motion-shim';
 import { usePrompt, useRecentPromptImages } from '@/lib/api/prompts';
 import { cn } from '@/lib/utils';
 import type { PromptWithStats } from '@/types/entities/prompt';

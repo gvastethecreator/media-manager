@@ -1,8 +1,8 @@
-import { CardsCanvas } from './canvas/cards-canvas';
+import { useState } from 'react';
 import type { MediaItem } from '../components/media-thumbnail';
 import type { ClickModifiers } from '../types/file-browser.types';
 import { CanvasRenderConfig } from './canvas/canvas-config';
-import { useState } from 'react';
+import { CardsCanvas } from './canvas/cards-canvas';
 
 export interface CardsProps {
 	items: MediaItem[];
@@ -32,9 +32,9 @@ export function Cards({
 					<CardsCanvas
 						itemSize={itemSize}
 						items={items}
-						scrollContainer={effectiveScrollContainer}
 						onItemClick={onItemClick}
 						onItemDoubleClick={onItemDoubleClick}
+						scrollContainer={effectiveScrollContainer}
 					/>
 				</div>
 			</div>

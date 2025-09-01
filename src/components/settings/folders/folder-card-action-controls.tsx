@@ -76,12 +76,7 @@ export const NormalModeControls = memo(function NormalModeControls({
 					size="icon"
 					variant="ghost"
 				>
-					<RefreshCw
-						className={cn(
-							'h-3.5 w-3.5 transition-transform',
-							isReindexing && processStatus.folderId === folder.id && 'animate-spin'
-						)}
-					/>
+					<RefreshCw className="h-3.5 w-3.5" />
 				</Button>
 			</SimpleTooltip>
 

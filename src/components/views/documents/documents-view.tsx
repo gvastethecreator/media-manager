@@ -1,5 +1,4 @@
 import { FileText } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import { useCallback, useEffect, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
@@ -8,6 +7,7 @@ import { MultiEntityViewer } from '@/components/features/file-viewer/multi-entit
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import { useCreateDocument, useDocuments } from '@/lib/api/documents';

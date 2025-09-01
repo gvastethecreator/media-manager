@@ -4,7 +4,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 
 /**
  * 🔧 TOOLTIP WRAPPER REUTILIZABLE OPTIMIZADO
- * 
+ *
  * IMPORTANTE: Requiere un TooltipProvider en un nivel superior
  * Eliminamos el provider interno para evitar renders excesivos
  */
@@ -25,7 +25,7 @@ export const SimpleTooltip = memo(function SimpleTooltip({
 	content,
 	side = 'top',
 	align = 'center',
-	className
+	className,
 }: SimpleTooltipProps) {
 	return (
 		<Tooltip>

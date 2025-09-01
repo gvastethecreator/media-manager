@@ -77,21 +77,19 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 	}
 
 	return (
-		<div className={`m-0 flex h-full flex-col p-0 ${className}`}>
-			<ScrollArea className="flex-1">
-				<div className="grid grid-cols-4 gap-2 p-0">
-					{allFolders.map((folder) => (
-						<FolderCard
-							className="h-full"
-							folder={folder}
-							interactive={true}
-							key={folder.id}
-							onClick={() => handleFolderClick(folder)}
-							tcgMode={false}
-						/>
-					))}
-				</div>
-			</ScrollArea>
+		<div className={`m-0 flex h-full flex-col overflow-auto p-0 ${className}`}>
+			<div className="grid grid-cols-4 gap-2 p-2">
+				{allFolders.map((folder) => (
+					<FolderCard
+						className="h-full"
+						folder={folder}
+						interactive={true}
+						key={folder.id}
+						onClick={() => handleFolderClick(folder)}
+						tcgMode={false}
+					/>
+				))}
+			</div>
 		</div>
 	);
 }

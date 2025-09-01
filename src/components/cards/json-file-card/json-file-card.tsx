@@ -1,7 +1,7 @@
 import { CheckIcon, DownloadIcon, EyeIcon, FileJsonIcon, XIcon } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import { useCallback, useMemo, useState } from 'react';
 import { darkenHex } from '@/components/cards/shared/rarity-style';
+import { motion } from '@/components/ui/motion-shim';
 import { useJsonFile } from '@/lib/api/json-files';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format'; // Importar formatBytes
