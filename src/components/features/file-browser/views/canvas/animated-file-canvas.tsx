@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useAddTags, useAddToCollection, useToggleFavorite } from '@/lib/api/files';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
@@ -6,12 +6,9 @@ import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { MediaItem } from '../../components/media-thumbnail';
 import { ExtendedContextMenu, type ExtendedContextMenuAction } from '../../context-menu/extended-context-menu';
 import type { ClickModifiers } from '../../types/file-browser.types';
+import { AnimationConfig, CanvasAnimationManager } from './canvas-animations';
 import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
 import { CanvasRenderConfig } from './canvas-config';
-import { 
-	CanvasAnimationManager, 
-	AnimationConfig
-} from './canvas-animations';
 
 // Props y defaults
 export interface AnimatedFileCanvasProps {
@@ -161,7 +158,7 @@ export function AnimatedFileCanvas({
 
 		const ctx = canvas.getContext('2d');
 		if (!ctx) return;
-		
+
 		ctx.resetTransform();
 		ctx.scale(dpr, dpr);
 		ctx.clearRect(0, 0, w, h);
@@ -236,7 +233,7 @@ export function AnimatedFileCanvas({
 			// Contenido de la imagen
 			const entry = get(item.id);
 			const pad = 2;
-			
+
 			ctx.save();
 			ctx.beginPath();
 			ctx.rect(finalX + pad, finalY + pad, finalSize - pad * 2, finalSize - pad * 2);
@@ -249,7 +246,7 @@ export function AnimatedFileCanvas({
 				const img = entry.image as any;
 				const iw = (img.naturalWidth ?? img.width) as number;
 				const ih = (img.naturalHeight ?? img.height) as number;
-				
+
 				if (iw > 0 && ih > 0) {
 					// Fade-in animation
 					const now = performance.now();
@@ -264,7 +261,7 @@ export function AnimatedFileCanvas({
 					const dh = Math.ceil(ih * imageScale);
 					const dx = finalX + pad + Math.floor((finalSize - pad * 2 - dw) / 2);
 					const dy = finalY + pad + Math.floor((finalSize - pad * 2 - dh) / 2);
-					
+
 					ctx.drawImage(img, dx, dy, dw, dh);
 					ctx.globalAlpha = prevAlpha;
 				}
@@ -323,7 +320,7 @@ export function AnimatedFileCanvas({
 	const animationLoop = useCallback(() => {
 		const currentTime = performance.now();
 		const needsRedraw = animationManager.current.update(currentTime);
-		
+
 		if (needsRedraw) {
 			renderCanvas();
 		}
@@ -334,7 +331,7 @@ export function AnimatedFileCanvas({
 	// Iniciar loop de animación
 	useEffect(() => {
 		animationFrameRef.current = requestAnimationFrame(animationLoop);
-		
+
 		return () => {
 			if (animationFrameRef.current) {
 				cancelAnimationFrame(animationFrameRef.current);
@@ -376,32 +373,32 @@ export function AnimatedFileCanvas({
 	// Manejo de hover mejorado
 	const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
 		const pos = getContentCoords(e);
-		
+
 		if (dragStart) {
 			setDragCurrent(pos);
 			return;
 		}
 
 		const idx = indexFromCoords(pos.x, pos.y);
-		
+
 		// Gestión de hover animation
 		if (idx !== hoverIndex) {
 			// Terminar animación anterior
 			if (hoverIndex !== null) {
 				animationManager.current.endHoverAnimation(hoverIndex);
 			}
-			
+
 			// Iniciar nueva animación
 			if (idx >= 0 && idx < items.length) {
 				animationManager.current.startHoverAnimation(idx);
-				
+
 				// Actualizar tooltip
 				const col = idx % Math.max(1, columns);
 				const row = Math.floor(idx / Math.max(1, columns));
 				const x = col * (cellSize + gap) + gap + 8;
 				const y = (row - visibleRange.firstVisibleRow) * (cellSize + gap) + gap + 8;
 				const name = items[idx]?.name || '';
-				
+
 				setHoverTooltip({
 					visible: true,
 					text: name,
@@ -413,10 +410,10 @@ export function AnimatedFileCanvas({
 				// Iniciar animación de tooltip
 				animationManager.current.startTooltipAnimation(AnimationConfig.tooltip.fadeDelay);
 			} else {
-				setHoverTooltip(prev => ({ ...prev, visible: false, itemIndex: null }));
+				setHoverTooltip((prev) => ({ ...prev, visible: false, itemIndex: null }));
 				animationManager.current.endTooltipAnimation();
 			}
-			
+
 			setHoverIndex(idx >= 0 && idx < items.length ? idx : null);
 		}
 	};
@@ -427,7 +424,7 @@ export function AnimatedFileCanvas({
 			animationManager.current.endTooltipAnimation();
 		}
 		setHoverIndex(null);
-		setHoverTooltip(prev => ({ ...prev, visible: false, itemIndex: null }));
+		setHoverTooltip((prev) => ({ ...prev, visible: false, itemIndex: null }));
 	};
 
 	// Resto de handlers (sin cambios significativos)
@@ -546,7 +543,7 @@ export function AnimatedFileCanvas({
 					for (const it of selected) {
 						try {
 							await toggleFavorite.mutateAsync(it.id);
-						} catch { }
+						} catch {}
 					}
 				})();
 				break;
@@ -558,7 +555,7 @@ export function AnimatedFileCanvas({
 					for (const it of selected) {
 						try {
 							await addToCollection.mutateAsync({ fileId: it.id, collectionId: targetId });
-						} catch { }
+						} catch {}
 					}
 				})();
 				break;
@@ -570,7 +567,7 @@ export function AnimatedFileCanvas({
 					for (const it of selected) {
 						try {
 							await addTags.mutateAsync({ fileId: it.id, tags: [targetId] });
-						} catch { }
+						} catch {}
 					}
 				})();
 				break;
@@ -671,7 +668,7 @@ export function AnimatedFileCanvas({
 				}));
 			});
 		});
-		
+
 		ro.observe(host);
 		ro.observe(internal);
 
@@ -715,7 +712,17 @@ export function AnimatedFileCanvas({
 		} catch {
 			host.scrollTop = targetTop + offset;
 		}
-	}, [activeId, items, columns, visibleRange.firstVisibleRow, visibleRange.lastVisibleRow, cellSize, gap, scrollContainer, viewport.offsetTop]);
+	}, [
+		activeId,
+		items,
+		columns,
+		visibleRange.firstVisibleRow,
+		visibleRange.lastVisibleRow,
+		cellSize,
+		gap,
+		scrollContainer,
+		viewport.offsetTop,
+	]);
 
 	// Cleanup
 	useEffect(() => {
@@ -725,11 +732,11 @@ export function AnimatedFileCanvas({
 	}, []);
 
 	const useExternal = !!scrollContainer;
-	
+
 	// Renderizar tooltip animado
 	const renderAnimatedTooltip = () => {
 		if (!hoverTooltip.visible || hoverTooltip.itemIndex === null) return null;
-		
+
 		const tooltipAnim = animationManager.current.getTooltipAnimation();
 		if (!tooltipAnim) return null;
 
@@ -787,7 +794,7 @@ export function AnimatedFileCanvas({
 			>
 				<div style={{ height: totalHeight }} />
 				<canvas className="pointer-events-none absolute inset-0" ref={canvasRef} />
-				
+
 				{/* Tooltip animado */}
 				{renderAnimatedTooltip()}
 			</div>

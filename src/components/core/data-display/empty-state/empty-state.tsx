@@ -1,6 +1,6 @@
 import type { LucideIcon } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import BlurFade from '@/components/ui/blur-fade';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 interface EmptyStateProps {

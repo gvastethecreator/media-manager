@@ -1,10 +1,9 @@
 import { StickyNote } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import React from 'react';
-
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface NotesViewSimpleProps {

@@ -1,5 +1,5 @@
-import { motion } from '@/components/ui/motion-shim';
 import React, { useCallback, useMemo, useState } from 'react';
+import { motion } from '@/components/ui/motion-shim';
 import { useVideo } from '@/lib/api/videos';
 import { cn } from '@/lib/utils';
 import type { VideoWithStats } from '@/types/entities/video';

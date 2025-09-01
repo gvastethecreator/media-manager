@@ -123,18 +123,16 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 								{effectiveLoading ? (
 									<div className="text-sm">
 										<div className="font-medium">Extrayendo metadatos...</div>
-										<div className="text-xs text-muted-foreground mt-1">
-											• Analizando EXIF/IPTC/XMP<br />
-											• Detectando engine de IA<br />
-											• Extrayendo parámetros de generación
+										<div className="mt-1 text-muted-foreground text-xs">
+											• Analizando EXIF/IPTC/XMP
+											<br />• Detectando engine de IA
+											<br />• Extrayendo parámetros de generación
 										</div>
 									</div>
 								) : (
 									<div className="text-sm">
 										<div className="font-medium">Extraer Metadatos</div>
-										<div className="text-xs text-muted-foreground mt-1">
-											Analizar archivos con sistema avanzado
-										</div>
+										<div className="mt-1 text-muted-foreground text-xs">Analizar archivos con sistema avanzado</div>
 									</div>
 								)}
 							</TooltipContent>
@@ -202,15 +200,15 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 								<DropdownMenuSeparator />
 								<DropdownMenuLabel>Exportar Metadatos</DropdownMenuLabel>
 								<DropdownMenuItem
-									onClick={() => exportMetadata?.('json')}
 									disabled={!effectiveEnhanced.length || effectiveLoading}
+									onClick={() => exportMetadata?.('json')}
 								>
 									<FileJson className="mr-2 h-4 w-4" />
 									Exportar como JSON
 								</DropdownMenuItem>
 								<DropdownMenuItem
-									onClick={() => exportMetadata?.('csv')}
 									disabled={!effectiveEnhanced.length || effectiveLoading}
+									onClick={() => exportMetadata?.('csv')}
 								>
 									<Download className="mr-2 h-4 w-4" />
 									Exportar como CSV
@@ -222,12 +220,12 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 
 					{/* Indicador de estado de carga de metadatos */}
 					{effectiveLoading && (
-						<div className="bg-blue-50 border border-blue-200 rounded-md p-2 m-1 dark:bg-blue-950/20 dark:border-blue-800/30">
+						<div className="m-1 rounded-md border border-blue-200 bg-blue-50 p-2 dark:border-blue-800/30 dark:bg-blue-950/20">
 							<div className="flex items-center gap-2 text-blue-800 dark:text-blue-300">
 								<RefreshCw className="h-3 w-3 animate-spin" />
-								<span className="text-xs font-medium">Extrayendo metadatos avanzados...</span>
+								<span className="font-medium text-xs">Extrayendo metadatos avanzados...</span>
 							</div>
-							<div className="text-blue-600 dark:text-blue-400 text-xs mt-1">
+							<div className="mt-1 text-blue-600 text-xs dark:text-blue-400">
 								Analizando archivo con sistema de detección IA
 							</div>
 						</div>
@@ -516,28 +514,26 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 														);
 													})()}
 													{effectiveError && (
-														<div className="bg-red-50 border border-red-200 rounded p-3 text-red-800 text-sm dark:bg-red-950/20 dark:border-red-800/30 dark:text-red-300">
-															<div className="flex items-center gap-2 mb-1">
+														<div className="rounded border border-red-200 bg-red-50 p-3 text-red-800 text-sm dark:border-red-800/30 dark:bg-red-950/20 dark:text-red-300">
+															<div className="mb-1 flex items-center gap-2">
 																<span className="font-medium">Error de extracción:</span>
 															</div>
-															<div className="text-xs text-red-700 dark:text-red-400">
-																{effectiveError}
-															</div>
+															<div className="text-red-700 text-xs dark:text-red-400">{effectiveError}</div>
 															<Button
 																className="mt-2 self-start"
+																disabled={effectiveLoading}
 																onClick={() => refetch()}
 																size="sm"
 																variant="outline"
-																disabled={effectiveLoading}
 															>
 																{effectiveLoading ? (
 																	<>
-																		<RefreshCw className="h-3 w-3 animate-spin mr-1" />
+																		<RefreshCw className="mr-1 h-3 w-3 animate-spin" />
 																		Reintentando...
 																	</>
 																) : (
 																	<>
-																		<RefreshCw className="h-3 w-3 mr-1" />
+																		<RefreshCw className="mr-1 h-3 w-3" />
 																		Reintentar
 																	</>
 																)}

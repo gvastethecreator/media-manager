@@ -1,5 +1,4 @@
 import { Lightbulb } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import React from 'react';
 import { ConceptCard } from '@/components/cards/concept-card';
 import { EmptyState } from '@/components/core/data-display';
@@ -7,6 +6,7 @@ import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import type { ConceptWithStats } from '@/types/entities/concept';

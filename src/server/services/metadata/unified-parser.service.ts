@@ -30,7 +30,7 @@ const DEFAULT_OPTIONS: MetadataExtractionOptions = {
 	extract_c2pa: true,
 	extract_ai_metadata: true,
 	extract_video_metadata: true,
-	timeout: 30000,
+	timeout: 30_000,
 	max_file_size: 100 * 1024 * 1024, // 100MB
 	debug: false,
 	include_raw_data: false,
@@ -489,11 +489,22 @@ function isPNGFile(buffer: Buffer): boolean {
 
 function isVideoFile(filename: string): boolean {
 	const videoExtensions = [
-		'mp4', 'mov', 'avi', 'mkv', 'webm', 
-		'm4v', '3gp', 'flv', 'wmv', 'mpg', 
-		'mpeg', 'ts', 'mts', 'm2ts'
+		'mp4',
+		'mov',
+		'avi',
+		'mkv',
+		'webm',
+		'm4v',
+		'3gp',
+		'flv',
+		'wmv',
+		'mpg',
+		'mpeg',
+		'ts',
+		'mts',
+		'm2ts',
 	];
-	
+
 	const ext = filename.toLowerCase().split('.').pop() || '';
 	return videoExtensions.includes(ext);
 }

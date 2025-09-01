@@ -1,8 +1,8 @@
 import { Copy, Download, Image as ImageIcon, RotateCcw, X, ZoomIn, ZoomOut } from 'lucide-react';
-import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import type React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
@@ -103,8 +103,8 @@ const ThumbnailItem = memo(function ThumbnailItemImpl({
 						alt={image.name}
 						className="h-full w-full object-cover"
 						loading="lazy"
-						src={thumbnail}
 						onError={() => setError(true)}
+						src={thumbnail}
 					/>
 				) : (
 					<div className="flex h-full w-full items-center justify-center bg-muted">
@@ -126,22 +126,22 @@ const ThumbnailItem = memo(function ThumbnailItemImpl({
 
 	return (
 		<motion.div
-			layout
 			animate={animateStyles}
 			className={baseClassName}
+			layout
 			onClick={onClick}
+			style={{ width: THUMBNAIL_SIZES.normal.width, height: THUMBNAIL_SIZES.normal.height }}
 			transition={{ type: 'spring', stiffness: 260, damping: 24, mass: 0.6 }}
 			whileHover={{ opacity: 1, scale: 1.05 }}
 			whileTap={{ scale: 0.98 }}
-			style={{ width: THUMBNAIL_SIZES.normal.width, height: THUMBNAIL_SIZES.normal.height }}
 		>
 			{thumbnailContent}
 			{isActive && (
 				<motion.div
-					layout
 					animate={{ opacity: 1 }}
 					className="pointer-events-none absolute inset-0 bg-primary/10"
 					initial={{ opacity: 0 }}
+					layout
 					transition={{ duration: 0.25 }}
 				/>
 			)}
@@ -222,8 +222,8 @@ const ThumbnailNavigationImpl = memo(function ThumbnailNavigationInner({
 	}, [images, currentIndex]);
 
 	return (
-		<motion.div layout className="-translate-x-1/2 fixed bottom-6 left-1/2 z-[9999] flex items-center justify-center">
-			<motion.div layout className="flex items-center rounded-lg bg-background/10 px-2 py-1 backdrop-blur-sm">
+		<motion.div className="-translate-x-1/2 fixed bottom-6 left-1/2 z-[9999] flex items-center justify-center" layout>
+			<motion.div className="flex items-center rounded-lg bg-background/10 px-2 py-1 backdrop-blur-sm" layout>
 				{visibleThumbnails.map(({ image, isActive, index }) => (
 					<ThumbnailItem image={image} isActive={isActive} key={image.id} onClick={() => onSelectImage(index)} />
 				))}
@@ -732,8 +732,8 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 								<img
 									alt={img.name}
 									className="max-h-full max-w-full object-contain"
-									src={url}
 									onError={() => console.error('Error cargando capa', id)}
+									src={url}
 								/>
 							</motion.div>
 						);
@@ -862,8 +862,8 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 								<img
 									alt={currentImage?.name || 'sin nombre'}
 									className="max-h-full max-w-full object-contain"
-									src={currentImage ? urls[currentImage.id] : ''}
 									onError={() => setIsLoading(false)}
+									src={currentImage ? urls[currentImage.id] : ''}
 								/>
 							</motion.div>
 						)}

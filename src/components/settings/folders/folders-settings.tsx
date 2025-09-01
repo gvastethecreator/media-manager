@@ -9,9 +9,9 @@ import { FolderCard } from './folder-card';
 import { FolderForm } from './folder-form';
 import { getFolderIndexStatus } from './folder-utils';
 import { FoldersStats } from './folders-stats';
-import { StructuredReindexConfig } from './structured-reindex-config';
 import { useFolderStats } from './hooks/use-folder-stats';
 import { useFolders } from './hooks/use-folders';
+import { StructuredReindexConfig } from './structured-reindex-config';
 
 const EmptyFoldersState = memo(function EmptyFoldersState() {
 	return (
@@ -128,18 +128,21 @@ export function FoldersSettings() {
 		reindexAll({
 			useStructuredFlow,
 			skipThumbnails,
-			skipMetadata
+			skipMetadata,
 		});
 	}, [reindexAll, useStructuredFlow, skipThumbnails, skipMetadata]);
 
 	// Función de reindexado individual que usa la configuración avanzada
-	const handleReindexFolderAdvanced = useCallback((folderId: string) => {
-		handleReindexFolder(folderId, {
-			useStructuredFlow,
-			skipThumbnails,
-			skipMetadata
-		});
-	}, [handleReindexFolder, useStructuredFlow, skipThumbnails, skipMetadata]);
+	const handleReindexFolderAdvanced = useCallback(
+		(folderId: string) => {
+			handleReindexFolder(folderId, {
+				useStructuredFlow,
+				skipThumbnails,
+				skipMetadata,
+			});
+		},
+		[handleReindexFolder, useStructuredFlow, skipThumbnails, skipMetadata]
+	);
 
 	// Derivar nombre de carpeta actual cuando hay reindex global (optimizado)
 	const currentFolderName = useMemo(() => {
@@ -260,13 +263,13 @@ export function FoldersSettings() {
 				<div className="border-b bg-muted/30 p-3">
 					<StructuredReindexConfig
 						isOpen={showAdvancedConfig}
-						onToggle={() => setShowAdvancedConfig(!showAdvancedConfig)}
-						useStructuredFlow={useStructuredFlow}
-						onUseStructuredFlowChange={setUseStructuredFlow}
-						skipThumbnails={skipThumbnails}
-						onSkipThumbnailsChange={setSkipThumbnails}
-						skipMetadata={skipMetadata}
 						onSkipMetadataChange={setSkipMetadata}
+						onSkipThumbnailsChange={setSkipThumbnails}
+						onToggle={() => setShowAdvancedConfig(!showAdvancedConfig)}
+						onUseStructuredFlowChange={setUseStructuredFlow}
+						skipMetadata={skipMetadata}
+						skipThumbnails={skipThumbnails}
+						useStructuredFlow={useStructuredFlow}
 					/>
 				</div>
 

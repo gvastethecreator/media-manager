@@ -1,8 +1,6 @@
 // MIGRADO PARA VITE - Arreglado sistema de theming
 import { BookOpen, Bug, Eye, Home, IdCard, Moon, Palette, Settings2, Sun } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
 import React, { memo, useCallback, useMemo } from 'react';
-
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
@@ -10,6 +8,7 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { motion } from '@/components/ui/motion-shim';
 import { useTheme } from '@/components/ui/theme-provider';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';

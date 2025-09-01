@@ -1,6 +1,4 @@
-import { motion } from '@/components/ui/motion-shim';
 import { Folder } from 'lucide-react';
-import { Progress } from '@/components/ui/progress';
 import { FolderStageIndicator } from './folder-stage-indicator';
 import type { ExtendedFolder, ExtendedProcessStatus } from './folder-types';
 
@@ -31,13 +29,7 @@ export function FolderProcessingDetails({
 
 			{/* Subcarpetas encontradas durante el indexado */}
 			{subfolders.length > 0 && (
-				<motion.div
-					animate={{ opacity: 1, height: 'auto' }}
-					className="mt-2 p-2"
-					exit={{ opacity: 0, height: 0 }}
-					initial={{ opacity: 0, height: 0 }}
-					transition={{ duration: 0.3 }}
-				>
+				<div className="mt-2 p-2">
 					<div className="mb-2 flex items-center gap-1.5">
 						<Folder className="h-3 w-3 text-muted-foreground" />
 						<span className="font-medium text-muted-foreground text-xs">Subcarpetas ({subfolders.length})</span>
@@ -61,7 +53,7 @@ export function FolderProcessingDetails({
 							</div>
 						)}
 					</div>
-				</motion.div>
+				</div>
 			)}
 		</div>
 	);

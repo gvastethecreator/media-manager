@@ -19,11 +19,11 @@ import type { MediaItem } from './components/media-thumbnail';
 import { StatusBar } from './components/status-bar';
 // Estilos de animación específicos para vistas Canvas
 import './views/canvas/canvas-animations.css';
+import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useProgressiveFolderFiles } from './hooks/use-progressive-folder-files';
 import { useKeyboardNavigation } from './navigation/keyboard-navigation';
 import type { ClickModifiers, FileBrowserProps } from './types/file-browser.types';
-import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
 
 function applySearch(items: MediaItem[], query: string) {
 	if (!query) return items;
@@ -228,9 +228,9 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 							{grouped ? (
 								<FileCanvasListGrouped
 									groups={grouped as any}
-									scrollContainer={listScrollEl}
 									onItemClick={handleItemClick}
 									onItemDoubleClick={handleItemDoubleClick}
+									scrollContainer={listScrollEl}
 								/>
 							) : (
 								<List

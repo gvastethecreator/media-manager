@@ -36,12 +36,12 @@ export function FolderCardContent({
 	// Formatear la fecha de última indexación
 	const formattedLastIndexed = lastIndexed
 		? new Intl.DateTimeFormat('es', {
-			day: '2-digit',
-			month: '2-digit',
-			year: '2-digit',
-			hour: '2-digit',
-			minute: '2-digit',
-		}).format(new Date(lastIndexed))
+				day: '2-digit',
+				month: '2-digit',
+				year: '2-digit',
+				hour: '2-digit',
+				minute: '2-digit',
+			}).format(new Date(lastIndexed))
 		: 'Nunca';
 
 	// Calcular puntaje de "poder" para la carpeta (estilo TCG)
@@ -104,9 +104,9 @@ export function FolderCardContent({
 						tcgMode
 							? {}
 							: {
-								borderColor: `${primaryColor}30`,
-								backgroundColor: `${primaryColor}15`,
-							}
+									borderColor: `${primaryColor}30`,
+									backgroundColor: `${primaryColor}15`,
+								}
 					}
 				>
 					{/* Stats especiales para modo TCG */}

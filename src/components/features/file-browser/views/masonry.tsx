@@ -1,8 +1,8 @@
-import { MasonryCanvas } from './canvas/masonry-canvas';
+import { useState } from 'react';
 import type { MediaItem } from '../components/media-thumbnail';
 import type { ClickModifiers } from '../types/file-browser.types';
 import { CanvasRenderConfig } from './canvas/canvas-config';
-import { useState } from 'react';
+import { MasonryCanvas } from './canvas/masonry-canvas';
 
 export interface MasonryProps {
 	items: MediaItem[];
@@ -31,9 +31,9 @@ export function Masonry({
 				<MasonryCanvas
 					columnWidth={itemSize}
 					items={items}
-					scrollContainer={effectiveScrollContainer}
 					onItemClick={onItemClick}
 					onItemDoubleClick={onItemDoubleClick}
+					scrollContainer={effectiveScrollContainer}
 				/>
 			</div>
 		</div>

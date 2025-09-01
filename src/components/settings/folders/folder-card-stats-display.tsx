@@ -23,13 +23,10 @@ function MicroProgressBar({ label, count, icon: Icon, total, color }: MicroProgr
 		<div className="group relative">
 			<div className="flex h-2 items-center">
 				<div className="w-full overflow-hidden rounded-full bg-muted/30">
-					<div
-						className={`h-full transition-all duration-300 ${color}`}
-						style={{ width: `${Math.min(100, Math.max(2, percentage))}%` }}
-					/>
+					<div className={`h-full ${color}`} style={{ width: `${Math.min(100, Math.max(2, percentage))}%` }} />
 				</div>
 			</div>
-			<div className="-top-8 -translate-x-1/2 absolute left-1/2 z-10 rounded bg-popover px-2 py-1 text-[10px] text-popover-foreground opacity-0 shadow-md transition-opacity group-hover:opacity-100">
+			<div className="-top-8 -translate-x-1/2 absolute left-1/2 z-10 rounded bg-popover px-2 py-1 text-[10px] text-popover-foreground opacity-0 shadow-md group-hover:opacity-100">
 				<Icon className="mr-1 inline h-2.5 w-2.5" />
 				{count} {label}
 			</div>

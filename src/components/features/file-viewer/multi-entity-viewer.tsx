@@ -3,8 +3,8 @@
  * @module components/features/file-viewer/multi-entity-viewer
  */
 
-import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import { useCallback, useEffect, useState } from 'react';
+import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import type { AnyEntityWithStats } from '@/types/entities';
 import type { AudioWithStats } from '@/types/entities/audio';
 import type { DocumentWithStats } from '@/types/entities/document';
