@@ -11,7 +11,7 @@ export function ExpandedSubfolders({ folders }: ExpandedSubfoldersProps) {
 	return (
 		<motion.div
 			animate={{ opacity: 1, height: 'auto' }}
-			className="mt-3 space-y-2 border-border border-l-2 pl-4"
+			className="mt-1 space-y-1 border-border border-l-2 pl-4"
 			exit={{ opacity: 0, height: 0 }}
 			initial={{ opacity: 0, height: 0 }}
 			transition={{ duration: 0.2 }}

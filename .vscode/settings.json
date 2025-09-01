@@ -1,4 +1,5 @@
 {
-    "workbench.colorTheme": "Bearded Theme Black & Ruby",
-    "editor.formatOnSave": true
+    "workbench.colorTheme": "Bearded Theme Black & Gold",
+    "editor.formatOnSave": true,
+    "workbench.iconTheme": "flow-dark"
 }

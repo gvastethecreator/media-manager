@@ -19,11 +19,11 @@ export function FolderProgressIndicator({
 		<div
 			className={cn(
 				'absolute inset-x-0 top-0 h-0.5 overflow-hidden',
-				showCompleteAnimation ? 'bg-emerald-400/50' : 'bg-primary/50'
+				showCompleteAnimation ? 'bg-emerald-400/50' : 'bg-primary/10'
 			)}
 		>
 			<div
-				className={cn('h-full', showCompleteAnimation ? 'bg-emerald-400' : 'animate-pulse bg-primary')}
+				className={cn('h-full', showCompleteAnimation ? 'bg-emerald-400' : 'bg-primary')}
 				style={{ width: `${lastProgress}%` }}
 			/>
 		</div>

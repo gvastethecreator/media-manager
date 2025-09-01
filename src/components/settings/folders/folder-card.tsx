@@ -77,20 +77,21 @@ interface FolderMetadataProps {
 }
 
 const FolderMetadata = memo(({ folder, parentFolderName, indexStatus, statusMessage }: FolderMetadataProps) => (
-	<div className="flex min-w-0 flex-1 content-start space-y-0 align-middle">
-		{/* Breadcrumb */}
-		{parentFolderName && (
-			<div className="inline-block flex items-center text-muted-foreground/70 text-xs">
-				<span className="truncate">{parentFolderName}</span>
-				<span className="font-medium">/</span>
-			</div>
-		)}
+	<div className="flex min-w-0 flex-1 flex-col space-y-1">
 
 		{/* Folder Name */}
-		<h4 className="inline-block truncate font-semibold text-foreground text-md leading-tight">{folder.name}</h4>
+		<span className="font-semibold text-foreground text-sm align-bottom truncate">
+
+			{/* Breadcrumb */}
+			{parentFolderName && (
+				<span className="truncate text-xs text-primary/50">{parentFolderName} / </span>
+			)}
+
+
+			{folder.name}</span>
 
 		{/* Status Row */}
-		<div className="absolute right-0 bottom-0 flex items-center gap-2">
+		<div className="flex items-center gap-2 absolute top-2 right-2">
 			<FolderIndexStatusBadge lastIndexed={folder.lastIndexed} status={indexStatus} />
 
 			{/* Favorite indicator */}
@@ -166,9 +167,8 @@ const FolderStatsSummary = memo(({ folder, folderStats, isCompact = false }: Fol
 	const textSize = isCompact ? 'text-xs' : 'text-sm';
 
 	return (
-		<div className="min-w-0 flex-1 space-y-1">
-			<FolderStatsDisplay folder={folder} folderStats={folderStats} />
-		</div>
+		<FolderStatsDisplay folder={folder} folderStats={folderStats} />
+
 	);
 });
 
@@ -289,17 +289,10 @@ export const FolderCard = memo(
 
 		// ===== RENDER =====
 		return (
-			<motion.div
-				animate={{ opacity: 1, y: 0 }}
-				className="group"
-				exit={{ opacity: 0, y: -20 }}
-				initial={{ opacity: 0, y: 20 }}
-				layout
-				transition={{ duration: 0.2 }}
-			>
+			<div>
 				<div
 					className={cn(
-						'relative h-full cursor-pointer overflow-hidden border-2 px-1 py-2 transition-all duration-200',
+						'group relative h-full overflow-hidden border-2 p-2 transition-all duration-200',
 						'border-border/60 bg-gradient-to-br from-card to-card/95',
 						'hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5',
 						{
@@ -309,7 +302,6 @@ export const FolderCard = memo(
 							'border-destructive/20 ring-2 ring-destructive/30': hasError,
 						}
 					)}
-					onClick={handleCardClick}
 				>
 					{/* Processing Progress Indicator */}
 					<FolderProgressIndicator
@@ -318,93 +310,77 @@ export const FolderCard = memo(
 						showCompleteAnimation={showCompleteAnimation}
 					/>
 
-					<div className="relative p-1">
-						<div className="flex items-start justify-between gap-3">
-							{/* Left Section: Icon + Metadata */}
-							<div className="flex min-w-0 flex-1 items-start gap-3">
-								<FolderThumbnail folderStats={folderStats} isCompact isLoading={childStatsQuery.isLoading} />
-								<FolderIcon folder={folder} size="md" />
-								<FolderMetadata
-									folder={folder}
-									indexStatus={indexStatus}
-									parentFolderName={parentFolderName || undefined}
-									statusMessage={statusMessage}
+					{/* Main clickeable content area */}
+
+					{/* Left Section: Icon + Metadata */}
+					<div className="flex min-w-0 flex-1 items-start gap-3">
+						<FolderThumbnail folderStats={folderStats} isCompact isLoading={childStatsQuery.isLoading} />
+						<FolderIcon folder={folder} size="md" />
+						<FolderMetadata
+							folder={folder}
+							indexStatus={indexStatus}
+							parentFolderName={parentFolderName || undefined}
+							statusMessage={statusMessage}
+						/>
+					</div>
+
+
+					{/* Controls Section - Positioned absolutely to avoid click conflicts */}
+					<div className="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:opacity-60 sm:group-hover:opacity-100">
+						<div className="flex items-center gap-1 rounded-md border border-border/20 bg-background/90 p-1 shadow-sm backdrop-blur-sm"
+							role="toolbar"
+							aria-label="Controles de carpeta"
+						>
+							{isEditing ? (
+								<EditModeControls
+									isDisabled={isGloballyProcessing}
+									onCancel={handleCancelEdit}
+									onSave={handleSaveEdit}
 								/>
-							</div>
-
-							{/* Right Section: Controls */}
-							<div className="flex items-center gap-1 opacity-0 transition-opacity group-hover:opacity-100">
-								{isEditing ? (
-									<EditModeControls
-										isDisabled={isGloballyProcessing}
-										onCancel={handleCancelEdit}
-										onSave={handleSaveEdit}
-									/>
-								) : (
-									<NormalModeControls
-										folder={folder}
-										hasChildren={Boolean(folder.children?.length)}
-										isExpanded={isExpanded}
-										isGloballyProcessing={isGloballyProcessing}
-										isReindexing={isReindexing}
-										onEdit={() => setIsEditing(true)}
-										onFolderClick={onFolderClick}
-										onReindex={onReindex}
-										onToggleExpanded={onToggleExpanded}
-										processStatus={processStatus}
-										selectedFolder={selectedFolder}
-									/>
-								)}
-							</div>
-						</div>
-					</div>
-
-					<div className="space-y-3 pt-2">
-						{/* Error Display */}
-						{hasError && <FolderErrorDisplay folder={folder} />}
-
-						{/* Processing Details */}
-						<AnimatePresence>
-							{(isReindexing || (processStatus?.folderId === folder.id && (processStatus?.progress ?? 0) > 0)) && (
-								<motion.div
-									animate={{ opacity: 1, height: 'auto' }}
-									className="pt-1"
-									exit={{ opacity: 0, height: 0 }}
-									initial={{ opacity: 0, height: 0 }}
-									transition={{ duration: 0.2 }}
-								>
-									<FolderProcessingDetails
-										isReindexing={isReindexing}
-										lastProgress={lastProgress}
-										processStatus={processStatus}
-										subfolders={subfolders}
-									/>
-								</motion.div>
+							) : (
+								<NormalModeControls
+									folder={folder}
+									hasChildren={Boolean(folder.children?.length)}
+									isExpanded={isExpanded}
+									isGloballyProcessing={isGloballyProcessing}
+									isReindexing={isReindexing}
+									onEdit={() => setIsEditing(true)}
+									onFolderClick={onFolderClick}
+									onReindex={onReindex}
+									onToggleExpanded={onToggleExpanded}
+									processStatus={processStatus}
+									selectedFolder={selectedFolder}
+								/>
 							)}
-						</AnimatePresence>
-
-						{/* Stats Section - Always Visible */}
-						<div className="mt-auto border-border/40 border-t pt-2">
-							<FolderStatsSummary folder={folder} folderStats={folderStats} isCompact />
 						</div>
 					</div>
+
+					{/* Error Display */}
+					{hasError && <FolderErrorDisplay folder={folder} />}
+
+					{/* Processing Details */}
+					{(isReindexing || (processStatus?.folderId === folder.id && (processStatus?.progress ?? 0) > 0)) && (
+						<FolderProcessingDetails
+							isReindexing={isReindexing}
+							lastProgress={lastProgress}
+							processStatus={processStatus}
+							subfolders={subfolders}
+						/>
+					)}
+
+					{/* Stats Section - Always Visible */}
+					<FolderStatsSummary folder={folder} folderStats={folderStats} isCompact />
+
 				</div>
 
+
 				{/* Expanded Subfolders */}
-				<AnimatePresence>
-					{isExpanded && folder.children && folder.children.length > 0 && (
-						<motion.div
-							animate={{ opacity: 1, height: 'auto' }}
-							className="mt-2"
-							exit={{ opacity: 0, height: 0 }}
-							initial={{ opacity: 0, height: 0 }}
-							transition={{ duration: 0.3 }}
-						>
-							<ExpandedSubfolders folders={folder.children} />
-						</motion.div>
-					)}
-				</AnimatePresence>
-			</motion.div>
+				{folder.children && folder.children.length > 0 && (
+					<div>
+						<ExpandedSubfolders folders={folder.children} />
+					</div>
+				)}
+			</div>
 		);
 	}
 );
