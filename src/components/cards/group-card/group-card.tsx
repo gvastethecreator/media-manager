@@ -1,7 +1,6 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from '@/components/ui/motion-shim';
-import { useGroupCardData } from '@/lib/api/groups';
 import { cn } from '@/lib/utils';
 import type { GroupCardProps } from './group-card.types';
 import { GroupCardContent } from './group-card-content';
@@ -10,7 +9,7 @@ import { GroupCardHeader } from './group-card-header';
 import { GroupCardImages } from './group-card-images';
 
 export function GroupCard({
-	groupId,
+	group,
 	onClick,
 	className,
 	tcgMode = true,
@@ -18,7 +17,6 @@ export function GroupCard({
 	disabled = false,
 	isSelected = false,
 }: GroupCardProps) {
-	const { data: group, isLoading, error } = useGroupCardData(groupId);
 	const [isHovered, setIsHovered] = useState(false);
 
 	// Calcular colores
@@ -57,19 +55,19 @@ export function GroupCard({
 
 	// Función de manejadores de eventos
 	const handleClick = useCallback(() => {
-		if (onClick && !disabled && group) {
-			onClick(group);
+		if (onClick && !disabled) {
+			onClick();
 		}
-	}, [onClick, disabled, group]);
+	}, [onClick, disabled]);
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
-			if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ') && group) {
+			if (onClick && !disabled && (e.key === 'Enter' || e.key === ' ')) {
 				e.preventDefault();
-				onClick(group);
+				onClick();
 			}
 		},
-		[onClick, disabled, group]
+		[onClick, disabled]
 	);
 
 	// Determinar el número total de entidades
@@ -106,31 +104,9 @@ export function GroupCard({
 		return 0;
 	}, [group?.filters]);
 
-	// Si no hay datos del grupo o está cargando, mostrar un esqueleto o un mensaje de error
-	if (isLoading) {
-		return (
-			<div
-				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
-					className
-				)}
-			>
-				<p className="text-gray-500">Cargando grupo...</p>
-			</div>
-		);
-	}
-
-	if (error || !group) {
-		return (
-			<div
-				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
-					className
-				)}
-			>
-				<p className="text-red-800">Error: {error?.message || 'Grupo no encontrado'}</p>
-			</div>
-		);
+	// Si no hay group, no renderizar nada
+	if (!group) {
+		return null;
 	}
 
 	// Construir la tarjeta
@@ -213,18 +189,14 @@ export function GroupCard({
 			{tcgMode && isHovered && !disabled && (
 				<motion.div
 					animate={{
-						opacity: [0.1, 0.2, 0.1],
-						background: [
-							`linear-gradient(45deg, ${primaryColor}50, transparent)`,
-							`linear-gradient(45deg, ${primaryColor}80, transparent)`,
-							`linear-gradient(45deg, ${primaryColor}50, transparent)`,
-						],
+						opacity: 0.2,
 					}}
 					className="pointer-events-none absolute inset-0 z-50 opacity-30 mix-blend-overlay"
+					style={{
+						background: `linear-gradient(45deg, ${primaryColor}50, transparent)`,
+					}}
 					transition={{
 						duration: 2,
-						repeat: Number.POSITIVE_INFINITY,
-						repeatType: 'reverse',
 					}}
 				/>
 			)}

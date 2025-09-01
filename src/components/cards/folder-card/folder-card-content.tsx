@@ -1,4 +1,5 @@
 import { FolderOutputIcon, HardDriveIcon, TimerResetIcon } from 'lucide-react';
+import { memo, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
 interface FolderCardContentProps {
@@ -16,7 +17,7 @@ interface FolderCardContentProps {
  * Componente para el contenido principal de la tarjeta de carpeta.
  * Diseñado con estilo de cuadro de texto de carta TCG.
  */
-export function FolderCardContent({
+export const FolderCardContent = memo(function FolderCardContent({
 	description,
 	totalFiles,
 	totalSize,
@@ -26,12 +27,28 @@ export function FolderCardContent({
 	featuredImage,
 	tcgMode = true,
 }: FolderCardContentProps) {
-	// Debug log para ver los valores recibidos
-	// Remover console.log que genera ruido en los logs
-	// console.log('FolderCardContent props:', { totalFiles, totalSize, childrenCount });
+	// Memoize computed values to prevent unnecessary recalculations
+	const computedStats = useMemo(() => {
+		const formatBytes = (bytes: number) => {
+			if (bytes === 0) return '0 B';
+			const k = 1024;
+			const sizes = ['B', 'KB', 'MB', 'GB'];
+			const i = Math.floor(Math.log(bytes) / Math.log(k));
+			return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`;
+		};
 
-	// Formatear el tamaño en bytes a una unidad más legible
-	const formattedSize = formatBytes(totalSize);
+		return {
+			formattedSize: formatBytes(totalSize),
+			formattedDate: lastIndexed
+				? new Date(lastIndexed).toLocaleDateString('es-ES', {
+						day: '2-digit',
+						month: '2-digit',
+						year: '2-digit',
+					})
+				: null,
+			hasContent: totalFiles > 0 || (description && description.length > 0),
+		};
+	}, [totalFiles, totalSize, lastIndexed, description]);
 
 	// Formatear la fecha de última indexación
 	const formattedLastIndexed = lastIndexed
@@ -45,10 +62,9 @@ export function FolderCardContent({
 		: 'Nunca';
 
 	// Calcular puntaje de "poder" para la carpeta (estilo TCG)
-	const powerScore = Math.min(
-		99,
-		Math.max(1, Math.floor(totalFiles * 0.3 + childrenCount * 2 + totalSize / 1_000_000))
-	);
+	const powerScore = useMemo(() => {
+		return Math.min(99, Math.max(1, Math.floor(totalFiles * 0.3 + childrenCount * 2 + totalSize / 1_000_000)));
+	}, [totalFiles, childrenCount, totalSize]);
 
 	return (
 		<div
@@ -147,7 +163,7 @@ export function FolderCardContent({
 								<HardDriveIcon className="mr-1 inline h-3 w-3" />
 								Tamaño:
 							</span>
-							<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{formattedSize}</span>
+							<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{computedStats.formattedSize}</span>
 						</div>
 					</div>
 
@@ -188,19 +204,4 @@ export function FolderCardContent({
 			)}
 		</div>
 	);
-}
-
-/**
- * Función auxiliar para formatear bytes en un formato más legible
- */
-function formatBytes(bytes: number, decimals = 1): string {
-	if (bytes === 0) {
-		return '0 Bytes';
-	}
-
-	const k = 1024;
-	const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-	return `${Number.parseFloat((bytes / k ** i).toFixed(decimals))} ${sizes[i]}`;
-}
+});

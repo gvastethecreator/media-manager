@@ -129,9 +129,9 @@ export async function extractAllMetadata(
 		}
 
 		// 7. Video metadata si es aplicable
-		if (opts.extract_video_metadata && isVideoFile(filename)) {
+		if (opts.extract_video_metadata && isVideoFileExtension(filename)) {
 			try {
-				const { extractVideoMetadata } = await import('./video-parser.service');
+				const { extractVideoMetadata } = await import('./mediabunny-parser.service');
 				const videoPath = fullPath || filename; // Usar ruta completa si está disponible
 				const videoMetadata = await extractVideoMetadata(videoPath);
 				if (videoMetadata) {
@@ -487,7 +487,7 @@ function isPNGFile(buffer: Buffer): boolean {
 	);
 }
 
-function isVideoFile(filename: string): boolean {
+function isVideoFileExtension(filename: string): boolean {
 	const videoExtensions = [
 		'mp4',
 		'mov',

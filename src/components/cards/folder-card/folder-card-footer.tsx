@@ -1,5 +1,5 @@
 import { FolderIcon } from 'lucide-react';
-import type { ReactNode } from 'react';
+import { memo, type ReactNode } from 'react';
 import { cn } from '@/lib/utils';
 import type { FolderBase } from '@/types/entities/folder';
 
@@ -10,10 +10,14 @@ interface FolderCardFooterProps {
 }
 
 /**
- * Componente para el footer de la tarjeta de carpeta
- * Incluye modo TCG para tarjetas estilo juego de cartas
+ * Componente para el footer de la tarjeta de carpeta.
+ * Diseñado con estilo de carta TCG para mostrar información adicional y efectos visuales.
  */
-export function FolderCardFooter({ folder, tcgMode = false, children }: FolderCardFooterProps) {
+export const FolderCardFooter = memo(function FolderCardFooter({
+	folder,
+	tcgMode = false,
+	children,
+}: FolderCardFooterProps) {
 	const folderId = typeof folder.id === 'string' ? folder.id : '';
 
 	return (
@@ -47,4 +51,4 @@ export function FolderCardFooter({ folder, tcgMode = false, children }: FolderCa
 			</div>
 		</div>
 	);
-}
+});

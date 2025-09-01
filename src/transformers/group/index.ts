@@ -5,6 +5,13 @@
  
  */
 
+// Exportar adaptador principal
+export {
+	adaptGroupsWithStats,
+	adaptGroupWithStats,
+	defaultGroupStats,
+} from './adapter';
+
 // Exportar mappers, serializers, validators y schemas
 export * from './mappers';
 export { toGroupWithStats } from './mappers';

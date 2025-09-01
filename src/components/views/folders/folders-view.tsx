@@ -1,10 +1,9 @@
 import { RefreshCw } from 'lucide-react';
-import { useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FolderCard } from '@/components/cards/folder-card';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCreateFolder, useFolders } from '@/lib/api/folders';
 import type { FolderWithStats } from '@/types/entities/folder';
 
@@ -24,9 +23,17 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 	const [newFolderPath, setNewFolderPath] = useState('');
 
 	// Manejar clic en carpeta - navegar a la vista de contenido
-	const handleFolderClick = (folder: FolderWithStats) => {
-		navigate(`/folders/${folder.id}`);
-	};
+	const handleFolderClick = useCallback(
+		(folder: FolderWithStats) => {
+			navigate(`/folders/${folder.id}`);
+		},
+		[navigate]
+	);
+
+	// Memoized folder click handlers to prevent recreating functions
+	const folderClickHandlers = useMemo(() => {
+		return new Map(folders.map((folder) => [folder.id, () => handleFolderClick(folder)]));
+	}, [folders, handleFolderClick]);
 
 	// Manejar creación de carpeta
 	const handleCreateFolder = async () => {
@@ -85,7 +92,7 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 						folder={folder}
 						interactive={true}
 						key={folder.id}
-						onClick={() => handleFolderClick(folder)}
+						onClick={folderClickHandlers.get(folder.id)}
 						tcgMode={false}
 					/>
 				))}

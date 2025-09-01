@@ -5,7 +5,7 @@
  */
 
 import { Metadata } from 'next';
-import ReindexLogsViewer from '@/components/system/ReindexLogsViewer';
+import ReindexLogsViewer from '@/components/settings/folders/reindex-logs-viewer';
 
 export const metadata: Metadata = {
 	title: 'Sistema de Reindexado - Administración',

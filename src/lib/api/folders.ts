@@ -249,11 +249,13 @@ export function useRecentFolderImages(folderId: string, limit = 4) {
 }
 
 // Hook para obtener estadísticas de una carpeta
-export function useFolderStats(folderId: string) {
+export function useFolderStats(folderId: string, options?: { staleTime?: number; gcTime?: number; enabled?: boolean }) {
 	return useQuery<FolderStatsResponse, Error>({
 		queryKey: [...folderKeys.detail(folderId), 'stats'],
 		queryFn: () => getFolderStats(folderId),
-		enabled: !!folderId,
+		enabled: !!folderId && (options?.enabled ?? true),
+		staleTime: options?.staleTime,
+		gcTime: options?.gcTime,
 	});
 }
 

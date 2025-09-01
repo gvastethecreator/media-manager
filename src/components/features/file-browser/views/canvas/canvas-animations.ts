@@ -188,6 +188,8 @@ export class CanvasAnimationManager {
 	private tooltipAnimation: TooltipAnimationState | null = null;
 	private tooltipTimeout: number | null = null;
 	private needsRedraw = false;
+	private animationFrameId: number | null = null;
+	private lastFrameTime = 0;
 
 	// Iniciar animación de hover para un índice específico
 	startHoverAnimation(itemIndex: number): void {
@@ -199,6 +201,7 @@ export class CanvasAnimationManager {
 		const hoverState = createHoverAnimation(true);
 		this.hoverAnimations.set(itemIndex, hoverState);
 		this.needsRedraw = true;
+		this.startAnimationLoop();
 	}
 
 	// Terminar animación de hover
@@ -208,6 +211,7 @@ export class CanvasAnimationManager {
 		const hoverState = createHoverAnimation(false);
 		this.hoverAnimations.set(itemIndex, hoverState);
 		this.needsRedraw = true;
+		this.startAnimationLoop();
 	}
 
 	// Iniciar animación de tooltip
@@ -225,6 +229,7 @@ export class CanvasAnimationManager {
 		this.tooltipTimeout = setTimeout(() => {
 			this.tooltipAnimation = createTooltipAnimation(true, 0);
 			this.needsRedraw = true;
+			this.startAnimationLoop();
 		}, delay) as any;
 	}
 
@@ -238,7 +243,32 @@ export class CanvasAnimationManager {
 		if (this.tooltipAnimation) {
 			this.tooltipAnimation = createTooltipAnimation(false);
 			this.needsRedraw = true;
+			this.startAnimationLoop();
 		}
+	}
+
+	// Start animation loop only when needed
+	private startAnimationLoop(): void {
+		if (this.animationFrameId !== null) return; // Already running
+
+		const animate = (currentTime: number) => {
+			// Throttle to 60fps max
+			if (currentTime - this.lastFrameTime < 16.67) {
+				this.animationFrameId = requestAnimationFrame(animate);
+				return;
+			}
+
+			const hasActiveAnimations = this.update(currentTime);
+			this.lastFrameTime = currentTime;
+
+			if (hasActiveAnimations) {
+				this.animationFrameId = requestAnimationFrame(animate);
+			} else {
+				this.animationFrameId = null; // Stop loop when no active animations
+			}
+		};
+
+		this.animationFrameId = requestAnimationFrame(animate);
 	}
 
 	// Actualizar todas las animaciones y retornar si necesita redraw
@@ -287,6 +317,11 @@ export class CanvasAnimationManager {
 
 	// Limpiar todas las animaciones
 	clear(): void {
+		if (this.animationFrameId !== null) {
+			cancelAnimationFrame(this.animationFrameId);
+			this.animationFrameId = null;
+		}
+
 		this.hoverAnimations.clear();
 		this.tooltipAnimation = null;
 		if (this.tooltipTimeout) {

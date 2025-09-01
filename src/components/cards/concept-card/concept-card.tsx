@@ -2,18 +2,19 @@ import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { CardHeader } from '@/components/cards/card-header';
 import { motion } from '@/components/ui/motion-shim';
-import { useConcept, useConceptCounts } from '@/lib/api/concepts';
 import { cn } from '@/lib/utils';
 import type { ConceptCardProps } from './concept-card.types';
 import { ConceptCardContent } from './concept-card-content';
 import { ConceptCardFooter } from './concept-card-footer';
 
-export function ConceptCard({ conceptId, onClick, className, style, tcgMode = true }: ConceptCardProps) {
-	const { data: concept, isLoading, error } = useConcept(conceptId);
-	const { data: conceptCounts } = useConceptCounts(conceptId);
+export function ConceptCard({ concept, onClick, className, style, tcgMode = true }: ConceptCardProps) {
+	// Si no hay concept, no renderizar nada
+	if (!concept) {
+		return null;
+	}
 
-	// Calcular valores derivados
-	const imagesCount = conceptCounts?.images || concept?.stats?.imageCount || concept?._count?.images || 0;
+	// Calcular valores derivados usando los datos del objeto concept
+	const imagesCount = concept?.stats?.imageCount || concept?._count?.images || 0;
 	const videosCount = concept?.stats?.videoCount || concept?._count?.videos || 0;
 	const promptsCount = concept?.stats?.promptCount || concept?._count?.prompts || 0;
 	const notesCount = concept?.stats?.noteCount || concept?._count?.notes || 0;
@@ -25,7 +26,7 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 	const groupsCount = concept?.stats?.groupCount || concept?._count?.groups || 0;
 	const albumsCount = concept?.stats?.albumCount || concept?._count?.albums || 0;
 	const collectionsCount = concept?.stats?.collectionCount || concept?._count?.collections || 0;
-	const tagsCount = conceptCounts?.tags || concept?.stats?.tagCount || concept?._count?.tags || 0;
+	const tagsCount = concept?.stats?.tagCount || concept?._count?.tags || 0;
 
 	// Total de relaciones para efectos visuales
 	const totalRelations =
@@ -74,23 +75,23 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 	// Manejar click del mouse
 	const handleClick = useCallback(
 		(e: React.MouseEvent<HTMLDivElement>) => {
-			if (onClick && concept) {
+			if (onClick) {
 				e.preventDefault();
-				onClick(concept);
+				onClick();
 			}
 		},
-		[onClick, concept]
+		[onClick]
 	);
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent<HTMLDivElement>) => {
-			if (onClick && (e.key === 'Enter' || e.key === ' ') && concept) {
+			if (onClick && (e.key === 'Enter' || e.key === ' ')) {
 				e.preventDefault();
-				onClick(concept);
+				onClick();
 			}
 		},
-		[onClick, concept]
+		[onClick]
 	);
 
 	// Parsear tags si es un string
@@ -136,33 +137,6 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 		};
 	}, [primaryColor, style, tcgMode, totalRelations]);
 
-	// Si no hay datos del concepto o está cargando, mostrar un esqueleto o un mensaje de error
-	if (isLoading) {
-		return (
-			<div
-				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
-					className
-				)}
-			>
-				<p className="text-gray-500">Cargando concepto...</p>
-			</div>
-		);
-	}
-
-	if (error || !concept) {
-		return (
-			<div
-				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
-					className
-				)}
-			>
-				<p className="text-red-800">Error: {error?.message || 'Concepto no encontrado'}</p>
-			</div>
-		);
-	}
-
 	// Render del componente
 	return (
 		<motion.div
@@ -182,7 +156,7 @@ export function ConceptCard({ conceptId, onClick, className, style, tcgMode = tr
 				className
 			)}
 			data-concept-id={concept.id}
-			onClick={handleClick}
+			onClick={onClick ? () => onClick() : undefined}
 			onKeyDown={handleKeyDown}
 			role={onClick ? 'button' : 'article'}
 			style={cardStyle}

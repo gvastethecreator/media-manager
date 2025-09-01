@@ -1,35 +1,24 @@
-// TODO: Refactorizar para usar el tipo canónico `PropertyWithStats`.
-// Este componente actualmente define su propio tipo extendido para la prop `property`,
-// lo que causa inconsistencias. Debería recibir una prop `property` del tipo `PropertyWithStats`
-// que ya incluya `totalAssociations` calculado. Esta refactorización está bloqueada
-// por los mismos fallos en la herramienta de edición que impiden corregir las
-// server actions de la entidad `Property`.
-
-import { Microscope } from 'lucide-react';
+import { AlertCircle, Microscope } from 'lucide-react';
 import React, { useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
-import { useProperty } from '@/lib/api/properties';
 import { cn } from '@/lib/utils';
 import type { PropertyWithStats } from '@/types/entities/property';
 import { CardContainer } from '../card-container';
 import { CardHeader } from '../card-header';
 
 export interface PropertyCardProps {
-	propertyId: string;
-	onClick?: (propertyData: PropertyWithStats) => void;
+	property: PropertyWithStats;
+	onClick?: () => void;
 	className?: string;
 	showBadges?: boolean;
 }
 
 /**
- * Card para mostrar una propiedad
- * Sigue el diseño de los otros componentes de tarjetas
+ * Card para mostrar una propiedad - Refactorizado para usar PropertyWithStats
+ * Sigue el diseño de los otros componentes de tarjetas estandarizados
  */
-export function PropertyCard({ propertyId, onClick, className, showBadges = true }: PropertyCardProps) {
-	const { data: property, isLoading, error } = useProperty(propertyId);
-	// Hooks arriba; estados tempranos abajo
-
+export function PropertyCard({ property, onClick, className, showBadges = true }: PropertyCardProps) {
 	// Calcular colores
 	const primaryColor = useMemo(() => property?.color || '#3b82f6', [property?.color]);
 	const secondaryColor = useMemo(() => {
@@ -54,23 +43,23 @@ export function PropertyCard({ propertyId, onClick, className, showBadges = true
 		}
 	}, [primaryColor, property?.color]);
 
-	// Calcular número total de relaciones desde stats o totalAssociations
+	// Calcular número total de relaciones desde stats
 	const totalRelations = property?.stats?.totalRelations ?? 0;
 
 	const handleClick = useCallback(() => {
-		if (onClick && property) {
-			onClick(property);
+		if (onClick) {
+			onClick();
 		}
-	}, [onClick, property]);
+	}, [onClick]);
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
-			if (onClick && (e.key === 'Enter' || e.key === ' ') && property) {
+			if (onClick && (e.key === 'Enter' || e.key === ' ')) {
 				e.preventDefault();
-				onClick(property);
+				onClick();
 			}
 		},
-		[onClick, property]
+		[onClick]
 	);
 
 	const cardContent = (
@@ -108,34 +97,19 @@ export function PropertyCard({ propertyId, onClick, className, showBadges = true
 		</CardContainer>
 	);
 
-	// Estados tempranos
-	if (isLoading) {
+	// Validación simple de property requerida
+	if (!property) {
 		return (
-			<div
-				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
-					className
-				)}
-			>
-				<p className="text-gray-500">Cargando propiedad...</p>
-			</div>
+			<CardContainer className={cn('border-red-300 bg-red-50', className)}>
+				<CardHeader
+					icon={<AlertCircle className="h-4 w-4 text-red-600" />}
+					primaryColor="#dc2626"
+					title="Property no encontrada"
+				/>
+				<p className="text-red-800">Error: Propiedad no encontrada</p>
+			</CardContainer>
 		);
-	}
-
-	if (error || !property) {
-		return (
-			<div
-				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
-					className
-				)}
-			>
-				<p className="text-red-800">Error: {error?.message || 'Propiedad no encontrada'}</p>
-			</div>
-		);
-	}
-
-	// Si hay onClick, usamos un botón para mejor accesibilidad
+	} // Si hay onClick, usamos un botón para mejor accesibilidad
 	if (onClick) {
 		return (
 			<button

@@ -15,7 +15,8 @@ export type {
 	UploadedImageUpdateInput,
 	UploadedImageWithStats,
 } from '../../types/entities/uploaded-image/types';
-
+// Adaptadores
+export { adaptUploadedImageResultToWithStats } from './adapter';
 export { toUploadedImageExtended } from './mappers';
 export {
 	transformToUploadedImageFromDrizzle as transformUploadedImage,

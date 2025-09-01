@@ -6,7 +6,4 @@ export * from './folder-card-images';
 
 // export * from './folder-server-actions'; // TODO: Archivo no encontrado
 
-// Componente memorizado para mejorar rendimiento
-import { memo } from 'react';
-import { FolderCard } from './folder-card';
-export const MemoizedFolderCard = memo(FolderCard);
+// Las versiones memo ya están exportadas desde los archivos individuales

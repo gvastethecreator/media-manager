@@ -197,43 +197,73 @@ function createMotionComponent(tag: keyof JSX.IntrinsicElements) {
 			}
 		}, [resolvedExit, presenceContext, transition]);
 
-		// Handle hover animations
+		// Handle hover animations with performance optimization
+		const hoverTimeoutRef = useRef<number | null>(null);
+		const isHoverAnimatingRef = useRef(false);
+
 		const handleMouseEnter = () => {
-			if (whileHover && elementRef.current) {
+			if (whileHover && elementRef.current && !isHoverAnimatingRef.current) {
+				isHoverAnimatingRef.current = true;
+
+				// Cancel any pending hover animation
+				if (hoverTimeoutRef.current) {
+					clearTimeout(hoverTimeoutRef.current);
+				}
+
 				gsap.to(elementRef.current, {
 					scale: whileHover.scale ?? undefined,
 					opacity: whileHover.opacity ?? undefined,
 					x: whileHover.x ?? undefined,
 					y: whileHover.y ?? undefined,
 					rotation: whileHover.rotation ?? undefined,
-					duration: 0.2,
+					duration: 0.15, // Shorter duration for performance
 					ease: 'power2.out',
+					onComplete: () => {
+						isHoverAnimatingRef.current = false;
+					},
 				});
 			}
 			onMouseEnter?.();
 		};
 
 		const handleMouseLeave = () => {
-			if (whileHover && elementRef.current && resolvedAnimate) {
-				gsap.to(elementRef.current, {
-					scale: resolvedAnimate.scale ?? 1,
-					opacity: resolvedAnimate.opacity ?? 1,
-					x: resolvedAnimate.x ?? 0,
-					y: resolvedAnimate.y ?? 0,
-					rotation: resolvedAnimate.rotation ?? 0,
-					duration: 0.2,
-					ease: 'power2.out',
-				});
+			if (whileHover && elementRef.current && resolvedAnimate && !isHoverAnimatingRef.current) {
+				isHoverAnimatingRef.current = true;
+
+				// Debounce mouse leave to avoid rapid fire animations
+				hoverTimeoutRef.current = window.setTimeout(() => {
+					if (elementRef.current) {
+						gsap.to(elementRef.current, {
+							scale: resolvedAnimate.scale ?? 1,
+							opacity: resolvedAnimate.opacity ?? 1,
+							x: resolvedAnimate.x ?? 0,
+							y: resolvedAnimate.y ?? 0,
+							rotation: resolvedAnimate.rotation ?? 0,
+							duration: 0.15, // Shorter duration for performance
+							ease: 'power2.out',
+							onComplete: () => {
+								isHoverAnimatingRef.current = false;
+							},
+						});
+					}
+				}, 50); // 50ms debounce to prevent rapid animations
 			}
 			onMouseLeave?.();
 		};
 
-		// Handle tap animation
+		// Handle tap animation with reduced intensity
+		const tapTimeoutRef = useRef<number | null>(null);
+
 		const handleClick = () => {
 			if (whileTap && elementRef.current) {
+				// Cancel previous tap animation
+				if (tapTimeoutRef.current) {
+					clearTimeout(tapTimeoutRef.current);
+				}
+
 				gsap.to(elementRef.current, {
-					scale: whileTap.scale ?? 0.95,
-					duration: 0.1,
+					scale: whileTap.scale ?? 0.97, // Less aggressive scaling
+					duration: 0.08, // Faster tap animation
 					ease: 'power2.out',
 					yoyo: true,
 					repeat: 1,
@@ -241,6 +271,18 @@ function createMotionComponent(tag: keyof JSX.IntrinsicElements) {
 			}
 			onClick?.();
 		};
+
+		// Cleanup timeouts on unmount
+		useEffect(() => {
+			return () => {
+				if (hoverTimeoutRef.current) {
+					clearTimeout(hoverTimeoutRef.current);
+				}
+				if (tapTimeoutRef.current) {
+					clearTimeout(tapTimeoutRef.current);
+				}
+			};
+		}, []);
 
 		const Component = tag as any;
 
