@@ -39,7 +39,6 @@ export function useFoldersState() {
 				totalFiles: Number(
 					(folder.totalFiles ?? (folder as any).stats?.totalFiles ?? folder._count?.images ?? 0) as number
 				),
-				autoReindex: folder.autoReindex,
 				recentImages: folder.recentImages?.filter((img: any): img is string => img !== null) || [],
 			}));
 

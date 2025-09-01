@@ -31,6 +31,7 @@ export function Masonry({
 				<MasonryCanvas
 					columnWidth={itemSize}
 					items={items}
+					scrollContainer={effectiveScrollContainer}
 					onItemClick={onItemClick}
 					onItemDoubleClick={onItemDoubleClick}
 				/>

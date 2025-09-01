@@ -9,6 +9,7 @@ import { FolderCard } from './folder-card';
 import { FolderForm } from './folder-form';
 import { getFolderIndexStatus } from './folder-utils';
 import { FoldersStats } from './folders-stats';
+import { StructuredReindexConfig } from './structured-reindex-config';
 import { useFolderStats } from './hooks/use-folder-stats';
 import { useFolders } from './hooks/use-folders';
 
@@ -91,6 +92,12 @@ const createHierarchicalOrder = (folderList: any[]) => {
 export function FoldersSettings() {
 	const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+	// Estados para configuración de reindexado estructurado
+	const [showAdvancedConfig, setShowAdvancedConfig] = useState(false);
+	const [useStructuredFlow, setUseStructuredFlow] = useState(false);
+	const [skipThumbnails, setSkipThumbnails] = useState(false);
+	const [skipMetadata, setSkipMetadata] = useState(false);
+
 	// Hook para estadísticas generales de carpetas (memoizado para evitar re-renders)
 	const memoizedStatsQuery = useFolderStats();
 	const { data: generalStats, isLoading: isStatsLoading, error: statsError } = memoizedStatsQuery;
@@ -115,6 +122,24 @@ export function FoldersSettings() {
 		loadStats,
 		setError,
 	} = useFolders();
+
+	// Función de reindexado que usa la configuración avanzada
+	const handleReindexAll = useCallback(() => {
+		reindexAll({
+			useStructuredFlow,
+			skipThumbnails,
+			skipMetadata
+		});
+	}, [reindexAll, useStructuredFlow, skipThumbnails, skipMetadata]);
+
+	// Función de reindexado individual que usa la configuración avanzada
+	const handleReindexFolderAdvanced = useCallback((folderId: string) => {
+		handleReindexFolder(folderId, {
+			useStructuredFlow,
+			skipThumbnails,
+			skipMetadata
+		});
+	}, [handleReindexFolder, useStructuredFlow, skipThumbnails, skipMetadata]);
 
 	// Derivar nombre de carpeta actual cuando hay reindex global (optimizado)
 	const currentFolderName = useMemo(() => {
@@ -210,7 +235,7 @@ export function FoldersSettings() {
 								className="h-7 cursor-pointer text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
 								data-testid="reindex-all-button"
 								disabled={globalReindexStatus.isProcessing}
-								onClick={() => reindexAll()}
+								onClick={handleReindexAll}
 								size="sm"
 								type="button"
 								variant="outline"
@@ -231,21 +256,37 @@ export function FoldersSettings() {
 
 				<Separator className="my-0" />
 
+				{/* Configuración avanzada de reindexado */}
+				<div className="border-b bg-muted/30 p-3">
+					<StructuredReindexConfig
+						isOpen={showAdvancedConfig}
+						onToggle={() => setShowAdvancedConfig(!showAdvancedConfig)}
+						useStructuredFlow={useStructuredFlow}
+						onUseStructuredFlowChange={setUseStructuredFlow}
+						skipThumbnails={skipThumbnails}
+						onSkipThumbnailsChange={setSkipThumbnails}
+						skipMetadata={skipMetadata}
+						onSkipMetadataChange={setSkipMetadata}
+					/>
+				</div>
+
 				<div className="p-3">
 					<div className="space-y-2">
 						{/* Lista de carpetas - grid responsiva optimizada para desktop */}
-						<FoldersGrid
-							folders={folders}
-							globalCurrentFolderId={globalReindexStatus.currentFolder}
-							isGloballyProcessing={isGloballyProcessing}
-							isProcessing={isProcessing}
-							onFolderClick={handleFolderClick}
-							onReindex={handleReindexFolder}
-							orderedFolders={orderedFolders}
-							processStatus={processStatus}
-							progressByFolder={progressByFolder}
-							selectedFolder={selectedFolder}
-						/>
+						<TooltipProvider>
+							<FoldersGrid
+								folders={folders}
+								globalCurrentFolderId={globalReindexStatus.currentFolder}
+								isGloballyProcessing={isGloballyProcessing}
+								isProcessing={isProcessing}
+								onFolderClick={handleFolderClick}
+								onReindex={handleReindexFolderAdvanced}
+								orderedFolders={orderedFolders}
+								processStatus={processStatus}
+								progressByFolder={progressByFolder}
+								selectedFolder={selectedFolder}
+							/>
+						</TooltipProvider>
 
 						{/* Progress bar para reindexado global */}
 						<GlobalReindexProgress progress={globalReindexStatus.progress} show={globalReindexStatus.isProcessing} />
@@ -282,6 +323,9 @@ const FoldersGrid = memo(function FoldersGrid({
 	selectedFolder: string | null;
 	isProcessing: boolean;
 }) {
+	// Memoizar la función getFolderIndexStatus para evitar re-renders
+	const memoizedGetFolderIndexStatus = useCallback(getFolderIndexStatus, []);
+
 	return (
 		<div
 			className={cn(
@@ -295,7 +339,7 @@ const FoldersGrid = memo(function FoldersGrid({
 				<FolderCard
 					allFolders={folders}
 					folder={folder}
-					getFolderIndexStatus={getFolderIndexStatus}
+					getFolderIndexStatus={memoizedGetFolderIndexStatus}
 					globalCurrentFolderId={globalCurrentFolderId}
 					isGloballyProcessing={isGloballyProcessing}
 					isProcessing={

@@ -86,8 +86,8 @@ export const FolderCard = memo(function FolderCard({
 			style={
 				tcgMode
 					? {
-							boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
-						}
+						boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
+					}
 					: {}
 			}
 		>
@@ -123,7 +123,6 @@ export const FolderCard = memo(function FolderCard({
 
 			{/* Contenido y estadísticas */}
 			<FolderCardContent
-				autoReindex={folderData.autoReindex}
 				childrenCount={folderData.childrenCount || 0}
 				description={folderData.description}
 				featuredImage={folderData.featuredImage}

@@ -463,14 +463,18 @@ export function useFolders() {
 	const reindexAllFoldersMutation = useReindexAllFolders();
 
 	// Función para reiniciar todas las carpetas
-	const reindexAll = useCallback(async () => {
+	const reindexAll = useCallback(async (options?: {
+		useStructuredFlow?: boolean;
+		skipThumbnails?: boolean;
+		skipMetadata?: boolean;
+	}) => {
 		// 🔧 FIX: Evitar bucle infinito si ya está procesando
 		if (globalReindexStatus.isProcessing) {
 			folderLogger.warn('⚠️ Reindexación global ya en progreso, omitiendo');
 			return;
 		}
 
-		folderLogger.info('🔄 Iniciando reindexación global');
+		folderLogger.info('🔄 Iniciando reindexación global', { options });
 
 		try {
 			setGlobalReindexStatus((prev) => ({
@@ -487,7 +491,7 @@ export function useFolders() {
 			setReindexOrder([]);
 
 			// 🔧 FIX: Usar await para asegurar que no se llame múltiples veces
-			const result = await reindexAllFoldersMutation.mutateAsync();
+			const result = await reindexAllFoldersMutation.mutateAsync(options);
 
 			folderLogger.info('✅ Reindexación global completada:', result);
 
@@ -515,16 +519,20 @@ export function useFolders() {
 
 	// Función para manejar el reindex de una carpeta específica
 	const reindexFolder = useCallback(
-		async (folderId: string) => {
+		async (folderId: string, options?: {
+			useStructuredFlow?: boolean;
+			skipThumbnails?: boolean;
+			skipMetadata?: boolean;
+		}) => {
 			if (!folderId || folderId === 'undefined' || typeof folderId !== 'string') {
 				folderLogger.error('[useFolders] ❌ Error: Invalid folderId provided to reindexFolder:', folderId);
 				return;
 			}
 
-			folderLogger.info(`🔄 Iniciando reindex de carpeta: ${folderId}`);
+			folderLogger.info(`🔄 Iniciando reindex de carpeta: ${folderId}`, { options });
 
 			try {
-				await foldersOperations.handleReindexFolder(folderId);
+				await foldersOperations.handleReindexFolder(folderId, options);
 			} catch (err1) {
 				folderLogger.error(`❌ Error en reindex de carpeta ${folderId}:`, err1);
 				handleProcessError({

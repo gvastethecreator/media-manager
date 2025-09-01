@@ -13,7 +13,7 @@ export interface ExtendedFolder extends FolderExtended {
 	// isFavorite ya está en FolderBase
 	// parentId ya está en FolderBase
 	children?: ExtendedFolder[]; // Override para usar ExtendedFolder en lugar de FolderComplete
-	// autoReindex ya está en FolderBase
+	// autoReindex eliminado del modelo
 	// path ya está en FolderBase
 
 	// Propiedades adicionales para compatibilidad con componentes

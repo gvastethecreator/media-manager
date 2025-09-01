@@ -44,31 +44,152 @@ async function detectSupport(client: any): Promise<boolean> {
 	}
 }
 
-const CREATE_TABLE = `CREATE VIRTUAL TABLE files_fts USING fts5(
+const CREATE_TABLE = `CREATE VIRTUAL TABLE media_fts USING fts5(
   name,
   content,
-  tags,
+  entity_type,
+  entity_id,
   tokenize = 'unicode61 remove_diacritics 2'
 )`;
 
-const INSERT_INITIAL = `INSERT INTO files_fts(rowid,name,content,tags)
-SELECT id,name,(name||' '||path||' '||COALESCE(tags,'')),COALESCE(tags,'') FROM File`;
+const INSERT_INITIAL = `
+-- Insertar imágenes
+INSERT INTO media_fts(rowid, name, content, entity_type, entity_id)
+SELECT 
+  ROW_NUMBER() OVER (ORDER BY id) as rowid,
+  name,
+  (name || ' ' || path || ' ' || COALESCE(description, '')),
+  'image' as entity_type,
+  id as entity_id
+FROM Image
+
+UNION ALL
+
+-- Insertar videos
+SELECT 
+  ROW_NUMBER() OVER (ORDER BY id) + (SELECT COUNT(*) FROM Image) as rowid,
+  name,
+  (name || ' ' || path || ' ' || COALESCE(description, '')),
+  'video' as entity_type,
+  id as entity_id
+FROM Video
+
+UNION ALL
+
+-- Insertar documentos
+SELECT 
+  ROW_NUMBER() OVER (ORDER BY id) + (SELECT COUNT(*) FROM Image) + (SELECT COUNT(*) FROM Video) as rowid,
+  name,
+  (name || ' ' || path || ' ' || COALESCE(content, '') || ' ' || COALESCE(summary, '')),
+  'document' as entity_type,
+  id as entity_id
+FROM Document
+
+UNION ALL
+
+-- Insertar archivos de audio
+SELECT 
+  ROW_NUMBER() OVER (ORDER BY id) + (SELECT COUNT(*) FROM Image) + (SELECT COUNT(*) FROM Video) + (SELECT COUNT(*) FROM Document) as rowid,
+  name,
+  (name || ' ' || path || ' ' || COALESCE(title, '') || ' ' || COALESCE(artist, '') || ' ' || COALESCE(album, '')),
+  'audio' as entity_type,
+  id as entity_id
+FROM Audio
+`;
 
 const TRIGGERS = `
-CREATE TRIGGER IF NOT EXISTS files_ai AFTER INSERT ON File BEGIN
-  INSERT INTO files_fts(rowid,name,content,tags)
-  VALUES (new.id, new.name, (new.name||' '||new.path||' '||COALESCE(new.tags,'')), COALESCE(new.tags,''));
+-- Triggers para imágenes
+CREATE TRIGGER IF NOT EXISTS images_ai AFTER INSERT ON Image BEGIN
+  INSERT INTO media_fts(rowid, name, content, entity_type, entity_id)
+  VALUES (
+    (SELECT COALESCE(MAX(rowid), 0) + 1 FROM media_fts),
+    new.name,
+    (new.name || ' ' || new.path || ' ' || COALESCE(new.description, '')),
+    'image',
+    new.id
+  );
 END;
-CREATE TRIGGER IF NOT EXISTS files_ad AFTER DELETE ON File BEGIN
-  DELETE FROM files_fts WHERE rowid = old.id;
+
+CREATE TRIGGER IF NOT EXISTS images_ad AFTER DELETE ON Image BEGIN
+  DELETE FROM media_fts WHERE entity_type = 'image' AND entity_id = old.id;
 END;
-CREATE TRIGGER IF NOT EXISTS files_au AFTER UPDATE ON File BEGIN
-  UPDATE files_fts SET
-    name=new.name,
-    content=(new.name||' '||new.path||' '||COALESCE(new.tags,'')),
-    tags=COALESCE(new.tags,'')
-  WHERE rowid=new.id;
-END;`;
+
+CREATE TRIGGER IF NOT EXISTS images_au AFTER UPDATE ON Image BEGIN
+  UPDATE media_fts SET
+    name = new.name,
+    content = (new.name || ' ' || new.path || ' ' || COALESCE(new.description, ''))
+  WHERE entity_type = 'image' AND entity_id = new.id;
+END;
+
+-- Triggers para videos
+CREATE TRIGGER IF NOT EXISTS videos_ai AFTER INSERT ON Video BEGIN
+  INSERT INTO media_fts(rowid, name, content, entity_type, entity_id)
+  VALUES (
+    (SELECT COALESCE(MAX(rowid), 0) + 1 FROM media_fts),
+    new.name,
+    (new.name || ' ' || new.path || ' ' || COALESCE(new.description, '')),
+    'video',
+    new.id
+  );
+END;
+
+CREATE TRIGGER IF NOT EXISTS videos_ad AFTER DELETE ON Video BEGIN
+  DELETE FROM media_fts WHERE entity_type = 'video' AND entity_id = old.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS videos_au AFTER UPDATE ON Video BEGIN
+  UPDATE media_fts SET
+    name = new.name,
+    content = (new.name || ' ' || new.path || ' ' || COALESCE(new.description, ''))
+  WHERE entity_type = 'video' AND entity_id = new.id;
+END;
+
+-- Triggers para documentos
+CREATE TRIGGER IF NOT EXISTS documents_ai AFTER INSERT ON Document BEGIN
+  INSERT INTO media_fts(rowid, name, content, entity_type, entity_id)
+  VALUES (
+    (SELECT COALESCE(MAX(rowid), 0) + 1 FROM media_fts),
+    new.name,
+    (new.name || ' ' || new.path || ' ' || COALESCE(new.content, '') || ' ' || COALESCE(new.summary, '')),
+    'document',
+    new.id
+  );
+END;
+
+CREATE TRIGGER IF NOT EXISTS documents_ad AFTER DELETE ON Document BEGIN
+  DELETE FROM media_fts WHERE entity_type = 'document' AND entity_id = old.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS documents_au AFTER UPDATE ON Document BEGIN
+  UPDATE media_fts SET
+    name = new.name,
+    content = (new.name || ' ' || new.path || ' ' || COALESCE(new.content, '') || ' ' || COALESCE(new.summary, ''))
+  WHERE entity_type = 'document' AND entity_id = new.id;
+END;
+
+-- Triggers para audio
+CREATE TRIGGER IF NOT EXISTS audios_ai AFTER INSERT ON Audio BEGIN
+  INSERT INTO media_fts(rowid, name, content, entity_type, entity_id)
+  VALUES (
+    (SELECT COALESCE(MAX(rowid), 0) + 1 FROM media_fts),
+    new.name,
+    (new.name || ' ' || new.path || ' ' || COALESCE(new.title, '') || ' ' || COALESCE(new.artist, '') || ' ' || COALESCE(new.album, '')),
+    'audio',
+    new.id
+  );
+END;
+
+CREATE TRIGGER IF NOT EXISTS audios_ad AFTER DELETE ON Audio BEGIN
+  DELETE FROM media_fts WHERE entity_type = 'audio' AND entity_id = old.id;
+END;
+
+CREATE TRIGGER IF NOT EXISTS audios_au AFTER UPDATE ON Audio BEGIN
+  UPDATE media_fts SET
+    name = new.name,
+    content = (new.name || ' ' || new.path || ' ' || COALESCE(new.title, '') || ' ' || COALESCE(new.artist, '') || ' ' || COALESCE(new.album, ''))
+  WHERE entity_type = 'audio' AND entity_id = new.id;
+END;
+`;
 
 async function tableExists(): Promise<boolean> {
 	const client = getDbClient();
@@ -76,7 +197,7 @@ async function tableExists(): Promise<boolean> {
 		return false;
 	}
 	try {
-		const res = await client.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='files_fts'");
+		const res = await client.execute("SELECT 1 FROM sqlite_master WHERE type='table' AND name='media_fts'");
 		return res.rows.length > 0;
 	} catch (e) {
 		return false;
@@ -86,12 +207,22 @@ async function tableExists(): Promise<boolean> {
 function buildBackfillFn(client: any) {
 	return async function backfillIfNeeded() {
 		try {
-			const countFiles = await client.execute('SELECT COUNT(1) FROM File');
-			const countFts = await client.execute('SELECT COUNT(1) FROM files_fts');
-			const totalFiles = Number(countFiles.rows?.[0]?.[0] || 0);
+			const countImages = await client.execute('SELECT COUNT(1) FROM Image');
+			const countVideos = await client.execute('SELECT COUNT(1) FROM Video');
+			const countDocuments = await client.execute('SELECT COUNT(1) FROM Document');
+			const countAudios = await client.execute('SELECT COUNT(1) FROM Audio');
+			const countFts = await client.execute('SELECT COUNT(1) FROM media_fts');
+
+			const totalMedia =
+				Number(countImages.rows?.[0]?.[0] || 0) +
+				Number(countVideos.rows?.[0]?.[0] || 0) +
+				Number(countDocuments.rows?.[0]?.[0] || 0) +
+				Number(countAudios.rows?.[0]?.[0] || 0);
 			const totalFts = Number(countFts.rows?.[0]?.[0] || 0);
-			if (totalFts < totalFiles) {
-				log.info('Backfill incremental FTS5', { totalFiles, totalFts });
+
+			if (totalFts < totalMedia) {
+				log.info('Backfill incremental FTS5', { totalMedia, totalFts });
+				await client.execute('DELETE FROM media_fts'); // Limpiar antes de re-poblar
 				await client.execute(INSERT_INITIAL);
 			}
 		} catch (e) {

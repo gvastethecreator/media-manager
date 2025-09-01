@@ -3,45 +3,10 @@ import { imageStats } from '../schema';
 import { seedLogger } from './index';
 
 /**
- * Siembra estadísticas de imágenes minimalistas para verificación del sistema
+ * Siembra estadísticas de imágenes - VACÍA
+ * No se generan datos para mantener la base de datos limpia
  */
 export async function seedImageStats(db: LibSQLDatabase<Record<string, never>>) {
-	seedLogger.info('📈 Creando estadísticas de imágenes de prueba...');
-
-	try {
-		const sampleImageStats = [
-			{
-				id: 'stats-1',
-				imageId: 'img-example-1',
-				views: 150,
-				likes: 25,
-				downloads: 8,
-				comments: 5,
-				rating: 4,
-				lastViewedAt: new Date(),
-				lastLikedAt: new Date(),
-				lastDownloadedAt: new Date(),
-				lastCommentedAt: new Date(),
-			},
-			{
-				id: 'stats-2',
-				imageId: 'img-example-2',
-				views: 89,
-				likes: 12,
-				downloads: 4,
-				comments: 2,
-				rating: 5,
-				lastViewedAt: new Date(),
-				lastLikedAt: new Date(),
-				lastDownloadedAt: null,
-				lastCommentedAt: new Date(),
-			},
-		];
-
-		await db.insert(imageStats).values(sampleImageStats);
-		seedLogger.success(`✅ ${sampleImageStats.length} estadísticas de imágenes creadas`);
-	} catch (error) {
-		seedLogger.error('❌ Error creando estadísticas de imágenes:', error);
-		throw error;
-	}
+	seedLogger.info('📈 Seed imageStats: Sin datos (vacía por política de DB limpia)');
+	// Sin inserción de datos - seed vacía
 }
