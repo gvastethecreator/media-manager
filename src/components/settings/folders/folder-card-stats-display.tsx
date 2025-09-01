@@ -1,7 +1,6 @@
-import { File, FileText, Folder, Image, Music, Video } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import { formatBytes } from '@/lib/utils/format.utils';
+import { File, FileText, Image, Music, Video } from 'lucide-react';
 import type { FolderStatsResponse } from '@/types/folders';
+import { FileTypeBadge, FolderBadge, SizeBadge, TotalFilesBadge } from './common/folder-badges';
 import type { ExtendedFolder } from './folder-types';
 
 interface FolderStatsDisplayProps {
@@ -111,18 +110,31 @@ export function FolderStatsDisplay({ folder, folderStats }: FolderStatsDisplayPr
 
 				{/* Métricas compactas */}
 				<div className="flex items-center justify-between gap-1">
-					{/* Subcarpetas */}
-					{folder.children && folder.children.length > 0 && (
-						<Badge className="flex h-3 items-center gap-1 px-1 text-[9px]" variant="outline">
-							<Folder className="h-2 w-2" />
-							{folder.children.length}
-						</Badge>
-					)}
+					<div className="flex flex-wrap items-center gap-1">
+						{/* Total de archivos - siempre visible si hay archivos */}
+						<TotalFilesBadge folderStats={folderStats} />
+
+						{/* Subcarpetas */}
+						{folder.children && folder.children.length > 0 && <FolderBadge count={folder.children.length} />}
+
+						{/* Conteos por tipo: visibles siempre si > 0 */}
+						{(folderStats?.totalImages ?? 0) > 0 && (
+							<FileTypeBadge count={folderStats?.totalImages ?? 0} type="images" />
+						)}
+						{(folderStats?.totalVideos ?? 0) > 0 && (
+							<FileTypeBadge count={folderStats?.totalVideos ?? 0} type="videos" />
+						)}
+						{(folderStats?.totalAudio ?? 0) > 0 && <FileTypeBadge count={folderStats?.totalAudio ?? 0} type="audio" />}
+						{(folderStats?.totalDocuments ?? 0) > 0 && (
+							<FileTypeBadge count={folderStats?.totalDocuments ?? 0} type="documents" />
+						)}
+						{(folderStats?.totalOthers ?? 0) > 0 && (
+							<FileTypeBadge count={folderStats?.totalOthers ?? 0} type="others" />
+						)}
+					</div>
 
 					{/* Tamaño total */}
-					<Badge className="h-3 px-1 text-[9px]" variant="secondary">
-						{formatBytes(Number(folderStats?.totalSize || 0))}
-					</Badge>
+					<SizeBadge bytes={Number(folderStats?.totalSize || 0)} />
 				</div>
 			</div>
 		</div>

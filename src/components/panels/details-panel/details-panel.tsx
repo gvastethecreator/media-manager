@@ -23,7 +23,7 @@ export function DetailsPanel({ selectedItems, className = '' }: DetailsPanelProp
 		}
 	};
 
-	return <div className={`h-full w-full overflow-hidden ${className}`}>{renderContent()}</div>;
+	return <div className={`w-full overflow-auto ${className}`}>{renderContent()}</div>;
 }
 
 export default DetailsPanel;

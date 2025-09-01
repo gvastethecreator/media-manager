@@ -2,8 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import type { AnyEntityWithStats } from '@/types/entities';
 import {
 	extractAIMetadata,
+	extractAudioMetadata,
+	extractDocumentMetadata,
 	extractEXIFMetadata,
 	extractIPTCMetadata,
+	extractJSONMetadata,
+	extractVideoMetadata,
 	extractXMPMetadata,
 } from '../metadata/enhanced-metadata-extractors';
 import type { EnhancedMetadataOptions, EnhancedMetadataResult, MetadataField } from '../types';
@@ -161,11 +165,36 @@ const processMetadataResult = (result: EnhancedMetadataResult, item: AnyEntityWi
 	// Agregar hash si existe
 	addHashMetadata(item, metadata);
 
-	// Extraer diferentes tipos de metadatos
-	extractAIMetadata(result, metadata);
-	extractEXIFMetadata(result, metadata);
-	extractIPTCMetadata(result, metadata);
-	extractXMPMetadata(result, metadata);
+	// Extraer diferentes tipos de metadatos según el tipo de entidad
+	const entityType = item.entityType;
+
+	// Metadatos de IA (disponibles principalmente en imágenes, pero podría extenderse)
+	if (entityType === 'image') {
+		extractAIMetadata(result, metadata);
+		extractEXIFMetadata(result, metadata);
+		extractIPTCMetadata(result, metadata);
+		extractXMPMetadata(result, metadata);
+	}
+
+	// Metadatos de video
+	if (entityType === 'video') {
+		extractVideoMetadata(result, metadata);
+	}
+
+	// Metadatos de audio
+	if (entityType === 'audio') {
+		extractAudioMetadata(result, metadata);
+	}
+
+	// Metadatos de JSON
+	if (entityType === 'jsonFile') {
+		extractJSONMetadata(result, metadata);
+	}
+
+	// Metadatos de documentos (markdown, txt, etc.)
+	if (entityType === 'document') {
+		extractDocumentMetadata(result, metadata);
+	}
 
 	return metadata;
 };
@@ -179,8 +208,14 @@ export const useEnhancedMetadata = (item?: AnyEntityWithStats) => {
 	const [error, setError] = useState<string | null>(null);
 
 	const loadEnhancedMetadata = useCallback(async () => {
-		// Solo procesar imágenes
-		if (!item || item.entityType !== 'image') {
+		// Verificar si es un tipo de archivo soportado
+		const supportedTypes = ['image', 'video', 'audio', 'json', 'document'];
+		if (!item) {
+			setEnhancedMetadata([]);
+			return;
+		}
+
+		if (!supportedTypes.includes(item.entityType)) {
 			setEnhancedMetadata([]);
 			return;
 		}
@@ -194,12 +229,14 @@ export const useEnhancedMetadata = (item?: AnyEntityWithStats) => {
 		setError(null);
 		setIsLoadingMetadata(true);
 		try {
+			// Configurar opciones según el tipo de archivo
 			const options: EnhancedMetadataOptions = {
-				includeExif: true,
-				includeIptc: true,
-				includeXmp: true,
-				detectAIOrigin: true,
+				includeExif: item.entityType === 'image',
+				includeIptc: item.entityType === 'image',
+				includeXmp: item.entityType === 'image',
+				detectAIOrigin: item.entityType === 'image',
 			};
+
 			const raw = await fetchMetadataFromAPI(filePath, options);
 			const normalized = normalizeMetadataResponse(raw);
 			if (!normalized.success) {
@@ -220,7 +257,8 @@ export const useEnhancedMetadata = (item?: AnyEntityWithStats) => {
 	}, [item]);
 
 	useEffect(() => {
-		if (item?.entityType === 'image') {
+		const supportedTypes = ['image', 'video', 'audio', 'json', 'document'];
+		if (item && supportedTypes.includes(item.entityType)) {
 			loadEnhancedMetadata();
 		} else {
 			setEnhancedMetadata([]);

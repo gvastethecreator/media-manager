@@ -56,12 +56,7 @@ const FolderIcon = memo(({ folder, size = 'md' }: FolderIconProps) => {
 	};
 
 	return (
-		<div
-			className={cn(
-				'flex items-center justify-center ring-1 ring-primary/10',
-				containerClasses[size]
-			)}
-		>
+		<div className={cn('flex items-center justify-center ring-1 ring-primary/10', containerClasses[size])}>
 			{folder.emoji ? (
 				<span className="text-sm leading-none">{folder.emoji}</span>
 			) : (
@@ -82,7 +77,7 @@ interface FolderMetadataProps {
 }
 
 const FolderMetadata = memo(({ folder, parentFolderName, indexStatus, statusMessage }: FolderMetadataProps) => (
-	<div className="flex min-w-0 flex-1 align-middle content-start space-y-0">
+	<div className="flex min-w-0 flex-1 content-start space-y-0 align-middle">
 		{/* Breadcrumb */}
 		{parentFolderName && (
 			<div className="inline-block flex items-center text-muted-foreground/70 text-xs">
@@ -95,7 +90,7 @@ const FolderMetadata = memo(({ folder, parentFolderName, indexStatus, statusMess
 		<h4 className="inline-block truncate font-semibold text-foreground text-md leading-tight">{folder.name}</h4>
 
 		{/* Status Row */}
-		<div className="flex items-center gap-2 absolute bottom-0 right-0">
+		<div className="absolute right-0 bottom-0 flex items-center gap-2">
 			<FolderIndexStatusBadge lastIndexed={folder.lastIndexed} status={indexStatus} />
 
 			{/* Favorite indicator */}
@@ -364,13 +359,7 @@ export const FolderCard = memo(
 						</div>
 					</div>
 
-					<div className="space-y-3 pt-0">
-						{/* Content Section */}
-						<div className="flex items-center gap-3">
-
-							<FolderStatsSummary folder={folder} folderStats={folderStats} isCompact />
-						</div>
-
+					<div className="space-y-3 pt-2">
 						{/* Error Display */}
 						{hasError && <FolderErrorDisplay folder={folder} />}
 
@@ -393,6 +382,11 @@ export const FolderCard = memo(
 								</motion.div>
 							)}
 						</AnimatePresence>
+
+						{/* Stats Section - Always Visible */}
+						<div className="mt-auto border-border/40 border-t pt-2">
+							<FolderStatsSummary folder={folder} folderStats={folderStats} isCompact />
+						</div>
 					</div>
 				</div>
 
