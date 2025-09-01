@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "8e6e51c0-089e-4457-950b-e42616dbd32b",
+  "id": "603f5511-1909-482c-909d-02865d7674f9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "Activity": {
@@ -223,13 +223,6 @@
         },
         "filters": {
           "name": "filters",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "shortcut": {
-          "name": "shortcut",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -1958,14 +1951,6 @@
           "autoincrement": false,
           "default": 0
         },
-        "autoReindex": {
-          "name": "autoReindex",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
         "lastIndexed": {
           "name": "lastIndexed",
           "type": "integer",
@@ -2012,13 +1997,6 @@
           ],
           "isUnique": true
         },
-        "Folder_path_idx": {
-          "name": "Folder_path_idx",
-          "columns": [
-            "path"
-          ],
-          "isUnique": false
-        },
         "Folder_lastIndexed_idx": {
           "name": "Folder_lastIndexed_idx",
           "columns": [
@@ -2037,7 +2015,28 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {}
+      "checkConstraints": {
+        "Folder_path_length_check": {
+          "name": "Folder_path_length_check",
+          "value": "length(path) BETWEEN 1 AND 1000"
+        },
+        "Folder_name_length_check": {
+          "name": "Folder_name_length_check",
+          "value": "length(name) BETWEEN 1 AND 255"
+        },
+        "Folder_color_format_check": {
+          "name": "Folder_color_format_check",
+          "value": "color IS NULL OR (color LIKE '#%' AND length(color) = 7)"
+        },
+        "Folder_total_files_check": {
+          "name": "Folder_total_files_check",
+          "value": "totalFiles >= 0"
+        },
+        "Folder_total_size_check": {
+          "name": "Folder_total_size_check",
+          "value": "totalSize >= 0"
+        }
+      }
     },
     "_GroupToAlbum": {
       "name": "_GroupToAlbum",
@@ -2673,27 +2672,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "lastLiked": {
-          "name": "lastLiked",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "lastDownloaded": {
-          "name": "lastDownloaded",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "lastCommented": {
-          "name": "lastCommented",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "lastRated": {
           "name": "lastRated",
           "type": "integer",
@@ -3001,6 +2979,28 @@
           "notNull": false,
           "autoincrement": false
         },
+        "aiEngine": {
+          "name": "aiEngine",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "aiModel": {
+          "name": "aiModel",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "aiOriginDetected": {
+          "name": "aiOriginDetected",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": false
+        },
         "isFavorite": {
           "name": "isFavorite",
           "type": "integer",
@@ -3090,12 +3090,43 @@
             "isFavorite"
           ],
           "isUnique": false
+        },
+        "Image_aiEngine_idx": {
+          "name": "Image_aiEngine_idx",
+          "columns": [
+            "aiEngine"
+          ],
+          "isUnique": false
+        },
+        "Image_aiOriginDetected_idx": {
+          "name": "Image_aiOriginDetected_idx",
+          "columns": [
+            "aiOriginDetected"
+          ],
+          "isUnique": false
         }
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {}
+      "checkConstraints": {
+        "Image_size_check": {
+          "name": "Image_size_check",
+          "value": "size >= 0 AND size <= 107374182400"
+        },
+        "Image_dimensions_check": {
+          "name": "Image_dimensions_check",
+          "value": "width > 0 AND width <= 32768 AND height > 0 AND height <= 32768"
+        },
+        "Image_hash_format_check": {
+          "name": "Image_hash_format_check",
+          "value": "length(hash) = 64"
+        },
+        "Image_path_length_check": {
+          "name": "Image_path_length_check",
+          "value": "length(path) BETWEEN 1 AND 1000"
+        }
+      }
     },
     "JsonFile": {
       "name": "JsonFile",
@@ -5416,7 +5447,24 @@
       "foreignKeys": {},
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
-      "checkConstraints": {}
+      "checkConstraints": {
+        "Video_size_check": {
+          "name": "Video_size_check",
+          "value": "size >= 0 AND size <= 107374182400"
+        },
+        "Video_duration_check": {
+          "name": "Video_duration_check",
+          "value": "duration >= 0 AND duration <= 86400"
+        },
+        "Video_hash_format_check": {
+          "name": "Video_hash_format_check",
+          "value": "length(hash) = 64"
+        },
+        "Video_path_length_check": {
+          "name": "Video_path_length_check",
+          "value": "length(path) BETWEEN 1 AND 1000"
+        }
+      }
     },
     "Wildcard": {
       "name": "Wildcard",

@@ -31,7 +31,6 @@ const normalizeInput = (p: string): { input: FolderCreateInput; name: string } =
 		isFavorite: false,
 		totalFiles: 0,
 		totalSize: 0,
-		autoReindex: false,
 		lastIndexed: null,
 		parentId: null,
 		presetId: null,
@@ -144,7 +143,7 @@ export function useFoldersOperations({
 	const startAutoIndexing = useCallback(
 		async (folderId: string, folderName: string) => {
 			try {
-				await reindexFolderMutation.mutateAsync(folderId);
+				await reindexFolderMutation.mutateAsync({ id: folderId });
 				toastService.success(`La carpeta ${folderName} se ha agregado e indexado correctamente`);
 			} catch (indexError) {
 				operationsLogger.warn('⚠️ Error iniciando indexación automática:', indexError);
@@ -201,20 +200,31 @@ export function useFoldersOperations({
 
 	// Reindexar carpeta
 	const handleReindexFolder = useCallback(
-		async (folderId: string) => {
+		async (
+			folderId: string,
+			options?: {
+				useStructuredFlow?: boolean;
+				skipThumbnails?: boolean;
+				skipMetadata?: boolean;
+			}
+		) => {
 			if (!folderId || folderId === 'undefined') {
 				operationsLogger.error('❌ Error: Invalid folderId for reindex:', folderId);
 				toastService.error('Error: ID de carpeta inválido');
 				return;
 			}
 			try {
-				operationsLogger.info('🔄 Reindexando carpeta:', { folderId });
+				operationsLogger.info('🔄 Reindexando carpeta:', { folderId, options });
 				onStartProcessing(folderId);
 				toastService.info('🔄 Iniciando reindexado', {
 					description: 'El proceso de reindexación ha comenzado...',
 					duration: 3000,
 				});
-				await withTimeout(reindexFolderMutation.mutateAsync(folderId), 120_000, 'Timeout en reindexación');
+				await withTimeout(
+					reindexFolderMutation.mutateAsync({ id: folderId, options }),
+					120_000,
+					'Timeout en reindexación'
+				);
 				await onLoadData();
 				operationsLogger.info('✅ Reindexación completada');
 				toastService.success('Carpeta reindexada correctamente');
@@ -256,51 +266,35 @@ export function useFoldersOperations({
 	);
 
 	// Toggle autoReindex
-	const handleAutoReindexToggle = useCallback(
-		async (folderId: string, value: boolean) => {
-			if (!folderId || folderId === 'undefined') {
-				operationsLogger.error('❌ Error: Invalid folderId for toggle auto-reindex:', folderId);
-				toastService.error('Error: ID de carpeta inválido');
-				return;
-			}
-			try {
-				operationsLogger.info('🔄 Actualizando auto-reindexado:', { folderId, value });
-				await updateFolderMutation.mutateAsync({ id: folderId, data: { autoReindex: value } });
-				await onLoadData();
-				toastService.success(`Auto-reindexado ${value ? 'activado' : 'desactivado'}`);
-			} catch (error) {
-				operationsLogger.error('❌ Error al actualizar auto-reindexado:', error);
-				onError(error instanceof Error ? error.message : 'Error desconocido');
-				toastService.error(error instanceof Error ? error.message : 'Error desconocido');
-			}
-		},
-		[onLoadData, onError, updateFolderMutation.mutateAsync]
-	);
+	/* Eliminado: toggle de autoReindex ya no existe en el modelo */
 
 	// Reindexar todo
-	const handleReindexAll = useCallback(async () => {
-		try {
-			operationsLogger.info('🔄 Iniciando reindexación global directa');
-			toastService.info('🔄 Iniciando reindexado global', {
-				description: 'Reindexando todas las carpetas...',
-				duration: 5000,
-			});
-			await withTimeout(reindexAllFoldersMutation.mutateAsync(), 300_000, 'Timeout en reindexación global');
-			await onLoadData();
-			operationsLogger.info('✅ Reindexación global completada');
-			toastService.success('Reindexación global completada');
-		} catch (error) {
-			operationsLogger.error('❌ Error al iniciar reindexación global:', error);
-			const errorMessage = mapNetworkTimeoutError(error, 'reindexAll');
-			onError(errorMessage);
-			toastService.error(errorMessage);
+	const handleReindexAll = useCallback(
+		async (options?: { useStructuredFlow?: boolean; skipThumbnails?: boolean; skipMetadata?: boolean }) => {
 			try {
+				operationsLogger.info('🔄 Iniciando reindexación global directa', { options });
+				toastService.info('🔄 Iniciando reindexado global', {
+					description: 'Reindexando todas las carpetas...',
+					duration: 5000,
+				});
+				await withTimeout(reindexAllFoldersMutation.mutateAsync(options), 300_000, 'Timeout en reindexación global');
 				await onLoadData();
-			} catch (reloadError) {
-				operationsLogger.warn('⚠️ Error recargando datos tras error en reindexación global:', reloadError);
+				operationsLogger.info('✅ Reindexación global completada');
+				toastService.success('Reindexación global completada');
+			} catch (error) {
+				operationsLogger.error('❌ Error al iniciar reindexación global:', error);
+				const errorMessage = mapNetworkTimeoutError(error, 'reindexAll');
+				onError(errorMessage);
+				toastService.error(errorMessage);
+				try {
+					await onLoadData();
+				} catch (reloadError) {
+					operationsLogger.warn('⚠️ Error recargando datos tras error en reindexación global:', reloadError);
+				}
 			}
-		}
-	}, [onLoadData, onError, reindexAllFoldersMutation.mutateAsync]);
+		},
+		[onLoadData, onError, reindexAllFoldersMutation.mutateAsync]
+	);
 
 	// Limpiar caché
 	const handleClearCache = useCallback(async () => {
@@ -320,7 +314,6 @@ export function useFoldersOperations({
 		handleAddFolder,
 		handleReindexFolder,
 		handleRemoveFolder,
-		handleAutoReindexToggle,
 		handleReindexAll,
 		handleClearCache,
 	};

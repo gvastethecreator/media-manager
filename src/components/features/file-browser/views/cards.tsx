@@ -32,6 +32,7 @@ export function Cards({
 					<CardsCanvas
 						itemSize={itemSize}
 						items={items}
+						scrollContainer={effectiveScrollContainer}
 						onItemClick={onItemClick}
 						onItemDoubleClick={onItemDoubleClick}
 					/>

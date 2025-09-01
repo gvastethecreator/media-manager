@@ -8,7 +8,8 @@
  * - Core: Tablas fundamentales del sistema (queueJobs, profiles, settings)
  * - Media: Archivos multimedia (folders, images, videos, uploadedImages)
  * - Organization: Organización de contenido (groups, albums, collections, favorites, files)
- * - Taxonomy: Clasificación y etiquetado (tags, properties, wildcards, characters, places, worldItems, concepts, prompts, notes)
+ * - Taxonomy: Clasificación y etiquetado (tags, properties, wildcards, prompts, notes)
+ * - Worldbuilding: Construcción de mundos (characters, places, concepts, worldItems)
  * - Content: Contenido adicional (imageStats, activities, audios, documents, jsonFiles, file3Ds, metadatas, thumbnails, workflows)
  * - Relations: Relaciones many-to-many entre entidades
  * =================================================================================
@@ -94,16 +95,22 @@ export {
 // TAXONOMY DOMAIN EXPORTS
 // =================================================================================
 export {
-	characters,
-	concepts,
 	notes,
-	places,
 	prompts,
 	properties,
 	tags,
 	wildcards,
-	worldItems,
 } from './taxonomy';
+
+// =================================================================================
+// WORLDBUILDING DOMAIN EXPORTS
+// =================================================================================
+export {
+	characters,
+	concepts,
+	places,
+	worldItems,
+} from './worldbuilding';
 
 // =================================================================================
 // SCHEMA OBJECT FOR DRIZZLE KIT

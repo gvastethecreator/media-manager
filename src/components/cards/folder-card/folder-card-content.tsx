@@ -6,7 +6,6 @@ interface FolderCardContentProps {
 	totalFiles: number;
 	totalSize: number;
 	lastIndexed?: Date | null;
-	autoReindex?: boolean;
 	childrenCount?: number;
 	primaryColor: string;
 	featuredImage?: string | null;
@@ -22,7 +21,6 @@ export function FolderCardContent({
 	totalFiles,
 	totalSize,
 	lastIndexed,
-	autoReindex = false,
 	childrenCount = 0,
 	primaryColor,
 	featuredImage,
@@ -38,12 +36,12 @@ export function FolderCardContent({
 	// Formatear la fecha de última indexación
 	const formattedLastIndexed = lastIndexed
 		? new Intl.DateTimeFormat('es', {
-				day: '2-digit',
-				month: '2-digit',
-				year: '2-digit',
-				hour: '2-digit',
-				minute: '2-digit',
-			}).format(new Date(lastIndexed))
+			day: '2-digit',
+			month: '2-digit',
+			year: '2-digit',
+			hour: '2-digit',
+			minute: '2-digit',
+		}).format(new Date(lastIndexed))
 		: 'Nunca';
 
 	// Calcular puntaje de "poder" para la carpeta (estilo TCG)
@@ -106,9 +104,9 @@ export function FolderCardContent({
 						tcgMode
 							? {}
 							: {
-									borderColor: `${primaryColor}30`,
-									backgroundColor: `${primaryColor}15`,
-								}
+								borderColor: `${primaryColor}30`,
+								backgroundColor: `${primaryColor}15`,
+							}
 					}
 				>
 					{/* Stats especiales para modo TCG */}
@@ -130,23 +128,8 @@ export function FolderCardContent({
 								</div>
 							</div>
 
-							<div className="flex items-center">
-								{autoReindex ? (
-									<div
-										className="rounded-sm border border-green-500/20 bg-green-600/30 px-1.5 py-0.5 font-semibold text-[0.65rem] text-green-400"
-										title="Auto-reindexación activada"
-									>
-										AUTO
-									</div>
-								) : (
-									<div
-										className="rounded-sm border border-yellow-500/20 bg-yellow-600/20 px-1.5 py-0.5 font-semibold text-[0.65rem] text-yellow-400"
-										title="Auto-reindexación desactivada"
-									>
-										MANUAL
-									</div>
-								)}
-							</div>
+							{/* Indicador AUTO/MANUAL eliminado por remoción de autoReindex */}
+							<div className="flex items-center" />
 						</div>
 					)}
 
@@ -175,12 +158,7 @@ export function FolderCardContent({
 							<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{childrenCount}</span>
 						</div>
 
-						{!tcgMode && (
-							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground">Auto-Reindex:</span>
-								<span className="font-medium">{autoReindex ? '✓' : '✗'}</span>
-							</div>
-						)}
+						{/* Indicador Auto-Reindex eliminado */}
 					</div>
 
 					{/* Última indexación */}

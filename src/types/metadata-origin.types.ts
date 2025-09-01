@@ -292,20 +292,42 @@ export interface IdeogramMetadata extends AIGenerationParameters {
 // ===== Metadata para Video =====
 
 export interface VideoMetadata extends BaseMetadata {
+	// Propiedades básicas
+	filename?: string;
+	format?: string;
+	size?: number;
+	
 	// Propiedades de video
 	duration?: number;
 	frame_rate?: number;
+	frameRate?: number; // Alias para compatibilidad
 	bitrate?: number;
+	
+	// Dimensiones
+	width?: number;
+	height?: number;
+	resolution?: string;
 
 	// Codec información
 	video_codec?: string;
+	videoCodec?: string; // Alias para compatibilidad
+	videoProfile?: string;
 	audio_codec?: string;
+	audioCodec?: string; // Alias para compatibilidad
+	audioChannels?: number;
+	audioSampleRate?: number;
 
 	// Contenedores
 	container_format?: string;
+	container?: string; // Alias para compatibilidad
+
+	// Timestamps
+	createdAt?: string;
+	modifiedAt?: string;
 
 	// Metadata de generación si es video generado por IA
 	ai_generation?: AIGenerationParameters;
+	aiMetadata?: Record<string, any>; // Para metadatos de IA extraídos
 }
 
 // ===== Resultado Final =====

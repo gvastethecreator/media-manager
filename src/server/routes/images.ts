@@ -80,6 +80,10 @@ const ImageFiltersSchema = z.object({
 	minSize: z.number().int().positive().optional(),
 	maxSize: z.number().int().positive().optional(),
 	search: z.string().optional(),
+	// AI Metadata filters
+	aiEngine: z.string().optional(),
+	aiModel: z.string().optional(),
+	aiOriginDetected: z.boolean().optional(),
 	limit: z
 		.preprocess((val) => (val ? Number.parseInt(String(val), 10) : 20), z.number().int().positive().max(100))
 		.optional(),
@@ -157,6 +161,17 @@ router.get('/', async (req, res) => {
 		if (filters.search) {
 			conditions.push(or(like(images.name, `%${filters.search}%`), like(images.description, `%${filters.search}%`)));
 		}
+		
+		// AI Metadata filters
+		if (filters.aiEngine) {
+			conditions.push(eq(images.aiEngine, filters.aiEngine));
+		}
+		if (filters.aiModel) {
+			conditions.push(eq(images.aiModel, filters.aiModel));
+		}
+		if (filters.aiOriginDetected !== undefined) {
+			conditions.push(eq(images.aiOriginDetected, filters.aiOriginDetected));
+		}
 
 		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -184,6 +199,10 @@ router.get('/', async (req, res) => {
 					thumbnailWidth: images.thumbnailWidth,
 					thumbnailHeight: images.thumbnailHeight,
 					thumbnailMimeType: images.thumbnailMimeType,
+					// AI Metadata fields
+					aiEngine: images.aiEngine,
+					aiModel: images.aiModel,
+					aiOriginDetected: images.aiOriginDetected,
 					isFavorite: images.isFavorite,
 					folderId: images.folderId,
 					noteId: images.noteId,

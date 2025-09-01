@@ -29,7 +29,6 @@ type DrizzleFolderCreateInput = {
 	isFavorite?: boolean;
 	totalFiles?: number;
 	totalSize?: number;
-	autoReindex?: boolean;
 	lastIndexed?: Date | null;
 	parentId?: string | null;
 	presetId?: string | null;
@@ -47,7 +46,6 @@ type DrizzleFolderUpdateInput = {
 	isFavorite?: boolean;
 	totalFiles?: number;
 	totalSize?: number;
-	autoReindex?: boolean;
 	lastIndexed?: Date | null;
 	parentId?: string | null;
 	presetId?: string | null;
@@ -84,7 +82,6 @@ type DrizzleFolder = {
 	isFavorite: boolean;
 	totalFiles: number;
 	totalSize: number;
-	autoReindex: boolean;
 	lastIndexed: Date | null;
 	parentId: string | null;
 	presetId: string | null;
@@ -103,7 +100,6 @@ export function mapCreateFolderDataToDrizzle(data: FolderCreateInput): DrizzleFo
 			id: crypto.randomUUID(),
 			name: data.name,
 			path: data.path,
-			autoReindex: data.autoReindex ?? false,
 			description: data.description ?? null,
 			emoji: data.emoji ?? null,
 			color: data.color ?? null,

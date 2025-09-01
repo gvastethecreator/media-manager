@@ -13,7 +13,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { check, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 
 // Modelo para las carpetas
 export const folders = sqliteTable(
@@ -29,7 +29,6 @@ export const folders = sqliteTable(
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalFiles: integer('totalFiles').notNull().default(0),
 		totalSize: integer('totalSize').notNull().default(0),
-		autoReindex: integer('autoReindex', { mode: 'boolean' }).notNull().default(false),
 		lastIndexed: integer('lastIndexed', { mode: 'timestamp_ms' }).default(sql`(CURRENT_TIMESTAMP)`),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
@@ -37,10 +36,15 @@ export const folders = sqliteTable(
 		presetId: text('presetId'),
 	},
 	(table) => ({
-		pathIdx: uniqueIndex('Folder_path_key').on(table.path),
-		path_idx: index('Folder_path_idx').on(table.path),
-		lastIndexed_idx: index('Folder_lastIndexed_idx').on(table.lastIndexed),
-		createdAt_idx: index('Folder_createdAt_idx').on(table.createdAt),
+		pathUniqueIdx: uniqueIndex('Folder_path_key').on(table.path),
+		lastIndexedIdx: index('Folder_lastIndexed_idx').on(table.lastIndexed),
+		createdAtIdx: index('Folder_createdAt_idx').on(table.createdAt),
+		// Constraints de validación
+		pathLengthCheck: check('Folder_path_length_check', sql`length(path) BETWEEN 1 AND 1000`),
+		nameCheck: check('Folder_name_length_check', sql`length(name) BETWEEN 1 AND 255`),
+		colorCheck: check('Folder_color_format_check', sql`color IS NULL OR (color LIKE '#%' AND length(color) = 7)`),
+		totalFilesCheck: check('Folder_total_files_check', sql`totalFiles >= 0`),
+		totalSizeCheck: check('Folder_total_size_check', sql`totalSize >= 0`),
 	})
 );
 
@@ -67,6 +71,10 @@ export const images = sqliteTable(
 		thumbnailOptimizedAt: integer('thumbnailOptimizedAt', {
 			mode: 'timestamp_ms',
 		}),
+		// AI Metadata columns
+		aiEngine: text('aiEngine'),
+		aiModel: text('aiModel'),
+		aiOriginDetected: integer('aiOriginDetected', { mode: 'boolean' }).default(false),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		folderId: text('folderId').notNull(),
 		noteId: text('noteId'),
@@ -75,12 +83,22 @@ export const images = sqliteTable(
 		addedAt: integer('addedAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
 	},
 	(table) => ({
-		pathFolderIdIdx: uniqueIndex('Image_path_folderId_key').on(table.path, table.folderId),
-		folderId_idx: index('Image_folderId_idx').on(table.folderId),
-		hash_idx: index('Image_hash_idx').on(table.hash),
-		createdAt_idx: index('Image_createdAt_idx').on(table.createdAt),
-		updatedAt_idx: index('Image_updatedAt_idx').on(table.updatedAt),
-		isFavorite_idx: index('Image_isFavorite_idx').on(table.isFavorite),
+		pathFolderUniqueIdx: uniqueIndex('Image_path_folderId_key').on(table.path, table.folderId),
+		folderIdIdx: index('Image_folderId_idx').on(table.folderId),
+		hashIdx: index('Image_hash_idx').on(table.hash),
+		createdAtIdx: index('Image_createdAt_idx').on(table.createdAt),
+		updatedAtIdx: index('Image_updatedAt_idx').on(table.updatedAt),
+		isFavoriteIdx: index('Image_isFavorite_idx').on(table.isFavorite),
+		aiEngineIdx: index('Image_aiEngine_idx').on(table.aiEngine),
+		aiOriginDetectedIdx: index('Image_aiOriginDetected_idx').on(table.aiOriginDetected),
+		// Constraints de validación
+		sizeCheck: check('Image_size_check', sql`size >= 0 AND size <= 107374182400`), // Max 100GB
+		dimensionsCheck: check(
+			'Image_dimensions_check',
+			sql`width > 0 AND width <= 32768 AND height > 0 AND height <= 32768`
+		),
+		hashFormatCheck: check('Image_hash_format_check', sql`length(hash) = 64`), // SHA-256
+		pathLengthCheck: check('Image_path_length_check', sql`length(path) BETWEEN 1 AND 1000`),
 	})
 );
 
@@ -110,11 +128,16 @@ export const videos = sqliteTable(
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({
-		pathIdx: uniqueIndex('Video_path_key').on(table.path),
-		folderId_idx: index('Video_folderId_idx').on(table.folderId),
-		hash_idx: index('Video_hash_idx').on(table.hash),
-		createdAt_idx: index('Video_createdAt_idx').on(table.createdAt),
-		updatedAt_idx: index('Video_updatedAt_idx').on(table.updatedAt),
+		pathUniqueIdx: uniqueIndex('Video_path_key').on(table.path),
+		folderIdIdx: index('Video_folderId_idx').on(table.folderId),
+		hashIdx: index('Video_hash_idx').on(table.hash),
+		createdAtIdx: index('Video_createdAt_idx').on(table.createdAt),
+		updatedAtIdx: index('Video_updatedAt_idx').on(table.updatedAt),
+		// Constraints de validación
+		sizeCheck: check('Video_size_check', sql`size >= 0 AND size <= 107374182400`), // Max 100GB
+		durationCheck: check('Video_duration_check', sql`duration >= 0 AND duration <= 86400`), // Max 24 horas
+		hashFormatCheck: check('Video_hash_format_check', sql`length(hash) = 64`), // SHA-256
+		pathLengthCheck: check('Video_path_length_check', sql`length(path) BETWEEN 1 AND 1000`),
 	})
 );
 
@@ -138,10 +161,10 @@ export const uploadedImages = sqliteTable(
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},
 	(table) => ({
-		pathIdx: uniqueIndex('UploadedImage_path_key').on(table.path),
-		imageId_idx: index('UploadedImage_imageId_idx').on(table.imageId),
-		hash_idx: index('UploadedImage_hash_idx').on(table.hash),
-		type_idx: index('UploadedImage_type_idx').on(table.type),
-		category_idx: index('UploadedImage_category_idx').on(table.category),
+		pathUniqueIdx: uniqueIndex('UploadedImage_path_key').on(table.path),
+		imageIdIdx: index('UploadedImage_imageId_idx').on(table.imageId),
+		hashIdx: index('UploadedImage_hash_idx').on(table.hash),
+		typeIdx: index('UploadedImage_type_idx').on(table.type),
+		categoryIdx: index('UploadedImage_category_idx').on(table.category),
 	})
 );

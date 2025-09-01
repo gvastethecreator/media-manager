@@ -57,7 +57,7 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 	// Usar las carpetas obtenidas del hook
 	const allFolders = folders;
 
-	if (isLoading && folders.length === 0) {
+	if (isLoading && !folders) {
 		return <LoadingScreen message="Cargando carpetas..." />;
 	}
 

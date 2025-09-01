@@ -158,7 +158,6 @@ const mockEntities: AnyEntityWithStats[] = [
 		path: '/home/user/documents/trabajo',
 		totalFiles: 78,
 		totalSize: 52_428_800,
-		autoReindex: true,
 		lastIndexed: new Date(),
 		parentId: null,
 		presetId: null,
@@ -263,8 +262,8 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 						value={selectedLayout}
 					>
 						{s.map(() => (
-							<option key={} value={}>
-								{}
+							<option key={ } value={ }>
+								{ }
 							</option>
 						))}
 					</select>
@@ -337,7 +336,7 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 						<EntityCard
 							entity={entity}
 							key={entity.id}
-							
+
 							onClick={() => console.log('Clicked:', entity.name || entity.id)}
 							onDoubleClick={() => console.log('Double clicked:', entity.name || entity.id)}
 							preset={selectedPreset || undefined}
@@ -395,14 +394,14 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 				<h3 className="font-semibold text-lg">Comparación de Layouts</h3>
 				<div className="space-y-6">
 					{s.map(() => (
-						<div className="space-y-2" key={}>
-							<h4 className="font-medium capitalize">{}</h4>
+						<div className="space-y-2" key={ }>
+							<h4 className="font-medium capitalize">{ }</h4>
 							<div className="grid grid-cols-1 gap-4 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3">
 								{mockEntities.map((entity) => (
 									<EntityCard
 										entity={entity}
 										key={`${}-${entity.id}`}
-										
+
 										size="md"
 										variant="default"
 									/>
@@ -425,9 +424,9 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 									<EntityCard
 										entity={entity}
 										key={`${variant}-${entity.id}`}
-										="complete"
-										size="md"
-										variant={variant}
+										= "complete"
+										size = "md"
+										variant = { variant }
 									/>
 								))}
 							</div>
