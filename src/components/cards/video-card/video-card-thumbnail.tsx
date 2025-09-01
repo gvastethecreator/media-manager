@@ -1,5 +1,5 @@
 import { Play, Volume2, VolumeX } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import type { VideoWithStats } from '@/types/entities/video';
 

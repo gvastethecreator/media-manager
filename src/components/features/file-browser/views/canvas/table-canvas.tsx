@@ -6,13 +6,12 @@ import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { MediaItem } from '../../components/media-thumbnail';
 import { ExtendedContextMenu, type ExtendedContextMenuAction } from '../../context-menu/extended-context-menu';
 import type { ClickModifiers } from '../../types/file-browser.types';
-import { generateThumbnailUrl, getFallbackIcon, useImageCache } from '../../views/canvas-common';
-import { CanvasRenderConfig } from '../../views/canvas-config';
+import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
+import { CanvasRenderConfig } from './canvas-config';
 
-export interface ListCanvasProps {
+export interface TableCanvasProps {
 	items: MediaItem[];
 	rowHeight?: number;
-	gap?: number;
 	overscanRows?: number;
 	scrollContainer?: HTMLElement | null;
 	onItemClick?: (item: MediaItem, modifiers?: ClickModifiers) => void;
@@ -20,57 +19,56 @@ export interface ListCanvasProps {
 }
 
 const DEFAULTS = {
-	rowHeight: CanvasRenderConfig.list.rowHeight,
-	gap: 0,
-	overscanRows: CanvasRenderConfig.list.overscanRows,
+	rowHeight: CanvasRenderConfig.table.rowHeight,
+	overscanRows: CanvasRenderConfig.table.overscanRows,
 };
 
-export function ListCanvas({
+export function TableCanvas({
 	items,
 	rowHeight = DEFAULTS.rowHeight,
-	gap = DEFAULTS.gap,
 	overscanRows = DEFAULTS.overscanRows,
 	scrollContainer = null,
 	onItemClick,
 	onItemDoubleClick,
-}: ListCanvasProps) {
+}: TableCanvasProps) {
 	const containerRef = useRef<HTMLDivElement | null>(null);
 	const canvasRef = useRef<HTMLCanvasElement | null>(null);
 	const [viewport, setViewport] = useState({ width: 0, height: 0, scrollTop: 0, scrollLeft: 0, offsetTop: 0 });
+	const headerHeight = 28;
 	const { load, get, set } = useImageCache();
 	const { openViewer } = useFileViewerStore();
 	const toggleFavorite = useToggleFavorite();
 	const addToCollection = useAddToCollection();
 	const addTags = useAddTags();
-
 	const isSelected = useSelectionStore((s) => s.isSelected);
 	const selectedIds = useSelectionStore((s) => s.selectedIds);
 	const setSelectedIds = useSelectionStore((s) => s.setSelectedIds);
 	const setActiveId = useSelectionStore((s) => s.setActiveId);
 
-	// Estado del menú contextual
 	const [contextMenu, setContextMenu] = useState<{
 		isOpen: boolean;
 		position: { x: number; y: number } | null;
 		selectedItems: MediaItem[];
 	}>({ isOpen: false, position: null, selectedItems: [] });
 
-	const totalHeight = items.length * rowHeight + gap;
+	const totalHeight = headerHeight + items.length * rowHeight;
 
 	const localScrollTop = Math.max(0, viewport.scrollTop - (scrollContainer ? viewport.offsetTop : 0));
-	const firstVisibleRow = Math.max(0, Math.floor(localScrollTop / rowHeight) - overscanRows);
+	const firstVisibleRow = Math.max(
+		0,
+		Math.floor(Math.max(0, localScrollTop - headerHeight) / rowHeight) - overscanRows
+	);
 	const lastVisibleRow = Math.min(
 		items.length - 1,
-		Math.floor((localScrollTop + viewport.height) / rowHeight) + overscanRows
+		Math.floor(Math.max(0, localScrollTop + viewport.height - headerHeight) / rowHeight) + overscanRows
 	);
-
 	const visibleRange = useMemo(() => ({ firstVisibleRow, lastVisibleRow }), [firstVisibleRow, lastVisibleRow]);
 
-	// Prefetch thumbs for visible rows
+	// Prefetch thumbs
 	useEffect(() => {
 		const startIndex = visibleRange.firstVisibleRow;
 		const endIndex = visibleRange.lastVisibleRow;
-		const prefetch = async () => {
+		(async () => {
 			for (let i = startIndex; i <= endIndex; i++) {
 				const it = items[i];
 				if (!it) continue;
@@ -95,11 +93,9 @@ export function ListCanvas({
 					set(key, { status: 'ready', fallbackIcon: fallback });
 				}
 			}
-		};
-		prefetch();
+		})();
 	}, [visibleRange, items, load, get, set]);
 
-	// Render
 	useEffect(() => {
 		const canvas = canvasRef.current;
 		const container = containerRef.current;
@@ -123,40 +119,39 @@ export function ListCanvas({
 		ctx.scale(dpr, dpr);
 		ctx.clearRect(0, 0, w, h);
 
+		// Header
+		drawHeader(ctx, w, headerHeight);
+
+		// Columns
+		const cols = calcColumns(w);
 		const startIndex = visibleRange.firstVisibleRow;
 		const endIndex = visibleRange.lastVisibleRow;
-
-		// Drawing constants
-		const padX = 8;
-		const thumb = CanvasRenderConfig.list.thumbSize;
-		const textLeft = padX + thumb + 10;
-		const baseY = startIndex * rowHeight - localScrollTop; // Y offset so first visible row starts at 0
+		const baseY = headerHeight + startIndex * rowHeight - localScrollTop;
 
 		for (let i = startIndex; i <= endIndex; i++) {
 			const it = items[i];
 			if (!it) continue;
 			const y = baseY + (i - startIndex) * rowHeight;
 
-			// Row bg
+			// Row background
 			ctx.fillStyle = i % 2 === 0 ? '#0b1020' : '#0d1224';
-			ctx.fillRect(0, y, w, rowHeight - 1);
+			ctx.fillRect(0, y, w, rowHeight);
 
-			// Selection highlight
+			// Selection outline
 			if (isSelected(it.id)) {
-				ctx.fillStyle = 'rgba(59,130,246,0.18)';
-				ctx.fillRect(0, y, w, rowHeight - 1);
 				ctx.strokeStyle = '#3b82f6';
-				ctx.lineWidth = CanvasRenderConfig.list.borderWidth;
-				ctx.strokeRect(0.5, y + 0.5, w - 1, rowHeight - 2);
+				ctx.lineWidth = CanvasRenderConfig.table.borderWidth;
+				ctx.strokeRect(0.5, y + 0.5, w - 1, rowHeight - 1);
 			}
 
-			// Thumbnail
+			// Name column with icon/thumbnail square
 			const entry = get(it.id);
-			const thumbY = Math.floor(y + (rowHeight - thumb) / 2);
-			const thumbX = padX;
+			const th = CanvasRenderConfig.table.thumbSize;
+			const ty = Math.floor(y + (rowHeight - th) / 2);
+			const tx = cols.name.x + 8;
 			ctx.save();
 			ctx.beginPath();
-			ctx.rect(thumbX, thumbY, thumb, thumb);
+			ctx.rect(tx, ty, th, th);
 			ctx.clip();
 			ctx.imageSmoothingEnabled = CanvasRenderConfig.visuals.enableSmoothing;
 			(ctx as any).imageSmoothingQuality = 'high';
@@ -166,54 +161,53 @@ export function ListCanvas({
 				const iw = (img.naturalWidth ?? img.width) as number;
 				const ih = (img.naturalHeight ?? img.height) as number;
 				if (iw > 0 && ih > 0) {
-					// Usar cover fit para mejor apariencia
-					const scale = Math.max(thumb / iw, thumb / ih);
+					const scale = Math.max(th / iw, th / ih);
 					const dw = Math.ceil(iw * scale);
 					const dh = Math.ceil(ih * scale);
-					const dx = thumbX + Math.floor((thumb - dw) / 2);
-					const dy = thumbY + Math.floor((thumb - dh) / 2);
+					const dx = tx + Math.floor((th - dw) / 2);
+					const dy = ty + Math.floor((th - dh) / 2);
 					try {
 						ctx.drawImage(img, dx, dy, dw, dh);
 					} catch (error) {
 						console.warn('Error drawing image:', error);
 						// Fallback a icono si falla el drawImage
 						ctx.fillStyle = '#374151';
-						ctx.fillRect(thumbX, thumbY, thumb, thumb);
+						ctx.fillRect(tx, ty, th, th);
 						const fallbackIcon = getFallbackIcon(it.entityType);
 						ctx.fillStyle = '#e5e7eb';
-						ctx.font = `${Math.floor(thumb * 0.6)}px system-ui, Segoe UI`;
+						ctx.font = `${Math.floor(th * 0.6)}px system-ui`;
 						ctx.textAlign = 'center';
 						ctx.textBaseline = 'middle';
-						ctx.fillText(fallbackIcon, thumbX + thumb / 2, thumbY + thumb / 2);
+						ctx.fillText(fallbackIcon, tx + th / 2, ty + th / 2);
 					}
 				}
 			} else if (entry?.status === 'ready' && entry.fallbackIcon) {
 				ctx.fillStyle = '#374151';
-				ctx.fillRect(thumbX, thumbY, thumb, thumb);
+				ctx.fillRect(tx, ty, th, th);
 				ctx.fillStyle = '#e5e7eb';
-				ctx.font = `${Math.floor(thumb * 0.6)}px system-ui, Segoe UI`;
+				ctx.font = `${Math.floor(th * 0.6)}px system-ui`;
 				ctx.textAlign = 'center';
 				ctx.textBaseline = 'middle';
-				ctx.fillText(entry.fallbackIcon, thumbX + thumb / 2, thumbY + thumb / 2);
+				ctx.fillText(entry.fallbackIcon, tx + th / 2, ty + th / 2);
 			} else if (entry?.status === 'loading') {
 				// Loading state
 				ctx.fillStyle = '#1f2937';
-				ctx.fillRect(thumbX, thumbY, thumb, thumb);
+				ctx.fillRect(tx, ty, th, th);
 				ctx.fillStyle = '#6b7280';
-				ctx.font = `${Math.floor(thumb * 0.4)}px system-ui`;
+				ctx.font = `${Math.floor(th * 0.5)}px system-ui`;
 				ctx.textAlign = 'center';
 				ctx.textBaseline = 'middle';
-				ctx.fillText('⟳', thumbX + thumb / 2, thumbY + thumb / 2);
+				ctx.fillText('⟳', tx + th / 2, ty + th / 2);
 			} else {
 				// Default/error state
 				ctx.fillStyle = '#1f2937';
-				ctx.fillRect(thumbX, thumbY, thumb, thumb);
+				ctx.fillRect(tx, ty, th, th);
 				const fallbackIcon = getFallbackIcon(it.entityType);
 				ctx.fillStyle = '#6b7280';
-				ctx.font = `${Math.floor(thumb * 0.6)}px system-ui`;
+				ctx.font = `${Math.floor(th * 0.6)}px system-ui`;
 				ctx.textAlign = 'center';
 				ctx.textBaseline = 'middle';
-				ctx.fillText(fallbackIcon, thumbX + thumb / 2, thumbY + thumb / 2);
+				ctx.fillText(fallbackIcon, tx + th / 2, ty + th / 2);
 			}
 
 			// Restaurar estado del texto
@@ -221,40 +215,42 @@ export function ListCanvas({
 			ctx.textBaseline = 'alphabetic';
 			ctx.restore();
 
-			// Texts
+			// Name text
 			ctx.fillStyle = '#e5e7eb';
-			ctx.font = '13px system-ui, Segoe UI, Roboto';
-			const name = it.name || '—';
-			const maxTextWidth = Math.max(40, w - textLeft - 12);
-			const nameY = Math.floor(y + rowHeight / 2) - 2;
-			drawClampedText(ctx, name, textLeft, nameY, maxTextWidth);
+			ctx.font = '12px system-ui, Segoe UI';
+			const nameX = tx + th + 8;
+			const nameMax = cols.name.w - (nameX - cols.name.x) - 8;
+			drawClampedText(ctx, it.name || '—', nameX, Math.floor(y + rowHeight / 2) + 4, nameMax);
 
-			// Secondary line (type/size)
-			ctx.fillStyle = '#9ca3af';
-			ctx.font = '12px system-ui, Segoe UI, Roboto';
-			const meta = [it.entityType, formatSize(it.size)].filter(Boolean).join(' · ');
-			drawClampedText(ctx, meta, textLeft, nameY + 14, maxTextWidth);
+			// Type
+			ctx.fillStyle = '#cbd5e1';
+			ctx.font = '12px system-ui';
+			drawClampedText(ctx, it.entityType || '', cols.type.x + 8, Math.floor(y + rowHeight / 2) + 4, cols.type.w - 16);
+
+			// Size
+			ctx.textAlign = 'right';
+			drawClampedText(
+				ctx,
+				formatSize(it.size),
+				cols.size.x + cols.size.w - 8,
+				Math.floor(y + rowHeight / 2) + 4,
+				cols.size.w - 16
+			);
+			ctx.textAlign = 'left';
 		}
-	}, [items, visibleRange, rowHeight, get, isSelected, scrollContainer, localScrollTop]);
+	}, [items, visibleRange, rowHeight, scrollContainer, localScrollTop, isSelected, get]);
 
-	// Observe container size/scroll
 	useEffect(() => {
 		const internal = containerRef.current;
 		if (!internal) return;
-		let host: HTMLElement | null = null;
-		if (scrollContainer) host = scrollContainer;
-		else host = internal;
-
+		const host = (scrollContainer ?? internal) as HTMLElement;
 		const computeOffsetTop = () => {
-			if (!host) return 0;
 			const hostRect = host.getBoundingClientRect();
 			const selfRect = internal.getBoundingClientRect();
 			return host.scrollTop + (selfRect.top - hostRect.top);
 		};
-
 		let rafId: number | null = null;
 		const onScroll = () => {
-			if (!host) return;
 			if (rafId != null) return;
 			rafId = requestAnimationFrame(() => {
 				rafId = null;
@@ -267,9 +263,7 @@ export function ListCanvas({
 			});
 		};
 		host.addEventListener('scroll', onScroll, { passive: true });
-
 		const ro = new ResizeObserver(() => {
-			if (!host) return;
 			if (rafId != null) return;
 			rafId = requestAnimationFrame(() => {
 				rafId = null;
@@ -283,8 +277,6 @@ export function ListCanvas({
 		});
 		ro.observe(host);
 		ro.observe(internal);
-
-		// init
 		setViewport({
 			width: host.clientWidth,
 			height: host.clientHeight,
@@ -292,7 +284,6 @@ export function ListCanvas({
 			scrollLeft: host.scrollLeft,
 			offsetTop: scrollContainer ? computeOffsetTop() : 0,
 		});
-
 		return () => {
 			ro.disconnect();
 			host.removeEventListener('scroll', onScroll);
@@ -300,16 +291,14 @@ export function ListCanvas({
 		};
 	}, [scrollContainer]);
 
-	// Click handling (single/double)
 	const handlePointerUp = (e: React.PointerEvent<HTMLDivElement>) => {
 		if (!containerRef.current) return;
 		const pos = getContentCoords(e, containerRef.current, viewport, scrollContainer);
-		const idx = indexFromCoords(pos.x, pos.y, rowHeight, items.length);
+		const idx = indexFromCoords(pos.x, pos.y, items.length, rowHeight, 28);
 		if (idx === -1) return;
 		const item = items[idx];
 		const modifiers: ClickModifiers = { ctrlKey: e.ctrlKey, metaKey: e.metaKey, shiftKey: e.shiftKey };
 		if (e.detail >= 2) {
-			// Abrir visor con los items actuales (solo imágenes)
 			const imageItems = items
 				.filter((it) => it.entityType === 'image')
 				.map((it) => ({
@@ -329,13 +318,12 @@ export function ListCanvas({
 		} else onItemClick?.(item, modifiers);
 	};
 
-	// Menú contextual (right-click)
 	const handleContextMenu = (e: React.MouseEvent<HTMLDivElement>) => {
 		e.preventDefault();
 		e.stopPropagation();
 		if (!containerRef.current) return;
 		const pos = getContentCoords(e, containerRef.current, viewport, scrollContainer);
-		const idx = indexFromCoords(pos.x, pos.y, rowHeight, items.length);
+		const idx = indexFromCoords(pos.x, pos.y, items.length, rowHeight, headerHeight);
 		if (idx !== -1 && items[idx]) {
 			const clickedItem = items[idx];
 			if (!selectedIds.includes(clickedItem.id)) {
@@ -345,18 +333,13 @@ export function ListCanvas({
 			const currentSelectedItems = items.filter((it) =>
 				(selectedIds.includes(clickedItem.id) ? selectedIds : [clickedItem.id]).includes(it.id)
 			);
-			setContextMenu({
-				isOpen: true,
-				position: { x: e.clientX, y: e.clientY },
-				selectedItems: currentSelectedItems,
-			});
+			setContextMenu({ isOpen: true, position: { x: e.clientX, y: e.clientY }, selectedItems: currentSelectedItems });
 		} else if (contextMenu.isOpen) {
 			setContextMenu({ isOpen: false, position: null, selectedItems: [] });
 		}
 	};
 
 	const closeContextMenu = () => setContextMenu({ isOpen: false, position: null, selectedItems: [] });
-
 	const handleContextMenuAction = (
 		action: ExtendedContextMenuAction,
 		payload: { selected: MediaItem[]; targetId?: string }
@@ -424,7 +407,7 @@ export function ListCanvas({
 		<>
 			<div
 				className={scrollContainer ? 'relative w-full' : 'relative h-full w-full overflow-auto'}
-				data-testid="list-canvas"
+				data-testid="table-canvas"
 				onContextMenu={handleContextMenu}
 				onPointerUp={handlePointerUp}
 				ref={containerRef}
@@ -433,7 +416,6 @@ export function ListCanvas({
 				<div style={{ height: totalHeight }} />
 				<canvas className="pointer-events-none absolute inset-0" ref={canvasRef} />
 			</div>
-
 			<ExtendedContextMenu
 				isOpen={contextMenu.isOpen}
 				onAction={handleContextMenuAction}
@@ -443,6 +425,35 @@ export function ListCanvas({
 			/>
 		</>
 	);
+}
+
+function calcColumns(width: number) {
+	const nameW = Math.max(160, Math.floor(width * 0.6));
+	const typeW = Math.max(100, Math.floor(width * 0.2));
+	const sizeW = Math.max(100, width - nameW - typeW);
+	return {
+		name: { x: 0, w: nameW },
+		type: { x: nameW, w: typeW },
+		size: { x: nameW + typeW, w: sizeW },
+	};
+}
+
+function drawHeader(ctx: CanvasRenderingContext2D, w: number, h: number) {
+	ctx.fillStyle = '#0a0f1e';
+	ctx.fillRect(0, 0, w, h);
+	ctx.strokeStyle = '#111827';
+	ctx.beginPath();
+	ctx.moveTo(0, h - 0.5);
+	ctx.lineTo(w, h - 0.5);
+	ctx.stroke();
+	const cols = calcColumns(w);
+	ctx.fillStyle = '#94a3b8';
+	ctx.font = '12px system-ui, Segoe UI';
+	ctx.fillText('Nombre', cols.name.x + 8, h - 8);
+	ctx.fillText('Tipo', cols.type.x + 8, h - 8);
+	ctx.textAlign = 'right';
+	ctx.fillText('Tamaño', cols.size.x + cols.size.w - 8, h - 8);
+	ctx.textAlign = 'left';
 }
 
 function getContentCoords(
@@ -458,9 +469,10 @@ function getContentCoords(
 	return { x, y };
 }
 
-function indexFromCoords(x: number, y: number, rowHeight: number, totalItems: number) {
-	const row = Math.floor(y / rowHeight);
-	if (row < 0 || row >= totalItems) return -1;
+function indexFromCoords(x: number, y: number, total: number, rowHeight: number, headerHeight: number) {
+	if (y < headerHeight) return -1;
+	const row = Math.floor((y - headerHeight) / rowHeight);
+	if (row < 0 || row >= total) return -1;
 	return row;
 }
 

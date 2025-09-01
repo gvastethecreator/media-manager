@@ -1,5 +1,5 @@
 /**
- * @file Showcase de layouts de cards
+ * @file Showcase de s de cards
  * @module	{
 		id: 'folder-1',
 		name: 'Documentos/Trabajo',
@@ -12,16 +12,16 @@
 			folderCount: 5,
 			totalSize: 1024000,
 			totalItems: 75
-		},rds/examples/card-layout-showcase
- * @description Demuestra los diferentes layouts y variantes disponibles para las cards
+		},rds/examples/card--showcase
+ * @description Demuestra los diferentes s y variantes disponibles para las cards
  */
 
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { EntityCard } from '../entity-card';
-import type { CardLayout, CardSize, CardVariant } from '../types/card-layout.types';
-import { LAYOUT_PRESETS } from '../types/card-layout.types';
+import type { CardLayout, CardSize, CardVariant } from '../types/card-.types';
+import { LAYOUT_PRESETS } from '../types/card-.types';
 
 // Mock data para demostración
 const mockEntities: AnyEntityWithStats[] = [
@@ -226,7 +226,7 @@ const mockEntities: AnyEntityWithStats[] = [
 	} as AnyEntityWithStats,
 ];
 
-const layouts: CardLayout[] = ['minimal', 'compact', 'complete', 'horizontal', 'vertical', 'list', 'grid', 'masonry'];
+const s: CardLayout[] = ['minimal', 'compact', 'complete', 'horizontal', 'vertical', 'list', 'grid', 'masonry'];
 const variants: CardVariant[] = ['default', 'minimal', 'elevated', 'outlined', 'tcg', 'polaroid', 'glass'];
 const sizes: CardSize[] = ['xs', 'sm', 'md', 'lg', 'xl', 'auto'];
 
@@ -245,7 +245,7 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 			<div className="space-y-4">
 				<h2 className="font-bold text-2xl">Sistema de Layouts para Cards</h2>
 				<p className="text-muted-foreground">
-					Explora los diferentes layouts, variantes y tamaños disponibles para las cards.
+					Explora los diferentes s, variantes y tamaños disponibles para las cards.
 				</p>
 			</div>
 
@@ -253,18 +253,18 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 			<div className="grid grid-cols-1 gap-4 rounded-lg bg-muted/50 p-4 md:grid-cols-4">
 				{/* Layout */}
 				<div className="space-y-2">
-					<label className="font-medium text-sm" htmlFor="layout-select">
+					<label className="font-medium text-sm" htmlFor="-select">
 						Layout
 					</label>
 					<select
 						className="w-full rounded border p-2"
-						id="layout-select"
+						id="-select"
 						onChange={(e) => setSelectedLayout(e.target.value as CardLayout)}
 						value={selectedLayout}
 					>
-						{layouts.map((layout) => (
-							<option key={layout} value={layout}>
-								{layout}
+						{s.map(() => (
+							<option key={} value={}>
+								{}
 							</option>
 						))}
 					</select>
@@ -337,7 +337,7 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 						<EntityCard
 							entity={entity}
 							key={entity.id}
-							layout={selectedLayout}
+							
 							onClick={() => console.log('Clicked:', entity.name || entity.id)}
 							onDoubleClick={() => console.log('Double clicked:', entity.name || entity.id)}
 							preset={selectedPreset || undefined}
@@ -359,7 +359,7 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 								<button
 									className="rounded bg-primary px-2 py-1 text-primary-foreground text-xs"
 									onClick={() => {
-										setSelectedLayout(config.layout);
+										setSelectedLayout(config.);
 										setSelectedVariant(config.variant);
 										setSelectedSize(config.size);
 										setSelectedPreset(presetName);
@@ -370,7 +370,7 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 								</button>
 							</div>
 							<div className="space-y-1 text-muted-foreground text-xs">
-								<div>Layout: {config.layout}</div>
+								<div>Layout: {config.}</div>
 								<div>Variante: {config.variant}</div>
 								<div>Tamaño: {config.size}</div>
 								<div>Densidad: {config.density}</div>
@@ -390,19 +390,19 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 				</div>
 			</div>
 
-			{/* Comparación de layouts */}
+			{/* Comparación de s */}
 			<div className="space-y-4">
 				<h3 className="font-semibold text-lg">Comparación de Layouts</h3>
 				<div className="space-y-6">
-					{layouts.map((layout) => (
-						<div className="space-y-2" key={layout}>
-							<h4 className="font-medium capitalize">{layout}</h4>
+					{s.map(() => (
+						<div className="space-y-2" key={}>
+							<h4 className="font-medium capitalize">{}</h4>
 							<div className="grid grid-cols-1 gap-4 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3">
 								{mockEntities.map((entity) => (
 									<EntityCard
 										entity={entity}
-										key={`${layout}-${entity.id}`}
-										layout={layout}
+										key={`${}-${entity.id}`}
+										
 										size="md"
 										variant="default"
 									/>
@@ -425,7 +425,7 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 									<EntityCard
 										entity={entity}
 										key={`${variant}-${entity.id}`}
-										layout="complete"
+										="complete"
 										size="md"
 										variant={variant}
 									/>

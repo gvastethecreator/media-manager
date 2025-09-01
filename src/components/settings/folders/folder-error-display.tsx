@@ -1,5 +1,5 @@
 import { AlertCircle } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { ExtendedFolder } from './folder-types';
 

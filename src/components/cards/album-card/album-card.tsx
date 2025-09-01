@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React, { useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import type { AlbumWithStats } from '@/types/entities/album';
@@ -22,16 +22,16 @@ export interface AlbumCardProps {
 		};
 		viewConfig?: {
 			theme?: string;
-			layout?: string;
-			thumbnailSize?: 'small' | 'medium' | 'large';
-		};
-	};
-	onClick?: () => void;
-	className?: string;
-	style?: React.CSSProperties;
-	compact?: boolean;
-	isSelected?: boolean;
-	tcgMode?: boolean;
+?: string
+thumbnailSize?: 'small' | 'medium' | 'large';
+}
+}
+onClick?: () => void;
+className?: string;
+style?: React.CSSProperties;
+compact?: boolean;
+isSelected?: boolean;
+tcgMode?: boolean;
 }
 
 /**

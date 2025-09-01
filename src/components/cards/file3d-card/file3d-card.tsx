@@ -1,5 +1,5 @@
 import { BoxIcon, DownloadIcon, EyeIcon, RotateCcwIcon, ZoomInIcon } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React, { useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { File3DWithStats } from '@/types/entities/file3d';

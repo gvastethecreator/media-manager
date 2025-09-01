@@ -8,7 +8,7 @@ const logger = clientLogger.withContext('ServerInitializer');
 /**
  * Componente que inicializa el servidor automáticamente
  *
- * Este componente se debe incluir en el layout principal de la aplicación.
+ * Este componente se debe incluir en el  principal de la aplicación.
  * Realiza una llamada a la API de inicialización del servidor cuando
  * la aplicación se carga en el navegador.
  */

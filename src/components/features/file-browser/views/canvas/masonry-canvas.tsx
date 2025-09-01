@@ -3,8 +3,8 @@ import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { MediaItem } from '../../components/media-thumbnail';
 import type { ClickModifiers } from '../../types/file-browser.types';
-import { generateThumbnailUrl, getFallbackIcon, useImageCache } from '../../views/canvas-common';
-import { CanvasRenderConfig } from '../../views/canvas-config';
+import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
+import { CanvasRenderConfig } from './canvas-config';
 
 export interface MasonryCanvasProps {
 	items: MediaItem[];

@@ -107,9 +107,13 @@ export async function getPaginatedProfiles(
  * ✅ MIGRADO A DRIZZLE
  */
 export async function getActiveProfile(): Promise<DrizzleProfile | null> {
-	const [profile] = await db.select().from(profiles).where(eq(profiles.isActive, true)).limit(1);
-
-	return profile || null;
+	try {
+		const result = await db.select().from(profiles).where(eq(profiles.isActive, true)).limit(1);
+		return result && result.length > 0 ? result[0] : null;
+	} catch (error) {
+		console.error('Error obteniendo perfil activo:', error);
+		return null;
+	}
 }
 
 /**
@@ -119,9 +123,9 @@ export async function getActiveProfile(): Promise<DrizzleProfile | null> {
 export async function setActiveProfile(id: string): Promise<boolean> {
 	try {
 		// Verificar que el perfil existe
-		const [profile] = await db.select().from(profiles).where(eq(profiles.id, id)).limit(1);
+		const profileResult = await db.select().from(profiles).where(eq(profiles.id, id)).limit(1);
 
-		if (!profile) {
+		if (!profileResult || profileResult.length === 0) {
 			return false;
 		}
 
@@ -144,35 +148,100 @@ export async function setActiveProfile(id: string): Promise<boolean> {
  * ✅ MIGRADO A DRIZZLE
  */
 export async function ensureDefaultProfile(): Promise<DrizzleProfile> {
-	// Buscar si ya existe algún perfil
-	const [existingProfilesResult] = await db.select({ count: count() }).from(profiles);
+	try {
+		// Buscar si ya existe algún perfil
+		const existingProfilesResult = await db.select({ count: count() }).from(profiles);
 
-	const existingProfiles = existingProfilesResult.count;
-
-	if (existingProfiles > 0) {
-		// Si no hay perfil activo pero hay perfiles, activamos el primero
-		const [activeProfile] = await db.select().from(profiles).where(eq(profiles.isActive, true)).limit(1);
-
-		if (activeProfile) {
-			return activeProfile;
-		}
-		const [firstProfile] = await db.select().from(profiles).orderBy(asc(profiles.createdAt)).limit(1);
-
-		if (firstProfile) {
-			const [updatedProfile] = await db
-				.update(profiles)
-				.set({ isActive: true })
-				.where(eq(profiles.id, firstProfile.id))
+		if (!existingProfilesResult || existingProfilesResult.length === 0) {
+			// Si no hay resultados, crear perfil por defecto
+			const insertResult = await db
+				.insert(profiles)
+				.values({
+					id: `profile-${Date.now()}`,
+					name: 'Perfil por defecto',
+					emoji: '👤',
+					color: '#3b82f6',
+					isActive: true,
+					description: null,
+					settingsId: null,
+					imageId: null,
+				})
 				.returning();
 
-			return updatedProfile;
+			return (
+				insertResult?.[0] ||
+				({
+					id: `profile-${Date.now()}`,
+					name: 'Perfil por defecto',
+					emoji: '👤',
+					color: '#3b82f6',
+					isActive: true,
+					description: null,
+					settingsId: null,
+					imageId: null,
+					createdAt: new Date(),
+					updatedAt: null,
+				} as DrizzleProfile)
+			);
 		}
-	}
 
-	// Si no hay perfiles, crear uno por defecto
-	const [newProfile] = await db
-		.insert(profiles)
-		.values({
+		const existingProfiles = existingProfilesResult[0]?.count || 0;
+
+		if (existingProfiles > 0) {
+			// Si no hay perfil activo pero hay perfiles, activamos el primero
+			const activeProfileResult = await db.select().from(profiles).where(eq(profiles.isActive, true)).limit(1);
+
+			if (activeProfileResult && activeProfileResult.length > 0) {
+				return activeProfileResult[0];
+			}
+
+			const firstProfileResult = await db.select().from(profiles).orderBy(asc(profiles.createdAt)).limit(1);
+
+			if (firstProfileResult && firstProfileResult.length > 0) {
+				const updateResult = await db
+					.update(profiles)
+					.set({ isActive: true })
+					.where(eq(profiles.id, firstProfileResult[0].id))
+					.returning();
+
+				return updateResult?.[0] || firstProfileResult[0];
+			}
+		}
+
+		// Si no hay perfiles, crear uno por defecto
+		const insertResult = await db
+			.insert(profiles)
+			.values({
+				id: `profile-${Date.now()}`,
+				name: 'Perfil por defecto',
+				emoji: '👤',
+				color: '#3b82f6',
+				isActive: true,
+				description: null,
+				settingsId: null,
+				imageId: null,
+			})
+			.returning();
+
+		return (
+			insertResult?.[0] ||
+			({
+				id: `profile-${Date.now()}`,
+				name: 'Perfil por defecto',
+				emoji: '👤',
+				color: '#3b82f6',
+				isActive: true,
+				description: null,
+				settingsId: null,
+				imageId: null,
+				createdAt: new Date(),
+				updatedAt: null,
+			} as DrizzleProfile)
+		);
+	} catch (error) {
+		console.error('Error en ensureDefaultProfile:', error);
+		// Retornar perfil por defecto como fallback
+		return {
 			id: `profile-${Date.now()}`,
 			name: 'Perfil por defecto',
 			emoji: '👤',
@@ -181,10 +250,10 @@ export async function ensureDefaultProfile(): Promise<DrizzleProfile> {
 			description: null,
 			settingsId: null,
 			imageId: null,
-		})
-		.returning();
-
-	return newProfile;
+			createdAt: new Date(),
+			updatedAt: null,
+		} as DrizzleProfile;
+	}
 }
 
 /**

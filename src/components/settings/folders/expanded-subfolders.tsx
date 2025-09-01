@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from '@/components/ui/motion-shim';
 import { Badge } from '@/components/ui/badge';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { ExtendedFolder } from './folder-types';

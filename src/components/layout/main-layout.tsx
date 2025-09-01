@@ -114,7 +114,7 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 	const leftPanelRef = useRef<ImperativePanelHandle>(null);
 	const rightPanelRef = useRef<ImperativePanelHandle>(null);
 
-	// Sincronizar visibilidad del details panel con el estado del layout
+	// Sincronizar visibilidad del details panel con el estado del
 	useEffect(() => {
 		console.log('📋 MainLayout: Sincronizando isVisible:', isVisible);
 		setIsRightCollapsed(!isVisible);

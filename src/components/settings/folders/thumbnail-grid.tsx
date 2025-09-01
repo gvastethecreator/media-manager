@@ -1,5 +1,5 @@
 import { Image as ImageIcon } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import { normalizeThumbailUrl } from './utils/folder-helpers';
 

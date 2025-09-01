@@ -1,10 +1,10 @@
 /**
- * @file Tipos para el sistema de layouts de cards
- * @module components/cards/types/card-layout-types
- * @description Define los diferentes tipos de layout disponibles para las cards
+ * @file Tipos para el sistema de s de cards
+ * @module components/cards/types/card--types
+ * @description Define los diferentes tipos de  disponibles para las cards
  */
 
-/** Tipos de layout disponibles para las cards */
+/** Tipos de  disponibles para las cards */
 export type CardLayout =
 	| 'minimal' // Solo icono/thumbnail + nombre
 	| 'compact' // Información básica compacta
@@ -58,16 +58,16 @@ export interface CardLayoutConfig {
 	showMetadata?: boolean;
 	/** Mostrar acciones */
 	showActions?: boolean;
-	/** Orientación para layouts horizontales */
+	/** Orientación para s horizontales */
 	orientation?: 'left' | 'right' | 'center';
 	/** Densidad de información */
 	density?: 'low' | 'medium' | 'high';
 }
 
-/** Props base para todas las cards con layout */
+/** Props base para todas las cards con  */
 export interface BaseCardProps {
-	/** Configuración de layout */
-	layoutConfig?: Partial<CardLayoutConfig>;
+	/** Configuración de  */
+	Config?: Partial<CardLayoutConfig>;
 	/** Layout rápido (shortcut) */
 	layout?: CardLayout;
 	/** Tamaño rápido (shortcut) */
@@ -193,7 +193,7 @@ export const LAYOUT_PRESETS: Record<string, CardLayoutConfig> = {
 	},
 };
 
-/** Función para resolver la configuración final de layout */
+/** Función para resolver la configuración final de  */
 export function resolveLayoutConfig(props: Partial<BaseCardProps>, preset?: string): CardLayoutConfig {
 	// Configuración base
 	const baseConfig: CardLayoutConfig = {
@@ -240,7 +240,7 @@ export function resolveLayoutConfig(props: Partial<BaseCardProps>, preset?: stri
 	return {
 		...baseConfig,
 		...presetConfig,
-		...props.layoutConfig,
+		...props.Config,
 		...directConfig,
 		...legacyConfig,
 	};

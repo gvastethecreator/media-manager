@@ -24,7 +24,7 @@ const mockImageIds = [
  * Incluye:
  * - Diferentes variantes visuales
  * - Opciones de selección
- * - Configuraciones de layout
+ * - Configuraciones de
  * - Ejemplos de uso con diferentes datos
  */
 export default function ImageGalleryExample() {
@@ -57,7 +57,7 @@ export default function ImageGalleryExample() {
 			<Tabs className="w-full" defaultValue="variants">
 				<TabsList className="mb-4">
 					<TabsTrigger value="variants">Variantes Visuales</TabsTrigger>
-					<TabsTrigger value="layouts">Layouts</TabsTrigger>
+					<TabsTrigger value="s">Layouts</TabsTrigger>
 					<TabsTrigger value="selectable">Selección</TabsTrigger>
 					<TabsTrigger value="infinite">Carga Infinita</TabsTrigger>
 				</TabsList>
@@ -98,7 +98,7 @@ export default function ImageGalleryExample() {
 				</TabsContent>
 
 				{/* Pestaña: Layouts */}
-				<TabsContent className="space-y-8" value="layouts">
+				<TabsContent className="space-y-8" value="s">
 					<div className="grid grid-cols-1 gap-8 lg:grid-cols-2">
 						<div className="space-y-4 rounded-lg border p-4">
 							<h3 className="font-medium text-lg">Layout Grid</h3>

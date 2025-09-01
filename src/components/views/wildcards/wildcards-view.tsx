@@ -1,5 +1,5 @@
 import { Sparkles } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { useCallback, useState } from 'react';
 import { WildcardCard } from '@/components/cards/wildcard-card';
 import { LoadingScreen } from '@/components/core/feedback';

@@ -1,5 +1,5 @@
 import { Grid2X2Icon, Grid3X3Icon, ListIcon, RefreshCw, SortAsc, SortDesc } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import {
@@ -38,7 +38,7 @@ type SortDirection = 'asc' | 'desc';
 
 /**
  * Componente para mostrar una galería de imágenes con opciones de visualización y control
- * - Soporta múltiples layouts: grid, grid-dense, list
+ * - Soporta múltiples s: grid, grid-dense, list
  * - Permite ordenamiento por diferentes criterios
  * - Filtrado de imágenes por texto
  * - Selección de imágenes con callback
@@ -66,7 +66,7 @@ export function ImageGallery({
 	const [searchTerm, setSearchTerm] = useState('');
 	const [sortBy, setSortBy] = useState<SortOption>('date');
 	const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-	const [layout, setLayout] = useState(defaultLayout);
+	const [, setLayout] = useState(defaultLayout);
 	const [selectedImages, setSelectedImages] = useState<string[]>([]);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
 	const [_imagesData, setImagesData] = useState<ImageWithStats[]>([]);
@@ -197,9 +197,9 @@ export function ImageGallery({
 		}
 	}, [onSelectionChange]);
 
-	// Determinar clases para el grid según el layout
+	// Determinar clases para el grid según el
 	const getLayoutClasses = () => {
-		switch (layout) {
+		switch () {
 			case 'grid':
 				return 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4';
 			case 'grid-dense':
@@ -264,10 +264,10 @@ export function ImageGallery({
 								</DropdownMenuContent>
 							</DropdownMenu>
 
-							{/* Selector de layout */}
+							{/* Selector de  */}
 							<div className="flex items-center rounded-md border border-input">
 								<Button
-									className={cn('h-9 rounded-none rounded-l-md px-2', layout === 'grid' && 'bg-primary/10')}
+									className={cn('h-9 rounded-none rounded-l-md px-2',  === 'grid' && 'bg-primary/10')}
 									onClick={() => setLayout('grid')}
 									size="sm"
 									variant="ghost"
@@ -277,7 +277,7 @@ export function ImageGallery({
 								<Button
 									className={cn(
 										'h-9 rounded-none border-input border-r border-l px-2',
-										layout === 'grid-dense' && 'bg-primary/10'
+										 === 'grid-dense' && 'bg-primary/10'
 									)}
 									onClick={() => setLayout('grid-dense')}
 									size="sm"
@@ -286,7 +286,7 @@ export function ImageGallery({
 									<Grid2X2Icon className="h-4 w-4" />
 								</Button>
 								<Button
-									className={cn('h-9 rounded-none rounded-r-md px-2', layout === 'list' && 'bg-primary/10')}
+									className={cn('h-9 rounded-none rounded-r-md px-2',  === 'list' && 'bg-primary/10')}
 									onClick={() => setLayout('list')}
 									size="sm"
 									variant="ghost"
@@ -311,7 +311,7 @@ export function ImageGallery({
 				animate={{ opacity: 1 }}
 				className={getLayoutClasses()}
 				initial={{ opacity: 0 }}
-				layout
+				
 				transition={{ duration: 0.3 }}
 			>
 				{sortedImages.map((image, index) => {
@@ -325,17 +325,17 @@ export function ImageGallery({
 								y: 0,
 								transition: { delay: index * 0.05, duration: 0.3 },
 							}}
-							className={layout === 'list' ? 'w-full' : undefined}
+							className={ === 'list' ? 'w-full' : undefined}
 							exit={{ opacity: 0, scale: 0.9 }}
 							initial={{ opacity: 0, y: 20 }}
 							key={imageId}
-							layout
+							
 						>
 							{typeof image === 'string' ? (
 								// Renderizar tarjeta con solo el ID, cargará datos internamente
 								<ImageCardImproved
-									aspectRatio={layout === 'list' ? 'auto' : aspectRatio}
-									className={layout === 'list' ? 'flex h-20 flex-row items-center' : undefined}
+									aspectRatio={ === 'list' ? 'auto' : aspectRatio}
+									className={ === 'list' ? 'flex h-20 flex-row items-center' : undefined}
 									imageId={image}
 									isSelected={isSelected}
 									onClick={onImageClick ? handleImageClick : undefined}
@@ -345,8 +345,8 @@ export function ImageGallery({
 							) : (
 								// Renderizar tarjeta con los datos completos
 								<ImageCardImproved
-									aspectRatio={layout === 'list' ? 'auto' : aspectRatio}
-									className={layout === 'list' ? 'flex h-20 flex-row items-center' : undefined}
+									aspectRatio={ === 'list' ? 'auto' : aspectRatio}
+									className={ === 'list' ? 'flex h-20 flex-row items-center' : undefined}
 									imageId={image.id}
 									isSelected={isSelected}
 									onClick={onImageClick ? handleImageClick : undefined}

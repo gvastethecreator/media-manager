@@ -4,7 +4,7 @@
  * @description Badge que muestra información visual del tipo de entidad con iconos y colores
  */
 
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 // imports limpios: eliminados ComponentProps y Badge no usados
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEntityTypeConfig } from '@/hooks/use-entity-type-config';
@@ -139,7 +139,7 @@ export interface EntityTypeStatsProps {
 	hideEmpty?: boolean;
 	/** Límite de tipos a mostrar */
 	limit?: number;
-	/** Orientación del layout */
+	/** Orientación del  */
 	orientation?: 'horizontal' | 'vertical';
 }
 

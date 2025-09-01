@@ -26,7 +26,7 @@ import {
 	Trash2,
 	X,
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { memo, useCallback, useMemo } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';

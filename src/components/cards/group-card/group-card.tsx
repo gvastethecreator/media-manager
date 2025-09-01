@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React, { useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useGroupCardData } from '@/lib/api/groups';

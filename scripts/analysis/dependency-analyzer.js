@@ -60,8 +60,8 @@ class DependencyAnalyzer {
 			'postcss',
 			'@tanstack/',
 			'zustand',
-			'framer-motion',
-			'motion',
+			'gsap',
+			'@gsap/react',
 		];
 
 		for (const [name, version] of Object.entries(allDeps)) {
@@ -130,8 +130,8 @@ class DependencyAnalyzer {
 			'tailwindcss',
 			'@tanstack/react-query',
 			'zustand',
-			'framer-motion',
-			'motion',
+			'gsap',
+			'@gsap/react',
 			'lucide-react',
 			'lodash',
 			'date-fns',

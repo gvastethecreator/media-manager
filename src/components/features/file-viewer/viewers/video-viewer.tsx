@@ -13,15 +13,19 @@ import { type VideoWithStats } from '@/types/entities/video/types';
 interface VideoViewerProps {
 	video: VideoWithStats;
 	className?: string;
+	onNext?: () => void;
+	onPrevious?: () => void;
+	onClose?: () => void;
 }
 
-export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className }) => {
+export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className, onNext, onPrevious, onClose }) => {
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const [playing, setPlaying] = useState(false);
 	const [muted, setMuted] = useState(false);
 	const [fullscreen, setFullscreen] = useState(false);
 	const [currentTime, setCurrentTime] = useState(0);
 	const [duration, setDuration] = useState(0);
+	const [error, setError] = useState<string | null>(null);
 
 	const handlePlayPause = () => {
 		const vid = videoRef.current;
@@ -112,6 +116,26 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className }) =>
 
 	return (
 		<div className={cn('mx-auto w-full max-w-3xl rounded-lg bg-card p-4 shadow-lg', className)}>
+			<div className="mb-2 flex items-center justify-between">
+				<div className="flex items-center gap-2">
+					{onPrevious && (
+						<Button aria-label="Anterior" onClick={onPrevious} size="icon" variant="ghost">
+							<span className="sr-only">Anterior</span>
+							{/* simple chevron using text */}‹
+						</Button>
+					)}
+					{onNext && (
+						<Button aria-label="Siguiente" onClick={onNext} size="icon" variant="ghost">
+							<span className="sr-only">Siguiente</span>›
+						</Button>
+					)}
+				</div>
+				{onClose && (
+					<Button aria-label="Cerrar" onClick={onClose} size="icon" variant="ghost">
+						✕
+					</Button>
+				)}
+			</div>
 			<video
 				className="w-full rounded-lg bg-black"
 				controls={false}
@@ -119,12 +143,14 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className }) =>
 				onClick={handlePlayPause}
 				onLoadedMetadata={handleLoadedMetadata}
 				onTimeUpdate={handleTimeUpdate}
+				onError={() => setError('Error al cargar el video')}
 				poster={video.thumbnail || undefined}
 				ref={videoRef}
 				src={video.path}
 			>
 				Sorry, your browser does not support embedded videos.
 			</video>
+			{error && <div className="mt-2 text-center text-red-500 text-sm">{error}</div>}
 			<div className="mt-2 flex items-center gap-2">
 				<Button aria-label={playing ? 'Pausar' : 'Reproducir'} onClick={handlePlayPause} size="icon" variant="ghost">
 					{playing ? <Pause /> : <Play />}

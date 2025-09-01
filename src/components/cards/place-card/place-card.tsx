@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React, { useCallback, useMemo, useState } from 'react';
 import { getRarityGradient } from '@/components/cards/shared/rarity-gradients';
 import { darkenHex } from '@/components/cards/shared/rarity-style';

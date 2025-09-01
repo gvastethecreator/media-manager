@@ -1,5 +1,5 @@
 import { Tag } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { memo, useCallback, useState } from 'react';
 import { TagCard } from '@/components/cards/tag-card/tag-card';
 import { EmptyState } from '@/components/core/data-display';

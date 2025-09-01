@@ -1,138 +1,218 @@
-import { AlertCircle, CheckCircle, FileText, Upload } from 'lucide-react';
-import { memo, useState } from 'react';
+'use client';
+
+import { AlertCircle, CheckCircle, Upload } from 'lucide-react';
+import { useCallback, useRef, useState } from 'react';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
+
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { useWorkflowDrop } from '@/hooks/use-workflow-drop';
 import { cn } from '@/lib/utils';
 
-interface WorkflowDropZoneProps {
-	className?: string;
+// Register GSAP plugin
+gsap.registerPlugin(useGSAP);
+
+export interface WorkflowDropZoneProps {
+	onFileDrop?: (files: FileList) => void;
+	accept?: string;
+	multiple?: boolean;
 	disabled?: boolean;
-	onSuccess?: (workflowCount: number) => void;
-	onError?: (error: string) => void;
+	className?: string;
+	children?: React.ReactNode;
 }
 
-/**
- * Zona de drag & drop para workflows ComfyUI
- */
-export const WorkflowDropZone = memo(function WorkflowDropZone({
-	className,
+interface DropMessage {
+	text: string;
+	type: 'success' | 'error';
+}
+
+export function WorkflowDropZone({
+	onFileDrop,
+	accept = 'image/*',
+	multiple = true,
 	disabled = false,
-	onSuccess,
-	onError,
+	className,
+	children,
 }: WorkflowDropZoneProps) {
-	const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null);
+	const containerRef = useRef<HTMLDivElement>(null);
+	const cardRef = useRef<HTMLDivElement>(null);
+	const [isDragging, setIsDragging] = useState(false);
+	const [message, setMessage] = useState<DropMessage | null>(null);
 
-	const { isDragging, isProcessing, dropZoneProps, handleFileInput } = useWorkflowDrop({
-		onSuccess: (count) => {
+	// GSAP Animations
+	useGSAP(
+		() => {
+			if (!cardRef.current) return;
+
+			// Initial load animation
+			gsap.fromTo(
+				cardRef.current,
+				{ opacity: 0, scale: 0.95 },
+				{ opacity: 1, scale: 1, duration: 0.3, ease: 'power2.out' }
+			);
+
+			// Drag state animation
+			if (isDragging && !disabled) {
+				gsap.to(cardRef.current, {
+					scale: 1.02,
+					boxShadow: '0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+					duration: 0.2,
+					ease: 'power2.out',
+				});
+			} else {
+				gsap.to(cardRef.current, {
+					scale: 1,
+					boxShadow: '0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06)',
+					duration: 0.2,
+					ease: 'power2.out',
+				});
+			}
+		},
+		{ scope: containerRef, dependencies: [isDragging, disabled] }
+	);
+
+	// Message animation
+	useGSAP(
+		() => {
+			if (!message || !containerRef.current) return;
+
+			const messageElement = containerRef.current.querySelector('[data-message]');
+			if (messageElement) {
+				gsap.fromTo(messageElement, { opacity: 0, y: -10 }, { opacity: 1, y: 0, duration: 0.3, ease: 'power2.out' });
+
+				// Auto-hide after 5 seconds
+				const timer = setTimeout(() => {
+					gsap.to(messageElement, {
+						opacity: 0,
+						y: -10,
+						duration: 0.2,
+						ease: 'power2.in',
+						onComplete: () => setMessage(null),
+					});
+				}, 5000);
+
+				return () => clearTimeout(timer);
+			}
+		},
+		{ dependencies: [message] }
+	);
+
+	const handleDragEnter = useCallback(
+		(e: React.DragEvent) => {
+			e.preventDefault();
+			if (disabled) return;
+			setIsDragging(true);
+		},
+		[disabled]
+	);
+
+	const handleDragLeave = useCallback(
+		(e: React.DragEvent) => {
+			e.preventDefault();
+			if (disabled) return;
+			setIsDragging(false);
+		},
+		[disabled]
+	);
+
+	const handleDragOver = useCallback((e: React.DragEvent) => {
+		e.preventDefault();
+	}, []);
+
+	const handleDrop = useCallback(
+		(e: React.DragEvent) => {
+			e.preventDefault();
+			setIsDragging(false);
+
+			if (disabled || !onFileDrop) return;
+
+			const files = e.dataTransfer.files;
+			if (files.length === 0) {
+				setMessage({
+					text: 'No se encontraron archivos válidos',
+					type: 'error',
+				});
+				return;
+			}
+
+			// Validate file types if accept is specified
+			if (accept !== '*') {
+				const validFiles = Array.from(files).filter((file) => {
+					const acceptTypes = accept.split(',').map((type) => type.trim());
+					return acceptTypes.some((type) => {
+						if (type.includes('/')) {
+							return file.type.match(type.replace('*', '.*'));
+						}
+						return file.name.toLowerCase().endsWith(type.toLowerCase());
+					});
+				});
+
+				if (validFiles.length === 0) {
+					setMessage({
+						text: `Formato de archivo no válido. Se aceptan: ${accept}`,
+						type: 'error',
+					});
+					return;
+				}
+
+				// Create new FileList with valid files
+				const dataTransfer = new DataTransfer();
+				validFiles.forEach((file) => dataTransfer.items.add(file));
+				onFileDrop(dataTransfer.files);
+			} else {
+				onFileDrop(files);
+			}
+
 			setMessage({
+				text: `${files.length} archivo(s) procesado(s) correctamente`,
 				type: 'success',
-				text: `${count} workflow${count === 1 ? '' : 's'} importado${count === 1 ? '' : 's'} exitosamente`,
 			});
-			onSuccess?.(count);
-
-			// Limpiar mensaje después de 3 segundos
-			setTimeout(() => setMessage(null), 3000);
 		},
-		onError: (error) => {
-			setMessage({ type: 'error', text: error });
-			onError?.(error);
-
-			// Limpiar mensaje después de 5 segundos
-			setTimeout(() => setMessage(null), 5000);
-		},
-	});
+		[disabled, onFileDrop, accept]
+	);
 
 	return (
-		<div className={cn('space-y-4', className)}>
-			{/* Zona de drop */}
+		<div ref={containerRef} className={cn('space-y-4', className)}>
 			<Card
+				ref={cardRef}
 				className={cn(
 					'border-2 border-dashed transition-colors duration-200',
 					isDragging && !disabled && 'border-primary bg-primary/5',
 					disabled && 'cursor-not-allowed opacity-50',
-					!disabled && 'hover:border-primary/50 hover:bg-muted/50'
+					!disabled && 'hover:border-muted-foreground/50'
 				)}
-				{...(disabled ? {} : dropZoneProps)}
+				onDragEnter={handleDragEnter}
+				onDragLeave={handleDragLeave}
+				onDragOver={handleDragOver}
+				onDrop={handleDrop}
 			>
-				<CardContent className="flex flex-col items-center justify-center space-y-4 p-8 text-center">
-					{isProcessing ? (
-						<>
-							<div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
-							<div className="space-y-2">
-								<p className="font-medium text-sm">Procesando workflows...</p>
-								<p className="text-muted-foreground text-xs">Validando y importando archivos JSON</p>
-							</div>
-						</>
-					) : (
-						<>
-							<div
-								className={cn(
-									'flex h-12 w-12 items-center justify-center rounded-full',
-									isDragging && !disabled ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
-								)}
-							>
-								<Upload className="h-6 w-6" />
-							</div>
-							<div className="space-y-2">
-								<p className="font-medium">
-									{isDragging && !disabled ? 'Suelta los archivos aquí' : 'Arrastra workflows ComfyUI aquí'}
-								</p>
-								<p className="text-muted-foreground text-sm">Archivos JSON de workflows ComfyUI (formato v1.0)</p>
-							</div>
-							<div className="flex items-center gap-2 text-muted-foreground text-xs">
-								<FileText className="h-4 w-4" />
-								<span>Soporta múltiples archivos</span>
-							</div>
-						</>
-					)}
-
-					{!(disabled || isProcessing) && (
-						<div className="pt-2">
-							<Button asChild size="sm" variant="outline">
-								<label className="cursor-pointer">
-									Seleccionar archivos
-									<input
-										accept=".json,application/json"
-										className="hidden"
-										multiple
-										onChange={handleFileInput}
-										type="file"
-									/>
-								</label>
-							</Button>
-						</div>
-					)}
+				<CardContent className="flex flex-col items-center justify-center p-8 text-center">
+					<Upload
+						className={cn(
+							'h-12 w-12 text-muted-foreground transition-colors',
+							isDragging && !disabled && 'text-primary'
+						)}
+					/>
+					<div className="mt-4 space-y-2">
+						<h3 className="font-medium">{isDragging ? 'Suelta los archivos aquí' : 'Arrastra archivos aquí'}</h3>
+						<p className="text-sm text-muted-foreground">
+							{accept !== '*' ? `Archivos permitidos: ${accept}` : 'Cualquier tipo de archivo'}
+							{multiple && ' (múltiples archivos permitidos)'}
+						</p>
+					</div>
+					{children}
 				</CardContent>
 			</Card>
 
-			{/* Mensajes de resultado */}
+			{/* Message display */}
 			{message && (
-				<Alert variant={message.type === 'error' ? 'destructive' : 'default'}>
+				<Alert data-message variant={message.type === 'error' ? 'destructive' : 'default'}>
 					{message.type === 'success' ? <CheckCircle className="h-4 w-4" /> : <AlertCircle className="h-4 w-4" />}
 					<AlertDescription>{message.text}</AlertDescription>
 				</Alert>
 			)}
-
-			{/* Información sobre el formato */}
-			<Card className="bg-muted/30">
-				<CardContent className="p-4">
-					<div className="space-y-2">
-						<h4 className="flex items-center gap-2 font-medium text-sm">
-							<FileText className="h-4 w-4" />
-							Formato Soportado
-						</h4>
-						<div className="space-y-1 text-muted-foreground text-xs">
-							<p>• Archivos JSON de workflows ComfyUI v1.0</p>
-							<p>• Debe contener nodos, conexiones y metadatos válidos</p>
-							<p>• Se validará la estructura antes de importar</p>
-						</div>
-					</div>
-				</CardContent>
-			</Card>
 		</div>
 	);
-});
+}
 
 WorkflowDropZone.displayName = 'WorkflowDropZone';

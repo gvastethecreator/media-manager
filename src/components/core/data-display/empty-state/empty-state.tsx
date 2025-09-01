@@ -1,5 +1,5 @@
 import type { LucideIcon } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import BlurFade from '@/components/ui/blur-fade';
 import { cn } from '@/lib/utils';
 

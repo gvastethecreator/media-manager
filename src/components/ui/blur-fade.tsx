@@ -1,71 +1,19 @@
-import { AnimatePresence, motion, type UseInViewOptions, useInView, type Variants } from 'motion/react';
-import type * as React from 'react';
-import { useRef } from 'react';
-
-type MarginType = UseInViewOptions['margin'];
+// Componente temporalmente deshabilitado durante migración a GSAP
+// Original: blur-fade
+import React from 'react';
 
 interface BlurFadeProps {
-	children: React.ReactNode;
+	children?: React.ReactNode;
 	className?: string;
-	variant?: {
-		hidden: { y: number };
-		visible: { y: number };
-	};
-	duration?: number;
-	delay?: number;
-	offset?: number;
-	direction?: 'up' | 'down' | 'left' | 'right';
-	inView?: boolean;
-	inViewMargin?: MarginType;
-	blur?: string;
+	[key: string]: any; // Aceptar cualquier prop para compatibilidad
 }
 
-export default function BlurFade({
-	children,
-	className,
-	variant,
-	duration = 0.4,
-	delay = 0,
-	offset = 6,
-	direction = 'down',
-	inView = false,
-	inViewMargin = '-50px',
-	blur = '6px',
-}: BlurFadeProps) {
-	const ref = useRef(null);
-	const inViewResult = useInView(ref, { once: true, margin: inViewMargin });
-	const isInView = !inView || inViewResult;
-	const defaultVariants: Variants = {
-		hidden: {
-			[direction === 'left' || direction === 'right' ? 'x' : 'y']:
-				direction === 'right' || direction === 'down' ? -offset : offset,
-			opacity: 0,
-			filter: `blur(${blur})`,
-		},
-		visible: {
-			[direction === 'left' || direction === 'right' ? 'x' : 'y']: 0,
-			opacity: 1,
-			filter: 'blur(0px)',
-		},
-	};
-	const combinedVariants = variant || defaultVariants;
+export function BlurFade({ children, className, ...props }: BlurFadeProps) {
 	return (
-		<AnimatePresence>
-			<motion.div
-				animate={isInView ? 'visible' : 'hidden'}
-				className={className}
-				exit="hidden"
-				initial="hidden"
-				ref={ref}
-				transition={{
-					delay: 0.04 + delay,
-					duration,
-					ease: 'easeOut',
-				}}
-				variants={combinedVariants}
-			>
-				{children}
-			</motion.div>
-		</AnimatePresence>
+		<div className={className} {...props}>
+			{children}
+		</div>
 	);
 }
+
+export default BlurFade;

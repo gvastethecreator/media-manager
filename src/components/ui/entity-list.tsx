@@ -20,10 +20,10 @@ import React from 'react';
  */
 
 import { ChevronLeft, ChevronRight, LayoutGrid, List as ListIcon, Rows, Search, SlidersHorizontal } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { useMemo, useState } from 'react';
 import { EntityCard, type EntityCardProps } from '@/components/cards/entity-card';
-import type { BaseCardProps } from '@/components/cards/types/card-layout.types';
+import type { BaseCardProps } from '@/components/cards/types/card-.types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -355,7 +355,6 @@ export function EntityList({
 							exit={{ opacity: 0, scale: 0.9 }}
 							initial={{ opacity: 0, y: 10 }}
 							key={item.id}
-							layout
 						>
 							<EntityCard {...cardProps} />
 

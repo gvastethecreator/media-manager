@@ -18,7 +18,7 @@ import {
 	FileText,
 } from 'lucide-react';
 import { useState } from 'react';
-import { toast } from 'sonner';
+import { toastService } from '@/lib/ui/toast';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -143,7 +143,6 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 		setError(null);
 
 		try {
-			// In a real implementation, this would fetch the file content from the server
 			const response = await fetch(`/api/files/${file.id}/content`);
 			if (!response.ok) {
 				throw new Error('Error al cargar el contenido del archivo');
@@ -156,9 +155,11 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 			if (fileSize < 10_000) {
 				try {
 					const fallbackResponse = await fetch(file.path);
-					const fallbackContent = await fallbackResponse.text();
-					setFileContent(fallbackContent);
-					setError(null);
+					if (fallbackResponse.ok) {
+						const fallbackContent = await fallbackResponse.text();
+						setFileContent(fallbackContent);
+						setError(null);
+					}
 				} catch {
 					setError('No se pudo cargar el contenido del archivo');
 				}
@@ -175,13 +176,24 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 		setShowContent(!showContent);
 	};
 
-	const handleDownload = () => {
-		const link = document.createElement('a');
-		link.href = file.path || `/api/files/${file.id}/download`;
-		link.download = fileName;
-		document.body.appendChild(link);
-		link.click();
-		document.body.removeChild(link);
+	const handleDownload = async () => {
+		try {
+			const href = file.path || `/api/files/${file.id}/download`;
+			const resp = await fetch(href);
+			if (!resp.ok) throw new Error('No se pudo iniciar la descarga');
+			const blob = await resp.blob();
+			const url = URL.createObjectURL(blob);
+			const link = document.createElement('a');
+			link.href = url;
+			link.download = fileName;
+			document.body.appendChild(link);
+			link.click();
+			document.body.removeChild(link);
+			URL.revokeObjectURL(url);
+			toastService.success('Descarga iniciada');
+		} catch (e) {
+			toastService.error('Error al descargar el archivo');
+		}
 	};
 
 	const handleOpenExternal = () => {
@@ -194,9 +206,9 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 		if (fileContent) {
 			try {
 				await navigator.clipboard.writeText(fileContent);
-				toast.success('Contenido copiado al portapapeles');
+				toastService.success('Contenido copiado al portapapeles');
 			} catch {
-				toast.error('Error al copiar el contenido');
+				toastService.error('Error al copiar el contenido');
 			}
 		}
 	};

@@ -1,4 +1,4 @@
-import { motion } from 'framer-motion';
+import { motion } from '@/components/ui/motion-shim';
 import { Folder } from 'lucide-react';
 import { Progress } from '@/components/ui/progress';
 import { FolderStageIndicator } from './folder-stage-indicator';
@@ -19,7 +19,6 @@ export function FolderProcessingDetails({
 }: FolderProcessingDetailsProps) {
 	return (
 		<div className="mt-1 space-y-2">
-
 			{/* Indicador de etapas */}
 			<FolderStageIndicator
 				filesProcessed={processStatus?.filesProcessed}

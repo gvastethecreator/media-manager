@@ -1,5 +1,5 @@
 import { Group as GroupIcon } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React, { memo } from 'react';
 import { GroupCard } from '@/components/cards/group-card';
 import { EmptyState } from '@/components/core/data-display';
