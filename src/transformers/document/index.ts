@@ -5,6 +5,13 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+// --- Adaptadores estandarizados ---
+export {
+	adaptDocumentsWithStats,
+	adaptDocumentWithStats,
+	defaultDocumentStats,
+} from './adapter';
+
 // --- Transformadores principales ---
 export { toDocumentWithStats, toDocumentWithStatsList } from './mappers';
 // --- Schema de Drizzle ---

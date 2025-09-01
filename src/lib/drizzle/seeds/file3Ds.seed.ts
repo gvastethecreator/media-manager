@@ -1,5 +1,4 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
-import { file3Ds } from '../schema';
 import { seedLogger } from './index';
 
 /**

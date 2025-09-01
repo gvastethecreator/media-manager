@@ -6,6 +6,7 @@
 
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { generateFolderIdFromName } from '@/lib/utils/folder-id-generator';
 import type {
 	FolderComplete,
 	FolderCreateInput,
@@ -94,10 +95,11 @@ type DrizzleFolder = {
  * Normaliza la ruta y establece valores por defecto.
  * ✅ MIGRADO A DRIZZLE
  */
-export function mapCreateFolderDataToDrizzle(data: FolderCreateInput): DrizzleFolderCreateInput {
+export async function mapCreateFolderDataToDrizzle(data: FolderCreateInput): Promise<DrizzleFolderCreateInput> {
 	try {
+		const folderId = await generateFolderIdFromName(data.name);
 		return {
-			id: crypto.randomUUID(),
+			id: folderId,
 			name: data.name,
 			path: data.path,
 			description: data.description ?? null,
@@ -202,7 +204,9 @@ export function transformCompleteFolderToDrizzle(folder: FolderComplete): Drizzl
 			// Normalizar path si existe
 			path: folder.path ? normalizeFolderPath(folder.path) : folder.path,
 			// Asegurar que todos los campos requeridos estén presentes
-			id: persistableData.id || crypto.randomUUID(),
+			// NOTA: Los folders deberían tener ID antes de llegar aquí
+			id:
+				persistableData.id || `emergency-${Date.now()}-${folder.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown'}`,
 			createdAt: persistableData.createdAt || new Date(),
 			updatedAt: persistableData.updatedAt || new Date(),
 		} as DrizzleFolder;
@@ -230,7 +234,9 @@ export function transformFolderToDrizzle(folder: any): DrizzleFolder {
 			// Normalizar path si existe
 			path: folder.path ? normalizeFolderPath(folder.path) : folder.path,
 			// Asegurar que todos los campos requeridos estén presentes
-			id: persistableData.id || crypto.randomUUID(),
+			// NOTA: Los folders deberían tener ID antes de llegar aquí
+			id:
+				persistableData.id || `emergency-${Date.now()}-${folder.name?.toLowerCase().replace(/\s+/g, '-') || 'unknown'}`,
 			createdAt: persistableData.createdAt || new Date(),
 			updatedAt: persistableData.updatedAt || new Date(),
 		} as DrizzleFolder;

@@ -5,6 +5,8 @@
  
  */
 
+// Adaptadores
+export * from './adapter';
 // Exportar mappers, serializers, validators y schemas
 export * from './mappers';
 export * from './schema';

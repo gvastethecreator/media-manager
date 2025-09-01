@@ -9,6 +9,7 @@ import {
 	Download,
 	Edit,
 	FileText,
+	FolderOpen,
 	GalleryHorizontal,
 	Grid,
 	Info,
@@ -115,6 +116,8 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	const setSearchQuery = useViewOptionsStore((state: any) => state.setSearchQuery);
 	const groupByEntityType = useViewOptionsStore((state: any) => state.groupByEntityType);
 	const toggleGroupByEntityType = useViewOptionsStore((state: any) => state.toggleGroupByEntityType);
+	const includeSubfolders = useViewOptionsStore((state: any) => state.includeSubfolders);
+	const toggleIncludeSubfolders = useViewOptionsStore((state: any) => state.toggleIncludeSubfolders);
 	// tamaño de item no utilizado en esta toolbar
 
 	// Crear versión debounced del setViewMode para mejorar performance
@@ -397,6 +400,22 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 				>
 					<Tags className="h-4 w-4" />
 				</Button>
+
+				{/* Botón para incluir subcarpetas - solo visible en folder-content view */}
+				{currentView === 'folders' && folderId && (
+					<Button
+						aria-label="Incluir subcarpetas"
+						aria-pressed={includeSubfolders}
+						data-active={includeSubfolders}
+						data-testid="toggle-include-subfolders-btn"
+						onClick={toggleIncludeSubfolders}
+						size="icon"
+						title={includeSubfolders ? 'Ocultar archivos de subcarpetas' : 'Mostrar archivos de subcarpetas'}
+						variant={includeSubfolders ? 'secondary' : 'ghost'}
+					>
+						<FolderOpen className="h-4 w-4" />
+					</Button>
+				)}
 
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>

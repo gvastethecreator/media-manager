@@ -6,7 +6,7 @@
  * and handling operation lifecycle events.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { OperationType, ProgressInfo, ProgressOperation } from '@/types/file-browser/progress-tracking';
 
 export interface UseProgressTrackingOptions {
@@ -226,36 +226,47 @@ export function useProgressTracking(options: UseProgressTrackingOptions = {}): U
 	const [operations, setOperations] = useState<ProgressOperation[]>([]);
 	const optionsRef = useRef(options);
 
+	// Memoizar options.operationTypes para evitar re-renders innecesarios
+	const operationTypes = useMemo(() => options.operationTypes, [options.operationTypes]);
+
 	// Update options ref when options change
 	useEffect(() => {
 		optionsRef.current = options;
 	}, [options]);
 
-	// Update operations state
+	// Update operations state con throttle para evitar actualizaciones excesivas
 	const updateOperations = useCallback(() => {
 		const activeOps = progressService.getActiveOperations();
 
 		// Filter by operation types if specified
-		const filteredOps = options.operationTypes
-			? activeOps.filter((op) => options.operationTypes?.includes(op.type))
-			: activeOps;
+		const filteredOps = operationTypes ? activeOps.filter((op) => operationTypes.includes(op.type)) : activeOps;
 
-		setOperations(filteredOps);
-	}, [options.operationTypes]);
+		// Solo actualizar si realmente cambió
+		setOperations((prev) => {
+			if (JSON.stringify(prev) === JSON.stringify(filteredOps)) {
+				return prev; // No cambiar referencia si no hay diferencias
+			}
+			return filteredOps;
+		});
+	}, [operationTypes]);
 
-	// Set up event listeners
+	// Set up event listeners con handlers memoizados
 	useEffect(() => {
-		if (!(options.trackAll || options.operationTypes)) {
+		if (!(options.trackAll || operationTypes)) {
 			return;
 		}
 
+		// Usar handlers memoizados para evitar re-renders
 		const handleOperationStart = (operation: ProgressOperation) => {
 			updateOperations();
 			optionsRef.current.onOperationStart?.(operation);
 		};
 
+		// Throttle progress updates para evitar demasiadas actualizaciones
+		let progressUpdateTimeout: NodeJS.Timeout;
 		const handleProgressUpdate = (_operation: ProgressOperation) => {
-			updateOperations();
+			clearTimeout(progressUpdateTimeout);
+			progressUpdateTimeout = setTimeout(updateOperations, 16); // ~60fps
 		};
 
 		const handleOperationComplete = (operation: ProgressOperation) => {
@@ -284,13 +295,14 @@ export function useProgressTracking(options: UseProgressTrackingOptions = {}): U
 		progressService.on('operationCancelled', handleOperationCancelled);
 
 		return () => {
+			clearTimeout(progressUpdateTimeout);
 			progressService.off('operationStarted', handleOperationStart);
 			progressService.off('progressUpdated', handleProgressUpdate);
 			progressService.off('operationCompleted', handleOperationComplete);
 			progressService.off('operationFailed', handleOperationFailed);
 			progressService.off('operationCancelled', handleOperationCancelled);
 		};
-	}, [options.trackAll, options.operationTypes, updateOperations]);
+	}, [options.trackAll, operationTypes, updateOperations]);
 
 	// Operation management functions
 	const startOperation = useCallback((type: OperationType, progressOptions: Partial<ProgressOperation>): string => {

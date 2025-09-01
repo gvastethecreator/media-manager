@@ -27,10 +27,10 @@ const StatsItem = memo(function StatsItemComponent({
 	color?: string;
 }) {
 	return (
-		<div className="flex items-center gap-3 rounded-lg bg-muted/30 p-2 transition-colors hover:bg-muted/50">
+		<div className="flex items-center gap-3 p-1 transition-colors hover:bg-muted/50">
 			<Icon className={`h-4 w-4 ${color}`} />
 			<div className="min-w-0 flex-1">
-				<p className="truncate font-medium text-sm">{label}</p>
+				<p className="truncate text-sm">{label}</p>
 				<p className="text-muted-foreground text-xs">{value}</p>
 			</div>
 		</div>
@@ -45,16 +45,13 @@ const StatsGrid = memo(function StatsGridComponent({
 	items: Array<{ icon: any; label: string; value: string | number; color?: string }>;
 }) {
 	return (
-		<Card className="mb-4">
-			<CardHeader className="pb-3">
-				<CardTitle className="font-medium text-sm">{title}</CardTitle>
-			</CardHeader>
-			<CardContent className="space-y-2">
-				{items.map((item) => (
-					<StatsItem key={`${title}-${item.label}`} {...item} />
-				))}
-			</CardContent>
-		</Card>
+		<div className="mb-3 border-2 border-accent/20 p-2">
+			<h2 className="mb-2 font-medium text-md">{title} </h2>
+
+			{items.map((item) => (
+				<StatsItem key={`${title}-${item.label}`} {...item} />
+			))}
+		</div>
 	);
 });
 
@@ -183,12 +180,7 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 	];
 
 	return (
-		<div className="max-h-full space-y-4 overflow-y-auto p-4">
-			<div className="mb-4 text-center">
-				<h4 className="font-medium text-muted-foreground text-sm">Estadísticas del Sistema</h4>
-				<p className="mt-1 text-muted-foreground text-xs">Resumen general de todo el contenido</p>
-			</div>
-
+		<div className="max-h-full w-full space-y-4 overflow-y-auto p-4">
 			<StatsGrid items={contentStats} title="📁 Contenido Principal" />
 			<StatsGrid items={worldStats} title="🌍 Worldbuilding" />
 			<StatsGrid items={activityStats} title="📊 Actividad" />

@@ -6,8 +6,8 @@
 
 import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import type { BaseCardProps, CardLayoutConfig } from '../types/card-.types';
-import { resolveLayoutConfig } from '../types/card-.types';
+import type { BaseCardProps, CardLayoutConfig } from '../types/card-layout.types';
+import { resolveLayoutConfig } from '../types/card-layout.types';
 
 interface UseCardLayoutReturn {
 	/** Clases CSS para el contenedor principal */
@@ -40,13 +40,13 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 	const stableConfigProps = useMemo(
 		() => ({
 			Config: props.Config,
-			: props.,
+			layout: props.layout,
 			size: props.size,
 			variant: props.variant,
 			compact: props.compact,
 			tcgMode: props.tcgMode,
 		}),
-		[props.Config, props., props.size, props.variant, props.compact, props.tcgMode]
+		[props.Config, props.layout, props.size, props.variant, props.compact, props.tcgMode]
 	);
 
 	const config = useMemo(() => resolveLayoutConfig(stableConfigProps, preset), [stableConfigProps, preset]);
@@ -111,7 +111,7 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 		const classes = ['relative overflow-hidden transition-all duration-200'];
 
 		// Layout específico
-		switch (config.) {
+		switch (config.layout) {
 			case 'minimal':
 				classes.push('flex flex-col items-center justify-center p-2');
 				break;
@@ -186,18 +186,18 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 	const contentClasses = useMemo(() => {
 		const classes = ['flex-1'];
 
-		if (config. === 'horizontal' || config. === 'list') {
+		if (config.layout === 'horizontal' || config.layout === 'list') {
 			classes.push('min-w-0'); // Para truncate en flex
 		}
 
 		return cn(classes);
-	}, [config.]);
+	}, [config.layout]);
 
 	// Generar clases para la imagen/thumbnail
 	const imageClasses = useMemo(() => {
 		const classes = ['object-cover'];
 
-		switch (config.) {
+		switch (config.layout) {
 			case 'minimal':
 				classes.push('w-8 h-8 rounded');
 				break;
@@ -246,7 +246,7 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 				break;
 		}
 
-		if (config. === 'horizontal' || config. === 'list') {
+		if (config.layout === 'horizontal' || config.layout === 'list') {
 			classes.push('min-w-0'); // Para permitir truncate
 		}
 
@@ -261,7 +261,7 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 			classes.push('hidden');
 		}
 
-		switch (config.) {
+		switch (config.layout) {
 			case 'minimal':
 				classes.push('hidden');
 				break;

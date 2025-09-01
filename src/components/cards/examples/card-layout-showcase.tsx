@@ -20,8 +20,8 @@ import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { EntityCard } from '../entity-card';
-import type { CardLayout, CardSize, CardVariant } from '../types/card-.types';
-import { LAYOUT_PRESETS } from '../types/card-.types';
+import type { CardLayout, CardSize, CardVariant } from '../types/card-layout.types';
+import { LAYOUT_PRESETS } from '../types/card-layout.types';
 
 // Mock data para demostración
 const mockEntities: AnyEntityWithStats[] = [
@@ -252,18 +252,18 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 			<div className="grid grid-cols-1 gap-4 rounded-lg bg-muted/50 p-4 md:grid-cols-4">
 				{/* Layout */}
 				<div className="space-y-2">
-					<label className="font-medium text-sm" htmlFor="-select">
+					<label className="font-medium text-sm" htmlFor="layout-select">
 						Layout
 					</label>
 					<select
 						className="w-full rounded border p-2"
-						id="-select"
+						id="layout-select"
 						onChange={(e) => setSelectedLayout(e.target.value as CardLayout)}
 						value={selectedLayout}
 					>
-						{s.map(() => (
-							<option key={ } value={ }>
-								{ }
+						{s.map((layout) => (
+							<option key={layout} value={layout}>
+								{layout}
 							</option>
 						))}
 					</select>
@@ -336,7 +336,6 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 						<EntityCard
 							entity={entity}
 							key={entity.id}
-
 							onClick={() => console.log('Clicked:', entity.name || entity.id)}
 							onDoubleClick={() => console.log('Double clicked:', entity.name || entity.id)}
 							preset={selectedPreset || undefined}
@@ -358,7 +357,7 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 								<button
 									className="rounded bg-primary px-2 py-1 text-primary-foreground text-xs"
 									onClick={() => {
-										setSelectedLayout(config.);
+										setSelectedLayout(config.layout);
 										setSelectedVariant(config.variant);
 										setSelectedSize(config.size);
 										setSelectedPreset(presetName);
@@ -369,7 +368,7 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 								</button>
 							</div>
 							<div className="space-y-1 text-muted-foreground text-xs">
-								<div>Layout: {config.}</div>
+								<div>Layout: {config.layout}</div>
 								<div>Variante: {config.variant}</div>
 								<div>Tamaño: {config.size}</div>
 								<div>Densidad: {config.density}</div>
@@ -393,15 +392,15 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 			<div className="space-y-4">
 				<h3 className="font-semibold text-lg">Comparación de Layouts</h3>
 				<div className="space-y-6">
-					{s.map(() => (
-						<div className="space-y-2" key={ }>
-							<h4 className="font-medium capitalize">{ }</h4>
+					{s.map((layout) => (
+						<div className="space-y-2" key={layout}>
+							<h4 className="font-medium capitalize">{layout}</h4>
 							<div className="grid grid-cols-1 gap-4 rounded-lg border p-4 sm:grid-cols-2 lg:grid-cols-3">
 								{mockEntities.map((entity) => (
 									<EntityCard
 										entity={entity}
-										key={`${}-${entity.id}`}
-
+										key={`${layout}-${entity.id}`}
+										layout={layout}
 										size="md"
 										variant="default"
 									/>
@@ -424,9 +423,9 @@ export function CardLayoutShowcase({ className }: CardLayoutShowcaseProps) {
 									<EntityCard
 										entity={entity}
 										key={`${variant}-${entity.id}`}
-										= "complete"
-										size = "md"
-										variant = { variant }
+										layout="complete"
+										size="md"
+										variant={variant}
 									/>
 								))}
 							</div>

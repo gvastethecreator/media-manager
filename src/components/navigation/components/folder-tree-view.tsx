@@ -76,6 +76,9 @@ const FolderTreeViewComponent = memo(function FolderTreeViewImpl({
 	const handleNodeClick = useCallback(
 		(node: TreeNode) => {
 			const folder = node.data as CategoryChild;
+			console.log('🚀 handleNodeClick - Node:', node);
+			console.log('🚀 handleNodeClick - Folder data:', folder);
+			console.log('🚀 handleNodeClick - Folder ID:', folder?.id);
 
 			// Navegar a la carpeta usando React Router
 			navigate(`/folders/${folder.id}`);

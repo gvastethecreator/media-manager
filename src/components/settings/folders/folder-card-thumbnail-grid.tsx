@@ -1,4 +1,5 @@
 import { Image as ImageIcon } from 'lucide-react';
+import { memo, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { normalizeThumbailUrl } from './utils/folder-helpers';
 
@@ -9,10 +10,29 @@ interface ThumbnailGridProps {
 	showCount?: boolean;
 }
 
-export function ThumbnailGrid({ images, totalImages, className, showCount = true }: ThumbnailGridProps) {
-	// Mostrar máximo 4 thumbnails (2x2)
-	const displayImages = images.slice(0, 4);
-	const remainingCount = Math.max(0, totalImages - displayImages.length);
+export const ThumbnailGrid = memo(function ThumbnailGrid({
+	images,
+	totalImages,
+	className,
+	showCount = true,
+}: ThumbnailGridProps) {
+	// Memoizar cálculos costosos
+	const { displayImages, remainingCount } = useMemo(() => {
+		const displayImages = images.slice(0, 4);
+		const remainingCount = Math.max(0, totalImages - displayImages.length);
+		return { displayImages, remainingCount };
+	}, [images, totalImages]);
+
+	// Memoizar las URLs normalizadas para evitar recálculos
+	const normalizedImages = useMemo(() => {
+		return displayImages.map((image) => {
+			const rawThumb = image?.thumbnailUrl || image?.thumbnail;
+			return {
+				...image,
+				normalizedUrl: normalizeThumbailUrl(rawThumb),
+			};
+		});
+	}, [displayImages]);
 
 	// Si no hay imágenes, no mostrar nada
 	if (displayImages.length === 0) {
@@ -25,21 +45,16 @@ export function ThumbnailGrid({ images, totalImages, className, showCount = true
 			<div className="grid h-full w-full grid-cols-2 grid-rows-2 gap-0.5">
 				{/* Mostrar imágenes disponibles */}
 				{Array.from({ length: 4 }).map((_, index) => {
+					const normalizedImage = normalizedImages[index];
 					const image = displayImages[index];
-					const rawThumb = image?.thumbnailUrl || image?.thumbnail;
-					// Normaliza a data URL si parece base64 sin prefijo
-					const normalizedUrl = normalizeThumbailUrl(rawThumb);
 
 					return (
-						<div
-							className="overflow-hidden border-1 border-muted bg-muted"
-							key={image?.id || `slot-${index}`}
-						>
-							{normalizedUrl ? (
+						<div className="overflow-hidden border-1 border-muted bg-muted" key={image?.id || `slot-${index}`}>
+							{normalizedImage?.normalizedUrl ? (
 								<div
 									className="h-full w-full bg-center bg-cover hover:scale-110"
-									style={{ backgroundImage: `url(${normalizedUrl})` }}
-									title={image?.name}
+									style={{ backgroundImage: `url(${normalizedImage.normalizedUrl})` }}
+									title={normalizedImage.name}
 								/>
 							) : image ? (
 								<div className="flex h-full w-full items-center justify-center bg-muted/50">
@@ -61,4 +76,4 @@ export function ThumbnailGrid({ images, totalImages, className, showCount = true
 			)}
 		</div>
 	);
-}
+});

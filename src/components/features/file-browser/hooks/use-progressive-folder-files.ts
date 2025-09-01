@@ -1,4 +1,5 @@
 import { useMemo, useRef } from 'react';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { MediaItem } from '../components/media-thumbnail';
 import { useFolderFiles as useOriginalFolderFiles } from './use-folder-files';
 
@@ -15,9 +16,11 @@ interface ProgressiveLoadingState {
 /**
  * Hook simplificado que envuelve useFolderFiles con preloader básico
  * Evita loops infinitos con lógica simplificada
+ * Incluye soporte para incluir subcarpetas
  */
 export function useProgressiveFolderFiles(folderId: string | null): ProgressiveLoadingState {
-	const { items, isLoading, error } = useOriginalFolderFiles(folderId);
+	const includeSubfolders = useViewOptionsStore((state) => state.includeSubfolders);
+	const { items, isLoading, error } = useOriginalFolderFiles(folderId, { includeSubfolders });
 
 	// Solo guardamos el último count exitoso para evitar loops
 	const lastSuccessCountRef = useRef(0);

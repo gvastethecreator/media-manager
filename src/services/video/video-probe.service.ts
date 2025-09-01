@@ -1,9 +1,11 @@
-import { execFile } from 'node:child_process';
-import { basename } from 'node:path';
-import { promisify } from 'node:util';
-import ffprobeStatic from 'ffprobe-static';
+/**
+ * Servicio para hacer probe de archivos de video usando mediabunny
+ * Reemplaza la implementación anterior basada en ffprobe
+ */
 
-const execFileAsync = promisify(execFile);
+import { readFile } from 'node:fs/promises';
+import { basename } from 'node:path';
+import { ALL_FORMATS, BufferSource, Input } from 'mediabunny';
 
 export interface VideoProbeData {
 	duration: number | null;
@@ -27,40 +29,98 @@ export class VideoProbeService {
 
 	async probe(filePath: string): Promise<VideoProbeData> {
 		try {
-			const args = ['-v', 'error', '-print_format', 'json', '-show_format', '-show_streams', filePath];
-			const { stdout } = await execFileAsync(ffprobeStatic.path, args, { maxBuffer: 10 * 1024 * 1024 });
-			const parsed = JSON.parse(stdout);
-			const videoStream = parsed.streams?.find((s: any) => s.codec_type === 'video');
-			const duration = parsed.format?.duration
-				? Number(parsed.format.duration)
-				: videoStream?.duration
-					? Number(videoStream.duration)
-					: null;
-			return {
-				duration: Number.isFinite(duration) ? duration : null,
-				width: videoStream?.width ?? null,
-				height: videoStream?.height ?? null,
-				codec: videoStream?.codec_name ?? null,
-				format: parsed.format?.format_name ?? null,
-				bitRate: parsed.format?.bit_rate ? Number(parsed.format.bit_rate) : null,
-				raw: {
-					format: parsed.format,
-					streams: parsed.streams?.map((s: any) => ({
-						index: s.index,
-						codec_type: s.codec_type,
-						codec_name: s.codec_name,
-						width: s.width,
-						height: s.height,
-						duration: s.duration,
-						bit_rate: s.bit_rate,
-						avg_frame_rate: s.avg_frame_rate,
-						r_frame_rate: s.r_frame_rate,
-					})),
-				},
+			// Leer archivo como buffer
+			const fileBuffer = await readFile(filePath);
+
+			// Crear input de mediabunny
+			const input = new Input({
+				source: new BufferSource(fileBuffer),
+				formats: ALL_FORMATS,
+			});
+
+			const result: VideoProbeData = {
+				duration: null,
+				width: null,
+				height: null,
+				codec: null,
+				format: null,
+				bitRate: null,
 			};
+
+			// Extraer duración total
+			try {
+				result.duration = await input.computeDuration();
+			} catch (error) {
+				console.debug('Error computando duración:', error);
+			}
+
+			// Extraer información del track de video principal
+			const videoTrack = await input.getPrimaryVideoTrack();
+			if (videoTrack) {
+				result.width = videoTrack.displayWidth;
+				result.height = videoTrack.displayHeight;
+
+				// Obtener codec desde configuración del decodificador
+				try {
+					const decoderConfig = await videoTrack.getDecoderConfig();
+					if (decoderConfig) {
+						result.codec = decoderConfig.codec;
+					}
+				} catch (error) {
+					console.debug('Error obteniendo codec:', error);
+				}
+
+				// Estimar bitrate usando estadísticas de paquetes
+				try {
+					const stats = await videoTrack.computePacketStats(20);
+					if (stats.averageBitrate) {
+						result.bitRate = Math.round(stats.averageBitrate);
+					}
+				} catch (error) {
+					console.debug('Error calculando bitrate:', error);
+				}
+			}
+
+			// Obtener formato del contenedor
+			try {
+				const format = await input.getFormat();
+				result.format = format?.name || null;
+			} catch (error) {
+				console.debug('Error obteniendo formato:', error);
+			}
+
+			// Raw data para compatibilidad
+			result.raw = {
+				format: {
+					duration: result.duration,
+					format_name: result.format,
+					bit_rate: result.bitRate,
+				},
+				streams: videoTrack
+					? [
+							{
+								codec_type: 'video',
+								codec_name: result.codec,
+								width: result.width,
+								height: result.height,
+								duration: result.duration,
+								bit_rate: result.bitRate,
+							},
+						]
+					: [],
+			};
+
+			return result;
 		} catch (error) {
-			console.warn('VideoProbeService: fallo al ejecutar ffprobe para', basename(filePath), error);
-			return { duration: null, width: null, height: null, codec: null, format: null, bitRate: null };
+			console.warn('VideoProbeService: fallo al hacer probe de video con mediabunny para', basename(filePath), error);
+			return {
+				duration: null,
+				width: null,
+				height: null,
+				codec: null,
+				format: null,
+				bitRate: null,
+			};
 		}
 	}
 }

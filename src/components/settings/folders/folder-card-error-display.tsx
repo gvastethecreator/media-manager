@@ -1,4 +1,5 @@
 import { AlertCircle } from 'lucide-react';
+import { memo } from 'react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { ExtendedFolder } from './folder-types';
 
@@ -6,7 +7,7 @@ interface FolderErrorDisplayProps {
 	folder: ExtendedFolder;
 }
 
-export function FolderErrorDisplay({ folder }: FolderErrorDisplayProps) {
+export const FolderErrorDisplay = memo(function FolderErrorDisplay({ folder }: FolderErrorDisplayProps) {
 	if (!folder.error) {
 		return null;
 	}
@@ -20,4 +21,4 @@ export function FolderErrorDisplay({ folder }: FolderErrorDisplayProps) {
 			</Alert>
 		</div>
 	);
-}
+});

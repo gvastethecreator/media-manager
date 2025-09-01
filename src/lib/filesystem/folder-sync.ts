@@ -4,7 +4,6 @@
  * @description Sincroniza las carpetas de la base de datos con las carpetas reales del sistema de archivos
  */
 
-import { randomUUID } from 'crypto';
 import { and, eq, inArray } from 'drizzle-orm';
 import path from 'path';
 import type { DrizzleDatabase } from '@/lib/drizzle';
@@ -49,6 +48,7 @@ import {
 	videoWorldItems,
 } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { generateFolderIdFromName } from '@/lib/utils/folder-id-generator';
 import { folderExists, scanFolder } from './folder-scanner';
 import { normalizePath } from './path-utils';
 
@@ -340,7 +340,7 @@ async function identifyFoldersToAdd(
 
 		// Carpeta nueva para agregar
 		const folderName = path.basename(fsPath);
-		const newId = randomUUID();
+		const newId = await generateFolderIdFromName(folderName);
 
 		foldersToAdd.push({
 			id: newId,
@@ -348,7 +348,7 @@ async function identifyFoldersToAdd(
 			name: folderName,
 		});
 
-		syncLogger.info(`➕ Carpeta marcada para agregar: ${folderName} (${fsPath})`);
+		syncLogger.info(`➕ Carpeta marcada para agregar: ${folderName} (ID: ${newId}) (${fsPath})`);
 	}
 
 	syncLogger.info(`📊 Resultado: ${foldersToAdd.length} nuevas carpetas para agregar`);

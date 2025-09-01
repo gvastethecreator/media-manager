@@ -1,4 +1,6 @@
 import { File, FileText, Image, Music, Video } from 'lucide-react';
+import { memo, useMemo } from 'react';
+import { cn } from '@/lib/utils';
 import type { FolderStatsResponse } from '@/types/folders';
 import { FileTypeBadge, FolderBadge, SizeBadge, TotalFilesBadge } from './common/folder-badges';
 import type { ExtendedFolder } from './folder-types';
@@ -16,25 +18,47 @@ interface MicroProgressBarProps {
 	color: string;
 }
 
-function MicroProgressBar({ label, count, icon: Icon, total, color }: MicroProgressBarProps) {
-	const percentage = total > 0 ? (count / total) * 100 : 0;
+const MicroProgressBar = memo(function MicroProgressBar({
+	label,
+	count,
+	icon: Icon,
+	total,
+	color,
+}: MicroProgressBarProps) {
+	const percentage = useMemo(() => {
+		return total > 0 ? (count / total) * 100 : 0;
+	}, [count, total]);
+
+	const widthStyle = useMemo(() => {
+		return { width: `${Math.min(100, Math.max(2, percentage))}%` };
+	}, [percentage]);
 
 	return (
 		<div className="group relative">
 			<div className="flex h-2 items-center">
-				<div className="w-full overflow-hidden rounded-full bg-muted/30">
-					<div className={`h-full ${color}`} style={{ width: `${Math.min(100, Math.max(2, percentage))}%` }} />
+				<div className="w-full overflow-hidden rounded-full bg-muted/30 transition-all duration-200 hover:bg-muted/40">
+					<div className={`h-full transition-all duration-500 ease-out ${color}`} style={widthStyle} />
 				</div>
 			</div>
-			<div className="-top-8 -translate-x-1/2 absolute left-1/2 z-10 rounded bg-popover px-2 py-1 text-[10px] text-popover-foreground opacity-0 shadow-md group-hover:opacity-100">
+			<div
+				className={cn(
+					'-top-8 -translate-x-1/2 absolute left-1/2 z-10 rounded bg-popover px-2 py-1 text-[10px] text-popover-foreground shadow-md',
+					'opacity-0 transition-all duration-200 ease-out',
+					'group-hover:-translate-y-1 group-hover:opacity-100'
+				)}
+			>
 				<Icon className="mr-1 inline h-2.5 w-2.5" />
 				{count} {label}
 			</div>
 		</div>
 	);
-}
+});
 
-function FileTypeProgressBars({ folderStats }: { folderStats?: FolderStatsResponse }) {
+const FileTypeProgressBars = memo(function FileTypeProgressBars({
+	folderStats,
+}: {
+	folderStats?: FolderStatsResponse;
+}) {
 	const totalFiles =
 		(folderStats?.totalImages || 0) +
 		(folderStats?.totalVideos || 0) +
@@ -91,44 +115,85 @@ function FileTypeProgressBars({ folderStats }: { folderStats?: FolderStatsRespon
 			))}
 		</div>
 	);
-}
+});
 
-export function FolderStatsDisplay({ folder, folderStats }: FolderStatsDisplayProps) {
+export const FolderStatsDisplay = memo(function FolderStatsDisplay({ folder, folderStats }: FolderStatsDisplayProps) {
+	// Memoizar valores calculados para evitar recálculos innecesarios
+	const memoizedStats = useMemo(() => {
+		if (!folderStats) return null;
+
+		return {
+			hasImages: (folderStats.totalImages ?? 0) > 0,
+			hasVideos: (folderStats.totalVideos ?? 0) > 0,
+			hasAudio: (folderStats.totalAudio ?? 0) > 0,
+			hasDocuments: (folderStats.totalDocuments ?? 0) > 0,
+			hasOthers: (folderStats.totalOthers ?? 0) > 0,
+			totalSize: Number(folderStats.totalSize || 0),
+			childrenCount: folder.children?.length || 0,
+		};
+	}, [folderStats, folder.children]);
+
+	// Memoizar el path para evitar re-renders innecesarios
+	const folderPath = useMemo(() => folder.path, [folder.path]);
+
 	return (
-		<div className="min-w-0 flex-1 space-y-1.5">
-			{/* Path compacto */}
-			<span className="truncate text-[11px] text-muted-foreground">{folder.path}</span>
+		<div className="min-w-0 flex-1 space-y-2">
+			{/* Path compacto con hover */}
+			<span className="truncate text-[11px] text-muted-foreground transition-colors duration-200 hover:text-muted-foreground/80">
+				{folderPath}
+			</span>
+
 			{/* Micro-progressbars por tipo de archivo */}
-			<div className="space-y-1">
-				{/* Métricas compactas */}
-				<div className="flex items-center justify-between gap-1">
-					<div className="flex flex-wrap items-center gap-1">
+			<div className="space-y-1.5">
+				{/* Métricas compactas con mejores animaciones */}
+				<div className="flex items-center justify-between gap-2">
+					<div className="flex flex-wrap items-center gap-1.5">
 						{/* Total de archivos - siempre visible si hay archivos */}
-						<TotalFilesBadge folderStats={folderStats} />
+						<div className="fade-in-0 animate-in duration-300">
+							<TotalFilesBadge folderStats={folderStats} />
+						</div>
 
-						{/* Subcarpetas */}
-						{folder.children && folder.children.length > 0 && <FolderBadge count={folder.children.length} />}
+						{/* Subcarpetas con animación */}
+						{memoizedStats?.childrenCount && memoizedStats.childrenCount > 0 && (
+							<div className="slide-in-from-left-2 fade-in-0 animate-in delay-100 duration-300">
+								<FolderBadge count={memoizedStats.childrenCount} />
+							</div>
+						)}
 
-						{/* Conteos por tipo: visibles siempre si > 0 */}
-						{(folderStats?.totalImages ?? 0) > 0 && (
-							<FileTypeBadge count={folderStats?.totalImages ?? 0} type="images" />
+						{/* Conteos por tipo: visibles siempre si > 0 con animaciones escalonadas */}
+						{memoizedStats?.hasImages && (
+							<div className="slide-in-from-left-2 fade-in-0 animate-in delay-150 duration-300">
+								<FileTypeBadge count={folderStats?.totalImages ?? 0} type="images" />
+							</div>
 						)}
-						{(folderStats?.totalVideos ?? 0) > 0 && (
-							<FileTypeBadge count={folderStats?.totalVideos ?? 0} type="videos" />
+						{memoizedStats?.hasVideos && (
+							<div className="slide-in-from-left-2 fade-in-0 animate-in delay-200 duration-300">
+								<FileTypeBadge count={folderStats?.totalVideos ?? 0} type="videos" />
+							</div>
 						)}
-						{(folderStats?.totalAudio ?? 0) > 0 && <FileTypeBadge count={folderStats?.totalAudio ?? 0} type="audio" />}
-						{(folderStats?.totalDocuments ?? 0) > 0 && (
-							<FileTypeBadge count={folderStats?.totalDocuments ?? 0} type="documents" />
+						{memoizedStats?.hasAudio && (
+							<div className="slide-in-from-left-2 fade-in-0 animate-in delay-250 duration-300">
+								<FileTypeBadge count={folderStats?.totalAudio ?? 0} type="audio" />
+							</div>
 						)}
-						{(folderStats?.totalOthers ?? 0) > 0 && (
-							<FileTypeBadge count={folderStats?.totalOthers ?? 0} type="others" />
+						{memoizedStats?.hasDocuments && (
+							<div className="slide-in-from-left-2 fade-in-0 animate-in delay-300 duration-300">
+								<FileTypeBadge count={folderStats?.totalDocuments ?? 0} type="documents" />
+							</div>
+						)}
+						{memoizedStats?.hasOthers && (
+							<div className="slide-in-from-left-2 fade-in-0 animate-in delay-350 duration-300">
+								<FileTypeBadge count={folderStats?.totalOthers ?? 0} type="others" />
+							</div>
 						)}
 					</div>
 
-					{/* Tamaño total */}
-					<SizeBadge bytes={Number(folderStats?.totalSize || 0)} />
+					{/* Tamaño total con animación desde la derecha */}
+					<div className="slide-in-from-right-2 fade-in-0 animate-in delay-100 duration-300">
+						<SizeBadge bytes={memoizedStats?.totalSize || 0} />
+					</div>
 				</div>
 			</div>
 		</div>
 	);
-}
+});

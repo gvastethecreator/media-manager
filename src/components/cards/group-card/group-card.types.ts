@@ -1,10 +1,10 @@
 import type { GroupWithStats } from '@/types/entities/group';
 
 export interface GroupCardProps {
-	/** ID del grupo a mostrar */
-	groupId: string;
+	/** Objeto group con estadísticas completas */
+	group: GroupWithStats;
 	/** Función a ejecutar al hacer clic en la tarjeta */
-	onClick?: (group: GroupWithStats) => void;
+	onClick?: () => void;
 	/** Clase CSS adicional para la carta */
 	className?: string;
 	/** Modo TCG con efectos especiales de carta */

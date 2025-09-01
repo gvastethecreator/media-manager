@@ -308,7 +308,7 @@ export function SystemMetricsPanel() {
 							<ResponsiveContainer height="100%" width="100%">
 								<BarChart
 									data={technicalMetrics.apiMetrics.topEndpoints}
-									="vertical"
+									layout="vertical"
 									margin={{ top: 5, right: 30, left: 20, bottom: 5 }}
 								>
 									<XAxis tick={{ fontSize: 10 }} type="number" />

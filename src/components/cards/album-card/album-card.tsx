@@ -22,16 +22,16 @@ export interface AlbumCardProps {
 		};
 		viewConfig?: {
 			theme?: string;
-?: string
-thumbnailSize?: 'small' | 'medium' | 'large'
-}
-}
-onClick?: () => void
-className?: string;
-style?: React.CSSProperties;
-compact?: boolean;
-isSelected?: boolean;
-tcgMode?: boolean;
+			layout?: string;
+			thumbnailSize?: 'small' | 'medium' | 'large';
+		};
+	};
+	onClick?: () => void;
+	className?: string;
+	style?: React.CSSProperties;
+	compact?: boolean;
+	isSelected?: boolean;
+	tcgMode?: boolean;
 }
 
 /**

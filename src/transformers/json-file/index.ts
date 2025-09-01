@@ -4,6 +4,13 @@
  
  */
 
+// Exportar adaptador principal
+export {
+	adaptJsonFilesWithStats,
+	adaptJsonFileWithStats,
+	defaultJsonFileStats,
+} from './adapter';
+
 // Exportar mappers, serializers, validators y schemas
 export * from './mappers';
 export * from './schema';

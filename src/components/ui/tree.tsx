@@ -84,7 +84,7 @@ function TreeItem<T = any>({ item, className, asChild, children, ...props }: Omi
 					'z-10 select-none ps-(--tree-padding) not-last:pb-0.5 outline-hidden focus:z-20 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 					className
 				)}
-				data- item.isDragTarget === 'function' ? item.isDragTarget() : undefined}
+				data-drag-target={typeof item.isDragTarget === 'function' ? item.isDragTarget() : undefined}
 				data-focus={typeof item.isFocused === 'function' ? item.isFocused() : undefined}
 				data-folder={typeof item.isFolder === 'function' ? item.isFolder() : undefined}
 				data-search-match={typeof item.isMatchingSearch === 'function' ? item.isMatchingSearch() : undefined}
@@ -144,8 +144,8 @@ function TreeDragLine({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 		return null;
 	}
 
-	const tree;
-	.getDragLineStyle()
+	const dragLine = tree.getDragLineStyle();
+
 	return (
 		<div
 			className={cn(
