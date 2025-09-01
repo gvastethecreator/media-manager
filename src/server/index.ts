@@ -3,6 +3,7 @@
 import express from 'express';
 import path from 'path';
 import { initializeFileLogging } from '@/lib/logger/init-file-logging';
+import { serverLogger } from '@/lib/logger';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { errorLogger, logError, logInfo, requestLogger } from './middleware/logging';
 import threeDThumbnailsRouter from './routes/3d-thumbnails';
@@ -150,53 +151,56 @@ app.use((req, res) => {
 app.use(errorLogger);
 
 app.listen(PORT, '0.0.0.0', () => {
-	console.log(`🚀 Servidor Express iniciado en puerto ${PORT}`);
-	console.log('\n📁 APIs de Entidades:');
-	console.log(`   📁 Folders: http://localhost:${PORT}/api/folders`);
-	console.log(`   🖼️  Images: http://localhost:${PORT}/api/images`);
-	console.log(`   📂 Files: http://localhost:${PORT}/api/files`);
-	console.log(`   📸 Albums: http://localhost:${PORT}/api/albums`);
-	console.log(`   📥 Download: http://localhost:${PORT}/api/download`);
-	console.log(`   🏷️  Tags: http://localhost:${PORT}/api/tags`);
-	console.log(`   👤 Characters: http://localhost:${PORT}/api/characters`);
-	console.log(`   🌟 Collections: http://localhost:${PORT}/api/collections`);
-	console.log(`   📍 Places: http://localhost:${PORT}/api/places`);
-	console.log(`   🎯 World Items: http://localhost:${PORT}/api/world-items`);
-	console.log(`   💡 Concepts: http://localhost:${PORT}/api/concepts`);
-	console.log(`   🤖 Prompts: http://localhost:${PORT}/api/prompts`);
-	console.log(`   📤 Uploaded Images: http://localhost:${PORT}/api/uploaded-images`);
-	console.log(`   ✨ Wildcards: http://localhost:${PORT}/api/wildcards`);
-	console.log(`   🎵 Audio: http://localhost:${PORT}/api/audio`);
-	console.log(`   🎬 Videos: http://localhost:${PORT}/api/videos`);
-	console.log(`   📝 Notes: http://localhost:${PORT}/api/notes`);
-	console.log(`   ⚙️  Properties: http://localhost:${PORT}/api/properties`);
-	console.log(`   👥 Groups: http://localhost:${PORT}/api/groups`);
-	console.log(`   ⭐ Favorites: http://localhost:${PORT}/api/favorites`);
-	console.log(`   📂 Local Files: http://localhost:${PORT}/api/local-files`);
-	console.log(`   🐞 Debug: http://localhost:${PORT}/api/debug`);
-	console.log(`   📦 Queue: http://localhost:${PORT}/api/queue`);
+	const logger = serverLogger.withContext('ServerStartup');
 
-	console.log('\n🔧 APIs de Sistema:');
-	console.log(`   🖥️  System: http://localhost:${PORT}/api/system`);
-	console.log(`   🔍 Search: http://localhost:${PORT}/api/search`);
-	console.log(`   📋 Metadata: http://localhost:${PORT}/api/metadata`);
-	console.log(`   🤖 Metadata Advanced: http://localhost:${PORT}/api/metadata-advanced`);
-	console.log(`   🖼️  Thumbnails: http://localhost:${PORT}/api/thumbnails`);
-	console.log(`   📊 Stats: http://localhost:${PORT}/api/stats`);
-	console.log(`   👤 Profiles: http://localhost:${PORT}/api/profiles`);
-	console.log(`   📈 Activity: http://localhost:${PORT}/api/activity`);
+	logger.success(`🚀 Servidor Express iniciado en puerto ${PORT}`);
 
-	console.log(`\n🩺 Health check: http://localhost:${PORT}/health`);
+	logger.info('\n📁 APIs de Entidades:');
+	logger.info(`   📁 Folders: http://localhost:${PORT}/api/folders`);
+	logger.info(`   🖼️  Images: http://localhost:${PORT}/api/images`);
+	logger.info(`   📂 Files: http://localhost:${PORT}/api/files`);
+	logger.info(`   📸 Albums: http://localhost:${PORT}/api/albums`);
+	logger.info(`   📥 Download: http://localhost:${PORT}/api/download`);
+	logger.info(`   🏷️  Tags: http://localhost:${PORT}/api/tags`);
+	logger.info(`   👤 Characters: http://localhost:${PORT}/api/characters`);
+	logger.info(`   🌟 Collections: http://localhost:${PORT}/api/collections`);
+	logger.info(`   📍 Places: http://localhost:${PORT}/api/places`);
+	logger.info(`   🎯 World Items: http://localhost:${PORT}/api/world-items`);
+	logger.info(`   💡 Concepts: http://localhost:${PORT}/api/concepts`);
+	logger.info(`   🤖 Prompts: http://localhost:${PORT}/api/prompts`);
+	logger.info(`   📤 Uploaded Images: http://localhost:${PORT}/api/uploaded-images`);
+	logger.info(`   ✨ Wildcards: http://localhost:${PORT}/api/wildcards`);
+	logger.info(`   🎵 Audio: http://localhost:${PORT}/api/audio`);
+	logger.info(`   🎬 Videos: http://localhost:${PORT}/api/videos`);
+	logger.info(`   📝 Notes: http://localhost:${PORT}/api/notes`);
+	logger.info(`   ⚙️  Properties: http://localhost:${PORT}/api/properties`);
+	logger.info(`   👥 Groups: http://localhost:${PORT}/api/groups`);
+	logger.info(`   ⭐ Favorites: http://localhost:${PORT}/api/favorites`);
+	logger.info(`   📂 Local Files: http://localhost:${PORT}/api/local-files`);
+	logger.info(`   🐞 Debug: http://localhost:${PORT}/api/debug`);
+	logger.info(`   📦 Queue: http://localhost:${PORT}/api/queue`);
+
+	logger.info('\n🔧 APIs de Sistema:');
+	logger.info(`   🖥️  System: http://localhost:${PORT}/api/system`);
+	logger.info(`   🔍 Search: http://localhost:${PORT}/api/search`);
+	logger.info(`   📋 Metadata: http://localhost:${PORT}/api/metadata`);
+	logger.info(`   🤖 Metadata Advanced: http://localhost:${PORT}/api/metadata-advanced`);
+	logger.info(`   🖼️  Thumbnails: http://localhost:${PORT}/api/thumbnails`);
+	logger.info(`   📊 Stats: http://localhost:${PORT}/api/stats`);
+	logger.info(`   👤 Profiles: http://localhost:${PORT}/api/profiles`);
+	logger.info(`   📈 Activity: http://localhost:${PORT}/api/activity`);
+
+	logger.info(`\n🩺 Health check: http://localhost:${PORT}/health`);
 
 	// 🔍 Inicializar monitor de reindexado
-	console.log('\n🔍 Iniciando sistema de monitoreo...');
+	logger.info('\n🔍 Iniciando sistema de monitoreo...');
 	reindexMonitor.start();
-	console.log('✅ Monitor de reindexado activo');
+	logger.success('✅ Monitor de reindexado activo');
 
 	// 📝 Inicializar sistema de logging de archivos
-	console.log('\n📝 Inicializando sistema de logging de archivos...');
+	logger.info('\n📝 Inicializando sistema de logging de archivos...');
 	initializeFileLogging();
-	console.log('✅ Sistema de logging de archivos activo');
+	logger.success('✅ Sistema de logging de archivos activo');
 });
 
 export default app;

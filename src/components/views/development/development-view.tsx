@@ -1,7 +1,7 @@
 // Se reemplaza react-markdown por el visor de @uiw/react-md-editor
 import MDEditor from '@uiw/react-md-editor';
 import { BarChart, Bug, Code2, FileCode2, Folder, Gauge, Image, Loader2, RefreshCw, Server, Tag } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { FoldersSettings } from '@/components/settings/folders/folders-settings';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';

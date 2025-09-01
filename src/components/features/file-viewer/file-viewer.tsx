@@ -1,5 +1,5 @@
 import { Copy, Download, Image as ImageIcon, RotateCcw, X, ZoomIn, ZoomOut } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import type React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -58,7 +58,6 @@ const ThumbnailItem = memo(function ThumbnailItemImpl({
 	image: ImageItem;
 	isActive: boolean;
 	onClick: () => void;
-	images: ImageItem[];
 }) {
 	const imageResources = useImageResources();
 	const [error, setError] = useState(false);
@@ -69,15 +68,12 @@ const ThumbnailItem = memo(function ThumbnailItemImpl({
 		const resource = imageResources.resources.get(image.id);
 		const thumbnailUrl = image.thumbnail || resource?.thumbnail || null;
 
-		// Solo actualizamos si cambia
 		if (thumbnailUrl !== thumbnail) {
 			setThumbnail(thumbnailUrl);
 		}
 
-		// Detectar errores en imágenes
-		if (!(thumbnailUrl || error)) {
-			setError(true);
-		}
+		// Resetear error si conseguimos thumbnail
+		if (thumbnailUrl && error) setError(false);
 	}, [image.id, image.thumbnail, imageResources.resources, thumbnail, error]);
 
 	// Memoizar la clase base
@@ -85,7 +81,6 @@ const ThumbnailItem = memo(function ThumbnailItemImpl({
 		() =>
 			cn(
 				'relative mr-2 cursor-pointer overflow-hidden rounded-md',
-				'transition-all duration-200 ease-out',
 				isActive ? 'ring-2 ring-primary' : 'hover:ring-1 hover:ring-primary/50'
 			),
 		[isActive]
@@ -104,7 +99,13 @@ const ThumbnailItem = memo(function ThumbnailItemImpl({
 		return (
 			<div className="h-full w-full">
 				{isValidSrc(thumbnail) ? (
-					<img alt={image.name} className="h-full w-full object-cover" loading="lazy" src={thumbnail} />
+					<img
+						alt={image.name}
+						className="h-full w-full object-cover"
+						loading="lazy"
+						src={thumbnail}
+						onError={() => setError(true)}
+					/>
 				) : (
 					<div className="flex h-full w-full items-center justify-center bg-muted">
 						<ImageIcon className="h-6 w-6 text-muted-foreground/50" />
@@ -117,32 +118,31 @@ const ThumbnailItem = memo(function ThumbnailItemImpl({
 	// Memoizar los estilos de animación
 	const animateStyles = useMemo(
 		() => ({
-			width: isActive ? THUMBNAIL_SIZES.active.width : THUMBNAIL_SIZES.normal.width,
-			height: isActive ? THUMBNAIL_SIZES.active.height : THUMBNAIL_SIZES.normal.height,
-			opacity: isActive ? 1 : 0.8,
+			scale: isActive ? 1.07 : 1,
+			opacity: isActive ? 1 : 0.9,
 		}),
 		[isActive]
 	);
 
 	return (
 		<motion.div
+			layout
 			animate={animateStyles}
 			className={baseClassName}
 			onClick={onClick}
-			transition={THUMBNAIL_ANIMATION}
-			whileHover={{
-				opacity: 1,
-				scale: 1.02,
-			}}
+			transition={{ type: 'spring', stiffness: 260, damping: 24, mass: 0.6 }}
+			whileHover={{ opacity: 1, scale: 1.05 }}
 			whileTap={{ scale: 0.98 }}
+			style={{ width: THUMBNAIL_SIZES.normal.width, height: THUMBNAIL_SIZES.normal.height }}
 		>
 			{thumbnailContent}
 			{isActive && (
 				<motion.div
+					layout
 					animate={{ opacity: 1 }}
 					className="pointer-events-none absolute inset-0 bg-primary/10"
 					initial={{ opacity: 0 }}
-					transition={{ duration: 0.2 }}
+					transition={{ duration: 0.25 }}
 				/>
 			)}
 		</motion.div>
@@ -204,38 +204,31 @@ const ThumbnailNavigationImpl = memo(function ThumbnailNavigationInner({
 	currentIndex: number;
 	onSelectImage: (index: number) => void;
 }) {
-	// Calcular hasta 10 miniaturas alrededor de la actual con wrap-around sin duplicados
+	// Mostrar anteriores 5 y siguientes 5 (±5), sin duplicados, con wrap-around
 	const visibleThumbnails = useMemo(() => {
-		if (!images.length) return [] as { image: ImageItem; isActive: boolean; index: number }[];
-		const maxThumbs = Math.min(10, images.length);
-		const half = Math.floor(maxThumbs / 2);
-		const result: { image: ImageItem; isActive: boolean; index: number }[] = [];
-		for (let offset = -half; offset < maxThumbs - half; offset++) {
-			let idx = (currentIndex + offset) % images.length;
-			if (idx < 0) idx += images.length;
-			const img = images[idx];
-			if (!img) continue;
-			if (!result.some((r) => r.index === idx)) {
-				result.push({ image: img, isActive: idx === currentIndex, index: idx });
-			}
+		const out: { image: ImageItem; isActive: boolean; index: number }[] = [];
+		const n = images.length;
+		if (n === 0) return out;
+		const maxEachSide = 5;
+		const seen = new Set<number>();
+		for (let o = -maxEachSide; o <= maxEachSide; o++) {
+			let idx = (currentIndex + o) % n;
+			if (idx < 0) idx += n;
+			if (seen.has(idx)) continue;
+			seen.add(idx);
+			out.push({ image: images[idx], isActive: idx === currentIndex, index: idx });
 		}
-		return result;
+		return out;
 	}, [images, currentIndex]);
 
 	return (
-		<div className="-translate-x-1/2 fixed bottom-6 left-1/2 z-[9999] flex items-center justify-center">
-			<div className="flex items-center rounded-lg bg-background/10 px-2 py-1 backdrop-blur-sm">
+		<motion.div layout className="-translate-x-1/2 fixed bottom-6 left-1/2 z-[9999] flex items-center justify-center">
+			<motion.div layout className="flex items-center rounded-lg bg-background/10 px-2 py-1 backdrop-blur-sm">
 				{visibleThumbnails.map(({ image, isActive, index }) => (
-					<ThumbnailItem
-						image={image}
-						images={images}
-						isActive={isActive}
-						key={image.id}
-						onClick={() => onSelectImage(index)}
-					/>
+					<ThumbnailItem image={image} isActive={isActive} key={image.id} onClick={() => onSelectImage(index)} />
 				))}
-			</div>
-		</div>
+			</motion.div>
+		</motion.div>
 	);
 });
 
@@ -255,13 +248,12 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	const [urls, setUrls] = useState<Record<string, string>>({});
 	const [isLoading, setIsLoading] = useState(true);
 	const imageContainerRef = useRef<HTMLFieldSetElement>(null);
+	const dialogRef = useRef<HTMLDialogElement>(null);
 	const constraintsRef = useRef<HTMLDivElement>(null);
 	const closeButtonRef = useRef<HTMLButtonElement>(null);
 	const [scale, setScale] = useState(1);
 	const [position, setPosition] = useState({ x: 0, y: 0 });
-	const [_isDragging, _setIsDragging] = useState(false);
-	const _dragStartRef = useRef({ x: 0, y: 0, posX: 0, posY: 0 });
-	const [_announceMessage, setAnnounceMessage] = useState('');
+	const [announceMessage, setAnnounceMessage] = useState('');
 	const previouslyFocusedElement = useRef<HTMLElement | null>(null);
 
 	// Memoizar la imagen actual
@@ -303,6 +295,34 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 		}
 	}, [isOpen, resetView]);
 
+	// Focus trap básico dentro del dialog
+	useEffect(() => {
+		if (!isOpen) return;
+		const dialogEl = dialogRef.current;
+		if (!dialogEl) return;
+		const handleKeyDown = (e: KeyboardEvent) => {
+			if (e.key !== 'Tab') return;
+			const focusableNodeList = dialogEl.querySelectorAll<HTMLElement>(
+				'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+			);
+			const focusable = Array.from(focusableNodeList);
+			if (focusable.length === 0) return;
+			const first = focusable[0];
+			const last = focusable.at(-1) as HTMLElement;
+			const active = document.activeElement as HTMLElement | null;
+			if (!active) return;
+			if (e.shiftKey && active === first) {
+				e.preventDefault();
+				last.focus();
+			} else if (!e.shiftKey && active === last) {
+				e.preventDefault();
+				first.focus();
+			}
+		};
+		dialogEl.addEventListener('keydown', handleKeyDown);
+		return () => dialogEl.removeEventListener('keydown', handleKeyDown);
+	}, [isOpen]);
+
 	// Validate images and index
 	useEffect(() => {
 		if (!images?.length) {
@@ -326,16 +346,14 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 		}
 	}, []);
 
-	// Determinar qué imágenes cargar inicialmente - carga todas en modo multi-layer
+	// Determinar qué imágenes cargar inicialmente: actual ± vecinos
 	const indicesToLoad = useMemo(() => {
-		if (images.length > 1) {
-			// Modo multi-capa: cargar todas las imágenes para mostrar todos los layers
-			return images.map((_, idx) => idx);
-		}
-		// Modo una sola imagen: precargar actual, siguiente y anterior
-		const nextIndex = (currentIndex + 1) % images.length;
-		const prevIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
-		return [currentIndex, nextIndex, prevIndex];
+		const len = images.length;
+		if (len === 0) return [] as number[];
+		if (len === 1) return [currentIndex];
+		const prevIndex = (currentIndex - 1 + len) % len;
+		const nextIndex = (currentIndex + 1) % len;
+		return [prevIndex, currentIndex, nextIndex];
 	}, [currentIndex, images]);
 
 	// Effect para cargar las URLs iniciales
@@ -345,7 +363,9 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 		}
 
 		const loadInitialUrls = async () => {
-			const imagesToLoad = indicesToLoad.map((idx) => images[idx]).filter((img) => img && !urls[img.id]);
+			const imagesToLoad = indicesToLoad
+				.map((idx) => images[idx])
+				.filter((img): img is ImageItem => Boolean(img && !urls[img.id]));
 
 			if (!imagesToLoad.length) {
 				setIsLoading(false);
@@ -363,7 +383,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 
 						try {
 							const url = await loadImageUrl(img.id);
-							newUrls[img.id] = url;
+							if (url) newUrls[img.id] = url;
 						} catch (error) {
 							console.error(`Error cargando URL para ${img.name}:`, error);
 						}
@@ -509,11 +529,9 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 		setAnnounceMessage('Zoom reducido');
 	}, [handleZoom]);
 
+	// Mantener un único manejador en window para evitar duplicados en fieldset
 	useEffect(() => {
-		if (!isOpen) {
-			return;
-		}
-
+		if (!isOpen) return;
 		const keyMap: Record<string, () => void> = {
 			Escape: onEscape,
 			ArrowLeft: onArrowLeft,
@@ -523,17 +541,13 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 			'-': onZoomOutKey,
 			'0': onReset,
 		};
-
 		const handleKeyDown = (e: KeyboardEvent) => {
-			if (e.key === 'Tab') {
-				return;
-			}
 			const fn = keyMap[e.key];
 			if (fn) {
+				e.preventDefault();
 				fn();
 			}
 		};
-
 		window.addEventListener('keydown', handleKeyDown);
 		return () => window.removeEventListener('keydown', handleKeyDown);
 	}, [isOpen, onEscape, onArrowLeft, onArrowRight, onReset, onZoomInKey, onZoomOutKey]);
@@ -653,6 +667,10 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 			}}
 			role="dialog"
 		>
+			{/* Región aria-live para anuncios */}
+			<div aria-live="polite" className="sr-only">
+				{announceMessage}
+			</div>
 			{/* Controles superiores consistentes */}
 			<ToolbarActions
 				closeButtonRef={closeButtonRef}
@@ -711,7 +729,12 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 								style={{ x: st.x, y: st.y, scale: st.scale, zIndex: z + 1 }}
 								transition={{ type: 'spring', stiffness: 300, damping: 30 }}
 							>
-								<img alt={img.name} className="max-h-full max-w-full object-contain" src={url} />
+								<img
+									alt={img.name}
+									className="max-h-full max-w-full object-contain"
+									src={url}
+									onError={() => console.error('Error cargando capa', id)}
+								/>
 							</motion.div>
 						);
 					})}
@@ -738,32 +761,20 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 				}
 			}}
 			onKeyDown={(e) => {
-				if (e.key === 'Escape') {
-					onClose();
+				if (e.key === 'Enter' || e.key === ' ') {
+					const target = e.target as HTMLElement;
+					if (target === e.currentTarget) onClose();
 				}
+				if (e.key === 'Escape') onClose();
 			}}
 			open={isOpen}
+			ref={dialogRef}
 		>
 			<fieldset
 				className="relative flex h-full w-full flex-col items-center justify-center"
 				onClick={(e) => e.stopPropagation()}
 				onDoubleClick={resetView}
-				onKeyDown={(e) => {
-					if (e.key === 'Escape') {
-						onClose();
-					} else if (e.key === 'ArrowLeft') {
-						const newIndex = currentIndex > 0 ? currentIndex - 1 : images.length - 1;
-						setCurrentIndex(newIndex);
-						setAnnounceMessage(`Imagen ${newIndex + 1} de ${images.length}: ${images[newIndex].name}`);
-					} else if (e.key === 'ArrowRight') {
-						const newIndex = currentIndex < images.length - 1 ? currentIndex + 1 : 0;
-						setCurrentIndex(newIndex);
-						setAnnounceMessage(`Imagen ${newIndex + 1} de ${images.length}: ${images[newIndex].name}`);
-					} else if (e.key === '0' || e.key === 'r') {
-						resetView();
-						setAnnounceMessage('Vista restablecida');
-					}
-				}}
+				onKeyDown={(e) => e.stopPropagation()}
 				onMouseDown={() => {}}
 				onTouchStart={() => {}}
 				onWheel={handleWheel}
@@ -771,6 +782,10 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 				tabIndex={-1}
 			>
 				<legend className="sr-only">Visor de archivos</legend>
+				{/* Región aria-live para anuncios */}
+				<div aria-live="polite" className="sr-only">
+					{announceMessage}
+				</div>
 				{/* Toolbar */}
 				<ToolbarActions
 					closeButtonRef={closeButtonRef}
@@ -848,16 +863,16 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 									alt={currentImage?.name || 'sin nombre'}
 									className="max-h-full max-w-full object-contain"
 									src={currentImage ? urls[currentImage.id] : ''}
+									onError={() => setIsLoading(false)}
 								/>
 							</motion.div>
 						)}
 
-						{!currentImage ||
-							(!(urls[currentImage.id] || isLoading) && (
-								<div className="absolute inset-0 flex items-center justify-center text-center text-muted-foreground">
-									<p>Error al cargar la imagen</p>
-								</div>
-							))}
+						{!isLoading && (!currentImage || (currentImage && !urls[currentImage.id])) && (
+							<div className="absolute inset-0 flex items-center justify-center text-center text-muted-foreground">
+								<p>Error al cargar la imagen</p>
+							</div>
+						)}
 					</div>
 				</motion.div>
 
@@ -878,10 +893,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 		return null;
 	}
 
-	// Si hay más de 1 imagen, usar el overlay multi-panel
-	if (images.length > 1) {
-		return MultiPaneOverlay;
-	}
+	// Mostrar siempre visor de una sola imagen con navegación por miniaturas
 
 	// Para modo de una sola imagen, verificar que currentImage esté disponible
 	if (!currentImage) {

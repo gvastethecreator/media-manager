@@ -1,5 +1,5 @@
 import { CircleDashed } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 
 interface LoadingScreenProps {
 	message?: string;

@@ -47,5 +47,17 @@ export const loggerConfig: LoggerConfig = {
 			enabled: true,
 			level: 'warn',
 		},
+		HTTPMiddleware: {
+			enabled: true,
+			level: 'info',
+		},
+		ServerStartup: {
+			enabled: true,
+			level: 'info',
+		},
+		FileEntityMapper: {
+			enabled: true,
+			level: 'warn', // Reducir verbosidad
+		},
 	},
 };

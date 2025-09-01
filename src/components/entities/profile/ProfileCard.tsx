@@ -3,7 +3,7 @@
  * @module components/entities/profile/ProfileCard
  */
 
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';

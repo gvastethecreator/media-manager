@@ -1,5 +1,5 @@
 import { ChevronRight, CornerDownRight, Home } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 import {

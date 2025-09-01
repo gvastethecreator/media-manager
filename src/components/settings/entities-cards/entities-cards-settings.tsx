@@ -74,7 +74,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 
 						{/* Modo de densidad */}
 						<div className="space-y-3">
-							<Label className="font-medium text-sm">Densidad del layout</Label>
+							<Label className="font-medium text-sm">Densidad del </Label>
 							<Select onValueChange={setDensityMode} value={densityMode}>
 								<SelectTrigger>
 									<SelectValue />

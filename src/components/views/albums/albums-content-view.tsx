@@ -1,5 +1,5 @@
 import { Album as AlbumIcon, Edit, Trash2 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React from 'react';
 import { AlbumCard } from '@/components/cards/album-card';
 import { EmptyState } from '@/components/core/data-display';

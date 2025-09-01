@@ -1,6 +1,6 @@
 // MIGRADO PARA VITE - Arreglado sistema de theming
 import { BookOpen, Bug, Eye, Home, IdCard, Moon, Palette, Settings2, Sun } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React, { memo, useCallback, useMemo } from 'react';
 
 import { Button } from '@/components/ui/button';

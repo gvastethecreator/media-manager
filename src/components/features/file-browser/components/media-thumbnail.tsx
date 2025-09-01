@@ -10,6 +10,7 @@ import { useInViewport, useVideoViewport } from '@/hooks/use-in-viewport';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSettings } from '@/lib/contexts';
 import { cn } from '@/lib/utils';
+import './canvas-enhancements.css';
 
 // Tipo unificado utilizado por las vistas del FileBrowser
 export type MediaItem = {
@@ -39,7 +40,7 @@ interface MediaThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> 
 	 */
 	preloadMargin?: string;
 	/**
-	 * Bloquea el tamaño inicial usando aspect-ratio para evitar rebotes de layout
+	 * Bloquea el tamaño inicial usando aspect-ratio para evitar rebotes de
 	 * al cargar la imagen. Si no hay dimensiones del item, se puede proveer
 	 * un `predictedAspectRatio`.
 	 */
@@ -364,7 +365,7 @@ function MediaThumbnailInner({
 		startContinuousAnimation,
 	]);
 
-	const baseClass = cn('block h-full w-full', className);
+	const baseClass = cn('media-thumbnail-container block h-full w-full', className);
 	// Calcular aspect-ratio efectivo cuando se solicita bloqueo
 	const aspectStyle = React.useMemo(() => {
 		if (!lockAspectRatio) return {} as React.CSSProperties;
@@ -406,17 +407,7 @@ function MediaThumbnailInner({
 
 	// GIF: el navegador lo anima de forma nativa
 	if (!isVideo && isGif && validSrc) {
-		return (
-			<img
-				alt={item.name}
-				className={baseClass}
-				draggable={false}
-				loading="lazy"
-				src={validSrc}
-				style={baseStyle}
-				{...imgProps}
-			/>
-		);
+		return <img alt={item.name} className={baseClass} loading="lazy" src={validSrc} style={baseStyle} {...imgProps} />;
 	}
 
 	// No renderizar si no hay src válido
@@ -448,11 +439,14 @@ function MediaThumbnailInner({
 
 		// Aplicar aspectStyle al contenedor para reservar el espacio
 		return (
-			<div className={cn(baseClass, 'relative')} ref={setCombinedRef} style={{ ...aspectStyle, ...style }}>
+			<div
+				className={cn(baseClass, 'media-thumbnail-video relative')}
+				ref={setCombinedRef}
+				style={{ ...aspectStyle, ...style }}
+			>
 				<img
 					alt={item.name}
 					className="h-full w-full"
-					draggable={false}
 					loading="lazy"
 					onBlur={() => setHovered(false)}
 					onFocus={() => setHovered(true)}
@@ -464,7 +458,7 @@ function MediaThumbnailInner({
 				/>
 				{/* Badge VID para videos */}
 				{badgeInfo && (
-					<div className={cn(badgeClasses.container, badgeInfo.bg)} title={badgeInfo.title}>
+					<div className={cn(badgeClasses.container, badgeInfo.bg, 'media-thumbnail-badge')} title={badgeInfo.title}>
 						<span className={badgeClasses.text}>{badgeInfo.text}</span>
 					</div>
 				)}
@@ -482,7 +476,6 @@ function MediaThumbnailInner({
 			<img
 				alt={item.name}
 				className="h-full w-full"
-				draggable={false}
 				loading="lazy"
 				onBlur={() => setHovered(false)}
 				onFocus={() => setHovered(true)}
@@ -494,7 +487,7 @@ function MediaThumbnailInner({
 			/>
 			{/* Badge para tipos especiales con tamaño adaptativo */}
 			{badgeInfo && (
-				<div className={cn(badgeClasses.container, badgeInfo.bg)} title={badgeInfo.title}>
+				<div className={cn(badgeClasses.container, badgeInfo.bg, 'media-thumbnail-badge')} title={badgeInfo.title}>
 					<span className={badgeClasses.text}>{badgeInfo.text}</span>
 				</div>
 			)}

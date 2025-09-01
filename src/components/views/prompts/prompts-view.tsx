@@ -1,5 +1,5 @@
 import { AlertCircle, MessageSquare } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { useCallback, useState } from 'react';
 import { MemoizedPromptCard } from '@/components/cards/prompt-card';
 import { EmptyState } from '@/components/core/data-display';

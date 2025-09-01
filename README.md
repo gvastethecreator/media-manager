@@ -521,7 +521,143 @@ bun run test:debug
 
 ---
 
-## 🤝 **Contribución**
+## 📋 **Sistema de Logging**
+
+El sistema de logging estructurado proporciona correlación de requests, contexto automático y salidas organizadas tanto a consola como a archivo.
+
+### **🔗 Correlación por Request ID**
+
+Cada request HTTP recibe un ID único para correlacionar logs relacionados:
+
+```bash
+# Header de entrada (opcional)
+x-request-id: mi-request-personalizado
+
+# Header de respuesta (automático)
+X-Request-Id: b297e7e1-f534-446c-b051-1e6598d9b72a
+```
+
+### **📝 Logger Contextual por Request**
+
+Cada request tiene un logger pre-configurado disponible en `res.locals.logger`:
+
+```typescript
+// ✅ RECOMENDADO: Usar logger contextual
+app.get('/api/users', async (req, res) => {
+  const logger = res.locals.logger; // Auto-configurado con requestId, método, URL, IP
+  
+  logger.info('Obteniendo usuarios', { limit: req.query.limit });
+  logger.db('Consultando base de datos', { table: 'users' });
+  
+  try {
+    const users = await getUsers();
+    logger.success('Usuarios obtenidos exitosamente', { count: users.length });
+    res.json(users);
+  } catch (error) {
+    logger.error('Error obteniendo usuarios', { error: error.message });
+    res.status(500).json({ error: 'internal_error' });
+  }
+});
+
+// ❌ EVITAR: Console directo o serverLogger sin contexto
+console.log('Usuario obtenido'); // No correlaciona, no persiste
+serverLogger.info('Usuario obtenido'); // Falta contexto de request
+```
+
+### **📊 Niveles de Logging**
+
+```typescript
+logger.debug('Información detallada de desarrollo');
+logger.info('Información general');
+logger.warn('Advertencias no críticas'); 
+logger.error('Errores que requieren atención');
+logger.success('Operaciones completadas exitosamente');
+logger.http('Requests y respuestas HTTP');
+logger.db('Operaciones de base de datos');
+logger.api('Llamadas a APIs externas');
+logger.system('Eventos del sistema');
+```
+
+### **🎯 Contexto Automático**
+
+El logger por-request incluye automáticamente:
+- `requestId`: UUID de correlación
+- `method`: GET, POST, etc.
+- `url`: Ruta completa del endpoint
+- `ip`: Dirección IP del cliente
+- `startTime`: Para medir performance
+
+### **📁 Ubicación de Logs**
+
+```bash
+logs/
+├── server-2025-09-01.log      # Log principal del servidor
+├── biome-format_*.log         # Logs de herramientas
+├── tsc_*.log                  # Logs de TypeScript
+└── reindex/                   # Logs del sistema de reindexado
+```
+
+### **🔍 Ejemplo de Log con Correlación**
+
+```bash
+# Archivo: logs/server-2025-09-01.log
+[2025-09-01T04:49:48.936Z] [INFO] [rid:b297e7e1...] 🌐 GET /health - IP: 127.0.0.1 - START
+[2025-09-01T04:49:48.937Z] [INFO] [rid:b297e7e1...] ✅ GET /health - 200 - 1ms - IP: 127.0.0.1 - END
+```
+
+### **⚙️ Configuración**
+
+```typescript
+// src/lib/logger/logger.config.ts
+export const loggerConfig = {
+  level: 'info',
+  enableConsole: true,
+  services: {
+    HTTPMiddleware: { level: 'info' },
+    ServerStartup: { level: 'info' },
+    // ... más servicios
+  }
+};
+```
+
+### **🚀 Scripts de Análisis**
+
+```bash
+# Ver logs recientes
+bun run logs:list
+
+# Limpiar logs antiguos  
+bun run logs:clean
+
+# Auditar uso de console.* (para migrar)
+bun run audit:console
+```
+
+### **📚 Guías de Migración**
+
+**De console.* a logger contextual:**
+
+```typescript
+// ❌ Antes
+console.log('Usuario creado:', userId);
+console.error('Error en validación:', error);
+
+// ✅ Después  
+logger.info('Usuario creado', { userId });
+logger.error('Error en validación', { error: error.message });
+```
+
+**De serverLogger directo a contextual:**
+
+```typescript
+// ❌ Antes
+serverLogger.info('Procesando request');
+
+// ✅ Después
+res.locals.logger.info('Procesando request');
+```
+
+---
 
 ### **Desarrollo Local**
 

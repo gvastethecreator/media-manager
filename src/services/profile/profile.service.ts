@@ -145,8 +145,11 @@ class ProfileServiceImpl {
 	 */
 	async createProfile(data: ProfileCreateInput): Promise<ProfileTransformed> {
 		try {
-			const [newProfile] = await db.insert(profiles).values(data).returning();
-			return transformProfile(newProfile);
+			const result = await db.insert(profiles).values(data).returning();
+			if (!result || result.length === 0) {
+				throw new Error('No se pudo crear el perfil');
+			}
+			return transformProfile(result[0]);
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
@@ -161,8 +164,11 @@ class ProfileServiceImpl {
 	 */
 	async updateProfile(id: string, data: ProfileUpdateInput): Promise<ProfileTransformed> {
 		try {
-			const [updatedProfile] = await db.update(profiles).set(data).where(eq(profiles.id, id)).returning();
-			return transformProfile(updatedProfile);
+			const result = await db.update(profiles).set(data).where(eq(profiles.id, id)).returning();
+			if (!result || result.length === 0) {
+				throw new Error('No se pudo actualizar el perfil');
+			}
+			return transformProfile(result[0]);
 		} catch (error) {
 			throw toServiceError(error, {
 				serviceName: SERVICE_NAME,
