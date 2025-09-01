@@ -39,7 +39,6 @@ export interface FolderCreateInput {
 	color?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
-	autoReindex?: boolean;
 	parentId?: string | null;
 	presetId?: string | null;
 }
@@ -52,7 +51,6 @@ export interface FolderUpdateInput {
 	color?: string | null;
 	featuredImage?: string | null;
 	isFavorite?: boolean;
-	autoReindex?: boolean;
 	parentId?: string | null;
 	presetId?: string | null;
 }
@@ -182,8 +180,19 @@ export function useToggleFolderFavorite() {
 export function useReindexFolder() {
 	const queryClient = useQueryClient();
 
-	return useMutation<FolderWithStats, Error, string>({
-		mutationFn: (id) => reindexFolder(id),
+	return useMutation<
+		FolderWithStats,
+		Error,
+		{
+			id: string;
+			options?: {
+				useStructuredFlow?: boolean;
+				skipThumbnails?: boolean;
+				skipMetadata?: boolean;
+			};
+		}
+	>({
+		mutationFn: ({ id, options }) => reindexFolder(id, options),
 		retry: false, // ✅ Deshabilitar retry automático para evitar loops infinitos
 		onSuccess: (data) => {
 			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });
@@ -205,8 +214,17 @@ export function useReindexFolder() {
 export function useReindexAllFolders() {
 	const queryClient = useQueryClient();
 
-	return useMutation<{ processed: number; errors: string[] }, Error, void>({
-		mutationFn: () => reindexAllFolders(),
+	return useMutation<
+		{ processed: number; errors: string[] },
+		Error,
+		| {
+				useStructuredFlow?: boolean;
+				skipThumbnails?: boolean;
+				skipMetadata?: boolean;
+		  }
+		| undefined
+	>({
+		mutationFn: (options) => reindexAllFolders(options),
 		retry: false, // ✅ Deshabilitar retry automático para evitar loops infinitos en ERR_EMPTY_RESPONSE
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: folderKeys.lists() });

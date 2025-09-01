@@ -208,7 +208,6 @@ router.get('/', async (req, res) => {
 				isFavorite: folders.isFavorite,
 				totalFiles: folders.totalFiles,
 				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
 				lastIndexed: folders.lastIndexed,
 				createdAt: folders.createdAt,
 				updatedAt: folders.updatedAt,
@@ -256,7 +255,6 @@ router.get('/root-id', async (_req, res) => {
 					color: null,
 					featuredImage: null,
 					isFavorite: false,
-					autoReindex: true,
 					totalFiles: 0,
 					totalSize: 0,
 					parentId: null,
@@ -291,7 +289,6 @@ router.get('/root', async (_req, res) => {
 				isFavorite: folders.isFavorite,
 				totalFiles: folders.totalFiles,
 				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
 				lastIndexed: folders.lastIndexed,
 				createdAt: folders.createdAt,
 				updatedAt: folders.updatedAt,
@@ -315,7 +312,6 @@ router.get('/root', async (_req, res) => {
 					color: null,
 					featuredImage: null,
 					isFavorite: false,
-					autoReindex: true,
 					totalFiles: 0,
 					totalSize: 0,
 					parentId: null,
@@ -334,7 +330,6 @@ router.get('/root', async (_req, res) => {
 					isFavorite: folders.isFavorite,
 					totalFiles: folders.totalFiles,
 					totalSize: folders.totalSize,
-					autoReindex: folders.autoReindex,
 					lastIndexed: folders.lastIndexed,
 					createdAt: folders.createdAt,
 					updatedAt: folders.updatedAt,
@@ -382,7 +377,6 @@ router.post('/', async (req, res) => {
 				color: data.color ?? null,
 				featuredImage: data.featuredImage ?? null,
 				isFavorite: data.isFavorite ?? false,
-				autoReindex: data.autoReindex ?? true,
 				totalFiles: 0,
 				totalSize: 0,
 				parentId: data.parentId ?? null,
@@ -401,7 +395,6 @@ router.post('/', async (req, res) => {
 				isFavorite: folders.isFavorite,
 				totalFiles: folders.totalFiles,
 				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
 				lastIndexed: folders.lastIndexed,
 				createdAt: folders.createdAt,
 				updatedAt: folders.updatedAt,
@@ -528,7 +521,6 @@ router.get('/tree', async (_req, res) => {
 				isFavorite: folders.isFavorite,
 				totalFiles: folders.totalFiles,
 				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
 				lastIndexed: folders.lastIndexed,
 				createdAt: folders.createdAt,
 				updatedAt: folders.updatedAt,
@@ -660,7 +652,6 @@ router.get('/:id', async (req, res) => {
 				isFavorite: folders.isFavorite,
 				totalFiles: folders.totalFiles,
 				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
 				lastIndexed: folders.lastIndexed,
 				createdAt: folders.createdAt,
 				updatedAt: folders.updatedAt,
@@ -715,7 +706,6 @@ router.post('/:id/toggle-favorite', async (req, res) => {
 				isFavorite: folders.isFavorite,
 				totalFiles: folders.totalFiles,
 				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
 				lastIndexed: folders.lastIndexed,
 				createdAt: folders.createdAt,
 				updatedAt: folders.updatedAt,
@@ -754,7 +744,6 @@ router.post('/:id/move', async (req, res) => {
 				isFavorite: folders.isFavorite,
 				totalFiles: folders.totalFiles,
 				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
 				lastIndexed: folders.lastIndexed,
 				createdAt: folders.createdAt,
 				updatedAt: folders.updatedAt,
@@ -1000,7 +989,6 @@ router.patch('/:id/featured-image', async (req, res) => {
 				isFavorite: folders.isFavorite,
 				totalFiles: folders.totalFiles,
 				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
 				lastIndexed: folders.lastIndexed,
 				createdAt: folders.createdAt,
 				updatedAt: folders.updatedAt,
@@ -1038,7 +1026,6 @@ router.patch('/:id/color', async (req, res) => {
 			isFavorite: folders.isFavorite,
 			totalFiles: folders.totalFiles,
 			totalSize: folders.totalSize,
-			autoReindex: folders.autoReindex,
 			lastIndexed: folders.lastIndexed,
 			createdAt: folders.createdAt,
 			updatedAt: folders.updatedAt,
@@ -1076,7 +1063,6 @@ router.patch('/:id/emoji', async (req, res) => {
 			isFavorite: folders.isFavorite,
 			totalFiles: folders.totalFiles,
 			totalSize: folders.totalSize,
-			autoReindex: folders.autoReindex,
 			lastIndexed: folders.lastIndexed,
 			createdAt: folders.createdAt,
 			updatedAt: folders.updatedAt,
@@ -1114,7 +1100,6 @@ router.patch('/:id/favorite', async (req, res) => {
 			isFavorite: folders.isFavorite,
 			totalFiles: folders.totalFiles,
 			totalSize: folders.totalSize,
-			autoReindex: folders.autoReindex,
 			lastIndexed: folders.lastIndexed,
 			createdAt: folders.createdAt,
 			updatedAt: folders.updatedAt,
@@ -1152,7 +1137,6 @@ router.patch('/:id/description', async (req, res) => {
 			isFavorite: folders.isFavorite,
 			totalFiles: folders.totalFiles,
 			totalSize: folders.totalSize,
-			autoReindex: folders.autoReindex,
 			lastIndexed: folders.lastIndexed,
 			createdAt: folders.createdAt,
 			updatedAt: folders.updatedAt,
@@ -1190,7 +1174,6 @@ router.patch('/:id/name', async (req, res) => {
 			isFavorite: folders.isFavorite,
 			totalFiles: folders.totalFiles,
 			totalSize: folders.totalSize,
-			autoReindex: folders.autoReindex,
 			lastIndexed: folders.lastIndexed,
 			createdAt: folders.createdAt,
 			updatedAt: folders.updatedAt,
@@ -1207,55 +1190,22 @@ router.patch('/:id/name', async (req, res) => {
 	}
 });
 
-// PATCH /api/folders/:id/auto-reindex - Actualizar estado de auto-reindexación de una carpeta
-router.patch('/:id/auto-reindex', async (req, res) => {
-	try {
-		const { id } = req.params;
-		const { autoReindex } = req.body;
-
-		if (!isValidFolderId(id)) {
-			return res.status(400).json({ error: 'ID de carpeta inválido' });
-		}
-
-		const updatedFolder = await db.update(folders).set({ autoReindex }).where(eq(folders.id, id)).returning({
-			id: folders.id,
-			name: folders.name,
-			description: folders.description,
-			path: folders.path,
-			emoji: folders.emoji,
-			color: folders.color,
-			featuredImage: folders.featuredImage,
-			isFavorite: folders.isFavorite,
-			totalFiles: folders.totalFiles,
-			totalSize: folders.totalSize,
-			autoReindex: folders.autoReindex,
-			lastIndexed: folders.lastIndexed,
-			createdAt: folders.createdAt,
-			updatedAt: folders.updatedAt,
-			parentId: folders.parentId,
-			presetId: folders.presetId,
-		});
-		res.json(updatedFolder);
-	} catch (error) {
-		logger.error('Error al actualizar el estado de auto-reindexación de la carpeta', { error });
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-		});
-	}
-});
-
 // POST /api/folders/:id/reindex - Reindexar una carpeta específica
 router.post('/:id/reindex', async (req, res) => {
 	try {
 		const { id } = req.params;
-		const { enableSync = true } = req.body; // Permitir deshabilitar sincronización
+		const { useStructuredFlow = false, enableSync = true, skipThumbnails = false, skipMetadata = false } = req.body;
 
 		if (!id || typeof id !== 'string' || id.trim().length === 0) {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		logger.info(`Iniciando reindexación de carpeta: ${id}`, { enableSync });
+		logger.info(`Iniciando reindexación de carpeta: ${id}`, {
+			useStructuredFlow,
+			enableSync,
+			skipThumbnails,
+			skipMetadata,
+		});
 
 		// Obtener la carpeta para verificar que existe
 		const folder = await db
@@ -1274,52 +1224,110 @@ router.post('/:id/reindex', async (req, res) => {
 
 		const targetFolder = folder[0];
 
-		// Importar la función updateFolderStats que maneja el reindexado
-		const { updateFolderStats } = await import('@/lib/filesystem/folder-stats');
+		// ===== USAR FLUJO ESTRUCTURADO O LEGACY =====
+		if (useStructuredFlow) {
+			logger.info('🚀 Usando nuevo servicio de reindexado estructurado');
 
-		// Ejecutar la reindexación con sincronización automática y eventos de progreso
-		const indexResult = await updateFolderStats(id, new Set(), 10, 0, enableSync, true);
+			const { FolderReindexService } = await import('@/services/folders/folder-reindex.service');
+			const reindexService = FolderReindexService.getInstance();
 
-		logger.success(`Reindexación completada para carpeta: ${targetFolder.name}`, {
-			entitiesCreated: indexResult.successful,
-			entitiesUpdated: indexResult.processed - indexResult.successful,
-			syncResult: indexResult.syncResult,
-		});
+			const result = await reindexService.executeStructuredReindex({
+				folderId: id,
+				includeSubfolders: true,
+				includeHidden: false,
+				concurrency: 3,
+				emitEvents: true,
+				skipThumbnails,
+				skipMetadata,
+			});
 
-		// Obtener la carpeta actualizada para devolverla
-		const updatedFolder = await db
-			.select({
-				id: folders.id,
-				name: folders.name,
-				description: folders.description,
-				path: folders.path,
-				emoji: folders.emoji,
-				color: folders.color,
-				featuredImage: folders.featuredImage,
-				isFavorite: folders.isFavorite,
-				totalFiles: folders.totalFiles,
-				totalSize: folders.totalSize,
-				autoReindex: folders.autoReindex,
-				lastIndexed: folders.lastIndexed,
-				createdAt: folders.createdAt,
-				updatedAt: folders.updatedAt,
-				parentId: folders.parentId,
-				presetId: folders.presetId,
-			})
-			.from(folders)
-			.where(eq(folders.id, id))
-			.limit(1);
+			logger.success(`Reindexación estructurada completada para carpeta: ${targetFolder.name}`, {
+				success: result.success,
+				foldersProcessed: result.summary.foldersProcessed,
+				filesIndexed: result.summary.filesIndexed,
+				thumbnailsGenerated: result.summary.thumbnailsGenerated,
+				metadataExtracted: result.summary.metadataExtracted,
+				totalDuration: result.totalDuration,
+			});
 
-		// Incluir información de sincronización en la respuesta
-		res.json({
-			folder: updatedFolder[0],
-			indexResult: {
-				created: indexResult.successful,
-				updated: indexResult.processed - indexResult.successful,
-				errors: indexResult.errors,
-			},
-			...(indexResult.syncResult && { syncResult: indexResult.syncResult }),
-		});
+			// Obtener la carpeta actualizada
+			const updatedFolder = await db
+				.select({
+					id: folders.id,
+					name: folders.name,
+					description: folders.description,
+					path: folders.path,
+					emoji: folders.emoji,
+					color: folders.color,
+					featuredImage: folders.featuredImage,
+					isFavorite: folders.isFavorite,
+					totalFiles: folders.totalFiles,
+					totalSize: folders.totalSize,
+					lastIndexed: folders.lastIndexed,
+					createdAt: folders.createdAt,
+					updatedAt: folders.updatedAt,
+					parentId: folders.parentId,
+					presetId: folders.presetId,
+				})
+				.from(folders)
+				.where(eq(folders.id, id))
+				.limit(1);
+
+			return res.json({
+				folder: updatedFolder[0],
+				reindexResult: result,
+				mode: 'structured',
+			});
+		} else {
+			// ===== FLUJO LEGACY =====
+			logger.info('📁 Usando flujo legacy de reindexado');
+
+			const { updateFolderStats } = await import('@/lib/filesystem/folder-stats');
+
+			// Ejecutar la reindexación con sincronización automática y eventos de progreso
+			const indexResult = await updateFolderStats(id, new Set(), 10, 0, enableSync, true);
+
+			logger.success(`Reindexación legacy completada para carpeta: ${targetFolder.name}`, {
+				entitiesCreated: indexResult.successful,
+				entitiesUpdated: indexResult.processed - indexResult.successful,
+				syncResult: indexResult.syncResult,
+			});
+
+			// Obtener la carpeta actualizada para devolverla
+			const updatedFolder = await db
+				.select({
+					id: folders.id,
+					name: folders.name,
+					description: folders.description,
+					path: folders.path,
+					emoji: folders.emoji,
+					color: folders.color,
+					featuredImage: folders.featuredImage,
+					isFavorite: folders.isFavorite,
+					totalFiles: folders.totalFiles,
+					totalSize: folders.totalSize,
+					lastIndexed: folders.lastIndexed,
+					createdAt: folders.createdAt,
+					updatedAt: folders.updatedAt,
+					parentId: folders.parentId,
+					presetId: folders.presetId,
+				})
+				.from(folders)
+				.where(eq(folders.id, id))
+				.limit(1);
+
+			// Incluir información de sincronización en la respuesta
+			return res.json({
+				folder: updatedFolder[0],
+				indexResult: {
+					created: indexResult.successful,
+					updated: indexResult.processed - indexResult.successful,
+					errors: indexResult.errors,
+				},
+				...(indexResult.syncResult && { syncResult: indexResult.syncResult }),
+				mode: 'legacy',
+			});
+		}
 	} catch (error) {
 		logger.error('Error al reindexar la carpeta', { error });
 		res.status(500).json({
@@ -1332,8 +1340,14 @@ router.post('/:id/reindex', async (req, res) => {
 // POST /api/folders/reindex-all - Reindexar todas las carpetas
 router.post('/reindex-all', async (req, res) => {
 	try {
-		const { enableSync = true } = req.body; // Permitir deshabilitar sincronización
-		logger.info('Iniciando reindexación global de todas las carpetas', { enableSync });
+		const { useStructuredFlow = false, enableSync = true, skipThumbnails = false, skipMetadata = false } = req.body;
+
+		logger.info('Iniciando reindexación global de todas las carpetas', {
+			useStructuredFlow,
+			enableSync,
+			skipThumbnails,
+			skipMetadata,
+		});
 
 		// Obtener todas las carpetas
 		const allFolders = await db
@@ -1346,16 +1360,56 @@ router.post('/reindex-all', async (req, res) => {
 			.orderBy(asc(folders.name));
 
 		if (allFolders.length === 0) {
-			return res.json({ processed: 0, errors: [], syncResult: null });
+			logger.info('No hay carpetas para reindexar');
+			return res.json({ processed: 0, errors: [], mode: useStructuredFlow ? 'structured' : 'legacy' });
 		}
 
-		// Importar funciones necesarias una sola vez
-		const { updateFolderStats } = await import('@/lib/filesystem/folder-stats');
-		const { emit } = await import('@/lib/server/events.server');
+		// ===== USAR FLUJO ESTRUCTURADO O LEGACY =====
+		if (useStructuredFlow) {
+			logger.info('🚀 Usando nuevo servicio de reindexado estructurado para todas las carpetas');
 
-		const result = await reindexAllFoldersProcess(allFolders, enableSync, updateFolderStats, emit);
+			const { FolderReindexService } = await import('@/services/folders/folder-reindex.service');
+			const reindexService = FolderReindexService.getInstance();
 
-		res.json(result);
+			const result = await reindexService.executeStructuredReindex({
+				includeSubfolders: true,
+				includeHidden: false,
+				concurrency: 3,
+				emitEvents: true,
+				skipThumbnails,
+				skipMetadata,
+			});
+
+			logger.success('Reindexación estructurada global completada', {
+				success: result.success,
+				foldersProcessed: result.summary.foldersProcessed,
+				filesIndexed: result.summary.filesIndexed,
+				thumbnailsGenerated: result.summary.thumbnailsGenerated,
+				metadataExtracted: result.summary.metadataExtracted,
+				totalDuration: result.totalDuration,
+			});
+
+			return res.json({
+				processed: result.summary.foldersProcessed,
+				errors: Object.values(result.phases).flatMap((phase) => phase.errors),
+				result,
+				mode: 'structured',
+			});
+		} else {
+			// ===== FLUJO LEGACY =====
+			logger.info('📁 Usando flujo legacy de reindexado para todas las carpetas');
+
+			// Importar funciones necesarias una sola vez
+			const { updateFolderStats } = await import('@/lib/filesystem/folder-stats');
+			const { emit } = await import('@/lib/server/events.server');
+
+			const result = await reindexAllFoldersProcess(allFolders, enableSync, updateFolderStats, emit);
+
+			return res.json({
+				...result,
+				mode: 'legacy',
+			});
+		}
 	} catch (error) {
 		console.error('Error en reindexación global:', error);
 		res.status(500).json({

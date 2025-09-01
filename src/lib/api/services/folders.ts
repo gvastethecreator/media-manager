@@ -74,7 +74,6 @@ const buildBaseFolder = (raw: any) => ({
 	// Si el backend no trae los agregados en top-level, tomar de stats cuando existan
 	totalFiles: (raw.totalFiles ?? raw.stats?.totalFiles ?? raw._count?.images ?? 0) as number,
 	totalSize: (raw.totalSize ?? raw.stats?.totalSize ?? 0) as number,
-	autoReindex: raw.autoReindex ?? false,
 	lastIndexed: raw.lastIndexed ?? null,
 	parentId: raw.parentId ?? null,
 	presetId: raw.presetId ?? null,
@@ -164,13 +163,24 @@ export const toggleFolderFavorite = async (id: string): Promise<FolderWithStats>
 	return response;
 };
 
-export const reindexFolder = async (id: string): Promise<FolderWithStats> => {
-	const response = await apiClient.post<FolderWithStats>(`/folders/${id}/reindex`);
+export const reindexFolder = async (
+	id: string,
+	options?: {
+		useStructuredFlow?: boolean;
+		skipThumbnails?: boolean;
+		skipMetadata?: boolean;
+	}
+): Promise<FolderWithStats> => {
+	const response = await apiClient.post<FolderWithStats>(`/folders/${id}/reindex`, options);
 	return response;
 };
 
-export const reindexAllFolders = async (): Promise<{ processed: number; errors: string[] }> => {
-	const response = await apiClient.post<{ processed: number; errors: string[] }>('/folders/reindex-all');
+export const reindexAllFolders = async (options?: {
+	useStructuredFlow?: boolean;
+	skipThumbnails?: boolean;
+	skipMetadata?: boolean;
+}): Promise<{ processed: number; errors: string[] }> => {
+	const response = await apiClient.post<{ processed: number; errors: string[] }>('/folders/reindex-all', options);
 	return response;
 };
 

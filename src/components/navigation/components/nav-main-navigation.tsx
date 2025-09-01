@@ -282,7 +282,13 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 									'mb-0.5 flex items-center gap-1 transition-all duration-300',
 									isCollapsed ? 'justify-center px-1 py-1' : ''
 								)}
-								onClick={() => toggleCategory(category.id)}
+								onClick={() => {
+									// Para carpetas, navegar a la vista principal además de expandir/contraer
+									if (category.id === 'folders') {
+										handleNavigate('folders' as ViewType);
+									}
+									toggleCategory(category.id);
+								}}
 								type="button"
 							>
 								<Tooltip>

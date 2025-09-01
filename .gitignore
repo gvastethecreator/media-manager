@@ -11,6 +11,7 @@
 !.yarn/versions
 /dist
 ~/
+logs/*.log
 
 # testing
 /coverage

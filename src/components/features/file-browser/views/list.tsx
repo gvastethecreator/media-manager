@@ -30,9 +30,10 @@ export function List({
 			<div className="relative" data-testid="file-browser-scroll-area-viewport">
 				<ListCanvas
 					items={items}
-					onItemClick={onItemClick} // Para list view, usamos rowHeight como itemSize
-					onItemDoubleClick={onItemDoubleClick} // No hay contenedor externo, usa scroll interno
 					rowHeight={rowHeight}
+					scrollContainer={effectiveScrollContainer}
+					onItemClick={onItemClick}
+					onItemDoubleClick={onItemDoubleClick}
 				/>
 			</div>
 		</div>

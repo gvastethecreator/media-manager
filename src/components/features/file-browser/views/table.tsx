@@ -30,9 +30,10 @@ export function Table({
 			<div className="relative" data-testid="file-browser-scroll-area-viewport">
 				<TableCanvas
 					items={items}
-					onItemClick={onItemClick}
-					onItemDoubleClick={onItemDoubleClick} // No hay contenedor externo, usa scroll interno
 					rowHeight={rowHeight}
+					scrollContainer={effectiveScrollContainer}
+					onItemClick={onItemClick}
+					onItemDoubleClick={onItemDoubleClick}
 				/>
 			</div>
 		</div>

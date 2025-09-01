@@ -46,7 +46,7 @@ const NavPanelComponent = memo(function NavPanelImpl({
 		<aside
 			aria-label="Panel de navegación principal"
 			className={cn(
-				'flex h-full flex-col overflow-hidden border-border border-r bg-background',
+				'flex h-full flex-col border-border border-r bg-background',
 				isAnimating && 'transition-all duration-300 ease-in-out'
 			)}
 		>

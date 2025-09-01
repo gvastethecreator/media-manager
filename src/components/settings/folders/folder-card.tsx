@@ -159,9 +159,11 @@ interface FolderStatsSummaryProps {
 	isCompact?: boolean;
 }
 
-const FolderStatsSummary = memo(({ folder, folderStats, isCompact = false }: FolderStatsSummaryProps) => {
-	const textSize = isCompact ? 'text-xs' : 'text-sm';
-
+const FolderStatsSummary = memo(function FolderStatsSummary({
+	folder,
+	folderStats,
+	isCompact = false
+}: FolderStatsSummaryProps) {
 	return <FolderStatsDisplay folder={folder} folderStats={folderStats} />;
 });
 
@@ -275,6 +277,17 @@ export const FolderCard = memo(
 			}
 		}, [folder.id, onReindex]);
 
+		// ===== MEMOIZED HANDLERS FOR CONTROLS =====
+		const handleEdit = useCallback(() => {
+			setIsEditing(true);
+		}, []);
+
+		const handleToggleExpanded = useCallback(() => {
+			if (onToggleExpanded && folder.id) {
+				onToggleExpanded(folder.id);
+			}
+		}, [onToggleExpanded, folder.id]);
+
 		// ===== STATUS INDICATORS =====
 		const statusMessage = getStatusMessage(isReindexing, showCompleteAnimation, isProcessing);
 		const isSelected = selectedFolder === folder.id;
@@ -337,10 +350,10 @@ export const FolderCard = memo(
 									isExpanded={isExpanded}
 									isGloballyProcessing={isGloballyProcessing}
 									isReindexing={isReindexing}
-									onEdit={() => setIsEditing(true)}
+									onEdit={handleEdit}
 									onFolderClick={onFolderClick}
-									onReindex={onReindex}
-									onToggleExpanded={onToggleExpanded}
+									onReindex={handleReindex}
+									onToggleExpanded={handleToggleExpanded}
 									processStatus={processStatus}
 									selectedFolder={selectedFolder}
 								/>

@@ -27,7 +27,6 @@ async function setupTestFiles() {
 			totalFiles: 0,
 			totalSize: 0,
 			isFavorite: false,
-			autoReindex: true,
 			lastIndexed: Date.now(),
 			createdAt: Date.now(),
 			updatedAt: Date.now(),

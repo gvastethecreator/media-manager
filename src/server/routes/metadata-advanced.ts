@@ -91,7 +91,7 @@ router.post('/extract-from-path', async (req, res) => {
 		// Extraer metadata del archivo usando el servicio unificado
 		const path = await import('node:path');
 		const filename = path.basename(filePath);
-		const metadata = await extractAllMetadata(fileBuffer, filename);
+		const metadata = await extractAllMetadata(fileBuffer, filename, {}, filePath);
 
 		logger.info('✅ Metadata extraída', { filePath, size: fileBuffer.length });
 

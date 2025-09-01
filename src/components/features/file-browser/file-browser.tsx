@@ -17,9 +17,13 @@ import type { AnyEntityWithStats } from '@/types/entities';
 import { FileListHeader } from './components/file-list-header';
 import type { MediaItem } from './components/media-thumbnail';
 import { StatusBar } from './components/status-bar';
+// Estilos de animación específicos para vistas Canvas
+import './views/canvas/canvas-animations.css';
 import { useProgressiveFolderFiles } from './hooks/use-progressive-folder-files';
 import { useKeyboardNavigation } from './navigation/keyboard-navigation';
 import type { ClickModifiers, FileBrowserProps } from './types/file-browser.types';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
+import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
 
 function applySearch(items: MediaItem[], query: string) {
 	if (!query) return items;
@@ -110,6 +114,22 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 	// Ref para navegación por teclado
 	const containerRef = useRef<HTMLDivElement>(null);
 
+	// Visor de imágenes (fallback por defecto en doble click)
+	const { openViewer } = useFileViewerStore();
+
+	// Helper para mapear MediaItem -> ImageItem esperado por el visor
+	const toImageItem = (mi: MediaItem): ImageItem => ({
+		id: mi.id,
+		name: mi.name,
+		type: 'image',
+		path: (mi as any).path || '',
+		size: (mi as any).size ?? 0,
+		width: (mi as any).width ?? null,
+		height: (mi as any).height ?? null,
+		thumbnail: (mi as any).thumbnailUrl ?? null,
+		metadata: null,
+	});
+
 	const handleItemClick = (item: MediaItem, modifiers?: ClickModifiers) => {
 		const mods = modifiers ?? { ctrlKey: false, metaKey: false, shiftKey: false };
 		const isToggle = mods.ctrlKey || mods.metaKey;
@@ -141,7 +161,21 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 	};
 
 	const handleItemDoubleClick = (item: MediaItem) => {
-		onItemDoubleClick?.(item as unknown as AnyEntityWithStats);
+		// Si el padre provee manejador, delegar completamente
+		if (onItemDoubleClick) {
+			onItemDoubleClick(item as unknown as AnyEntityWithStats);
+			return;
+		}
+
+		// Fallback por defecto: abrir visor sólo para imágenes
+		if (item.entityType === 'image') {
+			const allDisplayed = (grouped ? grouped.flatMap((g) => g.items) : processedItems) as MediaItem[];
+			const imageItems = allDisplayed.filter((it) => it.entityType === 'image');
+			const initialIndex = imageItems.findIndex((it) => it.id === item.id);
+			if (imageItems.length > 0 && initialIndex >= 0) {
+				openViewer(imageItems.map(toImageItem), initialIndex);
+			}
+		}
 	};
 
 	// Hook de navegación por teclado
@@ -362,8 +396,32 @@ function renderFromItems({
 		onItemClick?.(item as unknown as AnyEntityWithStats);
 	};
 
+	// Visor de imágenes (fallback por defecto en doble click)
+	const { openViewer } = useFileViewerStore();
+	const toImageItem = (mi: MediaItem): ImageItem => ({
+		id: mi.id,
+		name: mi.name,
+		type: 'image',
+		path: (mi as any).path || '',
+		size: (mi as any).size ?? 0,
+		width: (mi as any).width ?? null,
+		height: (mi as any).height ?? null,
+		thumbnail: (mi as any).thumbnailUrl ?? null,
+		metadata: null,
+	});
+
 	const handleItemDoubleClick = (item: MediaItem) => {
-		onItemDoubleClick?.(item as AnyEntityWithStats);
+		if (onItemDoubleClick) {
+			onItemDoubleClick(item as AnyEntityWithStats);
+			return;
+		}
+		if (item.entityType === 'image') {
+			const imageItems = processedItems.filter((it) => it.entityType === 'image');
+			const initialIndex = imageItems.findIndex((it) => it.id === item.id);
+			if (imageItems.length > 0 && initialIndex >= 0) {
+				openViewer(imageItems.map(toImageItem), initialIndex);
+			}
+		}
 	};
 	const effectiveItemSize = viewMode === 'cards' ? Math.max(120, itemSize) : itemSize;
 	const gridStyle: React.CSSProperties = useMemo(

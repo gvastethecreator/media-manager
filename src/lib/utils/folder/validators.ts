@@ -33,7 +33,6 @@ export const folderBaseSchema = z.object({
 		.regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Color inválido')
 		.default(FOLDER_DEFAULT_COLORS.DEFAULT),
 	isFavorite: z.boolean().default(false),
-	autoReindex: z.boolean().default(false),
 	presetId: z.string().nullish(),
 });
 
@@ -48,7 +47,6 @@ export const createFolderSchema = z.object({
 	color: z.string().nullish(),
 	featuredImage: z.string().nullish(),
 	isFavorite: z.boolean().default(false),
-	autoReindex: z.boolean().default(false),
 	parentId: z.string().nullish(),
 	presetId: z.string().nullish(),
 });
@@ -87,7 +85,6 @@ export const updateFolderFieldsSchema = z
 		totalSize: z.literal(true),
 		lastIndexed: z.literal(true),
 		isFavorite: z.literal(true),
-		autoReindex: z.literal(true),
 		presetId: z.literal(true),
 	})
 	.partial();

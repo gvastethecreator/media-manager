@@ -67,6 +67,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 		isLoadingMetadata: metaLoading,
 		error: metaError,
 		refetch,
+		exportMetadata,
 	} = useEnhancedMetadata(shouldUseInternalHook ? item : undefined);
 
 	// Estado para LoRAs detectados
@@ -118,7 +119,25 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 									<RefreshCw className={cn('h-4 w-4', effectiveLoading && 'animate-spin')} />
 								</Button>
 							</TooltipTrigger>
-							<TooltipContent>{effectiveLoading ? 'Extrayendo…' : 'Extraer Metadata'}</TooltipContent>
+							<TooltipContent>
+								{effectiveLoading ? (
+									<div className="text-sm">
+										<div className="font-medium">Extrayendo metadatos...</div>
+										<div className="text-xs text-muted-foreground mt-1">
+											• Analizando EXIF/IPTC/XMP<br />
+											• Detectando engine de IA<br />
+											• Extrayendo parámetros de generación
+										</div>
+									</div>
+								) : (
+									<div className="text-sm">
+										<div className="font-medium">Extraer Metadatos</div>
+										<div className="text-xs text-muted-foreground mt-1">
+											Analizar archivos con sistema avanzado
+										</div>
+									</div>
+								)}
+							</TooltipContent>
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
@@ -181,9 +200,39 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 									Renombrar
 								</DropdownMenuItem>
 								<DropdownMenuSeparator />
+								<DropdownMenuLabel>Exportar Metadatos</DropdownMenuLabel>
+								<DropdownMenuItem
+									onClick={() => exportMetadata?.('json')}
+									disabled={!effectiveEnhanced.length || effectiveLoading}
+								>
+									<FileJson className="mr-2 h-4 w-4" />
+									Exportar como JSON
+								</DropdownMenuItem>
+								<DropdownMenuItem
+									onClick={() => exportMetadata?.('csv')}
+									disabled={!effectiveEnhanced.length || effectiveLoading}
+								>
+									<Download className="mr-2 h-4 w-4" />
+									Exportar como CSV
+								</DropdownMenuItem>
+								<DropdownMenuSeparator />
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</div>
+
+					{/* Indicador de estado de carga de metadatos */}
+					{effectiveLoading && (
+						<div className="bg-blue-50 border border-blue-200 rounded-md p-2 m-1 dark:bg-blue-950/20 dark:border-blue-800/30">
+							<div className="flex items-center gap-2 text-blue-800 dark:text-blue-300">
+								<RefreshCw className="h-3 w-3 animate-spin" />
+								<span className="text-xs font-medium">Extrayendo metadatos avanzados...</span>
+							</div>
+							<div className="text-blue-600 dark:text-blue-400 text-xs mt-1">
+								Analizando archivo con sistema de detección IA
+							</div>
+						</div>
+					)}
+
 					{/* Imagen principal */}
 					{mainImageUrl && (
 						<div className="relative w-full max-w-full overflow-hidden p-1">
@@ -467,7 +516,33 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 														);
 													})()}
 													{effectiveError && (
-														<div className="text-red-600 text-xs dark:text-red-400">Error: {effectiveError}</div>
+														<div className="bg-red-50 border border-red-200 rounded p-3 text-red-800 text-sm dark:bg-red-950/20 dark:border-red-800/30 dark:text-red-300">
+															<div className="flex items-center gap-2 mb-1">
+																<span className="font-medium">Error de extracción:</span>
+															</div>
+															<div className="text-xs text-red-700 dark:text-red-400">
+																{effectiveError}
+															</div>
+															<Button
+																className="mt-2 self-start"
+																onClick={() => refetch()}
+																size="sm"
+																variant="outline"
+																disabled={effectiveLoading}
+															>
+																{effectiveLoading ? (
+																	<>
+																		<RefreshCw className="h-3 w-3 animate-spin mr-1" />
+																		Reintentando...
+																	</>
+																) : (
+																	<>
+																		<RefreshCw className="h-3 w-3 mr-1" />
+																		Reintentar
+																	</>
+																)}
+															</Button>
+														</div>
 													)}
 
 													{originRows.length > 0 && (

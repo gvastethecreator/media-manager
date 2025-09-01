@@ -1,9 +1,12 @@
 import type { ReactNode } from 'react';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { memo } from 'react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 /**
- * 🔧 TOOLTIP WRAPPER REUTILIZABLE
- * Elimina la duplicación de TooltipProvider en cada botón
+ * 🔧 TOOLTIP WRAPPER REUTILIZABLE OPTIMIZADO
+ * 
+ * IMPORTANTE: Requiere un TooltipProvider en un nivel superior
+ * Eliminamos el provider interno para evitar renders excesivos
  */
 
 interface SimpleTooltipProps {
@@ -15,17 +18,21 @@ interface SimpleTooltipProps {
 }
 
 /**
- * Tooltip simple que incluye su propio provider
+ * Tooltip optimizado que NO incluye TooltipProvider (debe estar en nivel superior)
  */
-export function SimpleTooltip({ children, content, side = 'top', align = 'center', className }: SimpleTooltipProps) {
+export const SimpleTooltip = memo(function SimpleTooltip({
+	children,
+	content,
+	side = 'top',
+	align = 'center',
+	className
+}: SimpleTooltipProps) {
 	return (
-		<TooltipProvider>
-			<Tooltip>
-				<TooltipTrigger asChild>{children}</TooltipTrigger>
-				<TooltipContent align={align} className={className} side={side}>
-					{content}
-				</TooltipContent>
-			</Tooltip>
-		</TooltipProvider>
+		<Tooltip>
+			<TooltipTrigger asChild>{children}</TooltipTrigger>
+			<TooltipContent align={align} className={className} side={side}>
+				{content}
+			</TooltipContent>
+		</Tooltip>
 	);
-}
+});
