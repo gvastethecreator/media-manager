@@ -100,10 +100,9 @@ export function FolderStatsDisplay({ folder, folderStats }: FolderStatsDisplayPr
 	return (
 		<div className="min-w-0 flex-1 space-y-1.5">
 			{/* Path compacto */}
-				<span className="truncate text-[11px] text-muted-foreground">{folder.path}</span>
+			<span className="truncate text-[11px] text-muted-foreground">{folder.path}</span>
 			{/* Micro-progressbars por tipo de archivo */}
 			<div className="space-y-1">
-
 				{/* Métricas compactas */}
 				<div className="flex items-center justify-between gap-1">
 					<div className="flex flex-wrap items-center gap-1">

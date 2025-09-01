@@ -12,7 +12,7 @@ import {
 	UploadCloud,
 	X,
 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import type * as React from 'react';
 import { useCallback, useId, useState } from 'react';
 import {

@@ -1,6 +1,6 @@
 'use client';
 
-import { AnimatePresence, Easing, motion, useMotionValue, useSpring, useTransform } from 'motion/react';
+import { AnimatePresence, motion, useMotionValue, useSpring, useTransform } from '@/components/ui/motion-shim';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 

@@ -1,13 +1,13 @@
 /**
- * @file Hook para manejar layouts de cards
- * @module components/cards/hooks/use-card-layout
- * @description Proporciona clases CSS y estilos basados en la configuración de layout
+ * @file Hook para manejar s de cards
+ * @module components/cards/hooks/use-card-
+ * @description Proporciona clases CSS y estilos basados en la configuración de
  */
 
 import React, { useMemo } from 'react';
 import { cn } from '@/lib/utils';
-import type { BaseCardProps, CardLayoutConfig } from '../types/card-layout.types';
-import { resolveLayoutConfig } from '../types/card-layout.types';
+import type { BaseCardProps, CardLayoutConfig } from '../types/card-.types';
+import { resolveLayoutConfig } from '../types/card-.types';
 
 interface UseCardLayoutReturn {
 	/** Clases CSS para el contenedor principal */
@@ -22,7 +22,7 @@ interface UseCardLayoutReturn {
 	metadataClasses: string;
 	/** Estilos inline para el contenedor */
 	containerStyles: React.CSSProperties;
-	/** Configuración de layout resuelta */
+	/** Configuración de  resuelta */
 	config: CardLayoutConfig;
 	/** Información de dimensiones */
 	dimensions: {
@@ -33,20 +33,20 @@ interface UseCardLayoutReturn {
 }
 
 /**
- * Hook para obtener clases CSS y estilos basados en la configuración de layout
+ * Hook para obtener clases CSS y estilos basados en la configuración de
  */
 export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): UseCardLayoutReturn {
 	// OPTIMIZACIÓN: Estabilizar la configuración para evitar re-renders
 	const stableConfigProps = useMemo(
 		() => ({
-			layoutConfig: props.layoutConfig,
-			layout: props.layout,
+			Config: props.Config,
+			: props.,
 			size: props.size,
 			variant: props.variant,
 			compact: props.compact,
 			tcgMode: props.tcgMode,
 		}),
-		[props.layoutConfig, props.layout, props.size, props.variant, props.compact, props.tcgMode]
+		[props.Config, props., props.size, props.variant, props.compact, props.tcgMode]
 	);
 
 	const config = useMemo(() => resolveLayoutConfig(stableConfigProps, preset), [stableConfigProps, preset]);
@@ -111,7 +111,7 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 		const classes = ['relative overflow-hidden transition-all duration-200'];
 
 		// Layout específico
-		switch (config.layout) {
+		switch (config.) {
 			case 'minimal':
 				classes.push('flex flex-col items-center justify-center p-2');
 				break;
@@ -186,18 +186,18 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 	const contentClasses = useMemo(() => {
 		const classes = ['flex-1'];
 
-		if (config.layout === 'horizontal' || config.layout === 'list') {
+		if (config. === 'horizontal' || config. === 'list') {
 			classes.push('min-w-0'); // Para truncate en flex
 		}
 
 		return cn(classes);
-	}, [config.layout]);
+	}, [config.]);
 
 	// Generar clases para la imagen/thumbnail
 	const imageClasses = useMemo(() => {
 		const classes = ['object-cover'];
 
-		switch (config.layout) {
+		switch (config.) {
 			case 'minimal':
 				classes.push('w-8 h-8 rounded');
 				break;
@@ -246,7 +246,7 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 				break;
 		}
 
-		if (config.layout === 'horizontal' || config.layout === 'list') {
+		if (config. === 'horizontal' || config. === 'list') {
 			classes.push('min-w-0'); // Para permitir truncate
 		}
 
@@ -261,7 +261,7 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 			classes.push('hidden');
 		}
 
-		switch (config.layout) {
+		switch (config.) {
 			case 'minimal':
 				classes.push('hidden');
 				break;

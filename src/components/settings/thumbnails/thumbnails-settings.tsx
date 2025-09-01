@@ -1,5 +1,5 @@
 import { AlertCircle, Settings2, Trash2, Zap } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import React, { useId } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

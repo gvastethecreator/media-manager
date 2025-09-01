@@ -17,7 +17,7 @@ import type { AnyEntityWithStats } from '@/types/entities';
 import { FileListHeader } from './components/file-list-header';
 import type { MediaItem } from './components/media-thumbnail';
 import { StatusBar } from './components/status-bar';
-import { useFolderFiles } from './hooks/use-folder-files';
+import { useProgressiveFolderFiles } from './hooks/use-progressive-folder-files';
 import { useKeyboardNavigation } from './navigation/keyboard-navigation';
 import type { ClickModifiers, FileBrowserProps } from './types/file-browser.types';
 
@@ -75,7 +75,7 @@ function groupByEntityType(items: MediaItem[]): Array<{ key: string; items: Medi
 }
 // Componente principal con filtro de carpeta
 export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }: FileBrowserProps) {
-	const { items, isLoading, error } = useFolderFiles(filterId ?? null);
+	const { items, isLoading, error, shouldShowPreloader, loadedCount } = useProgressiveFolderFiles(filterId ?? null);
 
 	// View options (modo, tamaño, sort, búsqueda)
 	const viewMode = useViewOptionsStore((s) => s.viewMode);
@@ -110,12 +110,6 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 	// Ref para navegación por teclado
 	const containerRef = useRef<HTMLDivElement>(null);
 
-	// Nota importante:
-	// En lugar de devolver temprano en loading/error, renderizamos siempre la estructura de vistas
-	// para garantizar la presencia de los contenedores con data-testid (grid-view/cards-view/etc.).
-	// Esto hace que los tests E2E puedan esperar de forma determinista a que aparezcan los ítems,
-	// mientras el store termina de poblarse. Mostramos un overlay discreto si hay loading/error.
-
 	const handleItemClick = (item: MediaItem, modifiers?: ClickModifiers) => {
 		const mods = modifiers ?? { ctrlKey: false, metaKey: false, shiftKey: false };
 		const isToggle = mods.ctrlKey || mods.metaKey;
@@ -145,6 +139,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 		}
 		onItemClick?.(item as AnyEntityWithStats);
 	};
+
 	const handleItemDoubleClick = (item: MediaItem) => {
 		onItemDoubleClick?.(item as unknown as AnyEntityWithStats);
 	};
@@ -180,11 +175,11 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 			tabIndex={-1}
 		>
 			<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container">
-				{/* Overlays no bloqueantes para loading/error */}
-				{(isLoading || error) && (
+				{/* Overlays no bloqueantes para loading/error solo si hay error */}
+				{error && (
 					<div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center p-2">
-						<div className="rounded-md bg-secondary/80 px-2 py-1 text-muted-foreground text-xs">
-							{error ? 'Error cargando datos' : 'Cargando…'}
+						<div className="rounded-md bg-destructive/80 px-2 py-1 text-destructive-foreground text-xs">
+							Error cargando datos
 						</div>
 					</div>
 				)}
@@ -199,6 +194,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 							{grouped ? (
 								<FileCanvasListGrouped
 									groups={grouped as any}
+									scrollContainer={listScrollEl}
 									onItemClick={handleItemClick}
 									onItemDoubleClick={handleItemDoubleClick}
 								/>
@@ -207,6 +203,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 									items={processedItems as MediaItem[]}
 									onItemClick={handleItemClick}
 									onItemDoubleClick={handleItemDoubleClick}
+									scrollContainer={listScrollEl}
 								/>
 							)}
 						</div>

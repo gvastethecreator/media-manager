@@ -11,8 +11,8 @@ const router = express.Router();
 // Schema para filtros de búsqueda
 const GroupFiltersSchema = z.object({
 	search: z.string().optional(),
-	limit: z.number().int().positive().max(100).default(50).optional(),
-	offset: z.number().int().min(0).default(0).optional(),
+	limit: z.coerce.number().int().positive().max(100).default(50).optional(),
+	offset: z.coerce.number().int().min(0).default(0).optional(),
 	sortBy: z.enum(['name', 'createdAt', 'updatedAt', 'totalImages', 'totalVideos']).default('name').optional(),
 	sortOrder: z.enum(['asc', 'desc']).default('asc').optional(),
 });

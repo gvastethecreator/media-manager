@@ -1,5 +1,5 @@
 import { Folder, Heart } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import type { ReactNode } from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { computeIsReindexing } from '@/components/settings/folders/utils/is-reindexing';
@@ -32,7 +32,7 @@ import { getStatusMessage } from './utils/status-message';
  * - Display folder information with modern design
  * - Handle folder actions (edit, reindex, select)
  * - Show processing status with smooth animations
- * - Provide responsive layout for different screen sizes
+ * - Provide responsive  for different screen sizes
  * - Maintain excellent performance with memoization
  */
 
@@ -78,17 +78,13 @@ interface FolderMetadataProps {
 
 const FolderMetadata = memo(({ folder, parentFolderName, indexStatus, statusMessage }: FolderMetadataProps) => (
 	<div className="flex min-w-0 flex-1 flex-col space-y-1">
-
 		{/* Folder Name */}
 		<span className="font-semibold text-foreground text-sm align-bottom truncate">
-
 			{/* Breadcrumb */}
-			{parentFolderName && (
-				<span className="truncate text-xs text-primary/50">{parentFolderName} / </span>
-			)}
+			{parentFolderName && <span className="truncate text-xs text-primary/50">{parentFolderName} / </span>}
 
-
-			{folder.name}</span>
+			{folder.name}
+		</span>
 
 		{/* Status Row */}
 		<div className="flex items-center gap-2 absolute top-2 right-2">
@@ -166,10 +162,7 @@ interface FolderStatsSummaryProps {
 const FolderStatsSummary = memo(({ folder, folderStats, isCompact = false }: FolderStatsSummaryProps) => {
 	const textSize = isCompact ? 'text-xs' : 'text-sm';
 
-	return (
-		<FolderStatsDisplay folder={folder} folderStats={folderStats} />
-
-	);
+	return <FolderStatsDisplay folder={folder} folderStats={folderStats} />;
 });
 
 FolderStatsSummary.displayName = 'FolderStatsSummary';
@@ -324,10 +317,10 @@ export const FolderCard = memo(
 						/>
 					</div>
 
-
 					{/* Controls Section - Positioned absolutely to avoid click conflicts */}
 					<div className="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-0 transition-opacity duration-200 group-hover:opacity-100 sm:opacity-60 sm:group-hover:opacity-100">
-						<div className="flex items-center gap-1 rounded-md border border-border/20 bg-background/90 p-1 shadow-sm backdrop-blur-sm"
+						<div
+							className="flex items-center gap-1 rounded-md border border-border/20 bg-background/90 p-1 shadow-sm backdrop-blur-sm"
 							role="toolbar"
 							aria-label="Controles de carpeta"
 						>
@@ -370,9 +363,7 @@ export const FolderCard = memo(
 
 					{/* Stats Section - Always Visible */}
 					<FolderStatsSummary folder={folder} folderStats={folderStats} isCompact />
-
 				</div>
-
 
 				{/* Expanded Subfolders */}
 				{folder.children && folder.children.length > 0 && (

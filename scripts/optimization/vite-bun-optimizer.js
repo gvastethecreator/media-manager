@@ -117,7 +117,7 @@ export default defineConfig({
 					react: ['react', 'react-dom'],
 					router: ['react-router-dom'],
 					query: ['@tanstack/react-query'],
-					ui: ['framer-motion', 'motion', 'lucide-react'],
+					ui: ['gsap', '@gsap/react', 'lucide-react'],
 					vendor: ['zustand', 'lodash', 'date-fns'],
 					utils: ['clsx', 'tailwind-merge', 'class-variance-authority'],
 				},
@@ -160,7 +160,7 @@ export default defineConfig({
 		include: [
 			// Pre-bundlear dependencias críticas
 			'react', 'react-dom', 'react-router-dom',
-			'framer-motion', 'motion',
+			'gsap', '@gsap/react',
 			'@tanstack/react-query',
 			'zustand',
 			'lucide-react',

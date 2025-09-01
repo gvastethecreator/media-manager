@@ -1,5 +1,5 @@
 import { Sparkles, Tag } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';

@@ -1,5 +1,3 @@
-import { ReactRouterProvider } from 'fumadocs-core/framework/react-router';
-import { RootProvider } from 'fumadocs-ui/provider/base';
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
 import { MainLayout } from '@/components/layout/main-layout';
@@ -23,7 +21,6 @@ import { PropertiesView } from '@/components/views/properties/properties-view';
 import { SearchView } from '@/components/views/search/search-view';
 import SettingsContentView from '@/components/views/settings/settings-content-view';
 import { TagsView } from '@/components/views/tags/tags-view';
-import { UploadedImagesView } from '@/components/views/uploaded-images/uploaded-images-view';
 import VideosView from '@/components/views/videos/videos-view';
 import { WildcardsView } from '@/components/views/wildcards/wildcards-view';
 import { WorkflowContentView } from '@/components/views/workflows/workflow-content-view';
@@ -36,25 +33,11 @@ const FolderContentWrapper = () => {
 	return <FolderContentView folderId={id} />;
 };
 
-// Lazy-load de componentes de documentación para evitar importar Fumadocs en el arranque
-const LazyDocsLayout = lazy(async () =>
-	import('@/components/docs/docs-layout').then((m) => ({ default: m.DocsLayoutComponent }))
-);
-const LazyDocsDynamicPage = lazy(async () =>
-	import('@/components/docs/docs-dynamic-page').then((m) => ({ default: m.DocsDynamicPage }))
-);
-
-// Wrapper para las rutas de documentación (con Suspense)
+// Wrapper para las rutas de documentación (simplificado sin fumadocs)
 const DocsWrapper = () => (
-	<RootProvider>
-		<ReactRouterProvider>
-			<Suspense fallback={<div />}>
-				<LazyDocsLayout>
-					<Outlet />
-				</LazyDocsLayout>
-			</Suspense>
-		</ReactRouterProvider>
-	</RootProvider>
+	<Suspense fallback={<div />}>
+		<Outlet />
+	</Suspense>
 );
 // Importar stores para los wrappers
 
@@ -123,10 +106,6 @@ export const router = createBrowserRouter([
 			{
 				path: 'all-images',
 				element: <AllImagesView className="h-full" />,
-			},
-			{
-				path: 'uploaded-images',
-				element: <UploadedImagesView />,
 			},
 			// Multimedia
 			{
@@ -315,29 +294,7 @@ export const router = createBrowserRouter([
 			},
 		],
 	},
-	// Rutas de Documentación - Layout independiente
-	{
-		path: '/docs',
-		element: <DocsWrapper />,
-		children: [
-			{
-				index: true,
-				element: (
-					<Suspense fallback={<div />}>
-						<LazyDocsDynamicPage />
-					</Suspense>
-				),
-			},
-			{
-				path: '*',
-				element: (
-					<Suspense fallback={<div />}>
-						<LazyDocsDynamicPage />
-					</Suspense>
-				),
-			},
-		],
-	},
+
 	{
 		path: '*',
 		element: <NotFoundPage />,

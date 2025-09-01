@@ -84,7 +84,7 @@ function TreeItem<T = any>({ item, className, asChild, children, ...props }: Omi
 					'z-10 select-none ps-(--tree-padding) not-last:pb-0.5 outline-hidden focus:z-20 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
 					className
 				)}
-				data-drag-target={typeof item.isDragTarget === 'function' ? item.isDragTarget() : undefined}
+				data- item.isDragTarget === 'function' ? item.isDragTarget() : undefined}
 				data-focus={typeof item.isFocused === 'function' ? item.isFocused() : undefined}
 				data-folder={typeof item.isFolder === 'function' ? item.isFolder() : undefined}
 				data-search-match={typeof item.isMatchingSearch === 'function' ? item.isMatchingSearch() : undefined}
@@ -115,7 +115,7 @@ function TreeItemLabel<T = any>({ item: propItem, children, className, ...props 
 	return (
 		<span
 			className={cn(
-				'flex items-center gap-1 rounded-sm bg-background in-data-[drag-target=true]:bg-accent in-data-[search-match=true]:bg-blue-50! in-data-[selected=true]:bg-accent px-2 py-1.5 not-in-data-[folder=true]:ps-7 in-data-[selected=true]:text-accent-foreground text-sm in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 transition-colors hover:bg-accent [&_svg]:pointer-events-none [&_svg]:shrink-0',
+				'flex items-center gap-1 rounded-sm bg-background in-data-[ in-data-[search-match=true]:bg-blue-50! in-data-[selected=true]:bg-accent px-2 py-1.5 not-in-data-[folder=true]:ps-7 in-data-[selected=true]:text-accent-foreground text-sm in-focus-visible:ring-[3px] in-focus-visible:ring-ring/50 transition-colors hover:bg-accent [&_svg]:pointer-events-none [&_svg]:shrink-0',
 				className
 			)}
 			data-slot="tree-item-label"
@@ -144,7 +144,8 @@ function TreeDragLine({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 		return null;
 	}
 
-	const dragLine = tree.getDragLineStyle();
+	const tree;
+	.getDragLineStyle()
 	return (
 		<div
 			className={cn(

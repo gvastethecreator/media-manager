@@ -1,5 +1,5 @@
 import { CheckIcon, DownloadIcon, EyeIcon, FileJsonIcon, XIcon } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { useCallback, useMemo, useState } from 'react';
 import { darkenHex } from '@/components/cards/shared/rarity-style';
 import { useJsonFile } from '@/lib/api/json-files';

@@ -1,121 +1,19 @@
-import { animate, motion, useMotionValue, useTransform } from 'motion/react';
-import type { CSSProperties, MouseEvent, ReactNode } from 'react';
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
+// Componente temporalmente deshabilitado durante migración a GSAP
+// Original: card-3d
+import React from 'react';
 
-// Tipos flexibles para permitir diferentes sistemas de tipos
-interface Card3DProps {
-	children: ReactNode;
+interface Card3dProps {
+	children?: React.ReactNode;
 	className?: string;
-	style?: CSSProperties;
-	options?: Record<string, unknown>; // Reemplazado any por un tipo más seguro
-	onClick?: () => void;
-	// Props de accesibilidad
-	'aria-labelledby'?: string;
-	'aria-describedby'?: string;
+	[key: string]: any; // Aceptar cualquier prop para compatibilidad
 }
 
-/**
- * Componente Card3D para efectos de tarjeta 3D
- *
- * Este componente añade un efecto de perspectiva y movimiento 3D a las tarjetas
- * basado en la posición del mouse para crear una sensación de profundidad.
- */
-export function Card3D({
-	children,
-	className,
-	style,
-	options = {},
-	onClick,
-	'aria-labelledby': ariaLabelledby,
-	'aria-describedby': ariaDescribedby,
-}: Card3DProps) {
-	// Referencias y estado
-	const cardRef = useRef<HTMLDivElement>(null);
-	const [isTouchDevice, setIsTouchDevice] = useState(false);
-	const [isHovering, setIsHovering] = useState(false);
-
-	// Determinar si es dispositivo táctil al cargar
-	useEffect(() => {
-		setIsTouchDevice('ontouchstart' in window || navigator.maxTouchPoints > 0);
-	}, []);
-
-	// Valores de movimiento para la animación
-	const rotateX = useMotionValue(0);
-	const rotateY = useMotionValue(0);
-	const shadowBlur = useTransform(rotateX, [-15, 0, 15], [10, 15, 10]);
-	const shadowOpacity = useTransform(rotateX, [-15, 0, 15], [0.3, 0.2, 0.3]);
-
-	// Obtener valores de configuración o usar valores predeterminados
-	const enable3DEffect = options.enable3DEffect !== undefined ? options.enable3DEffect : true;
-	const maxRotation = Number(options.maxRotation) || 5;
-	const hoverLiftHeight = Number(options.hoverLiftHeight) || 5;
-
-	// Manejar movimiento del ratón
-	const handleMouseMove = useCallback(
-		(e: MouseEvent<HTMLDivElement>) => {
-			if (!(cardRef.current && enable3DEffect) || isTouchDevice) {
-				return;
-			}
-
-			const rect = cardRef.current.getBoundingClientRect();
-			const width = rect.width;
-			const height = rect.height;
-
-			// Calcular posición relativa del ratón
-			const mouseX = e.clientX - rect.left;
-			const mouseY = e.clientY - rect.top;
-
-			// Calcular rotación basada en la posición del ratón
-			const rY = ((mouseX / width) * 2 - 1) * maxRotation;
-			const rX = ((mouseY / height) * 2 - 1) * -maxRotation;
-
-			// Aplicar valores
-			rotateX.set(rX);
-			rotateY.set(rY);
-		},
-		[enable3DEffect, isTouchDevice, maxRotation, rotateX, rotateY]
-	);
-
-	// Restablecer rotación al salir
-	const handleMouseLeave = useCallback(() => {
-		if (enable3DEffect) {
-			animate(rotateX, 0, { duration: 0.5 });
-			animate(rotateY, 0, { duration: 0.5 });
-		}
-		setIsHovering(false);
-	}, [enable3DEffect, rotateX, rotateY]);
-
-	// Establecer hover al entrar
-	const handleMouseEnter = useCallback(() => {
-		setIsHovering(true);
-	}, []);
-
-	// Estilos dinámicos basados en hover y opciones
-	const dynamicStyles: CSSProperties = {
-		transition: 'transform 0.1s ease, box-shadow 0.3s ease, translate 0.2s ease',
-		translate: isHovering && enable3DEffect ? `0 -${hoverLiftHeight}px` : undefined,
-	};
-
+export function Card3d({ children, className, ...props }: Card3dProps) {
 	return (
-		<motion.div
-			aria-describedby={ariaDescribedby}
-			aria-labelledby={ariaLabelledby}
-			className={cn('card-3d', className)}
-			onClick={onClick}
-			onMouseEnter={handleMouseEnter}
-			onMouseLeave={handleMouseLeave}
-			onMouseMove={handleMouseMove}
-			ref={cardRef}
-			style={{
-				...style,
-				...dynamicStyles,
-				perspective: enable3DEffect ? 1000 : undefined,
-				rotateX: enable3DEffect ? rotateX : 0,
-				rotateY: enable3DEffect ? rotateY : 0,
-			}}
-		>
+		<div className={className} {...props}>
 			{children}
-		</motion.div>
+		</div>
 	);
 }
+
+export default Card3d;

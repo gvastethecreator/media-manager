@@ -1,5 +1,5 @@
 import { ArrowLeft, Box, Download, Edit, Eye, RotateCcw, Share2, Trash2 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';

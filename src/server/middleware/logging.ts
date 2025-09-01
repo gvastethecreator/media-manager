@@ -1,6 +1,33 @@
-import { NextFunction, Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express'; // request-logger with requestId
+import { randomUUID } from 'crypto';
 import fs from 'fs';
 import path from 'path';
+import { serverLogger, type ServerLogger } from '../../lib/logger/server-logger';
+
+/**
+ * Interfaz para el logger contextual por-request
+ * Incluye los métodos principales de logging con contexto automático
+ */
+export interface RequestLogger {
+	/** Log de nivel debug con contexto de request */
+	debug(message: string, context?: unknown): void;
+	/** Log de nivel info con contexto de request */
+	info(message: string, context?: unknown): void;
+	/** Log de nivel warning con contexto de request */
+	warn(message: string, context?: unknown): void;
+	/** Log de nivel error con contexto de request */
+	error(message: string, context?: unknown): void;
+	/** Log de nivel success con contexto de request */
+	success(message: string, context?: unknown): void;
+	/** Log de nivel HTTP con contexto de request */
+	http(message: string, context?: unknown): void;
+	/** Log de nivel DB con contexto de request */
+	db(message: string, context?: unknown): void;
+	/** Log de nivel API con contexto de request */
+	api(message: string, context?: unknown): void;
+	/** Log de nivel system con contexto de request */
+	system(message: string, context?: unknown): void;
+}
 
 // Configuración de logging
 const LOG_TO_FILE = true; // Por defecto habilitado
@@ -46,20 +73,18 @@ function getStatusColor(status: number): string {
 	return colors.white;
 }
 
-// Función para escribir log
+// Función para escribir log (SIMPLICADA - sin duplicación)
 function writeLog(message: string, level: 'info' | 'warn' | 'error' = 'info') {
 	const timestamp = new Date().toISOString();
 	const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message}`;
 
-	// Log a consola con colores
+	// Log a consola con colores (UNA SOLA VEZ)
 	if (LOG_TO_CONSOLE) {
 		const colorCode = level === 'error' ? colors.red : level === 'warn' ? colors.yellow : colors.cyan;
 		const consoleMessage = `${colorCode}🔍 [HTTP-LOG] ${colors.reset}${message}`;
 
-		// Usar múltiples métodos para asegurar que aparezca
+		// Solo una salida a consola
 		console.log(consoleMessage);
-		process.stdout.write(`${consoleMessage}\n`);
-		process.stderr.write(`${colors.magenta}[STDERR-LOG]${colors.reset} ${message}\n`);
 	}
 
 	// Log a archivo
@@ -80,10 +105,45 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 	const method = req.method;
 	const url = req.originalUrl || req.url;
 
-	// 🚨 LOG DIRECTO INMEDIATO
-	const startMessage = `🌐 [${timestamp}] ${method} ${url} - IP: ${ip} - START`;
-	console.log(startMessage);
-	process.stdout.write(`${startMessage}\n`);
+	// Correlación: requestId desde cabecera o generado
+	const incomingId = req.get?.('x-request-id') || undefined;
+	const requestId = incomingId || randomUUID();
+	// Propagar en locals y respuesta
+	res.locals.requestId = requestId;
+	try {
+		res.setHeader('X-Request-Id', requestId);
+	} catch {}
+
+	// Inyectar un logger contextual por-request en res.locals.logger
+	// Evitamos duplicación: este logger está disponible para handlers/rutas, pero el middleware
+	// sigue usando writeLog para su salida a archivo.
+	const baseContext = { method, url, ip };
+	const base = serverLogger.withContext('HTTPMiddleware').withOptions({ showRequestId: true, showPerformance: true });
+
+	const boundLogger: RequestLogger = {
+		debug: (message: string, context?: unknown) =>
+			base.debug(message, { ...baseContext, ...((context as object) || {}) }, requestId, startTime),
+		info: (message: string, context?: unknown) =>
+			base.info(message, { ...baseContext, ...((context as object) || {}) }, requestId, startTime),
+		warn: (message: string, context?: unknown) =>
+			base.warn(message, { ...baseContext, ...((context as object) || {}) }, requestId, startTime),
+		error: (message: string, context?: unknown) =>
+			base.error(message, { ...baseContext, ...((context as object) || {}) }, requestId, startTime),
+		success: (message: string, context?: unknown) =>
+			base.success(message, { ...baseContext, ...((context as object) || {}) }, requestId, startTime),
+		http: (message: string, context?: unknown) =>
+			base.http(message, { ...baseContext, ...((context as object) || {}) }, requestId, startTime),
+		db: (message: string, context?: unknown) =>
+			base.db(message, { ...baseContext, ...((context as object) || {}) }, requestId, startTime),
+		api: (message: string, context?: unknown) =>
+			base.api(message, { ...baseContext, ...((context as object) || {}) }, requestId, startTime),
+		system: (message: string, context?: unknown) =>
+			base.system(message, { ...baseContext, ...((context as object) || {}) }, requestId, startTime),
+	};
+	res.locals.logger = boundLogger;
+
+	// LOG ÚNICO (eliminamos duplicación)
+	const startMessage = `[rid:${requestId}] 🌐 [${timestamp}] ${method} ${url} - IP: ${ip} - START`;
 	logInfo(startMessage);
 
 	// Usar evento 'finish' de Express para capturar el final
@@ -94,11 +154,9 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 		const statusCode = res.statusCode;
 
 		const statusEmoji = statusCode >= 400 ? '❌' : statusCode >= 300 ? '⚠️' : '✅';
-		const endMessage = `${statusEmoji} [${endTimestamp}] ${method} ${url} - ${statusCode} - ${duration}ms - IP: ${ip} - END`;
+		const endMessage = `[rid:${requestId}] ${statusEmoji} [${endTimestamp}] ${method} ${url} - ${statusCode} - ${duration}ms - IP: ${ip} - END`;
 
-		console.log(endMessage);
-		process.stdout.write(`${endMessage}\n`);
-
+		// Log único sin duplicación
 		if (statusCode >= 400) {
 			logError(endMessage);
 		} else {
@@ -110,9 +168,11 @@ export const requestLogger = (req: Request, res: Response, next: NextFunction) =
 };
 
 // Middleware para logging de errores
-export function errorLogger(error: any, req: Request, _res: Response, next: NextFunction) {
+export function errorLogger(error: any, req: Request, res: Response, next: NextFunction) {
 	const { method, url, ip } = req;
-	const errorMessage = `💥 ERROR - ${method} ${url} - IP: ${ip} - Error: ${error.message || error}`;
+	const rid = res?.locals?.requestId;
+	const ridSuffix = rid ? ` - rid: ${rid}` : '';
+	const errorMessage = `💥 ERROR - ${method} ${url} - IP: ${ip}${ridSuffix} - Error: ${error.message || error}`;
 
 	writeLog(errorMessage, 'error');
 

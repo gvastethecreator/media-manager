@@ -101,13 +101,7 @@ function DataGridTableDnd<TData>({ handleDragEnd }: { handleDragEnd: (event: Dra
 	const sensors = useSensors(useSensor(MouseSensor, {}), useSensor(TouchSensor, {}), useSensor(KeyboardSensor, {}));
 
 	return (
-		<DndContext
-			collisionDetection={closestCenter}
-			id={useId()}
-			modifiers={[restrictToParentElement]}
-			onDragEnd={handleDragEnd}
-			sensors={sensors}
-		>
+		<DndContext collisionDetection={closestCenter} id={useId()} modifiers={[restrictToParentElement]} sensors={sensors}>
 			<div className="relative">
 				<DataGridTableBase>
 					<DataGridTableHead>

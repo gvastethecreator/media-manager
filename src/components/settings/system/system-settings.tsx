@@ -1,5 +1,5 @@
 import { Activity, AlertCircle, Database, HardDrive, RefreshCw, Trash2 } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { useCallback } from 'react';
 import {
 	AlertDialog,

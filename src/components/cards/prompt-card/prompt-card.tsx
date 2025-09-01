@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { usePrompt, useRecentPromptImages } from '@/lib/api/prompts';
 import { cn } from '@/lib/utils';

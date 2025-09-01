@@ -13,15 +13,13 @@ import {
 	getProfile,
 	getProfiles,
 	updateProfile,
-} from '@/services/profile/profile.service';
-
-import type {
-	CreateProfileInput,
-	ProfileExtended,
-	ProfileFilters,
-	ProfilePaginationOptions,
-	UpdateProfileInput,
-} from '@/types/entities/profile/types';
+	type CreateProfileInput,
+	type ProfileExtended,
+	type ProfileFilters,
+	type ProfilePaginationOptions,
+	type UpdateProfileInput,
+} from './profile.service';
+import { ensureDefaultProfile } from '@/lib/utils/profile/profile-utils';
 
 /**
  * Cliente para consumir funcionalidades de perfiles desde componentes de cliente
@@ -68,7 +66,7 @@ export const profileClient = {
 	/**
 	 * Asegura que existe un perfil por defecto
 	 */
-	ensureDefaultProfile: () => getActiveProfile(), // Usamos getActiveProfile como sustituto para ensureDefaultProfile
+	ensureDefaultProfile: () => ensureDefaultProfile(),
 };
 
 // Re-exportar tipos para conveniencia

@@ -1,5 +1,5 @@
 import { Clock, File, FileText, Folder, HardDrive, Image, Music, Video } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import type { FolderStats } from '@/types/folders';
@@ -122,7 +122,6 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 										</div>
 									</div>
 								</div>
-
 							</div>
 							{pieData.length > 0 ? (
 								<div>
@@ -147,7 +146,6 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 						</CardContent>
 					</Card>
 				</div>
-
 			</div>
 		</div>
 	);

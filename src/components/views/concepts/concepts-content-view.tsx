@@ -1,5 +1,5 @@
 import { Lightbulb } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React from 'react';
 import { ConceptCard } from '@/components/cards/concept-card';
 import { EmptyState } from '@/components/core/data-display';

@@ -1,7 +1,7 @@
 'use client';
 
 import { ChevronRight, File, Folder, FolderOpen } from 'lucide-react';
-import { AnimatePresence, motion } from 'motion/react';
+import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import React, { useCallback, useState } from 'react';
 import { cn } from '@/lib/utils';
 

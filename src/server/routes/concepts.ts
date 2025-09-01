@@ -9,8 +9,8 @@ const router = express.Router();
 const ConceptFiltersSchema = z.object({
 	search: z.string().optional(),
 	category: z.string().optional(),
-	limit: z.number().int().positive().max(100).default(50).optional(),
-	offset: z.number().int().min(0).default(0).optional(),
+	limit: z.coerce.number().int().positive().max(100).default(50).optional(),
+	offset: z.coerce.number().int().min(0).default(0).optional(),
 	sortBy: z
 		.enum(['name', 'createdAt', 'updatedAt', 'category', 'totalImages', 'totalVideos', 'type', 'complexity'])
 		.default('name')

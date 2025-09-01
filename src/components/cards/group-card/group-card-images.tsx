@@ -1,5 +1,5 @@
 import { FolderIcon } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React, { useState } from 'react';
 import {
 	buildHolographicStyle,

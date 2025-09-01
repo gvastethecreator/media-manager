@@ -1,4 +1,4 @@
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import React, { useCallback, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 // Importar tipos correctos de entities

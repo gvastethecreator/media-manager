@@ -1,5 +1,5 @@
 import { ImageOffIcon, VideoIcon } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRecentCollectionMedia } from '@/lib/api/collections';
 

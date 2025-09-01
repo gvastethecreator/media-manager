@@ -1,5 +1,5 @@
 import { Check, Code, Eye, Image as ImageIcon } from 'lucide-react';
-import { motion } from 'motion/react';
+import { motion } from '@/components/ui/motion-shim';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 
