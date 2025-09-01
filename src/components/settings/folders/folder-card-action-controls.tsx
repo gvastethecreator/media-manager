@@ -1,4 +1,5 @@
 import { ChevronDown, ChevronRight, Edit2, RefreshCw, Trash2 } from 'lucide-react';
+import { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SimpleTooltip } from './common/simple-tooltip';
@@ -18,7 +19,7 @@ interface NormalModeControlsProps {
 	isExpanded?: boolean;
 }
 
-export function NormalModeControls({
+export const NormalModeControls = memo(function NormalModeControls({
 	folder,
 	selectedFolder,
 	isGloballyProcessing,
@@ -114,4 +115,4 @@ export function NormalModeControls({
 			</SimpleTooltip>
 		</>
 	);
-}
+});

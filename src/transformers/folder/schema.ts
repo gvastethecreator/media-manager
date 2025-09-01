@@ -25,7 +25,6 @@ export const FolderSchema = z.object({
 	isFavorite: z.boolean().default(false),
 	totalFiles: z.number().int('Debe ser un número entero').min(0, 'No puede ser negativo').default(0),
 	totalSize: z.number().int('Debe ser un número entero').min(0, 'No puede ser negativo').default(0),
-	autoReindex: z.boolean().default(false),
 	lastIndexed: z.date().nullable().optional(),
 	parentId: z.string().uuid('Parent ID debe ser un UUID válido').nullable().optional(),
 	presetId: z.string().uuid('Preset ID debe ser un UUID válido').nullable().optional(),
@@ -48,7 +47,6 @@ export const FolderCreateSchema = z.object({
 		.optional(),
 	featuredImage: z.string().url('Debe ser una URL válida').nullable().optional(),
 	isFavorite: z.boolean().default(false),
-	autoReindex: z.boolean().default(false),
 	parentId: z.string().uuid('Parent ID debe ser un UUID válido').nullable().optional(),
 	presetId: z.string().uuid('Preset ID debe ser un UUID válido').nullable().optional(),
 });
@@ -78,7 +76,6 @@ export const FolderUpdateSchema = z.object({
 	isFavorite: z.boolean().optional(),
 	totalFiles: z.number().int('Debe ser un número entero').min(0, 'No puede ser negativo').optional(),
 	totalSize: z.number().int('Debe ser un número entero').min(0, 'No puede ser negativo').optional(),
-	autoReindex: z.boolean().optional(),
 	lastIndexed: z.date().nullable().optional(),
 	parentId: z.string().uuid('Parent ID debe ser un UUID válido').nullable().optional(),
 	presetId: z.string().uuid('Preset ID debe ser un UUID válido').nullable().optional(),

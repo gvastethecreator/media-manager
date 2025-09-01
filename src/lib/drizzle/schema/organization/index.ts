@@ -47,7 +47,6 @@ export const albums = sqliteTable(
 		totalVideos: integer('totalVideos').notNull().default(0),
 		totalSize: integer('totalSize').notNull().default(0),
 		filters: text('filters'),
-		shortcut: text('shortcut'),
 		category: text('category'),
 		metadata: text('metadata'),
 		lastImageAddedAt: integer('lastImageAddedAt', { mode: 'timestamp_ms' }),

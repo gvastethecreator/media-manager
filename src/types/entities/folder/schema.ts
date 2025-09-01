@@ -21,7 +21,6 @@ export const FolderBaseSchema = z.object({
 		.nullable(),
 	featuredImage: z.string().url('Imagen destacada debe ser URL válida').nullable(),
 	isFavorite: z.boolean().default(false),
-	autoReindex: z.boolean().default(true),
 	totalFiles: z.number().int().min(0, 'Total de archivos no puede ser negativo'),
 	totalSize: z.number().int().min(0, 'Tamaño total no puede ser negativo'),
 	lastIndexed: z.date().nullable(),
@@ -54,7 +53,6 @@ export const CreateFolderSchema = z.object({
 		.nullable(),
 	featuredImage: z.string().url('La imagen destacada debe ser una URL válida').optional().nullable(),
 	isFavorite: z.boolean().default(false).optional(),
-	autoReindex: z.boolean().default(true),
 	parentId: z.string().uuid('El ID del padre debe ser un UUID válido').optional().nullable(),
 	presetId: z.string().uuid('El ID del preset debe ser un UUID válido').optional().nullable(),
 });
@@ -84,7 +82,6 @@ export const UpdateFolderSchema = z.object({
 		.optional(),
 	featuredImage: z.string().url('La imagen destacada debe ser una URL válida').nullable().optional(),
 	isFavorite: z.boolean().optional(),
-	autoReindex: z.boolean().optional(),
 	parentId: z.string().uuid('El ID del padre debe ser un UUID válido').nullable().optional(),
 	presetId: z.string().uuid('El ID del preset debe ser un UUID válido').nullable().optional(),
 });

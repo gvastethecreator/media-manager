@@ -23,7 +23,6 @@ export interface FolderBase extends EntityBase {
 	isFavorite: boolean;
 	totalFiles: number;
 	totalSize: number;
-	autoReindex: boolean;
 	lastIndexed: Date | null;
 	parentId: string | null;
 	presetId: string | null;

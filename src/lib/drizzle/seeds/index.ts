@@ -22,7 +22,7 @@ import { seedPlaces } from './places.seed';
 import { seedProfiles } from './profiles.seed';
 import { seedPrompts } from './prompts.seed';
 import { seedProperties } from './properties.seed';
-import { seedQueueJobs } from './queueJobs.seed';
+// import { seedQueueJobs } from './queueJobs.seed';
 import { seedSettings } from './settings.seed';
 import { seedTags } from './tags.seed';
 // import { seedThumbnails } from './thumbnails.seed';
@@ -66,7 +66,7 @@ export async function runSeeds() {
 		// Ejecutar seeds en orden de dependencias
 		// Core entities
 		await seedProfiles(db);
-		await seedQueueJobs(db);
+		// await seedQueueJobs(db);  // Vacía - sin datos
 		await seedSettings(db);
 
 		// Carpetas (estructura de almacenamiento)

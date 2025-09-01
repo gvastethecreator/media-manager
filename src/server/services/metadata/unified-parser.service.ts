@@ -27,10 +27,10 @@ const DEFAULT_OPTIONS: MetadataExtractionOptions = {
 	extract_exif: true,
 	extract_iptc: true,
 	extract_xmp: true,
-	extract_c2pa: false, // Por ahora deshabilitado hasta implementar C2PA
+	extract_c2pa: true,
 	extract_ai_metadata: true,
-	extract_video_metadata: false, // Se habilitará cuando sea video
-	timeout: 30_000, // 30 segundos
+	extract_video_metadata: true,
+	timeout: 30000,
 	max_file_size: 100 * 1024 * 1024, // 100MB
 	debug: false,
 	include_raw_data: false,
@@ -42,7 +42,8 @@ const DEFAULT_OPTIONS: MetadataExtractionOptions = {
 export async function extractAllMetadata(
 	buffer: Buffer,
 	filename: string,
-	options: Partial<MetadataExtractionOptions> = {}
+	options: Partial<MetadataExtractionOptions> = {},
+	fullPath?: string // Ruta completa para videos
 ): Promise<MetadataExtractionResult> {
 	const startTime = Date.now();
 	const opts = { ...DEFAULT_OPTIONS, ...options };
@@ -117,8 +118,11 @@ export async function extractAllMetadata(
 		// 6. C2PA (Content Credentials) si está habilitado
 		if (opts.extract_c2pa) {
 			try {
-				// TODO: Implementar cuando C2PA esté disponible
-				result.warnings.push('C2PA extraction no implementado aún');
+				const { extractC2PAData } = await import('./c2pa-parser.service');
+				const c2paData = await extractC2PAData(buffer, filename);
+				if (c2paData) {
+					result.c2pa = c2paData as any;
+				}
 			} catch (error) {
 				result.warnings.push(`Error C2PA: ${error}`);
 			}
@@ -127,8 +131,12 @@ export async function extractAllMetadata(
 		// 7. Video metadata si es aplicable
 		if (opts.extract_video_metadata && isVideoFile(filename)) {
 			try {
-				// TODO: Implementar extracción de video metadata
-				result.warnings.push('Video metadata extraction no implementado aún');
+				const { extractVideoMetadata } = await import('./video-parser.service');
+				const videoPath = fullPath || filename; // Usar ruta completa si está disponible
+				const videoMetadata = await extractVideoMetadata(videoPath);
+				if (videoMetadata) {
+					result.video_metadata = videoMetadata;
+				}
 			} catch (error) {
 				result.warnings.push(`Error video metadata: ${error}`);
 			}
@@ -480,8 +488,14 @@ function isPNGFile(buffer: Buffer): boolean {
 }
 
 function isVideoFile(filename: string): boolean {
+	const videoExtensions = [
+		'mp4', 'mov', 'avi', 'mkv', 'webm', 
+		'm4v', '3gp', 'flv', 'wmv', 'mpg', 
+		'mpeg', 'ts', 'mts', 'm2ts'
+	];
+	
 	const ext = filename.toLowerCase().split('.').pop() || '';
-	return ['mp4', 'mov', 'avi', 'webm', 'mkv', 'wmv', 'flv'].includes(ext);
+	return videoExtensions.includes(ext);
 }
 
 function getFileFormat(filename: string): string {

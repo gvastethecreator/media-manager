@@ -91,11 +91,7 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 				return true;
 			}
 
-			// Carpeta con autoReindex activado y desactualizada
-			if (folder.autoReindex && isOld) {
-				logger.debug(`Carpeta con autoReindex habilitado: ${folder.name} (${folder.id})`);
-				return true;
-			}
+			// Criterios adicionales podrían agregarse aquí si se requieren
 
 			return false;
 		});
@@ -120,7 +116,7 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
 
 				// Ejecutar con protección de circuit breaker
 				await circuitBreaker.current.execute(`folder-${folder.id}`, async () => {
-					await reindexFolderMutation.mutateAsync(folder.id);
+					await reindexFolderMutation.mutateAsync({ id: folder.id });
 				});
 
 				logger.info(`✅ Carpeta indexada correctamente: ${folder.name}`);
@@ -373,7 +369,7 @@ export function useAutoFolderIndexing(options: UseAutoFolderIndexingOptions = {}
  *
  * - Carpetas nunca indexadas (lastIndexed = null)
  * - Carpetas vacías indexadas hace más de 1 hora
- * - Carpetas con autoReindex activado y desactualizadas
+ * - Criterios configurables a futuro (sin bandera autoReindex)
  *
  * ## Ejemplo de uso:
  *

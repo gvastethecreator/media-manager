@@ -582,7 +582,6 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 						totalFiles: 0,
 						totalSize: 0,
 						lastIndexed: new Date(),
-						autoReindex: false,
 					});
 
 					syncLogger.info(`✅ Carpeta agregada: ${folder.name}`);
