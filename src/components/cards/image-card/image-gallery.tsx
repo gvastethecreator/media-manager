@@ -66,7 +66,7 @@ export function ImageGallery({
 	const [searchTerm, setSearchTerm] = useState('');
 	const [sortBy, setSortBy] = useState<SortOption>('date');
 	const [sortDirection, setSortDirection] = useState<SortDirection>('desc');
-	const [, setLayout] = useState(defaultLayout);
+	const [currentLayout, setLayout] = useState(defaultLayout);
 	const [selectedImages, setSelectedImages] = useState<string[]>([]);
 	const [isLoadingMore, setIsLoadingMore] = useState(false);
 	const [_imagesData, setImagesData] = useState<ImageWithStats[]>([]);
@@ -197,9 +197,9 @@ export function ImageGallery({
 		}
 	}, [onSelectionChange]);
 
-	// Determinar clases para el grid según el
+	// Determinar clases para el grid según el layout
 	const getLayoutClasses = () => {
-		switch () {
+		switch (currentLayout) {
 			case 'grid':
 				return 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4';
 			case 'grid-dense':
@@ -267,7 +267,7 @@ export function ImageGallery({
 							{/* Selector de  */}
 							<div className="flex items-center rounded-md border border-input">
 								<Button
-									className={cn('h-9 rounded-none rounded-l-md px-2',  === 'grid' && 'bg-primary/10')}
+									className={cn('h-9 rounded-none rounded-l-md px-2', currentLayout === 'grid' && 'bg-primary/10')}
 									onClick={() => setLayout('grid')}
 									size="sm"
 									variant="ghost"
@@ -277,7 +277,7 @@ export function ImageGallery({
 								<Button
 									className={cn(
 										'h-9 rounded-none border-input border-r border-l px-2',
-										 === 'grid-dense' && 'bg-primary/10'
+										currentLayout === 'grid-dense' && 'bg-primary/10'
 									)}
 									onClick={() => setLayout('grid-dense')}
 									size="sm"
@@ -286,7 +286,7 @@ export function ImageGallery({
 									<Grid2X2Icon className="h-4 w-4" />
 								</Button>
 								<Button
-									className={cn('h-9 rounded-none rounded-r-md px-2',  === 'list' && 'bg-primary/10')}
+									className={cn('h-9 rounded-none rounded-r-md px-2', currentLayout === 'list' && 'bg-primary/10')}
 									onClick={() => setLayout('list')}
 									size="sm"
 									variant="ghost"
@@ -311,7 +311,6 @@ export function ImageGallery({
 				animate={{ opacity: 1 }}
 				className={getLayoutClasses()}
 				initial={{ opacity: 0 }}
-				
 				transition={{ duration: 0.3 }}
 			>
 				{sortedImages.map((image, index) => {
@@ -325,17 +324,16 @@ export function ImageGallery({
 								y: 0,
 								transition: { delay: index * 0.05, duration: 0.3 },
 							}}
-							className={ === 'list' ? 'w-full' : undefined}
+							className={currentLayout === 'list' ? 'w-full' : undefined}
 							exit={{ opacity: 0, scale: 0.9 }}
 							initial={{ opacity: 0, y: 20 }}
 							key={imageId}
-							
 						>
 							{typeof image === 'string' ? (
 								// Renderizar tarjeta con solo el ID, cargará datos internamente
 								<ImageCardImproved
-									aspectRatio={ === 'list' ? 'auto' : aspectRatio}
-									className={ === 'list' ? 'flex h-20 flex-row items-center' : undefined}
+									aspectRatio={currentLayout === 'list' ? 'auto' : aspectRatio}
+									className={currentLayout === 'list' ? 'flex h-20 flex-row items-center' : undefined}
 									imageId={image}
 									isSelected={isSelected}
 									onClick={onImageClick ? handleImageClick : undefined}
@@ -345,8 +343,8 @@ export function ImageGallery({
 							) : (
 								// Renderizar tarjeta con los datos completos
 								<ImageCardImproved
-									aspectRatio={ === 'list' ? 'auto' : aspectRatio}
-									className={ === 'list' ? 'flex h-20 flex-row items-center' : undefined}
+									aspectRatio={currentLayout === 'list' ? 'auto' : aspectRatio}
+									className={currentLayout === 'list' ? 'flex h-20 flex-row items-center' : undefined}
 									imageId={image.id}
 									isSelected={isSelected}
 									onClick={onImageClick ? handleImageClick : undefined}

@@ -2,7 +2,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { getRarityGradient } from '@/components/cards/shared/rarity-gradients';
 import { darkenHex } from '@/components/cards/shared/rarity-style';
 import { motion } from '@/components/ui/motion-shim';
-import { usePlace, useRecentPlaceMedia } from '@/lib/api/places';
+import { useRecentPlaceMedia } from '@/lib/api/places';
 import { cn } from '@/lib/utils';
 import { PlaceWithStats } from '@/types/entities/place';
 import { CardContainer } from '../card-container';
@@ -12,8 +12,8 @@ import { PlaceCardHeader } from './place-card-header';
 import { PlaceCardImages } from './place-card-images';
 
 export interface PlaceCardProps {
-	/** ID del lugar a mostrar */
-	placeId: string;
+	/** Lugar a mostrar */
+	place: PlaceWithStats;
 	/** Tamaño compacto con menos información */
 	compact?: boolean;
 	/** Modo TCG con efectos especiales de carta */
@@ -23,7 +23,7 @@ export interface PlaceCardProps {
 	/** Clase CSS adicional para la carta */
 	className?: string;
 	/** Función a ejecutar al hacer clic en la tarjeta */
-	onClick?: (placeData: PlaceWithStats) => void;
+	onClick?: () => void;
 	/** Si la tarjeta está seleccionada */
 	isSelected?: boolean;
 }
@@ -335,7 +335,7 @@ const PlaceCardView: React.FC<PlaceCardViewProps> = ({
 				disabled && 'pointer-events-none opacity-70',
 				className
 			)}
-			onClick={disabled || !onClick ? undefined : () => onClick(place)}
+			onClick={disabled || !onClick ? undefined : () => onClick()}
 			onKeyDown={handleKeyDown}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
@@ -381,7 +381,7 @@ const PlaceCardView: React.FC<PlaceCardViewProps> = ({
 };
 
 export function PlaceCard({
-	placeId,
+	place,
 	compact = false,
 	tcgMode = true,
 	disabled = false,
@@ -389,14 +389,12 @@ export function PlaceCard({
 	onClick,
 	isSelected = false,
 }: PlaceCardProps) {
-	const { data: place, isLoading, error } = usePlace(placeId);
-	const { data: recentMediaData } = useRecentPlaceMedia(placeId);
+	// Cargar media reciente para el lugar
+	const { data: recentMediaData } = useRecentPlaceMedia(place.id);
 
-	if (isLoading) {
-		return <PlaceCardLoading className={className} />;
-	}
-	if (error || !place) {
-		return <PlaceCardError className={className} message={error?.message || 'Lugar no encontrado'} />;
+	// Validación simple de place requerido
+	if (!place) {
+		return <PlaceCardError className={className} message="Lugar no encontrado" />;
 	}
 
 	const derived = useMemo(() => preparePlaceDerivedData(place, recentMediaData), [place, recentMediaData]);

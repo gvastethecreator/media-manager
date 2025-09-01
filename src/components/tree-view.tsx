@@ -116,7 +116,7 @@ export function TreeView({
 						if (hasChildren) {
 							toggleExpanded(node.id);
 						}
-						handleSelection(node.id, e.ctrlKey || e.metaKey);
+						handleSelection(node.id, e?.ctrlKey || e?.metaKey);
 						onNodeClick?.(node);
 					}}
 					style={{ paddingLeft: level * indent + 4 }}

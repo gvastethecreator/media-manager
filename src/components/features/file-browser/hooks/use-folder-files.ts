@@ -1,33 +1,70 @@
 import { useEffect, useMemo } from 'react';
+import { useFolder } from '@/lib/api/folders';
 import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
 import { useFile3DStore } from '@/store/entities/file-3d';
 import { useImageStore } from '@/store/entities/image';
 import { useJsonFileStore } from '@/store/entities/json-file/json-file.store';
 import { useVideoStore } from '@/store/entities/video';
-import type { AudioWithStats } from '@/types/entities/audio';
-import type { DocumentWithStats } from '@/types/entities/document';
-import type { File3DWithStats } from '@/types/entities/file3d';
-import type { ImageWithStats } from '@/types/entities/image';
-import type { JsonFileWithStats } from '@/types/entities/json-file';
-import type { VideoWithStats } from '@/types/entities/video/types';
 import type { MediaItem } from '../components/media-thumbnail';
 
-type MediaUnion =
-	| (ImageWithStats & { entityType: 'image' })
-	| (VideoWithStats & { entityType: 'video' })
-	| (AudioWithStats & { entityType: 'audio' })
-	| (DocumentWithStats & { entityType: 'document' })
-	| (JsonFileWithStats & { entityType: 'jsonFile' })
-	| (File3DWithStats & { entityType: 'file3d' });
+// Opciones para el hook useFolderFiles
+interface UseFolderFilesOptions {
+	includeSubfolders?: boolean;
+}
 
-export function useFolderFiles(folderId: string | null) {
+/**
+ * Helper function para filtrar entidades por carpeta, considerando subcarpetas si es necesario
+ */
+function filterByFolder<T extends { folderId: string; path?: string }>(
+	items: T[],
+	folderId: string,
+	includeSubfolders: boolean,
+	folderPath?: string
+): T[] {
+	if (!includeSubfolders) {
+		// Comportamiento tradicional: solo elementos directos de la carpeta
+		return items.filter((item) => item.folderId === folderId);
+	}
+
+	// Si includeSubfolders está activado, también incluir elementos de subcarpetas
+	if (!folderPath) {
+		// Si no tenemos la ruta de la carpeta, fallback al comportamiento tradicional
+		return items.filter((item) => item.folderId === folderId);
+	}
+
+	return items.filter((item) => {
+		// Incluir elementos directos de la carpeta
+		if (item.folderId === folderId) {
+			return true;
+		}
+
+		// Incluir elementos de subcarpetas si tienen path y está dentro del folderPath
+		if (item.path && folderPath) {
+			// Normalizar paths para comparación
+			const itemPath = item.path.replace(/\\/g, '/');
+			const normalizedFolderPath = folderPath.replace(/\\/g, '/');
+
+			// Verificar si el archivo está en una subcarpeta
+			return itemPath.startsWith(`${normalizedFolderPath}/`);
+		}
+
+		return false;
+	});
+}
+
+export function useFolderFiles(folderId: string | null, options: UseFolderFilesOptions = {}) {
+	const { includeSubfolders = false } = options;
+
 	const { getImagesByFolder, fetchImages, folderLoadState } = useImageStore();
 	const { getVideosByFolder, fetchVideos, isLoading: loadingVideos } = useVideoStore();
 	const { fetchAudios, isLoading: loadingAudios } = useAudioStore();
 	const { fetchDocuments, isLoading: loadingDocuments, documents } = useDocumentStore();
 	const { fetchJsonFiles, loading: loadingJson, jsonFiles } = useJsonFileStore();
 	const { fetchFile3Ds, loading: loadingFile3D, file3Ds } = useFile3DStore();
+
+	// Obtener información de la carpeta para conocer su ruta (solo si includeSubfolders está habilitado)
+	const { data: folderData } = useFolder(includeSubfolders && folderId ? folderId : '');
 
 	const imageFolderState = folderId ? folderLoadState?.[folderId] : undefined;
 	const loadingImages = imageFolderState?.loading ?? !imageFolderState?.loaded;
@@ -54,6 +91,8 @@ export function useFolderFiles(folderId: string | null) {
 
 	const items: MediaItem[] = useMemo(() => {
 		const result: MediaItem[] = [];
+		const folderPath = folderData?.path;
+
 		// Images
 		for (const img of images) {
 			result.push({
@@ -84,9 +123,10 @@ export function useFolderFiles(folderId: string | null) {
 				height: (vid as any).height,
 			});
 		}
-		// Audios
+		// Audios - usar función de filtrado para subcarpetas
 		if (folderId) {
-			for (const a of audios.filter((x) => x.folderId === folderId)) {
+			const filteredAudios = filterByFolder(audios, folderId, includeSubfolders, folderPath);
+			for (const a of filteredAudios) {
 				result.push({
 					id: a.id,
 					name: a.name,
@@ -97,9 +137,10 @@ export function useFolderFiles(folderId: string | null) {
 					path: (a as any).path,
 				});
 			}
-			// Documents
+			// Documents - usar función de filtrado para subcarpetas
 			const docsArr = Object.values(documents || {});
-			for (const d of docsArr.filter((x) => x.folderId === folderId)) {
+			const filteredDocs = filterByFolder(docsArr, folderId, includeSubfolders, folderPath);
+			for (const d of filteredDocs) {
 				result.push({
 					id: d.id,
 					name: d.name,
@@ -110,8 +151,9 @@ export function useFolderFiles(folderId: string | null) {
 					path: (d as any).path,
 				});
 			}
-			// JSON Files
-			for (const j of (jsonFiles || []).filter((x) => x.folderId === folderId)) {
+			// JSON Files - usar función de filtrado para subcarpetas
+			const filteredJsonFiles = filterByFolder(jsonFiles || [], folderId, includeSubfolders, folderPath);
+			for (const j of filteredJsonFiles) {
 				result.push({
 					id: j.id,
 					name: j.name,
@@ -122,8 +164,9 @@ export function useFolderFiles(folderId: string | null) {
 					path: (j as any).path,
 				});
 			}
-			// 3D Files
-			for (const f of (file3Ds || []).filter((x) => x.folderId === folderId)) {
+			// 3D Files - usar función de filtrado para subcarpetas
+			const filteredFile3Ds = filterByFolder(file3Ds || [], folderId, includeSubfolders, folderPath);
+			for (const f of filteredFile3Ds) {
 				result.push({
 					id: f.id,
 					name: f.name,
@@ -137,7 +180,7 @@ export function useFolderFiles(folderId: string | null) {
 		}
 
 		return result;
-	}, [images, videos, audios, documents, jsonFiles, file3Ds, folderId]);
+	}, [images, videos, audios, documents, jsonFiles, file3Ds, folderId, includeSubfolders, folderData?.path]);
 
 	return {
 		items,

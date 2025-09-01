@@ -9,6 +9,7 @@
 
 export type { VideoBase, VideoStatistics, VideoWithStats } from '../../types/entities/video/base';
 export type { VideoComplete } from '../../types/entities/video/types';
+export * from './adapter';
 export {
 	mapCreateVideoDataToDrizzle,
 	mapUpdateVideoDataToDrizzle,

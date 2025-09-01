@@ -1,6 +1,5 @@
 import React, { useCallback, useMemo, useState } from 'react';
 import { motion } from '@/components/ui/motion-shim';
-import { useVideo } from '@/lib/api/videos';
 import { cn } from '@/lib/utils';
 import type { VideoWithStats } from '@/types/entities/video';
 import { CardContainer } from '../card-container';
@@ -10,8 +9,8 @@ import { VideoCardHeader } from './video-card-header';
 import { VideoCardThumbnail } from './video-card-thumbnail';
 
 export interface VideoCardProps {
-	videoId: string;
-	onClick?: (videoData: VideoWithStats) => void;
+	video: VideoWithStats;
+	onClick?: () => void;
 	className?: string;
 	style?: React.CSSProperties;
 	compact?: boolean;
@@ -27,7 +26,7 @@ export interface VideoCardProps {
  * incluyendo thumbnail, estadísticas técnicas, calidad y metadatos.
  */
 export function VideoCard({
-	videoId,
+	video,
 	onClick,
 	className,
 	style,
@@ -36,7 +35,6 @@ export function VideoCard({
 	tcgMode = true,
 	disabled = false,
 }: VideoCardProps) {
-	const { data: video, isLoading, error } = useVideo(videoId);
 	const [isHovered, setIsHovered] = useState(false);
 
 	// Calcular colores basados en la calidad técnica
@@ -100,36 +98,23 @@ export function VideoCard({
 
 	// Manejar eventos
 	const handleClick = useCallback(() => {
-		if (!disabled && onClick && video) {
-			onClick(video);
+		if (!disabled && onClick) {
+			onClick();
 		}
-	}, [onClick, disabled, video]);
+	}, [onClick, disabled]);
 
 	const handleKeyDown = useCallback(
 		(e: React.KeyboardEvent) => {
-			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick && video) {
+			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick) {
 				e.preventDefault();
-				onClick(video);
+				onClick();
 			}
 		},
-		[onClick, disabled, video]
+		[onClick, disabled]
 	);
 
-	// Si no hay datos del video o está cargando, mostrar un esqueleto o un mensaje de error
-	if (isLoading) {
-		return (
-			<div
-				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
-					className
-				)}
-			>
-				<p className="text-gray-500">Cargando video...</p>
-			</div>
-		);
-	}
-
-	if (error || !video) {
+	// Validación simple de video requerido
+	if (!video) {
 		return (
 			<div
 				className={cn(
@@ -137,7 +122,7 @@ export function VideoCard({
 					className
 				)}
 			>
-				<p className="text-red-800">Error: {error?.message || 'Video no encontrado'}</p>
+				<p className="text-red-800">Error: Video no encontrado</p>
 			</div>
 		);
 	}
@@ -162,13 +147,11 @@ export function VideoCard({
 				compact ? 'w-40' : 'w-64',
 				className
 			)}
-			disabled={disabled}
 			onClick={handleClick}
 			onKeyDown={handleKeyDown}
 			onMouseEnter={() => setIsHovered(true)}
 			onMouseLeave={() => setIsHovered(false)}
 			style={style}
-			type="button"
 			whileHover={disabled ? {} : { y: -4, scale: 1.02 }}
 			whileTap={disabled ? {} : { scale: 0.98 }}
 		>

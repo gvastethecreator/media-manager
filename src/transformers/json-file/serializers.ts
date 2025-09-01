@@ -48,6 +48,7 @@ export function validateAndSerializeJsonFile(input: unknown): JsonFileWithStats 
 		validationErrors: null,
 		keyCount: calculateKeyCount(data.content),
 		depth: calculateNestingDepth(data.content),
+		entityType: 'json-file',
 		createdAt: new Date(),
 		updatedAt: new Date(),
 		// Estadísticas calculadas

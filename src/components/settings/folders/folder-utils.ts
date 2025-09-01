@@ -1,5 +1,5 @@
 import { clientLogger } from '@/lib/logger/client-logger';
-import { IndexStatus } from './folder-index-status-badge';
+import type { IndexStatus } from './folder-card-index-status-badge';
 import type { ExtendedFolder } from './folder-types';
 
 const folderLogger = clientLogger.withContext('FolderUtils');

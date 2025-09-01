@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useCallback, useEffect } from 'react';
 import type { ExtendedProcessStatus } from '../folder-types';
 
 /**
@@ -12,24 +12,36 @@ export function useProgressTracking(
 	setLastProgress: (progress: number) => void,
 	setShowCompleteAnimation: (show: boolean) => void
 ): void {
+	// Memoizar funciones para evitar re-renders
+	const memoizedSetLastProgress = useCallback(setLastProgress, []);
+	const memoizedSetShowCompleteAnimation = useCallback(setShowCompleteAnimation, []);
+
 	useEffect(() => {
 		const isActiveProcess = isReindexing && processStatus?.folderId === folderId;
 
 		if (isActiveProcess && typeof processStatus?.progress === 'number') {
-			setLastProgress(processStatus.progress);
+			memoizedSetLastProgress(processStatus.progress);
 
 			// Marcar como completado inmediatamente cuando llega al 100%
 			if (processStatus.progress >= 100) {
-				setShowCompleteAnimation(true);
+				memoizedSetShowCompleteAnimation(true);
 			}
 		} else if (isComplete) {
-			setLastProgress(100);
-			setShowCompleteAnimation(true);
+			memoizedSetLastProgress(100);
+			memoizedSetShowCompleteAnimation(true);
 		}
 
 		// Limpiar estado de completado cuando no está reindexando
 		if (!(isReindexing || isComplete)) {
-			setShowCompleteAnimation(false);
+			memoizedSetShowCompleteAnimation(false);
 		}
-	}, [isReindexing, isComplete, processStatus, folderId, setLastProgress, setShowCompleteAnimation]);
+	}, [
+		isReindexing,
+		isComplete,
+		processStatus?.folderId,
+		processStatus?.progress,
+		folderId,
+		memoizedSetLastProgress,
+		memoizedSetShowCompleteAnimation,
+	]);
 }

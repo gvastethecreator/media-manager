@@ -254,10 +254,24 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 	const innerContainerClasses = useMemo(() => cn('rounded-md p-0.5 shadow-sm', isCollapsed && 'p-0.5'), [isCollapsed]);
 	const flexContainerClasses = useMemo(() => cn('flex flex-col gap-1'), []);
 
-	const handleChildClick = useCallback((childId: string) => {
-		// Implementar lógica para navegar a item hijo
-		console.log('Navegando a item hijo:', childId);
-	}, []);
+	const handleChildClick = useCallback(
+		(childId: string) => {
+			// Navegar al item hijo específico
+			console.log('Navegando a item hijo:', childId);
+
+			// Para carpetas, navegar a la vista específica de la carpeta
+			if (childId?.match(/^folder_/)) {
+				// Extraer el ID real de la carpeta (remover prefijo si existe)
+				const folderId = childId.replace('folder_', '');
+				navigateWithTransition(`/folders/${folderId}`);
+			} else {
+				// Para otras entidades, navegar a su vista específica
+				// Por ejemplo: notas, propiedades, etc.
+				navigateWithTransition(`/${childId}`);
+			}
+		},
+		[navigateWithTransition]
+	);
 
 	const handleNavigate = useCallback(
 		(id: ViewType) => {

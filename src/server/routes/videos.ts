@@ -1,7 +1,6 @@
 // @ts-nocheck - Temporary suppression for Express handler parameter types
 
 import { Buffer } from 'node:buffer';
-import { spawn } from 'node:child_process';
 import { existsSync } from 'node:fs';
 import { Router } from 'express';
 import { z } from 'zod';
@@ -276,109 +275,69 @@ router.get('/:id/thumbnail', async (req, res) => {
 			}
 		}
 
-		// 3) Generar on-the-fly con ffmpeg si el archivo existe
+		// 3) Generar on-the-fly con mediabunny si el archivo existe
 		if (!(video.path && existsSync(video.path))) {
 			res.status(404).send('Video file not found');
 			return;
 		}
 
 		try {
-			// Obtener parámetros de calidad de la query string
-			const thumbnailQuality = req.query.quality || 'medium';
-
-			// Generar WebP animado con 12 frames
+			// Intentar con mediabunny para thumbnails animados
 			const animatedWebpBuffer = await generateAnimatedVideoThumbnail(video.path, {
-				time: Number.isFinite(time) && time > 0 ? time : 5,
-				quality: thumbnailQuality as string,
+				time,
+				quality: req.query.quality as string,
+				frames: 8,
+				duration: 1.5,
 			});
 
-			if (!animatedWebpBuffer || animatedWebpBuffer.length === 0) {
-				res.status(500).send('Unable to generate animated thumbnail');
-				return;
-			}
+			if (animatedWebpBuffer) {
+				const etag = `W/"${animatedWebpBuffer.length.toString(16)}-${id}-animated"`;
+				const lastModified = new Date().toUTCString();
 
-			const etag = `W/"${animatedWebpBuffer.length.toString(16)}-${id}-animated"`;
-			const lastModified = new Date().toUTCString();
-
-			res.set({
-				'Content-Type': 'image/webp',
-				'Content-Length': animatedWebpBuffer.length.toString(),
-				'Cache-Control': 'public, max-age=86400',
-				ETag: etag,
-				'Last-Modified': lastModified,
-			});
-			res.send(animatedWebpBuffer);
-			return;
-		} catch (error) {
-			serverLogger.error('Error generating animated thumbnail:', error);
-
-			// Fallback a single frame JPEG si falla (robusto con reintento)
-			const qParam = (req.query.quality as string) || 'medium';
-			const jpegQ = qParam === 'high' ? '2' : qParam === 'low' ? '6' : '4';
-			const safeTs = Number.isFinite(time) ? Math.max(0.05, Math.min(time as number, 36_000)) : 0.05;
-
-			const runOnce = (placeSsAfterInput: boolean) =>
-				new Promise<Buffer>((resolve) => {
-					const args = [
-						'-hide_banner',
-						'-loglevel',
-						'error',
-						'-nostdin',
-						...(placeSsAfterInput ? [] : ['-ss', String(safeTs)]),
-						'-i',
-						video.path,
-						...(placeSsAfterInput ? ['-ss', String(safeTs)] : []),
-						'-an',
-						'-frames:v',
-						'1',
-						'-vf',
-						'scale=320:240:force_original_aspect_ratio=increase,crop=320:240',
-						'-q:v',
-						jpegQ,
-						'-f',
-						'mjpeg',
-						'pipe:1',
-					];
-
-					const proc = spawn('ffmpeg', args, { stdio: ['ignore', 'pipe', 'pipe'] });
-					const chunks: Buffer[] = [];
-					const timer = setTimeout(() => {
-						try {
-							proc.kill('SIGKILL');
-						} catch {}
-					}, 5000);
-					proc.stdout?.on('data', (c) => chunks.push(c as Buffer));
-					proc.on('close', (_code) => {
-						clearTimeout(timer);
-						resolve(Buffer.concat(chunks));
-					});
-					proc.on('error', () => {
-						clearTimeout(timer);
-						resolve(Buffer.alloc(0));
-					});
+				res.set({
+					'Content-Type': 'image/webp',
+					'Content-Length': animatedWebpBuffer.length.toString(),
+					'Cache-Control': 'public, max-age=86400',
+					ETag: etag,
+					'Last-Modified': lastModified,
 				});
-
-			const buf1 = await runOnce(false);
-			const buffer = buf1.length ? buf1 : await runOnce(true);
-			if (!buffer.length) {
-				res.status(500).send('Unable to generate thumbnail');
+				res.send(animatedWebpBuffer);
 				return;
 			}
-
-			const etag = `W/"${buffer.length.toString(16)}-${id}"`;
-			const lastModified = new Date().toUTCString();
-			res.set({
-				'Content-Type': 'image/jpeg',
-				'Content-Length': buffer.length.toString(),
-				'Cache-Control': 'public, max-age=86400',
-				ETag: etag,
-				'Last-Modified': lastModified,
-				Vary: 'Accept, Accept-Encoding',
-			});
-			res.send(buffer);
+		} catch (error) {
+			serverLogger.warn('Error generating animated thumbnail with mediabunny, falling back to single frame:', error);
 		}
+
+		// Fallback: generar thumbnail estático con mediabunny
+		try {
+			const { generateVideoThumbnail } = await import('@/server/services/media/mediabunny-thumbnail.service');
+			const timestamp = Number.isFinite(time) ? Math.max(0.05, Math.min(time as number, 36_000)) : 1;
+
+			const thumbnailBuffer = await generateVideoThumbnail(video.path, timestamp, 320, 240);
+
+			if (thumbnailBuffer) {
+				const etag = `W/"${thumbnailBuffer.length.toString(16)}-${id}"`;
+				const lastModified = new Date().toUTCString();
+
+				res.set({
+					'Content-Type': 'image/jpeg',
+					'Content-Length': thumbnailBuffer.length.toString(),
+					'Cache-Control': 'public, max-age=86400',
+					ETag: etag,
+					'Last-Modified': lastModified,
+					Vary: 'Accept, Accept-Encoding',
+				});
+				res.send(thumbnailBuffer);
+				return;
+			}
+		} catch (error) {
+			serverLogger.error('Error generating static thumbnail with mediabunny:', error);
+		}
+
+		// Fallback final: usar error estándar
+		res.status(500).send('Unable to generate thumbnail');
 	} catch (error) {
-		console.error('Error al servir thumbnail de video:', error);
+		serverLogger.error('Error al servir thumbnail de video:', error);
 		res.status(500).send('Error al servir thumbnail de video');
 	}
 });

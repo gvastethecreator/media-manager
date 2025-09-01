@@ -6,18 +6,18 @@ import { Badge } from '@/components/ui/badge';
 import { useFolderStats } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
 import type { FolderStatsResponse } from '@/types/folders';
-import { ExpandedSubfolders } from './expanded-subfolders';
 import { NormalModeControls } from './folder-card-action-controls';
 import { EditModeControls } from './folder-card-edit-controls';
+import { FolderErrorDisplay } from './folder-card-error-display';
+import { ExpandedSubfolders } from './folder-card-expanded-subfolders';
+import { FolderIndexStatusBadge, type IndexStatus } from './folder-card-index-status-badge';
+import { FolderProcessingDetails } from './folder-card-processing-details';
+import { FolderProgressIndicator } from './folder-card-progress-indicator';
 import { FolderStatsDisplay } from './folder-card-stats-display';
-import { FolderErrorDisplay } from './folder-error-display';
-import { FolderIndexStatusBadge, type IndexStatus } from './folder-index-status-badge';
-import { FolderProcessingDetails } from './folder-processing-details';
-import { FolderProgressIndicator } from './folder-progress-indicator';
+import { ThumbnailGrid } from './folder-card-thumbnail-grid';
 import type { ExtendedFolder, ExtendedProcessStatus } from './folder-types';
 import { useIsCompleteStatus } from './hooks/use-complete-status';
 import { useProgressTracking } from './hooks/use-progress-tracking';
-import { ThumbnailGrid } from './thumbnail-grid';
 import { getStatusMessage } from './utils/status-message';
 
 // =====================================
@@ -55,11 +55,27 @@ const FolderIcon = memo(({ folder, size = 'md' }: FolderIconProps) => {
 	};
 
 	return (
-		<div className={cn('flex items-center justify-center ring-1 ring-primary/10', containerClasses[size])}>
+		<div
+			className={cn(
+				'flex items-center justify-center bg-primary/5 ring-1 ring-primary/10 transition-all duration-200',
+				'hover:scale-105 hover:bg-primary/10 hover:ring-primary/20',
+				containerClasses[size]
+			)}
+		>
 			{folder.emoji ? (
-				<span className="text-sm leading-none">{folder.emoji}</span>
+				<span
+					className={cn('leading-none transition-transform duration-200 hover:scale-110', {
+						'text-sm': size === 'sm',
+						'text-base': size === 'md',
+						'text-lg': size === 'lg',
+					})}
+				>
+					{folder.emoji}
+				</span>
 			) : (
-				<Folder className={cn('text-primary/70', sizeClasses[size])} />
+				<Folder
+					className={cn('text-primary/70 transition-colors duration-200 hover:text-primary', sizeClasses[size])}
+				/>
 			)}
 		</div>
 	);
@@ -76,28 +92,34 @@ interface FolderMetadataProps {
 }
 
 const FolderMetadata = memo(({ folder, parentFolderName, indexStatus, statusMessage }: FolderMetadataProps) => (
-	<div className="flex min-w-0 flex-1 flex-col space-y-1">
-		{/* Folder Name */}
-		<span className="truncate align-bottom font-semibold text-foreground text-sm">
-			{/* Breadcrumb */}
-			{parentFolderName && <span className="truncate text-primary/50 text-xs">{parentFolderName} / </span>}
+	<div className="flex min-w-0 flex-1 flex-col justify-center space-y-1.5">
+		{/* Folder Name and Breadcrumb */}
+		<div className="flex flex-col gap-0.5">
+			<span className="truncate font-semibold text-foreground text-sm leading-tight">
+				{/* Breadcrumb con mejor estilo */}
+				{parentFolderName && (
+					<span className="truncate font-normal text-primary/60 text-xs">
+						{parentFolderName} <span className="text-primary/40">/</span>{' '}
+					</span>
+				)}
+				{folder.name}
+			</span>
+		</div>
 
-			{folder.name}
-		</span>
-
-		{/* Status Row */}
-		<div className="absolute top-2 right-2 flex items-center gap-2">
+		{/* Status and badges row - separado para evitar solapamiento con controles */}
+		<div className="flex flex-wrap items-center gap-2">
 			<FolderIndexStatusBadge lastIndexed={folder.lastIndexed} status={indexStatus} />
 
-			{/* Favorite indicator */}
+			{/* Favorite indicator con animación */}
 			{folder.isFavorite && (
-				<Badge className="h-5 px-1.5 text-xs" variant="secondary">
-					<Heart className="mr-1 h-3 w-3 fill-current" />
+				<Badge className="fade-in-50 h-5 animate-in px-1.5 text-xs duration-300" variant="secondary">
+					<Heart className="mr-1 h-3 w-3 animate-pulse fill-current text-red-500" />
 					Favorito
 				</Badge>
 			)}
 
-			{statusMessage}
+			{/* Status message con transición */}
+			{statusMessage && <div className="slide-in-from-right-2 animate-in duration-200">{statusMessage}</div>}
 		</div>
 	</div>
 ));
@@ -114,37 +136,52 @@ interface FolderThumbnailProps {
 const FolderThumbnail = memo(({ folderStats, isCompact = false, isLoading = false }: FolderThumbnailProps) => {
 	const size = isCompact ? 'h-10 w-10' : 'h-12 w-12';
 
-	// Mostrar loading state
+	// Mostrar loading state con animación
 	if (isLoading) {
 		return (
-			<div className={cn('flex flex-shrink-0 animate-pulse items-center justify-center bg-muted/50', size)}>
+			<div
+				className={cn(
+					'flex flex-shrink-0 items-center justify-center bg-muted/50 transition-all duration-300',
+					'animate-pulse hover:bg-muted/70',
+					size
+				)}
+			>
 				<Folder className="h-4 w-4 text-muted-foreground/40" />
 			</div>
 		);
 	}
 
-	// Mostrar thumbnails si hay imágenes
+	// Mostrar thumbnails si hay imágenes con hover effects
 	if (folderStats?.recentImages && folderStats.recentImages.length > 0) {
 		return (
-			<div className={cn('relative flex-shrink-0 overflow-hidden', size)}>
+			<div
+				className={cn(
+					'group/thumbnail relative flex-shrink-0 overflow-hidden transition-all duration-300',
+					'hover:scale-105 hover:shadow-md hover:ring-2 hover:ring-primary/20',
+					size
+				)}
+			>
 				<ThumbnailGrid
 					images={folderStats.recentImages.slice(0, 12)}
 					showCount={false}
 					totalImages={folderStats.totalImages || 0}
 				/>
+				{/* Overlay sutil en hover */}
+				<div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover/thumbnail:opacity-100" />
 			</div>
 		);
 	}
 
-	// Estado vacío con mejor indicador visual
+	// Estado vacío con mejor indicador visual y hover
 	return (
 		<div
 			className={cn(
-				'flex flex-shrink-0 items-center justify-center border-2 border-muted-foreground/20 border-dashed bg-muted/30',
+				'flex flex-shrink-0 items-center justify-center border-2 border-dashed transition-all duration-300',
+				'border-muted-foreground/20 bg-muted/30 hover:scale-105 hover:border-muted-foreground/40 hover:bg-muted/50',
 				size
 			)}
 		>
-			<Folder className="h-4 w-4 text-muted-foreground/40" />
+			<Folder className="h-4 w-4 text-muted-foreground/40 transition-colors duration-200 group-hover:text-muted-foreground/60" />
 		</div>
 	);
 });
@@ -211,10 +248,12 @@ export const FolderCard = memo(
 		});
 
 		// ===== DATA FETCHING =====
-		const childStatsQuery = useFolderStats(folder.id || '');
-		const folderStats = childStatsQuery.data as FolderStatsResponse | undefined;
-
-		// ===== COMPUTED VALUES =====
+		const childStatsQuery = useFolderStats(folder.id || '', {
+			staleTime: 30_000, // Cache por 30 segundos
+			gcTime: 5 * 60 * 1000, // Mantener en cache 5 minutos
+			enabled: Boolean(folder.id), // Solo consultar si hay ID
+		});
+		const folderStats = childStatsQuery.data as FolderStatsResponse | undefined; // ===== COMPUTED VALUES =====
 		const subfolders = useMemo(() => allFolders.filter((f) => f.parentId === folder.id), [allFolders, folder.id]);
 
 		const parentFolderName = useMemo(() => {
@@ -287,23 +326,48 @@ export const FolderCard = memo(
 			}
 		}, [onToggleExpanded, folder.id]);
 
+		// ===== OPTIMIZED MEMOIZED HANDLERS TO PREVENT PROP CHANGES =====
+		const stableOnFolderClick = useCallback(
+			(folderId: string) => {
+				onFolderClick(folderId);
+			},
+			[onFolderClick]
+		);
+
+		const stableOnReindex = useCallback(
+			(folderId: string) => {
+				onReindex(folderId);
+			},
+			[onReindex]
+		);
+
 		// ===== STATUS INDICATORS =====
 		const statusMessage = getStatusMessage(isReindexing, showCompleteAnimation, isProcessing);
 		const isSelected = selectedFolder === folder.id;
 		const hasError = Boolean(folder.error);
+
+		// OPTIMIZACIÓN: Detectar si está en modo focused (reindexado global)
+		const isFocusedMode = isGloballyProcessing && globalCurrentFolderId === folder.id;
 
 		// ===== RENDER =====
 		return (
 			<div>
 				<div
 					className={cn(
-						'group relative h-full overflow-hidden border-2 p-2',
-						'border-border/60 bg-gradient-to-br from-card to-card/95',
+						'group overflow-hiddenborder-2 relative h-full transition-all duration-300 ease-out',
+						// Padding adaptativo según el modo
+						isFocusedMode ? 'p-6' : 'p-3',
+						'border-border/60 bg-gradient-to-br from-card to-card/95 shadow-sm',
+						// Hover effects con animaciones suaves
+						'hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10',
+						// Estados visuales con mejor destacado en modo focused y transiciones
 						{
-							'border-primary/20 ring-2 ring-primary/30': isSelected,
-							'border-emerald-400/20 ring-2 ring-emerald-400/30': showCompleteAnimation,
-							'border-blue-400/20 ring-2 ring-blue-400/30': isReindexing,
-							'border-destructive/20 ring-2 ring-destructive/30': hasError,
+							'translate-y-0 border-primary/30 shadow-lg shadow-primary/10 ring-2 ring-primary/20': isSelected,
+							'border-emerald-400/30 shadow-emerald-400/10 shadow-lg ring-2 ring-emerald-400/20': showCompleteAnimation,
+							'scale-[1.02] border-blue-400/40 shadow-blue-400/20 shadow-xl ring-4 ring-blue-400/15':
+								isReindexing && isFocusedMode,
+							'border-blue-400/30 shadow-blue-400/10 shadow-md ring-2 ring-blue-400/20': isReindexing && !isFocusedMode,
+							'border-destructive/30 shadow-destructive/10 shadow-lg ring-2 ring-destructive/20': hasError,
 						}
 					)}
 				>
@@ -314,25 +378,43 @@ export const FolderCard = memo(
 						showCompleteAnimation={showCompleteAnimation}
 					/>
 
-					{/* Main clickeable content area */}
+					{/* Main content layout - mejor estructura sin overlaps */}
+					<div className="flex min-w-0 flex-col gap-3">
+						{/* Top section: Thumbnail + Icon + Metadata con mejor spacing */}
+						<div className="flex min-w-0 items-start gap-3">
+							<div className="flex flex-shrink-0 items-center gap-2">
+								<FolderThumbnail
+									folderStats={folderStats}
+									isCompact={!isFocusedMode}
+									isLoading={childStatsQuery.isLoading}
+								/>
+								<FolderIcon folder={folder} size={isFocusedMode ? 'lg' : 'md'} />
+							</div>
+							<div className="min-w-0 flex-1 pr-20">
+								<FolderMetadata
+									folder={folder}
+									indexStatus={indexStatus}
+									parentFolderName={parentFolderName || undefined}
+									statusMessage={statusMessage}
+								/>
+							</div>
+						</div>
 
-					{/* Left Section: Icon + Metadata */}
-					<div className="flex min-w-0 flex-1 items-start gap-3">
-						<FolderThumbnail folderStats={folderStats} isCompact isLoading={childStatsQuery.isLoading} />
-						<FolderIcon folder={folder} size="md" />
-						<FolderMetadata
-							folder={folder}
-							indexStatus={indexStatus}
-							parentFolderName={parentFolderName || undefined}
-							statusMessage={statusMessage}
-						/>
+						{/* Stats Section - Always Visible with better spacing */}
+						<FolderStatsSummary folder={folder} folderStats={folderStats} isCompact />
 					</div>
 
-					{/* Controls Section - Positioned absolutely to avoid click conflicts */}
-					<div className="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-60 group-hover:opacity-100">
+					{/* Controls Section - Mejor posicionamiento para evitar solapamientos */}
+					<div className="absolute top-3 right-3 z-20">
 						<div
 							aria-label="Controles de carpeta"
-							className="flex items-center gap-1 rounded-md border border-border/20 bg-background/90 p-1 shadow-sm backdrop-blur-sm"
+							className={cn(
+								'flex items-center gap-1 rounded-lg border border-border/30 bg-background/95 shadow-lg backdrop-blur-sm',
+								'opacity-0 transition-all duration-200 ease-out group-hover:opacity-100',
+								'translate-x-2 hover:bg-background hover:shadow-xl group-hover:translate-x-0',
+								// Padding adaptativo para controles
+								isFocusedMode ? 'p-1.5' : 'p-1'
+							)}
 							role="toolbar"
 						>
 							{isEditing ? (
@@ -349,8 +431,8 @@ export const FolderCard = memo(
 									isGloballyProcessing={isGloballyProcessing}
 									isReindexing={isReindexing}
 									onEdit={handleEdit}
-									onFolderClick={onFolderClick}
-									onReindex={handleReindex}
+									onFolderClick={stableOnFolderClick}
+									onReindex={stableOnReindex}
 									onToggleExpanded={handleToggleExpanded}
 									processStatus={processStatus}
 									selectedFolder={selectedFolder}
@@ -359,26 +441,29 @@ export const FolderCard = memo(
 						</div>
 					</div>
 
-					{/* Error Display */}
-					{hasError && <FolderErrorDisplay folder={folder} />}
-
-					{/* Processing Details */}
-					{(isReindexing || (processStatus?.folderId === folder.id && (processStatus?.progress ?? 0) > 0)) && (
-						<FolderProcessingDetails
-							isReindexing={isReindexing}
-							lastProgress={lastProgress}
-							processStatus={processStatus}
-							subfolders={subfolders}
-						/>
+					{/* Error Display con mejor positioning */}
+					{hasError && (
+						<div className="slide-in-from-top-2 mt-2 animate-in duration-300">
+							<FolderErrorDisplay folder={folder} />
+						</div>
 					)}
 
-					{/* Stats Section - Always Visible */}
-					<FolderStatsSummary folder={folder} folderStats={folderStats} isCompact />
+					{/* Processing Details con animación suave */}
+					{(isReindexing || (processStatus?.folderId === folder.id && (processStatus?.progress ?? 0) > 0)) && (
+						<div className="slide-in-from-bottom-2 mt-3 animate-in duration-300">
+							<FolderProcessingDetails
+								isReindexing={isReindexing}
+								lastProgress={lastProgress}
+								processStatus={processStatus}
+								subfolders={subfolders}
+							/>
+						</div>
+					)}
 				</div>
 
-				{/* Expanded Subfolders */}
+				{/* Expanded Subfolders con animación */}
 				{folder.children && folder.children.length > 0 && (
-					<div>
+					<div className="slide-in-from-top-3 mt-2 animate-in duration-500 ease-out">
 						<ExpandedSubfolders folders={folder.children} />
 					</div>
 				)}

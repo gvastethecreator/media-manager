@@ -23,8 +23,11 @@ export interface ViewOptionsState {
 	searchQuery: string;
 	groupByEntityType: boolean;
 	useCanvasRendering: boolean;
+	includeSubfolders: boolean;
 	setUseCanvasRendering: (enabled: boolean) => void;
 	toggleUseCanvasRendering: () => void;
+	setIncludeSubfolders: (enabled: boolean) => void;
+	toggleIncludeSubfolders: () => void;
 	setViewMode: (mode: ViewMode) => void;
 	setItemSize: (size: number) => void;
 	setSortOptions: (options: SortOption[]) => void;
@@ -49,6 +52,7 @@ const DEFAULT_STATE = {
 	searchQuery: '',
 	groupByEntityType: false,
 	useCanvasRendering: false,
+	includeSubfolders: false,
 };
 
 export type ViewOptionsStore = ViewOptionsState;
@@ -60,6 +64,9 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 
 			setUseCanvasRendering: (enabled: boolean) => set({ useCanvasRendering: enabled }),
 			toggleUseCanvasRendering: () => set((state) => ({ useCanvasRendering: !state.useCanvasRendering })),
+
+			setIncludeSubfolders: (enabled: boolean) => set({ includeSubfolders: enabled }),
+			toggleIncludeSubfolders: () => set((state) => ({ includeSubfolders: !state.includeSubfolders })),
 
 			setViewMode: (mode) => set({ viewMode: mode }),
 

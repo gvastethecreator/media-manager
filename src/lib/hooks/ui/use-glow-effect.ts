@@ -1,14 +1,23 @@
 import type * as React from 'react';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
 
 /**
  * Hook optimizado para manejar el efecto de brillo en las tarjetas
  * @param elementRef Referencia al elemento que tendrá el efecto
  */
 export function useGlowEffect(elementRef: React.RefObject<HTMLElement>) {
+	const rafIdRef = useRef<number | null>(null);
+	const lastUpdateRef = useRef<number>(0);
+
 	const handleMouseMove = useCallback(
 		(e: MouseEvent) => {
 			if (!elementRef.current) {
+				return;
+			}
+
+			// Throttle to max 60fps
+			const now = performance.now();
+			if (now - lastUpdateRef.current < 16) {
 				return;
 			}
 
@@ -16,9 +25,18 @@ export function useGlowEffect(elementRef: React.RefObject<HTMLElement>) {
 			const x = e.clientX - rect.left;
 			const y = e.clientY - rect.top;
 
-			requestAnimationFrame(() => {
-				elementRef.current?.style.setProperty('--mouse-x', `${x}px`);
-				elementRef.current?.style.setProperty('--mouse-y', `${y}px`);
+			// Cancel previous RAF if still pending
+			if (rafIdRef.current) {
+				cancelAnimationFrame(rafIdRef.current);
+			}
+
+			rafIdRef.current = requestAnimationFrame(() => {
+				if (elementRef.current) {
+					elementRef.current.style.setProperty('--mouse-x', `${x}px`);
+					elementRef.current.style.setProperty('--mouse-y', `${y}px`);
+					lastUpdateRef.current = now;
+				}
+				rafIdRef.current = null;
 			});
 		},
 		[elementRef]
@@ -30,10 +48,13 @@ export function useGlowEffect(elementRef: React.RefObject<HTMLElement>) {
 			return;
 		}
 
-		element.addEventListener('mousemove', handleMouseMove);
+		element.addEventListener('mousemove', handleMouseMove, { passive: true });
 
 		return () => {
 			element.removeEventListener('mousemove', handleMouseMove);
+			if (rafIdRef.current) {
+				cancelAnimationFrame(rafIdRef.current);
+			}
 		};
 	}, [elementRef, handleMouseMove]);
 }

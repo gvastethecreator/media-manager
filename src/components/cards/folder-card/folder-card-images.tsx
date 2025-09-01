@@ -1,4 +1,6 @@
+import { memo, useMemo } from 'react';
 import { cn } from '@/lib/utils';
+import { formatBytes } from '@/lib/utils/format.utils';
 
 export interface FolderCardImagesProps {
 	featuredImage?: string | null;
@@ -6,19 +8,33 @@ export interface FolderCardImagesProps {
 	primaryColor: string;
 	secondaryColor?: string;
 	tcgMode?: boolean;
+	totalFiles?: number;
+	totalSize?: number;
 }
 
 /**
  * Componente para mostrar las imágenes destacadas y recientes de una carpeta.
  * En modo TCG, se muestra con bordes y efectos visuales similares a cartas coleccionables.
+ * Si no hay imágenes pero hay archivos, muestra estadísticas en lugar de "Sin imágenes".
  */
-export function FolderCardImages({
+export const FolderCardImages = memo(function FolderCardImages({
 	featuredImage,
 	recentImages = [],
 	primaryColor,
 	secondaryColor = primaryColor,
 	tcgMode = false,
+	totalFiles = 0,
+	totalSize = 0,
 }: FolderCardImagesProps) {
+	// Memoize computed stats to prevent recalculation
+	const computedStats = useMemo(() => {
+		return {
+			hasFiles: totalFiles > 0,
+			formattedSize: formatBytes(totalSize),
+			hasRecentImages: recentImages && recentImages.length > 0,
+			displayImages: recentImages ? recentImages.slice(0, 4) : [],
+		};
+	}, [totalFiles, totalSize, recentImages]);
 	// Helper para decidir si usar <img> o background-image
 	const isDataUrl = (src?: string | null) => (src ? src.startsWith('data:') : false);
 	const isLargeDataUrl = (src?: string | null) => (isDataUrl(src) ? (src?.length || 0) > 200_000 : false);
@@ -80,8 +96,8 @@ export function FolderCardImages({
 	}
 
 	// Si no hay imagen destacada pero hay imágenes recientes, mostrar una cuadrícula de 4
-	if (recentImages && recentImages.length > 0) {
-		const images = recentImages.slice(0, 4);
+	if (computedStats.hasRecentImages) {
+		const images = computedStats.displayImages;
 
 		return (
 			<div
@@ -93,7 +109,7 @@ export function FolderCardImages({
 				{images.map((image, index) => (
 					<div
 						className="relative overflow-hidden"
-						key={`recent-image-${generateImageKey(image, index)}`}
+						key={`recent-image-${index}-${image.slice(-8)}`}
 						style={
 							isLargeDataUrl(image)
 								? { backgroundImage: `url(${image})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -151,7 +167,48 @@ export function FolderCardImages({
 		);
 	}
 
-	// Si no hay imágenes, mostrar un placeholder
+	// Si no hay imágenes pero hay archivos, mostrar estadísticas
+	if (computedStats.hasFiles) {
+		return (
+			<div
+				className={cn(
+					'relative flex h-40 w-full items-center justify-center',
+					tcgMode ? 'border-white/10 border-b bg-gradient-to-br from-gray-900 to-gray-800' : 'bg-muted'
+				)}
+				style={
+					tcgMode
+						? {
+								backgroundImage: `radial-gradient(circle at 70% 30%, ${primaryColor}30 0%, transparent 50%)`,
+							}
+						: {}
+				}
+			>
+				<div className={cn('p-4 text-center', tcgMode ? 'text-white/70' : 'text-muted-foreground')}>
+					<div className="mb-1 font-semibold text-lg">{totalFiles} archivos</div>
+					<div className="text-sm opacity-80">{computedStats.formattedSize}</div>
+				</div>
+
+				{/* Decoraciones TCG para estadísticas */}
+				{tcgMode && (
+					<>
+						<div className="absolute top-0 left-0 h-6 w-6 border-white/20 border-t-2 border-l-2" />
+						<div className="absolute top-0 right-0 h-6 w-6 border-white/20 border-t-2 border-r-2" />
+						<div className="absolute bottom-0 left-0 h-6 w-6 border-white/20 border-b-2 border-l-2" />
+						<div className="absolute right-0 bottom-0 h-6 w-6 border-white/20 border-r-2 border-b-2" />
+
+						<div
+							className="absolute right-2 bottom-2 h-8 w-8 rounded-full opacity-30"
+							style={{
+								background: `conic-gradient(${primaryColor}, ${secondaryColor}, ${primaryColor})`,
+							}}
+						/>
+					</>
+				)}
+			</div>
+		);
+	}
+
+	// Si no hay imágenes ni archivos, mostrar un placeholder
 	return (
 		<div
 			className={cn(
@@ -188,12 +245,4 @@ export function FolderCardImages({
 			)}
 		</div>
 	);
-}
-
-/**
- * Genera una clave única para cada imagen basada en la URL y posición
- */
-function generateImageKey(imageUrl: string, index: number): string {
-	const urlSegment = imageUrl.split('/').pop() || '';
-	return `${urlSegment.substring(0, 8)}-${index}`;
-}
+});

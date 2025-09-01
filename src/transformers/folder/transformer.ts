@@ -245,8 +245,12 @@ export function fromDrizzleFolderWithCounts(folderFromDrizzle: any | null, allFo
 	try {
 		const { _count, children, parent, ...baseData } = folderFromDrizzle;
 
-		const totalFiles = baseData.totalFiles > 0 ? baseData.totalFiles : _count.images || 0;
-		const totalSize = baseData.totalSize > 0 ? baseData.totalSize : (_count.images || 0) * 2 * 1024 * 1024;
+		// Solo usar fallback si totalFiles/totalSize son null o undefined, no si son 0 (carpetas vacías válidas)
+		const totalFiles =
+			baseData.totalFiles !== null && baseData.totalFiles !== undefined
+				? baseData.totalFiles
+				: (_count?.images || 0) + (_count?.videos || 0);
+		const totalSize = baseData.totalSize !== null && baseData.totalSize !== undefined ? baseData.totalSize : 0; // No calcular tamaño estimado, usar 0 para carpetas sin datos
 
 		const correctedFolderData = {
 			...folderFromDrizzle,

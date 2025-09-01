@@ -151,8 +151,10 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 				leftPanelRef.current.collapse();
 				setIsLeftCollapsed(true); // Actualizar estado inmediatamente
 			}
-			// Desactivar animaciones después de completar
-			setTimeout(() => setIsLeftAnimating(false), 350);
+			// Usar requestAnimationFrame para mejor rendimiento
+			requestAnimationFrame(() => {
+				setTimeout(() => setIsLeftAnimating(false), 350);
+			});
 		}
 	};
 
@@ -166,8 +168,10 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 				rightPanelRef.current.collapse();
 				setIsRightCollapsed(true); // Actualizar estado inmediatamente
 			}
-			// Desactivar animaciones después de completar
-			setTimeout(() => setIsRightAnimating(false), 350);
+			// Usar requestAnimationFrame para mejor rendimiento
+			requestAnimationFrame(() => {
+				setTimeout(() => setIsRightAnimating(false), 350);
+			});
 		}
 	};
 
