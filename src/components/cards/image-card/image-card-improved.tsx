@@ -231,8 +231,8 @@ export const ImageCardImproved = memo(function ImageCardImproved({
 			)}
 			initial={{ opacity: 0, y: 10 }}
 			onClick={handleClick}
-			onHoverEnd={handleHoverEnd}
-			onHoverStart={handleHoverStart}
+			onMouseEnter={handleHoverStart}
+			onMouseLeave={handleHoverEnd}
 			style={
 				memoizedProps.isTcgMode
 					? { boxShadow: `0 8px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30` }

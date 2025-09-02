@@ -13,8 +13,9 @@ interface EmptyStateProps {
 export function EmptyState({ icon: Icon, title, description, className }: EmptyStateProps) {
 	return (
 		<motion.div
-			animate={{ opacity: [0, 1], y: [20, 0] }}
+			animate={{ opacity: 1, y: 0 }}
 			className={cn('flex h-full w-full flex-col items-center justify-center text-muted-foreground', className)}
+			initial={{ opacity: 0, y: 20 }}
 		>
 			<BlurFade className="flex flex-col items-center justify-center text-center" delay={0.5} inView={true}>
 				<Icon className="mb-4 h-12 w-12 opacity-50" />

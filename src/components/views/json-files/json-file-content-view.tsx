@@ -1,6 +1,7 @@
 import { ArrowLeft, Brackets, Code, Download, Edit, Share2, Trash2 } from 'lucide-react';
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
+import { JsonViewer } from '@/components/panels/details-panel/components/json-viewer';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -193,11 +194,12 @@ export const JsonFileContentView: React.FC<JsonFileContentViewProps> = ({ classN
 								<CardTitle className="text-sm">Contenido JSON</CardTitle>
 							</CardHeader>
 							<CardContent className="h-full">
-								<ScrollArea className="h-full">
-									<pre className="overflow-auto rounded-lg bg-muted/20 p-4 text-sm">
-										<code className="language-json">{JSON.stringify(jsonData.content, null, 2)}</code>
-									</pre>
-								</ScrollArea>
+								<JsonViewer
+									className="h-full"
+									content={JSON.stringify(jsonData.content, null, 2)}
+									defaultExpanded={true}
+									maxHeight={400}
+								/>
 							</CardContent>
 						</Card>
 					</div>

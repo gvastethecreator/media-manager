@@ -13,6 +13,7 @@ import {
 	documents,
 	favorites,
 	file3Ds,
+	fileStats,
 	folders,
 	groupImages,
 	groupVideos,
@@ -25,7 +26,6 @@ import {
 	imagePlaces,
 	imagePrompts,
 	imageProperties,
-	imageStats,
 	images,
 	imageTags,
 	imageWildcards,
@@ -406,7 +406,9 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 							tx.delete(imageConcepts).where(inArray(imageConcepts.A, ids)),
 							tx.delete(imagePrompts).where(inArray(imagePrompts.A, ids)),
 							tx.delete(imageNotes).where(inArray(imageNotes.A, ids)),
-							tx.delete(groupImages).where(inArray(groupImages.imageId, ids)),
+							tx
+								.delete(groupImages)
+								.where(inArray(groupImages.A, ids)), // Fixed: usando A en lugar de imageId
 						]);
 					}
 				}
@@ -426,7 +428,9 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 							tx.delete(videoConcepts).where(inArray(videoConcepts.A, ids)),
 							tx.delete(videoPrompts).where(inArray(videoPrompts.A, ids)),
 							tx.delete(videoNotes).where(inArray(videoNotes.A, ids)),
-							tx.delete(groupVideos).where(inArray(groupVideos.videoId, ids)),
+							tx
+								.delete(groupVideos)
+								.where(inArray(groupVideos.A, ids)), // Fixed: usando A en lugar de videoId
 						]);
 					}
 				}
@@ -439,7 +443,7 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 							tx.delete(thumbnails).where(and(inArray(thumbnails.entityId, ids), eq(thumbnails.entityType, 'image'))),
 							tx.delete(favorites).where(and(inArray(favorites.entityId, ids), eq(favorites.entityType, 'image'))),
 							tx.delete(uploadedImages).where(inArray(uploadedImages.imageId, ids)),
-							tx.delete(imageStats).where(inArray(imageStats.imageId, ids)),
+							tx.delete(fileStats).where(inArray(fileStats.fileId, ids)),
 						]);
 					}
 				}

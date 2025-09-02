@@ -44,7 +44,8 @@ import { getDetailedMetadata } from '../metadata/legacy-metadata';
 import { getEntityIcon } from '../utils/icon-utils';
 import { getMainImageUrl } from '../utils/image-utils';
 import { getBasicMetadata, getRelatedEntities } from '../utils/metadata-utils';
-import { CollapsibleText, MetadataTable } from './metadata-table';
+import { JsonViewer } from './json-viewer';
+import { MetadataTable } from './metadata-table';
 import { CollapsiblePrompt } from './prompt-parser';
 
 interface SinglePanelProps {
@@ -455,16 +456,28 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 											fullWidth?: boolean;
 										}>;
 										const workflowLike = Array.from(kv.keys()).filter(
-											(k) => /workflow/i.test(k) || k === 'Workflow ID'
+											(k) => /workflow/i.test(k) || k === 'Workflow ID' || k.toLowerCase().includes('comfyui')
 										);
 										for (const k of workflowLike) {
 											const v = kv.get(k) ?? '';
-											if (/json/i.test(k)) {
+											// Detectar si el contenido es JSON
+											const isJsonContent = (() => {
+												if (typeof v !== 'string') return false;
+												if (/json/i.test(k)) return true; // Si el nombre del campo contiene "json"
+												try {
+													JSON.parse(v);
+													return v.trim().startsWith('{') || v.trim().startsWith('[');
+												} catch {
+													return false;
+												}
+											})();
+
+											if (isJsonContent) {
 												workflowRows.push({
 													icon: FileJson,
 													iconColor: 'text-amber-500 dark:text-amber-400',
 													label: k,
-													value: <CollapsibleText collapsedLines={10} text={v} />,
+													value: <JsonViewer content={v} defaultExpanded={false} maxHeight={250} />,
 													fullWidth: true,
 												});
 											} else {

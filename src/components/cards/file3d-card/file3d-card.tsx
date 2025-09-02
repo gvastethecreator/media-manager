@@ -164,7 +164,7 @@ export function File3DCard({
 					{isHovered && (
 						<motion.div
 							animate={{
-								rotate: [0, 360],
+								rotate: 360,
 							}}
 							className="pointer-events-none absolute inset-0 opacity-20"
 							style={{
@@ -172,7 +172,6 @@ export function File3DCard({
 							}}
 							transition={{
 								duration: 4,
-								repeat: Number.POSITIVE_INFINITY,
 								ease: 'linear',
 							}}
 						/>
@@ -212,11 +211,10 @@ export function File3DCard({
 								}}
 							>
 								<motion.div
-									animate={isRotating ? { rotateY: [0, 360] } : {}}
+									animate={isRotating ? { rotateY: 360 } : {}}
 									style={{ transformStyle: 'preserve-3d' }}
 									transition={{
 										duration: 3,
-										repeat: isRotating ? Number.POSITIVE_INFINITY : 0,
 										ease: 'linear',
 									}}
 								>

@@ -131,8 +131,12 @@ export function ShortcutsSettings() {
 						{shortcutCategories.map((category, categoryIndex) => (
 							<motion.div
 								animate={{
-									opacity: [0, 1],
-									y: [20, 0],
+									opacity: 1,
+									y: 0,
+								}}
+								initial={{
+									opacity: 0,
+									y: 20,
 								}}
 								key={category.name}
 								transition={{ delay: categoryIndex * 0.1 }}
@@ -148,10 +152,14 @@ export function ShortcutsSettings() {
 										{category.shortcuts.map((shortcut, index) => (
 											<motion.div
 												animate={{
-													opacity: [0, 1],
-													x: [-20, 0],
+													opacity: 1,
+													x: 0,
 												}}
 												className="group flex items-center justify-between rounded-lg p-2 hover:bg-accent"
+												initial={{
+													opacity: 0,
+													x: -20,
+												}}
 												key={shortcut.action}
 												transition={{ delay: categoryIndex * 0.1 + index * 0.05 }}
 											>

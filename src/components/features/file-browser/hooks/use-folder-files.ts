@@ -1,5 +1,5 @@
 import { useEffect, useMemo } from 'react';
-import { useFolder } from '@/lib/api/folders';
+import { useFolder, useFolders } from '@/lib/api/folders';
 import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
 import { useFile3DStore } from '@/store/entities/file-3d';
@@ -56,8 +56,8 @@ function filterByFolder<T extends { folderId: string; path?: string }>(
 export function useFolderFiles(folderId: string | null, options: UseFolderFilesOptions = {}) {
 	const { includeSubfolders = false } = options;
 
-	const { getImagesByFolder, fetchImages, folderLoadState } = useImageStore();
-	const { getVideosByFolder, fetchVideos, isLoading: loadingVideos } = useVideoStore();
+	const { getImagesByFolder, getImages, fetchImages, folderLoadState } = useImageStore();
+	const { getVideosByFolder, getVideos, fetchVideos, isLoading: loadingVideos } = useVideoStore();
 	const { fetchAudios, isLoading: loadingAudios } = useAudioStore();
 	const { fetchDocuments, isLoading: loadingDocuments, documents } = useDocumentStore();
 	const { fetchJsonFiles, loading: loadingJson, jsonFiles } = useJsonFileStore();
@@ -66,35 +66,88 @@ export function useFolderFiles(folderId: string | null, options: UseFolderFilesO
 	// Obtener información de la carpeta para conocer su ruta (solo si includeSubfolders está habilitado)
 	const { data: folderData } = useFolder(includeSubfolders && folderId ? folderId : '');
 
+	// Obtener subcarpetas cuando includeSubfolders es false
+	const { data: subfoldersData } = useFolders(!includeSubfolders && folderId ? { parentId: folderId, limit: 100 } : {});
+
 	const imageFolderState = folderId ? folderLoadState?.[folderId] : undefined;
 	const loadingImages = imageFolderState?.loading ?? !imageFolderState?.loaded;
 
-	const images = folderId ? getImagesByFolder(folderId) : [];
-	const videos = folderId ? getVideosByFolder(folderId) : [];
+	// Obtener imágenes: filtrar globalmente si includeSubfolders, sino usar por carpeta específica
+	const allImages = getImages();
+	const images = folderId ? (includeSubfolders ? allImages : getImagesByFolder(folderId)) : [];
+
+	// Obtener videos: filtrar globalmente si includeSubfolders, sino usar por carpeta específica
+	const allVideos = getVideos();
+	const videos = folderId ? (includeSubfolders ? allVideos : getVideosByFolder(folderId)) : [];
 	// Otros datasets (se filtran por folderId más abajo)
 	const audios = useAudioStore((s) => s.audios);
 	// Stores actuales no exponen consulta por folder para todos; cargamos global y filtramos por path si hace falta más adelante
 
 	useEffect(() => {
 		if (!folderId) return;
-		// Cargar imágenes si falta
-		if (!(imageFolderState?.loaded || imageFolderState?.loading)) {
-			fetchImages({ folderId });
+
+		if (includeSubfolders) {
+			// Cuando includeSubfolders está activado, cargar TODOS los datos globalmente
+			// para poder filtrar por path
+			if (!(imageFolderState?.loaded || imageFolderState?.loading)) {
+				fetchImages(); // Cargar todas las imágenes globalmente
+			}
+			// Cargar todos los videos globalmente
+			(async () => {
+				await fetchVideos(); // Sin filtro de carpetas específicas
+				await Promise.allSettled([fetchAudios(), fetchDocuments(), fetchJsonFiles(), fetchFile3Ds()]);
+			})();
+		} else {
+			// Comportamiento tradicional: cargar solo datos específicos de la carpeta
+			if (!(imageFolderState?.loaded || imageFolderState?.loading)) {
+				fetchImages({ folderId });
+			}
+			// Cargar videos del folder (VideoStore no tiene folderLoadState, hacemos fetch directo)
+			// Nota: el cliente de videos permite filtrar por múltiples folders; aquí pasamos uno.
+			(async () => {
+				await fetchVideos([folderId]);
+				await Promise.allSettled([fetchAudios(), fetchDocuments(), fetchJsonFiles(), fetchFile3Ds()]);
+			})();
 		}
-		// Cargar videos del folder (VideoStore no tiene folderLoadState, hacemos fetch directo)
-		// Nota: el cliente de videos permite filtrar por múltiples folders; aquí pasamos uno.
-		(async () => {
-			await fetchVideos([folderId]);
-			await Promise.allSettled([fetchAudios(), fetchDocuments(), fetchJsonFiles(), fetchFile3Ds()]);
-		})();
-	}, [folderId, imageFolderState, fetchImages, fetchVideos, fetchAudios, fetchDocuments, fetchJsonFiles, fetchFile3Ds]);
+	}, [
+		folderId,
+		includeSubfolders,
+		imageFolderState,
+		fetchImages,
+		fetchVideos,
+		fetchAudios,
+		fetchDocuments,
+		fetchJsonFiles,
+		fetchFile3Ds,
+	]);
 
 	const items: MediaItem[] = useMemo(() => {
 		const result: MediaItem[] = [];
 		const folderPath = folderData?.path;
 
-		// Images
-		for (const img of images) {
+		// Si includeSubfolders es false, incluir subcarpetas como items
+		if (!includeSubfolders && subfoldersData?.data) {
+			for (const subFolder of subfoldersData.data) {
+				result.push({
+					id: subFolder.id,
+					name: subFolder.name,
+					entityType: 'folder',
+					thumbnailUrl: subFolder.featuredImage || null,
+					createdAt: subFolder.createdAt,
+					size: subFolder.stats?.totalSize || 0,
+					path: subFolder.path,
+					parentId: subFolder.parentId,
+					totalItems: subFolder.stats?.totalItems || 0,
+					emoji: subFolder.emoji,
+					color: subFolder.color,
+				});
+			}
+		}
+
+		// Images - usar función de filtrado para subcarpetas cuando sea necesario
+		const filteredImages =
+			includeSubfolders && folderId ? filterByFolder(images, folderId, includeSubfolders, folderPath) : images;
+		for (const img of filteredImages) {
 			result.push({
 				id: img.id,
 				name: img.name,
@@ -108,8 +161,10 @@ export function useFolderFiles(folderId: string | null, options: UseFolderFilesO
 				height: (img as any).height,
 			});
 		}
-		// Videos
-		for (const vid of videos) {
+		// Videos - usar función de filtrado para subcarpetas cuando sea necesario
+		const filteredVideos =
+			includeSubfolders && folderId ? filterByFolder(videos, folderId, includeSubfolders, folderPath) : videos;
+		for (const vid of filteredVideos) {
 			const base64 = (vid as any).thumbnail ? `data:image/webp;base64,${(vid as any).thumbnail}` : null;
 			result.push({
 				id: vid.id,
@@ -180,7 +235,18 @@ export function useFolderFiles(folderId: string | null, options: UseFolderFilesO
 		}
 
 		return result;
-	}, [images, videos, audios, documents, jsonFiles, file3Ds, folderId, includeSubfolders, folderData?.path]);
+	}, [
+		images,
+		videos,
+		audios,
+		documents,
+		jsonFiles,
+		file3Ds,
+		folderId,
+		includeSubfolders,
+		folderData?.path,
+		subfoldersData,
+	]);
 
 	return {
 		items,

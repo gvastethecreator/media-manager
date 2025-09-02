@@ -128,10 +128,14 @@ export function SystemSettings() {
 					<div className="flex h-full flex-col space-y-3">
 						<motion.div
 							animate={{
-								opacity: [0, 1],
-								y: [20, 0],
+								opacity: 1,
+								y: 0,
 							}}
 							className="space-y-2"
+							initial={{
+								opacity: 0,
+								y: 20,
+							}}
 						>
 							<div className="space-y-1.5">
 								<div className="flex items-center justify-between">

@@ -47,7 +47,6 @@ import thumbnailsRouter from './routes/thumbnails';
 import uploadedImagesRouter from './routes/uploaded-images';
 import { videosRouter } from './routes/videos.js';
 import wildcardsRouter from './routes/wildcards';
-import { workflowsRouter } from './routes/workflows.js';
 import worldItemsRouter from './routes/world-items';
 
 const app = express();
@@ -106,7 +105,6 @@ app.use('/api/audio', audioRouter);
 app.use('/api/videos', videosRouter);
 app.use('/api/documents', documentsRouter);
 app.use('/api/file3ds', file3dsRouter);
-app.use('/api/workflows', workflowsRouter);
 app.use('/api/notes', notesRouter);
 app.use('/api/properties', propertiesRouter);
 app.use('/api/groups', groupsRouter);

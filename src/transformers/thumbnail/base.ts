@@ -81,13 +81,3 @@ export interface ThumbnailUpdateInput {
 // ----------------------------------------------------------------
 // TIPOS LEGACY PARA COMPATIBILIDAD TEMPORAL
 // ----------------------------------------------------------------
-
-/**
- * @deprecated Usar ThumbnailWithStats
- */
-export type ThumbnailComplete = ThumbnailWithStats;
-
-/**
- * @deprecated Usar ThumbnailWithStats
- */
-export type ThumbnailExtended = ThumbnailWithStats;

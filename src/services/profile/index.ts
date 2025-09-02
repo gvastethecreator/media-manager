@@ -4,14 +4,13 @@
  * @description Exporta todas las funcionalidades del servicio de perfiles
  */
 
-// Exportar el cliente para componentes de cliente
-export * from './client';
-
-// Solo exportar tipos del servicio interno (no exportar la implementación)
+// Re-exportar tipos desde el cliente (evitar importar directamente del servicio interno)
 export type {
 	CreateProfileInput,
 	ProfileExtended,
 	ProfileFilters,
 	ProfilePaginationOptions,
 	UpdateProfileInput,
-} from './profile.service';
+} from './client';
+// Exportar el cliente para componentes de cliente
+export * from './client';
