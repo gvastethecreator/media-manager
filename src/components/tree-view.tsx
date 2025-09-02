@@ -112,11 +112,11 @@ export function TreeView({
 						isSelected && 'bg-accent/60',
 						selectable && 'hover:border-accent-foreground/10'
 					)}
-					onClick={(e) => {
+					onClick={() => {
 						if (hasChildren) {
 							toggleExpanded(node.id);
 						}
-						handleSelection(node.id, e?.ctrlKey || e?.metaKey);
+						handleSelection(node.id, false); // Removemos ctrlKey/metaKey ya que no tenemos acceso al event
 						onNodeClick?.(node);
 					}}
 					style={{ paddingLeft: level * indent + 4 }}

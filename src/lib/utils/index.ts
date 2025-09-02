@@ -8,8 +8,6 @@ export function cn(...inputs: ClassValue[]): string {
 
 export * from './activity';
 // Re-exportar utilidades de entidades específicas
-// export * from './album'; // TODO: Temporalmente deshabilitado hasta resolver tipos
-// Utilidades consolidadas desde src/utils
 export * from './array.utils';
 export * from './character';
 export * from './collection';
@@ -23,7 +21,6 @@ export * from './folder';
 export * from './format.utils';
 export * from './id.utils';
 export * from './image';
-// export * from './image-utils'; // Conflicto con ./image - generateThumbnailUrl duplicado
 export * from './json';
 export * from './note';
 export * from './object-utils';
@@ -33,7 +30,6 @@ export * from './server-events.utils';
 // Nota: No re-exportamos todo de './stats' para evitar colisiones con
 // utils/transformers/calculate-completeness. Exportar explícitos donde se necesite.
 export { createDefaultEntityStats } from './stats';
-// export * from './store'; // TODO: Directorio no existe
 export * from './store-selectors.utils';
 export * from './string.utils';
 export * from './tag';

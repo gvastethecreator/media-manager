@@ -225,7 +225,7 @@ const createAlbumHandler = async (req: Request, res: Response) => {
 			createdAt: albums.createdAt,
 			updatedAt: albums.updatedAt,
 			featuredImage: albums.featuredImage,
-			shortcut: albums.shortcut,
+			// shortcut: albums.shortcut, // FIXME: Propiedad no existe en esquema
 			category: albums.category,
 			filters: albums.filters,
 		});
@@ -277,7 +277,7 @@ const updateAlbumHandler = async (req: Request, res: Response) => {
 			createdAt: albums.createdAt,
 			updatedAt: albums.updatedAt,
 			featuredImage: albums.featuredImage,
-			shortcut: albums.shortcut,
+			// shortcut: albums.shortcut, // FIXME: Propiedad no existe en esquema
 			category: albums.category,
 			filters: albums.filters,
 		});

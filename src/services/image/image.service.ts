@@ -45,7 +45,7 @@ import { promises as fs } from 'fs';
 import sharp from 'sharp';
 import { imageConfig } from '@/lib/config';
 import { db } from '@/lib/drizzle';
-import { folders, imageStats, images } from '@/lib/drizzle/schema/index';
+import { fileStats, folders, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import {
@@ -289,9 +289,9 @@ class ImageService {
 				.returning();
 
 			// Crear estadísticas iniciales
-			await db.insert(imageStats).values({
+			await db.insert(fileStats).values({
 				id: randomId(),
-				imageId: newImage.id,
+				fileId: newImage.id,
 				views: 0,
 			});
 
@@ -1009,7 +1009,7 @@ class ImageService {
 			const image = result[0];
 
 			// Obtener estadísticas de la imagen
-			const statsResult = await db.select().from(imageStats).where(eq(imageStats.imageId, image.id)).limit(1);
+			const statsResult = await db.select().from(fileStats).where(eq(fileStats.fileId, image.id)).limit(1);
 
 			const stats = statsResult[0] || { views: 0 };
 
@@ -1019,7 +1019,7 @@ class ImageService {
 				isFavorite: Boolean(image.isFavorite),
 				entityType: 'image',
 				stats: {
-					viewCount: stats.views,
+					viewCount: (stats as any).views ?? 0,
 					downloadCount: 0,
 					likeCount: 0,
 					commentCount: 0,

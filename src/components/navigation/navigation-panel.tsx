@@ -45,21 +45,19 @@ const NavPanelComponent = memo(function NavPanelImpl({
 	return (
 		<aside
 			aria-label="Panel de navegación principal"
-			className={cn(
-				'flex h-full flex-col border-border border-r bg-background',
-				isAnimating && 'transition-all duration-300 ease-in-out'
-			)}
+			className={cn('flex h-full flex-col', isAnimating && 'transition-all duration-300 ease-in-out')}
 		>
-			<NavPanelHeader
-				isAnimating={isAnimating}
-				isCollapsed={isCollapsed}
-				onOpenDevelopment={handleOpenDevelopment}
-				onOpenEntityCards={handleOpenEntityCards}
-				onOpenSettings={handleOpenSettings}
-			/>
-			<ScrollArea className="flex-1">
-				<NavMainNavigation currentView={currentView} isCollapsed={isCollapsed} />
-			</ScrollArea>
+			{' '}
+			<div className="sticky top-0 backdrop-blur-md">
+				<NavPanelHeader
+					isAnimating={isAnimating}
+					isCollapsed={isCollapsed}
+					onOpenDevelopment={handleOpenDevelopment}
+					onOpenEntityCards={handleOpenEntityCards}
+					onOpenSettings={handleOpenSettings}
+				/>
+			</div>
+			<NavMainNavigation currentView={currentView} isCollapsed={isCollapsed} />
 		</aside>
 	);
 });

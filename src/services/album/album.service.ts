@@ -46,7 +46,7 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 				emoji: albums.emoji,
 				color: albums.color,
 				description: albums.description,
-				shortcut: albums.shortcut,
+				// shortcut: albums.shortcut, // FIXME: Propiedad no existe en esquema
 				category: albums.category,
 				filters: albums.filters,
 				featuredImage: albums.featuredImage,
@@ -137,7 +137,7 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 				emoji: albums.emoji,
 				color: albums.color,
 				description: albums.description,
-				shortcut: albums.shortcut,
+				// shortcut: albums.shortcut, // FIXME: Propiedad no existe en esquema
 				category: albums.category,
 				filters: albums.filters,
 				featuredImage: albums.featuredImage,

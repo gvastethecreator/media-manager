@@ -1,44 +1,12 @@
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
-// Contenido/organización no esencial y tipos de archivo deshabilitados para base de datos limpia
-// import { seedActivities } from './activities.seed';
-// import { seedAlbums } from './albums.seed';
-// import { seedAudios } from './audios.seed';
-import { seedCharacters } from './characters.seed';
-// import { seedCollections } from './collections.seed';
-import { seedConcepts } from './concepts.seed';
-// import { seedDocuments } from './documents.seed';
-// import { seedFavorites } from './favorites.seed';
-// import { seedFile3Ds } from './file3Ds.seed';
-// import { seedFiles } from './files.seed';
 import { seedFolders } from './folders.seed';
-// import { seedGroups } from './groups.seed';
-// import { seedImageStats } from './imageStats.seed';
-// import { seedImages } from './images.seed';
-// import { seedJsonFiles } from './jsonFiles.seed';
-// import { seedMetadatas } from './metadatas.seed';
-import { seedNotes } from './notes.seed';
-import { seedPlaces } from './places.seed';
-import { seedProfiles } from './profiles.seed';
-import { seedPrompts } from './prompts.seed';
-import { seedProperties } from './properties.seed';
-// import { seedQueueJobs } from './queueJobs.seed';
-import { seedSettings } from './settings.seed';
-import { seedTags } from './tags.seed';
-// import { seedThumbnails } from './thumbnails.seed';
-// import { seedUploadedImages } from './uploadedImages.seed';
-// import { seedVideos } from './videos.seed';
-import { seedWildcards } from './wildcards.seed';
-// import { seedWorkflows } from './workflows.seed';
-import { seedWorldItems } from './worldItems.seed';
 
 /**
  * =================================================================================
  * SISTEMA DE SEEDS PARA DRIZZLE ORM
  * =================================================================================
- * Modo limpio: solo carpetas + entidades de categorización (taxonomía).
- * No se insertan archivos/mockups (imágenes, videos, audios, ficheros, documentos, 3D, etc.).
- * Se mantienen entidades core mínimas (profiles, settings, queueJobs) para operar.
+ * Modo limpio: SOLO carpetas. Todas las demás seeds están deshabilitadas.
  * =================================================================================
  */
 
@@ -64,26 +32,10 @@ export async function runSeeds() {
 		seedLogger.info('🌱 Iniciando proceso de seeds para Drizzle...');
 
 		// Ejecutar seeds en orden de dependencias
-		// Core entities
-		await seedProfiles(db);
-		// await seedQueueJobs(db);  // Vacía - sin datos
-		await seedSettings(db);
-
 		// Carpetas (estructura de almacenamiento)
 		await seedFolders(db);
 
-		// Taxonomy entities
-		await seedTags(db);
-		await seedCharacters(db);
-		await seedProperties(db);
-		await seedWildcards(db);
-		await seedConcepts(db);
-		await seedPrompts(db);
-		await seedNotes(db);
-		await seedPlaces(db);
-		await seedWorldItems(db);
-
-		// Content y tipos de archivo deshabilitados en modo limpio
+		// Modo limpio: sin más entidades
 
 		seedLogger.success('🎉 Seeds completadas exitosamente');
 	} catch (error) {

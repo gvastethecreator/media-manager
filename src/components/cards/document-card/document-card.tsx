@@ -139,7 +139,6 @@ export function DocumentCard({
 							}}
 							transition={{
 								duration: 2,
-								repeat: Number.POSITIVE_INFINITY,
 								ease: 'linear',
 							}}
 						/>

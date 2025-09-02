@@ -47,6 +47,12 @@ export interface FolderStats {
 	totalOthers: number;
 	totalSize: number;
 	formattedSize: string;
+	// Nuevos campos para BD y thumbnails
+	databaseSize?: number;
+	formattedDatabaseSize?: string;
+	thumbnailsCacheSize?: number;
+	formattedThumbnailsCacheSize?: string;
+	totalThumbnails?: number;
 	// Compatibilidad: timestamp ISO del último escaneo
 	lastScanned?: string;
 }

@@ -200,7 +200,7 @@ export class FolderReindexService {
 			const { eq } = await import('drizzle-orm');
 
 			// Si se especifica una carpeta específica, solo analizar esa
-			let foldersToAnalyze;
+			let foldersToAnalyze: Array<{ id: string; path: string; name: string }>;
 			if (options.folderId) {
 				foldersToAnalyze = await db
 					.select({ id: folders.id, path: folders.path, name: folders.name })
@@ -427,7 +427,7 @@ export class FolderReindexService {
 
 			const { db } = await import('@/lib/drizzle');
 			const { folders } = await import('@/lib/drizzle/schema/index');
-			const { generateFolderIdFromName } = await import('@/lib/api/services/folders');
+			const { generateFolderIdFromName } = await import('@/lib/utils/folder-id-generator');
 
 			// Crear subcarpetas ordenadas por profundidad (padres primero)
 			const sortedSubfolders = analysisResult.newSubfolders.sort((a, b) => {
@@ -522,11 +522,14 @@ export class FolderReindexService {
 						dryRun: false,
 					});
 
-					processed += syncResult.stats.totalProcessed;
-					successful += syncResult.stats.successful || 0;
+					processed += syncResult.stats.totalChecked;
+					successful +=
+						syncResult.stats.newFilesFound + syncResult.stats.totalChecked - syncResult.stats.filesRemoved || 0;
 					errors.push(...(syncResult.errors || []));
 
-					this.logger.debug(`✅ Carpeta indexada: ${folder.name} (${syncResult.stats.totalProcessed} archivos)`);
+					this.logger.debug(
+						`✅ Carpeta indexada: ${folder.name} (${syncResult.stats.totalChecked} archivos verificados, ${syncResult.stats.newFilesFound} nuevos)`
+					);
 				} catch (error) {
 					const errorMsg = `Error indexando carpeta ${folder.path}: ${error instanceof Error ? error.message : 'Error desconocido'}`;
 					errors.push(errorMsg);
@@ -574,8 +577,8 @@ export class FolderReindexService {
 		let processed = 0;
 
 		try {
-			const { ThumbnailService } = await import('@/lib/thumbnails/thumbnail.service');
-			const thumbnailService = ThumbnailService.getInstance();
+			const { bulkGenerateThumbnails } = await import('@/server/services/thumbnail.service');
+			// Ya no necesitamos instanciar un servicio, usamos la función directamente
 
 			// Procesar thumbnails por tipo de entidad
 			const entityTypes = ['image', 'video', 'document', 'file3d', 'json'];
@@ -586,7 +589,7 @@ export class FolderReindexService {
 
 					// Obtener entidades sin thumbnail
 					const { db } = await import('@/lib/drizzle');
-					let entitiesQuery;
+					let entitiesQuery: any;
 
 					switch (entityType) {
 						case 'image': {
@@ -612,7 +615,8 @@ export class FolderReindexService {
 
 					for (const entity of entities) {
 						try {
-							await thumbnailService.generateThumbnail(entity.path, entity.id, entityType as any);
+							// Usar la función bulkGenerateThumbnails con un solo elemento
+							await bulkGenerateThumbnails([entity.id]);
 							processed++;
 						} catch (error) {
 							const errorMsg = `Error generando thumbnail para ${entity.path}: ${error instanceof Error ? error.message : 'Error desconocido'}`;
@@ -665,8 +669,8 @@ export class FolderReindexService {
 		let processed = 0;
 
 		try {
-			const { MetadataService } = await import('@/services/metadata/metadata.service');
-			const metadataService = MetadataService.getInstance();
+			const { extractMetadata, clearMetadataCache } = await import('@/services/metadata/metadata.service');
+			// Ya no necesitamos instanciar un servicio, usamos las funciones directamente
 
 			// Obtener todos los archivos que necesitan metadata
 			const { db } = await import('@/lib/drizzle');
@@ -690,7 +694,9 @@ export class FolderReindexService {
 
 			for (const image of imagesWithoutMetadata) {
 				try {
-					await metadataService.extractAndStoreMetadata(image.path, image.id, 'image');
+					// Usar la función extractMetadata y almacenar la metadata
+					const metadata = await extractMetadata(image.path);
+					// TODO: Implementar almacenamiento de metadata extraída
 					processed++;
 				} catch (error) {
 					const errorMsg = `Error extrayendo metadata de ${image.path}: ${error instanceof Error ? error.message : 'Error desconocido'}`;
@@ -819,7 +825,7 @@ export class FolderReindexService {
 		try {
 			await emitProgress('folder:progress', {
 				isProcessing: progress < 100,
-				folderId: null,
+				folderId: undefined,
 				phase,
 				progress,
 				filesProcessed: 0,

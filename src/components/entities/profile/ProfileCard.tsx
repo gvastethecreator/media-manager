@@ -115,23 +115,24 @@ export function ProfileCard({
 					title={isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}
 					type="button"
 				>
-					<motion.svg
-						animate={{ rotate: isExpanded ? 180 : 0 }}
-						aria-label={isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}
-						fill="none"
-						height="20"
-						role="img"
-						stroke="currentColor"
-						strokeLinecap="round"
-						strokeLinejoin="round"
-						strokeWidth="2"
-						viewBox="0 0 24 24"
-						width="20"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<title>{isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}</title>
-						<polyline points="6 9 12 15 18 9" />
-					</motion.svg>
+					<motion.div animate={{ rotate: isExpanded ? 180 : 0 }}>
+						<svg
+							aria-label={isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}
+							fill="none"
+							height="20"
+							role="img"
+							stroke="currentColor"
+							strokeLinecap="round"
+							strokeLinejoin="round"
+							strokeWidth="2"
+							viewBox="0 0 24 24"
+							width="20"
+							xmlns="http://www.w3.org/2000/svg"
+						>
+							<title>{isExpanded ? 'Colapsar detalles' : 'Expandir detalles'}</title>
+							<polyline points="6 9 12 15 18 9" />
+						</svg>
+					</motion.div>
 				</button>
 			</Card>
 		</motion.div>

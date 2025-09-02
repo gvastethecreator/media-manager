@@ -91,27 +91,27 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 	// Preparar estadísticas de tipos de archivo
 	const fileTypeStats = folderStats
 		? [
-			{ type: 'Imágenes', count: folderStats.totalImages, icon: ImageIcon, color: 'text-blue-500' },
-			{ type: 'Videos', count: folderStats.totalVideos, icon: Video, color: 'text-purple-500' },
-			{ type: 'Audio', count: folderStats.totalAudio, icon: Music, color: 'text-green-500' },
-			{ type: 'Documentos', count: folderStats.totalDocuments, icon: FileText, color: 'text-orange-500' },
-			{ type: 'Otros', count: folderStats.totalOthers, icon: File, color: 'text-gray-500' },
-		].filter((stat) => stat.count > 0)
+				{ type: 'Imágenes', count: folderStats.totalImages, icon: ImageIcon, color: 'text-blue-500' },
+				{ type: 'Videos', count: folderStats.totalVideos, icon: Video, color: 'text-purple-500' },
+				{ type: 'Audio', count: folderStats.totalAudio, icon: Music, color: 'text-green-500' },
+				{ type: 'Documentos', count: folderStats.totalDocuments, icon: FileText, color: 'text-orange-500' },
+				{ type: 'Otros', count: folderStats.totalOthers, icon: File, color: 'text-gray-500' },
+			].filter((stat) => stat.count > 0)
 		: [];
 
 	const totalFiles = folderStats
 		? folderStats.totalImages +
-		folderStats.totalVideos +
-		folderStats.totalAudio +
-		folderStats.totalDocuments +
-		folderStats.totalOthers
+			folderStats.totalVideos +
+			folderStats.totalAudio +
+			folderStats.totalDocuments +
+			folderStats.totalOthers
 		: 0;
 
 	return (
 		<ScrollArea className={cn('h-full w-full', className)}>
 			{/* Header de la carpeta */}
 			<div className="flex items-start gap-3 p-2">
-				<div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-lg bg-primary/10">
+				<div className="flex h-12 w-12 flex-shrink-0 items-center justify-center">
 					{folderDetails?.emoji ? (
 						<span className="text-xl">{folderDetails.emoji}</span>
 					) : (
@@ -137,8 +137,8 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 				{/* Información sobre las imágenes cargadas */}
 				{imageCount > 0 && (
 					<div className="flex items-center justify-between gap-3 p-2">
-
-						<Badge className="text-xs" variant="secondary"><span className="text-muted-foreground text-xs">visibles : </span>
+						<Badge className="text-xs" variant="secondary">
+							<span className="text-muted-foreground text-xs">visibles : </span>
 							{imageCount} elemento{imageCount !== 1 ? 's' : ''}
 						</Badge>
 						{imageCount > 0 && (
@@ -148,27 +148,21 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 							</div>
 						)}
 					</div>
-
-
 				)}
 			</div>
 
-
 			{/* Grid de imágenes recientes */}
 			{recentImages && recentImages.length > 0 && (
-				<div className="border-0 bg-muted/30 p-4">
-					<div className="pt-0">
-						<div className="grid grid-cols-4 gap-2">
-							{recentImages.slice(0, 4).map((imageId) => (
-								<div
-									className="flex aspect-square items-center justify-center overflow-hidden rounded-md bg-muted/50"
-									key={imageId}
-								>
-									<ImageIcon className="h-4 w-4 text-muted-foreground" />
-								</div>
-							))}
-						</div>
-
+				<div className="border-0 p-4">
+					<div className="grid grid-cols-8 gap-2">
+						{recentImages.slice(0, 8).map((imageId) => (
+							<div
+								className="flex aspect-square items-center justify-center overflow-hidden rounded-md bg-muted/50"
+								key={imageId}
+							>
+								<ImageIcon className="h-4 w-4 text-muted-foreground" />
+							</div>
+						))}
 					</div>
 				</div>
 			)}
@@ -177,8 +171,8 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 			<div className="grid grid-cols-1 gap-3">
 				{/* Resumen de archivos por tipo */}
 				{folderStats && totalFiles > 0 && (
-					<div className="border-0 bg-muted/30 p-8 pt-0">
-						<div className="space-y-2">
+					<div className="border-0 p-8 pt-0">
+						<div className="space-y-4">
 							{fileTypeStats.map((stat) => {
 								const Icon = stat.icon;
 								const percentage = ((stat.count / totalFiles) * 100).toFixed(1);
@@ -200,7 +194,6 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 
 							{/* Tamaño total */}
 							{folderStats && folderStats.totalSize > 0 && (
-
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-2">
 										<Hash className="h-4 w-4 text-indigo-600" />
@@ -210,18 +203,11 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 										{formatFileSize(folderStats.totalSize)}
 									</Badge>
 								</div>
-
 							)}
-
-
-
-
 						</div>
-
 
 						{/* Información detallada */}
 						{folderDetails && (
-
 							<div className="space-y-3 pt-4">
 								{/* ID de la carpeta */}
 								<div className="flex items-center justify-between border-border/50 border-b py-2">
@@ -351,24 +337,10 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 										<code className="rounded bg-background px-2 py-1 font-mono text-xs">{folderDetails.path}</code>
 									</div>
 								)}
-
-
 							</div>
-
-
-
-
 						)}
 					</div>
 				)}
-
-
-
-
-
-
-
-
 			</div>
 		</ScrollArea>
 	);

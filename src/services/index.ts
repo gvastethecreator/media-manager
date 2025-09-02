@@ -38,5 +38,4 @@ export * from './toast/index';
 export * from './uploaded-images/index';
 export * from './video/index';
 export * from './wildcard/index';
-export * from './workflow/index';
 export * from './world-item/index';

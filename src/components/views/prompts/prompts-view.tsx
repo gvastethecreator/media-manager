@@ -180,7 +180,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 								<MemoizedPromptCard
 									className={prompt.id === selectedPrompt?.id ? 'ring-2 ring-primary' : ''}
 									onClick={() => handlePromptSelect(prompt.id)}
-									promptId={prompt.id}
+									prompt={prompt}
 								/>
 							</motion.div>
 						))}

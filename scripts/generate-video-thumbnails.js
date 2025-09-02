@@ -32,7 +32,9 @@ async function generateVideoThumbnails() {
 		// Importar dependencias necesarias
 		const { db } = await import('../src/lib/drizzle/index.js');
 		const { videos } = await import('../src/lib/drizzle/schema/index.js');
-		const { generateAnimatedVideoThumbnail } = await import('../src/lib/utils/video/helpers.js');
+		const { generateAnimatedVideoThumbnail, generateStaticVideoThumbnail } = await import(
+			'../src/lib/utils/video/helpers.js'
+		);
 		const { isNull, not, eq } = await import('drizzle-orm');
 		const PQueue = (await import('p-queue')).default;
 
@@ -90,18 +92,27 @@ async function generateVideoThumbnails() {
 						return;
 					}
 
-					// Generar WebP animado
-					const animatedWebpBuffer = await generateAnimatedVideoThumbnail(video.path, {
+					// Generar WebP animado (o estático como fallback)
+					let animatedWebpBuffer = await generateAnimatedVideoThumbnail(video.path, {
 						time: 5,
-						quality: 'high',
-						frames: 12,
+						quality: 'medium',
+						frames: 8,
 						duration: 2,
 					});
 
+					// Si falló el animado, intentar con thumbnail estático
 					if (!animatedWebpBuffer || animatedWebpBuffer.length === 0) {
-						console.warn(
-							`⚠️ No se pudo generar thumbnail para: ${video.name} (archivo probablemente no es un video válido)`
-						);
+						console.log(`⚠️ WebP animado falló, intentando estático: ${video.name}`);
+						animatedWebpBuffer = await generateStaticVideoThumbnail(video.path, {
+							time: 5,
+							quality: 'medium',
+							width: 320,
+							height: 240,
+						});
+					}
+
+					if (!animatedWebpBuffer || animatedWebpBuffer.length === 0) {
+						console.warn(`❌ No se pudo generar thumbnail para: ${video.name} (ambos métodos fallaron)`);
 						results.errors++;
 						return;
 					}

@@ -44,6 +44,5 @@ export * from './videos/videos-view';
 export { default as VideosView } from './videos/videos-view';
 export * from './wildcards/wildcard-content-view';
 export * from './wildcards/wildcards-view';
-export * from './workflows/workflows-view';
 export * from './world-items/world-item-content-view';
 export * from './world-items/world-items-view';

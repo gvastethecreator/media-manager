@@ -16,7 +16,7 @@ import './canvas-enhancements.css';
 export type MediaItem = {
 	id: string;
 	name: string;
-	entityType: 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d';
+	entityType: 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d' | 'folder';
 	mimeType?: string | null;
 	thumbnailUrl?: string | null;
 	// Metacampos opcionales utilizados por distintas vistas/columnas
@@ -25,6 +25,11 @@ export type MediaItem = {
 	path?: string;
 	width?: number;
 	height?: number;
+	// Campos específicos para folders
+	parentId?: string | null;
+	totalItems?: number;
+	emoji?: string | null;
+	color?: string | null;
 };
 
 interface MediaThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
@@ -284,6 +289,10 @@ function MediaThumbnailInner({
 						}
 					}
 					if (alive) setSrc(url || getFallbackIcon(item.entityType));
+				} else if (item.entityType === 'folder') {
+					// Para carpetas, usar featured image si está disponible, sino icono de carpeta
+					const folderThumbnail = item.thumbnailUrl || '/globe.svg';
+					if (alive) setSrc(folderThumbnail);
 				} else {
 					// Tipos no soportados por generadores: usar icono genérico según tipo
 					const fallback = getFallbackIcon(item.entityType);
@@ -516,6 +525,8 @@ export const MediaThumbnail = React.memo(MediaThumbnailInner, (prev, next) => {
 
 function getFallbackIcon(entityType: MediaItem['entityType']): string {
 	switch (entityType) {
+		case 'folder':
+			return '/globe.svg'; // O el icono que prefieras para carpetas
 		case 'audio':
 			return '/file.svg';
 		case 'document':
@@ -531,6 +542,8 @@ function getFallbackIcon(entityType: MediaItem['entityType']): string {
 
 function getBadgeInfo(entityType: MediaItem['entityType']) {
 	switch (entityType) {
+		case 'folder':
+			return { text: 'DIR', bg: 'bg-indigo-600/90', title: 'Folder' };
 		case 'video':
 			return { text: 'VID', bg: 'bg-blue-600/90', title: 'Video File' };
 		case 'audio':

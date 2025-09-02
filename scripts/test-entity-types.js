@@ -20,7 +20,6 @@ const ENTITY_TYPE_MAPPING = {
 	DOCUMENT: ['.pdf', '.doc', '.docx', '.txt', '.rtf', '.odt', '.pages', '.md', '.tex'],
 	JSON: ['.json', '.jsonl', '.geojson'],
 	FILE3D: ['.obj', '.fbx', '.dae', '.3ds', '.blend', '.max', '.c4d', '.ma', '.mb', '.lwo', '.x3d'],
-	WORKFLOW: ['.json'],
 };
 
 // Función para obtener tipo de entidad desde extensión

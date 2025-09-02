@@ -1,4 +1,5 @@
 import { type ReactNode, useEffect, useRef, useState } from 'react';
+import { JsonViewer } from '@/components/panels/details-panel/components/json-viewer';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 import { Badge } from './badge';
@@ -53,25 +54,37 @@ const renderLogData = (data: unknown): ReactNode => {
 };
 
 function renderEntry(log: LogEntry, showTimestamp: boolean) {
-	let logDataText: string | null = null;
+	let logDataComponent: ReactNode = null;
+
 	if (log.data) {
 		if (typeof log.data === 'string') {
-			logDataText = log.data;
-		} else {
+			// Si es string, verificar si es JSON válido
 			try {
-				logDataText = JSON.stringify(log.data, null, 2) || String(log.data);
+				JSON.parse(log.data);
+				// Es JSON válido, usar JsonViewer
+				logDataComponent = <JsonViewer className="mt-1" content={log.data} defaultExpanded={false} maxHeight={200} />;
 			} catch {
-				logDataText = String(log.data);
+				// No es JSON, mostrar como texto simple
+				logDataComponent = <pre className="mt-1 overflow-x-auto text-xs">{log.data}</pre>;
+			}
+		} else {
+			// Es objeto, usar JsonViewer
+			try {
+				const jsonString = JSON.stringify(log.data, null, 2);
+				logDataComponent = <JsonViewer className="mt-1" content={jsonString} defaultExpanded={false} maxHeight={200} />;
+			} catch {
+				logDataComponent = <pre className="mt-1 overflow-x-auto text-xs">{String(log.data)}</pre>;
 			}
 		}
 	}
+
 	return (
 		<div className={cn('break-all rounded p-2 font-mono text-sm', LOG_COLORS[log.level])} key={log.id}>
 			{showTimestamp && <span className="mr-2 opacity-70">[{log.timestamp}]</span>}
 			<span className="mr-1">{LOG_ICONS[log.level]}</span>
 			{log.context && <span className="mr-1 font-semibold">[{log.context}]</span>}
 			<span>{log.message}</span>
-			{logDataText && <pre className="mt-1 overflow-x-auto text-xs">{logDataText}</pre>}
+			{logDataComponent}
 		</div>
 	);
 }

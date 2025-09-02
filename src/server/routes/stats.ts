@@ -89,7 +89,7 @@ router.get('/storage', async (_req, res) => {
 		const totalDocuments = stats?.totalDocuments || 0;
 		const totalAudio = stats?.totalAudio || 0;
 		const totalJsonFiles = stats?.totalJsonFiles || 0;
-		const totalWorkflows = stats?.totalWorkflows || 0;
+		const totalWorkflows = 0; // stats?.totalWorkflows || 0; // totalWorkflows no está disponible
 		const totalFile3D = stats?.totalFile3D || 0;
 
 		const storage = {

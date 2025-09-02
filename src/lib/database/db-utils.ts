@@ -3,7 +3,7 @@
  */
 
 import { sql } from 'drizzle-orm';
-import { albums, collections, folders, imageStats, images, tags } from '@/lib/drizzle/schema';
+import { albums, collections, fileStats, folders, images, tags } from '@/lib/drizzle/schema';
 import { db } from './db';
 
 type DrizzleTransactionClient = Parameters<Parameters<typeof db.transaction>[0]>[0];
@@ -83,8 +83,8 @@ export async function cleanupOrphanedRecords() {
 	return withTransaction(async (tx) => {
 		// Eliminar estadísticas de imágenes que ya no existen
 		const deletedStats = await tx
-			.delete(imageStats)
-			.where(sql`${imageStats.imageId} NOT IN (SELECT ${images.id} FROM ${images})`);
+			.delete(fileStats)
+			.where(sql`${fileStats.fileId} NOT IN (SELECT ${images.id} FROM ${images})`);
 
 		return {
 			deletedStats: deletedStats.rowsAffected || 0,

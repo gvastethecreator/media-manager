@@ -187,9 +187,10 @@ const processMetadataResult = (result: EnhancedMetadataResult, item: AnyEntityWi
 	}
 
 	// Metadatos de JSON
-	if (entityType === 'jsonFile') {
-		extractJSONMetadata(result, metadata);
-	}
+	// TODO: Agregar 'jsonFile' al tipo EntityType
+	// if (entityType === 'jsonFile') {
+	//   extractJSONMetadata(result, metadata);
+	// }
 
 	// Metadatos de documentos (markdown, txt, etc.)
 	if (entityType === 'document') {

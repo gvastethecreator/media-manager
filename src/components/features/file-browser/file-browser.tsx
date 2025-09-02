@@ -11,15 +11,23 @@ import { FileCanvasMasonryGrouped } from '@/components/features/file-browser/vie
 import { Table } from '@/components/features/file-browser/views/table';
 import { FileCanvasTableGrouped } from '@/components/features/file-browser/views/table-grouped';
 import { cn } from '@/lib/utils';
+import { useAudioStore } from '@/store/entities/audio';
+import { useDocumentStore } from '@/store/entities/document';
+import { useFile3DStore } from '@/store/entities/file-3d';
+import { useImageStore } from '@/store/entities/image';
+import { useJsonFileStore } from '@/store/entities/json-file/json-file.store';
+import { useVideoStore } from '@/store/entities/video';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { AnyEntityWithStats } from '@/types/entities';
+import { FileBrowserToolbar } from './components/file-browser-toolbar';
 import { FileListHeader } from './components/file-list-header';
 import type { MediaItem } from './components/media-thumbnail';
 import { StatusBar } from './components/status-bar';
 // Estilos de animación específicos para vistas Canvas
 import './views/canvas/canvas-animations.css';
 import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
+import { useNavigation } from '@/components/navigation/hooks/navigation.utils';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useProgressiveFolderFiles } from './hooks/use-progressive-folder-files';
 import { useKeyboardNavigation } from './navigation/keyboard-navigation';
@@ -51,6 +59,7 @@ function applySort(items: MediaItem[], sortOptions: { field: string; direction: 
 function groupByEntityType(items: MediaItem[]): Array<{ key: string; items: MediaItem[]; displayName: string }> {
 	const map = new Map<string, MediaItem[]>();
 	const displayNames = {
+		folder: 'Carpetas',
 		image: 'Imágenes',
 		video: 'Videos',
 		audio: 'Audio',
@@ -66,8 +75,8 @@ function groupByEntityType(items: MediaItem[]): Array<{ key: string; items: Medi
 		map.set(type, arr);
 	}
 
-	// Orden específico para los tipos
-	const typeOrder = ['image', 'video', 'audio', 'document', 'json', 'file3d'];
+	// Orden específico para los tipos - carpetas primero
+	const typeOrder = ['folder', 'image', 'video', 'audio', 'document', 'json', 'file3d'];
 
 	return typeOrder
 		.filter((type) => map.has(type))
@@ -80,6 +89,42 @@ function groupByEntityType(items: MediaItem[]): Array<{ key: string; items: Medi
 // Componente principal con filtro de carpeta
 export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }: FileBrowserProps) {
 	const { items, isLoading, error, shouldShowPreloader, loadedCount } = useProgressiveFolderFiles(filterId ?? null);
+
+	// Estado para controlar loading del refresh
+	const [isRefreshing, setIsRefreshing] = useState(false);
+
+	// Hook de navegación para manejar carpetas
+	const { navigateToFolder } = useNavigation();
+
+	// Función de refresh que recarga los datos de la carpeta actual
+	const handleRefresh = async () => {
+		if (!filterId || isRefreshing) return;
+
+		setIsRefreshing(true);
+		try {
+			// Obtener los stores necesarios
+			const { fetchImages } = useImageStore.getState();
+			const { fetchVideos } = useVideoStore.getState();
+			const { fetchAudios } = useAudioStore.getState();
+			const { fetchDocuments } = useDocumentStore.getState();
+			const { fetchJsonFiles } = useJsonFileStore.getState();
+			const { fetchFile3Ds } = useFile3DStore.getState();
+
+			// Recargar todos los tipos de archivos de la carpeta
+			await Promise.allSettled([
+				fetchImages({ folderId: filterId }),
+				fetchVideos([filterId]),
+				fetchAudios(),
+				fetchDocuments(),
+				fetchJsonFiles(),
+				fetchFile3Ds(),
+			]);
+		} catch (error) {
+			console.error('Error al refrescar:', error);
+		} finally {
+			setIsRefreshing(false);
+		}
+	};
 
 	// View options (modo, tamaño, sort, búsqueda)
 	const viewMode = useViewOptionsStore((s) => s.viewMode);
@@ -131,6 +176,12 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 	});
 
 	const handleItemClick = (item: MediaItem, modifiers?: ClickModifiers) => {
+		// Si es una carpeta, navegar a ella directamente
+		if (item.entityType === 'folder') {
+			navigateToFolder(item.id);
+			return;
+		}
+
 		const mods = modifiers ?? { ctrlKey: false, metaKey: false, shiftKey: false };
 		const isToggle = mods.ctrlKey || mods.metaKey;
 		const isRange = mods.shiftKey;
@@ -161,6 +212,12 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 	};
 
 	const handleItemDoubleClick = (item: MediaItem) => {
+		// Si es una carpeta, navegar a ella
+		if (item.entityType === 'folder') {
+			navigateToFolder(item.id);
+			return;
+		}
+
 		// Si el padre provee manejador, delegar completamente
 		if (onItemDoubleClick) {
 			onItemDoubleClick(item as unknown as AnyEntityWithStats);
@@ -208,6 +265,12 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 			ref={containerRef} // Focusable programáticamente pero no por tab
 			tabIndex={-1}
 		>
+			{/* Toolbar del File Browser */}
+			<FileBrowserToolbar
+				allItemIds={(grouped ? grouped.flatMap((g) => g.items) : processedItems).map((it) => it.id)}
+				isLoading={isLoading || isRefreshing}
+				onRefresh={handleRefresh}
+			/>
 			<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container">
 				{/* Overlays no bloqueantes para loading/error solo si hay error */}
 				{error && (
@@ -318,7 +381,11 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 					</div>
 				)}
 			</div>
-			<StatusBar items={processedItems as MediaItem[]} />
+			<StatusBar
+				isLoading={isLoading || isRefreshing}
+				items={processedItems as MediaItem[]}
+				onRefresh={handleRefresh}
+			/>
 		</section>
 	);
 }
@@ -341,6 +408,12 @@ function renderFromItems({
 }: FileBrowserDataProps) {
 	// Admitir mezcla de imágenes y videos
 	const mediaItems = items as unknown as MediaItem[];
+
+	// Función de refresh básica para items directos (opcional)
+	const handleRefresh = () => {
+		// En este contexto, no hay mucho que refrescar ya que los items vienen como props
+		console.log('Refresh solicitado para items directos');
+	};
 
 	const viewMode = useViewOptionsStore((s) => s.viewMode);
 	const itemSize = useViewOptionsStore((s) => s.itemSize);
@@ -440,6 +513,12 @@ function renderFromItems({
 			data-view-mode={viewMode}
 			tabIndex={-1}
 		>
+			{/* Toolbar del File Browser */}
+			<FileBrowserToolbar
+				allItemIds={processedItems.map((it) => it.id)}
+				isLoading={isLoading}
+				onRefresh={handleRefresh}
+			/>
 			<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container">
 				{viewMode === 'list' ? (
 					<div className="flex h-full min-h-0 flex-col">
@@ -496,7 +575,7 @@ function renderFromItems({
 					</div>
 				)}
 			</div>
-			<StatusBar items={processedItems as MediaItem[]} />
+			<StatusBar isLoading={isLoading} items={processedItems as MediaItem[]} onRefresh={handleRefresh} />
 		</section>
 	);
 }

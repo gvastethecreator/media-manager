@@ -33,10 +33,8 @@ const EVENT_TYPE_MAPPING: Record<string, EventType> = {
 
 interface NoteServiceFilters {
 	category?: string;
-	priority?: number;
-	status?: string;
 	search?: string;
-	sortBy?: 'createdAt' | 'updatedAt' | 'title' | 'category' | 'priority' | 'status';
+	sortBy?: 'createdAt' | 'updatedAt' | 'title' | 'category';
 	sortOrder?: 'asc' | 'desc';
 	page?: number;
 	pageSize?: number;
@@ -63,13 +61,10 @@ const NoteServiceImpl = {
 					title: data.title,
 					content: data.content || '',
 					category: data.category || 'general',
-					priority: data.priority || 0,
-					status: data.status || 'active',
 					featuredImage: data.featuredImage || null,
 					isFavorite: data.isFavorite,
 					createdAt: new Date(),
 					updatedAt: new Date(),
-					presetId: data.presetId || null,
 				})
 				.returning();
 
@@ -123,8 +118,6 @@ const NoteServiceImpl = {
 					title: data.title,
 					content: data.content || '',
 					category: data.category || 'general',
-					priority: data.priority || 0,
-					status: data.status || 'active',
 					featuredImage: data.featuredImage || null,
 					isFavorite: data.isFavorite,
 					updatedAt: new Date(),
@@ -206,16 +199,13 @@ const NoteServiceImpl = {
 			const drizzleNote = await db
 				.select({
 					id: notes.id,
-					title: notes.title, // Campo real
+					title: notes.title,
 					content: notes.content,
 					category: notes.category,
-					priority: notes.priority, // INTEGER en BD real
-					status: notes.status,
 					featuredImage: notes.featuredImage,
 					isFavorite: notes.isFavorite,
 					createdAt: notes.createdAt,
 					updatedAt: notes.updatedAt,
-					presetId: notes.presetId, // Campo real
 				})
 				.from(notes)
 				.where(eq(notes.id, id))
@@ -270,16 +260,7 @@ const NoteServiceImpl = {
 			// **MIGRACIÓN A DRIZZLE**
 			noteLogger.info('🔍 Obteniendo notas con filtros:', filters);
 
-			const {
-				category,
-				priority,
-				status,
-				search,
-				sortBy = 'createdAt',
-				sortOrder = 'desc',
-				page = 0,
-				pageSize = 50,
-			} = filters;
+			const { category, search, sortBy = 'createdAt', sortOrder = 'desc', page = 0, pageSize = 50 } = filters;
 
 			// Construir condiciones WHERE para Drizzle
 			const conditions: any[] = [];
@@ -287,13 +268,7 @@ const NoteServiceImpl = {
 			if (category) {
 				conditions.push(eq(notes.category, category));
 			}
-			if (priority !== undefined) {
-				// priority es INTEGER en BD real
-				conditions.push(eq(notes.priority, priority));
-			}
-			if (status) {
-				conditions.push(eq(notes.status, status));
-			}
+
 			if (search) {
 				conditions.push(or(like(notes.title, `%${search}%`), like(notes.content, `%${search}%`)));
 			}
@@ -309,12 +284,6 @@ const NoteServiceImpl = {
 				case 'category':
 					orderByClause = sortOrder === 'desc' ? desc(notes.category) : asc(notes.category);
 					break;
-				case 'priority':
-					orderByClause = sortOrder === 'desc' ? desc(notes.priority) : asc(notes.priority);
-					break;
-				case 'status':
-					orderByClause = sortOrder === 'desc' ? desc(notes.status) : asc(notes.status);
-					break;
 				case 'updatedAt':
 					orderByClause = sortOrder === 'desc' ? desc(notes.updatedAt) : asc(notes.updatedAt);
 					break;
@@ -328,16 +297,13 @@ const NoteServiceImpl = {
 				db
 					.select({
 						id: notes.id,
-						title: notes.title, // Campo real
+						title: notes.title,
 						content: notes.content,
 						category: notes.category,
-						priority: notes.priority, // INTEGER en BD real
-						status: notes.status,
 						featuredImage: notes.featuredImage,
 						isFavorite: notes.isFavorite,
 						createdAt: notes.createdAt,
 						updatedAt: notes.updatedAt,
-						presetId: notes.presetId, // Campo real
 					})
 					.from(notes)
 					.where(whereClause)

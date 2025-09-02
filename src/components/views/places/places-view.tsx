@@ -141,7 +141,7 @@ export function PlacesView({ isVisible }: ViewProps) {
 								<PlaceCard
 									className={place.id === selectedPlaceId ? 'ring-2 ring-primary' : ''}
 									onClick={() => handlePlaceSelect(place.id)}
-									placeId={place.id}
+									place={place}
 								/>
 							</motion.div>
 						))}

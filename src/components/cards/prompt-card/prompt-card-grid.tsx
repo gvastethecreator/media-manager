@@ -140,7 +140,7 @@ export function PromptCardGrid({
 							isSelected={selectedPromptId === prompt.id}
 							key={prompt.id}
 							onClick={onPromptClick ? () => onPromptClick(prompt) : undefined}
-							promptId={prompt.id}
+							prompt={prompt}
 							tcgMode={tcgMode}
 						/>
 					));
