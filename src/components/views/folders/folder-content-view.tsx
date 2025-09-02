@@ -237,7 +237,7 @@ export function FolderContentView({
 			logger.info(`🔄 Iniciando escaneo de carpeta: ${currentFolderId}`);
 
 			// Importar y ejecutar la función de reindexación
-			await reindexFolderMutation.mutateAsync(currentFolderId);
+			await reindexFolderMutation.mutateAsync({ id: currentFolderId });
 
 			logger.info('✅ Escaneo completado, recargando imágenes...');
 

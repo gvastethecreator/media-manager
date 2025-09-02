@@ -25,6 +25,7 @@ import {
 	Workflow,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ViewType } from '@/components/views/types';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
@@ -250,7 +251,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 		});
 	}, []);
 
-	const containerClasses = useMemo(() => cn('pt-1 pb-1', isCollapsed ? 'px-1' : 'px-2'), [isCollapsed]);
+	const containerClasses = useMemo(() => cn('overflow-auto pt-1 pb-1', isCollapsed ? 'px-1' : 'px-2'), [isCollapsed]);
 	const innerContainerClasses = useMemo(() => cn('rounded-md p-0.5 shadow-sm', isCollapsed && 'p-0.5'), [isCollapsed]);
 	const flexContainerClasses = useMemo(() => cn('flex flex-col gap-1'), []);
 
@@ -285,7 +286,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 	);
 
 	return (
-		<div className={containerClasses}>
+		<ScrollArea className={containerClasses}>
 			<div className={innerContainerClasses}>
 				<div className={flexContainerClasses}>
 					{NAVIGATION_CATEGORIES.map((category, _catIdx) => (
@@ -336,7 +337,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 								<>
 									{/* TreeView directo para carpetas */}
 									{category.showTreeView && (
-										<div className="mt-1 ml-2">
+										<div className="mt-1">
 											<NavCategoryChildren
 												categoryId={category.id}
 												currentView={currentView}
@@ -421,7 +422,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 					))}
 				</div>
 			</div>
-		</div>
+		</ScrollArea>
 	);
 });
 

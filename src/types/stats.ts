@@ -97,7 +97,6 @@ export interface GeneralStats {
 	totalDocuments?: number;
 	totalAudio?: number;
 	totalJsonFiles?: number;
-	totalWorkflows?: number;
 	totalFile3D?: number;
 	topTags?: TopTag[];
 	recentActivity?: RecentActivity[];
@@ -176,7 +175,6 @@ export function transformSystemStatsToGeneralStats(systemStats: SystemStats): Ge
 		totalDocuments: 0,
 		totalAudio: 0,
 		totalJsonFiles: 0,
-		totalWorkflows: 0,
 		totalFile3D: 0,
 		topTags: [],
 		recentActivity: [],
@@ -204,7 +202,6 @@ export function createEmptyGeneralStats(): GeneralStats {
 		totalDocuments: 0,
 		totalAudio: 0,
 		totalJsonFiles: 0,
-		totalWorkflows: 0,
 		totalFile3D: 0,
 		topTags: [],
 		recentActivity: [],

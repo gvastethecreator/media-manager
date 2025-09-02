@@ -1,3 +1,5 @@
+import { RefreshCw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { MediaItem } from './media-thumbnail';
@@ -5,6 +7,8 @@ import type { MediaItem } from './media-thumbnail';
 export interface StatusBarProps {
 	items: MediaItem[];
 	className?: string;
+	onRefresh?: () => void;
+	isLoading?: boolean;
 }
 
 // Función utilitaria para formatear tamaños de archivo
@@ -25,7 +29,7 @@ function getItemSize(item: MediaItem): number {
 	return typeof size === 'number' ? size : 0;
 }
 
-export function StatusBar({ items, className }: StatusBarProps) {
+export function StatusBar({ items, className, onRefresh, isLoading = false }: StatusBarProps) {
 	const selectedIds = useSelectionStore((s) => s.selectedIds);
 
 	// Calcular estadísticas de todos los items
@@ -69,7 +73,7 @@ export function StatusBar({ items, className }: StatusBarProps) {
 		<div
 			aria-live="polite"
 			className={cn(
-				'flex items-center justify-between border-t bg-background/95 px-4 py-2 text-sm',
+				'flex items-center justify-between bg-background/95 px-4 py-2 text-xs',
 				'backdrop-blur supports-[backdrop-filter]:bg-background/60',
 				className
 			)}
@@ -78,12 +82,11 @@ export function StatusBar({ items, className }: StatusBarProps) {
 
 			{/* Información adicional del lado derecho */}
 			<div className="flex items-center gap-4 text-muted-foreground text-xs">
-				{selectedCount > 0 && (
-					<div className="flex items-center gap-1">
-						<div className="h-2 w-2 rounded-full bg-primary" />
-						<span>Selección activa</span>
-					</div>
-				)}
+				{/* Botón de refresh */}
+
+				<Button disabled={isLoading} onClick={onRefresh} size="sm" variant="ghost">
+					<RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
+				</Button>
 			</div>
 		</div>
 	);

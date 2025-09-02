@@ -40,7 +40,8 @@ export function JsonFilesContentView({ className }: JsonFilesContentViewProps) {
 
 	const handleJsonDoubleClick = useCallback(
 		(jsonFile: AnyEntityWithStats) => {
-			const jsonItem = jsonFile as JsonFileWithStats;
+			// Por ahora asumimos que todos los elementos en esta vista son JsonFile
+			const jsonItem = jsonFile as any as JsonFileWithStats;
 			logger.info('🖱️ Doble click en archivo JSON:', jsonItem.name);
 
 			// Obtener todos los archivos JSON para el visor

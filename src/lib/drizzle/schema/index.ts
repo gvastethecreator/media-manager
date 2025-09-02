@@ -10,42 +10,36 @@
  * - Organization: Organización de contenido (groups, albums, collections, favorites, files)
  * - Taxonomy: Clasificación y etiquetado (tags, properties, wildcards, prompts, notes)
  * - Worldbuilding: Construcción de mundos (characters, places, concepts, worldItems)
- * - Content: Contenido adicional (imageStats, activities, audios, documents, jsonFiles, file3Ds, metadatas, thumbnails, workflows)
+ * - Content: Contenido adicional (fileStats, activities, audios, documents, jsonFiles, file3Ds, metadatas, thumbnails)
  * - Relations: Relaciones many-to-many entre entidades
  * =================================================================================
  */
 
 // =================================================================================
-// CONTENT DOMAIN EXPORTS
-// =================================================================================
-export {
-	activities,
-	audios,
-	documents,
-	file3Ds,
-	imageStats,
-	jsonFiles,
-	metadatas,
-	thumbnails,
-	workflows,
-} from './content';
-// =================================================================================
 // CORE DOMAIN EXPORTS
 // =================================================================================
 export {
+	activities,
+	fileStats,
+	metadatas,
 	profiles,
 	queueJobs,
 	settings,
+	thumbnails,
 } from './core';
 // =================================================================================
-// MEDIA DOMAIN EXPORTS
+// FILES/MEDIA DOMAIN EXPORTS
 // =================================================================================
 export {
-	folders,
+	// Archivos
+	audios,
+	documents,
+	file3Ds,
 	images,
+	jsonFiles,
 	uploadedImages,
 	videos,
-} from './media';
+} from './files';
 // =================================================================================
 // ORGANIZATION DOMAIN EXPORTS
 // =================================================================================
@@ -54,6 +48,7 @@ export {
 	collections,
 	favorites,
 	files,
+	folders,
 	groups,
 } from './organization';
 // =================================================================================

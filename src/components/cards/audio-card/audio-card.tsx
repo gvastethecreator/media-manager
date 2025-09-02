@@ -187,8 +187,8 @@ export function AudioCard({
 					{isPlaying && (
 						<motion.div
 							animate={{
-								scale: [1, 1.1, 1],
-								opacity: [0.2, 0.4, 0.2],
+								scale: 1.1,
+								opacity: 0.4,
 							}}
 							className="pointer-events-none absolute inset-0 opacity-20"
 							style={{
@@ -196,7 +196,6 @@ export function AudioCard({
 							}}
 							transition={{
 								duration: 2,
-								repeat: Number.POSITIVE_INFINITY,
 								ease: 'easeInOut',
 							}}
 						/>
@@ -256,14 +255,13 @@ export function AudioCard({
 								{isPlaying && (
 									<motion.div
 										animate={{
-											scale: [1, 1.1, 1],
-											opacity: [0.5, 1, 0.5],
+											scale: 1.1,
+											opacity: 1,
 										}}
 										className="absolute inset-0 rounded-2xl border-2"
 										style={{ borderColor: primaryColor }}
 										transition={{
 											duration: 1,
-											repeat: Number.POSITIVE_INFINITY,
 											ease: 'easeInOut',
 										}}
 									/>

@@ -16,24 +16,24 @@ interface NavCategoryChildrenProps {
 
 const NavCategoryChildrenComponent = memo(function NavCategoryChildrenImpl({
 	categoryId,
-	isCollapsed: _isCollapsed,
+	isCollapsed,
 	selectedChildId,
 	currentView: _currentView,
 	items,
 	onItemClick,
 }: NavCategoryChildrenProps) {
-	// Para la categoría de carpetas, usar TreeView
+	// Para la categoría de carpetas, usar FolderTreeView
 	if (categoryId === 'folders') {
 		return (
 			<div className="px-1">
-				<FolderTreeView className="text-[11px]" />
+				<FolderTreeView className="text-[11px]" isCollapsed={isCollapsed} selectedFolderId={selectedChildId} />
 			</div>
 		);
 	}
 
 	// Para otras categorías, usar la lista normal
 	if (!items || items.length === 0) {
-		return <div className="px-2 py-1 text-[10px] text-muted-foreground italic">No hay elementos</div>;
+		return <div className="py-1 text-[10px] text-muted-foreground italic">No hay elementos</div>;
 	}
 
 	return (

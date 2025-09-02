@@ -23,8 +23,6 @@ import SettingsContentView from '@/components/views/settings/settings-content-vi
 import { TagsView } from '@/components/views/tags/tags-view';
 import VideosView from '@/components/views/videos/videos-view';
 import { WildcardsView } from '@/components/views/wildcards/wildcards-view';
-import { WorkflowContentView } from '@/components/views/workflows/workflow-content-view';
-import { WorkflowsView } from '@/components/views/workflows/workflows-view';
 import { WorldItemsView } from '@/components/views/world-items/world-items-view';
 
 // Wrapper components para pasar el parámetro de la URL
@@ -134,10 +132,6 @@ export const router = createBrowserRouter([
 			{
 				path: 'json-files',
 				element: <JsonFilesView className="h-full" />,
-			},
-			{
-				path: 'workflows',
-				element: <WorkflowsView />,
 			},
 			{
 				path: 'file-3ds',
@@ -279,10 +273,6 @@ export const router = createBrowserRouter([
 			{
 				path: 'json-file-content',
 				element: <JsonFileContentView />,
-			},
-			{
-				path: 'workflow-content',
-				element: <WorkflowContentView />,
 			},
 			{
 				path: 'file-3d-content',

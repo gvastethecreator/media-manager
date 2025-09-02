@@ -93,7 +93,7 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 			? {
 					whileHover: { scale: 1.05 },
 					whileTap: { scale: 0.95 },
-					transition: { type: 'spring', stiffness: 300, damping: 30 } as Transition,
+					transition: { type: 'spring' as const, stiffness: 300, damping: 30 },
 				}
 			: {};
 

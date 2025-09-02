@@ -13,7 +13,6 @@ import {
 	favorites,
 	file3Ds,
 	folders,
-	imageStats,
 	images,
 	jsonFiles,
 	metadatas,
@@ -25,7 +24,6 @@ import {
 	thumbnails,
 	videos,
 	wildcards,
-	workflows,
 	worldItems,
 } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -62,7 +60,6 @@ export interface GeneralStats {
 	totalDocuments: number;
 	totalJsonFiles: number;
 	totalFile3D: number;
-	totalWorkflows: number;
 	totalFolders: number;
 	totalAlbums: number;
 	totalCollections: number;
@@ -176,20 +173,17 @@ type MediaCounts = {
 	documents: number;
 	jsonFiles: number;
 	file3Ds: number;
-	workflows: number;
 };
 
 async function fetchMediaCounts(): Promise<MediaCounts> {
-	const [imagesCount, videosCount, audiosCount, documentsCount, jsonFilesCount, file3DsCount, workflowsCount] =
-		await Promise.all([
-			db.select({ count: sql<number>`count(*)` }).from(images),
-			db.select({ count: sql<number>`count(*)` }).from(videos),
-			db.select({ count: sql<number>`count(*)` }).from(audios),
-			db.select({ count: sql<number>`count(*)` }).from(documents),
-			db.select({ count: sql<number>`count(*)` }).from(jsonFiles),
-			db.select({ count: sql<number>`count(*)` }).from(file3Ds),
-			db.select({ count: sql<number>`count(*)` }).from(workflows),
-		]);
+	const [imagesCount, videosCount, audiosCount, documentsCount, jsonFilesCount, file3DsCount] = await Promise.all([
+		db.select({ count: sql<number>`count(*)` }).from(images),
+		db.select({ count: sql<number>`count(*)` }).from(videos),
+		db.select({ count: sql<number>`count(*)` }).from(audios),
+		db.select({ count: sql<number>`count(*)` }).from(documents),
+		db.select({ count: sql<number>`count(*)` }).from(jsonFiles),
+		db.select({ count: sql<number>`count(*)` }).from(file3Ds),
+	]);
 	return {
 		images: imagesCount[0]?.count || 0,
 		videos: videosCount[0]?.count || 0,
@@ -197,7 +191,6 @@ async function fetchMediaCounts(): Promise<MediaCounts> {
 		documents: documentsCount[0]?.count || 0,
 		jsonFiles: jsonFilesCount[0]?.count || 0,
 		file3Ds: file3DsCount[0]?.count || 0,
-		workflows: workflowsCount[0]?.count || 0,
 	};
 }
 
@@ -342,7 +335,6 @@ export async function getGeneralSystemStats(): Promise<GeneralStats | null> {
 			totalDocuments: media.documents,
 			totalJsonFiles: media.jsonFiles,
 			totalFile3D: media.file3Ds,
-			totalWorkflows: media.workflows,
 
 			// Organización
 			totalFolders: org.folders,
@@ -396,7 +388,6 @@ export interface ExtendedStats {
 	totalDocuments: number;
 	totalAudio: number;
 	totalJsonFiles: number;
-	totalWorkflows: number;
 	totalFile3D: number;
 }
 
@@ -407,7 +398,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 
 		// Obtener conteos y estadísticas con logging detallado
 		statsLogger.info('🔍 Ejecutando consultas a la base de datos...');
-		const [foldersCount, imagesCount, videosCount, totalSizeResult] = await Promise.all([
+		const [foldersCount, imagesCount, videosCount, totalSizeResult, thumbnailsStatsResult] = await Promise.all([
 			db
 				.select({ count: sql<number>`count(*)` })
 				.from(folders)
@@ -452,6 +443,21 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.error('❌ Error en consulta totalSize:', error);
 					throw error;
 				}),
+			// Obtener estadísticas de thumbnails y caché
+			db
+				.select({
+					totalThumbnails: sql<number>`COUNT(CASE WHEN ${images.thumbnail} IS NOT NULL THEN 1 END)`,
+					thumbnailsCacheSize: sql<number>`COALESCE(SUM(${images.thumbnailSize}), 0)`,
+				})
+				.from(images)
+				.then((rows: Array<{ totalThumbnails: number; thumbnailsCacheSize: number }>) => {
+					statsLogger.info('✅ Consulta thumbnails stats completada:', rows);
+					return rows;
+				})
+				.catch((error) => {
+					statsLogger.error('❌ Error en consulta thumbnails stats:', error);
+					throw error;
+				}),
 		]);
 
 		const totalFolders = foldersCount[0]?.count || 0;
@@ -459,6 +465,10 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 		const totalVideos = videosCount[0]?.count || 0;
 		const totalSize = totalSizeResult[0]?.totalSize || 0;
 		const totalFiles = totalImages + totalVideos;
+
+		// Nuevas estadísticas
+		const totalThumbnails = thumbnailsStatsResult[0]?.totalThumbnails || 0;
+		const thumbnailsCacheSize = thumbnailsStatsResult[0]?.thumbnailsCacheSize || 0;
 
 		// Formatear tamaño
 		const formatBytes = (bytes: number): string => {
@@ -471,6 +481,12 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 			return `${Math.round((bytes / k ** i) * 100) / 100} ${sizes[i]}`;
 		};
 
+		// Calcular tamaño aproximado de base de datos
+		// Estimación basada en el número de registros y tamaño promedio por registro
+		const estimatedRecordSize = 500; // bytes por registro (estimación conservadora)
+		const totalRecords = totalFolders + totalImages + totalVideos;
+		const databaseSize = totalRecords * estimatedRecordSize;
+
 		const result = {
 			totalFolders,
 			totalFiles,
@@ -481,6 +497,12 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 			totalOthers: 0, // TODO: Implementar cuando se agregue tabla de otros archivos
 			totalSize,
 			formattedSize: formatBytes(totalSize),
+			// Nuevos campos para base de datos y thumbnails
+			databaseSize,
+			formattedDatabaseSize: formatBytes(databaseSize),
+			thumbnailsCacheSize,
+			formattedThumbnailsCacheSize: formatBytes(thumbnailsCacheSize),
+			totalThumbnails,
 			directoryCount: totalFolders, // Para compatibilidad
 			lastScanned: new Date().toISOString(),
 		};
@@ -505,7 +527,6 @@ export async function getSystemStatsExtended(): Promise<(GeneralStats & Extended
 		totalDocuments: base.totalDocuments,
 		totalAudio: base.totalAudio,
 		totalJsonFiles: base.totalJsonFiles,
-		totalWorkflows: base.totalWorkflows,
 		totalFile3D: base.totalFile3D,
 	};
 }
@@ -563,10 +584,12 @@ export async function getImageStats(imageId: string) {
 		statsLogger.info('🔍 Obteniendo estadísticas de imagen:', imageId);
 
 		// Validación null-safe para evitar errores de Object.entries
-		let stats: typeof imageStats.$inferSelect | null;
+		let stats: any | null;
 		try {
-			stats = await db.query.imageStats.findFirst({
-				where: eq(imageStats.imageId, imageId),
+			// fileStats es por archivo genérico; para imágenes buscamos por fileId
+			const { fileStats } = await import('@/lib/drizzle/schema/index');
+			stats = await db.query.fileStats.findFirst({
+				where: eq(fileStats.fileId, imageId),
 			});
 		} catch (queryError) {
 			statsLogger.warn('⚠️ Error en query de imageStats, creando estadísticas por defecto:', queryError);
@@ -575,13 +598,14 @@ export async function getImageStats(imageId: string) {
 
 		if (!stats) {
 			statsLogger.info('➕ Creando estadísticas para imagen:', imageId);
+			const { fileStats } = await import('@/lib/drizzle/schema/index');
 			const [newStats] = await db
-				.insert(imageStats)
+				.insert(fileStats)
 				.values({
 					id: randomUUID(),
-					imageId,
+					fileId: imageId,
 					views: 0,
-					lastViewed: new Date(),
+					updatedAt: new Date(),
 				})
 				.returning();
 			stats = newStats;
@@ -604,13 +628,14 @@ export async function incrementImageView(imageId: string) {
 		statsLogger.info('👁️ Incrementando visualización de imagen:', imageId);
 
 		const now = new Date();
+		const { fileStats } = await import('@/lib/drizzle/schema/index');
 		let [updatedStats] = await db
-			.update(imageStats)
+			.update(fileStats)
 			.set({
-				views: sql`${imageStats.views} + 1`,
-				lastViewed: now,
+				views: sql`${fileStats.views} + 1`,
+				updatedAt: now,
 			})
-			.where(eq(imageStats.imageId, imageId))
+			.where(eq(fileStats.fileId, imageId))
 			.returning();
 
 		// Si no existe el registro, crear/actualizar de forma idempotente
@@ -618,20 +643,20 @@ export async function incrementImageView(imageId: string) {
 			// Intento de inserción; si hay conflicto único, ejecutar actualización
 			try {
 				const [inserted] = await db
-					.insert(imageStats)
+					.insert(fileStats)
 					.values({
 						id: randomUUID(),
-						imageId,
+						fileId: imageId,
 						views: 1,
-						lastViewed: now,
+						updatedAt: now,
 					})
 					.returning();
 				updatedStats = inserted;
 			} catch (_e) {
 				const [conflictUpdated] = await db
-					.update(imageStats)
-					.set({ views: sql`${imageStats.views} + 1`, lastViewed: now })
-					.where(eq(imageStats.imageId, imageId))
+					.update(fileStats)
+					.set({ views: sql`${fileStats.views} + 1`, updatedAt: now })
+					.where(eq(fileStats.fileId, imageId))
 					.returning();
 				updatedStats = conflictUpdated;
 			}
@@ -654,13 +679,15 @@ export async function incrementImageDownload(imageId: string) {
 	try {
 		statsLogger.info('⬇️ Incrementando descarga de imagen:', imageId);
 		const now = new Date();
+		const { fileStats } = await import('@/lib/drizzle/schema/index');
 		let [updatedStats] = await db
-			.update(imageStats)
+			.update(fileStats)
 			.set({
-				downloads: sql`${imageStats.downloads} + 1`,
-				lastDownloaded: now,
+				// No hay columna downloads en fileStats actual; solo incrementamos views como proxy o dejamos noop
+				views: sql`${fileStats.views} + 0`,
+				updatedAt: now,
 			})
-			.where(eq(imageStats.imageId, imageId))
+			.where(eq(fileStats.fileId, imageId))
 			.returning();
 
 		// Si no existe el registro, crear/actualizar de forma idempotente
@@ -668,20 +695,20 @@ export async function incrementImageDownload(imageId: string) {
 			// Intento de inserción; si hay conflicto único, ejecutar actualización
 			try {
 				const [inserted] = await db
-					.insert(imageStats)
+					.insert(fileStats)
 					.values({
 						id: randomUUID(),
-						imageId,
-						downloads: 1,
-						lastDownloaded: now,
+						fileId: imageId,
+						views: 0,
+						updatedAt: now,
 					})
 					.returning();
 				updatedStats = inserted;
 			} catch (_e) {
 				const [conflictUpdated] = await db
-					.update(imageStats)
-					.set({ downloads: sql`${imageStats.downloads} + 1`, lastDownloaded: now })
-					.where(eq(imageStats.imageId, imageId))
+					.update(fileStats)
+					.set({ views: sql`${fileStats.views} + 0`, updatedAt: now })
+					.where(eq(fileStats.fileId, imageId))
 					.returning();
 				updatedStats = conflictUpdated;
 			}

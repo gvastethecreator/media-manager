@@ -126,7 +126,7 @@ const ConceptsContentView: React.FC<ConceptsContentViewProps> = ({
 								key={concept.id}
 								transition={{ duration: 0.3, delay: index * 0.05 }}
 							>
-								<ConceptCard conceptId={concept.id} onClick={() => handleConceptSelect(concept.id)} />
+								<ConceptCard concept={concept} onClick={() => handleConceptSelect(concept.id)} />
 							</motion.div>
 						))}
 					</motion.div>

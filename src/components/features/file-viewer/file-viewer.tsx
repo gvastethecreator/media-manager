@@ -720,13 +720,14 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 								className="absolute inset-0 flex items-center justify-center"
 								drag
 								dragConstraints={canvasRef}
-								dragElastic={0}
-								dragMomentum={false}
 								key={id}
 								onDoubleClick={() => resetPane(id)}
-								onDrag={(e, info) => onPaneDrag(id, e, info)}
+								onDrag={((e: any, info: any) => onPaneDrag(id, e, info)) as any}
 								onWheel={(e) => handlePaneWheel(id, e)}
-								style={{ x: st.x, y: st.y, scale: st.scale, zIndex: z + 1 }}
+								style={{
+									transform: `translate(${st.x}px, ${st.y}px) scale(${st.scale})`,
+									zIndex: z + 1,
+								}}
 								transition={{ type: 'spring', stiffness: 300, damping: 30 }}
 							>
 								<img
@@ -824,19 +825,22 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 											initial={{ opacity: 0, filter: 'blur(10px)' }}
 											transition={{
 												duration: 0.8,
-												opacity: { duration: 0.5 },
-												filter: { duration: 0.4 },
+												type: 'tween',
 											}}
 										>
-											<motion.img
-												alt="Loading preview"
+											<motion.div
 												animate={{ scale: 1 }}
 												className="h-full w-full object-contain"
 												exit={{ scale: 1 }}
 												initial={{ scale: 1.1 }}
-												src={urls[currentImage.id]}
 												transition={{ duration: 0.5 }}
-											/>
+											>
+												<img
+													alt="Loading preview"
+													className="h-full w-full object-contain"
+													src={urls[currentImage.id]}
+												/>
+											</motion.div>
 										</motion.div>
 									) : (
 										<Skeleton className="h-full w-full" />
@@ -850,13 +854,11 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 								className="absolute inset-0 flex items-center justify-center"
 								drag
 								dragConstraints={constraintsRef}
-								dragElastic={0}
 								dragMomentum={false}
-								onDrag={(_e, info) => onMainDrag(_e, info as any)}
+								// @ts-expect-error - Conflict between motion-shim and React DragEventHandler
+								onDrag={(e, info) => onMainDrag(e, info as any)}
 								style={{
-									scale,
-									x: position.x,
-									y: position.y,
+									transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
 								}}
 							>
 								<img

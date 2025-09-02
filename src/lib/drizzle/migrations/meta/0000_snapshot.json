@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "1618f803-6665-4b50-ad41-1f10a175ca2e",
+  "id": "d32e1bfd-4a5a-469d-9d34-88eecf74e7ff",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "Activity": {
@@ -207,6 +207,14 @@
         },
         "totalVideos": {
           "name": "totalVideos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "totalFiles": {
+          "name": "totalFiles",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -815,6 +823,14 @@
           "autoincrement": false,
           "default": 0
         },
+        "totalFiles": {
+          "name": "totalFiles",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
         "totalSize": {
           "name": "totalSize",
           "type": "integer",
@@ -1294,13 +1310,6 @@
           "notNull": true,
           "autoincrement": false
         },
-        "userId": {
-          "name": "userId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "addedAt": {
           "name": "addedAt",
           "type": "integer",
@@ -1308,43 +1317,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": "(CURRENT_TIMESTAMP)"
-        },
-        "notes": {
-          "name": "notes",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "category": {
-          "name": "category",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "priority": {
-          "name": "priority",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": 0
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(CURRENT_TIMESTAMP)"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
         }
       },
       "indexes": {
@@ -1363,31 +1335,10 @@
           ],
           "isUnique": false
         },
-        "Favorite_userId_idx": {
-          "name": "Favorite_userId_idx",
-          "columns": [
-            "userId"
-          ],
-          "isUnique": false
-        },
         "Favorite_addedAt_idx": {
           "name": "Favorite_addedAt_idx",
           "columns": [
             "addedAt"
-          ],
-          "isUnique": false
-        },
-        "Favorite_category_idx": {
-          "name": "Favorite_category_idx",
-          "columns": [
-            "category"
-          ],
-          "isUnique": false
-        },
-        "Favorite_priority_idx": {
-          "name": "Favorite_priority_idx",
-          "columns": [
-            "priority"
           ],
           "isUnique": false
         }
@@ -1645,6 +1596,76 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
+    "FileStats": {
+      "name": "FileStats",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fileId": {
+          "name": "fileId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "views": {
+          "name": "views",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "rating": {
+          "name": "rating",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": 0
+        },
+        "createdAt": {
+          "name": "createdAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "FileStats_fileId_key": {
+          "name": "FileStats_fileId_key",
+          "columns": [
+            "fileId"
+          ],
+          "isUnique": true
+        },
+        "FileStats_rating_idx": {
+          "name": "FileStats_rating_idx",
+          "columns": [
+            "rating"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "File": {
       "name": "File",
       "columns": {
@@ -1721,14 +1742,6 @@
         },
         "isArchived": {
           "name": "isArchived",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
-        "isHidden": {
-          "name": "isHidden",
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
@@ -1935,6 +1948,22 @@
           "autoincrement": false,
           "default": false
         },
+        "totalImages": {
+          "name": "totalImages",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "totalVideos": {
+          "name": "totalVideos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
         "totalFiles": {
           "name": "totalFiles",
           "type": "integer",
@@ -2041,15 +2070,15 @@
     "_GroupToAlbum": {
       "name": "_GroupToAlbum",
       "columns": {
-        "groupId": {
-          "name": "groupId",
+        "A": {
+          "name": "A",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "albumId": {
-          "name": "albumId",
+        "B": {
+          "name": "B",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -2057,25 +2086,18 @@
         }
       },
       "indexes": {
-        "_GroupToAlbum_groupId_albumId_unique": {
-          "name": "_GroupToAlbum_groupId_albumId_unique",
+        "_GroupToAlbum_AB_unique": {
+          "name": "_GroupToAlbum_AB_unique",
           "columns": [
-            "groupId",
-            "albumId"
+            "A",
+            "B"
           ],
           "isUnique": true
         },
-        "_GroupToAlbum_groupId_idx": {
-          "name": "_GroupToAlbum_groupId_idx",
+        "_GroupToAlbum_B_index": {
+          "name": "_GroupToAlbum_B_index",
           "columns": [
-            "groupId"
-          ],
-          "isUnique": false
-        },
-        "_GroupToAlbum_albumId_idx": {
-          "name": "_GroupToAlbum_albumId_idx",
-          "columns": [
-            "albumId"
+            "B"
           ],
           "isUnique": false
         }
@@ -2088,15 +2110,15 @@
     "_GroupToImage": {
       "name": "_GroupToImage",
       "columns": {
-        "groupId": {
-          "name": "groupId",
+        "A": {
+          "name": "A",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "imageId": {
-          "name": "imageId",
+        "B": {
+          "name": "B",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -2104,25 +2126,18 @@
         }
       },
       "indexes": {
-        "_GroupToImage_groupId_imageId_unique": {
-          "name": "_GroupToImage_groupId_imageId_unique",
+        "_GroupToImage_AB_unique": {
+          "name": "_GroupToImage_AB_unique",
           "columns": [
-            "groupId",
-            "imageId"
+            "A",
+            "B"
           ],
           "isUnique": true
         },
-        "_GroupToImage_groupId_idx": {
-          "name": "_GroupToImage_groupId_idx",
+        "_GroupToImage_B_index": {
+          "name": "_GroupToImage_B_index",
           "columns": [
-            "groupId"
-          ],
-          "isUnique": false
-        },
-        "_GroupToImage_imageId_idx": {
-          "name": "_GroupToImage_imageId_idx",
-          "columns": [
-            "imageId"
+            "B"
           ],
           "isUnique": false
         }
@@ -2135,15 +2150,15 @@
     "_GroupToTag": {
       "name": "_GroupToTag",
       "columns": {
-        "groupId": {
-          "name": "groupId",
+        "A": {
+          "name": "A",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "tagId": {
-          "name": "tagId",
+        "B": {
+          "name": "B",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -2151,25 +2166,18 @@
         }
       },
       "indexes": {
-        "_GroupToTag_groupId_tagId_unique": {
-          "name": "_GroupToTag_groupId_tagId_unique",
+        "_GroupToTag_AB_unique": {
+          "name": "_GroupToTag_AB_unique",
           "columns": [
-            "groupId",
-            "tagId"
+            "A",
+            "B"
           ],
           "isUnique": true
         },
-        "_GroupToTag_groupId_idx": {
-          "name": "_GroupToTag_groupId_idx",
+        "_GroupToTag_B_index": {
+          "name": "_GroupToTag_B_index",
           "columns": [
-            "groupId"
-          ],
-          "isUnique": false
-        },
-        "_GroupToTag_tagId_idx": {
-          "name": "_GroupToTag_tagId_idx",
-          "columns": [
-            "tagId"
+            "B"
           ],
           "isUnique": false
         }
@@ -2182,15 +2190,15 @@
     "_GroupToVideo": {
       "name": "_GroupToVideo",
       "columns": {
-        "groupId": {
-          "name": "groupId",
+        "A": {
+          "name": "A",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false
         },
-        "videoId": {
-          "name": "videoId",
+        "B": {
+          "name": "B",
           "type": "text",
           "primaryKey": false,
           "notNull": true,
@@ -2198,25 +2206,18 @@
         }
       },
       "indexes": {
-        "_GroupToVideo_groupId_videoId_unique": {
-          "name": "_GroupToVideo_groupId_videoId_unique",
+        "_GroupToVideo_AB_unique": {
+          "name": "_GroupToVideo_AB_unique",
           "columns": [
-            "groupId",
-            "videoId"
+            "A",
+            "B"
           ],
           "isUnique": true
         },
-        "_GroupToVideo_groupId_idx": {
-          "name": "_GroupToVideo_groupId_idx",
+        "_GroupToVideo_B_index": {
+          "name": "_GroupToVideo_B_index",
           "columns": [
-            "groupId"
-          ],
-          "isUnique": false
-        },
-        "_GroupToVideo_videoId_idx": {
-          "name": "_GroupToVideo_videoId_idx",
-          "columns": [
-            "videoId"
+            "B"
           ],
           "isUnique": false
         }
@@ -2591,143 +2592,6 @@
           "name": "_ImageToProperty_B_index",
           "columns": [
             "B"
-          ],
-          "isUnique": false
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
-    "ImageStats": {
-      "name": "ImageStats",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "imageId": {
-          "name": "imageId",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "views": {
-          "name": "views",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "likes": {
-          "name": "likes",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "downloads": {
-          "name": "downloads",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "comments": {
-          "name": "comments",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "rating": {
-          "name": "rating",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": 0
-        },
-        "ratingCount": {
-          "name": "ratingCount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": 0
-        },
-        "lastViewed": {
-          "name": "lastViewed",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "lastRated": {
-          "name": "lastRated",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(CURRENT_TIMESTAMP)"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "ImageStats_imageId_key": {
-          "name": "ImageStats_imageId_key",
-          "columns": [
-            "imageId"
-          ],
-          "isUnique": true
-        },
-        "ImageStats_views_idx": {
-          "name": "ImageStats_views_idx",
-          "columns": [
-            "views"
-          ],
-          "isUnique": false
-        },
-        "ImageStats_likes_idx": {
-          "name": "ImageStats_likes_idx",
-          "columns": [
-            "likes"
-          ],
-          "isUnique": false
-        },
-        "ImageStats_downloads_idx": {
-          "name": "ImageStats_downloads_idx",
-          "columns": [
-            "downloads"
-          ],
-          "isUnique": false
-        },
-        "ImageStats_rating_idx": {
-          "name": "ImageStats_rating_idx",
-          "columns": [
-            "rating"
           ],
           "isUnique": false
         }
@@ -3609,22 +3473,6 @@
           "autoincrement": false,
           "default": "'general'"
         },
-        "priority": {
-          "name": "priority",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "status": {
-          "name": "status",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "'active'"
-        },
         "featuredImage": {
           "name": "featuredImage",
           "type": "text",
@@ -3651,13 +3499,6 @@
         "updatedAt": {
           "name": "updatedAt",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "presetId": {
-          "name": "presetId",
-          "type": "text",
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false
@@ -3991,6 +3832,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "content": {
+          "name": "content",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "emoji": {
           "name": "emoji",
           "type": "text",
@@ -4040,62 +3888,6 @@
         },
         "type": {
           "name": "type",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "content": {
-          "name": "content",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "parameters": {
-          "name": "parameters",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "style": {
-          "name": "style",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "mood": {
-          "name": "mood",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "lighting": {
-          "name": "lighting",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "composition": {
-          "name": "composition",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "technique": {
-          "name": "technique",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "inspiration": {
-          "name": "inspiration",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -4194,13 +3986,6 @@
         },
         "category": {
           "name": "category",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "shortcut": {
-          "name": "shortcut",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -4502,13 +4287,6 @@
         },
         "category": {
           "name": "category",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "shortcut": {
-          "name": "shortcut",
           "type": "text",
           "primaryKey": false,
           "notNull": false,
@@ -5513,13 +5291,6 @@
           "notNull": false,
           "autoincrement": false
         },
-        "shortcut": {
-          "name": "shortcut",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
         "children": {
           "name": "children",
           "type": "text",
@@ -5579,187 +5350,6 @@
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
-    "Workflow": {
-      "name": "Workflow",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "text",
-          "primaryKey": true,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "name": {
-          "name": "name",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false
-        },
-        "description": {
-          "name": "description",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "emoji": {
-          "name": "emoji",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "'⚙️'"
-        },
-        "color": {
-          "name": "color",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "'#3b82f6'"
-        },
-        "category": {
-          "name": "category",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "isFavorite": {
-          "name": "isFavorite",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": false
-        },
-        "isActive": {
-          "name": "isActive",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": true
-        },
-        "version": {
-          "name": "version",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false,
-          "default": "'1.0.0'"
-        },
-        "config": {
-          "name": "config",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "steps": {
-          "name": "steps",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "triggers": {
-          "name": "triggers",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "conditions": {
-          "name": "conditions",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "actions": {
-          "name": "actions",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "schedule": {
-          "name": "schedule",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "lastRun": {
-          "name": "lastRun",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "nextRun": {
-          "name": "nextRun",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "runCount": {
-          "name": "runCount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "successCount": {
-          "name": "successCount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "errorCount": {
-          "name": "errorCount",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "createdAt": {
-          "name": "createdAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": "(CURRENT_TIMESTAMP)"
-        },
-        "updatedAt": {
-          "name": "updatedAt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        }
-      },
-      "indexes": {
-        "Workflow_name_key": {
-          "name": "Workflow_name_key",
-          "columns": [
-            "name"
-          ],
-          "isUnique": true
-        }
-      },
-      "foreignKeys": {},
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "checkConstraints": {}
-    },
     "WorldItem": {
       "name": "WorldItem",
       "columns": {
@@ -5802,13 +5392,6 @@
         },
         "category": {
           "name": "category",
-          "type": "text",
-          "primaryKey": false,
-          "notNull": false,
-          "autoincrement": false
-        },
-        "shortcut": {
-          "name": "shortcut",
           "type": "text",
           "primaryKey": false,
           "notNull": false,

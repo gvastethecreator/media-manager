@@ -1,4 +1,4 @@
-import { Clock, File, FileText, Folder, HardDrive, Image, Music, Video } from 'lucide-react';
+import { Clock, Database, File, FileText, Folder, HardDrive, Image, ImageIcon, Music, Video } from 'lucide-react';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
 import { Card, CardContent } from '@/components/ui/card';
 import type { FolderStats } from '@/types/folders';
@@ -15,6 +15,12 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 		{ name: 'Audio', value: stats.totalAudio, color: '#f59e0b' },
 		{ name: 'Documentos', value: stats.totalDocuments, color: '#ef4444' },
 		{ name: 'Otros', value: stats.totalOthers, color: '#eab308' },
+		...(stats.databaseSize
+			? [{ name: 'Base de Datos', value: Math.round(stats.databaseSize / (1024 * 1024)), color: '#3b82f6' }]
+			: []),
+		...(stats.thumbnailsCacheSize
+			? [{ name: 'Caché Thumbnails', value: Math.round(stats.thumbnailsCacheSize / (1024 * 1024)), color: '#f97316' }]
+			: []),
 	].filter((item) => item.value > 0);
 
 	return (
@@ -121,6 +127,46 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 										</div>
 									</div>
 								</div>
+
+								{/* Cuarta fila: Base de datos, Thumbnails y estadísticas adicionales */}
+								{(stats.databaseSize || stats.thumbnailsCacheSize || stats.totalThumbnails) && (
+									<div className="grid grid-cols-3 gap-3">
+										{stats.databaseSize && (
+											<div className="flex items-center gap-2 rounded bg-background/50 p-2">
+												<Database className="h-4 w-4 text-blue-600" />
+												<div>
+													<div className="text-muted-foreground text-xs">Base de Datos</div>
+													<div className="font-medium text-sm" data-testid="stats-database-size">
+														{stats.formattedDatabaseSize || `${Math.round(stats.databaseSize / (1024 * 1024))} MB`}
+													</div>
+												</div>
+											</div>
+										)}
+										{stats.thumbnailsCacheSize && (
+											<div className="flex items-center gap-2 rounded bg-background/50 p-2">
+												<ImageIcon className="h-4 w-4 text-orange-600" />
+												<div>
+													<div className="text-muted-foreground text-xs">Caché Thumbnails</div>
+													<div className="font-medium text-sm" data-testid="stats-thumbnails-cache-size">
+														{stats.formattedThumbnailsCacheSize ||
+															`${Math.round(stats.thumbnailsCacheSize / (1024 * 1024))} MB`}
+													</div>
+												</div>
+											</div>
+										)}
+										{stats.totalThumbnails && (
+											<div className="flex items-center gap-2 rounded bg-background/50 p-2">
+												<Image className="h-4 w-4 text-green-600" />
+												<div>
+													<div className="text-muted-foreground text-xs">Thumbnails</div>
+													<div className="font-medium" data-testid="stats-total-thumbnails">
+														{stats.totalThumbnails}
+													</div>
+												</div>
+											</div>
+										)}
+									</div>
+								)}
 							</div>
 							{pieData.length > 0 ? (
 								<div>

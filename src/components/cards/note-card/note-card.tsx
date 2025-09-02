@@ -155,7 +155,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 				className
 			)}
 			data-note-id={note.id}
-			onClick={onClick ? (_e: React.MouseEvent<HTMLDivElement>) => onClick(note) : undefined}
+			onClick={onClick ? () => onClick(note) : undefined}
 			onKeyDown={handleKeyDown}
 			role={onClick ? 'button' : 'article'}
 			style={cardStyle}

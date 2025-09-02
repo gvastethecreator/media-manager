@@ -2,7 +2,6 @@
  * @file Implementaciones internas de transformers para Settings
  * @module transformers/settings/internal
  * ✅ MIGRADO A DRIZZLE - Julio 2025
- * @deprecated Este archivo será reemplazado por la nueva estructura estándar
  */
 
 import { serverLogger } from '../../lib/logger/server-logger';

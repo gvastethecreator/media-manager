@@ -1,7 +1,6 @@
 import {
 	Activity,
 	Archive,
-	BarChart3,
 	BookOpen,
 	Boxes,
 	Calendar,
@@ -27,7 +26,6 @@ import {
 import { memo } from 'react';
 import { useFolderStats } from '@/components/settings/folders/hooks/use-folder-stats';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import Silk from '@/components/ui/silk-background';
 import { useGeneralStats, useRecentActivity, useSystemStatsExtended, useTopTags } from '@/lib/api/stats';
@@ -145,14 +143,14 @@ export const Dashboard = memo(function Dashboard() {
 			<div className="relative h-full w-full">
 				{/* Silk Background */}
 				<div className="absolute inset-0 z-0">
-					<Silk color="#7B7481" noiseIntensity={1.2} rotation={0.1} scale={1.2} speed={3} />
+					<Silk color="#000000" noiseIntensity={1.2} rotation={0.1} scale={1.2} speed={3} />
 				</div>
 
 				{/* Content overlay */}
-				<div className="relative z-10 flex h-full w-full flex-col items-center justify-center p-6">
+				<div className="relative z-10 flex h-full w-full flex-col items-center justify-center p-4">
 					<div className="animate-pulse space-y-4">
-						<div className="h-8 w-64 rounded bg-white/20" />
-						<div className="h-4 w-48 rounded bg-white/10" />
+						<div className="h-6 w-56 rounded bg-white/20" />
+						<div className="h-3.5 w-40 rounded bg-white/10" />
 					</div>
 				</div>
 			</div>
@@ -163,195 +161,319 @@ export const Dashboard = memo(function Dashboard() {
 		<div className="relative h-full w-full">
 			{/* Silk Background */}
 			<div className="absolute inset-0 z-0">
-				<Silk color="#7B7481" noiseIntensity={1.2} rotation={0.1} scale={1.2} speed={3} />
+				<Silk color="#111111" noiseIntensity={1.2} rotation={0.2} scale={1.2} speed={6} />
 			</div>
 
 			{/* Content overlay */}
 			<div className="relative z-10 h-full w-full overflow-auto">
-				<div className="container mx-auto max-w-7xl space-y-6 p-4">
-					{/* Header - Más compacto */}
-					<div className="space-y-1 text-center">
-						<h1 className="font-bold text-3xl text-white drop-shadow-lg">📊 Panel de Control</h1>
-						<p className="text-white/80 drop-shadow-md">
-							Gestión avanzada de archivos multimedia - {formatNumber(totalAllEntities)} elementos
-						</p>
-					</div>
-
-					{/* Main KPIs Grid - Más compacto para desktop */}
-					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-6 xl:grid-cols-8">
+				<div className="-translate-y-1/2 -translate-x-1/2 container absolute top-1/2 left-1/2 mx-auto max-w-screen-xl space-y-3 p-2 md:p-3">
+					{/* Grid única: KPIs + Extendidas (compacto) */}
+					<div className="grid grid-cols-6 gap-2 sm:grid-cols-4 md:grid-cols-5">
 						{/* Imágenes */}
-						<Card className="border-blue-300/30 bg-gradient-to-br from-blue-500/20 to-blue-600/30 backdrop-blur-sm transition-all hover:from-blue-500/30 hover:to-blue-600/40">
-							<CardHeader className="pb-2">
-								<CardTitle className="flex items-center gap-2 font-medium text-sm">
+						<div className="border-blue-300/30 bg-gradient-to-br from-blue-500/15 to-blue-600/25 backdrop-blur-sm transition-all hover:from-blue-500/25 hover:to-blue-600/35">
+							<div className="p-2 pb-1">
+								<div className="flex items-center gap-1.5 font-medium text-xs">
 									<ImageIcon className="h-4 w-4 text-blue-400" />
 									Imágenes
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="font-bold text-2xl text-white">{formatNumber(combinedStats.totalImages)}</div>
-								<div className="text-blue-200 text-xs">
+								</div>
+							</div>
+							<div className="px-2 pt-0 pb-2">
+								<div className="font-bold text-lg text-white">{formatNumber(combinedStats.totalImages)}</div>
+								<div className="text-[10px] text-blue-200">
 									{totalMediaFiles > 0 ? `${((combinedStats.totalImages / totalMediaFiles) * 100).toFixed(1)}%` : '0%'}{' '}
 									del total
 								</div>
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 
 						{/* Videos */}
-						<Card className="border-purple-300/30 bg-gradient-to-br from-purple-500/20 to-purple-600/30 backdrop-blur-sm transition-all hover:from-purple-500/30 hover:to-purple-600/40">
-							<CardHeader className="pb-2">
-								<CardTitle className="flex items-center gap-2 font-medium text-sm">
+						<div className="border-purple-300/30 bg-gradient-to-br from-purple-500/15 to-purple-600/25 backdrop-blur-sm transition-all hover:from-purple-500/25 hover:to-purple-600/35">
+							<div className="p-2 pb-1">
+								<div className="flex items-center gap-1.5 font-medium text-xs">
 									<Video className="h-4 w-4 text-purple-400" />
 									Videos
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="font-bold text-2xl text-white">{formatNumber(combinedStats.totalVideos)}</div>
-								<div className="text-purple-200 text-xs">
+								</div>
+							</div>
+							<div className="px-2 pt-0 pb-2">
+								<div className="font-bold text-lg text-white">{formatNumber(combinedStats.totalVideos)}</div>
+								<div className="text-[10px] text-purple-200">
 									{totalMediaFiles > 0 ? `${((combinedStats.totalVideos / totalMediaFiles) * 100).toFixed(1)}%` : '0%'}{' '}
 									del total
 								</div>
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 
 						{/* Audio */}
-						<Card className="border-green-300/30 bg-gradient-to-br from-green-500/20 to-green-600/30 backdrop-blur-sm transition-all hover:from-green-500/30 hover:to-green-600/40">
-							<CardHeader className="pb-2">
-								<CardTitle className="flex items-center gap-2 font-medium text-sm">
+						<div className="border-green-300/30 bg-gradient-to-br from-green-500/15 to-green-600/25 backdrop-blur-sm transition-all hover:from-green-500/25 hover:to-green-600/35">
+							<div className="p-2 pb-1">
+								<div className="flex items-center gap-1.5 font-medium text-xs">
 									<Music className="h-4 w-4 text-green-400" />
 									Audio
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="font-bold text-2xl text-white">{formatNumber(combinedStats.totalAudio)}</div>
-								<div className="text-green-200 text-xs">
+								</div>
+							</div>
+							<div className="px-2 pt-0 pb-2">
+								<div className="font-bold text-lg text-white">{formatNumber(combinedStats.totalAudio)}</div>
+								<div className="text-[10px] text-green-200">
 									{totalMediaFiles > 0 ? `${((combinedStats.totalAudio / totalMediaFiles) * 100).toFixed(1)}%` : '0%'}{' '}
 									del total
 								</div>
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 
 						{/* Documentos */}
-						<Card className="border-orange-300/30 bg-gradient-to-br from-orange-500/20 to-orange-600/30 backdrop-blur-sm transition-all hover:from-orange-500/30 hover:to-orange-600/40">
-							<CardHeader className="pb-2">
-								<CardTitle className="flex items-center gap-2 font-medium text-sm">
+						<div className="border-orange-300/30 bg-gradient-to-br from-orange-500/15 to-orange-600/25 backdrop-blur-sm transition-all hover:from-orange-500/25 hover:to-orange-600/35">
+							<div className="p-2 pb-1">
+								<div className="flex items-center gap-1.5 font-medium text-xs">
 									<FileImage className="h-4 w-4 text-orange-400" />
 									Docs
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="font-bold text-2xl text-white">{formatNumber(combinedStats.totalDocuments)}</div>
-								<div className="text-orange-200 text-xs">
+								</div>
+							</div>
+							<div className="px-2 pt-0 pb-2">
+								<div className="font-bold text-lg text-white">{formatNumber(combinedStats.totalDocuments)}</div>
+								<div className="text-[10px] text-orange-200">
 									{totalContentFiles > 0
 										? `${((combinedStats.totalDocuments / totalContentFiles) * 100).toFixed(1)}%`
 										: '0%'}{' '}
 									del total
 								</div>
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 
 						{/* Carpetas */}
-						<Card className="border-yellow-300/30 bg-gradient-to-br from-yellow-500/20 to-yellow-600/30 backdrop-blur-sm transition-all hover:from-yellow-500/30 hover:to-yellow-600/40">
-							<CardHeader className="pb-2">
-								<CardTitle className="flex items-center gap-2 font-medium text-sm">
+						<div className="border-yellow-300/30 bg-gradient-to-br from-yellow-500/15 to-yellow-600/25 backdrop-blur-sm transition-all hover:from-yellow-500/25 hover:to-yellow-600/35">
+							<div className="p-2 pb-1">
+								<div className="flex items-center gap-1.5 font-medium text-xs">
 									<FolderOpen className="h-4 w-4 text-yellow-400" />
 									Carpetas
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="font-bold text-2xl text-white">{formatNumber(combinedStats.totalFolders)}</div>
-								<div className="text-xs text-yellow-200">Organizadas</div>
-							</CardContent>
-						</Card>
+								</div>
+							</div>
+							<div className="px-2 pt-0 pb-2">
+								<div className="font-bold text-lg text-white">{formatNumber(combinedStats.totalFolders)}</div>
+								<div className="text-[10px] text-yellow-200">Organizadas</div>
+							</div>
+						</div>
 
 						{/* Álbumes */}
-						<Card className="border-indigo-300/30 bg-gradient-to-br from-indigo-500/20 to-indigo-600/30 backdrop-blur-sm transition-all hover:from-indigo-500/30 hover:to-indigo-600/40">
-							<CardHeader className="pb-2">
-								<CardTitle className="flex items-center gap-2 font-medium text-sm">
+						<div className="border-indigo-300/30 bg-gradient-to-br from-indigo-500/15 to-indigo-600/25 backdrop-blur-sm transition-all hover:from-indigo-500/25 hover:to-indigo-600/35">
+							<div className="p-2 pb-1">
+								<div className="flex items-center gap-1.5 font-medium text-xs">
 									<Camera className="h-4 w-4 text-indigo-400" />
 									Álbumes
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="font-bold text-2xl text-white">{formatNumber(combinedStats.totalAlbums)}</div>
-								<div className="text-indigo-200 text-xs">Colecciones</div>
-							</CardContent>
-						</Card>
+								</div>
+							</div>
+							<div className="px-2 pt-0 pb-2">
+								<div className="font-bold text-lg text-white">{formatNumber(combinedStats.totalAlbums)}</div>
+								<div className="text-[10px] text-indigo-200">Colecciones</div>
+							</div>
+						</div>
 
 						{/* Tags */}
-						<Card className="border-cyan-300/30 bg-gradient-to-br from-cyan-500/20 to-cyan-600/30 backdrop-blur-sm transition-all hover:from-cyan-500/30 hover:to-cyan-600/40">
-							<CardHeader className="pb-2">
-								<CardTitle className="flex items-center gap-2 font-medium text-sm">
+						<div className="border-cyan-300/30 bg-gradient-to-br from-cyan-500/15 to-cyan-600/25 backdrop-blur-sm transition-all hover:from-cyan-500/25 hover:to-cyan-600/35">
+							<div className="p-2 pb-1">
+								<div className="flex items-center gap-1.5 font-medium text-xs">
 									<Tags className="h-4 w-4 text-cyan-400" />
 									Tags
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="font-bold text-2xl text-white">{formatNumber(combinedStats.totalTags)}</div>
-								<div className="text-cyan-200 text-xs">Etiquetas</div>
-							</CardContent>
-						</Card>
+								</div>
+							</div>
+							<div className="px-2 pt-0 pb-2">
+								<div className="font-bold text-lg text-white">{formatNumber(combinedStats.totalTags)}</div>
+								<div className="text-[10px] text-cyan-200">Etiquetas</div>
+							</div>
+						</div>
 
 						{/* JSON Files */}
-						<Card className="border-amber-300/30 bg-gradient-to-br from-amber-500/20 to-amber-600/30 backdrop-blur-sm transition-all hover:from-amber-500/30 hover:to-amber-600/40">
-							<CardHeader className="pb-2">
-								<CardTitle className="flex items-center gap-2 font-medium text-sm">
+						<div className="border-amber-300/30 bg-gradient-to-br from-amber-500/15 to-amber-600/25 backdrop-blur-sm transition-all hover:from-amber-500/25 hover:to-amber-600/35">
+							<div className="p-2 pb-1">
+								<div className="flex items-center gap-1.5 font-medium text-xs">
 									<Code className="h-4 w-4 text-amber-400" />
 									JSON
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="font-bold text-2xl text-white">{formatNumber(combinedStats.totalJsonFiles)}</div>
-								<div className="text-amber-200 text-xs">Archivos</div>
-							</CardContent>
-						</Card>
+								</div>
+							</div>
+							<div className="px-2 pt-0 pb-2">
+								<div className="font-bold text-lg text-white">{formatNumber(combinedStats.totalJsonFiles)}</div>
+								<div className="text-[10px] text-amber-200">Archivos</div>
+							</div>
+						</div>
 
 						{/* Archivos 3D */}
-						<Card className="border-purple-300/30 bg-gradient-to-br from-purple-500/20 to-purple-600/30 backdrop-blur-sm transition-all hover:from-purple-500/30 hover:to-purple-600/40">
-							<CardHeader className="pb-2">
-								<CardTitle className="flex items-center gap-2 font-medium text-sm">
+						<div className="border-purple-300/30 bg-gradient-to-br from-purple-500/15 to-purple-600/25 backdrop-blur-sm transition-all hover:from-purple-500/25 hover:to-purple-600/35">
+							<div className="p-2 pb-1">
+								<div className="flex items-center gap-1.5 font-medium text-xs">
 									<Boxes className="h-4 w-4 text-purple-400" />
 									3D
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="font-bold text-2xl text-white">{formatNumber(combinedStats.totalFile3D)}</div>
-								<div className="text-purple-200 text-xs">Modelos</div>
-							</CardContent>
-						</Card>
+								</div>
+							</div>
+							<div className="px-2 pt-0 pb-2">
+								<div className="font-bold text-lg text-white">{formatNumber(combinedStats.totalFile3D)}</div>
+								<div className="text-[10px] text-purple-200">Modelos</div>
+							</div>
+						</div>
 
 						{/* Workflows */}
-						<Card className="border-teal-300/30 bg-gradient-to-br from-teal-500/20 to-teal-600/30 backdrop-blur-sm transition-all hover:from-teal-500/30 hover:to-teal-600/40">
-							<CardHeader className="pb-2">
-								<CardTitle className="flex items-center gap-2 font-medium text-sm">
+						<div className="border-teal-300/30 bg-gradient-to-br from-teal-500/15 to-teal-600/25 backdrop-blur-sm transition-all hover:from-teal-500/25 hover:to-teal-600/35">
+							<div className="p-2 pb-1">
+								<div className="flex items-center gap-1.5 font-medium text-xs">
 									<Settings className="h-4 w-4 text-teal-400" />
 									Workflows
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
-								<div className="font-bold text-2xl text-white">{formatNumber(combinedStats.totalWorkflows)}</div>
-								<div className="text-teal-200 text-xs">Flujos</div>
-							</CardContent>
-						</Card>
+								</div>
+							</div>
+							<div className="px-2 pt-0 pb-2">
+								<div className="font-bold text-lg text-white">{formatNumber(combinedStats.totalWorkflows)}</div>
+								<div className="text-[10px] text-teal-200">Flujos</div>
+							</div>
+						</div>
+
+						{/* Extendidas (solo si hay datos) */}
+						{combinedStats.totalCharacters > 0 && (
+							<div className="border-white/10 bg-card/80 backdrop-blur-sm">
+								<div className="p-2 pb-1">
+									<div className="flex items-center gap-1.5 text-xs">
+										<Users className="h-4 w-4 text-teal-400" />
+										Personajes
+									</div>
+								</div>
+								<div className="px-2 pt-0 pb-2">
+									<div className="font-bold text-lg">{formatNumber(combinedStats.totalCharacters)}</div>
+								</div>
+							</div>
+						)}
+						{combinedStats.totalPlaces > 0 && (
+							<div className="border-white/10 bg-card/80 backdrop-blur-sm">
+								<div className="p-2 pb-1">
+									<div className="flex items-center gap-1.5 text-xs">
+										<Calendar className="h-4 w-4 text-emerald-400" />
+										Lugares
+									</div>
+								</div>
+								<div className="px-2 pt-0 pb-2">
+									<div className="font-bold text-lg">{formatNumber(combinedStats.totalPlaces)}</div>
+								</div>
+							</div>
+						)}
+						{combinedStats.totalConcepts > 0 && (
+							<div className="border-white/10 bg-card/80 backdrop-blur-sm">
+								<div className="p-2 pb-1">
+									<div className="flex items-center gap-1.5 text-xs">
+										<Zap className="h-4 w-4 text-violet-400" />
+										Conceptos
+									</div>
+								</div>
+								<div className="px-2 pt-0 pb-2">
+									<div className="font-bold text-lg">{formatNumber(combinedStats.totalConcepts)}</div>
+								</div>
+							</div>
+						)}
+						{combinedStats.totalNotes > 0 && (
+							<div className="border-white/10 bg-card/80 backdrop-blur-sm">
+								<div className="p-2 pb-1">
+									<div className="flex items-center gap-1.5 text-xs">
+										<BookOpen className="h-4 w-4 text-amber-400" />
+										Notas
+									</div>
+								</div>
+								<div className="px-2 pt-0 pb-2">
+									<div className="font-bold text-lg">{formatNumber(combinedStats.totalNotes)}</div>
+								</div>
+							</div>
+						)}
+						{combinedStats.totalPrompts > 0 && (
+							<div className="border-white/10 bg-card/80 backdrop-blur-sm">
+								<div className="p-2 pb-1">
+									<div className="flex items-center gap-1.5 text-xs">
+										<Wand2 className="h-4 w-4 text-indigo-400" />
+										Prompts
+									</div>
+								</div>
+								<div className="px-2 pt-0 pb-2">
+									<div className="font-bold text-lg">{formatNumber(combinedStats.totalPrompts)}</div>
+								</div>
+							</div>
+						)}
+						{combinedStats.totalProperties > 0 && (
+							<div className="border-white/10 bg-card/80 backdrop-blur-sm">
+								<div className="p-2 pb-1">
+									<div className="flex items-center gap-1.5 text-xs">
+										<Key className="h-4 w-4 text-slate-400" />
+										Propiedades
+									</div>
+								</div>
+								<div className="px-2 pt-0 pb-2">
+									<div className="font-bold text-lg">{formatNumber(combinedStats.totalProperties)}</div>
+								</div>
+							</div>
+						)}
+						{combinedStats.totalWildcards > 0 && (
+							<div className="border-white/10 bg-card/80 backdrop-blur-sm">
+								<div className="p-2 pb-1">
+									<div className="flex items-center gap-1.5 text-xs">
+										<Shuffle className="h-4 w-4 text-cyan-400" />
+										Comodines
+									</div>
+								</div>
+								<div className="px-2 pt-0 pb-2">
+									<div className="font-bold text-lg">{formatNumber(combinedStats.totalWildcards)}</div>
+								</div>
+							</div>
+						)}
+						{combinedStats.totalFavorites > 0 && (
+							<div className="border-white/10 bg-card/80 backdrop-blur-sm">
+								<div className="p-2 pb-1">
+									<div className="flex items-center gap-1.5 text-xs">
+										<Heart className="h-4 w-4 text-red-400" />
+										Favoritos
+									</div>
+								</div>
+								<div className="px-2 pt-0 pb-2">
+									<div className="font-bold text-lg">{formatNumber(combinedStats.totalFavorites)}</div>
+								</div>
+							</div>
+						)}
+						{combinedStats.totalWorldItems > 0 && (
+							<div className="border-white/10 bg-card/80 backdrop-blur-sm">
+								<div className="p-2 pb-1">
+									<div className="flex items-center gap-1.5 text-xs">
+										<Archive className="h-4 w-4 text-rose-400" />
+										Mundos
+									</div>
+								</div>
+								<div className="px-2 pt-0 pb-2">
+									<div className="font-bold text-lg">{formatNumber(combinedStats.totalWorldItems)}</div>
+								</div>
+							</div>
+						)}
+						{combinedStats.dbSize > 0 && (
+							<div className="border-white/10 bg-card/80 backdrop-blur-sm">
+								<div className="p-2 pb-1">
+									<div className="flex items-center gap-1.5 text-xs">
+										<Database className="h-4 w-4 text-slate-400" />
+										BD
+									</div>
+								</div>
+								<div className="px-2 pt-0 pb-2">
+									<div className="font-bold text-lg">{formatBytes(combinedStats.dbSize)}</div>
+								</div>
+							</div>
+						)}
 					</div>
 
-					{/* Secondary Stats Grid - Información adicional en diseño compacto */}
-					<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
+					{/* Secundarias compactas */}
+					<div className="grid grid-cols-3 gap-2 md:grid-cols-3">
 						{/* Almacenamiento */}
-						<Card className="border-white/20 bg-card/90 backdrop-blur-sm lg:col-span-2">
-							<CardHeader className="pb-3">
-								<CardTitle className="flex items-center gap-2 text-base">
+						<div className="border-white/15 bg-card/90 backdrop-blur-sm md:col-span-1">
+							<div className="p-3 pb-2">
+								<div className="flex items-center gap-2 text-sm">
 									<HardDrive className="h-5 w-5 text-slate-400" />
 									Almacenamiento
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="space-y-3">
-								<div className="space-y-2">
-									<div className="flex justify-between text-sm">
+								</div>
+							</div>
+							<div className="space-y-2 px-3 pt-0 pb-3">
+								<div className="space-y-1.5">
+									<div className="flex justify-between text-xs">
 										<span>Espacio utilizado</span>
 										<span className="font-medium">{formatBytes(combinedStats.storageUsed)}</span>
 									</div>
-									<Progress className="h-2" value={storageUsedPercentage} />
-									<div className="flex justify-between text-muted-foreground text-xs">
+									<Progress className="h-1.5" value={storageUsedPercentage} />
+									<div className="flex justify-between text-[10px] text-muted-foreground">
 										<span>{storageUsedPercentage.toFixed(1)}% usado</span>
 										<span>{formatBytes(combinedStats.storageAvailable)} disponible</span>
 									</div>
@@ -359,289 +481,88 @@ export const Dashboard = memo(function Dashboard() {
 
 								{combinedStats.averageFileSize > 0 && (
 									<div className="border-white/10 border-t pt-2">
-										<div className="text-sm">
-											<span className="text-muted-foreground">Tamaño promedio: </span>
+										<div className="text-xs">
+											<span className="text-muted-foreground">Promedio: </span>
 											<span className="font-medium">{formatBytes(combinedStats.averageFileSize)}</span>
 										</div>
 									</div>
 								)}
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 
 						{/* Actividad reciente */}
-						<Card className="border-white/20 bg-card/90 backdrop-blur-sm">
-							<CardHeader className="pb-3">
-								<CardTitle className="flex items-center gap-2 text-base">
+						<div className="border-white/15 bg-card/90 backdrop-blur-sm">
+							<div className="p-3 pb-2">
+								<div className="flex items-center gap-2 text-sm">
 									<Activity className="h-5 w-5 text-emerald-400" />
 									Actividad
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
+								</div>
+							</div>
+							<div className="px-3 pt-0 pb-3">
 								{activityLoading ? (
-									<div className="space-y-2">
+									<div className="space-y-1.5">
 										{Array.from({ length: 3 }, (_, i) => (
 											<div
-												className="h-4 animate-pulse rounded bg-white/10"
+												className="h-3.5 animate-pulse rounded bg-white/10"
 												key={`activity-skeleton-${Date.now()}-${i}`}
 											/>
 										))}
 									</div>
 								) : recentActivity && recentActivity.length > 0 ? (
-									<div className="space-y-2">
-										{recentActivity.slice(0, 3).map((activity, i) => (
-											<div className="text-sm" key={activity.id || i}>
+									<div className="space-y-1.5">
+										{recentActivity.slice(0, 2).map((activity, i) => (
+											<div className="text-xs" key={activity.id || i}>
 												<div className="truncate font-medium">{activity.entityName}</div>
-												<div className="text-muted-foreground text-xs capitalize">
+												<div className="text-[10px] text-muted-foreground capitalize">
 													{activity.type} • {activity.entityType}
 												</div>
 											</div>
 										))}
 									</div>
 								) : (
-									<div className="text-muted-foreground text-sm">Sin actividad reciente</div>
+									<div className="text-muted-foreground text-xs">Sin actividad reciente</div>
 								)}
-							</CardContent>
-						</Card>
+							</div>
+						</div>
 
 						{/* Top Tags */}
-						<Card className="border-white/20 bg-card/90 backdrop-blur-sm">
-							<CardHeader className="pb-3">
-								<CardTitle className="flex items-center gap-2 text-base">
+						<div className="border-white/15 bg-card/90 backdrop-blur-sm">
+							<div className="p-3 pb-2">
+								<div className="flex items-center gap-2 text-sm">
 									<Star className="h-5 w-5 text-yellow-400" />
 									Tags Populares
-								</CardTitle>
-							</CardHeader>
-							<CardContent>
+								</div>
+							</div>
+							<div className="px-3 pt-0 pb-3">
 								{tagsLoading ? (
-									<div className="space-y-2">
+									<div className="space-y-1.5">
 										{Array.from({ length: 3 }, (_, i) => (
-											<div className="h-4 animate-pulse rounded bg-white/10" key={`tag-skeleton-${Date.now()}-${i}`} />
+											<div
+												className="h-3.5 animate-pulse rounded bg-white/10"
+												key={`tag-skeleton-${Date.now()}-${i}`}
+											/>
 										))}
 									</div>
 								) : topTags && topTags.length > 0 ? (
-									<div className="space-y-2">
+									<div className="space-y-1.5">
 										{topTags.slice(0, 4).map((tag, i) => (
-											<div className="flex items-center justify-between text-sm" key={tag.id || i}>
+											<div className="flex items-center justify-between text-xs" key={tag.id || i}>
 												<div className="flex items-center gap-1 truncate">
-													{tag.emoji && <span className="text-xs">{tag.emoji}</span>}
+													{tag.emoji && <span className="text-[10px]">{tag.emoji}</span>}
 													<span className="truncate">{tag.name}</span>
 												</div>
-												<Badge className="ml-2 text-xs" variant="secondary">
+												<Badge className="ml-2 text-[10px]" variant="secondary">
 													{tag.imageCount}
 												</Badge>
 											</div>
 										))}
 									</div>
 								) : (
-									<div className="text-muted-foreground text-sm">Sin etiquetas</div>
+									<div className="text-muted-foreground text-xs">Sin etiquetas</div>
 								)}
-							</CardContent>
-						</Card>
-					</div>
-
-					{/* Extended Stats - Entidades adicionales */}
-					{(combinedStats.totalCharacters > 0 ||
-						combinedStats.totalPlaces > 0 ||
-						combinedStats.totalConcepts > 0 ||
-						combinedStats.totalNotes > 0 ||
-						combinedStats.totalPrompts > 0 ||
-						combinedStats.totalProperties > 0 ||
-						combinedStats.totalWildcards > 0 ||
-						combinedStats.totalFavorites > 0) && (
-						<div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6 xl:grid-cols-8">
-							{combinedStats.totalCharacters > 0 && (
-								<Card className="border-white/10 bg-card/80 backdrop-blur-sm">
-									<CardHeader className="pb-2">
-										<CardTitle className="flex items-center gap-2 text-sm">
-											<Users className="h-4 w-4 text-teal-400" />
-											Personajes
-										</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<div className="font-bold text-xl">{formatNumber(combinedStats.totalCharacters)}</div>
-									</CardContent>
-								</Card>
-							)}
-
-							{combinedStats.totalPlaces > 0 && (
-								<Card className="border-white/10 bg-card/80 backdrop-blur-sm">
-									<CardHeader className="pb-2">
-										<CardTitle className="flex items-center gap-2 text-sm">
-											<Calendar className="h-4 w-4 text-emerald-400" />
-											Lugares
-										</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<div className="font-bold text-xl">{formatNumber(combinedStats.totalPlaces)}</div>
-									</CardContent>
-								</Card>
-							)}
-
-							{combinedStats.totalConcepts > 0 && (
-								<Card className="border-white/10 bg-card/80 backdrop-blur-sm">
-									<CardHeader className="pb-2">
-										<CardTitle className="flex items-center gap-2 text-sm">
-											<Zap className="h-4 w-4 text-violet-400" />
-											Conceptos
-										</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<div className="font-bold text-xl">{formatNumber(combinedStats.totalConcepts)}</div>
-									</CardContent>
-								</Card>
-							)}
-
-							{combinedStats.totalNotes > 0 && (
-								<Card className="border-white/10 bg-card/80 backdrop-blur-sm">
-									<CardHeader className="pb-2">
-										<CardTitle className="flex items-center gap-2 text-sm">
-											<BookOpen className="h-4 w-4 text-amber-400" />
-											Notas
-										</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<div className="font-bold text-xl">{formatNumber(combinedStats.totalNotes)}</div>
-									</CardContent>
-								</Card>
-							)}
-
-							{combinedStats.totalPrompts > 0 && (
-								<Card className="border-white/10 bg-card/80 backdrop-blur-sm">
-									<CardHeader className="pb-2">
-										<CardTitle className="flex items-center gap-2 text-sm">
-											<Wand2 className="h-4 w-4 text-indigo-400" />
-											Prompts
-										</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<div className="font-bold text-xl">{formatNumber(combinedStats.totalPrompts)}</div>
-									</CardContent>
-								</Card>
-							)}
-
-							{combinedStats.totalProperties > 0 && (
-								<Card className="border-white/10 bg-card/80 backdrop-blur-sm">
-									<CardHeader className="pb-2">
-										<CardTitle className="flex items-center gap-2 text-sm">
-											<Key className="h-4 w-4 text-slate-400" />
-											Propiedades
-										</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<div className="font-bold text-xl">{formatNumber(combinedStats.totalProperties)}</div>
-									</CardContent>
-								</Card>
-							)}
-
-							{combinedStats.totalWildcards > 0 && (
-								<Card className="border-white/10 bg-card/80 backdrop-blur-sm">
-									<CardHeader className="pb-2">
-										<CardTitle className="flex items-center gap-2 text-sm">
-											<Shuffle className="h-4 w-4 text-cyan-400" />
-											Comodines
-										</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<div className="font-bold text-xl">{formatNumber(combinedStats.totalWildcards)}</div>
-									</CardContent>
-								</Card>
-							)}
-
-							{combinedStats.totalFavorites > 0 && (
-								<Card className="border-white/10 bg-card/80 backdrop-blur-sm">
-									<CardHeader className="pb-2">
-										<CardTitle className="flex items-center gap-2 text-sm">
-											<Heart className="h-4 w-4 text-red-400" />
-											Favoritos
-										</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<div className="font-bold text-xl">{formatNumber(combinedStats.totalFavorites)}</div>
-									</CardContent>
-								</Card>
-							)}
-
-							{combinedStats.totalWorldItems > 0 && (
-								<Card className="border-white/10 bg-card/80 backdrop-blur-sm">
-									<CardHeader className="pb-2">
-										<CardTitle className="flex items-center gap-2 text-sm">
-											<Archive className="h-4 w-4 text-rose-400" />
-											Mundos
-										</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<div className="font-bold text-xl">{formatNumber(combinedStats.totalWorldItems)}</div>
-									</CardContent>
-								</Card>
-							)}
-
-							{combinedStats.dbSize > 0 && (
-								<Card className="border-white/10 bg-card/80 backdrop-blur-sm">
-									<CardHeader className="pb-2">
-										<CardTitle className="flex items-center gap-2 text-sm">
-											<Database className="h-4 w-4 text-slate-400" />
-											BD
-										</CardTitle>
-									</CardHeader>
-									<CardContent>
-										<div className="font-bold text-xl">{formatBytes(combinedStats.dbSize)}</div>
-									</CardContent>
-								</Card>
-							)}
-						</div>
-					)}
-
-					{/* Sistema Overview - Resumen final compacto */}
-					<Card className="border-white/20 bg-card/90 backdrop-blur-sm">
-						<CardHeader>
-							<CardTitle className="flex items-center gap-2">
-								<BarChart3 className="h-5 w-5 text-emerald-500" />
-								Resumen del Sistema
-							</CardTitle>
-							<CardDescription>
-								Estado actual de tu biblioteca multimedia
-								{combinedStats.lastBackup && (
-									<span className="ml-2 text-xs">
-										• Último respaldo: {new Date(combinedStats.lastBackup).toLocaleDateString()}
-									</span>
-								)}
-							</CardDescription>
-						</CardHeader>
-						<CardContent>
-							<div className="grid grid-cols-2 gap-4 md:grid-cols-4 lg:grid-cols-6">
-								<div className="text-center">
-									<div className="font-bold text-2xl text-blue-500">
-										{totalMediaFiles > 0 ? ((combinedStats.totalImages / totalMediaFiles) * 100).toFixed(1) : '0'}%
-									</div>
-									<p className="text-muted-foreground text-xs">Imágenes</p>
-								</div>
-								<div className="text-center">
-									<div className="font-bold text-2xl text-purple-500">
-										{totalMediaFiles > 0 ? ((combinedStats.totalVideos / totalMediaFiles) * 100).toFixed(1) : '0'}%
-									</div>
-									<p className="text-muted-foreground text-xs">Videos</p>
-								</div>
-								<div className="text-center">
-									<div className="font-bold text-2xl text-green-500">
-										{totalMediaFiles > 0 ? ((combinedStats.totalAudio / totalMediaFiles) * 100).toFixed(1) : '0'}%
-									</div>
-									<p className="text-muted-foreground text-xs">Audio</p>
-								</div>
-								<div className="text-center">
-									<div className="font-bold text-2xl text-yellow-500">{formatNumber(combinedStats.totalFolders)}</div>
-									<p className="text-muted-foreground text-xs">Carpetas</p>
-								</div>
-								<div className="text-center">
-									<div className="font-bold text-2xl text-cyan-500">{formatNumber(combinedStats.totalTags)}</div>
-									<p className="text-muted-foreground text-xs">Etiquetas</p>
-								</div>
-								<div className="text-center">
-									<div className="font-bold text-2xl text-indigo-500">{formatNumber(totalAllEntities)}</div>
-									<p className="text-muted-foreground text-xs">Total</p>
-								</div>
 							</div>
-						</CardContent>
-					</Card>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>

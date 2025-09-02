@@ -1,5 +1,5 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
-import { thumbnails } from '../schema';
+import { thumbnails } from '../schema/index';
 import { seedLogger } from './index';
 
 /**

@@ -7,6 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Clock, FileText, RefreshCw, Trash2, XCircle } from 'lucide-react';
 import { useState } from 'react';
+import { JsonViewer } from '@/components/panels/details-panel/components/json-viewer';
 import type { ReindexLogEntry } from '@/lib/logger/reindex-file-logger';
 
 interface LogStats {
@@ -375,9 +376,13 @@ export default function ReindexLogsViewer() {
 															<summary className="cursor-pointer hover:text-gray-800 dark:hover:text-gray-200">
 																Contexto
 															</summary>
-															<pre className="mt-2 overflow-x-auto rounded bg-gray-100 p-2 text-xs dark:bg-gray-700">
-																{JSON.stringify(log.context, null, 2)}
-															</pre>
+															<div className="mt-2">
+																<JsonViewer
+																	content={JSON.stringify(log.context, null, 2)}
+																	defaultExpanded={false}
+																	maxHeight={200}
+																/>
+															</div>
 														</details>
 													)}
 													{log.error && (

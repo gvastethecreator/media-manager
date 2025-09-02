@@ -44,7 +44,6 @@ import { TagsSettings } from './tags/tags-settings';
 import { ThumbnailsSettings } from './thumbnails/thumbnails-settings';
 import { UploadedImagesSettings } from './uploaded-images/uploaded-images-settings';
 import { WildcardsSettings } from './wildcards/wildcards-settings';
-import { WorkflowSettings } from './workflow/workflow-settings';
 import { WorldItemsSettings } from './world-items/world-items-settings';
 
 // Definición de tipos para estructurar los tabs
@@ -80,7 +79,6 @@ const tabColors = {
 	document: '#fbbf24', // Amber
 	audio: '#38bdf8', // Sky
 	'json-file': '#f472b6', // Pink
-	workflow: '#a3e635', // Lime
 	file3d: '#818cf8', // Indigo
 };
 
@@ -223,12 +221,6 @@ const tabsData: TabItem[] = [
 		label: 'JSON',
 		icon: <BoxIcon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
 		color: tabColors['json-file'],
-	},
-	{
-		id: 'workflow',
-		label: 'Workflows',
-		icon: <Grid2X2Icon className="h-4 w-4 transition-transform duration-150 group-hover:rotate-12" />,
-		color: tabColors.workflow,
 	},
 	{
 		id: 'file3d',
@@ -444,14 +436,6 @@ export function SettingsView() {
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
 								<JsonFileSettings />
-							</div>
-						</ScrollArea>
-					</TabsContent>
-
-					<TabsContent className="m-0 h-full w-full border-none p-0" value="workflow">
-						<ScrollArea className="h-full w-full">
-							<div className="p-0">
-								<WorkflowSettings />
 							</div>
 						</ScrollArea>
 					</TabsContent>

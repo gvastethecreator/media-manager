@@ -22,11 +22,7 @@ export function Table({
 	const [internalScrollEl, setInternalScrollEl] = useState<HTMLDivElement | null>(null);
 	const effectiveScrollContainer = scrollContainer ?? internalScrollEl;
 	return (
-		<div
-			className="file-browser-canvas file-browser-table h-full w-full overflow-auto"
-			data-testid="file-browser-container"
-			ref={setInternalScrollEl}
-		>
+		<div className="w-full overflow-auto" data-testid="file-browser-container" ref={setInternalScrollEl}>
 			<div className="relative" data-testid="file-browser-scroll-area-viewport">
 				<TableCanvas
 					items={items}
