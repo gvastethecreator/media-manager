@@ -134,109 +134,113 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 	 * @returns void
 	 */
 	const handleHomeClick = useCallback((): void => {
-		window.location.href = '/dashboard';
+		window.location.href = '/';
 	}, []);
 
 	return (
-		<div className="relative border-border/20 border-b bg-gradient-to-b from-background/90 to-transparent py-2 shadow-sm">
+		<div className="border-border/20 border-b bg-gradient-to-b from-background/90 to-transparent py-2 shadow-sm">
 			{/* 📋 Layout responsivo */}
 			<div
 				className={cn(
-					'flex gap-2 px-2 transition-all duration-300',
+					'flex inline-flex w-full gap-2 px-2 transition-all duration-300',
 					isCollapsed ? 'flex-col items-center py-1' : 'flex-col'
 				)}
 			>
 				{/* Avatar */}
-				<div className={cn('flex items-center', isCollapsed ? 'mb-1 justify-center' : 'w-full justify-between')}>
+				<div
+					className={cn(
+						'flex w-full items-center justify-between p-1',
+						isCollapsed ? 'mb-1 justify-center' : 'w-full justify-between'
+					)}
+				>
 					<div className={cn('flex items-center gap-2', isCollapsed && 'justify-center')}>
 						<MemoizedAvatar color={activeProfileData.color} emoji={activeProfileData.emoji} />
 
 						{!isCollapsed && (
-							<div className="flex flex-col">
+							<div className="flex ">
 								<div className="flex items-center gap-2">
-									<span className="font-medium text-foreground/80 text-xs leading-tight">
+									<span className="font-medium text-foreground/80 text-sm leading-tight">
 										{activeProfileData?.name}
 									</span>
 								</div>
 							</div>
 						)}
 					</div>
-				</div>
-
-				{/* Botones de acción */}
-				{!isCollapsed && (
-					<div className="flex flex-wrap items-center justify-center gap-1">
-						<MemoizedHeaderButton
-							icon={<Home className="h-3.5 w-3.5" />}
-							onClick={handleHomeClick}
-							tooltipContent="Volver al dashboard"
-							tooltipTitle="Inicio"
-						/>
-
-						<MemoizedHeaderButton
-							icon={<IdCard className="h-3.5 w-3.5" />}
-							onClick={onOpenEntityCards}
-							tooltipContent="Visualizador y herramientas para tarjetas de entidades"
-							tooltipTitle="Entity Cards"
-						/>
-
-						<MemoizedHeaderButton
-							icon={<Bug className="h-3.5 w-3.5" />}
-							onClick={onOpenDevelopment}
-							tooltipContent="Accede a herramientas de desarrollo y depuración"
-							tooltipNote="Solo para administradores"
-							tooltipTitle="Modo Desarrollador"
-						/>
-
-						<MemoizedHeaderButton
-							icon={<BookOpen className="h-3.5 w-3.5" />}
-							onClick={() => window.open('/docs', '_blank')}
-							tooltipContent="Abre la documentación de la aplicación"
-							tooltipTitle="Documentación"
-						/>
-
-						{/* 🧘 Botón de modo zen */}
-						{onToggleZenMode && (
+					{/* Botones de acción */}
+					{!isCollapsed && (
+						<div className="flex w-full justify-end gap-1">
 							<MemoizedHeaderButton
-								icon={<Eye className="h-3.5 w-3.5" />}
-								onClick={onToggleZenMode}
-								tooltipContent="Activa el modo de concentración"
-								tooltipNote="Oculta distracciones"
-								tooltipTitle="Modo Zen"
+								icon={<Home className="h-3.5 w-3.5" />}
+								onClick={handleHomeClick}
+								tooltipContent="Volver al dashboard"
+								tooltipTitle="Inicio"
 							/>
-						)}
 
-						<DropdownMenu>
-							<DropdownMenuTrigger asChild>
-								<Button
-									className="h-7 w-7 cursor-pointer rounded-md bg-transparent text-muted-foreground transition-all hover:bg-secondary/40 hover:text-foreground"
-									size="icon"
-									variant="ghost"
-								>
-									{getThemeIcon(theme)}
-								</Button>
-							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end">
-								{themes.map((t) => (
-									<DropdownMenuItem key={t} onClick={() => setTheme(t as any)}>
-										{t.charAt(0).toUpperCase() + t.slice(1)}
-										{theme === t && <span className="ml-2 text-primary text-xs">(actual)</span>}
+							<MemoizedHeaderButton
+								icon={<IdCard className="h-3.5 w-3.5" />}
+								onClick={onOpenEntityCards}
+								tooltipContent="Visualizador y herramientas para tarjetas de entidades"
+								tooltipTitle="Entity Cards"
+							/>
+
+							<MemoizedHeaderButton
+								icon={<Bug className="h-3.5 w-3.5" />}
+								onClick={onOpenDevelopment}
+								tooltipContent="Accede a herramientas de desarrollo y depuración"
+								tooltipNote="Solo para administradores"
+								tooltipTitle="Modo Desarrollador"
+							/>
+
+							<MemoizedHeaderButton
+								icon={<BookOpen className="h-3.5 w-3.5" />}
+								onClick={() => window.open('/docs', '_blank')}
+								tooltipContent="Abre la documentación de la aplicación"
+								tooltipTitle="Documentación"
+							/>
+
+							{/* 🧘 Botón de modo zen */}
+							{onToggleZenMode && (
+								<MemoizedHeaderButton
+									icon={<Eye className="h-3.5 w-3.5" />}
+									onClick={onToggleZenMode}
+									tooltipContent="Activa el modo de concentración"
+									tooltipNote="Oculta distracciones"
+									tooltipTitle="Modo Zen"
+								/>
+							)}
+
+							<DropdownMenu>
+								<DropdownMenuTrigger asChild>
+									<Button
+										className="h-7 w-7 cursor-pointer rounded-md bg-transparent text-muted-foreground transition-all hover:bg-secondary/40 hover:text-foreground"
+										size="icon"
+										variant="ghost"
+									>
+										{getThemeIcon(theme)}
+									</Button>
+								</DropdownMenuTrigger>
+								<DropdownMenuContent align="end">
+									{themes.map((t) => (
+										<DropdownMenuItem key={t} onClick={() => setTheme(t as any)}>
+											{t.charAt(0).toUpperCase() + t.slice(1)}
+											{theme === t && <span className="ml-2 text-primary text-xs">(actual)</span>}
+										</DropdownMenuItem>
+									))}
+									<DropdownMenuItem onClick={() => setTheme('system')}>
+										Sistema{theme === 'system' && <span className="ml-2 text-primary text-xs">(actual)</span>}
 									</DropdownMenuItem>
-								))}
-								<DropdownMenuItem onClick={() => setTheme('system')}>
-									Sistema{theme === 'system' && <span className="ml-2 text-primary text-xs">(actual)</span>}
-								</DropdownMenuItem>
-							</DropdownMenuContent>
-						</DropdownMenu>
+								</DropdownMenuContent>
+							</DropdownMenu>
 
-						<MemoizedHeaderButton
-							icon={<Settings2 className="h-3.5 w-3.5" />}
-							onClick={onOpenSettings}
-							tooltipContent="Personaliza tu experiencia"
-							tooltipTitle="Configuración"
-						/>
-					</div>
-				)}
+							<MemoizedHeaderButton
+								icon={<Settings2 className="h-3.5 w-3.5" />}
+								onClick={onOpenSettings}
+								tooltipContent="Personaliza tu experiencia"
+								tooltipTitle="Configuración"
+							/>
+						</div>
+					)}
+				</div>
 
 				{/* Solo avatar cuando está colapsado */}
 				{isCollapsed && (

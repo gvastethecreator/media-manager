@@ -25,7 +25,6 @@ import {
 	tags,
 	videos,
 	wildcards,
-	workflows,
 	worldItems,
 } from '@/lib/drizzle/schema/index';
 import { createSettingsError, isSettingsError } from '@/lib/errors/settings';
@@ -95,7 +94,6 @@ export interface NavigationData {
 	jsonFiles: Array<{ id: string; name: string; size?: number; itemCount?: number }>;
 	file3ds: Array<{ id: string; name: string; format?: string; itemCount?: number }>;
 	videos: Array<{ id: string; name: string; duration?: number; itemCount?: number }>;
-	workflows: Array<{ id: string; name: string; status?: string }>;
 	stats: SystemStats;
 }
 
@@ -123,7 +121,6 @@ export async function getNavigationData(): Promise<NavigationData> {
 			jsonFilesData,
 			file3DsData,
 			videosData,
-			workflowsData,
 		] = await Promise.all([
 			db.select().from(folders),
 			db.select().from(collections),
@@ -143,7 +140,6 @@ export async function getNavigationData(): Promise<NavigationData> {
 			db.select().from(jsonFiles),
 			db.select().from(file3Ds),
 			db.select().from(videos),
-			db.select().from(workflows),
 		]);
 
 		navLogger.info(`📁 Encontradas ${foldersData.length} carpetas`);
@@ -285,11 +281,6 @@ export async function getNavigationData(): Promise<NavigationData> {
 				name: v.name,
 				duration: v.duration || 0,
 				itemCount: 0,
-			})),
-			workflows: workflowsData.map((wf: any) => ({
-				id: wf.id.toString(),
-				name: wf.name,
-				status: wf.status || '',
 			})),
 			stats: basicStats,
 		};

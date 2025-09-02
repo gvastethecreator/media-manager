@@ -8,9 +8,9 @@
 export type {
 	ThumbnailBase,
 	// Legacy para compatibilidad temporal
-	ThumbnailComplete,
+	// ThumbnailComplete, // No existe en base.ts
 	ThumbnailCreateInput,
-	ThumbnailExtended,
+	// ThumbnailExtended, // No existe en base.ts
 	ThumbnailStatistics,
 	ThumbnailUpdateInput,
 	ThumbnailWithStats,

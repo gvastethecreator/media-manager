@@ -1,8 +1,8 @@
 /**
  * =================================================================================
- * TAXONOMY DOMAIN SCHEMA - DRIZZLE ORM
+ * TAXONOMY DOMAIN SCHEMA INDEX - DRIZZLE ORM
  * =================================================================================
- * Definiciones de tablas para el dominio Taxonomy del sistema
+ * Exportación centralizada de todas las entidades del dominio Taxonomy
  *
  * Tablas incluidas:
  * - tags: Etiquetas para clasificación
@@ -10,132 +10,11 @@
  * - wildcards: Comodines para búsquedas
  * - prompts: Prompts para generación
  * - notes: Notas del sistema
- *
- * NOTA: Los esquemas de worldbuilding (characters, places, concepts, worldItems)
- * se han movido al dominio 'worldbuilding' para mejor organización.
  * =================================================================================
  */
 
-import { sql } from 'drizzle-orm';
-import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
-
-// Modelo para las etiquetas
-export const tags = sqliteTable(
-	'Tag',
-	{
-		id: text('id').primaryKey(),
-		name: text('name').notNull(),
-		description: text('description'),
-		emoji: text('emoji').default('🏷️'),
-		color: text('color').default('#3b82f6'),
-		category: text('category'),
-		shortcut: text('shortcut'),
-		featuredImage: text('featuredImage'),
-		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
-		parentId: text('parentId'),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
-		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
-	},
-	(table) => ({
-		nameIdx: uniqueIndex('Tag_name_key').on(table.name),
-	})
-);
-
-// Modelo para las propiedades
-export const properties = sqliteTable(
-	'Property',
-	{
-		id: text('id').primaryKey(),
-		name: text('name').notNull(),
-		description: text('description'),
-		emoji: text('emoji').default('🔍'),
-		color: text('color').default('#3b82f6'),
-		category: text('category'),
-		shortcut: text('shortcut'),
-		featuredImage: text('featuredImage'),
-		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
-		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
-	},
-	(table) => ({
-		nameIdx: uniqueIndex('Property_name_key').on(table.name),
-	})
-);
-
-// Modelo para los comodines
-export const wildcards = sqliteTable(
-	'Wildcard',
-	{
-		id: text('id').primaryKey(),
-		name: text('name').notNull(),
-		description: text('description'),
-		emoji: text('emoji').default('🎭'),
-		color: text('color').default('#3b82f6'),
-		category: text('category'),
-		shortcut: text('shortcut'),
-		children: text('children'),
-		featuredImage: text('featuredImage'),
-		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
-		parentId: text('parentId'),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
-		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
-	},
-	(table) => ({
-		nameIdx: uniqueIndex('Wildcard_name_key').on(table.name),
-	})
-);
-
-// Modelo para los prompts
-export const prompts = sqliteTable(
-	'Prompt',
-	{
-		id: text('id').primaryKey(),
-		name: text('name').notNull(),
-		description: text('description'),
-		emoji: text('emoji').default('🔮'),
-		color: text('color').default('#3b82f6'),
-		category: text('category'),
-
-		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
-		totalImages: integer('totalImages').notNull().default(0),
-		totalVideos: integer('totalVideos').notNull().default(0),
-		type: text('type'),
-		content: text('content'),
-		parameters: text('parameters'),
-		style: text('style'),
-		mood: text('mood'),
-		lighting: text('lighting'),
-		composition: text('composition'),
-		technique: text('technique'),
-		inspiration: text('inspiration'),
-		notes: text('notes'),
-		featuredImage: text('featuredImage'),
-		parentId: text('parentId'),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
-		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
-	},
-	(table) => ({
-		nameIdx: uniqueIndex('Prompt_name_key').on(table.name),
-	})
-);
-
-// Modelo para las notas - CORREGIDO según estructura real de BD
-export const notes = sqliteTable(
-	'Note',
-	{
-		id: text('id').primaryKey(),
-		title: text('title').notNull(), // Campo real en BD
-		content: text('content').notNull().default(''),
-		category: text('category').notNull().default('general'),
-		priority: integer('priority').notNull().default(0), // INTEGER en BD real
-		status: text('status').notNull().default('active'),
-		featuredImage: text('featuredImage'),
-		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
-		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
-		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
-		presetId: text('presetId'), // Campo real en BD
-	},
-	(table) => ({
-		titleIdx: uniqueIndex('Note_title_key').on(table.title),
-	})
-);
+export { tags } from '../organization/tags';
+export { notes } from './notes';
+export { prompts } from './prompts';
+export { properties } from './properties';
+export { wildcards } from './wildcards';

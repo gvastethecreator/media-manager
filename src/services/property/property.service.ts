@@ -119,7 +119,6 @@ export async function getProperty(id: string): Promise<PropertyWithStats | null>
 				emoji: properties.emoji,
 				color: properties.color,
 				category: properties.category,
-				shortcut: properties.shortcut,
 				featuredImage: properties.featuredImage,
 				isFavorite: properties.isFavorite,
 				createdAt: properties.createdAt,
@@ -215,7 +214,6 @@ export async function getProperties(options: GetPropertiesOptions = {}): Promise
 					emoji: properties.emoji,
 					color: properties.color,
 					category: properties.category,
-					shortcut: properties.shortcut,
 					featuredImage: properties.featuredImage,
 					isFavorite: properties.isFavorite,
 					createdAt: properties.createdAt,
@@ -294,7 +292,6 @@ export async function createProperty(data: PropertyCreateInput): Promise<Propert
 				emoji: data.emoji || null,
 				color: data.color || null,
 				category: data.category || null,
-				shortcut: data.shortcut || null,
 				featuredImage: data.featuredImage || null,
 				isFavorite: data.isFavorite,
 				createdAt: new Date(),
@@ -384,9 +381,7 @@ export async function updateProperty(id: string, data: PropertyUpdateInput): Pro
 		if (data.category !== undefined) {
 			updateData.category = data.category;
 		}
-		if (data.shortcut !== undefined) {
-			updateData.shortcut = data.shortcut;
-		}
+		// shortcut eliminado del esquema
 		if (data.featuredImage !== undefined) {
 			updateData.featuredImage = data.featuredImage;
 		}
@@ -557,7 +552,6 @@ export async function searchProperties(query: string): Promise<PropertyWithStats
 				emoji: properties.emoji,
 				color: properties.color,
 				category: properties.category,
-				shortcut: properties.shortcut,
 				featuredImage: properties.featuredImage,
 				isFavorite: properties.isFavorite,
 				createdAt: properties.createdAt,

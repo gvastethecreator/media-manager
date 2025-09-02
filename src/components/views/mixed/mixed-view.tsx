@@ -219,7 +219,7 @@ export default function MixedView({ className }: MixedViewProps) {
 							className="cursor-pointer transition-shadow hover:shadow-lg"
 							key={key}
 							onClick={() => handleItemClick(item)}
-							videoId={item.id}
+							video={item as VideoWithStats}
 						/>
 					);
 				case 'documents':

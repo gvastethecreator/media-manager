@@ -32,7 +32,7 @@ interface ReindexTerminalProps {
 }
 
 // Límite máximo de líneas para performance
-const MAX_LINES = 10;
+const MAX_LINES = 25;
 
 const LOG_ICONS = {
 	INFO: Info,
@@ -387,15 +387,15 @@ export function ReindexTerminal({
 				</div>
 			)}
 
-			{/* Terminal con soporte para sticky logs */}
-			<div className="relative h-full overflow-y-auto rounded-lg bg-black p-4">
+			{/* Terminal con soporte para sticky logs - usando todo el ancho disponible */}
+			<div className="relative h-full w-full overflow-y-auto rounded-lg bg-black p-4">
 				{logs.length === 0 ? (
 					<div className="flex items-center justify-center py-4 text-gray-500">
 						<Terminal className="mr-2 h-4 w-4" />
 						<span className="font-mono text-sm">Esperando logs...</span>
 					</div>
 				) : (
-					<div className="space-y-1" ref={logContainerRef}>
+					<div className="w-full space-y-1" ref={logContainerRef}>
 						{logs.map((log, index) => renderLogEntry(log, index))}
 					</div>
 				)}

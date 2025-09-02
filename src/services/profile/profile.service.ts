@@ -9,6 +9,8 @@ import { db } from '@/lib/drizzle';
 import { profiles, settings } from '@/lib/drizzle/schema/index';
 import { toServiceError } from '@/lib/utils/errors/service-errors';
 import { type ProfileTransformed, transformProfile } from '@/transformers/profile/profile-transformers';
+// Importar tipos desde '@/types/entities/profile' y './client'; evitar re-export circular
+// export type { CreateProfileInput, ProfileExtended, ProfileFilters, ProfilePaginationOptions, UpdateProfileInput };
 import {
 	type ProfileCreateInput,
 	type ProfileExtended,
@@ -18,7 +20,6 @@ import {
 	profileFiltersSchema,
 	profilePaginationSchema,
 } from '@/types/entities/profile';
-import { CreateProfileInput, UpdateProfileInput } from './client';
 
 const SERVICE_NAME = 'ProfileService';
 
@@ -375,5 +376,4 @@ export const getProfile = (id: string) => profileService.getById(id);
 
 export const deleteProfile = (id: string) => profileService.delete(id);
 
-// Exportar tipos útiles para los consumidores del servicio
-export type { CreateProfileInput, ProfileExtended, ProfileFilters, ProfilePaginationOptions, UpdateProfileInput };
+// Los tipos se exportan desde './client' para evitar duplicados circulares

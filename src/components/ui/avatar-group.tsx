@@ -88,9 +88,9 @@ export function AvatarGroupItem({
 	const finalTooltipClassName = tooltipClassName || context?.tooltipClassName;
 
 	// rotate the tooltip
-	const rotate = useSpring(useTransform(x, [-100, 100], [-45, 45]), springConfig);
+	const rotate = useSpring(useTransform(x, [-100, 100], [-45, 45]));
 	// translate the tooltip
-	const translateX = useSpring(useTransform(x, [-100, 100], [-50, 50]), springConfig);
+	const translateX = useSpring(useTransform(x, [-100, 100], [-50, 50]));
 
 	// Extract tooltip from children
 	const tooltipChild = React.Children.toArray(children).find(
@@ -130,7 +130,7 @@ export function AvatarGroupItem({
 				scale: 0.6,
 				transition: {
 					duration: 0.2,
-					ease: 'easeInOut' as Easing,
+					ease: 'easeInOut',
 				},
 			},
 		},
@@ -150,14 +150,14 @@ export function AvatarGroupItem({
 				rotateX: -90,
 				transition: {
 					duration: 0.3,
-					ease: 'easeInOut' as Easing,
+					ease: 'easeInOut',
 				},
 			},
 		},
 		reveal: {
 			initial: { opacity: 0, scale: 0.95 },
-			animate: { opacity: 1, scale: 1, transition: { duration: 0.15, ease: 'easeOut' as Easing } },
-			exit: { opacity: 0, scale: 0.95, transition: { duration: 0.1, ease: 'easeIn' as Easing } },
+			animate: { opacity: 1, scale: 1, transition: { duration: 0.15, ease: 'easeOut' } },
+			exit: { opacity: 0, scale: 0.95, transition: { duration: 0.1, ease: 'easeIn' } },
 		},
 	};
 
@@ -176,8 +176,10 @@ export function AvatarGroupItem({
 						exit={selectedVariant.exit}
 						initial={selectedVariant.initial}
 						style={{
-							translateX: animation === 'reveal' ? 0 : translateX,
-							rotate: animation === 'reveal' ? 0 : rotate,
+							transform:
+								animation === 'reveal'
+									? 'translateX(0) rotate(0deg)'
+									: `translateX(${translateX}px) rotate(${rotate}deg)`,
 							whiteSpace: 'nowrap',
 							transformOrigin: 'center',
 						}}
@@ -201,24 +203,25 @@ export function AvatarGroupItem({
 				)}
 			</AnimatePresence>
 
-			<motion.button
+			<motion.div
 				className="relative cursor-pointer"
 				onBlur={() => setHoveredIndex(false)}
 				onFocus={() => setHoveredIndex(true)}
 				onMouseEnter={() => setHoveredIndex(true)}
 				onMouseLeave={() => setHoveredIndex(false)}
 				onMouseMove={handleMouseMove}
+				role="button"
+				tabIndex={0}
 				transition={{
 					duration: 0.5,
 				}}
-				type="button"
 				whileHover={{
 					zIndex: 30,
 				}}
 				whileTap={{ scale: 0.95 }}
 			>
 				{otherChildren}
-			</motion.button>
+			</motion.div>
 		</div>
 	);
 }

@@ -6,18 +6,20 @@
  */
 
 import { ensureDefaultProfile } from '@/lib/utils/profile/profile-utils';
+import type {
+	ProfileCreateInput as CreateProfileInput,
+	ProfileExtended,
+	ProfileFilters,
+	ProfilePaginationOptions,
+	ProfileUpdateInput as UpdateProfileInput,
+} from '@/types/entities/profile';
 import {
 	activateProfile,
-	type CreateProfileInput,
 	createProfile,
 	deleteProfile,
 	getActiveProfile,
 	getProfile,
 	getProfiles,
-	type ProfileExtended,
-	type ProfileFilters,
-	type ProfilePaginationOptions,
-	type UpdateProfileInput,
 	updateProfile,
 } from './profile.service';
 

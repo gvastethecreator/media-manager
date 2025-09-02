@@ -11,6 +11,7 @@ import {
 	documents,
 	favorites,
 	file3Ds,
+	fileStats,
 	files,
 	// Media
 	folders,
@@ -30,7 +31,6 @@ import {
 	imagePrompts,
 	imageProperties,
 	// Content
-	imageStats,
 	images,
 	imageTags,
 	imageWildcards,
@@ -62,9 +62,8 @@ import {
 	videoWildcards,
 	videoWorldItems,
 	wildcards,
-	workflows,
 	worldItems,
-} from './schema/index.js';
+} from './schema/index';
 
 /**
  * =================================================================================
@@ -90,11 +89,19 @@ const schema = {
 	queueJobs,
 	profiles,
 	settings,
+	activities,
+	metadatas,
+	fileStats,
+	thumbnails,
 	// Media
 	folders,
 	images,
 	videos,
 	uploadedImages,
+	audios,
+	documents,
+	jsonFiles,
+	file3Ds,
 	// Organization
 	groups,
 	albums,
@@ -111,16 +118,6 @@ const schema = {
 	concepts,
 	prompts,
 	notes,
-	// Content
-	imageStats,
-	activities,
-	audios,
-	documents,
-	jsonFiles,
-	file3Ds,
-	metadatas,
-	thumbnails,
-	workflows,
 	// Relations
 	imageAlbums,
 	videoAlbums,

@@ -195,7 +195,9 @@ export function generateJsonPreview(
 		showLineNumbers?: boolean;
 	} = {}
 ): Promise<string> {
-	if (item.entityType !== 'jsonFile') {
+	// TODO: Agregar 'jsonFile' al tipo EntityType
+	// jsonFile aún no forma parte de DisplayableEntity, comprobación dinámica
+	if ((item as any).entityType !== 'jsonFile') {
 		return Promise.resolve('');
 	}
 
@@ -328,8 +330,9 @@ export function generateThumbnailByType(item: DisplayableEntity, options: Record
 		case 'document':
 			return generateDocumentPreview(item, options);
 
-		case 'jsonFile':
-			return generateJsonPreview(item, options);
+		// TODO: Agregar 'jsonFile' al tipo EntityType
+		// case 'jsonFile':
+		//   return generateJsonPreview(item, options);
 
 		case 'file3d':
 			return generate3DModelThumbnail(item, options);

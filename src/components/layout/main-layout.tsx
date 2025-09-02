@@ -87,7 +87,7 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 
 		try {
 			toastService.info('Escaneando carpeta...');
-			await reindexFolderMutation.mutateAsync(currentFolderId);
+			await reindexFolderMutation.mutateAsync({ id: currentFolderId });
 			toastService.success('Carpeta escaneada correctamente');
 		} catch (error) {
 			console.error('Error al escanear carpeta:', error);
@@ -102,7 +102,7 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 
 		try {
 			toastService.info('Recargando carpeta...');
-			await reindexFolderMutation.mutateAsync(currentFolderId);
+			await reindexFolderMutation.mutateAsync({ id: currentFolderId });
 			toastService.success('Carpeta recargada correctamente');
 		} catch (error) {
 			console.error('Error al recargar carpeta:', error);

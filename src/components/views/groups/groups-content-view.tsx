@@ -37,7 +37,7 @@ const MemoizedGroupCard = memo(
 			color: '#60a5fa',
 		};
 
-		return <GroupCard className="h-full" groupId={group.id} onClick={onGroupClick} />;
+		return <GroupCard className="h-full" group={group} onClick={onGroupClick} />;
 	},
 	(prevProps, nextProps) => {
 		// Memoización personalizada para solo re-renderizar si cambian propiedades importantes

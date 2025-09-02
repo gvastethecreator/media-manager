@@ -619,7 +619,7 @@ export function EntityForm({
 								<motion.div
 									animate={{ rotate: 360 }}
 									className="h-4 w-4 rounded-full border-2 border-current border-t-transparent"
-									transition={{ duration: 1, repeat: Number.POSITIVE_INFINITY, ease: 'linear' }}
+									transition={{ duration: 1, ease: 'linear' }}
 								/>
 							) : (
 								submitLabel

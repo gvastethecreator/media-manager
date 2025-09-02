@@ -109,7 +109,6 @@ export async function getWorldItemById(id: string): Promise<WorldItemComplete | 
 				description: worldItems.description,
 				emoji: worldItems.emoji,
 				color: worldItems.color,
-				shortcut: worldItems.shortcut,
 				category: worldItems.category,
 				type: worldItems.type,
 				subtype: worldItems.subtype,
