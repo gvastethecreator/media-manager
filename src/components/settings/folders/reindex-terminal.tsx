@@ -342,7 +342,7 @@ export function ReindexTerminal({
 		return (
 			<div
 				className={cn(
-					'flex items-center gap-3 py-1 transition-all duration-300',
+					'flex items-center gap-3 p-1 transition-all duration-300',
 					log.isSticky && {
 						'sticky top-0 z-10 border-gray-700/50 border-b bg-gray-900/95 shadow-lg backdrop-blur-sm': true,
 						'bg-gradient-to-r from-blue-900/20 to-transparent': true,
@@ -367,30 +367,13 @@ export function ReindexTerminal({
 	};
 
 	return (
-		<div className={cn('w-full', className)}>
-			{/* Barra de progreso arriba del terminal */}
-			{showProgress && (startTime || currentProgress > 0) && (
-				<div className="mb-3">
-					<div className="mb-2 flex items-center justify-between">
-						<div className="flex items-center gap-3">
-							<span className="font-medium font-mono text-gray-300 text-sm">{Math.round(currentProgress)}%</span>
-							{startTime && <span className="font-mono text-gray-400 text-xs">⏱️ {formatElapsedTime(elapsedTime)}</span>}
-						</div>
-						{currentProgress === 100 && <span className="font-mono text-green-400 text-xs">✅ Completado</span>}
-					</div>
-					<div className="h-2 w-full overflow-hidden rounded-lg bg-gray-800">
-						<div
-							className="h-full rounded-lg bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500 ease-out"
-							style={{ width: `${Math.min(100, Math.max(0, currentProgress))}%` }}
-						/>
-					</div>
-				</div>
-			)}
+		<div className={cn('h-full w-full', className)}>
+
 
 			{/* Terminal con soporte para sticky logs - usando todo el ancho disponible */}
-			<div className="relative h-full w-full overflow-y-auto rounded-lg bg-black p-4">
+			<div className="relative h-full w-full overflow-y-auto rounded-sm bg-black p-4">
 				{logs.length === 0 ? (
-					<div className="flex items-center justify-center py-4 text-gray-500">
+					<div className="flex items-center justify-center p-4 text-gray-500">
 						<Terminal className="mr-2 h-4 w-4" />
 						<span className="font-mono text-sm">Esperando logs...</span>
 					</div>
