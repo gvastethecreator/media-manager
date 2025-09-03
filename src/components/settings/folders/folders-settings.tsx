@@ -239,67 +239,67 @@ const FoldersSettings = memo(function FoldersSettings() {
 			{/* Layout en 2 columnas mejorado */}
 			<div className="flex">
 				{/* Columna izquierda: Tabla de carpetas */}
-				<div className="flex h-full flex-col overflow-hidden border border-border/30">
+				<div className="flex w-full h-full flex-col">
 					{/* Header de la tabla mejorado */}
-					<div className="border-border/30 border-b bg-muted/10">
-						<div className="flex items-center justify-between p-4">
-							<div className="flex items-center gap-3">
-								<div className="flex h-9 w-9 items-center justify-center bg-primary/5">
-									<FolderIcon className="h-5 w-5 text-primary" />
-								</div>
-								<div>
-									<h2 className="font-semibold text-lg leading-none">Gestión de Carpetas</h2>
-									<p className="mt-1 text-muted-foreground text-sm">{folders?.length || 0} carpetas configuradas</p>
-								</div>
-							</div>
 
-							{/* Selector de vista mejorado */}
-							<div className="flex items-center gap-3">
-								{(isGloballyProcessing || isProcessing) && (
-									<div className="flex items-center gap-2 bg-primary/5 px-3 py-2 text-primary">
-										<RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" />
-										<span className="font-medium text-sm">
-											{processStatus?.message || (isGloballyProcessing ? 'Reindexando...' : 'Procesando...')}
-										</span>
-									</div>
-								)}
-								<ToggleGroup
-									className="border border-border/30 bg-background p-1"
-									onValueChange={(value) => value && setViewMode(value as 'table' | 'grid')}
-									size="sm"
-									type="single"
-									value={viewMode}
-								>
-									<ToggleGroupItem
-										className="h-8 w-8 p-0 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-										value="table"
-									>
-										<List className="h-4 w-4" />
-									</ToggleGroupItem>
-									<ToggleGroupItem
-										className="h-8 w-8 p-0 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
-										value="grid"
-									>
-										<Grid3X3 className="h-4 w-4" />
-									</ToggleGroupItem>
-								</ToggleGroup>
+					<div className="flex items-center justify-between p-4">
+						<div className="flex items-center gap-3">
+							<div className="flex h-9 w-9 items-center justify-center bg-primary/5">
+								<FolderIcon className="h-5 w-5 text-primary" />
 							</div>
+							<div>
+								<h2 className="font-semibold text-lg leading-none">Gestión de Carpetas</h2>
+								<p className="mt-1 text-muted-foreground text-sm">{folders?.length || 0} carpetas configuradas</p>
+							</div>
+						</div>
+						{/* Progress bar para reindexado global */}
+						{globalReindexStatus.isProcessing && (
+							<div className="p-1 w-[200px]">
+								<GlobalReindexProgress progress={globalReindexStatus.progress} show={globalReindexStatus.isProcessing} />
+							</div>
+						)}
+						{/* Selector de vista mejorado */}
+						<div className="flex items-center gap-3">
+							{(isGloballyProcessing || isProcessing) && (
+								<div className="flex items-center gap-2 bg-primary/5 px-3 py-2 text-primary">
+									<RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" />
+									<span className="font-medium text-sm">
+										{processStatus?.message || (isGloballyProcessing ? 'Reindexando...' : 'Procesando...')}
+									</span>
+								</div>
+							)}
+							<ToggleGroup
+								className="border border-border/30 bg-background p-1"
+								onValueChange={(value) => value && setViewMode(value as 'table' | 'grid')}
+								size="sm"
+								type="single"
+								value={viewMode}
+							>
+								<ToggleGroupItem
+									className="h-8 w-8 p-0 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+									value="table"
+								>
+									<List className="h-4 w-4" />
+								</ToggleGroupItem>
+								<ToggleGroupItem
+									className="h-8 w-8 p-0 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+									value="grid"
+								>
+									<Grid3X3 className="h-4 w-4" />
+								</ToggleGroupItem>
+							</ToggleGroup>
 						</div>
 					</div>
 
+
 					{/* Contenido principal de la columna izquierda */}
-					<div className="flex-1 overflow-hidden">
+					<div className="flex w-full p-4">
 						{isGloballyProcessing ? (
-							<div className="flex h-full items-center justify-center">
-								<div className="space-y-6 text-center">
-									<div className="flex items-center justify-center gap-3 text-primary">
-										<RefreshCw className="h-5 w-5 animate-spin" />
-										<span className="font-semibold text-lg">Reindexado Global en Progreso</span>
-									</div>
-									<p className="text-muted-foreground">Monitoreando el progreso en tiempo real</p>
-									<ReindexTerminal className="mx-auto h-80 max-w-4xl border border-border/30" isActive={true} />
-								</div>
-							</div>
+
+							
+								<ReindexTerminal isActive={true} />
+							
+
 						) : viewMode === 'table' ? (
 							<ScrollArea className="h-full">
 								<div className="p-4">
@@ -337,20 +337,15 @@ const FoldersSettings = memo(function FoldersSettings() {
 						)}
 					</div>
 
-					{/* Progress bar para reindexado global */}
-					{globalReindexStatus.isProcessing && (
-						<div className="border-t bg-muted/30 p-3">
-							<GlobalReindexProgress progress={globalReindexStatus.progress} show={globalReindexStatus.isProcessing} />
-						</div>
-					)}
+
 				</div>
 
 				{/* Columna derecha: Configuración, input y stats mejorada */}
-				<div className="flex h-full max-w-1/3 flex-col space-y-6">
+				<div className="flex h-full max-w-1/3 flex-col pr-4">
 					{/* Formulario para agregar carpetas mejorado */}
-					<div className="border border-border/30">
-						<div className="border-border/30 border-b bg-muted/10 p-4" data-testid="folder-form-section">
-							<div className="mb-4 flex items-center gap-3">
+					<div className="h-full py-4">
+						<div data-testid="folder-form-section">
+							<div className="mb-1 flex items-center gap-3">
 								<div className="flex h-8 w-8 items-center justify-center bg-primary/5">
 									<Settings className="h-4 w-4 text-primary" />
 								</div>
@@ -373,7 +368,7 @@ const FoldersSettings = memo(function FoldersSettings() {
 						</div>
 
 						<div className="p-4">
-							<div className="space-y-4">
+							<div className="space-y-2">
 								{/* Formulario para agregar carpetas */}
 								<FolderForm isLoading={isLoading} isProcessing={isProcessing} onAddFolder={handleAddFolder} />
 
@@ -448,7 +443,7 @@ const FoldersSettings = memo(function FoldersSettings() {
 						{showAdvancedConfig && (
 							<>
 								<Separator />
-								<div className="bg-muted/10 p-4">
+								<div className="p-2">
 									<StructuredReindexConfig
 										isOpen={showAdvancedConfig}
 										onSkipMetadataChange={setSkipMetadata}
@@ -466,19 +461,13 @@ const FoldersSettings = memo(function FoldersSettings() {
 
 					{/* Estadísticas generales mejoradas */}
 					{generalStats && !isStatsLoading && (
-						<div className="flex-1 overflow-hidden border border-border/30">
-							<div className="border-border/30 border-b bg-muted/10 p-4">
-								<h3 className="font-semibold leading-none">Estadísticas</h3>
-								<p className="mt-1 text-muted-foreground text-sm">Resumen del sistema</p>
-							</div>
-							<div className="p-4">
-								<FoldersStats stats={generalStats} />
-							</div>
-						</div>
+
+						<FoldersStats stats={generalStats} />
+
 					)}
 				</div>
-			</div>
-		</div>
+			</div >
+		</div >
 	);
 });
 
@@ -627,7 +616,7 @@ function FoldersTable({
 	};
 
 	return (
-		<div className="space-y-2">
+		<div className="p-2">
 			{/* Herramientas de tabla mejoradas */}
 			<div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
 				<div className="flex flex-1 items-center gap-3">

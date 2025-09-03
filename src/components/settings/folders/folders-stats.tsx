@@ -24,25 +24,13 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 	].filter((item) => item.value > 0);
 
 	return (
-		<div className="space-y-3 p-4">
-			{/* Título compacto */}
-			<div className="flex items-center justify-between" data-testid="folders-stats">
-				<h3 className="flex items-center gap-2 font-medium text-muted-foreground text-sm">
-					<HardDrive className="h-4 w-4" />
-					Estadísticas Generales
-				</h3>
-				<div className="flex items-center gap-1 text-muted-foreground text-xs" data-testid="stats-last-scanned">
-					<Clock className="h-3 w-3" />
-					<span>{stats.lastScanned ? new Date(stats.lastScanned).toLocaleString() : 'Nunca'}</span>
-				</div>
-			</div>
-
+		<div className="space-y-3">
 			{/* Contenedor principal con estadísticas y gráfico */}
-			<div className="grid grid-cols-1 gap-4 lg:grid-cols-4">
+			<div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
 				{/* Estadísticas organizadas en 3 filas */}
 				<div className="lg:col-span-3">
-					<Card className="rounded-sm border-none bg-muted/30">
-						<CardContent className="grid grid-cols-2 p-4">
+					<div className="rounded-sm border-none bg-muted/30">
+						<CardContent className="grid grid-cols-1 p-4">
 							<div className="space-y-3">
 								{/* Primera fila: Carpetas y Archivos totales */}
 								<div className="grid grid-cols-2 gap-4">
@@ -67,7 +55,7 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 								</div>
 
 								{/* Segunda fila: Tipos de archivos multimedia */}
-								<div className="grid grid-cols-3 gap-3">
+								<div className="grid grid-cols-2 gap-3">
 									<div className="flex items-center gap-2 rounded bg-background/50 p-2">
 										<Image className="h-4 w-4 text-green-600" />
 										<div>
@@ -189,7 +177,7 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 								<div className="flex h-32 items-center justify-center text-muted-foreground text-xs">Sin datos</div>
 							)}
 						</CardContent>
-					</Card>
+					</div>
 				</div>
 			</div>
 		</div>
