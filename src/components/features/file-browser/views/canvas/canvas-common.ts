@@ -6,6 +6,7 @@ import {
 	generateAudioWaveform,
 	generateJsonPreview,
 } from '@/config/thumbnail-generators';
+import { getRecentFolderImages } from '@/lib/api/services/folders';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import type { MediaItem } from '../../components/media-thumbnail';
 
@@ -15,6 +16,10 @@ export type CacheEntry = {
 	fallbackIcon?: string;
 	/** Momento en el que la entrada pasó a 'ready' para animación de fade-in */
 	readyAt?: number;
+};
+
+export type FolderThumbnailEntry = CacheEntry & {
+	thumbnails?: string[];
 };
 
 export function useImageCache() {
@@ -107,6 +112,40 @@ export const getFallbackIcon = (entityType: string) => {
 			return '🎲';
 		default:
 			return '📁';
+	}
+};
+
+// Cache para miniaturas de carpetas
+const folderThumbnailCache = new Map<string, string[]>();
+
+// Función para obtener miniaturas recientes de carpetas
+export const getFolderThumbnails = async (folderId: string): Promise<string[]> => {
+	try {
+		// Verificar cache primero
+		if (folderThumbnailCache.has(folderId)) {
+			const cached = folderThumbnailCache.get(folderId);
+			return cached ?? [];
+		}
+
+		// Obtener URLs de miniaturas recientes
+		const thumbnailUrls = await getRecentFolderImages(folderId, 4);
+
+		// Cache el resultado
+		folderThumbnailCache.set(folderId, thumbnailUrls);
+
+		// Limpiar cache si es muy grande
+		if (folderThumbnailCache.size > 100) {
+			const entries = Array.from(folderThumbnailCache.entries());
+			const toDelete = entries.slice(0, 30);
+			for (const [key] of toDelete) {
+				folderThumbnailCache.delete(key);
+			}
+		}
+
+		return thumbnailUrls;
+	} catch (error) {
+		console.warn(`Failed to load folder thumbnails for ${folderId}:`, error);
+		return [];
 	}
 };
 

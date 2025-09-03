@@ -24,6 +24,13 @@ export interface ViewOptionsState {
 	groupByEntityType: boolean;
 	useCanvasRendering: boolean;
 	includeSubfolders: boolean;
+	virtualization: {
+		enabled: boolean;
+		threshold: number;
+		overscan: number;
+		estimatedItemHeight: number;
+		maxItems: number; // Límite máximo de elementos en memoria
+	};
 	setUseCanvasRendering: (enabled: boolean) => void;
 	toggleUseCanvasRendering: () => void;
 	setIncludeSubfolders: (enabled: boolean) => void;
@@ -53,6 +60,13 @@ const DEFAULT_STATE = {
 	groupByEntityType: false,
 	useCanvasRendering: false,
 	includeSubfolders: false,
+	virtualization: {
+		enabled: true,
+		threshold: 100, // Activar virtualización con 100+ elementos
+		overscan: 5, // Renderizar 5 elementos extra arriba/abajo para scroll suave
+		estimatedItemHeight: 200, // Altura estimada por elemento
+		maxItems: 250, // Límite máximo de elementos en memoria para performance
+	},
 };
 
 export type ViewOptionsStore = ViewOptionsState;

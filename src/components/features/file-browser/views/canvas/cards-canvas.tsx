@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDebounce, useRaf } from '@/hooks/useThrottle';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { MediaItem } from '../../components/media-thumbnail';
@@ -37,6 +38,7 @@ export function CardsCanvas({
 	const [viewport, setViewport] = useState({ width: 0, height: 0, scrollTop: 0, scrollLeft: 0, offsetTop: 0 });
 	const { load, get, set } = useImageCache();
 	const isSelected = useSelectionStore((s) => s.isSelected);
+	const viewportRafRef = useRef<number | null>(null);
 
 	const columns = Math.max(1, Math.floor(Math.max(0, viewport.width - gap) / (itemSize + gap)));
 	const cellSize =
@@ -55,29 +57,64 @@ export function CardsCanvas({
 	);
 	const visibleRange = useMemo(() => ({ firstVisibleRow, lastVisibleRow }), [firstVisibleRow, lastVisibleRow]);
 
-	// Prefetch
+	// Prefetch con AbortController y debouncing para evitar requests masivos
+	const abortControllerRef = useRef<AbortController | null>(null);
+
+	const debouncedPrefetch = useDebounce(
+		useCallback(
+			async (startIndex: number, endIndex: number, items: MediaItem[]) => {
+				// Cancelar requests anteriores
+				if (abortControllerRef.current) {
+					abortControllerRef.current.abort();
+				}
+
+				// Crear nuevo controller
+				abortControllerRef.current = new AbortController();
+				const signal = abortControllerRef.current.signal;
+
+				try {
+					for (let i = startIndex; i <= endIndex; i++) {
+						if (signal.aborted) break;
+
+						const it = items[i];
+						if (!it) continue;
+						const key = it.id;
+						if (get(key)) continue;
+						try {
+							const src = await generateThumbnailUrl(it, ThumbnailQuality.MEDIUM);
+							if (signal.aborted) break;
+
+							if (src && !src.startsWith('🎵') && !src.startsWith('🖼️') && !src.startsWith('🎥')) load(key, src);
+							else set(key, { status: 'ready', fallbackIcon: src });
+						} catch {
+							if (signal.aborted) break;
+							set(key, { status: 'ready', fallbackIcon: getFallbackIcon(it.entityType) });
+						}
+					}
+				} catch (error: unknown) {
+					if (error instanceof Error && error.name !== 'AbortError') {
+						console.warn('Error en prefetch de thumbnails:', error);
+					}
+				}
+			},
+			[load, get, set]
+		),
+		200
+	); // 200ms debounce
+
 	useEffect(() => {
 		const startIndex = visibleRange.firstVisibleRow * columns;
-		const endIndex = Math.min(items.length - 1, (visibleRange.lastVisibleRow + 1) * columns - 1);
-		(async () => {
-			for (let i = startIndex; i <= endIndex; i++) {
-				const it = items[i];
-				if (!it) continue;
-				const key = it.id;
-				if (get(key)) continue;
-				try {
-					const src = await generateThumbnailUrl(it, ThumbnailQuality.MEDIUM);
-					if (src && !src.startsWith('🎵') && !src.startsWith('🖼️') && !src.startsWith('🎥')) load(key, src);
-					else set(key, { status: 'ready', fallbackIcon: src });
-				} catch {
-					set(key, { status: 'ready', fallbackIcon: getFallbackIcon(it.entityType) });
-				}
-			}
-		})();
-	}, [visibleRange, columns, items, load, get, set]);
+		const rawEndIndex = Math.min(items.length - 1, (visibleRange.lastVisibleRow + 1) * columns - 1);
 
-	// Render
-	useEffect(() => {
+		// 🚀 OPTIMIZACIÓN: Limitar máximo 250 elementos en memoria para mejorar rendimiento del scroll
+		const MAX_ITEMS_IN_MEMORY = 250;
+		const endIndex = Math.min(rawEndIndex, startIndex + MAX_ITEMS_IN_MEMORY - 1);
+
+		debouncedPrefetch(startIndex, endIndex, items);
+	}, [visibleRange, columns, items, debouncedPrefetch]);
+
+	// Render callback throttleado para 60fps máximo
+	const renderCallback = useCallback(() => {
 		const canvas = canvasRef.current;
 		const container = containerRef.current;
 		if (!canvas) return;
@@ -99,7 +136,12 @@ export function CardsCanvas({
 		ctx.clearRect(0, 0, w, h);
 
 		const startIndex = visibleRange.firstVisibleRow * columns;
-		const endIndex = Math.min(items.length - 1, (visibleRange.lastVisibleRow + 1) * columns - 1);
+		const rawEndIndex = Math.min(items.length - 1, (visibleRange.lastVisibleRow + 1) * columns - 1);
+
+		// 🚀 OPTIMIZACIÓN: Limitar máximo 250 elementos renderizados para mejorar rendimiento del scroll
+		const MAX_ITEMS_RENDERED = 250;
+		const endIndex = Math.min(rawEndIndex, startIndex + MAX_ITEMS_RENDERED - 1);
+
 		for (let i = startIndex; i <= endIndex; i++) {
 			const it = items[i];
 			if (!it) continue;
@@ -171,6 +213,13 @@ export function CardsCanvas({
 		}
 	}, [items, visibleRange, columns, gap, cellSize, textBand, rowHeight, cellHeight, isSelected, get, scrollContainer]);
 
+	const rafRender = useRaf(renderCallback);
+
+	// useEffect que agenda render por frame (RAF)
+	useEffect(() => {
+		rafRender();
+	}, [rafRender]);
+
 	// Observe
 	useEffect(() => {
 		const internal = containerRef.current;
@@ -182,21 +231,29 @@ export function CardsCanvas({
 			return host.scrollTop + (selfRect.top - hostRect.top);
 		};
 		const onScroll = () => {
-			setViewport((v) => ({
-				...v,
-				scrollTop: host.scrollTop,
-				scrollLeft: host.scrollLeft,
-				offsetTop: scrollContainer ? computeOffsetTop() : 0,
-			}));
+			if (viewportRafRef.current != null) return;
+			viewportRafRef.current = requestAnimationFrame(() => {
+				viewportRafRef.current = null;
+				setViewport((v) => ({
+					...v,
+					scrollTop: host.scrollTop,
+					scrollLeft: host.scrollLeft,
+					offsetTop: scrollContainer ? computeOffsetTop() : 0,
+				}));
+			});
 		};
 		host.addEventListener('scroll', onScroll, { passive: true });
 		const ro = new ResizeObserver(() => {
-			setViewport((v) => ({
-				...v,
-				width: Math.floor(host.clientWidth),
-				height: Math.floor(host.clientHeight),
-				offsetTop: scrollContainer ? computeOffsetTop() : 0,
-			}));
+			if (viewportRafRef.current != null) return;
+			viewportRafRef.current = requestAnimationFrame(() => {
+				viewportRafRef.current = null;
+				setViewport((v) => ({
+					...v,
+					width: Math.floor(host.clientWidth),
+					height: Math.floor(host.clientHeight),
+					offsetTop: scrollContainer ? computeOffsetTop() : 0,
+				}));
+			});
 		});
 		ro.observe(host);
 		ro.observe(internal);
@@ -210,6 +267,7 @@ export function CardsCanvas({
 		return () => {
 			ro.disconnect();
 			host.removeEventListener('scroll', onScroll);
+			if (viewportRafRef.current != null) cancelAnimationFrame(viewportRafRef.current);
 		};
 	}, [scrollContainer]);
 

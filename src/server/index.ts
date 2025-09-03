@@ -84,6 +84,11 @@ app.get('/health', (_req, res) => {
 });
 
 // API Routes - Entidades principales
+// Debug middleware for folders routes
+app.use('/api/folders', (req, res, next) => {
+	console.log('📁 FOLDERS ROUTER - Request received:', req.method, req.path);
+	next();
+});
 app.use('/api/folders', foldersRouter);
 app.use('/api/images', imagesRouter);
 app.use('/api/files', filesRouter);

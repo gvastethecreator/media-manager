@@ -9,6 +9,12 @@ export interface StatusBarProps {
 	className?: string;
 	onRefresh?: () => void;
 	isLoading?: boolean;
+	// Paginación (opcional)
+	page?: number; // 0-based
+	pageCount?: number;
+	onPrevPage?: () => void;
+	onNextPage?: () => void;
+	shownCount?: number; // cantidad de items mostrados realmente (paginados)
 }
 
 // Función utilitaria para formatear tamaños de archivo
@@ -29,7 +35,17 @@ function getItemSize(item: MediaItem): number {
 	return typeof size === 'number' ? size : 0;
 }
 
-export function StatusBar({ items, className, onRefresh, isLoading = false }: StatusBarProps) {
+export function StatusBar({
+	items,
+	className,
+	onRefresh,
+	isLoading = false,
+	page,
+	pageCount,
+	onPrevPage,
+	onNextPage,
+	shownCount,
+}: StatusBarProps) {
 	const selectedIds = useSelectionStore((s) => s.selectedIds);
 
 	// Calcular estadísticas de todos los items
@@ -78,10 +94,41 @@ export function StatusBar({ items, className, onRefresh, isLoading = false }: St
 				className
 			)}
 		>
-			<div className="flex items-center gap-2">{getStatusText()}</div>
+			<div className="flex items-center gap-2">
+				{getStatusText()}
+				{typeof shownCount === 'number' && shownCount >= 0 && (
+					<span className="text-muted-foreground"> · mostrando {shownCount}</span>
+				)}
+			</div>
 
 			{/* Información adicional del lado derecho */}
 			<div className="flex items-center gap-4 text-muted-foreground text-xs">
+				{/* Paginación si está habilitada */}
+				{typeof page === 'number' && typeof pageCount === 'number' && pageCount > 1 && (
+					<div className="flex items-center gap-2">
+						<button
+							aria-label="Página anterior"
+							className="rounded bg-slate-800 px-2 py-1 disabled:opacity-40"
+							disabled={page <= 0}
+							onClick={onPrevPage}
+							type="button"
+						>
+							⟨ Prev
+						</button>
+						<span className="tabular-nums">
+							{page + 1} / {pageCount}
+						</span>
+						<button
+							aria-label="Página siguiente"
+							className="rounded bg-slate-800 px-2 py-1 disabled:opacity-40"
+							disabled={page >= pageCount - 1}
+							onClick={onNextPage}
+							type="button"
+						>
+							Next ⟩
+						</button>
+					</div>
+				)}
 				{/* Botón de refresh */}
 
 				<Button disabled={isLoading} onClick={onRefresh} size="sm" variant="ghost">

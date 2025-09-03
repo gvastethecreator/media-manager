@@ -203,25 +203,19 @@ export function AvatarGroupItem({
 				)}
 			</AnimatePresence>
 
-			<motion.div
+			<button
 				className="relative cursor-pointer"
 				onBlur={() => setHoveredIndex(false)}
 				onFocus={() => setHoveredIndex(true)}
 				onMouseEnter={() => setHoveredIndex(true)}
 				onMouseLeave={() => setHoveredIndex(false)}
 				onMouseMove={handleMouseMove}
-				role="button"
-				tabIndex={0}
-				transition={{
-					duration: 0.5,
-				}}
-				whileHover={{
-					zIndex: 30,
-				}}
-				whileTap={{ scale: 0.95 }}
+				type="button"
 			>
-				{otherChildren}
-			</motion.div>
+				<motion.div transition={{ duration: 0.5 }} whileHover={{ zIndex: 30 }} whileTap={{ scale: 0.95 }}>
+					{otherChildren}
+				</motion.div>
+			</button>
 		</div>
 	);
 }

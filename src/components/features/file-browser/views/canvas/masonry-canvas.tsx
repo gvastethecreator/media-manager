@@ -1,4 +1,5 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDebounce, useRaf } from '@/hooks/useThrottle';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { MediaItem } from '../../components/media-thumbnail';
@@ -38,6 +39,8 @@ export function MasonryCanvas({
 	const [viewport, setViewport] = useState({ width: 0, height: 0, scrollTop: 0, scrollLeft: 0, offsetTop: 0 });
 	const { load, get, set } = useImageCache();
 	const isSelected = useSelectionStore((s) => s.isSelected);
+	const viewportRafRef = useRef<number | null>(null);
+	const abortControllerRef = useRef<AbortController | null>(null);
 
 	// Layout: calcular columnas y posiciones con algoritmo simple de "mínima columna"
 	const layout = useMemo(() => {
@@ -64,41 +67,76 @@ export function MasonryCanvas({
 		return { placed, totalHeight, columns, actualColW };
 	}, [items, viewport.width, columnWidth, gap]);
 
-	// Prefetch según viewport con overscanPadding
-	useEffect(() => {
-		const vTop = viewport.scrollTop - (scrollContainer ? viewport.offsetTop : 0);
-		const startY = Math.max(0, vTop - overscanPadding);
-		const endY = vTop + viewport.height + overscanPadding;
-		const inRange = layout.placed.filter((p) => p.y + p.h >= startY && p.y <= endY);
-		(async () => {
-			for (const p of inRange) {
-				const it = items[p.index];
-				const key = it.id;
-				if (get(key)) continue;
-				try {
-					const src = await generateThumbnailUrl(it, ThumbnailQuality.MEDIUM);
-					if (src && !src.startsWith('🎵') && !src.startsWith('🖼️') && !src.startsWith('🎥')) load(key, src);
-					else set(key, { status: 'ready', fallbackIcon: src });
-				} catch {
-					set(key, { status: 'ready', fallbackIcon: getFallbackIcon(it.entityType) });
+	// Prefetch con debounce y AbortController
+	const debouncedPrefetch = useDebounce(
+		useCallback(async () => {
+			// Cancelar cualquier operación anterior
+			if (abortControllerRef.current) {
+				abortControllerRef.current.abort();
+			}
+
+			// Crear nuevo AbortController
+			const controller = new AbortController();
+			abortControllerRef.current = controller;
+
+			try {
+				const vTop = viewport.scrollTop - (scrollContainer ? viewport.offsetTop : 0);
+				const startY = Math.max(0, vTop - overscanPadding);
+				const endY = vTop + viewport.height + overscanPadding;
+				const inRange = layout.placed.filter((p) => p.y + p.h >= startY && p.y <= endY);
+
+				for (const p of inRange) {
+					if (controller.signal.aborted) break;
+
+					const it = items[p.index];
+					const key = it.id;
+					if (get(key)) continue;
+					try {
+						const src = await generateThumbnailUrl(it, ThumbnailQuality.MEDIUM);
+						if (controller.signal.aborted) break;
+
+						if (src && !src.startsWith('🎵') && !src.startsWith('🖼️') && !src.startsWith('🎥')) {
+							load(key, src);
+						} else {
+							set(key, { status: 'ready', fallbackIcon: src });
+						}
+					} catch {
+						if (!controller.signal.aborted) {
+							set(key, { status: 'ready', fallbackIcon: getFallbackIcon(it.entityType) });
+						}
+					}
+				}
+			} catch (error) {
+				if (!controller.signal.aborted) {
+					console.warn('Prefetch error:', error);
+				}
+			} finally {
+				if (abortControllerRef.current === controller) {
+					abortControllerRef.current = null;
 				}
 			}
-		})();
-	}, [
-		items,
-		layout.placed,
-		viewport.scrollTop,
-		viewport.height,
-		overscanPadding,
-		get,
-		load,
-		set,
-		scrollContainer,
-		viewport.offsetTop,
-	]);
+		}, [
+			items,
+			layout.placed,
+			viewport.scrollTop,
+			viewport.height,
+			overscanPadding,
+			get,
+			load,
+			set,
+			scrollContainer,
+			viewport.offsetTop,
+		]),
+		200
+	);
 
-	// Render
+	// useEffect que ejecuta el prefetch debounceado
 	useEffect(() => {
+		debouncedPrefetch();
+	}, [debouncedPrefetch]);
+
+	// Render con throttle
+	const renderCallback = useCallback(() => {
 		const canvas = canvasRef.current;
 		const container = containerRef.current;
 		if (!canvas) return;
@@ -179,6 +217,13 @@ export function MasonryCanvas({
 		viewport.offsetTop,
 	]);
 
+	const rafRender = useRaf(renderCallback);
+
+	// useEffect que agenda render por frame (RAF)
+	useEffect(() => {
+		rafRender();
+	}, [rafRender]);
+
 	// Observe
 	useEffect(() => {
 		const internal = containerRef.current;
@@ -190,21 +235,29 @@ export function MasonryCanvas({
 			return host.scrollTop + (selfRect.top - hostRect.top);
 		};
 		const onScroll = () => {
-			setViewport((v) => ({
-				...v,
-				scrollTop: host.scrollTop,
-				scrollLeft: host.scrollLeft,
-				offsetTop: scrollContainer ? computeOffsetTop() : 0,
-			}));
+			if (viewportRafRef.current != null) return;
+			viewportRafRef.current = requestAnimationFrame(() => {
+				viewportRafRef.current = null;
+				setViewport((v) => ({
+					...v,
+					scrollTop: host.scrollTop,
+					scrollLeft: host.scrollLeft,
+					offsetTop: scrollContainer ? computeOffsetTop() : 0,
+				}));
+			});
 		};
 		host.addEventListener('scroll', onScroll, { passive: true });
 		const ro = new ResizeObserver(() => {
-			setViewport((v) => ({
-				...v,
-				width: Math.floor(host.clientWidth),
-				height: Math.floor(host.clientHeight),
-				offsetTop: scrollContainer ? computeOffsetTop() : 0,
-			}));
+			if (viewportRafRef.current != null) return;
+			viewportRafRef.current = requestAnimationFrame(() => {
+				viewportRafRef.current = null;
+				setViewport((v) => ({
+					...v,
+					width: Math.floor(host.clientWidth),
+					height: Math.floor(host.clientHeight),
+					offsetTop: scrollContainer ? computeOffsetTop() : 0,
+				}));
+			});
 		});
 		ro.observe(host);
 		ro.observe(internal);
@@ -218,6 +271,7 @@ export function MasonryCanvas({
 		return () => {
 			ro.disconnect();
 			host.removeEventListener('scroll', onScroll);
+			if (viewportRafRef.current != null) cancelAnimationFrame(viewportRafRef.current);
 		};
 	}, [scrollContainer]);
 

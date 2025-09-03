@@ -49,12 +49,8 @@ function analyzeFile(filePath) {
 	try {
 		const content = fs.readFileSync(filePath, 'utf8');
 		const matches = [];
-		let match;
-
-		// Reset regex
-		CONSOLE_REGEX.lastIndex = 0;
-
-		while ((match = CONSOLE_REGEX.exec(content)) !== null) {
+		// Iterar con matchAll para evitar asignación en la condición del bucle
+		for (const match of content.matchAll(CONSOLE_REGEX)) {
 			const lineNumber = content.substring(0, match.index).split('\n').length;
 			const line = content.split('\n')[lineNumber - 1].trim();
 
@@ -158,19 +154,19 @@ function displayReport() {
 	console.log(`   Total statements: ${report.summary.totalStatements}\n`);
 
 	console.log('📊 POR TIPO:');
-	Object.entries(report.summary.byType).forEach(([type, count]) => {
+	for (const [type, count] of Object.entries(report.summary.byType)) {
 		if (count > 0) {
 			console.log(`   console.${type}: ${count}`);
 		}
-	});
+	}
 	console.log('');
 
 	console.log('🏆 ARCHIVOS MÁS CRÍTICOS:');
 	const sortedFiles = report.files.sort((a, b) => b.matches.length - a.matches.length).slice(0, 10);
 
-	sortedFiles.forEach((file) => {
+	for (const file of sortedFiles) {
 		console.log(`   ${file.path} (${file.matches.length} statements)`);
-	});
+	}
 
 	if (report.files.length > 10) {
 		console.log(`   ... y ${report.files.length - 10} archivos más`);

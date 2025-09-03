@@ -1,4 +1,4 @@
-import { Edit, Info, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Settings } from 'lucide-react';
+import { Edit, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Settings } from 'lucide-react';
 import { memo } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -86,7 +86,22 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 				)}
 
 				{/* Breadcrumbs */}
-				<ViewBreadcrumbs currentView={currentView as ViewType} />
+				<ViewBreadcrumbs
+					currentItem={
+						currentView === 'folder-content' && folderData
+							? {
+								id: folderData.id,
+								name: folderData.name,
+								emoji: (folderData as any).emoji,
+								description: (folderData as any).description,
+								totalSize: (folderData as any).stats?.totalSize,
+								_count: { images: (folderData as any)._count?.images },
+								breadcrumbs: (folderData as any).stats?.breadcrumbs ?? [],
+							}
+							: undefined
+					}
+					currentView={currentView as ViewType}
+				/>
 			</div>
 
 			{/* Centro: Acciones contextuales específicas por vista */}

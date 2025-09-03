@@ -631,49 +631,107 @@ router.post('/test-entity-types', async (req, res) => {
 	}
 });
 
-// GET /api/folders/:id - Obtener una carpeta por ID
-router.get('/:id', async (req, res) => {
+// GET /api/folders/:id/preview - Generar thumbnail compuesto de una carpeta
+router.get('/:id/preview', async (req, res) => {
 	try {
 		const { id } = req.params;
+		console.log('📁 PREVIEW ENDPOINT HIT:', id);
 
 		if (!isValidFolderId(id)) {
 			return res.status(400).json({ error: 'ID de carpeta inválido' });
 		}
 
-		const folder = await db
+		// Obtener imágenes de la carpeta (máximo 4 para el preview)
+		const recentImages = await db
 			.select({
-				id: folders.id,
-				name: folders.name,
-				description: folders.description,
-				path: folders.path,
-				emoji: folders.emoji,
-				color: folders.color,
-				featuredImage: folders.featuredImage,
-				isFavorite: folders.isFavorite,
-				totalFiles: folders.totalFiles,
-				totalSize: folders.totalSize,
-				lastIndexed: folders.lastIndexed,
-				createdAt: folders.createdAt,
-				updatedAt: folders.updatedAt,
-				parentId: folders.parentId,
-				presetId: folders.presetId,
+				id: images.id,
+				filename: images.filename,
+				path: images.path,
 			})
-			.from(folders)
-			.where(eq(folders.id, id));
+			.from(images)
+			.where(eq(images.folderId, id))
+			.orderBy(desc(images.createdAt))
+			.limit(4);
 
-		if (folder.length === 0) {
-			return res.status(404).json({ error: 'Carpeta no encontrada' });
+		console.log('📁 PREVIEW DB RESULT:', { 
+			id, 
+			imageCount: recentImages?.length || 0,
+			images: recentImages?.map(img => img?.filename || 'UNDEFINED') || 'NULL_RESULT'
+		});
+
+		// Si no hay imágenes, devolver un SVG con mensaje
+		if (!recentImages || recentImages.length === 0) {
+			const emptySvg = `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+				<rect width="100%" height="100%" fill="#f8f9fa"/>
+				<rect x="50" y="50" width="100" height="100" fill="#e9ecef" stroke="#dee2e6" stroke-width="2" stroke-dasharray="5,5"/>
+				<text x="100" y="100" text-anchor="middle" font-family="Arial" font-size="12" fill="#6c757d">Sin imágenes</text>
+				<text x="100" y="115" text-anchor="middle" font-family="Arial" font-size="10" fill="#adb5bd">${id}</text>
+			</svg>`;
+			
+			res.setHeader('Content-Type', 'image/svg+xml');
+			res.setHeader('Cache-Control', 'public, max-age=300');
+			return res.send(emptySvg);
 		}
 
-		return res.json(folder);
-	} catch (error) {
-		logger.error('Error al obtener carpeta', { error });
-		return res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
+		// Generar SVG composite
+		const svgWidth = 200;
+		const svgHeight = 200;
+		const gridSize = recentImages.length >= 4 ? 2 : recentImages.length === 3 ? 2 : 1;
+		const imageSize = svgWidth / gridSize;
+
+		let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
+		
+		// Fondo
+		svgContent += `<rect width="100%" height="100%" fill="#f8f9fa"/>`;
+
+		recentImages.forEach((image, index) => {
+			if (!image?.filename) {
+				console.log('📁 SKIPPING NULL IMAGE:', { index, image });
+				return;
+			}
+
+			const row = Math.floor(index / gridSize);
+			const col = index % gridSize;
+			const x = col * imageSize;
+			const y = row * imageSize;
+
+			// Crear rectángulo con imagen como fondo
+			svgContent += `<rect x="${x}" y="${y}" width="${imageSize}" height="${imageSize}" fill="#e9ecef" stroke="#dee2e6" stroke-width="1"/>`;
+			
+			// Texto del filename como fallback
+			const shortName = image.filename.length > 10 ? `${image.filename.substring(0, 10)}...` : image.filename;
+			svgContent += `<text x="${x + imageSize/2}" y="${y + imageSize/2}" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">${shortName}</text>`;
 		});
+
+		svgContent += '</svg>';
+
+		res.setHeader('Content-Type', 'image/svg+xml');
+		res.setHeader('Cache-Control', 'public, max-age=3600');
+		return res.send(svgContent);
+	} catch (error) {
+		console.error('📁 PREVIEW ERROR:', error);
+		
+		// SVG de error
+		const errorSvg = `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+			<rect width="100%" height="100%" fill="#ffe6e6"/>
+			<rect x="50" y="50" width="100" height="100" fill="#ffcccc" stroke="#ff6b6b" stroke-width="2"/>
+			<text x="100" y="100" text-anchor="middle" font-family="Arial" font-size="12" fill="#cc0000">Error</text>
+			<text x="100" y="115" text-anchor="middle" font-family="Arial" font-size="10" fill="#ff6b6b">${req.params.id}</text>
+		</svg>`;
+		
+		res.setHeader('Content-Type', 'image/svg+xml');
+		res.setHeader('Cache-Control', 'public, max-age=60');
+		return res.send(errorSvg);
 	}
 });
+
+// TEST - Endpoint simple para probar rutas parametrizadas
+router.get('/:id/test', async (req, res) => {
+	console.log('🧪 TEST ENDPOINT HIT:', req.params.id);
+	res.json({ test: 'success', id: req.params.id });
+});
+
+
 
 // POST /api/folders/:id/toggle-favorite - Alternar favorito
 router.post('/:id/toggle-favorite', async (req, res) => {
@@ -1667,6 +1725,50 @@ router.get('/:id/sync-status', async (req, res) => {
 	} catch (error) {
 		logger.error(`Error verificando estado de sincroncronización de carpeta ${req.params.id}`, { error });
 		res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// GET /api/folders/:id - Obtener una carpeta por ID (DEBE IR AL FINAL)
+router.get('/:id', async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		if (!isValidFolderId(id)) {
+			return res.status(400).json({ error: 'ID de carpeta inválido' });
+		}
+
+		const folder = await db
+			.select({
+				id: folders.id,
+				name: folders.name,
+				description: folders.description,
+				path: folders.path,
+				emoji: folders.emoji,
+				color: folders.color,
+				featuredImage: folders.featuredImage,
+				isFavorite: folders.isFavorite,
+				totalFiles: folders.totalFiles,
+				totalSize: folders.totalSize,
+				lastIndexed: folders.lastIndexed,
+				createdAt: folders.createdAt,
+				updatedAt: folders.updatedAt,
+				parentId: folders.parentId,
+				presetId: folders.presetId,
+			})
+			.from(folders)
+			.where(eq(folders.id, id));
+
+		if (folder.length === 0) {
+			return res.status(404).json({ error: 'Carpeta no encontrada' });
+		}
+
+		return res.json(folder);
+	} catch (error) {
+		logger.error('Error al obtener carpeta', { error });
+		return res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});

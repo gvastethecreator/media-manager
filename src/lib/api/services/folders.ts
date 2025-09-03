@@ -103,8 +103,20 @@ const normalizeFolder = (raw: any): FolderWithStats => {
 	} as FolderWithStats;
 };
 
-export const findFolders = async (_filters: FolderFilters): Promise<FoldersResponse> => {
-	const response = await apiClient.get<any>('/folders');
+export const findFolders = async (filters: FolderFilters): Promise<FoldersResponse> => {
+	// Construir query parameters basado en los filtros
+	const queryParams = new URLSearchParams();
+	if (filters.parentId) {
+		queryParams.append('parentId', filters.parentId);
+	}
+	if (filters.limit) {
+		queryParams.append('limit', filters.limit.toString());
+	}
+
+	const queryString = queryParams.toString();
+	const url = queryString ? `/folders?${queryString}` : '/folders';
+
+	const response = await apiClient.get<any>(url);
 	// Backend actual retorna array simple; mantener compatibilidad si en el futuro retorna {data, pagination}
 	let rawArray: any[] = [];
 	if (Array.isArray(response)) {

@@ -239,7 +239,7 @@ const FoldersSettings = memo(function FoldersSettings() {
 			{/* Layout en 2 columnas mejorado */}
 			<div className="flex">
 				{/* Columna izquierda: Tabla de carpetas */}
-				<div className="flex w-full h-full flex-col">
+				<div className="flex h-full w-full flex-col">
 					{/* Header de la tabla mejorado */}
 
 					<div className="flex items-center justify-between p-4">
@@ -254,8 +254,11 @@ const FoldersSettings = memo(function FoldersSettings() {
 						</div>
 						{/* Progress bar para reindexado global */}
 						{globalReindexStatus.isProcessing && (
-							<div className="p-1 w-[200px]">
-								<GlobalReindexProgress progress={globalReindexStatus.progress} show={globalReindexStatus.isProcessing} />
+							<div className="w-[200px] p-1">
+								<GlobalReindexProgress
+									progress={globalReindexStatus.progress}
+									show={globalReindexStatus.isProcessing}
+								/>
 							</div>
 						)}
 						{/* Selector de vista mejorado */}
@@ -291,15 +294,10 @@ const FoldersSettings = memo(function FoldersSettings() {
 						</div>
 					</div>
 
-
 					{/* Contenido principal de la columna izquierda */}
 					<div className="flex w-full p-4">
 						{isGloballyProcessing ? (
-
-							
-								<ReindexTerminal isActive={true} />
-							
-
+							<ReindexTerminal isActive={true} />
 						) : viewMode === 'table' ? (
 							<ScrollArea className="h-full">
 								<div className="p-4">
@@ -336,8 +334,6 @@ const FoldersSettings = memo(function FoldersSettings() {
 							</ScrollArea>
 						)}
 					</div>
-
-
 				</div>
 
 				{/* Columna derecha: Configuración, input y stats mejorada */}
@@ -460,14 +456,10 @@ const FoldersSettings = memo(function FoldersSettings() {
 					</div>
 
 					{/* Estadísticas generales mejoradas */}
-					{generalStats && !isStatsLoading && (
-
-						<FoldersStats stats={generalStats} />
-
-					)}
+					{generalStats && !isStatsLoading && <FoldersStats stats={generalStats} />}
 				</div>
-			</div >
-		</div >
+			</div>
+		</div>
 	);
 });
 

@@ -368,8 +368,6 @@ export function ReindexTerminal({
 
 	return (
 		<div className={cn('h-full w-full', className)}>
-
-
 			{/* Terminal con soporte para sticky logs - usando todo el ancho disponible */}
 			<div className="relative h-full w-full overflow-y-auto rounded-sm bg-black p-4">
 				{logs.length === 0 ? (

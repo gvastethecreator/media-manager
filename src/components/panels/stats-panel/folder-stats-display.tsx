@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import { memo } from 'react';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useFolderDetails } from '@/hooks/use-folder-details';
@@ -100,11 +99,13 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 		: [];
 
 	const totalFiles = folderStats
-		? folderStats.totalImages +
-			folderStats.totalVideos +
-			folderStats.totalAudio +
-			folderStats.totalDocuments +
-			folderStats.totalOthers
+		? [
+				folderStats.totalImages,
+				folderStats.totalVideos,
+				folderStats.totalAudio,
+				folderStats.totalDocuments,
+				folderStats.totalOthers,
+			].reduce((sum, n) => sum + n, 0)
 		: 0;
 
 	return (
