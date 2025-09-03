@@ -6,7 +6,6 @@ import {
 	extractDocumentMetadata,
 	extractEXIFMetadata,
 	extractIPTCMetadata,
-	extractJSONMetadata,
 	extractVideoMetadata,
 	extractXMPMetadata,
 } from '../metadata/enhanced-metadata-extractors';

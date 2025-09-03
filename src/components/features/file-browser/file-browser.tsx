@@ -1,5 +1,5 @@
 import { RefreshCw } from 'lucide-react';
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { Cards } from '@/components/features/file-browser/views/cards';
 import { Grid } from '@/components/features/file-browser/views/grid';
@@ -10,6 +10,9 @@ import { Masonry } from '@/components/features/file-browser/views/masonry';
 import { FileCanvasMasonryGrouped } from '@/components/features/file-browser/views/masonry-grouped';
 import { Table } from '@/components/features/file-browser/views/table';
 import { FileCanvasTableGrouped } from '@/components/features/file-browser/views/table-grouped';
+import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
+import { useNavigation } from '@/components/navigation/hooks/navigation.utils';
+import { useFolder } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
 import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
@@ -17,6 +20,7 @@ import { useFile3DStore } from '@/store/entities/file-3d';
 import { useImageStore } from '@/store/entities/image';
 import { useJsonFileStore } from '@/store/entities/json-file/json-file.store';
 import { useVideoStore } from '@/store/entities/video';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -24,14 +28,11 @@ import { FileBrowserToolbar } from './components/file-browser-toolbar';
 import { FileListHeader } from './components/file-list-header';
 import type { MediaItem } from './components/media-thumbnail';
 import { StatusBar } from './components/status-bar';
-// Estilos de animación específicos para vistas Canvas
-import './views/canvas/canvas-animations.css';
-import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
-import { useNavigation } from '@/components/navigation/hooks/navigation.utils';
-import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useProgressiveFolderFiles } from './hooks/use-progressive-folder-files';
 import { useKeyboardNavigation } from './navigation/keyboard-navigation';
 import type { ClickModifiers, FileBrowserProps } from './types/file-browser.types';
+// Estilos de animación específicos para vistas Canvas
+import './views/canvas/canvas-animations.css';
 
 function applySearch(items: MediaItem[], query: string) {
 	if (!query) return items;
@@ -96,6 +97,9 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 	// Hook de navegación para manejar carpetas
 	const { navigateToFolder } = useNavigation();
 
+	// Datos de la carpeta actual para conocer su carpeta padre
+	const { data: currentFolder } = useFolder(filterId || '');
+
 	// Función de refresh que recarga los datos de la carpeta actual
 	const handleRefresh = async () => {
 		if (!filterId || isRefreshing) return;
@@ -142,8 +146,19 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 	const processedItems = useMemo(() => {
 		const searched = applySearch(items as MediaItem[], searchQuery);
 		const sorted = applySort(searched, sortOptions);
+
+		// Inyectar ítem ".." para volver al padre cuando exista
+		if (currentFolder?.parentId) {
+			const upItem: MediaItem = {
+				id: currentFolder.parentId,
+				name: '..',
+				entityType: 'folder',
+			};
+			return [upItem, ...sorted];
+		}
+
 		return sorted;
-	}, [items, searchQuery, sortOptions]);
+	}, [items, searchQuery, sortOptions, currentFolder?.parentId]);
 
 	const grouped = useMemo(
 		() => (groupByType ? groupByEntityType(processedItems as MediaItem[]) : null),
@@ -155,6 +170,17 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 	const [gridScrollEl, setGridScrollEl] = useState<HTMLDivElement | null>(null);
 	const [tableScrollEl, setTableScrollEl] = useState<HTMLDivElement | null>(null);
 	const [cardsScrollEl, setCardsScrollEl] = useState<HTMLDivElement | null>(null);
+
+	// Paginación global simple para vistas de grid/canvas
+	const [page, setPage] = useState(0); // 0-based
+	const PAGE_SIZE = 300;
+
+	// Clamp de página ante cambios en el dataset o en el modo de vista
+	useEffect(() => {
+		const total = processedItems?.length ?? 0;
+		const count = Math.max(1, Math.ceil(total / PAGE_SIZE));
+		setPage((p) => (p >= count ? Math.max(0, count - 1) : p));
+	}, [processedItems?.length]);
 
 	// Ref para navegación por teclado
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -318,6 +344,8 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 								items={processedItems as MediaItem[]}
 								onItemClick={handleItemClick}
 								onItemDoubleClick={handleItemDoubleClick}
+								page={page}
+								pageSize={PAGE_SIZE}
 							/>
 						)}
 					</div>
@@ -350,6 +378,8 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 								items={processedItems as MediaItem[]}
 								onItemClick={handleItemClick}
 								onItemDoubleClick={handleItemDoubleClick}
+								page={page}
+								pageSize={PAGE_SIZE}
 							/>
 						)}
 					</div>
@@ -360,6 +390,8 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 							items={processedItems as MediaItem[]}
 							onItemClick={handleItemClick}
 							onItemDoubleClick={handleItemDoubleClick}
+							page={page}
+							pageSize={PAGE_SIZE}
 						/>
 					</div>
 				) : (
@@ -376,6 +408,8 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 								items={processedItems as MediaItem[]}
 								onItemClick={handleItemClick}
 								onItemDoubleClick={handleItemDoubleClick}
+								page={page}
+								pageSize={PAGE_SIZE}
 							/>
 						)}
 					</div>
@@ -384,7 +418,24 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 			<StatusBar
 				isLoading={isLoading || isRefreshing}
 				items={processedItems as MediaItem[]}
+				onNextPage={['grid', 'canvas', 'cards', 'masonry'].includes(viewMode) ? () => setPage((p) => p + 1) : undefined}
+				onPrevPage={
+					['grid', 'canvas', 'cards', 'masonry'].includes(viewMode)
+						? () => setPage((p) => Math.max(0, p - 1))
+						: undefined
+				}
 				onRefresh={handleRefresh}
+				page={['grid', 'canvas', 'cards', 'masonry'].includes(viewMode) ? page : undefined}
+				pageCount={
+					['grid', 'canvas', 'cards', 'masonry'].includes(viewMode)
+						? Math.max(1, Math.ceil((processedItems?.length ?? 0) / PAGE_SIZE))
+						: undefined
+				}
+				shownCount={
+					['grid', 'canvas', 'cards', 'masonry'].includes(viewMode)
+						? Math.min(PAGE_SIZE, Math.max(0, (processedItems?.length ?? 0) - page * PAGE_SIZE))
+						: undefined
+				}
 			/>
 		</section>
 	);

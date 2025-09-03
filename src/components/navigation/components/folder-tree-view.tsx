@@ -108,7 +108,7 @@ const FolderTreeItem = memo(function FolderTreeItemImpl({
 
 			{hasChildren && isExpanded && (
 				<div className="flex flex-col">
-					{folder.children!.map((child) => (
+					{folder.children?.map((child) => (
 						<FolderTreeItem
 							className={className}
 							expandedFolders={expandedFolders}

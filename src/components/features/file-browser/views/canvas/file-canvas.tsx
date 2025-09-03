@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useDebounce, useRaf } from '@/hooks/useThrottle';
 import { useAddTags, useAddToCollection, useToggleFavorite } from '@/lib/api/files';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
@@ -6,7 +7,11 @@ import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { MediaItem } from '../../components/media-thumbnail';
 import { ExtendedContextMenu, type ExtendedContextMenuAction } from '../../context-menu/extended-context-menu';
 import type { ClickModifiers } from '../../types/file-browser.types';
-import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
+import {
+	generateThumbnailUrl,
+	getFallbackIcon,
+	useImageCache,
+} from './canvas-common';
 import { CanvasRenderConfig } from './canvas-config';
 
 // Renderiza todos los items en un solo <canvas> para minimizar el overhead de DOM.
@@ -136,45 +141,82 @@ export function FileCanvas({
 		return ids;
 	};
 
-	// Prefetch imágenes de items visibles
+	// Prefetch con AbortController y debouncing para evitar requests masivos
+	const abortControllerRef = useRef<AbortController | null>(null);
+
+	const debouncedPrefetch = useDebounce(
+		useCallback(
+			async (startIndex: number, endIndex: number, items: MediaItem[]) => {
+				// Cancelar requests anteriores
+				if (abortControllerRef.current) {
+					abortControllerRef.current.abort();
+				}
+
+				// Crear nuevo controller
+				abortControllerRef.current = new AbortController();
+				const signal = abortControllerRef.current.signal;
+
+				try {
+					// Generar thumbnails de manera asíncrona para los items visibles
+					for (let i = startIndex; i <= endIndex; i++) {
+						if (signal.aborted) break; // Check de cancelación
+
+						const it = items[i];
+						if (!it) continue;
+						const key = it.id;
+
+						// Si ya tenemos la imagen en caché, continuar
+						if (get(key)) continue;
+
+						try {
+							// Caso especial para carpetas: cargar preview SVG compuesto
+							if (it.entityType === 'folder') {
+								const previewUrl = `/api/folders/${it.id}/preview`;
+								if (signal.aborted) break;
+
+								// Cargar la imagen SVG del preview
+								await load(key, previewUrl);
+								continue;
+							}
+
+							// Generar thumbnail usando la misma lógica que MediaThumbnail
+							const src = await generateThumbnailUrl(it, ThumbnailQuality.MEDIUM);
+							if (signal.aborted) break;
+
+							if (src && !src.startsWith('🎵') && !src.startsWith('🖼️') && !src.startsWith('🎥')) {
+								// Solo cargar si es una URL real (no un emoji)
+								load(key, src);
+							} else {
+								// Para fallback icons (emojis), crear un placeholder entry
+								set(key, { status: 'ready', fallbackIcon: src });
+							}
+						} catch (error) {
+							if (signal.aborted) break;
+							// Silenciar errores frecuentes de generación de thumbnails para rendimiento
+							const fallback = getFallbackIcon(it.entityType);
+							set(key, { status: 'ready', fallbackIcon: fallback });
+						}
+					}
+				} catch (error: unknown) {
+					if (error instanceof Error && error.name !== 'AbortError') {
+						console.warn('Error en prefetch de thumbnails:', error);
+					}
+				}
+			},
+			[load, get, set]
+		),
+		200
+	); // 200ms debounce
+
 	useEffect(() => {
 		const startIndex = visibleRange.firstVisibleRow * columns;
 		const endIndex = Math.min(items.length - 1, (visibleRange.lastVisibleRow + 1) * columns - 1);
 
-		// Generar thumbnails de manera asíncrona para los items visibles
-		const loadThumbnails = async () => {
-			for (let i = startIndex; i <= endIndex; i++) {
-				const it = items[i];
-				if (!it) continue;
-				const key = it.id;
+		debouncedPrefetch(startIndex, endIndex, items);
+	}, [visibleRange, columns, items, debouncedPrefetch]);
 
-				// Si ya tenemos la imagen en caché, continuar
-				if (get(key)) continue;
-
-				try {
-					// Generar thumbnail usando la misma lógica que MediaThumbnail
-					const src = await generateThumbnailUrl(it, ThumbnailQuality.MEDIUM);
-
-					if (src && !src.startsWith('🎵') && !src.startsWith('🖼️') && !src.startsWith('🎥')) {
-						// Solo cargar si es una URL real (no un emoji)
-						load(key, src);
-					} else {
-						// Para fallback icons (emojis), crear un placeholder entry
-						set(key, { status: 'ready', fallbackIcon: src });
-					}
-				} catch (error) {
-					// Silenciar errores frecuentes de generación de thumbnails para rendimiento
-					const fallback = getFallbackIcon(it.entityType);
-					set(key, { status: 'ready', fallbackIcon: fallback });
-				}
-			}
-		};
-
-		loadThumbnails();
-	}, [visibleRange, columns, items, load, get, set]);
-
-	// Render en canvas
-	useEffect(() => {
+	// Render throttleado para 60fps máximo
+	const renderCallback = useCallback(() => {
 		const canvas = canvasRef.current;
 		const container = containerRef.current;
 		if (!canvas) return;
@@ -199,7 +241,9 @@ export function FileCanvas({
 
 		// Offset superior por scroll
 		const startIndex = visibleRange.firstVisibleRow * columns;
-		const endIndex = Math.min(items.length - 1, (visibleRange.lastVisibleRow + 1) * columns - 1);
+		const rawEndIndex = Math.min(items.length - 1, (visibleRange.lastVisibleRow + 1) * columns - 1);
+
+		const endIndex = rawEndIndex;
 
 		// Logs de render eliminados por rendimiento
 
@@ -212,89 +256,120 @@ export function FileCanvas({
 			// CORREGIDO: No restar localScrollTop - las posiciones deben ser relativas al viewport
 			const y = (row - visibleRange.firstVisibleRow) * (cellSize + gap) + gap;
 
-			// Background y borde de selección
+			// Background y borde de selección (carpetas sin bordes por defecto)
+			const isFolder = it.entityType === 'folder';
+			const isHovered = hoverIndex === i;
+
 			ctx.fillStyle = '#111827'; // bg-card aproximado (tailwind slate-900)
 			ctx.fillRect(x, y, cellSize, cellSize);
+
+			// Solo mostrar borde para carpetas si están hover o seleccionadas
 			if (isSelected(it.id)) {
 				ctx.strokeStyle = '#3b82f6';
 				ctx.lineWidth = CanvasRenderConfig.grid.borderWidth;
 				ctx.strokeRect(x + 1, y + 1, cellSize - 2, cellSize - 2);
+			} else if (!isFolder && isHovered) {
+				// Para no-carpetas, mostrar borde de hover normal
+				ctx.strokeStyle = '#f59e0b';
+				ctx.lineWidth = 1;
+				ctx.setLineDash([4, 3]);
+				ctx.strokeRect(x + 2, y + 2, cellSize - 4, cellSize - 4);
+				ctx.setLineDash([]);
 			}
 
 			const entry = get(it.id);
-			// Definir área de recorte por celda para simular object-fit: cover sin desbordes
-			const pad = 2; // pequeño padding visual
-			ctx.save();
-			ctx.beginPath();
-			ctx.rect(x + pad, y + pad, cellSize - pad * 2, cellSize - pad * 2);
-			ctx.clip();
 
-			// Mejora de calidad de reescalado
-			ctx.imageSmoothingEnabled = CanvasRenderConfig.visuals.enableSmoothing;
-			// imageSmoothingQuality puede no estar tipeado, pero la mayoría de navegadores lo soportan
-			(ctx as any).imageSmoothingQuality = 'high';
-
-			if (entry?.status === 'ready' && entry.image) {
-				// Ajuste para cubrir celda manteniendo aspect ratio (object-fit: cover)
+			// Caso especial para carpetas con preview SVG
+			if (isFolder && entry?.status === 'ready' && entry.image) {
 				const img = entry.image as any;
 				const iw = (img.naturalWidth ?? img.width) as number;
 				const ih = (img.naturalHeight ?? img.height) as number;
+
 				if (iw > 0 && ih > 0) {
-					// Fade-in suave en primeros ~220ms desde readyAt
-					const now = performance.now();
-					const t0 = entry.readyAt ?? now;
-					const dt = Math.max(0, now - t0);
-					const alpha = Math.min(1, dt / 220);
-					const prevAlpha = ctx.globalAlpha;
-					ctx.globalAlpha = alpha;
-					const scale = Math.max((cellSize - pad * 2) / iw, (cellSize - pad * 2) / ih);
+					// Renderizar el preview SVG escalado para llenar la celda
+					const scale = Math.min(cellSize / iw, cellSize / ih);
 					const dw = Math.ceil(iw * scale);
 					const dh = Math.ceil(ih * scale);
-					// centrado dentro del área recortada
-					const dx = x + pad + Math.floor((cellSize - pad * 2 - dw) / 2);
-					const dy = y + pad + Math.floor((cellSize - pad * 2 - dh) / 2);
-					ctx.drawImage(img, dx, dy, dw, dh);
-					ctx.globalAlpha = prevAlpha;
-				}
-			} else if (entry?.status === 'ready' && entry.fallbackIcon) {
-				// Renderizar fallback icon (emoji) centrado y recortado
-				ctx.fillStyle = '#374151';
-				ctx.fillRect(x + pad, y + pad, cellSize - pad * 2, cellSize - pad * 2);
-				ctx.fillStyle = '#e5e7eb';
-				ctx.font = `${Math.floor(cellSize * 0.45)}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
-				ctx.textAlign = 'center';
-				ctx.textBaseline = 'middle';
-				ctx.fillText(entry.fallbackIcon, x + cellSize / 2, y + cellSize / 2);
-				ctx.textAlign = 'left';
-				ctx.textBaseline = 'alphabetic';
-			} else {
-				// placeholder con información del estado, recortado a la celda
-				ctx.fillStyle = entry?.status === 'loading' ? '#6b7280' : '#374151';
-				ctx.fillRect(x + pad, y + pad, cellSize - pad * 2, cellSize - pad * 2);
-				// Texto de debug del estado
-				ctx.fillStyle = '#ffffff';
-				ctx.font = '10px monospace';
-				ctx.textAlign = 'center';
-				const statusText = entry?.status || (it.thumbnailUrl ? 'no-cache' : 'no-url');
-				ctx.fillText(statusText, x + cellSize / 2, y + cellSize / 2);
-				ctx.textAlign = 'left';
-			}
+					const dx = x + Math.floor((cellSize - dw) / 2);
+					const dy = y + Math.floor((cellSize - dh) / 2);
 
-			// Restaurar para que bordes/overlays no queden recortados
-			ctx.restore();
+					ctx.drawImage(img, dx, dy, dw, dh);
+				} else {
+					// Fallback si no se pudo cargar el preview
+					ctx.fillStyle = '#374151';
+					ctx.fillRect(x, y, cellSize, cellSize);
+					ctx.fillStyle = '#e5e7eb';
+					ctx.font = `${Math.floor(cellSize * 0.4)}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
+					ctx.textAlign = 'center';
+					ctx.textBaseline = 'middle';
+					ctx.fillText('📁', x + cellSize / 2, y + cellSize / 2);
+				}
+			}
+			// Renderizado normal para no-carpetas y carpetas sin miniaturas
+			else {
+				// Definir área de recorte por celda para simular object-fit: cover sin desbordes
+				const pad = 2; // pequeño padding visual
+				ctx.save();
+				ctx.beginPath();
+				ctx.rect(x + pad, y + pad, cellSize - pad * 2, cellSize - pad * 2);
+				ctx.clip();
+
+				// Mejora de calidad de reescalado
+				ctx.imageSmoothingEnabled = CanvasRenderConfig.visuals.enableSmoothing;
+				// imageSmoothingQuality puede no estar tipeado, pero la mayoría de navegadores lo soportan
+				(ctx as any).imageSmoothingQuality = 'high';
+
+				if (entry?.status === 'ready' && entry.image) {
+					// Ajuste para cubrir celda manteniendo aspect ratio (object-fit: cover)
+					const img = entry.image as any;
+					const iw = (img.naturalWidth ?? img.width) as number;
+					const ih = (img.naturalHeight ?? img.height) as number;
+					if (iw > 0 && ih > 0) {
+						// Fade-in suave en primeros ~220ms desde readyAt
+						const now = performance.now();
+						const t0 = entry.readyAt ?? now;
+						const dt = Math.max(0, now - t0);
+						const alpha = Math.min(1, dt / 220);
+						const prevAlpha = ctx.globalAlpha;
+						ctx.globalAlpha = alpha;
+						const scale = Math.max((cellSize - pad * 2) / iw, (cellSize - pad * 2) / ih);
+						const dw = Math.ceil(iw * scale);
+						const dh = Math.ceil(ih * scale);
+						// centrado dentro del área recortada
+						const dx = x + pad + Math.floor((cellSize - pad * 2 - dw) / 2);
+						const dy = y + pad + Math.floor((cellSize - pad * 2 - dh) / 2);
+						ctx.drawImage(img, dx, dy, dw, dh);
+						ctx.globalAlpha = prevAlpha;
+					}
+				} else if (entry?.status === 'ready' && entry.fallbackIcon) {
+					// Renderizar fallback icon (emoji) centrado y recortado
+					ctx.fillStyle = '#374151';
+					ctx.fillRect(x + pad, y + pad, cellSize - pad * 2, cellSize - pad * 2);
+					ctx.fillStyle = '#e5e7eb';
+					ctx.font = `${Math.floor(cellSize * 0.45)}px system-ui, -apple-system, Segoe UI, Roboto, Arial`;
+					ctx.textAlign = 'center';
+					ctx.textBaseline = 'middle';
+					ctx.fillText(entry.fallbackIcon, x + cellSize / 2, y + cellSize / 2);
+					ctx.textAlign = 'left';
+					ctx.textBaseline = 'alphabetic';
+				} else {
+					// placeholder con información del estado, recortado a la celda
+					ctx.fillStyle = entry?.status === 'loading' ? '#6b7280' : '#374151';
+					ctx.fillRect(x + pad, y + pad, cellSize - pad * 2, cellSize - pad * 2);
+					// Texto de debug del estado
+					ctx.fillStyle = '#ffffff';
+					ctx.font = '10px monospace';
+					ctx.textAlign = 'center';
+					const statusText = entry?.status || (it.thumbnailUrl ? 'no-cache' : 'no-url');
+					ctx.fillText(statusText, x + cellSize / 2, y + cellSize / 2);
+					ctx.textAlign = 'left';
+				}
+
+				// Restaurar para que bordes/overlays no queden recortados
+				ctx.restore();
+			}
 		}
-		// Overlay de hover
-		if (hoverIndex !== null && hoverIndex >= startIndex && hoverIndex <= endIndex) {
-			const col = hoverIndex % columns;
-			const row = Math.floor(hoverIndex / columns);
-			const x = col * (cellSize + gap) + gap;
-			const y = (row - visibleRange.firstVisibleRow) * (cellSize + gap) + gap;
-			ctx.strokeStyle = '#f59e0b';
-			ctx.lineWidth = 2;
-			ctx.setLineDash([4, 3]);
-			ctx.strokeRect(x + 2, y + 2, cellSize - 4, cellSize - 4);
-			ctx.setLineDash([]);
-		}
+		// La lógica de hover ya está integrada en el renderizado de cada celda
 
 		// Overlay de selección por arrastre (rectángulo)
 		if (dragStart && dragCurrent) {
@@ -324,6 +399,13 @@ export function FileCanvas({
 		dragCurrent,
 		scrollContainer,
 	]);
+
+	const rafRender = useRaf(renderCallback);
+
+	// useEffect que agenda render por frame (RAF)
+	useEffect(() => {
+		rafRender();
+	}, [rafRender]);
 
 	// Autoscroll suave al ítem activo cuando cambia (mejora UX para navegación por teclado)
 	useEffect(() => {
@@ -617,7 +699,7 @@ export function FileCanvas({
 					for (const it of selected) {
 						try {
 							await toggleFavorite.mutateAsync(it.id);
-						} catch {}
+						} catch { }
 					}
 				})();
 				break;
@@ -629,7 +711,7 @@ export function FileCanvas({
 					for (const it of selected) {
 						try {
 							await addToCollection.mutateAsync({ fileId: it.id, collectionId: targetId });
-						} catch {}
+						} catch { }
 					}
 				})();
 				break;
@@ -641,7 +723,7 @@ export function FileCanvas({
 					for (const it of selected) {
 						try {
 							await addTags.mutateAsync({ fileId: it.id, tags: [targetId] });
-						} catch {}
+						} catch { }
 					}
 				})();
 				break;
@@ -712,7 +794,7 @@ export function FileCanvas({
 							pointerEvents: 'none',
 							left: hoverTooltip.x,
 							top: hoverTooltip.y,
-							maxWidth: '60%',
+							maxWidth: '150px',
 							backgroundColor: 'rgba(0,0,0,0.7)',
 							color: '#fff',
 							fontSize: '0.75rem',
@@ -722,6 +804,8 @@ export function FileCanvas({
 							overflow: 'hidden',
 							textOverflow: 'ellipsis',
 							boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
+							transition: 'all 100ms ease-in',
+							cursor: 'pointer',
 						}}
 					>
 						{hoverTooltip.text}

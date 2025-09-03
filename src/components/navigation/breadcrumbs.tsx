@@ -1,5 +1,5 @@
 import { ChevronRight, CornerDownRight, Home } from 'lucide-react';
-import type React from 'react';
+import React, { Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
 	Breadcrumb,
@@ -27,6 +27,8 @@ interface BreadcrumbsProps {
 		createdAt?: Date;
 		itemType?: string;
 		_count?: { images: number };
+		// Para vistas de carpeta: cadena de breadcrumbs jerárquicos
+		breadcrumbs?: Array<{ id: string; name: string; path: string }>;
 	};
 }
 
@@ -112,6 +114,8 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 	const navigate = useNavigate();
 	const config = currentView ? BREADCRUMB_CONFIG[currentView] : undefined;
 	const isContentView = currentView ? currentView.endsWith('-content') : false;
+	const isFolderContent = currentView === 'folder-content';
+	const crumbs = isFolderContent ? (currentItem?.breadcrumbs ?? []) : [];
 
 	if (!(config && currentView)) {
 		return (
@@ -152,6 +156,7 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 						</Button>
 					</BreadcrumbItem>
 
+					{/* En vistas de contenido, enlazar al índice de la entidad */}
 					{isContentView && (
 						<>
 							<BreadcrumbSeparator>
@@ -160,7 +165,7 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 							<BreadcrumbItem>
 								<Button
 									className="h-6 cursor-pointer p-0 font-medium text-primary text-xs hover:text-primary/80"
-									onClick={() => navigate(-1)}
+									onClick={() => navigate(config.contentPath || config.path)}
 									size="sm"
 									variant="ghost"
 								>
@@ -170,33 +175,45 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 						</>
 					)}
 
-					{isContentView && currentItem?.name && (
+					{/* Si es folder-content, pintar cadena jerárquica real */}
+					{isFolderContent &&
+						crumbs.length > 0 &&
+						crumbs.map((c, idx) => {
+							const isLast = idx === crumbs.length - 1;
+							return (
+								<Fragment key={c.id}>
+									<BreadcrumbSeparator>
+										<ChevronRight className="h-2 w-2 text-muted-foreground" />
+									</BreadcrumbSeparator>
+									<BreadcrumbItem>
+										{isLast ? (
+											<BreadcrumbPage className="font-medium text-muted-foreground text-xs">{c.name}</BreadcrumbPage>
+										) : (
+											<Button
+												className="h-6 cursor-pointer p-0 font-medium text-primary text-xs hover:text-primary/80"
+												onClick={() => navigate(`/folders/${c.id}`)}
+												size="sm"
+												variant="ghost"
+											>
+												{c.name}
+											</Button>
+										)}
+									</BreadcrumbItem>
+								</Fragment>
+							);
+						})}
+
+					{/* Fallback: si no hay breadcrumbs, mostrar nombre simple */}
+					{isContentView && !isFolderContent && currentItem?.name && (
 						<>
 							<BreadcrumbSeparator>
 								<ChevronRight className="h-2 w-2 text-muted-foreground" />
 							</BreadcrumbSeparator>
 							<BreadcrumbItem>
-								<div className="flex flex-col gap-0.5">
-									<div className="flex min-w-0 items-center overflow-hidden">
-										<CornerDownRight className="mr-0.5 h-2 w-2 shrink-0 text-muted" />
-										{currentItem.emoji && <span className="mr-0.5 shrink-0 text-xs">{currentItem.emoji}</span>}
-										<span className="truncate font-medium text-xs">{currentItem.name}</span>
-									</div>
-									{currentItem.description && (
-										<p className="line-clamp-1 pl-2.5 text-[10px] text-muted-foreground">{currentItem.description}</p>
-									)}
-									<div className="flex items-center gap-1 pl-2.5 text-[10px] text-muted-foreground">
-										{currentItem._count?.images !== undefined && (
-											<span className="inline-flex items-center space-x-0.5 rounded-sm bg-secondary/30 px-1">
-												{currentItem._count.images} imágenes
-											</span>
-										)}
-										{currentItem.totalSize !== undefined && <span>• {formatBytes(currentItem.totalSize)}</span>}
-										{currentItem.lastIndexed && (
-											<span>• Última actualización: {formatDate(currentItem.lastIndexed)}</span>
-										)}
-										{currentItem.createdAt && <span>• Creado: {formatDate(currentItem.createdAt)}</span>}
-									</div>
+								<div className="flex min-w-0 items-center overflow-hidden">
+									<CornerDownRight className="mr-0.5 h-2 w-2 shrink-0 text-muted" />
+									{currentItem.emoji && <span className="mr-0.5 shrink-0 text-xs">{currentItem.emoji}</span>}
+									<span className="truncate font-medium text-xs">{currentItem.name}</span>
 								</div>
 							</BreadcrumbItem>
 						</>

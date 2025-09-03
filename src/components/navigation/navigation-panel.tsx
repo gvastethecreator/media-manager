@@ -1,7 +1,6 @@
 import { memo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { NavPanelProps } from '@/components/navigation/types';
-import { ScrollArea } from '@/components/ui/scroll-area';
 import { ViewType } from '@/components/views/types';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { cn } from '@/lib/utils';
