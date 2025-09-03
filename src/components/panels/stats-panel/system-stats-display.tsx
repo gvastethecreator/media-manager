@@ -10,7 +10,7 @@ import {
 	UsersIcon,
 } from 'lucide-react';
 import { memo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+// Card UI no utilizado en este componente
 import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigationStats } from '@/lib/api/navigation';
 import { formatFileSize } from '@/lib/utils';

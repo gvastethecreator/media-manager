@@ -290,8 +290,14 @@ function MediaThumbnailInner({
 					}
 					if (alive) setSrc(url || getFallbackIcon(item.entityType));
 				} else if (item.entityType === 'folder') {
-					// Para carpetas, usar featured image si está disponible, sino icono de carpeta
-					const folderThumbnail = item.thumbnailUrl || '/globe.svg';
+					// Para carpetas, generar preview compuesto o usar featured image
+					let folderThumbnail = item.thumbnailUrl;
+
+					if (!folderThumbnail) {
+						// Generar thumbnail compuesto usando el nuevo endpoint
+						folderThumbnail = `/api/folders/${item.id}/preview?max=4&layout=grid`;
+					}
+
 					if (alive) setSrc(folderThumbnail);
 				} else {
 					// Tipos no soportados por generadores: usar icono genérico según tipo
