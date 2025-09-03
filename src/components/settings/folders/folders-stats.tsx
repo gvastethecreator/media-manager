@@ -1,6 +1,6 @@
-import { Clock, Database, File, FileText, Folder, HardDrive, Image, ImageIcon, Music, Video } from 'lucide-react';
+import { Database, File, FileText, Folder, HardDrive, Image, ImageIcon, Music, Video } from 'lucide-react';
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
-import { Card, CardContent } from '@/components/ui/card';
+import { CardContent } from '@/components/ui/card';
 import type { FolderStats } from '@/types/folders';
 
 interface FoldersStatsProps {

@@ -6,6 +6,7 @@
 import { RequestLogger } from '../server/middleware/logging';
 
 declare global {
+	// biome-ignore lint/style/noNamespace: augmentación oficial de tipos de Express
 	namespace Express {
 		interface Locals {
 			/**
