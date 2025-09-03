@@ -16,10 +16,10 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 			// Carpetas padre
 			// Más subcarpetas para demostrar jerarquía
 			{
-				id: 'personajes',
-				name: 'Personajes',
-				description: 'Fotografías de personajes',
-				path: 'A:\\MOKLOS DATASETS\\# PERSONAJES',
+				id: 'posters',
+				name: 'Posters',
+				description: 'Fotografías de posters',
+				path: 'A:\\MOKLOS DATASETS\\! POSTERS',
 				emoji: '🌿',
 				totalFiles: 0,
 				totalSize: 0,
