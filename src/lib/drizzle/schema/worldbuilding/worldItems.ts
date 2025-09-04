@@ -22,8 +22,7 @@ export const worldItems = sqliteTable(
 		subtype: text('subtype'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		isArchived: integer('isArchived', { mode: 'boolean' }).notNull().default(false),
-		totalImages: integer('totalImages').notNull().default(0),
-		totalVideos: integer('totalVideos').notNull().default(0),
+		// Agregados movidos a EntityAggregates tabla genérica
 		type: text('type'),
 		rarity: text('rarity'),
 		value: text('value'),

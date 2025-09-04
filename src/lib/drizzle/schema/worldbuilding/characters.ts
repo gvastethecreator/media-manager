@@ -20,8 +20,7 @@ export const characters = sqliteTable(
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
-		totalImages: integer('totalImages').notNull().default(0),
-		totalVideos: integer('totalVideos').notNull().default(0),
+		// Agregados movidos a EntityAggregates tabla genérica
 		age: text('age'),
 		gender: text('gender'),
 		species: text('species'),

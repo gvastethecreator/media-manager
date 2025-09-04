@@ -15,6 +15,7 @@
  */
 
 export { activities } from './activities';
+export { entityAggregates } from './aggregates';
 export { fileStats } from './fileStats';
 export { metadatas } from './metadatas';
 export { profiles } from './profiles';

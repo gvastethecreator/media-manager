@@ -69,11 +69,12 @@ router.get('/', async (req, res) => {
 
 		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-		// Determinar orden
-		const orderByClause =
-			filters.sortOrder === 'desc'
-				? desc(prompts[filters.sortBy || 'name'] as any)
-				: asc(prompts[filters.sortBy || 'name'] as any);
+		// Determinar orden (removiendo campos eliminados del ordenamiento)
+		const validSortFields = ['name', 'featuredImage', 'createdAt', 'updatedAt', 'parentId', 'type', 'notes'] as const;
+		const sortBy = validSortFields.includes(filters.sortBy as any)
+			? (filters.sortBy as 'name' | 'featuredImage' | 'createdAt' | 'updatedAt' | 'parentId' | 'type' | 'notes')
+			: 'name';
+		const orderByClause = filters.sortOrder === 'desc' ? desc(prompts[sortBy]) : asc(prompts[sortBy]);
 
 		// Ejecutar consultas en paralelo
 		const [promptResults, totalCount] = await Promise.all([
@@ -85,10 +86,8 @@ router.get('/', async (req, res) => {
 					emoji: prompts.emoji,
 					color: prompts.color,
 					category: prompts.category,
-
 					isFavorite: prompts.isFavorite,
-					totalImages: prompts.totalImages,
-					totalVideos: prompts.totalVideos,
+					// Los agregados se obtienen por separado desde EntityAggregates si necesario
 					type: prompts.type,
 					content: prompts.content,
 					notes: prompts.notes,
@@ -159,10 +158,8 @@ router.get('/:id', async (req, res) => {
 				emoji: prompts.emoji,
 				color: prompts.color,
 				category: prompts.category,
-
 				isFavorite: prompts.isFavorite,
-				totalImages: prompts.totalImages,
-				totalVideos: prompts.totalVideos,
+				// Los agregados se obtienen por separado desde EntityAggregates si necesario
 				type: prompts.type,
 				content: prompts.content,
 				notes: prompts.notes,

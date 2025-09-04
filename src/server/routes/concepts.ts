@@ -44,11 +44,12 @@ const getConceptsHandler = async (req: Request, res: Response) => {
 
 		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-		// Determinar orden
-		const orderByClause =
-			filters.sortOrder === 'desc'
-				? desc(concepts[filters.sortBy || 'name'] as any)
-				: asc(concepts[filters.sortBy || 'name'] as any);
+		// Determinar orden (removiendo campos eliminados del ordenamiento)
+		const validSortFields = ['name', 'category', 'createdAt', 'updatedAt', 'type', 'complexity'] as const;
+		const sortBy = validSortFields.includes(filters.sortBy as any)
+			? (filters.sortBy as 'name' | 'category' | 'createdAt' | 'updatedAt' | 'type' | 'complexity')
+			: 'name';
+		const orderByClause = filters.sortOrder === 'desc' ? desc(concepts[sortBy]) : asc(concepts[sortBy]);
 
 		// Ejecutar consultas en paralelo
 		const [conceptResults, totalCount] = await Promise.all([
@@ -60,10 +61,8 @@ const getConceptsHandler = async (req: Request, res: Response) => {
 					emoji: concepts.emoji,
 					color: concepts.color,
 					category: concepts.category,
-
 					isFavorite: concepts.isFavorite,
-					totalImages: concepts.totalImages,
-					totalVideos: concepts.totalVideos,
+					// Los agregados se obtienen por separado desde EntityAggregates si necesario
 					type: concepts.type,
 					complexity: concepts.complexity,
 					applications: concepts.applications,
@@ -126,10 +125,8 @@ const getConceptByIdHandler = async (req: Request, res: Response) => {
 				emoji: concepts.emoji,
 				color: concepts.color,
 				category: concepts.category,
-
 				isFavorite: concepts.isFavorite,
-				totalImages: concepts.totalImages,
-				totalVideos: concepts.totalVideos,
+				// Los agregados se obtienen por separado desde EntityAggregates si necesario
 				type: concepts.type,
 				complexity: concepts.complexity,
 				applications: concepts.applications,

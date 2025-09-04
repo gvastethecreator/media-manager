@@ -20,6 +20,7 @@
 // =================================================================================
 export {
 	activities,
+	entityAggregates,
 	fileStats,
 	metadatas,
 	profiles,

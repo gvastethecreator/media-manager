@@ -20,8 +20,7 @@ export const concepts = sqliteTable(
 		color: text('color').default('#3b82f6'),
 		category: text('category'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
-		totalImages: integer('totalImages').notNull().default(0),
-		totalVideos: integer('totalVideos').notNull().default(0),
+		// Agregados movidos a EntityAggregates tabla genérica
 		type: text('type'),
 		complexity: text('complexity'),
 		applications: text('applications'),

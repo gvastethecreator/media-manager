@@ -10,6 +10,7 @@ import { db } from '@/lib/drizzle';
 import { groupAlbums, groupImages, groups, groupTags, groupVideos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
+import { recomputeAggregatesForGroup } from '@/server/services/aggregates.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import type {
 	CreateGroupInput,
@@ -361,6 +362,11 @@ export const createGroupService = async (data: CreateGroupInput): Promise<GroupW
 
 		// Notificar creación
 		await notifyGroupChange('create', groupWithStats);
+
+		// Recompute agregados (no bloqueante)
+		recomputeAggregatesForGroup(groupWithStats.id).catch((err) =>
+			logger.warn('No se pudo recomputar agregados para grupo tras crear', { err, groupId: groupWithStats.id })
+		);
 		logger.info(`✅ Grupo creado: ${groupWithStats.name}`, { groupId: groupWithStats.id });
 		return groupWithStats;
 	} catch (error) {
@@ -476,6 +482,11 @@ export const updateGroupService = async (id: string, data: UpdateGroupInput): Pr
 
 		// Notificar actualización
 		await notifyGroupChange('update', groupWithStats);
+
+		// Recompute agregados (no bloqueante)
+		recomputeAggregatesForGroup(groupWithStats.id).catch((err) =>
+			logger.warn('No se pudo recomputar agregados para grupo tras actualizar', { err, groupId: groupWithStats.id })
+		);
 
 		logger.info(`✅ Grupo actualizado: ${groupWithStats.name}`, { groupId: groupWithStats.id });
 		return groupWithStats;
@@ -598,6 +609,11 @@ export const addItemToGroupService = async (
 		// Notificar cambio
 		await notifyGroupChange('items:add', { id: groupId });
 
+		// Recompute agregados (no bloqueante)
+		recomputeAggregatesForGroup(groupId).catch((err) =>
+			logger.warn('No se pudo recomputar agregados para grupo tras añadir item', { err, groupId })
+		);
+
 		logger.info('✅ Elemento añadido al grupo', { groupId, itemId, itemType });
 	} catch (error) {
 		logger.error('❌ Error al añadir elemento al grupo', { error, groupId, itemId, itemType });
@@ -652,6 +668,11 @@ export const removeItemFromGroupService = async (
 
 		// Notificar cambio
 		await notifyGroupChange('items:remove', { id: groupId });
+
+		// Recompute agregados (no bloqueante)
+		recomputeAggregatesForGroup(groupId).catch((err) =>
+			logger.warn('No se pudo recomputar agregados para grupo tras quitar item', { err, groupId })
+		);
 
 		logger.info('✅ Elemento eliminado del grupo', { groupId, itemId, itemType });
 	} catch (error) {
