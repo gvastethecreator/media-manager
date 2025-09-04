@@ -15,6 +15,7 @@ import { collections, imageCollections, images } from '@/lib/drizzle/schema/inde
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
+import { recomputeAggregatesForCollection } from '@/server/services/aggregates.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromDrizzleCollection, fromDrizzleCollections } from '@/transformers/collection/transformer';
 import type {
@@ -144,9 +145,9 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 				featuredImage: collections.featuredImage,
 
 				isFavorite: collections.isFavorite,
-				totalImages: collections.totalImages,
-				totalVideos: collections.totalVideos,
-				totalSize: collections.totalSize,
+				// totalImages: moved to EntityAggregates
+				// totalVideos: moved to EntityAggregates
+				// totalSize: moved to EntityAggregates
 				lastImageAddedAt: collections.lastImageAddedAt,
 				lastVideoAddedAt: collections.lastVideoAddedAt,
 				parentId: collections.parentId,
@@ -181,9 +182,9 @@ export const searchCollections = async (options: CollectionSearchOptions): Promi
 		const transformedCollections = drizzleCollections.map((rawCollection: any) => ({
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
-			totalImages: rawCollection.totalImages || 0,
-			totalVideos: rawCollection.totalVideos || 0,
-			totalSize: rawCollection.totalSize || 0,
+			// totalImages: 0, // TODO: get from EntityAggregates
+			// totalVideos: 0, // TODO: get from EntityAggregates
+			// totalSize: 0, // TODO: get from EntityAggregates
 			lastImageAddedAt: rawCollection.lastImageAddedAt || null,
 			lastVideoAddedAt: rawCollection.lastVideoAddedAt || null,
 		}));
@@ -223,9 +224,9 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 				featuredImage: collections.featuredImage,
 
 				isFavorite: collections.isFavorite,
-				totalImages: collections.totalImages,
-				totalVideos: collections.totalVideos,
-				totalSize: collections.totalSize,
+				// totalImages: moved to EntityAggregates
+				// totalVideos: moved to EntityAggregates
+				// totalSize: moved to EntityAggregates
 				lastImageAddedAt: collections.lastImageAddedAt,
 				lastVideoAddedAt: collections.lastVideoAddedAt,
 				parentId: collections.parentId,
@@ -238,9 +239,9 @@ export const getCollections = async (): Promise<CollectionWithStats[]> => {
 		const transformedCollections = drizzleCollections.map((rawCollection: any) => ({
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
-			totalImages: rawCollection.totalImages || 0,
-			totalVideos: rawCollection.totalVideos || 0,
-			totalSize: rawCollection.totalSize || 0,
+			// totalImages: 0, // TODO: get from EntityAggregates
+			// totalVideos: 0, // TODO: get from EntityAggregates
+			// totalSize: 0, // TODO: get from EntityAggregates
 			lastImageAddedAt: rawCollection.lastImageAddedAt || null,
 			lastVideoAddedAt: rawCollection.lastVideoAddedAt || null,
 			// Counts vacíos por ahora (TODO: implementar subqueries)
@@ -296,9 +297,9 @@ export const getCollection = async (id: string): Promise<CollectionWithStats | n
 				featuredImage: collections.featuredImage,
 
 				isFavorite: collections.isFavorite,
-				totalImages: collections.totalImages,
-				totalVideos: collections.totalVideos,
-				totalSize: collections.totalSize,
+				// totalImages: moved to EntityAggregates
+				// totalVideos: moved to EntityAggregates
+				// totalSize: moved to EntityAggregates
 				lastImageAddedAt: collections.lastImageAddedAt,
 				lastVideoAddedAt: collections.lastVideoAddedAt,
 				parentId: collections.parentId,
@@ -319,9 +320,9 @@ export const getCollection = async (id: string): Promise<CollectionWithStats | n
 		const transformedCollection = {
 			...rawCollection,
 			isFavorite: Boolean(rawCollection.isFavorite),
-			totalImages: rawCollection.totalImages || 0,
-			totalVideos: rawCollection.totalVideos || 0,
-			totalSize: rawCollection.totalSize || 0,
+			// totalImages: 0, // TODO: get from EntityAggregates
+			// totalVideos: 0, // TODO: get from EntityAggregates
+			// totalSize: 0, // TODO: get from EntityAggregates
 			lastImageAddedAt: rawCollection.lastImageAddedAt || null,
 			lastVideoAddedAt: rawCollection.lastVideoAddedAt || null,
 			// Counts vacíos por ahora (TODO: implementar subqueries)
@@ -417,6 +418,11 @@ export const createCollection = async (data: CollectionCreateInput): Promise<Col
 		// Revalidar rutas
 		await revalidateCollectionPaths();
 
+		// Recalcular agregados genéricos (no bloqueante)
+		recomputeAggregatesForCollection(newCollection.id).catch((err) =>
+			logger.warn('No se pudo recalcular agregados de colección tras crear', { err, id: newCollection.id })
+		);
+
 		const collectionWithStats = fromDrizzleCollection(transformedCollection as any, {
 			images: 0,
 			videos: 0,
@@ -488,6 +494,11 @@ export const updateCollection = async (id: string, data: CollectionUpdateInput):
 		// Revalidar rutas
 		await revalidateCollectionPaths();
 		revalidatePath(`/collections/${id}`);
+
+		// Recalcular agregados (no bloqueante)
+		recomputeAggregatesForCollection(id).catch((err) =>
+			logger.warn('No se pudo recalcular agregados de colección tras actualizar', { err, id })
+		);
 
 		const result: CollectionWithStats = {
 			...updatedCollection,

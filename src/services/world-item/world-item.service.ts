@@ -56,8 +56,8 @@ export async function getWorldItems(options: WorldItemSearchOptions = {}): Promi
 				category: worldItems.category,
 
 				isFavorite: worldItems.isFavorite,
-				totalImages: worldItems.totalImages,
-				totalVideos: worldItems.totalVideos,
+				// totalImages: moved to EntityAggregates
+				// totalVideos: moved to EntityAggregates
 				type: worldItems.type,
 				rarity: worldItems.rarity,
 				value: worldItems.value,
