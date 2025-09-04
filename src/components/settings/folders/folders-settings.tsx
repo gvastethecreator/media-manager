@@ -103,7 +103,7 @@ const MemoizedErrorWrapper = memo(function MemoizedErrorWrapper({
 	return <ErrorCard message={displayError} onRetry={handleRetry} />;
 });
 
-// Función pura para crear la ordenación jerárquica (optimizada fuera del componente)
+// Función pura para crear la ordenación jerárquica con niveles visuales (optimizada fuera del componente)
 const createHierarchicalOrderPure = (folderList: any[]) => {
 	const result: any[] = [];
 
@@ -115,17 +115,24 @@ const createHierarchicalOrderPure = (folderList: any[]) => {
 		return (a.name || '').localeCompare(b.name || '');
 	};
 
-	// Obtener carpetas padre (sin parentId) y ordenarlas por favorito y nombre
+	// Función recursiva para agregar carpetas con su nivel de anidación
+	const addFolderWithChildren = (folder: any, level = 0) => {
+		// Agregar carpeta con información de nivel
+		result.push({ ...folder, _hierarchyLevel: level, _hasParent: level > 0 });
+
+		// Encontrar y agregar subcarpetas ordenadas recursivamente
+		const subfolders = folderList.filter((f) => f.parentId === folder.id).sort(byFavoriteThenName);
+
+		for (const subfolder of subfolders) {
+			addFolderWithChildren(subfolder, level + 1);
+		}
+	};
+
+	// Obtener carpetas padre (sin parentId) y procesarlas recursivamente
 	const parentFolders = folderList.filter((folder) => !folder.parentId).sort(byFavoriteThenName);
 
-	// Para cada carpeta padre, agregar la carpeta y sus subcarpetas
 	for (const parent of parentFolders) {
-		result.push(parent);
-
-		// Encontrar y agregar subcarpetas del padre actual, ordenadas por favorito y nombre
-		const subfolders = folderList.filter((folder) => folder.parentId === parent.id).sort(byFavoriteThenName);
-
-		result.push(...subfolders);
+		addFolderWithChildren(parent);
 	}
 
 	// Agregar carpetas huérfanas (que tienen parentId pero el padre no existe)
@@ -133,7 +140,9 @@ const createHierarchicalOrderPure = (folderList: any[]) => {
 		.filter((folder) => folder.parentId && !folderList.some((parent) => parent.id === folder.parentId))
 		.sort(byFavoriteThenName);
 
-	result.push(...orphanFolders);
+	for (const orphan of orphanFolders) {
+		result.push({ ...orphan, _hierarchyLevel: 0, _hasParent: false, _isOrphan: true });
+	}
 
 	return result;
 };
@@ -793,6 +802,15 @@ function FoldersTable({
 									>
 										<TableCell className="max-w-[420px] py-3">
 											<div className="flex items-center gap-3">
+												{/* Indentación visual para mostrar jerarquía */}
+												{folder._hierarchyLevel > 0 && (
+													<div className="flex items-center" style={{ marginLeft: `${folder._hierarchyLevel * 20}px` }}>
+														{/* Línea vertical conectora */}
+														<div className="mr-2 h-4 w-px bg-border" />
+														{/* Línea horizontal conectora */}
+														<div className="mr-2 h-px w-3 bg-border" />
+													</div>
+												)}
 												<div className="relative">
 													{folder.emoji ? (
 														<div className="flex h-9 w-9 items-center justify-center bg-primary/5 text-sm">
@@ -800,7 +818,9 @@ function FoldersTable({
 														</div>
 													) : (
 														<div className="flex h-9 w-9 items-center justify-center bg-primary/5">
-															<FolderIcon className="h-5 w-5 text-primary" />
+															<FolderIcon
+																className={cn('h-5 w-5 text-primary', folder._hierarchyLevel > 0 && 'text-primary/70')}
+															/>
 														</div>
 													)}
 													{hasError && (
@@ -809,8 +829,20 @@ function FoldersTable({
 												</div>
 												<div className="min-w-0 flex-1">
 													<div className="flex items-center gap-2">
-														<span className="truncate font-medium">{folder.name}</span>
+														<span
+															className={cn(
+																'truncate font-medium',
+																folder._hierarchyLevel > 0 && 'text-muted-foreground text-sm'
+															)}
+														>
+															{folder.name}
+														</span>
 														{folder.isFavorite && <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />}
+														{folder._isOrphan && (
+															<Badge className="text-xs" variant="destructive">
+																Huérfana
+															</Badge>
+														)}
 													</div>
 													{parentName && (
 														<div className="truncate text-muted-foreground text-sm">

@@ -3,14 +3,32 @@
 
 import { asc, count, desc, eq, isNull, sql } from 'drizzle-orm';
 import { Router } from 'express';
+
 import { db } from '@/lib/drizzle';
 import { folders, images, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateFolderIdFromName, isValidFolderId } from '@/lib/utils/folder-id-generator';
+import { getFolderMediaCountsBatch } from '@/services/folder/folder.service';
 import { CreateFolderSchema } from '@/types/entities/folder/schema';
 
 const router = Router();
 const logger = serverLogger.withContext('FoldersRoutes');
+
+// DEBUG - Router middleware para logging
+router.use((req, res, next) => {
+	console.log('📁 FOLDERS ROUTER - Request received:', req.method, req.path);
+	next();
+});
+
+// TEST ENDPOINT SIMPLE
+router.get('/test-simple', (req, res) => {
+	console.log('📁 TEST SIMPLE ENDPOINT HIT');
+	res.json({
+		status: 'ok',
+		message: 'Simple test working',
+		timestamp: new Date().toISOString(),
+	});
+});
 
 // DEBUG-ROUTES - Rutas especiales de debug que deben ir ANTES que /:id
 router.get('/_debug_', async (_req, res) => {
@@ -195,7 +213,9 @@ router.get('/debug-scanner/:folderId', async (req, res) => {
 router.get('/', async (req, res) => {
 	try {
 		const { parentId } = req.query as { parentId?: string };
+		logger.info('📁 Obteniendo listado de carpetas', { parentId });
 
+		// Obtener carpetas base
 		const baseSelect = db
 			.select({
 				id: folders.id,
@@ -217,23 +237,62 @@ router.get('/', async (req, res) => {
 			.from(folders)
 			.orderBy(asc(folders.name));
 
+		let folderRows: any[] = [];
+
 		if (parentId) {
 			const rootRow = await db.select({ id: folders.id }).from(folders).where(eq(folders.path, '/')).limit(1);
 			if (rootRow.length && rootRow[0].id === parentId) {
-				const rows = await baseSelect.where(isNull(folders.parentId));
-				return res.json(rows);
+				folderRows = await baseSelect.where(isNull(folders.parentId));
+			} else {
+				folderRows = await baseSelect.where(eq(folders.parentId, parentId));
 			}
-			const rows = await baseSelect.where(eq(folders.parentId, parentId));
-			return res.json(rows);
+		} else {
+			folderRows = await baseSelect;
 		}
 
-		const rows = await baseSelect;
-		return res.json(rows);
+		// Enriquecer con conteos por tipo (batch, evita N+1)
+		const ids = folderRows.map((f) => f.id);
+		const countsMap = await getFolderMediaCountsBatch(ids);
+
+		const enrichedFolders = folderRows.map((folder) => {
+			const c = countsMap[folder.id] ?? {
+				images: 0,
+				videos: 0,
+				audios: 0,
+				documents: 0,
+				jsonFiles: 0,
+				file3Ds: 0,
+			};
+			return {
+				...folder,
+				// Compatibilidad existente
+				totalImages: c.images,
+				imageCount: c.images,
+				totalVideos: c.videos,
+				videoCount: c.videos,
+				// Campos extendidos (no romper UI si no los usan todavía)
+				totalAudios: c.audios,
+				audioCount: c.audios,
+				totalDocuments: c.documents,
+				documentCount: c.documents,
+				totalJsonFiles: c.jsonFiles,
+				jsonFileCount: c.jsonFiles,
+				totalFile3Ds: c.file3Ds,
+				file3DCount: c.file3Ds,
+			};
+		});
+
+		logger.info('✅ Listado de carpetas obtenido', {
+			total: enrichedFolders.length,
+			withImages: enrichedFolders.filter((f) => (f as any).totalImages > 0).length,
+			withVideos: enrichedFolders.filter((f) => (f as any).totalVideos > 0).length,
+		});
+
+		return res.json(enrichedFolders);
 	} catch (error) {
 		logger.error('Error al obtener carpetas', { error });
 		return res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
+			error: 'Error al obtener carpetas',
 		});
 	}
 });
@@ -631,6 +690,51 @@ router.post('/test-entity-types', async (req, res) => {
 	}
 });
 
+// DEBUG - Endpoint temporal para ver subcarpetas y sus imágenes
+router.get('/:id/debugsubs', async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		const subfolders = await db
+			.select({
+				id: folders.id,
+				name: folders.name,
+				path: folders.path,
+			})
+			.from(folders)
+			.where(eq(folders.parentId, id))
+			.limit(10);
+
+		const result = [];
+
+		for (const subfolder of subfolders) {
+			const subImages = await db
+				.select({
+					id: images.id,
+					filename: images.filename,
+					path: images.path,
+				})
+				.from(images)
+				.where(eq(images.folderId, subfolder.id))
+				.limit(5);
+
+			result.push({
+				subfolder,
+				imageCount: subImages.length,
+				images: subImages.map((img) => img.filename),
+			});
+		}
+
+		return res.json({
+			parentId: id,
+			subfolders: result,
+			totalSubfolders: subfolders.length,
+		});
+	} catch (error) {
+		return res.status(500).json({ error: error.message });
+	}
+});
+
 // GET /api/folders/:id/preview - Generar thumbnail compuesto de una carpeta
 router.get('/:id/preview', async (req, res) => {
 	try {
@@ -642,32 +746,131 @@ router.get('/:id/preview', async (req, res) => {
 		}
 
 		// Obtener imágenes de la carpeta (máximo 4 para el preview)
-		const recentImages = await db
-			.select({
-				id: images.id,
-				filename: images.filename,
-				path: images.path,
-			})
-			.from(images)
-			.where(eq(images.folderId, id))
-			.orderBy(desc(images.createdAt))
-			.limit(4);
+		let recentImages = [];
 
-		console.log('📁 PREVIEW DB RESULT:', { 
-			id, 
+		try {
+			console.log('📁 STARTING SEARCH FOR FOLDER:', id);
+			console.log('📁 FOLDER ID TYPE:', typeof id, 'VALUE:', JSON.stringify(id));
+
+			// Buscar imágenes directamente en la carpeta
+			let directImagesQuery = [];
+			try {
+				console.log('📁 EXECUTING DIRECT IMAGES QUERY FOR FOLDER:', id);
+				const queryResult = await db.select().from(images).where(eq(images.folderId, id)).limit(4);
+				console.log('📁 QUERY RAW RESULT:', queryResult);
+				// Convertir a array si es necesario
+				directImagesQuery = Array.isArray(queryResult) ? queryResult : queryResult ? [queryResult] : [];
+				console.log('📁 QUERY PROCESSED RESULT:', directImagesQuery);
+			} catch (queryError) {
+				console.error('📁 DIRECT IMAGES QUERY ERROR:', queryError);
+				directImagesQuery = [];
+			}
+
+			recentImages = directImagesQuery;
+
+			console.log('📁 DIRECT IMAGES RESULT:', directImagesQuery);
+			console.log('📁 DIRECT IMAGES COUNT:', recentImages?.length || 0);
+
+			// Si no hay imágenes directas, buscar en subcarpetas
+			const hasDirectImages = Array.isArray(recentImages) && recentImages.length > 0;
+			console.log('📁 HAS DIRECT IMAGES:', hasDirectImages);
+
+			if (!hasDirectImages) {
+				console.log('📁 NO DIRECT IMAGES, SEARCHING SUBFOLDERS...');
+
+				let subfolders = [];
+				try {
+					const subfoldersResult = await db
+						.select({ id: folders.id, name: folders.name })
+						.from(folders)
+						.where(eq(folders.parentId, id))
+						.limit(10);
+
+					// Convertir a array si es necesario
+					subfolders = Array.isArray(subfoldersResult) ? subfoldersResult : subfoldersResult ? [subfoldersResult] : [];
+				} catch (subfolderError) {
+					console.error('📁 SUBFOLDERS QUERY ERROR:', subfolderError);
+					subfolders = [];
+				}
+
+				console.log('📁 FOUND SUBFOLDERS:', subfolders?.map((f) => f.name) || []);
+
+				if (subfolders && subfolders.length > 0) {
+					// Buscar imágenes en las primeras subcarpetas
+					for (const subfolder of subfolders.slice(0, 5)) {
+						if (recentImages.length >= 4) break;
+
+						console.log(`📁 SEARCHING IN SUBFOLDER: ${subfolder.name} (${subfolder.id})`);
+
+						let subImagesQuery = [];
+						try {
+							const subImagesResult = await db
+								.select()
+								.from(images)
+								.where(eq(images.folderId, subfolder.id))
+								.limit(4 - recentImages.length);
+
+							// Convertir a array si es necesario
+							subImagesQuery = Array.isArray(subImagesResult)
+								? subImagesResult
+								: subImagesResult
+									? [subImagesResult]
+									: [];
+						} catch (subImageError) {
+							console.error('📁 SUBIMAGE QUERY ERROR:', subImageError);
+							subImagesQuery = [];
+						}
+
+						const subImages = subImagesQuery;
+
+						console.log(`📁 SUBFOLDER ${subfolder.name} IMAGES:`, subImages?.map((img) => img.filename) || []);
+
+						if (subImages && subImages.length > 0) {
+							recentImages = [...recentImages, ...subImages];
+						}
+					}
+				}
+			}
+		} catch (dbError) {
+			console.error('📁 PREVIEW DB ERROR:', dbError);
+		}
+
+		console.log('📁 PREVIEW FINAL RESULT:', {
+			id,
 			imageCount: recentImages?.length || 0,
-			images: recentImages?.map(img => img?.filename || 'UNDEFINED') || 'NULL_RESULT'
+			images: recentImages?.map((img) => img?.filename || 'UNDEFINED') || 'NULL_RESULT',
 		});
 
-		// Si no hay imágenes, devolver un SVG con mensaje
+		// Si no hay imágenes, mostrar SVG apropiado
 		if (!recentImages || recentImages.length === 0) {
+			// Verificar si la carpeta tiene subcarpetas para mostrar mensaje apropiado
+			let hasSubfolders = false;
+			try {
+				const subfolderCountResult = await db
+					.select({ count: sql<number>`count(*)` })
+					.from(folders)
+					.where(eq(folders.parentId, id));
+
+				// Manejo defensivo del resultado
+				const countResult = Array.isArray(subfolderCountResult) ? subfolderCountResult[0] : subfolderCountResult;
+				hasSubfolders = countResult?.count > 0;
+			} catch (error) {
+				console.error('📁 ERROR CHECKING SUBFOLDERS:', error);
+				hasSubfolders = false;
+			}
+
+			const message = hasSubfolders ? 'Contiene subcarpetas' : 'Sin imágenes';
+			const fillColor = hasSubfolders ? '#fff3cd' : '#f8f9fa';
+			const strokeColor = hasSubfolders ? '#ffeaa7' : '#dee2e6';
+			const textColor = hasSubfolders ? '#856404' : '#6c757d';
+
 			const emptySvg = `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-				<rect width="100%" height="100%" fill="#f8f9fa"/>
-				<rect x="50" y="50" width="100" height="100" fill="#e9ecef" stroke="#dee2e6" stroke-width="2" stroke-dasharray="5,5"/>
-				<text x="100" y="100" text-anchor="middle" font-family="Arial" font-size="12" fill="#6c757d">Sin imágenes</text>
-				<text x="100" y="115" text-anchor="middle" font-family="Arial" font-size="10" fill="#adb5bd">${id}</text>
+				<rect width="100%" height="100%" fill="${fillColor}"/>
+				<rect x="25" y="50" width="150" height="100" fill="${fillColor}" stroke="${strokeColor}" stroke-width="2" stroke-dasharray="5,5" rx="5"/>
+				<text x="100" y="95" text-anchor="middle" font-family="Arial" font-size="12" fill="${textColor}">${message}</text>
+				<text x="100" y="115" text-anchor="middle" font-family="Arial" font-size="10" fill="${textColor}" opacity="0.7">${id}</text>
 			</svg>`;
-			
+
 			res.setHeader('Content-Type', 'image/svg+xml');
 			res.setHeader('Cache-Control', 'public, max-age=300');
 			return res.send(emptySvg);
@@ -680,7 +883,7 @@ router.get('/:id/preview', async (req, res) => {
 		const imageSize = svgWidth / gridSize;
 
 		let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
-		
+
 		// Fondo
 		svgContent += `<rect width="100%" height="100%" fill="#f8f9fa"/>`;
 
@@ -697,10 +900,10 @@ router.get('/:id/preview', async (req, res) => {
 
 			// Crear rectángulo con imagen como fondo
 			svgContent += `<rect x="${x}" y="${y}" width="${imageSize}" height="${imageSize}" fill="#e9ecef" stroke="#dee2e6" stroke-width="1"/>`;
-			
+
 			// Texto del filename como fallback
 			const shortName = image.filename.length > 10 ? `${image.filename.substring(0, 10)}...` : image.filename;
-			svgContent += `<text x="${x + imageSize/2}" y="${y + imageSize/2}" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">${shortName}</text>`;
+			svgContent += `<text x="${x + imageSize / 2}" y="${y + imageSize / 2}" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">${shortName}</text>`;
 		});
 
 		svgContent += '</svg>';
@@ -710,7 +913,7 @@ router.get('/:id/preview', async (req, res) => {
 		return res.send(svgContent);
 	} catch (error) {
 		console.error('📁 PREVIEW ERROR:', error);
-		
+
 		// SVG de error
 		const errorSvg = `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
 			<rect width="100%" height="100%" fill="#ffe6e6"/>
@@ -718,7 +921,7 @@ router.get('/:id/preview', async (req, res) => {
 			<text x="100" y="100" text-anchor="middle" font-family="Arial" font-size="12" fill="#cc0000">Error</text>
 			<text x="100" y="115" text-anchor="middle" font-family="Arial" font-size="10" fill="#ff6b6b">${req.params.id}</text>
 		</svg>`;
-		
+
 		res.setHeader('Content-Type', 'image/svg+xml');
 		res.setHeader('Cache-Control', 'public, max-age=60');
 		return res.send(errorSvg);
@@ -730,8 +933,6 @@ router.get('/:id/test', async (req, res) => {
 	console.log('🧪 TEST ENDPOINT HIT:', req.params.id);
 	res.json({ test: 'success', id: req.params.id });
 });
-
-
 
 // POST /api/folders/:id/toggle-favorite - Alternar favorito
 router.post('/:id/toggle-favorite', async (req, res) => {
@@ -1731,6 +1932,104 @@ router.get('/:id/sync-status', async (req, res) => {
 	}
 });
 
+// Debug recursive endpoint - DEBE IR ANTES del endpoint genérico /:id
+router.get('/:id/debug-recursive', async (req: Request, res: Response) => {
+	const { id } = req.params;
+	console.log(`🔍 DEBUG RECURSIVE ENDPOINT HIT: ${id}`);
+
+	try {
+		// Get folder info
+		const folder = await db.select().from(folders).where(eq(folders.name, id)).limit(1);
+
+		if (!folder[0]) {
+			return res.status(404).json({ error: 'Folder not found' });
+		}
+
+		console.log('📁 DEBUG FOLDER FOUND:', folder[0]);
+
+		// Try direct images query with detailed logging
+
+		let directImages = [];
+		let directError = null;
+		try {
+			console.log('📁 DEBUG: Attempting direct images query...');
+			const directResult = await db.select().from(images).where(eq(images.folderId, folder[0].id)).limit(25);
+
+			directImages = directResult || [];
+			console.log(`📁 DEBUG: Direct images found: ${directImages.length}`);
+		} catch (error) {
+			directError = (error as any).message;
+			console.log('📁 DEBUG: Direct images query error:', (error as any).message);
+		}
+
+		// Get subfolders with detailed logging
+		let subfolders = [];
+		let subfoldersError = null;
+		try {
+			console.log('📁 DEBUG: Attempting subfolders query...');
+			const subfoldersResult = await db.select().from(folders).where(eq(folders.parentId, folder[0].id)).limit(10);
+
+			subfolders = subfoldersResult || [];
+			console.log(`📁 DEBUG: Subfolders found: ${subfolders.length}`);
+			console.log(
+				'📁 DEBUG: Subfolder names:',
+				subfolders.map((f) => f.name)
+			);
+		} catch (error) {
+			subfoldersError = (error as any).message;
+			console.log('📁 DEBUG: Subfolders query error:', (error as any).message);
+		}
+
+		// Try recursive search on each subfolder
+		const recursiveResults: any[] = [];
+		const recursiveErrors: any[] = [];
+
+		for (const subfolder of subfolders) {
+			try {
+				console.log(`📁 DEBUG: Searching images in subfolder: ${subfolder.name}`);
+				const subResult = await db.select().from(images).where(eq(images.folderId, subfolder.id)).limit(10);
+
+				const subImages = subResult || [];
+				console.log(`📁 DEBUG: Images in ${subfolder.name}: ${subImages.length}`);
+				recursiveResults.push({
+					subfolder: subfolder.name,
+					imageCount: subImages.length,
+					images: subImages.slice(0, 5).map((img) => ({ id: img.id, filename: img.filename })),
+				});
+			} catch (error) {
+				console.log(`📁 DEBUG: Error searching subfolder ${subfolder.name}:`, (error as any).message);
+				recursiveErrors.push({
+					subfolder: subfolder.name,
+					error: (error as any).message,
+				});
+			}
+		}
+
+		const debugInfo = {
+			folderId: id,
+			folderDbId: folder[0].id,
+			directImagesCount: directImages.length,
+			directError,
+			subfoldersCount: subfolders.length,
+			subfoldersError,
+			recursiveResults,
+			recursiveErrors,
+			totalRecursiveImages: recursiveResults.reduce((sum, r) => sum + r.imageCount, 0),
+		};
+
+		console.log('📁 DEBUG: Final debug info:', JSON.stringify(debugInfo, null, 2));
+
+		res.json(debugInfo);
+	} catch (error) {
+		console.error('📁 DEBUG: Fatal error:', (error as any).message);
+		res.status(500).json({
+			error: 'Debug failed',
+			message: (error as any).message,
+			stack: (error as any).stack,
+		});
+	}
+});
+
 // GET /api/folders/:id - Obtener una carpeta por ID (DEBE IR AL FINAL)
 router.get('/:id', async (req, res) => {
 	try {
@@ -1771,6 +2070,277 @@ router.get('/:id', async (req, res) => {
 		return res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// DELETE /api/folders/:id - Eliminar carpeta con eliminación en cascada
+router.delete('/:id', async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		if (!isValidFolderId(id)) {
+			return res.status(400).json({ error: 'ID de carpeta inválido' });
+		}
+
+		logger.info('Iniciando eliminación de carpeta con cascada', { folderId: id });
+
+		// Función recursiva para obtener todas las subcarpetas
+		const getAllSubfolders = async (parentId: string): Promise<string[]> => {
+			const subfolders = await db.select({ id: folders.id }).from(folders).where(eq(folders.parentId, parentId));
+
+			const allSubfolderIds: string[] = [];
+			for (const subfolder of subfolders) {
+				allSubfolderIds.push(subfolder.id);
+				// Recursivamente obtener subcarpetas de esta subcarpeta
+				const nestedSubfolders = await getAllSubfolders(subfolder.id);
+				allSubfolderIds.push(...nestedSubfolders);
+			}
+			return allSubfolderIds;
+		};
+
+		// Obtener todas las subcarpetas que serán eliminadas
+		const subfolderIds = await getAllSubfolders(id);
+		const allFolderIds = [id, ...subfolderIds];
+
+		logger.info('Carpetas a eliminar', {
+			parentId: id,
+			totalFolders: allFolderIds.length,
+			folderIds: allFolderIds,
+		});
+
+		// Verificar que la carpeta padre existe
+		const parentFolder = await db
+			.select({ id: folders.id, name: folders.name })
+			.from(folders)
+			.where(eq(folders.id, id))
+			.limit(1);
+
+		if (parentFolder.length === 0) {
+			return res.status(404).json({ error: 'Carpeta no encontrada' });
+		}
+
+		// Usar transacción para garantizar consistencia
+		await db.transaction(async (tx) => {
+			// Eliminar imágenes de todas las carpetas
+			const deleteImagesResult = await tx
+				.delete(images)
+				.where(sql`${images.folderId} IN (${sql.raw(allFolderIds.map(() => '?').join(','))})`, ...allFolderIds);
+
+			// Eliminar videos de todas las carpetas
+			const deleteVideosResult = await tx
+				.delete(videos)
+				.where(sql`${videos.folderId} IN (${sql.raw(allFolderIds.map(() => '?').join(','))})`, ...allFolderIds);
+
+			// Eliminar todas las carpetas (incluidas subcarpetas)
+			const deleteFoldersResult = await tx
+				.delete(folders)
+				.where(sql`${folders.id} IN (${sql.raw(allFolderIds.map(() => '?').join(','))})`, ...allFolderIds);
+
+			logger.info('Eliminación en cascada completada', {
+				foldersDeleted: deleteFoldersResult.changes || 0,
+				// imagesDeleted: deleteImagesResult.changes || 0,
+				// videosDeleted: deleteVideosResult.changes || 0,
+			});
+		});
+
+		// Emitir evento de eliminación para cada carpeta eliminada
+		for (const folderId of allFolderIds) {
+			try {
+				const { emit } = await import('@/lib/server/events.server');
+				await emit({
+					type: 'directory:deleted',
+					data: {
+						folderId,
+						timestamp: Date.now(),
+					},
+				});
+			} catch (eventError) {
+				logger.warn('Error emitiendo evento directory:deleted', { folderId, error: eventError });
+			}
+		}
+
+		logger.success('Carpeta eliminada exitosamente con todas sus subcarpetas', {
+			parentId: id,
+			totalDeleted: allFolderIds.length,
+		});
+
+		return res.status(200).json({
+			message: 'Carpeta eliminada exitosamente',
+			deletedFolders: allFolderIds.length,
+			deletedFolderIds: allFolderIds,
+		});
+	} catch (error) {
+		logger.error('Error al eliminar carpeta', { error });
+		return res.status(500).json({
+			error: 'Error interno del servidor',
+			message: error instanceof Error ? error.message : 'Error desconocido',
+		});
+	}
+});
+
+// GET /api/folders/:id/debug-recursive - Debug endpoint para diagnosticar errores Object.entries
+router.get('/:id/debug-recursive', async (req, res) => {
+	const { id } = req.params;
+	console.log(`📁 DEBUG RECURSIVE ENDPOINT HIT: ${id}`);
+
+	try {
+		const result = {
+			folderId: id,
+			timestamp: new Date().toISOString(),
+			queries: [],
+			errors: [],
+		};
+
+		// Test 1: Direct images query básica
+		try {
+			console.log('📁 DEBUG: Testing basic direct images query...');
+			const directQuery = db
+				.select({
+					id: images.id,
+					thumbnail: images.thumbnail,
+					originalPath: images.originalPath,
+				})
+				.from(images)
+				.where(eq(images.folderId, id))
+				.limit(20);
+
+			console.log('📁 DEBUG: Direct query created, executing...');
+			const directImages = await directQuery;
+
+			result.queries.push({
+				type: 'direct-images',
+				status: 'success',
+				count: directImages.length,
+				data: directImages.slice(0, 3), // Only first 3 for brevity
+			});
+			console.log(`📁 DEBUG: Direct images query successful, found ${directImages.length} images`);
+		} catch (error) {
+			console.log('📁 DEBUG: Direct images query failed:', error);
+			result.errors.push({
+				type: 'direct-images-error',
+				message: error instanceof Error ? error.message : 'Unknown error',
+				stack: error instanceof Error ? error.stack : undefined,
+			});
+		}
+
+		// Test 2: Subfolder search
+		try {
+			console.log('📁 DEBUG: Testing subfolder search...');
+			const subfoldersQuery = db.select({ id: folders.id }).from(folders).where(eq(folders.parentId, id));
+
+			console.log('📁 DEBUG: Subfolders query created, executing...');
+			const subfolders = await subfoldersQuery;
+
+			result.queries.push({
+				type: 'subfolders',
+				status: 'success',
+				count: subfolders.length,
+				data: subfolders,
+			});
+			console.log(`📁 DEBUG: Subfolders query successful, found ${subfolders.length} subfolders`);
+		} catch (error) {
+			console.log('📁 DEBUG: Subfolders query failed:', error);
+			result.errors.push({
+				type: 'subfolders-error',
+				message: error instanceof Error ? error.message : 'Unknown error',
+				stack: error instanceof Error ? error.stack : undefined,
+			});
+		}
+
+		// Test 3: Recursive images with problematic pattern
+		try {
+			console.log('📁 DEBUG: Testing recursive images query...');
+			const recursiveQuery = db
+				.select({
+					id: images.id,
+					thumbnail: images.thumbnail,
+					originalPath: images.originalPath,
+				})
+				.from(images)
+				.innerJoin(folders, eq(images.folderId, folders.id))
+				.where(eq(folders.parentId, id))
+				.limit(20);
+
+			console.log('📁 DEBUG: Recursive query created, executing...');
+			const recursiveImages = await recursiveQuery;
+
+			result.queries.push({
+				type: 'recursive-images',
+				status: 'success',
+				count: recursiveImages.length,
+				data: recursiveImages.slice(0, 3), // Only first 3 for brevity
+			});
+			console.log(`📁 DEBUG: Recursive images query successful, found ${recursiveImages.length} images`);
+		} catch (error) {
+			console.log('📁 DEBUG: Recursive images query failed:', error);
+			result.errors.push({
+				type: 'recursive-images-error',
+				message: error instanceof Error ? error.message : 'Unknown error',
+				stack: error instanceof Error ? error.stack : undefined,
+			});
+		}
+
+		console.log('📁 DEBUG FINAL RESULT:', JSON.stringify(result, null, 2));
+		return res.json(result);
+	} catch (error) {
+		console.log('📁 DEBUG ENDPOINT ERROR:', error);
+		return res.status(500).json({
+			error: 'Debug endpoint failed',
+			message: error instanceof Error ? error.message : 'Unknown error',
+			stack: error instanceof Error ? error.stack : undefined,
+		});
+	}
+});
+
+// DELETE /api/folders/:id - Eliminar carpeta y subcarpetas de la BD
+router.delete('/:id', async (req, res) => {
+	try {
+		const folderId = Number.parseInt(req.params.id, 10);
+		if (Number.isNaN(folderId)) {
+			return res.status(400).json({ error: 'Invalid folder ID' });
+		}
+
+		logger.info(`Eliminando carpeta ${folderId} y sus subcarpetas`);
+
+		// Función recursiva para obtener todos los IDs de subcarpetas
+		const getAllChildrenIds = async (parentId: number): Promise<number[]> => {
+			const children = await db.select({ id: folders.id }).from(folders).where(eq(folders.parentId, parentId));
+
+			let allIds = children.map((c) => c.id);
+
+			// Recursivamente obtener hijos de cada hijo
+			for (const child of children) {
+				const grandChildren = await getAllChildrenIds(child.id);
+				allIds = [...allIds, ...grandChildren];
+			}
+
+			return allIds;
+		};
+
+		// Obtener todos los IDs a eliminar (carpeta padre + todos los hijos)
+		const allIdsToDelete = [folderId, ...(await getAllChildrenIds(folderId))];
+
+		logger.info(`Se eliminarán ${allIdsToDelete.length} carpetas: ${allIdsToDelete.join(', ')}`);
+
+		// Eliminar las carpetas de la BD (en orden inverso para evitar problemas de FK)
+		const deletedCount = await db
+			.delete(folders)
+			.where(sql`${folders.id} IN (${allIdsToDelete.map(() => '?').join(',')})`);
+
+		const result = {
+			deletedFolders: allIdsToDelete.length,
+			deletedIds: allIdsToDelete,
+			success: true,
+		};
+
+		logger.info(`Eliminación completada: ${result.deletedFolders} carpetas eliminadas`);
+		res.json(result);
+	} catch (error) {
+		logger.error('Error deleting folder:', error);
+		res.status(500).json({
+			error: 'Error deleting folder',
+			message: error instanceof Error ? error.message : 'Unknown error',
 		});
 	}
 });

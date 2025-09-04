@@ -90,14 +90,14 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					currentItem={
 						currentView === 'folder-content' && folderData
 							? {
-								id: folderData.id,
-								name: folderData.name,
-								emoji: (folderData as any).emoji,
-								description: (folderData as any).description,
-								totalSize: (folderData as any).stats?.totalSize,
-								_count: { images: (folderData as any)._count?.images },
-								breadcrumbs: (folderData as any).stats?.breadcrumbs ?? [],
-							}
+									id: folderData.id,
+									name: folderData.name,
+									emoji: (folderData as any).emoji,
+									description: (folderData as any).description,
+									totalSize: (folderData as any).stats?.totalSize,
+									_count: { images: (folderData as any)._count?.images },
+									breadcrumbs: (folderData as any).stats?.breadcrumbs ?? [],
+								}
 							: undefined
 					}
 					currentView={currentView as ViewType}

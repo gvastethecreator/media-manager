@@ -20,10 +20,7 @@ export const albums = sqliteTable(
 		color: text('color').default('#3b82f6'),
 		featuredImage: text('featuredImage'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
-		totalImages: integer('totalImages').notNull().default(0),
-		totalVideos: integer('totalVideos').notNull().default(0),
-		totalFiles: integer('totalFiles').notNull().default(0),
-		totalSize: integer('totalSize').notNull().default(0),
+		// Agregados movidos a EntityAggregates tabla genérica
 		filters: text('filters'),
 		category: text('category'),
 		metadata: text('metadata'),

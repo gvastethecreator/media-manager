@@ -12,6 +12,7 @@ import { images, imageTags, tags } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
+import { recomputeAggregatesForTag } from '@/server/services/aggregates.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toTagWithStats } from '@/transformers/tag';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
@@ -308,6 +309,11 @@ export async function createTag(data: TagCreateInput): Promise<TagWithStats> {
 		// Notificar creación
 		await notifyTagChange('create', tagWithStats);
 
+		// Recompute agregados (no bloqueante)
+		recomputeAggregatesForTag(tagWithStats.id).catch((err) =>
+			logger.warn('No se pudo recomputar agregados para tag tras crear', { err, tagId: tagWithStats.id })
+		);
+
 		logger.info(`✅ Etiqueta creada exitosamente: ${tagWithStats.name}`, { id: tagWithStats.id });
 		return tagWithStats;
 	} catch (error) {
@@ -397,6 +403,11 @@ export async function updateTag(id: string, data: TagUpdateInput): Promise<TagWi
 
 		// Notificar actualización
 		await notifyTagChange('update', tagWithStats);
+
+		// Recompute agregados (no bloqueante)
+		recomputeAggregatesForTag(tagWithStats.id).catch((err) =>
+			logger.warn('No se pudo recomputar agregados para tag tras actualizar', { err, tagId: tagWithStats.id })
+		);
 
 		logger.info(`✅ Etiqueta actualizada exitosamente: ${tagWithStats.name}`, { id });
 		return tagWithStats;
@@ -509,6 +520,11 @@ export async function toggleTagFavorite(id: string): Promise<TagWithStats> {
 		// Notificar actualización
 		await notifyTagChange('update', tagWithStats);
 
+		// Recompute agregados (no bloqueante)
+		recomputeAggregatesForTag(tagWithStats.id).catch((err) =>
+			logger.warn('No se pudo recomputar agregados para tag tras toggle favorito', { err, tagId: tagWithStats.id })
+		);
+
 		logger.info(`✅ Estado de favorito cambiado: ${id} -> ${tagWithStats.isFavorite}`);
 		return tagWithStats;
 	} catch (error) {
@@ -611,6 +627,11 @@ export async function addImageToTag(tagId: string, imageId: string): Promise<voi
 		// Revalidar rutas y notificar
 		await revalidateTagPaths();
 		await notifyTagChange('update', { id: tagId });
+
+		// Recompute agregados (no bloqueante)
+		recomputeAggregatesForTag(tagId).catch((err) =>
+			logger.warn('No se pudo recomputar agregados para tag tras añadir imagen', { err, tagId })
+		);
 
 		logger.info(`✅ Imagen ${imageId} agregada a etiqueta ${tagId}`);
 	} catch (error) {

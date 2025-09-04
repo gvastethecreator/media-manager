@@ -441,6 +441,7 @@ async function recomputeAndPersistFolderAggregates(
 ): Promise<{ totalFiles: number; totalSize: number }> {
 	const { db } = await import('@/lib/drizzle');
 	const { folders, images, videos, audios, documents, jsonFiles, file3Ds } = await import('@/lib/drizzle/schema/index');
+	const { recomputeAggregatesForFolder } = await import('@/server/services/aggregates.service');
 	const { eq, sql } = await import('drizzle-orm');
 
 	const [imgAgg] = await db
@@ -484,6 +485,12 @@ async function recomputeAndPersistFolderAggregates(
 		Number(f3dAgg?.size ?? 0);
 
 	await db.update(folders).set({ totalFiles, totalSize, lastIndexed: new Date() }).where(eq(folders.id, folderId));
+	// Sincroniza agregados genéricos (upsert)
+	try {
+		await recomputeAggregatesForFolder(folderId);
+	} catch {
+		// No bloquear si falla la ruta genérica; el cache de Folder sigue actualizado
+	}
 
 	return { totalFiles, totalSize };
 }
@@ -550,6 +557,7 @@ export async function getFolderStats(folderId: string) {
 export async function updateAllFolderStats(): Promise<void> {
 	const { db } = await import('@/lib/drizzle');
 	const { folders, images, videos, audios, documents, jsonFiles, file3Ds } = await import('@/lib/drizzle/schema/index');
+	const { recomputeAggregatesForFolder } = await import('@/server/services/aggregates.service');
 	const { eq, sql } = await import('drizzle-orm');
 
 	// 1) Limpieza: sincronizar carpetas contra el sistema de archivos (elimina inexistentes, agrega nuevas)
@@ -606,6 +614,9 @@ export async function updateAllFolderStats(): Promise<void> {
 			Number(f3dAgg?.size ?? 0);
 
 		await db.update(folders).set({ totalFiles, totalSize, lastIndexed: new Date() }).where(eq(folders.id, id));
+		try {
+			await recomputeAggregatesForFolder(id);
+		} catch {}
 	});
 }
 
