@@ -85,8 +85,8 @@ export async function getPlaces(options: PlaceSearchOptions): Promise<PlaceWithS
 				category: places.category,
 
 				isFavorite: places.isFavorite,
-				totalImages: places.totalImages,
-				totalVideos: places.totalVideos,
+				// totalImages: moved to EntityAggregates
+				// totalVideos: moved to EntityAggregates
 				type: places.type,
 				location: places.location,
 				climate: places.climate,
@@ -148,8 +148,8 @@ export async function getPlaceById(id: string): Promise<PlaceWithStats | null> {
 				category: places.category,
 
 				isFavorite: places.isFavorite,
-				totalImages: places.totalImages,
-				totalVideos: places.totalVideos,
+				// totalImages: moved to EntityAggregates
+				// totalVideos: moved to EntityAggregates
 				type: places.type,
 				location: places.location,
 				climate: places.climate,

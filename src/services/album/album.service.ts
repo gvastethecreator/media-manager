@@ -10,6 +10,7 @@ import { db } from '@/lib/drizzle';
 import { albums, imageAlbums, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
+import { recomputeAggregatesForAlbum } from '@/server/services/aggregates.service';
 import { toAlbumWithStats } from '@/transformers/album';
 import type { AlbumCreateInput, AlbumUpdateInput, AlbumWithStats } from '@/types/entities/album';
 
@@ -52,9 +53,9 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 				featuredImage: albums.featuredImage,
 				isFavorite: albums.isFavorite,
 
-				totalImages: albums.totalImages,
-				totalVideos: albums.totalVideos,
-				totalSize: albums.totalSize,
+				// totalImages: moved to EntityAggregates
+				// totalVideos: moved to EntityAggregates
+				// totalSize: moved to EntityAggregates
 				metadata: albums.metadata,
 				lastImageAddedAt: albums.lastImageAddedAt,
 				lastVideoAddedAt: albums.lastVideoAddedAt,
@@ -76,9 +77,9 @@ export async function getAlbum(id: string): Promise<AlbumWithStats | null> {
 			...rawAlbum,
 			isFavorite: Boolean(rawAlbum.isFavorite),
 
-			totalImages: rawAlbum.totalImages || 0,
-			totalVideos: rawAlbum.totalVideos || 0,
-			totalSize: rawAlbum.totalSize || 0,
+			// totalImages: 0, // TODO: get from EntityAggregates
+			// totalVideos: 0, // TODO: get from EntityAggregates
+			// totalSize: 0, // TODO: get from EntityAggregates
 			metadata: rawAlbum.metadata || null,
 			lastImageAddedAt: rawAlbum.lastImageAddedAt || null,
 			lastVideoAddedAt: rawAlbum.lastVideoAddedAt || null,
@@ -143,9 +144,9 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 				featuredImage: albums.featuredImage,
 				isFavorite: albums.isFavorite,
 
-				totalImages: albums.totalImages,
-				totalVideos: albums.totalVideos,
-				totalSize: albums.totalSize,
+				// totalImages: moved to EntityAggregates
+				// totalVideos: moved to EntityAggregates
+				// totalSize: moved to EntityAggregates
 				metadata: albums.metadata,
 				lastImageAddedAt: albums.lastImageAddedAt,
 				lastVideoAddedAt: albums.lastVideoAddedAt,
@@ -176,9 +177,9 @@ export async function getAlbums(options: GetAlbumsOptions = {}): Promise<GetAlbu
 			...rawAlbum,
 			isFavorite: Boolean(rawAlbum.isFavorite),
 
-			totalImages: rawAlbum.totalImages || 0,
-			totalVideos: rawAlbum.totalVideos || 0,
-			totalSize: rawAlbum.totalSize || 0,
+			// totalImages: 0, // TODO: get from EntityAggregates
+			// totalVideos: 0, // TODO: get from EntityAggregates
+			// totalSize: 0, // TODO: get from EntityAggregates
 			metadata: rawAlbum.metadata || null,
 			lastImageAddedAt: rawAlbum.lastImageAddedAt || null,
 			lastVideoAddedAt: rawAlbum.lastVideoAddedAt || null,
@@ -235,6 +236,11 @@ export async function createAlbum(data: AlbumCreateInput): Promise<AlbumWithStat
 		const result = toAlbumWithStats(newAlbum);
 		logger.info(`✅ Álbum creado exitosamente: ${result.id}`);
 
+		// Recalcular agregados (no bloqueante)
+		recomputeAggregatesForAlbum(result.id).catch((err) =>
+			logger.warn('No se pudo recalcular agregados de álbum tras crear', { err, id: result.id })
+		);
+
 		return result;
 	} catch (error) {
 		logger.error('❌ Error al crear álbum', { error, data });
@@ -276,6 +282,11 @@ export async function updateAlbum(id: string, data: AlbumUpdateInput): Promise<A
 
 		const result = toAlbumWithStats(updatedAlbum);
 		logger.info(`✅ Álbum actualizado exitosamente: ${id}`);
+
+		// Recalcular agregados (no bloqueante)
+		recomputeAggregatesForAlbum(id).catch((err) =>
+			logger.warn('No se pudo recalcular agregados de álbum tras actualizar', { err, id })
+		);
 
 		return result;
 	} catch (error) {
@@ -351,6 +362,11 @@ export async function addImageToAlbum(albumId: string, imageId: string): Promise
 		}
 		revalidatePath(`/albums/${albumId}`);
 
+		// Recalcular agregados (no bloqueante)
+		recomputeAggregatesForAlbum(albumId).catch((err) =>
+			logger.warn('No se pudo recalcular agregados de álbum tras agregar imagen', { err, albumId })
+		);
+
 		logger.info('✅ Imagen agregada exitosamente al álbum');
 	} catch (error) {
 		logger.error('❌ Error al agregar imagen al álbum', { error, albumId, imageId });
@@ -374,6 +390,11 @@ export async function removeImageFromAlbum(albumId: string, imageId: string): Pr
 			revalidatePath(path);
 		}
 		revalidatePath(`/albums/${albumId}`);
+
+		// Recalcular agregados (no bloqueante)
+		recomputeAggregatesForAlbum(albumId).catch((err) =>
+			logger.warn('No se pudo recalcular agregados de álbum tras remover imagen', { err, albumId })
+		);
 
 		logger.info('✅ Imagen removida exitosamente del álbum');
 	} catch (error) {

@@ -121,8 +121,8 @@ export async function getCharacter(id: string): Promise<CharacterWithStats | nul
 				color: characters.color,
 
 				isFavorite: characters.isFavorite,
-				totalImages: characters.totalImages,
-				totalVideos: characters.totalVideos,
+				// totalImages: moved to EntityAggregates
+				// totalVideos: moved to EntityAggregates
 				age: characters.age,
 				gender: characters.gender,
 				species: characters.species,
@@ -200,8 +200,8 @@ export async function getCharacters(options: CharacterSearchOptions = {}): Promi
 				featuredImage: characters.featuredImage,
 
 				isFavorite: characters.isFavorite,
-				totalImages: characters.totalImages,
-				totalVideos: characters.totalVideos,
+				// totalImages: moved to EntityAggregates
+				// totalVideos: moved to EntityAggregates
 				parentId: characters.parentId,
 				createdAt: characters.createdAt,
 				updatedAt: characters.updatedAt,

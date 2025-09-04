@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "b68e1bf9-b02b-4e9c-83f3-fc78ec34de8d",
+  "id": "fda184c3-1f94-42f9-bf71-c496ef8794cf",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "Activity": {
@@ -196,38 +196,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": false
-        },
-        "totalImages": {
-          "name": "totalImages",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "totalVideos": {
-          "name": "totalVideos",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "totalFiles": {
-          "name": "totalFiles",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "totalSize": {
-          "name": "totalSize",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
         },
         "filters": {
           "name": "filters",
@@ -622,22 +590,6 @@
           "autoincrement": false,
           "default": false
         },
-        "totalImages": {
-          "name": "totalImages",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "totalVideos": {
-          "name": "totalVideos",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
         "age": {
           "name": "age",
           "type": "text",
@@ -807,38 +759,6 @@
           "autoincrement": false,
           "default": false
         },
-        "totalImages": {
-          "name": "totalImages",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "totalVideos": {
-          "name": "totalVideos",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "totalFiles": {
-          "name": "totalFiles",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "totalSize": {
-          "name": "totalSize",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
         "lastImageAddedAt": {
           "name": "lastImageAddedAt",
           "type": "integer",
@@ -944,22 +864,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": false
-        },
-        "totalImages": {
-          "name": "totalImages",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "totalVideos": {
-          "name": "totalVideos",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
         },
         "type": {
           "name": "type",
@@ -1283,6 +1187,125 @@
       },
       "foreignKeys": {},
       "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
+    "EntityAggregates": {
+      "name": "EntityAggregates",
+      "columns": {
+        "entityType": {
+          "name": "entityType",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "entityId": {
+          "name": "entityId",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "totalImages": {
+          "name": "totalImages",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "totalVideos": {
+          "name": "totalVideos",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "totalAudio": {
+          "name": "totalAudio",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "totalDocuments": {
+          "name": "totalDocuments",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "totalJsonFiles": {
+          "name": "totalJsonFiles",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "totalFile3D": {
+          "name": "totalFile3D",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "totalFiles": {
+          "name": "totalFiles",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "totalSize": {
+          "name": "totalSize",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": 0
+        },
+        "lastIndexed": {
+          "name": "lastIndexed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
+        },
+        "updatedAt": {
+          "name": "updatedAt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        }
+      },
+      "indexes": {
+        "EntityAggregates_lastIndexed_idx": {
+          "name": "EntityAggregates_lastIndexed_idx",
+          "columns": [
+            "lastIndexed"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {
+        "EntityAggregates_pk": {
+          "columns": [
+            "entityType",
+            "entityId"
+          ],
+          "name": "EntityAggregates_pk"
+        }
+      },
       "uniqueConstraints": {},
       "checkConstraints": {}
     },
@@ -3573,22 +3596,6 @@
           "autoincrement": false,
           "default": false
         },
-        "totalImages": {
-          "name": "totalImages",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "totalVideos": {
-          "name": "totalVideos",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
         "type": {
           "name": "type",
           "type": "text",
@@ -3869,22 +3876,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": false
-        },
-        "totalImages": {
-          "name": "totalImages",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "totalVideos": {
-          "name": "totalVideos",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
         },
         "type": {
           "name": "type",
@@ -5419,22 +5410,6 @@
           "notNull": true,
           "autoincrement": false,
           "default": false
-        },
-        "totalImages": {
-          "name": "totalImages",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
-        },
-        "totalVideos": {
-          "name": "totalVideos",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "autoincrement": false,
-          "default": 0
         },
         "type": {
           "name": "type",

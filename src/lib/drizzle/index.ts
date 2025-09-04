@@ -9,19 +9,17 @@ import {
 	collections,
 	concepts,
 	documents,
+	entityAggregates,
 	favorites,
 	file3Ds,
 	fileStats,
 	files,
-	// Media
 	folders,
 	groupAlbums,
 	groupImages,
-	// Organization
 	groups,
 	groupTags,
 	groupVideos,
-	// Relations
 	imageAlbums,
 	imageCharacters,
 	imageCollections,
@@ -30,7 +28,6 @@ import {
 	imagePlaces,
 	imagePrompts,
 	imageProperties,
-	// Content
 	images,
 	imageTags,
 	imageWildcards,
@@ -42,10 +39,8 @@ import {
 	profiles,
 	prompts,
 	properties,
-	// Core
 	queueJobs,
 	settings,
-	// Taxonomy
 	tags,
 	thumbnails,
 	uploadedImages,
@@ -93,6 +88,7 @@ const schema = {
 	metadatas,
 	fileStats,
 	thumbnails,
+	entityAggregates,
 	// Media
 	folders,
 	images,

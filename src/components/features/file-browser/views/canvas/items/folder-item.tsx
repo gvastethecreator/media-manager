@@ -13,12 +13,7 @@ export function FolderItem({ item, size, showItemCount = true, ...baseProps }: F
 		<BaseItem item={item} size={size} {...baseProps}>
 			<div className="relative h-full w-full overflow-hidden rounded-lg">
 				{/* Usar MediaThumbnail para mostrar el preview compuesto de la carpeta */}
-				<MediaThumbnail
-					item={item}
-					width={size}
-					height={size}
-					className="h-full w-full object-cover"
-				/>
+				<MediaThumbnail className="h-full w-full object-cover" height={size} item={item} width={size} />
 
 				{/* Overlay con información de la carpeta */}
 				<div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 via-black/30 to-transparent p-2">

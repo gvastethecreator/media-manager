@@ -29,6 +29,7 @@
     "db:studio": "bun scripts/db/studio.js",
     "db:check": "bun scripts/db/check.js",
     "db:reset": "bun scripts/db/reset.js",
+    "db:migrate:aggregates": "bun scripts/migrate-entity-aggregates.js",
     "db:cleanup-phantoms": "bun scripts/cleanup-phantom-images.js",
     "db:cleanup-cursed": "bun scripts/cleanup-cursed-images.js",
     "db:generate-video-thumbnails": "bun scripts/generate-video-thumbnails.js",

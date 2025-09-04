@@ -7,11 +7,7 @@ import { useSelectionStore } from '@/store/ui/selection.slice';
 import type { MediaItem } from '../../components/media-thumbnail';
 import { ExtendedContextMenu, type ExtendedContextMenuAction } from '../../context-menu/extended-context-menu';
 import type { ClickModifiers } from '../../types/file-browser.types';
-import {
-	generateThumbnailUrl,
-	getFallbackIcon,
-	useImageCache,
-} from './canvas-common';
+import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
 import { CanvasRenderConfig } from './canvas-config';
 
 // Renderiza todos los items en un solo <canvas> para minimizar el overhead de DOM.
@@ -699,7 +695,7 @@ export function FileCanvas({
 					for (const it of selected) {
 						try {
 							await toggleFavorite.mutateAsync(it.id);
-						} catch { }
+						} catch {}
 					}
 				})();
 				break;
@@ -711,7 +707,7 @@ export function FileCanvas({
 					for (const it of selected) {
 						try {
 							await addToCollection.mutateAsync({ fileId: it.id, collectionId: targetId });
-						} catch { }
+						} catch {}
 					}
 				})();
 				break;
@@ -723,7 +719,7 @@ export function FileCanvas({
 					for (const it of selected) {
 						try {
 							await addTags.mutateAsync({ fileId: it.id, tags: [targetId] });
-						} catch { }
+						} catch {}
 					}
 				})();
 				break;

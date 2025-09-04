@@ -133,12 +133,8 @@ export const ConceptService = {
 			if (data.isFavorite !== undefined) {
 				updateData.isFavorite = data.isFavorite;
 			}
-			if (data.totalImages !== undefined) {
-				updateData.totalImages = data.totalImages;
-			}
-			if (data.totalVideos !== undefined) {
-				updateData.totalVideos = data.totalVideos;
-			}
+			// Los campos totalImages/totalVideos ahora se manejan en EntityAggregates
+			// TODO: Implementar actualización de agregados si es necesario
 			if (data.type !== undefined) {
 				updateData.type = data.type;
 			}
@@ -258,8 +254,8 @@ export const ConceptService = {
 					color: concepts.color,
 
 					isFavorite: concepts.isFavorite,
-					totalImages: concepts.totalImages,
-					totalVideos: concepts.totalVideos,
+					// totalImages: moved to EntityAggregates
+					// totalVideos: moved to EntityAggregates
 					type: concepts.type,
 					complexity: concepts.complexity,
 					applications: concepts.applications,
@@ -357,8 +353,8 @@ export const ConceptService = {
 					color: concepts.color,
 
 					isFavorite: concepts.isFavorite,
-					totalImages: concepts.totalImages,
-					totalVideos: concepts.totalVideos,
+					// totalImages: moved to EntityAggregates
+					// totalVideos: moved to EntityAggregates
 					type: concepts.type,
 					complexity: concepts.complexity,
 					applications: concepts.applications,
@@ -419,6 +415,9 @@ export const ConceptService = {
 							color: rawConcept.color || '#3b82f6',
 							updatedAt: rawConcept.updatedAt || new Date(),
 							isFavorite: Boolean(rawConcept.isFavorite),
+							// Agregados por compatibilidad - TODO: obtener de EntityAggregates
+							totalImages: 0,
+							totalVideos: 0,
 						},
 						counts
 					);

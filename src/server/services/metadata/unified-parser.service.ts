@@ -31,7 +31,7 @@ const DEFAULT_OPTIONS: MetadataExtractionOptions = {
 	extract_ai_metadata: true,
 	extract_video_metadata: true,
 	timeout: 30_000,
-	max_file_size: 100 * 1024 * 1024, // 100MB
+	max_file_size: 200 * 1024 * 1024, // 200MB - Incrementado para PNG grandes
 	debug: false,
 	include_raw_data: false,
 };
