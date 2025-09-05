@@ -1,207 +1,42 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { motion } from '@/components/ui/motion-shim';
+import React from 'react';
 import { cn } from '@/lib/utils';
-import type { VideoWithStats } from '@/types/entities/video';
-import { CardContainer } from '../card-container';
-import { VideoCardContent } from './video-card-content';
-import { VideoCardFooter } from './video-card-footer';
-import { VideoCardHeader } from './video-card-header';
-import { VideoCardThumbnail } from './video-card-thumbnail';
 
-export interface VideoCardProps {
-	video: VideoWithStats;
-	onClick?: () => void;
-	className?: string;
-	style?: React.CSSProperties;
-	compact?: boolean;
-	isSelected?: boolean;
-	tcgMode?: boolean;
-	disabled?: boolean;
+export interface VideoCardProps extends React.HTMLAttributes<HTMLDivElement> {
+    video: any;
+    compact?: boolean;
+    tcgMode?: boolean;
+    className?: string;
+    isSelected?: boolean;
 }
 
-/**
- * 🎬 VideoCard - Componente de tarjeta para videos con diseño TCG
- *
- * Muestra información detallada de un video en formato de carta TCG,
- * incluyendo thumbnail, estadísticas técnicas, calidad y metadatos.
- */
-export function VideoCard({
-	video,
-	onClick,
-	className,
-	style,
-	compact = false,
-	isSelected = false,
-	tcgMode = true,
-	disabled = false,
-}: VideoCardProps) {
-	const [isHovered, setIsHovered] = useState(false);
+export function VideoCard({ video, className, onClick, compact, ...rest }: VideoCardProps) {
+    const thumb = (video as any)?.thumbnailUrl || `/api/videos/${encodeURIComponent(video?.id)}/thumbnail`;
+    if (onClick) {
+        return (
+            <button
+                className={cn('overflow-hidden rounded-md border bg-card text-card-foreground shadow-sm', className)}
+                onClick={onClick as any}
+                type="button"
+            >
+                <div className="w-full bg-muted" style={{ aspectRatio: compact ? '16 / 9' : '4 / 3' }}>
+                    <img alt={video?.name || 'Video'} className="h-full w-full object-cover" loading="lazy" src={thumb} />
+                </div>
+                <div className="truncate p-2 font-medium text-sm">{video?.name || 'Video'}</div>
+            </button>
+        );
+    }
 
-	// Calcular colores basados en la calidad técnica
-	const primaryColor = useMemo(() => {
-		if (!video) {
-			return '#6b7280';
-		}
-		const grade = video.stats?.technicalGrade || 'D';
-		switch (grade) {
-			case 'A':
-				return '#10b981'; // Verde esmeralda - Ultra calidad
-			case 'B':
-				return '#3b82f6'; // Azul - Alta calidad
-			case 'C':
-				return '#f59e0b'; // Ámbar - Calidad media
-			case 'D':
-				return '#ef4444'; // Rojo - Baja calidad
-			default:
-				return '#6b7280'; // Gris - Desconocida
-		}
-	}, [video?.stats?.technicalGrade, video]);
-
-	const secondaryColor = useMemo(() => {
-		// Oscurecer el color primario
-		const hex = primaryColor.slice(1);
-		const r = Number.parseInt(hex.slice(0, 2), 16);
-		const g = Number.parseInt(hex.slice(2, 4), 16);
-		const b = Number.parseInt(hex.slice(4, 6), 16);
-
-		const darkenFactor = 0.7;
-		const darkerR = Math.floor(r * darkenFactor);
-		const darkerG = Math.floor(g * darkenFactor);
-		const darkerB = Math.floor(b * darkenFactor);
-
-		return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-	}, [primaryColor]);
-
-	// Calcular nivel de rareza basado en quality score
-	const rarityLevel = useMemo(() => {
-		if (!video) {
-			return 1;
-		}
-		const score = video.stats?.qualityScore ?? 0;
-		if (score >= 90) {
-			return 10; // Mítico
-		}
-		if (score >= 80) {
-			return 9; // Legendario
-		}
-		if (score >= 70) {
-			return 7; // Épico
-		}
-		if (score >= 60) {
-			return 5; // Raro
-		}
-		if (score >= 50) {
-			return 3; // Poco común
-		}
-		return 1; // Común
-	}, [video?.stats?.qualityScore, video]);
-
-	// Manejar eventos
-	const handleClick = useCallback(() => {
-		if (!disabled && onClick) {
-			onClick();
-		}
-	}, [onClick, disabled]);
-
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
-			if ((e.key === 'Enter' || e.key === ' ') && !disabled && onClick) {
-				e.preventDefault();
-				onClick();
-			}
-		},
-		[onClick, disabled]
-	);
-
-	// Validación simple de video requerido
-	if (!video) {
-		return (
-			<div
-				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
-					className
-				)}
-			>
-				<p className="text-red-800">Error: Video no encontrado</p>
-			</div>
-		);
-	}
-
-	// Extraer datos del video
-	const { id, name } = video;
-
-	// ID de carta para TCG
-	const cardId = `V${id.substring(0, 6).toUpperCase()}`;
-
-	// Conteos de relaciones - usar stats en lugar de acceso directo
-	const totalRelations = video.stats?.totalRelations ?? 0;
-
-	return (
-		<motion.button
-			aria-label={`Video: ${name}`}
-			className={cn(
-				'group relative cursor-pointer select-none',
-				'transition-all duration-300 ease-out',
-				isSelected && 'ring-2 ring-primary ring-offset-2',
-				disabled && 'cursor-not-allowed opacity-50',
-				compact ? 'w-40' : 'w-64',
-				className
-			)}
-			onClick={handleClick}
-			onKeyDown={handleKeyDown}
-			onMouseEnter={() => setIsHovered(true)}
-			onMouseLeave={() => setIsHovered(false)}
-			style={style}
-			whileHover={disabled ? {} : { y: -4, scale: 1.02 }}
-			whileTap={disabled ? {} : { scale: 0.98 }}
-		>
-			<CardContainer
-				className={cn(
-					'transition-all duration-300',
-					isHovered && 'scale-[1.02]',
-					isSelected && 'ring-4 ring-primary/60'
-				)}
-				glowLevel={isHovered ? 2 : 0}
-				primaryColor={primaryColor} // Añadir glowLevel basado en isHovered
-				secondaryColor={secondaryColor}
-			>
-				<div className="relative z-10 flex h-full flex-col">
-					{/* Header con nombre, duración y calidad */}
-					<VideoCardHeader compact={compact} primaryColor={primaryColor} tcgMode={tcgMode} video={video} />
-
-					{/* Thumbnail del video */}
-					<VideoCardThumbnail
-						compact={compact}
-						isHovered={isHovered}
-						primaryColor={primaryColor}
-						rarityLevel={rarityLevel}
-						tcgMode={tcgMode}
-						video={video}
-					/>
-
-					{/* Contenido con estadísticas y metadatos */}
-					{!compact && (
-						<VideoCardContent
-							primaryColor={primaryColor}
-							secondaryColor={secondaryColor}
-							tcgMode={tcgMode}
-							video={video}
-						/>
-					)}
-
-					{/* Footer con conteos y stats TCG */}
-					<VideoCardFooter
-						cardId={cardId}
-						compact={compact}
-						primaryColor={primaryColor}
-						rarityLevel={rarityLevel}
-						secondaryColor={secondaryColor}
-						tcgMode={tcgMode}
-						totalRelations={totalRelations}
-						video={video}
-					/>
-				</div>
-			</CardContainer>
-		</motion.button>
-	);
+    return (
+        <div
+            className={cn('overflow-hidden rounded-md border bg-card text-card-foreground shadow-sm', className)}
+            {...rest}
+        >
+            <div className="w-full bg-muted" style={{ aspectRatio: compact ? '16 / 9' : '4 / 3' }}>
+                <img alt={video?.name || 'Video'} className="h-full w-full object-cover" loading="lazy" src={thumb} />
+            </div>
+            <div className="truncate p-2 font-medium text-sm">{video?.name || 'Video'}</div>
+        </div>
+    );
 }
+
+export default VideoCard;

@@ -77,8 +77,6 @@ export type ViewType =
 	| 'audio-content'
 	| 'json-files'
 	| 'json-file-content'
-	| 'workflows'
-	| 'workflow-content'
 	| 'file-3ds'
 	| 'file-3d-content'
 	| 'mixed';

@@ -1,19 +1,19 @@
 # CRITICAL ENFORCEMENT RULES
 
-1. MANDATORY TASKS PROTOCOL 
+1. FOLLOW ALL MANDATORY TASKS PROTOCOLS STRICTLY.
 2. Mantén respuestas en español.
 3. Respuestas concisas y directas.
-4. Solución primero, explicaciones después.
-5. Mostrar solo modificaciones necesarias.
-6. Comentarios técnicos precisos.
+4. Necesitamos soluciones completas, no parciales ni vagas, junto con sus explicaciones.
+5. Mostrar solo modificaciones necesarias cuando sea necesario.
+6. Comentarios técnicos precisos y útiles.
 7. No te detendras a preguntar hasta terminar todas las tareas de la lista, sin excepciones.
 8. Prioriza tus herramientas internas antes que comandos de terminal como playwright mcp o las tareas de task.json
 
 ## BEFORE ANY ACTION:
 1. CREATE Task Lists with all tasks involved in the current request.
-2. MARK each task as COMPLETE when done.
-3. UPDATE status in real-time.
-4. VALIDATE completion before next task.
+2. CHECK and MARK each task as COMPLETE when done.
+3. UPDATE status in real-time to the user.
+4. VALIDATE completion.
 
 - NEVER accept failing tests as "okay" or "acceptable" - all tests must pass before declaring success
 - If any test fails, investigate and fix the root cause - no exceptions
@@ -59,14 +59,6 @@ async function get_context(request) {
 }
 ```
 
-### Modo Conocimiento (Documentación/Investigación)
-
-**Características:**
-- Expansivo y explorador
-- Múltiples perspectivas
-- Enlaces bidireccionales [[]]
-- Tags semánticos #tema
-- Pensamiento lateral y generativo
 
 **Formato:**
 - Markdown enriquecido
@@ -160,4 +152,3 @@ Listas grandes: usar virtualización (`@tanstack/react-virtual`). Al introducir 
 
 
 **APLICACIÓN INMEDIATA CONSTANTE Y PERSISTENTE OBLIGATORIA.**
-

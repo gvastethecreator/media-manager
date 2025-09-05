@@ -292,9 +292,9 @@ export async function updateFolderStats(
 		serverLogger.warn('updateFolderStats: fallo sincronizando subcarpetas; continuo', { err: e, folderId });
 	}
 
-	// 3) Escanear carpeta para obtener archivos soportados
+	// 3) Escanear carpeta para obtener archivos soportados (RECURSIVO para incluir subcarpetas)
 	const { scanFolder } = await import('@/lib/filesystem/folder-scanner');
-	const scan = await scanFolder(folderPath, { recursive: false, includeHidden: false, limit: 0 });
+	const scan = await scanFolder(folderPath, { recursive: true, includeHidden: false, limit: 0 });
 	const filePaths = scan.files.map((f: any) => f.path);
 
 	// 3b) Carpeta vacía: emitir y retornar temprano
@@ -681,12 +681,12 @@ export async function reindexAllFoldersThreePasses(
 		serverLogger.warn('reindexAll: fallo sincronizando archivos por carpeta; continúo', { err: e });
 	}
 
-	// 2) Escanear TODAS las carpetas (no recursivo para evitar duplicados si subcarpetas están registradas)
+	// 2) Escanear TODAS las carpetas (RECURSIVO para incluir archivos en subcarpetas)
 	type Item = { filePath: string; folderId: string };
 	const items: Item[] = [];
 	for (const f of stillExisting) {
 		try {
-			const scan = await scanFolder(f.path, { recursive: false, includeHidden, limit: 0 });
+			const scan = await scanFolder(f.path, { recursive: true, includeHidden, limit: 0 });
 			for (const file of scan.files) items.push({ filePath: file.path, folderId: f.id });
 		} catch (e) {
 			serverLogger.warn('reindexAll: fallo escaneando carpeta; continúo', { id: f.id, path: f.path, err: e });
