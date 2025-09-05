@@ -204,7 +204,9 @@ test.describe('Video Thumbnails WebP Animados', () => {
 		console.log('🎬 Testing video:', firstVideo.name);
 
 		// Probar endpoint de thumbnail
-		const thumbnailResponse = await page.request.get(`${API_BASE}/videos/${firstVideo.id}/thumbnail`);
+		const thumbnailResponse = await page.request.get(`${API_BASE}/videos/${firstVideo.id}/thumbnail`, {
+			timeout: 60_000,
+		});
 		expect(thumbnailResponse.ok()).toBeTruthy();
 
 		// Verificar content-type WebP

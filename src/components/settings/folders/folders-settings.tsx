@@ -1,9 +1,11 @@
 import {
 	AlertCircle,
 	ArrowUpDown,
+	AudioLines,
 	Calendar,
 	EraserIcon,
 	Eye,
+	FileText,
 	Filter,
 	Folder,
 	FolderIcon,
@@ -39,6 +41,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 import { FolderCard } from './folder-card';
+import { FolderIndexStatusBadge, type IndexStatus } from './folder-card-index-status-badge';
 import { getFolderIndexStatus } from './folder-utils';
 import { FolderForm } from './folders-form';
 import { StructuredReindexConfig } from './folders-reindex-config';
@@ -46,6 +49,8 @@ import { FoldersStats } from './folders-stats';
 import { useFolderStats } from './hooks/use-folder-stats';
 import { useFolders } from './hooks/use-folders';
 import { ReindexTerminal } from './reindex-terminal';
+import { computeIsReindexing } from './utils/is-reindexing';
+import { getStatusMessage } from './utils/status-message';
 
 // OPTIMIZACIÓN: Provider global de tooltips para evitar 3400+ renders
 const GlobalTooltipProvider = memo(function GlobalTooltipProvider({ children }: { children: React.ReactNode }) {
@@ -101,6 +106,30 @@ const MemoizedErrorWrapper = memo(function MemoizedErrorWrapper({
 	}, [setErrorMessage, setError, loadStats]);
 
 	return <ErrorCard message={displayError} onRetry={handleRetry} />;
+});
+
+// Micro card reutilizable para condensar información en celdas
+const MicroCell = memo(function MicroCell({
+	children,
+	className,
+	tone = 'default',
+}: {
+	children: React.ReactNode;
+	className?: string;
+	// estilos suaves por tono; default para la mayoría
+	tone?: 'default' | 'info' | 'success' | 'warning' | 'danger';
+}) {
+	const toneClasses =
+		tone === 'danger'
+			? 'border-red-200/40 bg-red-50/60 dark:bg-red-950/20'
+			: tone === 'warning'
+				? 'border-amber-200/40 bg-amber-50/60 dark:bg-amber-950/20'
+				: tone === 'success'
+					? 'border-emerald-200/40 bg-emerald-50/60 dark:bg-emerald-950/20'
+					: tone === 'info'
+						? 'border-blue-200/40 bg-blue-50/60 dark:bg-blue-950/20'
+						: 'border-border/40 bg-muted/10';
+	return <div className={cn('rounded-sm border px-2.5 py-2', toneClasses, className)}>{children}</div>;
 });
 
 // Función pura para crear la ordenación jerárquica con niveles visuales (optimizada fuera del componente)
@@ -244,7 +273,7 @@ const FoldersSettings = memo(function FoldersSettings() {
 	}
 
 	return (
-		<div className="h-fit">
+		<div className="h-fit" data-testid="folders-settings">
 			{/* Layout en 2 columnas mejorado */}
 			<div className="flex">
 				{/* Columna izquierda: Tabla de carpetas */}
@@ -465,7 +494,19 @@ const FoldersSettings = memo(function FoldersSettings() {
 					</div>
 
 					{/* Estadísticas generales mejoradas */}
-					{generalStats && !isStatsLoading && <FoldersStats stats={generalStats} />}
+					<div data-testid="folders-stats">
+						{isStatsLoading ? (
+							<div className="rounded-sm border-none bg-muted/30 p-4 text-muted-foreground text-sm">
+								Cargando estadísticas…
+							</div>
+						) : generalStats ? (
+							<FoldersStats stats={generalStats} />
+						) : (
+							<div className="rounded-sm border-none bg-muted/30 p-4 text-muted-foreground text-sm">
+								Sin estadísticas disponibles
+							</div>
+						)}
+					</div>
 				</div>
 			</div>
 		</div>
@@ -587,7 +628,7 @@ function FoldersTable({
 		return filtered;
 	}, [orderedFolders, filterText, filterStatus, sortBy, sortDirection, getSortValue, getParentName]);
 
-	// Función para obtener color de estado
+	// Función para obtener color de estado (ampliada)
 	const getStatusColor = (status: string) => {
 		switch (status) {
 			case 'indexed':
@@ -596,10 +637,33 @@ function FoldersTable({
 				return 'text-orange-600';
 			case 'processing':
 				return 'text-blue-600';
+			case 'pending':
+				return 'text-blue-600';
+			case 'outdated':
+				return 'text-amber-600';
+			case 'not_found':
 			case 'error':
 				return 'text-red-600';
 			default:
 				return 'text-muted-foreground';
+		}
+	};
+
+	// Mapa de estado a tono visual de MicroCell
+	const getStatusTone = (status: string): 'default' | 'info' | 'success' | 'warning' | 'danger' => {
+		switch (status) {
+			case 'indexed':
+				return 'success';
+			case 'processing':
+			case 'pending':
+				return 'info';
+			case 'outdated':
+				return 'warning';
+			case 'error':
+			case 'not_found':
+				return 'danger';
+			default:
+				return 'default';
 		}
 	};
 
@@ -670,7 +734,7 @@ function FoldersTable({
 				<Table>
 					<TableHeader>
 						<TableRow className="border-b bg-muted/20 hover:bg-muted/30">
-							<TableHead className="min-w-[300px] font-semibold">
+							<TableHead className="min-w-[300px] font-semibold text-[13px]">
 								<Button
 									className="h-auto p-0 font-semibold hover:bg-transparent hover:text-primary"
 									onClick={() => handleSort('name')}
@@ -686,16 +750,7 @@ function FoldersTable({
 									/>
 								</Button>
 							</TableHead>
-							<TableHead className="w-16 text-center font-semibold">
-								<Tooltip>
-									<TooltipTrigger>
-										<Heart className="mx-auto h-4 w-4 text-red-500" />
-									</TooltipTrigger>
-									<TooltipContent>Favoritas</TooltipContent>
-								</Tooltip>
-							</TableHead>
-							<TableHead className="w-24 font-semibold">Estado</TableHead>
-							<TableHead className="min-w-[140px] font-semibold">
+							<TableHead className="w-44 font-semibold text-[13px]">
 								<Button
 									className="h-auto p-0 font-semibold hover:bg-transparent hover:text-primary"
 									onClick={() => handleSort('lastIndexed')}
@@ -703,7 +758,7 @@ function FoldersTable({
 									variant="ghost"
 								>
 									<Calendar className="mr-1.5 h-3.5 w-3.5" />
-									Último indexado
+									Estado
 									<ArrowUpDown
 										className={cn(
 											'ml-2 h-3.5 w-3.5 transition-colors',
@@ -712,7 +767,7 @@ function FoldersTable({
 									/>
 								</Button>
 							</TableHead>
-							<TableHead className="w-10 text-center font-semibold">
+							<TableHead className="w-28 text-center font-semibold text-[13px]">
 								<Button
 									className="h-auto p-0 font-semibold hover:bg-transparent hover:text-primary"
 									onClick={() => handleSort('images')}
@@ -720,7 +775,7 @@ function FoldersTable({
 									variant="ghost"
 								>
 									<Image className="mr-1 h-3.5 w-3.5" />
-									Img
+									Medios
 									<ArrowUpDown
 										className={cn(
 											'ml-1.5 h-3.5 w-3.5 transition-colors',
@@ -729,31 +784,13 @@ function FoldersTable({
 									/>
 								</Button>
 							</TableHead>
-							<TableHead className="w-20 text-center font-semibold">
-								<Button
-									className="h-auto p-0 font-semibold hover:bg-transparent hover:text-primary"
-									onClick={() => handleSort('videos')}
-									size="sm"
-									variant="ghost"
-								>
-									<Video className="mr-1 h-3.5 w-3.5" />
-									Vid
-									<ArrowUpDown
-										className={cn(
-											'ml-1.5 h-3.5 w-3.5 transition-colors',
-											sortBy === 'videos' ? 'text-primary' : 'text-muted-foreground'
-										)}
-									/>
-								</Button>
-							</TableHead>
-							<TableHead className="w-24 text-center font-semibold">Progreso</TableHead>
-							<TableHead className="w-32 text-right font-semibold">Acciones</TableHead>
+							<TableHead className="w-32 text-right font-semibold text-[13px]">Acciones</TableHead>
 						</TableRow>
 					</TableHeader>
 					<TableBody>
 						{rows.length === 0 ? (
 							<TableRow>
-								<TableCell className="py-12 text-center text-muted-foreground" colSpan={8}>
+								<TableCell className="py-12 text-center text-muted-foreground" colSpan={4}>
 									{filterText || filterStatus !== 'all' ? (
 										<div className="space-y-4">
 											<Folder className="mx-auto h-12 w-12 text-muted-foreground/30" />
@@ -800,130 +837,159 @@ function FoldersTable({
 										data-state={isSelected ? 'selected' : undefined}
 										key={folder.id}
 									>
-										<TableCell className="max-w-[420px] py-3">
-											<div className="flex items-center gap-3">
-												{/* Indentación visual para mostrar jerarquía */}
-												{folder._hierarchyLevel > 0 && (
-													<div className="flex items-center" style={{ marginLeft: `${folder._hierarchyLevel * 20}px` }}>
-														{/* Línea vertical conectora */}
-														<div className="mr-2 h-4 w-px bg-border" />
-														{/* Línea horizontal conectora */}
-														<div className="mr-2 h-px w-3 bg-border" />
-													</div>
-												)}
-												<div className="relative">
-													{folder.emoji ? (
-														<div className="flex h-9 w-9 items-center justify-center bg-primary/5 text-sm">
-															{folder.emoji}
-														</div>
-													) : (
-														<div className="flex h-9 w-9 items-center justify-center bg-primary/5">
-															<FolderIcon
-																className={cn('h-5 w-5 text-primary', folder._hierarchyLevel > 0 && 'text-primary/70')}
-															/>
-														</div>
-													)}
-													{hasError && (
-														<AlertCircle className="-right-1 -top-1 absolute h-3.5 w-3.5 text-destructive" />
-													)}
-												</div>
-												<div className="min-w-0 flex-1">
-													<div className="flex items-center gap-2">
-														<span
-															className={cn(
-																'truncate font-medium',
-																folder._hierarchyLevel > 0 && 'text-muted-foreground text-sm'
-															)}
+										<TableCell className="max-w-[420px] py-2.5">
+											<MicroCell className="bg-background">
+												<div className="flex items-center gap-2.5 text-[13px]">
+													{/* Indentación visual para mostrar jerarquía */}
+													{folder._hierarchyLevel > 0 && (
+														<div
+															className="flex items-center"
+															style={{ marginLeft: `${folder._hierarchyLevel * 16}px` }}
 														>
-															{folder.name}
-														</span>
-														{folder.isFavorite && <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />}
-														{folder._isOrphan && (
-															<Badge className="text-xs" variant="destructive">
-																Huérfana
-															</Badge>
+															{/* Línea vertical conectora */}
+															<div className="mr-2 h-3.5 w-px bg-border" />
+															{/* Línea horizontal conectora */}
+															<div className="mr-2 h-px w-2.5 bg-border" />
+														</div>
+													)}
+													<div className="relative">
+														{folder.emoji ? (
+															<div className="flex h-8 w-8 items-center justify-center bg-primary/5 text-xs">
+																{folder.emoji}
+															</div>
+														) : (
+															<div className="flex h-8 w-8 items-center justify-center bg-primary/5">
+																<FolderIcon
+																	className={cn(
+																		'h-4 w-4 text-primary',
+																		folder._hierarchyLevel > 0 && 'text-primary/70'
+																	)}
+																/>
+															</div>
+														)}
+														{hasError && <AlertCircle className="-right-1 -top-1 absolute h-3 w-3 text-destructive" />}
+													</div>
+													<div className="min-w-0 flex-1">
+														<div className="flex items-center gap-2">
+															<span
+																className={cn(
+																	'truncate font-medium text-[13px]',
+																	folder._hierarchyLevel > 0 && 'text-[12px] text-muted-foreground'
+																)}
+															>
+																{folder.name}
+															</span>
+															{folder.isFavorite && <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />}
+															{folder._isOrphan && (
+																<Badge className="text-[11px]" variant="destructive">
+																	Huérfana
+																</Badge>
+															)}
+														</div>
+														{parentName && (
+															<div className="truncate text-[12px] text-muted-foreground">
+																{parentName} / {folder.name}
+															</div>
 														)}
 													</div>
-													{parentName && (
-														<div className="truncate text-muted-foreground text-sm">
-															{parentName} / {folder.name}
+												</div>
+											</MicroCell>
+										</TableCell>
+										<TableCell className="py-2.5">
+											{(() => {
+												const indexStatus = status as IndexStatus;
+												const isReindexing = computeIsReindexing({
+													folderId: folder.id,
+													processStatus,
+													isGloballyProcessing,
+													globalCurrentFolderId,
+													isProcessingFlag: Boolean(progressByFolder[folder.id]?.isProcessing) || isProcessing,
+												});
+												const statusMsg = getStatusMessage(isReindexing, false, isProcessing);
+												return (
+													<MicroCell tone={getStatusTone(indexStatus)}>
+														<div className="flex items-center gap-2">
+															<FolderIndexStatusBadge lastIndexed={folder.lastIndexed} status={indexStatus} />
+															{statusMsg && <span className="text-[11px] text-muted-foreground">{statusMsg}</span>}
+															<Tooltip>
+																<TooltipTrigger asChild>
+																	<span className="cursor-help text-[11px] text-muted-foreground">
+																		{formatDate(folder.lastIndexed)}
+																	</span>
+																</TooltipTrigger>
+																<TooltipContent>
+																	{folder.lastIndexed
+																		? `Indexado el ${formatDate(folder.lastIndexed)}`
+																		: 'Nunca indexado'}
+																</TooltipContent>
+															</Tooltip>
 														</div>
-													)}
+													</MicroCell>
+												);
+											})()}
+										</TableCell>
+										<TableCell className="py-2.5 text-center text-[13px]">
+											<MicroCell className="inline-flex">
+												<div className="flex items-center justify-center gap-3">
+													<div className="flex items-center gap-1.5">
+														<Image className="h-3.5 w-3.5 text-muted-foreground" />
+														<span className="font-medium text-[12px]">
+															{folder.totalImages ?? folder.imageCount ?? 0}
+														</span>
+													</div>
+													<div className="flex items-center gap-1.5">
+														<Video className="h-3.5 w-3.5 text-muted-foreground" />
+														<span className="font-medium text-[12px]">
+															{folder.totalVideos ?? folder.videoCount ?? 0}
+														</span>
+													</div>
+													<div className="flex items-center gap-1.5">
+														<AudioLines className="h-3.5 w-3.5 text-muted-foreground" />
+														<span className="font-medium text-[12px]">
+															{folder.totalAudio ?? folder.audioCount ?? 0}
+														</span>
+													</div>
+													<div className="flex items-center gap-1.5">
+														<FileText className="h-3.5 w-3.5 text-muted-foreground" />
+														<span className="font-medium text-[12px]">
+															{folder.totalDocuments ?? folder.documentCount ?? 0}
+														</span>
+													</div>
 												</div>
-											</div>
+											</MicroCell>
 										</TableCell>
-										<TableCell className="text-center">
-											{folder.isFavorite && <Heart className="mx-auto h-4 w-4 fill-red-500 text-red-500" />}
-										</TableCell>
-										<TableCell>
-											<Badge className={cn('text-xs capitalize', getStatusColor(status))} variant="outline">
-												{status}
-											</Badge>
-										</TableCell>
-										<TableCell className="text-sm">
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<span className="cursor-help">{formatDate(folder.lastIndexed)}</span>
-												</TooltipTrigger>
-												<TooltipContent>
-													{folder.lastIndexed ? `Indexado el ${formatDate(folder.lastIndexed)}` : 'Nunca indexado'}
-												</TooltipContent>
-											</Tooltip>
-										</TableCell>
-										<TableCell className="text-center text-sm">
-											<div className="flex items-center justify-center gap-1.5">
-												<Image className="h-3.5 w-3.5 text-muted-foreground" />
-												<span className="font-medium">{folder.totalImages ?? folder.imageCount ?? 0}</span>
-											</div>
-										</TableCell>
-										<TableCell className="text-center text-sm">
-											<div className="flex items-center justify-center gap-1.5">
-												<Video className="h-3.5 w-3.5 text-muted-foreground" />
-												<span className="font-medium">{folder.totalVideos ?? folder.videoCount ?? 0}</span>
-											</div>
-										</TableCell>
-										<TableCell className="text-center">
-											{typeof rowProgress === 'number' ? (
-												<div className="space-y-1.5">
-													<Progress className="h-2.5" value={rowProgress} />
-													<span className="font-medium text-muted-foreground text-xs">{Math.round(rowProgress)}%</span>
+										<TableCell className="py-2.5 text-right">
+											<MicroCell className="inline-flex">
+												<div className="flex justify-end gap-1.5">
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<Button
+																className="h-7 w-7 p-0 shadow-sm transition-all hover:shadow-md"
+																disabled={disabled}
+																onClick={() => onReindex(folder.id)}
+																size="sm"
+																variant="outline"
+															>
+																<RefreshCw className={cn('h-3 w-3', disabled && 'opacity-50')} />
+															</Button>
+														</TooltipTrigger>
+														<TooltipContent>Reindexar carpeta</TooltipContent>
+													</Tooltip>
+													<Tooltip>
+														<TooltipTrigger asChild>
+															<Button
+																className="h-7 w-7 p-0 shadow-sm transition-all hover:shadow-md"
+																onClick={() => onFolderClick(folder.id)}
+																size="sm"
+																variant={isSelected ? 'destructive' : 'outline'}
+															>
+																<Trash2 className="h-3 w-3" />
+															</Button>
+														</TooltipTrigger>
+														<TooltipContent>{isSelected ? 'Confirmar eliminación' : 'Eliminar carpeta'}</TooltipContent>
+													</Tooltip>
 												</div>
-											) : (
-												<span className="text-muted-foreground text-xs">—</span>
-											)}
-										</TableCell>
-										<TableCell className="text-right">
-											<div className="flex justify-end gap-1.5">
-												<Tooltip>
-													<TooltipTrigger asChild>
-														<Button
-															className="h-8 w-8 p-0 shadow-sm transition-all hover:shadow-md"
-															disabled={disabled}
-															onClick={() => onReindex(folder.id)}
-															size="sm"
-															variant="outline"
-														>
-															<RefreshCw className={cn('h-3.5 w-3.5', disabled && 'opacity-50')} />
-														</Button>
-													</TooltipTrigger>
-													<TooltipContent>Reindexar carpeta</TooltipContent>
-												</Tooltip>
-												<Tooltip>
-													<TooltipTrigger asChild>
-														<Button
-															className="h-8 w-8 p-0 shadow-sm transition-all hover:shadow-md"
-															onClick={() => onFolderClick(folder.id)}
-															size="sm"
-															variant={isSelected ? 'destructive' : 'ghost'}
-														>
-															{isSelected ? <Trash2 className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-														</Button>
-													</TooltipTrigger>
-													<TooltipContent>
-														{isSelected ? 'Eliminar carpeta' : 'Seleccionar para eliminar'}
-													</TooltipContent>
-												</Tooltip>
-											</div>
+											</MicroCell>
 										</TableCell>
 									</TableRow>
 								);

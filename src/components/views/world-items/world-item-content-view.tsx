@@ -1,69 +1,61 @@
 import { Box } from 'lucide-react';
-import { memo, useCallback, useMemo } from 'react';
-import type { BaseContentProps } from '@/components/views/base';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import { memo, useCallback } from 'react';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { BaseContentView } from '@/components/views/base/base-content-view';
 import { useWorldItemImages } from '@/lib/api/world-items';
-import { clientLogger } from '@/lib/logger/client-logger';
+import { useDetailsPanel } from '@/store/details-panel.store';
 import { useWorldItemStore } from '@/store/entities/world-item';
-import { useSelectionStore } from '@/store/selection.store';
-import type { EntityWithStats } from '@/types/entities/entity.types';
-
-const viewLogger = clientLogger.withContext('WorldItemContentView');
+import type { AnyEntityWithStats } from '@/types/entities';
 
 export const WorldItemContentView = memo(function WorldItemContentView() {
 	const selectedId = useWorldItemStore((state) => state.ui.selectedId);
 	const selectedWorldItem = useWorldItemStore((state) => state.getWorldItemById(selectedId || ''));
-	const { toggleSelection } = useSelectionStore();
 
-	const { data: images = [], isLoading, error, refetch } = useWorldItemImages(selectedId || '');
+	const { data: images = [], isLoading, error } = useWorldItemImages(selectedId || '');
+	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 
-	const handleItemSelection = useCallback(
-		(item: EntityWithStats, _isMultiSelect: boolean) => {
-			viewLogger.info('🖱️ Item seleccionado:', item.name);
-			toggleSelection(item.id, item);
+	const handleItemSelect = useCallback(
+		(item: AnyEntityWithStats) => {
+			setSelectedItems([item]);
+			setDetailsPanelVisible(true);
 		},
-		[toggleSelection]
+		[setSelectedItems, setDetailsPanelVisible]
 	);
 
-	const emptyState = useMemo(
-		() =>
-			selectedId
-				? {
-						icon: Box,
-						title: 'Objeto del mundo sin imágenes',
-						description: 'Este objeto del mundo no tiene imágenes asociadas.',
-					}
-				: {
-						icon: Box,
-						title: 'No hay objeto del mundo seleccionado',
-						description: 'Selecciona un objeto del mundo para ver su contenido.',
-					},
-		[selectedId]
-	);
-
-	const contentProps: BaseContentProps = useMemo(
-		() => ({
-			items: images as EntityWithStats[],
-			isLoading,
-			error: error ? error.message : null,
-			toggleItemSelection: handleItemSelection,
-			currentContainerId: selectedId ?? null,
-			containerName: selectedWorldItem?.name ?? null,
-			emptyState,
-			onRefresh: async () => {
-				await refetch();
-			},
-		}),
-		[images, isLoading, error, handleItemSelection, selectedId, selectedWorldItem?.name, emptyState, refetch]
-	);
-
-	return (
-		<ContentViewProvider {...contentProps}>
+	if (!selectedId) {
+		return (
 			<BaseContentView>
-				<div className="p-4">
-					<p>World item content view</p>
+				<div className="flex h-full items-center justify-center">
+					<EmptyState
+						description="Selecciona un objeto del mundo para ver su contenido"
+						icon={Box}
+						title="Sin objeto seleccionado"
+					/>
 				</div>
 			</BaseContentView>
-		</ContentViewProvider>
+		);
+	}
+
+	if (error) {
+		return (
+			<BaseContentView>
+				<div className="flex h-full items-center justify-center text-red-500">Error: {error.message}</div>
+			</BaseContentView>
+		);
+	}
+
+	return (
+		<BaseContentView
+			description={selectedWorldItem?._count?.images ? `${selectedWorldItem._count.images} imágenes` : undefined}
+			title={selectedWorldItem?.name ?? 'Objeto del mundo'}
+		>
+			<FileBrowser
+				className="h-full"
+				isLoading={isLoading}
+				items={images as unknown as AnyEntityWithStats[]}
+				onItemClick={handleItemSelect}
+			/>
+		</BaseContentView>
 	);
 });

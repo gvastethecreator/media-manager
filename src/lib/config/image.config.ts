@@ -37,7 +37,7 @@ export const imageConfig: ImageConfig = {
 		cacheSize: 1000,
 	},
 	processing: {
-		maxSize: 1024 * 1024 * 20, // 20MB
+		maxSize: 1024 * 1024 * 200, // 200MB para procesar imágenes complejas
 		supportedFormats: ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
 		defaultFormat: 'webp',
 	},

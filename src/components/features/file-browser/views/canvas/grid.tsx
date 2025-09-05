@@ -36,7 +36,7 @@ export function Grid({
 		return (
 			<div
 				className="file-browser-canvas file-browser-grid h-full w-full overflow-auto"
-				data-testid="grid-view"
+				data-testid="grid-canvas-view"
 				ref={setInternalScrollEl}
 			>
 				<div className="relative" data-testid="file-browser-scroll-area-viewport">
@@ -56,7 +56,7 @@ export function Grid({
 	return (
 		<div
 			className="file-browser-canvas file-browser-grid h-full w-full overflow-auto"
-			data-testid="grid-view"
+			data-testid="grid-canvas-view"
 			ref={setInternalScrollEl}
 		>
 			{/* Contenedor virtual con altura total calculada */}

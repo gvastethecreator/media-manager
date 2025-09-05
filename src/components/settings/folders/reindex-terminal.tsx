@@ -185,19 +185,20 @@ export function ReindexTerminal({
 				}
 
 				case 'folder:reindexAll:progress': {
-					addLog(
-						'INFO',
-						`📂 [${data.processedFolders}/${data.totalFolders}] ${data.currentFolder || 'Procesando...'}`,
-						{
-							source: 'reindex-all',
-							folderId: data.folderId,
-							folderPath: data.currentFolder,
-							isFolderMain: true, // Este es un log de carpeta principal
-						}
-					);
+					// Validar datos y proveer fallbacks para evitar undefined
+					const processedFolders = data.filesProcessed ?? data.processedFolders ?? 0;
+					const totalFolders = data.totalFiles ?? data.totalFolders ?? 0;
+					const currentFolder = data.currentFolder ?? data.folderName ?? 'Procesando...';
+
+					addLog('INFO', `📂 [${processedFolders}/${totalFolders}] ${currentFolder}`, {
+						source: 'reindex-all',
+						folderId: data.folderId,
+						folderPath: data.currentFolder || data.folderPath,
+						isFolderMain: true, // Este es un log de carpeta principal
+					});
 					// Actualizar progreso
-					if (data.processedFolders && data.totalFolders) {
-						const progressPercent = (data.processedFolders / data.totalFolders) * 100;
+					if (processedFolders > 0 && totalFolders > 0) {
+						const progressPercent = (processedFolders / totalFolders) * 100;
 						setCurrentProgress(progressPercent);
 					}
 					break;
@@ -342,7 +343,7 @@ export function ReindexTerminal({
 		return (
 			<div
 				className={cn(
-					'flex items-center gap-3 p-1 transition-all duration-300',
+					'flex items-center gap-3 p-1 transition-all duration-300 h-12',
 					log.isSticky && {
 						'sticky top-0 z-10 border-gray-700/50 border-b bg-gray-900/95 shadow-lg backdrop-blur-sm': true,
 						'bg-gradient-to-r from-blue-900/20 to-transparent': true,
@@ -356,7 +357,7 @@ export function ReindexTerminal({
 				<Icon className={cn('h-3 w-3 flex-shrink-0', colorClass)} />
 				<span
 					className={cn(
-						'break-words font-mono text-sm leading-tight',
+						'break-words font-mono text-sm leading-tight overflow-hidden',
 						log.isSticky ? 'font-medium text-gray-50' : 'text-gray-100'
 					)}
 				>

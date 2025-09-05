@@ -11,8 +11,6 @@ import { EditModeControls } from './folder-card-edit-controls';
 import { FolderErrorDisplay } from './folder-card-error-display';
 import { ExpandedSubfolders } from './folder-card-expanded-subfolders';
 import { FolderIndexStatusBadge, type IndexStatus } from './folder-card-index-status-badge';
-import { FolderProcessingDetails } from './folder-card-processing-details';
-import { FolderProgressIndicator } from './folder-card-progress-indicator';
 import { FolderStatsDisplay } from './folder-card-stats-display';
 import { ThumbnailGrid } from './folder-card-thumbnail-grid';
 import type { ExtendedFolder, ExtendedProcessStatus } from './folder-types';
@@ -371,12 +369,7 @@ export const FolderCard = memo(
 						}
 					)}
 				>
-					{/* Processing Progress Indicator */}
-					<FolderProgressIndicator
-						isReindexing={isReindexing}
-						lastProgress={lastProgress}
-						showCompleteAnimation={showCompleteAnimation}
-					/>
+					{/* Progreso oculto en tarjetas (usamos ReindexTerminal) */}
 
 					{/* Main content layout - mejor estructura sin overlaps */}
 					<div className="flex min-w-0 flex-col gap-3">
@@ -448,17 +441,7 @@ export const FolderCard = memo(
 						</div>
 					)}
 
-					{/* Processing Details con animación suave */}
-					{(isReindexing || (processStatus?.folderId === folder.id && (processStatus?.progress ?? 0) > 0)) && (
-						<div className="slide-in-from-bottom-2 mt-3 animate-in duration-300">
-							<FolderProcessingDetails
-								isReindexing={isReindexing}
-								lastProgress={lastProgress}
-								processStatus={processStatus}
-								subfolders={subfolders}
-							/>
-						</div>
-					)}
+					{/* Detalles de procesamiento ocultos en tarjetas (centralizado en terminal) */}
 				</div>
 
 				{/* Expanded Subfolders con animación */}

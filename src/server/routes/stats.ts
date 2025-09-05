@@ -94,11 +94,15 @@ router.get('/storage', async (_req, res) => {
 
 		const storage = {
 			images: { count: stats?.totalImages || 0, size: totalSize, percentage: 0 },
-			videos: { count: 0, size: 0, percentage: 0 }, // No hay datos directos
-			audio: { count: 0, size: totalAudio, percentage: 0 },
-			documents: { count: 0, size: totalDocuments, percentage: 0 },
-			thumbnails: { count: 0, size: totalSize, percentage: 0 }, // totalSize es de thumbnails
-			other: { count: 0, size: totalJsonFiles + totalWorkflows + totalFile3D, percentage: 0 },
+			videos: { count: stats?.totalVideos || 0, size: 0, percentage: 0 }, // TODO: Añadir tamaño de videos
+			audio: { count: stats?.totalAudio || 0, size: totalAudio, percentage: 0 },
+			documents: { count: stats?.totalDocuments || 0, size: totalDocuments, percentage: 0 },
+			thumbnails: { count: stats?.totalThumbnails || 0, size: 0, percentage: 0 }, // TODO: Añadir tamaño de thumbnails
+			other: {
+				count: (stats?.totalJsonFiles || 0) + (stats?.totalFile3D || 0) + totalWorkflows,
+				size: totalJsonFiles + totalFile3D,
+				percentage: 0,
+			},
 		};
 
 		// Calcular porcentajes

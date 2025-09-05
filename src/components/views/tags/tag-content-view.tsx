@@ -1,56 +1,71 @@
-import { useCallback, useEffect, useState } from 'react';
-// import { getTagImages } from '@/app/actions/tags'; // Función no encontrada, comentada
+import { Tag } from 'lucide-react';
+import { useCallback, useMemo } from 'react';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { BaseContentView } from '@/components/views/base/base-content-view';
+import { useTagImages } from '@/lib/api/tags';
+import { useDetailsPanel } from '@/store/details-panel.store';
 import { useTagStore } from '@/store/entities/tag';
 import { useSelectedTag } from '@/store/entities/tag/selectors';
-import type { EntityWithStats } from '@/types/entities/entity.types';
+import type { AnyEntityWithStats } from '@/types/entities';
 
 /**
- * 🏷️ Vista de contenido de etiquetas
- *
- * Muestra todas las imágenes asociadas a una etiqueta utilizando el componente EntityCard
+ * 🏷️ Vista de contenido de etiquetas (refactor a FileBrowser)
  */
 export function TagContentView() {
 	const selectedId = useTagStore((state) => state.selectedId);
 	const selectedTag = useSelectedTag();
 
-	const [_images, setImages] = useState<EntityWithStats[]>([]);
-	const [_isLoading, setIsLoading] = useState(false);
+	const { data: images = [], isLoading, error, refetch } = useTagImages(selectedId || '');
+	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 
-	// Función para cargar imágenes de la etiqueta
-	const _fetchTagImages = useCallback(async (_tagId: string) => {
-		// const images = await getTagImages(tagId);
-		// return images as EntityWithStats[];
-		// Simulación mientras se encuentra la función correcta
-		await new Promise((res) => setTimeout(res, 500));
-		return [] as EntityWithStats[];
-	}, []);
+	const handleItemSelect = useCallback(
+		(item: AnyEntityWithStats) => {
+			setSelectedItems([item]);
+			setDetailsPanelVisible(true);
+		},
+		[setSelectedItems, setDetailsPanelVisible]
+	);
 
-	useEffect(() => {
-		if (!selectedId) {
-			return;
-		}
-		const fetchImages = async () => {
-			setIsLoading(true);
-			// const images = await getTagImages(currentTag.id);
-			// setImages(images);
-			// Simulación mientras se encuentra la función correcta
-			await new Promise((res) => setTimeout(res, 500));
-			setImages([]); // Poner un array vacío por ahora
-			setIsLoading(false);
-		};
-		fetchImages();
-	}, [selectedId]);
+	const headerTitle = useMemo(
+		() => (selectedTag?.name ? `Imágenes con etiqueta: ${selectedTag.name}` : 'Selecciona una etiqueta'),
+		[selectedTag?.name]
+	);
 
-	// Renderizar el componente adecuadamente
+	if (!selectedId) {
+		return (
+			<BaseContentView>
+				<div className="flex h-full items-center justify-center">
+					<EmptyState
+						description="Selecciona una etiqueta para ver su contenido"
+						icon={Tag}
+						title="Sin etiqueta seleccionada"
+					/>
+				</div>
+			</BaseContentView>
+		);
+	}
+
+	if (error) {
+		return (
+			<BaseContentView>
+				<div className="flex h-full items-center justify-center text-red-500">Error: {error.message}</div>
+			</BaseContentView>
+		);
+	}
+
 	return (
-		<div className="flex h-full w-full flex-col p-4">
-			<h1 className="mb-4 font-bold text-2xl">Imágenes con etiqueta: {selectedTag?.name || 'Cargando...'}</h1>
-
-			<p className="mb-6 text-muted-foreground">{selectedTag?._count?.images || 0} imágenes con esta etiqueta</p>
-
-			<div className="mt-8 text-center">
-				<p className="text-muted-foreground">Componente TagContentView en desarrollo. Próximamente disponible.</p>
-			</div>
-		</div>
+		<BaseContentView
+			description={selectedTag?._count?.images ? `${selectedTag._count.images} imágenes` : undefined}
+			title={headerTitle}
+		>
+			<FileBrowser
+				className="h-full"
+				isLoading={isLoading}
+				items={images as unknown as AnyEntityWithStats[]}
+				onItemClick={handleItemSelect}
+			// Doble clic: el FileBrowser abre visor por defecto para imágenes
+			/>
+		</BaseContentView>
 	);
 }

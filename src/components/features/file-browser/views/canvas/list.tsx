@@ -31,7 +31,7 @@ export function List({
 		return (
 			<div
 				className="file-browser-canvas file-browser-list h-full w-full overflow-auto"
-				data-testid="listview-container"
+				data-testid="list-canvas-view"
 				ref={setInternalScrollEl}
 			>
 				<div className="relative" data-testid="file-browser-scroll-area-viewport">
@@ -55,7 +55,7 @@ export function List({
 	return (
 		<div
 			className="file-browser-canvas file-browser-list h-full w-full overflow-auto"
-			data-testid="listview-container"
+			data-testid="list-canvas-view"
 			ref={setInternalScrollEl}
 		>
 			{/* Contenedor virtual */}
