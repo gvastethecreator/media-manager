@@ -90,7 +90,6 @@ interface StatsData extends BaseEntity {
 	totalDocuments: number;
 	totalAudio: number;
 	totalJsonFiles: number;
-	totalWorkflows: number;
 	totalFile3D: number;
 
 	// Listas detalladas
@@ -197,7 +196,6 @@ export const useStatsBaseStore = create<{
 					totalActivities: 0,
 					totalDocuments: 0,
 					totalJsonFiles: 0,
-					totalWorkflows: 0,
 					totalFile3D: 0,
 					// Listas detalladas
 					folders: [],
@@ -244,7 +242,6 @@ export const useStatsBaseStore = create<{
 					totalActivities: 0,
 					totalDocuments: 0,
 					totalJsonFiles: 0,
-					totalWorkflows: 0,
 					totalFile3D: 0,
 					// Listas detalladas
 					folders: [],

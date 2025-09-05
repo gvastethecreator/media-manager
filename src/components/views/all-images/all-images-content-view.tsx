@@ -12,7 +12,6 @@ import { motion } from '@/components/ui/motion-shim';
 import { Progress } from '@/components/ui/progress';
 
 import { useToast } from '@/components/ui/use-toast';
-import { BaseContentView } from '@/components/views/base/base-content-view';
 import type { AnyEntityWithStats } from '@/types/entities';
 import type { ImageWithStats } from '@/types/entities/image';
 
@@ -212,10 +211,21 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 	// }
 
 	return (
-		<BaseContentView
-			description={`${images?.length || 0} ${(images?.length || 0) === 1 ? 'imagen' : 'imágenes'} en total`}
-			headerControls={
-				<>
+		<div className="h-full">
+			{/* Barra de estado de indexación */}
+			{renderIndexingStatus()}
+
+			{/* Toolbar con controles superiores */}
+			<div className="flex items-center justify-between gap-3 border-border border-b bg-background/40 px-3 py-2 backdrop-blur-sm">
+				<div className="flex min-w-0 items-center gap-3">
+					<div className="min-w-0">
+						<h2 className="truncate font-semibold text-foreground text-sm leading-tight">Todas las Imágenes</h2>
+						<p className="truncate text-muted-foreground text-xs leading-tight">
+							{images?.length || 0} {(images?.length || 0) === 1 ? 'imagen' : 'imágenes'} en total
+						</p>
+					</div>
+				</div>
+				<div className="flex items-center gap-2">
 					{isIndexing && (
 						<Badge className="animate-pulse" variant="secondary">
 							<FolderSync className="mr-1 h-3 w-3 animate-spin" />
@@ -226,26 +236,23 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 						<FolderSync className="mr-2 h-4 w-4" />
 						Reindexar
 					</Button>
-				</>
-			}
-			icon="image"
-			title="Todas las Imágenes"
-		>
-			{/* Barra de estado de indexación */}
-			{renderIndexingStatus()}
+				</div>
+			</div>
 
 			{/* FileBrowser para mostrar todas las imágenes */}
-			<FileBrowser
-				className="min-h-[600px]"
-				isLoading={isLoading}
-				items={images as unknown as AnyEntityWithStats[]}
-				onItemClick={handleImageClick}
-				onItemDoubleClick={handleImageDoubleClick}
-			/>
+			<div className="min-h-0 flex-1 overflow-hidden">
+				<FileBrowser
+					className="h-full"
+					isLoading={isLoading}
+					items={images as unknown as AnyEntityWithStats[]}
+					onItemClick={handleImageClick}
+					onItemDoubleClick={handleImageDoubleClick}
+				/>
+			</div>
 
 			{/* Footer con información adicional */}
 			{images && images.length > 0 && (
-				<div className="mt-8 border-border border-t pt-6">
+				<div className="border-border border-t bg-background/40 px-3 py-2">
 					<div className="flex items-center justify-between text-muted-foreground text-sm">
 						<span>
 							Mostrando {images?.length || 0} {(images?.length || 0) === 1 ? 'imagen' : 'imágenes'}
@@ -330,7 +337,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 					</div>
 				</DialogContent>
 			</Dialog>
-		</BaseContentView>
+		</div>
 	);
 };
 

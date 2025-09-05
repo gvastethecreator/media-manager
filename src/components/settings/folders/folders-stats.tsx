@@ -1,6 +1,19 @@
 import { Database, File, FileText, Folder, HardDrive, Image, ImageIcon, Music, Video } from 'lucide-react';
-import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from 'recharts';
-import { CardContent } from '@/components/ui/card';
+import {
+	Bar,
+	BarChart,
+	CartesianGrid,
+	Cell,
+	Line,
+	LineChart,
+	Pie,
+	PieChart,
+	ResponsiveContainer,
+	Tooltip,
+	XAxis,
+	YAxis,
+} from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import type { FolderStats } from '@/types/folders';
 
 interface FoldersStatsProps {
@@ -23,8 +36,27 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 			: []),
 	].filter((item) => item.value > 0);
 
+	// Datos para gráfico de barras de distribución de archivos
+	const barData = [
+		{ name: 'Imágenes', value: stats.totalImages, color: '#10b981' },
+		{ name: 'Videos', value: stats.totalVideos, color: '#8b5cf6' },
+		{ name: 'Audio', value: stats.totalAudio, color: '#f59e0b' },
+		{ name: 'Documentos', value: stats.totalDocuments, color: '#ef4444' },
+		{ name: 'Otros', value: stats.totalOthers, color: '#eab308' },
+	].filter((item) => item.value > 0);
+
+	// Datos simulados para tendencias (en un caso real vendrían del backend)
+	const trendData = [
+		{ name: 'Ene', archivos: stats.totalFiles * 0.6 },
+		{ name: 'Feb', archivos: stats.totalFiles * 0.7 },
+		{ name: 'Mar', archivos: stats.totalFiles * 0.8 },
+		{ name: 'Abr', archivos: stats.totalFiles * 0.85 },
+		{ name: 'May', archivos: stats.totalFiles * 0.9 },
+		{ name: 'Jun', archivos: stats.totalFiles },
+	];
+
 	return (
-		<div className="space-y-3">
+		<div className="space-y-3" data-testid="folders-stats-inner">
 			{/* Contenedor principal con estadísticas y gráfico */}
 			<div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
 				{/* Estadísticas organizadas en 3 filas */}
@@ -179,6 +211,90 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 						</CardContent>
 					</div>
 				</div>
+			</div>
+
+			{/* Nueva sección: Gráficos adicionales */}
+			<div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+				{/* Gráfico de barras para distribución de tipos de archivo */}
+				{barData.length > 0 && (
+					<Card className="border-border/40">
+						<CardHeader className="pb-3">
+							<CardTitle className="flex items-center gap-2 text-sm">
+								<Database className="h-4 w-4 text-blue-600" />
+								Distribución por Tipo
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="p-4">
+							<div className="h-[200px]">
+								<ResponsiveContainer height="100%" width="100%">
+									<BarChart data={barData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+										<CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+										<XAxis angle={-45} dataKey="name" height={60} textAnchor="end" tick={{ fontSize: 11 }} />
+										<YAxis tick={{ fontSize: 11 }} width={40} />
+										<Tooltip
+											contentStyle={{
+												fontSize: '12px',
+												padding: '8px 12px',
+												backgroundColor: 'rgba(255, 255, 255, 0.95)',
+												border: '1px solid #e2e8f0',
+												borderRadius: '6px',
+											}}
+											formatter={(value: number) => [value.toLocaleString(), 'Archivos']}
+											labelFormatter={(name) => `Tipo: ${name}`}
+										/>
+										<Bar dataKey="value" radius={[2, 2, 0, 0]}>
+											{barData.map((entry, index) => (
+												<Cell fill={entry.color} key={`cell-${index}`} />
+											))}
+										</Bar>
+									</BarChart>
+								</ResponsiveContainer>
+							</div>
+						</CardContent>
+					</Card>
+				)}
+
+				{/* Gráfico de líneas para tendencias de crecimiento */}
+				{trendData.length > 0 && stats.totalFiles > 0 && (
+					<Card className="border-border/40">
+						<CardHeader className="pb-3">
+							<CardTitle className="flex items-center gap-2 text-sm">
+								<HardDrive className="h-4 w-4 text-green-600" />
+								Tendencia de Archivos
+							</CardTitle>
+						</CardHeader>
+						<CardContent className="p-4">
+							<div className="h-[200px]">
+								<ResponsiveContainer height="100%" width="100%">
+									<LineChart data={trendData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
+										<CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+										<XAxis dataKey="name" tick={{ fontSize: 11 }} />
+										<YAxis tick={{ fontSize: 11 }} width={50} />
+										<Tooltip
+											contentStyle={{
+												fontSize: '12px',
+												padding: '8px 12px',
+												backgroundColor: 'rgba(255, 255, 255, 0.95)',
+												border: '1px solid #e2e8f0',
+												borderRadius: '6px',
+											}}
+											formatter={(value: number) => [Math.round(value).toLocaleString(), 'Archivos']}
+											labelFormatter={(name) => `Mes: ${name}`}
+										/>
+										<Line
+											activeDot={{ r: 6, stroke: '#3b82f6', strokeWidth: 2 }}
+											dataKey="archivos"
+											dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
+											stroke="#3b82f6"
+											strokeWidth={2}
+											type="monotone"
+										/>
+									</LineChart>
+								</ResponsiveContainer>
+							</div>
+						</CardContent>
+					</Card>
+				)}
 			</div>
 		</div>
 	);

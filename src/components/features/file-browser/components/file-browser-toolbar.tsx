@@ -460,7 +460,7 @@ export const FileBrowserToolbar = memo<FileBrowserToolbarProps>(function FileBro
 				{/* Dropdown de modo de vista */}
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<Button size="sm" variant="ghost">
+						<Button data-testid="view-mode-dropdown-trigger" size="sm" variant="ghost">
 							{getViewIcon()}
 						</Button>
 					</DropdownMenuTrigger>
@@ -468,31 +468,31 @@ export const FileBrowserToolbar = memo<FileBrowserToolbarProps>(function FileBro
 						<DropdownMenuLabel>Modo de vista</DropdownMenuLabel>
 						<DropdownMenuSeparator />
 						<DropdownMenuRadioGroup onValueChange={handleViewModeChange} value={viewMode}>
-							<DropdownMenuRadioItem value="grid">
+							<DropdownMenuRadioItem data-testid="view-mode-grid-btn" value="grid">
 								<div className="flex items-center gap-2">
 									<Grid className="h-4 w-4" />
 									<span>Grid</span>
 								</div>
 							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem value="cards">
+							<DropdownMenuRadioItem data-testid="view-mode-cards-btn" value="cards">
 								<div className="flex items-center gap-2">
 									<LayoutGrid className="h-4 w-4" />
 									<span>Cards</span>
 								</div>
 							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem value="masonry">
+							<DropdownMenuRadioItem data-testid="view-mode-masonry-btn" value="masonry">
 								<div className="flex items-center gap-2">
 									<GalleryHorizontal className="h-4 w-4" />
 									<span>Masonry</span>
 								</div>
 							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem value="list">
+							<DropdownMenuRadioItem data-testid="view-mode-list-btn" value="list">
 								<div className="flex items-center gap-2">
 									<ListIcon className="h-4 w-4" />
 									<span>Lista</span>
 								</div>
 							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem value="table">
+							<DropdownMenuRadioItem data-testid="view-mode-table-btn" value="table">
 								<div className="flex items-center gap-2">
 									<TableIcon className="h-4 w-4" />
 									<span>Tabla</span>

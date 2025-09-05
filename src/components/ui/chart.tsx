@@ -69,12 +69,12 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 		return null;
 	}
 
-	const css = Object.entries(THEMES)
+	const cssText = Object.entries(THEMES)
 		.map(([theme, prefix]) => {
 			const lines = colorConfig
 				.map(([key, itemConfig]) => {
-					const c = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-					return c ? `  --color-${key}: ${c};` : '';
+					const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+					return color ? `  --color-${key}: ${color};` : null;
 				})
 				.filter(Boolean)
 				.join('\n');
@@ -82,7 +82,8 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 		})
 		.join('\n');
 
-	return <style>{css}</style>;
+	// Evitar dangerouslySetInnerHTML: inyectamos texto directamente
+	return <style>{cssText}</style>;
 };
 
 const ChartTooltip = RechartsPrimitive.Tooltip;

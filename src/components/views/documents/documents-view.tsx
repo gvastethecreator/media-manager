@@ -1,199 +1,82 @@
-import { FileText } from 'lucide-react';
-import { useCallback, useEffect, useState } from 'react';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
-import { MultiEntityViewer } from '@/components/features/file-viewer/multi-entity-viewer';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { motion } from '@/components/ui/motion-shim';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { useToast } from '@/components/ui/use-toast';
-import { useCreateDocument, useDocuments } from '@/lib/api/documents';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useMultiEntityViewerStore } from '@/stores/multi-entity-viewer.store';
+import { useDocumentStore } from '@/store/entities/document';
 import type { AnyEntityWithStats } from '@/types/entities';
-import type { DocumentWithStats } from '@/types/entities/document';
 import type { ViewProps } from '../types';
 
-const viewLogger = clientLogger.withContext('DocumentsView');
+const logger = clientLogger.withContext('DocumentsView');
 
-export function DocumentsView(_props: ViewProps) {
-	const { data: documents, isLoading, error } = useDocuments();
-	const { mutate: createDocument } = useCreateDocument();
-	const { isOpen, entities, currentIndex, openViewer, closeViewer, setCurrentIndex } = useMultiEntityViewerStore();
+export default function DocumentsView(_props: ViewProps) {
+	const documentsRecord = useDocumentStore((s) => s.documents);
+	const isLoading = useDocumentStore((s) => s.isLoading);
+	const error = useDocumentStore((s) => s.error);
+	const fetchDocuments = useDocumentStore((s) => s.fetchDocuments);
 
-	const [showForm, setShowForm] = useState(false);
-	const [newDocumentName, setNewDocumentName] = useState('');
-	const [newDocumentFile, setNewDocumentFile] = useState<File | null>(null);
+	const hasInitRef = useRef(false);
+
+	const documents = useMemo(() => Object.values(documentsRecord || {}), [documentsRecord]);
+	const count = documents.length;
 
 	useEffect(() => {
-		if (documents && documents.length > 0) {
-			viewLogger.info(`✅ ${documents.length} documentos cargados.`);
+		if (!hasInitRef.current && count === 0 && !isLoading) {
+			hasInitRef.current = true;
+			logger.info('Cargando documentos...');
+			fetchDocuments();
 		}
-	}, [documents]);
+	}, [count, isLoading, fetchDocuments]);
 
-	const { toast } = useToast();
-
-	const handleFileChange = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-		if (event.target.files?.[0]) {
-			setNewDocumentFile(event.target.files[0]);
-		}
+	const handleClick = useCallback((item: AnyEntityWithStats) => {
+		logger.info('Click en documento', { id: item.id, name: item.name });
 	}, []);
 
-	const handleCreateDocument = useCallback(async () => {
-		if (newDocumentName.trim() === '' || !newDocumentFile) {
-			toast({
-				title: '❌ Error',
-				description: 'El nombre y el archivo de documento no pueden estar vacíos.',
-				variant: 'destructive',
-			});
-			return;
-		}
-
-		try {
-			const documentData = {
-				name: newDocumentName,
-				path: newDocumentFile.name,
-				size: newDocumentFile.size,
-				hash: crypto.randomUUID(),
-				mimeType: newDocumentFile.type || 'application/octet-stream',
-				extension: newDocumentFile.name.split('.').pop() || '',
-				folderId: 'default-folder',
-				isFavorite: false,
-				isArchived: false,
-				pageCount: null,
-				wordCount: null,
-				language: null,
-				title: null,
-				author: null,
-				subject: null,
-				keywords: null,
-				creator: null,
-				producer: null,
-				creationDate: null,
-				modificationDate: null,
-				encrypted: false,
-				version: null,
-				content: null,
-				summary: null,
-			};
-
-			createDocument(documentData);
-			toast({
-				title: '✅ Éxito',
-				description: `Documento "${newDocumentName}" creado.`,
-			});
-			setNewDocumentName('');
-			setNewDocumentFile(null);
-			setShowForm(false);
-		} catch (err) {
-			toast({
-				title: '❌ Error',
-				description: `Error al crear el documento "${newDocumentName}".`,
-				variant: 'destructive',
-			});
-		}
-	}, [newDocumentName, newDocumentFile, toast, createDocument]);
-
-	const handleDocumentClick = useCallback((item: AnyEntityWithStats) => {
-		const document = item as unknown as DocumentWithStats;
-		viewLogger.info('🖱️ Click en documento:', document.name);
-		// TODO: Implementar navegación a detalle de documento
+	const handleDoubleClick = useCallback((item: AnyEntityWithStats) => {
+		// Por ahora, no abrimos visor específico; se podría integrar un viewer de documentos
+		logger.info('Doble click en documento', { id: item.id, name: item.name });
 	}, []);
-
-	const handleDocumentDoubleClick = useCallback(
-		(item: AnyEntityWithStats) => {
-			const document = item as unknown as DocumentWithStats;
-			viewLogger.info('🖱️ Doble click en documento:', document.name);
-
-			// Abrir MultiEntityViewer con todos los documentos
-			const documentItems = (documents || []) as unknown as AnyEntityWithStats[];
-			const currentIndex = documentItems.findIndex((d) => d.id === document.id);
-			openViewer(documentItems, currentIndex >= 0 ? currentIndex : 0);
-		},
-		[documents, openViewer]
-	);
 
 	if (error) {
 		return (
 			<div className="flex h-full items-center justify-center">
-				<p className="text-destructive">Error: {error.message}</p>
+				<div className="text-center">
+					<h2 className="mb-2 font-semibold text-lg">Error al cargar documentos</h2>
+					<p className="mb-4 text-muted-foreground">Error: {error}</p>
+					<button
+						className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
+						onClick={() => fetchDocuments()}
+						type="button"
+					>
+						Intentar de nuevo
+					</button>
+				</div>
 			</div>
 		);
 	}
 
-	if (isLoading) {
-		return <LoadingScreen />;
-	}
-
-	const documentItems = (documents || []) as unknown as AnyEntityWithStats[];
-
 	return (
-		<>
-			<ScrollArea className="h-full">
-				<div className="container mx-auto p-6">
-					<h2 className="mb-4 font-bold text-xl">Vista de Documentos</h2>
-
-					<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
-						{showForm ? 'Cancelar' : 'Subir Documento'}
-					</Button>
-
-					{showForm && (
-						<motion.div
-							animate={{ opacity: 1, y: 0 }}
-							className="mb-6 rounded-lg border p-4 shadow-sm"
-							initial={{ opacity: 0, y: -20 }}
-						>
-							<h3 className="mb-3 font-semibold text-lg">Nuevo Documento</h3>
-							<div className="mb-3 grid gap-2">
-								<Label htmlFor="documentName">Nombre del documento</Label>
-								<Input
-									id="documentName"
-									onChange={(e) => setNewDocumentName(e.target.value)}
-									placeholder="Mi documento"
-									value={newDocumentName}
-								/>
-							</div>
-							<div className="mb-4 grid gap-2">
-								<Label htmlFor="documentFile">Archivo</Label>
-								<Input accept=".pdf,.doc,.docx,.txt,.md" id="documentFile" onChange={handleFileChange} type="file" />
-								{newDocumentFile && (
-									<p className="text-muted-foreground text-sm">Archivo seleccionado: {newDocumentFile.name}</p>
-								)}
-							</div>
-							<Button onClick={handleCreateDocument}>Subir Documento</Button>
-						</motion.div>
-					)}
-
-					{(!documentItems || documentItems.length === 0) && !isLoading && !showForm ? (
-						<EmptyState
-							description="Sube documentos para organizarlos y buscar en su contenido."
-							icon={FileText}
-							title="No hay documentos"
-						/>
-					) : (
-						<div className="h-[calc(100vh-200px)]">
-							<FileBrowser
-								isLoading={isLoading}
-								items={documentItems}
-								onItemClick={handleDocumentClick}
-								onItemDoubleClick={handleDocumentDoubleClick}
-							/>
-						</div>
-					)}
+		<div className="h-full">
+			{/* Toolbar con controles superiores */}
+			<div className="flex items-center justify-between gap-3 border-border border-b bg-background/40 px-3 py-2 backdrop-blur-sm">
+				<div className="flex min-w-0 items-center gap-3">
+					<div className="min-w-0">
+						<h2 className="truncate font-semibold text-foreground text-sm leading-tight">Documentos</h2>
+						<p className="truncate text-muted-foreground text-xs leading-tight">
+							{count} {count === 1 ? 'documento' : 'documentos'}
+						</p>
+					</div>
 				</div>
-			</ScrollArea>
+			</div>
 
-			{/* MultiEntityViewer */}
-			<MultiEntityViewer
-				currentIndex={currentIndex}
-				entities={entities}
-				isOpen={isOpen}
-				onClose={closeViewer}
-				onIndexChange={setCurrentIndex}
-			/>
-		</>
+			{/* FileBrowser para mostrar todos los documentos */}
+			<div className="min-h-0 flex-1 overflow-hidden">
+				<FileBrowser
+					className="h-full"
+					isLoading={isLoading}
+					items={documents as unknown as AnyEntityWithStats[]}
+					onItemClick={handleClick}
+					onItemDoubleClick={handleDoubleClick}
+				/>
+			</div>
+		</div>
 	);
 }

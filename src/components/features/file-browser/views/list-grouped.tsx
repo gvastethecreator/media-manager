@@ -46,6 +46,7 @@ export function FileCanvasListGrouped({
 							onItemClick={onItemClick}
 							onItemDoubleClick={onItemDoubleClick}
 							scrollContainer={scrollContainer}
+							testId={null}
 						/>
 					</div>
 				))}

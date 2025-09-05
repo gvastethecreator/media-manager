@@ -2,11 +2,12 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LoadingScreen } from '@/components/core/feedback';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
-import { BaseContentView } from '@/components/views/base/base-content-view';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
+import { useFile3DStore } from '@/store/entities/file-3d';
 import { useImageStore } from '@/store/entities/image';
+import { useJsonFileStore } from '@/store/entities/json-file';
 import { useVideoStore } from '@/store/entities/video';
 import { useImageViewer } from '@/store/image-viewer.store';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
@@ -14,37 +15,45 @@ import type { AnyEntityWithStats } from '@/types/entities';
 import { isImageWithStats, isVideoWithStats } from '@/types/entity-guards';
 import type { ViewProps } from '../types';
 
-const viewLogger = clientLogger.withContext('FilesView');
+const viewLogger = clientLogger.withContext('AllFilesView');
 
 /**
  * Vista principal de todos los archivos
  * Muestra una galería con todos los archivos (imágenes, documentos, audio, etc.)
  * basada en los datos de la base de datos, no del sistema de archivos
  */
-export function FilesView(_: ViewProps) {
+export function AllFilesView(_: ViewProps) {
 	// Obtener todos los tipos de archivos desde los stores correspondientes
 	const imagesRecord = useImageStore((s) => s.images);
 	const videosRecord = useVideoStore((s) => s.videos);
 	const audiosArray = useAudioStore((s) => s.audios);
 	const documentsRecord = useDocumentStore((s) => s.documents);
+	const jsonFilesArray = useJsonFileStore((s) => s.jsonFiles);
+	const file3DsArray = useFile3DStore((s) => s.file3Ds);
 
 	// Estados de carga de cada store
 	const imagesLoading = useImageStore((s) => s.isLoading);
 	const videosLoading = useVideoStore((s) => s.isLoading);
 	const audiosLoading = useAudioStore((s) => s.isLoading);
 	const documentsLoading = useDocumentStore((s) => s.isLoading);
+	const jsonLoading = useJsonFileStore((s) => s.loading);
+	const file3DsLoading = useFile3DStore((s) => s.loading);
 
 	// Errores de cada store
 	const imagesError = useImageStore((s) => s.error);
 	const videosError = useVideoStore((s) => s.error);
 	const audiosError = useAudioStore((s) => s.error);
 	const documentsError = useDocumentStore((s) => s.error);
+	const jsonError = useJsonFileStore((s) => s.error);
+	const file3DsError = useFile3DStore((s) => s.error);
 
 	// Funciones de carga
 	const loadImages = useImageStore((s) => s.loadImages);
 	const fetchVideos = useVideoStore((s) => s.fetchVideos);
 	const fetchAudios = useAudioStore((s) => s.fetchAudios);
 	const fetchDocuments = useDocumentStore((s) => s.fetchDocuments);
+	const fetchJsonFiles = useJsonFileStore((s) => s.fetchJsonFiles);
+	const fetchFile3Ds = useFile3DStore((s) => s.fetchFile3Ds);
 
 	const navigate = useNavigate();
 
@@ -75,13 +84,35 @@ export function FilesView(_: ViewProps) {
 			files.push(...Object.values(documentsRecord));
 		}
 
+		// Agregar JSON (Array) con discriminador de tipo
+		if (jsonFilesArray) {
+			files.push(
+				...(jsonFilesArray as any[]).map((j) => ({
+					...j,
+					entityType: 'jsonFile' as const,
+				}))
+			);
+		}
+
+		// Agregar archivos 3D (Array) con discriminador de tipo
+		if (file3DsArray) {
+			files.push(
+				...(file3DsArray as any[]).map((f) => ({
+					...f,
+					entityType: 'file3d' as const,
+				}))
+			);
+		}
+
 		// Ordenar por fecha de actualización
 		return files.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
-	}, [imagesRecord, videosRecord, audiosArray, documentsRecord]);
+	}, [imagesRecord, videosRecord, audiosArray, documentsRecord, jsonFilesArray, file3DsArray]);
 
-	// Calcular estados combinados
-	const isLoading = imagesLoading || videosLoading || audiosLoading || documentsLoading;
-	const error = imagesError || videosError || audiosError || documentsError;
+	// Calcular estados combinados (forma estable para el formatter)
+	const isLoading = [imagesLoading, videosLoading, audiosLoading, documentsLoading, jsonLoading, file3DsLoading].some(
+		Boolean
+	);
+	const error = imagesError || videosError || audiosError || documentsError || jsonError || file3DsError;
 	const fileCount = allFiles.length;
 
 	useEffect(() => {
@@ -95,6 +126,8 @@ export function FilesView(_: ViewProps) {
 			const hasVideos = Object.keys(videosRecord || {}).length > 0;
 			const hasAudios = (audiosArray || []).length > 0;
 			const hasDocuments = Object.keys(documentsRecord || {}).length > 0;
+			const hasJson = (jsonFilesArray || []).length > 0;
+			const hasFile3Ds = (file3DsArray || []).length > 0;
 
 			if (!hasImages) {
 				loadImages();
@@ -108,8 +141,27 @@ export function FilesView(_: ViewProps) {
 			if (!hasDocuments) {
 				fetchDocuments();
 			}
+			if (!hasJson) {
+				fetchJsonFiles();
+			}
+			if (!hasFile3Ds) {
+				fetchFile3Ds();
+			}
 		}
-	}, [imagesRecord, videosRecord, audiosArray, documentsRecord, loadImages, fetchVideos, fetchAudios, fetchDocuments]);
+	}, [
+		imagesRecord,
+		videosRecord,
+		audiosArray,
+		documentsRecord,
+		jsonFilesArray,
+		file3DsArray,
+		loadImages,
+		fetchVideos,
+		fetchAudios,
+		fetchDocuments,
+		fetchJsonFiles,
+		fetchFile3Ds,
+	]);
 
 	const { openViewer: openImageViewer } = useImageViewer();
 	const { openViewer: openFileViewer } = useFileViewerStore();
@@ -191,9 +243,10 @@ export function FilesView(_: ViewProps) {
 
 	if (error && allFiles.length === 0) {
 		return (
-			<BaseContentView description={`Error: ${error}`} title="Error al cargar archivos">
+			<div className="flex h-full items-center justify-center">
 				<div className="text-center">
-					<p className="mb-4 text-muted-foreground">Ha ocurrido un error al cargar los archivos.</p>
+					<h2 className="mb-2 font-semibold text-lg">Error al cargar archivos</h2>
+					<p className="mb-4 text-muted-foreground">Error: {error}</p>
 					<button
 						className="rounded-md bg-primary px-4 py-2 text-primary-foreground hover:bg-primary/90"
 						onClick={() => {
@@ -201,24 +254,26 @@ export function FilesView(_: ViewProps) {
 							fetchVideos();
 							fetchAudios();
 							fetchDocuments();
+							fetchJsonFiles();
+							fetchFile3Ds();
 						}}
 						type="button"
 					>
 						Intentar de nuevo
 					</button>
 				</div>
-			</BaseContentView>
+			</div>
 		);
 	}
 
 	return (
-		<BaseContentView description={`${fileCount} archivos en total`} title="Todos los archivos">
+		<div className="h-full">
 			<FileBrowser
 				isLoading={isLoading}
 				items={allFiles}
 				onItemClick={handleFileClick}
 				onItemDoubleClick={handleFileDoubleClick}
 			/>
-		</BaseContentView>
+		</div>
 	);
 }

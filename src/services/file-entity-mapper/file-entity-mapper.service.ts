@@ -3,7 +3,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { basename, extname } from 'node:path';
 import { LRUCache } from 'lru-cache';
 import PQueue from 'p-queue';
-import { mediaProcessingLimits, shouldSkipImageBySize } from '@/config/media-processing';
+import { mediaProcessingLimits, shouldSkipFileByTypeAndSize } from '@/config/media-processing';
 import {
 	createVideo as createVideoServer,
 	getVideoByHash as getVideoByHashServer,
@@ -238,16 +238,18 @@ export class FileEntityMapperService {
 				// En entorno de tests, se stubbea createBasicEntity para UNKNOWN. Permitimos continuar.
 				// En producción, el método por defecto lanzará y caerá en el catch devolviendo fallo.
 			}
-			if (entityType === EntityType.IMAGE && quickSize !== null && shouldSkipImageBySize(quickSize)) {
+			if (quickSize !== null && shouldSkipFileByTypeAndSize(filePath, quickSize)) {
+				const typeLabel = entityType === EntityType.IMAGE ? 'image' : 
+								 entityType === EntityType.VIDEO ? 'video' : 
+								 entityType === EntityType.FILE3D ? '3d-file' : 'file';
 				console.warn(
-					'[skip][image-size]',
+					`[skip][${typeLabel}-size]`,
 					JSON.stringify({
 						path: filePath,
 						sizeBytes: quickSize,
 						sizeMB: (quickSize / (1024 * 1024)).toFixed(2),
-						limitBytes: mediaProcessingLimits.maxImageFileSizeBytes,
-						limitMB: (mediaProcessingLimits.maxImageFileSizeBytes / (1024 * 1024)).toFixed(2),
-						reason: 'image file too large - skipped before hashing',
+						entityType,
+						reason: `${typeLabel} file too large - skipped before hashing`,
 					})
 				);
 				return { success: true, entityType, error: 'Skipped: image size exceeds limit' };

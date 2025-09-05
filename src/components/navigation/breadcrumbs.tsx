@@ -83,8 +83,6 @@ const BREADCRUMB_CONFIG: Record<ViewType, BreadcrumbConfig> & Record<string, Bre
 	'audio-content': { label: 'Audios', path: '/audios', contentPath: '/audios' },
 	'json-files': { label: 'Archivos JSON', path: '/json-files' },
 	'json-file-content': { label: 'Archivos JSON', path: '/json-files', contentPath: '/json-files' },
-	workflows: { label: 'Workflows', path: '/workflows' },
-	'workflow-content': { label: 'Workflows', path: '/workflows', contentPath: '/workflows' },
 	'file-3ds': { label: 'Archivos 3D', path: '/file-3ds' },
 	'file-3d-content': { label: 'Archivos 3D', path: '/file-3ds', contentPath: '/file-3ds' },
 	mixed: { label: 'Mixto', path: '/' },

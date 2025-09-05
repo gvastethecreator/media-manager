@@ -22,7 +22,6 @@ import {
 	User,
 	Users,
 	Video,
-	Workflow,
 } from 'lucide-react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -65,7 +64,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 				icon: Files,
 				children: [
 					{
-						id: 'files',
+						id: 'all-files',
 						label: 'Todos los archivos',
 						icon: FileStack,
 						// Total de archivos = imágenes + videos (otros tipos opcionales se suman si están)
@@ -96,13 +95,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						count: stats.totalJsonFiles || 0,
 						color: '#06B6D4',
 					},
-					{
-						id: 'workflows',
-						label: 'Workflows',
-						icon: Workflow,
-						count: stats.totalWorkflows || 0,
-						color: '#84CC16',
-					},
+
 					{ id: 'file-3ds', label: '3D', icon: Box, count: stats.totalFile3D || 0, color: '#EC4899' },
 				],
 			},

@@ -45,7 +45,7 @@ export function Cards({
 	return (
 		<div
 			className="file-browser-canvas file-browser-cards h-full w-full overflow-auto"
-			data-testid="file-browser-container"
+			data-testid="cards-view"
 			ref={(el) => {
 				setInternalScrollEl(el);
 				containerRef.current = el;

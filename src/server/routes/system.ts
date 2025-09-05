@@ -2,12 +2,12 @@ import express from 'express';
 import { getDatabaseInfo } from '@/lib/drizzle';
 import { circuitBreakerRegistry } from '@/lib/system/circuit-breaker';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
+import { getSystemStats } from '../services/stats.service';
 import {
 	createDefaultSettingsData,
 	getNavigationData,
 	getProfileSettings,
 	getSystemSettings,
-	getSystemStats,
 	getSystemVersion,
 	repairSystem,
 	resetDatabase,
@@ -53,9 +53,10 @@ router.get('/health', async (_req, res) => {
 	}
 });
 
-// GET /api/system/stats - Obtener estadísticas del sistema
+// GET /api/system/stats - Obtener estadísticas del sistema corregidas
 router.get('/stats', async (_req, res) => {
 	try {
+		console.log('🎯 [SYSTEM] Usando getSystemStats de stats.service.ts');
 		const stats = await getSystemStats();
 		res.json(stats);
 	} catch (error) {

@@ -173,14 +173,15 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 
 	// Paginación global simple para vistas de grid/canvas
 	const [page, setPage] = useState(0); // 0-based
-	const PAGE_SIZE = 300;
+	const PAGE_SIZE = useViewOptionsStore((s) => s.pagination.pageSize) ?? 300;
+	const backgroundColor = useViewOptionsStore((s) => s.backgroundColor) ?? 'transparent';
 
 	// Clamp de página ante cambios en el dataset o en el modo de vista
 	useEffect(() => {
 		const total = processedItems?.length ?? 0;
 		const count = Math.max(1, Math.ceil(total / PAGE_SIZE));
 		setPage((p) => (p >= count ? Math.max(0, count - 1) : p));
-	}, [processedItems?.length]);
+	}, [processedItems?.length, PAGE_SIZE]);
 
 	// Ref para navegación por teclado
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -289,6 +290,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 			data-testid="file-browser"
 			data-view-mode={viewMode}
 			ref={containerRef} // Focusable programáticamente pero no por tab
+			style={{ backgroundColor }}
 			tabIndex={-1}
 		>
 			{/* Toolbar del File Browser */}
@@ -309,11 +311,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 				{viewMode === 'list' ? (
 					<div className="flex h-full min-h-0 flex-col">
 						<FileListHeader />
-						<div
-							className="min-h-0 flex-1 overflow-auto"
-							data-testid="file-browser-scroll-area-viewport"
-							ref={setListScrollEl}
-						>
+						<div className="min-h-0 flex-1 overflow-auto" ref={setListScrollEl}>
 							{grouped ? (
 								<FileCanvasListGrouped
 									groups={grouped as any}
@@ -459,6 +457,7 @@ function renderFromItems({
 }: FileBrowserDataProps) {
 	// Admitir mezcla de imágenes y videos
 	const mediaItems = items as unknown as MediaItem[];
+	const backgroundColor = useViewOptionsStore((s) => s.backgroundColor) ?? 'transparent';
 
 	// Función de refresh básica para items directos (opcional)
 	const handleRefresh = () => {
@@ -562,6 +561,7 @@ function renderFromItems({
 			className={cn('flex h-full min-h-0 flex-col overflow-hidden', className)}
 			data-testid="file-browser"
 			data-view-mode={viewMode}
+			style={{ backgroundColor }}
 			tabIndex={-1}
 		>
 			{/* Toolbar del File Browser */}

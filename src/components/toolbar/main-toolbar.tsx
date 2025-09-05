@@ -40,8 +40,8 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	// Crear versión debounced del setViewMode para mejorar performance
 	const { setViewMode: setViewModeDebounced } = useDebouncedViewMode();
 
-	const { isVisible, toggleVisibility, showInterfaceSettings, setShowInterfaceSettings, setVisible } =
-		useDetailsPanel() as any;
+	// Usar claves reales del store del panel derecho
+	const { showInterfaceSettings, setShowInterfaceSettings } = useDetailsPanel();
 
 	// ========================================================================
 	// FUNCIONES MOVIDAS A file-browser-toolbar.tsx - REMOVIDAS PARA LIBERAR ESPACIO
@@ -107,9 +107,9 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 			{/* Centro: Acciones contextuales específicas por vista */}
 			<div className="flex items-center gap-2">{renderContextActions()}</div>
 
-			{/* Lado derecho: Controles globales */}
+			{/* Lado derecho */}
 			<div className="flex items-center gap-0.5">
-				{/* Botón de configuraciones */}
+				{/* Botón de configuracion para file browser , esconder si no esta usando file browser  */}
 				<Button
 					className="h-7 px-2 hover:bg-accent"
 					onClick={() => setShowInterfaceSettings(!showInterfaceSettings)}

@@ -44,7 +44,7 @@ export function Grid({
 	return (
 		<div
 			className="file-browser-canvas file-browser-grid h-full w-full overflow-auto"
-			data-testid="file-browser-container"
+			data-testid="grid-view"
 			ref={(el) => {
 				setInternalScrollEl(el);
 				containerRef.current = el;

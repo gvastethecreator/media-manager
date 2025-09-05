@@ -84,7 +84,7 @@ const renderImage = ({
 			imageId={(entity as any).id}
 			onClick={finalOnClick as any}
 			onDoubleClick={finalOnDoubleClick}
-			onKeyDown={(e) => {
+			onKeyDown={(e: React.KeyboardEvent) => {
 				if (e.key === 'Enter' || e.key === ' ') {
 					e.preventDefault();
 					if (e.key === 'Enter' && finalOnDoubleClick) {

@@ -6,23 +6,30 @@ import ReindexLogsViewer from '@/components/settings/folders/reindex-logs-viewer
 import { AllImagesView } from '@/components/views/all-images/all-images-view';
 import Dashboard from '@/components/views/dashboard/dashboard';
 import DevelopmentContentView from '@/components/views/development/development-content-view';
+import DocumentsView from '@/components/views/documents/documents-view';
+import { EntityCardsView } from '@/components/views/entity-cards';
 import { File3DContentView as File3DDetailView } from '@/components/views/file3d/file-3d-content-view';
-import { FilesView } from '@/components/views/files/files-view';
+import File3DView from '@/components/views/file3d/file3d-view';
+import { AllFilesView } from '@/components/views/files/all-files-view';
+import AudioView from '@/components/views/audio/audio-view';
 import { FolderContentView } from '@/components/views/folders/folder-content-view';
 import FoldersView from '@/components/views/folders/folders-view';
 import ImageDetailView from '@/components/views/images/image-detail-view';
 import { JsonFileContentView } from '@/components/views/json-files/json-file-content-view';
-import { JsonFilesView } from '@/components/views/json-files/json-files-view';
+import JsonFilesView from '@/components/views/json-files/json-files-view';
 import MixedContentView from '@/components/views/mixed/mixed-content-view';
 import NotesViewSimple from '@/components/views/notes/notes-view-simple';
+import { PlaceContentView } from '@/components/views/places/place-content-view';
 import { PlacesView } from '@/components/views/places/places-view';
 import { PromptsView } from '@/components/views/prompts/prompts-view';
 import { PropertiesView } from '@/components/views/properties/properties-view';
 import { SearchView } from '@/components/views/search/search-view';
 import SettingsContentView from '@/components/views/settings/settings-content-view';
+import { TagContentView } from '@/components/views/tags/tag-content-view';
 import { TagsView } from '@/components/views/tags/tags-view';
 import VideosView from '@/components/views/videos/videos-view';
 import { WildcardsView } from '@/components/views/wildcards/wildcards-view';
+import { WorldItemContentView } from '@/components/views/world-items/world-item-content-view';
 import { WorldItemsView } from '@/components/views/world-items/world-items-view';
 
 // Wrapper components para pasar el parámetro de la URL
@@ -98,8 +105,8 @@ export const router = createBrowserRouter([
 				element: <FolderContentWrapper />,
 			},
 			{
-				path: 'files',
-				element: <FilesView className="h-full" />,
+				path: 'all-files',
+				element: <AllFilesView className="h-full" />,
 			},
 			{
 				path: 'all-images',
@@ -113,21 +120,11 @@ export const router = createBrowserRouter([
 			// Multimedia - Temporalmente simplificados
 			{
 				path: 'audios',
-				element: (
-					<div className="p-6">
-						<h2 className="font-bold text-2xl">Vista de Audio</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
-					</div>
-				),
+				element: <AudioView className="h-full" />,
 			},
 			{
 				path: 'documents',
-				element: (
-					<div className="p-6">
-						<h2 className="font-bold text-2xl">Vista de Documentos</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
-					</div>
-				),
+				element: <DocumentsView className="h-full" />,
 			},
 			{
 				path: 'json-files',
@@ -135,12 +132,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'file-3ds',
-				element: (
-					<div className="p-6">
-						<h2 className="font-bold text-2xl">Vista de Archivos 3D</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
-					</div>
-				),
+				element: <File3DView className="h-full" />,
 			},
 			// Organizadores - Temporalmente simplificados
 			{
@@ -183,6 +175,15 @@ export const router = createBrowserRouter([
 				path: 'tags',
 				element: <TagsView />,
 			},
+			// Contenido de Tag
+			{
+				path: 'tag-content',
+				element: <TagContentView />,
+			},
+			{
+				path: 'tags/:id',
+				element: <TagContentView />,
+			},
 			// Worldbuilding
 			{
 				path: 'characters',
@@ -192,9 +193,27 @@ export const router = createBrowserRouter([
 				path: 'places',
 				element: <PlacesView className="h-full" />,
 			},
+			// Contenido de Place
+			{
+				path: 'place-content',
+				element: <PlaceContentView />,
+			},
+			{
+				path: 'places/:id',
+				element: <PlaceContentView />,
+			},
 			{
 				path: 'world-items',
 				element: <WorldItemsView className="h-full" />,
+			},
+			// Contenido de World Item
+			{
+				path: 'world-item-content',
+				element: <WorldItemContentView />,
+			},
+			{
+				path: 'world-items/:id',
+				element: <WorldItemContentView />,
 			},
 			{
 				path: 'concepts',
@@ -229,12 +248,7 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'entity-cards',
-				element: (
-					<div className="p-6">
-						<h2 className="font-bold text-2xl">Vista de Tarjetas de Entidad</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
-					</div>
-				),
+				element: <EntityCardsView />,
 			},
 			{
 				path: 'mixed',

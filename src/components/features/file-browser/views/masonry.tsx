@@ -45,7 +45,7 @@ export function Masonry({
 	return (
 		<div
 			className="file-browser-canvas file-browser-masonry h-full w-full overflow-auto"
-			data-testid="file-browser-container"
+			data-testid="masonry-view"
 			ref={(el) => {
 				setInternalScrollEl(el);
 				containerRef.current = el;

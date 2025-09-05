@@ -30,17 +30,26 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
 	// Conteos básicos
 	const imageCount = _count.images || 0;
 	const videoCount = _count.videos || 0;
+	const audioCount = _count.audios || 0;
+	const documentCount = _count.documents || 0;
+	const jsonFileCount = _count.jsonFiles || 0;
+	const file3DCount = _count.file3Ds || 0;
+	const otherCount = jsonFileCount + file3DCount;
 	const folderCount = _count.children || 0;
 	const directChildren = folderCount;
 
 	// Calcular total de items
-	const totalItems = imageCount + videoCount + folderCount;
+	const totalItems = imageCount + videoCount + audioCount + documentCount + otherCount + folderCount;
 
 	// Calcular diversidad de contenido (0-100)
-	const contentTypes = [imageCount > 0 ? 1 : 0, videoCount > 0 ? 1 : 0, folderCount > 0 ? 1 : 0].reduce(
-		(sum, has) => sum + has,
-		0
-	);
+	const contentTypes = [
+		imageCount > 0 ? 1 : 0,
+		videoCount > 0 ? 1 : 0,
+		audioCount > 0 ? 1 : 0,
+		documentCount > 0 ? 1 : 0,
+		otherCount > 0 ? 1 : 0,
+		folderCount > 0 ? 1 : 0,
+	].reduce((sum, has) => sum + has, 0);
 	const contentDiversity = totalItems > 0 ? Math.min(100, (contentTypes / 3) * 100) : 0;
 
 	// Calcular organization score (0-100)
@@ -166,7 +175,7 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
 	const accessFrequency = totalItems > 0 ? Math.min(100, totalItems / 10) : 0;
 
 	// Total de relaciones
-	const totalRelations = imageCount + videoCount + folderCount;
+	const totalRelations = imageCount + videoCount + audioCount + documentCount + otherCount + folderCount;
 
 	const base = createDefaultEntityStats({ type: 'folder' });
 	return {
@@ -184,7 +193,7 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
 		totalFolders: folderCount,
 		totalImages: imageCount,
 		totalVideos: videoCount,
-		totalDocuments: 0,
+		totalDocuments: documentCount,
 		totalFiles: totalFiles || 0,
 
 		// Métricas de uso
@@ -195,9 +204,9 @@ function calculateFolderStatistics(folder: any, _allFolders?: any[]): FolderStat
 		imageCount,
 		videoCount,
 		noteCount: 0,
-		documentCount: 0,
-		totalAudio: 0,
-		totalOthers: 0,
+		documentCount,
+		totalAudio: audioCount,
+		totalOthers: otherCount,
 
 		// Métricas de tamaño
 		formattedSize,
@@ -249,7 +258,12 @@ export function fromDrizzleFolderWithCounts(folderFromDrizzle: any | null, allFo
 		const totalFiles =
 			baseData.totalFiles !== null && baseData.totalFiles !== undefined
 				? baseData.totalFiles
-				: (_count?.images || 0) + (_count?.videos || 0);
+				: (_count?.images || 0) +
+					(_count?.videos || 0) +
+					(_count?.audios || 0) +
+					(_count?.documents || 0) +
+					(_count?.jsonFiles || 0) +
+					(_count?.file3Ds || 0);
 		const totalSize = baseData.totalSize !== null && baseData.totalSize !== undefined ? baseData.totalSize : 0; // No calcular tamaño estimado, usar 0 para carpetas sin datos
 
 		const correctedFolderData = {
