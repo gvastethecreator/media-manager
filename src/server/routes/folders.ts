@@ -5,7 +5,7 @@ import { asc, count, desc, eq, isNull, sql } from 'drizzle-orm';
 import { Router } from 'express';
 
 import { db } from '@/lib/drizzle';
-import { folders, images, videos } from '@/lib/drizzle/schema/index';
+import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateFolderIdFromName, isValidFolderId } from '@/lib/utils/folder-id-generator';
 import { getFolderMediaCountsBatch } from '@/services/folder/folder.service';
@@ -158,7 +158,7 @@ router.get('/debug-scanner/:folderId', async (req, res) => {
 		// Usar el scanner directamente
 		const { scanFolder } = await import('@/lib/filesystem/folder-scanner');
 		const scanResult = await scanFolder(folder.path, {
-			recursive: false,
+			recursive: true,
 			includeHidden: false,
 		});
 
@@ -587,6 +587,10 @@ router.get('/tree', async (_req, res) => {
 				presetId: folders.presetId,
 				imagesCount: sql<number>`(SELECT COUNT(1) FROM Image WHERE Image.folderId = ${folders.id})`,
 				videosCount: sql<number>`(SELECT COUNT(1) FROM Video WHERE Video.folderId = ${folders.id})`,
+				audiosCount: sql<number>`(SELECT COUNT(1) FROM Audio WHERE Audio.folderId = ${folders.id})`,
+				documentsCount: sql<number>`(SELECT COUNT(1) FROM Document WHERE Document.folderId = ${folders.id})`,
+				jsonFilesCount: sql<number>`(SELECT COUNT(1) FROM JsonFile WHERE JsonFile.folderId = ${folders.id})`,
+				file3DsCount: sql<number>`(SELECT COUNT(1) FROM File3D WHERE File3D.folderId = ${folders.id})`,
 				childrenCount: sql<number>`(SELECT COUNT(*) FROM Folder WHERE Folder.parentId = ${folders.id})`,
 			})
 			.from(folders)
@@ -597,6 +601,10 @@ router.get('/tree', async (_req, res) => {
 			_count: {
 				images: Number(f.imagesCount) || 0,
 				videos: Number(f.videosCount) || 0,
+				audios: Number(f.audiosCount) || 0,
+				documents: Number(f.documentsCount) || 0,
+				jsonFiles: Number(f.jsonFilesCount) || 0,
+				file3Ds: Number(f.file3DsCount) || 0,
 				children: Number(f.childrenCount) || 0,
 			},
 		}));
@@ -1101,12 +1109,20 @@ router.get('/:id/stats', async (req, res) => {
 			.orderBy(desc(images.createdAt))
 			.limit(4);
 
+		// Obtener estadísticas de audio, documentos y otros archivos
+		const [audioStats, documentStats, jsonStats, file3DStats] = await Promise.all([
+			db.select({ count: sql<number>`count(*)` }).from(audios).where(eq(audios.folderId, id)),
+			db.select({ count: sql<number>`count(*)` }).from(documents).where(eq(documents.folderId, id)),
+			db.select({ count: sql<number>`count(*)` }).from(jsonFiles).where(eq(jsonFiles.folderId, id)),
+			db.select({ count: sql<number>`count(*)` }).from(file3Ds).where(eq(file3Ds.folderId, id)),
+		]);
+
 		const stats = {
 			totalImages: imageStats[0]?.count || 0,
 			totalVideos: videoStats[0]?.count || 0,
-			totalAudio: 0, // TODO: Implementar cuando se agregue tabla de audio
-			totalDocuments: 0, // TODO: Implementar cuando se agregue tabla de documentos
-			totalOthers: 0, // TODO: Implementar cuando se agregue tabla de otros archivos
+			totalAudio: audioStats[0]?.count || 0,
+			totalDocuments: documentStats[0]?.count || 0,
+			totalOthers: (jsonStats[0]?.count || 0) + (file3DStats[0]?.count || 0),
 			totalSize: folderData[0].totalSize,
 			lastActivity: folderData[0].lastIndexed,
 			recentImages: recentImages.map((image) => ({

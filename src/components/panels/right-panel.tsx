@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 
 // Lazy load InterfaceSection para no impactar bundle inicial
-const InterfaceSection = lazy(() => import('@/components/settings/interface-section'));
+const FileBrowserSettings = lazy(() => import('@/components/features/file-browser/components/file-browser-settings'));
 
 // Componente para manejar la carga perezosa del StatsPanel
 const LazyStatsPanel = reactMemo(function RightPanelLazyStatsPanel({
@@ -131,7 +131,7 @@ export const RightPanel = reactMemo(function RightPanelComponent({
 				(showInterfaceSettings ? (
 					<Suspense fallback={<div className="p-4 text-muted-foreground text-sm">Cargando configuración...</div>}>
 						<div className="w-full overflow-y-auto p-2 pr-3">
-							<InterfaceSection />
+							<FileBrowserSettings />
 						</div>
 					</Suspense>
 				) : hasSelectedItems ? (

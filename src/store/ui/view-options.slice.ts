@@ -2,6 +2,27 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
 export type ViewMode = 'grid' | 'list' | 'cards' | 'masonry' | 'simple-grid' | 'table' | 'single' | 'canvas';
+export type RenderingMode = 'virtualized' | 'canvas' | 'webgl';
+export type PaginationMode = 'pagination' | 'infinite';
+
+export type ViewKey = 'grid' | 'list' | 'masonry' | 'cards' | 'table';
+
+export interface PerViewConfigBase {
+	renderingMode: RenderingMode;
+}
+
+export interface GridLikeViewConfig extends PerViewConfigBase {
+	itemSize: number; // tamaño de celda o tarjeta
+	gap?: number;
+}
+
+export interface ListLikeViewConfig extends PerViewConfigBase {
+	rowHeight: number;
+}
+
+export type PerViewConfig =
+	| ({ kind: 'grid' | 'masonry' | 'cards' } & GridLikeViewConfig)
+	| ({ kind: 'list' | 'table' } & ListLikeViewConfig);
 
 export type SortOption = {
 	field: string;
@@ -24,6 +45,12 @@ export interface ViewOptionsState {
 	groupByEntityType: boolean;
 	useCanvasRendering: boolean;
 	includeSubfolders: boolean;
+	backgroundColor: string;
+	pagination: {
+		mode: PaginationMode;
+		pageSize: number;
+	};
+	views: Record<ViewKey, PerViewConfig>;
 	virtualization: {
 		enabled: boolean;
 		threshold: number;
@@ -35,6 +62,9 @@ export interface ViewOptionsState {
 	toggleUseCanvasRendering: () => void;
 	setIncludeSubfolders: (enabled: boolean) => void;
 	toggleIncludeSubfolders: () => void;
+	setBackgroundColor: (color: string) => void;
+	setPaginationMode: (mode: PaginationMode) => void;
+	setPageSize: (size: number) => void;
 	setViewMode: (mode: ViewMode) => void;
 	setItemSize: (size: number) => void;
 	setSortOptions: (options: SortOption[]) => void;
@@ -46,6 +76,9 @@ export interface ViewOptionsState {
 	setSearchQuery: (query: string) => void;
 	setGroupByEntityType: (enabled: boolean) => void;
 	toggleGroupByEntityType: () => void;
+	setRenderingMode: (view: ViewKey, mode: RenderingMode) => void;
+	setViewConfig: (view: ViewKey, patch: Partial<PerViewConfig>) => void;
+	setVirtualization: (patch: Partial<ViewOptionsState['virtualization']>) => void;
 	resetFilters: () => void;
 	resetAll: () => void;
 }
@@ -60,6 +93,18 @@ const DEFAULT_STATE = {
 	groupByEntityType: false,
 	useCanvasRendering: false,
 	includeSubfolders: false,
+	backgroundColor: 'transparent',
+	pagination: {
+		mode: 'pagination' as PaginationMode,
+		pageSize: 300,
+	},
+	views: {
+		grid: { kind: 'grid', renderingMode: 'canvas', itemSize: 150, gap: 8 },
+		list: { kind: 'list', renderingMode: 'canvas', rowHeight: 36 },
+		masonry: { kind: 'grid', renderingMode: 'canvas', itemSize: 150, gap: 8 },
+		cards: { kind: 'grid', renderingMode: 'canvas', itemSize: 180, gap: 12 },
+		table: { kind: 'list', renderingMode: 'canvas', rowHeight: 32 },
+	} as Record<ViewKey, PerViewConfig>,
 	virtualization: {
 		enabled: true,
 		threshold: 100, // Activar virtualización con 100+ elementos
@@ -73,62 +118,94 @@ export type ViewOptionsStore = ViewOptionsState;
 
 export const useViewOptionsStore = create<ViewOptionsState>()(
 	persist(
-		(set) => ({
+		(set, get) => ({
 			...DEFAULT_STATE,
 
 			setUseCanvasRendering: (enabled: boolean) => set({ useCanvasRendering: enabled }),
-			toggleUseCanvasRendering: () => set((state) => ({ useCanvasRendering: !state.useCanvasRendering })),
+			toggleUseCanvasRendering: () =>
+				set((state: ViewOptionsState) => ({ useCanvasRendering: !state.useCanvasRendering })),
 
 			setIncludeSubfolders: (enabled: boolean) => set({ includeSubfolders: enabled }),
-			toggleIncludeSubfolders: () => set((state) => ({ includeSubfolders: !state.includeSubfolders })),
+			toggleIncludeSubfolders: () =>
+				set((state: ViewOptionsState) => ({ includeSubfolders: !state.includeSubfolders })),
 
-			setViewMode: (mode) => set({ viewMode: mode }),
+			setBackgroundColor: (color: string) => set({ backgroundColor: color }),
 
-			setItemSize: (size) => set({ itemSize: size }),
+			setPaginationMode: (mode: PaginationMode) =>
+				set((state: ViewOptionsState) => ({ pagination: { ...state.pagination, mode } })),
+			setPageSize: (size: number) =>
+				set((state: ViewOptionsState) => ({ pagination: { ...state.pagination, pageSize: Math.max(1, size) } })),
 
-			setSortOptions: (options) => set((state) => ({ sortOptions: options, sortVersion: state.sortVersion + 1 })),
+			setViewMode: (mode: ViewMode) => set({ viewMode: mode }),
 
-			addSortOption: (option) =>
-				set((state) => {
-					const exists = state.sortOptions.some((o) => o.field === option.field);
+			setItemSize: (size: number) => set({ itemSize: size }),
+
+			setSortOptions: (options: SortOption[]) =>
+				set((state: ViewOptionsState) => ({ sortOptions: options, sortVersion: state.sortVersion + 1 })),
+
+			addSortOption: (option: SortOption) =>
+				set((state: ViewOptionsState) => {
+					const exists = state.sortOptions.some((o: SortOption) => o.field === option.field);
 					if (exists) {
 						return {
-							sortOptions: state.sortOptions.map((o) => (o.field === option.field ? option : o)),
+							sortOptions: state.sortOptions.map((o: SortOption) => (o.field === option.field ? option : o)),
 							sortVersion: state.sortVersion + 1,
 						};
 					}
 					return { sortOptions: [...state.sortOptions, option], sortVersion: state.sortVersion + 1 };
 				}),
 
-			removeSortOption: (field) =>
-				set((state) => ({
-					sortOptions: state.sortOptions.filter((o) => o.field !== field),
+			removeSortOption: (field: string) =>
+				set((state: ViewOptionsState) => ({
+					sortOptions: state.sortOptions.filter((o: SortOption) => o.field !== field),
 					sortVersion: state.sortVersion + 1,
 				})),
 
-			setFilterOptions: (options) => set({ filterOptions: options }),
+			setFilterOptions: (options: FilterOption[]) => set({ filterOptions: options }),
 
-			addFilterOption: (option) =>
-				set((state) => {
+			addFilterOption: (option: FilterOption) =>
+				set((state: ViewOptionsState) => {
 					// Replace if exists, otherwise add
-					const exists = state.filterOptions.some((o) => o.field === option.field);
+					const exists = state.filterOptions.some((o: FilterOption) => o.field === option.field);
 					if (exists) {
 						return {
-							filterOptions: state.filterOptions.map((o) => (o.field === option.field ? option : o)),
+							filterOptions: state.filterOptions.map((o: FilterOption) => (o.field === option.field ? option : o)),
 						};
 					}
 					return { filterOptions: [...state.filterOptions, option] };
 				}),
 
-			removeFilterOption: (field) =>
-				set((state) => ({
-					filterOptions: state.filterOptions.filter((o) => o.field !== field),
+			removeFilterOption: (field: string) =>
+				set((state: ViewOptionsState) => ({
+					filterOptions: state.filterOptions.filter((o: FilterOption) => o.field !== field),
 				})),
 
-			setSearchQuery: (query) => set({ searchQuery: query }),
+			setSearchQuery: (query: string) => set({ searchQuery: query }),
 
 			setGroupByEntityType: (enabled: boolean) => set({ groupByEntityType: enabled }),
-			toggleGroupByEntityType: () => set((state) => ({ groupByEntityType: !state.groupByEntityType })),
+			toggleGroupByEntityType: () =>
+				set((state: ViewOptionsState) => ({ groupByEntityType: !state.groupByEntityType })),
+
+			setRenderingMode: (view: ViewKey, mode: RenderingMode) =>
+				set((state: ViewOptionsState) => ({
+					views: {
+						...state.views,
+						[view]: { ...state.views[view], renderingMode: mode } as PerViewConfig,
+					},
+				})),
+
+			setViewConfig: (view: ViewKey, patch: Partial<PerViewConfig>) =>
+				set((state: ViewOptionsState) => ({
+					views: {
+						...state.views,
+						[view]: { ...state.views[view], ...patch } as PerViewConfig,
+					},
+				})),
+
+			setVirtualization: (patch: Partial<typeof DEFAULT_STATE.virtualization>) =>
+				set((state: ViewOptionsState) => ({
+					virtualization: { ...state.virtualization, ...patch },
+				})),
 
 			resetFilters: () =>
 				set({
@@ -140,6 +217,15 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 		}),
 		{
 			name: 'view-options-storage',
+			// merge para compatibilidad con estados previos persistidos
+			merge: (persisted: any, current: any) => {
+				const merged = { ...current, ...persisted };
+				// defaults para nuevos campos
+				merged.backgroundColor ??= DEFAULT_STATE.backgroundColor;
+				merged.pagination ??= DEFAULT_STATE.pagination;
+				merged.views = { ...DEFAULT_STATE.views, ...(persisted?.views ?? {}) };
+				return merged;
+			},
 		}
 	)
 );

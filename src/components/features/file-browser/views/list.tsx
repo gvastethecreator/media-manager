@@ -10,6 +10,11 @@ export interface ListProps {
 	scrollContainer?: HTMLElement | null;
 	onItemClick?: (item: MediaItem, modifiers?: ClickModifiers) => void;
 	onItemDoubleClick?: (item: MediaItem) => void;
+	/**
+	 * TestId opcional para el contenedor. Por defecto 'listview-container'.
+	 * Permite desactivar o personalizar el testid en usos agrupados para evitar duplicados.
+	 */
+	testId?: string | null;
 }
 
 export function List({
@@ -18,13 +23,14 @@ export function List({
 	scrollContainer = null,
 	onItemClick,
 	onItemDoubleClick,
+	testId = 'listview-container',
 }: ListProps) {
 	const [internalScrollEl, setInternalScrollEl] = useState<HTMLDivElement | null>(null);
 	const effectiveScrollContainer = scrollContainer ?? internalScrollEl;
 	return (
 		<div
 			className="file-browser-canvas file-browser-list h-full w-full overflow-auto"
-			data-testid="file-browser-container"
+			{...(testId ? { 'data-testid': testId } : {})}
 			ref={setInternalScrollEl}
 		>
 			<div className="relative" data-testid="file-browser-scroll-area-viewport">

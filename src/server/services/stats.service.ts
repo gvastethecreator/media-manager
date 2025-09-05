@@ -398,7 +398,17 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 
 		// Obtener conteos y estadísticas con logging detallado
 		statsLogger.info('🔍 Ejecutando consultas a la base de datos...');
-		const [foldersCount, imagesCount, videosCount, totalSizeResult, thumbnailsStatsResult] = await Promise.all([
+		const [
+			foldersCount,
+			imagesCount,
+			videosCount,
+			audiosCount,
+			documentsCount,
+			jsonFilesCount,
+			file3DsCount,
+			totalSizeResult,
+			thumbnailsStatsResult,
+		] = await Promise.all([
 			db
 				.select({ count: sql<number>`count(*)` })
 				.from(folders)
@@ -432,6 +442,53 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.error('❌ Error en consulta videos:', error);
 					throw error;
 				}),
+			// Obtener conteo de archivos de audio
+			db
+				.select({ count: sql<number>`count(*)` })
+				.from(audios)
+				.then((rows: Array<{ count: number }>) => {
+					statsLogger.info('✅ Consulta audios completada:', rows);
+					return rows;
+				})
+				.catch((error) => {
+					statsLogger.error('❌ Error en consulta audios:', error);
+					throw error;
+				}),
+			// Obtener conteo de documentos
+			db
+				.select({ count: sql<number>`count(*)` })
+				.from(documents)
+				.then((rows: Array<{ count: number }>) => {
+					statsLogger.info('✅ Consulta documents completada:', rows);
+					return rows;
+				})
+				.catch((error) => {
+					statsLogger.error('❌ Error en consulta documents:', error);
+					throw error;
+				}),
+			// Obtener conteo de otros archivos por separado (JSON y File3D)
+			db
+				.select({ count: sql<number>`count(*)` })
+				.from(jsonFiles)
+				.then((rows: Array<{ count: number }>) => {
+					statsLogger.info('✅ Consulta jsonFiles completada:', rows);
+					return rows;
+				})
+				.catch((error) => {
+					statsLogger.error('❌ Error en consulta jsonFiles (usando 0 por defecto):', error);
+					return [{ count: 0 }];
+				}),
+			db
+				.select({ count: sql<number>`count(*)` })
+				.from(file3Ds)
+				.then((rows: Array<{ count: number }>) => {
+					statsLogger.info('✅ Consulta file3Ds completada:', rows);
+					return rows;
+				})
+				.catch((error) => {
+					statsLogger.error('❌ Error en consulta file3Ds (usando 0 por defecto):', error);
+					return [{ count: 0 }];
+				}),
 			db
 				.select({ totalSize: sql<number>`COALESCE(SUM(${folders.totalSize}), 0)` })
 				.from(folders)
@@ -440,8 +497,8 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					return rows;
 				})
 				.catch((error) => {
-					statsLogger.error('❌ Error en consulta totalSize:', error);
-					throw error;
+					statsLogger.warn('⚠️ Error en consulta totalSize (usando 0 por defecto):', error);
+					return [{ totalSize: 0 }];
 				}),
 			// Obtener estadísticas de thumbnails y caché
 			db
@@ -455,16 +512,21 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					return rows;
 				})
 				.catch((error) => {
-					statsLogger.error('❌ Error en consulta thumbnails stats:', error);
-					throw error;
+					statsLogger.warn('⚠️ Error en consulta thumbnails stats (usando 0 por defecto):', error);
+					return [{ totalThumbnails: 0, thumbnailsCacheSize: 0 }];
 				}),
 		]);
 
 		const totalFolders = foldersCount[0]?.count || 0;
 		const totalImages = imagesCount[0]?.count || 0;
 		const totalVideos = videosCount[0]?.count || 0;
+		const totalAudios = audiosCount[0]?.count || 0;
+		const totalDocuments = documentsCount[0]?.count || 0;
+		const totalJsonFiles = jsonFilesCount[0]?.count || 0;
+		const totalFile3Ds = file3DsCount[0]?.count || 0;
+		const totalOthers = totalJsonFiles + totalFile3Ds;
 		const totalSize = totalSizeResult[0]?.totalSize || 0;
-		const totalFiles = totalImages + totalVideos;
+		const totalFiles = totalImages + totalVideos + totalAudios + totalDocuments + totalOthers;
 
 		// Nuevas estadísticas
 		const totalThumbnails = thumbnailsStatsResult[0]?.totalThumbnails || 0;
@@ -492,9 +554,9 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 			totalFiles,
 			totalImages,
 			totalVideos,
-			totalAudio: 0, // TODO: Implementar cuando se agregue tabla de audio
-			totalDocuments: 0, // TODO: Implementar cuando se agregue tabla de documentos
-			totalOthers: 0, // TODO: Implementar cuando se agregue tabla de otros archivos
+			totalAudio: totalAudios,
+			totalDocuments,
+			totalOthers,
 			totalSize,
 			formattedSize: formatBytes(totalSize),
 			// Nuevos campos para base de datos y thumbnails

@@ -253,13 +253,13 @@ export class FolderReindexService {
 				}
 			}
 
-			// Calcular total de archivos estimado
+			// Calcular total de archivos estimado (RECURSIVO para incluir archivos en subcarpetas)
 			let totalFiles = 0;
 			for (const folder of existingFolders) {
 				try {
 					const { scanFolder } = await import('@/lib/filesystem/folder-scanner');
 					const scan = await scanFolder(folder.path, {
-						recursive: false,
+						recursive: true,
 						includeHidden: options.includeHidden,
 						limit: 0,
 					});
