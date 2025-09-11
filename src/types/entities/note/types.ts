@@ -6,19 +6,15 @@
  */
 
 import { z } from 'zod';
-import type { AlbumWithStats } from '../album';
-import type { CharacterWithStats } from '../character';
-import type { CollectionWithStats } from '../collection';
-import type { ConceptWithStats } from '../concept';
-import type { GroupWithStats } from '../group';
-import type { ImageComplete } from '../image';
-import type { PlaceComplete } from '../place';
-import type { PromptComplete } from '../prompt';
-import type { PropertyComplete } from '../property';
-import type { TagWithStats } from '../tag';
-import type { VideoWithStats } from '../video';
-import type { WildcardWithStats } from '../wildcard';
-import type { WorldItemWithStats } from '../world-item';
+// Removed broken import - will define types here
+import { NoteCategory, NotePriority, NoteSortOption as NoteSortCriteria, NoteStatus, NoteViewMode } from './enums';
+
+// Re-export enums for direct access from types
+export { NoteCategory, NotePriority, NoteStatus, NoteViewMode } from './enums';
+export { NoteSortOption as NoteSortCriteria } from './enums';
+
+// Import base entity types
+import { EntityStats } from '../entity.types';
 
 /**
  * 📝 Tipo base canónico para Note
@@ -39,6 +35,27 @@ export interface NoteBase {
 	tags?: any;
 	createdAt: Date;
 	updatedAt: Date;
+}
+
+/**
+ * 📊 Estadísticas de Note
+ */
+export interface NoteStatistics extends EntityStats {
+	wordCount: number;
+	readingTime: number;
+	completionScore: number;
+
+	// File system functions
+	isDirectory: boolean;
+	isFile: boolean;
+}
+
+/**
+ * 📝 Note con estadísticas
+ */
+export interface NoteWithStats extends NoteBase {
+	stats: NoteStatistics; // Campo principal (statistics es alias legacy)
+	statistics?: NoteStatistics; // Alias para retrocompatibilidad legacy
 }
 
 /**
@@ -178,60 +195,8 @@ export interface RelatedNote {
 }
 
 /**
- * 🏷️ Enumeraciones y tipos auxiliares
+ * 🔗 Interfaz para notas relacionadas
  */
-export enum NoteStatus {
-	ACTIVE = 'active',
-	ARCHIVED = 'archived',
-	COMPLETED = 'completed',
-	DRAFT = 'draft',
-	PENDING = 'pending',
-}
-
-export enum NoteCategory {
-	GENERAL = 'general',
-	STORY = 'story',
-	LORE = 'lore',
-	MECHANICS = 'mechanics',
-	CHARACTER = 'character',
-	PLACE = 'place',
-	WORLD_ITEM = 'world_item',
-	PROMPT = 'prompt',
-	IDEA = 'idea',
-	TODO = 'todo',
-}
-
-export enum NotePriority {
-	LOWEST = 0,
-	LOW = 1,
-	MEDIUM = 2,
-	HIGH = 3,
-	HIGHEST = 4,
-}
-
-export enum NoteSortCriteria {
-	TITLE_ASC = 'title:asc',
-	TITLE_DESC = 'title:desc',
-	PRIORITY_ASC = 'priority:asc',
-	PRIORITY_DESC = 'priority:desc',
-	STATUS_ASC = 'status:asc',
-	STATUS_DESC = 'status:desc',
-	CREATED_ASC = 'created:asc',
-	CREATED_DESC = 'created:desc',
-	UPDATED_ASC = 'updated:asc',
-	UPDATED_DESC = 'updated:desc',
-}
-
-/**
- * 📋 Opciones de ordenamiento para UI
- */
-export enum NoteViewMode {
-	GRID = 'grid',
-	LIST = 'list',
-	CARDS = 'cards',
-	COMPACT = 'compact',
-	DETAIL = 'detail',
-}
 
 export const NOTE_SORT_PROPERTY_MAP: Record<NoteSortCriteria, string> = {
 	[NoteSortCriteria.TITLE_ASC]: 'title',
@@ -244,14 +209,14 @@ export const NOTE_SORT_PROPERTY_MAP: Record<NoteSortCriteria, string> = {
 	[NoteSortCriteria.CREATED_DESC]: 'createdAt',
 	[NoteSortCriteria.UPDATED_ASC]: 'updatedAt',
 	[NoteSortCriteria.UPDATED_DESC]: 'updatedAt',
+	[NoteSortCriteria.CATEGORY_ASC]: 'category',
+	[NoteSortCriteria.CATEGORY_DESC]: 'category',
 };
 
-import { EntityStats } from '../entity.types';
-
 /**
- * 📊 Estadísticas de Note
+ * 📊 Estadísticas de Note (duplicated interface removed)
  */
-export interface NoteStatistics extends EntityStats {
+export interface NoteStatisticsDuplicated extends EntityStats {
 	wordCount: number;
 	readingTime: number;
 	completionScore: number;
@@ -266,20 +231,20 @@ export interface NoteStatistics extends EntityStats {
  */
 export interface NoteComplete extends NoteBase {
 	entityType: 'note';
-	// Relaciones
-	images?: ImageComplete[];
-	videos?: VideoWithStats[];
-	albums?: AlbumWithStats[];
-	collections?: CollectionWithStats[];
-	tags?: TagWithStats[];
-	characters?: CharacterWithStats[];
-	places?: PlaceComplete[];
-	worldItems?: WorldItemWithStats[];
-	concepts?: ConceptWithStats[];
-	prompts?: PromptComplete[];
-	wildcards?: WildcardWithStats[];
-	properties?: PropertyComplete[];
-	groups?: GroupWithStats[];
+	// Relaciones - using any[] to avoid circular dependencies
+	images?: any[];
+	videos?: any[];
+	albums?: any[];
+	collections?: any[];
+	tags?: any[];
+	characters?: any[];
+	places?: any[];
+	worldItems?: any[];
+	concepts?: any[];
+	prompts?: any[];
+	wildcards?: any[];
+	properties?: any[];
+	groups?: any[];
 
 	// Conteos
 	_count?: {

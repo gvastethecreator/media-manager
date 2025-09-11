@@ -8,12 +8,12 @@
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { isValidFolderId } from '@/lib/utils/folder-id-generator';
-import type { FolderBase, FolderCreateInput, FolderUpdateInput } from '@/types/entities/folder/types';
 import {
-	FolderBaseSchema as CanonicalFolderSchema,
 	CreateFolderSchema as CanonicalCreateFolderSchema,
+	FolderBaseSchema as CanonicalFolderSchema,
 	UpdateFolderSchema as CanonicalUpdateFolderSchema,
 } from '@/types/entities/folder/schema';
+import type { FolderBase, FolderCreateInput, FolderUpdateInput } from '@/types/entities/folder/types';
 
 const logger = serverLogger.withContext('FolderValidators');
 

@@ -4,7 +4,8 @@
  */
 
 import type { EntityBase } from '@/types/entities/entity.types';
-import type { TagWithStats } from './base';
+import type { TagBase, TagStatistics, TagWithStats } from './base';
+import { TagSortCriteria } from './enums';
 
 // Re-export TagWithStats for external use
 export type { TagWithStats } from './base';
@@ -40,19 +41,6 @@ export interface TagFilters {
 	hasWildcard?: boolean;
 	hasProperty?: boolean;
 	hasGroup?: boolean;
-}
-
-export enum TagSortCriteria {
-	NAME_ASC = 'name:asc',
-	NAME_DESC = 'name:desc',
-	CREATED_ASC = 'createdAt:asc',
-	CREATED_DESC = 'createdAt:desc',
-	UPDATED_ASC = 'updatedAt:asc',
-	UPDATED_DESC = 'updatedAt:desc',
-	USAGE_ASC = 'usage:asc',
-	USAGE_DESC = 'usage:desc',
-	POPULARITY_ASC = 'popularity:asc',
-	POPULARITY_DESC = 'popularity:desc',
 }
 
 // TagStatistics y TagWithStats están definidos en base.ts

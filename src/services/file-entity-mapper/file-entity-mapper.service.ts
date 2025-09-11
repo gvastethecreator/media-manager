@@ -1,24 +1,7 @@
-import { createHash } from 'node:crypto';
 import { readFile, stat } from 'node:fs/promises';
 import { basename, extname } from 'node:path';
-import { LRUCache } from 'lru-cache';
 import PQueue from 'p-queue';
 import { shouldSkipFileByTypeAndSize } from '@/config/media-processing';
-import {
-	createVideo as createVideoServer,
-	getVideoByHash as getVideoByHashServer,
-} from '@/server/services/video.server.service';
-import { createAudio, getAudioByHash } from '@/services/audio/audio.service';
-import { createDocument, getDocumentByHash } from '@/services/document/document.service';
-import { createFile3D, getFile3DByHash } from '@/services/file3d/file3d.service';
-import type { CreateImageInput } from '@/services/image/image.service';
-import { ImageService } from '@/services/image/image.service';
-import { createJsonFile, getJsonFileByHash } from '@/services/json-file/json-file.service';
-import type { DocumentCreateInput } from '@/transformers/document/validators';
-import type { AudioCreateInput } from '@/types/entities/audio';
-import type { File3DCreateInput } from '@/types/entities/file3d';
-import type { JsonFileCreateInput } from '@/types/entities/json-file';
-import type { VideoCreateInput } from '@/types/entities/video';
 import {
 	ENTITY_TYPE_MAPPING,
 	EntityCreationResult,
@@ -26,6 +9,9 @@ import {
 	EntityType,
 	FileInfo,
 } from '@/types/file-entity-mapper';
+// Servicios especializados extraídos
+import { EntityExistenceService, FileHashService, FileInfoService, EntityCreationService } from './core';
+import { ThumbnailGeneratorService } from './thumbnail';
 
 // Regex reutilizables top-level para evitar recreación frecuente
 const WORD_SPLIT_REGEX = /\s+/g;
@@ -39,19 +25,29 @@ const LINE_SPLIT_REGEX = /\r?\n/;
  */
 export class FileEntityMapperService {
 	private static instance: FileEntityMapperService;
-	private imageService: ImageService;
-	private hashCache: LRUCache<string, string>;
 	private metrics: { start: number; phases: Record<string, number[]> };
 	private queue: PQueue;
 	// Cadena para serializar la etapa básica y mantener orden determinista en tests
 	private basicStageChain: Promise<unknown>;
 
+	// Servicios especializados extraídos
+	private hashService: FileHashService;
+	private fileInfoService: FileInfoService;
+	private entityExistenceService: EntityExistenceService;
+	private entityCreationService: EntityCreationService;
+	private thumbnailService: ThumbnailGeneratorService;
+
 	private constructor() {
-		this.imageService = ImageService.getInstance();
-		this.hashCache = new LRUCache<string, string>({ max: 500 });
 		this.metrics = { start: Date.now(), phases: {} };
 		this.queue = new PQueue({ concurrency: 4 }); // concurrency global inicial
 		this.basicStageChain = Promise.resolve();
+
+		// Inicializar servicios especializados
+		this.hashService = FileHashService.getInstance();
+		this.fileInfoService = FileInfoService.getInstance();
+		this.entityExistenceService = EntityExistenceService.getInstance();
+		this.entityCreationService = EntityCreationService.getInstance();
+		this.thumbnailService = ThumbnailGeneratorService.getInstance();
 	}
 
 	private runInBasicStage<T>(fn: () => Promise<T>): Promise<T> {
@@ -89,25 +85,13 @@ export class FileEntityMapperService {
 	}
 
 	private async calculateFileHash(filePath: string): Promise<string> {
-		// Clave incluye mtime y size para invalidar hash si cambia contenido.
-		const stats = await stat(filePath);
-		const cacheKey = `${filePath}:${stats.mtimeMs}:${stats.size}`;
-		const cached = this.hashCache.get(cacheKey);
-		if (cached) {
-			return cached;
-		}
-		const fileBuffer = await readFile(filePath);
-		const hash = createHash('sha256').update(fileBuffer).digest('hex');
-		this.hashCache.set(cacheKey, hash);
-		return hash;
+		// Delegar al servicio especializado
+		return await this.hashService.calculateFileHash(filePath);
 	}
 
 	private async getFileInfo(filePath: string, folderId: string): Promise<FileInfo> {
-		const stats = await stat(filePath);
-		const extension = extname(filePath).toLowerCase();
-		const name = basename(filePath, extension);
-		const hash = await this.calculateFileHash(filePath);
-		return { name, path: filePath, size: stats.size, extension, hash, lastModified: stats.mtime, folderId };
+		// Delegar al servicio especializado
+		return await this.fileInfoService.getFileInfo(filePath, folderId);
 	}
 
 	private recordPhase(name: string, startedAt: number) {
@@ -166,57 +150,8 @@ export class FileEntityMapperService {
 	}
 
 	private async checkExistingEntity(fileInfo: FileInfo, entityType: EntityType): Promise<boolean> {
-		try {
-			switch (entityType) {
-				case EntityType.IMAGE: {
-					if (!fileInfo.hash) {
-						return false;
-					}
-					const existingImage = await this.imageService.getImageByHash(fileInfo.hash);
-					return !!existingImage;
-				}
-				case EntityType.VIDEO: {
-					if (!fileInfo.hash) {
-						return false;
-					}
-					const existingVideo = await getVideoByHashServer(fileInfo.hash);
-					return !!existingVideo;
-				}
-				case EntityType.AUDIO: {
-					if (!fileInfo.hash) {
-						return false;
-					}
-					const existingAudio = await getAudioByHash(fileInfo.hash);
-					return !!existingAudio;
-				}
-				case EntityType.FILE3D: {
-					if (!fileInfo.hash) {
-						return false;
-					}
-					const existingFile3D = await getFile3DByHash(fileInfo.hash);
-					return !!existingFile3D;
-				}
-				case EntityType.DOCUMENT: {
-					if (!fileInfo.hash) {
-						return false;
-					}
-					const existingDocument = await getDocumentByHash(fileInfo.hash);
-					return !!existingDocument;
-				}
-				case EntityType.JSON: {
-					if (!fileInfo.hash) {
-						return false;
-					}
-					const existingJson = await getJsonFileByHash(fileInfo.hash);
-					return !!existingJson;
-				}
-				default:
-					return false;
-			}
-		} catch (e) {
-			console.warn('Error checking existing entity', e);
-			return false;
-		}
+		// Delegar al servicio especializado
+		return await this.entityExistenceService.checkExistingEntity(fileInfo, entityType);
 	}
 
 	// ===================== ETAPA 1 =====================
@@ -278,197 +213,8 @@ export class FileEntityMapperService {
 	}
 
 	private async createBasicEntity(fileInfo: FileInfo, entityType: EntityType): Promise<string> {
-		let entityId: string;
-		switch (entityType) {
-			case EntityType.IMAGE: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for image creation');
-				}
-
-				// Extraer dimensiones básicas de la imagen para evitar la violación de la restricción CHECK
-				let width = 1; // Valor mínimo válido por defecto
-				let height = 1; // Valor mínimo válido por defecto
-
-				try {
-					// Importar sharp dinámicamente para obtener las dimensiones
-					const sharp = (await import('sharp')).default;
-					const metadata = await sharp(fileInfo.path).metadata();
-					width = metadata.width || 1;
-					height = metadata.height || 1;
-				} catch (error) {
-					// Si no se pueden obtener las dimensiones reales, usar valores por defecto válidos
-					console.warn(`No se pudieron obtener dimensiones para ${fileInfo.path}, usando valores por defecto:`, error);
-				}
-
-				const imageData: CreateImageInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					size: fileInfo.size,
-					width,
-					height,
-					hash: fileInfo.hash,
-					folderId: fileInfo.folderId,
-				};
-				const image = await this.imageService.createImage(imageData);
-				entityId = image.id;
-				break;
-			}
-			case EntityType.VIDEO: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for video creation');
-				}
-				const videoData: VideoCreateInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					size: fileInfo.size,
-					hash: fileInfo.hash,
-					folderId: fileInfo.folderId,
-					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
-					duration: 0,
-					isFavorite: false,
-				};
-				const video = await createVideoServer(videoData as any);
-				entityId = video.id;
-				break;
-			}
-			case EntityType.AUDIO: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for audio creation');
-				}
-				const audioData: AudioCreateInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					hash: fileInfo.hash,
-					size: fileInfo.size,
-					folderId: fileInfo.folderId,
-					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
-					extension: fileInfo.extension,
-					description: null,
-					isFavorite: false,
-					isArchived: false,
-					duration: null,
-					bitrate: null,
-					sampleRate: null,
-					channels: null,
-					format: null,
-					codec: null,
-					title: null,
-					artist: null,
-					album: null,
-					year: null,
-					genre: null,
-					track: null,
-					disc: null,
-					albumArtist: null,
-					composer: null,
-					comment: null,
-					lyrics: null,
-					bpm: null,
-					key: null,
-					mood: null,
-				};
-				const audio = await createAudio(audioData);
-				entityId = audio.id;
-				break;
-			}
-			case EntityType.FILE3D: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for file3d creation');
-				}
-				const file3dData: File3DCreateInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					hash: fileInfo.hash,
-					size: fileInfo.size,
-					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
-					extension: fileInfo.extension,
-					folderId: fileInfo.folderId,
-					isFavorite: false,
-					isArchived: false,
-					format: null,
-					version: null,
-					vertices: null,
-					faces: null,
-					triangles: null,
-					materials: null,
-					textures: null,
-					animations: null,
-					bones: null,
-					scenes: null,
-					cameras: null,
-					lights: null,
-					hasUV: null,
-					hasNormals: null,
-					hasColors: null,
-					boundingBox: null,
-				};
-				const file3d = await createFile3D(file3dData);
-				entityId = file3d.id;
-				break;
-			}
-			case EntityType.JSON: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for json creation');
-				}
-				const jsonData: JsonFileCreateInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					size: fileInfo.size,
-					hash: fileInfo.hash,
-					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
-					extension: fileInfo.extension,
-					folderId: fileInfo.folderId,
-					isFavorite: false,
-					isArchived: false,
-					content: null,
-					schema: null as any,
-					isValid: true as any,
-					validationErrors: null as any,
-					keyCount: null as any,
-					depth: null as any,
-				};
-				const json = await createJsonFile(jsonData as any);
-				entityId = json.id as string;
-				break;
-			}
-			case EntityType.DOCUMENT: {
-				if (!fileInfo.hash) {
-					throw new Error('File hash is required for document creation');
-				}
-				const documentData: DocumentCreateInput = {
-					name: fileInfo.name,
-					path: fileInfo.path,
-					hash: fileInfo.hash,
-					size: fileInfo.size,
-					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
-					extension: fileInfo.extension,
-					folderId: fileInfo.folderId,
-					isFavorite: false,
-					isArchived: false,
-					pageCount: null,
-					wordCount: null,
-					language: null,
-					title: null,
-					author: null,
-					subject: null,
-					keywords: null,
-					creator: null,
-					producer: null,
-					creationDate: null,
-					modificationDate: null,
-					encrypted: null,
-					version: null,
-					content: null,
-					summary: null,
-				};
-				const document = await createDocument(documentData);
-				entityId = document.id;
-				break;
-			}
-			default:
-				throw new Error(`Unsupported entity type: ${entityType}`);
-		}
-		return entityId;
+		// Delegar al servicio especializado de creación de entidades
+		return await this.entityCreationService.createBasicEntity(fileInfo, entityType);
 	}
 
 	// ===================== ETAPA 2 =====================
@@ -941,24 +687,8 @@ export class FileEntityMapperService {
 		entityId: string,
 		entityType: EntityType
 	): Promise<{ success: boolean; error?: string }> {
-		try {
-			if (entityType === EntityType.IMAGE) {
-				await this.generateImageThumbnail(filePath, entityId);
-			} else if (entityType === EntityType.VIDEO) {
-				await this.generateVideoThumbnail(filePath, entityId);
-			} else if (entityType === EntityType.JSON) {
-				await this.generateJsonThumbnail(filePath, entityId);
-			} else if (entityType === EntityType.AUDIO) {
-				await this.generateAudioThumbnail(filePath, entityId);
-			} else if (entityType === EntityType.FILE3D) {
-				await this.generate3DThumbnail(filePath, entityId);
-			} else if (entityType === EntityType.DOCUMENT) {
-				await this.generateDocumentThumbnail(filePath, entityId);
-			}
-			return { success: true };
-		} catch (e) {
-			return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
-		}
+		// Delegar al servicio especializado de thumbnails
+		return await this.thumbnailService.generateThumbnail(filePath, entityId, entityType);
 	}
 
 	private async generateImageThumbnail(filePath: string, entityId: string) {

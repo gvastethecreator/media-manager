@@ -9,6 +9,57 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import { createDefaultEntityStats } from '@/lib/utils';
 import type { JsonFileBase, JsonFileWithStats } from '@/types/entities/json-file/base';
 
+/**
+ * 📊 Calcula la profundidad de anidamiento de un objeto JSON
+ */
+function calculateNestingDepth(obj: unknown): number {
+	if (obj === null || typeof obj !== 'object') {
+		return 0;
+	}
+
+	let maxDepth = 0;
+
+	if (Array.isArray(obj)) {
+		for (const item of obj) {
+			const depth = calculateNestingDepth(item);
+			maxDepth = Math.max(maxDepth, depth);
+		}
+	} else {
+		for (const value of Object.values(obj as Record<string, unknown>)) {
+			const depth = calculateNestingDepth(value);
+			maxDepth = Math.max(maxDepth, depth);
+		}
+	}
+
+	return maxDepth + 1;
+}
+
+/**
+ * 🔢 Cuenta el número total de claves en un objeto (recursivamente)
+ */
+function calculateKeyCount(obj: unknown): number {
+	if (obj === null || typeof obj !== 'object') {
+		return 0;
+	}
+
+	let count = 0;
+
+	if (Array.isArray(obj)) {
+		for (const item of obj) {
+			count += calculateKeyCount(item);
+		}
+	} else {
+		const objRecord = obj as Record<string, unknown>;
+		count += Object.keys(objRecord).length;
+
+		for (const value of Object.values(objRecord)) {
+			count += calculateKeyCount(value);
+		}
+	}
+
+	return count;
+}
+
 const logger = serverLogger.withContext('JsonFileTransformer');
 
 /**
@@ -40,11 +91,14 @@ export function fromDrizzleJsonFile(drizzleJsonFile: JsonFileBase): JsonFileWith
 				const content = JSON.parse(drizzleJsonFile.content);
 				stats.size = drizzleJsonFile.content.length;
 				stats.isValid = true;
-				// TODO: Implementar lógica real para nestingDepth y keyCount
-				stats.keyCount = Object.keys(content).length;
-				stats.nestingDepth = 1; // Placeholder
+				stats.keyCount = calculateKeyCount(content);
+				stats.nestingDepth = calculateNestingDepth(content);
 			} catch (e) {
 				// El JSON no es válido, se mantienen los stats por defecto
+				logger.warn('JSON content is invalid', {
+					jsonFileId: drizzleJsonFile.id,
+					contentLength: drizzleJsonFile.content?.length || 0,
+				});
 			}
 		}
 

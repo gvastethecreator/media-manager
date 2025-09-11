@@ -23,7 +23,7 @@ import eventsRouter from './routes/events';
 import favoritesRouter from './routes/favorites';
 import file3dsRouter from './routes/file3ds.js';
 import filesRouter from './routes/files.js';
-import { foldersRouter } from './routes/folders.js';
+import foldersRouter from './routes/folders.js';
 import groupsRouter from './routes/groups';
 import { imagesRouter } from './routes/images.js';
 import jsonFilesRouter from './routes/json-files';

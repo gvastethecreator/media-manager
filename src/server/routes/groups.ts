@@ -181,7 +181,7 @@ router.get('/:id/images', async (req, res) => {
 		};
 
 		// TODO: Implementar getGroupImages en groupService
-		// const { images, total } = await groupService.getGroupImages(id, filters);
+		// 		const { images, total } = await groupService.getImages(id, filters);
 		const images: any[] = [];
 		const total = 0;
 
@@ -191,8 +191,7 @@ router.get('/:id/images', async (req, res) => {
 				total,
 				limit: filters.limit,
 				offset: filters.offset,
-				hasNext: filters.offset + filters.limit < total,
-				hasPrev: filters.offset > 0,
+				hasMore: filters.offset + filters.limit < total,
 			},
 		});
 	} catch (error) {
@@ -205,9 +204,7 @@ router.get('/:id/media', async (req, res) => {
 	try {
 		const { id } = req.params;
 		const limit = Number(req.query.limit) || 6;
-		// TODO: Implementar getRecentGroupMediaService en groupService
-		// const media = await groupService.getRecentGroupMediaService(id, limit);
-		const media: any[] = [];
+		const media = await groupService.getRecentMedia(id, limit);
 		res.json(media);
 	} catch (error) {
 		console.error('Error getting recent group media:', error);
@@ -218,8 +215,6 @@ router.get('/:id/media', async (req, res) => {
 router.get('/:id/card-data', async (req, res) => {
 	try {
 		const { id } = req.params;
-		// TODO: Implementar getGroupCardDataService en groupService
-		// const cardData = await groupService.getGroupCardDataService(id);
 		const cardData = await groupService.getCardData(id);
 		res.json(cardData);
 	} catch (error) {

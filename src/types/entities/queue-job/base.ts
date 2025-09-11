@@ -6,18 +6,7 @@
  * @updated 2025-01-27
  */
 
-/**
- * Estado del trabajo en cola
- */
-export enum QueueJobStatus {
-	PENDING = 'pending',
-	PROCESSING = 'processing',
-	COMPLETED = 'completed',
-	FAILED = 'failed',
-	RETRYING = 'retrying',
-	CANCELLED = 'cancelled',
-	PAUSED = 'paused',
-}
+import { QueueJobStatus } from './enums';
 
 /**
  * 🗿 Modelo base de QueueJob, derivado del schema de Drizzle.

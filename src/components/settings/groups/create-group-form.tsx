@@ -9,7 +9,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import type { GroupWithStats } from '@/types/entities/group/base';
-import type { CreateGroupInput } from '@/types/entities/group/types';
+import type { GroupCreateInput } from '@/types/entities/group/types';
 
 // Esquema de validación para el formulario
 const groupFormSchema = z.object({
@@ -29,7 +29,7 @@ type FormData = z.infer<typeof groupFormSchema>;
 interface CreateGroupFormProps {
 	group?: GroupWithStats;
 	isEditing?: boolean;
-	onSubmit: (data: CreateGroupInput) => Promise<void>;
+	onSubmit: (data: GroupCreateInput) => Promise<void>;
 	onCancel: () => void;
 	onPreview?: () => void;
 }
@@ -54,7 +54,7 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 			throw new Error('El nombre es requerido');
 		}
 
-		const submitData: CreateGroupInput = {
+		const submitData: GroupCreateInput = {
 			name: data.name,
 			emoji: data.emoji,
 			color: data.color,

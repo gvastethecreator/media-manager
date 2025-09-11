@@ -1,5 +1,11 @@
 /**
- * @file Exportaciones de tipos para la entidad Place
+ * @file Exportaciones de tipos pa// --- 🔢 Enums ---
+export {
+	PlaceCategory,
+	PlaceSortCriteria,
+	PlaceType,
+	PlaceViewMode,
+} from './enums';tidad Place
  * @module types/entities/place
  * @description Centralizador de exportaciones para todos los tipos relacionados con la entidad Place.
  *              Unifica los tipos base generados y los tipos legacy para una migración progresiva.
@@ -15,7 +21,8 @@ export type {
 	PlaceUpdateInput,
 	PlaceWithStats,
 } from './base';
-
+// --- 🔢 Enums ---
+export { PlaceCategory, PlaceSortCriteria, PlaceType, PlaceViewMode } from './enums';
 // --- 📚 Tipos Adicionales ---
 export type { PlaceFilters, PlaceSearchOptions } from './types';
 
@@ -33,11 +40,3 @@ export type { PlaceFilters, PlaceSearchOptions } from './types';
 
 // --- Tipos Complete ---
 export type { PlaceComplete } from './types';
-// --- 🎨 Enums (Se Mueven a su Propio Archivo) ---
-// TODO: Mover estos enums a un archivo `enums.ts` dedicado.
-export {
-	PlaceCategory,
-	PlaceSortCriteria,
-	PlaceType,
-	PlaceViewMode,
-} from './types';
