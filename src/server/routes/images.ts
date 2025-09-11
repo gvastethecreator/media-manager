@@ -6,11 +6,13 @@ import { z } from 'zod';
 import { normalizeQuality } from '@/lib/config/thumbnail.config';
 import { db } from '@/lib/drizzle';
 import { folders, images } from '@/lib/drizzle/schema/index';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { imageService } from '@/services/image/image.service';
 import { processImage } from '../services/image-processing.service';
 import { verifySignedToken } from '../services/thumbnail.service';
 
 const router = Router();
+const logger = serverLogger.withContext('ImagesRoutes');
 
 import { ImageFiltersSchema } from '@/types/entities/image/schema';
 
@@ -205,7 +207,7 @@ router.get('/', async (req, res) => {
 			// silencioso
 		}
 	} catch (error) {
-		console.error('Error al obtener imágenes:', error);
+		logger.error('Error al obtener imágenes', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -231,7 +233,7 @@ router.get('/:id/content', async (req, res) => {
 			res.status(payload.httpStatus).json(payload);
 			return;
 		}
-		console.error('Error serving image:', error);
+		logger.error('Error serving image', { error });
 		res.status(500).send('Error serving image');
 	}
 });
@@ -282,7 +284,7 @@ router.get('/:id/thumbnail', async (req, res) => {
 			res.status(payload.httpStatus).json(payload);
 			return;
 		}
-		console.error('Error serving thumbnail:', error);
+		logger.error('Error serving thumbnail', { error });
 		res.status(500).send('Error serving thumbnail');
 	}
 });
@@ -364,7 +366,7 @@ router.get('/:id', async (req, res) => {
 
 		res.json(formattedImage);
 	} catch (error) {
-		console.error('Error al obtener imagen:', error);
+		logger.error('Error al obtener imagen', { error });
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -381,7 +383,7 @@ router.post('/:id/thumbnail/generate', async (req, res) => {
 		await imageService.generateThumbnail(id);
 		res.json({ status: 'success', quality });
 	} catch (error) {
-		console.error('Error generating thumbnail:', error);
+		logger.error('Error generating thumbnail', { error });
 		res.status(500).json({ error: 'Error generating thumbnail' });
 	}
 });
@@ -398,7 +400,7 @@ router.get('/signed/:token', async (req, res) => {
 		});
 		res.send(buffer);
 	} catch (error) {
-		console.error('Error serving signed image:', error);
+		logger.error('Error serving signed image', { error });
 		res.status(500).send('Error al servir la imagen');
 	}
 });
@@ -442,7 +444,7 @@ router.post('/:id/process', async (req, res) => {
 		});
 		res.send(processedBuffer);
 	} catch (error) {
-		console.error('Error processing image:', error);
+		logger.error('Error processing image', { error });
 		res.status(500).send('Error al procesar la imagen');
 	}
 });

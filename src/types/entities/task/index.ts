@@ -15,7 +15,8 @@ export type {
 	TaskWithStats,
 } from './base';
 
+// 🔢 ENUMS
 export {
 	TaskPriority,
 	TaskStatus,
-} from './base';
+} from './enums';

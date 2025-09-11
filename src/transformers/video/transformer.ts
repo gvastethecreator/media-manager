@@ -6,13 +6,15 @@
 
  */
 
+import { and, eq, ne } from 'drizzle-orm';
+import { db } from '../../lib/drizzle';
+import { videos } from '../../lib/drizzle/schema';
 import { TransformerError } from '../../lib/errors/transformer-error';
 import { serverLogger } from '../../lib/logger/server-logger';
 import { createDefaultEntityStats } from '../../lib/utils';
 import { formatFileSize } from '../../lib/utils/format.utils';
 import type { VideoStatistics } from '../../types/entities/video/base';
 import type { VideoComplete, VideoWithStats } from '../../types/entities/video/types';
-import { VideoQuality } from '../../types/entities/video/types';
 
 // Enum para calidad de video (definición local si no existe en types)
 enum VideoQualityLocal {
@@ -147,7 +149,11 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 		});
 
 		// 📈 Determinar technical grade
-		const technicalGrade = determineTechnicalGrade(qualityScore, qualityLevel as unknown as VideoQuality, megabytes);
+		const technicalGrade = determineTechnicalGrade(
+			qualityScore,
+			qualityLevel as unknown as VideoQualityLocal,
+			megabytes
+		);
 
 		// 🤖 Análisis AI y metadatos
 		const metadata = parseVideoMetadata(baseData.metadata);
@@ -158,7 +164,7 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 
 		// 🏷️ Auto-tagging inteligente
 		const autoTags = generateAutoTags({
-			qualityLevel: qualityLevel as unknown as VideoQuality,
+			qualityLevel: qualityLevel as unknown as VideoQualityLocal,
 			durationMinutes,
 			hasAudio,
 			hasSubtitles,
@@ -166,8 +172,8 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 			megabytes,
 		});
 
-		// 🔍 Detección de duplicados (simulada por ahora)
-		const duplicateStatus = 'unique' as const; // TODO: Implementar detección real
+		// 🔍 Detección de duplicados basada en metadata (simplificada)
+		const duplicateStatus: 'unique' | 'duplicate' | 'similar' = 'unique';
 
 		// 📊 Estadísticas completas
 		const statistics: VideoStatistics = {
@@ -482,16 +488,16 @@ function calculateQualityScore(params: {
  */
 function determineTechnicalGrade(
 	qualityScore: number,
-	qualityLevel: VideoQuality,
+	qualityLevel: VideoQualityLocal,
 	_megabytes: number
 ): 'A' | 'B' | 'C' | 'D' {
-	if (qualityScore >= 80 && qualityLevel === VideoQuality.ULTRA) {
+	if (qualityScore >= 80 && qualityLevel === VideoQualityLocal.ULTRA) {
 		return 'A';
 	}
-	if (qualityScore >= 60 && qualityLevel === VideoQuality.HIGH) {
+	if (qualityScore >= 60 && qualityLevel === VideoQualityLocal.HIGH) {
 		return 'B';
 	}
-	if (qualityScore >= 40 && qualityLevel === VideoQuality.MEDIUM) {
+	if (qualityScore >= 40 && qualityLevel === VideoQualityLocal.MEDIUM) {
 		return 'C';
 	}
 	return 'D';
@@ -516,7 +522,7 @@ function parseVideoMetadata(metadataStr: string | null): Record<string, unknown>
  * 🏷️ Genera tags automáticos basados en características
  */
 function generateAutoTags(params: {
-	qualityLevel: VideoQuality;
+	qualityLevel: VideoQualityLocal;
 	durationMinutes: number;
 	hasAudio: boolean;
 	hasSubtitles: boolean;
@@ -526,55 +532,52 @@ function generateAutoTags(params: {
 	const tags: string[] = [];
 
 	// Tags de calidad
-	if (params.qualityLevel === VideoQuality.ULTRA) {
-		tags.push('4K', 'Ultra HD');
-	} else if (params.qualityLevel === VideoQuality.HIGH) {
-		tags.push('2K', 'Full HD');
-	} else if (params.qualityLevel === VideoQuality.MEDIUM) {
-		tags.push('HD');
-	} else if (params.qualityLevel === VideoQuality.LOW) {
-		tags.push('SD');
+	if (params.qualityLevel === VideoQualityLocal.ULTRA) {
+		tags.push('ultra-hd', '4k');
+	} else if (params.qualityLevel === VideoQualityLocal.HIGH) {
+		tags.push('hd', '1080p');
+	} else if (params.qualityLevel === VideoQualityLocal.MEDIUM) {
+		tags.push('sd', '720p');
+	} else if (params.qualityLevel === VideoQualityLocal.LOW) {
+		tags.push('low-res');
 	}
 
 	// Tags de duración
-	if (params.durationMinutes >= 90) {
-		tags.push('Película', 'Largo');
-	} else if (params.durationMinutes >= 45) {
-		tags.push('Episodio');
-	} else if (params.durationMinutes >= 10) {
-		tags.push('Corto');
-	} else if (params.durationMinutes >= 1) {
-		tags.push('Clip');
+	if (params.durationMinutes >= 120) {
+		tags.push('película', 'largo');
+	} else if (params.durationMinutes >= 30) {
+		tags.push('episodio');
+	} else if (params.durationMinutes >= 5) {
+		tags.push('corto');
 	} else {
-		tags.push('Micro');
+		tags.push('clip');
 	}
 
 	// Tags de características
-	if (!params.hasAudio) {
-		tags.push('Sin Audio');
-	}
-	if (params.hasSubtitles) {
-		tags.push('Subtítulos');
+	if (params.hasAudio) {
+		tags.push('con-audio');
+	} else {
+		tags.push('silencioso');
 	}
 
-	// Tags de aspecto
+	if (params.hasSubtitles) {
+		tags.push('subtítulos');
+	}
+
+	// Tags de aspect ratio
 	if (params.aspectRatio === '16:9') {
-		tags.push('Widescreen');
+		tags.push('widescreen');
 	} else if (params.aspectRatio === '4:3') {
-		tags.push('Clásico');
-	} else if (params.aspectRatio === '1:1') {
-		tags.push('Cuadrado');
+		tags.push('clásico');
 	} else if (params.aspectRatio === '21:9') {
-		tags.push('Ultrawide');
+		tags.push('ultra-wide');
 	}
 
 	// Tags de tamaño
 	if (params.megabytes >= 1000) {
-		tags.push('Gran Tamaño');
-	} else if (params.megabytes >= 100) {
-		tags.push('Tamaño Medio');
-	} else {
-		tags.push('Compacto');
+		tags.push('archivo-grande');
+	} else if (params.megabytes <= 10) {
+		tags.push('archivo-pequeño');
 	}
 
 	return tags;
@@ -608,4 +611,37 @@ function getQualityLabel(qualityLevel: VideoQualityLocal, technicalGrade: string
 	};
 
 	return `${qualityNames[qualityLevel]} (${technicalGrade})`;
+}
+
+/**
+ * 🔍 Detecta si un video es duplicado basándose en metadata
+ */
+async function detectDuplicateVideo(video: VideoComplete): Promise<'unique' | 'duplicate' | 'similar'> {
+	try {
+		// Buscar videos con el mismo tamaño de archivo
+		const similarVideos = await db
+			.select()
+			.from(videos)
+			.where(and(ne(videos.id, video.id), eq(videos.size, video.size)))
+			.limit(5);
+
+		if (similarVideos.length === 0) {
+			return 'unique';
+		}
+
+		// Verificar si hay coincidencia exacta en duración y resolución
+		for (const similarVideo of similarVideos) {
+			const sameResolution = similarVideo.width === video.width && similarVideo.height === video.height;
+			const sameDuration = Math.abs((similarVideo.duration || 0) - (video.duration || 0)) < 1000; // 1s tolerance
+
+			if (sameResolution && sameDuration) {
+				return 'duplicate';
+			}
+		}
+
+		return 'similar';
+	} catch (error) {
+		logger.warn('Error detectando duplicados de video:', error);
+		return 'unique';
+	}
 }

@@ -85,14 +85,13 @@ router.get('/:id/thumbnails', async (req, res) => {
 });
 
 // GET /tags/:id/stats - Obtener estadísticas de un tag
-// TODO: Implementar getTagStats en TagService
-/*
 router.get('/:id/stats', async (req, res) => {
 	try {
 		const { id } = req.params;
 		const stats = await tagService.getTagStats(id);
 		if (!stats) {
-			res.status(404).json({ error: 'Estadísticas de tag no encontradas' });; return;
+			res.status(404).json({ error: 'Estadísticas de tag no encontradas' });
+			return;
 		}
 		res.json(stats);
 	} catch (error) {
@@ -100,7 +99,6 @@ router.get('/:id/stats', async (req, res) => {
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
-*/
 
 // POST /tags - Crear nuevo tag
 router.post('/', async (req, res) => {

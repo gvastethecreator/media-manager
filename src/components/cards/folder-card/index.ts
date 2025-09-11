@@ -4,6 +4,4 @@ export * from './folder-card-footer';
 export * from './folder-card-header';
 export * from './folder-card-images';
 
-// export * from './folder-server-actions'; // TODO: Archivo no encontrado
-
 // Las versiones memo ya están exportadas desde los archivos individuales
