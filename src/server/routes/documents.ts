@@ -39,11 +39,34 @@ const DocumentCreateSchema = z.object({
 
 const DocumentUpdateSchema = DocumentCreateSchema.partial();
 
-// GET /api/documents - Obtener todos los documentos
-router.get('/', async (_req, res) => {
+// Esquema de validación para filtros de documentos
+const DocumentFiltersSchema = z.object({
+	folderId: z.string().uuid().optional(),
+	search: z.string().optional(),
+	isFavorite: z.boolean().optional(),
+	isArchived: z.boolean().optional(),
+	mimeType: z.string().optional(),
+	extension: z.string().optional(),
+	minSize: z.number().int().positive().optional(),
+	maxSize: z.number().int().positive().optional(),
+	limit: z.number().int().positive().max(100).default(20).optional(),
+	offset: z.number().int().min(0).default(0).optional(),
+	sortBy: z.enum(['name', 'createdAt', 'updatedAt', 'size']).default('name').optional(),
+	sortOrder: z.enum(['asc', 'desc']).default('asc').optional(),
+});
+
+// GET /api/documents - Obtener documentos con filtros y paginación
+router.get('/', async (req, res) => {
 	try {
-		const documents = await getDocuments();
-		res.json(documents);
+		const filtersResult = DocumentFiltersSchema.safeParse(req.query);
+		if (!filtersResult.success) {
+			res.status(400).json({ error: 'Parámetros de filtro inválidos', details: filtersResult.error.issues });
+			return;
+		}
+
+		const filters = filtersResult.data;
+		const result = await getDocuments(filters);
+		res.json(result);
 	} catch (error) {
 		console.error('Error al obtener documentos:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });

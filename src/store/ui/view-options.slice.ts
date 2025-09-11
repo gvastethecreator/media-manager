@@ -50,6 +50,12 @@ export interface ViewOptionsState {
 		mode: PaginationMode;
 		pageSize: number;
 	};
+	infiniteScroll: {
+		enabled: boolean;
+		threshold: number; // Píxeles desde el bottom para activar carga automática
+		autoLoad: boolean; // Si debe cargar automáticamente o usar botón manual
+		cooldownMs: number; // Tiempo mínimo entre cargas automáticas
+	};
 	views: Record<ViewKey, PerViewConfig>;
 	virtualization: {
 		enabled: boolean;
@@ -79,8 +85,12 @@ export interface ViewOptionsState {
 	setRenderingMode: (view: ViewKey, mode: RenderingMode) => void;
 	setViewConfig: (view: ViewKey, patch: Partial<PerViewConfig>) => void;
 	setVirtualization: (patch: Partial<ViewOptionsState['virtualization']>) => void;
+	setInfiniteScroll: (patch: Partial<ViewOptionsState['infiniteScroll']>) => void;
+	toggleInfiniteScrollEnabled: () => void;
+	toggleInfiniteScrollAutoLoad: () => void;
 	resetFilters: () => void;
 	resetAll: () => void;
+	resetLocalStorage: () => void;
 }
 
 const DEFAULT_STATE = {
@@ -97,6 +107,12 @@ const DEFAULT_STATE = {
 	pagination: {
 		mode: 'pagination' as PaginationMode,
 		pageSize: 300,
+	},
+	infiniteScroll: {
+		enabled: true,
+		threshold: 300, // 300px desde el bottom
+		autoLoad: false, // Por defecto usar botón manual
+		cooldownMs: 300,
 	},
 	views: {
 		grid: { kind: 'grid', renderingMode: 'canvas', itemSize: 150, gap: 8 },
@@ -207,6 +223,21 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 					virtualization: { ...state.virtualization, ...patch },
 				})),
 
+			setInfiniteScroll: (patch: Partial<typeof DEFAULT_STATE.infiniteScroll>) =>
+				set((state: ViewOptionsState) => ({
+					infiniteScroll: { ...state.infiniteScroll, ...patch },
+				})),
+
+			toggleInfiniteScrollEnabled: () =>
+				set((state: ViewOptionsState) => ({
+					infiniteScroll: { ...state.infiniteScroll, enabled: !state.infiniteScroll.enabled },
+				})),
+
+			toggleInfiniteScrollAutoLoad: () =>
+				set((state: ViewOptionsState) => ({
+					infiniteScroll: { ...state.infiniteScroll, autoLoad: !state.infiniteScroll.autoLoad },
+				})),
+
 			resetFilters: () =>
 				set({
 					filterOptions: [],
@@ -214,6 +245,12 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 				}),
 
 			resetAll: () => set(DEFAULT_STATE),
+
+			// Función de debug para limpiar localStorage completamente
+			resetLocalStorage: () => {
+				localStorage.removeItem('view-options-storage');
+				set(DEFAULT_STATE);
+			},
 		}),
 		{
 			name: 'view-options-storage',
@@ -223,6 +260,10 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 				// defaults para nuevos campos
 				merged.backgroundColor ??= DEFAULT_STATE.backgroundColor;
 				merged.pagination ??= DEFAULT_STATE.pagination;
+				merged.infiniteScroll ??= DEFAULT_STATE.infiniteScroll;
+				merged.infiniteScroll.cooldownMs ??= DEFAULT_STATE.infiniteScroll.cooldownMs;
+				merged.includeSubfolders ??= DEFAULT_STATE.includeSubfolders;
+				merged.groupByEntityType ??= DEFAULT_STATE.groupByEntityType;
 				merged.views = { ...DEFAULT_STATE.views, ...(persisted?.views ?? {}) };
 				return merged;
 			},

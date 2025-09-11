@@ -29,6 +29,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { ViewType } from '@/components/views/types';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { cn } from '@/lib/utils';
+import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
 import { useCategoryStats } from '../hooks/use-category-stats';
 import { NavCategoryChildren } from './nav-category-children';
 
@@ -45,6 +46,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 }: NavMainNavigationProps) {
 	const { stats, getCategoryItemCount, getCategoryItems } = useCategoryStats();
 	const { navigateWithTransition } = useSeamlessNavigation();
+	const { buildHierarchicalPath } = useHierarchicalNavigation();
 
 	// Nueva estructura file-centric con contadores y colores únicos
 	const NAVIGATION_CATEGORIES = useMemo(
@@ -257,14 +259,24 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 			if (childId?.match(/^folder_/)) {
 				// Extraer el ID real de la carpeta (remover prefijo si existe)
 				const folderId = childId.replace('folder_', '');
-				navigateWithTransition(`/folders/${folderId}`);
+
+				// Usar navegación jerárquica
+				const hierarchicalPath = buildHierarchicalPath(folderId);
+
+				// Navegar usando path jerárquico
+				if (hierarchicalPath) {
+					navigateWithTransition(`/folders/${hierarchicalPath}`);
+				} else {
+					// Fallback para carpeta raíz o error
+					navigateWithTransition('/folders');
+				}
 			} else {
 				// Para otras entidades, navegar a su vista específica
 				// Por ejemplo: notas, propiedades, etc.
 				navigateWithTransition(`/${childId}`);
 			}
 		},
-		[navigateWithTransition]
+		[navigateWithTransition, buildHierarchicalPath]
 	);
 
 	const handleNavigate = useCallback(
@@ -354,14 +366,16 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 															isCollapsed ? 'justify-center px-1' : ''
 														)}
 													>
-														<button
-															className={cn('flex flex-1 items-center', isCollapsed ? 'justify-center' : '')}
-															onClick={() => handleNavigate(child.id as ViewType)}
-															type="button"
-														>
-															<child.icon className="h-3 w-3" style={{ color: child.color }} />
-															{!isCollapsed && <span className="ml-2">{child.label}</span>}
-														</button>
+														<div className={cn('flex flex-1 items-center', isCollapsed ? 'justify-center' : '')}>
+															<button
+																className="flex items-center"
+																onClick={() => handleNavigate(child.id as ViewType)}
+																type="button"
+															>
+																<child.icon className="h-3 w-3" style={{ color: child.color }} />
+																{!isCollapsed && <span className="ml-2">{child.label}</span>}
+															</button>
+														</div>
 														{!isCollapsed && (
 															<div className="flex items-center gap-1">
 																{child.count !== undefined && (

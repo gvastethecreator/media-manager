@@ -115,7 +115,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					onClick={() => setShowInterfaceSettings(!showInterfaceSettings)}
 					size="sm"
 					title="Configuraciones de interfaz"
-					variant="ghost"
+					variant={showInterfaceSettings ? 'default' : 'ghost'}
 				>
 					<Settings className="h-3.5 w-3.5" />
 				</Button>

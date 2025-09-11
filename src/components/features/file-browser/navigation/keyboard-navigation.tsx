@@ -37,7 +37,7 @@ export function useKeyboardNavigation({
 	const { selectedIds, activeId, setActiveId, setSelectedIds, toggleSelectedId, addSelectedId } = useSelectionStore();
 	const { openViewer, closeViewer, isOpen: isFileViewerOpen } = useFileViewerStore();
 
-	// Obtener el índice del elemento activo actual
+	// Obtener el índice del elemento activo current
 	const getCurrentIndex = useCallback(() => {
 		if (activeId) {
 			const index = items.findIndex((item) => item.id === activeId);
@@ -240,6 +240,39 @@ export function useKeyboardNavigation({
 		[items.length, viewMode, containerRef]
 	);
 
+	// Helper exportable para tests
+	const getNextIndex = getNavigationIndices;
+
+	// PageUp/PageDown handler
+	const handlePage = useCallback(
+		(event: KeyboardEvent, type: 'up' | 'down') => {
+			if (disabled || items.length === 0) return;
+			const container = containerRef?.current;
+			if (!container) return;
+			event.preventDefault();
+			const pageDelta = Math.max(
+				1,
+				Math.floor(container.clientHeight / (viewMode === 'list' || viewMode === 'table' ? 60 : 120))
+			);
+			const current = getCurrentIndex();
+			const newIndex =
+				type === 'up' ? Math.max(0, current - pageDelta) : Math.min(items.length - 1, current + pageDelta);
+			if (newIndex !== current) {
+				const newItem = items[newIndex];
+				if (event.shiftKey && selectedIds.length > 0) {
+					const start = Math.min(current, newIndex);
+					const end = Math.max(current, newIndex);
+					setSelectedIds(items.slice(start, end + 1).map((i) => i.id));
+				} else {
+					setSelectedIds([newItem.id]);
+				}
+				setActiveId(newItem.id);
+				setTimeout(() => scrollToItem(newIndex), 30);
+			}
+		},
+		[disabled, items, containerRef, viewMode, getCurrentIndex, selectedIds, setSelectedIds, setActiveId, scrollToItem]
+	);
+
 	// Manejar navegación con teclado - mejorado
 	const handleNavigation = useCallback(
 		(direction: 'up' | 'down' | 'left' | 'right', event: KeyboardEvent) => {
@@ -437,6 +470,12 @@ export function useKeyboardNavigation({
 				case 'End':
 					handleHomeEnd(event, 'end');
 					break;
+				case 'PageUp':
+					handlePage(event, 'up');
+					break;
+				case 'PageDown':
+					handlePage(event, 'down');
+					break;
 				case 'a':
 				case 'A':
 					if (event.ctrlKey || event.metaKey) {
@@ -465,6 +504,7 @@ export function useKeyboardNavigation({
 			items,
 			setSelectedIds,
 			setActiveId,
+			handlePage,
 		]
 	);
 
@@ -502,6 +542,7 @@ export function useKeyboardNavigation({
 		isKeyboardFocused: isKeyboardFocusedRef.current,
 		getCurrentIndex,
 		scrollToItem,
+		getNextIndex,
 	};
 }
 

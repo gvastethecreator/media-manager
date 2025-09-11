@@ -50,6 +50,14 @@ import wildcardsRouter from './routes/wildcards';
 import worldItemsRouter from './routes/world-items';
 
 const app = express();
+
+// Configuración para manejar headers grandes (error 431)
+app.use((req, res, next) => {
+	// Aumentar límite de headers para evitar error 431
+	res.setHeader('X-Max-Header-Size', '32768'); // 32KB
+	next();
+});
+
 const PORT = Number.parseInt(process.env.API_PORT || process.env.PORT || '4000', 10);
 // ...existing code...
 app.use(express.json({ limit: '50mb' }));

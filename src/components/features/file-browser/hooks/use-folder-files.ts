@@ -66,8 +66,9 @@ export function useFolderFiles(folderId: string | null, options: UseFolderFilesO
 	// Obtener información de la carpeta para conocer su ruta (solo si includeSubfolders está habilitado)
 	const { data: folderData } = useFolder(includeSubfolders && folderId ? folderId : '');
 
-	// Obtener subcarpetas cuando includeSubfolders es false
-	const { data: subfoldersData } = useFolders(!includeSubfolders && folderId ? { parentId: folderId, limit: 100 } : {});
+	// CAMBIO IMPORTANTE: Siempre obtener subcarpetas para navegación, independiente de includeSubfolders
+	// includeSubfolders solo afecta si los archivos de subcarpetas se incluyen en la vista
+	const { data: subfoldersData } = useFolders(folderId ? { parentId: folderId, limit: 100 } : {});
 
 	const imageFolderState = folderId ? folderLoadState?.[folderId] : undefined;
 	const loadingImages = imageFolderState?.loading ?? !imageFolderState?.loaded;
@@ -89,9 +90,7 @@ export function useFolderFiles(folderId: string | null, options: UseFolderFilesO
 		if (includeSubfolders) {
 			// Cuando includeSubfolders está activado, cargar TODOS los datos globalmente
 			// para poder filtrar por path
-			if (!(imageFolderState?.loaded || imageFolderState?.loading)) {
-				fetchImages(); // Cargar todas las imágenes globalmente
-			}
+			fetchImages({ refresh: true }); // Forzar recarga para obtener todas las imágenes
 			// Cargar todos los videos globalmente
 			(async () => {
 				await fetchVideos(); // Sin filtro de carpetas específicas
@@ -99,9 +98,7 @@ export function useFolderFiles(folderId: string | null, options: UseFolderFilesO
 			})();
 		} else {
 			// Comportamiento tradicional: cargar solo datos específicos de la carpeta
-			if (!(imageFolderState?.loaded || imageFolderState?.loading)) {
-				fetchImages({ folderId });
-			}
+			fetchImages({ folderId, refresh: true }); // Forzar recarga para obtener solo las de esta carpeta
 			// Cargar videos del folder (VideoStore no tiene folderLoadState, hacemos fetch directo)
 			// Nota: el cliente de videos permite filtrar por múltiples folders; aquí pasamos uno.
 			(async () => {
@@ -112,7 +109,6 @@ export function useFolderFiles(folderId: string | null, options: UseFolderFilesO
 	}, [
 		folderId,
 		includeSubfolders,
-		imageFolderState,
 		fetchImages,
 		fetchVideos,
 		fetchAudios,
@@ -125,7 +121,8 @@ export function useFolderFiles(folderId: string | null, options: UseFolderFilesO
 		const result: MediaItem[] = [];
 		const folderPath = folderData?.path;
 
-		// Si includeSubfolders es false, incluir subcarpetas como items
+		// CORRECCIÓN: Solo mostrar subcarpetas como items navegables cuando includeSubfolders está DESACTIVADO
+		// Cuando includeSubfolders está activado, no mostramos carpetas porque queremos vista plana de archivos
 		if (!includeSubfolders && subfoldersData?.data) {
 			for (const subFolder of subfoldersData.data) {
 				result.push({

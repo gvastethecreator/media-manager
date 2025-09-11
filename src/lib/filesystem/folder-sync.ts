@@ -4,7 +4,7 @@
  * @description Sincroniza las carpetas de la base de datos con las carpetas reales del sistema de archivos
  */
 
-import { and, eq, inArray } from 'drizzle-orm';
+import { and, eq, inArray, isNull, like } from 'drizzle-orm';
 import path from 'path';
 import type { DrizzleDatabase } from '@/lib/drizzle';
 import { db } from '@/lib/drizzle';
@@ -626,6 +626,23 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 							.set({ parentId: parent[0].id })
 							// Actualizar por id recién insertado para evitar discrepancias de formato de path
 							.where(eq(folders.id, folder.id));
+
+						// Unificación adicional: si ya existían hijos en BD cuyo parentPath coincide con la nueva carpeta,
+						// reasignarlos al nuevo parentId para consolidar jerarquía cuando se agrega la carpeta padre después.
+						const childExpectedPrefix = normalizePath(folder.path);
+						// Buscar hijos cuyo parentId esté vacío pero su path pertenezca al prefijo
+						const candidates = await db
+							.select({ id: folders.id, path: folders.path, parentId: folders.parentId })
+							.from(folders)
+							.where(and(isNull(folders.parentId), like(folders.path, `${childExpectedPrefix}/%` as any)))
+							.limit(1000);
+
+						for (const c of candidates) {
+							const cPath = normalizePath(c.path);
+							if (cPath !== childExpectedPrefix && cPath.startsWith(`${childExpectedPrefix}/`)) {
+								await db.update(folders).set({ parentId: folder.id }).where(eq(folders.id, c.id));
+							}
+						}
 					}
 				} catch (error) {
 					const errorMsg = `Error reconciliando parentId para ${folder.name}: ${error instanceof Error ? error.message : String(error)}`;
