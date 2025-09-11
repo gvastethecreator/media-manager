@@ -55,7 +55,7 @@ router.post('/generate/:imageId', async (req, res) => {
 	}
 });
 
-// POST /thumbnails/bulk-generate - Generar thumbnails en lote
+// POST /thumbnails/bulk-generate - Generar thumbnails en lote (OPTIMIZED)
 router.post('/bulk-generate', async (req, res) => {
 	try {
 		const { imageIds, ...options } = req.body;
@@ -67,6 +67,14 @@ router.post('/bulk-generate', async (req, res) => {
 			return;
 		}
 
+		// Validar límite razonable para evitar sobrecargar el servidor
+		if (imageIds.length > 50) {
+			res.status(400).json({
+				error: 'Máximo 50 imágenes por batch para optimizar performance',
+			});
+			return;
+		}
+
 		const result = await bulkGenerateThumbnails(imageIds, options);
 		res.json(result);
 		return;
@@ -74,6 +82,71 @@ router.post('/bulk-generate', async (req, res) => {
 		console.error('Error in bulk thumbnail generation:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 		return;
+	}
+});
+
+// POST /thumbnails/batch - Nuevo endpoint optimizado para batch requests
+router.post('/batch', async (req, res) => {
+	try {
+		const { requests } = req.body;
+
+		if (!(requests && Array.isArray(requests))) {
+			res.status(400).json({
+				error: 'requests (array) es requerido. Formato: [{imageId, quality}, ...]',
+			});
+			return;
+		}
+
+		// Validar límite razonable
+		if (requests.length > 20) {
+			res.status(400).json({
+				error: 'Máximo 20 requests por batch',
+			});
+			return;
+		}
+
+		// Procesar en paralelo con concurrencia limitada
+		const batchResults = await Promise.allSettled(
+			requests.map(async (req: any) => {
+				try {
+					const thumbnail = await getThumbnail(req.imageId, req.quality || 'medium');
+					return {
+						imageId: req.imageId,
+						success: true,
+						data: thumbnail,
+					};
+				} catch (error) {
+					return {
+						imageId: req.imageId,
+						success: false,
+						error: error instanceof Error ? error.message : 'Error desconocido',
+					};
+				}
+			})
+		);
+
+		const results = batchResults.map((result, index) => {
+			if (result.status === 'fulfilled') {
+				return result.value;
+			}
+			return {
+				imageId: requests[index].imageId,
+				success: false,
+				error: result.reason?.message || 'Error desconocido',
+			};
+		});
+
+		res.json({
+			results,
+			summary: {
+				total: requests.length,
+				successful: results.filter((r) => r.success).length,
+				failed: results.filter((r) => !r.success).length,
+			},
+		});
+	} catch (error) {
+		console.error('Error in batch thumbnail processing:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 

@@ -34,6 +34,18 @@ class RO {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 globalAny.ResizeObserver = RO as any;
 
+// Polyfill KeyboardEvent si no existe (algunos tests lo requieren)
+if (typeof globalAny.KeyboardEvent === 'undefined') {
+	class PolyfillKeyboardEvent extends dom.window.Event {
+		key: string;
+		constructor(type: string, options: any = {}) {
+			super(type, options);
+			this.key = options.key || '';
+		}
+	}
+	globalAny.KeyboardEvent = PolyfillKeyboardEvent;
+}
+
 // Evitar advertencias de act con React 19
 globalAny.IS_REACT_ACT_ENVIRONMENT = true;
 

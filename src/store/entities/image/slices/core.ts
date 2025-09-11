@@ -149,7 +149,16 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 				: state.folderLoadState,
 		}));
 		if (refresh) {
-			get().clearImages();
+			// Si hay folderId específico, solo limpiar las imágenes de esa carpeta
+			// Si no hay folderId, limpiar todo el store
+			if (folderId) {
+				// Remover solo las imágenes de esta carpeta del store
+				const currentImages = get().getImages();
+				const filteredImages = currentImages.filter((img) => img.folderId !== folderId);
+				set({ images: Object.fromEntries(filteredImages.map((img) => [img.id, img])) });
+			} else {
+				get().clearImages();
+			}
 		}
 		try {
 			const limit = 100;
@@ -171,6 +180,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 				return loadBatch(offset + limit, acc);
 			}
 			const all = await loadBatch(0, []);
+			// Solo agregar las nuevas imágenes sin limpiar otras carpetas
 			get().addImages(all);
 			return get().getImages();
 		} catch (e: unknown) {

@@ -23,7 +23,7 @@ export function Table({
 	const effectiveScrollContainer = scrollContainer ?? internalScrollEl;
 	return (
 		<div className="w-full overflow-auto" data-testid="file-browser-container" ref={setInternalScrollEl}>
-			<div className="relative" data-testid="file-browser-scroll-area-viewport">
+			<div className="relative min-h-[160px]" data-testid="file-browser-scroll-area-viewport">
 				<TableCanvas
 					items={items}
 					onItemClick={onItemClick}

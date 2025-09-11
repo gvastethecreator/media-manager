@@ -1,8 +1,8 @@
 import { ChevronDown, ChevronRight, Folder } from 'lucide-react';
 import { memo, useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
 import { useCategoryStats } from '../hooks/use-category-stats';
 import type { CategoryChild } from '../types';
 
@@ -76,18 +76,17 @@ const FolderTreeItem = memo(function FolderTreeItemImpl({
 
 	return (
 		<div className={cn('flex flex-col', className)}>
-			<Button
+			<div
 				className={cn(
-					'flex w-full items-center justify-between rounded px-2 py-0.5 text-xs hover:bg-secondary/30',
+					'flex w-full cursor-pointer items-center justify-between rounded px-2 py-0.5 text-xs hover:bg-secondary/30',
 					isSelected && 'bg-secondary/50'
 				)}
-				onClick={handleClick}
 				style={{ paddingLeft: `${0.5 + level * 0.75}rem` }}
-				variant="ghost"
 			>
-				<div className="flex items-center gap-1">
+				<div className="flex flex-1 items-center gap-1">
 					{hasChildren && (
 						<button
+							aria-label={isExpanded ? 'Contraer carpeta' : 'Expandir carpeta'}
 							className="flex h-4 w-4 items-center justify-center rounded-sm hover:bg-secondary/70"
 							onClick={handleToggleClick}
 							type="button"
@@ -96,15 +95,31 @@ const FolderTreeItem = memo(function FolderTreeItemImpl({
 						</button>
 					)}
 					{!hasChildren && <div className="h-4 w-4" />}
-					<Folder className="h-3 w-3 text-green-500" />
-					<span className="truncate">{folder.name}</span>
+
+					<button
+						aria-label={`Abrir carpeta ${folder.name}`}
+						className="flex flex-1 items-center gap-1 text-left"
+						onClick={handleClick}
+						onKeyDown={(e) => {
+							if (e.key === 'Enter' || e.key === ' ') {
+								e.preventDefault();
+								handleClick();
+							}
+						}}
+						tabIndex={0}
+						title={folder.name}
+						type="button"
+					>
+						<Folder className="h-3 w-3 text-green-500" />
+						<span className="truncate">{folder.name}</span>
+					</button>
 				</div>
 				{(folder.itemCount || folder._count?.images) && (
 					<span className="ml-2 min-w-[12px] text-right text-[9px] text-muted-foreground tabular-nums">
 						{folder.itemCount || folder._count?.images || 0}
 					</span>
 				)}
-			</Button>
+			</div>
 
 			{hasChildren && isExpanded && (
 				<div className="flex flex-col">
@@ -135,6 +150,7 @@ const FolderTreeViewComponent = memo(function FolderTreeViewImpl({
 }: FolderTreeViewProps) {
 	const { getCategoryItems, isLoading } = useCategoryStats();
 	const navigate = useNavigate();
+	const { buildHierarchicalPath } = useHierarchicalNavigation();
 	const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
 
 	// Obtener carpetas desde la API de navegación
@@ -167,10 +183,19 @@ const FolderTreeViewComponent = memo(function FolderTreeViewImpl({
 			if (onItemClick) {
 				onItemClick(folderId);
 			} else {
-				navigate(`/folders/${folderId}`);
+				// Usar navegación jerárquica
+				const hierarchicalPath = buildHierarchicalPath(folderId);
+
+				// Navegar usando path jerárquico
+				if (hierarchicalPath) {
+					navigate(`/folders/${hierarchicalPath}`);
+				} else {
+					// Fallback para carpeta raíz o error
+					navigate('/folders');
+				}
 			}
 		},
-		[onItemClick, navigate]
+		[onItemClick, navigate, buildHierarchicalPath]
 	);
 
 	if (isLoading) {

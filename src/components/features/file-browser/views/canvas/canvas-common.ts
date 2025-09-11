@@ -127,8 +127,12 @@ export const getFolderThumbnails = async (folderId: string): Promise<string[]> =
 			return cached ?? [];
 		}
 
-		// Obtener URLs de miniaturas recientes
-		const thumbnailUrls = await getRecentFolderImages(folderId, 4);
+		// Obtener objetos de miniaturas recientes y extraer solo URLs válidas
+		const thumbnailData = await getRecentFolderImages(folderId, 4);
+		const thumbnailUrls: string[] = thumbnailData
+			.map((img) => img.thumbnailUrl)
+			// Asegurar que el resultado sea exactamente string[]
+			.filter((u): u is string => typeof u === 'string' && u.length > 0);
 
 		// Cache el resultado
 		folderThumbnailCache.set(folderId, thumbnailUrls);

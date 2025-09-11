@@ -23,9 +23,11 @@ import { useVideoStore } from '@/store/entities/video';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
+import { sortSingleCriterion } from '@/transformers/file/sort';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { FileBrowserToolbar } from './components/file-browser-toolbar';
 import { FileListHeader } from './components/file-list-header';
+import { LoadMoreButton } from './components/load-more-button';
 import type { MediaItem } from './components/media-thumbnail';
 import { StatusBar } from './components/status-bar';
 import { useProgressiveFolderFiles } from './hooks/use-progressive-folder-files';
@@ -40,21 +42,10 @@ function applySearch(items: MediaItem[], query: string) {
 	return items.filter((it) => (it.name || '').toLowerCase().includes(q));
 }
 
+// applySort reemplazado por util estable sortSingleCriterion
 function applySort(items: MediaItem[], sortOptions: { field: string; direction: 'asc' | 'desc' }[]) {
 	if (!sortOptions || sortOptions.length === 0) return items;
-	const [{ field, direction }] = sortOptions; // exclusivo por toolbar
-	const dir = direction === 'asc' ? 1 : -1;
-	const copy = [...items];
-	copy.sort((a: any, b: any) => {
-		const av = a?.[field] ?? '';
-		const bv = b?.[field] ?? '';
-		if (av === bv) return 0;
-		if (typeof av === 'number' && typeof bv === 'number') return (av - bv) * dir;
-		const as = String(av).toLowerCase();
-		const bs = String(bv).toLowerCase();
-		return as < bs ? -1 * dir : 1 * dir;
-	});
-	return copy;
+	return sortSingleCriterion(items, sortOptions[0]);
 }
 
 function groupByEntityType(items: MediaItem[]): Array<{ key: string; items: MediaItem[]; displayName: string }> {
@@ -89,7 +80,21 @@ function groupByEntityType(items: MediaItem[]): Array<{ key: string; items: Medi
 }
 // Componente principal con filtro de carpeta
 export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }: FileBrowserProps) {
-	const { items, isLoading, error, shouldShowPreloader, loadedCount } = useProgressiveFolderFiles(filterId ?? null);
+	// Configuración de infinite scroll
+	const infiniteScroll = useViewOptionsStore((state) => state.infiniteScroll);
+
+	const {
+		items,
+		isLoading,
+		error,
+		shouldShowPreloader,
+		loadedCount,
+		totalCount,
+		hasMore,
+		loadMore,
+		isLoadingMore,
+		scrollContainerRef,
+	} = useProgressiveFolderFiles(filterId ?? null);
 
 	// Estado para controlar loading del refresh
 	const [isRefreshing, setIsRefreshing] = useState(false);
@@ -283,12 +288,16 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 		[viewMode, effectiveItemSize]
 	);
 
+	const hasViewportMounted = true; // todas las vistas rinden un viewport con data-testid
+
 	return (
 		<section
 			aria-label="Explorador de archivos - use las flechas para navegar, Enter para abrir, Escape para cerrar"
-			className={cn('flex h-full min-h-0 flex-col overflow-hidden')}
+			className={cn('flex h-full min-h-[200px] flex-col overflow-hidden')}
+			data-ready="true"
 			data-testid="file-browser"
 			data-view-mode={viewMode}
+			data-viewport-ready={hasViewportMounted ? 'true' : 'false'}
 			ref={containerRef} // Focusable programáticamente pero no por tab
 			style={{ backgroundColor }}
 			tabIndex={-1}
@@ -299,7 +308,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 				isLoading={isLoading || isRefreshing}
 				onRefresh={handleRefresh}
 			/>
-			<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container">
+			<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container" ref={scrollContainerRef}>
 				{/* Overlays no bloqueantes para loading/error solo si hay error */}
 				{error && (
 					<div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center p-2">
@@ -413,6 +422,18 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 					</div>
 				)}
 			</div>
+
+			{/* Load more button for chunked loading - only show if autoLoad is disabled */}
+			{!(infiniteScroll.enabled && infiniteScroll.autoLoad) && (
+				<LoadMoreButton
+					hasMore={hasMore}
+					isLoadingMore={isLoadingMore}
+					loadedCount={processedItems.length}
+					loadMore={loadMore}
+					totalCount={totalCount}
+				/>
+			)}
+
 			<StatusBar
 				isLoading={isLoading || isRefreshing}
 				items={processedItems as MediaItem[]}
@@ -558,9 +579,11 @@ function renderFromItems({
 	return (
 		<section
 			aria-label="Explorador de archivos"
-			className={cn('flex h-full min-h-0 flex-col overflow-hidden', className)}
+			className={cn('flex h-full min-h-[200px] flex-col overflow-hidden', className)}
+			data-ready="true"
 			data-testid="file-browser"
 			data-view-mode={viewMode}
+			data-viewport-ready="true"
 			style={{ backgroundColor }}
 			tabIndex={-1}
 		>

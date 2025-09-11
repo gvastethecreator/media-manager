@@ -51,7 +51,7 @@ export function Masonry({
 				containerRef.current = el;
 			}}
 		>
-			<div className="relative" data-testid="file-browser-scroll-area-viewport">
+			<div className="relative min-h-[160px]" data-testid="file-browser-scroll-area-viewport">
 				<MasonryCanvas
 					columnWidth={itemSize}
 					items={pagedItems}

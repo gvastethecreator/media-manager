@@ -140,6 +140,11 @@ router.get('/debug-subcarpetas-analysis', async (_req, res) => {
 	}
 });
 
+// Registrar endpoints modulares (reduce tamaño del archivo)
+import { registerFolderFilesEndpoints } from './folders/files-endpoints';
+
+registerFolderFilesEndpoints(router);
+
 // DEBUG SCANNER - Test específico del scanner de archivos
 router.get('/debug-scanner/:folderId', async (req, res) => {
 	try {
@@ -743,198 +748,9 @@ router.get('/:id/debugsubs', async (req, res) => {
 	}
 });
 
-// GET /api/folders/:id/preview - Generar thumbnail compuesto de una carpeta
-router.get('/:id/preview', async (req, res) => {
-	try {
-		const { id } = req.params;
-		console.log('📁 PREVIEW ENDPOINT HIT:', id);
+import { registerFolderPreviewEndpoint } from './folders/preview-endpoint';
 
-		if (!isValidFolderId(id)) {
-			return res.status(400).json({ error: 'ID de carpeta inválido' });
-		}
-
-		// Obtener imágenes de la carpeta (máximo 4 para el preview)
-		let recentImages = [];
-
-		try {
-			console.log('📁 STARTING SEARCH FOR FOLDER:', id);
-			console.log('📁 FOLDER ID TYPE:', typeof id, 'VALUE:', JSON.stringify(id));
-
-			// Buscar imágenes directamente en la carpeta
-			let directImagesQuery = [];
-			try {
-				console.log('📁 EXECUTING DIRECT IMAGES QUERY FOR FOLDER:', id);
-				const queryResult = await db.select().from(images).where(eq(images.folderId, id)).limit(4);
-				console.log('📁 QUERY RAW RESULT:', queryResult);
-				// Convertir a array si es necesario
-				directImagesQuery = Array.isArray(queryResult) ? queryResult : queryResult ? [queryResult] : [];
-				console.log('📁 QUERY PROCESSED RESULT:', directImagesQuery);
-			} catch (queryError) {
-				console.error('📁 DIRECT IMAGES QUERY ERROR:', queryError);
-				directImagesQuery = [];
-			}
-
-			recentImages = directImagesQuery;
-
-			console.log('📁 DIRECT IMAGES RESULT:', directImagesQuery);
-			console.log('📁 DIRECT IMAGES COUNT:', recentImages?.length || 0);
-
-			// Si no hay imágenes directas, buscar en subcarpetas
-			const hasDirectImages = Array.isArray(recentImages) && recentImages.length > 0;
-			console.log('📁 HAS DIRECT IMAGES:', hasDirectImages);
-
-			if (!hasDirectImages) {
-				console.log('📁 NO DIRECT IMAGES, SEARCHING SUBFOLDERS...');
-
-				let subfolders = [];
-				try {
-					const subfoldersResult = await db
-						.select({ id: folders.id, name: folders.name })
-						.from(folders)
-						.where(eq(folders.parentId, id))
-						.limit(10);
-
-					// Convertir a array si es necesario
-					subfolders = Array.isArray(subfoldersResult) ? subfoldersResult : subfoldersResult ? [subfoldersResult] : [];
-				} catch (subfolderError) {
-					console.error('📁 SUBFOLDERS QUERY ERROR:', subfolderError);
-					subfolders = [];
-				}
-
-				console.log('📁 FOUND SUBFOLDERS:', subfolders?.map((f) => f.name) || []);
-
-				if (subfolders && subfolders.length > 0) {
-					// Buscar imágenes en las primeras subcarpetas
-					for (const subfolder of subfolders.slice(0, 5)) {
-						if (recentImages.length >= 4) break;
-
-						console.log(`📁 SEARCHING IN SUBFOLDER: ${subfolder.name} (${subfolder.id})`);
-
-						let subImagesQuery = [];
-						try {
-							const subImagesResult = await db
-								.select()
-								.from(images)
-								.where(eq(images.folderId, subfolder.id))
-								.limit(4 - recentImages.length);
-
-							// Convertir a array si es necesario
-							subImagesQuery = Array.isArray(subImagesResult)
-								? subImagesResult
-								: subImagesResult
-									? [subImagesResult]
-									: [];
-						} catch (subImageError) {
-							console.error('📁 SUBIMAGE QUERY ERROR:', subImageError);
-							subImagesQuery = [];
-						}
-
-						const subImages = subImagesQuery;
-
-						console.log(`📁 SUBFOLDER ${subfolder.name} IMAGES:`, subImages?.map((img) => img.filename) || []);
-
-						if (subImages && subImages.length > 0) {
-							recentImages = [...recentImages, ...subImages];
-						}
-					}
-				}
-			}
-		} catch (dbError) {
-			console.error('📁 PREVIEW DB ERROR:', dbError);
-		}
-
-		console.log('📁 PREVIEW FINAL RESULT:', {
-			id,
-			imageCount: recentImages?.length || 0,
-			images: recentImages?.map((img) => img?.filename || 'UNDEFINED') || 'NULL_RESULT',
-		});
-
-		// Si no hay imágenes, mostrar SVG apropiado
-		if (!recentImages || recentImages.length === 0) {
-			// Verificar si la carpeta tiene subcarpetas para mostrar mensaje apropiado
-			let hasSubfolders = false;
-			try {
-				const subfolderCountResult = await db
-					.select({ count: sql<number>`count(*)` })
-					.from(folders)
-					.where(eq(folders.parentId, id));
-
-				// Manejo defensivo del resultado
-				const countResult = Array.isArray(subfolderCountResult) ? subfolderCountResult[0] : subfolderCountResult;
-				hasSubfolders = countResult?.count > 0;
-			} catch (error) {
-				console.error('📁 ERROR CHECKING SUBFOLDERS:', error);
-				hasSubfolders = false;
-			}
-
-			const message = hasSubfolders ? 'Contiene subcarpetas' : 'Sin imágenes';
-			const fillColor = hasSubfolders ? '#fff3cd' : '#f8f9fa';
-			const strokeColor = hasSubfolders ? '#ffeaa7' : '#dee2e6';
-			const textColor = hasSubfolders ? '#856404' : '#6c757d';
-
-			const emptySvg = `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-				<rect width="100%" height="100%" fill="${fillColor}"/>
-				<rect x="25" y="50" width="150" height="100" fill="${fillColor}" stroke="${strokeColor}" stroke-width="2" stroke-dasharray="5,5" rx="5"/>
-				<text x="100" y="95" text-anchor="middle" font-family="Arial" font-size="12" fill="${textColor}">${message}</text>
-				<text x="100" y="115" text-anchor="middle" font-family="Arial" font-size="10" fill="${textColor}" opacity="0.7">${id}</text>
-			</svg>`;
-
-			res.setHeader('Content-Type', 'image/svg+xml');
-			res.setHeader('Cache-Control', 'public, max-age=300');
-			return res.send(emptySvg);
-		}
-
-		// Generar SVG composite
-		const svgWidth = 200;
-		const svgHeight = 200;
-		const gridSize = recentImages.length >= 4 ? 2 : recentImages.length === 3 ? 2 : 1;
-		const imageSize = svgWidth / gridSize;
-
-		let svgContent = `<svg width="${svgWidth}" height="${svgHeight}" viewBox="0 0 ${svgWidth} ${svgHeight}" xmlns="http://www.w3.org/2000/svg">`;
-
-		// Fondo
-		svgContent += `<rect width="100%" height="100%" fill="#f8f9fa"/>`;
-
-		recentImages.forEach((image, index) => {
-			if (!image?.filename) {
-				console.log('📁 SKIPPING NULL IMAGE:', { index, image });
-				return;
-			}
-
-			const row = Math.floor(index / gridSize);
-			const col = index % gridSize;
-			const x = col * imageSize;
-			const y = row * imageSize;
-
-			// Crear rectángulo con imagen como fondo
-			svgContent += `<rect x="${x}" y="${y}" width="${imageSize}" height="${imageSize}" fill="#e9ecef" stroke="#dee2e6" stroke-width="1"/>`;
-
-			// Texto del filename como fallback
-			const shortName = image.filename.length > 10 ? `${image.filename.substring(0, 10)}...` : image.filename;
-			svgContent += `<text x="${x + imageSize / 2}" y="${y + imageSize / 2}" text-anchor="middle" font-family="Arial" font-size="12" fill="#666">${shortName}</text>`;
-		});
-
-		svgContent += '</svg>';
-
-		res.setHeader('Content-Type', 'image/svg+xml');
-		res.setHeader('Cache-Control', 'public, max-age=3600');
-		return res.send(svgContent);
-	} catch (error) {
-		console.error('📁 PREVIEW ERROR:', error);
-
-		// SVG de error
-		const errorSvg = `<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-			<rect width="100%" height="100%" fill="#ffe6e6"/>
-			<rect x="50" y="50" width="100" height="100" fill="#ffcccc" stroke="#ff6b6b" stroke-width="2"/>
-			<text x="100" y="100" text-anchor="middle" font-family="Arial" font-size="12" fill="#cc0000">Error</text>
-			<text x="100" y="115" text-anchor="middle" font-family="Arial" font-size="10" fill="#ff6b6b">${req.params.id}</text>
-		</svg>`;
-
-		res.setHeader('Content-Type', 'image/svg+xml');
-		res.setHeader('Cache-Control', 'public, max-age=60');
-		return res.send(errorSvg);
-	}
-});
+registerFolderPreviewEndpoint(router);
 
 // TEST - Endpoint simple para probar rutas parametrizadas
 router.get('/:id/test', async (req, res) => {
@@ -2309,56 +2125,6 @@ router.get('/:id/debug-recursive', async (req, res) => {
 	}
 });
 
-// DELETE /api/folders/:id - Eliminar carpeta y subcarpetas de la BD
-router.delete('/:id', async (req, res) => {
-	try {
-		const folderId = Number.parseInt(req.params.id, 10);
-		if (Number.isNaN(folderId)) {
-			return res.status(400).json({ error: 'Invalid folder ID' });
-		}
-
-		logger.info(`Eliminando carpeta ${folderId} y sus subcarpetas`);
-
-		// Función recursiva para obtener todos los IDs de subcarpetas
-		const getAllChildrenIds = async (parentId: number): Promise<number[]> => {
-			const children = await db.select({ id: folders.id }).from(folders).where(eq(folders.parentId, parentId));
-
-			let allIds = children.map((c) => c.id);
-
-			// Recursivamente obtener hijos de cada hijo
-			for (const child of children) {
-				const grandChildren = await getAllChildrenIds(child.id);
-				allIds = [...allIds, ...grandChildren];
-			}
-
-			return allIds;
-		};
-
-		// Obtener todos los IDs a eliminar (carpeta padre + todos los hijos)
-		const allIdsToDelete = [folderId, ...(await getAllChildrenIds(folderId))];
-
-		logger.info(`Se eliminarán ${allIdsToDelete.length} carpetas: ${allIdsToDelete.join(', ')}`);
-
-		// Eliminar las carpetas de la BD (en orden inverso para evitar problemas de FK)
-		const deletedCount = await db
-			.delete(folders)
-			.where(sql`${folders.id} IN (${allIdsToDelete.map(() => '?').join(',')})`);
-
-		const result = {
-			deletedFolders: allIdsToDelete.length,
-			deletedIds: allIdsToDelete,
-			success: true,
-		};
-
-		logger.info(`Eliminación completada: ${result.deletedFolders} carpetas eliminadas`);
-		res.json(result);
-	} catch (error) {
-		logger.error('Error deleting folder:', error);
-		res.status(500).json({
-			error: 'Error deleting folder',
-			message: error instanceof Error ? error.message : 'Unknown error',
-		});
-	}
-});
+// (Eliminado: ruta DELETE duplicada con parseo numérico de id que causaba conflictos)
 
 export { router as foldersRouter };

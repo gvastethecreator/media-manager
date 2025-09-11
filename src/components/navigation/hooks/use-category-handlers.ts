@@ -9,11 +9,13 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ViewType } from '@/components/views/types';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
 
 const logger = clientLogger.withContext('CategoryHandlers');
 
 export function useCategoryHandlers() {
 	const navigate = useNavigate();
+	const { buildHierarchicalPath } = useHierarchicalNavigation();
 
 	// Handler genérico para categorías
 	const handleCategoryClick = useCallback(
@@ -24,13 +26,23 @@ export function useCategoryHandlers() {
 		[navigate]
 	);
 
-	// Handlers específicos para cada tipo de entidad - VERSIÓN TEMPORAL SIN STORES
+	// Handlers específicos para cada tipo de entidad - VERSIÓN ACTUALIZADA CON PATHS JERÁRQUICOS
 	const handleFolderClick = useCallback(
 		(folderId: string) => {
 			logger.info(`📁 Click en folder: ${folderId}`);
-			navigate(`/folders/${folderId}`);
+
+			// Construir path jerárquico
+			const hierarchicalPath = buildHierarchicalPath(folderId);
+
+			// Navegar usando path jerárquico
+			if (hierarchicalPath) {
+				navigate(`/folders/${hierarchicalPath}`);
+			} else {
+				// Fallback para carpeta raíz o error
+				navigate('/folders');
+			}
 		},
-		[navigate]
+		[navigate, buildHierarchicalPath]
 	);
 
 	const handleCollectionClick = useCallback(

@@ -196,9 +196,21 @@ export const reindexAllFolders = async (options?: {
 	return response;
 };
 
-export const getRecentFolderImages = async (folderId: string, limit: number): Promise<string[]> => {
-	const response = await apiClient.get<string[]>(`/folders/${folderId}/recent-images?limit=${limit}`);
-	return response;
+export const getRecentFolderImages = async (
+	folderId: string,
+	limit: number
+): Promise<
+	Array<{
+		id: string;
+		name: string;
+		thumbnailUrl: string;
+	}>
+> => {
+	// ✅ Fix: Usar el endpoint /stats que devuelve objetos completos, no solo URLs
+	const statsResponse = await getFolderStats(folderId);
+	return (statsResponse.recentImages || [])
+		.filter((img): img is { id: string; name: string; thumbnailUrl: string } => Boolean(img.thumbnailUrl))
+		.slice(0, limit);
 };
 
 export const getFolderStats = async (
@@ -224,7 +236,7 @@ export const getFolderStats = async (
 		totalDocuments: number;
 		totalOthers: number;
 		totalSize: number;
-		lastActivity: Date | null;
+		lastActivity: string | null; // ✅ Fix: JSON serializa fechas como strings
 		recentImages?: Array<{
 			id: string;
 			name: string;
@@ -232,9 +244,11 @@ export const getFolderStats = async (
 		}>;
 	}>(`/folders/${folderId}/stats`);
 
-	// Normalizar para asegurar thumbnailUrl presente aunque el backend envíe 'thumbnail'
+	// Normalizar para asegurar thumbnailUrl presente y parsear lastActivity correctamente
 	const normalized = {
 		...response,
+		// ✅ Fix: Convertir string ISO a Date o null
+		lastActivity: response.lastActivity ? new Date(response.lastActivity) : null,
 		recentImages: response.recentImages?.map((img: any) => ({
 			id: img.id,
 			name: img.name,

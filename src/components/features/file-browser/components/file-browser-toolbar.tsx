@@ -21,12 +21,13 @@ import {
 	Trash2,
 	X,
 } from 'lucide-react';
-import { memo, useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo, useRef, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
+	DropdownMenuItem,
 	DropdownMenuLabel,
 	DropdownMenuRadioGroup,
 	DropdownMenuRadioItem,
@@ -176,11 +177,175 @@ export const FileBrowserToolbar = memo<FileBrowserToolbarProps>(function FileBro
 	);
 
 	// Manejador de cambio de vista
+	// Nota: diferimos el cambio para evitar que el Dropdown se desmonte en mitad del click
+	// (inestabilidad E2E por elemento "detached").
 	const handleViewModeChange = useCallback(
 		(mode: string) => {
-			setViewMode(mode as any);
+			// Pequeño retardo para dejar terminar el ciclo de click/selección y layout
+			setTimeout(() => setViewMode(mode as any), 80);
 		},
 		[setViewMode]
+	);
+
+	// Estado controlado para el dropdown de modo de vista. Mantenerlo abierto unos ms
+	// durante la selección evita que el elemento objetivo se "detache" antes de finalizar el click.
+	const [viewMenuOpen, setViewMenuOpen] = useState(false);
+	const viewTriggerRef = useRef<HTMLButtonElement | null>(null);
+	// Flag para suprimir el cierre automático del menú mientras procesamos la selección
+	const suppressCloseRef = useRef(false);
+
+	// Manejador de cambio de open controlado que respeta el guard de cierre
+	const handleViewMenuOpenChange = useCallback((nextOpen: boolean) => {
+		if (!nextOpen && suppressCloseRef.current) {
+			// Evitamos que Radix cierre el menú durante nuestra ventana crítica
+			setViewMenuOpen(true);
+			return;
+		}
+		setViewMenuOpen(nextOpen);
+	}, []);
+
+	// Helper para manejar selección de modo evitando detach durante el click.
+	// Interceptamos pointerdown para suprimir el cierre y ejecutamos en click (post-pointerup).
+	const onClickView = useCallback(
+		(mode: string) => (e: any) => {
+			// Evitar que Radix/DOM cambie foco/cierre automáticamente durante el click
+			e?.preventDefault?.();
+			e?.stopPropagation?.();
+			suppressCloseRef.current = true;
+			// Estrategia estable: aplicar primero el modo (con un pequeño retardo post-click)
+			// manteniendo abierto el menú; cerrar después de un margen mayor para no "detachear" el item.
+			// Aumentamos los márgenes para dar tiempo a Playwright a completar el click sin reflujo.
+			const applyDelay = 220;
+			const closeDelay = mode === 'masonry' ? 1000 : 700; // más margen para masonry
+
+			// Aplicar cambio de vista tras el click (siguiente frame + pequeño retardo)
+			setTimeout(() => {
+				// doble raf para asegurar fin de ciclo de input/layout antes de mutar vista
+				requestAnimationFrame(() => requestAnimationFrame(() => handleViewModeChange(mode)));
+			}, applyDelay);
+
+			// Cerrar y devolver foco al trigger tras margen seguro
+			setTimeout(() => {
+				setViewMenuOpen(false);
+				suppressCloseRef.current = false;
+				requestAnimationFrame(() => viewTriggerRef.current?.focus());
+			}, closeDelay);
+		},
+		[handleViewModeChange]
+	);
+
+	// Capturar el viewMode inicial para usarlo como defaultValue estático en el menú (evita re-renders)
+	const initialViewModeRef = useRef(viewMode);
+
+	// Subcomponente memoizado: contenido del menú de vista, no re-renderiza cuando cambia viewMode
+	const ViewModeMenuContent = useMemo(
+		() =>
+			memo(function ViewModeMenuContentInner({
+				onSelectViewCb,
+			}: {
+				onSelectViewCb: (mode: string) => (e: any) => void;
+			}) {
+				return (
+					<DropdownMenuContent
+						align="end"
+						avoidCollisions={false}
+						className="w-40 animate-none"
+						data-no-animate="true"
+						data-testid="view-mode-dropdown-content"
+						forceMount
+						onCloseAutoFocus={(e: Event) => e.preventDefault()}
+						onEscapeKeyDown={(e: Event) => e.preventDefault()}
+						onInteractOutside={(e: Event) => e.preventDefault()}
+						onPointerDownOutside={(e: Event) => e.preventDefault()}
+						sideOffset={0}
+					>
+						<DropdownMenuLabel>Modo de vista</DropdownMenuLabel>
+						<DropdownMenuSeparator />
+						{/* Items simples para evitar re-render interno por radios */}
+						<DropdownMenuItem
+							data-testid="view-mode-grid-btn"
+							onClick={onSelectViewCb('grid')}
+							onPointerDown={(ev) => {
+								ev.preventDefault();
+								ev.stopPropagation();
+								suppressCloseRef.current = true;
+							}}
+							onSelect={(ev) => ev.preventDefault()}
+							role="menuitemradio"
+						>
+							<div className="flex items-center gap-2">
+								<Grid className="h-4 w-4" />
+								<span>Grid</span>
+							</div>
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							data-testid="view-mode-cards-btn"
+							onClick={onSelectViewCb('cards')}
+							onPointerDown={(ev) => {
+								ev.preventDefault();
+								ev.stopPropagation();
+								suppressCloseRef.current = true;
+							}}
+							onSelect={(ev) => ev.preventDefault()}
+							role="menuitemradio"
+						>
+							<div className="flex items-center gap-2">
+								<LayoutGrid className="h-4 w-4" />
+								<span>Cards</span>
+							</div>
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							data-testid="view-mode-masonry-btn"
+							onClick={onSelectViewCb('masonry')}
+							onPointerDown={(ev) => {
+								ev.preventDefault();
+								ev.stopPropagation();
+								suppressCloseRef.current = true;
+							}}
+							onSelect={(ev) => ev.preventDefault()}
+							role="menuitemradio"
+						>
+							<div className="flex items-center gap-2">
+								<GalleryHorizontal className="h-4 w-4" />
+								<span>Masonry</span>
+							</div>
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							data-testid="view-mode-list-btn"
+							onClick={onSelectViewCb('list')}
+							onPointerDown={(ev) => {
+								ev.preventDefault();
+								ev.stopPropagation();
+								suppressCloseRef.current = true;
+							}}
+							onSelect={(ev) => ev.preventDefault()}
+							role="menuitemradio"
+						>
+							<div className="flex items-center gap-2">
+								<ListIcon className="h-4 w-4" />
+								<span>Lista</span>
+							</div>
+						</DropdownMenuItem>
+						<DropdownMenuItem
+							data-testid="view-mode-table-btn"
+							onClick={onSelectViewCb('table')}
+							onPointerDown={(ev) => {
+								ev.preventDefault();
+								ev.stopPropagation();
+								suppressCloseRef.current = true;
+							}}
+							onSelect={(ev) => ev.preventDefault()}
+							role="menuitemradio"
+						>
+							<div className="flex items-center gap-2">
+								<TableIcon className="h-4 w-4" />
+								<span>Tabla</span>
+							</div>
+						</DropdownMenuItem>
+					</DropdownMenuContent>
+				);
+			}),
+		[]
 	);
 
 	// Obtener el ordenamiento actual
@@ -340,14 +505,19 @@ export const FileBrowserToolbar = memo<FileBrowserToolbarProps>(function FileBro
 					aria-label="Agrupar por tipo de archivo"
 					aria-pressed={groupByEntityType}
 					className={cn(
-						'transition-colors duration-200',
-						groupByEntityType && 'bg-primary text-primary-foreground hover:bg-primary/90'
+						'transition-all duration-300 ease-in-out hover:scale-105',
+						groupByEntityType && 'bg-primary text-primary-foreground shadow-sm'
 					)}
 					onClick={toggleGroupByEntityType}
 					size="sm"
 					variant={groupByEntityType ? 'default' : 'ghost'}
 				>
-					<Tags className="h-4 w-4" />
+					<Tags
+						className={cn(
+							'h-4 w-4 transition-transform duration-300 ease-in-out',
+							groupByEntityType && 'text-primary-foreground'
+						)}
+					/>
 				</Button>
 
 				{/* Botón de incluir subcarpetas */}
@@ -355,14 +525,19 @@ export const FileBrowserToolbar = memo<FileBrowserToolbarProps>(function FileBro
 					aria-label="Incluir archivos de subcarpetas"
 					aria-pressed={includeSubfolders}
 					className={cn(
-						'transition-colors duration-200',
-						includeSubfolders && 'bg-primary text-primary-foreground hover:bg-primary/90'
+						'transition-all duration-300 ease-in-out hover:scale-105',
+						includeSubfolders && 'bg-primary text-primary-foreground shadow-sm'
 					)}
 					onClick={toggleIncludeSubfolders}
 					size="sm"
 					variant={includeSubfolders ? 'default' : 'ghost'}
 				>
-					<FolderTree className="h-4 w-4" />
+					<FolderTree
+						className={cn(
+							'h-4 w-4 transition-transform duration-300 ease-in-out',
+							includeSubfolders && 'text-primary-foreground'
+						)}
+					/>
 				</Button>
 
 				<Separator className="mx-1 h-6" orientation="vertical" />
@@ -458,48 +633,20 @@ export const FileBrowserToolbar = memo<FileBrowserToolbarProps>(function FileBro
 				</DropdownMenu>
 
 				{/* Dropdown de modo de vista */}
-				<DropdownMenu>
+				<DropdownMenu modal={false} onOpenChange={handleViewMenuOpenChange} open={viewMenuOpen}>
 					<DropdownMenuTrigger asChild>
-						<Button data-testid="view-mode-dropdown-trigger" size="sm" variant="ghost">
+						<Button
+							aria-label="Cambiar modo de vista"
+							data-testid="view-mode-dropdown-trigger"
+							ref={viewTriggerRef}
+							size="sm"
+							variant="ghost"
+						>
 							{getViewIcon()}
 						</Button>
 					</DropdownMenuTrigger>
-					<DropdownMenuContent align="end" className="w-40">
-						<DropdownMenuLabel>Modo de vista</DropdownMenuLabel>
-						<DropdownMenuSeparator />
-						<DropdownMenuRadioGroup onValueChange={handleViewModeChange} value={viewMode}>
-							<DropdownMenuRadioItem data-testid="view-mode-grid-btn" value="grid">
-								<div className="flex items-center gap-2">
-									<Grid className="h-4 w-4" />
-									<span>Grid</span>
-								</div>
-							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem data-testid="view-mode-cards-btn" value="cards">
-								<div className="flex items-center gap-2">
-									<LayoutGrid className="h-4 w-4" />
-									<span>Cards</span>
-								</div>
-							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem data-testid="view-mode-masonry-btn" value="masonry">
-								<div className="flex items-center gap-2">
-									<GalleryHorizontal className="h-4 w-4" />
-									<span>Masonry</span>
-								</div>
-							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem data-testid="view-mode-list-btn" value="list">
-								<div className="flex items-center gap-2">
-									<ListIcon className="h-4 w-4" />
-									<span>Lista</span>
-								</div>
-							</DropdownMenuRadioItem>
-							<DropdownMenuRadioItem data-testid="view-mode-table-btn" value="table">
-								<div className="flex items-center gap-2">
-									<TableIcon className="h-4 w-4" />
-									<span>Tabla</span>
-								</div>
-							</DropdownMenuRadioItem>
-						</DropdownMenuRadioGroup>
-					</DropdownMenuContent>
+					{/* Contenido memoizado para estabilidad durante el click */}
+					<ViewModeMenuContent onSelectViewCb={onClickView} />
 				</DropdownMenu>
 			</div>
 		</div>

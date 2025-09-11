@@ -1,9 +1,11 @@
 import { Suspense } from 'react';
 import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
+import { HierarchicalFolderWrapper } from '@/components/features/file-browser/wrappers/hierarchical-folder-wrapper';
 import { MainLayout } from '@/components/layout/main-layout';
 import ReindexLogsViewer from '@/components/settings/folders/reindex-logs-viewer';
 // Importar todas las vistas
 import { AllImagesView } from '@/components/views/all-images/all-images-view';
+import AudioView from '@/components/views/audio/audio-view';
 import Dashboard from '@/components/views/dashboard/dashboard';
 import DevelopmentContentView from '@/components/views/development/development-content-view';
 import DocumentsView from '@/components/views/documents/documents-view';
@@ -11,7 +13,6 @@ import { EntityCardsView } from '@/components/views/entity-cards';
 import { File3DContentView as File3DDetailView } from '@/components/views/file3d/file-3d-content-view';
 import File3DView from '@/components/views/file3d/file3d-view';
 import { AllFilesView } from '@/components/views/files/all-files-view';
-import AudioView from '@/components/views/audio/audio-view';
 import { FolderContentView } from '@/components/views/folders/folder-content-view';
 import FoldersView from '@/components/views/folders/folders-view';
 import ImageDetailView from '@/components/views/images/image-detail-view';
@@ -101,8 +102,8 @@ export const router = createBrowserRouter([
 				element: <FoldersView />,
 			},
 			{
-				path: 'folders/:id',
-				element: <FolderContentWrapper />,
+				path: 'folders/*',
+				element: <HierarchicalFolderWrapper />,
 			},
 			{
 				path: 'all-files',
