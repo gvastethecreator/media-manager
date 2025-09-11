@@ -1,5 +1,6 @@
 {
     "workbench.colorTheme": "Bearded Theme Black & Gold",
     "editor.formatOnSave": true,
-    "workbench.iconTheme": "flow-dark"
+    "workbench.iconTheme": "flow-dark",
+    "terminal.integrated.smoothScrolling": true
 }

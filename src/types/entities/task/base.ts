@@ -6,27 +6,7 @@
  * @updated 2025-01-27
  */
 
-/**
- * Estado de la tarea
- */
-export enum TaskStatus {
-	PENDING = 'pending',
-	IN_PROGRESS = 'in_progress',
-	COMPLETED = 'completed',
-	FAILED = 'failed',
-	CANCELLED = 'cancelled',
-	ON_HOLD = 'on_hold',
-}
-
-/**
- * Prioridad de la tarea
- */
-export enum TaskPriority {
-	LOW = 'low',
-	MEDIUM = 'medium',
-	HIGH = 'high',
-	URGENT = 'urgent',
-}
+import { TaskPriority, TaskStatus } from './enums';
 
 /**
  * 🗿 Modelo base de Task, derivado del schema de Drizzle.

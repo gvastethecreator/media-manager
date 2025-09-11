@@ -6,15 +6,7 @@
  * @updated 2025-01-27
  */
 
-/**
- * Calidad de los thumbnails
- */
-export enum ThumbnailQuality {
-	LOW = 'low',
-	MEDIUM = 'medium',
-	HIGH = 'high',
-	ULTRA = 'ultra',
-}
+import { ThumbnailQuality } from '@/types/entities/thumbnail/enums';
 
 /**
  * 🗿 Modelo base de Thumbnail, derivado del schema de Drizzle.

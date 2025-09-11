@@ -13,11 +13,11 @@ import { emit } from '@/lib/server/events.server';
 import { recomputeAggregatesForGroup } from '@/server/services/aggregates.service';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import type {
-	CreateGroupInput,
+	GroupCreateInput,
 	GroupRelations,
 	GroupSearchResult,
+	GroupUpdateInput,
 	GroupWithStats,
-	UpdateGroupInput,
 } from '@/types/entities/group/types';
 
 // Logger específico para el servicio de grupos
@@ -311,7 +311,7 @@ export const searchGroupsService = async (
 /**
  * Crea un nuevo grupo
  */
-export const createGroupService = async (data: CreateGroupInput): Promise<GroupWithStats> => {
+export const createGroupService = async (data: GroupCreateInput): Promise<GroupWithStats> => {
 	try {
 		logger.info('✨ Creando nuevo grupo', { name: data.name });
 
@@ -387,7 +387,7 @@ export const createGroupService = async (data: CreateGroupInput): Promise<GroupW
 /**
  * Actualiza un grupo existente
  */
-export const updateGroupService = async (id: string, data: UpdateGroupInput): Promise<GroupWithStats> => {
+export const updateGroupService = async (id: string, data: GroupUpdateInput): Promise<GroupWithStats> => {
 	try {
 		logger.info(`📝 Actualizando grupo: ${id}`);
 
@@ -692,9 +692,9 @@ export const removeItemFromGroupService = async (
 
 // Exportación de objetos agrupados para una interfaz más limpia
 export const groupService = {
-	// Operaciones principales
+	// Operaciones básicas CRUD
 	get: getGroupService,
-	getMany: getGroupsByIdsService,
+	getByIds: getGroupsByIdsService,
 	create: createGroupService,
 	update: updateGroupService,
 	delete: deleteGroupService,
@@ -704,12 +704,84 @@ export const groupService = {
 	removeItem: removeItemFromGroupService,
 	// Operaciones adicionales
 	getStats: getGroupStatsService,
+	getImages: getGroupImages,
 	getRecentMedia: getRecentGroupMediaService,
 	getCardData: getGroupCardDataService,
 };
 
 // Permitir el uso como importación predeterminada para mayor flexibilidad
 export default groupService;
+
+/**
+ * 📸 Obtiene todas las imágenes de un grupo con filtros
+ */
+export async function getGroupImages(
+	groupId: string,
+	filters: {
+		limit: number;
+		offset: number;
+		sortBy: 'name' | 'createdAt' | 'updatedAt';
+		sortOrder: 'asc' | 'desc';
+	}
+) {
+	try {
+		const { limit, offset, sortBy, sortOrder } = filters;
+
+		// Construir ordenamiento
+		const orderColumn = {
+			name: groupImages.name,
+			createdAt: groupImages.createdAt,
+			updatedAt: groupImages.updatedAt,
+		}[sortBy];
+
+		const orderDirection = sortOrder === 'asc' ? asc : desc;
+
+		// Obtener imágenes del grupo
+		const images = await db
+			.select({
+				id: groupImages.id,
+				name: groupImages.name,
+				path: groupImages.path,
+				thumbnailUrl: groupImages.thumbnailUrl,
+				size: groupImages.size,
+				format: groupImages.format,
+				createdAt: groupImages.createdAt,
+				updatedAt: groupImages.updatedAt,
+			})
+			.from(groupImages)
+			.where(eq(groupImages.groupId, groupId))
+			.orderBy(orderDirection(orderColumn))
+			.limit(limit)
+			.offset(offset);
+
+		// Contar total de imágenes
+		const totalResult = await db
+			.select({ count: count(groupImages.id) })
+			.from(groupImages)
+			.where(eq(groupImages.groupId, groupId));
+
+		const total = totalResult[0]?.count || 0;
+
+		logger.info('Imágenes de grupo obtenidas', {
+			groupId,
+			count: images.length,
+			total,
+			filters,
+		});
+
+		return {
+			images,
+			total,
+		};
+	} catch (error) {
+		logger.error('Error obteniendo imágenes de grupo', {
+			groupId,
+			filters,
+			error,
+		});
+		throw createGroupError(`Error al obtener imágenes del grupo: ${(error as Error).message}`);
+	}
+}
 
 /**
  * Obtiene las imágenes y videos recientes de un grupo para mostrar en la tarjeta

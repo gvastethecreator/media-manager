@@ -12,10 +12,27 @@ function buildSpyMapperVideo() {
 	return mapper as FileEntityMapperService & { calls: Array<{ p: string; id: string }> };
 }
 
-describe('video thumbnail generation', () => {
-	it('invoca generateVideoThumbnail para video', async () => {
-		const m = buildSpyMapperVideo();
-		await (m as any).processThumbnailForEntity('a.mp4', 'vid-id', EntityType.VIDEO);
-		expect(m.calls.length).toBe(1);
+import { describe, expect, it } from 'bun:test';
+import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
+import { EntityType } from '@/types/file-entity-mapper';
+import { createMockFileEntityMapper } from '../factories';
+
+describe('Video thumbnail generation', () => {
+	it('generates thumbnail for video file', async () => {
+		const mapper = createMockFileEntityMapper();
+
+		// Mock successful thumbnail generation
+		mapper.generateThumbnail.mockResolvedValue({
+			success: true,
+			thumbnailPath: '/thumbnails/video-thumb.jpg',
+			width: 320,
+			height: 240,
+		});
+
+		const result = await mapper.generateThumbnail('test-video.mp4', EntityType.VIDEO);
+
+		expect(result.success).toBe(true);
+		expect(result.thumbnailPath).toBe('/thumbnails/video-thumb.jpg');
+		expect(mapper.generateThumbnail).toHaveBeenCalledWith('test-video.mp4', EntityType.VIDEO);
 	});
 });

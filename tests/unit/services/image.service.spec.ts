@@ -1,50 +1,39 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { createMockDb, createMockEventStore, createTestImage } from '@tests/factories';
+import type { Image } from '@/lib/drizzle';
 import { db } from '@/lib/drizzle';
 import { getEventStore } from '@/lib/server/events.server';
 import { imageService } from '@/services/image/image.service';
 
-// Utilidad simple para crear una imagen fake
-const fakeImage = (overrides: Partial<any> = {}) => ({
-	id: 'img-1',
-	name: 'file.jpg',
-	description: null,
-	path: 'test-files/test-photo.jpg',
-	hash: 'hash-1',
-	size: 1234,
-	width: 1000,
-	height: 800,
-	metadata: null,
-	thumbnail: null,
-	thumbnailSize: null,
-	thumbnailWidth: null,
-	thumbnailHeight: null,
-	thumbnailMimeType: null,
-	thumbnailError: null,
-	thumbnailErrorAt: null,
-	thumbnailOptimizedAt: null,
-	isFavorite: 0,
-	folderId: 'folder-1',
-	noteId: null,
-	createdAt: new Date(),
-	updatedAt: new Date(),
-	addedAt: new Date(),
-	...overrides,
-});
+// Factory para crear imágenes de test tipadas
+const createTestImageWithDefaults = (overrides: Partial<Image> = {}): Image => {
+	return createTestImage({
+		id: 'img-1',
+		name: 'file.jpg',
+		path: 'test-files/test-photo.jpg',
+		folderId: 'folder-1',
+		size: 1234,
+		width: 1000,
+		height: 800,
+		...overrides,
+	});
+};
 
-// Mocks aislados (db y eventos)
+// Mocks tipados (db y eventos)
 let originalGenerateThumbnail: typeof imageService.generateThumbnail;
-let originalEmitEvent: any;
+let originalEmitEvent: (typeof imageService)['emitEvent'];
 
 beforeEach(() => {
-	// parchear generateThumbnail para evitar I/O pesado
+	// Mock generateThumbnail para evitar I/O pesado
 	originalGenerateThumbnail = imageService.generateThumbnail.bind(imageService);
-	(imageService as any).generateThumbnail = async () => {
+	(imageService as any).generateThumbnail = async (): Promise<void> => {
 		// stub: evitar trabajo de sharp/FS
 		await Promise.resolve();
 	};
-	// parchear emitEvent (método privado) para no depender de window ni fetch
+
+	// Mock emitEvent (método privado) para no depender de window ni fetch
 	originalEmitEvent = (imageService as any).emitEvent;
-	(imageService as any).emitEvent = async (_event: string, data: unknown) => {
+	(imageService as any).emitEvent = async (event: string, data: unknown): Promise<void> => {
 		const store = getEventStore();
 		const key = 'images:modified';
 		if (!store.has(key)) {
@@ -61,11 +50,20 @@ afterEach(() => {
 	(imageService as any).emitEvent = originalEmitEvent;
 });
 
-// Helper para stubear selects básicos
-function stubDbForGetById(image: any | null) {
-	// db.select().from().where().limit() -> devuelve lista
-	(db as any).select = () => {
-		const q = {
+// Helper tipado para stubear selects básicos
+interface MockQueryResult<T> {
+	from: (table: any) => MockQueryResult<T>;
+	where: (condition: any) => MockQueryResult<T>;
+	leftJoin: (condition: any) => MockQueryResult<T>;
+	orderBy: (condition: any) => MockQueryResult<T>;
+	limit: (count: number) => Promise<T[]>;
+	offset: (count: number) => MockQueryResult<T>;
+	execute: () => Promise<T[]>;
+}
+
+function stubDbForGetById(image: Image | null): void {
+	(db as any).select = (): MockQueryResult<Image> => {
+		const q: MockQueryResult<Image> = {
 			from: () => q,
 			where: () => q,
 			leftJoin: () => q,
@@ -80,24 +78,42 @@ function stubDbForGetById(image: any | null) {
 }
 
 // Helper para stubear db.query.images.findFirst
-function stubDbQueryFindFirst(record: any | null) {
+function stubDbQueryFindFirst(record: Image | null): void {
 	(db as any).query = {
 		images: {
-			findFirst: () => Promise.resolve(record),
+			findFirst: (): Promise<Image | null> => Promise.resolve(record),
 		},
 	};
 }
 
-// Helper para stubear insert/update/delete simples
-function stubDbMutation({ insertReturning, updateReturning }: { insertReturning?: any; updateReturning?: any } = {}) {
-	(db as any).insert = (_table: any) => ({
-		values: (_data: any) => ({
-			returning: () => Promise.resolve([insertReturning ?? fakeImage()]),
-			execute: () => Promise.resolve({ rowCount: 1 }),
+// Helper para stubear insert/update/delete con tipos
+interface MockMutationOptions {
+	insertReturning?: Image;
+	updateReturning?: Image;
+}
+
+function stubDbMutation({ insertReturning, updateReturning }: MockMutationOptions = {}): void {
+	const defaultImage = createTestImageWithDefaults();
+
+	(db as any).insert = (table: any) => ({
+		values: (data: any) => ({
+			returning: (): Promise<Image[]> => Promise.resolve([insertReturning ?? defaultImage]),
+			execute: (): Promise<{ rowCount: number }> => Promise.resolve({ rowCount: 1 }),
 		}),
 	});
-	(db as any).update = (_table: any) => ({
-		set: (_: any) => ({ where: (_w: any) => ({ returning: () => Promise.resolve([updateReturning ?? fakeImage()]) }) }),
+
+	(db as any).update = (table: any) => ({
+		set: (data: any) => ({
+			where: (condition: any) => ({
+				returning: (): Promise<Image[]> => Promise.resolve([updateReturning ?? defaultImage]),
+			}),
+		}),
+	});
+
+	(db as any).delete = (table: any) => ({
+		where: (condition: any) => ({
+			execute: (): Promise<{ rowCount: number }> => Promise.resolve({ rowCount: 1 }),
+		}),
 	});
 	(db as any).delete = (_table: any) => ({ where: (_: any) => ({ execute: () => Promise.resolve({ rowCount: 1 }) }) });
 }

@@ -749,6 +749,127 @@ export class TagService {
 	): Promise<Array<{ id: string; name?: string | null; thumbnailUrl: string }>> {
 		return await getTagThumbnails(id, limit);
 	}
+
+	/**
+	 * 📊 Obtiene estadísticas detalladas de una etiqueta
+	 */
+	async getTagStats(id: string): Promise<{
+		id: string;
+		name: string;
+		totalImages: number;
+		recentImagesCount: number;
+		averageFileSize: number;
+		topFormats: Array<{ format: string; count: number }>;
+		sizeDistribution: {
+			small: number; // < 1MB
+			medium: number; // 1-10MB
+			large: number; // > 10MB
+		};
+		createdAt: Date;
+		lastImageAdded?: Date;
+	} | null> {
+		try {
+			const tagExists = await db.select().from(tags).where(eq(tags.id, id)).limit(1);
+
+			if (tagExists.length === 0) {
+				return null;
+			}
+
+			const tag = tagExists[0];
+
+			// Obtener estadísticas de imágenes asociadas
+			const imageStats = await db
+				.select({
+					totalImages: count(images.id),
+					avgSize: eq(count(images.size), 0) ? 0 : count(images.size), // Placeholder para average
+				})
+				.from(images)
+				.innerJoin(imageTags, eq(images.id, imageTags.imageId))
+				.where(eq(imageTags.tagId, id));
+
+			// Contar imágenes por tamaño
+			const sizeDistribution = await db
+				.select({
+					size: images.size,
+				})
+				.from(images)
+				.innerJoin(imageTags, eq(images.id, imageTags.imageId))
+				.where(eq(imageTags.tagId, id));
+
+			// Calcular distribución de tamaños
+			let small = 0,
+				medium = 0,
+				large = 0;
+			let totalSize = 0;
+
+			for (const img of sizeDistribution) {
+				const size = img.size || 0;
+				totalSize += size;
+
+				if (size < 1024 * 1024) {
+					// < 1MB
+					small++;
+				} else if (size < 10 * 1024 * 1024) {
+					// < 10MB
+					medium++;
+				} else {
+					large++;
+				}
+			}
+
+			const totalImages = imageStats[0]?.totalImages || 0;
+			const averageFileSize = totalImages > 0 ? totalSize / totalImages : 0;
+
+			// Obtener formatos más populares
+			const formatStats = await db
+				.select({
+					format: images.format,
+					count: count(images.id),
+				})
+				.from(images)
+				.innerJoin(imageTags, eq(images.id, imageTags.imageId))
+				.where(eq(imageTags.tagId, id))
+				.groupBy(images.format)
+				.orderBy(desc(count(images.id)))
+				.limit(5);
+
+			// Fecha de la última imagen agregada
+			const lastImageResult = await db
+				.select({
+					createdAt: images.createdAt,
+				})
+				.from(images)
+				.innerJoin(imageTags, eq(images.id, imageTags.imageId))
+				.where(eq(imageTags.tagId, id))
+				.orderBy(desc(images.createdAt))
+				.limit(1);
+
+			return {
+				id: tag.id,
+				name: tag.name,
+				totalImages,
+				recentImagesCount: totalImages, // Puede refinarse con filtro de fecha
+				averageFileSize,
+				topFormats: formatStats.map((f) => ({
+					format: f.format || 'unknown',
+					count: f.count,
+				})),
+				sizeDistribution: {
+					small,
+					medium,
+					large,
+				},
+				createdAt: tag.createdAt,
+				lastImageAdded: lastImageResult[0]?.createdAt,
+			};
+		} catch (error) {
+			logger.error('Error obteniendo estadísticas de etiqueta', {
+				tagId: id,
+				error,
+			});
+			throw new TagServiceError(`Error al obtener estadísticas de la etiqueta: ${(error as Error).message}`);
+		}
+	}
 }
 
 // Servicio principal
@@ -761,6 +882,7 @@ const tagService = {
 	toggleTagFavorite,
 	toggleTagArchive,
 	addImageToTag, // <-- Añadir aquí
+	getTagStats: new TagService().getTagStats.bind(new TagService()), // Método de estadísticas
 	notifyTagChange,
 	TAG_EVENTS,
 	TagServiceError,
