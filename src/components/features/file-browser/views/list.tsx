@@ -33,7 +33,7 @@ export function List({
 			{...(testId ? { 'data-testid': testId } : {})}
 			ref={setInternalScrollEl}
 		>
-			<div className="relative" data-testid="file-browser-scroll-area-viewport">
+			<div className="relative min-h-[160px]" data-testid="file-browser-scroll-area-viewport">
 				<ListCanvas
 					items={items}
 					onItemClick={onItemClick}

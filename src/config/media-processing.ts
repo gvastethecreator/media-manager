@@ -48,27 +48,27 @@ export function shouldSkipDocumentBySize(sizeBytes: number): boolean {
 
 export function shouldSkipFileByTypeAndSize(filePath: string, sizeBytes: number): boolean {
 	const ext = filePath.toLowerCase().split('.').pop() || '';
-	
+
 	// Imágenes
 	if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp', 'tiff', 'svg'].includes(ext)) {
 		return shouldSkipImageBySize(sizeBytes);
 	}
-	
+
 	// Videos
 	if (['mp4', 'avi', 'mov', 'wmv', 'flv', 'webm', 'mkv', 'm4v'].includes(ext)) {
 		return shouldSkipVideoBySize(sizeBytes);
 	}
-	
+
 	// Archivos 3D
 	if (['obj', 'fbx', 'blend', 'dae', '3ds', 'max', 'ma', 'mb', 'c4d', 'stl', 'ply'].includes(ext)) {
 		return shouldSkip3DFileBySize(sizeBytes);
 	}
-	
+
 	// Documentos
 	if (['pdf', 'doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'].includes(ext)) {
 		return shouldSkipDocumentBySize(sizeBytes);
 	}
-	
+
 	// Por defecto, usar límite de imagen (más restrictivo)
 	return shouldSkipImageBySize(sizeBytes);
 }

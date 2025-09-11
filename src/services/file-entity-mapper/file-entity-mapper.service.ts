@@ -3,7 +3,7 @@ import { readFile, stat } from 'node:fs/promises';
 import { basename, extname } from 'node:path';
 import { LRUCache } from 'lru-cache';
 import PQueue from 'p-queue';
-import { mediaProcessingLimits, shouldSkipFileByTypeAndSize } from '@/config/media-processing';
+import { shouldSkipFileByTypeAndSize } from '@/config/media-processing';
 import {
 	createVideo as createVideoServer,
 	getVideoByHash as getVideoByHashServer,
@@ -239,9 +239,14 @@ export class FileEntityMapperService {
 				// En producción, el método por defecto lanzará y caerá en el catch devolviendo fallo.
 			}
 			if (quickSize !== null && shouldSkipFileByTypeAndSize(filePath, quickSize)) {
-				const typeLabel = entityType === EntityType.IMAGE ? 'image' : 
-								 entityType === EntityType.VIDEO ? 'video' : 
-								 entityType === EntityType.FILE3D ? '3d-file' : 'file';
+				const typeLabel =
+					entityType === EntityType.IMAGE
+						? 'image'
+						: entityType === EntityType.VIDEO
+							? 'video'
+							: entityType === EntityType.FILE3D
+								? '3d-file'
+								: 'file';
 				console.warn(
 					`[skip][${typeLabel}-size]`,
 					JSON.stringify({

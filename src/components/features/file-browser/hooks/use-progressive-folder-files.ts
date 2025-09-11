@@ -1,7 +1,7 @@
-import { useMemo, useRef } from 'react';
+import { useEffect, useMemo, useRef } from 'react';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { MediaItem } from '../components/media-thumbnail';
-import { useFolderFiles as useOriginalFolderFiles } from './use-folder-files';
+import { useFolderFilesPaginated } from './use-folder-files-paginated';
 
 interface ProgressiveLoadingState {
 	items: MediaItem[];
@@ -11,44 +11,113 @@ interface ProgressiveLoadingState {
 	loadedCount: number;
 	totalCount: number;
 	shouldShowPreloader: boolean;
+	// New chunked loading features
+	hasMore: boolean;
+	loadMore: () => void;
+	chunkSize: number;
+	isLoadingMore: boolean;
+	// Infinite scroll features
+	scrollContainerRef: React.RefObject<HTMLDivElement | null>;
 }
 
 /**
- * Hook simplificado que envuelve useFolderFiles con preloader básico
- * Evita loops infinitos con lógica simplificada
+ * Hook optimizado con carga paginada REAL desde backend
+ * Reemplaza el sistema anterior de chunks simulados
  * Incluye soporte para incluir subcarpetas
  */
 export function useProgressiveFolderFiles(folderId: string | null): ProgressiveLoadingState {
 	const includeSubfolders = useViewOptionsStore((state) => state.includeSubfolders);
-	const { items, isLoading, error } = useOriginalFolderFiles(folderId, { includeSubfolders });
+	const infiniteScroll = useViewOptionsStore((state) => state.infiniteScroll);
 
-	// Solo guardamos el último count exitoso para evitar loops
-	const lastSuccessCountRef = useRef(0);
+	// Ref para el contenedor de scroll
+	const scrollContainerRef = useRef<HTMLDivElement>(null);
 
-	// Actualizar count solo cuando termine la carga exitosamente
-	if (!isLoading && items.length > 0) {
-		lastSuccessCountRef.current = items.length;
-	}
+	// Usar el nuevo hook paginado que hace carga real
+	const { files, isLoading, isLoadingMore, error, hasMore, loadMore, total, loadedCount } = useFolderFilesPaginated({
+		folderId,
+		includeSubfolders,
+		pageSize: 150, // Tamaño de página optimizado
+		enabled: !!folderId,
+	});
 
 	const loadingStage = useMemo((): 'initial' | 'loading' | 'complete' => {
 		if (!folderId) return 'initial';
-		if (isLoading && items.length === 0) return 'initial';
-		if (isLoading) return 'loading';
+		if (isLoading && files.length === 0) return 'initial';
+		if (isLoading || isLoadingMore) return 'loading';
 		return 'complete';
-	}, [folderId, isLoading, items.length]);
+	}, [folderId, isLoading, isLoadingMore, files.length]);
 
-	// Mostrar preloader solo en carga inicial o si no hay items
+	// Mostrar preloader solo en carga inicial
 	const shouldShowPreloader = useMemo(() => {
-		return isLoading && items.length === 0;
-	}, [isLoading, items.length]);
+		return isLoading && files.length === 0;
+	}, [isLoading, files.length]);
+
+	// Infinite scroll automático con scroll real
+	useEffect(() => {
+		if (!(infiniteScroll.enabled && infiniteScroll.autoLoad && hasMore) || isLoadingMore || isLoading) {
+			return;
+		}
+
+		const container = scrollContainerRef.current;
+		if (!container) return;
+
+		// Refs para anti-spam y heurística mejorada
+		const lastTriggerScrollHeightRef = { current: 0 };
+		const lastTriggerTimeRef = { current: 0 };
+		const MIN_MS_BETWEEN_LOADS = Math.max(0, infiniteScroll.cooldownMs ?? 300);
+
+		const handleScroll = () => {
+			const { scrollTop, scrollHeight, clientHeight } = container;
+			const distanceFromBottom = scrollHeight - scrollTop - clientHeight;
+
+			// Umbral dinámico mejorado: considera el viewport y contenido actual
+			const baseThreshold = infiniteScroll.threshold;
+			const viewportThreshold = Math.round(clientHeight * 1.2);
+			const contentBasedThreshold = Math.min(scrollHeight * 0.1, clientHeight * 2);
+			const dynamicThreshold = Math.max(baseThreshold, viewportThreshold, contentBasedThreshold);
+
+			// Condición de disparo anticipado con mejor heurística
+			if (distanceFromBottom <= dynamicThreshold) {
+				const now = Date.now();
+				// Anti-spam mejorado: verificar que realmente se agregó contenido Y tiempo suficiente
+				if (
+					scrollHeight !== lastTriggerScrollHeightRef.current &&
+					now - lastTriggerTimeRef.current >= MIN_MS_BETWEEN_LOADS
+				) {
+					lastTriggerScrollHeightRef.current = scrollHeight;
+					lastTriggerTimeRef.current = now;
+
+					// Llamar a loadMore que ahora hace petición real al backend
+					loadMore();
+				}
+			}
+		};
+
+		container.addEventListener('scroll', handleScroll, { passive: true });
+		return () => container.removeEventListener('scroll', handleScroll);
+	}, [
+		infiniteScroll.enabled,
+		infiniteScroll.autoLoad,
+		infiniteScroll.threshold,
+		infiniteScroll.cooldownMs,
+		hasMore,
+		isLoadingMore,
+		isLoading,
+		loadMore,
+	]);
 
 	return {
-		items,
+		items: files,
 		isLoading,
-		error,
+		error: error?.message || null,
 		loadingStage,
-		loadedCount: items.length,
-		totalCount: lastSuccessCountRef.current,
+		loadedCount,
+		totalCount: total,
 		shouldShowPreloader,
+		hasMore,
+		loadMore,
+		chunkSize: 150, // Tamaño de página real
+		isLoadingMore,
+		scrollContainerRef,
 	};
 }

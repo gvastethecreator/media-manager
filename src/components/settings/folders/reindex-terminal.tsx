@@ -343,9 +343,9 @@ export function ReindexTerminal({
 		return (
 			<div
 				className={cn(
-					'flex items-center gap-3 p-1 transition-all duration-300 h-12',
+					'flex h-6 items-center gap-3 p-1',
 					log.isSticky && {
-						'sticky top-0 z-10 border-gray-700/50 border-b bg-gray-900/95 shadow-lg backdrop-blur-sm': true,
+						'sticky top-0 z-10 border-gray-700/50 py-3 shadow-lg backdrop-blur-sm': true,
 						'bg-gradient-to-r from-blue-900/20 to-transparent': true,
 						'ring-1 ring-blue-500/20': true,
 					}
@@ -357,7 +357,7 @@ export function ReindexTerminal({
 				<Icon className={cn('h-3 w-3 flex-shrink-0', colorClass)} />
 				<span
 					className={cn(
-						'break-words font-mono text-sm leading-tight overflow-hidden',
+						'overflow-hidden break-words font-mono text-sm leading-tight',
 						log.isSticky ? 'font-medium text-gray-50' : 'text-gray-100'
 					)}
 				>

@@ -52,7 +52,7 @@ export function Cards({
 			}}
 		>
 			<div className="h-full min-h-0">
-				<div className="relative" data-testid="file-browser-scroll-area-viewport">
+				<div className="relative min-h-[160px]" data-testid="file-browser-scroll-area-viewport">
 					<CardsCanvas
 						itemSize={itemSize}
 						items={pagedItems}

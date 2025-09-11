@@ -39,7 +39,7 @@ export function Grid({
 				data-testid="grid-canvas-view"
 				ref={setInternalScrollEl}
 			>
-				<div className="relative" data-testid="file-browser-scroll-area-viewport">
+				<div className="relative min-h-[160px]" data-testid="file-browser-scroll-area-viewport">
 					<GridCanvas
 						itemSize={itemSize}
 						items={items}

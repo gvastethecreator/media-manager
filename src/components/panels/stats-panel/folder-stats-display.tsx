@@ -156,12 +156,16 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 			{recentImages && recentImages.length > 0 && (
 				<div className="border-0 p-4">
 					<div className="grid grid-cols-8 gap-2">
-						{recentImages.slice(0, 8).map((imageId) => (
+						{recentImages.slice(0, 8).map((imageObj) => (
 							<div
 								className="flex aspect-square items-center justify-center overflow-hidden rounded-md bg-muted/50"
-								key={imageId}
+								key={imageObj.id}
 							>
-								<ImageIcon className="h-4 w-4 text-muted-foreground" />
+								{imageObj.thumbnailUrl ? (
+									<img alt={imageObj.name} className="h-full w-full object-cover" src={imageObj.thumbnailUrl} />
+								) : (
+									<ImageIcon className="h-4 w-4 text-muted-foreground" />
+								)}
 							</div>
 						))}
 					</div>

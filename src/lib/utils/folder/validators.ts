@@ -1,78 +1,21 @@
 /**
- * @file Validadores Zod para la entidad Folder
+ * @file Validadores Zod para la entidad Folder (delegan en esquemas canónicos)
  * @module utils/folder/validators
  */
 
-const FOLDER_DEFAULT_COLORS = {
-	DEFAULT: '#3b82f6',
-	SYSTEM: '#6b7280',
-};
-
-const FOLDER_DEFAULT_EMOJIS = {
-	DEFAULT: '📁',
-	FAVORITE: '⭐',
-	PHOTOS: '📸',
-	VIDEOS: '🎞',
-	DOWNLOADS: '⬇',
-};
-
 import { z } from 'zod';
+import {
+	FolderBaseSchema as CanonicalFolderSchema,
+	CreateFolderSchema as CanonicalCreateFolderSchema,
+	UpdateFolderSchema as CanonicalUpdateFolderSchema,
+} from '@/types/entities/folder/schema';
 
-/**
- * Esquema para validar campos básicos de Folder
- */
-export const folderBaseSchema = z.object({
-	id: z.string().cuid().optional(),
-	name: z.string().min(1, 'El nombre es obligatorio').max(100, 'El nombre es demasiado largo'),
-	description: z.string().max(2000, 'La descripción es demasiado larga').nullish(),
-	path: z.string().min(1, 'La ruta es obligatoria'),
-	parentId: z.string().cuid().nullish(),
-	emoji: z.string().max(10, 'El emoji debe ser más corto').default(FOLDER_DEFAULT_EMOJIS.DEFAULT),
-	color: z
-		.string()
-		.regex(/^#([A-Fa-f0-9]{6}|[A-Fa-f0-9]{3})$/, 'Color inválido')
-		.default(FOLDER_DEFAULT_COLORS.DEFAULT),
-	isFavorite: z.boolean().default(false),
-	presetId: z.string().nullish(),
-});
+// Re-export con nombres legacy para compatibilidad local
+export const folderBaseSchema = CanonicalFolderSchema;
+export const createFolderSchema = CanonicalCreateFolderSchema;
+export const updateFolderSchema = CanonicalUpdateFolderSchema;
 
-/**
- * Esquema para validar datos de creación de carpetas
- */
-export const createFolderSchema = z.object({
-	name: z.string().min(1, 'El nombre es obligatorio').max(255, 'El nombre es demasiado largo'),
-	description: z.string().max(1000, 'La descripción es demasiado larga').nullish(),
-	path: z.string().min(1, 'La ruta es obligatoria'),
-	emoji: z.string().nullish(),
-	color: z.string().nullish(),
-	featuredImage: z.string().nullish(),
-	isFavorite: z.boolean().default(false),
-	parentId: z.string().nullish(),
-	presetId: z.string().nullish(),
-});
-
-/**
- * Esquema para validar datos de actualización de carpetas
- */
-export const updateFolderSchema = createFolderSchema
-	.extend({
-		totalFiles: z.number().int().positive().optional(),
-		totalSize: z.number().int().positive().optional(),
-	})
-	.partial()
-	.refine(
-		(data) => {
-			return Object.keys(data).length > 0;
-		},
-		{
-			message: 'Al menos un campo debe ser actualizado',
-			path: ['_errors'],
-		}
-	);
-
-/**
- * Esquema para validar campos específicos en actualización de carpetas
- */
+// Campos específicos para actualizaciones parciales: mantener contrato existente
 export const updateFolderFieldsSchema = z
 	.object({
 		name: z.literal(true),
@@ -89,12 +32,6 @@ export const updateFolderFieldsSchema = z
 	})
 	.partial();
 
-/**
- * Tipo inferido para datos de creación de carpetas
- */
+// Tipos inferidos preservando nombres
 export type CreateFolderInput = z.infer<typeof createFolderSchema>;
-
-/**
- * Tipo inferido para datos de actualización de carpetas
- */
 export type UpdateFolderInput = z.infer<typeof updateFolderSchema>;

@@ -43,14 +43,14 @@ export function Grid({
 	}, [page]);
 	return (
 		<div
-			className="file-browser-canvas file-browser-grid h-full w-full overflow-auto"
+			className="file-browser-canvas file-browser-grid h-full min-h-[160px] w-full overflow-auto"
 			data-testid="grid-view"
 			ref={(el) => {
 				setInternalScrollEl(el);
 				containerRef.current = el;
 			}}
 		>
-			<div className="relative" data-testid="file-browser-scroll-area-viewport">
+			<div className="relative min-h-[160px]" data-testid="file-browser-scroll-area-viewport">
 				<GridCanvas
 					itemSize={itemSize}
 					items={pagedItems}

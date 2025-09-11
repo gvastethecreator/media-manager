@@ -116,7 +116,14 @@ class ProfileServiceImpl {
 			// 5. Ejecutar consulta
 			const drizzleProfiles = await queryWithPagination;
 
-			// 6. Restructurar resultados para compatibilidad con el tipo ProfileExtended
+			// 6. Validar que el resultado sea un array (puede estar vacío)
+			if (!Array.isArray(drizzleProfiles)) {
+				// Si no es un array, devolver array vacío (caso común cuando no hay perfiles)
+				console.warn('ProfileService: Query did not return array, returning empty array', drizzleProfiles);
+				return [];
+			}
+
+			// 7. Restructurar resultados para compatibilidad con el tipo ProfileExtended
 			const drizzleResults = drizzleProfiles.map((raw: any) => ({
 				id: raw.id,
 				name: raw.name,

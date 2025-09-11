@@ -8,7 +8,7 @@
 
 import * as crypto from 'crypto';
 // Drizzle imports
-import { asc, count, eq } from 'drizzle-orm';
+import { and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { documents } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
@@ -47,53 +47,143 @@ const createDocumentError = (
 };
 
 /**
- * Obtiene todos los documentos con sus estadísticas
+ * Obtiene documentos con filtros y paginación
  */
-export async function getDocuments(): Promise<DocumentWithStats[]> {
+export async function getDocuments(filters?: any): Promise<any> {
 	try {
 		// **MIGRACIÓN A DRIZZLE**
-		documentLogger.info('📄 Obteniendo documentos');
+		documentLogger.info('📄 Obteniendo documentos con filtros:', filters);
 
-		const drizzleDocuments = await db
-			.select({
-				id: documents.id,
-				name: documents.name,
-				path: documents.path,
-				size: documents.size,
-				hash: documents.hash,
-				mimeType: documents.mimeType,
-				extension: documents.extension,
-				folderId: documents.folderId,
-				isFavorite: documents.isFavorite,
-				isArchived: documents.isArchived,
-				pageCount: documents.pageCount,
-				wordCount: documents.wordCount,
-				language: documents.language,
-				title: documents.title,
-				author: documents.author,
-				subject: documents.subject,
-				keywords: documents.keywords,
-				creator: documents.creator,
-				producer: documents.producer,
-				creationDate: documents.creationDate,
-				modificationDate: documents.modificationDate,
-				encrypted: documents.encrypted,
-				version: documents.version,
-				content: documents.content,
-				summary: documents.summary,
-				createdAt: documents.createdAt,
-				updatedAt: documents.updatedAt,
-			})
-			.from(documents)
-			.orderBy(asc(documents.name));
+		const conditions = [];
 
-		// Transformar a formato compatible con transformadores legacy
-		const transformedDocuments = drizzleDocuments.map((rawDocument: typeof documents.$inferSelect) => ({
-			...rawDocument,
-			isFavorite: Boolean(rawDocument.isFavorite),
+		// Construir condiciones WHERE
+		if (filters?.folderId) {
+			conditions.push(eq(documents.folderId, filters.folderId));
+		}
+		if (filters?.search) {
+			conditions.push(
+				or(
+					like(documents.name, `%${filters.search}%`),
+					like(documents.title, `%${filters.search}%`),
+					like(documents.content, `%${filters.search}%`)
+				)
+			);
+		}
+		if (filters?.isFavorite !== undefined) {
+			conditions.push(eq(documents.isFavorite, filters.isFavorite));
+		}
+		if (filters?.isArchived !== undefined) {
+			conditions.push(eq(documents.isArchived, filters.isArchived));
+		}
+		if (filters?.mimeType) {
+			conditions.push(eq(documents.mimeType, filters.mimeType));
+		}
+		if (filters?.extension) {
+			conditions.push(eq(documents.extension, filters.extension));
+		}
+		if (filters?.minSize) {
+			conditions.push(gte(documents.size, filters.minSize));
+		}
+		if (filters?.maxSize) {
+			conditions.push(lte(documents.size, filters.maxSize));
+		}
+
+		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+
+		// Determinar orden
+		let orderByClause: any;
+		const sortBy = filters?.sortBy || 'name';
+		const sortOrder = filters?.sortOrder || 'asc';
+
+		switch (sortBy) {
+			case 'name':
+				orderByClause = sortOrder === 'desc' ? desc(documents.name) : asc(documents.name);
+				break;
+			case 'createdAt':
+				orderByClause = sortOrder === 'desc' ? desc(documents.createdAt) : asc(documents.createdAt);
+				break;
+			case 'updatedAt':
+				orderByClause = sortOrder === 'desc' ? desc(documents.updatedAt) : asc(documents.updatedAt);
+				break;
+			case 'size':
+				orderByClause = sortOrder === 'desc' ? desc(documents.size) : asc(documents.size);
+				break;
+			default:
+				orderByClause = asc(documents.name);
+		}
+
+		// Ejecutar consultas en paralelo
+		const [documentResults, totalCount] = await Promise.all([
+			db
+				.select({
+					id: documents.id,
+					name: documents.name,
+					path: documents.path,
+					size: documents.size,
+					hash: documents.hash,
+					mimeType: documents.mimeType,
+					extension: documents.extension,
+					folderId: documents.folderId,
+					isFavorite: documents.isFavorite,
+					isArchived: documents.isArchived,
+					pageCount: documents.pageCount,
+					wordCount: documents.wordCount,
+					language: documents.language,
+					title: documents.title,
+					author: documents.author,
+					subject: documents.subject,
+					keywords: documents.keywords,
+					creator: documents.creator,
+					producer: documents.producer,
+					creationDate: documents.creationDate,
+					modificationDate: documents.modificationDate,
+					encrypted: documents.encrypted,
+					version: documents.version,
+					content: documents.content,
+					summary: documents.summary,
+					createdAt: documents.createdAt,
+					updatedAt: documents.updatedAt,
+				})
+				.from(documents)
+				.where(whereClause)
+				.orderBy(orderByClause)
+				.limit(filters?.limit || 20)
+				.offset(filters?.offset || 0),
+
+			db
+				.select({ count: count() })
+				.from(documents)
+				.where(whereClause)
+				.then((result: any) => result[0]?.count || 0),
+		]);
+
+		// Formatear respuesta para compatibilidad
+		const formattedDocuments = documentResults.map((doc: any) => ({
+			...doc,
+			entityType: 'document' as const,
+			isFavorite: Boolean(doc.isFavorite),
+			isArchived: Boolean(doc.isArchived),
+			encrypted: Boolean(doc.encrypted),
 		}));
 
-		return transformedDocuments.map(toDocumentWithStats);
+		// Si no hay filtros (legacy), devolver solo la lista
+		if (!filters) {
+			return formattedDocuments.map(toDocumentWithStats);
+		}
+
+		// Con filtros, devolver estructura paginada
+		return {
+			data: formattedDocuments.map(toDocumentWithStats),
+			total: totalCount,
+			hasMore: (filters.offset || 0) + (filters.limit || 20) < totalCount,
+			pagination: {
+				total: totalCount,
+				limit: filters.limit || 20,
+				offset: filters.offset || 0,
+				hasNext: (filters.offset || 0) + (filters.limit || 20) < totalCount,
+				hasPrev: (filters.offset || 0) > 0,
+			},
+		};
 	} catch (error) {
 		documentLogger.error('Error obteniendo documentos:', { error });
 		throw new Error('Error al obtener documentos');
