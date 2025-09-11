@@ -6,12 +6,12 @@
 
 import { z } from 'zod';
 import {
-	FolderBaseSchema as CanonicalFolderSchema,
 	CreateFolderSchema as CanonicalFolderCreateSchema,
-	UpdateFolderSchema as CanonicalFolderUpdateSchema,
-	FolderStatisticsSchema as CanonicalFolderStatisticsSchema,
 	FolderFiltersSchema as CanonicalFolderFiltersSchema,
+	FolderBaseSchema as CanonicalFolderSchema,
 	FolderSearchOptionsSchema as CanonicalFolderSearchOptionsSchema,
+	FolderStatisticsSchema as CanonicalFolderStatisticsSchema,
+	UpdateFolderSchema as CanonicalFolderUpdateSchema,
 } from '@/types/entities/folder/schema';
 
 // Aliases legacy -> canónicos

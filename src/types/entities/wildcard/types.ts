@@ -6,32 +6,10 @@
 // Re-export tipo base para compatibilidad
 export type { WildcardWithStats } from './base';
 
-/**
- * Criterios de ordenación para wildcards
- */
-export enum WildcardSortCriteria {
-	NAME_ASC = 'name:asc',
-	NAME_DESC = 'name:desc',
-	USAGE_ASC = 'usage:asc',
-	USAGE_DESC = 'usage:desc',
-	CREATED_ASC = 'created:asc',
-	CREATED_DESC = 'created:desc',
-	UPDATED_ASC = 'updated:asc',
-	UPDATED_DESC = 'updated:desc',
-	CATEGORY_ASC = 'category:asc',
-	CATEGORY_DESC = 'category:desc',
-}
+import { WildcardSortCriteria, WildcardViewMode } from './enums';
 
-/**
- * Modos de visualización para wildcards
- */
-export enum WildcardViewMode {
-	GRID = 'grid',
-	LIST = 'list',
-	CARDS = 'cards',
-	COMPACT = 'compact',
-	TREE = 'tree',
-}
+// Re-export enums
+export { WildcardSortCriteria, WildcardViewMode } from './enums';
 
 /**
  * Mapa de propiedades de ordenamiento para wildcards

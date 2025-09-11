@@ -20,12 +20,11 @@ export type {
 	WildcardWithStats,
 } from './base';
 
-// --- 🎨 Enums y Constantes ---
-export {
-	WILDCARD_SORT_PROPERTY_MAP,
-	WildcardSortCriteria,
-	WildcardViewMode,
-} from './types';
+// --- 🔢 Enums ---
+export { WildcardSortCriteria, WildcardViewMode } from './enums';
+
+// --- 🎨 Constantes ---
+export { WILDCARD_SORT_PROPERTY_MAP } from './types';
 
 // --- 🔄 Aliases for compatibility ---
 // WildcardComplete is now exported from base.ts

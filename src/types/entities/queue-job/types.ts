@@ -5,18 +5,7 @@
  * Última migración: 2025-06-18
  */
 
-/**
- * Enum para el estado del trabajo en cola
- */
-export enum QueueJobStatus {
-	PENDING = 'pending',
-	PROCESSING = 'processing',
-	COMPLETED = 'completed',
-	FAILED = 'failed',
-	RETRYING = 'retrying',
-	CANCELLED = 'cancelled',
-	PAUSED = 'paused',
-}
+import { QueueJobStatus } from './enums';
 
 /**
  * Tipo base canónico para QueueJob
@@ -165,3 +154,6 @@ export interface QueueStats {
 // 🟢 Documentación:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
 // - Validar siempre con QueueJobSchema antes de persistir.
+
+// Re-export enum for convenience
+export { QueueJobStatus };

@@ -5,8 +5,8 @@
 
 import { z } from 'zod';
 import {
-	FolderBaseSchema as CanonicalFolderSchema,
 	CreateFolderSchema as CanonicalCreateFolderSchema,
+	FolderBaseSchema as CanonicalFolderSchema,
 	UpdateFolderSchema as CanonicalUpdateFolderSchema,
 } from '@/types/entities/folder/schema';
 

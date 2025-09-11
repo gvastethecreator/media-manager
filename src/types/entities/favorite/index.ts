@@ -20,7 +20,7 @@ export type {
 	FavoriteWithStats,
 } from './base';
 // --- Enums ---
-export { FavoriteEntityType } from './base';
+export { FavoriteEntityType } from './enums';
 
 // --- Tipos adicionales ---
 export type {

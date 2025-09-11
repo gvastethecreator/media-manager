@@ -7,24 +7,7 @@
 
 import { z } from 'zod';
 
-/**
- * Enum para el tema del perfil
- */
-export enum ThemeMode {
-	SYSTEM = 'system',
-	LIGHT = 'light',
-	DARK = 'dark',
-}
-
-/**
- * Enum para el idioma del perfil
- */
-export enum Language {
-	SPANISH = 'es',
-	ENGLISH = 'en',
-	PORTUGUESE = 'pt',
-	FRENCH = 'fr',
-}
+import { Language, ThemeMode } from './enums';
 
 /**
  * Tipo base canónico para Profile
@@ -186,3 +169,6 @@ export const ProfileSchema = z.object({
 // 🟢 Documentación:
 // - Usar solo estos tipos en transformers, server actions y validaciones.
 // - Validar siempre con ProfileSchema antes de persistir.
+
+// Re-export enums for convenience
+export { Language, ThemeMode };
