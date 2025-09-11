@@ -34,7 +34,7 @@ export function List({
 				data-testid="list-canvas-view"
 				ref={setInternalScrollEl}
 			>
-				<div className="relative" data-testid="file-browser-scroll-area-viewport">
+				<div className="relative min-h-[160px]" data-testid="file-browser-scroll-area-viewport">
 					<ListCanvas
 						items={items}
 						onItemClick={onItemClick}
@@ -60,7 +60,7 @@ export function List({
 		>
 			{/* Contenedor virtual */}
 			{containerProps && (
-				<div {...containerProps} data-testid="file-browser-scroll-area-viewport">
+				<div {...containerProps} className="min-h-[160px]" data-testid="file-browser-scroll-area-viewport">
 					{/* Elementos virtuales */}
 					{virtualItems.map((virtualItem) => {
 						const item = items[virtualItem.index];

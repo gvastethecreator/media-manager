@@ -420,6 +420,8 @@ image-manager/
 │   │   └── utils/          # Funciones utilitarias
 │   ├── types/              # Definiciones TypeScript
 │   └── server/             # Backend Express
+│       └── routes/
+│           └── folders/    # Endpoints modularizados: files/stream/stats/preview
 ├── docs/                   # Documentación
 │   ├── migration-drizzle/  # Documentación de migración
 │   └── architecture.md     # Arquitectura del sistema
@@ -429,6 +431,21 @@ image-manager/
 ```
 
 ---
+
+## 🧭 Notas de Arquitectura (Modularización reciente)
+
+- Se extrajeron endpoints voluminosos del router de folders a módulos dedicados en `src/server/routes/folders/`:
+  - `files-endpoints.ts`: listado paginado, SSE stream y stats rápidos por carpeta.
+  - `preview-endpoint.ts`: generación de SVG de previsualización de carpetas.
+- Se centralizaron los esquemas Zod del recurso Imagen en `src/types/entities/image/schema.ts` para evitar duplicación y facilitar la reutilización (create/update/filters).
+- Patrón recomendado para rutas Express: handlers tipados como `RequestHandler` y respuestas explícitas con `res` (evitar `return res.json(...)` como valor de función async).
+- Validación ligera y DTOs: mantener transformaciones y enriquecimientos en `src/transformers/*` cuando crezcan.
+
+Claves de calidad aplicadas:
+- Linting Biome sin forEach en loops críticos (preferir `for...of`).
+- Imports organizados y formateo consistente.
+- Checks automatizados en CI local: `bun run tsc`, `bun run biome`, `bun run format:check`, `bun run test:e2e`.
+
 
 ## 🔧 **Configuración Avanzada**
 

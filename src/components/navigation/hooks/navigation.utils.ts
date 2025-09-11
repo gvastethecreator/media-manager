@@ -2,6 +2,7 @@ import { useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import type { ViewType } from '@/components/views/types';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
 import { useAlbumStore } from '@/store/entities/album';
 import { useCharacterStore } from '@/store/entities/character';
 import { useCollectionStore } from '@/store/entities/collection';
@@ -37,17 +38,19 @@ type ContentVewType = keyof typeof navigationMap;
  */
 export function useNavigation() {
 	const navigate = useNavigate();
+	const { buildHierarchicalPath } = useHierarchicalNavigation();
 
-	const collectionStore = useCollectionStore();
-	const folderStore = useFolderStore();
-	const tagStore = useTagStore();
-	const albumStore = useAlbumStore();
-	const characterStore = useCharacterStore();
-	const placeStore = usePlaceStore();
-	const worldItemStore = useWorldItemStore();
-	const conceptStore = useConceptStore();
-	const promptStore = usePromptStore();
-	const noteStore = useNoteStore();
+	// Estados de las entidades para limpiar selecciones
+	const collectionStore = useCollectionStore.getState();
+	const folderStore = useFolderStore.getState();
+	const tagStore = useTagStore.getState();
+	const albumStore = useAlbumStore.getState();
+	const characterStore = useCharacterStore.getState();
+	const placeStore = usePlaceStore.getState();
+	const worldItemStore = useWorldItemStore.getState();
+	const conceptStore = useConceptStore.getState();
+	const promptStore = usePromptStore.getState();
+	const noteStore = useNoteStore.getState();
 
 	/**
 	 * Limpia todas las selecciones actuales de todas las entidades
@@ -140,7 +143,6 @@ export function useNavigation() {
 
 	// Se mantienen los wrappers para compatibilidad hacia atrás
 	const navigateToCollection = (id: string) => navigateToEntityContent('collection-content', id);
-	const navigateToFolder = (id: string) => navigateToEntityContent('folder-content', id);
 	const navigateToTag = (id: string) => navigateToEntityContent('tag-content', id);
 	const navigateToAlbum = (id: string) => navigateToEntityContent('album-content', id);
 	const navigateToCharacter = (id: string) => navigateToEntityContent('character-content', id);
@@ -149,6 +151,28 @@ export function useNavigation() {
 	const navigateToConcept = (id: string) => navigateToEntityContent('concept-content', id);
 	const navigateToPrompt = (id: string) => navigateToEntityContent('prompt-content', id);
 	const navigateToNote = (id: string) => navigateToEntityContent('note-content', id);
+
+	/**
+	 * Navega a una carpeta específica usando path jerárquico
+	 */
+	const navigateToFolder = useCallback(
+		(id: string) => {
+			navLogger.info(`[folder] Navegando a carpeta: ${id}`);
+			clearAllSelections();
+
+			// Construir path jerárquico
+			const hierarchicalPath = buildHierarchicalPath(id);
+
+			// Navegar usando path jerárquico
+			if (hierarchicalPath) {
+				navigate(`/folders/${hierarchicalPath}`);
+			} else {
+				// Fallback para carpeta raíz o error
+				navigate('/folders');
+			}
+		},
+		[clearAllSelections, navigate, buildHierarchicalPath]
+	);
 
 	return {
 		navigateToView,

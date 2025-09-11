@@ -5,70 +5,32 @@
  
  */
 
-import { z } from 'zod';
 import { TransformerError } from '@/lib/errors/transformer-error';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { isValidFolderId } from '@/lib/utils/folder-id-generator';
 import type { FolderBase, FolderCreateInput, FolderUpdateInput } from '@/types/entities/folder/types';
+import {
+	FolderBaseSchema as CanonicalFolderSchema,
+	CreateFolderSchema as CanonicalCreateFolderSchema,
+	UpdateFolderSchema as CanonicalUpdateFolderSchema,
+} from '@/types/entities/folder/schema';
 
 const logger = serverLogger.withContext('FolderValidators');
 
 /**
  * Esquema base para validación de carpetas
  */
-export const folderBaseSchema = z.object({
-	id: z.string().uuid(),
-	name: z.string().min(1, 'El nombre es requerido').max(255, 'El nombre es demasiado largo'),
-	path: z.string().min(1, 'La ruta es requerida'),
-	description: z.string().nullable(),
-	emoji: z.string().nullable().optional(),
-	color: z.string().nullable().optional(),
-	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean().default(false),
-	totalFiles: z.number().int().min(0).default(0),
-	totalSize: z.number().int().min(0).default(0),
-	lastIndexed: z.date().nullable().optional(),
-	parentId: z.string().uuid().nullable().optional(),
-	presetId: z.string().uuid().nullable().optional(),
-	createdAt: z.date(),
-	updatedAt: z.date(),
-});
+export const folderBaseSchema = CanonicalFolderSchema;
 
 /**
  * Esquema para crear carpetas
  */
-export const folderCreateSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido').max(255, 'El nombre es demasiado largo'),
-	path: z.string().min(1, 'La ruta es requerida'),
-	description: z.string().nullable().optional(),
-	emoji: z.string().nullable().optional(),
-	color: z.string().nullable().optional(),
-	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean().default(false),
-	totalFiles: z.number().int().min(0).default(0),
-	totalSize: z.number().int().min(0).default(0),
-	lastIndexed: z.date().nullable().optional(),
-	parentId: z.string().uuid().nullable().optional(),
-	presetId: z.string().uuid().nullable().optional(),
-});
+export const folderCreateSchema = CanonicalCreateFolderSchema;
 
 /**
  * Esquema para actualizar carpetas
  */
-export const folderUpdateSchema = z.object({
-	name: z.string().min(1).max(255).optional(),
-	path: z.string().min(1).optional(),
-	description: z.string().nullable().optional(),
-	emoji: z.string().nullable().optional(),
-	color: z.string().nullable().optional(),
-	featuredImage: z.string().nullable().optional(),
-	isFavorite: z.boolean().optional(),
-	totalFiles: z.number().int().min(0).optional(),
-	totalSize: z.number().int().min(0).optional(),
-	lastIndexed: z.date().nullable().optional(),
-	parentId: z.string().uuid().nullable().optional(),
-	presetId: z.string().uuid().nullable().optional(),
-});
+export const folderUpdateSchema = CanonicalUpdateFolderSchema;
 
 /**
  * Valida datos de entrada para crear una carpeta

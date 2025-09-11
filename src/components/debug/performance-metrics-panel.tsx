@@ -74,6 +74,7 @@ export const PerformanceMetricsPanel: React.FC<PerformanceMetricsPanelProps> = (
 				className={['rounded-md border bg-background/70 p-3 text-xs shadow-sm backdrop-blur', className]
 					.filter(Boolean)
 					.join(' ')}
+				data-testid="performance-metrics-panel"
 			>
 				<div className="mb-1 font-medium">Performance</div>
 				<div className="text-muted-foreground">Sin medidas todavía.</div>
@@ -93,6 +94,7 @@ export const PerformanceMetricsPanel: React.FC<PerformanceMetricsPanelProps> = (
 			className={['rounded-md border bg-background/70 p-3 text-xs shadow-sm backdrop-blur', className]
 				.filter(Boolean)
 				.join(' ')}
+			data-testid="performance-metrics-panel"
 		>
 			<div className="mb-2 flex items-center justify-between">
 				<span className="font-medium">Performance</span>

@@ -54,12 +54,9 @@ export function FolderContentView({
 		},
 		[setSelectedItems, setDetailsPanelVisible]
 	);
-	// Render: delegar completamente a FileBrowser por carpeta
-	const content = currentFolderId ? (
-		<FileBrowser filterId={currentFolderId} onItemClick={handleImageSelect} />
-	) : (
-		<div className="flex h-full items-center justify-center text-muted-foreground">Selecciona una carpeta</div>
-	);
+	// Render: siempre montar FileBrowser para asegurar disponibilidad de toolbar/viewport
+	// - Cuando no hay folderId aún, se monta con filterId undefined (estado vacío pero listo)
+	const content = <FileBrowser filterId={currentFolderId ?? undefined} onItemClick={handleImageSelect} />;
 
 	const showPerfPanel = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debugPerf');
 
@@ -68,7 +65,10 @@ export function FolderContentView({
 			<div className="relative h-full">
 				{content}
 				{showPerfPanel && (
-					<div className="pointer-events-auto absolute right-2 bottom-2 z-50 max-w-[220px]">
+					<div
+						className="pointer-events-auto absolute right-2 bottom-2 z-50 max-w-[220px]"
+						data-testid="perf-panel-container"
+					>
 						<PerformanceMetricsPanel autoUpdateMs={2500} />
 					</div>
 				)}

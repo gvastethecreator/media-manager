@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { motion } from '@/components/ui/motion-shim';
 import { ViewType } from '@/components/views/types';
+import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
 
 interface BreadcrumbsProps {
 	currentView: ViewType;
@@ -110,6 +111,7 @@ const formatDate = (date: Date): string => {
 
 export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) {
 	const navigate = useNavigate();
+	const { buildHierarchicalPath } = useHierarchicalNavigation();
 	const config = currentView ? BREADCRUMB_CONFIG[currentView] : undefined;
 	const isContentView = currentView ? currentView.endsWith('-content') : false;
 	const isFolderContent = currentView === 'folder-content';
@@ -189,7 +191,18 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 										) : (
 											<Button
 												className="h-6 cursor-pointer p-0 font-medium text-primary text-xs hover:text-primary/80"
-												onClick={() => navigate(`/folders/${c.id}`)}
+												onClick={() => {
+													// Usar navegación jerárquica
+													const hierarchicalPath = buildHierarchicalPath(c.id);
+
+													// Navegar usando path jerárquico
+													if (hierarchicalPath) {
+														navigate(`/folders/${hierarchicalPath}`);
+													} else {
+														// Fallback para carpeta raíz o error
+														navigate('/folders');
+													}
+												}}
 												size="sm"
 												variant="ghost"
 											>

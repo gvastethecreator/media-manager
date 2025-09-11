@@ -16,6 +16,7 @@ import { motion } from '@/components/ui/motion-shim';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useFolder } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
+import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
 
 interface FolderNavigationBarProps {
 	/** ID de la carpeta actual */
@@ -50,26 +51,12 @@ export const FolderNavigationBar = memo(function FolderNavigationBarImpl({
 	// Obtener datos de la carpeta actual
 	const { data: currentFolder, isLoading } = useFolder(folderId || '');
 	const { navigateToFolder } = useNavigation();
+	const { buildFullBreadcrumbs } = useHierarchicalNavigation();
 
-	// Construir breadcrumbs jerárquicos
+	// Construir breadcrumbs jerárquicos completos
 	const breadcrumbs = useMemo(() => {
-		if (!currentFolder) return [];
-
-		const crumbs = [];
-		const current = currentFolder;
-
-		// Construir cadena jerárquica hacia arriba
-		// En una implementación real, necesitaríamos obtener la carpeta padre
-		// Por ahora, solo mostramos la carpeta actual
-		crumbs.unshift({
-			id: current.id,
-			name: current.name,
-			emoji: current.emoji,
-			path: current.path,
-		});
-
-		return crumbs;
-	}, [currentFolder]);
+		return buildFullBreadcrumbs(folderId);
+	}, [folderId, buildFullBreadcrumbs]);
 
 	// Manejar navegación hacia atrás
 	const handleGoBack = () => {
@@ -87,7 +74,11 @@ export const FolderNavigationBar = memo(function FolderNavigationBarImpl({
 	const handleNavigateToFolder = (targetFolderId: string) => {
 		if (onNavigateToFolder) {
 			onNavigateToFolder(targetFolderId);
+		} else if (targetFolderId === '/') {
+			// Navegar a vista raíz de carpetas
+			navigateToFolder('/');
 		} else {
+			// Navegar a carpeta específica
 			navigateToFolder(targetFolderId);
 		}
 	};
@@ -140,35 +131,32 @@ export const FolderNavigationBar = memo(function FolderNavigationBarImpl({
 					<TooltipContent>Ir atrás</TooltipContent>
 				</Tooltip>
 
-				{/* Breadcrumbs */}
+				{/* Breadcrumbs jerárquicos */}
 				<nav className="flex min-w-0 items-center gap-1">
-					<Button
-						className="h-7 px-2 text-muted-foreground text-xs"
-						onClick={() => handleNavigateToFolder('/')}
-						variant="ghost"
-					>
-						<Home className="h-3 w-3" />
-					</Button>
-
 					{breadcrumbs.map((crumb, index) => (
 						<div className="flex items-center gap-1" key={crumb.id}>
-							<ChevronRight className="h-3 w-3 text-muted-foreground" />
+							{index > 0 && <ChevronRight className="h-3 w-3 text-muted-foreground" />}
 
-							{index === breadcrumbs.length - 1 ? (
+							{crumb.isActive ? (
 								// Carpeta actual - no clickeable
 								<div className="flex items-center gap-1 rounded px-2 py-1 text-xs">
 									{crumb.emoji && <span className="text-sm">{crumb.emoji}</span>}
-									<Folder className="h-3 w-3 text-primary" />
+									{crumb.id === 'root' ? (
+										<Home className="h-3 w-3 text-primary" />
+									) : (
+										<Folder className="h-3 w-3 text-primary" />
+									)}
 									<span className="max-w-40 truncate font-medium text-primary">{crumb.name}</span>
 								</div>
 							) : (
 								// Carpeta padre - clickeable
 								<Button
 									className="h-7 gap-1 px-2 text-xs"
-									onClick={() => handleNavigateToFolder(crumb.id)}
+									onClick={() => handleNavigateToFolder(crumb.id === 'root' ? '/' : crumb.id)}
 									variant="ghost"
 								>
 									{crumb.emoji && <span className="text-sm">{crumb.emoji}</span>}
+									{crumb.id === 'root' ? <Home className="h-3 w-3" /> : <Folder className="h-3 w-3" />}
 									<span className="max-w-32 truncate">{crumb.name}</span>
 								</Button>
 							)}

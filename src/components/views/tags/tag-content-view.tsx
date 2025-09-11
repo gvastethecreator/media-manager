@@ -64,7 +64,7 @@ export function TagContentView() {
 				isLoading={isLoading}
 				items={images as unknown as AnyEntityWithStats[]}
 				onItemClick={handleItemSelect}
-			// Doble clic: el FileBrowser abre visor por defecto para imágenes
+				// Doble clic: el FileBrowser abre visor por defecto para imágenes
 			/>
 		</BaseContentView>
 	);
