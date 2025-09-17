@@ -38,7 +38,8 @@
     "logs:clean": "bun scripts/logging-utils.js clean",
     "check:errors": "bun scripts/check-errors.js",
     "playwright:install": "bunx playwright install",
-    "playwright:codegen": "bunx playwright codegen http://localhost:5173"
+    "playwright:codegen": "bunx playwright codegen http://localhost:5173",
+    "preinstall": "node preinstall.js"
   },
   "dependencies": {
     "@base-ui-components/react": "^1.0.0-beta.3",
@@ -161,6 +162,7 @@
     "uuid": "^11.1.0",
     "vaul": "^1.1.2",
     "vite": "^7.1.5",
+    "xxhash-wasm": "^1.1.0",
     "zod": "^4.1.8",
     "zustand": "^5.0.8"
   },

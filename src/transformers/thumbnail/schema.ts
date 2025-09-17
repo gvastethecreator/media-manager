@@ -8,7 +8,8 @@
  */
 
 import { z } from 'zod';
-import { ThumbnailQuality } from '../../types/entities/thumbnail/base';
+// Usar barrel unificado para evitar conflictos de duplicación
+import { ThumbnailQuality } from '@/types/entities/thumbnail';
 
 /**
  * Schema Zod para ThumbnailBase

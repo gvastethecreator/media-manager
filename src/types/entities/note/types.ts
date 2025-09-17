@@ -7,11 +7,10 @@
 
 import { z } from 'zod';
 // Removed broken import - will define types here
-import { NoteCategory, NotePriority, NoteSortOption as NoteSortCriteria, NoteStatus, NoteViewMode } from './enums';
+import { NoteSortOption as NoteSortCriteria } from './enums';
 
 // Re-export enums for direct access from types
-export { NoteCategory, NotePriority, NoteStatus, NoteViewMode } from './enums';
-export { NoteSortOption as NoteSortCriteria } from './enums';
+export { NoteCategory, NotePriority, NoteSortOption as NoteSortCriteria, NoteStatus, NoteViewMode } from './enums';
 
 // Import base entity types
 import { EntityStats } from '../entity.types';
