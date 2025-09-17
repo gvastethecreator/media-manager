@@ -26,6 +26,7 @@ function calculateFavoriteStats(favorite: FavoriteBase): FavoriteStatistics {
 
 	// Mapeo de tipos de entidad a nombres legibles
 	const entityTypeNames: Record<FavoriteEntityType, string> = {
+		[FavoriteEntityType.FAVORITE]: 'Favorito', // clave canónica para el propio tipo
 		[FavoriteEntityType.IMAGE]: 'Imagen',
 		[FavoriteEntityType.VIDEO]: 'Video',
 		[FavoriteEntityType.ALBUM]: 'Álbum',

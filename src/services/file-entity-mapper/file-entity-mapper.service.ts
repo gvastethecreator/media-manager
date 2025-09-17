@@ -10,7 +10,7 @@ import {
 	FileInfo,
 } from '@/types/file-entity-mapper';
 // Servicios especializados extraídos
-import { EntityExistenceService, FileHashService, FileInfoService, EntityCreationService } from './core';
+import { EntityCreationService, EntityExistenceService, FileHashService, FileInfoService } from './core';
 import { ThumbnailGeneratorService } from './thumbnail';
 
 // Regex reutilizables top-level para evitar recreación frecuente
