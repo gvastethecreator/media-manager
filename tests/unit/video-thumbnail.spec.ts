@@ -1,19 +1,4 @@
 import { describe, expect, it } from 'bun:test';
-import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
-import { EntityType } from '@/types/file-entity-mapper';
-
-function buildSpyMapperVideo() {
-	const mapper: any = new (FileEntityMapperService as any)();
-	mapper.generateVideoThumbnail = (p: string, id: string) => {
-		mapper.calls.push({ p, id });
-	};
-	mapper.processThumbnailForEntity = FileEntityMapperService.prototype.processThumbnailForEntity;
-	mapper.calls = [] as Array<{ p: string; id: string }>;
-	return mapper as FileEntityMapperService & { calls: Array<{ p: string; id: string }> };
-}
-
-import { describe, expect, it } from 'bun:test';
-import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
 import { EntityType } from '@/types/file-entity-mapper';
 import { createMockFileEntityMapper } from '../factories';
 
@@ -33,6 +18,10 @@ describe('Video thumbnail generation', () => {
 
 		expect(result.success).toBe(true);
 		expect(result.thumbnailPath).toBe('/thumbnails/video-thumb.jpg');
-		expect(mapper.generateThumbnail).toHaveBeenCalledWith('test-video.mp4', EntityType.VIDEO);
+		// Verificar llamada manualmente usando spy ligero
+		expect(mapper.generateThumbnail.calls.length).toBeGreaterThan(0);
+		const firstCall = mapper.generateThumbnail.calls[0];
+		expect(firstCall[0]).toBe('test-video.mp4');
+		expect(firstCall[1]).toBe(EntityType.VIDEO);
 	});
 });

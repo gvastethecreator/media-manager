@@ -1,9 +1,9 @@
 import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
-import { createMockDb, createMockEventStore, createTestImage } from '@tests/factories';
 import type { Image } from '@/lib/drizzle';
 import { db } from '@/lib/drizzle';
 import { getEventStore } from '@/lib/server/events.server';
 import { imageService } from '@/services/image/image.service';
+import { createTestImage } from '../../factories';
 
 // Factory para crear imágenes de test tipadas
 const createTestImageWithDefaults = (overrides: Partial<Image> = {}): Image => {
@@ -120,7 +120,7 @@ function stubDbMutation({ insertReturning, updateReturning }: MockMutationOption
 
 describe('ImageService - contratos básicos', () => {
 	it('getImage devuelve ImageWithStats cuando existe', async () => {
-		const base = fakeImage();
+		const base = createTestImageWithDefaults();
 		stubDbForGetById(base);
 
 		const result = await imageService.getImage(base.id);
@@ -138,7 +138,7 @@ describe('ImageService - contratos básicos', () => {
 	});
 
 	it('createImage inserta, genera thumbnail y emite eventos', async () => {
-		const base = fakeImage();
+		const base = createTestImageWithDefaults();
 		// Insert returning new image
 		stubDbMutation({ insertReturning: base, updateReturning: base });
 		// getImage tras crear
@@ -165,7 +165,7 @@ describe('ImageService - contratos básicos', () => {
 	});
 
 	it('updateImage actualiza y emite eventos', async () => {
-		const base = fakeImage();
+		const base = createTestImageWithDefaults();
 		stubDbQueryFindFirst(base);
 		stubDbMutation({ updateReturning: base });
 		stubDbForGetById(base);
@@ -180,8 +180,9 @@ describe('ImageService - contratos básicos', () => {
 	});
 
 	it('deleteImage elimina cuando existe y emite', async () => {
-		const base = fakeImage();
-		stubDbQueryFindFirst({ id: base.id });
+		const base = createTestImageWithDefaults();
+		// Proveer objeto completo para cumplir tipo esperado por stub
+		stubDbQueryFindFirst(base);
 		stubDbMutation({});
 		const store = getEventStore();
 		const before = store.get('images:modified')?.length ?? 0;

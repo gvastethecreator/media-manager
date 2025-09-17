@@ -99,8 +99,24 @@ router.get('/fts', async (req, res) => {
 				throw new Error('client.execute no disponible');
 			}
 			const match = q.replace(/"/g, '');
-			const querySql =
-				'SELECT f.id, f.name, f.path, f.tags, bm25(files_fts) as score FROM files_fts ft JOIN File f ON f.rowid = ft.rowid WHERE ft MATCH ? ORDER BY score LIMIT ? OFFSET ?';
+			const querySql = `
+				SELECT 
+					files_fts.entity_id as id, 
+					files_fts.name, 
+					CASE files_fts.entity_type
+						WHEN 'image' THEN (SELECT path FROM Image WHERE id = files_fts.entity_id)
+						WHEN 'video' THEN (SELECT path FROM Video WHERE id = files_fts.entity_id)
+						WHEN 'audio' THEN (SELECT path FROM Audio WHERE id = files_fts.entity_id)
+						WHEN 'document' THEN (SELECT path FROM Document WHERE id = files_fts.entity_id)
+					END as path,
+					files_fts.tags, 
+					files_fts.entity_type,
+					bm25(files_fts) as score 
+				FROM files_fts 
+				WHERE files_fts MATCH ? 
+				ORDER BY score 
+				LIMIT ? OFFSET ?
+			`;
 			const execStart = performance.now();
 			const result = await client.execute({ sql: querySql, args: [match, limit, offset] });
 			const execMs = performance.now() - execStart;
@@ -109,7 +125,8 @@ router.get('/fts', async (req, res) => {
 				name: String(r[1]),
 				path: String(r[2]),
 				tags: String(r[3] ?? '[]'),
-				score: Number(r[4]),
+				type: String(r[4]),
+				score: Number(r[5]),
 			}));
 			total = rows.length + offset; // estimación
 			logger.debug('search.fts', { q, rows: rows.length, ms: Math.round(execMs * 100) / 100 });

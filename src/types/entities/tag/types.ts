@@ -3,26 +3,18 @@
  * @module types/entities/tag/types
  */
 
-import type { EntityBase } from '@/types/entities/entity.types';
-import type { TagBase, TagStatistics, TagWithStats } from './base';
+import type { TagBase, TagWithStats } from './base';
 import { TagSortCriteria } from './enums';
 
 // Re-export TagWithStats for external use
 export type { TagWithStats } from './base';
 
-export interface TagBase extends EntityBase {
-	name: string;
-	description: string | null;
-	emoji: string | null;
-	color: string | null;
-	category: string | null;
-	isFavorite: boolean;
-	totalImages: number;
-	totalVideos: number;
-}
-
-export interface TagCreateInput extends Omit<TagBase, 'id' | 'createdAt' | 'updatedAt'> {}
-export interface TagUpdateInput extends Partial<TagCreateInput> {}
+// Reutilizar TagBase canónico: crear inputs específicos sin duplicar campos
+export type TagCreateInput = Omit<TagBase, 'id' | 'createdAt' | 'updatedAt' | 'featuredImage' | 'shortcut'> & {
+	featuredImage?: string | null;
+	shortcut?: string | null;
+};
+export type TagUpdateInput = Partial<TagCreateInput>;
 
 export interface TagFilters {
 	search?: string;

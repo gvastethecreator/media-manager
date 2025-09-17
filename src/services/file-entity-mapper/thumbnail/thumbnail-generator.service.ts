@@ -3,8 +3,8 @@
  * @module services/file-entity-mapper/thumbnail/thumbnail-generator
  */
 
-import { eq } from 'drizzle-orm';
 import { readFile } from 'node:fs/promises';
+import { eq } from 'drizzle-orm';
 import sharp from 'sharp';
 import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, images, jsonFiles, videos } from '@/lib/drizzle/schema';

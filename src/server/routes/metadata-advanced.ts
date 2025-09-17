@@ -1,24 +1,26 @@
-// @ts-nocheck - Temporary suppression for Express handler parameter types
 /**
  * Rutas API para el sistema avanzado de extracción de metadatos
  * Soporta detección completa de IA engines y metadatos técnicos
  */
 
-import express from 'express';
+import { Router, type Request, type Response } from 'express';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createFileNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
 
-const router = express.Router() as any;
-
-// Log para verificar que el router se carga
+const router = Router();
 const logger = serverLogger.withContext('MetadataAdvancedAPI');
-logger.info('🤖 Router metadata-advanced cargado correctamente');
 
-/**
- * GET /api/metadata-advanced/test
- * Ruta de prueba para verificar que el router funciona
- */
-router.get('/test', (_req, res) => {
+logger.info('🔧 Router metadata-advanced cargado correctamente');
+
+type ExtractMetadataRequest = Request<
+	unknown,
+	unknown,
+	{
+		filePath?: string;
+	}
+>;
+
+router.get('/test', (_req: Request, res: Response) => {
 	logger.info('✅ Ruta /test ejecutándose');
 	res.json({
 		success: true,
@@ -27,11 +29,7 @@ router.get('/test', (_req, res) => {
 	});
 });
 
-/**
- * GET /api/metadata-advanced/simple-test
- * Otra ruta de prueba
- */
-router.get('/simple-test', (req, res) => {
+router.get('/simple-test', (req: Request, res: Response) => {
 	logger.info('✅ Ruta /simple-test ejecutándose');
 	res.json({
 		success: true,
@@ -42,55 +40,50 @@ router.get('/simple-test', (req, res) => {
 	});
 });
 
-/**
- * POST /api/metadata-advanced/extract-from-path
- * Extraer metadata de un archivo específico por su ruta
- */
-router.post('/extract-from-path', async (req, res) => {
+router.post('/extract-from-path', async (req: ExtractMetadataRequest, res: Response) => {
 	try {
-		const { filePath } = req.body;
+		const { filePath } = req.body ?? {};
 
 		if (!filePath || typeof filePath !== 'string') {
-			return res.status(400).json({
+			res.status(400).json({
 				error: 'Path del archivo requerido',
 				message: 'Debe proporcionar un filePath válido en el body de la request',
 			});
+			return;
 		}
 
-		logger.info('🔍 Extrayendo metadata', { filePath });
+		logger.info('🧠 Extrayendo metadata', { filePath });
 
-		// Importar el servicio de metadata integration
 		const { extractAllMetadata } = await import('@/server/services/metadata/unified-parser.service');
-
-		// Validar existencia y permisos de lectura antes de leer
 		const fsp = await import('node:fs/promises');
 		const { constants } = await import('node:fs');
+
 		try {
 			await fsp.access(filePath, constants.R_OK);
-		} catch (e: any) {
-			if (e && (e.code === 'ENOENT' || e.code === 'ENOTDIR')) {
-				const err = createFileNotFoundError(filePath, { op: 'metadata-extract' }, 'MetadataAdvancedAPI');
-				res.status(err.httpStatus).json({ error: true, code: err.code, message: err.message });
-				return;
+		} catch (error: unknown) {
+			if (error && typeof error === 'object' && 'code' in error) {
+				const code = (error as { code?: string }).code;
+				if (code === 'ENOENT' || code === 'ENOTDIR') {
+					const err = createFileNotFoundError(filePath, { op: 'metadata-extract' }, 'MetadataAdvancedAPI');
+					res.status(err.httpStatus).json({ error: true, code: err.code, message: err.message });
+					return;
+				}
+				if (code === 'EACCES' || code === 'EPERM') {
+					const err = toServiceError(error, {
+						code: ServiceErrorCode.FILE_ACCESS_DENIED,
+						message: `Permiso denegado al leer: ${filePath}`,
+						serviceName: 'MetadataAdvancedAPI',
+					});
+					res.status(err.httpStatus).json({ error: true, code: err.code, message: err.message });
+					return;
+				}
 			}
-			if (e && (e.code === 'EACCES' || e.code === 'EPERM')) {
-				const err = toServiceError(e, {
-					code: ServiceErrorCode.FILE_ACCESS_DENIED,
-					message: `Permiso denegado al leer: ${filePath}`,
-					serviceName: 'MetadataAdvancedAPI',
-				});
-				res.status(err.httpStatus).json({ error: true, code: err.code, message: err.message });
-				return;
-			}
-			throw e;
+			throw error;
 		}
 
-		// Leer el archivo como buffer
 		const fileBuffer = await fsp.readFile(filePath);
-
-		// Extraer metadata del archivo usando el servicio unificado
-		const path = await import('node:path');
-		const filename = path.basename(filePath);
+		const pathModule = await import('node:path');
+		const filename = pathModule.basename(filePath);
 		const metadata = await extractAllMetadata(fileBuffer, filename, {}, filePath);
 
 		logger.info('✅ Metadata extraída', { filePath, size: fileBuffer.length });
@@ -103,15 +96,17 @@ router.post('/extract-from-path', async (req, res) => {
 		});
 	} catch (error) {
 		logger.error('❌ Error al extraer metadata', { error, filePath: req.body?.filePath });
-		// Mapear errores comunes del FS a respuestas adecuadas
 		const err = toServiceError(error, {
 			code: ServiceErrorCode.FILE_READ_ERROR,
 			message: 'Error al extraer metadata',
 			serviceName: 'MetadataAdvancedAPI',
 		});
-		res
-			.status(err.httpStatus)
-			.json({ error: true, code: err.code, message: err.message, filePath: req.body?.filePath });
+		res.status(err.httpStatus).json({
+			error: true,
+			code: err.code,
+			message: err.message,
+			filePath: req.body?.filePath,
+		});
 	}
 });
 

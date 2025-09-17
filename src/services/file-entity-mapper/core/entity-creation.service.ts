@@ -3,13 +3,13 @@
  * @module services/file-entity-mapper/core/entity-creation
  */
 
+import { createVideo as createVideoServer } from '@/server/services/video.server.service';
 import { createAudio } from '@/services/audio/audio.service';
 import { createDocument } from '@/services/document/document.service';
 import { createFile3D } from '@/services/file3d/file3d.service';
 import type { CreateImageInput } from '@/services/image/image.service';
 import { ImageService } from '@/services/image/image.service';
 import { createJsonFile } from '@/services/json-file/json-file.service';
-import { createVideo as createVideoServer } from '@/server/services/video.server.service';
 import type { DocumentCreateInput } from '@/transformers/document/validators';
 import type { AudioCreateInput } from '@/types/entities/audio';
 import type { File3DCreateInput } from '@/types/entities/file3d';
@@ -141,12 +141,21 @@ export class EntityCreationService {
 				if (!fileInfo.hash) {
 					throw new Error('File hash is required for video creation');
 				}
-				const videoData: VideoCreateInput = {
+				let detectedMime = this.getMimeTypeFromExtension(fileInfo.extension);
+				// Fallback defensivo si no se reconoce el mime
+				if (detectedMime === 'application/octet-stream') {
+					// Asumir mp4 por prevalencia si extensión pertenece al set de vídeo conocido
+					detectedMime = 'video/mp4';
+				}
+				interface LocalVideoCreate extends VideoCreateInput {
+					mimeType: string; // forzamos requerido al pasar al server
+				}
+				const videoData: LocalVideoCreate = {
 					name: fileInfo.name,
 					path: fileInfo.path,
 					hash: fileInfo.hash,
 					size: fileInfo.size,
-					mimeType: this.getMimeTypeFromExtension(fileInfo.extension),
+					mimeType: detectedMime,
 					duration: 0, // Will be updated after processing
 					folderId: fileInfo.folderId,
 					isFavorite: false,

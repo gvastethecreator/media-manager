@@ -1,11 +1,11 @@
-import type { FileInfo } from '@/types/file-entity-mapper';
-import { EntityType } from '@/types/file-entity-mapper';
-import { ImageService } from '@/services/image/image.service';
 import { getVideoByHash as getVideoByHashServer } from '@/server/services/video.server.service';
 import { getAudioByHash } from '@/services/audio/audio.service';
 import { getDocumentByHash } from '@/services/document/document.service';
 import { getFile3DByHash } from '@/services/file3d/file3d.service';
+import { ImageService } from '@/services/image/image.service';
 import { getJsonFileByHash } from '@/services/json-file/json-file.service';
+import type { FileInfo } from '@/types/file-entity-mapper';
+import { EntityType } from '@/types/file-entity-mapper';
 
 /**
  * Servicio para verificación de entidades existentes por hash

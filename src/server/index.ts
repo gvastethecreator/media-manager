@@ -2,10 +2,12 @@
 
 import express from 'express';
 import path from 'path';
+import { ENV } from '@/config/env';
 import { serverLogger } from '@/lib/logger';
 import { initializeFileLogging } from '@/lib/logger/init-file-logging';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { errorLogger, logError, logInfo, requestLogger } from './middleware/logging';
+import { applySecurityMiddleware, createUploadsRouter } from './middleware/security';
 import threeDThumbnailsRouter from './routes/3d-thumbnails';
 import activityRouter from './routes/activity';
 import { albumsRouter } from './routes/albums.js';
@@ -51,31 +53,27 @@ import worldItemsRouter from './routes/world-items';
 
 const app = express();
 
-// Configuración para manejar headers grandes (error 431)
-app.use((req, res, next) => {
-	// Aumentar límite de headers para evitar error 431
-	res.setHeader('X-Max-Header-Size', '32768'); // 32KB
-	next();
-});
+applySecurityMiddleware(app);
+logInfo('🛡️ Middleware de seguridad inicializado');
 
-const PORT = Number.parseInt(process.env.API_PORT || process.env.PORT || '4000', 10);
-// ...existing code...
 app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 
-// Configurar archivos estáticos para las imágenes
+const PORT = Number.parseInt(ENV.API_PORT, 10);
+const HOST = process.env.API_HOST || '0.0.0.0';
 const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
-app.use('/uploads', express.static(path.resolve(UPLOADS_DIR)));
-logInfo(`📁 Archivos estáticos configurados: /uploads -> ${path.resolve(UPLOADS_DIR)}`);
+const uploadsRouter = createUploadsRouter(UPLOADS_DIR);
+app.use('/uploads', uploadsRouter);
+const resolvedUploadsPath = path.resolve(UPLOADS_DIR);
+logInfo(`📁 Archivos estáticos configurados: /uploads -> ${resolvedUploadsPath}`);
 
 // Middleware de logging
 app.use(requestLogger);
 
-logInfo('🔧 Middleware de logging configurado');
-
-// Validar routers críticos
+logInfo('📝 Middleware de logging configurado');
+// Validar routers crÃ­ticos
 if (typeof foldersRouter !== 'function' || typeof imagesRouter !== 'function') {
-	logError('❌ Routers críticos no están disponibles');
+	logError('âŒ Routers crÃ­ticos no estÃ¡n disponibles');
 	process.exit(1);
 }
 
@@ -94,7 +92,7 @@ app.get('/health', (_req, res) => {
 // API Routes - Entidades principales
 // Debug middleware for folders routes
 app.use('/api/folders', (req, res, next) => {
-	console.log('📁 FOLDERS ROUTER - Request received:', req.method, req.path);
+	console.log('ðŸ“ FOLDERS ROUTER - Request received:', req.method, req.path);
 	next();
 });
 app.use('/api/folders', foldersRouter);
@@ -161,57 +159,63 @@ app.use((req, res) => {
 // Middleware de manejo de errores (DEBE ir al final)
 app.use(errorLogger);
 
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, HOST, () => {
 	const logger = serverLogger.withContext('ServerStartup');
 
-	logger.success(`🚀 Servidor Express iniciado en puerto ${PORT}`);
+	logger.success(`ðŸš€ Servidor Express iniciado en puerto ${PORT}`);
 
-	logger.info('\n📁 APIs de Entidades:');
-	logger.info(`   📁 Folders: http://localhost:${PORT}/api/folders`);
-	logger.info(`   🖼️  Images: http://localhost:${PORT}/api/images`);
-	logger.info(`   📂 Files: http://localhost:${PORT}/api/files`);
-	logger.info(`   📸 Albums: http://localhost:${PORT}/api/albums`);
-	logger.info(`   📥 Download: http://localhost:${PORT}/api/download`);
-	logger.info(`   🏷️  Tags: http://localhost:${PORT}/api/tags`);
-	logger.info(`   👤 Characters: http://localhost:${PORT}/api/characters`);
-	logger.info(`   🌟 Collections: http://localhost:${PORT}/api/collections`);
-	logger.info(`   📍 Places: http://localhost:${PORT}/api/places`);
-	logger.info(`   🎯 World Items: http://localhost:${PORT}/api/world-items`);
-	logger.info(`   💡 Concepts: http://localhost:${PORT}/api/concepts`);
-	logger.info(`   🤖 Prompts: http://localhost:${PORT}/api/prompts`);
-	logger.info(`   📤 Uploaded Images: http://localhost:${PORT}/api/uploaded-images`);
-	logger.info(`   ✨ Wildcards: http://localhost:${PORT}/api/wildcards`);
-	logger.info(`   🎵 Audio: http://localhost:${PORT}/api/audio`);
-	logger.info(`   🎬 Videos: http://localhost:${PORT}/api/videos`);
-	logger.info(`   📝 Notes: http://localhost:${PORT}/api/notes`);
-	logger.info(`   ⚙️  Properties: http://localhost:${PORT}/api/properties`);
-	logger.info(`   👥 Groups: http://localhost:${PORT}/api/groups`);
-	logger.info(`   ⭐ Favorites: http://localhost:${PORT}/api/favorites`);
-	logger.info(`   📂 Local Files: http://localhost:${PORT}/api/local-files`);
-	logger.info(`   🐞 Debug: http://localhost:${PORT}/api/debug`);
-	logger.info(`   📦 Queue: http://localhost:${PORT}/api/queue`);
+	logger.info('\nðŸ“ APIs de Entidades:');
+	logger.info(`   ðŸ“ Folders: http://localhost:${PORT}/api/folders`);
+	logger.info(`   ðŸ–¼ï¸  Images: http://localhost:${PORT}/api/images`);
+	logger.info(`   ðŸ“‚ Files: http://localhost:${PORT}/api/files`);
+	logger.info(`   ðŸ“¸ Albums: http://localhost:${PORT}/api/albums`);
+	logger.info(`   ðŸ“¥ Download: http://localhost:${PORT}/api/download`);
+	logger.info(`   ðŸ·ï¸  Tags: http://localhost:${PORT}/api/tags`);
+	logger.info(`   ðŸ‘¤ Characters: http://localhost:${PORT}/api/characters`);
+	logger.info(`   ðŸŒŸ Collections: http://localhost:${PORT}/api/collections`);
+	logger.info(`   ðŸ“ Places: http://localhost:${PORT}/api/places`);
+	logger.info(`   ðŸŽ¯ World Items: http://localhost:${PORT}/api/world-items`);
+	logger.info(`   ðŸ’¡ Concepts: http://localhost:${PORT}/api/concepts`);
+	logger.info(`   ðŸ¤– Prompts: http://localhost:${PORT}/api/prompts`);
+	logger.info(`   ðŸ“¤ Uploaded Images: http://localhost:${PORT}/api/uploaded-images`);
+	logger.info(`   âœ¨ Wildcards: http://localhost:${PORT}/api/wildcards`);
+	logger.info(`   ðŸŽµ Audio: http://localhost:${PORT}/api/audio`);
+	logger.info(`   ðŸŽ¬ Videos: http://localhost:${PORT}/api/videos`);
+	logger.info(`   ðŸ“ Notes: http://localhost:${PORT}/api/notes`);
+	logger.info(`   âš™ï¸  Properties: http://localhost:${PORT}/api/properties`);
+	logger.info(`   ðŸ‘¥ Groups: http://localhost:${PORT}/api/groups`);
+	logger.info(`   â­ Favorites: http://localhost:${PORT}/api/favorites`);
+	logger.info(`   ðŸ“‚ Local Files: http://localhost:${PORT}/api/local-files`);
+	logger.info(`   ðŸž Debug: http://localhost:${PORT}/api/debug`);
+	logger.info(`   ðŸ“¦ Queue: http://localhost:${PORT}/api/queue`);
 
-	logger.info('\n🔧 APIs de Sistema:');
-	logger.info(`   🖥️  System: http://localhost:${PORT}/api/system`);
-	logger.info(`   🔍 Search: http://localhost:${PORT}/api/search`);
-	logger.info(`   📋 Metadata: http://localhost:${PORT}/api/metadata`);
-	logger.info(`   🤖 Metadata Advanced: http://localhost:${PORT}/api/metadata-advanced`);
-	logger.info(`   🖼️  Thumbnails: http://localhost:${PORT}/api/thumbnails`);
-	logger.info(`   📊 Stats: http://localhost:${PORT}/api/stats`);
-	logger.info(`   👤 Profiles: http://localhost:${PORT}/api/profiles`);
-	logger.info(`   📈 Activity: http://localhost:${PORT}/api/activity`);
+	logger.info('\nðŸ”§ APIs de Sistema:');
+	logger.info(`   ðŸ–¥ï¸  System: http://localhost:${PORT}/api/system`);
+	logger.info(`   ðŸ” Search: http://localhost:${PORT}/api/search`);
+	logger.info(`   ðŸ“‹ Metadata: http://localhost:${PORT}/api/metadata`);
+	logger.info(`   ðŸ¤– Metadata Advanced: http://localhost:${PORT}/api/metadata-advanced`);
+	logger.info(`   ðŸ–¼ï¸  Thumbnails: http://localhost:${PORT}/api/thumbnails`);
+	logger.info(`   ðŸ“Š Stats: http://localhost:${PORT}/api/stats`);
+	logger.info(`   ðŸ‘¤ Profiles: http://localhost:${PORT}/api/profiles`);
+	logger.info(`   ðŸ“ˆ Activity: http://localhost:${PORT}/api/activity`);
 
-	logger.info(`\n🩺 Health check: http://localhost:${PORT}/health`);
+	logger.info(`\nðŸ©º Health check: http://localhost:${PORT}/health`);
 
-	// 🔍 Inicializar monitor de reindexado
-	logger.info('\n🔍 Iniciando sistema de monitoreo...');
+	// ðŸ” Inicializar monitor de reindexado
+	logger.info('\nðŸ” Iniciando sistema de monitoreo...');
 	reindexMonitor.start();
-	logger.success('✅ Monitor de reindexado activo');
+	logger.success('âœ… Monitor de reindexado activo');
 
-	// 📝 Inicializar sistema de logging de archivos
-	logger.info('\n📝 Inicializando sistema de logging de archivos...');
+	// ðŸ“ Inicializar sistema de logging de archivos
+	logger.info('\nðŸ“ Inicializando sistema de logging de archivos...');
 	initializeFileLogging();
-	logger.success('✅ Sistema de logging de archivos activo');
+	logger.success('âœ… Sistema de logging de archivos activo');
 });
 
 export default app;
+
+
+
+
+
+

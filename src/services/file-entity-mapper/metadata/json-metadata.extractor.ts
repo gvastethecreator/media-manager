@@ -3,8 +3,8 @@
  * @module services/file-entity-mapper/metadata/json-metadata
  */
 
-import { eq } from 'drizzle-orm';
 import { readFile } from 'node:fs/promises';
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { jsonFiles } from '@/lib/drizzle/schema';
 

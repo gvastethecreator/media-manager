@@ -4,24 +4,32 @@ import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
 import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail';
 import { thumbnailService } from '@/services/thumbnail';
+import { optimizedThumbnailMiddleware } from '@/server/middleware/cache.middleware';
 import {
 	bulkGenerateThumbnails,
 	cleanThumbnails,
 	deleteThumbnail,
 	getThumbnail,
 	getThumbnailStats,
+	getThumbnailMetrics,
 	optimizeThumbnails,
 	reprocessThumbnails,
 } from '../services/thumbnail.service';
 
 const router = express.Router();
 
-// GET /thumbnails/image/:imageId - Obtener thumbnails de imagen
-router.get('/image/:imageId', async (req, res) => {
+// GET /thumbnails/image/:imageId - Obtener thumbnails de imagen (con cache optimizado)
+router.get('/image/:imageId', ...optimizedThumbnailMiddleware, async (req, res) => {
 	try {
 		const { imageId } = req.params;
 		const { quality } = req.query;
 		const thumbnail = await getThumbnail(imageId, quality as any);
+		
+		// Añadir timestamp para Last-Modified si no está presente
+		if (!res.get('Last-Modified')) {
+			res.set('Last-Modified', new Date().toUTCString());
+		}
+		
 		res.json(thumbnail);
 	} catch (error) {
 		console.error('Error obteniendo thumbnail de imagen:', error);
@@ -292,6 +300,17 @@ router.get('/events', async (req, res) => {
 		send('connected', { timestamp: Date.now() });
 	} catch (error) {
 		console.error('Error en conexión SSE:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// GET /thumbnails/metrics - Métricas del sistema optimizado
+router.get('/metrics', async (req, res) => {
+	try {
+		const metrics = getThumbnailMetrics();
+		res.json(metrics);
+	} catch (error) {
+		console.error('Error obteniendo métricas:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
