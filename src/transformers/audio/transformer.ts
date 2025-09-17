@@ -7,7 +7,7 @@
 import { TransformerError } from '../../lib/errors/transformer-error';
 import { serverLogger } from '../../lib/logger/server-logger';
 import { createDefaultEntityStats } from '../../lib/utils';
-import type { AudioBase, AudioWithStats } from '../../types/entities/audio';
+import type { AudioBase, AudioStatistics, AudioWithStats } from '../../types/entities/audio';
 
 const logger = serverLogger.withContext('AudioTransformer');
 
@@ -19,20 +19,20 @@ const logger = serverLogger.withContext('AudioTransformer');
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
 function fromDrizzleAudio(drizzleAudio: AudioBase): AudioWithStats {
-	const base = createBaseEntity(drizzleAudio);
-	const statistics = calculateAudioStatistics(drizzleAudio);
+	if (!drizzleAudio) {
+		throw new TransformerError('Audio inválido (null/undefined)');
+	}
 
-	return {
-		...base,
-		duration: drizzleAudio.duration,
-		format: drizzleAudio.format,
-		bitrate: drizzleAudio.bitrate,
-		volumePeaks: drizzleAudio.volumePeaks,
-		sampleRate: drizzleAudio.sampleRate,
-		channels: drizzleAudio.channels,
-		qualityScore: drizzleAudio.qualityScore,
-		...statistics,
+	const stats = calculateAudioStatistics(drizzleAudio);
+
+	const audio: AudioWithStats = {
+		...drizzleAudio,
+		entityType: 'audio',
+		stats,
+		statistics: stats, // alias temporal
 	};
+
+	return audio;
 }
 
 /**
@@ -48,31 +48,26 @@ export function fromDrizzleAudios(drizzleAudios: AudioBase[]): AudioWithStats[] 
 /**
  * 📊 Calcula estadísticas reales de audio basándose en metadata
  */
-function calculateAudioStatistics(drizzleAudio: AudioBase) {
-	const duration = drizzleAudio.duration || 0;
-	const bitrate = drizzleAudio.bitrate || 0;
-	const sampleRate = drizzleAudio.sampleRate || 44_100;
-	const channels = extractChannelsFromMetadata(drizzleAudio) || 2;
+function calculateAudioStatistics(drizzleAudio: AudioBase): AudioStatistics {
+	const duration = drizzleAudio.duration ?? 0;
+	const bitrate = drizzleAudio.bitrate ?? 0;
+	const sampleRate = drizzleAudio.sampleRate ?? 44_100;
+	const channels = drizzleAudio.channels ?? extractChannelsFromMetadata(drizzleAudio) ?? 2;
 
-	// Calcular calidad basada en bitrate y sample rate
-	const qualityScore = calculateAudioQuality(bitrate, sampleRate);
-
-	// Generar picos de volumen simulados (en producción vendría del análisis real)
 	const volumePeaks = generateVolumepeaks(duration);
 
 	return {
+		// EntityStats mínimos
 		...createDefaultEntityStats(),
 		duration,
-		format: drizzleAudio.format || 'unknown',
+		format: drizzleAudio.format ?? 'unknown',
 		bitrate,
 		volumePeaks,
 		sampleRate,
 		channels,
-		qualityScore,
-		// Conteos que pueden calcularse desde metadata
-		totalPlays: 0,
-		averageListenTime: duration * 0.7, // Estimación: 70% del audio se escucha
-		fileSize: drizzleAudio.size || 0,
+		// File system flags (no disponibles aquí -> asumir archivo)
+		isDirectory: false,
+		isFile: true,
 	};
 }
 
@@ -80,35 +75,16 @@ function calculateAudioStatistics(drizzleAudio: AudioBase) {
  * 🎚️ Extrae número de canales de metadata
  */
 function extractChannelsFromMetadata(audio: AudioBase): number {
-	// Intentar extraer de metadata si está disponible
-	const metadata = audio.metadata as any;
-	if (metadata?.streams?.[0]?.channels) {
-		return metadata.streams[0].channels;
-	}
-	// Default a stereo
-	return 2;
+	// No hay metadata tipada en AudioBase actual; fallback seguro
+	return audio.channels ?? 2;
 }
 
 /**
  * 📈 Calcula puntuación de calidad de audio
  */
-function calculateAudioQuality(bitrate: number, sampleRate: number): number {
-	let score = 0;
-
-	// Puntuación por bitrate (0-50 puntos)
-	if (bitrate >= 320) score += 50;
-	else if (bitrate >= 256) score += 40;
-	else if (bitrate >= 192) score += 30;
-	else if (bitrate >= 128) score += 20;
-	else score += 10;
-
-	// Puntuación por sample rate (0-50 puntos)
-	if (sampleRate >= 96_000) score += 50;
-	else if (sampleRate >= 48_000) score += 40;
-	else if (sampleRate >= 44_100) score += 30;
-	else score += 20;
-
-	return Math.min(score, 100);
+// (Calidad se eliminó del modelo final: si se reintroduce, mover a AudioStatistics extendido)
+function calculateAudioQuality(): number {
+	return 0;
 }
 
 /**

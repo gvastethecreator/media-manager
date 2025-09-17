@@ -1,10 +1,10 @@
-// @ts-nocheck - Temporary suppression for Express handler parameter types
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
-import { getWildcard, getWildcards } from '@/services/wildcard/wildcard.service';
-import { toWildcardWithStats } from '@/transformers/wildcard';
+import { serverLogger } from '@/lib/logger/server-logger';
+import wildcardService from '@/services/wildcard/wildcard.service';
 
-const router = Router() as any;
+const router = Router();
+const logger = serverLogger.withContext('WildcardsRouter');
 
 const WildcardCreateSchema = z.object({
 	name: z.string().min(1),
@@ -21,228 +21,240 @@ const WildcardCreateSchema = z.object({
 
 const WildcardUpdateSchema = WildcardCreateSchema.partial();
 
-// GET /wildcards/cards - Obtener wildcards para mostrar en galería de cards (migrado desde server actions)
-router.get('/cards', async (req, res) => {
+const ENTITY_ERROR_STATUS: Record<string, number> = {
+	ENTITY_NOT_FOUND: 404,
+	NOT_FOUND: 404,
+	VALIDATION_ERROR: 400,
+};
+
+function toNumber(value: unknown, fallback: number): number {
+	if (value === undefined || value === null) {
+		return fallback;
+	}
+
+	const raw = Array.isArray(value) ? value[0] : value;
+	const parsed = Number.parseInt(String(raw), 10);
+	if (Number.isNaN(parsed) || parsed < 0) {
+		return fallback;
+	}
+
+	return parsed;
+}
+
+function toBoolean(value: unknown): boolean | undefined {
+	if (value === undefined || value === null) {
+		return undefined;
+	}
+
+	const raw = Array.isArray(value) ? value[0] : value;
+	if (typeof raw === 'string') {
+		return raw.toLowerCase() === 'true';
+	}
+
+	return undefined;
+}
+
+function normalizeParentId(value: unknown): string | null | undefined {
+	if (value === undefined || value === null) {
+		return undefined;
+	}
+
+	const raw = Array.isArray(value) ? value[0] : value;
+	if (raw === 'null') {
+		return null;
+	}
+
+	return typeof raw === 'string' ? raw : String(raw);
+}
+
+function mapErrorToStatus(error: unknown): number {
+	if (error instanceof z.ZodError) {
+		return 400;
+	}
+
+	if (error && typeof error === 'object' && 'code' in error) {
+		const code = (error as { code?: string }).code;
+		if (code && ENTITY_ERROR_STATUS[code]) {
+			return ENTITY_ERROR_STATUS[code];
+		}
+	}
+
+	return 500;
+}
+
+function extractErrorMessage(error: unknown, fallback: string): string {
+	if (error instanceof z.ZodError) {
+		return 'Datos de entrada inválidos';
+	}
+
+	if (error instanceof Error && error.message) {
+		return error.message;
+	}
+
+	if (error && typeof error === 'object' && 'message' in error) {
+		const message = (error as { message?: unknown }).message;
+		if (typeof message === 'string' && message.trim().length > 0) {
+			return message;
+		}
+	}
+
+	if (typeof error === 'string' && error.trim().length > 0) {
+		return error;
+	}
+
+	return fallback;
+}
+
+function respondWithError(res: Response, error: unknown, fallback: string): void {
+	if (res.headersSent) {
+		return;
+	}
+
+	const status = mapErrorToStatus(error);
+	const message = extractErrorMessage(error, fallback);
+	logger.error(message, { error, status });
+
+	if (error instanceof z.ZodError) {
+		res.status(status).json({ error: true, message, details: error.flatten() });
+		return;
+	}
+
+	res.status(status).json({ error: true, message });
+}
+
+// GET /wildcards/cards - Obtener wildcards para cards
+router.get('/cards', async (req: Request, res: Response) => {
 	try {
-		const { limit = '20', category, parentId, searchTerm, orderBy = 'updatedAt', orderDir = 'desc' } = req.query;
+		const limit = toNumber(req.query.limit, 20);
+		const orderBy = (req.query.orderBy as 'name' | 'createdAt' | 'updatedAt') ?? 'updatedAt';
+		const orderDirection = (req.query.orderDir as 'asc' | 'desc') ?? 'desc';
+		const searchTerm = typeof req.query.searchTerm === 'string' ? req.query.searchTerm : undefined;
+		const parentId = normalizeParentId(req.query.parentId);
+		const category = typeof req.query.category === 'string' ? req.query.category : undefined;
 
-		const options = {
-			search: searchTerm as string,
-			orderBy: orderBy as 'name' | 'createdAt' | 'updatedAt',
-			orderDirection: orderDir as 'asc' | 'desc',
-			parentId: parentId === 'null' ? null : (parentId as string),
-		};
+		const { wildcards } = await wildcardService.getWildcards({
+			search: searchTerm,
+			orderBy,
+			orderDirection,
+			parentId,
+		});
 
-		const { wildcards } = await getWildcards(options);
+		const filtered = category
+			? wildcards.filter((item) => item.category === category)
+			: wildcards;
 
-		// Limitar resultados según el parámetro limit
-		const limitNum = Number.parseInt(limit as string, 10);
-		const limitedWildcards = wildcards.slice(0, limitNum);
-
-		res.json(limitedWildcards);
+		res.json(filtered.slice(0, limit));
 	} catch (error) {
-		console.error('Error getting wildcards for cards:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
+		respondWithError(res, error, 'Error al obtener wildcards para cards');
 	}
 });
 
 // GET /wildcards - Listar wildcards con filtros
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
 	try {
-		const { search, limit = '50', offset = '0', sortBy = 'name', sortOrder = 'asc' } = req.query;
+		const limit = toNumber(req.query.limit, 50);
+		const offset = toNumber(req.query.offset, 0);
+		const search = typeof req.query.search === 'string' ? req.query.search : undefined;
+		const sortBy = (req.query.sortBy as 'name' | 'createdAt' | 'updatedAt') ?? 'name';
+		const sortOrder = (req.query.sortOrder as 'asc' | 'desc') ?? 'asc';
+		const parentId = normalizeParentId(req.query.parentId);
+		const onlyFavorites = toBoolean(req.query.onlyFavorites);
 
-		const options = {
-			search: search as string,
-			orderBy: sortBy as 'name' | 'createdAt' | 'updatedAt',
-			orderDirection: sortOrder as 'asc' | 'desc',
-		};
+		const { wildcards, total } = await wildcardService.getWildcards({
+			search,
+			orderBy: sortBy,
+			orderDirection: sortOrder,
+			onlyFavorites: onlyFavorites ?? false,
+			parentId,
+		});
 
-		const { wildcards, total } = await getWildcards(options);
-
-		// Aplicar paginación manual
-		const limitNum = Number.parseInt(limit as string, 10);
-		const offsetNum = Number.parseInt(offset as string, 10);
-		const paginatedWildcards = wildcards.slice(offsetNum, offsetNum + limitNum);
-
+		const data = wildcards.slice(offset, offset + limit);
 		res.json({
-			data: paginatedWildcards,
+			data,
 			pagination: {
 				total,
-				limit: limitNum,
-				offset: offsetNum,
-				hasNext: offsetNum + limitNum < total,
-				hasPrev: offsetNum > 0,
+				limit,
+				offset,
+				hasNext: offset + limit < total,
+				hasPrev: offset > 0,
 			},
 		});
 	} catch (error) {
-		console.error('Error getting wildcards:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
+		respondWithError(res, error, 'Error al obtener wildcards');
 	}
 });
 
-// GET /wildcards/:id/card-data - Obtener datos específicos para card (migrado desde server actions)
-router.get('/:id/card-data', async (req, res) => {
+// GET /wildcards/:id/card-data - Datos enriquecidos para cards
+router.get('/:id/card-data', async (req: Request, res: Response) => {
 	try {
-		const { id } = req.params;
-		const wildcard = await getWildcard(id);
-
+		const wildcard = await wildcardService.getWildcard(req.params.id);
 		if (!wildcard) {
-			res.status(404).json({ error: 'Wildcard no encontrado' });
+			res.status(404).json({ error: true, message: 'Wildcard no encontrado' });
 			return;
 		}
 
-		// TODO: Implementar obtención de imágenes recientes cuando esté disponible
-		const recentImages: string[] = [];
-
-		// Transformar a formato de card data
-		const cardData = {
+		res.json({
 			...wildcard,
-			recentImages,
-		};
-
-		res.json(cardData);
+			recentImages: [] as string[],
+		});
 	} catch (error) {
-		console.error('Error getting wildcard card data:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
+		respondWithError(res, error, 'Error al obtener datos del wildcard');
 	}
 });
 
 // GET /wildcards/:id - Obtener wildcard por ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
 	try {
-		const { id } = req.params;
-		const wildcard = await getWildcard(id);
-
+		const wildcard = await wildcardService.getWildcard(req.params.id);
 		if (!wildcard) {
-			res.status(404).json({ error: 'Wildcard no encontrado' });
+			res.status(404).json({ error: true, message: 'Wildcard no encontrado' });
 			return;
 		}
 
 		res.json(wildcard);
 	} catch (error) {
-		console.error('Error getting wildcard:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
+		respondWithError(res, error, 'Error al obtener wildcard');
 	}
 });
 
-// GET /wildcards/:id/recent-images - Obtener imágenes recientes de un wildcard
-router.get('/:id/recent-images', async (req, res) => {
+// GET /wildcards/:id/recent-images - placeholder temporal
+router.get('/:id/recent-images', async (_req: Request, res: Response) => {
 	try {
-		const { id } = req.params;
-		const limit = Number(req.query.limit) || 4;
-		// const images = await getWildcard(id).then((wildcard) => wildcard?.images.slice(0, limit) || []); // images no existe en WildcardWithStats
-		const images: any[] = []; // TODO: Implementar relación images para wildcards
-		res.json(images);
+		res.json([]);
 	} catch (error) {
-		console.error('Error getting recent wildcard images:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
+		respondWithError(res, error, 'Error al obtener imágenes recientes del wildcard');
 	}
 });
 
 // POST /wildcards - Crear nuevo wildcard
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
 	try {
-		const { name, content, description, category, tags } = req.body;
-
-		if (!(name && content)) {
-			return res.status(400).json({ error: 'El nombre y contenido son requeridos' });
-		}
-
-		// Usar el parámetro del request (agregar :id a la ruta)
-		const wildcardId = req.params.id;
-		const wildcard = await getWildcard(wildcardId).then((wildcard) => {
-			if (wildcard) {
-				return wildcard;
-			}
-			return getWildcards({ search: name }).then((result) => result.wildcards[0]);
-		});
-
-		if (!wildcard) {
-			return res.status(500).json({ error: 'Error al obtener el wildcard' });
-		}
-
-		const updatedWildcard = await getWildcard(wildcard.id).then((wildcard) => {
-			if (wildcard) {
-				return {
-					...wildcard,
-					name,
-					content,
-					description,
-					category,
-					tags,
-				};
-			}
-			return null;
-		});
-
-		if (!updatedWildcard) {
-			res.status(500).json({ error: 'Error al actualizar el wildcard' });
-			return;
-		}
-
-		res.status(200).json(toWildcardWithStats(updatedWildcard));
+		const payload = WildcardCreateSchema.parse(req.body);
+		const created = await wildcardService.createWildcard(payload);
+		res.status(201).json(created);
 	} catch (error) {
-		console.error('Error creating wildcard:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
+		respondWithError(res, error, 'Error al crear wildcard');
 	}
 });
 
 // PUT /wildcards/:id - Actualizar wildcard
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request, res: Response) => {
 	try {
-		const { id } = req.params;
-		const { name, content, description, category, tags } = req.body;
-
-		const wildcard = await getWildcard(id);
-
-		if (!wildcard) {
-			res.status(404).json({ error: 'Wildcard no encontrado' });
-			return;
-		}
-
-		const updatedWildcard = {
-			...wildcard,
-			name,
-			content,
-			description,
-			category,
-			tags,
-		};
-
-		const result = await getWildcards({ search: name }).then((result) => {
-			if (result.wildcards.length > 0) {
-				return null;
-			}
-			return updatedWildcard;
-		});
-
-		if (!result) {
-			return res.status(500).json({ error: 'Wildcard ya existe' });
-		}
-
-		res.status(200).json(toWildcardWithStats(result));
+		const payload = WildcardUpdateSchema.parse(req.body);
+		const updated = await wildcardService.updateWildcard(req.params.id, payload);
+		res.json(updated);
 	} catch (error) {
-		console.error('Error updating wildcard:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
+		respondWithError(res, error, 'Error al actualizar wildcard');
 	}
 });
 
 // DELETE /wildcards/:id - Eliminar wildcard
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response) => {
 	try {
-		const { id } = req.params;
-
-		const deleted = await getWildcard(id);
-
-		if (!deleted) {
-			res.status(404).json({ error: 'Wildcard no encontrado' });
-			return;
-		}
-
+		await wildcardService.deleteWildcard(req.params.id);
 		res.status(204).send();
 	} catch (error) {
-		console.error('Error deleting wildcard:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
+		respondWithError(res, error, 'Error al eliminar wildcard');
 	}
 });
 
