@@ -1,4 +1,7 @@
-// @ts-nocheck - Temporary suppression for implicit any parameter types and type mismatches
+/**
+ * Servicio de estadísticas del sistema.
+ * Se ha retirado @ts-nocheck y se añaden tipos explícitos donde es factible.
+ */
 
 import { randomUUID } from 'crypto';
 import { eq, sql } from 'drizzle-orm';
@@ -45,10 +48,15 @@ const StatsErrorCode = {
 } as const;
 type StatsErrorCode = (typeof StatsErrorCode)[keyof typeof StatsErrorCode];
 
-const createStatsError = (message: string, code: StatsErrorCode = StatsErrorCode.OPERATION_FAILED, cause?: unknown) => {
-	const error = new Error(message);
+const createStatsError = (
+	message: string,
+	code: StatsErrorCode = StatsErrorCode.OPERATION_FAILED,
+	cause?: unknown
+): Error & { code: StatsErrorCode; cause?: unknown } => {
+	const error = new Error(message) as Error & { code: StatsErrorCode; cause?: unknown };
 	error.name = 'StatsError';
-	Object.assign(error, { code, cause });
+	error.code = code;
+	if (cause !== undefined) error.cause = cause;
 	return error;
 };
 
@@ -416,7 +424,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta folders completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta folders:', error);
 					throw error;
 				}),
@@ -427,7 +435,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta images completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta images:', error);
 					throw error;
 				}),
@@ -438,7 +446,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta videos completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta videos:', error);
 					throw error;
 				}),
@@ -450,7 +458,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta audios completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta audios:', error);
 					throw error;
 				}),
@@ -462,7 +470,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta documents completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta documents:', error);
 					throw error;
 				}),
@@ -474,7 +482,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta jsonFiles completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta jsonFiles (usando 0 por defecto):', error);
 					return [{ count: 0 }];
 				}),
@@ -485,7 +493,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta file3Ds completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.error('❌ Error en consulta file3Ds (usando 0 por defecto):', error);
 					return [{ count: 0 }];
 				}),
@@ -496,7 +504,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta totalSize completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.warn('⚠️ Error en consulta totalSize (usando 0 por defecto):', error);
 					return [{ totalSize: 0 }];
 				}),
@@ -511,7 +519,7 @@ export async function getFolderStats(): Promise<import('@/types/folders').Folder
 					statsLogger.info('✅ Consulta thumbnails stats completada:', rows);
 					return rows;
 				})
-				.catch((error) => {
+				.catch((error: unknown) => {
 					statsLogger.warn('⚠️ Error en consulta thumbnails stats (usando 0 por defecto):', error);
 					return [{ totalThumbnails: 0, thumbnailsCacheSize: 0 }];
 				}),
@@ -641,7 +649,8 @@ export function invalidateStats(): void {
 	statsLogger.info('✅ Caché de estadísticas invalidada');
 }
 
-export async function getImageStats(imageId: string) {
+// TODO: Extraer tipo FileStats desde schema cuando se genere type helper
+export async function getImageStats(imageId: string): Promise<any> {
 	try {
 		statsLogger.info('🔍 Obteniendo estadísticas de imagen:', imageId);
 
@@ -685,7 +694,7 @@ export async function getImageStats(imageId: string) {
 	}
 }
 
-export async function incrementImageView(imageId: string) {
+export async function incrementImageView(imageId: string): Promise<any> {
 	try {
 		statsLogger.info('👁️ Incrementando visualización de imagen:', imageId);
 
@@ -737,7 +746,7 @@ export async function incrementImageView(imageId: string) {
 	}
 }
 
-export async function incrementImageDownload(imageId: string) {
+export async function incrementImageDownload(imageId: string): Promise<any> {
 	try {
 		statsLogger.info('⬇️ Incrementando descarga de imagen:', imageId);
 		const now = new Date();

@@ -781,25 +781,24 @@ export class TagService {
 			const imageStats = await db
 				.select({
 					totalImages: count(images.id),
-					avgSize: eq(count(images.size), 0) ? 0 : count(images.size), // Placeholder para average
+					// Promedio real usando SUM(size)/COUNT(*). Drizzle no expone sum tipado directo en este snippet -> calculamos manual luego.
+					totalSize: count(images.id), // placeholder; se recalcula abajo sumando iteración sizeDistribution
 				})
 				.from(images)
-				.innerJoin(imageTags, eq(images.id, imageTags.imageId))
-				.where(eq(imageTags.tagId, id));
+				.innerJoin(imageTags, eq(images.id, imageTags.A))
+				.where(eq(imageTags.B, id));
 
 			// Contar imágenes por tamaño
 			const sizeDistribution = await db
-				.select({
-					size: images.size,
-				})
+				.select({ size: images.size })
 				.from(images)
-				.innerJoin(imageTags, eq(images.id, imageTags.imageId))
-				.where(eq(imageTags.tagId, id));
+				.innerJoin(imageTags, eq(images.id, imageTags.A))
+				.where(eq(imageTags.B, id));
 
 			// Calcular distribución de tamaños
-			let small = 0,
-				medium = 0,
-				large = 0;
+			let small = 0;
+			let medium = 0;
+			let large = 0;
 			let totalSize = 0;
 
 			for (const img of sizeDistribution) {
@@ -820,27 +819,36 @@ export class TagService {
 			const totalImages = imageStats[0]?.totalImages || 0;
 			const averageFileSize = totalImages > 0 ? totalSize / totalImages : 0;
 
-			// Obtener formatos más populares
-			const formatStats = await db
+			// Obtener "formatos" más populares derivando de la extensión del nombre (name o path) dado que el schema Image no tiene columna format/mimeType.
+			// Estrategia: consultar nombres y luego contar en memoria (volumen reducido por filtro de tag). Si escala, considerar vista materializada.
+			const rawFormatRows = await db
 				.select({
-					format: images.format,
-					count: count(images.id),
+					name: images.name,
+					path: images.path,
+					id: images.id,
 				})
 				.from(images)
-				.innerJoin(imageTags, eq(images.id, imageTags.imageId))
-				.where(eq(imageTags.tagId, id))
-				.groupBy(images.format)
-				.orderBy(desc(count(images.id)))
-				.limit(5);
+				.innerJoin(imageTags, eq(images.id, imageTags.A))
+				.where(eq(imageTags.B, id));
+
+			const formatCounter: Record<string, number> = {};
+			for (const row of rawFormatRows) {
+				const base = row.name || row.path || '';
+				const extMatch = base.match(/\.([a-zA-Z0-9]+)$/);
+				const ext = extMatch ? extMatch[1].toLowerCase() : 'unknown';
+				formatCounter[ext] = (formatCounter[ext] || 0) + 1;
+			}
+			const formatStats = Object.entries(formatCounter)
+				.sort((a, b) => b[1] - a[1])
+				.slice(0, 5)
+				.map(([format, count]) => ({ format, count }));
 
 			// Fecha de la última imagen agregada
 			const lastImageResult = await db
-				.select({
-					createdAt: images.createdAt,
-				})
+				.select({ createdAt: images.createdAt })
 				.from(images)
-				.innerJoin(imageTags, eq(images.id, imageTags.imageId))
-				.where(eq(imageTags.tagId, id))
+				.innerJoin(imageTags, eq(images.id, imageTags.A))
+				.where(eq(imageTags.B, id))
 				.orderBy(desc(images.createdAt))
 				.limit(1);
 
@@ -850,7 +858,7 @@ export class TagService {
 				totalImages,
 				recentImagesCount: totalImages, // Puede refinarse con filtro de fecha
 				averageFileSize,
-				topFormats: formatStats.map((f) => ({
+				topFormats: formatStats.map((f: { format: string | null; count: number }) => ({
 					format: f.format || 'unknown',
 					count: f.count,
 				})),

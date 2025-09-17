@@ -1,7 +1,5 @@
-// @ts-nocheck - Temporary suppression for Express handler parameter types
-
 import { asc } from 'drizzle-orm';
-import express from 'express';
+import express, { type Request, type Response } from 'express';
 import os from 'os';
 import { db } from '@/lib/drizzle';
 import { folders } from '@/lib/drizzle/schema/index';
@@ -15,7 +13,7 @@ import { FileEntityMapperService } from '@/services/file-entity-mapper/file-enti
 
 const fileEntityMapperService = FileEntityMapperService.getInstance();
 
-router.get('/app-stats', async (_req, res) => {
+router.get('/app-stats', async (_req: Request, res: Response) => {
 	try {
 		// MODO DEBUG TEMPORAL: Análisis de subcarpetas en lugar de app stats
 		console.log('🔍 [DEBUG] MODO DEBUG TEMPORAL: Analizando problema de subcarpetas');
@@ -92,7 +90,7 @@ router.get('/app-stats', async (_req, res) => {
 	}
 });
 
-router.get('/system-stats', async (_req, res) => {
+router.get('/system-stats', async (_req: Request, res: Response) => {
 	try {
 		const { getSystemStats } = await getSystemMonitorHelpers();
 		const stats = await getSystemStats();
@@ -166,7 +164,7 @@ function formatNetworkInterfaces() {
 }
 
 // DEBUG Endpoint para investigar subcarpetas
-router.get('/folder-children-test', async (_req, res) => {
+router.get('/folder-children-test', async (_req: Request, res: Response) => {
 	try {
 		const { db } = await import('@/lib/drizzle');
 		const { sql } = await import('drizzle-orm');
@@ -199,7 +197,7 @@ router.get('/folder-children-test', async (_req, res) => {
 	}
 });
 
-router.get('/subcarpetas', async (_req, res) => {
+router.get('/subcarpetas', async (_req: Request, res: Response) => {
 	try {
 		console.log('🔍 [DEBUG] Iniciando depuración de subcarpetas BD vs FS');
 
@@ -286,7 +284,7 @@ router.get('/subcarpetas', async (_req, res) => {
 });
 
 // DEBUG ESPECIAL: Investigación completa de subcarpetas BD vs FS
-router.get('/subcarpetas-full-analysis', async (_req, res) => {
+router.get('/subcarpetas-full-analysis', async (_req: Request, res: Response) => {
 	try {
 		console.log('🔍 [DEBUG] Iniciando análisis completo de subcarpetas BD vs FS');
 
@@ -307,7 +305,7 @@ router.get('/subcarpetas-full-analysis', async (_req, res) => {
 });
 
 // NEW TEST ENDPOINT
-router.get('/test-hot-reload', async (_req, res) => {
+router.get('/test-hot-reload', async (_req: Request, res: Response) => {
 	try {
 		console.log('🔥 [DEBUG] HOT RELOAD TEST ENDPOINT WORKING!');
 
@@ -327,7 +325,7 @@ router.get('/test-hot-reload', async (_req, res) => {
 });
 
 // CLEANUP ENDPOINT - Eliminar imágenes fantasma cursed-img-*
-router.get('/cleanup-phantom-images', async (_req, res) => {
+router.get('/cleanup-phantom-images', async (_req: Request, res: Response): Promise<void> => {
 	try {
 		console.log('🔥 [CLEANUP] Iniciando limpieza de imágenes fantasma...');
 
@@ -347,12 +345,13 @@ router.get('/cleanup-phantom-images', async (_req, res) => {
 		console.log(`📊 Imágenes cursed-img-* encontradas: ${cursedCount}`);
 
 		if (cursedCount === 0) {
-			return res.json({
+			res.json({
 				success: true,
 				message: 'No se encontraron imágenes fantasma cursed-img-*',
 				deleted: 0,
 				timestamp: new Date().toISOString(),
 			});
+			return;
 		}
 
 		// 2. Eliminar imágenes cursed-img-*
@@ -390,14 +389,13 @@ router.get('/cleanup-phantom-images', async (_req, res) => {
  * Endpoint de diagnóstico para validar mapeo de tipos de entidad
  * POST /api/debug/test-entity-types
  */
-router.post('/test-entity-types', async (req, res) => {
+router.post('/test-entity-types', async (req: Request, res: Response): Promise<void> => {
 	try {
 		const { extensions } = req.body;
 
 		if (!(extensions && Array.isArray(extensions))) {
-			return res.status(400).json({
-				error: 'Se requiere un array de extensiones en el body',
-			});
+			res.status(400).json({ error: 'Se requiere un array de extensiones en el body' });
+			return;
 		}
 
 		const results = extensions.map((ext: string) => {
@@ -420,10 +418,9 @@ router.post('/test-entity-types', async (req, res) => {
 		});
 	} catch (error) {
 		console.error('Error en test de mapeo de tipos:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			details: error instanceof Error ? error.message : String(error),
-		});
+		res
+			.status(500)
+			.json({ error: 'Error interno del servidor', details: error instanceof Error ? error.message : String(error) });
 	}
 });
 

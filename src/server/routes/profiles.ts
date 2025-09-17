@@ -1,11 +1,9 @@
-// @ts-nocheck - Temporary suppression for Express handler parameter types
-import { Router } from 'express';
+import { Router, type Request, type Response } from 'express';
 import { z } from 'zod';
 import { profileService } from '../../services/profile/profile.service';
 
-const router = Router() as any;
+const router = Router();
 
-// Schema para validación
 const createProfileSchema = z.object({
 	name: z.string().min(1, 'El nombre es requerido'),
 	emoji: z.string().nullable().optional(),
@@ -18,16 +16,48 @@ const createProfileSchema = z.object({
 
 const updateProfileSchema = createProfileSchema.partial();
 
-// GET /api/profiles/active - Obtener perfil activo
-router.get('/active', async (_req, res) => {
+function toString(value: unknown): string | undefined {
+	if (value === undefined || value === null) {
+		return undefined;
+	}
+
+	if (Array.isArray(value)) {
+		return value[0] ? String(value[0]) : undefined;
+	}
+
+	return typeof value === 'string' ? value : String(value);
+}
+
+function toNumber(value: unknown, fallback: number): number {
+	const raw = toString(value);
+	if (!raw) {
+		return fallback;
+	}
+
+	const parsed = Number.parseInt(raw, 10);
+	return Number.isNaN(parsed) ? fallback : parsed;
+}
+
+function respondWithServerError(res: Response, error: unknown, context: string) {
+	const message = error instanceof Error ? error.message : 'Error desconocido';
+	console.error(context, error);
+	res.status(500).json({
+		error: 'Error interno del servidor',
+		message,
+		timestamp: new Date().toISOString(),
+	});
+}
+
+router.get('/active', async (_req: Request, res: Response) => {
 	try {
 		const profile = await profileService.getActiveProfile();
 
 		if (!profile) {
-			return res.status(404).json({
+			res.status(404).json({
 				error: 'No se encontró un perfil activo',
 				timestamp: new Date().toISOString(),
 			});
+			return;
 		}
 
 		res.json({
@@ -35,21 +65,15 @@ router.get('/active', async (_req, res) => {
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		console.error('Error obteniendo perfil activo:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date().toISOString(),
-		});
+		respondWithServerError(res, error, 'Error obteniendo perfil activo');
 	}
 });
 
-// GET /api/profiles - Obtener todos los perfiles
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
 	try {
-		const page = Number(req.query.page) || 1;
-		const limit = Number(req.query.limit) || 10;
-		const search = req.query.search as string;
+		const page = toNumber(req.query.page, 1);
+		const limit = toNumber(req.query.limit, 10);
+		const search = toString(req.query.search);
 
 		const result = await profileService.getProfiles({ search }, { page, limit });
 
@@ -64,20 +88,13 @@ router.get('/', async (req, res) => {
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		console.error('Error obteniendo perfiles:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date().toISOString(),
-		});
+		respondWithServerError(res, error, 'Error obteniendo perfiles');
 	}
 });
 
-// POST /api/profiles - Crear nuevo perfil
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
 	try {
 		const rawData = createProfileSchema.parse(req.body);
-		// Normalizar undefined a null para campos nullable
 		const validatedData = {
 			...rawData,
 			emoji: rawData.emoji ?? undefined,
@@ -96,44 +113,38 @@ router.post('/', async (req, res) => {
 		});
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			return res.status(400).json({
+			res.status(400).json({
 				error: 'Datos de entrada inválidos',
 				details: error.issues,
 				timestamp: new Date().toISOString(),
 			});
+			return;
 		}
 
-		console.error('Error creando perfil:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date().toISOString(),
-		});
+		respondWithServerError(res, error, 'Error creando perfil');
 	}
 });
 
-// PUT /api/profiles/:id - Actualizar perfil
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request, res: Response) => {
 	try {
-		const { id } = req.params;
-		const rawData = updateProfileSchema.parse(req.body);
-		// Normalizar undefined a null para campos nullable
+		const payload = updateProfileSchema.parse(req.body);
 		const validatedData = {
-			...rawData,
-			emoji: rawData.emoji ?? undefined,
-			color: rawData.color ?? undefined,
-			description: rawData.description ?? undefined,
-			settingsId: rawData.settingsId ?? undefined,
-			imageId: rawData.imageId ?? undefined,
+			...payload,
+			emoji: payload.emoji ?? undefined,
+			color: payload.color ?? undefined,
+			description: payload.description ?? undefined,
+			settingsId: payload.settingsId ?? undefined,
+			imageId: payload.imageId ?? undefined,
 		};
 
-		const profile = await profileService.updateProfile(id, validatedData);
+		const profile = await profileService.updateProfile(req.params.id, validatedData);
 
 		if (!profile) {
-			return res.status(404).json({
+			res.status(404).json({
 				error: 'Perfil no encontrado',
 				timestamp: new Date().toISOString(),
 			});
+			return;
 		}
 
 		res.json({
@@ -143,61 +154,41 @@ router.put('/:id', async (req, res) => {
 		});
 	} catch (error) {
 		if (error instanceof z.ZodError) {
-			return res.status(400).json({
+			res.status(400).json({
 				error: 'Datos de entrada inválidos',
 				details: error.issues,
 				timestamp: new Date().toISOString(),
 			});
+			return;
 		}
 
-		console.error('Error actualizando perfil:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date().toISOString(),
-		});
+		respondWithServerError(res, error, 'Error actualizando perfil');
 	}
 });
 
-// POST /api/profiles/:id/activate - Activar perfil
-router.post('/:id/activate', async (req, res) => {
+router.post('/:id/activate', async (req: Request, res: Response) => {
 	try {
-		const { id } = req.params;
-
-		await profileService.setActiveProfile(id);
+		await profileService.setActiveProfile(req.params.id);
 
 		res.json({
 			message: 'Perfil activado exitosamente',
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		console.error('Error activando perfil:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date().toISOString(),
-		});
+		respondWithServerError(res, error, 'Error activando perfil');
 	}
 });
 
-// DELETE /api/profiles/:id - Eliminar perfil
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response) => {
 	try {
-		const { id } = req.params;
-
-		await profileService.delete(id);
+		await profileService.delete(req.params.id);
 
 		res.json({
 			message: 'Perfil eliminado exitosamente',
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		console.error('Error eliminando perfil:', error);
-		res.status(500).json({
-			error: 'Error interno del servidor',
-			message: error instanceof Error ? error.message : 'Error desconocido',
-			timestamp: new Date().toISOString(),
-		});
+		respondWithServerError(res, error, 'Error eliminando perfil');
 	}
 });
 

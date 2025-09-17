@@ -6,15 +6,21 @@
  
  */
 
+import { EntityStats } from '@/types/entities/entity.types';
 import {
 	FAVORITE_ENTITY_COLORS as ENTITY_COLORS,
-	FAVORITE_ENTITY_DISPLAY_NAMES as ENTITY_DISPLAY_NAMES,
 	FAVORITE_ENTITY_EMOJIS as ENTITY_ICONS,
-	FavoriteComplete,
 	FavoriteEntityType,
 	FavoriteStats,
-	FavoritesByType,
-} from '../../types/entities/favorite/types';
+	FavoriteWithStats,
+} from '@/types/entities/favorite/base';
+
+// Tipos auxiliares locales (no existen en barrel canónico)
+interface FavoriteComplete extends FavoriteWithStats {}
+interface FavoritesByType {
+	entityType: FavoriteEntityType;
+	favorites: FavoriteComplete[];
+}
 
 // Tipos locales equivalentes a Drizzle
 type DrizzleFavorite = {
@@ -43,21 +49,53 @@ interface TransformFavoriteOptions {
  * ✅ MIGRADO A DRIZZLE
  */
 export function transformFavorite(favorite: DrizzleFavorite, options: TransformFavoriteOptions = {}): FavoriteComplete {
-	// Valores por defecto para opciones
-	const { includeEntityDetails = false } = options;
+	// (Futuro) usar includeEntityDetails para enriquecer con datos de la entidad
+	const baseStats: EntityStats = {
+		imageCount: 0,
+		videoCount: 0,
+		albumCount: 0,
+		collectionCount: 0,
+		tagCount: 0,
+		characterCount: 0,
+		placeCount: 0,
+		worldItemCount: 0,
+		conceptCount: 0,
+		promptCount: 0,
+		noteCount: 0,
+		wildcardCount: 0,
+		propertyCount: 0,
+		groupCount: 0,
+		totalItems: 1,
+		totalAssociations: 0,
+		lastUpdated: favorite.updatedAt,
+		size: 0,
+		mtime: favorite.updatedAt,
+		birthtime: favorite.createdAt,
+		type: 'favorite',
+	};
+
+	const stats: FavoriteStats = {
+		...baseStats,
+		entityTypeName: favorite.entityType,
+		formattedCreatedAt: favorite.createdAt.toISOString(),
+		daysSinceFavorited: 0,
+		isRecent: true,
+		isOld: false,
+	};
 
 	return {
 		id: favorite.id,
 		entityId: favorite.entityId,
 		entityType: favorite.entityType as FavoriteEntityType,
-		userId: null, // Valor por defecto
+		userId: null,
 		profileId: favorite.profileId,
-		addedAt: favorite.createdAt, // Usar createdAt como addedAt
-		notes: null, // Valor por defecto
-		category: null, // Valor por defecto
-		priority: null, // Valor por defecto
+		addedAt: favorite.createdAt,
+		notes: null,
+		category: null,
+		priority: null,
 		createdAt: favorite.createdAt,
 		updatedAt: favorite.updatedAt,
+		stats,
 	};
 }
 
@@ -108,52 +146,55 @@ export function transformFavoriteToExtended(
  * ✅ MIGRADO A DRIZZLE
  */
 export function groupFavoritesByType(favorites: FavoriteComplete[]): FavoritesByType[] {
-	// Crear mapa para agrupar por tipo
-	const groupsMap: Record<string, FavoriteComplete[]> = {};
-
-	// Agrupar los favoritos por tipo
-	for (const favorite of favorites) {
-		const type = favorite.entityType;
-
-		if (!groupsMap[type]) {
-			groupsMap[type] = [];
+	const map = new Map<FavoriteEntityType, FavoriteComplete[]>();
+	for (const fav of favorites) {
+		const arr = map.get(fav.entityType);
+		if (arr) {
+			arr.push(fav);
+		} else {
+			map.set(fav.entityType, [fav]);
 		}
-
-		groupsMap[type].push(favorite);
 	}
-
-	// Convertir el mapa a array de grupos
-	return Object.entries(groupsMap).map(([type, items]) => ({
-		type,
-		displayName: ENTITY_DISPLAY_NAMES[type] || type,
-		icon: ENTITY_ICONS[type] || '⭐',
-		color: ENTITY_COLORS[type] || '#3b82f6',
-		count: items.length,
-		items,
-	}));
+	return Array.from(map.entries()).map(([entityType, favorites]) => ({ entityType, favorites }));
 }
 
 /**
  * Calcula estadísticas para favoritos
  * ✅ MIGRADO A DRIZZLE
  */
-export function calculateFavoriteStats(favorites: FavoriteComplete[], recentLimit = 5): FavoriteStats {
-	// Contar por tipo
-	const byType: Record<string, number> = {};
-
-	for (const favorite of favorites) {
-		const type = favorite.entityType;
-		byType[type] = (byType[type] || 0) + 1;
+// Devuelve estadísticas agregadas simples tomando el primero como base (placeholder hasta cálculo real)
+export function calculateFavoriteStats(favorites: FavoriteComplete[]): FavoriteStats {
+	if (favorites.length === 0) {
+		const now = new Date();
+		return {
+			imageCount: 0,
+			videoCount: 0,
+			albumCount: 0,
+			collectionCount: 0,
+			tagCount: 0,
+			characterCount: 0,
+			placeCount: 0,
+			worldItemCount: 0,
+			conceptCount: 0,
+			promptCount: 0,
+			noteCount: 0,
+			wildcardCount: 0,
+			propertyCount: 0,
+			groupCount: 0,
+			totalItems: 0,
+			totalAssociations: 0,
+			lastUpdated: now,
+			size: 0,
+			mtime: now,
+			birthtime: now,
+			type: 'favorite',
+			entityTypeName: 'favorite',
+			formattedCreatedAt: now.toISOString(),
+			daysSinceFavorited: 0,
+			isRecent: false,
+			isOld: false,
+		};
 	}
-
-	// Ordenar por fecha para obtener los más recientes
-	const recentlyAdded = [...favorites]
-		.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime())
-		.slice(0, recentLimit);
-
-	return {
-		totalCount: favorites.length,
-		byType,
-		recentlyAdded,
-	};
+	// Usa stats del primero como base (homogeneizar luego si se requiere agregación real)
+	return favorites[0].stats;
 }

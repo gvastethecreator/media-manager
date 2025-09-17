@@ -1,46 +1,58 @@
 #!/usr/bin/env bun
 
 /**
- * Script para ejecutar frontend (Vite) y backend (Express) simultáneamente
- * Ejecuta ambos servidores en paralelo con logs diferenciados
+ * Script para ejecutar frontend (Vite) y backend (Express) simultÃƒÂ¡neamente.
+ * Ejecuta ambos servidores en paralelo con logs diferenciados.
  */
 
 import chalk from 'chalk';
 import { spawn } from 'child_process';
 
 const processes = [];
+let shuttingDown = false;
 
-// Función para manejar la salida con colores
 function logWithPrefix(prefix, color, data) {
 	const lines = data
-		.toString()
+		?.toString()
 		.split('\n')
 		.filter((line) => line.trim());
+
+	if (!lines) {
+		return;
+	}
+
 	for (const line of lines) {
 		console.log(chalk[color](`[${prefix}]`), line);
 	}
 }
 
-// Función para limpiar procesos al salir
-function cleanup() {
-	console.log(chalk.yellow('\n🛑 Cerrando servidores...'));
+function cleanup(reason = 'EXIT') {
+	if (shuttingDown) {
+		return;
+	}
+
+	shuttingDown = true;
+	console.log(chalk.yellow(`\nCerrando servidores (${reason})...`));
+
 	for (const proc of processes) {
 		if (proc && !proc.killed) {
 			proc.kill('SIGTERM');
 		}
 	}
-	process.exit(0);
+
+	if (reason !== 'EXIT') {
+		process.exit(0);
+	}
 }
 
-// Manejar señales de cierre
-process.on('SIGINT', cleanup);
-process.on('SIGTERM', cleanup);
-process.on('exit', cleanup);
+process.once('SIGINT', () => cleanup('SIGINT'));
+process.once('SIGTERM', () => cleanup('SIGTERM'));
+process.on('exit', () => cleanup('EXIT'));
 
-console.log(chalk.blue('🚀 Iniciando desarrollo completo...'));
+console.log(chalk.blue('Iniciando desarrollo completo...'));
 console.log(chalk.gray('   Frontend: http://localhost:5173'));
 console.log(chalk.gray('   Backend:  http://localhost:4000\n'));
-// Utilidad: esperar a que el backend esté listo antes de lanzar Vite
+
 async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 	for (let i = 0; i < retries; i++) {
 		try {
@@ -49,13 +61,12 @@ async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 		} catch {
 			// ignorar mientras arranca
 		}
-		await new Promise((r) => setTimeout(r, intervalMs));
+		await new Promise((resolve) => setTimeout(resolve, intervalMs));
 	}
 	return false;
 }
 
 (async () => {
-	// Ejecutar backend (Express con hot reload) una sola vez
 	const serverProcess = spawn('bun', ['run', 'dev:server:hot'], {
 		stdio: 'pipe',
 		shell: true,
@@ -78,10 +89,9 @@ async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 
 	const ok = await waitForHealth('http://localhost:4000/health');
 	if (!ok) {
-		console.warn(chalk.yellow('[DEV] Backend no respondió al health check a tiempo, lanzando Vite de todas formas...'));
+		console.warn(chalk.yellow('[DEV] Backend no respondiÃƒÂ³ al health check a tiempo, se lanza Vite igualmente.'));
 	}
 
-	// Ejecutar frontend (Vite) una vez que el backend esté arriba (o tras timeout)
 	const viteProcess = spawn('bun', ['run', 'dev:vite'], {
 		stdio: 'pipe',
 		shell: true,
@@ -102,5 +112,5 @@ async function waitForHealth(url, { retries = 40, intervalMs = 250 } = {}) {
 
 	processes.push(viteProcess);
 
-	console.log(chalk.yellow('⌨️  Presiona Ctrl+C para detener ambos servidores\n'));
+	console.log(chalk.yellow('Presiona Ctrl+C para detener ambos servidores\n'));
 })();

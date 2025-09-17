@@ -13,6 +13,8 @@
  * ✅ MIGRADO A DRIZZLE - Enero 2025
  */
 
+// --- Enums (exportar directamente desde enums para evitar advertencias TS2459) ---
+export { VideoSortCriteria, VideoViewMode } from './enums';
 // --- Tipos Canónicos ---
 export type {
 	VideoBase,
@@ -22,11 +24,7 @@ export type {
 	VideoMetadata,
 	VideoPaginationOptions,
 	VideoPlayState,
-	VideoSortCriteria,
 	VideoStats,
 	VideoUpdateInput,
 	VideoWithStats,
 } from './types';
-
-// --- Enums ---
-export { VideoViewMode } from './types';

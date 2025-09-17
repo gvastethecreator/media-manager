@@ -1,5 +1,8 @@
 // src/server/services/system.service.ts
-// @ts-nocheck - Temporary suppression for type mismatches
+/**
+ * Limpieza: retirada de @ts-nocheck. Tipos explícitos añadidos donde es viable
+ * sin expandir el alcance del refactor.
+ */
 
 import { count } from 'drizzle-orm';
 import fs from 'fs/promises';
@@ -34,20 +37,26 @@ import { fileBrowserConfigSchema } from '@/transformers/settings/schema';
 import type { Settings } from '@/types/settings';
 
 // Loggers simplificados para evitar problemas
-const navLogger = {
-	info: (msg: string) => console.log(`[NAV] ${msg}`),
-	error: (msg: string, error?: any) => console.error(`[NAV ERROR] ${msg}`, error),
-	warn: (msg: string, error?: any) => console.warn(`[NAV WARN] ${msg}`, error),
+interface BasicLogger {
+	info: (msg: string, meta?: unknown) => void;
+	error: (msg: string, error?: unknown) => void;
+	warn?: (msg: string, error?: unknown) => void;
+	debug?: (msg: string, meta?: unknown) => void;
+}
+const navLogger: BasicLogger = {
+	info: (msg) => console.log(`[NAV] ${msg}`),
+	error: (msg, error) => console.error(`[NAV ERROR] ${msg}`, error),
+	warn: (msg, error) => console.warn(`[NAV WARN] ${msg}`, error),
 };
-const systemLogger = {
-	info: (msg: string) => console.log(`[SYSTEM] ${msg}`),
-	error: (msg: string, error?: any) => console.error(`[SYSTEM ERROR] ${msg}`, error),
-	warn: (msg: string, error?: any) => console.warn(`[SYSTEM WARN] ${msg}`, error),
+const systemLogger: BasicLogger = {
+	info: (msg) => console.log(`[SYSTEM] ${msg}`),
+	error: (msg, error) => console.error(`[SYSTEM ERROR] ${msg}`, error),
+	warn: (msg, error) => console.warn(`[SYSTEM WARN] ${msg}`, error),
 };
-const settingsLogger = {
-	info: (msg: string) => console.log(`[SETTINGS] ${msg}`),
-	error: (msg: string, error?: any) => console.error(`[SETTINGS ERROR] ${msg}`, error),
-	debug: (msg: string, data?: any) => console.log(`[SETTINGS DEBUG] ${msg}`, data),
+const settingsLogger: BasicLogger = {
+	info: (msg) => console.log(`[SETTINGS] ${msg}`),
+	error: (msg, error) => console.error(`[SETTINGS ERROR] ${msg}`, error),
+	debug: (msg, data) => console.log(`[SETTINGS DEBUG] ${msg}`, data),
 };
 
 type NavigationStats = {
@@ -443,7 +452,7 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 			const cacheStats = await fs.stat(viteCachePath).catch(() => ({ size: 0 }));
 			cacheSize = Math.round(cacheStats.size / (1024 * 1024)); // Convertir a MB
 		} catch (error) {
-			systemLogger.warn('⚠️ Error al obtener tamaño de caché:', error);
+			systemLogger.warn?.('⚠️ Error al obtener tamaño de caché:', error);
 		}
 
 		// Obtener estadísticas reales de la base de datos
@@ -543,7 +552,7 @@ export async function repairSystem(): Promise<SystemResponse> {
  */
 export async function resetDatabase(): Promise<SystemResponse> {
 	try {
-		systemLogger.warn('⚠️ Iniciando reseteo de base de datos');
+		systemLogger.warn?.('⚠️ Iniciando reseteo de base de datos');
 
 		// Esta es una simulación, en producción implementaríamos el borrado real
 		// Aquí se implementaría la lógica para:
@@ -603,7 +612,7 @@ export interface SettingsResponse {
  * Obtiene la configuración global del sistema
  */
 export async function getSystemSettings(): Promise<Settings> {
-	settingsLogger.debug('📤 Action: Obteniendo configuración global del sistema');
+	settingsLogger.debug?.('📤 Action: Obteniendo configuración global del sistema');
 
 	try {
 		return await settingsService.getSystemSettings();
@@ -620,7 +629,7 @@ export async function getSystemSettings(): Promise<Settings> {
  * Actualiza la configuración global del sistema
  */
 export async function updateSystemSettings(data: Partial<Settings>): Promise<Settings> {
-	settingsLogger.debug('📥 Action: Actualizando configuración global del sistema', { data });
+	settingsLogger.debug?.('📥 Action: Actualizando configuración global del sistema', { data });
 
 	try {
 		return await settingsService.updateSystemSettings(data);
@@ -637,7 +646,7 @@ export async function updateSystemSettings(data: Partial<Settings>): Promise<Set
  * Resetea la configuración global a valores predeterminados
  */
 export async function resetSystemSettings(): Promise<Settings> {
-	settingsLogger.debug('🔄 Action: Reseteando configuración global a valores predeterminados');
+	settingsLogger.debug?.('🔄 Action: Reseteando configuración global a valores predeterminados');
 
 	try {
 		return await settingsService.resetSystemSettings();
@@ -654,7 +663,7 @@ export async function resetSystemSettings(): Promise<Settings> {
  * Obtiene la configuración de un perfil específico
  */
 export async function getProfileSettings(profileId: string): Promise<Settings | null> {
-	settingsLogger.debug(`📤 Action: Obteniendo configuración del perfil: ${profileId}`);
+	settingsLogger.debug?.(`📤 Action: Obteniendo configuración del perfil: ${profileId}`);
 
 	try {
 		return await settingsService.getProfileSettings(profileId);
@@ -671,7 +680,7 @@ export async function getProfileSettings(profileId: string): Promise<Settings | 
  * Actualiza la configuración de un perfil específico
  */
 export async function updateProfileSettings(profileId: string, data: Partial<Settings>): Promise<Settings> {
-	settingsLogger.debug(`📥 Action: Actualizando configuración del perfil: ${profileId}`, { data });
+	settingsLogger.debug?.(`📥 Action: Actualizando configuración del perfil: ${profileId}`, { data });
 
 	try {
 		return await settingsService.updateProfileSettings(profileId, data);
@@ -688,7 +697,7 @@ export async function updateProfileSettings(profileId: string, data: Partial<Set
  * Resetea la configuración de un perfil a los valores globales
  */
 export async function resetProfileSettings(profileId: string): Promise<void> {
-	settingsLogger.debug(`🔄 Action: Reseteando configuración del perfil: ${profileId}`);
+	settingsLogger.debug?.(`🔄 Action: Reseteando configuración del perfil: ${profileId}`);
 
 	try {
 		return await settingsService.resetProfileSettings(profileId);
@@ -734,6 +743,12 @@ export async function createDefaultSettingsData(): Promise<Settings> {
 				experimentalFeatures: false,
 			},
 			fileBrowser: fileBrowserConfigSchema.parse({}),
+			version: '1.0.0',
+			lastUpdate: new Date(),
+			system: {
+				platform: 'web',
+				version: '1.0.0',
+			},
 		};
 
 		return defaultSettings;

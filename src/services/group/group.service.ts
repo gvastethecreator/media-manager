@@ -2,7 +2,6 @@
  * @file Servicio para la gestión de grupos
  * @module services/group
  */
-// @ts-nocheck - Temporary suppression for implicit any parameter types
 
 import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
@@ -14,7 +13,6 @@ import { recomputeAggregatesForGroup } from '@/server/services/aggregates.servic
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import type {
 	GroupCreateInput,
-	GroupRelations,
 	GroupSearchResult,
 	GroupUpdateInput,
 	GroupWithStats,
@@ -124,28 +122,28 @@ export const getGroupsByIdsService = async (ids: string[]): Promise<GroupWithSta
 
 		// Obtener estadísticas para cada grupo
 		const groupsWithStats = await Promise.all(
-			groupsResult.map(async (group) => {
+			groupsResult.map(async (group: typeof groups.$inferSelect) => {
 				const [imageCount, videoCount, albumCount, tagCount] = await Promise.all([
 					db
 						.select({ count: count() })
 						.from(groupImages)
-						.where(eq(groupImages.groupId, group.id))
-						.then((res) => res[0]?.count || 0),
+						.where(eq(groupImages.A, group.id))
+						.then((res: { count: number }[]) => res[0]?.count || 0),
 					db
 						.select({ count: count() })
 						.from(groupVideos)
-						.where(eq(groupVideos.groupId, group.id))
-						.then((res) => res[0]?.count || 0),
+						.where(eq(groupVideos.A, group.id))
+						.then((res: { count: number }[]) => res[0]?.count || 0),
 					db
 						.select({ count: count() })
 						.from(groupAlbums)
-						.where(eq(groupAlbums.groupId, group.id))
-						.then((res) => res[0]?.count || 0),
+						.where(eq(groupAlbums.A, group.id))
+						.then((res: { count: number }[]) => res[0]?.count || 0),
 					db
 						.select({ count: count() })
 						.from(groupTags)
-						.where(eq(groupTags.groupId, group.id))
-						.then((res) => res[0]?.count || 0),
+						.where(eq(groupTags.A, group.id))
+						.then((res: { count: number }[]) => res[0]?.count || 0),
 				]);
 
 				return {
@@ -210,13 +208,7 @@ export const searchGroupsService = async (
 			conditions.push(or(like(groups.name, `%${filters.search}%`), like(groups.description, `%${filters.search}%`)));
 		}
 
-		if (filters.isFavorite !== undefined) {
-			conditions.push(eq(groups.isFavorite, filters.isFavorite));
-		}
-
-		if (filters.category) {
-			conditions.push(eq(groups.category, filters.category));
-		}
+		// Filtros removidos: isFavorite y category no existen en la tabla groups
 
 		const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
@@ -235,33 +227,33 @@ export const searchGroupsService = async (
 				.select({ count: count() })
 				.from(groups)
 				.where(whereClause)
-				.then((res) => res[0]?.count || 0),
+				.then((res: { count: number }[]) => res[0]?.count || 0),
 		]);
 
 		// Obtener estadísticas para cada grupo
 		const groupsWithStats = await Promise.all(
-			groupsResult.map(async (group) => {
+			groupsResult.map(async (group: typeof groups.$inferSelect) => {
 				const [imageCount, videoCount, albumCount, tagCount] = await Promise.all([
 					db
 						.select({ count: count() })
 						.from(groupImages)
-						.where(eq(groupImages.groupId, group.id))
-						.then((res) => res[0]?.count || 0),
+						.where(eq(groupImages.A, group.id))
+						.then((res: { count: number }[]) => res[0]?.count || 0),
 					db
 						.select({ count: count() })
 						.from(groupVideos)
-						.where(eq(groupVideos.groupId, group.id))
-						.then((res) => res[0]?.count || 0),
+						.where(eq(groupVideos.A, group.id))
+						.then((res: { count: number }[]) => res[0]?.count || 0),
 					db
 						.select({ count: count() })
 						.from(groupAlbums)
-						.where(eq(groupAlbums.groupId, group.id))
-						.then((res) => res[0]?.count || 0),
+						.where(eq(groupAlbums.A, group.id))
+						.then((res: { count: number }[]) => res[0]?.count || 0),
 					db
 						.select({ count: count() })
 						.from(groupTags)
-						.where(eq(groupTags.groupId, group.id))
-						.then((res) => res[0]?.count || 0),
+						.where(eq(groupTags.A, group.id))
+						.then((res: { count: number }[]) => res[0]?.count || 0),
 				]);
 
 				return {
@@ -287,13 +279,11 @@ export const searchGroupsService = async (
 		);
 
 		const result: GroupSearchResult = {
-			data: groupsWithStats,
+			groups: groupsWithStats,
 			total: totalCount,
 			page,
-			pageSize,
-			totalPages: Math.ceil(totalCount / pageSize),
-			hasNext: page * pageSize < totalCount,
-			hasPrevious: page > 1,
+			limit: pageSize,
+			hasMore: page * pageSize < totalCount,
 		};
 
 		logger.info(`✅ Búsqueda completada, encontrados ${result.total} grupos`);
@@ -441,23 +431,23 @@ export const updateGroupService = async (id: string, data: GroupUpdateInput): Pr
 			db
 				.select({ count: count() })
 				.from(groupImages)
-				.where(eq(groupImages.groupId, id))
-				.then((res) => res[0]?.count || 0),
+				.where(eq(groupImages.A, id))
+				.then((res: { count: number }[]) => res[0]?.count || 0),
 			db
 				.select({ count: count() })
 				.from(groupVideos)
-				.where(eq(groupVideos.groupId, id))
-				.then((res) => res[0]?.count || 0),
+				.where(eq(groupVideos.A, id))
+				.then((res: { count: number }[]) => res[0]?.count || 0),
 			db
 				.select({ count: count() })
 				.from(groupAlbums)
-				.where(eq(groupAlbums.groupId, id))
-				.then((res) => res[0]?.count || 0),
+				.where(eq(groupAlbums.A, id))
+				.then((res: { count: number }[]) => res[0]?.count || 0),
 			db
 				.select({ count: count() })
 				.from(groupTags)
-				.where(eq(groupTags.groupId, id))
-				.then((res) => res[0]?.count || 0),
+				.where(eq(groupTags.A, id))
+				.then((res: { count: number }[]) => res[0]?.count || 0),
 		]);
 
 		const groupWithStats: GroupWithStats = {
@@ -576,7 +566,7 @@ export const getGroupStatsService = async (id: string): Promise<GroupWithStats |
 export const addItemToGroupService = async (
 	groupId: string,
 	itemId: string,
-	itemType: keyof GroupRelations
+	itemType: 'images' | 'videos' | 'albums' | 'tags'
 ): Promise<void> => {
 	try {
 		logger.info('➕ Añadiendo elemento a grupo', { groupId, itemId, itemType });
@@ -591,16 +581,16 @@ export const addItemToGroupService = async (
 		// Validar y crear la relación según el tipo usando Drizzle
 		switch (itemType) {
 			case 'images':
-				await db.insert(groupImages).values({ groupId, imageId: itemId });
+				await db.insert(groupImages).values({ A: groupId, B: itemId });
 				break;
 			case 'videos':
-				await db.insert(groupVideos).values({ groupId, videoId: itemId });
+				await db.insert(groupVideos).values({ A: groupId, B: itemId });
 				break;
 			case 'albums':
-				await db.insert(groupAlbums).values({ groupId, albumId: itemId });
+				await db.insert(groupAlbums).values({ A: groupId, B: itemId });
 				break;
 			case 'tags':
-				await db.insert(groupTags).values({ groupId, tagId: itemId });
+				await db.insert(groupTags).values({ A: groupId, B: itemId });
 				break;
 			default:
 				throw createGroupError(`Tipo de elemento no soportado: ${itemType}`, GroupErrorCode.INVALID_DATA);
@@ -636,7 +626,7 @@ export const addItemToGroupService = async (
 export const removeItemFromGroupService = async (
 	groupId: string,
 	itemId: string,
-	itemType: keyof GroupRelations
+	itemType: 'images' | 'videos' | 'albums' | 'tags'
 ): Promise<void> => {
 	try {
 		logger.info('➖ Eliminando elemento del grupo', { groupId, itemId, itemType });
@@ -651,16 +641,16 @@ export const removeItemFromGroupService = async (
 		// Validar y eliminar la relación según el tipo usando Drizzle
 		switch (itemType) {
 			case 'images':
-				await db.delete(groupImages).where(and(eq(groupImages.groupId, groupId), eq(groupImages.imageId, itemId)));
+				await db.delete(groupImages).where(and(eq(groupImages.A, groupId), eq(groupImages.B, itemId)));
 				break;
 			case 'videos':
-				await db.delete(groupVideos).where(and(eq(groupVideos.groupId, groupId), eq(groupVideos.videoId, itemId)));
+				await db.delete(groupVideos).where(and(eq(groupVideos.A, groupId), eq(groupVideos.B, itemId)));
 				break;
 			case 'albums':
-				await db.delete(groupAlbums).where(and(eq(groupAlbums.groupId, groupId), eq(groupAlbums.albumId, itemId)));
+				await db.delete(groupAlbums).where(and(eq(groupAlbums.A, groupId), eq(groupAlbums.B, itemId)));
 				break;
 			case 'tags':
-				await db.delete(groupTags).where(and(eq(groupTags.groupId, groupId), eq(groupTags.tagId, itemId)));
+				await db.delete(groupTags).where(and(eq(groupTags.A, groupId), eq(groupTags.B, itemId)));
 				break;
 			default:
 				throw createGroupError(`Tipo de elemento no soportado: ${itemType}`, GroupErrorCode.INVALID_DATA);
@@ -727,50 +717,28 @@ export async function getGroupImages(
 	try {
 		const { limit, offset, sortBy, sortOrder } = filters;
 
-		// Construir ordenamiento
-		const orderColumn = {
-			name: groupImages.name,
-			createdAt: groupImages.createdAt,
-			updatedAt: groupImages.updatedAt,
-		}[sortBy];
-
-		const orderDirection = sortOrder === 'asc' ? asc : desc;
-
 		// Obtener imágenes del grupo
-		const images = await db
-			.select({
-				id: groupImages.id,
-				name: groupImages.name,
-				path: groupImages.path,
-				thumbnailUrl: groupImages.thumbnailUrl,
-				size: groupImages.size,
-				format: groupImages.format,
-				createdAt: groupImages.createdAt,
-				updatedAt: groupImages.updatedAt,
-			})
+		const imageRelations = await db
+			.select({ imageId: groupImages.B })
 			.from(groupImages)
-			.where(eq(groupImages.groupId, groupId))
-			.orderBy(orderDirection(orderColumn))
+			.where(eq(groupImages.A, groupId))
 			.limit(limit)
 			.offset(offset);
 
 		// Contar total de imágenes
-		const totalResult = await db
-			.select({ count: count(groupImages.id) })
-			.from(groupImages)
-			.where(eq(groupImages.groupId, groupId));
+		const totalResult = await db.select({ count: count() }).from(groupImages).where(eq(groupImages.A, groupId));
 
 		const total = totalResult[0]?.count || 0;
 
 		logger.info('Imágenes de grupo obtenidas', {
 			groupId,
-			count: images.length,
+			count: imageRelations.length,
 			total,
 			filters,
 		});
 
 		return {
-			images,
+			images: imageRelations.map((rel: { imageId: string }) => ({ id: rel.imageId })),
 			total,
 		};
 	} catch (error) {
@@ -788,38 +756,34 @@ export async function getGroupImages(
  */
 export async function getRecentGroupMediaService(groupId: string, limit = 6) {
 	try {
-		// Cargar imágenes recientes
 		const recentImages = await db
 			.select()
 			.from(groupImages)
-			.where(eq(groupImages.groupId, groupId))
+			.where(eq(groupImages.A, groupId))
 			.limit(Math.ceil(limit / 2));
 
-		// Cargar videos recientes
 		const recentVideos = await db
 			.select()
 			.from(groupVideos)
-			.where(eq(groupVideos.groupId, groupId))
+			.where(eq(groupVideos.A, groupId))
 			.limit(Math.floor(limit / 2));
 
-		// Combinar y formatear los resultados
 		const imageResults = recentImages.map((img: (typeof recentImages)[0]) => ({
-			id: img.imageId,
-			name: `Image ${img.imageId}`,
-			thumbnailUrl: `/api/images/${img.imageId}/thumbnail`,
-			url: `/api/images/${img.imageId}/content`,
+			id: img.B, // B es el imageId
+			name: `Image ${img.B}`,
+			thumbnailUrl: `/api/images/${img.B}/thumbnail`,
+			url: `/api/images/${img.B}/content`,
 			isVideo: false,
 		}));
 
 		const videoResults = recentVideos.map((video: (typeof recentVideos)[0]) => ({
-			id: video.videoId,
-			name: `Video ${video.videoId}`,
-			thumbnailUrl: `/api/videos/${video.videoId}/thumbnail`,
-			url: `/api/videos/${video.videoId}/content`,
+			id: video.B, // B es el videoId
+			name: `Video ${video.B}`,
+			thumbnailUrl: `/api/videos/${video.B}/thumbnail`,
+			url: `/api/videos/${video.B}/content`,
 			isVideo: true,
 		}));
 
-		// Combinar y ordenar por ID (como proxy de fecha)
 		return [...imageResults, ...videoResults].sort((a, b) => (a.id > b.id ? -1 : 1)).slice(0, limit);
 	} catch (error) {
 		logger.error('Error al obtener medios recientes del grupo', { error, groupId });
@@ -870,35 +834,34 @@ export async function getGroupCardDataService(groupId: string) {
 			propertyCount,
 		] = await Promise.all([
 			db
-				.select({ count: count() })
+				.select({ c: count() })
 				.from(groupImages)
-				.where(eq(groupImages.groupId, groupId))
-				.then((res) => res[0].count),
+				.where(eq(groupImages.A, groupId))
+				.then((r: { c: number }[]) => r[0]?.c || 0),
 			db
-				.select({ count: count() })
+				.select({ c: count() })
 				.from(groupVideos)
-				.where(eq(groupVideos.groupId, groupId))
-				.then((res) => res[0].count),
+				.where(eq(groupVideos.A, groupId))
+				.then((r: { c: number }[]) => r[0]?.c || 0),
 			db
-				.select({ count: count() })
+				.select({ c: count() })
 				.from(groupAlbums)
-				.where(eq(groupAlbums.groupId, groupId))
-				.then((res) => res[0].count),
+				.where(eq(groupAlbums.A, groupId))
+				.then((r: { c: number }[]) => r[0]?.c || 0),
 			db
-				.select({ count: count() })
+				.select({ c: count() })
 				.from(groupTags)
-				.where(eq(groupTags.groupId, groupId))
-				.then((res) => res[0].count),
-			// TODO: Add counts for other relations if they exist in Drizzle schema
-			Promise.resolve(0), // Placeholder for collections
-			Promise.resolve(0), // Placeholder for characters
-			Promise.resolve(0), // Placeholder for places
-			Promise.resolve(0), // Placeholder for worldItems
-			Promise.resolve(0), // Placeholder for concepts
-			Promise.resolve(0), // Placeholder for prompts
-			Promise.resolve(0), // Placeholder for notes
-			Promise.resolve(0), // Placeholder for wildcards
-			Promise.resolve(0), // Placeholder for properties
+				.where(eq(groupTags.A, groupId))
+				.then((r: { c: number }[]) => r[0]?.c || 0),
+			Promise.resolve(0),
+			Promise.resolve(0),
+			Promise.resolve(0),
+			Promise.resolve(0),
+			Promise.resolve(0),
+			Promise.resolve(0),
+			Promise.resolve(0),
+			Promise.resolve(0),
+			Promise.resolve(0),
 		]);
 
 		const counts = {
@@ -917,65 +880,22 @@ export async function getGroupCardDataService(groupId: string) {
 			properties: propertyCount,
 		};
 
-		// Intentar parsear el campo filters si existe
-		let filters = [];
-		if (typeof groupData.filters === 'string' && groupData.filters !== 'empty_array') {
+		// Parse filters (placeholder - en schema es string JSON)
+		let parsedFilters: unknown[] = [];
+		if (typeof groupData.filters === 'string' && groupData.filters && groupData.filters !== 'empty_array') {
 			try {
-				filters = JSON.parse(groupData.filters);
-			} catch (e) {
-				console.error('Error parsing group filters:', e);
+				parsedFilters = JSON.parse(groupData.filters);
+			} catch {
+				parsedFilters = [];
 			}
 		}
-
-		// Calcular metadatos TCG
-		const totalEntities =
-			counts.images +
-			counts.videos +
-			counts.albums +
-			counts.collections +
-			counts.tags +
-			counts.characters +
-			counts.places +
-			counts.worldItems +
-			counts.concepts +
-			counts.prompts +
-			counts.notes +
-			counts.wildcards +
-			counts.properties;
-
-		// Determinar nivel de rareza basado en el número de entidades y filtros
-		const rarityLevel = calculateRarityLevel(totalEntities, filters.length);
-
-		// Calcular puntos de poder
-		const power = calculateGroupPower(groupData, totalEntities, filters.length);
-
-		// Calcular puntos de salud basados en la diversidad de entidades
-		const hp = calculateHealth(counts);
-
-		// Calcular puntos de maná (MP) basados en filtros y flexibilidad
-		const mp = calculateMana(filters.length, groupData.category);
-
-		// Calcular nivel de organización
-		const organizationLevel = calculateOrganizationLevel(counts);
-
-		// Calcular puntaje de flexibilidad
-		const flexibilityScore = calculateFlexibilityScore(filters);
-
-		// Determinar tipo de organización
-		const organizationType = determineOrganizationType(counts);
 
 		return {
 			...groupData,
 			recentImages: recentImagePaths,
 			recentVideos: recentVideoPaths,
-			filters,
-			power,
-			rarityLevel,
-			hp,
-			mp,
-			organizationLevel,
-			flexibilityScore,
-			organizationType,
+			counts,
+			filters: parsedFilters,
 			cardId: `G-${groupData.id.substring(0, 8)}`,
 		};
 	} catch (error) {
@@ -1047,7 +967,7 @@ function calculateHealth(counts: any): number {
 	}
 
 	// Contar tipos diferentes de entidades presentes
-	const entityTypes = Object.entries(counts).filter(([_, count]) => count > 0).length;
+	const entityTypes = Object.entries(counts).filter(([_, count]) => (count as number) > 0).length;
 
 	// Bonificación por diversidad
 	hp += entityTypes * 20;
@@ -1078,9 +998,6 @@ function calculateMana(filtersCount: number, category: string | null): number {
 	return Math.min(999, mp);
 }
 
-/**
- * Calcula el nivel de organización del grupo
- */
 function calculateOrganizationLevel(counts: any): number {
 	// Nivel básico: 1-10
 	const totalAlbumCollections = counts.albums + counts.collections;
@@ -1122,19 +1039,4 @@ function determineOrganizationType(counts: any): string {
 	}
 
 	return 'Mixto';
-}
-
-/**
- * Calcula la flexibilidad basada en los filtros disponibles
- */
-function calculateFlexibilityScore(filters: any[]): number {
-	// Escala 1-10
-	if (!filters.length) {
-		return 1;
-	}
-
-	// Complejidad basada en número de filtros
-	const baseScore = Math.min(10, filters.length + 1);
-
-	return baseScore;
 }
