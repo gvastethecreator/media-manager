@@ -676,21 +676,86 @@ res.locals.logger.info('Procesando request');
 
 ---
 
+## 🛠️ Scripts Disponibles
+
+### Desarrollo
+```bash
+bun run dev:full          # Frontend + Backend (unified)
+bun run dev:vite          # Solo frontend (puerto 5173)
+bun run dev:server:hot    # Solo backend con HMR (puerto 3000)
+bun run dev:tauri         # Aplicación desktop
+```
+
+### Build
+```bash
+bun run build             # Build completo
+bun run build:vite        # Build frontend
+bun run build:server      # Build backend
+bun run build:tauri       # Build desktop
+```
+
+### Testing & Quality
+```bash
+bun run test:e2e          # Tests E2E Playwright
+bun run test:ui           # Playwright UI mode
+bun run biome             # Lint con Biome
+bun run biome:fix         # Fix automático
+bun run format            # Format con Biome
+bun run format:check      # Check formato
+bun run tsc               # TypeScript check
+```
+
+### Base de Datos
+```bash
+bun run db:studio         # Drizzle Studio (UI)
+bun run db:push           # Push schema a DB
+bun run db:migrate        # Run migrations
+bun run db:seed           # Seed data abstracto
+bun run db:reset          # Reset completo
+bun run db:check          # Validar schema
+```
+
+### Utilidades
+```bash
+bun run logs:list         # Listar logs
+bun run logs:clean        # Limpiar logs antiguos
+bun run check:errors      # Resumen de errores
+bun run cleanup:repo      # Limpieza completa del repositorio
+```
+
+---
+
+## 📊 Estado del Proyecto
+
+**Última optimización:** 10 de octubre de 2025  
+**Métricas actuales:**
+- ✅ N+1 Queries: **-88%** (41 → 5)
+- ✅ Cards memoizados: **100%** (21/21)
+- ✅ Errores TypeScript: **0**
+- ✅ Índices DB: **23 aplicados**
+- ✅ Lazy loading: **28 rutas**
+- ✅ Code splitting: **20+ chunks**
+
+Ver documentación completa en [`docs/estado-actual-proyecto.md`](./docs/estado-actual-proyecto.md)
+
+---
+
 ### **Desarrollo Local**
 
 1. Fork del repositorio
 2. Crear rama feature: `git checkout -b feature/nueva-funcionalidad`
 3. Instalar dependencias: `bun install`
-4. Ejecutar tests: `bun run test`
+4. Ejecutar tests: `bun run test:e2e`
 5. Commit y push: `git commit -m "feat: nueva funcionalidad"`
 6. Crear Pull Request
 
 ### **Estándares de Código**
 
-- **ESLint + Biome** para linting
+- **Biome** para linting y formatting
 - **Conventional Commits** para mensajes
 - **TypeScript strict mode** habilitado
-- **Tests E2E** para funcionalidades críticas
+- **Tests E2E** con Playwright para funcionalidades críticas
+- **Drizzle ORM** para acceso a datos (no Prisma)
 
 ---
 
