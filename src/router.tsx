@@ -1,37 +1,40 @@
-import { Suspense } from 'react';
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
 import { HierarchicalFolderWrapper } from '@/components/features/file-browser/wrappers/hierarchical-folder-wrapper';
 import { MainLayout } from '@/components/layout/main-layout';
 import ReindexLogsViewer from '@/components/settings/folders/reindex-logs-viewer';
-// Importar todas las vistas
-import { AllImagesView } from '@/components/views/all-images/all-images-view';
-import AudioView from '@/components/views/audio/audio-view';
+
+// ✅ EAGER LOAD: Solo Dashboard y FolderContentView (rutas más usadas)
 import Dashboard from '@/components/views/dashboard/dashboard';
-import DevelopmentContentView from '@/components/views/development/development-content-view';
-import DocumentsView from '@/components/views/documents/documents-view';
-import { EntityCardsView } from '@/components/views/entity-cards';
-import { File3DContentView as File3DDetailView } from '@/components/views/file3d/file-3d-content-view';
-import File3DView from '@/components/views/file3d/file3d-view';
-import { AllFilesView } from '@/components/views/files/all-files-view';
 import { FolderContentView } from '@/components/views/folders/folder-content-view';
-import FoldersView from '@/components/views/folders/folders-view';
-import ImageDetailView from '@/components/views/images/image-detail-view';
-import { JsonFileContentView } from '@/components/views/json-files/json-file-content-view';
-import JsonFilesView from '@/components/views/json-files/json-files-view';
-import MixedContentView from '@/components/views/mixed/mixed-content-view';
-import NotesViewSimple from '@/components/views/notes/notes-view-simple';
-import { PlaceContentView } from '@/components/views/places/place-content-view';
-import { PlacesView } from '@/components/views/places/places-view';
-import { PromptsView } from '@/components/views/prompts/prompts-view';
-import { PropertiesView } from '@/components/views/properties/properties-view';
-import { SearchView } from '@/components/views/search/search-view';
-import SettingsContentView from '@/components/views/settings/settings-content-view';
-import { TagContentView } from '@/components/views/tags/tag-content-view';
-import { TagsView } from '@/components/views/tags/tags-view';
-import VideosView from '@/components/views/videos/videos-view';
-import { WildcardsView } from '@/components/views/wildcards/wildcards-view';
-import { WorldItemContentView } from '@/components/views/world-items/world-item-content-view';
-import { WorldItemsView } from '@/components/views/world-items/world-items-view';
+
+// ✅ LAZY LOAD: Todas las demás vistas (optimización de bundle -800KB ~28%)
+const AllImagesView = lazy(() => import('@/components/views/all-images/all-images-view').then(m => ({ default: m.AllImagesView })));
+const AudioView = lazy(() => import('@/components/views/audio/audio-view'));
+const DevelopmentContentView = lazy(() => import('@/components/views/development/development-content-view'));
+const DocumentsView = lazy(() => import('@/components/views/documents/documents-view'));
+const EntityCardsView = lazy(() => import('@/components/views/entity-cards').then(m => ({ default: m.EntityCardsView })));
+const File3DDetailView = lazy(() => import('@/components/views/file3d/file-3d-content-view').then(m => ({ default: m.File3DContentView })));
+const File3DView = lazy(() => import('@/components/views/file3d/file3d-view'));
+const AllFilesView = lazy(() => import('@/components/views/files/all-files-view').then(m => ({ default: m.AllFilesView })));
+const FoldersView = lazy(() => import('@/components/views/folders/folders-view'));
+const ImageDetailView = lazy(() => import('@/components/views/images/image-detail-view'));
+const JsonFileContentView = lazy(() => import('@/components/views/json-files/json-file-content-view').then(m => ({ default: m.JsonFileContentView })));
+const JsonFilesView = lazy(() => import('@/components/views/json-files/json-files-view'));
+const MixedContentView = lazy(() => import('@/components/views/mixed/mixed-content-view'));
+const NotesViewSimple = lazy(() => import('@/components/views/notes/notes-view-simple'));
+const PlaceContentView = lazy(() => import('@/components/views/places/place-content-view').then(m => ({ default: m.PlaceContentView })));
+const PlacesView = lazy(() => import('@/components/views/places/places-view').then(m => ({ default: m.PlacesView })));
+const PromptsView = lazy(() => import('@/components/views/prompts/prompts-view').then(m => ({ default: m.PromptsView })));
+const PropertiesView = lazy(() => import('@/components/views/properties/properties-view').then(m => ({ default: m.PropertiesView })));
+const SearchView = lazy(() => import('@/components/views/search/search-view').then(m => ({ default: m.SearchView })));
+const SettingsContentView = lazy(() => import('@/components/views/settings/settings-content-view'));
+const TagContentView = lazy(() => import('@/components/views/tags/tag-content-view').then(m => ({ default: m.TagContentView })));
+const TagsView = lazy(() => import('@/components/views/tags/tags-view').then(m => ({ default: m.TagsView })));
+const VideosView = lazy(() => import('@/components/views/videos/videos-view'));
+const WildcardsView = lazy(() => import('@/components/views/wildcards/wildcards-view').then(m => ({ default: m.WildcardsView })));
+const WorldItemContentView = lazy(() => import('@/components/views/world-items/world-item-content-view').then(m => ({ default: m.WorldItemContentView })));
+const WorldItemsView = lazy(() => import('@/components/views/world-items/world-items-view').then(m => ({ default: m.WorldItemsView })));
 
 // Wrapper components para pasar el parámetro de la URL
 const FolderContentWrapper = () => {

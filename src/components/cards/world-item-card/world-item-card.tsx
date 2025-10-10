@@ -1,5 +1,5 @@
 import { Beaker, BookOpenText, Box, GemIcon, Sparkles, StoreIcon, Sword } from 'lucide-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import { WorldItemRarity, WorldItemType, WorldItemWithStats } from '@/types/entities/world-item';
@@ -589,6 +589,6 @@ function WorldItemCardInner({
 	);
 }
 
-export function WorldItemCard(props: WorldItemCardProps) {
+export const WorldItemCard = memo(function WorldItemCard(props: WorldItemCardProps) {
 	return <WorldItemCardBase {...props} />;
-}
+});

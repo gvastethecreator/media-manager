@@ -2,7 +2,7 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
+import type { ImageItem } from '@/components/features/file-viewer';
 
 export interface FileViewerState {
 	// Estado

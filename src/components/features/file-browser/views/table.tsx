@@ -10,6 +10,7 @@ export interface TableProps {
 	scrollContainer?: HTMLElement | null;
 	onItemClick?: (item: MediaItem, modifiers?: ClickModifiers) => void;
 	onItemDoubleClick?: (item: MediaItem) => void;
+	onContainerReady?: (el: HTMLDivElement | null) => void;
 }
 
 export function Table({
@@ -18,11 +19,19 @@ export function Table({
 	scrollContainer = null,
 	onItemClick,
 	onItemDoubleClick,
+	onContainerReady,
 }: TableProps) {
 	const [internalScrollEl, setInternalScrollEl] = useState<HTMLDivElement | null>(null);
 	const effectiveScrollContainer = scrollContainer ?? internalScrollEl;
 	return (
-		<div className="w-full overflow-auto" data-testid="file-browser-container" ref={setInternalScrollEl}>
+		<div
+			className="w-full overflow-auto"
+			data-testid="file-browser-container"
+			ref={(el) => {
+				setInternalScrollEl(el);
+				onContainerReady?.(el);
+			}}
+		>
 			<div className="relative min-h-[160px]" data-testid="file-browser-scroll-area-viewport">
 				<TableCanvas
 					items={items}

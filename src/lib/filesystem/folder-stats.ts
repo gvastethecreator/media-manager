@@ -1,59 +1,24 @@
+/**
+ * 📊 FOLDER STATS - FUNCIONES PRINCIPALES
+ *
+ * Procesamiento y actualización de estadísticas de carpetas
+ */
+
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { ProcessStatus } from '@/types/folders';
+import { recomputeAndPersistFolderAggregates } from './folder-stats.aggregates';
+import type { ProcessOptions, ProgressEmitter, SimpleStats } from './folder-stats.types';
+import { computeOverallProgress, mapWithConcurrency, safeEmitProgress } from './folder-stats.utils';
 
-export type SimpleStats = {
-	totalFiles: number;
-	processed: number;
-	successful: number;
-	failed: number;
-	errors: Array<{ file: string; error: string }>;
-};
-
-type ProgressEmitter = (status: ProcessStatus) => void;
-
-interface ProcessOptions {
-	concurrency?: number;
-	progressEmitter?: ProgressEmitter;
-	microPauseMs?: number;
-}
-
-// Ejecuta tareas con concurrencia limitada preservando orden de resultados
-async function mapWithConcurrency<T, R>(
-	items: T[],
-	limit: number,
-	worker: (item: T, index: number) => Promise<R>
-): Promise<R[]> {
-	const results: R[] = new Array(items.length);
-	let cursor = 0;
-	async function run(): Promise<void> {
-		const i = cursor++;
-		if (i >= items.length) return;
-		results[i] = await worker(items[i], i);
-		await run();
-	}
-	const effective = Math.max(1, Math.min(limit || 1, items.length || 1));
-	await Promise.all(Array.from({ length: effective }, () => run()));
-	return results;
-}
-
-async function safeEmitProgress(payload: ProcessStatus): Promise<void> {
-	try {
-		const { emitProgress } = await import('@/lib/server/events.server');
-		await emitProgress('folder:progress', {
-			...payload,
-			timestamp: payload.timestamp || Date.now(),
-		});
-	} catch {
-		// silencioso en tests o cuando no está el servidor
-	}
-}
-
-function computeOverallProgress(stage: 1 | 2 | 3, stageProcessed: number, stageTotal: number): number {
-	const clamp = (n: number, min: number, max: number) => Math.max(min, Math.min(max, n));
-	const base = stage === 1 ? 0 : stage === 2 ? 33 : 66;
-	const portion = stageTotal > 0 ? (stageProcessed / stageTotal) * 33 : 0;
-	return clamp(Math.floor(base + portion), 0, 99);
-}
+export { getFolderStats, recomputeAndPersistFolderAggregates } from './folder-stats.aggregates';
+// Re-export tipos y utilidades para backward compatibility
+export type {
+	AggregateResult,
+	FileEntityMapper,
+	ProcessOptions,
+	ProgressEmitter,
+	SimpleStats,
+} from './folder-stats.types';
+export { computeOverallProgress, mapWithConcurrency, safeEmitProgress } from './folder-stats.utils';
 
 export async function processFilesWithProgress(
 	filePaths: string[],
@@ -433,125 +398,6 @@ export async function updateFolderStats(
 	});
 
 	return stats;
-}
-
-// Helper: recalcula y persiste agregados de carpeta (totalFiles, totalSize)
-async function recomputeAndPersistFolderAggregates(
-	folderId: string
-): Promise<{ totalFiles: number; totalSize: number }> {
-	const { db } = await import('@/lib/drizzle');
-	const { folders, images, videos, audios, documents, jsonFiles, file3Ds } = await import('@/lib/drizzle/schema/index');
-	const { recomputeAggregatesForFolder } = await import('@/server/services/aggregates.service');
-	const { eq, sql } = await import('drizzle-orm');
-
-	const [imgAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${images.size}), 0)` })
-		.from(images)
-		.where(eq(images.folderId, folderId));
-	const [vidAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${videos.size}), 0)` })
-		.from(videos)
-		.where(eq(videos.folderId, folderId));
-	const [audAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${audios.size}), 0)` })
-		.from(audios)
-		.where(eq(audios.folderId, folderId));
-	const [docAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${documents.size}), 0)` })
-		.from(documents)
-		.where(eq(documents.folderId, folderId));
-	const [jsonAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)` })
-		.from(jsonFiles)
-		.where(eq(jsonFiles.folderId, folderId));
-	const [f3dAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${file3Ds.size}), 0)` })
-		.from(file3Ds)
-		.where(eq(file3Ds.folderId, folderId));
-
-	const totalFiles =
-		Number(imgAgg?.count ?? 0) +
-		Number(vidAgg?.count ?? 0) +
-		Number(audAgg?.count ?? 0) +
-		Number(docAgg?.count ?? 0) +
-		Number(jsonAgg?.count ?? 0) +
-		Number(f3dAgg?.count ?? 0);
-	const totalSize =
-		Number(imgAgg?.size ?? 0) +
-		Number(vidAgg?.size ?? 0) +
-		Number(audAgg?.size ?? 0) +
-		Number(docAgg?.size ?? 0) +
-		Number(jsonAgg?.size ?? 0) +
-		Number(f3dAgg?.size ?? 0);
-
-	await db.update(folders).set({ totalFiles, totalSize, lastIndexed: new Date() }).where(eq(folders.id, folderId));
-	// Sincroniza agregados genéricos (upsert)
-	try {
-		await recomputeAggregatesForFolder(folderId);
-	} catch {
-		// No bloquear si falla la ruta genérica; el cache de Folder sigue actualizado
-	}
-
-	return { totalFiles, totalSize };
-}
-
-export async function getFolderStats(folderId: string) {
-	const { db } = await import('@/lib/drizzle');
-	const { folders, images, videos, audios, documents, jsonFiles, file3Ds } = await import('@/lib/drizzle/schema/index');
-	const { eq, sql } = await import('drizzle-orm');
-
-	const [imgAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${images.size}), 0)` })
-		.from(images)
-		.where(eq(images.folderId, folderId));
-	const [vidAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${videos.size}), 0)` })
-		.from(videos)
-		.where(eq(videos.folderId, folderId));
-	const [audAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${audios.size}), 0)` })
-		.from(audios)
-		.where(eq(audios.folderId, folderId));
-	const [docAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${documents.size}), 0)` })
-		.from(documents)
-		.where(eq(documents.folderId, folderId));
-	const [jsonAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${jsonFiles.size}), 0)` })
-		.from(jsonFiles)
-		.where(eq(jsonFiles.folderId, folderId));
-	const [f3dAgg] = await db
-		.select({ count: sql<number>`COALESCE(COUNT(1), 0)`, size: sql<number>`COALESCE(SUM(${file3Ds.size}), 0)` })
-		.from(file3Ds)
-		.where(eq(file3Ds.folderId, folderId));
-
-	const totalFiles =
-		Number(imgAgg?.count ?? 0) +
-		Number(vidAgg?.count ?? 0) +
-		Number(audAgg?.count ?? 0) +
-		Number(docAgg?.count ?? 0) +
-		Number(jsonAgg?.count ?? 0) +
-		Number(f3dAgg?.count ?? 0);
-	const totalSize =
-		Number(imgAgg?.size ?? 0) +
-		Number(vidAgg?.size ?? 0) +
-		Number(audAgg?.size ?? 0) +
-		Number(docAgg?.size ?? 0) +
-		Number(jsonAgg?.size ?? 0) +
-		Number(f3dAgg?.size ?? 0);
-
-	const row = await db
-		.select({ lastIndexed: folders.lastIndexed })
-		.from(folders)
-		.where(eq(folders.id, folderId))
-		.limit(1);
-
-	return {
-		totalFiles,
-		totalSize,
-		lastIndexed: row[0]?.lastIndexed as Date | undefined,
-		imageCount: Number(imgAgg?.count ?? 0),
-	};
 }
 
 export async function updateAllFolderStats(): Promise<void> {
