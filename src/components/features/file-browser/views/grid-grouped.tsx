@@ -9,6 +9,7 @@ export interface FileCanvasGridGroupedProps {
 	scrollContainer?: HTMLElement | null;
 	onItemClick?: (item: MediaItem, modifiers?: ClickModifiers) => void;
 	onItemDoubleClick?: (item: MediaItem) => void;
+	onContainerReady?: (el: HTMLDivElement | null) => void;
 }
 
 export function FileCanvasGridGrouped({
@@ -17,14 +18,18 @@ export function FileCanvasGridGrouped({
 	scrollContainer = null,
 	onItemClick,
 	onItemDoubleClick,
+	onContainerReady,
 }: FileCanvasGridGroupedProps) {
 	const headerH = CanvasRenderConfig.group.headerHeight;
 	return (
-		<div className="file-browser-canvas h-full w-full overflow-auto">
+		<div className="file-browser-canvas h-full w-full overflow-auto" ref={onContainerReady}>
 			<div className="flex flex-col gap-2">
 				{groups.map((g) => (
 					<div className="flex flex-col" key={g.key}>
-						<h2 className="sticky top-0 z-10 h-9 border-border/50 border-b bg-background/80 px-2 py-1 font-semibold text-lg text-muted-foreground uppercase shadow-xs backdrop-blur supports-[backdrop-filter]:bg-background/60">
+						<h2
+							className="sticky top-0 z-10 h-9 border-border/50 border-b bg-background/80 px-2 py-1 font-semibold text-lg text-muted-foreground uppercase shadow-xs backdrop-blur supports-[backdrop-filter]:bg-background/60"
+							style={{ height: headerH }}
+						>
 							{g.displayName}
 						</h2>
 						<div className="relative">
@@ -33,6 +38,7 @@ export function FileCanvasGridGrouped({
 								items={g.items}
 								onItemClick={onItemClick}
 								onItemDoubleClick={onItemDoubleClick}
+								scrollContainer={scrollContainer}
 							/>
 						</div>
 					</div>

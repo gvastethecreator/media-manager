@@ -18,29 +18,6 @@ const router = express.Router();
 const logger = serverLogger.withContext('FilesAPI');
 
 /**
- * GET /api/files/info - Obtener información de un archivo (ruta en query)
- * TODO: Reactivar después de corregir el patrón de ruta
- */
-// router.get('/info', async (req, res) => {
-// 	try {
-// 		const { path: filePath } = req.query;
-
-// 		if (!filePath || typeof filePath !== 'string') {
-// 			res.status(400).json({ error: 'Parámetro path requerido' });; return;
-// 		}
-
-// 		const fileInfo = await getFileInfo(filePath);
-// 		res.json({ success: true, data: fileInfo });
-// 	} catch (error) {
-// 		logger.error('Error obteniendo información del archivo:', error);
-// 		res.status(500).json({
-// 			success: false,
-// 			error: error instanceof Error ? error.message : 'Error interno del servidor',
-// 		});
-// 	}
-// });
-
-/**
  * GET /api/files/directory/:path - Obtener contenido de un directorio
  */
 router.get('/directory/:path', async (req, res) => {
@@ -87,52 +64,6 @@ router.post('/directory', async (req, res) => {
 		});
 	}
 });
-
-/**
- * DELETE /api/files/:path - Eliminar un archivo
- */
-// Ruta temporalmente comentada por conflicto con path-to-regexp
-// router.delete('/*', async (req, res) => {
-// 	try {
-// 		const filePath = req.params[0]; // Captura toda la ruta
-//
-// 		if (!filePath) {
-// 			res.status(400).json({ error: 'Ruta de archivo requerida' });; return;
-// 		}
-//
-// 		const result = await deleteFile(filePath);
-// 		res.json({ success: true, data: result });
-// 	} catch (error) {
-// 		logger.error('Error eliminando archivo:', error);
-// 		res.status(500).json({
-// 			success: false,
-// 			error: error instanceof Error ? error.message : 'Error interno del servidor',
-// 		});
-// 	}
-// });
-
-/**
- * GET /api/files/dataurl/:path - Obtener archivo como Data URL
- */
-// Ruta temporalmente comentada por conflicto con path-to-regexp
-// router.get('/dataurl/*', async (req, res) => {
-// 	try {
-// 		const filePath = req.params[0]; // Captura toda la ruta después de /dataurl/
-//
-// 		if (!filePath) {
-// 			res.status(400).json({ error: 'Ruta de archivo requerida' });; return;
-// 		}
-//
-// 		const dataUrl = await getFileAsDataUrl(filePath);
-// 		res.json({ success: true, data: dataUrl });
-// 	} catch (error) {
-// 		logger.error('Error obteniendo Data URL:', error);
-// 		res.status(500).json({
-// 			success: false,
-// 			error: error instanceof Error ? error.message : 'Error interno del servidor',
-// 		});
-// 	}
-// });
 
 /**
  * PUT /api/files/rename - Renombrar un archivo

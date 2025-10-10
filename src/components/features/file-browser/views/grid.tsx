@@ -12,6 +12,7 @@ export interface GridProps {
 	onItemDoubleClick?: (item: MediaItem) => void;
 	page?: number; // 0-based, opcional
 	pageSize?: number; // default 300
+	onContainerReady?: (el: HTMLDivElement | null) => void;
 }
 
 export function Grid({
@@ -22,9 +23,11 @@ export function Grid({
 	onItemDoubleClick,
 	page,
 	pageSize = 300,
+	onContainerReady,
 }: GridProps) {
 	const [internalScrollEl, setInternalScrollEl] = useState<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
+	const effectiveScrollContainer = (scrollContainer as HTMLDivElement | null) ?? internalScrollEl;
 
 	// Paginación controlada solo si se provee "page"; si no, renderizar todo el conjunto
 	const pagedItems = useMemo(() => {
@@ -48,6 +51,7 @@ export function Grid({
 			ref={(el) => {
 				setInternalScrollEl(el);
 				containerRef.current = el;
+				onContainerReady?.(el);
 			}}
 		>
 			<div className="relative min-h-[160px]" data-testid="file-browser-scroll-area-viewport">
@@ -56,6 +60,7 @@ export function Grid({
 					items={pagedItems}
 					onItemClick={onItemClick}
 					onItemDoubleClick={onItemDoubleClick}
+					scrollContainer={effectiveScrollContainer}
 				/>
 			</div>
 		</div>

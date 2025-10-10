@@ -11,9 +11,7 @@ import { desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { characters } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromDrizzleCharacter, fromDrizzleCharacters } from '@/transformers/character/transformer';
 import type {
 	CharacterCreateInput,
@@ -21,78 +19,20 @@ import type {
 	CharacterUpdateInput,
 	CharacterWithStats,
 } from '@/types/entities/character';
+import { CharacterServiceError } from './character-errors';
+import { CHARACTER_EVENTS, notifyCharacterChange } from './character-events';
+import type { GetCharactersResult } from './character-types';
+
+// Re-exports para compatibilidad backward
+export { CharacterServiceError, createCharacterError } from './character-errors';
+export { CHARACTER_EVENTS, notifyCharacterChange } from './character-events';
+export type { GetCharactersResult } from './character-types';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CharacterService');
 
 // Constantes del servicio
 const REVALIDATE_PATHS = ['/characters', '/settings/characters', '/dashboard/characters', '/api/characters'];
-
-// Eventos del servicio de personajes
-export const CHARACTER_EVENTS = {
-	CREATED: 'character:created',
-	UPDATED: 'character:updated',
-	DELETED: 'character:deleted',
-	STATS_UPDATED: 'character:stats:updated',
-} as const;
-
-// Tipos de entrada
-export interface GetCharactersResult {
-	characters: CharacterWithStats[];
-	total: number;
-}
-
-/**
- * Clase de error personalizada para operaciones de Character
- */
-export class CharacterServiceError extends Error {
-	constructor(
-		message: string,
-		public code?: string,
-		public cause?: unknown
-	) {
-		super(message);
-		this.name = 'CharacterServiceError';
-	}
-}
-
-/**
- * Notifica cambios en los personajes a través del sistema de eventos
- */
-export const notifyCharacterChange = async (
-	action: 'create' | 'update' | 'delete',
-	character: CharacterWithStats | { id: string }
-): Promise<void> => {
-	try {
-		let eventType: string;
-		switch (action) {
-			case 'create':
-				eventType = CHARACTER_EVENTS.CREATED;
-				break;
-			case 'update':
-				eventType = CHARACTER_EVENTS.UPDATED;
-				break;
-			case 'delete':
-				eventType = CHARACTER_EVENTS.DELETED;
-				break;
-			default:
-				eventType = 'character:modified';
-		}
-
-		// Emitir evento al sistema central
-		await emit({
-			type: 'characters:modified',
-			data: { action, character },
-		});
-
-		// Notificar a estadísticas
-		statsEventEmitter.emit(STATS_EVENTS.CHARACTER_CHANGE);
-
-		logger.info(`🔔 Notificado cambio en personaje: ${action}`, { characterId: character.id });
-	} catch (error) {
-		logger.error(`❌ Error al notificar cambio en personaje: ${action}`, { error, characterId: character.id });
-	}
-};
 
 /**
  * Revalida las rutas de caché relacionadas con los personajes

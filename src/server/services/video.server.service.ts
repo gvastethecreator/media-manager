@@ -5,66 +5,14 @@ import { db } from '@/lib/drizzle';
 import { folders, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createEntityNotFoundError, toServiceError } from '@/lib/utils/errors/service-errors';
+import { CreateVideoSchema, UpdateVideoSchema, VideoFiltersSchema } from './video-schemas';
+
+// Re-exports para compatibilidad backward
+export { createVideoError } from './video-errors';
+export { CreateVideoSchema, UpdateVideoSchema, VideoFiltersSchema } from './video-schemas';
 
 const SERVICE_NAME = 'VideoServerService';
 const videoLogger = serverLogger.withContext(SERVICE_NAME);
-
-const CreateVideoSchema = z.object({
-	name: z.string().min(1, 'El nombre es requerido').max(255),
-	description: z.string().max(1000).optional().nullable(),
-	path: z.string().min(1, 'La ruta es requerida'),
-	size: z.number().int().positive(),
-	mimeType: z.string().max(100),
-
-	// Identificador de integridad
-	hash: z.string().min(1, 'El hash es requerido'),
-
-	// Metadatos de video específicos
-	duration: z.number().positive().optional().nullable(),
-	width: z.number().int().positive().optional().nullable(),
-	height: z.number().int().positive().optional().nullable(),
-	framerate: z.number().positive().optional().nullable(),
-	bitrate: z.number().int().positive().optional().nullable(),
-	codec: z.string().max(50).optional().nullable(),
-	format: z.string().max(50).optional().nullable(),
-
-	// Propiedades base
-	isHidden: z.boolean().default(false).optional(),
-	isFavorite: z.boolean().default(false).optional(),
-	tags: z.string().default('[]').optional(),
-	notes: z.string().default('').optional(),
-
-	// Relaciones opcionales
-	folderId: z.string().uuid().optional().nullable(),
-});
-
-const UpdateVideoSchema = CreateVideoSchema.partial();
-
-const VideoFiltersSchema = z.object({
-	folderId: z.string().uuid().optional(),
-	codec: z.string().optional(),
-	format: z.string().optional(),
-	isFavorite: z.boolean().optional(),
-	isHidden: z.boolean().optional(),
-	minDuration: z.number().positive().optional(),
-	maxDuration: z.number().positive().optional(),
-	minWidth: z.number().int().positive().optional(),
-	maxWidth: z.number().int().positive().optional(),
-	minHeight: z.number().int().positive().optional(),
-	maxHeight: z.number().int().positive().optional(),
-	minSize: z.number().int().positive().optional(),
-	maxSize: z.number().int().positive().optional(),
-	search: z.string().optional(),
-	limit: z.number().int().positive().max(100).default(20).optional(),
-	offset: z.number().int().min(0).default(0).optional(),
-	sortBy: z.enum(['name', 'createdAt', 'updatedAt', 'size', 'duration', 'width', 'height']).default('name').optional(),
-	sortOrder: z.enum(['asc', 'desc']).default('asc').optional(),
-});
-
-// Función auxiliar para crear errores de video
-const createVideoError = (message: string, code = 'VIDEO_ERROR') => {
-	return new Error(`[${code}] ${message}`);
-};
 
 export async function getVideos(filters: z.infer<typeof VideoFiltersSchema>) {
 	try {

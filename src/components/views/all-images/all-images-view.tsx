@@ -40,18 +40,7 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 		return images.slice().sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
 	}, [imagesRecord]); // Solo depende del record de imágenes
 
-	// Auto-indexing deshabilitado temporalmente para evitar loops infinitos
-	// TODO: Re-habilitar una vez corregido el problema de re-renders
-	// const { status, isIndexing, progress, startIndexing } = useAutoFolderIndexing({
-	//   autoStart: true,
-	//   maxFoldersPerBatch: 2,
-	//   checkInterval: 5 * 60 * 1000, // 5 minutos
-	//   onIndexingComplete: (status) => {
-	//     logger.info('✅ Auto-indexing completado:', status);
-	//   },
-	// });
-
-	// Valores por defecto mientras auto-indexing está deshabilitado
+	// Valores por defecto (auto-indexing deshabilitado)
 	const status = {
 		isIndexing: false,
 		indexedFolders: 0,

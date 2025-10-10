@@ -9,13 +9,23 @@ interface CardHeaderProps {
 	primaryColor: string;
 	className?: string;
 	compact?: boolean;
+	children?: ReactNode;
 }
 
 /**
  * Componente de encabezado para tarjetas de entidades
  * Similar al encabezado de una carta Magic con título, subtítulo e icono
  */
-export function CardHeader({ title, subtitle, icon, emoji, primaryColor, className, compact }: CardHeaderProps) {
+export function CardHeader({
+	title,
+	subtitle,
+	icon,
+	emoji,
+	primaryColor,
+	className,
+	compact,
+	children,
+}: CardHeaderProps) {
 	return (
 		<div
 			className={cn('flex items-center gap-2 border-b', compact ? 'px-2 py-1' : 'px-3 py-2', className)}

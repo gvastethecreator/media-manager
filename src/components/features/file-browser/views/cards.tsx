@@ -12,6 +12,7 @@ export interface CardsProps {
 	onItemDoubleClick?: (item: MediaItem) => void;
 	page?: number; // 0-based
 	pageSize?: number; // default 300
+	onContainerReady?: (el: HTMLDivElement | null) => void;
 }
 
 export function Cards({
@@ -22,6 +23,7 @@ export function Cards({
 	onItemDoubleClick,
 	page,
 	pageSize = 300,
+	onContainerReady,
 }: CardsProps) {
 	const [internalScrollEl, setInternalScrollEl] = useState<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
@@ -49,6 +51,7 @@ export function Cards({
 			ref={(el) => {
 				setInternalScrollEl(el);
 				containerRef.current = el;
+				onContainerReady?.(el);
 			}}
 		>
 			<div className="h-full min-h-0">

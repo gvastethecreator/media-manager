@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { getRarityGradient } from '@/components/cards/shared/rarity-gradients';
 import { darkenHex } from '@/components/cards/shared/rarity-style';
 import { motion } from '@/components/ui/motion-shim';
@@ -380,7 +380,7 @@ const PlaceCardView: React.FC<PlaceCardViewProps> = ({
 	);
 };
 
-export function PlaceCard({
+export const PlaceCard = memo(function PlaceCard({
 	place,
 	compact = false,
 	tcgMode = true,
@@ -411,4 +411,4 @@ export function PlaceCard({
 			tcgMode={tcgMode}
 		/>
 	);
-}
+});

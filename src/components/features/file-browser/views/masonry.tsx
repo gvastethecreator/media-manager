@@ -12,6 +12,7 @@ export interface MasonryProps {
 	onItemDoubleClick?: (item: MediaItem) => void;
 	page?: number; // 0-based
 	pageSize?: number; // default 300
+	onContainerReady?: (el: HTMLDivElement | null) => void;
 }
 
 export function Masonry({
@@ -22,6 +23,7 @@ export function Masonry({
 	onItemDoubleClick,
 	page,
 	pageSize = 300,
+	onContainerReady,
 }: MasonryProps) {
 	const [internalScrollEl, setInternalScrollEl] = useState<HTMLDivElement | null>(null);
 	const containerRef = useRef<HTMLDivElement | null>(null);
@@ -49,6 +51,7 @@ export function Masonry({
 			ref={(el) => {
 				setInternalScrollEl(el);
 				containerRef.current = el;
+				onContainerReady?.(el);
 			}}
 		>
 			<div className="relative min-h-[160px]" data-testid="file-browser-scroll-area-viewport">

@@ -8,6 +8,7 @@ interface LoadMoreButtonProps {
 	loadMore: () => void;
 	loadedCount: number;
 	totalCount: number;
+	chunkSize?: number;
 	className?: string;
 }
 
@@ -21,6 +22,7 @@ export function LoadMoreButton({
 	loadMore,
 	loadedCount,
 	totalCount,
+	chunkSize = 150,
 	className,
 }: LoadMoreButtonProps) {
 	if (!hasMore) {
@@ -50,7 +52,7 @@ export function LoadMoreButton({
 				) : (
 					<>
 						<ChevronDown className="mr-2 h-4 w-4 transition-transform group-hover:translate-y-0.5" />
-						Cargar {Math.min(remaining, 150)} más ({remaining} restantes)
+						Cargar {Math.min(remaining, chunkSize)} más ({remaining} restantes)
 					</>
 				)}
 			</Button>

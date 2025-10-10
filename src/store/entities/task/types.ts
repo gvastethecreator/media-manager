@@ -2,10 +2,10 @@
  * @file Tipos para el store de Task
  * @module store/entities/task/types
  * @description Define los tipos para el store Zustand de tareas
- * @updated 2025-06-21
+ * @updated 2025-10-01
  */
 
-import { TaskExtended } from '@/types/entities/task/types';
+import type { TaskCreateInput, TaskSearchOptions, TaskUpdateInput, TaskWithStats } from '@/types/entities/task/types';
 
 /**
  * Modo de visualización para tareas
@@ -63,19 +63,23 @@ export interface SelectionState {
  */
 export interface TaskState {
 	// 📋 Datos principales
-	tasks: TaskExtended[];
+	tasks: TaskWithStats[];
+	currentTask: TaskWithStats | null;
 	isLoading: boolean;
+	isLoadingMore: boolean;
 	error: string | null;
 	lastUpdated: number | null;
+	total: number;
+	hasMore: boolean;
 
 	// 🎮 UI y configuración
 	ui: TaskUIState;
 	filters: TaskFiltersState;
 
 	// 🔍 Selectores y getters
-	getTaskById: (id: string) => TaskExtended | undefined;
-	getFilteredTasks: () => TaskExtended[];
-	getSortedTasks: () => TaskExtended[];
+	getTaskById: (id: string) => TaskWithStats | undefined;
+	getFilteredTasks: () => TaskWithStats[];
+	getSortedTasks: () => TaskWithStats[];
 }
 
 /**
@@ -89,6 +93,10 @@ export interface TaskUIState {
 	displayState: Record<string, any>;
 	highlightedId: string | null;
 	expandedIds: string[];
+	isCreateModalOpen: boolean;
+	isEditModalOpen: boolean;
+	isDeleteModalOpen: boolean;
+	editingId: string | null;
 }
 
 /**
@@ -119,7 +127,25 @@ export interface TaskFiltersState {
  */
 export interface TaskActions {
 	// 📥 Carga de datos
-	loadTasks: () => Promise<void>;
+	fetchTasks: (options?: TaskSearchOptions) => Promise<void>;
+	fetchTaskById: (id: string) => Promise<void>;
+	loadMore: () => Promise<void>;
+
+	// ✏️ CRUD
+	createTask: (input: TaskCreateInput) => Promise<void>;
+	updateTask: (id: string, input: TaskUpdateInput) => Promise<void>;
+	deleteTask: (id: string) => Promise<void>;
+	deleteTasks: (ids: string[]) => Promise<void>;
+
+	// ⭐ Operaciones especiales
+	toggleFavorite: (id: string) => Promise<void>;
+	toggleArchive: (id: string) => Promise<void>;
+	updateProgress: (id: string, progress: number) => Promise<void>;
+	completeTask: (id: string) => Promise<void>;
+
+	// 🔄 Refetch y reset
+	refetch: () => Promise<void>;
+	reset: () => void;
 
 	// 🎮 Acciones UI
 	selectTask: (id: string | null) => void;
@@ -127,10 +153,20 @@ export interface TaskActions {
 	toggleSelection: (id: string) => void;
 	clearSelection: () => void;
 
+	// 🎨 Modales
+	openCreateModal: () => void;
+	closeCreateModal: () => void;
+	openEditModal: (id: string) => void;
+	closeEditModal: () => void;
+	openDeleteModal: (id: string) => void;
+	closeDeleteModal: () => void;
+
 	// 🔍 Filtros
 	updateFilters: (filters: Partial<TaskFiltersState>) => void;
 	clearFilters: () => void;
 	setSearchQuery: (query: string) => void;
+	setSortBy: (sortBy: TaskSortCriteria) => void;
+	setSortOrder: (sortOrder: 'asc' | 'desc') => void;
 }
 
 /**

@@ -1,5 +1,5 @@
 import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
-import { useCallback, useMemo } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { CardHeader } from '@/components/cards/card-header';
 import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
@@ -7,7 +7,7 @@ import type { ConceptCardProps } from './concept-card.types';
 import { ConceptCardContent } from './concept-card-content';
 import { ConceptCardFooter } from './concept-card-footer';
 
-export function ConceptCard({ concept, onClick, className, style, tcgMode = true }: ConceptCardProps) {
+export const ConceptCard = memo(function ConceptCard({ concept, onClick, className, style, tcgMode = true }: ConceptCardProps) {
 	// Si no hay concept, no renderizar nada
 	if (!concept) {
 		return null;
@@ -268,4 +268,4 @@ export function ConceptCard({ concept, onClick, className, style, tcgMode = true
 			/>
 		</motion.div>
 	);
-}
+});

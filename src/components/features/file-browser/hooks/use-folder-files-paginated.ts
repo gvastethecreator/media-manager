@@ -107,7 +107,7 @@ export interface UseFolderFilesPaginatedResult {
 	queryTime?: number;
 
 	// Acciones
-	refetch: () => void;
+	refetch: () => Promise<void>;
 	invalidate: () => void;
 }
 
@@ -245,35 +245,44 @@ export function useFolderFilesPaginated(options: UseFolderFilesPaginatedOptions)
 	);
 
 	// Query infinita para paginación
-	const { data, isLoading, isFetching, isError, error, fetchNextPage, hasNextPage, isFetchingNextPage, refetch } =
-		useInfiniteQuery<FolderFilesResponse, Error>({
-			queryKey,
-			queryFn: ({ pageParam = 0 }) => {
-				if (!folderId) {
-					throw new Error('Folder ID is required');
-				}
+	const {
+		data,
+		isLoading,
+		isFetching,
+		isError,
+		error,
+		fetchNextPage,
+		hasNextPage,
+		isFetchingNextPage,
+		refetch: refetchQuery,
+	} = useInfiniteQuery<FolderFilesResponse, Error>({
+		queryKey,
+		queryFn: ({ pageParam = 0 }) => {
+			if (!folderId) {
+				throw new Error('Folder ID is required');
+			}
 
-				return fetchFolderFiles({
-					folderId,
-					includeSubfolders,
-					limit: pageSize,
-					offset: (pageParam as number) * pageSize,
-					search,
-					sortBy,
-					sortOrder,
-					fileTypes,
-				});
-			},
-			getNextPageParam: (lastPage: FolderFilesResponse) => {
-				if (!lastPage.hasMore) return;
-				return lastPage.pagination.currentPage; // Next page number
-			},
-			initialPageParam: 0,
-			enabled: enabled && !!folderId,
-			staleTime: 5 * 60 * 1000, // 5 minutes
-			gcTime: 10 * 60 * 1000, // 10 minutes (gcTime reemplaza cacheTime)
-			refetchOnWindowFocus: false,
-		});
+			return fetchFolderFiles({
+				folderId,
+				includeSubfolders,
+				limit: pageSize,
+				offset: (pageParam as number) * pageSize,
+				search,
+				sortBy,
+				sortOrder,
+				fileTypes,
+			});
+		},
+		getNextPageParam: (lastPage: FolderFilesResponse) => {
+			if (!lastPage.hasMore) return;
+			return lastPage.pagination.currentPage; // Next page number
+		},
+		initialPageParam: 0,
+		enabled: enabled && !!folderId,
+		staleTime: 5 * 60 * 1000, // 5 minutes
+		gcTime: 10 * 60 * 1000, // 10 minutes (gcTime reemplaza cacheTime)
+		refetchOnWindowFocus: false,
+	});
 
 	// Datos procesados
 	const processedData = useMemo(() => {
@@ -353,7 +362,9 @@ export function useFolderFilesPaginated(options: UseFolderFilesPaginatedOptions)
 		queryTime: processedData.queryTime,
 
 		// Acciones
-		refetch,
+		refetch: async () => {
+			await refetchQuery();
+		},
 		invalidate,
 	};
 }

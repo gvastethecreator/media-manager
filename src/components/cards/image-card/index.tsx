@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { cn } from '@/lib/utils';
 
 // Componente mínimo para cubrir el contrato usado por EntityCard y MixedView
@@ -15,7 +15,7 @@ export interface ImageCardProps extends React.HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
-export function ImageCard({ imageId, className, onClick, onDoubleClick, ...rest }: ImageCardProps) {
+export const ImageCard = memo(function ImageCard({ imageId, className, onClick, onDoubleClick, ...rest }: ImageCardProps) {
 	const thumbnailUrl = `/api/images/${encodeURIComponent(imageId)}/thumbnail`;
 	if (onClick) {
 		return (
@@ -43,6 +43,6 @@ export function ImageCard({ imageId, className, onClick, onDoubleClick, ...rest 
 			</div>
 		</div>
 	);
-}
+});
 
 export default ImageCard;

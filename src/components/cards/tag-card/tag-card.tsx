@@ -1,6 +1,6 @@
 import { Sparkles, Tag } from 'lucide-react';
 import type React from 'react';
-import { useCallback, useMemo, useState } from 'react';
+import { memo, useCallback, useMemo, useState } from 'react';
 import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import { type TagCategory, TagRarity } from '@/store/entities/tag/types';
@@ -431,7 +431,8 @@ function extractTagProperties(tag: TagWithStats) {
  * tipo cartas de colección, con efectos visuales y presentación de datos
  * organizada en secciones.
  */
-export function TagCard({
+// ✅ OPTIMIZADO: Memoizado para evitar re-renders innecesarios
+export const TagCard = memo(function TagCard({
 	tag,
 	onClick,
 	className,
@@ -483,4 +484,4 @@ export function TagCard({
 			/>
 		</motion.article>
 	);
-}
+});

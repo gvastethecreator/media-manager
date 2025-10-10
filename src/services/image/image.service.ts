@@ -43,20 +43,21 @@
 import { and, asc, count, desc, eq, isNotNull, like, or, sum } from 'drizzle-orm';
 import { promises as fs } from 'fs';
 import sharp from 'sharp';
-import { imageConfig } from '@/lib/config';
 import { db } from '@/lib/drizzle';
 import { fileStats, folders, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { type EventType, emit } from '@/lib/server/events.server';
+import { createFileNotFoundError } from '@/lib/utils/errors';
 import {
 	createEntityNotFoundError,
-	createFileNotFoundError,
 	createServiceError,
 	ServiceErrorCode,
 	toServiceError,
 } from '@/lib/utils/errors/service-errors';
 import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
 import type { ThumbnailStats } from '@/types/thumbnails';
+import { emitImageEvent, IMAGE_EVENTS } from './image-events';
+import { type ImageProcessingOptions, processImage } from './image-processing';
+import { MAX_THUMBNAIL_SIZE_BYTES, randomId, SERVICE_NAME } from './image-utils';
 // Tipos movidos a types locales
 export interface GetImagesOptions {
 	folderId?: string;
@@ -85,39 +86,12 @@ export interface GetImagesResult {
 	};
 }
 
-// Evitar import directo de 'crypto' (Node) para compatibilidad en bundle frontend.
-// Utilizar Web Crypto si existe; fallback a generador UUID v4 no-criptográfico.
-const randomId = (): string => {
-	try {
-		const g: any = globalThis as any;
-		const rndUUID = g?.crypto?.randomUUID;
-		if (typeof rndUUID === 'function') {
-			return rndUUID.call(g.crypto);
-		}
-	} catch {
-		// ignorar y usar fallback
-	}
-	// Fallback sin operaciones bitwise; generar 32 hex + guiones formateados
-	const hex = Array.from({ length: 32 }, () => Math.floor(Math.random() * 16).toString(16)).join('');
-	// xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx
-	// Version (4) fija y variante simulada sin bitwise: tomar valor 0-15 => map a 8-11
-	const variantSource = Number.parseInt(hex.slice(16, 17), 16) % 4; // 0..3
-	const variantNibble = (8 + variantSource).toString(16); // 8..b
-	return [
-		hex.slice(0, 8),
-		hex.slice(8, 12),
-		`4${hex.slice(13, 16)}`,
-		`${variantNibble}${hex.slice(17, 20)}`,
-		hex.slice(20, 32),
-	].join('-');
-};
+export { IMAGE_EVENTS } from './image-events';
+export type { ImageProcessingOptions } from './image-processing';
+// Re-exports de tipos para mantener compatibilidad con API existente
+export { THUMBNAIL_QUALITY_CONFIG } from './image-processing';
 
-const SERVICE_NAME = 'ImageService';
-const MAX_THUMBNAIL_SIZE_BYTES = 300 * 1024; // 300KB tope para almacenar en TEXT base64 con holgura
 const imageLogger = serverLogger.withContext(SERVICE_NAME);
-
-// Re-export eliminado para cumplir regla de estilo
-export const THUMBNAIL_QUALITY_CONFIG = imageConfig.thumbnail.qualities;
 
 export type CreateImageInput = {
 	name: string;
@@ -129,40 +103,6 @@ export type CreateImageInput = {
 	folderId: string;
 	metadata?: Record<string, string | number | boolean | string[] | null | undefined>;
 };
-
-export type ImageProcessingOptions = {
-	quality?: number;
-	width?: number;
-	height?: number;
-	format?: 'webp' | 'jpeg' | 'png';
-	fit?: 'cover' | 'contain' | 'inside' | 'outside';
-	type?: string;
-};
-
-// Definir los eventos de imágenes
-export const IMAGE_EVENTS = {
-	IMAGE_CREATED: 'image:created',
-	IMAGE_UPDATED: 'image:updated',
-	IMAGE_DELETED: 'image:deleted',
-	IMAGES_CHANGED: 'images:changed',
-	THUMBNAIL_GENERATED: 'image:thumbnail:generated',
-	METADATA_UPDATED: 'image:metadata:updated',
-	ERROR: 'image:error',
-} as const;
-
-// Mapeo de eventos internos a EventType
-const EVENT_TYPE_MAPPING: Record<string, EventType> = {
-	// Eventos genéricos
-	error: 'folder:error',
-	// Mapeos específicos
-	[IMAGE_EVENTS.IMAGE_CREATED]: 'images:modified',
-	[IMAGE_EVENTS.IMAGE_UPDATED]: 'images:modified',
-	[IMAGE_EVENTS.IMAGE_DELETED]: 'images:modified',
-	[IMAGE_EVENTS.IMAGES_CHANGED]: 'images:modified',
-	[IMAGE_EVENTS.THUMBNAIL_GENERATED]: 'images:modified',
-	[IMAGE_EVENTS.METADATA_UPDATED]: 'images:modified',
-	[IMAGE_EVENTS.ERROR]: 'folder:error',
-} as const;
 
 class ImageService {
 	private static instance: ImageService;
@@ -179,19 +119,6 @@ class ImageService {
 		return ImageService.instance;
 	}
 
-	// Método privado para emitir eventos
-	private async emitEvent(event: string, data: unknown): Promise<void> {
-		try {
-			const eventType = EVENT_TYPE_MAPPING[event] || 'images:modified';
-			await emit({
-				type: eventType,
-				data,
-			});
-		} catch (error) {
-			imageLogger.error('Error emitiendo evento:', { event, error });
-		}
-	}
-
 	private async ensureCacheDir() {
 		try {
 			await fs.mkdir(this.CACHE_DIR, { recursive: true });
@@ -201,62 +128,6 @@ class ImageService {
 				message: 'Error al crear directorio de caché',
 				serviceName: SERVICE_NAME,
 			});
-		}
-	}
-
-	private async processImage(
-		inputPath: string,
-		options: ImageProcessingOptions = {}
-	): Promise<{ buffer: Buffer; metadata: sharp.OutputInfo }> {
-		try {
-			let pipeline = sharp(inputPath);
-			const meta = await pipeline.metadata();
-			pipeline = this.applyResize(pipeline, meta, options);
-			pipeline = this.applyFormat(pipeline, options);
-			const { data, info } = await pipeline.toBuffer({ resolveWithObject: true });
-			return { buffer: data, metadata: info };
-		} catch (error) {
-			throw toServiceError(error, {
-				code: ServiceErrorCode.FILE_READ_ERROR,
-				message: 'Error al procesar imagen',
-				context: { inputPath, options },
-				serviceName: SERVICE_NAME,
-			});
-		}
-	}
-
-	private applyResize(pipeline: sharp.Sharp, metadata: sharp.Metadata, options: ImageProcessingOptions): sharp.Sharp {
-		const width = metadata.width ?? 0;
-		const height = metadata.height ?? 0;
-		const hasResize = Boolean(options.width) || Boolean(options.height);
-		if (!hasResize) {
-			return pipeline;
-		}
-		const aspectRatio = width > 0 && height > 0 ? width / height : 1;
-		let targetWidth = options.width;
-		let targetHeight = options.height;
-		if (aspectRatio > 1 && targetWidth) {
-			targetHeight = Math.round(targetWidth / aspectRatio);
-		} else if (targetHeight) {
-			targetWidth = Math.round(targetHeight * aspectRatio);
-		}
-		return pipeline.resize(targetWidth, targetHeight, {
-			fit: options.fit || 'cover',
-			withoutEnlargement: true,
-		});
-	}
-
-	private applyFormat(pipeline: sharp.Sharp, options: ImageProcessingOptions): sharp.Sharp {
-		switch (options.format) {
-			case 'webp':
-				// nearLossless genera archivos mayores; preferimos calidad moderada con esfuerzo razonable.
-				return pipeline.webp({ quality: options.quality || 75, effort: 4 });
-			case 'jpeg':
-				return pipeline.jpeg({ quality: options.quality || 75, progressive: true, mozjpeg: true });
-			case 'png':
-				return pipeline.png({ progressive: true, compressionLevel: 9 });
-			default:
-				return pipeline;
 		}
 	}
 
@@ -309,9 +180,8 @@ class ImageService {
 			}
 
 			// Emitir evento de creación
-			await this.emitEvent(IMAGE_EVENTS.IMAGE_CREATED, { id: newImage.id });
-			await this.emitEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'create', imageId: newImage.id });
-
+			await emitImageEvent(IMAGE_EVENTS.IMAGE_CREATED, { id: newImage.id });
+			await emitImageEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'create', imageId: newImage.id });
 			return result;
 		} catch (error: any) {
 			throw toServiceError(error, {
@@ -409,9 +279,8 @@ class ImageService {
 				throw createEntityNotFoundError('Image', id, 'después de actualizar');
 			}
 
-			await this.emitEvent(IMAGE_EVENTS.IMAGE_UPDATED, { id });
-			await this.emitEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'update', imageId: id });
-
+			await emitImageEvent(IMAGE_EVENTS.IMAGE_UPDATED, { id });
+			await emitImageEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'update', imageId: id });
 			return imageWithStats;
 		} catch (error) {
 			throw toServiceError(error, {
@@ -443,9 +312,8 @@ class ImageService {
 			await db.delete(images).where(eq(images.id, id));
 
 			// Emitir eventos
-			await this.emitEvent(IMAGE_EVENTS.IMAGE_DELETED, { id });
-			await this.emitEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'delete', imageId: id });
-
+			await emitImageEvent(IMAGE_EVENTS.IMAGE_DELETED, { id });
+			await emitImageEvent(IMAGE_EVENTS.IMAGES_CHANGED, { action: 'delete', imageId: id });
 			imageLogger.info('✅ Imagen eliminada correctamente');
 		} catch (error) {
 			imageLogger.error('❌ Error eliminando imagen:', error);
@@ -691,9 +559,7 @@ class ImageService {
 			}
 
 			// Procesar la imagen para crear el thumbnail (primero en WebP)
-			let { buffer, metadata } = await this.processImage(image.path, config);
-
-			// Si el resultado supera el tope, recomprimir con ajustes más fuertes
+			let { buffer, metadata } = await processImage(image.path, config); // Si el resultado supera el tope, recomprimir con ajustes más fuertes
 			let mime = 'image/webp';
 			if (buffer.length > MAX_THUMBNAIL_SIZE_BYTES) {
 				imageLogger.info('[thumbnail] buffer grande, recomprimiendo', {
@@ -744,8 +610,7 @@ class ImageService {
 			}
 
 			// Emitir evento de thumbnail generado
-			await this.emitEvent(IMAGE_EVENTS.THUMBNAIL_GENERATED, { imageId });
-
+			await emitImageEvent(IMAGE_EVENTS.THUMBNAIL_GENERATED, { imageId });
 			const memAfter = process.memoryUsage();
 			const durationMs = Number((process.hrtime.bigint() - startHr) / 1000000n);
 			imageLogger.info('[thumbnail] ✅ done', {
@@ -771,7 +636,7 @@ class ImageService {
 					error: e instanceof Error ? e.message : String(e),
 				});
 			}
-			await this.emitEvent(IMAGE_EVENTS.ERROR, {
+			await emitImageEvent(IMAGE_EVENTS.ERROR, {
 				message: 'Error al generar thumbnail',
 				imageId,
 				error: error instanceof Error ? error.message : String(error),

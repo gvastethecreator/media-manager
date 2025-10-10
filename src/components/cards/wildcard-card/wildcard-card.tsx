@@ -1,5 +1,5 @@
 import { Shuffle } from 'lucide-react';
-import React, { useMemo } from 'react';
+import React, { memo, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -18,7 +18,7 @@ export interface WildcardCardProps {
  * Card para mostrar un comodín
  * Sigue el diseño de los otros componentes de tarjetas
  */
-export function WildcardCard({ wildcard, onClick, className, showBadges = true }: WildcardCardProps) {
+export const WildcardCard = memo(function WildcardCard({ wildcard, onClick, className, showBadges = true }: WildcardCardProps) {
 	// Calcular colores
 	const primaryColor = useMemo(() => wildcard.color || '#3b82f6', [wildcard.color]);
 	const secondaryColor = useMemo(() => {
@@ -140,7 +140,7 @@ export function WildcardCard({ wildcard, onClick, className, showBadges = true }
 			{cardContent}
 		</Link>
 	);
-}
+});
 
 // Exportar también un componente memorizado
-export const MemoizedWildcardCard = React.memo(WildcardCard);
+export const MemoizedWildcardCard = WildcardCard;

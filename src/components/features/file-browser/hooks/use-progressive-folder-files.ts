@@ -18,6 +18,8 @@ interface ProgressiveLoadingState {
 	isLoadingMore: boolean;
 	// Infinite scroll features
 	scrollContainerRef: React.RefObject<HTMLDivElement | null>;
+	refetch: () => Promise<void>;
+	invalidate: () => void;
 }
 
 /**
@@ -33,12 +35,13 @@ export function useProgressiveFolderFiles(folderId: string | null): ProgressiveL
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 
 	// Usar el nuevo hook paginado que hace carga real
-	const { files, isLoading, isLoadingMore, error, hasMore, loadMore, total, loadedCount } = useFolderFilesPaginated({
-		folderId,
-		includeSubfolders,
-		pageSize: 150, // Tamaño de página optimizado
-		enabled: !!folderId,
-	});
+	const { files, isLoading, isLoadingMore, error, hasMore, loadMore, total, loadedCount, refetch, invalidate } =
+		useFolderFilesPaginated({
+			folderId,
+			includeSubfolders,
+			pageSize: 150, // Tamaño de página optimizado
+			enabled: !!folderId,
+		});
 
 	const loadingStage = useMemo((): 'initial' | 'loading' | 'complete' => {
 		if (!folderId) return 'initial';
@@ -119,5 +122,7 @@ export function useProgressiveFolderFiles(folderId: string | null): ProgressiveL
 		chunkSize: 150, // Tamaño de página real
 		isLoadingMore,
 		scrollContainerRef,
+		refetch,
+		invalidate,
 	};
 }

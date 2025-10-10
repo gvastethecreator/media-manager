@@ -86,6 +86,32 @@ export const videoPlaces = sqliteTable(
 	})
 );
 
+// Relación Album-Place
+export const albumPlaces = sqliteTable(
+	'_AlbumToPlace',
+	{
+		A: text('A').notNull(), // albumId
+		B: text('B').notNull(), // placeId
+	},
+	(table) => ({
+		AB_unique: uniqueIndex('_AlbumToPlace_AB_unique').on(table.A, table.B),
+		B_index: index('_AlbumToPlace_B_index').on(table.B),
+	})
+);
+
+// Relación Character-Place
+export const characterPlaces = sqliteTable(
+	'_CharacterToPlace',
+	{
+		A: text('A').notNull(), // characterId
+		B: text('B').notNull(), // placeId
+	},
+	(table) => ({
+		AB_unique: uniqueIndex('_CharacterToPlace_AB_unique').on(table.A, table.B),
+		B_index: index('_CharacterToPlace_B_index').on(table.B),
+	})
+);
+
 // Relación Image-WorldItem
 export const imageWorldItems = sqliteTable(
 	'_ImageToWorldItem',
@@ -239,5 +265,61 @@ export const groupTags = sqliteTable(
 	(table) => ({
 		AB_unique: uniqueIndex('_GroupToTag_AB_unique').on(table.A, table.B),
 		B_index: index('_GroupToTag_B_index').on(table.B),
+	})
+);
+
+// =================================================================================
+// TASK RELATIONS
+// =================================================================================
+
+// Relación Image-Task
+export const imageTasks = sqliteTable(
+	'_ImageToTask',
+	{
+		A: text('A').notNull(), // imageId
+		B: text('B').notNull(), // taskId
+	},
+	(table) => ({
+		AB_unique: uniqueIndex('_ImageToTask_AB_unique').on(table.A, table.B),
+		B_index: index('_ImageToTask_B_index').on(table.B),
+	})
+);
+
+// Relación Video-Task
+export const videoTasks = sqliteTable(
+	'_VideoToTask',
+	{
+		A: text('A').notNull(), // videoId
+		B: text('B').notNull(), // taskId
+	},
+	(table) => ({
+		AB_unique: uniqueIndex('_VideoToTask_AB_unique').on(table.A, table.B),
+		B_index: index('_VideoToTask_B_index').on(table.B),
+	})
+);
+
+// Relación Album-Task
+export const albumTasks = sqliteTable(
+	'_AlbumToTask',
+	{
+		A: text('A').notNull(), // albumId
+		B: text('B').notNull(), // taskId
+	},
+	(table) => ({
+		AB_unique: uniqueIndex('_AlbumToTask_AB_unique').on(table.A, table.B),
+		B_index: index('_AlbumToTask_B_index').on(table.B),
+	})
+);
+
+// Relación Character-Task
+export const characterTasks = sqliteTable(
+	'_CharacterToTask',
+	{
+		A: text('A').notNull(), // characterId
+		B: text('B').notNull(), // taskId
+	},
+	(table) => ({
+		AB_unique: uniqueIndex('_CharacterToTask_AB_unique').on(table.A, table.B),
+		B_index: index('_CharacterToTask_B_index').on(table.B),
 	})
 );
