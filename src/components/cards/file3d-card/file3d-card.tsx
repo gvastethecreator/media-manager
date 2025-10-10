@@ -1,5 +1,5 @@
 import { BoxIcon, DownloadIcon, EyeIcon, RotateCcwIcon, ZoomInIcon } from 'lucide-react';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 import type { File3DWithStats } from '@/types/entities/file3d';
@@ -32,7 +32,7 @@ interface File3DCardProps {
 /**
  * File3DCard - Componente de tarjeta para archivos 3D con viewer integrado
  */
-export function File3DCard({
+export const File3DCard = memo(function File3DCard({
 	file3d,
 	compact = false,
 	tcgMode = true,
@@ -330,4 +330,4 @@ export function File3DCard({
 			</div>
 		</CardContainer>
 	);
-}
+});

@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
@@ -8,7 +8,7 @@ import { GroupCardFooter } from './group-card-footer';
 import { GroupCardHeader } from './group-card-header';
 import { GroupCardImages } from './group-card-images';
 
-export function GroupCard({
+export const GroupCard = memo(function GroupCard({
 	group,
 	onClick,
 	className,
@@ -236,4 +236,4 @@ export function GroupCard({
 			{cardContent}
 		</Link>
 	);
-}
+});

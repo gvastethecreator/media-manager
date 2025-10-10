@@ -8,6 +8,7 @@ export interface FileCanvasTableGroupedProps {
 	scrollContainer?: HTMLElement | null;
 	onItemClick?: (item: MediaItem, modifiers?: ClickModifiers) => void;
 	onItemDoubleClick?: (item: MediaItem) => void;
+	onContainerReady?: (el: HTMLDivElement | null) => void;
 }
 
 export function FileCanvasTableGrouped({
@@ -15,10 +16,11 @@ export function FileCanvasTableGrouped({
 	scrollContainer = null,
 	onItemClick,
 	onItemDoubleClick,
+	onContainerReady,
 }: FileCanvasTableGroupedProps) {
 	const headerH = CanvasRenderConfig.group.headerHeight;
 	return (
-		<div className="file-browser-canvas file-browser-table h-full overflow-auto">
+		<div className="file-browser-canvas file-browser-table h-full overflow-auto" ref={onContainerReady}>
 			<div className="flex flex-col gap-2">
 				{groups.map((g) => (
 					<div className="flex flex-col" key={g.key}>
@@ -28,7 +30,12 @@ export function FileCanvasTableGrouped({
 						>
 							{g.displayName}
 						</h2>
-						<Table items={g.items} onItemClick={onItemClick} onItemDoubleClick={onItemDoubleClick} />
+						<Table
+							items={g.items}
+							onItemClick={onItemClick}
+							onItemDoubleClick={onItemDoubleClick}
+							scrollContainer={scrollContainer}
+						/>
 					</div>
 				))}
 			</div>

@@ -15,6 +15,7 @@ export interface ListProps {
 	 * Permite desactivar o personalizar el testid en usos agrupados para evitar duplicados.
 	 */
 	testId?: string | null;
+	onContainerReady?: (el: HTMLDivElement | null) => void;
 }
 
 export function List({
@@ -24,6 +25,7 @@ export function List({
 	onItemClick,
 	onItemDoubleClick,
 	testId = 'listview-container',
+	onContainerReady,
 }: ListProps) {
 	const [internalScrollEl, setInternalScrollEl] = useState<HTMLDivElement | null>(null);
 	const effectiveScrollContainer = scrollContainer ?? internalScrollEl;
@@ -31,7 +33,10 @@ export function List({
 		<div
 			className="file-browser-canvas file-browser-list h-full w-full overflow-auto"
 			{...(testId ? { 'data-testid': testId } : {})}
-			ref={setInternalScrollEl}
+			ref={(el) => {
+				setInternalScrollEl(el);
+				onContainerReady?.(el);
+			}}
 		>
 			<div className="relative min-h-[160px]" data-testid="file-browser-scroll-area-viewport">
 				<ListCanvas

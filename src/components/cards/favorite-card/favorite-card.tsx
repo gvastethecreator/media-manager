@@ -1,3 +1,4 @@
+import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import type { FavoriteExtended } from '@/types/entities/favorite';
 import { CardContainer } from '../card-container';
@@ -13,7 +14,7 @@ interface FavoriteCardProps {
 /**
  * Card sencilla para mostrar un favorito
  */
-export function FavoriteCard({ favorite, onSelect, isSelected, className }: FavoriteCardProps) {
+export const FavoriteCard = memo(function FavoriteCard({ favorite, onSelect, isSelected, className }: FavoriteCardProps) {
 	const primaryColor = favorite.entityColor || '#eab308';
 	const content = (
 		<CardContainer
@@ -35,4 +36,4 @@ export function FavoriteCard({ favorite, onSelect, isSelected, className }: Favo
 	) : (
 		content
 	);
-}
+});

@@ -56,6 +56,8 @@ export {
 // RELATIONS DOMAIN EXPORTS
 // =================================================================================
 export {
+	albumTasks,
+	characterTasks,
 	groupAlbums,
 	// Relaciones de grupos
 	groupImages,
@@ -73,6 +75,7 @@ export {
 	imageProperties,
 	// Relaciones de taxonomía
 	imageTags,
+	imageTasks,
 	imageWildcards,
 	imageWorldItems,
 	videoAlbums,
@@ -84,6 +87,7 @@ export {
 	videoPrompts,
 	videoProperties,
 	videoTags,
+	videoTasks,
 	videoWildcards,
 	videoWorldItems,
 } from './relations';
@@ -95,6 +99,7 @@ export {
 	prompts,
 	properties,
 	tags,
+	tasks,
 	wildcards,
 } from './taxonomy';
 

@@ -26,31 +26,22 @@ import {
 	wildcards,
 	worldItems,
 } from '@/lib/drizzle/schema/index';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { revalidatePath } from '@/lib/server/revalidate';
-
-// Constantes para caché
-const STATS_CACHE_TAG = 'stats';
-const STATS_REVALIDATE_SECONDS = 300; // 5 minutos en lugar de 1 minuto
-
-// Logger para estadísticas
-const statsLogger = serverLogger.withContext('StatsService');
-
-// Manejo de errores - enfoque funcional (sin enum)
-const StatsErrorCode = {
-	NOT_FOUND: 'NOT_FOUND',
-	VALIDATION_ERROR: 'VALIDATION_ERROR',
-	OPERATION_FAILED: 'OPERATION_FAILED',
-	ENTITY_NOT_FOUND: 'ENTITY_NOT_FOUND',
-} as const;
-type StatsErrorCode = (typeof StatsErrorCode)[keyof typeof StatsErrorCode];
-
-const createStatsError = (message: string, code: StatsErrorCode = StatsErrorCode.OPERATION_FAILED, cause?: unknown) => {
-	const error = new Error(message);
-	error.name = 'StatsError';
-	Object.assign(error, { code, cause });
-	return error;
-};
+import {
+	statsLogger,
+	StatsErrorCode,
+	createStatsError,
+	fetchMediaCounts,
+	fetchOrgCounts,
+	fetchWorldCounts,
+	fetchSystemCounts,
+	fetchSizeSums,
+	buildDiskUsage,
+	formatBytes,
+	type GeneralStats,
+	type ExtendedStats,
+	type EntitySearchResult,
+} from './stats';
 
 // Interfaces
 export interface GeneralStats {

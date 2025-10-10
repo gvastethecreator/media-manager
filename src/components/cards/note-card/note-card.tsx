@@ -20,7 +20,7 @@ export interface NoteCardProps {
 /**
  * Card para mostrar una nota, con un diseño inspirado en cartas de TCG.
  */
-export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: NoteCardProps) {
+export const NoteCard = memo(function NoteCard({ noteId, onClick, className, style, tcgMode = true }: NoteCardProps) {
 	const { data: note, isLoading, error } = useNote(noteId);
 	const { data: recentImagesData } = useRecentNoteImages(noteId);
 	const { data: noteCounts } = useNoteCounts(noteId);
@@ -221,7 +221,7 @@ export function NoteCard({ noteId, onClick, className, style, tcgMode = true }: 
 			/>
 		</motion.div>
 	);
-}
+});
 
-// Versión memorizada para optimizar rendimiento en listas
-export const MemoizedNoteCard = memo(NoteCard);
+// Versión memorizada ya incluida en la definición principal
+export const MemoizedNoteCard = NoteCard;

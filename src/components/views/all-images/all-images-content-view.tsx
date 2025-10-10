@@ -185,31 +185,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 		return <LoadingScreen />;
 	}
 
-	// Comentamos esta lógica para que siempre se muestre el FileBrowser
-	// El FileBrowser se encargará de mostrar el estado vacío si no hay imágenes
-	// if ((!images || images.length === 0) && !isIndexing) {
-	// 	return (
-	// 		<BaseContentView
-	// 			title="Todas las Imágenes"
-	// 			description="Gestiona y visualiza todas tus imágenes"
-	// 			icon={<ImageIcon className="h-5 w-5" />}
-	// 			headerControls={
-	// 				<Button onClick={startIndexing}>
-	// 					<FolderSync className="h-4 w-4 mr-2" />
-	// 					Buscar e indexar carpetas
-	// 				</Button>
-	// 			}
-	// 		>
-	// 			{renderIndexingStatus()}
-	// 			<EmptyState
-	// 				icon={ImageIcon}
-	// 				title="No hay imágenes"
-	// 				description="No se encontraron imágenes en la base de datos. Prueba agregando carpetas o iniciando la indexación."
-	// 			/>
-	// 		</BaseContentView>
-	// 	);
-	// }
-
+	// El FileBrowser maneja el estado vacío internamente
 	return (
 		<div className="h-full">
 			{/* Barra de estado de indexación */}

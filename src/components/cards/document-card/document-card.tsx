@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface DocumentCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -6,7 +6,7 @@ export interface DocumentCardProps extends React.HTMLAttributes<HTMLDivElement> 
 	className?: string;
 }
 
-export function DocumentCard({ document, className, onClick, ...rest }: DocumentCardProps) {
+export const DocumentCard = memo(function DocumentCard({ document, className, onClick, ...rest }: DocumentCardProps) {
 	if (onClick) {
 		return (
 			<button
@@ -33,6 +33,6 @@ export function DocumentCard({ document, className, onClick, ...rest }: Document
 			<div className="truncate p-2 font-medium text-sm">{document?.name || 'Documento'}</div>
 		</div>
 	);
-}
+});
 
 export default DocumentCard;
