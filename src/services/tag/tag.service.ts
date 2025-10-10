@@ -10,93 +10,24 @@ import { and, asc, count, desc, eq, isNotNull, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { images, imageTags, tags } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { recomputeAggregatesForTag } from '@/server/services/aggregates.service';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { toTagWithStats } from '@/transformers/tag';
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
+import { TagServiceError } from './tag-errors';
+import { notifyTagChange, TAG_EVENTS } from './tag-events';
+import type { GetTagsOptions, GetTagsResult } from './tag-types';
+
+// Re-exports para compatibilidad backward
+export { createTagError, TagServiceError } from './tag-errors';
+export { notifyTagChange, TAG_EVENTS } from './tag-events';
+export type { GetTagsOptions, GetTagsResult } from './tag-types';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('TagService');
 
 // Constantes del servicio
 const REVALIDATE_PATHS = ['/dashboard/tags', '/dashboard/images', '/dashboard/stats', '/api/tags'];
-
-// Eventos del servicio de etiquetas
-export const TAG_EVENTS = {
-	CREATED: 'tag:created',
-	UPDATED: 'tag:updated',
-	DELETED: 'tag:deleted',
-	STATS_UPDATED: 'tag:stats:updated',
-	ERROR: 'tag:error',
-} as const;
-
-// Tipos de entrada
-export interface GetTagsOptions {
-	includeArchived?: boolean;
-	search?: string;
-	orderBy?: 'name' | 'createdAt' | 'updatedAt';
-	orderDirection?: 'asc' | 'desc';
-	onlyFavorites?: boolean;
-}
-
-export interface GetTagsResult {
-	tags: TagWithStats[];
-	total: number;
-}
-
-/**
- * Clase de error personalizada para operaciones de Tag
- */
-export class TagServiceError extends Error {
-	constructor(
-		message: string,
-		public code?: string,
-		public cause?: unknown
-	) {
-		super(message);
-		this.name = 'TagServiceError';
-	}
-}
-
-/**
- * Notifica cambios en las etiquetas a través del sistema de eventos
- */
-export const notifyTagChange = async (
-	action: 'create' | 'update' | 'delete',
-	tag: TagWithStats | { id: string }
-): Promise<void> => {
-	try {
-		let eventType: string;
-		switch (action) {
-			case 'create':
-				eventType = TAG_EVENTS.CREATED;
-				break;
-			case 'update':
-				eventType = TAG_EVENTS.UPDATED;
-				break;
-			case 'delete':
-				eventType = TAG_EVENTS.DELETED;
-				break;
-			default:
-				eventType = 'tag:modified';
-		}
-
-		// Emitir evento al sistema central
-		await emit({
-			type: 'tags:modified',
-			data: { action, tag },
-		});
-
-		// Notificar a estadísticas
-		statsEventEmitter.emit(STATS_EVENTS.TAG_CHANGE);
-
-		logger.info(`🔔 Notificado cambio en etiqueta: ${action}`, { tagId: tag.id });
-	} catch (error) {
-		logger.error(`❌ Error al notificar cambio en etiqueta: ${action}`, { error, tagId: tag.id });
-	}
-};
 
 /**
  * Revalida las rutas de caché relacionadas con las etiquetas

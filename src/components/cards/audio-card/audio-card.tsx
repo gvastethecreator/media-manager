@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface AudioCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -6,7 +6,7 @@ export interface AudioCardProps extends React.HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
-export function AudioCard({ audio, className, onClick, ...rest }: AudioCardProps) {
+export const AudioCard = memo(function AudioCard({ audio, className, onClick, ...rest }: AudioCardProps) {
 	if (onClick) {
 		return (
 			<button
@@ -33,6 +33,6 @@ export function AudioCard({ audio, className, onClick, ...rest }: AudioCardProps
 			<div className="truncate p-2 font-medium text-sm">{audio?.name || 'Audio'}</div>
 		</div>
 	);
-}
+});
 
 export default AudioCard;

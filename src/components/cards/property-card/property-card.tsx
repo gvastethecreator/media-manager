@@ -1,5 +1,5 @@
 import { AlertCircle, Microscope } from 'lucide-react';
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -18,7 +18,7 @@ export interface PropertyCardProps {
  * Card para mostrar una propiedad - Refactorizado para usar PropertyWithStats
  * Sigue el diseño de los otros componentes de tarjetas estandarizados
  */
-export function PropertyCard({ property, onClick, className, showBadges = true }: PropertyCardProps) {
+export const PropertyCard = memo(function PropertyCard({ property, onClick, className, showBadges = true }: PropertyCardProps) {
 	// Calcular colores
 	const primaryColor = useMemo(() => property?.color || '#3b82f6', [property?.color]);
 	const secondaryColor = useMemo(() => {
@@ -129,7 +129,7 @@ export function PropertyCard({ property, onClick, className, showBadges = true }
 			{cardContent}
 		</Link>
 	);
-}
+});
 
 // Exportar también un componente memorizado si es necesario
-export const MemoizedPropertyCard = React.memo(PropertyCard);
+export const MemoizedPropertyCard = PropertyCard;

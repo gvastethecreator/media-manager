@@ -23,7 +23,7 @@ import eventsRouter from './routes/events';
 import favoritesRouter from './routes/favorites';
 import file3dsRouter from './routes/file3ds.js';
 import filesRouter from './routes/files.js';
-import { foldersRouter } from './routes/folders.js';
+import { foldersRouter } from './routes/folders/index';
 import groupsRouter from './routes/groups';
 import { imagesRouter } from './routes/images.js';
 import jsonFilesRouter from './routes/json-files';
@@ -42,6 +42,7 @@ import settingsRouter from './routes/settings';
 import statsRouter from './routes/stats';
 import systemRouter from './routes/system';
 import tagsRouter from './routes/tags';
+import tasksRouter from './routes/tasks';
 import testCharactersRouter from './routes/test-characters';
 import thumbnailsRouter from './routes/thumbnails';
 import uploadedImagesRouter from './routes/uploaded-images';
@@ -103,6 +104,7 @@ app.use('/api/files', filesRouter);
 app.use('/api/albums', albumsRouter);
 app.use('/api/download', downloadRouter);
 app.use('/api/tags', tagsRouter);
+app.use('/api/tasks', tasksRouter);
 app.use('/api/characters', charactersRouter);
 // app.use('/api/characters-debug', charactersDebugRouter); // DESHABILITADO - archivo no existe
 // app.use('/api/albums-debug', albumsDebugRouter); // DESHABILITADO - archivo no existe

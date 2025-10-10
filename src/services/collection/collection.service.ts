@@ -1,30 +1,28 @@
 /**
  * @file Servicio para gestión de colecciones
  * @module services/collection
- * @description Servicio centralizado para ope		if (options.where.isFavorite !== undefined) {
-			conditions.push(eq(collections.isFavorite, options.where.isFavorite));
-		}iones CRUD y lógica de negocio de colecciones
+ * @description Servicio centralizado para operaciones CRUD y lógica de negocio de colecciones
  * @updated 2025-01-27
  */
 
 import * as crypto from 'crypto';
-import { and, asc, desc, eq, like, or } from 'drizzle-orm';
+import { desc, eq } from 'drizzle-orm';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
 import { collections, imageCollections, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { type EventType, emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
 import { recomputeAggregatesForCollection } from '@/server/services/aggregates.service';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromDrizzleCollection, fromDrizzleCollections } from '@/transformers/collection/transformer';
-import type {
-	CollectionBase,
-	CollectionCreateInput,
-	CollectionSearchOptions,
-	CollectionUpdateInput,
-	CollectionWithStats,
-} from '@/types/entities/collection';
+import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
+import { CollectionServiceError } from './collection-errors';
+import { COLLECTION_EVENTS, notifyCollectionChange } from './collection-events';
+import { searchCollections } from './collection-search.service';
+
+// Re-exports para compatibilidad backward
+export { CollectionServiceError, createCollectionError } from './collection-errors';
+export { COLLECTION_EVENTS, notifyCollectionChange } from './collection-events';
+export { searchCollections } from './collection-search.service';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('CollectionService');
@@ -32,177 +30,12 @@ const logger = serverLogger.withContext('CollectionService');
 // Constantes del servicio
 const REVALIDATE_PATHS = ['/collections', '/settings/collections'];
 
-// Selección optimizada para obtener solo los conteos
-
-// Eventos del servicio de colecciones
-export const COLLECTION_EVENTS = {
-	CREATED: 'collection:created',
-	UPDATED: 'collection:updated',
-	DELETED: 'collection:deleted',
-	ITEMS_ADDED: 'collection:items:added',
-	ITEMS_REMOVED: 'collection:items:removed',
-	STATS_UPDATED: 'collection:stats:updated',
-} as const;
-
-/**
- * Clase de error personalizada para operaciones de Collection
- */
-export class CollectionServiceError extends Error {
-	constructor(
-		message: string,
-		public code?: string,
-		public cause?: unknown
-	) {
-		super(message);
-		this.name = 'CollectionServiceError';
-	}
-}
-
-/**
- * Notifica cambios en las colecciones a través del sistema de eventos
- */
-export const notifyCollectionChange = async (
-	action: 'create' | 'update' | 'delete' | 'items:add' | 'items:remove',
-	collection: CollectionBase | CollectionWithStats | { id: string }
-) => {
-	let eventType: string;
-
-	switch (action) {
-		case 'create':
-			eventType = COLLECTION_EVENTS.CREATED;
-			break;
-		case 'update':
-			eventType = COLLECTION_EVENTS.UPDATED;
-			break;
-		case 'delete':
-			eventType = COLLECTION_EVENTS.DELETED;
-			break;
-		case 'items:add':
-			eventType = COLLECTION_EVENTS.ITEMS_ADDED;
-			break;
-		case 'items:remove':
-			eventType = COLLECTION_EVENTS.ITEMS_REMOVED;
-			break;
-		default:
-			eventType = 'collection:modified';
-	}
-
-	// Emitir evento al sistema central
-	await emit({
-		type: eventType as EventType,
-		data: { action, collection },
-	});
-
-	// Notificar a estadísticas
-	statsEventEmitter.emit(STATS_EVENTS.COLLECTION_CHANGE);
-
-	logger.info(`🔔 Notificado cambio en colección: ${action}`, { collectionId: collection.id });
-};
-
 /**
  * Revalida las rutas de caché relacionadas con las colecciones
  */
 const revalidateCollectionPaths = async (): Promise<void> => {
 	for (const path of REVALIDATE_PATHS) {
 		revalidatePath(path);
-	}
-};
-
-/**
- * Busca y obtiene colecciones según los criterios de búsqueda
- */
-export const searchCollections = async (options: CollectionSearchOptions): Promise<CollectionWithStats[]> => {
-	try {
-		// **MIGRACIÓN A DRIZZLE**
-		logger.info('🔍 Buscando colecciones', { options });
-
-		// Construir condiciones de filtro
-		const conditions: any[] = [];
-
-		if (options.where?.search) {
-			conditions.push(
-				or(
-					like(collections.name, `%${options.where.search}%`),
-					like(collections.description, `%${options.where.search}%`)
-				)
-			);
-		}
-
-		if (options.where?.isFavorite !== undefined) {
-			conditions.push(eq(collections.isFavorite, Boolean(options.where.isFavorite)));
-		}
-
-		// Nota: La tabla collections no tiene campo category, se omite este filtro
-
-		// Construir query
-		let query = db
-			.select({
-				id: collections.id,
-				name: collections.name,
-				description: collections.description,
-				emoji: collections.emoji,
-				color: collections.color,
-				featuredImage: collections.featuredImage,
-
-				isFavorite: collections.isFavorite,
-				// totalImages: moved to EntityAggregates
-				// totalVideos: moved to EntityAggregates
-				// totalSize: moved to EntityAggregates
-				lastImageAddedAt: collections.lastImageAddedAt,
-				lastVideoAddedAt: collections.lastVideoAddedAt,
-				parentId: collections.parentId,
-				createdAt: collections.createdAt,
-				updatedAt: collections.updatedAt,
-			})
-			.from(collections);
-
-		// Aplicar filtros
-		if (conditions.length > 0) {
-			query = query.where(and(...conditions));
-		}
-
-		// Aplicar ordenamiento
-		const orderBy = options.orderBy || { createdAt: 'desc' };
-		if (orderBy.createdAt) {
-			query = query.orderBy(orderBy.createdAt === 'desc' ? desc(collections.createdAt) : asc(collections.createdAt));
-		} else if (orderBy.name) {
-			query = query.orderBy(orderBy.name === 'desc' ? desc(collections.name) : asc(collections.name));
-		}
-
-		// Aplicar paginación
-		if (options.skip) {
-			query = query.offset(options.skip);
-		}
-		if (options.take) {
-			query = query.limit(options.take);
-		}
-
-		const drizzleCollections = await query;
-
-		const transformedCollections = drizzleCollections.map((rawCollection: any) => ({
-			...rawCollection,
-			isFavorite: Boolean(rawCollection.isFavorite),
-			// totalImages: 0, // TODO: get from EntityAggregates
-			// totalVideos: 0, // TODO: get from EntityAggregates
-			// totalSize: 0, // TODO: get from EntityAggregates
-			lastImageAddedAt: rawCollection.lastImageAddedAt || null,
-			lastVideoAddedAt: rawCollection.lastVideoAddedAt || null,
-		}));
-
-		// Transformar usando el transformer correcto
-		const result = transformedCollections
-			.map((collection: any) => fromDrizzleCollection(collection, collection._count))
-			.filter((c: CollectionWithStats | null): c is CollectionWithStats => c !== null);
-
-		logger.info(`✅ ${result.length} colecciones encontradas`);
-		return result;
-	} catch (error) {
-		logger.error('❌ Error al buscar colecciones', { error, options });
-		throw new CollectionServiceError(
-			`Error al buscar colecciones: ${error instanceof Error ? error.message : 'Error desconocido'}`,
-			'SEARCH_COLLECTIONS_FAILED',
-			error
-		);
 	}
 };
 

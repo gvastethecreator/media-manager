@@ -6,33 +6,10 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emitProgress } from '@/lib/server/events.server';
 import type { ProcessStatus } from '@/types/folders';
+import type { ReindexAnalysisResult, ReindexOptions, ReindexPhaseResult } from './folder-reindex-types';
 
-export interface ReindexPhaseResult {
-	success: boolean;
-	processed: number;
-	failed: number;
-	errors: string[];
-	duration: number;
-}
-
-export interface ReindexAnalysisResult {
-	totalFolders: number;
-	existingFolders: Array<{ id: string; path: string; name: string; exists: boolean }>;
-	missingFolders: Array<{ id: string; path: string; name: string }>;
-	newSubfolders: Array<{ path: string; parentId: string | null; name: string }>;
-	totalFiles: number;
-	estimatedDuration: number;
-}
-
-export interface ReindexOptions {
-	folderId?: string; // Si se especifica, solo reindexar esta carpeta
-	includeSubfolders?: boolean;
-	includeHidden?: boolean;
-	concurrency?: number;
-	emitEvents?: boolean;
-	skipThumbnails?: boolean;
-	skipMetadata?: boolean;
-}
+// Re-exports para compatibilidad backward
+export type { ReindexAnalysisResult, ReindexOptions, ReindexPhaseResult } from './folder-reindex-types';
 
 export class FolderReindexService {
 	private static instance: FolderReindexService;

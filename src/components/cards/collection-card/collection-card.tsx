@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 // Importar tipos correctos de entities
@@ -24,6 +24,8 @@ export interface CollectionCardProps {
  * Este componente muestra información detallada de una colección en un formato
  * inspirado en cartas de juegos como Magic/Yu-Gi-Oh/Pokémon, con múltiples
  * secciones que muestran datos y miniaturas de las imágenes contenidas.
+ * 
+ * ✅ OPTIMIZADO: Ya tiene MemoizedCollectionCard export
  */
 export function CollectionCard({
 	collection,

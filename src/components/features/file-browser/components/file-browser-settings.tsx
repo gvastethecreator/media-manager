@@ -1,7 +1,5 @@
-import type { LucideIcon } from 'lucide-react';
 import {
 	ArrowDown,
-	Cpu,
 	Eye,
 	FolderTree,
 	Gauge,
@@ -9,176 +7,36 @@ import {
 	Layers,
 	LayoutGrid,
 	List,
-	Monitor,
 	RefreshCcw,
 	RotateCcw,
 	Search,
 	Settings,
 	Table,
 	X,
-	Zap,
 } from 'lucide-react';
-import React, { memo } from 'react';
+import { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import {
+	ColorPicker,
 	type PaginationMode,
+	RENDERING_MODES,
 	type RenderingMode,
-	useViewOptionsStore,
+	Row,
+	Section,
+	useSettingsBindings,
+	VIEW_MODES,
 	type ViewMode,
-} from '@/store/ui/view-options.slice';
+} from './settings';
 
-// Helper components
-interface SectionProps {
-	icon: LucideIcon;
-	title: string;
-	color: string;
-	children: React.ReactNode;
-}
-
-const Section = ({ icon: Icon, title, color, children }: SectionProps) => (
-	<div className="p-0">
-		<div className="mb-2 flex items-center gap-2">
-			<Icon className={`h-4 w-4 ${color}`} />
-			<span className="font-medium text-gray-700 text-sm dark:text-gray-300">{title}</span>
-		</div>
-		<Separator className="my-2" />
-		<div className="space-y-3">{children}</div>
-	</div>
-);
-
-interface RowProps {
-	children: React.ReactNode;
-}
-
-const Row = ({ children }: RowProps) => <div className="flex items-center justify-between gap-3">{children}</div>;
-
-interface ColorPickerProps {
-	value: string;
-	onChange: (value: string) => void;
-}
-
-const ColorPicker = ({ value, onChange }: ColorPickerProps) => {
-	const presetColors = ['#ffffff', '#f8f9fa', '#e9ecef', '#dee2e6', 'transparent', '#000000', '#1a1a1a', '#2d3748'];
-
-	return (
-		<div className="flex items-center gap-2">
-			<input
-				className="h-8 w-12 cursor-pointer rounded border"
-				onChange={(e) => onChange(e.target.value)}
-				type="color"
-				value={value === 'transparent' ? '#ffffff' : value}
-			/>
-			<input
-				className="h-8 w-28 rounded-md border bg-background px-2 text-gray-600 text-sm dark:text-gray-400"
-				onChange={(e) => onChange(e.target.value)}
-				placeholder="#ffffff"
-				type="text"
-				value={value}
-			/>
-			<Select onValueChange={onChange} value={value}>
-				<SelectTrigger className="h-8 w-24 text-xs">
-					<SelectValue />
-				</SelectTrigger>
-				<SelectContent>
-					{presetColors.map((color) => (
-						<SelectItem key={color} value={color}>
-							<div className="flex items-center gap-2">
-								<div
-									className="h-3 w-3 rounded border"
-									style={{ backgroundColor: color === 'transparent' ? 'transparent' : color }}
-								/>
-								<span className="text-xs">{color}</span>
-							</div>
-						</SelectItem>
-					))}
-				</SelectContent>
-			</Select>
-		</div>
-	);
-};
-
-// Constants
-const VIEW_MODES: { value: ViewMode; label: string; icon: LucideIcon; color: string }[] = [
-	{ value: 'grid', label: 'Grid', icon: Grid3X3, color: 'text-blue-600' },
-	{ value: 'list', label: 'Lista', icon: List, color: 'text-green-600' },
-	{ value: 'cards', label: 'Tarjetas', icon: LayoutGrid, color: 'text-purple-600' },
-	{ value: 'masonry', label: 'Masonry', icon: Layers, color: 'text-orange-600' },
-	{ value: 'table', label: 'Tabla', icon: Table, color: 'text-red-600' },
-	{ value: 'canvas', label: 'Canvas', icon: Monitor, color: 'text-cyan-600' },
-];
-
-const RENDERING_MODES: { value: RenderingMode; label: string; icon: LucideIcon; color: string }[] = [
-	{ value: 'canvas', label: 'Canvas', icon: Monitor, color: 'text-blue-500' },
-	{ value: 'virtualized', label: 'Virtualizado', icon: Zap, color: 'text-green-500' },
-	{ value: 'webgl', label: 'WebGL', icon: Cpu, color: 'text-purple-500' },
-];
-
-// Settings bindings hook
-function useSettingsBindings() {
-	const viewMode = useViewOptionsStore((s) => s.viewMode);
-	const setViewMode = useViewOptionsStore((s) => s.setViewMode);
-	const groupByEntityType = useViewOptionsStore((s) => s.groupByEntityType);
-	const toggleGroupByEntityType = useViewOptionsStore((s) => s.toggleGroupByEntityType);
-	const includeSubfolders = useViewOptionsStore((s) => s.includeSubfolders);
-	const toggleIncludeSubfolders = useViewOptionsStore((s) => s.toggleIncludeSubfolders);
-	const useCanvasRendering = useViewOptionsStore((s) => s.useCanvasRendering);
-	const setUseCanvasRendering = useViewOptionsStore((s) => s.setUseCanvasRendering);
-	const virtualization = useViewOptionsStore((s) => s.virtualization);
-	const setVirtualization = useViewOptionsStore((s) => s.setVirtualization);
-	const backgroundColor = useViewOptionsStore((s) => s.backgroundColor);
-	const setBackgroundColor = useViewOptionsStore((s) => s.setBackgroundColor);
-	const pagination = useViewOptionsStore((s) => s.pagination);
-	const setPaginationMode = useViewOptionsStore((s) => s.setPaginationMode);
-	const setPageSize = useViewOptionsStore((s) => s.setPageSize);
-	const infiniteScroll = useViewOptionsStore((s) => s.infiniteScroll);
-	const setInfiniteScroll = useViewOptionsStore((s) => s.setInfiniteScroll);
-	const toggleInfiniteScrollEnabled = useViewOptionsStore((s) => s.toggleInfiniteScrollEnabled);
-	const toggleInfiniteScrollAutoLoad = useViewOptionsStore((s) => s.toggleInfiniteScrollAutoLoad);
-	const views = useViewOptionsStore((s) => s.views);
-	const setRenderingMode = useViewOptionsStore((s) => s.setRenderingMode);
-	const setViewConfig = useViewOptionsStore((s) => s.setViewConfig);
-	const setSearchQuery = useViewOptionsStore((s) => s.setSearchQuery);
-	const resetFilters = useViewOptionsStore((s) => s.resetFilters);
-	const resetAll = useViewOptionsStore((s) => s.resetAll);
-	const resetLocalStorage = useViewOptionsStore((s) => s.resetLocalStorage);
-
-	return {
-		viewMode,
-		setViewMode,
-		groupByEntityType,
-		toggleGroupByEntityType,
-		includeSubfolders,
-		toggleIncludeSubfolders,
-		useCanvasRendering,
-		setUseCanvasRendering,
-		virtualization,
-		backgroundColor,
-		setBackgroundColor,
-		pagination,
-		setPaginationMode,
-		setPageSize,
-		infiniteScroll,
-		setInfiniteScroll,
-		toggleInfiniteScrollEnabled,
-		toggleInfiniteScrollAutoLoad,
-		views,
-		setRenderingMode,
-		setViewConfig,
-		setVirtualization,
-		setSearchQuery,
-		resetFilters,
-		resetAll,
-		resetLocalStorage,
-	};
-}
-
-// Main component
+/**
+ * Componente principal de settings del explorador
+ * Usa módulos extraídos de ./settings/ para mejor organización
+ */
 const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 	const {
 		viewMode,
