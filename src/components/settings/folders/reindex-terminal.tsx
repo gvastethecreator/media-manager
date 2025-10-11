@@ -206,11 +206,76 @@ export function ReindexTerminal({
 
 				case 'folder:progress': {
 					const progressMsg = data.message || `Progreso: ${data.filesProcessed || 0}/${data.totalFiles || 0}`;
-					addLog('INFO', `   └── ${progressMsg}`, {
+					const phase = data.phase || 'processing';
+					const progress = data.progress || 0;
+
+					// Detectar si es un log de archivo individual (mensaje empieza con └──)
+					const isFileLog = progressMsg.includes('└──');
+
+					// Determinar icono y nivel según fase
+					let icon = '└──';
+					let level: LogEntry['level'] = 'INFO';
+
+					if (phase === 'starting') icon = '🚀';
+					else if (phase === 'analysis') icon = '📊';
+					else if (phase === 'existence') icon = '🔍';
+					else if (phase === 'deletion') icon = '🗑️';
+					else if (phase === 'structure') icon = '🌳';
+					else if (phase === 'processing') {
+						// Para archivos individuales
+						if (isFileLog) {
+							// Log de archivo individual (no sticky)
+							addLog('INFO', progressMsg, {
+								source: 'file-processing',
+								folderId: data.folderId,
+								folderPath: data.folderPath,
+							});
+
+							// Actualizar progreso con granularidad fina
+							// Base 45% + progreso proporcional de archivos en carpeta actual
+							if (progress > 0 && data.totalFiles > 0) {
+								const folderProgress = (progress / 100);
+								// Asumiendo que indexing ocupa 15% del total (45% a 60%)
+								setCurrentProgress(45 + (folderProgress * 15));
+							}
+							break; // Salir temprano para no duplicar
+						}
+
+						// Para carpetas principales (sin └──)
+						if (data.folderId && !isFileLog) {
+							icon = '📁';
+							// Log de carpeta principal (sticky)
+							addLog('INFO', progressMsg, {
+								source: 'folder-processing',
+								folderId: data.folderId,
+								folderPath: data.folderPath,
+								isFolderMain: true, // Marcar como sticky
+							});
+							break; // Salir temprano para no duplicar
+						}
+						icon = '└──';
+					}
+					else if (phase === 'metadata') icon = '📊';
+					else if (phase === 'complete') {
+						icon = '✅';
+						level = 'SUCCESS';
+					}
+					else if (phase === 'error') {
+						icon = '❌';
+						level = 'ERROR';
+					}
+
+					// Log genérico de fase (solo si no fue manejado arriba)
+					addLog(level, `${icon} ${progressMsg}`, {
 						source: 'folder-progress',
 						folderId: data.folderId,
 						folderPath: data.folderPath,
 					});
+
+					// Actualizar progreso general
+					if (progress > 0) {
+						setCurrentProgress(progress);
+					}
 					break;
 				}
 
@@ -340,25 +405,48 @@ export function ReindexTerminal({
 		const Icon = LOG_ICONS[log.level];
 		const colorClass = LOG_COLORS[log.level];
 
+		// Detectar si es un sub-log (archivo individual)
+		const isSubLog = log.message.includes('└──');
+		// Detectar si es una carpeta sticky
+		const isFolderLog = log.isSticky || log.isFolderMain;
+
 		return (
 			<div
 				className={cn(
-					'flex h-6 items-center gap-3 p-1',
+					'flex min-h-[32px] items-center gap-3 px-3 py-2',
+					// Estilo para carpetas sticky
 					log.isSticky && {
-						'sticky top-0 z-10 border-gray-700/50 py-3 shadow-lg backdrop-blur-sm': true,
-						'bg-gradient-to-r from-blue-900/20 to-transparent': true,
-						'ring-1 ring-blue-500/20': true,
-					}
+						'sticky top-0 z-10 border-b border-blue-500/30 py-3 shadow-lg backdrop-blur-sm': true,
+						'bg-gradient-to-r from-blue-900/40 via-blue-800/20 to-transparent': true,
+						'ring-1 ring-blue-400/30': true,
+					},
+					// Estilo para carpetas normales (no sticky pero importante)
+					isFolderLog && !log.isSticky && 'bg-gray-900/30 font-semibold',
+					// Estilo para sub-logs (archivos)
+					isSubLog && 'pl-12 text-gray-400 hover:bg-gray-900/20'
 				)}
 				data-sticky={log.isSticky}
 				key={log.id}
 			>
-				<span className="font-mono text-gray-500 text-xs tabular-nums">{formatTimestamp(log.timestamp)}</span>
-				<Icon className={cn('h-3 w-3 flex-shrink-0', colorClass)} />
+				<span className={cn(
+					"font-mono tabular-nums",
+					log.isSticky ? "text-blue-300 text-xs" : "text-gray-600 text-[10px]"
+				)}>
+					{formatTimestamp(log.timestamp)}
+				</span>
+				<Icon className={cn(
+					'flex-shrink-0',
+					log.isSticky ? 'h-4 w-4' : 'h-3 w-3',
+					colorClass
+				)} />
 				<span
 					className={cn(
-						'overflow-hidden break-words font-mono text-sm leading-tight',
-						log.isSticky ? 'font-medium text-gray-50' : 'text-gray-100'
+						'flex-1 overflow-hidden break-words font-mono leading-relaxed',
+						// Tamaño y peso según tipo
+						log.isSticky && 'text-base font-bold text-white',
+						isFolderLog && !log.isSticky && 'text-sm font-semibold text-gray-100',
+						isSubLog && 'text-xs text-gray-400',
+						!isFolderLog && !isSubLog && 'text-sm text-gray-200'
 					)}
 				>
 					{log.message}
@@ -368,16 +456,41 @@ export function ReindexTerminal({
 	};
 
 	return (
-		<div className={cn('h-full w-full', className)}>
-			{/* Terminal con soporte para sticky logs - usando todo el ancho disponible */}
-			<div className="relative h-full w-full overflow-y-auto rounded-sm bg-black p-4">
+		<div className={cn('flex h-full w-full flex-col', className)}>
+			{/* Barra de progreso */}
+			{showProgress && (
+				<div className="border-b border-gray-800 bg-gray-950 px-4 py-3">
+					<div className="mb-2 flex items-center justify-between text-xs">
+						<span className="font-mono text-gray-400">
+							{currentProgress < 100 ? 'Procesando...' : 'Completado'}
+						</span>
+						<span className="font-mono font-bold text-blue-400">
+							{currentProgress.toFixed(1)}%
+						</span>
+					</div>
+					<div className="h-2 w-full overflow-hidden rounded-full bg-gray-800">
+						<div
+							className="h-full rounded-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 transition-all duration-300 ease-out"
+							style={{ width: `${currentProgress}%` }}
+						/>
+					</div>
+					{startTime && currentProgress < 100 && (
+						<div className="mt-2 text-[10px] font-mono text-gray-500">
+							Tiempo transcurrido: {formatElapsedTime(elapsedTime)}
+						</div>
+					)}
+				</div>
+			)}
+
+			{/* Terminal con soporte para sticky logs */}
+			<div className="relative flex-1 overflow-y-auto rounded-sm bg-black">
 				{logs.length === 0 ? (
-					<div className="flex items-center justify-center p-4 text-gray-500">
-						<Terminal className="mr-2 h-4 w-4" />
+					<div className="flex items-center justify-center p-8 text-gray-500">
+						<Terminal className="mr-3 h-5 w-5" />
 						<span className="font-mono text-sm">Esperando logs...</span>
 					</div>
 				) : (
-					<div className="w-full space-y-1" ref={logContainerRef}>
+					<div className="w-full space-y-0.5 p-2" ref={logContainerRef}>
 						{logs.map((log, index) => renderLogEntry(log, index))}
 					</div>
 				)}

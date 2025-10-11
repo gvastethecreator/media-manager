@@ -58,6 +58,8 @@ export interface FileSyncOptions {
 	entityTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'file3d'>;
 	/** Forzar sincronización incluso si hay errores */
 	forceSync?: boolean;
+	/** Callback para reportar progreso de archivos individuales */
+	onProgress?: (processed: number, total: number, currentFile: string) => void | Promise<void>;
 }
 
 /**
@@ -135,7 +137,7 @@ export class FileSyncService {
 
 			// 4. Ejecutar cambios si no es dry run
 			if (!dryRun) {
-				await this.executeFileSyncChanges(result, folderId);
+				await this.executeFileSyncChanges(result, folderId, options.onProgress);
 			}
 
 			result.stats.totalChecked = filesystemPaths.size;
@@ -332,10 +334,14 @@ export class FileSyncService {
 	/**
 	 * Ejecuta los cambios de sincronización (eliminar archivos que ya no existen)
 	 */
-	private async executeFileSyncChanges(result: FileSyncResult, folderId: string): Promise<void> {
+	private async executeFileSyncChanges(
+		result: FileSyncResult, 
+		folderId: string,
+		onProgress?: (processed: number, total: number, currentFile: string) => void | Promise<void>
+	): Promise<void> {
 		// 1. Procesar archivos nuevos (crear entidades con metadata)
 		if (result.newFiles.length > 0) {
-			await this.processNewFiles(result, folderId);
+			await this.processNewFiles(result, folderId, onProgress);
 		}
 
 		// 2. Eliminar archivos que ya no existen
@@ -344,7 +350,11 @@ export class FileSyncService {
 		}
 	}
 
-	private async processNewFiles(result: FileSyncResult, folderId: string): Promise<void> {
+	private async processNewFiles(
+		result: FileSyncResult, 
+		folderId: string, 
+		onProgress?: (processed: number, total: number, currentFile: string) => void | Promise<void>
+	): Promise<void> {
 		if (result.newFiles.length === 0) {
 			return;
 		}
@@ -357,7 +367,9 @@ export class FileSyncService {
 
 			// Procesar archivos nuevos con extracción de metadata completa
 			const filePaths = result.newFiles.map((f) => f.path);
-			const processingStats = await mapper.processFiles(filePaths, folderId);
+			const processingStats = await mapper.processFiles(filePaths, folderId, {
+				onProgress
+			});
 
 			syncLogger.info('✅ Procesamiento de archivos nuevos completado:', {
 				total: processingStats.totalFiles,
@@ -365,6 +377,18 @@ export class FileSyncService {
 				fallidos: processingStats.failed,
 				errores: processingStats.errors.length,
 			});
+
+			// Log primeros 5 errores para depuración
+			if (processingStats.errors.length > 0) {
+				syncLogger.error('❌ ERRORES DETALLADOS EN PROCESAMIENTO:');
+				processingStats.errors.slice(0, 5).forEach((err, idx) => {
+					syncLogger.error(`  [${idx + 1}] ${err.file}`);
+					syncLogger.error(`      Error: ${err.error}`);
+				});
+				if (processingStats.errors.length > 5) {
+					syncLogger.error(`  ... y ${processingStats.errors.length - 5} errores más`);
+				}
+			}
 
 			// Agregar errores al resultado de sincronización
 			if (processingStats.errors.length > 0) {

@@ -444,9 +444,11 @@ export async function updateAllFolderStats(): Promise<void> {
 			.from(file3Ds)
 			.where(eq(file3Ds.folderId, id));
 
+		const totalImages = Number(imgAgg?.count ?? 0);
+		const totalVideos = Number(vidAgg?.count ?? 0);
 		const totalFiles =
-			Number(imgAgg?.count ?? 0) +
-			Number(vidAgg?.count ?? 0) +
+			totalImages +
+			totalVideos +
 			Number(audAgg?.count ?? 0) +
 			Number(docAgg?.count ?? 0) +
 			Number(jsonAgg?.count ?? 0) +
@@ -459,7 +461,16 @@ export async function updateAllFolderStats(): Promise<void> {
 			Number(jsonAgg?.size ?? 0) +
 			Number(f3dAgg?.size ?? 0);
 
-		await db.update(folders).set({ totalFiles, totalSize, lastIndexed: new Date() }).where(eq(folders.id, id));
+		await db
+			.update(folders)
+			.set({
+				totalImages,
+				totalVideos,
+				totalFiles,
+				totalSize,
+				lastIndexed: new Date(),
+			})
+			.where(eq(folders.id, id));
 		try {
 			await recomputeAggregatesForFolder(id);
 		} catch {}
