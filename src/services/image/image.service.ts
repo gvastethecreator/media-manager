@@ -756,31 +756,31 @@ class ImageService {
 			const processedImages = await db
 				.select({ count: count() })
 				.from(images)
-				.where(isNotNull(images.thumbnailOptimizedAt));
+				.where(isNotNull(images.thumbnail));
 			const erroredImages = await db.select({ count: count() }).from(images).where(isNotNull(images.thumbnailError));
 			const totalThumbnailSize = await db
 				.select({ sum: sum(images.thumbnailSize) })
 				.from(images)
 				.where(isNotNull(images.thumbnailSize));
 			const lastProcessedImage = await db
-				.select({ date: images.thumbnailOptimizedAt })
+				.select({ date: images.updatedAt })
 				.from(images)
-				.where(isNotNull(images.thumbnailOptimizedAt))
-				.orderBy(desc(images.thumbnailOptimizedAt))
+				.where(isNotNull(images.thumbnail))
+				.orderBy(desc(images.updatedAt))
 				.limit(1);
 
-			return {
-				total: totalImages[0]?.count || 0,
-				processed: processedImages[0]?.count || 0,
-				failed: erroredImages[0]?.count || 0,
-				pending: (totalImages[0]?.count || 0) - (processedImages[0]?.count || 0),
-				totalFiles: totalImages[0]?.count || 0,
-				totalSize: Number(totalThumbnailSize[0].sum || 0),
-				processedSize: Number(totalThumbnailSize[0].sum || 0),
-				errors: [],
-				averageProcessingTime: 0,
-				lastProcessedAt: lastProcessedImage[0]?.date || undefined,
-			};
+		return {
+			total: totalImages[0]?.count || 0,
+			processed: processedImages[0]?.count || 0,
+			failed: erroredImages[0]?.count || 0,
+			pending: (totalImages[0]?.count || 0) - (processedImages[0]?.count || 0),
+			totalFiles: totalImages[0]?.count || 0,
+			totalSize: Number(totalThumbnailSize[0]?.sum || 0),
+			processedSize: Number(totalThumbnailSize[0]?.sum || 0),
+			errors: [],
+			averageProcessingTime: 0,
+			lastProcessedAt: lastProcessedImage[0]?.date || undefined,
+		};
 		} catch (error) {
 			imageLogger.error('Error al obtener estadísticas de miniaturas:', error);
 			throw toServiceError(error, {

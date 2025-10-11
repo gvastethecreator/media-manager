@@ -17,6 +17,7 @@ import {
 	WandIcon,
 } from 'lucide-react';
 import React from 'react';
+import { useSearchParams } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
@@ -231,14 +232,25 @@ const tabsData: TabItem[] = [
 ];
 
 export function SettingsView() {
-	const [activeTab, setActiveTab] = React.useState('folders');
+	const [searchParams, setSearchParams] = useSearchParams();
+
+	// 🔗 Leer tab desde URL query params, con fallback a 'folders'
+	const tabFromUrl = searchParams.get('tab') || 'folders';
+
+	// ✅ Validar que el tab existe en nuestros tabs disponibles
+	const validTab = tabsData.some((t) => t.id === tabFromUrl) ? tabFromUrl : 'folders';
+
+	// 📝 Función para cambiar tab y actualizar URL
+	const handleTabChange = React.useCallback((newTab: string) => {
+		setSearchParams({ tab: newTab }, { replace: true });
+	}, [setSearchParams]);
 
 	// 📡 Escuchar el evento para cambiar la pestaña activa desde otros componentes
 	React.useEffect(() => {
 		const handleSetSettingsTab = (event: CustomEvent<{ tab: string }>) => {
 			const { tab } = event.detail;
 			if (tab && tabsData.some((tabData) => tabData.id === tab)) {
-				setActiveTab(tab);
+				handleTabChange(tab);
 			}
 		};
 
@@ -249,11 +261,11 @@ export function SettingsView() {
 		return () => {
 			window.removeEventListener('set-settings-tab', handleSetSettingsTab as EventListener);
 		};
-	}, []);
+	}, [handleTabChange]);
 
 	return (
 		<div className="m-0 h-full w-full p-0">
-			<Tabs className="flex h-full flex-row" onValueChange={setActiveTab} value={activeTab}>
+			<Tabs className="flex h-full flex-row" onValueChange={handleTabChange} value={validTab}>
 				{/* 📋 Contenido de los tabs - ÁREA PRINCIPAL A LA IZQUIERDA */}
 				<div className="m-0 h-full flex-1 overflow-hidden p-0">
 					<TabsContent className="m-0 h-full w-full border-none p-0" value="folders">
