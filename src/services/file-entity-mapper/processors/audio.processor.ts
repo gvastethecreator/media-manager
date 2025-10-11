@@ -67,14 +67,22 @@ export class AudioProcessor {
 
 	/**
 	 * Extrae metadata de audio (duración, bitrate, tags ID3)
+	 * con fallback gracioso para formatos sin metadata completa
 	 */
 	async extractMetadata(filePath: string, entityId: string): Promise<{ success: boolean; error?: string }> {
+		const { basename, extname } = await import('node:path');
+		const fileName = basename(filePath);
+		const extension = extname(filePath).toLowerCase();
+		
+		console.log(`🎵 [AudioProcessor] Extrayendo metadata: ${fileName}`);
+
 		try {
 			const { audioMetadataService } = await import('@/services/audio/audio-metadata.service');
 			const { db } = await import('@/lib/drizzle');
 			const { audios } = await import('@/lib/drizzle/schema');
 			const { eq } = await import('drizzle-orm');
 
+			// Intentar extracción con servicio principal
 			const meta = await audioMetadataService.extract(filePath);
 			const baseFields = this.mapAudioTechnical(meta);
 			const tagFields = this.mapAudioTags(meta.tags);
@@ -106,38 +114,159 @@ export class AudioProcessor {
 				})
 				.where(eq(audios.id, entityId));
 
+			console.log(`✅ [AudioProcessor] Metadata extraída: ${fileName}`);
 			return { success: true };
-		} catch (e) {
-			return { success: false, error: 'Audio metadata extraction failed' };
+		} catch (primaryError) {
+			console.warn(`⚠️ [AudioProcessor] Servicio principal falló para ${fileName}:`, primaryError);
+
+			// Fallback: Extracción básica de metadata sin dependencias
+			try {
+				const basicMeta = await this.extractBasicAudioMetadata(filePath);
+				const { db } = await import('@/lib/drizzle');
+				const { audios } = await import('@/lib/drizzle/schema');
+				const { eq } = await import('drizzle-orm');
+
+				const enhancedMetadata = {
+					audioData: {
+						format: extension.slice(1), // .mp3 -> mp3
+						extractedBy: 'fallback',
+						note: 'Metadata básica extraída por fallback',
+					},
+				};
+
+				await db
+					.update(audios)
+					.set({
+						format: extension.slice(1),
+						metadata: JSON.stringify(enhancedMetadata),
+						updatedAt: new Date(),
+					})
+					.where(eq(audios.id, entityId));
+
+				console.log(`⚠️ [AudioProcessor] Metadata básica guardada (fallback): ${fileName}`);
+				return { success: true, error: 'Used fallback extraction' };
+			} catch (fallbackError) {
+				console.error(`❌ [AudioProcessor] Fallback también falló para ${fileName}:`, fallbackError);
+				return { 
+					success: false, 
+					error: `Audio metadata extraction failed: ${primaryError instanceof Error ? primaryError.message : 'Unknown error'}` 
+				};
+			}
 		}
 	}
 
 	/**
-	 * Genera waveform SVG como thumbnail para el audio
+	 * Extracción básica de metadata sin dependencias externas
+	 * (para formatos WAV, AIFF sin tags)
+	 */
+	private async extractBasicAudioMetadata(filePath: string): Promise<any> {
+		const { stat } = await import('node:fs/promises');
+		const { extname } = await import('node:path');
+		
+		const stats = await stat(filePath);
+		const extension = extname(filePath).toLowerCase();
+
+		// Metadata minima inferida
+		return {
+			format: extension.slice(1),
+			size: stats.size,
+			created: stats.birthtime,
+			modified: stats.mtime,
+		};
+	}
+
+	/**
+	 * Genera waveform visual como thumbnail para el audio
 	 */
 	async generateThumbnail(filePath: string, entityId: string): Promise<{ success: boolean; error?: string }> {
+		const { basename } = await import('node:path');
+		const fileName = basename(filePath);
+		
+		console.log(`🎵 [AudioProcessor] Generando waveform: ${fileName}`);
+
 		try {
-			const { generateAudioWaveform } = await import('@/config/thumbnail-generators');
-			const { basename } = await import('node:path');
+			const { generateAndSaveWaveform } = await import('@/lib/utils/audio/waveform-generator');
 
-			const mockItem = {
-				id: entityId,
-				name: basename(filePath),
-				path: filePath,
-				entityType: 'audio' as const,
-			};
+			// Generar waveform con configuración personalizada
+			await generateAndSaveWaveform(filePath, entityId, {
+				width: 800,
+				height: 200,
+				waveColor: '#3b82f6',
+				backgroundColor: '#1f2937',
+				samples: 200,
+			});
 
-			const thumbnailUrl = await generateAudioWaveform(mockItem as any);
-			if (!thumbnailUrl) {
-				return { success: false, error: 'Failed to generate waveform' };
-			}
-
-			console.log(`✅ Audio thumbnail generado para: ${filePath}`);
+			console.log(`✅ [AudioProcessor] Waveform generado: ${fileName}`);
 			return { success: true };
-		} catch (e) {
-			console.warn('Error generando thumbnail de audio:', filePath, e);
-			return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
+		} catch (error) {
+			console.warn(`⚠️ [AudioProcessor] Error generando waveform para ${fileName}:`, error);
+
+			// Fallback: Crear placeholder simple
+			try {
+				await this.createAudioPlaceholder(filePath, entityId);
+				console.log(`⚠️ [AudioProcessor] Usando placeholder para: ${fileName}`);
+				return { success: true, error: 'Using placeholder due to waveform generation failure' };
+			} catch (placeholderError) {
+				console.error(`❌ [AudioProcessor] Placeholder también falló para ${fileName}:`, placeholderError);
+				return { 
+					success: false, 
+					error: error instanceof Error ? error.message : 'Unknown error' 
+				};
+			}
 		}
+	}
+
+	/**
+	 * Crea un placeholder SVG simple para audio
+	 */
+	private async createAudioPlaceholder(filePath: string, entityId: string): Promise<void> {
+		const { basename } = await import('node:path');
+		const { db } = await import('@/lib/drizzle');
+		const { audios } = await import('@/lib/drizzle/schema');
+		const { eq } = await import('drizzle-orm');
+
+		const fileName = basename(filePath);
+
+		// SVG placeholder con icono de audio
+		const svg = `
+			<svg width="800" height="200" xmlns="http://www.w3.org/2000/svg">
+				<rect width="800" height="200" fill="#1f2937"/>
+				<text x="400" y="90" font-family="Arial" font-size="64" fill="#6b7280" text-anchor="middle">🎵</text>
+				<text x="400" y="130" font-family="Arial" font-size="16" fill="#9ca3af" text-anchor="middle">${fileName}</text>
+				<text x="400" y="155" font-family="Arial" font-size="12" fill="#6b7280" text-anchor="middle">Audio File</text>
+			</svg>
+		`.trim();
+
+		// Guardar en metadata
+		const existingAudio = await db.query.audios.findFirst({
+			where: eq(audios.id, entityId),
+		});
+
+		const existingMetadata = existingAudio?.metadata
+			? typeof existingAudio.metadata === 'string'
+				? JSON.parse(existingAudio.metadata)
+				: existingAudio.metadata
+			: {};
+
+		const updatedMetadata = {
+			...existingMetadata,
+			waveform: {
+				data: Buffer.from(svg).toString('base64'),
+				width: 800,
+				height: 200,
+				format: 'svg',
+				isPlaceholder: true,
+				generatedAt: new Date().toISOString(),
+			},
+		};
+
+		await db
+			.update(audios)
+			.set({
+				metadata: JSON.stringify(updatedMetadata),
+				updatedAt: new Date(),
+			})
+			.where(eq(audios.id, entityId));
 	}
 
 	// ===================== MÉTODOS PRIVADOS =====================

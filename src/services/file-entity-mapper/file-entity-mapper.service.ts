@@ -69,7 +69,11 @@ export class FileEntityMapperService {
 	/**
 	 * Procesa múltiples archivos en lote con cola de concurrencia
 	 */
-	async processFiles(filePaths: string[], folderId: string): Promise<EntityCreationStats> {
-		return this.core.processFiles(filePaths, folderId);
+	async processFiles(
+		filePaths: string[], 
+		folderId: string,
+		options?: { onProgress?: (processed: number, total: number, currentFile: string) => void | Promise<void> }
+	): Promise<EntityCreationStats> {
+		return this.core.processFiles(filePaths, folderId, options);
 	}
 }

@@ -185,11 +185,11 @@ export function FoldersTable({
 			// Filtro por estado
 			switch (filterStatus) {
 				case 'indexed':
-					return folder.lastIndexed;
+					return folder.lastIndexed != null;
 				case 'never':
-					return !folder.lastIndexed;
+					return folder.lastIndexed == null;
 				case 'favorite':
-					return folder.isFavorite;
+					return folder.isFavorite === true;
 				default:
 					return true;
 			}

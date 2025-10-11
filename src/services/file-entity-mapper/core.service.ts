@@ -221,7 +221,11 @@ export class FileEntityMapperCore {
 	/**
 	 * Procesa múltiples archivos en lote con cola de concurrencia
 	 */
-	async processFiles(filePaths: string[], folderId: string): Promise<EntityCreationStats> {
+	async processFiles(
+		filePaths: string[], 
+		folderId: string,
+		options?: { onProgress?: (processed: number, total: number, currentFile: string) => void | Promise<void> }
+	): Promise<EntityCreationStats> {
 		const stats: EntityCreationStats = {
 			totalFiles: filePaths.length,
 			processed: 0,
@@ -243,10 +247,20 @@ export class FileEntityMapperCore {
 							stats.errors.push({ file: fp, error: res.error });
 						}
 					}
+					
+					// Reportar progreso si hay callback
+					if (options?.onProgress) {
+						await options.onProgress(stats.processed, stats.totalFiles, fp);
+					}
 				} catch (e) {
 					stats.processed++;
 					stats.failed++;
 					stats.errors.push({ file: fp, error: e instanceof Error ? e.message : 'Unknown error' });
+					
+					// Reportar progreso incluso en error
+					if (options?.onProgress) {
+						await options.onProgress(stats.processed, stats.totalFiles, fp);
+					}
 				}
 			})
 		);

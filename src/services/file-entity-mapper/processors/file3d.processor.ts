@@ -118,31 +118,109 @@ export class File3DProcessor {
 	}
 
 	/**
-	 * Genera placeholder SVG para modelo 3D
+	 * Genera thumbnail visual para modelo 3D
+	 * Por ahora usa placeholder SVG mejorado con información del modelo
+	 * TODO: Implementar renderizado real con three.js headless
 	 */
 	async generateThumbnail(filePath: string, entityId: string): Promise<{ success: boolean; error?: string }> {
-		try {
-			const { generate3DModelThumbnail } = await import('@/config/thumbnail-generators');
-			const { basename } = await import('node:path');
+		const { basename } = await import('node:path');
+		const fileName = basename(filePath);
+		
+		console.log(`🎨 [File3DProcessor] Generando thumbnail: ${fileName}`);
 
-			const mockItem = {
-				id: entityId,
-				name: basename(filePath),
-				path: filePath,
-				entityType: 'file3d' as const,
+		try {
+			// Obtener metadata del modelo para mostrar en thumbnail
+			const { db } = await import('@/lib/drizzle');
+			const { file3Ds } = await import('@/lib/drizzle/schema');
+			const { eq } = await import('drizzle-orm');
+
+			const model = await db.query.file3Ds.findFirst({
+				where: eq(file3Ds.id, entityId),
+			});
+
+			// Crear placeholder SVG mejorado con información del modelo
+			const svg = this.create3DPlaceholderSVG(fileName, model);
+
+			// Guardar en metadata
+			const existingMetadata = model?.metadata
+				? typeof model.metadata === 'string'
+					? JSON.parse(model.metadata)
+					: model.metadata
+				: {};
+
+			const updatedMetadata = {
+				...existingMetadata,
+				thumbnail: {
+					data: Buffer.from(svg).toString('base64'),
+					width: 320,
+					height: 320,
+					format: 'svg',
+					isPlaceholder: true,
+					generatedAt: new Date().toISOString(),
+				},
 			};
 
-			const thumbnailUrl = await generate3DModelThumbnail(mockItem as any);
-			if (!thumbnailUrl) {
-				return { success: false, error: 'Failed to generate 3D preview' };
-			}
+			await db
+				.update(file3Ds)
+				.set({
+					metadata: JSON.stringify(updatedMetadata),
+					updatedAt: new Date(),
+				})
+				.where(eq(file3Ds.id, entityId));
 
-			console.log(`✅ 3D Model thumbnail generado para: ${filePath}`);
+			console.log(`✅ [File3DProcessor] Placeholder thumbnail generado: ${fileName}`);
 			return { success: true };
-		} catch (e) {
-			console.warn('Error generando thumbnail 3D:', filePath, e);
-			return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
+		} catch (error) {
+			console.error(`❌ [File3DProcessor] Error generando thumbnail para ${fileName}:`, error);
+			return { 
+				success: false, 
+				error: error instanceof Error ? error.message : 'Unknown error' 
+			};
 		}
+	}
+
+	/**
+	 * Crea placeholder SVG mejorado con información del modelo 3D
+	 */
+	private create3DPlaceholderSVG(fileName: string, model: any): string {
+		const vertices = model?.vertices || '?';
+		const faces = model?.faces || '?';
+		const format = model?.format?.toUpperCase() || 'Unknown';
+
+		return `
+			<svg width="320" height="320" xmlns="http://www.w3.org/2000/svg">
+				<defs>
+					<linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+						<stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
+						<stop offset="100%" style="stop-color:#111827;stop-opacity:1" />
+					</linearGradient>
+				</defs>
+				<rect width="320" height="320" fill="url(#bg)"/>
+				
+				<!-- Icono 3D -->
+				<text x="160" y="120" font-family="Arial" font-size="72" fill="#6b7280" text-anchor="middle">🎨</text>
+				
+				<!-- Nombre del archivo -->
+				<text x="160" y="165" font-family="Arial" font-size="14" fill="#9ca3af" text-anchor="middle">${fileName}</text>
+				
+				<!-- Formato -->
+				<text x="160" y="190" font-family="Arial, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="bold">${format}</text>
+				
+				<!-- Stats -->
+				<g transform="translate(160, 220)">
+					<text x="0" y="0" font-family="monospace" font-size="10" fill="#4b5563" text-anchor="middle">
+						Vertices: ${vertices}
+					</text>
+					<text x="0" y="15" font-family="monospace" font-size="10" fill="#4b5563" text-anchor="middle">
+						Faces: ${faces}
+					</text>
+				</g>
+				
+				<!-- Badge de "3D Model" -->
+				<rect x="100" y="270" width="120" height="25" rx="12" fill="#374151"/>
+				<text x="160" y="288" font-family="Arial" font-size="12" fill="#9ca3af" text-anchor="middle">3D Model</text>
+			</svg>
+		`.trim();
 	}
 
 	// ===================== MÉTODOS PRIVADOS =====================
