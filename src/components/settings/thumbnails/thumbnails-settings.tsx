@@ -27,6 +27,8 @@ import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { useThumbnailStore } from '@/store/thumbnails.store';
 import { ThumbnailError } from './thumbnail-error';
+import { ThumbnailAdvancedSettings } from './thumbnail-advanced-settings';
+import { DEFAULT_THUMBNAIL_ADVANCED_CONFIG, type ThumbnailAdvancedConfig } from '@/types/thumbnails-advanced.config';
 
 const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
 	{
@@ -199,6 +201,18 @@ export function ThumbnailsSettings() {
 
 	const handleCleanThumbnails = () => handleThumbnailProcess(cleanThumbnailsMutation, 'Limpieza');
 
+	const handleAdvancedConfigUpdate = async (config: Partial<ThumbnailAdvancedConfig>) => {
+		try {
+			const currentConfig = settings.thumbnailAdvancedConfig || DEFAULT_THUMBNAIL_ADVANCED_CONFIG;
+			const newConfig = { ...currentConfig, ...config };
+			await updateSettings({ thumbnailAdvancedConfig: newConfig });
+			toastService.success('Configuración avanzada actualizada');
+		} catch (error) {
+			console.error('Error actualizando configuración avanzada:', error);
+			toastService.error('No se pudo actualizar la configuración');
+		}
+	};
+
 	return (
 		<Card className="flex h-full flex-col gap-2 rounded-sm border-none bg-muted/30">
 			<CardHeader className="bg-transparent p-2 pb-0">
@@ -329,6 +343,14 @@ export function ThumbnailsSettings() {
 								</Button>
 							)}
 						</div>
+
+						<Separator className="my-2" />
+
+						{/* Configuración Avanzada */}
+						<ThumbnailAdvancedSettings
+							config={settings.thumbnailAdvancedConfig || DEFAULT_THUMBNAIL_ADVANCED_CONFIG}
+							onUpdate={handleAdvancedConfigUpdate}
+						/>
 
 						<Separator className="my-2" />
 						<div className="grid grid-cols-2 gap-3">

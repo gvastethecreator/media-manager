@@ -6,6 +6,8 @@ import { type CreateProfileInput, type ProfileExtended, type UpdateProfileInput 
 import { profileClient } from '@/services/profile/client';
 import { toastService } from '@/services/toast/toast.service';
 import type { ThumbnailQuality } from '@/types/thumbnails';
+import type { ThumbnailAdvancedConfig } from '@/types/thumbnails-advanced.config';
+import { DEFAULT_THUMBNAIL_ADVANCED_CONFIG } from '@/types/thumbnails-advanced.config';
 
 export interface Settings {
 	// Configuraciones básicas
@@ -22,6 +24,7 @@ export interface Settings {
 
 	// Configuraciones avanzadas
 	videoThumbnailAnimation?: boolean;
+	thumbnailAdvancedConfig?: ThumbnailAdvancedConfig;
 	shortcuts?: { [key: string]: string };
 
 	// Colecciones, etiquetas y perfiles
@@ -62,6 +65,7 @@ const defaultSettings: Settings = {
 	defaultSortOrder: 'asc',
 	defaultThumbnailSize: 'medium',
 	videoThumbnailAnimation: true,
+	thumbnailAdvancedConfig: DEFAULT_THUMBNAIL_ADVANCED_CONFIG,
 	profiles: [],
 	activeProfile: null,
 	shortcuts: {},
