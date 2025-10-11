@@ -16,7 +16,6 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/lib/utils';
 import { FoldersGrid } from './components/folders-grid';
 import { FoldersTable } from './components/folders-table';
-import { GlobalReindexProgress } from './components/global-reindex-progress';
 import { GlobalTooltipProvider, MemoizedErrorWrapper } from './components/ui-primitives';
 import { FolderForm } from './folders-form';
 import { StructuredReindexConfig } from './folders-reindex-config';
@@ -136,25 +135,8 @@ const FoldersSettings = memo(function FoldersSettings() {
 								<p className="mt-1 text-muted-foreground text-sm">{folders?.length || 0} carpetas configuradas</p>
 							</div>
 						</div>
-						{/* Progress bar para reindexado global */}
-						{globalReindexStatus.isProcessing && (
-							<div className="w-[200px] p-1">
-								<GlobalReindexProgress
-									progress={globalReindexStatus.progress}
-									show={globalReindexStatus.isProcessing}
-								/>
-							</div>
-						)}
-						{/* Selector de vista mejorado */}
+						{/* Selector de vista */}
 						<div className="flex items-center gap-3">
-							{(isGloballyProcessing || isProcessing) && (
-								<div className="flex items-center gap-2 bg-primary/5 px-3 py-2 text-primary">
-									<RefreshCw className="h-4 w-4 animate-spin motion-reduce:animate-none" />
-									<span className="font-medium text-sm">
-										{processStatus?.message || (isGloballyProcessing ? 'Reindexando...' : 'Procesando...')}
-									</span>
-								</div>
-							)}
 							<ToggleGroup
 								className="border border-border/30 bg-background p-1"
 								onValueChange={(value) => value && setViewMode(value as 'table' | 'grid')}
