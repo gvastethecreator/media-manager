@@ -343,7 +343,7 @@ export function FoldersTable({
 											</MicroCell>
 										</TableCell>
 										<TableCell className="text-center">
-											<FolderIndexStatusBadge status={indexStatus as IndexStatus} />
+											<FolderIndexStatusBadge status={indexStatus as IndexStatus} lastIndexed={folder.lastIndexed} />
 										</TableCell>
 										<TableCell className="text-center">
 											{folder.lastIndexed ? (

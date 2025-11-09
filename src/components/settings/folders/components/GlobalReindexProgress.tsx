@@ -17,7 +17,8 @@ export const GlobalReindexProgress = memo(function GlobalReindexProgress({
 }: GlobalReindexProgressProps) {
 	if (!isGloballyProcessing || !processStatus) return null;
 
-	const statusMessage = getStatusMessage(processStatus);
+	const isProcessing = processStatus.isProcessing ?? isGloballyProcessing;
+	const statusMessage = getStatusMessage(isGloballyProcessing, false, isProcessing);
 
 	return (
 		<div

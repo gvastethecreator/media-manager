@@ -24,8 +24,6 @@
 import { create } from 'zustand';
 // 🚀 Importaciones actualizadas - MIGRADAS A EntityWithStats
 import type { ViewMode } from '@/components/navigation/types';
-// 🚧 Refactor: ahora usamos cliente de API en lugar de servicio del servidor
-// Uso de cliente de API para desacoplar el store de los servicios del servidor
 import { getFolderImagesFromApi } from '@/lib/api/client/folder.client';
 import { folderResponseCache as folderCache } from '@/lib/filesystem/folder-cache';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -34,268 +32,18 @@ import { throttleEvent } from '@/lib/system/event-throttler';
 import type { EntityWithStats } from '@/types/entities/entity.types';
 import { isFolderWithStats, isImageWithStats, isVideoWithStats } from '@/types/entity-guards';
 import { EntityStatsType } from '@/types/file-browser/entity-stats';
+// 📦 Importaciones modularizadas
+import { OperationQueue } from './utils/OperationQueue';
+import {
+	ITEMS_PER_BATCH,
+	type BaseEntity,
+	type CollectionEntity,
+	type EntityWithEmoji,
+	type TagEntity,
+	type UnifiedFileManagerState,
+} from './types/unified-file-manager.types';
 
 const fileManagerLogger = clientLogger.withContext('UnifiedFileManager');
-
-// 📊 Constantes de configuración
-const ITEMS_PER_BATCH = 100; // 🚀 Aumentado de 50 para mejor performance
-const _DEBOUNCE_DELAY = 150; // ⚡ Optimizado para responsividad
-const MAX_OPERATION_QUEUE = 10; // 🔄 Límite de operaciones concurrentes
-
-// 🏗️ Tipos de entidades
-interface BaseEntity {
-	id: string;
-	name: string;
-	count: number;
-}
-
-interface CollectionEntity extends BaseEntity {
-	color?: string;
-	emoji?: string;
-}
-
-interface TagEntity extends BaseEntity {
-	color: string;
-}
-
-interface EntityWithEmoji extends BaseEntity {
-	emoji: string;
-}
-
-// 🎯 Operation Queue para prevenir race conditions
-class OperationQueue {
-	private queue: Array<{
-		operation: () => Promise<any>;
-		timeout: number;
-		startTime: number;
-		id: string;
-	}> = [];
-	private isProcessing = false;
-	private maxSize = MAX_OPERATION_QUEUE;
-	private currentOperation: { id: string; startTime: number } | null = null;
-
-	async add<T>(
-		operation: () => Promise<T>,
-		timeout = 120_000, // 2 minutos por defecto
-		id = `op-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`
-	): Promise<T> {
-		return new Promise((resolve, reject) => {
-			if (this.queue.length >= this.maxSize) {
-				fileManagerLogger.warn('🚨 Operation queue full, dropping oldest operation');
-				this.queue.shift();
-			}
-
-			this.queue.push({
-				operation: async () => {
-					try {
-						const result = await operation();
-						resolve(result);
-					} catch (error) {
-						reject(error);
-					}
-				},
-				timeout,
-				startTime: 0, // Se asignará al procesar
-				id,
-			});
-
-			this.processQueue();
-		});
-	}
-
-	private async processQueue() {
-		if (this.isProcessing || this.queue.length === 0) {
-			return;
-		}
-
-		this.isProcessing = true;
-
-		while (this.queue.length > 0) {
-			const operationWrapper = this.queue.shift();
-			if (operationWrapper) {
-				const { operation, timeout, id } = operationWrapper;
-				operationWrapper.startTime = Date.now();
-				this.currentOperation = { id, startTime: operationWrapper.startTime };
-
-				try {
-					// Ejecutar operación con timeout
-					await this.withTimeout(operation(), timeout, id);
-				} catch (error) {
-					fileManagerLogger.error(`❌ Operation failed (${id}):`, error);
-				} finally {
-					this.currentOperation = null;
-				}
-			}
-		}
-
-		this.isProcessing = false;
-	}
-
-	/**
-	 * Implementa timeout para operaciones
-	 */
-	private async withTimeout<T>(promise: Promise<T>, timeoutMs: number, operationId: string): Promise<T> {
-		let timeoutId: NodeJS.Timeout | undefined;
-
-		const timeoutPromise = new Promise<never>((_, reject) => {
-			timeoutId = setTimeout(() => {
-				reject(new Error(`Operation ${operationId} timeout after ${timeoutMs}ms`));
-			}, timeoutMs);
-		});
-
-		try {
-			return await Promise.race([promise, timeoutPromise]);
-		} finally {
-			if (timeoutId) {
-				clearTimeout(timeoutId);
-			}
-		}
-	}
-
-	clear() {
-		fileManagerLogger.warn('🧹 Clearing operation queue', {
-			queueSize: this.queue.length,
-			currentOperation: this.currentOperation?.id,
-		});
-		this.queue = [];
-		this.isProcessing = false;
-		this.currentOperation = null;
-	}
-
-	get length() {
-		return this.queue.length;
-	}
-
-	get processing() {
-		return this.isProcessing;
-	}
-
-	/**
-	 * Obtiene estadísticas de la cola
-	 */
-	getStats() {
-		const now = Date.now();
-		return {
-			queueSize: this.queue.length,
-			isProcessing: this.isProcessing,
-			currentOperation: this.currentOperation
-				? {
-						id: this.currentOperation.id,
-						runningTime: now - this.currentOperation.startTime,
-					}
-				: null,
-			maxSize: this.maxSize,
-		};
-	}
-
-	/**
-	 * Cancela la operación actual si excede un tiempo límite
-	 */
-	cancelIfStuck(maxRunningTime = 300_000) {
-		// 5 minutos
-		if (this.currentOperation) {
-			const runningTime = Date.now() - this.currentOperation.startTime;
-			if (runningTime > maxRunningTime) {
-				fileManagerLogger.warn(`🛑 Cancelando operación colgada: ${this.currentOperation.id} (${runningTime}ms)`);
-				this.clear();
-			}
-		}
-	}
-}
-
-// 🎯 Estado principal del store - MIGRADO A EntityWithStats
-interface UnifiedFileManagerState {
-	// 📂 Estado de items - ACTUALIZADO
-	currentItems: EntityWithStats[];
-	displayedItems: EntityWithStats[];
-	isLoading: boolean;
-	error: string | null;
-	lastUpdate: number;
-
-	// 📄 Estado de paginación
-	hasMoreItems: boolean;
-	currentPage: number;
-	totalItems: number;
-	isLoadingMore: boolean;
-
-	// 🎯 Estado de selección - ACTUALIZADO
-	selectedItem: EntityWithStats | null;
-	selectedItems: EntityWithStats[];
-	lastSelectedItem: EntityWithStats | null;
-
-	// 🧭 Estado de navegación
-	currentContext: 'folder' | 'collection' | 'tag' | 'album' | 'character' | 'place' | 'world-item' | 'all' | null;
-	currentFolderId: string | null;
-	currentCollectionId: string | null;
-	currentTagId: string | null;
-	currentAlbumId: string | null;
-	currentCharacterId: string | null;
-	currentPlaceId: string | null;
-	currentWorldItemId: string | null;
-
-	// 📊 Entidades actuales
-	currentFolder: BaseEntity | null;
-	currentCollection: CollectionEntity | null;
-	currentTag: TagEntity | null;
-	currentAlbum: EntityWithEmoji | null;
-	currentCharacter: EntityWithEmoji | null;
-	currentPlace: EntityWithEmoji | null;
-	currentWorldItem: EntityWithEmoji | null;
-
-	// 📈 Metadatos
-	collections: CollectionEntity[];
-	folders: BaseEntity[];
-	tags: TagEntity[];
-	albums: EntityWithEmoji[];
-	characters: EntityWithEmoji[];
-	places: EntityWithEmoji[];
-	worldItems: EntityWithEmoji[];
-
-	// ⚡ Estado de procesamiento
-	isProcessingThumbnails: boolean;
-	operationQueue: OperationQueue;
-
-	// 🎨 Estado de vista
-	viewMode: ViewMode;
-
-	// 🔄 Acciones principales
-	initialize: () => Promise<void>;
-	loadItems: (context: string, id?: string) => Promise<void>;
-	loadMoreItems: () => void;
-
-	// 🎯 Selección - ACTUALIZADO
-	selectItem: (item: EntityWithStats) => void;
-	deselectItem: (id: string) => void;
-	toggleItemSelection: (item: EntityWithStats, isMultiSelect: boolean) => void;
-	clearSelection: () => void;
-	selectAll: () => void;
-	selectRange: (fromIndex: number, toIndex: number) => void;
-
-	// 🧭 Navegación con cache
-	setCurrentFolder: (id: string) => Promise<void>;
-	setCurrentCollection: (id: string) => Promise<void>;
-	setCurrentTag: (id: string) => Promise<void>;
-	setCurrentAlbum: (id: string) => Promise<void>;
-	setCurrentCharacter: (id: string) => Promise<void>;
-	setCurrentPlace: (id: string) => Promise<void>;
-	setCurrentWorldItem: (id: string) => Promise<void>;
-	loadAllImages: () => Promise<void>;
-
-	// 🛠️ Utilidades
-	setViewMode: (mode: ViewMode) => void;
-	setIsLoading: (loading: boolean) => void;
-	resetState: () => void;
-	refreshCurrentContext: () => Promise<void>;
-
-	// 📊 Cache management
-	invalidateCache: (key?: string) => void;
-	getCacheStats: () => { size: number; maxSize: number; hitRate: number };
-
-	// 🔄 Nuevas utilidades para EntityWithStats
-	getEntityType: (entity: EntityWithStats) => EntityStatsType;
-	filterByType: (type: EntityStatsType) => EntityWithStats[];
-	getEntityStatistics: (entity: EntityWithStats) => any;
-}
 
 // 🏗️ Estado inicial
 const initialState = {
@@ -1008,59 +756,8 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 	},
 }));
 
-// 🔄 Hooks especializados para diferentes contextos
-export const useFolder = () => {
-	const store = useUnifiedFileManager();
-	return {
-		currentFolder: store.currentFolder,
-		setCurrentFolder: store.setCurrentFolder,
-		folderImages: store.currentContext === 'folder' ? store.currentItems : [],
-		isLoading: store.isLoading && store.currentContext === 'folder',
-	};
-};
-
-export const useCollection = () => {
-	const store = useUnifiedFileManager();
-	return {
-		currentCollection: store.currentCollection,
-		setCurrentCollection: store.setCurrentCollection,
-		collectionImages: store.currentContext === 'collection' ? store.currentItems : [],
-		isLoading: store.isLoading && store.currentContext === 'collection',
-	};
-};
-
-export const useSelection = () => {
-	const store = useUnifiedFileManager();
-	return {
-		selectedItems: store.selectedItems,
-		selectedItem: store.selectedItem,
-		lastSelectedItem: store.lastSelectedItem,
-		selectItem: store.selectItem,
-		deselectItem: store.deselectItem,
-		toggleItemSelection: store.toggleItemSelection,
-		clearSelection: store.clearSelection,
-		selectAll: store.selectAll,
-		selectRange: store.selectRange,
-	};
-};
-
-export const useNavigation = () => {
-	const store = useUnifiedFileManager();
-	return {
-		currentContext: store.currentContext,
-		setCurrentFolder: store.setCurrentFolder,
-		setCurrentCollection: store.setCurrentCollection,
-		setCurrentTag: store.setCurrentTag,
-		setCurrentAlbum: store.setCurrentAlbum,
-		setCurrentCharacter: store.setCurrentCharacter,
-		setCurrentPlace: store.setCurrentPlace,
-		setCurrentWorldItem: store.setCurrentWorldItem,
-		loadAllImages: store.loadAllImages,
-		refreshCurrentContext: store.refreshCurrentContext,
-	};
-};
+// 📦 Re-exports de hooks especializados
+export { useFolder, useCollection, useSelection, useNavigation } from './hooks';
 
 // 🎯 Hook principal - reexport para compatibilidad
 export const useFileManager = useUnifiedFileManager;
-
-fileManagerLogger.info('🚀 Unified File Manager Store configurado correctamente');
