@@ -22,12 +22,11 @@ import type { LastProcessedThumbnail, ProcessOptions } from '@/types/thumbnails'
 const thumbLogger = serverLogger.withContext('ThumbnailService');
 
 // Cola optimizada con prioridades y gestión avanzada
-const queue = new PQueue({ 
+const queue = new PQueue({
 	concurrency: thumbsConfig.concurrency,
 	interval: 100, // Procesar cada 100ms para mejor responsiveness
 	intervalCap: Math.max(2, Math.floor(thumbsConfig.concurrency / 2)), // Máximo 50% por intervalo
 	timeout: 30_000, // 30 segundos timeout
-	throwOnTimeout: true,
 	autoStart: true,
 });
 
@@ -304,9 +303,8 @@ export async function getThumbnail(
 
 						return result;
 					},
-					{ 
+					{
 						priority,
-						throwOnTimeout: true,
 					}
 				);
 				inflight.set(memKey, newPromise);

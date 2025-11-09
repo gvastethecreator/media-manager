@@ -30,17 +30,18 @@ const VideosView = lazy(() => import('@/components/views/videos/videos-view'));
 const WildcardsView = lazy(() => import('@/components/views/wildcards/wildcards-view').then((m) => ({ default: m.WildcardsView })));
 const WorldItemContentView = lazy(() => import('@/components/views/world-items/world-item-content-view').then((m) => ({ default: m.WorldItemContentView })));
 const WorldItemsView = lazy(() => import('@/components/views/world-items/world-items-view').then((m) => ({ default: m.WorldItemsView })));
-const ReindexLogsViewer = lazy(() => import('@/components/settings/folders/reindex-logs-viewer'));\n// Wrapper components para pasar el parÃ¡metro de la URL
+const ReindexLogsViewer = lazy(() => import('@/components/settings/folders/reindex-logs-viewer'));
+// Wrapper components para pasar el parámetro de la URL
 const RouteFallback = () => (
 	<div className="flex h-full w-full items-center justify-center p-6 text-muted-foreground">
 		Cargando…
 	</div>
 );
 
-const withSuspense = (element: JSX.Element) => <Suspense fallback={<RouteFallback />}>{element}</Suspense>;
+const withSuspense = (element: React.ReactElement) => <Suspense fallback={<RouteFallback />}>{element}</Suspense>;
 const FolderContentWrapper = () => {
-\tconst { id } = useParams<{ id: string }>();
-\treturn withSuspense(<FolderContentView folderId={id} />);
+	const { id } = useParams<{ id: string }>();
+	return withSuspense(<FolderContentView folderId={id} />);
 };
 
 // Wrapper para las rutas de documentaciÃ³n (simplificado sin fumadocs)

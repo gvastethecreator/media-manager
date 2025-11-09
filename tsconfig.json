@@ -46,6 +46,7 @@
     "src/components/cards/examples/**",
     "src/services/file-entity-mapper/file-entity-mapper.service.backup.ts",
     "src/services/file-entity-mapper/file-entity-mapper.service.clean.ts",
-    "src/components/features/file-browser/file-browser-backup.tsx"
+    "src/components/features/file-browser/file-browser-backup.tsx",
+    "src/app/admin/**"
   ]
 }
