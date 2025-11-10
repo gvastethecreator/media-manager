@@ -9,7 +9,13 @@ export default defineConfig({
 		environment: 'happy-dom',
 		setupFiles: ['./src/test/setup.ts'],
 		include: ['**/*.{test,spec}.{ts,tsx}'],
-		exclude: ['**/node_modules/**', '**/dist/**', '**/build/**', '**/.{idea,git,cache,output,temp}/**'],
+		exclude: [
+			'**/node_modules/**',
+			'**/dist/**',
+			'**/build/**',
+			'**/.{idea,git,cache,output,temp}/**',
+			'**/tests/e2e/**', // Playwright E2E tests (use 'npm run test:e2e' instead)
+		],
 		coverage: {
 			provider: 'v8',
 			reporter: ['text', 'json', 'html', 'lcov'],
