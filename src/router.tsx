@@ -36,6 +36,14 @@ const WildcardsView = lazy(() => import('@/components/views/wildcards/wildcards-
 const WorldItemContentView = lazy(() => import('@/components/views/world-items/world-item-content-view').then(m => ({ default: m.WorldItemContentView })));
 const WorldItemsView = lazy(() => import('@/components/views/world-items/world-items-view').then(m => ({ default: m.WorldItemsView })));
 
+// ✅ VISTAS DE ENTIDADES ABSTRACTAS - Previamente con placeholder, ahora conectadas
+const CharactersView = lazy(() => import('@/components/views/characters/characters-view'));
+const ConceptsView = lazy(() => import('@/components/views/concepts/concepts-view'));
+const CollectionsView = lazy(() => import('@/components/views/collections/collections-view'));
+const AlbumsView = lazy(() => import('@/components/views/albums/albums-view'));
+const FavoritesView = lazy(() => import('@/components/views/favorites/favorites-view'));
+const GroupsView = lazy(() => import('@/components/views/groups/groups-view'));
+
 // Wrapper components para pasar el parámetro de la URL
 const FolderContentWrapper = () => {
 	const { id } = useParams<{ id: string }>();
@@ -48,22 +56,6 @@ const DocsWrapper = () => (
 		<Outlet />
 	</Suspense>
 );
-// Importar stores para los wrappers
-
-// Wrapper para CharactersView
-const CharactersViewWrapper = () => {
-	return (
-		<div className="p-6">
-			<h2 className="font-bold text-2xl">Vista de Personajes</h2>
-			<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
-		</div>
-	);
-};
-
-// Wrappers eliminados - TODO: Re-implementar cuando se necesiten
-// const AlbumContentWrapper = () => ...
-// const CharacterContentWrapper = () => ...
-// etc.
 
 // Componente NotFound simple
 const NotFoundPage = () => {
@@ -138,42 +130,22 @@ export const router = createBrowserRouter([
 				path: 'file-3ds',
 				element: <File3DView className="h-full" />,
 			},
-			// Organizadores - Temporalmente simplificados
+			// Organizadores
 			{
 				path: 'favorites',
-				element: (
-					<div className="p-6">
-						<h2 className="font-bold text-2xl">Vista de Favoritos</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
-					</div>
-				),
+				element: <FavoritesView />,
 			},
 			{
 				path: 'collections',
-				element: (
-					<div className="p-6">
-						<h2 className="font-bold text-2xl">Vista de Colecciones</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
-					</div>
-				),
+				element: <CollectionsView />,
 			},
 			{
 				path: 'albums',
-				element: (
-					<div className="p-6">
-						<h2 className="font-bold text-2xl">Vista de Álbumes</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
-					</div>
-				),
+				element: <AlbumsView />,
 			},
 			{
 				path: 'groups',
-				element: (
-					<div className="p-6">
-						<h2 className="font-bold text-2xl">Vista de Grupos</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
-					</div>
-				),
+				element: <GroupsView />,
 			},
 			{
 				path: 'tags',
@@ -191,7 +163,7 @@ export const router = createBrowserRouter([
 			// Worldbuilding
 			{
 				path: 'characters',
-				element: <CharactersViewWrapper />,
+				element: <CharactersView />,
 			},
 			{
 				path: 'places',
@@ -221,16 +193,20 @@ export const router = createBrowserRouter([
 			},
 			{
 				path: 'concepts',
-				element: (
-					<div className="p-6">
-						<h2 className="font-bold text-2xl">Vista de Conceptos</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
-					</div>
-				),
+				element: <ConceptsView />,
 			},
 			{
 				path: 'wildcards',
 				element: <WildcardsView className="h-full" />,
+			},
+			{
+				path: 'workflows',
+				element: (
+					<div className="p-6">
+						<h2 className="font-bold text-2xl">Workflows</h2>
+						<p className="text-muted-foreground">Vista de workflows en desarrollo...</p>
+					</div>
+				),
 			},
 			// Gestión
 			{
@@ -269,13 +245,14 @@ export const router = createBrowserRouter([
 				path: 'images/:id',
 				element: <ImageDetailView />,
 			},
-			// Content Views - Vistas de detalle sin parámetros - Temporalmente simplificadas
+			// Content Views - Vistas de detalle pendientes de implementación
+			// TODO: Implementar DocumentContentView y AudioContentView
 			{
 				path: 'document-content',
 				element: (
 					<div className="p-6">
 						<h2 className="font-bold text-2xl">Contenido de Documento</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+						<p className="text-muted-foreground">Vista pendiente de implementación</p>
 					</div>
 				),
 			},
@@ -284,7 +261,7 @@ export const router = createBrowserRouter([
 				element: (
 					<div className="p-6">
 						<h2 className="font-bold text-2xl">Contenido de Audio</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
+						<p className="text-muted-foreground">Vista pendiente de implementación</p>
 					</div>
 				),
 			},
