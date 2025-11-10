@@ -332,7 +332,7 @@ export class FileEntityMapperService {
 
 	private async generateVideoThumbnail(_filePath: string, _entityId: string) {
 		try {
-			const { generateAnimatedVideoThumbnail } = await import('@/lib/utils/video/helpers');
+			const { generateAnimatedVideoThumbnail } = await import('@/lib/utils/video/thumbnail-helpers.server');
 			const { db } = await import('@/lib/drizzle');
 			const schema = await import('@/lib/drizzle/schema');
 			const { eq } = await import('drizzle-orm');
