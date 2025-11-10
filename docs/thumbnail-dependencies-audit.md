@@ -73,7 +73,7 @@ Track de video no se puede decodificar: D:\DEV\image-manager\test-files\test-vid
 1. **URGENTE**: Validar formato de `test-video.mp4` (codec, contenedor)
 2. **URGENTE**: Probar mediabunny con video simple (H.264, MP4)
 3. Implementar fallback a FFmpeg inmediatamente
-4. Considerar alternativa: `@ffmpeg/ffmpeg` (FFmpeg en WebAssembly)
+4. Considerar alternativa: `@ffmpeg/ffmpeg` (FFmpeg en WebAssembly) **[Nota: actualmente NO está instalada ni soportada oficialmente, solo sugerencia]**
 5. Agregar timeout de 30s para evitar bloqueos
 
 ---
