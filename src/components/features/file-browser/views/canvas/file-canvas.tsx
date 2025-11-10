@@ -1,6 +1,20 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebounce, useRaf } from '@/hooks/useThrottle';
-import { useAddTags, useAddToCollection, useToggleFavorite } from '@/lib/api/files';
+import {
+	useAddTags,
+	useAddToAlbum,
+	useAddToCharacter,
+	useAddToCollection,
+	useAddToConcept,
+	useAddToGroup,
+	useAddToNote,
+	useAddToPlace,
+	useAddToPrompt,
+	useAddToProperty,
+	useAddToWildcard,
+	useAddToWorldItem,
+	useToggleFavorite,
+} from '@/lib/api/files';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useSelectionStore } from '@/store/ui/selection.slice';
@@ -55,6 +69,16 @@ export function FileCanvas({
 	const toggleFavorite = useToggleFavorite();
 	const addToCollection = useAddToCollection();
 	const addTags = useAddTags();
+	const addToAlbum = useAddToAlbum();
+	const addToGroup = useAddToGroup();
+	const addToCharacter = useAddToCharacter();
+	const addToPlace = useAddToPlace();
+	const addToConcept = useAddToConcept();
+	const addToWorldItem = useAddToWorldItem();
+	const addToNote = useAddToNote();
+	const addToPrompt = useAddToPrompt();
+	const addToProperty = useAddToProperty();
+	const addToWildcard = useAddToWildcard();
 
 	// Estados de interacción (hover y selección por arrastre)
 	const [hoverIndex, setHoverIndex] = useState<number | null>(null);
@@ -719,6 +743,126 @@ export function FileCanvas({
 					for (const it of selected) {
 						try {
 							await addTags.mutateAsync({ fileId: it.id, tags: [targetId] });
+						} catch {}
+					}
+				})();
+				break;
+			}
+			case 'add-to-album': {
+				const targetId = payload.targetId;
+				if (!targetId) return;
+				(async () => {
+					for (const it of selected) {
+						try {
+							await addToAlbum.mutateAsync({ fileId: it.id, albumId: targetId });
+						} catch {}
+					}
+				})();
+				break;
+			}
+			case 'add-to-group': {
+				const targetId = payload.targetId;
+				if (!targetId) return;
+				(async () => {
+					for (const it of selected) {
+						try {
+							await addToGroup.mutateAsync({ fileId: it.id, groupId: targetId });
+						} catch {}
+					}
+				})();
+				break;
+			}
+			case 'add-to-characters': {
+				const targetId = payload.targetId;
+				if (!targetId) return;
+				(async () => {
+					for (const it of selected) {
+						try {
+							await addToCharacter.mutateAsync({ fileId: it.id, characterId: targetId });
+						} catch {}
+					}
+				})();
+				break;
+			}
+			case 'add-to-places': {
+				const targetId = payload.targetId;
+				if (!targetId) return;
+				(async () => {
+					for (const it of selected) {
+						try {
+							await addToPlace.mutateAsync({ fileId: it.id, placeId: targetId });
+						} catch {}
+					}
+				})();
+				break;
+			}
+			case 'add-to-concept': {
+				const targetId = payload.targetId;
+				if (!targetId) return;
+				(async () => {
+					for (const it of selected) {
+						try {
+							await addToConcept.mutateAsync({ fileId: it.id, conceptId: targetId });
+						} catch {}
+					}
+				})();
+				break;
+			}
+			case 'add-to-world-item': {
+				const targetId = payload.targetId;
+				if (!targetId) return;
+				(async () => {
+					for (const it of selected) {
+						try {
+							await addToWorldItem.mutateAsync({ fileId: it.id, worldItemId: targetId });
+						} catch {}
+					}
+				})();
+				break;
+			}
+			case 'add-to-notes': {
+				const targetId = payload.targetId;
+				if (!targetId) return;
+				(async () => {
+					for (const it of selected) {
+						try {
+							await addToNote.mutateAsync({ fileId: it.id, noteId: targetId });
+						} catch {}
+					}
+				})();
+				break;
+			}
+			case 'add-to-prompts': {
+				const targetId = payload.targetId;
+				if (!targetId) return;
+				(async () => {
+					for (const it of selected) {
+						try {
+							await addToPrompt.mutateAsync({ fileId: it.id, promptId: targetId });
+						} catch {}
+					}
+				})();
+				break;
+			}
+			case 'add-to-properties': {
+				const targetId = payload.targetId;
+				if (!targetId) return;
+				(async () => {
+					for (const it of selected) {
+						try {
+							await addToProperty.mutateAsync({ fileId: it.id, propertyId: targetId });
+						} catch {}
+					}
+				})();
+				break;
+			}
+			case 'add-to-wildcards': {
+				const targetId = payload.targetId;
+				if (!targetId) return;
+				(async () => {
+					for (const it of selected) {
+						try {
+							await addToWildcard.mutateAsync({ fileId: it.id, wildcardId: targetId });
 						} catch {}
 					}
 				})();
