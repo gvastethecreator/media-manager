@@ -21,7 +21,6 @@ const createTestImageWithDefaults = (overrides: Partial<Image> = {}): Image => {
 
 // Mocks tipados (db y eventos)
 let originalGenerateThumbnail: typeof imageService.generateThumbnail;
-let originalEmitEvent: (typeof imageService)['emitEvent'];
 
 beforeEach(() => {
 	// Mock generateThumbnail para evitar I/O pesado
@@ -30,24 +29,11 @@ beforeEach(() => {
 		// stub: evitar trabajo de sharp/FS
 		await Promise.resolve();
 	};
-
-	// Mock emitEvent (método privado) para no depender de window ni fetch
-	originalEmitEvent = (imageService as any).emitEvent;
-	(imageService as any).emitEvent = async (event: string, data: unknown): Promise<void> => {
-		const store = getEventStore();
-		const key = 'images:modified';
-		if (!store.has(key)) {
-			store.set(key, []);
-		}
-		store.get(key)?.push({ type: 'images:modified', data, timestamp: Date.now() } as any);
-		await Promise.resolve();
-	};
 });
 
 afterEach(() => {
 	// Restaurar método parcheado
 	(imageService as any).generateThumbnail = originalGenerateThumbnail;
-	(imageService as any).emitEvent = originalEmitEvent;
 });
 
 // Helper tipado para stubear selects básicos
