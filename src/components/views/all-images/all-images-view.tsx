@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 // import { useAutoFolderIndexing } from '@/hooks/use-auto-folder-indexing'; // Deshabilitado temporalmente
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
@@ -75,20 +76,25 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 
 	const navigate = useNavigate();
 	const { openViewer } = useImageViewer();
+	const { handleItemClick } = useEntitySelection();
 
-	const handleImageClick = useCallback((item: AnyEntityWithStats) => {
-		// Verificar que sea una imagen usando type guard
-		if (isImageWithStats(item)) {
-			const image = item as ImageWithStats;
-			viewLogger.info('🖱️ Click en imagen:', image.name);
+	const handleImageClick = useCallback(
+		(item: AnyEntityWithStats) => {
+			// Verificar que sea una imagen usando type guard
+			if (isImageWithStats(item)) {
+				const image = item as ImageWithStats;
+				viewLogger.info('🖱️ Click en imagen:', image.name);
 
-			// Navegar a la vista de detalle de imagen
-			// Por ahora mantenemos en la misma vista
-			viewLogger.info('Imagen seleccionada:', image.name);
-		} else {
-			viewLogger.warn('⚠️ Item clickeado no es una imagen:', item);
-		}
-	}, []);
+				// Actualizar panel de detalles con la imagen seleccionada
+				handleItemClick(item);
+
+				viewLogger.info('Imagen seleccionada:', image.name);
+			} else {
+				viewLogger.warn('⚠️ Item clickeado no es una imagen:', item);
+			}
+		},
+		[handleItemClick]
+	);
 
 	const handleImageDoubleClick = useCallback(
 		(item: AnyEntityWithStats) => {
