@@ -698,6 +698,127 @@ export const NOTE_PRESETS: EntityPresetConfig = {
 };
 
 /**
+ * 📸 PRESETS PARA ALBUMS
+ */
+export const ALBUM_PRESETS: EntityPresetConfig = {
+	entityType: 'album',
+	availableFields: [
+		{ name: 'name', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre del álbum' },
+		{ name: 'emoji', label: 'Emoji', type: 'emoji', defaultValue: '📸' },
+		{ name: 'color', label: 'Color', type: 'color', defaultValue: '#3b82f6' },
+		{ name: 'description', label: 'Descripción', type: 'textarea', placeholder: 'Descripción del álbum', max: 300 },
+		{ name: 'category', label: 'Categoría', type: 'text', placeholder: 'Ej: Vacaciones, Familia, Trabajo' },
+		{ name: 'featuredImage', label: 'Imagen Destacada', type: 'featuredImage' },
+		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
+	],
+	presets: [
+		{
+			id: 'minimal',
+			name: 'Mínimo',
+			description: 'Solo nombre',
+			icon: '⚡',
+			fields: ['name'],
+			isDefault: true,
+		},
+		{
+			id: 'basic',
+			name: 'Básico',
+			description: 'Álbum con apariencia',
+			icon: '📝',
+			fields: ['name', 'emoji', 'color', 'description'],
+		},
+		{
+			id: 'complete',
+			name: 'Completo',
+			description: 'Álbum completo',
+			icon: '📋',
+			fields: ['name', 'emoji', 'color', 'description', 'category', 'featuredImage', 'isFavorite'],
+		},
+	],
+};
+
+/**
+ * 👥 PRESETS PARA GROUPS
+ */
+export const GROUP_PRESETS: EntityPresetConfig = {
+	entityType: 'group',
+	availableFields: [
+		{ name: 'name', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre del grupo' },
+		{ name: 'emoji', label: 'Emoji', type: 'emoji', defaultValue: '👥' },
+		{ name: 'color', label: 'Color', type: 'color', defaultValue: '#8B5CF6' },
+		{ name: 'description', label: 'Descripción', type: 'textarea', placeholder: 'Descripción del grupo', max: 300 },
+		{ name: 'category', label: 'Categoría', type: 'text', placeholder: 'Ej: Proyecto, Tema, Temporal' },
+		{ name: 'featuredImage', label: 'Imagen Destacada', type: 'featuredImage' },
+		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
+	],
+	presets: [
+		{
+			id: 'minimal',
+			name: 'Mínimo',
+			description: 'Solo nombre',
+			icon: '⚡',
+			fields: ['name'],
+			isDefault: true,
+		},
+		{
+			id: 'basic',
+			name: 'Básico',
+			description: 'Grupo con apariencia',
+			icon: '📝',
+			fields: ['name', 'emoji', 'color', 'description'],
+		},
+		{
+			id: 'complete',
+			name: 'Completo',
+			description: 'Grupo completo',
+			icon: '📋',
+			fields: ['name', 'emoji', 'color', 'description', 'category', 'featuredImage', 'isFavorite'],
+		},
+	],
+};
+
+/**
+ * ✨ PRESETS PARA WILDCARDS
+ */
+export const WILDCARD_PRESETS: EntityPresetConfig = {
+	entityType: 'wildcard',
+	availableFields: [
+		{ name: 'name', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre del wildcard' },
+		{ name: 'emoji', label: 'Emoji', type: 'emoji', defaultValue: '✨' },
+		{ name: 'color', label: 'Color', type: 'color', defaultValue: '#ec4899' },
+		{ name: 'description', label: 'Descripción', type: 'textarea', placeholder: 'Descripción del wildcard', max: 300 },
+		{ name: 'content', label: 'Contenido', type: 'textarea', placeholder: 'Lista de opciones (una por línea)', max: 2000 },
+		{ name: 'category', label: 'Categoría', type: 'text', placeholder: 'Ej: Personajes, Lugares, Objetos' },
+		{ name: 'featuredImage', label: 'Imagen Destacada', type: 'featuredImage' },
+		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
+	],
+	presets: [
+		{
+			id: 'minimal',
+			name: 'Mínimo',
+			description: 'Solo nombre',
+			icon: '⚡',
+			fields: ['name'],
+			isDefault: true,
+		},
+		{
+			id: 'basic',
+			name: 'Básico',
+			description: 'Wildcard con descripción',
+			icon: '📝',
+			fields: ['name', 'emoji', 'color', 'description'],
+		},
+		{
+			id: 'complete',
+			name: 'Completo',
+			description: 'Wildcard completo',
+			icon: '📋',
+			fields: ['name', 'emoji', 'color', 'description', 'content', 'category', 'featuredImage', 'isFavorite'],
+		},
+	],
+};
+
+/**
  * 📚 Mapa de presets por tipo de entidad
  */
 export const ENTITY_PRESETS_MAP: Record<string, EntityPresetConfig> = {
@@ -707,6 +828,9 @@ export const ENTITY_PRESETS_MAP: Record<string, EntityPresetConfig> = {
 	'world-item': WORLD_ITEM_PRESETS,
 	tag: TAG_PRESETS,
 	collection: COLLECTION_PRESETS,
+	album: ALBUM_PRESETS,
+	group: GROUP_PRESETS,
+	wildcard: WILDCARD_PRESETS,
 	prompt: PROMPT_PRESETS,
 	note: NOTE_PRESETS,
 };
