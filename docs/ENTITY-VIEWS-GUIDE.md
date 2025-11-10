@@ -354,9 +354,94 @@ Ver `src/components/views/characters/character-enriched-view-example.tsx` para u
 5. ⏳ Agregar hooks adicionales si se necesitan (ej: useCharacterPlaces, useCharacterConcepts)
 6. ⏳ Crear vistas detalladas para cada tipo de entidad
 
+## Archivos vs Entidades
+
+Es importante entender la diferencia entre **archivos escaneados** y **entidades abstractas**:
+
+### Archivos Escaneados (Images, Videos, Audio, etc.)
+
+**Qué son:** Archivos físicos importados del sistema de archivos
+
+**Ejemplos:** `image.jpg`, `video.mp4`, `audio.mp3`, `document.pdf`
+
+**Componentes:**
+- Vistas usan **FileBrowser** (alto rendimiento con canvas)
+- Items específicos: `ImageItem`, `VideoItem`, `AudioItem`, etc.
+- Stores: `useImageStore`, `useVideoStore`, etc.
+
+**Características:**
+- Miles de items (necesitan virtualización)
+- Thumbnails del archivo real
+- Metadata del archivo (tamaño, resolución, duración)
+- Visor integrado para abrir archivos
+
+**Documentación:** Ver `FILE-VIEWS-STRUCTURE.md` para detalles completos
+
+### Entidades Abstractas (Characters, Places, Concepts, etc.)
+
+**Qué son:** Conceptos abstractos creados por el usuario para organizar contenido
+
+**Ejemplos:** "Luke Skywalker", "Tatooine", "The Force"
+
+**Componentes:**
+- Vistas usan **EntityGrid** (React-based, ligero)
+- Items específicos: `CharacterItem`, `PlaceItem`, `ConceptItem`, etc.
+- Vistas enriquecidas con EntityHeader + Tabs + FileBrowser
+
+**Características:**
+- Pocos items (< 100 generalmente)
+- Emoji y color personalizado
+- Campos dinámicos específicos del tipo
+- Asociaciones con archivos y otras entidades
+
+**Documentación:** Este documento (ENTITY-VIEWS-GUIDE.md)
+
+### Cuándo Usar Cada Uno
+
+| Escenario | Componente | Razón |
+|-----------|------------|-------|
+| Mostrar todas las imágenes | FileBrowser | Miles de items, necesita virtualización |
+| Mostrar todos los personajes | EntityGrid | < 100 personajes, visualización rica |
+| Imágenes de un personaje | FileBrowser | Potencialmente muchas imágenes |
+| Personajes relacionados | EntityGrid | Pocos personajes, info específica |
+| Videos del sistema | FileBrowser | Miles de videos, rendimiento crítico |
+| Tags de una imagen | EntityGrid | Pocos tags, badges visuales |
+
+### Combinación en Vistas Enriquecidas
+
+Las vistas enriquecidas de entidades combinan ambos:
+
+```tsx
+function CharacterDetailView({ characterId }) {
+  return (
+    <>
+      <EntityHeader /> {/* Info del personaje */}
+
+      <Tabs>
+        {/* FileBrowser para archivos del personaje */}
+        <Tab value="images">
+          <FileBrowser items={characterImages} />
+        </Tab>
+
+        {/* EntityGrid para entidades relacionadas */}
+        <Tab value="related">
+          <EntityGrid items={relatedCharacters} />
+        </Tab>
+      </Tabs>
+    </>
+  );
+}
+```
+
 ## Notas
 
 - Todos los componentes soportan dark mode
 - Las animaciones están optimizadas con framer-motion
 - Los componentes son accesibles (ARIA labels, keyboard navigation)
 - TypeScript types completos para todas las props
+
+## Documentos Relacionados
+
+- **FILE-VIEWS-STRUCTURE.md** - Estructura completa de vistas de archivos escaneados
+- **PRESET-FORMS-MIGRATION.md** - Sistema de presets para entidades
+- **ENTITY-PRESETS-SYSTEM.md** - Detalles del sistema de configuración de entidades
