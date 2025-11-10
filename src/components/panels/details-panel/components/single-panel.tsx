@@ -44,6 +44,7 @@ import { getDetailedMetadata } from '../metadata/legacy-metadata';
 import { getEntityIcon } from '../utils/icon-utils';
 import { getMainImageUrl } from '../utils/image-utils';
 import { getBasicMetadata, getRelatedEntities } from '../utils/metadata-utils';
+import { EntityDetailsPanel } from './entity-details-panel';
 import { JsonViewer } from './json-viewer';
 import { MetadataTable } from './metadata-table';
 import { CollapsiblePrompt } from './prompt-parser';
@@ -59,6 +60,33 @@ const PATH_SEPARATOR_REGEX = /[/\\]/;
 const FILE_EXTENSION_REGEX = /\.[^.]*$/;
 
 export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata, className = '' }) => {
+	// Detectar si es una entidad abstracta o un archivo
+	const isAbstractEntity = () => {
+		const entityType = item.entityType;
+		const abstractEntityTypes = [
+			'character',
+			'place',
+			'concept',
+			'collection',
+			'album',
+			'tag',
+			'group',
+			'note',
+			'prompt',
+			'wildcard',
+			'world-item',
+			'favorite',
+			'property',
+		];
+		return entityType && abstractEntityTypes.includes(entityType);
+	};
+
+	// Si es una entidad abstracta, usar el panel especializado
+	if (isAbstractEntity()) {
+		return <EntityDetailsPanel className={className} item={item} />;
+	}
+
+	// Para archivos, continuar con la lógica existente
 	// Solo usar hook interno si no hay metadata como prop
 	const shouldUseInternalHook = !enhancedMetadata || enhancedMetadata.length === 0;
 
