@@ -113,7 +113,6 @@
     "emoji-picker-react": "^4.13.3",
     "emojilib": "^4.0.2",
     "event-source-polyfill": "^1.0.31",
-    "event-source-stream": "^1.6.0",
     "exifr": "^7.1.3",
     "exifreader": "^4.32.0",
     "express": "^5.1.0",
