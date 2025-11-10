@@ -66,6 +66,14 @@ export class KeyboardShortcutManager {
 	}
 
 	/**
+	 * Limpia todos los shortcuts y handlers (útil para testing)
+	 */
+	clearAll(): void {
+		this.shortcuts.clear();
+		this.handlers.clear();
+	}
+
+	/**
 	 * Maneja eventos de teclado
 	 */
 	handleKeyDown = (event: KeyboardEvent): boolean => {
@@ -192,7 +200,10 @@ export class KeyboardShortcutManager {
 	/**
 	 * Determina si debe ignorar el target del evento
 	 */
-	private shouldIgnoreTarget(target: HTMLElement): boolean {
+	private shouldIgnoreTarget(target: HTMLElement | null): boolean {
+		if (!target) {
+			return false;
+		}
 		const tagName = target.tagName.toLowerCase();
 		const isEditable = target.isContentEditable;
 		const isInput = ['input', 'textarea', 'select'].includes(tagName);
