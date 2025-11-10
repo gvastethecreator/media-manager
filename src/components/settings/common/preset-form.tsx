@@ -13,6 +13,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { FeaturedImageSelector } from '@/components/ui/featured-image-selector';
 import { PresetSelector } from './preset-selector';
 import {
 	type FieldConfig,
@@ -35,12 +36,27 @@ interface PresetFormProps<T extends Record<string, any> = Record<string, any>> {
 	initialData?: Partial<T>;
 	/** Si está en modo edición */
 	isEditing?: boolean;
+	/** IDs de imágenes asociadas (para FeaturedImageSelector) */
+	imageIds?: string[];
+	/** Imágenes disponibles (para FeaturedImageSelector) */
+	images?: Array<{
+		id: string;
+		name: string;
+		thumbnailUrl?: string | null;
+		path?: string;
+	}>;
 }
 
 /**
  * Renderiza un campo según su configuración
  */
-function renderField(field: FieldConfig, value: any, onChange: (value: any) => void) {
+function renderField(
+	field: FieldConfig,
+	value: any,
+	onChange: (value: any) => void,
+	imageIds?: string[],
+	images?: Array<{ id: string; name: string; thumbnailUrl?: string | null; path?: string }>
+) {
 	const fieldId = `field-${field.name}`;
 
 	switch (field.type) {
@@ -125,6 +141,16 @@ function renderField(field: FieldConfig, value: any, onChange: (value: any) => v
 				/>
 			);
 
+		case 'featuredImage':
+			return (
+				<FeaturedImageSelector
+					currentFeaturedImage={value}
+					imageIds={imageIds}
+					images={images}
+					onSelect={onChange}
+				/>
+			);
+
 		default:
 			return null;
 	}
@@ -140,6 +166,8 @@ export function PresetForm<T extends Record<string, any> = Record<string, any>>(
 	onCancel,
 	initialData,
 	isEditing = false,
+	imageIds = [],
+	images = [],
 }: PresetFormProps<T>) {
 	const config = getEntityPresets(entityType);
 	const defaultPreset = getDefaultPreset(entityType);
@@ -236,7 +264,16 @@ export function PresetForm<T extends Record<string, any> = Record<string, any>>(
 					if (field.type === 'checkbox') {
 						return (
 							<div key={field.name}>
-								{renderField(field, formData[field.name], (v) => handleFieldChange(field.name, v))}
+								{renderField(field, formData[field.name], (v) => handleFieldChange(field.name, v), imageIds, images)}
+							</div>
+						);
+					}
+
+					// Campos normales con label (featuredImage no necesita label extra)
+					if (field.type === 'featuredImage') {
+						return (
+							<div key={field.name}>
+								{renderField(field, formData[field.name], (v) => handleFieldChange(field.name, v), imageIds, images)}
 							</div>
 						);
 					}
@@ -251,7 +288,7 @@ export function PresetForm<T extends Record<string, any> = Record<string, any>>(
 							{field.description && (
 								<p className="text-xs text-gray-500 dark:text-gray-400">{field.description}</p>
 							)}
-							{renderField(field, formData[field.name], (v) => handleFieldChange(field.name, v))}
+							{renderField(field, formData[field.name], (v) => handleFieldChange(field.name, v), imageIds, images)}
 						</div>
 					);
 				})}
