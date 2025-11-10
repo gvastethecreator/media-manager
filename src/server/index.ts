@@ -26,7 +26,6 @@ import filesRouter from './routes/files.js';
 import { foldersRouter } from './routes/folders/index';
 import groupsRouter from './routes/groups';
 import { imagesRouter } from './routes/images.js';
-import imagesEffectRouter from './routes/images.effect';
 import jsonFilesRouter from './routes/json-files';
 import jsonThumbnailsRouter from './routes/json-thumbnails';
 import localFilesRouter from './routes/local-files-simple.js';
@@ -43,15 +42,12 @@ import settingsRouter from './routes/settings';
 import statsRouter from './routes/stats';
 import systemRouter from './routes/system';
 import tagsRouter from './routes/tags';
-import tagsEffectRouter from './routes/tags.effect';
 import { FEATURES, logEnabledFeatures } from '@/config/features';
 import tasksRouter from './routes/tasks';
 import testCharactersRouter from './routes/test-characters';
 import thumbnailsRouter from './routes/thumbnails';
 import uploadedImagesRouter from './routes/uploaded-images';
 import { videosRouter } from './routes/videos.js';
-import videosEffectRouter from './routes/videos.effect';
-import audiosEffectRouter from './routes/audios.effect';
 import wildcardsRouter from './routes/wildcards';
 import worldItemsRouter from './routes/world-items';
 
@@ -104,25 +100,11 @@ app.use('/api/folders', (req, res, next) => {
 	next();
 });
 app.use('/api/folders', foldersRouter);
-// Images: cargar ruta condicional según feature flag
-if (FEATURES.USE_EFFECT_IMAGES) {
-	logInfo('✨ Usando ImageService con Effect-TS');
-	app.use('/api/images', imagesEffectRouter);
-} else {
-	logInfo('📦 Usando ImageService legacy');
-	app.use('/api/images', imagesRouter);
-}
+app.use('/api/images', imagesRouter);
 app.use('/api/files', filesRouter);
 app.use('/api/albums', albumsRouter);
 app.use('/api/download', downloadRouter);
-// Tags: cargar ruta condicional según feature flag
-if (FEATURES.USE_EFFECT_TAGS) {
-	logInfo('✨ Usando TagService con Effect-TS');
-	app.use('/api/tags', tagsEffectRouter);
-} else {
-	logInfo('📦 Usando TagService legacy');
-	app.use('/api/tags', tagsRouter);
-}
+app.use('/api/tags', tagsRouter);
 app.use('/api/tasks', tasksRouter);
 app.use('/api/characters', charactersRouter);
 // app.use('/api/characters-debug', charactersDebugRouter); // DESHABILITADO - archivo no existe
@@ -135,24 +117,8 @@ app.use('/api/concepts', conceptsRouter);
 app.use('/api/prompts', promptsRouter);
 app.use('/api/uploaded-images', uploadedImagesRouter);
 app.use('/api/wildcards', wildcardsRouter);
-
-// Audios: cargar ruta condicional según feature flag
-if (FEATURES.USE_EFFECT_AUDIOS) {
-	logInfo('✨ Usando AudioService con Effect-TS');
-	app.use('/api/audio', audiosEffectRouter);
-} else {
-	logInfo('📦 Usando AudioService legacy');
-	app.use('/api/audio', audioRouter);
-}
-
-// Videos: cargar ruta condicional según feature flag
-if (FEATURES.USE_EFFECT_VIDEOS) {
-	logInfo('✨ Usando VideoService con Effect-TS');
-	app.use('/api/videos', videosEffectRouter);
-} else {
-	logInfo('📦 Usando VideoService legacy');
-	app.use('/api/videos', videosRouter);
-}
+app.use('/api/audio', audioRouter);
+app.use('/api/videos', videosRouter);
 app.use('/api/documents', documentsRouter);
 app.use('/api/file3ds', file3dsRouter);
 app.use('/api/notes', notesRouter);
