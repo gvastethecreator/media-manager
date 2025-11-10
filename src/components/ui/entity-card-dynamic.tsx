@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { Heart, Star, MoreVertical } from 'lucide-react';
-import { cn } from '@/lib/utils/styles';
+import { cn } from '@/lib/utils';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import {
