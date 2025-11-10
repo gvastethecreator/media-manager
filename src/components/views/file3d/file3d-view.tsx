@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useFile3DStore } from '@/store/entities/file-3d';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -25,9 +26,15 @@ export default function File3DView(_props: ViewProps) {
 		}
 	}, [count, loading, fetchFile3Ds]);
 
-	const handleClick = useCallback((item: AnyEntityWithStats) => {
-		logger.info('Click en 3D', { id: item.id, name: item.name });
-	}, []);
+	const { handleItemClick: updateSelection } = useEntitySelection();
+
+	const handleClick = useCallback(
+		(item: AnyEntityWithStats) => {
+			logger.info('Click en 3D', { id: item.id, name: item.name });
+			updateSelection(item);
+		},
+		[updateSelection]
+	);
 
 	const handleDoubleClick = useCallback((item: AnyEntityWithStats) => {
 		logger.info('Doble click en 3D', { id: item.id, name: item.name });

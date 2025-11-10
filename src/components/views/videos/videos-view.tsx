@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useVideoStore } from '@/store/entities/video';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
@@ -28,10 +29,16 @@ export default function VideosView(_props: ViewProps) {
 	}, [videoCount, isLoading, fetchVideos]);
 
 	const { openViewer } = useFileViewerStore();
+	const { handleItemClick: updateSelection } = useEntitySelection();
 
-	const handleItemClick = useCallback((item: AnyEntityWithStats) => {
-		viewLogger.info('Click en video', { id: item.id, name: item.name });
-	}, []);
+	const handleItemClick = useCallback(
+		(item: AnyEntityWithStats) => {
+			viewLogger.info('Click en video', { id: item.id, name: item.name });
+			// Actualizar panel de detalles
+			updateSelection(item);
+		},
+		[updateSelection]
+	);
 
 	const handleItemDoubleClick = useCallback(
 		(item: AnyEntityWithStats) => {

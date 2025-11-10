@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDocumentStore } from '@/store/entities/document';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -26,9 +27,15 @@ export default function DocumentsView(_props: ViewProps) {
 		}
 	}, [count, isLoading, fetchDocuments]);
 
-	const handleClick = useCallback((item: AnyEntityWithStats) => {
-		logger.info('Click en documento', { id: item.id, name: item.name });
-	}, []);
+	const { handleItemClick: updateSelection } = useEntitySelection();
+
+	const handleClick = useCallback(
+		(item: AnyEntityWithStats) => {
+			logger.info('Click en documento', { id: item.id, name: item.name });
+			updateSelection(item);
+		},
+		[updateSelection]
+	);
 
 	const handleDoubleClick = useCallback((item: AnyEntityWithStats) => {
 		// Por ahora, no abrimos visor específico; se podría integrar un viewer de documentos
