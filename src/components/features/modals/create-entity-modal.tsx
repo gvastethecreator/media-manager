@@ -409,7 +409,7 @@ export function CreateEntityModal({ isOpen, onClose, entityType, fileIds = [], o
 								<Textarea
 									id="description"
 									onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-									placeholder={config.placeholder.description}
+									placeholder={(config.placeholder as any).description || 'Descripción'}
 									rows={3}
 									value={formData.description}
 								/>
@@ -423,7 +423,7 @@ export function CreateEntityModal({ isOpen, onClose, entityType, fileIds = [], o
 								<Textarea
 									id="content"
 									onChange={(e) => setFormData({ ...formData, content: e.target.value })}
-									placeholder={config.placeholder.content}
+									placeholder={(config.placeholder as any).content || 'Contenido'}
 									required={entityType === 'prompt'}
 									rows={5}
 									value={formData.content}
@@ -438,7 +438,7 @@ export function CreateEntityModal({ isOpen, onClose, entityType, fileIds = [], o
 								<Input
 									id="gender"
 									onChange={(e) => setFormData({ ...formData, gender: e.target.value })}
-									placeholder={config.placeholder.gender}
+									placeholder={(config.placeholder as any).gender || 'Género'}
 									value={formData.gender}
 								/>
 							</div>
@@ -450,7 +450,7 @@ export function CreateEntityModal({ isOpen, onClose, entityType, fileIds = [], o
 								<Input
 									id="location"
 									onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-									placeholder={config.placeholder.location}
+									placeholder={(config.placeholder as any).location || 'Ubicación'}
 									value={formData.location}
 								/>
 							</div>
@@ -462,7 +462,7 @@ export function CreateEntityModal({ isOpen, onClose, entityType, fileIds = [], o
 								<Input
 									id="category"
 									onChange={(e) => setFormData({ ...formData, category: e.target.value })}
-									placeholder={config.placeholder.category}
+									placeholder={(config.placeholder as any).category || 'Categoría'}
 									value={formData.category}
 								/>
 							</div>
