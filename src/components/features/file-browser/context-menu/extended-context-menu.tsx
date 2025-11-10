@@ -126,6 +126,7 @@ function EntityMenuItem({
 	baseAction,
 	label,
 	onSelect,
+	onCreateNew,
 }: {
 	entities: EntityOption[];
 	isLoading: boolean;
@@ -133,6 +134,7 @@ function EntityMenuItem({
 	baseAction: string;
 	label: string;
 	onSelect: (action: ExtendedContextMenuAction, entityId?: string) => void;
+	onCreateNew?: () => void;
 }) {
 	// Control explícito de apertura del submenú (evita solapamiento al abrir el menú)
 	const [open, setOpen] = React.useState(false);
@@ -172,11 +174,19 @@ function EntityMenuItem({
 
 	if (entities.length === 0) {
 		return (
-			<div className="relative flex select-none items-center rounded-sm px-2 py-1.5 text-muted-foreground text-sm">
+			<button
+				className={cn(
+					'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none',
+					'hover:bg-accent hover:text-accent-foreground',
+					'focus:bg-accent focus:text-accent-foreground'
+				)}
+				onClick={onCreateNew}
+				type="button"
+			>
 				{icon}
 				<span className="ml-2">{label}</span>
 				<Plus className="ml-auto h-4 w-4" />
-			</div>
+			</button>
 		);
 	}
 
@@ -215,6 +225,24 @@ function EntityMenuItem({
 			>
 				{open && (
 					<SubMenu className="max-h-64 overflow-y-auto">
+						{onCreateNew && (
+							<>
+								<button
+									className={cn(
+										'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none',
+										'hover:bg-accent hover:text-accent-foreground',
+										'focus:bg-accent focus:text-accent-foreground',
+										'font-medium'
+									)}
+									onClick={onCreateNew}
+									type="button"
+								>
+									<Plus className="mr-2 h-4 w-4" />
+									<span>Nuevo {label}...</span>
+								</button>
+								{entities.length > 0 && <div className="my-1 h-px bg-border" />}
+							</>
+						)}
 						{entities.map((entity) => (
 							<button
 								className={cn(
@@ -243,7 +271,10 @@ export function ExtendedContextMenu<T>({
 	selectedItems,
 	onAction,
 	onClose,
-}: ExtendedContextMenuProps<T>) {
+	onCreateEntity,
+}: ExtendedContextMenuProps<T> & {
+	onCreateEntity?: (entityType: string) => void;
+}) {
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	// Hook para obtener entidades disponibles
@@ -251,6 +282,11 @@ export function ExtendedContextMenu<T>({
 
 	const handleSelect = (action: ExtendedContextMenuAction, entityId?: string) => {
 		onAction(action, { selected: selectedItems, targetId: entityId });
+		onClose();
+	};
+
+	const handleCreateNew = (entityType: string) => {
+		onCreateEntity?.(entityType);
 		onClose();
 	};
 
@@ -299,6 +335,7 @@ export function ExtendedContextMenu<T>({
 				icon={<Album className="h-4 w-4" />}
 				isLoading={isLoading}
 				label="Album"
+				onCreateNew={() => handleCreateNew('album')}
 				onSelect={handleSelect}
 			/>
 			<EntityMenuItem
@@ -307,6 +344,7 @@ export function ExtendedContextMenu<T>({
 				icon={<Archive className="h-4 w-4" />}
 				isLoading={isLoading}
 				label="Colección"
+				onCreateNew={() => handleCreateNew('collection')}
 				onSelect={handleSelect}
 			/>
 			<EntityMenuItem
@@ -315,6 +353,7 @@ export function ExtendedContextMenu<T>({
 				icon={<Users className="h-4 w-4" />}
 				isLoading={isLoading}
 				label="Grupo"
+				onCreateNew={() => handleCreateNew('group')}
 				onSelect={handleSelect}
 			/>
 			<EntityMenuItem
@@ -323,6 +362,7 @@ export function ExtendedContextMenu<T>({
 				icon={<Tag className="h-4 w-4" />}
 				isLoading={isLoading}
 				label="Tag"
+				onCreateNew={() => handleCreateNew('tag')}
 				onSelect={handleSelect}
 			/>
 			<EntityMenuItem
@@ -331,6 +371,7 @@ export function ExtendedContextMenu<T>({
 				icon={<Sparkles className="h-4 w-4" />}
 				isLoading={isLoading}
 				label="World Item"
+				onCreateNew={() => handleCreateNew('world-item')}
 				onSelect={handleSelect}
 			/>
 			<EntityMenuItem
@@ -339,6 +380,7 @@ export function ExtendedContextMenu<T>({
 				icon={<Users className="h-4 w-4" />}
 				isLoading={isLoading}
 				label="Characters"
+				onCreateNew={() => handleCreateNew('character')}
 				onSelect={handleSelect}
 			/>
 			<EntityMenuItem
@@ -347,6 +389,7 @@ export function ExtendedContextMenu<T>({
 				icon={<Hash className="h-4 w-4" />}
 				isLoading={isLoading}
 				label="Concept"
+				onCreateNew={() => handleCreateNew('concept')}
 				onSelect={handleSelect}
 			/>
 			<EntityMenuItem
@@ -355,6 +398,7 @@ export function ExtendedContextMenu<T>({
 				icon={<Pencil className="h-4 w-4" />}
 				isLoading={isLoading}
 				label="Notes"
+				onCreateNew={() => handleCreateNew('note')}
 				onSelect={handleSelect}
 			/>
 			<EntityMenuItem
@@ -363,6 +407,7 @@ export function ExtendedContextMenu<T>({
 				icon={<MapPin className="h-4 w-4" />}
 				isLoading={isLoading}
 				label="Places"
+				onCreateNew={() => handleCreateNew('place')}
 				onSelect={handleSelect}
 			/>
 			<EntityMenuItem
@@ -371,6 +416,7 @@ export function ExtendedContextMenu<T>({
 				icon={<Sparkles className="h-4 w-4" />}
 				isLoading={isLoading}
 				label="Prompts"
+				onCreateNew={() => handleCreateNew('prompt')}
 				onSelect={handleSelect}
 			/>
 			<EntityMenuItem
@@ -379,6 +425,7 @@ export function ExtendedContextMenu<T>({
 				icon={<Hash className="h-4 w-4" />}
 				isLoading={isLoading}
 				label="Properties"
+				onCreateNew={() => handleCreateNew('property')}
 				onSelect={handleSelect}
 			/>
 			<EntityMenuItem
@@ -387,6 +434,7 @@ export function ExtendedContextMenu<T>({
 				icon={<Wand2 className="h-4 w-4" />}
 				isLoading={isLoading}
 				label="Wildcards"
+				onCreateNew={() => handleCreateNew('wildcard')}
 				onSelect={handleSelect}
 			/>
 			<MenuSeparator />
