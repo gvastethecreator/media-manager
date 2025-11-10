@@ -268,7 +268,7 @@ const getRelationsCounts = (${toCamelCase(entityName)}Id: string): Effect.Effect
 		logger.info(\`📊 Obteniendo conteos para ${entityName}: \${${toCamelCase(entityName)}Id}\`);
 
 		// TODO: Implementar conteos reales según las relaciones de la entidad
-		const imageCou nt = 0;
+		const imageCount = 0;
 		const videoCount = 0;
 
 		return {
