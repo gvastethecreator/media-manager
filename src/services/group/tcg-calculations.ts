@@ -62,7 +62,7 @@ export function calculateHealth(counts: any): number {
 	}
 
 	// Contar tipos diferentes de entidades presentes
-	const entityTypes = Object.entries(counts).filter(([_, count]) => count > 0).length;
+	const entityTypes = Object.entries(counts).filter(([_, count]) => (count as number) > 0).length;
 
 	// Bonificación por diversidad
 	hp += entityTypes * 20;

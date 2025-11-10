@@ -68,7 +68,7 @@ describe('Keyboard Shortcuts Integration', () => {
 				description: 'Test',
 			};
 
-			const handler = mock();
+			const handler = vi.fn();
 			manager.register(shortcut, handler);
 
 			// Verificar que el shortcut se registró correctamente

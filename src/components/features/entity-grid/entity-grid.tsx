@@ -112,8 +112,6 @@ export function EntityGrid({
 							item={item as any}
 							size={itemSize}
 							compact={compact}
-							onItemClick={() => onItemClick?.(item)}
-							onItemDoubleClick={() => onItemDoubleClick?.(item)}
 						/>
 					</div>
 				);

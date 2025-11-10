@@ -403,7 +403,7 @@ router.post('/test-entity-types', async (req: Request, res: Response): Promise<v
 			return {
 				extension: ext,
 				entityType,
-				isSupported: entityType !== 'UNKNOWN',
+				isSupported: entityType !== 'unknown',
 			};
 		});
 

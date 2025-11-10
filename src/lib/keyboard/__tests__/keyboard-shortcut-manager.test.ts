@@ -8,11 +8,11 @@ import { KeyboardShortcutManager } from '../keyboard-shortcut-manager';
 
 describe('KeyboardShortcutManager', () => {
 	let manager: KeyboardShortcutManager;
-	let mockHandler: ReturnType<typeof mock>;
+	let mockHandler: ReturnType<typeof vi.fn>;
 
 	beforeEach(() => {
 		manager = new KeyboardShortcutManager();
-		mockHandler = mock();
+		mockHandler = vi.fn();
 	});
 
 	it('should register and execute shortcuts', () => {
