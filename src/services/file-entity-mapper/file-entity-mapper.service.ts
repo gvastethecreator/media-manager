@@ -12,6 +12,15 @@ import {
 // Servicios especializados extraídos
 import { EntityCreationService, EntityExistenceService, FileHashService, FileInfoService } from './core';
 import { ThumbnailGeneratorService } from './thumbnail';
+// Handlers de metadata extraídos
+import {
+	handleImageMetadata,
+	handleVideoMetadata,
+	handleAudioMetadata,
+	handleDocumentMetadata,
+	handleFile3DMetadata,
+	handleJsonMetadata,
+} from './handlers';
 
 // Regex reutilizables top-level para evitar recreación frecuente
 const WORD_SPLIT_REGEX = /\s+/g;
@@ -226,458 +235,43 @@ export class FileEntityMapperService {
 		try {
 			if (entityType === EntityType.IMAGE) {
 				const t = Date.now();
-				const r = await this.handleImageMetadata(filePath, entityId);
+				const r = await handleImageMetadata(filePath, entityId);
 				this.recordPhase('metadata_image', t);
 				return r;
 			}
 			if (entityType === EntityType.VIDEO) {
 				const t = Date.now();
-				const r = await this.handleVideoMetadata(filePath, entityId);
+				const r = await handleVideoMetadata(filePath, entityId);
 				this.recordPhase('metadata_video', t);
 				return r;
 			}
 			if (entityType === EntityType.AUDIO) {
 				const t = Date.now();
-				const r = await this.handleAudioMetadata(filePath, entityId);
+				const r = await handleAudioMetadata(filePath, entityId);
 				this.recordPhase('metadata_audio', t);
 				return r;
 			}
 			if (entityType === EntityType.DOCUMENT) {
 				const t = Date.now();
-				const r = await this.handleDocumentMetadata(filePath, entityId);
+				const r = await handleDocumentMetadata(filePath, entityId);
 				this.recordPhase('metadata_document', t);
 				return r;
 			}
 			if (entityType === EntityType.FILE3D) {
 				const t = Date.now();
-				const r = await this.handleFile3DMetadata(filePath, entityId);
+				const r = await handleFile3DMetadata(filePath, entityId);
 				this.recordPhase('metadata_file3d', t);
 				return r;
 			}
 			if (entityType === EntityType.JSON) {
 				const t = Date.now();
-				const r = await this.handleJsonMetadata(filePath, entityId);
+				const r = await handleJsonMetadata(filePath, entityId);
 				this.recordPhase('metadata_json', t);
 				return r;
 			}
 			return { success: true };
 		} catch (e) {
 			return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
-		}
-	}
-
-	private async runUnifiedImageMetadataExtraction(filePath: string) {
-		const { extractAllMetadata } = await import('@/server/services/metadata/unified-parser.service');
-		const { images } = await import('@/lib/drizzle/schema');
-		const { db } = await import('@/lib/drizzle');
-		const { eq } = await import('drizzle-orm');
-		const fileBuffer = await readFile(filePath);
-		const fileName = basename(filePath);
-		const metadataResult = await extractAllMetadata(fileBuffer, fileName);
-		return { metadataResult, db, images, eq };
-	}
-
-	private flattenLegacyMetadata(metadataResult: any, persisted: Record<string, any>) {
-		try {
-			const aiMeta: any = metadataResult?.ai_metadata;
-			const flat = aiMeta?.legacy_flat;
-			if (flat && typeof flat === 'object') {
-				for (const [k, v] of Object.entries(flat)) {
-					if (v !== undefined && v !== null && !(k in persisted)) {
-						(persisted as any)[k] = v;
-					}
-				}
-			}
-		} catch (e) {
-			console.warn('No se pudo aplanar legacy_flat', e);
-		}
-	}
-
-	private async handleImageMetadata(filePath: string, entityId: string) {
-		const { metadataResult, db, images, eq } = await this.runUnifiedImageMetadataExtraction(filePath);
-		if (!metadataResult.success) {
-			return { success: false, error: 'Metadata extraction failed' };
-		}
-		const persisted: Record<string, any> = {
-			parser: metadataResult.parser_used,
-			processingTime: metadataResult.processing_time,
-			origin: metadataResult.origin,
-			ai_metadata: metadataResult.ai_metadata,
-			exif: metadataResult.exif,
-			iptc: metadataResult.iptc,
-			xmp: metadataResult.xmp,
-			base: metadataResult.base,
-			errors: metadataResult.errors,
-			warnings: metadataResult.warnings,
-		};
-		this.flattenLegacyMetadata(metadataResult, persisted);
-		const w = metadataResult.base?.dimensions?.width || 0;
-		const h = metadataResult.base?.dimensions?.height || 0;
-		try {
-			await db
-				.update(images)
-				.set({
-					metadata: JSON.stringify(persisted),
-					...(w > 0 && h > 0 ? { width: w, height: h } : {}),
-					updatedAt: new Date(),
-				})
-				.where(eq(images.id, entityId));
-		} catch (err) {
-			console.warn('No se pudo persistir metadata imagen', err);
-		}
-		return { success: true };
-	}
-
-	private async handleVideoMetadata(filePath: string, entityId: string) {
-		try {
-			const { videoProbeService } = await import('@/services/video/video-probe.service');
-			const { db } = await import('@/lib/drizzle');
-			const { videos } = await import('@/lib/drizzle/schema');
-			const { eq } = await import('drizzle-orm');
-
-			// Obtener datos básicos de probe
-			const probe = await videoProbeService.probe(filePath);
-
-			// Crear enhanced metadata usando nuestro formato
-			const enhancedMetadata = {
-				videoData: {
-					duration: probe.duration,
-					width: probe.width,
-					height: probe.height,
-					resolution: probe.width && probe.height ? `${probe.width}x${probe.height}` : null,
-					bitRate: probe.bitRate,
-					codec: probe.codec,
-					format: probe.format,
-				},
-				raw: probe.raw,
-			};
-
-			await db
-				.update(videos)
-				.set({
-					duration: probe.duration ? Math.round(probe.duration * 1000) : 0,
-					width: probe.width ?? null,
-					height: probe.height ?? null,
-					metadata: JSON.stringify(enhancedMetadata),
-					updatedAt: new Date(),
-				})
-				.where(eq(videos.id, entityId));
-			return { success: true };
-		} catch (e) {
-			return { success: false, error: 'Video metadata extraction failed' };
-		}
-	}
-
-	private async handleAudioMetadata(filePath: string, entityId: string) {
-		try {
-			const { audioMetadataService } = await import('@/services/audio/audio-metadata.service');
-			const { db } = await import('@/lib/drizzle');
-			const { audios } = await import('@/lib/drizzle/schema');
-			const { eq } = await import('drizzle-orm');
-
-			// Obtener datos básicos del archivo de audio
-			const meta = await audioMetadataService.extract(filePath);
-			const baseFields = this.mapAudioTechnical(meta);
-			const tagFields = this.mapAudioTags(meta.tags);
-
-			// Crear enhanced metadata usando nuestro formato
-			const enhancedMetadata = {
-				audioData: {
-					duration: meta.duration,
-					bitrate: meta.bitrate,
-					channels: meta.channels,
-					sampleRate: meta.sampleRate,
-					format: meta.format,
-					codec: meta.format,
-					title: meta.tags?.title,
-					artist: meta.tags?.artist,
-					album: meta.tags?.album,
-					year: meta.tags?.year,
-					genre: meta.tags?.genre,
-				},
-				raw: meta.raw,
-			};
-
-			await db
-				.update(audios)
-				.set({
-					...baseFields,
-					...tagFields,
-					metadata: JSON.stringify(enhancedMetadata),
-					updatedAt: new Date(),
-				})
-				.where(eq(audios.id, entityId));
-			return { success: true };
-		} catch (e) {
-			return { success: false, error: 'Audio metadata extraction failed' };
-		}
-	}
-
-	private mapAudioTechnical(meta: any) {
-		return {
-			duration: meta.duration ? Math.round(meta.duration * 1000) : null,
-			bitrate: meta.bitrate ?? null,
-			sampleRate: meta.sampleRate ?? null,
-			channels: meta.channels ?? null,
-			format: meta.format ?? null,
-			codec: meta.codec ?? null,
-		};
-	}
-
-	private mapAudioTags(tags: any) {
-		return {
-			title: tags?.title ?? null,
-			artist: tags?.artist ?? null,
-			album: tags?.album ?? null,
-			year: tags?.year ? Number(tags.year) : null,
-			genre: tags?.genre ?? null,
-			track: tags?.track ? Number(tags.track) : null,
-			disc: tags?.disc ? Number(tags.disc) : null,
-			albumArtist: tags?.albumArtist ?? null,
-			composer: tags?.composer ?? null,
-			comment: tags?.comment ?? null,
-			lyrics: tags?.lyrics ?? null,
-			bpm: tags?.bpm ? Number(tags.bpm) : null,
-			key: tags?.key ?? null,
-			mood: tags?.mood ?? null,
-		};
-	}
-
-	private async handleDocumentMetadata(filePath: string, entityId: string) {
-		try {
-			const ext = extname(filePath).toLowerCase();
-			const { db } = await import('@/lib/drizzle');
-			const { documents } = await import('@/lib/drizzle/schema');
-			const { eq } = await import('drizzle-orm');
-
-			let pageCount: number | null = null;
-			let wordCount: number | null = null;
-			let contentPreview: string | null = null;
-			let hasFrontmatter = false;
-			let documentType = 'unknown';
-
-			if (ext === '.pdf') {
-				documentType = 'pdf';
-				// Heurística simple: contar ocurrencias de '/Type /Page'
-				const buf = await readFile(filePath);
-				const text = buf.toString('latin1');
-				const matches = text.match(/\/Type\s*\/Page/g);
-				pageCount = matches ? matches.length : null;
-			} else if (ext === '.txt' || ext === '.md') {
-				documentType = ext === '.md' ? 'markdown' : 'text';
-				const buf = await readFile(filePath);
-				const text = buf.toString('utf8');
-				const words = text.trim().split(WORD_SPLIT_REGEX).filter(Boolean);
-				wordCount = words.length;
-				contentPreview = text.slice(0, 800);
-
-				// Detectar frontmatter en archivos markdown
-				if (ext === '.md') {
-					hasFrontmatter = text.startsWith('---\n') || text.startsWith('+++\n');
-				}
-			}
-
-			// Crear enhanced metadata usando nuestro formato
-			const enhancedMetadata = {
-				documentData: {
-					type: documentType,
-					wordCount,
-					pageCount,
-					hasFrontmatter,
-					encoding: 'utf8',
-				},
-				preview: contentPreview,
-			};
-
-			await db
-				.update(documents)
-				.set({
-					pageCount,
-					wordCount,
-					metadata: JSON.stringify(enhancedMetadata),
-					updatedAt: new Date(),
-				})
-				.where(eq(documents.id, entityId));
-			return { success: true };
-		} catch (e) {
-			return { success: false, error: 'Document metadata extraction failed' };
-		}
-	}
-
-	private async handleFile3DMetadata(filePath: string, entityId: string) {
-		try {
-			const ext = extname(filePath).toLowerCase();
-			const { db } = await import('@/lib/drizzle');
-			const { file3Ds } = await import('@/lib/drizzle/schema');
-			const { eq } = await import('drizzle-orm');
-			let format: string | null = null;
-			let rawInfo: Record<string, any> | null = null;
-			let version: string | null = null;
-			if (ext === '.gltf' || ext === '.glb') {
-				format = 'gltf';
-				if (ext === '.gltf') {
-					const parsed = await this.parseGltf(filePath);
-					rawInfo = parsed;
-				} else {
-					// GLB: leer cabecera para versión (bytes 0-3 magic, 4-7 version LE)
-					try {
-						const buf = await readFile(filePath);
-						if (buf.length >= 8 && buf.toString('ascii', 0, 4) === 'glTF') {
-							const ver = buf.readUInt32LE(4);
-							version = String(ver);
-						}
-					} catch {
-						// ignore
-					}
-				}
-			} else if (ext === '.obj') {
-				format = 'obj';
-				rawInfo = await this.parseObj(filePath);
-			}
-			await db
-				.update(file3Ds)
-				.set({
-					format,
-					vertices: (rawInfo as any)?.vertices ?? null,
-					faces: (rawInfo as any)?.faces ?? null,
-					version,
-					updatedAt: new Date(),
-				})
-				.where(eq(file3Ds.id, entityId));
-			return { success: true };
-		} catch {
-			return { success: false, error: '3D metadata extraction failed' };
-		}
-	}
-
-	private async handleJsonMetadata(filePath: string, entityId: string) {
-		try {
-			const { db } = await import('@/lib/drizzle');
-			const { jsonFiles } = await import('@/lib/drizzle/schema');
-			const { eq } = await import('drizzle-orm');
-			const { basename } = await import('path');
-
-			let contentText: string | null = null;
-			try {
-				const buf = await readFile(filePath);
-				contentText = buf.toString('utf8');
-			} catch {
-				contentText = null;
-			}
-
-			let isValid = false;
-			let validationErrors: string | null = null;
-			let keyCount: number | null = null;
-			let depth: number | null = null;
-			let parsed: any = null;
-			let jsonType = 'generic';
-
-			if (contentText && contentText.trim().length > 0) {
-				try {
-					parsed = JSON.parse(contentText);
-					isValid = true;
-					keyCount = this.countJsonKeys(parsed);
-					depth = this.computeJsonDepth(parsed);
-
-					// Detectar tipo de JSON especial
-					const fileName = basename(filePath).toLowerCase();
-					if (fileName === 'package.json') {
-						jsonType = 'package';
-					} else if (fileName === 'tsconfig.json') {
-						jsonType = 'tsconfig';
-					} else if (parsed.configurations || parsed.launch) {
-						jsonType = 'vscode';
-					}
-				} catch (e) {
-					isValid = false;
-					validationErrors = (e as Error).message;
-				}
-			}
-
-			// Crear enhanced metadata usando nuestro formato
-			const enhancedMetadata = {
-				jsonData: {
-					type: jsonType,
-					keyCount,
-					depth,
-					size: contentText?.length || 0,
-					isValid,
-					validationErrors,
-					hasNestedObjects: depth !== null && depth > 1,
-					isPackageJson: jsonType === 'package',
-				},
-				content: contentText && contentText.length < 50_000 ? contentText : null, // Limitar contenido muy grande
-			};
-
-			await db
-				.update(jsonFiles)
-				.set({
-					content: contentText,
-					isValid,
-					validationErrors,
-					keyCount,
-					depth,
-					metadata: JSON.stringify(enhancedMetadata),
-					updatedAt: new Date(),
-				})
-				.where(eq(jsonFiles.id, entityId));
-			return { success: true };
-		} catch (e) {
-			return { success: false, error: 'JSON metadata extraction failed' };
-		}
-	}
-
-	private computeJsonDepth(obj: any): number {
-		if (obj === null || typeof obj !== 'object') return 0;
-		let max = 0;
-		for (const v of Object.values(obj)) {
-			const d = this.computeJsonDepth(v);
-			if (d > max) max = d;
-		}
-		return max + 1;
-	}
-
-	private countJsonKeys(obj: any): number {
-		if (obj === null || typeof obj !== 'object') return 0;
-		let count = 0;
-		for (const [_, v] of Object.entries(obj)) {
-			count += 1;
-			count += this.countJsonKeys(v);
-		}
-		return count;
-	}
-
-	private async parseGltf(filePath: string) {
-		try {
-			const txt = await readFile(filePath, 'utf8');
-			const json = JSON.parse(txt);
-			return {
-				scenes: json.scenes?.length ?? null,
-				materials: json.materials?.length ?? null,
-				meshes: json.meshes?.length ?? null,
-				nodes: json.nodes?.length ?? null,
-			};
-		} catch {
-			return null;
-		}
-	}
-
-	private async parseObj(filePath: string) {
-		try {
-			const txt = await readFile(filePath, 'utf8');
-			const lines = txt.split(LINE_SPLIT_REGEX);
-			let vertices = 0;
-			let faces = 0;
-			for (const line of lines) {
-				if (line.startsWith('v ')) {
-					vertices++;
-				} else if (line.startsWith('f ')) {
-					faces++;
-				}
-			}
-			return { vertices, faces };
-		} catch {
-			return null;
 		}
 	}
 
