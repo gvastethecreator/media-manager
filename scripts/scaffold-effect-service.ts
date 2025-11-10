@@ -623,7 +623,7 @@ const createTestTemplate = (entityName: string, entityPascal: string): string =>
  * @module services/${entityName}/__tests__/${entityName}.service.effect.test
  */
 
-import { describe, it, expect, beforeEach } from 'bun:test';
+import { describe, it, expect, beforeEach } from 'vitest';
 import { Effect, Either } from 'effect';
 import { ${entityPascal}Service, ${entityPascal}ServiceLive } from '../${entityName}.service.effect';
 import { ${entityPascal}NotFound, ${entityPascal}NameConflict } from '../${entityName}-errors.effect';
