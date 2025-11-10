@@ -7,6 +7,9 @@ import { createDefaultEntityStats } from '@/lib/utils';
 import type { PlaceBase, PlaceStatistics, PlaceWithStats } from './base';
 import { PlaceCategory, PlaceSortCriteria, PlaceType, PlaceViewMode } from './enums';
 
+// Re-export tipos base
+export type { PlaceBase, PlaceStatistics, PlaceWithStats } from './base';
+
 export interface PlaceSearchOptions {
 	query?: string;
 	category?: PlaceCategory;

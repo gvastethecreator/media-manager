@@ -4,7 +4,7 @@
  */
 
 import { Check } from 'lucide-react';
-import { cn } from '@/lib/utils/styles';
+import { cn } from '@/lib/utils';
 import type { FieldPreset } from '@/config/entity-field-presets';
 
 interface PresetSelectorProps {
