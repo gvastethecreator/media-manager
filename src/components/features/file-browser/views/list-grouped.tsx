@@ -8,6 +8,7 @@ export interface FileCanvasListGroupedProps {
 	scrollContainer?: HTMLElement | null;
 	onItemClick?: (item: MediaItem, modifiers?: ClickModifiers) => void;
 	onItemDoubleClick?: (item: MediaItem) => void;
+	onContainerReady?: (el: HTMLDivElement | null) => void;
 }
 
 export function FileCanvasListGrouped({
@@ -15,11 +16,12 @@ export function FileCanvasListGrouped({
 	scrollContainer = null,
 	onItemClick,
 	onItemDoubleClick,
+	onContainerReady,
 }: FileCanvasListGroupedProps) {
 	// Render simple: encabezados DOM, contenido por grupo con FileCanvasList independiente
 	const headerH = CanvasRenderConfig.group.headerHeight;
 	return (
-		<div className="file-browser-canvas file-browser-list h-full overflow-auto">
+		<div className="file-browser-canvas file-browser-list h-full overflow-auto" ref={onContainerReady}>
 			<div className="flex flex-col gap-2">
 				{groups.map((g) => (
 					<div className="flex flex-col" key={g.key}>

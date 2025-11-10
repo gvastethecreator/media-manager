@@ -1,11 +1,11 @@
 export const EntityType = {
-	IMAGE: 'IMAGE',
-	VIDEO: 'VIDEO',
-	AUDIO: 'AUDIO',
-	JSON: 'JSON',
-	FILE3D: 'FILE3D',
-	DOCUMENT: 'DOCUMENT',
-	UNKNOWN: 'UNKNOWN',
+	IMAGE: 'image',
+	VIDEO: 'video',
+	AUDIO: 'audio',
+	JSON: 'jsonFile',
+	FILE3D: 'file3d',
+	DOCUMENT: 'document',
+	UNKNOWN: 'unknown',
 } as const;
 
 export type EntityType = (typeof EntityType)[keyof typeof EntityType];

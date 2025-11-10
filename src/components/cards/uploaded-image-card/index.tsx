@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface UploadedImageCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -6,7 +6,7 @@ export interface UploadedImageCardProps extends React.HTMLAttributes<HTMLDivElem
 	className?: string;
 }
 
-export function UploadedImageCard({ uploadedImage, className, onClick, ...rest }: UploadedImageCardProps) {
+export const UploadedImageCard = memo(function UploadedImageCard({ uploadedImage, className, onClick, ...rest }: UploadedImageCardProps) {
 	const thumb =
 		uploadedImage?.thumbnailUrl ||
 		(uploadedImage?.imageId ? `/api/images/${uploadedImage.imageId}/thumbnail` : undefined);
@@ -58,6 +58,6 @@ export function UploadedImageCard({ uploadedImage, className, onClick, ...rest }
 			<div className="truncate p-2 font-medium text-sm">{uploadedImage?.name || 'Imagen'}</div>
 		</div>
 	);
-}
+});
 
 export default UploadedImageCard;

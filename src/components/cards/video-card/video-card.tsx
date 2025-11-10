@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface VideoCardProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -9,7 +9,7 @@ export interface VideoCardProps extends React.HTMLAttributes<HTMLDivElement> {
 	isSelected?: boolean;
 }
 
-export function VideoCard({ video, className, onClick, compact, ...rest }: VideoCardProps) {
+export const VideoCard = memo(function VideoCard({ video, className, onClick, compact, ...rest }: VideoCardProps) {
 	const thumb = (video as any)?.thumbnailUrl || `/api/videos/${encodeURIComponent(video?.id)}/thumbnail`;
 	if (onClick) {
 		return (
@@ -37,6 +37,6 @@ export function VideoCard({ video, className, onClick, compact, ...rest }: Video
 			<div className="truncate p-2 font-medium text-sm">{video?.name || 'Video'}</div>
 		</div>
 	);
-}
+});
 
 export default VideoCard;

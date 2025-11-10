@@ -9,106 +9,25 @@ import { and, asc, count, desc, eq, isNull, like, or } from 'drizzle-orm';
 // Drizzle imports
 import { db } from '@/lib/drizzle';
 import { wildcards } from '@/lib/drizzle/schema/index';
-import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
+import { EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
 import { fromDrizzleWildcard } from '@/transformers/wildcard/transformer';
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
+import { createWildcardError, WildcardServiceError } from './wildcard-errors';
+import { notifyWildcardChange, WILDCARD_EVENTS } from './wildcard-events';
+import type { GetWildcardsOptions, GetWildcardsResult } from './wildcard-types';
+
+// Re-exports para compatibilidad backward
+export { createWildcardError, WildcardServiceError } from './wildcard-errors';
+export { notifyWildcardChange, WILDCARD_EVENTS } from './wildcard-events';
+export type { GetWildcardsOptions, GetWildcardsResult } from './wildcard-types';
 
 // Logger específico para el servicio
 const logger = serverLogger.withContext('WildcardService');
 
 // Constantes del servicio
 const REVALIDATE_PATHS = ['/wildcards', '/settings/wildcards', '/dashboard/wildcards', '/api/wildcards'];
-
-// Eventos del servicio de wildcards
-export const WILDCARD_EVENTS = {
-	CREATED: 'wildcard:created',
-	UPDATED: 'wildcard:updated',
-	DELETED: 'wildcard:deleted',
-	MOVED: 'wildcard:moved',
-	STATS_UPDATED: 'wildcard:stats:updated',
-} as const;
-
-// Función auxiliar para crear errores
-const createWildcardError = (
-	message: string,
-	code: EntityErrorCode = EntityErrorCode.OPERATION_FAILED,
-	cause?: unknown
-) => {
-	return createEntityErrorObject('WildcardError', message, code, cause);
-};
-
-// Tipos de entrada
-export interface GetWildcardsOptions {
-	search?: string;
-	orderBy?: 'name' | 'createdAt' | 'updatedAt';
-	orderDirection?: 'asc' | 'desc';
-	onlyFavorites?: boolean;
-	parentId?: string | null;
-}
-
-export interface GetWildcardsResult {
-	wildcards: WildcardWithStats[];
-	total: number;
-}
-
-/**
- * Clase de error personalizada para operaciones de Wildcard
- */
-export class WildcardServiceError extends Error {
-	constructor(
-		message: string,
-		public code?: string,
-		public cause?: unknown
-	) {
-		super(message);
-		this.name = 'WildcardServiceError';
-	}
-}
-
-/**
- * Notifica cambios en los wildcards a través del sistema de eventos
- */
-export const notifyWildcardChange = async (
-	action: 'create' | 'update' | 'delete' | 'move',
-	wildcard: WildcardWithStats | { id: string }
-): Promise<void> => {
-	try {
-		let eventType: string;
-		switch (action) {
-			case 'create':
-				eventType = WILDCARD_EVENTS.CREATED;
-				break;
-			case 'update':
-				eventType = WILDCARD_EVENTS.UPDATED;
-				break;
-			case 'delete':
-				eventType = WILDCARD_EVENTS.DELETED;
-				break;
-			case 'move':
-				eventType = WILDCARD_EVENTS.MOVED;
-				break;
-			default:
-				eventType = 'wildcard:modified';
-		}
-
-		// Emitir evento al sistema central
-		await emit({
-			type: 'wildcards:modified',
-			data: { action, wildcard },
-		});
-
-		// Notificar a estadísticas
-		statsEventEmitter.emit(STATS_EVENTS.WILDCARD_CHANGE);
-
-		logger.info(`🔔 Notificado cambio en wildcard: ${action}`, { wildcardId: wildcard.id });
-	} catch (error) {
-		logger.error(`❌ Error al notificar cambio en wildcard: ${action}`, { error, wildcardId: wildcard.id });
-	}
-};
 
 /**
  * Revalida las rutas de caché relacionadas con los wildcards
