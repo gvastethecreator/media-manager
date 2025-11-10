@@ -23,6 +23,13 @@ export interface SystemStats {
 	totalJsonFiles?: number;
 	totalFile3D?: number;
 	totalWorkflows?: number;
+	// Entidades abstractas
+	totalPrompts?: number;
+	totalNotes?: number;
+	totalProperties?: number;
+	totalWildcards?: number;
+	totalConcepts?: number;
+	totalGroups?: number;
 	topTags: Array<{ id: string; name: string; count: number }>;
 	recentActivity: unknown[];
 }

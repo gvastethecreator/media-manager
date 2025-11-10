@@ -819,6 +819,96 @@ export const WILDCARD_PRESETS: EntityPresetConfig = {
 };
 
 /**
+ * 🏷️ PRESETS PARA PROPERTIES
+ */
+export const PROPERTY_PRESETS: EntityPresetConfig = {
+	entityType: 'property',
+	availableFields: [
+		{ name: 'name', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre de la propiedad' },
+		{ name: 'emoji', label: 'Emoji', type: 'emoji', defaultValue: '🏷️' },
+		{ name: 'color', label: 'Color', type: 'color', defaultValue: '#ec4899' },
+		{
+			name: 'description',
+			label: 'Descripción',
+			type: 'textarea',
+			placeholder: 'Descripción de la propiedad',
+			max: 200,
+		},
+		{
+			name: 'propertyType',
+			label: 'Tipo',
+			type: 'select',
+			options: [
+				{ value: 'text', label: 'Texto' },
+				{ value: 'number', label: 'Número' },
+				{ value: 'boolean', label: 'Booleano' },
+				{ value: 'date', label: 'Fecha' },
+				{ value: 'select', label: 'Selección' },
+				{ value: 'multiselect', label: 'Selección múltiple' },
+			],
+			defaultValue: 'text',
+		},
+		{
+			name: 'defaultValue',
+			label: 'Valor por defecto',
+			type: 'text',
+			placeholder: 'Valor inicial para esta propiedad',
+		},
+		{
+			name: 'isRequired',
+			label: 'Requerido',
+			type: 'checkbox',
+			defaultValue: false,
+			description: 'Si esta propiedad es obligatoria',
+		},
+		{
+			name: 'options',
+			label: 'Opciones',
+			type: 'textarea',
+			placeholder: 'Una opción por línea (para tipo select)',
+			description: 'Solo aplica para propiedades de tipo select',
+		},
+		{ name: 'featuredImage', label: 'Imagen Destacada', type: 'featuredImage' },
+		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
+	],
+	presets: [
+		{
+			id: 'minimal',
+			name: 'Mínimo',
+			description: 'Solo nombre y tipo',
+			icon: '⚡',
+			fields: ['name', 'propertyType'],
+			isDefault: true,
+		},
+		{
+			id: 'basic',
+			name: 'Básico',
+			description: 'Propiedad con descripción',
+			icon: '📝',
+			fields: ['name', 'emoji', 'color', 'description', 'propertyType', 'defaultValue'],
+		},
+		{
+			id: 'complete',
+			name: 'Completo',
+			description: 'Propiedad completa',
+			icon: '📋',
+			fields: [
+				'name',
+				'emoji',
+				'color',
+				'description',
+				'propertyType',
+				'defaultValue',
+				'isRequired',
+				'options',
+				'featuredImage',
+				'isFavorite',
+			],
+		},
+	],
+};
+
+/**
  * 📚 Mapa de presets por tipo de entidad
  */
 export const ENTITY_PRESETS_MAP: Record<string, EntityPresetConfig> = {
@@ -833,6 +923,7 @@ export const ENTITY_PRESETS_MAP: Record<string, EntityPresetConfig> = {
 	wildcard: WILDCARD_PRESETS,
 	prompt: PROMPT_PRESETS,
 	note: NOTE_PRESETS,
+	property: PROPERTY_PRESETS,
 };
 
 /**

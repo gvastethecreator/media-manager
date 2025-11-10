@@ -168,8 +168,33 @@ export function useCategoryStats() {
 			totalFile3D: statsData?.totalFile3D ?? navigationData?.stats?.totalFile3D ?? derivedTotals.totalFile3D,
 			totalWorkflows:
 				statsData?.totalWorkflows ?? navigationData?.stats?.totalWorkflows ?? derivedTotals.totalWorkflows,
+			// Entidades abstractas con conteo de items
+			totalPrompts:
+				statsData?.totalPrompts ??
+				navigationData?.stats?.totalPrompts ??
+				getCategoryItemCount('prompts'),
+			totalNotes:
+				statsData?.totalNotes ??
+				navigationData?.stats?.totalNotes ??
+				getCategoryItemCount('notes'),
+			totalProperties:
+				statsData?.totalProperties ??
+				navigationData?.stats?.totalProperties ??
+				getCategoryItemCount('properties'),
+			totalWildcards:
+				statsData?.totalWildcards ??
+				navigationData?.stats?.totalWildcards ??
+				getCategoryItemCount('wildcards'),
+			totalConcepts:
+				statsData?.totalConcepts ??
+				navigationData?.stats?.totalConcepts ??
+				getCategoryItemCount('concepts'),
+			totalGroups:
+				statsData?.totalGroups ??
+				navigationData?.stats?.totalGroups ??
+				getCategoryItemCount('groups'),
 		}),
-		[statsData, navigationData, derivedTotals]
+		[statsData, navigationData, derivedTotals, getCategoryItemCount]
 	);
 
 	return {

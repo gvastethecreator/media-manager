@@ -32,6 +32,7 @@ const SettingsContentView = lazy(() => import('@/components/views/settings/setti
 const TagContentView = lazy(() => import('@/components/views/tags/tag-content-view').then(m => ({ default: m.TagContentView })));
 const TagsView = lazy(() => import('@/components/views/tags/tags-view').then(m => ({ default: m.TagsView })));
 const VideosView = lazy(() => import('@/components/views/videos/videos-view'));
+const VideoContentView = lazy(() => import('@/components/views/videos/video-content-view').then(m => ({ default: m.VideoContentView })));
 const WildcardsView = lazy(() => import('@/components/views/wildcards/wildcards-view').then(m => ({ default: m.WildcardsView })));
 const WorldItemContentView = lazy(() => import('@/components/views/world-items/world-item-content-view').then(m => ({ default: m.WorldItemContentView })));
 const WorldItemsView = lazy(() => import('@/components/views/world-items/world-items-view').then(m => ({ default: m.WorldItemsView })));
@@ -123,6 +124,10 @@ export const router = createBrowserRouter([
 			{
 				path: 'videos',
 				element: <VideosView className="h-full" />,
+			},
+			{
+				path: 'videos/:id',
+				element: <VideoContentView />,
 			},
 			// Multimedia - Temporalmente simplificados
 			{
