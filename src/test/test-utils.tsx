@@ -1,24 +1,52 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { render } from '@testing-library/react';
-import React from 'react';
+import { render, type RenderOptions } from '@testing-library/react';
+import React, { type ReactElement } from 'react';
 
+/**
+ * Creates a test QueryClient with sensible defaults for testing
+ */
 export const createTestQueryClient = () =>
 	new QueryClient({
 		defaultOptions: {
 			queries: {
 				retry: false,
-				gcTime: Number.POSITIVE_INFINITY,
+				gcTime: 0, // Don't cache in tests
 			},
+			mutations: {
+				retry: false,
+			},
+		},
+		logger: {
+			log: () => {},
+			warn: () => {},
+			error: () => {},
 		},
 	});
 
-const customRender = (ui: React.ReactElement, options?: any) => {
+/**
+ * Props for AllTheProviders wrapper
+ */
+interface AllTheProvidersProps {
+	children: React.ReactNode;
+}
+
+/**
+ * Wrapper component that provides all necessary providers for testing
+ */
+export const AllTheProviders = ({ children }: AllTheProvidersProps) => {
 	const queryClient = createTestQueryClient();
-	return render(<QueryClientProvider client={queryClient}>{ui}</QueryClientProvider>, options);
+	return <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>;
 };
 
-// re-export everything
+/**
+ * Custom render function that wraps components with all necessary providers
+ */
+export const renderWithProviders = (ui: ReactElement, options?: Omit<RenderOptions, 'wrapper'>) => {
+	return render(ui, { wrapper: AllTheProviders, ...options });
+};
+
+// Re-export everything from @testing-library/react
 export * from '@testing-library/react';
 
-// override render method
-export { customRender as render };
+// Export renderWithProviders as render for convenience
+export { renderWithProviders as render };
