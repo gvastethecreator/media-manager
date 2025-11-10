@@ -17,11 +17,11 @@ export {
 	hasCompleteMetadata,
 	isHDVideo,
 } from './metadata-helpers';
-export {
-	generateAnimatedVideoThumbnail,
-	generateStaticVideoThumbnail,
-	generateVideoThumbnailUrl,
-} from './thumbnail-helpers';
+// Client-safe thumbnail helper
+export { generateVideoThumbnailUrl } from './thumbnail-helpers';
+
+// NOTE: generateAnimatedVideoThumbnail and generateStaticVideoThumbnail are server-only
+// Import them directly from './thumbnail-helpers.server' when needed on the server
 
 export { generateVideoDownloadUrl, generateVideoStreamUrl } from './url-helpers';
 

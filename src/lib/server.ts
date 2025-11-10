@@ -4,8 +4,8 @@
  */
 
 export * from './config';
-// Re-exportar utilidades del servidor
-export * from './utils';
+// Nota: No re-exportamos './utils' para evitar colisiones con exports de nivel superior en src/lib/index.ts
+// Las utilidades se exportan directamente desde @/lib/utils cuando se necesiten
 
 // Servidor específico
 const isServer = typeof window === 'undefined';

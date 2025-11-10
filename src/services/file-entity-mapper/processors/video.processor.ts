@@ -162,7 +162,7 @@ export class VideoProcessor {
 		const TIMEOUT_MS = 30000; // 30 segundos
 		
 		const generationPromise = (async () => {
-			const { generateAnimatedVideoThumbnail } = await import('@/lib/utils/video/helpers');
+			const { generateAnimatedVideoThumbnail } = await import('@/lib/utils/video/thumbnail-helpers.server');
 
 			const animatedWebpBuffer = await generateAnimatedVideoThumbnail(filePath, {
 				time: 5,
@@ -232,7 +232,7 @@ export class VideoProcessor {
 		eq: any,
 		db: any
 	): Promise<{ success: boolean; error?: string }> {
-		const { generateStaticVideoThumbnail } = await import('@/lib/utils/video/helpers');
+		const { generateStaticVideoThumbnail } = await import('@/lib/utils/video/thumbnail-helpers.server');
 
 		const staticBuffer = await generateStaticVideoThumbnail(filePath, {
 			time: 5,

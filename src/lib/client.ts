@@ -9,8 +9,8 @@ export * from './contexts';
 // Resolver conflicto de exportación duplicada de useSettings
 export { useSettings } from './contexts/settings-context';
 export * from './hooks';
-// Re-exportar utilidades del cliente
-export * from './utils';
+// Nota: No re-exportamos './utils' para evitar colisiones con exports de nivel superior en src/lib/index.ts
+// Las utilidades se exportan directamente desde @/lib/utils cuando se necesiten
 
 // Cliente específico para el navegador
 export const isClient = typeof window !== 'undefined';

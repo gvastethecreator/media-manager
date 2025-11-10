@@ -9,7 +9,9 @@ export * from './validators';
 
 // Export from modularized helpers
 export * from './format-helpers';
-export * from './thumbnail-helpers';
+// Only export client-safe thumbnail helpers
+export { generateVideoThumbnailUrl } from './thumbnail-helpers';
+// Server-only: import from './thumbnail-helpers.server' when needed
 export * from './metadata-helpers';
 export * from './url-helpers';
 export * from './visual-config-helpers';

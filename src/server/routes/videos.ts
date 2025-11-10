@@ -5,7 +5,7 @@ import { existsSync } from 'node:fs';
 import { Router } from 'express';
 import { z } from 'zod';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { generateAnimatedVideoThumbnail } from '@/lib/utils/video/helpers';
+import { generateAnimatedVideoThumbnail } from '@/lib/utils/video/thumbnail-helpers.server';
 import { fromDrizzleVideoWithCounts } from '@/transformers/video/transformer';
 import {
 	deleteVideo,
