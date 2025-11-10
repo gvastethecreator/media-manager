@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useJsonFileStore } from '@/store/entities/json-file';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -25,9 +26,15 @@ export function JsonFilesView(_props: ViewProps) {
 		}
 	}, [count, loading, fetchJsonFiles]);
 
-	const handleClick = useCallback((item: AnyEntityWithStats) => {
-		logger.info('Click en JSON', { id: item.id, name: item.name });
-	}, []);
+	const { handleItemClick: updateSelection } = useEntitySelection();
+
+	const handleClick = useCallback(
+		(item: AnyEntityWithStats) => {
+			logger.info('Click en JSON', { id: item.id, name: item.name });
+			updateSelection(item);
+		},
+		[updateSelection]
+	);
 
 	const handleDoubleClick = useCallback((item: AnyEntityWithStats) => {
 		logger.info('Doble click en JSON', { id: item.id, name: item.name });

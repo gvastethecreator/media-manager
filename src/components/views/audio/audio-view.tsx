@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAudioStore } from '@/store/entities/audio';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
@@ -28,10 +29,15 @@ export default function AudioView(_props: ViewProps) {
 	}, [audioCount, isLoading, fetchAudios]);
 
 	const { openViewer } = useFileViewerStore();
+	const { handleItemClick: updateSelection } = useEntitySelection();
 
-	const handleItemClick = useCallback((item: AnyEntityWithStats) => {
-		viewLogger.info('Click en audio', { id: item.id, name: item.name });
-	}, []);
+	const handleItemClick = useCallback(
+		(item: AnyEntityWithStats) => {
+			viewLogger.info('Click en audio', { id: item.id, name: item.name });
+			updateSelection(item);
+		},
+		[updateSelection]
+	);
 
 	const handleItemDoubleClick = useCallback(
 		(item: AnyEntityWithStats) => {
