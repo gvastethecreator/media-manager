@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { CreateEntityModal, type EntityType } from '@/components/features/modals/create-entity-modal';
 import { useDebounce, useRaf } from '@/hooks/useThrottle';
 import {
 	useAddTags,
@@ -102,6 +103,17 @@ export function FileCanvas({
 		isOpen: false,
 		position: null,
 		selectedItems: [],
+	});
+
+	// Estado del modal de creación de entidades
+	const [createEntityModal, setCreateEntityModal] = useState<{
+		isOpen: boolean;
+		entityType: EntityType | null;
+		fileIds: string[];
+	}>({
+		isOpen: false,
+		entityType: null,
+		fileIds: [],
 	});
 
 	// Layout: columnas basado en ancho y ajuste dinámico de tamaño de celda para usar todo el ancho
@@ -684,6 +696,90 @@ export function FileCanvas({
 		});
 	};
 
+	// Abrir modal de creación de entidad
+	const handleCreateEntity = useCallback(
+		(entityType: string) => {
+			const fileIds = contextMenu.selectedItems.map((item) => item.id);
+			setCreateEntityModal({
+				isOpen: true,
+				entityType: entityType as EntityType,
+				fileIds,
+			});
+		},
+		[contextMenu.selectedItems]
+	);
+
+	// Cerrar modal de creación
+	const closeCreateEntityModal = () => {
+		setCreateEntityModal({ isOpen: false, entityType: null, fileIds: [] });
+	};
+
+	// Cuando se crea una entidad, asociar los archivos automáticamente
+	const handleEntityCreated = useCallback(
+		async (entityId: string, entityType: EntityType) => {
+			const fileIds = createEntityModal.fileIds;
+			if (fileIds.length === 0) return;
+
+			console.log(`📎 Asociando ${fileIds.length} archivos con ${entityType} ${entityId}`);
+
+			try {
+				// Asociar cada archivo con la nueva entidad según su tipo
+				for (const fileId of fileIds) {
+					switch (entityType) {
+						case 'album':
+							await addToAlbum.mutateAsync({ fileId, albumId: entityId });
+							break;
+						case 'collection':
+							await addToCollection.mutateAsync({ fileId, collectionId: entityId });
+							break;
+						case 'group':
+							await addToGroup.mutateAsync({ fileId, groupId: entityId });
+							break;
+						case 'character':
+							await addToCharacter.mutateAsync({ fileId, characterId: entityId });
+							break;
+						case 'place':
+							await addToPlace.mutateAsync({ fileId, placeId: entityId });
+							break;
+						case 'concept':
+							await addToConcept.mutateAsync({ fileId, conceptId: entityId });
+							break;
+						case 'tag':
+							await addTags.mutateAsync({ fileId, tags: [entityId] });
+							break;
+						case 'note':
+							await addToNote.mutateAsync({ fileId, noteId: entityId });
+							break;
+						case 'prompt':
+							await addToPrompt.mutateAsync({ fileId, promptId: entityId });
+							break;
+						case 'wildcard':
+							await addToWildcard.mutateAsync({ fileId, wildcardId: entityId });
+							break;
+						default:
+							console.warn(`⚠️ Tipo de entidad no soportado: ${entityType}`);
+					}
+				}
+				console.log(`✅ Archivos asociados exitosamente con ${entityType} ${entityId}`);
+			} catch (error) {
+				console.error(`❌ Error al asociar archivos con ${entityType}:`, error);
+			}
+		},
+		[
+			createEntityModal.fileIds,
+			addToAlbum,
+			addToCollection,
+			addToGroup,
+			addToCharacter,
+			addToPlace,
+			addToConcept,
+			addTags,
+			addToNote,
+			addToPrompt,
+			addToWildcard,
+		]
+	);
+
 	// Handler de acciones del menú contextual
 	const handleContextMenuAction = (
 		action: ExtendedContextMenuAction,
@@ -959,8 +1055,18 @@ export function FileCanvas({
 				isOpen={contextMenu.isOpen}
 				onAction={handleContextMenuAction}
 				onClose={closeContextMenu}
+				onCreateEntity={handleCreateEntity}
 				position={contextMenu.position}
 				selectedItems={contextMenu.selectedItems}
+			/>
+
+			{/* Modal de creación de entidades */}
+			<CreateEntityModal
+				entityType={createEntityModal.entityType}
+				fileIds={createEntityModal.fileIds}
+				isOpen={createEntityModal.isOpen}
+				onClose={closeCreateEntityModal}
+				onEntityCreated={handleEntityCreated}
 			/>
 		</>
 	);

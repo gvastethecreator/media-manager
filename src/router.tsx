@@ -37,12 +37,23 @@ const WorldItemContentView = lazy(() => import('@/components/views/world-items/w
 const WorldItemsView = lazy(() => import('@/components/views/world-items/world-items-view').then(m => ({ default: m.WorldItemsView })));
 
 // ✅ VISTAS DE ENTIDADES ABSTRACTAS - Previamente con placeholder, ahora conectadas
-const CharactersView = lazy(() => import('@/components/views/characters/characters-view'));
-const ConceptsView = lazy(() => import('@/components/views/concepts/concepts-view'));
-const CollectionsView = lazy(() => import('@/components/views/collections/collections-view'));
-const AlbumsView = lazy(() => import('@/components/views/albums/albums-view'));
-const FavoritesView = lazy(() => import('@/components/views/favorites/favorites-view'));
-const GroupsView = lazy(() => import('@/components/views/groups/groups-view'));
+const CharactersView = lazy(() => import('@/components/views/characters/characters-view').then(m => ({ default: m.CharactersView })));
+const CharacterContentView = lazy(() => import('@/components/views/characters/character-content-view').then(m => ({ default: m.CharacterContentView })));
+const ConceptsView = lazy(() => import('@/components/views/concepts/concepts-view').then(m => ({ default: m.ConceptsView })));
+const ConceptContentView = lazy(() => import('@/components/views/concepts/concept-content-view').then(m => ({ default: m.ConceptContentView })));
+const CollectionsView = lazy(() => import('@/components/views/collections/collections-view').then(m => ({ default: m.CollectionsView })));
+const CollectionContentView = lazy(() => import('@/components/views/collections/collection-content-view').then(m => ({ default: m.CollectionContentView })));
+const AlbumsView = lazy(() => import('@/components/views/albums/albums-view').then(m => ({ default: m.AlbumsView })));
+const AlbumContentView = lazy(() => import('@/components/views/albums/album-content-view').then(m => ({ default: m.AlbumContentView })));
+const FavoritesView = lazy(() => import('@/components/views/favorites/favorites-view').then(m => ({ default: m.FavoritesView })));
+const GroupsView = lazy(() => import('@/components/views/groups/groups-view').then(m => ({ default: m.GroupsView })));
+const GroupContentView = lazy(() => import('@/components/views/groups/group-content-view').then(m => ({ default: m.GroupContentView })));
+const NotesView = lazy(() => import('@/components/views/notes/notes-view-simple'));
+const NoteContentView = lazy(() => import('@/components/views/notes/note-content-view').then(m => ({ default: m.NoteContentView })));
+const PromptContentView = lazy(() => import('@/components/views/prompts/prompt-content-view').then(m => ({ default: m.PromptContentView })));
+const WildcardContentView = lazy(() => import('@/components/views/wildcards/wildcard-content-view').then(m => ({ default: m.WildcardContentView })));
+const DocumentContentView = lazy(() => import('@/components/views/documents/document-content-view').then(m => ({ default: m.DocumentContentView })));
+const AudioContentView = lazy(() => import('@/components/views/audio/audio-content-view').then(m => ({ default: m.AudioContentView })));
 
 // Wrapper components para pasar el parámetro de la URL
 const FolderContentWrapper = () => {
@@ -140,12 +151,24 @@ export const router = createBrowserRouter([
 				element: <CollectionsView />,
 			},
 			{
+				path: 'collections/:id',
+				element: <CollectionContentView />,
+			},
+			{
 				path: 'albums',
 				element: <AlbumsView />,
 			},
 			{
+				path: 'albums/:id',
+				element: <AlbumContentView />,
+			},
+			{
 				path: 'groups',
 				element: <GroupsView />,
+			},
+			{
+				path: 'groups/:id',
+				element: <GroupContentView />,
 			},
 			{
 				path: 'tags',
@@ -159,6 +182,10 @@ export const router = createBrowserRouter([
 			{
 				path: 'characters',
 				element: <CharactersView />,
+			},
+			{
+				path: 'characters/:id',
+				element: <CharacterContentView />,
 			},
 			{
 				path: 'places',
@@ -181,8 +208,16 @@ export const router = createBrowserRouter([
 				element: <ConceptsView />,
 			},
 			{
+				path: 'concepts/:id',
+				element: <ConceptContentView />,
+			},
+			{
 				path: 'wildcards',
 				element: <WildcardsView className="h-full" />,
+			},
+			{
+				path: 'wildcards/:id',
+				element: <WildcardContentView />,
 			},
 			{
 				path: 'workflows',
@@ -199,8 +234,16 @@ export const router = createBrowserRouter([
 				element: <PromptsView className="h-full" />,
 			},
 			{
+				path: 'prompts/:id',
+				element: <PromptContentView />,
+			},
+			{
 				path: 'notes',
-				element: <NotesViewSimple className="h-full" />,
+				element: <NotesView className="h-full" />,
+			},
+			{
+				path: 'notes/:id',
+				element: <NoteContentView />,
 			},
 			{
 				path: 'properties',
@@ -230,25 +273,14 @@ export const router = createBrowserRouter([
 				path: 'images/:id',
 				element: <ImageDetailView />,
 			},
-			// Content Views - Vistas de detalle pendientes de implementación
-			// TODO: Implementar DocumentContentView y AudioContentView
+			// Content Views - Vistas de detalle de archivos
 			{
-				path: 'document-content',
-				element: (
-					<div className="p-6">
-						<h2 className="font-bold text-2xl">Contenido de Documento</h2>
-						<p className="text-muted-foreground">Vista pendiente de implementación</p>
-					</div>
-				),
+				path: 'documents/:id',
+				element: <DocumentContentView />,
 			},
 			{
-				path: 'audio-content',
-				element: (
-					<div className="p-6">
-						<h2 className="font-bold text-2xl">Contenido de Audio</h2>
-						<p className="text-muted-foreground">Vista pendiente de implementación</p>
-					</div>
-				),
+				path: 'audios/:id',
+				element: <AudioContentView />,
 			},
 			{
 				path: 'json-file-content',
