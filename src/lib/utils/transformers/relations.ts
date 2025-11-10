@@ -1,8 +1,8 @@
-import { Logger } from '@/lib/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { RELATION_TYPES } from './constants';
 import { RelationError } from './errors';
 
-const logger = new Logger({ context: 'TransformerRelations' });
+const logger = serverLogger.withContext('TransformerRelations');
 
 /**
  * 🔄 Tipo para definición de relaciones

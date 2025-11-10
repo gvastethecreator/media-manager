@@ -1,9 +1,9 @@
 import { z } from 'zod';
-import { Logger } from '@/lib/logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { BaseEntitySchema } from '@/types/common/base';
 import { MetadataFieldsSchema, UIFieldsSchema } from '@/types/common/transformer';
 
-const logger = new Logger({ context: 'TransformerValidation' });
+const logger = serverLogger.withContext('TransformerValidation');
 
 /**
  * 🔍 Valida campos base de una entidad
