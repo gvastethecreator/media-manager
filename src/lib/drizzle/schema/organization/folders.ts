@@ -8,12 +8,15 @@
 
 import { sql } from 'drizzle-orm';
 import { check, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { nanoid } from 'nanoid';
 
 // Modelo para las carpetas
 export const folders = sqliteTable(
 	'Folder',
 	{
-		id: text('id').primaryKey(),
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => nanoid()),
 		name: text('name').notNull(),
 		description: text('description'),
 		path: text('path').notNull(),

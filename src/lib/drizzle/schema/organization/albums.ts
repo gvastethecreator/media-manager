@@ -8,12 +8,15 @@
 
 import { sql } from 'drizzle-orm';
 import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
+import { nanoid } from 'nanoid';
 
 // Modelo para los álbumes
 export const albums = sqliteTable(
 	'Album',
 	{
-		id: text('id').primaryKey(),
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => nanoid()),
 		name: text('name').notNull(),
 		description: text('description'),
 		emoji: text('emoji').default('📔'),
