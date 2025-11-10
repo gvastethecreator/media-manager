@@ -6,33 +6,10 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emitProgress } from '@/lib/server/events.server';
 import type { ProcessStatus } from '@/types/folders';
+import type { ReindexAnalysisResult, ReindexOptions, ReindexPhaseResult } from './folder-reindex-types';
 
-export interface ReindexPhaseResult {
-	success: boolean;
-	processed: number;
-	failed: number;
-	errors: string[];
-	duration: number;
-}
-
-export interface ReindexAnalysisResult {
-	totalFolders: number;
-	existingFolders: Array<{ id: string; path: string; name: string; exists: boolean }>;
-	missingFolders: Array<{ id: string; path: string; name: string }>;
-	newSubfolders: Array<{ path: string; parentId: string | null; name: string }>;
-	totalFiles: number;
-	estimatedDuration: number;
-}
-
-export interface ReindexOptions {
-	folderId?: string; // Si se especifica, solo reindexar esta carpeta
-	includeSubfolders?: boolean;
-	includeHidden?: boolean;
-	concurrency?: number;
-	emitEvents?: boolean;
-	skipThumbnails?: boolean;
-	skipMetadata?: boolean;
-}
+// Re-exports para compatibilidad backward
+export type { ReindexAnalysisResult, ReindexOptions, ReindexPhaseResult } from './folder-reindex-types';
 
 export class FolderReindexService {
 	private static instance: FolderReindexService;
@@ -508,11 +485,27 @@ export class FolderReindexService {
 
 		try {
 			const concurrency = options.concurrency || 3;
+			const totalFolders = analysisResult.existingFolders.length;
 
 			// Procesar cada carpeta existente
-			for (const folder of analysisResult.existingFolders) {
+			for (let i = 0; i < analysisResult.existingFolders.length; i++) {
+				const folder = analysisResult.existingFolders[i];
 				try {
 					this.logger.debug(`📁 Indexando archivos en: ${folder.path}`);
+
+					// Emitir evento de progreso para esta carpeta
+					if (options.emitEvents !== false) {
+						await emitProgress('folder:progress', {
+							isProcessing: true,
+							folderId: folder.id,
+							phase: 'processing',
+							progress: Math.round(((i + 1) / totalFolders) * 100),
+							filesProcessed: i + 1,
+							totalFiles: totalFolders,
+							message: `📁 Indexando: ${folder.name} [${i + 1}/${totalFolders}]`,
+							timestamp: Date.now(),
+						});
+					}
 
 					const { FileSyncService } = await import('@/lib/filesystem/file-sync.service');
 					const fileSyncService = FileSyncService.getInstance();
@@ -520,12 +513,39 @@ export class FolderReindexService {
 					// Sincronizar archivos de la carpeta (esto indexa los archivos)
 					const syncResult = await fileSyncService.syncFolderFiles(folder.id, {
 						dryRun: false,
+						// Callback para reportar progreso de archivos individuales
+						onProgress: async (filesProcessed, totalFiles, currentFile) => {
+							if (options.emitEvents !== false) {
+								const fileName = currentFile.split(/[\\/]/).pop() || currentFile;
+								await emitProgress('folder:progress', {
+									isProcessing: true,
+									folderId: folder.id,
+									phase: 'processing',
+									progress: Math.round((filesProcessed / totalFiles) * 100),
+									filesProcessed,
+									totalFiles,
+									message: `   └── [${filesProcessed}/${totalFiles}] ${fileName}`,
+									timestamp: Date.now(),
+								});
+							}
+						},
 					});
 
 					processed += syncResult.stats.totalChecked;
 					successful +=
 						syncResult.stats.newFilesFound + syncResult.stats.totalChecked - syncResult.stats.filesRemoved || 0;
 					errors.push(...(syncResult.errors || []));
+
+					// Recalcular y persistir estadísticas de carpeta
+					try {
+						const { recomputeAndPersistFolderAggregates } = await import(
+							'@/lib/filesystem/folder-stats.aggregates'
+						);
+						await recomputeAndPersistFolderAggregates(folder.id);
+						this.logger.debug(`📊 Estadísticas actualizadas para: ${folder.name}`);
+					} catch (statsError) {
+						this.logger.warn(`⚠️ No se pudieron actualizar estadísticas para ${folder.name}:`, statsError);
+					}
 
 					this.logger.debug(
 						`✅ Carpeta indexada: ${folder.name} (${syncResult.stats.totalChecked} archivos verificados, ${syncResult.stats.newFilesFound} nuevos)`
@@ -820,10 +840,12 @@ export class FolderReindexService {
 
 	/**
 	 * Emite eventos de progreso si está habilitado
+	 * 🔧 FIX: Emite 'folder:reindexAll:progress' para eventos globales
 	 */
 	private async emitProgress(phase: string, progress: number, message: string): Promise<void> {
 		try {
-			await emitProgress('folder:progress', {
+			// 🎯 Usar evento correcto para reindexado global
+			await emitProgress('folder:reindexAll:progress', {
 				isProcessing: progress < 100,
 				folderId: undefined,
 				phase,

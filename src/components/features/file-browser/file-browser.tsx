@@ -1,5 +1,5 @@
 import { RefreshCw } from 'lucide-react';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useRef, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { Cards } from '@/components/features/file-browser/views/cards';
 import { Grid } from '@/components/features/file-browser/views/grid';
@@ -10,7 +10,7 @@ import { Masonry } from '@/components/features/file-browser/views/masonry';
 import { FileCanvasMasonryGrouped } from '@/components/features/file-browser/views/masonry-grouped';
 import { Table } from '@/components/features/file-browser/views/table';
 import { FileCanvasTableGrouped } from '@/components/features/file-browser/views/table-grouped';
-import type { ImageItem } from '@/components/features/file-viewer/file-viewer';
+import type { ImageItem } from '@/components/features/file-viewer';
 import { useNavigation } from '@/components/navigation/hooks/navigation.utils';
 import { useFolder } from '@/lib/api/folders';
 import { cn } from '@/lib/utils';
@@ -23,61 +23,22 @@ import { useVideoStore } from '@/store/entities/video';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useSelectionStore } from '@/store/ui/selection.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import { sortSingleCriterion } from '@/transformers/file/sort';
 import type { AnyEntityWithStats } from '@/types/entities';
+import { FileBrowserPreloader } from './components/file-browser-preloader';
 import { FileBrowserToolbar } from './components/file-browser-toolbar';
 import { FileListHeader } from './components/file-list-header';
 import { LoadMoreButton } from './components/load-more-button';
 import type { MediaItem } from './components/media-thumbnail';
 import { StatusBar } from './components/status-bar';
+import { useBrowserPagination } from './hooks/use-browser-pagination';
+import { useBrowserStates } from './hooks/use-browser-states';
+import { useProcessedItems } from './hooks/use-processed-items';
 import { useProgressiveFolderFiles } from './hooks/use-progressive-folder-files';
 import { useKeyboardNavigation } from './navigation/keyboard-navigation';
 import type { ClickModifiers, FileBrowserProps } from './types/file-browser.types';
+import { renderFromItems } from './utils/file-browser.renderers';
 // Estilos de animación específicos para vistas Canvas
 import './views/canvas/canvas-animations.css';
-
-function applySearch(items: MediaItem[], query: string) {
-	if (!query) return items;
-	const q = query.toLowerCase();
-	return items.filter((it) => (it.name || '').toLowerCase().includes(q));
-}
-
-// applySort reemplazado por util estable sortSingleCriterion
-function applySort(items: MediaItem[], sortOptions: { field: string; direction: 'asc' | 'desc' }[]) {
-	if (!sortOptions || sortOptions.length === 0) return items;
-	return sortSingleCriterion(items, sortOptions[0]);
-}
-
-function groupByEntityType(items: MediaItem[]): Array<{ key: string; items: MediaItem[]; displayName: string }> {
-	const map = new Map<string, MediaItem[]>();
-	const displayNames = {
-		folder: 'Carpetas',
-		image: 'Imágenes',
-		video: 'Videos',
-		audio: 'Audio',
-		document: 'Documentos',
-		json: 'Archivos JSON',
-		file3d: 'Archivos 3D',
-	};
-
-	for (const item of items) {
-		const type = item.entityType;
-		const arr = map.get(type) ?? [];
-		arr.push(item);
-		map.set(type, arr);
-	}
-
-	// Orden específico para los tipos - carpetas primero
-	const typeOrder = ['folder', 'image', 'video', 'audio', 'document', 'json', 'file3d'];
-
-	return typeOrder
-		.filter((type) => map.has(type))
-		.map((type) => ({
-			key: type,
-			items: map.get(type) ?? [],
-			displayName: displayNames[type as keyof typeof displayNames] || type,
-		}));
-}
 // Componente principal con filtro de carpeta
 export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }: FileBrowserProps) {
 	// Configuración de infinite scroll
@@ -94,6 +55,8 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 		loadMore,
 		isLoadingMore,
 		scrollContainerRef,
+		chunkSize,
+		refetch,
 	} = useProgressiveFolderFiles(filterId ?? null);
 
 	// Estado para controlar loading del refresh
@@ -119,15 +82,18 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 			const { fetchJsonFiles } = useJsonFileStore.getState();
 			const { fetchFile3Ds } = useFile3DStore.getState();
 
-			// Recargar todos los tipos de archivos de la carpeta
-			await Promise.allSettled([
+			const refreshTasks: Promise<unknown>[] = [refetch()];
+			refreshTasks.push(
 				fetchImages({ folderId: filterId }),
 				fetchVideos([filterId]),
 				fetchAudios(),
 				fetchDocuments(),
 				fetchJsonFiles(),
-				fetchFile3Ds(),
-			]);
+				fetchFile3Ds()
+			);
+
+			// Recargar todos los tipos de archivos de la carpeta
+			await Promise.allSettled(refreshTasks);
 		} catch (error) {
 			console.error('Error al refrescar:', error);
 		} finally {
@@ -137,9 +103,9 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 
 	// View options (modo, tamaño, sort, búsqueda)
 	const viewMode = useViewOptionsStore((s) => s.viewMode);
-	const useCanvasRendering = useViewOptionsStore((s) => s.useCanvasRendering);
 	const itemSize = useViewOptionsStore((s) => s.itemSize);
 	const sortOptions = useViewOptionsStore((s) => s.sortOptions);
+	const sortVersion = useViewOptionsStore((s) => s.sortVersion);
 	const searchQuery = useViewOptionsStore((s) => s.searchQuery);
 	const groupByType = useViewOptionsStore((s) => s.groupByEntityType);
 
@@ -148,45 +114,69 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 	const setActiveId = useSelectionStore((s) => s.setActiveId);
 	const setSelectedIds = useSelectionStore((s) => s.setSelectedIds);
 
-	const processedItems = useMemo(() => {
-		const searched = applySearch(items as MediaItem[], searchQuery);
-		const sorted = applySort(searched, sortOptions);
+	// Hook de procesamiento de items (búsqueda, sort, agrupación, etc.)
+	const { baseItems, processedItems, nonSyntheticItems, grouped, linearItems, toolbarItemIds } = useProcessedItems({
+		items: items as MediaItem[],
+		searchQuery,
+		sortOptions,
+		parentId: currentFolder?.parentId,
+		groupByType,
+	});
 
-		// Inyectar ítem ".." para volver al padre cuando exista
-		if (currentFolder?.parentId) {
-			const upItem: MediaItem = {
-				id: currentFolder.parentId,
-				name: '..',
-				entityType: 'folder',
-			};
-			return [upItem, ...sorted];
-		}
+	const resolvedLoadedCount = Math.max(loadedCount, nonSyntheticItems.length);
+	const resolvedTotalCount =
+		totalCount != null ? Math.max(totalCount, nonSyntheticItems.length) : nonSyntheticItems.length;
+	const effectiveTotalCount = resolvedTotalCount;
+	const isPaginatedView = ['grid', 'canvas', 'cards', 'masonry'].includes(viewMode);
 
-		return sorted;
-	}, [items, searchQuery, sortOptions, currentFolder?.parentId]);
-
-	const grouped = useMemo(
-		() => (groupByType ? groupByEntityType(processedItems as MediaItem[]) : null),
-		[groupByType, processedItems]
+	// Scroll container centralizado para integrarse con infinite scroll real
+	const [scrollContainerEl, setScrollContainerEl] = useState<HTMLDivElement | null>(null);
+	const handleScrollContainerReady = useCallback(
+		(el: HTMLDivElement | null) => {
+			if (scrollContainerRef.current !== el) {
+				scrollContainerRef.current = el;
+			}
+			setScrollContainerEl((prev) => (prev === el ? prev : el));
+		},
+		[scrollContainerRef]
 	);
 
-	// Scroll parents como callback refs para asegurar elemento real
-	const [listScrollEl, setListScrollEl] = useState<HTMLDivElement | null>(null);
-	const [gridScrollEl, setGridScrollEl] = useState<HTMLDivElement | null>(null);
-	const [tableScrollEl, setTableScrollEl] = useState<HTMLDivElement | null>(null);
-	const [cardsScrollEl, setCardsScrollEl] = useState<HTMLDivElement | null>(null);
-
 	// Paginación global simple para vistas de grid/canvas
-	const [page, setPage] = useState(0); // 0-based
 	const PAGE_SIZE = useViewOptionsStore((s) => s.pagination.pageSize) ?? 300;
 	const backgroundColor = useViewOptionsStore((s) => s.backgroundColor) ?? 'transparent';
 
-	// Clamp de página ante cambios en el dataset o en el modo de vista
-	useEffect(() => {
-		const total = processedItems?.length ?? 0;
-		const count = Math.max(1, Math.ceil(total / PAGE_SIZE));
-		setPage((p) => (p >= count ? Math.max(0, count - 1) : p));
-	}, [processedItems?.length, PAGE_SIZE]);
+	const { page, setPage, totalPages, maxPageIndex, shownCount } = useBrowserPagination({
+		totalCount: effectiveTotalCount,
+		pageSize: PAGE_SIZE,
+		isPaginatedView,
+		filterId,
+		searchQuery,
+		sortVersion,
+	});
+
+	const handleNextPage = isPaginatedView ? () => setPage((p) => Math.min(maxPageIndex, p + 1)) : undefined;
+	const handlePrevPage = isPaginatedView ? () => setPage((p) => Math.max(0, p - 1)) : undefined;
+
+	// Hook de estados de renderizado (preloader, error, empty, content)
+	const {
+		hasRenderableItems,
+		isIdle,
+		isActivelyLoading,
+		showPreloader,
+		showErrorState,
+		showEmptyState,
+		hasBlockingState,
+		shouldRenderContent,
+	} = useBrowserStates({
+		isLoading,
+		isRefreshing,
+		error,
+		items: nonSyntheticItems,
+		shouldShowPreloader,
+	});
+
+	const errorDescription = error ?? 'No se pudieron cargar los archivos.';
+	const statusItems = nonSyntheticItems;
 
 	// Ref para navegación por teclado
 	const containerRef = useRef<HTMLDivElement>(null);
@@ -217,7 +207,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 		const mods = modifiers ?? { ctrlKey: false, metaKey: false, shiftKey: false };
 		const isToggle = mods.ctrlKey || mods.metaKey;
 		const isRange = mods.shiftKey;
-		const allIds = (grouped ? grouped.flatMap((g) => g.items) : processedItems).map((it) => it.id);
+		const allIds = linearItems.map((it) => it.id);
 		const { selectedIds: currentSelectedIds, activeId: storeActive } = useSelectionStore.getState();
 		if (isRange && currentSelectedIds.length > 0 && storeActive) {
 			const activeId = storeActive as string;
@@ -258,8 +248,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 
 		// Fallback por defecto: abrir visor sólo para imágenes
 		if (item.entityType === 'image') {
-			const allDisplayed = (grouped ? grouped.flatMap((g) => g.items) : processedItems) as MediaItem[];
-			const imageItems = allDisplayed.filter((it) => it.entityType === 'image');
+			const imageItems = (linearItems as MediaItem[]).filter((it) => it.entityType === 'image');
 			const initialIndex = imageItems.findIndex((it) => it.id === item.id);
 			if (imageItems.length > 0 && initialIndex >= 0) {
 				openViewer(imageItems.map(toImageItem), initialIndex);
@@ -277,16 +266,8 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 		disabled: isLoading || !!error || processedItems.length === 0,
 	});
 
-	// Estilos de grid dependientes del tamaño (cards usa tamaño un poco mayor por defecto)
+	// Estilos base para ajustar tamaños de tarjeta
 	const effectiveItemSize = viewMode === 'cards' ? Math.max(120, itemSize) : itemSize;
-	// Grid: mínimo 4 columnas; Cards se maneja con su propio componente - MEMOIZADO
-	const gridStyle: React.CSSProperties = useMemo(
-		() =>
-			viewMode === 'grid'
-				? { gridTemplateColumns: 'repeat(4, 1fr)' }
-				: { gridTemplateColumns: `repeat(auto-fill, minmax(${Math.max(80, effectiveItemSize)}px, 1fr))` },
-		[viewMode, effectiveItemSize]
-	);
 
 	const hasViewportMounted = true; // todas las vistas rinden un viewport con data-testid
 
@@ -303,13 +284,8 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 			tabIndex={-1}
 		>
 			{/* Toolbar del File Browser */}
-			<FileBrowserToolbar
-				allItemIds={(grouped ? grouped.flatMap((g) => g.items) : processedItems).map((it) => it.id)}
-				isLoading={isLoading || isRefreshing}
-				onRefresh={handleRefresh}
-			/>
-			<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container" ref={scrollContainerRef}>
-				{/* Overlays no bloqueantes para loading/error solo si hay error */}
+			<FileBrowserToolbar allItemIds={toolbarItemIds} isLoading={isActivelyLoading} onRefresh={handleRefresh} />
+			<div className="relative flex h-full min-h-0 flex-col" data-testid="file-browser-container">
 				{error && (
 					<div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center p-2">
 						<div className="rounded-md bg-destructive/80 px-2 py-1 text-destructive-foreground text-xs">
@@ -317,144 +293,185 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 						</div>
 					</div>
 				)}
-				{viewMode === 'list' ? (
-					<div className="flex h-full min-h-0 flex-col">
-						<FileListHeader />
-						<div className="min-h-0 flex-1 overflow-auto" ref={setListScrollEl}>
-							{grouped ? (
-								<FileCanvasListGrouped
-									groups={grouped as any}
-									onItemClick={handleItemClick}
-									onItemDoubleClick={handleItemDoubleClick}
-									scrollContainer={listScrollEl}
-								/>
-							) : (
-								<List
-									items={processedItems as MediaItem[]}
-									onItemClick={handleItemClick}
-									onItemDoubleClick={handleItemDoubleClick}
-									scrollContainer={listScrollEl}
-								/>
-							)}
-						</div>
-					</div>
-				) : viewMode === 'masonry' ? (
-					<div className="h-full min-h-0 overflow-hidden">
-						{grouped ? (
-							<FileCanvasMasonryGrouped
-								groups={grouped as any}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-							/>
-						) : (
-							<Masonry
-								items={processedItems as MediaItem[]}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-								page={page}
-								pageSize={PAGE_SIZE}
-							/>
-						)}
-					</div>
-				) : viewMode === 'table' ? (
-					<div className="h-full min-h-0 overflow-hidden">
-						{grouped ? (
-							<FileCanvasTableGrouped
-								groups={grouped as any}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-							/>
-						) : (
-							<Table
-								items={processedItems as MediaItem[]}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-							/>
-						)}
-					</div>
-				) : viewMode === 'cards' ? (
-					<div className="h-full min-h-0 overflow-hidden">
-						{grouped ? (
-							<FileCanvasGridGrouped
-								groups={grouped as any}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-							/>
-						) : (
-							<Cards
-								items={processedItems as MediaItem[]}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-								page={page}
-								pageSize={PAGE_SIZE}
-							/>
-						)}
-					</div>
-				) : viewMode === 'canvas' ? (
-					<div className="h-full min-h-0 overflow-hidden">
-						<Grid
-							itemSize={itemSize}
-							items={processedItems as MediaItem[]}
-							onItemClick={handleItemClick}
-							onItemDoubleClick={handleItemDoubleClick}
-							page={page}
-							pageSize={PAGE_SIZE}
+
+				{showPreloader && (
+					<div className="flex flex-1 flex-col">
+						<FileBrowserPreloader
+							className="flex-1"
+							isLoading={true}
+							itemCount={resolvedLoadedCount}
+							itemSize={effectiveItemSize}
+							viewMode={viewMode}
 						/>
 					</div>
-				) : (
-					<div className="h-full min-h-0 overflow-hidden">
-						{grouped ? (
-							<FileCanvasGridGrouped
-								groups={grouped as any}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-							/>
+				)}
+
+				{showErrorState && (
+					<div className="flex flex-1 flex-col items-center justify-center p-6">
+						<EmptyState description={errorDescription} icon={RefreshCw} title="Error al cargar" />
+					</div>
+				)}
+
+				{showEmptyState && (
+					<div className="flex flex-1 flex-col items-center justify-center p-6">
+						<EmptyState
+							description="No se encontraron archivos en esta carpeta."
+							icon={RefreshCw}
+							title="Sin archivos"
+						/>
+					</div>
+				)}
+
+				{shouldRenderContent && (
+					<div className="flex h-full min-h-0 flex-col">
+						{viewMode === 'list' ? (
+							<div className="flex h-full min-h-0 flex-col">
+								<FileListHeader />
+								<div className="min-h-0 flex-1 overflow-hidden">
+									{grouped ? (
+										<FileCanvasListGrouped
+											groups={grouped as any}
+											onContainerReady={handleScrollContainerReady}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											scrollContainer={scrollContainerEl}
+										/>
+									) : (
+										<List
+											items={processedItems as MediaItem[]}
+											onContainerReady={handleScrollContainerReady}
+											onItemClick={handleItemClick}
+											onItemDoubleClick={handleItemDoubleClick}
+											scrollContainer={scrollContainerEl}
+										/>
+									)}
+								</div>
+							</div>
+						) : viewMode === 'masonry' ? (
+							<div className="h-full min-h-0 overflow-hidden">
+								{grouped ? (
+									<FileCanvasMasonryGrouped
+										groups={grouped as any}
+										onContainerReady={handleScrollContainerReady}
+										onItemClick={handleItemClick}
+										onItemDoubleClick={handleItemDoubleClick}
+										scrollContainer={scrollContainerEl}
+									/>
+								) : (
+									<Masonry
+										items={processedItems as MediaItem[]}
+										onContainerReady={handleScrollContainerReady}
+										onItemClick={handleItemClick}
+										onItemDoubleClick={handleItemDoubleClick}
+										page={page}
+										pageSize={PAGE_SIZE}
+										scrollContainer={scrollContainerEl}
+									/>
+								)}
+							</div>
+						) : viewMode === 'table' ? (
+							<div className="h-full min-h-0 overflow-hidden">
+								{grouped ? (
+									<FileCanvasTableGrouped
+										groups={grouped as any}
+										onContainerReady={handleScrollContainerReady}
+										onItemClick={handleItemClick}
+										onItemDoubleClick={handleItemDoubleClick}
+										scrollContainer={scrollContainerEl}
+									/>
+								) : (
+									<Table
+										items={processedItems as MediaItem[]}
+										onContainerReady={handleScrollContainerReady}
+										onItemClick={handleItemClick}
+										onItemDoubleClick={handleItemDoubleClick}
+										scrollContainer={scrollContainerEl}
+									/>
+								)}
+							</div>
+						) : viewMode === 'cards' ? (
+							<div className="h-full min-h-0 overflow-hidden">
+								{grouped ? (
+									<FileCanvasGridGrouped
+										groups={grouped as any}
+										onContainerReady={handleScrollContainerReady}
+										onItemClick={handleItemClick}
+										onItemDoubleClick={handleItemDoubleClick}
+										scrollContainer={scrollContainerEl}
+									/>
+								) : (
+									<Cards
+										items={processedItems as MediaItem[]}
+										onContainerReady={handleScrollContainerReady}
+										onItemClick={handleItemClick}
+										onItemDoubleClick={handleItemDoubleClick}
+										page={page}
+										pageSize={PAGE_SIZE}
+										scrollContainer={scrollContainerEl}
+									/>
+								)}
+							</div>
+						) : viewMode === 'canvas' ? (
+							<div className="h-full min-h-0 overflow-hidden">
+								<Grid
+									itemSize={itemSize}
+									items={processedItems as MediaItem[]}
+									onContainerReady={handleScrollContainerReady}
+									onItemClick={handleItemClick}
+									onItemDoubleClick={handleItemDoubleClick}
+									page={page}
+									pageSize={PAGE_SIZE}
+									scrollContainer={scrollContainerEl}
+								/>
+							</div>
 						) : (
-							<Grid
-								itemSize={effectiveItemSize}
-								items={processedItems as MediaItem[]}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-								page={page}
-								pageSize={PAGE_SIZE}
-							/>
+							<div className="h-full min-h-0 overflow-hidden">
+								{grouped ? (
+									<FileCanvasGridGrouped
+										groups={grouped as any}
+										onContainerReady={handleScrollContainerReady}
+										onItemClick={handleItemClick}
+										onItemDoubleClick={handleItemDoubleClick}
+										scrollContainer={scrollContainerEl}
+									/>
+								) : (
+									<Grid
+										itemSize={effectiveItemSize}
+										items={processedItems as MediaItem[]}
+										onContainerReady={handleScrollContainerReady}
+										onItemClick={handleItemClick}
+										onItemDoubleClick={handleItemDoubleClick}
+										page={page}
+										pageSize={PAGE_SIZE}
+										scrollContainer={scrollContainerEl}
+									/>
+								)}
+							</div>
 						)}
 					</div>
 				)}
 			</div>
 
-			{/* Load more button for chunked loading - only show if autoLoad is disabled */}
-			{!(infiniteScroll.enabled && infiniteScroll.autoLoad) && (
+			{!(infiniteScroll.enabled && infiniteScroll.autoLoad) && shouldRenderContent && (
 				<LoadMoreButton
+					chunkSize={chunkSize}
 					hasMore={hasMore}
 					isLoadingMore={isLoadingMore}
-					loadedCount={processedItems.length}
+					loadedCount={resolvedLoadedCount}
 					loadMore={loadMore}
-					totalCount={totalCount}
+					totalCount={resolvedTotalCount}
 				/>
 			)}
 
 			<StatusBar
-				isLoading={isLoading || isRefreshing}
-				items={processedItems as MediaItem[]}
-				onNextPage={['grid', 'canvas', 'cards', 'masonry'].includes(viewMode) ? () => setPage((p) => p + 1) : undefined}
-				onPrevPage={
-					['grid', 'canvas', 'cards', 'masonry'].includes(viewMode)
-						? () => setPage((p) => Math.max(0, p - 1))
-						: undefined
-				}
+				isLoading={isActivelyLoading}
+				items={statusItems}
+				onNextPage={handleNextPage}
+				onPrevPage={handlePrevPage}
 				onRefresh={handleRefresh}
-				page={['grid', 'canvas', 'cards', 'masonry'].includes(viewMode) ? page : undefined}
-				pageCount={
-					['grid', 'canvas', 'cards', 'masonry'].includes(viewMode)
-						? Math.max(1, Math.ceil((processedItems?.length ?? 0) / PAGE_SIZE))
-						: undefined
-				}
-				shownCount={
-					['grid', 'canvas', 'cards', 'masonry'].includes(viewMode)
-						? Math.min(PAGE_SIZE, Math.max(0, (processedItems?.length ?? 0) - page * PAGE_SIZE))
-						: undefined
-				}
+				page={isPaginatedView ? page : undefined}
+				pageCount={isPaginatedView ? totalPages : undefined}
+				shownCount={shownCount}
 			/>
 		</section>
 	);
@@ -467,191 +484,6 @@ export interface FileBrowserDataProps {
 	isLoading?: boolean;
 	onItemClick?: (item: AnyEntityWithStats) => void;
 	onItemDoubleClick?: (item: AnyEntityWithStats) => void;
-}
-
-function renderFromItems({
-	className,
-	items,
-	isLoading = false,
-	onItemClick,
-	onItemDoubleClick,
-}: FileBrowserDataProps) {
-	// Admitir mezcla de imágenes y videos
-	const mediaItems = items as unknown as MediaItem[];
-	const backgroundColor = useViewOptionsStore((s) => s.backgroundColor) ?? 'transparent';
-
-	// Función de refresh básica para items directos (opcional)
-	const handleRefresh = () => {
-		// En este contexto, no hay mucho que refrescar ya que los items vienen como props
-		console.log('Refresh solicitado para items directos');
-	};
-
-	const viewMode = useViewOptionsStore((s) => s.viewMode);
-	const itemSize = useViewOptionsStore((s) => s.itemSize);
-	const sortOptions = useViewOptionsStore((s) => s.sortOptions);
-	const searchQuery = useViewOptionsStore((s) => s.searchQuery);
-
-	const toggleSelectedId = useSelectionStore((s) => s.toggleSelectedId);
-	const setActiveId = useSelectionStore((s) => s.setActiveId);
-	const setSelectedIds = useSelectionStore((s) => s.setSelectedIds);
-
-	const processedItems = useMemo(() => {
-		const searched = applySearch(mediaItems, searchQuery);
-		const sorted = applySort(searched, sortOptions);
-		return sorted;
-	}, [mediaItems, searchQuery, sortOptions]);
-
-	if (isLoading) {
-		return (
-			<div
-				className={cn('flex h-full flex-col items-center justify-center gap-4', className)}
-				data-testid="file-browser"
-			>
-				<EmptyState description="Cargando archivos..." icon={RefreshCw} title="Cargando" />
-			</div>
-		);
-	}
-
-	const handleItemClick = (item: MediaItem, modifiers?: ClickModifiers) => {
-		const mods = modifiers ?? { ctrlKey: false, metaKey: false, shiftKey: false };
-		const isToggle = mods.ctrlKey || mods.metaKey;
-		const isRange = mods.shiftKey;
-		const allIds = processedItems.map((it) => it.id);
-		const { selectedIds: currentSelectedIds, activeId } = useSelectionStore.getState();
-		if (isRange && currentSelectedIds.length > 0 && activeId) {
-			const start = allIds.indexOf(activeId as string);
-			const end = allIds.indexOf(item.id);
-			if (start !== -1 && end !== -1) {
-				const [from, to] = start <= end ? [start, end] : [end, start];
-				const rangeIds = allIds.slice(from, to + 1);
-				setSelectedIds(rangeIds);
-				setActiveId(item.id);
-			} else {
-				setSelectedIds([item.id]);
-				setActiveId(item.id);
-			}
-		} else if (isToggle) {
-			toggleSelectedId(item.id);
-			setActiveId(item.id);
-		} else {
-			setSelectedIds([item.id]);
-			setActiveId(item.id);
-		}
-		onItemClick?.(item as unknown as AnyEntityWithStats);
-	};
-
-	// Visor de imágenes (fallback por defecto en doble click)
-	const { openViewer } = useFileViewerStore();
-	const toImageItem = (mi: MediaItem): ImageItem => ({
-		id: mi.id,
-		name: mi.name,
-		type: 'image',
-		path: (mi as any).path || '',
-		size: (mi as any).size ?? 0,
-		width: (mi as any).width ?? null,
-		height: (mi as any).height ?? null,
-		thumbnail: (mi as any).thumbnailUrl ?? null,
-		metadata: null,
-	});
-
-	const handleItemDoubleClick = (item: MediaItem) => {
-		if (onItemDoubleClick) {
-			onItemDoubleClick(item as AnyEntityWithStats);
-			return;
-		}
-		if (item.entityType === 'image') {
-			const imageItems = processedItems.filter((it) => it.entityType === 'image');
-			const initialIndex = imageItems.findIndex((it) => it.id === item.id);
-			if (imageItems.length > 0 && initialIndex >= 0) {
-				openViewer(imageItems.map(toImageItem), initialIndex);
-			}
-		}
-	};
-	const effectiveItemSize = viewMode === 'cards' ? Math.max(120, itemSize) : itemSize;
-	const gridStyle: React.CSSProperties = useMemo(
-		() =>
-			viewMode === 'grid'
-				? { gridTemplateColumns: 'repeat(4, 1fr)' }
-				: { gridTemplateColumns: `repeat(auto-fill, minmax(${Math.max(80, effectiveItemSize)}px, 1fr))` },
-		[viewMode, effectiveItemSize]
-	);
-
-	return (
-		<section
-			aria-label="Explorador de archivos"
-			className={cn('flex h-full min-h-[200px] flex-col overflow-hidden', className)}
-			data-ready="true"
-			data-testid="file-browser"
-			data-view-mode={viewMode}
-			data-viewport-ready="true"
-			style={{ backgroundColor }}
-			tabIndex={-1}
-		>
-			{/* Toolbar del File Browser */}
-			<FileBrowserToolbar
-				allItemIds={processedItems.map((it) => it.id)}
-				isLoading={isLoading}
-				onRefresh={handleRefresh}
-			/>
-			<div className="flex h-full min-h-0 flex-col" data-testid="file-browser-container">
-				{viewMode === 'list' ? (
-					<div className="flex h-full min-h-0 flex-col">
-						<FileListHeader />
-						<div className="min-h-0 flex-1">
-							<List
-								items={processedItems as MediaItem[]}
-								onItemClick={handleItemClick}
-								onItemDoubleClick={handleItemDoubleClick}
-							/>
-						</div>
-					</div>
-				) : viewMode === 'masonry' ? (
-					<div className="h-full min-h-0 overflow-hidden">
-						<Masonry
-							items={processedItems as MediaItem[]}
-							onItemClick={handleItemClick}
-							onItemDoubleClick={handleItemDoubleClick}
-						/>
-					</div>
-				) : viewMode === 'table' ? (
-					<div className="h-full min-h-0 overflow-hidden">
-						<Table
-							items={processedItems as MediaItem[]}
-							onItemClick={handleItemClick}
-							onItemDoubleClick={handleItemDoubleClick}
-						/>
-					</div>
-				) : viewMode === 'cards' ? (
-					<div className="h-full min-h-0 overflow-hidden">
-						<Cards
-							items={processedItems as MediaItem[]}
-							onItemClick={handleItemClick}
-							onItemDoubleClick={handleItemDoubleClick}
-						/>
-					</div>
-				) : viewMode === 'canvas' ? (
-					<div className="h-full min-h-0 overflow-hidden">
-						<Grid
-							itemSize={itemSize}
-							items={processedItems as MediaItem[]}
-							onItemClick={handleItemClick}
-							onItemDoubleClick={handleItemDoubleClick}
-						/>
-					</div>
-				) : (
-					<div className="h-full min-h-0 overflow-hidden">
-						<Grid
-							itemSize={effectiveItemSize}
-							items={processedItems as MediaItem[]}
-							onItemClick={handleItemClick}
-							onItemDoubleClick={handleItemDoubleClick}
-						/>
-					</div>
-				)}
-			</div>
-			<StatusBar isLoading={isLoading} items={processedItems as MediaItem[]} onRefresh={handleRefresh} />
-		</section>
-	);
 }
 
 // Componente unificado: acepta props de datos o de carpeta

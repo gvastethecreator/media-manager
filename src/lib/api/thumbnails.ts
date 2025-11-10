@@ -97,7 +97,7 @@ export function useLastProcessedThumbnails(limit = 9) {
 export function useThumbnail(id: string, quality: string) {
 	return useQuery<ThumbnailResponse, Error>({
 		queryKey: thumbnailKeys.single(id, quality),
-		queryFn: () => apiClient.get<ThumbnailResponse>(`/thumbnails/${id}?quality=${quality}`),
+		queryFn: () => apiClient.get<ThumbnailResponse>(`/thumbnails/image/${id}?quality=${quality}`),
 		enabled: !!id,
 		staleTime: 1000 * 60 * 10, // 10 minutos
 	});

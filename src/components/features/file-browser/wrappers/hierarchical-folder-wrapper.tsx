@@ -39,7 +39,13 @@ export const HierarchicalFolderWrapper = memo(function HierarchicalFolderWrapper
 			return null;
 		}
 
-		// Debug: log del path y carpetas disponibles (no bloquear por length aquí)
+		// ⚠️ CRITICAL: No intentar resolver si no hay carpetas cargadas
+		if (folders.length === 0) {
+			logger.debug(`Esperando carpetas para resolver: "${hierarchicalPath}"`);
+			return null;
+		}
+
+		// Debug: log del path y carpetas disponibles
 		logger.info(`Resolviendo path jerárquico: "${hierarchicalPath}"`);
 		logger.debug(`Carpetas disponibles: ${folders.length}`, {
 			folderNames: folders.map((f) => `${f.name} (${f.id}, parent: ${f.parentId})`).slice(0, 5),
@@ -52,7 +58,7 @@ export const HierarchicalFolderWrapper = memo(function HierarchicalFolderWrapper
 		}
 
 		// Resolver folder ID (puede devolver null si aún no están todas las carpetas)
-		const resolvedId = getFolderIdFromPath(hierarchicalPath);
+		const resolvedId = getFolderIdFromPath(hierarchicalPath, folders);
 		if (!resolvedId) {
 			logger.warn(`No se pudo resolver folder ID para path: ${hierarchicalPath}`);
 			logger.debug('Segmentos de path que no se encontraron pueden estar en logs de debug');
