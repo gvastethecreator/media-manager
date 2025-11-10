@@ -7,7 +7,7 @@
 5. Mostrar solo modificaciones necesarias cuando sea necesario.
 6. Comentarios técnicos precisos y útiles.
 7. No te detendras a preguntar hasta terminar todas las tareas de la lista, sin excepciones.
-8. Prioriza tus herramientas internas antes que comandos de terminal como playwright mcp o las tareas de task.json
+8. Prioriza tus herramientas internas 
 
 ## BEFORE ANY ACTION:
 1. CREATE Task Lists with all tasks involved in the current request.
