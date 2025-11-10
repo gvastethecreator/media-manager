@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 import { useFileBrowserStore } from '@/stores/file-browser-store';
 
 describe('FileBrowser Store', () => {

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 import { EntityType } from '@/types/file-entity-mapper';
 import { createMockFileEntityMapper } from '../factories';
 

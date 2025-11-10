@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import { emit, emitProgress, getEventStore } from '@/lib/server/events.server';
 
 // Helpers para mockear fetch y window

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
 import { EntityType } from '@/types/file-entity-mapper';
 

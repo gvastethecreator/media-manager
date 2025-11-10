@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 import { computeIsReindexing } from '@/components/settings/folders/utils/is-reindexing';
 
 const base = {

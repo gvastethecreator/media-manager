@@ -1,4 +1,4 @@
-import { afterEach, beforeEach, describe, expect, it } from 'bun:test';
+import { afterEach, beforeEach, describe, expect, it } from 'vitest';
 import type { Image } from '@/lib/drizzle';
 import { db } from '@/lib/drizzle';
 import { getEventStore } from '@/lib/server/events.server';

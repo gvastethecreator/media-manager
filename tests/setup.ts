@@ -1,5 +1,5 @@
 import '@testing-library/jest-dom';
-import { afterEach } from 'bun:test';
+import { afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 // @ts-expect-error faltan tipos de jsdom en entorno Bun; solo se usa en tests
 import { JSDOM } from 'jsdom';

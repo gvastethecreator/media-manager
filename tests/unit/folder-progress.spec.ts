@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 import { processFilesWithProgress } from '@/lib/filesystem/folder-stats';
 
 // Stub minimal del mapper con delays controlados

@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 import { mapImageToComplete, mapToImageSummaries, mapToImageSummary } from '@/transformers/image/mappers';
 import type { ImageWithStats } from '@/types/entities/image/base';
 
