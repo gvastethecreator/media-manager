@@ -5,7 +5,7 @@
  *              niveles de detalle al crear entidades abstractas
  */
 
-import type { EntityType } from '@/types/entities/entity.types';
+import type { EntityType } from '@/types/entities';
 
 /**
  * Definición de un campo de formulario
@@ -567,6 +567,125 @@ export const TAG_PRESETS: EntityPresetConfig = {
 };
 
 /**
+ * 📦 PRESETS PARA COLLECTIONS
+ */
+export const COLLECTION_PRESETS: EntityPresetConfig = {
+	entityType: 'collection',
+	availableFields: [
+		{ name: 'name', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre de la colección' },
+		{ name: 'emoji', label: 'Emoji', type: 'emoji', defaultValue: '📦' },
+		{ name: 'color', label: 'Color', type: 'color', defaultValue: '#8b5cf6' },
+		{ name: 'description', label: 'Descripción', type: 'textarea', placeholder: 'Descripción de la colección', max: 300 },
+		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
+	],
+	presets: [
+		{
+			id: 'minimal',
+			name: 'Mínimo',
+			description: 'Solo nombre',
+			icon: '⚡',
+			fields: ['name'],
+			isDefault: true,
+		},
+		{
+			id: 'basic',
+			name: 'Básico',
+			description: 'Colección con apariencia',
+			icon: '📝',
+			fields: ['name', 'emoji', 'color', 'description'],
+		},
+		{
+			id: 'complete',
+			name: 'Completo',
+			description: 'Colección completa',
+			icon: '📋',
+			fields: ['name', 'emoji', 'color', 'description', 'isFavorite'],
+		},
+	],
+};
+
+/**
+ * 📝 PRESETS PARA PROMPTS
+ */
+export const PROMPT_PRESETS: EntityPresetConfig = {
+	entityType: 'prompt',
+	availableFields: [
+		{ name: 'name', label: 'Nombre', type: 'text', required: true, placeholder: 'Nombre del prompt' },
+		{ name: 'emoji', label: 'Emoji', type: 'emoji', defaultValue: '📝' },
+		{ name: 'color', label: 'Color', type: 'color', defaultValue: '#f59e0b' },
+		{ name: 'description', label: 'Descripción', type: 'textarea', placeholder: 'Descripción del prompt', max: 200 },
+		{ name: 'content', label: 'Contenido', type: 'textarea', placeholder: 'Texto del prompt', max: 2000 },
+		{ name: 'category', label: 'Categoría', type: 'text', placeholder: 'Ej: Imagen, Texto, Código' },
+		{ name: 'model', label: 'Modelo', type: 'text', placeholder: 'Ej: GPT-4, DALL-E, Stable Diffusion' },
+		{ name: 'parameters', label: 'Parámetros', type: 'textarea', placeholder: 'Parámetros en formato JSON', max: 500 },
+		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
+	],
+	presets: [
+		{
+			id: 'minimal',
+			name: 'Mínimo',
+			description: 'Solo nombre y contenido',
+			icon: '⚡',
+			fields: ['name', 'content'],
+			isDefault: true,
+		},
+		{
+			id: 'basic',
+			name: 'Básico',
+			description: 'Prompt con descripción',
+			icon: '📝',
+			fields: ['name', 'emoji', 'color', 'description', 'content'],
+		},
+		{
+			id: 'complete',
+			name: 'Completo',
+			description: 'Prompt con parámetros',
+			icon: '📋',
+			fields: ['name', 'emoji', 'color', 'description', 'content', 'category', 'model', 'parameters', 'isFavorite'],
+		},
+	],
+};
+
+/**
+ * 🗒️ PRESETS PARA NOTES
+ */
+export const NOTE_PRESETS: EntityPresetConfig = {
+	entityType: 'note',
+	availableFields: [
+		{ name: 'name', label: 'Título', type: 'text', required: true, placeholder: 'Título de la nota' },
+		{ name: 'emoji', label: 'Emoji', type: 'emoji', defaultValue: '🗒️' },
+		{ name: 'color', label: 'Color', type: 'color', defaultValue: '#eab308' },
+		{ name: 'content', label: 'Contenido', type: 'textarea', placeholder: 'Contenido de la nota', max: 5000 },
+		{ name: 'category', label: 'Categoría', type: 'text', placeholder: 'Ej: Personal, Trabajo, Ideas' },
+		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
+	],
+	presets: [
+		{
+			id: 'minimal',
+			name: 'Mínimo',
+			description: 'Solo título',
+			icon: '⚡',
+			fields: ['name'],
+			isDefault: true,
+		},
+		{
+			id: 'basic',
+			name: 'Básico',
+			description: 'Nota con contenido',
+			icon: '📝',
+			fields: ['name', 'emoji', 'color', 'content'],
+		},
+		{
+			id: 'complete',
+			name: 'Completo',
+			description: 'Nota completa',
+			icon: '📋',
+			fields: ['name', 'emoji', 'color', 'content', 'category', 'isFavorite'],
+		},
+	],
+};
+
+/**
  * 📚 Mapa de presets por tipo de entidad
  */
 export const ENTITY_PRESETS_MAP: Record<string, EntityPresetConfig> = {
@@ -575,6 +694,9 @@ export const ENTITY_PRESETS_MAP: Record<string, EntityPresetConfig> = {
 	concept: CONCEPT_PRESETS,
 	'world-item': WORLD_ITEM_PRESETS,
 	tag: TAG_PRESETS,
+	collection: COLLECTION_PRESETS,
+	prompt: PROMPT_PRESETS,
+	note: NOTE_PRESETS,
 };
 
 /**
