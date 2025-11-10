@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { describe, it, expect } from 'vitest';
 
 // Escenario: si el servidor se inició con DISABLE_FTS5=1, el engine debe ser 'like'.
 // Si no, aceptamos 'fts5' o 'like' (fallback por no soporte) para no generar falsos negativos.
@@ -11,8 +11,8 @@ async function fetchJson(path: string) {
 	return res.json() as Promise<any>;
 }
 
-test.describe('Search FTS5 (deshabilitable)', () => {
-	test('engine consistente con DISABLE_FTS5', async () => {
+describe('Search FTS5 (deshabilitable)', () => {
+	it('engine consistente con DISABLE_FTS5', async () => {
 		// Pequeña espera para asegurar arranque de servidor en entornos CI lentos
 		await new Promise((r) => setTimeout(r, 150));
 		const query = 'a';

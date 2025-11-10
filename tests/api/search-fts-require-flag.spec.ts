@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { describe, it, expect } from 'vitest';
 
 // Este test asume que se puede lanzar servidor con SEARCH_FTS_REQUIRE=1 para validar error si FTS ausente.
 // Si la tabla existe retornará 200; si no existe debe retornar 503 con { required: true }.
@@ -18,8 +18,8 @@ async function safeFetch(path: string) {
 	return { res, body };
 }
 
-test.describe('Search FTS5 require flag', () => {
-	test('maneja flag SEARCH_FTS_REQUIRE', async () => {
+describe('Search FTS5 require flag', () => {
+	it('maneja flag SEARCH_FTS_REQUIRE', async () => {
 		await wait(150);
 		const { res, body } = await safeFetch('/search/fts?q=test&limit=1');
 		if (res.status === 503) {

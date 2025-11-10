@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { describe, it, expect } from 'vitest';
 
 // Este test verifica comportamiento de /search/fts con y sin tabla FTS5
 // Asume servidor dev levantado y base de datos accesible.
@@ -13,8 +13,8 @@ async function fetchJson(path: string) {
 	return res.json() as Promise<any>;
 }
 
-test.describe('Search FTS5 fallback', () => {
-	test('devuelve engine fts5 cuando tabla existe', async () => {
+describe('Search FTS5 fallback', () => {
+	it('devuelve engine fts5 cuando tabla existe', async () => {
 		// Esperar bootstrap (init async)
 		await wait(200);
 		const q = 'a';
