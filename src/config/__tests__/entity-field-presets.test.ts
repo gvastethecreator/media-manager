@@ -163,7 +163,7 @@ describe('CHARACTER_PRESETS', () => {
 	});
 
 	it('should have valid field types', () => {
-		const validTypes = ['text', 'textarea', 'number', 'select', 'color', 'emoji', 'checkbox', 'date'];
+		const validTypes = ['text', 'textarea', 'number', 'select', 'color', 'emoji', 'checkbox', 'date', 'featuredImage'];
 		for (const field of CHARACTER_PRESETS.availableFields) {
 			expect(validTypes).toContain(field.type);
 		}

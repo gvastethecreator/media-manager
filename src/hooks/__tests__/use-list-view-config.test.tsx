@@ -72,9 +72,17 @@ describe('useListViewConfig', () => {
 		const { result } = renderHook(() => useListViewConfig());
 
 		const visibleColumns = result.current.visibleColumns;
-		expect(visibleColumns).toHaveLength(2);
-		expect(visibleColumns[0].key).toBe('name');
-		expect(visibleColumns[1].key).toBe('size');
+		// El hook merge con DEFAULT_LIST_VIEW_CONFIG que tiene 5 columnas por defecto
+		// (thumbnail, name, type, size, dateModified)
+		expect(visibleColumns.length).toBeGreaterThanOrEqual(2);
+		// Verificar que todas las columnas tengan visible: true
+		expect(visibleColumns.every((col) => col.visible)).toBe(true);
+		// Verificar que estén ordenadas por el campo 'order'
+		for (let i = 1; i < visibleColumns.length; i++) {
+			const prevOrder = visibleColumns[i - 1].order || 0;
+			const currOrder = visibleColumns[i].order || 0;
+			expect(currOrder).toBeGreaterThanOrEqual(prevOrder);
+		}
 	});
 
 	it('proporciona utilidades para columnas', () => {

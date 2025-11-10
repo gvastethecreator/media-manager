@@ -127,6 +127,9 @@ describe('KeyboardShortcutManager', () => {
 	});
 
 	it('should get shortcuts for context', () => {
+		// Limpiar shortcuts por defecto para este test
+		manager.clearAll();
+
 		const globalShortcut = {
 			key: 'escape',
 			modifiers: [] as const,
