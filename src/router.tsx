@@ -151,11 +151,6 @@ export const router = createBrowserRouter([
 				path: 'tags',
 				element: <TagsView />,
 			},
-			// Contenido de Tag
-			{
-				path: 'tag-content',
-				element: <TagContentView />,
-			},
 			{
 				path: 'tags/:id',
 				element: <TagContentView />,
@@ -169,11 +164,6 @@ export const router = createBrowserRouter([
 				path: 'places',
 				element: <PlacesView className="h-full" />,
 			},
-			// Contenido de Place
-			{
-				path: 'place-content',
-				element: <PlaceContentView />,
-			},
 			{
 				path: 'places/:id',
 				element: <PlaceContentView />,
@@ -181,11 +171,6 @@ export const router = createBrowserRouter([
 			{
 				path: 'world-items',
 				element: <WorldItemsView className="h-full" />,
-			},
-			// Contenido de World Item
-			{
-				path: 'world-item-content',
-				element: <WorldItemContentView />,
 			},
 			{
 				path: 'world-items/:id',
