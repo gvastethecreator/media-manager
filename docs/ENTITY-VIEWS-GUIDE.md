@@ -80,7 +80,40 @@ Card flexible para mostrar cualquier entidad con:
 - ✅ Acciones
 - ✅ Toggle favorito
 
-### 4. FileBrowser (`src/components/features/file-browser/file-browser.tsx`)
+### 4. EntityGrid (`src/components/features/entity-grid/entity-grid.tsx`)
+
+Grid especializado para mostrar entidades con componentes visuales específicos por tipo:
+- ✅ Componentes especializados para cada tipo de entidad (Character, Place, Concept, etc.)
+- ✅ Grid responsive con auto-fill
+- ✅ Modo compacto opcional
+- ✅ Click y double-click handlers
+- ✅ Hover effects y transiciones suaves
+
+**Componentes de entidad disponibles:**
+- `CharacterItem` - Muestra edad, género, especie, clase
+- `PlaceItem` - Muestra tipo de ubicación, clima, región
+- `ConceptItem` - Muestra definición y categoría
+- `WorldItemItem` - Muestra tipo y rareza con badges de color
+- `TagItem` - Visualización simplificada
+- `CollectionItem` - Muestra total de items
+- `PromptItem` - Muestra modelo y categoría
+- `NoteItem` - Muestra preview del contenido
+
+**Ejemplo de uso:**
+```tsx
+import { EntityGrid } from '@/components/features/entity-grid';
+
+<EntityGrid
+  items={characters}
+  itemSize={200}
+  gap={16}
+  compact={false}
+  onItemClick={(character) => console.log('Clicked:', character)}
+  onItemDoubleClick={(character) => router.push(`/characters/${character.id}`)}
+/>
+```
+
+### 5. FileBrowser (`src/components/features/file-browser/file-browser.tsx`)
 
 Grid de items con:
 - ✅ Múltiples vistas (grid, list, masonry)
@@ -88,6 +121,60 @@ Grid de items con:
 - ✅ Drag & drop
 - ✅ Paginación
 - ✅ Ordenamiento
+
+## ¿Cuándo Usar Cada Componente?
+
+### Para Mostrar Entidades (Characters, Places, Concepts, etc.)
+
+**EntityGrid** - Mejor para:
+- ✅ Grids de entidades con visualización rica y específica por tipo
+- ✅ Cuando quieres mostrar información específica de cada entidad (edad, género, tipo, rareza, etc.)
+- ✅ Navegación entre entidades (ej: lista de todos los personajes)
+- ✅ Menos de 100 items (no necesita virtualización canvas)
+
+**EntityCardDynamic** - Mejor para:
+- ✅ Vistas de configuración/settings
+- ✅ Cuando necesitas acciones inline (editar, eliminar, favorito)
+- ✅ Grid simple con información básica
+- ✅ Ya usado en todos los settings views
+
+**Ejemplo - Lista de personajes:**
+```tsx
+<EntityGrid
+  items={characters}
+  onItemDoubleClick={(char) => router.push(`/characters/${char.id}`)}
+/>
+```
+
+### Para Mostrar Contenido (Imágenes, Videos, Archivos)
+
+**FileBrowser** - Mejor para:
+- ✅ Imágenes y videos de una entidad
+- ✅ Colecciones grandes (cientos o miles de items)
+- ✅ Necesitas virtualización canvas para rendimiento
+- ✅ Selección múltiple y acciones en batch
+- ✅ Visor de imágenes integrado
+
+**Ejemplo - Imágenes de un personaje:**
+```tsx
+<FileBrowser
+  items={characterImages}
+  viewMode="grid"
+  onItemClick={(item) => console.log('Selected:', item)}
+/>
+```
+
+### Combinación Recomendada
+
+**Vista Enriquecida de Entidad:**
+- `EntityHeader` - Información del personaje/lugar/concepto
+- `Tabs` - Separar diferentes tipos de contenido
+  - Tab "Imágenes" → `FileBrowser` (para las imágenes del personaje)
+  - Tab "Entidades Relacionadas" → `EntityGrid` (para otros personajes relacionados)
+
+**Vista de Lista/Galería:**
+- `EntityGrid` - Para navegar entre entidades del mismo tipo
+- Click → Redirige a la vista enriquecida individual
 
 ## Patrón Recomendado para Vistas Enriquecidas
 
