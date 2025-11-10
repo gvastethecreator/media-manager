@@ -11,6 +11,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Spinner } from '@/components/ui/spinner';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { useCreatePrompt, usePrompts } from '@/lib/api/prompts';
 import { clientEvents } from '@/lib/client/events.client';
@@ -25,6 +26,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 	const { navigateWithTransition } = useSeamlessNavigation();
 	const { selectedPrompt, selectPrompt } = usePromptStore();
 	const { mutate: createPrompt } = useCreatePrompt();
+	const { handleItemClick: updateSelection } = useEntitySelection();
 
 	const [localSearch, setLocalSearch] = useState('');
 	const [showForm, setShowForm] = useState(false);
@@ -52,10 +54,13 @@ export function PromptsView({ isVisible }: ViewProps) {
 			const prompt = prompts.find((p) => p.id === promptId) as PromptWithStats | undefined;
 			if (prompt) {
 				selectPrompt(prompt);
+
+				// Actualizar panel de detalles con el prompt seleccionado
+				updateSelection(prompt as any);
 			}
 			clientEvents.emit('prompt:selected', { promptId });
 		},
-		[selectPrompt, prompts]
+		[selectPrompt, prompts, updateSelection]
 	);
 
 	const handlePromptEdit = useCallback(

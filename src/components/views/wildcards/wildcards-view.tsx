@@ -10,6 +10,7 @@ import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { useCreateWildcard, useWildcards } from '@/lib/api/wildcards';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -25,6 +26,7 @@ export function WildcardsView({ isVisible }: ViewProps) {
 		setCurrentWildcard,
 	} = useWildcardStore();
 	const { mutate: createWildcard } = useCreateWildcard();
+	const { handleItemClick: updateSelection } = useEntitySelection();
 
 	const [localSearch, setLocalSearch] = useState('');
 	const [showForm, setShowForm] = useState(false);
@@ -49,9 +51,16 @@ export function WildcardsView({ isVisible }: ViewProps) {
 		(wildcardId: string) => {
 			viewLogger.info('✨ Seleccionando wildcard', { wildcardId });
 			setCurrentWildcard(wildcardId);
+
+			// Actualizar panel de detalles con el wildcard seleccionado
+			const wildcard = wildcards.find((w) => w.id === wildcardId);
+			if (wildcard) {
+				updateSelection(wildcard as any);
+			}
+
 			clientEvents.emit('wildcard:selected', { wildcardId });
 		},
-		[setCurrentWildcard]
+		[setCurrentWildcard, wildcards, updateSelection]
 	);
 
 	const { toast } = useToast();

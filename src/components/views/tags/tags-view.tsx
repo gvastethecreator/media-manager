@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { useCreateTag, useTags } from '@/lib/api/tags';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -39,6 +40,7 @@ MemoizedTagCard.displayName = 'MemoizedTagCard';
 export function TagsView() {
 	const { navigateWithTransition } = useSeamlessNavigation();
 	const selectTag = useTagStore((state) => state.selectTag);
+	const { handleItemClick: updateSelection } = useEntitySelection();
 
 	const { data: tagsResponse, isLoading, error } = useTags();
 	const { mutate: createTag } = useCreateTag();
@@ -67,10 +69,13 @@ export function TagsView() {
 			// Actualizar el estado de selección en el store de etiquetas
 			selectTag(tag.id);
 
+			// Actualizar panel de detalles con la etiqueta seleccionada
+			updateSelection(tag as any);
+
 			// Luego cambiar la vista para mostrar el contenido
 			navigateWithTransition('/tag-content');
 		},
-		[navigateWithTransition, selectTag]
+		[navigateWithTransition, selectTag, updateSelection]
 	);
 
 	const handleCreateTag = useCallback(() => {

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { useCreateCollection } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useCollectionStore } from '@/store/entities/collection';
@@ -13,6 +14,7 @@ export function CollectionsView(_props: ViewProps) {
 	const navigate = useNavigate();
 	const { getCollections, isLoading, error, fetchCollections, selectCollection } = useCollectionStore();
 	const { mutate: createCollection } = useCreateCollection();
+	const { handleItemClick: updateSelection } = useEntitySelection();
 
 	const [showForm, setShowForm] = useState(false);
 	const [newCollectionName, setNewCollectionName] = useState('');
@@ -32,9 +34,13 @@ export function CollectionsView(_props: ViewProps) {
 		(collection: CollectionWithStats) => {
 			viewLogger.info('🖱️ Click en colección:', collection.name);
 			selectCollection(collection.id);
+
+			// Actualizar panel de detalles con la colección seleccionada
+			updateSelection(collection as any);
+
 			navigate('/collection-content');
 		},
-		[navigate, selectCollection]
+		[navigate, selectCollection, updateSelection]
 	);
 
 	const handleCreateCollection = useCallback(() => {

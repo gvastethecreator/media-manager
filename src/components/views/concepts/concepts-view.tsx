@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useConceptStore } from '@/store/entities/concept';
 import type { ConceptCreateInput } from '@/types/entities/concept';
@@ -20,6 +21,7 @@ export function ConceptsView() {
 		filters,
 		setFilters,
 	} = useConceptStore();
+	const { handleItemClick: updateSelection } = useEntitySelection();
 
 	const [showForm, setShowForm] = useState(false);
 	const [newConceptName, setNewConceptName] = useState('');
@@ -43,11 +45,14 @@ export function ConceptsView() {
 				viewLogger.info('💡 Seleccionando concept', { conceptId });
 				selectConcept(concept);
 
+				// Actualizar panel de detalles con el concepto seleccionado
+				updateSelection(concept as any);
+
 				// Navegar a la vista de detalle del concepto
 				navigate('/concept-content');
 			}
 		},
-		[concepts, selectConcept, navigate]
+		[concepts, selectConcept, updateSelection, navigate]
 	);
 
 	const handleCreateConcept = useCallback(async () => {

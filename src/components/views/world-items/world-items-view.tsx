@@ -5,6 +5,7 @@ import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
 import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { useWorldItems } from '@/lib/api/world-items';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -16,6 +17,7 @@ const viewLogger = clientLogger.withContext('WorldItemsView');
 export function WorldItemsView(_props: ViewProps) {
 	const { navigateWithTransition } = useSeamlessNavigation();
 	const selectWorldItem = useWorldItemStore((state) => state.selectWorldItem);
+	const { handleItemClick: updateSelection } = useEntitySelection();
 
 	const { data: worldItemsResponse, isLoading, error } = useWorldItems();
 	const worldItems = worldItemsResponse?.data || [];
@@ -23,10 +25,14 @@ export function WorldItemsView(_props: ViewProps) {
 	const handleWorldItemClick = useCallback(
 		(worldItem: any) => {
 			viewLogger.info('🖱️ Click en objeto del mundo:', worldItem.name);
+
+			// Actualizar panel de detalles con el objeto seleccionado
+			updateSelection(worldItem as any);
+
 			navigateWithTransition('/world-item-content');
 			selectWorldItem(worldItem.id);
 		},
-		[navigateWithTransition, selectWorldItem]
+		[navigateWithTransition, selectWorldItem, updateSelection]
 	);
 
 	if (error) {
