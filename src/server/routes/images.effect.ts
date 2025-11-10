@@ -1,0 +1,325 @@
+/**
+ * @file Express Routes para Images usando Effect
+ * @module server/routes/images.effect
+ * @description Rutas REST para Images implementadas con Effect-TS
+ * @created 2025-10-11 - Phase 6.1 ImageService Effect Implementation
+ */
+
+import express from 'express';
+import { Effect } from 'effect';
+import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import { ImageService, ImageServiceLive } from '@/services/image/image.service.effect';
+
+const router = express.Router();
+
+/**
+ * GET /images - Listar imágenes con filtros y paginación
+ */
+router.get('/', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+
+		const {
+			search,
+			limit = '50',
+			offset = '0',
+			sortBy = 'createdAt',
+			sortOrder = 'desc',
+			folderId,
+			isFavorite,
+			minWidth,
+			maxWidth,
+			minHeight,
+			maxHeight,
+			minSize,
+			maxSize,
+			aiEngine,
+			aiModel,
+			aiOriginDetected,
+		} = req.query;
+
+		const options = {
+			search: search as string | undefined,
+			limit: Number.parseInt(limit as string, 10),
+			offset: Number.parseInt(offset as string, 10),
+			orderBy: (sortBy as 'name' | 'createdAt' | 'updatedAt' | 'size' | 'width' | 'height') || 'createdAt',
+			orderDirection: (sortOrder as 'asc' | 'desc') || 'desc',
+			folderId: folderId as string | undefined,
+			isFavorite: isFavorite === 'true' ? true : isFavorite === 'false' ? false : undefined,
+			minWidth: minWidth ? Number.parseInt(minWidth as string, 10) : undefined,
+			maxWidth: maxWidth ? Number.parseInt(maxWidth as string, 10) : undefined,
+			minHeight: minHeight ? Number.parseInt(minHeight as string, 10) : undefined,
+			maxHeight: maxHeight ? Number.parseInt(maxHeight as string, 10) : undefined,
+			minSize: minSize ? Number.parseInt(minSize as string, 10) : undefined,
+			maxSize: maxSize ? Number.parseInt(maxSize as string, 10) : undefined,
+			aiEngine: aiEngine as string | undefined,
+			aiModel: aiModel as string | undefined,
+			aiOriginDetected: aiOriginDetected === 'true' ? true : aiOriginDetected === 'false' ? false : undefined,
+		};
+
+		const result = yield* imageService.getAll(options);
+
+		return {
+			data: result.images,
+			pagination: {
+				total: result.total,
+				limit: result.limit,
+				offset: result.offset,
+				hasNext: result.hasMore,
+				hasPrev: result.offset > 0,
+			},
+		};
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res);
+});
+
+/**
+ * GET /images/favorites - Listar solo imágenes favoritas
+ */
+router.get('/favorites', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+		const favorites = yield* imageService.getAllFavorites();
+		return { data: favorites };
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res);
+});
+
+/**
+ * GET /images/by-hash/:hash - Buscar imagen por hash SHA-256
+ */
+router.get('/by-hash/:hash', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+		const image = yield* imageService.getByHash(req.params.hash);
+		return image;
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res);
+});
+
+/**
+ * GET /images/folder/:folderId - Listar imágenes de una carpeta
+ */
+router.get('/folder/:folderId', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+
+		const { limit = '50', offset = '0' } = req.query;
+
+		const options = {
+			limit: Number.parseInt(limit as string, 10),
+			offset: Number.parseInt(offset as string, 10),
+		};
+
+		const images = yield* imageService.getByFolder(req.params.folderId, options);
+
+		return { data: images };
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res);
+});
+
+/**
+ * GET /images/folder/:folderId/count - Contar imágenes en una carpeta
+ */
+router.get('/folder/:folderId/count', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+		const count = yield* imageService.countByFolder(req.params.folderId);
+		return { count };
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res);
+});
+
+/**
+ * POST /images - Crear nueva imagen
+ */
+router.post('/', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+
+		// El servicio validará el input internamente con ImageCreateInput.make()
+		const image = yield* imageService.create(req.body);
+		return image;
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res, { successStatus: 201 });
+});
+
+/**
+ * GET /images/:id/stats - Obtener imagen con estadísticas completas
+ */
+router.get('/:id/stats', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+		const imageWithStats = yield* imageService.getByIdWithStats(req.params.id);
+		return imageWithStats;
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res);
+});
+
+/**
+ * PATCH /images/:id - Actualizar campos de una imagen
+ */
+router.patch('/:id', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+
+		// El servicio validará el input internamente con ImageUpdateInput.make()
+		const image = yield* imageService.update(req.params.id, req.body);
+		return image;
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res);
+});
+
+/**
+ * POST /images/:id/favorite - Toggle favorite status
+ */
+router.post('/:id/favorite', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+		const image = yield* imageService.toggleFavorite(req.params.id);
+		return image;
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res);
+});
+
+/**
+ * POST /images/batch/favorite - Actualizar favorito en lote
+ */
+router.post('/batch/favorite', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+
+		const { ids, isFavorite } = req.body;
+
+		if (!Array.isArray(ids) || typeof isFavorite !== 'boolean') {
+			yield* Effect.fail(new Error('Invalid request: ids must be array and isFavorite must be boolean'));
+		}
+
+		const count = yield* imageService.setFavoriteMany(ids, isFavorite);
+		return { success: true, count };
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res);
+});
+
+/**
+ * DELETE /images/:id - Eliminar imagen
+ */
+router.delete('/:id', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+
+		const force = req.query.force === 'true';
+
+		yield* imageService.deleteById(req.params.id, { force });
+		return { success: true };
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res, { successStatus: 204 });
+});
+
+/**
+ * DELETE /images/batch - Eliminar múltiples imágenes
+ */
+router.delete('/batch', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+
+		const { ids } = req.body;
+		const force = req.query.force === 'true';
+
+		if (!Array.isArray(ids)) {
+			yield* Effect.fail(new Error('Invalid request: ids must be array'));
+		}
+
+		const count = yield* imageService.deleteManyByIds(ids, { force });
+		return { success: true, count };
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res, { successStatus: 204 });
+});
+
+/**
+ * POST /images/:id/thumbnail/generate - Generar thumbnail manualmente
+ */
+router.post('/:id/thumbnail/generate', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+		yield* imageService.generateThumbnail(req.params.id);
+		return { success: true, message: 'Thumbnail generated' };
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res);
+});
+
+/**
+ * GET /images/:id/thumbnail - Obtener thumbnail (genera si no existe)
+ */
+router.get('/:id/thumbnail', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+		const buffer = yield* imageService.getThumbnail(req.params.id);
+		return buffer;
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	try {
+		const buffer = await Effect.runPromise(effect);
+		res.set('Content-Type', 'image/webp');
+		res.send(buffer);
+	} catch (error) {
+		const httpError = require('@/lib/effect/adapters/express.adapter').errorToHttpStatus(error);
+		res.status(httpError.status).json({
+			error: httpError.message,
+			...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
+		});
+	}
+});
+
+/**
+ * GET /images/:id/original - Obtener imagen original
+ */
+router.get('/:id/original', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+		const buffer = yield* imageService.getOriginalImage(req.params.id);
+		return buffer;
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	try {
+		const buffer = await Effect.runPromise(effect);
+		// Detectar mime type desde buffer o usar default
+		res.set('Content-Type', 'image/jpeg'); // TODO: Detectar tipo correcto
+		res.send(buffer);
+	} catch (error) {
+		const httpError = require('@/lib/effect/adapters/express.adapter').errorToHttpStatus(error);
+		res.status(httpError.status).json({
+			error: httpError.message,
+			...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
+		});
+	}
+});
+
+/**
+ * GET /images/:id - Obtener imagen por ID (sin stats)
+ * IMPORTANTE: Esta ruta debe ir AL FINAL para no interceptar rutas específicas
+ */
+router.get('/:id', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+		const image = yield* imageService.getById(req.params.id);
+		return image;
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	await runEffectForExpress(effect, res);
+});
+
+export default router;

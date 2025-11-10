@@ -156,7 +156,13 @@ let client: ReturnType<typeof createClient> | null = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- instancia dinámica mock o drizzle
 let dbInstance: any;
 
-if (typeof window === 'undefined') {
+// Detectar entorno de servidor/test: process.env existe Y (window no existe O estamos en test)
+// En tests, window puede existir por jsdom pero queremos usar DB real
+const isServerOrTest =
+	typeof process !== 'undefined' &&
+	(typeof window === 'undefined' || process.env.NODE_ENV === 'test' || typeof (globalThis as any).Bun !== 'undefined');
+
+if (isServerOrTest) {
 	client = createClient({
 		url: databaseUrl,
 	});
