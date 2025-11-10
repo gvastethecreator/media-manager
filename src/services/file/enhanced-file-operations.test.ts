@@ -3,7 +3,7 @@
  * @description Basic test to verify the enhanced file operations service structure
  */
 
-import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it,vi } from 'vitest';
 import type { AnyEntityWithStats } from '@/types/entities';
 
 // Mock dependencies

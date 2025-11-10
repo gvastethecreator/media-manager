@@ -3,7 +3,7 @@
  * @description Tests básicos para el sistema de atajos de teclado
  */
 
-import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it,vi } from 'vitest';
 import { KeyboardShortcutManager } from '../keyboard-shortcut-manager';
 
 describe('KeyboardShortcutManager', () => {

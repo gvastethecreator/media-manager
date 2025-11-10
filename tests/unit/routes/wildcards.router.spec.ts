@@ -1,6 +1,6 @@
 import express from 'express';
 import request from 'supertest';
-import { afterEach, describe, expect, it } from 'bun:test';
+import { afterEach, describe, expect, it } from 'vitest';
 import wildcardRouter from '@/server/routes/wildcards';
 import wildcardService from '@/services/wildcard/wildcard.service';
 

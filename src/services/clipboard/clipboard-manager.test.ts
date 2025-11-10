@@ -4,7 +4,7 @@
  * @description Comprehensive tests for ClipboardManager functionality
  */
 
-import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it,vi } from 'vitest';
 import type { AnyEntityWithStats } from '../../types/entities';
 import { FileType } from '../../types/entities/file';
 import { ClipboardFormat, ClipboardManager } from './clipboard-manager';

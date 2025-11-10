@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'bun:test';
+import { describe, expect, it } from 'vitest';
 import { sortMediaItems, sortSingleCriterion } from '@/transformers/file/sort';
 
 interface Item {

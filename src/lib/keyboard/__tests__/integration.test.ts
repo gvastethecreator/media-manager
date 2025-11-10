@@ -3,7 +3,7 @@
  * @description Test de integración básico para verificar que el sistema funciona
  */
 
-import { beforeEach, describe, expect, it, mock } from 'bun:test';
+import { beforeEach, describe, expect, it,vi } from 'vitest';
 import { KeyboardShortcutManager } from '../keyboard-shortcut-manager';
 
 describe('Keyboard Shortcuts Integration', () => {
