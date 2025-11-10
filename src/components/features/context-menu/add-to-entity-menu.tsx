@@ -33,7 +33,6 @@ import { useNoteStore } from '@/store/entities/note';
 import { usePlaceStore } from '@/store/entities/place';
 import { usePromptStore } from '@/store/entities/prompt';
 import { useTagStore } from '@/store/entities/tag';
-import { useWildcardStore } from '@/store/entities/wildcard';
 import type { AnyEntityWithStats } from '@/types/entities';
 
 interface AddToEntityMenuProps {
