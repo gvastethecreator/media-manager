@@ -16,7 +16,7 @@ export interface FieldConfig {
 	/** Etiqueta visible para el usuario */
 	label: string;
 	/** Tipo de campo para renderización */
-	type: 'text' | 'textarea' | 'number' | 'select' | 'color' | 'emoji' | 'checkbox' | 'date';
+	type: 'text' | 'textarea' | 'number' | 'select' | 'color' | 'emoji' | 'checkbox' | 'date' | 'featuredImage';
 	/** Placeholder opcional */
 	placeholder?: string;
 	/** Opciones para campos select */
@@ -158,6 +158,7 @@ export const CHARACTER_PRESETS: EntityPresetConfig = {
 
 		// Campos adicionales
 		{ name: 'notes', label: 'Notas', type: 'textarea', placeholder: 'Notas adicionales', max: 1000 },
+		{ name: 'featuredImage', label: 'Imagen Destacada', type: 'featuredImage' },
 		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
 	],
 	presets: [
@@ -240,6 +241,7 @@ export const CHARACTER_PRESETS: EntityPresetConfig = {
 				'skills',
 				'equipment',
 				'notes',
+				'featuredImage',
 				'isFavorite',
 			],
 		},
@@ -289,6 +291,7 @@ export const PLACE_PRESETS: EntityPresetConfig = {
 		},
 		{ name: 'dangers', label: 'Peligros', type: 'textarea', placeholder: 'Peligros o amenazas', max: 500 },
 		{ name: 'notes', label: 'Notas', type: 'textarea', placeholder: 'Notas adicionales', max: 1000 },
+		{ name: 'featuredImage', label: 'Imagen Destacada', type: 'featuredImage' },
 		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
 	],
 	presets: [
@@ -344,6 +347,7 @@ export const PLACE_PRESETS: EntityPresetConfig = {
 				'landmarks',
 				'dangers',
 				'notes',
+				'featuredImage',
 				'isFavorite',
 			],
 		},
@@ -389,6 +393,7 @@ export const CONCEPT_PRESETS: EntityPresetConfig = {
 			max: 300,
 		},
 		{ name: 'notes', label: 'Notas', type: 'textarea', placeholder: 'Notas adicionales', max: 1000 },
+		{ name: 'featuredImage', label: 'Imagen Destacada', type: 'featuredImage' },
 		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
 	],
 	presets: [
@@ -429,6 +434,7 @@ export const CONCEPT_PRESETS: EntityPresetConfig = {
 				'examples',
 				'relatedConcepts',
 				'notes',
+				'featuredImage',
 				'isFavorite',
 			],
 		},
@@ -469,6 +475,7 @@ export const WORLD_ITEM_PRESETS: EntityPresetConfig = {
 		{ name: 'origin', label: 'Origen', type: 'textarea', placeholder: 'Historia del origen', max: 500 },
 		{ name: 'effects', label: 'Efectos', type: 'textarea', placeholder: 'Efectos o poderes', max: 500 },
 		{ name: 'notes', label: 'Notas', type: 'textarea', placeholder: 'Notas adicionales', max: 1000 },
+		{ name: 'featuredImage', label: 'Imagen Destacada', type: 'featuredImage' },
 		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
 	],
 	presets: [
@@ -522,6 +529,7 @@ export const WORLD_ITEM_PRESETS: EntityPresetConfig = {
 				'origin',
 				'effects',
 				'notes',
+				'featuredImage',
 				'isFavorite',
 			],
 		},
@@ -538,6 +546,7 @@ export const TAG_PRESETS: EntityPresetConfig = {
 		{ name: 'emoji', label: 'Emoji', type: 'emoji', defaultValue: '🏷️' },
 		{ name: 'color', label: 'Color', type: 'color', defaultValue: '#06b6d4' },
 		{ name: 'description', label: 'Descripción', type: 'textarea', placeholder: 'Descripción de la etiqueta', max: 200 },
+		{ name: 'featuredImage', label: 'Imagen Destacada', type: 'featuredImage' },
 		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
 	],
 	presets: [
@@ -561,7 +570,7 @@ export const TAG_PRESETS: EntityPresetConfig = {
 			name: 'Completo',
 			description: 'Etiqueta completa',
 			icon: '📋',
-			fields: ['name', 'emoji', 'color', 'description', 'isFavorite'],
+			fields: ['name', 'emoji', 'color', 'description', 'featuredImage', 'isFavorite'],
 		},
 	],
 };
@@ -576,6 +585,7 @@ export const COLLECTION_PRESETS: EntityPresetConfig = {
 		{ name: 'emoji', label: 'Emoji', type: 'emoji', defaultValue: '📦' },
 		{ name: 'color', label: 'Color', type: 'color', defaultValue: '#8b5cf6' },
 		{ name: 'description', label: 'Descripción', type: 'textarea', placeholder: 'Descripción de la colección', max: 300 },
+		{ name: 'featuredImage', label: 'Imagen Destacada', type: 'featuredImage' },
 		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
 	],
 	presets: [
@@ -599,7 +609,7 @@ export const COLLECTION_PRESETS: EntityPresetConfig = {
 			name: 'Completo',
 			description: 'Colección completa',
 			icon: '📋',
-			fields: ['name', 'emoji', 'color', 'description', 'isFavorite'],
+			fields: ['name', 'emoji', 'color', 'description', 'featuredImage', 'isFavorite'],
 		},
 	],
 };
@@ -618,6 +628,7 @@ export const PROMPT_PRESETS: EntityPresetConfig = {
 		{ name: 'category', label: 'Categoría', type: 'text', placeholder: 'Ej: Imagen, Texto, Código' },
 		{ name: 'model', label: 'Modelo', type: 'text', placeholder: 'Ej: GPT-4, DALL-E, Stable Diffusion' },
 		{ name: 'parameters', label: 'Parámetros', type: 'textarea', placeholder: 'Parámetros en formato JSON', max: 500 },
+		{ name: 'featuredImage', label: 'Imagen Destacada', type: 'featuredImage' },
 		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
 	],
 	presets: [
@@ -641,7 +652,7 @@ export const PROMPT_PRESETS: EntityPresetConfig = {
 			name: 'Completo',
 			description: 'Prompt con parámetros',
 			icon: '📋',
-			fields: ['name', 'emoji', 'color', 'description', 'content', 'category', 'model', 'parameters', 'isFavorite'],
+			fields: ['name', 'emoji', 'color', 'description', 'content', 'category', 'model', 'parameters', 'featuredImage', 'isFavorite'],
 		},
 	],
 };
@@ -657,6 +668,7 @@ export const NOTE_PRESETS: EntityPresetConfig = {
 		{ name: 'color', label: 'Color', type: 'color', defaultValue: '#eab308' },
 		{ name: 'content', label: 'Contenido', type: 'textarea', placeholder: 'Contenido de la nota', max: 5000 },
 		{ name: 'category', label: 'Categoría', type: 'text', placeholder: 'Ej: Personal, Trabajo, Ideas' },
+		{ name: 'featuredImage', label: 'Imagen Destacada', type: 'featuredImage' },
 		{ name: 'isFavorite', label: 'Marcar como favorito', type: 'checkbox', defaultValue: false },
 	],
 	presets: [
@@ -680,7 +692,7 @@ export const NOTE_PRESETS: EntityPresetConfig = {
 			name: 'Completo',
 			description: 'Nota completa',
 			icon: '📋',
-			fields: ['name', 'emoji', 'color', 'content', 'category', 'isFavorite'],
+			fields: ['name', 'emoji', 'color', 'content', 'category', 'featuredImage', 'isFavorite'],
 		},
 	],
 };
