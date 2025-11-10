@@ -3,12 +3,12 @@
  * @description Tests para verificar la funcionalidad del hook useListViewConfig
  */
 
-import { describe, expect, it,vi } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useListViewConfig } from '@/hooks/use-list-view-config';
 
 // Mock de dependencias
-mock.module('@/store/settings.store', () => ({
+vi.mock('@/store/settings.store', () => ({
 	useSettingsStore: () => ({
 		settings: {
 			fileViews: {
@@ -43,7 +43,7 @@ mock.module('@/store/settings.store', () => ({
 				},
 			},
 		},
-		updateSettings: mock(),
+		updateSettings: vi.fn(),
 	}),
 }));
 

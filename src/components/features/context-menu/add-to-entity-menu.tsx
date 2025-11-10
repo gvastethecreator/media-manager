@@ -57,7 +57,7 @@ interface AddToEntityMenuProps {
  */
 export function AddToEntityMenu({ item, children, onAddToEntity, onCreateNewEntity }: AddToEntityMenuProps) {
 	// Obtener entidades de todos los stores
-	const { selectedIds: characterIds, characters } = useCharacterStore((s) => ({ selectedIds: s.selectedIds, characters: s.characters }));
+	const { characters } = useCharacterStore((s) => ({ characters: s.characters }));
 	const { places } = usePlaceStore((s) => ({ places: s.places }));
 	const { concepts } = useConceptStore((s) => ({ concepts: s.concepts }));
 	const { getCollections } = useCollectionStore();

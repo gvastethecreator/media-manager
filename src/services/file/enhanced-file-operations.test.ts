@@ -7,32 +7,32 @@ import { beforeEach, describe, expect, it,vi } from 'vitest';
 import type { AnyEntityWithStats } from '@/types/entities';
 
 // Mock dependencies
-mock.module('@/lib/logger/server-logger', () => ({
+vi.mock('@/lib/logger/server-logger', () => ({
 	serverLogger: {
 		withContext: () => ({
-			info: mock(),
-			error: mock(),
+			info: vi.fn(),
+			error: vi.fn(),
 		}),
 	},
 }));
 
-mock.module('@/services/toast', () => ({
+vi.mock('@/services/toast', () => ({
 	toastService: {
-		success: mock(),
-		error: mock(),
-		info: mock(),
+		success: vi.fn(),
+		error: vi.fn(),
+		info: vi.fn(),
 	},
 }));
 
-mock.module('./file.service', () => ({
-	copyFile: mock(),
-	moveFile: mock(),
-	deleteFile: mock(),
-	renameFile: mock(),
-	getFileInfo: mock(),
+vi.mock('./file.service', () => ({
+	copyFile: vi.fn(),
+	moveFile: vi.fn(),
+	deleteFile: vi.fn(),
+	renameFile: vi.fn(),
+	getFileInfo: vi.fn(),
 }));
 
-mock.module('@/types/entities/file', () => ({
+vi.mock('@/types/entities/file', () => ({
 	FileErrorCode: {
 		OPERATION_FAILED: 'OPERATION_FAILED',
 	},
@@ -65,7 +65,7 @@ describe('Enhanced File Operations Service', () => {
 
 	beforeEach(async () => {
 		// Reset mocks
-		mock.restore();
+		vi.clearAllMocks();
 
 		// Import the service after mocks are set up
 		const module = await import('./enhanced-file-operations.service');

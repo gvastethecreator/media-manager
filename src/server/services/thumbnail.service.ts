@@ -281,7 +281,7 @@ export async function getThumbnail(
 			} else {
 				// 4. Generar nuevo thumbnail con prioridad según contexto
 				const priority = getPriority(context);
-				const newPromise: Promise<LibThumbResult> = queue.add(
+				const newPromise = queue.add(
 					async (): Promise<LibThumbResult> => {
 						thumbLogger.debug(`🎯 Generando thumbnail: ${id} (prioridad: ${priority})`);
 						const result = await generateThumbnail(image.path, { quality: validQuality });
@@ -306,7 +306,7 @@ export async function getThumbnail(
 					{
 						priority,
 					}
-				);
+				) as Promise<LibThumbResult>;
 				inflight.set(memKey, newPromise);
 				thumbnail = await newPromise;
 				inflight.delete(memKey);

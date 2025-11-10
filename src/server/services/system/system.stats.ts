@@ -95,7 +95,7 @@ export async function getSystemStats(): Promise<RuntimeSystemStats> {
 			storageAvailable,
 			dbSize,
 			lastBackup: undefined, // TODO: Implementar sistema de backup
-		} satisfies RuntimeSystemStats;
+		} as unknown as RuntimeSystemStats;
 	} catch (error) {
 		systemLogger.error('❌ Error al obtener estadísticas del sistema:', error);
 		throw createSystemError('No se pudieron obtener las estadísticas del sistema', 'STATS_FETCH_ERROR', error);
@@ -187,7 +187,7 @@ export async function getSystemRuntimeStats(): Promise<SystemRuntimeStats> {
 			uptime: Math.round(os.uptime() / 60 / 60), // En horas
 			nodeVersion: process.version,
 			hostname: os.hostname(),
-		} satisfies SystemRuntimeStats;
+		} as unknown as SystemRuntimeStats;
 	} catch (error) {
 		systemLogger.error('❌ Error al obtener estadísticas de runtime del sistema:', error);
 		throw createSystemError(

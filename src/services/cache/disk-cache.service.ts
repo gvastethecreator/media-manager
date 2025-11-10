@@ -13,7 +13,7 @@
 import { createHash } from 'crypto';
 import { existsSync, promises as fs } from 'fs';
 import { join } from 'path';
-import xxh64 from 'xxhash-wasm';
+// import xxh64 from 'xxhash-wasm'; // TODO: Install xxhash-wasm package
 import sharp from 'sharp';
 import { thumbsConfig, type ThumbsConfig } from '@/config/thumbs';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -46,17 +46,11 @@ export interface CacheStats {
  * 🔑 Genera hash xxhash64 para contenido
  */
 export async function generateContentHash(input: string | Buffer): Promise<string> {
-	try {
-		const xxhash = await xxh64();
-		const inputData = typeof input === 'string' ? input : input.toString('utf8');
-		return xxhash.h64(inputData).toString(16);
-	} catch (error) {
-		// Fallback a MD5 si xxhash falla
-		diskCacheLogger.warn('xxhash falló, usando MD5 como fallback:', error);
-		const md5 = createHash('md5');
-		md5.update(input);
-		return md5.digest('hex');
-	}
+	// TODO: Replace with xxhash64 when package is installed
+	// Using MD5 as temporary solution
+	const md5 = createHash('md5');
+	md5.update(input);
+	return md5.digest('hex');
 }
 
 /**

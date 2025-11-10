@@ -24,7 +24,7 @@ router.post('/test', (async (req, res) => {
 			return {
 				extension: ext,
 				entityType,
-				isSupported: entityType !== 'UNKNOWN',
+				isSupported: entityType !== 'unknown',
 			};
 		});
 

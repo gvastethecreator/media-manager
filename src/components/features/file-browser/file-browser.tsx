@@ -149,7 +149,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 		totalCount: effectiveTotalCount,
 		pageSize: PAGE_SIZE,
 		isPaginatedView,
-		filterId,
+		filterId: filterId ?? undefined,
 		searchQuery,
 		sortVersion,
 	});
@@ -170,7 +170,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 	} = useBrowserStates({
 		isLoading,
 		isRefreshing,
-		error,
+		error: error ? new Error(error) : null,
 		items: nonSyntheticItems,
 		shouldShowPreloader,
 	});

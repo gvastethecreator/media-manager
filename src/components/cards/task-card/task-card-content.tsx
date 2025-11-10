@@ -71,7 +71,7 @@ export function TaskCardContent({
 					<Calendar className="h-3 w-3" />
 					<span>
 						{isOverdue ? '¡Vencida!' : `Vence: ${formatDate(dueDate)}`}
-						{daysUntilDue !== undefined && !isOverdue && daysUntilDue <= 3 && ` (${daysUntilDue}d)`}
+						{daysUntilDue !== undefined && daysUntilDue !== null && !isOverdue && daysUntilDue <= 3 && ` (${daysUntilDue}d)`}
 					</span>
 					{isOverdue && <AlertCircle className="ml-auto h-3 w-3" />}
 				</div>

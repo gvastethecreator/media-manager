@@ -2,7 +2,7 @@
  * Tests for PresetForm component
  */
 
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { render } from '@/test/test-utils';
 import { PresetForm } from '../preset-form';

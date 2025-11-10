@@ -367,9 +367,7 @@ export class FileSyncService {
 
 			// Procesar archivos nuevos con extracción de metadata completa
 			const filePaths = result.newFiles.map((f) => f.path);
-			const processingStats = await mapper.processFiles(filePaths, folderId, {
-				onProgress
-			});
+			const processingStats = await mapper.processFiles(filePaths, folderId);
 
 			syncLogger.info('✅ Procesamiento de archivos nuevos completado:', {
 				total: processingStats.totalFiles,

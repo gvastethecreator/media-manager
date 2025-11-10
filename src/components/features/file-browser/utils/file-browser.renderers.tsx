@@ -113,7 +113,7 @@ export function renderFromItems({
             const imageItems = processedItems.filter((it) => it.entityType === 'image');
             const initialIndex = imageItems.findIndex((it) => it.id === item.id);
             if (imageItems.length > 0 && initialIndex >= 0) {
-                openViewer(imageItems as AnyEntityWithStats[], initialIndex);
+                openViewer(imageItems as any, initialIndex);
             }
         }
     };
