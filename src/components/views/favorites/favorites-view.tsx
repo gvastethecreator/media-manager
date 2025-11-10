@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { useCreateFavorite, useFavorites } from '@/lib/api/favorites';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -13,6 +14,7 @@ export function FavoritesView({ isVisible }: ViewProps) {
 	const selectedIds = useFavoriteStore((state) => state.selectedIds) || [];
 	const selectFavorite = useFavoriteStore((state) => state.selectFavorite);
 	const deselectFavorite = useFavoriteStore((state) => state.deselectFavorite);
+	const { handleItemClick: updateSelection } = useEntitySelection();
 
 	// Obtener el primer favorito seleccionado como selectedFavoriteId
 	const selectedFavoriteId = selectedIds.length > 0 ? selectedIds[0] : null;
@@ -51,9 +53,16 @@ export function FavoritesView({ isVisible }: ViewProps) {
 		(favoriteId: string) => {
 			viewLogger.info('⭐ Seleccionando favorite', { favoriteId });
 			setSelectedFavoriteId(favoriteId);
+
+			// Actualizar panel de detalles con el favorito seleccionado
+			const favorite = favorites.find((f) => f.id === favoriteId);
+			if (favorite) {
+				updateSelection(favorite as any);
+			}
+
 			clientEvents.emit('favorite:selected', { favoriteId });
 		},
-		[setSelectedFavoriteId]
+		[setSelectedFavoriteId, favorites, updateSelection]
 	);
 
 	const handleCreateFavorite = useCallback(() => {

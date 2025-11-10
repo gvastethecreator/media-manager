@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { useCreateAlbum, useDeleteAlbum, useUpdateAlbum } from '@/lib/api/albums';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAlbumStore } from '@/store/entities/album';
@@ -17,6 +18,7 @@ export function AlbumsView(_props: ViewProps) {
 	const { mutate: createAlbum } = useCreateAlbum();
 	const { mutate: updateAlbum } = useUpdateAlbum();
 	const { mutate: deleteAlbum } = useDeleteAlbum();
+	const { handleItemClick: updateSelection } = useEntitySelection();
 
 	const [showForm, setShowForm] = useState(false);
 	const [editingAlbum, setEditingAlbum] = useState<AlbumWithStats | null>(null);
@@ -30,10 +32,17 @@ export function AlbumsView(_props: ViewProps) {
 		}
 	}, [loadAlbums, albumsRecord]);
 
-	const handleAlbumClick = useCallback((album: AlbumWithStats) => {
-		viewLogger.info('🖱️ Click en álbum:', album.name);
-		// TODO: Lógica de navegación o apertura de visor aquí
-	}, []);
+	const handleAlbumClick = useCallback(
+		(album: AlbumWithStats) => {
+			viewLogger.info('🖱️ Click en álbum:', album.name);
+
+			// Actualizar panel de detalles con el álbum seleccionado
+			updateSelection(album as any);
+
+			// TODO: Lógica de navegación o apertura de visor aquí
+		},
+		[updateSelection]
+	);
 
 	const handleEditAlbum = useCallback((album: AlbumWithStats) => {
 		setEditingAlbum(album);

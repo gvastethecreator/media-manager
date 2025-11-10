@@ -10,6 +10,7 @@ import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/components/ui/use-toast';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { useCreatePlace, usePlaces } from '@/lib/api/places';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -21,6 +22,7 @@ const viewLogger = clientLogger.withContext('PlacesView');
 export function PlacesView({ isVisible }: ViewProps) {
 	const { selectedPlaceId, selectPlace } = usePlaceStore();
 	const { mutate: createPlace } = useCreatePlace();
+	const { handleItemClick: updateSelection } = useEntitySelection();
 
 	const [localSearch, setLocalSearch] = useState('');
 	const [showForm, setShowForm] = useState(false);
@@ -45,9 +47,16 @@ export function PlacesView({ isVisible }: ViewProps) {
 		(placeId: string) => {
 			viewLogger.info('📍 Seleccionando place', { placeId });
 			selectPlace(placeId);
+
+			// Actualizar panel de detalles con el lugar seleccionado
+			const place = places.find((p) => p.id === placeId);
+			if (place) {
+				updateSelection(place as any);
+			}
+
 			clientEvents.emit('place:selected', { placeId });
 		},
-		[selectPlace]
+		[selectPlace, places, updateSelection]
 	);
 
 	const { toast } = useToast();

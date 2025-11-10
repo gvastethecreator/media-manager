@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { useCharacters, useCreateCharacter } from '@/lib/api/characters';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -12,6 +13,7 @@ const viewLogger = clientLogger.withContext('CharactersView');
 export function CharactersView(_props: ViewProps) {
 	const { selectedCharacterId, selectCharacter } = useCharacterStore();
 	const { mutate: createCharacter } = useCreateCharacter();
+	const { handleItemClick: updateSelection } = useEntitySelection();
 
 	const [localSearch, setLocalSearch] = useState('');
 	const [showForm, setShowForm] = useState(false);
@@ -36,9 +38,16 @@ export function CharactersView(_props: ViewProps) {
 		(characterId: string) => {
 			viewLogger.info('🎭 Seleccionando character', { characterId });
 			selectCharacter(characterId);
+
+			// Actualizar panel de detalles con el personaje seleccionado
+			const character = characters.find((c) => c.id === characterId);
+			if (character) {
+				updateSelection(character as any);
+			}
+
 			clientEvents.emit('character:selected', { characterId });
 		},
-		[selectCharacter]
+		[selectCharacter, characters, updateSelection]
 	);
 
 	const handleCreateCharacter = useCallback(() => {

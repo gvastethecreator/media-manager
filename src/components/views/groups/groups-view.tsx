@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useEntitySelection } from '@/hooks/use-entity-selection';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useGroupStore } from '@/store/entities/group';
@@ -11,6 +12,7 @@ const viewLogger = clientLogger.withContext('GroupsView');
 
 export function GroupsView(_props: ViewProps) {
 	const navigate = useNavigate();
+	const { handleItemClick: updateSelection } = useEntitySelection();
 
 	// Leer el estado y las acciones directamente del store de Zustand
 	const { groups, isLoading, error, fetchGroups, addGroup } = useGroupStore((state) => ({
@@ -37,12 +39,16 @@ export function GroupsView(_props: ViewProps) {
 	const handleGroupClick = useCallback(
 		(group: GroupWithStats) => {
 			viewLogger.info('🖱️ Click en grupo:', group.name);
+
+			// Actualizar panel de detalles con el grupo seleccionado
+			updateSelection(group as any);
+
 			// Navegar a la vista de detalle del grupo usando React Router
 			navigate('/group-content');
 			// Emitir evento para otros componentes que puedan necesitar este dato
 			clientEvents.emit('group:selected', { groupId: group.id });
 		},
-		[navigate]
+		[navigate, updateSelection]
 	);
 
 	const handleCreateGroup = useCallback(() => {
