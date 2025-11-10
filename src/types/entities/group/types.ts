@@ -36,6 +36,10 @@ export interface GroupUpdateInput {
 	filters?: any;
 }
 
+// Alias para compatibilidad con servicios existentes
+export type CreateGroupInput = GroupCreateInput;
+export type UpdateGroupInput = GroupUpdateInput;
+
 export type GroupSortKey = 'name' | 'category' | 'createdAt';
 
 export interface GroupFilters {
