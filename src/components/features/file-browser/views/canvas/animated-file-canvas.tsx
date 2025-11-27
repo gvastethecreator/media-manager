@@ -2,7 +2,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useAddTags, useAddToCollection, useToggleFavorite } from '@/lib/api/files';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useSelectionStore } from '@/store/selection.store';
 import type { MediaItem } from '../../components/media-thumbnail';
 import { ExtendedContextMenu, type ExtendedContextMenuAction } from '../../context-menu/extended-context-menu';
 import type { ClickModifiers } from '../../types/file-browser.types';
@@ -543,7 +543,7 @@ export function AnimatedFileCanvas({
 					for (const it of selected) {
 						try {
 							await toggleFavorite.mutateAsync(it.id);
-						} catch {}
+						} catch { }
 					}
 				})();
 				break;
@@ -555,7 +555,7 @@ export function AnimatedFileCanvas({
 					for (const it of selected) {
 						try {
 							await addToCollection.mutateAsync({ fileId: it.id, collectionId: targetId });
-						} catch {}
+						} catch { }
 					}
 				})();
 				break;
@@ -567,7 +567,7 @@ export function AnimatedFileCanvas({
 					for (const it of selected) {
 						try {
 							await addTags.mutateAsync({ fileId: it.id, tags: [targetId] });
-						} catch {}
+						} catch { }
 					}
 				})();
 				break;

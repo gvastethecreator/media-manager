@@ -41,6 +41,7 @@ const MemoizedHeaderButton = memo(function HeaderButton({
 		<Tooltip>
 			<TooltipTrigger asChild>
 				<Button
+					aria-label={tooltipTitle}
 					className="h-7 w-7 cursor-pointer rounded-md bg-transparent text-muted-foreground transition-all hover:bg-secondary/40 hover:text-foreground"
 					onClick={onClick}
 					size="icon"
@@ -212,6 +213,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
 									<Button
+										aria-label="Cambiar tema"
 										className="h-7 w-7 cursor-pointer rounded-md bg-transparent text-muted-foreground transition-all hover:bg-secondary/40 hover:text-foreground"
 										size="icon"
 										variant="ghost"

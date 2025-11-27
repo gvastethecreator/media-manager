@@ -33,7 +33,7 @@ import {
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
-import { formatDuration } from '@/lib/utils/format';
+import { formatDuration } from '@/lib/utils/format.utils';
 import {
 	type BatchOperation,
 	type BatchOperationStatus,

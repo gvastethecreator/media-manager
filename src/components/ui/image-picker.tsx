@@ -47,7 +47,7 @@ export function ImagePicker({
 				<div className="relative aspect-video w-full overflow-hidden rounded-lg bg-muted">
 					<img alt="Selected" className="h-full w-full object-cover" src={selectedImage} />
 					{!disabled && (
-						<Button className="absolute top-2 right-2" onClick={handleRemoveImage} size="icon" variant="destructive">
+						<Button aria-label="Eliminar imagen" className="absolute top-2 right-2" onClick={handleRemoveImage} size="icon" variant="destructive">
 							<X className="h-4 w-4" />
 						</Button>
 					)}

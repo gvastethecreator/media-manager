@@ -66,19 +66,19 @@ export function ProfileControls({ className }: ProfileControlsProps) {
 				{/* Modo de vista */}
 				<div className="flex items-center rounded-lg border p-1">
 					<Button
+						aria-label="Vista en grid"
 						className={viewConfig.mode === 'grid' ? 'bg-muted' : ''}
 						onClick={() => setViewMode('grid')}
 						size="icon"
-						title="Vista en grid"
 						variant="ghost"
 					>
 						<LayoutGrid className="h-4 w-4" />
 					</Button>
 					<Button
+						aria-label="Vista en lista"
 						className={viewConfig.mode === 'list' ? 'bg-muted' : ''}
 						onClick={() => setViewMode('list')}
 						size="icon"
-						title="Vista en lista"
 						variant="ghost"
 					>
 						<List className="h-4 w-4" />
@@ -89,28 +89,28 @@ export function ProfileControls({ className }: ProfileControlsProps) {
 				{viewConfig.mode === 'grid' && (
 					<div className="flex items-center rounded-lg border p-1">
 						<Button
+							aria-label="2 columnas"
 							className={viewConfig.gridColumns === 2 ? 'bg-muted' : ''}
 							onClick={() => setGridColumns(2)}
 							size="icon"
-							title="2 columnas"
 							variant="ghost"
 						>
 							<Grid2x2 className="h-4 w-4" />
 						</Button>
 						<Button
+							aria-label="3 columnas"
 							className={viewConfig.gridColumns === 3 ? 'bg-muted' : ''}
 							onClick={() => setGridColumns(3)}
 							size="icon"
-							title="3 columnas"
 							variant="ghost"
 						>
 							<Grid3x3 className="h-4 w-4" />
 						</Button>
 						<Button
+							aria-label="4 columnas"
 							className={viewConfig.gridColumns === 4 ? 'bg-muted' : ''}
 							onClick={() => setGridColumns(4)}
 							size="icon"
-							title="4 columnas"
 							variant="ghost"
 						>
 							<Layers className="h-4 w-4" />

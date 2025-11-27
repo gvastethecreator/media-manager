@@ -13,7 +13,7 @@ import { getEntityTypeColor, getEntityTypeIcon } from '@/config/entity-type-conf
 import { useAddImageToAlbum } from '@/lib/api/albums';
 import { useAddImageToCollection } from '@/lib/api/collections';
 import { useAddTags } from '@/lib/api/files';
-import { useEntityCatalogStore } from '@/stores/entity-catalog-store';
+import { useEntityCatalogStore } from '@/store/entity-catalog-store';
 import { EntityStatsType } from '@/types/file-browser/entity-stats';
 
 type MinimalItem = { id: string; label: string };

@@ -6,7 +6,7 @@
 import React from 'react';
 import { RouterProvider } from 'react-router-dom';
 import { useNavigationRefresh } from '@/hooks/use-navigation-refresh';
-import { useEntityCatalogStore } from '@/stores/entity-catalog-store';
+import { useEntityCatalogStore } from '@/store/entity-catalog-store';
 import { ErrorBoundary } from './components/core/error-boundary';
 import { ThemeProvider } from './components/ui/theme-provider';
 import { ReactScanProvider } from './lib/dev/react-scan';
