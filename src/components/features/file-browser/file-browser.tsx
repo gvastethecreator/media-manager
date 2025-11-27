@@ -21,7 +21,7 @@ import { useImageStore } from '@/store/entities/image';
 import { useJsonFileStore } from '@/store/entities/json-file/json-file.store';
 import { useVideoStore } from '@/store/entities/video';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useSelectionStore } from '@/store/selection.store';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { FileBrowserPreloader } from './components/file-browser-preloader';

@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { motion } from '@/components/ui/motion-shim';
 import { useEntityTypeConfig } from '@/hooks/use-entity-type-config';
 import { cn } from '@/lib/utils';
+import { formatFileSize } from '@/lib/utils/format.utils';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { getEntityStatsType } from '@/types/entity-guards';
 import { EntityStatsType } from '@/types/file-browser/entity-stats';
@@ -243,18 +244,3 @@ export const EntityTypeHeader = memo<{
 });
 
 EntityTypeHeader.displayName = 'EntityTypeHeader';
-
-/**
- * Utilidad para formatear tamaños de archivo
- */
-function formatFileSize(bytes: number): string {
-	if (bytes === 0) {
-		return '0 B';
-	}
-
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
-}

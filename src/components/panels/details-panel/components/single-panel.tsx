@@ -116,7 +116,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 					<div className="background-secondary flex items-center gap-1">
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button disabled={effectiveLoading} onClick={() => refetch()} size="icon" variant="ghost">
+								<Button aria-label="Extraer metadatos" disabled={effectiveLoading} onClick={() => refetch()} size="icon" variant="ghost">
 									<RefreshCw className={cn('h-4 w-4', effectiveLoading && 'animate-spin')} />
 								</Button>
 							</TooltipTrigger>
@@ -140,7 +140,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button className="" size="icon" variant="ghost">
+								<Button aria-label="Editar" className="" size="icon" variant="ghost">
 									<Edit className={cn('h-4 w-4')} />
 								</Button>
 							</TooltipTrigger>
@@ -148,7 +148,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button className="" size="icon" variant="ghost">
+								<Button aria-label="Abrir en carpeta" className="" size="icon" variant="ghost">
 									<FolderOpen className={cn('h-4 w-4')} />
 								</Button>
 							</TooltipTrigger>
@@ -156,7 +156,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button className="" size="icon" variant="ghost">
+								<Button aria-label="Copiar imagen" className="" size="icon" variant="ghost">
 									<Copy className={cn('h-4 w-4')} />
 								</Button>
 							</TooltipTrigger>
@@ -164,7 +164,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button className="" size="icon" variant="ghost">
+								<Button aria-label="Descargar" className="" size="icon" variant="ghost">
 									<Download className={cn('h-4 w-4')} />
 								</Button>
 							</TooltipTrigger>
@@ -172,7 +172,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button className="" size="icon" variant="ghost">
+								<Button aria-label="Analizar" className="" size="icon" variant="ghost">
 									<ScanEye className={cn('h-4 w-4')} />
 								</Button>
 							</TooltipTrigger>
@@ -180,7 +180,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button className="" size="icon" variant="ghost">
+								<Button aria-label="Marcar" className="" size="icon" variant="ghost">
 									<Crosshair className={cn('h-4 w-4')} />
 								</Button>
 							</TooltipTrigger>

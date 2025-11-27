@@ -82,6 +82,7 @@ export const NormalModeControls = memo(function NormalModeControls({
 			{/* Botón de edición con hover suave */}
 			<SimpleTooltip content="Editar carpeta">
 				<Button
+					aria-label="Editar carpeta"
 					className={cn(
 						'h-6 w-6 transition-all duration-200 ease-out',
 						'hover:scale-110 hover:bg-accent hover:text-accent-foreground',
@@ -100,6 +101,7 @@ export const NormalModeControls = memo(function NormalModeControls({
 			{hasChildren && onToggleExpanded && (
 				<SimpleTooltip content={isExpanded ? 'Contraer subcarpetas' : 'Expandir subcarpetas'}>
 					<Button
+						aria-label={isExpanded ? 'Contraer subcarpetas' : 'Expandir subcarpetas'}
 						className={cn(
 							'h-6 w-6 transition-all duration-200 ease-out',
 							'hover:scale-110 hover:bg-accent hover:text-accent-foreground',
@@ -119,6 +121,7 @@ export const NormalModeControls = memo(function NormalModeControls({
 			{/* Botón de reindexar con spin animation */}
 			<SimpleTooltip content={isReindexing ? 'Reindexando...' : 'Reindexar carpeta'}>
 				<Button
+					aria-label={isReindexing ? 'Reindexando carpeta' : 'Reindexar carpeta'}
 					className={cn(
 						'h-6 w-6 transition-all duration-200 ease-out',
 						'hover:scale-110 hover:bg-accent hover:text-accent-foreground',
@@ -143,6 +146,7 @@ export const NormalModeControls = memo(function NormalModeControls({
 			{/* Botón eliminar con estados visuales mejorados */}
 			<SimpleTooltip content={selectedFolder === folder.id ? 'Confirmar eliminación' : 'Eliminar carpeta'}>
 				<Button
+					aria-label={selectedFolder === folder.id ? 'Confirmar eliminación de carpeta' : 'Eliminar carpeta'}
 					className={cn(
 						'h-6 w-6 transition-all duration-200 ease-out',
 						'focus:outline-none focus:ring-2',
