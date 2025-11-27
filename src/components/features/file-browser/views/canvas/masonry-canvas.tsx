@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebounce, useRaf } from '@/hooks/useThrottle';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useSelectionStore } from '@/store/selection.store';
 import type { MediaItem } from '../../components/media-thumbnail';
 import type { ClickModifiers } from '../../types/file-browser.types';
 import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';

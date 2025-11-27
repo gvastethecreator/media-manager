@@ -40,7 +40,7 @@ import { Separator } from '@/components/ui/separator';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import { deleteFile, getFileAsDataUrl } from '@/services/file/file.service';
-import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useSelectionStore } from '@/store/selection.store';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 
 export interface FileBrowserToolbarProps {
