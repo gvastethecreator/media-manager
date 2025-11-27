@@ -1,7 +1,8 @@
 import { RefreshCw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { useSelectionStore } from '@/store/ui/selection.slice';
+import { formatFileSize } from '@/lib/utils/format.utils';
+import { useSelectionStore } from '@/store/selection.store';
 import type { MediaItem } from './media-thumbnail';
 
 export interface StatusBarProps {
@@ -15,17 +16,6 @@ export interface StatusBarProps {
 	onPrevPage?: () => void;
 	onNextPage?: () => void;
 	shownCount?: number; // cantidad de items mostrados realmente (paginados)
-}
-
-// Función utilitaria para formatear tamaños de archivo
-function formatFileSize(bytes: number): string {
-	if (bytes === 0) return '0 B';
-
-	const units = ['B', 'KB', 'MB', 'GB', 'TB'];
-	const k = 1024;
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-
-	return `${(bytes / k ** i).toFixed(1)} ${units[i]}`;
 }
 
 // Función utilitaria para obtener el tamaño de un item

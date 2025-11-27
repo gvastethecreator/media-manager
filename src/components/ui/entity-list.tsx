@@ -447,6 +447,7 @@ export function EntityList({
 
 						{/* Botón para mostrar filtros adicionales */}
 						<Button
+							aria-label="Mostrar filtros"
 							onClick={() => setShowFiltersPanel(!showFiltersPanel)}
 							size="icon"
 							variant={showFiltersPanel ? 'default' : 'outline'}
@@ -537,6 +538,7 @@ export function EntityList({
 			{pagination && totalPages > 1 && (
 				<div className="mt-6 flex items-center justify-center gap-2">
 					<Button
+						aria-label="Página anterior"
 						disabled={currentPage === 1}
 						onClick={() => handlePageChange(currentPage - 1)}
 						size="icon"
@@ -575,6 +577,7 @@ export function EntityList({
 					</div>
 
 					<Button
+						aria-label="Página siguiente"
 						disabled={currentPage === totalPages}
 						onClick={() => handlePageChange(currentPage + 1)}
 						size="icon"

@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef } from 'react';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import { useSelectionStore } from '@/store/ui/selection.slice';
+import { useSelectionStore } from '@/store/selection.store';
 import type { MediaItem } from '../components/media-thumbnail';
 
 export interface UseKeyboardNavigationOptions {

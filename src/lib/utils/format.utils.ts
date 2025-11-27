@@ -139,3 +139,47 @@ export function capitalizeFirstLetter(text: string): string {
 	}
 	return text.charAt(0).toUpperCase() + text.slice(1);
 }
+
+/**
+ * Formatea una fecha relativa (hace X tiempo)
+ * @param date - Fecha a formatear
+ * @returns Texto relativo (ej: "hace 5 minutos")
+ */
+export function formatRelativeTime(date: Date | string): string {
+	const dateObj = typeof date === 'string' ? new Date(date) : date;
+	const now = new Date();
+	const diffInSeconds = Math.floor((now.getTime() - dateObj.getTime()) / 1000);
+
+	if (diffInSeconds < 60) {
+		return 'hace unos segundos';
+	}
+	if (diffInSeconds < 3600) {
+		return `hace ${Math.floor(diffInSeconds / 60)} minutos`;
+	}
+	if (diffInSeconds < 86_400) {
+		return `hace ${Math.floor(diffInSeconds / 3600)} horas`;
+	}
+	if (diffInSeconds < 2_592_000) {
+		return `hace ${Math.floor(diffInSeconds / 86_400)} días`;
+	}
+	if (diffInSeconds < 31_536_000) {
+		return `hace ${Math.floor(diffInSeconds / 2_592_000)} meses`;
+	}
+
+	return `hace ${Math.floor(diffInSeconds / 31_536_000)} años`;
+}
+
+/**
+ * Formatea un porcentaje
+ * @param value - Valor actual
+ * @param total - Valor total
+ * @param decimals - Número de decimales (por defecto 1)
+ * @returns Porcentaje formateado (ej: "75.5%")
+ */
+export function formatPercentage(value: number, total: number, decimals = 1): string {
+	if (total === 0) {
+		return '0%';
+	}
+	const percentage = (value / total) * 100;
+	return `${percentage.toFixed(decimals)}%`;
+}
