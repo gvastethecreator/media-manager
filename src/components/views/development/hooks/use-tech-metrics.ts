@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { getFileSystemPerformance, getImageProcessingPerformance, getTechnicalMetrics } from '../services/tech-metrics';
 
 export function useTechMetrics() {
@@ -29,7 +30,7 @@ export function useTechMetrics() {
 			setFileSystemPerformance(fsPerformance);
 			setImageProcessingPerformance(imgProcessing);
 		} catch (err) {
-			console.error('Error al obtener métricas técnicas:', err);
+			clientLogger.error('Error al obtener métricas técnicas:', err);
 			setError('No se pudieron cargar las métricas técnicas');
 		} finally {
 			setIsLoading(false);

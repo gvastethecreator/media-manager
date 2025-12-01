@@ -1,5 +1,6 @@
 import { BookImage, Cloud, Database, Folder, ImageIcon, Server, Settings, Zap } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { Feature } from '../cards/feature-card';
 import type { Issue } from '../cards/issue-card';
 import { ServiceStatus } from '../cards/service-card';
@@ -74,7 +75,7 @@ export function useFeaturesIssues() {
 					}
 				}, 50);
 			} catch (error) {
-				console.error('Error al obtener datos de features e issues:', error);
+				clientLogger.error('Error al obtener datos de features e issues:', error);
 				if (showLoadingIndicator) {
 					setIsLoading(false);
 				}

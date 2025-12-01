@@ -10,6 +10,7 @@ import { useCreateProperty, useUpdateProperty } from '@/lib/api/properties';
 import { CreatePropertySchema } from '@/types/entities/property/schema';
 import type { PropertyWithStats as Property } from '@/types/entities/property/types';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 type FormData = z.infer<typeof CreatePropertySchema>;
 
@@ -97,7 +98,7 @@ export function CreatePropertyForm({
 				}
 			}
 		} catch (error) {
-			console.error('Error al procesar la propiedad:', error);
+			clientLogger.error('Error al procesar la propiedad:', error);
 		}
 	};
 

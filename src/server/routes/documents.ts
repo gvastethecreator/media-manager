@@ -1,4 +1,5 @@
 import { type Request, type Response, Router } from 'express';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { z } from 'zod';
 import {
 	createDocument,
@@ -68,7 +69,7 @@ router.get('/', async (req, res) => {
 		const result = await getDocuments(filters);
 		res.json(result);
 	} catch (error) {
-		console.error('Error al obtener documentos:', error);
+		serverLogger.error('Error al obtener documentos:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -84,7 +85,7 @@ const getDocumentByIdHandler = async (req: Request, res: Response) => {
 		}
 		res.json(document);
 	} catch (error) {
-		console.error('Error al obtener documento por ID:', error);
+		serverLogger.error('Error al obtener documento por ID:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 };
@@ -134,7 +135,7 @@ const createDocumentHandler = async (req: Request, res: Response) => {
 		const newDocument = await createDocument(validatedData);
 		res.status(201).json(newDocument);
 	} catch (error) {
-		console.error('Error al crear documento:', error);
+		serverLogger.error('Error al crear documento:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 };
@@ -149,7 +150,7 @@ router.put('/:id', async (req, res) => {
 		const updatedDocument = await updateDocument(id, validatedData);
 		res.json(updatedDocument);
 	} catch (error) {
-		console.error('Error al actualizar documento:', error);
+		serverLogger.error('Error al actualizar documento:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -161,7 +162,7 @@ router.delete('/:id', async (req, res) => {
 		await deleteDocument(id);
 		res.json({ message: 'Documento eliminado correctamente' });
 	} catch (error) {
-		console.error('Error al eliminar documento:', error);
+		serverLogger.error('Error al eliminar documento:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

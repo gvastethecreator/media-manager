@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import type { ExpressHandler } from '@/lib/express-types';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
 
 const router = Router();
@@ -24,7 +25,7 @@ router.post('/test', (async (req, res) => {
 			return {
 				extension: ext,
 				entityType,
-				isSupported: entityType !== 'UNKNOWN',
+				isSupported: entityType !== 'unknown',
 			};
 		});
 
@@ -38,7 +39,7 @@ router.post('/test', (async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error en test de mapeo de tipos:', error);
+		serverLogger.error('Error en test de mapeo de tipos:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			details: error instanceof Error ? error.message : String(error),

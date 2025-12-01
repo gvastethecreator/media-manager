@@ -1,4 +1,5 @@
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { serverLogger } from '@/lib/logger/server-logger';
 import express, { type Request, type Response } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
@@ -98,7 +99,7 @@ const getConceptsHandler = async (req: Request, res: Response) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error al obtener conceptos:', error);
+		serverLogger.error('Error al obtener conceptos:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -149,7 +150,7 @@ const getConceptByIdHandler = async (req: Request, res: Response) => {
 
 		res.json(conceptResult[0]);
 	} catch (error) {
-		console.error('Error al obtener concepto:', error);
+		serverLogger.error('Error al obtener concepto:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',

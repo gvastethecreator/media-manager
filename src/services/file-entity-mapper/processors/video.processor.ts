@@ -2,9 +2,12 @@ import {
 	createVideo as createVideoServer,
 	getVideoByHash as getVideoByHashServer,
 } from '@/server/services/video.server.service';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { VideoCreateInput } from '@/types/entities/video';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
+
+const videoLogger = serverLogger.withContext('VideoProcessor');
 
 /**
  * Procesador especializado para entidades de tipo VIDEO
@@ -99,7 +102,7 @@ export class VideoProcessor {
 		const { basename } = await import('node:path');
 		const fileName = basename(filePath);
 		
-		console.log(`🎬 [VideoProcessor] Iniciando generación de thumbnail: ${fileName}`);
+		videoLogger.debug(`🎬 [VideoProcessor] Iniciando generación de thumbnail: ${fileName}`);
 
 		const { db } = await import('@/lib/drizzle');
 		const schema = await import('@/lib/drizzle/schema');
@@ -115,12 +118,12 @@ export class VideoProcessor {
 			const result = await this.tryAnimatedThumbnail(filePath, entityId, videos, eq, db);
 			if (result.success) {
 				const duration = Date.now() - startTime;
-				console.log(`✅ [VideoProcessor] Thumbnail animado generado en ${duration}ms: ${fileName}`);
+				videoLogger.debug(`✅ [VideoProcessor] Thumbnail animado generado en ${duration}ms: ${fileName}`);
 				return result;
 			}
-			console.warn(`⚠️ [VideoProcessor] Thumbnail animado falló, intentando estático: ${result.error}`);
+			videoLogger.warn(`⚠️ [VideoProcessor] Thumbnail animado falló, intentando estático: ${result.error}`);
 		} catch (e) {
-			console.warn(`⚠️ [VideoProcessor] Error en thumbnail animado:`, e);
+			videoLogger.warn(`⚠️ [VideoProcessor] Error en thumbnail animado:`, e);
 		}
 
 		// Estrategia 2: Thumbnail estático JPEG
@@ -128,23 +131,23 @@ export class VideoProcessor {
 			const result = await this.tryStaticThumbnail(filePath, entityId, videos, eq, db);
 			if (result.success) {
 				const duration = Date.now() - startTime;
-				console.log(`✅ [VideoProcessor] Thumbnail estático generado en ${duration}ms: ${fileName}`);
+				videoLogger.debug(`✅ [VideoProcessor] Thumbnail estático generado en ${duration}ms: ${fileName}`);
 				return result;
 			}
-			console.warn(`⚠️ [VideoProcessor] Thumbnail estático falló: ${result.error}`);
+			videoLogger.warn(`⚠️ [VideoProcessor] Thumbnail estático falló: ${result.error}`);
 		} catch (e) {
-			console.warn(`⚠️ [VideoProcessor] Error en thumbnail estático:`, e);
+			videoLogger.warn(`⚠️ [VideoProcessor] Error en thumbnail estático:`, e);
 		}
 
 		// Estrategia 3: Placeholder SVG
 		try {
 			const result = await this.createPlaceholderThumbnail(filePath, entityId, videos, eq, db);
 			const duration = Date.now() - startTime;
-			console.log(`⚠️ [VideoProcessor] Usando placeholder en ${duration}ms: ${fileName}`);
+			videoLogger.debug(`⚠️ [VideoProcessor] Usando placeholder en ${duration}ms: ${fileName}`);
 			return result;
 		} catch (e) {
 			const duration = Date.now() - startTime;
-			console.error(`❌ [VideoProcessor] Todas las estrategias fallaron en ${duration}ms:`, e);
+			videoLogger.error(`❌ [VideoProcessor] Todas las estrategias fallaron en ${duration}ms:`, e);
 			return { success: false, error: 'All thumbnail generation strategies failed' };
 		}
 	}
@@ -200,7 +203,7 @@ export class VideoProcessor {
 			thumbnailWidth = metadata.width || null;
 			thumbnailHeight = metadata.height || null;
 		} catch (e) {
-			console.warn('No se pudieron obtener dimensiones del thumbnail:', e);
+			videoLogger.warn('No se pudieron obtener dimensiones del thumbnail:', e);
 		}
 
 		// Guardar en BD
@@ -254,7 +257,7 @@ export class VideoProcessor {
 			thumbnailWidth = metadata.width || null;
 			thumbnailHeight = metadata.height || null;
 		} catch (e) {
-			console.warn('No se pudieron obtener dimensiones del thumbnail estático:', e);
+			videoLogger.warn('No se pudieron obtener dimensiones del thumbnail estático:', e);
 		}
 
 		// Guardar en BD

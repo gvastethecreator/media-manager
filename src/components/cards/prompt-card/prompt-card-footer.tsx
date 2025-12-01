@@ -1,5 +1,4 @@
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatDate } from '@/lib/utils/date';
 import { Calendar, Image, Tag, Video } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -26,7 +25,7 @@ export function PromptCardFooter({
 	primaryColor,
 	tcgMode = true,
 }: PromptCardFooterProps) {
-	const formattedDate = format(new Date(updatedAt), 'dd/MM/yyyy', { locale: es });
+	const formattedDate = formatDate(new Date(updatedAt), 'dd/MM/yyyy');
 	const daysSinceUpdate = Math.floor((Date.now() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24));
 
 	const isRecent = daysSinceUpdate < 7;

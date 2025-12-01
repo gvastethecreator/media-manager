@@ -1,8 +1,11 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { CreateImageInput } from '@/services/image/image.service';
 import { ImageService } from '@/services/image/image.service';
 import type { FileInfo } from '@/types/file-entity-mapper';
+
+const imageLogger = serverLogger.withContext('ImageProcessor');
 
 /**
  * Procesador especializado para entidades de tipo IMAGE
@@ -44,7 +47,7 @@ export class ImageProcessor {
 			width = metadata.width || 1;
 			height = metadata.height || 1;
 		} catch (error) {
-			console.warn(`No se pudieron obtener dimensiones para ${fileInfo.path}, usando valores por defecto:`, error);
+			imageLogger.warn(`No se pudieron obtener dimensiones para ${fileInfo.path}, usando valores por defecto:`, error);
 		}
 
 		const imageData: CreateImageInput = {
@@ -108,7 +111,7 @@ export class ImageProcessor {
 					})
 					.where(eq(images.id, entityId));
 			} catch (err) {
-				console.warn('No se pudo persistir metadata imagen', err);
+				imageLogger.warn('No se pudo persistir metadata imagen', err);
 			}
 
 			return { success: true };
@@ -145,7 +148,7 @@ export class ImageProcessor {
 
 			return { success: true };
 		} catch (e) {
-			console.warn('Fallo generando thumbnail imagen', e);
+			imageLogger.warn('Fallo generando thumbnail imagen', e);
 			return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
 		}
 	}
@@ -196,7 +199,7 @@ export class ImageProcessor {
 				}
 			}
 		} catch (e) {
-			console.warn('No se pudo aplanar legacy_flat', e);
+			imageLogger.warn('No se pudo aplanar legacy_flat', e);
 		}
 	}
 
@@ -220,7 +223,7 @@ export class ImageProcessor {
 			metaObj.thumbnail = { format: 'jpeg', width: 320, data: b64 };
 			return JSON.stringify(metaObj);
 		} catch (e) {
-			console.warn('No se pudo fusionar thumbnail en metadata', e);
+			imageLogger.warn('No se pudo fusionar thumbnail en metadata', e);
 			return JSON.stringify({ thumbnail: { format: 'jpeg', width: 320, data: b64 } });
 		}
 	}

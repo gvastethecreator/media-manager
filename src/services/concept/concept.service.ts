@@ -473,12 +473,12 @@ export const ConceptService = {
 	},
 
 	async getRecentConceptImages(conceptId: string): Promise<{ id: string; thumbnailUrl: string }[]> {
-		console.warn(`[ConceptService] getRecentConceptImages no implementado. ID: ${conceptId}. Retornando array vacío.`);
+		conceptLogger.warn(`getRecentConceptImages no implementado. ID: ${conceptId}. Retornando array vacío.`);
 		return [];
 	},
 
 	async getConceptCounts(conceptId: string): Promise<{ images: number; videos: number; albums: number; tags: number }> {
-		console.warn(`[ConceptService] getConceptCounts no implementado. ID: ${conceptId}. Retornando ceros.`);
+		conceptLogger.warn(`getConceptCounts no implementado. ID: ${conceptId}. Retornando ceros.`);
 		return {
 			images: 0,
 			videos: 0,

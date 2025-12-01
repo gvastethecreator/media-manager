@@ -15,6 +15,7 @@ import { toastService } from '@/lib/ui/toast';
 import { WorldItemCategory, WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
 import type { WorldItemComplete, WorldItemCreateInput, WorldItemStatistics } from '@/types/entities/world-item/types';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 // Esquema de validación con Zod (solo name requerido, el resto opcional)
 const worldItemSchema = z.object({
@@ -447,7 +448,7 @@ export function CreateWorldItemForm({
 						onCreated?.(createData);
 					}
 				} catch (error) {
-					console.error('Error al procesar el world item:', error);
+					clientLogger.error('Error al procesar el world item:', error);
 				}
 			}}
 			optionalFields={optionalFields as any}

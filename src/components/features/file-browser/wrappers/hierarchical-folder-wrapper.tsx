@@ -58,7 +58,7 @@ export const HierarchicalFolderWrapper = memo(function HierarchicalFolderWrapper
 		}
 
 		// Resolver folder ID (puede devolver null si aún no están todas las carpetas)
-		const resolvedId = getFolderIdFromPath(hierarchicalPath, folders);
+		const resolvedId = getFolderIdFromPath(hierarchicalPath);
 		if (!resolvedId) {
 			logger.warn(`No se pudo resolver folder ID para path: ${hierarchicalPath}`);
 			logger.debug('Segmentos de path que no se encontraron pueden estar en logs de debug');

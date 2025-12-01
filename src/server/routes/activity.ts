@@ -3,6 +3,7 @@ import { z } from 'zod';
 import type { ExpressHandler } from '@/lib/express-types';
 import type { ActivityFilters } from '@/types/entities/activity/types';
 import { getActivityService } from '../../services/activity/activity.service';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 const activityService = getActivityService();
@@ -54,7 +55,7 @@ const createActivity: ExpressHandler = async (req, res) => {
 			message: 'Actividad registrada exitosamente',
 		});
 	} catch (error) {
-		console.error('Error registrando actividad:', error);
+		serverLogger.error('Error registrando actividad:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -92,7 +93,7 @@ const getActivities: ExpressHandler = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error obteniendo actividades:', error);
+		serverLogger.error('Error obteniendo actividades:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -123,7 +124,7 @@ const getActivityStats: ExpressHandler = async (req, res) => {
 
 		res.json({ data: stats });
 	} catch (error) {
-		console.error('Error obteniendo estadísticas de actividad:', error);
+		serverLogger.error('Error obteniendo estadísticas de actividad:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -144,7 +145,7 @@ const getActivityById: ExpressHandler = async (req, res) => {
 
 		res.json({ data: activity });
 	} catch (error) {
-		console.error('Error obteniendo actividad:', error);
+		serverLogger.error('Error obteniendo actividad:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -165,7 +166,7 @@ const deleteActivity: ExpressHandler = async (req, res) => {
 
 		res.json({ message: 'Actividad eliminada exitosamente' });
 	} catch (error) {
-		console.error('Error eliminando actividad:', error);
+		serverLogger.error('Error eliminando actividad:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',

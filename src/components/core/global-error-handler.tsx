@@ -2,6 +2,7 @@ import { AlertCircle, RefreshCw } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { ErrorBoundary } from './error-boundary';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 /**
  * Componente de fallback para errores globales
@@ -10,7 +11,7 @@ import { ErrorBoundary } from './error-boundary';
 export function GlobalErrorFallback({ error, resetError }: { error: Error; resetError: () => void }) {
 	// Registrar el error en la consola para depuración
 	React.useEffect(() => {
-		console.error('Error global capturado:', error);
+		clientLogger.error('Error global capturado:', error);
 	}, [error]);
 
 	return (

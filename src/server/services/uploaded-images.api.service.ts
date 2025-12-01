@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'fs/promises';
 import * as path from 'path';
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { uploadedImagesService } from '@/services/uploaded-images';
 import type { UploadedImageType } from '@/types/entities/uploaded-image';
@@ -46,7 +46,7 @@ export async function uploadImages(formData: FormData) {
 			}
 
 			// Generamos un ID único para el archivo
-			const fileId = uuidv4();
+			const fileId = nanoid();
 			const fileExt = path.extname(file.name) || '.jpg';
 			const fileName = `${fileId}${fileExt}`;
 			const filePath = path.join(UPLOADS_DIR, fileName);

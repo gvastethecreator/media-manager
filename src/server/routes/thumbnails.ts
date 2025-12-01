@@ -2,6 +2,7 @@ import { and, desc, isNotNull } from 'drizzle-orm';
 import express from 'express';
 import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail';
 import { thumbnailService } from '@/services/thumbnail';
 import {
@@ -24,7 +25,7 @@ router.get('/image/:imageId', async (req, res) => {
 		const thumbnail = await getThumbnail(imageId, quality as any);
 		res.json(thumbnail);
 	} catch (error) {
-		console.error('Error obteniendo thumbnail de imagen:', error);
+		serverLogger.error('Error obteniendo thumbnail de imagen:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -35,7 +36,7 @@ router.get('/stats', async (_req, res) => {
 		const stats = await getThumbnailStats();
 		res.json(stats);
 	} catch (error) {
-		console.error('Error obteniendo estadísticas de thumbnails:', error);
+		serverLogger.error('Error obteniendo estadísticas de thumbnails:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -50,7 +51,7 @@ router.post('/generate/:imageId', async (req, res) => {
 
 		res.json(thumbnail);
 	} catch (error) {
-		console.error('Error generando thumbnails:', error);
+		serverLogger.error('Error generando thumbnails:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -79,7 +80,7 @@ router.post('/bulk-generate', async (req, res) => {
 		res.json(result);
 		return;
 	} catch (error) {
-		console.error('Error in bulk thumbnail generation:', error);
+		serverLogger.error('Error in bulk thumbnail generation:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 		return;
 	}
@@ -145,7 +146,7 @@ router.post('/batch', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error in batch thumbnail processing:', error);
+		serverLogger.error('Error in batch thumbnail processing:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -157,7 +158,7 @@ router.delete('/image/:imageId', async (req, res) => {
 		const result = await deleteThumbnail(imageId);
 		res.json(result);
 	} catch (error) {
-		console.error('Error eliminando thumbnails:', error);
+		serverLogger.error('Error eliminando thumbnails:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -168,7 +169,7 @@ router.post('/cleanup', async (req, res) => {
 		const result = await cleanThumbnails(req.body);
 		res.json(result);
 	} catch (error) {
-		console.error('Error cleaning up thumbnails:', error);
+		serverLogger.error('Error cleaning up thumbnails:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -179,7 +180,7 @@ router.get('/cleanup', async (req, res) => {
 		const result = await cleanThumbnails(req.query);
 		res.json(result);
 	} catch (error) {
-		console.error('Error cleaning up thumbnails:', error);
+		serverLogger.error('Error cleaning up thumbnails:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -190,7 +191,7 @@ router.get('/optimize', async (req, res) => {
 		const result = await optimizeThumbnails(req.query);
 		res.json(result);
 	} catch (error) {
-		console.error('Error optimizing thumbnails:', error);
+		serverLogger.error('Error optimizing thumbnails:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -201,7 +202,7 @@ router.get('/reprocess', async (req, res) => {
 		const result = await reprocessThumbnails(req.query);
 		res.json(result);
 	} catch (error) {
-		console.error('Error reprocessing thumbnails:', error);
+		serverLogger.error('Error reprocessing thumbnails:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -237,7 +238,7 @@ router.get('/last-processed', async (req, res) => {
 
 		res.json(formattedThumbnails);
 	} catch (error) {
-		console.error('Error obteniendo thumbnails procesados recientes:', error);
+		serverLogger.error('Error obteniendo thumbnails procesados recientes:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -291,7 +292,7 @@ router.get('/events', async (req, res) => {
 
 		send('connected', { timestamp: Date.now() });
 	} catch (error) {
-		console.error('Error en conexión SSE:', error);
+		serverLogger.error('Error en conexión SSE:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

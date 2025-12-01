@@ -9,6 +9,7 @@ import { AlertTriangle, Clock, FileText, RefreshCw, Trash2, XCircle } from 'luci
 import { useState } from 'react';
 import { JsonViewer } from '@/components/panels/details-panel/components/json-viewer';
 import type { ReindexLogEntry } from '@/lib/logger/reindex-file-logger';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 interface LogStats {
 	errorLogPath: string;
@@ -158,7 +159,7 @@ export default function ReindexLogsViewer() {
 			// Refetch statistics after cleanup
 			await statsQuery.refetch();
 		} catch (error) {
-			console.error('Error limpiando logs:', error);
+			clientLogger.error('Error limpiando logs:', error);
 		}
 	};
 

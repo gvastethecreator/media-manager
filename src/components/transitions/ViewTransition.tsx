@@ -7,6 +7,7 @@
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { useViewTransition } from '@/providers/ViewTransitionProvider';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 /**
  * Props para el componente ViewTransition
@@ -98,7 +99,7 @@ export const ViewTransition = forwardRef<ViewTransitionRef, ViewTransitionProps>
 						});
 						onTransitionEnd?.();
 					} catch (error) {
-						console.warn('ViewTransition failed:', error);
+						clientLogger.warn('ViewTransition failed:', error);
 						callback(); // Ejecutar callback como fallback
 						onTransitionEnd?.();
 					}

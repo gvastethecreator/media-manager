@@ -6,6 +6,7 @@ import type { MediaItem } from '../../components/media-thumbnail';
 import type { ClickModifiers } from '../../types/file-browser.types';
 import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
 import { CanvasRenderConfig } from './canvas-config';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 export interface CardsCanvasProps {
 	items: MediaItem[];
@@ -93,7 +94,7 @@ export function CardsCanvas({
 					}
 				} catch (error: unknown) {
 					if (error instanceof Error && error.name !== 'AbortError') {
-						console.warn('Error en prefetch de thumbnails:', error);
+						clientLogger.warn('Error en prefetch de thumbnails:', error);
 					}
 				}
 			},

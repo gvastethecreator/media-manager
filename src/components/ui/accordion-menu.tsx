@@ -2,7 +2,7 @@
 
 import { cva, type VariantProps } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
-import { Accordion as AccordionPrimitive } from 'radix-ui';
+import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
@@ -39,9 +39,9 @@ interface AccordionMenuProps {
 const AccordionMenuContext = React.createContext<AccordionMenuContextValue>({
 	matchPath: () => false,
 	selectedValue: '',
-	setSelectedValue: () => {},
+	setSelectedValue: () => { },
 	nestedStates: {},
-	setNestedStates: () => {},
+	setNestedStates: () => { },
 });
 
 function AccordionMenu({
@@ -293,15 +293,15 @@ function AccordionMenuSubTrigger({
 
 type AccordionMenuSubContentProps = (
 	| (React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content> & {
-			type: 'single';
-			collapsible: boolean;
-			defaultValue?: string;
-	  })
+		type: 'single';
+		collapsible: boolean;
+		defaultValue?: string;
+	})
 	| (React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content> & {
-			type: 'multiple';
-			collapsible?: boolean;
-			defaultValue?: string | string[];
-	  })
+		type: 'multiple';
+		collapsible?: boolean;
+		defaultValue?: string | string[];
+	})
 ) & {
 	parentValue: string;
 };

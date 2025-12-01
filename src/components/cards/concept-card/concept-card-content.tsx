@@ -3,6 +3,7 @@ import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { ConceptService } from '@/services/concept/concept.service';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 const { getConceptCounts } = ConceptService;
 
@@ -79,7 +80,7 @@ export function ConceptCardContent({
 				const counts = await getConceptCounts(conceptId);
 				setRelationCounts((prev) => ({ ...prev, ...counts }));
 			} catch (error) {
-				console.error('Error cargando recuentos:', error);
+				clientLogger.error('Error cargando recuentos:', error);
 			}
 		};
 

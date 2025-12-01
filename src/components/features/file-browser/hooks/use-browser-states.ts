@@ -1,10 +1,10 @@
 import { useMemo } from 'react';
-import type { MediaItem } from '@/types';
+import type { MediaItem } from '../components/media-thumbnail';
 
 export interface UseBrowserStatesOptions {
 	isLoading: boolean;
 	isRefreshing: boolean;
-	error: Error | null;
+	error: string | null;
 	items: MediaItem[];
 	shouldShowPreloader?: boolean;
 }

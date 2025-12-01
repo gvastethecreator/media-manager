@@ -13,6 +13,7 @@ import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFolderStore } from '@/store/entities/folder';
 import { useImageStore } from '@/store/entities/image';
 import { useUIStore } from '@/store/ui.store';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 const MainLayoutComponent = memo(function MainLayoutImpl() {
 	const location = useLocation();
@@ -90,7 +91,7 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 			await reindexFolderMutation.mutateAsync({ id: currentFolderId });
 			toastService.success('Carpeta escaneada correctamente');
 		} catch (error) {
-			console.error('Error al escanear carpeta:', error);
+			clientLogger.error('Error al escanear carpeta:', error);
 			toastService.error('Error al escanear la carpeta');
 		}
 	}, [currentFolderId, reindexFolderMutation]);
@@ -105,7 +106,7 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 			await reindexFolderMutation.mutateAsync({ id: currentFolderId });
 			toastService.success('Carpeta recargada correctamente');
 		} catch (error) {
-			console.error('Error al recargar carpeta:', error);
+			clientLogger.error('Error al recargar carpeta:', error);
 			toastService.error('Error al recargar la carpeta');
 		}
 	}, [currentFolderId, reindexFolderMutation]);
@@ -116,19 +117,19 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 
 	// Sincronizar visibilidad del details panel con el estado del
 	useEffect(() => {
-		console.log('📋 MainLayout: Sincronizando isVisible:', isVisible);
+		clientLogger.debug('📋 MainLayout: Sincronizando isVisible:', isVisible);
 		setIsRightCollapsed(!isVisible);
 	}, [isVisible]);
 
 	// Sincronizar store UI con el panel físico
 	useEffect(() => {
-		console.log('🔄 MainLayout: Sincronizando UI store panel collapsed:', uiPanelCollapsed);
+		clientLogger.debug('🔄 MainLayout: Sincronizando UI store panel collapsed:', uiPanelCollapsed);
 		if (rightPanelRef.current) {
 			if (uiPanelCollapsed) {
-				console.log('📐 MainLayout: Colapsando panel físico');
+				clientLogger.debug('📐 MainLayout: Colapsando panel físico');
 				rightPanelRef.current.collapse();
 			} else {
-				console.log('📐 MainLayout: Expandiendo panel físico');
+				clientLogger.debug('📐 MainLayout: Expandiendo panel físico');
 				rightPanelRef.current.expand();
 			}
 		}

@@ -4,6 +4,7 @@ import { createDocument, getDocumentByHash } from '@/services/document/document.
 import type { DocumentCreateInput } from '@/transformers/document/validators';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 // Regex reutilizables para procesamiento de documentos
 const WORD_SPLIT_REGEX = /\s+/g;
@@ -146,10 +147,10 @@ export class DocumentProcessor {
 				return { success: false, error: 'Failed to generate preview' };
 			}
 
-			console.log(`✅ Document thumbnail generado para: ${filePath}`);
+			serverLogger.debug(`✅ Document thumbnail generado para: ${filePath}`);
 			return { success: true };
 		} catch (e) {
-			console.warn('Error generando thumbnail documento:', filePath, e);
+			serverLogger.warn('Error generando thumbnail documento:', { filePath, error: e instanceof Error ? e.message : String(e) });
 			return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
 		}
 	}

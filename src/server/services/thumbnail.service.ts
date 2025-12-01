@@ -154,8 +154,8 @@ export async function getThumbnail(
 							memoryCache.set(memKey, result);
 							return result;
 						},
-						{ priority: 0, throwOnTimeout: true }
-					);
+						{ priority: 0 }
+					) as Promise<LibThumbResult>;
 					inflight.set(memKey, newPromise);
 					thumbnail = await newPromise;
 					inflight.delete(memKey);

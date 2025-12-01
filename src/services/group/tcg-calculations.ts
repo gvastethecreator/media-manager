@@ -3,6 +3,10 @@
  * @module services/group/tcg-calculations
  */
 
+import { serverLogger } from '@/lib/logger/server-logger';
+
+const tcgLogger = serverLogger.withContext('TCGCalculations');
+
 /**
  * Calcula el nivel de rareza del grupo basado en su contenido
  */
@@ -57,12 +61,12 @@ export function calculateHealth(counts: any): number {
 
 	// Validación null-safe para evitar errores de Object.entries
 	if (!counts || typeof counts !== 'object') {
-		console.warn('⚠️ [GROUP-SERVICE] calculateHealth recibió counts null/undefined, usando valores por defecto');
+		tcgLogger.warn('⚠️ [GROUP-SERVICE] calculateHealth recibió counts null/undefined, usando valores por defecto');
 		return hp;
 	}
 
 	// Contar tipos diferentes de entidades presentes
-	const entityTypes = Object.entries(counts).filter(([_, count]) => count > 0).length;
+	const entityTypes = Object.entries(counts).filter(([_, count]) => (count as number) > 0).length;
 
 	// Bonificación por diversidad
 	hp += entityTypes * 20;

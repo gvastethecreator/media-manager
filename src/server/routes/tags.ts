@@ -1,6 +1,7 @@
 import express from 'express';
 import { TagService } from '@/services/tag/tag.service';
 import { toImageWithStats } from '@/transformers/image';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 const tagService = new TagService();
@@ -33,7 +34,7 @@ router.get('/', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error getting tags:', error);
+		serverLogger.error('Error getting tags:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -52,7 +53,7 @@ router.get('/:id', async (req, res) => {
 		// El tag ya viene como TagWithStats del servicio
 		res.json(tag);
 	} catch (error) {
-		console.error('Error getting tag:', error);
+		serverLogger.error('Error getting tag:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -66,7 +67,7 @@ router.get('/:id/images', async (req, res) => {
 
 		res.json(transformedImages);
 	} catch (error) {
-		console.error('Error getting tag images:', error);
+		serverLogger.error('Error getting tag images:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -79,7 +80,7 @@ router.get('/:id/thumbnails', async (req, res) => {
 		const thumbnails = await tagService.getTagThumbnails(id, limit);
 		res.json(thumbnails);
 	} catch (error) {
-		console.error('Error getting tag thumbnails:', error);
+		serverLogger.error('Error getting tag thumbnails:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -96,7 +97,7 @@ router.get('/:id/stats', async (req, res) => {
 		}
 		res.json(stats);
 	} catch (error) {
-		console.error('Error getting tag stats:', error);
+		serverLogger.error('Error getting tag stats:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -122,7 +123,7 @@ router.post('/', async (req, res) => {
 		// El tag ya viene como TagWithStats del servicio
 		res.status(201).json(tag);
 	} catch (error) {
-		console.error('Error creating tag:', error);
+		serverLogger.error('Error creating tag:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -148,7 +149,7 @@ router.put('/:id', async (req, res) => {
 		// El tag ya viene como TagWithStats del servicio
 		res.json(tag);
 	} catch (error) {
-		console.error('Error updating tag:', error);
+		serverLogger.error('Error updating tag:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -167,7 +168,7 @@ router.delete('/:id', async (req, res) => {
 
 		res.status(204).send();
 	} catch (error) {
-		console.error('Error deleting tag:', error);
+		serverLogger.error('Error deleting tag:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

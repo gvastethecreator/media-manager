@@ -40,7 +40,7 @@ router.get('/', async (req, res) => {
 			engine: 'like',
 		});
 	} catch (error) {
-		console.error('Error in search:', error);
+		serverLogger.error('Error in search:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -68,7 +68,7 @@ router.get('/images', async (req, res) => {
 			engine: 'like',
 		});
 	} catch (error) {
-		console.error('Error in image search:', error);
+		serverLogger.error('Error in image search:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

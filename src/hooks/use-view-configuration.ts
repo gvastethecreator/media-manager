@@ -8,6 +8,7 @@
 
 import { useCallback, useMemo } from 'react';
 import { useSettingsStore } from '@/store/settings.store';
+import { clientLogger } from '@/lib/logger/client-logger';
 import {
 	CommonViewSettings,
 	cloneViewConfiguration,
@@ -157,7 +158,7 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
 			try {
 				return validateViewConfiguration(savedConfig);
 			} catch (error) {
-				console.warn(`Invalid view configuration for ${viewType}, using default:`, error);
+				clientLogger.warn(`Invalid view configuration for ${viewType}, using default:`, error);
 			}
 		}
 
@@ -308,14 +309,14 @@ export function useViewConfiguration(viewType: ViewType): UseViewConfigurationRe
 				const validatedConfig = validateViewConfiguration(config);
 
 				if (validatedConfig.type !== viewType) {
-					console.error(`Configuration type mismatch: expected ${viewType}, got ${validatedConfig.type}`);
+					clientLogger.error(`Configuration type mismatch: expected ${viewType}, got ${validatedConfig.type}`);
 					return false;
 				}
 
 				updateConfiguration(validatedConfig);
 				return true;
 			} catch (error) {
-				console.error('Failed to import configuration:', error);
+				clientLogger.error('Failed to import configuration:', error);
 				return false;
 			}
 		},

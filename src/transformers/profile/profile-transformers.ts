@@ -4,8 +4,7 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatDate } from '@/lib/utils/date';
 import type { Profile, Settings } from '@/lib/drizzle';
 
 /**
@@ -71,7 +70,7 @@ export function getLanguageText(language: Language): string {
 }
 
 /**
- * Formatea la fecha de creación/actualización del perfil
+ * Formatea una fecha para mostrar en el perfil
  * @param date - Fecha a formatear
  * @returns Fecha formateada
  */
@@ -79,7 +78,7 @@ export function formatProfileDate(date: Date): string {
 	if (!date) {
 		return '';
 	}
-	return format(new Date(date), 'PPP', { locale: es });
+	return formatDate(new Date(date), 'PPP');
 }
 
 /**

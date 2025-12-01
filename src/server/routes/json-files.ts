@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	createJsonFile,
 	deleteJsonFile,
@@ -44,7 +45,7 @@ router.get('/:id', async (req, res) => {
 
 		res.json(jsonFile);
 	} catch (error) {
-		console.error('Error al obtener archivo JSON:', error);
+		serverLogger.error('Error al obtener archivo JSON:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -55,7 +56,7 @@ router.get('/', async (_req, res) => {
 		const jsonFiles = await getJsonFiles();
 		res.json(jsonFiles);
 	} catch (error) {
-		console.error('Error al obtener archivos JSON:', error);
+		serverLogger.error('Error al obtener archivos JSON:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -67,7 +68,7 @@ router.delete('/:id', async (req, res) => {
 		await deleteJsonFile(id);
 		res.json({ message: 'Archivo JSON eliminado correctamente' });
 	} catch (error) {
-		console.error('Error al eliminar archivo JSON:', error);
+		serverLogger.error('Error al eliminar archivo JSON:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -80,7 +81,7 @@ router.put('/:id', async (req, res) => {
 		const updatedJsonFile = await updateJsonFile(id, validatedData);
 		res.json(updatedJsonFile);
 	} catch (error) {
-		console.error('Error al actualizar archivo JSON:', error);
+		serverLogger.error('Error al actualizar archivo JSON:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -108,7 +109,7 @@ router.post('/', async (req, res) => {
 		const newJsonFile = await createJsonFile(jsonFileData);
 		res.status(201).json(newJsonFile);
 	} catch (error) {
-		console.error('Error al crear archivo JSON:', error);
+		serverLogger.error('Error al crear archivo JSON:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

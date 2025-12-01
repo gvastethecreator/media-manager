@@ -1,9 +1,10 @@
 import { Router } from 'express';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = Router();
 
 router.get('/', (req, res) => {
-	console.log('🚨 ENDPOINT DIAGNÓSTICO TOTALMENTE NUEVO');
+	serverLogger.debug('🚨 ENDPOINT DIAGNÓSTICO TOTALMENTE NUEVO');
 	res.json({
 		debug: true,
 		message: 'Endpoint de diagnóstico funciona correctamente',

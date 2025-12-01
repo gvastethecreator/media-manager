@@ -4,8 +4,7 @@
  
  */
 
-import { formatDistanceToNow, formatDuration, intervalToDuration } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatDistanceToNow, formatDuration, intervalToDuration } from '@/lib/utils/date';
 import { serverLogger } from '../../lib/logger/server-logger';
 import { deserializeJsonField, serializeJsonField } from '../../lib/utils/transformers/common';
 import { type QueueJobExtended, type QueueJobMetadata, QueueJobStatus } from '../../types/entities/queue-job';
@@ -41,7 +40,7 @@ export function formatQueueJobDate(date: Date | null): string | undefined {
 	if (!date) {
 		return;
 	}
-	return formatDistanceToNow(date, { addSuffix: true, locale: es });
+	return formatDistanceToNow(date, { addSuffix: true });
 }
 
 /**
@@ -57,7 +56,7 @@ export function calculateDuration(start: Date | null, end: Date | null): string 
 	}
 	const endDate = end || new Date();
 	const duration = intervalToDuration({ start, end: endDate });
-	return formatDuration(duration, { locale: es });
+	return formatDuration(duration);
 }
 
 /**
@@ -179,5 +178,5 @@ function calculateEstimatedTimeRemaining(job: DrizzleQueueJob): string | undefin
 	const remainingMs = estimatedTotalMs - elapsedMs;
 
 	const duration = intervalToDuration({ start: 0, end: remainingMs });
-	return formatDuration(duration, { locale: es });
+	return formatDuration(duration);
 }

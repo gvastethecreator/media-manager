@@ -4,6 +4,7 @@ import { Suspense, useEffect, useMemo, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 import { WorldItemService } from '@/services/world-item/world-item.service';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 interface WorldItemCardImagesProps {
 	worldItemId: string;
@@ -31,7 +32,7 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 				const validImages = data.filter((img) => img.fullUrl);
 				setImages(validImages);
 			} catch (err) {
-				console.error('Error cargando imágenes:', err);
+				clientLogger.error('Error cargando imágenes:', err);
 				setError(err instanceof Error ? err.message : 'Error desconocido');
 			} finally {
 				setIsLoading(false);

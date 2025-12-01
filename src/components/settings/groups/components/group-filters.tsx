@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { cn } from '@/lib/utils';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 // Definir tipos locales ya que no están exportados
 interface GroupFilter {
@@ -36,12 +37,12 @@ export function GroupFilters({ filtersString }: GroupFiltersProps) {
 					groupFilterSchema.parse(filter);
 					return true;
 				} catch {
-					console.error('Invalid filter:', filter);
+					clientLogger.error('Invalid filter:', filter);
 					return false;
 				}
 			});
 		} catch (error) {
-			console.error('Error parsing filters:', error);
+			clientLogger.error('Error parsing filters:', error);
 			return [];
 		}
 	};

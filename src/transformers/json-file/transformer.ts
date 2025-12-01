@@ -1,7 +1,6 @@
 /**
  * @file Transformador principal para la entidad JsonFile
  * @module transformers/json-file/transformer
-
  */
 
 import { TransformerError } from '@/lib/errors/transformer-error';
@@ -12,9 +11,46 @@ import type { JsonFileBase, JsonFileWithStats } from '@/types/entities/json-file
 const logger = serverLogger.withContext('JsonFileTransformer');
 
 /**
- * 🔄 Transforma un objeto JsonFile de Prisma a nuestro tipo canónico JsonFileWithStats.
+ * Calcula la profundidad máxima de anidamiento de un objeto/array JSON
+ * @param value - Valor JSON a analizar
+ * @param currentDepth - Profundidad actual (para recursión)
+ * @returns Profundidad máxima de anidamiento
+ */
+function calculateNestingDepth(value: unknown, currentDepth = 0): number {
+	if (value === null || typeof value !== 'object') {
+		return currentDepth;
+	}
+
+	const values = Array.isArray(value) ? value : Object.values(value);
+	if (values.length === 0) {
+		return currentDepth + 1;
+	}
+
+	return Math.max(...values.map((v) => calculateNestingDepth(v, currentDepth + 1)));
+}
+
+/**
+ * Cuenta recursivamente todas las keys en un objeto JSON (incluyendo anidadas)
+ * @param value - Valor JSON a analizar
+ * @returns Número total de keys
+ */
+function countAllKeys(value: unknown): number {
+	if (value === null || typeof value !== 'object') {
+		return 0;
+	}
+
+	if (Array.isArray(value)) {
+		return value.reduce((sum, item) => sum + countAllKeys(item), 0);
+	}
+
+	const keys = Object.keys(value);
+	return keys.length + keys.reduce((sum, key) => sum + countAllKeys((value as Record<string, unknown>)[key]), 0);
+}
+
+/**
+ * 🔄 Transforma un objeto JsonFile de Drizzle a nuestro tipo canónico JsonFileWithStats.
  *
- * @param prismaJsonFile - El objeto JsonFileBase obtenido de Prisma.
+ * @param drizzleJsonFile - El objeto JsonFileBase obtenido de Drizzle.
  * @returns Un objeto JsonFileWithStats compatible con nuestra aplicación.
  * @throws {TransformerError} Si el objeto de entrada es nulo o inválido.
  */
@@ -40,10 +76,9 @@ export function fromDrizzleJsonFile(drizzleJsonFile: JsonFileBase): JsonFileWith
 				const content = JSON.parse(drizzleJsonFile.content);
 				stats.size = drizzleJsonFile.content.length;
 				stats.isValid = true;
-				// TODO: Implementar lógica real para nestingDepth y keyCount
-				stats.keyCount = Object.keys(content).length;
-				stats.nestingDepth = 1; // Placeholder
-			} catch (e) {
+				stats.keyCount = countAllKeys(content);
+				stats.nestingDepth = calculateNestingDepth(content);
+			} catch {
 				// El JSON no es válido, se mantienen los stats por defecto
 			}
 		}

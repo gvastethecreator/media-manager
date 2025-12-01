@@ -1,10 +1,11 @@
 import { Router } from 'express';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = Router();
 
 // GET /api/videos/:id/thumbnail - Servir thumbnail de video (endpoint temporal de debug)
 router.get('/:id/thumbnail', async (req, res) => {
-	console.log('🎬 DEBUG TEMP: Entrando al endpoint thumbnail temporal');
+	serverLogger.debug('🎬 DEBUG TEMP: Entrando al endpoint thumbnail temporal');
 
 	try {
 		res.status(200).json({
@@ -14,7 +15,7 @@ router.get('/:id/thumbnail', async (req, res) => {
 			message: 'Handler temporal sin duplicaciones',
 		});
 	} catch (error) {
-		console.error('Error en thumbnail endpoint temporal:', error);
+		serverLogger.error('Error en thumbnail endpoint temporal:', error);
 		res
 			.status(500)
 			.json({ error: 'Error en endpoint temporal', message: error instanceof Error ? error.message : String(error) });

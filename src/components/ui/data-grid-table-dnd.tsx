@@ -16,6 +16,7 @@ import { GripVertical } from 'lucide-react';
 import { CSSProperties, Fragment, useId } from 'react';
 import { Button } from '@/components/ui/button';
 import { useDataGrid } from '@/components/ui/data-grid';
+import { clientLogger } from '@/lib/logger/client-logger';
 import {
 	DataGridTableBase,
 	DataGridTableBody,
@@ -106,7 +107,7 @@ function DataGridTableDnd<TData>({ handleDragEnd }: { handleDragEnd: (event: Dra
 				<DataGridTableBase>
 					<DataGridTableHead>
 						{table.getHeaderGroups().map((headerGroup: HeaderGroup<TData>, index) => {
-							console.log('table.getState().columnOrder:', table.getState().columnOrder);
+							clientLogger.debug('table.getState().columnOrder:', table.getState().columnOrder);
 
 							return (
 								<DataGridTableHeadRow headerGroup={headerGroup} key={index}>

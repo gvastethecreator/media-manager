@@ -6,6 +6,7 @@ import { prompts } from '@/lib/drizzle/schema/index';
 import { PromptService, promptService } from '@/services/prompt/prompt.service';
 import { toImageWithStats } from '@/transformers/image';
 import { toPromptWithStats } from '@/transformers/prompt';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 const legacyPromptService = new PromptService(); // Para métodos legacy
@@ -132,7 +133,7 @@ router.get('/', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error al obtener prompts:', error);
+		serverLogger.error('Error al obtener prompts:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -191,7 +192,7 @@ router.get('/:id', async (req, res) => {
 
 		res.json(toPromptWithStats(formattedPrompt));
 	} catch (error) {
-		console.error('Error al obtener prompt:', error);
+		serverLogger.error('Error al obtener prompt:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -207,7 +208,7 @@ router.get('/:id/images', async (req, res) => {
 		const transformedImages = images.map(toImageWithStats);
 		res.json(transformedImages);
 	} catch (error) {
-		console.error('Error getting prompt images:', error);
+		serverLogger.error('Error getting prompt images:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -219,7 +220,7 @@ router.get('/:id/recent-images', async (req, res) => {
 		const images = await promptService.getRecentImages(id, limit);
 		res.json(images);
 	} catch (error) {
-		console.error('Error getting recent prompt images:', error);
+		serverLogger.error('Error getting recent prompt images:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -230,7 +231,7 @@ router.post('/', async (req, res) => {
 		const newPrompt = await promptService.create(req.body);
 		res.status(201).json(newPrompt);
 	} catch (error) {
-		console.error('Error al crear prompt:', error);
+		serverLogger.error('Error al crear prompt:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -245,7 +246,7 @@ router.put('/:id', async (req, res) => {
 		const updatedPrompt = await promptService.update(id, req.body);
 		res.json(updatedPrompt);
 	} catch (error) {
-		console.error('Error al actualizar prompt:', error);
+		serverLogger.error('Error al actualizar prompt:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -264,7 +265,7 @@ router.delete('/:id', async (req, res) => {
 			deletedId: id,
 		});
 	} catch (error) {
-		console.error('Error al eliminar prompt:', error);
+		serverLogger.error('Error al eliminar prompt:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',

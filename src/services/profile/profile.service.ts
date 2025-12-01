@@ -9,6 +9,7 @@ import { db } from '@/lib/drizzle';
 import { profiles, settings } from '@/lib/drizzle/schema/index';
 import { toServiceError } from '@/lib/utils/errors/service-errors';
 import { type ProfileTransformed, transformProfile } from '@/transformers/profile/profile-transformers';
+import { serverLogger } from '@/lib/logger/server-logger';
 // Importar tipos desde '@/types/entities/profile' y './client'; evitar re-export circular
 // export type { CreateProfileInput, ProfileExtended, ProfileFilters, ProfilePaginationOptions, UpdateProfileInput };
 import {
@@ -119,7 +120,7 @@ class ProfileServiceImpl {
 			// 6. Validar que el resultado sea un array (puede estar vacío)
 			if (!Array.isArray(drizzleProfiles)) {
 				// Si no es un array, devolver array vacío (caso común cuando no hay perfiles)
-				console.warn('ProfileService: Query did not return array, returning empty array', drizzleProfiles);
+				serverLogger.warn('ProfileService: Query did not return array, returning empty array', drizzleProfiles);
 				return [];
 			}
 

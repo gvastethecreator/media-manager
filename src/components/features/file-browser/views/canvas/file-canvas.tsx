@@ -9,6 +9,7 @@ import { ExtendedContextMenu, type ExtendedContextMenuAction } from '../../conte
 import type { ClickModifiers } from '../../types/file-browser.types';
 import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
 import { CanvasRenderConfig } from './canvas-config';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 // Renderiza todos los items en un solo <canvas> para minimizar el overhead de DOM.
 // Estrategia: layout en celdas (grid) con tamaño fijo, prefetch de imágenes con Intersection-like
@@ -195,7 +196,7 @@ export function FileCanvas({
 					}
 				} catch (error: unknown) {
 					if (error instanceof Error && error.name !== 'AbortError') {
-						console.warn('Error en prefetch de thumbnails:', error);
+						clientLogger.warn('Error en prefetch de thumbnails:', error);
 					}
 				}
 			},
@@ -524,7 +525,7 @@ export function FileCanvas({
 			offsetTop: scrollContainer ? computeOffsetTop() : 0,
 		};
 
-		console.log('🚀 FileCanvas initial viewport:', initialViewport);
+		clientLogger.debug('🚀 FileCanvas initial viewport:', initialViewport);
 		setViewport(initialViewport);
 
 		return () => {
@@ -683,7 +684,7 @@ export function FileCanvas({
 						thumbnail: null,
 						metadata: null,
 					};
-					console.log('🖱️ Abriendo visor desde menú contextual:', first.name);
+					clientLogger.debug('🖱️ Abriendo visor desde menú contextual:', first.name);
 					// Abrir en modo single-image pasando solo este elemento
 					openViewer([singleImageItem] as any, 0);
 				}
@@ -737,7 +738,7 @@ export function FileCanvas({
 		const item = items[idx];
 		if (!item) return;
 
-		console.log('🖱️ Doble-click detectado en:', item.name);
+		clientLogger.debug('🖱️ Doble-click detectado en:', item.name);
 
 		// Para doble-click, abrir SOLO la imagen seleccionada, no toda la colección
 		if (item.entityType === 'image') {

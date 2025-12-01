@@ -31,14 +31,14 @@ const PRESET_COLORS = [
 ];
 
 interface ColorPickerProps {
-	value: string;
+	value?: string;
 	onChange: (value: string) => void;
 	className?: string;
 	compact?: boolean;
 	showLabel?: boolean;
 }
 
-export function ColorPicker({ value, onChange, className, compact = false, showLabel = true }: ColorPickerProps) {
+export function ColorPicker({ value = '#3b82f6', onChange, className, compact = false, showLabel = true }: ColorPickerProps) {
 	const [open, setOpen] = useState(false);
 	const [currentColor, setCurrentColor] = useState(value);
 

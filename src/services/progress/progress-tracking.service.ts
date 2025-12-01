@@ -13,6 +13,7 @@ import type {
 	ProgressOperation,
 	SizeInfo,
 } from '@/types/file-browser/progress-tracking';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '../toast/toast.service';
 
 // Export types for external use
@@ -65,8 +66,7 @@ class TypedEventEmitter {
 			try {
 				(listener as Listener<typeof payload>)(payload);
 			} catch (err) {
-				// eslint-disable-next-line no-console
-				console.error('[ProgressTracking] listener error', err);
+				clientLogger.error('[ProgressTracking] listener error', err);
 			}
 		}
 	}

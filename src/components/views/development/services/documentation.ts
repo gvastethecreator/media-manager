@@ -3,6 +3,8 @@
  * @description Compatible con Vite + React
  */
 
+import { clientLogger } from '@/lib/logger/client-logger';
+
 /**
  * Carga el contenido de un archivo markdown desde la carpeta docs
  */
@@ -21,7 +23,7 @@ export async function loadDocumentationFile(filename: string): Promise<string> {
 
 		return await response.text();
 	} catch (error) {
-		console.error(`Error al cargar el archivo de documentación ${filename}:`, error);
+		clientLogger.error(`Error al cargar el archivo de documentación ${filename}:`, error);
 		return `# Error al cargar ${filename}\n\nNo se pudo cargar el archivo solicitado.`;
 	}
 }
@@ -37,7 +39,7 @@ export async function loadDocumentationFiles(filenames: string[]): Promise<Recor
 			try {
 				result[filename] = await loadDocumentationFile(filename);
 			} catch (error) {
-				console.error(`Error al cargar ${filename}:`, error);
+				clientLogger.error(`Error al cargar ${filename}:`, error);
 				result[filename] = `# Error al cargar ${filename}\n\nNo se pudo cargar el archivo solicitado.`;
 			}
 		})

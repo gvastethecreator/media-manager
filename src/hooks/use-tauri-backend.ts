@@ -4,6 +4,7 @@
 
 import { invoke } from '@tauri-apps/api/core';
 import { useEffect, useState } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 interface BackendStatus {
 	isRunning: boolean;
@@ -23,7 +24,7 @@ export function useTauriBackend() {
 			setStatus((prev) => ({ ...prev, isChecking: true, error: null }));
 
 			const result = await invoke<string>('check_backend_health');
-			console.log('Backend health check:', result);
+			clientLogger.debug('Backend health check:', result);
 
 			setStatus({
 				isRunning: true,
@@ -31,7 +32,7 @@ export function useTauriBackend() {
 				error: null,
 			});
 		} catch (error) {
-			console.warn('Backend not available:', error);
+			clientLogger.warn('Backend not available:', error);
 			setStatus({
 				isRunning: false,
 				isChecking: false,
@@ -45,7 +46,7 @@ export function useTauriBackend() {
 			const appDataDir = await invoke<string>('get_app_data_dir');
 			return appDataDir;
 		} catch (error) {
-			console.error('Failed to get app data directory:', error);
+			clientLogger.error('Failed to get app data directory:', error);
 			throw error;
 		}
 	};
@@ -57,7 +58,7 @@ export function useTauriBackend() {
 				setStatus((prev) => ({ ...prev, isChecking: true, error: null }));
 
 				const result = await invoke<string>('check_backend_health');
-				console.log('Backend health check:', result);
+				clientLogger.debug('Backend health check:', result);
 
 				setStatus({
 					isRunning: true,
@@ -65,7 +66,7 @@ export function useTauriBackend() {
 					error: null,
 				});
 			} catch (error) {
-				console.warn('Backend not available:', error);
+				clientLogger.warn('Backend not available:', error);
 				setStatus({
 					isRunning: false,
 					isChecking: false,

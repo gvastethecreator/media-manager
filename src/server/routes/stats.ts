@@ -1,5 +1,6 @@
 import express from 'express';
 import { getFolderStats, getStats, getSystemStats, getSystemStatsExtended } from '../services/stats.service';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 
@@ -9,21 +10,21 @@ router.get('/general', async (_req, res) => {
 		const stats = await getStats();
 		res.json(stats);
 	} catch (error) {
-		console.error('Error getting general stats:', error);
+		serverLogger.error('Error getting general stats:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 
 // GET /stats/system - Obtener estadísticas del sistema (compatibilidad con frontend)
 router.get('/system', async (_req, res) => {
-	console.log('🎯 [ROUTER] /stats/system endpoint llamado');
+	serverLogger.debug('🎯 [ROUTER] /stats/system endpoint llamado');
 	try {
-		console.log('🎯 [ROUTER] Llamando a getSystemStats()...');
+		serverLogger.debug('🎯 [ROUTER] Llamando a getSystemStats()...');
 		const stats = await getSystemStats();
-		console.log('🎯 [ROUTER] Resultado de getSystemStats:', stats);
+		serverLogger.debug('🎯 [ROUTER] Resultado de getSystemStats:', stats);
 		res.json(stats);
 	} catch (error) {
-		console.error('🚨 [ROUTER] Error getting system stats:', error);
+		serverLogger.error('🚨 [ROUTER] Error getting system stats:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -34,7 +35,7 @@ router.get('/extended', async (_req, res) => {
 		const stats = await getSystemStatsExtended();
 		res.json(stats);
 	} catch (error) {
-		console.error('Error getting extended stats:', error);
+		serverLogger.error('Error getting extended stats:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -47,7 +48,7 @@ router.get('/activity', async (req, res) => {
 		const activity = stats?.recentActivity?.slice(0, Number.parseInt(limit as string, 10)) || [];
 		res.json(activity);
 	} catch (error) {
-		console.error('Error getting recent activity:', error);
+		serverLogger.error('Error getting recent activity:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -60,7 +61,7 @@ router.get('/top-tags', async (req, res) => {
 		const topTags = stats?.topTags?.slice(0, Number.parseInt(limit as string, 10)) || [];
 		res.json(topTags);
 	} catch (error) {
-		console.error('Error getting top tags:', error);
+		serverLogger.error('Error getting top tags:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -75,7 +76,7 @@ router.get('/folders', async (_req, res) => {
 		}
 		res.json(stats);
 	} catch (error) {
-		console.error('Error getting folder stats:', error);
+		serverLogger.error('Error getting folder stats:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -125,7 +126,7 @@ router.get('/storage', async (_req, res) => {
 
 		res.json(storage);
 	} catch (error) {
-		console.error('Error getting storage breakdown:', error);
+		serverLogger.error('Error getting storage breakdown:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

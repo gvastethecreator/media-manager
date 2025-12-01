@@ -1,5 +1,3 @@
-// @ts-nocheck - Temporary suppression for Express handler parameter types
-
 import { asc } from 'drizzle-orm';
 import express from 'express';
 import os from 'os';
@@ -12,13 +10,14 @@ const router = express.Router();
 
 // Importar el servicio para el endpoint de test de tipos de entidad
 import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const fileEntityMapperService = FileEntityMapperService.getInstance();
 
 router.get('/app-stats', async (_req, res) => {
 	try {
 		// MODO DEBUG TEMPORAL: Análisis de subcarpetas en lugar de app stats
-		console.log('🔍 [DEBUG] MODO DEBUG TEMPORAL: Analizando problema de subcarpetas');
+		serverLogger.debug('🔍 [DEBUG] MODO DEBUG TEMPORAL: Analizando problema de subcarpetas');
 
 		// 1. Test básico de query SQL childrenCount
 		const { sql } = await import('drizzle-orm');
@@ -81,10 +80,10 @@ router.get('/app-stats', async (_req, res) => {
 			})),
 		};
 
-		console.log('✅ [DEBUG] Análisis temporal completado');
+		serverLogger.debug('✅ [DEBUG] Análisis temporal completado');
 		res.json(stats);
 	} catch (error) {
-		console.error('❌ Error en análisis temporal de subcarpetas:', error);
+		serverLogger.error('❌ Error en análisis temporal de subcarpetas:', error);
 		res.status(500).json({
 			error: 'Error en análisis temporal',
 			message: error instanceof Error ? error.message : String(error),
@@ -149,7 +148,7 @@ function formatNetworkInterfaces() {
 
 	// Validación null-safe para evitar errores de Object.entries
 	if (!interfaces || typeof interfaces !== 'object') {
-		console.warn('⚠️ [DEBUG] os.networkInterfaces() retornó null/undefined, retornando array vacío');
+		serverLogger.warn('⚠️ [DEBUG] os.networkInterfaces() retornó null/undefined, retornando array vacío');
 		return result;
 	}
 
@@ -191,7 +190,7 @@ router.get('/folder-children-test', async (_req, res) => {
 			})),
 		});
 	} catch (error) {
-		console.error('❌ Error en test de folder children:', error);
+		serverLogger.error('❌ Error en test de folder children:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -201,7 +200,7 @@ router.get('/folder-children-test', async (_req, res) => {
 
 router.get('/subcarpetas', async (_req, res) => {
 	try {
-		console.log('🔍 [DEBUG] Iniciando depuración de subcarpetas BD vs FS');
+		serverLogger.debug('🔍 [DEBUG] Iniciando depuración de subcarpetas BD vs FS');
 
 		// Importar servicios necesarios
 		const { syncFoldersWithFileSystem } = await import('@/lib/filesystem/folder-sync');
@@ -217,13 +216,13 @@ router.get('/subcarpetas', async (_req, res) => {
 			.from(folders)
 			.orderBy(asc(folders.path));
 
-		console.log(`📊 [DEBUG] Carpetas en BD: ${carpetasBD.length}`);
+		serverLogger.debug(`📊 [DEBUG] Carpetas en BD: ${carpetasBD.length}`);
 
 		// 2. Realizar sincronización con dry-run para obtener estadísticas
-		console.log('🔍 [DEBUG] Ejecutando análisis de sincronización...');
+		serverLogger.debug('🔍 [DEBUG] Ejecutando análisis de sincronización...');
 		const syncResult = await syncFoldersWithFileSystem({ dryRun: true });
 
-		console.log(
+		serverLogger.debug(
 			`📊 [DEBUG] Resultado sincronización - Agregar: ${syncResult.added.length}, Eliminar: ${syncResult.removed.length}`
 		);
 
@@ -243,7 +242,7 @@ router.get('/subcarpetas', async (_req, res) => {
 
 			const padre = carpetasBD.find((p: any) => p.id === carpeta.parentId);
 			if (!padre) {
-				console.warn(`⚠️ [DEBUG] Carpeta ${carpeta.name} tiene parentId ${carpeta.parentId} que no existe`);
+				serverLogger.warn(`⚠️ [DEBUG] Carpeta ${carpeta.name} tiene parentId ${carpeta.parentId} que no existe`);
 				return true;
 			}
 
@@ -274,10 +273,10 @@ router.get('/subcarpetas', async (_req, res) => {
 			muestrasBD: carpetasBD.slice(0, 10), // Muestra de carpetas en BD
 		};
 
-		console.log('✅ [DEBUG] Análisis de subcarpetas completado');
+		serverLogger.debug('✅ [DEBUG] Análisis de subcarpetas completado');
 		res.json(respuesta);
 	} catch (error) {
-		console.error('❌ Error en debug de subcarpetas:', error);
+		serverLogger.error('❌ Error en debug de subcarpetas:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -288,7 +287,7 @@ router.get('/subcarpetas', async (_req, res) => {
 // DEBUG ESPECIAL: Investigación completa de subcarpetas BD vs FS
 router.get('/subcarpetas-full-analysis', async (_req, res) => {
 	try {
-		console.log('🔍 [DEBUG] Iniciando análisis completo de subcarpetas BD vs FS');
+		serverLogger.debug('🔍 [DEBUG] Iniciando análisis completo de subcarpetas BD vs FS');
 
 		// Test simple primero - sin imports dinámicos
 		res.json({
@@ -298,7 +297,7 @@ router.get('/subcarpetas-full-analysis', async (_req, res) => {
 			next_step: 'Implementar lógica completa',
 		});
 	} catch (error) {
-		console.error('❌ Error en análisis completo de subcarpetas:', error);
+		serverLogger.error('❌ Error en análisis completo de subcarpetas:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -309,7 +308,7 @@ router.get('/subcarpetas-full-analysis', async (_req, res) => {
 // NEW TEST ENDPOINT
 router.get('/test-hot-reload', async (_req, res) => {
 	try {
-		console.log('🔥 [DEBUG] HOT RELOAD TEST ENDPOINT WORKING!');
+		serverLogger.debug('🔥 [DEBUG] HOT RELOAD TEST ENDPOINT WORKING!');
 
 		res.json({
 			message: 'HOT RELOAD IS WORKING!',
@@ -318,7 +317,7 @@ router.get('/test-hot-reload', async (_req, res) => {
 			status: 'ACTIVE_NEW_ENDPOINT',
 		});
 	} catch (error) {
-		console.error('❌ Error en test hot reload:', error);
+		serverLogger.error('❌ Error en test hot reload:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -329,7 +328,7 @@ router.get('/test-hot-reload', async (_req, res) => {
 // CLEANUP ENDPOINT - Eliminar imágenes fantasma cursed-img-*
 router.get('/cleanup-phantom-images', async (_req, res) => {
 	try {
-		console.log('🔥 [CLEANUP] Iniciando limpieza de imágenes fantasma...');
+		serverLogger.debug('🔥 [CLEANUP] Iniciando limpieza de imágenes fantasma...');
 
 		// Importar base de datos
 		const { sql } = await import('drizzle-orm');
@@ -344,7 +343,7 @@ router.get('/cleanup-phantom-images', async (_req, res) => {
 		`);
 
 		const cursedCount = cursedQuery.rows.length;
-		console.log(`📊 Imágenes cursed-img-* encontradas: ${cursedCount}`);
+		serverLogger.debug(`📊 Imágenes cursed-img-* encontradas: ${cursedCount}`);
 
 		if (cursedCount === 0) {
 			return res.json({
@@ -356,7 +355,7 @@ router.get('/cleanup-phantom-images', async (_req, res) => {
 		}
 
 		// 2. Eliminar imágenes cursed-img-*
-		console.log(`🗑️ Eliminando ${cursedCount} imágenes fantasma...`);
+		serverLogger.debug(`🗑️ Eliminando ${cursedCount} imágenes fantasma...`);
 		const deleteResult = await db.execute(sql`
 			DELETE FROM ${images} WHERE id LIKE 'cursed-img-%'
 		`);
@@ -365,8 +364,8 @@ router.get('/cleanup-phantom-images', async (_req, res) => {
 		const finalCountResult = await db.execute(sql`SELECT COUNT(*) as count FROM ${images}`);
 		const finalCount = finalCountResult.rows[0]?.[0] || 0;
 
-		console.log(`✅ Eliminadas: ${cursedCount} imágenes fantasma`);
-		console.log(`📊 Imágenes restantes en BD: ${finalCount}`);
+		serverLogger.debug(`✅ Eliminadas: ${cursedCount} imágenes fantasma`);
+		serverLogger.debug(`📊 Imágenes restantes en BD: ${finalCount}`);
 
 		res.json({
 			success: true,
@@ -377,7 +376,7 @@ router.get('/cleanup-phantom-images', async (_req, res) => {
 			note: 'Los errores ServiceError file_not_found deberían desaparecer ahora.',
 		});
 	} catch (error) {
-		console.error('❌ Error en cleanup de imágenes fantasma:', error);
+		serverLogger.error('❌ Error en cleanup de imágenes fantasma:', error);
 		res.status(500).json({
 			success: false,
 			error: 'Error durante la limpieza',
@@ -405,7 +404,7 @@ router.post('/test-entity-types', async (req, res) => {
 			return {
 				extension: ext,
 				entityType,
-				isSupported: entityType !== 'UNKNOWN',
+				isSupported: entityType !== 'unknown',
 			};
 		});
 
@@ -419,7 +418,7 @@ router.post('/test-entity-types', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error en test de mapeo de tipos:', error);
+		serverLogger.error('Error en test de mapeo de tipos:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			details: error instanceof Error ? error.message : String(error),

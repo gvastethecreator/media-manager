@@ -1,6 +1,7 @@
 import { produce } from 'immer';
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { useShallow } from 'zustand/react/shallow';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 // Logger para el store de UI
@@ -159,21 +160,25 @@ export const useUIStore = create<UIState>()(
 	)
 );
 
-// Selectores memoizados
-export const useViewSettings = () => {
-	const { view, thumbnailSize, zoomLevel } = useUIStore();
-	return { view, thumbnailSize, zoomLevel };
-};
+// Selectores memoizados con shallow comparison para evitar re-renders
+export const useViewSettings = () =>
+	useUIStore(
+		useShallow((state) => ({
+			view: state.view,
+			thumbnailSize: state.thumbnailSize,
+			zoomLevel: state.zoomLevel,
+		}))
+	);
 
-export const usePanelSettings = () => {
-	const { isSettingsOpen, isRightPanelCollapsed } = useUIStore();
-	return { isSettingsOpen, isRightPanelCollapsed };
-};
+export const usePanelSettings = () =>
+	useUIStore(
+		useShallow((state) => ({
+			isSettingsOpen: state.isSettingsOpen,
+			isRightPanelCollapsed: state.isRightPanelCollapsed,
+		}))
+	);
 
-export const useThemeSetting = () => {
-	const { theme } = useUIStore();
-	return theme;
-};
+export const useThemeSetting = () => useUIStore((state) => state.theme);
 
 // Tipos exportados para uso en componentes
 export type { UIState };

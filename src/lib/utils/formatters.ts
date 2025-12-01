@@ -3,7 +3,7 @@
  * @module lib/utils/formatters
  */
 
-import { formatBytes, formatDate, formatNumber, formatPercentage, formatRelativeTime } from './format';
+import { formatBytes, formatDate, formatNumber, formatPercentage, formatRelativeTime } from './format.utils';
 
 // Re-exportar formatters básicos
 export { formatBytes, formatDate, formatRelativeTime, formatNumber, formatPercentage };

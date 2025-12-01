@@ -17,6 +17,7 @@ import { useImageLoader } from './use-image-loader';
 import { useKeyboardNavigation } from './use-keyboard-navigation';
 import { useToolbarActions } from './use-toolbar-actions';
 import { useZoomPan } from './use-zoom-pan';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 // Componente principal del visor de archivos - memoizado
 export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { triggerRef?: React.RefObject<HTMLElement> }) {
@@ -242,7 +243,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 								<img
 									alt={img.name}
 									className="max-h-full max-w-full object-contain"
-									onError={() => console.error('Error cargando capa', id)}
+									onError={() => clientLogger.error('Error cargando capa', id)}
 									src={url}
 								/>
 							</motion.div>

@@ -9,6 +9,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import type { CharacterWithStats } from '@/types/entities/character';
 import { CharacterSortOption } from '@/types/entities/character/enums';
 import type { CharacterCoreSlice, CharacterState } from '../types';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 const logger = serverLogger.withContext('CharacterCoreSlice');
 
@@ -304,7 +305,7 @@ export const createCharacterCoreSlice: StateCreator<
 	 */
 	refreshCharacter: async (id: string) => {
 		// Implementación placeholder - en una app real, esto haría una llamada a la API
-		console.log(`Refreshing character ${id}`);
+		clientLogger.debug(`Refreshing character ${id}`);
 	},
 
 	/**
@@ -312,7 +313,7 @@ export const createCharacterCoreSlice: StateCreator<
 	 */
 	refreshAllCharacters: async () => {
 		// Implementación placeholder - en una app real, esto haría una llamada a la API
-		console.log('Refreshing all characters');
+		clientLogger.debug('Refreshing all characters');
 	},
 
 	// Gestión del estado de carga

@@ -1,5 +1,4 @@
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatDistanceToNow, esLocale } from '@/lib/utils/date';
 import { Cpu, Database, HardDrive, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
@@ -30,7 +29,7 @@ const formatNumber = (num: number): string => {
 
 // Formateador para segundos a texto legible
 const formatUptime = (seconds: number): string => {
-	return formatDistanceToNow(Date.now() - seconds * 1000, { locale: es });
+	return formatDistanceToNow(Date.now() - seconds * 1000, { locale: esLocale });
 };
 
 // Componente para mostrar las métricas del sistema

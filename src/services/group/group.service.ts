@@ -2,7 +2,6 @@
  * @file Servicio principal para la gestión de grupos (re-exports)
  * @module services/group
  */
-// @ts-nocheck - Temporary suppression for implicit any parameter types
 
 import { getGroupCardDataService, getRecentGroupMediaService } from './group-card';
 import {

@@ -4,12 +4,13 @@
 
 import { CustomContextMenu } from '@/components/features/file-browser/context-menu/custom-context-menu';
 import { useCustomContextMenu } from '@/hooks/use-custom-context-menu';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 export function TestContextMenu() {
 	const { isOpen, position, handleContextMenu, closeMenu } = useCustomContextMenu();
 
 	const handleAction = (action: string, data?: any) => {
-		console.log('Acción ejecutada:', action, data);
+		clientLogger.debug('Acción ejecutada:', { action, data });
 		// eslint-disable-next-line no-alert
 		alert(`Acción: ${action}`);
 	};

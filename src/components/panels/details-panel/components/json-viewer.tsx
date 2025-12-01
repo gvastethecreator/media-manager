@@ -2,6 +2,7 @@ import { Copy, Eye, EyeOff } from 'lucide-react';
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 export interface JsonViewerProps {
 	/**
@@ -72,7 +73,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
 			setCopied(true);
 			setTimeout(() => setCopied(false), 2000);
 		} catch (error) {
-			console.error('Error copying to clipboard:', error);
+			clientLogger.error('Error copying to clipboard:', error);
 		}
 	};
 

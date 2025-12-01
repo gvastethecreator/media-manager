@@ -3,6 +3,7 @@ import { getDatabaseInfo } from '@/lib/drizzle';
 import { circuitBreakerRegistry } from '@/lib/system/circuit-breaker';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { getSystemStats } from '../services/stats.service';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	createDefaultSettingsData,
 	getNavigationData,
@@ -22,14 +23,14 @@ const router = express.Router();
 // GET /api/system/navigation - Obtener datos de navegación
 router.get('/navigation', async (_req, res) => {
 	try {
-		console.log('🧭 [SystemRouter] Iniciando obtención de datos de navegación');
-		console.log('🔍 [DEBUG] Petición recibida en /api/system/navigation');
+		serverLogger.debug('🧭 [SystemRouter] Iniciando obtención de datos de navegación');
+		serverLogger.debug('🔍 [DEBUG] Petición recibida en /api/system/navigation');
 		const navigationData = await getNavigationData();
-		console.log('✅ [SystemRouter] Datos de navegación obtenidos exitosamente');
-		console.log('📊 [DEBUG] Folders encontradas:', navigationData.folders.length);
+		serverLogger.debug('✅ [SystemRouter] Datos de navegación obtenidos exitosamente');
+		serverLogger.debug('📊 [DEBUG] Folders encontradas:', navigationData.folders.length);
 		res.json(navigationData);
 	} catch (error) {
-		console.error('❌ [SystemRouter] Error al obtener datos de navegación:', error);
+		serverLogger.error('❌ [SystemRouter] Error al obtener datos de navegación:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -45,7 +46,7 @@ router.get('/health', async (_req, res) => {
 			version: process.version,
 		});
 	} catch (error) {
-		console.error('Error en health check:', error);
+		serverLogger.error('Error en health check:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'Error en health check',
@@ -56,11 +57,11 @@ router.get('/health', async (_req, res) => {
 // GET /api/system/stats - Obtener estadísticas del sistema corregidas
 router.get('/stats', async (_req, res) => {
 	try {
-		console.log('🎯 [SYSTEM] Usando getSystemStats de stats.service.ts');
+		serverLogger.debug('🎯 [SYSTEM] Usando getSystemStats de stats.service.ts');
 		const stats = await getSystemStats();
 		res.json(stats);
 	} catch (error) {
-		console.error('Error obteniendo estadísticas del sistema:', error);
+		serverLogger.error('Error obteniendo estadísticas del sistema:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudieron obtener las estadísticas del sistema',
@@ -74,7 +75,7 @@ router.post('/repair', async (_req, res) => {
 		const result = await repairSystem();
 		res.json(result);
 	} catch (error) {
-		console.error('Error reparando el sistema:', error);
+		serverLogger.error('Error reparando el sistema:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudo reparar el sistema',
@@ -88,7 +89,7 @@ router.post('/reset-db', async (_req, res) => {
 		const result = await resetDatabase();
 		res.json(result);
 	} catch (error) {
-		console.error('Error reseteando la base de datos:', error);
+		serverLogger.error('Error reseteando la base de datos:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudo resetear la base de datos',
@@ -102,7 +103,7 @@ router.get('/version', async (_req, res) => {
 		const version = await getSystemVersion();
 		res.json(version);
 	} catch (error) {
-		console.error('Error obteniendo versión del sistema:', error);
+		serverLogger.error('Error obteniendo versión del sistema:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudo obtener la versión del sistema',
@@ -116,7 +117,7 @@ router.get('/settings', async (_req, res) => {
 		const settings = await getSystemSettings();
 		res.json(settings);
 	} catch (error) {
-		console.error('Error obteniendo configuración del sistema:', error);
+		serverLogger.error('Error obteniendo configuración del sistema:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudo obtener la configuración del sistema',
@@ -130,7 +131,7 @@ router.put('/settings', async (req, res) => {
 		const updatedSettings = await updateSystemSettings(req.body);
 		res.json(updatedSettings);
 	} catch (error) {
-		console.error('Error actualizando configuración del sistema:', error);
+		serverLogger.error('Error actualizando configuración del sistema:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudo actualizar la configuración del sistema',
@@ -144,7 +145,7 @@ router.post('/settings/reset', async (_req, res) => {
 		const resetSettings = await resetSystemSettings();
 		res.json(resetSettings);
 	} catch (error) {
-		console.error('Error reseteando configuración del sistema:', error);
+		serverLogger.error('Error reseteando configuración del sistema:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudo resetear la configuración del sistema',
@@ -159,7 +160,7 @@ router.get('/profiles/:profileId/settings', async (req, res) => {
 		const settings = await getProfileSettings(profileId);
 		res.json(settings);
 	} catch (error) {
-		console.error(`Error obteniendo configuración del perfil ${req.params.profileId}:`, error);
+		serverLogger.error(`Error obteniendo configuración del perfil ${req.params.profileId}:`, error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudo obtener la configuración del perfil',
@@ -174,7 +175,7 @@ router.put('/profiles/:profileId/settings', async (req, res) => {
 		const updatedSettings = await updateProfileSettings(profileId, req.body);
 		res.json(updatedSettings);
 	} catch (error) {
-		console.error(`Error actualizando configuración del perfil ${req.params.profileId}:`, error);
+		serverLogger.error(`Error actualizando configuración del perfil ${req.params.profileId}:`, error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudo actualizar la configuración del perfil',
@@ -189,7 +190,7 @@ router.post('/profiles/:profileId/settings/reset', async (req, res) => {
 		await resetProfileSettings(profileId);
 		res.json({ success: true, message: 'Configuración del perfil reseteada' });
 	} catch (error) {
-		console.error(`Error reseteando configuración del perfil ${req.params.profileId}:`, error);
+		serverLogger.error(`Error reseteando configuración del perfil ${req.params.profileId}:`, error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudo resetear la configuración del perfil',
@@ -203,7 +204,7 @@ router.post('/settings/default', async (_req, res) => {
 		const defaultSettings = await createDefaultSettingsData();
 		res.json(defaultSettings);
 	} catch (error) {
-		console.error('Error creando configuración por defecto:', error);
+		serverLogger.error('Error creando configuración por defecto:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudo crear la configuración por defecto',
@@ -226,7 +227,7 @@ router.get('/health', async (_req, res) => {
 			circuitBreakers,
 		});
 	} catch (error) {
-		console.error('Error obteniendo health del sistema:', error);
+		serverLogger.error('Error obteniendo health del sistema:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudo obtener el estado del sistema',
@@ -245,7 +246,7 @@ router.post('/reindex/reset', async (_req, res) => {
 			timestamp: Date.now(),
 		});
 	} catch (error) {
-		console.error('Error reseteando sistema:', error);
+		serverLogger.error('Error reseteando sistema:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudo resetear el sistema',
@@ -263,7 +264,7 @@ router.post('/reindex/cancel', async (_req, res) => {
 			timestamp: Date.now(),
 		});
 	} catch (error) {
-		console.error('Error cancelando operaciones:', error);
+		serverLogger.error('Error cancelando operaciones:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: 'No se pudieron cancelar las operaciones',
