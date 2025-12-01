@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { SimpleTooltip } from './common/simple-tooltip';
 import type { ExtendedFolder, ExtendedProcessStatus } from './folder-types';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 interface NormalModeControlsProps {
 	folder: ExtendedFolder;
@@ -45,7 +46,7 @@ export const NormalModeControls = memo(function NormalModeControls({
 
 	const handleReindex = useCallback(() => {
 		if (!folder.id) {
-			console.error('[FolderCard] ❌ Error: folder.id is undefined', { folder });
+			clientLogger.error('[FolderCard] ❌ Error: folder.id is undefined', { folder });
 			return;
 		}
 		onReindex(folder.id);
@@ -53,7 +54,7 @@ export const NormalModeControls = memo(function NormalModeControls({
 
 	const handleFolderClick = useCallback(() => {
 		if (!folder.id) {
-			console.error('[FolderCard] ❌ Error: folder.id is undefined for delete', { folder });
+			clientLogger.error('[FolderCard] ❌ Error: folder.id is undefined for delete', { folder });
 			return;
 		}
 		onFolderClick(folder.id);
@@ -131,7 +132,7 @@ export const NormalModeControls = memo(function NormalModeControls({
 					disabled={isGloballyProcessing || isReindexing || !folder.id}
 					onClick={() => {
 						if (!folder.id) {
-							console.error('[FolderCard] ❌ Error: folder.id is undefined', { folder });
+							clientLogger.error('[FolderCard] ❌ Error: folder.id is undefined', { folder });
 							return;
 						}
 						onReindex(folder.id);
@@ -157,7 +158,7 @@ export const NormalModeControls = memo(function NormalModeControls({
 					disabled={isGloballyProcessing || !folder.id}
 					onClick={() => {
 						if (!folder.id) {
-							console.error('[FolderCard] ❌ Error: folder.id is undefined for delete', { folder });
+							clientLogger.error('[FolderCard] ❌ Error: folder.id is undefined for delete', { folder });
 							return;
 						}
 						onFolderClick(folder.id);

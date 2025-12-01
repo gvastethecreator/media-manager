@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 // Definimos los temas personalizados (mantenidos de la versión original)
 const customThemes = [
@@ -49,8 +50,8 @@ function ThemeDebugger() {
 			for (const mutation of mutations) {
 				if (mutation.type === 'attributes' && mutation.attributeName === 'data-theme') {
 					const target = mutation.target as HTMLElement;
-					console.log(`Tema cambiado a: ${target.getAttribute('data-theme')}`);
-					console.log(`HTML tiene atributo data-theme: ${document.documentElement.getAttribute('data-theme')}`);
+					clientLogger.debug(`Tema cambiado a: ${target.getAttribute('data-theme')}`);
+					clientLogger.debug(`HTML tiene atributo data-theme: ${document.documentElement.getAttribute('data-theme')}`);
 				}
 			}
 		});
@@ -69,7 +70,7 @@ function ThemeEnforcer() {
 
 	useEffect(() => {
 		if (resolvedTheme && typeof document !== 'undefined') {
-			console.log(`Forzando aplicación del tema: ${resolvedTheme}`);
+			clientLogger.debug(`Forzando aplicación del tema: ${resolvedTheme}`);
 			document.documentElement.setAttribute('data-theme', resolvedTheme);
 		}
 	}, [resolvedTheme]);

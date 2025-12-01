@@ -1,5 +1,4 @@
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatDistanceToNow } from '@/lib/utils/date';
 import { BarChart4, Calendar, Heart, Image, LinkIcon, ListChecks, RefreshCw, Star, Video } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -41,16 +40,14 @@ export function NoteCardFooter({
 	// Formatear fecha relativa
 	const formattedDate = formatDistanceToNow(createdAtDate, {
 		addSuffix: true,
-		locale: es,
 	});
 
 	// Formatear fecha actualizada si es diferente a la creación
 	const wasUpdated = updatedAtDate.getTime() - createdAtDate.getTime() > 60_000; // 1 minuto de diferencia
 	const updatedFormattedDate = wasUpdated
 		? formatDistanceToNow(updatedAtDate, {
-				addSuffix: true,
-				locale: es,
-			})
+			addSuffix: true,
+		})
 		: null;
 
 	// Obtener color de prioridad

@@ -3,7 +3,7 @@
  * @module utils/character/helpers
  */
 
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
 // Importación comentada porque las funciones no existen actualmente
 // import { getSuggestedAppearance, serializeObject } from '@/transformers/character';
 import {
@@ -22,7 +22,7 @@ import {
  * @returns String con ID único
  */
 export function generateCharacterId(): string {
-	return uuidv4();
+	return nanoid();
 }
 
 /**

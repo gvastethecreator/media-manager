@@ -10,6 +10,7 @@ import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import type { GroupWithStats } from '@/types/entities/group';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 interface GroupsContentViewProps {
 	groups: GroupWithStats[];
@@ -124,7 +125,7 @@ const GroupsContentView: React.FC<GroupsContentViewProps> = ({
 						{optimisticGroups.map((group, index) => {
 							// Verificar que el grupo tenga un id válido
 							if (!group?.id) {
-								console.error('Grupo sin id válido:', group);
+								clientLogger.error('Grupo sin id válido:', group);
 								return null;
 							}
 

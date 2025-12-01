@@ -42,6 +42,7 @@ import { cn } from '@/lib/utils';
 import { deleteFile, getFileAsDataUrl } from '@/services/file/file.service';
 import { useSelectionStore } from '@/store/selection.store';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 export interface FileBrowserToolbarProps {
 	/** Función para refrescar/recargar los datos */
@@ -97,7 +98,7 @@ export const FileBrowserToolbar = memo<FileBrowserToolbarProps>(function FileBro
 			toastService.success(`${selectedIds.length} archivo(s) eliminado(s) correctamente.`);
 			clearSelection();
 		} catch (error) {
-			console.error('Error al eliminar archivos:', error);
+			clientLogger.error('Error al eliminar archivos:', error);
 			toastService.error('Error al eliminar archivo(s).');
 		}
 	}, [selectedIds, clearSelection]);
@@ -126,7 +127,7 @@ export const FileBrowserToolbar = memo<FileBrowserToolbarProps>(function FileBro
 			}
 			toastService.success(`${selectedIds.length} archivo(s) descargado(s) correctamente.`);
 		} catch (error) {
-			console.error('Error al descargar archivos:', error);
+			clientLogger.error('Error al descargar archivos:', error);
 			toastService.error('Error al descargar archivo(s).');
 		}
 	}, [selectedIds]);
@@ -136,7 +137,7 @@ export const FileBrowserToolbar = memo<FileBrowserToolbarProps>(function FileBro
 			return;
 		}
 		// TODO: Implementar server action para comprimir archivos
-		console.warn('La funcionalidad de compresión no está implementada en esta versión');
+		clientLogger.warn('La funcionalidad de compresión no está implementada en esta versión');
 		toastService.info('La funcionalidad de compresión de archivos estará disponible en una próxima actualización.');
 	}, [selectedIds]);
 
@@ -145,7 +146,7 @@ export const FileBrowserToolbar = memo<FileBrowserToolbarProps>(function FileBro
 			return;
 		}
 		// TODO: Implementar server action para copiar archivos
-		console.warn('La funcionalidad de copiado no está implementada en esta versión');
+		clientLogger.warn('La funcionalidad de copiado no está implementada en esta versión');
 		toastService.info('La funcionalidad de copiado de archivos estará disponible en una próxima actualización.');
 	}, [selectedIds]);
 

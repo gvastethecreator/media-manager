@@ -4,6 +4,7 @@ import React, { Suspense, useEffect, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 import { ConceptService } from '@/services/concept/concept.service';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 const { getRecentConceptImages } = ConceptService;
 
@@ -35,7 +36,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 				const validImages = data.filter((img) => img.thumbnailUrl);
 				setImages(validImages);
 			} catch (err) {
-				console.error('Error cargando imágenes:', err);
+				clientLogger.error('Error cargando imágenes:', err);
 				setError(err instanceof Error ? err.message : 'Error desconocido');
 			} finally {
 				setIsLoading(false);

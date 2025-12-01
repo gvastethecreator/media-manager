@@ -4,6 +4,7 @@ import { createFile3D, getFile3DByHash } from '@/services/file3d/file3d.service'
 import type { File3DCreateInput } from '@/types/entities/file3d';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 // Regex para procesamiento de archivos OBJ
 const LINE_SPLIT_REGEX = /\r?\n/;
@@ -126,7 +127,7 @@ export class File3DProcessor {
 		const { basename } = await import('node:path');
 		const fileName = basename(filePath);
 		
-		console.log(`🎨 [File3DProcessor] Generando thumbnail: ${fileName}`);
+		serverLogger.debug(`🎨 [File3DProcessor] Generando thumbnail: ${fileName}`);
 
 		try {
 			// Obtener metadata del modelo para mostrar en thumbnail
@@ -168,10 +169,10 @@ export class File3DProcessor {
 				})
 				.where(eq(file3Ds.id, entityId));
 
-			console.log(`✅ [File3DProcessor] Placeholder thumbnail generado: ${fileName}`);
+			serverLogger.debug(`✅ [File3DProcessor] Placeholder thumbnail generado: ${fileName}`);
 			return { success: true };
 		} catch (error) {
-			console.error(`❌ [File3DProcessor] Error generando thumbnail para ${fileName}:`, error);
+			serverLogger.error(`❌ [File3DProcessor] Error generando thumbnail para ${fileName}:`, error);
 			return { 
 				success: false, 
 				error: error instanceof Error ? error.message : 'Unknown error' 

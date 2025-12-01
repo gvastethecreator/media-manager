@@ -7,6 +7,7 @@ import { count, gte, sum } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { collections, folders, images, tags } from '@/lib/drizzle/schema/index';
 import { formatBytes } from '@/lib/utils/format.utils';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 /**
  * Obtiene el total de archivos indexados en la base de datos
@@ -17,7 +18,7 @@ export async function getIndexedFilesCount(): Promise<number> {
 
 		return result.count;
 	} catch (error) {
-		console.error('Error al obtener conteo de archivos:', error);
+		clientLogger.error('Error al obtener conteo de archivos:', error);
 		return 0;
 	}
 }
@@ -39,7 +40,7 @@ export async function getTotalSpaceUsed(): Promise<{
 			formatted: formatBytes(totalBytes),
 		};
 	} catch (error) {
-		console.error('Error al calcular espacio usado:', error);
+		clientLogger.error('Error al calcular espacio usado:', error);
 		return {
 			raw: 0,
 			formatted: formatBytes(0),
@@ -56,7 +57,7 @@ export async function getMonitoredFoldersCount(): Promise<number> {
 
 		return result.count;
 	} catch (error) {
-		console.error('Error al obtener carpetas monitoreadas:', error);
+		clientLogger.error('Error al obtener carpetas monitoreadas:', error);
 		return 0;
 	}
 }
@@ -70,7 +71,7 @@ export async function getCollectionsCount(): Promise<number> {
 
 		return result.count;
 	} catch (error) {
-		console.error('Error al obtener colecciones:', error);
+		clientLogger.error('Error al obtener colecciones:', error);
 		return 0;
 	}
 }
@@ -84,7 +85,7 @@ export async function getTagsCount(): Promise<number> {
 
 		return result.count;
 	} catch (error) {
-		console.error('Error al obtener etiquetas:', error);
+		clientLogger.error('Error al obtener etiquetas:', error);
 		return 0;
 	}
 }
@@ -131,7 +132,7 @@ export async function getFilesHistoricalData(): Promise<
 
 		return result;
 	} catch (error) {
-		console.error('Error al obtener datos históricos:', error);
+		clientLogger.error('Error al obtener datos históricos:', error);
 		return [];
 	}
 }
@@ -178,7 +179,7 @@ export async function getTagsHistoricalData(): Promise<
 
 		return result;
 	} catch (error) {
-		console.error('Error al obtener datos históricos de etiquetas:', error);
+		clientLogger.error('Error al obtener datos históricos de etiquetas:', error);
 		return [];
 	}
 }

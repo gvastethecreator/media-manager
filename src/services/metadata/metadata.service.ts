@@ -75,7 +75,7 @@ export async function getAllMetadata(): Promise<MetadataExtended[]> {
 
 		return transformMetadatas(transformedMetadatas as any);
 	} catch (error) {
-		console.error('Error al obtener metadatos:', error);
+		serverLogger.error('Error al obtener metadatos:', error);
 		return [];
 	}
 }
@@ -117,7 +117,7 @@ export async function getMetadataByImageId(imageId: string): Promise<MetadataExt
 
 		return transformMetadata(transformedMetadata as any);
 	} catch (error) {
-		console.error(`Error al obtener metadatos para imagen ${imageId}:`, error);
+		serverLogger.error(`Error al obtener metadatos para imagen ${imageId}:`, error);
 		return null;
 	}
 }
@@ -159,7 +159,7 @@ export async function getMetadataById(id: string): Promise<MetadataExtended | nu
 
 		return transformMetadata(transformedMetadata as any);
 	} catch (error) {
-		console.error(`Error al obtener metadatos ${id}:`, error);
+		serverLogger.error(`Error al obtener metadatos ${id}:`, error);
 		return null;
 	}
 }
@@ -200,7 +200,7 @@ export async function createMetadata(data: MetadataCreateInput): Promise<Metadat
 
 		return transformMetadata(transformedMetadata as any);
 	} catch (error) {
-		console.error('Error al crear metadatos:', error);
+		serverLogger.error('Error al crear metadatos:', error);
 		return null;
 	}
 }
@@ -237,7 +237,7 @@ export async function updateMetadata(
 
 		return transformMetadata(transformedMetadata as any);
 	} catch (error) {
-		console.error(`Error al actualizar metadatos ${id}:`, error);
+		serverLogger.error(`Error al actualizar metadatos ${id}:`, error);
 		return null;
 	}
 }
@@ -283,7 +283,7 @@ export async function deleteMetadata(id: string): Promise<boolean> {
 
 		return true;
 	} catch (error) {
-		console.error(`Error al eliminar metadatos ${id}:`, error);
+		serverLogger.error(`Error al eliminar metadatos ${id}:`, error);
 		return false;
 	}
 }
@@ -300,7 +300,7 @@ export async function deleteMetadataByImageId(imageId: string): Promise<boolean>
 
 		return true;
 	} catch (error) {
-		console.error(`Error al eliminar metadatos para imagen ${imageId}:`, error);
+		serverLogger.error(`Error al eliminar metadatos para imagen ${imageId}:`, error);
 		return false;
 	}
 }

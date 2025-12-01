@@ -1,5 +1,5 @@
 import { Check, Smile, UserCog, UserPlus, Users, UserX } from 'lucide-react';
-import { CompactPicker } from 'react-color';
+import { HexColorPicker } from 'react-colorful';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
@@ -111,11 +111,10 @@ export function ProfilesSettings() {
 									<div className="h-4 w-4 rounded-full" style={{ backgroundColor: activeProfileData?.color }} />
 								</Button>
 							</PopoverTrigger>
-							<PopoverContent align="end" className="w-auto border-none bg-transparent p-0">
-								<CompactPicker
-									className="overflow-hidden bg-black/90 text-white"
+							<PopoverContent align="end" className="w-auto p-3">
+								<HexColorPicker
 									color={activeProfileData?.color}
-									onChange={(color) => handleUpdateActiveProfile({ color: color.hex })}
+									onChange={(color) => handleUpdateActiveProfile({ color })}
 								/>
 							</PopoverContent>
 						</Popover>

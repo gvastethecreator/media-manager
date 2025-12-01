@@ -1,5 +1,4 @@
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatDistanceToNow } from '@/lib/utils/date';
 import { Calendar, Clock, Image as ImageIcon, ShieldCheck, Sparkles, Star } from 'lucide-react';
 
 import type { WorldItemWithStats } from '@/types/entities/world-item';
@@ -34,11 +33,9 @@ export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 	// Calcular tiempo relativo
 	const createdTimeAgo = formatDistanceToNow(createdAtDate, {
 		addSuffix: true,
-		locale: es,
 	});
 	const updatedTimeAgo = formatDistanceToNow(updatedAtDate, {
 		addSuffix: true,
-		locale: es,
 	});
 
 	// Mapear el tipo a un icono

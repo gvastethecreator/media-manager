@@ -14,6 +14,7 @@ import { Progress } from '@/components/ui/progress';
 import { useToast } from '@/components/ui/use-toast';
 import type { AnyEntityWithStats } from '@/types/entities';
 import type { ImageWithStats } from '@/types/entities/image';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 interface AllImagesContentViewProps {
 	images: ImageWithStats[];
@@ -85,7 +86,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 
 				handleFileUpload(files); // Call the prop function to trigger data reload
 			} catch (error) {
-				console.error('Error al subir imágenes:', error);
+				clientLogger.error('Error al subir imágenes:', error);
 				toast({
 					title: '❌ Error al subir imágenes',
 					description: error instanceof Error ? error.message : 'Error desconocido',

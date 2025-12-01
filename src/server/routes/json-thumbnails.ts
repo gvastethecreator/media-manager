@@ -4,6 +4,7 @@
  */
 
 import express from 'express';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 
@@ -220,7 +221,7 @@ router.get('/:id/preview', async (req, res) => {
 		res.setHeader('Cache-Control', 'public, max-age=3600');
 		res.send(previewSVG);
 	} catch (error) {
-		console.error('Error generando preview JSON:', error);
+		serverLogger.error('Error generando preview JSON:', error);
 		res.status(500).json({ error: 'Error generating JSON preview' });
 	}
 });

@@ -1,5 +1,6 @@
 import { Activity, BarChart, Boxes, Cpu, FileJson, Folder, HardDrive, Library, Tag } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { SystemMetric } from '../cards/metric-card';
 import type { ProcessingMetric } from '../cards/processing-metric-card';
 import {
@@ -129,7 +130,7 @@ export function useSystemStats() {
 			setMetrics(systemMetricsData);
 			setProcessingMetrics(processingMetricsData);
 		} catch (error) {
-			console.error('Error al obtener estadísticas del sistema:', error);
+			clientLogger.error('Error al obtener estadísticas del sistema:', error);
 		} finally {
 			setIsLoading(false);
 		}

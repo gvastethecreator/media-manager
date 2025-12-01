@@ -6,6 +6,7 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import { ALL_FORMATS, BufferSource, Input } from 'mediabunny';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 export interface VideoProbeData {
 	duration: number | null;
@@ -51,7 +52,7 @@ export class VideoProbeService {
 			try {
 				result.duration = await input.computeDuration();
 			} catch (error) {
-				console.debug('Error computando duración:', error);
+				serverLogger.debug('Error computando duración:', error);
 			}
 
 			// Extraer información del track de video principal
@@ -67,7 +68,7 @@ export class VideoProbeService {
 						result.codec = decoderConfig.codec;
 					}
 				} catch (error) {
-					console.debug('Error obteniendo codec:', error);
+					serverLogger.debug('Error obteniendo codec:', error);
 				}
 
 				// Estimar bitrate usando estadísticas de paquetes
@@ -77,7 +78,7 @@ export class VideoProbeService {
 						result.bitRate = Math.round(stats.averageBitrate);
 					}
 				} catch (error) {
-					console.debug('Error calculando bitrate:', error);
+					serverLogger.debug('Error calculando bitrate:', error);
 				}
 			}
 
@@ -86,7 +87,7 @@ export class VideoProbeService {
 				const format = await input.getFormat();
 				result.format = format?.name || null;
 			} catch (error) {
-				console.debug('Error obteniendo formato:', error);
+				serverLogger.debug('Error obteniendo formato:', error);
 			}
 
 			// Raw data para compatibilidad
@@ -112,7 +113,7 @@ export class VideoProbeService {
 
 			return result;
 		} catch (error) {
-			console.warn('VideoProbeService: fallo al hacer probe de video con mediabunny para', basename(filePath), error);
+			serverLogger.warn('VideoProbeService: fallo al hacer probe de video con mediabunny para', { filePath: basename(filePath), error: String(error) });
 			return {
 				duration: null,
 				width: null,

@@ -7,7 +7,10 @@
 import { and, count, desc, eq, gte, ilike, inArray, lte } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { activities, images } from '@/lib/drizzle/schema/index';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { Activity, ActivityFilters, ActivityListResponse, CreateActivityData } from '@/types/entities/activity';
+
+const activityLogger = serverLogger.withContext('ActivityService');
 
 /**
  * Interfaz para el servicio de Activity
@@ -129,7 +132,7 @@ export class ActivityServiceImpl implements ActivityService {
 
 			return this.transformActivityResponse({ ...newActivity, image: imageData });
 		} catch (error) {
-			console.error('Error al crear actividad:', error);
+			activityLogger.error('Error al crear actividad:', error);
 			throw new Error('No se pudo crear la actividad');
 		}
 	}
@@ -173,7 +176,7 @@ export class ActivityServiceImpl implements ActivityService {
 
 			return this.transformActivityResponse(result[0]);
 		} catch (error) {
-			console.error('Error al buscar actividad:', error);
+			activityLogger.error('Error al buscar actividad:', error);
 			throw new Error('No se pudo buscar la actividad');
 		}
 	}
@@ -231,7 +234,7 @@ export class ActivityServiceImpl implements ActivityService {
 				hasMore: offset + limit < totalCount,
 			};
 		} catch (error) {
-			console.error('Error al listar actividades:', error);
+			activityLogger.error('Error al listar actividades:', error);
 			throw new Error('No se pudieron listar las actividades');
 		}
 	}
@@ -247,7 +250,7 @@ export class ActivityServiceImpl implements ActivityService {
 
 			return result.length > 0;
 		} catch (error) {
-			console.error('Error al eliminar actividad:', error);
+			activityLogger.error('Error al eliminar actividad:', error);
 			return false;
 		}
 	}
@@ -265,7 +268,7 @@ export class ActivityServiceImpl implements ActivityService {
 
 			return result.length;
 		} catch (error) {
-			console.error('Error al eliminar todas las actividades:', error);
+			activityLogger.error('Error al eliminar todas las actividades:', error);
 			throw new Error('No se pudieron eliminar las actividades');
 		}
 	}
@@ -396,5 +399,5 @@ export const ActivityService = getActivityService();
  * Función de inicialización del servicio
  */
 export function initActivityService(): void {
-	console.log('ActivityService inicializado');
+	activityLogger.debug('ActivityService inicializado');
 }

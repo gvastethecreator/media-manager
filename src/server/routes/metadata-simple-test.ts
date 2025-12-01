@@ -1,11 +1,12 @@
 import express from 'express';
+import { serverLogger } from '@/lib/logger/server-logger';
 
-console.log('🤖 Metadata Advanced Test Router - SIMPLE VERSION');
+serverLogger.debug('🤖 Metadata Advanced Test Router - SIMPLE VERSION');
 
 const router = express.Router();
 
 router.get('/test', (_req, res) => {
-	console.log('🔍 Simple test route executed');
+	serverLogger.debug('🔍 Simple test route executed');
 	res.json({ message: 'Simple test working' });
 });
 

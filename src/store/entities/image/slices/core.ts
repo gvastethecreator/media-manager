@@ -130,7 +130,7 @@ export const createImageCoreSlice: StateCreator<ImageState & ImageCoreState, [],
 	},
 	fetchImages: async (options: { folderId?: string; refresh?: boolean } = {}) => {
 		const { folderId, refresh } = options;
-		console.log('[ImageStore] fetchImages', options);
+		clientLogger.debug('[ImageStore] fetchImages', options);
 		if (get().isLoading && !refresh) {
 			return get().getImages();
 		}

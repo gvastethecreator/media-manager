@@ -32,6 +32,7 @@ import { cn } from '@/lib/utils';
 import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
 import { useCategoryStats } from '../hooks/use-category-stats';
 import { NavCategoryChildren } from './nav-category-children';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 interface NavMainNavigationProps {
 	currentView: string;
@@ -253,7 +254,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 	const handleChildClick = useCallback(
 		(childId: string) => {
 			// Navegar al item hijo específico
-			console.log('Navegando a item hijo:', childId);
+			clientLogger.debug('Navegando a item hijo:', childId);
 
 			// Para carpetas, navegar a la vista específica de la carpeta
 			if (childId?.match(/^folder_/)) {

@@ -1,9 +1,9 @@
-// @ts-nocheck - Temporary suppression for Express handler parameter types
 /**
  * Rutas API para el sistema avanzado de extracción de metadatos
  * Soporta detección completa de IA engines y metadatos técnicos
  */
 
+import type { Request, Response } from 'express';
 import express from 'express';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createFileNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
@@ -18,7 +18,7 @@ logger.info('🤖 Router metadata-advanced cargado correctamente');
  * GET /api/metadata-advanced/test
  * Ruta de prueba para verificar que el router funciona
  */
-router.get('/test', (_req, res) => {
+router.get('/test', (_req: Request, res: Response) => {
 	logger.info('✅ Ruta /test ejecutándose');
 	res.json({
 		success: true,
@@ -31,7 +31,7 @@ router.get('/test', (_req, res) => {
  * GET /api/metadata-advanced/simple-test
  * Otra ruta de prueba
  */
-router.get('/simple-test', (req, res) => {
+router.get('/simple-test', (req: Request, res: Response) => {
 	logger.info('✅ Ruta /simple-test ejecutándose');
 	res.json({
 		success: true,
@@ -46,7 +46,7 @@ router.get('/simple-test', (req, res) => {
  * POST /api/metadata-advanced/extract-from-path
  * Extraer metadata de un archivo específico por su ruta
  */
-router.post('/extract-from-path', async (req, res) => {
+router.post('/extract-from-path', async (req: Request, res: Response) => {
 	try {
 		const { filePath } = req.body;
 

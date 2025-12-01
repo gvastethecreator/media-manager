@@ -1,6 +1,7 @@
 import * as path from 'path';
 import sharp from 'sharp';
-import { v4 as uuidv4 } from 'uuid';
+import { nanoid } from 'nanoid';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { UploadedImageMetadata, UploadedImageProcessingOptions } from '@/types/uploaded-images';
 
 const UPLOADS_DIR = process.env.UPLOADS_DIR || 'public/uploads';
@@ -56,7 +57,7 @@ export async function processUploadedImage(
 		}
 
 		// Generar nombre de archivo único
-		const fileName = `${uuidv4()}.${format}`;
+		const fileName = `${nanoid()}.${format}`;
 		const outputPath = path.join(UPLOADS_DIR, fileName);
 
 		// Procesar y guardar imagen
@@ -84,7 +85,7 @@ export async function processUploadedImage(
 			metadata,
 		};
 	} catch (error) {
-		console.error('Error processing image:', error);
+		serverLogger.error('Error processing image:', error);
 		throw new Error('Error al procesar imagen');
 	}
 }
@@ -108,7 +109,7 @@ export async function getImageDimensions(imagePath: string): Promise<{ width: nu
 			height: metadata.height || 0,
 		};
 	} catch (error) {
-		console.error('Error getting image dimensions:', error);
+		serverLogger.error('Error getting image dimensions:', error);
 		throw new Error('Error al obtener dimensiones de imagen');
 	}
 }
@@ -128,7 +129,7 @@ export async function getImageMetadata(imagePath: string): Promise<UploadedImage
 			originalHeight: metadata.height,
 		};
 	} catch (error) {
-		console.error('Error getting image metadata:', error);
+		serverLogger.error('Error getting image metadata:', error);
 		throw new Error('Error al obtener metadata de imagen');
 	}
 }

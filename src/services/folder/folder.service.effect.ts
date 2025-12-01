@@ -292,8 +292,50 @@ const checkNoCircularReference = (folderId: string, newParentId: string | null):
 
 			if (result.length === 0) break;
 			currentId = result[0].parentId;
-			iterations++;
+		iterations++;
+	}
+});
+
+/**
+ * Elimina una carpeta (función interna para uso en bulkDelete)
+ */
+const deleteFolderInternal = (id: string, force = false): Effect.Effect<void, FolderError> =>
+	Effect.gen(function* () {
+		logger.info(`🗑️ Eliminando carpeta:`, { id, force });
+
+		// Verificar que existe
+		const existingFolder = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
+			try: async () => await db.select().from(folders).where(eq(folders.id, id)),
+			catch: (error: unknown) => fromUnknownError('delete:fetch', error),
+		});
+
+		if (existingFolder.length === 0) {
+			return yield* Effect.fail(new FolderNotFound({ folderId: id }));
 		}
+
+		if (!force) {
+			// Verificar que no tenga subcarpetas
+			const childrenResult = yield* Effect.tryPromise<Array<{ count: number }>, FolderError>({
+				try: async () => await db.select({ count: count() }).from(folders).where(eq(folders.parentId, id)),
+				catch: (error: unknown) => fromUnknownError('delete:check:children', error),
+			});
+
+			const childrenCount = childrenResult[0]?.count ?? 0;
+
+			if (childrenCount > 0) {
+				return yield* Effect.fail(new FolderHasChildrenError({ folderId: id, childrenCount }));
+			}
+		}
+
+		// Eliminar carpeta
+		yield* Effect.tryPromise<void, FolderError>({
+			try: async () => {
+				await db.delete(folders).where(eq(folders.id, id));
+			},
+			catch: (error: unknown) => fromUnknownError('delete:delete', error),
+		});
+
+		logger.info(`✅ Carpeta eliminada:`, { id });
 	});
 
 // ============= Service Implementation =============
@@ -554,90 +596,40 @@ const FolderServiceLive = Layer.succeed(
 				return yield* enrichFolderWithCounts(updatedFolder);
 			}),
 
-		/**
-		 * Elimina una carpeta
-		 */
-		delete: (id: string, force = false) =>
-			Effect.gen(function* () {
-				logger.info(`🗑️ Eliminando carpeta:`, { id, force });
+	/**
+	 * Elimina una carpeta
+	 */
+	delete: (id: string, force = false) => deleteFolderInternal(id, force),
 
-				// Verificar que existe
-				const existingFolder = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
-					try: async () => await db.select().from(folders).where(eq(folders.id, id)),
-					catch: (error: unknown) => fromUnknownError('delete:fetch', error),
-				});
+	/**
+	 * Elimina múltiples carpetas
+	 */
+	bulkDelete: (ids: string[], force = false): Effect.Effect<BulkDeleteResult, FolderError> =>
+		Effect.gen(function* () {
+			logger.info(`🗑️ Eliminación masiva:`, { count: ids.length, force });
 
-				if (existingFolder.length === 0) {
-					return yield* Effect.fail(new FolderNotFound({ folderId: id }));
-				}
+			const successful: string[] = [];
+			const failed: Array<{ id: string; error: string }> = [];
 
-				if (!force) {
-					// Verificar que no tenga subcarpetas
-					const childrenResult = yield* Effect.tryPromise<Array<{ count: number }>, FolderError>({
-						try: async () => await db.select({ count: count() }).from(folders).where(eq(folders.parentId, id)),
-						catch: (error: unknown) => fromUnknownError('delete:check:children', error),
+			for (const id of ids) {
+				const result = yield* Effect.either(deleteFolderInternal(id, force));				if (result._tag === 'Right') {
+					successful.push(id);
+				} else {
+					const error = result.left;
+					failed.push({
+						id,
+						error: 'displayMessage' in error ? (error as any).displayMessage : String(error),
 					});
-
-					const childrenCount = childrenResult[0]?.count ?? 0;
-
-					if (childrenCount > 0) {
-						return yield* Effect.fail(new FolderHasChildrenError({ folderId: id, childrenCount }));
-					}
-
-					// TODO: Verificar que no tenga contenido (imágenes/videos) cuando esté implementado
-					// if (existingFolder[0].totalFiles > 0) {
-					//   return yield* Effect.fail(new FolderHasContentError({ folderId: id, filesCount: existingFolder[0].totalFiles }));
-					// }
 				}
+			}
 
-				// Eliminar carpeta
-				yield* Effect.tryPromise<void, FolderError>({
-					try: async () => {
-						await db.delete(folders).where(eq(folders.id, id));
-					},
-					catch: (error: unknown) => fromUnknownError('delete:delete', error),
-				});
+			logger.info(`✅ Eliminación masiva completada:`, {
+				successful: successful.length,
+				failed: failed.length,
+			});
 
-				logger.info(`✅ Carpeta eliminada:`, { id });
-			}),
-
-		/**
-		 * Elimina múltiples carpetas
-		 */
-		bulkDelete: (ids: string[], force = false) =>
-			Effect.gen(function* () {
-				logger.info(`🗑️ Eliminación masiva:`, { count: ids.length, force });
-
-				const successful: string[] = [];
-				const failed: Array<{ id: string; error: string }> = [];
-
-				for (const id of ids) {
-					const result = yield* Effect.either(
-						Effect.gen(function* () {
-							return yield* FolderService.pipe(Effect.flatMap((service) => service.delete(id, force)));
-						})
-					);
-
-					if (result._tag === 'Right') {
-						successful.push(id);
-					} else {
-						const error = result.left;
-						failed.push({
-							id,
-							error: 'displayMessage' in error ? (error as any).displayMessage : String(error),
-						});
-					}
-				}
-
-				logger.info(`✅ Eliminación masiva completada:`, {
-					successful: successful.length,
-					failed: failed.length,
-				});
-
-				return { successful, failed };
-			}),
-
-		/**
+			return { successful, failed };
+		}),		/**
 		 * Obtiene las subcarpetas de una carpeta (o carpetas raíz si parentId es null)
 		 */
 		getChildren: (parentId: string | null) =>

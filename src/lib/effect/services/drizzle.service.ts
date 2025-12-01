@@ -73,9 +73,9 @@ export class DrizzleService extends Context.Tag('DrizzleService')<
 		 * 
 		 * @param fn - Función que recibe la transacción y retorna un Effect
 		 */
-		readonly transaction: <A, E, R>(
-			fn: (tx: DrizzleTx) => Effect.Effect<A, E, R>
-		) => Effect.Effect<A, E | TransactionError, R>;
+		readonly transaction: <A, E>(
+			fn: (tx: DrizzleTx) => Effect.Effect<A, E, never>
+		) => Effect.Effect<A, E | TransactionError, never>;
 	}
 >() {}
 
@@ -85,7 +85,7 @@ export class DrizzleService extends Context.Tag('DrizzleService')<
 const make = (): {
 	readonly db: DrizzleDB;
 	readonly query: <A>(fn: (db: DrizzleDB) => Promise<A>) => Effect.Effect<A, Error>;
-	readonly transaction: <A, E, R>(fn: (tx: DrizzleTx) => Effect.Effect<A, E, R>) => Effect.Effect<A, E | TransactionError, R>;
+	readonly transaction: <A, E>(fn: (tx: DrizzleTx) => Effect.Effect<A, E, never>) => Effect.Effect<A, E | TransactionError, never>;
 } => ({
 	db,
 

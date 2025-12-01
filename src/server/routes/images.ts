@@ -13,6 +13,7 @@ import { verifySignedToken } from '../services/thumbnail.service';
 const router = Router();
 
 import { ImageFiltersSchema } from '@/types/entities/image/schema';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 // Incluye estándar para imágenes con relaciones
 const imageInclude = {
@@ -205,7 +206,7 @@ router.get('/', async (req, res) => {
 			// silencioso
 		}
 	} catch (error) {
-		console.error('Error al obtener imágenes:', error);
+		serverLogger.error('Error al obtener imágenes:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -231,7 +232,7 @@ router.get('/:id/content', async (req, res) => {
 			res.status(payload.httpStatus).json(payload);
 			return;
 		}
-		console.error('Error serving image:', error);
+		serverLogger.error('Error serving image:', error);
 		res.status(500).send('Error serving image');
 	}
 });
@@ -282,7 +283,7 @@ router.get('/:id/thumbnail', async (req, res) => {
 			res.status(payload.httpStatus).json(payload);
 			return;
 		}
-		console.error('Error serving thumbnail:', error);
+		serverLogger.error('Error serving thumbnail:', error);
 		res.status(500).send('Error serving thumbnail');
 	}
 });
@@ -364,7 +365,7 @@ router.get('/:id', async (req, res) => {
 
 		res.json(formattedImage);
 	} catch (error) {
-		console.error('Error al obtener imagen:', error);
+		serverLogger.error('Error al obtener imagen:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -381,7 +382,7 @@ router.post('/:id/thumbnail/generate', async (req, res) => {
 		await imageService.generateThumbnail(id);
 		res.json({ status: 'success', quality });
 	} catch (error) {
-		console.error('Error generating thumbnail:', error);
+		serverLogger.error('Error generating thumbnail:', error);
 		res.status(500).json({ error: 'Error generating thumbnail' });
 	}
 });
@@ -398,7 +399,7 @@ router.get('/signed/:token', async (req, res) => {
 		});
 		res.send(buffer);
 	} catch (error) {
-		console.error('Error serving signed image:', error);
+		serverLogger.error('Error serving signed image:', error);
 		res.status(500).send('Error al servir la imagen');
 	}
 });
@@ -442,7 +443,7 @@ router.post('/:id/process', async (req, res) => {
 		});
 		res.send(processedBuffer);
 	} catch (error) {
-		console.error('Error processing image:', error);
+		serverLogger.error('Error processing image:', error);
 		res.status(500).send('Error al procesar la imagen');
 	}
 });

@@ -15,6 +15,7 @@ import {
 } from '@/lib/api/client/collection.client';
 import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 import type { CollectionState } from '../types';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 /**
  * Slice principal con operaciones CRUD básicas para colecciones
@@ -148,7 +149,7 @@ export const createCollectionCoreSlice: StateCreator<
 			return;
 		} catch (error: any) {
 			set({ error: error.message, isLoading: false });
-			console.error('Error fetching collection:', error);
+			clientLogger.error('Error fetching collection:', error);
 			return;
 		} finally {
 			set({ isLoading: false });
@@ -163,7 +164,7 @@ export const createCollectionCoreSlice: StateCreator<
 			return collections;
 		} catch (error: any) {
 			set({ error: error.message, isLoading: false });
-			console.error('Error fetching collections:', error);
+			clientLogger.error('Error fetching collections:', error);
 			return [];
 		} finally {
 			set({ isLoading: false });
@@ -178,7 +179,7 @@ export const createCollectionCoreSlice: StateCreator<
 			return newCollection;
 		} catch (error: any) {
 			set({ error: error.message, isLoading: false });
-			console.error('Error creating collection:', error);
+			clientLogger.error('Error creating collection:', error);
 			return;
 		} finally {
 			set({ isLoading: false });
@@ -193,7 +194,7 @@ export const createCollectionCoreSlice: StateCreator<
 			return updatedCollection;
 		} catch (error: any) {
 			set({ error: error.message, isLoading: false });
-			console.error('Error updating collection:', error);
+			clientLogger.error('Error updating collection:', error);
 			return;
 		} finally {
 			set({ isLoading: false });
@@ -208,7 +209,7 @@ export const createCollectionCoreSlice: StateCreator<
 			return true;
 		} catch (error: any) {
 			set({ error: error.message, isLoading: false });
-			console.error('Error removing collection:', error);
+			clientLogger.error('Error removing collection:', error);
 			return false;
 		} finally {
 			set({ isLoading: false });

@@ -40,13 +40,11 @@
  * permitiendo redimensionar, cambiar formato y optimizar imágenes.
  */
 
-import { and, asc, count, desc, eq, isNotNull, like, or, sum } from 'drizzle-orm';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { promises as fs } from 'fs';
-import sharp from 'sharp';
 import { db } from '@/lib/drizzle';
 import { fileStats, folders, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { createFileNotFoundError } from '@/lib/utils/errors';
 import {
 	createEntityNotFoundError,
 	createServiceError,
@@ -56,8 +54,9 @@ import {
 import type { ImageUpdateInput, ImageWithStats } from '@/types/entities/image/types';
 import type { ThumbnailStats } from '@/types/thumbnails';
 import { emitImageEvent, IMAGE_EVENTS } from './image-events';
-import { type ImageProcessingOptions, processImage } from './image-processing';
-import { MAX_THUMBNAIL_SIZE_BYTES, randomId, SERVICE_NAME } from './image-utils';
+import { getImageByHash, getImageByPathAndFolder } from './image-lookup.service';
+import { thumbnailService } from './image-thumbnail.service';
+import { randomId, SERVICE_NAME } from './image-utils';
 // Tipos movidos a types locales
 export interface GetImagesOptions {
 	folderId?: string;
@@ -496,425 +495,68 @@ class ImageService {
 		}
 	}
 
+	// ========================================================================
+	// DELEGACIONES A THUMBNAIL SERVICE
+	// ========================================================================
+
+	/**
+	 * Genera thumbnail para una imagen
+	 * @deprecated Usar thumbnailService.generateThumbnail() directamente
+	 */
 	async generateThumbnail(imageId: string): Promise<void> {
-		// Logging defensivo para diagnosticar posibles caídas en reindex masivo
-		const startHr = process.hrtime.bigint();
-		const memBefore = process.memoryUsage();
-		imageLogger.info('[thumbnail] ▶️ start', {
-			imageId,
-			memRssMB: (memBefore.rss / 1024 / 1024).toFixed(1),
-			memHeapUsedMB: (memBefore.heapUsed / 1024 / 1024).toFixed(1),
-		});
-		try {
-			const image = await db.query.images.findFirst({
-				where: eq(images.id, imageId),
-			});
-
-			if (!image) {
-				throw createEntityNotFoundError('Image', imageId, SERVICE_NAME);
-			}
-
-			// Configuración fija para el thumbnail
-			const config: ImageProcessingOptions = {
-				width: 512,
-				height: 512,
-				quality: 80,
-				format: 'webp',
-				fit: 'cover',
-			};
-
-			// Verificar existencia y permisos del archivo
-			try {
-				await fs.access(image.path, fs.constants.R_OK);
-			} catch (permError: any) {
-				const code = permError?.code;
-				if (code === 'ENOENT' || code === 'ENOTDIR') {
-					imageLogger.error('[thumbnail] Archivo no encontrado:', { path: image.path, code });
-					throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
-				}
-				if (code === 'EACCES' || code === 'EPERM') {
-					imageLogger.error('[thumbnail] Permiso denegado al leer:', {
-						path: image.path,
-						code,
-						message: permError.message,
-					});
-					throw toServiceError(permError, {
-						code: ServiceErrorCode.FILE_ACCESS_DENIED,
-						message: `Permiso denegado: ${image.path}`,
-						serviceName: SERVICE_NAME,
-						context: { imageId, path: image.path },
-					});
-				}
-				imageLogger.error('[thumbnail] Error comprobando acceso:', {
-					path: image.path,
-					code,
-					message: permError instanceof Error ? permError.message : String(permError),
-				});
-				throw toServiceError(permError, {
-					code: ServiceErrorCode.FILE_READ_ERROR,
-					message: `No se pudo acceder al archivo: ${image.path}`,
-					serviceName: SERVICE_NAME,
-					context: { imageId, path: image.path },
-				});
-			}
-
-			// Procesar la imagen para crear el thumbnail (primero en WebP)
-			let { buffer, metadata } = await processImage(image.path, config); // Si el resultado supera el tope, recomprimir con ajustes más fuertes
-			let mime = 'image/webp';
-			if (buffer.length > MAX_THUMBNAIL_SIZE_BYTES) {
-				imageLogger.info('[thumbnail] buffer grande, recomprimiendo', {
-					imageId,
-					sizeKB: (buffer.length / 1024).toFixed(1),
-				});
-				try {
-					// Intento 1: WebP con menor calidad
-					const webpRetry = await sharp(buffer).webp({ quality: 60, effort: 5 }).toBuffer({
-						resolveWithObject: true,
-					});
-					buffer = webpRetry.data;
-					metadata = webpRetry.info;
-					mime = 'image/webp';
-				} catch {
-					// Intento 2: JPEG como fallback
-					const jpegRetry = await sharp(image.path)
-						.resize(config.width, config.height, { fit: config.fit || 'cover', withoutEnlargement: true })
-						.jpeg({ quality: 75, progressive: true, mozjpeg: true })
-						.toBuffer({ resolveWithObject: true });
-					buffer = jpegRetry.data;
-					metadata = jpegRetry.info;
-					mime = 'image/jpeg';
-				}
-			}
-
-			// Guardar resultado (try separado para capturar posibles errores DB sin perder métricas)
-			try {
-				await db
-					.update(images)
-					.set({
-						thumbnail: buffer.toString('base64'), // Convertir Buffer a string base64
-						thumbnailSize: buffer.length,
-						thumbnailWidth: metadata.width ?? config.width,
-						thumbnailHeight: metadata.height ?? config.height,
-						thumbnailMimeType: mime,
-						thumbnailError: null,
-						thumbnailErrorAt: null,
-						thumbnailOptimizedAt: new Date(),
-					})
-					.where(eq(images.id, imageId));
-			} catch (dbErr) {
-				imageLogger.error('[thumbnail] 💥 DB update failed', {
-					imageId,
-					error: dbErr instanceof Error ? dbErr.message : String(dbErr),
-				});
-				throw dbErr;
-			}
-
-			// Emitir evento de thumbnail generado
-			await emitImageEvent(IMAGE_EVENTS.THUMBNAIL_GENERATED, { imageId });
-			const memAfter = process.memoryUsage();
-			const durationMs = Number((process.hrtime.bigint() - startHr) / 1000000n);
-			imageLogger.info('[thumbnail] ✅ done', {
-				imageId,
-				durationMs,
-				bufferKB: (buffer.length / 1024).toFixed(1),
-				memHeapDeltaMB: ((memAfter.heapUsed - memBefore.heapUsed) / 1024 / 1024).toFixed(2),
-				memRssMB: (memAfter.rss / 1024 / 1024).toFixed(1),
-			});
-		} catch (error: any) {
-			// Registrar error en columnas dedicadas para permitir reintentos controlados
-			try {
-				await db
-					.update(images)
-					.set({
-						thumbnailError: error instanceof Error ? error.message : String(error),
-						thumbnailErrorAt: new Date(),
-					})
-					.where(eq(images.id, imageId));
-			} catch (e) {
-				imageLogger.warn('[thumbnail] No se pudo registrar thumbnailError', {
-					imageId,
-					error: e instanceof Error ? e.message : String(e),
-				});
-			}
-			await emitImageEvent(IMAGE_EVENTS.ERROR, {
-				message: 'Error al generar thumbnail',
-				imageId,
-				error: error instanceof Error ? error.message : String(error),
-			});
-			imageLogger.error('[thumbnail] ❌ failed', {
-				imageId,
-				error: error instanceof Error ? error.message : String(error),
-			});
-			throw toServiceError(error, {
-				code: ServiceErrorCode.FILE_WRITE_ERROR,
-				message: 'Error al generar thumbnail',
-				context: { imageId },
-				serviceName: SERVICE_NAME,
-			});
-		}
+		return thumbnailService.generateThumbnail(imageId);
 	}
 
 	/**
-	 * Variante segura: intenta generar thumbnail y NO lanza excepción.
-	 * Devuelve true si se generó con éxito, false en caso contrario (registrando thumbnailError/thumbnailErrorAt).
+	 * Genera thumbnail de forma segura (no lanza excepciones)
+	 * @deprecated Usar thumbnailService.generateThumbnailSafe() directamente
 	 */
 	async generateThumbnailSafe(imageId: string): Promise<boolean> {
-		try {
-			await this.generateThumbnail(imageId);
-			return true;
-		} catch (err: any) {
-			// Asegurar registro de error ya fue hecho en generateThumbnail catch; redundancia defensiva
-			try {
-				await db
-					.update(images)
-					.set({
-						thumbnailError: err instanceof Error ? err.message : String(err),
-						thumbnailErrorAt: new Date(),
-					})
-					.where(eq(images.id, imageId));
-			} catch {}
-			return false;
-		}
+		return thumbnailService.generateThumbnailSafe(imageId);
 	}
 
 	/**
-	 * Obtiene el thumbnail de una imagen (buffer). Si no existe, lo genera en caliente y lo cachea.
-	 * @param imageId ID de la imagen
-	 * @returns Buffer del thumbnail
+	 * Obtiene el thumbnail de una imagen
+	 * @deprecated Usar thumbnailService.getThumbnail() directamente
 	 */
 	async getThumbnail(imageId: string): Promise<Buffer> {
-		try {
-			const image = await this.getImage(imageId);
-			if (!image) {
-				throw createEntityNotFoundError('Image', imageId);
-			}
-
-			if (image.thumbnail) {
-				// Intentar convertir base64 -> Buffer y validar que sea una imagen legible
-				try {
-					const buf = Buffer.from(image.thumbnail, 'base64');
-					// Validación ligera con sharp: obtener metadata; si falla, regenerar
-					await sharp(buf).metadata();
-					return buf;
-				} catch (_e) {
-					// Thumbnail corrupto o no válido: regenerar
-					await this.generateThumbnail(imageId);
-					const refreshed = await this.getImage(imageId);
-					if (refreshed?.thumbnail) {
-						return Buffer.from(refreshed.thumbnail, 'base64');
-					}
-					throw createFileNotFoundError(`Miniatura corrupta reparada pero no disponible para la imagen ${imageId}`);
-				}
-			}
-
-			await this.generateThumbnail(imageId);
-			const updatedImage = await this.getImage(imageId);
-			if (!updatedImage?.thumbnail) {
-				throw createFileNotFoundError(`Miniatura para la imagen ${imageId} no encontrada después de la generación`);
-			}
-			// Convertir string base64 a Buffer
-			return Buffer.from(updatedImage.thumbnail, 'base64');
-		} catch (error) {
-			throw toServiceError(error, {
-				code: ServiceErrorCode.FILE_READ_ERROR,
-				message: 'Error al obtener miniatura',
-				context: { imageId },
-				serviceName: SERVICE_NAME,
-			});
-		}
-	}
-
-	async getOriginalImage(imageId: string): Promise<Buffer> {
-		try {
-			const image = await this.getImage(imageId);
-			if (!image) {
-				throw createEntityNotFoundError('Image', imageId);
-			}
-
-			if (!image.path) {
-				throw createFileNotFoundError(`Ruta original para la imagen ${imageId} no encontrada`);
-			}
-
-			return await fs.readFile(image.path);
-		} catch (error) {
-			throw toServiceError(error, {
-				code: ServiceErrorCode.FILE_READ_ERROR,
-				message: 'Error al obtener la imagen original',
-				context: { imageId },
-				serviceName: SERVICE_NAME,
-			});
-		}
+		return thumbnailService.getThumbnail(imageId, this.getImage.bind(this));
 	}
 
 	/**
-	 * Obtiene estadísticas de procesamiento de miniaturas.
-	 * @returns Estadísticas de miniaturas.
+	 * Obtiene la imagen original
+	 * @deprecated Usar thumbnailService.getOriginalImage() directamente
+	 */
+	async getOriginalImage(imageId: string): Promise<Buffer> {
+		return thumbnailService.getOriginalImage(imageId, this.getImage.bind(this));
+	}
+
+	/**
+	 * Obtiene estadísticas de procesamiento de thumbnails
+	 * @deprecated Usar thumbnailService.getThumbnailProcessingStats() directamente
 	 */
 	async getThumbnailProcessingStats(): Promise<ThumbnailStats> {
-		try {
-			const totalImages = await db.select({ count: count() }).from(images);
-			const processedImages = await db
-				.select({ count: count() })
-				.from(images)
-				.where(isNotNull(images.thumbnail));
-			const erroredImages = await db.select({ count: count() }).from(images).where(isNotNull(images.thumbnailError));
-			const totalThumbnailSize = await db
-				.select({ sum: sum(images.thumbnailSize) })
-				.from(images)
-				.where(isNotNull(images.thumbnailSize));
-			const lastProcessedImage = await db
-				.select({ date: images.updatedAt })
-				.from(images)
-				.where(isNotNull(images.thumbnail))
-				.orderBy(desc(images.updatedAt))
-				.limit(1);
-
-		return {
-			total: totalImages[0]?.count || 0,
-			processed: processedImages[0]?.count || 0,
-			failed: erroredImages[0]?.count || 0,
-			pending: (totalImages[0]?.count || 0) - (processedImages[0]?.count || 0),
-			totalFiles: totalImages[0]?.count || 0,
-			totalSize: Number(totalThumbnailSize[0]?.sum || 0),
-			processedSize: Number(totalThumbnailSize[0]?.sum || 0),
-			errors: [],
-			averageProcessingTime: 0,
-			lastProcessedAt: lastProcessedImage[0]?.date || undefined,
-		};
-		} catch (error) {
-			imageLogger.error('Error al obtener estadísticas de miniaturas:', error);
-			throw toServiceError(error, {
-				code: ServiceErrorCode.DATABASE_ERROR,
-				message: 'Error al obtener estadísticas de miniaturas',
-				serviceName: SERVICE_NAME,
-			});
-		}
+		return thumbnailService.getThumbnailProcessingStats();
 	}
+
+	// ========================================================================
+	// DELEGACIONES A LOOKUP SERVICE
+	// ========================================================================
 
 	/**
 	 * Obtiene una imagen por su hash.
-	 * @param hash Hash de la imagen
-	 * @returns Imagen con estadísticas o null si no se encuentra
+	 * @deprecated Usar getImageByHash() de image-lookup.service directamente
 	 */
 	async getImageByHash(hash: string): Promise<ImageWithStats | null> {
-		try {
-			imageLogger.info('🔍 Buscando imagen por hash:', hash);
-
-			// **MIGRACIÓN A DRIZZLE**
-			const result = await db.select().from(images).where(eq(images.hash, hash)).limit(1);
-
-			if (result.length === 0) {
-				imageLogger.info('Imagen no encontrada por hash:', hash);
-				return null;
-			}
-
-			const image = result[0];
-			imageLogger.info('✅ Imagen encontrada por hash:', image.name);
-
-			// Construir imagen con estadísticas
-			const imageWithStats: ImageWithStats = {
-				...image,
-				isFavorite: Boolean(image.isFavorite),
-				entityType: 'image',
-				stats: {
-					viewCount: 0,
-					downloadCount: 0,
-					likeCount: 0,
-					commentCount: 0,
-					tagCount: 0,
-					albumCount: 0,
-					collectionCount: 0,
-					characterCount: 0,
-					placeCount: 0,
-					worldItemCount: 0,
-					conceptCount: 0,
-					promptCount: 0,
-					noteCount: 0,
-					wildcardCount: 0,
-					propertyCount: 0,
-					groupCount: 0,
-				},
-				thumbnailUrl: `/api/images/${image.id}/thumbnail`,
-				fullUrl: `/api/images/${image.id}/original`,
-			};
-
-			return imageWithStats;
-		} catch (error) {
-			imageLogger.error('❌ Error al buscar imagen por hash:', error);
-			throw toServiceError(error, {
-				code: ServiceErrorCode.DATABASE_ERROR,
-				message: 'Error al buscar imagen por hash',
-				context: { hash },
-				serviceName: SERVICE_NAME,
-			});
-		}
+		return getImageByHash(hash);
 	}
 
 	/**
-	 * Busca una imagen por path y folderId para evitar duplicados
-	 * @param path - Ruta del archivo
-	 * @param folderId - ID de la carpeta
-	 * @returns Imagen con estadísticas o null si no se encuentra
+	 * Busca una imagen por path y folderId
+	 * @deprecated Usar getImageByPathAndFolder() de image-lookup.service directamente
 	 */
 	async getImageByPathAndFolder(path: string, folderId: string): Promise<ImageWithStats | null> {
-		try {
-			imageLogger.info('🔍 Buscando imagen por path y folderId:', { path, folderId });
-
-			const result = await db
-				.select()
-				.from(images)
-				.where(and(eq(images.path, path), eq(images.folderId, folderId)))
-				.limit(1);
-
-			if (result.length === 0) {
-				imageLogger.info('Imagen no encontrada por path y folderId');
-				return null;
-			}
-
-			const image = result[0];
-
-			// Obtener estadísticas de la imagen
-			const statsResult = await db.select().from(fileStats).where(eq(fileStats.fileId, image.id)).limit(1);
-
-			const stats = statsResult[0] || { views: 0 };
-
-			// Convertir a ImageWithStats
-			const imageWithStats: ImageWithStats = {
-				...image,
-				isFavorite: Boolean(image.isFavorite),
-				entityType: 'image',
-				stats: {
-					viewCount: (stats as any).views ?? 0,
-					downloadCount: 0,
-					likeCount: 0,
-					commentCount: 0,
-					tagCount: 0,
-					albumCount: 0,
-					collectionCount: 0,
-					characterCount: 0,
-					placeCount: 0,
-					worldItemCount: 0,
-					conceptCount: 0,
-					promptCount: 0,
-					noteCount: 0,
-					wildcardCount: 0,
-					propertyCount: 0,
-					groupCount: 0,
-				},
-				thumbnailUrl: `/api/images/${image.id}/thumbnail`,
-				fullUrl: `/api/images/${image.id}/original`,
-			};
-
-			return imageWithStats;
-		} catch (error) {
-			imageLogger.error('❌ Error al buscar imagen por path y folderId:', error);
-			throw toServiceError(error, {
-				code: ServiceErrorCode.DATABASE_ERROR,
-				message: 'Error al buscar imagen por path y folderId',
-				context: { path, folderId },
-				serviceName: SERVICE_NAME,
-			});
-		}
+		return getImageByPathAndFolder(path, folderId);
 	}
 }
 

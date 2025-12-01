@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { z } from 'zod';
 import * as noteService from '@/services/note/note.service';
 import { toNoteWithStats } from '@/transformers/note';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = Router();
 
@@ -45,7 +46,7 @@ router.get('/', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error getting notes:', error);
+		serverLogger.error('Error getting notes:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -63,7 +64,7 @@ router.get('/:id', async (req, res) => {
 
 		res.json(toNoteWithStats(note));
 	} catch (error) {
-		console.error('Error getting note:', error);
+		serverLogger.error('Error getting note:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -76,7 +77,7 @@ router.get('/:id/images', async (req, res) => {
 		// TODO: Implementar transformación cuando getNoteImages devuelva el tipo correcto
 		res.json(images);
 	} catch (error) {
-		console.error('Error getting note images:', error);
+		serverLogger.error('Error getting note images:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -89,7 +90,7 @@ router.get('/:id/recent-images', async (req, res) => {
 		const images = await noteService.getRecentNoteImages(id, limit);
 		res.json(images);
 	} catch (error) {
-		console.error('Error getting recent note images:', error);
+		serverLogger.error('Error getting recent note images:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -101,7 +102,7 @@ router.get('/:id/counts', async (req, res) => {
 		const counts = await noteService.getNoteCounts(id);
 		res.json(counts);
 	} catch (error) {
-		console.error('Error getting note counts:', error);
+		serverLogger.error('Error getting note counts:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -112,7 +113,7 @@ router.get('/statuses', async (_req, res) => {
 		const statuses = await noteService.getNoteStatuses();
 		res.json(statuses);
 	} catch (error) {
-		console.error('Error getting note statuses:', error);
+		serverLogger.error('Error getting note statuses:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -140,7 +141,7 @@ router.post('/', async (req, res) => {
 		const newNote = await noteService.createNote(noteData);
 		res.status(201).json(toNoteWithStats(newNote));
 	} catch (error) {
-		console.error('Error creating note:', error);
+		serverLogger.error('Error creating note:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -175,7 +176,7 @@ router.put('/:id', async (req, res) => {
 
 		res.json(toNoteWithStats(note));
 	} catch (error) {
-		console.error('Error updating note:', error);
+		serverLogger.error('Error updating note:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -194,7 +195,7 @@ router.delete('/:id', async (req, res) => {
 
 		res.status(204).send();
 	} catch (error) {
-		console.error('Error deleting note:', error);
+		serverLogger.error('Error deleting note:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

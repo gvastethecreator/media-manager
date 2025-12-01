@@ -1,5 +1,4 @@
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatDate } from '@/lib/utils/date';
 import { Calendar, Clock, Heart, Image, Video } from 'lucide-react';
 import React from 'react';
 import { cn } from '@/lib/utils';
@@ -99,8 +98,8 @@ export function TagCardFooter({
 	})();
 
 	// Formatear fechas
-	const formattedCreated = format(new Date(createdAt), 'dd/MM/yy', { locale: es });
-	const formattedUpdated = format(new Date(updatedAt), 'dd/MM/yy', { locale: es });
+	const formattedCreated = formatDate(new Date(createdAt), 'dd/MM/yy');
+	const formattedUpdated = formatDate(new Date(updatedAt), 'dd/MM/yy');
 
 	const { glow } = raritySettings;
 

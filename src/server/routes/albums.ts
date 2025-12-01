@@ -19,6 +19,7 @@
  */
 
 import express from 'express';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	addImageToAlbumHandler,
 	createAlbumHandler,
@@ -68,10 +69,10 @@ albumsRouter.delete('/:id/images/:imageId', removeImageFromAlbumHandler);
 
 // Middleware de captura de errores específico para albums (debe ir al final)
 albumsRouter.use((error: any, req: any, res: any, _next: any) => {
-	console.error('🚨 [ALBUMS ERROR MIDDLEWARE] Error capturado:', error);
-	console.error('🚨 [ALBUMS ERROR MIDDLEWARE] Stack:', error.stack);
-	console.error('🚨 [ALBUMS ERROR MIDDLEWARE] Message:', error.message);
-	console.error('🚨 [ALBUMS ERROR MIDDLEWARE] URL:', req.url);
-	console.error('🚨 [ALBUMS ERROR MIDDLEWARE] Method:', req.method);
+	serverLogger.error('🚨 [ALBUMS ERROR MIDDLEWARE] Error capturado:', error);
+	serverLogger.error('🚨 [ALBUMS ERROR MIDDLEWARE] Stack:', error.stack);
+	serverLogger.error('🚨 [ALBUMS ERROR MIDDLEWARE] Message:', error.message);
+	serverLogger.error('🚨 [ALBUMS ERROR MIDDLEWARE] URL:', req.url);
+	serverLogger.error('🚨 [ALBUMS ERROR MIDDLEWARE] Method:', req.method);
 	res.status(500).json({ error: 'Error interno del servidor en albums' });
 });

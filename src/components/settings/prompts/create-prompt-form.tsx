@@ -10,6 +10,7 @@ import { toastService } from '@/lib/ui/toast';
 import type { PromptBase } from '@/types/entities/prompt/base';
 import { PromptCategory, PromptModel } from '@/types/entities/prompt/enums';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 // Función para formatear los nombres de modelos para mostrar
 const _formatModelName = (model: string): string => {
@@ -204,7 +205,7 @@ export function CreatePromptForm({
 						onCreated?.(created as PromptBase);
 					}
 				} catch (error) {
-					console.error('Error al procesar el prompt:', error);
+					clientLogger.error('Error al procesar el prompt:', error);
 				}
 			}}
 			optionalFields={optionalFields}

@@ -3,6 +3,7 @@ import gsap from 'gsap';
 import { AlertCircle, Check, Info, Terminal } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 interface LogEntry {
 	id: string;
@@ -364,7 +365,7 @@ export function ReindexTerminal({
 				const event = JSON.parse(e.data);
 				handleSSEEvent(event);
 			} catch (error) {
-				console.error('Error parsing SSE event:', error);
+				clientLogger.error('Error parsing SSE event:', error);
 				addLog('ERROR', '❌ Error procesando evento del servidor', { source: 'sse' });
 			}
 		});
@@ -375,7 +376,7 @@ export function ReindexTerminal({
 		});
 
 		eventSource.onerror = (error) => {
-			console.error('SSE Error:', error);
+			clientLogger.error('SSE Error:', error);
 			addLog('WARNING', '⚠️  Conexión perdida, intentando reconectar...', { source: 'sse' });
 		};
 

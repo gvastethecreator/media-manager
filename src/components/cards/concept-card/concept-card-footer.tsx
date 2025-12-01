@@ -1,5 +1,4 @@
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatDistanceToNow } from '@/lib/utils/date';
 import { BookOpen, Calendar, Clock, Lightbulb, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -43,11 +42,9 @@ export function ConceptCardFooter({
 	// Calcular tiempo relativo
 	const createdTimeAgo = formatDistanceToNow(createdAtDate, {
 		addSuffix: true,
-		locale: es,
 	});
 	const updatedTimeAgo = formatDistanceToNow(updatedAtDate, {
 		addSuffix: true,
-		locale: es,
 	});
 
 	// Calcular rareza basado en relaciones totales
@@ -83,9 +80,9 @@ export function ConceptCardFooter({
 	// Calcular nivel de "poder" para cartas TCG (mayor valor = carta más poderosa)
 	const powerLevel = tcgMode
 		? Math.min(
-				99,
-				Math.floor(imagesCount * 2 + videosCount * 3 + promptsCount * 2 + notesCount * 1 + totalRelations * 0.5)
-			)
+			99,
+			Math.floor(imagesCount * 2 + videosCount * 3 + promptsCount * 2 + notesCount * 1 + totalRelations * 0.5)
+		)
 		: 0;
 
 	return (
@@ -93,7 +90,7 @@ export function ConceptCardFooter({
 			className={cn(
 				'px-3 py-2 text-white/80 text-xs',
 				tcgMode ? 'border-white/10 border-t' : '',
-				isFavorite && tcgMode ? 'bg-gradient-to-t from-amber-950/40 to-amber-900/20' : ''
+				isFavorite && tcgMode ? 'bg-linear-to-t from-amber-950/40 to-amber-900/20' : ''
 			)}
 			style={{
 				background: tcgMode

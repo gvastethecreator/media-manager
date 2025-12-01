@@ -29,6 +29,7 @@ import { useThumbnailStore } from '@/store/thumbnails.store';
 import { ThumbnailError } from './thumbnail-error';
 import { ThumbnailAdvancedSettings } from './thumbnail-advanced-settings';
 import { DEFAULT_THUMBNAIL_ADVANCED_CONFIG, type ThumbnailAdvancedConfig } from '@/types/thumbnails-advanced.config';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
 	{
@@ -132,7 +133,7 @@ export function ThumbnailsSettings() {
 					}
 				},
 				onError: (error: unknown) => {
-					console.error(`Error en ${processName}:`, error);
+					clientLogger.error(`Error en ${processName}:`, error);
 					toastService.error(
 						error instanceof Error
 							? `Error: ${error.message}`
@@ -162,7 +163,7 @@ export function ThumbnailsSettings() {
 
 			await mutation.mutateAsync(options);
 		} catch (error: unknown) {
-			console.error(`Error en ${processName}:`, error);
+			clientLogger.error(`Error en ${processName}:`, error);
 			toastService.error(
 				error instanceof Error
 					? `Error: ${error.message}`
@@ -180,7 +181,7 @@ export function ThumbnailsSettings() {
 			await updateSettings({ thumbnailQuality: quality });
 			toastService.success('La calidad de las miniaturas se ha actualizado correctamente');
 		} catch (error) {
-			console.error('Error actualizando calidad:', error);
+			clientLogger.error('Error actualizando calidad:', error);
 			toastService.error('No se pudo actualizar la calidad de las miniaturas');
 		}
 	};
@@ -190,7 +191,7 @@ export function ThumbnailsSettings() {
 			await updateSettings({ videoThumbnailAnimation: enabled });
 			toastService.success(`La animación de videos se ha ${enabled ? 'activado' : 'desactivado'} correctamente`);
 		} catch (error) {
-			console.error('Error actualizando animación:', error);
+			clientLogger.error('Error actualizando animación:', error);
 			toastService.error('No se pudo actualizar la configuración de animación');
 		}
 	};
@@ -208,7 +209,7 @@ export function ThumbnailsSettings() {
 			await updateSettings({ thumbnailAdvancedConfig: newConfig });
 			toastService.success('Configuración avanzada actualizada');
 		} catch (error) {
-			console.error('Error actualizando configuración avanzada:', error);
+			clientLogger.error('Error actualizando configuración avanzada:', error);
 			toastService.error('No se pudo actualizar la configuración');
 		}
 	};

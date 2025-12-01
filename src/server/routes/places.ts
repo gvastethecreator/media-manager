@@ -4,6 +4,7 @@ import express from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
 import { places } from '@/lib/drizzle/schema/index';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 
@@ -29,7 +30,7 @@ router.get('/', async (req, res) => {
 	const { search, limit, offset, sortBy, sortOrder, category, isFavorite } = parse.data;
 
 	try {
-		console.log('🔍 [DEBUG] Iniciando consulta de places...');
+		serverLogger.debug('🔍 [DEBUG] Iniciando consulta de places...');
 
 		const whereConditions = [];
 		if (search) {
@@ -66,7 +67,7 @@ router.get('/', async (req, res) => {
 		]);
 
 		const total = totalResult[0].count;
-		console.log('🔍 [DEBUG] Places obtenidos:', placesData.length);
+		serverLogger.debug('🔍 [DEBUG] Places obtenidos:', placesData.length);
 
 		res.json({
 			data: placesData,
@@ -79,7 +80,7 @@ router.get('/', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('🚨 [ERROR] Error en /api/places:', error);
+		serverLogger.error('🚨 [ERROR] Error en /api/places:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -100,7 +101,7 @@ router.get('/:id', async (req, res) => {
 
 		res.json(place);
 	} catch (error) {
-		console.error('Error getting place:', error);
+		serverLogger.error('Error getting place:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -172,7 +173,7 @@ router.post('/', async (req, res) => {
 		const [created] = await db.insert(places).values(newPlace).returning();
 		res.status(201).json(created);
 	} catch (error) {
-		console.error('Error creating place:', error);
+		serverLogger.error('Error creating place:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -229,7 +230,7 @@ router.put('/:id', async (req, res) => {
 		const [updated] = await db.update(places).set(updateData).where(eq(places.id, id)).returning();
 		res.json(updated);
 	} catch (error) {
-		console.error('Error updating place:', error);
+		serverLogger.error('Error updating place:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -252,7 +253,7 @@ router.delete('/:id', async (req, res) => {
 		await db.delete(places).where(eq(places.id, id));
 		res.json({ success: true, message: 'Lugar eliminado correctamente', deletedId: id });
 	} catch (error) {
-		console.error('Error deleting place:', error);
+		serverLogger.error('Error deleting place:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

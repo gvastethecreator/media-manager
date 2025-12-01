@@ -5,6 +5,7 @@ import { db } from '@/lib/drizzle';
 import { groups } from '@/lib/drizzle/schema/index';
 import { groupService } from '@/services/group/group.service';
 import { toGroupWithStats } from '@/transformers/group';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 
@@ -110,7 +111,7 @@ router.get('/', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error al obtener grupos:', error);
+		serverLogger.error('Error al obtener grupos:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -159,7 +160,7 @@ router.get('/:id', async (req, res) => {
 
 		res.json(toGroupWithStats(formattedGroup));
 	} catch (error) {
-		console.error('Error al obtener grupo:', error);
+		serverLogger.error('Error al obtener grupo:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -196,7 +197,7 @@ router.get('/:id/images', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error getting group images:', error);
+		serverLogger.error('Error getting group images:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -210,7 +211,7 @@ router.get('/:id/media', async (req, res) => {
 		const media: any[] = [];
 		res.json(media);
 	} catch (error) {
-		console.error('Error getting recent group media:', error);
+		serverLogger.error('Error getting recent group media:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -223,7 +224,7 @@ router.get('/:id/card-data', async (req, res) => {
 		const cardData = await groupService.getCardData(id);
 		res.json(cardData);
 	} catch (error) {
-		console.error('Error getting group card data:', error);
+		serverLogger.error('Error getting group card data:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

@@ -2,6 +2,7 @@ import { createAudio, getAudioByHash } from '@/services/audio/audio.service';
 import type { AudioCreateInput } from '@/types/entities/audio';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 /**
  * Procesador especializado para entidades de tipo AUDIO
@@ -74,7 +75,7 @@ export class AudioProcessor {
 		const fileName = basename(filePath);
 		const extension = extname(filePath).toLowerCase();
 		
-		console.log(`🎵 [AudioProcessor] Extrayendo metadata: ${fileName}`);
+		serverLogger.debug(`🎵 [AudioProcessor] Extrayendo metadata: ${fileName}`);
 
 		try {
 			const { audioMetadataService } = await import('@/services/audio/audio-metadata.service');
@@ -114,10 +115,10 @@ export class AudioProcessor {
 				})
 				.where(eq(audios.id, entityId));
 
-			console.log(`✅ [AudioProcessor] Metadata extraída: ${fileName}`);
+			serverLogger.debug(`✅ [AudioProcessor] Metadata extraída: ${fileName}`);
 			return { success: true };
 		} catch (primaryError) {
-			console.warn(`⚠️ [AudioProcessor] Servicio principal falló para ${fileName}:`, primaryError);
+			serverLogger.warn(`⚠️ [AudioProcessor] Servicio principal falló para ${fileName}:`, primaryError);
 
 			// Fallback: Extracción básica de metadata sin dependencias
 			try {
@@ -143,10 +144,10 @@ export class AudioProcessor {
 					})
 					.where(eq(audios.id, entityId));
 
-				console.log(`⚠️ [AudioProcessor] Metadata básica guardada (fallback): ${fileName}`);
+				serverLogger.debug(`⚠️ [AudioProcessor] Metadata básica guardada (fallback): ${fileName}`);
 				return { success: true, error: 'Used fallback extraction' };
 			} catch (fallbackError) {
-				console.error(`❌ [AudioProcessor] Fallback también falló para ${fileName}:`, fallbackError);
+				serverLogger.error(`❌ [AudioProcessor] Fallback también falló para ${fileName}:`, fallbackError);
 				return { 
 					success: false, 
 					error: `Audio metadata extraction failed: ${primaryError instanceof Error ? primaryError.message : 'Unknown error'}` 
@@ -182,7 +183,7 @@ export class AudioProcessor {
 		const { basename } = await import('node:path');
 		const fileName = basename(filePath);
 		
-		console.log(`🎵 [AudioProcessor] Generando waveform: ${fileName}`);
+		serverLogger.debug(`🎵 [AudioProcessor] Generando waveform: ${fileName}`);
 
 		try {
 			const { generateAndSaveWaveform } = await import('@/lib/utils/audio/waveform-generator');
@@ -196,18 +197,18 @@ export class AudioProcessor {
 				samples: 200,
 			});
 
-			console.log(`✅ [AudioProcessor] Waveform generado: ${fileName}`);
+			serverLogger.debug(`✅ [AudioProcessor] Waveform generado: ${fileName}`);
 			return { success: true };
 		} catch (error) {
-			console.warn(`⚠️ [AudioProcessor] Error generando waveform para ${fileName}:`, error);
+			serverLogger.warn(`⚠️ [AudioProcessor] Error generando waveform para ${fileName}:`, error);
 
 			// Fallback: Crear placeholder simple
 			try {
 				await this.createAudioPlaceholder(filePath, entityId);
-				console.log(`⚠️ [AudioProcessor] Usando placeholder para: ${fileName}`);
+				serverLogger.debug(`⚠️ [AudioProcessor] Usando placeholder para: ${fileName}`);
 				return { success: true, error: 'Using placeholder due to waveform generation failure' };
 			} catch (placeholderError) {
-				console.error(`❌ [AudioProcessor] Placeholder también falló para ${fileName}:`, placeholderError);
+				serverLogger.error(`❌ [AudioProcessor] Placeholder también falló para ${fileName}:`, placeholderError);
 				return { 
 					success: false, 
 					error: error instanceof Error ? error.message : 'Unknown error' 

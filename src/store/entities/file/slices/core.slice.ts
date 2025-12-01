@@ -10,6 +10,7 @@ import { toFileWithStatsList } from '@/transformers/file/mappers';
 import { FileBase, FileWithStats } from '@/types/entities/file/base';
 import type { DirectoryReadResult, FileBase as FileBaseFromTypes } from '@/types/entities/file/types';
 import { FileStore } from '..';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 // Estado
 export interface CoreState {
@@ -123,7 +124,7 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 			updateDirectoryContents(result);
 		} catch (error: any) {
 			setError(error.message);
-			console.error('Error navigating to directory:', error);
+			clientLogger.error('Error navigating to directory:', error);
 		} finally {
 			setIsLoading(false);
 		}
@@ -148,7 +149,7 @@ export const createCoreSlice: StateCreator<FileStore, [], [], CoreState & CoreAc
 			updateDirectoryContents(result);
 		} catch (error: any) {
 			setError(error.message);
-			console.error('Error navigating up:', error);
+			clientLogger.error('Error navigating up:', error);
 		} finally {
 			setIsLoading(false);
 		}

@@ -4,6 +4,7 @@
  */
 
 import express from 'express';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 
@@ -80,7 +81,7 @@ async function analyze3DModel(modelPath: string): Promise<Model3DInfo | null> {
 		const extension = modelPath.substring(modelPath.lastIndexOf('.')).toLowerCase();
 
 		if (!SUPPORTED_FORMATS.includes(extension)) {
-			console.warn(`Formato no soportado: ${extension}`);
+			serverLogger.warn(`Formato no soportado: ${extension}`);
 			return null;
 		}
 
@@ -96,7 +97,7 @@ async function analyze3DModel(modelPath: string): Promise<Model3DInfo | null> {
 			},
 		};
 	} catch (error) {
-		console.error('Error analizando modelo 3D:', error);
+		serverLogger.error('Error analizando modelo 3D:', error);
 		return null;
 	}
 }
@@ -156,8 +157,8 @@ function generate3DInfoSVG(modelInfo: Model3DInfo | null, options: Model3DThumbn
  */
 async function render3DModelHeadless(modelPath: string, options: Model3DThumbnailOptions): Promise<Buffer | null> {
 	// TODO: Implementar renderizado headless real con Three.js + canvas
-	console.log('Renderizado headless de modelos 3D pendiente de implementación');
-	console.log('Modelo:', modelPath, 'Opciones:', options);
+	serverLogger.debug('Renderizado headless de modelos 3D pendiente de implementación');
+	serverLogger.debug('Modelo:', { modelPath, options });
 	return null;
 }
 
@@ -200,7 +201,7 @@ router.get('/:id/thumbnail', async (req, res) => {
 		res.setHeader('Cache-Control', 'public, max-age=3600');
 		res.send(infoSVG);
 	} catch (error) {
-		console.error('Error generando thumbnail 3D:', error);
+		serverLogger.error('Error generando thumbnail 3D:', error);
 
 		// Fallback de error: SVG simple
 		const errorSVG = generate3DPlaceholderSVG({
@@ -242,7 +243,7 @@ router.get('/:id/info', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error obteniendo información del modelo 3D:', error);
+		serverLogger.error('Error obteniendo información del modelo 3D:', error);
 		res.status(500).json({ error: 'Error analyzing 3D model' });
 	}
 });

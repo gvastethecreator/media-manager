@@ -1,7 +1,8 @@
-// @ts-nocheck - Temporary suppression for Express handler parameter types
+import type { Request, Response } from 'express';
 import { Router } from 'express';
 import { z } from 'zod';
 import { profileService } from '../../services/profile/profile.service';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = Router() as any;
 
@@ -19,7 +20,7 @@ const createProfileSchema = z.object({
 const updateProfileSchema = createProfileSchema.partial();
 
 // GET /api/profiles/active - Obtener perfil activo
-router.get('/active', async (_req, res) => {
+router.get('/active', async (_req: Request, res: Response) => {
 	try {
 		const profile = await profileService.getActiveProfile();
 
@@ -35,7 +36,7 @@ router.get('/active', async (_req, res) => {
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		console.error('Error obteniendo perfil activo:', error);
+		serverLogger.error('Error obteniendo perfil activo:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -45,7 +46,7 @@ router.get('/active', async (_req, res) => {
 });
 
 // GET /api/profiles - Obtener todos los perfiles
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
 	try {
 		const page = Number(req.query.page) || 1;
 		const limit = Number(req.query.limit) || 10;
@@ -64,7 +65,7 @@ router.get('/', async (req, res) => {
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		console.error('Error obteniendo perfiles:', error);
+		serverLogger.error('Error obteniendo perfiles:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -74,7 +75,7 @@ router.get('/', async (req, res) => {
 });
 
 // POST /api/profiles - Crear nuevo perfil
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
 	try {
 		const rawData = createProfileSchema.parse(req.body);
 		// Normalizar undefined a null para campos nullable
@@ -103,7 +104,7 @@ router.post('/', async (req, res) => {
 			});
 		}
 
-		console.error('Error creando perfil:', error);
+		serverLogger.error('Error creando perfil:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -113,7 +114,7 @@ router.post('/', async (req, res) => {
 });
 
 // PUT /api/profiles/:id - Actualizar perfil
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		const rawData = updateProfileSchema.parse(req.body);
@@ -150,7 +151,7 @@ router.put('/:id', async (req, res) => {
 			});
 		}
 
-		console.error('Error actualizando perfil:', error);
+		serverLogger.error('Error actualizando perfil:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -160,7 +161,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // POST /api/profiles/:id/activate - Activar perfil
-router.post('/:id/activate', async (req, res) => {
+router.post('/:id/activate', async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 
@@ -171,7 +172,7 @@ router.post('/:id/activate', async (req, res) => {
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		console.error('Error activando perfil:', error);
+		serverLogger.error('Error activando perfil:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -181,7 +182,7 @@ router.post('/:id/activate', async (req, res) => {
 });
 
 // DELETE /api/profiles/:id - Eliminar perfil
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 
@@ -192,7 +193,7 @@ router.delete('/:id', async (req, res) => {
 			timestamp: new Date().toISOString(),
 		});
 	} catch (error) {
-		console.error('Error eliminando perfil:', error);
+		serverLogger.error('Error eliminando perfil:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',

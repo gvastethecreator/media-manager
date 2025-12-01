@@ -17,6 +17,7 @@ import type { AnyEntityWithStats } from '@/types/entities';
 import type { MediaItem } from '../components/media-thumbnail';
 import type { ClickModifiers } from '../types/file-browser.types';
 import { applySearch, applySort } from './file-browser.utils';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 export interface RenderFromItemsProps {
     className?: string;
@@ -44,7 +45,7 @@ export function renderFromItems({
     // Función de refresh básica para items directos (opcional)
     const handleRefresh = () => {
         // En este contexto, no hay mucho que refrescar ya que los items vienen como props
-        console.log('Refresh solicitado para items directos');
+        clientLogger.debug('Refresh solicitado para items directos');
     };
 
     const viewMode = useViewOptionsStore((s) => s.viewMode);
@@ -113,7 +114,8 @@ export function renderFromItems({
             const imageItems = processedItems.filter((it) => it.entityType === 'image');
             const initialIndex = imageItems.findIndex((it) => it.id === item.id);
             if (imageItems.length > 0 && initialIndex >= 0) {
-                openViewer(imageItems as AnyEntityWithStats[], initialIndex);
+                // El store filtra internamente con isImageWithStats
+                openViewer(imageItems as unknown as AnyEntityWithStats[], initialIndex);
             }
         }
     };

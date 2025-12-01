@@ -5,6 +5,8 @@
  * capabilities, progress tracking, and operation queuing.
  */
 
+import { clientLogger } from '@/lib/logger/client-logger';
+
 // Browser-compatible EventEmitter implementation
 type BatchEvents =
 	| { type: 'operationStarted'; payload: BatchOperation }
@@ -40,7 +42,7 @@ class EventEmitter {
 			try {
 				(listener as BatchListener<typeof payload>)(payload);
 			} catch (error) {
-				console.error('Error in event listener:', error);
+				clientLogger.error('Error in event listener:', error);
 			}
 		}
 		return true;
