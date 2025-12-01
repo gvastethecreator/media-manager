@@ -1,8 +1,9 @@
-// @ts-nocheck - Temporary suppression for Express handler parameter types
+import type { Request, Response } from 'express';
 import { Router } from 'express';
 import { z } from 'zod';
 import { getWildcard, getWildcards } from '@/services/wildcard/wildcard.service';
 import { toWildcardWithStats } from '@/transformers/wildcard';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = Router() as any;
 
@@ -22,7 +23,7 @@ const WildcardCreateSchema = z.object({
 const WildcardUpdateSchema = WildcardCreateSchema.partial();
 
 // GET /wildcards/cards - Obtener wildcards para mostrar en galería de cards (migrado desde server actions)
-router.get('/cards', async (req, res) => {
+router.get('/cards', async (req: Request, res: Response) => {
 	try {
 		const { limit = '20', category, parentId, searchTerm, orderBy = 'updatedAt', orderDir = 'desc' } = req.query;
 
@@ -41,13 +42,13 @@ router.get('/cards', async (req, res) => {
 
 		res.json(limitedWildcards);
 	} catch (error) {
-		console.error('Error getting wildcards for cards:', error);
+		serverLogger.error('Error getting wildcards for cards:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 
 // GET /wildcards - Listar wildcards con filtros
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
 	try {
 		const { search, limit = '50', offset = '0', sortBy = 'name', sortOrder = 'asc' } = req.query;
 
@@ -75,13 +76,13 @@ router.get('/', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error getting wildcards:', error);
+		serverLogger.error('Error getting wildcards:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 
 // GET /wildcards/:id/card-data - Obtener datos específicos para card (migrado desde server actions)
-router.get('/:id/card-data', async (req, res) => {
+router.get('/:id/card-data', async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		const wildcard = await getWildcard(id);
@@ -102,13 +103,13 @@ router.get('/:id/card-data', async (req, res) => {
 
 		res.json(cardData);
 	} catch (error) {
-		console.error('Error getting wildcard card data:', error);
+		serverLogger.error('Error getting wildcard card data:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 
 // GET /wildcards/:id - Obtener wildcard por ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		const wildcard = await getWildcard(id);
@@ -120,13 +121,13 @@ router.get('/:id', async (req, res) => {
 
 		res.json(wildcard);
 	} catch (error) {
-		console.error('Error getting wildcard:', error);
+		serverLogger.error('Error getting wildcard:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 
 // GET /wildcards/:id/recent-images - Obtener imágenes recientes de un wildcard
-router.get('/:id/recent-images', async (req, res) => {
+router.get('/:id/recent-images', async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		const limit = Number(req.query.limit) || 4;
@@ -134,13 +135,13 @@ router.get('/:id/recent-images', async (req, res) => {
 		const images: any[] = []; // TODO: Implementar relación images para wildcards
 		res.json(images);
 	} catch (error) {
-		console.error('Error getting recent wildcard images:', error);
+		serverLogger.error('Error getting recent wildcard images:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 
 // POST /wildcards - Crear nuevo wildcard
-router.post('/', async (req, res) => {
+router.post('/', async (req: Request, res: Response) => {
 	try {
 		const { name, content, description, category, tags } = req.body;
 
@@ -180,15 +181,21 @@ router.post('/', async (req, res) => {
 			return;
 		}
 
-		res.status(200).json(toWildcardWithStats(updatedWildcard));
+		// Re-fetch para obtener el objeto con formato correcto
+		const result = await getWildcard(updatedWildcard.id);
+		if (!result) {
+			res.status(500).json({ error: 'Error al obtener el wildcard actualizado' });
+			return;
+		}
+		res.status(200).json(result);
 	} catch (error) {
-		console.error('Error creating wildcard:', error);
+		serverLogger.error('Error creating wildcard:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 
 // PUT /wildcards/:id - Actualizar wildcard
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		const { name, content, description, category, tags } = req.body;
@@ -209,8 +216,8 @@ router.put('/:id', async (req, res) => {
 			tags,
 		};
 
-		const result = await getWildcards({ search: name }).then((result) => {
-			if (result.wildcards.length > 0) {
+		const result = await getWildcards({ search: name }).then((searchResult) => {
+			if (searchResult.wildcards.length > 0) {
 				return null;
 			}
 			return updatedWildcard;
@@ -220,15 +227,21 @@ router.put('/:id', async (req, res) => {
 			return res.status(500).json({ error: 'Wildcard ya existe' });
 		}
 
-		res.status(200).json(toWildcardWithStats(result));
+		// Re-fetch para obtener el objeto con formato correcto
+		const freshWildcard = await getWildcard(result.id);
+		if (!freshWildcard) {
+			res.status(500).json({ error: 'Error al obtener el wildcard actualizado' });
+			return;
+		}
+		res.status(200).json(freshWildcard);
 	} catch (error) {
-		console.error('Error updating wildcard:', error);
+		serverLogger.error('Error updating wildcard:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 
 // DELETE /wildcards/:id - Eliminar wildcard
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 
@@ -241,7 +254,7 @@ router.delete('/:id', async (req, res) => {
 
 		res.status(204).send();
 	} catch (error) {
-		console.error('Error deleting wildcard:', error);
+		serverLogger.error('Error deleting wildcard:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

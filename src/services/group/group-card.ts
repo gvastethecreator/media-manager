@@ -160,7 +160,7 @@ export async function getGroupCardDataService(groupId: string) {
 			try {
 				filters = JSON.parse(groupData.filters);
 			} catch (e) {
-				console.error('Error parsing group filters:', e);
+				serverLogger.error('Error parsing group filters:', e);
 			}
 		}
 

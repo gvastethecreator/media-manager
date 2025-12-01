@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import type { MediaItem } from '@/types';
-import type { SortOption } from '@/types/sort';
+import type { MediaItem } from '../components/media-thumbnail';
+import type { SortOption } from '@/store/ui/view-options.slice';
 import {
 	addParentNavigation,
 	applySearch,

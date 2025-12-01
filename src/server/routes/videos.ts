@@ -1,7 +1,6 @@
-// @ts-nocheck - Temporary suppression for Express handler parameter types
-
 import { Buffer } from 'node:buffer';
 import { existsSync } from 'node:fs';
+import type { Request, Response } from 'express';
 import { Router } from 'express';
 import { z } from 'zod';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -41,7 +40,7 @@ const VideoCreateSchema = z.object({
 const VideoUpdateSchema = VideoCreateSchema.partial();
 
 // GET /api/videos - Obtener videos con filtros
-router.get('/', async (req, res) => {
+router.get('/', async (req: Request, res: Response) => {
 	try {
 		const filters = req.query; // Los filtros se validan en el servicio
 		const result = await getVideos(filters as any);
@@ -126,7 +125,7 @@ router.get('/', async (req, res) => {
 });
 
 // GET /api/videos/:id - Obtener un video por ID
-router.get('/:id', async (req, res) => {
+router.get('/:id', async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		const video = await getVideoById(id);
@@ -198,7 +197,7 @@ router.get('/:id', async (req, res) => {
 });
 
 // GET /api/videos/:id/thumbnail - Servir thumbnail de video
-router.get('/:id/thumbnail', async (req, res) => {
+router.get('/:id/thumbnail', async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params as { id: string };
 		const timeParam = (req.query.time || req.query.timestamp) as string | undefined;
@@ -343,7 +342,7 @@ router.get('/:id/thumbnail', async (req, res) => {
 });
 
 // PUT /api/videos/:id - Actualizar video
-router.put('/:id', async (req, res) => {
+router.put('/:id', async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		const validatedData = VideoUpdateSchema.parse(req.body);
@@ -359,7 +358,7 @@ router.put('/:id', async (req, res) => {
 });
 
 // DELETE /api/videos/:id - Eliminar video
-router.delete('/:id', async (req, res) => {
+router.delete('/:id', async (req: Request, res: Response) => {
 	try {
 		const { id } = req.params;
 		const result = await deleteVideo(id);
@@ -382,7 +381,7 @@ router.delete('/:id', async (req, res) => {
 });
 
 // GET /api/videos/stats/formats - Obtener estadísticas de formatos de video
-router.get('/stats/formats', async (_req, res) => {
+router.get('/stats/formats', async (_req: Request, res: Response) => {
 	try {
 		const formatStats = await getVideoFormatStats();
 		res.json({

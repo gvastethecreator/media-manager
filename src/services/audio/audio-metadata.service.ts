@@ -1,6 +1,7 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import { type IAudioMetadata, parseBuffer } from 'music-metadata';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 export interface AudioMetadataExtract {
 	duration: number | null;
@@ -59,7 +60,7 @@ export class AudioMetadataService {
 				},
 			};
 		} catch (error) {
-			console.warn('AudioMetadataService: fallo extrayendo metadata para', basename(filePath), error);
+			serverLogger.warn('AudioMetadataService: fallo extrayendo metadata para', { filePath: basename(filePath), error: String(error) });
 			return { duration: null, bitrate: null, sampleRate: null, channels: null, format: null, codec: null, tags: null };
 		}
 	}

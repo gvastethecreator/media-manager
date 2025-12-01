@@ -6,6 +6,7 @@ import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen
 import { Button } from '@/components/ui/button';
 import { useCreateFolder, useFolders } from '@/lib/api/folders';
 import type { FolderWithStats } from '@/types/entities/folder';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 interface FoldersViewProps {
 	className?: string;
@@ -52,7 +53,7 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 			setNewFolderPath('');
 			setShowForm(false);
 		} catch (error) {
-			console.error('Error creating folder:', error);
+			clientLogger.error('Error creating folder:', error);
 		}
 	};
 

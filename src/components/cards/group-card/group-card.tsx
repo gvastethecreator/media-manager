@@ -7,6 +7,7 @@ import { GroupCardContent } from './group-card-content';
 import { GroupCardFooter } from './group-card-footer';
 import { GroupCardHeader } from './group-card-header';
 import { GroupCardImages } from './group-card-images';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 export const GroupCard = memo(function GroupCard({
 	group,
@@ -97,7 +98,7 @@ export const GroupCard = memo(function GroupCard({
 				const parsedFilters = JSON.parse(group.filters);
 				return Array.isArray(parsedFilters) ? parsedFilters.length : 0;
 			} catch (e) {
-				console.error('Error parsing group filters:', e);
+				clientLogger.error('Error parsing group filters:', e);
 				return 0;
 			}
 		}

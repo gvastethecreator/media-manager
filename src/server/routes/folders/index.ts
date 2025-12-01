@@ -5,10 +5,9 @@
  * ✅ FIXED - Integrados módulos implementados (Oct 10, 2025)
  */
 
-// @ts-nocheck - Temporary suppression for Express handler parameter types
-
 import { eq } from 'drizzle-orm';
-import { Router } from 'express';
+import type { Request, Response, Router } from 'express';
+import express from 'express';
 import { db } from '@/lib/drizzle';
 import { folders } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -18,7 +17,8 @@ import { registerFolderPreviewEndpoint } from './preview-endpoint';
 
 const logger = serverLogger.withContext('FoldersRouter');
 
-export const foldersRouter = Router();
+// Express 5 + TypeScript estricto requiere casteo para handlers async con return condicional
+export const foldersRouter: Router = express.Router();
 
 // ==================== BASIC ROUTES ====================
 
@@ -105,14 +105,16 @@ foldersRouter.post('/', async (req, res) => {
 
 		// Validación básica
 		if (!data.path || !data.name) {
-			return res.status(400).json({ error: 'path y name son requeridos' });
+			res.status(400).json({ error: 'path y name son requeridos' });
+			return;
 		}
 
 		// Verificar si ya existe una carpeta con ese path
 		const existing = await db.select().from(folders).where(eq(folders.path, data.path)).limit(1);
 		if (existing.length > 0) {
 			logger.warn(`❌ Carpeta ya existe: ${data.path}`);
-			return res.status(409).json({ error: 'Ya existe una carpeta con esa ruta' });
+			res.status(409).json({ error: 'Ya existe una carpeta con esa ruta' });
+			return;
 		}
 
 		// Generar ID único
@@ -165,7 +167,8 @@ foldersRouter.get('/:id/stats', async (req, res) => {
 		});
 
 		if (!folder) {
-			return res.status(404).json({ error: 'Carpeta no encontrada' });
+			res.status(404).json({ error: 'Carpeta no encontrada' });
+			return;
 		}
 
 		// Retornar estadísticas from folder record
@@ -196,7 +199,8 @@ foldersRouter.get('/:id', async (req, res) => {
 		});
 
 		if (!folder) {
-			return res.status(404).json({ error: 'Carpeta no encontrada' });
+			res.status(404).json({ error: 'Carpeta no encontrada' });
+			return;
 		}
 
 		res.json(folder);
@@ -220,7 +224,8 @@ foldersRouter.put('/:id', async (req, res) => {
 		const existing = await db.select().from(folders).where(eq(folders.id, id)).limit(1);
 		if (existing.length === 0) {
 			logger.warn(`❌ Carpeta no encontrada: ${id}`);
-			return res.status(404).json({ error: 'Carpeta no encontrada' });
+			res.status(404).json({ error: 'Carpeta no encontrada' });
+			return;
 		}
 
 		// Actualizar
@@ -254,7 +259,8 @@ foldersRouter.delete('/:id', async (req, res) => {
 
 		if (deleted.length === 0) {
 			logger.warn(`❌ Carpeta no encontrada: ${id}`);
-			return res.status(404).json({ error: 'Carpeta no encontrada' });
+			res.status(404).json({ error: 'Carpeta no encontrada' });
+			return;
 		}
 
 		logger.info(`✅ Carpeta eliminada: ${id}`);
@@ -279,7 +285,8 @@ foldersRouter.post('/:id/move', async (req, res) => {
 		const existing = await db.select().from(folders).where(eq(folders.id, id)).limit(1);
 		if (existing.length === 0) {
 			logger.warn(`❌ Carpeta no encontrada: ${id}`);
-			return res.status(404).json({ error: 'Carpeta no encontrada' });
+			res.status(404).json({ error: 'Carpeta no encontrada' });
+			return;
 		}
 
 		// Actualizar parentId
@@ -313,7 +320,8 @@ foldersRouter.post('/:id/toggle-favorite', async (req, res) => {
 		const current = await db.select().from(folders).where(eq(folders.id, id)).limit(1);
 		if (current.length === 0) {
 			logger.warn(`❌ Carpeta no encontrada: ${id}`);
-			return res.status(404).json({ error: 'Carpeta no encontrada' });
+			res.status(404).json({ error: 'Carpeta no encontrada' });
+			return;
 		}
 
 		// Toggle
@@ -347,7 +355,8 @@ foldersRouter.post('/:id/reindex', async (req, res) => {
 		const folder = await db.select().from(folders).where(eq(folders.id, id)).limit(1);
 		if (!folder || folder.length === 0) {
 			logger.warn(`❌ Carpeta no encontrada: ${id}`);
-			return res.status(404).json({ error: 'Carpeta no encontrada' });
+			res.status(404).json({ error: 'Carpeta no encontrada' });
+			return;
 		}
 
 		const options = req.body || {};

@@ -4,7 +4,7 @@ export interface UseBrowserPaginationOptions {
 	totalCount: number;
 	pageSize: number;
 	isPaginatedView: boolean;
-	filterId?: string;
+	filterId?: string | null;
 	searchQuery?: string;
 	sortVersion?: number;
 }

@@ -4,6 +4,10 @@
  * @description Configuración de variables de entorno sin dotenv para compatibilidad con bundling
  */
 
+import { serverLogger } from '@/lib/logger/server-logger';
+
+const envLogger = serverLogger.withContext('ENV');
+
 // Detectar si estamos ejecutando en Tauri
 const isTauri = typeof window !== 'undefined' && '__TAURI__' in window;
 const isTauriDev = process.env.TAURI_ENV === 'dev';
@@ -22,8 +26,8 @@ export const ENV = {
 // Validar variables críticas en el servidor
 if (typeof window === 'undefined') {
 	if (!ENV.DATABASE_URL) {
-		console.error('❌ DATABASE_URL no está definida');
-		console.error('Variables disponibles:', {
+		envLogger.error('❌ DATABASE_URL no está definida');
+		envLogger.error('Variables disponibles:', {
 			NODE_ENV: process.env.NODE_ENV,
 			DATABASE_URL: process.env.DATABASE_URL,
 			TAURI_ENV: process.env.TAURI_ENV,
@@ -35,7 +39,7 @@ if (typeof window === 'undefined') {
 
 	// Log de configuración en desarrollo
 	if (ENV.NODE_ENV === 'development') {
-		console.log('🔧 Configuración ENV:', {
+		envLogger.info('🔧 Configuración ENV:', {
 			NODE_ENV: ENV.NODE_ENV,
 			API_PORT: ENV.API_PORT,
 			DATABASE_URL: ENV.DATABASE_URL,

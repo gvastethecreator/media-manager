@@ -11,6 +11,7 @@ import { JsonProcessor } from './processors/json.processor';
 import { VideoProcessor } from './processors/video.processor';
 import { getEntityTypeFromExtension, getFileInfo } from './utils/file-info.utils';
 import { MetricsCollector } from './utils/metrics.utils';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 /**
  * Servicio core que orquesta el mapeo de archivos físicos a entidades BD
@@ -78,7 +79,7 @@ export class FileEntityMapperCore {
 			// Validar límites de tamaño antes de hash costoso
 			if (quickSize !== null && shouldSkipFileByTypeAndSize(filePath, quickSize)) {
 				const typeLabel = this.getEntityTypeLabel(entityType);
-				console.warn(
+				serverLogger.warn(
 					`[skip][${typeLabel}-size]`,
 					JSON.stringify({
 						path: filePath,
@@ -204,7 +205,7 @@ export class FileEntityMapperCore {
 		const meta = await this.extractMetadataForEntity(filePath, id, basic.entityType);
 		this.metrics.recordPhase('metadata', t1);
 		if (!meta.success) {
-			console.warn('Metadata extraction issue', meta.error);
+			serverLogger.warn('Metadata extraction issue', meta.error);
 		}
 
 		// Etapa 3: Thumbnail
@@ -212,7 +213,7 @@ export class FileEntityMapperCore {
 		const thumb = await this.processThumbnailForEntity(filePath, id, basic.entityType);
 		this.metrics.recordPhase('thumbnail', t2);
 		if (!thumb.success) {
-			console.warn('Thumbnail processing issue', thumb.error);
+			serverLogger.warn('Thumbnail processing issue', thumb.error);
 		}
 
 		return { success: true, entityType: basic.entityType, entityId: id };
@@ -291,7 +292,7 @@ export class FileEntityMapperCore {
 				await this.extractMetadataForEntity(filePath, check.entityId, entityType);
 			}
 		} catch (e) {
-			console.warn('Deferred metadata extraction failed', e);
+			serverLogger.warn('Deferred metadata extraction failed', e);
 		}
 	}
 

@@ -1,6 +1,7 @@
 import React from 'react';
 import packageJson from '../../../package.json' with { type: 'json' };
 import { GlobalErrorFallback } from './global-error-handler';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 interface ErrorBoundaryProps {
 	children: React.ReactNode;
@@ -25,7 +26,7 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
 	componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
 		if (process.env.NODE_ENV !== 'production') {
-			console.error('Error capturado por ErrorBoundary:', error, errorInfo);
+			clientLogger.error('Error capturado por ErrorBoundary:', { error, errorInfo });
 		}
 	}
 

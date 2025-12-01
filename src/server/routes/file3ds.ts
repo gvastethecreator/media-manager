@@ -1,6 +1,7 @@
 import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
 import { createFile3D, deleteFile3D, getFile3DById, getFile3Ds, updateFile3D } from '@/services/file3d/file3d.service';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = Router();
 
@@ -40,7 +41,7 @@ router.get('/', async (_req, res) => {
 		const file3ds = await getFile3Ds();
 		res.json(file3ds);
 	} catch (error) {
-		console.error('Error al obtener archivos 3D:', error);
+		serverLogger.error('Error al obtener archivos 3D:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -56,7 +57,7 @@ const getFile3DByIdHandler = async (req: Request, res: Response) => {
 		}
 		res.json(file3d);
 	} catch (error) {
-		console.error('Error al obtener archivo 3D por ID:', error);
+		serverLogger.error('Error al obtener archivo 3D por ID:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 };
@@ -108,7 +109,7 @@ const createFile3DHandler = async (req: Request, res: Response) => {
 		const newFile3D = await createFile3D(validatedData);
 		res.status(201).json(newFile3D);
 	} catch (error) {
-		console.error('Error al crear archivo 3D:', error);
+		serverLogger.error('Error al crear archivo 3D:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 };
@@ -123,7 +124,7 @@ router.put('/:id', async (req, res) => {
 		const updatedFile3D = await updateFile3D(id, validatedData);
 		res.json(updatedFile3D);
 	} catch (error) {
-		console.error('Error al actualizar archivo 3D:', error);
+		serverLogger.error('Error al actualizar archivo 3D:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -135,7 +136,7 @@ router.delete('/:id', async (req, res) => {
 		await deleteFile3D(id);
 		res.json({ message: 'Archivo 3D eliminado correctamente' });
 	} catch (error) {
-		console.error('Error al eliminar archivo 3D:', error);
+		serverLogger.error('Error al eliminar archivo 3D:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

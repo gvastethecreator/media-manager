@@ -4,6 +4,7 @@
  */
 
 import express from 'express';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 
@@ -188,7 +189,7 @@ async function analyzeAudioFile(audioPath: string): Promise<AudioInfo | null> {
 		const supportedFormats = ['.mp3', '.wav', '.m4a', '.ogg', '.flac', '.aac'];
 
 		if (!supportedFormats.includes(extension)) {
-			console.warn(`Formato de audio no soportado: ${extension}`);
+			serverLogger.warn(`Formato de audio no soportado: ${extension}`);
 			return null;
 		}
 
@@ -202,7 +203,7 @@ async function analyzeAudioFile(audioPath: string): Promise<AudioInfo | null> {
 			bitRate: Math.floor(Math.random() * 192) + 128, // 128-320 kbps
 		};
 	} catch (error) {
-		console.error('Error analizando archivo de audio:', error);
+		serverLogger.error('Error analizando archivo de audio:', error);
 		return null;
 	}
 }
@@ -217,10 +218,10 @@ async function extractWaveformFromAudio(audioPath: string, samples: number): Pro
 		// - Web Audio API o librería similar para análisis
 		// Por ahora, retornamos datos simulados
 
-		console.log(`Extrayendo waveform de ${audioPath} con ${samples} muestras`);
+		serverLogger.debug(`Extrayendo waveform de ${audioPath} con ${samples} muestras`);
 		return generateMockWaveformData(samples);
 	} catch (error) {
-		console.error('Error extrayendo waveform:', error);
+		serverLogger.error('Error extrayendo waveform:', error);
 		return null;
 	}
 }
@@ -263,7 +264,7 @@ router.get('/:id/waveform', async (req, res) => {
 			res.send(infoSVG);
 		}
 	} catch (error) {
-		console.error('Error generando waveform:', error);
+		serverLogger.error('Error generando waveform:', error);
 
 		// Error fallback
 		const errorSVG = generateAudioInfoSVG(null, {
@@ -299,7 +300,7 @@ router.get('/:id/info', async (req, res) => {
 			...audioInfo,
 		});
 	} catch (error) {
-		console.error('Error obteniendo información del audio:', error);
+		serverLogger.error('Error obteniendo información del audio:', error);
 		res.status(500).json({ error: 'Error analyzing audio file' });
 	}
 });
@@ -342,7 +343,7 @@ router.get('/:id/waveform/preview', async (req, res) => {
 			res.send(miniSVG);
 		}
 	} catch (error) {
-		console.error('Error generando preview de waveform:', error);
+		serverLogger.error('Error generando preview de waveform:', error);
 		res.status(500).json({ error: 'Error generating waveform preview' });
 	}
 });

@@ -8,6 +8,7 @@ import { ExtendedContextMenu, type ExtendedContextMenuAction } from '../../conte
 import type { ClickModifiers } from '../../types/file-browser.types';
 import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
 import { CanvasRenderConfig } from './canvas-config';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 export interface ListCanvasProps {
 	items: MediaItem[];
@@ -90,7 +91,7 @@ export function ListCanvas({
 						set(key, { status: 'ready', fallbackIcon: fallback });
 					}
 				} catch (error) {
-					console.warn(`Failed to generate thumbnail for ${it.name}:`, error);
+					clientLogger.warn(`Failed to generate thumbnail for ${it.name}:`, error);
 					const fallback = getFallbackIcon(it.entityType);
 					set(key, { status: 'ready', fallbackIcon: fallback });
 				}
@@ -175,7 +176,7 @@ export function ListCanvas({
 					try {
 						ctx.drawImage(img, dx, dy, dw, dh);
 					} catch (error) {
-						console.warn('Error drawing image:', error);
+						clientLogger.warn('Error drawing image:', error);
 						// Fallback a icono si falla el drawImage
 						ctx.fillStyle = '#374151';
 						ctx.fillRect(thumbX, thumbY, thumb, thumb);

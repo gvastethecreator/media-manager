@@ -21,6 +21,7 @@ import {
 import { getCachedThumbnail } from '@/config/thumbnail-generators';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { EntityStatsType } from '@/types/file-browser/entity-stats';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 /**
  * 🎯 Resultado del hook useEntityTypeConfig
@@ -246,7 +247,7 @@ export function useEntityThumbnails() {
 						const thumbnail = await getCachedThumbnail(item, options);
 						results[item.id] = thumbnail;
 					} catch (error) {
-						console.warn(`Error generando thumbnail para ${item.id}:`, error);
+						clientLogger.warn(`Error generando thumbnail para ${item.id}:`, error);
 						results[item.id] = '';
 					}
 				});

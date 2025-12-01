@@ -53,13 +53,13 @@ export function TagsView() {
 	const handleTagClick = useCallback(
 		(tag: TagWithStats) => {
 			if (!tag?.id) {
-				console.error('❌ Error: Intento de seleccionar una etiqueta inválida', tag);
+				clientLogger.error('❌ Error: Intento de seleccionar una etiqueta inválida', tag);
 				return;
 			}
 
 			// Comprobar que la etiqueta tiene todos los datos necesarios
 			if (!tag.name) {
-				console.warn('⚠️ Advertencia: La etiqueta no tiene un nombre definido');
+				clientLogger.warn('⚠️ Advertencia: La etiqueta no tiene un nombre definido');
 			}
 
 			viewLogger.info('🔍 Seleccionando etiqueta:', { tagId: tag.id, tagName: tag.name });
@@ -75,7 +75,7 @@ export function TagsView() {
 
 	const handleCreateTag = useCallback(() => {
 		if (newTagName.trim() === '') {
-			console.error('❌ Error: El nombre de la etiqueta no puede estar vacío');
+			clientLogger.error('❌ Error: El nombre de la etiqueta no puede estar vacío');
 			return;
 		}
 		createTag({ name: newTagName, description: newTagDescription });

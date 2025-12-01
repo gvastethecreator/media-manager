@@ -5,6 +5,7 @@ import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
 import { FolderCardHeader } from './folder-card-header';
 import { FolderCardImages } from './folder-card-images';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 export interface FolderCardProps {
 	folder: FolderWithStats;
@@ -22,7 +23,7 @@ export const FolderCard = memo(
 			const isWithStats = 'stats' in folder;
 
 			// Debug deshabilitado para limpiar consola
-			// console.log('🔍 FolderCard Debug:', {
+			// clientLogger.debug('🔍 FolderCard Debug:', {
 			//   folderName: folder.name,
 			//   totalFiles: folder.totalFiles,
 			//   totalSize: folder.totalSize,
@@ -74,7 +75,7 @@ export const FolderCard = memo(
 
 		// Validar que el objeto folder exista
 		if (!folder) {
-			console.error('FolderCard recibió un objeto folder inválido');
+			clientLogger.error('FolderCard recibió un objeto folder inválido');
 			return null;
 		}
 

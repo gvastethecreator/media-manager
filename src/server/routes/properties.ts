@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { z } from 'zod';
 import { PropertyService } from '@/services/property/property.service';
 
@@ -50,7 +51,7 @@ router.get('/', async (req, res) => {
 		});
 		return;
 	} catch (error) {
-		console.error('Error getting properties:', error);
+		serverLogger.error('Error getting properties:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 		return;
 	}
@@ -70,7 +71,7 @@ router.get('/:id', async (req, res) => {
 		res.json(toPropertyWithStats(property));
 		return;
 	} catch (error) {
-		console.error('Error getting property:', error);
+		serverLogger.error('Error getting property:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 		return;
 	}
@@ -97,7 +98,7 @@ router.post('/', async (req, res) => {
 		res.status(201).json(toPropertyWithStats(property));
 		return;
 	} catch (error) {
-		console.error('Error creating property:', error);
+		serverLogger.error('Error creating property:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 		return;
 	}
@@ -125,7 +126,7 @@ router.put('/:id', async (req, res) => {
 		res.json(toPropertyWithStats(property));
 		return;
 	} catch (error) {
-		console.error('Error updating property:', error);
+		serverLogger.error('Error updating property:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 		return;
 	}
@@ -146,7 +147,7 @@ router.delete('/:id', async (req, res) => {
 		res.json({ message: 'Property eliminada correctamente' });
 		return;
 	} catch (error) {
-		console.error('Error deleting property:', error);
+		serverLogger.error('Error deleting property:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 		return;
 	}

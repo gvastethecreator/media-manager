@@ -58,18 +58,18 @@ export const AllImagesView = function AllImagesView(_props: ViewProps) {
 	const hasTriedToLoad = useRef(false);
 
 	useEffect(() => {
-		console.log('🔍 DEBUG AllImagesView: useEffect ejecutado');
-		console.log('🔍 DEBUG AllImagesView: imageCount:', imageCount);
-		console.log('🔍 DEBUG AllImagesView: hasTriedToLoad:', hasTriedToLoad.current);
+		clientLogger.debug('🔍 DEBUG AllImagesView: useEffect ejecutado');
+		clientLogger.debug('🔍 DEBUG AllImagesView: imageCount:', imageCount);
+		clientLogger.debug('🔍 DEBUG AllImagesView: hasTriedToLoad:', hasTriedToLoad.current);
 
 		// Solo cargar la primera vez cuando el componente se monta
 		if (!hasTriedToLoad.current && imageCount === 0 && !isLoading) {
 			hasTriedToLoad.current = true;
-			console.log('🚀 DEBUG AllImagesView: Store de imágenes vacío, llamando loadImages()');
+			clientLogger.debug('🚀 DEBUG AllImagesView: Store de imágenes vacío, llamando loadImages()');
 			viewLogger.info('Store de imágenes vacío, cargando desde el servidor...');
 			loadImages();
 		} else {
-			console.log('✅ DEBUG AllImagesView: Ya se intentó cargar o no es necesario');
+			clientLogger.debug('✅ DEBUG AllImagesView: Ya se intentó cargar o no es necesario');
 		}
 	}, [imageCount, isLoading, loadImages]); // Dependencias necesarias
 

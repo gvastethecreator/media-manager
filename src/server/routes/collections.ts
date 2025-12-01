@@ -1,4 +1,5 @@
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { serverLogger } from '@/lib/logger/server-logger';
 import express, { type Request, type Response } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
@@ -26,7 +27,7 @@ const getCollectionsHandler = async (req: Request, res: Response) => {
 	const { search, limit, offset, sortBy, sortOrder } = parse.data;
 
 	try {
-		console.log('🔍 [DEBUG] Iniciando consulta de collections...');
+		serverLogger.debug('🔍 [DEBUG] Iniciando consulta de collections...');
 
 		const whereConditions = [];
 		if (search) {
@@ -50,7 +51,7 @@ const getCollectionsHandler = async (req: Request, res: Response) => {
 		]);
 
 		const total = totalResult[0].count;
-		console.log('🔍 [DEBUG] Collections obtenidos:', collectionsData.length);
+		serverLogger.debug('🔍 [DEBUG] Collections obtenidos:', collectionsData.length);
 
 		res.json({
 			data: collectionsData,
@@ -63,7 +64,7 @@ const getCollectionsHandler = async (req: Request, res: Response) => {
 			},
 		});
 	} catch (error) {
-		console.error('🚨 [ERROR] Error en /api/collections:', error);
+		serverLogger.error('🚨 [ERROR] Error en /api/collections:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 };
@@ -86,7 +87,7 @@ const getCollectionByIdHandler = async (req: Request, res: Response) => {
 
 		res.json(collection);
 	} catch (error) {
-		console.error('Error getting collection:', error);
+		serverLogger.error('Error getting collection:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 };

@@ -19,20 +19,17 @@ import {
 	videos,
 } from '@/lib/drizzle/schema/index';
 import { createSystemError } from '@/lib/errors/system';
-import type { RuntimeSystemStats, SystemRuntimeStats } from './system.types';
+import { serverLogger } from '@/lib/logger/server-logger';
+import type { DatabaseEntityStats, SystemRuntimeStats } from './system.types';
 
-// Logger simplificado
-const systemLogger = {
-	info: (msg: string) => console.log(`[SYSTEM] ${msg}`),
-	error: (msg: string, error?: any) => console.error(`[SYSTEM ERROR] ${msg}`, error),
-	warn: (msg: string, error?: any) => console.warn(`[SYSTEM WARN] ${msg}`, error),
-};
+// Logger con contexto
+const systemLogger = serverLogger.withContext('SystemStats');
 
 /**
  * Obtiene estadísticas del sistema compatibles con frontend
  * Incluye conteos de entidades y estimaciones de almacenamiento
  */
-export async function getSystemStats(): Promise<RuntimeSystemStats> {
+export async function getSystemStats(): Promise<DatabaseEntityStats> {
 	try {
 		systemLogger.info('📊 Obteniendo estadísticas del sistema (Frontend compatible)');
 
@@ -95,7 +92,7 @@ export async function getSystemStats(): Promise<RuntimeSystemStats> {
 			storageAvailable,
 			dbSize,
 			lastBackup: undefined, // TODO: Implementar sistema de backup
-		} satisfies RuntimeSystemStats;
+		} satisfies DatabaseEntityStats;
 	} catch (error) {
 		systemLogger.error('❌ Error al obtener estadísticas del sistema:', error);
 		throw createSystemError('No se pudieron obtener las estadísticas del sistema', 'STATS_FETCH_ERROR', error);

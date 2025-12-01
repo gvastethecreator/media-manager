@@ -12,6 +12,7 @@ import {
 	shouldUseFallback,
 	calculateRetryDelay,
 } from '@/types/thumbnails-advanced.config';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 /**
  * 🔧 Servicio singleton para configuración de thumbnails
@@ -134,7 +135,7 @@ class ThumbnailConfigService {
 	 */
 	log(message: string, ...args: unknown[]) {
 		if (this.isVerboseLogging()) {
-			console.log(`[ThumbnailConfig] ${message}`, ...args);
+			serverLogger.debug(`[ThumbnailConfig] ${message}`, ...args);
 		}
 	}
 

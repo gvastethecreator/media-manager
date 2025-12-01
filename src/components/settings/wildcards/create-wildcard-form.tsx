@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { WildcardBase } from '@/types/entities/wildcard/base';
 import { CreateWildcardSchema } from '@/types/entities/wildcard/schema';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 // Esquema Zod adaptado para el formulario
 const formSchema = z.object({
@@ -72,7 +73,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 		if (result.success) {
 			onSubmit(result.data);
 		} else {
-			console.error('Error de validación final:', result.error.flatten());
+			clientLogger.error('Error de validación final:', result.error.flatten());
 		}
 	};
 

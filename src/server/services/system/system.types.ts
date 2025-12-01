@@ -24,6 +24,24 @@ export type NavigationStats = {
 };
 
 /**
+ * Estadísticas de entidades de la base de datos para el frontend
+ */
+export interface DatabaseEntityStats {
+	totalImages: number;
+	totalVideos: number;
+	totalAudio: number;
+	totalFolders: number;
+	totalAlbums: number;
+	totalCharacters: number;
+	totalCollections: number;
+	totalTags: number;
+	storageUsed: number;
+	storageAvailable: number;
+	dbSize: number;
+	lastBackup?: Date;
+}
+
+/**
  * Datos completos de navegación con todas las entidades
  */
 export interface NavigationData {
@@ -88,19 +106,14 @@ export interface RuntimeSystemStats {
  * Estadísticas completas del sistema (runtime + DB counts)
  */
 export interface SystemRuntimeStats {
-	memory: {
-		total: number;
-		free: number;
-		used: number;
-		percentage: number;
-	};
-	cpu: {
-		cores: number;
-		usage: number;
-	};
+	cpuUsage: number;
+	memoryUsage: number;
+	cacheSize: number;
+	dbSize: number;
+	totalEntities: number;
 	uptime: number;
-	platform: string;
 	nodeVersion: string;
+	hostname: string;
 }
 
 /**

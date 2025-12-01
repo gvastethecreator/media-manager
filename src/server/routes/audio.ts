@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import type { ExpressHandler } from '@/lib/express-types';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	createAudio,
 	deleteAudio,
@@ -53,7 +54,7 @@ const getAudiosHandler: ExpressHandler = async (_req, res) => {
 		const audios = await getAudios();
 		res.json(audios);
 	} catch (error) {
-		console.error('Error al obtener archivos de audio:', error);
+		serverLogger.error('Error al obtener archivos de audio:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -76,7 +77,7 @@ const getAudioByIdHandler: ExpressHandler = async (req, res) => {
 
 		res.json(audio);
 	} catch (error) {
-		console.error('Error al obtener archivo de audio:', error);
+		serverLogger.error('Error al obtener archivo de audio:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -109,7 +110,7 @@ const createAudioHandler: ExpressHandler = async (req, res) => {
 		const newAudio = await createAudio(audioData);
 		res.status(201).json(newAudio);
 	} catch (error) {
-		console.error('Error al crear archivo de audio:', error);
+		serverLogger.error('Error al crear archivo de audio:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -127,7 +128,7 @@ const updateAudioHandler: ExpressHandler = async (req, res) => {
 		const updatedAudio = await updateAudio(id, validatedData);
 		res.json(updatedAudio);
 	} catch (error) {
-		console.error('Error al actualizar archivo de audio:', error);
+		serverLogger.error('Error al actualizar archivo de audio:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -152,7 +153,7 @@ const deleteAudioHandler: ExpressHandler = async (req, res) => {
 			deletedId: id,
 		});
 	} catch (error) {
-		console.error('Error al eliminar archivo de audio:', error);
+		serverLogger.error('Error al eliminar archivo de audio:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -170,7 +171,7 @@ const getAudioFormatStatsHandler: ExpressHandler = async (_req, res) => {
 			data: formatStats,
 		});
 	} catch (error) {
-		console.error('Error al obtener estadísticas de formatos:', error);
+		serverLogger.error('Error al obtener estadísticas de formatos:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
@@ -188,7 +189,7 @@ const getAudioGenreStatsHandler: ExpressHandler = async (_req, res) => {
 			data: genreStats,
 		});
 	} catch (error) {
-		console.error('Error al obtener estadísticas de géneros:', error);
+		serverLogger.error('Error al obtener estadísticas de géneros:', error);
 		res.status(500).json({
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',

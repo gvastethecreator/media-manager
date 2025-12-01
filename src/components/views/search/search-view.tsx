@@ -15,6 +15,7 @@ import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { ImageWithStats } from '@/types/entities/image';
 import { isImageWithStats } from '@/types/entity-guards';
 import type { ViewProps } from '../types';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 interface SearchFilters {
 	query: string;
@@ -58,13 +59,13 @@ export function SearchView(_props: ViewProps) {
 			// Por ahora, cargar todas las imágenes
 			await loadImages();
 		} catch (err) {
-			console.error('Error en búsqueda:', err);
+			clientLogger.error('Error en búsqueda:', err);
 		}
 	}, [filters, loadImages]);
 
 	const handleItemSelect = useCallback((item: AnyEntityWithStats) => {
 		// TODO: Implementar selección con el nuevo sistema
-		console.log('Item seleccionado:', item.id);
+		clientLogger.debug('Item seleccionado:', item.id);
 	}, []);
 
 	const handleItemDoubleClick = useCallback(

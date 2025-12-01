@@ -2,9 +2,10 @@
 
 import { ItemInstance } from '@headless-tree/core';
 import { ChevronDownIcon, SquareMinus, SquarePlus } from 'lucide-react';
-import { Slot as SlotPrimitive } from 'radix-ui';
+import * as SlotPrimitive from '@radix-ui/react-slot';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 type ToggleIconType = 'chevron' | 'plus-minus';
 
@@ -81,7 +82,7 @@ function TreeItem<T = any>({ item, className, asChild, children, ...props }: Omi
 			<Comp
 				aria-expanded={item.isExpanded()}
 				className={cn(
-					'z-10 select-none ps-(--tree-padding) not-last:pb-0.5 outline-hidden focus:z-20 data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
+					'z-10 select-none ps-(--tree-padding) not-last:pb-0.5 outline-hidden focus:z-20 data-disabled:pointer-events-none data-disabled:opacity-50',
 					className
 				)}
 				data-drag-target={typeof item.isDragTarget === 'function' ? item.isDragTarget() : undefined}
@@ -108,7 +109,7 @@ function TreeItemLabel<T = any>({ item: propItem, children, className, ...props 
 	const item = propItem || currentItem;
 
 	if (!item) {
-		console.warn('TreeItemLabel: No item provided via props or context');
+		clientLogger.warn('TreeItemLabel: No item provided via props or context');
 		return null;
 	}
 
@@ -140,7 +141,7 @@ function TreeDragLine({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 	const { tree } = useTreeContext();
 
 	if (!tree || typeof tree.getDragLineStyle !== 'function') {
-		console.warn('TreeDragLine: No tree provided via context or tree does not have getDragLineStyle method');
+		clientLogger.warn('TreeDragLine: No tree provided via context or tree does not have getDragLineStyle method');
 		return null;
 	}
 
