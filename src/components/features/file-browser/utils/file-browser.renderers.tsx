@@ -115,7 +115,7 @@ export function renderFromItems({
             const initialIndex = imageItems.findIndex((it) => it.id === item.id);
             if (imageItems.length > 0 && initialIndex >= 0) {
                 // El store filtra internamente con isImageWithStats
-                openViewer(imageItems as unknown as AnyEntityWithStats[], initialIndex);
+                openViewer(imageItems as any, initialIndex);
             }
         }
     };

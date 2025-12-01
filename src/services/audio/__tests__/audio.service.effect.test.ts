@@ -111,21 +111,35 @@ describe('AudioService - CRUD Operations', () => {
 
 			const input = {
 				name: 'test-audio.mp3',
+				description: null,
 				path: '/test/audio.mp3',
 				size: 5_000_000,
 				hash: validHash,
 				mimeType: 'audio/mpeg',
 				extension: 'mp3',
 				folderId: folder.id,
+				isFavorite: false,
+				isArchived: false,
 				duration: 180,
 				bitrate: 320_000,
 				sampleRate: 44100,
 				channels: 2,
 				format: 'mp3',
+				codec: null,
 				title: 'Test Song',
 				artist: 'Test Artist',
 				album: 'Test Album',
+				year: null,
 				genre: 'Test Genre',
+				track: null,
+				disc: null,
+				albumArtist: null,
+				composer: null,
+				comment: null,
+				lyrics: null,
+				bpm: null,
+				key: null,
+				mood: null,
 			};
 
 			const audio = await expectSuccess(AudioService.create(input));
@@ -155,7 +169,7 @@ describe('AudioService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(AudioService.create(input));
+			const error = await expectError(AudioService.create(input as any));
 
 			expect(error._tag).toBe('AudioHashConflict');
 			if (error._tag === 'AudioHashConflict') {
@@ -178,7 +192,7 @@ describe('AudioService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(AudioService.create(input));
+			const error = await expectError(AudioService.create(input as any));
 
 			expect(error._tag).toBe('AudioValidationError');
 			if (error._tag === 'AudioValidationError') {
@@ -201,7 +215,7 @@ describe('AudioService - CRUD Operations', () => {
 				duration: 86_401, // 24h + 1s
 			};
 
-			const error = await expectError(AudioService.create(input));
+			const error = await expectError(AudioService.create(input as any));
 
 			expect(error._tag).toBe('AudioValidationError');
 			if (error._tag === 'AudioValidationError') {
@@ -222,7 +236,7 @@ describe('AudioService - CRUD Operations', () => {
 				folderId: folder.id,
 			};
 
-			const error = await expectError(AudioService.create(input));
+			const error = await expectError(AudioService.create(input as any));
 
 			expect(error._tag).toBe('AudioValidationError');
 			if (error._tag === 'AudioValidationError') {
