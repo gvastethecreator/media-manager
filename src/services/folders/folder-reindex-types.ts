@@ -12,6 +12,8 @@ export interface ReindexPhaseResult {
 	failed: number;
 	errors: string[];
 	duration: number;
+	/** Indica si la fase fue saltada intencionalmente */
+	skipped?: boolean;
 }
 
 /**
