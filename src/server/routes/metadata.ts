@@ -2,6 +2,7 @@ import express from 'express';
 // import { getImageMetadata, updateImageMetadata, clearImageMetadata } from '../services/metadata.service';
 // import { extractAIGenerationInfo } from '../services/metadata/parsers.service';
 import * as MetadataService from '@/services/metadata';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 
@@ -27,7 +28,7 @@ router.put('/:id', async (req, res) => {
 		return;
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-		console.error(`Error actualizando metadatos ${req.params.id}:`, errorMessage);
+		serverLogger.error(`Error actualizando metadatos ${req.params.id}:`, errorMessage);
 		res.status(500).json({ error: 'Error interno del servidor', details: errorMessage });
 		return;
 	}
@@ -41,7 +42,7 @@ router.get('/image/:imageId', async (req, res) => {
 		const metadata = await getImageMetadata(imageId);
 		res.json(metadata);
 	} catch (error) {
-		console.error('Error obteniendo metadatos de imagen:', error);
+		serverLogger.error('Error obteniendo metadatos de imagen:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -55,7 +56,7 @@ router.delete('/image/:imageId', async (req, res) => {
 		const result = await clearImageMetadata(imageId);
 		res.json(result);
 	} catch (error) {
-		console.error('Error limpiando metadatos de imagen:', error);
+		serverLogger.error('Error limpiando metadatos de imagen:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -82,7 +83,7 @@ router.post('/extract/:imageId', async (req, res) => {
 
 		res.json(result);
 	} catch (error) {
-		console.error('Error extracting metadata:', error);
+		serverLogger.error('Error extracting metadata:', error);
 		res.status(500).json({
 			success: false,
 			metadata: {},
@@ -102,7 +103,7 @@ router.get('/parsers', async (req, res) => {
 
 		res.json(parsers);
 	} catch (error) {
-		console.error('Error getting parsers:', error);
+		serverLogger.error('Error getting parsers:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -123,7 +124,7 @@ router.put('/image/:imageId', async (req, res) => {
 
 		res.json(updatedMetadata);
 	} catch (error) {
-		console.error('Error actualizando metadatos de imagen:', error);
+		serverLogger.error('Error actualizando metadatos de imagen:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -146,7 +147,7 @@ router.put('/bulk-update', async (req, res) => {
 		return;
 	} catch (error) {
 		const errorMessage = error instanceof Error ? error.message : 'Error desconocido';
-		console.error('Error en la actualización masiva de metadatos:', errorMessage);
+		serverLogger.error('Error en la actualización masiva de metadatos:', errorMessage);
 		res.status(500).json({ error: 'Error interno del servidor', details: errorMessage });
 		return;
 	}
@@ -175,7 +176,7 @@ router.post('/reprocess/:imageId', async (req, res) => {
 
 		res.json(result);
 	} catch (error) {
-		console.error('Error reprocessing metadata:', error);
+		serverLogger.error('Error reprocessing metadata:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

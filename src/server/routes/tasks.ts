@@ -21,6 +21,7 @@ import {
 } from '@/services/task';
 import { serializeTask, serializeTasks } from '@/transformers/task';
 import type { TaskCreateInput, TaskUpdateInput } from '@/types/entities/task';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 
@@ -78,7 +79,7 @@ router.get('/', async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('Error listing tasks:', error);
+		serverLogger.error('Error listing tasks:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -89,7 +90,7 @@ router.get('/stats', async (req, res) => {
 		const stats = await getTaskStats();
 		res.json(stats);
 	} catch (error) {
-		console.error('Error getting task stats:', error);
+		serverLogger.error('Error getting task stats:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -111,7 +112,7 @@ router.get('/:id', async (req, res) => {
 
 		res.json(serializeTask(task));
 	} catch (error) {
-		console.error('Error getting task:', error);
+		serverLogger.error('Error getting task:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -123,7 +124,7 @@ router.get('/:id/subtasks', async (req, res) => {
 		const subtasks = await getSubtasks(id);
 		res.json(serializeTasks(subtasks));
 	} catch (error) {
-		console.error('Error getting subtasks:', error);
+		serverLogger.error('Error getting subtasks:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -146,7 +147,7 @@ router.post('/', async (req, res) => {
 		const task = await createTask(input);
 		res.status(201).json(serializeTask(task));
 	} catch (error) {
-		console.error('Error creating task:', error);
+		serverLogger.error('Error creating task:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -170,7 +171,7 @@ router.put('/:id', async (req, res) => {
 
 		res.json(serializeTask(task));
 	} catch (error) {
-		console.error('Error updating task:', error);
+		serverLogger.error('Error updating task:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -195,7 +196,7 @@ router.patch('/:id/progress', async (req, res) => {
 
 		res.json(serializeTask(task));
 	} catch (error) {
-		console.error('Error updating task progress:', error);
+		serverLogger.error('Error updating task progress:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -211,7 +212,7 @@ router.delete('/:id', async (req, res) => {
 		await deleteTask(id);
 		res.status(204).send();
 	} catch (error) {
-		console.error('Error deleting task:', error);
+		serverLogger.error('Error deleting task:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -229,7 +230,7 @@ router.post('/bulk-delete', async (req, res) => {
 		await deleteTasks(ids);
 		res.json({ deleted: ids.length });
 	} catch (error) {
-		console.error('Error bulk deleting tasks:', error);
+		serverLogger.error('Error bulk deleting tasks:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -251,7 +252,7 @@ router.post('/:id/favorite', async (req, res) => {
 
 		res.json(serializeTask(task));
 	} catch (error) {
-		console.error('Error toggling task favorite:', error);
+		serverLogger.error('Error toggling task favorite:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
@@ -269,7 +270,7 @@ router.post('/:id/archive', async (req, res) => {
 
 		res.json(serializeTask(task));
 	} catch (error) {
-		console.error('Error toggling task archive:', error);
+		serverLogger.error('Error toggling task archive:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

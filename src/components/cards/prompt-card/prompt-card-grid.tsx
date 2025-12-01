@@ -6,6 +6,7 @@ import { debounceEvent } from '@/lib/system/event-throttler';
 import { searchPromptsService } from '@/services/prompt/prompt.service';
 import type { PromptWithStats } from '@/types/entities/prompt';
 import { PromptCard } from './prompt-card';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 interface PromptCardGridProps {
 	/** Título del grid */
@@ -60,7 +61,7 @@ export function PromptCardGrid({
 				const results = await searchPromptsService({ search: query }, { pageSize: maxPrompts });
 				setPrompts(results.data);
 			} catch (error) {
-				console.error('Error al buscar prompts:', error);
+				clientLogger.error('Error al buscar prompts:', error);
 			} finally {
 				setLoading(false);
 			}

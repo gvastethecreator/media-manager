@@ -269,104 +269,102 @@ export const CollectionServiceLive = Layer.succeed(
 				return yield* enrichCollectionWithCounts(collection);
 			}),
 
-		getAll: (options: GetCollectionsOptions = {}) =>
-			Effect.gen(function* () {
-				const {
-					search,
-					parentId,
-					onlyFavorites = false,
-					orderBy = 'createdAt',
-					orderDirection = 'desc',
-					limit = 50,
-					offset = 0,
-				} = options;
+	getAll: (options: GetCollectionsOptions = {}) =>
+		Effect.gen(function* () {
+			const {
+				search,
+				parentId,
+				onlyFavorites = false,
+				orderBy = 'createdAt',
+				orderDirection = 'desc',
+				limit = 50,
+				offset = 0,
+			} = options;
 
-				logger.info('📋 Obteniendo collections', {
-					search,
-					parentId,
-					onlyFavorites,
-					limit,
-					offset,
-				});
+			logger.info('📋 Obteniendo collections', {
+				search,
+				parentId,
+				onlyFavorites,
+				limit,
+				offset,
+			});
 
-				// Build conditions
-				const conditions = [];
-				if (search) {
-					conditions.push(or(like(collections.name, `%${search}%`), like(collections.description, `%${search}%`)));
-				}
-				if (parentId !== undefined) {
-					conditions.push(parentId === null ? isNull(collections.parentId) : eq(collections.parentId, parentId));
-				}
-				if (onlyFavorites) {
-					conditions.push(eq(collections.isFavorite, true));
-				}
+			// Build conditions
+			const conditions = [];
+			if (search) {
+				conditions.push(or(like(collections.name, `%${search}%`), like(collections.description, `%${search}%`)));
+			}
+			if (parentId !== undefined) {
+				conditions.push(parentId === null ? isNull(collections.parentId) : eq(collections.parentId, parentId));
+			}
+			if (onlyFavorites) {
+				conditions.push(eq(collections.isFavorite, true));
+			}
 
-				const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+			const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-				// Get total count
-				const [countResult] = yield* Effect.tryPromise({
-					try: async () => {
-						const result = await db.select({ count: count() }).from(collections).where(whereClause);
-						return result;
-					},
-					catch: (error) =>
-						new CollectionDatabaseError({
-							operation: 'getAll:count',
-							originalError: error,
-						}),
-				});
+			// Get total count
+			const [countResult] = yield* Effect.tryPromise({
+				try: async () => {
+					const result = await db.select({ count: count() }).from(collections).where(whereClause);
+					return result;
+				},
+				catch: (error) =>
+					new CollectionDatabaseError({
+						operation: 'getAll:count',
+						originalError: error,
+					}),
+			});
 
-				const total = countResult?.count ?? 0;
+			const total = countResult?.count ?? 0;
 
-				// Get collections
-				const orderColumn =
-					orderBy === 'name'
-						? collections.name
-						: orderBy === 'updatedAt'
-							? collections.updatedAt
-							: collections.createdAt;
-				const orderFn = orderDirection === 'asc' ? asc : desc;
+			// Get collections
+			const orderColumn =
+				orderBy === 'name'
+					? collections.name
+					: orderBy === 'updatedAt'
+						? collections.updatedAt
+						: collections.createdAt;
+			const orderFn = orderDirection === 'asc' ? asc : desc;
 
-				const results = yield* Effect.tryPromise({
-					try: async () =>
-						await db.query.collections.findMany({
-							where: whereClause,
-							orderBy: [orderFn(orderColumn)],
-							limit,
-							offset,
-						}),
-					catch: (error) =>
-						new CollectionDatabaseError({
-							operation: 'getAll:query',
-							originalError: error,
-						}),
-				});
+			const results = yield* Effect.tryPromise({
+				try: async () =>
+					await db.query.collections.findMany({
+						where: whereClause,
+						orderBy: [orderFn(orderColumn)],
+						limit,
+						offset,
+					}),
+				catch: (error) =>
+					new CollectionDatabaseError({
+						operation: 'getAll:query',
+						originalError: error,
+					}),
+			});
 
-				// Validate and enrich
-				const validated = yield* Effect.try({
-					try: () => results.map((r: any) => Schema.decodeUnknownSync(Collection)(r)),
-					catch: (error) =>
-						new CollectionDatabaseError({
-							operation: 'getAll:validation',
-							originalError: error,
-						}),
-				});
+			// Validate and enrich
+			const validated = yield* Effect.try({
+				try: () => results.map((r: any) => Schema.decodeUnknownSync(Collection)(r)),
+				catch: (error) =>
+					new CollectionDatabaseError({
+						operation: 'getAll:validation',
+						originalError: error,
+					}),
+			});
 
-				const enriched = (yield* Effect.all(validated.map(enrichCollectionWithCounts), {
-					concurrency: 'unbounded',
-				})) as CollectionWithStats[];
+			const enriched = (yield* Effect.all(validated.map(enrichCollectionWithCounts), {
+				concurrency: 'unbounded',
+			}).pipe(Effect.mapError((error) => error as CollectionError))) as CollectionWithStats[];
 
-				logger.info('✅ Collections obtenidas', { count: enriched.length, total });
+			logger.info('✅ Collections obtenidas', { count: enriched.length, total });
 
-				return {
-					collections: enriched,
-					total,
-					limit,
-					offset,
-				};
-			}),
-
-		create: (input) =>
+			return {
+				collections: enriched,
+				total,
+				limit,
+				offset,
+			};
+		}).pipe(Effect.mapError((error) => error as CollectionError)),		create: (input) =>
 			Effect.gen(function* () {
 				logger.info('➕ Creando collection', { name: input.name });
 
@@ -673,11 +671,11 @@ export const CollectionServiceLive = Layer.succeed(
 
 				const enriched = (yield* Effect.all(validated.map(enrichCollectionWithCounts), {
 					concurrency: 'unbounded',
-				})) as CollectionWithStats[];
+				}).pipe(Effect.mapError((error) => error as CollectionError))) as CollectionWithStats[];
 
 				logger.info('✅ Collections encontradas', { count: enriched.length });
 
 				return enriched;
-			}),
+			}).pipe(Effect.mapError((error) => error as CollectionError)),
 	})
 );

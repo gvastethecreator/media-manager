@@ -127,6 +127,7 @@ export const UndefinedToNull = <A, I, R>(schema: Schema.Schema<A, I, R>) =>
 
 /**
  * Asegura que el valor sea un array (envuelve en array si no lo es)
+ * @note Usa strict: false debido a la complejidad de tipos genéricos de Effect Schema
  */
 export const ensureArray = <A, I, R>(itemSchema: Schema.Schema<A, I, R>) =>
 	Schema.Union(
@@ -135,6 +136,7 @@ export const ensureArray = <A, I, R>(itemSchema: Schema.Schema<A, I, R>) =>
 			Schema.transform(
 				Schema.Array(itemSchema),
 				{
+					strict: false,
 					decode: (item) => [item],
 					encode: (arr) => arr[0],
 				}
@@ -144,12 +146,14 @@ export const ensureArray = <A, I, R>(itemSchema: Schema.Schema<A, I, R>) =>
 
 /**
  * Filtra valores null/undefined de un array
+ * @note Usa strict: false debido a la complejidad de tipos genéricos de Effect Schema
  */
 export const compactArray = <A, I, R>(itemSchema: Schema.Schema<A, I, R>) =>
 	Schema.Array(Schema.NullOr(Schema.UndefinedOr(itemSchema))).pipe(
 		Schema.transform(
 			Schema.Array(itemSchema),
 			{
+				strict: false,
 				decode: (arr) => arr.filter((item): item is A => item != null),
 				encode: (arr) => arr,
 			}
@@ -167,8 +171,9 @@ export const TimestampToDate = Schema.Number.pipe(
 	Schema.transform(
 		Schema.Date,
 		{
+			strict: false,
 			decode: (timestamp) => new Date(timestamp),
-			encode: (date) => date.getTime(),
+			encode: (_toI, toA) => toA.getTime(),
 		}
 	)
 ).annotations({
@@ -186,6 +191,7 @@ export const FlexibleDateFromString = Schema.Union(
 		Schema.transform(
 			Schema.Date,
 			{
+				strict: false,
 				decode: (s) => {
 					const date = new Date(s);
 					if (isNaN(date.getTime())) {
@@ -193,7 +199,7 @@ export const FlexibleDateFromString = Schema.Union(
 					}
 					return date;
 				},
-				encode: (d) => d.toISOString(),
+				encode: (_toI, toA) => toA.toISOString(),
 			}
 		)
 	)
@@ -206,12 +212,14 @@ export const FlexibleDateFromString = Schema.Union(
 
 /**
  * Omite propiedades con valores undefined
+ * @note Usa strict: false debido a la complejidad de tipos genéricos de Effect Schema
  */
 export const omitUndefined = <Fields extends Schema.Struct.Fields>(fields: Fields) =>
 	Schema.Struct(fields).pipe(
 		Schema.transform(
 			Schema.Struct(fields),
 			{
+				strict: false,
 				decode: (obj) => {
 					const result: any = {};
 					for (const [key, value] of Object.entries(obj)) {
@@ -264,12 +272,14 @@ export const jsKeysToDb = <A extends Record<string, unknown>>(obj: A): any => {
 
 /**
  * Aplica un valor por defecto si el campo es null/undefined
+ * @note Usa strict: false debido a la complejidad de tipos genéricos de Effect Schema
  */
 export const withDefault = <A, I, R>(schema: Schema.Schema<A, I, R>, defaultValue: A) =>
 	Schema.NullOr(Schema.UndefinedOr(schema)).pipe(
 		Schema.transform(
 			schema,
 			{
+				strict: false,
 				decode: (value) => value ?? defaultValue,
 				encode: (value) => value,
 			}
@@ -301,6 +311,7 @@ export const TrimmedString = Schema.String.pipe(
 	Schema.transform(
 		Schema.String,
 		{
+			strict: true,
 			decode: (s) => s.trim(),
 			encode: (s) => s,
 		}
@@ -314,6 +325,7 @@ export const LowercaseString = Schema.String.pipe(
 	Schema.transform(
 		Schema.String,
 		{
+			strict: true,
 			decode: (s) => s.toLowerCase(),
 			encode: (s) => s,
 		}
@@ -327,6 +339,7 @@ export const UppercaseString = Schema.String.pipe(
 	Schema.transform(
 		Schema.String,
 		{
+			strict: true,
 			decode: (s) => s.toUpperCase(),
 			encode: (s) => s,
 		}
@@ -340,6 +353,7 @@ export const SlugString = Schema.String.pipe(
 	Schema.transform(
 		Schema.String,
 		{
+			strict: true,
 			decode: (s) =>
 				s
 					.toLowerCase()
@@ -362,7 +376,7 @@ export const SlugString = Schema.String.pipe(
  * Valida que un string no esté vacío después de trim
  */
 export const NonEmptyTrimmedString = TrimmedString.pipe(
-	Schema.minLength(1).annotations({
+	Schema.minLength(1, {
 		message: () => 'String cannot be empty or whitespace-only',
 	})
 );
@@ -374,6 +388,7 @@ export const NormalizedEmail = Schema.String.pipe(
 	Schema.transform(
 		Schema.String,
 		{
+			strict: true,
 			decode: (s) => s.trim().toLowerCase(),
 			encode: (s) => s,
 		}

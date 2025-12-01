@@ -1,4 +1,5 @@
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { serverLogger } from '@/lib/logger/server-logger';
 import express from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
@@ -75,7 +76,7 @@ const getCharactersHandler: ExpressHandler = async (req, res) => {
 			},
 		});
 	} catch (error) {
-		console.error('🚨 [ERROR] Error en /api/characters:', error);
+		serverLogger.error('🚨 [ERROR] Error en /api/characters:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 };
@@ -98,7 +99,7 @@ const getCharacterByIdHandler: ExpressHandler = async (req, res) => {
 
 		res.json(character);
 	} catch (error) {
-		console.error('Error getting character:', error);
+		serverLogger.error('Error getting character:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 };

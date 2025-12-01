@@ -6,6 +6,7 @@ import type { MediaItem } from '../../components/media-thumbnail';
 import type { ClickModifiers } from '../../types/file-browser.types';
 import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
 import { CanvasRenderConfig } from './canvas-config';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 export interface MasonryCanvasProps {
 	items: MediaItem[];
@@ -108,7 +109,7 @@ export function MasonryCanvas({
 				}
 			} catch (error) {
 				if (!controller.signal.aborted) {
-					console.warn('Prefetch error:', error);
+					clientLogger.warn('Prefetch error:', error);
 				}
 			} finally {
 				if (abortControllerRef.current === controller) {

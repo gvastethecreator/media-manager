@@ -12,6 +12,7 @@ import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
 import type { FileWithStats } from '@/types/entities/file';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 interface FilesContentViewProps {
 	files: FileWithStats[];
@@ -98,7 +99,7 @@ const FilesContentView: React.FC<FilesContentViewProps> = ({
 
 				handleFileUpload(files); // Call the prop function to trigger data reload
 			} catch (error) {
-				console.error('Error al subir archivos:', error);
+				clientLogger.error('Error al subir archivos:', error);
 				toast({
 					title: '❌ Error al subir archivos',
 					description: error instanceof Error ? error.message : 'Error desconocido',

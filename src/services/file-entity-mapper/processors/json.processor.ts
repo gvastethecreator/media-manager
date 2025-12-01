@@ -1,9 +1,12 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { createJsonFile, getJsonFileByHash } from '@/services/json-file/json-file.service';
 import type { JsonFileCreateInput } from '@/types/entities/json-file';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
+
+const jsonLogger = serverLogger.withContext('JsonProcessor');
 
 /**
  * Procesador especializado para entidades de tipo JSON
@@ -150,10 +153,10 @@ export class JsonProcessor {
 				return { success: false, error: 'Failed to generate JSON preview' };
 			}
 
-			console.log(`✅ JSON thumbnail generado para: ${filePath}`);
+			jsonLogger.debug(`✅ JSON thumbnail generado para: ${filePath}`);
 			return { success: true };
 		} catch (e) {
-			console.warn('Error generando thumbnail JSON:', filePath, e);
+			jsonLogger.warn('Error generando thumbnail JSON:', { filePath, error: e instanceof Error ? e.message : String(e) });
 			return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
 		}
 	}

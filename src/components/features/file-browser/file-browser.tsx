@@ -39,6 +39,7 @@ import type { ClickModifiers, FileBrowserProps } from './types/file-browser.type
 import { renderFromItems } from './utils/file-browser.renderers';
 // Estilos de animación específicos para vistas Canvas
 import './views/canvas/canvas-animations.css';
+import { clientLogger } from '@/lib/logger/client-logger';
 // Componente principal con filtro de carpeta
 export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }: FileBrowserProps) {
 	// Configuración de infinite scroll
@@ -95,7 +96,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 			// Recargar todos los tipos de archivos de la carpeta
 			await Promise.allSettled(refreshTasks);
 		} catch (error) {
-			console.error('Error al refrescar:', error);
+			clientLogger.error('Error al refrescar:', error);
 		} finally {
 			setIsRefreshing(false);
 		}

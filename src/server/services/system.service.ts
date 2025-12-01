@@ -29,26 +29,15 @@ import {
 } from '@/lib/drizzle/schema/index';
 import { createSettingsError, isSettingsError } from '@/lib/errors/settings';
 import { createSystemError } from '@/lib/errors/system';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { settingsService } from '@/services/settings/settings.service';
 import { fileBrowserConfigSchema } from '@/transformers/settings/schema';
 import type { Settings } from '@/types/settings';
 
-// Loggers simplificados para evitar problemas
-const navLogger = {
-	info: (msg: string) => console.log(`[NAV] ${msg}`),
-	error: (msg: string, error?: any) => console.error(`[NAV ERROR] ${msg}`, error),
-	warn: (msg: string, error?: any) => console.warn(`[NAV WARN] ${msg}`, error),
-};
-const systemLogger = {
-	info: (msg: string) => console.log(`[SYSTEM] ${msg}`),
-	error: (msg: string, error?: any) => console.error(`[SYSTEM ERROR] ${msg}`, error),
-	warn: (msg: string, error?: any) => console.warn(`[SYSTEM WARN] ${msg}`, error),
-};
-const settingsLogger = {
-	info: (msg: string) => console.log(`[SETTINGS] ${msg}`),
-	error: (msg: string, error?: any) => console.error(`[SETTINGS ERROR] ${msg}`, error),
-	debug: (msg: string, data?: any) => console.log(`[SETTINGS DEBUG] ${msg}`, data),
-};
+// Loggers con contexto
+const navLogger = serverLogger.withContext('Navigation');
+const systemLogger = serverLogger.withContext('System');
+const settingsLogger = serverLogger.withContext('Settings');
 
 type NavigationStats = {
 	totalImages: number;

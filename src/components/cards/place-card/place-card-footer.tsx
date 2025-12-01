@@ -1,5 +1,4 @@
-import { format } from 'date-fns';
-import { es } from 'date-fns/locale';
+import { formatDate } from '@/lib/utils/date';
 import { HeartIcon, ImageIcon, Star, VideoIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
@@ -35,7 +34,7 @@ export function PlaceCardFooter({
 	const _powerStars = Math.max(1, Math.min(5, Math.ceil(power / 2)));
 
 	// Formatear fecha de creación
-	const formattedDate = createdAt ? format(createdAt, 'MMM yyyy', { locale: es }) : '';
+	const formattedDate = createdAt ? formatDate(createdAt, 'MMM yyyy') : '';
 
 	return (
 		<div

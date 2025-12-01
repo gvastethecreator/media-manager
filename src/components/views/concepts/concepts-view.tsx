@@ -52,7 +52,7 @@ export function ConceptsView() {
 
 	const handleCreateConcept = useCallback(async () => {
 		if (newConceptName.trim() === '') {
-			console.error('❌ Error: El nombre del concepto no puede estar vacío');
+			clientLogger.error('❌ Error: El nombre del concepto no puede estar vacío');
 			return;
 		}
 
@@ -74,7 +74,7 @@ export function ConceptsView() {
 			setNewConceptDescription('');
 			setShowForm(false);
 		} catch (error) {
-			console.error('❌ Error creando concepto:', error);
+			clientLogger.error('❌ Error creando concepto:', error);
 		}
 	}, [newConceptName, newConceptDescription, createConcept]);
 

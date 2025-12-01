@@ -6,6 +6,8 @@
  * an action history and allows users to revert operations.
  */
 
+import { clientLogger } from '@/lib/logger/client-logger';
+
 // Browser-compatible EventEmitter implementation
 type UndoRedoEvents = { type: 'stateChanged'; payload: UndoRedoState };
 type URListener<T> = (payload: T) => void;
@@ -33,7 +35,7 @@ class EventEmitter {
 			try {
 				(listener as URListener<typeof payload>)(payload);
 			} catch (error) {
-				console.error('Error in event listener:', error);
+				clientLogger.error('Error in event listener:', error);
 			}
 		}
 		return true;
@@ -165,7 +167,7 @@ class UndoRedoManager extends EventEmitter {
 			// Show success toast
 			toastService.success(action.description);
 		} catch (error) {
-			console.error('Failed to execute action:', error);
+			clientLogger.error('Failed to execute action:', error);
 			toastService.error(`Error: ${action.description}`);
 			throw error;
 		}
@@ -194,7 +196,7 @@ class UndoRedoManager extends EventEmitter {
 			this.emitStateChange();
 			toastService.success(`Deshecho: ${action.description}`);
 		} catch (error) {
-			console.error('Failed to undo action:', error);
+			clientLogger.error('Failed to undo action:', error);
 			toastService.error(`Error al deshacer: ${action.description}`);
 			throw error;
 		}
@@ -218,7 +220,7 @@ class UndoRedoManager extends EventEmitter {
 			this.emitStateChange();
 			toastService.success(`Rehecho: ${action.description}`);
 		} catch (error) {
-			console.error('Failed to redo action:', error);
+			clientLogger.error('Failed to redo action:', error);
 			toastService.error(`Error al rehacer: ${action.description}`);
 			throw error;
 		}
