@@ -405,7 +405,12 @@ const make = (): AlbumServiceInterface => {
 			// Verificar que existe el ID
 			const albumId = newAlbum[0]?.id;
 			if (!albumId) {
-				return yield* Effect.fail(new AlbumError('CREATION_FAILED', 'Álbum creado pero no se obtuvo ID'));
+				return yield* Effect.fail(
+					new AlbumDatabaseError({
+						operation: 'create',
+						message: 'Álbum creado pero no se obtuvo ID',
+					})
+				);
 			}
 
 			// Retornar con stats

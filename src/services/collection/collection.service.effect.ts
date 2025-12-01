@@ -343,7 +343,7 @@ export const CollectionServiceLive = Layer.succeed(
 			});
 
 			// Validate and enrich
-			const validated = yield* Effect.try({
+			const validated: Collection[] = yield* Effect.try({
 				try: () => results.map((r: any) => Schema.decodeUnknownSync(Collection)(r)),
 				catch: (error) =>
 					new CollectionDatabaseError({
@@ -352,9 +352,9 @@ export const CollectionServiceLive = Layer.succeed(
 					}),
 			});
 
-			const enriched = (yield* Effect.all(validated.map(enrichCollectionWithCounts), {
+			const enriched = yield* Effect.forEach(validated, (c) => enrichCollectionWithCounts(c), {
 				concurrency: 'unbounded',
-			}).pipe(Effect.mapError((error) => error as CollectionError))) as CollectionWithStats[];
+			}).pipe(Effect.mapError((error) => error as CollectionError));
 
 			logger.info('✅ Collections obtenidas', { count: enriched.length, total });
 
@@ -364,7 +364,7 @@ export const CollectionServiceLive = Layer.succeed(
 				limit,
 				offset,
 			};
-		}).pipe(Effect.mapError((error) => error as CollectionError)),		create: (input) =>
+		}),		create: (input) =>
 			Effect.gen(function* () {
 				logger.info('➕ Creando collection', { name: input.name });
 
@@ -660,7 +660,7 @@ export const CollectionServiceLive = Layer.succeed(
 						}),
 				});
 
-				const validated = yield* Effect.try({
+				const validated: Collection[] = yield* Effect.try({
 					try: () => results.map((r: any) => Schema.decodeUnknownSync(Collection)(r)),
 					catch: (error) =>
 						new CollectionDatabaseError({
@@ -669,13 +669,13 @@ export const CollectionServiceLive = Layer.succeed(
 						}),
 				});
 
-				const enriched = (yield* Effect.all(validated.map(enrichCollectionWithCounts), {
+				const enriched = yield* Effect.forEach(validated, (c) => enrichCollectionWithCounts(c), {
 					concurrency: 'unbounded',
-				}).pipe(Effect.mapError((error) => error as CollectionError))) as CollectionWithStats[];
+				}).pipe(Effect.mapError((error) => error as CollectionError));
 
 				logger.info('✅ Collections encontradas', { count: enriched.length });
 
 				return enriched;
-			}).pipe(Effect.mapError((error) => error as CollectionError)),
+			}),
 	})
 );

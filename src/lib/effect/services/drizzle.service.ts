@@ -160,9 +160,9 @@ export const runQuery = <A>(fn: (db: DrizzleDB) => Promise<A>): Effect.Effect<A,
  * );
  * ```
  */
-export const runTransaction = <A, E, R>(
-	fn: (tx: DrizzleTx) => Effect.Effect<A, E, R>
-): Effect.Effect<A, E | TransactionError, DrizzleService | R> =>
+export const runTransaction = <A, E>(
+	fn: (tx: DrizzleTx) => Effect.Effect<A, E, never>
+): Effect.Effect<A, E | TransactionError, DrizzleService> =>
 	Effect.gen(function* () {
 		const drizzle = yield* DrizzleService;
 		return yield* drizzle.transaction(fn);

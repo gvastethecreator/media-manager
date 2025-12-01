@@ -326,7 +326,7 @@ router.get('/test-hot-reload', async (_req, res) => {
 });
 
 // CLEANUP ENDPOINT - Eliminar imágenes fantasma cursed-img-*
-router.get('/cleanup-phantom-images', async (_req, res) => {
+router.get('/cleanup-phantom-images', async (_req, res): Promise<void> => {
 	try {
 		serverLogger.debug('🔥 [CLEANUP] Iniciando limpieza de imágenes fantasma...');
 
@@ -346,12 +346,13 @@ router.get('/cleanup-phantom-images', async (_req, res) => {
 		serverLogger.debug(`📊 Imágenes cursed-img-* encontradas: ${cursedCount}`);
 
 		if (cursedCount === 0) {
-			return res.json({
+			res.json({
 				success: true,
 				message: 'No se encontraron imágenes fantasma cursed-img-*',
 				deleted: 0,
 				timestamp: new Date().toISOString(),
 			});
+			return;
 		}
 
 		// 2. Eliminar imágenes cursed-img-*
@@ -389,14 +390,15 @@ router.get('/cleanup-phantom-images', async (_req, res) => {
  * Endpoint de diagnóstico para validar mapeo de tipos de entidad
  * POST /api/debug/test-entity-types
  */
-router.post('/test-entity-types', async (req, res) => {
+router.post('/test-entity-types', async (req, res): Promise<void> => {
 	try {
 		const { extensions } = req.body;
 
 		if (!(extensions && Array.isArray(extensions))) {
-			return res.status(400).json({
+			res.status(400).json({
 				error: 'Se requiere un array de extensiones en el body',
 			});
+			return;
 		}
 
 		const results = extensions.map((ext: string) => {
