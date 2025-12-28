@@ -115,14 +115,14 @@ export const RightPanel = reactMemo(function RightPanelComponent({
 	const panelTitle = showInterfaceSettings ? 'Configuración' : hasSelectedItems ? 'Detalles' : 'Panel';
 
 	// No mostramos nada si no hay razón para mostrar el panel
-	if (!shouldShowPanel) {
+	if (!shouldShowPanel && !isCollapsed) {
 		return null;
 	}
 
 	return (
 		<div
 			className={cn(
-				'flex h-full w-full bg-background',
+				'flex h-full w-full bg-background min-w-0',
 				isAnimating && 'transition-all duration-50',
 				isCollapsed && 'right-panel-collapsed'
 			)}

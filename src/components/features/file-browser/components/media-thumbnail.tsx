@@ -114,6 +114,12 @@ function MediaThumbnailInner({
 	// Estado para animación inicial en viewport
 	const [hasPlayedInitialAnimation, setHasPlayedInitialAnimation] = React.useState(false);
 
+	// Refs para animación de video - DEBEN estar antes de useCallbacks que las usan
+	const rafRef = React.useRef<number | null>(null);
+	const abortRef = React.useRef<AbortController | null>(null);
+	const framesRef = React.useRef<string[] | null>(null);
+	const frameIndexRef = React.useRef(0);
+
 	// Función para animar frames una sola vez (inicial)
 	const animateFramesOnce = React.useCallback(
 		(frames: string[]) => {
@@ -209,12 +215,6 @@ function MediaThumbnailInner({
 	const viewportHook = useVideoViewport(isVideo && allowVideoAnimation ? playInitialAnimation : undefined);
 	// Gating general para evitar generar thumbnails cuando el ítem aún no está en viewport
 	const baseViewport = useInViewport({ rootMargin: preloadMargin ?? '200px', threshold: 0.01, once: true });
-
-	// Refs para animación de video
-	const rafRef = React.useRef<number | null>(null);
-	const abortRef = React.useRef<AbortController | null>(null);
-	const framesRef = React.useRef<string[] | null>(null);
-	const frameIndexRef = React.useRef(0);
 
 	// Detección simple de GIF por nombre o mime
 	const isGif = React.useMemo(() => {
@@ -412,6 +412,15 @@ function MediaThumbnailInner({
 		};
 	}, []);
 
+	// Combinar refs para observar el mismo elemento con ambos observadores - DEBE estar antes de returns
+	const setCombinedRef = React.useCallback(
+		(el: HTMLDivElement | null) => {
+			(viewportHook.ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
+			(baseViewport.ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
+		},
+		[viewportHook.ref, baseViewport.ref]
+	);
+
 	if (error) {
 		return (
 			<div className={cn(baseClass, 'flex items-center justify-center bg-muted text-muted-foreground text-xs')}>
@@ -442,15 +451,6 @@ function MediaThumbnailInner({
 	if (isVideo) {
 		const badgeInfo = getBadgeInfo(item.entityType);
 		const badgeClasses = getBadgeClasses(imgProps.width as number, imgProps.height as number);
-
-		// Combinar refs para observar el mismo elemento con ambos observadores
-		const setCombinedRef = React.useCallback(
-			(el: HTMLDivElement | null) => {
-				(viewportHook.ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
-				(baseViewport.ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
-			},
-			[viewportHook.ref, baseViewport.ref]
-		);
 
 		// Aplicar aspectStyle al contenedor para reservar el espacio
 		return (

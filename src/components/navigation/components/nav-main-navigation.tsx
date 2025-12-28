@@ -327,14 +327,14 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 								</Tooltip>
 								{!isCollapsed && (
 									<>
-										<span className="flex-1 font-semibold text-xs" style={{ color: category.color }}>
+										<span className="flex-1 font-semibold text-xs truncate" style={{ color: category.color }}>
 											{category.label}
 										</span>
 										{((category.children && category.children.length > 0) || category.showTreeView) &&
 											(expandedCategories.has(category.id) ? (
-												<ChevronDown className="h-4 w-4 text-muted-foreground" />
+												<ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground" />
 											) : (
-												<ChevronRight className="h-4 w-4 text-muted-foreground" />
+												<ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
 											))}
 									</>
 								)}
@@ -343,7 +343,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 								<>
 									{/* TreeView directo para carpetas */}
 									{category.showTreeView && (
-										<div className="mt-1">
+										<div className="mt-1 min-w-0 overflow-hidden">
 											<NavCategoryChildren
 												categoryId={category.id}
 												currentView={currentView}
@@ -356,29 +356,29 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 									)}
 									{/* Categorías normales */}
 									{!category.showTreeView && (
-										<div className="flex flex-col gap-0.5">
+										<div className="flex flex-col gap-0.5 min-w-0 overflow-hidden">
 											{(category.children || []).map((child, _idx) => (
-												<div className="flex flex-col" key={child.id}>
+												<div className="flex flex-col min-w-0" key={child.id}>
 													<div
 														className={cn(
-															'flex w-full items-center justify-between rounded px-2 py-1 text-xs transition-all duration-300',
+															'flex w-full items-center justify-between rounded px-2 py-1 text-xs transition-all duration-300 min-w-0',
 															'transition-colors hover:bg-secondary/50',
 															currentView === child.id && 'bg-secondary font-bold',
 															isCollapsed ? 'justify-center px-1' : ''
 														)}
 													>
-														<div className={cn('flex flex-1 items-center', isCollapsed ? 'justify-center' : '')}>
+														<div className={cn('flex flex-1 items-center min-w-0', isCollapsed ? 'justify-center' : '')}>
 															<button
-																className="flex items-center"
+																className="flex items-center min-w-0 w-full"
 																onClick={() => handleNavigate(child.id as ViewType)}
 																type="button"
 															>
-																<child.icon className="h-3 w-3" style={{ color: child.color }} />
-																{!isCollapsed && <span className="ml-2">{child.label}</span>}
+																<child.icon className="h-3 w-3 shrink-0" style={{ color: child.color }} />
+																{!isCollapsed && <span className="ml-2 truncate">{child.label}</span>}
 															</button>
 														</div>
 														{!isCollapsed && (
-															<div className="flex items-center gap-1">
+															<div className="flex shrink-0 items-center gap-1">
 																{child.count !== undefined && (
 																	<span
 																		className="min-w-[18px] text-right text-[10px] text-muted-foreground tabular-nums"
@@ -391,7 +391,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 																	<button
 																		aria-expanded={expandedCategories.has(child.id)}
 																		aria-label={`Toggle ${child.label} children`}
-																		className="flex h-5 w-5 items-center justify-center rounded-sm border border-border/30 bg-background/50 p-0.5 hover:bg-secondary/70"
+																		className="flex h-5 w-5 shrink-0 items-center justify-center rounded-sm border border-border/30 bg-background/50 p-0.5 hover:bg-secondary/70"
 																		onClick={(e) => {
 																			e.stopPropagation();
 																			toggleCategory(child.id);

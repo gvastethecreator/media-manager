@@ -21,27 +21,27 @@ export const ToolbarActions = memo(function ToolbarActionsImpl({
     closeButtonRef?: React.RefObject<HTMLButtonElement | null>;
 }) {
     return (
-        <div className="fixed inset-x-4 top-4 z-[9999] flex items-center justify-between">
-            <div className="flex space-x-2">
-                <Button onClick={onZoomIn} size="icon" title="Acercar" variant="outline">
-                    <ZoomIn className="h-4 w-4" />
+        <div className="fixed inset-x-4 top-4 z-[9999] flex items-center justify-between pointer-events-none">
+            <div className="flex space-x-2 pointer-events-auto">
+                <Button onClick={onZoomIn} size="icon" title="Acercar" variant="ghost" className="text-white hover:bg-white/20 hover:text-white">
+                    <ZoomIn className="h-5 w-5" />
                 </Button>
-                <Button onClick={onZoomOut} size="icon" title="Alejar" variant="outline">
-                    <ZoomOut className="h-4 w-4" />
+                <Button onClick={onZoomOut} size="icon" title="Alejar" variant="ghost" className="text-white hover:bg-white/20 hover:text-white">
+                    <ZoomOut className="h-5 w-5" />
                 </Button>
-                <Button onClick={onReset} size="icon" title="Restablecer vista" variant="outline">
-                    <RotateCcw className="h-4 w-4" />
+                <Button onClick={onReset} size="icon" title="Restablecer vista" variant="ghost" className="text-white hover:bg-white/20 hover:text-white">
+                    <RotateCcw className="h-5 w-5" />
                 </Button>
-                <Button onClick={onCopy} size="icon" title="Copiar" variant="outline">
-                    <Copy className="h-4 w-4" />
+                <Button onClick={onCopy} size="icon" title="Copiar" variant="ghost" className="text-white hover:bg-white/20 hover:text-white">
+                    <Copy className="h-5 w-5" />
                 </Button>
-                <Button onClick={onDownload} size="icon" title="Descargar" variant="outline">
-                    <Download className="h-4 w-4" />
+                <Button onClick={onDownload} size="icon" title="Descargar" variant="ghost" className="text-white hover:bg-white/20 hover:text-white">
+                    <Download className="h-5 w-5" />
                 </Button>
             </div>
 
-            <Button onClick={onClose} ref={closeButtonRef} size="icon" title="Cerrar" variant="outline">
-                <X className="h-4 w-4" />
+            <Button onClick={onClose} ref={closeButtonRef} size="icon" title="Cerrar" variant="ghost" className="pointer-events-auto text-white hover:bg-white/20 hover:text-white">
+                <X className="h-6 w-6" />
             </Button>
         </div>
     );

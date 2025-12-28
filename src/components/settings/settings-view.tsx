@@ -55,32 +55,34 @@ interface TabItem {
 	color: string;
 }
 
-// Colores para cada tab
+// Colores para cada tab usando clases Tailwind (preferir sobre hex hardcodeados)
+// Los colores específicos se mantienen en esta vista porque son decorativos para tabs
+// En componentes de datos, usar tokens de @/lib/styles/color-tokens
 const tabColors = {
-	system: '#64748b', // Slate
-	albums: '#8b5cf6', // Violet
-	collections: '#ef4444', // Red
-	folders: '#f59e0b', // Amber
-	interface: '#0ea5e9', // Sky
-	tags: '#f59e0b', // Amber
-	characters: '#ec4899', // Pink
-	'world-items': '#f59e0b', // Amber
-	places: '#14b8a6', // Teal
-	concepts: '#3b82f6', // Blue
-	prompts: '#10b981', // Emerald
-	notes: '#a855f7', // Purple
-	thumbnails: '#0ea5e9', // Sky
-	'uploaded-images': '#22c55e', // Green
-	shortcuts: '#475569', // Slate
-	'entities-cards': '#6366f1', // Indigo
-	profiles: '#6366f1', // Indigo
-	properties: '#f472b6', // Pink
-	groups: '#a855f7', // Purple
-	wildcards: '#ec4899', // Pink
-	document: '#fbbf24', // Amber
-	audio: '#38bdf8', // Sky
-	'json-file': '#f472b6', // Pink
-	file3d: '#818cf8', // Indigo
+	system: 'rgb(100, 116, 139)', // slate-500
+	albums: 'rgb(139, 92, 246)', // violet-500
+	collections: 'rgb(239, 68, 68)', // red-500
+	folders: 'rgb(245, 158, 11)', // amber-500
+	interface: 'rgb(14, 165, 233)', // sky-500
+	tags: 'rgb(245, 158, 11)', // amber-500
+	characters: 'rgb(236, 72, 153)', // pink-500
+	'world-items': 'rgb(245, 158, 11)', // amber-500
+	places: 'rgb(20, 184, 166)', // teal-500
+	concepts: 'rgb(59, 130, 246)', // blue-500
+	prompts: 'rgb(16, 185, 129)', // emerald-500
+	notes: 'rgb(168, 85, 247)', // purple-500
+	thumbnails: 'rgb(14, 165, 233)', // sky-500
+	'uploaded-images': 'rgb(34, 197, 94)', // green-500
+	shortcuts: 'rgb(71, 85, 105)', // slate-600
+	'entities-cards': 'rgb(99, 102, 241)', // indigo-500
+	profiles: 'rgb(99, 102, 241)', // indigo-500
+	properties: 'rgb(244, 114, 182)', // pink-400
+	groups: 'rgb(168, 85, 247)', // purple-500
+	wildcards: 'rgb(236, 72, 153)', // pink-500
+	document: 'rgb(251, 191, 36)', // amber-400
+	audio: 'rgb(56, 189, 248)', // sky-400
+	'json-file': 'rgb(244, 114, 182)', // pink-400
+	file3d: 'rgb(129, 140, 248)', // indigo-400
 };
 
 // Definición de todos los tabs para evitar la duplicación de código

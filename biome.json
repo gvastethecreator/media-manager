@@ -1,5 +1,5 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.1.2/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.3.10/schema.json",
   "assist": {
     "actions": {
       "source": {
@@ -36,9 +36,7 @@
         "noEvolvingTypes": "off"
       },
       "nursery": {
-        "noNoninteractiveElementInteractions": "off",
-        "noShadow": "off",
-        "noAwaitInLoop": "off"
+        "noShadow": "off"
       },
       "a11y": {
         "useAltText": "error",
@@ -90,14 +88,14 @@
       "**/*.json",
       "!src/components/features/file-browser/file-browser-backup.tsx",
       "!**/*.backup.*",
-      "!**/node_modules/**",
-      "!**/dist/**",
-      "!**/build/**",
-      "!**/coverage/**",
-      "!**/.image-cache/**",
-      "!**/.thumbnail-cache/**",
-      "!**/public/assets/**",
-      "!**/.vscode/**"
+      "!**/node_modules",
+      "!**/dist",
+      "!**/build",
+      "!**/coverage",
+      "!**/.image-cache",
+      "!**/.thumbnail-cache",
+      "!**/public/assets",
+      "!**/.vscode"
     ]
   },
   "javascript": {
@@ -121,5 +119,5 @@
     "clientKind": "git",
     "useIgnoreFile": true
   },
-  "extends": ["ultracite"]
+  "extends": ["ultracite/core", "ultracite/react"]
 }

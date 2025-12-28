@@ -139,13 +139,13 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 	return (
 		<motion.div
 			animate={{ opacity: 1, y: 0 }}
-			className="flex items-center"
+			className="flex items-center min-w-0 overflow-hidden"
 			initial={{ opacity: 0, y: -5 }}
 			transition={{ duration: 0.15 }}
 		>
-			<Breadcrumb>
-				<BreadcrumbList className="flex items-center gap-0">
-					<BreadcrumbItem>
+			<Breadcrumb className="min-w-0 overflow-hidden">
+				<BreadcrumbList className="flex flex-nowrap items-center gap-0 min-w-0 overflow-hidden">
+					<BreadcrumbItem className="shrink-0">
 						<Button
 							className="flex h-6 cursor-pointer items-center gap-0.5 p-0 font-medium text-primary hover:text-primary/80"
 							onClick={() => navigate('/')}
@@ -159,10 +159,10 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 					{/* En vistas de contenido, enlazar al índice de la entidad */}
 					{isContentView && (
 						<>
-							<BreadcrumbSeparator>
+							<BreadcrumbSeparator className="shrink-0">
 								<ChevronRight className="h-2 w-2 text-muted-foreground" />
 							</BreadcrumbSeparator>
-							<BreadcrumbItem>
+							<BreadcrumbItem className="shrink-0">
 								<Button
 									className="h-6 cursor-pointer p-0 font-medium text-primary text-xs hover:text-primary/80"
 									onClick={() => navigate(config.contentPath || config.path)}
@@ -182,15 +182,15 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 							const isLast = idx === crumbs.length - 1;
 							return (
 								<Fragment key={c.id}>
-									<BreadcrumbSeparator>
+									<BreadcrumbSeparator className="shrink-0">
 										<ChevronRight className="h-2 w-2 text-muted-foreground" />
 									</BreadcrumbSeparator>
-									<BreadcrumbItem>
+									<BreadcrumbItem className="min-w-0 overflow-hidden">
 										{isLast ? (
-											<BreadcrumbPage className="font-medium text-muted-foreground text-xs">{c.name}</BreadcrumbPage>
+											<BreadcrumbPage className="font-medium text-muted-foreground text-xs truncate">{c.name}</BreadcrumbPage>
 										) : (
 											<Button
-												className="h-6 cursor-pointer p-0 font-medium text-primary text-xs hover:text-primary/80"
+												className="h-6 cursor-pointer p-0 font-medium text-primary text-xs hover:text-primary/80 truncate"
 												onClick={() => {
 													// Usar navegación jerárquica
 													const hierarchicalPath = buildHierarchicalPath(c.id);
@@ -217,10 +217,10 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 					{/* Fallback: si no hay breadcrumbs, mostrar nombre simple */}
 					{isContentView && !isFolderContent && currentItem?.name && (
 						<>
-							<BreadcrumbSeparator>
+							<BreadcrumbSeparator className="shrink-0">
 								<ChevronRight className="h-2 w-2 text-muted-foreground" />
 							</BreadcrumbSeparator>
-							<BreadcrumbItem>
+							<BreadcrumbItem className="min-w-0 overflow-hidden">
 								<div className="flex min-w-0 items-center overflow-hidden">
 									<CornerDownRight className="mr-0.5 h-2 w-2 shrink-0 text-muted" />
 									{currentItem.emoji && <span className="mr-0.5 shrink-0 text-xs">{currentItem.emoji}</span>}
@@ -232,10 +232,10 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 
 					{!isContentView && (
 						<>
-							<BreadcrumbSeparator>
+							<BreadcrumbSeparator className="shrink-0">
 								<ChevronRight className="h-2 w-2 text-muted-foreground" />
 							</BreadcrumbSeparator>
-							<BreadcrumbItem>
+							<BreadcrumbItem className="shrink-0">
 								<BreadcrumbPage className="font-medium text-muted-foreground text-xs">{config.label}</BreadcrumbPage>
 							</BreadcrumbItem>
 						</>

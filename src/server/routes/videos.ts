@@ -196,6 +196,42 @@ router.get('/:id', async (req: Request, res: Response) => {
 	}
 });
 
+// GET /api/videos/:id/content - Servir el video original
+router.get('/:id/content', async (req: Request, res: Response) => {
+	try {
+		const { id } = req.params;
+		const video = await getVideoById(id);
+
+		if (!video || !video.path) {
+			res.status(404).send('Video not found');
+			return;
+		}
+
+		if (!existsSync(video.path)) {
+			res.status(404).send('Video file not found');
+			return;
+		}
+
+		// Determinar mime type básico por extensión
+		const ext = video.path.split('.').pop()?.toLowerCase();
+		let mimeType = 'video/mp4';
+		if (ext === 'webm') mimeType = 'video/webm';
+		if (ext === 'ogg') mimeType = 'video/ogg';
+		if (ext === 'mov') mimeType = 'video/quicktime';
+		if (ext === 'mkv') mimeType = 'video/x-matroska';
+
+		res.sendFile(video.path, {
+			acceptRanges: true,
+			headers: {
+				'Content-Type': mimeType,
+			},
+		});
+	} catch (error) {
+		serverLogger.error('Error serving video content:', error);
+		res.status(500).send('Error serving video content');
+	}
+});
+
 // GET /api/videos/:id/thumbnail - Servir thumbnail de video
 router.get('/:id/thumbnail', async (req: Request, res: Response) => {
 	try {

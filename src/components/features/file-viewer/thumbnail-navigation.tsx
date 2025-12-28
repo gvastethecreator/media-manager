@@ -30,12 +30,12 @@ export const ThumbnailNavigation = memo(function ThumbnailNavigationImpl({
     }, [images, currentIndex]);
 
     return (
-        <motion.div className="-translate-x-1/2 fixed bottom-6 left-1/2 z-[9999] flex items-center justify-center" layout>
-            <motion.div className="flex items-center rounded-lg bg-background/10 px-2 py-1 backdrop-blur-sm" layout>
+        <div className="fixed bottom-8 left-1/2 z-[10000] flex -translate-x-1/2 items-center justify-center">
+            <motion.div className="flex items-center gap-2 rounded-full bg-black/50 p-2 backdrop-blur-md border border-white/10 shadow-xl" layout>
                 {visibleThumbnails.map(({ image, isActive, index }) => (
                     <ThumbnailItem image={image} isActive={isActive} key={image.id} onClick={() => onSelectImage(index)} />
                 ))}
             </motion.div>
-        </motion.div>
+        </div>
     );
 });

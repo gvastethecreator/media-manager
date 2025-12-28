@@ -6,7 +6,6 @@
  */
 
 import { Effect } from 'effect';
-import { afterEach, describe, expect, it } from 'bun:test';
 import { db } from '@/lib/drizzle';
 import { audios, folders } from '@/lib/drizzle/schema';
 import * as AudioService from '../audio.service.effect';

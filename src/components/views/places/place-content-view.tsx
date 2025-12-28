@@ -1,7 +1,8 @@
 import { MapPin } from 'lucide-react';
-import { memo, useCallback } from 'react';
+import { memo, useCallback, useMemo } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { LoadingScreen } from '@/components/core/feedback';
+import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { usePlaceImages } from '@/lib/api/places';
 import { useDetailsPanel } from '@/store/details-panel.store';
@@ -14,10 +15,13 @@ export const PlaceContentView = memo(function PlaceContentViewInner() {
 
 	const { data: images = [], isLoading, error } = usePlaceImages(selectedPlaceId || '');
 	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
+	const browserItems = useMemo(() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)), [images]);
 
 	const handleItemSelect = useCallback(
-		(item: AnyEntityWithStats) => {
-			setSelectedItems([item]);
+		(item: BrowserItem) => {
+			const entity = item.raw as unknown as AnyEntityWithStats | undefined;
+			if (!entity) return;
+			setSelectedItems([entity]);
 			setDetailsPanelVisible(true);
 		},
 		[setSelectedItems, setDetailsPanelVisible]
@@ -45,6 +49,14 @@ export const PlaceContentView = memo(function PlaceContentViewInner() {
 		);
 	}
 
+	if (isLoading && images.length === 0) {
+		return (
+			<BaseContentView description={undefined} title={selectedPlace?.name ?? 'Lugar'}>
+				<LoadingScreen />
+			</BaseContentView>
+		);
+	}
+
 	return (
 		<BaseContentView
 			description={selectedPlace?._count?.images ? `${selectedPlace._count.images} imágenes` : undefined}
@@ -52,8 +64,7 @@ export const PlaceContentView = memo(function PlaceContentViewInner() {
 		>
 			<FileBrowser
 				className="h-full"
-				isLoading={isLoading}
-				items={images as unknown as AnyEntityWithStats[]}
+				items={browserItems}
 				onItemClick={handleItemSelect}
 			/>
 		</BaseContentView>

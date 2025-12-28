@@ -3,7 +3,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import express from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { characters } from '@/lib/drizzle/schema/index';
+import { characters, imageCharacters, images } from '@/lib/drizzle/schema/index';
 import type { ExpressHandler } from '@/lib/express-types';
 
 const router = express.Router();
@@ -105,5 +105,60 @@ const getCharacterByIdHandler: ExpressHandler = async (req, res) => {
 };
 
 router.get('/:id', getCharacterByIdHandler);
+
+// POST /api/characters/:id/images/:imageId - Agregar imagen a personaje
+router.post('/:id/images/:imageId', async (req, res) => {
+	try {
+		const { id, imageId } = req.params;
+
+		const character = await db.query.characters.findFirst({
+			where: eq(characters.id, id),
+		});
+		if (!character) {
+			res.status(404).json({ error: 'Personaje no encontrado' });
+			return;
+		}
+
+		const image = await db.query.images.findFirst({
+			where: eq(images.id, imageId),
+		});
+		if (!image) {
+			res.status(404).json({ error: 'Imagen no encontrada' });
+			return;
+		}
+
+		// A=imageId, B=characterId
+		const existingRelation = await db
+			.select()
+			.from(imageCharacters)
+			.where(and(eq(imageCharacters.A, imageId), eq(imageCharacters.B, id)))
+			.limit(1);
+
+		if (existingRelation.length > 0) {
+			res.status(200).json({ message: 'La imagen ya está asociada al personaje', alreadyExists: true });
+			return;
+		}
+
+		await db.insert(imageCharacters).values({ A: imageId, B: id });
+		serverLogger.info(`✅ Imagen ${imageId} agregada a personaje ${id}`);
+		res.status(201).json({ message: 'Imagen agregada al personaje exitosamente' });
+	} catch (error) {
+		serverLogger.error('Error adding image to character:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// DELETE /api/characters/:id/images/:imageId
+router.delete('/:id/images/:imageId', async (req, res) => {
+	try {
+		const { id, imageId } = req.params;
+		await db.delete(imageCharacters).where(and(eq(imageCharacters.A, imageId), eq(imageCharacters.B, id)));
+		serverLogger.info(`✅ Imagen ${imageId} removida de personaje ${id}`);
+		res.status(200).json({ message: 'Imagen removida del personaje' });
+	} catch (error) {
+		serverLogger.error('Error removing image from character:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
 
 export default router;

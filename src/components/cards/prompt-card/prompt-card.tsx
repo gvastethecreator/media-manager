@@ -77,8 +77,12 @@ function calculateCardStyle(
 ): React.CSSProperties {
 	return {
 		...style,
-		background: tcgMode ? `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}25)` : 'rgba(255, 255, 255, 0.02)',
-		boxShadow: tcgMode ? `0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px ${primaryColor}30` : '0 4px 8px rgba(0, 0, 0, 0.1)',
+		background: tcgMode
+			? `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}25)`
+			: 'rgba(var(--effect-highlight-rgb), 0.02)',
+		boxShadow: tcgMode
+			? `0 8px 32px rgba(var(--effect-shadow-rgb), 0.1), 0 4px 16px ${primaryColor}30`
+			: '0 4px 8px rgba(var(--effect-shadow-rgb), 0.1)',
 		borderColor: tcgMode ? `${primaryColor}40` : 'transparent',
 		borderWidth: totalRelations > 10 ? '2px' : '1px',
 	};
@@ -102,11 +106,11 @@ function PromptCardLoadingState({ className }: { className?: string }) {
 	return (
 		<div
 			className={cn(
-				'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
+				'flex h-117.5 w-75 items-center justify-center overflow-hidden rounded-lg bg-muted md:w-80',
 				className
 			)}
 		>
-			<p className="text-gray-500">Cargando prompt...</p>
+			<p className="text-muted-foreground">Cargando prompt...</p>
 		</div>
 	);
 }
@@ -116,7 +120,7 @@ function PromptCardErrorState({ error, className }: { error: any; className?: st
 	return (
 		<div
 			className={cn(
-				'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-red-100 md:w-[320px] dark:bg-red-900',
+				'flex h-117.5 w-75 items-center justify-center overflow-hidden rounded-lg bg-destructive/10 md:w-80',
 				className
 			)}
 		>
@@ -229,8 +233,8 @@ function PromptCardComponent({
 		<motion.div
 			aria-label={`Prompt: ${prompt.name}`}
 			className={cn(
-				'w-[300px] md:w-[320px]',
-				tcgMode ? 'h-[470px]' : 'h-auto',
+				'w-75 md:w-80',
+				tcgMode ? 'h-117.5' : 'h-auto',
 				compact && 'h-auto',
 				disabled && 'pointer-events-none opacity-70',
 				className

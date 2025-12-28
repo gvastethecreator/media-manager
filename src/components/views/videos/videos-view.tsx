@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { LoadingScreen } from '@/components/core/feedback';
+import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useVideoStore } from '@/store/entities/video';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
@@ -18,6 +19,7 @@ export default function VideosView(_props: ViewProps) {
 
 	const videos = useMemo(() => Object.values(videosRecord || {}), [videosRecord]);
 	const videoCount = videos.length;
+	const browserItems = useMemo(() => videos.map((v) => toBrowserItem(v as unknown as Record<string, unknown>)), [videos]);
 
 	useEffect(() => {
 		if (!hasInitializedRef.current && videoCount === 0 && !isLoading) {
@@ -29,12 +31,12 @@ export default function VideosView(_props: ViewProps) {
 
 	const { openViewer } = useFileViewerStore();
 
-	const handleItemClick = useCallback((item: AnyEntityWithStats) => {
+	const handleItemClick = useCallback((item: BrowserItem) => {
 		viewLogger.info('Click en video', { id: item.id, name: item.name });
 	}, []);
 
 	const handleItemDoubleClick = useCallback(
-		(item: AnyEntityWithStats) => {
+		(item: BrowserItem) => {
 			// Abrir el visor con todos los videos
 			const mediaItems = videos.map((video) => ({
 				id: video.id,
@@ -53,6 +55,10 @@ export default function VideosView(_props: ViewProps) {
 		},
 		[videos, openViewer]
 	);
+
+	if (isLoading && videoCount === 0) {
+		return <LoadingScreen message="Cargando videos..." />;
+	}
 
 	if (error) {
 		return (
@@ -90,8 +96,7 @@ export default function VideosView(_props: ViewProps) {
 			<div className="min-h-0 flex-1 overflow-hidden">
 				<FileBrowser
 					className="h-full"
-					isLoading={isLoading}
-					items={videos as unknown as AnyEntityWithStats[]}
+					items={browserItems}
 					onItemClick={handleItemClick}
 					onItemDoubleClick={handleItemDoubleClick}
 				/>

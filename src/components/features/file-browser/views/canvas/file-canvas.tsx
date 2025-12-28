@@ -14,6 +14,14 @@ import { clientLogger } from '@/lib/logger/client-logger';
 // Renderiza todos los items en un solo <canvas> para minimizar el overhead de DOM.
 // Estrategia: layout en celdas (grid) con tamaño fijo, prefetch de imágenes con Intersection-like
 // (calculado por posición/scroll), overscan, y caché en memoria de ImageBitmap/Image.
+//
+// NOTA: Los colores en canvas deben ser valores computados (hex/rgb) porque ctx.fillStyle
+// no soporta var(). Los valores aquí corresponden a la paleta Tailwind para consistencia:
+// - Fondo card: slate-900 (#111827)
+// - Selección: blue-500 (#3b82f6)
+// - Hover: amber-500 (#f59e0b)
+// - Texto claro: gray-200 (#e5e7eb)
+// - Fondo placeholder: gray-700 (#374151), gray-500 (#6b7280)
 
 // Props y defaults
 export interface FileCanvasProps {
@@ -785,24 +793,13 @@ export function FileCanvas({
 				{hoverTooltip.visible && !dragStart && (
 					<div
 						aria-hidden
+						className="pointer-events-none absolute z-20 max-w-[150px] rounded bg-popover/90 px-2 py-1 text-xs text-popover-foreground shadow-md transition-all duration-100 ease-in"
 						style={{
-							position: 'absolute',
-							zIndex: 20,
-							pointerEvents: 'none',
 							left: hoverTooltip.x,
 							top: hoverTooltip.y,
-							maxWidth: '150px',
-							backgroundColor: 'rgba(0,0,0,0.7)',
-							color: '#fff',
-							fontSize: '0.75rem',
-							borderRadius: 4,
-							padding: '0.25rem 0.5rem',
 							whiteSpace: 'nowrap',
 							overflow: 'hidden',
 							textOverflow: 'ellipsis',
-							boxShadow: '0 1px 2px rgba(0,0,0,0.3)',
-							transition: 'all 100ms ease-in',
-							cursor: 'pointer',
 						}}
 					>
 						{hoverTooltip.text}

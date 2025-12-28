@@ -3,7 +3,7 @@ import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import express from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { places } from '@/lib/drizzle/schema/index';
+import { places, imagePlaces, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
@@ -254,6 +254,56 @@ router.delete('/:id', async (req, res) => {
 		res.json({ success: true, message: 'Lugar eliminado correctamente', deletedId: id });
 	} catch (error) {
 		serverLogger.error('Error deleting place:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// POST /places/:id/images/:imageId - Agregar imagen a lugar
+router.post('/:id/images/:imageId', async (req, res) => {
+	try {
+		const { id, imageId } = req.params;
+
+		const place = await db.query.places.findFirst({ where: eq(places.id, id) });
+		if (!place) {
+			res.status(404).json({ error: 'Lugar no encontrado' });
+			return;
+		}
+
+		const image = await db.query.images.findFirst({ where: eq(images.id, imageId) });
+		if (!image) {
+			res.status(404).json({ error: 'Imagen no encontrada' });
+			return;
+		}
+
+		// A=imageId, B=placeId
+		const existing = await db
+			.select()
+			.from(imagePlaces)
+			.where(and(eq(imagePlaces.A, imageId), eq(imagePlaces.B, id)))
+			.limit(1);
+
+		if (existing.length > 0) {
+			res.status(200).json({ message: 'La imagen ya está asociada', alreadyExists: true });
+			return;
+		}
+
+		await db.insert(imagePlaces).values({ A: imageId, B: id });
+		serverLogger.info(`✅ Imagen ${imageId} agregada a lugar ${id}`);
+		res.status(201).json({ message: 'Imagen agregada al lugar exitosamente' });
+	} catch (error) {
+		serverLogger.error('Error adding image to place:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// DELETE /places/:id/images/:imageId
+router.delete('/:id/images/:imageId', async (req, res) => {
+	try {
+		const { id, imageId } = req.params;
+		await db.delete(imagePlaces).where(and(eq(imagePlaces.A, imageId), eq(imagePlaces.B, id)));
+		res.status(200).json({ message: 'Imagen removida del lugar' });
+	} catch (error) {
+		serverLogger.error('Error removing image from place:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

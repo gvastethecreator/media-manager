@@ -56,7 +56,7 @@ export function TagCardHeader({
 					<div
 						className={cn('flex items-center justify-center rounded-full text-lg', compact ? 'h-6 w-6' : 'h-7 w-7')}
 						style={{
-							background: 'rgba(255, 255, 255, 0.25)',
+							background: 'rgba(var(--effect-highlight-rgb), 0.25)',
 							boxShadow: `0 0 8px ${color}40`,
 						}}
 					>
@@ -71,24 +71,20 @@ export function TagCardHeader({
 
 				{/* Icono de etiqueta o favorito a la derecha */}
 				<div
-					className="flex flex-shrink-0 items-center gap-1"
+					className="flex shrink-0 items-center gap-1"
 					style={{
-						color: 'rgba(255, 255, 255, 0.7)',
+						color: 'rgba(var(--effect-highlight-rgb), 0.7)',
 					}}
 				>
 					{isFavorite && (
 						<Heart
-							className={cn('drop-shadow-sm', compact ? 'h-4 w-4' : 'h-5 w-5')}
-							style={{
-								color: 'rgb(239, 68, 68)',
-								fill: 'rgb(239, 68, 68)',
-							}}
+							className={cn('drop-shadow-sm fill-destructive text-destructive', compact ? 'h-4 w-4' : 'h-5 w-5')}
 						/>
 					)}
 					<TagIcon
 						className={cn('drop-shadow-sm', compact ? 'h-4 w-4' : 'h-5 w-5')}
 						style={{
-							filter: 'drop-shadow(0 0 2px rgba(0, 0, 0, 0.3))',
+							filter: 'drop-shadow(0 0 2px rgba(var(--effect-shadow-rgb), 0.3))',
 						}}
 					/>
 				</div>
@@ -98,7 +94,8 @@ export function TagCardHeader({
 			<div
 				className={cn('flex items-center justify-between text-white text-xs', compact ? 'px-3 py-1' : 'px-3.5 py-1.5')}
 				style={{
-					background: tcgMode ? 'rgba(0, 0, 0, 0.3)' : 'rgba(0, 0, 0, 0.2)',
+					background:
+						tcgMode ? 'rgba(var(--effect-shadow-rgb), 0.3)' : 'rgba(var(--effect-shadow-rgb), 0.2)',
 					borderBottom: `1px solid ${color}50`,
 				}}
 			>

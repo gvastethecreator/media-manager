@@ -1,7 +1,7 @@
 import { AlertTriangle, FolderSync, Upload } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -220,10 +220,15 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 			<div className="min-h-0 flex-1 overflow-hidden">
 				<FileBrowser
 					className="h-full"
-					isLoading={isLoading}
-					items={images as unknown as AnyEntityWithStats[]}
-					onItemClick={handleImageClick}
-					onItemDoubleClick={handleImageDoubleClick}
+					items={images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>))}
+					onItemClick={(it: BrowserItem) => {
+						const entity = it.raw as unknown as AnyEntityWithStats | undefined;
+						if (entity) handleImageClick(entity);
+					}}
+					onItemDoubleClick={(it: BrowserItem) => {
+						const entity = it.raw as unknown as AnyEntityWithStats | undefined;
+						if (entity) handleImageDoubleClick(entity);
+					}}
 				/>
 			</div>
 

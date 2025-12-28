@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
@@ -114,6 +114,7 @@ export function AllFilesView(_: ViewProps) {
 	);
 	const error = imagesError || videosError || audiosError || documentsError || jsonError || file3DsError;
 	const fileCount = allFiles.length;
+	const browserItems = useMemo(() => allFiles.map((f) => toBrowserItem(f as unknown as Record<string, unknown>)), [allFiles]);
 
 	useEffect(() => {
 		// Cargar todos los tipos de archivos solo una vez al montar el componente
@@ -167,7 +168,7 @@ export function AllFilesView(_: ViewProps) {
 	const { openViewer: openFileViewer } = useFileViewerStore();
 
 	const handleFileClick = useCallback(
-		(file: AnyEntityWithStats) => {
+		(file: BrowserItem) => {
 			viewLogger.info('🖱️ Click en archivo:', file.name);
 
 			// Navegar según el entityType
@@ -192,23 +193,31 @@ export function AllFilesView(_: ViewProps) {
 	);
 
 	const handleFileDoubleClick = useCallback(
-		(file: AnyEntityWithStats) => {
+		(file: BrowserItem) => {
 			viewLogger.info('🖱️ Doble click en archivo:', file.name);
 			viewLogger.info('🔍 Debug - entityType:', file.entityType);
-			viewLogger.info('🔍 Debug - isImageWithStats:', isImageWithStats(file));
-			viewLogger.info('🔍 Debug - isVideoWithStats:', isVideoWithStats(file));
+
+			const entity = file.raw as unknown as AnyEntityWithStats | undefined;
+			if (!entity) {
+				viewLogger.info('🔍 Debug - sin raw en item; usando fallback de navegación');
+				handleFileClick(file);
+				return;
+			}
+
+			viewLogger.info('🔍 Debug - isImageWithStats:', isImageWithStats(entity));
+			viewLogger.info('🔍 Debug - isVideoWithStats:', isVideoWithStats(entity));
 
 			// Manejar imágenes con el image viewer
-			if (isImageWithStats(file)) {
+			if (isImageWithStats(entity)) {
 				viewLogger.info('📸 Abriendo imagen en image viewer');
 				const imageEntities = allFiles.filter((item) => isImageWithStats(item));
-				const currentIndex = imageEntities.findIndex((img) => img.id === file.id);
+				const currentIndex = imageEntities.findIndex((img) => img.id === entity.id);
 				openImageViewer(imageEntities, currentIndex);
 				return;
 			}
 
 			// Manejar videos con el file viewer
-			if (isVideoWithStats(file)) {
+			if (isVideoWithStats(entity)) {
 				viewLogger.info('🎬 Abriendo video en file viewer');
 				const videoItems = allFiles
 					.filter((item) => isVideoWithStats(item))
@@ -225,7 +234,7 @@ export function AllFilesView(_: ViewProps) {
 						metadata: video.metadata,
 					}));
 
-				const currentIndex = videoItems.findIndex((item) => item.id === file.id);
+				const currentIndex = videoItems.findIndex((item) => item.id === entity.id);
 				openFileViewer(videoItems, Math.max(0, currentIndex));
 				return;
 			}
@@ -269,8 +278,7 @@ export function AllFilesView(_: ViewProps) {
 	return (
 		<div className="h-full">
 			<FileBrowser
-				isLoading={isLoading}
-				items={allFiles}
+				items={browserItems}
 				onItemClick={handleFileClick}
 				onItemDoubleClick={handleFileDoubleClick}
 			/>
