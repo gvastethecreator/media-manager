@@ -1,6 +1,9 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
 import { z } from 'zod';
+import { and, eq } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { wildcards, imageWildcards, images } from '@/lib/drizzle/schema/index';
 import { getWildcard, getWildcards } from '@/services/wildcard/wildcard.service';
 import { toWildcardWithStats } from '@/transformers/wildcard';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -255,6 +258,56 @@ router.delete('/:id', async (req: Request, res: Response) => {
 		res.status(204).send();
 	} catch (error) {
 		serverLogger.error('Error deleting wildcard:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// POST /wildcards/:id/images/:imageId - Agregar imagen a wildcard
+router.post('/:id/images/:imageId', async (req: Request, res: Response) => {
+	try {
+		const { id, imageId } = req.params;
+
+		const wildcard = await db.query.wildcards.findFirst({ where: eq(wildcards.id, id) });
+		if (!wildcard) {
+			res.status(404).json({ error: 'Wildcard no encontrado' });
+			return;
+		}
+
+		const image = await db.query.images.findFirst({ where: eq(images.id, imageId) });
+		if (!image) {
+			res.status(404).json({ error: 'Imagen no encontrada' });
+			return;
+		}
+
+		// A=imageId, B=wildcardId
+		const existing = await db
+			.select()
+			.from(imageWildcards)
+			.where(and(eq(imageWildcards.A, imageId), eq(imageWildcards.B, id)))
+			.limit(1);
+
+		if (existing.length > 0) {
+			res.status(200).json({ message: 'La imagen ya está asociada', alreadyExists: true });
+			return;
+		}
+
+		await db.insert(imageWildcards).values({ A: imageId, B: id });
+		serverLogger.info(`✅ Imagen ${imageId} agregada a wildcard ${id}`);
+		res.status(201).json({ message: 'Imagen agregada al wildcard exitosamente' });
+	} catch (error) {
+		serverLogger.error('Error adding image to wildcard:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// DELETE /wildcards/:id/images/:imageId
+router.delete('/:id/images/:imageId', async (req: Request, res: Response) => {
+	try {
+		const { id, imageId } = req.params;
+		await db.delete(imageWildcards).where(and(eq(imageWildcards.A, imageId), eq(imageWildcards.B, id)));
+		res.status(200).json({ message: 'Imagen removida del wildcard' });
+	} catch (error) {
+		serverLogger.error('Error removing image from wildcard:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

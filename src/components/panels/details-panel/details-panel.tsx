@@ -1,4 +1,5 @@
 import { useUIStore } from '@/store/ui.store';
+import { cn } from '@/lib/utils';
 import { EmptyPanel } from './components/empty-panel';
 import { MultiplePanel } from './components/multiple-panel';
 import { SinglePanel } from './components/single-panel';
@@ -23,7 +24,7 @@ export function DetailsPanel({ selectedItems, className = '' }: DetailsPanelProp
 		}
 	};
 
-	return <div className={`w-full overflow-auto ${className}`}>{renderContent()}</div>;
+	return <div className={cn('w-full h-full flex flex-col min-h-0', className)}>{renderContent()}</div>;
 }
 
 export default DetailsPanel;

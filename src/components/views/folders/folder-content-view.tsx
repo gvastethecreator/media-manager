@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { PerformanceMetricsPanel } from '@/components/debug/performance-metrics-panel';
-import { FileBrowser } from '@/components/features/file-browser';
+import { FileBrowser, type BrowserItem } from '@/components/features/file-browser-new';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';
@@ -47,16 +47,18 @@ export function FolderContentView({
 	}, [currentFolderId, setDetailsPanelVisible, isRightPanelCollapsed, toggleRightPanel]);
 
 	const handleImageSelect = useCallback(
-		(item: AnyEntityWithStats) => {
-			logger.info(`🖱️ Entidad seleccionada: ${item.name} (tipo: ${item.entityType})`);
-			setSelectedItems([item]);
+		(item: BrowserItem) => {
+			const entity = item.raw as unknown as AnyEntityWithStats | undefined;
+			if (!entity) return;
+			logger.info(`🖱️ Entidad seleccionada: ${entity.name} (tipo: ${(entity as any).entityType})`);
+			setSelectedItems([entity]);
 			setDetailsPanelVisible(true);
 		},
 		[setSelectedItems, setDetailsPanelVisible]
 	);
 	// Render: siempre montar FileBrowser para asegurar disponibilidad de toolbar/viewport
 	// - Cuando no hay folderId aún, se monta con filterId undefined (estado vacío pero listo)
-	const content = <FileBrowser filterId={currentFolderId ?? undefined} onItemClick={handleImageSelect} />;
+	const content = <FileBrowser folderId={currentFolderId ?? undefined} onItemClick={handleImageSelect} />;
 
 	const showPerfPanel = typeof window !== 'undefined' && new URLSearchParams(window.location.search).has('debugPerf');
 

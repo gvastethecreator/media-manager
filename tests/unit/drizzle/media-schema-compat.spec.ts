@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'bun:test';
 import type { ImageBase } from '@/types/entities/image/base';
 
 // Nota: Este test no toca DB; solo verifica correspondencia de shape entre

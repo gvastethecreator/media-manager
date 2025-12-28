@@ -1,4 +1,3 @@
-import type React from 'react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
@@ -6,33 +5,36 @@ import { useCallback, useEffect, useRef, useState } from 'react';
  *
  * Gestiona zoom y paneo (pan) de la imagen
  */
-export function useZoomPan(isOpen: boolean, resetView: () => void) {
+export function useZoomPan(isOpen: boolean) {
 	const [scale, setScale] = useState(1);
 	const [position, setPosition] = useState({ x: 0, y: 0 });
-	const imageContainerRef = useRef<HTMLFieldSetElement>(null);
+	const imageContainerRef = useRef<HTMLDivElement>(null);
+	const isDraggingRef = useRef(false);
+	const startPosRef = useRef({ x: 0, y: 0 });
 
-	// Reset state when opening viewer
+	// Resetear estado cuando se abre el visor
+	const resetView = useCallback(() => {
+		setScale(1);
+		setPosition({ x: 0, y: 0 });
+	}, []);
+
+	// Reset cuando se abre
 	useEffect(() => {
 		if (isOpen) {
 			resetView();
 		}
 	}, [isOpen, resetView]);
 
-	// Resetear posición y escala cuando cambia la imagen seleccionada
-	useEffect(() => {
-		resetView();
-	}, [resetView]);
-
-	// Manejar zoom con la rueda
-	const handleWheel = useCallback(
-		(e: React.WheelEvent) => {
-			e.preventDefault();
-			const zoomFactor = 0.1;
-			const newScale = Math.min(Math.max(0.1, scale * (1 - Math.sign(e.deltaY) * zoomFactor)), 8);
-			setScale(newScale);
-		},
-		[scale]
-	);
+	// Manejar zoom con la rueda - usando WheelEvent nativo
+	const handleWheel = useCallback((e: WheelEvent) => {
+		e.preventDefault();
+		e.stopPropagation();
+		const zoomFactor = 0.1;
+		setScale((prevScale) => {
+			const delta = e.deltaY > 0 ? -zoomFactor : zoomFactor;
+			return Math.min(Math.max(0.1, prevScale + prevScale * delta), 8);
+		});
+	}, []);
 
 	// Función memoizada para cambiar el zoom
 	const handleZoom = useCallback((factor: number) => {
@@ -46,35 +48,51 @@ export function useZoomPan(isOpen: boolean, resetView: () => void) {
 	const handleZoomIn = useCallback(() => handleZoom(0.2), [handleZoom]);
 	const handleZoomOut = useCallback(() => handleZoom(-0.2), [handleZoom]);
 
-	// Función para drag (paneo)
-	const onMainDrag = useCallback((_e: any, info: { delta: { x: number; y: number } }) => {
-		setPosition((prev) => {
-			const next = { x: prev.x + info.delta.x, y: prev.y + info.delta.y };
-			const container = imageContainerRef.current?.getBoundingClientRect();
-			if (container) {
-				const maxX = container.width / 2;
-				const maxY = container.height / 2;
-				next.x = Math.max(-maxX, Math.min(maxX, next.x));
-				next.y = Math.max(-maxY, Math.min(maxY, next.y));
-			}
-			return next;
-		});
+	// Manejar drag con click central o izquierdo
+	const handleMouseDown = useCallback((e: React.MouseEvent) => {
+		// Click izquierdo (0) o central (1)
+		if (e.button === 0 || e.button === 1) {
+			e.preventDefault();
+			isDraggingRef.current = true;
+			startPosRef.current = { x: e.clientX, y: e.clientY };
+		}
 	}, []);
 
-	const resetViewImpl = useCallback(() => {
-		setScale(1);
-		setPosition({ x: 0, y: 0 });
+	const handleMouseMove = useCallback((e: React.MouseEvent) => {
+		if (!isDraggingRef.current) return;
+		e.preventDefault();
+		const dx = e.clientX - startPosRef.current.x;
+		const dy = e.clientY - startPosRef.current.y;
+		setPosition((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
+		startPosRef.current = { x: e.clientX, y: e.clientY };
 	}, []);
+
+	const handleMouseUp = useCallback(() => {
+		isDraggingRef.current = false;
+	}, []);
+
+	// Registrar wheel event nativo (passive: false para poder preventDefault)
+	useEffect(() => {
+		const container = imageContainerRef.current;
+		if (!container || !isOpen) return;
+
+		container.addEventListener('wheel', handleWheel, { passive: false });
+		return () => {
+			container.removeEventListener('wheel', handleWheel);
+		};
+	}, [isOpen, handleWheel]);
 
 	return {
 		scale,
 		position,
 		imageContainerRef,
-		handleWheel,
 		handleZoom,
 		handleZoomIn,
 		handleZoomOut,
-		onMainDrag,
-		resetView: resetViewImpl,
+		resetView,
+		// Mouse handlers para drag
+		handleMouseDown,
+		handleMouseMove,
+		handleMouseUp,
 	};
 }

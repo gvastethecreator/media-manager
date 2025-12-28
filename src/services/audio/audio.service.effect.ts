@@ -6,7 +6,7 @@
  */
 
 import { Context, Effect, Layer } from 'effect';
-import { and, count, desc, eq, gte, lte, or, sql } from 'drizzle-orm';
+import { and, count, desc, eq, gte, inArray, lte, or, sql } from 'drizzle-orm';
 import * as crypto from 'node:crypto';
 import { db } from '@/lib/drizzle';
 import { audios, folders } from '@/lib/drizzle/schema';
@@ -555,8 +555,9 @@ const make = (): AudioServiceInterface => {
 
 			const deletedCount = yield* Effect.tryPromise({
 				try: async () => {
-					const result = await db.delete(audios).where(sql`${audios.id} IN ${ids}`);
-					return result.changes || 0;
+					const result = await db.delete(audios).where(inArray(audios.id, ids));
+					// libsql usa rowsAffected, better-sqlite3 usa changes
+					return (result as any).rowsAffected ?? (result as any).changes ?? 0;
 				},
 				catch: (error) => toAudioError(error, 'deleteManyByIds'),
 			});
@@ -759,8 +760,9 @@ const make = (): AudioServiceInterface => {
 					const result = await db
 						.update(audios)
 						.set({ isFavorite, updatedAt: new Date() })
-						.where(sql`${audios.id} IN ${ids}`);
-					return result.changes || 0;
+						.where(inArray(audios.id, ids));
+					// libsql usa rowsAffected, better-sqlite3 usa changes
+					return (result as any).rowsAffected ?? (result as any).changes ?? 0;
 				},
 				catch: (error) => toAudioError(error, 'setFavoriteMany'),
 			});

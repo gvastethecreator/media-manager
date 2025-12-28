@@ -24,7 +24,8 @@
       "vite/client",
       "@testing-library/jest-dom",
       "@types/react",
-      "@types/react-dom"
+      "@types/react-dom",
+      "vitest/globals"
     ],
     "paths": {
       "@/*": [

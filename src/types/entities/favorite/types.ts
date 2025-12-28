@@ -197,24 +197,30 @@ export const FAVORITE_ENTITY_EMOJIS: Record<string, string> = {
 	default: '⭐',
 };
 
+/**
+ * Colores por tipo de entidad favorita.
+ * NOTA: Estos colores hex se mantienen aquí porque son valores por defecto
+ * que pueden ser personalizados por el usuario. En componentes de UI,
+ * preferir usar las clases de @/lib/styles/color-tokens
+ */
 export const FAVORITE_ENTITY_COLORS: Record<string, string> = {
-	[FavoriteEntityType.IMAGE]: '#3b82f6',
-	[FavoriteEntityType.VIDEO]: '#ef4444',
-	[FavoriteEntityType.ALBUM]: '#f97316',
-	[FavoriteEntityType.COLLECTION]: '#8b5cf6',
-	[FavoriteEntityType.FOLDER]: '#22c55e',
-	[FavoriteEntityType.CHARACTER]: '#f43f5e',
-	[FavoriteEntityType.PLACE]: '#0ea5e9',
-	[FavoriteEntityType.WORLD_ITEM]: '#d946ef',
-	[FavoriteEntityType.CONCEPT]: '#fbbf24',
-	[FavoriteEntityType.PROMPT]: '#10b981',
-	[FavoriteEntityType.NOTE]: '#ef4444',
-	[FavoriteEntityType.DOCUMENT]: '#64748b',
-	[FavoriteEntityType.FILE]: '#6b7280',
-	[FavoriteEntityType.TAG]: '#ec4899',
-	[FavoriteEntityType.GROUP]: '#14b8a6',
-	[FavoriteEntityType.FAVORITE]: '#fbbf24',
-	default: '#3b82f6',
+	[FavoriteEntityType.IMAGE]: 'rgb(59, 130, 246)', // blue-500
+	[FavoriteEntityType.VIDEO]: 'rgb(239, 68, 68)', // red-500
+	[FavoriteEntityType.ALBUM]: 'rgb(249, 115, 22)', // orange-500
+	[FavoriteEntityType.COLLECTION]: 'rgb(139, 92, 246)', // violet-500
+	[FavoriteEntityType.FOLDER]: 'rgb(34, 197, 94)', // green-500
+	[FavoriteEntityType.CHARACTER]: 'rgb(244, 63, 94)', // rose-500
+	[FavoriteEntityType.PLACE]: 'rgb(14, 165, 233)', // sky-500
+	[FavoriteEntityType.WORLD_ITEM]: 'rgb(217, 70, 239)', // fuchsia-500
+	[FavoriteEntityType.CONCEPT]: 'rgb(251, 191, 36)', // amber-400
+	[FavoriteEntityType.PROMPT]: 'rgb(16, 185, 129)', // emerald-500
+	[FavoriteEntityType.NOTE]: 'rgb(239, 68, 68)', // red-500
+	[FavoriteEntityType.DOCUMENT]: 'rgb(100, 116, 139)', // slate-500
+	[FavoriteEntityType.FILE]: 'rgb(107, 114, 128)', // gray-500
+	[FavoriteEntityType.TAG]: 'rgb(236, 72, 153)', // pink-500
+	[FavoriteEntityType.GROUP]: 'rgb(20, 184, 166)', // teal-500
+	[FavoriteEntityType.FAVORITE]: 'rgb(251, 191, 36)', // amber-400
+	default: 'rgb(59, 130, 246)', // blue-500
 };
 
 export const FAVORITE_ENTITY_DISPLAY_NAMES: Record<string, string> = {

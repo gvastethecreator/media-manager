@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'bun:test';
 import { renderHook } from '@testing-library/react';
 import { useKeyboardNavigation } from '@/components/features/file-browser/navigation/keyboard-navigation';
 

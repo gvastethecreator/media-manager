@@ -148,7 +148,8 @@ const FolderTreeViewComponent = memo(function FolderTreeViewImpl({
 	isCollapsed = false,
 	onItemClick,
 }: FolderTreeViewProps) {
-	const { getCategoryItems, isLoading } = useCategoryStats();
+	const { getCategoryItems, isLoadingNavigation, navigationData } = useCategoryStats();
+
 	const navigate = useNavigate();
 	const { buildHierarchicalPath } = useHierarchicalNavigation();
 	const [expandedFolders, setExpandedFolders] = useState<Set<string>>(new Set());
@@ -198,11 +199,11 @@ const FolderTreeViewComponent = memo(function FolderTreeViewImpl({
 		[onItemClick, navigate, buildHierarchicalPath]
 	);
 
-	if (isLoading) {
+	if (isLoadingNavigation && !navigationData) {
 		return <div className="px-2 py-1 text-[10px] text-muted-foreground italic">Cargando carpetas...</div>;
 	}
 
-	if (treeData.length === 0) {
+	if (treeData.length === 0 && !isLoadingNavigation) {
 		return <div className="px-2 py-1 text-[10px] text-muted-foreground italic">No hay carpetas</div>;
 	}
 

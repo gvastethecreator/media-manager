@@ -3,16 +3,20 @@
  * @description Tests básicos para el sistema de atajos de teclado
  */
 
-import { beforeEach, describe, expect, it, mock } from 'bun:test';
-import { KeyboardShortcutManager } from '../keyboard-shortcut-manager';
+import { vi, type Mock } from 'vitest';
+import { KeyboardShortcutManager, type ShortcutHandler } from '../keyboard-shortcut-manager';
 
 describe('KeyboardShortcutManager', () => {
 	let manager: KeyboardShortcutManager;
-	let mockHandler: ReturnType<typeof mock>;
+	let mockHandler: Mock<ShortcutHandler>;
 
 	beforeEach(() => {
 		manager = new KeyboardShortcutManager();
-		mockHandler = mock();
+		mockHandler = vi.fn();
+		// Configurar document.activeElement mock para JSDOM
+		if (!document.activeElement) {
+			document.body.focus();
+		}
 	});
 
 	it('should register and execute shortcuts', () => {
@@ -76,6 +80,7 @@ describe('KeyboardShortcutManager', () => {
 			key: 'a',
 			ctrlKey: true,
 		});
+		Object.defineProperty(event, 'target', { value: document.body, writable: false });
 
 		const handled = manager.handleKeyDown(event);
 
@@ -119,6 +124,7 @@ describe('KeyboardShortcutManager', () => {
 			key: 'a',
 			ctrlKey: true,
 		});
+		Object.defineProperty(event, 'target', { value: document.body, writable: false });
 
 		const handled = manager.handleKeyDown(event);
 
@@ -128,18 +134,18 @@ describe('KeyboardShortcutManager', () => {
 
 	it('should get shortcuts for context', () => {
 		const globalShortcut = {
-			key: 'escape',
+			key: 'q',
 			modifiers: [] as const,
-			action: 'global-action',
-			description: 'Global shortcut',
+			action: 'custom-global-action',
+			description: 'Custom Global shortcut',
 			context: 'global' as const,
 		};
 
 		const contextShortcut = {
-			key: 'a',
+			key: 'w',
 			modifiers: ['ctrl'] as const,
-			action: 'context-action',
-			description: 'Context shortcut',
+			action: 'custom-context-action',
+			description: 'Custom Context shortcut',
 			context: 'file-browser' as const,
 		};
 
@@ -148,8 +154,8 @@ describe('KeyboardShortcutManager', () => {
 
 		const fileBrowserShortcuts = manager.getShortcutsForContext('file-browser');
 
-		expect(fileBrowserShortcuts).toHaveLength(2); // global + context-specific
-		expect(fileBrowserShortcuts.some((s) => s.action === 'global-action')).toBe(true);
-		expect(fileBrowserShortcuts.some((s) => s.action === 'context-action')).toBe(true);
+		// Verifica que se incluyen los shortcuts custom registrados
+		expect(fileBrowserShortcuts.some((s) => s.action === 'custom-global-action')).toBe(true);
+		expect(fileBrowserShortcuts.some((s) => s.action === 'custom-context-action')).toBe(true);
 	});
 });

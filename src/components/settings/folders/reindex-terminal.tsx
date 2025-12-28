@@ -34,6 +34,10 @@ interface ReindexTerminalProps {
 
 // Límite máximo de líneas para performance
 const MAX_LINES = 25;
+// Configuración de reconexión SSE
+const MAX_RECONNECT_ATTEMPTS = 10;
+const BASE_RECONNECT_DELAY = 1000; // 1 segundo inicial
+const MAX_RECONNECT_DELAY = 30_000; // 30 segundos máximo
 
 const LOG_ICONS = {
 	INFO: Info,
@@ -70,6 +74,9 @@ export function ReindexTerminal({
 	const logCounterRef = useRef(0);
 	const logContainerRef = useRef<HTMLDivElement>(null);
 	const timerRef = useRef<NodeJS.Timeout | null>(null);
+	const reconnectAttemptRef = useRef(0);
+	const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+	const isConnectingRef = useRef(false);
 
 	// GSAP Context para animaciones
 	const { contextSafe } = useGSAP();
@@ -339,48 +346,102 @@ export function ReindexTerminal({
 		};
 	}, [startTime]);
 
-	// Configurar conexión SSE cuando está activo
+	// Configurar conexión SSE cuando está activo - con reconexión automática
 	useEffect(() => {
 		if (!isActive) return;
 
-		addLog('INFO', '🔌 Conectando al servidor de eventos...', { source: 'terminal' });
-
-		const eventSource = new EventSource('/api/events/stream');
-		sseRef.current = eventSource;
-
-		eventSource.onopen = () => {
-			addLog('SUCCESS', '✅ Conexión establecida con el servidor', { source: 'sse' });
+		// Función para calcular delay con exponential backoff
+		const getReconnectDelay = (attempt: number) => {
+			const delay = Math.min(BASE_RECONNECT_DELAY * (2 ** attempt), MAX_RECONNECT_DELAY);
+			// Añadir jitter para evitar thundering herd
+			return delay + Math.random() * 1000;
 		};
 
-		eventSource.addEventListener('connected', (e) => {
-			const data = JSON.parse(e.data);
-			addLog('SUCCESS', '🎯 Suscrito a eventos de reindexado', {
-				source: 'sse',
-				timestamp: new Date(data.timestamp).toISOString(),
-			});
-		});
-
-		eventSource.addEventListener('event', (e) => {
-			try {
-				const event = JSON.parse(e.data);
-				handleSSEEvent(event);
-			} catch (error) {
-				clientLogger.error('Error parsing SSE event:', error);
-				addLog('ERROR', '❌ Error procesando evento del servidor', { source: 'sse' });
+		// Función para conectar SSE con manejo de reconexión
+		const connectSSE = () => {
+			// Evitar conexiones duplicadas
+			if (isConnectingRef.current || sseRef.current?.readyState === EventSource.OPEN) {
+				return;
 			}
-		});
 
-		eventSource.addEventListener('heartbeat', () => {
-			// Opcional: mostrar heartbeat
-			// addLog('INFO', '💓 Heartbeat', { source: 'sse' });
-		});
+			isConnectingRef.current = true;
 
-		eventSource.onerror = (error) => {
-			clientLogger.error('SSE Error:', error);
-			addLog('WARNING', '⚠️  Conexión perdida, intentando reconectar...', { source: 'sse' });
+			if (reconnectAttemptRef.current === 0) {
+				addLog('INFO', '🔌 Conectando al servidor de eventos...', { source: 'terminal' });
+			} else {
+				addLog('INFO', `🔄 Reconectando... (intento ${reconnectAttemptRef.current}/${MAX_RECONNECT_ATTEMPTS})`, { source: 'sse' });
+			}
+
+			// Cerrar conexión existente si hay
+			if (sseRef.current) {
+				sseRef.current.close();
+				sseRef.current = null;
+			}
+
+			const eventSource = new EventSource('/api/events/stream');
+			sseRef.current = eventSource;
+
+			eventSource.onopen = () => {
+				isConnectingRef.current = false;
+				reconnectAttemptRef.current = 0; // Reset intentos en conexión exitosa
+				addLog('SUCCESS', '✅ Conexión establecida con el servidor', { source: 'sse' });
+			};
+
+			eventSource.addEventListener('connected', (e) => {
+				const data = JSON.parse(e.data);
+				addLog('SUCCESS', '🎯 Suscrito a eventos de reindexado', {
+					source: 'sse',
+					timestamp: new Date(data.timestamp).toISOString(),
+				});
+			});
+
+			eventSource.addEventListener('event', (e) => {
+				try {
+					const event = JSON.parse(e.data);
+					handleSSEEvent(event);
+				} catch (error) {
+					clientLogger.error('Error parsing SSE event:', error);
+					addLog('ERROR', '❌ Error procesando evento del servidor', { source: 'sse' });
+				}
+			});
+
+			eventSource.addEventListener('heartbeat', () => {
+				// Heartbeat silencioso - confirma que conexión está viva
+			});
+
+			eventSource.onerror = (error) => {
+				isConnectingRef.current = false;
+				clientLogger.error('SSE Error:', error);
+
+				// Solo intentar reconectar si está activo y no hemos agotado intentos
+				if (isActive && reconnectAttemptRef.current < MAX_RECONNECT_ATTEMPTS) {
+					const delay = getReconnectDelay(reconnectAttemptRef.current);
+					addLog('WARNING', `⚠️ Conexión perdida. Reconectando en ${Math.round(delay / 1000)}s...`, { source: 'sse' });
+
+					// Limpiar timeout anterior si existe
+					if (reconnectTimeoutRef.current) {
+						clearTimeout(reconnectTimeoutRef.current);
+					}
+
+					reconnectAttemptRef.current++;
+					reconnectTimeoutRef.current = setTimeout(() => {
+						connectSSE();
+					}, delay);
+				} else if (reconnectAttemptRef.current >= MAX_RECONNECT_ATTEMPTS) {
+					addLog('ERROR', '❌ No se pudo restablecer la conexión. Los logs pueden estar desactualizados.', { source: 'sse' });
+				}
+			};
 		};
+
+		// Iniciar conexión
+		connectSSE();
 
 		return () => {
+			// Limpiar todo al desmontar
+			if (reconnectTimeoutRef.current) {
+				clearTimeout(reconnectTimeoutRef.current);
+				reconnectTimeoutRef.current = null;
+			}
 			if (sseRef.current) {
 				sseRef.current.close();
 				sseRef.current = null;
@@ -388,6 +449,8 @@ export function ReindexTerminal({
 			if (timerRef.current) {
 				clearInterval(timerRef.current);
 			}
+			reconnectAttemptRef.current = 0;
+			isConnectingRef.current = false;
 		};
 	}, [isActive, addLog, handleSSEEvent]);
 

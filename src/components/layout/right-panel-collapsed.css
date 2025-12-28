@@ -32,7 +32,7 @@
 	will-change: transform;
 }
 
-/* Estilos para el panel derecho colapsado */
+/* Estilos para el panel derecho colapsado - COMENTADO PARA NO INTERFERIR CON REACT-RESIZABLE-PANELS
 .right-panel-collapsed {
 	width: 60px !important;
 	min-width: 60px !important;
@@ -41,6 +41,7 @@
 	transform: translateZ(0);
 	will-change: width;
 }
+*/
 
 .right-panel-collapsed h3 {
 	opacity: 0;

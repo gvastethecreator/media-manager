@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { LoadingScreen } from '@/components/core/feedback';
+import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAudioStore } from '@/store/entities/audio';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
@@ -18,6 +19,7 @@ export default function AudioView(_props: ViewProps) {
 
 	const audios = useMemo(() => audiosArray || [], [audiosArray]);
 	const audioCount = audios.length;
+	const browserItems = useMemo(() => audios.map((a) => toBrowserItem(a as unknown as Record<string, unknown>)), [audios]);
 
 	useEffect(() => {
 		if (!hasInitializedRef.current && audioCount === 0 && !isLoading) {
@@ -29,12 +31,12 @@ export default function AudioView(_props: ViewProps) {
 
 	const { openViewer } = useFileViewerStore();
 
-	const handleItemClick = useCallback((item: AnyEntityWithStats) => {
+	const handleItemClick = useCallback((item: BrowserItem) => {
 		viewLogger.info('Click en audio', { id: item.id, name: item.name });
 	}, []);
 
 	const handleItemDoubleClick = useCallback(
-		(item: AnyEntityWithStats) => {
+		(item: BrowserItem) => {
 			// Abrir el visor con todos los audios
 			const mediaItems = audios.map((audio) => ({
 				id: audio.id,
@@ -51,6 +53,10 @@ export default function AudioView(_props: ViewProps) {
 		},
 		[audios, openViewer]
 	);
+
+	if (isLoading && audioCount === 0) {
+		return <LoadingScreen message="Cargando audios..." />;
+	}
 
 	if (error) {
 		return (
@@ -88,8 +94,7 @@ export default function AudioView(_props: ViewProps) {
 			<div className="min-h-0 flex-1 overflow-hidden">
 				<FileBrowser
 					className="h-full"
-					isLoading={isLoading}
-					items={audios as unknown as AnyEntityWithStats[]}
+					items={browserItems}
 					onItemClick={handleItemClick}
 					onItemDoubleClick={handleItemDoubleClick}
 				/>

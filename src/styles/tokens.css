@@ -1,0 +1,140 @@
+/**
+ * 🎨 TOKENS DE COLOR SEMÁNTICOS
+ * =============================
+ * 
+ * Este archivo define los colores semánticos centralizados del proyecto.
+ * Todos los componentes deben usar estas variables en lugar de colores hardcodeados.
+ * 
+ * REGLAS DE USO:
+ * 1. NUNCA usar colores hex directamente (#3b82f6)
+ * 2. SIEMPRE usar variables CSS: var(--color-xxx) o clases Tailwind
+ * 3. Para colores de entidad, usar las variables --entity-xxx
+ * 4. Para colores de gráficos/charts, usar --chart-x
+ */
+
+:root {
+  /* =====================================================
+   * EFECTOS VISUALES (sombras/brillos)
+   * Se exponen como RGB para poder usar rgba(var(--...-rgb), a)
+   * ===================================================== */
+  --effect-highlight-rgb: 255 255 255;
+  --effect-shadow-rgb: 0 0 0;
+
+  /* =====================================================
+   * PALETA DE COLORES PARA ENTIDADES
+   * Usa estos tokens para representar tipos de entidad
+   * ===================================================== */
+  
+  /* Entidades de contenido */
+  --entity-image: oklch(0.59 0.2 255);       /* Azul - para imágenes */
+  --entity-video: oklch(0.63 0.24 29);       /* Rojo - para videos */
+  --entity-audio: oklch(0.68 0.16 201);      /* Sky - para audio */
+  --entity-document: oklch(0.55 0.1 250);    /* Slate - para documentos */
+  --entity-file: oklch(0.55 0.1 250);        /* Gris - archivos genéricos */
+  --entity-file-3d: oklch(0.65 0.15 277);    /* Índigo - archivos 3D */
+  --entity-json: oklch(0.7 0.15 350);        /* Rosa - archivos JSON */
+  
+  /* Entidades de organización */
+  --entity-folder: oklch(0.75 0.18 85);      /* Amarillo - carpetas */
+  --entity-album: oklch(0.59 0.23 293);      /* Violeta - álbumes */
+  --entity-collection: oklch(0.63 0.2 195);  /* Cyan - colecciones */
+  --entity-group: oklch(0.64 0.17 175);      /* Teal - grupos */
+  --entity-favorite: oklch(0.75 0.18 85);    /* Ámbar - favoritos */
+  
+  /* Entidades creativas */
+  --entity-character: oklch(0.7 0.2 350);    /* Rosa - personajes */
+  --entity-place: oklch(0.64 0.17 175);      /* Teal - lugares */
+  --entity-world-item: oklch(0.72 0.2 130);  /* Lima - objetos de mundo */
+  --entity-concept: oklch(0.72 0.18 65);     /* Ámbar - conceptos */
+  
+  /* Entidades de metadatos */
+  --entity-tag: oklch(0.7 0.2 350);          /* Rosa - tags */
+  --entity-prompt: oklch(0.64 0.17 165);     /* Esmeralda - prompts */
+  --entity-note: oklch(0.63 0.24 29);        /* Rojo - notas */
+  --entity-profile: oklch(0.59 0.2 255);     /* Azul - perfiles */
+  --entity-property: oklch(0.7 0.15 350);    /* Rosa claro - propiedades */
+  --entity-wildcard: oklch(0.7 0.2 350);     /* Rosa - wildcards */
+
+  /* =====================================================
+   * COLORES FUNCIONALES
+   * Usa estos tokens para estados y acciones
+   * ===================================================== */
+  
+  /* Estados de éxito */
+  --status-success: oklch(0.72 0.19 142);
+  --status-success-foreground: oklch(0.98 0 0);
+  
+  /* Estados de advertencia */
+  --status-warning: oklch(0.75 0.18 85);
+  --status-warning-foreground: oklch(0.25 0.05 85);
+  
+  /* Estados de información */
+  --status-info: oklch(0.59 0.2 255);
+  --status-info-foreground: oklch(0.98 0 0);
+  
+  /* =====================================================
+   * COLORES DE UI ESPECÍFICOS
+   * Para elementos de interfaz comunes
+   * ===================================================== */
+  
+  /* Selección y highlight */
+  --selection-bg: oklch(0.59 0.2 255 / 0.15);
+  --selection-border: oklch(0.59 0.2 255);
+  
+  /* Marcado/favoritos */
+  --marked-bg: oklch(0.75 0.18 55 / 0.15);
+  --marked-border: oklch(0.75 0.18 55);
+  
+  /* Canvas y superficies especiales */
+  --canvas-bg-dark: oklch(0.15 0.02 240);
+  --canvas-bg-light: oklch(0.96 0.01 240);
+  --canvas-text-dark: oklch(0.25 0.02 240);
+  --canvas-text-light: oklch(0.92 0.01 240);
+  
+  /* Loading/skeleton */
+  --loading-shimmer-1: oklch(0.92 0 0);
+  --loading-shimmer-2: oklch(0.85 0 0);
+  --loading-shimmer-3: oklch(0.92 0 0);
+
+  /* =====================================================
+   * PALETA PRESET PARA COLOR PICKER
+   * Colores predefinidos para selección de usuario
+   * ===================================================== */
+  --preset-blue: oklch(0.59 0.2 255);
+  --preset-red: oklch(0.63 0.24 29);
+  --preset-green: oklch(0.72 0.19 142);
+  --preset-yellow: oklch(0.8 0.18 95);
+  --preset-pink: oklch(0.7 0.2 350);
+  --preset-purple: oklch(0.59 0.23 293);
+  --preset-cyan: oklch(0.72 0.14 195);
+  --preset-orange: oklch(0.72 0.19 45);
+  --preset-teal: oklch(0.64 0.17 175);
+  --preset-rose: oklch(0.65 0.24 15);
+  --preset-indigo: oklch(0.58 0.22 277);
+  --preset-sky: oklch(0.68 0.16 230);
+  --preset-slate: oklch(0.55 0.02 250);
+  --preset-gray: oklch(0.55 0.01 0);
+  --preset-fuchsia: oklch(0.65 0.27 320);
+  --preset-lime: oklch(0.72 0.2 130);
+  --preset-cyan-dark: oklch(0.58 0.15 195);
+  --preset-purple-dark: oklch(0.52 0.27 293);
+  --preset-black: oklch(0 0 0);
+  --preset-white: oklch(1 0 0);
+}
+
+/* Tema oscuro - ajustar opacidades y brillos */
+html.dark,
+html[data-theme="dark"],
+html[data-theme="nocturno"],
+html[data-theme="carbon"],
+html[data-theme="neon"],
+html[data-theme="aurora"] {
+  --canvas-bg-dark: oklch(0.15 0.02 240);
+  --canvas-bg-light: oklch(0.25 0.02 240);
+  --canvas-text-dark: oklch(0.92 0.01 240);
+  --canvas-text-light: oklch(0.4 0.02 240);
+  
+  --loading-shimmer-1: oklch(0.25 0 0);
+  --loading-shimmer-2: oklch(0.3 0 0);
+  --loading-shimmer-3: oklch(0.25 0 0);
+}

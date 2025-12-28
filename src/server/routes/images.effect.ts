@@ -285,6 +285,46 @@ router.get('/:id/thumbnail', async (req, res) => {
 });
 
 /**
+ * GET /images/:id/content - Obtener imagen original (Alias de /original para compatibilidad)
+ */
+router.get('/:id/content', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const imageService = yield* ImageService;
+		const image = yield* imageService.getById(req.params.id);
+		const buffer = yield* imageService.getOriginalImage(req.params.id);
+		return { buffer, image };
+	}).pipe(Effect.provide(ImageServiceLive));
+
+	try {
+		const { buffer, image } = await Effect.runPromise(effect);
+
+		let mimeType = 'image/jpeg';
+		if (image && image.path) {
+			const ext = image.path.split('.').pop()?.toLowerCase();
+			if (ext === 'png') mimeType = 'image/png';
+			if (ext === 'gif') mimeType = 'image/gif';
+			if (ext === 'webp') mimeType = 'image/webp';
+			if (ext === 'svg') mimeType = 'image/svg+xml';
+			if (ext === 'bmp') mimeType = 'image/bmp';
+			if (ext === 'avif') mimeType = 'image/avif';
+		}
+
+		res.set({
+			'Content-Type': mimeType,
+			'Content-Length': buffer.length.toString(),
+			'Cache-Control': 'public, max-age=31536000',
+		});
+		res.send(buffer);
+	} catch (error) {
+		const httpError = require('@/lib/effect/adapters/express.adapter').errorToHttpStatus(error);
+		res.status(httpError.status).json({
+			error: httpError.message,
+			...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
+		});
+	}
+});
+
+/**
  * GET /images/:id/original - Obtener imagen original
  */
 router.get('/:id/original', async (req, res) => {

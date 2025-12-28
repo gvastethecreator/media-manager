@@ -3,47 +3,52 @@
  * @description Tests para verificar la funcionalidad del hook useListViewConfig
  */
 
-import { describe, expect, it, mock } from 'bun:test';
+import { vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useListViewConfig } from '@/hooks/use-list-view-config';
 
-// Mock de dependencias
-mock.module('@/store/settings.store', () => ({
-	useSettingsStore: () => ({
-		settings: {
-			fileViews: {
-				listView: {
-					columns: [
-						{
-							key: 'name',
-							label: 'Nombre',
-							width: 'auto',
-							visible: true,
-							sortable: true,
-							order: 0,
-						},
-						{
-							key: 'size',
-							label: 'Tamaño',
-							width: 100,
-							visible: true,
-							sortable: true,
-							order: 1,
-						},
-					],
-					rowHeight: 72,
-					showZebraStripes: true,
-					showHeader: true,
-					allowResize: true,
-					allowReorder: true,
-					showThumbnails: true,
-					thumbnailSize: 'none',
-					rowGap: 2,
-					cellPadding: 12,
+const mockListViewConfig = {
+	columns: [
+		{
+			key: 'name',
+			label: 'Nombre',
+			width: 'auto',
+			visible: true,
+			sortable: true,
+			order: 0,
+		},
+		{
+			key: 'size',
+			label: 'Tamaño',
+			width: 100,
+			visible: true,
+			sortable: true,
+			order: 1,
+		},
+	],
+	rowHeight: 72,
+	showZebraStripes: true,
+	showHeader: true,
+	allowResize: true,
+	allowReorder: true,
+	showThumbnails: true,
+	thumbnailSize: 'none',
+	rowGap: 2,
+	cellPadding: 12,
+};
+
+// Mock de dependencias usando el selector pattern de zustand
+vi.mock('@/store/settings.store', () => ({
+	useSettingsStore: vi.fn((selector?: (state: any) => any) => {
+		const state = {
+			settings: {
+				fileViews: {
+					listView: mockListViewConfig,
 				},
 			},
-		},
-		updateSettings: mock(),
+			updateSettings: vi.fn(),
+		};
+		return selector ? selector(state) : state;
 	}),
 }));
 

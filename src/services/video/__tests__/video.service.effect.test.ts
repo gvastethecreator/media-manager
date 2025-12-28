@@ -6,7 +6,6 @@
  */
 
 import { Effect } from 'effect';
-import { afterEach, describe, expect, it } from 'bun:test';
 import { db } from '@/lib/drizzle';
 import { videos, folders } from '@/lib/drizzle/schema';
 import * as VideoService from '../video.service.effect';

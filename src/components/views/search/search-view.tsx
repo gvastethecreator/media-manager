@@ -2,7 +2,7 @@ import { Search } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -69,14 +69,15 @@ export function SearchView(_props: ViewProps) {
 	}, []);
 
 	const handleItemDoubleClick = useCallback(
-		(item: AnyEntityWithStats) => {
+		(item: BrowserItem) => {
 			// ✅ Usar directamente las imágenes tipadas del store con EntityWithStats
-			if (!isImageWithStats(item)) {
+			const entity = item.raw as unknown as AnyEntityWithStats | undefined;
+			if (!entity || !isImageWithStats(entity)) {
 				return;
 			}
 
 			const imageItems: ImageWithStats[] = items;
-			const currentIndex = imageItems.findIndex((i) => i.id === item.id);
+			const currentIndex = imageItems.findIndex((i) => i.id === entity.id);
 
 			// openViewer espera EntityWithStats[]; adaptamos a tipo más amplio sin copiar
 			const asEntities = imageItems as unknown as EntityWithStats[];
@@ -92,9 +93,11 @@ export function SearchView(_props: ViewProps) {
 		if (items && items.length > 0) {
 			return (
 				<FileBrowser
-					isLoading={isLoading}
-					items={items as unknown as AnyEntityWithStats[]}
-					onItemClick={handleItemSelect}
+					items={items.map((it) => toBrowserItem(it as unknown as Record<string, unknown>))}
+					onItemClick={(it) => {
+						const entity = it.raw as unknown as AnyEntityWithStats | undefined;
+						if (entity) handleItemSelect(entity);
+					}}
 					onItemDoubleClick={handleItemDoubleClick}
 				/>
 			);

@@ -340,14 +340,14 @@ function getContainerStyles(cardColor: string, tcgMode: boolean, compact?: boole
 	}
 
 	return {
-		background: 'rgba(0, 0, 0, 0.05)',
+		background: 'rgba(var(--effect-shadow-rgb), 0.05)',
 		borderRadius: tcgMode ? '12px' : '8px',
-		border: tcgMode ? `2px solid ${cardColor}40` : '1px solid rgba(255, 255, 255, 0.1)',
+		border: tcgMode ? `2px solid ${cardColor}40` : '1px solid rgba(var(--effect-highlight-rgb), 0.1)',
 		transition: 'all 0.3s ease',
 		backdropFilter: 'blur(10px)',
 		boxShadow: tcgMode
-			? `0 8px 32px rgba(0, 0, 0, 0.1), 0 4px 16px ${cardColor}30, inset 0 1px 0 rgba(255, 255, 255, 0.1)`
-			: '0 4px 8px rgba(0, 0, 0, 0.1)',
+			? `0 8px 32px rgba(var(--effect-shadow-rgb), 0.1), 0 4px 16px ${cardColor}30, inset 0 1px 0 rgba(var(--effect-highlight-rgb), 0.1)`
+			: '0 4px 8px rgba(var(--effect-shadow-rgb), 0.1)',
 		minHeight,
 		width: compact ? '180px' : '280px',
 		transformStyle: 'preserve-3d' as const,

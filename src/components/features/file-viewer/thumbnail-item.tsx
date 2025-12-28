@@ -21,16 +21,28 @@ export const ThumbnailItem = memo(function ThumbnailItemImpl({
 
     // Obtener la miniatura de forma optimizada
     useEffect(() => {
-        const resource = imageResources.resources.get(image.id);
-        const thumbnailUrl = image.thumbnail || resource?.thumbnail || null;
+        // Prioridad: 
+        // 1. thumbnailUrl directo del item (si existe)
+        // 2. thumbnail del store de recursos
+        // 3. Construcción manual de URL si tenemos ID
 
-        if (thumbnailUrl !== thumbnail) {
-            setThumbnail(thumbnailUrl);
+        let url = image.thumbnailUrl;
+
+        if (!url && image.id) {
+            if (image.type === 'video' || image.mimeType?.startsWith('video/')) {
+                url = `/api/videos/${image.id}/thumbnail`;
+            } else {
+                url = `/api/images/${image.id}/thumbnail`;
+            }
+        }
+
+        if (url !== thumbnail) {
+            setThumbnail(url || null);
         }
 
         // Resetear error si conseguimos thumbnail
-        if (thumbnailUrl && error) setError(false);
-    }, [image.id, image.thumbnail, imageResources.resources, thumbnail, error]);
+        if (url && error) setError(false);
+    }, [image.id, image.thumbnailUrl, image.type, image.mimeType, thumbnail, error]);
 
     // Memoizar la clase base
     const baseClassName = useMemo(

@@ -14,6 +14,7 @@ import {
 	YAxis,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { FILE_TYPE_COLORS } from '@/lib/styles/chart-colors';
 import type { FolderStats } from '@/types/folders';
 
 interface FoldersStatsProps {
@@ -23,26 +24,26 @@ interface FoldersStatsProps {
 export function FoldersStats({ stats }: FoldersStatsProps) {
 	// Datos para el gráfico de pie
 	const pieData = [
-		{ name: 'Imágenes', value: stats.totalImages, color: '#10b981' },
-		{ name: 'Videos', value: stats.totalVideos, color: '#8b5cf6' },
-		{ name: 'Audio', value: stats.totalAudio, color: '#f59e0b' },
-		{ name: 'Documentos', value: stats.totalDocuments, color: '#ef4444' },
-		{ name: 'Otros', value: stats.totalOthers, color: '#eab308' },
+		{ name: 'Imágenes', value: stats.totalImages, color: FILE_TYPE_COLORS.images },
+		{ name: 'Videos', value: stats.totalVideos, color: FILE_TYPE_COLORS.videos },
+		{ name: 'Audio', value: stats.totalAudio, color: FILE_TYPE_COLORS.audio },
+		{ name: 'Documentos', value: stats.totalDocuments, color: FILE_TYPE_COLORS.documents },
+		{ name: 'Otros', value: stats.totalOthers, color: FILE_TYPE_COLORS.others },
 		...(stats.databaseSize
-			? [{ name: 'Base de Datos', value: Math.round(stats.databaseSize / (1024 * 1024)), color: '#3b82f6' }]
+			? [{ name: 'Base de Datos', value: Math.round(stats.databaseSize / (1024 * 1024)), color: FILE_TYPE_COLORS.database }]
 			: []),
 		...(stats.thumbnailsCacheSize
-			? [{ name: 'Caché Thumbnails', value: Math.round(stats.thumbnailsCacheSize / (1024 * 1024)), color: '#f97316' }]
+			? [{ name: 'Caché Thumbnails', value: Math.round(stats.thumbnailsCacheSize / (1024 * 1024)), color: FILE_TYPE_COLORS.cache }]
 			: []),
 	].filter((item) => item.value > 0);
 
 	// Datos para gráfico de barras de distribución de archivos
 	const barData = [
-		{ name: 'Imágenes', value: stats.totalImages, color: '#10b981' },
-		{ name: 'Videos', value: stats.totalVideos, color: '#8b5cf6' },
-		{ name: 'Audio', value: stats.totalAudio, color: '#f59e0b' },
-		{ name: 'Documentos', value: stats.totalDocuments, color: '#ef4444' },
-		{ name: 'Otros', value: stats.totalOthers, color: '#eab308' },
+		{ name: 'Imágenes', value: stats.totalImages, color: FILE_TYPE_COLORS.images },
+		{ name: 'Videos', value: stats.totalVideos, color: FILE_TYPE_COLORS.videos },
+		{ name: 'Audio', value: stats.totalAudio, color: FILE_TYPE_COLORS.audio },
+		{ name: 'Documentos', value: stats.totalDocuments, color: FILE_TYPE_COLORS.documents },
+		{ name: 'Otros', value: stats.totalOthers, color: FILE_TYPE_COLORS.others },
 	].filter((item) => item.value > 0);
 
 	// Datos simulados para tendencias (en un caso real vendrían del backend)
@@ -199,7 +200,7 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 											</Pie>
 											<Tooltip
 												contentStyle={{ fontSize: '12px', padding: '4px 8px' }}
-												formatter={(value: number, name: string) => [value, name]}
+												formatter={(value: number | string | undefined, name: string | undefined) => [value ?? 0, name ?? '']}
 												labelStyle={{ fontSize: '12px' }}
 											/>
 										</PieChart>
@@ -220,26 +221,26 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 					<Card className="border-border/40">
 						<CardHeader className="pb-3">
 							<CardTitle className="flex items-center gap-2 text-sm">
-								<Database className="h-4 w-4 text-blue-600" />
+								<Database className="h-4 w-4 text-primary" />
 								Distribución por Tipo
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="p-4">
-							<div className="h-[200px]">
+							<div className="h-50">
 								<ResponsiveContainer height="100%" width="100%">
 									<BarChart data={barData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-										<CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+										<CartesianGrid stroke="hsl(var(--border) / 0.7)" strokeDasharray="3 3" />
 										<XAxis angle={-45} dataKey="name" height={60} textAnchor="end" tick={{ fontSize: 11 }} />
 										<YAxis tick={{ fontSize: 11 }} width={40} />
 										<Tooltip
 											contentStyle={{
 												fontSize: '12px',
 												padding: '8px 12px',
-												backgroundColor: 'rgba(255, 255, 255, 0.95)',
-												border: '1px solid #e2e8f0',
+												backgroundColor: 'hsl(var(--popover) / 0.95)',
+												border: '1px solid hsl(var(--border))',
 												borderRadius: '6px',
 											}}
-											formatter={(value: number) => [value.toLocaleString(), 'Archivos']}
+											formatter={(value: number | string | undefined) => [Number(value ?? 0).toLocaleString(), 'Archivos']}
 											labelFormatter={(name) => `Tipo: ${name}`}
 										/>
 										<Bar dataKey="value" radius={[2, 2, 0, 0]}>
@@ -259,33 +260,33 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 					<Card className="border-border/40">
 						<CardHeader className="pb-3">
 							<CardTitle className="flex items-center gap-2 text-sm">
-								<HardDrive className="h-4 w-4 text-green-600" />
+								<HardDrive className="h-4 w-4 text-primary" />
 								Tendencia de Archivos
 							</CardTitle>
 						</CardHeader>
 						<CardContent className="p-4">
-							<div className="h-[200px]">
+							<div className="h-50">
 								<ResponsiveContainer height="100%" width="100%">
 									<LineChart data={trendData} margin={{ top: 5, right: 10, left: 0, bottom: 5 }}>
-										<CartesianGrid stroke="#e2e8f0" strokeDasharray="3 3" />
+										<CartesianGrid stroke="hsl(var(--border) / 0.7)" strokeDasharray="3 3" />
 										<XAxis dataKey="name" tick={{ fontSize: 11 }} />
 										<YAxis tick={{ fontSize: 11 }} width={50} />
 										<Tooltip
 											contentStyle={{
 												fontSize: '12px',
 												padding: '8px 12px',
-												backgroundColor: 'rgba(255, 255, 255, 0.95)',
-												border: '1px solid #e2e8f0',
+												backgroundColor: 'hsl(var(--popover) / 0.95)',
+												border: '1px solid hsl(var(--border))',
 												borderRadius: '6px',
 											}}
-											formatter={(value: number) => [Math.round(value).toLocaleString(), 'Archivos']}
+											formatter={(value: number | string | undefined) => [Math.round(Number(value ?? 0)).toLocaleString(), 'Archivos']}
 											labelFormatter={(name) => `Mes: ${name}`}
 										/>
 										<Line
-											activeDot={{ r: 6, stroke: '#3b82f6', strokeWidth: 2 }}
+											activeDot={{ r: 6, stroke: 'hsl(var(--primary))', strokeWidth: 2 }}
 											dataKey="archivos"
-											dot={{ fill: '#3b82f6', strokeWidth: 2, r: 4 }}
-											stroke="#3b82f6"
+											dot={{ fill: 'hsl(var(--primary))', strokeWidth: 2, r: 4 }}
+											stroke="hsl(var(--primary))"
 											strokeWidth={2}
 											type="monotone"
 										/>

@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { CHART_COLORS, METRIC_COLORS } from '@/lib/styles/chart-colors';
 import { useTechMetrics } from '../hooks/use-tech-metrics';
 
 // Formateador para números
@@ -168,10 +169,10 @@ export function SystemMetricsPanel() {
 									<YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: number) => [`${value}%`, 'Uso de CPU']}
+										formatter={(value: number | string | undefined) => [`${Number(value ?? 0)}%`, 'Uso de CPU']}
 										labelFormatter={(time) => `Hora: ${time}`}
 									/>
-									<Line dataKey="usage" stroke="#10b981" strokeWidth={2} type="monotone" />
+									<Line dataKey="usage" stroke={METRIC_COLORS.cpu} strokeWidth={2} type="monotone" />
 								</LineChart>
 							</ResponsiveContainer>
 						</CardContent>
@@ -200,11 +201,11 @@ export function SystemMetricsPanel() {
 									<YAxis tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: number) => [`${value} MB`, 'Memoria']}
+										formatter={(value: number | string | undefined) => [`${Number(value ?? 0)} MB`, 'Memoria']}
 										labelFormatter={(time) => `Hora: ${time}`}
 									/>
-									<Area dataKey="used" fill="#3b82f6" stackId="1" stroke="#3b82f6" type="monotone" />
-									<Area dataKey="free" fill="#10b981" stackId="1" stroke="#10b981" type="monotone" />
+									<Area dataKey="used" fill={METRIC_COLORS.memory} stackId="1" stroke={METRIC_COLORS.memory} type="monotone" />
+									<Area dataKey="free" fill={METRIC_COLORS.memoryFree} stackId="1" stroke={METRIC_COLORS.memoryFree} type="monotone" />
 									<Legend />
 								</AreaChart>
 							</ResponsiveContainer>
@@ -227,8 +228,11 @@ export function SystemMetricsPanel() {
 									<XAxis dataKey="name" tick={{ fontSize: 10 }} />
 									<YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
-									<Tooltip formatter={(value: number) => [`${value}%`, 'Uso']} labelFormatter={(name) => `${name}`} />
-									<Bar dataKey="usage" fill="#3b82f6" />
+									<Tooltip
+										formatter={(value: number | string | undefined) => [`${Number(value ?? 0)}%`, 'Uso']}
+										labelFormatter={(name) => `${name}`}
+									/>
+									<Bar dataKey="usage" fill={CHART_COLORS.primary} />
 								</BarChart>
 							</ResponsiveContainer>
 						</CardContent>
@@ -314,10 +318,10 @@ export function SystemMetricsPanel() {
 									<YAxis dataKey="endpoint" tick={{ fontSize: 10 }} type="category" width={80} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: number) => [formatNumber(value), 'Solicitudes']}
+										formatter={(value: number | string | undefined) => [formatNumber(Number(value ?? 0)), 'Solicitudes']}
 										labelFormatter={(name) => `Endpoint: ${name}`}
 									/>
-									<Bar dataKey="hits" fill="#3b82f6" />
+									<Bar dataKey="hits" fill={CHART_COLORS.primary} />
 								</BarChart>
 							</ResponsiveContainer>
 						</CardContent>
@@ -381,12 +385,12 @@ export function SystemMetricsPanel() {
 									<YAxis tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: number) => [`${value} MB/s`, 'Velocidad']}
+										formatter={(value: number | string | undefined) => [`${Number(value ?? 0)} MB/s`, 'Velocidad']}
 										labelFormatter={(name) => `Operación: ${name}`}
 									/>
-									<Bar dataKey="value" fill="#3b82f6">
-										<Cell fill="#10b981" />
-										<Cell fill="#3b82f6" />
+									<Bar dataKey="value" fill={CHART_COLORS.primary}>
+										<Cell fill={METRIC_COLORS.io.read} />
+										<Cell fill={METRIC_COLORS.io.write} />
 									</Bar>
 								</BarChart>
 							</ResponsiveContainer>

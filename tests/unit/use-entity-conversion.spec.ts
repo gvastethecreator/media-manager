@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'bun:test';
 import { useEntityConversion } from '@/lib/hooks/entities/use-entity-conversion';
 
 // Simular entorno React mínimo no es necesario para hooks sin estado global

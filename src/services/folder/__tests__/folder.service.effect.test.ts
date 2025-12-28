@@ -4,7 +4,6 @@
  * @created 2025-10-11 - Fase 4 Effect Implementation
  */
 
-import { describe, expect, it, afterEach } from 'bun:test';
 import { Effect, Exit } from 'effect';
 import { db } from '@/lib/drizzle';
 import { folders } from '@/lib/drizzle/schema';

@@ -15,12 +15,13 @@ import {
 	YAxis,
 } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { CHART_COLORS, FILE_TYPE_COLORS } from '@/lib/styles/chart-colors';
 
 export function FileDistributionChart() {
 	const data = [
-		{ name: 'Imágenes', value: 8500, color: '#3b82f6' },
-		{ name: 'Videos', value: 2500, color: '#10b981' },
-		{ name: 'Documentos', value: 1458, color: '#f59e0b' },
+		{ name: 'Imágenes', value: 8500, color: FILE_TYPE_COLORS.images },
+		{ name: 'Videos', value: 2500, color: FILE_TYPE_COLORS.videos },
+		{ name: 'Documentos', value: 1458, color: FILE_TYPE_COLORS.documents },
 	];
 
 	return (
@@ -37,7 +38,7 @@ export function FileDistributionChart() {
 								cy="50%"
 								data={data}
 								dataKey="value"
-								fill="#8884d8"
+								fill={CHART_COLORS.quaternary}
 								innerRadius={50}
 								outerRadius={70}
 								paddingAngle={5}
@@ -47,7 +48,7 @@ export function FileDistributionChart() {
 								))}
 							</Pie>
 							<Tooltip
-								formatter={(value: number) => [`${value.toLocaleString()} archivos`, 'Cantidad']}
+								formatter={(value: number | string | undefined) => [`${Number(value ?? 0).toLocaleString()} archivos`, 'Cantidad']}
 								labelFormatter={(name) => `Tipo: ${name}`}
 							/>
 						</PieChart>
@@ -80,18 +81,18 @@ export function IndexingActivityChart() {
 						<AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
 							<defs>
 								<linearGradient id="colorArchivos" x1="0" x2="0" y1="0" y2="1">
-									<stop offset="5%" stopColor="#3b82f6" stopOpacity={0.8} />
-									<stop offset="95%" stopColor="#3b82f6" stopOpacity={0} />
+									<stop offset="5%" stopColor={CHART_COLORS.primary} stopOpacity={0.8} />
+									<stop offset="95%" stopColor={CHART_COLORS.primary} stopOpacity={0} />
 								</linearGradient>
 							</defs>
 							<XAxis dataKey="name" tick={{ fontSize: 12 }} />
 							<YAxis tick={{ fontSize: 12 }} width={30} />
 							<CartesianGrid strokeDasharray="3 3" />
 							<Tooltip
-								formatter={(value: number) => [`${value} archivos`, 'Indexados']}
+								formatter={(value: number | string | undefined) => [`${Number(value ?? 0)} archivos`, 'Indexados']}
 								labelFormatter={(name) => `Día: ${name}`}
 							/>
-							<Area dataKey="archivos" fill="url(#colorArchivos)" fillOpacity={1} stroke="#3b82f6" type="monotone" />
+							<Area dataKey="archivos" fill="url(#colorArchivos)" fillOpacity={1} stroke={CHART_COLORS.primary} type="monotone" />
 						</AreaChart>
 					</ResponsiveContainer>
 				</div>
@@ -121,10 +122,10 @@ export function ResourceUsageChart() {
 							<YAxis tick={{ fontSize: 12 }} width={30} />
 							<CartesianGrid strokeDasharray="3 3" />
 							<Tooltip
-								formatter={(value: number) => [`${value}%`, 'Utilización']}
+								formatter={(value: number | string | undefined) => [`${Number(value ?? 0)}%`, 'Utilización']}
 								labelFormatter={(name) => `Recurso: ${name}`}
 							/>
-							<Bar dataKey="valor" fill="#10b981" />
+							<Bar dataKey="valor" fill={CHART_COLORS.secondary} />
 						</BarChart>
 					</ResponsiveContainer>
 				</div>
@@ -156,10 +157,10 @@ export function SystemPerformanceChart() {
 							<YAxis tick={{ fontSize: 12 }} width={30} />
 							<CartesianGrid strokeDasharray="3 3" />
 							<Tooltip
-								formatter={(value: number) => [`${value}/100`, 'Puntuación']}
+								formatter={(value: number | string | undefined) => [`${Number(value ?? 0)}/100`, 'Puntuación']}
 								labelFormatter={(name) => `Hora: ${name}`}
 							/>
-							<Line dataKey="valor" stroke="#f59e0b" strokeWidth={2} type="monotone" />
+							<Line dataKey="valor" stroke={CHART_COLORS.tertiary} strokeWidth={2} type="monotone" />
 						</LineChart>
 					</ResponsiveContainer>
 				</div>

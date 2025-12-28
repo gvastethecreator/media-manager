@@ -58,6 +58,46 @@ interface SinglePanelProps {
 const PATH_SEPARATOR_REGEX = /[/\\]/;
 const FILE_EXTENSION_REGEX = /\.[^.]*$/;
 
+/**
+ * Copia texto al portapapeles con fallback
+ */
+const copyToClipboard = async (text: string): Promise<boolean> => {
+	try {
+		await navigator.clipboard.writeText(text);
+		return true;
+	} catch {
+		// Fallback para navegadores sin soporte
+		const textArea = document.createElement('textarea');
+		textArea.value = text;
+		textArea.style.position = 'fixed';
+		textArea.style.opacity = '0';
+		document.body.appendChild(textArea);
+		textArea.focus();
+		textArea.select();
+		const result = document.execCommand('copy');
+		document.body.removeChild(textArea);
+		return result;
+	}
+};
+
+/**
+ * Descarga un archivo desde una URL
+ */
+const downloadFile = async (url: string, filename: string): Promise<void> => {
+	try {
+		const response = await fetch(url);
+		const blob = await response.blob();
+		const objectUrl = URL.createObjectURL(blob);
+		const a = document.createElement('a');
+		a.href = objectUrl;
+		a.download = filename;
+		a.click();
+		URL.revokeObjectURL(objectUrl);
+	} catch (err) {
+		console.error('Error descargando archivo:', err);
+	}
+};
+
 export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata, className = '' }) => {
 	// Solo usar hook interno si no hay metadata como prop
 	const shouldUseInternalHook = !enhancedMetadata || enhancedMetadata.length === 0;
@@ -106,6 +146,40 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 	const detailedMetadata = getDetailedMetadata(item, effectiveEnhanced);
 	const EntityIcon = getEntityIcon(item.entityType || 'file');
 
+	// Handler para copiar imagen al portapapeles
+	const handleCopyImage = React.useCallback(async () => {
+		if (!mainImageUrl) return;
+		try {
+			const response = await fetch(mainImageUrl);
+			const blob = await response.blob();
+			await navigator.clipboard.write([
+				new ClipboardItem({ [blob.type]: blob }),
+			]);
+		} catch (err) {
+			// Fallback: copiar URL
+			const itemName = 'name' in item ? item.name : '';
+			const itemPath = 'path' in item ? item.path : '';
+			await copyToClipboard(itemPath || mainImageUrl || itemName);
+		}
+	}, [mainImageUrl, item]);
+
+	// Handler para descargar archivo
+	const handleDownload = React.useCallback(() => {
+		if (!mainImageUrl) return;
+		const filename = 'name' in item ? item.name : 'download';
+		downloadFile(mainImageUrl, filename);
+	}, [mainImageUrl, item]);
+
+	// Handler para abrir en carpeta (si disponible)
+	const handleOpenInFolder = React.useCallback(() => {
+		const itemPath = 'path' in item ? item.path : null;
+		if (itemPath) {
+			// En Tauri/desktop, podría usar invoke('open_folder', { path: itemPath })
+			// Por ahora, copiar la ruta
+			copyToClipboard(itemPath);
+		}
+	}, [item]);
+
 	return (
 		<div className={cn('details-panel flex h-full w-full flex-col bg-background', className)}>
 			{/* Header */}
@@ -148,7 +222,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button aria-label="Abrir en carpeta" className="" size="icon" variant="ghost">
+								<Button aria-label="Abrir en carpeta" className="" onClick={handleOpenInFolder} size="icon" variant="ghost">
 									<FolderOpen className={cn('h-4 w-4')} />
 								</Button>
 							</TooltipTrigger>
@@ -156,7 +230,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button aria-label="Copiar imagen" className="" size="icon" variant="ghost">
+								<Button aria-label="Copiar imagen" className="" onClick={handleCopyImage} size="icon" variant="ghost">
 									<Copy className={cn('h-4 w-4')} />
 								</Button>
 							</TooltipTrigger>
@@ -164,7 +238,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button aria-label="Descargar" className="" size="icon" variant="ghost">
+								<Button aria-label="Descargar" className="" onClick={handleDownload} size="icon" variant="ghost">
 									<Download className={cn('h-4 w-4')} />
 								</Button>
 							</TooltipTrigger>
