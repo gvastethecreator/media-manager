@@ -3,7 +3,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
 import express, { type Request, type Response } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { concepts } from '@/lib/drizzle/schema/index';
+import { concepts, imageConcepts, images } from '@/lib/drizzle/schema/index';
 
 const router = express.Router();
 
@@ -178,6 +178,56 @@ router.put('/:id', async (_req, res) => {
 // DELETE /concepts/:id - Eliminar concepto (métodos de escritura pendientes)
 router.delete('/:id', async (_req, res) => {
 	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
+});
+
+// POST /concepts/:id/images/:imageId - Agregar imagen a concepto
+router.post('/:id/images/:imageId', async (req, res) => {
+	try {
+		const { id, imageId } = req.params;
+
+		const concept = await db.query.concepts.findFirst({ where: eq(concepts.id, id) });
+		if (!concept) {
+			res.status(404).json({ error: 'Concepto no encontrado' });
+			return;
+		}
+
+		const image = await db.query.images.findFirst({ where: eq(images.id, imageId) });
+		if (!image) {
+			res.status(404).json({ error: 'Imagen no encontrada' });
+			return;
+		}
+
+		// A=imageId, B=conceptId
+		const existing = await db
+			.select()
+			.from(imageConcepts)
+			.where(and(eq(imageConcepts.A, imageId), eq(imageConcepts.B, id)))
+			.limit(1);
+
+		if (existing.length > 0) {
+			res.status(200).json({ message: 'La imagen ya está asociada', alreadyExists: true });
+			return;
+		}
+
+		await db.insert(imageConcepts).values({ A: imageId, B: id });
+		serverLogger.info(`✅ Imagen ${imageId} agregada a concepto ${id}`);
+		res.status(201).json({ message: 'Imagen agregada al concepto exitosamente' });
+	} catch (error) {
+		serverLogger.error('Error adding image to concept:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// DELETE /concepts/:id/images/:imageId
+router.delete('/:id/images/:imageId', async (req, res) => {
+	try {
+		const { id, imageId } = req.params;
+		await db.delete(imageConcepts).where(and(eq(imageConcepts.A, imageId), eq(imageConcepts.B, id)));
+		res.status(200).json({ message: 'Imagen removida del concepto' });
+	} catch (error) {
+		serverLogger.error('Error removing image from concept:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
 });
 
 export default router;

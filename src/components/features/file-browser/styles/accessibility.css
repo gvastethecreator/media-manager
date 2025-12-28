@@ -3,25 +3,25 @@
 
 /* Visibilidad de foco para navegación por teclado */
 :focus-visible {
-  outline: 2px solid #2563eb; /* azul-600 */
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
 /* Asegurar foco visible en tarjetas */
 .entity-card:focus,
 .entity-card:focus-visible {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
 }
 
 /* Estado seleccionado con alto contraste (no interfiere con Tailwind) */
 .entity-card.entity-card--selected {
-  box-shadow: 0 0 0 2px #22c55e; /* verde-500 */
+  box-shadow: 0 0 0 2px var(--status-success);
 }
 
 /* Mejorar accesibilidad de botones en la toolbar del file-browser */
 [data-testid^="view-mode-"][role="menuitemradio"]:focus-visible,
 [data-testid^="view-mode-"][role="menuitemradio"]:focus {
-  outline: 2px solid #2563eb;
+  outline: 2px solid var(--ring);
   outline-offset: 2px;
 }

@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { LoadingScreen } from '@/components/core/feedback';
+import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDocumentStore } from '@/store/entities/document';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -17,6 +18,7 @@ export default function DocumentsView(_props: ViewProps) {
 
 	const documents = useMemo(() => Object.values(documentsRecord || {}), [documentsRecord]);
 	const count = documents.length;
+	const browserItems = useMemo(() => documents.map((d) => toBrowserItem(d as unknown as Record<string, unknown>)), [documents]);
 
 	useEffect(() => {
 		if (!hasInitRef.current && count === 0 && !isLoading) {
@@ -26,14 +28,18 @@ export default function DocumentsView(_props: ViewProps) {
 		}
 	}, [count, isLoading, fetchDocuments]);
 
-	const handleClick = useCallback((item: AnyEntityWithStats) => {
+	const handleClick = useCallback((item: BrowserItem) => {
 		logger.info('Click en documento', { id: item.id, name: item.name });
 	}, []);
 
-	const handleDoubleClick = useCallback((item: AnyEntityWithStats) => {
+	const handleDoubleClick = useCallback((item: BrowserItem) => {
 		// Por ahora, no abrimos visor específico; se podría integrar un viewer de documentos
 		logger.info('Doble click en documento', { id: item.id, name: item.name });
 	}, []);
+
+	if (isLoading && count === 0) {
+		return <LoadingScreen message="Cargando documentos..." />;
+	}
 
 	if (error) {
 		return (
@@ -71,8 +77,7 @@ export default function DocumentsView(_props: ViewProps) {
 			<div className="min-h-0 flex-1 overflow-hidden">
 				<FileBrowser
 					className="h-full"
-					isLoading={isLoading}
-					items={documents as unknown as AnyEntityWithStats[]}
+					items={browserItems}
 					onItemClick={handleClick}
 					onItemDoubleClick={handleDoubleClick}
 				/>

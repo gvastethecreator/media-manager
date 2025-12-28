@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
-import { FileBrowser } from '@/components/features/file-browser/file-browser';
+import { LoadingScreen } from '@/components/core/feedback';
+import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useJsonFileStore } from '@/store/entities/json-file';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -16,6 +17,7 @@ export function JsonFilesView(_props: ViewProps) {
 	const hasInitRef = useRef(false);
 	const items = useMemo(() => jsonFiles || [], [jsonFiles]);
 	const count = items.length;
+	const browserItems = useMemo(() => items.map((it) => toBrowserItem(it as unknown as Record<string, unknown>)), [items]);
 
 	useEffect(() => {
 		if (!hasInitRef.current && count === 0 && !loading) {
@@ -25,14 +27,18 @@ export function JsonFilesView(_props: ViewProps) {
 		}
 	}, [count, loading, fetchJsonFiles]);
 
-	const handleClick = useCallback((item: AnyEntityWithStats) => {
+	const handleClick = useCallback((item: BrowserItem) => {
 		logger.info('Click en JSON', { id: item.id, name: item.name });
 	}, []);
 
-	const handleDoubleClick = useCallback((item: AnyEntityWithStats) => {
+	const handleDoubleClick = useCallback((item: BrowserItem) => {
 		logger.info('Doble click en JSON', { id: item.id, name: item.name });
 		// TODO: Abrir visor JSON específico o mostrar el contenido
 	}, []);
+
+	if (loading && count === 0) {
+		return <LoadingScreen message="Cargando archivos JSON..." />;
+	}
 
 	if (error) {
 		return (
@@ -70,8 +76,7 @@ export function JsonFilesView(_props: ViewProps) {
 			<div className="min-h-0 flex-1 overflow-hidden">
 				<FileBrowser
 					className="h-full"
-					isLoading={loading}
-					items={items as unknown as AnyEntityWithStats[]}
+					items={browserItems}
 					onItemClick={handleClick}
 					onItemDoubleClick={handleDoubleClick}
 				/>

@@ -2,8 +2,6 @@
 
 ## 📋 Funcionalidad Implementada
 
-✅ **Menú Contextual con Click Derecho**
-- Implementado en `file-canvas.tsx` (componente base de todos los canvas)
 - Se activa al hacer click derecho en cualquier item del file browser
 
 ✅ **Opciones Principales del Menú:**

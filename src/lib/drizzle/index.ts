@@ -147,20 +147,34 @@ const schema = {
 // Temporalmente sin relaciones para debugging
 const fullSchema = { ...schema };
 
+// Detectar Bun de forma robusta (en tests con jsdom existe `window`, pero seguimos queriendo DB real)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const isBun = typeof (globalThis as any)?.Bun !== 'undefined';
+
+// Obtener env vars tanto en Node como en Bun (en algunos contextos `process` puede no estar disponible)
+const env: Record<string, string | undefined> =
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	typeof process !== 'undefined' && (process as any)?.env
+		? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+			((process as any).env as Record<string, string | undefined>)
+		: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+			(((globalThis as any)?.Bun?.env ?? {}) as Record<string, string | undefined>);
+
+const isUnitTest = env.NODE_ENV === 'test' || env.BUN_TEST === '1';
+
 // Obtener la URL de la base de datos desde las variables de entorno
-// En el servidor (Node.js) usa process.env.DATABASE_URL directamente
-// En el cliente (browser) usa una URL por defecto que será interceptada por el proxy
-const databaseUrl = typeof window === 'undefined' ? process.env.DATABASE_URL || 'file:./db.sqlite' : 'file:./db.sqlite'; // Fallback para el cliente, aunque no se usará realmente
+// - En servidor/tests (Node/Bun) usa env.DATABASE_URL
+// - En cliente (browser) usa un fallback que normalmente no se ejecutará (proxy)
+const databaseUrl =
+	typeof window === 'undefined' || isBun || isUnitTest ? env.DATABASE_URL || 'file:./db.sqlite' : 'file:./db.sqlite';
 
 let client: ReturnType<typeof createClient> | null = null;
 // eslint-disable-next-line @typescript-eslint/no-explicit-any -- instancia dinámica mock o drizzle
 let dbInstance: any;
 
-// Detectar entorno de servidor/test: process.env existe Y (window no existe O estamos en test)
-// En tests, window puede existir por jsdom pero queremos usar DB real
-const isServerOrTest =
-	typeof process !== 'undefined' &&
-	(typeof window === 'undefined' || process.env.NODE_ENV === 'test' || typeof (globalThis as any).Bun !== 'undefined');
+// Detectar entorno de servidor/test.
+// Nota: en unit tests con jsdom existe `window`, así que no podemos depender solo de eso.
+const isServerOrTest = typeof window === 'undefined' || isBun || isUnitTest;
 
 if (isServerOrTest) {
 	client = createClient({
@@ -168,18 +182,21 @@ if (isServerOrTest) {
 	});
 	// Evitar logs masivos de consultas (base64 de thumbnails) => logger desactivado por defecto.
 	// Si se requiere, activar con DRIZZLE_LOG=1 explícitamente.
-	const enableDrizzleLogger = process.env.DRIZZLE_LOG === '1';
+	const enableDrizzleLogger = env.DRIZZLE_LOG === '1';
 	dbInstance = drizzle(client, {
 		schema: fullSchema,
 		logger: enableDrizzleLogger,
 	});
 	// Inicializar FTS5 de forma asíncrona (no bloquear arranque)
 	// Lanzar inicialización FTS5 sin bloquear; ignorar promesa
-	ensureFts5Ready().catch((e) => {
-		if (process.env.NODE_ENV === 'development') {
-			console.warn('FTS5 init error', e);
-		}
-	});
+	// En tests no queremos inicializaciones pesadas o side-effects (FTS5 no es requerida para unit tests)
+	if (!isUnitTest) {
+		ensureFts5Ready().catch((e) => {
+			if (env.NODE_ENV === 'development') {
+				console.warn('FTS5 init error', e);
+			}
+		});
+	}
 } else {
 	dbInstance = {
 		// Mock object completo para el cliente - simula toda la API de Drizzle

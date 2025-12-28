@@ -1,1 +1,0 @@
-{"timestamp":"2025-09-23T02:52:54.234Z","level":"WARN","source":"monitor","message":"Sistema de logging de archivos inicializado correctamente","context":{"timestamp":"2025-09-23T02:52:54.234Z","logDirectory":"logs/reindex","initializationTest":true}}

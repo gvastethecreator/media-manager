@@ -1,0 +1,317 @@
+/**
+ * @file Componente de item multimedia con thumbnail real
+ * @module file-browser-new/components/media-item
+ * 
+ * Reutiliza MediaThumbnail del file-browser original para
+ * una experiencia de visualización consistente.
+ */
+
+import { memo, useCallback } from 'react';
+import { Folder, CornerUpLeft } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import type { BrowserItem, ClickModifiers } from '../types';
+// Importar MediaThumbnail del file-browser original
+import { MediaThumbnail, type MediaItem } from '@/components/features/file-browser/components/media-thumbnail';
+
+/**
+ * Convierte BrowserItem a MediaItem compatible
+ */
+function toMediaItem(item: BrowserItem): MediaItem {
+    return {
+        id: item.id,
+        name: item.name,
+        entityType: item.entityType === 'json' ? 'jsonFile' : item.entityType as MediaItem['entityType'],
+        thumbnailUrl: item.thumbnailUrl,
+        mimeType: item.mimeType,
+        createdAt: item.createdAt,
+        size: item.size,
+        path: item.path,
+        width: item.width,
+        height: item.height,
+        parentId: item.parentId,
+        totalItems: item.totalItems,
+        emoji: item.emoji,
+        color: item.color,
+    };
+}
+
+export interface MediaItemProps {
+    item: BrowserItem;
+    size: number;
+    isSelected?: boolean;
+    isActive?: boolean;
+    onClick?: (e: React.MouseEvent) => void;
+    onDoubleClick?: () => void;
+    onContextMenu?: (e: React.MouseEvent) => void;
+    className?: string;
+    style?: React.CSSProperties;
+    /** Modo de vista para ajustar el render */
+    viewMode?: 'grid' | 'list' | 'masonry' | 'table' | 'cards';
+}
+
+/**
+ * Componente de item para vista de Grid/Cards/Masonry
+ */
+function MediaItemGridInner({
+    item,
+    size,
+    isSelected = false,
+    isActive = false,
+    onClick,
+    onDoubleClick,
+    onContextMenu,
+    className,
+    style,
+}: MediaItemProps) {
+    // Si es item sintético de navegación (..)
+    if (item.isSynthetic && item.name === '..') {
+        return (
+            <div
+                className={cn(
+                    'group relative flex flex-col items-center justify-center gap-2 rounded-lg p-2 transition-colors',
+                    'hover:bg-accent/50 cursor-pointer',
+                    isSelected && 'bg-accent ring-2 ring-primary',
+                    isActive && 'ring-2 ring-primary/50',
+                    className
+                )}
+                data-item-id={item.id}
+                data-selected={isSelected}
+                onClick={onClick}
+                onContextMenu={onContextMenu}
+                onDoubleClick={onDoubleClick}
+                style={{ ...style, width: size, height: size }}
+            >
+                <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+                    <CornerUpLeft className="h-6 w-6 text-muted-foreground" />
+                </div>
+                <span className="text-sm font-medium text-muted-foreground">Subir nivel</span>
+            </div>
+        );
+    }
+
+    // Si es carpeta
+    if (item.entityType === 'folder') {
+        return (
+            <div
+                className={cn(
+                    'group relative flex flex-col gap-1 rounded-lg p-1.5 transition-colors',
+                    'hover:bg-accent/50 cursor-pointer',
+                    isSelected && 'bg-accent ring-2 ring-primary',
+                    isActive && 'ring-2 ring-primary/50',
+                    className
+                )}
+                data-item-id={item.id}
+                data-selected={isSelected}
+                onClick={onClick}
+                onContextMenu={onContextMenu}
+                onDoubleClick={onDoubleClick}
+                style={style}
+            >
+                <div
+                    className="mx-auto flex items-center justify-center rounded-lg"
+                    style={{
+                        width: size - 12,
+                        height: size - 12,
+                        backgroundColor: item.color ?? 'hsl(var(--muted))',
+                    }}
+                >
+                    {item.emoji ? (
+                        <span className="text-3xl">{item.emoji}</span>
+                    ) : (
+                        <Folder className="h-1/3 w-1/3 text-amber-600" />
+                    )}
+                </div>
+                <div className="flex items-center justify-center gap-1 px-1">
+                    <span className="truncate text-center text-xs leading-tight" title={item.name}>
+                        {item.name}
+                    </span>
+                    {typeof item.totalItems === 'number' && (
+                        <span className="shrink-0 text-[10px] text-muted-foreground">
+                            ({item.totalItems})
+                        </span>
+                    )}
+                </div>
+            </div>
+        );
+    }
+
+    // Para archivos multimedia, usar MediaThumbnail
+    const mediaItem = toMediaItem(item);
+
+    return (
+        <div
+            className={cn(
+                'group relative flex flex-col gap-1 rounded-lg p-1.5 transition-colors',
+                'hover:bg-accent/50 cursor-pointer',
+                isSelected && 'bg-accent ring-2 ring-primary',
+                isActive && 'ring-2 ring-primary/50',
+                className
+            )}
+            data-item-id={item.id}
+            data-selected={isSelected}
+            onClick={onClick}
+            onContextMenu={onContextMenu}
+            onDoubleClick={onDoubleClick}
+            style={style}
+        >
+            <div className="mx-auto overflow-hidden rounded-lg" style={{ width: size - 12, height: size - 12 }}>
+                <MediaThumbnail
+                    className="h-full w-full object-cover"
+                    item={mediaItem}
+                    lockAspectRatio
+                />
+            </div>
+            <span
+                className="truncate text-center text-xs leading-tight px-1"
+                title={item.name}
+            >
+                {item.name}
+            </span>
+        </div>
+    );
+}
+
+/**
+ * Componente de item para vista de Lista
+ */
+function MediaItemListInner({
+    item,
+    isSelected = false,
+    isActive = false,
+    onClick,
+    onDoubleClick,
+    onContextMenu,
+    className,
+    style,
+}: Omit<MediaItemProps, 'size'>) {
+    // Si es item sintético de navegación (..)
+    if (item.isSynthetic && item.name === '..') {
+        return (
+            <div
+                className={cn(
+                    'flex items-center gap-3 px-3 py-2 transition-colors',
+                    'hover:bg-accent/50 cursor-pointer',
+                    isSelected && 'bg-accent',
+                    isActive && 'ring-1 ring-inset ring-primary/50',
+                    className
+                )}
+                data-item-id={item.id}
+                data-selected={isSelected}
+                onClick={onClick}
+                onContextMenu={onContextMenu}
+                onDoubleClick={onDoubleClick}
+                style={style}
+            >
+                <div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
+                    <CornerUpLeft className="h-4 w-4 text-muted-foreground" />
+                </div>
+                <span className="flex-1 text-sm text-muted-foreground">Subir nivel</span>
+            </div>
+        );
+    }
+
+    // Si es carpeta
+    if (item.entityType === 'folder') {
+        return (
+            <div
+                className={cn(
+                    'flex items-center gap-3 px-3 py-2 transition-colors',
+                    'hover:bg-accent/50 cursor-pointer',
+                    isSelected && 'bg-accent',
+                    isActive && 'ring-1 ring-inset ring-primary/50',
+                    className
+                )}
+                data-item-id={item.id}
+                data-selected={isSelected}
+                onClick={onClick}
+                onContextMenu={onContextMenu}
+                onDoubleClick={onDoubleClick}
+                style={style}
+            >
+                <div
+                    className="flex h-8 w-8 items-center justify-center rounded"
+                    style={{ backgroundColor: item.color ?? 'hsl(var(--muted))' }}
+                >
+                    {item.emoji ? (
+                        <span className="text-sm">{item.emoji}</span>
+                    ) : (
+                        <Folder className="h-4 w-4 text-amber-600" />
+                    )}
+                </div>
+                <span className="flex-1 truncate text-sm">{item.name}</span>
+                {typeof item.totalItems === 'number' && (
+                    <span className="text-xs text-muted-foreground">{item.totalItems} items</span>
+                )}
+            </div>
+        );
+    }
+
+    // Para archivos multimedia
+    const mediaItem = toMediaItem(item);
+
+    return (
+        <div
+            className={cn(
+                'flex items-center gap-3 px-3 py-2 transition-colors',
+                'hover:bg-accent/50 cursor-pointer',
+                isSelected && 'bg-accent',
+                isActive && 'ring-1 ring-inset ring-primary/50',
+                className
+            )}
+            data-item-id={item.id}
+            data-selected={isSelected}
+            onClick={onClick}
+            onContextMenu={onContextMenu}
+            onDoubleClick={onDoubleClick}
+            style={style}
+        >
+            <div className="h-8 w-8 overflow-hidden rounded">
+                <MediaThumbnail
+                    className="h-full w-full object-cover"
+                    item={mediaItem}
+                />
+            </div>
+            <span className="flex-1 truncate text-sm">{item.name}</span>
+            {item.size != null && (
+                <span className="text-xs text-muted-foreground">
+                    {formatFileSize(item.size)}
+                </span>
+            )}
+        </div>
+    );
+}
+
+/**
+ * Formatea tamaño de archivo
+ */
+function formatFileSize(bytes: number): string {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`;
+}
+
+/**
+ * Componentes exportados memorizados
+ */
+export const MediaItemGrid = memo(MediaItemGridInner);
+export const MediaItemList = memo(MediaItemListInner);
+
+/**
+ * Selector genérico según modo de vista
+ */
+export interface GenericMediaItemProps extends MediaItemProps {
+    viewMode: 'grid' | 'list' | 'masonry' | 'table' | 'cards';
+}
+
+export const GenericMediaItem = memo(function GenericMediaItem({
+    viewMode,
+    size = 150,
+    ...props
+}: GenericMediaItemProps) {
+    if (viewMode === 'list' || viewMode === 'table') {
+        return <MediaItemList {...props} />;
+    }
+    return <MediaItemGrid {...props} size={size} />;
+});

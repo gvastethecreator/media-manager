@@ -17,6 +17,7 @@ import { useImageLoader } from './use-image-loader';
 import { useKeyboardNavigation } from './use-keyboard-navigation';
 import { useToolbarActions } from './use-toolbar-actions';
 import { useZoomPan } from './use-zoom-pan';
+import { FileContentRenderer } from './file-content-renderer';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 // Componente principal del visor de archivos - memoizado
@@ -40,10 +41,18 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	const currentImage = useMemo(() => images[currentIndex], [images, currentIndex]);
 
 	// Custom hooks
-	const { resetView, scale, position, imageContainerRef, handleWheel, handleZoomIn, handleZoomOut, onMainDrag } =
-		useZoomPan(isOpen, () => {
-			// Callback vacío para resetView inicial
-		});
+	const {
+		resetView,
+		scale,
+		position,
+		imageContainerRef,
+		handleZoom,
+		handleZoomIn,
+		handleZoomOut,
+		handleMouseDown,
+		handleMouseMove,
+		handleMouseUp,
+	} = useZoomPan(isOpen);
 
 	const { urls, setUrls, isLoading, setIsLoading, loadImageUrl } = useImageLoader(images, currentIndex, isOpen);
 
@@ -59,9 +68,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 		nextItem,
 		previousItem,
 		resetView,
-		(factor: number) => {
-			// handleZoom inline
-		}
+		handleZoom
 	);
 
 	// Validate images and index
@@ -281,18 +288,16 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 			open={isOpen}
 			ref={dialogRef}
 		>
-			<fieldset
-				className="relative flex h-full w-full flex-col items-center justify-center"
+			<div
+				className="relative flex h-full w-full flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none"
 				onClick={(e) => e.stopPropagation()}
 				onDoubleClick={resetView}
-				onKeyDown={(e) => e.stopPropagation()}
-				onMouseDown={() => { }}
-				onTouchStart={() => { }}
-				onWheel={handleWheel}
+				onMouseDown={handleMouseDown}
+				onMouseMove={handleMouseMove}
+				onMouseUp={handleMouseUp}
+				onMouseLeave={handleMouseUp}
 				ref={imageContainerRef}
-				tabIndex={-1}
 			>
-				<legend className="sr-only">Visor de archivos</legend>
 				{/* Región aria-live para anuncios */}
 				<div aria-live="polite" className="sr-only">
 					{announceMessage}
@@ -360,29 +365,21 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 						</AnimatePresence>
 
 						{!isLoading && currentImage && urls[currentImage.id] && (
-							<motion.div
-								className="absolute inset-0 flex items-center justify-center"
-								drag
-								dragConstraints={constraintsRef}
-								dragMomentum={false}
-								// @ts-expect-error - Conflict between motion-shim and React DragEventHandler
-								onDrag={(e, info) => onMainDrag(e, info as any)}
-								style={{
+							<FileContentRenderer
+								item={currentImage}
+								contentUrl={urls[currentImage.id]}
+								isLoading={false}
+								onError={() => setIsLoading(false)}
+								onLoad={() => setIsLoading(false)}
+								transformStyle={{
 									transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
 								}}
-							>
-								<img
-									alt={currentImage?.name || 'sin nombre'}
-									className="max-h-full max-w-full object-contain"
-									onError={() => setIsLoading(false)}
-									src={currentImage ? urls[currentImage.id] : ''}
-								/>
-							</motion.div>
+							/>
 						)}
 
 						{!isLoading && (!currentImage || (currentImage && !urls[currentImage.id])) && (
 							<div className="absolute inset-0 flex items-center justify-center text-center text-muted-foreground">
-								<p>Error al cargar la imagen</p>
+								<p>Error al cargar el archivo</p>
 							</div>
 						)}
 					</div>
@@ -396,7 +393,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 					<p>Flechas: navegar • Rueda: zoom • Arrastrar: mover</p>
 					<p>ESC: cerrar • R: restablecer • +/-: zoom</p>
 				</div>
-			</fieldset>
+			</div>
 		</dialog>
 	);
 

@@ -30,8 +30,11 @@ type NavItem = {
  * Migrado para usar API calls en lugar de datos mock
  */
 export function useCategoryStats() {
-	const { data: navigationData, isLoading: isLoadingNavigation } = useNavigationData();
-	const { data: statsData, isLoading: isLoadingStats } = useNavigationStats();
+	const { data: navigationData, isLoading: isLoadingNavigation, error: navError } = useNavigationData();
+	const { data: statsData, isLoading: isLoadingStats, error: statsError } = useNavigationStats();
+
+	if (navError) console.error('[useCategoryStats] Nav Error:', navError);
+	if (statsError) console.error('[useCategoryStats] Stats Error:', statsError);
 
 	const categoryDataMap = useMemo(() => {
 		if (!navigationData) {
@@ -178,6 +181,8 @@ export function useCategoryStats() {
 		getImagesForCategory,
 		getCategoryItems,
 		isLoading: isLoadingNavigation || isLoadingStats,
+		isLoadingNavigation,
+		isLoadingStats,
 		navigationData,
 		statsData,
 	};

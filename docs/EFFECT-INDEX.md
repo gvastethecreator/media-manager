@@ -10,7 +10,7 @@
 
 ### 🚀 Empezar Ahora
 
-- **[EFFECT-EXECUTIVE-SUMMARY.md](./EFFECT-EXECUTIVE-SUMMARY.md)** ⭐ **START HERE**
+- **[__temp__EFFECT-EXECUTIVE-SUMMARY.md](__temp__EFFECT-EXECUTIVE-SUMMARY.md)** ⭐ **START HERE**
   - Resumen ejecutivo completo
   - Estado actual y próximos pasos
   - Timeline de 8 semanas
@@ -18,20 +18,20 @@
 
 ### 📚 Guías Principales
 
-1. **[EFFECT-MASTER-PLAN.md](./EFFECT-MASTER-PLAN.md)**
+1. **[EFFECT-MASTER-PLAN.md](EFFECT-MASTER-PLAN.md)**
    - Plan maestro completo de implementación
    - Arquitectura target vs actual
    - Roadmap detallado por fases
    - Métricas de éxito
 
-2. **[EFFECT-MIGRATION-GUIDE.md](./EFFECT-MIGRATION-GUIDE.md)**
+2. **[EFFECT-MIGRATION-GUIDE.md](EFFECT-MIGRATION-GUIDE.md)**
    - Guía práctica paso a paso
    - Template completo de AlbumService (ejemplo)
    - Patrones de código probados
    - Checklist de migración
    - Troubleshooting común
 
-3. **[EFFECT-ADVANCED-PATTERNS.md](./EFFECT-ADVANCED-PATTERNS.md)**
+3. **[EFFECT-ADVANCED-PATTERNS.md](EFFECT-ADVANCED-PATTERNS.md)**
    - Resource management
    - Batching & Caching
    - Stream processing
@@ -41,25 +41,25 @@
 
 ### 📖 Documentación de Referencia
 
-4. **[EFFECT-IMPLEMENTATION-PLAN.md](./EFFECT-IMPLEMENTATION-PLAN.md)**
+4. **[EFFECT-IMPLEMENTATION-PLAN.md](EFFECT-IMPLEMENTATION-PLAN.md)**
    - Plan original detallado
    - Fundamentos de Effect-TS
    - Configuración inicial
    - Patrones base
 
-5. **[EFFECT-PHASE-1-SUMMARY.md](./EFFECT-PHASE-1-SUMMARY.md)**
+5. **[EFFECT-PHASE-1-SUMMARY.md](EFFECT-PHASE-1-SUMMARY.md)**
    - Resumen de Fase 1 completada
    - TagService como referencia
    - 18 replacements exitosos
    - Lecciones aprendidas
 
-6. **[EFFECT-PHASE-2-PLAN.md](./EFFECT-PHASE-2-PLAN.md)**
+6. **[EFFECT-PHASE-2-PLAN.md](EFFECT-PHASE-2-PLAN.md)**
    - Plan detallado Fase 2
    - Schemas y validación
    - Transformers
    - Middleware Express
 
-7. **[EFFECT-README.md](./EFFECT-README.md)**
+7. **[EFFECT-README.md](EFFECT-README.md)**
    - Guía rápida de Effect
    - Conceptos fundamentales
    - Ejemplos básicos
@@ -145,17 +145,17 @@ graph TD
 ### Para Principiantes en Effect
 
 1. **Día 1: Fundamentos**
-   - Leer [EFFECT-README.md](./EFFECT-README.md)
+   - Leer [EFFECT-README.md](EFFECT-README.md)
    - Estudiar `src/lib/effect/runtime/runtime.ts`
    - Revisar conceptos: Effect, Layer, Context
 
 2. **Día 2: Patrón Básico**
-   - Leer [EFFECT-MIGRATION-GUIDE.md](./EFFECT-MIGRATION-GUIDE.md) (Paso 1-3)
+   - Leer [EFFECT-MIGRATION-GUIDE.md](EFFECT-MIGRATION-GUIDE.md) (Paso 1-3)
    - Estudiar `src/services/tag/tag-errors.effect.ts`
    - Crear errores tipados para tu servicio
 
 3. **Día 3: Implementación**
-   - Seguir [EFFECT-MIGRATION-GUIDE.md](./EFFECT-MIGRATION-GUIDE.md) (Paso 4-5)
+   - Seguir [EFFECT-MIGRATION-GUIDE.md](EFFECT-MIGRATION-GUIDE.md) (Paso 4-5)
    - Implementar servicio completo
    - Escribir tests
 
@@ -167,7 +167,7 @@ graph TD
 ### Para Desarrolladores Avanzados
 
 1. **Patrones Avanzados**
-   - [EFFECT-ADVANCED-PATTERNS.md](./EFFECT-ADVANCED-PATTERNS.md) completo
+   - [EFFECT-ADVANCED-PATTERNS.md](EFFECT-ADVANCED-PATTERNS.md) completo
    - Implementar batching para N+1 queries
    - Agregar caching con TTL
    - Integrar métricas y tracing
@@ -234,7 +234,7 @@ bun run bench:services
 
 ### Templates
 
-Ubicados en [EFFECT-MIGRATION-GUIDE.md](./EFFECT-MIGRATION-GUIDE.md):
+Ubicados en [EFFECT-MIGRATION-GUIDE.md](EFFECT-MIGRATION-GUIDE.md):
 - ✅ Error classes template
 - ✅ Schema definitions template
 - ✅ Service implementation template (completo con AlbumService)
@@ -271,10 +271,10 @@ Durante el análisis del proyecto, se descargó documentación actualizada de:
 
 ### ¿Necesitas Ayuda?
 
-1. **Primero:** Revisar [EFFECT-MIGRATION-GUIDE.md](./EFFECT-MIGRATION-GUIDE.md) sección Troubleshooting
+1. **Primero:** Revisar [EFFECT-MIGRATION-GUIDE.md](EFFECT-MIGRATION-GUIDE.md) sección Troubleshooting
 2. **Ejemplo:** Estudiar `src/services/tag/` como referencia
-3. **Patrones:** Buscar en [EFFECT-ADVANCED-PATTERNS.md](./EFFECT-ADVANCED-PATTERNS.md)
-4. **Plan:** Consultar [EFFECT-MASTER-PLAN.md](./EFFECT-MASTER-PLAN.md)
+3. **Patrones:** Buscar en [EFFECT-ADVANCED-PATTERNS.md](EFFECT-ADVANCED-PATTERNS.md)
+4. **Plan:** Consultar [EFFECT-MASTER-PLAN.md](EFFECT-MASTER-PLAN.md)
 
 ### Contribuir a la Documentación
 
@@ -304,7 +304,7 @@ Al migrar un servicio:
 - [ ] 📋 4 servicios prioridad media
 
 ### Semanas 4-8
-- Ver [EFFECT-EXECUTIVE-SUMMARY.md](./EFFECT-EXECUTIVE-SUMMARY.md) para timeline completo
+- Ver [__temp__EFFECT-EXECUTIVE-SUMMARY.md](__temp__EFFECT-EXECUTIVE-SUMMARY.md) para timeline completo
 
 ---
 
@@ -312,9 +312,9 @@ Al migrar un servicio:
 
 ### Para empezar HOY con tu primer servicio:
 
-- [ ] 1. Leer [EFFECT-EXECUTIVE-SUMMARY.md](./EFFECT-EXECUTIVE-SUMMARY.md) (15 min)
+- [ ] 1. Leer [__temp__EFFECT-EXECUTIVE-SUMMARY.md](__temp__EFFECT-EXECUTIVE-SUMMARY.md) (15 min)
 - [ ] 2. Estudiar `src/services/tag/tag.service.effect.ts` (30 min)
-- [ ] 3. Leer [EFFECT-MIGRATION-GUIDE.md](./EFFECT-MIGRATION-GUIDE.md) Paso 1-3 (20 min)
+- [ ] 3. Leer [EFFECT-MIGRATION-GUIDE.md](EFFECT-MIGRATION-GUIDE.md) Paso 1-3 (20 min)
 - [ ] 4. Crear archivos para tu servicio:
   - [ ] `service-name-errors.effect.ts`
   - [ ] `service-name-schemas.ts`

@@ -91,9 +91,9 @@ export function PlaceCardHeader({
 					className="absolute inset-0 opacity-20"
 					style={{
 						backgroundImage:
-							'radial-gradient(circle at 20% 50%, white 1px, transparent 1px), ' +
-							'radial-gradient(circle at 80% 50%, white 1px, transparent 1px), ' +
-							'radial-gradient(circle at 50% 20%, white 1px, transparent 1px)',
+							'radial-gradient(circle at 20% 50%, rgba(var(--effect-highlight-rgb), 1) 1px, transparent 1px), ' +
+							'radial-gradient(circle at 80% 50%, rgba(var(--effect-highlight-rgb), 1) 1px, transparent 1px), ' +
+							'radial-gradient(circle at 50% 20%, rgba(var(--effect-highlight-rgb), 1) 1px, transparent 1px)',
 						backgroundSize: '20px 20px, 20px 20px, 30px 30px',
 					}}
 				/>
@@ -113,12 +113,12 @@ export function PlaceCardHeader({
 					{/* Emoji (como símbolo de la tarjeta en TCG) */}
 					<div
 						className={cn(
-							'relative flex flex-shrink-0 items-center justify-center rounded-full text-xl',
+							'relative flex shrink-0 items-center justify-center rounded-full text-xl',
 							tcgMode ? 'h-10 w-10' : 'h-8 w-8'
 						)}
 						style={{
 							background: `radial-gradient(circle, ${color}30 0%, ${color}60 100%)`,
-							boxShadow: `0 0 8px rgba(0,0,0,0.4), inset 0 0 5px ${color}`,
+							boxShadow: `0 0 8px rgba(var(--effect-shadow-rgb), 0.4), inset 0 0 5px ${color}`,
 						}}
 					>
 						{/* Efecto de brillo en el emoji */}
@@ -126,7 +126,7 @@ export function PlaceCardHeader({
 							<div
 								className="absolute top-0 left-1/4 h-1/3 w-1/2 blur-[1px]"
 								style={{
-									background: 'linear-gradient(to bottom, rgba(255,255,255,0.7), transparent)',
+									background: 'linear-gradient(to bottom, rgba(var(--effect-highlight-rgb), 0.7), transparent)',
 								}}
 							/>
 						</div>
@@ -153,13 +153,14 @@ export function PlaceCardHeader({
 				</div>
 
 				{/* Parte derecha: Clima y Favorito */}
-				<div className="relative z-10 flex flex-shrink-0 items-center gap-1">
+				<div className="relative z-10 flex shrink-0 items-center gap-1">
 					{isFavorite && (
 						<span
 							className="flex items-center justify-center rounded-full px-2 py-0.5"
 							style={{
-								background: 'rgba(255, 255, 255, 0.3)',
-								boxShadow: '0 0 10px rgba(255, 255, 255, 0.5), inset 0 0 3px rgba(255, 255, 255, 0.5)',
+								background: 'rgba(var(--effect-highlight-rgb), 0.3)',
+								boxShadow:
+									'0 0 10px rgba(var(--effect-highlight-rgb), 0.5), inset 0 0 3px rgba(var(--effect-highlight-rgb), 0.5)',
 							}}
 						>
 							<Sparkles className="h-4 w-4 text-white" />
@@ -171,7 +172,7 @@ export function PlaceCardHeader({
 						className="flex h-8 w-8 items-center justify-center rounded-full text-white"
 						style={{
 							background: `radial-gradient(circle, ${color} 0%, ${color}90 100%)`,
-							boxShadow: `0 0 8px rgba(0,0,0,0.4), inset 0 0 5px ${color}60`,
+							boxShadow: `0 0 8px rgba(var(--effect-shadow-rgb), 0.4), inset 0 0 5px ${color}60`,
 						}}
 					>
 						{getClimateIcon()}
@@ -181,11 +182,11 @@ export function PlaceCardHeader({
 				{/* Elementos decorativos de esquina estilo TCG */}
 				<div
 					className="absolute top-0 left-0 h-5 w-5 rounded-br-sm border-t-2 border-l-2"
-					style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+					style={{ borderColor: 'rgba(var(--effect-highlight-rgb), 0.3)' }}
 				/>
 				<div
 					className="absolute top-0 right-0 h-5 w-5 rounded-bl-sm border-t-2 border-r-2"
-					style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+					style={{ borderColor: 'rgba(var(--effect-highlight-rgb), 0.3)' }}
 				/>
 			</div>
 
@@ -194,17 +195,17 @@ export function PlaceCardHeader({
 				className="relative flex items-center justify-between px-3.5 py-1.5 text-white text-xs"
 				style={{
 					borderBottom: `2px solid ${color}70`,
-					background: 'linear-gradient(to right, rgba(0,0,0,0.6), rgba(0,0,0,0.5))',
+					background: 'linear-gradient(to right, rgba(var(--effect-shadow-rgb), 0.6), rgba(var(--effect-shadow-rgb), 0.5))',
 				}}
 			>
 				{/* Decoración de esquina de TCG */}
 				<div
 					className="absolute top-0 left-0 h-4 w-4 border-t border-l"
-					style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+					style={{ borderColor: 'rgba(var(--effect-highlight-rgb), 0.3)' }}
 				/>
 				<div
 					className="absolute top-0 right-0 h-4 w-4 border-t border-r"
-					style={{ borderColor: 'rgba(255,255,255,0.3)' }}
+					style={{ borderColor: 'rgba(var(--effect-highlight-rgb), 0.3)' }}
 				/>
 
 				<span className="ml-1 flex items-center gap-1 font-semibold tracking-wide">
@@ -218,21 +219,21 @@ export function PlaceCardHeader({
 						className="h-1.5 w-1.5 rounded-full"
 						style={{
 							backgroundColor: color,
-							boxShadow: '0 0 2px rgba(255, 255, 255, 0.7)',
+							boxShadow: '0 0 2px rgba(var(--effect-highlight-rgb), 0.7)',
 						}}
 					/>
 					<div
 						className="h-1.5 w-1.5 rounded-full"
 						style={{
 							backgroundColor: color,
-							boxShadow: '0 0 2px rgba(255, 255, 255, 0.7)',
+							boxShadow: '0 0 2px rgba(var(--effect-highlight-rgb), 0.7)',
 						}}
 					/>
 					<div
 						className="h-1.5 w-1.5 rounded-full"
 						style={{
 							backgroundColor: color,
-							boxShadow: '0 0 2px rgba(255, 255, 255, 0.7)',
+							boxShadow: '0 0 2px rgba(var(--effect-highlight-rgb), 0.7)',
 						}}
 					/>
 				</div>

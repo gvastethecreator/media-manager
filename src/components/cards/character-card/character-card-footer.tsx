@@ -205,7 +205,10 @@ export function CharacterCardFooter({
 			)}
 
 			{/* Línea decorativa inferior en estilo TCG */}
-			<div className="mt-2 h-1 w-full overflow-hidden rounded-full" style={{ background: 'rgba(255,255,255,0.1)' }}>
+			<div
+				className="mt-2 h-1 w-full overflow-hidden rounded-full"
+				style={{ background: 'rgba(var(--effect-highlight-rgb), 0.1)' }}
+			>
 				<div
 					className="h-full rounded-full"
 					style={{

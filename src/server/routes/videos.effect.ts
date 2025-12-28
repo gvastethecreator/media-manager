@@ -300,6 +300,141 @@ router.delete('/batch', async (req, res) => {
 });
 
 /**
+ * GET /videos/:id/content - Servir el video original
+ */
+router.get('/:id/content', async (req, res) => {
+	const { id } = req.params;
+
+	const effect = Effect.gen(function* () {
+		const videoService = yield* VideoService;
+		const video = yield* videoService.getById(id);
+		return video;
+	}).pipe(Effect.provide(VideoServiceLive));
+
+	try {
+		const video = await Effect.runPromise(effect);
+
+		if (!video || !video.path) {
+			res.status(404).send('Video not found');
+			return;
+		}
+
+		const fs = require('fs');
+		if (!fs.existsSync(video.path)) {
+			res.status(404).send('Video file not found');
+			return;
+		}
+
+		// Determinar mime type básico por extensión
+		const ext = video.path.split('.').pop()?.toLowerCase();
+		let mimeType = 'video/mp4';
+		if (ext === 'webm') mimeType = 'video/webm';
+		if (ext === 'ogg') mimeType = 'video/ogg';
+		if (ext === 'mov') mimeType = 'video/quicktime';
+		if (ext === 'mkv') mimeType = 'video/x-matroska';
+
+		res.sendFile(video.path, {
+			acceptRanges: true,
+			headers: {
+				'Content-Type': mimeType,
+			},
+		});
+	} catch (error) {
+		const httpError = require('@/lib/effect/adapters/express.adapter').errorToHttpStatus(error);
+		res.status(httpError.status).json({
+			error: httpError.message,
+			...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
+		});
+	}
+});
+
+/**
+ * GET /videos/:id/thumbnail - Servir thumbnail de video
+ */
+router.get('/:id/thumbnail', async (req, res) => {
+	const { id } = req.params;
+	const timeParam = (req.query.time || req.query.timestamp) as string | undefined;
+	const time = timeParam ? Number.parseFloat(timeParam) : 1;
+
+	const effect = Effect.gen(function* () {
+		const videoService = yield* VideoService;
+		const video = yield* videoService.getById(id);
+		return video;
+	}).pipe(Effect.provide(VideoServiceLive));
+
+	try {
+		const video = await Effect.runPromise(effect);
+
+		if (!video) {
+			res.status(404).send('Video not found');
+			return;
+		}
+
+		// 1) Intentar desde DB (thumbnail base64)
+		if (video.thumbnail) {
+			try {
+				const buffer = Buffer.from(video.thumbnail, 'base64');
+				const etag = `W/"${buffer.length.toString(16)}-${id}"`;
+				const lastModified = new Date(video.updatedAt || Date.now()).toUTCString();
+
+				const ifNoneMatch = req.header('If-None-Match');
+				const ifModifiedSince = req.header('If-Modified-Since');
+				if (ifNoneMatch === etag || (ifModifiedSince && new Date(ifModifiedSince) >= new Date(lastModified))) {
+					res.status(304).end();
+					return;
+				}
+
+				res.set({
+					'Content-Type': 'image/jpeg',
+					'Content-Length': buffer.length.toString(),
+					'Cache-Control': 'public, max-age=31536000',
+					ETag: etag,
+					'Last-Modified': lastModified,
+				});
+				res.send(buffer);
+				return;
+			} catch {
+				// continuar
+			}
+		}
+
+		// Fallback: generar thumbnail estático con mediabunny
+		try {
+			const { generateVideoThumbnail } = await import('@/server/services/media/mediabunny-thumbnail.service');
+			const timestamp = Number.isFinite(time) ? Math.max(0.05, Math.min(time as number, 36_000)) : 1;
+
+			const thumbnailBuffer = await generateVideoThumbnail(video.path, timestamp, 320, 240);
+
+			if (thumbnailBuffer) {
+				const etag = `W/"${thumbnailBuffer.length.toString(16)}-${id}"`;
+				const lastModified = new Date().toUTCString();
+
+				res.set({
+					'Content-Type': 'image/jpeg',
+					'Content-Length': thumbnailBuffer.length.toString(),
+					'Cache-Control': 'public, max-age=86400',
+					ETag: etag,
+					'Last-Modified': lastModified,
+					Vary: 'Accept, Accept-Encoding',
+				});
+				res.send(thumbnailBuffer);
+				return;
+			}
+		} catch (error) {
+			console.error('Error generating static thumbnail with mediabunny:', error);
+		}
+
+		res.status(500).send('Unable to generate thumbnail');
+	} catch (error) {
+		const httpError = require('@/lib/effect/adapters/express.adapter').errorToHttpStatus(error);
+		res.status(httpError.status).json({
+			error: httpError.message,
+			...(process.env.NODE_ENV === 'development' && { details: httpError.details }),
+		});
+	}
+});
+
+/**
  * GET /videos/:id - Obtener video por ID (último para evitar conflictos con rutas dinámicas)
  */
 router.get('/:id', async (req, res) => {
