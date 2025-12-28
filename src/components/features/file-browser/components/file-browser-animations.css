@@ -5,7 +5,7 @@
   --fb-hover-duration: 200ms;
   --fb-hover-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
   --fb-hover-scale: 1.05;
-  --fb-hover-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  --fb-hover-shadow: 0 8px 32px rgba(var(--effect-shadow-rgb), 0.15);
   --fb-hover-border-opacity: 0.2;
   --fb-selection-color: hsl(var(--primary));
 }
@@ -160,7 +160,7 @@
   background: linear-gradient(
     90deg,
     transparent,
-    rgba(255, 255, 255, 0.1),
+    rgba(var(--effect-highlight-rgb), 0.1),
     transparent
   );
   transform: translateX(-100%);

@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import * as RechartsPrimitive from 'recharts';
+import type { NameType, Payload as RechartsPayload, ValueType } from 'recharts/types/component/DefaultTooltipContent';
 
 import { cn } from '@/lib/utils';
 
@@ -88,6 +89,9 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
 
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
+type RechartsTooltipPayload = ReadonlyArray<RechartsPayload<ValueType, NameType>>;
+type RechartsTooltipPayloadItem = RechartsPayload<ValueType, NameType>;
+
 function ChartTooltipContent({
 	active,
 	payload,
@@ -109,14 +113,7 @@ function ChartTooltipContent({
 		indicator?: 'line' | 'dot' | 'dashed';
 		nameKey?: string;
 		labelKey?: string;
-		payload?: Array<{
-			name?: string;
-			dataKey?: string | number;
-			value?: number | string;
-			color?: string;
-			payload?: Record<string, unknown>;
-			fill?: string;
-		}>;
+		payload?: RechartsTooltipPayload;
 		label?: string;
 	}) {
 	const { config } = useChart();
@@ -158,9 +155,9 @@ function ChartTooltipContent({
 		>
 			{nestLabel ? null : tooltipLabel}
 			<div className="grid gap-1.5">
-				{payload.map((item, index) => {
-					const key = `${nameKey || item.name || item.dataKey || 'value'}`;
-					const itemConfig = getPayloadConfigFromPayload(config, item, key);
+				{payload.map((item: RechartsTooltipPayloadItem, index: number) => {
+					const payloadKey = `${nameKey || item.name || item.dataKey || 'value'}`;
+					const itemConfig = getPayloadConfigFromPayload(config, item, payloadKey);
 					const indicatorColor = color || item.payload?.fill || item.color;
 
 					return (
@@ -169,7 +166,7 @@ function ChartTooltipContent({
 								'flex w-full flex-wrap items-stretch gap-2 [&>svg]:h-2.5 [&>svg]:w-2.5 [&>svg]:text-muted-foreground',
 								indicator === 'dot' && 'items-center'
 							)}
-							key={item.dataKey}
+							key={`${item.graphicalItemId}-${payloadKey}`}
 						>
 							{formatter && item?.value !== undefined && item.name ? (
 								formatter(item.value, item.name, item, index, payload)

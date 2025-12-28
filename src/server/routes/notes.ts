@@ -1,5 +1,8 @@
 import { Router } from 'express';
 import { z } from 'zod';
+import { and, eq } from 'drizzle-orm';
+import { db } from '@/lib/drizzle';
+import { notes, imageNotes, images } from '@/lib/drizzle/schema/index';
 import * as noteService from '@/services/note/note.service';
 import { toNoteWithStats } from '@/transformers/note';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -196,6 +199,56 @@ router.delete('/:id', async (req, res) => {
 		res.status(204).send();
 	} catch (error) {
 		serverLogger.error('Error deleting note:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// POST /notes/:id/images/:imageId - Agregar imagen a nota
+router.post('/:id/images/:imageId', async (req, res) => {
+	try {
+		const { id, imageId } = req.params;
+
+		const note = await db.query.notes.findFirst({ where: eq(notes.id, id) });
+		if (!note) {
+			res.status(404).json({ error: 'Nota no encontrada' });
+			return;
+		}
+
+		const image = await db.query.images.findFirst({ where: eq(images.id, imageId) });
+		if (!image) {
+			res.status(404).json({ error: 'Imagen no encontrada' });
+			return;
+		}
+
+		// A=imageId, B=noteId
+		const existing = await db
+			.select()
+			.from(imageNotes)
+			.where(and(eq(imageNotes.A, imageId), eq(imageNotes.B, id)))
+			.limit(1);
+
+		if (existing.length > 0) {
+			res.status(200).json({ message: 'La imagen ya está asociada', alreadyExists: true });
+			return;
+		}
+
+		await db.insert(imageNotes).values({ A: imageId, B: id });
+		serverLogger.info(`✅ Imagen ${imageId} agregada a nota ${id}`);
+		res.status(201).json({ message: 'Imagen agregada a la nota exitosamente' });
+	} catch (error) {
+		serverLogger.error('Error adding image to note:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// DELETE /notes/:id/images/:imageId
+router.delete('/:id/images/:imageId', async (req, res) => {
+	try {
+		const { id, imageId } = req.params;
+		await db.delete(imageNotes).where(and(eq(imageNotes.A, imageId), eq(imageNotes.B, id)));
+		res.status(200).json({ message: 'Imagen removida de la nota' });
+	} catch (error) {
+		serverLogger.error('Error removing image from note:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });

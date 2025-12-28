@@ -2,7 +2,7 @@ import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import express from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { prompts } from '@/lib/drizzle/schema/index';
+import { prompts, imagePrompts, images } from '@/lib/drizzle/schema/index';
 import { PromptService, promptService } from '@/services/prompt/prompt.service';
 import { toImageWithStats } from '@/transformers/image';
 import { toPromptWithStats } from '@/transformers/prompt';
@@ -270,6 +270,56 @@ router.delete('/:id', async (req, res) => {
 			error: 'Error interno del servidor',
 			message: error instanceof Error ? error.message : 'Error desconocido',
 		});
+	}
+});
+
+// POST /prompts/:id/images/:imageId - Agregar imagen a prompt
+router.post('/:id/images/:imageId', async (req, res) => {
+	try {
+		const { id, imageId } = req.params;
+
+		const prompt = await db.query.prompts.findFirst({ where: eq(prompts.id, id) });
+		if (!prompt) {
+			res.status(404).json({ error: 'Prompt no encontrado' });
+			return;
+		}
+
+		const image = await db.query.images.findFirst({ where: eq(images.id, imageId) });
+		if (!image) {
+			res.status(404).json({ error: 'Imagen no encontrada' });
+			return;
+		}
+
+		// A=imageId, B=promptId
+		const existing = await db
+			.select()
+			.from(imagePrompts)
+			.where(and(eq(imagePrompts.A, imageId), eq(imagePrompts.B, id)))
+			.limit(1);
+
+		if (existing.length > 0) {
+			res.status(200).json({ message: 'La imagen ya está asociada', alreadyExists: true });
+			return;
+		}
+
+		await db.insert(imagePrompts).values({ A: imageId, B: id });
+		serverLogger.info(`✅ Imagen ${imageId} agregada a prompt ${id}`);
+		res.status(201).json({ message: 'Imagen agregada al prompt exitosamente' });
+	} catch (error) {
+		serverLogger.error('Error adding image to prompt:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
+// DELETE /prompts/:id/images/:imageId
+router.delete('/:id/images/:imageId', async (req, res) => {
+	try {
+		const { id, imageId } = req.params;
+		await db.delete(imagePrompts).where(and(eq(imagePrompts.A, imageId), eq(imagePrompts.B, id)));
+		res.status(200).json({ message: 'Imagen removida del prompt' });
+	} catch (error) {
+		serverLogger.error('Error removing image from prompt:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
 	}
 });
 

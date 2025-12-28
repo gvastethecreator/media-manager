@@ -332,7 +332,7 @@ async generateThumbnail(entity: Video) {
 
 ## 🔗 Enlaces Relacionados
 
-- [Audit de Dependencias](./thumbnail-dependencies-audit.md)
+- [Audit de Dependencias](__temp__THUMBNAIL-AUDIT.md)
 - [Diagnóstico del Sistema](../reports/thumbnail-diagnosis-2025-10-11T01-12-33.md)
 - [Configuración de Thumbnails](../src/lib/config/thumbnail.config.ts)
 - [Generadores de Thumbnails](../src/config/thumbnail-generators.ts)

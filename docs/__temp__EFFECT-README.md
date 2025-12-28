@@ -67,7 +67,7 @@ src/lib/effect/
 | Documento | Descripción |
 |-----------|-------------|
 | [EFFECT-IMPLEMENTATION-PLAN.md](./EFFECT-IMPLEMENTATION-PLAN.md) | 📘 Plan completo de 5 fases |
-| [EFFECT-PHASE-0-SUMMARY.md](./EFFECT-PHASE-0-SUMMARY.md) | ✅ Resumen Fase 0 completada |
+| [__temp__EFFECT-PHASE-0-SUMMARY.md](__temp__EFFECT-PHASE-0-SUMMARY.md) | ✅ Resumen Fase 0 completada |
 | Este README | 🚀 Guía rápida de uso |
 
 ---

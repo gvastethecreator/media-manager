@@ -10,16 +10,16 @@
 
 ## 📋 Tabla de Contenidos
 
-1. [Estado Actual del Proyecto](#estado-actual)
-2. [Fundamentos de Effect-TS](#fundamentos)
-3. [Arquitectura y Patrones del Proyecto](#arquitectura)
-4. [Proceso de Migración Paso a Paso](#proceso-migracion)
-5. [Guía de Implementación Práctica](#guia-implementacion)
-6. [Patrones Avanzados](#patrones-avanzados)
-7. [Testing con Effect](#testing)
-8. [Roadmap de Migración](#roadmap)
-9. [Scripts y Herramientas](#herramientas)
-10. [Recursos y Referencias](#recursos)
+1. [Estado Actual del Proyecto](EFFECT-IMPLEMENTATION-STRATEGY-2025.md#estado-actual)
+2. [Fundamentos de Effect-TS](EFFECT-IMPLEMENTATION-STRATEGY-2025.md#fundamentos)
+3. [Arquitectura y Patrones del Proyecto](EFFECT-IMPLEMENTATION-STRATEGY-2025.md#arquitectura)
+4. [Proceso de Migración Paso a Paso](EFFECT-IMPLEMENTATION-STRATEGY-2025.md#proceso-migracion)
+5. [Guía de Implementación Práctica](EFFECT-IMPLEMENTATION-STRATEGY-2025.md#guia-implementacion)
+6. [Patrones Avanzados](EFFECT-IMPLEMENTATION-STRATEGY-2025.md#patrones-avanzados)
+7. [Testing con Effect](EFFECT-IMPLEMENTATION-STRATEGY-2025.md#testing)
+8. [Roadmap de Migración](EFFECT-IMPLEMENTATION-STRATEGY-2025.md#roadmap)
+9. [Scripts y Herramientas](EFFECT-IMPLEMENTATION-STRATEGY-2025.md#herramientas)
+10. [Recursos y Referencias](EFFECT-IMPLEMENTATION-STRATEGY-2025.md#recursos)
 
 ---
 

@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDeleteTag, useTags } from '@/lib/api/tags';
+import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import type { TagBase as UITag } from '@/types/entities/tag';
 import { TagCategory } from '@/types/entities/tag';
@@ -151,8 +152,8 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 							<div className="text-sm">
 								{tags.length > 0
 									? tags.reduce((max, tag) =>
-											(tag.stats?.totalRelations || 0) > (max.stats?.totalRelations || 0) ? tag : max
-										).name
+										(tag.stats?.totalRelations || 0) > (max.stats?.totalRelations || 0) ? tag : max
+									).name
 									: 'N/A'}
 							</div>
 						</CardContent>
@@ -249,8 +250,8 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 					/>
 				) : (
 					<div
-						className="max-h-[600px] space-y-4 overflow-y-auto pr-2"
-						style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgb(203 213 225) transparent' }}
+						className="max-h-150 space-y-4 overflow-y-auto pr-2"
+						style={{ scrollbarWidth: 'thin', scrollbarColor: 'hsl(var(--border)) transparent' }}
 					>
 						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 							{filteredTags.map((tag) => (
@@ -304,7 +305,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 											</div>
 											<div
 												className="h-4 w-4 rounded-full border"
-												style={{ backgroundColor: tag.color || '#6b7280' }}
+												style={{ backgroundColor: tag.color || DEFAULT_NEUTRAL_COLOR }}
 											/>
 										</div>
 									</CardContent>

@@ -7,12 +7,12 @@
 
 ## 📖 Índice
 
-1. [Resource Management](#resource-management)
-2. [Batching & Caching](#batching--caching)
-3. [Stream Processing](#stream-processing)
-4. [Error Recovery](#error-recovery)
-5. [Observability](#observability)
-6. [Testing Avanzado](#testing-avanzado)
+1. [Resource Management](EFFECT-ADVANCED-PATTERNS.md#resource-management)
+2. [Batching & Caching](EFFECT-ADVANCED-PATTERNS.md#batching--caching)
+3. [Stream Processing](EFFECT-ADVANCED-PATTERNS.md#stream-processing)
+4. [Error Recovery](EFFECT-ADVANCED-PATTERNS.md#error-recovery)
+5. [Observability](EFFECT-ADVANCED-PATTERNS.md#observability)
+6. [Testing Avanzado](EFFECT-ADVANCED-PATTERNS.md#testing-avanzado)
 
 ---
 

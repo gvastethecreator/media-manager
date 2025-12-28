@@ -7,11 +7,11 @@
 
 ## 📖 Índice
 
-1. [Preparación](#preparación)
-2. [Paso a Paso: Migrar un Servicio](#paso-a-paso)
-3. [Patrones y Ejemplos](#patrones-y-ejemplos)
-4. [Testing](#testing)
-5. [Troubleshooting](#troubleshooting)
+1. [Preparación](EFFECT-MIGRATION-GUIDE.md#preparación)
+2. [Paso a Paso: Migrar un Servicio](EFFECT-MIGRATION-GUIDE.md#paso-a-paso)
+3. [Patrones y Ejemplos](EFFECT-MIGRATION-GUIDE.md#patrones-y-ejemplos)
+4. [Testing](EFFECT-MIGRATION-GUIDE.md#testing)
+5. [Troubleshooting](EFFECT-MIGRATION-GUIDE.md#troubleshooting)
 
 ---
 

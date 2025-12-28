@@ -218,9 +218,29 @@ router.get('/', async (req, res) => {
 router.get('/:id/content', async (req, res) => {
 	try {
 		const { id } = req.params;
+
+		// Obtener metadatos para MIME type
+		const image = await imageService.getImage(id);
+		if (!image) {
+			res.status(404).json({ error: 'Image not found' });
+			return;
+		}
+
 		const buffer = await imageService.getOriginalImage(id);
+
+		let mimeType = 'image/jpeg';
+		if (image.path) {
+			const ext = image.path.split('.').pop()?.toLowerCase();
+			if (ext === 'png') mimeType = 'image/png';
+			if (ext === 'gif') mimeType = 'image/gif';
+			if (ext === 'webp') mimeType = 'image/webp';
+			if (ext === 'svg') mimeType = 'image/svg+xml';
+			if (ext === 'bmp') mimeType = 'image/bmp';
+			if (ext === 'avif') mimeType = 'image/avif';
+		}
+
 		res.set({
-			'Content-Type': 'image/jpeg', // Asumimos JPEG por defecto, se puede mejorar
+			'Content-Type': mimeType,
 			'Content-Length': buffer.length.toString(),
 			'Cache-Control': 'public, max-age=31536000',
 		});

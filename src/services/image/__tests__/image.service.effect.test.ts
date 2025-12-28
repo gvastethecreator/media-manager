@@ -6,7 +6,6 @@
  */
 
 import { Effect } from 'effect';
-import { afterEach, describe, expect, it } from 'bun:test';
 import { db } from '@/lib/drizzle';
 import { images, folders, imageAlbums, albums, imageTags, tags } from '@/lib/drizzle/schema';
 import * as ImageService from '../image.service.effect';

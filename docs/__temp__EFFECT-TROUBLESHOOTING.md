@@ -8,12 +8,12 @@
 
 ## 📋 Índice
 
-1. [Drizzle Integration Issues](#drizzle-integration-issues)
-2. [Test Environment Issues](#test-environment-issues)
-3. [Schema Validation Issues](#schema-validation-issues)
-4. [TaggedError Issues](#taggederror-issues)
-5. [Performance Issues](#performance-issues)
-6. [Type Issues](#type-issues)
+1. [Drizzle Integration Issues](EFFECT-TROUBLESHOOTING.md#drizzle-integration-issues)
+2. [Test Environment Issues](EFFECT-TROUBLESHOOTING.md#test-environment-issues)
+3. [Schema Validation Issues](EFFECT-TROUBLESHOOTING.md#schema-validation-issues)
+4. [TaggedError Issues](EFFECT-TROUBLESHOOTING.md#taggederror-issues)
+5. [Performance Issues](EFFECT-TROUBLESHOOTING.md#performance-issues)
+6. [Type Issues](EFFECT-TROUBLESHOOTING.md#type-issues)
 
 ---
 

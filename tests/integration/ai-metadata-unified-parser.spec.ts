@@ -1,4 +1,3 @@
-import { describe, expect, it } from 'bun:test';
 import { extractAllMetadata } from '@/server/services/metadata/unified-parser.service';
 
 // Implementación ligera CRC32 (IEEE) para evitar dependencia externa solo para el test

@@ -1,0 +1,7 @@
+
+> image-manager@0.1.0 test
+> vitest run
+
+
+[1m[46m RUN [49m[22m [36mv4.0.16 [39m[90mD:/DEV/image-manager[39m
+
