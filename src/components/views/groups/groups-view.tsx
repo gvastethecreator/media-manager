@@ -13,13 +13,11 @@ export function GroupsView(_props: ViewProps) {
 	const navigate = useNavigate();
 
 	// Leer el estado y las acciones directamente del store de Zustand
-	const { groups, isLoading, error, fetchGroups, addGroup } = useGroupStore((state) => ({
-		groups: Object.values(state.groups) as GroupWithStats[],
-		isLoading: state.isLoading,
-		error: state.error,
-		fetchGroups: state.loadGroups,
-		addGroup: state.createGroup,
-	}));
+	const groups = useGroupStore((state) => state.groups);
+	const isLoading = useGroupStore((state) => state.isLoading);
+	const error = useGroupStore((state) => state.error);
+	const fetchGroups = useGroupStore((state) => state.loadGroups);
+	const addGroup = useGroupStore((state) => state.createGroup);
 
 	const [showForm, setShowForm] = useState(false);
 	const [newGroupName, setNewGroupName] = useState('');

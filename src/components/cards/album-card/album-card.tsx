@@ -285,6 +285,7 @@ export function AlbumCard({
 				<div className="flex flex-1 flex-col overflow-hidden">
 					{/* Imágenes del álbum */}
 					<AlbumCardImages
+						albumId={album.id}
 						className="flex-1"
 						compact={compact}
 						recentImages={album.recentImages || []}

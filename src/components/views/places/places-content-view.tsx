@@ -40,7 +40,7 @@ const PlacesContentView = () => {
 				{items.length === 0 ? (
 					<EmptyState description="Aún no has creado lugares." icon={MapPinIcon} title="Sin lugares" />
 				) : (
-					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 						{items.map((place, index) => (
 							<motion.div
 								animate={{ opacity: 1, y: 0 }}

@@ -9,6 +9,8 @@ import { useNavigationRefresh } from '@/hooks/use-navigation-refresh';
 import { useEntityCatalogStore } from '@/store/entity-catalog-store';
 import { ErrorBoundary } from './components/core/error-boundary';
 import { ThemeProvider } from './components/ui/theme-provider';
+import { Toaster } from './components/ui/toaster';
+import { TooltipProvider } from './components/ui/tooltip';
 import { ReactScanProvider } from './lib/dev/react-scan';
 import lastLogContent from './logs/last-log.json' with { type: 'json' };
 import { ViewTransitionProvider } from './providers/ViewTransitionProvider';
@@ -30,15 +32,18 @@ function EntityCatalogBootstrapper() {
 export function App() {
 	return (
 		<ThemeProvider defaultTheme="system" storageKey="theme">
-			<ViewTransitionProvider>
-				<ReactScanProvider>
-					<ErrorBoundary lastLogContent={lastLogContent}>
-						<SSENavigationRefresher />
-						<EntityCatalogBootstrapper />
-						<RouterProvider router={router} />
-					</ErrorBoundary>
-				</ReactScanProvider>
-			</ViewTransitionProvider>
+			<TooltipProvider>
+				<ViewTransitionProvider>
+					<ReactScanProvider>
+						<ErrorBoundary lastLogContent={lastLogContent}>
+							<SSENavigationRefresher />
+							<EntityCatalogBootstrapper />
+							<RouterProvider router={router} />
+							<Toaster />
+						</ErrorBoundary>
+					</ReactScanProvider>
+				</ViewTransitionProvider>
+			</TooltipProvider>
 		</ThemeProvider>
 	);
 }

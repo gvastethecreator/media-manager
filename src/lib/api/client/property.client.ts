@@ -2,6 +2,7 @@
  * Cliente de API para propiedades.
  */
 import type { PropertyCreateInput, PropertyUpdateInput, PropertyWithStats } from '@/types/entities/property';
+import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/properties';
 
@@ -10,7 +11,8 @@ export async function getPropertiesFromApi(): Promise<PropertyWithStats[]> {
 	if (!response.ok) {
 		throw new Error('Error al obtener propiedades');
 	}
-	return response.json();
+	const result = await response.json();
+	return unwrapArrayResponse<PropertyWithStats>(result);
 }
 
 export async function createPropertyInApi(data: PropertyCreateInput): Promise<PropertyWithStats> {

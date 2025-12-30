@@ -11,7 +11,7 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 	try {
 		const sampleTags = [
 			{
-				id: 'tag-1',
+				id: '11111111-1111-4111-a111-111111111111',
 				name: 'Arte Digital',
 				description: 'Creaciones artísticas digitales',
 				emoji: '🎨',
@@ -20,13 +20,40 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 				isFavorite: true,
 			},
 			{
-				id: 'tag-2',
+				id: '11111111-1111-4111-a111-111111111112',
 				name: 'Naturaleza',
 				description: 'Paisajes y elementos naturales',
 				emoji: '🌿',
 				color: '#10b981',
 				category: 'temática',
 				isFavorite: false,
+			},
+			{
+				id: '11111111-1111-4111-a111-111111111113',
+				name: 'Retrato',
+				description: 'Fotografías de retratos y rostros',
+				emoji: '👤',
+				color: '#f59e0b',
+				category: 'género',
+				isFavorite: true,
+			},
+			{
+				id: '11111111-1111-4111-a111-111111111114',
+				name: 'Cyberpunk',
+				description: 'Estética futurista y tecnológica',
+				emoji: '🤖',
+				color: '#ef4444',
+				category: 'estilo',
+				isFavorite: false,
+			},
+			{
+				id: '11111111-1111-4111-a111-111111111115',
+				name: 'Fantasía',
+				description: 'Mundos mágicos e imaginarios',
+				emoji: '🧙',
+				color: '#6366f1',
+				category: 'género',
+				isFavorite: true,
 			},
 		];
 

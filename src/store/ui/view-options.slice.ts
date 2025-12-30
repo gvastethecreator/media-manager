@@ -102,16 +102,16 @@ const DEFAULT_STATE = {
 	searchQuery: '',
 	groupByEntityType: false,
 	useCanvasRendering: false,
-	includeSubfolders: false,
+	includeSubfolders: true,
 	backgroundColor: 'transparent',
 	pagination: {
-		mode: 'pagination' as PaginationMode,
+		mode: 'infinite' as PaginationMode,
 		pageSize: 300,
 	},
 	infiniteScroll: {
 		enabled: true,
 		threshold: 300, // 300px desde el bottom
-		autoLoad: false, // Por defecto usar botón manual
+		autoLoad: true, // Por defecto usar botón manual
 		cooldownMs: 300,
 	},
 	views: {
@@ -126,7 +126,7 @@ const DEFAULT_STATE = {
 		threshold: 100, // Activar virtualización con 100+ elementos
 		overscan: 5, // Renderizar 5 elementos extra arriba/abajo para scroll suave
 		estimatedItemHeight: 200, // Altura estimada por elemento
-		maxItems: 250, // Límite máximo de elementos en memoria para performance
+		maxItems: 1000, // Límite máximo de elementos en memoria para performance
 	},
 };
 

@@ -2,6 +2,7 @@
  * Cliente de API para grupos.
  */
 import type { GroupCreateInput, GroupUpdateInput, GroupWithStats } from '@/types/entities/group';
+import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/groups';
 
@@ -10,7 +11,8 @@ export async function getGroupsFromApi(): Promise<GroupWithStats[]> {
 	if (!response.ok) {
 		throw new Error('Error al obtener grupos');
 	}
-	return response.json();
+	const result = await response.json();
+	return unwrapArrayResponse<GroupWithStats>(result);
 }
 
 export async function createGroupInApi(data: GroupCreateInput): Promise<GroupWithStats> {

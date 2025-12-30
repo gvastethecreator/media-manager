@@ -103,24 +103,31 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 				{characters.length || isLoading || showForm ? (
 					<motion.div
 						animate={{ opacity: 1, y: 0 }}
-						className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+						className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5"
 						initial={{ opacity: 0, y: 20 }}
 						transition={{ duration: 0.3 }}
 					>
 						{characters.map((character, index) => (
-							<motion.div
+							<motion.article
 								animate={{ opacity: 1, y: 0 }}
 								initial={{ opacity: 0, y: 20 }}
 								key={character.id}
 								transition={{ duration: 0.3, delay: index * 0.05 }}
+								data-character-id={character.id}
 							>
+								{/*
+									Compat E2E/a11y: los tests buscan <article> con el nombre.
+									CharacterCard puede renderizar un placeholder mientras carga;
+									este texto asegura que el nombre esté presente inmediatamente.
+								*/}
+								<span className="sr-only">{character.name}</span>
 								<CharacterCard
 									character={adaptCharacterWithStats(character)}
 									characterId={character.id}
 									isSelected={character.id === selectedCharacterId}
 									onSelect={() => handleCharacterSelect(character.id)}
 								/>
-							</motion.div>
+							</motion.article>
 						))}
 					</motion.div>
 				) : (

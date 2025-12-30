@@ -109,7 +109,17 @@ export async function getThumbnail(
 		}
 
 		// Validar que la ruta del archivo exista
-		if (!(image.path && existsSync(image.path))) {
+		// Protección contra rutas corruptas o demasiado largas (ej. base64 en lugar de path)
+		if (!image.path || image.path.length > 1024) {
+			const error = `Ruta de archivo inválida o demasiado larga: ${image.path ? image.path.substring(0, 50) + '...' : 'null'}`;
+			thumbLogger.error(`❌ ${error}`);
+			return {
+				thumbnailUrl: '',
+				error,
+			};
+		}
+
+		if (!existsSync(image.path)) {
 			const error = `Archivo no encontrado en ruta: ${image.path}`;
 			// Registrar el error en la base de datos
 			await db

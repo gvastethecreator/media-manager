@@ -29,7 +29,7 @@ import { WildcardCard } from './wildcard-card/wildcard-card';
 import { WorldItemCard } from './world-item-card/world-item-card';
 
 // Importar estilos de accesibilidad
-import '../features/file-browser/styles/accessibility.css';
+import '../features/file-browser-new/styles/accessibility.css';
 
 // Utilidad de no-op para evitar cuerpos vacíos en funciones
 const noop = () => {

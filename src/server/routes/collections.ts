@@ -92,6 +92,50 @@ const getCollectionByIdHandler = async (req: Request, res: Response) => {
 	}
 };
 
+// GET /api/collections/:id/media - Obtener medios recientes de una colección
+// IMPORTANTE: Esta ruta debe estar ANTES de /:id para evitar que /:id capture 'media' como ID
+const getCollectionMediaHandler = async (req: Request, res: Response) => {
+	try {
+		const { id } = req.params;
+		const limit = Number(req.query.limit) || 6;
+
+		// Verificar que la colección existe
+		const collection = await db.query.collections.findFirst({
+			where: eq(collections.id, id),
+		});
+		if (!collection) {
+			res.status(404).json({ error: 'Colección no encontrada' });
+			return;
+		}
+
+		// Obtener imágenes recientes de la colección
+		const recentImages = await db
+			.select({
+				id: images.id,
+				name: images.name,
+			})
+			.from(images)
+			.innerJoin(imageCollections, eq(imageCollections.A, images.id))
+			.where(eq(imageCollections.B, id))
+			.orderBy(desc(images.updatedAt))
+			.limit(limit);
+
+		const thumbnails = recentImages.map((img) => ({
+			id: img.id,
+			name: img.name,
+			thumbnailUrl: `/api/thumbnails/${img.id}`,
+			url: `/api/images/${img.id}`,
+			isVideo: false,
+		}));
+
+		res.json(thumbnails);
+	} catch (error) {
+		serverLogger.error('Error getting collection media:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+};
+
+router.get('/:id/media', getCollectionMediaHandler);
 router.get('/:id', getCollectionByIdHandler);
 
 // POST /api/collections/:id/images/:imageId - Agregar imagen a colección

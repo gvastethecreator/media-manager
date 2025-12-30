@@ -11,7 +11,7 @@ export async function seedProperties(db: LibSQLDatabase<Record<string, never>>) 
 	try {
 		const sampleProperties = [
 			{
-				id: 'property-1',
+				id: 'ffffffff-ffff-4fff-afff-fffffffffff1',
 				name: 'Estilo Artístico',
 				description: 'Define el estilo visual de la imagen',
 				emoji: '🎨',
@@ -22,7 +22,7 @@ export async function seedProperties(db: LibSQLDatabase<Record<string, never>>) 
 				isFavorite: true,
 			},
 			{
-				id: 'property-2',
+				id: 'ffffffff-ffff-4fff-afff-fffffffffff2',
 				name: 'Calidad',
 				description: 'Nivel de calidad de la imagen',
 				emoji: '⭐',
