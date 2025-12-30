@@ -11,7 +11,7 @@ import {
     Music,
     Video,
     Image,
-    Cube,
+    Box,
     FileJson,
     File,
     AlertCircle,
@@ -91,7 +91,7 @@ function FileTypeIcon({ type, className }: { type: ReturnType<typeof detectFileT
         case 'audio': return <Music className={iconClass} />;
         case 'document': return <FileText className={iconClass} />;
         case 'json': return <FileJson className={iconClass} />;
-        case 'file3d': return <Cube className={iconClass} />;
+        case 'file3d': return <Box className={iconClass} />;
         default: return <File className={iconClass} />;
     }
 }
@@ -350,7 +350,7 @@ function File3DRenderer({
     return (
         <div className={cn('absolute inset-0 flex flex-col items-center justify-center gap-6', className)}>
             <div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 shadow-2xl animate-pulse">
-                <Cube className="h-16 w-16 text-white" />
+                <Box className="h-16 w-16 text-white" />
             </div>
             <div className="text-center">
                 <h3 className="text-xl font-semibold text-white">{item.name}</h3>

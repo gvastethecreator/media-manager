@@ -1,12 +1,9 @@
 import { ImageIcon, Sparkles } from 'lucide-react';
 import { nanoid } from 'nanoid';
-import React, { Suspense, useEffect, useState } from 'react';
+import React, { Suspense, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 
-import { ConceptService } from '@/services/concept/concept.service';
-import { clientLogger } from '@/lib/logger/client-logger';
-
-const { getRecentConceptImages } = ConceptService;
+import { useRecentConceptImages } from '@/lib/api/concepts';
 
 interface ConceptCardImagesProps {
 	conceptId: string;
@@ -20,31 +17,16 @@ interface ConceptCardImagesProps {
  * Diseñado para parecer la ilustración de una carta TCG con efectos visuales.
  */
 export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcgMode = true }: ConceptCardImagesProps) {
-	const [images, setImages] = useState<{ id: string; thumbnailUrl: string }[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const { data, isLoading, error } = useRecentConceptImages(conceptId, 6);
+
+	// Filtrar solo imágenes con thumbnailUrl válida
+	const images = useMemo(() => {
+		if (!data) return [];
+		return data.filter((img) => img.thumbnailUrl);
+	}, [data]);
 
 	// Generar un ID de renderizado único
-	const renderKey = React.useMemo(() => nanoid(), []);
-
-	useEffect(() => {
-		const loadImages = async () => {
-			try {
-				setIsLoading(true);
-				const data = await getRecentConceptImages(conceptId);
-				// Filtrar solo imágenes con thumbnailUrl válida
-				const validImages = data.filter((img) => img.thumbnailUrl);
-				setImages(validImages);
-			} catch (err) {
-				clientLogger.error('Error cargando imágenes:', err);
-				setError(err instanceof Error ? err.message : 'Error desconocido');
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		loadImages();
-	}, [conceptId]);
+	const renderKey = useMemo(() => nanoid(), []);
 
 	return (
 		<div className={cn('relative h-[160px] overflow-hidden', tcgMode ? 'border-b-0' : 'border-gray-400/30 border-b')}>
@@ -89,7 +71,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 					) : error ? (
 						// Mostrar mensaje de error
 						<div className="col-span-full row-span-full flex items-center justify-center text-destructive text-sm">
-							<ImageIcon className="mr-2 h-4 w-4" /> Error: {error}
+							<ImageIcon className="mr-2 h-4 w-4" /> Error: {error.message}
 						</div>
 					) : images.length === 0 ? (
 						// Mostrar mensaje si no hay imágenes

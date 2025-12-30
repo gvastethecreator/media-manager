@@ -85,6 +85,49 @@ router.get('/', async (req, res) => {
 	}
 });
 
+// GET /places/:id/media - Obtener medios recientes de un lugar
+// IMPORTANTE: Esta ruta debe estar ANTES de /:id para evitar que /:id capture 'media' como ID
+router.get('/:id/media', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const limit = Number(req.query.limit) || 6;
+
+		// Verificar que el lugar existe
+		const place = await db.query.places.findFirst({
+			where: eq(places.id, id),
+		});
+		if (!place) {
+			res.status(404).json({ error: 'Lugar no encontrado' });
+			return;
+		}
+
+		// Obtener imágenes recientes del lugar
+		const recentImages = await db
+			.select({
+				id: images.id,
+				name: images.name,
+			})
+			.from(images)
+			.innerJoin(imagePlaces, eq(imagePlaces.A, images.id))
+			.where(eq(imagePlaces.B, id))
+			.orderBy(desc(images.updatedAt))
+			.limit(limit);
+
+		const thumbnails = recentImages.map((img) => ({
+			id: img.id,
+			name: img.name,
+			thumbnailUrl: `/api/thumbnails/${img.id}`,
+			url: `/api/images/${img.id}`,
+			isVideo: false,
+		}));
+
+		res.json(thumbnails);
+	} catch (error) {
+		serverLogger.error('Error getting place media:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
 // GET /api/places/:id - Obtener lugar específico
 router.get('/:id', async (req, res) => {
 	try {

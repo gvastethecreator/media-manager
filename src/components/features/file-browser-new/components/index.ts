@@ -33,3 +33,7 @@ export {
 	type ContextMenuAction,
 	type ContextMenuPayload,
 } from './item-context-menu';
+
+// MediaThumbnail - componente de thumbnail con soporte avanzado
+export { MediaThumbnail } from './media-thumbnail';
+export type { MediaItem, MediaThumbnailProps } from './media-thumbnail';

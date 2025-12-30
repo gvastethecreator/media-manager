@@ -6,12 +6,12 @@
  * una experiencia de visualización consistente.
  */
 
-import { memo, useCallback } from 'react';
+import { memo } from 'react';
 import { Folder, CornerUpLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import type { BrowserItem, ClickModifiers } from '../types';
-// Importar MediaThumbnail del file-browser original
-import { MediaThumbnail, type MediaItem } from '@/components/features/file-browser/components/media-thumbnail';
+import type { BrowserItem } from '../types';
+// MediaThumbnail del módulo migrado
+import { MediaThumbnail, type MediaItem } from './media-thumbnail';
 
 /**
  * Convierte BrowserItem a MediaItem compatible
@@ -45,6 +45,8 @@ export interface MediaItemProps {
     onContextMenu?: (e: React.MouseEvent) => void;
     className?: string;
     style?: React.CSSProperties;
+    /** Test id opcional (compatibilidad E2E) */
+    testId?: string;
     /** Modo de vista para ajustar el render */
     viewMode?: 'grid' | 'list' | 'masonry' | 'table' | 'cards';
 }
@@ -62,49 +64,58 @@ function MediaItemGridInner({
     onContextMenu,
     className,
     style,
+    testId,
 }: MediaItemProps) {
     // Si es item sintético de navegación (..)
     if (item.isSynthetic && item.name === '..') {
         return (
-            <div
+            <button
                 className={cn(
                     'group relative flex flex-col items-center justify-center gap-2 rounded-lg p-2 transition-colors',
-                    'hover:bg-accent/50 cursor-pointer',
+                    'cursor-pointer hover:bg-accent/50',
                     isSelected && 'bg-accent ring-2 ring-primary',
                     isActive && 'ring-2 ring-primary/50',
                     className
                 )}
+                data-entity-card
+                data-entity-type={item.entityType}
                 data-item-id={item.id}
                 data-selected={isSelected}
+                data-testid={testId}
                 onClick={onClick}
                 onContextMenu={onContextMenu}
                 onDoubleClick={onDoubleClick}
+                type="button"
                 style={{ ...style, width: size, height: size }}
             >
                 <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
                     <CornerUpLeft className="h-6 w-6 text-muted-foreground" />
                 </div>
-                <span className="text-sm font-medium text-muted-foreground">Subir nivel</span>
-            </div>
+                <span className="font-medium text-muted-foreground text-sm">Subir nivel</span>
+            </button>
         );
     }
 
     // Si es carpeta
     if (item.entityType === 'folder') {
         return (
-            <div
+            <button
                 className={cn(
                     'group relative flex flex-col gap-1 rounded-lg p-1.5 transition-colors',
-                    'hover:bg-accent/50 cursor-pointer',
+                    'cursor-pointer hover:bg-accent/50',
                     isSelected && 'bg-accent ring-2 ring-primary',
                     isActive && 'ring-2 ring-primary/50',
                     className
                 )}
+                data-entity-card
+                data-entity-type={item.entityType}
                 data-item-id={item.id}
                 data-selected={isSelected}
+                data-testid={testId}
                 onClick={onClick}
                 onContextMenu={onContextMenu}
                 onDoubleClick={onDoubleClick}
+                type="button"
                 style={style}
             >
                 <div
@@ -131,7 +142,7 @@ function MediaItemGridInner({
                         </span>
                     )}
                 </div>
-            </div>
+            </button>
         );
     }
 
@@ -139,19 +150,23 @@ function MediaItemGridInner({
     const mediaItem = toMediaItem(item);
 
     return (
-        <div
+        <button
             className={cn(
                 'group relative flex flex-col gap-1 rounded-lg p-1.5 transition-colors',
-                'hover:bg-accent/50 cursor-pointer',
+                'cursor-pointer hover:bg-accent/50',
                 isSelected && 'bg-accent ring-2 ring-primary',
                 isActive && 'ring-2 ring-primary/50',
                 className
             )}
+            data-entity-card
+            data-entity-type={item.entityType}
             data-item-id={item.id}
             data-selected={isSelected}
+            data-testid={testId}
             onClick={onClick}
             onContextMenu={onContextMenu}
             onDoubleClick={onDoubleClick}
+            type="button"
             style={style}
         >
             <div className="mx-auto overflow-hidden rounded-lg" style={{ width: size - 12, height: size - 12 }}>
@@ -162,12 +177,12 @@ function MediaItemGridInner({
                 />
             </div>
             <span
-                className="truncate text-center text-xs leading-tight px-1"
+                className="truncate px-1 text-center text-xs leading-tight"
                 title={item.name}
             >
                 {item.name}
             </span>
-        </div>
+        </button>
     );
 }
 
@@ -183,49 +198,58 @@ function MediaItemListInner({
     onContextMenu,
     className,
     style,
+    testId,
 }: Omit<MediaItemProps, 'size'>) {
     // Si es item sintético de navegación (..)
     if (item.isSynthetic && item.name === '..') {
         return (
-            <div
+            <button
                 className={cn(
                     'flex items-center gap-3 px-3 py-2 transition-colors',
-                    'hover:bg-accent/50 cursor-pointer',
+                    'cursor-pointer hover:bg-accent/50',
                     isSelected && 'bg-accent',
-                    isActive && 'ring-1 ring-inset ring-primary/50',
+                    isActive && 'ring-1 ring-primary/50 ring-inset',
                     className
                 )}
+                data-entity-card
+                data-entity-type={item.entityType}
                 data-item-id={item.id}
                 data-selected={isSelected}
+                data-testid={testId}
                 onClick={onClick}
                 onContextMenu={onContextMenu}
                 onDoubleClick={onDoubleClick}
+                type="button"
                 style={style}
             >
                 <div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
                     <CornerUpLeft className="h-4 w-4 text-muted-foreground" />
                 </div>
-                <span className="flex-1 text-sm text-muted-foreground">Subir nivel</span>
-            </div>
+                <span className="flex-1 text-muted-foreground text-sm">Subir nivel</span>
+            </button>
         );
     }
 
     // Si es carpeta
     if (item.entityType === 'folder') {
         return (
-            <div
+            <button
                 className={cn(
                     'flex items-center gap-3 px-3 py-2 transition-colors',
-                    'hover:bg-accent/50 cursor-pointer',
+                    'cursor-pointer hover:bg-accent/50',
                     isSelected && 'bg-accent',
-                    isActive && 'ring-1 ring-inset ring-primary/50',
+                    isActive && 'ring-1 ring-primary/50 ring-inset',
                     className
                 )}
+                data-entity-card
+                data-entity-type={item.entityType}
                 data-item-id={item.id}
                 data-selected={isSelected}
+                data-testid={testId}
                 onClick={onClick}
                 onContextMenu={onContextMenu}
                 onDoubleClick={onDoubleClick}
+                type="button"
                 style={style}
             >
                 <div
@@ -240,9 +264,9 @@ function MediaItemListInner({
                 </div>
                 <span className="flex-1 truncate text-sm">{item.name}</span>
                 {typeof item.totalItems === 'number' && (
-                    <span className="text-xs text-muted-foreground">{item.totalItems} items</span>
+                    <span className="text-muted-foreground text-xs">{item.totalItems} items</span>
                 )}
-            </div>
+            </button>
         );
     }
 
@@ -250,19 +274,23 @@ function MediaItemListInner({
     const mediaItem = toMediaItem(item);
 
     return (
-        <div
+        <button
             className={cn(
                 'flex items-center gap-3 px-3 py-2 transition-colors',
-                'hover:bg-accent/50 cursor-pointer',
+                'cursor-pointer hover:bg-accent/50',
                 isSelected && 'bg-accent',
-                isActive && 'ring-1 ring-inset ring-primary/50',
+                isActive && 'ring-1 ring-primary/50 ring-inset',
                 className
             )}
+            data-entity-card
+            data-entity-type={item.entityType}
             data-item-id={item.id}
             data-selected={isSelected}
+            data-testid={testId}
             onClick={onClick}
             onContextMenu={onContextMenu}
             onDoubleClick={onDoubleClick}
+            type="button"
             style={style}
         >
             <div className="h-8 w-8 overflow-hidden rounded">
@@ -273,11 +301,11 @@ function MediaItemListInner({
             </div>
             <span className="flex-1 truncate text-sm">{item.name}</span>
             {item.size != null && (
-                <span className="text-xs text-muted-foreground">
+                <span className="text-muted-foreground text-xs">
                     {formatFileSize(item.size)}
                 </span>
             )}
-        </div>
+        </button>
     );
 }
 

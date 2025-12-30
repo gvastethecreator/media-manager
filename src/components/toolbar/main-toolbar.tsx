@@ -31,11 +31,14 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	const params = useParams<{ id: string }>();
 	const currentView = location.pathname.split('/')[1] || 'gallery';
 
-	const folderId = params.id;
+	// ⚠️ Importante: el param `id` existe en múltiples rutas (/folders/:id, /characters/:id, ...).
+	// Solo debemos tratarlo como folderId cuando realmente estemos en una ruta de folders.
+	const isFoldersRoute = location.pathname.startsWith('/folders');
+	const folderId = isFoldersRoute ? (params.id ?? '') : '';
 
-	// Obtener información de la carpeta si estamos en folder-content view
-	const { data: folderData } = useFolder(folderId || '');
-	const { data: folderName } = useFolderName(folderId || '');
+	// Obtener información de la carpeta solo cuando aplique (enabled internamente por folderId)
+	const { data: folderData } = useFolder(folderId);
+	useFolderName(folderId);
 
 	// Crear versión debounced del setViewMode para mejorar performance
 	const { setViewMode: setViewModeDebounced } = useDebouncedViewMode();
@@ -88,7 +91,7 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 				{/* Breadcrumbs */}
 				<ViewBreadcrumbs
 					currentItem={
-						currentView === 'folder-content' && folderData
+						isFoldersRoute && folderData
 							? {
 								id: folderData.id,
 								name: folderData.name,

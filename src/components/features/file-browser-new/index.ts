@@ -119,6 +119,9 @@ export {
 	useSelection,
 	useKeyboardNavigation,
 	usePagination,
+	useFolderFilesPaginated,
+	useFolderStats,
+	useFolderCacheInvalidation,
 	type UseFileBrowserOptions,
 	type UseFileBrowserResult,
 	type UseDataSourceOptions,
@@ -129,6 +132,11 @@ export {
 	type UseKeyboardNavigationResult,
 	type UsePaginationOptions,
 	type UsePaginationResult,
+	type FolderFile,
+	type FolderFilesResponse,
+	type FolderStatsResponse,
+	type UseFolderFilesPaginatedOptions,
+	type UseFolderFilesPaginatedResult,
 } from './hooks';
 
 // Components
@@ -143,11 +151,17 @@ export {
 	ItemRendererGrid,
 	ItemRendererList,
 	GenericItemRenderer,
+	MediaThumbnail,
 	type FileBrowserToolbarProps,
 	type ErrorStateProps,
 	type LoadMoreButtonProps,
 	type GenericItemRendererProps,
+	type MediaItem,
+	type MediaThumbnailProps,
 } from './components';
+
+// Wrappers
+export { HierarchicalFolderWrapper } from './wrappers';
 
 // Views
 export {

@@ -2,6 +2,7 @@
  * Cliente de API para colecciones.
  */
 import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
+import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/collections';
 
@@ -10,7 +11,8 @@ export async function getCollectionsFromApi(): Promise<CollectionWithStats[]> {
 	if (!response.ok) {
 		throw new Error('Error al obtener colecciones');
 	}
-	return response.json();
+	const result = await response.json();
+	return unwrapArrayResponse<CollectionWithStats>(result);
 }
 
 export async function getCollectionFromApi(id: string): Promise<CollectionWithStats> {

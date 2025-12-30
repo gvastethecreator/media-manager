@@ -29,6 +29,12 @@ export async function generateStaticVideoThumbnailFFmpeg(
 ): Promise<Buffer | null> {
 	const { time = 2, width = 320, height = 240, quality = 'medium' } = options;
 
+	// Protección contra rutas corruptas
+	if (videoPath.length > 1024) {
+		console.error(`Ruta de video demasiado larga (${videoPath.length} chars). Posible data corrupta.`);
+		return null;
+	}
+
 	if (!existsSync(videoPath)) {
 		console.warn(`Archivo de video no existe: ${videoPath}`);
 		return null;

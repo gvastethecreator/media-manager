@@ -6,7 +6,7 @@
 import { useCallback, useMemo, useRef } from 'react';
 import type { BrowserItem } from '../types';
 import { toBrowserItem, createParentNavItem } from '../types';
-import { useFolderFilesPaginated } from '@/components/features/file-browser/hooks/use-folder-files-paginated';
+import { useFolderFilesPaginated } from './use-folder-files-paginated';
 import { useFolder } from '@/lib/api/folders';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { DEFAULT_PAGE_SIZE } from '../core/constants';
@@ -73,23 +73,13 @@ export function useDataSource({
 	const { data: currentFolder } = useFolder(folderId || '');
 
 	// Hook de carga paginada
-	const {
-		files,
-		isLoading,
-		isLoadingMore,
-		error,
-		hasMore,
-		loadMore,
-		total,
-		loadedCount,
-		refetch,
-		invalidate,
-	} = useFolderFilesPaginated({
-		folderId,
-		includeSubfolders,
-		pageSize,
-		enabled: enabled && !!folderId && !directItems,
-	});
+	const { files, isLoading, isLoadingMore, error, hasMore, loadMore, total, loadedCount, refetch, invalidate } =
+		useFolderFilesPaginated({
+			folderId,
+			includeSubfolders,
+			pageSize,
+			enabled: enabled && !!folderId && !directItems,
+		});
 
 	// Convertir a BrowserItems
 	const items = useMemo(() => {

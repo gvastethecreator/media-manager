@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { serverLogger } from '@/lib/logger/server-logger';
 import express, { type Request, type Response } from 'express';
@@ -6,6 +7,26 @@ import { db } from '@/lib/drizzle';
 import { concepts, imageConcepts, images } from '@/lib/drizzle/schema/index';
 
 const router = express.Router();
+
+// Schema de validación para crear/actualizar conceptos
+const ConceptCreateSchema = z.object({
+	name: z.string().min(1).max(255),
+	description: z.string().optional(),
+	emoji: z.string().optional().default('💡'),
+	color: z.string().optional().default('#8b5cf6'),
+	category: z.string().optional(),
+	type: z.string().optional(),
+	complexity: z.string().optional(),
+	applications: z.string().optional(),
+	examples: z.string().optional(),
+	relatedConcepts: z.string().optional(),
+	notes: z.string().optional(),
+	featuredImage: z.string().optional(),
+	parentId: z.string().optional(),
+	isFavorite: z.boolean().optional().default(false),
+});
+
+const ConceptUpdateSchema = ConceptCreateSchema.partial();
 
 const ConceptFiltersSchema = z.object({
 	search: z.string().optional(),
@@ -158,6 +179,48 @@ const getConceptByIdHandler = async (req: Request, res: Response) => {
 	}
 };
 
+// GET /concepts/:id/recent-images - Obtener imágenes recientes de un concepto
+// IMPORTANTE: Esta ruta debe estar ANTES de /:id para evitar que /:id la capture
+router.get('/:id/recent-images', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const limit = Number(req.query.limit) || 6;
+
+		// Verificar que el concepto existe
+		const concept = await db.query.concepts.findFirst({
+			where: eq(concepts.id, id),
+		});
+		if (!concept) {
+			res.status(404).json({ error: 'Concepto no encontrado' });
+			return;
+		}
+
+		// Obtener imágenes recientes
+		const recentImages = await db
+			.select({
+				id: images.id,
+				name: images.name,
+			})
+			.from(images)
+			.innerJoin(imageConcepts, eq(imageConcepts.A, images.id))
+			.where(eq(imageConcepts.B, id))
+			.orderBy(desc(images.updatedAt))
+			.limit(limit);
+
+		const thumbnails = recentImages.map((img) => ({
+			id: img.id,
+			name: img.name,
+			thumbnailUrl: `/api/thumbnails/${img.id}`,
+			url: `/api/images/${img.id}`,
+		}));
+
+		res.json(thumbnails);
+	} catch (error) {
+		serverLogger.error('Error getting concept recent images:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
+});
+
 router.get('/:id', getConceptByIdHandler);
 
 // GET /concepts/:id/stats - Obtener estadísticas de un concepto (métodos de escritura pendientes)
@@ -165,19 +228,107 @@ router.get('/:id/stats', async (_req, res) => {
 	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
 });
 
-// POST /concepts - Crear nuevo concepto (métodos de escritura pendientes)
-router.post('/', async (_req, res) => {
-	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
+// POST /concepts - Crear nuevo concepto
+router.post('/', async (req, res) => {
+	const parse = ConceptCreateSchema.safeParse(req.body);
+	if (!parse.success) {
+		res.status(400).json({ error: 'Datos inválidos', details: parse.error.issues });
+		return;
+	}
+
+	try {
+		const data = parse.data;
+		const newConcept = {
+			id: crypto.randomUUID(),
+			name: data.name,
+			description: data.description || null,
+			emoji: data.emoji || '💡',
+			color: data.color || '#8b5cf6',
+			category: data.category || null,
+			type: data.type || null,
+			complexity: data.complexity || null,
+			applications: data.applications || null,
+			examples: data.examples || null,
+			relatedConcepts: data.relatedConcepts || null,
+			notes: data.notes || null,
+			featuredImage: data.featuredImage || null,
+			parentId: data.parentId || null,
+			isFavorite: data.isFavorite ?? false,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		};
+
+		const [created] = await db.insert(concepts).values(newConcept).returning();
+		res.status(201).json(created);
+	} catch (error) {
+		serverLogger.error('Error creating concept:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
 });
 
-// PUT /concepts/:id - Actualizar concepto (métodos de escritura pendientes)
-router.put('/:id', async (_req, res) => {
-	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
+// PUT /concepts/:id - Actualizar concepto
+router.put('/:id', async (req, res) => {
+	const { id } = req.params;
+	const parse = ConceptUpdateSchema.safeParse(req.body);
+
+	if (!parse.success) {
+		res.status(400).json({ error: 'Datos inválidos', details: parse.error.issues });
+		return;
+	}
+
+	try {
+		// Verificar que existe
+		const existing = await db.query.concepts.findFirst({
+			where: eq(concepts.id, id),
+		});
+
+		if (!existing) {
+			res.status(404).json({ error: 'Concepto no encontrado' });
+			return;
+		}
+
+		const [updated] = await db
+			.update(concepts)
+			.set({
+				...parse.data,
+				updatedAt: new Date(),
+			})
+			.where(eq(concepts.id, id))
+			.returning();
+
+		res.json(updated);
+	} catch (error) {
+		serverLogger.error('Error updating concept:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
 });
 
-// DELETE /concepts/:id - Eliminar concepto (métodos de escritura pendientes)
-router.delete('/:id', async (_req, res) => {
-	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
+// DELETE /concepts/:id - Eliminar concepto
+router.delete('/:id', async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		// Verificar que existe
+		const existing = await db.query.concepts.findFirst({
+			where: eq(concepts.id, id),
+		});
+
+		if (!existing) {
+			res.status(404).json({ error: 'Concepto no encontrado' });
+			return;
+		}
+
+		// Eliminar relaciones primero
+		await db.delete(imageConcepts).where(eq(imageConcepts.B, id));
+
+		// Eliminar el concepto
+		await db.delete(concepts).where(eq(concepts.id, id));
+
+		res.json({ success: true, message: 'Concepto eliminado correctamente', deletedId: id });
+	} catch (error) {
+		serverLogger.error('Error deleting concept:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
 });
 
 // POST /concepts/:id/images/:imageId - Agregar imagen a concepto

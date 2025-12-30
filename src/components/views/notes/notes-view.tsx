@@ -143,7 +143,7 @@ export const NotesView = memo(function NotesView({ className }: ViewProps) {
 					<p>Cargando notas...</p>
 				) : notes && notes.length > 0 ? (
 					<ScrollArea className="h-[calc(100vh-200px)]">
-						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
+						<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 							{notes.map((note: NoteWithStats) => (
 								<Card key={note.id}>
 									<CardHeader>

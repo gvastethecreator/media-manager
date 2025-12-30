@@ -36,21 +36,22 @@ export function CollectionCard({
 	showEntitiesCount = true,
 	showImagesCount = true,
 }: CollectionCardProps) {
+	const stats = collection.stats || {};
 	const {
-		imageCount,
-		videoCount,
-		albumCount,
-		tagCount,
-		characterCount,
-		placeCount,
-		worldItemCount,
-		conceptCount,
-		promptCount,
-		noteCount,
-		wildcardCount,
-		propertyCount,
-		groupCount,
-	} = collection.stats;
+		imageCount = 0,
+		videoCount = 0,
+		albumCount = 0,
+		tagCount = 0,
+		characterCount = 0,
+		placeCount = 0,
+		worldItemCount = 0,
+		conceptCount = 0,
+		promptCount = 0,
+		noteCount = 0,
+		wildcardCount = 0,
+		propertyCount = 0,
+		groupCount = 0,
+	} = stats;
 
 	const totalMedia = imageCount + videoCount;
 	const totalEntities =

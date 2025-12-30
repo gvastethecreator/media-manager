@@ -1,6 +1,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from '@/components/ui/motion-shim';
+import { useRecentGroupMedia } from '@/lib/api/groups';
 import { cn } from '@/lib/utils';
 import type { GroupCardProps } from './group-card.types';
 import { GroupCardContent } from './group-card-content';
@@ -19,6 +20,9 @@ export const GroupCard = memo(function GroupCard({
 	isSelected = false,
 }: GroupCardProps) {
 	const [isHovered, setIsHovered] = useState(false);
+
+	// Cargar media reciente si no viene en las props
+	const { data: mediaData } = useRecentGroupMedia(group?.id || '', 6);
 
 	// Calcular colores
 	const primaryColor = useMemo(() => group?.color || '#3b82f6', [group?.color]);
@@ -49,10 +53,20 @@ export const GroupCard = memo(function GroupCard({
 		}
 	}, [group?.color]);
 
-	// Preparar media para la galería
+	// Preparar media para la galería (usar props o datos cargados)
+	const recentImages = useMemo(() => {
+		if (group?.recentImages?.length) return group.recentImages;
+		return mediaData?.filter(m => !m.isVideo).map(m => m.thumbnailUrl) || [];
+	}, [group?.recentImages, mediaData]);
+
+	const recentVideos = useMemo(() => {
+		if (group?.recentVideos?.length) return group.recentVideos;
+		return mediaData?.filter(m => m.isVideo).map(m => m.thumbnailUrl) || [];
+	}, [group?.recentVideos, mediaData]);
+
 	const allMedia = useMemo(() => {
-		return [...(group?.recentImages || []), ...(group?.recentVideos || [])];
-	}, [group?.recentImages, group?.recentVideos]);
+		return [...recentImages, ...recentVideos];
+	}, [recentImages, recentVideos]);
 
 	// Función de manejadores de eventos
 	const handleClick = useCallback(() => {
@@ -147,11 +161,11 @@ export const GroupCard = memo(function GroupCard({
 				compact={compact}
 				emoji={group.emoji || ''}
 				holographicEffect={isHovered}
-				images={group.recentImages || []}
+				images={recentImages}
 				primaryColor={primaryColor}
 				rarityLevel={Number(group.rarityLevel) || 1}
 				tcgMode={tcgMode}
-				videos={group.recentVideos || []}
+				videos={recentVideos}
 			/>
 
 			{/* Contenido */}
@@ -174,7 +188,7 @@ export const GroupCard = memo(function GroupCard({
 				compact={compact}
 				hp={group.hp || 0}
 				id={group.id}
-				imagesCount={group.stats.imageCount}
+				imagesCount={group.stats?.imageCount || 0}
 				isFavorite={group.isFavorite}
 				mp={group.mp || 0}
 				name={group.name}
@@ -183,7 +197,7 @@ export const GroupCard = memo(function GroupCard({
 				primaryColor={primaryColor}
 				rarityLevel={Number(group.rarityLevel) || 1}
 				tcgMode={tcgMode}
-				videosCount={group.stats.videoCount}
+				videosCount={group.stats?.videoCount || 0}
 			/>
 
 			{/* Efecto holográfico general en modo TCG */}

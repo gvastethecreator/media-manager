@@ -89,6 +89,10 @@ function useAddImageToCharacter() {
 		},
 		onSuccess: (_, { characterId }) => {
 			queryClient.invalidateQueries({ queryKey: ['characters', 'detail', characterId] });
+			queryClient.invalidateQueries({ queryKey: ['characters', 'detail', characterId, 'images'] });
+			queryClient.invalidateQueries({ queryKey: ['characters', 'detail', characterId, 'media'] });
+			// Invalidar lista para actualizar thumbnails en tarjetas
+			queryClient.invalidateQueries({ queryKey: ['characters', 'list'] });
 		},
 	});
 }
@@ -278,17 +282,20 @@ export function useAddToEntity() {
 
 			// Mostrar toast con resultado
 			if (failed === 0) {
+				clientLogger.info(`[useAddToEntity] Success toast: ${added} items added to ${entityType}`);
 				toast({
 					title: '✅ Agregado correctamente',
 					description: `${added} elemento${added > 1 ? 's' : ''} agregado${added > 1 ? 's' : ''} a ${getEntityLabel(entityType)}`,
 				});
 			} else if (added > 0) {
+				clientLogger.warn(`[useAddToEntity] Partial success toast: ${added} added, ${failed} failed`);
 				toast({
 					variant: 'default',
 					title: '⚠️ Parcialmente agregado',
 					description: `${added} agregado${added > 1 ? 's' : ''}, ${failed} con error`,
 				});
 			} else {
+				clientLogger.error(`[useAddToEntity] Error toast: ${errors[0]}`);
 				toast({
 					variant: 'destructive',
 					title: '❌ Error al agregar',

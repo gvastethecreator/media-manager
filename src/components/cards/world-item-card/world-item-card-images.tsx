@@ -1,10 +1,10 @@
 import { ImageIcon } from 'lucide-react';
 
-import { Suspense, useEffect, useMemo, useState } from 'react';
+import { Suspense, useMemo } from 'react';
+import { nanoid } from 'nanoid';
 import { cn } from '@/lib/utils';
 
-import { WorldItemService } from '@/services/world-item/world-item.service';
-import { clientLogger } from '@/lib/logger/client-logger';
+import { useRecentWorldItemImages } from '@/lib/api/world-items';
 
 interface WorldItemCardImagesProps {
 	worldItemId: string;
@@ -17,30 +17,16 @@ interface WorldItemCardImagesProps {
  * Similar a la sección de ilustración de una carta Magic.
  */
 export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor }: WorldItemCardImagesProps) {
-	const [images, setImages] = useState<{ id: string; fullUrl: string }[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const { data, isLoading, error } = useRecentWorldItemImages(worldItemId, 6);
 
-	const worldItemService = useMemo(() => new WorldItemService(), []);
+	// Filtrar solo imágenes con thumbnailUrl válida
+	const images = useMemo(() => {
+		if (!data) return [];
+		return data.filter((img) => img.thumbnailUrl);
+	}, [data]);
 
-	useEffect(() => {
-		const loadImages = async () => {
-			try {
-				setIsLoading(true);
-				const data = await worldItemService.getRecentWorldItemImages(worldItemId, 6);
-				// Filtrar solo imágenes con fullUrl válida
-				const validImages = data.filter((img) => img.fullUrl);
-				setImages(validImages);
-			} catch (err) {
-				clientLogger.error('Error cargando imágenes:', err);
-				setError(err instanceof Error ? err.message : 'Error desconocido');
-			} finally {
-				setIsLoading(false);
-			}
-		};
-
-		loadImages();
-	}, [worldItemId, worldItemService]);
+	// ID único para keys estables
+	const renderKey = useMemo(() => nanoid(), []);
 
 	return (
 		<div className="relative h-[160px] overflow-hidden border-gray-400/30 border-b">
@@ -58,16 +44,16 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} />}>
 					{isLoading ? (
 						// Mostrar placeholders mientras carga
-						Array.from({ length: 6 }).map((_, _i) => (
+						Array.from({ length: 6 }).map((_, i) => (
 							<ImageLoading
 								backgroundColor={secondaryColor}
-								key={`loading-placeholder-${worldItemId}-${Math.random().toString(36).substring(2, 9)}`}
+								key={`loading-${renderKey}-${i}`}
 							/>
 						))
 					) : error ? (
 						// Mostrar mensaje de error
 						<div className="col-span-full row-span-full flex items-center justify-center text-destructive text-sm">
-							<ImageIcon className="mr-2 h-4 w-4" /> Error: {error}
+							<ImageIcon className="mr-2 h-4 w-4" /> Error: {error.message}
 						</div>
 					) : images.length === 0 ? (
 						// Mostrar mensaje si no hay imágenes
@@ -84,16 +70,16 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 										alt={`Imagen ${index + 1}`}
 										className="h-full w-full object-cover"
 										loading="lazy"
-										src={image.fullUrl}
+										src={image.thumbnailUrl}
 									/>
 								</div>
 							))}
 							{/* Rellena con placeholders si hay menos de 6 imágenes */}
 							{images.length < 6 &&
-								Array.from({ length: 6 - images.length }).map((_, _i) => (
+								Array.from({ length: 6 - images.length }).map((_, i) => (
 									<div
 										className="flex h-full w-full items-center justify-center bg-black/20"
-										key={`empty-placeholder-${worldItemId}-${Math.random().toString(36).substring(2, 9)}`}
+										key={`empty-${renderKey}-${i}`}
 									>
 										<ImageIcon className="h-5 w-5 opacity-20" />
 									</div>

@@ -2,6 +2,7 @@
  * Cliente de API para conceptos.
  */
 import type { ConceptCreateInput, ConceptUpdateInput, ConceptWithStats } from '@/types/entities/concept';
+import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/concepts';
 
@@ -11,7 +12,7 @@ export async function getConceptsFromApi(): Promise<ConceptWithStats[]> {
 		throw new Error('Error al obtener conceptos');
 	}
 	const result = await response.json();
-	return result.items ?? result;
+	return unwrapArrayResponse<ConceptWithStats>(result);
 }
 
 export async function createConceptInApi(data: ConceptCreateInput): Promise<ConceptWithStats> {

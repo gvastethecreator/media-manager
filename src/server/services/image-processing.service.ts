@@ -35,6 +35,13 @@ export async function processImage(imageId: string, options: ImageProcessingOpti
 			throw createEntityNotFoundError('Imagen', imageId, SERVICE_NAME);
 		}
 
+		// Protección contra rutas corruptas o demasiado largas
+		if (!image.path || image.path.length > 1024) {
+			const errorMsg = `Ruta de archivo inválida o demasiado larga: ${image.path ? image.path.substring(0, 50) + '...' : 'null'}`;
+			imageLogger.error(`❌ ${errorMsg}`);
+			throw createFileNotFoundError(image.path || 'unknown', { imageId, error: errorMsg }, SERVICE_NAME);
+		}
+
 		if (!existsSync(image.path)) {
 			throw createFileNotFoundError(image.path, { imageId }, SERVICE_NAME);
 		}

@@ -2,6 +2,7 @@
  * Cliente de API para notas.
  */
 import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
+import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/notes';
 
@@ -11,7 +12,7 @@ export async function getNotesFromApi(): Promise<NoteWithStats[]> {
 		throw new Error('Error al obtener notas');
 	}
 	const result = await response.json();
-	return result.items ?? result;
+	return unwrapArrayResponse<NoteWithStats>(result);
 }
 
 export async function createNoteInApi(data: NoteCreateInput): Promise<NoteWithStats> {

@@ -11,17 +11,17 @@ export async function seedFavorites(db: LibSQLDatabase<Record<string, never>>) {
 	try {
 		const sampleFavorites = [
 			{
-				id: 'fav-1',
-				userId: 'profile-1',
+				id: 'dddddddd-dddd-4ddd-addd-dddddddddd01',
+				userId: '88888888-8888-4888-a888-888888888881',
 				entityType: 'image',
-				entityId: 'img-example-1',
+				entityId: 'eeeeeeee-eeee-4eee-aeee-eeeeeeeeee01',
 				notes: 'Imagen favorita de paisaje',
 			},
 			{
-				id: 'fav-2',
-				userId: 'profile-1',
+				id: 'dddddddd-dddd-4ddd-addd-dddddddddd02',
+				userId: '88888888-8888-4888-a888-888888888881',
 				entityType: 'album',
-				entityId: 'album-1',
+				entityId: '22222222-2222-4222-a222-222222222221',
 				notes: 'Álbum favorito de fotografía',
 			},
 		];

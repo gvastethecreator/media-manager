@@ -129,3 +129,17 @@ export function useRemoveImageFromAlbum() {
 		},
 	});
 }
+
+export function useAlbumRecentMedia(albumId: string, limit = 6) {
+	return useQuery<
+		Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>,
+		Error
+	>({
+		queryKey: [...albumKeys.detail(albumId), 'recent-media', limit],
+		queryFn: () =>
+			apiClient.get<Array<{ id: string; name?: string | null; thumbnailUrl: string; url?: string; isVideo?: boolean }>>(
+				`/albums/${albumId}/recent-media?limit=${limit}`
+			),
+		enabled: !!albumId,
+	});
+}

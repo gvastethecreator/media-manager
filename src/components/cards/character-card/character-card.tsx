@@ -254,6 +254,7 @@ function CharacterCardBody({
 			disabled={disabled}
 			isSelected={isSelected}
 			onClick={onClick ? () => onClick(character) : undefined}
+			onKeyDown={handleKeyDown}
 			primaryColor={primaryColor}
 			secondaryColor={secondaryColor}
 			tcgMode={tcgMode}
@@ -318,10 +319,19 @@ export function CharacterCard({
 	disabled = false,
 	className,
 	onClick,
+	onSelect,
 	isSelected = false,
 }: CharacterCardProps) {
 	const { data: characterData, isLoading, error } = useCharacter(characterId);
 	const { data: recentMediaData } = useRecentCharacterMedia(characterId);
+
+	const handleCardSelect = useCallback(
+		(c: ReturnType<typeof adaptCharacterWithStats>) => {
+			onSelect?.(c as any);
+			onClick?.(c as any);
+		},
+		[onClick, onSelect]
+	);
 
 	const character = useMemo(() => (characterData ? adaptCharacterWithStats(characterData) : null), [characterData]);
 
@@ -342,7 +352,7 @@ export function CharacterCard({
 			compact={compact}
 			disabled={disabled}
 			isSelected={isSelected}
-			onClick={onClick}
+			onClick={onSelect || onClick ? handleCardSelect : undefined}
 			recentThumbnails={thumbnails}
 			tcgMode={tcgMode}
 		/>

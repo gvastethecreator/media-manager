@@ -12,7 +12,7 @@ export async function seedProfiles(db: LibSQLDatabase<Record<string, never>>) {
 	try {
 		const sampleProfiles = [
 			{
-				id: 'profile-1',
+				id: '88888888-8888-4888-a888-888888888881',
 				name: 'Usuario Principal',
 				emoji: '🎨',
 				color: '#3b82f6',
@@ -22,11 +22,31 @@ export async function seedProfiles(db: LibSQLDatabase<Record<string, never>>) {
 				imageId: null,
 			},
 			{
-				id: 'profile-2',
+				id: '88888888-8888-4888-a888-888888888882',
 				name: 'Usuario Secundario',
 				emoji: '🎭',
 				color: '#ef4444',
 				description: 'Perfil secundario para pruebas',
+				isActive: false,
+				settingsId: null,
+				imageId: null,
+			},
+			{
+				id: '88888888-8888-4888-a888-888888888883',
+				name: 'Artista Digital',
+				emoji: '🖌️',
+				color: '#8b5cf6',
+				description: 'Perfil para trabajo artístico',
+				isActive: false,
+				settingsId: null,
+				imageId: null,
+			},
+			{
+				id: '88888888-8888-4888-a888-888888888884',
+				name: 'Fotógrafo',
+				emoji: '📷',
+				color: '#10b981',
+				description: 'Perfil para fotografía',
 				isActive: false,
 				settingsId: null,
 				imageId: null,

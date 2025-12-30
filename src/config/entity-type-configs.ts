@@ -25,7 +25,7 @@ import {
 	Video,
 	WandSparkles,
 } from 'lucide-react';
-import type { ContextMenuAction } from '@/components/features/file-browser/context-menu/types';
+import type { ContextMenuAction } from '@/components/features/file-browser-new/components/item-context-menu';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { EntityStatsType } from '@/types/file-browser/entity-stats';
 

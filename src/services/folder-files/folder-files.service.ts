@@ -4,7 +4,7 @@
  * @description Servicio unificado para obtener todos los tipos de archivos de una carpeta con paginación optimizada
  */
 
-import { and, asc, count, desc, eq, inArray, like } from 'drizzle-orm';
+import { and, asc, count, desc, eq, inArray, like, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -294,152 +294,137 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 		// 1. Determinar carpetas a incluir
 		const folderIds = includeSubfolders ? await getSubfolderIds(folderId) : [folderId];
 
-		// 2. Crear consultas para cada tipo de archivo solicitado
-		const queries: Promise<FolderFile[]>[] = [];
-		let totalQueries = 0;
-
-		// Configurar ordenamiento dinámico
-		const orderFn = sortOrder === 'desc' ? desc : asc;
-		const getOrderColumn = (table: any, orderBy: string) => {
-			switch (orderBy) {
-				case 'size':
-					return table.size;
-				case 'createdAt':
-					return table.createdAt;
-				case 'updatedAt':
-					return table.updatedAt;
-				default:
-					return table.name;
-			}
-		};
+		// 2. Crear consultas UNION ALL
+		const unionQueries = [];
 
 		// Imágenes
 		if (fileTypes.includes('image')) {
-			const imageQuery = db
-				.select()
-				.from(images)
-				.where(buildWhereConditions(folderIds, search, images))
-				.orderBy(orderFn(getOrderColumn(images, sortBy)))
-				.limit(limit)
-				.offset(offset)
-				.then((results: any[]) => results.map(mapImageToFolderFile));
-
-			queries.push(imageQuery);
-			totalQueries++;
+			unionQueries.push(sql`
+				SELECT
+					id, name, path, size, createdAt, updatedAt, folderId, 'image' as entityType,
+					NULL as extension,
+					thumbnail,
+					metadata,
+					isFavorite,
+					0 as views
+				FROM ${images}
+				WHERE ${buildWhereConditions(folderIds, search, images)}
+			`);
 		}
 
 		// Videos
 		if (fileTypes.includes('video')) {
-			const videoQuery = db
-				.select()
-				.from(videos)
-				.where(buildWhereConditions(folderIds, search, videos))
-				.orderBy(orderFn(getOrderColumn(videos, sortBy)))
-				.limit(limit)
-				.offset(offset)
-				.then((results: any[]) => results.map(mapVideoToFolderFile));
-
-			queries.push(videoQuery);
-			totalQueries++;
+			unionQueries.push(sql`
+				SELECT
+					id, name, path, size, createdAt, updatedAt, folderId, 'video' as entityType,
+					NULL as extension,
+					thumbnail,
+					metadata,
+					isFavorite,
+					0 as views
+				FROM ${videos}
+				WHERE ${buildWhereConditions(folderIds, search, videos)}
+			`);
 		}
 
 		// Audios
 		if (fileTypes.includes('audio')) {
-			const audioQuery = db
-				.select()
-				.from(audios)
-				.where(buildWhereConditions(folderIds, search, audios))
-				.orderBy(orderFn(getOrderColumn(audios, sortBy)))
-				.limit(limit)
-				.offset(offset)
-				.then((results: any[]) => results.map(mapAudioToFolderFile));
-
-			queries.push(audioQuery);
-			totalQueries++;
+			unionQueries.push(sql`
+				SELECT
+					id, name, path, size, createdAt, updatedAt, folderId, 'audio' as entityType,
+					extension,
+					NULL as thumbnail,
+					NULL as metadata,
+					isFavorite,
+					0 as views
+				FROM ${audios}
+				WHERE ${buildWhereConditions(folderIds, search, audios)}
+			`);
 		}
 
 		// Documentos
 		if (fileTypes.includes('document')) {
-			const docQuery = db
-				.select()
-				.from(documents)
-				.where(buildWhereConditions(folderIds, search, documents))
-				.orderBy(orderFn(getOrderColumn(documents, sortBy)))
-				.limit(limit)
-				.offset(offset)
-				.then((results: any[]) => results.map(mapDocumentToFolderFile));
-
-			queries.push(docQuery);
-			totalQueries++;
+			unionQueries.push(sql`
+				SELECT
+					id, name, path, size, createdAt, updatedAt, folderId, 'document' as entityType,
+					extension,
+					NULL as thumbnail,
+					NULL as metadata,
+					isFavorite,
+					0 as views
+				FROM ${documents}
+				WHERE ${buildWhereConditions(folderIds, search, documents)}
+			`);
 		}
 
 		// JSONs
 		if (fileTypes.includes('json')) {
-			const jsonQuery = db
-				.select()
-				.from(jsonFiles)
-				.where(buildWhereConditions(folderIds, search, jsonFiles))
-				.orderBy(orderFn(getOrderColumn(jsonFiles, sortBy)))
-				.limit(limit)
-				.offset(offset)
-				.then((results: any[]) => results.map(mapJsonToFolderFile));
-
-			queries.push(jsonQuery);
-			totalQueries++;
+			unionQueries.push(sql`
+				SELECT
+					id, name, path, size, createdAt, updatedAt, folderId, 'json' as entityType,
+					extension,
+					NULL as thumbnail,
+					metadata,
+					isFavorite,
+					0 as views
+				FROM ${jsonFiles}
+				WHERE ${buildWhereConditions(folderIds, search, jsonFiles)}
+			`);
 		}
 
 		// Archivos 3D
 		if (fileTypes.includes('3d')) {
-			const file3dQuery = db
-				.select()
-				.from(file3Ds)
-				.where(buildWhereConditions(folderIds, search, file3Ds))
-				.orderBy(orderFn(getOrderColumn(file3Ds, sortBy)))
-				.limit(limit)
-				.offset(offset)
-				.then((results: any[]) => results.map(mapFile3DToFolderFile));
-
-			queries.push(file3dQuery);
-			totalQueries++;
+			unionQueries.push(sql`
+				SELECT
+					id, name, path, size, createdAt, updatedAt, folderId, '3d' as entityType,
+					extension,
+					NULL as thumbnail,
+					NULL as metadata,
+					isFavorite,
+					0 as views
+				FROM ${file3Ds}
+				WHERE ${buildWhereConditions(folderIds, search, file3Ds)}
+			`);
 		}
 
-		// 3. Ejecutar todas las consultas en paralelo
-		const results = await Promise.all(queries);
+		if (unionQueries.length === 0) {
+			return {
+				files: [],
+				total: 0,
+				hasMore: false,
+				pagination: { limit, offset, totalPages: 0, currentPage: 1 },
+				performance: { queryTime: 0, processedRecords: 0 },
+			};
+		}
 
-		// 4. Combinar y ordenar resultados
-		const allFiles: FolderFile[] = results.flat();
+		// Construir query final
+		const combinedQuery = unionQueries.reduce((acc, q, i) => {
+			if (i === 0) return q;
+			return sql`${acc} UNION ALL ${q}`;
+		}, sql``);
 
-		// Ordenar por el criterio especificado
-		allFiles.sort((a, b) => {
-			let aVal: any;
-			let bVal: any;
+		// Mapeo de columnas de ordenamiento
+		const sortColumn =
+			sortBy === 'size'
+				? sql`size`
+				: sortBy === 'createdAt'
+					? sql`createdAt`
+					: sortBy === 'updatedAt'
+						? sql`updatedAt`
+						: sql`name`; // Default to name
 
-			switch (sortBy) {
-				case 'size':
-					aVal = a.size;
-					bVal = b.size;
-					break;
-				case 'createdAt':
-					aVal = a.createdAt.getTime();
-					bVal = b.createdAt.getTime();
-					break;
-				case 'updatedAt':
-					aVal = a.updatedAt.getTime();
-					bVal = b.updatedAt.getTime();
-					break;
-				default:
-					aVal = a.name.toLowerCase();
-					bVal = b.name.toLowerCase();
-			}
+		const finalQuery = sql`
+			SELECT * FROM (${combinedQuery})
+			ORDER BY ${sortColumn} ${sortOrder === 'desc' ? sql`DESC` : sql`ASC`}
+			LIMIT ${limit} OFFSET ${offset}
+		`;
 
-			if (sortOrder === 'desc') {
-				return aVal < bVal ? 1 : aVal > bVal ? -1 : 0;
-			}
-			return aVal > bVal ? 1 : aVal < bVal ? -1 : 0;
-		});
+		// Ejecutar query
+		const result = await db.run(finalQuery);
+		const rows = result.rows;
 
-		// 5. Aplicar paginación final
-		const paginatedFiles = allFiles.slice(offset, offset + limit);
+		// Mapear resultados
+		const files = rows.map(mapRowToFolderFile);
 
 		// 6. Calcular total (consulta separada optimizada)
 		const totalCount = await getTotalFileCount(folderIds, search, fileTypes);
@@ -453,13 +438,12 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 			folderId,
 			includeSubfolders,
 			folderCount: folderIds.length,
-			totalQueries,
-			resultCount: paginatedFiles.length,
+			resultCount: files.length,
 			totalCount,
 		});
 
 		return {
-			files: paginatedFiles,
+			files,
 			total: totalCount,
 			hasMore,
 			pagination: {
@@ -470,7 +454,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 			},
 			performance: {
 				queryTime,
-				processedRecords: allFiles.length,
+				processedRecords: files.length,
 			},
 		};
 	} catch (error) {
@@ -606,4 +590,29 @@ export async function getFolderFileStats(folderId: string, includeSubfolders = f
 			total: 0,
 		};
 	}
+}
+
+function mapRowToFolderFile(row: any): FolderFile {
+	return {
+		id: row.id,
+		name: row.name,
+		path: row.path,
+		size: Number(row.size),
+		createdAt: new Date(row.createdAt),
+		updatedAt: new Date(row.updatedAt),
+		folderId: row.folderId,
+		entityType: row.entityType,
+		extension: row.extension || getExtensionFromPath(row.path),
+		thumbnailPath: row.thumbnail,
+		metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
+		stats: {
+			views: Number(row.views || 0),
+			isFavorite: Boolean(row.isFavorite),
+		},
+	};
+}
+
+function getExtensionFromPath(path: string): string {
+	const parts = path.split('.');
+	return parts.length > 1 ? `.${parts.pop()}` : '';
 }
