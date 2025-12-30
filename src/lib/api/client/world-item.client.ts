@@ -6,6 +6,7 @@ import type {
 	WorldItemUpdateInput as UpdateWorldItemData,
 	WorldItemWithStats as WorldItem,
 } from '@/types/entities/world-item/types';
+import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/world-items';
 
@@ -14,7 +15,8 @@ export async function getWorldItemsFromApi(): Promise<WorldItem[]> {
 	if (!response.ok) {
 		throw new Error('Error al obtener world items');
 	}
-	return response.json();
+	const result = await response.json();
+	return unwrapArrayResponse<WorldItem>(result);
 }
 
 export async function createWorldItemInApi(data: CreateWorldItemData): Promise<WorldItem> {

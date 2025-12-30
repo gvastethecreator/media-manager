@@ -4,10 +4,10 @@
  */
 
 import { useCallback, useMemo, useRef, useState, useEffect } from 'react';
-import { Folder, CornerUpLeft, File } from 'lucide-react';
+import { Folder, CornerUpLeft } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import type { BrowserViewProps, BrowserItem, ClickModifiers, CardsViewConfig, BrowserEntityType, ItemContextMenuHandler } from '../types';
-import { MediaThumbnail, type MediaItem } from '@/components/features/file-browser/components/media-thumbnail';
+import { MediaThumbnail, type MediaItem } from '../components/media-thumbnail';
 
 export interface CardsViewProps extends Omit<BrowserViewProps, 'config'> {
     /** Configuración de cards */
@@ -82,50 +82,56 @@ function CardItem({
     // Si es item sintético de navegación (..)
     if (item.isSynthetic && item.name === '..') {
         return (
-            <div
+            <button
                 className={cn(
                     'group flex flex-col rounded-xl border bg-card p-3 transition-all',
-                    'hover:border-primary/50 hover:shadow-md cursor-pointer',
+                    'cursor-pointer hover:border-primary/50 hover:shadow-md',
                     isSelected && 'border-primary bg-accent shadow-md',
                     isActive && 'ring-2 ring-primary/50'
                 )}
+                data-entity-card
+                data-entity-type={item.entityType}
                 data-item-id={item.id}
                 onClick={onClick}
                 onContextMenu={onContextMenu}
                 onDoubleClick={onDoubleClick}
+                type="button"
                 style={{ width: size }}
             >
                 <div
-                    className="relative mb-2 overflow-hidden rounded-lg flex items-center justify-center bg-muted"
+                    className="relative mb-2 flex items-center justify-center overflow-hidden rounded-lg bg-muted"
                     style={{ height: size * 0.65 }}
                 >
                     <CornerUpLeft className="h-1/3 w-1/3 text-muted-foreground" />
                 </div>
-                <div className="flex-1 min-w-0">
-                    <h4 className="truncate text-sm font-medium text-muted-foreground">Subir nivel</h4>
+                <div className="min-w-0 flex-1">
+                    <h4 className="truncate font-medium text-muted-foreground text-sm">Subir nivel</h4>
                 </div>
-            </div>
+            </button>
         );
     }
 
     // Si es carpeta
     if (item.entityType === 'folder') {
         return (
-            <div
+            <button
                 className={cn(
                     'group flex flex-col rounded-xl border bg-card p-3 transition-all',
-                    'hover:border-primary/50 hover:shadow-md cursor-pointer',
+                    'cursor-pointer hover:border-primary/50 hover:shadow-md',
                     isSelected && 'border-primary bg-accent shadow-md',
                     isActive && 'ring-2 ring-primary/50'
                 )}
+                data-entity-card
+                data-entity-type={item.entityType}
                 data-item-id={item.id}
                 onClick={onClick}
                 onContextMenu={onContextMenu}
                 onDoubleClick={onDoubleClick}
+                type="button"
                 style={{ width: size }}
             >
                 <div
-                    className="relative mb-2 overflow-hidden rounded-lg flex items-center justify-center"
+                    className="relative mb-2 flex items-center justify-center overflow-hidden rounded-lg"
                     style={{
                         height: size * 0.65,
                         backgroundColor: item.color ?? 'hsl(var(--muted))',
@@ -137,12 +143,12 @@ function CardItem({
                         <Folder className="h-1/3 w-1/3 text-amber-600" />
                     )}
                 </div>
-                <div className="flex-1 min-w-0">
-                    <h4 className="truncate text-sm font-medium" title={item.name}>
+                <div className="min-w-0 flex-1">
+                    <h4 className="truncate font-medium text-sm" title={item.name}>
                         {item.name}
                     </h4>
                     {showDetails && (
-                        <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                        <div className="mt-1 flex items-center gap-2 text-muted-foreground text-xs">
                             <span className={cn('rounded px-1.5 py-0.5', colorClass)}>
                                 carpeta
                             </span>
@@ -152,7 +158,7 @@ function CardItem({
                         </div>
                     )}
                 </div>
-            </div>
+            </button>
         );
     }
 
@@ -160,17 +166,20 @@ function CardItem({
     const mediaItem = toMediaItem(item);
 
     return (
-        <div
+        <button
             className={cn(
                 'group flex flex-col rounded-xl border bg-card p-3 transition-all',
-                'hover:border-primary/50 hover:shadow-md cursor-pointer',
+                'cursor-pointer hover:border-primary/50 hover:shadow-md',
                 isSelected && 'border-primary bg-accent shadow-md',
                 isActive && 'ring-2 ring-primary/50'
             )}
+            data-entity-card
+            data-entity-type={item.entityType}
             data-item-id={item.id}
             onClick={onClick}
             onContextMenu={onContextMenu}
             onDoubleClick={onDoubleClick}
+            type="button"
             style={{ width: size }}
         >
             {/* Thumbnail */}
@@ -186,13 +195,13 @@ function CardItem({
             </div>
 
             {/* Info */}
-            <div className="flex-1 min-w-0">
-                <h4 className="truncate text-sm font-medium" title={item.name}>
+            <div className="min-w-0 flex-1">
+                <h4 className="truncate font-medium text-sm" title={item.name}>
                     {item.name}
                 </h4>
 
                 {showDetails && (
-                    <div className="mt-1 flex items-center gap-2 text-xs text-muted-foreground">
+                    <div className="mt-1 flex items-center gap-2 text-muted-foreground text-xs">
                         <span className={cn('rounded px-1.5 py-0.5', colorClass)}>
                             {item.entityType}
                         </span>
@@ -202,7 +211,7 @@ function CardItem({
                     </div>
                 )}
             </div>
-        </div>
+        </button>
     );
 }
 
@@ -251,8 +260,10 @@ export function CardsView({
 
     // Scroll al item activo cuando cambia
     useEffect(() => {
-        if (!activeId || !containerRef.current) return;
-        const activeElement = containerRef.current.querySelector(`[data-item-id="${activeId}"]`);
+        if (!activeId) return;
+        const container = containerRef.current;
+        if (!container) return;
+        const activeElement = container.querySelector(`[data-item-id="${activeId}"]`);
         if (activeElement) {
             activeElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         }
@@ -289,31 +300,33 @@ export function CardsView({
     return (
         <div
             className="h-full w-full overflow-auto"
-            data-testid="cards-view"
+            data-testid="file-browser-scroll-area-viewport"
             ref={(el) => {
                 setInternalScrollEl(el);
                 containerRef.current = el;
                 onContainerReady?.(el);
             }}
         >
-            <div
-                className="flex flex-wrap p-3"
-                data-testid="cards-view-container"
-                style={{ gap: `${gap}px` }}
-            >
-                {displayItems.map((item) => (
-                    <CardItem
-                        isActive={activeId === item.id}
-                        isSelected={selectedIds.has(item.id)}
-                        item={item}
-                        key={item.id}
-                        onClick={(e) => handleItemClick(item, e)}
-                        onContextMenu={(e) => handleItemContextMenu(item, e)}
-                        onDoubleClick={() => handleItemDoubleClick(item)}
-                        showDetails={showDetails}
-                        size={cardSize}
-                    />
-                ))}
+            <div className="h-full w-full" data-testid="cards-view">
+                <div
+                    className="flex flex-wrap p-3"
+                    data-testid="cards-view-container"
+                    style={{ gap: `${gap}px` }}
+                >
+                    {displayItems.map((item) => (
+                        <CardItem
+                            isActive={activeId === item.id}
+                            isSelected={selectedIds.has(item.id)}
+                            item={item}
+                            key={item.id}
+                            onClick={(e) => handleItemClick(item, e)}
+                            onContextMenu={(e) => handleItemContextMenu(item, e)}
+                            onDoubleClick={() => handleItemDoubleClick(item)}
+                            showDetails={showDetails}
+                            size={cardSize}
+                        />
+                    ))}
+                </div>
             </div>
         </div>
     );

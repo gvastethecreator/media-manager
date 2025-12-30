@@ -95,7 +95,7 @@ const CollectionsContentView: React.FC<CollectionsContentViewProps> = ({
 						title="No hay colecciones creadas"
 					/>
 				) : (
-					<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 						{collections?.map((collection, index) => (
 							<motion.div
 								animate={{ opacity: 1, y: 0 }}

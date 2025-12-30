@@ -2,6 +2,7 @@
  * Cliente de API para wildcards.
  */
 import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from '@/types/entities/wildcard';
+import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/wildcards';
 
@@ -21,7 +22,8 @@ export async function getWildcardsFromApi(): Promise<WildcardWithStats[]> {
 	if (!response.ok) {
 		throw new Error('Error al obtener wildcards');
 	}
-	return response.json();
+	const result = await response.json();
+	return unwrapArrayResponse<WildcardWithStats>(result);
 }
 
 export async function createWildcardInApi(data: WildcardCreateInput): Promise<WildcardWithStats> {

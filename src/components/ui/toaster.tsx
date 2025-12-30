@@ -1,7 +1,7 @@
 'use client';
 
 import { Toaster as SonnerToaster } from 'sonner';
-import { useTheme } from '@/lib/contexts/theme-context';
+import { useTheme } from '@/components/ui/theme-provider';
 
 export function Toaster() {
 	const { resolvedTheme = 'light' } = useTheme();

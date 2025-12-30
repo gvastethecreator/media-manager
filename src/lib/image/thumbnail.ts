@@ -179,6 +179,13 @@ export async function generateThumbnail(
 	try {
 		// 🟡 Logging de diagnóstico: primero existencia, luego permisos
 		thumbLogger.info('🔍 Verificando acceso al archivo para thumbnail:', filePath);
+
+		// Protección contra rutas inválidas (ej. base64 pasado como path)
+		if (filePath.length > 1024) {
+			thumbLogger.error(`❌ Ruta de archivo demasiado larga (${filePath.length} chars). Posible data corrupta.`);
+			throw new Error('Ruta de archivo inválida (demasiado larga)');
+		}
+
 		const exists = existsSync(filePath);
 		thumbLogger.info('🟡 existsSync:', exists);
 		if (!exists) {

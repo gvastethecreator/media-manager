@@ -1,12 +1,16 @@
 import { Box } from 'lucide-react';
-import { useCallback } from 'react';
+import { useCallback, useState } from 'react';
 import { WorldItemCard } from '@/components/cards/world-item-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
-import { useWorldItems } from '@/lib/api/world-items';
+import { useCreateWorldItem, useWorldItems } from '@/lib/api/world-items';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useWorldItemStore } from '@/store/entities/world-item';
 import type { ViewProps } from '../types';
@@ -18,7 +22,12 @@ export function WorldItemsView(_props: ViewProps) {
 	const selectWorldItem = useWorldItemStore((state) => state.selectWorldItem);
 
 	const { data: worldItemsResponse, isLoading, error } = useWorldItems();
+	const { mutate: createWorldItem } = useCreateWorldItem();
 	const worldItems = worldItemsResponse?.data || [];
+
+	const [showForm, setShowForm] = useState(false);
+	const [newItemName, setNewItemName] = useState('');
+	const [newItemDescription, setNewItemDescription] = useState('');
 
 	const handleWorldItemClick = useCallback(
 		(worldItem: any) => {
@@ -28,6 +37,14 @@ export function WorldItemsView(_props: ViewProps) {
 		},
 		[navigateWithTransition, selectWorldItem]
 	);
+
+	const handleCreateWorldItem = useCallback(() => {
+		if (newItemName.trim() === '') return;
+		createWorldItem({ name: newItemName, description: newItemDescription });
+		setNewItemName('');
+		setNewItemDescription('');
+		setShowForm(false);
+	}, [newItemName, newItemDescription, createWorldItem]);
 
 	if (error) {
 		return (
@@ -41,31 +58,60 @@ export function WorldItemsView(_props: ViewProps) {
 		return <LoadingScreen />;
 	}
 
-	if (!worldItems || worldItems.length === 0) {
-		return (
-			<EmptyState
-				description="Los objetos del mundo te ayudan a organizar tus imágenes. Crea un nuevo objeto del mundo desde el panel de configuración."
-				icon={Box}
-				title="No hay objetos del mundo"
-			/>
-		);
-	}
-
 	return (
 		<ScrollArea className="h-full">
 			<div className="container mx-auto p-6">
-				<div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-					{worldItems.map((worldItem, index) => (
-						<motion.div
-							animate={{ opacity: 1, y: 0 }}
-							initial={{ opacity: 0, y: 20 }}
-							key={worldItem.id}
-							transition={{ delay: index * 0.1 }}
-						>
-							<WorldItemCard className="h-full" onClick={handleWorldItemClick} worldItemId={worldItem.id} />
-						</motion.div>
-					))}
-				</div>
+				<h2 className="mb-4 font-bold text-xl">Objetos del Mundo</h2>
+
+				<Button className="mb-4" onClick={() => setShowForm(!showForm)}>
+					{showForm ? 'Cancelar' : 'Crear Objeto'}
+				</Button>
+
+				{showForm && (
+					<div className="mb-6 rounded-lg border p-4 shadow-sm">
+						<h3 className="mb-3 font-semibold text-lg">Nuevo Objeto</h3>
+						<div className="mb-3 grid gap-2">
+							<Label htmlFor="itemName">Nombre</Label>
+							<Input
+								id="itemName"
+								onChange={(e) => setNewItemName(e.target.value)}
+								placeholder="Nombre del objeto"
+								value={newItemName}
+							/>
+						</div>
+						<div className="mb-4 grid gap-2">
+							<Label htmlFor="itemDescription">Descripción</Label>
+							<Textarea
+								id="itemDescription"
+								onChange={(e) => setNewItemDescription(e.target.value)}
+								placeholder="Descripción del objeto (opcional)"
+								value={newItemDescription}
+							/>
+						</div>
+						<Button onClick={handleCreateWorldItem}>Guardar Objeto</Button>
+					</div>
+				)}
+
+				{(!worldItems || worldItems.length === 0) && !showForm ? (
+					<EmptyState
+						description="Los objetos del mundo te ayudan a organizar tus imágenes. Crea un nuevo objeto del mundo."
+						icon={Box}
+						title="No hay objetos del mundo"
+					/>
+				) : (
+					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+						{worldItems.map((worldItem, index) => (
+							<motion.div
+								animate={{ opacity: 1, y: 0 }}
+								initial={{ opacity: 0, y: 20 }}
+								key={worldItem.id}
+								transition={{ delay: index * 0.1 }}
+							>
+								<WorldItemCard className="h-full" onClick={handleWorldItemClick} worldItemId={worldItem.id} worldItem={worldItem} />
+							</motion.div>
+						))}
+					</div>
+				)}
 			</div>
 		</ScrollArea>
 	);

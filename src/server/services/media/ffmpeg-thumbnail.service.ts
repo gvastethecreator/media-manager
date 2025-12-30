@@ -28,6 +28,12 @@ export async function generateFFmpegThumbnail(
 ): Promise<Buffer | null> {
 	const { timestampSeconds = 1, width = 320, height = 240, quality = 15 } = options;
 
+	// Protección contra rutas corruptas
+	if (videoPath.length > 1024) {
+		logger.error('❌ Ruta de video demasiado larga, posible data corrupta', { length: videoPath.length });
+		return null;
+	}
+
 	// Generar nombre único para el archivo temporal
 	const tempFilename = `thumbnail_${Date.now()}_${Math.random().toString(36).substr(2, 9)}.jpg`;
 	const tempPath = join(tmpdir(), tempFilename);

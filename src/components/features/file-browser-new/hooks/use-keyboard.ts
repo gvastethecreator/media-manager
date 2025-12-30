@@ -30,9 +30,13 @@ export interface UseKeyboardNavigationOptions {
 export interface UseKeyboardNavigationResult {
 	/** Handler de tecla */
 	handleKeyDown: (e: React.KeyboardEvent) => void;
+	/** Handler nativo (para listeners en document/window) */
+	handleNativeKeyDown: (e: KeyboardEvent) => void;
 	/** Si la navegación está activa */
 	isActive: boolean;
 }
+
+type KeyboardLikeEvent = Pick<KeyboardEvent, 'key' | 'ctrlKey' | 'metaKey' | 'shiftKey' | 'preventDefault'>;
 
 /**
  * Calcula columnas visibles basado en contenedor y tamaño de item
@@ -90,8 +94,8 @@ export function useKeyboardNavigation({
 	);
 
 	// Handler de teclas
-	const handleKeyDown = useCallback(
-		(e: React.KeyboardEvent) => {
+	const handleKeyDownCore = useCallback(
+		(e: KeyboardLikeEvent) => {
 			if (disabled || items.length === 0) return;
 
 			const currentIndex = getActiveIndex();
@@ -100,9 +104,7 @@ export function useKeyboardNavigation({
 			switch (e.key) {
 				case 'ArrowUp': {
 					e.preventDefault();
-					const targetIndex = viewMode === 'list' || viewMode === 'table'
-						? currentIndex - 1
-						: currentIndex - cols;
+					const targetIndex = viewMode === 'list' || viewMode === 'table' ? currentIndex - 1 : currentIndex - cols;
 					if (targetIndex >= 0) {
 						navigateToIndex(targetIndex, e);
 					}
@@ -111,9 +113,7 @@ export function useKeyboardNavigation({
 
 				case 'ArrowDown': {
 					e.preventDefault();
-					const targetIndex = viewMode === 'list' || viewMode === 'table'
-						? currentIndex + 1
-						: currentIndex + cols;
+					const targetIndex = viewMode === 'list' || viewMode === 'table' ? currentIndex + 1 : currentIndex + cols;
 					if (targetIndex < items.length) {
 						navigateToIndex(targetIndex, e);
 					}
@@ -198,17 +198,44 @@ export function useKeyboardNavigation({
 					}
 					break;
 				}
+
+				default:
+					break;
 			}
 		},
-		[disabled, items, getActiveIndex, getColumns, viewMode, navigateToIndex, onItemClick, onItemDoubleClick, onActiveChange]
+		[
+			disabled,
+			items,
+			getActiveIndex,
+			getColumns,
+			viewMode,
+			navigateToIndex,
+			onItemClick,
+			onItemDoubleClick,
+			onActiveChange,
+		]
 	);
 
-	// Focus handler para activar navegación
+	const handleKeyDown = useCallback(
+		(e: React.KeyboardEvent) => {
+			handleKeyDownCore(e);
+		},
+		[handleKeyDownCore]
+	);
+
+	const handleNativeKeyDown = useCallback(
+		(e: KeyboardEvent) => {
+			handleKeyDownCore(e);
+		},
+		[handleKeyDownCore]
+	);
+
+	// Focus handler para activar navegación (cuando cualquier hijo recibe foco)
 	useEffect(() => {
 		const container = containerRef.current;
 		if (!container) return;
 
-		const handleFocus = () => {
+		const handleFocusIn = () => {
 			isActiveRef.current = true;
 			// Si no hay item activo, activar el primero
 			if (!activeId && items.length > 0) {
@@ -216,21 +243,26 @@ export function useKeyboardNavigation({
 			}
 		};
 
-		const handleBlur = () => {
+		const handleFocusOut = (ev: FocusEvent) => {
+			const nextTarget = ev.relatedTarget;
+			if (nextTarget && nextTarget instanceof Node && container.contains(nextTarget)) {
+				return;
+			}
 			isActiveRef.current = false;
 		};
 
-		container.addEventListener('focus', handleFocus);
-		container.addEventListener('blur', handleBlur);
+		container.addEventListener('focusin', handleFocusIn);
+		container.addEventListener('focusout', handleFocusOut);
 
 		return () => {
-			container.removeEventListener('focus', handleFocus);
-			container.removeEventListener('blur', handleBlur);
+			container.removeEventListener('focusin', handleFocusIn);
+			container.removeEventListener('focusout', handleFocusOut);
 		};
 	}, [containerRef, activeId, items, onActiveChange]);
 
 	return {
 		handleKeyDown,
+		handleNativeKeyDown,
 		isActive: isActiveRef.current,
 	};
 }

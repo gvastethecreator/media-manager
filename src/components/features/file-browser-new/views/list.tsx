@@ -4,7 +4,6 @@
  */
 
 import { useCallback, useRef, useState, useEffect } from 'react';
-import { cn } from '@/lib/utils';
 import type { BrowserViewProps, BrowserItem, ClickModifiers, ListViewConfig, ItemContextMenuHandler } from '../types';
 import { MediaItemList } from '../components/media-item';
 
@@ -37,8 +36,10 @@ export function ListView({
 
     // Scroll al item activo cuando cambia
     useEffect(() => {
-        if (!activeId || !containerRef.current) return;
-        const activeElement = containerRef.current.querySelector(`[data-item-id="${activeId}"]`);
+        if (!activeId) return;
+        const container = containerRef.current;
+        if (!container) return;
+        const activeElement = container.querySelector(`[data-item-id="${activeId}"]`);
         if (activeElement) {
             activeElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         }
@@ -75,26 +76,29 @@ export function ListView({
     return (
         <div
             className="h-full w-full overflow-auto"
-            data-testid="list-view"
+            data-testid="file-browser-scroll-area-viewport"
             ref={(el) => {
                 setInternalScrollEl(el);
                 containerRef.current = el;
                 onContainerReady?.(el);
             }}
         >
-            <div className="flex flex-col" data-testid="list-view-container">
-                {items.map((item) => (
-                    <MediaItemList
-                        isActive={activeId === item.id}
-                        isSelected={selectedIds.has(item.id)}
-                        item={item}
-                        key={item.id}
-                        onClick={(e) => handleItemClick(item, e)}
-                        onContextMenu={(e) => handleItemContextMenu(item, e)}
-                        onDoubleClick={() => handleItemDoubleClick(item)}
-                        style={{ height: rowHeight }}
-                    />
-                ))}
+            <div className="h-full w-full" data-testid="list-view">
+                <div className="flex flex-col" data-testid="listview-container">
+                    {items.map((item) => (
+                        <MediaItemList
+                            isActive={activeId === item.id}
+                            isSelected={selectedIds.has(item.id)}
+                            item={item}
+                            key={item.id}
+                            onClick={(e) => handleItemClick(item, e)}
+                            onContextMenu={(e) => handleItemContextMenu(item, e)}
+                            onDoubleClick={() => handleItemDoubleClick(item)}
+                            style={{ height: rowHeight }}
+                            testId={`list-row-${item.id}`}
+                        />
+                    ))}
+                </div>
             </div>
         </div>
     );

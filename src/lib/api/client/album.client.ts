@@ -6,12 +6,23 @@ import type { AlbumWithStats } from '@/types/entities/album';
 
 const API_BASE_PATH = '/api/albums';
 
+interface PaginatedResponse<T> {
+	data: T[];
+	pagination: {
+		total: number;
+		limit: number;
+		offset: number;
+	};
+	message?: string;
+}
+
 export async function getAlbumsFromApi(): Promise<AlbumWithStats[]> {
 	const response = await fetch(API_BASE_PATH);
 	if (!response.ok) {
 		throw new Error('Error al obtener álbumes');
 	}
-	return response.json();
+	const result: PaginatedResponse<AlbumWithStats> = await response.json();
+	return result.data;
 }
 
 export async function createAlbumInApi(data: AlbumCreateInput): Promise<AlbumWithStats> {

@@ -25,8 +25,12 @@ export function PromptCardFooter({
 	primaryColor,
 	tcgMode = true,
 }: PromptCardFooterProps) {
-	const formattedDate = formatDate(new Date(updatedAt), 'dd/MM/yyyy');
-	const daysSinceUpdate = Math.floor((Date.now() - new Date(updatedAt).getTime()) / (1000 * 60 * 60 * 24));
+	// Manejar fechas que pueden venir como string o Date
+	const createdAtDate = createdAt ? (typeof createdAt === 'string' ? new Date(createdAt) : createdAt) : new Date();
+	const updatedAtDate = updatedAt ? (typeof updatedAt === 'string' ? new Date(updatedAt) : updatedAt) : new Date();
+
+	const formattedDate = formatDate(updatedAtDate, 'dd/MM/yyyy');
+	const daysSinceUpdate = Math.floor((Date.now() - updatedAtDate.getTime()) / (1000 * 60 * 60 * 24));
 
 	const isRecent = daysSinceUpdate < 7;
 
@@ -87,7 +91,7 @@ export function PromptCardFooter({
 			{/* Sello TCG en la esquina inferior */}
 			{tcgMode && (
 				<div className="absolute right-1 bottom-1 font-mono text-[0.6rem] opacity-60" style={{ color: primaryColor }}>
-					P{String(createdAt.getTime()).slice(-4)}
+					P{String(createdAtDate.getTime()).slice(-4)}
 				</div>
 			)}
 		</div>

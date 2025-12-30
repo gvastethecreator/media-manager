@@ -3,6 +3,7 @@
  * Reemplaza el uso directo de tag.service en los stores.
  */
 import type { TagCreateInput, TagUpdateInput, TagWithStats } from '@/types/entities/tag';
+import { unwrapArrayResponse } from './pagination';
 
 const API_BASE_PATH = '/api/tags';
 
@@ -11,7 +12,8 @@ export async function getTagsFromApi(): Promise<TagWithStats[]> {
 	if (!response.ok) {
 		throw new Error('Error al obtener etiquetas');
 	}
-	return response.json();
+	const result = await response.json();
+	return unwrapArrayResponse<TagWithStats>(result);
 }
 
 export async function createTagInApi(data: TagCreateInput): Promise<TagWithStats> {

@@ -7,7 +7,7 @@
 import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
 import type { Request, Response } from 'express';
 import { db } from '@/lib/drizzle';
-import { albums, images, videos } from '@/lib/drizzle/schema/index';
+import { albums, images, videos, imageAlbums, videoAlbums } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { AlbumCardData, ThumbnailImage } from './albums.types';
 import { getAlbumStats } from './albums.utils';
@@ -17,28 +17,36 @@ const albumLogger = serverLogger.withContext('AlbumsAPI');
 /**
  * GET /api/albums - Listar albums
  */
-export async function getAlbumsHandler(_req: Request, res: Response) {
+export async function getAlbumsHandler(req: Request, res: Response) {
 	try {
-		const albumCount = await db.select({ count: count() }).from(albums);
+		const { limit = '50', offset = '0', sortBy = 'updatedAt', sortOrder = 'desc' } = req.query;
+		const limitNum = Number.parseInt(limit as string, 10);
+		const offsetNum = Number.parseInt(offset as string, 10);
 
-		if (albumCount[0].count === 0) {
+		const albumCount = await db.select({ count: count() }).from(albums);
+		const total = albumCount[0].count;
+
+		if (total === 0) {
 			res.json({
 				data: [],
-				pagination: { total: 0, limit: 0, offset: 0 },
+				pagination: { total: 0, limit: limitNum, offset: offsetNum },
 				message: 'No hay albums disponibles',
 			});
 			return;
 		}
 
-		// Test básico con solo 1 album
-		const simpleAlbums = await db.select().from(albums).limit(1);
+		// Obtener albums con ordenamiento
+		const orderColumn = sortBy === 'name' ? albums.name : sortBy === 'createdAt' ? albums.createdAt : albums.updatedAt;
+		const orderDir = sortOrder === 'asc' ? asc(orderColumn) : desc(orderColumn);
+
+		const allAlbums = await db.select().from(albums).orderBy(orderDir).limit(limitNum).offset(offsetNum);
 
 		res.json({
-			data: simpleAlbums,
+			data: allAlbums,
 			pagination: {
-				total: albumCount[0].count,
-				limit: 1,
-				offset: 0,
+				total,
+				limit: limitNum,
+				offset: offsetNum,
 			},
 		});
 	} catch (error) {
@@ -277,12 +285,9 @@ export async function getAlbumRecentMediaHandler(req: Request, res: Response) {
 		const { limit = '6' } = req.query;
 		const limitNum = Number.parseInt(limit as string, 10);
 
+		// Verificar que el álbum existe
 		const album = await db.query.albums.findFirst({
 			where: eq(albums.id, albumId),
-			with: {
-				images: { columns: { id: true } },
-				videos: { columns: { id: true } },
-			},
 		});
 
 		if (!album) {
@@ -292,55 +297,53 @@ export async function getAlbumRecentMediaHandler(req: Request, res: Response) {
 
 		const media: ThumbnailImage[] = [];
 
-		// Imágenes recientes (80%)
-		if (album.images.length > 0) {
-			const recentImages = await db.query.images.findMany({
-				where: inArray(
-					images.id,
-					album.images.map((img: any) => img.id)
-				),
-				columns: { id: true, name: true, path: true },
-				orderBy: desc(images.updatedAt),
-				limit: Math.ceil(limitNum * 0.8),
-			});
+		// Obtener imágenes recientes del álbum usando JOIN
+		const recentImages = await db
+			.select({
+				id: images.id,
+				name: images.name,
+			})
+			.from(images)
+			.innerJoin(imageAlbums, eq(imageAlbums.A, images.id))
+			.where(eq(imageAlbums.B, albumId))
+			.orderBy(desc(images.updatedAt))
+			.limit(Math.ceil(limitNum * 0.8));
 
-			media.push(
-				...recentImages.map(
-					(img: any): ThumbnailImage => ({
-						id: img.id,
-						name: img.name,
-						thumbnailUrl: `/api/thumbnails/${img.id}`,
-						url: `/api/images/${img.id}`,
-						isVideo: false,
-					})
-				)
-			);
-		}
+		media.push(
+			...recentImages.map(
+				(img): ThumbnailImage => ({
+					id: img.id,
+					name: img.name,
+					thumbnailUrl: `/api/thumbnails/${img.id}`,
+					url: `/api/images/${img.id}`,
+					isVideo: false,
+				})
+			)
+		);
 
-		// Videos recientes (20%)
-		if (album.videos.length > 0) {
-			const recentVideos = await db.query.videos.findMany({
-				where: inArray(
-					videos.id,
-					album.videos.map((vid: any) => vid.id)
-				),
-				columns: { id: true, name: true, path: true },
-				orderBy: desc(videos.updatedAt),
-				limit: Math.ceil(limitNum * 0.2),
-			});
+		// Obtener videos recientes del álbum usando JOIN
+		const recentVideos = await db
+			.select({
+				id: videos.id,
+				name: videos.name,
+			})
+			.from(videos)
+			.innerJoin(videoAlbums, eq(videoAlbums.A, videos.id))
+			.where(eq(videoAlbums.B, albumId))
+			.orderBy(desc(videos.updatedAt))
+			.limit(Math.ceil(limitNum * 0.2));
 
-			media.push(
-				...recentVideos.map(
-					(video: any): ThumbnailImage => ({
-						id: video.id,
-						name: video.name,
-						thumbnailUrl: `/api/video-thumbnails/${video.id}`,
-						url: `/api/videos/${video.id}`,
-						isVideo: true,
-					})
-				)
-			);
-		}
+		media.push(
+			...recentVideos.map(
+				(video): ThumbnailImage => ({
+					id: video.id,
+					name: video.name,
+					thumbnailUrl: `/api/video-thumbnails/${video.id}`,
+					url: `/api/videos/${video.id}`,
+					isVideo: true,
+				})
+			)
+		);
 
 		res.json(media.slice(0, limitNum));
 	} catch (error) {

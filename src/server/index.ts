@@ -18,6 +18,7 @@ import conceptsRouter from './routes/concepts';
 import debugRouter from './routes/debug.js';
 import debugEntityTypesRouter from './routes/debug-entity-types.js';
 import documentsRouter from './routes/documents.js';
+// Force restart
 import downloadRouter from './routes/download.js';
 import eventsRouter from './routes/events';
 import favoritesRouter from './routes/favorites';

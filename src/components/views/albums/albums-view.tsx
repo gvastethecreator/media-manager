@@ -82,8 +82,9 @@ export function AlbumsView(_props: ViewProps) {
 	}, [albumName, albumDescription, editingAlbum, createAlbum, updateAlbum]);
 
 	const sortedAlbums = useMemo(() => {
+		viewLogger.info('Recalculando sortedAlbums. Registros:', Object.keys(albumsRecord).length);
 		return getSortedAlbums();
-	}, [getSortedAlbums]);
+	}, [getSortedAlbums, albumsRecord]);
 
 	return (
 		<AlbumsContentView

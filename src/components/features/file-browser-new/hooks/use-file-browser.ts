@@ -3,7 +3,7 @@
  * @module file-browser-new/hooks/use-file-browser
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigation } from '@/components/navigation/hooks/navigation.utils';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
@@ -310,6 +310,19 @@ export function useFileBrowser({
 		},
 		[dataSource.scrollContainerRef]
 	);
+
+	// Efecto para manejar el scroll infinito
+	useEffect(() => {
+		const container = scrollContainerEl;
+		if (!container) return;
+
+		const handleScroll = () => {
+			pagination.scrollHandler(container);
+		};
+
+		container.addEventListener('scroll', handleScroll);
+		return () => container.removeEventListener('scroll', handleScroll);
+	}, [scrollContainerEl, pagination.scrollHandler]);
 
 	// Estados UI derivados
 	const showPreloader = dataSource.isLoading && processedData.items.length === 0;

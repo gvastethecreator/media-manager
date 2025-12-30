@@ -11,18 +11,18 @@ export async function seedSettings(db: LibSQLDatabase<Record<string, never>>) {
 	try {
 		const sampleSettings = [
 			{
-				id: 'settings-1',
+				id: '12121212-1212-4121-a121-121212121211',
 				theme: 'dark',
 				language: 'es',
 				data: '{"notificaciones":true}',
-				profileId: 'profile-1',
+				profileId: '88888888-8888-4888-a888-888888888881',
 			},
 			{
-				id: 'settings-2',
+				id: '12121212-1212-4121-a121-121212121212',
 				theme: 'light',
 				language: 'en',
 				data: '{"notificaciones":false}',
-				profileId: 'profile-2',
+				profileId: '88888888-8888-4888-a888-888888888882',
 			},
 		];
 

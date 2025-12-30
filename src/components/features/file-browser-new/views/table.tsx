@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import type { BrowserViewProps, BrowserItem, ClickModifiers, TableViewConfig, SortOption, ItemContextMenuHandler } from '../types';
 import { ENTITY_TYPE_DISPLAY_NAMES } from '../utils';
-import { MediaThumbnail, type MediaItem } from '@/components/features/file-browser/components/media-thumbnail';
+import { MediaThumbnail, type MediaItem } from '../components/media-thumbnail';
 
 export interface TableViewProps extends Omit<BrowserViewProps, 'config'> {
     /** Configuración de tabla */
@@ -63,7 +63,7 @@ function TableThumbnail({ item }: { item: BrowserItem }) {
     // Item sintético de navegación
     if (item.isSynthetic && item.name === '..') {
         return (
-            <div className="flex h-6 w-6 items-center justify-center rounded bg-muted shrink-0">
+            <div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-muted">
                 <CornerUpLeft className="h-3.5 w-3.5 text-muted-foreground" />
             </div>
         );
@@ -73,7 +73,7 @@ function TableThumbnail({ item }: { item: BrowserItem }) {
     if (item.entityType === 'folder') {
         return (
             <div
-                className="flex h-6 w-6 items-center justify-center rounded shrink-0"
+                className="flex h-6 w-6 shrink-0 items-center justify-center rounded"
                 style={{ backgroundColor: item.color ?? 'hsl(var(--muted))' }}
             >
                 {item.emoji ? (
@@ -88,7 +88,7 @@ function TableThumbnail({ item }: { item: BrowserItem }) {
     // Archivo multimedia
     const mediaItem = toMediaItem(item);
     return (
-        <div className="h-6 w-6 overflow-hidden rounded shrink-0">
+        <div className="h-6 w-6 shrink-0 overflow-hidden rounded">
             <MediaThumbnail className="h-full w-full object-cover" item={mediaItem} />
         </div>
     );
@@ -177,8 +177,10 @@ export function TableView({
 
     // Scroll al item activo cuando cambia
     useEffect(() => {
-        if (!activeId || !containerRef.current) return;
-        const activeElement = containerRef.current.querySelector(`[data-item-id="${activeId}"]`);
+        if (!activeId) return;
+        const container = containerRef.current;
+        if (!container) return;
+        const activeElement = container.querySelector(`[data-item-id="${activeId}"]`);
         if (activeElement) {
             activeElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
         }
@@ -222,16 +224,16 @@ export function TableView({
     return (
         <div
             className="h-full w-full overflow-auto"
-            data-testid="table-view"
+            data-testid="file-browser-scroll-area-viewport"
             ref={(el) => {
                 setInternalScrollEl(el);
                 containerRef.current = el;
                 onContainerReady?.(el);
             }}
         >
-            <table className="w-full border-collapse text-sm">
+            <table className="w-full border-collapse text-sm" data-testid="table-view">
                 {/* Header */}
-                <thead className="sticky top-0 z-10 bg-background border-b">
+                <thead className="sticky top-0 z-10 border-b bg-background">
                     <tr>
                         {columns.map((col) => {
                             const sortState = getSortState(col.key);
@@ -266,9 +268,12 @@ export function TableView({
                     {items.map((item) => (
                         <tr
                             className={cn(
-                                'border-b hover:bg-accent/50 cursor-pointer transition-colors',
+                                'border-b',
+                                'cursor-pointer',
+                                'transition-colors',
+                                'hover:bg-accent/50',
                                 selectedIds.has(item.id) && 'bg-accent',
-                                activeId === item.id && 'ring-1 ring-inset ring-primary/50'
+                                activeId === item.id && 'ring-1 ring-primary/50 ring-inset'
                             )}
                             data-item-id={item.id}
                             key={item.id}
@@ -278,7 +283,7 @@ export function TableView({
                             style={{ height: rowHeight }}
                         >
                             {columns.map((col) => (
-                                <td className="px-3 py-2 truncate" key={col.key}>
+                                <td className="truncate px-3 py-2" key={col.key}>
                                     {col.render
                                         ? col.render(item)
                                         : (item as unknown as Record<string, unknown>)[col.key] as React.ReactNode}

@@ -52,11 +52,13 @@ albumsRouter.get('/search', searchAlbumsHandler);
 albumsRouter.get('/cards', getAlbumCardsHandler);
 
 // GET - Album específico y sus recursos
-albumsRouter.get('/:id', getAlbumByIdHandler);
+// IMPORTANTE: Rutas específicas (/:id/images, /:id/recent-media, etc.) deben ir ANTES de /:id
+// para evitar que /:id capture el path completo como un ID
 albumsRouter.get('/:id/images', getAlbumImagesHandler);
 albumsRouter.get('/:id/card-data', getAlbumCardDataHandler);
 albumsRouter.get('/:id/recent-media', getAlbumRecentMediaHandler);
 albumsRouter.get('/:id/stats', getAlbumStatsHandler);
+albumsRouter.get('/:id', getAlbumByIdHandler);
 
 // POST - Crear y modificar albums
 albumsRouter.post('/', createAlbumHandler);
