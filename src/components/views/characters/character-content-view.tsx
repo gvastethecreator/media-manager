@@ -1,129 +1,88 @@
 import { Users } from 'lucide-react';
-import { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import type { BaseContentProps } from '@/components/views/base';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import { memo, useCallback, useEffect, useMemo } from 'react';
+import { useParams } from 'react-router-dom';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback';
+import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { BaseContentView } from '@/components/views/base';
 import { useCharacterImages } from '@/lib/api/characters';
-import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useDetailsPanel } from '@/store/details-panel.store';
 import { useCharacterStore } from '@/store/entities/character';
-import type { EntityWithStats } from '@/types/entities/entity.types';
+import type { AnyEntityWithStats } from '@/types/entities';
 
 const viewLogger = clientLogger.withContext('CharacterContentView');
 
 export const CharacterContentView = memo(function CharacterContentView() {
-	const { selectedCharacterId, getCharacterById } = useCharacterStore();
-	const currentCharacter = selectedCharacterId ? getCharacterById(selectedCharacterId) : null;
+	const { id } = useParams<{ id: string }>();
+	const { selectedCharacterId, getCharacterById, selectCharacter } = useCharacterStore();
+	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 
-	const [items, setItems] = useState<EntityWithStats[]>([]);
-	const [isLoading, setIsLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
-	const [currentCharacterId, setCurrentCharacterId] = useState(selectedCharacterId);
+	// Priorizar ID de URL, luego store
+	const effectiveId = id || selectedCharacterId;
+	const currentCharacter = effectiveId ? getCharacterById(effectiveId) : null;
 
-	// React Query hook must be at top level
-	const {
-		data: characterImages,
-		isLoading: isLoadingImages,
-		error: characterError,
-	} = useCharacterImages(currentCharacterId || '');
-
-	// Usar el hook de eventos optimistas del cliente
-	const [optimisticItems, _addEvent] = clientEvents.useEvents<EntityWithStats[]>(items);
-
-	const loadCharacterImages = useCallback(async () => {
-		if (!currentCharacterId) {
-			return;
-		}
-
-		try {
-			setError(null);
-			setIsLoading(true);
-			viewLogger.info('🔄 Cargando imágenes del personaje...');
-			if (characterImages) {
-				setItems(characterImages as EntityWithStats[]);
-			}
-			viewLogger.info('✅ Imágenes cargadas');
-		} catch (err) {
-			const errorMessage = err instanceof Error ? err.message : 'Error desconocido';
-			setError(errorMessage);
-			viewLogger.error('❌ Error cargando imágenes del personaje:', errorMessage);
-		} finally {
-			setIsLoading(false);
-		}
-	}, [currentCharacterId, characterImages]);
-
+	// Sincronizar URL con store si es necesario
 	useEffect(() => {
-		// Cargar imágenes inicialmente
-		loadCharacterImages();
-	}, [loadCharacterImages]);
+		if (id && id !== selectedCharacterId) {
+			selectCharacter(id);
+		}
+	}, [id, selectedCharacterId, selectCharacter]);
 
-	const handleItemSelection = useCallback((item: EntityWithStats) => {
-		viewLogger.info('🖱️ Item seleccionado:', item.name);
-	}, []);
-
-	const emptyState = useMemo(
-		() =>
-			selectedCharacterId
-				? {
-						icon: Users,
-						title: 'Personaje sin imágenes',
-						description: currentCharacter
-							? `${currentCharacter.name} no tiene imágenes asociadas.`
-							: 'Este personaje no tiene imágenes asociadas.',
-					}
-				: {
-						icon: Users,
-						title: 'No hay personaje seleccionado',
-						description: 'Selecciona un personaje para ver su contenido.',
-					},
-		[selectedCharacterId, currentCharacter]
+	const { data: images = [], isLoading, error } = useCharacterImages(effectiveId || '');
+	const browserItems = useMemo(
+		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
+		[images]
 	);
 
-	const contentProps: BaseContentProps = useMemo(
-		() => ({
-			items: optimisticItems,
-			isLoading,
-			error,
-			toggleItemSelection: handleItemSelection,
-			currentContainerId: selectedCharacterId ?? null,
-			containerName: currentCharacter?.name ?? null,
-			emptyState,
-		}),
-		[optimisticItems, isLoading, error, handleItemSelection, selectedCharacterId, currentCharacter?.name, emptyState]
+	const handleItemSelect = useCallback(
+		(item: BrowserItem) => {
+			const entity = item.raw as unknown as AnyEntityWithStats | undefined;
+			if (!entity) return;
+			setSelectedItems([entity]);
+			setDetailsPanelVisible(true);
+		},
+		[setSelectedItems, setDetailsPanelVisible]
 	);
 
-	if (isLoading || isLoadingImages) {
-		return <div className="flex items-center justify-center p-8">Cargando imágenes...</div>;
-	}
+	const headerTitle = useMemo(() => {
+		if (!effectiveId) return 'Selecciona un personaje';
+		return currentCharacter?.name ? `Imágenes de personaje: ${currentCharacter.name}` : 'Imágenes del personaje';
+	}, [effectiveId, currentCharacter?.name]);
 
-	if (error || characterError) {
+	if (!effectiveId) {
 		return (
-			<div className="flex items-center justify-center p-8 text-red-500">Error: {error || characterError?.message}</div>
+			<BaseContentView>
+				<div className="flex h-full items-center justify-center">
+					<EmptyState
+						description="Selecciona un personaje para ver sus imágenes relacionadas"
+						icon={Users}
+						title="Sin personaje seleccionado"
+					/>
+				</div>
+			</BaseContentView>
 		);
 	}
 
-	if (!items || items.length === 0) {
-		return <div className="flex items-center justify-center p-8">No se encontraron imágenes</div>;
+	if (error) {
+		return (
+			<BaseContentView title={headerTitle}>
+				<div className="flex h-full items-center justify-center text-red-500">Error: {error.message}</div>
+			</BaseContentView>
+		);
+	}
+
+	if (isLoading && images.length === 0) {
+		return (
+			<BaseContentView title={headerTitle}>
+				<LoadingScreen />
+			</BaseContentView>
+		);
 	}
 
 	return (
-		<ContentViewProvider {...contentProps}>
-			<BaseContentView>
-				<div className="p-4">
-					<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-						{items.map((item) => (
-							<button
-								className="cursor-pointer rounded-lg border p-4 text-left hover:bg-accent"
-								key={item.id}
-								onClick={() => handleItemSelection(item)}
-								type="button"
-							>
-								<h3 className="font-medium">{item.name}</h3>
-								<p className="text-muted-foreground text-sm">{item.entityType}</p>
-							</button>
-						))}
-					</div>
-				</div>
-			</BaseContentView>
-		</ContentViewProvider>
+		<BaseContentView description={images.length ? `${images.length} imágenes` : undefined} title={headerTitle}>
+			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
+		</BaseContentView>
 	);
 });

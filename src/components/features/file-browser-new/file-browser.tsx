@@ -3,15 +3,9 @@
  * @module file-browser-new/file-browser
  */
 
-import { useRef, useCallback, useMemo, useState } from 'react';
+import { useRef, useCallback, useMemo, useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
-import type {
-    FileBrowserProps,
-    BrowserItem,
-    ViewMode,
-    ViewConfig,
-    ClickModifiers,
-} from './types';
+import type { FileBrowserProps, BrowserItem } from './types';
 import { useFileBrowser, useAddToEntity, actionToEntityType } from './hooks';
 import { useKeyboardNavigation } from './hooks/use-keyboard';
 import {
@@ -55,7 +49,7 @@ export function FileBrowser({
     className,
 }: FileBrowserProps) {
     // Ref del contenedor principal
-    const containerRef = useRef<HTMLDivElement>(null);
+    const containerRef = useRef<HTMLElement>(null);
     const { toast } = useToast();
 
     // Estado del menú contextual
@@ -81,7 +75,7 @@ export function FileBrowser({
     const infiniteScroll = useViewOptionsStore((s) => s.infiniteScroll);
 
     // Navegación por teclado
-    const { handleKeyDown } = useKeyboardNavigation({
+    const { handleNativeKeyDown } = useKeyboardNavigation({
         items: browser.linearItems,
         activeId: browser.activeId,
         viewMode: browser.viewMode,
@@ -92,27 +86,92 @@ export function FileBrowser({
         disabled: browser.isLoading || !!browser.error || browser.items.length === 0,
     });
 
+    // Navegación por teclado sin depender de tabIndex/handlers en contenedores no interactivos.
+    // Solo se activa cuando el foco está dentro del FileBrowser y no estamos escribiendo en inputs.
+    useEffect(() => {
+        const handler = (e: KeyboardEvent) => {
+            const container = containerRef.current;
+            if (!container) return;
+
+            const active = document.activeElement;
+            if (!(active instanceof HTMLElement)) return;
+            if (!container.contains(active)) return;
+
+            const tag = active.tagName;
+            const isTextInput = tag === 'INPUT' || tag === 'TEXTAREA' || active.isContentEditable;
+            if (isTextInput) return;
+
+            handleNativeKeyDown(e);
+        };
+
+        document.addEventListener('keydown', handler);
+        return () => {
+            document.removeEventListener('keydown', handler);
+        };
+    }, [handleNativeKeyDown]);
+
+    const openContextMenuForItem = useCallback(
+        (item: BrowserItem, x: number, y: number) => {
+            // Si el item no está seleccionado, seleccionarlo
+            if (!browser.selectedSet.has(item.id)) {
+                browser.handleItemClick(item, { ctrlKey: false, metaKey: false, shiftKey: false });
+            }
+
+            setContextMenu({
+                isOpen: true,
+                position: { x, y },
+                targetItem: item,
+            });
+        },
+        [browser]
+    );
+
     // Handler para abrir menú contextual
-    const handleContextMenu = useCallback((e: React.MouseEvent, item: BrowserItem) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        // Si el item no está seleccionado, seleccionarlo
-        if (!browser.selectedSet.has(item.id)) {
-            browser.handleItemClick(item, { ctrlKey: false, metaKey: false, shiftKey: false });
-        }
-
-        setContextMenu({
-            isOpen: true,
-            position: { x: e.clientX, y: e.clientY },
-            targetItem: item,
-        });
-    }, [browser]);
+    const handleContextMenu = useCallback(
+        (e: React.MouseEvent, item: BrowserItem) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openContextMenuForItem(item, e.clientX, e.clientY);
+        },
+        [openContextMenuForItem]
+    );
 
     // Handler para cerrar menú contextual
     const handleCloseContextMenu = useCallback(() => {
         setContextMenu({ isOpen: false, position: null, targetItem: null });
     }, []);
+
+    // Compat (E2E/legacy): click derecho en el contenedor (p.ej. canvas/área vacía)
+    // debe abrir el menú contextual sobre un item razonable (activo o primero).
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const handler = (e: MouseEvent) => {
+            const target = e.target as HTMLElement | null;
+            if (target?.closest?.('[data-item-id]')) {
+                return;
+            }
+
+            const fallbackItem =
+                (browser.activeId
+                    ? browser.linearItems.find((it) => it.id === browser.activeId) ?? null
+                    : null) ??
+                browser.linearItems.find((it) => !it.isSynthetic) ??
+                null;
+
+            if (!fallbackItem) return;
+
+            e.preventDefault();
+            e.stopPropagation();
+            openContextMenuForItem(fallbackItem, e.clientX, e.clientY);
+        };
+
+        container.addEventListener('contextmenu', handler);
+        return () => {
+            container.removeEventListener('contextmenu', handler);
+        };
+    }, [browser.activeId, browser.linearItems, openContextMenuForItem]);
 
     // Handler para acciones del menú contextual
     const handleContextMenuAction = useCallback(async (action: ContextMenuAction, payload: ContextMenuPayload) => {
@@ -265,8 +324,6 @@ export function FileBrowser({
                         pageSize={browser.pagination.pageSize}
                     />
                 );
-
-            case 'grid':
             default:
                 return (
                     <GridView
@@ -286,17 +343,22 @@ export function FileBrowser({
         [browser.linearItems]
     );
 
+    const blockingState: 'loading' | 'error' | 'empty' | null = useMemo(() => {
+        if (browser.showPreloader) return 'loading';
+        if (browser.showErrorState) return 'error';
+        if (browser.showEmptyState) return 'empty';
+        return null;
+    }, [browser.showPreloader, browser.showErrorState, browser.showEmptyState]);
+
     return (
         <section
             aria-label="Explorador de archivos"
-            className={cn('flex h-full min-h-[200px] flex-col overflow-hidden', className)}
+            className={cn('flex h-full min-h-50 flex-col overflow-hidden', className)}
             data-ready={browser.shouldRenderContent ? 'true' : 'false'}
             data-testid="file-browser"
             data-view-mode={browser.viewMode}
-            onKeyDown={handleKeyDown}
             ref={containerRef}
             style={{ backgroundColor }}
-            tabIndex={-1}
         >
             {/* Toolbar */}
             <FileBrowserToolbar
@@ -312,11 +374,14 @@ export function FileBrowser({
                 searchQuery={browser.searchQuery}
                 selectedCount={browser.selectedIds.length}
                 viewMode={browser.viewMode}
+                sortOptions={browser.sortOptions}
+                onSortChange={browser.toggleSortField}
             />
 
             {/* Área de contenido */}
-            <div
-                className="relative flex flex-1 min-h-0 flex-col"
+            <section
+                aria-label="Navegación de explorador de archivos"
+                className="relative flex min-h-0 flex-1 flex-col"
                 data-testid="file-browser-container"
             >
                 {/* Banner de error (si hay error pero también contenido) */}
@@ -329,33 +394,33 @@ export function FileBrowser({
                 )}
 
                 {/* Estados de bloqueo */}
-                {browser.showPreloader && (
-                    <FileBrowserLoadingState
-                        className="flex-1"
-                        itemSize={browser.itemSize}
-                        viewMode={browser.viewMode}
-                    />
-                )}
-
-                {browser.showErrorState && (
-                    <FileBrowserErrorState
-                        className="flex-1"
-                        message={browser.error ?? 'No se pudieron cargar los archivos.'}
-                        onRetry={browser.refresh}
-                    />
-                )}
-
-                {browser.showEmptyState && (
-                    <FileBrowserEmptyState className="flex-1" />
+                {!browser.shouldRenderContent && blockingState && (
+                    <div className="h-full w-full overflow-auto" data-testid="file-browser-scroll-area-viewport">
+                        {blockingState === 'loading' && (
+                            <FileBrowserLoadingState
+                                className="flex-1"
+                                itemSize={browser.itemSize}
+                                viewMode={browser.viewMode}
+                            />
+                        )}
+                        {blockingState === 'error' && (
+                            <FileBrowserErrorState
+                                className="flex-1"
+                                message={browser.error ?? 'No se pudieron cargar los archivos.'}
+                                onRetry={browser.refresh}
+                            />
+                        )}
+                        {blockingState === 'empty' && <FileBrowserEmptyState className="flex-1" />}
+                    </div>
                 )}
 
                 {/* Contenido principal */}
                 {browser.shouldRenderContent && (
-                    <div className="flex flex-1 min-h-0 flex-col">
+                    <div className="flex min-h-0 flex-1 flex-col">
                         {renderView()}
                     </div>
                 )}
-            </div>
+            </section>
 
             {/* Botón de cargar más (si no es infinite scroll automático) */}
             {!(infiniteScroll.enabled && infiniteScroll.autoLoad) &&

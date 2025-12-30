@@ -9,9 +9,10 @@ const { spawn } = require('child_process');
 const path = require('path');
 
 // Configurar variables de entorno para manejar headers grandes
-process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS || ''} --max-http-header-size=32768`;
+// Aumentamos a 128KB para asegurar que cookies grandes no bloqueen la carga
+process.env.NODE_OPTIONS = `${process.env.NODE_OPTIONS || ''} --max-http-header-size=131072`;
 
-console.log('🚀 Iniciando Vite con soporte para headers grandes...');
+console.log('🚀 Iniciando Vite con soporte para headers grandes (128KB)...');
 console.log('🔧 NODE_OPTIONS:', process.env.NODE_OPTIONS);
 
 // Ejecutar Vite

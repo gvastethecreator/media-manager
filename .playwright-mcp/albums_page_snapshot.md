@@ -1,0 +1,573 @@
+### New console messages
+- [INFO] [INFO] [AlbumsView] Recalculando sortedAlbums. Registros:  @ http://localhost:5173/src/lib/lo...
+- [INFO] [INFO] [AlbumsView] Recalculando sortedAlbums. Registros:  @ http://localhost:5173/src/lib/lo...
+- [INFO] [INFO] [ApiClient] 🌐 GET /albums?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined} ...
+- [INFO] [INFO] [ApiClient] 🌐 GET /collections?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefi...
+- [INFO] [INFO] [ApiClient] 🌐 GET /concepts?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined...
+- [INFO] [INFO] [ApiClient] 🌐 GET /characters?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefin...
+- [INFO] [INFO] [ApiClient] 🌐 GET /groups?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined} ...
+- [INFO] [INFO] [ApiClient] 🌐 GET /notes?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined} @...
+- [INFO] [INFO] [ApiClient] 🌐 GET /places?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined} ...
+- [INFO] [INFO] [ApiClient] 🌐 GET /properties?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefin...
+- [INFO] [INFO] [ApiClient] 🌐 GET /prompts?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined}...
+- [INFO] [INFO] [ApiClient] 🌐 GET /tags?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined} @ ...
+- [INFO] [INFO] [ApiClient] 🌐 GET /wildcards?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefine...
+- [INFO] [INFO] [ApiClient] 🌐 GET /world-items?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefi...
+- [INFO] [INFO] [ApiClient] 🌐 GET /system/navigation {data: undefined} @ http://localhost:5173/src/li...
+- [INFO] [INFO] [ApiClient] 🌐 GET /stats/system {data: undefined} @ http://localhost:5173/src/lib/log...
+- [INFO] [INFO] [ApiClient] 🌐 GET /folders/tree {data: undefined} @ http://localhost:5173/src/lib/log...
+- [INFO] [INFO] [AlbumsView] Store de álbumes vacío, cargando desde el servidor...  @ http://localhost...
+- [INFO] [2m[2025-12-28T21:30:52.408Z][0m ℹ️ [32m[1mINFO[0m [1m[CacheProvider][0m 🚀 Inicializa...
+- [INFO] [INFO] [NavigationRefresh] SSE cerrado  @ http://localhost:5173/src/lib/logger/client-logger....
+- [INFO] [INFO] [ApiClient] 🌐 GET /albums?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined} ...
+- [INFO] [INFO] [ApiClient] 🌐 GET /collections?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefi...
+- [INFO] [INFO] [ApiClient] 🌐 GET /concepts?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined...
+- [INFO] [INFO] [ApiClient] 🌐 GET /characters?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefin...
+- [INFO] [INFO] [ApiClient] 🌐 GET /groups?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined} ...
+- [INFO] [INFO] [ApiClient] 🌐 GET /notes?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined} @...
+- [INFO] [INFO] [ApiClient] 🌐 GET /places?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined} ...
+- [INFO] [INFO] [ApiClient] 🌐 GET /properties?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefin...
+- [INFO] [INFO] [ApiClient] 🌐 GET /prompts?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined}...
+- [INFO] [INFO] [ApiClient] 🌐 GET /tags?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefined} @ ...
+- [INFO] [INFO] [ApiClient] 🌐 GET /wildcards?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefine...
+- [INFO] [INFO] [ApiClient] 🌐 GET /world-items?limit=15&sortBy=updatedAt&sortOrder=desc {data: undefi...
+- [INFO] [INFO] [AlbumsView] Store de álbumes vacío, cargando desde el servidor...  @ http://localhost...
+- [INFO] [2m[2025-12-28T21:30:52.444Z][0m ℹ️ [32m[1mINFO[0m [1m[CacheProvider][0m 🚀 Inicializa...
+- [LOG] Tema cambiado a: light @ http://localhost:5173/src/providers/theme-provider.tsx:26
+- [LOG] HTML tiene atributo data-theme: light @ http://localhost:5173/src/providers/theme-provider.tsx...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m 🧹 Cache thumbnails: ...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m 🧹 Cache metadata: Li...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m 🧹 Cache search: Limp...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m 🧹 Cache stats: Limpi...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m 🧹 Cache characters: ...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m 🧹 Cache places: Limp...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m 🧹 Cache world-items:...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m ⏹️ Cache thumbnails: ...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m ⏹️ Cache metadata: De...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m ⏹️ Cache search: Dete...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m ⏹️ Cache stats: Deten...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m ⏹️ Cache characters: ...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m ⏹️ Cache places: Dete...
+- [INFO] [2m[2025-12-28T21:30:52.546Z][0m ℹ️ [32m[1mINFO[0m [1m[Cache][0m ⏹️ Cache world-items:...
+- [WARNING] 
+[33m┌─────┐
+│ ⚠️ │
+└─────┘[0m
+[2m[2025-12-28T21:30:52.547Z][0m [33m[1mWARN[0m [1m...
+- [WARNING] 
+[33m┌─────┐
+│ ⚠️ │
+└─────┘[0m
+[2m[2025-12-28T21:30:52.547Z][0m [33m[1mWARN[0m [1m...
+- [LOG] %c[·] %cReact Scan font-weight:bold;color:#7a68e8;font-size:20px; font-weight:bold;font-size:1...
+- [LOG] Try React Scan Monitoring to target performance issues in production: https://react-scan.com/m...
+- [INFO] [INFO] [NavigationRefresh] SSE conectado {data: {"timestamp":1766957452578}} @ http://localho...
+- [INFO] [INFO] [ApiClient] ✅ GET /albums?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http://l...
+- [INFO] [INFO] [ApiClient] ✅ GET /collections?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ htt...
+- [INFO] [INFO] [ApiClient] ✅ GET /concepts?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http:/...
+- [INFO] [INFO] [ApiClient] ✅ GET /characters?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http...
+- [INFO] [INFO] [ApiClient] ✅ GET /groups?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http://l...
+- [INFO] [INFO] [ApiClient] ✅ GET /notes?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http://lo...
+- [INFO] [INFO] [ApiClient] ✅ GET /places?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http://l...
+- [INFO] [INFO] [ApiClient] ✅ GET /properties?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http...
+- [INFO] [INFO] [ApiClient] ✅ GET /prompts?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http://...
+- [INFO] [INFO] [ApiClient] ✅ GET /tags?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http://loc...
+- [INFO] [INFO] [ApiClient] ✅ GET /wildcards?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http:...
+- [INFO] [INFO] [ApiClient] ✅ GET /world-items?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ htt...
+- [INFO] [INFO] [ApiClient] ✅ GET /system/navigation exitoso  @ http://localhost:5173/src/lib/logger/c...
+- [INFO] [INFO] [ApiClient] ✅ GET /stats/system exitoso  @ http://localhost:5173/src/lib/logger/client...
+- [INFO] [INFO] [ApiClient] ✅ GET /folders/tree exitoso  @ http://localhost:5173/src/lib/logger/client...
+- [INFO] [INFO] [AlbumCoreSlice] ✅ 4 álbumes cargados.  @ http://localhost:5173/src/lib/logger/client-...
+- [INFO] [INFO] [AlbumsView] Recalculando sortedAlbums. Registros: 4 @ http://localhost:5173/src/lib/l...
+- [INFO] [INFO] [AlbumsView] Recalculando sortedAlbums. Registros: 4 @ http://localhost:5173/src/lib/l...
+- [INFO] [INFO] [ApiClient] 🌐 GET /albums/22222222-2222-4222-a222-222222222221/recent-media?limit=6 {...
+- [INFO] [INFO] [ApiClient] 🌐 GET /albums/22222222-2222-4222-a222-222222222222/recent-media?limit=6 {...
+- [INFO] [INFO] [ApiClient] 🌐 GET /albums/22222222-2222-4222-a222-222222222223/recent-media?limit=6 {...
+- [INFO] [INFO] [ApiClient] 🌐 GET /albums/22222222-2222-4222-a222-222222222224/recent-media?limit=6 {...
+- [INFO] [INFO] [ApiClient] ✅ GET /albums?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http://l...
+- [INFO] [INFO] [ApiClient] ✅ GET /collections?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ htt...
+- [INFO] [INFO] [ApiClient] ✅ GET /concepts?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http:/...
+- [INFO] [INFO] [ApiClient] ✅ GET /characters?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http...
+- [INFO] [INFO] [ApiClient] ✅ GET /groups?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http://l...
+- [INFO] [INFO] [ApiClient] ✅ GET /notes?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http://lo...
+- [INFO] [INFO] [ApiClient] ✅ GET /places?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http://l...
+- [INFO] [INFO] [ApiClient] ✅ GET /properties?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http...
+- [INFO] [INFO] [ApiClient] ✅ GET /prompts?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http://...
+- [INFO] [INFO] [ApiClient] ✅ GET /tags?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http://loc...
+- [INFO] [INFO] [ApiClient] ✅ GET /wildcards?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ http:...
+- [INFO] [INFO] [ApiClient] ✅ GET /world-items?limit=15&sortBy=updatedAt&sortOrder=desc exitoso  @ htt...
+- [INFO] [INFO] [ApiClient] ✅ GET /albums/22222222-2222-4222-a222-222222222221/recent-media?limit=6 ex...
+- [INFO] [INFO] [ApiClient] ✅ GET /albums/22222222-2222-4222-a222-222222222222/recent-media?limit=6 ex...
+- [INFO] [INFO] [ApiClient] ✅ GET /albums/22222222-2222-4222-a222-222222222223/recent-media?limit=6 ex...
+- [INFO] [INFO] [ApiClient] ✅ GET /albums/22222222-2222-4222-a222-222222222224/recent-media?limit=6 ex...
+
+### Page state
+- Page URL: http://localhost:5173/albums
+- Page Title: Sistema de Gestión de Imágenes
+- Page Snapshot:
+```yaml
+- generic [ref=e2]:
+  - region "Notifications alt+T"
+  - generic [ref=e5]:
+    - complementary "Panel de navegación principal" [ref=e9]:
+      - generic [ref=e13]:
+        - generic [ref=e14]:
+          - generic [ref=e17] [cursor=pointer]: 🎨
+          - generic [ref=e20]: Usuario
+        - generic [ref=e21]:
+          - button "Inicio" [ref=e22] [cursor=pointer]:
+            - img
+          - button "Entity Cards" [ref=e23] [cursor=pointer]:
+            - img
+          - button "Modo Desarrollador" [ref=e24] [cursor=pointer]:
+            - img
+          - button "Documentación" [ref=e25] [cursor=pointer]:
+            - img
+          - button "Cambiar tema" [ref=e26] [cursor=pointer]:
+            - img
+          - button "Configuración" [ref=e27] [cursor=pointer]:
+            - img
+      - generic [ref=e32]:
+        - generic [ref=e33]:
+          - button "Carpetas" [expanded] [ref=e34]:
+            - img [ref=e35]
+            - generic [ref=e37]: Carpetas
+            - img [ref=e38]
+          - generic [ref=e42]:
+            - generic [ref=e44] [cursor=pointer]:
+              - button "Abrir carpeta Cursed Dump" [ref=e47]:
+                - img [ref=e48]
+                - generic [ref=e50]: Cursed Dump
+              - generic [ref=e51]: "114"
+            - generic [ref=e53] [cursor=pointer]:
+              - generic [ref=e54]:
+                - button "Expandir carpeta" [ref=e55]:
+                  - img [ref=e56]
+                - button "Abrir carpeta comfy" [ref=e58]:
+                  - img [ref=e59]
+                  - generic [ref=e61]: comfy
+              - generic [ref=e62]: "998"
+            - generic [ref=e64] [cursor=pointer]:
+              - button "Abrir carpeta Cartoons" [ref=e67]:
+                - img [ref=e68]
+                - generic [ref=e70]: Cartoons
+              - generic [ref=e71]: "65"
+            - generic [ref=e73] [cursor=pointer]:
+              - button "Abrir carpeta Wallpapers" [ref=e76]:
+                - img [ref=e77]
+                - generic [ref=e79]: Wallpapers
+              - generic [ref=e80]: "24"
+        - generic [ref=e81]:
+          - button "Archivos" [expanded] [ref=e82]:
+            - img [ref=e83]
+            - generic [ref=e87]: Archivos
+            - img [ref=e88]
+          - generic [ref=e90]:
+            - generic [ref=e92]:
+              - button "Todos los archivos" [ref=e94]:
+                - img [ref=e95]
+                - generic [ref=e99]: Todos los archivos
+              - generic [ref=e101]: "2645"
+            - generic [ref=e103]:
+              - button "Imágenes" [ref=e105]:
+                - img [ref=e106]
+                - generic [ref=e110]: Imágenes
+              - generic [ref=e112]: "2613"
+            - generic [ref=e114]:
+              - button "Videos" [ref=e116]:
+                - img [ref=e117]
+                - generic [ref=e120]: Videos
+              - generic [ref=e122]: "29"
+            - generic [ref=e124]:
+              - button "Audio" [ref=e126]:
+                - img [ref=e127]
+                - generic [ref=e131]: Audio
+              - generic [ref=e133]: "1"
+            - generic [ref=e135]:
+              - button "Documentos" [ref=e137]:
+                - img [ref=e138]
+                - generic [ref=e141]: Documentos
+              - generic [ref=e143]: "1"
+            - generic [ref=e145]:
+              - button "JSON" [ref=e147]:
+                - img [ref=e148]
+                - generic [ref=e151]: JSON
+              - generic [ref=e153]: "1"
+            - generic [ref=e155]:
+              - button "3D" [ref=e157]:
+                - img [ref=e158]
+                - generic [ref=e161]: 3D
+              - generic [ref=e163]: "0"
+        - generic [ref=e164]:
+          - button "Librería" [expanded] [ref=e165]:
+            - img [ref=e166]
+            - generic [ref=e170]: Librería
+            - img [ref=e171]
+          - generic [ref=e173]:
+            - generic [ref=e175]:
+              - button "Favoritos" [ref=e177]:
+                - img [ref=e178]
+                - generic [ref=e180]: Favoritos
+              - generic [ref=e182]: "0"
+            - generic [ref=e184]:
+              - button "Álbumes" [ref=e186]:
+                - img [ref=e187]
+                - generic [ref=e190]: Álbumes
+              - generic [ref=e191]:
+                - generic [ref=e192]: "4"
+                - button "Toggle Álbumes children" [ref=e193]:
+                  - img [ref=e194]
+            - generic [ref=e197]:
+              - button "Grupos" [ref=e199]:
+                - img [ref=e200]
+                - generic [ref=e205]: Grupos
+              - generic [ref=e206]:
+                - generic [ref=e207]: "4"
+                - button "Toggle Grupos children" [ref=e208]:
+                  - img [ref=e209]
+            - generic [ref=e212]:
+              - button "Etiquetas" [ref=e214]:
+                - img [ref=e215]
+                - generic [ref=e218]: Etiquetas
+              - generic [ref=e219]:
+                - generic [ref=e220]: "5"
+                - button "Toggle Etiquetas children" [ref=e221]:
+                  - img [ref=e222]
+            - generic [ref=e225]:
+              - button "Colecciones" [ref=e227]:
+                - img [ref=e228]
+                - generic [ref=e230]: Colecciones
+              - generic [ref=e231]:
+                - generic [ref=e232]: "4"
+                - button "Toggle Colecciones children" [ref=e233]:
+                  - img [ref=e234]
+            - generic [ref=e237]:
+              - button "Prompts" [ref=e239]:
+                - img [ref=e240]
+                - generic [ref=e242]: Prompts
+              - generic [ref=e243]:
+                - generic [ref=e244]: "4"
+                - button "Toggle Prompts children" [ref=e245]:
+                  - img [ref=e246]
+        - generic [ref=e248]:
+          - button "Worldbuilding" [expanded] [ref=e249]:
+            - img [ref=e250]
+            - generic [ref=e253]: Worldbuilding
+            - img [ref=e254]
+          - generic [ref=e256]:
+            - generic [ref=e258]:
+              - button "Personajes" [ref=e260]:
+                - img [ref=e261]
+                - generic [ref=e264]: Personajes
+              - generic [ref=e265]:
+                - generic [ref=e266]: "4"
+                - button "Toggle Personajes children" [ref=e267]:
+                  - img [ref=e268]
+            - generic [ref=e271]:
+              - button "Lugares" [ref=e273]:
+                - img [ref=e274]
+                - generic [ref=e277]: Lugares
+              - generic [ref=e278]:
+                - generic [ref=e279]: "4"
+                - button "Toggle Lugares children" [ref=e280]:
+                  - img [ref=e281]
+            - generic [ref=e284]:
+              - button "Objetos del mundo" [ref=e286]:
+                - img [ref=e287]
+                - generic [ref=e290]: Objetos del mundo
+              - generic [ref=e291]:
+                - generic [ref=e292]: "4"
+                - button "Toggle Objetos del mundo children" [ref=e293]:
+                  - img [ref=e294]
+            - generic [ref=e297]:
+              - button "Conceptos" [ref=e299]:
+                - img [ref=e300]
+                - generic [ref=e302]: Conceptos
+              - generic [ref=e303]:
+                - generic [ref=e304]: "4"
+                - button "Toggle Conceptos children" [ref=e305]:
+                  - img [ref=e306]
+            - generic [ref=e309]:
+              - button "Comodines" [ref=e311]:
+                - img [ref=e312]
+                - generic [ref=e315]: Comodines
+              - generic [ref=e316]:
+                - generic [ref=e317]: "4"
+                - button "Toggle Comodines children" [ref=e318]:
+                  - img [ref=e319]
+        - generic [ref=e321]:
+          - button "Gestión" [expanded] [ref=e322]:
+            - img [ref=e323]
+            - generic [ref=e326]: Gestión
+            - img [ref=e327]
+          - generic [ref=e329]:
+            - generic [ref=e331]:
+              - button "Notas" [ref=e333]:
+                - img [ref=e334]
+                - generic [ref=e337]: Notas
+              - generic [ref=e338]:
+                - generic [ref=e339]: "4"
+                - button "Toggle Notas children" [ref=e340]:
+                  - img [ref=e341]
+            - generic [ref=e344]:
+              - button "Propiedades" [ref=e346]:
+                - img [ref=e347]
+                - generic [ref=e350]: Propiedades
+              - generic [ref=e351]:
+                - generic [ref=e352]: "0"
+                - button "Toggle Propiedades children" [ref=e353]:
+                  - img [ref=e354]
+    - separator [ref=e356]:
+      - img [ref=e358]
+    - generic [ref=e367]:
+      - generic [ref=e369]:
+        - generic [ref=e370]:
+          - button "Cerrar panel izquierdo" [ref=e371]:
+            - img
+          - navigation "breadcrumb" [ref=e373]:
+            - list [ref=e374]:
+              - listitem [ref=e375]:
+                - button [ref=e376] [cursor=pointer]:
+                  - img
+              - listitem [ref=e377]:
+                - img [ref=e378]
+              - listitem [ref=e380]:
+                - generic [ref=e381]: Álbumes
+        - generic [ref=e382]:
+          - button "Configuraciones de interfaz" [ref=e383]:
+            - img
+          - button "Cerrar panel derecho" [ref=e384]:
+            - img
+      - generic [ref=e389]:
+        - heading "Vista de Álbumes" [level=2] [ref=e390]
+        - button "Crear Álbum" [ref=e391]
+        - generic [ref=e392]:
+          - generic [ref=e394]:
+            - 'button "Álbum: Favoritos" [ref=e395] [cursor=pointer]':
+              - generic [ref=e396]:
+                - banner [ref=e397]:
+                  - generic [ref=e399]: ⭐
+                  - heading "Favoritos" [level=3] [ref=e401]
+                  - img "Favorito" [ref=e403]
+                - generic [ref=e405]:
+                  - generic [ref=e406]:
+                    - img [ref=e407]
+                    - paragraph [ref=e414]: Sin imágenes
+                  - generic [ref=e415]:
+                    - paragraph [ref=e416]: Álbum de imágenes favoritas
+                    - generic [ref=e418]:
+                      - generic [ref=e419]:
+                        - generic [ref=e420]: "Imágenes:"
+                        - generic [ref=e421]: "0"
+                      - generic [ref=e422]:
+                        - generic [ref=e423]: "Videos:"
+                        - generic [ref=e424]: "0"
+                - contentinfo [ref=e425]:
+                  - generic [ref=e426]:
+                    - generic [ref=e427]:
+                      - generic [ref=e428]: "ID:"
+                      - generic [ref=e429]: 22222222-0
+                    - generic [ref=e430]:
+                      - generic [ref=e431]: "Tamaño:"
+                      - generic [ref=e432]: 0 MB
+                  - generic [ref=e433]:
+                    - generic [ref=e434]:
+                      - generic [ref=e435]: "Entidades:"
+                      - generic [ref=e436]: "0"
+                    - generic [ref=e437]:
+                      - generic [ref=e438]: "Actualizado:"
+                      - generic [ref=e439]: 28/12/2025
+            - generic [ref=e440]:
+              - button [ref=e441]:
+                - img
+              - button [ref=e442]:
+                - img
+          - generic [ref=e444]:
+            - 'button "Álbum: Colección Digital" [ref=e445] [cursor=pointer]':
+              - generic [ref=e446]:
+                - banner [ref=e447]:
+                  - generic [ref=e449]: 🎨
+                  - heading "Colección Digital" [level=3] [ref=e451]
+                - generic [ref=e452]:
+                  - generic [ref=e453]:
+                    - img [ref=e454]
+                    - paragraph [ref=e461]: Sin imágenes
+                  - generic [ref=e462]:
+                    - paragraph [ref=e463]: Arte y diseño digital
+                    - generic [ref=e465]:
+                      - generic [ref=e466]:
+                        - generic [ref=e467]: "Imágenes:"
+                        - generic [ref=e468]: "0"
+                      - generic [ref=e469]:
+                        - generic [ref=e470]: "Videos:"
+                        - generic [ref=e471]: "0"
+                - contentinfo [ref=e472]:
+                  - generic [ref=e473]:
+                    - generic [ref=e474]:
+                      - generic [ref=e475]: "ID:"
+                      - generic [ref=e476]: 22222222-0
+                    - generic [ref=e477]:
+                      - generic [ref=e478]: "Tamaño:"
+                      - generic [ref=e479]: 0 MB
+                  - generic [ref=e480]:
+                    - generic [ref=e481]:
+                      - generic [ref=e482]: "Entidades:"
+                      - generic [ref=e483]: "0"
+                    - generic [ref=e484]:
+                      - generic [ref=e485]: "Actualizado:"
+                      - generic [ref=e486]: 28/12/2025
+            - generic [ref=e487]:
+              - button [ref=e488]:
+                - img
+              - button [ref=e489]:
+                - img
+          - generic [ref=e491]:
+            - 'button "Álbum: Paisajes Épicos" [ref=e492] [cursor=pointer]':
+              - generic [ref=e493]:
+                - banner [ref=e494]:
+                  - generic [ref=e496]: 🏔️
+                  - heading "Paisajes Épicos" [level=3] [ref=e498]
+                  - img "Favorito" [ref=e500]
+                - generic [ref=e502]:
+                  - generic [ref=e503]:
+                    - img [ref=e504]
+                    - paragraph [ref=e511]: Sin imágenes
+                  - generic [ref=e512]:
+                    - paragraph [ref=e513]: Vistas panorámicas y naturaleza
+                    - generic [ref=e515]:
+                      - generic [ref=e516]:
+                        - generic [ref=e517]: "Imágenes:"
+                        - generic [ref=e518]: "0"
+                      - generic [ref=e519]:
+                        - generic [ref=e520]: "Videos:"
+                        - generic [ref=e521]: "0"
+                - contentinfo [ref=e522]:
+                  - generic [ref=e523]:
+                    - generic [ref=e524]:
+                      - generic [ref=e525]: "ID:"
+                      - generic [ref=e526]: 22222222-0
+                    - generic [ref=e527]:
+                      - generic [ref=e528]: "Tamaño:"
+                      - generic [ref=e529]: 0 MB
+                  - generic [ref=e530]:
+                    - generic [ref=e531]:
+                      - generic [ref=e532]: "Entidades:"
+                      - generic [ref=e533]: "0"
+                    - generic [ref=e534]:
+                      - generic [ref=e535]: "Actualizado:"
+                      - generic [ref=e536]: 28/12/2025
+            - generic [ref=e537]:
+              - button [ref=e538]:
+                - img
+              - button [ref=e539]:
+                - img
+          - generic [ref=e541]:
+            - 'button "Álbum: Retratos Creativos" [ref=e542] [cursor=pointer]':
+              - generic [ref=e543]:
+                - banner [ref=e544]:
+                  - generic [ref=e546]: 📸
+                  - heading "Retratos Creativos" [level=3] [ref=e548]
+                - generic [ref=e549]:
+                  - generic [ref=e550]:
+                    - img [ref=e551]
+                    - paragraph [ref=e558]: Sin imágenes
+                  - generic [ref=e559]:
+                    - paragraph [ref=e560]: Retratos artísticos y expresivos
+                    - generic [ref=e562]:
+                      - generic [ref=e563]:
+                        - generic [ref=e564]: "Imágenes:"
+                        - generic [ref=e565]: "0"
+                      - generic [ref=e566]:
+                        - generic [ref=e567]: "Videos:"
+                        - generic [ref=e568]: "0"
+                - contentinfo [ref=e569]:
+                  - generic [ref=e570]:
+                    - generic [ref=e571]:
+                      - generic [ref=e572]: "ID:"
+                      - generic [ref=e573]: 22222222-0
+                    - generic [ref=e574]:
+                      - generic [ref=e575]: "Tamaño:"
+                      - generic [ref=e576]: 0 MB
+                  - generic [ref=e577]:
+                    - generic [ref=e578]:
+                      - generic [ref=e579]: "Entidades:"
+                      - generic [ref=e580]: "0"
+                    - generic [ref=e581]:
+                      - generic [ref=e582]: "Actualizado:"
+                      - generic [ref=e583]: 28/12/2025
+            - generic [ref=e584]:
+              - button [ref=e585]:
+                - img
+              - button [ref=e586]:
+                - img
+    - separator [ref=e587]:
+      - img [ref=e589]
+    - generic [ref=e600]:
+      - generic [ref=e601]:
+        - heading "📁 Contenido Principal" [level=2] [ref=e602]
+        - generic [ref=e603]:
+          - img [ref=e604]
+          - generic [ref=e608]:
+            - paragraph [ref=e609]: Imágenes
+            - paragraph [ref=e610]: "2.613"
+        - generic [ref=e611]:
+          - img [ref=e612]
+          - generic [ref=e615]:
+            - paragraph [ref=e616]: Etiquetas
+            - paragraph [ref=e617]: "5"
+        - generic [ref=e618]:
+          - img [ref=e619]
+          - generic [ref=e622]:
+            - paragraph [ref=e623]: Colecciones
+            - paragraph [ref=e624]: "4"
+        - generic [ref=e625]:
+          - img [ref=e626]
+          - generic [ref=e628]:
+            - paragraph [ref=e629]: Álbumes
+            - paragraph [ref=e630]: "4"
+      - generic [ref=e631]:
+        - heading "🌍 Worldbuilding" [level=2] [ref=e632]
+        - generic [ref=e633]:
+          - img [ref=e634]
+          - generic [ref=e639]:
+            - paragraph [ref=e640]: Personajes
+            - paragraph [ref=e641]: "4"
+        - generic [ref=e642]:
+          - img [ref=e643]
+          - generic [ref=e646]:
+            - paragraph [ref=e647]: Lugares
+            - paragraph [ref=e648]: "4"
+        - generic [ref=e649]:
+          - img [ref=e650]
+          - generic [ref=e653]:
+            - paragraph [ref=e654]: Objetos del mundo
+            - paragraph [ref=e655]: "4"
+        - generic [ref=e656]:
+          - img [ref=e657]
+          - generic [ref=e660]:
+            - paragraph [ref=e661]: Favoritos
+            - paragraph [ref=e662]: "0"
+      - generic [ref=e663]:
+        - heading "📊 Actividad" [level=2] [ref=e664]
+        - generic [ref=e665]:
+          - img [ref=e666]
+          - generic [ref=e669]:
+            - paragraph [ref=e670]: Actividades
+            - paragraph [ref=e671]: "0"
+      - generic [ref=e672]:
+        - heading "💾 Almacenamiento" [level=2] [ref=e673]
+        - generic [ref=e674]:
+          - img [ref=e675]
+          - generic [ref=e677]:
+            - paragraph [ref=e678]: Carpetas
+            - paragraph [ref=e679]: "23"
+        - generic [ref=e680]:
+          - img [ref=e681]
+          - generic [ref=e685]:
+            - paragraph [ref=e686]: Tamaño total
+            - paragraph [ref=e687]: 9.26 GB
+  - generic [ref=e688]:
+    - img [ref=e690]
+    - button "Open Tanstack query devtools" [ref=e738] [cursor=pointer]:
+      - img [ref=e739]
+```

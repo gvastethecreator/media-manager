@@ -27,8 +27,8 @@ export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 	const { createdAt, updatedAt, isFavorite, category, type, stats } = worldItem;
 	const imagesCount = stats?.imageCount || worldItem.stats?.imageCount || 0;
 	// Convertir fechas a objetos Date si son strings
-	const createdAtDate = typeof createdAt === 'string' ? new Date(createdAt) : createdAt;
-	const updatedAtDate = typeof updatedAt === 'string' ? new Date(updatedAt) : updatedAt;
+	const createdAtDate = createdAt ? (typeof createdAt === 'string' ? new Date(createdAt) : createdAt) : new Date();
+	const updatedAtDate = updatedAt ? (typeof updatedAt === 'string' ? new Date(updatedAt) : updatedAt) : new Date();
 
 	// Calcular tiempo relativo
 	const createdTimeAgo = formatDistanceToNow(createdAtDate, {

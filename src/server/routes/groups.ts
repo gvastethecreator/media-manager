@@ -1,3 +1,4 @@
+import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, like } from 'drizzle-orm';
 import express from 'express';
 import { z } from 'zod';
@@ -8,6 +9,18 @@ import { toGroupWithStats } from '@/transformers/group';
 import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
+
+// Schema de validación para crear/actualizar grupos
+const GroupCreateSchema = z.object({
+	name: z.string().min(1).max(255),
+	description: z.string().optional(),
+	emoji: z.string().optional().default('📁'),
+	color: z.string().optional().default('#3b82f6'),
+	category: z.string().optional(),
+	isFavorite: z.boolean().optional().default(false),
+});
+
+const GroupUpdateSchema = GroupCreateSchema.partial();
 
 // Schema para filtros de búsqueda
 const GroupFiltersSchema = z.object({
@@ -206,10 +219,37 @@ router.get('/:id/media', async (req, res) => {
 	try {
 		const { id } = req.params;
 		const limit = Number(req.query.limit) || 6;
-		// TODO: Implementar getRecentGroupMediaService en groupService
-		// const media = await groupService.getRecentGroupMediaService(id, limit);
-		const media: any[] = [];
-		res.json(media);
+
+		// Verificar que el grupo existe
+		const group = await db.query.groups.findFirst({
+			where: eq(groups.id, id),
+		});
+		if (!group) {
+			res.status(404).json({ error: 'Grupo no encontrado' });
+			return;
+		}
+
+		// Obtener imágenes recientes del grupo (A = groupId, B = imageId)
+		const recentImages = await db
+			.select({
+				id: images.id,
+				name: images.name,
+			})
+			.from(images)
+			.innerJoin(groupImages, eq(groupImages.B, images.id))
+			.where(eq(groupImages.A, id))
+			.orderBy(desc(images.updatedAt))
+			.limit(limit);
+
+		const thumbnails = recentImages.map((img) => ({
+			id: img.id,
+			name: img.name,
+			thumbnailUrl: `/api/thumbnails/${img.id}`,
+			url: `/api/images/${img.id}`,
+			isVideo: false,
+		}));
+
+		res.json(thumbnails);
 	} catch (error) {
 		serverLogger.error('Error getting recent group media:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });
@@ -229,17 +269,97 @@ router.get('/:id/card-data', async (req, res) => {
 	}
 });
 
-// MÉTODOS DE ESCRITURA - PENDIENTES DE MIGRACIÓN (Status 501)
-router.post('/', async (_req, res) => {
-	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
+// MÉTODOS DE ESCRITURA - IMPLEMENTADOS
+router.post('/', async (req, res) => {
+	const parse = GroupCreateSchema.safeParse(req.body);
+	if (!parse.success) {
+		res.status(400).json({ error: 'Datos inválidos', details: parse.error.issues });
+		return;
+	}
+
+	try {
+		const data = parse.data;
+		const newGroup = {
+			id: crypto.randomUUID(),
+			name: data.name,
+			description: data.description || null,
+			emoji: data.emoji || '📁',
+			color: data.color || '#3b82f6',
+			category: data.category || null,
+			isFavorite: data.isFavorite ?? false,
+			createdAt: new Date(),
+			updatedAt: new Date(),
+		};
+
+		const [created] = await db.insert(groups).values(newGroup).returning();
+		res.status(201).json(toGroupWithStats(created));
+	} catch (error) {
+		serverLogger.error('Error creating group:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
 });
 
-router.put('/:id', async (_req, res) => {
-	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
+router.put('/:id', async (req, res) => {
+	const { id } = req.params;
+	const parse = GroupUpdateSchema.safeParse(req.body);
+
+	if (!parse.success) {
+		res.status(400).json({ error: 'Datos inválidos', details: parse.error.issues });
+		return;
+	}
+
+	try {
+		// Verificar que existe
+		const existing = await db.query.groups.findFirst({
+			where: eq(groups.id, id),
+		});
+
+		if (!existing) {
+			res.status(404).json({ error: 'Grupo no encontrado' });
+			return;
+		}
+
+		const [updated] = await db
+			.update(groups)
+			.set({
+				...parse.data,
+				updatedAt: new Date(),
+			})
+			.where(eq(groups.id, id))
+			.returning();
+
+		res.json(toGroupWithStats(updated));
+	} catch (error) {
+		serverLogger.error('Error updating group:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
 });
 
-router.delete('/:id', async (_req, res) => {
-	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
+router.delete('/:id', async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		// Verificar que existe
+		const existing = await db.query.groups.findFirst({
+			where: eq(groups.id, id),
+		});
+
+		if (!existing) {
+			res.status(404).json({ error: 'Grupo no encontrado' });
+			return;
+		}
+
+		// Eliminar relaciones primero
+		await db.delete(groupImages).where(eq(groupImages.A, id));
+
+		// Eliminar el grupo
+		await db.delete(groups).where(eq(groups.id, id));
+
+		res.json({ success: true, message: 'Grupo eliminado correctamente', deletedId: id });
+	} catch (error) {
+		serverLogger.error('Error deleting group:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
 });
 
 // POST /groups/:id/images/:imageId - Agregar imagen a grupo

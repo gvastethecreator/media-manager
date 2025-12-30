@@ -1,56 +1,76 @@
 import { Terminal } from 'lucide-react';
-import { useCallback } from 'react';
-import type { BaseContentProps } from '@/components/views/base';
-import { BaseContentView, ContentViewProvider } from '@/components/views/base';
+import { useCallback, useMemo } from 'react';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback';
+import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { BaseContentView } from '@/components/views/base';
 import { usePromptImages } from '@/lib/api/prompts';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useDetailsPanel } from '@/store/details-panel.store';
 import { usePromptStore } from '@/store/entities/prompt/store';
-import type { EntityWithStats } from '@/types/entities/entity.types';
+import type { AnyEntityWithStats } from '@/types/entities';
 
 const viewLogger = clientLogger.withContext('PromptContentView');
 
 export function PromptContentView() {
 	const selectedPrompt = usePromptStore((state) => state.selectedPrompt);
+	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
 
-	// Usar React Query hook en lugar de server action
-	const { data: images = [], isLoading, error, refetch: loadPromptImages } = usePromptImages(selectedPrompt?.id || '');
+	const promptId = selectedPrompt?.id ?? null;
+	const { data: images = [], isLoading, error } = usePromptImages(promptId || '');
+	const browserItems = useMemo(
+		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
+		[images]
+	);
 
-	const toggleItemSelection = useCallback((item: EntityWithStats) => {
-		// Implementar la lógica de selección de items si es necesaria
-		viewLogger.info('🔄 Toggle selección de item:', item?.id);
-	}, []);
-
-	const handleRefresh = useCallback((): Promise<void> => {
-		viewLogger.info('🔄 Refrescando imágenes del prompt:', selectedPrompt?.id);
-		return loadPromptImages().then(() => Promise.resolve());
-	}, [loadPromptImages, selectedPrompt?.id]);
-
-	const contentProps: BaseContentProps = {
-		items: images,
-		isLoading,
-		error: error ? (error instanceof Error ? error.message : 'Error desconocido') : null,
-		toggleItemSelection,
-		currentContainerId: selectedPrompt?.id ?? null,
-		containerName: selectedPrompt?.name ?? null,
-		setCurrentContainer: (_id: string) => Promise.resolve(), // No es necesario en el nuevo enfoque
-		emptyState: {
-			icon: Terminal,
-			title: 'Prompt vacío',
-			description: `No se encontraron imágenes en ${
-				selectedPrompt?.name || 'este prompt'
-			}. Puedes agregar imágenes arrastrándolas aquí.`,
+	const handleItemSelect = useCallback(
+		(item: BrowserItem) => {
+			const entity = item.raw as unknown as AnyEntityWithStats | undefined;
+			if (!entity) return;
+			setSelectedItems([entity]);
+			setDetailsPanelVisible(true);
 		},
-		onRefresh: handleRefresh,
-	};
+		[setSelectedItems, setDetailsPanelVisible]
+	);
 
-	return (
-		<ContentViewProvider {...contentProps}>
+	const headerTitle = useMemo(
+		() => (selectedPrompt?.name ? `Imágenes del prompt: ${selectedPrompt.name}` : 'Selecciona un prompt'),
+		[selectedPrompt?.name]
+	);
+
+	if (!promptId) {
+		return (
 			<BaseContentView>
-				{/* Prompt content will be added here */}
-				<div className="p-4">
-					<p>Contenido del prompt se mostrará aquí</p>
+				<div className="flex h-full items-center justify-center">
+					<EmptyState
+						description="Selecciona un prompt para ver sus imágenes relacionadas"
+						icon={Terminal}
+						title="Sin prompt seleccionado"
+					/>
 				</div>
 			</BaseContentView>
-		</ContentViewProvider>
+		);
+	}
+
+	if (error) {
+		return (
+			<BaseContentView title={headerTitle}>
+				<div className="flex h-full items-center justify-center text-red-500">Error: {error.message}</div>
+			</BaseContentView>
+		);
+	}
+
+	if (isLoading && images.length === 0) {
+		return (
+			<BaseContentView title={headerTitle}>
+				<LoadingScreen />
+			</BaseContentView>
+		);
+	}
+
+	return (
+		<BaseContentView description={images.length ? `${images.length} imágenes` : undefined} title={headerTitle}>
+			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
+		</BaseContentView>
 	);
 }

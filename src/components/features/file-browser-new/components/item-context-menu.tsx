@@ -41,6 +41,11 @@ export type ContextMenuAction =
     | 'rename'
     | 'download'
     | 'delete'
+    | 'move'
+    | 'paste'
+    | 'add-tag'
+    | 'favorite-toggle'
+    | 'open-in-explorer'
     | 'add-to-album'
     | 'add-to-collection'
     | 'add-to-group'
@@ -98,6 +103,32 @@ function MenuItem({
     destructive = false,
     submenu,
 }: MenuItemProps) {
+    const [open, setOpen] = useState(false);
+    const hoverTimeout = useRef<number | null>(null);
+    const subMenuRef = useRef<HTMLDivElement | null>(null);
+
+    const openWithDelay = useCallback(() => {
+        if (hoverTimeout.current) {
+            window.clearTimeout(hoverTimeout.current);
+            hoverTimeout.current = null;
+        }
+        hoverTimeout.current = window.setTimeout(() => setOpen(true), 100);
+    }, []);
+
+    const closeWithDelay = useCallback(() => {
+        if (hoverTimeout.current) {
+            window.clearTimeout(hoverTimeout.current);
+            hoverTimeout.current = null;
+        }
+        hoverTimeout.current = window.setTimeout(() => setOpen(false), 200);
+    }, []);
+
+    useEffect(() => {
+        return () => {
+            if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current);
+        };
+    }, []);
+
     const handleClick = () => {
         if (disabled) return;
         if (onClick) {
@@ -106,6 +137,32 @@ function MenuItem({
             onSelect(action);
         }
     };
+
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'ArrowRight' && submenu) {
+            e.preventDefault();
+            e.stopPropagation();
+            setOpen(true);
+        }
+    };
+
+    const handleSubMenuMouseEnter = useCallback(() => {
+        if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current);
+        setOpen(true);
+    }, []);
+
+    useEffect(() => {
+        if (!submenu) return;
+        const el = subMenuRef.current;
+        if (!el) return;
+
+        el.addEventListener('mouseenter', handleSubMenuMouseEnter);
+        el.addEventListener('mouseleave', closeWithDelay);
+        return () => {
+            el.removeEventListener('mouseenter', handleSubMenuMouseEnter);
+            el.removeEventListener('mouseleave', closeWithDelay);
+        };
+    }, [closeWithDelay, handleSubMenuMouseEnter, submenu]);
 
     return (
         <div className="group relative">
@@ -118,14 +175,24 @@ function MenuItem({
                 )}
                 disabled={disabled}
                 onClick={handleClick}
+                onKeyDown={handleKeyDown}
+                onMouseEnter={submenu ? openWithDelay : undefined}
+                onMouseLeave={submenu ? closeWithDelay : undefined}
                 type="button"
             >
-                <span className="h-4 w-4 flex-shrink-0">{icon}</span>
+                <span className="h-4 w-4 shrink-0">{icon}</span>
                 <span className="flex-1">{label}</span>
                 {submenu && <ChevronRight className="h-4 w-4" />}
             </button>
             {submenu && (
-                <div className="invisible absolute top-0 left-full z-50 ml-1 opacity-0 transition-all duration-150 group-hover:visible group-hover:opacity-100">
+                <div
+                    className={cn(
+                        'absolute top-0 left-full z-50 ml-1',
+                        open ? 'visible opacity-100' : 'invisible opacity-0',
+                        'transition-all duration-150'
+                    )}
+                    ref={subMenuRef}
+                >
                     {submenu}
                 </div>
             )}
@@ -138,8 +205,23 @@ function MenuSeparator() {
 }
 
 function SubMenu({ children, className }: { children: React.ReactNode; className?: string }) {
+    const menuRef = useRef<HTMLDivElement>(null);
+
+    // Enfocar el primer elemento cuando se monta
+    useEffect(() => {
+        if (menuRef.current) {
+            const firstButton = menuRef.current.querySelector('button');
+            if (firstButton) {
+                firstButton.focus();
+            }
+        }
+    }, []);
+
     return (
-        <div className={cn('min-w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md', className)}>
+        <div
+            className={cn('min-w-56 rounded-md border bg-popover p-1 text-popover-foreground shadow-md', className)}
+            ref={menuRef}
+        >
             {children}
         </div>
     );
@@ -163,28 +245,60 @@ function EntityMenuItem({
 }) {
     const [open, setOpen] = useState(false);
     const hoverTimeout = useRef<number | null>(null);
+    const subMenuRef = useRef<HTMLDivElement | null>(null);
 
-    const openWithDelay = () => {
+    const openWithDelay = useCallback(() => {
         if (hoverTimeout.current) {
             window.clearTimeout(hoverTimeout.current);
             hoverTimeout.current = null;
         }
-        hoverTimeout.current = window.setTimeout(() => setOpen(true), 80);
-    };
+        hoverTimeout.current = window.setTimeout(() => setOpen(true), 100);
+    }, []);
 
-    const closeWithDelay = () => {
+    const closeWithDelay = useCallback(() => {
         if (hoverTimeout.current) {
             window.clearTimeout(hoverTimeout.current);
             hoverTimeout.current = null;
         }
-        hoverTimeout.current = window.setTimeout(() => setOpen(false), 120);
-    };
+        hoverTimeout.current = window.setTimeout(() => setOpen(false), 200);
+    }, []);
 
     useEffect(() => {
         return () => {
             if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current);
         };
     }, []);
+
+    const handleSubMenuMouseEnter = useCallback(() => {
+        if (hoverTimeout.current) window.clearTimeout(hoverTimeout.current);
+        setOpen(true);
+    }, []);
+
+    useEffect(() => {
+        const el = subMenuRef.current;
+        if (!el) return;
+
+        el.addEventListener('mouseenter', handleSubMenuMouseEnter);
+        el.addEventListener('mouseleave', closeWithDelay);
+        return () => {
+            el.removeEventListener('mouseenter', handleSubMenuMouseEnter);
+            el.removeEventListener('mouseleave', closeWithDelay);
+        };
+    }, [closeWithDelay, handleSubMenuMouseEnter]);
+
+    // Manejo de teclado para navegación
+    const handleKeyDown = (e: React.KeyboardEvent) => {
+        if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            e.stopPropagation();
+            setOpen(true);
+            // El foco se manejará cuando el submenú se monte
+        } else if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            e.stopPropagation();
+            setOpen(false);
+        }
+    };
 
     if (isLoading) {
         return (
@@ -218,6 +332,7 @@ function EntityMenuItem({
                 )}
                 onBlur={closeWithDelay}
                 onFocus={openWithDelay}
+                onKeyDown={handleKeyDown}
                 onMouseEnter={openWithDelay}
                 onMouseLeave={closeWithDelay}
                 type="button"
@@ -234,15 +349,15 @@ function EntityMenuItem({
                     'transition-all duration-150',
                     open ? 'translate-x-0' : 'translate-x-1'
                 )}
-                onMouseEnter={() => setOpen(true)}
-                onMouseLeave={closeWithDelay}
-                role="menu"
-                tabIndex={0}
+                role={open ? 'menu' : undefined}
+                tabIndex={open ? -1 : undefined}
+                ref={subMenuRef}
             >
                 {open && (
                     <SubMenu className="max-h-64 overflow-y-auto">
-                        {entities.map((entity) => (
+                        {entities.map((entity, index) => (
                             <button
+                                autoFocus={index === 0}
                                 className={cn(
                                     'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none',
                                     'hover:bg-accent hover:text-accent-foreground',
@@ -250,6 +365,14 @@ function EntityMenuItem({
                                 )}
                                 key={entity.id}
                                 onClick={() => onSelect(baseAction as ContextMenuAction, entity.id)}
+                                onKeyDown={(e) => {
+                                    if (e.key === 'ArrowLeft') {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        setOpen(false);
+                                        // Focus parent logic would go here if we had ref to it
+                                    }
+                                }}
                                 type="button"
                             >
                                 {entity.icon ? <span className="mr-2">{entity.icon}</span> : icon}
@@ -311,7 +434,11 @@ export function ItemContextMenu({
         };
     }, [isOpen, onClose]);
 
-    if (!isOpen || !position) {
+    if (!isOpen) {
+        return null;
+    }
+
+    if (!position) {
         return null;
     }
 

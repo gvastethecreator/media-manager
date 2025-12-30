@@ -13,3 +13,15 @@ export {
 } from './use-keyboard';
 export { usePagination, type UsePaginationOptions, type UsePaginationResult } from './use-pagination';
 export { useAddToEntity, actionToEntityType, type EntityType } from './use-add-to-entity';
+
+// Hooks de datos de carpetas
+export {
+	useFolderFilesPaginated,
+	useFolderStats,
+	useFolderCacheInvalidation,
+	type FolderFile,
+	type FolderFilesResponse,
+	type FolderStatsResponse,
+	type UseFolderFilesPaginatedOptions,
+	type UseFolderFilesPaginatedResult,
+} from './use-folder-files-paginated';

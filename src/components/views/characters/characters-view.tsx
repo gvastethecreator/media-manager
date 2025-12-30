@@ -1,4 +1,5 @@
 import { useCallback, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 import { useCharacters, useCreateCharacter } from '@/lib/api/characters';
 import { clientEvents } from '@/lib/client/events.client';
@@ -10,6 +11,7 @@ import CharactersContentView from './characters-content-view';
 const viewLogger = clientLogger.withContext('CharactersView');
 
 export function CharactersView(_props: ViewProps) {
+	const navigate = useNavigate();
 	const { selectedCharacterId, selectCharacter } = useCharacterStore();
 	const { mutate: createCharacter } = useCreateCharacter();
 
@@ -26,19 +28,21 @@ export function CharactersView(_props: ViewProps) {
 		refetch,
 	} = useCharacters({
 		search: localSearch,
-		sortBy: 'name',
-		sortOrder: 'asc',
+		limit: 100,
+		sortBy: 'updatedAt',
+		sortOrder: 'desc',
 	});
 
 	const characters = charactersResponse?.data || [];
 
 	const handleCharacterSelect = useCallback(
 		(characterId: string) => {
-			viewLogger.info('🎭 Seleccionando character', { characterId });
+			viewLogger.info('🎭 Seleccionando character y navegando', { characterId });
 			selectCharacter(characterId);
 			clientEvents.emit('character:selected', { characterId });
+			navigate(`/characters/${characterId}`);
 		},
-		[selectCharacter]
+		[selectCharacter, navigate]
 	);
 
 	const handleCreateCharacter = useCallback(() => {

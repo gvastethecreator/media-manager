@@ -7,7 +7,7 @@ import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 
 // Lazy load InterfaceSection para no impactar bundle inicial
-const FileBrowserSettings = lazy(() => import('@/components/features/file-browser/components/file-browser-settings'));
+const FileBrowserSettings = lazy(() => import('@/components/features/file-browser-new/components/settings'));
 
 // Componente para manejar la carga perezosa del StatsPanel
 const LazyStatsPanel = reactMemo(function RightPanelLazyStatsPanel({

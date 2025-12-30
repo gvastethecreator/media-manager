@@ -1,29 +1,28 @@
-'use client';
+import { cn } from "@/lib/utils"
 
-import { cva, type VariantProps } from 'class-variance-authority';
-import * as React from 'react';
-import { cn } from '@/lib/utils';
-
-const kbdVariants = cva('inline-flex items-center justify-center rounded-md font-mono', {
-	variants: {
-		variant: {
-			default: 'border border-border bg-accent text-accent-foreground',
-			outline: 'border border-input text-accent-foreground',
-		},
-		size: {
-			md: 'h-7 min-w-7 px-1.5 text-xs [&_svg]:size-3.5',
-			sm: 'h-6 min-w-6 px-1 text-[0.75rem] leading-[0.75rem] [&_svg]:size-3',
-			xs: 'h-5 min-w-5 px-1 text-[0.6875rem] leading-[0.75rem] [&_svg]:size-3',
-		},
-	},
-	defaultVariants: {
-		variant: 'default',
-		size: 'md',
-	},
-});
-
-function Kbd({ className, variant, size, ...props }: React.ComponentProps<'kbd'> & VariantProps<typeof kbdVariants>) {
-	return <kbd className={cn(kbdVariants({ variant, size }), className)} data-slot="kbd" {...props} />;
+function Kbd({ className, ...props }: React.ComponentProps<"kbd">) {
+  return (
+    <kbd
+      data-slot="kbd"
+      className={cn(
+        "bg-muted text-muted-foreground pointer-events-none inline-flex h-5 w-fit min-w-5 select-none items-center justify-center gap-1 rounded-sm px-1 font-sans text-xs font-medium",
+        "[&_svg:not([class*='size-'])]:size-3",
+        "[[data-slot=tooltip-content]_&]:bg-background/20 [[data-slot=tooltip-content]_&]:text-background dark:[[data-slot=tooltip-content]_&]:bg-background/10",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
-export { Kbd, kbdVariants };
+function KbdGroup({ className, ...props }: React.ComponentProps<"div">) {
+  return (
+    <kbd
+      data-slot="kbd-group"
+      className={cn("inline-flex items-center gap-1", className)}
+      {...props}
+    />
+  )
+}
+
+export { Kbd, KbdGroup }
