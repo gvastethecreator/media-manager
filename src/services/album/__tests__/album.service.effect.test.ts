@@ -4,12 +4,12 @@
  * @created 2025-10-11 - Fase 3 Effect Implementation
  */
 
+import { eq } from 'drizzle-orm';
 import { Effect, Exit } from 'effect';
 import { db } from '@/lib/drizzle';
 import { albums, imageAlbums } from '@/lib/drizzle/schema';
-import { eq } from 'drizzle-orm';
 import { AlbumService, AlbumServiceLive, type GetAlbumsOptions } from '../album.service.effect';
-import { AlbumNotFound, AlbumNameConflict } from '../album-errors.effect';
+import { AlbumNameConflict, AlbumNotFound } from '../album-errors.effect';
 
 // Helper para ejecutar Effect con timeout
 const runEffect = <A, E>(effect: Effect.Effect<A, E, AlbumService>, timeout = 5000) => {

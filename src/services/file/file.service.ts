@@ -157,7 +157,7 @@ export async function getDirectoryInfo(dirPath: string): Promise<DirectoryReadRe
 		const items = await fs.readdir(normalizedPath, { withFileTypes: true });
 
 		// Procesar cada elemento (sin await en bucles)
-		const processedItems: FileBase[] = await Promise.all(
+		const processedItemsResults = await Promise.allSettled(
 			items.map(async (item) => {
 				const itemPath = path.join(normalizedPath, item.name);
 				const itemStats = await stat(itemPath);
@@ -185,6 +185,18 @@ export async function getDirectoryInfo(dirPath: string): Promise<DirectoryReadRe
 				return fileBase;
 			})
 		);
+
+		const processedItems = processedItemsResults
+			.filter((result): result is PromiseFulfilledResult<FileBase> => result.status === 'fulfilled')
+			.map((result) => result.value);
+
+		const errors = processedItemsResults.filter(
+			(result): result is PromiseRejectedResult => result.status === 'rejected'
+		);
+
+		if (errors.length > 0) {
+			logger.warn(`⚠️ Se omitieron ${errors.length} archivos debido a errores (posiblemente nombres largos o permisos)`);
+		}
 
 		// Usar transformer para serializar el resultado
 		const result = serializeDirectoryContents(normalizedPath, processedItems);
@@ -257,17 +269,23 @@ export async function getDirectoryInfoConcurrent(dirPath: string): Promise<Direc
 			// timeout por item
 			Effect.timeout('10 seconds'),
 			// reintentos con backoff corto (3 intentos)
-			Effect.retry(Schedule.addDelay(Schedule.recurs(2), () => '150 millis'))
+			Effect.retry(Schedule.addDelay(Schedule.recurs(2), () => '150 millis')),
+			// Catch errors to avoid failing the whole batch
+			Effect.catchAll((error) => {
+				logger.warn(`⚠️ Omitiendo archivo ${item.name.substring(0, 50)}... por error:`, error);
+				return Effect.succeed(null);
+			})
 		);
 
 		return eff;
 	};
 
 	// Ejecutar con concurrencia limitada
-	const effectAll = Effect.all(dirents.map(processItem), { concurrency: 8, mode: 'validate' as const });
+	const effectAll = Effect.all(dirents.map(processItem), { concurrency: 8 });
 
 	try {
-		const processedItems = await Effect.runPromise(effectAll);
+		const results = await Effect.runPromise(effectAll);
+		const processedItems = results.filter((item): item is FileBase => item !== null);
 		const result = serializeDirectoryContents(normalizedPath, processedItems);
 		logger.info('✅ (Effect) Contenido del directorio obtenido:', {
 			path: normalizedPath,

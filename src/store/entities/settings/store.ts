@@ -4,9 +4,9 @@
 
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { interfacePreferencesSchema } from '@/types/ui/interface.schema';
 import type { InterfacePreferences, InterfaceSettingsState } from '@/types/ui/types';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 // Estado inicial por defecto
 const defaultPreferences: InterfacePreferences = {

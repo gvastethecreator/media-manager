@@ -4,11 +4,10 @@
  * @description Wrapper de Drizzle ORM como servicio de Effect para dependency injection
  */
 
-import { Context, Effect, Layer } from 'effect';
-import { db } from '@/lib/drizzle';
 import type { ExtractTablesWithRelations } from 'drizzle-orm';
 import type { SQLiteTransaction } from 'drizzle-orm/sqlite-core';
-import type { BunSQLiteDatabase } from 'drizzle-orm/bun-sqlite';
+import { Context, Effect, Layer } from 'effect';
+import { db } from '@/lib/drizzle';
 
 /**
  * Tipo de la instancia de Drizzle DB
@@ -30,7 +29,10 @@ export type DrizzleTx = SQLiteTransaction<
  */
 export class TransactionError extends Error {
 	readonly _tag = 'TransactionError';
-	constructor(message: string, readonly cause?: unknown) {
+	constructor(
+		message: string,
+		readonly cause?: unknown
+	) {
 		super(message);
 		this.name = 'TransactionError';
 	}
@@ -38,7 +40,7 @@ export class TransactionError extends Error {
 
 /**
  * Servicio de Drizzle con operaciones type-safe
- * 
+ *
  * @example
  * ```typescript
  * const program = Effect.gen(function*() {
@@ -62,7 +64,7 @@ export class DrizzleService extends Context.Tag('DrizzleService')<
 		/**
 		 * Ejecuta una query dentro de un Effect
 		 * Envuelve automáticamente errores en Effect
-		 * 
+		 *
 		 * @param fn - Función que recibe la DB y retorna una Promise
 		 */
 		readonly query: <A>(fn: (db: DrizzleDB) => Promise<A>) => Effect.Effect<A, Error>;
@@ -70,7 +72,7 @@ export class DrizzleService extends Context.Tag('DrizzleService')<
 		/**
 		 * Ejecuta múltiples operaciones en una transacción
 		 * Si alguna falla, toda la transacción se revierte
-		 * 
+		 *
 		 * @param fn - Función que recibe la transacción y retorna un Effect
 		 */
 		readonly transaction: <A, E>(
@@ -85,7 +87,9 @@ export class DrizzleService extends Context.Tag('DrizzleService')<
 const make = (): {
 	readonly db: DrizzleDB;
 	readonly query: <A>(fn: (db: DrizzleDB) => Promise<A>) => Effect.Effect<A, Error>;
-	readonly transaction: <A, E>(fn: (tx: DrizzleTx) => Effect.Effect<A, E, never>) => Effect.Effect<A, E | TransactionError, never>;
+	readonly transaction: <A, E>(
+		fn: (tx: DrizzleTx) => Effect.Effect<A, E, never>
+	) => Effect.Effect<A, E | TransactionError, never>;
 } => ({
 	db,
 
@@ -114,14 +118,14 @@ const make = (): {
 
 /**
  * Layer que proporciona el servicio Drizzle
- * 
+ *
  * @example
  * ```typescript
  * const program = Effect.gen(function*() {
  *   const drizzle = yield* DrizzleService;
  *   return yield* drizzle.query((db) => db.select().from(tags));
  * });
- * 
+ *
  * // Ejecutar con el layer
  * const result = await Effect.runPromise(
  *   program.pipe(Effect.provide(DrizzleLive))
@@ -132,7 +136,7 @@ export const DrizzleLive = Layer.succeed(DrizzleService, make());
 
 /**
  * Helper para queries simples sin necesidad de acceder al servicio completo
- * 
+ *
  * @example
  * ```typescript
  * const tags = await runQuery((db) =>
@@ -148,7 +152,7 @@ export const runQuery = <A>(fn: (db: DrizzleDB) => Promise<A>): Effect.Effect<A,
 
 /**
  * Helper para ejecutar operaciones en transacción
- * 
+ *
  * @example
  * ```typescript
  * const result = await runTransaction((tx) =>

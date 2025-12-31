@@ -19,11 +19,7 @@ export class CursorPaginationInput extends Schema.Class<CursorPaginationInput>('
 		})
 	),
 	limit: Schema.optional(
-		Schema.Number.pipe(
-			Schema.int(),
-			Schema.positive(),
-			Schema.lessThanOrEqualTo(100)
-		).annotations({
+		Schema.Number.pipe(Schema.int(), Schema.positive(), Schema.lessThanOrEqualTo(100)).annotations({
 			description: 'Items per page (max 100)',
 			default: 20,
 		})
@@ -64,7 +60,12 @@ export class MultiSortOptions extends Schema.Class<MultiSortOptions>('MultiSortO
 		})
 	).annotations({
 		description: 'Array of sort conditions applied in order',
-		examples: [[{ field: 'isFavorite', order: 'desc' }, { field: 'name', order: 'asc' }]],
+		examples: [
+			[
+				{ field: 'isFavorite', order: 'desc' },
+				{ field: 'name', order: 'asc' },
+			],
+		],
 	}),
 }) {}
 
@@ -245,32 +246,21 @@ export class ImageFilters extends Schema.Class<ImageFilters>('ImageFilters')({
  * Opciones completas de query para listado de entidades
  * Combina paginación, sorting, búsqueda y filtrado
  */
-export const makeQueryOptions = <FilterSchema extends Schema.Schema.Any>(
-	filterSchema: FilterSchema
-) =>
+export const makeQueryOptions = <FilterSchema extends Schema.Schema.Any>(filterSchema: FilterSchema) =>
 	Schema.Struct({
 		// Pagination
 		limit: Schema.optional(
-			Schema.Number.pipe(
-				Schema.int(),
-				Schema.positive(),
-				Schema.lessThanOrEqualTo(100)
-			).annotations({ default: 20 })
+			Schema.Number.pipe(Schema.int(), Schema.positive(), Schema.lessThanOrEqualTo(100)).annotations({ default: 20 })
 		),
-		offset: Schema.optional(
-			Schema.Number.pipe(
-				Schema.int(),
-				Schema.nonNegative()
-			).annotations({ default: 0 })
-		),
-		
+		offset: Schema.optional(Schema.Number.pipe(Schema.int(), Schema.nonNegative()).annotations({ default: 0 })),
+
 		// Sorting
 		sortBy: Schema.optional(Schema.String),
 		sortOrder: Schema.optional(Schema.Literal('asc', 'desc').annotations({ default: 'asc' })),
-		
+
 		// Search
 		search: Schema.optional(Schema.String),
-		
+
 		// Filters
 		filters: Schema.optional(filterSchema),
 	});
@@ -373,11 +363,11 @@ export class CategoryDistribution extends Schema.Class<CategoryDistribution>('Ca
 // ============= Export All =============
 
 export {
+	BooleanFilters,
+	DateRange,
 	// Re-export from common for convenience
 	PaginationInput,
 	PaginationMeta,
-	SortOptions,
-	DateRange,
 	SearchOptions,
-	BooleanFilters,
+	SortOptions,
 } from './common';

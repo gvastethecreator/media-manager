@@ -105,18 +105,18 @@ export function GroupsSettings() {
 			}
 			return (
 				groupStats.imageCount +
-					groupStats.videoCount +
-					groupStats.albumCount +
-					groupStats.collectionCount +
-					groupStats.tagCount +
-					groupStats.characterCount +
-					groupStats.placeCount +
-					groupStats.worldItemCount +
-					groupStats.conceptCount +
-					groupStats.promptCount +
-					groupStats.noteCount +
-					groupStats.wildcardCount +
-					groupStats.propertyCount ===
+				groupStats.videoCount +
+				groupStats.albumCount +
+				groupStats.collectionCount +
+				groupStats.tagCount +
+				groupStats.characterCount +
+				groupStats.placeCount +
+				groupStats.worldItemCount +
+				groupStats.conceptCount +
+				groupStats.promptCount +
+				groupStats.noteCount +
+				groupStats.wildcardCount +
+				groupStats.propertyCount ===
 				0
 			);
 		}).length;
@@ -192,10 +192,10 @@ export function GroupsSettings() {
 	return (
 		<div className="grid grid-cols-12 gap-3">
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-dt-md border-none bg-muted/30 shadow-sm">
 					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
-							<CardTitle className="font-bold text-xl">Grupos</CardTitle>
+							<CardTitle className="text-heading-lg">Grupos</CardTitle>
 							<Button onClick={() => setIsCreateDialogOpen(true)} size="sm" variant="ghost">
 								<PlusIcon className="h-4 w-4" />
 							</Button>
@@ -234,9 +234,8 @@ export function GroupsSettings() {
 							<div className="space-y-1 p-2">
 								{sortedGroups.map((group) => (
 									<div
-										className={`group/item relative rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${
-											selectedGroup?.id === group.id ? 'bg-secondary text-secondary-foreground' : ''
-										}`}
+										className={`group/item relative rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${selectedGroup?.id === group.id ? 'bg-secondary text-secondary-foreground' : ''
+											}`}
 										key={group.id}
 									>
 										<Button
@@ -291,11 +290,11 @@ export function GroupsSettings() {
 						onSubmit={(data) => handleUpdateGroup(selectedGroup.id, data)}
 					/>
 				) : (
-					<Card className="flex h-[calc(100vh-8rem)] flex-col items-center justify-center rounded-sm border-none bg-muted/30">
+					<Card className="flex h-[calc(100vh-8rem)] flex-col items-center justify-center rounded-dt-md border-none bg-muted/30 shadow-sm">
 						<div className="text-center">
 							<FolderIcon className="mx-auto h-12 w-12 text-gray-400" />
-							<h3 className="mt-2 font-medium text-gray-900 text-sm dark:text-gray-100">Selecciona un grupo</h3>
-							<p className="mt-1 text-gray-500 text-sm">O crea uno nuevo para empezar a organizarte</p>
+							<h3 className="mt-2 font-medium text-foreground text-heading-sm">Selecciona un grupo</h3>
+							<p className="mt-1 text-caption text-muted-foreground">O crea uno nuevo para empezar a organizarte</p>
 						</div>
 					</Card>
 				)}

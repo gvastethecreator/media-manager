@@ -1,7 +1,7 @@
 import { ImageOff } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAlbumRecentMedia } from '@/lib/api/albums';
 import { cn } from '@/lib/utils';
-import { Skeleton } from '@/components/ui/skeleton';
 
 interface AlbumCardImagesProps {
 	albumId: string;
@@ -23,18 +23,13 @@ export function AlbumCardImages({
 	className,
 }: AlbumCardImagesProps) {
 	// Cargar thumbnails desde API si no se proporcionan
-	const { data: mediaData, isLoading } = useAlbumRecentMedia(
-		albumId,
-		6
-	);
+	const { data: mediaData, isLoading } = useAlbumRecentMedia(albumId, 6);
 
 	// Usar datos proporcionados o cargados desde API
-	const images = recentImages.length > 0
-		? recentImages
-		: (mediaData?.filter(m => !m.isVideo).map(m => m.thumbnailUrl) ?? []);
-	const videos = recentVideos.length > 0
-		? recentVideos
-		: (mediaData?.filter(m => m.isVideo).map(m => m.thumbnailUrl) ?? []);
+	const images =
+		recentImages.length > 0 ? recentImages : (mediaData?.filter((m) => !m.isVideo).map((m) => m.thumbnailUrl) ?? []);
+	const videos =
+		recentVideos.length > 0 ? recentVideos : (mediaData?.filter((m) => m.isVideo).map((m) => m.thumbnailUrl) ?? []);
 
 	// Combinar imágenes y videos, limitando a 6 items
 	const allImages = [...images, ...videos].slice(0, 6);
@@ -44,7 +39,7 @@ export function AlbumCardImages({
 		return (
 			<div className={cn('grid grid-cols-3 gap-1 p-1.5', compact ? 'h-25' : 'h-35', className)}>
 				{[...new Array(compact ? 4 : 6)].map((_, i) => (
-					<Skeleton key={i} className="h-full w-full rounded bg-primary/10" />
+					<Skeleton className="h-full w-full rounded bg-primary/10" key={i} />
 				))}
 			</div>
 		);

@@ -4,7 +4,7 @@
  * @description Servicio unificado para obtener todos los tipos de archivos de una carpeta con paginación optimizada
  */
 
-import { and, asc, count, desc, eq, inArray, like, sql } from 'drizzle-orm';
+import { and, count, eq, inArray, like, sql } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { audios, documents, file3Ds, folders, images, jsonFiles, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -78,7 +78,8 @@ function mapImageToFolderFile(image: any): FolderFile {
 		folderId: image.folderId,
 		entityType: 'image',
 		extension: image.extension || '',
-		thumbnailPath: image.thumbnailPath,
+		// Generar URL de API para thumbnail (NO usar thumbnailPath que puede contener base64)
+		thumbnailPath: `/api/images/${image.id}/thumbnail`,
 		metadata: {
 			width: image.width,
 			height: image.height,
@@ -105,7 +106,8 @@ function mapVideoToFolderFile(video: any): FolderFile {
 		folderId: video.folderId,
 		entityType: 'video',
 		extension: video.extension || '',
-		thumbnailPath: video.thumbnailPath,
+		// Generar URL de API para thumbnail (NO usar thumbnailPath que puede contener base64)
+		thumbnailPath: `/api/videos/${video.id}/thumbnail`,
 		metadata: {
 			duration: video.duration,
 			width: video.width,
@@ -298,12 +300,13 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 		const unionQueries = [];
 
 		// Imágenes
+		// NOTA: No seleccionamos `thumbnail` (base64) - generamos URL desde ID en mapRowToFolderFile
 		if (fileTypes.includes('image')) {
 			unionQueries.push(sql`
 				SELECT
 					id, name, path, size, createdAt, updatedAt, folderId, 'image' as entityType,
 					NULL as extension,
-					thumbnail,
+					NULL as thumbnail,
 					metadata,
 					isFavorite,
 					0 as views
@@ -313,12 +316,13 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 		}
 
 		// Videos
+		// NOTA: No seleccionamos `thumbnail` (base64) - generamos URL desde ID en mapRowToFolderFile
 		if (fileTypes.includes('video')) {
 			unionQueries.push(sql`
 				SELECT
 					id, name, path, size, createdAt, updatedAt, folderId, 'video' as entityType,
 					NULL as extension,
-					thumbnail,
+					NULL as thumbnail,
 					metadata,
 					isFavorite,
 					0 as views
@@ -593,6 +597,20 @@ export async function getFolderFileStats(folderId: string, includeSubfolders = f
 }
 
 function mapRowToFolderFile(row: any): FolderFile {
+	// Generar URL de thumbnail basada en entityType e id
+	// NO usar row.thumbnail que contiene el contenido base64 (causaría ENAMETOOLONG)
+	let thumbnailPath: string | undefined;
+	if (row.entityType === 'image') {
+		thumbnailPath = `/api/images/${row.id}/thumbnail`;
+	} else if (row.entityType === 'video') {
+		thumbnailPath = `/api/videos/${row.id}/thumbnail`;
+	}
+	// audios, documents, json, 3d no tienen thumbnail API por defecto
+
+	// Parse metadata y excluir thumbnail (contiene base64 pesado)
+	const rawMetadata = typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata;
+	const { thumbnail: _thumbnailData, ...cleanMetadata } = rawMetadata || {};
+
 	return {
 		id: row.id,
 		name: row.name,
@@ -603,8 +621,8 @@ function mapRowToFolderFile(row: any): FolderFile {
 		folderId: row.folderId,
 		entityType: row.entityType,
 		extension: row.extension || getExtensionFromPath(row.path),
-		thumbnailPath: row.thumbnail,
-		metadata: typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata,
+		thumbnailPath,
+		metadata: cleanMetadata,
 		stats: {
 			views: Number(row.views || 0),
 			isFavorite: Boolean(row.isFavorite),

@@ -60,7 +60,10 @@ export class AudioMetadataService {
 				},
 			};
 		} catch (error) {
-			serverLogger.warn('AudioMetadataService: fallo extrayendo metadata para', { filePath: basename(filePath), error: String(error) });
+			serverLogger.warn('AudioMetadataService: fallo extrayendo metadata para', {
+				filePath: basename(filePath),
+				error: String(error),
+			});
 			return { duration: null, bitrate: null, sampleRate: null, channels: null, format: null, codec: null, tags: null };
 		}
 	}

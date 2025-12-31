@@ -360,10 +360,10 @@ export function WildcardsSettings() {
 		<div className="grid grid-cols-12 gap-3">
 			{/* Panel izquierdo: Lista jerárquica de comodines */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-dt-md border-none bg-muted/30 shadow-sm">
 					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
-							<CardTitle className="font-bold text-xl">Comodines</CardTitle>
+							<CardTitle className="text-heading-lg">Comodines</CardTitle>
 							<Button onClick={() => setIsCreateDialogOpen(true)} size="sm" variant="ghost">
 								<PlusIcon className="h-4 w-4" />
 							</Button>
@@ -373,7 +373,7 @@ export function WildcardsSettings() {
 
 						<div className="flex gap-2">
 							<div className="relative w-full">
-								<SearchIcon className="-translate-y-1/2 absolute top-1/2 left-2 h-4 w-4 transform text-muted-foreground" />
+								<SearchIcon className="absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
 								<Input
 									className="h-8 pl-8"
 									onChange={(e) => setSearchQuery(e.target.value)}
@@ -428,7 +428,7 @@ export function WildcardsSettings() {
 
 			{/* Panel derecho: Formulario y Preview */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-dt-md border-none bg-muted/30 shadow-sm">
 					{selectedWildcard ? (
 						isEditMode ? (
 							<Dialog onOpenChange={setIsEditMode} open={isEditMode}>

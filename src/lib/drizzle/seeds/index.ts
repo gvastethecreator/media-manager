@@ -1,18 +1,18 @@
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
-import { seedFolders } from './folders.seed';
-import { seedTags } from './tags.seed';
+import { seedAlbums } from './albums.seed';
 import { seedCharacters } from './characters.seed';
 import { seedCollections } from './collections.seed';
-import { seedAlbums } from './albums.seed';
-import { seedPlaces } from './places.seed';
 import { seedConcepts } from './concepts.seed';
-import { seedWorldItems } from './worldItems.seed';
-import { seedPrompts } from './prompts.seed';
-import { seedWildcards } from './wildcards.seed';
-import { seedProfiles } from './profiles.seed';
-import { seedNotes } from './notes.seed';
+import { seedFolders } from './folders.seed';
 import { seedGroups } from './groups.seed';
+import { seedNotes } from './notes.seed';
+import { seedPlaces } from './places.seed';
+import { seedProfiles } from './profiles.seed';
+import { seedPrompts } from './prompts.seed';
+import { seedTags } from './tags.seed';
+import { seedWildcards } from './wildcards.seed';
+import { seedWorldItems } from './worldItems.seed';
 
 /**
  * =================================================================================

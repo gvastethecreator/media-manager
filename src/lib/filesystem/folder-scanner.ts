@@ -461,6 +461,19 @@ async function processFileEntry(
 			return;
 		}
 
+		// Protección contra rutas demasiado largas
+		if (fullPath.length > 260) {
+			// Windows MAX_PATH es 260, aunque Node lo maneja, a veces falla con ENAMETOOLONG
+			// Si es extremadamente largo (como el base64 del error), lo saltamos
+			if (fullPath.length > 1000) {
+				scannerLogger.warn('⚠️ Saltando archivo con ruta extremadamente larga:', {
+					pathLength: fullPath.length,
+					name: path.basename(fullPath).substring(0, 50) + '...',
+				});
+				return;
+			}
+		}
+
 		const stats = await fs.stat(fullPath);
 		const extension = path.extname(fullPath).toLowerCase();
 

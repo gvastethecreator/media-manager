@@ -161,11 +161,11 @@ export function CollectionsSettings() {
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
 		return (
-			<Card className="rounded-sm border-none bg-muted/30">
+			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-3">
 						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-						<p className="text-muted-foreground text-sm">Cargando colecciones...</p>
+						<p className="text-body-sm text-muted-foreground">Cargando colecciones...</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -174,13 +174,13 @@ export function CollectionsSettings() {
 
 	if (error) {
 		return (
-			<Card className="rounded-sm border-none bg-muted/30">
+			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<CardContent>
 					<div className="flex flex-col items-center gap-4 p-6 text-center">
 						<AlertCircle className="h-12 w-12 text-destructive" />
 						<div>
-							<h3 className="font-semibold text-lg">Error al cargar colecciones</h3>
-							<p className="mt-1 text-muted-foreground text-sm">
+							<h3 className="text-heading-sm">Error al cargar colecciones</h3>
+							<p className="mt-1 text-body-sm text-muted-foreground">
 								{error instanceof Error ? error.message : 'Error desconocido'}
 							</p>
 						</div>
@@ -197,13 +197,13 @@ export function CollectionsSettings() {
 		<div className="grid grid-cols-12 gap-3">
 			{/* Panel izquierdo: Lista de colecciones */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-dt-md border-none bg-muted/30 shadow-sm">
 					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
-							<CardTitle className="flex items-center text-sm">
+							<CardTitle className="flex items-center text-body-sm">
 								Colecciones ({filteredCollections.length})
 								{filteredCollections.length !== collections.length && (
-									<Badge className="ml-2 text-[10px]" variant="outline">
+									<Badge className="ml-2 text-caption" variant="outline">
 										Filtradas
 									</Badge>
 								)}
@@ -216,11 +216,13 @@ export function CollectionsSettings() {
 										</Button>
 									</PopoverTrigger>
 									<PopoverContent align="end" className="w-72">
-										<div className="space-y-4">
-											<h4 className="font-medium text-sm">Filtrar Colecciones</h4>
+										<div className="space-y-stack-sm">
+											<h4 className="font-medium text-body-sm">Filtrar Colecciones</h4>
 
-											<div className="space-y-2">
-												<Label htmlFor="search">Buscar</Label>
+											<div className="space-y-1.5">
+												<Label className="text-caption" htmlFor="search">
+													Buscar
+												</Label>
 												<Input
 													id="search"
 													onChange={(e) => setSearchQuery(e.target.value)}
@@ -229,8 +231,8 @@ export function CollectionsSettings() {
 												/>
 											</div>
 
-											<div className="space-y-2">
-												<Label>Categorías</Label>
+											<div className="space-y-1.5">
+												<Label className="text-caption">Categorías</Label>
 												<div className="grid grid-cols-2 gap-2">
 													{Object.values(CollectionCategory).map((category) => (
 														<div className="flex items-center space-x-2" key={category}>
@@ -243,7 +245,7 @@ export function CollectionsSettings() {
 																	);
 																}}
 															/>
-															<Label className="text-sm" htmlFor={`category-${category}`}>
+															<Label className="text-body-sm" htmlFor={`category-${category}`}>
 																{category}
 															</Label>
 														</div>
@@ -257,7 +259,7 @@ export function CollectionsSettings() {
 													id="only-favorites"
 													onCheckedChange={(checked) => setOnlyFavorites(Boolean(checked))}
 												/>
-												<Label className="text-sm" htmlFor="only-favorites">
+												<Label className="text-body-sm" htmlFor="only-favorites">
 													Solo favoritos
 												</Label>
 											</div>
@@ -286,8 +288,8 @@ export function CollectionsSettings() {
 								)}
 								{filteredCollections.map((collection: CollectionWithStats) => (
 									<div
-										className={`flex items-center justify-between rounded-md p-2 transition-colors${
-											selectedCollection?.id === collection.id ? ' bg-accent text-accent-foreground' : ' hover:bg-muted'
+										className={`flex items-center justify-between rounded-dt-sm p-2 transition-colors${
+											selectedCollection?.id === collection.id ? 'bg-accent text-accent-foreground' : 'hover:bg-muted'
 										}`}
 										key={collection.id}
 									>
@@ -300,8 +302,8 @@ export function CollectionsSettings() {
 												{COLLECTION_CATEGORY_EMOJIS[collection.category as CollectionCategory] || '📚'}
 											</span>
 											<div className="flex flex-col">
-												<span className="font-medium text-sm">{collection.name}</span>
-												<span className="text-muted-foreground text-xs">
+												<span className="text-body-sm">{collection.name}</span>
+												<span className="text-caption text-muted-foreground">
 													{collection.stats?.imageCount || 0} imágenes
 												</span>
 											</div>
@@ -325,12 +327,12 @@ export function CollectionsSettings() {
 			</div>
 			{/* Panel derecho: Formulario de edición/creación */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-dt-md border-none bg-muted/30 shadow-sm">
 					<CardHeader className="px-3 py-2">
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="text-sm">{isEditing ? 'Editar Colección' : 'Nueva Colección'}</CardTitle>
-								<CardDescription className="text-xs">
+								<CardTitle className="text-body-sm">{isEditing ? 'Editar Colección' : 'Nueva Colección'}</CardTitle>
+								<CardDescription className="text-caption">
 									{isEditing
 										? 'Modifica los detalles de la colección seleccionada'
 										: 'Completa el formulario para crear una nueva colección'}
@@ -339,11 +341,11 @@ export function CollectionsSettings() {
 							<div className="flex gap-1">
 								{isEditing && selectedCollection && (
 									<>
-										<Button className="h-7 text-xs" onClick={handleReset} size="sm" variant="outline">
+										<Button className="h-7 text-caption" onClick={handleReset} size="sm" variant="outline">
 											Cancelar
 										</Button>
 										<Button
-											className="h-7 text-xs"
+											className="h-7 text-caption"
 											onClick={() => handleDeleteCollection(selectedCollection.id)}
 											size="sm"
 											variant="destructive"
@@ -375,12 +377,12 @@ export function CollectionsSettings() {
 									/>
 								</div>
 								<div className="hidden flex-col items-center justify-start lg:flex">
-									<h3 className="mb-2 font-medium text-xs">Vista Previa</h3>
-									<div className="w-[220px] transition-all duration-300">
+									<h3 className="mb-2 font-medium text-caption">Vista Previa</h3>
+									<div className="w-55 transition-all duration-300">
 										{previewData || selectedCollection ? (
-											<div className="flex flex-col rounded-lg border bg-background p-4">
+											<div className="flex flex-col rounded-dt-md border bg-background p-4">
 												<div
-													className="mb-3 flex aspect-video w-full items-center justify-center rounded-md bg-muted"
+													className="mb-3 flex aspect-video w-full items-center justify-center rounded-dt-sm bg-muted"
 													style={{
 														backgroundColor:
 															COLLECTION_CATEGORY_COLORS[
@@ -394,36 +396,36 @@ export function CollectionsSettings() {
 														] || '📚'}
 													</span>
 												</div>
-												<h3 className="font-medium text-lg">
+												<h3 className="text-heading-sm">
 													{previewData?.name || selectedCollection?.name || 'Nueva Colección'}
 												</h3>
-												<p className="mt-2 text-muted-foreground text-sm">
+												<p className="mt-2 text-body-sm text-muted-foreground">
 													{previewData?.description || selectedCollection?.description || 'Sin descripción'}
 												</p>
 
 												<div className="mt-3 flex flex-wrap gap-2">
 													{(previewData?.category || selectedCollection?.category) && (
-														<Badge className="text-xs" variant="secondary">
+														<Badge className="text-caption" variant="secondary">
 															{previewData?.category || selectedCollection?.category}
 														</Badge>
 													)}
 													{(previewData?.isFavorite || selectedCollection?.isFavorite) && (
-														<Badge className="text-xs" variant="outline">
+														<Badge className="text-caption" variant="outline">
 															Favorito
 														</Badge>
 													)}
 												</div>
 
 												{selectedCollection?.stats?.imageCount ? (
-													<p className="mt-4 text-muted-foreground text-xs">
+													<p className="mt-4 text-caption text-muted-foreground">
 														{selectedCollection.stats.imageCount} imágenes asociadas
 													</p>
 												) : null}
 											</div>
 										) : (
-											<div className="flex h-[260px] flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50">
+											<div className="flex h-65 flex-col items-center justify-center rounded-dt-md border border-dashed bg-muted/50">
 												<Library className="h-7 w-7 text-muted-foreground/50" />
-												<p className="mt-2 text-[10px] text-muted-foreground">Vista previa</p>
+												<p className="mt-2 text-caption text-muted-foreground">Vista previa</p>
 											</div>
 										)}
 									</div>

@@ -1,10 +1,10 @@
 import { ChevronDown, ChevronRight, Edit2, RefreshCw, Trash2 } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { SimpleTooltip } from './common/simple-tooltip';
 import type { ExtendedFolder, ExtendedProcessStatus } from './folder-types';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 interface NormalModeControlsProps {
 	folder: ExtendedFolder;

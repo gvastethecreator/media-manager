@@ -1,4 +1,3 @@
-import { formatDistanceToNow, esLocale } from '@/lib/utils/date';
 import { Cpu, Database, HardDrive, Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import {
@@ -16,17 +15,24 @@ import {
 	XAxis,
 	YAxis,
 } from 'recharts';
+import type { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CHART_COLORS, METRIC_COLORS } from '@/lib/styles/chart-colors';
+import { esLocale, formatDistanceToNow } from '@/lib/utils/date';
 import { useTechMetrics } from '../hooks/use-tech-metrics';
 
 // Formateador para números
 const formatNumber = (num: number): string => {
 	return new Intl.NumberFormat('es-ES').format(num);
 };
+
+function toNumberValue(value: ValueType): number {
+	if (Array.isArray(value)) return Number(value[0] ?? 0);
+	return Number(value ?? 0);
+}
 
 // Formateador para segundos a texto legible
 const formatUptime = (seconds: number): string => {
@@ -169,7 +175,7 @@ export function SystemMetricsPanel() {
 									<YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: number | string | undefined) => [`${Number(value ?? 0)}%`, 'Uso de CPU']}
+										formatter={(value: ValueType) => [`${toNumberValue(value)}%`, 'Uso de CPU']}
 										labelFormatter={(time) => `Hora: ${time}`}
 									/>
 									<Line dataKey="usage" stroke={METRIC_COLORS.cpu} strokeWidth={2} type="monotone" />
@@ -201,11 +207,23 @@ export function SystemMetricsPanel() {
 									<YAxis tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: number | string | undefined) => [`${Number(value ?? 0)} MB`, 'Memoria']}
+										formatter={(value: ValueType) => [`${toNumberValue(value)} MB`, 'Memoria']}
 										labelFormatter={(time) => `Hora: ${time}`}
 									/>
-									<Area dataKey="used" fill={METRIC_COLORS.memory} stackId="1" stroke={METRIC_COLORS.memory} type="monotone" />
-									<Area dataKey="free" fill={METRIC_COLORS.memoryFree} stackId="1" stroke={METRIC_COLORS.memoryFree} type="monotone" />
+									<Area
+										dataKey="used"
+										fill={METRIC_COLORS.memory}
+										stackId="1"
+										stroke={METRIC_COLORS.memory}
+										type="monotone"
+									/>
+									<Area
+										dataKey="free"
+										fill={METRIC_COLORS.memoryFree}
+										stackId="1"
+										stroke={METRIC_COLORS.memoryFree}
+										type="monotone"
+									/>
 									<Legend />
 								</AreaChart>
 							</ResponsiveContainer>
@@ -229,7 +247,7 @@ export function SystemMetricsPanel() {
 									<YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: number | string | undefined) => [`${Number(value ?? 0)}%`, 'Uso']}
+										formatter={(value: ValueType) => [`${toNumberValue(value)}%`, 'Uso']}
 										labelFormatter={(name) => `${name}`}
 									/>
 									<Bar dataKey="usage" fill={CHART_COLORS.primary} />
@@ -318,7 +336,10 @@ export function SystemMetricsPanel() {
 									<YAxis dataKey="endpoint" tick={{ fontSize: 10 }} type="category" width={80} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: number | string | undefined) => [formatNumber(Number(value ?? 0)), 'Solicitudes']}
+										formatter={(value: ValueType) => [
+											formatNumber(toNumberValue(value)),
+											'Solicitudes',
+										]}
 										labelFormatter={(name) => `Endpoint: ${name}`}
 									/>
 									<Bar dataKey="hits" fill={CHART_COLORS.primary} />
@@ -385,7 +406,7 @@ export function SystemMetricsPanel() {
 									<YAxis tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: number | string | undefined) => [`${Number(value ?? 0)} MB/s`, 'Velocidad']}
+										formatter={(value: ValueType) => [`${toNumberValue(value)} MB/s`, 'Velocidad']}
 										labelFormatter={(name) => `Operación: ${name}`}
 									/>
 									<Bar dataKey="value" fill={CHART_COLORS.primary}>

@@ -22,14 +22,14 @@ import {
 } from '@/lib/api/thumbnails';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import { useSettings } from '@/lib/contexts';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import { useThumbnailStore } from '@/store/thumbnails.store';
-import { ThumbnailError } from './thumbnail-error';
-import { ThumbnailAdvancedSettings } from './thumbnail-advanced-settings';
 import { DEFAULT_THUMBNAIL_ADVANCED_CONFIG, type ThumbnailAdvancedConfig } from '@/types/thumbnails-advanced.config';
-import { clientLogger } from '@/lib/logger/client-logger';
+import { ThumbnailAdvancedSettings } from './thumbnail-advanced-settings';
+import { ThumbnailError } from './thumbnail-error';
 
 const thumbnailQualityOptions: { value: ThumbnailQuality; label: string }[] = [
 	{
@@ -215,7 +215,7 @@ export function ThumbnailsSettings() {
 	};
 
 	return (
-		<Card className="flex h-full flex-col gap-2 rounded-sm border-none bg-muted/30">
+		<Card className="flex h-full flex-col gap-2 rounded-dt-md border-none bg-muted/30 shadow-sm">
 			<CardHeader className="bg-transparent p-2 pb-0">
 				<CardTitle className="flex items-center justify-between pl-1 font-semibold text-base text-muted-foreground">
 					<span className="flex h-7 items-center gap-2">

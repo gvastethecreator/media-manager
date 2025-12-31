@@ -77,12 +77,7 @@ export interface CardsViewConfig extends ViewConfigBase {
 /**
  * Unión de configuraciones de vista
  */
-export type ViewConfig =
-	| GridViewConfig
-	| ListViewConfig
-	| MasonryViewConfig
-	| TableViewConfig
-	| CardsViewConfig;
+export type ViewConfig = GridViewConfig | ListViewConfig | MasonryViewConfig | TableViewConfig | CardsViewConfig;
 
 /**
  * Valores por defecto para cada tipo de vista

@@ -3,7 +3,7 @@
  * @description Tests básicos para el sistema de atajos de teclado
  */
 
-import { vi, type Mock } from 'vitest';
+import { type Mock, vi } from 'vitest';
 import { KeyboardShortcutManager, type ShortcutHandler } from '../keyboard-shortcut-manager';
 
 describe('KeyboardShortcutManager', () => {

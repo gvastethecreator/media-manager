@@ -3,8 +3,7 @@
  * @module file-browser-new/utils/filtering
  */
 
-import type { BrowserItem } from '../types';
-import type { FilterOption } from '../types';
+import type { BrowserItem, FilterOption } from '../types';
 
 /**
  * Obtiene valor de un campo para filtrado
@@ -44,11 +43,23 @@ function evaluateFilter(item: BrowserItem, filter: FilterOption): boolean {
 		case 'lte':
 			return typeof value === 'number' && typeof filterValue === 'number' && value <= filterValue;
 		case 'contains':
-			return typeof value === 'string' && typeof filterValue === 'string' && value.toLowerCase().includes(filterValue.toLowerCase());
+			return (
+				typeof value === 'string' &&
+				typeof filterValue === 'string' &&
+				value.toLowerCase().includes(filterValue.toLowerCase())
+			);
 		case 'startsWith':
-			return typeof value === 'string' && typeof filterValue === 'string' && value.toLowerCase().startsWith(filterValue.toLowerCase());
+			return (
+				typeof value === 'string' &&
+				typeof filterValue === 'string' &&
+				value.toLowerCase().startsWith(filterValue.toLowerCase())
+			);
 		case 'endsWith':
-			return typeof value === 'string' && typeof filterValue === 'string' && value.toLowerCase().endsWith(filterValue.toLowerCase());
+			return (
+				typeof value === 'string' &&
+				typeof filterValue === 'string' &&
+				value.toLowerCase().endsWith(filterValue.toLowerCase())
+			);
 		default:
 			return true;
 	}

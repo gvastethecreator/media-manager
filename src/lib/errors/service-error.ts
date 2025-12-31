@@ -19,7 +19,7 @@ export class BaseServiceError<TCode extends string = string> extends Error {
 		this.code = code;
 		this.cause = cause;
 		this.timestamp = new Date();
-		
+
 		// Mantener el stack trace correcto en V8
 		if (Error.captureStackTrace) {
 			Error.captureStackTrace(this, this.constructor);
@@ -45,12 +45,12 @@ export class BaseServiceError<TCode extends string = string> extends Error {
  * Factory para crear clases de error específicas de un servicio
  * @param serviceName Nombre del servicio
  * @returns Clase de error específica del servicio
- * 
+ *
  * @example
  * ```typescript
  * // Crear clase de error para ImageService
  * export class ImageServiceError extends createServiceErrorClass('ImageService') {}
- * 
+ *
  * // Usar en el servicio
  * throw new ImageServiceError('Image not found', 'IMAGE_NOT_FOUND');
  * ```
@@ -65,7 +65,7 @@ export function createServiceErrorClass<TCode extends string = string>(serviceNa
  * Factory para crear función de error de servicio
  * @param serviceName Nombre del servicio
  * @returns Función para crear errores del servicio
- * 
+ *
  * @example
  * ```typescript
  * const createImageError = createServiceErrorFactory('ImageService');
@@ -74,7 +74,7 @@ export function createServiceErrorClass<TCode extends string = string>(serviceNa
  */
 export function createServiceErrorFactory<TCode extends string = string>(serviceName: string) {
 	const ErrorClass = createServiceErrorClass<TCode>(serviceName);
-	
+
 	return function createError(message: string, code?: TCode, cause?: unknown) {
 		return new ErrorClass(message, code, cause);
 	};
@@ -94,4 +94,4 @@ export const CommonErrorCodes = {
 	NETWORK_ERROR: 'NETWORK_ERROR',
 } as const;
 
-export type CommonErrorCode = typeof CommonErrorCodes[keyof typeof CommonErrorCodes];
+export type CommonErrorCode = (typeof CommonErrorCodes)[keyof typeof CommonErrorCodes];

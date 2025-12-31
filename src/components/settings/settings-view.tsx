@@ -243,9 +243,12 @@ export function SettingsView() {
 	const validTab = tabsData.some((t) => t.id === tabFromUrl) ? tabFromUrl : 'folders';
 
 	// 📝 Función para cambiar tab y actualizar URL
-	const handleTabChange = React.useCallback((newTab: string) => {
-		setSearchParams({ tab: newTab }, { replace: true });
-	}, [setSearchParams]);
+	const handleTabChange = React.useCallback(
+		(newTab: string) => {
+			setSearchParams({ tab: newTab }, { replace: true });
+		},
+		[setSearchParams]
+	);
 
 	// 📡 Escuchar el evento para cambiar la pestaña activa desde otros componentes
 	React.useEffect(() => {
@@ -464,32 +467,32 @@ export function SettingsView() {
 				</div>
 
 				{/* 🎨 Sidebar vertical con navegación de tabs - COMPACTO A LA DERECHA */}
-				<div className="h-full w-44 flex-shrink-0 overflow-y-auto border-border/20 border-l bg-background/50 backdrop-blur-sm">
-					<TabsList className="flex h-auto w-full flex-col justify-start gap-0.5 rounded-none bg-transparent p-1">
+				<div className="h-full w-44 shrink-0 overflow-y-auto border-border/20 border-l bg-background/60 backdrop-blur-sm">
+					<TabsList className="flex h-auto w-full flex-col justify-start gap-0.5 rounded-none bg-transparent p-1.5">
 						{tabsData.map((tab) => (
 							<TabsTrigger
 								className={cn(
-									'flex w-full items-center justify-start gap-2 px-2 py-1.5',
-									'rounded-md border border-transparent font-medium text-xs',
+									'flex w-full items-center justify-start gap-2 px-2.5 py-2',
+									'rounded-md border border-transparent text-caption',
 									'group cursor-pointer transition-all duration-200',
-									'hover:border-border/20 hover:bg-secondary/30',
-									'data-[state=active]:border-white/10 data-[state=active]:bg-secondary/50',
-									'data-[state=active]:text-primary data-[state=active]:shadow-sm'
+									'hover:border-border/30 hover:bg-secondary/40',
+									'data-[state=active]:border-white/15 data-[state=active]:bg-secondary/60',
+									'data-[state=active]:font-medium data-[state=active]:text-foreground data-[state=active]:shadow-sm'
 								)}
 								key={tab.id}
 								value={tab.id}
 							>
 								{/* 🎨 Icono con color temático */}
-								<span className="flex flex-shrink-0 items-center justify-center" style={{ color: tab.color }}>
+								<span className="flex shrink-0 items-center justify-center" style={{ color: tab.color }}>
 									{tab.icon}
 								</span>
 
 								{/* 📝 Label con truncado inteligente */}
-								<span className="flex-1 truncate text-left group-data-[state=active]:font-semibold">{tab.label}</span>
+								<span className="flex-1 truncate text-left">{tab.label}</span>
 
 								{/* ✨ Indicador visual del estado activo */}
 								<div
-									className="h-3 w-0.5 rounded-full opacity-0 transition-opacity duration-200 group-data-[state=active]:opacity-100"
+									className="h-3.5 w-0.5 rounded-full opacity-0 transition-opacity duration-200 group-data-[state=active]:opacity-100"
 									style={{ backgroundColor: tab.color }}
 								/>
 							</TabsTrigger>

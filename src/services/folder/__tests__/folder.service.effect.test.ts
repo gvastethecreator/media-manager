@@ -7,14 +7,14 @@
 import { Effect, Exit } from 'effect';
 import { db } from '@/lib/drizzle';
 import { folders } from '@/lib/drizzle/schema';
-import { FolderService, FolderServiceLive, type GetFoldersOptions } from '../folder.service.effect';
+import { FolderService, FolderServiceLive } from '../folder.service.effect';
 import {
+	FolderCircularReferenceError,
+	FolderHasChildrenError,
+	FolderMaxDepthExceededError,
+	FolderNameConflict,
 	FolderNotFound,
 	FolderPathConflict,
-	FolderNameConflict,
-	FolderHasChildrenError,
-	FolderCircularReferenceError,
-	FolderMaxDepthExceededError,
 } from '../folder-errors.effect';
 
 // Helper para ejecutar Effect con timeout

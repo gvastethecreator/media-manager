@@ -109,11 +109,11 @@ export function CollectionCardImages({ collectionId, primaryColor, secondaryColo
 
 			{/* Partículas decorativas estilo TCG */}
 			<div
-				className="-bottom-1 absolute right-2 z-10 h-4 w-4 rounded-full opacity-60"
+				className="absolute right-2 -bottom-1 z-10 h-4 w-4 rounded-full opacity-60"
 				style={{ backgroundColor: primaryColor }}
 			/>
 			<div
-				className="-top-1 absolute left-2 z-10 h-2 w-2 rounded-full opacity-60"
+				className="absolute -top-1 left-2 z-10 h-2 w-2 rounded-full opacity-60"
 				style={{ backgroundColor: derivedSecondaryColor }}
 			/>
 		</div>

@@ -139,7 +139,7 @@ const FolderThumbnail = memo(({ folderStats, isCompact = false, isLoading = fals
 		return (
 			<div
 				className={cn(
-					'flex flex-shrink-0 items-center justify-center bg-muted/50 transition-all duration-300',
+					'flex shrink-0 items-center justify-center bg-muted/50 transition-all duration-300',
 					'animate-pulse hover:bg-muted/70',
 					size
 				)}
@@ -154,7 +154,7 @@ const FolderThumbnail = memo(({ folderStats, isCompact = false, isLoading = fals
 		return (
 			<div
 				className={cn(
-					'group/thumbnail relative flex-shrink-0 overflow-hidden transition-all duration-300',
+					'group/thumbnail relative shrink-0 overflow-hidden transition-all duration-300',
 					'hover:scale-105 hover:shadow-md hover:ring-2 hover:ring-primary/20',
 					size
 				)}
@@ -174,7 +174,7 @@ const FolderThumbnail = memo(({ folderStats, isCompact = false, isLoading = fals
 	return (
 		<div
 			className={cn(
-				'flex flex-shrink-0 items-center justify-center border-2 border-dashed transition-all duration-300',
+				'flex shrink-0 items-center justify-center border-2 border-dashed transition-all duration-300',
 				'border-muted-foreground/20 bg-muted/30 hover:scale-105 hover:border-muted-foreground/40 hover:bg-muted/50',
 				size
 			)}
@@ -375,7 +375,7 @@ export const FolderCard = memo(
 					<div className="flex min-w-0 flex-col gap-3">
 						{/* Top section: Thumbnail + Icon + Metadata con mejor spacing */}
 						<div className="flex min-w-0 items-start gap-3">
-							<div className="flex flex-shrink-0 items-center gap-2">
+							<div className="flex shrink-0 items-center gap-2">
 								<FolderThumbnail
 									folderStats={folderStats}
 									isCompact={!isFocusedMode}

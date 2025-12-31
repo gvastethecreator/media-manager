@@ -14,15 +14,13 @@
 
 // Servicio principal (CRUD)
 export * from './image.service';
-
-// Servicio de thumbnails
-export { thumbnailService } from './image-thumbnail.service';
+// Eventos
+export { emitImageEvent, IMAGE_EVENTS } from './image-events';
 
 // Funciones de búsqueda
 export { buildImageWithStats, getImageByHash, getImageByPathAndFolder } from './image-lookup.service';
-
-// Eventos
-export { emitImageEvent, IMAGE_EVENTS } from './image-events';
+// Servicio de thumbnails
+export { thumbnailService } from './image-thumbnail.service';
 
 // Utilidades
 export { SERVICE_NAME as IMAGE_SERVICE_NAME } from './image-utils';

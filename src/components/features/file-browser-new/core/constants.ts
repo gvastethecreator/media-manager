@@ -3,7 +3,7 @@
  * @module file-browser-new/core/constants
  */
 
-import type { ViewMode, ViewConfig, InfiniteScrollOptions, SortOption } from '../types';
+import type { InfiniteScrollOptions, SortOption, ViewConfig, ViewMode } from '../types';
 
 /**
  * Modo de vista por defecto
@@ -28,9 +28,7 @@ export const DEFAULT_ITEM_SIZE = 150;
 /**
  * Opciones de ordenamiento por defecto
  */
-export const DEFAULT_SORT_OPTIONS: SortOption[] = [
-	{ field: 'createdAt', direction: 'desc' },
-];
+export const DEFAULT_SORT_OPTIONS: SortOption[] = [{ field: 'createdAt', direction: 'desc' }];
 
 /**
  * Opciones de scroll infinito por defecto
@@ -129,4 +127,4 @@ export const SEARCH_DEBOUNCE_MS = 300;
 /**
  * Intervalo de refresh automático (ms)
  */
-export const AUTO_REFRESH_INTERVAL_MS = 30000;
+export const AUTO_REFRESH_INTERVAL_MS = 30_000;

@@ -6,10 +6,10 @@
  */
 
 import { Schema } from '@effect/schema';
-import { Effect, Exit } from 'effect';
-import type { Request, Response, NextFunction } from 'express';
+import { Effect } from 'effect';
+import type { NextFunction, Request, Response } from 'express';
+import { runPromiseEither } from '@/lib/effect/runtime/runtime';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { runPromise, runPromiseEither } from '@/lib/effect/runtime/runtime';
 
 const logger = serverLogger.withContext('ValidationMiddleware');
 
@@ -26,7 +26,7 @@ export interface ValidationError {
 
 /**
  * Valida el body de un request usando un schema Effect
- * 
+ *
  * @example
  * ```typescript
  * router.post('/albums',
@@ -81,7 +81,7 @@ export function validateBody<A, I>(schema: Schema.Schema<A, I>) {
 
 /**
  * Valida los params de un request usando un schema Effect
- * 
+ *
  * @example
  * ```typescript
  * router.get('/albums/:id',
@@ -135,7 +135,7 @@ export function validateParams<A, I>(schema: Schema.Schema<A, I>) {
 
 /**
  * Valida la query string de un request usando un schema Effect
- * 
+ *
  * @example
  * ```typescript
  * router.get('/albums',
@@ -193,7 +193,7 @@ export function validateQuery<A, I>(schema: Schema.Schema<A, I>) {
 
 /**
  * Middleware combinado: valida body, params y query
- * 
+ *
  * @example
  * ```typescript
  * router.put('/albums/:id',
@@ -208,11 +208,11 @@ export function validateQuery<A, I>(schema: Schema.Schema<A, I>) {
  * );
  * ```
  */
-export function validate<PSchema extends Schema.Schema.Any, BSchema extends Schema.Schema.Any, QSchema extends Schema.Schema.Any>(options: {
-	params?: PSchema;
-	body?: BSchema;
-	query?: QSchema;
-}) {
+export function validate<
+	PSchema extends Schema.Schema.Any,
+	BSchema extends Schema.Schema.Any,
+	QSchema extends Schema.Schema.Any,
+>(options: { params?: PSchema; body?: BSchema; query?: QSchema }) {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			// Validate params first
@@ -296,38 +296,31 @@ function formatValidationError(error: unknown): any {
  * Wrapper para decodificar con logging mejorado
  * Útil para debugging en desarrollo
  */
-export async function decodeWithLog<A, I>(
-	schema: Schema.Schema<A, I>,
-	value: unknown,
-	context: string
-): Promise<A> {
+export async function decodeWithLog<A, I>(schema: Schema.Schema<A, I>, value: unknown, context: string): Promise<A> {
 	logger.debug(`Decodificando ${context}`, { value });
-	
+
 	const decode = Schema.decodeUnknown(schema);
 	const eitherResult = await runPromiseEither(decode(value) as Effect.Effect<A, unknown, never>);
-	
+
 	if (eitherResult._tag === 'Left') {
 		logger.error(`Error decodificando ${context}`, { error: eitherResult.left });
 		throw eitherResult.left;
 	}
-	
+
 	logger.debug(`${context} decodificado exitosamente`, { result: eitherResult.right });
-	
+
 	return eitherResult.right;
 }
 
 /**
  * Helper para validar en servicios (fuera de Express)
- * 
+ *
  * @example
  * ```typescript
  * const validatedInput = yield* validateInService(AlbumCreateInput, rawInput);
  * ```
  */
-export function validateInService<A, I>(
-	schema: Schema.Schema<A, I>,
-	value: unknown
-): Effect.Effect<A, unknown, never> {
+export function validateInService<A, I>(schema: Schema.Schema<A, I>, value: unknown): Effect.Effect<A, unknown, never> {
 	const decode = Schema.decodeUnknown(schema);
 	return decode(value) as Effect.Effect<A, unknown, never>;
 }

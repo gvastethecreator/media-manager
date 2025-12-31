@@ -3,10 +3,10 @@ import { and, asc, count, desc, eq, like } from 'drizzle-orm';
 import express from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { groups, groupImages, images } from '@/lib/drizzle/schema/index';
+import { groupImages, groups, images } from '@/lib/drizzle/schema/index';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { groupService } from '@/services/group/group.service';
 import { toGroupWithStats } from '@/transformers/group';
-import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 
@@ -241,7 +241,7 @@ router.get('/:id/media', async (req, res) => {
 			.orderBy(desc(images.updatedAt))
 			.limit(limit);
 
-		const thumbnails = recentImages.map((img) => ({
+		const thumbnails = recentImages.map((img: { id: string; name: string }) => ({
 			id: img.id,
 			name: img.name,
 			thumbnailUrl: `/api/thumbnails/${img.id}`,

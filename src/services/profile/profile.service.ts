@@ -7,9 +7,9 @@ import { and, asc, desc, eq, like, or } from 'drizzle-orm';
 // Importar Drizzle para coexistencia
 import { db } from '@/lib/drizzle';
 import { profiles, settings } from '@/lib/drizzle/schema/index';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { toServiceError } from '@/lib/utils/errors/service-errors';
 import { type ProfileTransformed, transformProfile } from '@/transformers/profile/profile-transformers';
-import { serverLogger } from '@/lib/logger/server-logger';
 // Importar tipos desde '@/types/entities/profile' y './client'; evitar re-export circular
 // export type { CreateProfileInput, ProfileExtended, ProfileFilters, ProfilePaginationOptions, UpdateProfileInput };
 import {

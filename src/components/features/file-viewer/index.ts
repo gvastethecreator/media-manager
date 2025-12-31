@@ -4,6 +4,7 @@
  * Barrel file para facilitar importaciones
  */
 
+export { detectFileType, FileContentRenderer } from './file-content-renderer';
 // Componente principal
 export { FileViewer } from './file-viewer';
 // Tipos y constantes
@@ -12,7 +13,6 @@ export * from './file-viewer.types';
 export { ThumbnailItem } from './thumbnail-item';
 export { ThumbnailNavigation } from './thumbnail-navigation';
 export { ToolbarActions } from './toolbar-actions';
-export { FileContentRenderer, detectFileType } from './file-content-renderer';
 // Hooks
 export { useFocusManagement } from './use-focus-management';
 export { useImageLoader } from './use-image-loader';

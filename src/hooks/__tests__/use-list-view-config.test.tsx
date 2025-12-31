@@ -3,8 +3,8 @@
  * @description Tests para verificar la funcionalidad del hook useListViewConfig
  */
 
-import { vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
+import { vi } from 'vitest';
 import { useListViewConfig } from '@/hooks/use-list-view-config';
 
 const mockListViewConfig = {

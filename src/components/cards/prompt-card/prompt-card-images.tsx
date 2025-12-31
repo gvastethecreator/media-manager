@@ -115,7 +115,7 @@ export function PromptCardImages({
 
 								{/* Miniaturas inferiores */}
 								{displayImages.length > 1 && (
-									<div className="-translate-x-1/2 absolute bottom-2 left-1/2 z-10 flex transform items-center justify-center gap-1">
+									<div className="absolute bottom-2 left-1/2 z-10 flex -translate-x-1/2 transform items-center justify-center gap-1">
 										{displayImages.map((img, idx) => (
 											<button
 												aria-label={`Ver imagen ${idx + 1}`}

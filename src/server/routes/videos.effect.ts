@@ -5,8 +5,8 @@
  * @created 2025-01-10 - Phase 6.2 VideoService Effect Implementation
  */
 
-import express from 'express';
 import { Effect } from 'effect';
+import express from 'express';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
 import { VideoService, VideoServiceLive } from '@/services/video/video.service.effect';
 
@@ -314,7 +314,7 @@ router.get('/:id/content', async (req, res) => {
 	try {
 		const video = await Effect.runPromise(effect);
 
-		if (!video || !video.path) {
+		if (!(video && video.path)) {
 			res.status(404).send('Video not found');
 			return;
 		}

@@ -4,8 +4,6 @@
  * @description Genera representaciones visuales PNG de waveforms de audio
  */
 
-import { readFile } from 'node:fs/promises';
-
 /**
  * Configuración para generación de waveform
  */
@@ -40,15 +38,12 @@ export interface WaveformResult {
 
 /**
  * Genera un waveform visual para un archivo de audio
- * 
+ *
  * @param audioPath - Ruta al archivo de audio
  * @param config - Configuración de generación
  * @returns Promise con el resultado de la generación
  */
-export async function generateWaveform(
-	audioPath: string,
-	config: WaveformConfig = {}
-): Promise<WaveformResult> {
+export async function generateWaveform(audioPath: string, config: WaveformConfig = {}): Promise<WaveformResult> {
 	const {
 		width = 800,
 		height = 200,
@@ -97,9 +92,7 @@ async function generateWaveformFallback(
 	// Convertir SVG a PNG usando Sharp
 	try {
 		const sharp = (await import('sharp')).default;
-		const buffer = await sharp(Buffer.from(svg))
-			.png({ quality: 90 })
-			.toBuffer();
+		const buffer = await sharp(Buffer.from(svg)).png({ quality: 90 }).toBuffer();
 
 		return {
 			buffer,
@@ -177,10 +170,7 @@ function createWaveformSVG(
 /**
  * Convierte waveform a base64 para almacenamiento en BD
  */
-export async function generateWaveformBase64(
-	audioPath: string,
-	config: WaveformConfig = {}
-): Promise<string> {
+export async function generateWaveformBase64(audioPath: string, config: WaveformConfig = {}): Promise<string> {
 	const result = await generateWaveform(audioPath, config);
 	return result.buffer.toString('base64');
 }
@@ -250,8 +240,7 @@ export async function getWaveformFromAudio(audioId: string): Promise<string | nu
 		return null;
 	}
 
-	const metadata =
-		typeof audio.metadata === 'string' ? JSON.parse(audio.metadata) : audio.metadata;
+	const metadata = typeof audio.metadata === 'string' ? JSON.parse(audio.metadata) : audio.metadata;
 
 	return metadata.waveform?.data || null;
 }

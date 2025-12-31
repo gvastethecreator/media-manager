@@ -1,6 +1,6 @@
 import { mkdir, writeFile } from 'fs/promises';
-import * as path from 'path';
 import { nanoid } from 'nanoid';
+import * as path from 'path';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { uploadedImagesService } from '@/services/uploaded-images';
 import type { UploadedImageType } from '@/types/entities/uploaded-image';

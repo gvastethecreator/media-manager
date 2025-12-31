@@ -11,9 +11,9 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { ImagePicker } from '@/components/ui/image-picker';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { WildcardBase } from '@/types/entities/wildcard/base';
 import { CreateWildcardSchema } from '@/types/entities/wildcard/schema';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 // Esquema Zod adaptado para el formulario
 const formSchema = z.object({

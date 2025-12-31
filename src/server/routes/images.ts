@@ -12,8 +12,8 @@ import { verifySignedToken } from '../services/thumbnail.service';
 
 const router = Router();
 
-import { ImageFiltersSchema } from '@/types/entities/image/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { ImageFiltersSchema } from '@/types/entities/image/schema';
 
 // Incluye estándar para imágenes con relaciones
 const imageInclude = {

@@ -1,9 +1,10 @@
-import { Calendar, ChevronRight, Folder, HardDrive, Hash, Image as ImageIcon, Loader2 } from 'lucide-react';
+import { Calendar, ChevronRight, Folder, HardDrive, Hash, Image as ImageIcon } from 'lucide-react';
 import React from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
 
@@ -66,37 +67,43 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 	}, [stats.distribution]);
 
 	return (
-		<Card className="rounded-sm bg-muted/30">
-			<CardHeader className="p-3">
+		<Card className="rounded-dt-md border-border/50 bg-card/80 shadow-dt-1 transition-shadow duration-dt-normal hover:shadow-dt-2">
+			<CardHeader className="p-3 pb-2">
 				<CardTitle className="flex items-center gap-2 text-sm">
-					{icon}
-					{title}
+					<span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-dt-sm bg-primary/10 text-primary">
+						{icon}
+					</span>
+					<span className="heading-sm">{title}</span>
 				</CardTitle>
 			</CardHeader>
 			<CardContent className="p-3 pt-0">
 				{isLoading ? (
-					<div className="flex items-center justify-center p-4">
-						<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+					<div className="stack-md">
+						<div className="grid grid-cols-2 gap-2">
+							{[1, 2, 3, 4].map((i) => (
+								<Skeleton className="h-16 rounded-dt-sm" key={i} />
+							))}
+						</div>
 					</div>
 				) : (
-					<div className="space-y-6">
+					<div className="space-y-4">
 						{/* Estadísticas básicas */}
-						<div className="grid grid-cols-2 gap-4">
-							<div className="flex flex-col items-center justify-center rounded-sm bg-muted/50 p-4">
-								<span className="font-bold text-2xl">{stats.total}</span>
-								<span className="text-muted-foreground text-xs">Total</span>
+						<div className="grid grid-cols-2 gap-2">
+							<div className="flex flex-col items-center justify-center rounded-dt-sm bg-muted/50 p-3 transition-colors duration-dt-fast hover:bg-muted/70">
+								<span className="numeric-lg">{stats.total}</span>
+								<span className="caption">Total</span>
 							</div>
-							<div className="flex flex-col items-center justify-center rounded-sm bg-muted/50 p-4">
-								<span className="font-bold text-2xl">{stats.active}</span>
-								<span className="text-muted-foreground text-xs">Activos</span>
+							<div className="flex flex-col items-center justify-center rounded-dt-sm bg-muted/50 p-3 transition-colors duration-dt-fast hover:bg-muted/70">
+								<span className="numeric-lg">{stats.active}</span>
+								<span className="caption">Activos</span>
 							</div>
-							<div className="flex flex-col items-center justify-center rounded-sm bg-muted/50 p-4">
-								<span className="font-bold text-2xl">{stats.isFavorite}</span>
-								<span className="text-muted-foreground text-xs">Favoritos</span>
+							<div className="flex flex-col items-center justify-center rounded-dt-sm bg-muted/50 p-3 transition-colors duration-dt-fast hover:bg-muted/70">
+								<span className="numeric-lg">{stats.isFavorite}</span>
+								<span className="caption">Favoritos</span>
 							</div>
-							<div className="flex flex-col items-center justify-center rounded-sm bg-muted/50 p-4">
-								<span className="font-bold text-2xl">{stats.archived}</span>
-								<span className="text-muted-foreground text-xs">Archivados</span>
+							<div className="flex flex-col items-center justify-center rounded-dt-sm bg-muted/50 p-3 transition-colors duration-dt-fast hover:bg-muted/70">
+								<span className="numeric-lg">{stats.archived}</span>
+								<span className="caption">Archivados</span>
 							</div>
 						</div>
 
@@ -105,15 +112,15 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 							stats.totalImages !== undefined ||
 							stats.totalSize !== undefined ||
 							stats.lastUpdated !== undefined) && (
-							<div className="grid grid-cols-4 gap-4">
+							<div className="grid grid-cols-4 gap-2">
 								<TooltipProvider>
 									{stats.totalItems !== undefined && (
 										<Tooltip>
 											<TooltipTrigger asChild>
-												<div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-3 transition-colors hover:bg-background/80">
-													<Hash className="mb-2 h-4 w-4 text-primary" />
-													<p className="font-bold text-2xl">{stats.totalItems}</p>
-													<p className="text-muted-foreground text-xs">Total</p>
+												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
+													<Hash className="mb-1 h-4 w-4 text-primary" />
+													<p className="numeric-md">{stats.totalItems}</p>
+													<p className="caption">Total</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -125,10 +132,10 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 									{stats.totalImages !== undefined && (
 										<Tooltip>
 											<TooltipTrigger asChild>
-												<div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-3 transition-colors hover:bg-background/80">
-													<ImageIcon className="mb-2 h-4 w-4 text-primary" />
-													<p className="font-bold text-2xl">{stats.totalImages}</p>
-													<p className="text-muted-foreground text-xs">Imágenes</p>
+												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
+													<ImageIcon className="mb-1 h-4 w-4 text-primary" />
+													<p className="numeric-md">{stats.totalImages}</p>
+													<p className="caption">Imágenes</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -140,10 +147,10 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 									{stats.totalSize !== undefined && (
 										<Tooltip>
 											<TooltipTrigger asChild>
-												<div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-3 transition-colors hover:bg-background/80">
-													<HardDrive className="mb-2 h-4 w-4 text-primary" />
-													<p className="font-bold text-2xl">{formatSize(stats.totalSize)}</p>
-													<p className="text-muted-foreground text-xs">Tamaño</p>
+												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
+													<HardDrive className="mb-1 h-4 w-4 text-primary" />
+													<p className="numeric-md">{formatSize(stats.totalSize)}</p>
+													<p className="caption">Tamaño</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -155,10 +162,10 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 									{stats.lastUpdated && (
 										<Tooltip>
 											<TooltipTrigger asChild>
-												<div className="flex flex-col items-center justify-center rounded-lg bg-background/50 p-3 transition-colors hover:bg-background/80">
-													<Calendar className="mb-2 h-4 w-4 text-primary" />
-													<p className="font-medium text-sm">{formatDate(stats.lastUpdated)}</p>
-													<p className="text-muted-foreground text-xs">Actualizado</p>
+												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
+													<Calendar className="mb-1 h-4 w-4 text-primary" />
+													<p className="body-sm font-medium">{formatDate(stats.lastUpdated)}</p>
+													<p className="caption">Actualizado</p>
 												</div>
 											</TooltipTrigger>
 											<TooltipContent>
@@ -172,37 +179,33 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 
 						{/* Items recientes */}
 						{stats.recentItems && stats.recentItems.length > 0 && (
-							<div className="space-y-3">
+							<div className="stack-sm">
 								<div className="flex items-center justify-between">
-									<h4 className="font-medium text-sm">Elementos Recientes</h4>
-									<Badge className="text-xs" variant="outline">
-										{stats.recentItems.length}
-									</Badge>
+									<h4 className="heading-sm">Elementos Recientes</h4>
+									<Badge variant="outline">{stats.recentItems.length}</Badge>
 								</div>
-								<ScrollArea className="h-[120px] rounded-md border bg-background/50 p-2">
-									<div className="space-y-2">
+								<ScrollArea className="h-30 rounded-dt-sm border bg-background/50 p-2">
+									<div className="stack-xs">
 										{stats.recentItems.map((item) => (
 											<div
-												className="group flex items-center justify-between rounded-md p-2 transition-colors hover:bg-muted"
+												className="group flex items-center justify-between rounded-dt-xs p-2 transition-colors duration-dt-fast hover:bg-muted"
 												key={item.id}
 											>
 												<div className="flex items-center gap-2">
 													<div
 														className={cn(
-															'flex h-8 w-8 items-center justify-center rounded-md border',
+															'flex h-8 w-8 items-center justify-center rounded-dt-sm border',
 															item.color ? `bg-[${item.color}]/10 text-[${item.color}]` : 'bg-muted'
 														)}
 													>
 														{item.emoji || <Hash className="h-4 w-4" />}
 													</div>
 													<div>
-														<p className="font-medium text-sm">{item.name}</p>
-														{item.count !== undefined && (
-															<p className="text-muted-foreground text-xs">{item.count} imágenes</p>
-														)}
+														<p className="body-sm font-medium">{item.name}</p>
+														{item.count !== undefined && <p className="caption">{item.count} imágenes</p>}
 													</div>
 												</div>
-												<ChevronRight className="h-4 w-4 opacity-0 transition-opacity group-hover:opacity-100" />
+												<ChevronRight className="h-4 w-4 opacity-0 transition-opacity duration-dt-fast group-hover:opacity-100" />
 											</div>
 										))}
 									</div>
@@ -212,24 +215,22 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 
 						{/* Distribución */}
 						{stats.distribution && stats.distribution.length > 0 && (
-							<div className="space-y-3">
+							<div className="stack-sm">
 								<div className="flex items-center justify-between">
-									<h4 className="font-medium text-sm">Distribución</h4>
-									<Badge className="text-xs" variant="outline">
-										{stats.distribution.length}
-									</Badge>
+									<h4 className="heading-sm">Distribución</h4>
+									<Badge variant="outline">{stats.distribution.length}</Badge>
 								</div>
-								<div className="space-y-2">
+								<div className="stack-xs">
 									{stats.distribution.map((item) => (
-										<div className="space-y-1" key={item.name}>
-											<div className="flex items-center justify-between text-sm">
+										<div className="stack-xs" key={item.name}>
+											<div className="flex items-center justify-between">
 												<div className="flex items-center gap-2">
 													<Folder className="h-4 w-4 text-muted-foreground" />
-													<span className="font-medium">{item.name}</span>
+													<span className="body-sm font-medium">{item.name}</span>
 												</div>
-												<span className="text-muted-foreground text-xs">{item.count}</span>
+												<span className="caption tabular-nums">{item.count}</span>
 											</div>
-											<Progress className="h-2" value={(item.count / maxCount) * 100} />
+											<Progress className="h-1.5" value={(item.count / maxCount) * 100} />
 										</div>
 									))}
 								</div>

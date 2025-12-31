@@ -11,11 +11,11 @@ import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { useCreateWorldItem, useUpdateWorldItem } from '@/lib/api/world-items';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
 import { WorldItemCategory, WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
 import type { WorldItemComplete, WorldItemCreateInput, WorldItemStatistics } from '@/types/entities/world-item/types';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 // Esquema de validación con Zod (solo name requerido, el resto opcional)
 const worldItemSchema = z.object({

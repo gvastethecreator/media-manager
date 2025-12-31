@@ -5,15 +5,15 @@
  * @created 2025-01-10 - Phase 6.3: Audio Service Migration
  */
 
-import { Context, Effect, Layer } from 'effect';
-import { and, count, desc, eq, gte, inArray, lte, or, sql } from 'drizzle-orm';
 import * as crypto from 'node:crypto';
+import { and, count, desc, eq, gte, inArray, lte, or, sql } from 'drizzle-orm';
+import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { audios, folders } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger';
 import type { AudioBase, AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
-import * as AudioErrors from './audio-errors.effect';
 import type { AudioError } from './audio-errors.effect';
+import * as AudioErrors from './audio-errors.effect';
 
 const audioServiceLogger = serverLogger.withContext('AudioService.Effect');
 

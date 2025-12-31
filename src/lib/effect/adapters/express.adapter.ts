@@ -6,9 +6,9 @@
  */
 
 import { Effect } from 'effect';
-import type { Request, Response, NextFunction } from 'express';
-import { runPromise } from '../runtime/runtime';
+import type { NextFunction, Request, Response } from 'express';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { runPromise } from '../runtime/runtime';
 
 const logger = serverLogger.withContext('ExpressAdapter');
 

@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAudioStore } from '@/store/entities/audio';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import type { AnyEntityWithStats } from '@/types/entities';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('AudioView');
@@ -19,7 +18,10 @@ export default function AudioView(_props: ViewProps) {
 
 	const audios = useMemo(() => audiosArray || [], [audiosArray]);
 	const audioCount = audios.length;
-	const browserItems = useMemo(() => audios.map((a) => toBrowserItem(a as unknown as Record<string, unknown>)), [audios]);
+	const browserItems = useMemo(
+		() => audios.map((a) => toBrowserItem(a as unknown as Record<string, unknown>)),
+		[audios]
+	);
 
 	useEffect(() => {
 		if (!hasInitializedRef.current && audioCount === 0 && !isLoading) {

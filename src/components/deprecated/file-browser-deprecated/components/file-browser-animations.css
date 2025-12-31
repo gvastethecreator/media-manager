@@ -2,95 +2,96 @@
 
 /* Variables CSS para timing y colores consistentes */
 :root {
-  --fb-hover-duration: 200ms;
-  --fb-hover-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  --fb-hover-scale: 1.05;
-  --fb-hover-shadow: 0 8px 32px rgba(var(--effect-shadow-rgb), 0.15);
-  --fb-hover-border-opacity: 0.2;
-  --fb-selection-color: hsl(var(--primary));
+	--fb-hover-duration: 200ms;
+	--fb-hover-ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+	--fb-hover-scale: 1.05;
+	--fb-hover-shadow: 0 8px 32px rgba(var(--effect-shadow-rgb), 0.15);
+	--fb-hover-border-opacity: 0.2;
+	--fb-selection-color: hsl(var(--primary));
 }
 
 /* Base hover effects para items del file-browser */
 .file-browser-item {
-  position: relative;
-  display: block;
-  width: 100%;
-  height: 100%;
-  cursor: pointer;
-  transition: transform var(--fb-hover-duration) var(--fb-hover-ease),
-              opacity var(--fb-hover-duration) var(--fb-hover-ease);
-  transform: translate3d(0, 0, 0); /* Force GPU layer */
-  backface-visibility: hidden; /* Reduce flicker */
+	position: relative;
+	display: block;
+	width: 100%;
+	height: 100%;
+	cursor: pointer;
+	transition:
+		transform var(--fb-hover-duration) var(--fb-hover-ease),
+		opacity var(--fb-hover-duration) var(--fb-hover-ease);
+	transform: translate3d(0, 0, 0); /* Force GPU layer */
+	backface-visibility: hidden; /* Reduce flicker */
 }
 
 /* Focus styles para accesibilidad */
 .file-browser-item:focus-visible {
-  outline: 2px solid var(--fb-selection-color);
-  outline-offset: 2px;
+	outline: 2px solid var(--fb-selection-color);
+	outline-offset: 2px;
 }
 
 /* Hover state - usar will-change temporalmente */
 .file-browser-item:hover {
-  will-change: transform, box-shadow;
-  transform: translate3d(0, -2px, 0) scale(var(--fb-hover-scale));
+	will-change: transform, box-shadow;
+	transform: translate3d(0, -2px, 0) scale(var(--fb-hover-scale));
 }
 
 /* Limpiar will-change después del hover para liberar memoria GPU */
 .file-browser-item:not(:hover) {
-  will-change: auto;
+	will-change: auto;
 }
 
 /* Fade border effect */
 .file-browser-item::before {
-  content: '';
-  position: absolute;
-  inset: -1px;
-  border-radius: inherit;
-  background: linear-gradient(
-    135deg,
-    transparent 0%,
-    var(--fb-selection-color) 50%,
-    transparent 100%
-  );
-  opacity: 0;
-  z-index: -1;
-  transition: opacity var(--fb-hover-duration) var(--fb-hover-ease);
-  transform: translate3d(0, 0, 0); /* GPU layer */
+	content: "";
+	position: absolute;
+	inset: -1px;
+	border-radius: inherit;
+	background: linear-gradient(
+		135deg,
+		transparent 0%,
+		var(--fb-selection-color) 50%,
+		transparent 100%
+	);
+	opacity: 0;
+	z-index: -1;
+	transition: opacity var(--fb-hover-duration) var(--fb-hover-ease);
+	transform: translate3d(0, 0, 0); /* GPU layer */
 }
 
 .file-browser-item:hover::before {
-  opacity: var(--fb-hover-border-opacity);
+	opacity: var(--fb-hover-border-opacity);
 }
 
 /* Shadow effect para depth */
 .file-browser-item::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  box-shadow: var(--fb-hover-shadow);
-  opacity: 0;
-  z-index: -2;
-  transition: opacity var(--fb-hover-duration) var(--fb-hover-ease);
-  transform: translate3d(0, 0, 0); /* GPU layer */
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	box-shadow: var(--fb-hover-shadow);
+	opacity: 0;
+	z-index: -2;
+	transition: opacity var(--fb-hover-duration) var(--fb-hover-ease);
+	transform: translate3d(0, 0, 0); /* GPU layer */
 }
 
 .file-browser-item:hover::after {
-  opacity: 1;
+	opacity: 1;
 }
 
 /* Estados especiales */
 .file-browser-item.selected {
-  transform: translate3d(0, -1px, 0) scale(1.02);
+	transform: translate3d(0, -1px, 0) scale(1.02);
 }
 
 .file-browser-item.selected::before {
-  opacity: calc(var(--fb-hover-border-opacity) * 2);
+	opacity: calc(var(--fb-hover-border-opacity) * 2);
 }
 
 .file-browser-item.loading {
-  opacity: 0.7;
-  pointer-events: none;
+	opacity: 0.7;
+	pointer-events: none;
 }
 
 /* Animations para diferentes view modes */
@@ -98,107 +99,111 @@
 /* Grid/Cards view específico */
 .file-browser-grid .file-browser-item,
 .file-browser-cards .file-browser-item {
-  border-radius: 12px;
-  overflow: hidden;
+	border-radius: 12px;
+	overflow: hidden;
 }
 
 .file-browser-grid .file-browser-item:hover,
 .file-browser-cards .file-browser-item:hover {
-  transform: translate3d(0, -4px, 0) scale(1.08);
+	transform: translate3d(0, -4px, 0) scale(1.08);
 }
 
 /* List view específico */
 .file-browser-list .file-browser-item {
-  border-radius: 6px;
-  overflow: hidden;
+	border-radius: 6px;
+	overflow: hidden;
 }
 
 .file-browser-list .file-browser-item:hover {
-  transform: translate3d(2px, 0, 0) scale(1.02);
+	transform: translate3d(2px, 0, 0) scale(1.02);
 }
 
 /* Table view específico */
 .file-browser-table .file-browser-item {
-  border-radius: 4px;
+	border-radius: 4px;
 }
 
 .file-browser-table .file-browser-item:hover {
-  transform: translate3d(0, 0, 0) scale(1.01);
-  background-color: hsl(var(--muted) / 0.5);
+	transform: translate3d(0, 0, 0) scale(1.01);
+	background-color: hsl(var(--muted) / 0.5);
 }
 
 /* Masonry view específico */
 .file-browser-masonry .file-browser-item {
-  border-radius: 8px;
-  overflow: hidden;
+	border-radius: 8px;
+	overflow: hidden;
 }
 
 .file-browser-masonry .file-browser-item:hover {
-  transform: translate3d(0, -3px, 0) scale(1.05);
+	transform: translate3d(0, -3px, 0) scale(1.05);
 }
 
 /* Canvas view específico */
 .file-browser-canvas .file-browser-item {
-  border-radius: 10px;
-  overflow: hidden;
+	border-radius: 10px;
+	overflow: hidden;
 }
 
 .file-browser-canvas .file-browser-item:hover {
-  transform: translate3d(0, -2px, 0) scale(1.06);
+	transform: translate3d(0, -2px, 0) scale(1.06);
 }
 
 /* Loading spinner mejorado para items individuales */
 .file-browser-item-loading {
-  position: relative;
+	position: relative;
 }
 
 .file-browser-item-loading::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  border-radius: inherit;
-  background: linear-gradient(
-    90deg,
-    transparent,
-    rgba(var(--effect-highlight-rgb), 0.1),
-    transparent
-  );
-  transform: translateX(-100%);
-  animation: shimmer 1.5s infinite;
+	content: "";
+	position: absolute;
+	inset: 0;
+	border-radius: inherit;
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(var(--effect-highlight-rgb), 0.1),
+		transparent
+	);
+	transform: translateX(-100%);
+	animation: shimmer 1.5s infinite;
 }
 
 @keyframes shimmer {
-  0% { transform: translateX(-100%); }
-  100% { transform: translateX(100%); }
+	0% {
+		transform: translateX(-100%);
+	}
+	100% {
+		transform: translateX(100%);
+	}
 }
 
 /* Optimizaciones para móviles */
 @media (hover: none) {
-  .file-browser-item {
-    transition: none;
-  }
-  
-  .file-browser-item:hover {
-    transform: none;
-    will-change: auto;
-  }
-  
-  .file-browser-item::before,
-  .file-browser-item::after {
-    display: none;
-  }
+	.file-browser-item {
+		transition: none;
+	}
+
+	.file-browser-item:hover {
+		transform: none;
+		will-change: auto;
+	}
+
+	.file-browser-item::before,
+	.file-browser-item::after {
+		display: none;
+	}
 }
 
 /* Reduce motion para accesibilidad */
 @media (prefers-reduced-motion: reduce) {
-  .file-browser-item,
-  .file-browser-item::before,
-  .file-browser-item::after {
-    transition: none;
-    animation: none;
-  }
-  
-  .file-browser-item:hover {
-    transform: none;
-  }
+	.file-browser-item,
+	.file-browser-item::before,
+	.file-browser-item::after {
+		transition: none;
+		animation: none;
+	}
+
+	.file-browser-item:hover {
+		transform: none;
+	}
 }

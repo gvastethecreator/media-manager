@@ -5,8 +5,8 @@
  * @created 2025-01-10 - Phase 6.3 AudioService Effect Implementation
  */
 
-import express from 'express';
 import { Effect } from 'effect';
+import express from 'express';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
 import { AudioService, AudioServiceLive } from '@/services/audio/audio.service.effect';
 

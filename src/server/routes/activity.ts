@@ -1,9 +1,9 @@
 import express from 'express';
 import { z } from 'zod';
 import type { ExpressHandler } from '@/lib/express-types';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { ActivityFilters } from '@/types/entities/activity/types';
 import { getActivityService } from '../../services/activity/activity.service';
-import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 const activityService = getActivityService();

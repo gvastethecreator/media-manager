@@ -139,7 +139,7 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 						value={folderPath}
 					/>
 					<Button
-						className="-translate-y-1/2 absolute top-1/2 right-1 h-7 cursor-pointer text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
+						className="absolute top-1/2 right-1 h-7 -translate-y-1/2 cursor-pointer text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
 						disabled={isSubmitting || isProcessing || isLoading}
 						onClick={handleBrowse}
 						size="sm"

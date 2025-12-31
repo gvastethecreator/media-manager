@@ -7,7 +7,7 @@
 
 import { Effect } from 'effect';
 import { db } from '@/lib/drizzle';
-import { videos, folders } from '@/lib/drizzle/schema';
+import { folders, videos } from '@/lib/drizzle/schema';
 import * as VideoService from '../video.service.effect';
 
 // ============= Test Helpers =============

@@ -139,12 +139,12 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 	return (
 		<motion.div
 			animate={{ opacity: 1, y: 0 }}
-			className="flex items-center min-w-0 overflow-hidden"
+			className="flex min-w-0 items-center overflow-hidden"
 			initial={{ opacity: 0, y: -5 }}
 			transition={{ duration: 0.15 }}
 		>
 			<Breadcrumb className="min-w-0 overflow-hidden">
-				<BreadcrumbList className="flex flex-nowrap items-center gap-0 min-w-0 overflow-hidden">
+				<BreadcrumbList className="flex min-w-0 flex-nowrap items-center gap-0 overflow-hidden">
 					<BreadcrumbItem className="shrink-0">
 						<Button
 							className="flex h-6 cursor-pointer items-center gap-0.5 p-0 font-medium text-primary hover:text-primary/80"
@@ -187,10 +187,12 @@ export function ViewBreadcrumbs({ currentView, currentItem }: BreadcrumbsProps) 
 									</BreadcrumbSeparator>
 									<BreadcrumbItem className="min-w-0 overflow-hidden">
 										{isLast ? (
-											<BreadcrumbPage className="font-medium text-muted-foreground text-xs truncate">{c.name}</BreadcrumbPage>
+											<BreadcrumbPage className="truncate font-medium text-muted-foreground text-xs">
+												{c.name}
+											</BreadcrumbPage>
 										) : (
 											<Button
-												className="h-6 cursor-pointer p-0 font-medium text-primary text-xs hover:text-primary/80 truncate"
+												className="h-6 cursor-pointer truncate p-0 font-medium text-primary text-xs hover:text-primary/80"
 												onClick={() => {
 													// Usar navegación jerárquica
 													const hierarchicalPath = buildHierarchicalPath(c.id);

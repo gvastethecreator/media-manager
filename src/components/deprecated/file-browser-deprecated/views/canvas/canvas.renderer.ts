@@ -5,9 +5,9 @@
  */
 
 import type { MediaItem } from '../../components/media-thumbnail';
+import type { Point, Viewport, VisibleRange } from './canvas.types';
 import type { CacheEntry } from './canvas-common';
 import { CanvasRenderConfig } from './canvas-config';
-import type { Point, VisibleRange, Viewport } from './canvas.types';
 
 /**
  * Parámetros para renderizado de canvas

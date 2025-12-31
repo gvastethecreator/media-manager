@@ -1,8 +1,8 @@
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	createVideo as createVideoServer,
 	getVideoByHash as getVideoByHashServer,
 } from '@/server/services/video.server.service';
-import { serverLogger } from '@/lib/logger/server-logger';
 import type { VideoCreateInput } from '@/types/entities/video';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
@@ -101,7 +101,7 @@ export class VideoProcessor {
 		const startTime = Date.now();
 		const { basename } = await import('node:path');
 		const fileName = basename(filePath);
-		
+
 		videoLogger.debug(`🎬 [VideoProcessor] Iniciando generación de thumbnail: ${fileName}`);
 
 		const { db } = await import('@/lib/drizzle');
@@ -123,7 +123,7 @@ export class VideoProcessor {
 			}
 			videoLogger.warn(`⚠️ [VideoProcessor] Thumbnail animado falló, intentando estático: ${result.error}`);
 		} catch (e) {
-			videoLogger.warn(`⚠️ [VideoProcessor] Error en thumbnail animado:`, e);
+			videoLogger.warn('⚠️ [VideoProcessor] Error en thumbnail animado:', e);
 		}
 
 		// Estrategia 2: Thumbnail estático JPEG
@@ -136,7 +136,7 @@ export class VideoProcessor {
 			}
 			videoLogger.warn(`⚠️ [VideoProcessor] Thumbnail estático falló: ${result.error}`);
 		} catch (e) {
-			videoLogger.warn(`⚠️ [VideoProcessor] Error en thumbnail estático:`, e);
+			videoLogger.warn('⚠️ [VideoProcessor] Error en thumbnail estático:', e);
 		}
 
 		// Estrategia 3: Placeholder SVG
@@ -162,8 +162,8 @@ export class VideoProcessor {
 		eq: any,
 		db: any
 	): Promise<{ success: boolean; error?: string }> {
-		const TIMEOUT_MS = 30000; // 30 segundos
-		
+		const TIMEOUT_MS = 30_000; // 30 segundos
+
 		const generationPromise = (async () => {
 			const { generateAnimatedVideoThumbnail } = await import('@/lib/utils/video/helpers');
 

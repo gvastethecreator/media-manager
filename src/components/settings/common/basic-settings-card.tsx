@@ -32,24 +32,20 @@ interface BasicSettingsProps {
 export function BasicSettingsCard({ title, description, icon, children }: BasicSettingsProps) {
 	return (
 		<ScrollArea className="h-[calc(100vh-8rem)] w-full">
-			<Card className="rounded-sm border-none bg-muted/30">
-				<CardHeader className="p-3 pb-2">
-					<CardTitle className="flex items-center gap-2 font-medium text-base text-muted-foreground">
+			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
+				<CardHeader className="space-y-0 p-3 pb-2">
+					<CardTitle className="flex items-center gap-2 text-heading-sm text-muted-foreground">
 						{icon}
 						<span>{title}</span>
 					</CardTitle>
 				</CardHeader>
 				<Separator className="my-0" />
-				<CardContent className="p-3">
-					<div className="flex flex-col gap-4">
-						<span className="text-muted-foreground text-xs">{description}</span>
-						{children && children}
-						{!children && (
-							<span className="text-muted-foreground/70 text-xs italic">
-								Configuraciones pendientes de implementación
-							</span>
-						)}
-					</div>
+				<CardContent className="space-y-stack-sm p-4">
+					<p className="text-body-sm text-muted-foreground">{description}</p>
+					{children && children}
+					{!children && (
+						<p className="text-caption text-muted-foreground/60 italic">Configuraciones pendientes de implementación</p>
+					)}
 				</CardContent>
 			</Card>
 		</ScrollArea>

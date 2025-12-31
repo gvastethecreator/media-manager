@@ -1,8 +1,8 @@
 import express from 'express';
+import { serverLogger } from '@/lib/logger/server-logger';
 // import { getImageMetadata, updateImageMetadata, clearImageMetadata } from '../services/metadata.service';
 // import { extractAIGenerationInfo } from '../services/metadata/parsers.service';
 import * as MetadataService from '@/services/metadata';
-import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 

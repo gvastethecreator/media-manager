@@ -58,26 +58,22 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 
 	if (isLoading) {
 		return (
-			<div className={cn('flex items-center justify-center p-2', className)}>
-				<div className="flex flex-col items-center gap-2">
-					<Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
-					<p className="text-muted-foreground text-sm">Cargando estadísticas...</p>
-				</div>
+			<div className={cn('flex flex-col items-center justify-center gap-3 p-6', className)}>
+				<Loader2 className="h-6 w-6 animate-spin text-primary" />
+				<p className="body-sm text-muted-foreground">Cargando estadísticas...</p>
 			</div>
 		);
 	}
 
 	if (error) {
 		return (
-			<div className={cn('flex items-center justify-center p-2', className)}>
-				<div className="flex flex-col items-center gap-2 text-center">
-					<div className="flex h-12 w-12 items-center justify-center rounded-full bg-destructive/10">
-						<Folder className="h-6 w-6 text-destructive" />
-					</div>
-					<div>
-						<p className="font-medium text-destructive text-sm">Error al cargar estadísticas</p>
-						<p className="text-muted-foreground text-xs">No se pudieron obtener los datos de la carpeta</p>
-					</div>
+			<div className={cn('flex flex-col items-center justify-center gap-3 p-6', className)}>
+				<div className="flex h-12 w-12 items-center justify-center rounded-dt-md bg-destructive/10">
+					<Folder className="h-6 w-6 text-destructive" />
+				</div>
+				<div className="text-center">
+					<p className="heading-sm text-destructive">Error al cargar estadísticas</p>
+					<p className="caption">No se pudieron obtener los datos de la carpeta</p>
 				</div>
 			</div>
 		);

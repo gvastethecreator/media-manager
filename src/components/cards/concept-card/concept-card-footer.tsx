@@ -1,6 +1,6 @@
-import { formatDistanceToNow } from '@/lib/utils/date';
 import { BookOpen, Calendar, Clock, Lightbulb, Star } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from '@/lib/utils/date';
 
 interface ConceptCardFooterProps {
 	createdAt: Date | string;
@@ -80,9 +80,9 @@ export function ConceptCardFooter({
 	// Calcular nivel de "poder" para cartas TCG (mayor valor = carta más poderosa)
 	const powerLevel = tcgMode
 		? Math.min(
-			99,
-			Math.floor(imagesCount * 2 + videosCount * 3 + promptsCount * 2 + notesCount * 1 + totalRelations * 0.5)
-		)
+				99,
+				Math.floor(imagesCount * 2 + videosCount * 3 + promptsCount * 2 + notesCount * 1 + totalRelations * 0.5)
+			)
 		: 0;
 
 	return (

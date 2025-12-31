@@ -4,28 +4,26 @@
  */
 
 export {
-	sortBySingle,
-	sortByMultiple,
-	sortWithFoldersFirst,
-} from './sorting';
-
-export {
-	filterBySearch,
-	filterByEntityType,
-	applyFilters,
-	filterSynthetic,
 	applyFilterPipeline,
+	applyFilters,
 	type FilterPipeline,
+	filterByEntityType,
+	filterBySearch,
+	filterSynthetic,
 } from './filtering';
-
 export {
+	applyGrouping,
 	ENTITY_TYPE_DISPLAY_NAMES,
 	ENTITY_TYPE_ORDER,
+	flattenGroups,
+	type GroupingOptions,
+	type GroupingType,
+	groupByDate,
 	groupByEntityType,
 	groupByField,
-	groupByDate,
-	applyGrouping,
-	flattenGroups,
-	type GroupingType,
-	type GroupingOptions,
 } from './grouping';
+export {
+	sortByMultiple,
+	sortBySingle,
+	sortWithFoldersFirst,
+} from './sorting';

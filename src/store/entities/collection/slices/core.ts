@@ -13,9 +13,9 @@ import {
 	getCollectionsFromApi,
 	updateCollectionInApi,
 } from '@/lib/api/client/collection.client';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { CollectionCreateInput, CollectionUpdateInput, CollectionWithStats } from '@/types/entities/collection';
 import type { CollectionState } from '../types';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 /**
  * Slice principal con operaciones CRUD básicas para colecciones

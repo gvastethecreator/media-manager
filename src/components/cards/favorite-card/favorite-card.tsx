@@ -14,7 +14,12 @@ interface FavoriteCardProps {
 /**
  * Card sencilla para mostrar un favorito
  */
-export const FavoriteCard = memo(function FavoriteCard({ favorite, onSelect, isSelected, className }: FavoriteCardProps) {
+export const FavoriteCard = memo(function FavoriteCard({
+	favorite,
+	onSelect,
+	isSelected,
+	className,
+}: FavoriteCardProps) {
 	const primaryColor = favorite.entityColor || '#eab308';
 	const content = (
 		<CardContainer

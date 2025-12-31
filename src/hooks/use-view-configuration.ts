@@ -7,8 +7,8 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useSettingsStore } from '@/store/settings.store';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { useSettingsStore } from '@/store/settings.store';
 import {
 	CommonViewSettings,
 	cloneViewConfiguration,

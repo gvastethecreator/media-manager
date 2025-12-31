@@ -5,8 +5,8 @@
  * @created 2025-10-11 - Phase 6.1 ImageService Effect Implementation
  */
 
-import express from 'express';
 import { Effect } from 'effect';
+import express from 'express';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
 import { ImageService, ImageServiceLive } from '@/services/image/image.service.effect';
 

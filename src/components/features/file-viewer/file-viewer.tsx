@@ -8,8 +8,10 @@ import type React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import { Skeleton } from '@/components/ui/skeleton';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
+import { FileContentRenderer } from './file-content-renderer';
 import { ThumbnailNavigation } from './thumbnail-navigation';
 import { ToolbarActions } from './toolbar-actions';
 import { useFocusManagement } from './use-focus-management';
@@ -17,8 +19,7 @@ import { useImageLoader } from './use-image-loader';
 import { useKeyboardNavigation } from './use-keyboard-navigation';
 import { useToolbarActions } from './use-toolbar-actions';
 import { useZoomPan } from './use-zoom-pan';
-import { FileContentRenderer } from './file-content-renderer';
-import { clientLogger } from '@/lib/logger/client-logger';
+import type { PaneState } from './file-viewer.types';
 
 // Componente principal del visor de archivos - memoizado
 export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { triggerRef?: React.RefObject<HTMLElement> }) {
@@ -94,7 +95,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	const dialogClassName = useMemo(
 		() =>
 			cn(
-				'fixed inset-0 z-[9999] m-0 flex h-full w-full flex-col items-center justify-center bg-black/90 p-0 backdrop-blur-md',
+				'fixed inset-0 z-9999 m-0 flex h-full w-full flex-col items-center justify-center bg-black/90 p-0 backdrop-blur-md',
 				isOpen ? 'flex' : 'hidden'
 			),
 		[isOpen]
@@ -110,7 +111,6 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	);
 
 	// -------- MODO MULTI-LAYER (capas superpuestas) --------
-	type PaneState = { scale: number; x: number; y: number };
 	const [paneOrder, setPaneOrder] = useState<string[]>([]);
 	const [paneState, setPaneState] = useState<Record<string, PaneState>>({});
 	const canvasRef = useRef<HTMLDivElement>(null);
@@ -168,10 +168,11 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	}, []);
 
 	const MultiPaneOverlay = (
+		// biome-ignore lint/a11y/noNoninteractiveElementInteractions: Backdrop del modal (click/teclado para cerrar)
 		<div
 			aria-modal="true"
 			className={cn(
-				'fixed inset-0 z-[9999] m-0 flex h-full w-full flex-col bg-black/90 p-3 backdrop-blur-md',
+				'fixed inset-0 z-9999 m-0 flex h-full w-full flex-col bg-black/90 p-3 backdrop-blur-md',
 				isOpen ? 'flex' : 'hidden'
 			)}
 			onClick={(e) => {
@@ -247,11 +248,14 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 								}}
 								transition={{ type: 'spring', stiffness: 300, damping: 30 }}
 							>
+								{/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: onError es válido para img */}
 								<img
 									alt={img.name}
 									className="max-h-full max-w-full object-contain"
+									height={img.height ?? img.parsedMetadata?.dimensions?.height ?? 1}
 									onError={() => clientLogger.error('Error cargando capa', id)}
 									src={url}
+									width={img.width ?? img.parsedMetadata?.dimensions?.width ?? 1}
 								/>
 							</motion.div>
 						);
@@ -260,7 +264,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 			</div>
 
 			{/* Sugerencias de navegación */}
-			<div className="pointer-events-none absolute bottom-4 left-4 max-w-[300px] select-none text-muted-foreground/50 text-xs">
+			<div className="pointer-events-none absolute bottom-4 left-4 max-w-75 select-none text-caption text-muted-foreground/60">
 				<p>Rueda: zoom • Arrastrar: mover • Doble clic: reset capa</p>
 				<p>ESC: cerrar</p>
 			</div>
@@ -270,6 +274,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	// -------- FIN MODO MULTI-PANEL --------
 
 	const viewerContent = (
+		// biome-ignore lint/a11y/noNoninteractiveElementInteractions: dialog maneja click/teclado para cerrar sobre el backdrop
 		<dialog
 			aria-modal="true"
 			className={dialogClassName}
@@ -288,14 +293,15 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 			open={isOpen}
 			ref={dialogRef}
 		>
+			{/* biome-ignore lint/a11y/noStaticElementInteractions: superficie interactiva (drag/zoom) */}
+			{/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: superficie interactiva (drag/zoom) */}
 			<div
-				className="relative flex h-full w-full flex-col items-center justify-center cursor-grab active:cursor-grabbing select-none"
-				onClick={(e) => e.stopPropagation()}
+				className="relative flex h-full w-full cursor-grab select-none flex-col items-center justify-center active:cursor-grabbing"
 				onDoubleClick={resetView}
 				onMouseDown={handleMouseDown}
+				onMouseLeave={handleMouseUp}
 				onMouseMove={handleMouseMove}
 				onMouseUp={handleMouseUp}
-				onMouseLeave={handleMouseUp}
 				ref={imageContainerRef}
 			>
 				{/* Región aria-live para anuncios */}
@@ -353,7 +359,9 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 												<img
 													alt="Loading preview"
 													className="h-full w-full object-contain"
+													height={currentImage.height ?? currentImage.parsedMetadata?.dimensions?.height ?? 1}
 													src={urls[currentImage.id]}
+													width={currentImage.width ?? currentImage.parsedMetadata?.dimensions?.width ?? 1}
 												/>
 											</motion.div>
 										</motion.div>
@@ -366,9 +374,9 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 
 						{!isLoading && currentImage && urls[currentImage.id] && (
 							<FileContentRenderer
-								item={currentImage}
 								contentUrl={urls[currentImage.id]}
 								isLoading={false}
+								item={currentImage}
 								onError={() => setIsLoading(false)}
 								onLoad={() => setIsLoading(false)}
 								transformStyle={{
@@ -389,7 +397,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 				<ThumbnailNavigation currentIndex={currentIndex} images={images} onSelectImage={handleSelectImage} />
 
 				{/* Navigation hints */}
-				<div className="pointer-events-none fixed bottom-4 left-4 max-w-[300px] select-none text-muted-foreground/50 text-xs">
+				<div className="pointer-events-none fixed bottom-4 left-4 max-w-75 select-none text-caption text-muted-foreground/60">
 					<p>Flechas: navegar • Rueda: zoom • Arrastrar: mover</p>
 					<p>ESC: cerrar • R: restablecer • +/-: zoom</p>
 				</div>

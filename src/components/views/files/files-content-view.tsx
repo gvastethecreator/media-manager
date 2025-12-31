@@ -11,8 +11,8 @@ import { motion } from '@/components/ui/motion-shim';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
-import type { FileWithStats } from '@/types/entities/file';
 import { clientLogger } from '@/lib/logger/client-logger';
+import type { FileWithStats } from '@/types/entities/file';
 
 interface FilesContentViewProps {
 	files: FileWithStats[];

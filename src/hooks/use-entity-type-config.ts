@@ -19,9 +19,9 @@ import {
 	isFormatSupported,
 } from '@/config/entity-type-configs';
 import { getCachedThumbnail } from '@/config/thumbnail-generators';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { EntityStatsType } from '@/types/file-browser/entity-stats';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 /**
  * 🎯 Resultado del hook useEntityTypeConfig

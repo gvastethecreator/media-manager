@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 // Importar tipos correctos de entities
@@ -24,7 +24,7 @@ export interface CollectionCardProps {
  * Este componente muestra información detallada de una colección en un formato
  * inspirado en cartas de juegos como Magic/Yu-Gi-Oh/Pokémon, con múltiples
  * secciones que muestran datos y miniaturas de las imágenes contenidas.
- * 
+ *
  * ✅ OPTIMIZADO: Ya tiene MemoizedCollectionCard export
  */
 export function CollectionCard({
@@ -161,7 +161,7 @@ export function CollectionCard({
 		>
 			{/* Resplandor de borde en hover */}
 			<div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-100">
-				<div className="-z-10 absolute inset-0 rounded-[4.75%] blur-md" style={glowStyle} />
+				<div className="absolute inset-0 -z-10 rounded-[4.75%] blur-md" style={glowStyle} />
 			</div>
 
 			{/* Textura holográfica tipo TCG */}

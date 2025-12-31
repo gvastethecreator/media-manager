@@ -1,6 +1,6 @@
-import { formatDate } from '@/lib/utils/date';
 import { HeartIcon, ImageIcon, Star, VideoIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/utils/date';
 
 interface PlaceCardFooterProps {
 	createdAt?: Date;

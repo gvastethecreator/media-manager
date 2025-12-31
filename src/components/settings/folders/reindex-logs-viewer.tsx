@@ -8,8 +8,8 @@ import { useQuery } from '@tanstack/react-query';
 import { AlertTriangle, Clock, FileText, RefreshCw, Trash2, XCircle } from 'lucide-react';
 import { useState } from 'react';
 import { JsonViewer } from '@/components/panels/details-panel/components/json-viewer';
-import type { ReindexLogEntry } from '@/lib/logger/reindex-file-logger';
 import { clientLogger } from '@/lib/logger/client-logger';
+import type { ReindexLogEntry } from '@/lib/logger/reindex-file-logger';
 
 interface LogStats {
 	errorLogPath: string;

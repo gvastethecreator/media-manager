@@ -1,8 +1,8 @@
 'use client';
 
+import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { ChevronDown } from 'lucide-react';
-import * as AccordionPrimitive from '@radix-ui/react-accordion';
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
@@ -39,9 +39,9 @@ interface AccordionMenuProps {
 const AccordionMenuContext = React.createContext<AccordionMenuContextValue>({
 	matchPath: () => false,
 	selectedValue: '',
-	setSelectedValue: () => { },
+	setSelectedValue: () => {},
 	nestedStates: {},
-	setNestedStates: () => { },
+	setNestedStates: () => {},
 });
 
 function AccordionMenu({
@@ -282,7 +282,7 @@ function AccordionMenuSubTrigger({
 				{children}
 				<ChevronDown
 					className={cn(
-						'[[data-state=open]>&]:-rotate-180 ms-auto size-3.5! shrink-0 text-muted-foreground transition-transform duration-200'
+						'ms-auto size-3.5! shrink-0 text-muted-foreground transition-transform duration-200 [[data-state=open]>&]:-rotate-180'
 					)}
 					data-slot="accordion-menu-sub-indicator"
 				/>
@@ -293,15 +293,15 @@ function AccordionMenuSubTrigger({
 
 type AccordionMenuSubContentProps = (
 	| (React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content> & {
-		type: 'single';
-		collapsible: boolean;
-		defaultValue?: string;
-	})
+			type: 'single';
+			collapsible: boolean;
+			defaultValue?: string;
+	  })
 	| (React.ComponentPropsWithoutRef<typeof AccordionPrimitive.Content> & {
-		type: 'multiple';
-		collapsible?: boolean;
-		defaultValue?: string | string[];
-	})
+			type: 'multiple';
+			collapsible?: boolean;
+			defaultValue?: string | string[];
+	  })
 ) & {
 	parentValue: string;
 };

@@ -6,6 +6,7 @@
  * the existing file service and toast service for user feedback.
  */
 
+import { clientLogger } from '@/lib/logger/client-logger';
 import type {
 	ItemsInfo,
 	OperationType,
@@ -13,7 +14,6 @@ import type {
 	ProgressOperation,
 	SizeInfo,
 } from '@/types/file-browser/progress-tracking';
-import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '../toast/toast.service';
 
 // Export types for external use

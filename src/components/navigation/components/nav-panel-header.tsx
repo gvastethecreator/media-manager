@@ -139,28 +139,28 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 	}, []);
 
 	return (
-		<div className="border-border/20 border-b bg-gradient-to-b from-background/90 to-transparent py-2 shadow-sm min-w-0 overflow-hidden">
+		<div className="min-w-0 overflow-hidden border-border/20 border-b bg-gradient-to-b from-background/90 to-transparent py-2 shadow-sm">
 			{/* 📋 Layout responsivo */}
 			<div
 				className={cn(
-					'flex w-full gap-2 px-2 transition-all duration-300 min-w-0',
+					'flex w-full min-w-0 gap-2 px-2 transition-all duration-300',
 					isCollapsed ? 'flex-col items-center py-1' : 'flex-col'
 				)}
 			>
 				{/* Avatar */}
 				<div
 					className={cn(
-						'flex w-full items-center justify-between p-1 min-w-0',
+						'flex w-full min-w-0 items-center justify-between p-1',
 						isCollapsed ? 'mb-1 justify-center' : 'w-full justify-between'
 					)}
 				>
-					<div className={cn('flex items-center gap-2 min-w-0', isCollapsed && 'justify-center')}>
+					<div className={cn('flex min-w-0 items-center gap-2', isCollapsed && 'justify-center')}>
 						<MemoizedAvatar color={activeProfileData.color} emoji={activeProfileData.emoji} />
 
 						{!isCollapsed && (
 							<div className="flex min-w-0 overflow-hidden">
-								<div className="flex items-center gap-2 min-w-0">
-									<span className="font-medium text-foreground/80 text-sm leading-tight truncate">
+								<div className="flex min-w-0 items-center gap-2">
+									<span className="truncate font-medium text-foreground/80 text-sm leading-tight">
 										{activeProfileData?.name}
 									</span>
 								</div>
@@ -169,7 +169,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 					</div>
 					{/* Botones de acción */}
 					{!isCollapsed && (
-						<div className="flex shrink-0 items-center gap-1 ml-auto">
+						<div className="ml-auto flex shrink-0 items-center gap-1">
 							<MemoizedHeaderButton
 								icon={<Home className="h-3.5 w-3.5" />}
 								onClick={handleHomeClick}

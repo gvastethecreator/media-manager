@@ -1,6 +1,6 @@
-import { formatDistanceToNow } from '@/lib/utils/date';
 import { BarChart4, Calendar, Heart, Image, LinkIcon, ListChecks, RefreshCw, Star, Video } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatDistanceToNow } from '@/lib/utils/date';
 
 interface NoteCardFooterProps {
 	createdAt: Date | string;
@@ -46,8 +46,8 @@ export function NoteCardFooter({
 	const wasUpdated = updatedAtDate.getTime() - createdAtDate.getTime() > 60_000; // 1 minuto de diferencia
 	const updatedFormattedDate = wasUpdated
 		? formatDistanceToNow(updatedAtDate, {
-			addSuffix: true,
-		})
+				addSuffix: true,
+			})
 		: null;
 
 	// Obtener color de prioridad

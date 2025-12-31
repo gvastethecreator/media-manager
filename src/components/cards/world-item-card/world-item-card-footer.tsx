@@ -1,5 +1,5 @@
-import { formatDistanceToNow } from '@/lib/utils/date';
 import { Calendar, Clock, Image as ImageIcon, ShieldCheck, Sparkles, Star } from 'lucide-react';
+import { formatDistanceToNow } from '@/lib/utils/date';
 
 import type { WorldItemWithStats } from '@/types/entities/world-item';
 

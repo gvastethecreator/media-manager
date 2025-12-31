@@ -1,12 +1,12 @@
-import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
-import { serverLogger } from '@/lib/logger/server-logger';
 import * as crypto from 'crypto';
+import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
 import express from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
 import { characters, imageCharacters, images } from '@/lib/drizzle/schema/index';
-import { toImageWithStats } from '@/transformers/image';
 import type { ExpressHandler } from '@/lib/express-types';
+import { serverLogger } from '@/lib/logger/server-logger';
+import { toImageWithStats } from '@/transformers/image';
 
 const router = express.Router();
 
@@ -206,7 +206,7 @@ router.get('/:id/media', async (req, res) => {
 			.orderBy(desc(images.updatedAt))
 			.limit(limit);
 
-		const thumbnails = recentImages.map((img) => ({
+		const thumbnails = recentImages.map((img: { id: string; name: string }) => ({
 			id: img.id,
 			name: img.name,
 			thumbnailUrl: `/api/thumbnails/${img.id}`,
@@ -243,7 +243,9 @@ router.get('/:id/images', async (req, res) => {
 			.from(imageCharacters)
 			.where(eq(imageCharacters.B, id));
 
-		const imageIds = relations.map((r) => r.imageId).filter(Boolean);
+		const imageIds = relations
+			.map((r: { imageId: string | null }) => r.imageId)
+			.filter((id: string | null): id is string => Boolean(id));
 		if (imageIds.length === 0) {
 			res.json([]);
 			return;
@@ -255,7 +257,7 @@ router.get('/:id/images', async (req, res) => {
 			orderBy: desc(images.updatedAt),
 		});
 
-		res.json(drizzleImages.map((img) => toImageWithStats(img as any)));
+		res.json(drizzleImages.map((img: unknown) => toImageWithStats(img as any)));
 	} catch (error) {
 		serverLogger.error('Error getting character images:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });

@@ -223,12 +223,12 @@ export function WorldItemsSettings() {
 		<div className="grid h-[calc(100vh-8rem)] grid-cols-12 gap-3">
 			{/* Panel izquierdo: Lista de objetos */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="flex h-full flex-col rounded-sm border-none bg-muted/30">
+				<Card className="flex h-full flex-col rounded-dt-md border-none bg-muted/30 shadow-sm">
 					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="font-bold text-xl">Objetos del Mundo</CardTitle>
-								<CardDescription className="text-xs">
+								<CardTitle className="text-heading-lg">Objetos del Mundo</CardTitle>
+								<CardDescription className="text-caption">
 									{stats.totalItems} objetos • {stats.favoriteItems} favoritos
 								</CardDescription>
 							</div>
@@ -409,7 +409,7 @@ export function WorldItemsSettings() {
 
 			{/* Panel derecho: Formulario o vista previa */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="flex h-full flex-col rounded-sm border-none bg-muted/30">
+				<Card className="flex h-full flex-col rounded-dt-md border-none bg-muted/30 shadow-sm">
 					{isEditing && selectedItem ? (
 						<>
 							<CardHeader>

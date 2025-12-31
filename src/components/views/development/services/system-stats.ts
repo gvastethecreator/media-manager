@@ -6,8 +6,8 @@
 import { count, gte, sum } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { collections, folders, images, tags } from '@/lib/drizzle/schema/index';
-import { formatBytes } from '@/lib/utils/format.utils';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { formatBytes } from '@/lib/utils/format.utils';
 
 /**
  * Obtiene el total de archivos indexados en la base de datos

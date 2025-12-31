@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useFile3DStore } from '@/store/entities/file-3d';
-import type { AnyEntityWithStats } from '@/types/entities';
 import type { ViewProps } from '../types';
 
 const logger = clientLogger.withContext('File3DView');
@@ -17,7 +16,10 @@ export default function File3DView(_props: ViewProps) {
 	const hasInitRef = useRef(false);
 	const items = useMemo(() => file3Ds || [], [file3Ds]);
 	const count = items.length;
-	const browserItems = useMemo(() => items.map((it) => toBrowserItem(it as unknown as Record<string, unknown>)), [items]);
+	const browserItems = useMemo(
+		() => items.map((it) => toBrowserItem(it as unknown as Record<string, unknown>)),
+		[items]
+	);
 
 	useEffect(() => {
 		if (!hasInitRef.current && count === 0 && !loading) {
