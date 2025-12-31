@@ -5,9 +5,9 @@
  * @created 2025-10-11 - Fase 2 Effect Implementation
  */
 
-import type { Request, Response, NextFunction } from 'express';
 import { Schema } from '@effect/schema';
 import { Effect } from 'effect';
+import type { NextFunction, Request, Response } from 'express';
 
 /**
  * Error de validación HTTP
@@ -32,10 +32,10 @@ const toValidationError = (error: unknown, source: string): ValidationError => (
 
 /**
  * Middleware para validar request body
- * 
+ *
  * @example
  * ```typescript
- * router.post('/', 
+ * router.post('/',
  *   validateBody(TagCreate),
  *   async (req, res) => {
  *     // req.body ya está validado y tipado como TagCreate
@@ -69,10 +69,10 @@ export const validateBody = <A, I>(schema: Schema.Schema<A, I, never>) => {
 
 /**
  * Middleware para validar query params
- * 
+ *
  * @example
  * ```typescript
- * router.get('/', 
+ * router.get('/',
  *   validateQuery(PaginationInput),
  *   async (req, res) => {
  *     // req.query ya está validado y tipado como PaginationInput
@@ -87,7 +87,7 @@ export const validateQuery = <A, I>(schema: Schema.Schema<A, I, never>) => {
 	return async (req: Request, res: Response, next: NextFunction) => {
 		// Convertir query params (siempre strings) a tipos apropiados
 		const queryWithTypes = convertQueryTypes(req.query);
-		
+
 		const effect = decode(queryWithTypes);
 		const result = await Effect.runPromise(Effect.either(effect));
 
@@ -108,12 +108,12 @@ export const validateQuery = <A, I>(schema: Schema.Schema<A, I, never>) => {
 
 /**
  * Middleware para validar route params
- * 
+ *
  * @example
  * ```typescript
  * const ParamSchema = Schema.Struct({ id: Schema.UUID });
- * 
- * router.get('/:id', 
+ *
+ * router.get('/:id',
  *   validateParams(ParamSchema),
  *   async (req, res) => {
  *     // req.params.id está validado como UUID
@@ -193,10 +193,10 @@ function convertQueryValue(value: any): any {
 
 /**
  * Middleware genérico que valida múltiples partes del request
- * 
+ *
  * @example
  * ```typescript
- * router.post('/:id', 
+ * router.post('/:id',
  *   validate({
  *     params: Schema.Struct({ id: Schema.UUID }),
  *     body: TagUpdate,

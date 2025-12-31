@@ -360,18 +360,18 @@ class ThumbnailService {
 				.orderBy(desc(images.thumbnailOptimizedAt))
 				.limit(1);
 
-		return {
-			total: totalImages[0]?.count || 0,
-			processed: processedImages[0]?.count || 0,
-			failed: erroredImages[0]?.count || 0,
-			pending: (totalImages[0]?.count || 0) - (processedImages[0]?.count || 0),
-			totalFiles: totalImages[0]?.count || 0,
-			totalSize: Number(totalThumbnailSize[0]?.sum || 0),
-			processedSize: Number(totalThumbnailSize[0]?.sum || 0),
-			errors: [],
-			averageProcessingTime: 0,
-			lastProcessedAt: lastProcessedImage[0]?.date || undefined,
-		};
+			return {
+				total: totalImages[0]?.count || 0,
+				processed: processedImages[0]?.count || 0,
+				failed: erroredImages[0]?.count || 0,
+				pending: (totalImages[0]?.count || 0) - (processedImages[0]?.count || 0),
+				totalFiles: totalImages[0]?.count || 0,
+				totalSize: Number(totalThumbnailSize[0]?.sum || 0),
+				processedSize: Number(totalThumbnailSize[0]?.sum || 0),
+				errors: [],
+				averageProcessingTime: 0,
+				lastProcessedAt: lastProcessedImage[0]?.date || undefined,
+			};
 		} catch (error) {
 			thumbnailLogger.error('Error al obtener estadísticas de miniaturas:', error);
 			throw toServiceError(error, {

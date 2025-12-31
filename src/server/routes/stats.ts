@@ -1,6 +1,6 @@
 import express from 'express';
-import { getFolderStats, getStats, getSystemStats, getSystemStatsExtended } from '../services/stats.service';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { getFolderStats, getStats, getSystemStats, getSystemStatsExtended } from '../services/stats.service';
 
 const router = express.Router();
 

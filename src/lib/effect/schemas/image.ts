@@ -6,16 +6,8 @@
  */
 
 import { Schema } from '@effect/schema';
-import {
-	UUID,
-	NonNegativeInt,
-	PositiveInt,
-	AspectRatio,
-	HexColor,
-	TimestampFields,
-	AbsoluteFilePath,
-	FileSize,
-} from './index';
+import { UUID } from './common';
+import { AbsoluteFilePath, AspectRatio, FileSize, HexColor, NonNegativeInt, PositiveInt } from './primitives';
 
 /**
  * Schema base para Image entity
@@ -76,7 +68,7 @@ export class CompleteImage extends Schema.Class<CompleteImage>('CompleteImage')(
 	width: NonNegativeInt,
 	height: NonNegativeInt,
 	folderId: Schema.optional(Schema.NullOr(UUID)),
-	
+
 	// Extended fields
 	url: Schema.String,
 	aspectRatio: AspectRatio,
@@ -107,7 +99,7 @@ export class ExtendedImage extends Schema.Class<ExtendedImage>('ExtendedImage')(
 	metadata: Schema.Record({ key: Schema.String, value: Schema.Unknown }),
 	stats: ImageStats,
 	visualConfig: ImageVisualConfig,
-	
+
 	// UI-specific fields
 	isSelected: Schema.Boolean,
 	isHighlighted: Schema.Boolean,

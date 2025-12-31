@@ -6,7 +6,7 @@
  */
 
 import { eq } from 'drizzle-orm';
-import type { Request, Response, Router } from 'express';
+import type { Router } from 'express';
 import express from 'express';
 import { db } from '@/lib/drizzle';
 import { folders } from '@/lib/drizzle/schema';
@@ -63,15 +63,15 @@ foldersRouter.get('/', async (_req, res) => {
 foldersRouter.post('/reindex-all', async (req, res) => {
 	try {
 		logger.info('🔄 POST /folders/reindex-all - Iniciando reindexación global');
-		
+
 		const options = req.body || {};
 		const reindexService = FolderReindexService.getInstance();
-		
+
 		const result = await reindexService.executeStructuredReindex({
 			emitEvents: true,
 			includeSubfolders: true,
-			skipThumbnails: options.skipThumbnails || false,
-			skipMetadata: options.skipMetadata || false,
+			skipThumbnails: options.skipThumbnails,
+			skipMetadata: options.skipMetadata,
 			concurrency: 3,
 		});
 
@@ -83,7 +83,7 @@ foldersRouter.post('/reindex-all', async (req, res) => {
 		res.json({
 			processed: result.summary.foldersProcessed,
 			errors: Object.values(result.phases)
-				.flatMap(phase => phase.errors)
+				.flatMap((phase) => phase.errors)
 				.filter(Boolean),
 		});
 	} catch (error) {
@@ -104,7 +104,7 @@ foldersRouter.post('/', async (req, res) => {
 		const data = req.body;
 
 		// Validación básica
-		if (!data.path || !data.name) {
+		if (!(data.path && data.name)) {
 			res.status(400).json({ error: 'path y name son requeridos' });
 			return;
 		}
@@ -350,7 +350,7 @@ foldersRouter.post('/:id/reindex', async (req, res) => {
 	try {
 		const { id } = req.params;
 		logger.info(`🔄 POST /folders/${id}/reindex - Iniciando reindexación`);
-		
+
 		// Verificar que la carpeta existe
 		const folder = await db.select().from(folders).where(eq(folders.id, id)).limit(1);
 		if (!folder || folder.length === 0) {
@@ -361,13 +361,13 @@ foldersRouter.post('/:id/reindex', async (req, res) => {
 
 		const options = req.body || {};
 		const reindexService = FolderReindexService.getInstance();
-		
+
 		const result = await reindexService.executeStructuredReindex({
 			folderId: id,
 			emitEvents: true,
 			includeSubfolders: true,
-			skipThumbnails: options.skipThumbnails || false,
-			skipMetadata: options.skipMetadata || false,
+			skipThumbnails: options.skipThumbnails,
+			skipMetadata: options.skipMetadata,
 			concurrency: 3,
 		});
 

@@ -1,8 +1,8 @@
 import type { Request, Response } from 'express';
 import { Router } from 'express';
 import { z } from 'zod';
-import { profileService } from '../../services/profile/profile.service';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { profileService } from '../../services/profile/profile.service';
 
 const router = Router() as any;
 

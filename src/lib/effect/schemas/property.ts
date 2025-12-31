@@ -6,7 +6,8 @@
  */
 
 import { Schema } from '@effect/schema';
-import { UUID, HexColor, Emoji, TimestampFields, BoundedString } from './index';
+import { UUID } from './common';
+import { BoundedString, Emoji, HexColor } from './primitives';
 
 /**
  * Categorías válidas para Property

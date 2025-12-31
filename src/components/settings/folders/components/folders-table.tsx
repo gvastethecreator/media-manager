@@ -398,7 +398,7 @@ export function FoldersTable({
 																/>
 															</div>
 														)}
-														{hasError && <AlertCircle className="-right-1 -top-1 absolute h-3 w-3 text-destructive" />}
+														{hasError && <AlertCircle className="absolute -top-1 -right-1 h-3 w-3 text-destructive" />}
 													</div>
 													<div className="min-w-0 flex-1">
 														<div className="flex items-center gap-2">

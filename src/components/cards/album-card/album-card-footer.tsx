@@ -62,7 +62,7 @@ export function AlbumCardFooter({
 			{tcgMode && (
 				<div
 					className={cn(
-						'-translate-x-1/2 absolute bottom-1 left-1/2 z-20 rounded-full px-3 py-0.5 font-medium text-[10px]',
+						'absolute bottom-1 left-1/2 z-20 -translate-x-1/2 rounded-full px-3 py-0.5 font-medium text-[10px]',
 						rarityLevel === 'Mítica' && 'bg-gradient-to-r from-amber-400 via-purple-500 to-pink-500 text-white',
 						rarityLevel === 'Rara' && 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white',
 						rarityLevel === 'Poco común' && 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white',
@@ -77,7 +77,7 @@ export function AlbumCardFooter({
 			{tcgMode && album.isFavorite && (
 				<div className="pointer-events-none absolute top-0 right-0 z-30 h-24 w-24 overflow-hidden">
 					<div
-						className="-translate-y-8 absolute top-0 right-0 h-24 w-24 translate-x-12 rotate-45 opacity-70"
+						className="absolute top-0 right-0 h-24 w-24 translate-x-12 -translate-y-8 rotate-45 opacity-70"
 						style={{
 							background: `linear-gradient(45deg, transparent 30%, ${primaryColor} 40%, gold 50%, ${primaryColor} 60%, transparent 70%)`,
 							backgroundSize: '600% 600%',

@@ -9,48 +9,94 @@ import Dashboard from '@/components/views/dashboard/dashboard';
 import { FolderContentView } from '@/components/views/folders/folder-content-view';
 
 // ✅ LAZY LOAD: Todas las demás vistas (optimización de bundle -800KB ~28%)
-const AllImagesView = lazy(() => import('@/components/views/all-images/all-images-view').then(m => ({ default: m.AllImagesView })));
-const AlbumsView = lazy(() => import('@/components/views/albums/albums-view').then(m => ({ default: m.AlbumsView })));
+const AllImagesView = lazy(() =>
+	import('@/components/views/all-images/all-images-view').then((m) => ({ default: m.AllImagesView }))
+);
+const AlbumsView = lazy(() => import('@/components/views/albums/albums-view').then((m) => ({ default: m.AlbumsView })));
 const AudioView = lazy(() => import('@/components/views/audio/audio-view'));
-const CharactersView = lazy(() => import('@/components/views/characters/characters-view').then(m => ({ default: m.CharactersView })));
-const CollectionsView = lazy(() => import('@/components/views/collections/collections-view').then(m => ({ default: m.CollectionsView })));
-const ConceptsView = lazy(() => import('@/components/views/concepts/concepts-view').then(m => ({ default: m.ConceptsView })));
+const CharactersView = lazy(() =>
+	import('@/components/views/characters/characters-view').then((m) => ({ default: m.CharactersView }))
+);
+const CollectionsView = lazy(() =>
+	import('@/components/views/collections/collections-view').then((m) => ({ default: m.CollectionsView }))
+);
+const ConceptsView = lazy(() =>
+	import('@/components/views/concepts/concepts-view').then((m) => ({ default: m.ConceptsView }))
+);
 const DevelopmentContentView = lazy(() => import('@/components/views/development/development-content-view'));
 const DocumentsView = lazy(() => import('@/components/views/documents/documents-view'));
-const EntityCardsView = lazy(() => import('@/components/views/entity-cards').then(m => ({ default: m.EntityCardsView })));
-const FavoritesView = lazy(() => import('@/components/views/favorites/favorites-view').then(m => ({ default: m.FavoritesView })));
-const File3DDetailView = lazy(() => import('@/components/views/file3d/file-3d-content-view').then(m => ({ default: m.File3DContentView })));
+const EntityCardsView = lazy(() =>
+	import('@/components/views/entity-cards').then((m) => ({ default: m.EntityCardsView }))
+);
+const FavoritesView = lazy(() =>
+	import('@/components/views/favorites/favorites-view').then((m) => ({ default: m.FavoritesView }))
+);
+const File3DDetailView = lazy(() =>
+	import('@/components/views/file3d/file-3d-content-view').then((m) => ({ default: m.File3DContentView }))
+);
 const File3DView = lazy(() => import('@/components/views/file3d/file3d-view'));
-const AllFilesView = lazy(() => import('@/components/views/files/all-files-view').then(m => ({ default: m.AllFilesView })));
+const AllFilesView = lazy(() =>
+	import('@/components/views/files/all-files-view').then((m) => ({ default: m.AllFilesView }))
+);
 const FoldersView = lazy(() => import('@/components/views/folders/folders-view'));
-const GroupsView = lazy(() => import('@/components/views/groups/groups-view').then(m => ({ default: m.GroupsView })));
+const GroupsView = lazy(() => import('@/components/views/groups/groups-view').then((m) => ({ default: m.GroupsView })));
 const ImageDetailView = lazy(() => import('@/components/views/images/image-detail-view'));
-const JsonFileContentView = lazy(() => import('@/components/views/json-files/json-file-content-view').then(m => ({ default: m.JsonFileContentView })));
+const JsonFileContentView = lazy(() =>
+	import('@/components/views/json-files/json-file-content-view').then((m) => ({ default: m.JsonFileContentView }))
+);
 const JsonFilesView = lazy(() => import('@/components/views/json-files/json-files-view'));
 const MixedContentView = lazy(() => import('@/components/views/mixed/mixed-content-view'));
 const NotesView = lazy(() =>
 	import('@/components/views/notes/notes-view').then((module) => ({ default: module.NotesView }))
 );
-const PlaceContentView = lazy(() => import('@/components/views/places/place-content-view').then(m => ({ default: m.PlaceContentView })));
-const PlacesView = lazy(() => import('@/components/views/places/places-view').then(m => ({ default: m.PlacesView })));
-const PromptsView = lazy(() => import('@/components/views/prompts/prompts-view').then(m => ({ default: m.PromptsView })));
-const PropertiesView = lazy(() => import('@/components/views/properties/properties-view').then(m => ({ default: m.PropertiesView })));
-const SearchView = lazy(() => import('@/components/views/search/search-view').then(m => ({ default: m.SearchView })));
+const PlaceContentView = lazy(() =>
+	import('@/components/views/places/place-content-view').then((m) => ({ default: m.PlaceContentView }))
+);
+const PlacesView = lazy(() => import('@/components/views/places/places-view').then((m) => ({ default: m.PlacesView })));
+const PromptsView = lazy(() =>
+	import('@/components/views/prompts/prompts-view').then((m) => ({ default: m.PromptsView }))
+);
+const PropertiesView = lazy(() =>
+	import('@/components/views/properties/properties-view').then((m) => ({ default: m.PropertiesView }))
+);
+const SearchView = lazy(() => import('@/components/views/search/search-view').then((m) => ({ default: m.SearchView })));
 const SettingsContentView = lazy(() => import('@/components/views/settings/settings-content-view'));
-const TagContentView = lazy(() => import('@/components/views/tags/tag-content-view').then(m => ({ default: m.TagContentView })));
-const TagsView = lazy(() => import('@/components/views/tags/tags-view').then(m => ({ default: m.TagsView })));
+const TagContentView = lazy(() =>
+	import('@/components/views/tags/tag-content-view').then((m) => ({ default: m.TagContentView }))
+);
+const TagsView = lazy(() => import('@/components/views/tags/tags-view').then((m) => ({ default: m.TagsView })));
 const VideosView = lazy(() => import('@/components/views/videos/videos-view'));
-const WildcardsView = lazy(() => import('@/components/views/wildcards/wildcards-view').then(m => ({ default: m.WildcardsView })));
-const WorldItemContentView = lazy(() => import('@/components/views/world-items/world-item-content-view').then(m => ({ default: m.WorldItemContentView })));
-const WorldItemsView = lazy(() => import('@/components/views/world-items/world-items-view').then(m => ({ default: m.WorldItemsView })));
+const WildcardsView = lazy(() =>
+	import('@/components/views/wildcards/wildcards-view').then((m) => ({ default: m.WildcardsView }))
+);
+const WorldItemContentView = lazy(() =>
+	import('@/components/views/world-items/world-item-content-view').then((m) => ({ default: m.WorldItemContentView }))
+);
+const WorldItemsView = lazy(() =>
+	import('@/components/views/world-items/world-items-view').then((m) => ({ default: m.WorldItemsView }))
+);
 // Content Views para detalle
-const AlbumContentView = lazy(() => import('@/components/views/albums/album-content-view').then(m => ({ default: m.AlbumContentView })));
-const CharacterContentView = lazy(() => import('@/components/views/characters/character-content-view').then(m => ({ default: m.CharacterContentView })));
-const CollectionContentView = lazy(() => import('@/components/views/collections/collection-content-view').then(m => ({ default: m.CollectionContentView })));
-const ConceptContentView = lazy(() => import('@/components/views/concepts/concept-content-view').then(m => ({ default: m.ConceptContentView })));
-const GroupContentView = lazy(() => import('@/components/views/groups/group-content-view').then(m => ({ default: m.GroupContentView })));
-const WildcardContentView = lazy(() => import('@/components/views/wildcards/wildcard-content-view').then(m => ({ default: m.WildcardContentView })));
-const PromptContentView = lazy(() => import('@/components/views/prompts/prompt-content-view').then(m => ({ default: m.PromptContentView })));
+const AlbumContentView = lazy(() =>
+	import('@/components/views/albums/album-content-view').then((m) => ({ default: m.AlbumContentView }))
+);
+const CharacterContentView = lazy(() =>
+	import('@/components/views/characters/character-content-view').then((m) => ({ default: m.CharacterContentView }))
+);
+const CollectionContentView = lazy(() =>
+	import('@/components/views/collections/collection-content-view').then((m) => ({ default: m.CollectionContentView }))
+);
+const ConceptContentView = lazy(() =>
+	import('@/components/views/concepts/concept-content-view').then((m) => ({ default: m.ConceptContentView }))
+);
+const GroupContentView = lazy(() =>
+	import('@/components/views/groups/group-content-view').then((m) => ({ default: m.GroupContentView }))
+);
+const WildcardContentView = lazy(() =>
+	import('@/components/views/wildcards/wildcard-content-view').then((m) => ({ default: m.WildcardContentView }))
+);
+const PromptContentView = lazy(() =>
+	import('@/components/views/prompts/prompt-content-view').then((m) => ({ default: m.PromptContentView }))
+);
 
 // Wrapper components para pasar el parámetro de la URL
 const FolderContentWrapper = () => {

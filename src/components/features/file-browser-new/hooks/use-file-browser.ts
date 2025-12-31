@@ -5,24 +5,23 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigation } from '@/components/navigation/hooks/navigation.utils';
-import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
+import { useViewOptionsStore } from '@/store/ui/view-options.slice';
+import { DEFAULT_PAGE_SIZE, VIEW_CONFIGS } from '../core/constants';
 import type {
 	BrowserItem,
 	BrowserItemGroup,
-	ViewMode,
-	ViewConfig,
-	SortOption,
-	PaginationState,
 	ItemClickHandler,
 	ItemDoubleClickHandler,
-	ClickModifiers,
+	PaginationState,
+	SortOption,
+	ViewConfig,
+	ViewMode,
 } from '../types';
-import { VIEW_CONFIGS, DEFAULT_PAGE_SIZE } from '../core/constants';
+import { applyGrouping, filterBySearch, filterSynthetic, flattenGroups, sortWithFoldersFirst } from '../utils';
 import { useDataSource } from './use-data-source';
-import { useSelection } from './use-selection';
 import { usePagination } from './use-pagination';
-import { filterBySearch, filterSynthetic, sortWithFoldersFirst, applyGrouping, flattenGroups } from '../utils';
+import { useSelection } from './use-selection';
 
 export interface UseFileBrowserOptions {
 	/** ID de carpeta */
@@ -328,8 +327,8 @@ export function useFileBrowser({
 	const showPreloader = dataSource.isLoading && processedData.items.length === 0;
 	const showErrorState = !showPreloader && !!dataSource.error && processedData.items.length === 0;
 	const showEmptyState =
-		!showPreloader && !showErrorState && processedData.realItems.length === 0 && !dataSource.isLoading;
-	const shouldRenderContent = !showPreloader && !showErrorState && !showEmptyState && processedData.items.length > 0;
+		!(showPreloader || showErrorState) && processedData.realItems.length === 0 && !dataSource.isLoading;
+	const shouldRenderContent = !(showPreloader || showErrorState || showEmptyState) && processedData.items.length > 0;
 
 	return {
 		// Datos

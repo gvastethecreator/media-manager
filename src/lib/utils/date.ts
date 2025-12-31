@@ -76,10 +76,13 @@ export function formatRelativeTime(date: Date | string | number, addSuffix = tru
  * @param startDate Fecha de inicio
  * @param endDate Fecha de fin (default: now)
  */
-export function formatTimeDuration(startDate: Date | string | number, endDate: Date | string | number = new Date()): string {
+export function formatTimeDuration(
+	startDate: Date | string | number,
+	endDate: Date | string | number = new Date()
+): string {
 	const start = typeof startDate === 'string' || typeof startDate === 'number' ? new Date(startDate) : startDate;
 	const end = typeof endDate === 'string' || typeof endDate === 'number' ? new Date(endDate) : endDate;
-	
+
 	const duration = intervalToDuration({ start, end });
 	return formatDuration(duration);
 }

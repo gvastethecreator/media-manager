@@ -269,7 +269,7 @@ export const TaskCard = memo(function TaskCard({
 				{tcgMode && (
 					<div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-100">
 						<div
-							className="-z-10 absolute inset-0 rounded-[4.75%] blur-sm"
+							className="absolute inset-0 -z-10 rounded-[4.75%] blur-sm"
 							style={{ boxShadow: `0 0 15px 2px ${primaryColor}` }}
 						/>
 					</div>

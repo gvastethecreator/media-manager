@@ -3,7 +3,7 @@
  * @module file-browser-new/utils/grouping
  */
 
-import type { BrowserItem, BrowserItemGroup, BrowserEntityType } from '../types';
+import type { BrowserEntityType, BrowserItem, BrowserItemGroup } from '../types';
 
 /**
  * Nombres de display para tipos de entidad
@@ -115,9 +115,7 @@ export function groupByDate(items: BrowserItem[], field: 'createdAt' = 'createdA
 		const value = item[field];
 		let dateKey: string;
 
-		if (!value) {
-			dateKey = 'Sin fecha';
-		} else {
+		if (value) {
 			const date = value instanceof Date ? value : new Date(value);
 			if (Number.isNaN(date.getTime())) {
 				dateKey = 'Sin fecha';
@@ -128,6 +126,8 @@ export function groupByDate(items: BrowserItem[], field: 'createdAt' = 'createdA
 					day: 'numeric',
 				});
 			}
+		} else {
+			dateKey = 'Sin fecha';
 		}
 
 		const existing = groups.get(dateKey) ?? [];

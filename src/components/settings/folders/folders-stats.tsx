@@ -13,6 +13,7 @@ import {
 	XAxis,
 	YAxis,
 } from 'recharts';
+import type { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FILE_TYPE_COLORS } from '@/lib/styles/chart-colors';
 import type { FolderStats } from '@/types/folders';
@@ -30,10 +31,22 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 		{ name: 'Documentos', value: stats.totalDocuments, color: FILE_TYPE_COLORS.documents },
 		{ name: 'Otros', value: stats.totalOthers, color: FILE_TYPE_COLORS.others },
 		...(stats.databaseSize
-			? [{ name: 'Base de Datos', value: Math.round(stats.databaseSize / (1024 * 1024)), color: FILE_TYPE_COLORS.database }]
+			? [
+				{
+					name: 'Base de Datos',
+					value: Math.round(stats.databaseSize / (1024 * 1024)),
+					color: FILE_TYPE_COLORS.database,
+				},
+			]
 			: []),
 		...(stats.thumbnailsCacheSize
-			? [{ name: 'Caché Thumbnails', value: Math.round(stats.thumbnailsCacheSize / (1024 * 1024)), color: FILE_TYPE_COLORS.cache }]
+			? [
+				{
+					name: 'Caché Thumbnails',
+					value: Math.round(stats.thumbnailsCacheSize / (1024 * 1024)),
+					color: FILE_TYPE_COLORS.cache,
+				},
+			]
 			: []),
 	].filter((item) => item.value > 0);
 
@@ -62,7 +75,7 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 			<div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
 				{/* Estadísticas organizadas en 3 filas */}
 				<div className="lg:col-span-3">
-					<div className="rounded-sm border-none bg-muted/30">
+					<div className="rounded-dt-md border-none bg-muted/30 shadow-sm">
 						<CardContent className="grid grid-cols-1 p-4">
 							<div className="space-y-3">
 								{/* Primera fila: Carpetas y Archivos totales */}
@@ -200,7 +213,10 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 											</Pie>
 											<Tooltip
 												contentStyle={{ fontSize: '12px', padding: '4px 8px' }}
-												formatter={(value: number | string | undefined, name: string | undefined) => [value ?? 0, name ?? '']}
+												formatter={(value: ValueType, name: string) => [
+													Array.isArray(value) ? (value[0] ?? 0) : (value ?? 0),
+													name,
+												]}
 												labelStyle={{ fontSize: '12px' }}
 											/>
 										</PieChart>
@@ -240,7 +256,10 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 												border: '1px solid hsl(var(--border))',
 												borderRadius: '6px',
 											}}
-											formatter={(value: number | string | undefined) => [Number(value ?? 0).toLocaleString(), 'Archivos']}
+											formatter={(value: ValueType) => [
+												Number(Array.isArray(value) ? (value[0] ?? 0) : (value ?? 0)).toLocaleString(),
+												'Archivos',
+											]}
 											labelFormatter={(name) => `Tipo: ${name}`}
 										/>
 										<Bar dataKey="value" radius={[2, 2, 0, 0]}>
@@ -279,7 +298,10 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 												border: '1px solid hsl(var(--border))',
 												borderRadius: '6px',
 											}}
-											formatter={(value: number | string | undefined) => [Math.round(Number(value ?? 0)).toLocaleString(), 'Archivos']}
+											formatter={(value: ValueType) => [
+												Math.round(Number(Array.isArray(value) ? (value[0] ?? 0) : (value ?? 0))).toLocaleString(),
+												'Archivos',
+											]}
 											labelFormatter={(name) => `Mes: ${name}`}
 										/>
 										<Line

@@ -40,9 +40,7 @@ export const BoundedString = (min: number, max: number) =>
 /**
  * Email válido
  */
-export const Email = Schema.String.pipe(
-	Schema.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)
-).annotations({
+export const Email = Schema.String.pipe(Schema.pattern(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)).annotations({
 	identifier: 'Email',
 	title: 'Email address',
 	description: 'Valid email format',
@@ -54,10 +52,7 @@ export const Email = Schema.String.pipe(
 /**
  * Entero positivo (> 0)
  */
-export const PositiveInt = Schema.Number.pipe(
-	Schema.int(),
-	Schema.positive()
-).annotations({
+export const PositiveInt = Schema.Number.pipe(Schema.int(), Schema.positive()).annotations({
 	identifier: 'PositiveInt',
 	title: 'Positive integer',
 	description: 'Integer greater than 0',
@@ -66,10 +61,7 @@ export const PositiveInt = Schema.Number.pipe(
 /**
  * Entero no negativo (>= 0)
  */
-export const NonNegativeInt = Schema.Number.pipe(
-	Schema.int(),
-	Schema.nonNegative()
-).annotations({
+export const NonNegativeInt = Schema.Number.pipe(Schema.int(), Schema.nonNegative()).annotations({
 	identifier: 'NonNegativeInt',
 	title: 'Non-negative integer',
 	description: 'Integer greater than or equal to 0',
@@ -78,23 +70,19 @@ export const NonNegativeInt = Schema.Number.pipe(
 /**
  * Porcentaje (0-100)
  */
-export const Percentage = Schema.Number.pipe(
-	Schema.greaterThanOrEqualTo(0),
-	Schema.lessThanOrEqualTo(100)
-).annotations({
-	identifier: 'Percentage',
-	title: 'Percentage',
-	description: 'Number between 0 and 100',
-	examples: [0, 50, 100],
-});
+export const Percentage = Schema.Number.pipe(Schema.greaterThanOrEqualTo(0), Schema.lessThanOrEqualTo(100)).annotations(
+	{
+		identifier: 'Percentage',
+		title: 'Percentage',
+		description: 'Number between 0 and 100',
+		examples: [0, 50, 100],
+	}
+);
 
 /**
  * Ratio (0-1)
  */
-export const Ratio = Schema.Number.pipe(
-	Schema.greaterThanOrEqualTo(0),
-	Schema.lessThanOrEqualTo(1)
-).annotations({
+export const Ratio = Schema.Number.pipe(Schema.greaterThanOrEqualTo(0), Schema.lessThanOrEqualTo(1)).annotations({
 	identifier: 'Ratio',
 	title: 'Ratio',
 	description: 'Number between 0 and 1',
@@ -104,10 +92,7 @@ export const Ratio = Schema.Number.pipe(
 /**
  * File size en bytes (no negativo)
  */
-export const FileSize = Schema.Number.pipe(
-	Schema.int(),
-	Schema.nonNegative()
-).annotations({
+export const FileSize = Schema.Number.pipe(Schema.int(), Schema.nonNegative()).annotations({
 	identifier: 'FileSize',
 	title: 'File size in bytes',
 	description: 'Non-negative integer representing file size',
@@ -118,9 +103,7 @@ export const FileSize = Schema.Number.pipe(
 /**
  * Color hexadecimal RGB (#RRGGBB)
  */
-export const HexColor = Schema.String.pipe(
-	Schema.pattern(/^#[0-9A-Fa-f]{6}$/)
-).annotations({
+export const HexColor = Schema.String.pipe(Schema.pattern(/^#[0-9A-Fa-f]{6}$/)).annotations({
 	identifier: 'HexColor',
 	title: 'Hex color code',
 	description: 'RGB color in #RRGGBB format',
@@ -130,9 +113,7 @@ export const HexColor = Schema.String.pipe(
 /**
  * Color hexadecimal RGBA (#RRGGBBAA)
  */
-export const HexColorWithAlpha = Schema.String.pipe(
-	Schema.pattern(/^#[0-9A-Fa-f]{8}$/)
-).annotations({
+export const HexColorWithAlpha = Schema.String.pipe(Schema.pattern(/^#[0-9A-Fa-f]{8}$/)).annotations({
 	identifier: 'HexColorWithAlpha',
 	title: 'Hex color with alpha',
 	description: 'RGBA color in #RRGGBBAA format',
@@ -144,9 +125,7 @@ export const HexColorWithAlpha = Schema.String.pipe(
 /**
  * URL HTTP/HTTPS
  */
-export const HttpUrl = Schema.String.pipe(
-	Schema.pattern(/^https?:\/\/.+/)
-).annotations({
+export const HttpUrl = Schema.String.pipe(Schema.pattern(/^https?:\/\/.+/)).annotations({
 	identifier: 'HttpUrl',
 	title: 'HTTP/HTTPS URL',
 	description: 'Valid HTTP or HTTPS URL',
@@ -176,10 +155,7 @@ export const RelativeFilePath = Schema.String.pipe(Schema.minLength(1)).annotati
 /**
  * Filename (solo nombre, sin path)
  */
-export const FileName = Schema.String.pipe(
-	Schema.minLength(1),
-	Schema.maxLength(255)
-).annotations({
+export const FileName = Schema.String.pipe(Schema.minLength(1), Schema.maxLength(255)).annotations({
 	identifier: 'FileName',
 	title: 'File name',
 	description: 'File name without path',
@@ -189,9 +165,7 @@ export const FileName = Schema.String.pipe(
 /**
  * File extension (con punto)
  */
-export const FileExtension = Schema.String.pipe(
-	Schema.pattern(/^\.[a-z0-9]+$/i)
-).annotations({
+export const FileExtension = Schema.String.pipe(Schema.pattern(/^\.[a-z0-9]+$/i)).annotations({
 	identifier: 'FileExtension',
 	title: 'File extension',
 	description: 'File extension with leading dot',
@@ -300,12 +274,7 @@ export const EntityStatus = Schema.Literal('active', 'archived', 'deleted').anno
 /**
  * Estado de procesamiento
  */
-export const ProcessingStatus = Schema.Literal(
-	'pending',
-	'processing',
-	'completed',
-	'failed'
-).annotations({
+export const ProcessingStatus = Schema.Literal('pending', 'processing', 'completed', 'failed').annotations({
 	identifier: 'ProcessingStatus',
 	title: 'Processing status',
 	description: 'Status of an async processing task',

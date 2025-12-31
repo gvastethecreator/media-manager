@@ -1,10 +1,10 @@
 import { readFile } from 'node:fs/promises';
 import { extname } from 'node:path';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { createFile3D, getFile3DByHash } from '@/services/file3d/file3d.service';
 import type { File3DCreateInput } from '@/types/entities/file3d';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
-import { serverLogger } from '@/lib/logger/server-logger';
 
 // Regex para procesamiento de archivos OBJ
 const LINE_SPLIT_REGEX = /\r?\n/;
@@ -126,7 +126,7 @@ export class File3DProcessor {
 	async generateThumbnail(filePath: string, entityId: string): Promise<{ success: boolean; error?: string }> {
 		const { basename } = await import('node:path');
 		const fileName = basename(filePath);
-		
+
 		serverLogger.debug(`🎨 [File3DProcessor] Generando thumbnail: ${fileName}`);
 
 		try {
@@ -173,9 +173,9 @@ export class File3DProcessor {
 			return { success: true };
 		} catch (error) {
 			serverLogger.error(`❌ [File3DProcessor] Error generando thumbnail para ${fileName}:`, error);
-			return { 
-				success: false, 
-				error: error instanceof Error ? error.message : 'Unknown error' 
+			return {
+				success: false,
+				error: error instanceof Error ? error.message : 'Unknown error',
 			};
 		}
 	}

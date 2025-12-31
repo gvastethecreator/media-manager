@@ -7,14 +7,26 @@ import { toast as sonnerToast } from 'sonner';
 
 import { cn } from '@/lib/utils';
 
-// Variantes de toast usando CVA
+/**
+ * Toast variants con Design Tokens v2
+ * - Borde 2px para mayor definición
+ * - Sombra elevada (shadow-dt-3)
+ * - Indicador lateral de color según variante
+ * - Gradiente de fondo sutil
+ * - Transiciones suaves
+ */
 const toastVariants = cva(
-	'group data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[state=closed]:animate-out data-[state=open]:animate-in data-[swipe=end]:animate-out data-[swipe=move]:transition-none',
+	'group data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-dt-md border-2 p-6 pr-8 shadow-dt-3 transition-all duration-dt-normal before:absolute before:top-0 before:bottom-0 before:left-0 before:w-1 before:rounded-l-dt-md data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[state=closed]:animate-out data-[state=open]:animate-in data-[swipe=end]:animate-out data-[swipe=move]:transition-none',
 	{
 		variants: {
 			variant: {
-				default: 'border bg-background text-foreground',
-				destructive: 'destructive group border-destructive bg-destructive text-destructive-foreground',
+				default: 'border-border/50 bg-gradient-to-b from-background to-background/98 text-foreground before:bg-primary',
+				destructive:
+					'destructive group border-destructive/30 bg-gradient-to-b from-destructive/10 to-destructive/5 text-destructive-foreground before:bg-destructive',
+				success:
+					'border-green-500/30 bg-gradient-to-b from-green-500/10 to-green-500/5 text-foreground before:bg-green-500',
+				warning:
+					'border-yellow-500/30 bg-gradient-to-b from-yellow-500/10 to-yellow-500/5 text-foreground before:bg-yellow-500',
 			},
 		},
 		defaultVariants: {
@@ -83,7 +95,7 @@ function ToastAction({ className, ...props }: React.ComponentProps<'button'>) {
 	return (
 		<button
 			className={cn(
-				'inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 font-medium text-sm ring-offset-background transition-colors hover:bg-secondary focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:focus:ring-destructive group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground',
+				'inline-flex h-8 shrink-0 items-center justify-center rounded-dt-sm border-2 bg-transparent px-3 font-medium text-sm ring-offset-background transition-all duration-dt-fast hover:bg-secondary hover:shadow-dt-1 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:focus:ring-destructive group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground',
 				className
 			)}
 			{...props}
@@ -95,7 +107,7 @@ function ToastClose({ className, ...props }: React.ComponentProps<'button'>) {
 	return (
 		<button
 			className={cn(
-				'absolute top-2 right-2 rounded-md p-1 text-foreground/50 opacity-0 transition-opacity hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600 group-[.destructive]:hover:text-red-50',
+				'absolute top-2 right-2 rounded-dt-xs p-1 text-foreground/50 opacity-0 transition-all duration-dt-fast hover:bg-muted/50 hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600 group-[.destructive]:hover:text-red-50',
 				className
 			)}
 			{...props}

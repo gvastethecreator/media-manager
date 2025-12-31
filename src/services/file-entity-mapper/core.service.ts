@@ -2,6 +2,7 @@ import { stat } from 'node:fs/promises';
 import { extname } from 'node:path';
 import PQueue from 'p-queue';
 import { shouldSkipFileByTypeAndSize } from '@/config/media-processing';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { EntityCreationResult, EntityCreationStats, EntityType } from '@/types/file-entity-mapper';
 import { AudioProcessor } from './processors/audio.processor';
 import { DocumentProcessor } from './processors/document.processor';
@@ -11,7 +12,6 @@ import { JsonProcessor } from './processors/json.processor';
 import { VideoProcessor } from './processors/video.processor';
 import { getEntityTypeFromExtension, getFileInfo } from './utils/file-info.utils';
 import { MetricsCollector } from './utils/metrics.utils';
-import { serverLogger } from '@/lib/logger/server-logger';
 
 /**
  * Servicio core que orquesta el mapeo de archivos físicos a entidades BD
@@ -223,7 +223,7 @@ export class FileEntityMapperCore {
 	 * Procesa múltiples archivos en lote con cola de concurrencia
 	 */
 	async processFiles(
-		filePaths: string[], 
+		filePaths: string[],
 		folderId: string,
 		options?: { onProgress?: (processed: number, total: number, currentFile: string) => void | Promise<void> }
 	): Promise<EntityCreationStats> {
@@ -248,7 +248,7 @@ export class FileEntityMapperCore {
 							stats.errors.push({ file: fp, error: res.error });
 						}
 					}
-					
+
 					// Reportar progreso si hay callback
 					if (options?.onProgress) {
 						await options.onProgress(stats.processed, stats.totalFiles, fp);
@@ -257,7 +257,7 @@ export class FileEntityMapperCore {
 					stats.processed++;
 					stats.failed++;
 					stats.errors.push({ file: fp, error: e instanceof Error ? e.message : 'Unknown error' });
-					
+
 					// Reportar progreso incluso en error
 					if (options?.onProgress) {
 						await options.onProgress(stats.processed, stats.totalFiles, fp);

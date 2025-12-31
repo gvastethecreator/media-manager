@@ -335,7 +335,7 @@ export class FileSyncService {
 	 * Ejecuta los cambios de sincronización (eliminar archivos que ya no existen)
 	 */
 	private async executeFileSyncChanges(
-		result: FileSyncResult, 
+		result: FileSyncResult,
 		folderId: string,
 		onProgress?: (processed: number, total: number, currentFile: string) => void | Promise<void>
 	): Promise<void> {
@@ -351,8 +351,8 @@ export class FileSyncService {
 	}
 
 	private async processNewFiles(
-		result: FileSyncResult, 
-		folderId: string, 
+		result: FileSyncResult,
+		folderId: string,
 		onProgress?: (processed: number, total: number, currentFile: string) => void | Promise<void>
 	): Promise<void> {
 		if (result.newFiles.length === 0) {
@@ -368,7 +368,7 @@ export class FileSyncService {
 			// Procesar archivos nuevos con extracción de metadata completa
 			const filePaths = result.newFiles.map((f) => f.path);
 			const processingStats = await mapper.processFiles(filePaths, folderId, {
-				onProgress
+				onProgress,
 			});
 
 			syncLogger.info('✅ Procesamiento de archivos nuevos completado:', {

@@ -1,6 +1,6 @@
-import { formatDate } from '@/lib/utils/date';
 import { Calendar, Image, Tag, Video } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/utils/date';
 
 interface PromptCardFooterProps {
 	createdAt: Date;

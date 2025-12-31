@@ -6,7 +6,12 @@ export interface UploadedImageCardProps extends React.HTMLAttributes<HTMLDivElem
 	className?: string;
 }
 
-export const UploadedImageCard = memo(function UploadedImageCard({ uploadedImage, className, onClick, ...rest }: UploadedImageCardProps) {
+export const UploadedImageCard = memo(function UploadedImageCard({
+	uploadedImage,
+	className,
+	onClick,
+	...rest
+}: UploadedImageCardProps) {
 	const thumb =
 		uploadedImage?.thumbnailUrl ||
 		(uploadedImage?.imageId ? `/api/images/${uploadedImage.imageId}/thumbnail` : undefined);

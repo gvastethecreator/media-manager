@@ -1,7 +1,7 @@
 import React from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import packageJson from '../../../package.json' with { type: 'json' };
 import { GlobalErrorFallback } from './global-error-handler';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 interface ErrorBoundaryProps {
 	children: React.ReactNode;

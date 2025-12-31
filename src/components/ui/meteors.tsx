@@ -32,7 +32,7 @@ export const Meteors = ({ number = 20 }: MeteorsProps) => {
 					style={style}
 				>
 					{/* Meteor Tail */}
-					<span className="-z-10 -translate-y-1/2 absolute top-1/2 h-[1px] w-[50px] bg-gradient-to-r from-slate-500 to-transparent" />
+					<span className="absolute top-1/2 -z-10 h-[1px] w-[50px] -translate-y-1/2 bg-gradient-to-r from-slate-500 to-transparent" />
 				</span>
 			))}
 		</>

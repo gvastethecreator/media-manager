@@ -4,12 +4,12 @@
  */
 
 import type { ComponentType } from 'react';
-import type { ViewMode, ViewConfig, BrowserViewProps } from '../types';
-import { GridView, type GridViewProps } from './grid';
-import { ListView, type ListViewProps } from './list';
-import { MasonryView, type MasonryViewProps } from './masonry';
-import { TableView, type TableViewProps } from './table';
-import { CardsView, type CardsViewProps } from './cards';
+import type { BrowserViewProps, ViewConfig, ViewMode } from '../types';
+import { CardsView } from './cards';
+import { GridView } from './grid';
+import { ListView } from './list';
+import { MasonryView } from './masonry';
+import { TableView } from './table';
 
 /**
  * Tipo de componente de vista

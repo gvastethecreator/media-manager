@@ -1,10 +1,8 @@
 import { ImageIcon } from 'lucide-react';
-
-import { Suspense, useMemo } from 'react';
 import { nanoid } from 'nanoid';
-import { cn } from '@/lib/utils';
-
+import { Suspense, useMemo } from 'react';
 import { useRecentWorldItemImages } from '@/lib/api/world-items';
+import { cn } from '@/lib/utils';
 
 interface WorldItemCardImagesProps {
 	worldItemId: string;
@@ -45,10 +43,7 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 					{isLoading ? (
 						// Mostrar placeholders mientras carga
 						Array.from({ length: 6 }).map((_, i) => (
-							<ImageLoading
-								backgroundColor={secondaryColor}
-								key={`loading-${renderKey}-${i}`}
-							/>
+							<ImageLoading backgroundColor={secondaryColor} key={`loading-${renderKey}-${i}`} />
 						))
 					) : error ? (
 						// Mostrar mensaje de error

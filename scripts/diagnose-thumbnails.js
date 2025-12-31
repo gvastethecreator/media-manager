@@ -86,32 +86,32 @@ class DiagnosticReport {
 		const duration = Date.now() - this.startTime;
 		const timestamp = new Date().toISOString().replace(/:/g, '-').split('.')[0];
 
-		let md = `# 🔍 Reporte de Diagnóstico de Thumbnails\n\n`;
+		let md = '# 🔍 Reporte de Diagnóstico de Thumbnails\n\n';
 		md += `**Fecha**: ${new Date().toLocaleString('es')}\n`;
 		md += `**Duración**: ${(duration / 1000).toFixed(2)}s\n\n`;
 
 		// Resumen general
-		md += `## 📊 Resumen General\n\n`;
-		md += `| Métrica | Valor |\n`;
-		md += `|---------|-------|\n`;
+		md += '## 📊 Resumen General\n\n';
+		md += '| Métrica | Valor |\n';
+		md += '|---------|-------|\n';
 		md += `| Total archivos | ${this.summary.total} |\n`;
 		md += `| ✅ Exitosos | ${this.summary.success} (${((this.summary.success / this.summary.total) * 100).toFixed(1)}%) |\n`;
 		md += `| ⚠️ Parciales | ${this.summary.partial} (${((this.summary.partial / this.summary.total) * 100).toFixed(1)}%) |\n`;
 		md += `| ❌ Fallidos | ${this.summary.error} (${((this.summary.error / this.summary.total) * 100).toFixed(1)}%) |\n\n`;
 
 		// Resumen por tipo
-		md += `## 📁 Resultados por Tipo de Archivo\n\n`;
-		md += `| Tipo | ✅ Éxito | ⚠️ Parcial | ❌ Error | Estado |\n`;
-		md += `|------|----------|-----------|----------|--------|\n`;
+		md += '## 📁 Resultados por Tipo de Archivo\n\n';
+		md += '| Tipo | ✅ Éxito | ⚠️ Parcial | ❌ Error | Estado |\n';
+		md += '|------|----------|-----------|----------|--------|\n';
 		for (const [type, stats] of Object.entries(this.byType)) {
 			const total = stats.success + stats.partial + stats.error;
 			const status = stats.success === total ? '✅' : stats.error === total ? '❌' : '⚠️';
 			md += `| ${type} | ${stats.success} | ${stats.partial} | ${stats.error} | ${status} |\n`;
 		}
-		md += `\n`;
+		md += '\n';
 
 		// Detalles por archivo
-		md += `## 📄 Detalles por Archivo\n\n`;
+		md += '## 📄 Detalles por Archivo\n\n';
 		for (const file of this.files) {
 			const icon = file.status === 'success' ? '✅' : file.status === 'partial' ? '⚠️' : '❌';
 			md += `### ${icon} ${file.filePath.split(/[/\\]/).pop()}\n\n`;
@@ -119,32 +119,32 @@ class DiagnosticReport {
 			md += `- **Estado**: ${file.status}\n`;
 			md += `- **Tiempo total**: ${file.totalTime.toFixed(2)}ms\n\n`;
 
-			md += `**Fases**:\n`;
+			md += '**Fases**:\n';
 			for (const [phase, data] of Object.entries(file.phases)) {
 				const phaseIcon = data.success ? '✅' : '❌';
 				md += `- ${phaseIcon} ${phase}: ${data.time.toFixed(2)}ms`;
 				if (data.error) md += ` - Error: \`${data.error}\``;
-				md += `\n`;
+				md += '\n';
 			}
 
 			if (file.thumbnailInfo.generated) {
-				md += `\n**Thumbnail**:\n`;
-				md += `- Generado: ✅\n`;
+				md += '\n**Thumbnail**:\n';
+				md += '- Generado: ✅\n';
 				md += `- Tamaño: ${(file.thumbnailInfo.size / 1024).toFixed(2)} KB\n`;
 				md += `- Formato: ${file.thumbnailInfo.format || 'desconocido'}\n`;
 				md += `- Válido: ${file.thumbnailInfo.valid ? '✅' : '❌'}\n`;
 			} else {
-				md += `\n**Thumbnail**: ❌ No generado\n`;
+				md += '\n**Thumbnail**: ❌ No generado\n';
 			}
 
-			md += `\n`;
+			md += '\n';
 		}
 
 		// Problemas detectados
-		md += `## 🚨 Problemas Detectados\n\n`;
+		md += '## 🚨 Problemas Detectados\n\n';
 		const errors = this.files.filter((f) => f.status === 'error' || f.status === 'partial');
 		if (errors.length === 0) {
-			md += `✅ No se detectaron problemas críticos.\n\n`;
+			md += '✅ No se detectaron problemas críticos.\n\n';
 		} else {
 			for (const file of errors) {
 				md += `### ${file.filePath.split(/[/\\]/).pop()}\n\n`;
@@ -153,12 +153,12 @@ class DiagnosticReport {
 						md += `- **${phase}**: ${data.error}\n`;
 					}
 				}
-				md += `\n`;
+				md += '\n';
 			}
 		}
 
 		// Recomendaciones
-		md += `## 💡 Recomendaciones\n\n`;
+		md += '## 💡 Recomendaciones\n\n';
 		const recommendations = this.generateRecommendations();
 		for (const rec of recommendations) {
 			md += `- ${rec}\n`;
@@ -301,11 +301,11 @@ async function runDiagnostic() {
 				const metaResult = await core.extractMetadataForEntity(filePath, entityId, basicResult.entityType);
 				result.phases.metadata.time = performance.now() - t2;
 				result.phases.metadata.success = metaResult.success;
-				if (!metaResult.success) {
+				if (metaResult.success) {
+					log.success('Metadata extraída');
+				} else {
 					result.phases.metadata.error = metaResult.error || 'Unknown error';
 					log.warning(`Metadata falló: ${result.phases.metadata.error}`);
-				} else {
-					log.success('Metadata extraída');
 				}
 			}
 
@@ -317,15 +317,15 @@ async function runDiagnostic() {
 				result.phases.thumbnail.time = performance.now() - t3;
 				result.phases.thumbnail.success = thumbResult.success;
 
-				if (!thumbResult.success) {
-					result.phases.thumbnail.error = thumbResult.error || 'Unknown error';
-					log.error(`Thumbnail falló: ${result.phases.thumbnail.error}`);
-				} else {
+				if (thumbResult.success) {
 					log.success('Thumbnail generado');
 					result.thumbnailInfo.generated = true;
 
 					// Validar thumbnail en BD
 					await validateThumbnail(db, entityId, basicResult.entityType, result);
+				} else {
+					result.phases.thumbnail.error = thumbResult.error || 'Unknown error';
+					log.error(`Thumbnail falló: ${result.phases.thumbnail.error}`);
 				}
 			}
 

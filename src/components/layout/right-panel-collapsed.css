@@ -15,7 +15,7 @@
 }
 
 .right-panel-collapsed-handle::after {
-	content: '';
+	content: "";
 	position: absolute;
 	top: 50%;
 	left: 50%;

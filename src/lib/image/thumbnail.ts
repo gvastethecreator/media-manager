@@ -186,7 +186,18 @@ export async function generateThumbnail(
 			throw new Error('Ruta de archivo inválida (demasiado larga)');
 		}
 
-		const exists = existsSync(filePath);
+		// Protección adicional para existsSync que puede lanzar en algunas versiones de Node con paths muy largos
+		let exists = false;
+		try {
+			exists = existsSync(filePath);
+		} catch (e) {
+			thumbLogger.error(
+				`❌ Error verificando existencia de archivo (posible ruta inválida): ${filePath.substring(0, 100)}...`,
+				e
+			);
+			throw new Error(`Error verificando archivo: ${e instanceof Error ? e.message : 'Unknown error'}`);
+		}
+
 		thumbLogger.info('🟡 existsSync:', exists);
 		if (!exists) {
 			thumbLogger.error(`Archivo no encontrado: ${filePath}`);

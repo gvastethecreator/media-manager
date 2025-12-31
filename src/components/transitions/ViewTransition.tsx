@@ -5,9 +5,9 @@
  */
 
 import React, { forwardRef, useEffect, useImperativeHandle, useRef } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { useViewTransition } from '@/providers/ViewTransitionProvider';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 /**
  * Props para el componente ViewTransition

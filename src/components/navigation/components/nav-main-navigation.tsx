@@ -28,11 +28,11 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ViewType } from '@/components/views/types';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
 import { useCategoryStats } from '../hooks/use-category-stats';
 import { NavCategoryChildren } from './nav-category-children';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 interface NavMainNavigationProps {
 	currentView: string;
@@ -327,7 +327,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 								</Tooltip>
 								{!isCollapsed && (
 									<>
-										<span className="flex-1 font-semibold text-xs truncate" style={{ color: category.color }}>
+										<span className="flex-1 truncate font-semibold text-xs" style={{ color: category.color }}>
 											{category.label}
 										</span>
 										{((category.children && category.children.length > 0) || category.showTreeView) &&
@@ -356,20 +356,22 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 									)}
 									{/* Categorías normales */}
 									{!category.showTreeView && (
-										<div className="flex flex-col gap-0.5 min-w-0 overflow-hidden">
+										<div className="flex min-w-0 flex-col gap-0.5 overflow-hidden">
 											{(category.children || []).map((child, _idx) => (
-												<div className="flex flex-col min-w-0" key={child.id}>
+												<div className="flex min-w-0 flex-col" key={child.id}>
 													<div
 														className={cn(
-															'flex w-full items-center justify-between rounded px-2 py-1 text-xs transition-all duration-300 min-w-0',
+															'flex w-full min-w-0 items-center justify-between rounded px-2 py-1 text-xs transition-all duration-300',
 															'transition-colors hover:bg-secondary/50',
 															currentView === child.id && 'bg-secondary font-bold',
 															isCollapsed ? 'justify-center px-1' : ''
 														)}
 													>
-														<div className={cn('flex flex-1 items-center min-w-0', isCollapsed ? 'justify-center' : '')}>
+														<div
+															className={cn('flex min-w-0 flex-1 items-center', isCollapsed ? 'justify-center' : '')}
+														>
 															<button
-																className="flex items-center min-w-0 w-full"
+																className="flex w-full min-w-0 items-center"
 																onClick={() => handleNavigate(child.id as ViewType)}
 																type="button"
 															>

@@ -78,7 +78,7 @@ export function TagCardHeader({
 				>
 					{isFavorite && (
 						<Heart
-							className={cn('drop-shadow-sm fill-destructive text-destructive', compact ? 'h-4 w-4' : 'h-5 w-5')}
+							className={cn('fill-destructive text-destructive drop-shadow-sm', compact ? 'h-4 w-4' : 'h-5 w-5')}
 						/>
 					)}
 					<TagIcon
@@ -94,8 +94,7 @@ export function TagCardHeader({
 			<div
 				className={cn('flex items-center justify-between text-white text-xs', compact ? 'px-3 py-1' : 'px-3.5 py-1.5')}
 				style={{
-					background:
-						tcgMode ? 'rgba(var(--effect-shadow-rgb), 0.3)' : 'rgba(var(--effect-shadow-rgb), 0.2)',
+					background: tcgMode ? 'rgba(var(--effect-shadow-rgb), 0.3)' : 'rgba(var(--effect-shadow-rgb), 0.2)',
 					borderBottom: `1px solid ${color}50`,
 				}}
 			>

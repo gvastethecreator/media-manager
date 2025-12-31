@@ -1,9 +1,8 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDocumentStore } from '@/store/entities/document';
-import type { AnyEntityWithStats } from '@/types/entities';
 import type { ViewProps } from '../types';
 
 const logger = clientLogger.withContext('DocumentsView');
@@ -18,7 +17,10 @@ export default function DocumentsView(_props: ViewProps) {
 
 	const documents = useMemo(() => Object.values(documentsRecord || {}), [documentsRecord]);
 	const count = documents.length;
-	const browserItems = useMemo(() => documents.map((d) => toBrowserItem(d as unknown as Record<string, unknown>)), [documents]);
+	const browserItems = useMemo(
+		() => documents.map((d) => toBrowserItem(d as unknown as Record<string, unknown>)),
+		[documents]
+	);
 
 	useEffect(() => {
 		if (!hasInitRef.current && count === 0 && !isLoading) {

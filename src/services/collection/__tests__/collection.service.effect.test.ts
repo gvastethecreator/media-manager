@@ -7,9 +7,9 @@
 
 import { Effect } from 'effect';
 import { db } from '@/lib/drizzle';
-import { collections, imageCollections, images, folders } from '@/lib/drizzle/schema';
+import { collections, folders, imageCollections, images } from '@/lib/drizzle/schema';
 import { CollectionService, CollectionServiceLive } from '../collection.service.effect';
-import { CollectionNotFound, CollectionValidationError, CollectionHasContentError } from '../collection-errors.effect';
+import { CollectionHasContentError, CollectionNotFound, CollectionValidationError } from '../collection-errors.effect';
 
 // ============= Test Helpers =============
 

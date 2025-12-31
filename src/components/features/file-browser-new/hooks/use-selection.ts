@@ -77,9 +77,7 @@ export function useSelection({ items, onSelectionChange }: UseSelectionOptions):
 		(id: string) => {
 			toggleSelectedId(id);
 			setActiveId(id);
-			const newSelection = selectedSet.has(id)
-				? selectedIds.filter((sid) => sid !== id)
-				: [...selectedIds, id];
+			const newSelection = selectedSet.has(id) ? selectedIds.filter((sid) => sid !== id) : [...selectedIds, id];
 			onSelectionChange?.(newSelection);
 		},
 		[toggleSelectedId, setActiveId, selectedIds, selectedSet, onSelectionChange]

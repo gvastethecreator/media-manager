@@ -2,7 +2,7 @@ import { FileBox, ImageIcon, TagIcon } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGroup, useGroupImages } from '@/lib/api/groups';
@@ -20,11 +20,7 @@ export function GroupContentView(_props: ViewProps) {
 
 	// Usar React Query hook en lugar de server action
 	const { data: group, isLoading, error } = useGroup(groupId || '');
-	const {
-		data: images = [],
-		isLoading: isLoadingImages,
-		error: imagesError,
-	} = useGroupImages(groupId || '');
+	const { data: images = [], isLoading: isLoadingImages, error: imagesError } = useGroupImages(groupId || '');
 	const browserItems = useMemo(
 		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
 		[images]

@@ -68,10 +68,10 @@ export interface ThumbnailProcessingConfig {
 export interface ThumbnailAdvancedConfig {
 	/** Configuración de reintentos */
 	retry: ThumbnailRetryConfig;
-	
+
 	/** Configuración de procesamiento */
 	processing: ThumbnailProcessingConfig;
-	
+
 	/** Configuración por tipo de entidad */
 	entities: {
 		video: EntityThumbnailConfig;
@@ -81,19 +81,19 @@ export interface ThumbnailAdvancedConfig {
 		jsonFile: EntityThumbnailConfig;
 		file3d: EntityThumbnailConfig;
 	};
-	
+
 	/** Habilitar logging detallado */
 	verboseLogging: boolean;
-	
+
 	/** Generar thumbnails durante indexación inicial */
 	generateOnIndex: boolean;
-	
+
 	/** Guardar placeholders en caso de fallo */
 	savePlaceholdersOnError: boolean;
-	
+
 	/** Limpiar thumbnails huérfanos automáticamente */
 	autoCleanOrphans: boolean;
-	
+
 	/** Intervalo de limpieza automática en horas (0 = deshabilitado) */
 	autoCleanInterval: number;
 }
@@ -168,7 +168,7 @@ export const ThumbnailFallbackStrategySchema = z.nativeEnum(ThumbnailFallbackStr
 export const ThumbnailRetryConfigSchema = z.object({
 	enabled: z.boolean(),
 	maxRetries: z.number().int().min(0).max(10),
-	retryDelay: z.number().int().min(100).max(10000),
+	retryDelay: z.number().int().min(100).max(10_000),
 	exponentialBackoff: z.boolean(),
 });
 
@@ -215,10 +215,7 @@ export function getEntityThumbnailConfig(
 	return config.entities[entityType] || config.entities.image;
 }
 
-export function shouldUseFallback(
-	strategy: ThumbnailFallbackStrategy,
-	attemptNumber: number
-): boolean {
+export function shouldUseFallback(strategy: ThumbnailFallbackStrategy, attemptNumber: number): boolean {
 	switch (strategy) {
 		case ThumbnailFallbackStrategy.AGGRESSIVE:
 			return true;
@@ -231,13 +228,9 @@ export function shouldUseFallback(
 	}
 }
 
-export function calculateRetryDelay(
-	baseDelay: number,
-	attemptNumber: number,
-	useExponential: boolean
-): number {
+export function calculateRetryDelay(baseDelay: number, attemptNumber: number, useExponential: boolean): number {
 	if (!useExponential) {
 		return baseDelay;
 	}
-	return baseDelay * Math.pow(2, attemptNumber);
+	return baseDelay * 2 ** attemptNumber;
 }

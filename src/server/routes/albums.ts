@@ -29,8 +29,8 @@ import {
 	getAlbumCardsHandler,
 	getAlbumImagesHandler,
 	getAlbumRecentMediaHandler,
-	getAlbumsHandler,
 	getAlbumStatsHandler,
+	getAlbumsHandler,
 	removeImageFromAlbumHandler,
 	searchAlbumsHandler,
 	updateAlbumHandler,
@@ -38,9 +38,9 @@ import {
 
 export const albumsRouter = express.Router();
 
+export type { AlbumCardData, AlbumStats, ThumbnailImage } from './albums/albums.types';
 // Re-export para backward compatibility
 export { getAlbumStats } from './albums/albums.utils';
-export type { AlbumCardData, AlbumStats, ThumbnailImage } from './albums/albums.types';
 
 // ==========================================
 // RUTAS

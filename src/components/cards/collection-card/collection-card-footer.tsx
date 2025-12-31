@@ -1,5 +1,5 @@
-import { formatDate } from '@/lib/utils/date';
 import { Calendar, Database, Heart, Image } from 'lucide-react';
+import { formatDate } from '@/lib/utils/date';
 
 interface CollectionCardFooterProps {
 	createdAt: Date | string;

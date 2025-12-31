@@ -18,7 +18,12 @@ export interface PropertyCardProps {
  * Card para mostrar una propiedad - Refactorizado para usar PropertyWithStats
  * Sigue el diseño de los otros componentes de tarjetas estandarizados
  */
-export const PropertyCard = memo(function PropertyCard({ property, onClick, className, showBadges = true }: PropertyCardProps) {
+export const PropertyCard = memo(function PropertyCard({
+	property,
+	onClick,
+	className,
+	showBadges = true,
+}: PropertyCardProps) {
 	// Calcular colores
 	const primaryColor = useMemo(() => property?.color || '#3b82f6', [property?.color]);
 	const secondaryColor = useMemo(() => {

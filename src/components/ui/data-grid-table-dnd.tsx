@@ -16,7 +16,6 @@ import { GripVertical } from 'lucide-react';
 import { CSSProperties, Fragment, useId } from 'react';
 import { Button } from '@/components/ui/button';
 import { useDataGrid } from '@/components/ui/data-grid';
-import { clientLogger } from '@/lib/logger/client-logger';
 import {
 	DataGridTableBase,
 	DataGridTableBody,
@@ -32,6 +31,7 @@ import {
 	DataGridTableHeadRowCellResize,
 	DataGridTableRowSpacer,
 } from '@/components/ui/data-grid-table';
+import { clientLogger } from '@/lib/logger/client-logger';
 
 function DataGridTableDndHeader<TData>({ header }: { header: Header<TData, unknown> }) {
 	const { props } = useDataGrid();

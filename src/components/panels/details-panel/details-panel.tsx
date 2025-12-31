@@ -1,5 +1,5 @@
-import { useUIStore } from '@/store/ui.store';
 import { cn } from '@/lib/utils';
+import { useUIStore } from '@/store/ui.store';
 import { EmptyPanel } from './components/empty-panel';
 import { MultiplePanel } from './components/multiple-panel';
 import { SinglePanel } from './components/single-panel';
@@ -24,7 +24,7 @@ export function DetailsPanel({ selectedItems, className = '' }: DetailsPanelProp
 		}
 	};
 
-	return <div className={cn('w-full h-full flex flex-col min-h-0', className)}>{renderContent()}</div>;
+	return <div className={cn('flex h-full min-h-0 w-full flex-col', className)}>{renderContent()}</div>;
 }
 
 export default DetailsPanel;

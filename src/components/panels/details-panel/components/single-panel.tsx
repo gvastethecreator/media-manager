@@ -124,7 +124,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 			setDetectedLoras([]);
 			prevItemIdRef.current = currentItemId;
 		}
-	});
+	}, [item?.id]);
 
 	const handleLorasDetected = React.useCallback((loras: string[]) => {
 		setDetectedLoras((prev) => {
@@ -152,9 +152,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 		try {
 			const response = await fetch(mainImageUrl);
 			const blob = await response.blob();
-			await navigator.clipboard.write([
-				new ClipboardItem({ [blob.type]: blob }),
-			]);
+			await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
 		} catch (err) {
 			// Fallback: copiar URL
 			const itemName = 'name' in item ? item.name : '';
@@ -181,16 +179,22 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 	}, [item]);
 
 	return (
-		<div className={cn('details-panel flex h-full w-full flex-col bg-background', className)}>
+		<div className={cn('details-panel flex h-full w-full flex-col border-l bg-background', className)}>
 			{/* Header */}
 
 			<div className="flex-1 overflow-y-auto">
-				<div className="w-full items-center p-1 content-betwen ">
+				<div className="flex w-full flex-col gap-3 p-2">
 					{/* Toolbar de acciones */}
-					<div className="background-secondary flex items-center gap-1">
+					<div className="flex items-center gap-1 rounded-dt-md bg-muted/30 p-1">
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button aria-label="Extraer metadatos" disabled={effectiveLoading} onClick={() => refetch()} size="icon" variant="ghost">
+								<Button
+									aria-label="Extraer metadatos"
+									disabled={effectiveLoading}
+									onClick={() => refetch()}
+									size="icon"
+									variant="ghost"
+								>
 									<RefreshCw className={cn('h-4 w-4', effectiveLoading && 'animate-spin')} />
 								</Button>
 							</TooltipTrigger>
@@ -222,7 +226,13 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 						</Tooltip>
 						<Tooltip>
 							<TooltipTrigger asChild>
-								<Button aria-label="Abrir en carpeta" className="" onClick={handleOpenInFolder} size="icon" variant="ghost">
+								<Button
+									aria-label="Abrir en carpeta"
+									className=""
+									onClick={handleOpenInFolder}
+									size="icon"
+									variant="ghost"
+								>
 									<FolderOpen className={cn('h-4 w-4')} />
 								</Button>
 							</TooltipTrigger>
@@ -295,7 +305,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 
 					{/* Indicador de estado de carga de metadatos */}
 					{effectiveLoading && (
-						<div className="m-1 rounded-md border border-blue-200 bg-blue-50 p-2 dark:border-blue-800/30 dark:bg-blue-950/20">
+						<div className="rounded-dt-md border border-blue-200 bg-blue-50 p-2 dark:border-blue-800/30 dark:bg-blue-950/20">
 							<div className="flex items-center gap-2 text-blue-800 dark:text-blue-300">
 								<RefreshCw className="h-3 w-3 animate-spin" />
 								<span className="font-medium text-xs">Extrayendo metadatos avanzados...</span>
@@ -308,7 +318,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 
 					{/* Imagen principal */}
 					{mainImageUrl && (
-						<div className="relative w-full max-w-full overflow-hidden p-1">
+						<div className="relative w-full max-w-full overflow-hidden rounded-dt-md bg-muted/20 p-1">
 							<Button className="absolute top-2 right-2 z-10" size="icon" variant="ghost">
 								<Fullscreen className="h-4 w-4" />
 							</Button>
@@ -319,10 +329,10 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 							/>
 						</div>
 					)}
-					<div className="flex-shrink-0 p-1">
+					<div className="shrink-0">
 						<div className="mb-1 flex items-center gap-2">
 							<EntityIcon className="h-4 w-4 text-muted-foreground" />
-							<h2 className="truncate font-semibold text-xs">{'name' in item ? item.name : 'Sin nombre'}</h2>
+							<h2 className="heading-sm truncate">{'name' in item ? item.name : 'Sin nombre'}</h2>
 							<Tooltip>
 								<TooltipTrigger asChild>
 									<Button className="" size="icon" variant="ghost">
@@ -335,13 +345,13 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 							</Tooltip>
 						</div>
 						{'description' in item && item.description && (
-							<p className="line-clamp-2 text-muted-foreground text-xs">{item.description}</p>
+							<p className="body-sm line-clamp-2 text-muted-foreground">{item.description}</p>
 						)}
 					</div>
 
 					{/* Información básica */}
 					{basicMetadata.length > 0 && (
-						<div className="ph-4 flex w-full justify-center gap-4">
+						<div className="flex w-full flex-wrap justify-center gap-4 px-4">
 							{basicMetadata.map(({ key, value, icon: Icon }) => (
 								<div className="flex items-center gap-1 pl-2 text-xs" key={key}>
 									<Icon className="h-4 w-4" />
@@ -354,7 +364,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 					{/* Entidades relacionadas */}
 					{relatedEntities.length > 0 && (
 						<div>
-							<div className="ph-4 flex w-full justify-center gap-4">
+							<div className="flex w-full flex-wrap justify-center gap-4 px-4">
 								{relatedEntities.map(({ type, count, icon: Icon, color }) => (
 									<Badge className={cn('gap-1', color)} key={type} variant="secondary">
 										<Icon className="h-3 w-3" />
@@ -581,7 +591,13 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 
 										return (
 											<div className="space-y-3" key={category}>
-												<h4 className="pv-1 mt-1 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+												<h4
+													className={cn(
+														'mt-1 py-1',
+														'text-caption',
+														'font-medium text-muted-foreground uppercase tracking-wide'
+													)}
+												>
 													{categoryNames[category as keyof typeof categoryNames] || category}
 												</h4>
 												<div className="space-y-3 pl-1">
@@ -717,7 +733,13 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 									// Resto de categorías: usar MetadataTable con iconos por categoría
 									return (
 										<div className="space-y-3" key={category}>
-											<h4 className="pv-1 mt-1 font-semibold text-muted-foreground text-xs uppercase tracking-wide">
+											<h4
+												className={cn(
+													'mt-1 py-1',
+													'text-caption',
+													'font-medium text-muted-foreground uppercase tracking-wide'
+												)}
+											>
 												{categoryNames[category as keyof typeof categoryNames] || category}
 											</h4>
 											<div className="space-y-3 pl-1">
