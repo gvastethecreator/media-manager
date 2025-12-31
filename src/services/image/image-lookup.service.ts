@@ -80,10 +80,7 @@ export async function getImageByHash(hash: string): Promise<ImageWithStats | nul
  * @param folderId - ID de la carpeta
  * @returns Imagen con estadísticas o null si no se encuentra
  */
-export async function getImageByPathAndFolder(
-	path: string,
-	folderId: string
-): Promise<ImageWithStats | null> {
+export async function getImageByPathAndFolder(path: string, folderId: string): Promise<ImageWithStats | null> {
 	try {
 		lookupLogger.info('🔍 Buscando imagen por path y folderId:', { path, folderId });
 
@@ -101,11 +98,7 @@ export async function getImageByPathAndFolder(
 		const image = result[0];
 
 		// Obtener estadísticas de la imagen
-		const statsResult = await db
-			.select()
-			.from(fileStats)
-			.where(eq(fileStats.fileId, image.id))
-			.limit(1);
+		const statsResult = await db.select().from(fileStats).where(eq(fileStats.fileId, image.id)).limit(1);
 
 		const stats = statsResult[0] || { views: 0 };
 

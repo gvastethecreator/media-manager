@@ -251,7 +251,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 					{/* Search */}
 					<div className="flex items-center space-x-2">
 						<div className="relative">
-							<Search className="-translate-y-1/2 absolute top-1/2 left-2 h-4 w-4 transform text-muted-foreground" />
+							<Search className="absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
 							<Input
 								className="w-48 pl-8"
 								onChange={(e) => setSearchTerm(e.target.value)}

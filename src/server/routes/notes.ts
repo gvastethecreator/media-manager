@@ -1,11 +1,11 @@
+import { and, eq } from 'drizzle-orm';
 import { Router } from 'express';
 import { z } from 'zod';
-import { and, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { notes, imageNotes, images } from '@/lib/drizzle/schema/index';
+import { imageNotes, images, notes } from '@/lib/drizzle/schema/index';
+import { serverLogger } from '@/lib/logger/server-logger';
 import * as noteService from '@/services/note/note.service';
 import { toNoteWithStats } from '@/transformers/note';
-import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = Router();
 

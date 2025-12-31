@@ -9,8 +9,8 @@ import { Label } from '@/components/ui/label';
 import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
-import type { GroupWithStats } from '@/types/entities/group';
 import { clientLogger } from '@/lib/logger/client-logger';
+import type { GroupWithStats } from '@/types/entities/group';
 
 interface GroupsContentViewProps {
 	groups: GroupWithStats[];

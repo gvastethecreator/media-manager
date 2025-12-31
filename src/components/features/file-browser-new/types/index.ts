@@ -7,49 +7,46 @@
 export type {
 	BrowserEntityType,
 	BrowserItem,
-	SelectableBrowserItem,
 	BrowserItemGroup,
 	ProcessedItems,
+	SelectableBrowserItem,
 } from './item.types';
 
 export {
+	createParentNavItem,
 	ENTITY_TYPE_MAP,
 	normalizeEntityType,
 	toBrowserItem,
-	createParentNavItem,
 } from './item.types';
-
-// View types
-export type {
-	ViewMode,
-	RenderMode,
-	ViewConfigBase,
-	GridViewConfig,
-	ListViewConfig,
-	MasonryViewConfig,
-	TableViewConfig,
-	CardsViewConfig,
-	ViewConfig,
-	SortOption,
-	FilterOption,
-	PaginationState,
-	InfiniteScrollOptions,
-} from './view.types';
-
-export { DEFAULT_VIEW_CONFIGS } from './view.types';
-
 // Props types
 export type {
-	ClickModifiers,
-	ItemClickHandler,
-	ItemDoubleClickHandler,
-	ItemContextMenuHandler,
-	FileBrowserProps,
 	BrowserViewProps,
-	ItemRendererProps,
-	ToolbarProps,
-	StatusBarProps,
+	ClickModifiers,
 	EmptyStateProps,
-	LoadingStateProps,
+	FileBrowserProps,
 	FileBrowserProviderProps,
+	ItemClickHandler,
+	ItemContextMenuHandler,
+	ItemDoubleClickHandler,
+	ItemRendererProps,
+	LoadingStateProps,
+	StatusBarProps,
+	ToolbarProps,
 } from './props.types';
+// View types
+export type {
+	CardsViewConfig,
+	FilterOption,
+	GridViewConfig,
+	InfiniteScrollOptions,
+	ListViewConfig,
+	MasonryViewConfig,
+	PaginationState,
+	RenderMode,
+	SortOption,
+	TableViewConfig,
+	ViewConfig,
+	ViewConfigBase,
+	ViewMode,
+} from './view.types';
+export { DEFAULT_VIEW_CONFIGS } from './view.types';

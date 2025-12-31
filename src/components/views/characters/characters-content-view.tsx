@@ -110,10 +110,10 @@ const CharactersContentView: React.FC<CharactersContentViewProps> = ({
 						{characters.map((character, index) => (
 							<motion.article
 								animate={{ opacity: 1, y: 0 }}
+								data-character-id={character.id}
 								initial={{ opacity: 0, y: 20 }}
 								key={character.id}
 								transition={{ duration: 0.3, delay: index * 0.05 }}
-								data-character-id={character.id}
 							>
 								{/*
 									Compat E2E/a11y: los tests buscan <article> con el nombre.

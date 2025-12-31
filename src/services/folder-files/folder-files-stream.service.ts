@@ -291,6 +291,7 @@ async function fetchFilesBatch(
 			.offset(offset);
 
 		// Mapear a FolderFile
+		// Generar URL de API para thumbnail (NO usar item.thumbnailPath que puede contener base64)
 		return results.map((item: any) => ({
 			id: item.id,
 			name: item.name,
@@ -301,7 +302,12 @@ async function fetchFilesBatch(
 			folderId: item.folderId,
 			entityType,
 			extension: item.extension || '',
-			thumbnailPath: item.thumbnailPath,
+			thumbnailPath:
+				entityType === 'image'
+					? `/api/images/${item.id}/thumbnail`
+					: entityType === 'video'
+						? `/api/videos/${item.id}/thumbnail`
+						: undefined,
 			metadata: extractMetadata(item, entityType),
 			stats: {
 				views: item.views || 0,

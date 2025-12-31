@@ -250,7 +250,7 @@ export function getEntityColor(entityType: keyof typeof ENTITY_COLOR_VARS): stri
  */
 export function getEntityClasses(
 	entityType: keyof typeof ENTITY_TAILWIND_CLASSES,
-	variant: 'bg' | 'text' | 'border' = 'bg',
+	variant: 'bg' | 'text' | 'border' = 'bg'
 ): string {
 	return ENTITY_TAILWIND_CLASSES[entityType]?.[variant] ?? 'bg-gray-500';
 }

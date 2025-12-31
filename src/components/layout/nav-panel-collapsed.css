@@ -37,7 +37,9 @@
 
 /* Ajuste para la transición del panel */
 .view-container-transition {
-	transition: opacity 0.3s ease, visibility 0.3s ease;
+	transition:
+		opacity 0.3s ease,
+		visibility 0.3s ease;
 }
 
 /* Estilos para prevenir selección de texto durante el resize */

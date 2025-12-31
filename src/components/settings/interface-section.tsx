@@ -157,19 +157,19 @@ const InterfaceSection: React.FC = () => {
 	}, [preferences.fileBrowser.general.defaultViewMode, viewMode, setViewMode]);
 
 	return (
-		<div className="space-y-6">
-			<Card className="rounded-sm border-none bg-muted/30">
-				<CardHeader className="p-3 pb-2">
-					<CardTitle className="flex items-center gap-2 font-medium text-base text-muted-foreground">
+		<div className="space-y-stack-md">
+			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
+				<CardHeader className="p-4 pb-2">
+					<CardTitle className="flex items-center gap-2 text-heading-sm text-muted-foreground">
 						<Settings className="h-4 w-4" />
 						<span>Interfaz General</span>
 					</CardTitle>
 				</CardHeader>
 				<Separator className="my-0" />
-				<CardContent className="p-3">
+				<CardContent className="space-y-stack-sm p-4">
 					<div className="grid grid-cols-3 gap-4">
-						<div className="col-span-1 flex flex-col gap-1">
-							<Label>Tipografía</Label>
+						<div className="col-span-1 flex flex-col gap-1.5">
+							<Label className="text-caption">Tipografía</Label>
 							<Select onValueChange={(v) => setPreferences({ fontFamily: v })} value={preferences.fontFamily}>
 								<SelectTrigger className="w-full">
 									<SelectValue placeholder="Fuente" />
@@ -181,16 +181,16 @@ const InterfaceSection: React.FC = () => {
 												className="flex flex-col"
 												style={{ fontFamily: f.value.startsWith('system') ? 'inherit' : undefined }}
 											>
-												<span className="font-medium text-xs">{f.label}</span>
-												<span className="text-[10px] opacity-70">{f.sample}</span>
+												<span className="text-body-sm">{f.label}</span>
+												<span className="text-caption text-muted-foreground">{f.sample}</span>
 											</span>
 										</SelectItem>
 									))}
 								</SelectContent>
 							</Select>
 						</div>
-						<div className="col-span-1 flex flex-col gap-1">
-							<Label>Tamaño fuente</Label>
+						<div className="col-span-1 flex flex-col gap-1.5">
+							<Label className="text-caption">Tamaño fuente</Label>
 							<Select onValueChange={(v) => setPreferences({ fontSize: v })} value={preferences.fontSize}>
 								<SelectTrigger className="w-full">
 									<SelectValue placeholder="Tamaño" />
@@ -204,8 +204,8 @@ const InterfaceSection: React.FC = () => {
 								</SelectContent>
 							</Select>
 						</div>
-						<div className="col-span-1 flex flex-col gap-1">
-							<Label>Tema</Label>
+						<div className="col-span-1 flex flex-col gap-1.5">
+							<Label className="text-caption">Tema</Label>
 							<Select onValueChange={handleThemeChange} value={preferences.theme}>
 								<SelectTrigger className="w-full">
 									<SelectValue placeholder="Tema" />
@@ -219,52 +219,52 @@ const InterfaceSection: React.FC = () => {
 								</SelectContent>
 							</Select>
 						</div>
-						<div className="col-span-3 grid grid-cols-4 gap-4 pt-2">
-							<div className="flex items-center gap-2 text-xs">
+						<div className="col-span-3 grid grid-cols-4 gap-4 pt-3">
+							<div className="flex items-center gap-2">
 								<Switch
 									checked={preferences.animations}
 									id={animationsId}
 									onCheckedChange={(v) => setPreferences({ animations: v })}
 								/>
-								<Label className="cursor-pointer" htmlFor={animationsId}>
+								<Label className="cursor-pointer text-body-sm" htmlFor={animationsId}>
 									Animaciones
 								</Label>
 							</div>
-							<div className="flex items-center gap-2 text-xs">
+							<div className="flex items-center gap-2">
 								<Switch
 									checked={preferences.thumbnailsRespectAspectRatio}
 									id={thumbnailsRespectAspectRatioId}
 									onCheckedChange={(v) => setPreferences({ thumbnailsRespectAspectRatio: v })}
 								/>
-								<Label className="cursor-pointer" htmlFor={thumbnailsRespectAspectRatioId}>
+								<Label className="cursor-pointer text-body-sm" htmlFor={thumbnailsRespectAspectRatioId}>
 									Aspect Ratio Grilla
 								</Label>
 							</div>
-							<div className="flex items-center gap-2 text-xs">
+							<div className="flex items-center gap-2">
 								<Switch
 									checked={preferences.thumbnailsAnimations}
 									id={thumbnailsAnimationsId}
 									onCheckedChange={(v) => setPreferences({ thumbnailsAnimations: v })}
 								/>
-								<Label className="cursor-pointer" htmlFor={thumbnailsAnimationsId}>
+								<Label className="cursor-pointer text-body-sm" htmlFor={thumbnailsAnimationsId}>
 									Animaciones Thumbs
 								</Label>
 							</div>
-							<div className="flex items-center gap-2 text-xs">
+							<div className="flex items-center gap-2">
 								<Switch
 									checked={preferences.thumbnailsUltraPerformance}
 									id={thumbnailsUltraPerformanceId}
 									onCheckedChange={(v) => setPreferences({ thumbnailsUltraPerformance: v })}
 								/>
-								<Label className="cursor-pointer" htmlFor={thumbnailsUltraPerformanceId}>
+								<Label className="cursor-pointer text-body-sm" htmlFor={thumbnailsUltraPerformanceId}>
 									Ultra Performance
 								</Label>
 							</div>
 						</div>
-						<div className="col-span-3 flex flex-col gap-2 pt-2">
-							<Label className="text-xs">Borde thumbnails</Label>
-							<div className="grid grid-cols-6 items-center gap-2 text-xs">
-								<span className="opacity-60">Grid</span>
+						<div className="col-span-3 flex flex-col gap-2 pt-3">
+							<Label className="text-caption">Borde thumbnails</Label>
+							<div className="grid grid-cols-6 items-center gap-3 text-body-sm">
+								<span className="text-muted-foreground">Grid</span>
 								<Input
 									className="w-20"
 									max={32}
@@ -277,7 +277,7 @@ const InterfaceSection: React.FC = () => {
 									type="number"
 									value={preferences.thumbnailsBorderRadius.grid}
 								/>
-								<span className="opacity-60">Card</span>
+								<span className="text-muted-foreground">Card</span>
 								<Input
 									className="w-20"
 									max={32}
@@ -290,7 +290,7 @@ const InterfaceSection: React.FC = () => {
 									type="number"
 									value={preferences.thumbnailsBorderRadius.card}
 								/>
-								<span className="opacity-60">Mosaico</span>
+								<span className="text-muted-foreground">Mosaico</span>
 								<Input
 									className="w-20"
 									max={32}
@@ -309,22 +309,22 @@ const InterfaceSection: React.FC = () => {
 				</CardContent>
 			</Card>
 
-			<Card className="rounded-sm border-none bg-muted/30">
-				<CardHeader className="p-3 pb-2">
-					<CardTitle className="flex items-center gap-2 font-medium text-base text-muted-foreground">
+			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
+				<CardHeader className="p-4 pb-2">
+					<CardTitle className="flex items-center gap-2 text-heading-sm text-muted-foreground">
 						<span>Opciones del visor de archivos</span>
-						<Badge className="text-xs" variant="secondary">
+						<Badge className="text-caption" variant="secondary">
 							FileBrowser
 						</Badge>
 					</CardTitle>
 				</CardHeader>
 				<Separator className="my-0" />
-				<CardContent className="p-3">
+				<CardContent className="space-y-stack-sm p-4">
 					{/* Opciones apiladas, no tabs */}
 					<div className="flex flex-col gap-4">
 						{/* General */}
-						<div className="flex flex-col gap-1">
-							<Label>Vista por defecto</Label>
+						<div className="flex flex-col gap-1.5">
+							<Label className="text-caption">Vista por defecto</Label>
 							<Select
 								onValueChange={(v) =>
 									setPreferences({
@@ -348,8 +348,8 @@ const InterfaceSection: React.FC = () => {
 								</SelectContent>
 							</Select>
 						</div>
-						<div className="flex flex-col gap-1">
-							<Label>Elementos por lote</Label>
+						<div className="flex flex-col gap-1.5">
+							<Label className="text-caption">Elementos por lote</Label>
 							<Input
 								max={200}
 								min={10}
@@ -366,8 +366,8 @@ const InterfaceSection: React.FC = () => {
 							/>
 						</div>
 						{/* Performance */}
-						<div className="flex flex-col gap-1">
-							<Label>Virtualización</Label>
+						<div className="flex flex-col gap-1.5">
+							<Label className="text-caption">Virtualización</Label>
 							<Switch
 								checked={preferences.fileBrowser.performance.enableVirtualization}
 								onCheckedChange={(v) =>
@@ -380,8 +380,8 @@ const InterfaceSection: React.FC = () => {
 								}
 							/>
 						</div>
-						<div className="flex flex-col gap-1">
-							<Label>Calidad de thumbnails</Label>
+						<div className="flex flex-col gap-1.5">
+							<Label className="text-caption">Calidad de thumbnails</Label>
 							<Select
 								onValueChange={(v) =>
 									setPreferences({

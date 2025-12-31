@@ -1,10 +1,9 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useVideoStore } from '@/store/entities/video';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
-import type { AnyEntityWithStats } from '@/types/entities';
 import type { ViewProps } from '../types';
 
 const viewLogger = clientLogger.withContext('VideosView');
@@ -19,7 +18,10 @@ export default function VideosView(_props: ViewProps) {
 
 	const videos = useMemo(() => Object.values(videosRecord || {}), [videosRecord]);
 	const videoCount = videos.length;
-	const browserItems = useMemo(() => videos.map((v) => toBrowserItem(v as unknown as Record<string, unknown>)), [videos]);
+	const browserItems = useMemo(
+		() => videos.map((v) => toBrowserItem(v as unknown as Record<string, unknown>)),
+		[videos]
+	);
 
 	useEffect(() => {
 		if (!hasInitializedRef.current && videoCount === 0 && !isLoading) {

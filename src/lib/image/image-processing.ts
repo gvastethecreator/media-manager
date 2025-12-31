@@ -1,6 +1,6 @@
+import { nanoid } from 'nanoid';
 import * as path from 'path';
 import sharp from 'sharp';
-import { nanoid } from 'nanoid';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { UploadedImageMetadata, UploadedImageProcessingOptions } from '@/types/uploaded-images';
 

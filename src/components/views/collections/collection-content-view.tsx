@@ -2,7 +2,7 @@ import { Library } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
 import { BaseContentView } from '@/components/views/base';
 import { useCollectionImages } from '@/lib/api/collections';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -35,7 +35,8 @@ export function CollectionContentView() {
 	);
 
 	const headerTitle = useMemo(
-		() => (currentCollection?.name ? `Imágenes de la colección: ${currentCollection.name}` : 'Selecciona una colección'),
+		() =>
+			currentCollection?.name ? `Imágenes de la colección: ${currentCollection.name}` : 'Selecciona una colección',
 		[currentCollection?.name]
 	);
 

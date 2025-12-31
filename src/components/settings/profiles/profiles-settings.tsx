@@ -38,9 +38,9 @@ export function ProfilesSettings() {
 
 	if (!profiles || profiles.length === 0) {
 		return (
-			<Card className="flex flex-col gap-2 rounded-sm border-none bg-muted/30">
+			<Card className="flex flex-col gap-2 rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<CardHeader className="bg-transparent p-2 pb-0">
-					<CardTitle className="flex items-center justify-between pl-1 font-semibold text-base text-muted-foreground">
+					<CardTitle className="flex items-center justify-between pl-1 text-heading-sm text-muted-foreground">
 						<span className="flex h-7 items-center gap-2">
 							<UserCog className="h-5 w-5" /> Perfiles
 						</span>
@@ -59,10 +59,10 @@ export function ProfilesSettings() {
 	}
 
 	return (
-		<Card className="flex flex-col gap-2 rounded-sm border-none bg-muted/30">
+		<Card className="flex flex-col gap-2 rounded-dt-md border-none bg-muted/30 shadow-sm">
 			{/* Perfil Activo */}
 			<CardHeader className="bg-transparent p-2 pb-0">
-				<CardTitle className="flex items-center justify-between pl-1 font-semibold text-base text-muted-foreground">
+				<CardTitle className="flex items-center justify-between pl-1 text-heading-sm text-muted-foreground">
 					<span className="flex h-7 items-center gap-2">
 						<UserCog className="h-5 w-5" /> Perfiles
 					</span>
@@ -132,7 +132,7 @@ export function ProfilesSettings() {
 						.filter((profile) => profile.id !== activeProfile)
 						.map((profile) => (
 							<Card
-								className={cn('group rounded-sm bg-muted/30', profile.isActive && 'ring-1 ring-primary')}
+								className={cn('group rounded-dt-sm bg-muted/30', profile.isActive && 'ring-1 ring-primary')}
 								key={profile.id}
 							>
 								<CardContent className="p-2">
@@ -145,8 +145,8 @@ export function ProfilesSettings() {
 												<span className="text-lg">{profile.emoji}</span>
 											</div>
 											<div className="min-w-0 flex-1">
-												<span className="truncate pl-1 font-semibold text-xs">{profile.name}</span>
-												<div className="flex gap-1 text-[10px] text-muted-foreground/75">
+												<span className="truncate pl-1 font-semibold text-body-sm">{profile.name}</span>
+												<div className="flex gap-1 text-caption text-muted-foreground/75">
 													<span>
 														{profile.preferences?.theme === 'system'
 															? 'Sistema'

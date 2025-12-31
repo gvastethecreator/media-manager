@@ -28,7 +28,7 @@ import {
 	wildcards,
 	worldItems,
 } from '@/lib/drizzle/schema/index';
-import type { MediaCounts, OrgCounts, WorldCounts, SystemCounts, SizeSums } from './stats.types';
+import type { MediaCounts, OrgCounts, SizeSums, SystemCounts, WorldCounts } from './stats.types';
 
 /**
  * Obtiene conteos de archivos multimedia (images, videos, audios, documents, jsonFiles, file3Ds)

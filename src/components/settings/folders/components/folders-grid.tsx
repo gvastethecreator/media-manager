@@ -82,7 +82,7 @@ export function FoldersGrid({
 											<FolderIcon className="h-5 w-5 text-primary" />
 										</div>
 									)}
-									{hasError && <AlertCircle className="-right-1 -top-1 absolute h-3.5 w-3.5 text-destructive" />}
+									{hasError && <AlertCircle className="absolute -top-1 -right-1 h-3.5 w-3.5 text-destructive" />}
 								</div>
 								<div className="flex items-center gap-1">
 									{folder.isFavorite && <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />}

@@ -1,13 +1,14 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { cn } from '@/lib/utils';
 import { useConceptStore } from '@/store/entities/concept';
 import type { ConceptCreateInput } from '@/types/entities/concept';
 import ConceptsContentView from './concepts-content-view';
 
 const viewLogger = clientLogger.withContext('ConceptsView');
 
-export function ConceptsView() {
+export function ConceptsView({ className }: { className?: string }) {
 	const navigate = useNavigate();
 	const {
 		concepts,
@@ -79,20 +80,22 @@ export function ConceptsView() {
 	}, [newConceptName, newConceptDescription, createConcept]);
 
 	return (
-		<ConceptsContentView
-			concepts={concepts}
-			error={error}
-			handleConceptSelect={handleConceptSelect}
-			handleCreateConcept={handleCreateConcept}
-			isLoading={isLoading}
-			newConceptDescription={newConceptDescription}
-			newConceptName={newConceptName}
-			searchTerm={searchTerm}
-			setNewConceptDescription={setNewConceptDescription}
-			setNewConceptName={setNewConceptName}
-			setSearchTerm={setSearchTerm}
-			setShowForm={setShowForm}
-			showForm={showForm}
-		/>
+		<div className={cn('h-full', className)}>
+			<ConceptsContentView
+				concepts={concepts}
+				error={error}
+				handleConceptSelect={handleConceptSelect}
+				handleCreateConcept={handleCreateConcept}
+				isLoading={isLoading}
+				newConceptDescription={newConceptDescription}
+				newConceptName={newConceptName}
+				searchTerm={searchTerm}
+				setNewConceptDescription={setNewConceptDescription}
+				setNewConceptName={setNewConceptName}
+				setSearchTerm={setSearchTerm}
+				setShowForm={setShowForm}
+				showForm={showForm}
+			/>
+		</div>
 	);
 }

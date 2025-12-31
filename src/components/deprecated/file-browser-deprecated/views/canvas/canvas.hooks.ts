@@ -8,9 +8,9 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { useDebounce } from '@/hooks/useThrottle';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 import type { MediaItem } from '../../components/media-thumbnail';
-import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
-import { computeOffsetTop } from './canvas.utils';
 import type { Viewport } from './canvas.types';
+import { computeOffsetTop } from './canvas.utils';
+import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
 
 /**
  * Hook para prefetch de thumbnails con debouncing y cancelación

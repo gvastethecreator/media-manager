@@ -30,11 +30,7 @@ export async function phase8_verifyIntegrity(
 		// Verificar que todas las carpetas existentes están en BD
 		for (const folder of analysisResult.existingFolders) {
 			try {
-				const folderInDB = await db
-					.select({ id: folders.id })
-					.from(folders)
-					.where(eq(folders.id, folder.id))
-					.limit(1);
+				const folderInDB = await db.select({ id: folders.id }).from(folders).where(eq(folders.id, folder.id)).limit(1);
 
 				if (folderInDB.length === 0) {
 					errors.push(`Carpeta faltante en BD: ${folder.path}`);

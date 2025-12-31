@@ -4,8 +4,8 @@
  * @updated 2025-01-27 - MIGRADO A DRIZZLE ORM
  */
 
-import { formatDate } from '@/lib/utils/date';
 import type { Profile, Settings } from '@/lib/drizzle';
+import { formatDate } from '@/lib/utils/date';
 
 /**
  * Tipo extendido de Profile que incluye settings (para compatibilidad con transformadores legacy)

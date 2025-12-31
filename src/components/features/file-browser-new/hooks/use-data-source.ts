@@ -4,12 +4,12 @@
  */
 
 import { useCallback, useMemo, useRef } from 'react';
-import type { BrowserItem } from '../types';
-import { toBrowserItem, createParentNavItem } from '../types';
-import { useFolderFilesPaginated } from './use-folder-files-paginated';
 import { useFolder } from '@/lib/api/folders';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { DEFAULT_PAGE_SIZE } from '../core/constants';
+import type { BrowserItem } from '../types';
+import { createParentNavItem, toBrowserItem } from '../types';
+import { useFolderFilesPaginated } from './use-folder-files-paginated';
 
 export interface UseDataSourceOptions {
 	/** ID de carpeta a cargar */

@@ -2,11 +2,11 @@ import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import express from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { prompts, imagePrompts, images } from '@/lib/drizzle/schema/index';
+import { imagePrompts, images, prompts } from '@/lib/drizzle/schema/index';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { PromptService, promptService } from '@/services/prompt/prompt.service';
 import { toImageWithStats } from '@/transformers/image';
 import { toPromptWithStats } from '@/transformers/prompt';
-import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 const legacyPromptService = new PromptService(); // Para métodos legacy

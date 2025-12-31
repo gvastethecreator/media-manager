@@ -7,10 +7,10 @@ import { ColorPicker } from '@/components/ui/color-picker';
 import { DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { useCreateProperty, useUpdateProperty } from '@/lib/api/properties';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { CreatePropertySchema } from '@/types/entities/property/schema';
 import type { PropertyWithStats as Property } from '@/types/entities/property/types';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 type FormData = z.infer<typeof CreatePropertySchema>;
 

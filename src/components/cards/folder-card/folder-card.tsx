@@ -1,11 +1,11 @@
 import { memo, useCallback, useMemo } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import type { FolderWithStats } from '@/types/entities/folder';
 import { FolderCardContent } from './folder-card-content';
 import { FolderCardFooter } from './folder-card-footer';
 import { FolderCardHeader } from './folder-card-header';
 import { FolderCardImages } from './folder-card-images';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 export interface FolderCardProps {
 	folder: FolderWithStats;

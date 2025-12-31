@@ -3,7 +3,7 @@ import { memo, useCallback, useEffect, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
 import { BaseContentView } from '@/components/views/base';
 import { useCharacterImages } from '@/lib/api/characters';
 import { clientLogger } from '@/lib/logger/client-logger';

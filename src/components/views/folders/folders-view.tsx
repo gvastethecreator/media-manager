@@ -5,8 +5,8 @@ import { FolderCard } from '@/components/cards/folder-card';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
 import { useCreateFolder, useFolders } from '@/lib/api/folders';
-import type { FolderWithStats } from '@/types/entities/folder';
 import { clientLogger } from '@/lib/logger/client-logger';
+import type { FolderWithStats } from '@/types/entities/folder';
 
 interface FoldersViewProps {
 	className?: string;
@@ -71,12 +71,15 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 
 	if (error) {
 		return (
-			<div className="flex h-full flex-col items-center justify-center space-y-4">
-				<div className="text-center">
-					<h3 className="font-semibold text-destructive text-lg">Error al cargar carpetas</h3>
-					<p className="text-muted-foreground text-sm">{error instanceof Error ? error.message : String(error)}</p>
+			<div className="flex h-full flex-col items-center justify-center gap-4 p-6">
+				<div className="flex h-16 w-16 items-center justify-center rounded-dt-lg bg-destructive/10">
+					<RefreshCw className="h-8 w-8 text-destructive" />
 				</div>
-				<Button onClick={handleManualRetry} variant="outline">
+				<div className="stack-xs text-center">
+					<h3 className="heading-lg text-destructive">Error al cargar carpetas</h3>
+					<p className="body-sm text-muted-foreground">{error instanceof Error ? error.message : String(error)}</p>
+				</div>
+				<Button className="mt-2" onClick={handleManualRetry} variant="outline">
 					<RefreshCw className="mr-2 h-4 w-4" />
 					Reintentar
 				</Button>
@@ -85,8 +88,8 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 	}
 
 	return (
-		<div className={`m-0 flex h-full flex-col overflow-auto p-0 ${className}`}>
-			<div className="grid grid-cols-4 gap-2 p-2">
+		<div className={`flex h-full flex-col overflow-auto ${className}`}>
+			<div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
 				{allFolders.map((folder) => (
 					<FolderCard
 						className="h-full"

@@ -4,6 +4,11 @@
  * @description Barrel export para módulos de canvas
  */
 
+// Hooks
+export { useThumbnailPrefetch, useViewportObserver } from './canvas.hooks';
+export type { CanvasRenderParams } from './canvas.renderer';
+// Renderer
+export { renderCanvas } from './canvas.renderer';
 // Types
 export type {
 	ClickModifiers,
@@ -13,7 +18,6 @@ export type {
 	Viewport,
 	VisibleRange,
 } from './canvas.types';
-
 // Utils
 export {
 	calculateCellSize,
@@ -23,10 +27,3 @@ export {
 	idsFromMarquee,
 	indexFromCoords,
 } from './canvas.utils';
-
-// Hooks
-export { useThumbnailPrefetch, useViewportObserver } from './canvas.hooks';
-
-// Renderer
-export { renderCanvas } from './canvas.renderer';
-export type { CanvasRenderParams } from './canvas.renderer';

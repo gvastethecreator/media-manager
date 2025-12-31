@@ -113,7 +113,10 @@ export class VideoProbeService {
 
 			return result;
 		} catch (error) {
-			serverLogger.warn('VideoProbeService: fallo al hacer probe de video con mediabunny para', { filePath: basename(filePath), error: String(error) });
+			serverLogger.warn('VideoProbeService: fallo al hacer probe de video con mediabunny para', {
+				filePath: basename(filePath),
+				error: String(error),
+			});
 			return {
 				duration: null,
 				width: null,

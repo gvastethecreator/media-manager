@@ -146,7 +146,7 @@ export function ConceptsSettings() {
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
 		return (
-			<Card className="rounded-sm border-none bg-muted/30">
+			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-3">
 						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -159,7 +159,7 @@ export function ConceptsSettings() {
 
 	if (error) {
 		return (
-			<Card className="rounded-sm border-none bg-muted/30">
+			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-3">
 						<p className="text-destructive text-sm">Error al cargar conceptos: {error.message}</p>
@@ -173,10 +173,10 @@ export function ConceptsSettings() {
 		<div className="grid grid-cols-12 gap-3">
 			{/* Panel izquierdo: Lista de conceptos */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-dt-md border-none bg-muted/30 shadow-sm">
 					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
-							<CardTitle className="flex items-center text-sm">
+							<CardTitle className="flex items-center text-heading-sm">
 								Conceptos ({filteredConcepts.length})
 								{filteredConcepts.length !== concepts.length && (
 									<Badge className="ml-2 text-[10px]" variant="outline">
@@ -258,7 +258,7 @@ export function ConceptsSettings() {
 								</Button>
 							</div>
 						</div>
-						<div className="flex gap-2 text-muted-foreground text-xs">
+						<div className="flex gap-2 text-caption text-muted-foreground">
 							<span>{stats.totalConcepts} conceptos</span>
 							{stats.favoriteConcepts > 0 && (
 								<>
@@ -308,7 +308,7 @@ export function ConceptsSettings() {
 												type="button"
 											>
 												<div
-													className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-white"
+													className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-white"
 													style={{
 														backgroundColor: concept.color,
 													}}
@@ -316,8 +316,8 @@ export function ConceptsSettings() {
 													<span className="text-xs">{concept.emoji}</span>
 												</div>
 												<div className="min-w-0 flex-1">
-													<h4 className="truncate font-medium text-xs">{concept.name}</h4>
-													<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+													<h4 className="truncate font-medium text-body-sm">{concept.name}</h4>
+													<div className="flex items-center gap-1 text-caption text-muted-foreground">
 														<span>{concept.stats?.imageCount || 0} imágenes</span>
 														{concept.category && (
 															<>
@@ -351,12 +351,12 @@ export function ConceptsSettings() {
 
 			{/* Panel derecho: Formulario y Preview */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-dt-md border-none bg-muted/30 shadow-sm">
 					<CardHeader className="px-3 py-2">
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="text-sm">{isEditing ? 'Editar Concepto' : 'Nuevo Concepto'}</CardTitle>
-								<CardDescription className="text-xs">
+								<CardTitle className="text-heading-sm">{isEditing ? 'Editar Concepto' : 'Nuevo Concepto'}</CardTitle>
+								<CardDescription className="text-caption">
 									{isEditing
 										? 'Modifica los detalles del concepto seleccionado'
 										: 'Completa el formulario para crear un nuevo concepto'}
@@ -400,10 +400,10 @@ export function ConceptsSettings() {
 									/>
 								</div>
 								<div className="hidden flex-col items-center justify-start lg:flex">
-									<h3 className="mb-2 font-medium text-xs">Vista Previa</h3>
-									<div className="w-[180px] transition-all duration-300">
+									<h3 className="mb-2 font-medium text-caption">Vista Previa</h3>
+									<div className="w-45 transition-all duration-300">
 										{previewData || selectedConcept ? (
-											<div className="flex flex-col items-center rounded-lg border bg-background p-4">
+											<div className="flex flex-col items-center rounded-dt-md border bg-background p-4">
 												<div
 													className="mb-3 flex h-12 w-12 items-center justify-center rounded-full text-2xl"
 													style={{ backgroundColor: previewData?.color || selectedConcept?.color || '#3b82f6' }}
@@ -435,9 +435,9 @@ export function ConceptsSettings() {
 												)}
 											</div>
 										) : (
-											<div className="flex h-[260px] flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50">
+											<div className="flex h-65 flex-col items-center justify-center rounded-dt-md border border-dashed bg-muted/50">
 												<LightbulbIcon className="h-7 w-7 text-muted-foreground/50" />
-												<p className="mt-2 text-[10px] text-muted-foreground">Vista previa</p>
+												<p className="mt-2 text-caption text-muted-foreground">Vista previa</p>
 											</div>
 										)}
 									</div>

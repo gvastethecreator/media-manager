@@ -201,7 +201,7 @@ export function AlbumCard({
 			{/* Resplandor de borde en hover - solo visible en modo TCG */}
 			{tcgMode && (
 				<div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-100">
-					<div className="-z-10 absolute inset-0 rounded-[4.75%] blur-md" style={glowStyle} />
+					<div className="absolute inset-0 -z-10 rounded-[4.75%] blur-md" style={glowStyle} />
 				</div>
 			)}
 

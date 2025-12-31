@@ -1,6 +1,6 @@
 import { z } from 'zod';
-import { cn } from '@/lib/utils';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { cn } from '@/lib/utils';
 
 // Definir tipos locales ya que no están exportados
 interface GroupFilter {

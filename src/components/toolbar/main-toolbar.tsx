@@ -68,9 +68,9 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	};
 
 	return (
-		<div className="flex h-9 items-center justify-between border-2 border-background bg-secondary p-2 min-w-0">
+		<div className="flex h-9 min-w-0 items-center justify-between border-2 border-background bg-secondary p-2">
 			{/* Lado izquierdo: Botón colapsar panel izquierdo + breadcrumbs */}
-			<div className="flex items-center gap-2 min-w-0 overflow-hidden">
+			<div className="flex min-w-0 items-center gap-2 overflow-hidden">
 				{/* Botón de colapsar panel izquierdo */}
 				{toggleLeftPanelCollapse && (
 					<Button
@@ -93,14 +93,14 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 					currentItem={
 						isFoldersRoute && folderData
 							? {
-								id: folderData.id,
-								name: folderData.name,
-								emoji: (folderData as any).emoji,
-								description: (folderData as any).description,
-								totalSize: (folderData as any).stats?.totalSize,
-								_count: { images: (folderData as any)._count?.images },
-								breadcrumbs: (folderData as any).stats?.breadcrumbs ?? [],
-							}
+									id: folderData.id,
+									name: folderData.name,
+									emoji: (folderData as any).emoji,
+									description: (folderData as any).description,
+									totalSize: (folderData as any).stats?.totalSize,
+									_count: { images: (folderData as any)._count?.images },
+									breadcrumbs: (folderData as any).stats?.breadcrumbs ?? [],
+								}
 							: undefined
 					}
 					currentView={currentView as ViewType}

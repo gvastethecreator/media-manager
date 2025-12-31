@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { PaginationState, InfiniteScrollOptions } from '../types';
+import type { InfiniteScrollOptions, PaginationState } from '../types';
 
 export interface UsePaginationOptions {
 	/** Total de items */
@@ -134,7 +134,7 @@ export function usePagination({
 	// Handler de scroll para infinite scroll
 	const scrollHandler = useCallback(
 		(container: HTMLElement) => {
-			if (!infiniteScroll?.enabled || !hasMoreItems || isLoadingMore || !onLoadMore) {
+			if (!(infiniteScroll?.enabled && hasMoreItems) || isLoadingMore || !onLoadMore) {
 				return;
 			}
 
@@ -151,10 +151,7 @@ export function usePagination({
 				const cooldown = infiniteScroll.cooldownMs ?? 300;
 
 				// Anti-spam: verificar tiempo y que realmente se agregó contenido
-				if (
-					scrollHeight !== lastScrollHeightRef.current &&
-					now - lastLoadTimeRef.current >= cooldown
-				) {
+				if (scrollHeight !== lastScrollHeightRef.current && now - lastLoadTimeRef.current >= cooldown) {
 					lastScrollHeightRef.current = scrollHeight;
 					lastLoadTimeRef.current = now;
 					onLoadMore();

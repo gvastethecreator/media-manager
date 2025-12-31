@@ -5,21 +5,21 @@
  * @created 2025-10-11 - Fase 3 Effect Implementation
  */
 
-import { Effect, Context, Layer } from 'effect';
 import { Schema } from '@effect/schema';
 import { and, asc, count, desc, eq, like, or, sql } from 'drizzle-orm';
+import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { albums, imageAlbums, images } from '@/lib/drizzle/schema';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { Album, AlbumCreateInput, AlbumUpdateInput, AlbumWithStats } from '@/lib/effect/schemas/entities';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	AlbumError,
-	AlbumNotFound,
-	AlbumNameConflict,
 	AlbumDatabaseError,
-	AlbumValidationError,
+	AlbumError,
 	AlbumHasRelationsError,
+	AlbumNameConflict,
+	AlbumNotFound,
 	AlbumRelationError,
+	AlbumValidationError,
 	fromUnknownError,
 } from './album-errors.effect';
 
@@ -177,7 +177,7 @@ const make = (): AlbumServiceInterface => {
 				return yield* Effect.fail(new AlbumNotFound({ albumId: id }));
 			}
 
-			logger.info(`✅ Álbum encontrado:`, result[0]);
+			logger.info('✅ Álbum encontrado:', result[0]);
 
 			// Validar con Schema (síncrono)
 			const validated = yield* Effect.try({

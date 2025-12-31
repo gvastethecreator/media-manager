@@ -129,7 +129,7 @@ const RarityBadge: React.FC<{
 	metadata: NonNullable<CollectionCardContentProps['metadata']>;
 	rarityColors: { border: string; background: string; text: string };
 }> = ({ metadata, rarityColors }) => (
-	<div className="-top-1 -right-1 absolute flex items-center gap-1">
+	<div className="absolute -top-1 -right-1 flex items-center gap-1">
 		<Badge
 			className="h-5 py-0 font-bold text-[9px] uppercase shadow-md"
 			style={{

@@ -6,8 +6,8 @@
 
 import { useInfiniteQuery, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
-import type { MediaItem } from '../components/media-thumbnail';
 import { clientLogger } from '@/lib/logger/client-logger';
+import type { MediaItem } from '../components/media-thumbnail';
 
 const logger = clientLogger.withContext('FolderFilesPaginated');
 

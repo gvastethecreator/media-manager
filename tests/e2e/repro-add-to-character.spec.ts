@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { expect, test } from '@playwright/test';
 
 test('Add image to character flow', async ({ page }) => {
 	// 1. Crear un personaje de prueba
@@ -32,7 +32,7 @@ test('Add image to character flow', async ({ page }) => {
 
 	// Esperar a que aparezca el personaje
 	// A veces la recarga es lenta o requiere invalidación
-	await expect(page.getByText(testCharName)).toBeVisible({ timeout: 15000 });
+	await expect(page.getByText(testCharName)).toBeVisible({ timeout: 15_000 });
 
 	// 2. Ir a una carpeta con imágenes
 	// Vamos a usar la ruta que mencionó el usuario si es posible, o fallback a una genérica

@@ -7,278 +7,280 @@
 /* CSS básico para ViewTransition API nativo */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: 0.3s;
-  animation-timing-function: ease-in-out;
+	animation-duration: 0.3s;
+	animation-timing-function: ease-in-out;
 }
 
 ::view-transition-group(root) {
-  animation-duration: 0.3s;
-  animation-timing-function: ease-in-out;
+	animation-duration: 0.3s;
+	animation-timing-function: ease-in-out;
 }
 
 /* Configuraciones específicas por tipo */
 ::view-transition-old(navigation),
 ::view-transition-new(navigation) {
-  animation-duration: 0.4s;
-  animation-timing-function: ease-in-out;
+	animation-duration: 0.4s;
+	animation-timing-function: ease-in-out;
 }
 
 ::view-transition-old(modal),
 ::view-transition-new(modal) {
-  animation-duration: 0.25s;
-  animation-timing-function: ease-out;
+	animation-duration: 0.25s;
+	animation-timing-function: ease-out;
 }
 
 ::view-transition-old(list),
 ::view-transition-new(list) {
-  animation-duration: 0.2s;
-  animation-timing-function: ease-out;
+	animation-duration: 0.2s;
+	animation-timing-function: ease-out;
 }
 
 /* Fallback para elementos sin ViewTransition nativo */
 .view-transition-fallback {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
-  z-index: 9999;
-  background: linear-gradient(45deg,
-      transparent 48%,
-      rgba(255, 255, 255, 0.1) 50%,
-      transparent 52%);
-  opacity: 0;
-  transition: opacity 0.3s ease-out;
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	pointer-events: none;
+	z-index: 9999;
+	background: linear-gradient(
+		45deg,
+		transparent 48%,
+		rgba(255, 255, 255, 0.1) 50%,
+		transparent 52%
+	);
+	opacity: 0;
+	transition: opacity 0.3s ease-out;
 }
 
 /* Animaciones personalizadas para elementos específicos */
 .view-transition-container {
-  position: relative;
-  overflow: hidden;
+	position: relative;
+	overflow: hidden;
 }
 
 .view-transition-element {
-  transition: all 0.3s ease-in-out;
+	transition: all 0.3s ease-in-out;
 }
 
 .view-transition-element.entering {
-  opacity: 0;
-  transform: translateY(20px);
+	opacity: 0;
+	transform: translateY(20px);
 }
 
 .view-transition-element.entered {
-  opacity: 1;
-  transform: translateY(0);
+	opacity: 1;
+	transform: translateY(0);
 }
 
 .view-transition-element.exiting {
-  opacity: 0;
-  transform: translateY(-20px);
+	opacity: 0;
+	transform: translateY(-20px);
 }
 
 /* Modo de reducción de movimiento */
 @media (prefers-reduced-motion: reduce) {
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation-duration: 0.15s;
+		animation-timing-function: ease-out;
+	}
 
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 0.15s;
-    animation-timing-function: ease-out;
-  }
+	::view-transition-group(root) {
+		animation-duration: 0.15s;
+		animation-timing-function: ease-out;
+	}
 
-  ::view-transition-group(root) {
-    animation-duration: 0.15s;
-    animation-timing-function: ease-out;
-  }
+	.view-transition-element {
+		transition-duration: 0.15s;
+	}
 
-  .view-transition-element {
-    transition-duration: 0.15s;
-  }
-
-  .view-transition-fallback {
-    transition-duration: 0.15s;
-  }
+	.view-transition-fallback {
+		transition-duration: 0.15s;
+	}
 }
 
 /* Debug mode - mostrar bordes de transición */
 .view-transition-debug ::view-transition-group(*) {
-  outline: 2px solid red;
+	outline: 2px solid red;
 }
 
 .view-transition-debug ::view-transition-old(*) {
-  outline: 2px solid blue;
+	outline: 2px solid blue;
 }
 
 .view-transition-debug ::view-transition-new(*) {
-  outline: 2px solid green;
+	outline: 2px solid green;
 }
 
 /* Transiciones específicas para navegación */
 .view-transition-navigation-slide-left {
-  view-transition-name: navigation;
+	view-transition-name: navigation;
 }
 
 .view-transition-navigation-slide-right {
-  view-transition-name: navigation;
+	view-transition-name: navigation;
 }
 
 .view-transition-navigation-fade {
-  view-transition-name: navigation;
+	view-transition-name: navigation;
 }
 
 /* Transiciones para elementos de lista */
 .view-transition-list-item {
-  view-transition-name: var(--view-transition-name);
+	view-transition-name: var(--view-transition-name);
 }
 
 /* Transiciones para modales */
 .view-transition-modal {
-  view-transition-name: modal;
+	view-transition-name: modal;
 }
 
 .view-transition-modal-overlay {
-  view-transition-name: modal-overlay;
+	view-transition-name: modal-overlay;
 }
 
 /* Transiciones para elementos compartidos */
 .view-transition-shared {
-  view-transition-name: var(--view-transition-name);
+	view-transition-name: var(--view-transition-name);
 }
 
 /* Animaciones keyframes personalizadas */
 @keyframes view-transition-fade-in {
-  from {
-    opacity: 0;
-  }
+	from {
+		opacity: 0;
+	}
 
-  to {
-    opacity: 1;
-  }
+	to {
+		opacity: 1;
+	}
 }
 
 @keyframes view-transition-fade-out {
-  from {
-    opacity: 1;
-  }
+	from {
+		opacity: 1;
+	}
 
-  to {
-    opacity: 0;
-  }
+	to {
+		opacity: 0;
+	}
 }
 
 @keyframes view-transition-slide-in-left {
-  from {
-    transform: translateX(-100%);
-  }
+	from {
+		transform: translateX(-100%);
+	}
 
-  to {
-    transform: translateX(0);
-  }
+	to {
+		transform: translateX(0);
+	}
 }
 
 @keyframes view-transition-slide-out-left {
-  from {
-    transform: translateX(0);
-  }
+	from {
+		transform: translateX(0);
+	}
 
-  to {
-    transform: translateX(-100%);
-  }
+	to {
+		transform: translateX(-100%);
+	}
 }
 
 @keyframes view-transition-slide-in-right {
-  from {
-    transform: translateX(100%);
-  }
+	from {
+		transform: translateX(100%);
+	}
 
-  to {
-    transform: translateX(0);
-  }
+	to {
+		transform: translateX(0);
+	}
 }
 
 @keyframes view-transition-slide-out-right {
-  from {
-    transform: translateX(0);
-  }
+	from {
+		transform: translateX(0);
+	}
 
-  to {
-    transform: translateX(100%);
-  }
+	to {
+		transform: translateX(100%);
+	}
 }
 
 @keyframes view-transition-scale-in {
-  from {
-    transform: scale(0.8);
-    opacity: 0;
-  }
+	from {
+		transform: scale(0.8);
+		opacity: 0;
+	}
 
-  to {
-    transform: scale(1);
-    opacity: 1;
-  }
+	to {
+		transform: scale(1);
+		opacity: 1;
+	}
 }
 
 @keyframes view-transition-scale-out {
-  from {
-    transform: scale(1);
-    opacity: 1;
-  }
+	from {
+		transform: scale(1);
+		opacity: 1;
+	}
 
-  to {
-    transform: scale(0.8);
-    opacity: 0;
-  }
+	to {
+		transform: scale(0.8);
+		opacity: 0;
+	}
 }
 
 /* Clases utility para usar con JavaScript */
 .vt-name-navigation {
-  view-transition-name: navigation;
+	view-transition-name: navigation;
 }
 
 .vt-name-modal {
-  view-transition-name: modal;
+	view-transition-name: modal;
 }
 
 .vt-name-list {
-  view-transition-name: list;
+	view-transition-name: list;
 }
 
 .vt-name-shared {
-  view-transition-name: shared;
+	view-transition-name: shared;
 }
 
 /* Variables CSS para personalización */
 :root {
-  --view-transition-duration: 0.3s;
-  --view-transition-easing: ease-in-out;
-  --view-transition-reduced-duration: 0.15s;
-  --view-transition-reduced-easing: ease-out;
+	--view-transition-duration: 0.3s;
+	--view-transition-easing: ease-in-out;
+	--view-transition-reduced-duration: 0.15s;
+	--view-transition-reduced-easing: ease-out;
 }
 
 /* Aplicar variables CSS a las transiciones */
 ::view-transition-old(root),
 ::view-transition-new(root) {
-  animation-duration: var(--view-transition-duration);
-  animation-timing-function: var(--view-transition-easing);
+	animation-duration: var(--view-transition-duration);
+	animation-timing-function: var(--view-transition-easing);
 }
 
 /* Soporte para temas dark/light */
 .dark .view-transition-fallback {
-  background: linear-gradient(45deg,
-      transparent 48%,
-      rgba(255, 255, 255, 0.05) 50%,
-      transparent 52%);
+	background: linear-gradient(
+		45deg,
+		transparent 48%,
+		rgba(255, 255, 255, 0.05) 50%,
+		transparent 52%
+	);
 }
 
 /* Responsivo - ajustar transiciones en móviles */
 @media (max-width: 768px) {
+	::view-transition-old(root),
+	::view-transition-new(root) {
+		animation-duration: 0.2s;
+	}
 
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 0.2s;
-  }
-
-  .view-transition-element {
-    transition-duration: 0.2s;
-  }
+	.view-transition-element {
+		transition-duration: 0.2s;
+	}
 }

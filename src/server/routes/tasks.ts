@@ -6,6 +6,7 @@
  */
 
 import express from 'express';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	createTask,
 	deleteTask,
@@ -21,7 +22,6 @@ import {
 } from '@/services/task';
 import { serializeTask, serializeTasks } from '@/transformers/task';
 import type { TaskCreateInput, TaskUpdateInput } from '@/types/entities/task';
-import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 

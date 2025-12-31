@@ -7,7 +7,7 @@
 import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
 import type { Request, Response } from 'express';
 import { db } from '@/lib/drizzle';
-import { albums, images, videos, imageAlbums, videoAlbums } from '@/lib/drizzle/schema/index';
+import { albums, imageAlbums, images, videoAlbums, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { AlbumCardData, ThumbnailImage } from './albums.types';
 import { getAlbumStats } from './albums.utils';
@@ -311,7 +311,7 @@ export async function getAlbumRecentMediaHandler(req: Request, res: Response) {
 
 		media.push(
 			...recentImages.map(
-				(img): ThumbnailImage => ({
+				(img: { id: string; name: string }): ThumbnailImage => ({
 					id: img.id,
 					name: img.name,
 					thumbnailUrl: `/api/thumbnails/${img.id}`,
@@ -335,7 +335,7 @@ export async function getAlbumRecentMediaHandler(req: Request, res: Response) {
 
 		media.push(
 			...recentVideos.map(
-				(video): ThumbnailImage => ({
+				(video: { id: string; name: string }): ThumbnailImage => ({
 					id: video.id,
 					name: video.name,
 					thumbnailUrl: `/api/video-thumbnails/${video.id}`,

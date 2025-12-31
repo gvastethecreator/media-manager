@@ -195,7 +195,8 @@ export function PlaceCardHeader({
 				className="relative flex items-center justify-between px-3.5 py-1.5 text-white text-xs"
 				style={{
 					borderBottom: `2px solid ${color}70`,
-					background: 'linear-gradient(to right, rgba(var(--effect-shadow-rgb), 0.6), rgba(var(--effect-shadow-rgb), 0.5))',
+					background:
+						'linear-gradient(to right, rgba(var(--effect-shadow-rgb), 0.6), rgba(var(--effect-shadow-rgb), 0.5))',
 				}}
 			>
 				{/* Decoración de esquina de TCG */}

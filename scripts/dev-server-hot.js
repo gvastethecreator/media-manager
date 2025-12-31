@@ -62,38 +62,15 @@ console.log(`- NODE_ENV: ${serverEnv.NODE_ENV || 'undefined'}`);
 console.log();
 
 const SERVER_SRC = 'src/server/index.ts';
-const SERVER_DIST = 'dist/server/index.js';
 const SERVER_DIR = 'src/server';
 const REQUIRED_DEPS = ['music-metadata', 'ffprobe-static'];
 
 let serverProcess = null;
 
-// Función para compilar el servidor con Bun
-function buildServer() {
-	console.log(chalk.blue('🔨 Compilando servidor con Bun...'));
-
-	try {
-		const buildProcess = spawn('bun', ['build', SERVER_SRC, '--outdir', 'dist/server', '--target', 'node'], {
-			stdio: 'inherit',
-			shell: true,
-		});
-
-		return new Promise((resolve, reject) => {
-			buildProcess.on('close', (code) => {
-				if (code === 0) {
-					console.log(chalk.green('✅ Build exitoso'));
-					resolve(true);
-				} else {
-					console.log(chalk.red('❌ Error en build'));
-					reject(new Error(`Build falló con código ${code}`));
-				}
-			});
-		});
-	} catch (error) {
-		console.error(chalk.red('❌ Error compilando servidor:'), error);
-		throw error;
-	}
-}
+// NOTE:
+// En desarrollo, preferimos ejecutar el entrypoint TS directamente.
+// Esto evita fallos sutiles del bundler (orden de inicialización / exports undefined)
+// y acelera el ciclo de feedback cuando el servidor se reinicia por cambios.
 
 function checkRequiredDependencies() {
 	const missing = [];
@@ -118,14 +95,14 @@ function startServer() {
 		serverProcess.kill();
 	}
 
-	if (!existsSync(SERVER_DIST)) {
-		console.log(chalk.red('❌ Archivo compilado no encontrado:', SERVER_DIST));
+	if (!existsSync(SERVER_SRC)) {
+		console.log(chalk.red('❌ Entry point no encontrado:', SERVER_SRC));
 		return;
 	}
 
-	console.log(chalk.green('🚀 Iniciando servidor con variables de entorno...'));
+	console.log(chalk.green('🚀 Iniciando servidor (TS) con variables de entorno...'));
 
-	serverProcess = spawn('bun', [SERVER_DIST], {
+	serverProcess = spawn('bun', [SERVER_SRC], {
 		stdio: 'inherit',
 		shell: true,
 		env: serverEnv, // Usar las variables de entorno cargadas
@@ -150,8 +127,6 @@ async function main() {
 		if (!checkRequiredDependencies()) {
 			process.exit(1);
 		}
-		// Build inicial
-		await buildServer();
 		startServer();
 
 		// Configurar watcher
@@ -165,13 +140,7 @@ async function main() {
 
 		watcher.on('change', async (path) => {
 			console.log(chalk.yellow(`📝 Cambio detectado: ${path}`));
-
-			try {
-				await buildServer();
-				startServer();
-			} catch (error) {
-				console.error(chalk.red('❌ Error en hot reload:'), error);
-			}
+			startServer();
 		});
 
 		// Manejar cierre graceful
