@@ -6,9 +6,9 @@ import { LoadingScreen } from '@/components/core/feedback';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Textarea } from '@/components/ui/textarea';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { useCreateWorldItem, useWorldItems } from '@/lib/api/world-items';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -107,7 +107,12 @@ export function WorldItemsView(_props: ViewProps) {
 								key={worldItem.id}
 								transition={{ delay: index * 0.1 }}
 							>
-								<WorldItemCard className="h-full" onClick={handleWorldItemClick} worldItemId={worldItem.id} worldItem={worldItem} />
+								<WorldItemCard
+									className="h-full"
+									onClick={handleWorldItemClick}
+									worldItem={worldItem}
+									worldItemId={worldItem.id}
+								/>
 							</motion.div>
 						))}
 					</div>

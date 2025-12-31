@@ -202,7 +202,7 @@ router.get('/:id/content', async (req: Request, res: Response) => {
 		const { id } = req.params;
 		const video = await getVideoById(id);
 
-		if (!video || !video.path) {
+		if (!(video && video.path)) {
 			res.status(404).send('Video not found');
 			return;
 		}

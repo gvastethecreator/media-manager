@@ -15,7 +15,13 @@ export interface ImageCardProps extends React.HTMLAttributes<HTMLDivElement> {
 	className?: string;
 }
 
-export const ImageCard = memo(function ImageCard({ imageId, className, onClick, onDoubleClick, ...rest }: ImageCardProps) {
+export const ImageCard = memo(function ImageCard({
+	imageId,
+	className,
+	onClick,
+	onDoubleClick,
+	...rest
+}: ImageCardProps) {
 	const thumbnailUrl = `/api/images/${encodeURIComponent(imageId)}/thumbnail`;
 	if (onClick) {
 		return (

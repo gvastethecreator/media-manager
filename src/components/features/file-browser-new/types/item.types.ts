@@ -3,8 +3,6 @@
  * @module file-browser-new/types/item
  */
 
-import type { EntityType } from '@/types/entities/entities';
-
 /**
  * Tipos de entidad soportados por el browser
  */
@@ -103,7 +101,7 @@ export interface ProcessedItems {
  */
 export function toBrowserItem(entity: Record<string, unknown>): BrowserItem {
 	const entityType = normalizeEntityType(String(entity.entityType ?? entity.type ?? 'unknown'));
-	
+
 	return {
 		id: String(entity.id),
 		raw: entity,

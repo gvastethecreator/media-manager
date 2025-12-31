@@ -8,13 +8,13 @@ import { ViewToolbar } from '@/components/toolbar/main-toolbar';
 import { NavigationTransition } from '@/components/transitions/ViewTransition';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useReindexFolder } from '@/lib/api/folders';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
+import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 import { useFolderStore } from '@/store/entities/folder';
 import { useImageStore } from '@/store/entities/image';
 import { useUIStore } from '@/store/ui.store';
-import { clientLogger } from '@/lib/logger/client-logger';
-import { cn } from '@/lib/utils';
 
 const MainLayoutComponent = memo(function MainLayoutImpl() {
 	const location = useLocation();
@@ -230,7 +230,7 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 	};
 
 	return (
-		<div className="flex h-screen w-full min-h-0 min-w-0 bg-background text-foreground">
+		<div className="flex h-screen min-h-0 w-full min-w-0 bg-background text-foreground">
 			<ResizablePanelGroup className="h-full" id="main-layout-v13-final" orientation="horizontal">
 				{/* Panel de navegación izquierdo */}
 				<ResizablePanel
@@ -252,12 +252,12 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 
 				{/* Panel central con toolbar y view container */}
 				<ResizablePanel
-					className="flex flex-col min-h-0 min-w-0 overflow-hidden"
+					className="flex min-h-0 min-w-0 flex-col overflow-hidden"
 					defaultSize={`${shouldHideToolbarAndPanel ? 80 : 55}`}
 					id="center"
 					minSize="20"
 				>
-					<div className="flex h-full w-full min-h-0 min-w-0 flex-1 flex-col bg-background overflow-hidden">
+					<div className="flex h-full min-h-0 w-full min-w-0 flex-1 flex-col overflow-hidden bg-background">
 						{/* Toolbar superior - solo mostrar en vistas que lo necesiten */}
 						{!shouldHideToolbarAndPanel && (
 							<div className="border-border border-b bg-background/95 backdrop-blur supports-backdrop-filter:bg-background/95">
@@ -275,7 +275,7 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 							</div>
 						)}
 						{/* Contenido principal */}
-						<NavigationTransition className="min-h-0 min-w-0 flex-1 bg-background overflow-hidden">
+						<NavigationTransition className="min-h-0 min-w-0 flex-1 overflow-hidden bg-background">
 							<Outlet />
 						</NavigationTransition>
 					</div>

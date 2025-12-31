@@ -117,7 +117,7 @@ export function ShortcutsSettings() {
 
 	return (
 		<ScrollArea className="h-[calc(100vh-8rem)] w-full">
-			<Card className="flex flex-col gap-2 rounded-sm border-none bg-muted/30">
+			<Card className="flex flex-col gap-2 rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<CardHeader className="bg-transparent p-2 pb-0">
 					<CardTitle className="flex items-center justify-between pl-1 font-semibold text-base text-muted-foreground">
 						<span className="flex h-7 items-center gap-2">

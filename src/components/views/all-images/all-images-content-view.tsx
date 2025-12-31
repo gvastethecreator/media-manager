@@ -1,7 +1,7 @@
 import { AlertTriangle, FolderSync, Upload } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,9 +12,9 @@ import { motion } from '@/components/ui/motion-shim';
 import { Progress } from '@/components/ui/progress';
 
 import { useToast } from '@/components/ui/use-toast';
+import { clientLogger } from '@/lib/logger/client-logger';
 import type { AnyEntityWithStats } from '@/types/entities';
 import type { ImageWithStats } from '@/types/entities/image';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 interface AllImagesContentViewProps {
 	images: ImageWithStats[];

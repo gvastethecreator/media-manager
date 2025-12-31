@@ -147,7 +147,7 @@ function TCGEffects({
 
 			{/* Sello de rareza */}
 			<div
-				className="-translate-x-1/2 -translate-y-1/2 pointer-events-none absolute top-1/4 left-1/2 h-24 w-24 opacity-10"
+				className="pointer-events-none absolute top-1/4 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 opacity-10"
 				style={{
 					background: `radial-gradient(circle, ${rarityColor}50 0%, transparent 70%)`,
 				}}

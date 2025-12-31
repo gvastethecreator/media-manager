@@ -1,9 +1,9 @@
 import express from 'express';
 import { getDatabaseInfo } from '@/lib/drizzle';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { circuitBreakerRegistry } from '@/lib/system/circuit-breaker';
 import { reindexMonitor } from '@/lib/system/reindex-monitor';
 import { getSystemStats } from '../services/stats.service';
-import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	createDefaultSettingsData,
 	getNavigationData,

@@ -4,15 +4,15 @@
  * @description Proporciona acceso centralizado a la configuración de thumbnails desde procesadores
  */
 
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	type ThumbnailAdvancedConfig,
-	type EntityThumbnailConfig,
+	calculateRetryDelay,
 	DEFAULT_THUMBNAIL_ADVANCED_CONFIG,
+	type EntityThumbnailConfig,
 	getEntityThumbnailConfig,
 	shouldUseFallback,
-	calculateRetryDelay,
+	type ThumbnailAdvancedConfig,
 } from '@/types/thumbnails-advanced.config';
-import { serverLogger } from '@/lib/logger/server-logger';
 
 /**
  * 🔧 Servicio singleton para configuración de thumbnails
@@ -55,11 +55,7 @@ class ThumbnailConfigService {
 	 * Calcular delay de reintento
 	 */
 	calculateRetryDelay(attemptNumber: number): number {
-		return calculateRetryDelay(
-			this.config.retry.retryDelay,
-			attemptNumber,
-			this.config.retry.exponentialBackoff
-		);
+		return calculateRetryDelay(this.config.retry.retryDelay, attemptNumber, this.config.retry.exponentialBackoff);
 	}
 
 	/**

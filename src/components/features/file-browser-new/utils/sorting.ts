@@ -3,8 +3,7 @@
  * @module file-browser-new/utils/sorting
  */
 
-import type { BrowserItem } from '../types';
-import type { SortOption } from '../types';
+import type { BrowserItem, SortOption } from '../types';
 
 /**
  * Obtiene valor de un campo para ordenamiento
@@ -66,7 +65,7 @@ function compareValues(a: unknown, b: unknown, direction: 'asc' | 'desc'): numbe
  * Ordena items por un criterio único
  */
 export function sortBySingle(items: BrowserItem[], sort: SortOption): BrowserItem[] {
-	if (!items.length || !sort.field) return items;
+	if (!(items.length && sort.field)) return items;
 
 	return [...items].sort((a, b) => {
 		const aVal = getFieldValue(a, sort.field);
@@ -79,7 +78,7 @@ export function sortBySingle(items: BrowserItem[], sort: SortOption): BrowserIte
  * Ordena items por múltiples criterios
  */
 export function sortByMultiple(items: BrowserItem[], sorts: SortOption[]): BrowserItem[] {
-	if (!items.length || !sorts.length) return items;
+	if (!(items.length && sorts.length)) return items;
 
 	return [...items].sort((a, b) => {
 		for (const sort of sorts) {

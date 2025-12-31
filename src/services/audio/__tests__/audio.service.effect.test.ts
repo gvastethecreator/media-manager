@@ -121,7 +121,7 @@ describe('AudioService - CRUD Operations', () => {
 				isArchived: false,
 				duration: 180,
 				bitrate: 320_000,
-				sampleRate: 44100,
+				sampleRate: 44_100,
 				channels: 2,
 				format: 'mp3',
 				codec: null,
@@ -628,8 +628,8 @@ describe('AudioService - Stats Operations', () => {
 	describe('getFormatStats', () => {
 		it('debería calcular estadísticas con audios', async () => {
 			const folder = await createTestFolder();
-			await createTestAudio(folder.id, { size: 5_000_000, duration: 180, bitrate: 320_000, sampleRate: 44100 });
-			await createTestAudio(folder.id, { size: 3_000_000, duration: 120, bitrate: 256_000, sampleRate: 48000 });
+			await createTestAudio(folder.id, { size: 5_000_000, duration: 180, bitrate: 320_000, sampleRate: 44_100 });
+			await createTestAudio(folder.id, { size: 3_000_000, duration: 120, bitrate: 256_000, sampleRate: 48_000 });
 
 			const stats = await expectSuccess(AudioService.getFormatStats());
 
@@ -654,14 +654,14 @@ describe('AudioService - Stats Operations', () => {
 
 		it('debería calcular promedios correctamente', async () => {
 			const folder = await createTestFolder();
-			await createTestAudio(folder.id, { duration: 100, bitrate: 100_000, sampleRate: 44100 });
-			await createTestAudio(folder.id, { duration: 200, bitrate: 200_000, sampleRate: 48000 });
+			await createTestAudio(folder.id, { duration: 100, bitrate: 100_000, sampleRate: 44_100 });
+			await createTestAudio(folder.id, { duration: 200, bitrate: 200_000, sampleRate: 48_000 });
 
 			const stats = await expectSuccess(AudioService.getFormatStats());
 
 			expect(stats[0].avgDuration).toBe(150); // (100 + 200) / 2
 			expect(stats[0].avgBitrate).toBe(150_000); // (100k + 200k) / 2
-			expect(stats[0].avgSampleRate).toBe(46050); // (44.1k + 48k) / 2
+			expect(stats[0].avgSampleRate).toBe(46_050); // (44.1k + 48k) / 2
 		});
 	});
 });

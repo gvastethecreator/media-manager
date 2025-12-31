@@ -322,13 +322,13 @@ const FoldersSettings = memo(function FoldersSettings() {
 					{/* Estadísticas generales mejoradas */}
 					<div data-testid="folders-stats">
 						{isStatsLoading ? (
-							<div className="rounded-sm border-none bg-muted/30 p-4 text-muted-foreground text-sm">
+							<div className="rounded-dt-md border-none bg-muted/30 p-4 text-muted-foreground text-sm shadow-sm">
 								Cargando estadísticas…
 							</div>
 						) : generalStats ? (
 							<FoldersStats stats={generalStats} />
 						) : (
-							<div className="rounded-sm border-none bg-muted/30 p-4 text-muted-foreground text-sm">
+							<div className="rounded-dt-md border-none bg-muted/30 p-4 text-muted-foreground text-sm shadow-sm">
 								Sin estadísticas disponibles
 							</div>
 						)}

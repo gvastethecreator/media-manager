@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from 'react';
 import { PerformanceMetricsPanel } from '@/components/debug/performance-metrics-panel';
-import { FileBrowser, type BrowserItem } from '@/components/features/file-browser-new';
+import { type BrowserItem, FileBrowser } from '@/components/features/file-browser-new';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDetailsPanel } from '@/store/details-panel.store';

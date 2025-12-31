@@ -47,11 +47,78 @@ const config: Config = {
 					DEFAULT: 'hsl(var(--card))',
 					foreground: 'hsl(var(--card-foreground))',
 				},
+				// Design Tokens v2 - Semantic colors
+				'dt-primary': {
+					50: 'var(--dt-primary-50)',
+					100: 'var(--dt-primary-100)',
+					200: 'var(--dt-primary-200)',
+					300: 'var(--dt-primary-300)',
+					400: 'var(--dt-primary-400)',
+					500: 'var(--dt-primary-500)',
+					600: 'var(--dt-primary-600)',
+					700: 'var(--dt-primary-700)',
+					800: 'var(--dt-primary-800)',
+					900: 'var(--dt-primary-900)',
+				},
+				'dt-success': {
+					50: 'var(--dt-success-50)',
+					500: 'var(--dt-success-500)',
+					600: 'var(--dt-success-600)',
+				},
+				'dt-warning': {
+					50: 'var(--dt-warning-50)',
+					500: 'var(--dt-warning-500)',
+					600: 'var(--dt-warning-600)',
+				},
+				'dt-danger': {
+					50: 'var(--dt-danger-50)',
+					500: 'var(--dt-danger-500)',
+					600: 'var(--dt-danger-600)',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
 				md: 'calc(var(--radius) - 2px)',
 				sm: 'calc(var(--radius) - 4px)',
+				// Design Tokens v2
+				'dt-xs': 'var(--dt-radius-xs)',
+				'dt-sm': 'var(--dt-radius-sm)',
+				'dt-md': 'var(--dt-radius-md)',
+				'dt-lg': 'var(--dt-radius-lg)',
+				'dt-xl': 'var(--dt-radius-xl)',
+			},
+			borderWidth: {
+				// Design Tokens v2
+				dt: 'var(--dt-border-width)',
+				'dt-thin': 'var(--dt-border-width-thin)',
+			},
+			boxShadow: {
+				// Design Tokens v2 - Elevations
+				'dt-0': 'var(--dt-shadow-0)',
+				'dt-1': 'var(--dt-shadow-1)',
+				'dt-2': 'var(--dt-shadow-2)',
+				'dt-3': 'var(--dt-shadow-3)',
+				'dt-4': 'var(--dt-shadow-4)',
+				// Inset shadows
+				'dt-inset-1': 'var(--dt-inset-1)',
+				'dt-inset-2': 'var(--dt-inset-2)',
+				// Focus ring
+				'dt-focus': 'var(--dt-focus-ring)',
+				'dt-focus-error': 'var(--dt-focus-ring-error)',
+			},
+			transitionDuration: {
+				// Design Tokens v2
+				'dt-instant': 'var(--dt-duration-instant)',
+				'dt-fast': 'var(--dt-duration-fast)',
+				'dt-normal': 'var(--dt-duration-normal)',
+				'dt-slow': 'var(--dt-duration-slow)',
+			},
+			transitionTimingFunction: {
+				// Design Tokens v2
+				'dt-default': 'var(--dt-ease-default)',
+				'dt-in': 'var(--dt-ease-in)',
+				'dt-out': 'var(--dt-ease-out)',
+				'dt-bounce': 'var(--dt-ease-bounce)',
 			},
 			keyframes: {
 				'accordion-down': {

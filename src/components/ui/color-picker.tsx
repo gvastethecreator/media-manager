@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { PRESET_COLORS_HEX, DEFAULT_ENTITY_COLOR, DEFAULT_LIGHT_COLOR } from '@/lib/styles/color-tokens';
+import { DEFAULT_ENTITY_COLOR, DEFAULT_LIGHT_COLOR, PRESET_COLORS_HEX } from '@/lib/styles/color-tokens';
 import { cn } from '@/lib/utils';
 
 // Paleta de colores predefinidos - importada de tokens centralizados
@@ -18,7 +18,13 @@ interface ColorPickerProps {
 	showLabel?: boolean;
 }
 
-export function ColorPicker({ value = DEFAULT_ENTITY_COLOR, onChange, className, compact = false, showLabel = true }: ColorPickerProps) {
+export function ColorPicker({
+	value = DEFAULT_ENTITY_COLOR,
+	onChange,
+	className,
+	compact = false,
+	showLabel = true,
+}: ColorPickerProps) {
 	const [open, setOpen] = useState(false);
 	const [currentColor, setCurrentColor] = useState(value);
 

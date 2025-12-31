@@ -2,12 +2,13 @@ import { Search } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useImageStore } from '@/store/entities/image';
 import { useImageViewer } from '@/store/image-viewer.store';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -15,7 +16,6 @@ import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { ImageWithStats } from '@/types/entities/image';
 import { isImageWithStats } from '@/types/entity-guards';
 import type { ViewProps } from '../types';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 interface SearchFilters {
 	query: string;
@@ -72,7 +72,7 @@ export function SearchView(_props: ViewProps) {
 		(item: BrowserItem) => {
 			// ✅ Usar directamente las imágenes tipadas del store con EntityWithStats
 			const entity = item.raw as unknown as AnyEntityWithStats | undefined;
-			if (!entity || !isImageWithStats(entity)) {
+			if (!(entity && isImageWithStats(entity))) {
 				return;
 			}
 

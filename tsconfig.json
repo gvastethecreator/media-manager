@@ -52,6 +52,8 @@
     "node_modules",
     "dist",
     "build",
+    "src/components/deprecated/**",
+    "src/components/test/**",
     "src/components/cards/examples/**",
     "src/services/file-entity-mapper/file-entity-mapper.service.backup.ts",
     "src/services/file-entity-mapper/file-entity-mapper.service.clean.ts",

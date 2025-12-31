@@ -1,6 +1,6 @@
 import '@testing-library/jest-dom/vitest';
-import { afterEach, vi } from 'vitest';
 import { cleanup } from '@testing-library/react';
+import { afterEach, vi } from 'vitest';
 
 // Asegurar flags de entorno para ejecución de tests unitarios
 // - Fuerza detección de "test" en módulos compartidos (p.ej. Drizzle)

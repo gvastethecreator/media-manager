@@ -4,7 +4,7 @@
  * @description Configura el runtime de Effect integrándose con el logger existente del proyecto
  */
 
-import { Effect, Logger, Runtime, Exit, Either } from 'effect';
+import { Effect, Either, Exit, Logger, Runtime } from 'effect';
 import { serverLogger } from '@/lib/logger/server-logger';
 
 /**
@@ -40,7 +40,7 @@ export const AppRuntime = Runtime.defaultRuntime;
 
 /**
  * Helper para ejecutar Effects como Promises usando el runtime del proyecto
- * 
+ *
  * @example
  * ```typescript
  * const result = await runPromise(
@@ -54,7 +54,7 @@ export const runPromise = <A, E>(effect: Effect.Effect<A, E, never>): Promise<A>
 /**
  * Helper para ejecutar Effects síncronamente usando el runtime del proyecto
  * ⚠️ IMPORTANTE: Solo usar con Effects que no contengan operaciones async
- * 
+ *
  * @example
  * ```typescript
  * const result = runSync(
@@ -67,11 +67,11 @@ export const runSync = <A, E>(effect: Effect.Effect<A, E, never>): A => Runtime.
 /**
  * Helper para ejecutar Effects con callback para el resultado
  * Útil para integración con código no-Effect
- * 
+ *
  * @example
  * ```typescript
  * import { Exit } from "effect";
- * 
+ *
  * runCallback(myEffect, (exit) => {
  *   if (Exit.isSuccess(exit)) {
  *     console.log('Success:', exit.value);
@@ -81,7 +81,10 @@ export const runSync = <A, E>(effect: Effect.Effect<A, E, never>): A => Runtime.
  * });
  * ```
  */
-export const runCallback = <A, E>(effect: Effect.Effect<A, E, never>, callback: (exit: Exit.Exit<A, E>) => void): void => {
+export const runCallback = <A, E>(
+	effect: Effect.Effect<A, E, never>,
+	callback: (exit: Exit.Exit<A, E>) => void
+): void => {
 	Runtime.runCallback(AppRuntime)(effect, {
 		onExit: callback,
 	});
@@ -90,11 +93,11 @@ export const runCallback = <A, E>(effect: Effect.Effect<A, E, never>, callback: 
 /**
  * Helper para ejecutar Effects y retornar un Either (Left = error, Right = success)
  * Útil cuando se quiere manejar el resultado sin lanzar excepciones
- * 
+ *
  * @example
  * ```typescript
  * import { Either } from "effect";
- * 
+ *
  * const result = await runPromiseEither(myEffect);
  * if (Either.isRight(result)) {
  *   console.log('Success:', result.right);

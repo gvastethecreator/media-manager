@@ -1,12 +1,11 @@
+import { and, eq } from 'drizzle-orm';
 import type { Request, Response } from 'express';
 import { Router } from 'express';
 import { z } from 'zod';
-import { and, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { wildcards, imageWildcards, images } from '@/lib/drizzle/schema/index';
-import { getWildcard, getWildcards } from '@/services/wildcard/wildcard.service';
-import { toWildcardWithStats } from '@/transformers/wildcard';
+import { images, imageWildcards, wildcards } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { getWildcard, getWildcards } from '@/services/wildcard/wildcard.service';
 
 const router = Router() as any;
 

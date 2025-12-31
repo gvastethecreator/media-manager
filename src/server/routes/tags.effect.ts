@@ -5,12 +5,12 @@
  * @created 2025-10-11 - Fase 1 Effect Implementation
  */
 
-import express from 'express';
+import { Schema } from '@effect/schema';
 import { Effect } from 'effect';
-import { effectHandler, runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import express from 'express';
+import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
 import { TagService, TagServiceLive } from '@/services/tag/tag.service.effect';
 import { TagCreate, TagUpdate } from '@/services/tag/tag-schemas';
-import { Schema } from '@effect/schema';
 
 const router = express.Router();
 

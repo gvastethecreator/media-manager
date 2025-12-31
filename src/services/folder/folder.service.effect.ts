@@ -5,23 +5,21 @@
  * @created 2025-10-11 - Fase 4 Effect Implementation
  */
 
-import { Effect, Context, Layer } from 'effect';
 import { Schema } from '@effect/schema';
-import { and, asc, count, desc, eq, like, or, sql, isNull } from 'drizzle-orm';
+import { and, asc, count, desc, eq, isNull, like, or, sql } from 'drizzle-orm';
+import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { folders } from '@/lib/drizzle/schema';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { Folder, FolderCreateInput, FolderUpdateInput } from '@/lib/effect/schemas/entities';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
+	FolderCircularReferenceError,
 	type FolderError,
+	FolderHasChildrenError,
+	FolderMaxDepthExceededError,
+	FolderNameConflict,
 	FolderNotFound,
 	FolderPathConflict,
-	FolderNameConflict,
-	FolderValidationError,
-	FolderHasChildrenError,
-	FolderHasContentError,
-	FolderCircularReferenceError,
-	FolderMaxDepthExceededError,
 	fromUnknownError,
 } from './folder-errors.effect';
 
@@ -140,7 +138,7 @@ const getRelationsCounts = (folderId: string): Effect.Effect<FolderCounts, Folde
 		const imageCount = 0;
 		const videoCount = 0;
 
-		logger.info(`✅ Conteos obtenidos:`, { childrenCount, imageCount, videoCount });
+		logger.info('✅ Conteos obtenidos:', { childrenCount, imageCount, videoCount });
 
 		return {
 			children: childrenCount,
@@ -292,16 +290,16 @@ const checkNoCircularReference = (folderId: string, newParentId: string | null):
 
 			if (result.length === 0) break;
 			currentId = result[0].parentId;
-		iterations++;
-	}
-});
+			iterations++;
+		}
+	});
 
 /**
  * Elimina una carpeta (función interna para uso en bulkDelete)
  */
 const deleteFolderInternal = (id: string, force = false): Effect.Effect<void, FolderError> =>
 	Effect.gen(function* () {
-		logger.info(`🗑️ Eliminando carpeta:`, { id, force });
+		logger.info('🗑️ Eliminando carpeta:', { id, force });
 
 		// Verificar que existe
 		const existingFolder = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
@@ -335,7 +333,7 @@ const deleteFolderInternal = (id: string, force = false): Effect.Effect<void, Fo
 			catch: (error: unknown) => fromUnknownError('delete:delete', error),
 		});
 
-		logger.info(`✅ Carpeta eliminada:`, { id });
+		logger.info('✅ Carpeta eliminada:', { id });
 	});
 
 // ============= Service Implementation =============
@@ -370,7 +368,7 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('getById:validation', error),
 				});
 
-				logger.info(`✅ Carpeta encontrada:`, { id: folder.id, name: folder.name });
+				logger.info('✅ Carpeta encontrada:', { id: folder.id, name: folder.name });
 
 				// Enriquecer con conteos
 				return yield* enrichFolderWithCounts(folder);
@@ -391,7 +389,7 @@ const FolderServiceLive = Layer.succeed(
 					orderDirection = 'asc',
 				} = options ?? {};
 
-				logger.info(`📋 Obteniendo carpetas:`, { search, onlyFavorites, parentId, limit, offset });
+				logger.info('📋 Obteniendo carpetas:', { search, onlyFavorites, parentId, limit, offset });
 
 				// Construir condiciones WHERE
 				const conditions: any[] = [];
@@ -466,7 +464,7 @@ const FolderServiceLive = Layer.succeed(
 		 */
 		create: (input: Schema.Schema.Type<typeof FolderCreateInput>) =>
 			Effect.gen(function* () {
-				logger.info(`➕ Creando carpeta:`, { name: input.name, parentId: input.parentId });
+				logger.info('➕ Creando carpeta:', { name: input.name, parentId: input.parentId });
 
 				// Validar input
 				const validatedInput = yield* Effect.try({
@@ -515,7 +513,7 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('create:validation:result', error),
 				});
 
-				logger.info(`✅ Carpeta creada:`, { id: createdFolder.id, name: createdFolder.name });
+				logger.info('✅ Carpeta creada:', { id: createdFolder.id, name: createdFolder.name });
 
 				return yield* enrichFolderWithCounts(createdFolder);
 			}),
@@ -525,7 +523,7 @@ const FolderServiceLive = Layer.succeed(
 		 */
 		update: (id: string, input: Schema.Schema.Type<typeof FolderUpdateInput>) =>
 			Effect.gen(function* () {
-				logger.info(`🔧 Actualizando carpeta:`, { id, updates: input });
+				logger.info('🔧 Actualizando carpeta:', { id, updates: input });
 
 				// Verificar que existe
 				const existingFolder = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
@@ -591,50 +589,51 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('update:validation:result', error),
 				});
 
-				logger.info(`✅ Carpeta actualizada:`, { id: updatedFolder.id, name: updatedFolder.name });
+				logger.info('✅ Carpeta actualizada:', { id: updatedFolder.id, name: updatedFolder.name });
 
 				return yield* enrichFolderWithCounts(updatedFolder);
 			}),
 
-	/**
-	 * Elimina una carpeta
-	 */
-	delete: (id: string, force = false) => deleteFolderInternal(id, force),
-
-	/**
-	 * Elimina múltiples carpetas
-	 */
-	bulkDelete: (ids: string[], force = false): Effect.Effect<BulkDeleteResult, FolderError> =>
-		Effect.gen(function* () {
-			logger.info(`🗑️ Eliminación masiva:`, { count: ids.length, force });
-
-			const successful: string[] = [];
-			const failed: Array<{ id: string; error: string }> = [];
-
-			for (const id of ids) {
-				const result = yield* Effect.either(deleteFolderInternal(id, force));				if (result._tag === 'Right') {
-					successful.push(id);
-				} else {
-					const error = result.left;
-					failed.push({
-						id,
-						error: 'displayMessage' in error ? (error as any).displayMessage : String(error),
-					});
-				}
-			}
-
-			logger.info(`✅ Eliminación masiva completada:`, {
-				successful: successful.length,
-				failed: failed.length,
-			});
-
-			return { successful, failed };
-		}),		/**
-		 * Obtiene las subcarpetas de una carpeta (o carpetas raíz si parentId es null)
+		/**
+		 * Elimina una carpeta
 		 */
+		delete: (id: string, force = false) => deleteFolderInternal(id, force),
+
+		/**
+		 * Elimina múltiples carpetas
+		 */
+		bulkDelete: (ids: string[], force = false): Effect.Effect<BulkDeleteResult, FolderError> =>
+			Effect.gen(function* () {
+				logger.info('🗑️ Eliminación masiva:', { count: ids.length, force });
+
+				const successful: string[] = [];
+				const failed: Array<{ id: string; error: string }> = [];
+
+				for (const id of ids) {
+					const result = yield* Effect.either(deleteFolderInternal(id, force));
+					if (result._tag === 'Right') {
+						successful.push(id);
+					} else {
+						const error = result.left;
+						failed.push({
+							id,
+							error: 'displayMessage' in error ? (error as any).displayMessage : String(error),
+						});
+					}
+				}
+
+				logger.info('✅ Eliminación masiva completada:', {
+					successful: successful.length,
+					failed: failed.length,
+				});
+
+				return { successful, failed };
+			}) /**
+		 * Obtiene las subcarpetas de una carpeta (o carpetas raíz si parentId es null)
+		 */,
 		getChildren: (parentId: string | null) =>
 			Effect.gen(function* () {
-				logger.info(`👶 Obteniendo hijos de:`, { parentId: parentId ?? 'ROOT' });
+				logger.info('👶 Obteniendo hijos de:', { parentId: parentId ?? 'ROOT' });
 
 				const whereClause = parentId === null ? isNull(folders.parentId) : eq(folders.parentId, parentId);
 
@@ -712,7 +711,7 @@ const FolderServiceLive = Layer.succeed(
 		 */
 		moveTo: (id: string, newParentId: string | null) =>
 			Effect.gen(function* () {
-				logger.info(`🚚 Moviendo carpeta:`, { id, newParentId: newParentId ?? 'ROOT' });
+				logger.info('🚚 Moviendo carpeta:', { id, newParentId: newParentId ?? 'ROOT' });
 
 				// Verificar que la carpeta existe
 				const existingFolder = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
@@ -759,7 +758,7 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('moveTo:validation', error),
 				});
 
-				logger.info(`✅ Carpeta movida:`, { id: movedFolder.id, newParentId: movedFolder.parentId });
+				logger.info('✅ Carpeta movida:', { id: movedFolder.id, newParentId: movedFolder.parentId });
 
 				return yield* enrichFolderWithCounts(movedFolder);
 			}),
@@ -786,7 +785,7 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('getByPath:validation', error),
 				});
 
-				logger.info(`✅ Carpeta encontrada por path:`, { id: folder.id, path: folder.path });
+				logger.info('✅ Carpeta encontrada por path:', { id: folder.id, path: folder.path });
 
 				return yield* enrichFolderWithCounts(folder);
 			}),
@@ -826,7 +825,7 @@ const FolderServiceLive = Layer.succeed(
 					catch: (error: unknown) => fromUnknownError('toggleFavorite:validation', error),
 				});
 
-				logger.info(`✅ Favorito alternado:`, { id: updatedFolder.id, isFavorite: updatedFolder.isFavorite });
+				logger.info('✅ Favorito alternado:', { id: updatedFolder.id, isFavorite: updatedFolder.isFavorite });
 
 				return yield* enrichFolderWithCounts(updatedFolder);
 			}),

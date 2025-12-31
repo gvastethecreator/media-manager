@@ -1,7 +1,7 @@
 /**
  * @file Servicio estructurado de reindexado de carpetas
  * @description Implementa el flujo completo de reindexado en fases separadas y ordenadas
- * 
+ *
  * Las fases están extraídas en módulos separados para mejor mantenibilidad.
  * Ver carpeta reindex-phases/ para la implementación de cada fase.
  */
@@ -9,7 +9,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emitProgress } from '@/lib/server/events.server';
 import type { ProcessStatus } from '@/types/folders';
-import type { ReindexAnalysisResult, ReindexOptions, ReindexPhaseResult } from './folder-reindex-types';
+import type { ReindexOptions, ReindexPhaseResult } from './folder-reindex-types';
 
 // Importar fases desde módulos separados
 import {

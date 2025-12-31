@@ -1,8 +1,15 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
-@import './themes.css';
-@import '../styles/tokens.css';
-@import '../styles/card-animations.css';
+@import "tailwindcss";
+@import "tw-animate-css";
+@import "./themes.css";
+@import "../styles/tokens.css";
+@import "../styles/design-tokens.css";
+@import "../styles/card-animations.css";
+@import "../styles/utilities/border-pulse.css";
+@import "../styles/utilities/component-recipes.css";
+@import "../styles/utilities/animations.css";
+@import "../styles/utilities/transitions.css";
+@import "../styles/utilities/typography.css";
+@import "../styles/utilities/theme-system.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -48,7 +55,8 @@
 	--animate-accordion-down: accordion-down 0.2s ease-out;
 	--animate-accordion-up: accordion-up 0.2s ease-out;
 	--animate-shine: shine var(--duration, 3s) infinite linear;
-	--animate-border-beam: border-beam calc(var(--duration, 3) * 1s) infinite linear;
+	--animate-border-beam: border-beam calc(var(--duration, 3) * 1s) infinite
+		linear;
 	--animate-meteor: meteor 5s linear infinite;
 	--animate-shiny-text: shiny-text 8s infinite;
 	--animate-gradient-shift: gradient-shift 3s ease infinite;
@@ -112,7 +120,6 @@
 	}
 
 	@keyframes shiny-text {
-
 		0%,
 		90%,
 		100% {
@@ -150,7 +157,6 @@
 	}
 
 	@keyframes iridescent {
-
 		0%,
 		100% {
 			filter: hue-rotate(0deg) saturate(100%);
@@ -309,13 +315,15 @@ html[data-theme="dark"] {
 	isolation: isolate;
 
 	&::before {
-		content: '';
+		content: "";
 		position: absolute;
 		inset: -1px;
 		border-radius: inherit;
-		background: radial-gradient(var(--glow-size) circle at var(--mouse-x) var(--mouse-y),
-				var(--glow-color),
-				transparent 50%);
+		background: radial-gradient(
+			var(--glow-size) circle at var(--mouse-x) var(--mouse-y),
+			var(--glow-color),
+			transparent 50%
+		);
 		opacity: 0;
 		transition: opacity 0.2s ease;
 		z-index: -1;
@@ -323,13 +331,15 @@ html[data-theme="dark"] {
 	}
 
 	&::after {
-		content: '';
+		content: "";
 		position: absolute;
 		inset: -1px;
 		border-radius: inherit;
-		background: radial-gradient(var(--glow-size) circle at var(--mouse-x) var(--mouse-y),
-				var(--glow-color),
-				transparent 50%);
+		background: radial-gradient(
+			var(--glow-size) circle at var(--mouse-x) var(--mouse-y),
+			var(--glow-color),
+			transparent 50%
+		);
 		opacity: 0;
 		transition: opacity 0.2s ease;
 		z-index: -1;
@@ -366,23 +376,23 @@ html[data-theme="dark"] {
 	}
 
 	/* Estado seleccionado */
-	&[data-selected='true']::before {
+	&[data-selected="true"]::before {
 		--glow-color: rgba(var(--primary), 0.35);
 		opacity: 1;
 	}
 
-	&[data-selected='true']::after {
+	&[data-selected="true"]::after {
 		--glow-color: rgba(var(--primary), 0.35);
 		opacity: 1;
 	}
 
 	/* Estado marcado */
-	&[data-marked='true']::before {
+	&[data-marked="true"]::before {
 		--glow-color: rgba(var(--warning), 0.35);
 		opacity: 1;
 	}
 
-	&[data-marked='true']::after {
+	&[data-marked="true"]::after {
 		--glow-color: rgba(var(--warning), 0.35);
 		opacity: 1;
 	}
@@ -404,7 +414,6 @@ html[data-theme="dark"] {
 
 /* Estilos para la explosión 3D de tarjetas */
 @layer card-exploder {
-
 	/* Variables de transformación */
 	:root {
 		--power: cubic-bezier(0.34, 1.56, 0.64, 1);
@@ -431,7 +440,7 @@ html[data-theme="dark"] {
 	}
 
 	/* Cuando la tarjeta NO está explotada */
-	[data-exploded='false'] .explodable-card {
+	[data-exploded="false"] .explodable-card {
 		transform: translate3d(0, 0, 0) rotateX(0deg) rotateY(0deg) rotateX(0deg);
 		transition: transform 1s 0.5s var(--power);
 
@@ -459,8 +468,9 @@ html[data-theme="dark"] {
 	}
 
 	/* Cuando la tarjeta ESTÁ explotada */
-	[data-exploded='true'] .explodable-card {
-		transform: translate3d(0, 0, 40px) rotateX(calc(var(--x1, -20) * 1deg)) rotateY(calc(var(--y1, 35) * 1deg)) rotateX(calc(var(--x2, 30) * 1deg));
+	[data-exploded="true"] .explodable-card {
+		transform: translate3d(0, 0, 40px) rotateX(calc(var(--x1, -20) * 1deg))
+			rotateY(calc(var(--y1, 35) * 1deg)) rotateX(calc(var(--x2, 30) * 1deg));
 		transition: transform 1s var(--power);
 
 		.shadow-layer {
@@ -487,25 +497,27 @@ html[data-theme="dark"] {
 		}
 
 		.exploded-layer {
-			translate: calc(var(--tx, 0.5) * 1rem) calc(var(--ty, -0.5) * 1rem) calc(var(--step, 3) * 1rem);
+			translate: calc(var(--tx, 0.5) * 1rem) calc(var(--ty, -0.5) * 1rem)
+				calc(var(--step, 3) * 1rem);
 			transition: translate 1s 0.5s var(--power);
 		}
 	}
 
 	/* Cuando una capa específica está activa */
-	[data-exploded='true'] .explodable-card {
-		[data-layer-active='true'] {
+	[data-exploded="true"] .explodable-card {
+		[data-layer-active="true"] {
 			z-index: 10;
 
 			&::after {
-				content: '';
+				content: "";
 				position: absolute;
 				inset: -1px;
 				border: 2px solid var(--color-primary);
 				border-radius: inherit;
 				pointer-events: none;
 				z-index: 100;
-				box-shadow: 0 0 0 4px color-mix(in oklch, var(--color-primary), transparent 80%);
+				box-shadow: 0 0 0 4px
+					color-mix(in oklch, var(--color-primary), transparent 80%);
 			}
 		}
 	}
@@ -600,7 +612,7 @@ html[data-theme="dark"] {
 }
 
 .nav-tag::after {
-	content: '';
+	content: "";
 	position: absolute;
 	left: 0;
 	bottom: 0;
@@ -622,7 +634,7 @@ html[data-theme="dark"] {
 }
 
 .nav-category-item::before {
-	content: '';
+	content: "";
 	position: absolute;
 	top: 0;
 	left: 0;
@@ -650,7 +662,7 @@ html[data-theme="dark"] {
 }
 
 .nav-category-child::before {
-	content: '';
+	content: "";
 	position: absolute;
 	left: 0;
 	top: 50%;
@@ -750,19 +762,23 @@ html[data-theme="dark"] {
 
 /* Estilo para el borde brillante en hover */
 .card-container::before {
-	content: '';
+	content: "";
 	position: absolute;
 	inset: 0;
 	z-index: -1;
 	border-radius: 4.75%;
 	padding: 2px;
-	background: linear-gradient(135deg,
-			transparent 0%,
-			rgba(255, 255, 255, 0.1) 45%,
-			rgba(255, 255, 255, 0.6) 50%,
-			rgba(255, 255, 255, 0.1) 55%,
-			transparent 100%);
-	-webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+	background: linear-gradient(
+		135deg,
+		transparent 0%,
+		rgba(255, 255, 255, 0.1) 45%,
+		rgba(255, 255, 255, 0.6) 50%,
+		rgba(255, 255, 255, 0.1) 55%,
+		transparent 100%
+	);
+	-webkit-mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
 	-webkit-mask-composite: xor;
 	mask-composite: exclude;
 	opacity: 0;
@@ -775,7 +791,6 @@ html[data-theme="dark"] {
 
 /* Soporte para dispositivos con preferencia a reducción de movimiento */
 @media (prefers-reduced-motion) {
-
 	.card-container,
 	.card-container::before,
 	[class*="animate-"] {

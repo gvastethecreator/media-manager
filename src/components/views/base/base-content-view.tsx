@@ -48,7 +48,7 @@ const BaseContentView: React.FC<BaseContentViewProps> = ({
 			)}
 
 			{/* Contenido principal */}
-			<div className="min-h-0 flex-1 flex flex-col">{children}</div>
+			<div className="flex min-h-0 flex-1 flex-col">{children}</div>
 		</div>
 	);
 };

@@ -1,10 +1,10 @@
 import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
-import { serverLogger } from '@/lib/logger/server-logger';
 import express, { type Request, type Response } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
 import { concepts, imageConcepts, images } from '@/lib/drizzle/schema/index';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 
@@ -207,7 +207,7 @@ router.get('/:id/recent-images', async (req, res) => {
 			.orderBy(desc(images.updatedAt))
 			.limit(limit);
 
-		const thumbnails = recentImages.map((img) => ({
+		const thumbnails = recentImages.map((img: { id: string; name: string }) => ({
 			id: img.id,
 			name: img.name,
 			thumbnailUrl: `/api/thumbnails/${img.id}`,

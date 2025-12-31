@@ -1,8 +1,8 @@
 import { AlertCircle, RefreshCw } from 'lucide-react';
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { ErrorBoundary } from './error-boundary';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { ErrorBoundary } from './error-boundary';
 
 /**
  * Componente de fallback para errores globales

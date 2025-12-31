@@ -37,12 +37,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { motion } from '@/components/ui/motion-shim';
 import { Separator } from '@/components/ui/separator';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
 import { deleteFile, getFileAsDataUrl } from '@/services/file/file.service';
 import { useSelectionStore } from '@/store/selection.store';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 export interface FileBrowserToolbarProps {
 	/** Función para refrescar/recargar los datos */
@@ -477,7 +477,7 @@ export const FileBrowserToolbar = memo<FileBrowserToolbarProps>(function FileBro
 			{/* Lado izquierdo: Búsqueda + Acciones de selección */}
 			<div className="flex items-center gap-2">
 				<div className="relative">
-					<Search className="-translate-y-1/2 absolute top-1/2 left-2 h-4 w-4 text-muted-foreground" />
+					<Search className="absolute top-1/2 left-2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 					<Input
 						className="h-8 w-64 pl-8"
 						onChange={(e) => setSearchQuery(e.target.value)}
@@ -487,7 +487,7 @@ export const FileBrowserToolbar = memo<FileBrowserToolbarProps>(function FileBro
 					/>
 					{searchQuery && (
 						<Button
-							className="-translate-y-1/2 absolute top-1/2 right-1 h-6 w-6"
+							className="absolute top-1/2 right-1 h-6 w-6 -translate-y-1/2"
 							onClick={() => setSearchQuery('')}
 							size="icon"
 							variant="ghost"

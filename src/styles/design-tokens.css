@@ -1,0 +1,287 @@
+/**
+ * 🎨 DESIGN TOKENS v2.0
+ * ====================
+ * Sistema de diseño unificado para Image Manager
+ *
+ * Convenciones:
+ * - Prefijo --dt- para "design token"
+ * - Valores en OKLCH para consistencia
+ * - Fallbacks HSL para compatibilidad
+ *
+ * @see docs/UX-UI-AUDIT-2025-12-30.md
+ */
+
+:root {
+	/* =====================================================
+   * 🎨 PALETA RAMP - PRIMARY (Azul base)
+   * ===================================================== */
+	--dt-primary-50: oklch(0.97 0.02 240);
+	--dt-primary-100: oklch(0.93 0.04 240);
+	--dt-primary-200: oklch(0.86 0.08 240);
+	--dt-primary-300: oklch(0.76 0.12 240);
+	--dt-primary-400: oklch(0.65 0.16 240);
+	--dt-primary-500: oklch(0.55 0.18 240); /* Base */
+	--dt-primary-600: oklch(0.48 0.16 240);
+	--dt-primary-700: oklch(0.4 0.14 240);
+	--dt-primary-800: oklch(0.32 0.12 240);
+	--dt-primary-900: oklch(0.24 0.1 240);
+	--dt-primary-950: oklch(0.16 0.08 240);
+
+	/* =====================================================
+   * 🎨 PALETA RAMP - NEUTRAL (Grises)
+   * ===================================================== */
+	--dt-neutral-50: oklch(0.98 0.002 0);
+	--dt-neutral-100: oklch(0.96 0.002 0);
+	--dt-neutral-200: oklch(0.92 0.002 0);
+	--dt-neutral-300: oklch(0.87 0.002 0);
+	--dt-neutral-400: oklch(0.7 0.002 0);
+	--dt-neutral-500: oklch(0.55 0.002 0);
+	--dt-neutral-600: oklch(0.45 0.002 0);
+	--dt-neutral-700: oklch(0.35 0.002 0);
+	--dt-neutral-800: oklch(0.25 0.002 0);
+	--dt-neutral-900: oklch(0.18 0.002 0);
+	--dt-neutral-950: oklch(0.12 0.002 0);
+
+	/* =====================================================
+   * 🎨 PALETA RAMP - SUCCESS (Verde)
+   * ===================================================== */
+	--dt-success-50: oklch(0.97 0.03 145);
+	--dt-success-100: oklch(0.93 0.06 145);
+	--dt-success-200: oklch(0.86 0.1 145);
+	--dt-success-300: oklch(0.76 0.14 145);
+	--dt-success-400: oklch(0.68 0.17 145);
+	--dt-success-500: oklch(0.6 0.18 145); /* Base */
+	--dt-success-600: oklch(0.52 0.16 145);
+	--dt-success-700: oklch(0.44 0.14 145);
+	--dt-success-800: oklch(0.36 0.12 145);
+	--dt-success-900: oklch(0.28 0.1 145);
+
+	/* =====================================================
+   * 🎨 PALETA RAMP - WARNING (Ámbar)
+   * ===================================================== */
+	--dt-warning-50: oklch(0.98 0.04 85);
+	--dt-warning-100: oklch(0.94 0.08 85);
+	--dt-warning-200: oklch(0.88 0.14 85);
+	--dt-warning-300: oklch(0.82 0.18 85);
+	--dt-warning-400: oklch(0.76 0.18 85);
+	--dt-warning-500: oklch(0.7 0.17 85); /* Base */
+	--dt-warning-600: oklch(0.62 0.15 85);
+	--dt-warning-700: oklch(0.52 0.13 85);
+	--dt-warning-800: oklch(0.42 0.11 85);
+	--dt-warning-900: oklch(0.32 0.09 85);
+
+	/* =====================================================
+   * 🎨 PALETA RAMP - DANGER (Rojo)
+   * ===================================================== */
+	--dt-danger-50: oklch(0.97 0.03 25);
+	--dt-danger-100: oklch(0.93 0.06 25);
+	--dt-danger-200: oklch(0.86 0.12 25);
+	--dt-danger-300: oklch(0.76 0.18 25);
+	--dt-danger-400: oklch(0.68 0.22 25);
+	--dt-danger-500: oklch(0.6 0.24 25); /* Base */
+	--dt-danger-600: oklch(0.52 0.22 25);
+	--dt-danger-700: oklch(0.44 0.18 25);
+	--dt-danger-800: oklch(0.36 0.14 25);
+	--dt-danger-900: oklch(0.28 0.1 25);
+
+	/* =====================================================
+   * 🌈 GRADIENTES RECETA
+   * Formato: from -> to (2-3 stops max)
+   * ===================================================== */
+
+	/* Solid: Mismo color, diferente luminosidad */
+	--dt-g-primary-solid: linear-gradient(
+		135deg,
+		var(--dt-primary-400) 0%,
+		var(--dt-primary-500) 50%,
+		var(--dt-primary-600) 100%
+	);
+
+	--dt-g-secondary-solid: linear-gradient(
+		135deg,
+		var(--dt-neutral-200) 0%,
+		var(--dt-neutral-300) 100%
+	);
+
+	--dt-g-success-solid: linear-gradient(
+		135deg,
+		var(--dt-success-400) 0%,
+		var(--dt-success-500) 50%,
+		var(--dt-success-600) 100%
+	);
+
+	--dt-g-warning-solid: linear-gradient(
+		135deg,
+		var(--dt-warning-400) 0%,
+		var(--dt-warning-500) 50%,
+		var(--dt-warning-600) 100%
+	);
+
+	--dt-g-danger-solid: linear-gradient(
+		135deg,
+		var(--dt-danger-400) 0%,
+		var(--dt-danger-500) 50%,
+		var(--dt-danger-600) 100%
+	);
+
+	/* Soft: Muy sutil, para superficies */
+	--dt-g-primary-soft: linear-gradient(
+		135deg,
+		oklch(0.97 0.01 240 / 0.8) 0%,
+		oklch(0.95 0.02 240 / 0.9) 100%
+	);
+
+	--dt-g-surface-soft: linear-gradient(
+		180deg,
+		oklch(1 0 0 / 0.02) 0%,
+		oklch(0 0 0 / 0.02) 100%
+	);
+
+	/* Glass: Para overlays y modales */
+	--dt-g-glass: linear-gradient(
+		135deg,
+		oklch(1 0 0 / 0.1) 0%,
+		oklch(1 0 0 / 0.05) 100%
+	);
+
+	/* =====================================================
+   * 🌑 SOMBRAS POR ELEVACIÓN
+   * Outset: elevación visual
+   * Inset: feedback táctil
+   * ===================================================== */
+
+	/* Base shadow color */
+	--dt-shadow-color: oklch(0 0 0 / 0.08);
+	--dt-shadow-color-strong: oklch(0 0 0 / 0.15);
+
+	/* Elevación 0: Sin sombra (pressed/active) */
+	--dt-shadow-0: none;
+
+	/* Elevación 1: Sutil (inputs, botones default) */
+	--dt-shadow-1: 0 1px 2px oklch(0 0 0 / 0.05), 0 1px 3px oklch(0 0 0 / 0.08);
+
+	/* Elevación 2: Media (cards, dropdowns) */
+	--dt-shadow-2: 0 2px 4px oklch(0 0 0 / 0.04), 0 4px 8px oklch(0 0 0 / 0.08);
+
+	/* Elevación 3: Alta (popovers, tooltips) */
+	--dt-shadow-3:
+		0 4px 8px oklch(0 0 0 / 0.04), 0 8px 16px oklch(0 0 0 / 0.08), 0 16px 32px
+		oklch(0 0 0 / 0.04);
+
+	/* Elevación 4: Máxima (modales) */
+	--dt-shadow-4:
+		0 8px 16px oklch(0 0 0 / 0.06), 0 16px 32px oklch(0 0 0 / 0.1), 0 32px 64px
+		oklch(0 0 0 / 0.06);
+
+	/* Inset shadows (presión/tacto) */
+	--dt-inset-1: inset 0 1px 2px oklch(0 0 0 / 0.08);
+	--dt-inset-2: inset 0 2px 4px oklch(0 0 0 / 0.12);
+
+	/* Highlight interno (brillo superior) */
+	--dt-highlight-1: inset 0 1px 0 oklch(1 0 0 / 0.1);
+	--dt-highlight-2: inset 0 2px 0 oklch(1 0 0 / 0.15);
+
+	/* =====================================================
+   * 📏 BORDES
+   * ===================================================== */
+	--dt-border-width: 2px;
+	--dt-border-width-thin: 1px;
+
+	--dt-border-soft: var(--dt-border-width) solid oklch(0 0 0 / 0.06);
+	--dt-border-medium: var(--dt-border-width) solid oklch(0 0 0 / 0.12);
+	--dt-border-strong: var(--dt-border-width) solid oklch(0 0 0 / 0.2);
+
+	--dt-border-focus: var(--dt-border-width) solid var(--dt-primary-500);
+	--dt-border-error: var(--dt-border-width) solid var(--dt-danger-500);
+	--dt-border-success: var(--dt-border-width) solid var(--dt-success-500);
+
+	/* =====================================================
+   * 🔵 BORDER RADIUS
+   * ===================================================== */
+	--dt-radius-xs: 2px;
+	--dt-radius-sm: 4px;
+	--dt-radius-md: 6px;
+	--dt-radius-lg: 8px;
+	--dt-radius-xl: 12px;
+	--dt-radius-full: 9999px;
+
+	/* =====================================================
+   * ⚡ MOTION & TIMING
+   * ===================================================== */
+	--dt-ease-default: cubic-bezier(0.4, 0, 0.2, 1);
+	--dt-ease-in: cubic-bezier(0.4, 0, 1, 1);
+	--dt-ease-out: cubic-bezier(0, 0, 0.2, 1);
+	--dt-ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+
+	--dt-duration-instant: 50ms;
+	--dt-duration-fast: 150ms;
+	--dt-duration-normal: 250ms;
+	--dt-duration-slow: 400ms;
+
+	/* =====================================================
+   * 🎯 FOCUS RING
+   * ===================================================== */
+	--dt-focus-ring: 0 0 0 2px var(--background), 0 0 0 4px var(--dt-primary-500);
+
+	--dt-focus-ring-error:
+		0 0 0 2px var(--background), 0 0 0 4px var(--dt-danger-500);
+
+	--dt-focus-ring-inset: inset 0 0 0 2px var(--dt-primary-500);
+}
+
+/* =====================================================
+ * 🌙 DARK MODE OVERRIDES
+ * ===================================================== */
+html.dark,
+html[data-theme="dark"],
+html[data-theme="nocturno"],
+html[data-theme="carbon"],
+html[data-theme="neon"],
+html[data-theme="aurora"] {
+	--dt-shadow-color: oklch(0 0 0 / 0.3);
+	--dt-shadow-color-strong: oklch(0 0 0 / 0.5);
+
+	--dt-border-soft: var(--dt-border-width) solid oklch(1 0 0 / 0.06);
+	--dt-border-medium: var(--dt-border-width) solid oklch(1 0 0 / 0.12);
+	--dt-border-strong: var(--dt-border-width) solid oklch(1 0 0 / 0.2);
+
+	--dt-highlight-1: inset 0 1px 0 oklch(1 0 0 / 0.05);
+	--dt-highlight-2: inset 0 2px 0 oklch(1 0 0 / 0.08);
+
+	/* Sombras más pronunciadas en dark */
+	--dt-shadow-1: 0 1px 2px oklch(0 0 0 / 0.15), 0 1px 3px oklch(0 0 0 / 0.2);
+
+	--dt-shadow-2: 0 2px 4px oklch(0 0 0 / 0.15), 0 4px 8px oklch(0 0 0 / 0.25);
+
+	--dt-shadow-3:
+		0 4px 8px oklch(0 0 0 / 0.15), 0 8px 16px oklch(0 0 0 / 0.25), 0 16px 32px
+		oklch(0 0 0 / 0.15);
+
+	--dt-shadow-4:
+		0 8px 16px oklch(0 0 0 / 0.2), 0 16px 32px oklch(0 0 0 / 0.3), 0 32px 64px
+		oklch(0 0 0 / 0.2);
+
+	--dt-g-surface-soft: linear-gradient(
+		180deg,
+		oklch(1 0 0 / 0.03) 0%,
+		oklch(0 0 0 / 0.03) 100%
+	);
+
+	--dt-g-primary-soft: linear-gradient(
+		135deg,
+		oklch(0.25 0.04 240 / 0.6) 0%,
+		oklch(0.2 0.05 240 / 0.7) 100%
+	);
+}
+
+/* =====================================================
+ * ♿ REDUCED MOTION SUPPORT
+ * ===================================================== */
+@media (prefers-reduced-motion: reduce) {
+	:root {
+		--dt-duration-instant: 0ms;
+		--dt-duration-fast: 0ms;
+		--dt-duration-normal: 0ms;
+		--dt-duration-slow: 0ms;
+	}
+}

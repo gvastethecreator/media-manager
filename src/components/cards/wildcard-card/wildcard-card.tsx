@@ -18,7 +18,12 @@ export interface WildcardCardProps {
  * Card para mostrar un comodín
  * Sigue el diseño de los otros componentes de tarjetas
  */
-export const WildcardCard = memo(function WildcardCard({ wildcard, onClick, className, showBadges = true }: WildcardCardProps) {
+export const WildcardCard = memo(function WildcardCard({
+	wildcard,
+	onClick,
+	className,
+	showBadges = true,
+}: WildcardCardProps) {
 	// Calcular colores
 	const primaryColor = useMemo(() => wildcard.color || '#3b82f6', [wildcard.color]);
 	const secondaryColor = useMemo(() => {

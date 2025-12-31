@@ -99,11 +99,11 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 	// Estado de carga
 	if (isLoading) {
 		return (
-			<Card className="rounded-sm border-none bg-muted/30">
+			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-8">
 						<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
-						<span className="text-muted-foreground text-sm">Cargando etiquetas...</span>
+						<span className="text-body-sm text-muted-foreground">Cargando etiquetas...</span>
 					</div>
 				</CardContent>
 			</Card>
@@ -113,10 +113,10 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 	// Estado de error
 	if (error) {
 		return (
-			<Card className="rounded-sm border-none bg-muted/30">
+			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-8">
-						<p className="text-destructive text-sm">Error al cargar etiquetas: {error.message}</p>
+						<p className="text-body-sm text-destructive">Error al cargar etiquetas: {error.message}</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -128,32 +128,32 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 			<div className={className}>
 				{/* 📊 Estadísticas */}
 				<div className="mb-6 grid grid-cols-1 gap-4 md:grid-cols-3">
-					<Card>
-						<CardHeader className="pb-2">
-							<CardTitle className="font-medium text-sm">Total de Etiquetas</CardTitle>
+					<Card className="rounded-dt-sm border-border/30 bg-muted/20 shadow-sm">
+						<CardHeader className="space-y-0 pb-2">
+							<CardTitle className="text-caption text-muted-foreground">Total de Etiquetas</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<div className="font-bold text-2xl">{stats.total}</div>
+							<div className="text-numeric-lg">{stats.total}</div>
 						</CardContent>
 					</Card>
-					<Card>
-						<CardHeader className="pb-2">
-							<CardTitle className="font-medium text-sm">Favoritas</CardTitle>
+					<Card className="rounded-dt-sm border-border/30 bg-muted/20 shadow-sm">
+						<CardHeader className="space-y-0 pb-2">
+							<CardTitle className="text-caption text-muted-foreground">Favoritas</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<div className="font-bold text-2xl">{stats.favorites}</div>
+							<div className="text-numeric-lg">{stats.favorites}</div>
 						</CardContent>
 					</Card>
-					<Card>
-						<CardHeader className="pb-2">
-							<CardTitle className="font-medium text-sm">Más Usada</CardTitle>
+					<Card className="rounded-dt-sm border-border/30 bg-muted/20 shadow-sm">
+						<CardHeader className="space-y-0 pb-2">
+							<CardTitle className="text-caption text-muted-foreground">Más Usada</CardTitle>
 						</CardHeader>
 						<CardContent>
-							<div className="text-sm">
+							<div className="text-body-sm">
 								{tags.length > 0
 									? tags.reduce((max, tag) =>
-										(tag.stats?.totalRelations || 0) > (max.stats?.totalRelations || 0) ? tag : max
-									).name
+											(tag.stats?.totalRelations || 0) > (max.stats?.totalRelations || 0) ? tag : max
+										).name
 									: 'N/A'}
 							</div>
 						</CardContent>
@@ -181,8 +181,8 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 								</Button>
 							</PopoverTrigger>
 							<PopoverContent className="w-56">
-								<div className="space-y-2">
-									<Label className="font-medium text-sm">Filtrar por categoría</Label>
+								<div className="space-y-stack-sm">
+									<Label className="font-medium text-body-sm">Filtrar por categoría</Label>
 									<div className="space-y-1">
 										<div className="flex items-center space-x-2">
 											<Checkbox
@@ -190,7 +190,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 												id="all-categories"
 												onCheckedChange={() => setSelectedCategory(null)}
 											/>
-											<Label className="text-sm" htmlFor="all-categories">
+											<Label className="text-body-sm" htmlFor="all-categories">
 												Todas
 											</Label>
 										</div>
@@ -201,7 +201,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 													id={`category-${category}`}
 													onCheckedChange={() => setSelectedCategory(selectedCategory === category ? null : category)}
 												/>
-												<Label className="text-sm" htmlFor={`category-${category}`}>
+												<Label className="text-body-sm" htmlFor={`category-${category}`}>
 													{category} ({stats.byCategory[category] || 0})
 												</Label>
 											</div>
@@ -218,7 +218,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 								id="favorites-only"
 								onCheckedChange={(checked) => setShowOnlyFavorites(checked === true)}
 							/>
-							<Label className="text-sm" htmlFor="favorites-only">
+							<Label className="text-body-sm" htmlFor="favorites-only">
 								Solo favoritas
 							</Label>
 						</div>
@@ -255,21 +255,24 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 					>
 						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 							{filteredTags.map((tag) => (
-								<Card className="transition-shadow hover:shadow-md" key={tag.id}>
+								<Card
+									className="rounded-dt-sm border-border/30 shadow-sm transition-shadow hover:shadow-md"
+									key={tag.id}
+								>
 									<CardHeader className="pb-3">
 										<div className="flex items-start justify-between">
 											<div className="flex items-center gap-2">
 												<span className="text-lg">{tag.emoji}</span>
 												<div>
-													<CardTitle className="font-medium text-sm">{tag.name}</CardTitle>
+													<CardTitle className="text-body-sm">{tag.name}</CardTitle>
 													{tag.description && (
-														<CardDescription className="mt-1 text-xs">{tag.description}</CardDescription>
+														<CardDescription className="mt-1 text-caption">{tag.description}</CardDescription>
 													)}
 												</div>
 											</div>
 											<div className="flex items-center gap-1">
 												{tag.isFavorite && (
-													<Badge className="text-xs" variant="secondary">
+													<Badge className="text-caption" variant="secondary">
 														Favorita
 													</Badge>
 												)}
@@ -294,11 +297,11 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 										</div>
 									</CardHeader>
 									<CardContent className="pt-0">
-										<div className="flex items-center justify-between text-muted-foreground text-xs">
+										<div className="flex items-center justify-between text-caption text-muted-foreground">
 											<div className="flex items-center gap-4">
 												<span>Relaciones: {tag.stats?.totalRelations || 0}</span>
 												{tag.category && (
-													<Badge className="text-xs" variant="outline">
+													<Badge className="text-caption" variant="outline">
 														{tag.category}
 													</Badge>
 												)}

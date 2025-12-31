@@ -2,14 +2,14 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDebounce, useRaf } from '@/hooks/useThrottle';
 import { useAddTags, useAddToCollection, useToggleFavorite } from '@/lib/api/files';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
-import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useSelectionStore } from '@/store/selection.store';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import type { MediaItem } from '../../components/media-thumbnail';
 import { ExtendedContextMenu, type ExtendedContextMenuAction } from '../../context-menu/extended-context-menu';
 import type { ClickModifiers } from '../../types/file-browser.types';
 import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
 import { CanvasRenderConfig } from './canvas-config';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 // Renderiza todos los items en un solo <canvas> para minimizar el overhead de DOM.
 // Estrategia: layout en celdas (grid) con tamaño fijo, prefetch de imágenes con Intersection-like
@@ -704,7 +704,7 @@ export function FileCanvas({
 					for (const it of selected) {
 						try {
 							await toggleFavorite.mutateAsync(it.id);
-						} catch { }
+						} catch {}
 					}
 				})();
 				break;
@@ -716,7 +716,7 @@ export function FileCanvas({
 					for (const it of selected) {
 						try {
 							await addToCollection.mutateAsync({ fileId: it.id, collectionId: targetId });
-						} catch { }
+						} catch {}
 					}
 				})();
 				break;
@@ -728,7 +728,7 @@ export function FileCanvas({
 					for (const it of selected) {
 						try {
 							await addTags.mutateAsync({ fileId: it.id, tags: [targetId] });
-						} catch { }
+						} catch {}
 					}
 				})();
 				break;
@@ -793,7 +793,7 @@ export function FileCanvas({
 				{hoverTooltip.visible && !dragStart && (
 					<div
 						aria-hidden
-						className="pointer-events-none absolute z-20 max-w-[150px] rounded bg-popover/90 px-2 py-1 text-xs text-popover-foreground shadow-md transition-all duration-100 ease-in"
+						className="pointer-events-none absolute z-20 max-w-[150px] rounded bg-popover/90 px-2 py-1 text-popover-foreground text-xs shadow-md transition-all duration-100 ease-in"
 						style={{
 							left: hoverTooltip.x,
 							top: hoverTooltip.y,

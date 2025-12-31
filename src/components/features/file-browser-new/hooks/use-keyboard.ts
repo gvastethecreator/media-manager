@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import type { BrowserItem, ViewMode, ItemClickHandler, ItemDoubleClickHandler } from '../types';
+import type { BrowserItem, ItemClickHandler, ItemDoubleClickHandler, ViewMode } from '../types';
 
 export interface UseKeyboardNavigationOptions {
 	/** Items para navegar */
@@ -79,7 +79,7 @@ export function useKeyboardNavigation({
 
 	// Navegar a índice
 	const navigateToIndex = useCallback(
-		(index: number, e?: React.KeyboardEvent) => {
+		(index: number, e?: KeyboardLikeEvent) => {
 			if (index < 0 || index >= items.length) return;
 
 			const item = items[index];

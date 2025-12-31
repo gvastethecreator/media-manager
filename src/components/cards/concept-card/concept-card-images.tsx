@@ -1,9 +1,8 @@
 import { ImageIcon, Sparkles } from 'lucide-react';
 import { nanoid } from 'nanoid';
-import React, { Suspense, useMemo } from 'react';
-import { cn } from '@/lib/utils';
-
+import { Suspense, useMemo } from 'react';
 import { useRecentConceptImages } from '@/lib/api/concepts';
+import { cn } from '@/lib/utils';
 
 interface ConceptCardImagesProps {
 	conceptId: string;

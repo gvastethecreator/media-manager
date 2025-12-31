@@ -2,7 +2,9 @@
 
 /* Hover animations for canvas elements */
 .canvas-item {
-	transition: transform 0.2s ease-out, box-shadow 0.2s ease-out;
+	transition:
+		transform 0.2s ease-out,
+		box-shadow 0.2s ease-out;
 }
 
 .canvas-item:hover {
@@ -54,7 +56,12 @@
 
 /* Loading skeleton animations */
 .canvas-loading-skeleton {
-	background: linear-gradient(90deg, var(--loading-shimmer-1) 25%, var(--loading-shimmer-2) 50%, var(--loading-shimmer-3) 75%);
+	background: linear-gradient(
+		90deg,
+		var(--loading-shimmer-1) 25%,
+		var(--loading-shimmer-2) 50%,
+		var(--loading-shimmer-3) 75%
+	);
 	background-size: 200% 100%;
 	animation: loading-shimmer 1.5s infinite;
 }

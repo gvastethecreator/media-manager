@@ -156,7 +156,10 @@ export class JsonProcessor {
 			jsonLogger.debug(`✅ JSON thumbnail generado para: ${filePath}`);
 			return { success: true };
 		} catch (e) {
-			jsonLogger.warn('Error generando thumbnail JSON:', { filePath, error: e instanceof Error ? e.message : String(e) });
+			jsonLogger.warn('Error generando thumbnail JSON:', {
+				filePath,
+				error: e instanceof Error ? e.message : String(e),
+			});
 			return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
 		}
 	}

@@ -1,7 +1,7 @@
-import { formatDate } from '@/lib/utils/date';
 import { Calendar, Clock, Heart, Image, Video } from 'lucide-react';
 import React from 'react';
 import { cn } from '@/lib/utils';
+import { formatDate } from '@/lib/utils/date';
 import { TagRarity } from '@/store/entities/tag/types';
 
 // Componente para contador individual

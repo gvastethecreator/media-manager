@@ -5,14 +5,14 @@
  * Centraliza las mutaciones para agregar imágenes/videos a cualquier entidad
  */
 
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 import { useAddImageToAlbum } from '@/lib/api/albums';
-import { useAddImageToCollection } from '@/lib/api/collections';
-import { useAddTags } from '@/lib/api/files';
-import { useCreateFavorite } from '@/lib/api/favorites';
 import { apiClient } from '@/lib/api/client';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useAddImageToCollection } from '@/lib/api/collections';
+import { useCreateFavorite } from '@/lib/api/favorites';
+import { useAddTags } from '@/lib/api/files';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 // Tipos de entidad soportados

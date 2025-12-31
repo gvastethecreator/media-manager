@@ -2,8 +2,8 @@ import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { AlertCircle, Check, Info, Terminal } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { cn } from '@/lib/utils';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { cn } from '@/lib/utils';
 
 interface LogEntry {
 	id: string;
@@ -242,9 +242,9 @@ export function ReindexTerminal({
 							// Actualizar progreso con granularidad fina
 							// Base 45% + progreso proporcional de archivos en carpeta actual
 							if (progress > 0 && data.totalFiles > 0) {
-								const folderProgress = (progress / 100);
+								const folderProgress = progress / 100;
 								// Asumiendo que indexing ocupa 15% del total (45% a 60%)
-								setCurrentProgress(45 + (folderProgress * 15));
+								setCurrentProgress(45 + folderProgress * 15);
 							}
 							break; // Salir temprano para no duplicar
 						}
@@ -262,13 +262,11 @@ export function ReindexTerminal({
 							break; // Salir temprano para no duplicar
 						}
 						icon = '└──';
-					}
-					else if (phase === 'metadata') icon = '📊';
+					} else if (phase === 'metadata') icon = '📊';
 					else if (phase === 'complete') {
 						icon = '✅';
 						level = 'SUCCESS';
-					}
-					else if (phase === 'error') {
+					} else if (phase === 'error') {
 						icon = '❌';
 						level = 'ERROR';
 					}
@@ -352,7 +350,7 @@ export function ReindexTerminal({
 
 		// Función para calcular delay con exponential backoff
 		const getReconnectDelay = (attempt: number) => {
-			const delay = Math.min(BASE_RECONNECT_DELAY * (2 ** attempt), MAX_RECONNECT_DELAY);
+			const delay = Math.min(BASE_RECONNECT_DELAY * 2 ** attempt, MAX_RECONNECT_DELAY);
 			// Añadir jitter para evitar thundering herd
 			return delay + Math.random() * 1000;
 		};
@@ -369,7 +367,9 @@ export function ReindexTerminal({
 			if (reconnectAttemptRef.current === 0) {
 				addLog('INFO', '🔌 Conectando al servidor de eventos...', { source: 'terminal' });
 			} else {
-				addLog('INFO', `🔄 Reconectando... (intento ${reconnectAttemptRef.current}/${MAX_RECONNECT_ATTEMPTS})`, { source: 'sse' });
+				addLog('INFO', `🔄 Reconectando... (intento ${reconnectAttemptRef.current}/${MAX_RECONNECT_ATTEMPTS})`, {
+					source: 'sse',
+				});
 			}
 
 			// Cerrar conexión existente si hay
@@ -428,7 +428,9 @@ export function ReindexTerminal({
 						connectSSE();
 					}, delay);
 				} else if (reconnectAttemptRef.current >= MAX_RECONNECT_ATTEMPTS) {
-					addLog('ERROR', '❌ No se pudo restablecer la conexión. Los logs pueden estar desactualizados.', { source: 'sse' });
+					addLog('ERROR', '❌ No se pudo restablecer la conexión. Los logs pueden estar desactualizados.', {
+						source: 'sse',
+					});
 				}
 			};
 		};
@@ -480,7 +482,7 @@ export function ReindexTerminal({
 					'flex min-h-[32px] items-center gap-3 px-3 py-2',
 					// Estilo para carpetas sticky
 					log.isSticky && {
-						'sticky top-0 z-10 border-b border-blue-500/30 py-3 shadow-lg backdrop-blur-sm': true,
+						'sticky top-0 z-10 border-blue-500/30 border-b py-3 shadow-lg backdrop-blur-sm': true,
 						'bg-gradient-to-r from-blue-900/40 via-blue-800/20 to-transparent': true,
 						'ring-1 ring-blue-400/30': true,
 					},
@@ -492,25 +494,20 @@ export function ReindexTerminal({
 				data-sticky={log.isSticky}
 				key={log.id}
 			>
-				<span className={cn(
-					"font-mono tabular-nums",
-					log.isSticky ? "text-blue-300 text-xs" : "text-gray-600 text-[10px]"
-				)}>
+				<span
+					className={cn('font-mono tabular-nums', log.isSticky ? 'text-blue-300 text-xs' : 'text-[10px] text-gray-600')}
+				>
 					{formatTimestamp(log.timestamp)}
 				</span>
-				<Icon className={cn(
-					'flex-shrink-0',
-					log.isSticky ? 'h-4 w-4' : 'h-3 w-3',
-					colorClass
-				)} />
+				<Icon className={cn('shrink-0', log.isSticky ? 'h-4 w-4' : 'h-3 w-3', colorClass)} />
 				<span
 					className={cn(
 						'flex-1 overflow-hidden break-words font-mono leading-relaxed',
 						// Tamaño y peso según tipo
-						log.isSticky && 'text-base font-bold text-white',
-						isFolderLog && !log.isSticky && 'text-sm font-semibold text-gray-100',
-						isSubLog && 'text-xs text-gray-400',
-						!isFolderLog && !isSubLog && 'text-sm text-gray-200'
+						log.isSticky && 'font-bold text-base text-white',
+						isFolderLog && !log.isSticky && 'font-semibold text-gray-100 text-sm',
+						isSubLog && 'text-gray-400 text-xs',
+						!(isFolderLog || isSubLog) && 'text-gray-200 text-sm'
 					)}
 				>
 					{log.message}
@@ -523,14 +520,10 @@ export function ReindexTerminal({
 		<div className={cn('flex h-full w-full flex-col', className)}>
 			{/* Barra de progreso */}
 			{showProgress && (
-				<div className="border-b border-gray-800 bg-gray-950 px-4 py-3">
+				<div className="border-gray-800 border-b bg-gray-950 px-4 py-3">
 					<div className="mb-2 flex items-center justify-between text-xs">
-						<span className="font-mono text-gray-400">
-							{currentProgress < 100 ? 'Procesando...' : 'Completado'}
-						</span>
-						<span className="font-mono font-bold text-blue-400">
-							{currentProgress.toFixed(1)}%
-						</span>
+						<span className="font-mono text-gray-400">{currentProgress < 100 ? 'Procesando...' : 'Completado'}</span>
+						<span className="font-bold font-mono text-blue-400">{currentProgress.toFixed(1)}%</span>
 					</div>
 					<div className="h-2 w-full overflow-hidden rounded-full bg-gray-800">
 						<div
@@ -539,7 +532,7 @@ export function ReindexTerminal({
 						/>
 					</div>
 					{startTime && currentProgress < 100 && (
-						<div className="mt-2 text-[10px] font-mono text-gray-500">
+						<div className="mt-2 font-mono text-[10px] text-gray-500">
 							Tiempo transcurrido: {formatElapsedTime(elapsedTime)}
 						</div>
 					)}

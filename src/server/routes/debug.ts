@@ -8,9 +8,9 @@ import { formatBytes } from '@/lib/utils/format.utils';
 
 const router = express.Router();
 
+import { serverLogger } from '@/lib/logger/server-logger';
 // Importar el servicio para el endpoint de test de tipos de entidad
 import { FileEntityMapperService } from '@/services/file-entity-mapper/file-entity-mapper.service';
-import { serverLogger } from '@/lib/logger/server-logger';
 
 const fileEntityMapperService = FileEntityMapperService.getInstance();
 

@@ -105,7 +105,7 @@ export function PropertiesSettings() {
 	const rightPanel = useMemo(() => {
 		if (selectedProperty && !isEditMode) {
 			return (
-				<Card className="h-[calc(100vh-8rem)] rounded-sm border-none bg-muted/30">
+				<Card className="h-[calc(100vh-8rem)] rounded-dt-md border-none bg-muted/30 shadow-sm">
 					<CardHeader>
 						<div className="flex items-center justify-between">
 							<CardTitle>{selectedProperty.name}</CardTitle>
@@ -161,11 +161,11 @@ export function PropertiesSettings() {
 		}
 
 		return (
-			<Card className="flex h-[calc(100vh-8rem)] flex-col items-center justify-center rounded-sm border-none bg-muted/30">
+			<Card className="flex h-[calc(100vh-8rem)] flex-col items-center justify-center rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<div className="text-center">
 					<Plus className="mx-auto h-12 w-12 text-gray-400" />
-					<h3 className="mt-2 font-medium text-gray-900 text-sm dark:text-gray-100">Selecciona una propiedad</h3>
-					<p className="mt-1 text-gray-500 text-sm">O crea una nueva para empezar</p>
+					<h3 className="mt-2 font-medium text-foreground text-heading-sm">Selecciona una propiedad</h3>
+					<p className="mt-1 text-caption text-muted-foreground">O crea una nueva para empezar</p>
 				</div>
 			</Card>
 		);
@@ -244,12 +244,12 @@ export function PropertiesSettings() {
 			<div className="grid grid-cols-12 gap-3">
 				{/* Panel izquierdo: Lista de propiedades */}
 				<div className="col-span-12 md:col-span-5 lg:col-span-4">
-					<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+					<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-dt-md border-none bg-muted/30 shadow-sm">
 						<CardHeader className="space-y-1 px-3 py-2">
 							<div className="flex items-center justify-between">
 								<div>
-									<CardTitle className="font-bold text-xl">Propiedades</CardTitle>
-									<p className="text-muted-foreground text-xs">
+									<CardTitle className="text-heading-lg">Propiedades</CardTitle>
+									<p className="text-caption text-muted-foreground">
 										{stats.totalProperties} total • {stats.favoriteProperties} favoritas
 									</p>
 								</div>
@@ -285,9 +285,8 @@ export function PropertiesSettings() {
 								<div className="space-y-1 p-2">
 									{sortedProperties.map((property) => (
 										<div
-											className={`group/item relative rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${
-												selectedProperty?.id === property.id ? 'bg-secondary text-secondary-foreground' : ''
-											}`}
+											className={`group/item relative rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${selectedProperty?.id === property.id ? 'bg-secondary text-secondary-foreground' : ''
+												}`}
 											key={property.id}
 										>
 											<Button

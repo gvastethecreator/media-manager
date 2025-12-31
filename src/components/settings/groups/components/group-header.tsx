@@ -32,7 +32,13 @@ export function GroupHeader({
 						<CardTitle className="flex items-center gap-2 font-bold text-xl">
 							{name}
 							{isFavorite && onFavoriteToggle && (
-								<Button aria-label="Quitar de favoritos" className="h-4 w-4 p-0" onClick={onFavoriteToggle} size="icon" variant="ghost">
+								<Button
+									aria-label="Quitar de favoritos"
+									className="h-4 w-4 p-0"
+									onClick={onFavoriteToggle}
+									size="icon"
+									variant="ghost"
+								>
 									<StarIcon className="h-4 w-4 text-yellow-500" />
 								</Button>
 							)}

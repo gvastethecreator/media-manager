@@ -7,7 +7,7 @@
  */
 
 import { Schema } from '@effect/schema';
-import { UUID, HexColor, Emoji, TimestampFields } from '@/lib/effect/schemas';
+import { Emoji, HexColor, UUID } from '@/lib/effect/schemas';
 
 /**
  * Schema base para Tag entity (matches Drizzle schema)

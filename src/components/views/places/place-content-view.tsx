@@ -2,7 +2,7 @@ import { MapPin } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { usePlaceImages } from '@/lib/api/places';
 import { useDetailsPanel } from '@/store/details-panel.store';
@@ -15,7 +15,10 @@ export const PlaceContentView = memo(function PlaceContentViewInner() {
 
 	const { data: images = [], isLoading, error } = usePlaceImages(selectedPlaceId || '');
 	const { setVisible: setDetailsPanelVisible, setSelectedItems } = useDetailsPanel();
-	const browserItems = useMemo(() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)), [images]);
+	const browserItems = useMemo(
+		() => images.map((img) => toBrowserItem(img as unknown as Record<string, unknown>)),
+		[images]
+	);
 
 	const handleItemSelect = useCallback(
 		(item: BrowserItem) => {
@@ -62,11 +65,7 @@ export const PlaceContentView = memo(function PlaceContentViewInner() {
 			description={selectedPlace?._count?.images ? `${selectedPlace._count.images} imágenes` : undefined}
 			title={selectedPlace?.name ?? 'Lugar'}
 		>
-			<FileBrowser
-				className="h-full"
-				items={browserItems}
-				onItemClick={handleItemSelect}
-			/>
+			<FileBrowser className="h-full" items={browserItems} onItemClick={handleItemSelect} />
 		</BaseContentView>
 	);
 });

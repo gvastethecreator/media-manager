@@ -4,7 +4,7 @@
  */
 
 import type { BrowserItem, BrowserItemGroup } from './item.types';
-import type { ViewMode, ViewConfig, SortOption, PaginationState } from './view.types';
+import type { PaginationState, ViewConfig, ViewMode } from './view.types';
 
 /**
  * Modificadores de click

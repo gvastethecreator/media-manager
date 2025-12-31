@@ -5,32 +5,31 @@
  * @created 2025-10-11 - Fase 1 Effect Implementation
  */
 
-import { Effect, Context, Layer, pipe } from 'effect';
 import { Schema } from '@effect/schema';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import * as crypto from 'crypto';
+import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { Context, Effect, Layer, pipe } from 'effect';
 import { db } from '@/lib/drizzle';
-import { images, imageTags, tags } from '@/lib/drizzle/schema';
+import { imageTags, tags } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	Tag,
-	TagCreate,
-	TagUpdate,
-	TagWithStats,
+	fromUnknownError,
+	TagError,
+	TagHasRelationsError,
+	TagNameConflict,
+	TagNotFound,
+	TagValidationError,
+} from './tag-errors.effect';
+import {
 	GetTagsOptions,
 	GetTagsResult,
-	TagStatistics,
+	Tag,
 	TagCounts,
+	TagCreate,
+	TagStatistics,
+	TagUpdate,
+	TagWithStats,
 } from './tag-schemas';
-import {
-	TagError,
-	TagNotFound,
-	TagNameConflict,
-	TagDatabaseError,
-	TagValidationError,
-	TagHasRelationsError,
-	fromUnknownError,
-} from './tag-errors.effect';
 
 // Logger específico
 const logger = serverLogger.withContext('TagService.Effect');
@@ -127,7 +126,7 @@ const make = (): TagServiceInterface => {
 			logger.info(`🔍 Buscando tag: ${id}`);
 
 			// Query usando db directamente (importado de drizzle/index)
-			const result = yield* Effect.tryPromise<typeof tags.$inferSelect[], TagError>({
+			const result = yield* Effect.tryPromise<(typeof tags.$inferSelect)[], TagError>({
 				try: () => db.select().from(tags).where(eq(tags.id, id)).limit(1),
 				catch: (error: unknown) => {
 					logger.error(`❌ Error al obtener tag ${id}`, { error });
@@ -282,12 +281,12 @@ const make = (): TagServiceInterface => {
 			const rawTags = yield* Effect.tryPromise<Array<typeof tags.$inferSelect>, TagError>({
 				try: () => {
 					let query = db.select().from(tags);
-					
+
 					// Aplicar filtros
 					if (conditions.length > 0) {
 						query = query.where(and(...conditions));
 					}
-					
+
 					// Aplicar ordenamiento, limit y offset
 					return query.orderBy(orderField).limit(limit).offset(offset);
 				},

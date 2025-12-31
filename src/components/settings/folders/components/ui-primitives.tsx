@@ -32,7 +32,7 @@ export const EmptyFoldersState = memo(function EmptyFoldersState() {
  */
 export const ErrorCard = memo(function ErrorCard({ message, onRetry }: { message: string; onRetry: () => void }) {
 	return (
-		<div className="rounded-sm border-none bg-muted/30">
+		<div className="rounded-dt-md border-none bg-muted/30 shadow-sm">
 			<div className="flex flex-col gap-2 p-3">
 				<div className="flex items-center gap-2 text-destructive">
 					<AlertCircle className="h-4 w-4" />

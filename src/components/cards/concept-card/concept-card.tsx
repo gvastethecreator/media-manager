@@ -7,7 +7,13 @@ import type { ConceptCardProps } from './concept-card.types';
 import { ConceptCardContent } from './concept-card-content';
 import { ConceptCardFooter } from './concept-card-footer';
 
-export const ConceptCard = memo(function ConceptCard({ concept, onClick, className, style, tcgMode = true }: ConceptCardProps) {
+export const ConceptCard = memo(function ConceptCard({
+	concept,
+	onClick,
+	className,
+	style,
+	tcgMode = true,
+}: ConceptCardProps) {
 	// Si no hay concept, no renderizar nada
 	if (!concept) {
 		return null;
@@ -214,7 +220,7 @@ export const ConceptCard = memo(function ConceptCard({ concept, onClick, classNa
 			{/* Resplandor de borde en hover */}
 			<div className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-100">
 				<div
-					className="-z-10 absolute inset-0 rounded-[4.75%] blur-sm"
+					className="absolute inset-0 -z-10 rounded-[4.75%] blur-sm"
 					style={{ boxShadow: `0 0 15px 2px ${primaryColor}` }}
 				/>
 			</div>

@@ -78,7 +78,7 @@ export function JsonFileSettings() {
 
 	return (
 		<ScrollArea className="h-[calc(100vh-8rem)] w-full">
-			<Card className="rounded-sm border-none bg-muted/30">
+			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<CardHeader className="p-3 pb-2">
 					<CardTitle className="flex items-center gap-2 font-medium text-base text-muted-foreground">
 						<FileText className="h-4 w-4" />

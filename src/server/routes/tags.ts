@@ -1,7 +1,7 @@
 import express from 'express';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { TagService } from '@/services/tag/tag.service';
 import { toImageWithStats } from '@/transformers/image';
-import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
 const tagService = new TagService();

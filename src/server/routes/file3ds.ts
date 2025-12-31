@@ -1,7 +1,7 @@
 import { type Request, type Response, Router } from 'express';
 import { z } from 'zod';
-import { createFile3D, deleteFile3D, getFile3DById, getFile3Ds, updateFile3D } from '@/services/file3d/file3d.service';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { createFile3D, deleteFile3D, getFile3DById, getFile3Ds, updateFile3D } from '@/services/file3d/file3d.service';
 
 const router = Router();
 

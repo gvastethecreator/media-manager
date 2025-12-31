@@ -74,7 +74,7 @@ export function useZoomPan(isOpen: boolean) {
 	// Registrar wheel event nativo (passive: false para poder preventDefault)
 	useEffect(() => {
 		const container = imageContainerRef.current;
-		if (!container || !isOpen) return;
+		if (!(container && isOpen)) return;
 
 		container.addEventListener('wheel', handleWheel, { passive: false });
 		return () => {

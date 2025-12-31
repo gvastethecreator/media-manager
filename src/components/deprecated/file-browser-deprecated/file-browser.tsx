@@ -20,8 +20,8 @@ import { useFile3DStore } from '@/store/entities/file-3d';
 import { useImageStore } from '@/store/entities/image';
 import { useJsonFileStore } from '@/store/entities/json-file/json-file.store';
 import { useVideoStore } from '@/store/entities/video';
-import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useSelectionStore } from '@/store/selection.store';
+import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { FileBrowserPreloader } from './components/file-browser-preloader';
@@ -286,7 +286,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 		>
 			{/* Toolbar del File Browser */}
 			<FileBrowserToolbar allItemIds={toolbarItemIds} isLoading={isActivelyLoading} onRefresh={handleRefresh} />
-			<div className="relative flex flex-1 min-h-0 flex-col" data-testid="file-browser-container">
+			<div className="relative flex min-h-0 flex-1 flex-col" data-testid="file-browser-container">
 				{error && (
 					<div className="pointer-events-none absolute inset-x-0 top-0 z-10 flex justify-center p-2">
 						<div className="rounded-md bg-destructive/80 px-2 py-1 text-destructive-foreground text-xs">
@@ -324,9 +324,9 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 				)}
 
 				{shouldRenderContent && (
-					<div className="flex flex-1 min-h-0 flex-col">
+					<div className="flex min-h-0 flex-1 flex-col">
 						{viewMode === 'list' ? (
-							<div className="flex flex-1 min-h-0 flex-col">
+							<div className="flex min-h-0 flex-1 flex-col">
 								<FileListHeader />
 								<div className="min-h-0 flex-1 overflow-hidden">
 									{grouped ? (
@@ -349,7 +349,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 								</div>
 							</div>
 						) : viewMode === 'masonry' ? (
-							<div className="flex-1 min-h-0 overflow-hidden">
+							<div className="min-h-0 flex-1 overflow-hidden">
 								{grouped ? (
 									<FileCanvasMasonryGrouped
 										groups={grouped as any}
@@ -371,7 +371,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 								)}
 							</div>
 						) : viewMode === 'table' ? (
-							<div className="flex-1 min-h-0 overflow-hidden">
+							<div className="min-h-0 flex-1 overflow-hidden">
 								{grouped ? (
 									<FileCanvasTableGrouped
 										groups={grouped as any}
@@ -391,7 +391,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 								)}
 							</div>
 						) : viewMode === 'cards' ? (
-							<div className="flex-1 min-h-0 overflow-hidden">
+							<div className="min-h-0 flex-1 overflow-hidden">
 								{grouped ? (
 									<FileCanvasGridGrouped
 										groups={grouped as any}
@@ -413,7 +413,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 								)}
 							</div>
 						) : viewMode === 'canvas' ? (
-							<div className="flex-1 min-h-0 overflow-hidden">
+							<div className="min-h-0 flex-1 overflow-hidden">
 								<Grid
 									itemSize={itemSize}
 									items={processedItems as MediaItem[]}
@@ -426,7 +426,7 @@ export function FileBrowserByFolder({ filterId, onItemClick, onItemDoubleClick }
 								/>
 							</div>
 						) : (
-							<div className="flex-1 min-h-0 overflow-hidden">
+							<div className="min-h-0 flex-1 overflow-hidden">
 								{grouped ? (
 									<FileCanvasGridGrouped
 										groups={grouped as any}

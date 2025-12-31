@@ -5,24 +5,24 @@
  * @created 2025-10-11 - Phase 5: Collection Migration
  */
 
-import { Effect, Context, Layer } from 'effect';
 import { Schema } from '@effect/schema';
-import { and, asc, count, desc, eq, like, ne, or, isNull } from 'drizzle-orm';
+import { and, asc, count, desc, eq, isNull, like, ne, or } from 'drizzle-orm';
+import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { collections, imageCollections, images } from '@/lib/drizzle/schema';
-import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	Collection,
 	CollectionCreateInput,
 	CollectionUpdateInput,
 	CollectionWithStats,
 } from '@/lib/effect/schemas/entities';
+import { serverLogger } from '@/lib/logger/server-logger';
 import type { CollectionError } from './collection-errors.effect';
 import {
-	CollectionNotFound,
-	CollectionValidationError,
 	CollectionDatabaseError,
 	CollectionHasContentError,
+	CollectionNotFound,
+	CollectionValidationError,
 } from './collection-errors.effect';
 
 // Logger específico
@@ -269,102 +269,103 @@ export const CollectionServiceLive = Layer.succeed(
 				return yield* enrichCollectionWithCounts(collection);
 			}),
 
-	getAll: (options: GetCollectionsOptions = {}) =>
-		Effect.gen(function* () {
-			const {
-				search,
-				parentId,
-				onlyFavorites = false,
-				orderBy = 'createdAt',
-				orderDirection = 'desc',
-				limit = 50,
-				offset = 0,
-			} = options;
+		getAll: (options: GetCollectionsOptions = {}) =>
+			Effect.gen(function* () {
+				const {
+					search,
+					parentId,
+					onlyFavorites = false,
+					orderBy = 'createdAt',
+					orderDirection = 'desc',
+					limit = 50,
+					offset = 0,
+				} = options;
 
-			logger.info('📋 Obteniendo collections', {
-				search,
-				parentId,
-				onlyFavorites,
-				limit,
-				offset,
-			});
+				logger.info('📋 Obteniendo collections', {
+					search,
+					parentId,
+					onlyFavorites,
+					limit,
+					offset,
+				});
 
-			// Build conditions
-			const conditions = [];
-			if (search) {
-				conditions.push(or(like(collections.name, `%${search}%`), like(collections.description, `%${search}%`)));
-			}
-			if (parentId !== undefined) {
-				conditions.push(parentId === null ? isNull(collections.parentId) : eq(collections.parentId, parentId));
-			}
-			if (onlyFavorites) {
-				conditions.push(eq(collections.isFavorite, true));
-			}
+				// Build conditions
+				const conditions = [];
+				if (search) {
+					conditions.push(or(like(collections.name, `%${search}%`), like(collections.description, `%${search}%`)));
+				}
+				if (parentId !== undefined) {
+					conditions.push(parentId === null ? isNull(collections.parentId) : eq(collections.parentId, parentId));
+				}
+				if (onlyFavorites) {
+					conditions.push(eq(collections.isFavorite, true));
+				}
 
-			const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
+				const whereClause = conditions.length > 0 ? and(...conditions) : undefined;
 
-			// Get total count
-			const [countResult] = yield* Effect.tryPromise({
-				try: async () => {
-					const result = await db.select({ count: count() }).from(collections).where(whereClause);
-					return result;
-				},
-				catch: (error) =>
-					new CollectionDatabaseError({
-						operation: 'getAll:count',
-						originalError: error,
-					}),
-			});
+				// Get total count
+				const [countResult] = yield* Effect.tryPromise({
+					try: async () => {
+						const result = await db.select({ count: count() }).from(collections).where(whereClause);
+						return result;
+					},
+					catch: (error) =>
+						new CollectionDatabaseError({
+							operation: 'getAll:count',
+							originalError: error,
+						}),
+				});
 
-			const total = countResult?.count ?? 0;
+				const total = countResult?.count ?? 0;
 
-			// Get collections
-			const orderColumn =
-				orderBy === 'name'
-					? collections.name
-					: orderBy === 'updatedAt'
-						? collections.updatedAt
-						: collections.createdAt;
-			const orderFn = orderDirection === 'asc' ? asc : desc;
+				// Get collections
+				const orderColumn =
+					orderBy === 'name'
+						? collections.name
+						: orderBy === 'updatedAt'
+							? collections.updatedAt
+							: collections.createdAt;
+				const orderFn = orderDirection === 'asc' ? asc : desc;
 
-			const results = yield* Effect.tryPromise({
-				try: async () =>
-					await db.query.collections.findMany({
-						where: whereClause,
-						orderBy: [orderFn(orderColumn)],
-						limit,
-						offset,
-					}),
-				catch: (error) =>
-					new CollectionDatabaseError({
-						operation: 'getAll:query',
-						originalError: error,
-					}),
-			});
+				const results = yield* Effect.tryPromise({
+					try: async () =>
+						await db.query.collections.findMany({
+							where: whereClause,
+							orderBy: [orderFn(orderColumn)],
+							limit,
+							offset,
+						}),
+					catch: (error) =>
+						new CollectionDatabaseError({
+							operation: 'getAll:query',
+							originalError: error,
+						}),
+				});
 
-			// Validate and enrich
-			const validated: Collection[] = yield* Effect.try({
-				try: () => results.map((r: any) => Schema.decodeUnknownSync(Collection)(r)),
-				catch: (error) =>
-					new CollectionDatabaseError({
-						operation: 'getAll:validation',
-						originalError: error,
-					}),
-			});
+				// Validate and enrich
+				const validated: Collection[] = yield* Effect.try({
+					try: () => results.map((r: any) => Schema.decodeUnknownSync(Collection)(r)),
+					catch: (error) =>
+						new CollectionDatabaseError({
+							operation: 'getAll:validation',
+							originalError: error,
+						}),
+				});
 
-			const enriched = yield* Effect.forEach(validated, (c) => enrichCollectionWithCounts(c), {
-				concurrency: 'unbounded',
-			}).pipe(Effect.mapError((error) => error as CollectionError));
+				const enriched = yield* Effect.forEach(validated, (c) => enrichCollectionWithCounts(c), {
+					concurrency: 'unbounded',
+				}).pipe(Effect.mapError((error) => error as CollectionError));
 
-			logger.info('✅ Collections obtenidas', { count: enriched.length, total });
+				logger.info('✅ Collections obtenidas', { count: enriched.length, total });
 
-			return {
-				collections: enriched,
-				total,
-				limit,
-				offset,
-			};
-		}),		create: (input) =>
+				return {
+					collections: enriched,
+					total,
+					limit,
+					offset,
+				};
+			}),
+		create: (input) =>
 			Effect.gen(function* () {
 				logger.info('➕ Creando collection', { name: input.name });
 

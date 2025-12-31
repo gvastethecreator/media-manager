@@ -1,9 +1,9 @@
-import { Router } from 'express';
 import { and, eq } from 'drizzle-orm';
-import { serverLogger } from '@/lib/logger/server-logger';
+import { Router } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { properties, imageProperties, images } from '@/lib/drizzle/schema/index';
+import { imageProperties, images, properties } from '@/lib/drizzle/schema/index';
+import { serverLogger } from '@/lib/logger/server-logger';
 import { PropertyService } from '@/services/property/property.service';
 
 const propertyService = new PropertyService();

@@ -2,11 +2,11 @@ import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { debounceEvent } from '@/lib/system/event-throttler';
 import { searchPromptsService } from '@/services/prompt/prompt.service';
 import type { PromptWithStats } from '@/types/entities/prompt';
 import { PromptCard } from './prompt-card';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 interface PromptCardGridProps {
 	/** Título del grid */
@@ -105,7 +105,7 @@ export function PromptCardGrid({
 
 				{showSearch && (
 					<div className="relative w-full md:w-[320px]">
-						<Search className="-translate-y-1/2 absolute top-1/2 left-3 h-4 w-4 transform text-muted-foreground" />
+						<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform text-muted-foreground" />
 						<Input
 							className="w-full pl-10"
 							onChange={handleSearchChange}

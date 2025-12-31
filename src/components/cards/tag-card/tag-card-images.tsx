@@ -154,7 +154,7 @@ export function TagCardImages({
 		>
 			{/* Fondo estilizado */}
 			<div
-				className="-z-10 absolute inset-0"
+				className="absolute inset-0 -z-10"
 				style={{
 					background: tcgMode ? `linear-gradient(90deg, ${primaryColor}10, ${secondaryColor}10)` : `${primaryColor}05`,
 				}}

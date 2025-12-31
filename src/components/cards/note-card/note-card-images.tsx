@@ -127,7 +127,7 @@ export const NoteCardImages = memo(function NoteCardImagesComponent({
 
 			{/* Decoraci?n TCG por debajo de las im?genes */}
 			{tcgMode && (
-				<div className="-bottom-1 absolute inset-x-0 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+				<div className="absolute inset-x-0 -bottom-1 h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent" />
 			)}
 		</div>
 	);

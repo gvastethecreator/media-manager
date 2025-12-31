@@ -5,8 +5,8 @@
  * @created 2025-10-11 - Fase 2 Effect Implementation
  */
 
-import { Effect, Schema } from 'effect';
 import { sql } from 'drizzle-orm';
+import { Effect, Schema } from 'effect';
 
 // ============= Type Definitions =============
 

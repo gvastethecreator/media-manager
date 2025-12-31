@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useAudioStore } from '@/store/entities/audio';
 import { useDocumentStore } from '@/store/entities/document';
@@ -114,7 +114,10 @@ export function AllFilesView(_: ViewProps) {
 	);
 	const error = imagesError || videosError || audiosError || documentsError || jsonError || file3DsError;
 	const fileCount = allFiles.length;
-	const browserItems = useMemo(() => allFiles.map((f) => toBrowserItem(f as unknown as Record<string, unknown>)), [allFiles]);
+	const browserItems = useMemo(
+		() => allFiles.map((f) => toBrowserItem(f as unknown as Record<string, unknown>)),
+		[allFiles]
+	);
 
 	useEffect(() => {
 		// Cargar todos los tipos de archivos solo una vez al montar el componente
@@ -277,11 +280,7 @@ export function AllFilesView(_: ViewProps) {
 
 	return (
 		<div className="h-full">
-			<FileBrowser
-				items={browserItems}
-				onItemClick={handleFileClick}
-				onItemDoubleClick={handleFileDoubleClick}
-			/>
+			<FileBrowser items={browserItems} onItemClick={handleFileClick} onItemDoubleClick={handleFileDoubleClick} />
 		</div>
 	);
 }

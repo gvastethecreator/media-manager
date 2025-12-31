@@ -5,11 +5,11 @@
  */
 
 import type { StateCreator } from 'zustand';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { CharacterWithStats } from '@/types/entities/character';
 import { CharacterSortOption } from '@/types/entities/character/enums';
 import type { CharacterCoreSlice, CharacterState } from '../types';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 const logger = serverLogger.withContext('CharacterCoreSlice');
 

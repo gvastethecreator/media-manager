@@ -2,7 +2,7 @@ import { ScrollText } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback';
-import { FileBrowser, toBrowserItem, type BrowserItem } from '@/components/features/file-browser-new';
+import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
 import { BaseContentView } from '@/components/views/base';
 import { useNoteImages } from '@/lib/api/notes';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -34,7 +34,10 @@ export function NoteContentView() {
 	);
 
 	const headerTitle = useMemo(
-		() => (selectedNote?.title || selectedNote?.name ? `Imágenes de la nota: ${selectedNote?.title ?? selectedNote?.name}` : 'Selecciona una nota'),
+		() =>
+			selectedNote?.title || selectedNote?.name
+				? `Imágenes de la nota: ${selectedNote?.title ?? selectedNote?.name}`
+				: 'Selecciona una nota',
 		[selectedNote?.title, selectedNote?.name]
 	);
 

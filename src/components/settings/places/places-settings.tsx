@@ -56,8 +56,8 @@ export function PlacesSettings() {
 					matches &&
 					Boolean(
 						place.name.toLowerCase().includes(normalizedQuery) ||
-							place.description?.toLowerCase().includes(normalizedQuery) ||
-							place.region?.toLowerCase().includes(normalizedQuery)
+						place.description?.toLowerCase().includes(normalizedQuery) ||
+						place.region?.toLowerCase().includes(normalizedQuery)
 					);
 			}
 
@@ -145,7 +145,7 @@ export function PlacesSettings() {
 	// Contenido condicional basado en estado de carga
 	if (isLoading) {
 		return (
-			<Card className="rounded-sm border-none bg-muted/30">
+			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<CardContent>
 					<div className="flex items-center justify-center gap-2 p-3">
 						<Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
@@ -158,7 +158,7 @@ export function PlacesSettings() {
 
 	if (error) {
 		return (
-			<Card className="rounded-sm border-none bg-muted/30">
+			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<CardContent>
 					<EmptyState
 						actions={<Button onClick={() => window.location.reload()}>Intentar de nuevo</Button>}
@@ -175,10 +175,10 @@ export function PlacesSettings() {
 		<div className="grid grid-cols-12 gap-3">
 			{/* Panel izquierdo: Lista de lugares */}
 			<div className="col-span-12 md:col-span-5 lg:col-span-4">
-				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-dt-md border-none bg-muted/30 shadow-sm">
 					<CardHeader className="space-y-1 px-3 py-2">
 						<div className="flex items-center justify-between">
-							<CardTitle className="flex items-center text-sm">
+							<CardTitle className="flex items-center text-heading-sm">
 								Lugares ({filteredPlaces.length})
 								{filteredPlaces.length !== places.length && (
 									<Badge className="ml-2 text-[10px]" variant="outline">
@@ -291,7 +291,7 @@ export function PlacesSettings() {
 								</Button>
 							</div>
 						</div>
-						<div className="flex gap-2 text-muted-foreground text-xs">
+						<div className="flex gap-2 text-caption text-muted-foreground">
 							<span>{stats.totalPlaces} lugares</span>
 							<span>•</span>
 							<span>{stats.totalImages} imágenes</span>
@@ -335,7 +335,7 @@ export function PlacesSettings() {
 												type="button"
 											>
 												<div
-													className="flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-md text-white"
+													className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-white"
 													style={{
 														backgroundColor: place.color || '#888',
 													}}
@@ -343,8 +343,8 @@ export function PlacesSettings() {
 													<span className="text-xs">{place.emoji}</span>
 												</div>
 												<div className="min-w-0 flex-1">
-													<h4 className="truncate font-medium text-xs">{place.name}</h4>
-													<div className="flex items-center gap-1 text-[10px] text-muted-foreground">
+													<h4 className="truncate font-medium text-body-sm">{place.name}</h4>
+													<div className="flex items-center gap-1 text-caption text-muted-foreground">
 														<span>{place._count?.images || 0} imágenes</span>
 														{place.region && (
 															<>
@@ -378,12 +378,12 @@ export function PlacesSettings() {
 
 			{/* Panel derecho: Formulario y Preview */}
 			<div className="col-span-12 md:col-span-7 lg:col-span-8">
-				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-sm border-none bg-muted/30">
+				<Card className="flex h-[calc(100vh-8rem)] flex-col rounded-dt-md border-none bg-muted/30 shadow-sm">
 					<CardHeader className="px-3 py-2">
 						<div className="flex items-center justify-between">
 							<div>
-								<CardTitle className="text-sm">{isEditing ? 'Editar Lugar' : 'Nuevo Lugar'}</CardTitle>
-								<CardDescription className="text-xs">
+								<CardTitle className="text-heading-sm">{isEditing ? 'Editar Lugar' : 'Nuevo Lugar'}</CardTitle>
+								<CardDescription className="text-caption">
 									{isEditing
 										? 'Modifica los detalles del lugar seleccionado'
 										: 'Completa el formulario para crear un nuevo lugar'}
@@ -428,10 +428,10 @@ export function PlacesSettings() {
 									/>
 								</div>
 								<div className="hidden flex-col items-center justify-start lg:flex">
-									<h3 className="mb-2 font-medium text-xs">Vista Previa</h3>
-									<div className="w-[220px] transition-all duration-300">
+									<h3 className="mb-2 font-medium text-caption">Vista Previa</h3>
+									<div className="w-55 transition-all duration-300">
 										{previewData || selectedPlace ? (
-											<div className="flex flex-col rounded-lg border bg-background p-4">
+											<div className="flex flex-col rounded-dt-md border bg-background p-4">
 												<div
 													className="mb-3 flex aspect-video w-full items-center justify-center rounded-md"
 													style={{ backgroundColor: previewData?.color || selectedPlace?.color || '#3b82f6' }}
@@ -479,9 +479,9 @@ export function PlacesSettings() {
 												)}
 											</div>
 										) : (
-											<div className="flex h-[260px] flex-col items-center justify-center rounded-lg border border-dashed bg-muted/50">
+											<div className="flex h-65 flex-col items-center justify-center rounded-dt-md border border-dashed bg-muted/50">
 												<MapPin className="h-7 w-7 text-muted-foreground/50" />
-												<p className="mt-2 text-[10px] text-muted-foreground">Vista previa</p>
+												<p className="mt-2 text-caption text-muted-foreground">Vista previa</p>
 											</div>
 										)}
 									</div>

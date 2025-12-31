@@ -1,6 +1,6 @@
 import { type Request, type Response, Router } from 'express';
-import { serverLogger } from '@/lib/logger/server-logger';
 import { z } from 'zod';
+import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	createDocument,
 	deleteDocument,

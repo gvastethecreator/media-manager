@@ -77,12 +77,7 @@ export class TagHasRelationsError extends Data.TaggedError('TagHasRelationsError
 /**
  * Union type para todos los errores posibles del TagService
  */
-export type TagError =
-	| TagNotFound
-	| TagNameConflict
-	| TagDatabaseError
-	| TagValidationError
-	| TagHasRelationsError;
+export type TagError = TagNotFound | TagNameConflict | TagDatabaseError | TagValidationError | TagHasRelationsError;
 
 /**
  * Helper para crear TagDatabaseError desde errores desconocidos

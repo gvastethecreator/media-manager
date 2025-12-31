@@ -2,13 +2,13 @@ import React, { memo, useCallback, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from '@/components/ui/motion-shim';
 import { useRecentGroupMedia } from '@/lib/api/groups';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import type { GroupCardProps } from './group-card.types';
 import { GroupCardContent } from './group-card-content';
 import { GroupCardFooter } from './group-card-footer';
 import { GroupCardHeader } from './group-card-header';
 import { GroupCardImages } from './group-card-images';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 export const GroupCard = memo(function GroupCard({
 	group,
@@ -56,12 +56,12 @@ export const GroupCard = memo(function GroupCard({
 	// Preparar media para la galería (usar props o datos cargados)
 	const recentImages = useMemo(() => {
 		if (group?.recentImages?.length) return group.recentImages;
-		return mediaData?.filter(m => !m.isVideo).map(m => m.thumbnailUrl) || [];
+		return mediaData?.filter((m) => !m.isVideo).map((m) => m.thumbnailUrl) || [];
 	}, [group?.recentImages, mediaData]);
 
 	const recentVideos = useMemo(() => {
 		if (group?.recentVideos?.length) return group.recentVideos;
-		return mediaData?.filter(m => m.isVideo).map(m => m.thumbnailUrl) || [];
+		return mediaData?.filter((m) => m.isVideo).map((m) => m.thumbnailUrl) || [];
 	}, [group?.recentVideos, mediaData]);
 
 	const allMedia = useMemo(() => {

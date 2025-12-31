@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDebounce, useRaf } from '@/hooks/useThrottle';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useSelectionStore } from '@/store/selection.store';
 import type { MediaItem } from '../../components/media-thumbnail';
 import type { ClickModifiers } from '../../types/file-browser.types';
 import { generateThumbnailUrl, getFallbackIcon, useImageCache } from './canvas-common';
 import { CanvasRenderConfig } from './canvas-config';
-import { clientLogger } from '@/lib/logger/client-logger';
 
 export interface MasonryCanvasProps {
 	items: MediaItem[];

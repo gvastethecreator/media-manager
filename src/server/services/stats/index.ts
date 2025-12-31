@@ -2,43 +2,41 @@
  * Barrel export para módulos de stats service
  */
 
-// Types
-export type {
-	GeneralStats,
-	StatsResponse,
-	ExtendedStats,
-	CountRow,
-	SizeRow,
-	MediaCounts,
-	OrgCounts,
-	WorldCounts,
-	SystemCounts,
-	SizeSums,
-	TopTag,
-	EntityWithImageCount,
-	CollectionWithData,
-	TagWithData,
-	EntityWithEmoji,
-	EntitySearchResult,
-} from './stats.types';
-
 // Constants
 export {
+	createStatsError,
 	STATS_CACHE_TAG,
 	STATS_REVALIDATE_SECONDS,
-	statsLogger,
 	StatsErrorCode,
-	createStatsError,
 	type StatsErrorCode as StatsErrorCodeType,
+	statsLogger,
 } from './stats.constants';
-
 // Queries
 export {
+	buildDiskUsage,
 	fetchMediaCounts,
 	fetchOrgCounts,
-	fetchWorldCounts,
-	fetchSystemCounts,
 	fetchSizeSums,
-	buildDiskUsage,
+	fetchSystemCounts,
+	fetchWorldCounts,
 	formatBytes,
 } from './stats.queries';
+// Types
+export type {
+	CollectionWithData,
+	CountRow,
+	EntitySearchResult,
+	EntityWithEmoji,
+	EntityWithImageCount,
+	ExtendedStats,
+	GeneralStats,
+	MediaCounts,
+	OrgCounts,
+	SizeRow,
+	SizeSums,
+	StatsResponse,
+	SystemCounts,
+	TagWithData,
+	TopTag,
+	WorldCounts,
+} from './stats.types';

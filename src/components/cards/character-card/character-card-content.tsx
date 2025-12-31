@@ -98,7 +98,7 @@ export function CharacterCardContent({
 				<div className="relative line-clamp-3 text-sm italic">
 					{tcgMode && (
 						<div
-							className="-left-2 -right-2 -top-1 -bottom-1 absolute rounded opacity-10"
+							className="absolute -top-1 -right-2 -bottom-1 -left-2 rounded opacity-10"
 							style={{
 								background: `linear-gradient(135deg, ${primaryColor}70 0%, transparent 60%)`,
 							}}
