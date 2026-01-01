@@ -13,7 +13,7 @@ export const DEFAULT_VIEW_MODE: ViewMode = 'grid';
 /**
  * Tamaño de página por defecto
  */
-export const DEFAULT_PAGE_SIZE = 150;
+export const DEFAULT_PAGE_SIZE = 20;
 
 /**
  * Tamaño máximo de página

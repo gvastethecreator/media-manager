@@ -7,10 +7,10 @@
 
 import { Schema } from '@effect/schema';
 import * as crypto from 'crypto';
-import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
+import { and, asc, count, desc, eq, isNotNull, like, or } from 'drizzle-orm';
 import { Context, Effect, Layer, pipe } from 'effect';
 import { db } from '@/lib/drizzle';
-import { imageTags, tags } from '@/lib/drizzle/schema';
+import { images, imageTags, tags } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	fromUnknownError,
@@ -47,6 +47,13 @@ export interface TagServiceInterface {
 	readonly toggleFavorite: (id: string) => Effect.Effect<Tag, TagError>;
 	readonly getImageCount: (id: string) => Effect.Effect<number, TagError>;
 	readonly getRelationsCounts: (id: string) => Effect.Effect<TagCounts, TagError>;
+	readonly getImages: (
+		id: string
+	) => Effect.Effect<Array<{ id: string; name: string | null; path: string; thumbnailPath: string | null }>, TagError>;
+	readonly getThumbnails: (
+		id: string,
+		limit?: number
+	) => Effect.Effect<Array<{ id: string; name: string | null; thumbnailUrl: string }>, TagError>;
 }
 
 /**
@@ -558,6 +565,80 @@ const make = (): TagServiceInterface => {
 			return yield* getById(id);
 		});
 
+	/**
+	 * Obtiene las imágenes asociadas a un tag
+	 */
+	const getImages = (
+		id: string
+	): Effect.Effect<Array<{ id: string; name: string | null; path: string; thumbnailPath: string | null }>, TagError> =>
+		Effect.gen(function* () {
+			logger.info(`🖼️ Obteniendo imágenes para tag: ${id}`);
+
+			// Verificar que el tag existe
+			yield* getById(id);
+
+			const tagImages = yield* Effect.tryPromise({
+				try: async () => {
+					return db
+						.select({
+							id: images.id,
+							name: images.name,
+							path: images.path,
+							thumbnailPath: images.thumbnail,
+						})
+						.from(images)
+						.innerJoin(imageTags, eq(imageTags.A, images.id))
+						.where(eq(imageTags.B, id))
+						.orderBy(desc(images.updatedAt));
+				},
+				catch: (error) => fromUnknownError('getImages', error),
+			});
+
+			logger.info(`✅ Obtenidas ${tagImages.length} imágenes para tag ${id}`);
+			return tagImages;
+		});
+
+	/**
+	 * Obtiene thumbnails de imágenes asociadas a un tag
+	 */
+	const getThumbnails = (
+		id: string,
+		limit = 6
+	): Effect.Effect<Array<{ id: string; name: string | null; thumbnailUrl: string }>, TagError> =>
+		Effect.gen(function* () {
+			logger.info(`🔄 Obteniendo thumbnails para tag: ${id}, límite: ${limit}`);
+
+			// Verificar que el tag existe
+			yield* getById(id);
+
+			const tagImages = yield* Effect.tryPromise({
+				try: async () => {
+					return db
+						.select({
+							id: images.id,
+							name: images.name,
+							path: images.path,
+						})
+						.from(images)
+						.innerJoin(imageTags, eq(imageTags.A, images.id))
+						.where(and(eq(imageTags.B, id), isNotNull(images.thumbnail)))
+						.orderBy(desc(images.updatedAt))
+						.limit(limit);
+				},
+				catch: (error) => fromUnknownError('getThumbnails', error),
+			});
+
+			// Mapear a formato de respuesta con URL de thumbnail
+			const thumbnails = tagImages.map((image) => ({
+				id: image.id,
+				name: image.name,
+				thumbnailUrl: `/api/images/${image.id}/thumbnail`,
+			}));
+
+			logger.info(`✅ Obtenidos ${thumbnails.length} thumbnails para tag ${id}`);
+			return thumbnails;
+		});
+
 	// Retornar la implementación del servicio
 	return {
 		getById,
@@ -569,6 +650,8 @@ const make = (): TagServiceInterface => {
 		toggleFavorite,
 		getImageCount,
 		getRelationsCounts,
+		getImages,
+		getThumbnails,
 	};
 };
 

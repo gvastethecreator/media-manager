@@ -301,13 +301,14 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 
 		// Imágenes
 		// NOTA: No seleccionamos `thumbnail` (base64) - generamos URL desde ID en mapRowToFolderFile
+		// OPTIMIZACIÓN: Usamos json_remove para excluir el thumbnail del metadata JSON si existe
 		if (fileTypes.includes('image')) {
 			unionQueries.push(sql`
 				SELECT
 					id, name, path, size, createdAt, updatedAt, folderId, 'image' as entityType,
 					NULL as extension,
 					NULL as thumbnail,
-					metadata,
+					json_remove(metadata, '$.thumbnail') as metadata,
 					isFavorite,
 					0 as views
 				FROM ${images}
@@ -368,7 +369,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 					id, name, path, size, createdAt, updatedAt, folderId, 'json' as entityType,
 					extension,
 					NULL as thumbnail,
-					metadata,
+					NULL as metadata,
 					isFavorite,
 					0 as views
 				FROM ${jsonFiles}

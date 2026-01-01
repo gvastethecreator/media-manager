@@ -16,6 +16,20 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 			// Carpetas padre
 			// Más subcarpetas para demostrar jerarquía
 			{
+				id: 'test-files',
+				name: 'Test Files',
+				description: 'Archivos de prueba para desarrollo',
+				path: 'D:\\DEV\\image-manager\\test-files',
+				emoji: '🧪',
+				totalFiles: 0,
+				totalSize: 0,
+				lastIndexed: null,
+				color: '#6366f1',
+				isFavorite: false,
+				parentId: null,
+				presetId: null,
+			},
+			{
 				id: 'posters',
 				name: 'Posters',
 				description: 'Fotografías de posters',
