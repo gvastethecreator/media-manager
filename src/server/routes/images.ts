@@ -5,7 +5,22 @@ import { Router } from 'express';
 import { z } from 'zod';
 import { normalizeQuality } from '@/lib/config/thumbnail.config';
 import { db } from '@/lib/drizzle';
-import { folders, images } from '@/lib/drizzle/schema/index';
+import {
+	folders,
+	imageAlbums,
+	imageCharacters,
+	imageCollections,
+	imageConcepts,
+	imageNotes,
+	imagePlaces,
+	imagePrompts,
+	imageProperties,
+	images,
+	imageTags,
+	imageTasks,
+	imageWildcards,
+	imageWorldItems,
+} from '@/lib/drizzle/schema/index';
 import { imageService } from '@/services/image/image.service';
 import { processImage } from '../services/image-processing.service';
 import { verifySignedToken } from '../services/thumbnail.service';
@@ -14,6 +29,22 @@ const router = Router();
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { ImageFiltersSchema } from '@/types/entities/image/schema';
+
+// Mapeo de entityType a tabla de relación para imágenes
+const imageRelationTables: Record<string, any> = {
+	album: imageAlbums,
+	tag: imageTags,
+	collection: imageCollections,
+	character: imageCharacters,
+	place: imagePlaces,
+	concept: imageConcepts,
+	prompt: imagePrompts,
+	note: imageNotes,
+	wildcard: imageWildcards,
+	worldItem: imageWorldItems,
+	property: imageProperties,
+	task: imageTasks,
+};
 
 // Incluye estándar para imágenes con relaciones
 const imageInclude = {
@@ -425,28 +456,132 @@ router.get('/signed/:token', async (req, res) => {
 });
 
 // POST /api/images - Crear nueva imagen
-router.post('/', async (_req, res) => {
-	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
+router.post('/', async (req, res) => {
+	try {
+		const { name, path, size, width, height, hash, folderId, metadata } = req.body;
+
+		// Validación básica
+		const hasRequiredFields = Boolean(name) && Boolean(path) && Boolean(folderId);
+		if (!hasRequiredFields) {
+			res.status(400).json({ error: 'Campos requeridos: name, path, folderId' });
+			return;
+		}
+
+		const newImage = await imageService.createImage({
+			name,
+			path,
+			size: size || 0,
+			width: width || 0,
+			height: height || 0,
+			hash: hash || '',
+			folderId,
+			metadata,
+		});
+
+		res.status(201).json(newImage);
+	} catch (error) {
+		serverLogger.error('Error creating image:', error);
+		res.status(500).json({ error: 'Error al crear imagen' });
+	}
 });
 
 // PUT /api/images/:id - Actualizar imagen
-router.put('/:id', async (_req, res) => {
-	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
+router.put('/:id', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const updateData = req.body;
+
+		if (!id) {
+			res.status(400).json({ error: 'ID de imagen requerido' });
+			return;
+		}
+
+		const updatedImage = await imageService.updateImage(id, updateData);
+		res.json(updatedImage);
+	} catch (error: any) {
+		serverLogger.error('Error updating image:', error);
+		if (error.code === 'NOT_FOUND') {
+			res.status(404).json({ error: 'Imagen no encontrada' });
+			return;
+		}
+		res.status(500).json({ error: 'Error al actualizar imagen' });
+	}
 });
 
 // DELETE /api/images/:id - Eliminar imagen
-router.delete('/:id', async (_req, res) => {
-	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
+router.delete('/:id', async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		if (!id) {
+			res.status(400).json({ error: 'ID de imagen requerido' });
+			return;
+		}
+
+		await imageService.deleteImage(id);
+		res.status(204).send();
+	} catch (error: any) {
+		serverLogger.error('Error deleting image:', error);
+		if (error.code === 'NOT_FOUND') {
+			res.status(404).json({ error: 'Imagen no encontrada' });
+			return;
+		}
+		res.status(500).json({ error: 'Error al eliminar imagen' });
+	}
 });
 
 // POST /api/images/:id/relations/:entityType/:entityId - Agregar relación
-router.post('/:id/relations/:entityType/:entityId', async (_req, res) => {
-	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
+router.post('/:id/relations/:entityType/:entityId', async (req, res) => {
+	try {
+		const { id, entityType, entityId } = req.params;
+
+		const hasRequiredParams = Boolean(id) && Boolean(entityType) && Boolean(entityId);
+		if (!hasRequiredParams) {
+			res.status(400).json({ error: 'Parámetros requeridos: id, entityType, entityId' });
+			return;
+		}
+
+		const relationTable = imageRelationTables[entityType];
+		if (!relationTable) {
+			res.status(400).json({ error: `Tipo de entidad no soportado: ${entityType}` });
+			return;
+		}
+
+		// Insertar relación (ignorar si ya existe)
+		await db.insert(relationTable).values({ A: id, B: entityId }).onConflictDoNothing();
+
+		res.status(201).json({ success: true, imageId: id, entityType, entityId });
+	} catch (error) {
+		serverLogger.error('Error adding image relation:', error);
+		res.status(500).json({ error: 'Error al agregar relación' });
+	}
 });
 
 // DELETE /api/images/:id/relations/:entityType/:entityId - Eliminar relación
-router.delete('/:id/relations/:entityType/:entityId', async (_req, res) => {
-	res.status(501).json({ error: 'Método de escritura pendiente de migración a Drizzle' });
+router.delete('/:id/relations/:entityType/:entityId', async (req, res) => {
+	try {
+		const { id, entityType, entityId } = req.params;
+
+		const hasRequiredParams = Boolean(id) && Boolean(entityType) && Boolean(entityId);
+		if (!hasRequiredParams) {
+			res.status(400).json({ error: 'Parámetros requeridos: id, entityType, entityId' });
+			return;
+		}
+
+		const relationTable = imageRelationTables[entityType];
+		if (!relationTable) {
+			res.status(400).json({ error: `Tipo de entidad no soportado: ${entityType}` });
+			return;
+		}
+
+		// Eliminar relación
+		await db.delete(relationTable).where(and(eq(relationTable.A, id), eq(relationTable.B, entityId)));
+
+		res.status(204).send();
+	} catch (error) {
+		serverLogger.error('Error removing image relation:', error);
+		res.status(500).json({ error: 'Error al eliminar relación' });
+	}
 });
 
 // POST /api/images/:id/process - Procesar imagen

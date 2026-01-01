@@ -6,7 +6,7 @@
 import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, inArray, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { prompts } from '@/lib/drizzle/schema/index';
+import { imagePrompts, images, prompts } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
@@ -583,14 +583,25 @@ export const getPromptCountService = async (): Promise<number> => {
 /**
  * Obtiene las imágenes asociadas a un prompt
  */
-export const getPromptImagesService = async (promptId: string) => {
+export const getPromptImagesService = async (
+	promptId: string
+): Promise<Array<{ id: string; name: string; path: string; thumbnailPath?: string | null }>> => {
 	try {
 		logger.info(`🖼️ Obteniendo imágenes del prompt: ${promptId}`);
 
-		// TODO: Implementar cuando existan las tablas de relación
-		// Por ahora retornamos array vacío
-		logger.warn('⚠️ getPromptImages no implementado - falta tabla de relación');
-		return [];
+		const result = await db
+			.select({
+				id: images.id,
+				name: images.name,
+				path: images.path,
+				thumbnailPath: images.thumbnail,
+			})
+			.from(imagePrompts)
+			.innerJoin(images, eq(imagePrompts.A, images.id))
+			.where(eq(imagePrompts.B, promptId))
+			.orderBy(desc(images.createdAt));
+
+		return result;
 	} catch (error) {
 		logger.error('❌ Error al obtener imágenes del prompt', { error, promptId });
 		throw createPromptError(
@@ -604,14 +615,27 @@ export const getPromptImagesService = async (promptId: string) => {
 /**
  * Obtiene las imágenes recientes de un prompt
  */
-export const getRecentPromptImagesService = async (promptId: string, _limit = 6) => {
+export const getRecentPromptImagesService = async (
+	promptId: string,
+	limit = 6
+): Promise<Array<{ id: string; name: string; path: string; thumbnailPath?: string | null }>> => {
 	try {
 		logger.info(`🖼️ Obteniendo imágenes recientes del prompt: ${promptId}`);
 
-		// TODO: Implementar cuando existan las tablas de relación
-		// Por ahora retornamos array vacío
-		logger.warn('⚠️ getRecentPromptImages no implementado - falta tabla de relación');
-		return [];
+		const result = await db
+			.select({
+				id: images.id,
+				name: images.name,
+				path: images.path,
+				thumbnailPath: images.thumbnail,
+			})
+			.from(imagePrompts)
+			.innerJoin(images, eq(imagePrompts.A, images.id))
+			.where(eq(imagePrompts.B, promptId))
+			.orderBy(desc(images.createdAt))
+			.limit(limit);
+
+		return result;
 	} catch (error) {
 		logger.error('❌ Error al obtener imágenes recientes del prompt', { error, promptId });
 		throw createPromptError(

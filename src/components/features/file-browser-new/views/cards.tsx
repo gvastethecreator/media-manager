@@ -6,6 +6,7 @@
 import { CornerUpLeft, Folder } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { formatFileSize } from '@/lib/utils/format.utils';
 import { type MediaItem, MediaThumbnail } from '../components/media-thumbnail';
 import type {
 	BrowserEntityType,
@@ -207,13 +208,7 @@ function CardItem({
 	);
 }
 
-function formatFileSize(bytes: number): string {
-	if (bytes === 0) return '0 B';
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`;
-}
+// formatFileSize importada desde @/lib/utils/format.utils
 
 export function CardsView({
 	items,

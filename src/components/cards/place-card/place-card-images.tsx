@@ -126,10 +126,8 @@ export function PlaceCardImages({
 		<div
 			aria-label={getImageAriaLabel()}
 			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-48', tcgMode && 'border-white/10 border-b')}
-			onBlur={handleMouseLeave}
-			onFocus={handleMouseLeave}
-			onMouseLeave={handleMouseLeave}
-			onMouseMove={handleMouseMove}
+			onPointerLeave={handleMouseLeave}
+			onPointerMove={handleMouseMove}
 			role="img"
 		>
 			{/* Fondo decorativo para cartas TCG */}
@@ -182,11 +180,13 @@ export function PlaceCardImages({
 							'h-full w-full object-cover',
 							rarityLevel >= 5 && tcgMode && holographicEffect && 'transition-all duration-500'
 						)}
+						height={compact ? 96 : 192}
 						src={displayImage?.thumbnailUrl || ''}
 						style={{
 							...holographicStyle,
 							transformStyle: 'preserve-3d',
 						}}
+						width={192}
 					/>
 
 					{/* Efecto holográfico de brillo */}
@@ -244,10 +244,10 @@ export function PlaceCardImages({
 					/>
 
 					{/* Efecto viñeta */}
-					<div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/30" />
+					<div className="absolute inset-0 bg-linear-to-b from-transparent via-transparent to-black/30" />
 
 					{/* Efecto de brillo superior */}
-					<div className="absolute top-0 right-0 left-0 h-[20%] bg-gradient-to-b from-white/10 to-transparent" />
+					<div className="absolute top-0 right-0 left-0 h-[20%] bg-linear-to-b from-white/10 to-transparent" />
 				</div>
 			)}
 		</div>

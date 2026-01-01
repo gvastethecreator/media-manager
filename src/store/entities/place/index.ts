@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { createJSONStorage, persist } from 'zustand/middleware';
 // Refactor 2025-07: se usa cliente API para lugares
+import { apiClient } from '@/lib/api/client';
 import { getPlacesFromApi, type PlaceSearchOptions } from '@/lib/api/client/place.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { toastService } from '@/lib/ui/toast';
@@ -196,15 +197,18 @@ export const usePlaceStore = create<PlaceStore>()(
 			addImageToPlace: async (placeId: string, imageId: string) => {
 				try {
 					placeLogger.info('➕ Añadiendo imagen al lugar:', { placeId, imageId });
-					// TODO: Implementar addImageToPlace en actions
-					// await addImageToPlace(placeId, imageId);
-					// const updatedPlace = await getPlace(placeId);
-					// set((state) => ({
-					// 	places: state.places.map((place) => (place.id === placeId ? updatedPlace : place)),
-					// }));
 
-					placeLogger.error('❌ addImageToPlace no está implementado');
-					toastService.system.error('Función no implementada');
+					await apiClient.post(`/places/${placeId}/images/${imageId}`);
+
+					// Actualizar el contador de imágenes del lugar en el estado local
+					set((state) => ({
+						places: state.places.map((place) =>
+							place.id === placeId ? { ...place, totalImages: (place.totalImages || 0) + 1 } : place
+						),
+					}));
+
+					placeLogger.info('✅ Imagen añadida al lugar correctamente');
+					toastService.system.success('Imagen añadida al lugar');
 				} catch (error) {
 					placeLogger.error('❌ Error al añadir imagen al lugar:', error);
 					toastService.system.error('Error al añadir imagen al lugar');
@@ -213,15 +217,18 @@ export const usePlaceStore = create<PlaceStore>()(
 			removeImageFromPlace: async (placeId: string, imageId: string) => {
 				try {
 					placeLogger.info('➖ Eliminando imagen del lugar:', { placeId, imageId });
-					// TODO: Implementar removeImageFromPlace en actions
-					// await removeImageFromPlace(placeId, imageId);
-					// const updatedPlace = await getPlace(placeId);
-					// set((state) => ({
-					// 	places: state.places.map((place) => (place.id === placeId ? updatedPlace : place)),
-					// }));
 
-					placeLogger.error('❌ removeImageFromPlace no está implementado');
-					toastService.system.error('Función no implementada');
+					await apiClient.delete(`/places/${placeId}/images/${imageId}`);
+
+					// Actualizar el contador de imágenes del lugar en el estado local
+					set((state) => ({
+						places: state.places.map((place) =>
+							place.id === placeId ? { ...place, totalImages: Math.max(0, (place.totalImages || 0) - 1) } : place
+						),
+					}));
+
+					placeLogger.info('✅ Imagen eliminada del lugar correctamente');
+					toastService.system.success('Imagen eliminada del lugar');
 				} catch (error) {
 					placeLogger.error('❌ Error al eliminar imagen del lugar:', error);
 					toastService.system.error('Error al eliminar imagen del lugar');

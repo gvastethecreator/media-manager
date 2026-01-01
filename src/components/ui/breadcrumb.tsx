@@ -33,6 +33,12 @@ const BreadcrumbItem = React.forwardRef<HTMLLIElement, React.ComponentPropsWitho
 );
 BreadcrumbItem.displayName = 'BreadcrumbItem';
 
+/**
+ * BreadcrumbLink con Design Tokens v2
+ * - Focus visible mejorado para accesibilidad
+ * - Transiciones suaves
+ * - Underline animado en hover
+ */
 const BreadcrumbLink = React.forwardRef<
 	HTMLAnchorElement,
 	React.ComponentPropsWithoutRef<'a'> & {
@@ -41,18 +47,38 @@ const BreadcrumbLink = React.forwardRef<
 >(({ asChild, className, ...props }, ref) => {
 	const Comp = asChild ? Slot : 'a';
 
-	return <Comp className={cn('transition-colors hover:text-foreground', className)} ref={ref} {...props} />;
+	return (
+		<Comp
+			className={cn(
+				'relative cursor-pointer rounded-dt-xs px-0.5 transition-all duration-dt-fast',
+				// Colors
+				'text-muted-foreground hover:text-foreground',
+				// Underline animado
+				'after:absolute after:inset-x-0 after:bottom-0 after:h-px after:origin-left after:scale-x-0 after:bg-current after:transition-transform after:duration-dt-fast',
+				'hover:after:scale-x-100',
+				// Focus visible - Design Tokens v2
+				'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1',
+				className
+			)}
+			ref={ref}
+			{...props}
+		/>
+	);
 });
 BreadcrumbLink.displayName = 'BreadcrumbLink';
 
+/**
+ * BreadcrumbPage con Design Tokens v2
+ * - Estilo visual distintivo para página actual
+ * - Font weight semibold para jerarquía
+ */
 const BreadcrumbPage = React.forwardRef<HTMLSpanElement, React.ComponentPropsWithoutRef<'span'>>(
 	({ className, ...props }, ref) => (
 		<span
 			aria-current="page"
 			aria-disabled="true"
-			className={cn('font-normal text-foreground', className)}
+			className={cn('rounded-dt-xs px-0.5 font-medium text-foreground', className)}
 			ref={ref}
-			role="link"
 			{...props}
 		/>
 	)

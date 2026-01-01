@@ -12,7 +12,12 @@ interface SkeletonItemProps {
 }
 
 function SkeletonItem({ size, className }: SkeletonItemProps) {
-	return <div className={cn('animate-skeleton rounded-dt-md bg-muted/50', className)} style={{ width: size, height: size }} />;
+	return (
+		<div
+			className={cn('animate-skeleton rounded-dt-md bg-muted/50', className)}
+			style={{ width: size, height: size }}
+		/>
+	);
 }
 
 function SkeletonRow({ className }: { className?: string }) {

@@ -657,21 +657,77 @@ export class TagService {
 		}
 	}
 
-	async getTagImages(id: string): Promise<any[]> {
-		// TODO: Implementar lógica para obtener imágenes de la etiqueta
+	async getTagImages(
+		id: string
+	): Promise<Array<{ id: string; name: string; path: string; thumbnailPath?: string | null }>> {
 		logger.info(`Obteniendo imágenes de la etiqueta ${id}`);
-		return [];
+		try {
+			const result = await db
+				.select({
+					id: images.id,
+					name: images.name,
+					path: images.path,
+					thumbnailPath: images.thumbnail,
+				})
+				.from(imageTags)
+				.innerJoin(images, eq(imageTags.A, images.id))
+				.where(eq(imageTags.B, id))
+				.orderBy(desc(images.createdAt));
+
+			return result;
+		} catch (error) {
+			logger.error(`Error obteniendo imágenes de la etiqueta ${id}:`, error);
+			return [];
+		}
 	}
 
-	async getRecentTagImages(id: string, limit: number): Promise<any[]> {
-		// TODO: Implementar lógica para obtener imágenes recientes de la etiqueta
+	async getRecentTagImages(
+		id: string,
+		limit: number
+	): Promise<Array<{ id: string; name: string; path: string; thumbnailPath?: string | null }>> {
 		logger.info(`Obteniendo imágenes recientes de la etiqueta ${id} (limit: ${limit})`);
-		return [];
+		try {
+			const result = await db
+				.select({
+					id: images.id,
+					name: images.name,
+					path: images.path,
+					thumbnailPath: images.thumbnail,
+				})
+				.from(imageTags)
+				.innerJoin(images, eq(imageTags.A, images.id))
+				.where(eq(imageTags.B, id))
+				.orderBy(desc(images.createdAt))
+				.limit(limit);
+
+			return result;
+		} catch (error) {
+			logger.error(`Error obteniendo imágenes recientes de la etiqueta ${id}:`, error);
+			return [];
+		}
 	}
 
 	async addImageToTag(tagId: string, imageId: string): Promise<void> {
-		// TODO: Implementar lógica para agregar imagen a etiqueta
 		logger.info(`Agregando imagen ${imageId} a etiqueta ${tagId}`);
+		try {
+			// Verificar que no exista ya
+			const existing = await db
+				.select()
+				.from(imageTags)
+				.where(and(eq(imageTags.A, imageId), eq(imageTags.B, tagId)))
+				.limit(1);
+
+			if (existing.length > 0) {
+				logger.info('La imagen ya está asociada a la etiqueta');
+				return;
+			}
+
+			await db.insert(imageTags).values({ A: imageId, B: tagId });
+			logger.info(`✅ Imagen ${imageId} agregada a etiqueta ${tagId}`);
+		} catch (error) {
+			logger.error(`Error agregando imagen ${imageId} a etiqueta ${tagId}:`, error);
+			throw error;
+		}
 	}
 
 	async getTagThumbnails(
