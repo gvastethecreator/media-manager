@@ -206,7 +206,7 @@ export function useFolderFilesPaginated(options: UseFolderFilesPaginatedOptions)
 	const {
 		folderId,
 		includeSubfolders = false,
-		pageSize = 150,
+		pageSize = 20,
 		search,
 		sortBy = 'name',
 		sortOrder = 'asc',
@@ -242,12 +242,12 @@ export function useFolderFilesPaginated(options: UseFolderFilesPaginatedOptions)
 		refetch: refetchQuery,
 	} = useInfiniteQuery<FolderFilesResponse, Error>({
 		queryKey,
-		queryFn: ({ pageParam = 0 }) => {
+		queryFn: async ({ pageParam = 0 }) => {
 			if (!folderId) {
 				throw new Error('Folder ID is required');
 			}
 
-			return fetchFolderFiles({
+			const result = await fetchFolderFiles({
 				folderId,
 				includeSubfolders,
 				limit: pageSize,
@@ -257,6 +257,8 @@ export function useFolderFilesPaginated(options: UseFolderFilesPaginatedOptions)
 				sortOrder,
 				fileTypes,
 			});
+
+			return result;
 		},
 		getNextPageParam: (lastPage: FolderFilesResponse) => {
 			if (!lastPage.hasMore) return;

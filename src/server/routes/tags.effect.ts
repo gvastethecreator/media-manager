@@ -120,6 +120,33 @@ router.post('/:id/favorite', async (req, res) => {
 });
 
 /**
+ * GET /tags/:id/images - Obtener imágenes asociadas a un tag
+ */
+router.get('/:id/images', async (req, res) => {
+	const effect = Effect.gen(function* () {
+		const tagService = yield* TagService;
+		const images = yield* tagService.getImages(req.params.id);
+		return images;
+	}).pipe(Effect.provide(TagServiceLive));
+
+	await runEffectForExpress(effect, res);
+});
+
+/**
+ * GET /tags/:id/thumbnails - Obtener thumbnails de imágenes asociadas a un tag
+ */
+router.get('/:id/thumbnails', async (req, res) => {
+	const limit = Number(req.query.limit) || 6;
+	const effect = Effect.gen(function* () {
+		const tagService = yield* TagService;
+		const thumbnails = yield* tagService.getThumbnails(req.params.id, limit);
+		return thumbnails;
+	}).pipe(Effect.provide(TagServiceLive));
+
+	await runEffectForExpress(effect, res);
+});
+
+/**
  * GET /tags/:id - Obtener tag por ID
  * IMPORTANTE: Esta ruta debe ir AL FINAL para no interceptar rutas específicas como /:id/favorite
  */

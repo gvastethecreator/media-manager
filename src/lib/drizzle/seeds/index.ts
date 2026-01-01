@@ -1,16 +1,22 @@
 import { createClient } from '@libsql/client';
 import { drizzle } from 'drizzle-orm/libsql';
 import { seedAlbums } from './albums.seed';
+import { seedAudios } from './audios.seed';
 import { seedCharacters } from './characters.seed';
 import { seedCollections } from './collections.seed';
 import { seedConcepts } from './concepts.seed';
+import { seedDocuments } from './documents.seed';
+import { seedFile3Ds } from './file3Ds.seed';
 import { seedFolders } from './folders.seed';
 import { seedGroups } from './groups.seed';
+import { seedImages } from './images.seed';
+import { seedJsonFiles } from './jsonFiles.seed';
 import { seedNotes } from './notes.seed';
 import { seedPlaces } from './places.seed';
 import { seedProfiles } from './profiles.seed';
 import { seedPrompts } from './prompts.seed';
 import { seedTags } from './tags.seed';
+import { seedVideos } from './videos.seed';
 import { seedWildcards } from './wildcards.seed';
 import { seedWorldItems } from './worldItems.seed';
 
@@ -49,6 +55,12 @@ export async function runSeeds() {
 
 		// 2. Carpetas (estructura de almacenamiento)
 		await seedFolders(db);
+		await seedImages(db);
+		await seedVideos(db);
+		await seedAudios(db);
+		await seedDocuments(db);
+		await seedJsonFiles(db);
+		await seedFile3Ds(db);
 
 		// 3. Entidades de organización
 		await seedGroups(db);
