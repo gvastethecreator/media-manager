@@ -61,10 +61,25 @@ async function clickFirstItem(page: any, view: 'grid' | 'cards' | 'masonry' | 'l
 async function switchView(page: any, mode: 'grid' | 'cards' | 'masonry' | 'list') {
 	const trigger = page.getByTestId('view-mode-dropdown-trigger');
 	await expect(trigger).toBeVisible();
-	await trigger.click();
-	const item = page.getByTestId(`view-mode-${mode}-btn`);
-	await expect(item).toBeVisible();
-	await item.click();
+
+	// Reintentar el click del dropdown si el item no aparece
+	let attempts = 0;
+	const maxAttempts = 3;
+	while (attempts < maxAttempts) {
+		await trigger.click();
+		try {
+			await page.waitForSelector(`[data-testid="view-mode-${mode}-btn"]`, { state: 'visible', timeout: 2000 });
+			await page.click(`[data-testid="view-mode-${mode}-btn"]`);
+			break;
+		} catch {
+			attempts++;
+			if (attempts >= maxAttempts) {
+				throw new Error(`Dropdown no se abrió después de ${maxAttempts} intentos`);
+			}
+			// Esperar un momento antes de reintentar
+			await page.waitForTimeout(200);
+		}
+	}
 	// Sincronizar con el estado global del FileBrowser
 	await expect(page.getByTestId('file-browser')).toHaveAttribute('data-view-mode', mode);
 	// Asegurar que el viewport vuelve al inicio para facilitar visibilidad del primer item

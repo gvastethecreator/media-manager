@@ -6,7 +6,7 @@
 import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { notes } from '@/lib/drizzle/schema/index';
+import { imageNotes, images, notes, videoNotes } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { createDefaultEntityStats } from '@/lib/utils';
@@ -496,28 +496,81 @@ export class NoteService {
 		}
 	}
 
-	async getNoteImages(id: string): Promise<unknown[]> {
-		// TODO: Implementar lógica para obtener imágenes de la nota
+	async getNoteImages(
+		id: string
+	): Promise<Array<{ id: string; name: string; path: string; thumbnailPath?: string | null }>> {
 		noteLogger.info(`Obteniendo imágenes de la nota ${id}`);
-		return [];
+		try {
+			const result = await db
+				.select({
+					id: images.id,
+					name: images.name,
+					path: images.path,
+					thumbnailPath: images.thumbnail,
+				})
+				.from(imageNotes)
+				.innerJoin(images, eq(imageNotes.A, images.id))
+				.where(eq(imageNotes.B, id))
+				.orderBy(desc(images.createdAt));
+
+			return result;
+		} catch (error) {
+			noteLogger.error(`Error obteniendo imágenes de la nota ${id}:`, error);
+			return [];
+		}
 	}
 
-	async getRecentNoteImages(id: string, limit: number): Promise<unknown[]> {
-		// TODO: Implementar lógica para obtener imágenes recientes de la nota
+	async getRecentNoteImages(
+		id: string,
+		limit: number
+	): Promise<Array<{ id: string; name: string; path: string; thumbnailPath?: string | null }>> {
 		noteLogger.info(`Obteniendo imágenes recientes de la nota ${id} (limit: ${limit})`);
-		return [];
+		try {
+			const result = await db
+				.select({
+					id: images.id,
+					name: images.name,
+					path: images.path,
+					thumbnailPath: images.thumbnail,
+				})
+				.from(imageNotes)
+				.innerJoin(images, eq(imageNotes.A, images.id))
+				.where(eq(imageNotes.B, id))
+				.orderBy(desc(images.createdAt))
+				.limit(limit);
+
+			return result;
+		} catch (error) {
+			noteLogger.error(`Error obteniendo imágenes recientes de la nota ${id}:`, error);
+			return [];
+		}
 	}
 
 	async getNoteCounts(id: string): Promise<Record<string, number>> {
-		// TODO: Implementar lógica para obtener conteos de la nota
 		noteLogger.info(`Obteniendo conteos de la nota ${id}`);
-		return {
-			images: 0,
-			videos: 0,
-			albums: 0,
-			collections: 0,
-			tags: 0,
-		};
+		try {
+			const [imageCount, videoCount] = await Promise.all([
+				db.select({ count: count() }).from(imageNotes).where(eq(imageNotes.B, id)),
+				db.select({ count: count() }).from(videoNotes).where(eq(videoNotes.B, id)),
+			]);
+
+			return {
+				images: imageCount[0]?.count ?? 0,
+				videos: videoCount[0]?.count ?? 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+			};
+		} catch (error) {
+			noteLogger.error(`Error obteniendo conteos de la nota ${id}:`, error);
+			return {
+				images: 0,
+				videos: 0,
+				albums: 0,
+				collections: 0,
+				tags: 0,
+			};
+		}
 	}
 
 	async getNoteStatuses(): Promise<string[]> {

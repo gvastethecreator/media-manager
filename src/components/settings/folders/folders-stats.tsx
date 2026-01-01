@@ -32,21 +32,21 @@ export function FoldersStats({ stats }: FoldersStatsProps) {
 		{ name: 'Otros', value: stats.totalOthers, color: FILE_TYPE_COLORS.others },
 		...(stats.databaseSize
 			? [
-				{
-					name: 'Base de Datos',
-					value: Math.round(stats.databaseSize / (1024 * 1024)),
-					color: FILE_TYPE_COLORS.database,
-				},
-			]
+					{
+						name: 'Base de Datos',
+						value: Math.round(stats.databaseSize / (1024 * 1024)),
+						color: FILE_TYPE_COLORS.database,
+					},
+				]
 			: []),
 		...(stats.thumbnailsCacheSize
 			? [
-				{
-					name: 'Caché Thumbnails',
-					value: Math.round(stats.thumbnailsCacheSize / (1024 * 1024)),
-					color: FILE_TYPE_COLORS.cache,
-				},
-			]
+					{
+						name: 'Caché Thumbnails',
+						value: Math.round(stats.thumbnailsCacheSize / (1024 * 1024)),
+						color: FILE_TYPE_COLORS.cache,
+					},
+				]
 			: []),
 	].filter((item) => item.value > 0);
 

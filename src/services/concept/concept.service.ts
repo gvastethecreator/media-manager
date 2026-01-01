@@ -3,7 +3,7 @@
 import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, like, type SQL } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { concepts } from '@/lib/drizzle/schema/index';
+import { concepts, imageConcepts, images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
 import { fromDrizzleConcept } from '@/transformers/concept/transformer';
@@ -472,18 +472,48 @@ export const ConceptService = {
 		}
 	},
 
-	async getRecentConceptImages(conceptId: string): Promise<{ id: string; thumbnailUrl: string }[]> {
-		conceptLogger.warn(`getRecentConceptImages no implementado. ID: ${conceptId}. Retornando array vacío.`);
-		return [];
+	async getRecentConceptImages(conceptId: string, limit = 6): Promise<{ id: string; thumbnailUrl: string }[]> {
+		conceptLogger.info(`Obteniendo imágenes recientes del concepto ${conceptId} (limit: ${limit})`);
+		try {
+			const result: Array<{ id: string; thumbnail: string | null }> = await db
+				.select({
+					id: images.id,
+					thumbnail: images.thumbnail,
+				})
+				.from(imageConcepts)
+				.innerJoin(images, eq(imageConcepts.A, images.id))
+				.where(eq(imageConcepts.B, conceptId))
+				.orderBy(desc(images.createdAt))
+				.limit(limit);
+
+			return result.map((img) => ({
+				id: img.id,
+				thumbnailUrl: img.thumbnail ? `/api/images/${img.id}/thumbnail` : '',
+			}));
+		} catch (error) {
+			conceptLogger.error(`Error obteniendo imágenes recientes del concepto ${conceptId}:`, error);
+			return [];
+		}
 	},
 
 	async getConceptCounts(conceptId: string): Promise<{ images: number; videos: number; albums: number; tags: number }> {
-		conceptLogger.warn(`getConceptCounts no implementado. ID: ${conceptId}. Retornando ceros.`);
-		return {
-			images: 0,
-			videos: 0,
-			albums: 0,
-			tags: 0,
-		};
+		conceptLogger.info(`Obteniendo conteos del concepto ${conceptId}`);
+		try {
+			// Contar imágenes
+			const [imageCount] = await db
+				.select({ count: count() })
+				.from(imageConcepts)
+				.where(eq(imageConcepts.B, conceptId));
+
+			return {
+				images: imageCount?.count || 0,
+				videos: 0, // TODO: Implementar cuando exista videoConcepts
+				albums: 0,
+				tags: 0,
+			};
+		} catch (error) {
+			conceptLogger.error(`Error obteniendo conteos del concepto ${conceptId}:`, error);
+			return { images: 0, videos: 0, albums: 0, tags: 0 };
+		}
 	},
 };

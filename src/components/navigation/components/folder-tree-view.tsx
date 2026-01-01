@@ -115,7 +115,7 @@ const FolderTreeItem = memo(function FolderTreeItemImpl({
 					</button>
 				</div>
 				{(folder.itemCount || folder._count?.images) && (
-					<span className="ml-2 min-w-[12px] text-right text-[9px] text-muted-foreground tabular-nums">
+					<span className="ml-2 min-w-3 text-right text-[9px] text-muted-foreground tabular-nums">
 						{folder.itemCount || folder._count?.images || 0}
 					</span>
 				)}

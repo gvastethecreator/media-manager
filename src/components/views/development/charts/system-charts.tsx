@@ -54,10 +54,7 @@ export function FileDistributionChart() {
 								))}
 							</Pie>
 							<Tooltip
-								formatter={(value: ValueType) => [
-									`${toNumberValue(value).toLocaleString()} archivos`,
-									'Cantidad',
-								]}
+								formatter={(value: ValueType) => [`${toNumberValue(value).toLocaleString()} archivos`, 'Cantidad']}
 								labelFormatter={(name) => `Tipo: ${name}`}
 							/>
 						</PieChart>

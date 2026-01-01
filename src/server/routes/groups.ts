@@ -194,13 +194,36 @@ router.get('/:id/images', async (req, res) => {
 			sortOrder: sortOrder as 'asc' | 'desc',
 		};
 
-		// TODO: Implementar getGroupImages en groupService
-		// const { images, total } = await groupService.getGroupImages(id, filters);
-		const images: any[] = [];
-		const total = 0;
+		// Obtener imágenes del grupo usando groupImages (A = groupId, B = imageId)
+		const orderColumn =
+			filters.sortBy === 'name' ? images.name : filters.sortBy === 'updatedAt' ? images.updatedAt : images.createdAt;
+		const orderDirection = filters.sortOrder === 'asc' ? asc(orderColumn) : desc(orderColumn);
+
+		const [groupImagesResult, totalResult] = await Promise.all([
+			db
+				.select({
+					id: images.id,
+					name: images.name,
+					path: images.path,
+					thumbnailPath: images.thumbnail,
+					width: images.width,
+					height: images.height,
+					createdAt: images.createdAt,
+					updatedAt: images.updatedAt,
+				})
+				.from(groupImages)
+				.innerJoin(images, eq(groupImages.B, images.id))
+				.where(eq(groupImages.A, id))
+				.orderBy(orderDirection)
+				.limit(filters.limit)
+				.offset(filters.offset),
+			db.select({ count: count() }).from(groupImages).where(eq(groupImages.A, id)),
+		]);
+
+		const total = totalResult[0]?.count ?? 0;
 
 		res.json({
-			data: images,
+			data: groupImagesResult,
 			pagination: {
 				total,
 				limit: filters.limit,
@@ -259,8 +282,6 @@ router.get('/:id/media', async (req, res) => {
 router.get('/:id/card-data', async (req, res) => {
 	try {
 		const { id } = req.params;
-		// TODO: Implementar getGroupCardDataService en groupService
-		// const cardData = await groupService.getGroupCardDataService(id);
 		const cardData = await groupService.getCardData(id);
 		res.json(cardData);
 	} catch (error) {

@@ -13,11 +13,21 @@ export interface SkeletonProps extends React.HTMLAttributes<HTMLDivElement> {
 function Skeleton({ className, animation = 'shimmer', ...props }: SkeletonProps) {
 	const animationClasses = {
 		pulse: 'animate-skeleton',
-		shimmer: 'animate-skeleton-shimmer',
+		shimmer:
+			'animate-skeleton-shimmer bg-gradient-to-r from-muted via-muted-foreground/10 to-muted bg-[length:200%_100%]',
 		none: '',
 	};
 
-	return <div className={cn('rounded-md bg-muted', animationClasses[animation], className)} {...props} />;
+	return (
+		<div
+			className={cn(
+				'rounded-dt-sm',
+				animation === 'shimmer' ? animationClasses.shimmer : `bg-muted ${animationClasses[animation]}`,
+				className
+			)}
+			{...props}
+		/>
+	);
 }
 
 /* =====================================================

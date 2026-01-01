@@ -7,9 +7,9 @@
  */
 
 import * as crypto from 'crypto';
-import { asc, count, eq } from 'drizzle-orm';
+import { asc, count, desc, eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { places } from '@/lib/drizzle/schema/index';
+import { imagePlaces, images, places, videoPlaces, videos } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
@@ -18,7 +18,7 @@ import { fromDrizzlePlace } from '@/transformers/place/transformer';
 import type { PlaceCreateInput, PlaceSearchOptions, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place';
 
 // Tipo local para Drizzle Place con counts
-type DrizzlePlaceWithCounts = {
+interface DrizzlePlaceWithCounts {
 	id: string;
 	name: string;
 	description: string | null;
@@ -53,7 +53,7 @@ type DrizzlePlaceWithCounts = {
 		collections?: number;
 		concepts?: number;
 	};
-};
+}
 
 const placeLogger = serverLogger.withContext('PlaceService');
 
@@ -471,16 +471,100 @@ export class PlaceService {
 		return await deletePlace(id);
 	}
 
-	async getPlaceImages(id: string): Promise<Array<{ id: string; name: string; path: string }>> {
-		// TODO: Implementar lógica para obtener imágenes del lugar
+	async getPlaceImages(
+		id: string
+	): Promise<Array<{ id: string; name: string; path: string; thumbnailPath?: string | null }>> {
 		placeLogger.info(`Obteniendo imágenes del lugar ${id}`);
-		return [];
+		try {
+			const result = await db
+				.select({
+					id: images.id,
+					name: images.name,
+					path: images.path,
+					thumbnailPath: images.thumbnail,
+				})
+				.from(imagePlaces)
+				.innerJoin(images, eq(imagePlaces.A, images.id))
+				.where(eq(imagePlaces.B, id))
+				.orderBy(desc(images.createdAt));
+
+			return result;
+		} catch (error) {
+			placeLogger.error(`Error obteniendo imágenes del lugar ${id}:`, error);
+			return [];
+		}
 	}
 
-	async getRecentPlaceMedia(id: string, limit: number): Promise<Array<{ id: string; type: string; name: string }>> {
-		// TODO: Implementar lógica para obtener media reciente del lugar
+	async getRecentPlaceMedia(
+		id: string,
+		limit: number
+	): Promise<Array<{ id: string; type: string; name: string; path?: string; thumbnailPath?: string | null }>> {
 		placeLogger.info(`Obteniendo media reciente del lugar ${id} (limit: ${limit})`);
-		return [];
+		try {
+			interface RecentImageRow {
+				id: string;
+				name: string;
+				path: string;
+				thumbnailPath: string | null;
+				createdAt: Date | null;
+			}
+			interface RecentVideoRow {
+				id: string;
+				name: string;
+				path: string;
+				thumbnailPath: string | null;
+				createdAt: Date | null;
+			}
+			interface MediaItemImage extends RecentImageRow {
+				type: 'image';
+			}
+			interface MediaItemVideo extends RecentVideoRow {
+				type: 'video';
+			}
+
+			// Obtener imágenes recientes
+			const recentImages: RecentImageRow[] = await db
+				.select({
+					id: images.id,
+					name: images.name,
+					path: images.path,
+					thumbnailPath: images.thumbnail,
+					createdAt: images.createdAt,
+				})
+				.from(imagePlaces)
+				.innerJoin(images, eq(imagePlaces.A, images.id))
+				.where(eq(imagePlaces.B, id))
+				.orderBy(desc(images.createdAt))
+				.limit(limit);
+
+			// Obtener videos recientes
+			const recentVideos: RecentVideoRow[] = await db
+				.select({
+					id: videos.id,
+					name: videos.name,
+					path: videos.path,
+					thumbnailPath: videos.thumbnail,
+					createdAt: videos.createdAt,
+				})
+				.from(videoPlaces)
+				.innerJoin(videos, eq(videoPlaces.A, videos.id))
+				.where(eq(videoPlaces.B, id))
+				.orderBy(desc(videos.createdAt))
+				.limit(limit);
+
+			// Combinar y ordenar por fecha
+			const combined: Array<MediaItemImage | MediaItemVideo> = [
+				...recentImages.map((img) => ({ ...img, type: 'image' as const })),
+				...recentVideos.map((vid) => ({ ...vid, type: 'video' as const })),
+			]
+				.sort((a, b) => (b.createdAt?.getTime() ?? 0) - (a.createdAt?.getTime() ?? 0))
+				.slice(0, limit);
+
+			return combined.map(({ createdAt, ...rest }) => rest);
+		} catch (error) {
+			placeLogger.error(`Error obteniendo media reciente del lugar ${id}:`, error);
+			return [];
+		}
 	}
 }
 

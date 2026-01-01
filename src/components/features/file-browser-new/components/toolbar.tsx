@@ -100,7 +100,7 @@ export function FileBrowserToolbar({
 
 	const activeSort = sortOptions[0];
 	const activeSortLabel = activeSort
-		? AVAILABLE_SORT_OPTIONS.find((o) => o.field === activeSort.field)?.label ?? activeSort.field
+		? (AVAILABLE_SORT_OPTIONS.find((o) => o.field === activeSort.field)?.label ?? activeSort.field)
 		: 'Ordenar';
 
 	return (

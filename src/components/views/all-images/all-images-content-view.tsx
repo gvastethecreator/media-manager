@@ -256,7 +256,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 						Subir Imágenes
 					</Button>
 				</DialogTrigger>
-				<DialogContent className="sm:max-w-[425px]">
+				<DialogContent className="sm:max-w-106">
 					<DialogHeader>
 						<DialogTitle>Subir Imágenes</DialogTitle>
 					</DialogHeader>

@@ -3,7 +3,7 @@ import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import express, { type Request, type Response } from 'express';
 import { z } from 'zod';
 import { db } from '@/lib/drizzle';
-import { concepts, imageConcepts, images } from '@/lib/drizzle/schema/index';
+import { concepts, imageConcepts, images, videoConcepts } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
@@ -223,9 +223,32 @@ router.get('/:id/recent-images', async (req, res) => {
 
 router.get('/:id', getConceptByIdHandler);
 
-// GET /concepts/:id/stats - Obtener estadísticas de un concepto (métodos de escritura pendientes)
-router.get('/:id/stats', async (_req, res) => {
-	res.status(501).json({ error: 'Método no implementado - pendiente de migración' });
+// GET /concepts/:id/stats - Obtener estadísticas de un concepto
+router.get('/:id/stats', async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		if (!id) {
+			res.status(400).json({ error: 'ID de concepto requerido' });
+			return;
+		}
+
+		// Obtener conteos de relaciones del concepto
+		const [imageCount] = await db.select({ count: count() }).from(imageConcepts).where(eq(imageConcepts.B, id));
+
+		const [videoCount] = await db.select({ count: count() }).from(videoConcepts).where(eq(videoConcepts.B, id));
+
+		res.json({
+			conceptId: id,
+			counts: {
+				images: imageCount?.count || 0,
+				videos: videoCount?.count || 0,
+			},
+		});
+	} catch (error) {
+		serverLogger.error('Error getting concept stats:', error);
+		res.status(500).json({ error: 'Error interno del servidor' });
+	}
 });
 
 // POST /concepts - Crear nuevo concepto

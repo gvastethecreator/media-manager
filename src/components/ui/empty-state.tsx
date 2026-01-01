@@ -39,10 +39,10 @@ const iconContainerVariants = cva('flex items-center justify-center rounded-full
 		},
 		iconVariant: {
 			default: 'bg-muted text-muted-foreground',
-			primary: 'bg-primary/10 text-primary',
-			warning: 'bg-amber-500/10 text-amber-500',
-			error: 'bg-red-500/10 text-red-500',
-			success: 'bg-emerald-500/10 text-emerald-500',
+			primary: 'bg-dt-primary-50 text-dt-primary-600',
+			warning: 'bg-dt-warning-50 text-dt-warning-600',
+			error: 'bg-dt-danger-50 text-dt-danger-600',
+			success: 'bg-dt-success-50 text-dt-success-600',
 		},
 	},
 	defaultVariants: {

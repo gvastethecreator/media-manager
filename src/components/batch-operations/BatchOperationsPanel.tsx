@@ -116,15 +116,15 @@ export function BatchOperationsPanel({ className, maxHeight = '400px' }: BatchOp
 			case 'running':
 				return <Loader2 className="h-4 w-4 animate-spin" />;
 			case 'completed':
-				return <CheckCircle className="h-4 w-4 text-green-500" />;
+				return <CheckCircle className="h-4 w-4 text-dt-success-500" />;
 			case 'failed':
-				return <XCircle className="h-4 w-4 text-red-500" />;
+				return <XCircle className="h-4 w-4 text-dt-danger-500" />;
 			case 'cancelled':
-				return <XCircle className="h-4 w-4 text-gray-500" />;
+				return <XCircle className="h-4 w-4 text-muted-foreground" />;
 			case 'paused':
-				return <Pause className="h-4 w-4 text-yellow-500" />;
+				return <Pause className="h-4 w-4 text-dt-warning-500" />;
 			case 'queued':
-				return <Clock className="h-4 w-4 text-blue-500" />;
+				return <Clock className="h-4 w-4 text-dt-primary-500" />;
 			default:
 				return <Clock className="h-4 w-4" />;
 		}
@@ -218,7 +218,7 @@ export function BatchOperationsPanel({ className, maxHeight = '400px' }: BatchOp
 									<div>
 										<h4 className="font-medium text-sm">{formatOperationTitle(operation)}</h4>
 										{operation.targetPath && (
-											<p className="max-w-[200px] truncate text-muted-foreground text-xs">→ {operation.targetPath}</p>
+											<p className="max-w-50 truncate text-muted-foreground text-xs">→ {operation.targetPath}</p>
 										)}
 									</div>
 								</div>
@@ -305,7 +305,7 @@ export function BatchOperationsPanel({ className, maxHeight = '400px' }: BatchOp
 										<div className="text-left">
 											<h4 className="font-medium text-sm">{formatOperationTitle(operation)}</h4>
 											{operation.targetPath && (
-												<p className="max-w-[200px] truncate text-muted-foreground text-xs">→ {operation.targetPath}</p>
+												<p className="max-w-50 truncate text-muted-foreground text-xs">→ {operation.targetPath}</p>
 											)}
 										</div>
 									</div>

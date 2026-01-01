@@ -152,8 +152,8 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 							<div className="text-body-sm">
 								{tags.length > 0
 									? tags.reduce((max, tag) =>
-											(tag.stats?.totalRelations || 0) > (max.stats?.totalRelations || 0) ? tag : max
-										).name
+										(tag.stats?.totalRelations || 0) > (max.stats?.totalRelations || 0) ? tag : max
+									).name
 									: 'N/A'}
 							</div>
 						</CardContent>
@@ -347,19 +347,19 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 function _generateCategoryColor(category: TagCategory): string {
 	switch (category) {
 		case TagCategory.GENERAL:
-			return 'bg-gray-500';
+			return 'bg-dt-neutral-500';
 		case TagCategory.SUBJECT:
-			return 'bg-blue-500';
+			return 'bg-dt-primary-500';
 		case TagCategory.STYLE:
 			return 'bg-purple-500';
 		case TagCategory.COLOR:
 			return 'bg-indigo-500';
 		case TagCategory.QUALITY:
-			return 'bg-green-500';
+			return 'bg-dt-success-500';
 		case TagCategory.TECHNIQUE:
-			return 'bg-yellow-500';
+			return 'bg-dt-warning-500';
 		case TagCategory.COMPOSITION:
-			return 'bg-red-500';
+			return 'bg-dt-danger-500';
 		case TagCategory.CONTENT:
 			return 'bg-pink-500';
 		case TagCategory.EMOTION:
@@ -371,6 +371,6 @@ function _generateCategoryColor(category: TagCategory): string {
 		case TagCategory.CUSTOM:
 			return 'bg-violet-500';
 		default:
-			return 'bg-gray-500';
+			return 'bg-dt-neutral-500';
 	}
 }

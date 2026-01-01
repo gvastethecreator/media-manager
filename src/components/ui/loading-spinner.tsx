@@ -20,9 +20,9 @@ const spinnerVariants = cva('inline-flex items-center justify-center transition-
 		variant: {
 			default: 'text-muted-foreground',
 			primary: 'text-primary',
-			success: 'text-emerald-500',
-			warning: 'text-amber-500',
-			danger: 'text-red-500',
+			success: 'text-dt-success-500',
+			warning: 'text-dt-warning-500',
+			danger: 'text-dt-danger-500',
 		},
 	},
 	defaultVariants: {
@@ -32,8 +32,8 @@ const spinnerVariants = cva('inline-flex items-center justify-center transition-
 });
 
 export interface LoadingSpinnerProps
-	extends React.HTMLAttributes<HTMLDivElement>,
-		VariantProps<typeof spinnerVariants> {
+	extends React.HTMLAttributes<HTMLOutputElement>,
+	VariantProps<typeof spinnerVariants> {
 	/** Estado actual: loading, success, error */
 	state?: 'loading' | 'success' | 'error';
 	/** Texto descriptivo para accesibilidad */
@@ -55,15 +55,15 @@ export function LoadingSpinner({
 	const iconSize = sizeMap[size || 'md'];
 
 	return (
-		<div aria-live="polite" className={cn('inline-flex items-center gap-2', className)} role="status" {...props}>
+		<output aria-live="polite" className={cn('inline-flex items-center gap-2', className)} {...props}>
 			<span className={cn(spinnerVariants({ size, variant }))}>
 				{state === 'loading' && <Loader2 className="animate-spin-smooth" size={iconSize} />}
-				{state === 'success' && <CheckCircle className="animate-scale-in text-emerald-500" size={iconSize} />}
-				{state === 'error' && <XCircle className="animate-shake text-red-500" size={iconSize} />}
+				{state === 'success' && <CheckCircle className="animate-scale-in text-dt-success-500" size={iconSize} />}
+				{state === 'error' && <XCircle className="animate-shake text-dt-danger-500" size={iconSize} />}
 			</span>
 			{showLabel && <span className="animate-fade-in text-muted-foreground text-sm">{label}</span>}
 			<span className="sr-only">{label}</span>
-		</div>
+		</output>
 	);
 }
 
@@ -71,8 +71,7 @@ export function LoadingSpinner({
  * 🔵 LOADING DOTS
  * Indicador de carga con puntos animados
  * ===================================================== */
-
-export interface LoadingDotsProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface LoadingDotsProps extends React.HTMLAttributes<HTMLOutputElement> {
 	size?: 'sm' | 'md' | 'lg';
 }
 
@@ -84,11 +83,11 @@ export function LoadingDots({ size = 'md', className, ...props }: LoadingDotsPro
 	};
 
 	return (
-		<div aria-label="Cargando" className={cn('loading-dots', sizeClasses[size], className)} role="status" {...props}>
+		<output aria-label="Cargando" className={cn('loading-dots', sizeClasses[size], className)} {...props}>
 			<span />
 			<span />
 			<span />
-		</div>
+		</output>
 	);
 }
 

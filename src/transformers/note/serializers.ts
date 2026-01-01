@@ -175,18 +175,3 @@ export function extendNotes(
 ): NoteComplete[] {
 	return notes.map((note) => extendNote(note, options));
 }
-
-/**
- * @deprecated Usa las funciones específicas en su lugar
- * Objeto con las funciones de serialización para compatibilidad
- */
-export const NoteSerializer = {
-	toDrizzleNote,
-	fromDrizzleNote,
-	validateNote,
-	extendNote,
-	extendNotes,
-};
-
-// Exportar como default para compatibilidad
-export default NoteSerializer;

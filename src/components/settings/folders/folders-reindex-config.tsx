@@ -70,7 +70,7 @@ export function StructuredReindexConfig({
 					<div className="flex items-center justify-between">
 						<div className="space-y-1">
 							<Label className="flex items-center gap-2 font-medium text-sm" htmlFor="structured-flow">
-								<Zap className="h-3.5 w-3.5 text-blue-500" />
+								<Zap className="h-3.5 w-3.5 text-dt-primary-500" />
 								Flujo Estructurado
 								<Badge className="px-1.5 py-0 text-[10px]" variant="outline">
 									NUEVO
@@ -90,18 +90,18 @@ export function StructuredReindexConfig({
 					</div>
 
 					{useStructuredFlow && (
-						<div className="ml-6 space-y-2 border-blue-200 border-l-2 pl-3 dark:border-blue-800">
+						<div className="ml-6 space-y-2 border-dt-primary-200 border-l-2 pl-3 dark:border-dt-primary-800">
 							<div className="grid grid-cols-4 gap-2 text-xs">
 								<div className="flex items-center gap-1 text-muted-foreground">
-									<div className="h-2 w-2 rounded-full bg-blue-500" />
+									<div className="h-2 w-2 rounded-full bg-dt-primary-500" />
 									<span>Análisis</span>
 								</div>
 								<div className="flex items-center gap-1 text-muted-foreground">
-									<div className="h-2 w-2 rounded-full bg-green-500" />
+									<div className="h-2 w-2 rounded-full bg-dt-success-500" />
 									<span>Existencia</span>
 								</div>
 								<div className="flex items-center gap-1 text-muted-foreground">
-									<div className="h-2 w-2 rounded-full bg-red-500" />
+									<div className="h-2 w-2 rounded-full bg-dt-danger-500" />
 									<span>Limpieza</span>
 								</div>
 								<div className="flex items-center gap-1 text-muted-foreground">
@@ -109,7 +109,7 @@ export function StructuredReindexConfig({
 									<span>Estructura</span>
 								</div>
 								<div className="flex items-center gap-1 text-muted-foreground">
-									<div className="h-2 w-2 rounded-full bg-yellow-500" />
+									<div className="h-2 w-2 rounded-full bg-dt-warning-500" />
 									<span>Indexado</span>
 								</div>
 								<div className="flex items-center gap-1 text-muted-foreground">
@@ -121,7 +121,7 @@ export function StructuredReindexConfig({
 									<span>Metadata</span>
 								</div>
 								<div className="flex items-center gap-1 text-muted-foreground">
-									<div className="h-2 w-2 rounded-full bg-gray-500" />
+									<div className="h-2 w-2 rounded-full bg-dt-neutral-500" />
 									<span>Verificación</span>
 								</div>
 							</div>
@@ -129,7 +129,7 @@ export function StructuredReindexConfig({
 					)}
 
 					{!useStructuredFlow && (
-						<div className="ml-6 space-y-1 border-gray-200 border-l-2 pl-3 dark:border-gray-800">
+						<div className="ml-6 space-y-1 border-border border-l-2 pl-3">
 							<p className="text-muted-foreground text-xs">
 								<Clock className="mr-1 inline h-3 w-3" />
 								Flujo legacy: procesa todas las operaciones por carpeta simultáneamente

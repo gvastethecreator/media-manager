@@ -44,7 +44,7 @@ type ToastProps = VariantProps<typeof toastVariants> & {
 	className?: string;
 } & React.ComponentProps<'div'>;
 
-interface ToastActionElement extends React.ReactElement {}
+interface ToastActionElement extends React.ReactElement { }
 
 // Hook para usar toast con sonner
 function useToast() {
@@ -130,7 +130,7 @@ function ToastViewport({ className, ...props }: React.ComponentProps<'div'>) {
 	return (
 		<div
 			className={cn(
-				'fixed top-0 z-[100] flex max-h-screen w-full flex-col-reverse p-4 sm:top-auto sm:right-0 sm:bottom-0 sm:flex-col md:max-w-[420px]',
+				'fixed top-0 z-100 flex max-h-screen w-full flex-col-reverse p-4 sm:top-auto sm:right-0 sm:bottom-0 sm:flex-col md:max-w-105',
 				className
 			)}
 			{...props}
