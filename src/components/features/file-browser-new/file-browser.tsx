@@ -297,7 +297,7 @@ export function FileBrowser({
 						config={
 							config.kind === 'masonry' ? config : { kind: 'masonry', renderMode: 'canvas', gap: 8, columnWidth: 200 }
 						}
-						page={browser.pagination.page}
+						page={infiniteScroll.enabled ? undefined : browser.pagination.page}
 						pageSize={browser.pagination.pageSize}
 					/>
 				);
@@ -310,12 +310,12 @@ export function FileBrowser({
 							config.kind === 'table'
 								? config
 								: {
-										kind: 'table',
-										renderMode: 'canvas',
-										gap: 0,
-										rowHeight: 32,
-										visibleColumns: ['name', 'entityType', 'size', 'createdAt'],
-									}
+									kind: 'table',
+									renderMode: 'canvas',
+									gap: 0,
+									rowHeight: 32,
+									visibleColumns: ['name', 'entityType', 'size', 'createdAt'],
+								}
 						}
 						onSortChange={browser.toggleSortField}
 						sortOptions={browser.sortOptions}
@@ -331,7 +331,7 @@ export function FileBrowser({
 								? config
 								: { kind: 'cards', renderMode: 'canvas', gap: 12, cardSize: 180, showDetails: true }
 						}
-						page={browser.pagination.page}
+						page={infiniteScroll.enabled ? undefined : browser.pagination.page}
 						pageSize={browser.pagination.pageSize}
 					/>
 				);
@@ -345,7 +345,7 @@ export function FileBrowser({
 								: { kind: 'grid', renderMode: 'canvas', gap: 8, itemSize: 150, columns: 0 }
 						}
 						itemSize={browser.itemSize}
-						page={browser.pagination.page}
+						page={infiniteScroll.enabled ? undefined : browser.pagination.page}
 						pageSize={browser.pagination.pageSize}
 					/>
 				);

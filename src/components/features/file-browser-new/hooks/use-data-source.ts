@@ -4,12 +4,15 @@
  */
 
 import { useCallback, useMemo, useRef } from 'react';
+import { clientLogger } from '@/lib/logger/client-logger';
 import { useFolder } from '@/lib/api/folders';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { DEFAULT_PAGE_SIZE } from '../core/constants';
 import type { BrowserItem } from '../types';
 import { createParentNavItem, toBrowserItem } from '../types';
 import { useFolderFilesPaginated } from './use-folder-files-paginated';
+
+const logger = clientLogger.withContext('UseDataSource');
 
 export interface UseDataSourceOptions {
 	/** ID de carpeta a cargar */
@@ -87,6 +90,8 @@ export function useDataSource({
 		if (directItems) {
 			return directItems;
 		}
+
+		logger.info('🔄 Converting files to items', { filesCount: files.length });
 
 		// Convertir archivos cargados
 		return files.map((file) => toBrowserItem(file as Record<string, unknown>));
