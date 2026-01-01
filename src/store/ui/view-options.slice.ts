@@ -106,7 +106,7 @@ const DEFAULT_STATE = {
 	backgroundColor: 'transparent',
 	pagination: {
 		mode: 'infinite' as PaginationMode,
-		pageSize: 300,
+		pageSize: 20,
 	},
 	infiniteScroll: {
 		enabled: true,
