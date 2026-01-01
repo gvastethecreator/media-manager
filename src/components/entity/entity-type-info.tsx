@@ -234,7 +234,7 @@ export const EntityTypeHeader = memo<{
 
 	return (
 		<div className={cn('flex items-center gap-2', className)}>
-			<config.icon className="h-4 w-4 flex-shrink-0" style={{ color: config.color }} />
+			<config.icon className="h-4 w-4 shrink-0" style={{ color: config.color }} />
 			<span className="truncate font-medium text-sm">{entity.name || 'Sin nombre'}</span>
 			<Badge className="ml-auto" variant="secondary">
 				{config.emoji}

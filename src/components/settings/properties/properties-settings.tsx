@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { PageState } from '@/components/ui/page-state';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Toggle } from '@/components/ui/toggle';
 import type { PropertyCreateInput, PropertyUpdateInput } from '@/lib/api/properties';
@@ -163,7 +164,7 @@ export function PropertiesSettings() {
 		return (
 			<Card className="flex h-[calc(100vh-8rem)] flex-col items-center justify-center rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<div className="text-center">
-					<Plus className="mx-auto h-12 w-12 text-gray-400" />
+					<Plus className="mx-auto h-12 w-12 text-muted-foreground" />
 					<h3 className="mt-2 font-medium text-foreground text-heading-sm">Selecciona una propiedad</h3>
 					<p className="mt-1 text-caption text-muted-foreground">O crea una nueva para empezar</p>
 				</div>
@@ -217,25 +218,17 @@ export function PropertiesSettings() {
 
 	// Mostrar loading state
 	if (isLoading) {
-		return (
-			<div className="flex h-[calc(100vh-8rem)] items-center justify-center">
-				<div className="text-center">
-					<div className="mx-auto h-8 w-8 animate-spin rounded-full border-gray-900 border-b-2" />
-					<p className="mt-2 text-gray-500 text-sm">Cargando propiedades...</p>
-				</div>
-			</div>
-		);
+		return <PageState mode="loading" title="Cargando propiedades..." />;
 	}
 
 	// Mostrar error state
 	if (error) {
 		return (
-			<div className="flex h-[calc(100vh-8rem)] items-center justify-center">
-				<div className="text-center">
-					<p className="text-red-500">Error al cargar las propiedades</p>
-					<p className="mt-1 text-gray-500 text-sm">{error instanceof Error ? error.message : 'Error desconocido'}</p>
-				</div>
-			</div>
+			<PageState
+				description={error instanceof Error ? error.message : 'Error desconocido'}
+				mode="error"
+				title="Error al cargar las propiedades"
+			/>
 		);
 	}
 

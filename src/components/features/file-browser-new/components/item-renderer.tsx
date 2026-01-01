@@ -6,6 +6,7 @@
 import { Box, File, FileJson, FileText, Folder, Image, Music, Video } from 'lucide-react';
 import { memo } from 'react';
 import { cn } from '@/lib/utils';
+import { formatFileSize } from '@/lib/utils/format.utils';
 import type { BrowserEntityType, BrowserItem, ItemRendererProps } from '../types';
 
 /**
@@ -54,7 +55,14 @@ export function ItemThumbnail({ item, size, className }: ItemThumbnailProps) {
 				className={cn('relative overflow-hidden rounded-lg bg-muted', className)}
 				style={{ width: size, height: size }}
 			>
-				<img alt={item.name} className="h-full w-full object-cover" loading="lazy" src={item.thumbnailUrl} />
+				<img
+					alt={item.name}
+					className="h-full w-full object-cover"
+					loading="lazy"
+					src={item.thumbnailUrl}
+					width={size}
+					height={size}
+				/>
 			</div>
 		);
 	}
@@ -85,7 +93,8 @@ function ItemRendererGridInner({
 	style,
 }: ItemRendererProps) {
 	return (
-		<div
+		<button
+			type="button"
 			className={cn(
 				'group relative flex flex-col gap-1 rounded-lg p-1.5 transition-colors',
 				'cursor-pointer hover:bg-accent/50',
@@ -104,7 +113,7 @@ function ItemRendererGridInner({
 			<span className="truncate px-1 text-center text-xs leading-tight" title={item.name}>
 				{item.name}
 			</span>
-		</div>
+		</button>
 	);
 }
 
@@ -125,7 +134,8 @@ function ItemRendererListInner({
 	const colorClass = ENTITY_COLORS[item.entityType] ?? 'text-muted-foreground';
 
 	return (
-		<div
+		<button
+			type="button"
 			className={cn(
 				'flex items-center gap-3 px-3 py-2 transition-colors',
 				'cursor-pointer hover:bg-accent/50',
@@ -141,7 +151,7 @@ function ItemRendererListInner({
 			style={style}
 		>
 			{item.thumbnailUrl ? (
-				<img alt="" className="h-8 w-8 rounded object-cover" src={item.thumbnailUrl} />
+				<img alt="" className="h-8 w-8 rounded object-cover" src={item.thumbnailUrl} width={32} height={32} />
 			) : (
 				<div
 					className={cn(
@@ -154,20 +164,11 @@ function ItemRendererListInner({
 			)}
 			<span className="flex-1 truncate text-sm">{item.name}</span>
 			{item.size != null && <span className="text-muted-foreground text-xs">{formatFileSize(item.size)}</span>}
-		</div>
+		</button>
 	);
 }
 
-/**
- * Formatea tamaño de archivo
- */
-function formatFileSize(bytes: number): string {
-	if (bytes === 0) return '0 B';
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return `${Number.parseFloat((bytes / k ** i).toFixed(1))} ${sizes[i]}`;
-}
+// formatFileSize importada desde @/lib/utils/format.utils
 
 /**
  * Componentes memorizados para rendimiento

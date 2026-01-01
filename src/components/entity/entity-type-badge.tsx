@@ -91,7 +91,7 @@ export function EntityTypeBadge({
 			whileHover={animated ? { scale: 1.05 } : {}}
 			whileTap={animated ? { scale: 0.95 } : {}}
 		>
-			<Icon className={cn('flex-shrink-0', size === 'sm' ? 'h-3 w-3' : size === 'md' ? 'h-4 w-4' : 'h-5 w-5')} />
+			<Icon className={cn('shrink-0', size === 'sm' ? 'h-3 w-3' : size === 'md' ? 'h-4 w-4' : 'h-5 w-5')} />
 			{showText && <span className="truncate">{displayName}</span>}
 		</motion.div>
 	);

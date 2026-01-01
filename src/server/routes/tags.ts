@@ -1,7 +1,6 @@
 import express from 'express';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { TagService } from '@/services/tag/tag.service';
-import { toImageWithStats } from '@/transformers/image';
 
 const router = express.Router();
 const tagService = new TagService();
@@ -63,9 +62,9 @@ router.get('/:id/images', async (req, res) => {
 	try {
 		const { id } = req.params;
 		const images = await tagService.getTagImages(id);
-		const transformedImages = images.map(toImageWithStats);
 
-		res.json(transformedImages);
+		// Ya devuelve formato simplificado {id, name, path, thumbnailPath}
+		res.json(images);
 	} catch (error) {
 		serverLogger.error('Error getting tag images:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });

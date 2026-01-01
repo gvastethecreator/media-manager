@@ -24,10 +24,10 @@ type StatsHandler = (stats: Record<string, unknown>) => void;
  * Servicio de re-encoding/optimización de thumbnails almacenados en DB (columna TEXT base64)
  */
 class ThumbnailService {
-	private progressHandlers: Set<ProgressHandler> = new Set();
-	private errorHandlers: Set<ErrorHandler> = new Set();
-	private completeHandlers: Set<CompleteHandler> = new Set();
-	private statsHandlers: Set<StatsHandler> = new Set();
+	private readonly progressHandlers: Set<ProgressHandler> = new Set();
+	private readonly errorHandlers: Set<ErrorHandler> = new Set();
+	private readonly completeHandlers: Set<CompleteHandler> = new Set();
+	private readonly statsHandlers: Set<StatsHandler> = new Set();
 
 	private emitProgress(status: ProcessStatus) {
 		for (const h of this.progressHandlers) h(status);
