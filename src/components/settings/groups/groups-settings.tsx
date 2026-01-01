@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
+import { PageState } from '@/components/ui/page-state';
 import { useCreateGroup, useDeleteGroup, useGroups, useUpdateGroup } from '@/lib/api/groups';
 import { toastService } from '@/lib/ui/toast';
 import type { CreateGroupInput, GroupWithStats, UpdateGroupInput } from '@/types/entities/group';
@@ -167,25 +168,17 @@ export function GroupsSettings() {
 
 	// Mostrar loading state
 	if (isLoading) {
-		return (
-			<div className="flex h-[calc(100vh-8rem)] items-center justify-center">
-				<div className="text-center">
-					<div className="mx-auto h-8 w-8 animate-spin rounded-full border-gray-900 border-b-2" />
-					<p className="mt-2 text-gray-500 text-sm">Cargando grupos...</p>
-				</div>
-			</div>
-		);
+		return <PageState mode="loading" title="Cargando grupos..." />;
 	}
 
 	// Mostrar error state
 	if (error) {
 		return (
-			<div className="flex h-[calc(100vh-8rem)] items-center justify-center">
-				<div className="text-center">
-					<p className="text-red-500">Error al cargar los grupos</p>
-					<p className="mt-1 text-gray-500 text-sm">{error instanceof Error ? error.message : 'Error desconocido'}</p>
-				</div>
-			</div>
+			<PageState
+				description={error instanceof Error ? error.message : 'Error desconocido'}
+				mode="error"
+				title="Error al cargar los grupos"
+			/>
 		);
 	}
 

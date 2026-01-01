@@ -5,6 +5,7 @@
  */
 
 import type { AnyEntityWithStats } from '@/types/entities';
+import { formatFileSize } from '@/lib/utils/format.utils';
 
 /**
  * Interfaz base para items del explorador de archivos
@@ -96,15 +97,4 @@ export function entityToFileItem(entity: AnyEntityWithStats): FileItem {
 	};
 }
 
-/**
- * Formatea el tamaño de archivo en bytes a una cadena legible
- */
-function formatFileSize(bytes: number): string {
-	if (bytes === 0) {
-		return '0 B';
-	}
-	const k = 1024;
-	const sizes = ['B', 'KB', 'MB', 'GB', 'TB'];
-	const i = Math.floor(Math.log(bytes) / Math.log(k));
-	return `${Number.parseFloat((bytes / k ** i).toFixed(2))} ${sizes[i]}`;
-}
+// formatFileSize importada desde @/lib/utils/format.utils

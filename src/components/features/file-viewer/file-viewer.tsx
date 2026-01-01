@@ -12,6 +12,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { FileContentRenderer } from './file-content-renderer';
+import type { PaneState } from './file-viewer.types';
 import { ThumbnailNavigation } from './thumbnail-navigation';
 import { ToolbarActions } from './toolbar-actions';
 import { useFocusManagement } from './use-focus-management';
@@ -19,7 +20,6 @@ import { useImageLoader } from './use-image-loader';
 import { useKeyboardNavigation } from './use-keyboard-navigation';
 import { useToolbarActions } from './use-toolbar-actions';
 import { useZoomPan } from './use-zoom-pan';
-import type { PaneState } from './file-viewer.types';
 
 // Componente principal del visor de archivos - memoizado
 export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { triggerRef?: React.RefObject<HTMLElement> }) {

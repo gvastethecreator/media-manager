@@ -16,7 +16,7 @@ import type {
 import { ConceptSortOption } from '@/types/entities/concept';
 
 // Tipos locales equivalentes a Drizzle
-type DrizzleConceptCreateInput = {
+interface DrizzleConceptCreateInput {
 	id?: string;
 	name: string;
 	description?: string | null;
@@ -37,9 +37,9 @@ type DrizzleConceptCreateInput = {
 	parentId?: string | null;
 	createdAt?: Date;
 	updatedAt?: Date;
-};
+}
 
-type DrizzleConceptUpdateInput = {
+interface DrizzleConceptUpdateInput {
 	name?: string;
 	description?: string | null;
 	emoji?: string | null;
@@ -58,9 +58,9 @@ type DrizzleConceptUpdateInput = {
 	featuredImage?: string | null;
 	parentId?: string | null;
 	updatedAt?: Date;
-};
+}
 
-type DrizzleConceptWhereInput = {
+interface DrizzleConceptWhereInput {
 	id?: string;
 	name?: { contains?: string };
 	description?: { contains?: string };
@@ -77,22 +77,22 @@ type DrizzleConceptWhereInput = {
 	parentId?: string;
 	OR?: DrizzleConceptWhereInput[];
 	tagEntities?: { some?: { id?: { in?: string[] } } };
-};
+}
 
-type DrizzleConceptOrderByInput = {
+interface DrizzleConceptOrderByInput {
 	name?: 'asc' | 'desc';
 	createdAt?: 'asc' | 'desc';
 	updatedAt?: 'asc' | 'desc';
 	category?: 'asc' | 'desc';
-};
+}
 
-type DrizzleConceptFindManyArgs = {
+interface DrizzleConceptFindManyArgs {
 	where?: DrizzleConceptWhereInput;
 	orderBy?: DrizzleConceptOrderByInput;
 	skip?: number;
 	take?: number;
-	include?: any;
-};
+	include?: unknown;
+}
 
 /**
  * Mapea la entrada de creación de un concepto al formato de Drizzle.
@@ -313,29 +313,3 @@ export function processConcepts(
 		total: filteredConcepts.length,
 	};
 }
-
-// Mantener funciones legacy con nombres de Drizzle por compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar toCreateDataDrizzle en su lugar
- */
-export const toCreateData = toCreateDataDrizzle;
-
-/**
- * @deprecated Usar toUpdateDataDrizzle en su lugar
- */
-export const toUpdateData = toUpdateDataDrizzle;
-
-/**
- * @deprecated Usar createOrderByDrizzle en su lugar
- */
-export const createOrderBy = createOrderByDrizzle;
-
-/**
- * @deprecated Usar createFilterDrizzle en su lugar
- */
-export const createFilter = createFilterDrizzle;
-
-/**
- * @deprecated Usar toSearchOptionsDrizzle en su lugar
- */
-export const toSearchOptions = toSearchOptionsDrizzle;

@@ -68,7 +68,7 @@ export function FolderContentView({
 				{content}
 				{showPerfPanel && (
 					<div
-						className="pointer-events-auto absolute right-2 bottom-2 z-50 max-w-[220px]"
+						className="pointer-events-auto absolute right-2 bottom-2 z-50 max-w-55"
 						data-testid="perf-panel-container"
 					>
 						<PerformanceMetricsPanel autoUpdateMs={2500} />

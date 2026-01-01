@@ -67,10 +67,10 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 	}, [stats.distribution]);
 
 	return (
-		<Card className="rounded-dt-md border-border/50 bg-card/80 shadow-dt-1 transition-shadow duration-dt-normal hover:shadow-dt-2">
+		<Card className="animate-fade-up rounded-dt-md border-border/50 bg-card/80 shadow-dt-1 transition-shadow duration-dt-normal hover:shadow-dt-2">
 			<CardHeader className="p-3 pb-2">
 				<CardTitle className="flex items-center gap-2 text-sm">
-					<span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-dt-sm bg-primary/10 text-primary">
+					<span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-dt-sm bg-primary/10 text-primary transition-transform duration-dt-normal group-hover:scale-110">
 						{icon}
 					</span>
 					<span className="heading-sm">{title}</span>
@@ -89,20 +89,38 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 					<div className="space-y-4">
 						{/* Estadísticas básicas */}
 						<div className="grid grid-cols-2 gap-2">
-							<div className="flex flex-col items-center justify-center rounded-dt-sm bg-muted/50 p-3 transition-colors duration-dt-fast hover:bg-muted/70">
-								<span className="numeric-lg">{stats.total}</span>
+							<div
+								className="flex flex-col items-center justify-center rounded-dt-sm bg-muted/50 p-3 transition-colors duration-dt-fast hover:bg-muted/70"
+								style={{ animationDelay: '0ms' }}
+							>
+								<span className="numeric-lg animate-count-up">{stats.total}</span>
 								<span className="caption">Total</span>
 							</div>
-							<div className="flex flex-col items-center justify-center rounded-dt-sm bg-muted/50 p-3 transition-colors duration-dt-fast hover:bg-muted/70">
-								<span className="numeric-lg">{stats.active}</span>
+							<div
+								className="flex flex-col items-center justify-center rounded-dt-sm bg-muted/50 p-3 transition-colors duration-dt-fast hover:bg-muted/70"
+								style={{ animationDelay: '50ms' }}
+							>
+								<span className="numeric-lg animate-count-up" style={{ animationDelay: '50ms' }}>
+									{stats.active}
+								</span>
 								<span className="caption">Activos</span>
 							</div>
-							<div className="flex flex-col items-center justify-center rounded-dt-sm bg-muted/50 p-3 transition-colors duration-dt-fast hover:bg-muted/70">
-								<span className="numeric-lg">{stats.isFavorite}</span>
+							<div
+								className="flex flex-col items-center justify-center rounded-dt-sm bg-muted/50 p-3 transition-colors duration-dt-fast hover:bg-muted/70"
+								style={{ animationDelay: '100ms' }}
+							>
+								<span className="numeric-lg animate-count-up" style={{ animationDelay: '100ms' }}>
+									{stats.isFavorite}
+								</span>
 								<span className="caption">Favoritos</span>
 							</div>
-							<div className="flex flex-col items-center justify-center rounded-dt-sm bg-muted/50 p-3 transition-colors duration-dt-fast hover:bg-muted/70">
-								<span className="numeric-lg">{stats.archived}</span>
+							<div
+								className="flex flex-col items-center justify-center rounded-dt-sm bg-muted/50 p-3 transition-colors duration-dt-fast hover:bg-muted/70"
+								style={{ animationDelay: '150ms' }}
+							>
+								<span className="numeric-lg animate-count-up" style={{ animationDelay: '150ms' }}>
+									{stats.archived}
+								</span>
 								<span className="caption">Archivados</span>
 							</div>
 						</div>
@@ -112,70 +130,70 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 							stats.totalImages !== undefined ||
 							stats.totalSize !== undefined ||
 							stats.lastUpdated !== undefined) && (
-							<div className="grid grid-cols-4 gap-2">
-								<TooltipProvider>
-									{stats.totalItems !== undefined && (
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
-													<Hash className="mb-1 h-4 w-4 text-primary" />
-													<p className="numeric-md">{stats.totalItems}</p>
-													<p className="caption">Total</p>
-												</div>
-											</TooltipTrigger>
-											<TooltipContent>
-												<p>Total de elementos</p>
-											</TooltipContent>
-										</Tooltip>
-									)}
+								<div className="grid grid-cols-4 gap-2">
+									<TooltipProvider>
+										{stats.totalItems !== undefined && (
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
+														<Hash className="mb-1 h-4 w-4 text-primary" />
+														<p className="numeric-md">{stats.totalItems}</p>
+														<p className="caption">Total</p>
+													</div>
+												</TooltipTrigger>
+												<TooltipContent>
+													<p>Total de elementos</p>
+												</TooltipContent>
+											</Tooltip>
+										)}
 
-									{stats.totalImages !== undefined && (
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
-													<ImageIcon className="mb-1 h-4 w-4 text-primary" />
-													<p className="numeric-md">{stats.totalImages}</p>
-													<p className="caption">Imágenes</p>
-												</div>
-											</TooltipTrigger>
-											<TooltipContent>
-												<p>Total de imágenes asociadas</p>
-											</TooltipContent>
-										</Tooltip>
-									)}
+										{stats.totalImages !== undefined && (
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
+														<ImageIcon className="mb-1 h-4 w-4 text-primary" />
+														<p className="numeric-md">{stats.totalImages}</p>
+														<p className="caption">Imágenes</p>
+													</div>
+												</TooltipTrigger>
+												<TooltipContent>
+													<p>Total de imágenes asociadas</p>
+												</TooltipContent>
+											</Tooltip>
+										)}
 
-									{stats.totalSize !== undefined && (
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
-													<HardDrive className="mb-1 h-4 w-4 text-primary" />
-													<p className="numeric-md">{formatSize(stats.totalSize)}</p>
-													<p className="caption">Tamaño</p>
-												</div>
-											</TooltipTrigger>
-											<TooltipContent>
-												<p>Tamaño total de archivos</p>
-											</TooltipContent>
-										</Tooltip>
-									)}
+										{stats.totalSize !== undefined && (
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
+														<HardDrive className="mb-1 h-4 w-4 text-primary" />
+														<p className="numeric-md">{formatSize(stats.totalSize)}</p>
+														<p className="caption">Tamaño</p>
+													</div>
+												</TooltipTrigger>
+												<TooltipContent>
+													<p>Tamaño total de archivos</p>
+												</TooltipContent>
+											</Tooltip>
+										)}
 
-									{stats.lastUpdated && (
-										<Tooltip>
-											<TooltipTrigger asChild>
-												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
-													<Calendar className="mb-1 h-4 w-4 text-primary" />
-													<p className="body-sm font-medium">{formatDate(stats.lastUpdated)}</p>
-													<p className="caption">Actualizado</p>
-												</div>
-											</TooltipTrigger>
-											<TooltipContent>
-												<p>Última actualización</p>
-											</TooltipContent>
-										</Tooltip>
-									)}
-								</TooltipProvider>
-							</div>
-						)}
+										{stats.lastUpdated && (
+											<Tooltip>
+												<TooltipTrigger asChild>
+													<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
+														<Calendar className="mb-1 h-4 w-4 text-primary" />
+														<p className="body-sm font-medium">{formatDate(stats.lastUpdated)}</p>
+														<p className="caption">Actualizado</p>
+													</div>
+												</TooltipTrigger>
+												<TooltipContent>
+													<p>Última actualización</p>
+												</TooltipContent>
+											</Tooltip>
+										)}
+									</TooltipProvider>
+								</div>
+							)}
 
 						{/* Items recientes */}
 						{stats.recentItems && stats.recentItems.length > 0 && (

@@ -20,6 +20,18 @@ export {
 	TimestampFields,
 	UUID,
 } from './common';
+// ============= Entity Schemas =============
+export {
+	BaseImage,
+	CompleteImage,
+	ExtendedImage,
+	ImageCreate,
+	ImageFilters,
+	ImageStats,
+	ImageThumbnail,
+	ImageUpdate,
+	ImageVisualConfig,
+} from './image';
 // ============= Primitive Schemas =============
 export {
 	AbsoluteFilePath,
@@ -48,19 +60,6 @@ export {
 	RelativeFilePath,
 	VideoMimeType,
 } from './primitives';
-
-// ============= Entity Schemas =============
-export {
-	BaseImage,
-	CompleteImage,
-	ExtendedImage,
-	ImageCreate,
-	ImageFilters,
-	ImageStats,
-	ImageThumbnail,
-	ImageUpdate,
-	ImageVisualConfig,
-} from './image';
 
 export {
 	Property,

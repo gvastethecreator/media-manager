@@ -597,10 +597,30 @@ export class WorldItemService {
 		}
 	}
 
-	async getRecentWorldItemImages(id: string, limit: number): Promise<any[]> {
-		// TODO: Implementar lógica para obtener imágenes recientes
+	async getRecentWorldItemImages(
+		id: string,
+		limit: number
+	): Promise<Array<{ id: string; name: string; path: string; thumbnailPath?: string | null }>> {
 		worldItemLogger.info(`Obteniendo imágenes recientes del world item ${id} (limit: ${limit})`);
-		return [];
+		try {
+			const result = await db
+				.select({
+					id: images.id,
+					name: images.name,
+					path: images.path,
+					thumbnailPath: images.thumbnail,
+				})
+				.from(imageWorldItems)
+				.innerJoin(images, eq(imageWorldItems.A, images.id))
+				.where(eq(imageWorldItems.B, id))
+				.orderBy(desc(images.createdAt))
+				.limit(limit);
+
+			return result;
+		} catch (error) {
+			worldItemLogger.error(`Error obteniendo imágenes recientes del world item ${id}:`, error);
+			return [];
+		}
 	}
 }
 

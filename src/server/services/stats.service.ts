@@ -140,17 +140,21 @@ interface TopTag {
 }
 
 // Helpers internos para reducir complejidad en la obtención de estadísticas
-type CountRow = { count: number };
-type SizeRow = { totalSize: number };
+interface CountRow {
+	count: number;
+}
+interface SizeRow {
+	totalSize: number;
+}
 
-type MediaCounts = {
+interface MediaCounts {
 	images: number;
 	videos: number;
 	audios: number;
 	documents: number;
 	jsonFiles: number;
 	file3Ds: number;
-};
+}
 
 async function fetchMediaCounts(): Promise<MediaCounts> {
 	const [imagesCount, videosCount, audiosCount, documentsCount, jsonFilesCount, file3DsCount] = await Promise.all([
@@ -171,13 +175,13 @@ async function fetchMediaCounts(): Promise<MediaCounts> {
 	};
 }
 
-type OrgCounts = {
+interface OrgCounts {
 	folders: number;
 	albums: number;
 	collections: number;
 	tags: number;
 	favorites: number;
-};
+}
 
 async function fetchOrgCounts(): Promise<OrgCounts> {
 	const [foldersCount, albumsCount, collectionsCount, tagsCount, favoritesCount] = await Promise.all([
@@ -196,7 +200,7 @@ async function fetchOrgCounts(): Promise<OrgCounts> {
 	};
 }
 
-type WorldCounts = {
+interface WorldCounts {
 	characters: number;
 	places: number;
 	worldItems: number;
@@ -205,7 +209,7 @@ type WorldCounts = {
 	notes: number;
 	properties: number;
 	wildcards: number;
-};
+}
 
 async function fetchWorldCounts(): Promise<WorldCounts> {
 	const [
@@ -239,10 +243,10 @@ async function fetchWorldCounts(): Promise<WorldCounts> {
 	};
 }
 
-type SystemCounts = {
+interface SystemCounts {
 	thumbnails: number;
 	metadatas: number;
-};
+}
 
 async function fetchSystemCounts(): Promise<SystemCounts> {
 	const [thumbnailsCount, metadataCount] = await Promise.all([

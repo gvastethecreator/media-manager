@@ -76,9 +76,23 @@ test.describe('Context Menu Performance', () => {
 
 		// Esperar que la app esté cargada
 		await page.waitForSelector('[data-testid="file-browser"]', { timeout: 10_000 });
-		// Forzar vista grid para selectores determinísticos
-		await page.getByTestId('view-mode-dropdown-trigger').click({ force: true });
-		await page.getByTestId('view-mode-grid-btn').click();
+		// Forzar vista grid para selectores determinísticos - con reintentos
+		let attempts = 0;
+		const maxAttempts = 3;
+		while (attempts < maxAttempts) {
+			await page.getByTestId('view-mode-dropdown-trigger').click({ force: true });
+			try {
+				await page.waitForSelector('[data-testid="view-mode-grid-btn"]', { state: 'visible', timeout: 2000 });
+				await page.click('[data-testid="view-mode-grid-btn"]');
+				break;
+			} catch {
+				attempts++;
+				if (attempts >= maxAttempts) {
+					throw new Error('Dropdown no se abrió después de varios intentos');
+				}
+				await page.waitForTimeout(200);
+			}
+		}
 		await expect(page.getByTestId('file-browser')).toHaveAttribute('data-view-mode', 'grid');
 		// Resetear scroll para asegurar primer item montado
 		const viewport = page.getByTestId('file-browser-scroll-area-viewport');

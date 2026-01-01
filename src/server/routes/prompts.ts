@@ -5,7 +5,7 @@ import { db } from '@/lib/drizzle';
 import { imagePrompts, images, prompts } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { PromptService, promptService } from '@/services/prompt/prompt.service';
-import { toImageWithStats } from '@/transformers/image';
+import { transformImagesForCard } from '@/transformers/image';
 import { toPromptWithStats } from '@/transformers/prompt';
 
 const router = express.Router();
@@ -205,8 +205,7 @@ router.get('/:id/images', async (req, res) => {
 	try {
 		const { id } = req.params;
 		const images = await promptService.getImages(id);
-		const transformedImages = images.map(toImageWithStats);
-		res.json(transformedImages);
+		res.json(transformImagesForCard(images));
 	} catch (error) {
 		serverLogger.error('Error getting prompt images:', error);
 		res.status(500).json({ error: 'Error interno del servidor' });

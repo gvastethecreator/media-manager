@@ -3,6 +3,7 @@
  * @module file-browser-new/components/empty-state
  */
 
+import type { LucideIcon } from 'lucide-react';
 import { FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -26,7 +27,7 @@ export function FileBrowserEmptyState({
 			}
 			className={className}
 			description={description}
-			icon={Icon}
+			icon={Icon as LucideIcon}
 			title={title}
 		/>
 	);

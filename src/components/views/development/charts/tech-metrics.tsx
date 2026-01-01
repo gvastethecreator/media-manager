@@ -336,10 +336,7 @@ export function SystemMetricsPanel() {
 									<YAxis dataKey="endpoint" tick={{ fontSize: 10 }} type="category" width={80} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: ValueType) => [
-											formatNumber(toNumberValue(value)),
-											'Solicitudes',
-										]}
+										formatter={(value: ValueType) => [formatNumber(toNumberValue(value)), 'Solicitudes']}
 										labelFormatter={(name) => `Endpoint: ${name}`}
 									/>
 									<Bar dataKey="hits" fill={CHART_COLORS.primary} />

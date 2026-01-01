@@ -8,7 +8,7 @@
 import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, like, or } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { properties } from '@/lib/drizzle/schema/index';
+import { imageProperties, images, properties } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
 import { revalidatePath } from '@/lib/server/revalidate';
@@ -632,16 +632,54 @@ export class PropertyService {
 		}
 	}
 
-	async getPropertyImages(id: string): Promise<any[]> {
-		// TODO: Implementar lógica para obtener imágenes de la propiedad
+	async getPropertyImages(
+		id: string
+	): Promise<Array<{ id: string; name: string; path: string; thumbnailPath?: string | null }>> {
 		logger.info(`Obteniendo imágenes de la propiedad ${id}`);
-		return [];
+		try {
+			const result = await db
+				.select({
+					id: images.id,
+					name: images.name,
+					path: images.path,
+					thumbnailPath: images.thumbnail,
+				})
+				.from(imageProperties)
+				.innerJoin(images, eq(imageProperties.A, images.id))
+				.where(eq(imageProperties.B, id))
+				.orderBy(desc(images.createdAt));
+
+			return result;
+		} catch (error) {
+			logger.error(`Error obteniendo imágenes de la propiedad ${id}:`, error);
+			return [];
+		}
 	}
 
-	async getRecentPropertyImages(id: string, limit: number): Promise<any[]> {
-		// TODO: Implementar lógica para obtener imágenes recientes de la propiedad
+	async getRecentPropertyImages(
+		id: string,
+		limit: number
+	): Promise<Array<{ id: string; name: string; path: string; thumbnailPath?: string | null }>> {
 		logger.info(`Obteniendo imágenes recientes de la propiedad ${id} (limit: ${limit})`);
-		return [];
+		try {
+			const result = await db
+				.select({
+					id: images.id,
+					name: images.name,
+					path: images.path,
+					thumbnailPath: images.thumbnail,
+				})
+				.from(imageProperties)
+				.innerJoin(images, eq(imageProperties.A, images.id))
+				.where(eq(imageProperties.B, id))
+				.orderBy(desc(images.createdAt))
+				.limit(limit);
+
+			return result;
+		} catch (error) {
+			logger.error(`Error obteniendo imágenes recientes de la propiedad ${id}:`, error);
+			return [];
+		}
 	}
 }
 

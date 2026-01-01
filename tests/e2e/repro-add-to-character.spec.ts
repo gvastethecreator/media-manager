@@ -8,15 +8,10 @@ test('Add image to character flow', async ({ page }) => {
 	const createBtn = page.getByRole('button', { name: 'Crear Personaje' });
 	if (await createBtn.isVisible()) {
 		await createBtn.click();
-	} else {
-		// Tal vez ya está el formulario abierto o hay que buscar otro botón
-		// Asumimos que si no está el botón, quizás ya hay personajes.
-		// Pero para el test es mejor crear uno nuevo para asegurar estado limpio.
-		// Si el formulario ya está abierto:
-		if (!(await page.getByLabel('Nombre').isVisible())) {
-			// Intentar abrir formulario si no está visible
-			await page.getByText('Crear Personaje').click();
-		}
+	} else if (!(await page.getByLabel('Nombre').isVisible())) {
+		// Si el formulario no está abierto y no hay botón principal,
+		// intentar abrir mediante texto alternativo
+		await page.getByText('Crear Personaje').click();
 	}
 
 	const testCharName = `Test Char ${Date.now()}`;
@@ -30,9 +25,9 @@ test('Add image to character flow', async ({ page }) => {
 	// Esperar a que el formulario desaparezca
 	await expect(page.getByRole('button', { name: 'Guardar Personaje' })).not.toBeVisible();
 
-	// Esperar a que aparezca el personaje
+	// Esperar a que aparezca el personaje (usar h3 para evitar duplicado con sr-only)
 	// A veces la recarga es lenta o requiere invalidación
-	await expect(page.getByText(testCharName)).toBeVisible({ timeout: 15_000 });
+	await expect(page.locator('h3', { hasText: testCharName })).toBeVisible({ timeout: 15_000 });
 
 	// 2. Ir a una carpeta con imágenes
 	// Vamos a usar la ruta que mencionó el usuario si es posible, o fallback a una genérica
@@ -94,8 +89,8 @@ test('Add image to character flow', async ({ page }) => {
 	await expect(page.getByText(testCharName)).toBeVisible();
 	await page.getByText(testCharName).click();
 
-	// 5. Verificar Toast
-	await expect(page.getByText('✅ Agregado correctamente')).toBeVisible();
+	// 5. Verificar Toast (puede aparecer más de una vez, validamos que al menos uno sea visible)
+	await expect(page.getByText('✅ Agregado correctamente').first()).toBeVisible();
 
 	// 6. Verificar en vista de Personajes
 	await page.goto('/characters');

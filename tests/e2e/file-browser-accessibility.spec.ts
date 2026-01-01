@@ -34,8 +34,23 @@ test.describe('File Browser: accesibilidad y foco', () => {
 		await page.goto('/folders/cursed-dump', { waitUntil: 'domcontentloaded', timeout: 60_000 });
 		// Forzar modo grid si no lo está
 		await page.waitForSelector('[data-testid="file-browser"]', { state: 'attached' });
-		await page.getByTestId('view-mode-dropdown-trigger').click();
-		await page.getByTestId('view-mode-grid-btn').click();
+		// Abrir dropdown con reintentos
+		let attempts = 0;
+		const maxAttempts = 3;
+		while (attempts < maxAttempts) {
+			await page.getByTestId('view-mode-dropdown-trigger').click();
+			try {
+				await page.waitForSelector('[data-testid="view-mode-grid-btn"]', { state: 'visible', timeout: 2000 });
+				await page.click('[data-testid="view-mode-grid-btn"]');
+				break;
+			} catch {
+				attempts++;
+				if (attempts >= maxAttempts) {
+					throw new Error('Dropdown no se abrió después de varios intentos');
+				}
+				await page.waitForTimeout(200);
+			}
+		}
 		await expect(page.getByTestId('file-browser')).toHaveAttribute('data-view-mode', 'grid');
 		// Esperar a que exista al menos una entidad si el dataset no está vacío
 		let tries = 0;

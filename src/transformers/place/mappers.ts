@@ -14,7 +14,7 @@ import { PlaceCreateInput, PlaceStatistics, PlaceUpdateInput, PlaceWithStats } f
 import type { PlaceSearchOptions } from '@/types/entities/place/types';
 
 // Tipos locales equivalentes a Drizzle
-type DrizzlePlaceWithCounts = {
+interface DrizzlePlaceWithCounts {
 	id: string;
 	name: string;
 	description: string | null;
@@ -50,9 +50,9 @@ type DrizzlePlaceWithCounts = {
 		collections?: number;
 		concepts?: number;
 	};
-};
+}
 
-type DrizzleCreatePlaceData = {
+interface DrizzleCreatePlaceData {
 	name: string;
 	description?: string | null;
 	emoji?: string | null;
@@ -77,15 +77,15 @@ type DrizzleCreatePlaceData = {
 	notes?: string | null;
 	featuredImage?: string | null;
 	parentId?: string | null;
-};
+}
 
 type DrizzleUpdatePlaceData = Partial<DrizzleCreatePlaceData>;
 
-type DrizzleOrderBy = {
+interface DrizzleOrderBy {
 	[key: string]: 'asc' | 'desc';
-};
+}
 
-type DrizzleWhereFilter = {
+interface DrizzleWhereFilter {
 	AND?: DrizzleWhereFilter[];
 	OR?: DrizzleWhereFilter[];
 	name?: { contains?: string; equals?: string };
@@ -95,14 +95,14 @@ type DrizzleWhereFilter = {
 	type?: { equals?: string; in?: string[] };
 	location?: { equals?: string };
 	isFavorite?: boolean;
-};
+}
 
-type DrizzleFindManyArgs = {
+interface DrizzleFindManyArgs {
 	where?: DrizzleWhereFilter;
 	orderBy?: DrizzleOrderBy;
 	skip?: number;
 	take?: number;
-};
+}
 
 /**
  * 🗺️ Transforma un objeto Place de Drizzle a un objeto PlaceWithStats enriquecido.
@@ -316,29 +316,3 @@ export function toSearchOptionsForDrizzle(options: PlaceSearchOptions = {}): Dri
 
 	return args;
 }
-
-// Mantener funciones legacy para compatibilidad (DEPRECATED)
-/**
- * @deprecated Usar toCreateDataForDrizzle
- */
-export const toCreateData = toCreateDataForDrizzle;
-
-/**
- * @deprecated Usar toUpdateDataForDrizzle
- */
-export const toUpdateData = toUpdateDataForDrizzle;
-
-/**
- * @deprecated Usar createOrderByForDrizzle
- */
-export const createOrderBy = createOrderByForDrizzle;
-
-/**
- * @deprecated Usar createFilterForDrizzle
- */
-export const createFilter = createFilterForDrizzle;
-
-/**
- * @deprecated Usar toSearchOptionsForDrizzle
- */
-export const toSearchOptions = toSearchOptionsForDrizzle;

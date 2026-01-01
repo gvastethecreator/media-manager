@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { PageState } from '@/components/ui/page-state';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import type { WorldItemCreateInput, WorldItemUpdateInput } from '@/lib/api/world-items';
@@ -197,25 +198,17 @@ export function WorldItemsSettings() {
 
 	// Mostrar loading state
 	if (isLoading) {
-		return (
-			<div className="flex h-[calc(100vh-8rem)] items-center justify-center">
-				<div className="text-center">
-					<div className="mx-auto h-8 w-8 animate-spin rounded-full border-gray-900 border-b-2" />
-					<p className="mt-2 text-gray-500 text-sm">Cargando objetos del mundo...</p>
-				</div>
-			</div>
-		);
+		return <PageState mode="loading" title="Cargando objetos del mundo..." />;
 	}
 
 	// Mostrar error state
 	if (error) {
 		return (
-			<div className="flex h-[calc(100vh-8rem)] items-center justify-center">
-				<div className="text-center">
-					<p className="text-red-500">Error al cargar los objetos del mundo</p>
-					<p className="mt-1 text-gray-500 text-sm">{error instanceof Error ? error.message : 'Error desconocido'}</p>
-				</div>
-			</div>
+			<PageState
+				description={error instanceof Error ? error.message : 'Error desconocido'}
+				mode="error"
+				title="Error al cargar los objetos del mundo"
+			/>
 		);
 	}
 
