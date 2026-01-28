@@ -3,4 +3,4 @@
  * @module services/world-item
  */
 
-export * from './world-item.service';
+export { WorldItemService, WorldItemServiceLive } from '@/services/secondary/secondary-services.effect';

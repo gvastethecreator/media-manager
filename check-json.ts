@@ -1,6 +1,5 @@
 import { db } from './src/lib/drizzle';
 import { images } from './src/lib/drizzle/schema/files';
-import { sql } from 'drizzle-orm';
 
 async function checkInvalidJson() {
 	try {

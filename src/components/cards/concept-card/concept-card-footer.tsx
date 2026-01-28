@@ -89,7 +89,7 @@ export function ConceptCardFooter({
 		<div
 			className={cn(
 				'px-3 py-2 text-white/80 text-xs',
-				tcgMode ? 'border-white/10 border-t' : '',
+				tcgMode ? 'border-border/40 border-t' : '',
 				isFavorite && tcgMode ? 'bg-linear-to-t from-amber-950/40 to-amber-900/20' : ''
 			)}
 			style={{
@@ -135,7 +135,7 @@ export function ConceptCardFooter({
 						<span
 							className="rounded-sm px-1.5 py-0.5 font-bold text-[0.65rem]"
 							style={{
-								backgroundColor: isFavorite ? '#FFD700' : primaryColor,
+								backgroundColor: isFavorite ? 'var(--preset-yellow)' : primaryColor,
 								color: isFavorite ? 'black' : 'white',
 								boxShadow: isFavorite ? '0 0 5px rgba(255, 215, 0, 0.7)' : 'none',
 							}}
@@ -148,7 +148,7 @@ export function ConceptCardFooter({
 					{isFavorite && (
 						<Star
 							aria-label="Favorito"
-							className={cn(tcgMode ? 'fill-yellow-300 text-yellow-300' : 'fill-yellow-400 text-yellow-400')}
+							className={cn(tcgMode ? 'fill-yellow-300 text-yellow-300' : 'fill-warning text-warning')}
 							size={14}
 						/>
 					)}
@@ -159,7 +159,7 @@ export function ConceptCardFooter({
 			<div className="mb-1.5 flex items-center justify-between text-[0.65rem]">
 				{/* ID de colección */}
 				{tcgMode && collectionId && (
-					<div className="flex items-center rounded-sm bg-black/30 px-1.5 py-0.5">
+					<div className="flex items-center rounded-sm bg-muted/30 px-1.5 py-0.5">
 						<span className="font-mono tracking-wide">{collectionId}</span>
 					</div>
 				)}
@@ -194,7 +194,7 @@ export function ConceptCardFooter({
 
 			{/* Sello de copyright al estilo TCG */}
 			{tcgMode && (
-				<div className="mt-1 border-white/10 border-t pt-1 text-center text-[0.6rem] opacity-60">
+				<div className="mt-1 border-border/40 border-t pt-1 text-center text-[0.6rem] opacity-60">
 					™ & © {new Date().getFullYear()} IdeaVault · {(category || 'CONCEPTO').toUpperCase()} · #{collectionId}
 				</div>
 			)}

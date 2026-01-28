@@ -5,5 +5,4 @@
  * @updated 2025-01-27
  */
 
-export * from './collection.service';
-export { default } from './collection.service';
+export * from './collection.service.effect';

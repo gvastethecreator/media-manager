@@ -21,7 +21,7 @@ export interface FolderFile {
 	createdAt: Date;
 	updatedAt: Date;
 	folderId: string;
-	entityType: 'image' | 'video' | 'audio' | 'document' | 'json' | '3d';
+	entityType: 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d';
 	extension: string;
 	// Metadatos específicos por tipo (opcional)
 	metadata?: Record<string, any>;
@@ -44,7 +44,7 @@ export interface GetFolderFilesOptions {
 	search?: string;
 	sortBy?: 'name' | 'size' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
-	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'json' | '3d'>;
+	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d'>;
 }
 
 export interface GetFolderFilesResult {
@@ -186,7 +186,7 @@ function mapJsonToFolderFile(json: any): FolderFile {
 		createdAt: json.createdAt,
 		updatedAt: json.updatedAt,
 		folderId: json.folderId,
-		entityType: 'json',
+		entityType: 'jsonFile',
 		extension: json.extension || '.json',
 		metadata: {
 			isValid: json.isValid,
@@ -211,7 +211,7 @@ function mapFile3DToFolderFile(file3d: any): FolderFile {
 		createdAt: file3d.createdAt,
 		updatedAt: file3d.updatedAt,
 		folderId: file3d.folderId,
-		entityType: '3d',
+		entityType: 'file3d',
 		extension: file3d.extension || '',
 		metadata: {
 			vertices: file3d.vertices,
@@ -289,7 +289,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 		search,
 		sortBy = 'name',
 		sortOrder = 'asc',
-		fileTypes = ['image', 'video', 'audio', 'document', 'json', '3d'],
+		fileTypes = ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d'],
 	} = options;
 
 	try {
@@ -363,10 +363,10 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 		}
 
 		// JSONs
-		if (fileTypes.includes('json')) {
+		if (fileTypes.includes('jsonFile')) {
 			unionQueries.push(sql`
 				SELECT
-					id, name, path, size, createdAt, updatedAt, folderId, 'json' as entityType,
+					id, name, path, size, createdAt, updatedAt, folderId, 'jsonFile' as entityType,
 					extension,
 					NULL as thumbnail,
 					NULL as metadata,
@@ -378,10 +378,10 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 		}
 
 		// Archivos 3D
-		if (fileTypes.includes('3d')) {
+		if (fileTypes.includes('file3d')) {
 			unionQueries.push(sql`
 				SELECT
-					id, name, path, size, createdAt, updatedAt, folderId, '3d' as entityType,
+					id, name, path, size, createdAt, updatedAt, folderId, 'file3d' as entityType,
 					extension,
 					NULL as thumbnail,
 					NULL as metadata,
@@ -481,7 +481,7 @@ export async function getFolderFiles(options: GetFolderFilesOptions): Promise<Ge
 async function getTotalFileCount(
 	folderIds: string[],
 	search?: string,
-	fileTypes: string[] = ['image', 'video', 'audio', 'document', 'json', '3d']
+	fileTypes: string[] = ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d']
 ): Promise<number> {
 	try {
 		const countQueries: Promise<number>[] = [];
@@ -527,7 +527,7 @@ async function getTotalFileCount(
 			);
 		}
 
-		if (fileTypes.includes('json')) {
+		if (fileTypes.includes('jsonFile')) {
 			countQueries.push(
 				db
 					.select({ count: count() })
@@ -537,7 +537,7 @@ async function getTotalFileCount(
 			);
 		}
 
-		if (fileTypes.includes('3d')) {
+		if (fileTypes.includes('file3d')) {
 			countQueries.push(
 				db
 					.select({ count: count() })
@@ -570,8 +570,8 @@ export async function getFolderFileStats(folderId: string, includeSubfolders = f
 			getTotalFileCount(folderIds, undefined, ['video']),
 			getTotalFileCount(folderIds, undefined, ['audio']),
 			getTotalFileCount(folderIds, undefined, ['document']),
-			getTotalFileCount(folderIds, undefined, ['json']),
-			getTotalFileCount(folderIds, undefined, ['3d']),
+			getTotalFileCount(folderIds, undefined, ['jsonFile']),
+			getTotalFileCount(folderIds, undefined, ['file3d']),
 		]);
 
 		return {
@@ -606,7 +606,7 @@ function mapRowToFolderFile(row: any): FolderFile {
 	} else if (row.entityType === 'video') {
 		thumbnailPath = `/api/videos/${row.id}/thumbnail`;
 	}
-	// audios, documents, json, 3d no tienen thumbnail API por defecto
+	// audios, documents, jsonFile, file3d no tienen thumbnail API por defecto
 
 	// Parse metadata y excluir thumbnail (contiene base64 pesado)
 	const rawMetadata = typeof row.metadata === 'string' ? JSON.parse(row.metadata) : row.metadata;

@@ -82,7 +82,7 @@ export function PlaceCardHeader({
 			<div
 				className="relative flex h-16 items-center overflow-hidden px-3.5 pt-2.5"
 				style={{
-					background: `linear-gradient(90deg, ${color}95, ${color}70)`,
+					background: `linear-gradient(90deg, color-mix(in oklab, ${color}, transparent 5%), color-mix(in oklab, ${color}, transparent 30%))`,
 					borderBottom: `2px solid ${color}`,
 				}}
 			>
@@ -117,7 +117,7 @@ export function PlaceCardHeader({
 							tcgMode ? 'h-10 w-10' : 'h-8 w-8'
 						)}
 						style={{
-							background: `radial-gradient(circle, ${color}30 0%, ${color}60 100%)`,
+							background: `radial-gradient(circle, color-mix(in oklab, ${color}, transparent 70%) 0%, color-mix(in oklab, ${color}, transparent 40%) 100%)`,
 							boxShadow: `0 0 8px rgba(var(--effect-shadow-rgb), 0.4), inset 0 0 5px ${color}`,
 						}}
 					>
@@ -132,7 +132,7 @@ export function PlaceCardHeader({
 						</div>
 
 						{/* Anillo brillante alrededor del emoji */}
-						<div className="absolute inset-0 rounded-full border-2 border-white/20" />
+						<div className="absolute inset-0 rounded-full border-2 border-border/60" />
 
 						<span className="relative z-10 drop-shadow-sm">{emoji}</span>
 					</div>
@@ -171,8 +171,8 @@ export function PlaceCardHeader({
 					<div
 						className="flex h-8 w-8 items-center justify-center rounded-full text-white"
 						style={{
-							background: `radial-gradient(circle, ${color} 0%, ${color}90 100%)`,
-							boxShadow: `0 0 8px rgba(var(--effect-shadow-rgb), 0.4), inset 0 0 5px ${color}60`,
+							background: `radial-gradient(circle, ${color} 0%, color-mix(in oklab, ${color}, transparent 10%) 100%)`,
+							boxShadow: `0 0 8px rgba(var(--effect-shadow-rgb), 0.4), inset 0 0 5px color-mix(in oklab, ${color}, transparent 40%)`,
 						}}
 					>
 						{getClimateIcon()}
@@ -194,7 +194,7 @@ export function PlaceCardHeader({
 			<div
 				className="relative flex items-center justify-between px-3.5 py-1.5 text-white text-xs"
 				style={{
-					borderBottom: `2px solid ${color}70`,
+					borderBottom: `2px solid color-mix(in oklab, ${color}, transparent 30%)`,
 					background:
 						'linear-gradient(to right, rgba(var(--effect-shadow-rgb), 0.6), rgba(var(--effect-shadow-rgb), 0.5))',
 				}}

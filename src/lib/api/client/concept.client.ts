@@ -15,6 +15,14 @@ export async function getConceptsFromApi(): Promise<ConceptWithStats[]> {
 	return unwrapArrayResponse<ConceptWithStats>(result);
 }
 
+export async function getConceptCountsFromApi(id: string): Promise<Record<string, number>> {
+	const response = await fetch(`${API_BASE_PATH}/${id}/counts`);
+	if (!response.ok) {
+		throw new Error('Error al obtener conteos de concepto');
+	}
+	return response.json();
+}
+
 export async function createConceptInApi(data: ConceptCreateInput): Promise<ConceptWithStats> {
 	const response = await fetch(API_BASE_PATH, {
 		method: 'POST',

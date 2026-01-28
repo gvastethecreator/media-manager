@@ -1,5 +1,5 @@
 import { ArrowUpRight, Brain, Heart, Shield, Sparkles, Star, Swords, User, Wand, Zap } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { Progress } from '@/components/ui/progress';
 
 import type { CharacterStats } from '@/types/entities/character';
@@ -33,8 +33,8 @@ interface CharacterCardContentProps {
 
 export function CharacterCardContent({
 	description,
-	primaryColor = '#8e44ad',
-	secondaryColor = '#6d28d9',
+	primaryColor = 'var(--entity-character)',
+	secondaryColor = 'var(--entity-character)',
 	stats,
 	abilities,
 	personality,
@@ -62,7 +62,7 @@ export function CharacterCardContent({
 						<span
 							className="rounded px-1.5 py-0.5 font-medium"
 							style={{
-								backgroundColor: `${primaryColor}30`,
+								backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 70%)`,
 								color: primaryColor,
 							}}
 						>
@@ -76,7 +76,7 @@ export function CharacterCardContent({
 						<div
 							className="flex items-center gap-0.5 rounded px-1.5 py-0.5 font-bold text-xs"
 							style={{
-								backgroundColor: `${secondaryColor}30`,
+								backgroundColor: `color-mix(in oklab, ${secondaryColor}, transparent 70%)`,
 								color: secondaryColor,
 							}}
 						>
@@ -92,7 +92,7 @@ export function CharacterCardContent({
 	return (
 		<div className="flex flex-col gap-2 px-4 py-3">
 			{tcgMode && (
-				<div className="pointer-events-none absolute top-2 right-2 bottom-2 left-2 rounded border border-white/10" />
+				<div className="pointer-events-none absolute top-2 right-2 bottom-2 left-2 rounded border border-border/40" />
 			)}
 			{displayDescription && (
 				<div className="relative line-clamp-3 text-sm italic">
@@ -100,7 +100,7 @@ export function CharacterCardContent({
 						<div
 							className="absolute -top-1 -right-2 -bottom-1 -left-2 rounded opacity-10"
 							style={{
-								background: `linear-gradient(135deg, ${primaryColor}70 0%, transparent 60%)`,
+								background: `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 30%) 0%, transparent 60%)`,
 							}}
 						/>
 					)}
@@ -180,18 +180,18 @@ function computeDisplayDescription(description?: string | null, compact?: boolea
 function computeAlignmentColor(alignment?: string | null): string {
 	const align = alignment?.toLowerCase() ?? 'neutral';
 	if (align.includes('evil')) {
-		return '#dc2626';
+		return 'var(--dt-danger-500)';
 	}
 	if (align.includes('good')) {
-		return '#16a34a';
+		return 'var(--dt-success-600)';
 	}
 	if (align.includes('lawful')) {
-		return '#2563eb';
+		return 'var(--dt-primary-600)';
 	}
 	if (align.includes('chaotic')) {
-		return '#d97706';
+		return 'var(--dt-warning-600)';
 	}
-	return '#6b7280';
+	return 'var(--dt-neutral-500)';
 }
 
 function normalizeAbilities(
@@ -278,10 +278,10 @@ const StatsGrid: React.FC<{ stats?: CharacterStats | null; primaryColor: string;
 						className="flex items-center justify-between gap-1 rounded px-1.5 py-0.5"
 						key={`stat-${key}`}
 						style={{
-							backgroundColor: `${primaryColor}20`,
-							border: tcgMode ? `1px solid ${primaryColor}40` : 'none',
+							backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 80%)`,
+							border: tcgMode ? `1px solid color-mix(in oklab, ${primaryColor}, transparent 60%)` : 'none',
 						}}
-						whileHover={{ scale: 1.05, backgroundColor: `${primaryColor}30` }}
+						whileHover={{ scale: 1.05, backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 70%)` }}
 					>
 						<div className="flex items-center gap-1">
 							{statIcon(key)}
@@ -304,9 +304,9 @@ const AlignmentAndRarity: React.FC<{
 		<div
 			className="flex items-center gap-1 rounded-md px-2 py-0.5 font-bold"
 			style={{
-				backgroundColor: `${alignmentColor}20`,
+				backgroundColor: `color-mix(in oklab, ${alignmentColor}, transparent 80%)`,
 				color: alignmentColor,
-				border: `1px dashed ${alignmentColor}40`,
+				border: `1px dashed color-mix(in oklab, ${alignmentColor}, transparent 60%)`,
 			}}
 		>
 			<Sparkles className="h-3 w-3" /> {alignment}
@@ -315,9 +315,9 @@ const AlignmentAndRarity: React.FC<{
 			<div
 				className="rounded-md px-2 py-0.5 font-semibold"
 				style={{
-					backgroundColor: `${secondaryColor}20`,
+					backgroundColor: `color-mix(in oklab, ${secondaryColor}, transparent 80%)`,
 					color: secondaryColor,
-					border: `1px solid ${secondaryColor}30`,
+					border: `1px solid color-mix(in oklab, ${secondaryColor}, transparent 70%)`,
 				}}
 			>
 				{metadata.rarityLevel}
@@ -338,7 +338,7 @@ const AbilitiesList: React.FC<{
 	return (
 		<div className="mt-1.5 space-y-1.5">
 			<div className="flex items-center font-semibold text-xs">
-				<Sparkles className="mr-1 h-3.5 w-3.5 text-yellow-400" />
+				<Sparkles className="mr-1 h-3.5 w-3.5 text-warning" />
 				<span>HABILIDADES</span>
 			</div>
 			<div className="space-y-1.5">
@@ -347,10 +347,10 @@ const AbilitiesList: React.FC<{
 						className="relative overflow-hidden rounded border px-2 py-1.5 text-xs"
 						key={`ability-${ability.name}`}
 						style={{
-							backgroundColor: `${primaryColor}30`,
-							borderColor: `${primaryColor}50`,
+							backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 70%)`,
+							borderColor: `color-mix(in oklab, ${primaryColor}, transparent 50%)`,
 							backgroundImage: tcgMode
-								? `linear-gradient(135deg, ${primaryColor}40, ${secondaryColor}30, ${primaryColor}20)`
+								? `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 60%), color-mix(in oklab, ${secondaryColor}, transparent 70%), color-mix(in oklab, ${primaryColor}, transparent 80%))`
 								: undefined,
 						}}
 						whileHover={{ scale: 1.02, y: -2 }}
@@ -363,7 +363,7 @@ const AbilitiesList: React.FC<{
 						)}
 						<div className="relative z-10">
 							<div className="flex items-center font-bold">
-								<Star className="mr-1 h-3 w-3 text-yellow-400" />
+								<Star className="mr-1 h-3 w-3 text-warning" />
 								{ability.name}
 							</div>
 							{ability.description && (
@@ -389,7 +389,7 @@ const GoalsAndPersonality: React.FC<{
 	return (
 		<div className="mt-2 grid grid-cols-2 gap-1.5 text-[10px] opacity-90">
 			{goals && goals.length > 0 && (
-				<div className="rounded px-1.5 py-1" style={{ backgroundColor: `${primaryColor}15` }}>
+				<div className="rounded px-1.5 py-1" style={{ backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 85%)` }}>
 					<div className="mb-0.5 font-semibold">OBJETIVOS:</div>
 					<ul className="list-inside list-disc pl-1">
 						{goals.slice(0, 2).map((goal) => (
@@ -401,7 +401,7 @@ const GoalsAndPersonality: React.FC<{
 				</div>
 			)}
 			{personality && personality.length > 0 && (
-				<div className="rounded px-1.5 py-1" style={{ backgroundColor: `${secondaryColor}15` }}>
+				<div className="rounded px-1.5 py-1" style={{ backgroundColor: `color-mix(in oklab, ${secondaryColor}, transparent 85%)` }}>
 					<div className="mb-0.5 font-semibold">PERSONALIDAD:</div>
 					<ul className="list-inside list-disc pl-1">
 						{personality.slice(0, 2).map((trait) => (

@@ -16,13 +16,13 @@ export const MicroCell = memo(function MicroCell({
 }) {
 	const toneClasses =
 		tone === 'danger'
-			? 'border-red-200/40 bg-red-50/60 dark:bg-red-950/20'
+			? 'border-ui-error-border bg-ui-error'
 			: tone === 'warning'
-				? 'border-amber-200/40 bg-amber-50/60 dark:bg-amber-950/20'
+				? 'border-ui-warning-border bg-ui-warning'
 				: tone === 'success'
-					? 'border-emerald-200/40 bg-emerald-50/60 dark:bg-emerald-950/20'
+					? 'border-ui-success-border bg-ui-success'
 					: tone === 'info'
-						? 'border-blue-200/40 bg-blue-50/60 dark:bg-blue-950/20'
+						? 'border-ui-info-border bg-ui-info'
 						: 'border-border/40 bg-muted/10';
 
 	return <div className={cn('rounded-sm border px-2.5 py-2', toneClasses, className)}>{children}</div>;

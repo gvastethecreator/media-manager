@@ -13,7 +13,7 @@ import { Schema } from '@effect/schema';
  * ID genérico (nanoid format, 21 caracteres)
  * @example "juO3ZL-S7P3gZe_xoqQl-"
  */
-export const ID = Schema.String.pipe(Schema.minLength(1), Schema.maxLength(30)).annotations({
+export const ID = Schema.String.pipe(Schema.minLength(1), Schema.maxLength(50)).annotations({
 	identifier: 'ID',
 	title: 'Entity Identifier',
 	description: 'Unique identifier (nanoid format)',

@@ -15,7 +15,6 @@ export interface PromptParserProps {
 	onLorasDetected?: (loras: string[]) => void;
 }
 
-// Regex patterns para diferentes elementos de prompts
 const LORA_PATTERN = /<lora:([^:>]+)(?::([0-9.]+))?>/gi;
 const EMBEDDING_PATTERN = /<(?:embedding|textual_inversion):([^:>]+)(?::([0-9.]+))?>/gi;
 const WEIGHT_PATTERN = /\(([^)]+)\)(?::([0-9.]+))?/g;
@@ -26,7 +25,6 @@ export function parsePrompt(prompt: string): ParsedPromptSegment[] {
 	const detectedLoras: string[] = [];
 	let lastIndex = 0;
 
-	// Crear un array de todos los matches con sus posiciones
 	const allMatches: Array<{
 		match: RegExpExecArray;
 		type: 'lora' | 'embedding' | 'network';
@@ -34,7 +32,6 @@ export function parsePrompt(prompt: string): ParsedPromptSegment[] {
 		end: number;
 	}> = [];
 
-	// Buscar LoRAs
 	const loraMatches = Array.from(prompt.matchAll(new RegExp(LORA_PATTERN.source, 'gi')));
 	for (const match of loraMatches) {
 		if (match.index !== undefined) {
@@ -48,7 +45,6 @@ export function parsePrompt(prompt: string): ParsedPromptSegment[] {
 		}
 	}
 
-	// Buscar embeddings
 	const embeddingMatches = Array.from(prompt.matchAll(new RegExp(EMBEDDING_PATTERN.source, 'gi')));
 	for (const match of embeddingMatches) {
 		if (match.index !== undefined) {
@@ -61,7 +57,6 @@ export function parsePrompt(prompt: string): ParsedPromptSegment[] {
 		}
 	}
 
-	// Buscar networks
 	const networkMatches = Array.from(prompt.matchAll(new RegExp(NETWORK_PATTERN.source, 'gi')));
 	for (const match of networkMatches) {
 		if (match.index !== undefined) {
@@ -74,12 +69,9 @@ export function parsePrompt(prompt: string): ParsedPromptSegment[] {
 		}
 	}
 
-	// Ordenar por posición
 	allMatches.sort((a, b) => a.start - b.start);
 
-	// Procesar segmentos
 	for (const { match, type, start, end } of allMatches) {
-		// Agregar texto antes del match
 		if (lastIndex < start) {
 			const textBefore = prompt.slice(lastIndex, start);
 			if (textBefore.trim()) {
@@ -90,7 +82,6 @@ export function parsePrompt(prompt: string): ParsedPromptSegment[] {
 			}
 		}
 
-		// Agregar el elemento especial
 		const name = match[1];
 		const weight = match[2] ? Number.parseFloat(match[2]) : undefined;
 
@@ -107,7 +98,6 @@ export function parsePrompt(prompt: string): ParsedPromptSegment[] {
 		lastIndex = end;
 	}
 
-	// Agregar texto restante
 	if (lastIndex < prompt.length) {
 		const remainingText = prompt.slice(lastIndex);
 		if (remainingText.trim()) {
@@ -126,66 +116,60 @@ export const PromptParser: React.FC<PromptParserProps> = ({ prompt, className, o
 
 	React.useEffect(() => {
 		const loras = segments.filter((segment) => segment.type === 'lora').map((segment) => segment.content);
-
 		if (loras.length > 0 && onLorasDetected) {
 			onLorasDetected(loras);
 		}
 	}, [segments, onLorasDetected]);
 
 	if (!prompt.trim()) {
-		return <span className="text-muted-foreground italic">Sin prompt</span>;
+		return <span className="text-muted-foreground italic text-[10px]">Sin prompt</span>;
 	}
 
 	return (
-		<div className={cn('whitespace-pre-wrap break-words font-sans leading-relaxed', className)}>
+		<div className={cn('whitespace-pre-wrap break-words [word-break:break-word] font-sans leading-relaxed text-[11px] min-w-0 w-full', className)}>
 			{segments.map((segment, idx) => {
+				const badgeBase = "inline-flex items-center gap-1 px-1.5 py-0 h-auto text-[9px] font-bold tracking-tighter uppercase mb-1 mr-1 max-w-full";
 				switch (segment.type) {
 					case 'lora':
 						return (
 							<Badge
-								className="mx-1 inline-flex items-center gap-1 bg-blue-100 text-blue-800 hover:bg-blue-200 dark:bg-blue-900/30 dark:text-blue-300"
+								className={cn(badgeBase, "bg-blue-500/10 text-blue-600 border-blue-500/20 hover:bg-blue-500/20")}
 								key={idx}
 								variant="secondary"
 							>
-								<span className="font-medium">LoRA:</span>
-								<span className="font-mono text-xs">{segment.content}</span>
-								{segment.weight && (
-									<span className="font-mono text-blue-600 text-xs dark:text-blue-400">:{segment.weight}</span>
-								)}
+								<span>LoRA:</span>
+								<span className="truncate">{segment.content}</span>
+								{segment.weight && <span>:{segment.weight}</span>}
 							</Badge>
 						);
 
 					case 'embedding':
 						return (
 							<Badge
-								className="mx-1 inline-flex items-center gap-1 bg-green-100 text-green-800 hover:bg-green-200 dark:bg-green-900/30 dark:text-green-300"
+								className={cn(badgeBase, "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20")}
 								key={idx}
 								variant="secondary"
 							>
-								<span className="font-medium">Embed:</span>
-								<span className="font-mono text-xs">{segment.content}</span>
-								{segment.weight && (
-									<span className="font-mono text-green-600 text-xs dark:text-green-400">:{segment.weight}</span>
-								)}
+								<span>Emb:</span>
+								<span className="truncate">{segment.content}</span>
+								{segment.weight && <span>:{segment.weight}</span>}
 							</Badge>
 						);
 
 					case 'network':
 						return (
 							<Badge
-								className="mx-1 inline-flex items-center gap-1 bg-purple-100 text-purple-800 hover:bg-purple-200 dark:bg-purple-900/30 dark:text-purple-300"
+								className={cn(badgeBase, "bg-amber-500/10 text-amber-600 border-amber-500/20 hover:bg-amber-500/20")}
 								key={idx}
 								variant="secondary"
 							>
-								<span className="font-medium">Net:</span>
-								<span className="font-mono text-xs">{segment.content}</span>
-								{segment.weight && (
-									<span className="font-mono text-purple-600 text-xs dark:text-purple-400">:{segment.weight}</span>
-								)}
+								<span>Net:</span>
+								<span className="truncate">{segment.content}</span>
+								{segment.weight && <span>:{segment.weight}</span>}
 							</Badge>
 						);
 					default:
-						return <span key={idx}>{segment.content}</span>;
+						return <span className="break-words" key={idx}>{segment.content}</span>;
 				}
 			})}
 		</div>
@@ -200,10 +184,10 @@ export const CollapsiblePrompt: React.FC<{
 	onLorasDetected?: (loras: string[]) => void;
 }> = ({ prompt, collapsedLines = 10, className, defaultExpanded = true, onLorasDetected }) => {
 	const [expanded, setExpanded] = React.useState(defaultExpanded);
-	const needsCollapse = prompt.split('\n').length > collapsedLines || prompt.length > 1200;
+	const needsCollapse = prompt.split('\n').length > collapsedLines || prompt.length > 800;
 
 	const content = (
-		<div className={cn(expanded ? 'max-h-none' : 'line-clamp-10', className)}>
+		<div className={cn(expanded ? 'max-h-none' : 'line-clamp-6', className, "min-w-0 w-full overflow-hidden")}>
 			<PromptParser onLorasDetected={onLorasDetected} prompt={prompt} />
 		</div>
 	);
@@ -211,14 +195,14 @@ export const CollapsiblePrompt: React.FC<{
 	if (!needsCollapse) return content;
 
 	return (
-		<div className="space-y-2">
+		<div className="space-y-1.5 min-w-0 w-full overflow-hidden">
 			{content}
 			<button
-				className="text-[11px] text-blue-600 transition-colors hover:underline dark:text-blue-400"
+				className="text-[9px] font-black uppercase tracking-widest text-primary/60 transition-colors hover:text-primary"
 				onClick={() => setExpanded((v) => !v)}
 				type="button"
 			>
-				{expanded ? 'Ocultar' : 'Ver completo'}
+				{expanded ? '[ Ocultar ]' : '[ Ver más ]'}
 			</button>
 		</div>
 	);

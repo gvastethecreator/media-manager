@@ -215,13 +215,13 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 
 	const getCategoryColor = (category: string) => {
 		const colors = {
-			archive: 'bg-orange-100 text-orange-800 dark:bg-orange-900 dark:text-orange-200',
-			code: 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200',
-			data: 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200',
-			text: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+			archive: 'bg-orange-100 text-warning dark:bg-orange-900 dark:text-orange-200',
+			code: 'bg-blue-100 text-primary dark:bg-blue-900 dark:text-blue-200',
+			data: 'bg-green-100 text-success dark:bg-green-900 dark:text-green-200',
+			text: 'bg-muted text-gray-800 dark:bg-background dark:text-gray-200',
 			config: 'bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200',
-			executable: 'bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200',
-			unknown: 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-200',
+			executable: 'bg-red-100 text-destructive dark:bg-red-900 dark:text-red-200',
+			unknown: 'bg-muted text-gray-800 dark:bg-background dark:text-gray-200',
 		};
 		return colors[category as keyof typeof colors] || colors.unknown;
 	};
@@ -316,8 +316,8 @@ export function GenericFileViewer({ file, onClose, onNext, onPrevious }: Generic
 							)}
 
 							{error && (
-								<div className="rounded-lg border border-red-200 bg-red-50 p-4 dark:border-red-800 dark:bg-red-900/20">
-									<p className="text-red-600 dark:text-red-400">{error}</p>
+								<div className="rounded-lg border border-ui-error-border bg-ui-error p-4">
+									"<p className="text-destructive dark:text-red-400">{error}</p>
 								</div>
 							)}
 

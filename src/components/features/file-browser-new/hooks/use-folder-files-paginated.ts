@@ -20,7 +20,7 @@ export interface FolderFile {
 	createdAt: string;
 	updatedAt: string;
 	folderId: string;
-	entityType: 'image' | 'video' | 'audio' | 'document' | 'json' | '3d';
+	entityType: 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d';
 	extension: string;
 	metadata?: Record<string, any>;
 	thumbnailPath?: string;
@@ -32,8 +32,7 @@ export interface FolderFile {
 }
 
 export interface FolderFilesResponse {
-	success: boolean;
-	data: FolderFile[];
+	files: FolderFile[];
 	pagination: {
 		limit: number;
 		offset: number;
@@ -46,7 +45,7 @@ export interface FolderFilesResponse {
 		queryTime: number;
 		processedRecords: number;
 	};
-	folder: {
+	folder?: {
 		id: string;
 		name: string;
 		path: string;
@@ -54,17 +53,14 @@ export interface FolderFilesResponse {
 }
 
 export interface FolderStatsResponse {
-	success: boolean;
-	data: {
-		images: number;
-		videos: number;
-		audios: number;
-		documents: number;
-		jsonFiles: number;
-		file3Ds: number;
-		total: number;
-	};
-	folder: {
+	images: number;
+	videos: number;
+	audios: number;
+	documents: number;
+	jsonFiles: number;
+	file3Ds: number;
+	total: number;
+	folder?: {
 		id: string;
 		name: string;
 		path: string;
@@ -78,7 +74,7 @@ export interface UseFolderFilesPaginatedOptions {
 	search?: string;
 	sortBy?: 'name' | 'size' | 'createdAt' | 'updatedAt';
 	sortOrder?: 'asc' | 'desc';
-	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'json' | '3d'>;
+	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d'>;
 	enabled?: boolean;
 }
 
@@ -111,7 +107,7 @@ async function fetchFolderFiles({
 	search,
 	sortBy = 'name',
 	sortOrder = 'asc',
-	fileTypes = ['image', 'video', 'audio', 'document', 'json', '3d'],
+	fileTypes = ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d'],
 }: {
 	folderId: string;
 	includeSubfolders?: boolean;
@@ -171,12 +167,7 @@ async function fetchFolderStats({
  * Convierte FolderFile a MediaItem para compatibilidad
  */
 function folderFileToMediaItem(file: FolderFile): MediaItem {
-	const entityType =
-		file.entityType === 'json'
-			? 'jsonFile'
-			: file.entityType === '3d'
-				? 'file3d'
-				: (file.entityType as MediaItem['entityType']);
+	const entityType = file.entityType as MediaItem['entityType'];
 
 	return {
 		id: file.id,
@@ -210,7 +201,7 @@ export function useFolderFilesPaginated(options: UseFolderFilesPaginatedOptions)
 		search,
 		sortBy = 'name',
 		sortOrder = 'asc',
-		fileTypes = ['image', 'video', 'audio', 'document', 'json', '3d'],
+		fileTypes = ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d'],
 		enabled = true,
 	} = options;
 
@@ -284,7 +275,9 @@ export function useFolderFilesPaginated(options: UseFolderFilesPaginatedOptions)
 			};
 		}
 
-		const flatFiles = data.pages.flatMap((page) => page.data);
+		const flatFiles = data.pages
+			.flatMap((page) => page?.files ?? (page as any)?.data ?? [])
+			.filter(Boolean) as FolderFile[];
 		const files = flatFiles.map(folderFileToMediaItem);
 		const lastPage = data.pages.at(-1);
 

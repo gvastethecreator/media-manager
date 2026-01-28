@@ -8,7 +8,7 @@ export function ContextMenuTest() {
 
 			<ContextMenu>
 				<ContextMenuTrigger asChild>
-					<div className="flex h-32 w-32 cursor-pointer items-center justify-center rounded-lg bg-blue-500 text-white">
+					<div className="flex h-32 w-32 cursor-pointer items-center justify-center rounded-lg bg-primary text-white">
 						Right-click me!
 					</div>
 				</ContextMenuTrigger>

@@ -1,5 +1,5 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { useRecentPromptImages } from '@/lib/api/prompts';
 import { cn } from '@/lib/utils';
 import type { PromptWithStats } from '@/types/entities/prompt';
@@ -48,23 +48,10 @@ function calculateTotalRelations(stats: any, count: any): number {
 // Helper function para generar colores
 function generateSecondaryColor(baseColor: string): string {
 	if (!baseColor) {
-		return '#0369a1';
+		return 'var(--dt-primary-600)';
 	}
 
-	try {
-		const r = Number.parseInt(baseColor.slice(1, 3), 16);
-		const g = Number.parseInt(baseColor.slice(3, 5), 16);
-		const b = Number.parseInt(baseColor.slice(5, 7), 16);
-
-		const darkenFactor = 0.7;
-		const darkerR = Math.floor(r * darkenFactor);
-		const darkerG = Math.floor(g * darkenFactor);
-		const darkerB = Math.floor(b * darkenFactor);
-
-		return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-	} catch (_e) {
-		return '#0369a1';
-	}
+	return `color-mix(in oklab, ${baseColor}, black 20%)`;
 }
 
 // Helper function para calcular estilo de tarjeta
@@ -78,19 +65,19 @@ function calculateCardStyle(
 	return {
 		...style,
 		background: tcgMode
-			? `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}25)`
+			? `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 85%), color-mix(in oklab, ${primaryColor}, transparent 75%))`
 			: 'rgba(var(--effect-highlight-rgb), 0.02)',
 		boxShadow: tcgMode
-			? `0 8px 32px rgba(var(--effect-shadow-rgb), 0.1), 0 4px 16px ${primaryColor}30`
+			? `0 8px 32px rgba(var(--effect-shadow-rgb), 0.1), 0 4px 16px color-mix(in oklab, ${primaryColor}, transparent 70%)`
 			: '0 4px 8px rgba(var(--effect-shadow-rgb), 0.1)',
-		borderColor: tcgMode ? `${primaryColor}40` : 'transparent',
+		borderColor: tcgMode ? `color-mix(in oklab, ${primaryColor}, transparent 60%)` : 'transparent',
 		borderWidth: totalRelations > 10 ? '2px' : '1px',
 	};
 }
 
 // Helper function para calcular props de la tarjeta principal
 function calculateCardProps(promptData: any, tcgMode: boolean, totalRelations: number, style?: React.CSSProperties) {
-	const primaryColor = promptData.baseColor || '#0ea5e9';
+	const primaryColor = promptData.baseColor || 'var(--entity-prompt)';
 	const secondaryColor = generateSecondaryColor(promptData.baseColor);
 	const cardStyle = calculateCardStyle(tcgMode, primaryColor, totalRelations, style);
 
@@ -124,7 +111,7 @@ function PromptCardErrorState({ error, className }: { error: any; className?: st
 				className
 			)}
 		>
-			<p className="text-red-800">Error: {error?.message || 'Prompt no encontrado'}</p>
+			<p className="text-destructive">Error: {error?.message || 'Prompt no encontrado'}</p>
 		</div>
 	);
 }

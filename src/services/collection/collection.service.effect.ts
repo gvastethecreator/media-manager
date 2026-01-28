@@ -87,7 +87,10 @@ export interface CollectionServiceInterface {
 	// Relation Operations
 	readonly addImages: (collectionId: string, imageIds: string[]) => Effect.Effect<{ added: number }, CollectionError>;
 	readonly removeImage: (collectionId: string, imageId: string) => Effect.Effect<void, CollectionError>;
-	readonly getImages: (collectionId: string) => Effect.Effect<any[], CollectionError>;
+	readonly getImages: (
+		collectionId: string,
+		options?: { limit?: number; offset?: number }
+	) => Effect.Effect<any[], CollectionError>;
 
 	// Stats Operations
 	readonly toggleFavorite: (id: string) => Effect.Effect<CollectionWithStats, CollectionError>;
@@ -577,10 +580,11 @@ export const CollectionServiceLive = Layer.succeed(
 				logger.info('✅ Imagen removida');
 			}),
 
-		getImages: (collectionId) =>
+		getImages: (collectionId, options = {}) =>
 			Effect.gen(function* () {
 				logger.info('🖼️ Obteniendo imágenes de collection', { collectionId });
 
+				const { limit = 50, offset = 0 } = options;
 				const results = yield* Effect.tryPromise({
 					try: async () =>
 						await db
@@ -589,7 +593,9 @@ export const CollectionServiceLive = Layer.succeed(
 							})
 							.from(imageCollections)
 							.innerJoin(images, eq(imageCollections.A, images.id))
-							.where(eq(imageCollections.B, collectionId)),
+							.where(eq(imageCollections.B, collectionId))
+							.limit(limit)
+							.offset(offset),
 					catch: (error) =>
 						new CollectionDatabaseError({
 							operation: 'getImages',

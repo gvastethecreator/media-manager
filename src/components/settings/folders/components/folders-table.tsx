@@ -68,17 +68,17 @@ function getParentName(folder: any, folders: any[]): string | null {
 function getStatusColor(status: string): string {
 	switch (status) {
 		case 'indexed':
-			return 'text-emerald-600';
+			return 'text-success';
 		case 'never':
-			return 'text-orange-600';
+			return 'text-warning';
 		case 'processing':
 		case 'pending':
-			return 'text-blue-600';
+			return 'text-primary';
 		case 'outdated':
-			return 'text-amber-600';
+			return 'text-warning';
 		case 'not_found':
 		case 'error':
-			return 'text-red-600';
+			return 'text-destructive';
 		default:
 			return 'text-muted-foreground';
 	}
@@ -243,15 +243,15 @@ export function FoldersTable({
 								Mostrar todas
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => setFilterStatus('indexed')}>
-								<Folder className="mr-2 h-4 w-4 text-emerald-600" />
+								<Folder className="mr-2 h-4 w-4 text-success" />
 								Solo indexadas
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => setFilterStatus('never')}>
-								<Folder className="mr-2 h-4 w-4 text-orange-600" />
+								<Folder className="mr-2 h-4 w-4 text-warning" />
 								Sin indexar
 							</DropdownMenuItem>
 							<DropdownMenuItem onClick={() => setFilterStatus('favorite')}>
-								<Heart className="mr-2 h-4 w-4 text-red-500" />
+								<Heart className="mr-2 h-4 w-4 text-destructive" />
 								Favoritas
 							</DropdownMenuItem>
 						</DropdownMenuContent>
@@ -410,7 +410,9 @@ export function FoldersTable({
 															>
 																{folder.name}
 															</span>
-															{folder.isFavorite && <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />}
+															{folder.isFavorite && (
+																<Star className="h-3 w-3 fill-amber-500 text-warning dark:fill-amber-400 dark:text-amber-400" />
+															)}
 															{folder._isOrphan && (
 																<Badge className="text-[11px]" variant="destructive">
 																	Huérfana

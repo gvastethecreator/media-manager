@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import { useProfileContext } from '@/lib/contexts';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { cn } from '@/lib/utils';
 import type { UpdateProfileInput as ProfileUpdate } from '@/services/profile';
 
@@ -25,7 +26,7 @@ export function ProfilesSettings() {
 		await updateProfile(null, {
 			name: 'Nuevo Perfil',
 			emoji: '👤',
-			color: '#3b82f6',
+			color: DEFAULT_ENTITY_COLOR,
 		});
 	};
 
@@ -165,11 +166,11 @@ export function ProfilesSettings() {
 												onClick={() => setActiveProfile(profile.id)}
 												variant="outline"
 											>
-												<Check className="h-3.5 w-3.5 text-green-500" />
+												<Check className="h-3.5 w-3.5 text-[color:var(--status-success)]" />
 												Activar
 											</Button>
 											<Button
-												className="h-4 rounded-sm p-1 py-2 text-[9px] text-red-500 hover:text-red-500/90"
+												className="h-4 rounded-sm p-1 py-2 text-[9px] text-destructive hover:text-destructive/90"
 												onClick={() => handleDeleteProfile(profile.id)}
 												variant="ghost"
 											>

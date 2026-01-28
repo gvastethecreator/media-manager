@@ -493,9 +493,11 @@ async function executeSyncChanges(result: FolderSyncResult): Promise<void> {
 				if (jsonIds.length > 0) {
 					for (const ids of chunk(jsonIds, 800)) {
 						await Promise.all([
-							tx.delete(metadatas).where(and(inArray(metadatas.entityId, ids), eq(metadatas.entityType, 'json'))),
-							tx.delete(thumbnails).where(and(inArray(thumbnails.entityId, ids), eq(thumbnails.entityType, 'json'))),
-							tx.delete(favorites).where(and(inArray(favorites.entityId, ids), eq(favorites.entityType, 'json'))),
+							tx.delete(metadatas).where(and(inArray(metadatas.entityId, ids), eq(metadatas.entityType, 'jsonFile'))),
+							tx
+								.delete(thumbnails)
+								.where(and(inArray(thumbnails.entityId, ids), eq(thumbnails.entityType, 'jsonFile'))),
+							tx.delete(favorites).where(and(inArray(favorites.entityId, ids), eq(favorites.entityType, 'jsonFile'))),
 						]);
 					}
 				}

@@ -22,9 +22,9 @@ export function TauriBackendStatus() {
 			return <Loader2 className="h-4 w-4 animate-spin" />;
 		}
 		if (isRunning) {
-			return <CheckCircle className="h-4 w-4 text-green-500" />;
+			return <CheckCircle className="h-4 w-4 text-success" />;
 		}
-		return <AlertCircle className="h-4 w-4 text-red-500" />;
+		return <AlertCircle className="h-4 w-4 text-destructive" />;
 	};
 
 	const getStatusBadge = () => {
@@ -33,7 +33,7 @@ export function TauriBackendStatus() {
 		}
 		if (isRunning) {
 			return (
-				<Badge className="bg-green-500" variant="primary">
+				<Badge className="bg-success" variant="primary">
 					Conectado
 				</Badge>
 			);

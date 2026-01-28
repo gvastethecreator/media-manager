@@ -31,7 +31,7 @@ export function DataTableRowActions<TData>({ row, actions }: DataTableRowActions
 			<DropdownMenuContent align="end" className="w-[160px]">
 				{actions.map((action, _index) => (
 					<DropdownMenuItem
-						className={action.variant === 'destructive' ? 'text-red-600' : ''}
+						className={action.variant === 'destructive' ? 'text-destructive' : ''}
 						key={action.label}
 						onClick={() => action.onClick(row.original)}
 					>

@@ -12,7 +12,7 @@ export const conceptCreateSchema = z.object({
 		message: 'El nombre no puede exceder 100 caracteres',
 	}),
 	emoji: z.string().optional().default('💡'),
-	color: z.string().optional().default('#3b82f6'),
+	color: z.string().optional().default('var(--dt-primary-500)'),
 	description: z.string().optional().nullable(),
 	content: z.string().optional().default(''),
 	category: z.nativeEnum(ConceptCategory).optional().default(ConceptCategory.GENERAL),

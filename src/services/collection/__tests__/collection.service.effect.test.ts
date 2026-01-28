@@ -118,7 +118,7 @@ describe('CollectionService - CRUD Operations', () => {
 			const input = {
 				name: 'Test Collection',
 				emoji: '📚',
-				color: '#3b82f6',
+				color: 'var(--dt-primary-500)',
 				description: 'Test description',
 			};
 

@@ -121,7 +121,7 @@ export function toRelatedNote(
 			return {
 				...relatedNote,
 				emoji: note.emoji || '📝',
-				color: note.color || '#3b82f6',
+				color: note.color || 'var(--dt-primary-500)',
 				category: note.category || 'general',
 				excerpt: note.excerpt || note.content?.substring(0, 100) || '',
 				isFavorite: note.isFavorite || note.isFavorite,

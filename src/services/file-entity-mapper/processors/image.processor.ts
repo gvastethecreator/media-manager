@@ -1,8 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
+import { Effect } from 'effect';
+import { ImageCreateInput } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { CreateImageInput } from '@/services/image/image.service';
-import { ImageService } from '@/services/image/image.service';
+import { create as createImage, getByHash as getImageByHash } from '@/services/image/image.service.effect';
 import type { FileInfo } from '@/types/file-entity-mapper';
 
 const imageLogger = serverLogger.withContext('ImageProcessor');
@@ -11,19 +12,13 @@ const imageLogger = serverLogger.withContext('ImageProcessor');
  * Procesador especializado para entidades de tipo IMAGE
  */
 export class ImageProcessor {
-	private imageService: ImageService;
-
-	constructor() {
-		this.imageService = ImageService.getInstance();
-	}
-
 	/**
 	 * Verifica si una imagen ya existe por hash
 	 */
 	async checkExists(hash: string): Promise<boolean> {
 		if (!hash) return false;
 		try {
-			const existing = await this.imageService.getImageByHash(hash);
+			const existing = await Effect.runPromise(getImageByHash(hash));
 			return !!existing;
 		} catch {
 			return false;
@@ -50,7 +45,7 @@ export class ImageProcessor {
 			imageLogger.warn(`No se pudieron obtener dimensiones para ${fileInfo.path}, usando valores por defecto:`, error);
 		}
 
-		const imageData: CreateImageInput = {
+		const imageData: typeof ImageCreateInput.Type = {
 			name: fileInfo.name,
 			path: fileInfo.path,
 			size: fileInfo.size,
@@ -60,7 +55,7 @@ export class ImageProcessor {
 			folderId: fileInfo.folderId,
 		};
 
-		const image = await this.imageService.createImage(imageData);
+		const image = await Effect.runPromise(createImage(imageData));
 		return image.id;
 	}
 

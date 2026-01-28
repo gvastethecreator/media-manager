@@ -7,9 +7,9 @@
 
 import { Download, Edit3, ExternalLink, Eye, MoreHorizontal, Share2, Star, Trash2 } from 'lucide-react';
 import { memo } from 'react';
+import { motion } from '@/components/ui/animejs-shim';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { motion } from '@/components/ui/motion-shim';
 import { useEntityTypeConfig } from '@/hooks/use-entity-type-config';
 import { cn } from '@/lib/utils';
 import { formatFileSize } from '@/lib/utils/format.utils';
@@ -164,7 +164,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 				>
 					<div className="flex items-start justify-between">
 						<div className="flex items-center gap-3">
-							<div className="rounded-md p-2" style={{ backgroundColor: `${config.color}20` }}>
+							<div className="rounded-md p-2" style={{ backgroundColor: `color-mix(in oklab, ${config.color}, transparent 80%)` }}>
 								<config.icon className="h-5 w-5" style={{ color: config.color }} />
 							</div>
 							<div>
@@ -189,7 +189,7 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 			>
 				<div className="flex items-start justify-between">
 					<div className="flex items-center gap-4">
-						<div className="rounded-lg p-3" style={{ backgroundColor: `${config.color}20` }}>
+						<div className="rounded-lg p-3" style={{ backgroundColor: `color-mix(in oklab, ${config.color}, transparent 80%)` }}>
 							<config.icon className="h-8 w-8" style={{ color: config.color }} />
 						</div>
 						<div>

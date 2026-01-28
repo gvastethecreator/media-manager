@@ -27,7 +27,7 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 	const renderKey = useMemo(() => nanoid(), []);
 
 	return (
-		<div className="relative h-[160px] overflow-hidden border-gray-400/30 border-b">
+		<div className="relative h-[160px] overflow-hidden border-muted-foreground/30/30 border-b">
 			{/* Contenedor de imágenes con grid */}
 			<div
 				className={cn(
@@ -73,7 +73,7 @@ export function WorldItemCardImages({ worldItemId, primaryColor, secondaryColor 
 							{images.length < 6 &&
 								Array.from({ length: 6 - images.length }).map((_, i) => (
 									<div
-										className="flex h-full w-full items-center justify-center bg-black/20"
+										className="flex h-full w-full items-center justify-center bg-muted/20"
 										key={`empty-${renderKey}-${i}`}
 									>
 										<ImageIcon className="h-5 w-5 opacity-20" />

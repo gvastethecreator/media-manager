@@ -1,11 +1,11 @@
+import { Effect } from 'effect';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	createVideo as createVideoServer,
-	getVideoByHash as getVideoByHashServer,
-} from '@/server/services/video.server.service';
-import type { VideoCreateInput } from '@/types/entities/video';
+	type CreateVideoInput,
+	create as createVideo,
+	getByHash as getVideoByHash,
+} from '@/services/video/video.service.effect';
 import type { FileInfo } from '@/types/file-entity-mapper';
-import { getMimeTypeFromExtension } from '../utils/file-info.utils';
 
 const videoLogger = serverLogger.withContext('VideoProcessor');
 
@@ -19,7 +19,7 @@ export class VideoProcessor {
 	async checkExists(hash: string): Promise<boolean> {
 		if (!hash) return false;
 		try {
-			const existing = await getVideoByHashServer(hash);
+			const existing = await Effect.runPromise(getVideoByHash(hash));
 			return !!existing;
 		} catch {
 			return false;
@@ -34,18 +34,17 @@ export class VideoProcessor {
 			throw new Error('File hash is required for video creation');
 		}
 
-		const videoData: VideoCreateInput = {
+		const videoData: CreateVideoInput = {
 			name: fileInfo.name,
 			path: fileInfo.path,
 			size: fileInfo.size,
 			hash: fileInfo.hash,
 			folderId: fileInfo.folderId,
-			mimeType: getMimeTypeFromExtension(fileInfo.extension),
 			duration: 0,
 			isFavorite: false,
 		};
 
-		const video = await createVideoServer(videoData as any);
+		const video = await Effect.runPromise(createVideo(videoData));
 		return video.id;
 	}
 
@@ -303,11 +302,11 @@ export class VideoProcessor {
 		// Generar SVG placeholder
 		const svg = `
 			<svg width="320" height="180" xmlns="http://www.w3.org/2000/svg">
-				<rect width="320" height="180" fill="#1f2937"/>
-				<text x="160" y="70" font-family="Arial" font-size="48" fill="#6b7280" text-anchor="middle">🎬</text>
-				<text x="160" y="110" font-family="Arial" font-size="12" fill="#9ca3af" text-anchor="middle">${fileName}</text>
-				<text x="160" y="130" font-family="Arial" font-size="10" fill="#6b7280" text-anchor="middle">${resolution}</text>
-				<text x="160" y="145" font-family="Arial" font-size="10" fill="#6b7280" text-anchor="middle">${duration}s</text>
+				<rect width="320" height="180" fill="oklch(0.18 0.002 0)"/>
+				<text x="160" y="70" font-family="Arial" font-size="48" fill="oklch(0.55 0.002 0)" text-anchor="middle">🎬</text>
+				<text x="160" y="110" font-family="Arial" font-size="12" fill="oklch(0.7 0.002 0)" text-anchor="middle">${fileName}</text>
+				<text x="160" y="130" font-family="Arial" font-size="10" fill="oklch(0.55 0.002 0)" text-anchor="middle">${resolution}</text>
+				<text x="160" y="145" font-family="Arial" font-size="10" fill="oklch(0.55 0.002 0)" text-anchor="middle">${duration}s</text>
 			</svg>
 		`;
 

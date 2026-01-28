@@ -11,7 +11,7 @@
 
 .right-panel-collapsed-handle:hover {
 	opacity: 1;
-	background-color: rgba(var(--accent-rgb), 0.15);
+	background-color: var(--panel-border-accent);
 }
 
 .right-panel-collapsed-handle::after {
@@ -22,9 +22,9 @@
 	transform: translate(-50%, -50%) rotate(180deg);
 	width: 8px;
 	height: 20px;
-	background-color: rgba(var(--foreground-rgb), 0.3);
-	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='20' viewBox='0 0 8 20' fill='none'%3E%3Cpath d='M0 0L8 5V15L0 20V0Z' fill='%23000'/%3E%3C/svg%3E");
-	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='20' viewBox='0 0 8 20' fill='none'%3E%3Cpath d='M0 0L8 5V15L0 20V0Z' fill='%23000'/%3E%3C/svg%3E");
+	background-color: var(--handler-icon);
+	mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='20' viewBox='0 0 8 20' fill='none'%3E%3Cpath d='M0 0L8 5V15L0 20V0Z' fill='currentColor'/%3E%3C/svg%3E");
+	-webkit-mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='20' viewBox='0 0 8 20' fill='none'%3E%3Cpath d='M0 0L8 5V15L0 20V0Z' fill='currentColor'/%3E%3C/svg%3E");
 	mask-size: contain;
 	-webkit-mask-size: contain;
 	mask-repeat: no-repeat;

@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDeletePlace, usePlaces } from '@/lib/api/places';
+import { DEFAULT_ENTITY_COLOR, DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import type { PlaceWithStats } from '@/types/entities/place';
 import { CreatePlaceForm } from './create-place-form';
@@ -335,9 +336,9 @@ export function PlacesSettings() {
 												type="button"
 											>
 												<div
-													className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-white"
+													className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-foreground"
 													style={{
-														backgroundColor: place.color || '#888',
+														backgroundColor: place.color || DEFAULT_NEUTRAL_COLOR,
 													}}
 												>
 													<span className="text-xs">{place.emoji}</span>
@@ -365,7 +366,7 @@ export function PlacesSettings() {
 												type="button"
 												variant="ghost"
 											>
-												<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
+												<Trash className="h-3 w-3 text-muted-foreground hover:text-destructive" />
 											</Button>
 										</div>
 									))}
@@ -434,9 +435,11 @@ export function PlacesSettings() {
 											<div className="flex flex-col rounded-dt-md border bg-background p-4">
 												<div
 													className="mb-3 flex aspect-video w-full items-center justify-center rounded-md"
-													style={{ backgroundColor: previewData?.color || selectedPlace?.color || '#3b82f6' }}
+													style={{
+														backgroundColor: previewData?.color || selectedPlace?.color || DEFAULT_ENTITY_COLOR,
+													}}
 												>
-													<span className="text-4xl text-white">
+													<span className="text-4xl text-foreground">
 														{previewData?.emoji || selectedPlace?.emoji || '📍'}
 													</span>
 												</div>
@@ -475,7 +478,7 @@ export function PlacesSettings() {
 												)}
 
 												{(previewData?.isFavorite || selectedPlace?.isFavorite) && (
-													<div className="mt-2 text-xs text-yellow-500">★ Favorito</div>
+													<div className="mt-2 text-[color:var(--entity-favorite)] text-xs">★ Favorito</div>
 												)}
 											</div>
 										) : (
@@ -499,27 +502,27 @@ export function PlacesSettings() {
 function _generateTypeColor(placeType: string): string {
 	switch (placeType) {
 		case 'city':
-			return 'bg-blue-500';
+			return 'bg-[color:var(--status-info)]';
 		case 'town':
-			return 'bg-indigo-500';
+			return 'bg-[color:var(--entity-place)]';
 		case 'village':
-			return 'bg-teal-500';
+			return 'bg-[color:var(--status-success)]';
 		case 'forest':
-			return 'bg-green-500';
+			return 'bg-[color:var(--status-success)]';
 		case 'mountain':
-			return 'bg-gray-500';
+			return 'bg-[color:var(--entity-file)]';
 		case 'desert':
-			return 'bg-yellow-500';
+			return 'bg-[color:var(--status-warning)]';
 		case 'castle':
-			return 'bg-purple-500';
+			return 'bg-[color:var(--entity-concept)]';
 		case 'ruin':
-			return 'bg-zinc-500';
+			return 'bg-[color:var(--entity-file)]';
 		case 'cave':
-			return 'bg-amber-500';
+			return 'bg-[color:var(--status-warning)]';
 		case 'other':
-			return 'bg-gray-500';
+			return 'bg-[color:var(--entity-file)]';
 		default:
-			return 'bg-gray-500';
+			return 'bg-[color:var(--entity-file)]';
 	}
 }
 
@@ -527,16 +530,16 @@ function _generateTypeColor(placeType: string): string {
 function _generateClimateColor(climate: string): string {
 	switch (climate) {
 		case 'tropical':
-			return 'bg-red-400';
+			return 'bg-[color:var(--status-warning)]';
 		case 'arid':
-			return 'bg-yellow-400';
+			return 'bg-[color:var(--status-warning)]';
 		case 'temperate':
-			return 'bg-green-400';
+			return 'bg-[color:var(--status-success)]';
 		case 'continental':
-			return 'bg-orange-400';
+			return 'bg-[color:var(--status-warning)]';
 		case 'polar':
-			return 'bg-blue-200';
+			return 'bg-[color:var(--status-info)]';
 		default:
-			return 'bg-gray-400';
+			return 'bg-[color:var(--entity-file)]';
 	}
 }

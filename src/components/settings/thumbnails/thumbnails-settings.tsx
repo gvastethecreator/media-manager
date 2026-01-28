@@ -1,11 +1,11 @@
 import { AlertCircle, Settings2, Trash2, Zap } from 'lucide-react';
 import React, { useId } from 'react';
+import { AnimatePresence, motion } from '@/components/ui/animejs-shim';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
-import { AnimatePresence, motion } from '@/components/ui/motion-shim';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -58,7 +58,7 @@ function ThumbnailItem({ image, index }: { image: LastProcessedThumbnail; index:
 					<div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-t-transparent" />
 				</div>
 			) : error ? (
-				<div className="absolute inset-0 flex items-center justify-center text-red-500 text-xs">Error</div>
+				<div className="absolute inset-0 flex items-center justify-center text-destructive text-xs">Error</div>
 			) : (
 				thumbnailData?.thumbnailUrl && (
 					<>
@@ -335,7 +335,7 @@ export function ThumbnailsSettings() {
 
 							{isThumbnailProcessing && (
 								<Button
-									className="h-7 text-red-500 text-xs hover:text-red-600"
+									className="h-7 text-destructive text-xs hover:text-destructive"
 									onClick={() => setThumbnailProcessing(false)}
 									size="sm"
 									variant="ghost"
@@ -385,7 +385,7 @@ export function ThumbnailsSettings() {
 											<Label className="text-sm">Estado</Label>
 											{thumbnailStats.errors.length > 0 && (
 												<Button
-													className="h-6 text-red-500 text-xs hover:text-red-600"
+													className="h-6 text-destructive text-xs hover:text-destructive"
 													onClick={() => setShowErrors(true)}
 													size="sm"
 													variant="ghost"
@@ -398,7 +398,7 @@ export function ThumbnailsSettings() {
 										<div className="flex items-center justify-between rounded-lg bg-muted/50 p-2">
 											<span className="font-medium text-sm">{thumbnailStats.errors.length} errores</span>
 											<Badge
-												className={cn('text-xs', thumbnailStats.pending === 0 && 'bg-green-500/20 text-green-500')}
+												className={cn('text-xs', thumbnailStats.pending === 0 && 'bg-success/20 text-success')}
 												variant="secondary"
 											>
 												{thumbnailStats.pending === 0 ? 'Al día' : 'Pendiente'}
@@ -468,7 +468,7 @@ export function ThumbnailsSettings() {
 										<span className="font-medium">{error.imagePath}</span>
 										<span className="text-muted-foreground text-sm">{new Date(error.timestamp).toLocaleString()}</span>
 									</div>
-									<p className="text-red-500 text-sm">{error.error}</p>
+									<p className="text-destructive text-sm">{error.error}</p>
 								</motion.div>
 							))}
 						</div>

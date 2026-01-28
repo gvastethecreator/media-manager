@@ -23,3 +23,5 @@ router.get('/:id/thumbnail', async (req, res) => {
 });
 
 export { router as videosThumbnailRouter };
+
+export default router;

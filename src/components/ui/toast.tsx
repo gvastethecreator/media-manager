@@ -22,11 +22,11 @@ const toastVariants = cva(
 			variant: {
 				default: 'border-border/50 bg-gradient-to-b from-background to-background/98 text-foreground before:bg-primary',
 				destructive:
-					'destructive group border-destructive/30 bg-gradient-to-b from-destructive/10 to-destructive/5 text-destructive-foreground before:bg-destructive',
+					'destructive group border-ui-error-border bg-gradient-to-b from-ui-error to-ui-error/50 text-destructive-foreground before:bg-destructive',
 				success:
-					'border-green-500/30 bg-gradient-to-b from-green-500/10 to-green-500/5 text-foreground before:bg-green-500',
+					'border-ui-success-border bg-gradient-to-b from-ui-success to-ui-success/50 text-foreground before:bg-ui-success-text',
 				warning:
-					'border-yellow-500/30 bg-gradient-to-b from-yellow-500/10 to-yellow-500/5 text-foreground before:bg-yellow-500',
+					'border-ui-warning-border bg-gradient-to-b from-ui-warning to-ui-warning/50 text-foreground before:bg-ui-warning-text',
 			},
 		},
 		defaultVariants: {
@@ -44,7 +44,7 @@ type ToastProps = VariantProps<typeof toastVariants> & {
 	className?: string;
 } & React.ComponentProps<'div'>;
 
-interface ToastActionElement extends React.ReactElement { }
+interface ToastActionElement extends React.ReactElement {}
 
 // Hook para usar toast con sonner
 function useToast() {

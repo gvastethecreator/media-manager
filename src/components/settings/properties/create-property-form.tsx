@@ -8,6 +8,7 @@ import { DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/compon
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { useCreateProperty, useUpdateProperty } from '@/lib/api/properties';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
 import { CreatePropertySchema } from '@/types/entities/property/schema';
 import type { PropertyWithStats as Property } from '@/types/entities/property/types';
 import { DynamicCreateForm } from '../common/dynamic-create-form';
@@ -40,7 +41,7 @@ export function CreatePropertyForm({
 			name: property?.name ?? '',
 			category: property?.category ?? 'general',
 			emoji: property?.emoji ?? '🔧',
-			color: property?.color ?? '#64748b',
+			color: property?.color ?? DEFAULT_NEUTRAL_COLOR,
 			description: property?.description ?? '',
 			shortcut: property?.shortcut ?? '',
 			featuredImage: property?.featuredImage ?? undefined,

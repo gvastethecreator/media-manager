@@ -3,6 +3,7 @@
  * @module file-browser-new/views/masonry
  */
 
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MediaItemGrid } from '../components/media-item';
 import type {
@@ -68,6 +69,10 @@ export function MasonryView({
 	pageSize = 300,
 	scrollContainer,
 	onContainerReady,
+	onLayoutRootReady,
+	layoutItemLimit = 120,
+	suppressAppearAnimation,
+	virtualization,
 	selectedIds = new Set(),
 	activeId,
 }: MasonryViewProps) {
@@ -77,6 +82,13 @@ export function MasonryView({
 
 	const columnWidth = config.columnWidth;
 	const gap = config.gap;
+	const virtualizationConfig = virtualization ?? {
+		enabled: false,
+		threshold: Number.POSITIVE_INFINITY,
+		overscan: 0,
+		estimatedItemHeight: columnWidth,
+		maxItems: Number.POSITIVE_INFINITY,
+	};
 
 	// Paginación controlada
 	const displayItems = useMemo(() => {
@@ -86,6 +98,7 @@ export function MasonryView({
 		}
 		return items;
 	}, [items, page, pageSize]);
+	const shouldVirtualize = virtualizationConfig.enabled && displayItems.length >= virtualizationConfig.threshold;
 
 	// Observar cambios de tamaño del contenedor
 	useEffect(() => {
@@ -104,7 +117,27 @@ export function MasonryView({
 		return () => observer.disconnect();
 	}, []);
 
-	// Calcular layout
+	const safeWidth = Math.max(containerWidth, columnWidth);
+	const columnCount = Math.max(1, Math.floor((safeWidth + gap) / (columnWidth + gap)));
+	const actualColumnWidth = (safeWidth - gap * (columnCount - 1)) / columnCount;
+	const estimateHeight = useCallback(
+		(index: number) => {
+			const item = displayItems[index];
+			if (!item) return columnWidth;
+			const aspectRatio = item.width && item.height ? item.width / item.height : 1;
+			return actualColumnWidth / aspectRatio + gap;
+		},
+		[displayItems, actualColumnWidth, columnWidth, gap]
+	);
+	const virtualizer = useVirtualizer({
+		count: displayItems.length,
+		getScrollElement: () => containerRef.current,
+		estimateSize: estimateHeight,
+		overscan: virtualizationConfig.overscan,
+		lanes: columnCount,
+	});
+
+	// Calcular layout no virtualizado
 	const layout = useMemo(() => {
 		return calculateMasonryLayout(displayItems, containerWidth, columnWidth, gap);
 	}, [displayItems, containerWidth, columnWidth, gap]);
@@ -159,24 +192,90 @@ export function MasonryView({
 			}}
 		>
 			<div className="h-full w-full" data-testid="masonry-view">
-				<div className="flex p-2" data-testid="masonry-view-container" style={{ gap: `${gap}px` }}>
-					{layout.columns.map((column, colIndex) => (
-						<div className="flex flex-col" key={colIndex} style={{ width: layout.columnWidth, gap: `${gap}px` }}>
-							{column.map((item) => (
-								<MediaItemGrid
-									isActive={activeId === item.id}
-									isSelected={selectedIds.has(item.id)}
-									item={item}
+				{!shouldVirtualize && (
+					<div
+						className="flex p-2"
+						data-testid="masonry-view-container"
+						ref={(el) => onLayoutRootReady?.(el)}
+						style={{ gap: `${gap}px` }}
+					>
+						{layout.columns.map((column, colIndex) => {
+							let columnIndexOffset = 0;
+							for (let i = 0; i < colIndex; i++) {
+								columnIndexOffset += layout.columns[i].length;
+							}
+							return (
+								<div className="flex flex-col" key={colIndex} style={{ width: layout.columnWidth, gap: `${gap}px` }}>
+									{column.map((item, itemIndex) => {
+										const layoutIndex = columnIndexOffset + itemIndex;
+										return (
+											<MediaItemGrid
+												animateIn={!suppressAppearAnimation}
+												isActive={activeId === item.id}
+												isSelected={selectedIds.has(item.id)}
+												item={item}
+												key={item.id}
+												layoutItem={layoutIndex < layoutItemLimit}
+												layoutOrder={layoutIndex}
+												onClick={(e) => handleItemClick(item, e)}
+												onContextMenu={(e) => handleItemContextMenu(item, e)}
+												onDoubleClick={() => handleItemDoubleClick(item)}
+												size={Math.round(layout.columnWidth)}
+												variant="masonry"
+											/>
+										);
+									})}
+								</div>
+							);
+						})}
+					</div>
+				)}
+				{shouldVirtualize && (
+					<div
+						className="relative p-2"
+						data-testid="masonry-view-container"
+						ref={(el) => onLayoutRootReady?.(el)}
+						style={{
+							height: virtualizer.getTotalSize(),
+							width: actualColumnWidth * columnCount + gap * (columnCount - 1),
+						}}
+					>
+						{virtualizer.getVirtualItems().map((virtualItem) => {
+							const item = displayItems[virtualItem.index];
+							if (!item) return null;
+							const x = virtualItem.lane * (actualColumnWidth + gap);
+							const shouldLayout = virtualItem.index < layoutItemLimit;
+							return (
+								<div
+									data-index={virtualItem.index}
 									key={item.id}
-									onClick={(e) => handleItemClick(item, e)}
-									onContextMenu={(e) => handleItemContextMenu(item, e)}
-									onDoubleClick={() => handleItemDoubleClick(item)}
-									size={Math.round(layout.columnWidth)}
-								/>
-							))}
-						</div>
-					))}
-				</div>
+									ref={virtualizer.measureElement}
+									style={{
+										position: 'absolute',
+										top: 0,
+										left: 0,
+										width: actualColumnWidth,
+										transform: `translate(${x}px, ${virtualItem.start}px)`,
+									}}
+								>
+									<MediaItemGrid
+										animateIn={!suppressAppearAnimation}
+										isActive={activeId === item.id}
+										isSelected={selectedIds.has(item.id)}
+										item={item}
+										layoutItem={shouldLayout}
+										layoutOrder={virtualItem.index}
+										onClick={(e) => handleItemClick(item, e)}
+										onContextMenu={(e) => handleItemContextMenu(item, e)}
+										onDoubleClick={() => handleItemDoubleClick(item)}
+										size={Math.round(actualColumnWidth)}
+										variant="masonry"
+									/>
+								</div>
+							);
+						})}
+					</div>
+				)}
 			</div>
 		</div>
 	);

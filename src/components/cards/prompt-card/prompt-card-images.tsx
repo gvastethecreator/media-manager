@@ -23,7 +23,7 @@ export function PromptCardImages({
 	mainImage,
 	images = [],
 	primaryColor,
-	secondaryColor = '#0369a1',
+	secondaryColor = 'var(--dt-primary-700)',
 	tcgMode = true,
 }: PromptCardImagesProps) {
 	const [isLoading, setIsLoading] = useState(false);
@@ -44,13 +44,13 @@ export function PromptCardImages({
 	return (
 		<div
 			className={cn('relative overflow-hidden border-b', containerHeight)}
-			style={{ borderColor: `${primaryColor}40` }}
+			style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 60%)` }}
 		>
 			{/* Contenedor de im?genes */}
 			<div
 				className="relative h-full w-full"
 				style={{
-					backgroundImage: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}50)`,
+					backgroundImage: `linear-gradient(to bottom, color-mix(in oklab, ${primaryColor}, transparent 75%), color-mix(in oklab, ${secondaryColor}, transparent 50%))`,
 				}}
 			>
 				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} />}>
@@ -70,7 +70,7 @@ export function PromptCardImages({
 										<div
 											className="pointer-events-none absolute inset-0 opacity-20"
 											style={{
-												background: `repeating-linear-gradient(45deg, transparent, transparent 10px, ${primaryColor}20 10px, ${primaryColor}20 20px)`,
+												background: `repeating-linear-gradient(45deg, transparent, transparent 10px, color-mix(in oklab, ${primaryColor}, transparent 80%) 10px, color-mix(in oklab, ${primaryColor}, transparent 80%) 20px)`,
 											}}
 										/>
 									)}
@@ -102,7 +102,7 @@ export function PromptCardImages({
 												<div
 													className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 hover:opacity-20"
 													style={{
-														background: `linear-gradient(45deg, transparent 0%, ${primaryColor}80 45%, white 50%, ${primaryColor}80 55%, transparent 100%)`,
+														background: `linear-gradient(45deg, transparent 0%, color-mix(in oklab, ${primaryColor}, transparent 20%) 45%, white 50%, color-mix(in oklab, ${primaryColor}, transparent 20%) 55%, transparent 100%)`,
 														backgroundSize: '200% 200%',
 														animation: 'shine 5s ease-in-out infinite',
 													}}
@@ -121,7 +121,9 @@ export function PromptCardImages({
 												aria-label={`Ver imagen ${idx + 1}`}
 												className={cn(
 													'h-2 w-2 rounded-full transition-all',
-													activeImage === img ? 'scale-125 bg-white shadow-lg' : 'bg-white/50 hover:bg-white/80',
+													activeImage === img
+														? 'scale-125 bg-background shadow-lg'
+														: 'bg-background/50 hover:bg-background/80',
 													tcgMode && 'outline-1 outline-offset-1'
 												)}
 												key={`thumb-${img.substring(0, 8)}-${idx + 1}`}
@@ -142,11 +144,11 @@ export function PromptCardImages({
 }
 
 // Componente para mostrar mientras se cargan las im?genes
-function ImageLoading({ backgroundColor = '#0369a1' }: { backgroundColor?: string }) {
+function ImageLoading({ backgroundColor = 'var(--dt-primary-700)' }: { backgroundColor?: string }) {
 	return (
 		<div
 			className="relative flex h-full w-full animate-pulse items-center justify-center overflow-hidden"
-			style={{ backgroundColor: `${backgroundColor}30` }}
+			style={{ backgroundColor: `color-mix(in oklab, ${backgroundColor}, transparent 70%)` }}
 		>
 			<ImageIcon className="h-5 w-5 opacity-20" />
 		</div>

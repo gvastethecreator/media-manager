@@ -83,7 +83,7 @@ export function transformFavoriteToExtended(
 	// Extraer las propiedades de UI
 	const entityType = favorite.entityType;
 	const entityIcon = ENTITY_ICONS[entityType] || '⭐';
-	const entityColor = ENTITY_COLORS[entityType] || '#3b82f6';
+	const entityColor = ENTITY_COLORS[entityType] || 'var(--dt-primary-500)';
 
 	// Propiedades de la entidad si están disponibles
 	let entityName = '';
@@ -127,7 +127,7 @@ export function groupFavoritesByType(favorites: FavoriteComplete[]): FavoritesBy
 		type,
 		displayName: ENTITY_DISPLAY_NAMES[type] || type,
 		icon: ENTITY_ICONS[type] || '⭐',
-		color: ENTITY_COLORS[type] || '#3b82f6',
+		color: ENTITY_COLORS[type] || 'var(--dt-primary-500)',
 		count: items.length,
 		items,
 	}));

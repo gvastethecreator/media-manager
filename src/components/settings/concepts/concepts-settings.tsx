@@ -338,7 +338,7 @@ export function ConceptsSettings() {
 												type="button"
 												variant="ghost"
 											>
-												<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
+												<Trash className="h-3 w-3 text-muted-foreground hover:text-destructive" />
 											</Button>
 										</div>
 									))}
@@ -406,7 +406,9 @@ export function ConceptsSettings() {
 											<div className="flex flex-col items-center rounded-dt-md border bg-background p-4">
 												<div
 													className="mb-3 flex h-12 w-12 items-center justify-center rounded-full text-2xl"
-													style={{ backgroundColor: previewData?.color || selectedConcept?.color || '#3b82f6' }}
+													style={{
+														backgroundColor: previewData?.color || selectedConcept?.color || 'var(--dt-primary-500)',
+													}}
 												>
 													{previewData?.emoji || selectedConcept?.emoji || '💡'}
 												</div>

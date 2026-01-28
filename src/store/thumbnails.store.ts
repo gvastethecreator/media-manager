@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { imageService } from '@/services/image/image.service';
 import type { ThumbnailStats } from '@/types/thumbnails';
 
 export interface ProcessStatus {
@@ -50,6 +49,7 @@ const initialProcessStatus: ProcessStatus = {
 };
 
 const _BASE_URL = import.meta.env.VITE_API_URL || '';
+const THUMBNAILS_BASE_URL = _BASE_URL ? `${_BASE_URL}/api/thumbnails` : '/api/thumbnails';
 
 export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 	isLoading: true,
@@ -110,7 +110,11 @@ export const useThumbnailStore = create<ThumbnailStore>((set, get) => ({
 
 			while (retries > 0 && !stats) {
 				try {
-					stats = await imageService.getThumbnailProcessingStats();
+					const response = await fetch(`${THUMBNAILS_BASE_URL}/stats`);
+					if (!response.ok) {
+						throw new Error('Error al obtener estadísticas de miniaturas');
+					}
+					stats = (await response.json()) as ThumbnailStats;
 					break;
 				} catch (error) {
 					_lastError = error;

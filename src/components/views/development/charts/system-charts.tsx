@@ -14,11 +14,10 @@ import {
 	XAxis,
 	YAxis,
 } from 'recharts';
-import type { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CHART_COLORS, FILE_TYPE_COLORS } from '@/lib/styles/chart-colors';
 
-function toNumberValue(value: ValueType): number {
+function toNumberValue(value: unknown): number {
 	if (Array.isArray(value)) return Number(value[0] ?? 0);
 	return Number(value ?? 0);
 }
@@ -54,7 +53,7 @@ export function FileDistributionChart() {
 								))}
 							</Pie>
 							<Tooltip
-								formatter={(value: ValueType) => [`${toNumberValue(value).toLocaleString()} archivos`, 'Cantidad']}
+								formatter={(value) => [`${toNumberValue(value).toLocaleString()} archivos`, 'Cantidad']}
 								labelFormatter={(name) => `Tipo: ${name}`}
 							/>
 						</PieChart>
@@ -95,7 +94,7 @@ export function IndexingActivityChart() {
 							<YAxis tick={{ fontSize: 12 }} width={30} />
 							<CartesianGrid strokeDasharray="3 3" />
 							<Tooltip
-								formatter={(value: ValueType) => [`${toNumberValue(value)} archivos`, 'Indexados']}
+								formatter={(value) => [`${toNumberValue(value)} archivos`, 'Indexados']}
 								labelFormatter={(name) => `Día: ${name}`}
 							/>
 							<Area
@@ -134,7 +133,7 @@ export function ResourceUsageChart() {
 							<YAxis tick={{ fontSize: 12 }} width={30} />
 							<CartesianGrid strokeDasharray="3 3" />
 							<Tooltip
-								formatter={(value: ValueType) => [`${toNumberValue(value)}%`, 'Utilización']}
+								formatter={(value) => [`${toNumberValue(value)}%`, 'Utilización']}
 								labelFormatter={(name) => `Recurso: ${name}`}
 							/>
 							<Bar dataKey="valor" fill={CHART_COLORS.secondary} />
@@ -169,7 +168,7 @@ export function SystemPerformanceChart() {
 							<YAxis tick={{ fontSize: 12 }} width={30} />
 							<CartesianGrid strokeDasharray="3 3" />
 							<Tooltip
-								formatter={(value: ValueType) => [`${toNumberValue(value)}/100`, 'Puntuación']}
+								formatter={(value) => [`${toNumberValue(value)}/100`, 'Puntuación']}
 								labelFormatter={(name) => `Hora: ${name}`}
 							/>
 							<Line dataKey="valor" stroke={CHART_COLORS.tertiary} strokeWidth={2} type="monotone" />

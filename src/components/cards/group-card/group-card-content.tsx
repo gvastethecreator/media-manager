@@ -38,7 +38,7 @@ export function GroupCardContent({
 	flexibilityScore = 1,
 	filtersCount = 0,
 	entityCounts = {},
-	primaryColor = '#3b82f6',
+	primaryColor = 'var(--dt-primary-500)',
 	tcgMode = true,
 	compact = false,
 }: GroupCardContentProps) {

@@ -133,7 +133,7 @@ export function CharacterCardFooter({
 				<div className="flex items-center gap-3">
 					{/* HP (Puntos de vida) */}
 					<div className="flex items-center gap-1">
-						<Heart className="h-3.5 w-3.5 text-red-500" />
+						<Heart className="h-3.5 w-3.5 text-destructive" />
 						<span className="font-medium">{hp}</span>
 					</div>
 
@@ -145,7 +145,7 @@ export function CharacterCardFooter({
 
 					{/* Power (Nivel de poder) */}
 					<div className="flex items-center gap-1">
-						<Sparkles className="h-3.5 w-3.5 text-yellow-400" />
+						<Sparkles className="h-3.5 w-3.5 text-warning" />
 						<span className="font-medium">{power}</span>
 					</div>
 				</div>
@@ -185,15 +185,15 @@ export function CharacterCardFooter({
 
 			{/* Habilidades destacadas (si existen) */}
 			{skills && skills.length > 0 && (
-				<div className="mt-2 border-white/10 border-t pt-2">
+				<div className="mt-2 border-border/40 border-t pt-2">
 					<div className="flex flex-wrap gap-1.5">
 						{skills.slice(0, 3).map((skill, _index) => (
 							<div
 								className="flex items-center gap-0.5 rounded px-1.5 py-0.5 font-medium text-[10px]"
 								key={`skill-${characterId}-${skill.name}`}
 								style={{
-									backgroundColor: `${primaryColor}40`,
-									border: `1px solid ${primaryColor}80`,
+									backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 60%)`,
+									border: `1px solid color-mix(in oklab, ${primaryColor}, transparent 20%)`,
 								}}
 							>
 								<span>{skill.name}</span>

@@ -47,10 +47,10 @@ function LoadingState({
 function TCGCorners() {
 	return (
 		<div className="pointer-events-none absolute inset-0 z-10">
-			<div className="absolute top-0 left-0 h-4 w-4 border-white/20 border-t border-l" />
-			<div className="absolute top-0 right-0 h-4 w-4 border-white/20 border-t border-r" />
-			<div className="absolute bottom-0 left-0 h-4 w-4 border-white/20 border-b border-l" />
-			<div className="absolute right-0 bottom-0 h-4 w-4 border-white/20 border-r border-b" />
+			<div className="absolute top-0 left-0 h-4 w-4 border-border/60 border-t border-l" />
+			<div className="absolute top-0 right-0 h-4 w-4 border-border/60 border-t border-r" />
+			<div className="absolute bottom-0 left-0 h-4 w-4 border-border/60 border-b border-l" />
+			<div className="absolute right-0 bottom-0 h-4 w-4 border-border/60 border-r border-b" />
 		</div>
 	);
 }
@@ -166,7 +166,7 @@ export function TagCardImages({
 			{/* Grid de imágenes con efecto de mosaico etiquetado */}
 			<div className="grid h-full grid-cols-3 grid-rows-2 gap-px">
 				{images.slice(0, 6).map((image, index) => (
-					<div className="relative overflow-hidden bg-black/20" key={image.id}>
+					<div className="relative overflow-hidden bg-muted/20" key={image.id}>
 						{/* Imagen */}
 						<img
 							alt={image.name || 'Imagen etiquetada'}
@@ -222,7 +222,7 @@ export function TagCardImages({
 					style={{
 						background: `${primaryColor}80`,
 						color: 'white',
-						boxShadow: '0 1px 3px rgba(0,0,0,0.3)',
+						boxShadow: '0 1px 3px var(--dt-shadow-color-strong)',
 					}}
 				>
 					+{images.length - 6}

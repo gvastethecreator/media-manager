@@ -6,6 +6,7 @@ import {
 	extractDocumentMetadata,
 	extractEXIFMetadata,
 	extractIPTCMetadata,
+	extractJSONMetadata,
 	extractVideoMetadata,
 	extractXMPMetadata,
 } from '../metadata/enhanced-metadata-extractors';
@@ -186,10 +187,9 @@ const processMetadataResult = (result: EnhancedMetadataResult, item: AnyEntityWi
 	}
 
 	// Metadatos de JSON
-	// TODO: Agregar 'jsonFile' al tipo EntityType
-	// if (entityType === 'jsonFile') {
-	//   extractJSONMetadata(result, metadata);
-	// }
+	if (entityType === 'jsonFile') {
+		extractJSONMetadata(result, metadata);
+	}
 
 	// Metadatos de documentos (markdown, txt, etc.)
 	if (entityType === 'document') {
@@ -209,7 +209,7 @@ export const useEnhancedMetadata = (item?: AnyEntityWithStats) => {
 
 	const loadEnhancedMetadata = useCallback(async () => {
 		// Verificar si es un tipo de archivo soportado
-		const supportedTypes = ['image', 'video', 'audio', 'json', 'document'];
+		const supportedTypes = ['image', 'video', 'audio', 'jsonFile', 'document'];
 		if (!item) {
 			setEnhancedMetadata([]);
 			return;
@@ -257,7 +257,7 @@ export const useEnhancedMetadata = (item?: AnyEntityWithStats) => {
 	}, [item]);
 
 	useEffect(() => {
-		const supportedTypes = ['image', 'video', 'audio', 'json', 'document'];
+		const supportedTypes = ['image', 'video', 'audio', 'jsonFile', 'document'];
 		if (item && supportedTypes.includes(item.entityType)) {
 			loadEnhancedMetadata();
 		} else {

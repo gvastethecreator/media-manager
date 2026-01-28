@@ -42,7 +42,7 @@ export function MetricCard({ metric }: { metric: SystemMetric }) {
 								<div
 									className={cn(
 										'flex items-center gap-1 font-medium text-xs',
-										metric.change.type === 'increase' ? 'text-green-500' : 'text-red-500'
+										metric.change.type === 'increase' ? 'text-success' : 'text-destructive'
 									)}
 								>
 									{metric.change.type === 'increase' ? '+' : '-'}

@@ -85,7 +85,9 @@ export function FoldersGrid({
 									{hasError && <AlertCircle className="absolute -top-1 -right-1 h-3.5 w-3.5 text-destructive" />}
 								</div>
 								<div className="flex items-center gap-1">
-									{folder.isFavorite && <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />}
+									{folder.isFavorite && (
+										<Star className="h-3.5 w-3.5 fill-amber-500 text-warning dark:fill-amber-400 dark:text-amber-400" />
+									)}
 									{folder._isOrphan && (
 										<Badge className="text-[10px]" variant="destructive">
 											Huérfana

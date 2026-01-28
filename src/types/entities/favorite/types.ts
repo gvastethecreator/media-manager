@@ -199,28 +199,27 @@ export const FAVORITE_ENTITY_EMOJIS: Record<string, string> = {
 
 /**
  * Colores por tipo de entidad favorita.
- * NOTA: Estos colores hex se mantienen aquí porque son valores por defecto
- * que pueden ser personalizados por el usuario. En componentes de UI,
- * preferir usar las clases de @/lib/styles/color-tokens
+ * NOTA: Ahora utilizamos variables CSS semánticas para asegurar la integración
+ * con los diferentes temas de la aplicación.
  */
 export const FAVORITE_ENTITY_COLORS: Record<string, string> = {
-	[FavoriteEntityType.IMAGE]: 'rgb(59, 130, 246)', // blue-500
-	[FavoriteEntityType.VIDEO]: 'rgb(239, 68, 68)', // red-500
-	[FavoriteEntityType.ALBUM]: 'rgb(249, 115, 22)', // orange-500
-	[FavoriteEntityType.COLLECTION]: 'rgb(139, 92, 246)', // violet-500
-	[FavoriteEntityType.FOLDER]: 'rgb(34, 197, 94)', // green-500
-	[FavoriteEntityType.CHARACTER]: 'rgb(244, 63, 94)', // rose-500
-	[FavoriteEntityType.PLACE]: 'rgb(14, 165, 233)', // sky-500
-	[FavoriteEntityType.WORLD_ITEM]: 'rgb(217, 70, 239)', // fuchsia-500
-	[FavoriteEntityType.CONCEPT]: 'rgb(251, 191, 36)', // amber-400
-	[FavoriteEntityType.PROMPT]: 'rgb(16, 185, 129)', // emerald-500
-	[FavoriteEntityType.NOTE]: 'rgb(239, 68, 68)', // red-500
-	[FavoriteEntityType.DOCUMENT]: 'rgb(100, 116, 139)', // slate-500
-	[FavoriteEntityType.FILE]: 'rgb(107, 114, 128)', // gray-500
-	[FavoriteEntityType.TAG]: 'rgb(236, 72, 153)', // pink-500
-	[FavoriteEntityType.GROUP]: 'rgb(20, 184, 166)', // teal-500
-	[FavoriteEntityType.FAVORITE]: 'rgb(251, 191, 36)', // amber-400
-	default: 'rgb(59, 130, 246)', // blue-500
+	[FavoriteEntityType.IMAGE]: 'var(--entity-image)',
+	[FavoriteEntityType.VIDEO]: 'var(--entity-video)',
+	[FavoriteEntityType.ALBUM]: 'var(--entity-album)',
+	[FavoriteEntityType.COLLECTION]: 'var(--entity-collection)',
+	[FavoriteEntityType.FOLDER]: 'var(--entity-folder)',
+	[FavoriteEntityType.CHARACTER]: 'var(--entity-character)',
+	[FavoriteEntityType.PLACE]: 'var(--entity-place)',
+	[FavoriteEntityType.WORLD_ITEM]: 'var(--entity-world-item)',
+	[FavoriteEntityType.CONCEPT]: 'var(--entity-concept)',
+	[FavoriteEntityType.PROMPT]: 'var(--entity-prompt)',
+	[FavoriteEntityType.NOTE]: 'var(--entity-note)',
+	[FavoriteEntityType.DOCUMENT]: 'var(--entity-document)',
+	[FavoriteEntityType.FILE]: 'var(--entity-file)',
+	[FavoriteEntityType.TAG]: 'var(--entity-tag)',
+	[FavoriteEntityType.GROUP]: 'var(--entity-group)',
+	[FavoriteEntityType.FAVORITE]: 'var(--entity-favorite)',
+	default: 'var(--dt-primary-500)',
 };
 
 export const FAVORITE_ENTITY_DISPLAY_NAMES: Record<string, string> = {

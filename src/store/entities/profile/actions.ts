@@ -103,7 +103,11 @@ export const createProfileActions: StateCreator<ProfileStoreState & ProfileActio
 	setPagination: (pagination) => set({ pagination }),
 
 	// Acciones para la configuración de vista
-	setViewMode: (mode) => set((state) => ({ viewConfig: { ...state.viewConfig, mode } })),
+	setViewMode: (mode) =>
+		set((state) => {
+			if (state.viewConfig.mode === mode) return state;
+			return { viewConfig: { ...state.viewConfig, mode } };
+		}),
 	setShowStats: (show) => set((state) => ({ viewConfig: { ...state.viewConfig, showStats: show } })),
 	setShowDescription: (show) => set((state) => ({ viewConfig: { ...state.viewConfig, showDescription: show } })),
 	setGridColumns: (columns) => set((state) => ({ viewConfig: { ...state.viewConfig, gridColumns: columns } })),

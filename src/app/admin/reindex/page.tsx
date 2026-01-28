@@ -19,7 +19,7 @@ export default function ReindexAdminPage() {
 				<h1 className="mb-2 font-bold text-3xl text-gray-900 dark:text-gray-100">
 					Administración del Sistema de Reindexado
 				</h1>
-				<p className="text-gray-600 dark:text-gray-400">
+				<p className="text-muted-foreground dark:text-muted-foreground">
 					Monitoreo, logs y estadísticas del sistema de reindexado automático de carpetas y archivos.
 				</p>
 			</div>

@@ -107,7 +107,7 @@ export const HexColor = Schema.String.pipe(Schema.pattern(/^#[0-9A-Fa-f]{6}$/)).
 	identifier: 'HexColor',
 	title: 'Hex color code',
 	description: 'RGB color in #RRGGBB format',
-	examples: ['#FF5733', '#3498db', '#000000'],
+	examples: ['#FF5733', '#3498db', 'var(--dt-neutral-950)'],
 });
 
 /**

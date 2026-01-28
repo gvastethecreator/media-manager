@@ -55,7 +55,9 @@ export function GroupContentView(_props: ViewProps) {
 				<div className="mb-6 flex items-center gap-4">
 					<div
 						className="flex h-14 w-14 items-center justify-center rounded-full text-3xl"
-						style={{ backgroundColor: `${group.color ?? '#60a5fa'}25` }}
+						style={{
+							backgroundColor: `color-mix(in oklch, ${group.color ?? 'var(--entity-group)'} 15%, transparent)`,
+						}}
 					>
 						{group.emoji || '📂'}
 					</div>

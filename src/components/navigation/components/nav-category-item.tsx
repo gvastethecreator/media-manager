@@ -1,8 +1,8 @@
 import { ChevronRight, Grid, List, type LucideIcon } from 'lucide-react';
 import type React from 'react';
 import { memo, useCallback, useMemo } from 'react';
+import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
-import { motion } from '@/components/ui/motion-shim';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { ViewType } from '@/components/views/types';
 import { cn } from '@/lib/utils';
@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 const CollapseIndicatorComponent = memo(function CollapseIndicator({
 	isCollapsed,
 	onToggleCollapse,
-	color = '#888888',
+	color = 'hsl(var(--muted-foreground))',
 }: {
 	isCollapsed: boolean;
 	onToggleCollapse: (e: React.MouseEvent | React.KeyboardEvent) => void;
@@ -46,7 +46,7 @@ const CollapseIndicatorComponent = memo(function CollapseIndicator({
 	return (
 		<button
 			aria-label={isCollapsed ? 'Expandir categoría' : 'Colapsar categoría'}
-			className="flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 transition-colors hover:bg-gray-100/10"
+			className="flex h-5 w-5 shrink-0 cursor-pointer items-center justify-center border-0 bg-transparent p-0 transition-colors hover:bg-muted/40"
 			onClick={onToggleCollapse}
 			onKeyDown={handleKeyDown}
 			type="button"
@@ -149,17 +149,7 @@ export const NavCategoryItem = memo(function NavCategoryItemImpl({
 	viewMode = 'list',
 }: NavCategoryItemProps) {
 	const colorWithOpacity = useMemo(() => {
-		// Convertir el color a rgba con una opacidad de 0.2
-		let hexColor = color;
-		if (hexColor.startsWith('#')) {
-			hexColor = hexColor.slice(1);
-		}
-
-		const r = Number.parseInt(hexColor.substr(0, 2), 16);
-		const g = Number.parseInt(hexColor.substr(2, 2), 16);
-		const b = Number.parseInt(hexColor.substr(4, 2), 16);
-
-		return `rgba(${r}, ${g}, ${b}, 0.15)`;
+		return `color-mix(in oklch, ${color} 15%, transparent)`;
 	}, [color]);
 
 	// Memoizar clases para evitar recreaciones
@@ -239,7 +229,9 @@ export const NavCategoryItem = memo(function NavCategoryItemImpl({
 				<Tooltip>
 					<TooltipTrigger>{categoryItem}</TooltipTrigger>
 					<TooltipContent className="p-2 text-xs">
-						<p className="font-medium text-amber-400">{label}</p>
+						<p className="font-medium" style={{ color }}>
+							{label}
+						</p>
 						<p className="flex items-center gap-2">
 							<span className="inline-flex min-w-[24px] items-center justify-center rounded-sm bg-muted/60 px-1.5 py-0.5 text-[9px] text-muted-foreground">
 								{itemCount}

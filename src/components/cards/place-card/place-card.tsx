@@ -1,7 +1,6 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { getRarityGradient } from '@/components/cards/shared/rarity-gradients';
-import { darkenHex } from '@/components/cards/shared/rarity-style';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { useRecentPlaceMedia } from '@/lib/api/places';
 import { cn } from '@/lib/utils';
 import { PlaceWithStats } from '@/types/entities/place';
@@ -35,19 +34,20 @@ export interface PlaceCardProps {
 // --- Helpers & constantes extraídas para reducir complejidad del componente principal ---
 
 const TYPE_COLORS: Record<string, string> = {
-	city: '#2563eb',
-	forest: '#047857',
-	mountain: '#b91c1c',
-	desert: '#d97706',
+	city: 'var(--preset-blue)',
+	forest: 'var(--preset-green)',
+	mountain: 'var(--preset-red)',
+	desert: 'var(--preset-orange)',
 };
 
 // darkenHex centralizado en shared/rarity-style
 
 function computeSecondaryColor(color: string | undefined, type: string | undefined): string {
 	if (!color) {
-		return TYPE_COLORS[type ?? ''] || '#064e3b';
+		return TYPE_COLORS[type ?? ''] || 'var(--entity-place)';
 	}
-	return darkenHex(color, 0.7);
+	// Usar color-mix para oscurecer el color de forma nativa en CSS
+	return `color-mix(in oklab, ${color}, black 20%)`;
 }
 
 interface DerivedPlaceData {
@@ -102,7 +102,7 @@ function extractMetadata(metadata: unknown, id: string) {
 
 function preparePlaceDerivedData(place: PlaceWithStats, recentMediaData: any[] | undefined): DerivedPlaceData {
 	const {
-		color = '#10b981',
+		color = 'var(--entity-place)',
 		type,
 		parsedResources = [],
 		parsedDangers = [],
@@ -113,7 +113,7 @@ function preparePlaceDerivedData(place: PlaceWithStats, recentMediaData: any[] |
 		id,
 	} = place as any;
 	const population = typeof rawPopulation === 'string' ? Number.parseInt(rawPopulation, 10) : rawPopulation;
-	const primaryColor = color || '#10b981';
+	const primaryColor = color || 'var(--entity-place)';
 	const secondaryColor = computeSecondaryColor(color, type);
 	const { safeParsedResources, safeParsedDangers, safeParsedStats } = normalizeArrays(
 		parsedResources,
@@ -145,11 +145,11 @@ function preparePlaceDerivedData(place: PlaceWithStats, recentMediaData: any[] |
 const PlaceCardLoading: React.FC<{ className?: string }> = ({ className }) => (
 	<div
 		className={cn(
-			'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
+			'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-muted md:w-[320px] dark:bg-background',
 			className
 		)}
 	>
-		<p className="text-gray-500">Cargando lugar...</p>
+		<p className="text-muted-foreground">Cargando lugar...</p>
 	</div>
 );
 
@@ -160,7 +160,7 @@ const PlaceCardError: React.FC<{ className?: string; message: string }> = ({ cla
 			className
 		)}
 	>
-		<p className="text-red-800">Error: {message}</p>
+		<p className="text-destructive">Error: {message}</p>
 	</div>
 );
 
@@ -185,7 +185,7 @@ const TCGEffects: React.FC<{
 			<div
 				className="pointer-events-none absolute inset-0 z-1 opacity-0 transition-opacity duration-300 hover:opacity-30"
 				style={{
-					backgroundImage: `linear-gradient(125deg,transparent 0%,${primaryColor}30 25%,${secondaryColor}30 50%,${primaryColor}30 75%,transparent 100%)`,
+					backgroundImage: `linear-gradient(125deg, transparent 0%, color-mix(in oklab, ${primaryColor}, transparent 70%) 25%, color-mix(in oklab, ${secondaryColor}, transparent 70%) 50%, color-mix(in oklab, ${primaryColor}, transparent 70%) 75%, transparent 100%)`,
 					backgroundSize: '200% 200%',
 					animation: 'gradient-shift 3s ease infinite',
 				}}

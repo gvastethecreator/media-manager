@@ -6,7 +6,7 @@
 
 import type React from 'react';
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion } from '@/components/ui/motion-shim';
+import { AnimatePresence, motion } from '@/components/ui/animejs-shim';
 import { Skeleton } from '@/components/ui/skeleton';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';

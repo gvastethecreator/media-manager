@@ -161,7 +161,7 @@ const ContentBlock: React.FC<{
 	primaryColor: string;
 }> = ({ content, hasContent, tcgMode }) => (
 	<div
-		className={cn('mb-2 text-muted-foreground', tcgMode ? 'rounded border border-white/10 bg-black/20 p-2' : '')}
+		className={cn('mb-2 text-muted-foreground', tcgMode ? 'rounded border border-border/40 bg-muted/20 p-2' : '')}
 		style={{ fontSize: '0.8rem', lineHeight: '1.25rem' }}
 	>
 		{hasContent ? (
@@ -187,7 +187,7 @@ const TagsBlock: React.FC<{ tags: string[]; primaryColor: string; renderKey: str
 				<Badge
 					className="rounded-sm px-1.5 py-0.5 text-xs"
 					key={`tag-${renderKey}-${tag}`}
-					style={{ backgroundColor: `${primaryColor}20`, borderColor: `${primaryColor}40`, color: primaryColor }}
+					style={{ backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 80%)`, borderColor: `color-mix(in oklab, ${primaryColor}, transparent 60%)`, color: primaryColor }}
 					variant="outline"
 				>
 					{tag}
@@ -206,7 +206,7 @@ const TCGStats: React.FC<{ relationCounts?: Record<string, number>; primaryColor
 	relationCounts,
 	primaryColor,
 }) => (
-	<div className="mt-auto grid grid-cols-2 gap-x-4 gap-y-1 rounded border border-white/10 bg-black/30 px-3 py-2">
+	<div className="mt-auto grid grid-cols-2 gap-x-4 gap-y-1 rounded border border-border/40 bg-muted/30 px-3 py-2">
 		<StatBar
 			icon={<Image className="h-3.5 w-3.5" />}
 			label="Imágenes"
@@ -276,25 +276,25 @@ const AdditionalRelations: React.FC<{ relationCounts?: Record<string, number>; p
 }) => (
 	<div className="mt-2 flex justify-center gap-2" style={{ ['--accent' as any]: primaryColor }}>
 		{relationCounts?.tags && relationCounts.tags > 0 && (
-			<Badge className="flex items-center gap-1 border-white/20 bg-black/40 px-1.5 py-0.5 text-xs" variant="outline">
+			<Badge className="flex items-center gap-1 border-border/60 bg-muted/40 px-1.5 py-0.5 text-xs" variant="outline">
 				<TagIcon className="h-3 w-3" />
 				<span>{relationCounts.tags}</span>
 			</Badge>
 		)}
 		{relationCounts?.prompts && relationCounts.prompts > 0 && (
-			<Badge className="flex items-center gap-1 border-white/20 bg-black/40 px-1.5 py-0.5 text-xs" variant="outline">
+			<Badge className="flex items-center gap-1 border-border/60 bg-muted/40 px-1.5 py-0.5 text-xs" variant="outline">
 				<BookMarked className="h-3 w-3" />
 				<span>{relationCounts.prompts}</span>
 			</Badge>
 		)}
 		{relationCounts?.places && relationCounts.places > 0 && (
-			<Badge className="flex items-center gap-1 border-white/20 bg-black/40 px-1.5 py-0.5 text-xs" variant="outline">
+			<Badge className="flex items-center gap-1 border-border/60 bg-muted/40 px-1.5 py-0.5 text-xs" variant="outline">
 				<MapPin className="h-3 w-3" />
 				<span>{relationCounts.places}</span>
 			</Badge>
 		)}
 		{relationCounts?.worldItems && relationCounts.worldItems > 0 && (
-			<Badge className="flex items-center gap-1 border-white/20 bg-black/40 px-1.5 py-0.5 text-xs" variant="outline">
+			<Badge className="flex items-center gap-1 border-border/60 bg-muted/40 px-1.5 py-0.5 text-xs" variant="outline">
 				<HashIcon className="h-3 w-3" />
 				<span>{relationCounts.worldItems}</span>
 			</Badge>
@@ -355,7 +355,7 @@ function StatBar({
 					{value}
 				</span>
 			</div>
-			<div className="h-1.5 w-full overflow-hidden rounded-full bg-gray-800">
+			<div className="h-1.5 w-full overflow-hidden rounded-full bg-card">
 				<div
 					className="h-full rounded-full"
 					style={{

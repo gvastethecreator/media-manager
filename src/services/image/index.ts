@@ -13,7 +13,7 @@
  */
 
 // Servicio principal (CRUD)
-export * from './image.service';
+export * from './image.service.effect';
 // Eventos
 export { emitImageEvent, IMAGE_EVENTS } from './image-events';
 

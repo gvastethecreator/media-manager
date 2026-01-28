@@ -251,7 +251,7 @@ export function BatchOperationsPanel({ className, maxHeight = '400px' }: BatchOp
 													)}
 												</DropdownMenuItem>
 											)}
-											<DropdownMenuItem className="text-red-600" onClick={() => handleCancel(operation)}>
+											<DropdownMenuItem className="text-destructive" onClick={() => handleCancel(operation)}>
 												<X className="mr-2 h-4 w-4" />
 												Cancelar
 											</DropdownMenuItem>
@@ -323,11 +323,11 @@ export function BatchOperationsPanel({ className, maxHeight = '400px' }: BatchOp
 										<div className="mt-3 grid grid-cols-2 gap-4 text-xs">
 											<div>
 												<span className="font-medium">Procesados:</span>
-												<span className="ml-1 text-green-600">{operation.progress.processed}</span>
+												<span className="ml-1 text-[color:var(--status-success)]">{operation.progress.processed}</span>
 											</div>
 											<div>
 												<span className="font-medium">Fallidos:</span>
-												<span className="ml-1 text-red-600">{operation.progress.failed}</span>
+												<span className="ml-1 text-destructive">{operation.progress.failed}</span>
 											</div>
 											<div>
 												<span className="font-medium">Total:</span>
@@ -342,7 +342,9 @@ export function BatchOperationsPanel({ className, maxHeight = '400px' }: BatchOp
 										{/* Error Summary */}
 										{operation.errors.length > 0 && (
 											<div className="mt-3">
-												<h5 className="mb-2 font-medium text-red-600 text-xs">Errores ({operation.errors.length}):</h5>
+												<h5 className="mb-2 font-medium text-destructive text-xs">
+													Errores ({operation.errors.length}):
+												</h5>
 												<div className="max-h-20 space-y-1 overflow-y-auto">
 													{operation.errors.slice(0, 3).map((error) => {
 														const stableKey = error.item?.id

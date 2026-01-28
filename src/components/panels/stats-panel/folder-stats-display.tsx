@@ -86,11 +86,21 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 	// Preparar estadísticas de tipos de archivo
 	const fileTypeStats = folderStats
 		? [
-				{ type: 'Imágenes', count: folderStats.totalImages, icon: ImageIcon, color: 'text-blue-500' },
-				{ type: 'Videos', count: folderStats.totalVideos, icon: Video, color: 'text-purple-500' },
-				{ type: 'Audio', count: folderStats.totalAudio, icon: Music, color: 'text-green-500' },
-				{ type: 'Documentos', count: folderStats.totalDocuments, icon: FileText, color: 'text-orange-500' },
-				{ type: 'Otros', count: folderStats.totalOthers, icon: File, color: 'text-gray-500' },
+				{
+					type: 'Imágenes',
+					count: folderStats.totalImages,
+					icon: ImageIcon,
+					color: 'text-[color:var(--entity-image)]',
+				},
+				{ type: 'Videos', count: folderStats.totalVideos, icon: Video, color: 'text-[color:var(--entity-video)]' },
+				{ type: 'Audio', count: folderStats.totalAudio, icon: Music, color: 'text-[color:var(--entity-audio)]' },
+				{
+					type: 'Documentos',
+					count: folderStats.totalDocuments,
+					icon: FileText,
+					color: 'text-[color:var(--entity-document)]',
+				},
+				{ type: 'Otros', count: folderStats.totalOthers, icon: File, color: 'text-[color:var(--entity-file)]' },
 			].filter((stat) => stat.count > 0)
 		: [];
 
@@ -118,7 +128,9 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 				<div className="min-w-0 flex-1">
 					<div className="flex h-12 items-center gap-2">
 						<h1 className="truncate font-medium text-xl">{displayName}</h1>
-						{folderDetails?.isFavorite && <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />}
+						{folderDetails?.isFavorite && (
+							<Star className="h-3 w-3 fill-[color:var(--entity-favorite)] text-[color:var(--entity-favorite)]" />
+						)}
 					</div>
 
 					{folderDetails?.color && (
@@ -197,7 +209,7 @@ const FolderStatsDisplayComponent = memo(function FolderStatsDisplayImpl({
 							{folderStats && folderStats.totalSize > 0 && (
 								<div className="flex items-center justify-between">
 									<div className="flex items-center gap-2">
-										<Hash className="h-4 w-4 text-indigo-600" />
+										<Hash className="h-4 w-4 text-[color:var(--entity-file)]" />
 										<span className="text-sm">Tamaño total</span>
 									</div>
 									<Badge className="text-xs" variant="outline">

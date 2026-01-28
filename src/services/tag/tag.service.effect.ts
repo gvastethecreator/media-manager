@@ -385,7 +385,7 @@ const make = (): TagServiceInterface => {
 							id,
 							name: validated.name,
 							description: validated.description ?? null,
-							color: validated.color ?? '#3b82f6',
+							color: validated.color ?? 'var(--dt-primary-500)',
 							emoji: validated.emoji ?? '🏷️',
 							category: validated.category ?? null,
 							shortcut: validated.shortcut ?? null,
@@ -577,7 +577,10 @@ const make = (): TagServiceInterface => {
 			// Verificar que el tag existe
 			yield* getById(id);
 
-			const tagImages = yield* Effect.tryPromise({
+			const tagImages = yield* Effect.tryPromise<
+				Array<{ id: string; name: string | null; path: string; thumbnailPath: string | null }>,
+				TagError
+			>({
 				try: async () => {
 					return db
 						.select({
@@ -611,7 +614,7 @@ const make = (): TagServiceInterface => {
 			// Verificar que el tag existe
 			yield* getById(id);
 
-			const tagImages = yield* Effect.tryPromise({
+			const tagImages = yield* Effect.tryPromise<Array<{ id: string; name: string | null; path: string }>, TagError>({
 				try: async () => {
 					return db
 						.select({

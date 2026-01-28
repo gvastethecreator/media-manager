@@ -68,7 +68,7 @@ export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 				{/* Contador de imágenes y favorito */}
 				<div className="flex items-center space-x-2">
 					{/* Indicador de favorito */}
-					{isFavorite && <Star aria-label="Favorito" className="fill-yellow-400 text-yellow-400" size={14} />}
+					{isFavorite && <Star aria-label="Favorito" className="fill-warning text-warning" size={14} />}
 
 					{/* Contador de imágenes */}
 					<div className="flex items-center">
