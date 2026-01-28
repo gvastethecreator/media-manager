@@ -1,5 +1,5 @@
 import { memo, useMemo } from 'react';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import type { ImageItem } from './file-viewer.types';
 import { ThumbnailItem } from './thumbnail-item';
 
@@ -32,7 +32,7 @@ export const ThumbnailNavigation = memo(function ThumbnailNavigationImpl({
 	return (
 		<div className="fixed bottom-8 left-1/2 z-[10000] flex -translate-x-1/2 items-center justify-center">
 			<motion.div
-				className="flex items-center gap-2 rounded-full border border-white/10 bg-black/50 p-2 shadow-xl backdrop-blur-md"
+				className="flex items-center gap-2 rounded-full border border-border/40 bg-muted/50 p-2 shadow-xl backdrop-blur-md"
 				layout
 			>
 				{visibleThumbnails.map(({ image, isActive, index }) => (

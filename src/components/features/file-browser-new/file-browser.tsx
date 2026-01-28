@@ -3,10 +3,13 @@
  * @module file-browser-new/file-browser
  */
 
+import { createLayout } from 'animejs';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { useToast } from '@/components/ui/use-toast';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
+import { shouldReduceMotion } from '@/lib/view-transition/utils';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import {
 	type ContextMenuAction,
@@ -23,6 +26,7 @@ import { actionToEntityType, useAddToEntity, useFileBrowser } from './hooks';
 import { useKeyboardNavigation } from './hooks/use-keyboard';
 import type { BrowserItem, FileBrowserProps } from './types';
 import { CardsView, GridView, ListView, MasonryView, TableView } from './views';
+import './styles/items.css';
 
 // Estado del menú contextual
 interface ContextMenuState {
@@ -42,8 +46,12 @@ export function FileBrowser({
 	onItemDoubleClick,
 	className,
 }: FileBrowserProps) {
+	const layoutItemLimit = 120;
+	const [suppressAppearAnimation, setSuppressAppearAnimation] = useState(false);
 	// Ref del contenedor principal
 	const containerRef = useRef<HTMLElement>(null);
+	const layoutRootRef = useRef<HTMLElement | null>(null);
+	const layoutRef = useRef<ReturnType<typeof createLayout> | null>(null);
 	const { toast } = useToast();
 
 	// Estado del menú contextual
@@ -67,6 +75,7 @@ export function FileBrowser({
 	// Opciones de vista
 	const backgroundColor = useViewOptionsStore((s) => s.backgroundColor);
 	const infiniteScroll = useViewOptionsStore((s) => s.infiniteScroll);
+	const virtualization = useViewOptionsStore((s) => s.virtualization);
 
 	// Navegación por teclado
 	const { handleNativeKeyDown } = useKeyboardNavigation({
@@ -270,12 +279,79 @@ export function FileBrowser({
 			onItemDoubleClick: browser.handleItemDoubleClick,
 			onItemContextMenu: handleContextMenu,
 			onContainerReady: browser.setScrollContainer,
+			layoutItemLimit,
+			suppressAppearAnimation,
+			virtualization,
 			scrollContainer: browser.scrollContainerRef.current,
 			selectedIds: browser.selectedSet,
 			activeId: browser.activeId,
 		}),
-		[browser, handleContextMenu]
+		[browser, handleContextMenu, suppressAppearAnimation, virtualization]
 	);
+
+	const setLayoutRoot = useCallback((el: HTMLElement | null) => {
+		if (layoutRootRef.current === el) return;
+		layoutRootRef.current = el;
+
+		if (layoutRef.current) {
+			layoutRef.current.revert();
+			layoutRef.current = null;
+		}
+
+		if (!el) return;
+
+		layoutRef.current = createLayout(el, {
+			children: ['[data-layout-item="true"]'],
+			properties: ['opacity', 'transform'],
+			enterFrom: {
+				opacity: 0,
+				transform: 'translateY(8px) scale(0.98)',
+			},
+			leaveTo: {
+				opacity: 0,
+				transform: 'translateY(-8px) scale(0.98)',
+			},
+		});
+	}, []);
+
+	useEffect(() => {
+		return () => {
+			layoutRef.current?.revert();
+			layoutRef.current = null;
+		};
+	}, []);
+
+	const runLayoutUpdate = useCallback((action: () => void, options?: { duration?: number; ease?: string }) => {
+		const layout = layoutRef.current;
+		if (!layout || shouldReduceMotion()) {
+			action();
+			return;
+		}
+
+		layout.update(
+			() => {
+				flushSync(() => {
+					action();
+				});
+			},
+			{
+				duration: options?.duration ?? 220,
+				ease: options?.ease ?? 'out(3)',
+				delay: (el, index) => {
+					const orderValue = Number((el as HTMLElement).dataset.layoutOrder ?? index);
+					return Math.min(orderValue * 4, 200);
+				},
+			}
+		);
+	}, []);
+
+	useEffect(() => {
+		if (!suppressAppearAnimation) return;
+		const timeoutId = window.setTimeout(() => {
+			setSuppressAppearAnimation(false);
+		}, 0);
+		return () => window.clearTimeout(timeoutId);
+	}, [suppressAppearAnimation]);
 
 	// Renderizar vista según modo
 	const renderView = useCallback(() => {
@@ -310,12 +386,12 @@ export function FileBrowser({
 							config.kind === 'table'
 								? config
 								: {
-									kind: 'table',
-									renderMode: 'canvas',
-									gap: 0,
-									rowHeight: 32,
-									visibleColumns: ['name', 'entityType', 'size', 'createdAt'],
-								}
+										kind: 'table',
+										renderMode: 'canvas',
+										gap: 0,
+										rowHeight: 32,
+										visibleColumns: ['name', 'entityType', 'size', 'createdAt'],
+									}
 						}
 						onSortChange={browser.toggleSortField}
 						sortOptions={browser.sortOptions}
@@ -350,7 +426,7 @@ export function FileBrowser({
 					/>
 				);
 		}
-	}, [browser, viewProps]);
+	}, [browser, viewProps, infiniteScroll.enabled]);
 
 	// IDs para toolbar (sin sintéticos)
 	const toolbarItemIds = useMemo(
@@ -381,12 +457,18 @@ export function FileBrowser({
 				itemIds={toolbarItemIds}
 				itemSize={browser.itemSize}
 				onClearSelection={browser.clearSelection}
-				onItemSizeChange={browser.setItemSize}
-				onRefresh={browser.refresh}
-				onSearchChange={browser.setSearchQuery}
+				onItemSizeChange={(size) => runLayoutUpdate(() => browser.setItemSize(size), { duration: 250 })}
+				onRefresh={() => runLayoutUpdate(() => void browser.refresh(), { duration: 300 })}
+				onSearchChange={(query) => runLayoutUpdate(() => browser.setSearchQuery(query), { duration: 200 })}
 				onSelectAll={browser.selectAll}
-				onSortChange={browser.toggleSortField}
-				onViewModeChange={browser.setViewMode}
+				onSortChange={(field) =>
+					runLayoutUpdate(() => browser.toggleSortField(field), { duration: 300, ease: 'inOut(3)' })
+				}
+				onViewModeChange={(mode) => {
+					if (mode === browser.viewMode) return;
+					setSuppressAppearAnimation(true);
+					runLayoutUpdate(() => browser.setViewMode(mode), { duration: 450, ease: 'inOut(3)' });
+				}}
 				searchQuery={browser.searchQuery}
 				selectedCount={browser.selectedIds.length}
 				sortOptions={browser.sortOptions}
@@ -426,7 +508,11 @@ export function FileBrowser({
 				)}
 
 				{/* Contenido principal */}
-				{browser.shouldRenderContent && <div className="flex min-h-0 flex-1 flex-col">{renderView()}</div>}
+				{browser.shouldRenderContent && (
+					<div className="flex min-h-0 flex-1 flex-col" ref={setLayoutRoot}>
+						{renderView()}
+					</div>
+				)}
 			</section>
 
 			{/* Botón de cargar más (si no es infinite scroll automático) */}
@@ -443,8 +529,8 @@ export function FileBrowser({
 			{/* Status Bar */}
 			<FileBrowserStatusBar
 				isLoading={browser.isLoading || browser.isLoadingMore}
-				onNextPage={browser.nextPage}
-				onPrevPage={browser.prevPage}
+				onNextPage={() => runLayoutUpdate(() => browser.nextPage(), { duration: 250 })}
+				onPrevPage={() => runLayoutUpdate(() => browser.prevPage(), { duration: 250 })}
 				pagination={browser.pagination}
 				selectedCount={browser.selectedIds.length}
 				shownItems={browser.shownCount}

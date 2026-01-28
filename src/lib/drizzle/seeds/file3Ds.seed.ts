@@ -14,7 +14,7 @@ export async function seedFile3Ds(db: LibSQLDatabase<Record<string, never>>) {
 				id: '3d-seed-001',
 				name: 'test-3d.glb',
 				path: 'D:\\DEV\\image-manager\\test-files\\test-3d.glb',
-				size: 10240,
+				size: 10_240,
 				hash: 'd3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b865',
 				mimeType: 'model/gltf-binary',
 				extension: 'glb',

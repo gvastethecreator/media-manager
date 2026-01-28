@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { useCreateWorldItem, useUpdateWorldItem } from '@/lib/api/world-items';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import { WorldItemCategory, WorldItemRarity, WorldItemType } from '@/types/entities/world-item/enums';
 import type { WorldItemComplete, WorldItemCreateInput, WorldItemStatistics } from '@/types/entities/world-item/types';
@@ -85,7 +86,7 @@ export function CreateWorldItemForm({
 		defaultValues: {
 			name: '',
 			description: '',
-			color: '#6b7280',
+			color: DEFAULT_NEUTRAL_COLOR,
 			emoji: '📦',
 			type: 'none',
 			category: 'none',
@@ -227,7 +228,7 @@ export function CreateWorldItemForm({
 			form.reset({
 				name: worldItem.name,
 				description: worldItem.description || '',
-				color: worldItem.color || '#6b7280',
+				color: worldItem.color || DEFAULT_NEUTRAL_COLOR,
 				emoji: worldItem.emoji || '📦',
 				type: worldItem.type || 'none',
 				category: worldItem.category || 'none',

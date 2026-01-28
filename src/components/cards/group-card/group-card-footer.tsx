@@ -33,7 +33,7 @@ export function GroupCardFooter({
 	rarityLevel = 1,
 	hp = 100,
 	mp = 60,
-	primaryColor = '#3b82f6',
+	primaryColor = 'var(--dt-primary-500)',
 	cardId = '',
 	tcgMode = true,
 	compact = false,
@@ -45,7 +45,7 @@ export function GroupCardFooter({
 
 	return (
 		<div
-			className={cn('px-3 py-2', tcgMode ? 'border-white/10 border-t' : '')}
+			className={cn('px-3 py-2', tcgMode ? 'border-border/40 border-t' : '')}
 			style={{
 				background: tcgMode ? `linear-gradient(to top, ${primaryColor}20, transparent)` : undefined,
 			}}
@@ -67,7 +67,7 @@ export function GroupCardFooter({
 						</div>
 
 						{/* Poder */}
-						<div className="flex items-center rounded bg-black/10 px-1">
+						<div className="flex items-center rounded bg-muted/10 px-1">
 							<span className="font-medium text-xs">{power}</span>
 						</div>
 					</div>
@@ -122,7 +122,7 @@ export function GroupCardFooter({
 
 					{/* Información de archivos */}
 					<div className="flex items-center space-x-2 text-muted-foreground text-xs">
-						{isFavorite && <HeartIcon className="h-3.5 w-3.5 fill-rose-500 text-rose-500" />}
+						{isFavorite && <HeartIcon className="h-3.5 w-3.5 fill-rose-500 text-destructive" />}
 						{imagesCount > 0 && <span>🖼️ {imagesCount}</span>}
 						{videosCount > 0 && <span>🎬 {videosCount}</span>}
 					</div>

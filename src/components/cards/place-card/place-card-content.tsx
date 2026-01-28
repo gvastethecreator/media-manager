@@ -31,7 +31,7 @@ export function PlaceCardContent({
 	parsedResources = [],
 	parsedDangers = [],
 	parsedStats = {},
-	primaryColor = '#10b981',
+	primaryColor = 'var(--dt-success-500)',
 	tcgMode = true,
 	compact = false,
 }: PlaceCardContentProps) {
@@ -62,14 +62,14 @@ export function PlaceCardContent({
 	};
 
 	// Calcular colores para elementos de UI basados en el color primario
-	const tagColor = `${primaryColor}70`;
-	const borderColor = `${primaryColor}30`;
+	const tagColor = `color-mix(in oklab, ${primaryColor}, transparent 30%)`;
+	const borderColor = `color-mix(in oklab, ${primaryColor}, transparent 70%)`;
 
 	return (
 		<div
 			className={cn('flex flex-col px-3 py-2', compact ? 'space-y-1' : 'space-y-2')}
 			style={{
-				background: tcgMode ? `linear-gradient(to bottom, transparent, ${primaryColor}10)` : undefined,
+				background: tcgMode ? `linear-gradient(to bottom, transparent, color-mix(in oklab, ${primaryColor}, transparent 90%))` : undefined,
 				borderBottom: tcgMode ? `1px solid ${borderColor}` : undefined,
 			}}
 		>
@@ -112,7 +112,7 @@ export function PlaceCardContent({
 							<div className="flex flex-wrap gap-1">
 								{parsedResources.slice(0, maxTags).map((resource) => (
 									<Badge
-										className="h-5 bg-black/10 px-1 text-xs"
+										className="h-5 bg-muted/10 px-1 text-xs"
 										key={`resource-${resource.name}`}
 										style={{ borderColor: tagColor }}
 										variant="outline"
@@ -121,7 +121,7 @@ export function PlaceCardContent({
 									</Badge>
 								))}
 								{parsedResources.length > maxTags && (
-									<Badge className="h-5 bg-black/10 px-1 text-xs" style={{ borderColor: tagColor }} variant="outline">
+									<Badge className="h-5 bg-muted/10 px-1 text-xs" style={{ borderColor: tagColor }} variant="outline">
 										+{parsedResources.length - maxTags}
 									</Badge>
 								)}
@@ -139,7 +139,7 @@ export function PlaceCardContent({
 							<div className="flex flex-wrap gap-1">
 								{parsedDangers.slice(0, maxTags).map((danger) => (
 									<Badge
-										className="h-5 bg-black/10 px-1 text-xs"
+										className="h-5 bg-muted/10 px-1 text-xs"
 										key={`danger-${danger.type}`}
 										style={{ borderColor: tagColor }}
 										variant="outline"
@@ -148,7 +148,7 @@ export function PlaceCardContent({
 									</Badge>
 								))}
 								{parsedDangers.length > maxTags && (
-									<Badge className="h-5 bg-black/10 px-1 text-xs" style={{ borderColor: tagColor }} variant="outline">
+									<Badge className="h-5 bg-muted/10 px-1 text-xs" style={{ borderColor: tagColor }} variant="outline">
 										+{parsedDangers.length - maxTags}
 									</Badge>
 								)}

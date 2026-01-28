@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateNote, useUpdateNote } from '@/lib/api/notes';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import { NoteCategory } from '@/types/entities/note/enums';
 import type { NoteBase, NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note/types';
@@ -50,7 +51,7 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 			title: '',
 			summary: '',
 			content: '',
-			color: '#3b82f6',
+			color: DEFAULT_ENTITY_COLOR,
 			emoji: '📝',
 			category: NoteCategory.GENERAL,
 			tags: [],
@@ -65,7 +66,7 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 				title: note.title,
 				summary: note.summary || '',
 				content: note.content || '',
-				color: note.color || '#3b82f6',
+				color: note.color || DEFAULT_ENTITY_COLOR,
 				emoji: note.emoji || '📝',
 				category: note.category as NoteCategory,
 				tags: Array.isArray(note.tags) ? note.tags : [],
@@ -134,7 +135,12 @@ export function CreateNoteForm({ note, isEditing = false, onSuccess, onCancel, o
 						<FormItem>
 							<FormLabel>Color</FormLabel>
 							<FormControl>
-								<ColorPicker compact onChange={field.onChange} showLabel={false} value={field.value || '#3b82f6'} />
+								<ColorPicker
+									compact
+									onChange={field.onChange}
+									showLabel={false}
+									value={field.value || DEFAULT_ENTITY_COLOR}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>

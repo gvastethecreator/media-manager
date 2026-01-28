@@ -1,6 +1,6 @@
 import { BoxIcon, DownloadIcon, EyeIcon, RotateCcwIcon, ZoomInIcon } from 'lucide-react';
 import React, { memo, useCallback, useMemo, useState } from 'react';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { cn } from '@/lib/utils';
 import type { File3DWithStats } from '@/types/entities/file3d';
 import { CardContainer } from '../card-container';
@@ -51,19 +51,19 @@ export const File3DCard = memo(function File3DCard({
 		switch (format) {
 			case 'glb':
 			case 'gltf':
-				return '#8b5cf6'; // Púrpura para GLTF/GLB
+				return 'var(--entity-character)'; // Púrpura para GLTF/GLB
 			case 'obj':
-				return '#f59e0b'; // Amarillo para OBJ
+				return 'var(--dt-warning-500)'; // Amarillo para OBJ
 			case 'fbx':
-				return '#3b82f6'; // Azul para FBX
+				return 'var(--dt-primary-500)'; // Azul para FBX
 			case 'dae':
-				return '#10b981'; // Verde para DAE
+				return 'var(--dt-success-500)'; // Verde para DAE
 			case 'ply':
-				return '#ef4444'; // Rojo para PLY
+				return 'var(--dt-danger-500)'; // Rojo para PLY
 			case '3ds':
-				return '#ec4899'; // Rosa para 3DS
+				return 'var(--entity-file-3d)'; // Rosa para 3DS
 			default:
-				return '#6b7280'; // Gris para otros
+				return 'var(--dt-neutral-500)'; // Gris para otros
 		}
 	}, [file3d.format]);
 

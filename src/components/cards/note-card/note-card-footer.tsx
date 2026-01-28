@@ -46,21 +46,21 @@ export function NoteCardFooter({
 	const wasUpdated = updatedAtDate.getTime() - createdAtDate.getTime() > 60_000; // 1 minuto de diferencia
 	const updatedFormattedDate = wasUpdated
 		? formatDistanceToNow(updatedAtDate, {
-				addSuffix: true,
-			})
+			addSuffix: true,
+		})
 		: null;
 
 	// Obtener color de prioridad
 	const getPriorityColor = () => {
 		switch (priority) {
 			case 0:
-				return '#4b5563'; // Gris para normal
+				return 'var(--dt-neutral-600)'; // Gris para normal
 			case 1:
-				return '#fbbf24'; // Amarillo para alta
+				return 'var(--dt-warning-400)'; // Amarillo para alta
 			case 2:
-				return '#ef4444'; // Rojo para urgente
+				return 'var(--dt-danger-500)'; // Rojo para urgente
 			default:
-				return '#9ca3af'; // Gris claro para baja
+				return 'var(--dt-neutral-400)'; // Gris claro para baja
 		}
 	};
 
@@ -68,22 +68,22 @@ export function NoteCardFooter({
 	const getFooterStyles = () => {
 		if (tcgMode) {
 			return {
-				background: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}45)`,
-				borderTop: `1px solid ${primaryColor}50`,
-				borderImage: `linear-gradient(to right, transparent, ${primaryColor}60, transparent) 1`,
+				background: `linear-gradient(to bottom, color-mix(in oklab, ${primaryColor}, transparent 75%), color-mix(in oklab, ${secondaryColor}, transparent 55%))`,
+				borderTop: `1px solid color-mix(in oklab, ${primaryColor}, transparent 50%)`,
+				borderImage: `linear-gradient(to right, transparent, color-mix(in oklab, ${primaryColor}, transparent 40%), transparent) 1`,
 			};
 		}
 
 		return {
-			background: `linear-gradient(to bottom, ${primaryColor}10, ${secondaryColor}30)`,
-			borderTop: `1px solid ${primaryColor}30`,
+			background: `linear-gradient(to bottom, color-mix(in oklab, ${primaryColor}, transparent 90%), color-mix(in oklab, ${secondaryColor}, transparent 70%))`,
+			borderTop: `1px solid color-mix(in oklab, ${primaryColor}, transparent 70%)`,
 		};
 	};
 
 	return (
 		<div
 			className={cn(
-				'mt-auto flex flex-col gap-1 border-gray-400/30 border-t px-3 py-2',
+				'mt-auto flex flex-col gap-1 border-muted-foreground/30/30 border-t px-3 py-2',
 				tcgMode && 'rounded-b-[4.75%] backdrop-blur-sm'
 			)}
 			style={getFooterStyles()}
@@ -136,7 +136,7 @@ export function NoteCardFooter({
 					{/* Indicador de favorito */}
 					{isFavorite &&
 						(tcgMode ? (
-							<Star className="h-3.5 w-3.5 fill-current text-yellow-500" />
+							<Star className="h-3.5 w-3.5 fill-current text-warning" />
 						) : (
 							<Heart className="h-3 w-3 fill-current text-pink-500" />
 						))}
@@ -164,7 +164,7 @@ export function NoteCardFooter({
 
 			{/* Sello TCG en la parte inferior */}
 			{tcgMode && (
-				<div className="mt-1 flex justify-center border-white/10 border-t pt-1">
+				<div className="mt-1 flex justify-center border-border/40 border-t pt-1">
 					<div
 						className="font-medium text-[0.65rem] uppercase tracking-wide opacity-60"
 						style={{ color: primaryColor }}

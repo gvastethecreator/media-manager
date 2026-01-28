@@ -74,11 +74,11 @@ const buildBaseFolder = (raw: any) => ({
 	// Si el backend no trae los agregados en top-level, tomar de stats cuando existan
 	totalFiles: (raw.totalFiles ?? raw.stats?.totalFiles ?? raw._count?.images ?? 0) as number,
 	totalSize: (raw.totalSize ?? raw.stats?.totalSize ?? 0) as number,
-	lastIndexed: raw.lastIndexed ?? null,
+	lastIndexed: raw.lastIndexed ? new Date(raw.lastIndexed) : null,
 	parentId: raw.parentId ?? null,
 	presetId: raw.presetId ?? null,
-	createdAt: raw.createdAt || new Date().toISOString(),
-	updatedAt: raw.updatedAt || new Date().toISOString(),
+	createdAt: raw.createdAt ? new Date(raw.createdAt) : new Date(),
+	updatedAt: raw.updatedAt ? new Date(raw.updatedAt) : new Date(),
 });
 
 // Normaliza una carpeta cruda del backend (que puede no incluir stats) a FolderWithStats

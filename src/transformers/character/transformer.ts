@@ -252,7 +252,7 @@ export function toDrizzleCharacterCreate(character: Partial<CharacterWithStats>)
 		name: baseData.name || 'Nuevo Personaje',
 		description: baseData.description || null,
 		emoji: baseData.emoji || '👤',
-		color: baseData.color || '#CCCCCC',
+		color: baseData.color || 'var(--entity-character)',
 		category: baseData.category || null,
 
 		isFavorite: baseData.isFavorite,

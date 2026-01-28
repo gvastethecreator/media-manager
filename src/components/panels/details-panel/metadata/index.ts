@@ -1,5 +1,6 @@
 // Exportar todas las funciones de metadatos
 
+export { getDetailedMetadata } from './detailed-metadata';
 export {
 	extractAIMetadata,
 	extractAudioMetadata,
@@ -10,4 +11,3 @@ export {
 	extractVideoMetadata,
 	extractXMPMetadata,
 } from './enhanced-metadata-extractors';
-export { getDetailedMetadata } from './legacy-metadata';

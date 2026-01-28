@@ -1,5 +1,6 @@
+import { Effect } from 'effect';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { createAudio, getAudioByHash } from '@/services/audio/audio.service';
+import { create, getByHash } from '@/services/audio/audio.service.effect';
 import type { AudioCreateInput } from '@/types/entities/audio';
 import type { FileInfo } from '@/types/file-entity-mapper';
 import { getMimeTypeFromExtension } from '../utils/file-info.utils';
@@ -14,7 +15,7 @@ export class AudioProcessor {
 	async checkExists(hash: string): Promise<boolean> {
 		if (!hash) return false;
 		try {
-			const existing = await getAudioByHash(hash);
+			const existing = await Effect.runPromise(getByHash(hash));
 			return !!existing;
 		} catch {
 			return false;
@@ -62,7 +63,7 @@ export class AudioProcessor {
 			mood: null,
 		};
 
-		const audio = await createAudio(audioData);
+		const audio = await Effect.runPromise(create(audioData));
 		return audio.id;
 	}
 
@@ -192,8 +193,8 @@ export class AudioProcessor {
 			await generateAndSaveWaveform(filePath, entityId, {
 				width: 800,
 				height: 200,
-				waveColor: '#3b82f6',
-				backgroundColor: '#1f2937',
+				waveColor: 'oklch(0.59 0.2 255)', // --entity-audio
+				backgroundColor: 'oklch(0.18 0.002 0)', // --dt-neutral-900
 				samples: 200,
 			});
 
@@ -231,10 +232,10 @@ export class AudioProcessor {
 		// SVG placeholder con icono de audio
 		const svg = `
 			<svg width="800" height="200" xmlns="http://www.w3.org/2000/svg">
-				<rect width="800" height="200" fill="#1f2937"/>
-				<text x="400" y="90" font-family="Arial" font-size="64" fill="#6b7280" text-anchor="middle">🎵</text>
-				<text x="400" y="130" font-family="Arial" font-size="16" fill="#9ca3af" text-anchor="middle">${fileName}</text>
-				<text x="400" y="155" font-family="Arial" font-size="12" fill="#6b7280" text-anchor="middle">Audio File</text>
+				<rect width="800" height="200" fill="oklch(0.18 0.002 0)"/>
+				<text x="400" y="90" font-family="Arial" font-size="64" fill="oklch(0.55 0.002 0)" text-anchor="middle">🎵</text>
+				<text x="400" y="130" font-family="Arial" font-size="16" fill="oklch(0.7 0.002 0)" text-anchor="middle">${fileName}</text>
+				<text x="400" y="155" font-family="Arial" font-size="12" fill="oklch(0.55 0.002 0)" text-anchor="middle">Audio File</text>
 			</svg>
 		`.trim();
 

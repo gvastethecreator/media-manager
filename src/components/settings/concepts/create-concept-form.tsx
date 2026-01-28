@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { useCreateConcept, useUpdateConcept } from '@/lib/api/concepts';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import type { ConceptBase } from '@/types/entities/concept/base';
 import type {
@@ -58,7 +59,7 @@ export function CreateConceptForm({
 			name: '',
 			description: '',
 			content: '',
-			color: '#3b82f6',
+			color: DEFAULT_ENTITY_COLOR,
 			emoji: '💡',
 			category: 'general',
 			isFavorite: false,
@@ -82,7 +83,7 @@ export function CreateConceptForm({
 				name: (concept as ConceptBase).name,
 				description: (concept as ConceptBase).description || '',
 				content: (concept as ConceptBase).content || '',
-				color: (concept as ConceptBase).color || '#3b82f6',
+				color: (concept as ConceptBase).color || DEFAULT_ENTITY_COLOR,
 				emoji: (concept as ConceptBase).emoji || '💡',
 				category: (concept as ConceptBase).category || 'general',
 				isFavorite: (concept as ConceptBase).isFavorite,

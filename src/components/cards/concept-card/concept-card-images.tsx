@@ -28,7 +28,12 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 	const renderKey = useMemo(() => nanoid(), []);
 
 	return (
-		<div className={cn('relative h-[160px] overflow-hidden', tcgMode ? 'border-b-0' : 'border-gray-400/30 border-b')}>
+		<div
+			className={cn(
+				'relative h-[160px] overflow-hidden',
+				tcgMode ? 'border-b-0' : 'border-muted-foreground/30/30 border-b'
+			)}
+		>
 			{/* Marco decorativo para TCG */}
 			{tcgMode && (
 				<>
@@ -52,9 +57,9 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 				)}
 				style={{
 					backgroundImage: tcgMode
-						? `linear-gradient(to bottom, ${secondaryColor}80, ${secondaryColor})`
-						: `linear-gradient(to bottom, ${primaryColor}25, ${secondaryColor}50)`,
-					borderBottom: tcgMode ? `2px solid ${primaryColor}` : `1px solid ${primaryColor}50`,
+						? `linear-gradient(to bottom, color-mix(in oklab, ${secondaryColor}, transparent 50%), ${secondaryColor})`
+						: `linear-gradient(to bottom, color-mix(in oklab, ${primaryColor}, transparent 81%), color-mix(in oklab, ${secondaryColor}, transparent 69%))`,
+					borderBottom: tcgMode ? `2px solid ${primaryColor}` : `1px solid color-mix(in oklab, ${primaryColor}, transparent 69%)`,
 				}}
 			>
 				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} tcgMode={tcgMode} />}>
@@ -77,7 +82,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 						<div
 							className={cn(
 								'col-span-full row-span-full flex flex-col items-center justify-center p-4 text-center',
-								tcgMode ? 'bg-black/30' : ''
+								tcgMode ? 'bg-muted/30' : ''
 							)}
 						>
 							{tcgMode ? (
@@ -102,7 +107,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 						<>
 							{images.map((image, index) => (
 								<div
-									className={cn('relative h-full w-full overflow-hidden', tcgMode ? 'border border-white/10' : '')}
+									className={cn('relative h-full w-full overflow-hidden', tcgMode ? 'border border-border/40' : '')}
 									key={image.id}
 								>
 									<img
@@ -125,7 +130,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 									<div
 										className={cn(
 											'flex h-full w-full items-center justify-center',
-											tcgMode ? 'border border-white/5 bg-black/40' : 'bg-black/20'
+											tcgMode ? 'border border-border/20 bg-muted/40' : 'bg-muted/20'
 										)}
 										key={`placeholder-${renderKey}-position-${i + 1}`}
 									>
@@ -153,9 +158,9 @@ function ImageLoading({ backgroundColor, tcgMode = false }: { backgroundColor: s
 		<div
 			className={cn(
 				'relative flex h-full w-full animate-pulse items-center justify-center overflow-hidden',
-				tcgMode ? 'border border-white/5' : ''
+				tcgMode ? 'border border-border/20' : ''
 			)}
-			style={{ backgroundColor: tcgMode ? `${backgroundColor}60` : `${backgroundColor}30` }}
+			style={{ backgroundColor: tcgMode ? `color-mix(in oklab, ${backgroundColor}, transparent 63%)` : `color-mix(in oklab, ${backgroundColor}, transparent 81%)` }}
 		>
 			<ImageIcon className="h-5 w-5 opacity-20" />
 		</div>

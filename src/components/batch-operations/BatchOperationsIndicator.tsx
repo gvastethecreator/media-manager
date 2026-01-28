@@ -73,32 +73,32 @@ export function BatchOperationsIndicator({
 			case 'running':
 				return <Loader2 className="h-3 w-3 animate-spin" />;
 			case 'completed':
-				return <CheckCircle className="h-3 w-3 text-green-500" />;
+				return <CheckCircle className="h-3 w-3 text-[color:var(--status-success)]" />;
 			case 'failed':
-				return <AlertCircle className="h-3 w-3 text-red-500" />;
+				return <AlertCircle className="h-3 w-3 text-destructive" />;
 			case 'paused':
-				return <Clock className="h-3 w-3 text-yellow-500" />;
+				return <Clock className="h-3 w-3 text-[color:var(--status-warning)]" />;
 			case 'queued':
-				return <Clock className="h-3 w-3 text-blue-500" />;
+				return <Clock className="h-3 w-3 text-[color:var(--status-info)]" />;
 			default:
-				return <CheckCircle className="h-3 w-3 text-gray-400" />;
+				return <CheckCircle className="h-3 w-3 text-muted-foreground" />;
 		}
 	};
 
 	const getStatusColor = () => {
 		switch (status) {
 			case 'running':
-				return 'bg-blue-500';
+				return 'bg-[color:var(--status-info)]';
 			case 'completed':
-				return 'bg-green-500';
+				return 'bg-[color:var(--status-success)]';
 			case 'failed':
-				return 'bg-red-500';
+				return 'bg-destructive';
 			case 'paused':
-				return 'bg-yellow-500';
+				return 'bg-[color:var(--status-warning)]';
 			case 'queued':
-				return 'bg-blue-400';
+				return 'bg-[color:var(--status-info)]';
 			default:
-				return 'bg-gray-400';
+				return 'bg-muted-foreground';
 		}
 	};
 
@@ -167,7 +167,7 @@ export function BatchOperationsIndicator({
 					{/* Quick cancel button for running operations */}
 					{summary.running > 0 && (
 						<Button
-							className="h-4 w-4 p-0 hover:bg-red-100 hover:text-red-600"
+							className="h-4 w-4 p-0 hover:bg-destructive/10 hover:text-destructive"
 							onClick={handleQuickCancel}
 							size="sm"
 							title="Cancelar operación activa"

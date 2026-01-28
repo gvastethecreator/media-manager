@@ -152,7 +152,10 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 			setPageSize: (size: number) =>
 				set((state: ViewOptionsState) => ({ pagination: { ...state.pagination, pageSize: Math.max(1, size) } })),
 
-			setViewMode: (mode: ViewMode) => set({ viewMode: mode }),
+			setViewMode: (mode: ViewMode) => {
+				if (get().viewMode === mode) return;
+				set({ viewMode: mode });
+			},
 
 			setItemSize: (size: number) => set({ itemSize: size }),
 

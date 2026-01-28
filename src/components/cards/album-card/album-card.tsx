@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { cn } from '@/lib/utils';
 import type { AlbumWithStats } from '@/types/entities/album';
 import { AlbumCardContent } from './album-card-content';
@@ -70,33 +70,15 @@ export function AlbumCard({
 		(album.stats?.groupCount || 0);
 
 	// Calcular color primario y secundario
-	const primaryColor = useMemo(() => album.color || '#8b5cf6', [album.color]);
+	const primaryColor = useMemo(() => album.color || 'var(--entity-album)', [album.color]);
 	const secondaryColor = useMemo(() => {
-		// Si no hay color definido, usar un valor por defecto
+		// Si no hay color definido, usar un valor por defecto (violeta de álbumes)
 		if (!album.color) {
-			return '#6d28d9';
+			return 'oklch(0.55 0.23 293)';
 		}
 
-		// Oscurecer el color primario para el secundario
-		try {
-			// Convertir hex a RGB
-			const r = Number.parseInt(album.color.slice(1, 3), 16);
-			const g = Number.parseInt(album.color.slice(3, 5), 16);
-			const b = Number.parseInt(album.color.slice(5, 7), 16);
-
-			// Oscurecer los componentes
-			const darkenFactor = 0.7;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
-
-			// Convertir de vuelta a hex
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (_e) {
-			// Si hay algún error, volver al valor por defecto
-			return '#6d28d9';
-		}
-	}, [album.color]);
+		return `color-mix(in oklab, ${primaryColor}, black 20%)`;
+	}, [album.color, primaryColor]);
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
@@ -128,8 +110,8 @@ export function AlbumCard({
 			borderColor: `${primaryColor}`,
 			// Fondo con gradiente más pronunciado tipo TCG
 			background: compact
-				? `linear-gradient(135deg, ${primaryColor}20, ${primaryColor}10)`
-				: `linear-gradient(135deg, ${primaryColor}40, ${secondaryColor}50, ${primaryColor}30)`,
+				? `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 80%), color-mix(in oklab, ${primaryColor}, transparent 90%))`
+				: `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 60%), color-mix(in oklab, ${secondaryColor}, transparent 50%), color-mix(in oklab, ${primaryColor}, transparent 70%))`,
 			...style,
 		}),
 		[primaryColor, secondaryColor, compact, style]
@@ -138,7 +120,7 @@ export function AlbumCard({
 	// Estilos para el resplandor de la carta
 	const glowStyle = useMemo(
 		() => ({
-			boxShadow: `0 0 20px 5px ${primaryColor}80`,
+			boxShadow: `0 0 20px 5px color-mix(in oklab, ${primaryColor}, transparent 20%)`,
 		}),
 		[primaryColor]
 	);
@@ -211,7 +193,9 @@ export function AlbumCard({
 					<div className="pointer-events-none absolute inset-0 z-1 bg-noise-subtle opacity-5 mix-blend-overlay" />
 					<div
 						className="pointer-events-none absolute inset-0 z-1 bg-gradient-to-br opacity-10 transition-opacity duration-300 hover:opacity-20"
-						style={{ background: `linear-gradient(45deg, transparent 25%, ${primaryColor}50 50%, transparent 75%)` }}
+						style={{
+							background: `linear-gradient(45deg, transparent 25%, color-mix(in oklab, ${primaryColor}, transparent 50%) 50%, transparent 75%)`,
+						}}
 					/>
 
 					{/* Efecto holográfico de resplandor que se mueve con hover */}
@@ -221,9 +205,9 @@ export function AlbumCard({
 							backgroundImage: `
 								linear-gradient(125deg,
 								transparent 0%,
-								${primaryColor}30 25%,
-								${secondaryColor}30 50%,
-								${primaryColor}30 75%,
+								color-mix(in oklab, ${primaryColor}, transparent 70%) 25%,
+								color-mix(in oklab, ${secondaryColor}, transparent 70%) 50%,
+								color-mix(in oklab, ${primaryColor}, transparent 70%) 75%,
 								transparent 100%)
 							`,
 							backgroundSize: '200% 200%',
@@ -234,7 +218,7 @@ export function AlbumCard({
 			)}
 
 			{/* Marco interior tipo TCG - solo visible en modo TCG */}
-			{tcgMode && <div className="pointer-events-none absolute inset-2 z-0 rounded-[4%] border border-white/20" />}
+			{tcgMode && <div className="pointer-events-none absolute inset-2 z-0 rounded-[4%] border border-border/60" />}
 
 			{/* Esquinas y marcos decorativos estilo TCG - solo visibles en modo TCG */}
 			{tcgMode && (

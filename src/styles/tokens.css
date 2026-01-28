@@ -6,7 +6,7 @@
  * Todos los componentes deben usar estas variables en lugar de colores hardcodeados.
  *
  * REGLAS DE USO:
- * 1. NUNCA usar colores hex directamente (#3b82f6)
+ * 1. NUNCA usar colores hex directamente (var(--dt-primary-500))
  * 2. SIEMPRE usar variables CSS: var(--color-xxx) o clases Tailwind
  * 3. Para colores de entidad, usar las variables --entity-xxx
  * 4. Para colores de gráficos/charts, usar --chart-x
@@ -97,6 +97,45 @@
 	--loading-shimmer-3: oklch(0.92 0 0);
 
 	/* =====================================================
+   * TOKENS SEMÁNTICOS DE UI
+   * Para componentes de interfaz (alertas, badges, etc.)
+   * ===================================================== */
+
+	/* Estados de éxito */
+	--ui-success-bg: var(--dt-success-50);
+	--ui-success-bg-hover: var(--dt-success-100);
+	--ui-success-border: var(--dt-success-200);
+	--ui-success-text: var(--dt-success-600);
+	--ui-success-text-strong: var(--dt-success-700);
+
+	/* Estados de advertencia */
+	--ui-warning-bg: var(--dt-warning-50);
+	--ui-warning-bg-hover: var(--dt-warning-100);
+	--ui-warning-border: var(--dt-warning-200);
+	--ui-warning-text: var(--dt-warning-600);
+	--ui-warning-text-strong: var(--dt-warning-700);
+
+	/* Estados de error */
+	--ui-error-bg: var(--dt-danger-50);
+	--ui-error-bg-hover: var(--dt-danger-100);
+	--ui-error-border: var(--dt-danger-200);
+	--ui-error-text: var(--dt-danger-600);
+	--ui-error-text-strong: var(--dt-danger-700);
+
+	/* Estados de información */
+	--ui-info-bg: var(--dt-primary-50);
+	--ui-info-bg-hover: var(--dt-primary-100);
+	--ui-info-border: var(--dt-primary-200);
+	--ui-info-text: var(--dt-primary-600);
+	--ui-info-text-strong: var(--dt-primary-700);
+
+	/* Superficies con tintes de color */
+	--surface-tinted-success: var(--dt-success-50);
+	--surface-tinted-warning: var(--dt-warning-50);
+	--surface-tinted-error: var(--dt-danger-50);
+	--surface-tinted-info: var(--dt-primary-50);
+
+	/* =====================================================
    * PALETA PRESET PARA COLOR PICKER
    * Colores predefinidos para selección de usuario
    * ===================================================== */
@@ -109,9 +148,12 @@
 	--preset-cyan: oklch(0.72 0.14 195);
 	--preset-orange: oklch(0.72 0.19 45);
 	--preset-teal: oklch(0.64 0.17 175);
+	--preset-emerald: oklch(0.64 0.17 165);
 	--preset-rose: oklch(0.65 0.24 15);
 	--preset-indigo: oklch(0.58 0.22 277);
 	--preset-sky: oklch(0.68 0.16 230);
+	--preset-violet: oklch(0.55 0.23 293);
+	--preset-purple: oklch(0.52 0.27 293);
 	--preset-slate: oklch(0.55 0.02 250);
 	--preset-gray: oklch(0.55 0.01 0);
 	--preset-fuchsia: oklch(0.65 0.27 320);
@@ -120,6 +162,43 @@
 	--preset-purple-dark: oklch(0.52 0.27 293);
 	--preset-black: oklch(0 0 0);
 	--preset-white: oklch(1 0 0);
+
+	/* =====================================================
+   * COLORES PARA CLASES DE PERSONAJE
+   * Character class specific colors
+   * ===================================================== */
+	--entity-class-warrior: oklch(0.51 0.18 25); /* Rojo oscuro */
+	--entity-class-mage: oklch(0.48 0.2 260); /* Azul índigo */
+	--entity-class-rogue: oklch(0.52 0.12 85); /* Verde oliva */
+	--entity-class-cleric: oklch(0.87 0.16 95); /* Amarillo */
+	--entity-class-ranger: oklch(0.54 0.16 142); /* Verde bosque */
+	--entity-class-bard: oklch(0.45 0.22 293); /* Morado */
+	--entity-class-paladin: oklch(0.76 0.18 85); /* Ámbar */
+	--entity-class-druid: oklch(0.42 0.14 175); /* Verde azulado */
+	--entity-class-monk: oklch(0.66 0.18 65); /* Ámbar oscuro */
+	--entity-class-warlock: oklch(0.38 0.24 293); /* Púrpura oscuro */
+	--entity-class-sorcerer: oklch(0.55 0.22 350); /* Rosa oscuro */
+	--entity-class-barbarian: oklch(0.5 0.22 35); /* Naranja profundo */
+	--entity-class-artificer: oklch(0.58 0.16 195); /* Cian */
+	--entity-class-unknown: oklch(0.55 0.06 250); /* Gris azulado */
+
+	/* =====================================================
+   * HANDLERS Y CONTROLES DE PANEL
+   * Para resize handlers y controles de UI
+   * ===================================================== */
+	--handler-bg: oklch(from var(--border) l c h / 0.5);
+	--handler-bg-hover: oklch(from var(--primary) l c h / 0.5);
+	--handler-icon: oklch(from var(--foreground) l c h / 0.35);
+	--handler-bg-active: oklch(from var(--primary) l c h / 0.7);
+
+	/* =====================================================
+   * BORDES DE PANEL
+   * Para paneles laterales y componentes estructurales
+   * ===================================================== */
+	--panel-border-soft: oklch(from var(--border) l c h / 0.5);
+	--panel-border-medium: var(--border);
+	--panel-border-accent: oklch(from var(--accent) l c h / 0.15);
+	--panel-bg-overlay: oklch(from var(--background) l c h / 0.4);
 }
 
 /* Tema oscuro - ajustar opacidades y brillos */
@@ -137,4 +216,34 @@ html[data-theme="aurora"] {
 	--loading-shimmer-1: oklch(0.25 0 0);
 	--loading-shimmer-2: oklch(0.3 0 0);
 	--loading-shimmer-3: oklch(0.25 0 0);
+
+	/* Tokens semánticos de UI - modo oscuro */
+	--ui-success-bg: oklch(0.2 0.08 145 / 0.3);
+	--ui-success-bg-hover: oklch(0.25 0.1 145 / 0.4);
+	--ui-success-border: var(--dt-success-800);
+	--ui-success-text: var(--dt-success-300);
+	--ui-success-text-strong: var(--dt-success-200);
+
+	--ui-warning-bg: oklch(0.25 0.08 85 / 0.3);
+	--ui-warning-bg-hover: oklch(0.3 0.1 85 / 0.4);
+	--ui-warning-border: var(--dt-warning-800);
+	--ui-warning-text: var(--dt-warning-300);
+	--ui-warning-text-strong: var(--dt-warning-200);
+
+	--ui-error-bg: oklch(0.2 0.08 25 / 0.3);
+	--ui-error-bg-hover: oklch(0.25 0.1 25 / 0.4);
+	--ui-error-border: var(--dt-danger-800);
+	--ui-error-text: var(--dt-danger-300);
+	--ui-error-text-strong: var(--dt-danger-200);
+
+	--ui-info-bg: oklch(0.2 0.08 240 / 0.3);
+	--ui-info-bg-hover: oklch(0.25 0.1 240 / 0.4);
+	--ui-info-border: var(--dt-primary-800);
+	--ui-info-text: var(--dt-primary-300);
+	--ui-info-text-strong: var(--dt-primary-200);
+
+	--surface-tinted-success: oklch(0.2 0.08 145 / 0.2);
+	--surface-tinted-warning: oklch(0.25 0.08 85 / 0.2);
+	--surface-tinted-error: oklch(0.2 0.08 25 / 0.2);
+	--surface-tinted-info: oklch(0.2 0.08 240 / 0.2);
 }

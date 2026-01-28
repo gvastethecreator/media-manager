@@ -110,7 +110,7 @@ const FolderTreeItem = memo(function FolderTreeItemImpl({
 						title={folder.name}
 						type="button"
 					>
-						<Folder className="h-3 w-3 text-green-500" />
+						<Folder className="h-3 w-3 text-[color:var(--entity-folder)]" />
 						<span className="truncate">{folder.name}</span>
 					</button>
 				</div>

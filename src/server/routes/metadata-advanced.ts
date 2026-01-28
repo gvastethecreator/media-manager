@@ -3,12 +3,11 @@
  * Soporta detección completa de IA engines y metadatos técnicos
  */
 
-import type { Request, Response } from 'express';
 import express from 'express';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createFileNotFoundError, ServiceErrorCode, toServiceError } from '@/lib/utils/errors/service-errors';
 
-const router = express.Router() as any;
+const router = express.Router();
 
 // Log para verificar que el router se carga
 const logger = serverLogger.withContext('MetadataAdvancedAPI');
@@ -18,7 +17,7 @@ logger.info('🤖 Router metadata-advanced cargado correctamente');
  * GET /api/metadata-advanced/test
  * Ruta de prueba para verificar que el router funciona
  */
-router.get('/test', (_req: Request, res: Response) => {
+router.get('/test', (_req, res) => {
 	logger.info('✅ Ruta /test ejecutándose');
 	res.json({
 		success: true,
@@ -31,7 +30,7 @@ router.get('/test', (_req: Request, res: Response) => {
  * GET /api/metadata-advanced/simple-test
  * Otra ruta de prueba
  */
-router.get('/simple-test', (req: Request, res: Response) => {
+router.get('/simple-test', (req, res) => {
 	logger.info('✅ Ruta /simple-test ejecutándose');
 	res.json({
 		success: true,
@@ -46,15 +45,16 @@ router.get('/simple-test', (req: Request, res: Response) => {
  * POST /api/metadata-advanced/extract-from-path
  * Extraer metadata de un archivo específico por su ruta
  */
-router.post('/extract-from-path', async (req: Request, res: Response) => {
+router.post('/extract-from-path', async (req, res): Promise<void> => {
 	try {
 		const { filePath } = req.body;
 
 		if (!filePath || typeof filePath !== 'string') {
-			return res.status(400).json({
+			res.status(400).json({
 				error: 'Path del archivo requerido',
 				message: 'Debe proporcionar un filePath válido en el body de la request',
 			});
+			return;
 		}
 
 		logger.info('🔍 Extrayendo metadata', { filePath });
@@ -101,6 +101,7 @@ router.post('/extract-from-path', async (req: Request, res: Response) => {
 			metadata,
 			extractedAt: new Date().toISOString(),
 		});
+		return;
 	} catch (error) {
 		logger.error('❌ Error al extraer metadata', { error, filePath: req.body?.filePath });
 		// Mapear errores comunes del FS a respuestas adecuadas
@@ -112,6 +113,7 @@ router.post('/extract-from-path', async (req: Request, res: Response) => {
 		res
 			.status(err.httpStatus)
 			.json({ error: true, code: err.code, message: err.message, filePath: req.body?.filePath });
+		return;
 	}
 });
 

@@ -6,22 +6,7 @@
 /**
  * Tipos de entidad soportados por el browser
  */
-export type BrowserEntityType = 'folder' | 'image' | 'video' | 'audio' | 'document' | 'json' | 'file3d';
-
-/**
- * Mapeo de nombres legacy a nuevos
- */
-export const ENTITY_TYPE_MAP: Record<string, BrowserEntityType> = {
-	jsonFile: 'json',
-	'3d': 'file3d',
-} as const;
-
-/**
- * Normaliza el tipo de entidad a formato consistente
- */
-export function normalizeEntityType(type: string): BrowserEntityType {
-	return (ENTITY_TYPE_MAP[type] as BrowserEntityType) ?? (type as BrowserEntityType);
-}
+export type BrowserEntityType = 'folder' | 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d';
 
 /**
  * Item base del browser - tipo canónico unificado
@@ -100,7 +85,7 @@ export interface ProcessedItems {
  * Convierte cualquier entidad a BrowserItem
  */
 export function toBrowserItem(entity: Record<string, unknown>): BrowserItem {
-	const entityType = normalizeEntityType(String(entity.entityType ?? entity.type ?? 'unknown'));
+	const entityType = String(entity.entityType ?? entity.type ?? 'unknown') as BrowserEntityType;
 
 	return {
 		id: String(entity.id),

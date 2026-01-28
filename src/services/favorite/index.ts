@@ -3,4 +3,4 @@
  * @module services/favorite
  */
 
-export { favoriteService, default } from './favorite.service';
+export { default, favoriteService } from './favorite.service';

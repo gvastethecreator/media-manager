@@ -4,8 +4,8 @@
  */
 
 import { useCallback, useMemo, useRef } from 'react';
+import { useFolder, useFolders } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFolder } from '@/lib/api/folders';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { DEFAULT_PAGE_SIZE } from '../core/constants';
 import type { BrowserItem } from '../types';
@@ -74,6 +74,11 @@ export function useDataSource({
 
 	// Datos de la carpeta actual
 	const { data: currentFolder } = useFolder(folderId || '');
+	const {
+		data: childFoldersResponse,
+		isLoading: isFoldersLoading,
+		error: childFoldersError,
+	} = useFolders(folderId ? { parentId: folderId, limit: 500 } : {}, { enabled: !!folderId && !directItems });
 
 	// Hook de carga paginada
 	const { files, isLoading, isLoadingMore, error, hasMore, loadMore, total, loadedCount, refetch, invalidate } =
@@ -84,18 +89,34 @@ export function useDataSource({
 			enabled: enabled && !!folderId && !directItems,
 		});
 
+	const folderItems = useMemo(() => {
+		if (!folderId || directItems) {
+			return [] as BrowserItem[];
+		}
+
+		const folders = childFoldersResponse?.data ?? [];
+		return folders
+			.filter(Boolean)
+			.map((folder) => toBrowserItem(folder as unknown as Record<string, unknown>))
+			.filter((item) => Boolean(item?.id) && Boolean(item?.entityType));
+	}, [childFoldersResponse?.data, directItems, folderId]);
+
 	// Convertir a BrowserItems
 	const items = useMemo(() => {
-		// Si hay items directos, usarlos
+		// Si hay items directos, usarlos (filtrar nulos)
 		if (directItems) {
-			return directItems;
+			return directItems.filter(Boolean) as BrowserItem[];
 		}
 
 		logger.info('🔄 Converting files to items', { filesCount: files.length });
 
-		// Convertir archivos cargados
-		return files.map((file) => toBrowserItem(file as Record<string, unknown>));
-	}, [directItems, files]);
+		// Convertir archivos cargados con guardas básicas
+		const fileItems = files
+			.filter(Boolean)
+			.map((file) => toBrowserItem(file as Record<string, unknown>))
+			.filter((item) => Boolean(item?.id) && Boolean(item?.entityType));
+		return [...folderItems, ...fileItems];
+	}, [directItems, files, folderItems]);
 
 	// Items con navegación a padre
 	const itemsWithParent = useMemo(() => {
@@ -132,11 +153,11 @@ export function useDataSource({
 
 	return {
 		items: itemsWithParent,
-		isLoading,
+		isLoading: isLoading || isFoldersLoading,
 		isLoadingMore,
-		error: error?.message ?? null,
-		totalCount: total,
-		loadedCount,
+		error: error?.message ?? childFoldersError?.message ?? null,
+		totalCount: total + folderItems.length,
+		loadedCount: loadedCount + folderItems.length,
 		hasMore,
 		loadMore,
 		refresh,

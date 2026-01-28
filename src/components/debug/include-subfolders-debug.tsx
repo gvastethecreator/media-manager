@@ -15,9 +15,9 @@ export function IncludeSubfoldersDebug() {
 	const resetLocalStorage = useViewOptionsStore((state) => state.resetLocalStorage);
 
 	return (
-		<Card className="m-4 border-red-500">
+		<Card className="m-4 border-destructive">
 			<CardHeader>
-				<CardTitle className="text-red-600">🚨 Debug: includeSubfolders Issue</CardTitle>
+				<CardTitle className="text-destructive">🚨 Debug: includeSubfolders Issue</CardTitle>
 			</CardHeader>
 			<CardContent className="space-y-4">
 				<div className="grid grid-cols-2 gap-4">

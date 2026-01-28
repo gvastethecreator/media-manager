@@ -116,26 +116,26 @@ export function getActivityEmoji(type: string): string {
 /**
  * Obtiene un color representativo para un tipo de actividad
  * @param type Tipo de actividad
- * @returns Color en formato HEX
+ * @returns Color en formato HEX o Variable CSS
  */
 export function getActivityColor(type: string): string {
 	// Obtener la categoría
 	const category = getActivityCategory(type);
 
-	// Mapeo de categorías a colores
+	// Mapeo de categorías a colores usando tokens semánticos
 	const colorMap: Record<string, string> = {
-		[ActivityCategory.IMAGES]: '#3b82f6', // Azul
-		[ActivityCategory.VIDEOS]: '#ef4444', // Rojo
-		[ActivityCategory.FOLDERS]: '#8b5cf6', // Violeta
-		[ActivityCategory.ALBUMS]: '#10b981', // Verde
-		[ActivityCategory.COLLECTIONS]: '#f59e0b', // Ámbar
-		[ActivityCategory.SYSTEM]: '#6b7280', // Gris
-		[ActivityCategory.USER]: '#ec4899', // Rosa
-		[ActivityCategory.SEARCH]: '#6366f1', // Índigo
-		[ActivityCategory.OTHER]: '#9ca3af', // Gris claro
+		[ActivityCategory.IMAGES]: 'var(--entity-image)',
+		[ActivityCategory.VIDEOS]: 'var(--entity-video)',
+		[ActivityCategory.FOLDERS]: 'var(--entity-folder)',
+		[ActivityCategory.ALBUMS]: 'var(--entity-album)',
+		[ActivityCategory.COLLECTIONS]: 'var(--entity-collection)',
+		[ActivityCategory.SYSTEM]: 'var(--dt-neutral-500)',
+		[ActivityCategory.USER]: 'var(--entity-profile)',
+		[ActivityCategory.SEARCH]: 'var(--dt-primary-500)',
+		[ActivityCategory.OTHER]: 'var(--dt-neutral-400)',
 	};
 
-	return colorMap[category] || '#3b82f6';
+	return colorMap[category] || 'var(--dt-primary-500)';
 }
 
 /**

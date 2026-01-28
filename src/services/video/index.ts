@@ -4,4 +4,4 @@
  * @description Punto de entrada para el servicio de videos
  */
 
-export * from './video.service';
+export * from './video.service.effect';

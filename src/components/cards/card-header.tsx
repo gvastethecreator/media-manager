@@ -30,8 +30,8 @@ export function CardHeader({
 		<div
 			className={cn('flex items-center gap-2 border-b', compact ? 'px-2 py-1' : 'px-3 py-2', className)}
 			style={{
-				borderColor: `${primaryColor}40`,
-				background: `linear-gradient(135deg, ${primaryColor}25, ${primaryColor}15)`,
+				borderColor: `color-mix(in oklab, ${primaryColor}, transparent 60%)`,
+				background: `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 75%), color-mix(in oklab, ${primaryColor}, transparent 85%))`,
 			}}
 		>
 			{/* Emoji o icono si está presente */}
@@ -41,7 +41,10 @@ export function CardHeader({
 				</div>
 			)}
 			{!emoji && icon && (
-				<div className="flex-shrink-0 rounded-full p-1" style={{ backgroundColor: `${primaryColor}30` }}>
+				<div
+					className="flex-shrink-0 rounded-full p-1"
+					style={{ backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 70%)` }}
+				>
 					{icon}
 				</div>
 			)}

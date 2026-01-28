@@ -93,7 +93,7 @@ export const FolderCardHeader = memo(function FolderCardHeader({
 						)}
 					</div>
 
-					{isFavorite && <Star className="ml-2 h-4 w-4 fill-yellow-200 text-yellow-400" />}
+					{isFavorite && <Star className="ml-2 h-4 w-4 fill-yellow-200 text-warning" />}
 				</div>
 			)}
 
@@ -148,21 +148,21 @@ export const FolderCardHeader = memo(function FolderCardHeader({
 							)}
 						</div>
 
-						{isFavorite && <Star className="ml-2 h-5 w-5 fill-yellow-200 text-yellow-400" />}
+						{isFavorite && <Star className="ml-2 h-5 w-5 fill-yellow-200 text-warning" />}
 					</div>
 
 					{/* Barra inferior con tipo de carpeta */}
 					<div
-						className="flex items-center justify-between border-y bg-black/40 px-3.5 py-1.5 text-white text-xs"
+						className="flex items-center justify-between border-y bg-muted/40 px-3.5 py-1.5 text-white text-xs"
 						style={{
 							borderBottom: `1px solid ${primaryColor}50`,
 							borderTop: `1px solid ${primaryColor}30`,
-							boxShadow: 'inset 0 0 10px rgba(0,0,0,0.3)',
+							boxShadow: 'inset 0 0 10px var(--dt-shadow-color-strong)',
 						}}
 					>
 						<span className="font-semibold tracking-wide">{folderType}</span>
 						<span
-							className="rounded-sm bg-black/30 px-1.5 py-0.5 text-[10px] opacity-80"
+							className="rounded-sm bg-muted/30 px-1.5 py-0.5 text-[10px] opacity-80"
 							style={{ border: `1px solid ${primaryColor}40` }}
 						>
 							{getFolderTypeCode()}-{name.substring(0, 3).toUpperCase()}

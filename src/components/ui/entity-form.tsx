@@ -3,11 +3,11 @@ import { useEffect, useState } from 'react';
 import { HexColorPicker } from 'react-colorful';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
+import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { motion } from '@/components/ui/motion-shim';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -241,7 +241,7 @@ export function EntityForm({
 					fieldSchema = z.string().default('');
 					break;
 				case 'color':
-					fieldSchema = z.string().default('#3b82f6');
+					fieldSchema = z.string().default('var(--dt-primary-500)');
 					break;
 				default:
 					fieldSchema = z.string().optional();
@@ -333,7 +333,7 @@ export function EntityForm({
 							defaultValues[field.name] = [];
 							break;
 						case 'color':
-							defaultValues[field.name] = '#3b82f6';
+							defaultValues[field.name] = 'var(--dt-primary-500)';
 							break;
 						case 'emoji':
 							defaultValues[field.name] = '📝';
@@ -529,13 +529,17 @@ export function EntityForm({
 													className="h-5 w-5 cursor-pointer rounded-md border"
 													style={{
 														backgroundColor:
-															typeof formField.value === 'string' ? (formField.value as string) : undefined,
+															typeof formField.value === 'string'
+																? formField.value.startsWith('var(')
+																	? formField.value
+																	: formField.value
+																: undefined,
 													}}
 												/>
 												<Input
-													className="w-20 font-mono"
+													className="w-40 font-mono text-xs"
 													onChange={formField.onChange}
-													placeholder="#RRGGBB"
+													placeholder="#RRGGBB o var(--...)"
 													value={typeof formField.value === 'string' ? formField.value : ''}
 												/>
 											</div>
@@ -543,7 +547,11 @@ export function EntityForm({
 									</PopoverTrigger>
 									<PopoverContent className="w-auto p-3">
 										<HexColorPicker
-											color={typeof formField.value === 'string' ? formField.value : '#000000'}
+											color={
+												typeof formField.value === 'string' && formField.value.startsWith('#')
+													? formField.value
+													: 'var(--dt-neutral-950)'
+											}
 											onChange={formField.onChange}
 										/>
 									</PopoverContent>
@@ -630,7 +638,7 @@ export function EntityForm({
 
 				{/* Confirmación antes de enviar (esto podría expandirse a un componente de diálogo) */}
 				{showConfirmation && (
-					<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50">
+					<div className="fixed inset-0 z-50 flex items-center justify-center bg-muted/50">
 						<div className="w-full max-w-md rounded-lg bg-card p-6 shadow-lg">
 							<h3 className="mb-4 font-medium text-lg">Confirmar acción</h3>
 							<p className="mb-6">{confirmMessage}</p>

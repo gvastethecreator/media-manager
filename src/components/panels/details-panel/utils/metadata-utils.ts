@@ -110,16 +110,59 @@ export const getBasicMetadata = (item: AnyEntityWithStats): BasicMetadataField[]
  * Configuración de tipos de entidades relacionadas
  */
 const RELATED_ENTITY_CONFIG: Record<string, Omit<RelatedEntity, 'count'>> = {
-	images: { type: 'Imágenes', icon: ImageIcon, color: 'bg-blue-100 text-blue-800' },
-	videos: { type: 'Videos', icon: Video, color: 'bg-red-100 text-red-800' },
-	albums: { type: 'Álbumes', icon: Album, color: 'bg-purple-100 text-purple-800' },
-	collections: { type: 'Colecciones', icon: Album, color: 'bg-green-100 text-green-800' },
-	tags: { type: 'Etiquetas', icon: Tag, color: 'bg-pink-100 text-pink-800' },
-	characters: { type: 'Personajes', icon: User, color: 'bg-orange-100 text-orange-800' },
-	places: { type: 'Lugares', icon: MapPin, color: 'bg-teal-100 text-teal-800' },
-	worldItems: { type: 'Objetos', icon: Package, color: 'bg-indigo-100 text-indigo-800' },
-	concepts: { type: 'Conceptos', icon: BookOpen, color: 'bg-yellow-100 text-yellow-800' },
-	prompts: { type: 'Prompts', icon: MessageSquare, color: 'bg-cyan-100 text-cyan-800' },
+	images: {
+		type: 'Imágenes',
+		icon: ImageIcon,
+		color: 'bg-[color:color-mix(in_oklch,var(--entity-image)_15%,transparent)] text-[color:var(--entity-image)]',
+	},
+	videos: {
+		type: 'Videos',
+		icon: Video,
+		color: 'bg-[color:color-mix(in_oklch,var(--entity-video)_15%,transparent)] text-[color:var(--entity-video)]',
+	},
+	albums: {
+		type: 'Álbumes',
+		icon: Album,
+		color: 'bg-[color:color-mix(in_oklch,var(--entity-album)_15%,transparent)] text-[color:var(--entity-album)]',
+	},
+	collections: {
+		type: 'Colecciones',
+		icon: Album,
+		color:
+			'bg-[color:color-mix(in_oklch,var(--entity-collection)_15%,transparent)] text-[color:var(--entity-collection)]',
+	},
+	tags: {
+		type: 'Etiquetas',
+		icon: Tag,
+		color: 'bg-[color:color-mix(in_oklch,var(--entity-tag)_15%,transparent)] text-[color:var(--entity-tag)]',
+	},
+	characters: {
+		type: 'Personajes',
+		icon: User,
+		color:
+			'bg-[color:color-mix(in_oklch,var(--entity-character)_15%,transparent)] text-[color:var(--entity-character)]',
+	},
+	places: {
+		type: 'Lugares',
+		icon: MapPin,
+		color: 'bg-[color:color-mix(in_oklch,var(--entity-place)_15%,transparent)] text-[color:var(--entity-place)]',
+	},
+	worldItems: {
+		type: 'Objetos',
+		icon: Package,
+		color:
+			'bg-[color:color-mix(in_oklch,var(--entity-world-item)_15%,transparent)] text-[color:var(--entity-world-item)]',
+	},
+	concepts: {
+		type: 'Conceptos',
+		icon: BookOpen,
+		color: 'bg-[color:color-mix(in_oklch,var(--entity-concept)_15%,transparent)] text-[color:var(--entity-concept)]',
+	},
+	prompts: {
+		type: 'Prompts',
+		icon: MessageSquare,
+		color: 'bg-[color:color-mix(in_oklch,var(--entity-prompt)_15%,transparent)] text-[color:var(--entity-prompt)]',
+	},
 };
 
 /**

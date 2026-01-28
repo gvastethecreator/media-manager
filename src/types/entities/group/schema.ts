@@ -52,7 +52,13 @@ export const GroupSchema = z.object({
 	id: z.string(),
 	name: z.string().min(1, 'El nombre es obligatorio'),
 	emoji: z.string().default('👥'),
-	color: z.string().default('#8B5CF6'),
+	color: z
+		.string()
+		.refine(
+			(val) => /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
+			'Color debe ser un valor hexadecimal o una variable CSS válida'
+		)
+		.default('var(--entity-group)'),
 	description: z.string().nullable().optional(),
 	shortcut: z.string().nullable().optional(),
 	category: z.string().nullable().optional(),

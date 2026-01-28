@@ -20,7 +20,7 @@ export const albums = sqliteTable(
 		name: text('name').notNull(),
 		description: text('description'),
 		emoji: text('emoji').default('📔'),
-		color: text('color').default('#3b82f6'),
+		color: text('color').default('var(--entity-album)'),
 		featuredImage: text('featuredImage'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		// Agregados movidos a EntityAggregates tabla genérica

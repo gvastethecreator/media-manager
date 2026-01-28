@@ -147,8 +147,6 @@ export type {
 export {
 	createParentNavItem,
 	DEFAULT_VIEW_CONFIGS,
-	ENTITY_TYPE_MAP,
-	normalizeEntityType,
 	toBrowserItem,
 } from './types';
 // Utils

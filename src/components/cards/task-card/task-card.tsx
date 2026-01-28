@@ -6,7 +6,7 @@
 
 import { memo, useCallback, useMemo } from 'react';
 import { CardContainer } from '@/components/cards/card-container';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { cn } from '@/lib/utils';
 import type { TaskCardProps } from './task-card.types';
 import { TaskCardContent } from './task-card-content';
@@ -15,18 +15,18 @@ import { TaskCardHeader } from './task-card-header';
 
 // Colores por status
 const STATUS_COLORS = {
-	pending: '#6b7280',
-	in_progress: '#3b82f6',
-	completed: '#10b981',
-	cancelled: '#ef4444',
+	pending: 'var(--dt-neutral-500)',
+	in_progress: 'var(--dt-primary-500)',
+	completed: 'var(--dt-success-500)',
+	cancelled: 'var(--dt-danger-500)',
 } as const;
 
 // Colores por priority
 const PRIORITY_COLORS = {
-	low: '#6b7280',
-	medium: '#eab308',
-	high: '#f97316',
-	urgent: '#ef4444',
+	low: 'var(--dt-neutral-500)',
+	medium: 'var(--dt-warning-500)',
+	high: 'var(--dt-warning-600)',
+	urgent: 'var(--dt-danger-500)',
 } as const;
 
 export const TaskCard = memo(function TaskCard({
@@ -60,21 +60,7 @@ export const TaskCard = memo(function TaskCard({
 	}, [task.priority, task.status]);
 
 	const secondaryColor = useMemo(() => {
-		// Oscurecer el color primario
-		try {
-			const r = Number.parseInt(primaryColor.slice(1, 3), 16);
-			const g = Number.parseInt(primaryColor.slice(3, 5), 16);
-			const b = Number.parseInt(primaryColor.slice(5, 7), 16);
-
-			const darkenFactor = 0.6;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
-
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch {
-			return '#1e40af';
-		}
+		return `color-mix(in oklab, ${primaryColor}, black 20%)`;
 	}, [primaryColor]);
 
 	// Calcular si está vencida
@@ -128,18 +114,19 @@ export const TaskCard = memo(function TaskCard({
 		if (!tcgMode) {
 			return {
 				borderColor: primaryColor,
-				background: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}05)`,
+				background: `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 85%), color-mix(in oklab, ${primaryColor}, transparent 95%))`,
 				...style,
 			};
 		}
 
 		// Estilo TCG
 		const relationIntensity = Math.min(0.5 + (totalRelations / 50) * 0.5, 0.9);
+		const bgOpacity = Math.round(relationIntensity * 50);
 
 		return {
 			borderColor: primaryColor,
-			background: `linear-gradient(135deg, ${primaryColor}${Math.round(relationIntensity * 50)}, ${primaryColor}10)`,
-			boxShadow: `0 0 15px ${primaryColor}40, inset 0 0 20px ${primaryColor}20`,
+			background: `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent ${100 - bgOpacity}%), color-mix(in oklab, ${primaryColor}, transparent 90%))`,
+			boxShadow: `0 0 15px color-mix(in oklab, ${primaryColor}, transparent 60%), inset 0 0 20px color-mix(in oklab, ${primaryColor}, transparent 80%)`,
 			...style,
 		};
 	}, [primaryColor, style, tcgMode, totalRelations]);
@@ -235,9 +222,9 @@ export const TaskCard = memo(function TaskCard({
 								backgroundImage: `
 									linear-gradient(125deg,
 									transparent 0%,
-									${primaryColor}30 25%,
-									${secondaryColor}30 50%,
-									${primaryColor}30 75%,
+									color-mix(in oklab, ${primaryColor}, transparent 70%) 25%,
+									color-mix(in oklab, ${secondaryColor}, transparent 70%) 50%,
+									color-mix(in oklab, ${primaryColor}, transparent 70%) 75%,
 									transparent 100%)
 								`,
 								backgroundSize: '200% 200%',

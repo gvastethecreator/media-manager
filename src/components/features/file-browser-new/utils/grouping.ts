@@ -14,7 +14,7 @@ export const ENTITY_TYPE_DISPLAY_NAMES: Record<BrowserEntityType, string> = {
 	video: 'Videos',
 	audio: 'Audio',
 	document: 'Documentos',
-	json: 'Archivos JSON',
+	jsonFile: 'Archivos JSON',
 	file3d: 'Archivos 3D',
 };
 
@@ -27,7 +27,7 @@ export const ENTITY_TYPE_ORDER: BrowserEntityType[] = [
 	'video',
 	'audio',
 	'document',
-	'json',
+	'jsonFile',
 	'file3d',
 ];
 

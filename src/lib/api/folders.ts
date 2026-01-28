@@ -77,7 +77,7 @@ export const folderKeys = {
 };
 
 // Hooks
-export function useFolders(filters: FolderFilters = {}) {
+export function useFolders(filters: FolderFilters = {}, options?: { enabled?: boolean }) {
 	return useQuery<FoldersResponse, Error>({
 		queryKey: folderKeys.list(filters),
 		queryFn: async () => {
@@ -94,6 +94,7 @@ export function useFolders(filters: FolderFilters = {}) {
 				},
 			};
 		},
+		enabled: options?.enabled ?? true,
 		staleTime: 1000 * 60, // 1 minuto
 	});
 }

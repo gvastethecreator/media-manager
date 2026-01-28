@@ -55,34 +55,32 @@ interface TabItem {
 	color: string;
 }
 
-// Colores para cada tab usando clases Tailwind (preferir sobre hex hardcodeados)
-// Los colores específicos se mantienen en esta vista porque son decorativos para tabs
-// En componentes de datos, usar tokens de @/lib/styles/color-tokens
+// Colores para cada tab usando tokens del tema
 const tabColors = {
-	system: 'rgb(100, 116, 139)', // slate-500
-	albums: 'rgb(139, 92, 246)', // violet-500
-	collections: 'rgb(239, 68, 68)', // red-500
-	folders: 'rgb(245, 158, 11)', // amber-500
-	interface: 'rgb(14, 165, 233)', // sky-500
-	tags: 'rgb(245, 158, 11)', // amber-500
-	characters: 'rgb(236, 72, 153)', // pink-500
-	'world-items': 'rgb(245, 158, 11)', // amber-500
-	places: 'rgb(20, 184, 166)', // teal-500
-	concepts: 'rgb(59, 130, 246)', // blue-500
-	prompts: 'rgb(16, 185, 129)', // emerald-500
-	notes: 'rgb(168, 85, 247)', // purple-500
-	thumbnails: 'rgb(14, 165, 233)', // sky-500
-	'uploaded-images': 'rgb(34, 197, 94)', // green-500
-	shortcuts: 'rgb(71, 85, 105)', // slate-600
-	'entities-cards': 'rgb(99, 102, 241)', // indigo-500
-	profiles: 'rgb(99, 102, 241)', // indigo-500
-	properties: 'rgb(244, 114, 182)', // pink-400
-	groups: 'rgb(168, 85, 247)', // purple-500
-	wildcards: 'rgb(236, 72, 153)', // pink-500
-	document: 'rgb(251, 191, 36)', // amber-400
-	audio: 'rgb(56, 189, 248)', // sky-400
-	'json-file': 'rgb(244, 114, 182)', // pink-400
-	file3d: 'rgb(129, 140, 248)', // indigo-400
+	system: 'hsl(var(--primary))',
+	albums: 'var(--entity-album)',
+	collections: 'var(--entity-collection)',
+	folders: 'var(--entity-folder)',
+	interface: 'hsl(var(--primary))',
+	tags: 'var(--entity-tag)',
+	characters: 'var(--entity-character)',
+	'world-items': 'var(--entity-world-item)',
+	places: 'var(--entity-place)',
+	concepts: 'var(--entity-concept)',
+	prompts: 'var(--entity-prompt)',
+	notes: 'var(--entity-note)',
+	thumbnails: 'var(--entity-image)',
+	'uploaded-images': 'var(--entity-image)',
+	shortcuts: 'hsl(var(--muted-foreground))',
+	'entities-cards': 'var(--entity-file)',
+	profiles: 'var(--entity-profile)',
+	properties: 'var(--entity-property)',
+	groups: 'var(--entity-group)',
+	wildcards: 'var(--entity-wildcard)',
+	document: 'var(--entity-document)',
+	audio: 'var(--entity-audio)',
+	'json-file': 'var(--entity-json)',
+	file3d: 'var(--entity-file-3d)',
 };
 
 // Definición de todos los tabs para evitar la duplicación de código
@@ -476,7 +474,7 @@ export function SettingsView() {
 									'rounded-md border border-transparent text-caption',
 									'group cursor-pointer transition-all duration-200',
 									'hover:border-border/30 hover:bg-secondary/40',
-									'data-[state=active]:border-white/15 data-[state=active]:bg-secondary/60',
+									'data-[state=active]:border-border/30 data-[state=active]:bg-secondary/60',
 									'data-[state=active]:font-medium data-[state=active]:text-foreground data-[state=active]:shadow-sm'
 								)}
 								key={tab.id}

@@ -5,8 +5,8 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 const ACTION_BUTTON_CLASS =
-	'text-white hover:bg-white/15 hover:text-white focus-visible:ring-1 focus-visible:ring-white/30';
-const ACTION_PANEL_CLASS = 'rounded-dt-lg border border-white/10 bg-black/40 p-1 backdrop-blur';
+	'text-white hover:bg-background/15 hover:text-white focus-visible:ring-1 focus-visible:ring-white/30';
+const ACTION_PANEL_CLASS = 'rounded-dt-lg border border-border/40 bg-muted/40 p-1 backdrop-blur';
 
 export const ToolbarActions = memo(function ToolbarActionsImpl({
 	onZoomIn,

@@ -35,8 +35,8 @@ export function PromptCardFooter({
 	const isRecent = daysSinceUpdate < 7;
 
 	// Color estilizado para el footer
-	const borderColor = `${primaryColor}40`;
-	const bgColor = tcgMode ? `linear-gradient(to top, ${primaryColor}20, transparent)` : undefined;
+	const borderColor = `color-mix(in oklab, ${primaryColor}, transparent 60%)`;
+	const bgColor = tcgMode ? `linear-gradient(to top, color-mix(in oklab, ${primaryColor}, transparent 80%), transparent)` : undefined;
 
 	return (
 		<div
@@ -56,7 +56,7 @@ export function PromptCardFooter({
 				{isRecent && (
 					<span
 						className="rounded-full px-1 text-[0.65rem]"
-						style={{ backgroundColor: `${primaryColor}20`, color: primaryColor }}
+						style={{ backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 80%)`, color: primaryColor }}
 					>
 						{daysSinceUpdate === 0 ? 'Hoy' : `${daysSinceUpdate}d`}
 					</span>

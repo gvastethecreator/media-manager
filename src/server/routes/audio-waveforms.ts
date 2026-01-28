@@ -58,8 +58,8 @@ function generateWaveformSVG(waveformData: number[], options: AudioWaveformOptio
 	const {
 		width = 300,
 		height = 100,
-		color = '#3b82f6',
-		backgroundColor = '#ffffff',
+		color = 'var(--dt-primary-500)',
+		backgroundColor = 'var(--background)',
 		style = 'bars',
 		showAxis = false,
 	} = options;
@@ -140,10 +140,10 @@ function generateWaveformSVG(waveformData: number[], options: AudioWaveformOptio
  * 📊 Genera SVG con información de audio
  */
 function generateAudioInfoSVG(audioInfo: AudioInfo | null, options: AudioWaveformOptions): string {
-	const { width = 300, height = 100, backgroundColor = '#ffffff' } = options;
+	const { width = 300, height = 100, backgroundColor = 'var(--background)' } = options;
 
-	const textColor = backgroundColor === '#ffffff' ? '#1f2937' : '#f9fafb';
-	const accentColor = '#10b981';
+	const textColor = backgroundColor === 'var(--background)' ? '#1f2937' : '#f9fafb';
+	const accentColor = 'var(--dt-success-500)';
 
 	if (!audioInfo) {
 		return `
@@ -316,7 +316,7 @@ router.get('/:id/waveform/preview', async (req, res) => {
 		const options: AudioWaveformOptions = {
 			width: 150,
 			height: 50,
-			color: '#10b981',
+			color: 'var(--dt-success-500)',
 			backgroundColor: 'transparent',
 			samples: 50,
 			style: 'bars',
@@ -336,7 +336,7 @@ router.get('/:id/waveform/preview', async (req, res) => {
 			const miniSVG = `
 <svg width="150" height="50" xmlns="http://www.w3.org/2000/svg">
   <rect width="100%" height="100%" fill="transparent"/>
-  <path d="M 10 25 Q 40 15 70 25 Q 100 35 130 25" stroke="#10b981" stroke-width="2" fill="none"/>
+  <path d="M 10 25 Q 40 15 70 25 Q 100 35 130 25" stroke="var(--dt-success-500)" stroke-width="2" fill="none"/>
 </svg>`;
 
 			res.setHeader('Content-Type', 'image/svg+xml');

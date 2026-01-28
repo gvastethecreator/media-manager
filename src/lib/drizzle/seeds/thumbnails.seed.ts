@@ -14,7 +14,7 @@ export async function seedThumbnails(db: LibSQLDatabase<Record<string, never>>) 
 			{
 				id: '13131313-1313-4131-a131-131313131311',
 				entityType: 'image',
-				entityId: 'eeeeeeee-eeee-4eee-aeee-eeeeeeeeee01',
+				entityId: 'img-seed-001',
 				size: 'small',
 				path: '/thumbnails/images/img-example-1_150x150.jpg',
 				width: 150,
@@ -27,7 +27,7 @@ export async function seedThumbnails(db: LibSQLDatabase<Record<string, never>>) 
 			{
 				id: '13131313-1313-4131-a131-131313131312',
 				entityType: 'video',
-				entityId: 'eeeeeeee-eeee-4eee-aeee-eeeeeeeeee02',
+				entityId: 'vid-seed-001',
 				size: 'medium',
 				path: '/thumbnails/videos/vid-example-1_300x200.jpg',
 				width: 300,

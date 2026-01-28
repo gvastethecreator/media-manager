@@ -1,7 +1,7 @@
 import { BrainCircuitIcon, LightbulbIcon } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 import { CardHeader } from '@/components/cards/card-header';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { cn } from '@/lib/utils';
 import type { ConceptCardProps } from './concept-card.types';
 import { ConceptCardContent } from './concept-card-content';
@@ -51,32 +51,15 @@ export const ConceptCard = memo(function ConceptCard({
 		tagsCount;
 
 	// Colores para el gradiente
-	const primaryColor = useMemo(() => concept?.color || '#3b82f6', [concept?.color]);
+	const primaryColor = useMemo(() => concept?.color || 'var(--entity-concept)', [concept?.color]);
 	const secondaryColor = useMemo(() => {
-		// Si no hay color definido, usar un valor por defecto
+		// Si no hay color definido, usar un valor por defecto (ámbar de conceptos)
 		if (!concept?.color) {
-			return '#1e40af';
+			return 'oklch(0.65 0.18 65)';
 		}
 
-		// Oscurecer el color primario para el secundario
-		try {
-			// Convertir hex a RGB
-			const r = Number.parseInt(concept.color.slice(1, 3), 16);
-			const g = Number.parseInt(concept.color.slice(3, 5), 16);
-			const b = Number.parseInt(concept.color.slice(5, 7), 16);
-
-			// Oscurecer los componentes
-			const darkenFactor = 0.6;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
-
-			// Convertir de vuelta a hex
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (_e) {
-			return '#1e40af';
-		}
-	}, [concept?.color]);
+		return `color-mix(in oklab, ${primaryColor}, black 20%)`;
+	}, [concept?.color, primaryColor]);
 
 	// Manejar click del mouse
 	const handleClick = useCallback(
@@ -124,21 +107,22 @@ export const ConceptCard = memo(function ConceptCard({
 		if (!tcgMode) {
 			return {
 				borderColor: primaryColor,
-				background: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}05)`,
+				background: `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 85%), color-mix(in oklab, ${primaryColor}, transparent 95%))`,
 				...style,
 			};
 		}
 
 		// Ajustar intensidad del estilo TCG basado en la cantidad de relaciones
 		const relationIntensity = Math.min(0.5 + (totalRelations / 100) * 0.5, 0.9);
+		const bgOpacity = Math.round(relationIntensity * 50);
 
 		// Estilo TCG por defecto
 		return {
 			// Base estilo TCG
 			borderColor: primaryColor,
 			// Fondo con gradiente y texturas para parecer una carta TCG
-			background: `linear-gradient(135deg, ${primaryColor}${Math.round(relationIntensity * 50)}, ${primaryColor}10)`,
-			boxShadow: `0 0 15px ${primaryColor}40, inset 0 0 20px ${primaryColor}20`,
+			background: `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent ${100 - bgOpacity}%), color-mix(in oklab, ${primaryColor}, transparent 90%))`,
+			boxShadow: `0 0 15px color-mix(in oklab, ${primaryColor}, transparent 60%), inset 0 0 20px color-mix(in oklab, ${primaryColor}, transparent 80%)`,
 			...style,
 		};
 	}, [primaryColor, style, tcgMode, totalRelations]);
@@ -176,16 +160,21 @@ export const ConceptCard = memo(function ConceptCard({
 					{/* Textura de fondo */}
 					<div
 						className="pointer-events-none absolute inset-0 opacity-5 mix-blend-overlay"
-						style={{
-							backgroundImage: `url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23${primaryColor.slice(1)}' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E")`,
-						}}
+						style={
+							{
+								'--concept-fill-color': primaryColor,
+								backgroundImage:
+									"url(\"data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='currentColor' fill-opacity='0.2' fill-rule='evenodd'/%3E%3C/svg%3E\")",
+								color: 'var(--concept-fill-color)',
+							} as React.CSSProperties
+						}
 					/>
 
 					{/* Brillo superior */}
 					<div
 						className="pointer-events-none absolute top-0 right-0 left-0 h-[30%] opacity-20"
 						style={{
-							background: `linear-gradient(to bottom, ${primaryColor}70, transparent)`,
+							background: `linear-gradient(to bottom, color-mix(in oklab, ${primaryColor}, transparent 30%), transparent)`,
 						}}
 					/>
 

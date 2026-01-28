@@ -8,16 +8,6 @@ import React, { forwardRef, useLayoutEffect, useMemo, useRef } from 'react';
 // @ts-expect-error: Three.js types not available, but module works correctly
 import { Color, IUniform, Mesh, ShaderMaterial } from 'three';
 
-type NormalizedRGB = [number, number, number];
-
-const hexToNormalizedRGB = (hex: string): NormalizedRGB => {
-	const clean = hex.replace('#', '');
-	const r = Number.parseInt(clean.slice(0, 2), 16) / 255;
-	const g = Number.parseInt(clean.slice(2, 4), 16) / 255;
-	const b = Number.parseInt(clean.slice(4, 6), 16) / 255;
-	return [r, g, b];
-};
-
 interface UniformValue<T = number | Color> {
 	value: T;
 }
@@ -130,20 +120,41 @@ export interface SilkProps {
 	rotation?: number;
 }
 
-const Silk: React.FC<SilkProps> = ({ speed = 5, scale = 1, color = '#7B7481', noiseIntensity = 1.5, rotation = 0 }) => {
+const Silk: React.FC<SilkProps> = ({
+	speed = 5,
+	scale = 1,
+	color = 'var(--dt-neutral-500)',
+	noiseIntensity = 1.5,
+	rotation = 0,
+}) => {
 	const meshRef = useRef<Mesh>(null);
 
-	const uniforms = useMemo<SilkUniforms>(
-		() => ({
+	const uniforms = useMemo<SilkUniforms>(() => {
+		const threeColor = new Color();
+
+		// Resolver variable CSS si es necesario
+		if (color.startsWith('var(')) {
+			if (typeof window !== 'undefined') {
+				const temp = document.createElement('div');
+				temp.style.color = color;
+				document.body.appendChild(temp);
+				const computed = getComputedStyle(temp).color;
+				document.body.removeChild(temp);
+				threeColor.set(computed);
+			}
+		} else {
+			threeColor.set(color);
+		}
+
+		return {
 			uSpeed: { value: speed },
 			uScale: { value: scale },
 			uNoiseIntensity: { value: noiseIntensity },
-			uColor: { value: new Color(...hexToNormalizedRGB(color)) },
+			uColor: { value: threeColor },
 			uRotation: { value: rotation },
 			uTime: { value: 0 },
-		}),
-		[speed, scale, noiseIntensity, color, rotation]
-	);
+		};
+	}, [speed, scale, noiseIntensity, color, rotation]);
 
 	return (
 		<Canvas dpr={[1, 2]} frameloop="always">

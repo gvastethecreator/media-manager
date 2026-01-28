@@ -4,13 +4,14 @@
  */
 
 import { count, eq, isNull, not } from 'drizzle-orm';
+import { Effect } from 'effect';
 import PQueue from 'p-queue';
 import sharp from 'sharp';
 import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
 import { optimizeThumbnail } from '@/lib/image/thumbnail';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { imageService } from '@/services/image/image.service';
+import { generateThumbnail } from '@/services/image/image.service.effect';
 import type { ProcessOptions, ProcessStatus, ThumbnailError } from '@/types/thumbnails';
 
 const log = serverLogger.withContext('ThumbnailReencoder');
@@ -225,7 +226,7 @@ class ThumbnailService {
 			tasks.push(
 				queue.add(async () => {
 					try {
-						await imageService.generateThumbnail(id);
+						await Effect.runPromise(generateThumbnail(id));
 					} catch (e: unknown) {
 						errors += 1;
 						this.emitError({ message: e instanceof Error ? e.message : 'Error desconocido', code: 'REPROCESS_ERROR' });

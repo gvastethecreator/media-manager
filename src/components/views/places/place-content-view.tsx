@@ -47,7 +47,7 @@ export const PlaceContentView = memo(function PlaceContentViewInner() {
 	if (error) {
 		return (
 			<BaseContentView>
-				<div className="flex h-full items-center justify-center text-red-500">Error: {error.message}</div>
+				<div className="flex h-full items-center justify-center text-destructive">Error: {error.message}</div>
 			</BaseContentView>
 		);
 	}

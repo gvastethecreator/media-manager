@@ -178,8 +178,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Imagen',
 		displayNamePlural: 'Imágenes',
 		icon: ImageIcon,
-		color: '#3b82f6', // Azul
-		secondaryColor: '#1d4ed8',
+		color: 'var(--entity-image)',
 		emoji: '🖼️',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.jpg', '.jpeg', '.png', '.gif', '.webp', '.avif', '.bmp', '.tiff', '.svg'],
@@ -196,8 +195,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Video',
 		displayNamePlural: 'Videos',
 		icon: Video,
-		color: '#ef4444', // Rojo
-		secondaryColor: '#dc2626',
+		color: 'var(--entity-video)',
 		emoji: '🎬',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.mp4', '.webm', '.avi', '.mov', '.mkv', '.flv', '.wmv', '.m4v'],
@@ -214,8 +212,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Audio',
 		displayNamePlural: 'Audios',
 		icon: AudioWaveform,
-		color: '#10b981', // Verde
-		secondaryColor: '#059669',
+		color: 'var(--entity-audio)',
 		emoji: '🎵',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.mp3', '.wav', '.flac', '.aac', '.ogg', '.wma', '.m4a'],
@@ -232,8 +229,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Documento',
 		displayNamePlural: 'Documentos',
 		icon: FileText,
-		color: '#f59e0b', // Amarillo
-		secondaryColor: '#d97706',
+		color: 'var(--entity-document)',
 		emoji: '📄',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.pdf', '.doc', '.docx', '.txt', '.rtf', '.odt'],
@@ -250,8 +246,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Carpeta',
 		displayNamePlural: 'Carpetas',
 		icon: Folder,
-		color: '#eab308', // Oro
-		secondaryColor: '#ca8a04',
+		color: 'var(--entity-folder)',
 		emoji: '📁',
 		supportedOperations: CONTAINER_OPERATIONS,
 		thumbnailGenerator: generateFolderThumbnail,
@@ -266,8 +261,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Colección',
 		displayNamePlural: 'Colecciones',
 		icon: SquareStack,
-		color: '#8b5cf6', // Púrpura
-		secondaryColor: '#7c3aed',
+		color: 'var(--entity-collection)',
 		emoji: '📚',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -282,8 +276,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Álbum',
 		displayNamePlural: 'Álbumes',
 		icon: Grid2X2,
-		color: '#06b6d4', // Cian
-		secondaryColor: '#0891b2',
+		color: 'var(--entity-album)',
 		emoji: '📖',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -298,8 +291,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Etiqueta',
 		displayNamePlural: 'Etiquetas',
 		icon: Tag,
-		color: '#ec4899', // Rosa
-		secondaryColor: '#db2777',
+		color: 'var(--entity-tag)',
 		emoji: '🏷️',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -314,8 +306,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Personaje',
 		displayNamePlural: 'Personajes',
 		icon: Users,
-		color: '#f97316', // Naranja
-		secondaryColor: '#ea580c',
+		color: 'var(--entity-character)',
 		emoji: '🧑‍🎤',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -330,8 +321,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Lugar',
 		displayNamePlural: 'Lugares',
 		icon: MapPin,
-		color: '#14b8a6', // Teal
-		secondaryColor: '#0f766e',
+		color: 'var(--entity-place)',
 		emoji: '📍',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -346,8 +336,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Objeto',
 		displayNamePlural: 'Objetos',
 		icon: WandSparkles,
-		color: '#84cc16', // Lima
-		secondaryColor: '#65a30d',
+		color: 'var(--entity-world-item)',
 		emoji: '🌍',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -362,8 +351,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Concepto',
 		displayNamePlural: 'Conceptos',
 		icon: Palette,
-		color: '#6366f1', // Índigo
-		secondaryColor: '#4f46e5',
+		color: 'var(--entity-concept)',
 		emoji: '💡',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -378,8 +366,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Prompt',
 		displayNamePlural: 'Prompts',
 		icon: MessageSquare,
-		color: '#22c55e', // Verde esmeralda
-		secondaryColor: '#16a34a',
+		color: 'var(--entity-prompt)',
 		emoji: '🤖',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -394,8 +381,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Nota',
 		displayNamePlural: 'Notas',
 		icon: StickyNote,
-		color: '#a855f7', // Violeta
-		secondaryColor: '#9333ea',
+		color: 'var(--entity-note)',
 		emoji: '📝',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -410,8 +396,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Propiedad',
 		displayNamePlural: 'Propiedades',
 		icon: Database,
-		color: '#64748b', // Pizarra
-		secondaryColor: '#475569',
+		color: 'var(--entity-property)',
 		emoji: '🔧',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -426,8 +411,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Comodín',
 		displayNamePlural: 'Comodines',
 		icon: WandSparkles,
-		color: '#d946ef', // Fucsia
-		secondaryColor: '#c026d3',
+		color: 'var(--entity-wildcard)',
 		emoji: '🃏',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -442,8 +426,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Grupo',
 		displayNamePlural: 'Grupos',
 		icon: FolderKanban,
-		color: '#0ea5e9', // Cielo
-		secondaryColor: '#0284c7',
+		color: 'var(--entity-group)',
 		emoji: '👥',
 		supportedOperations: RELATIONAL_OPERATIONS,
 		metadata: {
@@ -458,8 +441,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Imagen Subida',
 		displayNamePlural: 'Imágenes Subidas',
 		icon: ImageIcon,
-		color: '#15803d', // Verde
-		secondaryColor: '#166534',
+		color: 'var(--entity-image)',
 		emoji: '📤',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.jpg', '.jpeg', '.png', '.gif', '.webp'],
@@ -476,8 +458,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Archivo JSON',
 		displayNamePlural: 'Archivos JSON',
 		icon: FileText,
-		color: '#0ea5e9', // Azul cielo
-		secondaryColor: '#0284c7',
+		color: 'var(--entity-json)',
 		emoji: '🧾',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.json'],
@@ -492,8 +473,7 @@ export const ENTITY_TYPE_CONFIGS: Record<EntityStatsType, EntityTypeConfig> = {
 		displayName: 'Archivo 3D',
 		displayNamePlural: 'Archivos 3D',
 		icon: File,
-		color: '#06b6d4', // Cian
-		secondaryColor: '#0891b2',
+		color: 'var(--entity-file-3d)',
 		emoji: '📦',
 		supportedOperations: MEDIA_OPERATIONS,
 		supportedFormats: ['.obj', '.fbx', '.gltf', '.glb', '.stl'],
@@ -516,7 +496,7 @@ export function getEntityTypeConfig(type: EntityStatsType): EntityTypeConfig | u
  */
 export function getEntityTypeColor(type: EntityStatsType): string {
 	const config = getEntityTypeConfig(type);
-	return config?.color || '#6b7280'; // Gris por defecto
+	return config?.color || 'var(--dt-neutral-500)'; // Gris por defecto
 }
 
 /**

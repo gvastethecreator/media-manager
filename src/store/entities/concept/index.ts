@@ -129,7 +129,7 @@ const initialUIState = {
 	isDetailsDrawerOpen: false,
 	viewMode: ConceptViewMode.GRID,
 };
-const createUISlice: StateCreator<ConceptStore, [], [], ConceptUISlice> = (set) => ({
+const createUISlice: StateCreator<ConceptStore, [], [], ConceptUISlice> = (set, get) => ({
 	...initialUIState,
 	openCreateModal: () => set({ isCreateModalOpen: true }),
 	closeCreateModal: () => set({ isCreateModalOpen: false }),
@@ -139,7 +139,10 @@ const createUISlice: StateCreator<ConceptStore, [], [], ConceptUISlice> = (set) 
 	closeDeleteDialog: () => set({ isDeleteDialogOpen: false }),
 	openDetailsDrawer: () => set({ isDetailsDrawerOpen: true }),
 	closeDetailsDrawer: () => set({ isDetailsDrawerOpen: false }),
-	setViewMode: (mode) => set({ viewMode: mode as ConceptViewMode }),
+	setViewMode: (mode) => {
+		if (get().viewMode === mode) return;
+		set({ viewMode: mode as ConceptViewMode });
+	},
 	resetUI: () => set({ ...initialUIState }),
 });
 

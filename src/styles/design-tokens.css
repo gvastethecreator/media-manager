@@ -165,13 +165,13 @@
 
 	/* Elevación 3: Alta (popovers, tooltips) */
 	--dt-shadow-3:
-		0 4px 8px oklch(0 0 0 / 0.04), 0 8px 16px oklch(0 0 0 / 0.08), 0 16px 32px
-		oklch(0 0 0 / 0.04);
+		0 4px 8px oklch(0 0 0 / 0.04), 0 8px 16px oklch(0 0 0 / 0.08),
+		0 16px 32px oklch(0 0 0 / 0.04);
 
 	/* Elevación 4: Máxima (modales) */
 	--dt-shadow-4:
-		0 8px 16px oklch(0 0 0 / 0.06), 0 16px 32px oklch(0 0 0 / 0.1), 0 32px 64px
-		oklch(0 0 0 / 0.06);
+		0 8px 16px oklch(0 0 0 / 0.06), 0 16px 32px oklch(0 0 0 / 0.1),
+		0 32px 64px oklch(0 0 0 / 0.06);
 
 	/* Inset shadows (presión/tacto) */
 	--dt-inset-1: inset 0 1px 2px oklch(0 0 0 / 0.08);
@@ -254,12 +254,12 @@ html[data-theme="aurora"] {
 	--dt-shadow-2: 0 2px 4px oklch(0 0 0 / 0.15), 0 4px 8px oklch(0 0 0 / 0.25);
 
 	--dt-shadow-3:
-		0 4px 8px oklch(0 0 0 / 0.15), 0 8px 16px oklch(0 0 0 / 0.25), 0 16px 32px
-		oklch(0 0 0 / 0.15);
+		0 4px 8px oklch(0 0 0 / 0.15), 0 8px 16px oklch(0 0 0 / 0.25),
+		0 16px 32px oklch(0 0 0 / 0.15);
 
 	--dt-shadow-4:
-		0 8px 16px oklch(0 0 0 / 0.2), 0 16px 32px oklch(0 0 0 / 0.3), 0 32px 64px
-		oklch(0 0 0 / 0.2);
+		0 8px 16px oklch(0 0 0 / 0.2), 0 16px 32px oklch(0 0 0 / 0.3),
+		0 32px 64px oklch(0 0 0 / 0.2);
 
 	--dt-g-surface-soft: linear-gradient(
 		180deg,

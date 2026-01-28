@@ -47,7 +47,7 @@
 	background: linear-gradient(
 		45deg,
 		transparent 48%,
-		rgba(255, 255, 255, 0.1) 50%,
+		color-mix(in oklab, var(--foreground), transparent 90%) 50%,
 		transparent 52%
 	);
 	opacity: 0;
@@ -103,15 +103,15 @@
 
 /* Debug mode - mostrar bordes de transición */
 .view-transition-debug ::view-transition-group(*) {
-	outline: 2px solid red;
+	outline: 2px solid var(--status-warning);
 }
 
 .view-transition-debug ::view-transition-old(*) {
-	outline: 2px solid blue;
+	outline: 2px solid var(--status-info);
 }
 
 .view-transition-debug ::view-transition-new(*) {
-	outline: 2px solid green;
+	outline: 2px solid var(--status-success);
 }
 
 /* Transiciones específicas para navegación */
@@ -268,7 +268,7 @@
 	background: linear-gradient(
 		45deg,
 		transparent 48%,
-		rgba(255, 255, 255, 0.05) 50%,
+		color-mix(in oklab, var(--foreground), transparent 95%) 50%,
 		transparent 52%
 	);
 }

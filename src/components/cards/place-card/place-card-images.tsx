@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { cn } from '@/lib/utils';
 
 interface CardMediaItem {
@@ -34,7 +34,7 @@ interface PlaceCardImagesProps {
 export function PlaceCardImages({
 	images = [],
 	mainImage,
-	primaryColor = '#10b981',
+	primaryColor = 'var(--dt-success-500)',
 	rarityLevel = 1,
 	holographicEffect = true,
 	tcgMode = true,
@@ -86,7 +86,7 @@ export function PlaceCardImages({
 		if (rarityLevel >= 5) {
 			return {
 				// Efecto de cambio de gradiente para lugares épicos
-				background: `linear-gradient(45deg, ${primaryColor}40, ${primaryColor}90, ${primaryColor}40)`,
+				background: `linear-gradient(45deg, color-mix(in oklab, ${primaryColor}, transparent 75%), color-mix(in oklab, ${primaryColor}, transparent 44%), color-mix(in oklab, ${primaryColor}, transparent 75%))`,
 				backgroundSize: '200% 200%',
 				animation: 'var(--animate-gradient-shift)',
 			};
@@ -125,7 +125,7 @@ export function PlaceCardImages({
 	return (
 		<div
 			aria-label={getImageAriaLabel()}
-			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-48', tcgMode && 'border-white/10 border-b')}
+			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-48', tcgMode && 'border-border/40 border-b')}
 			onPointerLeave={handleMouseLeave}
 			onPointerMove={handleMouseMove}
 			role="img"
@@ -133,9 +133,9 @@ export function PlaceCardImages({
 			{/* Fondo decorativo para cartas TCG */}
 			{tcgMode && (
 				<div
-					className="absolute inset-0 z-0 bg-black/20"
+					className="absolute inset-0 z-0 bg-muted/20"
 					style={{
-						backgroundImage: `radial-gradient(circle at 50% 50%, ${primaryColor}30, transparent 80%)`,
+						backgroundImage: `radial-gradient(circle at 50% 50%, color-mix(in oklab, ${primaryColor}, transparent 81%), transparent 80%)`,
 					}}
 				/>
 			)}
@@ -197,7 +197,7 @@ export function PlaceCardImages({
 								background: `linear-gradient(
 									${135 + viewAngle.x * 30}deg,
 									transparent,
-									rgba(255, 255, 255, 0.5) ${50 + viewAngle.y * 10}%,
+									color-mix(in oklch, var(--foreground), transparent 50%) ${50 + viewAngle.y * 10}%,
 									transparent
 								)`,
 							}}
@@ -223,9 +223,9 @@ export function PlaceCardImages({
 			) : (
 				// Placeholder cuando no hay imagen
 				<div
-					className="flex h-full w-full items-center justify-center bg-black/20 text-white/50"
+					className="flex h-full w-full items-center justify-center bg-muted/20 text-white/50"
 					style={{
-						background: `radial-gradient(circle, ${primaryColor}30 0%, transparent 70%)`,
+						background: `radial-gradient(circle, color-mix(in oklab, ${primaryColor}, transparent 81%) 0%, transparent 70%)`,
 					}}
 				>
 					<span className="-rotate-12 transform text-4xl">📍</span>
@@ -237,9 +237,9 @@ export function PlaceCardImages({
 				<div className="pointer-events-none absolute inset-0 z-30">
 					{/* Marco interno */}
 					<div
-						className="absolute inset-3 rounded border border-white/10"
+						className="absolute inset-3 rounded border border-border/40"
 						style={{
-							boxShadow: rarityLevel >= 5 ? `0 0 10px ${primaryColor}50 inset` : 'none',
+							boxShadow: rarityLevel >= 5 ? `0 0 10px color-mix(in oklab, ${primaryColor}, transparent 69%) inset` : 'none',
 						}}
 					/>
 

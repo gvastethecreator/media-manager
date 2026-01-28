@@ -94,22 +94,22 @@ const highlightJSON = (jsonString: string): React.ReactNode => {
 		let className = '';
 		switch (token.type) {
 			case 'string':
-				className = 'text-emerald-600 dark:text-emerald-400';
+				className = 'text-[color:var(--status-success)]';
 				break;
 			case 'number':
-				className = 'text-blue-600 dark:text-blue-400';
+				className = 'text-[color:var(--status-info)]';
 				break;
 			case 'boolean':
-				className = 'text-purple-600 dark:text-purple-400';
+				className = 'text-[color:var(--status-warning)]';
 				break;
 			case 'null':
-				className = 'text-red-600 dark:text-red-400';
+				className = 'text-destructive';
 				break;
 			case 'punctuation':
-				className = 'text-gray-600 dark:text-gray-400';
+				className = 'text-muted-foreground';
 				break;
 			default:
-				className = 'text-gray-900 dark:text-gray-100';
+				className = 'text-foreground';
 		}
 
 		return (
@@ -141,15 +141,15 @@ export const JSONSyntaxHighlighter: React.FC<JSONSyntaxHighlighterProps> = ({
 
 	return (
 		<div
-			className={cn('relative w-full overflow-auto rounded-md border bg-gray-50 dark:bg-gray-900', className)}
+			className={cn('relative w-full overflow-auto rounded-md border border-border/60 bg-muted/40', className)}
 			style={{ maxHeight }}
 		>
 			<div className="relative">
 				<pre className="p-4 text-sm leading-relaxed">
 					{showLineNumbers && (
-						<div className="absolute top-0 left-0 w-12 bg-gray-100 p-4 text-right dark:bg-gray-800">
+						<div className="absolute top-0 left-0 w-12 bg-muted/60 p-4 text-right">
 							{lines.map((_, index) => (
-								<div className="text-gray-500 dark:text-gray-400" key={index}>
+								<div className="text-muted-foreground" key={index}>
 									{index + 1}
 								</div>
 							))}
@@ -209,13 +209,13 @@ export const CollapsibleJSON: React.FC<CollapsibleJSONProps> = ({
 
 			{/* Overlay gradient cuando está colapsado */}
 			{!isExpanded && (
-				<div className="pointer-events-none absolute right-0 bottom-0 left-0 h-16 bg-gradient-to-t from-gray-50 to-transparent dark:from-gray-900" />
+				<div className="pointer-events-none absolute right-0 bottom-0 left-0 h-16 bg-gradient-to-t from-muted/60 to-transparent" />
 			)}
 
 			{/* Botón para expandir/colapsar */}
 			<div className="mt-2 flex justify-center">
 				<button
-					className="rounded-md bg-blue-100 px-3 py-1 text-blue-700 text-sm hover:bg-blue-200 dark:bg-blue-900 dark:text-blue-300 dark:hover:bg-blue-800"
+					className="rounded-md bg-primary/10 px-3 py-1 text-primary text-sm hover:bg-primary/20"
 					onClick={() => setIsExpanded(!isExpanded)}
 					type="button"
 				>

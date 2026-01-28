@@ -19,7 +19,7 @@ interface GroupCardHeaderProps {
 export function GroupCardHeader({
 	name,
 	emoji = '📂',
-	color = '#3b82f6',
+	color = 'var(--dt-primary-500)',
 	category = 'General',
 	organizationType = 'Mixto',
 	organizationLevel = 1,
@@ -47,7 +47,7 @@ export function GroupCardHeader({
 		<div
 			className={cn(
 				'relative overflow-hidden border-b',
-				tcgMode ? 'border-white/10 bg-gradient-to-r from-black/30 to-transparent' : 'border-gray-200',
+				tcgMode ? 'border-border/40 bg-gradient-to-r from-black/30 to-transparent' : 'border-border',
 				compact ? 'p-2' : 'p-3'
 			)}
 			style={{
@@ -72,7 +72,7 @@ export function GroupCardHeader({
 				<div
 					className={cn(
 						'flex items-center justify-center rounded',
-						tcgMode ? 'bg-black/20 p-1' : 'bg-white/10 p-0.5',
+						tcgMode ? 'bg-muted/20 p-1' : 'bg-background/10 p-0.5',
 						compact ? 'mr-1.5 h-6 w-6' : 'mr-2 h-8 w-8'
 					)}
 					style={{
@@ -125,7 +125,7 @@ export function GroupCardHeader({
 			)}
 
 			{/* Estrella de favorito */}
-			{isFavorite && <div className="absolute top-1 right-1 text-xs text-yellow-400">★</div>}
+			{isFavorite && <div className="absolute top-1 right-1 text-warning text-xs">★</div>}
 		</div>
 	);
 }

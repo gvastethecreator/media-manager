@@ -10,5 +10,3 @@ export { Context, Effect, Layer, pipe } from 'effect';
 export * from './runtime/runtime';
 // Services
 export * from './services/drizzle.service';
-// Utils
-export * from './utils/adapt-promise';

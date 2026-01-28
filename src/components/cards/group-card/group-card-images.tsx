@@ -5,7 +5,7 @@ import {
 	computeRarityVisualConfig,
 	rarityAccessibilityLabel,
 } from '@/components/cards/shared/rarity-style';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { cn } from '@/lib/utils';
 
 interface GroupCardImagesProps {
@@ -35,7 +35,7 @@ export function GroupCardImages({
 	images = [],
 	videos = [],
 	emoji = '📂',
-	primaryColor = '#3b82f6',
+	primaryColor = 'var(--dt-primary-500)',
 	rarityLevel = 1,
 	holographicEffect = true,
 	tcgMode = true,
@@ -89,7 +89,7 @@ export function GroupCardImages({
 	return (
 		<div
 			aria-label={ariaLabel}
-			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-40', tcgMode && 'border-white/10 border-b')}
+			className={cn('relative overflow-hidden', compact ? 'h-24' : 'h-40', tcgMode && 'border-border/40 border-b')}
 			onBlur={handleMouseLeave}
 			onFocus={handleMouseLeave}
 			onMouseLeave={handleMouseLeave}
@@ -99,7 +99,7 @@ export function GroupCardImages({
 			{/* Fondo decorativo para cartas TCG */}
 			{tcgMode && (
 				<div
-					className="absolute inset-0 z-0 bg-black/20"
+					className="absolute inset-0 z-0 bg-muted/20"
 					style={{
 						backgroundImage: `radial-gradient(circle at 50% 50%, ${primaryColor}30, transparent 80%)`,
 					}}
@@ -144,7 +144,7 @@ export function GroupCardImages({
 					{/* Mostrar imágenes en una grilla 2x2 */}
 					{allMedia.map((media, index) => (
 						<div
-							className="relative overflow-hidden bg-black/10"
+							className="relative overflow-hidden bg-muted/10"
 							key={`media-${index}-${media.substring(media.lastIndexOf('/') + 1)}`}
 						>
 							<img
@@ -175,7 +175,7 @@ export function GroupCardImages({
 					{/* Relleno para grilla si faltan imágenes */}
 					{Array.from({ length: Math.max(0, 4 - allMedia.length) }).map((_, idx) => (
 						<div
-							className="flex items-center justify-center bg-black/10"
+							className="flex items-center justify-center bg-muted/10"
 							key={`placeholder-${emoji}-${rarityLevel}-${idx + 1}`}
 						>
 							<FolderIcon className="h-6 w-6 opacity-20" />
@@ -190,7 +190,7 @@ export function GroupCardImages({
 								background: `linear-gradient(
                   ${135 + viewAngle.x * 30}deg,
                   transparent,
-                  rgba(255, 255, 255, 0.5) ${50 + viewAngle.y * 10}%,
+                  color-mix(in oklch, var(--foreground), transparent 50%) ${50 + viewAngle.y * 10}%,
                   transparent
                 )`,
 							}}
@@ -200,7 +200,7 @@ export function GroupCardImages({
 			) : (
 				// Placeholder cuando no hay multimedia
 				<div
-					className="flex h-full w-full items-center justify-center bg-black/10 text-white/50"
+					className="flex h-full w-full items-center justify-center bg-muted/10 text-white/50"
 					style={{
 						background: `radial-gradient(circle, ${primaryColor}30 0%, transparent 70%)`,
 					}}

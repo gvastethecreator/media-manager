@@ -85,7 +85,7 @@ export function fromDrizzleJsonFile(drizzleJsonFile: JsonFileBase): JsonFileWith
 
 		const jsonFileWithStats: JsonFileWithStats = {
 			...drizzleJsonFile,
-			entityType: 'json-file',
+			entityType: 'jsonFile',
 			stats,
 		};
 

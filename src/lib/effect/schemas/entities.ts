@@ -295,14 +295,6 @@ export class Image extends Schema.Class<Image>('Image')({
 
 /**
  * Input para crear Image
- * CONSTRAINTS (from schema):
- * - hash: CHECK length(hash) = 64 (SHA-256)
- * - size: CHECK size >= 0 AND size <= 107374182400 (100GB)
- * - dimensions: CHECK width/height > 0 AND <= 32768
- * - path: CHECK length(path) BETWEEN 1 AND 1000
- * - folderId: NOT NULL (required)
- * - UNIQUE (path, folderId)
- * - UNIQUE (hash) with index
  */
 export class ImageCreateInput extends Schema.Class<ImageCreateInput>('ImageCreateInput')({
 	name: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(255)),
@@ -353,33 +345,7 @@ export class ImageUpdateInput extends Schema.Class<ImageUpdateInput>('ImageUpdat
  * Schema para Image con stats enriquecido
  */
 export class ImageWithStats extends Schema.Class<ImageWithStats>('ImageWithStats')({
-	id: Schema.String,
-	name: Schema.String,
-	description: Schema.NullOr(Schema.String),
-	path: Schema.String,
-	hash: Schema.String,
-	size: Schema.Number,
-	width: Schema.Number,
-	height: Schema.Number,
-	metadata: Schema.NullOr(Schema.String),
-	thumbnail: Schema.NullOr(Schema.String),
-	thumbnailSize: Schema.NullOr(Schema.Number),
-	thumbnailWidth: Schema.NullOr(Schema.Number),
-	thumbnailHeight: Schema.NullOr(Schema.Number),
-	thumbnailMimeType: Schema.NullOr(Schema.String),
-	thumbnailError: Schema.NullOr(Schema.String),
-	thumbnailErrorAt: Schema.NullOr(Schema.DateFromSelf),
-	thumbnailOptimizedAt: Schema.NullOr(Schema.DateFromSelf),
-	aiEngine: Schema.NullOr(Schema.String),
-	aiModel: Schema.NullOr(Schema.String),
-	aiOriginDetected: Schema.NullOr(Schema.Boolean),
-	isFavorite: Schema.Boolean,
-	folderId: Schema.String,
-	noteId: Schema.NullOr(Schema.String),
-	createdAt: Schema.DateFromSelf,
-	updatedAt: Schema.NullOr(Schema.DateFromSelf),
-	addedAt: Schema.DateFromSelf,
-	// Stats computed
+	...Image.fields,
 	albumCount: Schema.Number.pipe(Schema.int(), Schema.nonNegative()),
 	collectionCount: Schema.Number.pipe(Schema.int(), Schema.nonNegative()),
 	tagCount: Schema.Number.pipe(Schema.int(), Schema.nonNegative()),
@@ -410,6 +376,7 @@ export class Character extends Schema.Class<Character>('Character')({
 	featuredImage: Schema.NullOr(Schema.String),
 	isFavorite: Schema.Boolean,
 	metadata: Schema.NullOr(Schema.Unknown),
+	parentId: Schema.NullOr(ID),
 	createdAt: Schema.DateFromSelf,
 	updatedAt: Schema.DateFromSelf,
 }) {}
@@ -427,6 +394,7 @@ export class CharacterCreateInput extends Schema.Class<CharacterCreateInput>('Ch
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
 	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
+	parentId: Schema.optional(Schema.NullOr(ID)),
 }) {}
 
 /**
@@ -442,6 +410,15 @@ export class CharacterUpdateInput extends Schema.Class<CharacterUpdateInput>('Ch
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
 	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
+	parentId: Schema.optional(Schema.NullOr(ID)),
+}) {}
+
+/**
+ * Character con estadísticas
+ */
+export class CharacterWithStats extends Schema.Class<CharacterWithStats>('CharacterWithStats')({
+	...Character.fields,
+	stats: Schema.optional(Schema.Unknown),
 }) {}
 
 // ============= Place Entity =============
@@ -460,6 +437,7 @@ export class Place extends Schema.Class<Place>('Place')({
 	featuredImage: Schema.NullOr(Schema.String),
 	isFavorite: Schema.Boolean,
 	metadata: Schema.NullOr(Schema.Unknown),
+	parentId: Schema.NullOr(ID),
 	createdAt: Schema.DateFromSelf,
 	updatedAt: Schema.DateFromSelf,
 }) {}
@@ -477,6 +455,7 @@ export class PlaceCreateInput extends Schema.Class<PlaceCreateInput>('PlaceCreat
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
 	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
+	parentId: Schema.optional(Schema.NullOr(ID)),
 }) {}
 
 /**
@@ -492,6 +471,15 @@ export class PlaceUpdateInput extends Schema.Class<PlaceUpdateInput>('PlaceUpdat
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
 	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
+	parentId: Schema.optional(Schema.NullOr(ID)),
+}) {}
+
+/**
+ * Place con estadísticas
+ */
+export class PlaceWithStats extends Schema.Class<PlaceWithStats>('PlaceWithStats')({
+	...Place.fields,
+	stats: Schema.optional(Schema.Unknown),
 }) {}
 
 // ============= Concept Entity =============
@@ -510,6 +498,7 @@ export class Concept extends Schema.Class<Concept>('Concept')({
 	featuredImage: Schema.NullOr(Schema.String),
 	isFavorite: Schema.Boolean,
 	metadata: Schema.NullOr(Schema.Unknown),
+	parentId: Schema.NullOr(ID),
 	createdAt: Schema.DateFromSelf,
 	updatedAt: Schema.DateFromSelf,
 }) {}
@@ -527,6 +516,7 @@ export class ConceptCreateInput extends Schema.Class<ConceptCreateInput>('Concep
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
 	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
+	parentId: Schema.optional(Schema.NullOr(ID)),
 }) {}
 
 /**
@@ -542,6 +532,73 @@ export class ConceptUpdateInput extends Schema.Class<ConceptUpdateInput>('Concep
 	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
 	isFavorite: Schema.optional(Schema.Boolean),
 	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
+	parentId: Schema.optional(Schema.NullOr(ID)),
+}) {}
+
+/**
+ * Concept con estadísticas
+ */
+export class ConceptWithStats extends Schema.Class<ConceptWithStats>('ConceptWithStats')({
+	...Concept.fields,
+	stats: Schema.optional(Schema.Unknown),
+}) {}
+
+// ============= Prompt Entity =============
+
+/**
+ * Schema para Prompt
+ */
+export class Prompt extends Schema.Class<Prompt>('Prompt')({
+	id: ID,
+	name: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(255)),
+	emoji: Schema.NullOr(Schema.String),
+	color: Schema.NullOr(Schema.String),
+	description: Schema.NullOr(Schema.String),
+	category: Schema.NullOr(Schema.String),
+	filters: Schema.NullOr(Schema.String),
+	featuredImage: Schema.NullOr(Schema.String),
+	isFavorite: Schema.Boolean,
+	metadata: Schema.NullOr(Schema.Unknown),
+	createdAt: Schema.DateFromSelf,
+	updatedAt: Schema.DateFromSelf,
+}) {}
+
+/**
+ * Input para crear Prompt
+ */
+export class PromptCreateInput extends Schema.Class<PromptCreateInput>('PromptCreateInput')({
+	name: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(255)),
+	emoji: Schema.optional(Schema.NullOr(Schema.String)),
+	color: Schema.optional(Schema.NullOr(Schema.String)),
+	description: Schema.optional(Schema.NullOr(Schema.String)),
+	category: Schema.optional(Schema.NullOr(Schema.String)),
+	filters: Schema.optional(Schema.NullOr(Schema.String)),
+	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
+	isFavorite: Schema.optional(Schema.Boolean),
+	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
+}) {}
+
+/**
+ * Input para actualizar Prompt
+ */
+export class PromptUpdateInput extends Schema.Class<PromptUpdateInput>('PromptUpdateInput')({
+	name: Schema.optional(Schema.String.pipe(Schema.minLength(1), Schema.maxLength(255))),
+	emoji: Schema.optional(Schema.NullOr(Schema.String)),
+	color: Schema.optional(Schema.NullOr(Schema.String)),
+	description: Schema.optional(Schema.NullOr(Schema.String)),
+	category: Schema.optional(Schema.NullOr(Schema.String)),
+	filters: Schema.optional(Schema.NullOr(Schema.String)),
+	featuredImage: Schema.optional(Schema.NullOr(Schema.String)),
+	isFavorite: Schema.optional(Schema.Boolean),
+	metadata: Schema.optional(Schema.NullOr(Schema.Unknown)),
+}) {}
+
+/**
+ * Prompt con estadísticas
+ */
+export class PromptWithStats extends Schema.Class<PromptWithStats>('PromptWithStats')({
+	...Prompt.fields,
+	stats: Schema.optional(Schema.Unknown),
 }) {}
 
 // ============= Export All =============

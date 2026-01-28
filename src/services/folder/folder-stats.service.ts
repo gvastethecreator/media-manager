@@ -69,7 +69,7 @@ export async function getFolderMediaCountsBatch(folderIds: string[]): Promise<Fo
       WHERE folderId IN (${inList})
       GROUP BY folderId
       UNION ALL
-      SELECT 'json' AS type, folderId, COUNT(1) AS count
+      SELECT 'jsonFile' AS type, folderId, COUNT(1) AS count
       FROM JsonFile
       WHERE folderId IN (${inList})
       GROUP BY folderId
@@ -116,7 +116,7 @@ export async function getFolderMediaCountsBatch(folderIds: string[]): Promise<Fo
 			case 'document':
 				entry.documents = r.count;
 				break;
-			case 'json':
+			case 'jsonFile':
 				entry.jsonFiles = r.count;
 				break;
 			case 'file3d':

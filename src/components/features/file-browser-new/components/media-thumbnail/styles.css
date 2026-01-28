@@ -12,6 +12,15 @@
 	transform: translate3d(0, 0, 0);
 }
 
+.media-thumbnail-img {
+	opacity: 0;
+	transition: opacity 180ms ease;
+}
+
+.media-thumbnail-img.is-loaded {
+	opacity: 1;
+}
+
 .media-thumbnail-container:hover {
 	transform: translate3d(0, -2px, 0) scale(1.05);
 	box-shadow: 0 8px 32px rgba(var(--effect-shadow-rgb), 0.15);
@@ -82,6 +91,10 @@
 	.media-thumbnail-video::after {
 		transition: none;
 		animation: none;
+	}
+
+	.media-thumbnail-img {
+		transition: none;
 	}
 
 	.media-thumbnail-container:hover,

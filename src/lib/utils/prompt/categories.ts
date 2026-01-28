@@ -24,7 +24,7 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'General',
 		description: 'Prompts de propósito general y uso común',
 		icon: '🌐',
-		color: '#6366f1',
+		color: 'var(--preset-indigo)',
 		order: 0,
 	},
 	[PromptCategory.TEXT]: {
@@ -32,7 +32,7 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Texto',
 		description: 'Generación y manipulación de texto, resúmenes, reescritura',
 		icon: '📝',
-		color: '#22c55e',
+		color: 'var(--preset-green)',
 		order: 1,
 	},
 	[PromptCategory.IMAGE]: {
@@ -40,7 +40,7 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Imagen',
 		description: 'Prompts para describir y analizar imágenes',
 		icon: '🖼️',
-		color: '#ef4444',
+		color: 'var(--dt-danger-500)',
 		order: 2,
 	},
 	[PromptCategory.CODE]: {
@@ -48,7 +48,7 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Código',
 		description: 'Generación y análisis de código de programación',
 		icon: '👨‍💻',
-		color: '#3b82f6',
+		color: 'var(--dt-primary-500)',
 		order: 3,
 	},
 	[PromptCategory.CREATIVE]: {
@@ -56,7 +56,7 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Creativo',
 		description: 'Prompts para creación de contenido creativo y storytelling',
 		icon: '🎨',
-		color: '#ec4899',
+		color: 'var(--preset-pink)',
 		order: 4,
 	},
 	[PromptCategory.CHARACTER]: {
@@ -64,7 +64,7 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Personajes',
 		description: 'Creación y desarrollo de personajes',
 		icon: '👤',
-		color: '#f97316',
+		color: 'var(--preset-orange)',
 		order: 5,
 	},
 	[PromptCategory.WORLDBUILDING]: {
@@ -72,7 +72,7 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Worldbuilding',
 		description: 'Creación de mundos, escenarios y ambientación',
 		icon: '🌍',
-		color: '#8b5cf6',
+		color: 'var(--preset-purple)',
 		order: 6,
 	},
 	[PromptCategory.ASSISTANT]: {
@@ -80,7 +80,7 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Asistente',
 		description: 'Prompts para crear asistentes virtuales especializados',
 		icon: '🤖',
-		color: '#0ea5e9',
+		color: 'var(--preset-sky)',
 		order: 7,
 	},
 	[PromptCategory.SYSTEM]: {
@@ -88,7 +88,7 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Sistema',
 		description: 'Prompts reservados para uso del sistema',
 		icon: '⚙️',
-		color: '#6b7280',
+		color: 'var(--dt-neutral-500)',
 		order: 8,
 	},
 	[PromptCategory.AUDIO]: {
@@ -96,7 +96,7 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Audio',
 		description: 'Prompts enfocados en generación y análisis de audio',
 		icon: '🎵',
-		color: '#0ea5e9',
+		color: 'var(--preset-sky)',
 		order: 9,
 	},
 	[PromptCategory.VIDEO]: {
@@ -112,7 +112,7 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Chat',
 		description: 'Prompts para conversaciones o chatbots',
 		icon: '💬',
-		color: '#10b981',
+		color: 'var(--dt-success-500)',
 		order: 11,
 	},
 	[PromptCategory.SETTING]: {
@@ -120,7 +120,7 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Entorno',
 		description: 'Creación de escenarios y ubicaciones',
 		icon: '🏞️',
-		color: '#84cc16',
+		color: 'var(--preset-lime)',
 		order: 12,
 	},
 	[PromptCategory.STORY]: {
@@ -136,7 +136,7 @@ export const PROMPT_CATEGORIES: Record<PromptCategory, PromptCategoryMetadata> =
 		name: 'Sin clasificar',
 		description: 'Prompts sin categoría específica',
 		icon: '❔',
-		color: '#9ca3af',
+		color: 'var(--dt-neutral-400)',
 		order: 14,
 	},
 	[PromptCategory.OTHER]: {

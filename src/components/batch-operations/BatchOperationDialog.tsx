@@ -82,11 +82,11 @@ export function BatchOperationDialog({
 	const getOperationIcon = () => {
 		switch (type) {
 			case 'copy':
-				return <Copy className="h-5 w-5 text-blue-500" />;
+				return <Copy className="h-5 w-5 text-primary" />;
 			case 'move':
-				return <Move className="h-5 w-5 text-orange-500" />;
+				return <Move className="h-5 w-5 text-warning" />;
 			case 'delete':
-				return <Trash2 className="h-5 w-5 text-red-500" />;
+				return <Trash2 className="h-5 w-5 text-destructive" />;
 			default:
 				return null;
 		}
@@ -212,14 +212,14 @@ export function BatchOperationDialog({
 								Ruta de destino
 							</Label>
 							<Input
-								className={cn(!targetPath.trim() && 'border-red-200 focus:border-red-300')}
+								className={cn(!targetPath.trim() && 'border-ui-error-border focus:border-ui-error-border')}
 								id="targetPath"
 								onChange={(e) => setTargetPath(e.target.value)}
 								placeholder="Selecciona la carpeta de destino..."
 								value={targetPath}
 							/>
 							{!targetPath.trim() && (
-								<p className="flex items-center gap-1 text-red-600 text-sm">
+								<p className="flex items-center gap-1 text-destructive text-sm">
 									<AlertTriangle className="h-3 w-3" />
 									La ruta de destino es requerida
 								</p>
@@ -329,12 +329,12 @@ export function BatchOperationDialog({
 
 					{/* Warning for delete operations */}
 					{type === 'delete' && (
-						<div className="rounded-lg border border-red-200 bg-red-50 p-4">
+						<div className="rounded-lg border-ui-error-border bg-ui-error p-4">
 							<div className="flex items-start gap-2">
-								<AlertTriangle className="mt-0.5 h-5 w-5 text-red-500" />
+								<AlertTriangle className="mt-0.5 h-5 w-5 text-destructive" />
 								<div>
-									<h4 className="font-medium text-red-800">Advertencia</h4>
-									<p className="mt-1 text-red-700 text-sm">
+									<h4 className="font-medium text-destructive">Advertencia</h4>
+									<p className="mt-1 text-destructive text-sm">
 										Esta operación eliminará permanentemente los archivos seleccionados. Esta acción no se puede
 										deshacer.
 									</p>

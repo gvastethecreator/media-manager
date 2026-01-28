@@ -39,10 +39,10 @@ export const MIN_PAGE_SIZE = 10;
 
 // 🎨 Colores por defecto
 export const DEFAULT_COLORS = {
-	primary: '#3b82f6',
-	secondary: '#8b5cf6',
-	accent: '#f59e0b',
-	neutral: '#6b7280',
+	primary: 'var(--dt-primary-500)',
+	secondary: 'var(--preset-purple)',
+	accent: 'var(--preset-yellow)',
+	neutral: 'var(--dt-neutral-500)',
 } as const;
 
 // 🎭 Emojis por defecto

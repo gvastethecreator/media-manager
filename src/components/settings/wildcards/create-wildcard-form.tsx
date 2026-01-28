@@ -12,6 +12,7 @@ import { ImagePicker } from '@/components/ui/image-picker';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import type { WildcardBase } from '@/types/entities/wildcard/base';
 import { CreateWildcardSchema } from '@/types/entities/wildcard/schema';
 
@@ -44,7 +45,7 @@ export function CreateWildcardForm({ wildcard, parentWildcards = [], onSubmit, o
 		defaultValues: {
 			name: wildcard?.name || '',
 			emoji: wildcard?.emoji || '🎭',
-			color: wildcard?.color || '#6366F1',
+			color: wildcard?.color || DEFAULT_ENTITY_COLOR,
 			description: wildcard?.description || null,
 			shortcut: wildcard?.shortcut || null,
 			category: wildcard?.category || null,

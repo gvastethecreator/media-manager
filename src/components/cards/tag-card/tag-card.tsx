@@ -1,7 +1,7 @@
 import { Sparkles, Tag } from 'lucide-react';
 import type React from 'react';
 import { memo, useCallback, useMemo, useState } from 'react';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { cn } from '@/lib/utils';
 import { type TagCategory, TagRarity } from '@/store/entities/tag/types';
 import type { TagWithStats } from '@/types/entities/tag';
@@ -29,40 +29,22 @@ function calculateTagRarity(totalRelations: number): TagRarity {
 
 // Helper function para generar color secundario
 function generateSecondaryColor(color?: string): string {
-	// Si no hay color definido, usar un valor por defecto
+	// Si no hay color definido, usar un valor por defecto (rosa de tags)
 	if (!color) {
-		return '#be185d';
+		return 'oklch(0.65 0.25 350)';
 	}
 
-	// Oscurecer el color primario para el secundario
-	try {
-		// Convertir hex a RGB
-		const r = Number.parseInt(color.slice(1, 3), 16);
-		const g = Number.parseInt(color.slice(3, 5), 16);
-		const b = Number.parseInt(color.slice(5, 7), 16);
-
-		// Oscurecer los componentes
-		const darkenFactor = 0.7;
-		const darkerR = Math.floor(r * darkenFactor);
-		const darkerG = Math.floor(g * darkenFactor);
-		const darkerB = Math.floor(b * darkenFactor);
-
-		// Convertir de vuelta a hex
-		return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-	} catch (_e) {
-		// Si hay algún error, volver al valor por defecto
-		return '#be185d';
-	}
+	return `color-mix(in oklab, ${color}, black 20%)`;
 }
 
 // Helper function para obtener configuración de rareza
 function getRarityConfig(rarity: TagRarity) {
 	const rarityColorMap: Record<string, string> = {
-		[TagRarity.COMMON]: '#6b7280',
-		[TagRarity.UNCOMMON]: '#22c55e',
-		[TagRarity.RARE]: '#3b82f6',
-		[TagRarity.VERY_RARE]: '#8b5cf6',
-		[TagRarity.LEGENDARY]: '#f59e0b',
+		[TagRarity.COMMON]: 'var(--dt-neutral-400)',
+		[TagRarity.UNCOMMON]: 'var(--preset-green)',
+		[TagRarity.RARE]: 'var(--preset-blue)',
+		[TagRarity.VERY_RARE]: 'var(--preset-purple)',
+		[TagRarity.LEGENDARY]: 'var(--preset-yellow)',
 	};
 
 	const rarityGlowMap: Record<string, number> = {
@@ -135,9 +117,9 @@ function TCGEffects({
 					backgroundImage: `
 						linear-gradient(125deg,
 						transparent 0%,
-						${cardColor}30 25%,
-						${rarityColor}30 50%,
-						${cardColor}30 75%,
+						color-mix(in oklab, ${cardColor}, transparent 70%) 25%,
+						color-mix(in oklab, ${rarityColor}, transparent 70%) 50%,
+						color-mix(in oklab, ${cardColor}, transparent 70%) 75%,
 						transparent 100%)
 					`,
 					backgroundSize: '200% 200%',
@@ -149,7 +131,7 @@ function TCGEffects({
 			<div
 				className="pointer-events-none absolute top-1/4 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 opacity-10"
 				style={{
-					background: `radial-gradient(circle, ${rarityColor}50 0%, transparent 70%)`,
+					background: `radial-gradient(circle, color-mix(in oklab, ${rarityColor}, transparent 50%) 0%, transparent 70%)`,
 				}}
 			>
 				<div className="flex h-full w-full items-center justify-center">
@@ -162,7 +144,7 @@ function TCGEffects({
 				<div className="absolute top-2 right-2 z-10">
 					<div
 						className={cn('rounded-full p-1', calculatedRarity === TagRarity.LEGENDARY && 'animate-pulse')}
-						style={{ backgroundColor: `${rarityColor}30` }}
+						style={{ backgroundColor: `color-mix(in oklab, ${rarityColor}, transparent 70%)` }}
 					>
 						<Sparkles className="h-4 w-4" style={{ color: rarityColor }} />
 					</div>
@@ -262,7 +244,9 @@ function TagCardInnerContent(props: TagCardInnerContentProps) {
 				tcgMode && 'shadow-md',
 				isHovered && tcgMode && 'scale-[1.01]'
 			)}
-			style={{ background: `linear-gradient(135deg, ${cardColor}15, ${cardColor}05)` }}
+			style={{
+				background: `linear-gradient(135deg, color-mix(in oklab, ${cardColor}, transparent 85%), color-mix(in oklab, ${cardColor}, transparent 95%))`,
+			}}
 		>
 			<TCGEffects
 				calculatedRarity={tagData.calculatedRarity}
@@ -342,11 +326,13 @@ function getContainerStyles(cardColor: string, tcgMode: boolean, compact?: boole
 	return {
 		background: 'rgba(var(--effect-shadow-rgb), 0.05)',
 		borderRadius: tcgMode ? '12px' : '8px',
-		border: tcgMode ? `2px solid ${cardColor}40` : '1px solid rgba(var(--effect-highlight-rgb), 0.1)',
+		border: tcgMode
+			? `2px solid color-mix(in oklab, ${cardColor}, transparent 60%)`
+			: '1px solid rgba(var(--effect-highlight-rgb), 0.1)',
 		transition: 'all 0.3s ease',
 		backdropFilter: 'blur(10px)',
 		boxShadow: tcgMode
-			? `0 8px 32px rgba(var(--effect-shadow-rgb), 0.1), 0 4px 16px ${cardColor}30, inset 0 1px 0 rgba(var(--effect-highlight-rgb), 0.1)`
+			? `0 8px 32px rgba(var(--effect-shadow-rgb), 0.1), 0 4px 16px color-mix(in oklab, ${cardColor}, transparent 70%), inset 0 1px 0 rgba(var(--effect-highlight-rgb), 0.1)`
 			: '0 4px 8px rgba(var(--effect-shadow-rgb), 0.1)',
 		minHeight,
 		width: compact ? '180px' : '280px',

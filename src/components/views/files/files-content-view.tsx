@@ -2,12 +2,12 @@ import { FileIcon, Upload } from 'lucide-react';
 import React, { useCallback } from 'react';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
+import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { motion } from '@/components/ui/motion-shim';
 import { Progress } from '@/components/ui/progress';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useToast } from '@/components/ui/use-toast';
@@ -35,12 +35,12 @@ interface FilesContentViewProps {
 const MemoizedEntityCard = React.memo(
 	({ file, onFileClick }: { file: FileWithStats; onFileClick: () => void }) => (
 		<button
-			className="h-full w-full rounded-lg border p-4 text-left shadow-sm hover:bg-gray-50"
+			className="h-full w-full rounded-lg border p-4 text-left shadow-sm hover:bg-muted/50"
 			onClick={onFileClick}
 			type="button"
 		>
 			<h3 className="font-medium">{file.name}</h3>
-			<p className="text-gray-600 text-sm">{file.path}</p>
+			<p className="text-muted-foreground text-sm">{file.path}</p>
 		</button>
 	),
 	(prevProps, nextProps) =>

@@ -74,7 +74,7 @@ export function CollectionCardHeader({
 					{/* Indicador de favorito */}
 					{isFavorite && (
 						<Star
-							className="z-10 ml-auto h-4 w-4 flex-shrink-0 fill-yellow-400 text-yellow-400"
+							className="z-10 ml-auto h-4 w-4 flex-shrink-0 fill-warning text-warning"
 							style={{ filter: 'drop-shadow(0 0 2px rgba(0,0,0,0.5))' }}
 						/>
 					)}
@@ -91,11 +91,11 @@ export function CollectionCardHeader({
 
 			{/* Tipo de la carta - estilo TCG */}
 			<div
-				className="flex items-center justify-between border-y bg-black/40 px-3.5 py-1.5 text-white text-xs"
+				className="flex items-center justify-between border-y bg-muted/40 px-3.5 py-1.5 text-white text-xs"
 				style={{
 					borderBottom: `1px solid ${color}50`,
 					borderTop: `1px solid ${color}30`,
-					boxShadow: 'inset 0 0 10px rgba(0,0,0,0.3)',
+					boxShadow: 'inset 0 0 10px var(--dt-shadow-color-strong)',
 				}}
 			>
 				{/* Categoría (como tipo de carta TCG) */}
@@ -113,7 +113,7 @@ export function CollectionCardHeader({
 					<div className="flex items-center gap-1">
 						<Globe className="h-3.5 w-3.5 opacity-80" />
 						<span
-							className="rounded-sm bg-black/30 px-1.5 py-0.5 text-[10px] opacity-90"
+							className="rounded-sm bg-muted/30 px-1.5 py-0.5 text-[10px] opacity-90"
 							style={{ border: `1px solid ${color}40` }}
 						>
 							{platform}

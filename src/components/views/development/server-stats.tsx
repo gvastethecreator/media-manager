@@ -305,13 +305,13 @@ export function ServerStats() {
 									</CardHeader>
 									<CardContent className="space-y-4">
 										<div className="grid grid-cols-2 gap-4">
-											<div className="rounded-lg bg-green-50 p-3 text-center">
-												<p className="font-bold text-2xl text-green-600">{appStats.requests.success}</p>
-												<p className="text-green-700 text-sm">Exitosas</p>
+											<div className="rounded-lg bg-ui-success p-3 text-center">
+												<p className="font-bold text-2xl text-ui-success-text">{appStats.requests.success}</p>
+												<p className="text-sm text-ui-success-text">Exitosas</p>
 											</div>
-											<div className="rounded-lg bg-red-50 p-3 text-center">
-												<p className="font-bold text-2xl text-red-600">{appStats.requests.error}</p>
-												<p className="text-red-700 text-sm">Errores</p>
+											<div className="rounded-lg bg-ui-error p-3 text-center">
+												<p className="font-bold text-2xl text-ui-error-text">{appStats.requests.error}</p>
+												<p className="text-sm text-ui-error-text">Errores</p>
 											</div>
 										</div>
 										<div className="text-center">
@@ -408,9 +408,9 @@ export function ServerStats() {
 											<Badge variant="destructive">{appStats.errors.count}</Badge>
 										</div>
 										{appStats.errors.last && (
-											<div className="rounded-lg border border-red-200 bg-red-50 p-3">
-												<p className="font-medium text-red-800">Último error:</p>
-												<p className="mt-1 text-red-700 text-sm">{appStats.errors.last.mensaje}</p>
+											<div className="rounded-lg border-ui-error-border bg-ui-error p-3">
+												<p className="font-medium text-destructive">Último error:</p>
+												<p className="mt-1 text-destructive text-sm">{appStats.errors.last.mensaje}</p>
 												<Badge className="mt-2" variant="outline">
 													{appStats.errors.last.tipo}
 												</Badge>

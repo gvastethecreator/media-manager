@@ -66,6 +66,20 @@ export interface BrowserViewProps {
 	scrollContainer?: HTMLElement | null;
 	/** Callback cuando el contenedor está listo */
 	onContainerReady?: (el: HTMLDivElement | null) => void;
+	/** Callback cuando el root del layout está listo */
+	onLayoutRootReady?: (el: HTMLElement | null) => void;
+	/** Límite de items animados en layout */
+	layoutItemLimit?: number;
+	/** Suprime animación de aparición (p.ej. al cambiar vista) */
+	suppressAppearAnimation?: boolean;
+	/** Configuración de virtualización */
+	virtualization?: {
+		enabled: boolean;
+		threshold: number;
+		overscan: number;
+		estimatedItemHeight: number;
+		maxItems: number;
+	};
 }
 
 /**

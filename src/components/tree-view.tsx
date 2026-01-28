@@ -2,7 +2,7 @@
 
 import { ChevronRight, File, Folder, FolderOpen } from 'lucide-react';
 import React, { useCallback, useState } from 'react';
-import { AnimatePresence, motion } from '@/components/ui/motion-shim';
+import { AnimatePresence, motion } from '@/components/ui/animejs-shim';
 import { cn } from '@/lib/utils';
 
 // Types

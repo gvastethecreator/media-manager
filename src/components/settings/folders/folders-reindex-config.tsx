@@ -148,7 +148,7 @@ export function StructuredReindexConfig({
 						<div className="flex items-center justify-between">
 							<div className="space-y-1">
 								<Label className="flex items-center gap-2 text-sm" htmlFor="skip-thumbnails">
-									<Image className="h-3.5 w-3.5 text-orange-500" />
+									<Image className="h-3.5 w-3.5 text-warning" />
 									Saltar Thumbnails
 								</Label>
 								<p className="text-muted-foreground text-xs">

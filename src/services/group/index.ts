@@ -4,4 +4,4 @@
  * @description Exporta todas las funcionalidades del servicio de grupos
  */
 
-export * from './group.service';
+export { GroupService, GroupServiceLive } from '@/services/secondary/secondary-services.effect';

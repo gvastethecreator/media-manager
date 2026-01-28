@@ -47,7 +47,7 @@ function cleanupThumbCache() {
 
 function cacheKeyFor(
 	item: MediaItem,
-	kind: 'image' | 'videoPoster' | 'json' | 'audio' | 'file3d' | 'other',
+	kind: 'image' | 'videoPoster' | 'jsonFile' | 'audio' | 'file3d' | 'other',
 	quality: ThumbnailQuality
 ) {
 	return `${kind}:${item.id}:q${quality}`;
@@ -74,6 +74,7 @@ function MediaThumbnailInner({
 	const [error, setError] = React.useState<string | null>(null);
 	const [hovered, setHovered] = React.useState(false);
 	const [hasPlayedInitialAnimation, setHasPlayedInitialAnimation] = React.useState(false);
+	const [isLoaded, setIsLoaded] = React.useState(false);
 
 	const rafRef = React.useRef<number | null>(null);
 	const abortRef = React.useRef<AbortController | null>(null);
@@ -205,7 +206,7 @@ function MediaThumbnailInner({
 					}
 					if (alive) setSrc(url || item.thumbnailUrl || '');
 				} else if (item.entityType === 'jsonFile') {
-					const key = cacheKeyFor(item, 'json', quality);
+					const key = cacheKeyFor(item, 'jsonFile', quality);
 					url = thumbnailCache.get(key) || '';
 					if (!url) {
 						url = await generateJsonPreview(item as any);
@@ -342,6 +343,11 @@ function MediaThumbnailInner({
 	}, [style, aspectStyle, lockAspectRatio]);
 
 	const validSrc = src || item.thumbnailUrl;
+	const imgClassName = cn('media-thumbnail-img', isLoaded && 'is-loaded');
+
+	React.useEffect(() => {
+		setIsLoaded(false);
+	}, [validSrc]);
 
 	React.useEffect(() => {
 		return () => {
@@ -369,7 +375,17 @@ function MediaThumbnailInner({
 	}
 
 	if (!isVideo && isGif && validSrc) {
-		return <img alt={item.name} className={baseClass} loading="lazy" src={validSrc} style={baseStyle} {...imgProps} />;
+		return (
+			<img
+				alt={item.name}
+				className={cn(baseClass, imgClassName)}
+				loading="lazy"
+				onLoad={() => setIsLoaded(true)}
+				src={validSrc}
+				style={baseStyle}
+				{...imgProps}
+			/>
+		);
 	}
 
 	if (!validSrc) {
@@ -396,10 +412,11 @@ function MediaThumbnailInner({
 			>
 				<img
 					alt={item.name}
-					className="h-full w-full"
+					className={cn('h-full w-full', imgClassName)}
 					loading="lazy"
 					onBlur={() => setHovered(false)}
 					onFocus={() => setHovered(true)}
+					onLoad={() => setIsLoaded(true)}
 					onMouseEnter={() => setHovered(true)}
 					onMouseLeave={() => setHovered(false)}
 					src={validSrc}
@@ -407,7 +424,11 @@ function MediaThumbnailInner({
 					{...imgProps}
 				/>
 				{badgeInfo && (
-					<div className={cn(badgeClasses.container, badgeInfo.bg, 'media-thumbnail-badge')} title={badgeInfo.title}>
+					<div
+						className={cn(badgeClasses.container, 'media-thumbnail-badge')}
+						style={{ backgroundColor: `color-mix(in oklch, ${badgeInfo.color} 85%, transparent)` }}
+						title={badgeInfo.title}
+					>
 						<span className={badgeClasses.text}>{badgeInfo.text}</span>
 					</div>
 				)}
@@ -422,10 +443,11 @@ function MediaThumbnailInner({
 		<div className={cn(baseClass, 'relative')} ref={baseViewport.ref} style={{ ...aspectStyle, ...style }}>
 			<img
 				alt={item.name}
-				className="h-full w-full"
+				className={cn('h-full w-full', imgClassName)}
 				loading="lazy"
 				onBlur={() => setHovered(false)}
 				onFocus={() => setHovered(true)}
+				onLoad={() => setIsLoaded(true)}
 				onMouseEnter={() => setHovered(true)}
 				onMouseLeave={() => setHovered(false)}
 				src={validSrc}
@@ -433,7 +455,11 @@ function MediaThumbnailInner({
 				{...imgProps}
 			/>
 			{badgeInfo && (
-				<div className={cn(badgeClasses.container, badgeInfo.bg, 'media-thumbnail-badge')} title={badgeInfo.title}>
+				<div
+					className={cn(badgeClasses.container, 'media-thumbnail-badge')}
+					style={{ backgroundColor: `color-mix(in oklch, ${badgeInfo.color} 85%, transparent)` }}
+					title={badgeInfo.title}
+				>
 					<span className={badgeClasses.text}>{badgeInfo.text}</span>
 				</div>
 			)}
@@ -476,17 +502,17 @@ function getFallbackIcon(entityType: MediaItem['entityType']): string {
 function getBadgeInfo(entityType: MediaItem['entityType']) {
 	switch (entityType) {
 		case 'folder':
-			return { text: 'DIR', bg: 'bg-indigo-600/90', title: 'Folder' };
+			return { text: 'DIR', color: 'var(--entity-folder)', title: 'Folder' };
 		case 'video':
-			return { text: 'VID', bg: 'bg-blue-600/90', title: 'Video File' };
+			return { text: 'VID', color: 'var(--entity-video)', title: 'Video File' };
 		case 'audio':
-			return { text: 'AUD', bg: 'bg-orange-600/90', title: 'Audio File' };
+			return { text: 'AUD', color: 'var(--entity-audio)', title: 'Audio File' };
 		case 'document':
-			return { text: 'PDF', bg: 'bg-red-600/90', title: 'Document File' };
+			return { text: 'PDF', color: 'var(--entity-document)', title: 'Document File' };
 		case 'jsonFile':
-			return { text: 'JSON', bg: 'bg-green-600/90', title: 'JSON File' };
+			return { text: 'JSON', color: 'var(--entity-json)', title: 'JSON File' };
 		case 'file3d':
-			return { text: '3D', bg: 'bg-purple-600/90', title: '3D Model' };
+			return { text: '3D', color: 'var(--entity-file-3d)', title: '3D Model' };
 		default:
 			return null;
 	}
@@ -498,18 +524,19 @@ function getBadgeClasses(width?: number, height?: number) {
 	if (minDimension <= 30) {
 		return {
 			container:
-				'absolute right-0 bottom-0 rounded px-0.5 py-0 font-bold text-white text-[7px] backdrop-blur-sm leading-none min-w-0',
+				'absolute right-0 bottom-0 rounded px-0.5 py-0 font-bold text-foreground text-[7px] backdrop-blur-sm leading-none min-w-0',
 			text: 'truncate',
 		};
 	}
 	if (minDimension <= 100) {
 		return {
-			container: 'absolute right-1 bottom-1 rounded px-1 py-0.5 font-medium text-white text-[9px] backdrop-blur-sm',
+			container:
+				'absolute right-1 bottom-1 rounded px-1 py-0.5 font-medium text-foreground text-[9px] backdrop-blur-sm',
 			text: '',
 		};
 	}
 	return {
-		container: 'absolute right-1 bottom-1 rounded px-1.5 py-0.5 font-medium text-white text-xs backdrop-blur-sm',
+		container: 'absolute right-1 bottom-1 rounded px-1.5 py-0.5 font-medium text-foreground text-xs backdrop-blur-sm',
 		text: '',
 	};
 }

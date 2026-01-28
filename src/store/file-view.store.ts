@@ -54,8 +54,11 @@ export const useFileViewStore = create<FileViewState>()(
 			...initialState,
 
 			setViewMode: (mode: ViewMode) => {
-				viewLogger.info(`🔄 Cambiando modo de visualización a: ${mode}`);
-				set({ viewMode: mode });
+				set((state: FileViewState) => {
+					if (state.viewMode === mode) return state;
+					viewLogger.info(`🔄 Cambiando modo de visualización a: ${mode}`);
+					return { viewMode: mode };
+				});
 			},
 
 			setSortBy: (field: string) => {

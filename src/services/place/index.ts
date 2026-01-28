@@ -4,4 +4,4 @@
  * @module services/place
  */
 
-export * from './place.service';
+export * from './place.service.effect';

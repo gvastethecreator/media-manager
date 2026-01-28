@@ -51,7 +51,13 @@ export const WildcardSchema = z.object({
 	id: z.string(),
 	name: z.string().min(1, 'El nombre es obligatorio'),
 	emoji: z.string().default('🎭'),
-	color: z.string().default('#6366F1'),
+	color: z
+		.string()
+		.refine(
+			(val) => /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
+			'Color debe ser un valor hexadecimal o una variable CSS válida'
+		)
+		.default('var(--entity-wildcard)'),
 	description: z.string().nullable().optional(),
 	shortcut: z.string().nullable().optional(),
 	category: z.string().nullable().optional(),

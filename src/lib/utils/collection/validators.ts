@@ -37,8 +37,11 @@ export const createCollectionSchema = z.object({
 	description: z.string().max(1000).optional(),
 	color: z
 		.string()
-		.regex(/^#([0-9A-F]{3}){1,2}$/i, 'Formato de color inválido')
-		.default('#3b82f6'),
+		.refine(
+			(val) => /^#([0-9A-F]{3}){1,2}$/i.test(val) || val.startsWith('var(--'),
+			'Color debe ser un valor hexadecimal o una variable CSS válida'
+		)
+		.default('var(--entity-collection)'),
 	presetId: z.string().optional().nullable(),
 	category: z.nativeEnum(CollectionCategory).optional(),
 	rarity: z.nativeEnum(CollectionRarity).default(CollectionRarity.COMMON),

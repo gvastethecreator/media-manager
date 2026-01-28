@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "89b0f43d-981f-45b8-bbe9-e98b690bd484",
+  "id": "063b300a-b417-4f2d-8e9e-e623fd2e4501",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "Activity": {
@@ -662,6 +662,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "filters": {
+          "name": "filters",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "isFavorite": {
           "name": "isFavorite",
           "type": "integer",
@@ -669,6 +676,13 @@
           "notNull": true,
           "autoincrement": false,
           "default": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "age": {
           "name": "age",
@@ -937,6 +951,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "filters": {
+          "name": "filters",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "isFavorite": {
           "name": "isFavorite",
           "type": "integer",
@@ -944,6 +965,13 @@
           "notNull": true,
           "autoincrement": false,
           "default": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "type": {
           "name": "type",
@@ -3708,6 +3736,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "filters": {
+          "name": "filters",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "isFavorite": {
           "name": "isFavorite",
           "type": "integer",
@@ -3715,6 +3750,13 @@
           "notNull": true,
           "autoincrement": false,
           "default": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "type": {
           "name": "type",
@@ -3989,6 +4031,13 @@
           "notNull": false,
           "autoincrement": false
         },
+        "filters": {
+          "name": "filters",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
         "isFavorite": {
           "name": "isFavorite",
           "type": "integer",
@@ -3996,6 +4045,13 @@
           "notNull": true,
           "autoincrement": false,
           "default": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
         },
         "type": {
           "name": "type",

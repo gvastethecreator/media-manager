@@ -100,7 +100,10 @@ export const createUISlice: StateCreator<MetadataStore, [], [], UIState & UIActi
 	},
 
 	// Visualización
-	setViewMode: (viewMode) => set({ viewMode }),
+	setViewMode: (viewMode) => {
+		if (get().viewMode === viewMode) return;
+		set({ viewMode });
+	},
 
 	// Modales
 	openCreateModal: () => set({ isCreateModalOpen: true }),

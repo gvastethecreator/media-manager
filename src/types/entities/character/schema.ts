@@ -109,6 +109,14 @@ export const CharacterSchema = BaseEntitySchema.extend({
 	race: z.string(),
 	alignment: z.string(),
 	backstory: z.string().optional(),
+	emoji: z.string().default('👤'),
+	color: z
+		.string()
+		.refine(
+			(val) => /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
+			'Color debe ser un valor hexadecimal o una variable CSS válida'
+		)
+		.default('var(--entity-character)'),
 
 	// Objetos complejos (parsear JSON antes de validar)
 	stats: z.preprocess(safeJsonParse({}), CharacterStatsSchema.optional()),

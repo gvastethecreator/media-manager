@@ -139,14 +139,14 @@ export function getWorldItemStats(worldItems: WorldItemExtended[]) {
  */
 export function generateWorldItemColor(rarity: string): string {
 	const rarityColors: Record<string, string> = {
-		common: '#9CA3AF', // Gris
-		uncommon: '#10B981', // Verde
-		rare: '#3B82F6', // Azul
-		epic: '#8B5CF6', // Púrpura
-		legendary: '#F59E0B', // Amarillo
-		mythic: '#EF4444', // Rojo
-		unique: '#EC4899', // Rosa
-		artifact: '#F97316', // Naranja
+		common: 'var(--dt-neutral-400)', // Gris
+		uncommon: 'var(--dt-success-500)', // Verde
+		rare: 'var(--dt-primary-500)', // Azul
+		epic: 'var(--preset-purple)', // Púrpura
+		legendary: 'var(--dt-warning-500)', // Amarillo
+		mythic: 'var(--dt-danger-500)', // Rojo
+		unique: 'var(--preset-pink)', // Rosa
+		artifact: 'var(--preset-orange)', // Naranja
 	};
 
 	return rarityColors[rarity.toLowerCase()] || rarityColors.common;

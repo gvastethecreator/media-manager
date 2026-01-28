@@ -114,20 +114,20 @@ export enum CharacterSortOption {
  * Mapa de colores sugeridos por clase
  */
 export const CHARACTER_CLASS_COLORS: Record<CharacterClass, string> = {
-	[CharacterClass.WARRIOR]: '#C62828', // Rojo oscuro
-	[CharacterClass.MAGE]: '#303F9F', // Azul índigo
-	[CharacterClass.ROGUE]: '#827717', // Verde oliva
-	[CharacterClass.CLERIC]: '#FFEB3B', // Amarillo
-	[CharacterClass.RANGER]: '#2E7D32', // Verde bosque
-	[CharacterClass.BARD]: '#6A1B9A', // Morado
-	[CharacterClass.PALADIN]: '#FFC107', // Ámbar
-	[CharacterClass.DRUID]: '#004D40', // Verde azulado
-	[CharacterClass.MONK]: '#F57F17', // Ámbar oscuro
-	[CharacterClass.WARLOCK]: '#4A148C', // Púrpura oscuro
-	[CharacterClass.SORCERER]: '#C2185B', // Rosa oscuro
-	[CharacterClass.BARBARIAN]: '#BF360C', // Naranja profundo
-	[CharacterClass.ARTIFICER]: '#0097A7', // Cian
-	[CharacterClass.UNKNOWN]: '#607D8B', // Gris azulado
+	[CharacterClass.WARRIOR]: 'var(--entity-class-warrior)',
+	[CharacterClass.MAGE]: 'var(--entity-class-mage)',
+	[CharacterClass.ROGUE]: 'var(--entity-class-rogue)',
+	[CharacterClass.CLERIC]: 'var(--entity-class-cleric)',
+	[CharacterClass.RANGER]: 'var(--entity-class-ranger)',
+	[CharacterClass.BARD]: 'var(--entity-class-bard)',
+	[CharacterClass.PALADIN]: 'var(--entity-class-paladin)',
+	[CharacterClass.DRUID]: 'var(--entity-class-druid)',
+	[CharacterClass.MONK]: 'var(--entity-class-monk)',
+	[CharacterClass.WARLOCK]: 'var(--entity-class-warlock)',
+	[CharacterClass.SORCERER]: 'var(--entity-class-sorcerer)',
+	[CharacterClass.BARBARIAN]: 'var(--entity-class-barbarian)',
+	[CharacterClass.ARTIFICER]: 'var(--entity-class-artificer)',
+	[CharacterClass.UNKNOWN]: 'var(--entity-class-unknown)',
 };
 
 /**

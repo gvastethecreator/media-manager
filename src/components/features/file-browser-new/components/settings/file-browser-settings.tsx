@@ -12,15 +12,24 @@ import {
 	Layers,
 	LayoutGrid,
 	List,
+	Monitor,
 	RefreshCcw,
 	RotateCcw,
 	Search,
 	Settings,
+	Sliders,
 	Table,
 	X,
 } from 'lucide-react';
-import { memo } from 'react';
+import { memo, useMemo } from 'react';
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
@@ -30,7 +39,6 @@ import {
 	ColorPicker,
 	type PaginationMode,
 	Row,
-	Section,
 	useSettingsBindings,
 	VIEW_MODES,
 	type ViewMode,
@@ -44,8 +52,6 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 		toggleGroupByEntityType,
 		includeSubfolders,
 		toggleIncludeSubfolders,
-		useCanvasRendering,
-		setUseCanvasRendering,
 		virtualization,
 		backgroundColor,
 		setBackgroundColor,
@@ -57,7 +63,6 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 		toggleInfiniteScrollEnabled,
 		toggleInfiniteScrollAutoLoad,
 		views,
-		setRenderingMode,
 		setViewConfig,
 		setVirtualization,
 		setSearchQuery,
@@ -68,389 +73,353 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 
 	const { setShowInterfaceSettings } = useDetailsPanel();
 
+	// Configuración específica de la vista activa
+	const activeViewConfig = useMemo(() => {
+		const config = views[viewMode as keyof typeof views];
+		if (!config) return null;
+
+		switch (viewMode) {
+			case 'grid':
+			case 'masonry':
+			case 'cards':
+				return (
+					<Row>
+						<Label className="text-muted-foreground text-xs">
+							{viewMode === 'masonry' ? 'Ancho base' : 'Tamaño de celda'}
+						</Label>
+						<div className="flex items-center gap-2">
+							<Input
+								className="h-7 w-20 text-right text-xs"
+								min={60}
+								onChange={(e) => setViewConfig(viewMode as any, { itemSize: Number(e.target.value) } as any)}
+								type="number"
+								value={(config as any).itemSize}
+							/>
+							<span className="text-muted-foreground text-[10px]">px</span>
+						</div>
+					</Row>
+				);
+			case 'list':
+			case 'table':
+				return (
+					<Row>
+						<Label className="text-muted-foreground text-xs">Altura de fila</Label>
+						<div className="flex items-center gap-2">
+							<Input
+								className="h-7 w-20 text-right text-xs"
+								min={20}
+								onChange={(e) => setViewConfig(viewMode as any, { rowHeight: Number(e.target.value) } as any)}
+								type="number"
+								value={(config as any).rowHeight}
+							/>
+							<span className="text-muted-foreground text-[10px]">px</span>
+						</div>
+					</Row>
+				);
+			default:
+				return null;
+		}
+	}, [viewMode, views, setViewConfig]);
+
 	return (
-		<div className="h-full space-y-4 overflow-y-auto">
-			{/* Header */}
-			<div className="sticky top-0 flex items-center justify-between border-b bg-background/95 pb-2 backdrop-blur-sm">
+		<div className="flex h-full flex-col">
+			{/* Header Compacto */}
+			<div className="flex items-center justify-between border-border/40 border-b bg-background px-4 py-3">
 				<div className="flex items-center gap-2">
-					<Settings className="h-5 w-5 text-blue-600" />
-					<h3 className="font-semibold text-base text-gray-800 dark:text-gray-200">Configuración del Explorador</h3>
+					<div className="rounded-md bg-primary/10 p-1.5 text-primary">
+						<Sliders className="h-4 w-4" />
+					</div>
+					<h3 className="font-bold text-sm tracking-tight text-foreground">Ajustes del Explorador</h3>
 				</div>
-				<div className="flex items-center gap-2">
-					<Button className="text-xs" onClick={() => resetFilters()} size="sm" variant="ghost">
-						<RefreshCcw className="mr-1 h-3 w-3" />
-						Filtros
-					</Button>
-					<Button className="text-xs" onClick={() => resetAll()} size="sm" variant="ghost">
-						<RotateCcw className="mr-1 h-3 w-3" />
-						Todo
-					</Button>
-					<Button
-						className="text-orange-600 text-xs"
-						onClick={() => {
-							resetLocalStorage();
-							window.location.reload();
-						}}
-						size="sm"
-						title="Limpiar localStorage y recargar página"
-						variant="ghost"
-					>
-						<X className="mr-1 h-3 w-3" />
-						Debug
-					</Button>
-					<Button onClick={() => setShowInterfaceSettings(false)} size="sm" variant="outline">
-						<X className="h-3 w-3" />
-					</Button>
-				</div>
+				<Button
+					className="h-8 w-8 hover:bg-muted"
+					onClick={() => setShowInterfaceSettings(false)}
+					size="icon"
+					variant="ghost"
+				>
+					<X className="h-4 w-4" />
+				</Button>
 			</div>
 
-			{/* Global Settings */}
-			<Section color="text-blue-600" icon={Settings} title="Configuración Global">
-				<Row>
-					<Label className="text-gray-600 text-sm dark:text-gray-400">Vista por defecto</Label>
-					<Select onValueChange={(v) => setViewMode(v as ViewMode)} value={viewMode}>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<SelectTrigger className="h-8 w-40">
-									<SelectValue />
-								</SelectTrigger>
-							</TooltipTrigger>
-							<TooltipContent>Cambia el modo de vista por defecto</TooltipContent>
-						</Tooltip>
-						<SelectContent>
-							{VIEW_MODES.map((m) => {
-								const IconComponent = m.icon;
-								return (
-									<SelectItem key={m.value} value={m.value}>
-										<div className="flex items-center gap-2">
-											<IconComponent className={`h-3 w-3 ${m.color}`} />
-											<span>{m.label}</span>
+			<div className="flex-1 overflow-y-auto p-4 pt-2">
+				<Accordion className="w-full" defaultValue="appearance" type="single">
+					{/* 1. APARIENCIA */}
+					<AccordionItem className="border-border/40" value="appearance">
+						<AccordionTrigger className="hover:no-underline py-3">
+							<div className="flex items-center gap-2.5">
+								<Monitor className="h-4 w-4" style={{ color: 'var(--dt-info-500)' }} />
+								<span className="text-sm font-semibold">Apariencia</span>
+							</div>
+						</AccordionTrigger>
+						<AccordionContent className="space-y-3 pb-4">
+							<div className="space-y-2">
+								<Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+									Interfaz Global
+								</Label>
+								<Row>
+									<Label className="text-muted-foreground text-xs font-medium">Modo de vista</Label>
+									<Select onValueChange={(v) => setViewMode(v as ViewMode)} value={viewMode}>
+										<SelectTrigger className="h-7 w-32 text-xs">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											{VIEW_MODES.map((m) => {
+												const IconComponent = m.icon;
+												return (
+													<SelectItem key={m.value} value={m.value}>
+														<div className="flex items-center gap-2">
+															<IconComponent className={`h-3 w-3 ${m.color}`} />
+															<span className="text-xs">{m.label}</span>
+														</div>
+													</SelectItem>
+												);
+											})}
+										</SelectContent>
+									</Select>
+								</Row>
+								<Row>
+									<Label className="text-muted-foreground text-xs font-medium">Fondo personalizado</Label>
+									<ColorPicker onChange={setBackgroundColor} value={backgroundColor} />
+								</Row>
+							</div>
+
+							<div className="space-y-2 pt-1">
+								<Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+									Ajustes de Vista ({viewMode})
+								</Label>
+								{activeViewConfig}
+							</div>
+						</AccordionContent>
+					</AccordionItem>
+
+					{/* 2. ORGANIZACIÓN */}
+					<AccordionItem className="border-border/40" value="organization">
+						<AccordionTrigger className="hover:no-underline py-3">
+							<div className="flex items-center gap-2.5">
+								<FolderTree className="h-4 w-4" style={{ color: 'var(--dt-success-500)' }} />
+								<span className="text-sm font-semibold">Organización</span>
+							</div>
+						</AccordionTrigger>
+						<AccordionContent className="space-y-3 pb-4">
+							<Row>
+								<div className="flex flex-col gap-0.5">
+									<Label className="text-xs font-medium">Agrupar por tipo</Label>
+									<p className="text-[10px] text-muted-foreground">Separa imágenes de videos</p>
+								</div>
+								<Switch checked={groupByEntityType} onCheckedChange={toggleGroupByEntityType} />
+							</Row>
+							<Row>
+								<div className="flex flex-col gap-0.5">
+									<Label className="text-xs font-medium">Modo recursivo</Label>
+									<p className="text-[10px] text-muted-foreground">Incluir subcarpetas</p>
+								</div>
+								<Switch checked={includeSubfolders} onCheckedChange={toggleIncludeSubfolders} />
+							</Row>
+							<div className="space-y-2 pt-2">
+								<Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+									Búsqueda Rápida
+								</Label>
+								<div className="relative">
+									<Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-muted-foreground" />
+									<Input
+										className="h-9 pl-8 text-xs focus-visible:ring-success/30"
+										onChange={(e) => setSearchQuery(e.target.value)}
+										placeholder="Filtrar por nombre..."
+									/>
+								</div>
+							</div>
+						</AccordionContent>
+					</AccordionItem>
+
+					{/* 3. RENDIMIENTO */}
+					<AccordionItem className="border-border/40" value="performance">
+						<AccordionTrigger className="hover:no-underline py-3">
+							<div className="flex items-center gap-2.5">
+								<Gauge className="h-4 w-4" style={{ color: 'var(--dt-warning-500)' }} />
+								<span className="text-sm font-semibold">Rendimiento</span>
+							</div>
+						</AccordionTrigger>
+						<AccordionContent className="space-y-4 pb-4">
+							{/* Virtualización */}
+							<div className="space-y-2">
+								<div className="flex items-center justify-between">
+									<Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+										Virtualización
+									</Label>
+									<Switch
+										checked={virtualization.enabled}
+										onCheckedChange={(v) => setVirtualization({ enabled: v })}
+									/>
+								</div>
+								{virtualization.enabled && (
+									<div className="grid grid-cols-2 gap-2">
+										<div className="space-y-1.5 rounded-md bg-muted/30 p-2 border border-border/20">
+											<Label className="text-[10px] font-medium text-muted-foreground uppercase">Umbral</Label>
+											<div className="flex items-center gap-1.5">
+												<Input
+													className="h-6 w-full text-right text-xs"
+													min={0}
+													onChange={(e) => setVirtualization({ threshold: Number(e.target.value) })}
+													type="number"
+													value={virtualization.threshold}
+												/>
+												<span className="text-[10px] text-muted-foreground">it.</span>
+											</div>
 										</div>
-									</SelectItem>
-								);
-							})}
-						</SelectContent>
-					</Select>
-				</Row>
-				<Row>
-					<Label className="text-gray-600 text-sm dark:text-gray-400">Color de fondo</Label>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<div>
-								<ColorPicker onChange={setBackgroundColor} value={backgroundColor} />
+										<div className="space-y-1.5 rounded-md bg-muted/30 p-2 border border-border/20">
+											<Label className="text-[10px] font-medium text-muted-foreground uppercase">Overscan</Label>
+											<div className="flex items-center gap-1.5">
+												<Input
+													className="h-6 w-full text-right text-xs"
+													min={0}
+													onChange={(e) => setVirtualization({ overscan: Number(e.target.value) })}
+													type="number"
+													value={virtualization.overscan}
+												/>
+												<span className="text-[10px] text-muted-foreground">filas</span>
+											</div>
+										</div>
+									</div>
+								)}
 							</div>
-						</TooltipTrigger>
-						<TooltipContent>Personaliza el color de fondo del explorador</TooltipContent>
-					</Tooltip>
-				</Row>
-			</Section>
 
-			{/* Folders & Grouping */}
-			<Section color="text-green-600" icon={FolderTree} title="Carpetas y Agrupación">
-				<Row>
-					<Label className="text-gray-600 text-sm dark:text-gray-400">Agrupar por tipo</Label>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Switch checked={groupByEntityType} onCheckedChange={toggleGroupByEntityType} />
-						</TooltipTrigger>
-						<TooltipContent>Agrupa resultados por tipo de entidad</TooltipContent>
-					</Tooltip>
-				</Row>
-				<Row>
-					<Label className="text-gray-600 text-sm dark:text-gray-400">Incluir subcarpetas</Label>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Switch checked={includeSubfolders} onCheckedChange={toggleIncludeSubfolders} />
-						</TooltipTrigger>
-						<TooltipContent>Incluye elementos de todas las subcarpetas</TooltipContent>
-					</Tooltip>
-				</Row>
-			</Section>
-
-			{/* Performance */}
-			<Section color="text-orange-600" icon={Gauge} title="Rendimiento y Virtualización">
-				<Row>
-					<Label className="text-gray-600 text-sm dark:text-gray-400">Virtualización</Label>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Switch checked={virtualization.enabled} onCheckedChange={(v) => setVirtualization({ enabled: v })} />
-						</TooltipTrigger>
-						<TooltipContent>Mejora rendimiento en listas grandes</TooltipContent>
-					</Tooltip>
-				</Row>
-				<Row>
-					<Label className="text-gray-600 text-sm dark:text-gray-400">Umbral de activación</Label>
-					<div className="flex items-center gap-2">
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<input
-									className="h-8 w-24 rounded-md border bg-background px-2 text-right text-gray-600 text-sm dark:text-gray-400"
-									min={0}
-									onChange={(e) => setVirtualization({ threshold: Number(e.target.value) })}
-									type="number"
-									value={virtualization.threshold}
-								/>
-							</TooltipTrigger>
-							<TooltipContent>Cantidad mínima para activar virtualización</TooltipContent>
-						</Tooltip>
-						<span className="text-muted-foreground text-xs">items</span>
-					</div>
-				</Row>
-				<Row>
-					<Label className="text-gray-600 text-sm dark:text-gray-400">Overscan</Label>
-					<div className="flex items-center gap-2">
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<input
-									className="h-8 w-24 rounded-md border bg-background px-2 text-right text-gray-600 text-sm dark:text-gray-400"
-									min={0}
-									onChange={(e) => setVirtualization({ overscan: Number(e.target.value) })}
-									type="number"
-									value={virtualization.overscan}
-								/>
-							</TooltipTrigger>
-							<TooltipContent>Filas extra renderizadas fuera de pantalla</TooltipContent>
-						</Tooltip>
-						<span className="text-muted-foreground text-xs">filas</span>
-					</div>
-				</Row>
-				<Row>
-					<Label className="text-gray-600 text-sm dark:text-gray-400">Paginación</Label>
-					<Select onValueChange={(v) => setPaginationMode(v as PaginationMode)} value={pagination.mode}>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<SelectTrigger className="h-8 w-40">
-									<SelectValue />
-								</SelectTrigger>
-							</TooltipTrigger>
-							<TooltipContent>Elige el modo de carga de elementos</TooltipContent>
-						</Tooltip>
-						<SelectContent>
-							<SelectItem value="pagination">Páginas</SelectItem>
-							<SelectItem value="infinite">Scroll infinito</SelectItem>
-						</SelectContent>
-					</Select>
-				</Row>
-				<Row>
-					<Label className="text-gray-600 text-sm dark:text-gray-400">Items por página</Label>
-					<div className="flex items-center gap-2">
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<input
-									className="h-8 w-28 rounded-md border bg-background px-2 text-right text-gray-600 text-sm dark:text-gray-400"
-									min={1}
-									onChange={(e) => setPageSize(Number(e.target.value))}
-									type="number"
-									value={pagination.pageSize}
-								/>
-							</TooltipTrigger>
-							<TooltipContent>Cantidad de elementos por página</TooltipContent>
-						</Tooltip>
-						<span className="text-muted-foreground text-xs">items</span>
-					</div>
-				</Row>
-			</Section>
-
-			{/* Infinite Scroll */}
-			<Section color="text-cyan-600" icon={ArrowDown} title="Infinite Scroll Automático">
-				<Row>
-					<Label className="text-gray-600 text-sm dark:text-gray-400">Habilitar</Label>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<Switch checked={infiniteScroll.enabled} onCheckedChange={toggleInfiniteScrollEnabled} />
-						</TooltipTrigger>
-						<TooltipContent>Activa el infinite scroll automático</TooltipContent>
-					</Tooltip>
-				</Row>
-				{infiniteScroll.enabled && (
-					<>
-						<Row>
-							<Label className="text-gray-600 text-sm dark:text-gray-400">Auto-carga</Label>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Switch checked={infiniteScroll.autoLoad} onCheckedChange={toggleInfiniteScrollAutoLoad} />
-								</TooltipTrigger>
-								<TooltipContent>Carga automáticamente al llegar al final</TooltipContent>
-							</Tooltip>
-						</Row>
-						<Row>
-							<Label className="text-gray-600 text-sm dark:text-gray-400">Cooldown</Label>
-							<div className="flex items-center gap-2">
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<input
-											className="h-8 w-28 rounded-md border bg-background px-2 text-right text-gray-600 text-sm dark:text-gray-400"
-											max={2000}
-											min={50}
-											onChange={(e) =>
-												setInfiniteScroll({ cooldownMs: Math.min(2000, Math.max(50, Number(e.target.value))) })
-											}
-											step={50}
+							{/* Paginación */}
+							<div className="space-y-2 pt-1 border-t border-border/20 mt-2">
+								<Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+									Carga de Datos
+								</Label>
+								<Row>
+									<Label className="text-xs font-medium text-muted-foreground">Método</Label>
+									<Select onValueChange={(v) => setPaginationMode(v as PaginationMode)} value={pagination.mode}>
+										<SelectTrigger className="h-7 w-32 text-xs">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem className="text-xs" value="pagination">Páginas</SelectItem>
+											<SelectItem className="text-xs" value="infinite">Scroll infinito</SelectItem>
+										</SelectContent>
+									</Select>
+								</Row>
+								<Row>
+									<Label className="text-xs font-medium text-muted-foreground">Items por página</Label>
+									<div className="flex items-center gap-1.5">
+										<Input
+											className="h-7 w-20 text-right text-xs"
+											min={1}
+											onChange={(e) => setPageSize(Number(e.target.value))}
 											type="number"
-											value={infiniteScroll.cooldownMs}
+											value={pagination.pageSize}
 										/>
-									</TooltipTrigger>
-									<TooltipContent>Tiempo mínimo entre cargas automáticas</TooltipContent>
-								</Tooltip>
-								<span className="text-muted-foreground text-xs">ms</span>
+										<span className="text-[10px] text-muted-foreground">it.</span>
+									</div>
+								</Row>
 							</div>
-						</Row>
-						<Row>
-							<Label className="text-gray-600 text-sm dark:text-gray-400">Umbral</Label>
-							<div className="flex items-center gap-2">
-								<Tooltip>
-									<TooltipTrigger asChild>
-										<input
-											className="h-8 w-24 rounded-md border bg-background px-2 text-right text-gray-600 text-sm dark:text-gray-400"
-											max={1000}
-											min={50}
-											onChange={(e) => setInfiniteScroll({ threshold: Number(e.target.value) })}
-											type="number"
-											value={infiniteScroll.threshold}
-										/>
-									</TooltipTrigger>
-									<TooltipContent>Distancia en píxeles para activar carga</TooltipContent>
-								</Tooltip>
-								<span className="text-muted-foreground text-xs">px</span>
+
+							{/* Infinite Scroll */}
+							<div className="space-y-2 pt-1 border-t border-border/20 mt-2">
+								<div className="flex items-center justify-between">
+									<Label className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground/70">
+										Infinite Scroll Auto
+									</Label>
+									<Switch checked={infiniteScroll.enabled} onCheckedChange={toggleInfiniteScrollEnabled} />
+								</div>
+								{infiniteScroll.enabled && (
+									<div className="space-y-2 pl-1 border-l-2 ml-1" style={{ borderColor: 'color-mix(in oklab, var(--dt-warning-500), transparent 80%)' }}>
+										<div className="flex items-center justify-between gap-2 bg-transparent border-none p-0 h-6">
+											<Label className="text-[11px] text-muted-foreground">Carga automática</Label>
+											<Switch checked={infiniteScroll.autoLoad} onCheckedChange={toggleInfiniteScrollAutoLoad} />
+										</div>
+										<div className="grid grid-cols-2 gap-2 pt-1">
+											<div className="flex flex-col gap-1">
+												<Label className="text-[10px] text-muted-foreground">Cooldown</Label>
+												<div className="flex items-center gap-1">
+													<Input
+														className="h-6 w-full text-right text-xs"
+														max={2000}
+														min={50}
+														onChange={(e) =>
+															setInfiniteScroll({
+																cooldownMs: Math.min(2000, Math.max(50, Number(e.target.value))),
+															})
+														}
+														step={50}
+														type="number"
+														value={infiniteScroll.cooldownMs}
+													/>
+													<span className="text-[9px] text-muted-foreground">ms</span>
+												</div>
+											</div>
+											<div className="flex flex-col gap-1">
+												<Label className="text-[10px] text-muted-foreground">Umbral</Label>
+												<div className="flex items-center gap-1">
+													<Input
+														className="h-6 w-full text-right text-xs"
+														max={1000}
+														min={50}
+														onChange={(e) => setInfiniteScroll({ threshold: Number(e.target.value) })}
+														type="number"
+														value={infiniteScroll.threshold}
+													/>
+													<span className="text-[9px] text-muted-foreground">px</span>
+												</div>
+											</div>
+										</div>
+									</div>
+								)}
 							</div>
-						</Row>
-					</>
-				)}
-			</Section>
+						</AccordionContent>
+					</AccordionItem>
 
-			{/* Search */}
-			<Section color="text-purple-600" icon={Search} title="Búsqueda">
-				<Row>
-					<Label className="text-gray-600 text-sm dark:text-gray-400">Texto de búsqueda</Label>
-					<Tooltip>
-						<TooltipTrigger asChild>
-							<input
-								className="h-8 w-60 rounded-md border bg-background px-2 text-gray-600 text-sm dark:text-gray-400"
-								onChange={(e) => setSearchQuery(e.target.value)}
-								placeholder="buscar por nombre..."
-							/>
-						</TooltipTrigger>
-						<TooltipContent>Filtra por nombre o texto</TooltipContent>
-					</Tooltip>
-				</Row>
-			</Section>
+					{/* 4. AVANZADO */}
+					<AccordionItem className="border-none" value="advanced">
+						<AccordionTrigger className="hover:no-underline py-3 opacity-70 hover:opacity-100 transition-opacity">
+							<div className="flex items-center gap-2.5">
+								<Settings className="h-4 w-4" style={{ color: 'var(--dt-primary-500)' }} />
+								<span className="text-sm font-semibold">Avanzado</span>
+							</div>
+						</AccordionTrigger>
+						<AccordionContent className="space-y-2 pb-4 pt-1">
+							<div className="grid grid-cols-2 gap-2">
+								<Button
+									className="h-8 text-[11px] justify-start px-2 hover:bg-primary/10"
+									onClick={() => resetFilters()}
+									variant="outline"
+								>
+									<RefreshCcw className="mr-2 h-3 w-3" />
+									Reset Filtros
+								</Button>
+								<Button
+									className="h-8 text-[11px] justify-start px-2 hover:text-warning hover:bg-warning/10 hover:border-warning/30"
+									onClick={() => resetAll()}
+									variant="outline"
+								>
+									<RotateCcw className="mr-2 h-3 w-3" />
+									Limpiar Todo
+								</Button>
+							</div>
+							<Button
+								className="w-full h-8 text-[11px] justify-start px-2 text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
+								onClick={() => {
+									resetLocalStorage();
+									window.location.reload();
+								}}
+								variant="outline"
+							>
+								<X className="mr-2 h-3 w-3" />
+								Restablecer Memoria (LocalStorage)
+							</Button>
+							<div className="rounded-md bg-muted/50 p-2 text-[9px] text-muted-foreground leading-relaxed">
+								<strong>Nota:</strong> Estas acciones restaurarán los valores de fábrica. Restablecer memoria recargará la página por completo.
+							</div>
+						</AccordionContent>
+					</AccordionItem>
+				</Accordion>
+			</div>
 
-			{/* View-specific settings */}
-			<div className="space-y-4">
-				<div className="flex items-center gap-2 border-t pt-4">
-					<Eye className="h-4 w-4 text-gray-500" />
-					<span className="font-medium text-gray-700 text-sm dark:text-gray-300">Configuración por Vista</span>
-				</div>
-
-				{/* Grid */}
-				<Section color="text-blue-600" icon={Grid3X3} title="Grid">
-					<Row>
-						<Label className="text-gray-600 text-sm dark:text-gray-400">Tamaño de celda</Label>
-						<div className="flex items-center gap-2">
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<input
-										className="h-8 w-24 rounded-md border bg-background px-2 text-right text-gray-600 text-sm dark:text-gray-400"
-										min={60}
-										onChange={(e) => setViewConfig('grid', { itemSize: Number(e.target.value) } as any)}
-										type="number"
-										value={(views.grid as any).itemSize}
-									/>
-								</TooltipTrigger>
-								<TooltipContent>Tamaño de cada celda en la cuadrícula</TooltipContent>
-							</Tooltip>
-							<span className="text-muted-foreground text-xs">px</span>
-						</div>
-					</Row>
-				</Section>
-
-				{/* List */}
-				<Section color="text-green-600" icon={List} title="Lista">
-					<Row>
-						<Label className="text-gray-600 text-sm dark:text-gray-400">Altura de fila</Label>
-						<div className="flex items-center gap-2">
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<input
-										className="h-8 w-24 rounded-md border bg-background px-2 text-right text-gray-600 text-sm dark:text-gray-400"
-										min={20}
-										onChange={(e) => setViewConfig('list', { rowHeight: Number(e.target.value) } as any)}
-										type="number"
-										value={(views.list as any).rowHeight}
-									/>
-								</TooltipTrigger>
-								<TooltipContent>Altura de cada fila en la lista</TooltipContent>
-							</Tooltip>
-							<span className="text-muted-foreground text-xs">px</span>
-						</div>
-					</Row>
-				</Section>
-
-				{/* Masonry */}
-				<Section color="text-orange-600" icon={Layers} title="Masonry">
-					<Row>
-						<Label className="text-gray-600 text-sm dark:text-gray-400">Ancho base</Label>
-						<div className="flex items-center gap-2">
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<input
-										className="h-8 w-24 rounded-md border bg-background px-2 text-right text-gray-600 text-sm dark:text-gray-400"
-										min={100}
-										onChange={(e) => setViewConfig('masonry', { itemSize: Number(e.target.value) } as any)}
-										type="number"
-										value={(views.masonry as any).itemSize}
-									/>
-								</TooltipTrigger>
-								<TooltipContent>Ancho base de los elementos en masonry</TooltipContent>
-							</Tooltip>
-							<span className="text-muted-foreground text-xs">px</span>
-						</div>
-					</Row>
-				</Section>
-
-				{/* Cards */}
-				<Section color="text-purple-600" icon={LayoutGrid} title="Tarjetas">
-					<Row>
-						<Label className="text-gray-600 text-sm dark:text-gray-400">Tamaño de tarjeta</Label>
-						<div className="flex items-center gap-2">
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<input
-										className="h-8 w-24 rounded-md border bg-background px-2 text-right text-gray-600 text-sm dark:text-gray-400"
-										min={120}
-										onChange={(e) => setViewConfig('cards', { itemSize: Number(e.target.value) } as any)}
-										type="number"
-										value={(views.cards as any).itemSize}
-									/>
-								</TooltipTrigger>
-								<TooltipContent>Tamaño de cada tarjeta</TooltipContent>
-							</Tooltip>
-							<span className="text-muted-foreground text-xs">px</span>
-						</div>
-					</Row>
-				</Section>
-
-				{/* Table */}
-				<Section color="text-red-600" icon={Table} title="Tabla">
-					<Row>
-						<Label className="text-gray-600 text-sm dark:text-gray-400">Altura de fila</Label>
-						<div className="flex items-center gap-2">
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<input
-										className="h-8 w-24 rounded-md border bg-background px-2 text-right text-gray-600 text-sm dark:text-gray-400"
-										min={24}
-										onChange={(e) => setViewConfig('table', { rowHeight: Number(e.target.value) } as any)}
-										type="number"
-										value={(views.table as any).rowHeight}
-									/>
-								</TooltipTrigger>
-								<TooltipContent>Altura de cada fila en la tabla</TooltipContent>
-							</Tooltip>
-							<span className="text-muted-foreground text-xs">px</span>
-						</div>
-					</Row>
-				</Section>
+			<div className="p-4 border-t border-border/40 bg-muted/20">
+				<p className="text-[10px] text-center text-muted-foreground uppercase tracking-tighter opacity-50">
+					Image Manager Engine v2.0
+				</p>
 			</div>
 		</div>
 	);

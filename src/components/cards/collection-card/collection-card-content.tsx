@@ -1,7 +1,7 @@
 import { Bookmark, Calendar, Currency, Diamond, Globe, Link, Tag } from 'lucide-react';
 import { useMemo } from 'react';
+import { motion } from '@/components/ui/animejs-shim';
 import { Badge } from '@/components/ui/badge';
-import { motion } from '@/components/ui/motion-shim';
 import type { CollectionEdition } from '@/types/entities/collection';
 
 // Regex para limpiar URLs (extraído a nivel superior para mejor performance)
@@ -98,7 +98,7 @@ const CollectionCardContentView: React.FC<CollectionContentState> = ({
 				backgroundBlendMode: 'overlay',
 			}}
 		>
-			{backgroundImage && <div className="absolute inset-0 z-0 bg-black/30" />}
+			{backgroundImage && <div className="absolute inset-0 z-0 bg-muted/30" />}
 			<div className="relative z-10 flex h-full flex-col">
 				{metadata && <RarityBadge metadata={metadata} rarityColors={rarityColors} />}
 				{description && <Description primaryColor={primaryColor} text={description} />}
@@ -225,7 +225,7 @@ const TokenItem: React.FC<{ tokenId: string }> = ({ tokenId }) => (
 const UrlItem: React.FC<{ url: string }> = ({ url }) => (
 	<div className="col-span-2 flex items-center gap-1 text-xs">
 		<Link className="h-3.5 w-3.5 text-muted-foreground" />
-		<span className="truncate font-medium text-blue-500 underline hover:text-blue-600">
+		<span className="truncate font-medium text-primary underline hover:text-primary">
 			{url.replace(URL_PROTOCOL_REGEX, '').substring(0, 30)}
 			{url.length > 30 && '...'}
 		</span>
@@ -278,27 +278,27 @@ function getRarityColors(rarity: 'Common' | 'Uncommon' | 'Rare' | 'Mythic') {
 	switch (rarity) {
 		case 'Mythic':
 			return {
-				border: '#FF8C00',
-				background: '#FF8C0020',
-				text: '#FF8C00',
+				border: 'var(--dt-warning-600)',
+				background: 'var(--dt-warning-100)',
+				text: 'var(--dt-warning-600)',
 			};
 		case 'Rare':
 			return {
-				border: '#FFD700',
-				background: '#FFD70020',
-				text: '#FFD700',
+				border: 'var(--preset-yellow)',
+				background: 'var(--preset-yellow)20',
+				text: 'var(--preset-yellow)',
 			};
 		case 'Uncommon':
 			return {
-				border: '#C0C0C0',
-				background: '#C0C0C020',
-				text: '#C0C0C0',
+				border: 'var(--preset-slate)',
+				background: 'var(--preset-slate)20',
+				text: 'var(--preset-slate)',
 			};
 		default: // Common
 			return {
-				border: '#CD7F32',
-				background: '#CD7F3220',
-				text: '#CD7F32',
+				border: 'var(--preset-orange)',
+				background: 'var(--preset-orange)20',
+				text: 'var(--preset-orange)',
 			};
 	}
 }

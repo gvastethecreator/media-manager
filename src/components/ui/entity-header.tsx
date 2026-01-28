@@ -1,5 +1,6 @@
 import { ChevronLeft, MoreHorizontal, PencilIcon, StarIcon, TrashIcon } from 'lucide-react';
 import React from 'react';
+import { motion } from '@/components/ui/animejs-shim';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -15,7 +16,6 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { EntityStats, StatItem } from '@/components/ui/entity-stats';
-import { motion } from '@/components/ui/motion-shim';
 import { cn } from '@/lib/utils';
 
 export interface EntityHeaderAction {
@@ -151,7 +151,7 @@ export function EntityHeader({
 	icon,
 	backUrl,
 	backLabel = 'Volver',
-	primaryColor = '#3b82f6',
+	primaryColor = 'var(--dt-primary-500)',
 	stats,
 	actions = [],
 	featuredImage,
@@ -251,7 +251,7 @@ export function EntityHeader({
 						{icon && (
 							<div
 								className="flex h-8 w-8 items-center justify-center rounded-full"
-								style={{ backgroundColor: `${primaryColor}20` }}
+								style={{ backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 80%)` }}
 							>
 								{icon}
 							</div>
@@ -269,7 +269,7 @@ export function EntityHeader({
 										<StarIcon
 											className={cn(
 												'h-5 w-5 transition-colors',
-												isFavorite ? 'fill-yellow-400 text-yellow-400' : 'text-muted-foreground hover:text-yellow-400'
+												isFavorite ? 'fill-warning text-warning' : 'text-muted-foreground hover:text-warning'
 											)}
 										/>
 									</button>
@@ -312,7 +312,7 @@ export function EntityHeader({
 												className={cn(
 													'cursor-pointer',
 													action.variant === 'destructive' &&
-														'text-destructive hover:text-destructive focus:text-destructive'
+													'text-destructive hover:text-destructive focus:text-destructive'
 												)}
 												key={action.label}
 												onClick={action.onClick}

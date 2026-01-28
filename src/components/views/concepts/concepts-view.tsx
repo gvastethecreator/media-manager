@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { cn } from '@/lib/utils';
 import { useConceptStore } from '@/store/entities/concept';
 import type { ConceptCreateInput } from '@/types/entities/concept';
@@ -62,7 +63,7 @@ export function ConceptsView({ className }: { className?: string }) {
 				name: newConceptName,
 				description: newConceptDescription || null,
 				emoji: '💡',
-				color: '#3b82f6',
+				color: DEFAULT_ENTITY_COLOR,
 				category: 'general',
 				content: newConceptDescription || '',
 				isFavorite: false,

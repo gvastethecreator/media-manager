@@ -43,7 +43,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 	if (featuredImage) {
 		return (
 			<div
-				className={cn('relative h-40 w-full overflow-hidden', tcgMode ? 'border-white/10 border-b' : '')}
+				className={cn('relative h-40 w-full overflow-hidden', tcgMode ? 'border-border/40 border-b' : '')}
 				style={
 					isLargeDataUrl(featuredImage)
 						? { backgroundImage: `url(${featuredImage})`, backgroundSize: 'cover', backgroundPosition: 'center' }
@@ -79,10 +79,10 @@ export const FolderCardImages = memo(function FolderCardImages({
 				{tcgMode && (
 					<>
 						{/* Esquinas decorativas */}
-						<div className="absolute top-0 left-0 h-6 w-6 border-white/30 border-t-2 border-l-2" />
-						<div className="absolute top-0 right-0 h-6 w-6 border-white/30 border-t-2 border-r-2" />
-						<div className="absolute bottom-0 left-0 h-6 w-6 border-white/30 border-b-2 border-l-2" />
-						<div className="absolute right-0 bottom-0 h-6 w-6 border-white/30 border-r-2 border-b-2" />
+						<div className="absolute top-0 left-0 h-6 w-6 border-border/80 border-t-2 border-l-2" />
+						<div className="absolute top-0 right-0 h-6 w-6 border-border/80 border-t-2 border-r-2" />
+						<div className="absolute bottom-0 left-0 h-6 w-6 border-border/80 border-b-2 border-l-2" />
+						<div className="absolute right-0 bottom-0 h-6 w-6 border-border/80 border-r-2 border-b-2" />
 
 						{/* Insignia de rareza */}
 						<div
@@ -103,7 +103,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 			<div
 				className={cn(
 					'relative grid h-40 w-full grid-cols-2 grid-rows-2 gap-0.5 overflow-hidden',
-					tcgMode ? 'border-white/10 border-b bg-black/20 p-0.5' : ''
+					tcgMode ? 'border-border/40 border-b bg-muted/20 p-0.5' : ''
 				)}
 			>
 				{images.map((image, index) => (
@@ -145,10 +145,10 @@ export const FolderCardImages = memo(function FolderCardImages({
 				{tcgMode && (
 					<div className="pointer-events-none absolute inset-0">
 						{/* Bordes externos decorativos */}
-						<div className="absolute top-0 left-0 h-4 w-4 border-white/30 border-t border-l" />
-						<div className="absolute top-0 right-0 h-4 w-4 border-white/30 border-t border-r" />
-						<div className="absolute bottom-0 left-0 h-4 w-4 border-white/30 border-b border-l" />
-						<div className="absolute right-0 bottom-0 h-4 w-4 border-white/30 border-r border-b" />
+						<div className="absolute top-0 left-0 h-4 w-4 border-border/80 border-t border-l" />
+						<div className="absolute top-0 right-0 h-4 w-4 border-border/80 border-t border-r" />
+						<div className="absolute bottom-0 left-0 h-4 w-4 border-border/80 border-b border-l" />
+						<div className="absolute right-0 bottom-0 h-4 w-4 border-border/80 border-r border-b" />
 
 						{/* Marcador de elementos */}
 						<div
@@ -173,7 +173,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 			<div
 				className={cn(
 					'relative flex h-40 w-full items-center justify-center',
-					tcgMode ? 'border-white/10 border-b bg-gradient-to-br from-gray-900 to-gray-800' : 'bg-muted'
+					tcgMode ? 'border-border/40 border-b bg-gradient-to-br from-gray-900 to-gray-800' : 'bg-muted'
 				)}
 				style={
 					tcgMode
@@ -191,10 +191,10 @@ export const FolderCardImages = memo(function FolderCardImages({
 				{/* Decoraciones TCG para estadísticas */}
 				{tcgMode && (
 					<>
-						<div className="absolute top-0 left-0 h-6 w-6 border-white/20 border-t-2 border-l-2" />
-						<div className="absolute top-0 right-0 h-6 w-6 border-white/20 border-t-2 border-r-2" />
-						<div className="absolute bottom-0 left-0 h-6 w-6 border-white/20 border-b-2 border-l-2" />
-						<div className="absolute right-0 bottom-0 h-6 w-6 border-white/20 border-r-2 border-b-2" />
+						<div className="absolute top-0 left-0 h-6 w-6 border-border/60 border-t-2 border-l-2" />
+						<div className="absolute top-0 right-0 h-6 w-6 border-border/60 border-t-2 border-r-2" />
+						<div className="absolute bottom-0 left-0 h-6 w-6 border-border/60 border-b-2 border-l-2" />
+						<div className="absolute right-0 bottom-0 h-6 w-6 border-border/60 border-r-2 border-b-2" />
 
 						<div
 							className="absolute right-2 bottom-2 h-8 w-8 rounded-full opacity-30"
@@ -213,7 +213,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 		<div
 			className={cn(
 				'relative flex h-40 w-full items-center justify-center',
-				tcgMode ? 'border-white/10 border-b bg-gradient-to-br from-gray-900 to-gray-800' : 'bg-muted'
+				tcgMode ? 'border-border/40 border-b bg-gradient-to-br from-gray-900 to-gray-800' : 'bg-muted'
 			)}
 			style={
 				tcgMode
@@ -230,10 +230,10 @@ export const FolderCardImages = memo(function FolderCardImages({
 			{/* Decoraciones TCG para el placeholder */}
 			{tcgMode && (
 				<>
-					<div className="absolute top-0 left-0 h-6 w-6 border-white/20 border-t-2 border-l-2" />
-					<div className="absolute top-0 right-0 h-6 w-6 border-white/20 border-t-2 border-r-2" />
-					<div className="absolute bottom-0 left-0 h-6 w-6 border-white/20 border-b-2 border-l-2" />
-					<div className="absolute right-0 bottom-0 h-6 w-6 border-white/20 border-r-2 border-b-2" />
+					<div className="absolute top-0 left-0 h-6 w-6 border-border/60 border-t-2 border-l-2" />
+					<div className="absolute top-0 right-0 h-6 w-6 border-border/60 border-t-2 border-r-2" />
+					<div className="absolute bottom-0 left-0 h-6 w-6 border-border/60 border-b-2 border-l-2" />
+					<div className="absolute right-0 bottom-0 h-6 w-6 border-border/60 border-r-2 border-b-2" />
 
 					<div
 						className="absolute right-2 bottom-2 h-8 w-8 rounded-full opacity-30"

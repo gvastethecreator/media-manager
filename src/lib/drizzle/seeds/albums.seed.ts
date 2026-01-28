@@ -1,4 +1,5 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { nanoid } from 'nanoid';
 import { albums } from '../schema';
 import { seedLogger } from './index';
 
@@ -11,11 +12,11 @@ export async function seedAlbums(db: LibSQLDatabase<Record<string, never>>) {
 	try {
 		const sampleAlbums = [
 			{
-				id: '22222222-2222-4222-a222-222222222221',
+				id: 'V1StGXR8_Z5jdHi6B-myc',
 				name: 'Favoritos',
 				description: 'Álbum de imágenes favoritas',
 				emoji: '⭐',
-				color: '#f59e0b',
+				color: 'var(--dt-warning-500)',
 				featuredImage: null,
 				isPublic: false,
 				isFavorite: true,
@@ -26,11 +27,11 @@ export async function seedAlbums(db: LibSQLDatabase<Record<string, never>>) {
 				lastVideoAddedAt: null,
 			},
 			{
-				id: '22222222-2222-4222-a222-222222222222',
+				id: 'V1StGXR8_Z5jdHi6B-myd',
 				name: 'Colección Digital',
 				description: 'Arte y diseño digital',
 				emoji: '🎨',
-				color: '#8b5cf6',
+				color: 'var(--preset-purple)',
 				featuredImage: null,
 				isPublic: true,
 				isFavorite: false,
@@ -41,11 +42,11 @@ export async function seedAlbums(db: LibSQLDatabase<Record<string, never>>) {
 				lastVideoAddedAt: null,
 			},
 			{
-				id: '22222222-2222-4222-a222-222222222223',
+				id: 'V1StGXR8_Z5jdHi6B-mye',
 				name: 'Paisajes Épicos',
 				description: 'Vistas panorámicas y naturaleza',
 				emoji: '🏔️',
-				color: '#10b981',
+				color: 'var(--dt-success-500)',
 				featuredImage: null,
 				isPublic: true,
 				isFavorite: true,
@@ -56,11 +57,11 @@ export async function seedAlbums(db: LibSQLDatabase<Record<string, never>>) {
 				lastVideoAddedAt: null,
 			},
 			{
-				id: '22222222-2222-4222-a222-222222222224',
+				id: 'V1StGXR8_Z5jdHi6B-myf',
 				name: 'Retratos Creativos',
 				description: 'Retratos artísticos y expresivos',
 				emoji: '📸',
-				color: '#ec4899',
+				color: 'var(--preset-pink)',
 				featuredImage: null,
 				isPublic: false,
 				isFavorite: false,

@@ -1,6 +1,6 @@
+import { sql } from 'drizzle-orm';
 import { db } from './src/lib/drizzle';
 import { folders } from './src/lib/drizzle/schema/index';
-import { sql } from 'drizzle-orm';
 
 async function checkFolder() {
 	try {

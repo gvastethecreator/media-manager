@@ -124,9 +124,9 @@ const NotFoundPage = () => {
 	return (
 		<div className="flex min-h-screen items-center justify-center bg-red-50 p-4">
 			<div className="w-full max-w-md rounded-lg border border-red-200 p-6 text-center">
-				<h1 className="mb-4 font-bold text-2xl text-red-800">Página no encontrada</h1>
-				<p className="mb-4 text-red-600">La página que estás buscando no existe o ha sido movida.</p>
-				<a className="font-semibold text-red-700 hover:underline" href="/">
+				<h1 className="mb-4 font-bold text-2xl text-destructive">Página no encontrada</h1>
+				<p className="mb-4 text-destructive">La página que estás buscando no existe o ha sido movida.</p>
+				<a className="font-semibold text-destructive hover:underline" href="/">
 					Volver al inicio
 				</a>
 			</div>
@@ -180,19 +180,7 @@ export const router = createBrowserRouter([
 				path: 'audios',
 				element: <AudioView className="h-full" />,
 			},
-			{
-				path: 'documents',
-				element: <DocumentsView className="h-full" />,
-			},
-			{
-				path: 'json-files',
-				element: <JsonFilesView className="h-full" />,
-			},
-			{
-				path: 'file-3ds',
-				element: <File3DView className="h-full" />,
-			},
-			// Organizadores - Temporalmente simplificados
+			// Organización
 			{
 				path: 'favorites',
 				element: <FavoritesView className="h-full" />,
@@ -309,7 +297,6 @@ export const router = createBrowserRouter([
 				path: 'wildcards/:id',
 				element: <WildcardContentView />,
 			},
-			// Gestión
 			{
 				path: 'prompts',
 				element: <PromptsView className="h-full" />,
@@ -327,69 +314,55 @@ export const router = createBrowserRouter([
 				element: <NotesView className="h-full" />,
 			},
 			{
-				path: 'properties',
-				element: <PropertiesView className="h-full" />,
+				path: 'documents',
+				element: <DocumentsView className="h-full" />,
 			},
-			// Utilidades
 			{
-				path: 'search',
-				element: <SearchView className="h-full" />,
+				path: 'file3d',
+				element: <File3DView className="h-full" />,
+			},
+			{
+				path: 'file3d/:id',
+				element: <File3DDetailView />,
+			},
+			{
+				path: 'json-files',
+				element: <JsonFilesView className="h-full" />,
+			},
+			{
+				path: 'json-files/:id',
+				element: <JsonFileContentView />,
+			},
+			{
+				path: 'mixed',
+				element: <MixedContentView />,
 			},
 			{
 				path: 'entity-cards',
 				element: <EntityCardsView />,
 			},
 			{
-				path: 'mixed',
-				element: <MixedContentView />,
+				path: 'properties',
+				element: <PropertiesView className="h-full" />,
 			},
-			// Content Views - Vistas de detalle con parámetros
-			// TODO: Re-implementar wrappers para vistas de detalle
-			// {
-			//	path: 'albums/:id',
-			//	element: <AlbumContentWrapper />,
-			// },
-			// Rutas para imágenes individuales
+			{
+				path: 'search',
+				element: <SearchView className="h-full" />,
+			},
 			{
 				path: 'images/:id',
 				element: <ImageDetailView />,
 			},
-			// Content Views - Vistas de detalle sin parámetros - Temporalmente simplificadas
+			// Sistema
 			{
-				path: 'document-content',
-				element: (
-					<div className="p-6">
-						<h2 className="font-bold text-2xl">Contenido de Documento</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
-					</div>
-				),
-			},
-			{
-				path: 'audio-content',
-				element: (
-					<div className="p-6">
-						<h2 className="font-bold text-2xl">Contenido de Audio</h2>
-						<p className="text-muted-foreground">Esta vista está siendo reparada...</p>
-					</div>
-				),
-			},
-			{
-				path: 'json-file-content',
-				element: <JsonFileContentView />,
-			},
-			{
-				path: 'file-3d-content',
-				element: <File3DDetailView />,
-			},
-			{
-				path: 'admin/reindex',
+				path: 'reindex-logs',
 				element: <ReindexLogsViewer />,
 			},
+			// 404 Not Found
+			{
+				path: '*',
+				element: <NotFoundPage />,
+			},
 		],
-	},
-
-	{
-		path: '*',
-		element: <NotFoundPage />,
 	},
 ]);

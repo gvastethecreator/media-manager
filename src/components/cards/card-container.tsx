@@ -24,7 +24,15 @@ interface CardContainerProps extends React.HTMLAttributes<HTMLDivElement> {
  */
 export const CardContainer = forwardRef<HTMLDivElement, CardContainerProps>(
 	(
-		{ primaryColor = '#0ea5e9', secondaryColor = '#0369a1', glowLevel = 1, className, style, children, ...props },
+		{
+			primaryColor = 'var(--primary)',
+			secondaryColor = 'var(--accent)',
+			glowLevel = 1,
+			className,
+			style,
+			children,
+			...props
+		},
 		ref
 	) => {
 		// Calcular nivel de brillo para los efectos
@@ -34,9 +42,9 @@ export const CardContainer = forwardRef<HTMLDivElement, CardContainerProps>(
 		// Estilos para el contenedor
 		const containerStyle: React.CSSProperties = {
 			// Borde basado en el color primario
-			borderColor: `${primaryColor}90`,
+			borderColor: `color-mix(in oklab, ${primaryColor}, transparent 40%)`,
 			// Fondo con gradiente sutil basado en el color primario
-			background: `linear-gradient(145deg, ${primaryColor}08, ${secondaryColor}15)`,
+			background: `linear-gradient(145deg, color-mix(in oklab, ${primaryColor}, transparent 95%), color-mix(in oklab, ${secondaryColor}, transparent 90%))`,
 			...style,
 		};
 

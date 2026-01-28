@@ -3,6 +3,7 @@
  * @module file-browser-new/views/table
  */
 
+import { useVirtualizer } from '@tanstack/react-virtual';
 import { ArrowDown, ArrowUp, ArrowUpDown, CornerUpLeft, Folder } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -49,7 +50,7 @@ function toMediaItem(item: BrowserItem): MediaItem {
 	return {
 		id: item.id,
 		name: item.name,
-		entityType: item.entityType === 'json' ? 'jsonFile' : (item.entityType as MediaItem['entityType']),
+		entityType: item.entityType as MediaItem['entityType'],
 		thumbnailUrl: item.thumbnailUrl,
 		mimeType: item.mimeType,
 		createdAt: item.createdAt,
@@ -84,7 +85,7 @@ function TableThumbnail({ item }: { item: BrowserItem }) {
 				className="flex h-6 w-6 shrink-0 items-center justify-center rounded"
 				style={{ backgroundColor: item.color ?? 'hsl(var(--muted))' }}
 			>
-				{item.emoji ? <span className="text-xs">{item.emoji}</span> : <Folder className="h-3.5 w-3.5 text-amber-600" />}
+				{item.emoji ? <span className="text-xs">{item.emoji}</span> : <Folder className="h-3.5 w-3.5 text-warning" />}
 			</div>
 		);
 	}
@@ -154,6 +155,10 @@ export function TableView({
 	config,
 	scrollContainer,
 	onContainerReady,
+	onLayoutRootReady,
+	layoutItemLimit = 120,
+	suppressAppearAnimation,
+	virtualization,
 	selectedIds = new Set(),
 	activeId,
 	sortOptions = [],
@@ -164,6 +169,24 @@ export function TableView({
 
 	const rowHeight = config.rowHeight;
 	const columns = DEFAULT_COLUMNS.filter((col) => !config.visibleColumns || config.visibleColumns.includes(col.key));
+	const virtualizationConfig = virtualization ?? {
+		enabled: false,
+		threshold: Number.POSITIVE_INFINITY,
+		overscan: 0,
+		estimatedItemHeight: rowHeight,
+		maxItems: Number.POSITIVE_INFINITY,
+	};
+	const shouldVirtualize = virtualizationConfig.enabled && items.length >= virtualizationConfig.threshold;
+	const rowVirtualizer = useVirtualizer({
+		count: items.length,
+		getScrollElement: () => containerRef.current,
+		estimateSize: () => rowHeight,
+		overscan: virtualizationConfig.overscan,
+	});
+	const virtualRows = shouldVirtualize ? rowVirtualizer.getVirtualItems() : [];
+	const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
+	const paddingBottom =
+		virtualRows.length > 0 ? rowVirtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end : 0;
 
 	// Obtener estado de sort para una columna
 	const getSortState = (field: string): 'asc' | 'desc' | null => {
@@ -260,33 +283,59 @@ export function TableView({
 				</thead>
 
 				{/* Body */}
-				<tbody>
-					{items.map((item) => (
-						<tr
-							className={cn(
-								'border-b',
-								'cursor-pointer',
-								'transition-colors',
-								'hover:bg-accent/50',
-								selectedIds.has(item.id) && 'bg-accent',
-								activeId === item.id && 'ring-1 ring-primary/50 ring-inset'
-							)}
-							data-item-id={item.id}
-							key={item.id}
-							onClick={(e) => handleItemClick(item, e)}
-							onContextMenu={(e) => handleItemContextMenu(item, e)}
-							onDoubleClick={() => handleItemDoubleClick(item)}
-							style={{ height: rowHeight }}
-						>
-							{columns.map((col) => (
-								<td className="truncate px-3 py-2" key={col.key}>
-									{col.render
-										? col.render(item)
-										: ((item as unknown as Record<string, unknown>)[col.key] as React.ReactNode)}
-								</td>
-							))}
+				<tbody ref={(el) => onLayoutRootReady?.(el)}>
+					{shouldVirtualize && paddingTop > 0 && (
+						<tr>
+							<td colSpan={columns.length} style={{ height: paddingTop }} />
 						</tr>
-					))}
+					)}
+					{(shouldVirtualize ? virtualRows : items.map((_, index) => ({ index }) as const)).map((virtualRow) => {
+						const item = items[virtualRow.index];
+						if (!item) return null;
+						const shouldLayout = virtualRow.index < layoutItemLimit;
+						return (
+							<tr
+								className={cn(
+									!suppressAppearAnimation && 'file-browser-item',
+									'border-b',
+									'cursor-pointer',
+									'transition-colors',
+									'hover:bg-accent/50',
+									selectedIds.has(item.id) && 'bg-accent',
+									activeId === item.id && 'ring-1 ring-primary/50 ring-inset'
+								)}
+								{...(shouldLayout
+									? {
+											'data-layout-id': item.id,
+											'data-layout-item': 'true',
+											'data-layout-order': String(virtualRow.index),
+										}
+									: {})}
+								data-item-id={item.id}
+								key={item.id}
+								onClick={(e) => handleItemClick(item, e)}
+								onContextMenu={(e) => handleItemContextMenu(item, e)}
+								onDoubleClick={() => handleItemDoubleClick(item)}
+								style={{
+									height: rowHeight,
+									...(suppressAppearAnimation ? {} : { animationDelay: `${Math.min(virtualRow.index * 6, 200)}ms` }),
+								}}
+							>
+								{columns.map((col) => (
+									<td className="truncate px-3 py-2" key={col.key}>
+										{col.render
+											? col.render(item)
+											: ((item as unknown as Record<string, unknown>)[col.key] as React.ReactNode)}
+									</td>
+								))}
+							</tr>
+						);
+					})}
+					{shouldVirtualize && paddingBottom > 0 && (
+						<tr>
+							<td colSpan={columns.length} style={{ height: paddingBottom }} />
+						</tr>
+					)}
 				</tbody>
 			</table>
 		</div>

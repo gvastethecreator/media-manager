@@ -3,7 +3,7 @@ import { memo, useMemo } from 'react';
 import { WorldItemCard } from '@/components/cards/world-item-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useWorldItems } from '@/lib/api/world-items';
 import type { WorldItemWithStats } from '@/types/entities/world-item';

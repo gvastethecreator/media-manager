@@ -28,6 +28,10 @@ export const createWorldItemUISlice: StateCreator<WorldItemState & WorldItemActi
 	selectWorldItem: (id) => set((state) => ({ ui: { ...state.ui, selectedId: id, editingId: null } })),
 	startEditing: (id) => set((state) => ({ ui: { ...state.ui, editingId: id } })),
 	highlightWorldItem: (id) => set((state) => ({ ui: { ...state.ui, highlightedId: id } })),
-	setViewMode: (mode) => set((state) => ({ ui: { ...state.ui, viewMode: mode } })),
+	setViewMode: (mode) =>
+		set((state) => {
+			if (state.ui.viewMode === mode) return state;
+			return { ui: { ...state.ui, viewMode: mode } };
+		}),
 	clearSelection: () => set((state) => ({ ui: { ...state.ui, selectedId: null, editingId: null } })),
 });

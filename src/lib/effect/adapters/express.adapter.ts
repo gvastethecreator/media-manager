@@ -25,7 +25,7 @@ export interface HttpError {
  * Mapea errores de Effect a status HTTP
  */
 export const errorToHttpStatus = (error: unknown): HttpError => {
-	// Si es un error con _tag (Data.TaggedError)
+	// 1. Si es un error con _tag (Data.TaggedError)
 	if (error && typeof error === 'object' && '_tag' in error) {
 		const taggedError = error as any;
 
@@ -38,6 +38,7 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 			case 'ImageFileNotFound':
 			case 'VideoFileNotFound':
 			case 'AudioFileNotFound':
+			case 'FolderNotFound':
 				return {
 					status: 404,
 					message: taggedError.displayMessage || taggedError.message || 'Resource not found',
@@ -50,6 +51,8 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 			case 'ImageValidationError':
 			case 'VideoValidationError':
 			case 'AudioValidationError':
+			case 'FolderValidationError':
+			case 'FolderMaxDepthExceededError':
 				return {
 					status: 400,
 					message: taggedError.displayMessage || taggedError.message || 'Validation error',
@@ -63,6 +66,11 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 			case 'ImageHashConflict':
 			case 'VideoHashConflict':
 			case 'AudioHashConflict':
+			case 'FolderPathConflict':
+			case 'FolderNameConflict':
+			case 'FolderHasChildrenError':
+			case 'FolderHasContentError':
+			case 'FolderCircularReferenceError':
 				return {
 					status: 409,
 					message: taggedError.displayMessage || taggedError.message || 'Conflict - resource has relations',
@@ -87,6 +95,8 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 			case 'ImageUnknownError':
 			case 'VideoUnknownError':
 			case 'AudioUnknownError':
+			case 'FolderDatabaseError':
+			case 'FolderUnknownError':
 				return {
 					status: 500,
 					message: 'Database error occurred',
@@ -103,8 +113,17 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 		}
 	}
 
-	// Error estándar de JavaScript
+	// 2. Si es un FiberFailure (error de runtime de Effect), intentamos extraer información del nombre o stack
 	if (error instanceof Error) {
+		// Detectar FolderNotFound envuelto en FiberFailure
+		if (error.name.includes('FolderNotFound') || error.message.includes('FolderNotFound')) {
+			return {
+				status: 404,
+				message: 'Folder not found',
+				details: { name: error.name, message: error.message },
+			};
+		}
+
 		return {
 			status: 500,
 			message: error.message,
@@ -112,7 +131,7 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 		};
 	}
 
-	// Error desconocido
+	// 3. Error desconocido
 	return {
 		status: 500,
 		message: 'Unknown error occurred',

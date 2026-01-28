@@ -203,8 +203,8 @@ export const PRESET_COLOR_VARS = [
  * Solo usar en contextos donde se necesite el valor hex explícito
  */
 export const PRESET_COLORS_HEX = [
-	'#3b82f6', // blue
-	'#ef4444', // red
+	'var(--dt-primary-500)', // blue
+	'var(--dt-danger-500)', // red
 	'#22c55e', // green
 	'#eab308', // yellow
 	'#ec4899', // pink
@@ -221,22 +221,22 @@ export const PRESET_COLORS_HEX = [
 	'#84cc16', // lime
 	'#0891b2', // cyan-dark
 	'#9333ea', // purple-dark
-	'#000000', // black
-	'#ffffff', // white
+	'var(--dt-neutral-950)', // black
+	'var(--background)', // white
 ] as const;
 
 /**
  * Color por defecto para nuevas entidades
  */
-export const DEFAULT_ENTITY_COLOR = '#3b82f6';
+export const DEFAULT_ENTITY_COLOR = 'var(--dt-primary-500)';
 
 /**
  * Colores de fallback comunes.
  * Úsalos solo cuando sea necesario (por ejemplo, cuando una entidad aún no tiene color).
  */
 export const DEFAULT_NEUTRAL_COLOR = '#6b7280';
-export const DEFAULT_DARK_COLOR = '#000000';
-export const DEFAULT_LIGHT_COLOR = '#ffffff';
+export const DEFAULT_DARK_COLOR = 'var(--dt-neutral-950)';
+export const DEFAULT_LIGHT_COLOR = 'var(--background)';
 
 /**
  * Obtiene el color CSS para una entidad
