@@ -12,7 +12,7 @@ import { ThemeProvider } from './components/ui/theme-provider';
 import { Toaster } from './components/ui/toaster';
 import { TooltipProvider } from './components/ui/tooltip';
 import { ReactScanProvider } from './lib/dev/react-scan';
-import lastLogContent from './logs/last-log.json' with { type: 'json' };
+// import lastLogContent from './logs/last-log.json' with { type: 'json' };
 import { ViewTransitionProvider } from './providers/ViewTransitionProvider';
 import { router } from './router';
 
@@ -35,7 +35,7 @@ export function App() {
 			<TooltipProvider>
 				<ViewTransitionProvider>
 					<ReactScanProvider>
-						<ErrorBoundary lastLogContent={lastLogContent}>
+						<ErrorBoundary>
 							<SSENavigationRefresher />
 							<EntityCatalogBootstrapper />
 							<RouterProvider router={router} />

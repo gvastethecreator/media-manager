@@ -4,7 +4,7 @@ import { defineConfig } from 'vite';
 import svgr from 'vite-plugin-svgr';
 import tsconfigPaths from 'vite-tsconfig-paths';
 
-const emptyModule = resolve(__dirname, 'src/empty.ts');
+const emptyModule = resolve(__dirname, 'src/config/empty.ts');
 
 export default defineConfig({
 	plugins: [
