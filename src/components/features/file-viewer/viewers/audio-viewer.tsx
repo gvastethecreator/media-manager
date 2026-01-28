@@ -239,7 +239,7 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 				</div>
 
 				{/* Error State */}
-				{error && <div className="mb-4 text-center text-red-500">{error}</div>}
+				{error && <div className="mb-4 text-center text-destructive">{error}</div>}
 
 				{/* Loading State */}
 				{isLoading && <div className="mb-4 text-center text-muted-foreground">Cargando audio...</div>}

@@ -5,5 +5,4 @@
  * @updated 2025-01-27
  */
 
-export * from './album.service';
-export { default } from './album.service';
+export * from './album.service.effect';

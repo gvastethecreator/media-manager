@@ -16,7 +16,7 @@ export function AlbumCardHeader({ album, primaryColor, compact = false }: AlbumC
 
 	return (
 		<header
-			className={cn('relative z-20 flex items-center gap-3 px-3 py-2', compact ? 'pb-1' : 'border-white/10 border-b')}
+			className={cn('relative z-20 flex items-center gap-3 px-3 py-2', compact ? 'pb-1' : 'border-border/40 border-b')}
 		>
 			{/* Emoji o imagen del álbum */}
 			{emoji && (

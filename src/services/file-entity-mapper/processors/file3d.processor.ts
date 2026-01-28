@@ -192,34 +192,34 @@ export class File3DProcessor {
 			<svg width="320" height="320" xmlns="http://www.w3.org/2000/svg">
 				<defs>
 					<linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
-						<stop offset="0%" style="stop-color:#1f2937;stop-opacity:1" />
-						<stop offset="100%" style="stop-color:#111827;stop-opacity:1" />
+						<stop offset="0%" style="stop-color:oklch(0.18 0.002 0);stop-opacity:1" />
+						<stop offset="100%" style="stop-color:oklch(0.12 0.002 0);stop-opacity:1" />
 					</linearGradient>
 				</defs>
 				<rect width="320" height="320" fill="url(#bg)"/>
 				
 				<!-- Icono 3D -->
-				<text x="160" y="120" font-family="Arial" font-size="72" fill="#6b7280" text-anchor="middle">🎨</text>
+				<text x="160" y="120" font-family="Arial" font-size="72" fill="oklch(0.55 0.002 0)" text-anchor="middle">🎨</text>
 				
 				<!-- Nombre del archivo -->
-				<text x="160" y="165" font-family="Arial" font-size="14" fill="#9ca3af" text-anchor="middle">${fileName}</text>
+				<text x="160" y="165" font-family="Arial" font-size="14" fill="oklch(0.7 0.002 0)" text-anchor="middle">${fileName}</text>
 				
 				<!-- Formato -->
-				<text x="160" y="190" font-family="Arial, sans-serif" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="bold">${format}</text>
+				<text x="160" y="190" font-family="Arial, sans-serif" font-size="12" fill="oklch(0.55 0.002 0)" text-anchor="middle" font-weight="bold">${format}</text>
 				
 				<!-- Stats -->
 				<g transform="translate(160, 220)">
-					<text x="0" y="0" font-family="monospace" font-size="10" fill="#4b5563" text-anchor="middle">
+					<text x="0" y="0" font-family="monospace" font-size="10" fill="oklch(0.45 0.002 0)" text-anchor="middle">
 						Vertices: ${vertices}
 					</text>
-					<text x="0" y="15" font-family="monospace" font-size="10" fill="#4b5563" text-anchor="middle">
+					<text x="0" y="15" font-family="monospace" font-size="10" fill="oklch(0.45 0.002 0)" text-anchor="middle">
 						Faces: ${faces}
 					</text>
 				</g>
 				
 				<!-- Badge de "3D Model" -->
-				<rect x="100" y="270" width="120" height="25" rx="12" fill="#374151"/>
-				<text x="160" y="288" font-family="Arial" font-size="12" fill="#9ca3af" text-anchor="middle">3D Model</text>
+				<rect x="100" y="270" width="120" height="25" rx="12" fill="oklch(0.25 0.002 0)"/>
+				<text x="160" y="288" font-family="Arial" font-size="12" fill="oklch(0.7 0.002 0)" text-anchor="middle">3D Model</text>
 			</svg>
 		`.trim();
 	}

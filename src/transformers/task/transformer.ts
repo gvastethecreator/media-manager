@@ -55,7 +55,7 @@ export function toCreateTaskData(input: TaskCreateInput) {
 		status: input.status ?? 'pending',
 		priority: input.priority ?? 'medium',
 		emoji: input.emoji ?? '📋',
-		color: input.color ?? '#6366f1',
+		color: input.color ?? 'var(--preset-indigo)',
 		category: input.category ?? null,
 		tags: input.tags ? JSON.stringify(input.tags) : null,
 		dueDate: input.dueDate ?? null,

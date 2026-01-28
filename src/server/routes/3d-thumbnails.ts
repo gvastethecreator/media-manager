@@ -44,10 +44,10 @@ const SUPPORTED_FORMATS = ['.gltf', '.glb', '.obj', '.ply', '.fbx', '.dae'];
  * 🎨 Genera SVG placeholder para modelos 3D
  */
 function generate3DPlaceholderSVG(options: Model3DThumbnailOptions): string {
-	const { width = 300, height = 300, backgroundColor = '#ffffff' } = options;
+	const { width = 300, height = 300, backgroundColor = 'var(--background)' } = options;
 
-	const wireframeColor = backgroundColor === '#ffffff' ? '#374151' : '#d1d5db';
-	const textColor = backgroundColor === '#ffffff' ? '#1f2937' : '#f9fafb';
+	const wireframeColor = backgroundColor === 'var(--background)' ? '#374151' : '#d1d5db';
+	const textColor = backgroundColor === 'var(--background)' ? '#1f2937' : '#f9fafb';
 
 	return `
 <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
@@ -106,10 +106,10 @@ async function analyze3DModel(modelPath: string): Promise<Model3DInfo | null> {
  * 📊 Genera SVG informativo con estadísticas del modelo
  */
 function generate3DInfoSVG(modelInfo: Model3DInfo | null, options: Model3DThumbnailOptions): string {
-	const { width = 300, height = 300, backgroundColor = '#ffffff' } = options;
+	const { width = 300, height = 300, backgroundColor = 'var(--background)' } = options;
 
-	const textColor = backgroundColor === '#ffffff' ? '#1f2937' : '#f9fafb';
-	const accentColor = '#3b82f6';
+	const textColor = backgroundColor === 'var(--background)' ? '#1f2937' : '#f9fafb';
+	const accentColor = 'var(--dt-primary-500)';
 
 	if (!modelInfo) {
 		return generate3DPlaceholderSVG(options);

@@ -4,7 +4,7 @@
  */
 
 import { useCallback } from 'react';
-import { AnimatePresence, motion } from '@/components/ui/motion-shim';
+import { AnimatePresence, motion } from '@/components/ui/animejs-shim';
 import { useProfileStore } from '@/store/entities/profile';
 import type { ProfileExtended } from '@/types/entities/profile';
 import { ProfileCard } from './ProfileCard';

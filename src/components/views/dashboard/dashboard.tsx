@@ -324,14 +324,14 @@ export const Dashboard = memo(function Dashboard() {
 			<div className="relative h-full w-full">
 				{/* Silk Background */}
 				<div className="absolute inset-0 z-0">
-					<Silk color="#000000" noiseIntensity={1.2} rotation={0.1} scale={1.2} speed={3} />
+					<Silk color="var(--background)" noiseIntensity={1.2} rotation={0.1} scale={1.2} speed={3} />
 				</div>
 
 				{/* Content overlay */}
 				<div className="relative z-10 flex h-full w-full flex-col items-center justify-center p-4">
 					<div className="animate-pulse space-y-4">
-						<div className="h-6 w-56 rounded bg-white/20" />
-						<div className="h-3.5 w-40 rounded bg-white/10" />
+						<div className="h-6 w-56 rounded bg-foreground/20" />
+						<div className="h-3.5 w-40 rounded bg-foreground/10" />
 					</div>
 				</div>
 			</div>
@@ -342,7 +342,7 @@ export const Dashboard = memo(function Dashboard() {
 		<div className="relative h-full w-full">
 			{/* Silk Background */}
 			<div className="absolute inset-0 z-0">
-				<Silk color="#111111" noiseIntensity={1.2} rotation={0.2} scale={1.2} speed={6} />
+				<Silk color="var(--background)" noiseIntensity={1.2} rotation={0.2} scale={1.2} speed={6} />
 			</div>
 
 			{/* Content overlay */}
@@ -364,11 +364,11 @@ export const Dashboard = memo(function Dashboard() {
 					{/* Secundarias compactas */}
 					<div className="grid grid-cols-3 gap-2 md:grid-cols-3">
 						{/* Almacenamiento */}
-						<div className="rounded-dt-md border border-white/15 bg-card/90 backdrop-blur-sm md:col-span-1">
+						<div className="rounded-dt-md border border-border/40 bg-card/90 backdrop-blur-sm md:col-span-1">
 							<div className="p-3 pb-2">
 								<div className="flex items-center gap-2 text-sm">
 									<div className="flex h-7 w-7 items-center justify-center rounded-dt-xs bg-slate-500/20">
-										<HardDrive className="h-4 w-4 text-slate-400" />
+										<HardDrive className="h-4 w-4 text-muted-foreground" />
 									</div>
 									<span className="body-sm font-medium">Almacenamiento</span>
 								</div>
@@ -387,7 +387,7 @@ export const Dashboard = memo(function Dashboard() {
 								</div>
 
 								{combinedStats.averageFileSize > 0 && (
-									<div className="border-white/10 border-t pt-2">
+									<div className="border-border/20 border-t pt-2">
 										<div className="caption">
 											<span className="text-muted-foreground">Promedio: </span>
 											<span className="font-medium tabular-nums">{formatBytes(combinedStats.averageFileSize)}</span>
@@ -398,11 +398,11 @@ export const Dashboard = memo(function Dashboard() {
 						</div>
 
 						{/* Actividad reciente */}
-						<div className="rounded-dt-md border border-white/15 bg-card/90 backdrop-blur-sm">
+						<div className="rounded-dt-md border border-border/40 bg-card/90 backdrop-blur-sm">
 							<div className="p-3 pb-2">
 								<div className="flex items-center gap-2 text-sm">
-									<div className="flex h-7 w-7 items-center justify-center rounded-dt-xs bg-emerald-500/20">
-										<Activity className="h-4 w-4 text-emerald-400" />
+									<div className="flex h-7 w-7 items-center justify-center rounded-dt-xs bg-success/20">
+										<Activity className="h-4 w-4 text-success" />
 									</div>
 									<span className="body-sm font-medium">Actividad</span>
 								</div>
@@ -412,7 +412,7 @@ export const Dashboard = memo(function Dashboard() {
 									<div className="space-y-1.5">
 										{Array.from({ length: 3 }, (_, i) => (
 											<div
-												className="h-3.5 animate-pulse rounded-dt-xs bg-white/10"
+												className="h-3.5 animate-pulse rounded-dt-xs bg-foreground/10"
 												key={`activity-skeleton-${Date.now()}-${i}`}
 											/>
 										))}
@@ -435,11 +435,11 @@ export const Dashboard = memo(function Dashboard() {
 						</div>
 
 						{/* Top Tags */}
-						<div className="rounded-dt-md border border-white/15 bg-card/90 backdrop-blur-sm">
+						<div className="rounded-dt-md border border-border/40 bg-card/90 backdrop-blur-sm">
 							<div className="p-3 pb-2">
 								<div className="flex items-center gap-2 text-sm">
-									<div className="flex h-7 w-7 items-center justify-center rounded-dt-xs bg-yellow-500/20">
-										<Star className="h-4 w-4 text-yellow-400" />
+									<div className="flex h-7 w-7 items-center justify-center rounded-dt-xs bg-warning/20">
+										<Star className="h-4 w-4 text-warning" />
 									</div>
 									<span className="body-sm font-medium">Tags Populares</span>
 								</div>
@@ -449,7 +449,7 @@ export const Dashboard = memo(function Dashboard() {
 									<div className="space-y-1.5">
 										{Array.from({ length: 3 }, (_, i) => (
 											<div
-												className="h-3.5 animate-pulse rounded-dt-xs bg-white/10"
+												className="h-3.5 animate-pulse rounded-dt-xs bg-foreground/10"
 												key={`tag-skeleton-${Date.now()}-${i}`}
 											/>
 										))}

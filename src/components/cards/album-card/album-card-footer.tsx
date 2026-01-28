@@ -31,7 +31,7 @@ export function AlbumCardFooter({
 	};
 
 	return (
-		<footer className="relative border-white/10 border-t p-2 text-xs">
+		<footer className="relative border-border/40 border-t p-2 text-xs">
 			{/* Id de carta y contenido tipo TCG */}
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-1">

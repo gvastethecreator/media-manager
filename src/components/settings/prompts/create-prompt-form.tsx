@@ -7,6 +7,7 @@ import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCreatePrompt, useUpdatePrompt } from '@/lib/api/prompts';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import type { PromptBase } from '@/types/entities/prompt/base';
 import { PromptCategory, PromptModel } from '@/types/entities/prompt/enums';
@@ -66,7 +67,7 @@ export function CreatePromptForm({
 			name: '',
 			description: '',
 			content: '',
-			color: '#3b82f6',
+			color: DEFAULT_ENTITY_COLOR,
 			emoji: '💬',
 			category: undefined,
 			model: undefined,
@@ -92,7 +93,7 @@ export function CreatePromptForm({
 				name: prompt.name,
 				description: prompt.description || '',
 				content: prompt.content || '',
-				color: prompt.color || '#3b82f6',
+				color: prompt.color || DEFAULT_ENTITY_COLOR,
 				emoji: prompt.emoji || '💬',
 				category: prompt.category as PromptCategory | undefined,
 				parameters: prompt.parameters || '{}',

@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo } from 'react';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { cn } from '@/lib/utils';
 // Importar tipos correctos de entities
 import type { CollectionWithStats } from '@/types/entities/collection';
@@ -68,33 +68,15 @@ export function CollectionCard({
 		groupCount;
 
 	// Calcular color primario y secundario
-	const primaryColor = useMemo(() => collection.color || '#10b981', [collection.color]);
+	const primaryColor = useMemo(() => collection.color || 'var(--entity-collection)', [collection.color]);
 	const secondaryColor = useMemo(() => {
-		// Si no hay color definido, usar un valor por defecto
+		// Si no hay color definido, usar un valor por defecto (cyan de colecciones)
 		if (!collection.color) {
-			return '#059669';
+			return 'oklch(0.63 0.2 195)';
 		}
 
-		// Oscurecer el color primario para el secundario
-		try {
-			// Convertir hex a RGB
-			const r = Number.parseInt(collection.color.slice(1, 3), 16);
-			const g = Number.parseInt(collection.color.slice(3, 5), 16);
-			const b = Number.parseInt(collection.color.slice(5, 7), 16);
-
-			// Oscurecer los componentes
-			const darkenFactor = 0.7;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
-
-			// Convertir de vuelta a hex
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (_e) {
-			// Si hay algún error, volver al valor por defecto
-			return '#059669';
-		}
-	}, [collection.color]);
+		return `color-mix(in oklab, ${primaryColor}, black 20%)`;
+	}, [collection.color, primaryColor]);
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
@@ -114,8 +96,8 @@ export function CollectionCard({
 			borderColor: `${primaryColor}`,
 			// Fondo con gradiente más pronunciado tipo TCG
 			background: compact
-				? `linear-gradient(135deg, ${primaryColor}20, ${primaryColor}10)`
-				: `linear-gradient(135deg, ${primaryColor}40, ${secondaryColor}50, ${primaryColor}30)`,
+				? `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 80%), color-mix(in oklab, ${primaryColor}, transparent 90%))`
+				: `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 60%), color-mix(in oklab, ${secondaryColor}, transparent 50%), color-mix(in oklab, ${primaryColor}, transparent 70%))`,
 			...style,
 		}),
 		[primaryColor, secondaryColor, compact, style]
@@ -124,7 +106,7 @@ export function CollectionCard({
 	// Estilos para el resplandor de la carta
 	const glowStyle = useMemo(
 		() => ({
-			boxShadow: `0 0 20px 5px ${primaryColor}80`,
+			boxShadow: `0 0 20px 5px color-mix(in oklab, ${primaryColor}, transparent 20%)`,
 		}),
 		[primaryColor]
 	);
@@ -168,11 +150,13 @@ export function CollectionCard({
 			<div className="pointer-events-none absolute inset-0 z-1 bg-noise-subtle opacity-5 mix-blend-overlay" />
 			<div
 				className="pointer-events-none absolute inset-0 z-1 bg-gradient-to-br opacity-10 transition-opacity duration-300 hover:opacity-20"
-				style={{ background: `linear-gradient(45deg, transparent 25%, ${primaryColor}50 50%, transparent 75%)` }}
+				style={{
+					background: `linear-gradient(45deg, transparent 25%, color-mix(in oklab, ${primaryColor}, transparent 50%) 50%, transparent 75%)`,
+				}}
 			/>
 
 			{/* Marco interior tipo TCG */}
-			<div className="pointer-events-none absolute inset-2 z-0 rounded-[4%] border border-white/20" />
+			<div className="pointer-events-none absolute inset-2 z-0 rounded-[4%] border border-border/60" />
 
 			{/* Esquinas y marcos decorativos estilo TCG */}
 			<div

@@ -332,23 +332,23 @@ export class ActivityServiceImpl implements ActivityService {
 	private getColorForActivityType(type: string): string {
 		// Podemos identificar categorías principales
 		if (type.startsWith('image_')) {
-			return '#3b82f6';
+			return 'var(--dt-primary-500)';
 		}
 		if (type.startsWith('video_')) {
-			return '#ec4899';
+			return 'var(--entity-video)';
 		}
 		if (type.startsWith('album_')) {
-			return '#f59e0b';
+			return 'var(--entity-album)';
 		}
 		if (type.startsWith('tag_')) {
-			return '#10b981';
+			return 'var(--entity-tag)';
 		}
 		if (type.startsWith('user_')) {
-			return '#8b5cf6';
+			return 'var(--entity-character)';
 		}
 
 		// Default
-		return '#6b7280';
+		return 'var(--muted-foreground)';
 	}
 
 	/**

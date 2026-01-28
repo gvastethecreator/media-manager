@@ -658,6 +658,7 @@ export const useUnifiedFileManager = create<UnifiedFileManagerState>((set, get) 
 
 	// 🛠️ Utilidades
 	setViewMode: (mode: ViewMode) => {
+		if (get().viewMode === mode) return;
 		fileManagerLogger.debug('🎨 Cambiando modo de vista:', mode);
 		set({ viewMode: mode, lastUpdate: Date.now() });
 	},

@@ -144,7 +144,7 @@ export const useProfileStore = create<ProfileStore>()(
 							if (state.activeProfile && !state.activeProfile.preferences) {
 								state.activeProfile.preferences = {
 									theme: ThemeMode.SYSTEM,
-									color: '#3b82f6',
+									color: 'var(--dt-primary-500)',
 									emoji: '👤',
 									language: Language.SPANISH,
 									enableAnimations: true,
@@ -217,7 +217,7 @@ export const useProfileStore = create<ProfileStore>()(
 							if (!state.activeProfile.preferences) {
 								state.activeProfile.preferences = {
 									theme: ThemeMode.SYSTEM,
-									color: '#3b82f6',
+									color: 'var(--dt-primary-500)',
 									emoji: '👤',
 									language: Language.SPANISH,
 									enableAnimations: true,
@@ -291,7 +291,7 @@ export const selectPreference =
 		state.activeProfile?.preferences?.[key];
 
 // Selector para obtener el color del perfil activo
-export const selectProfileColor = (state: ProfileStore) => state.activeProfile?.color || '#3b82f6';
+export const selectProfileColor = (state: ProfileStore) => state.activeProfile?.color || 'var(--dt-primary-500)';
 
 // Selector para verificar si hay un perfil activo
 export const selectHasActiveProfile = (state: ProfileStore) => !!state.activeProfile;
@@ -301,7 +301,7 @@ export const selectActiveProfileInfo = (state: ProfileStore) => ({
 	id: state.activeProfile?.id || '',
 	name: state.activeProfile?.name || '',
 	emoji: state.activeProfile?.emoji || '👤',
-	color: state.activeProfile?.color || '#3b82f6',
+	color: state.activeProfile?.color || 'var(--dt-primary-500)',
 });
 
 // Selector para verificar si el sistema está en modo oscuro

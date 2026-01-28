@@ -6,7 +6,7 @@
  */
 
 import { memo } from 'react';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { useEntityThumbnails, useEntityTypeConfig } from '@/hooks/use-entity-type-config';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/entities';
@@ -91,10 +91,10 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 		// Props para el componente motion
 		const motionProps = animated
 			? {
-					whileHover: { scale: 1.05 },
-					whileTap: { scale: 0.95 },
-					transition: { type: 'spring' as const, stiffness: 300, damping: 30 },
-				}
+				whileHover: { scale: 1.05 },
+				whileTap: { scale: 0.95 },
+				transition: { type: 'spring' as const, stiffness: 300, damping: 30 },
+			}
 			: {};
 
 		// Renderizar thumbnail específico según el tipo de entidad
@@ -125,7 +125,7 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 			return (
 				<div
 					className="flex h-full w-full items-center justify-center"
-					style={{ backgroundColor: `${config.color}20` }}
+					style={{ backgroundColor: `color-mix(in oklab, ${config.color}, transparent 80%)` }}
 				>
 					<IconComponent className="h-1/2 w-1/2 text-muted-foreground" style={{ color: config.color }} />
 				</div>
@@ -139,7 +139,7 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 			}
 
 			return (
-				<div className="absolute inset-0 flex items-end bg-black/50 p-2 opacity-0 transition-opacity duration-200 hover:opacity-100">
+				<div className="absolute inset-0 flex items-end bg-muted/50 p-2 opacity-0 transition-opacity duration-200 hover:opacity-100">
 					<div className="text-white text-xs">
 						<div className="truncate font-medium">{entity?.name || 'Sin nombre'}</div>
 						<div className="text-white/80">{config?.displayName ?? ''}</div>
@@ -186,7 +186,9 @@ export const EntityThumbnailCompact = memo<Omit<EntityThumbnailProps, 'size' | '
 				aria-label={config?.displayName ?? 'thumbnail'}
 				className={cn('flex h-6 w-6 flex-shrink-0 items-center justify-center rounded', className)}
 				role="img"
-				style={{ backgroundColor: `${config?.color ?? '#888'}20` }}
+				style={{
+					backgroundColor: `color-mix(in oklab, ${config?.color ?? 'var(--muted-foreground)'}, transparent 80%)`,
+				}}
 			>
 				{IconComponent ? (
 					<IconComponent className="h-4 w-4" style={{ color: config?.color }} />

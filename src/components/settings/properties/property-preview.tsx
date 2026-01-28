@@ -1,6 +1,7 @@
 import { PencilIcon, StarIcon, TrashIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
 import type { PropertyWithStats } from '@/types/entities/property';
 
 interface PropertyPreviewProps {
@@ -37,7 +38,9 @@ export function PropertyPreview({
 							title={property.isFavorite ? 'Quitar de favoritos' : 'Marcar como favorito'}
 							variant="ghost"
 						>
-							<StarIcon className={`h-4 w-4 ${property.isFavorite ? 'fill-yellow-500 text-yellow-500' : ''}`} />
+							<StarIcon
+								className={`h-4 w-4 ${property.isFavorite ? 'fill-[color:var(--entity-favorite)] text-[color:var(--entity-favorite)]' : ''}`}
+							/>
 						</Button>
 						<Button onClick={onEdit} size="icon" title="Editar propiedad" variant="ghost">
 							<PencilIcon className="h-4 w-4" />
@@ -65,8 +68,11 @@ export function PropertyPreview({
 									<dt className="text-muted-foreground">Color</dt>
 									<dd className="font-medium">
 										<div className="flex items-center gap-2">
-											<div className="h-4 w-4 rounded-full" style={{ backgroundColor: property.color || '#64748b' }} />
-											{property.color || '#64748b'}
+											<div
+												className="h-4 w-4 rounded-full"
+												style={{ backgroundColor: property.color || DEFAULT_NEUTRAL_COLOR }}
+											/>
+											{property.color || DEFAULT_NEUTRAL_COLOR}
 										</div>
 									</dd>
 								</div>

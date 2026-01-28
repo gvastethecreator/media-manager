@@ -85,7 +85,7 @@ export const JsonViewer: React.FC<JsonViewerProps> = ({
 
 		// Para evitar dangerouslySetInnerHTML, usamos un componente simple sin highlighting avanzado
 		// Se puede mejorar con una librería como react-syntax-highlighter si se necesita
-		return <pre className="whitespace-pre-wrap break-words text-green-600 dark:text-green-400">{text}</pre>;
+		return <pre className="whitespace-pre-wrap break-words text-[color:var(--status-success)]">{text}</pre>;
 	};
 
 	return (

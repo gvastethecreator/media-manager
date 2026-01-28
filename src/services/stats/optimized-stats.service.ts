@@ -641,7 +641,7 @@ export class OptimizedStatsService {
 			return topTagsQuery.map((tag) => ({
 				id: tag.id,
 				name: tag.name,
-				color: tag.color || '#6B7280',
+				color: tag.color || 'var(--entity-tag)',
 				count: Number(tag.totalCount) || 0,
 				imageCount: Number(tag.imageCount) || 0,
 				videoCount: Number(tag.videoCount) || 0,

@@ -278,8 +278,9 @@ export function PropertiesSettings() {
 								<div className="space-y-1 p-2">
 									{sortedProperties.map((property) => (
 										<div
-											className={`group/item relative rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${selectedProperty?.id === property.id ? 'bg-secondary text-secondary-foreground' : ''
-												}`}
+											className={`group/item relative rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${
+												selectedProperty?.id === property.id ? 'bg-secondary text-secondary-foreground' : ''
+											}`}
 											key={property.id}
 										>
 											<Button

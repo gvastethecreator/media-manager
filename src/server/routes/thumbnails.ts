@@ -4,7 +4,7 @@ import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail';
-import { thumbnailService } from '@/services/thumbnail';
+import { thumbnailService as baseThumbnailService } from '@/services/thumbnail';
 import {
 	bulkGenerateThumbnails,
 	cleanThumbnails,
@@ -277,17 +277,17 @@ router.get('/events', async (req, res) => {
 		const completeHandler = (data: Record<string, unknown>) => send('complete', data);
 		const statsHandler = (stats: Record<string, unknown>) => send('stats', stats);
 
-		thumbnailService.onProgress(progressHandler);
-		thumbnailService.onError(errorHandler as (error: ThumbnailError) => void);
-		thumbnailService.onComplete(completeHandler);
-		thumbnailService.onStats(statsHandler);
+		baseThumbnailService.onProgress(progressHandler);
+		baseThumbnailService.onError(errorHandler as (error: ThumbnailError) => void);
+		baseThumbnailService.onComplete(completeHandler);
+		baseThumbnailService.onStats(statsHandler);
 
 		req.on('close', () => {
 			clearInterval(heartbeat);
-			thumbnailService.offProgress(progressHandler);
-			thumbnailService.offError(errorHandler as (error: ThumbnailError) => void);
-			thumbnailService.offComplete(completeHandler);
-			thumbnailService.offStats(statsHandler);
+			baseThumbnailService.offProgress(progressHandler);
+			baseThumbnailService.offError(errorHandler as (error: ThumbnailError) => void);
+			baseThumbnailService.offComplete(completeHandler);
+			baseThumbnailService.offStats(statsHandler);
 		});
 
 		send('connected', { timestamp: Date.now() });

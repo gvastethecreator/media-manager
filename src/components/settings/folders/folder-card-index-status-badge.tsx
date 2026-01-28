@@ -18,13 +18,13 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 		switch (status) {
 			case 'indexed':
 				return (
-					<CircleCheckBig className="h-3 w-3 text-green-500">
+					<CircleCheckBig className="h-3 w-3 text-success">
 						<title>Indexado</title>
 					</CircleCheckBig>
 				);
 			case 'outdated':
 				return (
-					<TimerReset className="h-3 w-3 text-amber-500">
+					<TimerReset className="h-3 w-3 text-warning">
 						<title>Desactualizado</title>
 					</TimerReset>
 				);
@@ -90,8 +90,8 @@ export function FolderIndexStatusBadge({ status, lastIndexed, className }: Folde
 			<Badge
 				className={cn(
 					'flex h-4 items-center gap-1 px-2 text-[10px]',
-					status === 'indexed' && 'border-green-200 bg-green-50/30 text-green-600',
-					status === 'outdated' && 'border-amber-200 bg-amber-50/30 text-amber-600',
+					status === 'indexed' && 'border-ui-success-border bg-ui-success text-ui-success-text',
+					status === 'outdated' && 'border-ui-warning-border bg-ui-warning text-ui-warning-text',
 					status === 'pending' && 'border-muted bg-muted/30 text-muted-foreground',
 					(status === 'not_found' || status === 'error') && 'border-destructive/30 bg-destructive/10 text-destructive',
 					className

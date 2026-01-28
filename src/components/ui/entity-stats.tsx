@@ -1,5 +1,5 @@
 import React, { useMemo } from 'react';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { cn } from '@/lib/utils';
 import { Badge } from './badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from './tooltip';
@@ -64,7 +64,7 @@ export interface EntityStatsProps {
  */
 export function EntityStats({
 	stats,
-	primaryColor = '#3b82f6',
+	primaryColor = 'var(--dt-primary-500)',
 	size = 'md',
 	animated = true,
 	asBadges = false,
@@ -103,7 +103,9 @@ export function EntityStats({
 							<TooltipTrigger asChild>
 								<Badge
 									className={cn(fontSize, 'whitespace-nowrap')}
-									style={{ borderColor: stat.color ? `${stat.color}50` : `${primaryColor}50` }}
+									style={{
+										borderColor: `color-mix(in oklab, ${stat.color || primaryColor}, transparent 50%)`,
+									}}
 									variant="outline"
 								>
 									{stat.icon ? <span className="mr-1">{stat.icon}</span> : null}
@@ -126,7 +128,7 @@ export function EntityStats({
 	return (
 		<div className={cn('flex flex-wrap gap-2', className)}>
 			{statsWithKeys.map((stat, index) => {
-				const StatsContainer = animated ? motion.div : 'div';
+				const StatsContainer = animated ? (motion.div as any) : 'div';
 
 				return (
 					<TooltipProvider key={stat.key}>
@@ -141,10 +143,10 @@ export function EntityStats({
 									style={{ borderLeft: `3px solid ${stat.color || primaryColor}` }}
 									{...(animated
 										? {
-												initial: { opacity: 0, y: 5 },
-												animate: { opacity: 1, y: 0 },
-												transition: { delay: index * 0.1 },
-											}
+											initial: { opacity: 0, y: 5 },
+											animate: { opacity: 1, y: 0 },
+											transition: { delay: index * 0.1 },
+										}
 										: {})}
 								>
 									{stat.icon && <span className="mr-1.5">{stat.icon}</span>}

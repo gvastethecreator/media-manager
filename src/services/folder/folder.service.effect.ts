@@ -94,6 +94,7 @@ export interface FolderServiceInterface {
 	// CRUD Básico
 	readonly getById: (id: string) => Effect.Effect<FolderWithStats, FolderError>;
 	readonly getAll: (options?: GetFoldersOptions) => Effect.Effect<GetFoldersResult, FolderError>;
+	readonly getTree: () => Effect.Effect<FolderWithStats[], FolderError>;
 	readonly create: (input: Schema.Schema.Type<typeof FolderCreateInput>) => Effect.Effect<FolderWithStats, FolderError>;
 	readonly update: (
 		id: string,
@@ -628,9 +629,35 @@ const FolderServiceLive = Layer.succeed(
 				});
 
 				return { successful, failed };
-			}) /**
-		 * Obtiene las subcarpetas de una carpeta (o carpetas raíz si parentId es null)
+			}) /*
+		 * Obtiene el árbol completo de carpetas
 		 */,
+		getTree: () =>
+			Effect.gen(function* () {
+				logger.info('🌳 Obteniendo árbol completo de carpetas');
+
+				const result = yield* Effect.tryPromise<Schema.Schema.Type<typeof Folder>[], FolderError>({
+					try: async () => await db.select().from(folders).orderBy(asc(folders.name)),
+					catch: (error: unknown) => fromUnknownError('getTree', error),
+				});
+
+				// Validar con Schema
+				const validatedFolders = yield* Effect.try({
+					try: () => result.map((f) => Schema.decodeUnknownSync(Folder)(f)),
+					catch: (error: unknown) => fromUnknownError('getTree:validation', error),
+				});
+
+				// Enriquecer con conteos (opcional, pero good to have)
+				// Por ahora simple para evitar query N+1 masivo
+				return validatedFolders.map((f) => ({
+					...f,
+					_count: { children: 0, images: 0, videos: 0 }, // Placeholder
+				})) as FolderWithStats[];
+			}),
+
+		/**
+		 * Obtiene las subcarpetas de una carpeta (o carpetas raíz si parentId es null)
+		 */
 		getChildren: (parentId: string | null) =>
 			Effect.gen(function* () {
 				logger.info('👶 Obteniendo hijos de:', { parentId: parentId ?? 'ROOT' });

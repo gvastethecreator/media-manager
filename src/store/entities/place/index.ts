@@ -57,7 +57,10 @@ export const usePlaceStore = create<PlaceStore>()(
 			selectedIds: [],
 			expandedIds: [],
 			currentPlaceId: null,
-			setViewMode: (mode) => set({ viewMode: mode }),
+			setViewMode: (mode) => {
+				if (get().viewMode === mode) return;
+				set({ viewMode: mode });
+			},
 			setIsCreatingPlace: (value) => set({ isCreatingPlace: value }),
 			setIsEditingPlace: (value) => set({ isEditingPlace: value }),
 			setIsProcessingAction: (value) => set({ isProcessingAction: value }),

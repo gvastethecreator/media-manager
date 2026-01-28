@@ -62,28 +62,28 @@ export const LOAD_WORLD_ITEMS_ERROR = 'Error al cargar objetos del mundo';
  * Colores para categorías de objetos
  */
 export const WORLD_ITEM_CATEGORY_COLORS = {
-	combat: '#ef4444',
-	magic: '#8b5cf6',
-	technology: '#06b6d4',
-	utility: '#10b981',
-	decoration: '#f59e0b',
-	survival: '#84cc16',
-	transportation: '#0ea5e9',
-	quest: '#ec4899',
-	lore: '#d946ef',
-	other: '#6b7280',
+	combat: 'var(--preset-red)',
+	magic: 'var(--preset-purple)',
+	technology: 'var(--preset-cyan)',
+	utility: 'var(--preset-green)',
+	decoration: 'var(--preset-yellow)',
+	survival: 'var(--preset-lime)',
+	transportation: 'var(--preset-sky)',
+	quest: 'var(--preset-pink)',
+	lore: 'var(--preset-fuchsia)',
+	other: 'var(--dt-neutral-500)',
 };
 
 /**
  * Colores para rareza de objetos
  */
 export const WORLD_ITEM_RARITY_COLORS = {
-	common: '#6b7280',
-	uncommon: '#22c55e',
-	rare: '#3b82f6',
-	epic: '#a855f7',
-	legendary: '#f59e0b',
-	mythic: '#ef4444',
-	unique: '#ec4899',
-	artifact: '#fcd34d',
+	common: 'var(--dt-neutral-500)',
+	uncommon: 'var(--preset-green)',
+	rare: 'var(--preset-blue)',
+	epic: 'var(--preset-violet)',
+	legendary: 'var(--preset-yellow)',
+	mythic: 'var(--preset-red)',
+	unique: 'var(--preset-pink)',
+	artifact: 'var(--preset-orange)',
 };

@@ -3,10 +3,10 @@ import React, { memo } from 'react';
 import { GroupCard } from '@/components/cards/group-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
+import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -31,13 +31,6 @@ interface GroupsContentViewProps {
 // Componente memoizado para cada tarjeta de grupo
 const MemoizedGroupCard = memo(
 	({ group, onGroupClick }: { group: GroupWithStats; onGroupClick: () => void }) => {
-		// Asegurarse de que el grupo tenga todas las propiedades requeridas
-		const completeGroup = {
-			...group,
-			emoji: '📂',
-			color: '#60a5fa',
-		};
-
 		return <GroupCard className="h-full" group={group} onClick={onGroupClick} />;
 	},
 	(prevProps, nextProps) => {

@@ -34,7 +34,7 @@ function calculateFileStats(file: FileBase): FileStatistics {
 		formattedSize: formatFileSize(file.size),
 		typeLabel: file.type,
 		iconName: 'file',
-		colorCode: '#6B7280',
+		colorCode: 'var(--dt-neutral-500)',
 		daysSinceModified,
 		daysSinceAccessed,
 		isRecent: daysSinceModified <= 7,

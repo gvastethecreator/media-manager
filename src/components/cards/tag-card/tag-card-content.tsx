@@ -35,7 +35,7 @@ function DescriptionSection({
 		<div
 			className={cn(
 				'mb-3 text-xs',
-				tcgMode ? 'rounded border border-white/5 bg-black/10 p-2' : 'text-muted-foreground'
+				tcgMode ? 'rounded border border-border/20 bg-muted/10 p-2' : 'text-muted-foreground'
 			)}
 			style={{
 				lineHeight: '1.25rem',
@@ -158,7 +158,7 @@ export function TagCardContent({
 					{icon}
 					<span className="opacity-90">{label}</span>
 				</div>
-				<div className="h-1.5 flex-grow overflow-hidden rounded-full bg-black/20">
+				<div className="h-1.5 flex-grow overflow-hidden rounded-full bg-muted/20">
 					<div
 						className="h-full rounded-full"
 						style={{

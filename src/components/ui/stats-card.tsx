@@ -213,8 +213,17 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 													<div
 														className={cn(
 															'flex h-8 w-8 items-center justify-center rounded-dt-sm border',
-															item.color ? `bg-[${item.color}]/10 text-[${item.color}]` : 'bg-muted'
+															!item.color && 'bg-muted'
 														)}
+														style={
+															item.color
+																? {
+																	backgroundColor: `color-mix(in oklab, ${item.color}, transparent 90%)`,
+																	color: item.color,
+																	borderColor: `color-mix(in oklab, ${item.color}, transparent 80%)`,
+																}
+																: undefined
+														}
 													>
 														{item.emoji || <Hash className="h-4 w-4" />}
 													</div>

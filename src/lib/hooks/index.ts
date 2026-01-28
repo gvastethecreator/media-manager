@@ -4,7 +4,6 @@
 export * from './entities/concept';
 export * from './entities/note';
 // 📊 Hooks de entidades
-export * from './entities/use-entity-conversion';
 export * from './entities/use-group-filters';
 export * from './entities/use-group-sort';
 export * from './entities/useFilteredData';

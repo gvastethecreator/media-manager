@@ -5,5 +5,4 @@
  * @updated 2025-01-27
  */
 
-export * from './character.service';
-export { default } from './character.service';
+export * from './character.service.effect';

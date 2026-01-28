@@ -23,7 +23,7 @@ export function PlaceCardFooter({
 	createdAt,
 	imagesCount = 0,
 	videosCount = 0,
-	primaryColor = '#10b981',
+	primaryColor = 'var(--dt-success-500)',
 	power = 1,
 	healthPoints = 100,
 	cardId = '',
@@ -38,9 +38,11 @@ export function PlaceCardFooter({
 
 	return (
 		<div
-			className={cn('px-3 py-2', tcgMode ? 'border-white/10 border-t' : '')}
+			className={cn('px-3 py-2', tcgMode ? 'border-border/40 border-t' : '')}
 			style={{
-				background: tcgMode ? `linear-gradient(to top, ${primaryColor}20, transparent)` : undefined,
+				background: tcgMode
+					? `linear-gradient(to top, color-mix(in oklab, ${primaryColor}, transparent 80%), transparent)`
+					: undefined,
 			}}
 		>
 			{tcgMode ? (

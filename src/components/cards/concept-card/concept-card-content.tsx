@@ -1,11 +1,9 @@
 import { BookText, Globe, Image, MessageSquare, Package, Tag, UserSquare, VideoIcon } from 'lucide-react';
 import { nanoid } from 'nanoid';
 import React, { useEffect, useState } from 'react';
+import { getConceptCountsFromApi } from '@/lib/api/client/concept.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
-import { ConceptService } from '@/services/concept/concept.service';
-
-const { getConceptCounts } = ConceptService;
 
 interface ConceptCardContentProps {
 	description?: string | null;
@@ -77,7 +75,7 @@ export function ConceptCardContent({
 	useEffect(() => {
 		const loadCounts = async () => {
 			try {
-				const counts = await getConceptCounts(conceptId);
+				const counts = await getConceptCountsFromApi(conceptId);
 				setRelationCounts((prev) => ({ ...prev, ...counts }));
 			} catch (error) {
 				clientLogger.error('Error cargando recuentos:', error);
@@ -109,7 +107,7 @@ export function ConceptCardContent({
 
 	return (
 		<div
-			className={`flex flex-1 flex-col overflow-hidden p-3 ${tcgMode ? 'bg-black/10' : 'bg-card/80'}`}
+			className={`flex flex-1 flex-col overflow-hidden p-3 ${tcgMode ? 'bg-muted/10' : 'bg-card/80'}`}
 			style={
 				tcgMode
 					? {
@@ -172,7 +170,7 @@ export function ConceptCardContent({
 
 			{/* Descripción del concepto */}
 			<div
-				className={`mb-3 ${tcgMode ? 'rounded-sm border border-white/5 bg-black/20 px-2 py-1.5 text-white/90' : 'text-muted-foreground'}`}
+				className={`mb-3 ${tcgMode ? 'rounded-sm border border-border/20 bg-muted/20 px-2 py-1.5 text-white/90' : 'text-muted-foreground'}`}
 				style={{
 					fontSize: '0.8rem',
 					lineHeight: '1.25rem',
@@ -196,7 +194,7 @@ export function ConceptCardContent({
 					<div className="flex flex-wrap gap-1">
 						{parsedTags.slice(0, 5).map((tag: string, _index: number) => (
 							<span
-								className={`rounded-sm px-1.5 py-0.5 text-xs ${tcgMode ? 'border border-white/10' : 'bg-primary/10'}`}
+								className={`rounded-sm px-1.5 py-0.5 text-xs ${tcgMode ? 'border border-border/40' : 'bg-primary/10'}`}
 								key={`tag-${renderKey}-${tag}`}
 								style={{
 									backgroundColor: tcgMode ? `${primaryColor}30` : `${primaryColor}20`,
@@ -208,7 +206,7 @@ export function ConceptCardContent({
 							</span>
 						))}
 						{parsedTags.length > 5 && (
-							<span className={`rounded-sm px-1.5 py-0.5 text-xs opacity-80 ${tcgMode ? 'bg-black/20' : ''}`}>
+							<span className={`rounded-sm px-1.5 py-0.5 text-xs opacity-80 ${tcgMode ? 'bg-muted/20' : ''}`}>
 								+{parsedTags.length - 5}
 							</span>
 						)}
@@ -257,7 +255,7 @@ export function ConceptCardContent({
 			{/* Contadores de relaciones */}
 			<div className="mt-auto grid grid-cols-4 gap-2 text-xs">
 				<div className="col-span-4 mb-1">
-					<div className="mb-1 flex justify-between border-white/10 border-b pb-1 text-xs opacity-60">
+					<div className="mb-1 flex justify-between border-border/40 border-b pb-1 text-xs opacity-60">
 						<span>Relaciones principales</span>
 						<span>{totalRelations}</span>
 					</div>
@@ -356,7 +354,7 @@ function StatBar({ label, value, color, max }: { label: string; value: number; c
 				<span className="uppercase tracking-wider">{label}</span>
 				<span>{value}</span>
 			</div>
-			<div className="h-1.5 overflow-hidden rounded-sm border border-white/5 bg-black/30">
+			<div className="h-1.5 overflow-hidden rounded-sm border border-border/20 bg-muted/30">
 				<div
 					className="h-full rounded-sm"
 					style={{

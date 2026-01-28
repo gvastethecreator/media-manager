@@ -4,4 +4,4 @@
  * @module services/note
  */
 
-export * from './note.service';
+export { NoteService, NoteServiceLive } from '@/services/secondary/secondary-services.effect';

@@ -1,6 +1,7 @@
 import { ChevronRight, EditIcon, StarIcon, Trash } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { cn } from '@/lib/utils';
 import type { WildcardWithStats } from '@/types/entities/wildcard/base';
 
@@ -42,7 +43,7 @@ export function WildcardPreview({ wildcard, onEdit, onDelete, isDeleting = false
 								)}
 								{wildcard.name}
 							</CardTitle>
-							{wildcard.isFavorite && <StarIcon className="h-4 w-4 text-yellow-500" />}
+							{wildcard.isFavorite && <StarIcon className="h-4 w-4 text-[color:var(--entity-favorite)]" />}
 						</div>
 					</div>
 					<div className="flex items-center gap-2">
@@ -83,8 +84,8 @@ export function WildcardPreview({ wildcard, onEdit, onDelete, isDeleting = false
 				<div className="space-y-2">
 					<h3 className="font-medium text-sm">Color</h3>
 					<div className="flex items-center gap-2">
-						<div className="h-4 w-4 rounded" style={{ backgroundColor: wildcard.color || '#3b82f6' }} />
-						<span className="text-muted-foreground text-sm">{wildcard.color || '#3b82f6'}</span>
+						<div className="h-4 w-4 rounded" style={{ backgroundColor: wildcard.color || DEFAULT_ENTITY_COLOR }} />
+						<span className="text-muted-foreground text-sm">{wildcard.color || DEFAULT_ENTITY_COLOR}</span>
 					</div>
 				</div>
 

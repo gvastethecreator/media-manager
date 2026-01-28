@@ -18,6 +18,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreatePlace, useUpdatePlace } from '@/lib/api/places';
+import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import type { PlaceBase, PlaceCreateInput, PlaceUpdateInput, PlaceWithStats } from '@/types/entities/place/base';
 
@@ -33,7 +34,7 @@ const placeFormSchema = z
 		name: z.string().min(1, 'El nombre es obligatorio').max(100).default('').catch(''),
 		description: z.string().max(1000).default('').catch(''),
 		emoji: z.string().min(1, 'El emoji es obligatorio').default('📍').catch('📍'),
-		color: z.string().min(1, 'El color es obligatorio').default('#6b7280').catch('#6b7280'),
+		color: z.string().min(1, 'El color es obligatorio').default(DEFAULT_NEUTRAL_COLOR).catch(DEFAULT_NEUTRAL_COLOR),
 		category: z.string().default('general').catch('general'),
 		type: z.string().default('unknown').catch('unknown'),
 		climate: z.string().default('temperate').catch('temperate'),
@@ -89,7 +90,7 @@ export function CreatePlaceForm({
 				name: place.name,
 				description: place.description ?? '',
 				emoji: place.emoji ?? '📍',
-				color: place.color ?? '#6b7280',
+				color: place.color ?? DEFAULT_NEUTRAL_COLOR,
 				category: place.category ?? 'general',
 				type: place.type ?? 'unknown',
 				climate: place.climate ?? 'temperate',

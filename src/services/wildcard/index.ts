@@ -5,5 +5,4 @@
  * @updated 2025-01-27
  */
 
-export * from './wildcard.service';
-export { default } from './wildcard.service';
+export { WildcardService, WildcardServiceLive } from '@/services/secondary/secondary-services.effect';

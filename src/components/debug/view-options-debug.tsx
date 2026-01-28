@@ -14,7 +14,7 @@ export function ViewOptionsDebug() {
 	return (
 		<Card className="m-4 border-orange-500">
 			<CardHeader>
-				<CardTitle className="text-orange-600">🔍 Debug: Estados del Store</CardTitle>
+				<CardTitle className="text-warning">🔍 Debug: Estados del Store</CardTitle>
 			</CardHeader>
 			<CardContent>
 				<div className="grid grid-cols-2 gap-4">

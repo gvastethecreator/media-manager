@@ -18,10 +18,10 @@ const inlineFeedbackVariants = cva(
 	{
 		variants: {
 			variant: {
-				info: 'bg-blue-500/10 text-blue-600 dark:text-blue-400',
-				success: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400',
-				warning: 'bg-amber-500/10 text-amber-600 dark:text-amber-400',
-				error: 'bg-red-500/10 text-red-600 dark:text-red-400',
+				info: 'bg-ui-info text-ui-info-text',
+				success: 'bg-ui-success text-ui-success-text',
+				warning: 'bg-ui-warning text-ui-warning-text',
+				error: 'bg-ui-error text-ui-error-text',
 				loading: 'bg-muted text-muted-foreground',
 			},
 			size: {
@@ -87,10 +87,10 @@ const statusBadgeVariants = cva(
 		variants: {
 			status: {
 				idle: 'bg-muted text-muted-foreground',
-				pending: 'bg-amber-500/15 text-amber-600 dark:text-amber-400',
-				processing: 'bg-blue-500/15 text-blue-600 dark:text-blue-400',
-				success: 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400',
-				error: 'bg-red-500/15 text-red-600 dark:text-red-400',
+				pending: 'bg-ui-warning text-ui-warning-text',
+				processing: 'bg-ui-info text-ui-info-text',
+				success: 'bg-ui-success text-ui-success-text',
+				error: 'bg-ui-error text-ui-error-text',
 			},
 			size: {
 				sm: 'px-2 py-0.5 text-xs',
@@ -129,15 +129,15 @@ export function StatusBadge({
 					<span
 						className={cn(
 							'absolute inline-flex h-full w-full animate-ping rounded-full opacity-75',
-							status === 'processing' && 'bg-blue-400',
-							status === 'pending' && 'bg-amber-400'
+							status === 'processing' && 'bg-ui-info-text',
+							status === 'pending' && 'bg-ui-warning-text'
 						)}
 					/>
 					<span
 						className={cn(
 							'relative inline-flex h-2 w-2 rounded-full',
-							status === 'processing' && 'bg-blue-500',
-							status === 'pending' && 'bg-amber-500'
+							status === 'processing' && 'bg-ui-info-text',
+							status === 'pending' && 'bg-ui-warning-text'
 						)}
 					/>
 				</span>
@@ -243,14 +243,14 @@ export function OperationProgress({
 			<div className="flex items-center justify-between text-sm">
 				<div className="flex items-center gap-2">
 					{!isComplete && <Loader2 className="h-4 w-4 animate-spin text-primary" />}
-					{isComplete && !hasErrors && <CheckCircle2 className="h-4 w-4 text-emerald-500" />}
-					{isComplete && hasErrors && <AlertCircle className="h-4 w-4 text-amber-500" />}
+					{isComplete && !hasErrors && <CheckCircle2 className="h-4 w-4 text-success" />}
+					{isComplete && hasErrors && <AlertCircle className="h-4 w-4 text-warning" />}
 					<span className="font-medium">{operation}</span>
 				</div>
 				{showDetails && (
 					<span className="text-muted-foreground tabular-nums">
 						{completed}/{total}
-						{hasErrors && <span className="ml-2 text-red-500">({failed} errores)</span>}
+						{hasErrors && <span className="ml-2 text-destructive">({failed} errores)</span>}
 					</span>
 				)}
 			</div>
@@ -258,9 +258,9 @@ export function OperationProgress({
 				<div
 					className={cn(
 						'h-full rounded-full transition-all duration-dt-normal',
-						isComplete && !hasErrors && 'bg-emerald-500',
-						isComplete && hasErrors && 'bg-amber-500',
-						!isComplete && 'bg-primary'
+						isComplete && !hasErrors && 'bg-ui-success-text',
+						isComplete && hasErrors && 'bg-ui-warning-text',
+						!isComplete && 'bg-ui-info-text'
 					)}
 					style={{ width: `${progress}%` }}
 				/>

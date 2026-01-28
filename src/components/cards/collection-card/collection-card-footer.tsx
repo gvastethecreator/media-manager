@@ -78,7 +78,7 @@ export function CollectionCardFooter({
 				{/* Parte derecha - Favorito con estilo TCG */}
 				{isFavorite && (
 					<div
-						className="flex items-center gap-1 rounded-sm bg-red-500/10 px-2 py-1"
+						className="flex items-center gap-1 rounded-sm bg-destructive/10 px-2 py-1"
 						style={{
 							color: 'rgb(239, 68, 68)',
 							boxShadow: '0 0 5px rgba(239, 68, 68, 0.3)',

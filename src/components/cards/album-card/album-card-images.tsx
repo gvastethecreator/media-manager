@@ -83,13 +83,13 @@ export function AlbumCardImages({
 		<div className={cn('relative grid gap-1 overflow-hidden p-1.5', getGridClass(), className)}>
 			{allImages.map((imgSrc, index) => (
 				<div
-					className={cn('relative overflow-hidden rounded bg-background/20', index < 3 && 'border-white/10 border-b')}
+					className={cn('relative overflow-hidden rounded bg-background/20', index < 3 && 'border-border/40 border-b')}
 					key={`album-img-${index}-${imgSrc.substring(imgSrc.lastIndexOf('/') + 1)}`}
 				>
 					<img alt={`Imagen de álbum ${index + 1}`} className="h-full w-full object-cover" src={imgSrc} />
 					{/* Indicador de video */}
 					{videos.includes(imgSrc) && (
-						<div className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-black/50">
+						<div className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-muted/50">
 							<div className="ml-0.5 h-0 w-0 border-t-4 border-t-transparent border-b-4 border-b-transparent border-l-4 border-l-white" />
 						</div>
 					)}

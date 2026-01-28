@@ -38,24 +38,32 @@ interface ParticlesProps {
 	vy?: number;
 }
 
-function hexToRgb(hexValue: string): number[] {
-	const cleanHex = hexValue.replace('#', '');
-
-	let formattedHex = cleanHex;
-	if (cleanHex.length === 3) {
-		formattedHex = cleanHex
-			.split('')
-			.map((char) => char + char)
-			.join('');
+function parseColor(color: string, canvas: HTMLCanvasElement): number[] {
+	if (color.startsWith('#')) {
+		const cleanHex = color.replace('#', '');
+		let formattedHex = cleanHex;
+		if (cleanHex.length === 3) {
+			formattedHex = cleanHex
+				.split('')
+				.map((char) => char + char)
+				.join('');
+		}
+		const rHex = formattedHex.substring(0, 2);
+		const gHex = formattedHex.substring(2, 4);
+		const bHex = formattedHex.substring(4, 6);
+		return [Number.parseInt(rHex, 16), Number.parseInt(gHex, 16), Number.parseInt(bHex, 16)];
 	}
 
-	const rHex = formattedHex.substring(0, 2);
-	const gHex = formattedHex.substring(2, 4);
-	const bHex = formattedHex.substring(4, 6);
-	const red = Number.parseInt(rHex, 16);
-	const green = Number.parseInt(gHex, 16);
-	const blue = Number.parseInt(bHex, 16);
-	return [red, green, blue];
+	// Si es una variable CSS o color con nombre, usar el navegador para parsearlo
+	const tempElement = document.createElement('div');
+	tempElement.style.color = color;
+	tempElement.style.display = 'none';
+	document.body.appendChild(tempElement);
+	const computedColor = getComputedStyle(tempElement).color;
+	document.body.removeChild(tempElement);
+
+	const match = computedColor.match(/\d+/g);
+	return match ? match.slice(0, 3).map(Number) : [255, 255, 255];
 }
 
 type Circle = {
@@ -77,7 +85,7 @@ const Particles: React.FC<ParticlesProps> = ({
 	staticity = 50,
 	ease = 50,
 	size = 0.4,
-	color = '#ffffff',
+	color = 'currentColor',
 	vx = 0,
 	vy = 0,
 }) => {
@@ -92,7 +100,13 @@ const Particles: React.FC<ParticlesProps> = ({
 	const rafID = useRef<number | null>(null);
 	const resizeTimeout = useRef<NodeJS.Timeout | null>(null);
 
-	const rgb = hexToRgb(color);
+	const [rgb, setRgb] = useState<number[]>([255, 255, 255]);
+
+	useEffect(() => {
+		if (canvasRef.current) {
+			setRgb(parseColor(color, canvasRef.current));
+		}
+	}, [color]);
 
 	const circleParams = useCallback((): Circle => {
 		const x = Math.floor(Math.random() * canvasSize.current.w);
