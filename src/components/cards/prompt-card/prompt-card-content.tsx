@@ -65,8 +65,8 @@ function getContentPreview(content: string, compact: boolean): string {
 
 function getColorStyles(primaryColor: string) {
 	return {
-		tagColor: `${primaryColor}20`,
-		borderColor: `${primaryColor}30`,
+		tagColor: `color-mix(in oklab, ${primaryColor}, transparent 80%)`,
+		borderColor: `color-mix(in oklab, ${primaryColor}, transparent 70%)`,
 	};
 }
 
@@ -183,7 +183,7 @@ function TagsSection({
 							backgroundColor: tagColor,
 							color: primaryColor,
 							borderColor: primaryColor,
-							boxShadow: tcgMode ? `0 0 5px ${primaryColor}30` : undefined,
+							boxShadow: tcgMode ? `0 0 5px color-mix(in oklab, ${primaryColor}, transparent 70%)` : undefined,
 						}}
 						variant="outline"
 					>
@@ -218,7 +218,7 @@ function ParametersSection({
 	}
 
 	return (
-		<div className="mb-2 rounded border bg-black/5 p-1.5" style={{ borderColor: `${primaryColor}40` }}>
+		<div className="mb-2 rounded border bg-black/5 p-1.5" style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 60%)` }}>
 			<div className="mb-1 flex items-center gap-1 font-medium text-xs" style={{ color: primaryColor }}>
 				<Settings className="h-3.5 w-3.5" />
 				<span>Parámetros</span>
@@ -228,14 +228,14 @@ function ParametersSection({
 					<div
 						className="flex justify-between overflow-hidden rounded bg-black/5 px-1.5 py-0.5"
 						key={`param-${key}`}
-						style={{ backgroundColor: `${primaryColor}10` }}
+						style={{ backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 90%)` }}
 					>
 						<span className="truncate font-medium">{key}:</span>
 						<span className="ml-1 truncate opacity-80">
 							{typeof parsedParameters[key] === 'object'
 								? '{...}'
 								: String(parsedParameters[key]).substring(0, 10) +
-									(String(parsedParameters[key]).length > 10 ? '...' : '')}
+								(String(parsedParameters[key]).length > 10 ? '...' : '')}
 						</span>
 					</div>
 				))}
@@ -316,9 +316,9 @@ export function PromptCardContent({
 		<div
 			className={cn('flex flex-1 flex-col overflow-hidden p-3', tcgMode ? 'bg-card/80' : 'bg-card')}
 			style={{
-				background: tcgMode ? `linear-gradient(to bottom, transparent, ${primaryColor}10)` : undefined,
+				background: tcgMode ? `linear-gradient(to bottom, transparent, color-mix(in oklab, ${primaryColor}, transparent 90%))` : undefined,
 				borderBottom: tcgMode ? `1px solid ${borderColor}` : undefined,
-				boxShadow: tcgMode ? `0 0 15px ${primaryColor}20 inset` : undefined,
+				boxShadow: tcgMode ? `0 0 15px color-mix(in oklab, ${primaryColor}, transparent 80%) inset` : undefined,
 			}}
 		>
 			<CategoryHeader

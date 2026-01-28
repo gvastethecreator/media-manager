@@ -12,12 +12,7 @@ export type {
 	SelectableBrowserItem,
 } from './item.types';
 
-export {
-	createParentNavItem,
-	ENTITY_TYPE_MAP,
-	normalizeEntityType,
-	toBrowserItem,
-} from './item.types';
+export { createParentNavItem, toBrowserItem } from './item.types';
 // Props types
 export type {
 	BrowserViewProps,

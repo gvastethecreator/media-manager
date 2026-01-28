@@ -55,7 +55,7 @@ export function AlbumContentView() {
 	if (error) {
 		return (
 			<BaseContentView title={headerTitle}>
-				<div className="flex h-full items-center justify-center text-red-500">Error: {error.message}</div>
+				<div className="flex h-full items-center justify-center text-destructive">Error: {error.message}</div>
 			</BaseContentView>
 		);
 	}

@@ -14,7 +14,7 @@ export function mapCreateProfileDataToDrizzle(data: ProfileCreateInput) {
 		id: crypto.randomUUID(),
 		name: data.name,
 		emoji: data.emoji || '👤',
-		color: data.color || '#3B82F6',
+		color: data.color || 'var(--dt-primary-500)',
 		description: data.description || null,
 		isActive: data.isActive ?? true,
 		createdAt: new Date(),

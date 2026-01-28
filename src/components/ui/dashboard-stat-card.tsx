@@ -20,28 +20,28 @@ const statCardVariants = cva(
 		variants: {
 			variant: {
 				default: 'border-border/30 bg-card/80 hover:bg-card/95',
-				blue: 'border-blue-300/30 bg-linear-to-br from-blue-500/15 to-blue-600/25 hover:from-blue-500/25 hover:to-blue-600/35',
+				blue: 'border-blue-500/30 bg-linear-to-br from-blue-500/10 to-blue-600/20 hover:from-blue-500/20 hover:to-blue-600/30',
 				purple:
-					'border-purple-300/30 bg-linear-to-br from-purple-500/15 to-purple-600/25 hover:from-purple-500/25 hover:to-purple-600/35',
+					'border-purple-500/30 bg-linear-to-br from-purple-500/10 to-purple-600/20 hover:from-purple-500/20 hover:to-purple-600/30',
 				green:
-					'border-green-300/30 bg-linear-to-br from-green-500/15 to-green-600/25 hover:from-green-500/25 hover:to-green-600/35',
+					'border-green-500/30 bg-linear-to-br from-green-500/10 to-green-600/20 hover:from-green-500/20 hover:to-green-600/30',
 				orange:
-					'border-orange-300/30 bg-linear-to-br from-orange-500/15 to-orange-600/25 hover:from-orange-500/25 hover:to-orange-600/35',
+					'border-orange-500/30 bg-linear-to-br from-orange-500/10 to-orange-600/20 hover:from-orange-500/20 hover:to-orange-600/30',
 				yellow:
-					'border-yellow-300/30 bg-linear-to-br from-yellow-500/15 to-yellow-600/25 hover:from-yellow-500/25 hover:to-yellow-600/35',
+					'border-yellow-500/30 bg-linear-to-br from-yellow-500/10 to-yellow-600/20 hover:from-yellow-500/20 hover:to-yellow-600/30',
 				indigo:
-					'border-indigo-300/30 bg-linear-to-br from-indigo-500/15 to-indigo-600/25 hover:from-indigo-500/25 hover:to-indigo-600/35',
-				cyan: 'border-cyan-300/30 bg-linear-to-br from-cyan-500/15 to-cyan-600/25 hover:from-cyan-500/25 hover:to-cyan-600/35',
+					'border-indigo-500/30 bg-linear-to-br from-indigo-500/10 to-indigo-600/20 hover:from-indigo-500/20 hover:to-indigo-600/30',
+				cyan: 'border-cyan-500/30 bg-linear-to-br from-cyan-500/10 to-cyan-600/20 hover:from-cyan-500/20 hover:to-cyan-600/30',
 				amber:
-					'border-amber-300/30 bg-linear-to-br from-amber-500/15 to-amber-600/25 hover:from-amber-500/25 hover:to-amber-600/35',
-				teal: 'border-teal-300/30 bg-linear-to-br from-teal-500/15 to-teal-600/25 hover:from-teal-500/25 hover:to-teal-600/35',
-				rose: 'border-rose-300/30 bg-linear-to-br from-rose-500/15 to-rose-600/25 hover:from-rose-500/25 hover:to-rose-600/35',
+					'border-amber-500/30 bg-linear-to-br from-amber-500/10 to-amber-600/20 hover:from-amber-500/20 hover:to-amber-600/30',
+				teal: 'border-teal-500/30 bg-linear-to-br from-teal-500/10 to-teal-600/20 hover:from-teal-500/20 hover:to-teal-600/30',
+				rose: 'border-rose-500/30 bg-linear-to-br from-rose-500/10 to-rose-600/20 hover:from-rose-500/20 hover:to-rose-600/30',
 				emerald:
-					'border-emerald-300/30 bg-linear-to-br from-emerald-500/15 to-emerald-600/25 hover:from-emerald-500/25 hover:to-emerald-600/35',
+					'border-emerald-500/30 bg-linear-to-br from-emerald-500/10 to-emerald-600/20 hover:from-emerald-500/20 hover:to-emerald-600/30',
 				violet:
-					'border-violet-300/30 bg-linear-to-br from-violet-500/15 to-violet-600/25 hover:from-violet-500/25 hover:to-violet-600/35',
+					'border-violet-500/30 bg-linear-to-br from-violet-500/10 to-violet-600/20 hover:from-violet-500/20 hover:to-violet-600/30',
 				slate:
-					'border-slate-300/30 bg-linear-to-br from-slate-500/15 to-slate-600/25 hover:from-slate-500/25 hover:to-slate-600/35',
+					'border-slate-500/30 bg-linear-to-br from-slate-500/10 to-slate-600/20 hover:from-slate-500/20 hover:to-slate-600/30',
 			},
 			size: {
 				sm: 'p-2',
@@ -58,36 +58,36 @@ const statCardVariants = cva(
 
 const iconColorMap: Record<string, string> = {
 	default: 'text-foreground',
-	blue: 'text-blue-400',
-	purple: 'text-purple-400',
-	green: 'text-green-400',
-	orange: 'text-orange-400',
-	yellow: 'text-yellow-400',
-	indigo: 'text-indigo-400',
-	cyan: 'text-cyan-400',
-	amber: 'text-amber-400',
-	teal: 'text-teal-400',
-	rose: 'text-rose-400',
-	emerald: 'text-emerald-400',
-	violet: 'text-violet-400',
-	slate: 'text-slate-400',
+	blue: 'text-ui-info-text',
+	purple: 'text-entity-character',
+	green: 'text-ui-success-text',
+	orange: 'text-ui-warning-text',
+	yellow: 'text-ui-warning-text',
+	indigo: 'text-entity-file-3d',
+	cyan: 'text-entity-collection',
+	amber: 'text-ui-warning-text',
+	teal: 'text-entity-group',
+	rose: 'text-ui-error-text',
+	emerald: 'text-ui-success-text',
+	violet: 'text-entity-album',
+	slate: 'text-muted-foreground',
 };
 
 const subtitleColorMap: Record<string, string> = {
 	default: 'text-muted-foreground',
-	blue: 'text-blue-200',
-	purple: 'text-purple-200',
-	green: 'text-green-200',
-	orange: 'text-orange-200',
-	yellow: 'text-yellow-200',
-	indigo: 'text-indigo-200',
-	cyan: 'text-cyan-200',
-	amber: 'text-amber-200',
-	teal: 'text-teal-200',
-	rose: 'text-rose-200',
-	emerald: 'text-emerald-200',
-	violet: 'text-violet-200',
-	slate: 'text-slate-200',
+	blue: 'text-ui-info-text/70',
+	purple: 'text-entity-character/70',
+	green: 'text-ui-success-text/70',
+	orange: 'text-ui-warning-text/70',
+	yellow: 'text-ui-warning-text/70',
+	indigo: 'text-entity-file-3d/70',
+	cyan: 'text-entity-collection/70',
+	amber: 'text-ui-warning-text/70',
+	teal: 'text-entity-group/70',
+	rose: 'text-ui-error-text/70',
+	emerald: 'text-ui-success-text/70',
+	violet: 'text-entity-album/70',
+	slate: 'text-muted-foreground/70',
 };
 
 /* =====================================================
@@ -154,7 +154,7 @@ export const DashboardStatCard = memo(function DashboardStatCard({
 			</div>
 
 			{/* Valor principal */}
-			<div className="font-bold text-lg text-white tabular-nums">{value}</div>
+			<div className="font-bold text-foreground text-lg tabular-nums">{value}</div>
 
 			{/* Subtítulo */}
 			{subtitle && <div className={cn('truncate text-[10px]', subtitleColor)}>{subtitle}</div>}

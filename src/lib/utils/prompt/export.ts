@@ -386,7 +386,7 @@ export function importPromptFromJSON(content: string): PromptBase | null {
 			id,
 			name: parsed.name,
 			emoji: parsed.emoji || '📝',
-			color: parsed.color || '#3b82f6',
+			color: parsed.color || 'var(--dt-primary-500)',
 			description: parsed.description || null,
 			content: parsed.content,
 			category: parsed.category || null,

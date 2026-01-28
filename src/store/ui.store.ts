@@ -57,9 +57,10 @@ export const useUIStore = create<UIState>()(
 			...initialState,
 
 			setView: (view) => {
-				uiLogger.info('🎯 Cambiando vista a:', view);
 				set(
 					produce((state: UIState) => {
+						if (state.view === view) return;
+						uiLogger.info('🎯 Cambiando vista a:', view);
 						state.view = view;
 						state.lastUpdate = Date.now();
 					})

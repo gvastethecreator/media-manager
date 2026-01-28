@@ -4,10 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
+import { PageState } from '@/components/ui/page-state';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Toggle } from '@/components/ui/toggle';
-import { PageState } from '@/components/ui/page-state';
 import { useCreateGroup, useDeleteGroup, useGroups, useUpdateGroup } from '@/lib/api/groups';
 import { toastService } from '@/lib/ui/toast';
 import type { CreateGroupInput, GroupWithStats, UpdateGroupInput } from '@/types/entities/group';
@@ -106,18 +106,18 @@ export function GroupsSettings() {
 			}
 			return (
 				groupStats.imageCount +
-				groupStats.videoCount +
-				groupStats.albumCount +
-				groupStats.collectionCount +
-				groupStats.tagCount +
-				groupStats.characterCount +
-				groupStats.placeCount +
-				groupStats.worldItemCount +
-				groupStats.conceptCount +
-				groupStats.promptCount +
-				groupStats.noteCount +
-				groupStats.wildcardCount +
-				groupStats.propertyCount ===
+					groupStats.videoCount +
+					groupStats.albumCount +
+					groupStats.collectionCount +
+					groupStats.tagCount +
+					groupStats.characterCount +
+					groupStats.placeCount +
+					groupStats.worldItemCount +
+					groupStats.conceptCount +
+					groupStats.promptCount +
+					groupStats.noteCount +
+					groupStats.wildcardCount +
+					groupStats.propertyCount ===
 				0
 			);
 		}).length;
@@ -227,8 +227,9 @@ export function GroupsSettings() {
 							<div className="space-y-1 p-2">
 								{sortedGroups.map((group) => (
 									<div
-										className={`group/item relative rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${selectedGroup?.id === group.id ? 'bg-secondary text-secondary-foreground' : ''
-											}`}
+										className={`group/item relative rounded-md transition-colors hover:bg-accent hover:text-accent-foreground ${
+											selectedGroup?.id === group.id ? 'bg-secondary text-secondary-foreground' : ''
+										}`}
 										key={group.id}
 									>
 										<Button
@@ -285,7 +286,7 @@ export function GroupsSettings() {
 				) : (
 					<Card className="flex h-[calc(100vh-8rem)] flex-col items-center justify-center rounded-dt-md border-none bg-muted/30 shadow-sm">
 						<div className="text-center">
-							<FolderIcon className="mx-auto h-12 w-12 text-gray-400" />
+							<FolderIcon className="mx-auto h-12 w-12 text-muted-foreground" />
 							<h3 className="mt-2 font-medium text-foreground text-heading-sm">Selecciona un grupo</h3>
 							<p className="mt-1 text-caption text-muted-foreground">O crea uno nuevo para empezar a organizarte</p>
 						</div>

@@ -39,7 +39,7 @@ export function GroupHeader({
 									size="icon"
 									variant="ghost"
 								>
-									<StarIcon className="h-4 w-4 text-yellow-500" />
+									<StarIcon className="h-4 w-4 text-warning" />
 								</Button>
 							)}
 						</CardTitle>

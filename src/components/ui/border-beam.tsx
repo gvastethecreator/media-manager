@@ -18,8 +18,8 @@ export const BorderBeam = ({
 	duration = 15,
 	anchor = 90,
 	borderWidth = 1.5,
-	colorFrom = '#ffaa40',
-	colorTo = '#9c40ff',
+	colorFrom = 'var(--primary)',
+	colorTo = 'var(--accent)',
 	delay = 0,
 }: BorderBeamProps) => {
 	return (

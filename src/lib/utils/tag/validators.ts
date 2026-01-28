@@ -20,7 +20,10 @@ export const createTagSchema = z.object({
 	emoji: z.string().max(5, 'El emoji no puede exceder 5 caracteres').nullable().optional(),
 	color: z
 		.string()
-		.regex(/^#[0-9A-Fa-f]{6}$/, 'El color debe ser un valor hexadecimal válido (ej: #3b82f6)')
+		.refine(
+			(val) => !val || /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
+			'El color debe ser un valor hexadecimal o una variable CSS válida'
+		)
 		.nullable()
 		.optional(),
 	description: z.string().max(500, 'La descripción no puede exceder 500 caracteres').nullable().optional(),
@@ -46,7 +49,10 @@ export const updateTagSchema = z.object({
 	emoji: z.string().max(5, 'El emoji no puede exceder 5 caracteres').nullable().optional(),
 	color: z
 		.string()
-		.regex(/^#[0-9A-Fa-f]{6}$/, 'El color debe ser un valor hexadecimal válido (ej: #3b82f6)')
+		.refine(
+			(val) => !val || /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
+			'El color debe ser un valor hexadecimal o una variable CSS válida'
+		)
 		.nullable()
 		.optional(),
 	description: z.string().max(500, 'La descripción no puede exceder 500 caracteres').nullable().optional(),

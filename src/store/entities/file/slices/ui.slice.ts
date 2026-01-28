@@ -127,7 +127,10 @@ export const createUISlice: StateCreator<FileStore, [], [], UIState & UIActions>
 	},
 
 	// Visualización
-	setViewMode: (viewMode) => set({ viewMode }),
+	setViewMode: (viewMode) => {
+		if (get().viewMode === viewMode) return;
+		set({ viewMode });
+	},
 
 	setLastVisitedPath: (lastVisitedPath) => set({ lastVisitedPath }),
 

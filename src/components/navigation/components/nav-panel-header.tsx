@@ -1,6 +1,7 @@
 // MIGRADO PARA VITE - Arreglado sistema de theming
 import { BookOpen, Bug, Eye, Home, IdCard, Moon, Palette, Settings2, Sun } from 'lucide-react';
 import React, { memo, useCallback, useMemo } from 'react';
+import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import {
 	DropdownMenu,
@@ -8,7 +9,6 @@ import {
 	DropdownMenuItem,
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { motion } from '@/components/ui/motion-shim';
 import { useTheme } from '@/components/ui/theme-provider';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
@@ -51,9 +51,9 @@ const MemoizedHeaderButton = memo(function HeaderButton({
 				</Button>
 			</TooltipTrigger>
 			<TooltipContent className="text-xs">
-				<p className="font-medium text-amber-400">{tooltipTitle}</p>
+				<p className="font-medium text-foreground">{tooltipTitle}</p>
 				<p>{tooltipContent}</p>
-				{tooltipNote && <p className="mt-1.5 text-[10px] text-zinc-400">{tooltipNote}</p>}
+				{tooltipNote && <p className="mt-1.5 text-[10px] text-muted-foreground">{tooltipNote}</p>}
 			</TooltipContent>
 		</Tooltip>
 	);
@@ -67,7 +67,7 @@ const MemoizedAvatar = memo(function Avatar({ color, emoji }: { color: string; e
 				className="flex h-6 w-6 cursor-pointer items-center justify-center overflow-hidden rounded-full shadow-sm transition-all duration-200 group-hover:brightness-110"
 				style={{
 					backgroundColor: color,
-					boxShadow: '0 0 0 1px rgba(0,0,0,0.05), 0 1px 3px 0 rgba(0,0,0,0.1)',
+					boxShadow: '0 0 0 1px oklch(0 0 0 / 5%), 0 1px 3px 0 var(--dt-shadow-color)',
 				}}
 			>
 				<span className="font-large text-sm">{emoji}</span>
@@ -79,29 +79,29 @@ const MemoizedAvatar = memo(function Avatar({ color, emoji }: { color: string; e
 function getThemeIcon(theme: string | undefined) {
 	switch (theme) {
 		case 'light':
-			return <Sun className="h-4 w-4 text-yellow-400" />;
+			return <Sun className="h-4 w-4 text-primary" />;
 		case 'dark':
-			return <Moon className="h-4 w-4 text-blue-400" />;
+			return <Moon className="h-4 w-4 text-primary" />;
 		case 'cafe':
-			return <Palette className="h-4 w-4 text-amber-700" />;
+			return <Palette className="h-4 w-4 text-primary" />;
 		case 'violeta':
-			return <Palette className="h-4 w-4 text-violet-400" />;
+			return <Palette className="h-4 w-4 text-primary" />;
 		case 'madera':
-			return <Palette className="h-4 w-4 text-yellow-800" />;
+			return <Palette className="h-4 w-4 text-primary" />;
 		case 'nocturno':
-			return <Moon className="h-4 w-4 text-sky-400" />;
+			return <Moon className="h-4 w-4 text-primary" />;
 		case 'verde':
-			return <Palette className="h-4 w-4 text-green-400" />;
+			return <Palette className="h-4 w-4 text-primary" />;
 		case 'atardecer':
-			return <Palette className="h-4 w-4 text-orange-400" />;
+			return <Palette className="h-4 w-4 text-primary" />;
 		case 'corporativo':
-			return <Palette className="h-4 w-4 text-blue-600" />;
+			return <Palette className="h-4 w-4 text-primary" />;
 		case 'carbon':
-			return <Palette className="h-4 w-4 text-neutral-500" />;
+			return <Palette className="h-4 w-4 text-primary" />;
 		case 'teal':
-			return <Palette className="h-4 w-4 text-teal-400" />;
+			return <Palette className="h-4 w-4 text-primary" />;
 		case 'citrico':
-			return <Palette className="h-4 w-4 text-lime-400" />;
+			return <Palette className="h-4 w-4 text-primary" />;
 		default:
 			return <Palette className="h-4 w-4 text-primary" />;
 	}
@@ -121,7 +121,7 @@ const NavPanelHeaderComponent = memo(function NavPanelHeaderImpl({
 		() => ({
 			name: 'Usuario',
 			emoji: '🎨',
-			color: '#3b82f6',
+			color: 'var(--entity-profile)',
 		}),
 		[]
 	);

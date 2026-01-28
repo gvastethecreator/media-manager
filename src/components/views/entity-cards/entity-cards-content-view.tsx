@@ -27,7 +27,7 @@ const EntityCardsContentView: React.FC<EntityCardsContentViewProps> = memo(funct
 	if (isError) {
 		return (
 			<div className="flex h-full w-full flex-col items-center justify-center p-6">
-				<p className="text-red-500">Error al cargar los datos: {error?.message}</p>
+				<p className="text-destructive">Error al cargar los datos: {error?.message}</p>
 			</div>
 		);
 	}

@@ -8,6 +8,7 @@ import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import type { GroupWithStats } from '@/types/entities/group/base';
 import type { CreateGroupInput } from '@/types/entities/group/types';
 
@@ -41,7 +42,7 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 		defaultValues: {
 			name: group?.name ?? '',
 			emoji: group?.emoji ?? '📂',
-			color: group?.color ?? '#3b82f6',
+			color: group?.color ?? DEFAULT_ENTITY_COLOR,
 			description: group?.description ?? '',
 			category: group?.category ?? '',
 			filters: group?.filters ?? '',
@@ -105,7 +106,12 @@ export function CreateGroupForm({ group, isEditing = false, onSubmit, onCancel, 
 						<FormItem>
 							<FormLabel>Color</FormLabel>
 							<FormControl>
-								<ColorPicker compact onChange={field.onChange} showLabel={false} value={field.value || '#3b82f6'} />
+								<ColorPicker
+									compact
+									onChange={field.onChange}
+									showLabel={false}
+									value={field.value || DEFAULT_ENTITY_COLOR}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>

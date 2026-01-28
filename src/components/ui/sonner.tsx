@@ -48,10 +48,10 @@ const Toaster = ({ ...props }: ToasterProps) => {
 						'group-[.toast]:rounded-dt-sm',
 					].join(' '),
 					// Variantes por tipo
-					success: 'group-[.toaster]:before:bg-emerald-500',
+					success: 'group-[.toaster]:before:bg-success',
 					error: 'group-[.toaster]:before:bg-destructive',
-					warning: 'group-[.toaster]:before:bg-amber-500',
-					info: 'group-[.toaster]:before:bg-blue-500',
+					warning: 'group-[.toaster]:before:bg-ui-warning-text',
+					info: 'group-[.toaster]:before:bg-primary',
 				},
 			}}
 			{...props}

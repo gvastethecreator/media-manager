@@ -26,10 +26,10 @@ const STATUS_LABELS = {
 
 // Colores por priority
 const PRIORITY_COLORS = {
-	low: '#6b7280',
-	medium: '#eab308',
-	high: '#f97316',
-	urgent: '#ef4444',
+	low: 'var(--dt-neutral-500)',
+	medium: 'var(--dt-warning-500)',
+	high: 'var(--dt-warning-600)',
+	urgent: 'var(--dt-danger-500)',
 } as const;
 
 export function TaskCardHeader({
@@ -62,8 +62,8 @@ export function TaskCardHeader({
 						aria-label={isFavorite ? 'Quitar de favoritos' : 'Agregar a favoritos'}
 						className={cn(
 							'rounded-full p-1 transition-all duration-200',
-							'hover:bg-white/10',
-							isFavorite && 'text-yellow-400'
+							'hover:bg-background/10',
+							isFavorite && 'text-warning'
 						)}
 						onClick={(e) => {
 							e.stopPropagation();
@@ -81,8 +81,8 @@ export function TaskCardHeader({
 						aria-label={isArchived ? 'Desarchivar' : 'Archivar'}
 						className={cn(
 							'rounded-full p-1 transition-all duration-200',
-							'hover:bg-white/10',
-							isArchived && 'text-gray-400'
+							'hover:bg-background/10',
+							isArchived && 'text-muted-foreground'
 						)}
 						onClick={(e) => {
 							e.stopPropagation();

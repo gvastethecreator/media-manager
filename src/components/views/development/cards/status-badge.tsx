@@ -7,18 +7,18 @@ export function StatusBadge({ status }: { status: string }) {
 			case 'online':
 			case 'completed':
 			case 'resolved':
-				return 'bg-green-500/20 text-green-500 hover:bg-green-500/30';
+				return 'bg-success/20 text-success hover:bg-success/30';
 			case 'warning':
 			case 'in-progress':
-				return 'bg-yellow-500/20 text-yellow-500 hover:bg-yellow-500/30';
+				return 'bg-warning/20 text-warning hover:bg-warning/30';
 			case 'offline':
 			case 'failed':
 			case 'critical':
-				return 'bg-red-500/20 text-red-500 hover:bg-red-500/30';
+				return 'bg-destructive/20 text-destructive hover:bg-destructive/30';
 			case 'pending':
-				return 'bg-blue-500/20 text-blue-500 hover:bg-blue-500/30';
+				return 'bg-primary/20 text-primary hover:bg-primary/30';
 			default:
-				return 'bg-gray-500/20 text-gray-500 hover:bg-gray-500/30';
+				return 'bg-muted/20 text-muted-foreground hover:bg-muted/30';
 		}
 	};
 

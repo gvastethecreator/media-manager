@@ -5,5 +5,4 @@
  * @updated 2025-01-27
  */
 
-export * from './tag.service';
-export { default } from './tag.service';
+export * from './tag.service.effect';

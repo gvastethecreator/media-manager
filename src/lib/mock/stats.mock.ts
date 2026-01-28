@@ -32,9 +32,9 @@ export const MOCK_STATS: GeneralStats = {
 
 	// Etiquetas más populares simuladas
 	topTags: [
-		{ id: '1', name: 'paisaje', color: '#3b82f6', count: 231, percentage: 0 },
-		{ id: '2', name: 'retrato', color: '#10b981', count: 187, percentage: 0 },
-		{ id: '3', name: 'animales', color: '#f59e0b', count: 143, percentage: 0 },
+		{ id: '1', name: 'paisaje', color: 'var(--dt-primary-500)', count: 231, percentage: 0 },
+		{ id: '2', name: 'retrato', color: 'var(--dt-success-500)', count: 187, percentage: 0 },
+		{ id: '3', name: 'animales', color: 'var(--dt-warning-500)', count: 143, percentage: 0 },
 		{ id: '4', name: 'arquitectura', color: '#8b5cf6', count: 98, percentage: 0 },
 		{ id: '5', name: 'comida', color: '#f43f5e', count: 76, percentage: 0 },
 	],

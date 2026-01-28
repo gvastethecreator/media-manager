@@ -9,22 +9,18 @@ export interface MetadataTableRow {
 	value: React.ReactNode;
 	fullWidth?: boolean;
 	className?: string;
-	compact?: boolean; // Para elementos que pueden ir en columnas múltiples
-	category?: string; // Para identificar el tipo de contenido
+	compact?: boolean; 
+	category?: string; 
 }
 export interface MetadataTableProps {
 	title?: React.ReactNode;
 	rows: MetadataTableRow[];
 	className?: string;
 	dense?: boolean;
-	multiColumn?: boolean; // Permitir distribución en múltiples columnas para elementos compact
+	multiColumn?: boolean; 
 }
 
-/**
- * Renderiza el valor de una fila según su categoría
- */
 const renderRowValue = (row: MetadataTableRow): React.ReactNode => {
-	// Renderizar JSON con syntax highlighting
 	if (row.category === 'json_content' && typeof row.value === 'string') {
 		return (
 			<CollapsibleJSON
@@ -37,130 +33,74 @@ const renderRowValue = (row: MetadataTableRow): React.ReactNode => {
 			/>
 		);
 	}
-
-	// Renderizar contenido de documentos con formato preservado
-	if (row.category === 'document_content' && typeof row.value === 'string') {
-		return (
-			<CollapsibleText className="font-mono text-xs" collapsedLines={8} defaultExpanded={false} text={row.value} />
-		);
-	}
-
-	// Para otros tipos, renderizar normalmente
 	return row.value;
 };
 
 export const MetadataTable: React.FC<MetadataTableProps> = ({ title, rows, className, dense, multiColumn }) => {
-	// Separar filas compactas de las normales para distribución multi-columna
 	const compactRows = rows.filter((row) => row.compact && !row.fullWidth);
 	const normalRows = rows.filter((row) => !row.compact || row.fullWidth);
 
 	return (
-		<div className={cn('rounded-lg border-border/40 bg-card/50 text-card-foreground shadow-sm', className)}>
-			{title ? (
-				<div
-					className={[
-						'px-4',
-						'py-3',
-						'border-b',
-						'border-border/30',
-						'text-xs',
-						'font-semibold',
-						'uppercase',
-						'tracking-wide',
-					].join(' ')}
-				>
-					<h4 className="text-muted-foreground">{title}</h4>
-				</div>
-			) : null}
-
-			{/* Filas normales */}
-			{normalRows.length > 0 && (
-				<div className={cn('grid grid-cols-1 gap-0', dense ? 'text-[11px]' : 'text-xs')}>
-					{normalRows.map((row, idx) => {
-						const Icon = row.icon;
-						return (
-							<div
-								className={cn(
-									'grid items-start gap-3 px-4 py-2.5',
-									row.fullWidth ? 'grid-cols-[auto_1fr]' : 'grid-cols-[auto_140px_1fr]',
-									idx !== normalRows.length - 1 && 'border-border/20 border-b'
-								)}
-								key={`${row.label}-${idx}`}
-							>
-								{Icon ? (
-									<Icon className={cn('mt-0.5 h-3.5 w-3.5', row.iconColor || 'text-muted-foreground')} />
-								) : (
-									<span className="h-3.5 w-3.5" />
-								)}
-								{!row.fullWidth && <div className="truncate font-medium text-muted-foreground">{row.label}</div>}
-								{row.fullWidth ? (
-									<div className={cn('min-w-0 break-words leading-relaxed', row.className)}>
-										<div className="grid grid-cols-[auto_1fr] items-start gap-3">
-											<div className="font-medium text-muted-foreground">{row.label}</div>
-											<div>{renderRowValue(row)}</div>
-										</div>
-									</div>
-								) : (
-									<div className={cn('min-w-0 break-words leading-relaxed', row.className)}>{renderRowValue(row)}</div>
-								)}
-							</div>
-						);
-					})}
+		<div className={cn('rounded-lg border border-border/40 bg-card/30 text-card-foreground shadow-sm min-w-0 w-full overflow-hidden', className)}>
+			{title && (
+				<div className="px-3 py-2 border-b border-border/20 bg-muted/20 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
+					{title}
 				</div>
 			)}
 
-			{/* Filas compactas en grid multi-columna */}
+			<div className={cn('divide-y divide-border/10', dense ? 'text-[10px]' : 'text-xs')}>
+				{normalRows.map((row, idx) => {
+					const Icon = row.icon;
+					return (
+						<div
+							className={cn(
+								'flex flex-col gap-1 p-2.5 min-w-0',
+								!row.fullWidth && 'xs:flex-row xs:items-start xs:gap-3'
+							)}
+							key={`${row.label}-${idx}`}
+						>
+							<div className={cn(
+								'flex items-center gap-2 shrink-0 min-w-0',
+								!row.fullWidth && 'xs:w-[90px] sm:w-[110px]'
+							)}>
+								{Icon && <Icon className={cn('h-3 w-3 shrink-0', row.iconColor || 'text-muted-foreground/60')} />}
+								<div className="truncate font-bold text-muted-foreground/80 uppercase tracking-tighter text-[9px]">
+									{row.label}
+								</div>
+							</div>
+							<div className={cn(
+								'min-w-0 break-words leading-normal text-foreground/90 flex-1',
+								row.className
+							)}>
+								{renderRowValue(row)}
+							</div>
+						</div>
+					);
+				})}
+			</div>
+
 			{compactRows.length > 0 && multiColumn && (
 				<div
 					className={cn(
-						'grid gap-x-4 gap-y-2 px-4 py-2.5',
-						normalRows.length > 0 && 'border-border/20 border-t',
-						dense ? 'text-[11px]' : 'text-xs',
-						'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+						'grid gap-1.5 p-2.5 min-w-0 w-full bg-muted/5',
+						normalRows.length > 0 && 'border-t border-border/10',
+						'grid-cols-1 min-[300px]:grid-cols-2'
 					)}
 				>
 					{compactRows.map((row, idx) => {
 						const Icon = row.icon;
 						return (
-							<div className="flex min-w-0 items-center gap-2" key={`compact-${row.label}-${idx}`}>
-								{Icon && <Icon className={cn('h-3 w-3 flex-shrink-0', row.iconColor || 'text-muted-foreground')} />}
-								<span className="truncate font-medium text-[10px] text-muted-foreground">{row.label}:</span>
-								<span className={cn('truncate', row.className)}>{renderRowValue(row)}</span>
+							<div className="flex flex-col gap-0.5 min-w-0 border border-border/10 rounded p-1.5 bg-background/50" key={`compact-${row.label}-${idx}`}>
+								<div className="flex items-center gap-1.5 opacity-60">
+									{Icon && <Icon className={cn('h-2.5 w-2.5 flex-shrink-0', row.iconColor || 'text-muted-foreground')} />}
+									<span className="truncate font-bold text-[8px] uppercase tracking-tighter">{row.label}</span>
+								</div>
+								<div className={cn('truncate font-medium text-[10px]', row.className)}>{renderRowValue(row)}</div>
 							</div>
 						);
 					})}
 				</div>
 			)}
-		</div>
-	);
-};
-
-export const CollapsibleText: React.FC<{
-	text: string;
-	collapsedLines?: number;
-	className?: string;
-	defaultExpanded?: boolean;
-}> = ({ text, collapsedLines = 10, className, defaultExpanded = true }) => {
-	const [expanded, setExpanded] = React.useState(defaultExpanded); // por defecto expandido para prompts completos
-	const needsCollapse = text.split('\n').length > collapsedLines || text.length > 1200;
-	const content = (
-		<pre
-			className={cn('whitespace-pre-wrap break-words font-sans', expanded ? 'max-h-none' : 'line-clamp-10', className)}
-		>
-			{text}
-		</pre>
-	);
-	if (!needsCollapse) return content;
-	return (
-		<div>
-			{content}
-			<button
-				className="mt-1 text-[11px] text-blue-600 hover:underline dark:text-blue-400"
-				onClick={() => setExpanded((v) => !v)}
-				type="button"
-			>
-				{expanded ? 'Ocultar' : 'Ver completo'}
-			</button>
 		</div>
 	);
 };

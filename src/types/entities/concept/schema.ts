@@ -61,7 +61,13 @@ export const ConceptSchema = z.object({
 	...MetadataFieldsSchema.shape,
 	name: z.string().min(1),
 	emoji: z.string().default('💡'),
-	color: z.string().default('#4B5563'),
+	color: z
+		.string()
+		.refine(
+			(val) => /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
+			'Color debe ser un valor hexadecimal o una variable CSS válida'
+		)
+		.default('var(--entity-concept)'),
 	description: z.string().nullable(),
 	content: z.string().default(''),
 	category: z.string().default('general'),

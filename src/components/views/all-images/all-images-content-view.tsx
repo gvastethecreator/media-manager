@@ -2,13 +2,13 @@ import { AlertTriangle, FolderSync, Upload } from 'lucide-react';
 import { useCallback, useState } from 'react';
 import { LoadingScreen } from '@/components/core/feedback';
 import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
+import { motion } from '@/components/ui/animejs-shim';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { motion } from '@/components/ui/motion-shim';
 import { Progress } from '@/components/ui/progress';
 
 import { useToast } from '@/components/ui/use-toast';
@@ -131,12 +131,12 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 		return (
 			<motion.div
 				animate={{ opacity: 1, y: 0 }}
-				className="mb-4 rounded-lg border border-blue-200 bg-blue-50 p-3 dark:border-blue-800 dark:bg-blue-950/30"
+				className="mb-4 rounded-lg border-ui-info-border bg-ui-info p-3"
 				initial={{ opacity: 0, y: -20 }}
 			>
 				<div className="mb-2 flex items-center justify-between">
 					<div className="flex items-center gap-2">
-						<FolderSync className={`h-4 w-4 text-blue-600 ${isIndexing ? 'animate-spin' : ''}`} />
+						<FolderSync className={`h-4 w-4 text-primary ${isIndexing ? 'animate-spin' : ''}`} />
 						<span className="font-medium text-blue-900 text-sm dark:text-blue-100">
 							{isIndexing ? 'Indexando carpetas...' : 'Indexación completada'}
 						</span>
@@ -151,7 +151,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 				{isIndexing && (
 					<>
 						<Progress className="mb-2 h-2" value={progress * 100} />
-						<div className="flex items-center justify-between text-blue-700 text-xs dark:text-blue-300">
+						<div className="flex items-center justify-between text-primary text-xs dark:text-blue-300">
 							<span>
 								{indexingStatus?.indexedFolders || 0} de {indexingStatus?.totalFolders || 0} carpetas
 							</span>
@@ -164,8 +164,8 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 
 				{indexingStatus?.errors && indexingStatus.errors.length > 0 && (
 					<div className="mt-2 flex items-center gap-2">
-						<AlertTriangle className="h-4 w-4 text-amber-600" />
-						<Badge className="border-amber-600 text-amber-700" variant="outline">
+						<AlertTriangle className="h-4 w-4 text-warning" />
+						<Badge className="border-ui-warning-border text-ui-warning-text" variant="outline">
 							{indexingStatus.errors.length} errores
 						</Badge>
 					</div>
@@ -240,7 +240,7 @@ const AllImagesContentView: React.FC<AllImagesContentViewProps> = ({
 							Mostrando {images?.length || 0} {(images?.length || 0) === 1 ? 'imagen' : 'imágenes'}
 						</span>
 						{indexingStatus?.indexedFolders && indexingStatus.indexedFolders > 0 && (
-							<span className="text-green-600 dark:text-green-400">
+							<span className="text-success dark:text-green-400">
 								✅ {indexingStatus.indexedFolders} carpetas indexadas automáticamente
 							</span>
 						)}

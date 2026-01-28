@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCollections, useDeleteCollection } from '@/lib/api/collections';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import {
@@ -387,7 +388,7 @@ export function CollectionsSettings() {
 														backgroundColor:
 															COLLECTION_CATEGORY_COLORS[
 																(previewData?.category || selectedCollection?.category) as CollectionCategory
-															] || '#3b82f6',
+															] || DEFAULT_ENTITY_COLOR,
 													}}
 												>
 													<span className="text-4xl">
@@ -443,24 +444,24 @@ export function CollectionsSettings() {
 function _generateCategoryColor(category: CollectionCategory): string {
 	switch (category) {
 		case CollectionCategory.ART:
-			return 'bg-blue-500';
+			return 'bg-[color:var(--entity-concept)]';
 		case CollectionCategory.PHOTOGRAPHY:
-			return 'bg-green-500';
+			return 'bg-[color:var(--entity-image)]';
 		case CollectionCategory.DIGITAL:
-			return 'bg-yellow-500';
+			return 'bg-[color:var(--entity-file)]';
 		case CollectionCategory.NFT:
-			return 'bg-purple-500';
+			return 'bg-[color:var(--entity-collection)]';
 		case CollectionCategory.GAME:
-			return 'bg-red-500';
+			return 'bg-[color:var(--entity-group)]';
 		case CollectionCategory.COMIC:
-			return 'bg-indigo-500';
+			return 'bg-[color:var(--entity-prompt)]';
 		case CollectionCategory.MUSIC:
-			return 'bg-pink-500';
+			return 'bg-[color:var(--entity-audio)]';
 		case CollectionCategory.MOVIE:
-			return 'bg-orange-500';
+			return 'bg-[color:var(--entity-video)]';
 		case CollectionCategory.OTHER:
-			return 'bg-cyan-500';
+			return 'bg-[color:var(--entity-collection)]';
 		default:
-			return 'bg-gray-500';
+			return 'bg-[color:var(--entity-collection)]';
 	}
 }

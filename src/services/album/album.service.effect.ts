@@ -105,6 +105,10 @@ export interface AlbumServiceInterface {
 	readonly removeImage: (albumId: string, imageId: string) => Effect.Effect<void, AlbumError>;
 	readonly addImages: (albumId: string, imageIds: string[]) => Effect.Effect<{ added: number }, AlbumError>;
 	readonly removeImages: (albumId: string, imageIds: string[]) => Effect.Effect<{ removed: number }, AlbumError>;
+	readonly getImages: (
+		albumId: string,
+		options?: { limit?: number; offset?: number }
+	) => Effect.Effect<any[], AlbumError>;
 }
 
 /**
@@ -229,6 +233,51 @@ const make = (): AlbumServiceInterface => {
 
 			logger.info(`✅ Conteos obtenidos: ${imageCount} imágenes`);
 			return counts;
+		});
+
+	/**
+	 * Obtiene las imágenes asociadas a un álbum
+	 */
+	const getImages = (id: string, options: { limit?: number; offset?: number } = {}): Effect.Effect<any[], AlbumError> =>
+		Effect.gen(function* () {
+			logger.info(`🖼️ Obteniendo imágenes para álbum: ${id}`);
+
+			const { limit = 50, offset = 0 } = options;
+			const safeLimit = Math.max(0, limit);
+			const safeOffset = Math.max(0, offset);
+
+			const album = yield* Effect.tryPromise({
+				try: async () =>
+					await db.query.albums.findFirst({
+						where: eq(albums.id, id),
+						with: {
+							images: {
+								with: {
+									folder: true,
+									tags: { columns: { id: true } },
+									albums: { columns: { id: true } },
+									collections: { columns: { id: true } },
+									characters: { columns: { id: true } },
+									places: { columns: { id: true } },
+									worldItems: { columns: { id: true } },
+									notes: { columns: { id: true } },
+								},
+							},
+						},
+					}),
+				catch: (error: unknown) => fromUnknownError('getImages', error),
+			});
+
+			if (!album) {
+				return yield* Effect.fail(new AlbumNotFound({ albumId: id }));
+			}
+
+			const images = album.images ?? [];
+			if (safeLimit === 0) {
+				return [];
+			}
+
+			return images.slice(safeOffset, safeOffset + safeLimit);
 		});
 
 	/**
@@ -717,6 +766,7 @@ const make = (): AlbumServiceInterface => {
 		removeImage,
 		addImages,
 		removeImages,
+		getImages,
 	};
 };
 

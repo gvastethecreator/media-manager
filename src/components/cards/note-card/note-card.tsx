@@ -1,6 +1,6 @@
 import { BookOpen, ScrollText } from 'lucide-react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { useNote, useNoteCounts, useRecentNoteImages } from '@/lib/api/notes';
 import { cn } from '@/lib/utils';
 import type { NoteComplete } from '@/types/entities/note';
@@ -56,33 +56,17 @@ export const NoteCard = memo(function NoteCard({ noteId, onClick, className, sty
 		charactersCount;
 
 	// Colores para el gradiente
-	const primaryColor = useMemo(() => color || '#ec4899', [color]);
+	const primaryColor = useMemo(() => color || 'var(--entity-note)', [color]);
 	const secondaryColor = useMemo(() => {
-		// Si no hay color definido, usar un valor por defecto
+		// Si no hay color definido, usar un valor por defecto basado en OKLCH (rojo/rosa de notas)
 		if (!color) {
-			return '#db2777';
+			return 'oklch(0.55 0.24 29)';
 		}
 
-		// Oscurecer el color primario para el secundario
-		try {
-			// Convertir hex a RGB
-			const r = Number.parseInt(color.slice(1, 3), 16);
-			const g = Number.parseInt(color.slice(3, 5), 16);
-			const b = Number.parseInt(color.slice(5, 7), 16);
-
-			// Oscurecer los componentes
-			const darkenFactor = 0.7;
-			const darkerR = Math.floor(r * darkenFactor);
-			const darkerG = Math.floor(g * darkenFactor);
-			const darkerB = Math.floor(b * darkenFactor);
-
-			// Convertir de vuelta a hex
-			return `#${darkerR.toString(16).padStart(2, '0')}${darkerG.toString(16).padStart(2, '0')}${darkerB.toString(16).padStart(2, '0')}`;
-		} catch (_e) {
-			// Si hay algún error, volver al valor por defecto
-			return '#db2777';
-		}
-	}, [color]);
+		// Usar color-mix para oscurecer el color de forma nativa en CSS si es posible,
+		// o simplemente retornar el mismo color (el CSS se encargará de las variaciones)
+		return `color-mix(in oklab, ${primaryColor}, black 20%)`;
+	}, [color, primaryColor]);
 
 	// Manejar eventos de teclado para accesibilidad
 	const handleKeyDown = useCallback(
@@ -99,11 +83,11 @@ export const NoteCard = memo(function NoteCard({ noteId, onClick, className, sty
 	const cardStyle = useMemo(
 		() => ({
 			// Borde basado en el color primario
-			borderColor: tcgMode ? `${primaryColor}70` : primaryColor,
+			borderColor: tcgMode ? `color-mix(in oklab, ${primaryColor}, transparent 30%)` : primaryColor,
 			// Fondo con gradiente sutil basado en el color primario
 			background: tcgMode
-				? `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}10)`
-				: `linear-gradient(135deg, ${primaryColor}15, ${primaryColor}05)`,
+				? `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 80%), color-mix(in oklab, ${secondaryColor}, transparent 90%))`
+				: `linear-gradient(135deg, color-mix(in oklab, ${primaryColor}, transparent 85%), color-mix(in oklab, ${primaryColor}, transparent 95%))`,
 			...style,
 		}),
 		[primaryColor, secondaryColor, style, tcgMode]
@@ -114,11 +98,11 @@ export const NoteCard = memo(function NoteCard({ noteId, onClick, className, sty
 		return (
 			<div
 				className={cn(
-					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-gray-100 md:w-[320px] dark:bg-gray-900',
+					'flex h-[470px] w-[300px] items-center justify-center overflow-hidden rounded-lg bg-muted md:w-[320px] dark:bg-background',
 					className
 				)}
 			>
-				<p className="text-gray-500">Cargando nota...</p>
+				<p className="text-muted-foreground">Cargando nota...</p>
 			</div>
 		);
 	}
@@ -131,7 +115,7 @@ export const NoteCard = memo(function NoteCard({ noteId, onClick, className, sty
 					className
 				)}
 			>
-				<p className="text-red-800">Error: {error?.message || 'Nota no encontrada'}</p>
+				<p className="text-destructive">Error: {error?.message || 'Nota no encontrada'}</p>
 			</div>
 		);
 	}

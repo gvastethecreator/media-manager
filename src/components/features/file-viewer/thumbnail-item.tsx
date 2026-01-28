@@ -1,6 +1,6 @@
 import { Image as ImageIcon } from 'lucide-react';
 import { memo, useEffect, useMemo, useState } from 'react';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { cn } from '@/lib/utils';
 import { useImageResources } from '@/store/image-resources.store';
 import type { ImageItem } from './file-viewer.types';

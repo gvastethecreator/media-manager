@@ -28,7 +28,7 @@ export function ImagePicker({ value, onChange, className }: ImagePickerProps) {
 			{value ? (
 				<div className="relative aspect-video overflow-hidden rounded-lg bg-muted">
 					<img alt="Imagen seleccionada" className="object-cover" src={value} />
-					<div className="absolute inset-0 bg-black/40 opacity-0 transition-opacity hover:opacity-100">
+					<div className="absolute inset-0 bg-muted/40 opacity-0 transition-opacity hover:opacity-100">
 						<div className="absolute inset-0 flex items-center justify-center gap-2">
 							<Button onClick={() => onChange(null)} size="sm" type="button" variant="secondary">
 								Eliminar

@@ -18,7 +18,7 @@ const ENTITY_ICONS: Record<BrowserEntityType, React.ComponentType<{ className?: 
 	video: Video,
 	audio: Music,
 	document: FileText,
-	json: FileJson,
+	jsonFile: FileJson,
 	file3d: Box,
 };
 
@@ -26,13 +26,13 @@ const ENTITY_ICONS: Record<BrowserEntityType, React.ComponentType<{ className?: 
  * Colores de fondo por tipo de entidad
  */
 const ENTITY_COLORS: Record<BrowserEntityType, string> = {
-	folder: 'bg-amber-500/20 text-amber-600',
-	image: 'bg-blue-500/20 text-blue-600',
-	video: 'bg-purple-500/20 text-purple-600',
-	audio: 'bg-green-500/20 text-green-600',
-	document: 'bg-red-500/20 text-red-600',
-	json: 'bg-orange-500/20 text-orange-600',
-	file3d: 'bg-cyan-500/20 text-cyan-600',
+	folder: 'bg-[color:color-mix(in_oklch,var(--entity-folder)_20%,transparent)] text-[color:var(--entity-folder)]',
+	image: 'bg-[color:color-mix(in_oklch,var(--entity-image)_20%,transparent)] text-[color:var(--entity-image)]',
+	video: 'bg-[color:color-mix(in_oklch,var(--entity-video)_20%,transparent)] text-[color:var(--entity-video)]',
+	audio: 'bg-[color:color-mix(in_oklch,var(--entity-audio)_20%,transparent)] text-[color:var(--entity-audio)]',
+	document: 'bg-[color:color-mix(in_oklch,var(--entity-document)_20%,transparent)] text-[color:var(--entity-document)]',
+	jsonFile: 'bg-[color:color-mix(in_oklch,var(--entity-json)_20%,transparent)] text-[color:var(--entity-json)]',
+	file3d: 'bg-[color:color-mix(in_oklch,var(--entity-file-3d)_20%,transparent)] text-[color:var(--entity-file-3d)]',
 };
 
 /**
@@ -58,10 +58,10 @@ export function ItemThumbnail({ item, size, className }: ItemThumbnailProps) {
 				<img
 					alt={item.name}
 					className="h-full w-full object-cover"
+					height={size}
 					loading="lazy"
 					src={item.thumbnailUrl}
 					width={size}
-					height={size}
 				/>
 			</div>
 		);
@@ -94,7 +94,6 @@ function ItemRendererGridInner({
 }: ItemRendererProps) {
 	return (
 		<button
-			type="button"
 			className={cn(
 				'group relative flex flex-col gap-1 rounded-lg p-1.5 transition-colors',
 				'cursor-pointer hover:bg-accent/50',
@@ -108,6 +107,7 @@ function ItemRendererGridInner({
 			onContextMenu={onContextMenu}
 			onDoubleClick={onDoubleClick}
 			style={style}
+			type="button"
 		>
 			<ItemThumbnail className="mx-auto" item={item} size={size - 12} />
 			<span className="truncate px-1 text-center text-xs leading-tight" title={item.name}>
@@ -132,10 +132,10 @@ function ItemRendererListInner({
 }: Omit<ItemRendererProps, 'size'>) {
 	const Icon = ENTITY_ICONS[item.entityType] ?? File;
 	const colorClass = ENTITY_COLORS[item.entityType] ?? 'text-muted-foreground';
+	const iconColor = colorClass.includes('text-') ? colorClass.split(' ').find((c) => c.startsWith('text-')) : undefined;
 
 	return (
 		<button
-			type="button"
 			className={cn(
 				'flex items-center gap-3 px-3 py-2 transition-colors',
 				'cursor-pointer hover:bg-accent/50',
@@ -149,17 +149,13 @@ function ItemRendererListInner({
 			onContextMenu={onContextMenu}
 			onDoubleClick={onDoubleClick}
 			style={style}
+			type="button"
 		>
 			{item.thumbnailUrl ? (
-				<img alt="" className="h-8 w-8 rounded object-cover" src={item.thumbnailUrl} width={32} height={32} />
+				<img alt="" className="h-8 w-8 rounded object-cover" height={32} src={item.thumbnailUrl} width={32} />
 			) : (
-				<div
-					className={cn(
-						'flex h-8 w-8 items-center justify-center rounded',
-						colorClass.replace('text-', 'bg-').replace('600', '500/20')
-					)}
-				>
-					<Icon className={cn('h-4 w-4', colorClass)} />
+				<div className={cn('flex h-8 w-8 items-center justify-center rounded', colorClass)}>
+					<Icon className={cn('h-4 w-4', iconColor || 'text-muted-foreground')} />
 				</div>
 			)}
 			<span className="flex-1 truncate text-sm">{item.name}</span>

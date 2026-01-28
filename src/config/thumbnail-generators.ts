@@ -49,13 +49,13 @@ export const THUMBNAIL_CONFIGS: Record<string, ThumbnailConfig> = {
 		outputFormat: 'jpeg',
 		supportsAnimation: false,
 	},
-	json: {
+	jsonFile: {
 		defaultQuality: ThumbnailQuality.MEDIUM,
 		preferredSize: { width: 300, height: 400 }, // JSON structure
 		outputFormat: 'png',
 		supportsAnimation: false,
 	},
-	'3d': {
+	file3d: {
 		defaultQuality: ThumbnailQuality.MEDIUM,
 		preferredSize: { width: 300, height: 300 }, // Square for 3D model
 		outputFormat: 'png',
@@ -143,7 +143,7 @@ export function generateAudioWaveform(
 		return Promise.resolve('');
 	}
 
-	const { width = 300, height = 100, color = '#3b82f6' } = options;
+	const { width = 300, height = 100, color = 'var(--dt-primary-500)' } = options;
 
 	// Si ya tiene waveform generado
 	if ((item as any).waveformUrl) {
@@ -195,8 +195,6 @@ export function generateJsonPreview(
 		showLineNumbers?: boolean;
 	} = {}
 ): Promise<string> {
-	// TODO: Agregar 'jsonFile' al tipo EntityType
-	// jsonFile aún no forma parte de DisplayableEntity, comprobación dinámica
 	if ((item as any).entityType !== 'jsonFile') {
 		return Promise.resolve('');
 	}
@@ -241,7 +239,7 @@ export function generate3DModelThumbnail(
 	const {
 		angle = 45,
 		lightIntensity = 1.5,
-		backgroundColor = '#ffffff',
+		backgroundColor = 'var(--background)',
 		width = 300,
 		height = 300,
 		wireframe = false,

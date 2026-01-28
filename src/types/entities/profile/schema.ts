@@ -11,8 +11,11 @@ export const profilePreferencesSchema = z.object({
 	theme: z.nativeEnum(ThemeMode).default(ThemeMode.SYSTEM),
 	color: z
 		.string()
-		.regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un valor hexadecimal válido')
-		.default('#3b82f6'),
+		.refine(
+			(val) => /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
+			'Color debe ser un valor hexadecimal o una variable CSS válida'
+		)
+		.default('var(--entity-profile)'),
 	emoji: z.string().emoji('Debe ser un emoji válido').default('👤'),
 	language: z.nativeEnum(Language).default(Language.SPANISH),
 	enableAnimations: z.boolean().default(true),
@@ -35,7 +38,10 @@ export const createProfileSchema = z.object({
 	emoji: z.string().emoji('Debe ser un emoji válido').optional(),
 	color: z
 		.string()
-		.regex(/^#[0-9A-Fa-f]{6}$/, 'Color debe ser un valor hexadecimal válido')
+		.refine(
+			(val) => /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
+			'Color debe ser un valor hexadecimal o una variable CSS válida'
+		)
 		.optional(),
 	theme: z.nativeEnum(ThemeMode).optional(),
 	language: z.nativeEnum(Language).optional(),

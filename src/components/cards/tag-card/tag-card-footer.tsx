@@ -22,10 +22,12 @@ function Counter({
 }) {
 	return (
 		<div
-			className={cn('flex items-center gap-1 rounded bg-black/20 px-2 py-1 font-bold text-sm', tcgMode && 'border')}
+			className={cn('flex items-center gap-1 rounded bg-muted/20 px-2 py-1 font-bold text-sm', tcgMode && 'border')}
 			style={{
 				borderColor: tcgMode ? `${primaryColor}40` : 'transparent',
-				background: tcgMode ? `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}30)` : 'rgba(0,0,0,0.1)',
+				background: tcgMode
+					? `linear-gradient(135deg, ${primaryColor}20, ${secondaryColor}30)`
+					: 'var(--dt-shadow-color)',
 				boxShadow: tcgMode && glow > 0 ? `0 0 ${glow}px ${primaryColor}60` : 'none',
 			}}
 		>
@@ -43,7 +45,7 @@ function FavoriteIndicator({ isFavorite, tcgMode }: { isFavorite: boolean; tcgMo
 
 	return (
 		<div
-			className={cn('flex items-center gap-1 rounded-sm bg-black/10 px-2 py-1', tcgMode && 'border border-red-900/20')}
+			className={cn('flex items-center gap-1 rounded-sm bg-muted/10 px-2 py-1', tcgMode && 'border border-red-900/20')}
 			style={{
 				color: 'rgb(239, 68, 68)',
 				boxShadow: tcgMode ? '0 0 5px rgba(239, 68, 68, 0.3)' : 'none',

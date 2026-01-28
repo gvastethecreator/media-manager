@@ -48,7 +48,7 @@ export interface JsonFileStatistics extends EntityStats {
  * Este es el tipo canónico para usar en la aplicación.
  */
 export interface JsonFileWithStats extends JsonFileBase {
-	entityType: 'json-file';
+	entityType: 'jsonFile';
 	stats: JsonFileStatistics;
 }
 

@@ -1,7 +1,5 @@
 import express from 'express';
 import { serverLogger } from '@/lib/logger/server-logger';
-// import { getImageMetadata, updateImageMetadata, clearImageMetadata } from '../services/metadata.service';
-// import { extractAIGenerationInfo } from '../services/metadata/parsers.service';
 import * as MetadataService from '@/services/metadata';
 
 const router = express.Router();
@@ -34,102 +32,6 @@ router.put('/:id', async (req, res) => {
 	}
 });
 
-// GET /metadata/image/:imageId - Obtener metadata de imagen
-/*
-router.get('/image/:imageId', async (req, res) => {
-	try {
-		const { imageId } = req.params;
-		const metadata = await getImageMetadata(imageId);
-		res.json(metadata);
-	} catch (error) {
-		serverLogger.error('Error obteniendo metadatos de imagen:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-*/
-
-// DELETE /metadata/image/:imageId - Limpiar metadata de imagen
-/*
-router.delete('/image/:imageId', async (req, res) => {
-	try {
-		const { imageId } = req.params;
-		const result = await clearImageMetadata(imageId);
-		res.json(result);
-	} catch (error) {
-		serverLogger.error('Error limpiando metadatos de imagen:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-*/
-
-// POST /metadata/extract/:imageId - Extraer metadata de imagen
-/*
-router.post('/extract/:imageId', async (req, res) => {
-	try {
-		const { imageId } = req.params;
-
-		// TODO: Implementar extracción real de metadata desde archivo
-		const metadata = {}; // Obtener metadata del archivo
-
-		const aiMetadata = await extractAIGenerationInfo(metadata);
-
-		const result = {
-			success: true,
-			metadata,
-			aiMetadata,
-			errors: [],
-			parser: aiMetadata ? 'auto-detected' : null,
-		};
-
-		res.json(result);
-	} catch (error) {
-		serverLogger.error('Error extracting metadata:', error);
-		res.status(500).json({
-			success: false,
-			metadata: {},
-			aiMetadata: null,
-			errors: [error instanceof Error ? error.message : 'Error desconocido'],
-			parser: null,
-		});
-	}
-});
-*/
-
-// GET /metadata/parsers - Obtener parsers disponibles
-/*
-router.get('/parsers', async (req, res) => {
-	try {
-		const parsers = ['comfyui', 'automatic1111', 'invokeai', 'novelai', 'generic'];
-
-		res.json(parsers);
-	} catch (error) {
-		serverLogger.error('Error getting parsers:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-*/
-
-// PUT /metadata/image/:imageId - Actualizar metadata de imagen
-/*
-router.put('/image/:imageId', async (req, res) => {
-	try {
-		const { imageId } = req.params;
-		const metadata = req.body;
-
-		if (!metadata) {
-			res.status(400).json({ error: 'Los datos de metadata son requeridos' });; return;
-		}
-
-		const updatedMetadata = await updateImageMetadata(imageId, metadata);
-
-		res.json(updatedMetadata);
-	} catch (error) {
-		serverLogger.error('Error actualizando metadatos de imagen:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-*/
-
 // PUT /metadata/bulk-update - Actualizar metadata en lote
 router.put('/bulk-update', async (req, res) => {
 	try {
@@ -152,34 +54,5 @@ router.put('/bulk-update', async (req, res) => {
 		return;
 	}
 });
-
-// POST /metadata/reprocess/:imageId - Reprocesar metadata de imagen
-/*
-router.post('/reprocess/:imageId', async (req, res) => {
-	try {
-		const { imageId } = req.params;
-
-		// TODO: Implementar reprocesamiento completo
-		const metadata = {}; // Re-extraer del archivo
-		const aiMetadata = await extractAIGenerationInfo(metadata);
-
-		// Actualizar en base de datos
-		await updateImageMetadata(imageId, metadata);
-
-		const result = {
-			success: true,
-			metadata,
-			aiMetadata,
-			errors: [],
-			parser: aiMetadata ? 'reprocessed' : null,
-		};
-
-		res.json(result);
-	} catch (error) {
-		serverLogger.error('Error reprocessing metadata:', error);
-		res.status(500).json({ error: 'Error interno del servidor' });
-	}
-});
-*/
 
 export default router;

@@ -17,7 +17,7 @@ export const tags = sqliteTable(
 		name: text('name').notNull(),
 		description: text('description'),
 		emoji: text('emoji').default('🏷️'),
-		color: text('color').default('#3b82f6'),
+		color: text('color').default('var(--entity-tag)'),
 		category: text('category'),
 		featuredImage: text('featuredImage'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),

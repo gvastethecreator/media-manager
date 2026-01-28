@@ -122,7 +122,7 @@ export function toCreateDataDrizzle(input: ConceptCreateInput): DrizzleConceptCr
 		...rest,
 		id: crypto.randomUUID(),
 		emoji: input.emoji || '💡',
-		color: input.color || '#3b82f6',
+		color: input.color || 'var(--dt-primary-500)',
 		category: input.category || 'general',
 
 		isFavorite: input.isFavorite,

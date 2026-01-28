@@ -98,7 +98,7 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 			<div className="space-y-2">
 				<Label htmlFor="name">Nombre</Label>
 				<Input
-					className={error ? 'border-red-500' : ''}
+					className={error ? 'border-destructive' : ''}
 					disabled={isSubmitting}
 					id="name"
 					onChange={handleNameChange}
@@ -106,7 +106,7 @@ export function DynamicCreateForm<T extends Record<string, any> = Record<string,
 					required
 					value={formData.name || ''}
 				/>
-				{error && <p className="text-red-500 text-sm">{error}</p>}
+				{error && <p className="text-destructive text-sm">{error}</p>}
 			</div>
 
 			{/* Selector para agregar campos opcionales */}

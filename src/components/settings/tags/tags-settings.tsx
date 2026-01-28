@@ -152,8 +152,8 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 							<div className="text-body-sm">
 								{tags.length > 0
 									? tags.reduce((max, tag) =>
-										(tag.stats?.totalRelations || 0) > (max.stats?.totalRelations || 0) ? tag : max
-									).name
+											(tag.stats?.totalRelations || 0) > (max.stats?.totalRelations || 0) ? tag : max
+										).name
 									: 'N/A'}
 							</div>
 						</CardContent>
@@ -351,9 +351,9 @@ function _generateCategoryColor(category: TagCategory): string {
 		case TagCategory.SUBJECT:
 			return 'bg-dt-primary-500';
 		case TagCategory.STYLE:
-			return 'bg-purple-500';
+			return 'bg-entity-character';
 		case TagCategory.COLOR:
-			return 'bg-indigo-500';
+			return 'bg-entity-file-3d';
 		case TagCategory.QUALITY:
 			return 'bg-dt-success-500';
 		case TagCategory.TECHNIQUE:
@@ -361,15 +361,15 @@ function _generateCategoryColor(category: TagCategory): string {
 		case TagCategory.COMPOSITION:
 			return 'bg-dt-danger-500';
 		case TagCategory.CONTENT:
-			return 'bg-pink-500';
+			return 'bg-entity-tag';
 		case TagCategory.EMOTION:
-			return 'bg-orange-500';
+			return 'bg-ui-warning-text';
 		case TagCategory.THEME:
-			return 'bg-cyan-500';
+			return 'bg-entity-collection';
 		case TagCategory.GENRE:
-			return 'bg-teal-500';
+			return 'bg-entity-group';
 		case TagCategory.CUSTOM:
-			return 'bg-violet-500';
+			return 'bg-entity-album';
 		default:
 			return 'bg-dt-neutral-500';
 	}

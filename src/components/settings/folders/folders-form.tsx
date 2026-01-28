@@ -1,8 +1,9 @@
-import { Folder } from 'lucide-react';
+import { Folder, FolderOpen } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { clientLogger } from '@/lib/logger/client-logger';
 
 // Logger específico para este componente
@@ -127,53 +128,59 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 	};
 
 	return (
-		<form className="space-y-2" onSubmit={handleSubmit}>
-			<div className="flex items-center gap-2">
-				<div className="relative flex-1">
-					<Input
-						className={`pr-24 ${errorMessage ? 'border-red-500' : ''}`}
-						disabled={isSubmitting || isProcessing || isLoading}
-						onChange={handleInputChange}
-						placeholder="Ruta de la carpeta"
-						type="text"
-						value={folderPath}
-					/>
-					<Button
-						className="absolute top-1/2 right-1 h-7 -translate-y-1/2 cursor-pointer text-xs transition-colors hover:bg-accent hover:text-accent-foreground"
-						disabled={isSubmitting || isProcessing || isLoading}
-						onClick={handleBrowse}
-						size="sm"
-						type="button"
-						variant="ghost"
-					>
-						<Folder className="mr-1 h-3.5 w-3.5" />
-						Explorar
-					</Button>
+		<form className="space-y-3" onSubmit={handleSubmit}>
+			<div className="flex flex-col gap-1.5">
+				<Label className="text-sm font-semibold opacity-90">Path Selection</Label>
+				<div className="flex items-center gap-2">
+					<div className="relative flex-1">
+						<Input
+							className={`pr-10 bg-card border-input/60 focus-visible:ring-primary/20 ${errorMessage ? 'border-destructive' : ''}`}
+							disabled={isSubmitting || isProcessing || isLoading}
+							onChange={handleInputChange}
+							placeholder="Route de la carpeta"
+							type="text"
+							value={folderPath}
+						/>
+						<Button
+							className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 cursor-pointer text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/50 p-0"
+							disabled={isSubmitting || isProcessing || isLoading}
+							onClick={handleBrowse}
+							size="icon"
+							type="button"
+							variant="ghost"
+							title="Explore Folders"
+						>
+							<FolderOpen className="h-4 w-4" />
+						</Button>
+					</div>
 				</div>
-				<Button
-					className="h-9 cursor-pointer transition-colors hover:bg-primary/90"
-					disabled={isSubmitting || isProcessing || isLoading || !folderPath.trim()}
-					size="sm"
-					type="submit"
-				>
-					{isSubmitting ? 'Agregando...' : 'Agregar'}
-				</Button>
 			</div>
 
+			{/* Hidden submit button to allow Enter key submission without visual clutter if desired, 
+                OR we can add an explicit "Add" button if we want to follow the design 1:1 which doesn't seem to show one 
+                but usually one is needed. The reference image DOES NOT show an "Add" button, just "Re-index All". 
+                However, for UX we probably need a way to submit. 
+                I'll leave the implicit submit via Enter, and maybe add a small "Add" button if the input is filled?
+                For now, preserving the "Add" button but making it full width/styled if needed, 
+                OR maybe the reference implies selecting a path implies adding it? 
+                Let's keep the functional "Add" button but maybe style it subtly or integrate it better.
+                Actually, the reference has "Explore" next to input (which I did inside).
+                Let's stick to the previous functionality but cleaned up.
+            */}
+			<Button
+				className="w-full font-medium"
+				disabled={isSubmitting || isProcessing || isLoading || !folderPath.trim()}
+				size="sm"
+				type="submit"
+				variant="secondary"
+			>
+				{isSubmitting ? 'Adding...' : 'Add Folder'}
+			</Button>
+
 			{errorMessage && (
-				<div className="mt-1 rounded-md border border-red-200 bg-red-50 p-2">
+				<div className="mt-1 rounded-md border-ui-error-border bg-ui-error/10 p-2 border border-destructive/20">
 					<div className="flex items-start gap-2">
-						<div className="mt-0.5 text-red-400">
-							<svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 20 20">
-								<title>Icono de error</title>
-								<path
-									clipRule="evenodd"
-									d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
-									fillRule="evenodd"
-								/>
-							</svg>
-						</div>
-						<div className="text-red-700 text-xs">{errorMessage}</div>
+						<div className="text-destructive text-xs font-medium">{errorMessage}</div>
 					</div>
 				</div>
 			)}

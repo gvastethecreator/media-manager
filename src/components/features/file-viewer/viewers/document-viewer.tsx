@@ -106,7 +106,7 @@ export function DocumentViewer({ document: documentEntity, onClose, onNext, onPr
 				<div className="flex h-full items-center justify-center">
 					<div className="text-center">
 						<FileText className="mx-auto mb-4 h-16 w-16 text-muted-foreground" />
-						<p className="mb-4 text-red-500">{error}</p>
+						<p className="mb-4 text-destructive">{error}</p>
 						<Button onClick={handleDownload} variant="outline">
 							<Download className="mr-2 h-4 w-4" />
 							Descargar archivo

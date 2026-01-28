@@ -218,7 +218,7 @@ export function createPromptFromTemplate(templateId: string, variables?: Record<
 			totalImages: 0,
 			totalVideos: 0,
 			emoji: '📝',
-			color: '#3b82f6',
+			color: 'var(--dt-primary-500)',
 			type: template.templateType,
 			style: null,
 			mood: null,

@@ -110,7 +110,13 @@ export const WorldItemSchema = z.object({
 	...MetadataFieldsSchema.shape,
 	name: z.string().min(1),
 	emoji: z.string().default('🔮'),
-	color: z.string().default('#6D28D9'),
+	color: z
+		.string()
+		.refine(
+			(val) => /^#[0-9A-Fa-f]{6}$/.test(val) || val.startsWith('var(--'),
+			'Color debe ser un valor hexadecimal o una variable CSS válida'
+		)
+		.default('var(--entity-world-item)'),
 	description: z.string().nullable(),
 	shortcut: z.string().nullable(),
 	category: z.string().nullable().default('general'),

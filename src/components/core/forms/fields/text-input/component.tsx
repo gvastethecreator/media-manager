@@ -39,7 +39,7 @@ const TextInput: React.FC<TextInputProps> = ({
 				value={value}
 				{...(props as any)}
 			/>
-			{error && <p className="mt-1 text-red-500 text-sm">{error}</p>}
+			{error && <p className="mt-1 text-destructive text-sm">{error}</p>}
 		</div>
 	);
 };

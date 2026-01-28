@@ -1,5 +1,4 @@
-import { useGSAP } from '@gsap/react';
-import gsap from 'gsap';
+import { animate } from 'animejs';
 import { AlertCircle, Check, Info, Terminal } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -47,15 +46,15 @@ const LOG_ICONS = {
 } as const;
 
 const LOG_COLORS = {
-	INFO: 'text-blue-400',
-	SUCCESS: 'text-green-400',
-	WARNING: 'text-yellow-400',
-	ERROR: 'text-red-400',
+	INFO: 'text-primary',
+	SUCCESS: 'text-success',
+	WARNING: 'text-warning',
+	ERROR: 'text-destructive',
 } as const;
 
 /**
  * Componente que simula una terminal para mostrar logs de reindexado en tiempo real
- * Optimizado para mantener solo 100 líneas máximo con animaciones GSAP
+ * Optimizado para mantener solo 100 líneas máximo con animaciones Anime.js
  */
 export function ReindexTerminal({
 	isActive = false,
@@ -77,9 +76,6 @@ export function ReindexTerminal({
 	const reconnectAttemptRef = useRef(0);
 	const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 	const isConnectingRef = useRef(false);
-
-	// GSAP Context para animaciones
-	const { contextSafe } = useGSAP();
 
 	// Formato de timestamp para terminal
 	const formatTimestamp = (timestamp: string) => {
@@ -108,24 +104,16 @@ export function ReindexTerminal({
 		return `${secs}s`;
 	};
 
-	// Animación para nuevas líneas
-	const animateNewLog = contextSafe((element: HTMLElement) => {
-		gsap.fromTo(
-			element,
-			{
-				x: -20,
-				opacity: 0,
-				scale: 0.95,
-			},
-			{
-				x: 0,
-				opacity: 1,
-				scale: 1,
-				duration: 0.3,
-				ease: 'back.out(1.7)',
-			}
-		);
-	});
+	// Animación para nuevas líneas con Anime.js
+	const animateNewLog = (element: HTMLElement) => {
+		animate(element, {
+			translateX: [-20, 0],
+			opacity: [0, 1],
+			scale: [0.95, 1],
+			duration: 300,
+			easing: 'easeOutBack',
+		});
+	};
 
 	// Agregar un nuevo log con límite de líneas y manejo de sticky
 	const addLog = useCallback(
@@ -464,7 +452,7 @@ export function ReindexTerminal({
 				animateNewLog(lastLog);
 			}
 		}
-	}, [logs.length, animateNewLog]);
+	}, [logs.length]);
 
 	// Renderizar entrada de log con soporte para sticky
 	const renderLogEntry = (log: LogEntry, index: number) => {
@@ -482,20 +470,23 @@ export function ReindexTerminal({
 					'flex min-h-[32px] items-center gap-3 px-3 py-2',
 					// Estilo para carpetas sticky
 					log.isSticky && {
-						'sticky top-0 z-10 border-blue-500/30 border-b py-3 shadow-lg backdrop-blur-sm': true,
-						'bg-gradient-to-r from-blue-900/40 via-blue-800/20 to-transparent': true,
-						'ring-1 ring-blue-400/30': true,
+						'sticky top-0 z-10 border-primary/30 border-b py-3 shadow-lg backdrop-blur-sm': true,
+						'bg-gradient-to-r from-primary/20 via-primary/10 to-transparent': true,
+						'ring-1 ring-primary/30': true,
 					},
 					// Estilo para carpetas normales (no sticky pero importante)
-					isFolderLog && !log.isSticky && 'bg-gray-900/30 font-semibold',
+					isFolderLog && !log.isSticky && 'bg-muted/30 font-semibold',
 					// Estilo para sub-logs (archivos)
-					isSubLog && 'pl-12 text-gray-400 hover:bg-gray-900/20'
+					isSubLog && 'pl-12 text-muted-foreground hover:bg-muted/20'
 				)}
 				data-sticky={log.isSticky}
 				key={log.id}
 			>
 				<span
-					className={cn('font-mono tabular-nums', log.isSticky ? 'text-blue-300 text-xs' : 'text-[10px] text-gray-600')}
+					className={cn(
+						'font-mono tabular-nums',
+						log.isSticky ? 'text-primary/80 text-xs' : 'text-[10px] text-muted-foreground/60'
+					)}
 				>
 					{formatTimestamp(log.timestamp)}
 				</span>
@@ -504,10 +495,10 @@ export function ReindexTerminal({
 					className={cn(
 						'flex-1 overflow-hidden break-words font-mono leading-relaxed',
 						// Tamaño y peso según tipo
-						log.isSticky && 'font-bold text-base text-white',
-						isFolderLog && !log.isSticky && 'font-semibold text-gray-100 text-sm',
-						isSubLog && 'text-gray-400 text-xs',
-						!(isFolderLog || isSubLog) && 'text-gray-200 text-sm'
+						log.isSticky && 'font-bold text-base text-foreground',
+						isFolderLog && !log.isSticky && 'font-semibold text-foreground text-sm',
+						isSubLog && 'text-muted-foreground text-xs',
+						!(isFolderLog || isSubLog) && 'text-foreground/90 text-sm'
 					)}
 				>
 					{log.message}
@@ -520,19 +511,21 @@ export function ReindexTerminal({
 		<div className={cn('flex h-full w-full flex-col', className)}>
 			{/* Barra de progreso */}
 			{showProgress && (
-				<div className="border-gray-800 border-b bg-gray-950 px-4 py-3">
+				<div className="border-border border-b bg-background px-4 py-3">
 					<div className="mb-2 flex items-center justify-between text-xs">
-						<span className="font-mono text-gray-400">{currentProgress < 100 ? 'Procesando...' : 'Completado'}</span>
-						<span className="font-bold font-mono text-blue-400">{currentProgress.toFixed(1)}%</span>
+						<span className="font-mono text-muted-foreground">
+							{currentProgress < 100 ? 'Procesando...' : 'Completado'}
+						</span>
+						<span className="font-bold font-mono text-primary">{currentProgress.toFixed(1)}%</span>
 					</div>
-					<div className="h-2 w-full overflow-hidden rounded-full bg-gray-800">
+					<div className="h-2 w-full overflow-hidden rounded-full bg-muted">
 						<div
-							className="h-full rounded-full bg-gradient-to-r from-blue-500 via-blue-400 to-cyan-400 transition-all duration-300 ease-out"
+							className="h-full rounded-full bg-primary transition-all duration-300 ease-out"
 							style={{ width: `${currentProgress}%` }}
 						/>
 					</div>
 					{startTime && currentProgress < 100 && (
-						<div className="mt-2 font-mono text-[10px] text-gray-500">
+						<div className="mt-2 font-mono text-[10px] text-muted-foreground/60">
 							Tiempo transcurrido: {formatElapsedTime(elapsedTime)}
 						</div>
 					)}
@@ -540,9 +533,9 @@ export function ReindexTerminal({
 			)}
 
 			{/* Terminal con soporte para sticky logs */}
-			<div className="relative flex-1 overflow-y-auto rounded-sm bg-black">
+			<div className="relative flex-1 overflow-y-auto rounded-sm border border-border/40 bg-background shadow-inner">
 				{logs.length === 0 ? (
-					<div className="flex items-center justify-center p-8 text-gray-500">
+					<div className="flex items-center justify-center p-8 text-muted-foreground/40">
 						<Terminal className="mr-3 h-5 w-5" />
 						<span className="font-mono text-sm">Esperando logs...</span>
 					</div>

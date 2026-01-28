@@ -5,5 +5,4 @@
  * @updated 2025-01-27
  */
 
-export * from './property.service';
-export { default } from './property.service';
+export { PropertyService, PropertyServiceLive } from '@/services/secondary/secondary-services.effect';

@@ -29,11 +29,11 @@ interface LogViewerProps {
 }
 
 const LOG_COLORS = {
-	debug: 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
-	info: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300',
-	warn: 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300',
-	error: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300',
-	success: 'bg-teal-100 text-teal-800 dark:bg-teal-900/30 dark:text-teal-300',
+	debug: 'bg-ui-info text-ui-info-text',
+	info: 'bg-ui-success text-ui-success-text',
+	warn: 'bg-ui-warning text-ui-warning-text',
+	error: 'bg-ui-error text-ui-error-text',
+	success: 'bg-ui-success text-ui-success-text',
 };
 
 const LOG_ICONS = {

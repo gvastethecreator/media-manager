@@ -131,7 +131,10 @@ export const createVideoUISlice: StateCreator<VideoStore, [], [], VideoUISlice> 
 	getCurrentVideo: () => get().currentVideoId,
 
 	// Modo de visualización
-	setViewMode: (viewMode) => set({ viewMode }),
+	setViewMode: (viewMode) => {
+		if (get().viewMode === viewMode) return;
+		set({ viewMode });
+	},
 	getViewMode: () => get().viewMode,
 
 	// Expansión de detalles

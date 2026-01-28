@@ -110,7 +110,7 @@ export function JsonFileSettings() {
 												{f.size ? `${(f.size / 1024).toFixed(1)}KB` : 'Sin tamaño'}
 											</div>
 											{f.isValid !== undefined && (
-												<div className={`text-xs ${f.isValid ? 'text-green-600' : 'text-red-600'}`}>
+												<div className={`text-xs ${f.isValid ? 'text-success' : 'text-destructive'}`}>
 													{f.isValid ? 'JSON válido' : 'JSON inválido'}
 												</div>
 											)}

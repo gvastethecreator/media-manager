@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useState } from 'react';
-import { AnimatePresence, motion } from '@/components/ui/motion-shim';
+import { AnimatePresence, motion } from '@/components/ui/animejs-shim';
 import type { AnyEntityWithStats } from '@/types/entities';
 import type { AudioWithStats } from '@/types/entities/audio';
 import type { DocumentWithStats } from '@/types/entities/document';

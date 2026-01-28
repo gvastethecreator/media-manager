@@ -2,15 +2,12 @@ import { nanoid } from 'nanoid';
 import React, { useMemo } from 'react';
 import { useTheme } from '@/lib/contexts/theme-context';
 import { cn } from '@/lib/utils';
-import worldItemService from '@/services/world-item/world-item.service';
 import type {
 	WorldItemEffect,
 	WorldItemProperty,
 	WorldItemRequirement,
 	WorldItemStats,
 } from '@/types/entities/world-item/stats-types';
-
-const { getRecentWorldItemImages } = worldItemService;
 
 interface WorldItemCardContentProps {
 	description?: string | null;
@@ -37,7 +34,7 @@ export function WorldItemCardContent({
 	stats,
 	origin,
 	rarity,
-	primaryColor = '#3b82f6',
+	primaryColor = 'var(--dt-primary-500)',
 }: WorldItemCardContentProps) {
 	const { theme } = useTheme();
 	const isDark = theme === 'dark';

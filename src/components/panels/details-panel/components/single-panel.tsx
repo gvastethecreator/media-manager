@@ -7,6 +7,7 @@ import {
 	Crosshair,
 	Download,
 	Edit,
+	ExternalLink,
 	FileJson,
 	FolderOpen,
 	Fullscreen,
@@ -14,19 +15,28 @@ import {
 	GitBranch,
 	Hash,
 	Heart,
+	Info,
 	Monitor,
+	MoreVertical,
 	Package,
 	Plus,
 	RefreshCw,
-	ScanEye,
 	Settings,
+	Share2,
 	Tag,
 	Target,
 	Zap,
 } from 'lucide-react';
-import React from 'react';
+import React, { useMemo } from 'react';
+import {
+	Accordion,
+	AccordionContent,
+	AccordionItem,
+	AccordionTrigger,
+} from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -40,7 +50,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { useEnhancedMetadata } from '../hooks/use-enhanced-metadata';
-import { getDetailedMetadata } from '../metadata/legacy-metadata';
+import { getDetailedMetadata } from '../metadata/detailed-metadata';
 import { getEntityIcon } from '../utils/icon-utils';
 import { getMainImageUrl } from '../utils/image-utils';
 import { getBasicMetadata, getRelatedEntities } from '../utils/metadata-utils';
@@ -54,19 +64,11 @@ interface SinglePanelProps {
 	className?: string;
 }
 
-// Constantes para regex
-const PATH_SEPARATOR_REGEX = /[/\\]/;
-const FILE_EXTENSION_REGEX = /\.[^.]*$/;
-
-/**
- * Copia texto al portapapeles con fallback
- */
 const copyToClipboard = async (text: string): Promise<boolean> => {
 	try {
 		await navigator.clipboard.writeText(text);
 		return true;
 	} catch {
-		// Fallback para navegadores sin soporte
 		const textArea = document.createElement('textarea');
 		textArea.value = text;
 		textArea.style.position = 'fixed';
@@ -80,9 +82,6 @@ const copyToClipboard = async (text: string): Promise<boolean> => {
 	}
 };
 
-/**
- * Descarga un archivo desde una URL
- */
 const downloadFile = async (url: string, filename: string): Promise<void> => {
 	try {
 		const response = await fetch(url);
@@ -99,10 +98,8 @@ const downloadFile = async (url: string, filename: string): Promise<void> => {
 };
 
 export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata, className = '' }) => {
-	// Solo usar hook interno si no hay metadata como prop
 	const shouldUseInternalHook = !enhancedMetadata || enhancedMetadata.length === 0;
 
-	// Hook de metadata mejorada (condicional)
 	const {
 		enhancedMetadata: liveEnhanced,
 		isLoadingMetadata: metaLoading,
@@ -111,13 +108,9 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 		exportMetadata,
 	} = useEnhancedMetadata(shouldUseInternalHook ? item : undefined);
 
-	// Estado para LoRAs detectados
 	const [detectedLoras, setDetectedLoras] = React.useState<string[]>([]);
-
-	// Referencia para detectar cambios de item
 	const prevItemIdRef = React.useRef<string | undefined>(undefined);
 
-	// Limpiar LoRAs detectados cuando cambia el item
 	React.useEffect(() => {
 		const currentItemId = item?.id;
 		if (prevItemIdRef.current !== currentItemId) {
@@ -127,16 +120,10 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 	}, [item?.id]);
 
 	const handleLorasDetected = React.useCallback((loras: string[]) => {
-		setDetectedLoras((prev) => {
-			const newLoras = [...new Set([...prev, ...loras])];
-			return newLoras;
-		});
+		setDetectedLoras((prev) => [...new Set([...prev, ...loras])]);
 	}, []);
 
-	// Determinar metadata efectiva: si no usamos hook interno, usar prop; sino usar resultado del hook
 	const effectiveEnhanced = shouldUseInternalHook ? liveEnhanced || [] : enhancedMetadata || [];
-
-	// Estados efectivos de loading y error
 	const effectiveLoading = shouldUseInternalHook ? metaLoading : false;
 	const effectiveError = shouldUseInternalHook ? metaError : null;
 
@@ -146,7 +133,14 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 	const detailedMetadata = getDetailedMetadata(item, effectiveEnhanced);
 	const EntityIcon = getEntityIcon(item.entityType || 'file');
 
-	// Handler para copiar imagen al portapapeles
+	const itemName = 'name' in item ? (item.name as string) : 'Sin nombre';
+	const itemExtension = useMemo(() => {
+		if ('path' in item && typeof item.path === 'string') {
+			return item.path.split('.').pop()?.toUpperCase() || '';
+		}
+		return '';
+	}, [item]);
+
 	const handleCopyImage = React.useCallback(async () => {
 		if (!mainImageUrl) return;
 		try {
@@ -154,619 +148,360 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 			const blob = await response.blob();
 			await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
 		} catch (err) {
-			// Fallback: copiar URL
-			const itemName = 'name' in item ? item.name : '';
-			const itemPath = 'path' in item ? item.path : '';
+			const itemPath = 'path' in item ? (item.path as string) : '';
 			await copyToClipboard(itemPath || mainImageUrl || itemName);
 		}
-	}, [mainImageUrl, item]);
+	}, [mainImageUrl, item, itemName]);
 
-	// Handler para descargar archivo
 	const handleDownload = React.useCallback(() => {
 		if (!mainImageUrl) return;
-		const filename = 'name' in item ? item.name : 'download';
-		downloadFile(mainImageUrl, filename);
-	}, [mainImageUrl, item]);
+		downloadFile(mainImageUrl, itemName);
+	}, [mainImageUrl, itemName]);
 
-	// Handler para abrir en carpeta (si disponible)
 	const handleOpenInFolder = React.useCallback(() => {
-		const itemPath = 'path' in item ? item.path : null;
-		if (itemPath) {
-			// En Tauri/desktop, podría usar invoke('open_folder', { path: itemPath })
-			// Por ahora, copiar la ruta
-			copyToClipboard(itemPath);
-		}
+		const itemPath = 'path' in item ? (item.path as string) : null;
+		if (itemPath) copyToClipboard(itemPath);
 	}, [item]);
 
-	return (
-		<div className={cn('details-panel flex h-full w-full flex-col border-l bg-background', className)}>
-			{/* Header */}
+	const groupedMetadata = useMemo(() => {
+		return detailedMetadata.reduce(
+			(acc, metaItem) => {
+				const category = metaItem.category || 'general';
+				if (!acc[category]) acc[category] = [];
+				acc[category].push(metaItem);
+				return acc;
+			},
+			{} as Record<string, typeof detailedMetadata>
+		);
+	}, [detailedMetadata]);
 
-			<div className="flex-1 overflow-y-auto">
-				<div className="flex w-full flex-col gap-3 p-2">
-					{/* Toolbar de acciones */}
-					<div className="flex items-center gap-1 rounded-dt-md bg-muted/30 p-1">
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button
-									aria-label="Extraer metadatos"
-									disabled={effectiveLoading}
-									onClick={() => refetch()}
-									size="icon"
-									variant="ghost"
-								>
-									<RefreshCw className={cn('h-4 w-4', effectiveLoading && 'animate-spin')} />
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>
-								{effectiveLoading ? (
-									<div className="text-sm">
-										<div className="font-medium">Extrayendo metadatos...</div>
-										<div className="mt-1 text-muted-foreground text-xs">
-											• Analizando EXIF/IPTC/XMP
-											<br />• Detectando engine de IA
-											<br />• Extrayendo parámetros de generación
-										</div>
-									</div>
-								) : (
-									<div className="text-sm">
-										<div className="font-medium">Extraer Metadatos</div>
-										<div className="mt-1 text-muted-foreground text-xs">Analizar archivos con sistema avanzado</div>
-									</div>
+	const aiSection = useMemo(() => {
+		const aiItems = groupedMetadata.ia || [];
+		if (aiItems.length === 0 && !effectiveLoading && !effectiveError) return null;
+
+		const kv = new Map<string, string>();
+		for (const { key, value } of aiItems) {
+			if (!kv.has(key)) kv.set(key, value);
+		}
+
+		const take = (label: string) => kv.get(label);
+		const has = (label: string) => kv.has(label);
+
+		const originRows = [];
+		if (has('Engine IA')) {
+			originRows.push({
+				icon: Bot,
+				iconColor: 'text-blue-500',
+				label: 'Engine',
+				value: take('Engine IA') ?? '',
+			});
+		}
+
+		const modelKeys = ['Modelo', 'Checkpoint', 'VAE', 'LoRA', 'LoRAs', 'ControlNet'];
+		const modelRows = modelKeys
+			.filter((k) => has(k))
+			.map((k) => ({
+				icon: k.includes('LoRA') ? Zap : Package,
+				iconColor: k.includes('LoRA') ? 'text-amber-500' : 'text-orange-500',
+				label: k,
+				value: take(k) ?? '',
+				compact: true,
+			}));
+
+		const paramKeys = [
+			'Pasos', 'CFG Scale', 'Guidance Scale', 'Sampler', 'Scheduler', 'Seed', 'Ancho', 'Alto', 'Tamaño', 'Batch Size', 'Denoising Strength', 'CLIP Skip',
+		];
+		const paramRows = paramKeys
+			.filter((k) => has(k))
+			.map((k) => {
+				let icon = Settings;
+				let iconColor = 'text-emerald-500';
+				if (k === 'Seed') {
+					icon = Target; iconColor = 'text-amber-500';
+				} else if (['Ancho', 'Alto', 'Tamaño'].includes(k)) {
+					icon = Monitor; iconColor = 'text-blue-400';
+				} else if (['Pasos', 'CFG Scale'].includes(k)) {
+					icon = Gauge;
+				}
+				return { icon, iconColor, label: k, value: take(k) ?? '', compact: true };
+			});
+
+		const promptsRows = [];
+		if (has('Prompt')) {
+			promptsRows.push({
+				icon: AlignLeft,
+				iconColor: 'text-primary',
+				label: 'Prompt',
+				value: <CollapsiblePrompt collapsedLines={6} defaultExpanded onLorasDetected={handleLorasDetected} prompt={take('Prompt') ?? ''} />,
+				fullWidth: true,
+			});
+		}
+		if (has('Prompt Negativo')) {
+			promptsRows.push({
+				icon: AlignLeft,
+				iconColor: 'text-destructive',
+				label: 'Negativo',
+				value: <CollapsiblePrompt collapsedLines={6} defaultExpanded onLorasDetected={handleLorasDetected} prompt={take('Prompt Negativo') ?? ''} />,
+				fullWidth: true,
+			});
+		}
+
+		const workflowRows = [];
+		const workflowLike = Array.from(kv.keys()).filter(
+			(k) => /workflow/i.test(k) || k === 'Workflow ID' || k.toLowerCase().includes('comfyui')
+		);
+		for (const k of workflowLike) {
+			const v = kv.get(k) ?? '';
+			const isJson = typeof v === 'string' && (v.trim().startsWith('{') || v.trim().startsWith('['));
+			workflowRows.push({
+				icon: isJson ? FileJson : GitBranch,
+				iconColor: isJson ? 'text-amber-500' : 'text-blue-400',
+				label: k,
+				value: isJson ? <JsonViewer content={v} defaultExpanded={false} maxHeight={200} /> : v,
+				fullWidth: isJson,
+			});
+		}
+
+		return (
+			<div className="space-y-3 pt-1 min-w-0 w-full overflow-hidden">
+				{effectiveError && (
+					<div className="rounded-md border border-destructive/20 bg-destructive/5 p-2.5 text-[11px] min-w-0 overflow-hidden">
+						<div className="flex items-center gap-2 font-bold text-destructive mb-1 uppercase tracking-tighter">
+							<Info className="h-3 w-3 shrink-0" /> Error
+						</div>
+						<p className="text-muted-foreground mb-2 break-words leading-tight">{effectiveError}</p>
+						<Button className="h-6 px-2 text-[9px] font-bold" onClick={() => refetch()} size="sm" variant="outline">
+							<RefreshCw className="mr-1 h-2.5 w-2.5" /> REINTENTAR
+						</Button>
+					</div>
+				)}
+
+				{originRows.length > 0 && <MetadataTable dense rows={originRows} />}
+				{modelRows.length > 0 && <MetadataTable dense multiColumn rows={modelRows} title="Modelos" />}
+				{paramRows.length > 0 && <MetadataTable dense multiColumn rows={paramRows} title="Parámetros" />}
+				{promptsRows.length > 0 && <MetadataTable rows={promptsRows} />}
+				{detectedLoras.length > 0 && (
+					<MetadataTable
+						dense
+						multiColumn
+						rows={detectedLoras.map((lora, i) => ({ icon: Zap, label: `L${i+1}`, value: lora, compact: true }))}
+						title={`LoRAs (${detectedLoras.length})`}
+					/>
+				)}
+				{workflowRows.length > 0 && <MetadataTable dense rows={workflowRows} title="Workflow" />}
+			</div>
+		);
+	}, [groupedMetadata.ia, effectiveLoading, effectiveError, handleLorasDetected, detectedLoras, refetch]);
+
+	return (
+		<div className={cn('flex h-full w-full min-w-0 flex-col bg-background overflow-hidden relative', className)}>
+			{/* HEADER ULTRA-FLEXIBLE */}
+			<header className="flex flex-col border-b bg-background/95 backdrop-blur shrink-0 min-w-0 w-full overflow-hidden">
+				<div className="flex items-start justify-between gap-2 px-3 py-3 sm:px-4 min-w-0 w-full">
+					<div className="flex items-start gap-2.5 min-w-0 flex-1 overflow-hidden">
+						<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/5 text-primary border border-primary/10 mt-0.5">
+							<EntityIcon className="h-4.5 w-4.5" />
+						</div>
+						<div className="min-w-0 flex-1 overflow-hidden">
+							<div className="flex flex-wrap items-center gap-1.5 min-w-0 overflow-hidden">
+								<h2 className="font-bold text-xs sm:text-sm truncate text-foreground leading-none max-w-full">{itemName}</h2>
+								{itemExtension && (
+									<Badge className="h-3.5 px-1 text-[7px] font-black tracking-tighter shrink-0 uppercase border-none bg-muted text-muted-foreground" variant="outline">
+										{itemExtension}
+									</Badge>
 								)}
-							</TooltipContent>
-						</Tooltip>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button aria-label="Editar" className="" size="icon" variant="ghost">
-									<Edit className={cn('h-4 w-4')} />
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>Editar</TooltipContent>
-						</Tooltip>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button
-									aria-label="Abrir en carpeta"
-									className=""
-									onClick={handleOpenInFolder}
-									size="icon"
-									variant="ghost"
-								>
-									<FolderOpen className={cn('h-4 w-4')} />
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>Abrir en carpeta</TooltipContent>
-						</Tooltip>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button aria-label="Copiar imagen" className="" onClick={handleCopyImage} size="icon" variant="ghost">
-									<Copy className={cn('h-4 w-4')} />
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>Copiar Imagen</TooltipContent>
-						</Tooltip>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button aria-label="Descargar" className="" onClick={handleDownload} size="icon" variant="ghost">
-									<Download className={cn('h-4 w-4')} />
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>Descargar</TooltipContent>
-						</Tooltip>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button aria-label="Analizar" className="" size="icon" variant="ghost">
-									<ScanEye className={cn('h-4 w-4')} />
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>Analizar</TooltipContent>
-						</Tooltip>
-						<Tooltip>
-							<TooltipTrigger asChild>
-								<Button aria-label="Marcar" className="" size="icon" variant="ghost">
-									<Crosshair className={cn('h-4 w-4')} />
-								</Button>
-							</TooltipTrigger>
-							<TooltipContent>Marcar</TooltipContent>
-						</Tooltip>
+							</div>
+							<p className="text-[9px] text-muted-foreground truncate opacity-50 font-mono mt-1 w-full overflow-hidden break-all">
+								{'path' in item ? (item.path as string) : 'ID: ' + item.id}
+							</p>
+						</div>
+					</div>
+					<div className="flex items-center gap-0.5 shrink-0 ml-1">
+						<Button
+							className={cn(
+								'h-7 w-7 transition-all',
+								'isFavorite' in item && item.isFavorite ? 'text-destructive bg-destructive/10' : 'opacity-40 hover:opacity-100'
+							)}
+							size="icon"
+							variant="ghost"
+						>
+							<Heart className={cn('h-3.5 w-3.5', 'isFavorite' in item && item.isFavorite && 'fill-current')} />
+						</Button>
 						<DropdownMenu>
 							<DropdownMenuTrigger asChild>
-								<Button size="icon" variant="outline">
-									<Plus className="h-4 w-4" />
+								<Button className="h-7 w-7 opacity-40 hover:opacity-100" size="icon" variant="ghost">
+									<MoreVertical className="h-3.5 w-3.5" />
 								</Button>
 							</DropdownMenuTrigger>
-							<DropdownMenuContent>
-								<DropdownMenuLabel>Agregar a</DropdownMenuLabel>
-								<DropdownMenuItem>
-									<Edit className="mr-2 h-4 w-4" />
-									Renombrar
+							<DropdownMenuContent align="end" className="w-48 shadow-xl border-border/40">
+								<DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.1em] opacity-40">Acciones</DropdownMenuLabel>
+								<DropdownMenuItem className="text-xs font-medium" onClick={handleOpenInFolder}>
+									<FolderOpen className="mr-2 h-3.5 w-3.5 opacity-60" /> Abrir Carpeta
 								</DropdownMenuItem>
-								<DropdownMenuSeparator />
-								<DropdownMenuLabel>Exportar Metadatos</DropdownMenuLabel>
-								<DropdownMenuItem
-									disabled={!effectiveEnhanced.length || effectiveLoading}
-									onClick={() => exportMetadata?.('json')}
-								>
-									<FileJson className="mr-2 h-4 w-4" />
-									Exportar como JSON
+								<DropdownMenuItem className="text-xs font-medium" onClick={handleCopyImage}>
+									<Copy className="mr-2 h-3.5 w-3.5 opacity-60" /> Copiar Imagen
 								</DropdownMenuItem>
-								<DropdownMenuItem
-									disabled={!effectiveEnhanced.length || effectiveLoading}
-									onClick={() => exportMetadata?.('csv')}
-								>
-									<Download className="mr-2 h-4 w-4" />
-									Exportar como CSV
+								<DropdownMenuSeparator className="opacity-40" />
+								<DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.1em] opacity-40">Herramientas</DropdownMenuLabel>
+								<DropdownMenuItem className="text-xs font-medium" onClick={() => refetch()}>
+									<RefreshCw className={cn('mr-2 h-3.5 w-3.5 opacity-60', effectiveLoading && 'animate-spin')} />
+									Extraer Metadata
 								</DropdownMenuItem>
-								<DropdownMenuSeparator />
+								<DropdownMenuItem className="text-xs font-medium" onClick={() => exportMetadata?.('json')}>
+									<FileJson className="mr-2 h-3.5 w-3.5 opacity-60" /> Exportar JSON
+								</DropdownMenuItem>
 							</DropdownMenuContent>
 						</DropdownMenu>
 					</div>
+				</div>
+			</header>
 
-					{/* Indicador de estado de carga de metadatos */}
-					{effectiveLoading && (
-						<div className="rounded-dt-md border border-blue-200 bg-blue-50 p-2 dark:border-blue-800/30 dark:bg-blue-950/20">
-							<div className="flex items-center gap-2 text-blue-800 dark:text-blue-300">
-								<RefreshCw className="h-3 w-3 animate-spin" />
-								<span className="font-medium text-xs">Extrayendo metadatos avanzados...</span>
-							</div>
-							<div className="mt-1 text-blue-600 text-xs dark:text-blue-400">
-								Analizando archivo con sistema de detección IA
-							</div>
-						</div>
-					)}
-
-					{/* Imagen principal */}
-					{mainImageUrl && (
-						<div className="relative w-full max-w-full overflow-hidden rounded-dt-md bg-muted/20 p-1">
-							<Button className="absolute top-2 right-2 z-10" size="icon" variant="ghost">
-								<Fullscreen className="h-4 w-4" />
-							</Button>
+			<div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar bg-muted/5 min-w-0 w-full">
+				{/* HERO SECTION - ADAPTIVE */}
+				<div className="relative group w-full bg-black/5 border-b overflow-hidden flex items-center justify-center min-h-[150px] max-h-[350px]">
+					{mainImageUrl ? (
+						<>
 							<ImageFallback
-								alt={'name' in item ? item.name || 'Sin nombre' : 'Sin nombre'}
-								className="h-full w-full object-contain"
+								alt={itemName}
+								className="w-full h-full object-contain transition-all duration-700 group-hover:scale-105"
 								src={mainImageUrl}
 							/>
+							<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+							<div className="absolute bottom-2 inset-x-2 flex items-center justify-center gap-1.5 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+								<Button className="h-6 px-2 rounded-md bg-background/90 backdrop-blur shadow-xl text-[8px] font-black border-none uppercase tracking-wider flex-1 min-w-0" onClick={handleDownload} size="sm">
+									<Download className="mr-1 h-2.5 w-2.5 shrink-0" /> <span className="truncate">GUARDAR</span>
+								</Button>
+								<Button className="h-6 px-2 rounded-md bg-background/90 backdrop-blur shadow-xl text-[8px] font-black border-none uppercase tracking-wider flex-1 min-w-0" size="sm">
+									<Fullscreen className="mr-1 h-2.5 w-2.5 shrink-0" /> <span className="truncate">ZOOM</span>
+								</Button>
+							</div>
+						</>
+					) : (
+						<div className="flex flex-col items-center gap-3 text-muted-foreground/10 py-12">
+							<EntityIcon className="h-10 w-10" />
+							<span className="text-[8px] font-black uppercase tracking-[0.2em] opacity-50 text-center px-4">Preview unavailable</span>
 						</div>
 					)}
-					<div className="shrink-0">
-						<div className="mb-1 flex items-center gap-2">
-							<EntityIcon className="h-4 w-4 text-muted-foreground" />
-							<h2 className="heading-sm truncate">{'name' in item ? item.name : 'Sin nombre'}</h2>
-							<Tooltip>
-								<TooltipTrigger asChild>
-									<Button className="" size="icon" variant="ghost">
-										<Heart
-											className={cn('h-4 w-4', 'isFavorite' in item && item.isFavorite && 'fill-red-500 text-red-500')}
-										/>
-									</Button>
-								</TooltipTrigger>
-								<TooltipContent>Favorito</TooltipContent>
-							</Tooltip>
-						</div>
-						{'description' in item && item.description && (
-							<p className="body-sm line-clamp-2 text-muted-foreground">{item.description}</p>
-						)}
-					</div>
+				</div>
 
-					{/* Información básica */}
-					{basicMetadata.length > 0 && (
-						<div className="flex w-full flex-wrap justify-center gap-4 px-4">
-							{basicMetadata.map(({ key, value, icon: Icon }) => (
-								<div className="flex items-center gap-1 pl-2 text-xs" key={key}>
-									<Icon className="h-4 w-4" />
-									<span className="font-medium">{value}</span>
+				<div className="p-3 sm:p-4 space-y-4 sm:space-y-5 min-w-0 w-full overflow-hidden">
+					{/* RELATIONS - WRAPPABLE */}
+					{relatedEntities.length > 0 && (
+						<div className="flex flex-wrap gap-1 w-full min-w-0 overflow-hidden">
+							{relatedEntities.map(({ type, count, icon: Icon, color }) => (
+								<div className={cn('h-5 px-1.5 rounded-md flex items-center gap-1 text-[9px] font-black uppercase border-none tracking-tight shrink-0', color)} key={type}>
+									<Icon className="h-2.5 w-2.5 shrink-0" /> <span>{count}</span>
 								</div>
 							))}
 						</div>
 					)}
 
-					{/* Entidades relacionadas */}
-					{relatedEntities.length > 0 && (
-						<div>
-							<div className="flex w-full flex-wrap justify-center gap-4 px-4">
-								{relatedEntities.map(({ type, count, icon: Icon, color }) => (
-									<Badge className={cn('gap-1', color)} key={type} variant="secondary">
-										<Icon className="h-3 w-3" />
-										{count} {type}
-									</Badge>
-								))}
-							</div>
+					{/* DESCRIPTION - FLEXIBLE */}
+					{'description' in item && item.description && (
+						<div className="space-y-1 pl-2.5 border-l-2 border-primary/20 bg-primary/[0.02] py-1.5 rounded-r-md min-w-0 w-full overflow-hidden">
+							<Label className="text-[8px] font-black uppercase tracking-[0.15em] text-primary opacity-60">Descripción</Label>
+							<p className="text-[11px] leading-snug text-foreground/80 font-medium italic break-words">{item.description}</p>
 						</div>
 					)}
 
-					{/* Metadatos detallados organizados por categorías */}
-					{detailedMetadata.length > 0 && (
-						<div>
-							{(() => {
-								const groupedMetadata = detailedMetadata.reduce(
-									(acc, metaItem) => {
-										const category = metaItem.category || 'general';
-										if (!acc[category]) acc[category] = [];
-										acc[category].push(metaItem);
-										return acc;
-									},
-									{} as Record<string, typeof detailedMetadata>
-								);
-
-								const categoryOrder = ['ia', 'exif', 'iptc', 'xmp', 'técnico', 'general', 'error'];
-								const categoryNames = {
-									ia: '🤖 Metadatos de IA',
-									exif: '📷 EXIF (Cámara)',
-									iptc: '📝 IPTC (Editorial)',
-									xmp: '🏷️ XMP (Extensibles)',
-									técnico: '⚙️ Técnico',
-									general: '📊 General',
-									error: '⚠️ Errores',
-								} as const;
-
-								const sortedCategories = categoryOrder.filter((cat) => groupedMetadata[cat]);
-
-								return sortedCategories.map((category) => {
-									if (category === 'ia') {
-										const aiItems = groupedMetadata.ia || [];
-										const kv = new Map<string, string>();
-										for (const { key, value } of aiItems) {
-											if (!kv.has(key)) kv.set(key, value);
-										}
-
-										// Helpers
-										const take = (label: string) => kv.get(label);
-										const has = (label: string) => kv.has(label);
-
-										// Construir filas por secciones
-										const originRows = [] as Array<{
-											icon?: any;
-											iconColor?: string;
-											label: string;
-											value: any;
-											fullWidth?: boolean;
-											compact?: boolean;
-										}>;
-										if (has('Engine IA')) {
-											originRows.push({
-												icon: Bot,
-												iconColor: 'text-purple-500 dark:text-purple-400',
-												label: 'Engine IA',
-												value: take('Engine IA') ?? '',
-											});
-										}
-
-										const modelKeys = ['Modelo', 'Checkpoint', 'VAE', 'LoRA', 'LoRAs', 'ControlNet'];
-										const modelRows = modelKeys
-											.filter((k) => has(k))
-											.map((k) => ({
-												icon: k === 'LoRA' || k === 'LoRAs' ? Zap : Package,
-												iconColor:
-													k === 'LoRA' || k === 'LoRAs'
-														? 'text-blue-500 dark:text-blue-400'
-														: 'text-indigo-500 dark:text-indigo-400',
-												label: k,
-												value: take(k) ?? '',
-												compact: true,
-											}));
-
-										const paramKeys = [
-											'Pasos',
-											'CFG Scale',
-											'Guidance Scale',
-											'Sampler',
-											'Scheduler',
-											'Seed',
-											'Ancho',
-											'Alto',
-											'Tamaño',
-											'Batch Size',
-											'Denoising Strength',
-											'CLIP Skip',
-											'ETA',
-										];
-										const paramRows = paramKeys
-											.filter((k) => has(k))
-											.map((k) => {
-												// Iconos específicos para diferentes tipos de parámetros
-												let icon = Settings;
-												let iconColor = 'text-green-500 dark:text-green-400';
-
-												if (k === 'Seed') {
-													icon = Target;
-													iconColor = 'text-orange-500 dark:text-orange-400';
-												} else if (['Ancho', 'Alto', 'Tamaño'].includes(k)) {
-													icon = Monitor;
-													iconColor = 'text-teal-500 dark:text-teal-400';
-												} else if (['Pasos', 'CFG Scale', 'Guidance Scale'].includes(k)) {
-													icon = Gauge;
-													iconColor = 'text-emerald-500 dark:text-emerald-400';
-												} else if (['Sampler', 'Scheduler'].includes(k)) {
-													icon = Cpu;
-													iconColor = 'text-cyan-500 dark:text-cyan-400';
-												}
-
-												return {
-													icon,
-													iconColor,
-													label: k,
-													value: take(k) ?? '',
-													compact: ['Seed', 'Ancho', 'Alto', 'Batch Size', 'CLIP Skip', 'ETA'].includes(k),
-												};
-											});
-
-										const promptsRows = [] as Array<{
-											icon?: any;
-											iconColor?: string;
-											label: string;
-											value: any;
-											fullWidth?: boolean;
-										}>;
-										if (has('Prompt')) {
-											promptsRows.push({
-												icon: AlignLeft,
-												iconColor: 'text-pink-500 dark:text-pink-400',
-												label: 'Prompt',
-												value: (
-													<CollapsiblePrompt
-														collapsedLines={12}
-														defaultExpanded
-														onLorasDetected={handleLorasDetected}
-														prompt={take('Prompt') ?? ''}
-													/>
-												),
-												fullWidth: true,
-											});
-										}
-										if (has('Prompt Negativo')) {
-											promptsRows.push({
-												icon: AlignLeft,
-												iconColor: 'text-red-500 dark:text-red-400',
-												label: 'Prompt Negativo',
-												value: (
-													<CollapsiblePrompt
-														collapsedLines={12}
-														defaultExpanded
-														onLorasDetected={handleLorasDetected}
-														prompt={take('Prompt Negativo') ?? ''}
-													/>
-												),
-												fullWidth: true,
-											});
-										}
-
-										// Workflow
-										const workflowRows = [] as Array<{
-											icon?: any;
-											iconColor?: string;
-											label: string;
-											value: any;
-											fullWidth?: boolean;
-										}>;
-										const workflowLike = Array.from(kv.keys()).filter(
-											(k) => /workflow/i.test(k) || k === 'Workflow ID' || k.toLowerCase().includes('comfyui')
-										);
-										for (const k of workflowLike) {
-											const v = kv.get(k) ?? '';
-											// Detectar si el contenido es JSON
-											const isJsonContent = (() => {
-												if (typeof v !== 'string') return false;
-												if (/json/i.test(k)) return true; // Si el nombre del campo contiene "json"
-												try {
-													JSON.parse(v);
-													return v.trim().startsWith('{') || v.trim().startsWith('[');
-												} catch {
-													return false;
-												}
-											})();
-
-											if (isJsonContent) {
-												workflowRows.push({
-													icon: FileJson,
-													iconColor: 'text-amber-500 dark:text-amber-400',
-													label: k,
-													value: <JsonViewer content={v} defaultExpanded={false} maxHeight={250} />,
-													fullWidth: true,
-												});
-											} else {
-												workflowRows.push({
-													icon: GitBranch,
-													iconColor: 'text-violet-500 dark:text-violet-400',
-													label: k,
-													value: v,
-												});
-											}
-										}
-
-										// Otros: aquellos que no cayeron en grupos anteriores
-										const usedKeys = new Set([
-											'Engine IA',
-											'engine',
-											'confidence',
-											...modelKeys,
-											...paramKeys,
-											'Prompt',
-											'Prompt Negativo',
-											...workflowLike,
-										]);
-										const otherRows = Array.from(kv.entries())
-											.filter(([k]) => !usedKeys.has(k))
-											.map(([k, v]) => ({ icon: undefined, label: k, value: v }));
-
-										return (
-											<div className="space-y-3" key={category}>
-												<h4
-													className={cn(
-														'mt-1 py-1',
-														'text-caption',
-														'font-medium text-muted-foreground uppercase tracking-wide'
-													)}
-												>
-													{categoryNames[category as keyof typeof categoryNames] || category}
-												</h4>
-												<div className="space-y-3 pl-1">
-													{(() => {
-														const notLoading = !effectiveLoading;
-														const noError = !effectiveError;
-														const emptyAi = aiItems.length === 0;
-														const noAi = notLoading && noError && emptyAi;
-														if (!noAi) return null;
-														return (
-															<div className="flex flex-col gap-1 rounded border border-dashed p-2 text-muted-foreground text-xs">
-																<span>No se encontraron metadatos de IA.</span>
-																<Button className="self-start" onClick={() => refetch()} size="sm" variant="outline">
-																	Intentar extraer
-																</Button>
-															</div>
-														);
-													})()}
-													{effectiveError && (
-														<div className="rounded border border-red-200 bg-red-50 p-3 text-red-800 text-sm dark:border-red-800/30 dark:bg-red-950/20 dark:text-red-300">
-															<div className="mb-1 flex items-center gap-2">
-																<span className="font-medium">Error de extracción:</span>
-															</div>
-															<div className="text-red-700 text-xs dark:text-red-400">{effectiveError}</div>
-															<Button
-																className="mt-2 self-start"
-																disabled={effectiveLoading}
-																onClick={() => refetch()}
-																size="sm"
-																variant="outline"
-															>
-																{effectiveLoading ? (
-																	<>
-																		<RefreshCw className="mr-1 h-3 w-3 animate-spin" />
-																		Reintentando...
-																	</>
-																) : (
-																	<>
-																		<RefreshCw className="mr-1 h-3 w-3" />
-																		Reintentar
-																	</>
-																)}
-															</Button>
-														</div>
-													)}
-
-													{originRows.length > 0 && (
-														<MetadataTable
-															dense
-															rows={originRows}
-															title={
-																<div className="flex items-center gap-2">
-																	<Bot className="h-3.5 w-3.5" /> Origen
-																</div>
-															}
-														/>
-													)}
-
-													{modelRows.length > 0 && (
-														<MetadataTable
-															dense
-															multiColumn
-															rows={modelRows}
-															title={
-																<div className="flex items-center gap-2">
-																	<Package className="h-3.5 w-3.5" /> Modelo y Checkpoint
-																</div>
-															}
-														/>
-													)}
-
-													{paramRows.length > 0 && (
-														<MetadataTable
-															dense
-															multiColumn
-															rows={paramRows}
-															title={
-																<div className="flex items-center gap-2">
-																	<Settings className="h-3.5 w-3.5" /> Parámetros
-																</div>
-															}
-														/>
-													)}
-
-													{promptsRows.length > 0 && (
-														<MetadataTable
-															rows={promptsRows}
-															title={
-																<div className="flex items-center gap-2">
-																	<AlignLeft className="h-3.5 w-3.5" /> Prompts
-																</div>
-															}
-														/>
-													)}
-
-													{detectedLoras.length > 0 && (
-														<MetadataTable
-															dense
-															multiColumn
-															rows={detectedLoras.map((lora, idx) => ({
-																icon: Zap,
-																iconColor: 'text-blue-500 dark:text-blue-400',
-																label: `LoRA ${idx + 1}`,
-																value: lora,
-																compact: true,
-															}))}
-															title={
-																<div className="flex items-center gap-2">
-																	<Zap className="h-3.5 w-3.5" /> LoRAs Detectados ({detectedLoras.length})
-																</div>
-															}
-														/>
-													)}
-
-													{workflowRows.length > 0 && (
-														<MetadataTable
-															dense
-															rows={workflowRows}
-															title={
-																<div className="flex items-center gap-2">
-																	<GitBranch className="h-3.5 w-3.5" /> Workflow
-																</div>
-															}
-														/>
-													)}
-
-													{otherRows.length > 0 && <MetadataTable dense rows={otherRows} title="Otros" />}
-												</div>
-											</div>
-										);
-									}
-
-									// Resto de categorías: usar MetadataTable con iconos por categoría
-									return (
-										<div className="space-y-3" key={category}>
-											<h4
-												className={cn(
-													'mt-1 py-1',
-													'text-caption',
-													'font-medium text-muted-foreground uppercase tracking-wide'
-												)}
-											>
-												{categoryNames[category as keyof typeof categoryNames] || category}
-											</h4>
-											<div className="space-y-3 pl-1">
-												{(() => {
-													const rows = groupedMetadata[category].map(({ key, value }) => ({
-														icon:
-															category === 'exif'
-																? Camera
-																: category === 'iptc'
-																	? Tag
-																	: category === 'xmp'
-																		? Hash
-																		: undefined,
-														label: key,
-														value,
-													}));
-													return <MetadataTable dense rows={rows} />;
-												})()}
-											</div>
+					{/* ACCORDION - REFINED TRIGGER FOR NARROW SPACE */}
+					<Accordion className="w-full space-y-1.5" defaultValue={['ai', 'general']} type="multiple">
+						{(effectiveEnhanced.length > 0 || effectiveLoading || effectiveError) && (
+							<AccordionItem className="border-none bg-card/40 rounded-lg overflow-hidden border border-border/5" value="ai">
+								<AccordionTrigger className="px-2.5 hover:no-underline py-2 sm:py-2.5 hover:bg-muted/30 transition-colors group">
+									<div className="flex items-center gap-2 min-w-0 w-full text-left">
+										<div className="rounded-md bg-amber-500/10 p-1 shrink-0 group-data-[state=open]:bg-amber-500/20 transition-colors">
+											<Zap className="h-3.5 w-3.5 text-amber-500" />
 										</div>
-									);
-								});
-							})()}
-						</div>
-					)}
+										<span className="text-[9.5px] font-black uppercase tracking-tight truncate flex-1 min-w-0">IA & Generación</span>
+										{effectiveLoading && <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground mr-1 shrink-0" />}
+									</div>
+								</AccordionTrigger>
+								<AccordionContent className="px-1.5 pb-2.5 pt-0 min-w-0 w-full overflow-hidden">
+									{metaLoading ? (
+										<div className="py-8 flex flex-col items-center justify-center gap-3">
+											<RefreshCw className="h-5 w-5 animate-spin text-primary/40" />
+											<p className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] animate-pulse">Scanning...</p>
+										</div>
+									) : (
+										aiSection
+									)}
+								</AccordionContent>
+							</AccordionItem>
+						)}
+
+						<AccordionItem className="border-none bg-card/40 rounded-lg overflow-hidden border border-border/5" value="general">
+							<AccordionTrigger className="px-2.5 hover:no-underline py-2 sm:py-2.5 hover:bg-muted/30 transition-colors group">
+								<div className="flex items-center gap-2 min-w-0 w-full text-left">
+									<div className="rounded-md bg-blue-500/10 p-1 shrink-0 group-data-[state=open]:bg-blue-500/20 transition-colors">
+										<Info className="h-3.5 w-3.5 text-blue-500" />
+									</div>
+									<span className="text-[9.5px] font-black uppercase tracking-tight truncate flex-1 min-w-0">Propiedades</span>
+								</div>
+							</AccordionTrigger>
+							<AccordionContent className="px-1.5 pb-2.5 pt-0 min-w-0 w-full overflow-hidden">
+								<MetadataTable
+									dense
+									rows={basicMetadata.map(({ key, value, icon: Icon }) => ({
+										icon: Icon,
+										label: key,
+										value: value,
+									}))}
+								/>
+							</AccordionContent>
+						</AccordionItem>
+
+						{(groupedMetadata.exif || groupedMetadata.iptc || groupedMetadata.xmp) && (
+							<AccordionItem className="border-none bg-card/40 rounded-lg overflow-hidden border border-border/5" value="technical">
+								<AccordionTrigger className="px-2.5 hover:no-underline py-2 sm:py-2.5 hover:bg-muted/30 transition-colors group">
+									<div className="flex items-center gap-2 min-w-0 w-full text-left">
+										<div className="rounded-md bg-emerald-500/10 p-1 shrink-0 group-data-[state=open]:bg-emerald-500/20 transition-colors">
+											<Camera className="h-3.5 w-3.5 text-emerald-500" />
+										</div>
+										<span className="text-[9.5px] font-black uppercase tracking-tight truncate flex-1 min-w-0">Técnico</span>
+									</div>
+								</AccordionTrigger>
+								<AccordionContent className="px-1.5 pb-2.5 pt-0 space-y-2 min-w-0 w-full overflow-hidden">
+									{['exif', 'iptc', 'xmp'].map((cat) => {
+										const items = groupedMetadata[cat];
+										if (!items || items.length === 0) return null;
+										const catLabels: Record<string, { label: string; icon: any; color: string }> = {
+											exif: { label: 'Cámara', icon: Camera, color: 'text-emerald-500' },
+											iptc: { label: 'Editorial', icon: Tag, color: 'text-blue-500' },
+											xmp: { label: 'XMP', icon: Hash, color: 'text-purple-500' },
+										};
+										const info = catLabels[cat];
+										return (
+											<MetadataTable
+												dense
+												key={cat}
+												multiColumn
+												rows={items.map((it) => ({ label: it.key, value: it.value, compact: true }))}
+												title={
+													<div className="flex items-center gap-2 min-w-0 overflow-hidden">
+														<info.icon className={cn('h-2.5 w-2.5 shrink-0', info.color)} /> <span className="truncate">{info.label}</span>
+													</div>
+												}
+											/>
+										);
+									})}
+								</AccordionContent>
+							</AccordionItem>
+						)}
+					</Accordion>
 				</div>
 			</div>
+
+			<footer className="border-t bg-background/95 backdrop-blur px-3 py-2.5 shrink-0 min-w-0 w-full overflow-hidden">
+				<div className="flex items-center gap-2 min-w-0 w-full">
+					<Button className="flex-1 h-7 px-1 text-[8px] font-black uppercase tracking-tighter border-border/40 hover:bg-muted/50 min-w-0" variant="outline">
+						<Share2 className="mr-1 h-3 w-3 shrink-0 opacity-60" /> <span className="truncate">COMPARTIR</span>
+					</Button>
+					<Button className="flex-1 h-7 px-1 text-[8px] font-black uppercase tracking-tighter border-border/40 hover:bg-muted/50 min-w-0" variant="outline">
+						<ExternalLink className="mr-1 h-3 w-3 shrink-0 opacity-60" /> <span className="truncate">ABRIR</span>
+					</Button>
+				</div>
+			</footer>
 		</div>
 	);
 };

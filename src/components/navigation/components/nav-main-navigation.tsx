@@ -55,7 +55,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 			{
 				id: 'folders',
 				label: 'Carpetas',
-				color: '#F59E0B', // Amber
+				color: 'var(--entity-folder)',
 				icon: Folder,
 				children: [],
 				showTreeView: true, // Nueva propiedad para mostrar TreeView directamente
@@ -63,7 +63,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 			{
 				id: 'files',
 				label: 'Archivos',
-				color: '#3B82F6', // Blue
+				color: 'var(--entity-file)',
 				icon: Files,
 				children: [
 					{
@@ -79,43 +79,67 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 							(stats.totalJsonFiles || 0) +
 							(stats.totalFile3D || 0) +
 							(stats.totalWorkflows || 0),
-						color: '#6B7280',
+						color: 'var(--entity-file)',
 					},
-					{ id: 'all-images', label: 'Imágenes', icon: ImageIcon, count: stats.totalImages || 0, color: '#10B981' },
-					{ id: 'videos', label: 'Videos', icon: Video, count: stats.totalVideos || 0, color: '#EF4444' },
-					{ id: 'audios', label: 'Audio', icon: Music, count: stats.totalAudio || 0, color: '#8B5CF6' },
+					{
+						id: 'all-images',
+						label: 'Imágenes',
+						icon: ImageIcon,
+						count: stats.totalImages || 0,
+						color: 'var(--entity-image)',
+					},
+					{
+						id: 'videos',
+						label: 'Videos',
+						icon: Video,
+						count: stats.totalVideos || 0,
+						color: 'var(--entity-video)',
+					},
+					{
+						id: 'audios',
+						label: 'Audio',
+						icon: Music,
+						count: stats.totalAudio || 0,
+						color: 'var(--entity-audio)',
+					},
 					{
 						id: 'documents',
 						label: 'Documentos',
 						icon: FileText,
 						count: stats.totalDocuments || 0,
-						color: '#F97316',
+						color: 'var(--entity-document)',
 					},
 					{
 						id: 'json-files',
 						label: 'JSON',
 						icon: Brackets,
 						count: stats.totalJsonFiles || 0,
-						color: '#06B6D4',
+						color: 'var(--entity-json)',
 					},
 
-					{ id: 'file-3ds', label: '3D', icon: Box, count: stats.totalFile3D || 0, color: '#EC4899' },
+					{ id: 'file-3ds', label: '3D', icon: Box, count: stats.totalFile3D || 0, color: 'var(--entity-file-3d)' },
 				],
 			},
 			{
 				id: 'library',
 				label: 'Librería',
-				color: '#A21CAF', // Fuchsia
+				color: 'var(--entity-collection)',
 				icon: Layers,
 				children: [
-					{ id: 'favorites', label: 'Favoritos', icon: Star, count: stats.totalFavorites || 0, color: '#FBBF24' },
+					{
+						id: 'favorites',
+						label: 'Favoritos',
+						icon: Star,
+						count: stats.totalFavorites || 0,
+						color: 'var(--entity-favorite)',
+					},
 					{
 						id: 'albums',
 						label: 'Álbumes',
 						icon: Album,
 						count: stats.totalAlbums || 0,
 						hasChildren: true,
-						color: '#8B5CF6',
+						color: 'var(--entity-album)',
 					},
 					{
 						id: 'groups',
@@ -123,7 +147,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						icon: Users,
 						count: getCategoryItemCount('groups'),
 						hasChildren: true,
-						color: '#06B6D4',
+						color: 'var(--entity-group)',
 					},
 					{
 						id: 'tags',
@@ -131,7 +155,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						icon: Tag,
 						count: stats.totalTags || 0,
 						hasChildren: true,
-						color: '#10B981',
+						color: 'var(--entity-tag)',
 					},
 					{
 						id: 'collections',
@@ -139,7 +163,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						icon: Bookmark,
 						count: stats.totalCollections || 0,
 						hasChildren: true,
-						color: '#F97316',
+						color: 'var(--entity-collection)',
 					},
 					{
 						id: 'prompts',
@@ -147,14 +171,14 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						icon: MessageSquare,
 						count: getCategoryItemCount('prompts'),
 						hasChildren: true,
-						color: '#EF4444',
+						color: 'var(--entity-prompt)',
 					},
 				],
 			},
 			{
 				id: 'worldbuilding',
 				label: 'Worldbuilding',
-				color: '#059669', // Emerald
+				color: 'var(--entity-world-item)',
 				icon: Globe,
 				children: [
 					{
@@ -163,7 +187,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						icon: User,
 						count: stats.totalCharacters || 0,
 						hasChildren: true,
-						color: '#3B82F6',
+						color: 'var(--entity-character)',
 					},
 					{
 						id: 'places',
@@ -171,7 +195,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						icon: MapPin,
 						count: stats.totalPlaces || 0,
 						hasChildren: true,
-						color: '#EF4444',
+						color: 'var(--entity-place)',
 					},
 					{
 						id: 'world-items',
@@ -179,7 +203,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						icon: Box,
 						count: stats.totalWorldItems || 0,
 						hasChildren: true,
-						color: '#F59E0B',
+						color: 'var(--entity-world-item)',
 					},
 					{
 						id: 'concepts',
@@ -187,7 +211,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						icon: Lightbulb,
 						count: getCategoryItemCount('concepts'),
 						hasChildren: true,
-						color: '#FBBF24',
+						color: 'var(--entity-concept)',
 					},
 					{
 						id: 'wildcards',
@@ -195,14 +219,14 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						icon: Asterisk,
 						count: getCategoryItemCount('wildcards'),
 						hasChildren: true,
-						color: '#8B5CF6',
+						color: 'var(--entity-wildcard)',
 					},
 				],
 			},
 			{
 				id: 'management',
 				label: 'Gestión',
-				color: '#6D28D9', // Violet
+				color: 'var(--entity-note)',
 				icon: Asterisk,
 				children: [
 					{
@@ -211,7 +235,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						icon: FileText,
 						count: getCategoryItemCount('notes'),
 						hasChildren: true,
-						color: '#06B6D4',
+						color: 'var(--entity-note)',
 					},
 					{
 						id: 'properties',
@@ -219,7 +243,7 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 						icon: Asterisk,
 						count: getCategoryItemCount('properties'),
 						hasChildren: true,
-						color: '#EC4899',
+						color: 'var(--entity-property)',
 					},
 				],
 			},
@@ -321,7 +345,9 @@ const NavMainNavigationComponent = memo(function NavMainNavigationImpl({
 									</TooltipTrigger>
 									{isCollapsed && (
 										<TooltipContent className="text-xs" side="right">
-											<p className="font-medium text-amber-400">{category.label}</p>
+											<p className="font-medium" style={{ color: category.color }}>
+												{category.label}
+											</p>
 										</TooltipContent>
 									)}
 								</Tooltip>

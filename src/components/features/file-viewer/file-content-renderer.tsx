@@ -194,7 +194,7 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 	if (isPdf && pdfUrl) {
 		return (
 			<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)}>
-				<iframe className="h-full w-full rounded-lg bg-white shadow-2xl" src={pdfUrl} title={item.name} />
+				<iframe className="h-full w-full rounded-lg bg-background shadow-2xl" src={pdfUrl} title={item.name} />
 			</div>
 		);
 	}
@@ -223,7 +223,7 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 				</p>
 			</div>
 			<a
-				className="mt-4 rounded-lg bg-white/10 px-6 py-2 text-white transition-colors hover:bg-white/20"
+				className="mt-4 rounded-lg bg-background/10 px-6 py-2 text-white transition-colors hover:bg-background/20"
 				download={item.name}
 				href={contentUrl}
 			>
@@ -272,7 +272,7 @@ function JsonRenderer({ item, contentUrl, onError, onLoad, className }: FileCont
 		<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)}>
 			<div className="h-full w-full max-w-4xl overflow-auto rounded-lg bg-zinc-900 shadow-2xl">
 				{parseError && (
-					<div className="sticky top-0 bg-yellow-500/20 px-4 py-2 text-sm text-yellow-300">⚠️ {parseError}</div>
+					<div className="sticky top-0 bg-warning/20 px-4 py-2 text-sm text-yellow-300">⚠️ {parseError}</div>
 				)}
 				<pre className="p-6 font-mono text-sm leading-relaxed">
 					<code className="text-green-400">{jsonContent}</code>
@@ -299,7 +299,7 @@ function File3DRenderer({ item, contentUrl, className }: FileContentRendererProp
 				{item.size && <p className="mt-0.5 text-white/40 text-xs">{(item.size / 1024 / 1024).toFixed(2)} MB</p>}
 			</div>
 			<a
-				className="mt-4 rounded-lg bg-white/10 px-6 py-2 text-white transition-colors hover:bg-white/20"
+				className="mt-4 rounded-lg bg-background/10 px-6 py-2 text-white transition-colors hover:bg-background/20"
 				download={item.name}
 				href={contentUrl}
 			>
@@ -326,7 +326,7 @@ function UnknownRenderer({ item, contentUrl, className }: FileContentRendererPro
 				<p className="mt-1 text-sm text-white/60">Tipo de archivo no soportado para vista previa</p>
 			</div>
 			<a
-				className="mt-4 rounded-lg bg-white/10 px-6 py-2 text-white transition-colors hover:bg-white/20"
+				className="mt-4 rounded-lg bg-background/10 px-6 py-2 text-white transition-colors hover:bg-background/20"
 				download={item.name}
 				href={contentUrl}
 			>

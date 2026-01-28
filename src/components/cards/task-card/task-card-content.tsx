@@ -27,7 +27,13 @@ export function TaskCardContent({
 }: TaskCardContentProps) {
 	// Calcular color de progreso
 	const progressColor =
-		progress === 100 ? '#10b981' : progress >= 75 ? '#3b82f6' : progress >= 50 ? '#eab308' : '#6b7280';
+		progress === 100
+			? 'var(--dt-success-500)'
+			: progress >= 75
+				? 'var(--dt-primary-500)'
+				: progress >= 50
+					? 'var(--dt-warning-500)'
+					: 'var(--dt-neutral-500)';
 
 	// Formatear fecha
 	const formatDate = (date: Date) => {
@@ -48,13 +54,13 @@ export function TaskCardContent({
 					<span>Progreso</span>
 					<span className="font-medium">{progress}%</span>
 				</div>
-				<div className="relative h-2 overflow-hidden rounded-full bg-black/20">
+				<div className="relative h-2 overflow-hidden rounded-full bg-muted/20">
 					<div
 						className="absolute inset-y-0 left-0 rounded-full transition-all duration-500"
 						style={{
 							width: `${progress}%`,
 							backgroundColor: progressColor,
-							boxShadow: `0 0 8px ${progressColor}50`,
+							boxShadow: `0 0 8px color-mix(in oklab, ${progressColor}, transparent 69%)`,
 						}}
 					/>
 				</div>
@@ -65,7 +71,7 @@ export function TaskCardContent({
 				<div
 					className={cn(
 						'flex items-center gap-2 rounded px-2 py-1 text-xs',
-						isOverdue ? 'bg-red-500/20 text-red-400' : 'bg-white/5'
+						isOverdue ? 'bg-destructive/20 text-red-400' : 'bg-background/5'
 					)}
 				>
 					<Calendar className="h-3 w-3" />
@@ -106,7 +112,7 @@ export function TaskCardContent({
 							className="rounded px-1.5 py-0.5 font-medium text-[10px]"
 							key={`${tag}-${idx + 1}`}
 							style={{
-								backgroundColor: `${primaryColor}20`,
+								backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 88%)`,
 								color: primaryColor,
 							}}
 						>
@@ -114,7 +120,7 @@ export function TaskCardContent({
 						</span>
 					))}
 					{tags.length > (compact ? 2 : 3) && (
-						<span className="rounded bg-white/10 px-1.5 py-0.5 text-[10px] opacity-60">
+						<span className="rounded bg-background/10 px-1.5 py-0.5 text-[10px] opacity-60">
 							+{tags.length - (compact ? 2 : 3)}
 						</span>
 					)}
@@ -134,7 +140,7 @@ export function TaskCardContent({
 				<div
 					className="mt-auto h-0.5 rounded-full"
 					style={{
-						background: `linear-gradient(90deg, transparent, ${primaryColor}60, transparent)`,
+						background: `linear-gradient(90deg, transparent, color-mix(in oklab, ${primaryColor}, transparent 63%), transparent)`,
 					}}
 				/>
 			)}

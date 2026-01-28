@@ -47,7 +47,7 @@ export async function generateWaveform(audioPath: string, config: WaveformConfig
 	const {
 		width = 800,
 		height = 200,
-		waveColor = '#3b82f6',
+		waveColor = 'var(--dt-primary-500)',
 		backgroundColor = '#1f2937',
 		samples = 200,
 		quality = 90,

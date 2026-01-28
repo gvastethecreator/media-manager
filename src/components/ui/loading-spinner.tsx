@@ -33,7 +33,7 @@ const spinnerVariants = cva('inline-flex items-center justify-center transition-
 
 export interface LoadingSpinnerProps
 	extends React.HTMLAttributes<HTMLOutputElement>,
-	VariantProps<typeof spinnerVariants> {
+		VariantProps<typeof spinnerVariants> {
 	/** Estado actual: loading, success, error */
 	state?: 'loading' | 'success' | 'error';
 	/** Texto descriptivo para accesibilidad */

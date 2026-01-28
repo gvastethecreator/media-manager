@@ -22,7 +22,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 			{/* Header */}
 			<div className="flex items-center gap-3">
 				<div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/20">
-					<IdCard className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+					<IdCard className="h-5 w-5 text-primary dark:text-blue-400" />
 				</div>
 				<div>
 					<h2 className="font-semibold text-xl">Configuración de Tarjetas de Entidades</h2>

@@ -1,6 +1,7 @@
 import { ChevronRight, CornerDownRight, Home } from 'lucide-react';
 import React, { Fragment } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion } from '@/components/ui/animejs-shim';
 import {
 	Breadcrumb,
 	BreadcrumbItem,
@@ -9,7 +10,6 @@ import {
 	BreadcrumbSeparator,
 } from '@/components/ui/breadcrumb';
 import { Button } from '@/components/ui/button';
-import { motion } from '@/components/ui/motion-shim';
 import { ViewType } from '@/components/views/types';
 import { useHierarchicalNavigation } from '@/lib/utils/folder/hierarchical-navigation';
 

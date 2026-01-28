@@ -16,7 +16,7 @@ export interface StreamOptions {
 	folderId: string;
 	includeSubfolders?: boolean;
 	search?: string;
-	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'json' | '3d'>;
+	fileTypes?: Array<'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d'>;
 	batchSize?: number;
 	delayMs?: number;
 }
@@ -42,7 +42,7 @@ export async function* streamFolderFiles(options: StreamOptions): AsyncGenerator
 		folderId,
 		includeSubfolders = false,
 		search,
-		fileTypes = ['image', 'video', 'audio', 'document', 'json', '3d'],
+		fileTypes = ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d'],
 		batchSize = 200,
 		delayMs = 10,
 	} = options;
@@ -166,7 +166,7 @@ async function getSubfolderIds(folderId: string): Promise<string[]> {
 async function estimateTotalFiles(
 	folderIds: string[],
 	search?: string,
-	fileTypes: string[] = ['image', 'video', 'audio', 'document', 'json', '3d']
+	fileTypes: string[] = ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d']
 ): Promise<number> {
 	try {
 		const promises: Promise<number>[] = [];
@@ -184,10 +184,10 @@ async function estimateTotalFiles(
 		if (fileTypes.includes('document')) {
 			promises.push(countFiles(documents, folderIds, search));
 		}
-		if (fileTypes.includes('json')) {
+		if (fileTypes.includes('jsonFile')) {
 			promises.push(countFiles(jsonFiles, folderIds, search));
 		}
-		if (fileTypes.includes('3d')) {
+		if (fileTypes.includes('file3d')) {
 			promises.push(countFiles(file3Ds, folderIds, search));
 		}
 
@@ -259,13 +259,13 @@ async function fetchFilesBatch(
 				table = documents;
 				entityType = 'document';
 				break;
-			case 'json':
+			case 'jsonFile':
 				table = jsonFiles;
-				entityType = 'json';
+				entityType = 'jsonFile';
 				break;
-			case '3d':
+			case 'file3d':
 				table = file3Ds;
-				entityType = '3d';
+				entityType = 'file3d';
 				break;
 			default:
 				return [];
@@ -351,12 +351,12 @@ function extractMetadata(item: any, entityType: FolderFile['entityType']): Recor
 				title: item.title,
 				author: item.author,
 			};
-		case 'json':
+		case 'jsonFile':
 			return {
 				isValid: item.isValid,
 				keys: item.keys,
 			};
-		case '3d':
+		case 'file3d':
 			return {
 				vertices: item.vertices,
 				faces: item.faces,

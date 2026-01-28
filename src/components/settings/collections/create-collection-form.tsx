@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateCollection, useUpdateCollection } from '@/lib/api/collections';
+import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import type { CollectionWithStats, CreateCollectionInput, UpdateCollectionInput } from '@/types/entities/collection';
 import {
@@ -79,7 +80,7 @@ export function CreateCollectionForm({
 		defaultValues: {
 			name: '',
 			description: '',
-			color: '#6b7280',
+			color: DEFAULT_NEUTRAL_COLOR,
 			emoji: '📚',
 			category: undefined,
 			platform: undefined,
@@ -115,7 +116,7 @@ export function CreateCollectionForm({
 
 		if (category && COLLECTION_CATEGORY_COLORS[category as CollectionCategory]) {
 			// Usar colores y emojis predefinidos por categoría
-			const color = COLLECTION_CATEGORY_COLORS[category as CollectionCategory] || '#6b7280';
+			const color = COLLECTION_CATEGORY_COLORS[category as CollectionCategory] || DEFAULT_NEUTRAL_COLOR;
 			const emoji = COLLECTION_CATEGORY_EMOJIS[category as CollectionCategory] || '📚';
 
 			form.setValue('color', color);

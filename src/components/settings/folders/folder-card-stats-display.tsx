@@ -73,7 +73,7 @@ const FileTypeProgressBars = memo(function FileTypeProgressBars({
 			count: folderStats?.totalImages || 0,
 			icon: Image,
 			label: 'images',
-			color: 'bg-blue-500',
+			color: 'bg-primary',
 		},
 		{
 			count: folderStats?.totalVideos || 0,
@@ -85,7 +85,7 @@ const FileTypeProgressBars = memo(function FileTypeProgressBars({
 			count: folderStats?.totalAudio || 0,
 			icon: Music,
 			label: 'audio',
-			color: 'bg-green-500',
+			color: 'bg-success',
 		},
 		{
 			count: folderStats?.totalDocuments || 0,
@@ -97,7 +97,7 @@ const FileTypeProgressBars = memo(function FileTypeProgressBars({
 			count: folderStats?.totalOthers || 0,
 			icon: File,
 			label: 'others',
-			color: 'bg-gray-500',
+			color: 'bg-muted/500',
 		},
 	].filter((stat) => stat.count > 0);
 

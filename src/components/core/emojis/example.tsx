@@ -144,11 +144,11 @@ export function EmojiPickerExample() {
 			{/* Información de migración */}
 			<Card className="border-green-200 bg-green-50 dark:border-green-800 dark:bg-green-950">
 				<CardHeader>
-					<CardTitle className="flex items-center gap-2 text-green-800 dark:text-green-200">
+					<CardTitle className="flex items-center gap-2 text-success dark:text-green-200">
 						✅ Migración Exitosa
 					</CardTitle>
 				</CardHeader>
-				<CardContent className="text-green-700 dark:text-green-300">
+				<CardContent className="text-success dark:text-green-300">
 					<div className="grid gap-4 text-sm md:grid-cols-2">
 						<div>
 							<h5 className="mb-2 font-medium">Beneficios obtenidos:</h5>

@@ -1,5 +1,5 @@
 import { ImageOffIcon, VideoIcon } from 'lucide-react';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useRecentCollectionMedia } from '@/lib/api/collections';
 
@@ -89,7 +89,7 @@ export function CollectionCardImages({ collectionId, primaryColor, secondaryColo
 							.map((thumbnail, idx) => (
 								<motion.div
 									animate={{ opacity: 1, y: 0 }}
-									className="relative h-full overflow-hidden rounded-sm bg-black/30 shadow-sm"
+									className="relative h-full overflow-hidden rounded-sm bg-muted/30 shadow-sm"
 									initial={{ opacity: 0, y: 10 }}
 									key={thumbnail.id}
 									transition={{ duration: 0.3, delay: idx * 0.1 }}

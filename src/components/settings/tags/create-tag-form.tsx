@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateTag, useUpdateTag } from '@/lib/api/tags';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { generateTagColor } from '@/lib/utils/string.utils';
 import { createTagSchema, type ValidatedCreateTagData } from '@/lib/utils/tag/validators';
 import { toastService } from '@/services/toast/toast.service';
@@ -150,7 +151,12 @@ export function CreateTagForm({
 						<FormItem>
 							<FormLabel>Color</FormLabel>
 							<FormControl>
-								<ColorPicker compact onChange={field.onChange} showLabel={false} value={field.value || '#3b82f6'} />
+								<ColorPicker
+									compact
+									onChange={field.onChange}
+									showLabel={false}
+									value={field.value || DEFAULT_ENTITY_COLOR}
+								/>
 							</FormControl>
 							<FormMessage />
 						</FormItem>

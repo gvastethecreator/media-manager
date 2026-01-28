@@ -3,7 +3,7 @@ import { memo, useMemo } from 'react';
 import { PlaceCard } from '@/components/cards/place-card';
 import { EmptyState } from '@/components/core/data-display';
 import { LoadingScreen } from '@/components/core/feedback';
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { usePlaces } from '@/lib/api/places';
 import type { PlaceWithStats } from '@/types/entities/place';

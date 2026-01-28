@@ -2,9 +2,9 @@ import { Search } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { Skeleton } from '@/components/ui/skeleton';
+import { getPrompts } from '@/lib/api/client/prompt.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { debounceEvent } from '@/lib/system/event-throttler';
-import { searchPromptsService } from '@/services/prompt/prompt.service';
 import type { PromptWithStats } from '@/types/entities/prompt';
 import { PromptCard } from './prompt-card';
 
@@ -58,8 +58,8 @@ export function PromptCardGrid({
 		debounceEvent(async (query: string) => {
 			try {
 				setLoading(true);
-				const results = await searchPromptsService({ search: query }, { pageSize: maxPrompts });
-				setPrompts(results.data);
+				const results = await getPrompts({ search: query, limit: maxPrompts });
+				setPrompts(results);
 			} catch (error) {
 				clientLogger.error('Error al buscar prompts:', error);
 			} finally {

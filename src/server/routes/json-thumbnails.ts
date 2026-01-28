@@ -24,7 +24,7 @@ interface JsonPreviewOptions {
  */
 const THEMES = {
 	light: {
-		background: '#ffffff',
+		background: 'var(--background)',
 		text: '#1f2937',
 		keyword: '#7c3aed',
 		string: '#059669',
@@ -38,9 +38,9 @@ const THEMES = {
 		background: '#111827',
 		text: '#f9fafb',
 		keyword: '#a855f7',
-		string: '#10b981',
-		number: '#ef4444',
-		boolean: '#f59e0b',
+		string: 'var(--dt-success-500)',
+		number: 'var(--dt-danger-500)',
+		boolean: 'var(--dt-warning-500)',
 		null: '#9ca3af',
 		lineNumber: '#6b7280',
 		bracket: '#d1d5db',
@@ -181,7 +181,7 @@ function generateJsonPreviewSVG(jsonContent: string, options: JsonPreviewOptions
 	} catch (parseError) {
 		// Si el JSON es inválido, mostrar error
 		svgContent += `<text x="${padding + lineNumberWidth}" y="${padding + fontSize}" class="json-text" fill="${themeColors.text}">Invalid JSON</text>`;
-		svgContent += `<text x="${padding + lineNumberWidth}" y="${padding + fontSize * 2}" class="json-text" fill="#ef4444">Parse Error</text>`;
+		svgContent += `<text x="${padding + lineNumberWidth}" y="${padding + fontSize * 2}" class="json-text" fill="var(--dt-danger-500)">Parse Error</text>`;
 	}
 
 	svgContent += '</svg>';

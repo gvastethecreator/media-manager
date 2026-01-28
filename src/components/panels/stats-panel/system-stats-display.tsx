@@ -108,25 +108,25 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 			icon: ImageIcon,
 			label: 'Imágenes',
 			value: stats.totalImages.toLocaleString(),
-			color: 'text-blue-500',
+			color: 'text-[color:var(--entity-image)]',
 		},
 		{
 			icon: TagIcon,
 			label: 'Etiquetas',
 			value: stats.totalTags.toLocaleString(),
-			color: 'text-green-500',
+			color: 'text-[color:var(--entity-tag)]',
 		},
 		{
 			icon: ArchiveIcon,
 			label: 'Colecciones',
 			value: stats.totalCollections.toLocaleString(),
-			color: 'text-purple-500',
+			color: 'text-[color:var(--entity-collection)]',
 		},
 		{
 			icon: FolderIcon,
 			label: 'Álbumes',
 			value: stats.totalAlbums.toLocaleString(),
-			color: 'text-yellow-500',
+			color: 'text-[color:var(--entity-album)]',
 		},
 	];
 
@@ -136,25 +136,25 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 			icon: UsersIcon,
 			label: 'Personajes',
 			value: stats.totalCharacters.toLocaleString(),
-			color: 'text-pink-500',
+			color: 'text-[color:var(--entity-character)]',
 		},
 		{
 			icon: MapPinIcon,
 			label: 'Lugares',
 			value: stats.totalPlaces.toLocaleString(),
-			color: 'text-orange-500',
+			color: 'text-[color:var(--entity-place)]',
 		},
 		{
 			icon: BoxIcon,
 			label: 'Objetos del mundo',
 			value: stats.totalWorldItems.toLocaleString(),
-			color: 'text-indigo-500',
+			color: 'text-[color:var(--entity-world-item)]',
 		},
 		{
 			icon: SparklesIcon,
 			label: 'Favoritos',
 			value: stats.totalFavorites.toLocaleString(),
-			color: 'text-cyan-500',
+			color: 'text-[color:var(--entity-favorite)]',
 		},
 	];
 
@@ -164,7 +164,7 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 			icon: FileTextIcon,
 			label: 'Actividades',
 			value: stats.totalActivities.toLocaleString(),
-			color: 'text-slate-500',
+			color: 'text-[color:var(--status-info)]',
 		},
 	];
 
@@ -174,13 +174,13 @@ export const SystemStatsDisplay = memo(function SystemStatsDisplayImpl() {
 			icon: FolderIcon,
 			label: 'Carpetas',
 			value: stats.totalFolders.toLocaleString(),
-			color: 'text-amber-500',
+			color: 'text-[color:var(--entity-folder)]',
 		},
 		{
 			icon: ImageIcon,
 			label: 'Tamaño total',
 			value: formatFileSize(stats.totalSize),
-			color: 'text-blue-400',
+			color: 'text-[color:var(--entity-file)]',
 		},
 	];
 

@@ -15,7 +15,6 @@ import {
 	XAxis,
 	YAxis,
 } from 'recharts';
-import type { ValueType } from 'recharts/types/component/DefaultTooltipContent';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
@@ -29,7 +28,7 @@ const formatNumber = (num: number): string => {
 	return new Intl.NumberFormat('es-ES').format(num);
 };
 
-function toNumberValue(value: ValueType): number {
+function toNumberValue(value: unknown): number {
 	if (Array.isArray(value)) return Number(value[0] ?? 0);
 	return Number(value ?? 0);
 }
@@ -175,7 +174,7 @@ export function SystemMetricsPanel() {
 									<YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: ValueType) => [`${toNumberValue(value)}%`, 'Uso de CPU']}
+										formatter={(value) => [`${toNumberValue(value)}%`, 'Uso de CPU']}
 										labelFormatter={(time) => `Hora: ${time}`}
 									/>
 									<Line dataKey="usage" stroke={METRIC_COLORS.cpu} strokeWidth={2} type="monotone" />
@@ -207,7 +206,7 @@ export function SystemMetricsPanel() {
 									<YAxis tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: ValueType) => [`${toNumberValue(value)} MB`, 'Memoria']}
+										formatter={(value) => [`${toNumberValue(value)} MB`, 'Memoria']}
 										labelFormatter={(time) => `Hora: ${time}`}
 									/>
 									<Area
@@ -247,7 +246,7 @@ export function SystemMetricsPanel() {
 									<YAxis domain={[0, 100]} tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: ValueType) => [`${toNumberValue(value)}%`, 'Uso']}
+										formatter={(value) => [`${toNumberValue(value)}%`, 'Uso']}
 										labelFormatter={(name) => `${name}`}
 									/>
 									<Bar dataKey="usage" fill={CHART_COLORS.primary} />
@@ -336,7 +335,7 @@ export function SystemMetricsPanel() {
 									<YAxis dataKey="endpoint" tick={{ fontSize: 10 }} type="category" width={80} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: ValueType) => [formatNumber(toNumberValue(value)), 'Solicitudes']}
+										formatter={(value) => [formatNumber(toNumberValue(value)), 'Solicitudes']}
 										labelFormatter={(name) => `Endpoint: ${name}`}
 									/>
 									<Bar dataKey="hits" fill={CHART_COLORS.primary} />
@@ -403,7 +402,7 @@ export function SystemMetricsPanel() {
 									<YAxis tick={{ fontSize: 10 }} />
 									<CartesianGrid strokeDasharray="3 3" />
 									<Tooltip
-										formatter={(value: ValueType) => [`${toNumberValue(value)} MB/s`, 'Velocidad']}
+										formatter={(value) => [`${toNumberValue(value)} MB/s`, 'Velocidad']}
 										labelFormatter={(name) => `Operación: ${name}`}
 									/>
 									<Bar dataKey="value" fill={CHART_COLORS.primary}>

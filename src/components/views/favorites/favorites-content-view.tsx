@@ -2,13 +2,14 @@ import { Heart } from 'lucide-react';
 import React from 'react';
 import { FavoriteCard } from '@/components/cards/favorite-card';
 import { LoadingScreen } from '@/components/core/feedback';
+import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { motion } from '@/components/ui/motion-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Textarea } from '@/components/ui/textarea';
+import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
 import type { FavoriteWithStats } from '@/types/entities/favorite/base';
 import { FAVORITE_ENTITY_COLORS, FAVORITE_ENTITY_EMOJIS } from '@/types/entities/favorite/base';
 import type { FavoriteExtended } from '@/types/entities/favorite/types';
@@ -18,7 +19,7 @@ import type { FavoriteExtended } from '@/types/entities/favorite/types';
  */
 function transformToExtended(favorite: FavoriteWithStats): FavoriteExtended {
 	const entityIcon = FAVORITE_ENTITY_EMOJIS[favorite.entityType] || '⭐';
-	const entityColor = FAVORITE_ENTITY_COLORS[favorite.entityType] || '#6b7280';
+	const entityColor = FAVORITE_ENTITY_COLORS[favorite.entityType] || DEFAULT_NEUTRAL_COLOR;
 
 	return {
 		...favorite,

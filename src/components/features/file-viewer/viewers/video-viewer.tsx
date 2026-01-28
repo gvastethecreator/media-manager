@@ -150,7 +150,7 @@ export const VideoViewer: React.FC<VideoViewerProps> = ({ video, className, onNe
 			>
 				Sorry, your browser does not support embedded videos.
 			</video>
-			{error && <div className="mt-2 text-center text-red-500 text-sm">{error}</div>}
+			{error && <div className="mt-2 text-center text-destructive text-sm">{error}</div>}
 			<div className="mt-2 flex items-center gap-2">
 				<Button aria-label={playing ? 'Pausar' : 'Reproducir'} onClick={handlePlayPause} size="icon" variant="ghost">
 					{playing ? <Pause /> : <Play />}

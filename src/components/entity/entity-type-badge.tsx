@@ -4,7 +4,7 @@
  * @description Badge que muestra información visual del tipo de entidad con iconos y colores
  */
 
-import { motion } from '@/components/ui/motion-shim';
+import { motion } from '@/components/ui/animejs-shim';
 // imports limpios: eliminados ComponentProps y Badge no usados
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useEntityTypeConfig } from '@/hooks/use-entity-type-config';
@@ -54,28 +54,36 @@ export function EntityTypeBadge({
 
 	// Estilos según la variante
 	const getVariantStyles = () => {
+		const baseStyles: React.CSSProperties = {
+			'--entity-color': color,
+		} as any;
+
 		switch (variant) {
 			case 'solid':
 				return {
-					backgroundColor: color,
+					...baseStyles,
+					backgroundColor: 'var(--entity-color)',
 					color: 'white',
 					border: 'none',
 				};
 			case 'outline':
 				return {
+					...baseStyles,
 					backgroundColor: 'transparent',
-					color,
-					borderColor: color,
+					color: 'var(--entity-color)',
+					borderColor: 'var(--entity-color)',
 					borderWidth: '1px',
+					borderStyle: 'solid',
 				};
 			case 'ghost':
 				return {
-					backgroundColor: `${color}10`, // 10% opacity
-					color,
+					...baseStyles,
+					backgroundColor: 'color-mix(in oklab, var(--entity-color), transparent 90%)',
+					color: 'var(--entity-color)',
 					border: 'none',
 				};
 			default:
-				return {};
+				return baseStyles;
 		}
 	};
 

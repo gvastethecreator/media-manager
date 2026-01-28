@@ -111,7 +111,7 @@ const FolderMetadata = memo(({ folder, parentFolderName, indexStatus, statusMess
 			{/* Favorite indicator con animación */}
 			{folder.isFavorite && (
 				<Badge className="fade-in-50 h-5 animate-in px-1.5 text-xs duration-300" variant="secondary">
-					<Heart className="mr-1 h-3 w-3 animate-pulse fill-current text-red-500" />
+					<Heart className="mr-1 h-3 w-3 animate-pulse fill-current text-destructive" />
 					Favorito
 				</Badge>
 			)}
@@ -361,10 +361,12 @@ export const FolderCard = memo(
 						// Estados visuales con mejor destacado en modo focused y transiciones
 						{
 							'translate-y-0 border-primary/30 shadow-lg shadow-primary/10 ring-2 ring-primary/20': isSelected,
-							'border-emerald-400/30 shadow-emerald-400/10 shadow-lg ring-2 ring-emerald-400/20': showCompleteAnimation,
-							'scale-[1.02] border-blue-400/40 shadow-blue-400/20 shadow-xl ring-4 ring-blue-400/15':
+							'border-ui-success-border shadow-lg shadow-ui-success ring-2 ring-ui-success-border':
+								showCompleteAnimation,
+							'scale-[1.02] border-ui-info-border shadow-ui-info shadow-xl ring-4 ring-ui-info-border':
 								isReindexing && isFocusedMode,
-							'border-blue-400/30 shadow-blue-400/10 shadow-md ring-2 ring-blue-400/20': isReindexing && !isFocusedMode,
+							'border-ui-info-border shadow-md shadow-ui-info ring-2 ring-ui-info-border':
+								isReindexing && !isFocusedMode,
 							'border-destructive/30 shadow-destructive/10 shadow-lg ring-2 ring-destructive/20': hasError,
 						}
 					)}

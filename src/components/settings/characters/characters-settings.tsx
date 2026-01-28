@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCharacters, useDeleteCharacter } from '@/lib/api/characters';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import type { CharacterWithStats } from '@/types/entities/character';
 import { CharacterCategory, CharacterClass } from '@/types/entities/character/enums';
@@ -335,8 +336,8 @@ export function CharactersSettings() {
 												type="button"
 											>
 												<div
-													className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-white"
-													style={{ backgroundColor: character.color || '' }}
+													className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-foreground"
+													style={{ backgroundColor: character.color || DEFAULT_ENTITY_COLOR }}
 												>
 													<span className="text-xs">{character.emoji || character.name.charAt(0).toUpperCase()}</span>
 												</div>
@@ -353,7 +354,7 @@ export function CharactersSettings() {
 														{character.isFavorite && (
 															<>
 																<span>•</span>
-																<span className="text-yellow-500">★</span>
+																<span className="text-[color:var(--entity-favorite)]">★</span>
 															</>
 														)}
 													</div>
@@ -436,8 +437,10 @@ export function CharactersSettings() {
 										{previewData || selectedCharacter ? (
 											<div className="flex flex-col items-center rounded-dt-md border bg-background p-4">
 												<div
-													className="mb-3 flex h-16 w-16 items-center justify-center rounded-full text-white"
-													style={{ backgroundColor: previewData?.color || selectedCharacter?.color || '#3b82f6' }}
+													className="mb-3 flex h-16 w-16 items-center justify-center rounded-full text-foreground"
+													style={{
+														backgroundColor: previewData?.color || selectedCharacter?.color || DEFAULT_ENTITY_COLOR,
+													}}
 												>
 													<span className="text-xl">{previewData?.emoji || selectedCharacter?.emoji || '👤'}</span>
 												</div>
@@ -469,7 +472,7 @@ export function CharactersSettings() {
 												)}
 
 												{(previewData?.isFavorite || selectedCharacter?.isFavorite) && (
-													<div className="mt-2 text-xs text-yellow-500">★ Favorito</div>
+													<div className="mt-2 text-[color:var(--entity-favorite)] text-xs">★ Favorito</div>
 												)}
 											</div>
 										) : (
@@ -493,31 +496,31 @@ export function CharactersSettings() {
 function _generateCategoryColor(category: CharacterCategory): string {
 	switch (category) {
 		case CharacterCategory.PROTAGONIST:
-			return 'bg-blue-500';
+			return 'bg-[color:var(--status-info)]';
 		case CharacterCategory.ANTAGONIST:
-			return 'bg-red-500';
+			return 'bg-destructive';
 		case CharacterCategory.ALLY:
-			return 'bg-green-500';
+			return 'bg-[color:var(--status-success)]';
 		case CharacterCategory.VILLAIN:
-			return 'bg-purple-700';
+			return 'bg-[color:var(--entity-note)]';
 		case CharacterCategory.SUPPORTING:
-			return 'bg-green-500';
+			return 'bg-[color:var(--status-success)]';
 		case CharacterCategory.MENTOR:
-			return 'bg-amber-500';
+			return 'bg-[color:var(--status-warning)]';
 		case CharacterCategory.SIDEKICK:
-			return 'bg-teal-500';
+			return 'bg-[color:var(--entity-group)]';
 		case CharacterCategory.ANTIHERO:
-			return 'bg-indigo-500';
+			return 'bg-[color:var(--entity-profile)]';
 		case CharacterCategory.HISTORICAL:
-			return 'bg-orange-500';
+			return 'bg-[color:var(--status-warning)]';
 		case CharacterCategory.MYTHOLOGICAL:
-			return 'bg-violet-500';
+			return 'bg-[color:var(--entity-album)]';
 		case CharacterCategory.FICTIONAL:
-			return 'bg-sky-500';
+			return 'bg-[color:var(--entity-audio)]';
 		case CharacterCategory.OTHER:
-			return 'bg-gray-500';
+			return 'bg-[color:var(--entity-file)]';
 		default:
-			return 'bg-gray-500';
+			return 'bg-[color:var(--entity-file)]';
 	}
 }
 
@@ -525,34 +528,34 @@ function _generateCategoryColor(category: CharacterCategory): string {
 function _generateClassColor(characterClass: CharacterClass): string {
 	switch (characterClass) {
 		case CharacterClass.WARRIOR:
-			return 'bg-red-600';
+			return 'bg-destructive';
 		case CharacterClass.MAGE:
-			return 'bg-blue-600';
+			return 'bg-[color:var(--status-info)]';
 		case CharacterClass.ROGUE:
-			return 'bg-green-600';
+			return 'bg-[color:var(--status-success)]';
 		case CharacterClass.CLERIC:
-			return 'bg-yellow-600';
+			return 'bg-[color:var(--status-warning)]';
 		case CharacterClass.RANGER:
-			return 'bg-teal-600';
+			return 'bg-[color:var(--entity-group)]';
 		case CharacterClass.BARD:
-			return 'bg-purple-600';
+			return 'bg-[color:var(--entity-note)]';
 		case CharacterClass.PALADIN:
-			return 'bg-amber-600';
+			return 'bg-[color:var(--status-warning)]';
 		case CharacterClass.DRUID:
-			return 'bg-emerald-600';
+			return 'bg-[color:var(--status-success)]';
 		case CharacterClass.MONK:
-			return 'bg-orange-600';
+			return 'bg-[color:var(--status-warning)]';
 		case CharacterClass.WARLOCK:
-			return 'bg-violet-600';
+			return 'bg-[color:var(--entity-album)]';
 		case CharacterClass.SORCERER:
-			return 'bg-indigo-600';
+			return 'bg-[color:var(--entity-profile)]';
 		case CharacterClass.BARBARIAN:
-			return 'bg-rose-600';
+			return 'bg-[color:var(--entity-note)]';
 		case CharacterClass.ARTIFICER:
-			return 'bg-cyan-600';
+			return 'bg-[color:var(--entity-collection)]';
 		case CharacterClass.UNKNOWN:
-			return 'bg-slate-600';
+			return 'bg-[color:var(--entity-file)]';
 		default:
-			return 'bg-gray-600';
+			return 'bg-[color:var(--entity-file)]';
 	}
 }

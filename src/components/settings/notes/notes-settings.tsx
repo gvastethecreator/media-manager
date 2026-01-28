@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useDeleteNote, useNotes } from '@/lib/api/notes';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import { formatDate } from '@/lib/utils/format.utils';
 import type { NoteWithStats } from '@/types/entities/note';
@@ -311,9 +312,9 @@ export function NotesSettings() {
 											type="button"
 										>
 											<div
-												className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-white"
+												className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-foreground"
 												style={{
-													backgroundColor: note.color || '#3b82f6',
+													backgroundColor: note.color || DEFAULT_ENTITY_COLOR,
 												}}
 											>
 												<span className="text-xs">{note.emoji}</span>
@@ -341,7 +342,7 @@ export function NotesSettings() {
 												type="button"
 												variant="ghost"
 											>
-												<Trash className="h-3 w-3 text-gray-500 hover:text-red-500" />
+												<Trash className="h-3 w-3 text-muted-foreground hover:text-destructive" />
 											</Button>
 										</button>
 									))}
@@ -413,7 +414,7 @@ export function NotesSettings() {
 														className="flex h-10 w-10 items-center justify-center rounded-md text-xl"
 														style={{
 															backgroundColor:
-																previewData?.color || (selectedNote as NoteWithStats)?.color || '#3b82f6',
+																previewData?.color || (selectedNote as NoteWithStats)?.color || DEFAULT_ENTITY_COLOR,
 														}}
 													>
 														{previewData?.emoji || (selectedNote as NoteWithStats)?.emoji || '📝'}

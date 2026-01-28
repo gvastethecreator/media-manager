@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { type AlbumCreateInput, type AlbumUpdateInput, useCreateAlbum, useUpdateAlbum } from '@/lib/api/albums';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import type { AlbumWithStats } from '@/types/entities/album';
 
@@ -50,7 +51,7 @@ export function CreateAlbumForm({
 		name: '',
 		description: '',
 		emoji: '📔',
-		color: '#3b82f6',
+		color: DEFAULT_ENTITY_COLOR,
 		category: '',
 	});
 
@@ -61,7 +62,7 @@ export function CreateAlbumForm({
 				name: album.name,
 				description: album.description || '',
 				emoji: album.emoji || '📔',
-				color: album.color || '#3b82f6',
+				color: album.color || DEFAULT_ENTITY_COLOR,
 				category: album.category || '',
 			});
 		} else if (!isEditing) {
@@ -69,7 +70,7 @@ export function CreateAlbumForm({
 				name: '',
 				description: '',
 				emoji: '📔',
-				color: '#3b82f6',
+				color: DEFAULT_ENTITY_COLOR,
 				category: '',
 			});
 		}
@@ -146,7 +147,7 @@ export function CreateAlbumForm({
 						name: '',
 						description: '',
 						emoji: '📔',
-						color: '#3b82f6',
+						color: DEFAULT_ENTITY_COLOR,
 						category: '',
 					});
 					toastService.success('Álbum creado correctamente');
@@ -169,7 +170,7 @@ export function CreateAlbumForm({
 			name: '',
 			description: '',
 			emoji: '📔',
-			color: '#3b82f6',
+			color: DEFAULT_ENTITY_COLOR,
 			category: '',
 		});
 		setErrors({});
@@ -186,14 +187,14 @@ export function CreateAlbumForm({
 					Nombre *
 				</Label>
 				<Input
-					className={errors.name ? 'border-red-500' : ''}
+					className={errors.name ? 'border-destructive' : ''}
 					id="name"
 					onChange={(e) => handleChange('name', e.target.value)}
 					placeholder="Nombre del álbum..."
 					type="text"
 					value={formData.name}
 				/>
-				{errors.name && <p className="mt-1 text-red-500 text-xs">{errors.name}</p>}
+				{errors.name && <p className="mt-1 text-destructive text-xs">{errors.name}</p>}
 			</div>
 
 			{/* Descripción */}
@@ -234,7 +235,7 @@ export function CreateAlbumForm({
 					Color
 				</Label>
 				<div className="flex items-center gap-2">
-					<div className="h-8 w-8 rounded border-2 border-gray-300" style={{ backgroundColor: formData.color }} />
+					<div className="h-8 w-8 rounded border-2 border-border" style={{ backgroundColor: formData.color }} />
 					<Input
 						className="w-20"
 						id="color"

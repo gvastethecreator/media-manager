@@ -4,11 +4,34 @@
  * @description Funciones para interactuar con los endpoints de la API de imágenes desde el cliente.
  */
 
-import type { GetImagesOptions, GetImagesResult } from '@/services/image/image.service';
 import type { ImageWithStats } from '@/types/entities/image/base';
 import type { ImageUpdateInput } from '@/types/entities/image/types';
 
 const API_BASE_PATH = '/api/images';
+
+export interface GetImagesOptions {
+	folderId?: string;
+	limit?: number;
+	offset?: number;
+	search?: string;
+	sortBy?: string;
+	sortOrder?: 'asc' | 'desc';
+	pageSize?: number;
+	page?: number;
+}
+
+export interface GetImagesResult {
+	images: ImageWithStats[];
+	total: number;
+	hasMore: boolean;
+	pagination: {
+		total: number;
+		limit: number;
+		offset: number;
+		hasNext: boolean;
+		hasPrev: boolean;
+	};
+}
 
 /**
  * Obtiene una lista de imágenes desde la API.
@@ -52,7 +75,29 @@ export async function getImagesFromApi(options: GetImagesOptions = {}): Promise<
 		throw new Error(errorData.error || 'Error al obtener las imágenes');
 	}
 
-	return response.json();
+	const payload = (await response.json()) as {
+		data: ImageWithStats[];
+		pagination: {
+			total: number;
+			limit: number;
+			offset: number;
+			hasNext: boolean;
+			hasPrev: boolean;
+		};
+	};
+
+	return {
+		images: payload.data ?? [],
+		total: payload.pagination?.total ?? 0,
+		hasMore: payload.pagination?.hasNext ?? false,
+		pagination: payload.pagination ?? {
+			total: 0,
+			limit: options.limit ?? 0,
+			offset: options.offset ?? 0,
+			hasNext: false,
+			hasPrev: false,
+		},
+	};
 }
 
 /**
@@ -61,7 +106,7 @@ export async function getImagesFromApi(options: GetImagesOptions = {}): Promise<
  * @returns Una promesa que se resuelve con los datos de la imagen.
  */
 export async function getImageFromApi(id: string): Promise<ImageWithStats> {
-	const response = await fetch(`${API_BASE_PATH}/${id}`);
+	const response = await fetch(`${API_BASE_PATH}/${id}/stats`);
 
 	if (!response.ok) {
 		const errorData = await response.json();
@@ -79,7 +124,7 @@ export async function getImageFromApi(id: string): Promise<ImageWithStats> {
  */
 export async function updateImageInApi(id: string, data: ImageUpdateInput): Promise<ImageWithStats> {
 	const response = await fetch(`${API_BASE_PATH}/${id}`, {
-		method: 'PUT',
+		method: 'PATCH',
 		headers: {
 			'Content-Type': 'application/json',
 		},

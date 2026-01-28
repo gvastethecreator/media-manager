@@ -24,7 +24,7 @@ export function DetailsPanel({ selectedItems, className = '' }: DetailsPanelProp
 		}
 	};
 
-	return <div className={cn('flex h-full min-h-0 w-full flex-col', className)}>{renderContent()}</div>;
+	return <div className={cn('flex h-full min-h-0 min-w-0 w-full flex-col', className)}>{renderContent()}</div>;
 }
 
 export default DetailsPanel;

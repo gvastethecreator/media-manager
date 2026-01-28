@@ -18,9 +18,11 @@ export const prompts = sqliteTable(
 		description: text('description'),
 		content: text('content'),
 		emoji: text('emoji').default('🔮'),
-		color: text('color').default('#3b82f6'),
+		color: text('color').default('var(--entity-prompt)'),
 		category: text('category'),
+		filters: text('filters'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
+		metadata: text('metadata'),
 		// Agregados movidos a EntityAggregates tabla genérica
 		type: text('type'),
 		notes: text('notes'),

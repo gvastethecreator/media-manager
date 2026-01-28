@@ -63,8 +63,11 @@ export const FolderCard = memo(
 		}, [folder]);
 
 		// Colores para personalización
-		const primaryColor = useMemo(() => folderData.color || '#3b82f6', [folderData.color]);
-		const secondaryColor = useMemo(() => (primaryColor === '#3b82f6' ? '#1d4ed8' : primaryColor), [primaryColor]);
+		const primaryColor = useMemo(() => folderData.color || 'var(--entity-folder)', [folderData.color]);
+		const secondaryColor = useMemo(
+			() => (primaryColor === 'var(--entity-folder)' ? 'var(--dt-primary-600)' : primaryColor),
+			[primaryColor]
+		);
 
 		// Manejador de clicks para la tarjeta
 		const handleCardClick = useCallback(() => {
@@ -84,15 +87,15 @@ export const FolderCard = memo(
 			<div
 				className={cn(
 					'group relative flex h-full flex-col overflow-hidden rounded-md transition-all duration-300',
-					tcgMode ? 'border border-white/10 bg-gradient-to-b from-gray-900 to-black shadow-lg' : 'bg-card shadow',
+					tcgMode ? 'border border-border/40 bg-gradient-to-b from-gray-900 to-black shadow-lg' : 'bg-card shadow',
 					interactive && 'cursor-pointer hover:shadow-md',
 					className
 				)}
 				style={
 					tcgMode
 						? {
-								boxShadow: `0 10px 15px -3px ${primaryColor}20, 0 4px 6px -4px ${primaryColor}30`,
-							}
+							boxShadow: `0 10px 15px -3px color-mix(in oklab, ${primaryColor}, transparent 80%), 0 4px 6px -4px color-mix(in oklab, ${primaryColor}, transparent 70%)`,
+						}
 						: {}
 				}
 			>
@@ -101,7 +104,7 @@ export const FolderCard = memo(
 					<div
 						className="pointer-events-none absolute inset-0 rounded-md opacity-0 transition-opacity duration-300 group-hover:opacity-100"
 						style={{
-							boxShadow: `inset 0 0 0 1px ${primaryColor}50, 0 0 15px ${primaryColor}30`,
+							boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${primaryColor}, transparent 50%), 0 0 15px color-mix(in oklab, ${primaryColor}, transparent 70%)`,
 							zIndex: 20,
 						}}
 					/>
@@ -160,7 +163,7 @@ export const FolderCard = memo(
 						<div
 							className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
 							style={{
-								background: `radial-gradient(circle at 50% 50%, ${primaryColor}10 0%, transparent 70%)`,
+								background: `radial-gradient(circle at 50% 50%, color-mix(in oklab, ${primaryColor}, transparent 90%) 0%, transparent 70%)`,
 								zIndex: 1,
 							}}
 						/>
@@ -168,19 +171,19 @@ export const FolderCard = memo(
 						{/* Esquinas decorativas TCG */}
 						<div
 							className="pointer-events-none absolute top-0 left-0 h-6 w-6 rounded-br-sm border-t-2 border-l-2 opacity-60"
-							style={{ borderColor: `${primaryColor}80` }}
+							style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 20%)` }}
 						/>
 						<div
 							className="pointer-events-none absolute top-0 right-0 h-6 w-6 rounded-bl-sm border-t-2 border-r-2 opacity-60"
-							style={{ borderColor: `${primaryColor}80` }}
+							style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 20%)` }}
 						/>
 						<div
 							className="pointer-events-none absolute bottom-0 left-0 h-6 w-6 rounded-tr-sm border-b-2 border-l-2 opacity-60"
-							style={{ borderColor: `${primaryColor}80` }}
+							style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 20%)` }}
 						/>
 						<div
 							className="pointer-events-none absolute right-0 bottom-0 h-6 w-6 rounded-tl-sm border-r-2 border-b-2 opacity-60"
-							style={{ borderColor: `${primaryColor}80` }}
+							style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 20%)` }}
 						/>
 					</>
 				)}
@@ -238,7 +241,9 @@ export const FolderCard = memo(
 		if (prevFolder.featuredImage !== nextFolder.featuredImage) return false;
 		if (prevFolder.totalFiles !== nextFolder.totalFiles) return false;
 		if (prevFolder.totalSize !== nextFolder.totalSize) return false;
-		if (prevFolder.lastIndexed?.getTime() !== nextFolder.lastIndexed?.getTime()) return false;
+		const prevTime = prevFolder.lastIndexed instanceof Date ? prevFolder.lastIndexed.getTime() : 0;
+		const nextTime = nextFolder.lastIndexed instanceof Date ? nextFolder.lastIndexed.getTime() : 0;
+		if (prevTime !== nextTime) return false;
 
 		// Compare stats object
 		if (prevFolder.stats?.totalItems !== nextFolder.stats?.totalItems) return false;

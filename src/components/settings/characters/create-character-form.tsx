@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { useCreateCharacter, useUpdateCharacter } from '@/lib/api/characters';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { toastService } from '@/lib/ui/toast';
 import { generateTagColor } from '@/lib/utils/string.utils';
 import {
@@ -82,7 +83,7 @@ export function CreateCharacterForm({
 		defaultValues: {
 			name: '',
 			description: '',
-			color: '#3b82f6',
+			color: DEFAULT_ENTITY_COLOR,
 			emoji: '👤',
 			backstory: '',
 			category: undefined,
@@ -99,7 +100,7 @@ export function CreateCharacterForm({
 			form.reset({
 				name: character.name,
 				description: character.description || '',
-				color: character.color || '#3b82f6',
+				color: character.color || DEFAULT_ENTITY_COLOR,
 				emoji: character.emoji || '👤',
 				backstory: character.background || '',
 				category: character.category as CharacterCategory | undefined,
@@ -115,7 +116,7 @@ export function CreateCharacterForm({
 
 		if (characterClass && Object.values(CharacterClass).includes(characterClass)) {
 			// Usar colores y emojis predefinidos por clase
-			const color = CHARACTER_CLASS_COLORS[characterClass] || '#3b82f6';
+			const color = CHARACTER_CLASS_COLORS[characterClass] || DEFAULT_ENTITY_COLOR;
 			const emoji = CHARACTER_CLASS_EMOJIS[characterClass] || '👤';
 
 			form.setValue('color', color);
@@ -181,7 +182,7 @@ export function CreateCharacterForm({
 				description: data.description || null,
 				category: data.category || null,
 				emoji: data.emoji || '👤',
-				color: data.color || '#3b82f6',
+				color: data.color || DEFAULT_ENTITY_COLOR,
 
 				isFavorite: data.isFavorite,
 				totalImages: 0,

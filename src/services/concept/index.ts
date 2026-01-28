@@ -4,4 +4,4 @@
  * @module services/concept
  */
 
-export * from './concept.service';
+export * from './concept.service.effect';

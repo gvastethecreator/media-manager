@@ -20,7 +20,7 @@ export const FavoriteCard = memo(function FavoriteCard({
 	isSelected,
 	className,
 }: FavoriteCardProps) {
-	const primaryColor = favorite.entityColor || '#eab308';
+	const primaryColor = favorite.entityColor || 'var(--dt-warning-500)';
 	const content = (
 		<CardContainer
 			className={cn(className, 'transition-colors', isSelected ? 'ring-2 ring-primary' : '')}

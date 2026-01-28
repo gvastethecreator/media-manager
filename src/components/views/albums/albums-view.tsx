@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useCreateAlbum, useDeleteAlbum, useUpdateAlbum } from '@/lib/api/albums';
 import { clientLogger } from '@/lib/logger/client-logger';
+import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { useAlbumStore } from '@/store/entities/album';
 import type { AlbumWithStats } from '@/types/entities/album';
 import type { ViewProps } from '../types';
@@ -66,7 +67,7 @@ export function AlbumsView(_props: ViewProps) {
 				name: albumName,
 				description: albumDescription,
 				emoji: '📸',
-				color: '#3b82f6',
+				color: DEFAULT_ENTITY_COLOR,
 				isFavorite: false,
 				filters: '[]',
 				sortBy: 'name',

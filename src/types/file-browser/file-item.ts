@@ -4,8 +4,8 @@
  * @description Define la interfaz FileItem para el explorador de archivos
  */
 
-import type { AnyEntityWithStats } from '@/types/entities';
 import { formatFileSize } from '@/lib/utils/format.utils';
+import type { AnyEntityWithStats } from '@/types/entities';
 
 /**
  * Interfaz base para items del explorador de archivos

@@ -21,7 +21,7 @@ function toMediaItem(item: BrowserItem): MediaItem {
 	return {
 		id: item.id,
 		name: item.name,
-		entityType: item.entityType === 'json' ? 'jsonFile' : (item.entityType as MediaItem['entityType']),
+		entityType: item.entityType as MediaItem['entityType'],
 		thumbnailUrl: item.thumbnailUrl,
 		mimeType: item.mimeType,
 		createdAt: item.createdAt,
@@ -41,6 +41,10 @@ export interface MediaItemProps {
 	size: number;
 	isSelected?: boolean;
 	isActive?: boolean;
+	layoutItem?: boolean;
+	layoutOrder?: number;
+	variant?: 'grid' | 'masonry';
+	animateIn?: boolean;
 	onClick?: (e: React.MouseEvent) => void;
 	onDoubleClick?: () => void;
 	onContextMenu?: (e: React.MouseEvent) => void;
@@ -66,18 +70,35 @@ function MediaItemGridInner({
 	className,
 	style,
 	testId,
+	layoutItem = true,
+	layoutOrder,
+	variant = 'grid',
+	animateIn = true,
 }: MediaItemProps) {
+	const isMasonry = variant === 'masonry';
+	const fadeDelayMs = layoutOrder != null ? Math.min(layoutOrder * 6, 200) : 0;
+	const fadeStyle =
+		layoutItem && animateIn ? { animationDelay: `${fadeDelayMs}ms`, '--fb-item-delay': `${fadeDelayMs}ms` } : {};
+	const layoutAttributes = layoutItem
+		? {
+				'data-layout-id': item.id,
+				'data-layout-item': 'true',
+				...(layoutOrder != null ? { 'data-layout-order': String(layoutOrder) } : {}),
+			}
+		: {};
 	// Si es item sintético de navegación (..)
 	if (item.isSynthetic && item.name === '..') {
 		return (
 			<button
 				className={cn(
+					animateIn && 'file-browser-item',
 					'group relative flex flex-col items-center justify-center gap-2 rounded-lg p-2 transition-colors',
 					'cursor-pointer hover:bg-accent/50',
 					isSelected && 'bg-accent ring-2 ring-primary',
 					isActive && 'ring-2 ring-primary/50',
 					className
 				)}
+				{...layoutAttributes}
 				data-entity-card
 				data-entity-type={item.entityType}
 				data-item-id={item.id}
@@ -86,7 +107,7 @@ function MediaItemGridInner({
 				onClick={onClick}
 				onContextMenu={onContextMenu}
 				onDoubleClick={onDoubleClick}
-				style={{ ...style, width: size, height: size }}
+				style={{ ...style, ...fadeStyle, width: size, height: size }}
 				type="button"
 			>
 				<div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
@@ -102,12 +123,14 @@ function MediaItemGridInner({
 		return (
 			<button
 				className={cn(
+					animateIn && 'file-browser-item',
 					'group relative flex flex-col gap-1 rounded-lg p-1.5 transition-colors',
 					'cursor-pointer hover:bg-accent/50',
 					isSelected && 'bg-accent ring-2 ring-primary',
 					isActive && 'ring-2 ring-primary/50',
 					className
 				)}
+				{...layoutAttributes}
 				data-entity-card
 				data-entity-type={item.entityType}
 				data-item-id={item.id}
@@ -116,7 +139,7 @@ function MediaItemGridInner({
 				onClick={onClick}
 				onContextMenu={onContextMenu}
 				onDoubleClick={onDoubleClick}
-				style={style}
+				style={{ ...style, ...fadeStyle, width: size }}
 				type="button"
 			>
 				<div
@@ -130,7 +153,7 @@ function MediaItemGridInner({
 					{item.emoji ? (
 						<span className="text-3xl">{item.emoji}</span>
 					) : (
-						<Folder className="h-1/3 w-1/3 text-amber-600" />
+						<Folder className="h-1/3 w-1/3 text-warning" />
 					)}
 				</div>
 				<div className="flex items-center justify-center gap-1 px-1">
@@ -151,12 +174,14 @@ function MediaItemGridInner({
 	return (
 		<button
 			className={cn(
+				animateIn && 'file-browser-item',
 				'group relative flex flex-col gap-1 rounded-lg p-1.5 transition-colors',
 				'cursor-pointer hover:bg-accent/50',
 				isSelected && 'bg-accent ring-2 ring-primary',
 				isActive && 'ring-2 ring-primary/50',
 				className
 			)}
+			{...layoutAttributes}
 			data-entity-card
 			data-entity-type={item.entityType}
 			data-item-id={item.id}
@@ -165,11 +190,19 @@ function MediaItemGridInner({
 			onClick={onClick}
 			onContextMenu={onContextMenu}
 			onDoubleClick={onDoubleClick}
-			style={style}
+			style={{ ...style, ...fadeStyle, width: size }}
 			type="button"
 		>
-			<div className="mx-auto overflow-hidden rounded-lg" style={{ width: size - 12, height: size - 12 }}>
-				<MediaThumbnail className="h-full w-full object-cover" item={mediaItem} lockAspectRatio />
+			<div
+				className="mx-auto overflow-hidden rounded-lg"
+				style={isMasonry ? { width: size } : { width: size - 12, height: size - 12 }}
+			>
+				<MediaThumbnail
+					className="h-full w-full object-cover"
+					item={mediaItem}
+					lockAspectRatio={isMasonry}
+					predictedAspectRatio={mediaItem.width && mediaItem.height ? mediaItem.width / mediaItem.height : undefined}
+				/>
 			</div>
 			<span className="truncate px-1 text-center text-xs leading-tight" title={item.name}>
 				{item.name}
@@ -191,18 +224,33 @@ function MediaItemListInner({
 	className,
 	style,
 	testId,
+	layoutItem = true,
+	layoutOrder,
+	animateIn = true,
 }: Omit<MediaItemProps, 'size'>) {
+	const layoutAttributes = layoutItem
+		? {
+				'data-layout-id': item.id,
+				'data-layout-item': 'true',
+				...(layoutOrder != null ? { 'data-layout-order': String(layoutOrder) } : {}),
+			}
+		: {};
+	const fadeDelayMs = layoutOrder != null ? Math.min(layoutOrder * 6, 200) : 0;
+	const fadeStyle =
+		layoutItem && animateIn ? { animationDelay: `${fadeDelayMs}ms`, '--fb-item-delay': `${fadeDelayMs}ms` } : {};
 	// Si es item sintético de navegación (..)
 	if (item.isSynthetic && item.name === '..') {
 		return (
 			<button
 				className={cn(
+					animateIn && 'file-browser-item',
 					'flex items-center gap-3 px-3 py-2 transition-colors',
 					'cursor-pointer hover:bg-accent/50',
 					isSelected && 'bg-accent',
 					isActive && 'ring-1 ring-primary/50 ring-inset',
 					className
 				)}
+				{...layoutAttributes}
 				data-entity-card
 				data-entity-type={item.entityType}
 				data-item-id={item.id}
@@ -211,7 +259,7 @@ function MediaItemListInner({
 				onClick={onClick}
 				onContextMenu={onContextMenu}
 				onDoubleClick={onDoubleClick}
-				style={style}
+				style={{ ...style, ...fadeStyle }}
 				type="button"
 			>
 				<div className="flex h-8 w-8 items-center justify-center rounded bg-muted">
@@ -227,12 +275,14 @@ function MediaItemListInner({
 		return (
 			<button
 				className={cn(
+					animateIn && 'file-browser-item',
 					'flex items-center gap-3 px-3 py-2 transition-colors',
 					'cursor-pointer hover:bg-accent/50',
 					isSelected && 'bg-accent',
 					isActive && 'ring-1 ring-primary/50 ring-inset',
 					className
 				)}
+				{...layoutAttributes}
 				data-entity-card
 				data-entity-type={item.entityType}
 				data-item-id={item.id}
@@ -241,14 +291,14 @@ function MediaItemListInner({
 				onClick={onClick}
 				onContextMenu={onContextMenu}
 				onDoubleClick={onDoubleClick}
-				style={style}
+				style={{ ...style, ...fadeStyle }}
 				type="button"
 			>
 				<div
 					className="flex h-8 w-8 items-center justify-center rounded"
 					style={{ backgroundColor: item.color ?? 'hsl(var(--muted))' }}
 				>
-					{item.emoji ? <span className="text-sm">{item.emoji}</span> : <Folder className="h-4 w-4 text-amber-600" />}
+					{item.emoji ? <span className="text-sm">{item.emoji}</span> : <Folder className="h-4 w-4 text-warning" />}
 				</div>
 				<span className="flex-1 truncate text-sm">{item.name}</span>
 				{typeof item.totalItems === 'number' && (
@@ -264,12 +314,14 @@ function MediaItemListInner({
 	return (
 		<button
 			className={cn(
+				animateIn && 'file-browser-item',
 				'flex items-center gap-3 px-3 py-2 transition-colors',
 				'cursor-pointer hover:bg-accent/50',
 				isSelected && 'bg-accent',
 				isActive && 'ring-1 ring-primary/50 ring-inset',
 				className
 			)}
+			{...layoutAttributes}
 			data-entity-card
 			data-entity-type={item.entityType}
 			data-item-id={item.id}
@@ -278,7 +330,7 @@ function MediaItemListInner({
 			onClick={onClick}
 			onContextMenu={onContextMenu}
 			onDoubleClick={onDoubleClick}
-			style={style}
+			style={{ ...style, ...fadeStyle }}
 			type="button"
 		>
 			<div className="h-8 w-8 overflow-hidden rounded">
@@ -313,5 +365,5 @@ export const GenericMediaItem = memo(function GenericMediaItem({
 	if (viewMode === 'list' || viewMode === 'table') {
 		return <MediaItemList {...props} />;
 	}
-	return <MediaItemGrid {...props} size={size} />;
+	return <MediaItemGrid {...props} size={size} variant={viewMode === 'masonry' ? 'masonry' : 'grid'} />;
 });

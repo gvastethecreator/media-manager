@@ -17,9 +17,11 @@ export const concepts = sqliteTable(
 		name: text('name').notNull(),
 		description: text('description'),
 		emoji: text('emoji').default('💡'),
-		color: text('color').default('#3b82f6'),
+		color: text('color').default('var(--entity-concept)'),
 		category: text('category'),
+		filters: text('filters'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
+		metadata: text('metadata'),
 		// Agregados movidos a EntityAggregates tabla genérica
 		type: text('type'),
 		complexity: text('complexity'),

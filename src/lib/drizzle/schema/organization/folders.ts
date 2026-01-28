@@ -21,7 +21,7 @@ export const folders = sqliteTable(
 		description: text('description'),
 		path: text('path').notNull(),
 		emoji: text('emoji').default('📁'),
-		color: text('color').default('#3b82f6'),
+		color: text('color').default('var(--entity-folder)'),
 		featuredImage: text('featuredImage'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),
