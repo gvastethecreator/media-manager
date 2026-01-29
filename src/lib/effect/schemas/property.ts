@@ -6,8 +6,8 @@
  */
 
 import { Schema } from '@effect/schema';
-import { UUID } from './common';
-import { BoundedString, Emoji, HexColor } from './primitives';
+import { ID } from './common';
+import { BoundedString, Emoji, ThemeColor } from './primitives';
 
 /**
  * Categorías válidas para Property
@@ -22,10 +22,10 @@ export const PropertyCategory = Schema.Literal('general', 'technical', 'artistic
  * Schema base para Property entity
  */
 export class Property extends Schema.Class<Property>('Property')({
-	id: UUID,
+	id: ID,
 	name: BoundedString(1, 50),
 	emoji: Emoji,
-	color: HexColor,
+	color: ThemeColor,
 	description: Schema.optional(Schema.String),
 	shortcut: Schema.optional(Schema.String.pipe(Schema.maxLength(10))),
 	category: PropertyCategory,
@@ -41,7 +41,7 @@ export class Property extends Schema.Class<Property>('Property')({
 export class PropertyCreate extends Schema.Class<PropertyCreate>('PropertyCreate')({
 	name: BoundedString(1, 50),
 	emoji: Schema.optional(Emoji),
-	color: Schema.optional(HexColor),
+	color: Schema.optional(ThemeColor),
 	description: Schema.optional(Schema.String),
 	shortcut: Schema.optional(Schema.String.pipe(Schema.maxLength(10))),
 	category: Schema.optional(PropertyCategory),
@@ -53,10 +53,10 @@ export class PropertyCreate extends Schema.Class<PropertyCreate>('PropertyCreate
  * Schema para actualizar una Property
  */
 export class PropertyUpdate extends Schema.Class<PropertyUpdate>('PropertyUpdate')({
-	id: UUID,
+	id: ID,
 	name: Schema.optional(BoundedString(1, 50)),
 	emoji: Schema.optional(Emoji),
-	color: Schema.optional(HexColor),
+	color: Schema.optional(ThemeColor),
 	description: Schema.optional(Schema.String),
 	shortcut: Schema.optional(Schema.String.pipe(Schema.maxLength(10))),
 	category: Schema.optional(PropertyCategory),

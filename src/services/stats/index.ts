@@ -1,8 +1,25 @@
 /**
- * 📊 Exportaciones del servicio Stats
- * @file Exportaciones centralizadas del servicio Stats
+ * 📊 Exportaciones centralizadas del servicio Stats
  * @module services/stats
  */
 
-export * from './optimized-stats.service';
-export * from './stats.service';
+// Exportar desde el servicio legacy (stats.service.ts contiene STATS_EVENTS y statsEventEmitter)
+export {
+	STATS_EVENTS,
+	statsEventEmitter,
+	StatsService,
+	statsService,
+} from './stats.service';
+
+// Exportar tipos
+export type {
+	StatsEventType,
+	StatsEvents,
+	StatsUpdateEvent,
+} from './stats.service';
+
+// Exportar desde el servicio optimizado
+export {
+	OptimizedStatsService,
+	optimizedStatsUtils,
+} from './optimized-stats.service';

@@ -1,9 +1,11 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { collections } from '../schema';
 import { seedLogger } from './index';
 
 /**
- * Siembra colecciones minimalistas para verificación del sistema
+ * Siembra colecciones con IDs legibles
+ * Formato: collection-nombre-01, collection-nombre-02, etc.
  */
 export async function seedCollections(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('📚 Creando colecciones de prueba...');
@@ -11,67 +13,43 @@ export async function seedCollections(db: LibSQLDatabase<Record<string, never>>)
 	try {
 		const sampleCollections = [
 			{
-				id: '44444444-4444-4444-a444-444444444441',
+				id: generateReadableId('collection', 'Biblioteca Principal', 1),
 				name: 'Biblioteca Principal',
 				description: 'Colección principal de recursos',
 				emoji: '📚',
-				color: 'var(--dt-primary-500)',
+				color: '#3b82f6',
 				featuredImage: null,
-				isPublic: true,
 				isFavorite: true,
-				totalImages: 0,
-				totalVideos: 0,
-				totalSize: 0,
-				lastImageAddedAt: null,
-				lastVideoAddedAt: null,
 				parentId: null,
 			},
 			{
-				id: '44444444-4444-4444-a444-444444444442',
+				id: generateReadableId('collection', 'Archivo Personal', 1),
 				name: 'Archivo Personal',
 				description: 'Colección personal privada',
 				emoji: '🗃️',
-				color: 'var(--preset-slate)',
+				color: '#64748b',
 				featuredImage: null,
-				isPublic: false,
 				isFavorite: false,
-				totalImages: 0,
-				totalVideos: 0,
-				totalSize: 0,
-				lastImageAddedAt: null,
-				lastVideoAddedAt: null,
 				parentId: null,
 			},
 			{
-				id: '44444444-4444-4444-a444-444444444443',
+				id: generateReadableId('collection', 'Referencias Artistic', 1),
 				name: 'Referencias Artísticas',
 				description: 'Material de referencia para proyectos',
 				emoji: '🎨',
-				color: 'var(--dt-warning-500)',
+				color: '#f59e0b',
 				featuredImage: null,
-				isPublic: true,
 				isFavorite: true,
-				totalImages: 0,
-				totalVideos: 0,
-				totalSize: 0,
-				lastImageAddedAt: null,
-				lastVideoAddedAt: null,
 				parentId: null,
 			},
 			{
-				id: '44444444-4444-4444-a444-444444444444',
+				id: generateReadableId('collection', 'Proyectos Activos', 1),
 				name: 'Proyectos Activos',
 				description: 'Trabajos en progreso',
 				emoji: '🚀',
-				color: 'var(--dt-success-500)',
+				color: '#22c55e',
 				featuredImage: null,
-				isPublic: false,
 				isFavorite: false,
-				totalImages: 0,
-				totalVideos: 0,
-				totalSize: 0,
-				lastImageAddedAt: null,
-				lastVideoAddedAt: null,
 				parentId: null,
 			},
 		];

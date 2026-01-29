@@ -8,6 +8,7 @@
 import { desc, eq } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { groups, imageNotes, images, notes, properties, wildcards, worldItems } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
@@ -70,12 +71,12 @@ const makeGroupService = (): GroupServiceInterface => {
 
 	const create = (input: any): Effect.Effect<any, GroupError> =>
 		Effect.gen(function* () {
-			const id = crypto.randomUUID();
+			const readableId = generateReadableId('group', input.name || 'grupo', 1);
 			const result = yield* Effect.tryPromise<(typeof groups.$inferSelect)[], GroupError>({
 				try: () =>
 					db
 						.insert(groups)
-						.values({ id, ...input, createdAt: new Date(), updatedAt: new Date() })
+						.values({ id: readableId, ...input, createdAt: new Date(), updatedAt: new Date() })
 						.returning(),
 				catch: (error) => fromUnknownGroupError('create', error),
 			});
@@ -164,12 +165,12 @@ const makeWildcardService = (): WildcardServiceInterface => {
 
 	const create = (input: any): Effect.Effect<any, WildcardError> =>
 		Effect.gen(function* () {
-			const id = crypto.randomUUID();
+			const readableId = generateReadableId('wildcard', input.name || 'wildcard', 1);
 			const result = yield* Effect.tryPromise<(typeof wildcards.$inferSelect)[], WildcardError>({
 				try: () =>
 					db
 						.insert(wildcards)
-						.values({ id, ...input, createdAt: new Date(), updatedAt: new Date() })
+						.values({ id: readableId, ...input, createdAt: new Date(), updatedAt: new Date() })
 						.returning(),
 				catch: (error) => fromUnknownWildcardError('create', error),
 			});
@@ -258,12 +259,12 @@ const makeNoteService = (): NoteServiceInterface => {
 
 	const create = (input: any): Effect.Effect<any, NoteError> =>
 		Effect.gen(function* () {
-			const id = crypto.randomUUID();
+			const readableId = generateReadableId('note', input.title || 'nota', 1);
 			const result = yield* Effect.tryPromise<(typeof notes.$inferSelect)[], NoteError>({
 				try: () =>
 					db
 						.insert(notes)
-						.values({ id, ...input, createdAt: new Date(), updatedAt: new Date() })
+						.values({ id: readableId, ...input, createdAt: new Date(), updatedAt: new Date() })
 						.returning(),
 				catch: (error) => fromUnknownNoteError('create', error),
 			});
@@ -350,12 +351,12 @@ const makePropertyService = (): PropertyServiceInterface => {
 
 	const create = (input: any): Effect.Effect<any, PropertyError> =>
 		Effect.gen(function* () {
-			const id = crypto.randomUUID();
+			const readableId = generateReadableId('property', input.name || 'propiedad', 1);
 			const result = yield* Effect.tryPromise<(typeof properties.$inferSelect)[], PropertyError>({
 				try: () =>
 					db
 						.insert(properties)
-						.values({ id, ...input, createdAt: new Date(), updatedAt: new Date() })
+						.values({ id: readableId, ...input, createdAt: new Date(), updatedAt: new Date() })
 						.returning(),
 				catch: (error) => fromUnknownPropertyError('create', error),
 			});
@@ -428,12 +429,12 @@ const makeWorldItemService = (): WorldItemServiceInterface => {
 
 	const create = (input: any): Effect.Effect<any, WorldItemError> =>
 		Effect.gen(function* () {
-			const id = crypto.randomUUID();
+			const readableId = generateReadableId('world-item', input.name || 'item', 1);
 			const result = yield* Effect.tryPromise<(typeof worldItems.$inferSelect)[], WorldItemError>({
 				try: () =>
 					db
 						.insert(worldItems)
-						.values({ id, ...input, createdAt: new Date(), updatedAt: new Date() })
+						.values({ id: readableId, ...input, createdAt: new Date(), updatedAt: new Date() })
 						.returning(),
 				catch: (error) => fromUnknownWorldItemError('create', error),
 			});
