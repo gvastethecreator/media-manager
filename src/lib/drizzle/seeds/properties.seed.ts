@@ -1,9 +1,11 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { properties } from '../schema';
 import { seedLogger } from './index';
 
 /**
- * Siembra propiedades minimalistas para verificación del sistema
+ * Siembra propiedades con IDs legibles
+ * Formato: prop-nombre-01, prop-nombre-02, etc.
  */
 export async function seedProperties(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('🔍 Creando propiedades de prueba...');
@@ -11,25 +13,21 @@ export async function seedProperties(db: LibSQLDatabase<Record<string, never>>) 
 	try {
 		const sampleProperties = [
 			{
-				id: 'ffffffff-ffff-4fff-afff-fffffffffff1',
+				id: generateReadableId('property', 'Estilo Artistico', 1),
 				name: 'Estilo Artístico',
 				description: 'Define el estilo visual de la imagen',
 				emoji: '🎨',
-				color: 'var(--dt-warning-500)',
+				color: '#f59e0b',
 				category: 'visual',
-				shortcut: 'ctrl+e',
-				featuredImage: null,
 				isFavorite: true,
 			},
 			{
-				id: 'ffffffff-ffff-4fff-afff-fffffffffff2',
+				id: generateReadableId('property', 'Calidad', 1),
 				name: 'Calidad',
 				description: 'Nivel de calidad de la imagen',
 				emoji: '⭐',
-				color: 'var(--dt-success-500)',
+				color: '#22c55e',
 				category: 'técnico',
-				shortcut: 'ctrl+q',
-				featuredImage: null,
 				isFavorite: false,
 			},
 		];

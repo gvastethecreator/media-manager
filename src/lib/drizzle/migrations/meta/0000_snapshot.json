@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "063b300a-b417-4f2d-8e9e-e623fd2e4501",
+  "id": "91b76aae-88a6-4749-a573-ef7272b7bab9",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "Activity": {
@@ -220,7 +220,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "'#3b82f6'"
+          "default": "'#f59e0b'"
         },
         "featuredImage": {
           "name": "featuredImage",
@@ -653,7 +653,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "'#3b82f6'"
+          "default": "'#ec4899'"
         },
         "category": {
           "name": "category",
@@ -942,7 +942,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "'#3b82f6'"
+          "default": "'#f59e0b'"
         },
         "category": {
           "name": "category",
@@ -3727,7 +3727,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "'#3b82f6'"
+          "default": "'#14b8a6'"
         },
         "category": {
           "name": "category",
@@ -4022,7 +4022,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "'#3b82f6'"
+          "default": "'#8b5cf6'"
         },
         "category": {
           "name": "category",
@@ -4149,7 +4149,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "'#3b82f6'"
+          "default": "'#f97316'"
         },
         "category": {
           "name": "category",
@@ -4450,7 +4450,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "'#3b82f6'"
+          "default": "'#22c55e'"
         },
         "category": {
           "name": "category",
@@ -5668,7 +5668,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "'#3b82f6'"
+          "default": "'#8b5cf6'"
         },
         "category": {
           "name": "category",
@@ -5774,7 +5774,7 @@
           "primaryKey": false,
           "notNull": false,
           "autoincrement": false,
-          "default": "'#3b82f6'"
+          "default": "'#a855f7'"
         },
         "category": {
           "name": "category",

@@ -17,7 +17,7 @@ export const concepts = sqliteTable(
 		name: text('name').notNull(),
 		description: text('description'),
 		emoji: text('emoji').default('💡'),
-		color: text('color').default('var(--entity-concept)'),
+		color: text('color').default('#f59e0b'),
 		category: text('category'),
 		filters: text('filters'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),

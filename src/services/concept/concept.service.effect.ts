@@ -7,6 +7,7 @@ import { Schema } from '@effect/schema';
 import { asc, count, desc, eq, like, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { concepts, imageConcepts, images, videoConcepts } from '@/lib/drizzle/schema';
 import { Concept, ConceptCreateInput, ConceptUpdateInput, ConceptWithStats } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -148,12 +149,14 @@ const make = (): ConceptServiceInterface => {
 				return yield* Effect.fail(new ConceptNameConflict({ name: input.name }));
 			}
 
+			const readableId = generateReadableId('concept', input.name, 1);
+
 			const result = yield* Effect.tryPromise<(typeof concepts.$inferSelect)[], ConceptError>({
 				try: () =>
 					db
 						.insert(concepts)
 						.values({
-							id: crypto.randomUUID(),
+							id: readableId,
 							name: input.name,
 							description: input.description ?? null,
 							emoji: input.emoji ?? null,

@@ -10,6 +10,7 @@ export {
 	BooleanFilters,
 	DateRange,
 	EntityType,
+	ID,
 	makePaginatedResult,
 	PaginationInput,
 	PaginationMeta,
@@ -55,9 +56,11 @@ export {
 	NonNegativeInt,
 	Percentage,
 	PositiveInt,
+	PresetColor,
 	ProcessingStatus,
 	Ratio,
 	RelativeFilePath,
+	ThemeColor,
 	VideoMimeType,
 } from './primitives';
 
