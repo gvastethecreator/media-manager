@@ -9,6 +9,7 @@ import { Schema } from '@effect/schema';
 import { and, asc, count, desc, eq, isNull, like, ne, or } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { collections, imageCollections, images } from '@/lib/drizzle/schema';
 import {
 	Collection,
@@ -388,6 +389,9 @@ export const CollectionServiceLive = Layer.succeed(
 				// Validate parent if provided
 				yield* validateParentExists(validated.parentId);
 
+				// Generate readable ID
+				const readableId = generateReadableId('collection', validated.name, 1);
+
 				// Insert to DB
 				const now = new Date();
 				const [result] = yield* Effect.tryPromise({
@@ -395,7 +399,7 @@ export const CollectionServiceLive = Layer.succeed(
 						await db
 							.insert(collections)
 							.values({
-								id: crypto.randomUUID(),
+								id: readableId,
 								name: validated.name,
 								emoji: validated.emoji ?? null,
 								color: validated.color ?? null,

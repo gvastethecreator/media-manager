@@ -27,7 +27,7 @@ export async function generateStaticVideoThumbnailFFmpeg(
 		quality?: string;
 	} = {}
 ): Promise<Buffer | null> {
-	const { time = 2, width = 320, height = 240, quality = 'medium' } = options;
+	const { time = 1, width = 320, height = 240, quality = 'medium' } = options;
 
 	// Protección contra rutas corruptas
 	if (videoPath.length > 1024) {
@@ -44,20 +44,25 @@ export async function generateStaticVideoThumbnailFFmpeg(
 	const tempOutputPath = join(tmpdir(), `thumbnail-${Date.now()}-${Math.random().toString(36).slice(2)}.webp`);
 
 	try {
+		// Obtener ruta del binario FFmpeg (local o del sistema)
+		const ffmpegPath = await getFFmpegPath();
+
 		// Construir comando FFmpeg
 		const qualityValue = quality === 'high' ? 90 : quality === 'low' ? 50 : 75;
 
 		const ffmpegCmd = [
-			'ffmpeg',
+			`"${ffmpegPath}"`,
 			'-y', // Sobrescribir archivo de salida
+			'-ss',
+			'1', // Timestamp fijo a 1s (más seguro para videos cortos)
 			'-i',
 			`"${videoPath}"`, // Archivo de entrada
-			'-ss',
-			time.toString(), // Timestamp para extraer
 			'-vframes',
 			'1', // Solo un frame
 			'-vf',
 			`scale=${width}:${height}:force_original_aspect_ratio=increase,crop=${width}:${height}`, // Redimensionar y recortar
+			'-c:v',
+			'libwebp', // Usar codec WebP estático (no animado)
 			'-q:v',
 			qualityValue.toString(), // Calidad
 			'-f',
@@ -107,7 +112,9 @@ export async function generateStaticVideoThumbnailFFmpeg(
 }
 
 /**
- * Genera un thumbnail animado (GIF/WebP) usando FFmpeg
+ * Genera un thumbnail animado (GIF) usando FFmpeg
+ * Nota: WebP animado tiene problemas de memoria en algunas configuraciones,
+ * por eso usamos GIF que es más compatible y confiable.
  * @param videoPath Ruta del archivo de video
  * @param options Opciones de configuración
  * @returns Buffer con la imagen animada
@@ -123,7 +130,7 @@ export async function generateAnimatedVideoThumbnailFFmpeg(
 		quality?: string;
 	} = {}
 ): Promise<Buffer | null> {
-	const { time = 2, duration = 2, frames = 6, width = 320, height = 240, quality = 'medium' } = options;
+	const { time = 1, duration = 1.5, frames = 4, width = 320, height = 240, quality = 'medium' } = options;
 
 	if (!existsSync(videoPath)) {
 		console.warn(`Archivo de video no existe: ${videoPath}`);
@@ -131,20 +138,23 @@ export async function generateAnimatedVideoThumbnailFFmpeg(
 	}
 
 	// Crear archivo temporal para el thumbnail animado
-	const tempOutputPath = join(tmpdir(), `thumbnail-animated-${Date.now()}-${Math.random().toString(36).slice(2)}.webp`);
+	const tempOutputPath = join(tmpdir(), `thumbnail-animated-${Date.now()}-${Math.random().toString(36).slice(2)}.gif`);
 
 	try {
-		// Calcular FPS para el GIF animado
-		const fps = frames / duration;
+		// Obtener ruta del binario FFmpeg (local o del sistema)
+		const ffmpegPath = await getFFmpegPath();
 
-		// Construir comando FFmpeg para WebP animado
+		// Calcular FPS para el GIF animado
+		const fps = Math.round(frames / duration);
+
+		// Construir comando FFmpeg para GIF (más confiable que WebP animado)
 		const ffmpegCmd = [
-			'ffmpeg',
+			`"${ffmpegPath}"`,
 			'-y', // Sobrescribir archivo de salida
-			'-i',
-			`"${videoPath}"`, // Archivo de entrada
 			'-ss',
 			time.toString(), // Timestamp de inicio
+			'-i',
+			`"${videoPath}"`, // Archivo de entrada
 			'-t',
 			duration.toString(), // Duración a extraer
 			'-vf',
@@ -152,13 +162,12 @@ export async function generateAnimatedVideoThumbnailFFmpeg(
 				`scale=${width}:${height}:force_original_aspect_ratio=increase`,
 				`crop=${width}:${height}`,
 				`fps=${fps}`, // Reducir FPS para animación más suave
+				'split[s0][s1];[s0]palettegen[p];[s1][p]paletteuse', // Generar paleta para mejor calidad GIF
 			].join(','),
 			'-loop',
 			'0', // Loop infinito
-			'-quality',
-			quality === 'high' ? '80' : quality === 'low' ? '40' : '60',
 			'-f',
-			'webp', // Formato WebP animado
+			'gif', // Formato GIF
 			`"${tempOutputPath}"`, // Archivo de salida
 		].join(' ');
 
@@ -205,10 +214,24 @@ export async function generateAnimatedVideoThumbnailFFmpeg(
 
 /**
  * Verifica si FFmpeg está disponible en el sistema
+ * @param checkLocal - Si true, también verifica el binario local en bin/
  * @returns true si FFmpeg está disponible
  */
-export async function isFFmpegAvailable(): Promise<boolean> {
+export async function isFFmpegAvailable(checkLocal: boolean = true): Promise<boolean> {
 	try {
+		// ✅ Verificar binario local primero si se solicita
+		if (checkLocal) {
+			const platform = process.platform;
+			const ffmpegName = platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg';
+			const { join } = await import('node:path');
+			const { existsSync } = await import('node:fs');
+			const localPath = join(process.cwd(), 'bin', ffmpegName);
+			if (existsSync(localPath)) {
+				return true;
+			}
+		}
+
+		// Verificar en PATH del sistema
 		const { stdout } = await execAsync('ffmpeg -version');
 		return stdout.includes('ffmpeg version');
 	} catch {
@@ -228,7 +251,8 @@ export async function getVideoInfo(videoPath: string): Promise<{
 	codec: string;
 } | null> {
 	try {
-		const { stdout } = await execAsync(`ffprobe -v quiet -print_format json -show_format -show_streams "${videoPath}"`);
+		const ffprobePath = await getFFmpegPath('ffprobe');
+		const { stdout } = await execAsync(`"${ffprobePath}" -v quiet -print_format json -show_format -show_streams "${videoPath}"`);
 		const data = JSON.parse(stdout);
 
 		const videoStream = data.streams?.find((stream: any) => stream.codec_type === 'video');
@@ -246,4 +270,23 @@ export async function getVideoInfo(videoPath: string): Promise<{
 		console.error('Error obteniendo info del video:', error);
 		return null;
 	}
+}
+
+/**
+ * Obtiene la ruta del binario FFmpeg (local o del sistema)
+ * @param tool Nombre de la herramienta (ffmpeg, ffprobe, ffplay)
+ * @returns Ruta al binario
+ */
+async function getFFmpegPath(tool: 'ffmpeg' | 'ffprobe' | 'ffplay' = 'ffmpeg'): Promise<string> {
+	// Intentar usar binario local primero
+	const platform = process.platform;
+	const toolName = platform === 'win32' ? `${tool}.exe` : tool;
+	const localPath = join(process.cwd(), 'bin', toolName);
+
+	if (existsSync(localPath)) {
+		return localPath;
+	}
+
+	// Usar del sistema
+	return tool;
 }

@@ -27,7 +27,7 @@
  * Recomendaciones para archivos de tipos:
  *
  * 1. types.ts: Definiciones principales de la entidad (Base, WithRelations, CreateData, UpdateData)
- * 2. base.ts: Tipos base y utilidades derivados directamente de Prisma
+ * 2. base.ts: Tipos base y utilidades derivados directamente de Drizzle ORM
  * 3. extended.ts: Tipos extendidos con propiedades adicionales para UI o lógica específica
  * 4. enums.ts: Enumeraciones y constantes relacionadas con la entidad
  *

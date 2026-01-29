@@ -10,6 +10,7 @@ import { and, asc, count, desc, eq, like, or, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { albums, imageAlbums, images } from '@/lib/drizzle/schema';
+import { generateReadableId, normalizeNameForId } from '@/lib/utils/id-generator';
 import { Album, AlbumCreateInput, AlbumUpdateInput, AlbumWithStats } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
@@ -422,8 +423,12 @@ const make = (): AlbumServiceInterface => {
 				);
 			}
 
+			// Generar ID legible basado en el nombre
+			const readableId = generateReadableId('album', validated.name, 1);
+
 			// Insertar en DB
 			const insertData = {
+				id: readableId,
 				name: validated.name,
 				description: validated.description ?? null,
 				emoji: validated.emoji ?? null,

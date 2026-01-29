@@ -16,7 +16,7 @@ import type {
 
 const logger = serverLogger.withContext('NoteMappers');
 
-// Tipos locales equivalentes a Prisma (migración a Drizzle)
+// Tipos locales para Drizzle ORM
 type DrizzleCreateNoteData = {
 	title: string;
 	content: string;

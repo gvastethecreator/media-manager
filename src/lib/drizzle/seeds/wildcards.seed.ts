@@ -1,9 +1,11 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { wildcards } from '../schema';
 import { seedLogger } from './index';
 
 /**
- * Siembra wildcards minimalistas para verificación del sistema
+ * Siembra wildcards con IDs legibles
+ * Formato: wild-nombre-01, wild-nombre-02, etc.
  */
 export async function seedWildcards(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('🎭 Creando wildcards de prueba...');
@@ -11,54 +13,46 @@ export async function seedWildcards(db: LibSQLDatabase<Record<string, never>>) {
 	try {
 		const sampleWildcards = [
 			{
-				id: 'bbbbbbbb-bbbb-4bbb-abbb-bbbbbbbbbb01',
+				id: generateReadableId('wildcard', 'Elemento Aleatorio', 1),
 				name: 'Elemento Aleatorio',
 				description: 'Comodín para elementos aleatorios',
 				emoji: '🎲',
-				color: 'var(--dt-danger-500)',
+				color: '#ef4444',
 				category: 'aleatorio',
-				shortcut: null,
 				children: '["elemento1", "elemento2", "elemento3"]',
-				featuredImage: null,
 				isFavorite: true,
 				parentId: null,
 			},
 			{
-				id: 'bbbbbbbb-bbbb-4bbb-abbb-bbbbbbbbbb02',
+				id: generateReadableId('wildcard', 'Estilo Dinamico', 1),
 				name: 'Estilo Dinámico',
 				description: 'Comodín para estilos variables',
 				emoji: '🌈',
-				color: 'var(--preset-purple)',
+				color: '#a855f7',
 				category: 'estilo',
-				shortcut: null,
 				children: '["realista", "cartoon", "abstracto"]',
-				featuredImage: null,
 				isFavorite: false,
 				parentId: null,
 			},
 			{
-				id: 'bbbbbbbb-bbbb-4bbb-abbb-bbbbbbbbbb03',
+				id: generateReadableId('wildcard', 'Colores Vibrantes', 1),
 				name: 'Colores Vibrantes',
 				description: 'Paleta de colores intensos',
 				emoji: '🎨',
-				color: 'var(--dt-warning-500)',
+				color: '#f59e0b',
 				category: 'color',
-				shortcut: null,
 				children: '["rojo intenso", "azul eléctrico", "verde neón", "amarillo brillante"]',
-				featuredImage: null,
 				isFavorite: true,
 				parentId: null,
 			},
 			{
-				id: 'bbbbbbbb-bbbb-4bbb-abbb-bbbbbbbbbb04',
+				id: generateReadableId('wildcard', 'Ambientes', 1),
 				name: 'Ambientes',
 				description: 'Diferentes ambientaciones',
 				emoji: '🌍',
-				color: 'var(--dt-success-500)',
+				color: '#22c55e',
 				category: 'ambiente',
-				shortcut: null,
 				children: '["bosque mágico", "ciudad futurista", "desierto místico", "océano profundo"]',
-				featuredImage: null,
 				isFavorite: false,
 				parentId: null,
 			},

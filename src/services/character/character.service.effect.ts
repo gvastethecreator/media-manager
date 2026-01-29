@@ -9,6 +9,7 @@ import { Schema } from '@effect/schema';
 import { and, asc, count, desc, eq, isNull, like, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { characters, imageCharacters, imageNotes } from '@/lib/drizzle/schema';
 import {
 	Character,
@@ -299,14 +300,14 @@ const make = (): CharacterServiceInterface => {
 				return yield* Effect.fail(new CharacterNameConflict({ name: input.name }));
 			}
 
-			const id = crypto.randomUUID();
+			const readableId = generateReadableId('character', input.name, 1);
 
 			const result = yield* Effect.tryPromise({
 				try: async () =>
 					await db
 						.insert(characters)
 						.values({
-							id,
+							id: readableId,
 							name: input.name,
 							description: input.description ?? null,
 							emoji: input.emoji ?? null,

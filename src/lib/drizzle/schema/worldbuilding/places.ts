@@ -17,7 +17,7 @@ export const places = sqliteTable(
 		name: text('name').notNull(),
 		description: text('description'),
 		emoji: text('emoji').default('📍'),
-		color: text('color').default('var(--entity-place)'),
+		color: text('color').default('#14b8a6'),
 		category: text('category'),
 		filters: text('filters'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),

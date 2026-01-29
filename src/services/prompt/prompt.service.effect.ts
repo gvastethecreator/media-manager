@@ -7,6 +7,7 @@ import { Schema } from '@effect/schema';
 import { asc, count, desc, eq, like, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { imagePrompts, images, prompts } from '@/lib/drizzle/schema';
 import { Prompt, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
@@ -131,12 +132,14 @@ const make = (): PromptServiceInterface => {
 				return yield* Effect.fail(new PromptNameConflict({ name: input.name }));
 			}
 
+			const readableId = generateReadableId('prompt', input.name, 1);
+
 			const result = yield* Effect.tryPromise<(typeof prompts.$inferSelect)[], PromptError>({
 				try: () =>
 					db
 						.insert(prompts)
 						.values({
-							id: crypto.randomUUID(),
+							id: readableId,
 							name: input.name,
 							description: input.description ?? null,
 							emoji: input.emoji ?? null,

@@ -1,9 +1,11 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { groups } from '../schema';
 import { seedLogger } from './index';
 
 /**
- * Siembra grupos para verificación del sistema
+ * Siembra grupos con IDs legibles
+ * Formato: grp-nombre-01, grp-nombre-02, etc.
  */
 export async function seedGroups(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('👥 Creando grupos de prueba...');
@@ -11,44 +13,24 @@ export async function seedGroups(db: LibSQLDatabase<Record<string, never>>) {
 	try {
 		const sampleGroups = [
 			{
-				id: '66666666-6666-4666-a666-666666666661',
+				id: generateReadableId('group', 'Proyecto Principal', 1),
 				name: 'Proyecto Principal',
 				description: 'Grupo para el proyecto principal activo',
-				emoji: '🎯',
-				color: 'var(--dt-primary-500)',
-				featuredImage: null,
-				isFavorite: true,
-				parentId: null,
 			},
 			{
-				id: '66666666-6666-4666-a666-666666666662',
+				id: generateReadableId('group', 'Referencias Artistic', 1),
 				name: 'Referencias Artísticas',
 				description: 'Material de referencia para inspiración',
-				emoji: '🎨',
-				color: 'var(--preset-purple)',
-				featuredImage: null,
-				isFavorite: true,
-				parentId: null,
 			},
 			{
-				id: '66666666-6666-4666-a666-666666666663',
+				id: generateReadableId('group', 'Archivo Historico', 1),
 				name: 'Archivo Histórico',
 				description: 'Proyectos completados y archivados',
-				emoji: '📦',
-				color: 'var(--preset-slate)',
-				featuredImage: null,
-				isFavorite: false,
-				parentId: null,
 			},
 			{
-				id: '66666666-6666-4666-a666-666666666664',
+				id: generateReadableId('group', 'Trabajo en Progreso', 1),
 				name: 'Trabajo en Progreso',
 				description: 'Contenido en desarrollo activo',
-				emoji: '🚧',
-				color: 'var(--dt-warning-500)',
-				featuredImage: null,
-				isFavorite: false,
-				parentId: null,
 			},
 		];
 

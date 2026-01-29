@@ -1,9 +1,11 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { places } from '../schema';
 import { seedLogger } from './index';
 
 /**
- * Siembra lugares minimalistas para verificación del sistema
+ * Siembra lugares con IDs legibles
+ * Formato: place-nombre-01, place-nombre-02, etc.
  */
 export async function seedPlaces(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('📍 Creando lugares de prueba...');
@@ -11,16 +13,13 @@ export async function seedPlaces(db: LibSQLDatabase<Record<string, never>>) {
 	try {
 		const samplePlaces = [
 			{
-				id: '77777777-7777-4777-a777-777777777771',
+				id: generateReadableId('place', 'Ciudad Central', 1),
 				name: 'Ciudad Central',
 				description: 'Centro neurálgico del mundo',
 				emoji: '🏙️',
-				color: 'var(--dt-primary-500)',
+				color: '#3b82f6',
 				category: 'ciudad',
-				isPublic: true,
 				isFavorite: true,
-				totalImages: 0,
-				totalVideos: 0,
 				type: 'urbano',
 				location: 'Lat:0,Long:0',
 				climate: 'templado',
@@ -34,20 +33,16 @@ export async function seedPlaces(db: LibSQLDatabase<Record<string, never>>) {
 				dangers: 'Baja',
 				resources: 'Alta',
 				notes: 'Lugar principal para pruebas',
-				featuredImage: null,
 				parentId: null,
 			},
 			{
-				id: '77777777-7777-4777-a777-777777777772',
+				id: generateReadableId('place', 'Bosque Antiguo', 1),
 				name: 'Bosque Antiguo',
 				description: 'Bosque místico y extenso',
 				emoji: '🌲',
-				color: 'var(--dt-success-500)',
+				color: '#22c55e',
 				category: 'naturaleza',
-				isPublic: false,
 				isFavorite: false,
-				totalImages: 0,
-				totalVideos: 0,
 				type: 'bosque',
 				location: 'Lat:10,Long:10',
 				climate: 'húmedo',
@@ -61,20 +56,16 @@ export async function seedPlaces(db: LibSQLDatabase<Record<string, never>>) {
 				dangers: 'Media',
 				resources: 'Madera',
 				notes: 'Ideal para pruebas de naturaleza',
-				featuredImage: null,
 				parentId: null,
 			},
 			{
-				id: '77777777-7777-4777-a777-777777777773',
+				id: generateReadableId('place', 'Fortaleza Costera', 1),
 				name: 'Fortaleza Costera',
 				description: 'Castillo defensivo frente al mar',
 				emoji: '🏰',
-				color: 'var(--preset-slate)',
+				color: '#64748b',
 				category: 'construcción',
-				isPublic: true,
 				isFavorite: true,
-				totalImages: 0,
-				totalVideos: 0,
 				type: 'fortaleza',
 				location: 'Lat:25,Long:-15',
 				climate: 'marítimo',
@@ -88,20 +79,16 @@ export async function seedPlaces(db: LibSQLDatabase<Record<string, never>>) {
 				dangers: 'Baja',
 				resources: 'Pesca, sal',
 				notes: 'Punto estratégico de defensa',
-				featuredImage: null,
 				parentId: null,
 			},
 			{
-				id: '77777777-7777-4777-a777-777777777774',
+				id: generateReadableId('place', 'Ruinas Templo Solar', 1),
 				name: 'Ruinas del Templo Solar',
 				description: 'Restos de un templo dedicado al sol',
 				emoji: '🏛️',
-				color: 'var(--dt-warning-500)',
+				color: '#f59e0b',
 				category: 'ruinas',
-				isPublic: true,
 				isFavorite: false,
-				totalImages: 0,
-				totalVideos: 0,
 				type: 'templo',
 				location: 'Lat:35,Long:40',
 				climate: 'desértico',
@@ -115,7 +102,6 @@ export async function seedPlaces(db: LibSQLDatabase<Record<string, never>>) {
 				dangers: 'Alta (trampas antiguas)',
 				resources: 'Artefactos, oro',
 				notes: 'Se dice que guarda secretos mágicos',
-				featuredImage: null,
 				parentId: null,
 			},
 		];

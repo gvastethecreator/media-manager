@@ -14,7 +14,33 @@ import * as crypto from 'node:crypto';
 import { and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
-import { folders, videos } from '@/lib/drizzle/schema';
+import {
+	albums,
+	characters,
+	collections,
+	concepts,
+	folders,
+	groupVideos,
+	notes,
+	places,
+	prompts,
+	properties,
+	tags,
+	videoAlbums,
+	videoCharacters,
+	videoCollections,
+	videoConcepts,
+	videoNotes,
+	videoPlaces,
+	videoPrompts,
+	videoProperties,
+	videoTags,
+	videoWildcards,
+	videoWorldItems,
+	videos,
+	wildcards,
+	worldItems,
+} from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { VideoError } from './video-errors.effect';
 import {
@@ -409,23 +435,58 @@ const make = (): VideoServiceInterface => {
 
 			const video = yield* getById(id);
 
-			// TODO: Implementar conteos reales cuando las relaciones estén disponibles
+			// Obtener conteos reales de todas las relaciones
+			const counts = yield* Effect.tryPromise({
+				try: async () => {
+					const [
+						albumsCount,
+						collectionsCount,
+						tagsCount,
+						charactersCount,
+						placesCount,
+						worldItemsCount,
+						conceptsCount,
+						promptsCount,
+						notesCount,
+						wildcardsCount,
+						propertiesCount,
+						groupsCount,
+					] = await Promise.all([
+						db.select({ count: count() }).from(videoAlbums).where(eq(videoAlbums.A, id)),
+						db.select({ count: count() }).from(videoCollections).where(eq(videoCollections.A, id)),
+						db.select({ count: count() }).from(videoTags).where(eq(videoTags.A, id)),
+						db.select({ count: count() }).from(videoCharacters).where(eq(videoCharacters.A, id)),
+						db.select({ count: count() }).from(videoPlaces).where(eq(videoPlaces.A, id)),
+						db.select({ count: count() }).from(videoWorldItems).where(eq(videoWorldItems.A, id)),
+						db.select({ count: count() }).from(videoConcepts).where(eq(videoConcepts.A, id)),
+						db.select({ count: count() }).from(videoPrompts).where(eq(videoPrompts.A, id)),
+						db.select({ count: count() }).from(videoNotes).where(eq(videoNotes.A, id)),
+						db.select({ count: count() }).from(videoWildcards).where(eq(videoWildcards.A, id)),
+						db.select({ count: count() }).from(videoProperties).where(eq(videoProperties.A, id)),
+						db.select({ count: count() }).from(groupVideos).where(eq(groupVideos.B, id)),
+					]);
+
+					return {
+						albums: albumsCount[0]?.count ?? 0,
+						collections: collectionsCount[0]?.count ?? 0,
+						tags: tagsCount[0]?.count ?? 0,
+						characters: charactersCount[0]?.count ?? 0,
+						places: placesCount[0]?.count ?? 0,
+						worldItems: worldItemsCount[0]?.count ?? 0,
+						concepts: conceptsCount[0]?.count ?? 0,
+						prompts: promptsCount[0]?.count ?? 0,
+						notes: notesCount[0]?.count ?? 0,
+						wildcards: wildcardsCount[0]?.count ?? 0,
+						properties: propertiesCount[0]?.count ?? 0,
+						groups: groupsCount[0]?.count ?? 0,
+					};
+				},
+				catch: (error) => toVideoError(error, 'getByIdWithStats:counts'),
+			});
+
 			const videoWithStats: VideoWithStats = {
 				...video,
-				_count: {
-					albums: 0,
-					collections: 0,
-					tags: 0,
-					characters: 0,
-					places: 0,
-					worldItems: 0,
-					concepts: 0,
-					prompts: 0,
-					notes: 0,
-					wildcards: 0,
-					properties: 0,
-					groups: 0,
-				},
+				_count: counts,
 			};
 
 			return videoWithStats;

@@ -10,7 +10,24 @@ import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, isNotNull, like, or } from 'drizzle-orm';
 import { Context, Effect, Layer, pipe } from 'effect';
 import { db } from '@/lib/drizzle';
-import { images, imageTags, tags } from '@/lib/drizzle/schema';
+import { generateReadableId } from '@/lib/utils/id-generator';
+import {
+	albums,
+	characters,
+	collections,
+	concepts,
+	groupTags,
+	images,
+	imageTags,
+	notes,
+	places,
+	prompts,
+	properties,
+	tags,
+	videoTags,
+	wildcards,
+	worldItems,
+} from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
 	fromUnknownError,
@@ -169,18 +186,31 @@ const make = (): TagServiceInterface => {
 		Effect.gen(function* () {
 			logger.info(`📊 Obteniendo conteos para tag: ${id}`);
 
-			// Por ahora solo contamos images (otros se pueden agregar después)
-			const imageCountResult = yield* Effect.tryPromise<Array<{ count: number }>, TagError>({
-				try: () => db.select({ count: count() }).from(imageTags).where(eq(imageTags.B, id)),
+			// Obtener conteos reales de todas las relaciones existentes
+			const [imageCountResult, videoCountResult, groupCountResult] = yield* Effect.tryPromise<
+				[
+					Array<{ count: number }>,
+					Array<{ count: number }>,
+					Array<{ count: number }>,
+				],
+				TagError
+			>({
+				try: () =>
+					Promise.all([
+						db.select({ count: count() }).from(imageTags).where(eq(imageTags.B, id)),
+						db.select({ count: count() }).from(videoTags).where(eq(videoTags.A, id)),
+						db.select({ count: count() }).from(groupTags).where(eq(groupTags.B, id)),
+					]),
 				catch: (error: unknown) => fromUnknownError('getRelationsCounts', error),
 			});
 
 			const imageCount = imageCountResult[0]?.count ?? 0;
+			const videoCount = videoCountResult[0]?.count ?? 0;
+			const groupCount = groupCountResult[0]?.count ?? 0;
 
-			// TODO: agregar conteos reales para otros tipos de entidades
 			const counts: TagCounts = {
 				images: imageCount,
-				videos: 0,
+				videos: videoCount,
 				documents: 0,
 				file3Ds: 0,
 				jsonFiles: 0,
@@ -195,10 +225,10 @@ const make = (): TagServiceInterface => {
 				notes: 0,
 				wildcards: 0,
 				properties: 0,
-				groups: 0,
+				groups: groupCount,
 			};
 
-			logger.info(`✅ Conteos obtenidos: ${imageCount} imágenes`);
+			logger.info(`✅ Conteos obtenidos: ${imageCount} imágenes, ${videoCount} videos, ${groupCount} grupos`);
 			return counts;
 		});
 
@@ -373,19 +403,21 @@ const make = (): TagServiceInterface => {
 				return yield* Effect.fail(new TagNameConflict({ name: validated.name, existingTagId: existingTags[0].id }));
 			}
 
+			// Generar ID legible basado en el nombre
+			const readableId = generateReadableId('tag', validated.name, 1);
+
 			// Insertar nuevo tag
 			const newTag = yield* Effect.tryPromise({
 				try: async () => {
 					const now = new Date();
-					const id = crypto.randomUUID();
 
 					const result = await db
 						.insert(tags)
 						.values({
-							id,
+							id: readableId,
 							name: validated.name,
 							description: validated.description ?? null,
-							color: validated.color ?? 'var(--dt-primary-500)',
+							color: validated.color ?? '#3b82f6',
 							emoji: validated.emoji ?? '🏷️',
 							category: validated.category ?? null,
 							shortcut: validated.shortcut ?? null,

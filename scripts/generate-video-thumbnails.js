@@ -94,17 +94,17 @@ async function generateVideoThumbnails() {
 
 					// Generar WebP animado (o estático como fallback)
 					let animatedWebpBuffer = await generateAnimatedVideoThumbnail(video.path, {
-						time: 5,
+						time: 1,
 						quality: 'medium',
-						frames: 8,
-						duration: 2,
+						frames: 4,
+						duration: 1.5,
 					});
 
 					// Si falló el animado, intentar con thumbnail estático
 					if (!animatedWebpBuffer || animatedWebpBuffer.length === 0) {
-						console.log(`⚠️ WebP animado falló, intentando estático: ${video.name}`);
+						console.log(`⚠️ GIF animado falló, intentando estático: ${video.name}`);
 						animatedWebpBuffer = await generateStaticVideoThumbnail(video.path, {
-							time: 5,
+							time: 1,
 							quality: 'medium',
 							width: 320,
 							height: 240,

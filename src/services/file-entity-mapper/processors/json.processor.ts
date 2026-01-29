@@ -135,25 +135,58 @@ export class JsonProcessor {
 	}
 
 	/**
-	 * Genera preview SVG del contenido JSON
+	 * Genera preview SVG del contenido JSON y lo guarda en metadata
 	 */
 	async generateThumbnail(filePath: string, entityId: string): Promise<{ success: boolean; error?: string }> {
-		try {
-			const { generateJsonPreview } = await import('@/config/thumbnail-generators');
+		const fileName = basename(filePath);
 
-			const mockItem = {
-				id: entityId,
-				name: basename(filePath),
-				path: filePath,
-				entityType: 'jsonFile' as const,
+		jsonLogger.debug(`📝 [JsonProcessor] Generando thumbnail: ${fileName}`);
+
+		try {
+			const { db } = await import('@/lib/drizzle');
+			const { jsonFiles } = await import('@/lib/drizzle/schema');
+			const { eq } = await import('drizzle-orm');
+
+			// Obtener metadata del JSON para mostrar en thumbnail
+			const jsonFile = await db.query.jsonFiles.findFirst({
+				where: eq(jsonFiles.id, entityId),
+			});
+
+			const keyCount = jsonFile?.keyCount ?? 0;
+			const depth = jsonFile?.depth ?? 0;
+			const isValid = jsonFile?.isValid ?? true;
+
+			// Crear SVG placeholder con información del JSON
+			const svg = this.createJsonPlaceholderSVG(fileName, keyCount, depth, isValid);
+
+			// Guardar en metadata (jsonFiles tiene campo metadata)
+			const existingMetadata = jsonFile?.metadata
+				? typeof jsonFile.metadata === 'string'
+					? JSON.parse(jsonFile.metadata)
+					: jsonFile.metadata
+				: {};
+
+			const updatedMetadata = {
+				...existingMetadata,
+				thumbnail: {
+					data: Buffer.from(svg).toString('base64'),
+					width: 300,
+					height: 400,
+					format: 'svg',
+					isPlaceholder: true,
+					generatedAt: new Date().toISOString(),
+				},
 			};
 
-			const thumbnailUrl = await generateJsonPreview(mockItem as any);
-			if (!thumbnailUrl) {
-				return { success: false, error: 'Failed to generate JSON preview' };
-			}
+			await db
+				.update(jsonFiles)
+				.set({
+					metadata: JSON.stringify(updatedMetadata),
+					updatedAt: new Date(),
+				})
+				.where(eq(jsonFiles.id, entityId));
 
-			jsonLogger.debug(`✅ JSON thumbnail generado para: ${filePath}`);
+			jsonLogger.debug(`✅ [JsonProcessor] Thumbnail generado: ${fileName}`);
 			return { success: true };
 		} catch (e) {
 			jsonLogger.warn('Error generando thumbnail JSON:', {
@@ -162,6 +195,50 @@ export class JsonProcessor {
 			});
 			return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
 		}
+	}
+
+	/**
+	 * Crea placeholder SVG mejorado con información del archivo JSON
+	 */
+	private createJsonPlaceholderSVG(fileName: string, keyCount: number, depth: number, isValid: boolean): string {
+		const keyInfo = keyCount > 0 ? `${keyCount} claves` : 'Sin claves';
+		const depthInfo = depth > 0 ? `Profundidad: ${depth}` : 'Profundidad: 0';
+		const validationIcon = isValid ? '✅' : '❌';
+
+		return `
+			<svg width="300" height="400" xmlns="http://www.w3.org/2000/svg">
+				<defs>
+					<linearGradient id="json-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+						<stop offset="0%" style="stop-color:oklch(0.18 0.002 0);stop-opacity:1" />
+						<stop offset="100%" style="stop-color:oklch(0.12 0.002 0);stop-opacity:1" />
+					</linearGradient>
+				</defs>
+				<rect width="300" height="400" fill="url(#json-bg)" rx="8"/>
+
+				<!-- Icono de JSON -->
+				<text x="150" y="120" font-family="monospace" font-size="64" fill="oklch(0.55 0.002 0)" text-anchor="middle">{}</text>
+
+				<!-- Validación -->
+				<text x="150" y="150" font-family="Arial" font-size="32" fill="${isValid ? 'oklch(0.65 0.15 140)' : 'oklch(0.65 0.15 25)'}" text-anchor="middle">${validationIcon}</text>
+
+				<!-- Nombre del archivo -->
+				<text x="150" y="190" font-family="Arial" font-size="12" fill="oklch(0.7 0.002 0)" text-anchor="middle">${fileName}</text>
+
+				<!-- Claves -->
+				<text x="150" y="220" font-family="monospace" font-size="11" fill="oklch(0.55 0.002 0)" text-anchor="middle">
+					${keyInfo}
+				</text>
+
+				<!-- Profundidad -->
+				<text x="150" y="240" font-family="monospace" font-size="11" fill="oklch(0.55 0.002 0)" text-anchor="middle">
+					${depthInfo}
+				</text>
+
+				<!-- Badge de "JSON" -->
+				<rect x="100" y="350" width="100" height="20" rx="10" fill="oklch(0.25 0.002 0)"/>
+				<text x="150" y="364" font-family="Arial" font-size="10" fill="oklch(0.7 0.002 0)" text-anchor="middle">JSON File</text>
+			</svg>
+		`.trim();
 	}
 
 	// ===================== MÉTODOS PRIVADOS =====================

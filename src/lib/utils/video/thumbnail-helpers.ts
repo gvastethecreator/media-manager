@@ -55,28 +55,31 @@ export async function generateAnimatedVideoThumbnail(
 ): Promise<Buffer | null> {
 	const { time = 2, quality = 'medium', frames = 6, duration = 2 } = options;
 
-	// Primero intentar con mediabunny
+	// Estrategia 1: Intentar con mediabunny
+	let mediabunnyResult: Buffer | null = null;
 	try {
-		const result = await generateAnimatedVideoThumbnailMediabunny(videoPath, options);
-		if (result) {
-			console.log(`✅ Thumbnail animado generado con mediabunny: ${result.length} bytes`);
-			return result;
+		mediabunnyResult = await generateAnimatedVideoThumbnailMediabunny(videoPath, options);
+		if (mediabunnyResult) {
+			console.log(`✅ Thumbnail animado generado con mediabunny: ${mediabunnyResult.length} bytes`);
+			return mediabunnyResult;
 		}
+		console.warn('⚠️ Mediabunny retornó null para thumbnail animado, intentando FFmpeg...');
 	} catch (error) {
 		console.warn('Mediabunny falló para thumbnail animado, intentando con FFmpeg:', error);
 	}
 
-	// Fallback a FFmpeg si mediabunny falla
+	// Estrategia 2: Fallback a FFmpeg (se activa si mediabunny retorna null O lanza error)
 	try {
 		const { generateAnimatedVideoThumbnailFFmpeg, isFFmpegAvailable } = await import('./ffmpeg-thumbnails.js');
 
-		const ffmpegAvailable = await isFFmpegAvailable();
+		// Verificar FFmpeg disponible (incluye binario local)
+		const ffmpegAvailable = await isFFmpegAvailable(true);
 		if (!ffmpegAvailable) {
-			console.error('Ni mediabunny ni FFmpeg están disponibles para generar thumbnails animados');
+			console.error('❌ Ni mediabunny ni FFmpeg están disponibles para generar thumbnails animados');
 			return null;
 		}
 
-		return await generateAnimatedVideoThumbnailFFmpeg(videoPath, {
+		const ffmpegResult = await generateAnimatedVideoThumbnailFFmpeg(videoPath, {
 			time,
 			duration,
 			frames,
@@ -84,8 +87,13 @@ export async function generateAnimatedVideoThumbnail(
 			height: 240,
 			quality,
 		});
+
+		if (ffmpegResult) {
+			console.log(`✅ Thumbnail animado generado con FFmpeg: ${ffmpegResult.length} bytes`);
+		}
+		return ffmpegResult;
 	} catch (error) {
-		console.error('Error con fallback FFmpeg para thumbnail animado:', error);
+		console.error('❌ Error con fallback FFmpeg para thumbnail animado:', error);
 		return null;
 	}
 }
@@ -288,30 +296,38 @@ export async function generateStaticVideoThumbnail(
 ): Promise<Buffer | null> {
 	const { time = 2, quality = 'medium', width = 320, height = 240 } = options;
 
-	// Primero intentar con mediabunny
+	// Estrategia 1: Intentar con mediabunny
+	let mediabunnyResult: Buffer | null = null;
 	try {
-		const result = await generateStaticVideoThumbnailMediabunny(videoPath, options);
-		if (result) {
-			console.log(`✅ Thumbnail generado con mediabunny: ${result.length} bytes`);
-			return result;
+		mediabunnyResult = await generateStaticVideoThumbnailMediabunny(videoPath, options);
+		if (mediabunnyResult) {
+			console.log(`✅ Thumbnail generado con mediabunny: ${mediabunnyResult.length} bytes`);
+			return mediabunnyResult;
 		}
+		console.warn('⚠️ Mediabunny retornó null para thumbnail estático, intentando FFmpeg...');
 	} catch (error) {
-		console.warn('Mediabunny falló, intentando con FFmpeg:', error);
+		console.warn('Mediabunny falló para thumbnail estático, intentando con FFmpeg:', error);
 	}
 
-	// Fallback a FFmpeg si mediabunny falla
+	// Estrategia 2: Fallback a FFmpeg (se activa si mediabunny retorna null O lanza error)
 	try {
 		const { generateStaticVideoThumbnailFFmpeg, isFFmpegAvailable } = await import('./ffmpeg-thumbnails.js');
 
-		const ffmpegAvailable = await isFFmpegAvailable();
+		// Verificar FFmpeg disponible (incluye binario local)
+		const ffmpegAvailable = await isFFmpegAvailable(true);
 		if (!ffmpegAvailable) {
-			console.error('Ni mediabunny ni FFmpeg están disponibles para generar thumbnails');
+			console.error('❌ Ni mediabunny ni FFmpeg están disponibles para generar thumbnails');
 			return null;
 		}
 
-		return await generateStaticVideoThumbnailFFmpeg(videoPath, { time, width, height, quality });
+		const ffmpegResult = await generateStaticVideoThumbnailFFmpeg(videoPath, { time, width, height, quality });
+
+		if (ffmpegResult) {
+			console.log(`✅ Thumbnail estático generado con FFmpeg: ${ffmpegResult.length} bytes`);
+		}
+		return ffmpegResult;
 	} catch (error) {
-		console.error('Error con fallback FFmpeg:', error);
+		console.error('❌ Error con fallback FFmpeg para thumbnail estático:', error);
 		return null;
 	}
 }
