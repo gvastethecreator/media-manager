@@ -115,30 +115,31 @@ const FoldersSettings = memo(function FoldersSettings() {
 	}
 
 	return (
-		<div className="h-full flex flex-col lg:flex-row bg-background" data-testid="folders-settings">
-			{/* Left Panel: Folder Management */}
-			<div className="flex-1 flex flex-col min-w-0 border-r border-border/40">
-				<div className="p-6 pb-2 space-y-4">
+		<div className="h-full w-full bg-background" data-testid="folders-settings">
+			<div className="h-full w-full grid grid-cols-1 lg:grid-cols-2 gap-6 p-6">
+				{/* Left Column: Folder Management */}
+				<div className="flex flex-col gap-4 min-w-0">
 					{/* Header */}
 					<div className="flex items-center justify-between">
-						<h2 className="text-xl font-bold tracking-tight">Folder Management</h2>
+						<h2 className="text-2xl font-bold tracking-tight text-foreground">Folder Management</h2>
+
 						{/* View Toggles & Actions */}
 						<div className="flex items-center gap-2">
 							<ToggleGroup
-								className="border border-border/30 bg-background/50 p-0.5 rounded-md"
+								className="border border-border bg-muted/30 p-0.5 rounded-lg"
 								onValueChange={(value) => value && setViewMode(value as 'table' | 'grid')}
 								size="sm"
 								type="single"
 								value={viewMode}
 							>
 								<ToggleGroupItem
-									className="h-7 w-7 p-0 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+									className="h-8 w-8 p-0 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground transition-colors"
 									value="table"
 								>
 									<List className="h-4 w-4" />
 								</ToggleGroupItem>
 								<ToggleGroupItem
-									className="h-7 w-7 p-0 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground"
+									className="h-8 w-8 p-0 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground transition-colors"
 									value="grid"
 								>
 									<Grid3X3 className="h-4 w-4" />
@@ -147,18 +148,27 @@ const FoldersSettings = memo(function FoldersSettings() {
 
 							<DropdownMenu>
 								<DropdownMenuTrigger asChild>
-									<Button className="h-8 w-8 p-0" variant="ghost">
+									<Button
+										className="h-8 w-8 p-0 hover:bg-muted/80 transition-colors"
+										variant="ghost"
+									>
 										<SlidersHorizontal className="h-4 w-4" />
 									</Button>
 								</DropdownMenuTrigger>
-								<DropdownMenuContent align="end" className="w-56">
-									<DropdownMenuLabel>Maintenance</DropdownMenuLabel>
-									<DropdownMenuItem onClick={handleClearCache}>
+								<DropdownMenuContent align="end" className="w-56 bg-popover border-border">
+									<DropdownMenuLabel className="text-popover-foreground">Maintenance</DropdownMenuLabel>
+									<DropdownMenuItem
+										onClick={handleClearCache}
+										className="hover:bg-accent hover:text-accent-foreground transition-colors"
+									>
 										<EraserIcon className="mr-2 h-4 w-4" />
 										Clear Cache
 									</DropdownMenuItem>
-									<DropdownMenuSeparator />
-									<DropdownMenuItem onClick={() => setShowAdvancedConfig(true)}>
+									<DropdownMenuSeparator className="bg-border" />
+									<DropdownMenuItem
+										onClick={() => setShowAdvancedConfig(true)}
+										className="hover:bg-accent hover:text-accent-foreground transition-colors"
+									>
 										<Settings className="mr-2 h-4 w-4" />
 										Re-index Config
 									</DropdownMenuItem>
@@ -167,125 +177,124 @@ const FoldersSettings = memo(function FoldersSettings() {
 						</div>
 					</div>
 
+					{/* Config Section */}
+					<div className="rounded-lg border border-border/40 bg-card/30 p-4 shadow-sm space-y-3">
+						<FolderForm isLoading={isLoading} isProcessing={isProcessing} onAddFolder={handleAddFolder} />
+
+						<Button
+							className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-semibold h-10 shadow-sm transition-colors"
+							data-testid="reindex-all-button"
+							disabled={globalReindexStatus.isProcessing || folders.length === 0}
+							onClick={handleReindexAll}
+							size="default"
+						>
+							<RefreshCw
+								className={cn(
+									'mr-2 h-4 w-4 transition-transform',
+									(isLoading || globalReindexStatus.isProcessing) && 'animate-spin'
+								)}
+							/>
+							{globalReindexStatus.isProcessing
+								? `Re-indexing (${Math.round(globalReindexStatus.progress)}%)`
+								: 'Re-index All'}
+						</Button>
+					</div>
+
 					{/* Search Bar */}
 					<div className="relative">
 						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
 						<Input
 							placeholder="Search folders..."
-							className="pl-9 bg-muted/30 border-border/50"
+							className="pl-9 bg-muted/20 border-border/60 focus-visible:ring-primary/30 focus-visible:border-primary/50 transition-colors"
 							value={searchTerm}
 							onChange={(e) => setSearchTerm(e.target.value)}
 						/>
 					</div>
-				</div>
 
-				{/* Content Area */}
-				<div className="flex-1 min-h-0 relative">
-					<ScrollArea className="h-full">
-						<div className="p-6 pt-2">
-							{isGloballyProcessing ? (
-								<ReindexTerminal isActive={true} />
-							) : viewMode === 'table' ? (
-								<FoldersTable
-									folders={folders}
-									globalCurrentFolderId={globalReindexStatus.currentFolder}
-									isGloballyProcessing={isGloballyProcessing}
-									isProcessing={isProcessing}
-									onFolderClick={handleFolderClick}
-									onReindex={handleReindexFolderAdvanced}
-									orderedFolders={orderedFolders}
-									processStatus={processStatus}
-									progressByFolder={progressByFolder}
-									selectedFolder={selectedFolder}
-								/>
-							) : (
-								<FoldersGrid
-									globalCurrentFolderId={globalReindexStatus.currentFolder}
-									isGloballyProcessing={isGloballyProcessing}
-									isProcessing={isProcessing}
-									onFolderClick={handleFolderClick}
-									orderedFolders={orderedFolders}
-									processStatus={processStatus}
-									progressByFolder={progressByFolder}
-									selectedFolder={selectedFolder}
-								/>
-							)}
-						</div>
-					</ScrollArea>
-				</div>
-			</div>
-
-			{/* Right Panel: Config & Stats */}
-			<div className="w-full lg:w-[400px] flex flex-col bg-muted/10">
-				<ScrollArea className="h-full">
-					<div className="p-6 space-y-6">
-						<h2 className="text-xl font-bold tracking-tight">Configuration & Statistics</h2>
-
-						{/* Config Section */}
-						<div className="space-y-4">
-							<FolderForm isLoading={isLoading} isProcessing={isProcessing} onAddFolder={handleAddFolder} />
-
-							<Button
-								className="w-full bg-emerald-600 hover:bg-emerald-700 text-white font-semibold h-10 shadow-sm"
-								data-testid="reindex-all-button"
-								disabled={globalReindexStatus.isProcessing || folders.length === 0}
-								onClick={handleReindexAll}
-								size="default"
-							>
-								<RefreshCw
-									className={cn(
-										'mr-2 h-4 w-4 transition-transform',
-										(isLoading || globalReindexStatus.isProcessing) && 'animate-spin'
-									)}
-								/>
-								{globalReindexStatus.isProcessing
-									? `Re-indexing (${Math.round(globalReindexStatus.progress)}%)`
-									: 'Re-index All'}
-							</Button>
-						</div>
-
-						{/* Stats Section */}
-						<div data-testid="folders-stats">
-							{isStatsLoading ? (
-								<div className="text-sm text-muted-foreground p-4 text-center">Loading stats...</div>
-							) : generalStats ? (
-								<FoldersStats stats={generalStats} />
-							) : (
-								<div className="text-sm text-muted-foreground p-4 text-center">No stats available</div>
-							)}
-						</div>
-
-						{/* Modals outside the flow */}
-						{showAdvancedConfig && (
-							<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-								<div className="bg-background rounded-lg shadow-xl max-w-md w-full p-4 relative">
-									<Button
-										variant="ghost"
-										size="icon"
-										className="absolute right-2 top-2"
-										onClick={() => setShowAdvancedConfig(false)}
-									>
-										<EraserIcon className="h-4 w-4 rotate-45" /> {/* Close icon workaround */}
-									</Button>
-									<StructuredReindexConfig
-										isOpen={showAdvancedConfig}
-										onSkipMetadataChange={setSkipMetadata}
-										onSkipThumbnailsChange={setSkipThumbnails}
-										onToggle={() => setShowAdvancedConfig(!showAdvancedConfig)}
-										onUseStructuredFlowChange={setUseStructuredFlow}
-										skipMetadata={skipMetadata}
-										skipThumbnails={skipThumbnails}
-										useStructuredFlow={useStructuredFlow}
+					{/* Content Area */}
+					<div className="flex-1 min-h-0 rounded-lg border border-border/40 bg-card/30 shadow-sm">
+						<ScrollArea className="h-full">
+							<div className="p-4">
+								{isGloballyProcessing ? (
+									<ReindexTerminal isActive={true} />
+								) : viewMode === 'table' ? (
+									<FoldersTable
+										folders={folders}
+										globalCurrentFolderId={globalReindexStatus.currentFolder}
+										isGloballyProcessing={isGloballyProcessing}
+										isProcessing={isProcessing}
+										onFolderClick={handleFolderClick}
+										onReindex={handleReindexFolderAdvanced}
+										orderedFolders={orderedFolders}
+										processStatus={processStatus}
+										progressByFolder={progressByFolder}
+										selectedFolder={selectedFolder}
 									/>
-								</div>
+								) : (
+									<FoldersGrid
+										globalCurrentFolderId={globalReindexStatus.currentFolder}
+										isGloballyProcessing={isGloballyProcessing}
+										isProcessing={isProcessing}
+										onFolderClick={handleFolderClick}
+										orderedFolders={orderedFolders}
+										processStatus={processStatus}
+										progressByFolder={progressByFolder}
+										selectedFolder={selectedFolder}
+									/>
+								)}
 							</div>
-						)}
+						</ScrollArea>
 					</div>
-				</ScrollArea>
+				</div>
+
+				{/* Right Column: Statistics Only */}
+				<div className="flex flex-col gap-4 min-w-0">
+					<h2 className="text-2xl font-bold tracking-tight text-foreground">Statistics</h2>
+
+					<div className="flex-1 min-h-0 rounded-lg border border-border/40 bg-card/30 p-5 shadow-sm">
+						<ScrollArea className="h-full">
+							<div className="space-y-4" data-testid="folders-stats">
+								{isStatsLoading ? (
+									<div className="text-sm text-muted-foreground p-8 text-center">Loading stats...</div>
+								) : generalStats ? (
+									<FoldersStats stats={generalStats} />
+								) : (
+									<div className="text-sm text-muted-foreground p-8 text-center">No stats available</div>
+								)}
+							</div>
+						</ScrollArea>
+					</div>
+				</div>
 			</div>
+
+			{/* Modal: Advanced Config */}
+			{showAdvancedConfig && (
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+					<div className="bg-background rounded-lg shadow-2xl max-w-md w-full p-6 relative border border-border">
+						<Button
+							variant="ghost"
+							size="icon"
+							className="absolute right-2 top-2 hover:bg-muted transition-colors"
+							onClick={() => setShowAdvancedConfig(false)}
+						>
+							<EraserIcon className="h-4 w-4 rotate-45" />
+						</Button>
+						<StructuredReindexConfig
+							isOpen={showAdvancedConfig}
+							onSkipMetadataChange={setSkipMetadata}
+							onSkipThumbnailsChange={setSkipThumbnails}
+							onToggle={() => setShowAdvancedConfig(!showAdvancedConfig)}
+							onUseStructuredFlowChange={setUseStructuredFlow}
+							skipMetadata={skipMetadata}
+							skipThumbnails={skipThumbnails}
+							useStructuredFlow={useStructuredFlow}
+						/>
+					</div>
+				</div>
+			)}
 		</div>
 	);
 });
 
-// Exportar con nombre para compatibilidad
+// Exportar con nombre para compatiblidad
 export { FoldersSettings };
