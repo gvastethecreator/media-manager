@@ -17,7 +17,7 @@ export const characters = sqliteTable(
 		name: text('name').notNull(),
 		description: text('description'),
 		emoji: text('emoji').default('👤'),
-		color: text('color').default('var(--entity-character)'),
+		color: text('color').default('#ec4899'),
 		category: text('category'),
 		filters: text('filters'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),

@@ -17,7 +17,7 @@ export const worldItems = sqliteTable(
 		name: text('name').notNull(),
 		description: text('description'),
 		emoji: text('emoji').default('🎯'),
-		color: text('color').default('var(--entity-world-item)'),
+		color: text('color').default('#a855f7'),
 		category: text('category'),
 		subtype: text('subtype'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),

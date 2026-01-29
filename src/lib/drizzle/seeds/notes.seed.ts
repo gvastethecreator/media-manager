@@ -1,9 +1,11 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { notes } from '../schema';
 import { seedLogger } from './index';
 
 /**
- * Siembra notas minimalistas para verificación del sistema
+ * Siembra notas con IDs legibles
+ * Formato: note-titulo-01, note-titulo-02, etc.
  */
 export async function seedNotes(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('📝 Creando notas de prueba...');
@@ -11,48 +13,32 @@ export async function seedNotes(db: LibSQLDatabase<Record<string, never>>) {
 	try {
 		const sampleNotes = [
 			{
-				id: 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaaaa',
+				id: generateReadableId('note', 'Bienvenida', 1),
 				title: 'Nota de bienvenida',
 				content: 'Esta es una nota de ejemplo para verificar el sistema.',
 				category: 'general',
-				priority: 1,
-				status: 'active',
-				featuredImage: null,
 				isFavorite: true,
-				presetId: null,
 			},
 			{
-				id: 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaabbb',
+				id: generateReadableId('note', 'Ideas', 1),
 				title: 'Nota secundaria',
 				content: 'Otra nota para pruebas básicas.',
 				category: 'ideas',
-				priority: 0,
-				status: 'archived',
-				featuredImage: null,
 				isFavorite: false,
-				presetId: null,
 			},
 			{
-				id: 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaccc',
+				id: generateReadableId('note', 'Lista Tareas', 1),
 				title: 'Lista de Tareas',
 				content: '- Tarea 1: Organizar archivos\n- Tarea 2: Revisar etiquetas\n- Tarea 3: Crear álbumes nuevos',
 				category: 'tareas',
-				priority: 2,
-				status: 'active',
-				featuredImage: null,
 				isFavorite: true,
-				presetId: null,
 			},
 			{
-				id: 'aaaaaaaa-aaaa-4aaa-aaaa-aaaaaaaaaddd',
+				id: generateReadableId('note', 'Referencias Estilo', 1),
 				title: 'Referencias de Estilo',
 				content: 'Estilos artísticos para explorar: Art Nouveau, Cyberpunk, Steampunk, Vaporwave.',
 				category: 'referencias',
-				priority: 1,
-				status: 'active',
-				featuredImage: null,
 				isFavorite: false,
-				presetId: null,
 			},
 		];
 

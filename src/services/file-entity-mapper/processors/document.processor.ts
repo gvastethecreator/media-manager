@@ -128,26 +128,52 @@ export class DocumentProcessor {
 	}
 
 	/**
-	 * Genera preview SVG para el documento
+	 * Genera preview SVG para el documento y lo guarda en tabla metadatas
 	 */
 	async generateThumbnail(filePath: string, entityId: string): Promise<{ success: boolean; error?: string }> {
+		const { basename } = await import('node:path');
+		const fileName = basename(filePath);
+
+		serverLogger.debug(`📄 [DocumentProcessor] Generando thumbnail: ${fileName}`);
+
 		try {
-			const { generateDocumentPreview } = await import('@/config/thumbnail-generators');
-			const { basename } = await import('node:path');
+			const { db } = await import('@/lib/drizzle');
+			const { documents } = await import('@/lib/drizzle/schema');
+			const { metadatas } = await import('@/lib/drizzle/schema/core');
+			const { eq } = await import('drizzle-orm');
 
-			const mockItem = {
-				id: entityId,
-				name: basename(filePath),
-				path: filePath,
-				entityType: 'document' as const,
-			};
+			// Obtener metadata del documento para mostrar en thumbnail
+			const document = await db.query.documents.findFirst({
+				where: eq(documents.id, entityId),
+			});
 
-			const thumbnailUrl = await generateDocumentPreview(mockItem as any);
-			if (!thumbnailUrl) {
-				return { success: false, error: 'Failed to generate preview' };
-			}
+			const pageCount = document?.pageCount ?? 0;
+			const wordCount = document?.wordCount ?? 0;
 
-			serverLogger.debug(`✅ Document thumbnail generado para: ${filePath}`);
+			// Crear SVG placeholder con información del documento
+			const svg = this.createDocumentPlaceholderSVG(fileName, pageCount, wordCount);
+
+			// Guardar en tabla metadatas (no hay campo thumbnail dedicado en documents)
+			const svgBase64 = Buffer.from(svg).toString('base64');
+
+			await db.insert(metadatas).values({
+				id: `${entityId}-thumbnail`,
+				entityType: 'document',
+				entityId,
+				key: 'thumbnail',
+				value: svgBase64,
+				type: 'base64',
+				category: 'preview',
+				description: 'Document thumbnail preview',
+			}).onConflictDoUpdate({
+				target: metadatas.id,
+				set: {
+					value: svgBase64,
+					updatedAt: new Date(),
+				},
+			});
+
+			serverLogger.debug(`✅ [DocumentProcessor] Thumbnail generado: ${fileName}`);
 			return { success: true };
 		} catch (e) {
 			serverLogger.warn('Error generando thumbnail documento:', {
@@ -156,5 +182,44 @@ export class DocumentProcessor {
 			});
 			return { success: false, error: e instanceof Error ? e.message : 'Unknown error' };
 		}
+	}
+
+	/**
+	 * Crea placeholder SVG mejorado con información del documento
+	 */
+	private createDocumentPlaceholderSVG(fileName: string, pageCount: number, wordCount: number): string {
+		const pageInfo = pageCount > 0 ? `${pageCount} páginas` : 'Desconocido';
+		const wordInfo = wordCount > 0 ? `${wordCount.toLocaleString()} palabras` : '';
+
+		return `
+			<svg width="212" height="300" xmlns="http://www.w3.org/2000/svg">
+				<defs>
+					<linearGradient id="doc-bg" x1="0%" y1="0%" x2="100%" y2="100%">
+						<stop offset="0%" style="stop-color:oklch(0.18 0.002 0);stop-opacity:1" />
+						<stop offset="100%" style="stop-color:oklch(0.12 0.002 0);stop-opacity:1" />
+					</linearGradient>
+				</defs>
+				<rect width="212" height="300" fill="url(#doc-bg)" rx="8"/>
+
+				<!-- Icono de documento -->
+				<text x="106" y="100" font-family="Arial" font-size="64" fill="oklch(0.55 0.002 0)" text-anchor="middle">📄</text>
+
+				<!-- Nombre del archivo -->
+				<text x="106" y="145" font-family="Arial" font-size="12" fill="oklch(0.7 0.002 0)" text-anchor="middle">${fileName}</text>
+
+				<!-- Páginas -->
+				<text x="106" y="170" font-family="monospace" font-size="10" fill="oklch(0.55 0.002 0)" text-anchor="middle">
+					${pageInfo}
+				</text>
+
+				${wordInfo ? `<text x="106" y="185" font-family="monospace" font-size="10" fill="oklch(0.55 0.002 0)" text-anchor="middle">
+					${wordInfo}
+				</text>` : ''}
+
+				<!-- Badge de "Document" -->
+				<rect x="50" y="260" width="112" height="20" rx="10" fill="oklch(0.25 0.002 0)"/>
+				<text x="106" y="274" font-family="Arial" font-size="10" fill="oklch(0.7 0.002 0)" text-anchor="middle">Document</text>
+			</svg>
+		`.trim();
 	}
 }

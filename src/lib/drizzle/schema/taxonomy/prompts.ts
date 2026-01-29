@@ -18,7 +18,7 @@ export const prompts = sqliteTable(
 		description: text('description'),
 		content: text('content'),
 		emoji: text('emoji').default('🔮'),
-		color: text('color').default('var(--entity-prompt)'),
+		color: text('color').default('#8b5cf6'),
 		category: text('category'),
 		filters: text('filters'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),

@@ -8,7 +8,7 @@
 
 import { sql } from 'drizzle-orm';
 import { integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
-import { nanoid } from 'nanoid';
+import { generateUniqueId } from '@/lib/utils/id-generator';
 
 // Modelo para los álbumes
 export const albums = sqliteTable(
@@ -16,11 +16,11 @@ export const albums = sqliteTable(
 	{
 		id: text('id')
 			.primaryKey()
-			.$defaultFn(() => nanoid()),
+			.$defaultFn(() => generateUniqueId('album')),
 		name: text('name').notNull(),
 		description: text('description'),
 		emoji: text('emoji').default('📔'),
-		color: text('color').default('var(--entity-album)'),
+		color: text('color').default('#f59e0b'),
 		featuredImage: text('featuredImage'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		// Agregados movidos a EntityAggregates tabla genérica

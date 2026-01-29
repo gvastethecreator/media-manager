@@ -17,7 +17,7 @@ export const wildcards = sqliteTable(
 		name: text('name').notNull(),
 		description: text('description'),
 		emoji: text('emoji').default('🎭'),
-		color: text('color').default('var(--entity-wildcard)'),
+		color: text('color').default('#8b5cf6'),
 		category: text('category'),
 		children: text('children'),
 		featuredImage: text('featuredImage'),

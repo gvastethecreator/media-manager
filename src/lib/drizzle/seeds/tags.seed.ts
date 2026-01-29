@@ -1,9 +1,11 @@
 import type { LibSQLDatabase } from 'drizzle-orm/libsql';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import { tags } from '../schema/index';
 import { seedLogger } from './index';
 
 /**
- * Siembra etiquetas minimalistas para verificación del sistema
+ * Siembra etiquetas con IDs legibles
+ * Formato: tag-nombre-01, tag-nombre-02, etc.
  */
 export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('🏷️ Creando etiquetas de prueba...');
@@ -11,48 +13,48 @@ export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 	try {
 		const sampleTags = [
 			{
-				id: '11111111-1111-4111-a111-111111111111',
+				id: generateReadableId('tag', 'Arte Digital', 1),
 				name: 'Arte Digital',
 				description: 'Creaciones artísticas digitales',
 				emoji: '🎨',
-				color: 'var(--preset-purple)',
+				color: '#a855f7',
 				category: 'arte',
 				isFavorite: true,
 			},
 			{
-				id: '11111111-1111-4111-a111-111111111112',
+				id: generateReadableId('tag', 'Naturaleza', 1),
 				name: 'Naturaleza',
 				description: 'Paisajes y elementos naturales',
 				emoji: '🌿',
-				color: 'var(--dt-success-500)',
-				category: 'temática',
+				color: '#22c55e',
+				category: 'tematica',
 				isFavorite: false,
 			},
 			{
-				id: '11111111-1111-4111-a111-111111111113',
+				id: generateReadableId('tag', 'Retrato', 1),
 				name: 'Retrato',
 				description: 'Fotografías de retratos y rostros',
 				emoji: '👤',
-				color: 'var(--dt-warning-500)',
-				category: 'género',
+				color: '#f59e0b',
+				category: 'genero',
 				isFavorite: true,
 			},
 			{
-				id: '11111111-1111-4111-a111-111111111114',
+				id: generateReadableId('tag', 'Cyberpunk', 1),
 				name: 'Cyberpunk',
 				description: 'Estética futurista y tecnológica',
 				emoji: '🤖',
-				color: 'var(--dt-danger-500)',
+				color: '#ef4444',
 				category: 'estilo',
 				isFavorite: false,
 			},
 			{
-				id: '11111111-1111-4111-a111-111111111115',
+				id: generateReadableId('tag', 'Fantasia', 1),
 				name: 'Fantasía',
 				description: 'Mundos mágicos e imaginarios',
 				emoji: '🧙',
-				color: 'var(--preset-indigo)',
-				category: 'género',
+				color: '#6366f1',
+				category: 'genero',
 				isFavorite: true,
 			},
 		];

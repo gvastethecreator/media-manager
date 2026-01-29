@@ -7,17 +7,17 @@
  */
 
 import { Schema } from '@effect/schema';
-import { Emoji, HexColor, UUID } from '@/lib/effect/schemas';
+import { Emoji, ID, ThemeColor } from '@/lib/effect/schemas';
 
 /**
  * Schema base para Tag entity (matches Drizzle schema)
  * Representa un tag almacenado en la base de datos
  */
 export class Tag extends Schema.Class<Tag>('Tag')({
-	id: UUID,
+	id: ID,
 	name: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(100)),
 	description: Schema.NullOr(Schema.String),
-	color: Schema.NullOr(HexColor),
+	color: Schema.NullOr(ThemeColor),
 	emoji: Schema.NullOr(Emoji),
 	category: Schema.NullOr(Schema.String.pipe(Schema.maxLength(50))),
 	shortcut: Schema.optional(Schema.NullOr(Schema.String.pipe(Schema.maxLength(20)))),
@@ -34,11 +34,7 @@ export class Tag extends Schema.Class<Tag>('Tag')({
 export class TagCreate extends Schema.Class<TagCreate>('TagCreate')({
 	name: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(100)),
 	description: Schema.optional(Schema.NullOr(Schema.String)),
-	color: Schema.optional(
-		Schema.NullOr(Schema.String.pipe(Schema.pattern(/^#[0-9A-Fa-f]{6}$/))).annotations({
-			message: () => 'Color debe ser formato hex (#RRGGBB)',
-		})
-	),
+	color: Schema.optional(Schema.NullOr(ThemeColor)),
 	emoji: Schema.optional(Schema.NullOr(Schema.String.pipe(Schema.maxLength(10)))),
 	category: Schema.optional(Schema.NullOr(Schema.String.pipe(Schema.maxLength(50)))),
 	shortcut: Schema.optional(Schema.NullOr(Schema.String.pipe(Schema.maxLength(20)))),
@@ -51,14 +47,10 @@ export class TagCreate extends Schema.Class<TagCreate>('TagCreate')({
  * Todos los campos son opcionales excepto el ID
  */
 export class TagUpdate extends Schema.Class<TagUpdate>('TagUpdate')({
-	id: Schema.UUID,
+	id: ID,
 	name: Schema.optional(Schema.String.pipe(Schema.minLength(1), Schema.maxLength(100))),
 	description: Schema.optional(Schema.NullOr(Schema.String)),
-	color: Schema.optional(
-		Schema.NullOr(Schema.String.pipe(Schema.pattern(/^#[0-9A-Fa-f]{6}$/))).annotations({
-			message: () => 'Color debe ser formato hex (#RRGGBB)',
-		})
-	),
+	color: Schema.optional(Schema.NullOr(ThemeColor)),
 	emoji: Schema.optional(Schema.NullOr(Schema.String.pipe(Schema.maxLength(10)))),
 	category: Schema.optional(Schema.NullOr(Schema.String.pipe(Schema.maxLength(50)))),
 	shortcut: Schema.optional(Schema.NullOr(Schema.String.pipe(Schema.maxLength(20)))),
@@ -106,7 +98,7 @@ export class TagStatistics extends Schema.Class<TagStatistics>('TagStatistics')(
  * Este es el tipo canónico que se usa en la UI
  */
 export class TagWithStats extends Schema.Class<TagWithStats>('TagWithStats')({
-	id: Schema.UUID,
+	id: ID,
 	name: Schema.String.pipe(Schema.minLength(1), Schema.maxLength(100)),
 	description: Schema.NullOr(Schema.String),
 	color: Schema.NullOr(Schema.String),
@@ -152,7 +144,7 @@ export class GetTagsResult extends Schema.Class<GetTagsResult>('GetTagsResult')(
  * Schema para Tag preview (vista reducida)
  */
 export class TagPreview extends Schema.Class<TagPreview>('TagPreview')({
-	id: Schema.UUID,
+	id: ID,
 	name: Schema.String,
 	color: Schema.NullOr(Schema.String),
 	emoji: Schema.NullOr(Schema.String),

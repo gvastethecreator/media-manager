@@ -8,7 +8,7 @@
 
 import { sql } from 'drizzle-orm';
 import { check, index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
-import { nanoid } from 'nanoid';
+import { generateUniqueId } from '@/lib/utils/id-generator';
 
 // Modelo para las carpetas
 export const folders = sqliteTable(
@@ -16,12 +16,12 @@ export const folders = sqliteTable(
 	{
 		id: text('id')
 			.primaryKey()
-			.$defaultFn(() => nanoid()),
+			.$defaultFn(() => generateUniqueId('folder')),
 		name: text('name').notNull(),
 		description: text('description'),
 		path: text('path').notNull(),
 		emoji: text('emoji').default('📁'),
-		color: text('color').default('var(--entity-folder)'),
+		color: text('color').default('#3b82f6'),
 		featuredImage: text('featuredImage'),
 		isFavorite: integer('isFavorite', { mode: 'boolean' }).notNull().default(false),
 		totalImages: integer('totalImages').notNull().default(0),

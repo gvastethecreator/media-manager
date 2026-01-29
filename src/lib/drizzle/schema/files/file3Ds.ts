@@ -39,6 +39,7 @@ export const file3Ds = sqliteTable(
 		hasNormals: integer('hasNormals', { mode: 'boolean' }).default(false),
 		hasColors: integer('hasColors', { mode: 'boolean' }).default(false),
 		boundingBox: text('boundingBox'),
+		metadata: text('metadata'),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},

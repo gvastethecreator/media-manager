@@ -107,7 +107,7 @@ export const HexColor = Schema.String.pipe(Schema.pattern(/^#[0-9A-Fa-f]{6}$/)).
 	identifier: 'HexColor',
 	title: 'Hex color code',
 	description: 'RGB color in #RRGGBB format',
-	examples: ['#FF5733', '#3498db', 'var(--dt-neutral-950)'],
+	examples: ['#FF5733', '#3498db'],
 });
 
 /**
@@ -118,6 +118,28 @@ export const HexColorWithAlpha = Schema.String.pipe(Schema.pattern(/^#[0-9A-Fa-f
 	title: 'Hex color with alpha',
 	description: 'RGBA color in #RRGGBBAA format',
 	examples: ['#FF573380', '#3498dbFF'],
+});
+
+/**
+ * CSS variable color preset (var(--preset-*))
+ */
+export const PresetColor = Schema.String.pipe(
+	Schema.pattern(/^var\(--preset-[a-z]+\)$/)
+).annotations({
+	identifier: 'PresetColor',
+	title: 'Preset color variable',
+	description: 'CSS variable preset color like var(--preset-purple)',
+	examples: ['var(--preset-purple)', 'var(--preset-red)', 'var(--preset-blue)'],
+});
+
+/**
+ * Flexible color that accepts hex colors or CSS preset variables
+ */
+export const ThemeColor = Schema.Union(HexColor, PresetColor).annotations({
+	identifier: 'ThemeColor',
+	title: 'Theme color',
+	description: 'Hex color (#RRGGBB) or preset CSS variable (var(--preset-*))',
+	examples: ['#FF5733', 'var(--preset-purple)'],
 });
 
 // ============= URLs & Paths =============

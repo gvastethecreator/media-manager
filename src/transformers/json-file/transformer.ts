@@ -100,7 +100,7 @@ export function fromDrizzleJsonFile(drizzleJsonFile: JsonFileBase): JsonFileWith
 }
 
 /**
- * 🔄 Transforma una lista de archivos JSON de Prisma a una lista de JsonFileWithStats.
+ * 🔄 Transforma una lista de archivos JSON de Drizzle a una lista de JsonFileWithStats.
  *
  * @param drizzleJsonFiles - Un array de objetos JsonFile de Drizzle.
  * @returns Un array de objetos JsonFileWithStats.

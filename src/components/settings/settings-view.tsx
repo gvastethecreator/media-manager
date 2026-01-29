@@ -15,11 +15,15 @@ import {
 	UploadCloud,
 	UserIcon,
 	WandIcon,
+	LayoutGrid,
 } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { ModernSettingsView } from './modern/modern-settings-view';
 
 import { cn } from '@/lib/utils';
 import { AlbumsSettings } from './albums/albums-settings';
@@ -233,6 +237,7 @@ const tabsData: TabItem[] = [
 
 export function SettingsView() {
 	const [searchParams, setSearchParams] = useSearchParams();
+	const [useModernLayout, setUseModernLayout] = useState(false);
 
 	// 🔗 Leer tab desde URL query params, con fallback a 'folders'
 	const tabFromUrl = searchParams.get('tab') || 'folders';
@@ -269,8 +274,52 @@ export function SettingsView() {
 	return (
 		<div className="m-0 h-full w-full p-0">
 			<Tabs className="flex h-full flex-row" onValueChange={handleTabChange} value={validTab}>
-				{/* 📋 Contenido de los tabs - ÁREA PRINCIPAL A LA IZQUIERDA */}
-				<div className="m-0 h-full flex-1 overflow-hidden p-0">
+				{/* Header con Toggle de Layout Moderno */}
+				<div className="flex h-14 shrink-0 items-center justify-between border-b px-6">
+					<div className="flex items-center gap-3">
+						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+							<SettingsIcon className="h-4 w-4 text-primary" />
+						</div>
+						<div>
+							<h2 className="text-sm font-semibold">Configuración</h2>
+							<p className="text-xs text-muted-foreground">
+								{useModernLayout ? 'Vista moderna' : 'Vista clásica'}
+							</p>
+						</div>
+					</div>
+
+					{/* Toggle entre layouts */}
+					<div className="flex items-center gap-2 rounded-lg border bg-muted/30 p-1">
+						<Button
+							variant={useModernLayout ? 'default' : 'ghost'}
+							size="sm"
+							onClick={() => setUseModernLayout(true)}
+							className="h-8 gap-2 px-3"
+						>
+							<LayoutGrid className="h-3.5 w-3.5" />
+							<span className="text-sm">Moderno</span>
+						</Button>
+						<Button
+							variant={!useModernLayout ? 'default' : 'ghost'}
+							size="sm"
+							onClick={() => setUseModernLayout(false)}
+							className="h-8 gap-2 px-3"
+						>
+							<ListIcon className="h-3.5 w-3.5" />
+							<span className="text-sm">Clásico</span>
+						</Button>
+					</div>
+				</div>
+
+				{/* Content Area - Layout Moderno o Clásico */}
+				{useModernLayout ? (
+					<div className="m-0 h-full w-full p-0">
+						<ModernSettingsView />
+					</div>
+				) : (
+					<>
+						{/* 📋 Contenido de los tabs - ÁREA PRINCIPAL A LA IZQUIERDA */}
+						<div className="m-0 h-full flex-1 overflow-hidden p-0">
 					<TabsContent className="m-0 h-full w-full border-none p-0" value="folders">
 						<ScrollArea className="h-full w-full">
 							<div className="p-0">
@@ -463,40 +512,44 @@ export function SettingsView() {
 						</ScrollArea>
 					</TabsContent>
 				</div>
+			</>
+				)}
 
-				{/* 🎨 Sidebar vertical con navegación de tabs - COMPACTO A LA DERECHA */}
-				<div className="h-full w-44 shrink-0 overflow-y-auto border-border/20 border-l bg-background/60 backdrop-blur-sm">
-					<TabsList className="flex h-auto w-full flex-col justify-start gap-0.5 rounded-none bg-transparent p-1.5">
-						{tabsData.map((tab) => (
-							<TabsTrigger
-								className={cn(
-									'flex w-full items-center justify-start gap-2 px-2.5 py-2',
-									'rounded-md border border-transparent text-caption',
-									'group cursor-pointer transition-all duration-200',
-									'hover:border-border/30 hover:bg-secondary/40',
-									'data-[state=active]:border-border/30 data-[state=active]:bg-secondary/60',
-									'data-[state=active]:font-medium data-[state=active]:text-foreground data-[state=active]:shadow-sm'
-								)}
-								key={tab.id}
-								value={tab.id}
-							>
-								{/* 🎨 Icono con color temático */}
-								<span className="flex shrink-0 items-center justify-center" style={{ color: tab.color }}>
-									{tab.icon}
-								</span>
+				{/* 🎨 Sidebar vertical con navegación de tabs - COMPACTO A LA DERECHA (solo layout clásico) */}
+				{!useModernLayout && (
+					<div className="h-full w-44 shrink-0 overflow-y-auto border-border/20 border-l bg-background/60 backdrop-blur-sm">
+						<TabsList className="flex h-auto w-full flex-col justify-start gap-0.5 rounded-none bg-transparent p-1.5">
+							{tabsData.map((tab) => (
+								<TabsTrigger
+									className={cn(
+										'flex w-full items-center justify-start gap-2 px-2.5 py-2',
+										'rounded-md border border-transparent text-caption',
+										'group cursor-pointer transition-all duration-200',
+										'hover:border-border/30 hover:bg-secondary/40',
+										'data-[state=active]:border-border/30 data-[state=active]:bg-secondary/60',
+										'data-[state=active]:font-medium data-[state=active]:text-foreground data-[state=active]:shadow-sm'
+									)}
+									key={tab.id}
+									value={tab.id}
+								>
+									{/* 🎨 Icono con color temático */}
+									<span className="flex shrink-0 items-center justify-center" style={{ color: tab.color }}>
+										{tab.icon}
+									</span>
 
-								{/* 📝 Label con truncado inteligente */}
-								<span className="flex-1 truncate text-left">{tab.label}</span>
+									{/* 📝 Label con truncado inteligente */}
+									<span className="flex-1 truncate text-left">{tab.label}</span>
 
-								{/* ✨ Indicador visual del estado activo */}
-								<div
-									className="h-3.5 w-0.5 rounded-full opacity-0 transition-opacity duration-200 group-data-[state=active]:opacity-100"
-									style={{ backgroundColor: tab.color }}
-								/>
-							</TabsTrigger>
-						))}
-					</TabsList>
-				</div>
+									{/* ✨ Indicador visual del estado activo */}
+									<div
+										className="h-3.5 w-0.5 rounded-full opacity-0 transition-opacity duration-200 group-data-[state=active]:opacity-100"
+										style={{ backgroundColor: tab.color }}
+									/>
+								</TabsTrigger>
+							))}
+						</TabsList>
+					</div>
+				)}
 			</Tabs>
 		</div>
 	);

@@ -4,7 +4,6 @@ import { seedLogger } from './index';
 
 /**
  * Siembra las carpetas por defecto en la base de datos con Drizzle
- * Mantiene la estructura original del sistema Prisma
  */
 export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('📁 Creando carpetas por defecto...');
@@ -24,7 +23,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: 'var(--preset-indigo)',
+				color: '#6366f1', // indigo
 				isFavorite: false,
 				parentId: null,
 				presetId: null,
@@ -38,7 +37,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: 'var(--preset-green)',
+				color: '#22c55e', // green
 				isFavorite: false,
 				parentId: null,
 				presetId: null,
@@ -52,7 +51,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: 'var(--preset-yellow)',
+				color: '#eab308', // yellow
 				isFavorite: true,
 				parentId: null,
 				presetId: null,
@@ -67,7 +66,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: 'var(--preset-yellow)',
+				color: '#eab308', // yellow
 				isFavorite: true,
 				parentId: null,
 				presetId: null,
@@ -81,7 +80,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: 'var(--entity-image)',
+				color: '#8b5cf6', // violet
 				isFavorite: true,
 				parentId: null,
 				presetId: null,
@@ -95,7 +94,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: 'var(--preset-green)',
+				color: '#22c55e', // green
 				isFavorite: false,
 				parentId: null,
 				presetId: null,
@@ -109,7 +108,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: 'var(--dt-danger-500)',
+				color: '#ef4444', // red
 				isFavorite: false,
 				parentId: null,
 				presetId: null,
@@ -123,7 +122,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: 'var(--preset-purple)',
+				color: '#a855f7', // purple
 				isFavorite: false,
 				parentId: null,
 				presetId: null,
@@ -137,7 +136,7 @@ export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 				totalFiles: 0,
 				totalSize: 0,
 				lastIndexed: null,
-				color: 'var(--dt-warning-500)',
+				color: '#f59e0b', // amber/orange
 				isFavorite: true,
 				parentId: null,
 				presetId: null,

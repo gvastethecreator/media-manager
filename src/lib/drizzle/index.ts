@@ -68,11 +68,7 @@ import {
  *
  * ✅ UNIFICADO A SQLITE - Enero 2025
  * 🔧 RELACIONES COMPLETAS - Enero 2025
- *
- * Coexistencia con Prisma:
- * - Drizzle y Prisma apuntan a la misma base de datos física (prisma/dev.db)
- * - Ambos ORMs pueden leer/escribir sin conflictos
- * - La migración será gradual, servicio por servicio
+ * ✅ MIGRADO COMPLETAMENTE A DRIZZLE - 2025
  *
  * Configuración según documentación oficial:
  * https://orm.drizzle.team/docs/get-started/sqlite-existing

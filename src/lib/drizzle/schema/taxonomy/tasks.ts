@@ -30,7 +30,7 @@ export const tasks = sqliteTable('Task', {
 
 	// Metadata visual
 	emoji: text('emoji').default('📋'),
-	color: text('color').default('var(--entity-property)'),
+	color: text('color').default('#6366f1'),
 	category: text('category'),
 	tags: text('tags'), // JSON array de tags
 

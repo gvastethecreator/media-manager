@@ -43,6 +43,7 @@ export const audios = sqliteTable(
 		bpm: integer('bpm'),
 		key: text('key'),
 		mood: text('mood'),
+		metadata: text('metadata'),
 		createdAt: integer('createdAt', { mode: 'timestamp_ms' }).notNull().default(sql`(CURRENT_TIMESTAMP)`),
 		updatedAt: integer('updatedAt', { mode: 'timestamp_ms' }).$onUpdate(() => new Date()),
 	},

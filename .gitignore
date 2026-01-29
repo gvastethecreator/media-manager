@@ -45,8 +45,14 @@ yarn-error.log*
 # project
 .image-cache
 .thumbnail-cache
+/bin/
 
+# database
 db.sqlite
 /src/lib/drizzle/migrations/
+
+# logs
+logs/*.log
+logs/*.jsonl
 
 .qodo
