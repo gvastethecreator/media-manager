@@ -24,8 +24,20 @@ import {
 	fromUnknownError,
 } from './album-errors.effect';
 
+// Helper para crear un logger seguro que funcione en tests y producción
+const createSafeLogger = (context: string) => {
+	const baseLogger = serverLogger.withContext(context);
+	// En tests, el mock puede no tener todas las funciones, así que las proporcionamos
+	return {
+		debug: baseLogger.debug?.bind(baseLogger) ?? (() => {}),
+		info: baseLogger.info?.bind(baseLogger) ?? (() => {}),
+		warn: baseLogger.warn?.bind(baseLogger) ?? (() => {}),
+		error: baseLogger.error?.bind(baseLogger) ?? (() => {}),
+	};
+};
+
 // Logger específico
-const logger = serverLogger.withContext('AlbumService.Effect');
+const logger = createSafeLogger('AlbumService.Effect');
 
 /**
  * Opciones para obtener álbumes

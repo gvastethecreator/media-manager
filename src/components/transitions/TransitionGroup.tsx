@@ -274,11 +274,13 @@ export const TransitionItem = React.memo(function TransitionItem({
 		return <>{children}</>;
 	}
 
-	return React.cloneElement(children as React.ReactElement, {
+	const child = children as React.ReactElement & { ref?: React.Ref<HTMLElement> };
+
+	return React.cloneElement(child, {
 		ref: (node: HTMLElement | null) => {
 			itemRef.current = node;
 			// Preservar ref original del hijo si existe
-			const originalRef = (children as React.ReactElement & { ref?: React.Ref<HTMLElement> }).ref;
+			const originalRef = child.ref;
 			if (typeof originalRef === 'function') {
 				originalRef(node);
 			} else if (originalRef && 'current' in originalRef) {
@@ -286,7 +288,7 @@ export const TransitionItem = React.memo(function TransitionItem({
 			}
 		},
 		'data-transition-item': id,
-	});
+	} as unknown as React.Attributes);
 });
 
 // ============================================================================
