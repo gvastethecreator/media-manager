@@ -1,7 +1,9 @@
 // Se reemplaza react-markdown por el visor de @uiw/react-md-editor
 import MDEditor from '@uiw/react-md-editor';
-import { BarChart, Bug, Code2, FileCode2, Folder, Gauge, Image, Loader2, RefreshCw, Server, Tag } from 'lucide-react';
-import { FoldersSettings } from '@/components/settings/folders/folders-settings';
+import { BarChart, Bug, Code2, FileCode2, Folder, Gauge, Loader2, RefreshCw, Server, Tag } from 'lucide-react';
+import { FilesSettingsModern } from '@/components/settings/modern/files-settings-modern';
+import { TaxonomySettingsModern } from '@/components/settings/modern/taxonomy-settings-modern';
+import { ScannedImagesSettings } from '@/components/settings/image/scanned-images-settings';
 import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -181,29 +183,15 @@ export function DevelopmentView(_props: ViewProps) {
 					</TabsContent>
 
 					<TabsContent className="mt-4" value="folders">
-						<FoldersSettings />
+						<FilesSettingsModern />
 					</TabsContent>
 
 					<TabsContent className="mt-4" value="tags">
-						<Card className="border-2 border-primary/10">
-							<CardContent className="p-4">
-								<div className="p-4">
-									<h3 className="font-medium text-lg">Etiquetas</h3>
-									<p className="text-muted-foreground">Gestión de etiquetas en desarrollo</p>
-								</div>
-							</CardContent>
-						</Card>
+						<TaxonomySettingsModern />
 					</TabsContent>
 
 					<TabsContent className="mt-4" value="images">
-						<Card className="border-2 border-primary/10">
-							<CardContent className="p-4">
-								<div className="p-4">
-									<h3 className="font-medium text-lg">Imágenes</h3>
-									<p className="text-muted-foreground">Gestión de imágenes en desarrollo</p>
-								</div>
-							</CardContent>
-						</Card>
+						<ScannedImagesSettings />
 					</TabsContent>
 
 					<TabsContent className="mt-4" value="stats">
