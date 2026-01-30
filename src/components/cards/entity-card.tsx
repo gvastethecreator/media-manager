@@ -21,6 +21,7 @@ import { PlaceCard } from './place-card/place-card';
 import { PromptCard } from './prompt-card/prompt-card';
 import { PropertyCard } from './property-card/property-card';
 import { TagCard } from './tag-card/tag-card';
+import { TCGEntityCard } from './tcg-entity-card';
 // Importar el nuevo sistema de layouts
 import type { BaseCardProps, CardVariant } from './types/card-layout.types';
 import { UploadedImageCard } from './uploaded-image-card';
@@ -54,7 +55,7 @@ const mapToImageCardVariant = (cardVariant: CardVariant): 'default' | 'minimal' 
 // (se mantiene noop por compatibilidad potencial)
 
 // Contexto para renderers
-type RenderCtx = {
+interface RenderCtx {
 	entity: AnyEntityWithStats;
 	isSelected?: boolean;
 	className?: string;
@@ -62,7 +63,7 @@ type RenderCtx = {
 	finalOnClick?: (e: React.MouseEvent) => void;
 	finalOnDoubleClick?: () => void;
 	thumbnailQuality?: 'low' | 'medium' | 'high';
-};
+}
 
 // Renderers por tipo
 const renderImage = ({
@@ -424,7 +425,7 @@ export const EntityCard: FC<EntityCardProps> = memo(
 		// debug: estado final de handlers (se removió console por reglas de estilo)
 
 		// debug: estado final de handlers (removido console por reglas de estilo)
-		// Usar el hook de  para obtener la configuración
+		// Usar el hook de layout para obtener la configuración
 		const { config } = useCardLayout(
 			{
 				Config,
@@ -440,7 +441,26 @@ export const EntityCard: FC<EntityCardProps> = memo(
 				tcgMode,
 			},
 			preset
-		); // Render genérico por tipo
+		);
+
+		// Si el modo es TCG, usar el nuevo componente TCGEntityCard
+		if (config.variant === 'tcg') {
+			return (
+				<TCGEntityCard
+					className={className}
+					disable3D={false}
+					entity={entity}
+					isCompact={compact}
+					isSelected={isSelected}
+					onClick={finalOnClick}
+					onDoubleClick={finalOnDoubleClick}
+					size={config.size as 'sm' | 'md' | 'lg' | 'xl'}
+					thumbnailQuality={thumbnailQuality}
+				/>
+			);
+		}
+
+		// Render genérico por tipo para otras variantes
 		const type = getEntityStatsType(entity as any) ?? 'unknown';
 		return renderEntityByType(type as string, {
 			entity,

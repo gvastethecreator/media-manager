@@ -6,12 +6,12 @@
  * A11y: WCAG 3.3.4 - Error Prevention, WCAG 4.1.3 - Status Messages
  */
 
+import { AlertTriangle, CheckCircle2, Info, Trash2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { AlertTriangle, CheckCircle2, HelpCircle, Info, Trash2, X } from 'lucide-react';
+import { cn } from '@/lib/utils';
 import { Button } from './button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from './dialog';
 import { FocusTrap } from './focus-trap';
-import { cn } from '@/lib/utils';
 
 export type ConfirmVariant = 'danger' | 'warning' | 'info' | 'success';
 
@@ -138,29 +138,29 @@ export function ConfirmDialog({
 	};
 
 	return (
-		<Dialog open={open} onOpenChange={(isOpen) => !isOpen && handleCancel()}>
+		<Dialog onOpenChange={(isOpen) => !isOpen && handleCancel()} open={open}>
 			<DialogContent
-				className="sm:max-w-md"
-				aria-labelledby="confirm-dialog-title"
 				aria-describedby={description ? 'confirm-dialog-description' : undefined}
+				aria-labelledby="confirm-dialog-title"
+				className="sm:max-w-md"
 			>
-				<FocusTrap active={open} onEscape={handleCancel} initialFocus="last">
+				<FocusTrap active={open} initialFocus="last" onEscape={handleCancel}>
 					<DialogHeader className="gap-4">
 						<div className="flex items-start gap-4">
 							{showIcon && (
 								<div
-									className={cn('flex h-12 w-12 shrink-0 items-center justify-center rounded-full', config.bgColor)}
 									aria-hidden="true"
+									className={cn('flex h-12 w-12 shrink-0 items-center justify-center rounded-full', config.bgColor)}
 								>
 									<Icon className={cn('h-6 w-6', config.iconColor)} />
 								</div>
 							)}
 							<div className="flex-1 space-y-2">
-								<DialogTitle id="confirm-dialog-title" className="text-left">
+								<DialogTitle className="text-left" id="confirm-dialog-title">
 									{title}
 								</DialogTitle>
 								{description && (
-									<DialogDescription id="confirm-dialog-description" className="text-left">
+									<DialogDescription className="text-left" id="confirm-dialog-description">
 										{description}
 									</DialogDescription>
 								)}
@@ -169,15 +169,15 @@ export function ConfirmDialog({
 					</DialogHeader>
 
 					<DialogFooter className="gap-2 sm:gap-0">
-						<Button variant="outline" onClick={handleCancel} data-autofocus={variant !== 'danger'}>
+						<Button data-autofocus={variant !== 'danger'} onClick={handleCancel} variant="outline">
 							{cancelText}
 						</Button>
 						<Button
-							variant={config.buttonVariant}
-							onClick={handleConfirm}
-							disabled={isConfirmDisabled}
-							data-autofocus={variant === 'danger'}
 							className={cn('min-w-[120px]', isConfirmDisabled && 'opacity-70')}
+							data-autofocus={variant === 'danger'}
+							disabled={isConfirmDisabled}
+							onClick={handleConfirm}
+							variant={config.buttonVariant}
 						>
 							{isConfirmDisabled && countdown > 0
 								? `${confirmText || config.confirmDefault} (${countdown}s)`
@@ -245,7 +245,7 @@ export function useConfirm() {
 
 	const ConfirmDialogWrapper = () =>
 		state.props ? (
-			<ConfirmDialog open={state.isOpen} onClose={handleClose} onConfirm={handleConfirm} {...state.props} />
+			<ConfirmDialog onClose={handleClose} onConfirm={handleConfirm} open={state.isOpen} {...state.props} />
 		) : null;
 
 	return { confirm, ConfirmDialogWrapper };

@@ -7,7 +7,7 @@
 import type { WorldItemComplete, WorldItemStatistics } from '../../types/entities/world-item';
 
 // Tipos locales equivalentes a Drizzle
-type DrizzleWorldItemFromDrizzle = {
+interface DrizzleWorldItemFromDrizzle {
 	id: string;
 	name: string;
 	description: string | null;
@@ -55,7 +55,7 @@ type DrizzleWorldItemFromDrizzle = {
 		properties?: number;
 		groups?: number;
 	};
-};
+}
 
 /**
  * 🔄 Transforma un objeto WorldItem de Drizzle a un WorldItemComplete.

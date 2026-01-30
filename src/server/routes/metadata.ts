@@ -1,6 +1,6 @@
 import express from 'express';
 import { serverLogger } from '@/lib/logger/server-logger';
-import * as MetadataService from '@/services/metadata';
+import * as MetadataService from '@/services/metadata/metadata.service';
 
 const router = express.Router();
 

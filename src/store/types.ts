@@ -47,12 +47,12 @@ export type StoreCreator<
 	UpdateType = Partial<T>,
 > = StateCreator<ExtendedStore<T, S, CreateType, UpdateType>, [], [], ExtendedStore<T, S, CreateType, UpdateType>>;
 
-export type StoreHook<
+export interface StoreHook<
 	T extends BaseEntity,
 	S = Record<string, unknown>,
 	CreateType = Partial<T>,
 	UpdateType = Partial<T>,
-> = {
+> {
 	(): ExtendedStore<T, S, CreateType, UpdateType>;
 	<U>(selector: (state: ExtendedStore<T, S, CreateType, UpdateType>) => U): U;
-};
+}

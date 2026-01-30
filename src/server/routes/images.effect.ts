@@ -299,7 +299,7 @@ router.get('/:id/content', async (req, res) => {
 		const { buffer, image } = await Effect.runPromise(effect);
 
 		let mimeType = 'image/jpeg';
-		if (image && image.path) {
+		if (image?.path) {
 			const ext = image.path.split('.').pop()?.toLowerCase();
 			if (ext === 'png') mimeType = 'image/png';
 			if (ext === 'gif') mimeType = 'image/gif';

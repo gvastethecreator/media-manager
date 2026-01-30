@@ -1,8 +1,8 @@
 import { Tag } from 'lucide-react';
 import { memo, useCallback, useState } from 'react';
 import { TagCard } from '@/components/cards/tag-card/tag-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

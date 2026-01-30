@@ -9,7 +9,7 @@ import { images } from '@/lib/drizzle/schema/index';
 import type { ThumbnailResult as LibThumbResult } from '@/lib/image/thumbnail';
 import { generateThumbnail } from '@/lib/image/thumbnail';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { thumbnailUnified as baseThumbnailService } from '@/services/thumbnail/index'; // Usar servicio unificado
+import { thumbnailUnifiedService as baseThumbnailService } from '@/services/thumbnail/thumbnail-unified.service';
 import type { ThumbnailStats } from '@/types/stats';
 import type { LastProcessedThumbnail, ProcessOptions } from '@/types/thumbnails';
 
@@ -111,7 +111,7 @@ export async function getThumbnail(
 		// Validar que la ruta del archivo exista
 		// Protección contra rutas corruptas o demasiado largas (ej. base64 en lugar de path)
 		if (!image.path || image.path.length > 1024) {
-			const error = `Ruta de archivo inválida o demasiado larga: ${image.path ? image.path.substring(0, 50) + '...' : 'null'}`;
+			const error = `Ruta de archivo inválida o demasiado larga: ${image.path ? `${image.path.substring(0, 50)}...` : 'null'}`;
 			thumbLogger.error(`❌ ${error}`);
 			return {
 				thumbnailUrl: '',

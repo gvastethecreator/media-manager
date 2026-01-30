@@ -31,7 +31,7 @@ function SettingsContent({ itemId }: { itemId: string }) {
 		setIsLoading(true);
 		const timer = setTimeout(() => setIsLoading(false), 300);
 		return () => clearTimeout(timer);
-	}, [itemId]);
+	}, []);
 
 	if (isLoading) {
 		return (

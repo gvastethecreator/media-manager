@@ -43,8 +43,6 @@ export function SkipLink({
 
 	return (
 		<a
-			href={`#${targetId}`}
-			onClick={handleClick}
 			className={cn(
 				// Por defecto oculto
 				'sr-only',
@@ -54,11 +52,13 @@ export function SkipLink({
 				'focus:flex focus:items-center focus:gap-2',
 				'focus:rounded-dt-sm focus:border-2 focus:border-primary focus:bg-background',
 				'focus:px-4 focus:py-3 focus:shadow-dt-3',
-				'focus:text-foreground focus:font-medium',
+				'focus:font-medium focus:text-foreground',
 				// Animación suave
 				'focus:transition-all focus:duration-dt-fast',
 				className
 			)}
+			href={`#${targetId}`}
+			onClick={handleClick}
 		>
 			{children}
 		</a>
@@ -70,7 +70,7 @@ export function SkipLink({
  * Marca el inicio del contenido principal
  */
 export function SkipLinkTarget({ id = 'main-content' }: { id?: string }) {
-	return <div id={id} tabIndex={-1} className="outline-none" aria-label="Contenido principal" />;
+	return <div aria-label="Contenido principal" className="outline-none" id={id} tabIndex={-1} />;
 }
 
 export default SkipLink;

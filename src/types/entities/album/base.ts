@@ -2,7 +2,7 @@
  * 🗿 Modelo base de Album, basado en el esquema de Drizzle.
  * Este tipo no se modifica y representa la estructura en la base de datos.
  */
-export type AlbumBase = {
+export interface AlbumBase {
 	id: string;
 	name: string;
 	description: string | null;
@@ -22,7 +22,7 @@ export type AlbumBase = {
 	lastVideoAddedAt: Date | null;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 import type { EntityStats } from '../entity.types';
 

@@ -17,14 +17,14 @@ import {
 } from '../../types/entities/favorite/types';
 
 // Tipos locales equivalentes a Drizzle
-type DrizzleFavorite = {
+interface DrizzleFavorite {
 	id: string;
 	entityId: string;
 	entityType: string;
 	profileId: string;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 // Tipo extendido local para UI
 type FavoriteExtended = FavoriteComplete & {

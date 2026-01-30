@@ -9,16 +9,12 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatFileSize } from '@/lib/utils/format.utils';
-import { type MediaItem, MediaThumbnail } from '../components/media-thumbnail';
-import type {
-	BrowserItem,
-	BrowserViewProps,
-	ClickModifiers,
-	ItemContextMenuHandler,
-	SortOption,
-	TableViewConfig,
-} from '../types';
-import { ENTITY_TYPE_DISPLAY_NAMES } from '../utils';
+import { MediaThumbnail } from '../components/media-thumbnail/media-thumbnail';
+import type { MediaItem } from '../components/media-thumbnail/types';
+import type { BrowserItem } from '../types/item.types';
+import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '../types/props.types';
+import type { SortOption, TableViewConfig } from '../types/view.types';
+import { ENTITY_TYPE_DISPLAY_NAMES } from '../utils/grouping';
 
 export interface TableViewProps extends Omit<BrowserViewProps, 'config'> {
 	/** Configuración de tabla */
@@ -186,7 +182,7 @@ export function TableView({
 	const virtualRows = shouldVirtualize ? rowVirtualizer.getVirtualItems() : [];
 	const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
 	const paddingBottom =
-		virtualRows.length > 0 ? rowVirtualizer.getTotalSize() - virtualRows[virtualRows.length - 1].end : 0;
+		virtualRows.length > 0 ? rowVirtualizer.getTotalSize() - (virtualRows[virtualRows.length - 1]?.end ?? 0) : 0;
 
 	// Obtener estado de sort para una columna
 	const getSortState = (field: string): 'asc' | 'desc' | null => {

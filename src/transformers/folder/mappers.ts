@@ -19,7 +19,7 @@ import { normalizeFolderPath } from './serializers';
 const logger = serverLogger.withContext('FolderMappers');
 
 // Tipos locales equivalentes a Drizzle (migración a Drizzle)
-type DrizzleFolderCreateInput = {
+interface DrizzleFolderCreateInput {
 	id?: string;
 	name: string;
 	path: string;
@@ -35,9 +35,9 @@ type DrizzleFolderCreateInput = {
 	presetId?: string | null;
 	createdAt?: Date;
 	updatedAt?: Date;
-};
+}
 
-type DrizzleFolderUpdateInput = {
+interface DrizzleFolderUpdateInput {
 	name?: string;
 	path?: string;
 	description?: string | null;
@@ -51,9 +51,9 @@ type DrizzleFolderUpdateInput = {
 	parentId?: string | null;
 	presetId?: string | null;
 	updatedAt?: Date;
-};
+}
 
-type DrizzleFolderWhereInput = {
+interface DrizzleFolderWhereInput {
 	id?: string;
 	name?: { contains?: string };
 	description?: { contains?: string };
@@ -62,17 +62,17 @@ type DrizzleFolderWhereInput = {
 	parentId?: string | null;
 	OR?: DrizzleFolderWhereInput[];
 	images?: { some?: any };
-};
+}
 
-type DrizzleFolderFindManyArgs = {
+interface DrizzleFolderFindManyArgs {
 	skip?: number;
 	take?: number;
 	orderBy?: any;
 	where?: DrizzleFolderWhereInput;
 	include?: any;
-};
+}
 
-type DrizzleFolder = {
+interface DrizzleFolder {
 	id: string;
 	name: string;
 	path: string;
@@ -88,7 +88,7 @@ type DrizzleFolder = {
 	presetId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 /**
  * 🔄 Mapea un `FolderCreateInput` a un `DrizzleFolderCreateInput`.

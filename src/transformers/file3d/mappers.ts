@@ -3,7 +3,7 @@
 import type { File3DBase } from '@/types/entities/file3d';
 
 // Tipo local equivalente a Drizzle
-type DrizzleFile3D = {
+interface DrizzleFile3D {
 	id: string;
 	name: string;
 	path: string;
@@ -32,7 +32,7 @@ type DrizzleFile3D = {
 	boundingBox: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 /**
  * Convierte un objeto File3D de Drizzle al tipo de la aplicación

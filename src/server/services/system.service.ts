@@ -39,7 +39,7 @@ const navLogger = serverLogger.withContext('Navigation');
 const systemLogger = serverLogger.withContext('System');
 const settingsLogger = serverLogger.withContext('Settings');
 
-type NavigationStats = {
+interface NavigationStats {
 	totalImages: number;
 	totalFolders: number;
 	totalCollections: number;
@@ -55,7 +55,7 @@ type NavigationStats = {
 	totalDownloads: number;
 	topTags: Array<{ id: string; name: string; count: number }>;
 	recentActivity: unknown[];
-};
+}
 
 export interface NavigationData {
 	folders: Array<{

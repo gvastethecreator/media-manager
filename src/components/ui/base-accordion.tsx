@@ -85,10 +85,10 @@ const accordionPanelVariants = cva(
 );
 
 // Context
-type AccordionContextType = {
+interface AccordionContextType {
 	variant?: 'default' | 'outline' | 'solid';
 	indicator?: 'arrow' | 'plus' | 'none';
-};
+}
 
 const AccordionContext = React.createContext<AccordionContextType>({
 	variant: 'default',

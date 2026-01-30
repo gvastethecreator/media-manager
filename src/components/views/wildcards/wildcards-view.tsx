@@ -1,7 +1,7 @@
 import { Sparkles } from 'lucide-react';
 import { useCallback, useState } from 'react';
-import { WildcardCard } from '@/components/cards/wildcard-card';
-import { LoadingScreen } from '@/components/core/feedback';
+import { WildcardCard } from '@/components/cards/wildcard-card/wildcard-card';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';

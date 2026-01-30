@@ -18,8 +18,8 @@ const CACHE_CONFIG = {
 
 // Sistema de caché LRU optimizado
 class LRUCache<K, V> {
-	private cache: Map<K, { value: V; timestamp: number }>;
-	private maxSize: number;
+	private readonly cache: Map<K, { value: V; timestamp: number }>;
+	private readonly maxSize: number;
 
 	constructor(maxSize: number) {
 		this.cache = new Map();

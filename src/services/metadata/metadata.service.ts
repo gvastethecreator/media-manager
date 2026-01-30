@@ -29,7 +29,7 @@ const metadataLogger = serverLogger.withContext('MetadataService');
 // Cache simple en memoria para metadatos (migrado desde server actions)
 const metadataCache = new Map<string, MediaMetadata>();
 
-export type MetadataOptions = {
+export interface MetadataOptions {
 	skipExif?: boolean;
 	skipIptc?: boolean;
 	skipXmp?: boolean;
@@ -37,7 +37,7 @@ export type MetadataOptions = {
 		maxRetries: number;
 		delay: number;
 	};
-};
+}
 
 const DEFAULT_RETRY_CONFIG = {
 	maxRetries: 3,

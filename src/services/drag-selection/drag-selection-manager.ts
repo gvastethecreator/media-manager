@@ -87,13 +87,13 @@ const defaultConfig: DragSelectionConfig = {
 
 export class DragSelectionManager {
 	private config: DragSelectionConfig;
-	private state: DragSelectionState;
-	private events: DragSelectionEvents;
+	private readonly state: DragSelectionState;
+	private readonly events: DragSelectionEvents;
 	private container: HTMLElement | null = null;
-	private selectableElements: Map<string, HTMLElement> = new Map();
+	private readonly selectableElements: Map<string, HTMLElement> = new Map();
 	private animationFrame: number | null = null;
 	private scrollInterval: NodeJS.Timeout | null = null;
-	private getSelectionStore: () => SelectionState;
+	private readonly getSelectionStore: () => SelectionState;
 
 	constructor(config: Partial<DragSelectionConfig> = {}, events: DragSelectionEvents = {}) {
 		this.config = { ...defaultConfig, ...config };

@@ -148,11 +148,11 @@ const calculateAlbumStatistics = (album: Album, counts: AlbumCounts): AlbumStati
 	return {
 		totalImages: counts.images,
 		totalVideos: counts.videos,
-		totalSize: 0, // TODO: calcular desde aggregates
+		totalSize: 0, // Los álbumes no tienen campo totalSize en su tabla (usar entityAggregates si es necesario)
 		totalItems: counts.images + counts.videos,
 		totalRelations,
-		lastImageAddedAt: null, // TODO: obtener desde DB
-		lastVideoAddedAt: null, // TODO: obtener desde DB
+		lastImageAddedAt: album.lastImageAddedAt ?? null, // Obtenido desde la tabla albums
+		lastVideoAddedAt: album.lastVideoAddedAt ?? null, // Obtenido desde la tabla albums
 		completenessScore,
 		lastUpdated: new Date(),
 	};

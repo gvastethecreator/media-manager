@@ -8,10 +8,10 @@ import { z } from 'zod';
 /**
  * Tipo genérico para resolver de formularios
  */
-export type Resolver<T = unknown> = {
+export interface Resolver<T = unknown> {
 	(values: T): Promise<{ values: T; errors: Record<string, unknown> }>;
 	(values: T): { values: T; errors: Record<string, unknown> };
-};
+}
 
 /**
  * Esquema base para entidades con propiedades comunes

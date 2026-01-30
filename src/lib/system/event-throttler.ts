@@ -128,9 +128,9 @@ export class BatchThrottler<T> {
 	private processing = false;
 
 	constructor(
-		private processor: (items: T[]) => Promise<void>,
-		private delay = 1000,
-		private maxBatchSize = 50
+		private readonly processor: (items: T[]) => Promise<void>,
+		private readonly delay = 1000,
+		private readonly maxBatchSize = 50
 	) {}
 
 	/**

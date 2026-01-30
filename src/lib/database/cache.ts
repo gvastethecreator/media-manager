@@ -21,12 +21,12 @@ interface CacheOptions {
 }
 
 export class CacheManager<T> {
-	private cache: Map<string, { value: T; timestamp: number }>;
-	private ttl: number;
-	private maxSize: number;
-	private name: string;
-	private updateAgeOnGet: boolean;
-	private allowStale: boolean;
+	private readonly cache: Map<string, { value: T; timestamp: number }>;
+	private readonly ttl: number;
+	private readonly maxSize: number;
+	private readonly name: string;
+	private readonly updateAgeOnGet: boolean;
+	private readonly allowStale: boolean;
 
 	constructor(options: CacheOptions = {}) {
 		this.cache = new Map();

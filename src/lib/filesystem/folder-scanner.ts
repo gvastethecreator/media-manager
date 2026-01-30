@@ -468,7 +468,7 @@ async function processFileEntry(
 			if (fullPath.length > 1000) {
 				scannerLogger.warn('⚠️ Saltando archivo con ruta extremadamente larga:', {
 					pathLength: fullPath.length,
-					name: path.basename(fullPath).substring(0, 50) + '...',
+					name: `${path.basename(fullPath).substring(0, 50)}...`,
 				});
 				return;
 			}

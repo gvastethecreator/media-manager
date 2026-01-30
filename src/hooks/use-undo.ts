@@ -55,11 +55,12 @@ interface UseUndoOptions {
  * };
  */
 export function useUndo(options: UseUndoOptions = {}) {
-	const { defaultTtl = 30000, maxHistory = 10, showToast = true } = options;
+	const { defaultTtl = 30_000, maxHistory = 10, showToast = true } = options;
 
 	const [history, setHistory] = useState<UndoableAction[]>([]);
 	const [currentIndex, setCurrentIndex] = useState(-1);
 	const timeoutsRef = useRef<Map<string, NodeJS.Timeout>>(new Map());
+	const undoByIdRef = useRef<(id: string) => Promise<boolean>>(async () => false);
 
 	// Limpiar timeout cuando se desmonta
 	const clearActionTimeout = useCallback((id: string) => {
@@ -110,9 +111,9 @@ export function useUndo(options: UseUndoOptions = {}) {
 				toastService.success(`${action.description} completado`, {
 					action: {
 						label: 'Deshacer',
-						onClick: () => undoById(fullAction.id),
+						onClick: () => undoByIdRef.current(fullAction.id),
 					},
-					duration: Math.min(ttl, 10000), // Máximo 10 segundos visible
+					duration: Math.min(ttl, 10_000), // Máximo 10 segundos visible
 				});
 			}
 		},
@@ -163,6 +164,9 @@ export function useUndo(options: UseUndoOptions = {}) {
 		[history, clearActionTimeout]
 	);
 
+	// Update ref to avoid circular dependency
+	undoByIdRef.current = undoById;
+
 	// Rehacer la siguiente acción
 	const redo = useCallback(async (): Promise<boolean> => {
 		const nextIndex = currentIndex + 1;
@@ -188,7 +192,9 @@ export function useUndo(options: UseUndoOptions = {}) {
 
 	// Limpiar historial
 	const clear = useCallback(() => {
-		timeoutsRef.current.forEach((timeout) => clearTimeout(timeout));
+		for (const timeout of timeoutsRef.current.values()) {
+			clearTimeout(timeout);
+		}
 		timeoutsRef.current.clear();
 		setHistory([]);
 		setCurrentIndex(-1);

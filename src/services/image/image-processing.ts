@@ -12,22 +12,22 @@ import { SERVICE_NAME } from './image-utils';
 /**
  * Opciones para el procesamiento de imágenes
  */
-export type ImageProcessingOptions = {
+export interface ImageProcessingOptions {
 	quality?: number;
 	width?: number;
 	height?: number;
 	format?: 'webp' | 'jpeg' | 'png';
 	fit?: 'cover' | 'contain' | 'inside' | 'outside';
 	type?: string;
-};
+}
 
 /**
  * Resultado del procesamiento de imagen
  */
-export type ProcessedImage = {
+export interface ProcessedImage {
 	buffer: Buffer;
 	metadata: sharp.OutputInfo;
-};
+}
 
 /**
  * Re-export de configuración de calidad de thumbnails

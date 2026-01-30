@@ -1,16 +1,13 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { PanelImperativeHandle } from 'react-resizable-panels';
 import { Outlet, useLocation, useParams } from 'react-router-dom';
+import { SkipLinks } from '@/components/a11y/skip-links';
 import { FileViewer } from '@/components/features/file-viewer/file-viewer';
 import { NavPanel } from '@/components/navigation/navigation-panel';
+import { DetailsPanelTransition, NavPanelTransition } from '@/components/panels/panel-transitions';
 import { RightPanel } from '@/components/panels/right-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
 import { NavigationTransition } from '@/components/transitions/ViewTransition';
-import { 
-  NavPanelTransition, 
-  DetailsPanelTransition,
-  ResizablePanelTransition 
-} from '@/components/panels/panel-transitions';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useReindexFolder } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -236,6 +233,7 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 
 	return (
 		<div className="flex h-screen min-h-0 w-full min-w-0 bg-background text-foreground">
+			<SkipLinks />
 			<ResizablePanelGroup className="h-full" id="main-layout-v13-final" orientation="horizontal">
 				{/* Panel de navegación izquierdo con transiciones */}
 				<ResizablePanel
@@ -248,10 +246,7 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 					onResize={handleLeftPanelResize}
 					panelRef={leftPanelRef}
 				>
-					<NavPanelTransition
-						isExpanded={!isLeftCollapsed}
-						isAnimating={isLeftAnimating}
-					>
+					<NavPanelTransition isAnimating={isLeftAnimating} isExpanded={!isLeftCollapsed}>
 						<NavPanel isAnimating={isLeftAnimating} isCollapsed={isLeftCollapsed} onToggleCollapse={toggleLeftPanel} />
 					</NavPanelTransition>
 				</ResizablePanel>
@@ -284,10 +279,10 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 						)}
 						{/* Contenido principal - id para SkipLink WCAG 2.4.1 */}
 						<NavigationTransition
+							aria-label="Contenido principal"
+							className="min-h-0 min-w-0 flex-1 overflow-hidden bg-background outline-none focus:outline-none"
 							id="main-content"
 							tabIndex={-1}
-							className="min-h-0 min-w-0 flex-1 overflow-hidden bg-background outline-none focus:outline-none"
-							aria-label="Contenido principal"
 						>
 							<Outlet />
 						</NavigationTransition>
@@ -308,10 +303,7 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 							onResize={handleRightPanelResize}
 							panelRef={rightPanelRef}
 						>
-							<DetailsPanelTransition
-								isVisible={!isRightCollapsed}
-								isAnimating={isRightAnimating}
-							>
+							<DetailsPanelTransition isAnimating={isRightAnimating} isVisible={!isRightCollapsed}>
 								<RightPanel
 									isAnimating={isRightAnimating}
 									isCollapsed={isRightCollapsed}

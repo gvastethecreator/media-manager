@@ -10,14 +10,14 @@ import { instrumentedAll } from '@/lib/drizzle/instrumentation';
 /**
  * Conteos de archivos por tipo para una carpeta
  */
-export type FolderMediaCounts = {
+export interface FolderMediaCounts {
 	images: number;
 	videos: number;
 	audios: number;
 	documents: number;
 	jsonFiles: number;
 	file3Ds: number;
-};
+}
 
 /**
  * Mapa de conteos de archivos por ID de carpeta
@@ -39,11 +39,11 @@ export async function getFolderMediaCountsBatch(folderIds: string[]): Promise<Fo
 		sql`, `
 	);
 
-	type Row = {
+	interface Row {
 		type: string;
 		folderId: string;
 		count: number;
-	};
+	}
 
 	// Nota: usamos los nombres de tablas físicos según el esquema (Image, Video, Audio, Document, JsonFile, File3D)
 	const rows = await instrumentedAll<Row>(

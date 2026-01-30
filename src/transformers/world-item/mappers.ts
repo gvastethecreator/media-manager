@@ -20,7 +20,7 @@ import type {
 // Las funciones de serialización ya no se usan en este archivo
 
 // Tipos de datos para Drizzle
-type DrizzleWorldItemCreateInput = {
+interface DrizzleWorldItemCreateInput {
 	name: string;
 	description?: string | null;
 	type: string;
@@ -38,29 +38,29 @@ type DrizzleWorldItemCreateInput = {
 	tags: string;
 	isFavorite?: boolean;
 	// Las relaciones se manejan por separado en Drizzle
-};
+}
 
 type DrizzleWorldItemUpdateInput = Partial<DrizzleWorldItemCreateInput>;
 
-type DrizzleWorldItemWhereInput = {
+interface DrizzleWorldItemWhereInput {
 	OR?: Array<{ name?: { contains?: string }; description?: { contains?: string } }>;
 	type?: { in?: string[] };
 	category?: { in?: string[] };
 	rarity?: { in?: string[] };
 	isFavorite?: boolean;
 	images?: { some?: Record<string, never> } | { none?: Record<string, never> };
-};
+}
 
-type DrizzleWorldItemFindManyArgs = {
+interface DrizzleWorldItemFindManyArgs {
 	where?: DrizzleWorldItemWhereInput;
 	orderBy?: { [key: string]: 'asc' | 'desc' };
 	take?: number;
 	skip?: number;
-};
+}
 
-type DrizzleWorldItemOrderByInput = {
+interface DrizzleWorldItemOrderByInput {
 	[key: string]: 'asc' | 'desc';
-};
+}
 
 // Logger específico para este módulo
 const logger = serverLogger.withContext('WorldItemMappers');

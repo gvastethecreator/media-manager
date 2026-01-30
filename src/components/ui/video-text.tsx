@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ElementType, ReactNode, useEffect, useRef } from 'react';
+import { ReactNode, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface VideoTextProps {
@@ -48,11 +48,6 @@ export interface VideoTextProps {
 	 */
 	fontWeight?: string | number;
 	/**
-	 * The element type to render for the container
-	 * @default "div"
-	 */
-	as?: ElementType;
-	/**
 	 * Callback when video starts playing
 	 */
 	onPlay?: () => void;
@@ -80,23 +75,18 @@ export function VideoText({
 	preload = 'auto',
 	fontSize = '20vw',
 	fontWeight = 'bold',
-	as: Component = 'div',
 	onPlay,
 	onPause,
 	onEnded,
 }: VideoTextProps) {
-	const videoRef = useRef<HTMLVideoElement>(null);
 	const canvasRef = useRef<HTMLCanvasElement>(null);
-	const textRef = useRef<HTMLDivElement>(null);
+	const videoRef = useRef<HTMLVideoElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		const video = videoRef.current;
 		const canvas = canvasRef.current;
-		const textElement = textRef.current;
-		const container = containerRef.current;
-
-		if (!(video && canvas && textElement && container)) return;
+		const video = videoRef.current;
+		if (!(canvas && video)) return;
 
 		const ctx = canvas.getContext('2d');
 		if (!ctx) return;
@@ -104,38 +94,14 @@ export function VideoText({
 		let animationId: number;
 
 		const updateCanvas = () => {
-			// Get text dimensions first
-			const text = textElement.textContent || '';
-			ctx.font = `${fontWeight} ${typeof fontSize === 'number' ? `${fontSize}px` : fontSize} system-ui, -apple-system, sans-serif`;
-			const textMetrics = ctx.measureText(text);
-			const textWidth = textMetrics.width;
-			const textHeight =
-				typeof fontSize === 'number' ? fontSize : Number.parseFloat(fontSize.replace(/[^\d.]/g, '')) || 100;
+			if (video.paused || video.ended) return;
 
-			// Set canvas size to accommodate full text with padding
-			const padding = 40;
-			canvas.width = Math.max(textWidth + padding * 2, 400);
-			canvas.height = Math.max(textHeight + padding * 2, 200);
+			// Set canvas size to match video
+			canvas.width = video.videoWidth || 640;
+			canvas.height = video.videoHeight || 360;
 
-			// Clear canvas
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-			// Draw video frame to fill canvas
+			// Draw video frame
 			ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-			// Set up text masking
-			ctx.globalCompositeOperation = 'destination-in';
-
-			// Draw text as mask
-			ctx.fillStyle = 'white';
-			ctx.font = `${fontWeight} ${typeof fontSize === 'number' ? `${fontSize}px` : fontSize} system-ui, -apple-system, sans-serif`;
-			ctx.textAlign = 'center';
-			ctx.textBaseline = 'middle';
-
-			ctx.fillText(text, canvas.width / 2, canvas.height / 2);
-
-			// Reset composite operation
-			ctx.globalCompositeOperation = 'source-over';
 
 			animationId = requestAnimationFrame(updateCanvas);
 		};
@@ -145,7 +111,13 @@ export function VideoText({
 		};
 
 		const handleResize = () => {
-			updateCanvas();
+			if (containerRef.current && video.videoWidth) {
+				const rect = containerRef.current.getBoundingClientRect();
+				// Scale canvas to fit container while maintaining aspect ratio
+				const scale = Math.min(rect.width / video.videoWidth, rect.height / video.videoHeight);
+				canvas.style.width = `${video.videoWidth * scale}px`;
+				canvas.style.height = `${video.videoHeight * scale}px`;
+			}
 		};
 
 		video.addEventListener('loadeddata', handleVideoLoad);
@@ -160,13 +132,13 @@ export function VideoText({
 				cancelAnimationFrame(animationId);
 			}
 		};
-	}, [fontSize, fontWeight]);
+	}, []);
 
 	const sources = Array.isArray(src) ? src : [src];
 	const content = React.Children.toArray(children).join('');
 
 	return (
-		<Component className={cn('relative inline-block overflow-hidden', className)} ref={containerRef}>
+		<div className={cn('relative inline-block overflow-hidden', className)} ref={containerRef}>
 			{/* Hidden video element */}
 			<video
 				autoPlay={autoPlay}
@@ -197,21 +169,20 @@ export function VideoText({
 				}}
 			/>
 
-			{/* Hidden text for measuring only (not exposed to a11y tree) */}
+			{/* Text overlay with mix-blend-mode to create mask effect */}
 			<div
-				aria-hidden="true"
-				className="pointer-events-none absolute font-bold opacity-0"
-				ref={textRef}
+				className="pointer-events-none absolute inset-0 flex items-center justify-center"
 				style={{
 					fontSize: typeof fontSize === 'number' ? `${fontSize}px` : fontSize,
 					fontWeight,
+					fontFamily: 'system-ui, -apple-system, sans-serif',
+					color: 'black',
+					background: 'white',
+					mixBlendMode: 'screen',
 				}}
 			>
-				{children}
+				<span className="whitespace-nowrap">{content}</span>
 			</div>
-
-			{/* Screen reader text */}
-			<span className="sr-only">{content}</span>
-		</Component>
+		</div>
 	);
 }

@@ -198,7 +198,7 @@ export async function executePrompt(
  */
 export class PromptExecutionHistory {
 	private static instance: PromptExecutionHistory;
-	private executions: Map<string, PromptExecutionResult[]> = new Map();
+	private readonly executions: Map<string, PromptExecutionResult[]> = new Map();
 	private maxHistoryPerPrompt = 10;
 
 	private constructor() {

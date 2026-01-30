@@ -4,7 +4,9 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
-import type { BrowserItem, ItemClickHandler, ItemDoubleClickHandler, ViewMode } from '../types';
+import type { BrowserItem } from '../types/item.types';
+import type { ItemClickHandler, ItemDoubleClickHandler } from '../types/props.types';
+import type { ViewMode } from '../types/view.types';
 
 export interface UseKeyboardNavigationOptions {
 	/** Items para navegar */

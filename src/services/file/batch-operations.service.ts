@@ -20,7 +20,7 @@ type BatchEvents =
 type BatchListener<T> = (payload: T) => void;
 
 class EventEmitter {
-	private events = new Map<string, Set<BatchListener<any>>>();
+	private readonly events = new Map<string, Set<BatchListener<any>>>();
 
 	on<TEvent extends BatchEvents['type']>(
 		event: TEvent,
@@ -199,10 +199,10 @@ export interface BatchOperationError {
  * Batch File Operations Service
  */
 class BatchFileOperationsService extends EventEmitter {
-	private operations = new Map<string, BatchOperation>();
-	private queue: string[] = [];
-	private running = new Set<string>();
-	private maxConcurrentOperations = 3;
+	private readonly operations = new Map<string, BatchOperation>();
+	private readonly queue: string[] = [];
+	private readonly running = new Set<string>();
+	private readonly maxConcurrentOperations = 3;
 	private isProcessing = false;
 
 	constructor() {

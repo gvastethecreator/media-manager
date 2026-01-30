@@ -1,6 +1,6 @@
 import { lazy, Suspense } from 'react';
 import { createBrowserRouter, Outlet, useParams } from 'react-router-dom';
-import { HierarchicalFolderWrapper } from '@/components/features/file-browser-new';
+import { HierarchicalFolderWrapper } from '@/components/features/file-browser-new/wrappers/hierarchical-folder-wrapper';
 import { MainLayout } from '@/components/layout/main-layout';
 import ReindexLogsViewer from '@/components/settings/folders/reindex-logs-viewer';
 
@@ -26,7 +26,7 @@ const ConceptsView = lazy(() =>
 const DevelopmentContentView = lazy(() => import('@/components/views/development/development-content-view'));
 const DocumentsView = lazy(() => import('@/components/views/documents/documents-view'));
 const EntityCardsView = lazy(() =>
-	import('@/components/views/entity-cards').then((m) => ({ default: m.EntityCardsView }))
+	import('@/components/views/entity-cards/entity-cards-view').then((m) => ({ default: m.EntityCardsView }))
 );
 const FavoritesView = lazy(() =>
 	import('@/components/views/favorites/favorites-view').then((m) => ({ default: m.FavoritesView }))

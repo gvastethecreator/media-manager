@@ -13,7 +13,7 @@ import { serverLogger } from '@/lib/logger/server-logger';
  */
 export class OptimizedStatsService {
 	private static instance: OptimizedStatsService;
-	private logger = serverLogger.withContext('OptimizedStatsService');
+	private readonly logger = serverLogger.withContext('OptimizedStatsService');
 
 	private constructor() {
 		// Constructor vacío - ya no necesitamos PrismaClient

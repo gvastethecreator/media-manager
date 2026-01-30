@@ -1,8 +1,8 @@
 import { BookMarked } from 'lucide-react';
 import { memo } from 'react';
-import { CollectionCard } from '@/components/cards/collection-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { CollectionCard } from '@/components/cards/collection-card/collection-card';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

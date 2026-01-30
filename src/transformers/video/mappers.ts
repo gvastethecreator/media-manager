@@ -106,7 +106,7 @@ export function toVideoWithStats(video: VideoBase): VideoWithStats {
 const logger = serverLogger.withContext('VideoMapper');
 
 // Tipos de datos para Drizzle
-type DrizzleCreateVideoData = {
+interface DrizzleCreateVideoData {
 	name: string;
 	description?: string | null;
 	path: string;
@@ -123,11 +123,11 @@ type DrizzleCreateVideoData = {
 	isFavorite?: boolean;
 	isHidden?: boolean;
 	folderId: string;
-};
+}
 
 type DrizzleUpdateVideoData = Partial<Omit<DrizzleCreateVideoData, 'folderId'>>;
 
-type DrizzleWhereFilter = {
+interface DrizzleWhereFilter {
 	AND?: DrizzleWhereFilter[];
 	OR?: DrizzleWhereFilter[];
 	name?: { contains?: string; equals?: string };
@@ -141,11 +141,11 @@ type DrizzleWhereFilter = {
 	size?: { gte?: number; lte?: number };
 	metadata?: { not?: null } | null;
 	thumbnail?: { not?: null } | null;
-};
+}
 
-type DrizzleFindManyArgs = {
+interface DrizzleFindManyArgs {
 	where?: DrizzleWhereFilter;
-};
+}
 
 /**
  * 🔄 Mapea un `VideoCreateInput` a datos de creación de Drizzle.

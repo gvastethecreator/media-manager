@@ -7,7 +7,7 @@
 /**
  * 🟫 Tipo base de JsonFile directamente desde el schema de Drizzle.
  */
-export type JsonFileBase = {
+export interface JsonFileBase {
 	id: string;
 	name: string;
 	path: string;
@@ -26,7 +26,7 @@ export type JsonFileBase = {
 	depth: number | null;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 import { EntityStats } from '../entity.types';
 

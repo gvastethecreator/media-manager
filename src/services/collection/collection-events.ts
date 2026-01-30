@@ -5,7 +5,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats/stats.service';
 import type { CollectionBase, CollectionWithStats } from '@/types/entities/collection';
 
 const logger = serverLogger.withContext('CollectionEvents');

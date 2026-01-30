@@ -4,16 +4,9 @@
  */
 
 import { createContext, useContext } from 'react';
-import type {
-	BrowserItem,
-	BrowserItemGroup,
-	ItemClickHandler,
-	ItemDoubleClickHandler,
-	PaginationState,
-	SortOption,
-	ViewConfig,
-	ViewMode,
-} from '../types';
+import type { BrowserItem, BrowserItemGroup } from '../types/item.types';
+import type { ItemClickHandler, ItemDoubleClickHandler } from '../types/props.types';
+import type { PaginationState, SortOption, ViewConfig, ViewMode } from '../types/view.types';
 
 /**
  * Estado del File Browser

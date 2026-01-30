@@ -23,8 +23,8 @@ export interface KeyboardShortcutConfig {
 export type ShortcutHandler = (event: KeyboardEvent, config: KeyboardShortcutConfig) => void | Promise<void>;
 
 export class KeyboardShortcutManager {
-	private shortcuts: Map<string, KeyboardShortcutConfig> = new Map();
-	private handlers: Map<string, ShortcutHandler> = new Map();
+	private readonly shortcuts: Map<string, KeyboardShortcutConfig> = new Map();
+	private readonly handlers: Map<string, ShortcutHandler> = new Map();
 	private isEnabled = true;
 	private currentContext = 'global';
 

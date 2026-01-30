@@ -1,7 +1,7 @@
 import { MapPin } from 'lucide-react';
 import { useCallback, useState } from 'react';
-import { PlaceCard } from '@/components/cards/place-card';
-import { LoadingScreen } from '@/components/core/feedback';
+import { PlaceCard } from '@/components/cards/place-card/place-card';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';

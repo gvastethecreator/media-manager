@@ -10,7 +10,7 @@ import { serverLogger } from '../../lib/logger/server-logger';
 import type { CharacterAssociationStats, CharacterWithStats } from '../../types/entities/character';
 
 // Tipos locales equivalentes a Drizzle
-type DrizzleCharacterWithCounts = {
+interface DrizzleCharacterWithCounts {
 	id: string;
 	name: string;
 	description?: string | null;
@@ -52,9 +52,9 @@ type DrizzleCharacterWithCounts = {
 		relatedCharacters?: number;
 		relatedTo?: number;
 	};
-};
+}
 
-type DrizzleCharacterCreateInput = {
+interface DrizzleCharacterCreateInput {
 	name: string;
 	description?: string | null;
 	emoji?: string | null;
@@ -73,7 +73,7 @@ type DrizzleCharacterCreateInput = {
 	notes?: string | null;
 	featuredImage?: string | null;
 	parentId?: string | null;
-};
+}
 
 type DrizzleCharacterUpdateInput = Partial<DrizzleCharacterCreateInput>;
 

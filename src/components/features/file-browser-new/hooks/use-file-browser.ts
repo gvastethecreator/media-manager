@@ -8,17 +8,12 @@ import { useNavigation } from '@/components/navigation/hooks/navigation.utils';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { DEFAULT_PAGE_SIZE, VIEW_CONFIGS } from '../core/constants';
-import type {
-	BrowserItem,
-	BrowserItemGroup,
-	ItemClickHandler,
-	ItemDoubleClickHandler,
-	PaginationState,
-	SortOption,
-	ViewConfig,
-	ViewMode,
-} from '../types';
-import { applyGrouping, filterBySearch, filterSynthetic, flattenGroups, sortWithFoldersFirst } from '../utils';
+import type { BrowserItem, BrowserItemGroup } from '../types/item.types';
+import type { ItemClickHandler, ItemDoubleClickHandler } from '../types/props.types';
+import type { PaginationState, SortOption, ViewConfig, ViewMode } from '../types/view.types';
+import { filterBySearch, filterSynthetic } from '../utils/filtering';
+import { applyGrouping, flattenGroups } from '../utils/grouping';
+import { sortWithFoldersFirst } from '../utils/sorting';
 import { useDataSource } from './use-data-source';
 import { usePagination } from './use-pagination';
 import { useSelection } from './use-selection';

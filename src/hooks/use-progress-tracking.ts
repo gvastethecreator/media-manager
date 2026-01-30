@@ -47,8 +47,8 @@ export interface UseProgressTrackingReturn {
 
 // Internal service simulation
 class ProgressTrackingServiceImpl {
-	private operations = new Map<string, ProgressOperation>();
-	private eventListeners = new Map<string, ((operation: ProgressOperation) => void)[]>();
+	private readonly operations = new Map<string, ProgressOperation>();
+	private readonly eventListeners = new Map<string, ((operation: ProgressOperation) => void)[]>();
 
 	generateId(): string {
 		return `op_${Date.now()}_${Math.random().toString(36).slice(2, 11)}`;

@@ -3,7 +3,10 @@ import { devtools } from 'zustand/middleware';
 import { immer } from 'zustand/middleware/immer';
 import { apiClient } from '@/lib/api/client';
 
-type MinimalItem = { id: string; label: string };
+interface MinimalItem {
+	id: string;
+	label: string;
+}
 
 type EntityKey =
 	| 'albums'
@@ -19,21 +22,21 @@ type EntityKey =
 	| 'wildcards'
 	| 'worldItems';
 
-type CatalogSection = {
+interface CatalogSection {
 	items: MinimalItem[];
 	loading: boolean;
 	loaded: boolean;
 	error?: string;
-};
+}
 
 type CatalogState = Record<EntityKey, CatalogSection> & {
 	lastPreloadAt?: number;
 };
 
-type CatalogActions = {
+interface CatalogActions {
 	preload: () => Promise<void>;
 	getItems: (key: EntityKey) => MinimalItem[];
-};
+}
 
 export type EntityCatalogStore = CatalogState & CatalogActions;
 

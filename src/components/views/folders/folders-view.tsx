@@ -1,7 +1,7 @@
 import { RefreshCw } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FolderCard } from '@/components/cards/folder-card';
+import { FolderCard } from '@/components/cards/folder-card/folder-card';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
 import { useCreateFolder, useFolders } from '@/lib/api/folders';

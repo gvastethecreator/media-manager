@@ -539,7 +539,10 @@ export async function reindexAllFoldersThreePasses(
 	}
 
 	// 2) Escanear TODAS las carpetas (RECURSIVO para incluir archivos en subcarpetas)
-	type Item = { filePath: string; folderId: string };
+	interface Item {
+		filePath: string;
+		folderId: string;
+	}
 	const items: Item[] = [];
 	for (const f of stillExisting) {
 		try {

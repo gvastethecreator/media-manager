@@ -1,6 +1,19 @@
 // Se reemplaza react-markdown por el visor de @uiw/react-md-editor
 import MDEditor from '@uiw/react-md-editor';
-import { BarChart, Bug, Code2, FileCode2, Folder, Gauge, Image, Loader2, RefreshCw, Server, Sparkles, Tag } from 'lucide-react';
+import {
+	BarChart,
+	Bug,
+	Code2,
+	FileCode2,
+	Folder,
+	Gauge,
+	Image,
+	Loader2,
+	RefreshCw,
+	Server,
+	Sparkles,
+	Tag,
+} from 'lucide-react';
 import { ScannedImagesSettings } from '@/components/settings/image/scanned-images-settings';
 import { FilesSettingsModern } from '@/components/settings/modern/files-settings-modern';
 import { TaxonomySettingsModern } from '@/components/settings/modern/taxonomy-settings-modern';
@@ -11,7 +24,11 @@ import { HoverCard, HoverCardContent, HoverCardTrigger } from '@/components/ui/h
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { ViewProps } from '../types';
-import { FeatureCard, IssueCard, MetricCard, ProcessingMetricCard, ServiceCard } from './cards';
+import { FeatureCard } from './cards/feature-card';
+import { IssueCard } from './cards/issue-card';
+import { MetricCard } from './cards/metric-card';
+import { ProcessingMetricCard } from './cards/processing-metric-card';
+import { ServiceCard } from './cards/service-card';
 import {
 	FileDistributionChart,
 	IndexingActivityChart,
@@ -19,10 +36,10 @@ import {
 	SystemPerformanceChart,
 } from './charts/system-charts';
 import { SystemMetricsPanel } from './charts/tech-metrics';
-import { TransitionsDemo } from './transitions-demo';
 import { DOCUMENTATION_FILES, useDocumentation } from './hooks/use-documentation';
 import { useFeaturesIssues } from './hooks/use-features-issues';
 import { useSystemStats } from './hooks/use-system-stats';
+import { TransitionsDemo } from './transitions-demo';
 
 export function DevelopmentView(_props: ViewProps) {
 	const { metrics, processingMetrics, isLoading: isLoadingStats, refreshData: refreshStats } = useSystemStats();

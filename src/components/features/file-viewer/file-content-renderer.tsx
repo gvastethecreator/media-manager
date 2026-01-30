@@ -9,6 +9,7 @@ import { memo, useEffect, useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import type { ImageItem } from './file-viewer.types';
+import { JsonAdvancedViewer } from './json-advanced-viewer';
 
 export interface FileContentRendererProps {
 	/** Item a renderizar */
@@ -234,27 +235,18 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 }
 
 /**
- * Renderizador de JSON con syntax highlighting básico
+ * Renderizador de JSON con visualizador avanzado multi-modo
  */
 function JsonRenderer({ item, contentUrl, onError, onLoad, className }: FileContentRendererProps) {
 	const [jsonContent, setJsonContent] = useState<string | null>(null);
-	const [parseError, setParseError] = useState<string | null>(null);
 
 	useEffect(() => {
 		if (contentUrl) {
 			fetch(contentUrl)
 				.then((res) => res.text())
 				.then((text) => {
-					try {
-						// Parsear y re-formatear para pretty print
-						const parsed = JSON.parse(text);
-						setJsonContent(JSON.stringify(parsed, null, 2));
-						onLoad?.();
-					} catch {
-						setJsonContent(text);
-						setParseError('No es un JSON válido');
-						onLoad?.();
-					}
+					setJsonContent(text);
+					onLoad?.();
 				})
 				.catch(() => onError?.());
 		}
@@ -270,14 +262,7 @@ function JsonRenderer({ item, contentUrl, onError, onLoad, className }: FileCont
 
 	return (
 		<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)}>
-			<div className="h-full w-full max-w-4xl overflow-auto rounded-lg bg-zinc-900 shadow-2xl">
-				{parseError && (
-					<div className="sticky top-0 bg-warning/20 px-4 py-2 text-sm text-yellow-300">⚠️ {parseError}</div>
-				)}
-				<pre className="p-6 font-mono text-sm leading-relaxed">
-					<code className="text-green-400">{jsonContent}</code>
-				</pre>
-			</div>
+			<JsonAdvancedViewer className="h-full w-full max-w-6xl" content={jsonContent} fileName={item.name} />
 		</div>
 	);
 }

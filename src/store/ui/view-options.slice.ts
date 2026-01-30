@@ -24,16 +24,16 @@ export type PerViewConfig =
 	| ({ kind: 'grid' | 'masonry' | 'cards' } & GridLikeViewConfig)
 	| ({ kind: 'list' | 'table' } & ListLikeViewConfig);
 
-export type SortOption = {
+export interface SortOption {
 	field: string;
 	direction: 'asc' | 'desc';
-};
+}
 
-export type FilterOption = {
+export interface FilterOption {
 	field: string;
 	value: string | number | boolean | null;
 	operator: 'eq' | 'neq' | 'gt' | 'gte' | 'lt' | 'lte' | 'contains' | 'startsWith' | 'endsWith';
-};
+}
 
 export interface ViewOptionsState {
 	viewMode: ViewMode;
@@ -46,6 +46,12 @@ export interface ViewOptionsState {
 	useCanvasRendering: boolean;
 	includeSubfolders: boolean;
 	backgroundColor: string;
+	showThumbnails: boolean;
+	showMetadata: boolean;
+	showTags: boolean;
+	showStats: boolean;
+	enableAnimations: boolean;
+	animationDuration: number;
 	pagination: {
 		mode: PaginationMode;
 		pageSize: number;
@@ -88,6 +94,17 @@ export interface ViewOptionsState {
 	setInfiniteScroll: (patch: Partial<ViewOptionsState['infiniteScroll']>) => void;
 	toggleInfiniteScrollEnabled: () => void;
 	toggleInfiniteScrollAutoLoad: () => void;
+	setShowThumbnails: (enabled: boolean) => void;
+	toggleShowThumbnails: () => void;
+	setShowMetadata: (enabled: boolean) => void;
+	toggleShowMetadata: () => void;
+	setShowTags: (enabled: boolean) => void;
+	toggleShowTags: () => void;
+	setShowStats: (enabled: boolean) => void;
+	toggleShowStats: () => void;
+	setEnableAnimations: (enabled: boolean) => void;
+	toggleEnableAnimations: () => void;
+	setAnimationDuration: (duration: number) => void;
 	resetFilters: () => void;
 	resetAll: () => void;
 	resetLocalStorage: () => void;
@@ -104,6 +121,12 @@ const DEFAULT_STATE = {
 	useCanvasRendering: false,
 	includeSubfolders: true,
 	backgroundColor: 'transparent',
+	showThumbnails: true,
+	showMetadata: true,
+	showTags: true,
+	showStats: true,
+	enableAnimations: true,
+	animationDuration: 300,
 	pagination: {
 		mode: 'infinite' as PaginationMode,
 		pageSize: 20,
@@ -157,7 +180,24 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 				set({ viewMode: mode });
 			},
 
-			setItemSize: (size: number) => set({ itemSize: size }),
+			setItemSize: (size: number) =>
+				set((state: ViewOptionsState) => {
+					const viewKey = state.viewMode as ViewKey;
+					const currentView = state.views[viewKey];
+
+					// Sincronizar itemSize global y el de la vista actual
+					const updates: Partial<ViewOptionsState> = { itemSize: size };
+
+					// Si la vista actual tiene itemSize (grid, masonry, cards), actualizarlo también
+					if (currentView && 'itemSize' in currentView) {
+						updates.views = {
+							...state.views,
+							[viewKey]: { ...currentView, itemSize: size } as PerViewConfig,
+						};
+					}
+
+					return updates;
+				}),
 
 			setSortOptions: (options: SortOption[]) =>
 				set((state: ViewOptionsState) => ({ sortOptions: options, sortVersion: state.sortVersion + 1 })),
@@ -241,6 +281,23 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 					infiniteScroll: { ...state.infiniteScroll, autoLoad: !state.infiniteScroll.autoLoad },
 				})),
 
+			setShowThumbnails: (enabled: boolean) => set({ showThumbnails: enabled }),
+			toggleShowThumbnails: () => set((state: ViewOptionsState) => ({ showThumbnails: !state.showThumbnails })),
+
+			setShowMetadata: (enabled: boolean) => set({ showMetadata: enabled }),
+			toggleShowMetadata: () => set((state: ViewOptionsState) => ({ showMetadata: !state.showMetadata })),
+
+			setShowTags: (enabled: boolean) => set({ showTags: enabled }),
+			toggleShowTags: () => set((state: ViewOptionsState) => ({ showTags: !state.showTags })),
+
+			setShowStats: (enabled: boolean) => set({ showStats: enabled }),
+			toggleShowStats: () => set((state: ViewOptionsState) => ({ showStats: !state.showStats })),
+
+			setEnableAnimations: (enabled: boolean) => set({ enableAnimations: enabled }),
+			toggleEnableAnimations: () => set((state: ViewOptionsState) => ({ enableAnimations: !state.enableAnimations })),
+
+			setAnimationDuration: (duration: number) => set({ animationDuration: duration }),
+
 			resetFilters: () =>
 				set({
 					filterOptions: [],
@@ -249,10 +306,9 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 
 			resetAll: () => set(DEFAULT_STATE),
 
-			// Función de debug para limpiar localStorage completamente
 			resetLocalStorage: () => {
 				localStorage.removeItem('view-options-storage');
-				set(DEFAULT_STATE);
+				window.location.reload();
 			},
 		}),
 		{
@@ -268,6 +324,13 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 				merged.includeSubfolders ??= DEFAULT_STATE.includeSubfolders;
 				merged.groupByEntityType ??= DEFAULT_STATE.groupByEntityType;
 				merged.views = { ...DEFAULT_STATE.views, ...(persisted?.views ?? {}) };
+				// defaults para settings visuales
+				merged.showThumbnails ??= DEFAULT_STATE.showThumbnails;
+				merged.showMetadata ??= DEFAULT_STATE.showMetadata;
+				merged.showTags ??= DEFAULT_STATE.showTags;
+				merged.showStats ??= DEFAULT_STATE.showStats;
+				merged.enableAnimations ??= DEFAULT_STATE.enableAnimations;
+				merged.animationDuration ??= DEFAULT_STATE.animationDuration;
 				return merged;
 			},
 		}

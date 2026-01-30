@@ -1,8 +1,8 @@
 import { ZapIcon } from 'lucide-react';
 import { memo, useMemo } from 'react';
-import { PromptCard } from '@/components/cards/prompt-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { PromptCard } from '@/components/cards/prompt-card/prompt-card';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/animejs-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { usePrompts } from '@/lib/api/prompts';

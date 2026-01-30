@@ -1,7 +1,7 @@
 import { AlertCircle, MessageSquare } from 'lucide-react';
 import { useCallback, useState } from 'react';
-import { MemoizedPromptCard } from '@/components/cards/prompt-card';
-import { EmptyState } from '@/components/core/data-display';
+import { PromptCard } from '@/components/cards/prompt-card/prompt-card';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
@@ -177,7 +177,7 @@ export function PromptsView({ isVisible }: ViewProps) {
 								key={prompt.id}
 								transition={{ duration: 0.3, delay: index * 0.05 }}
 							>
-								<MemoizedPromptCard
+								<PromptCard
 									className={prompt.id === selectedPrompt?.id ? 'ring-2 ring-primary' : ''}
 									onClick={() => handlePromptSelect(prompt.id)}
 									prompt={prompt}

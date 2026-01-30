@@ -3,29 +3,35 @@
  * @module file-browser-new/file-browser
  */
 
-import { createLayout } from 'animejs';
+// import { createLayout } from 'animejs'; // TODO: Revisar si es necesario
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { flushSync } from 'react-dom';
 import { useToast } from '@/components/ui/use-toast';
+import { useMove } from '@/hooks/use-move';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { cn } from '@/lib/utils';
-import { shouldReduceMotion } from '@/lib/view-transition/utils';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import {
-	type ContextMenuAction,
-	type ContextMenuPayload,
-	FileBrowserEmptyState,
-	FileBrowserErrorState,
-	FileBrowserLoadingState,
-	FileBrowserStatusBar,
-	FileBrowserToolbar,
-	ItemContextMenu,
-	LoadMoreButton,
-} from './components';
-import { actionToEntityType, useAddToEntity, useFileBrowser } from './hooks';
+import { DeleteDialog } from './components/delete-dialog';
+import { FileBrowserEmptyState } from './components/empty-state';
+import { FileBrowserErrorState } from './components/error-state';
+import { type ContextMenuAction, type ContextMenuPayload, ItemContextMenu } from './components/item-context-menu';
+import { LoadMoreButton } from './components/load-more-button';
+import { FileBrowserLoadingState } from './components/loading-state';
+import { MoveDialog } from './components/move-dialog';
+import { RenameDialog } from './components/rename-dialog';
+import { FileBrowserStatusBar } from './components/status-bar';
+import { FileBrowserToolbar } from './components/toolbar';
+import { actionToEntityType, useAddToEntity } from './hooks/use-add-to-entity';
+import { useDelete } from './hooks/use-delete';
+import { useFileBrowser } from './hooks/use-file-browser';
 import { useKeyboardNavigation } from './hooks/use-keyboard';
-import type { BrowserItem, FileBrowserProps } from './types';
-import { CardsView, GridView, ListView, MasonryView, TableView } from './views';
+import { useRename } from './hooks/use-rename';
+import type { BrowserItem } from './types/item.types';
+import type { FileBrowserProps } from './types/props.types';
+import { CardsView } from './views/cards';
+import { GridView } from './views/grid';
+import { ListView } from './views/list';
+import { MasonryView } from './views/masonry';
+import { TableView } from './views/table';
 import './styles/items.css';
 
 // Estado del menú contextual
@@ -51,8 +57,14 @@ export function FileBrowser({
 	// Ref del contenedor principal
 	const containerRef = useRef<HTMLElement>(null);
 	const layoutRootRef = useRef<HTMLElement | null>(null);
-	const layoutRef = useRef<ReturnType<typeof createLayout> | null>(null);
+	// TODO: createLayout no está disponible en animejs v4+, investigar alternativa
+	// const layoutRef = useRef<ReturnType<typeof createLayout> | null>(null);
+	const layoutRef = useRef<{ destroy: () => void } | null>(null);
 	const { toast } = useToast();
+
+	const { renameItem, renameBatch, isLoading: isRenaming } = useRename();
+	const { deleteItems, isLoading: isDeleting } = useDelete();
+	const { moveFiles, isLoading: isMoving } = useMove();
 
 	// Estado del menú contextual
 	const [contextMenu, setContextMenu] = useState<ContextMenuState>({
@@ -60,6 +72,17 @@ export function FileBrowser({
 		position: null,
 		targetItem: null,
 	});
+
+	// Estado para modales de acciones
+	const [renameModal, setRenameModal] = useState<{ isOpen: boolean; items: BrowserItem[] }>({
+		isOpen: false,
+		items: [],
+	});
+	const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; items: BrowserItem[] }>({
+		isOpen: false,
+		items: [],
+	});
+	const [moveModal, setMoveModal] = useState<{ isOpen: boolean; items: BrowserItem[] }>({ isOpen: false, items: [] });
 
 	// Hook principal
 	const browser = useFileBrowser({
@@ -207,12 +230,8 @@ export function FileBrowser({
 					}
 					break;
 				case 'rename':
-					// TODO: Implementar modal de renombrar
-					if (payload.selected.length === 1) {
-						toast({
-							title: '✏️ Renombrar',
-							description: 'Función próximamente disponible',
-						});
+					if (payload.selected.length > 0) {
+						setRenameModal({ isOpen: true, items: payload.selected });
 					}
 					break;
 				case 'download':
@@ -234,12 +253,14 @@ export function FileBrowser({
 					}
 					break;
 				case 'delete':
-					// TODO: Implementar confirmación y eliminación
-					toast({
-						variant: 'destructive',
-						title: '🗑️ Eliminar',
-						description: 'Función próximamente disponible (requiere confirmación)',
-					});
+					if (payload.selected.length > 0) {
+						setDeleteModal({ isOpen: true, items: payload.selected });
+					}
+					break;
+				case 'move':
+					if (payload.selected.length > 0) {
+						setMoveModal({ isOpen: true, items: payload.selected });
+					}
 					break;
 				default:
 					// Acciones de "Agregar a..."
@@ -294,55 +315,28 @@ export function FileBrowser({
 		layoutRootRef.current = el;
 
 		if (layoutRef.current) {
-			layoutRef.current.revert();
+			layoutRef.current.destroy();
 			layoutRef.current = null;
 		}
 
 		if (!el) return;
 
-		layoutRef.current = createLayout(el, {
-			children: ['[data-layout-item="true"]'],
-			properties: ['opacity', 'transform'],
-			enterFrom: {
-				opacity: 0,
-				transform: 'translateY(8px) scale(0.98)',
-			},
-			leaveTo: {
-				opacity: 0,
-				transform: 'translateY(-8px) scale(0.98)',
-			},
-		});
+		// TODO: createLayout no está disponible en animejs v4+
+		// Se necesita implementar una alternativa para animaciones de layout
+		// layoutRef.current = createLayout(el, { ... });
 	}, []);
 
 	useEffect(() => {
 		return () => {
-			layoutRef.current?.revert();
+			layoutRef.current?.destroy();
 			layoutRef.current = null;
 		};
 	}, []);
 
 	const runLayoutUpdate = useCallback((action: () => void, options?: { duration?: number; ease?: string }) => {
-		const layout = layoutRef.current;
-		if (!layout || shouldReduceMotion()) {
-			action();
-			return;
-		}
-
-		layout.update(
-			() => {
-				flushSync(() => {
-					action();
-				});
-			},
-			{
-				duration: options?.duration ?? 220,
-				ease: options?.ease ?? 'out(3)',
-				delay: (el, index) => {
-					const orderValue = Number((el as HTMLElement).dataset.layoutOrder ?? index);
-					return Math.min(orderValue * 4, 200);
-				},
-			}
-		);
+		// TODO: createLayout no está disponible en animejs v4+
+		// Se necesita implementar alternativa para animaciones de layout
+		action();
 	}, []);
 
 	useEffect(() => {
@@ -544,6 +538,52 @@ export function FileBrowser({
 				onClose={handleCloseContextMenu}
 				position={contextMenu.position}
 				selectedItems={browser.linearItems.filter((item) => browser.selectedSet.has(item.id))}
+			/>
+
+			{/* Modal de renombrar */}
+			<RenameDialog
+				isLoading={isRenaming}
+				isOpen={renameModal.isOpen}
+				items={renameModal.items}
+				onCancel={() => setRenameModal({ isOpen: false, items: [] })}
+				onConfirm={async (newNames) => {
+					if (newNames.length === 1) {
+						await renameItem(newNames[0].id, newNames[0].newName);
+					} else {
+						const items = newNames.map((n) => {
+							const item = renameModal.items.find((i) => i.id === n.id);
+							return { id: n.id, currentName: item?.name || '' };
+						});
+						await renameBatch(items, newNames[0].newName); // Usar el patrón del primer nombre
+					}
+					setRenameModal({ isOpen: false, items: [] });
+				}}
+			/>
+
+			{/* Modal de eliminar */}
+			<DeleteDialog
+				isLoading={isDeleting}
+				isOpen={deleteModal.isOpen}
+				items={deleteModal.items}
+				onCancel={() => setDeleteModal({ isOpen: false, items: [] })}
+				onConfirm={async () => {
+					const ids = deleteModal.items.map((i) => i.id);
+					await deleteItems(ids);
+					setDeleteModal({ isOpen: false, items: [] });
+				}}
+			/>
+
+			{/* Modal de mover */}
+			<MoveDialog
+				isLoading={isMoving}
+				isOpen={moveModal.isOpen}
+				items={moveModal.items}
+				onCancel={() => setMoveModal({ isOpen: false, items: [] })}
+				onConfirm={async (targetFolderId) => {
+					const fileIds = moveModal.items.map((i) => i.id);
+					await moveFiles({ fileIds, targetFolderId });
+					setMoveModal({ isOpen: false, items: [] });
+				}}
 			/>
 		</section>
 	);

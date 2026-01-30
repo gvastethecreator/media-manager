@@ -10,10 +10,10 @@ const HEARTBEAT_TIMEOUT = 30_000;
 const MAX_RECONNECT_ATTEMPTS = 5;
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:4000';
 
-type EventSourceMessage = {
+interface EventSourceMessage {
 	data: string;
 	type?: string;
-};
+}
 
 export function useThumbnailEvents() {
 	const { setProcessing, setStats, setError, setProcessStatus } = useThumbnailStore();

@@ -1,8 +1,8 @@
 import { Album as AlbumIcon, Edit, Trash2 } from 'lucide-react';
 import React from 'react';
-import { AlbumCard } from '@/components/cards/album-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { AlbumCard } from '@/components/cards/album-card/album-card';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import {
 	AlertDialog,
 	AlertDialogAction,

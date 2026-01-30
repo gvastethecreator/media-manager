@@ -5,7 +5,7 @@
  */
 
 // Tipos locales para mock (equivalentes a Drizzle)
-type MockImage = {
+interface MockImage {
 	id: string;
 	name: string | null;
 	path: string;
@@ -25,9 +25,9 @@ type MockImage = {
 	addedAt: Date;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
-type MockTag = {
+interface MockTag {
 	id: string;
 	name: string;
 	description: string | null;
@@ -39,9 +39,9 @@ type MockTag = {
 	isFavorite: boolean;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
-type MockCollection = {
+interface MockCollection {
 	id: string;
 	name: string;
 	description: string | null;
@@ -53,9 +53,9 @@ type MockCollection = {
 	userId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
-type MockAlbum = {
+interface MockAlbum {
 	id: string;
 	name: string;
 	description: string | null;
@@ -67,7 +67,7 @@ type MockAlbum = {
 	userId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 /**
  * Datos mock para imágenes

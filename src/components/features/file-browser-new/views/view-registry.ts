@@ -4,7 +4,8 @@
  */
 
 import type { ComponentType } from 'react';
-import type { BrowserViewProps, ViewConfig, ViewMode } from '../types';
+import type { BrowserViewProps } from '../types/props.types';
+import type { ViewConfig, ViewMode } from '../types/view.types';
 import { CardsView } from './cards';
 import { GridView } from './grid';
 import { ListView } from './list';

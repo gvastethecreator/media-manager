@@ -5,7 +5,8 @@
 
 import { useCallback, useMemo } from 'react';
 import { useSelectionStore } from '@/store/selection.store';
-import type { BrowserItem, ClickModifiers } from '../types';
+import type { BrowserItem } from '../types/item.types';
+import type { ClickModifiers } from '../types/props.types';
 
 export interface UseSelectionOptions {
 	/** Items disponibles para selección */

@@ -6,13 +6,13 @@
 
 import type { ProcessStatus } from '@/types/folders';
 
-export type SimpleStats = {
+export interface SimpleStats {
 	totalFiles: number;
 	processed: number;
 	successful: number;
 	failed: number;
 	errors: Array<{ file: string; error: string }>;
-};
+}
 
 export type ProgressEmitter = (status: ProcessStatus) => void;
 

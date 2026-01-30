@@ -10,7 +10,7 @@ import { getEntityTypeFromExtension } from './utils/file-info.utils';
  */
 export class FileEntityMapperService {
 	private static instance: FileEntityMapperService;
-	private core: FileEntityMapperCore;
+	private readonly core: FileEntityMapperCore;
 
 	private constructor() {
 		this.core = FileEntityMapperCore.getInstance();

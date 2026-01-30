@@ -111,12 +111,12 @@ export interface ServerLoggerOptions {
 }
 
 export class ServerLogger {
-	private context: string;
-	private timestamp: boolean;
-	private level: LogLevel;
-	private showRequestId: boolean;
-	private showPerformance: boolean;
-	private showMemoryUsage: boolean;
+	private readonly context: string;
+	private readonly timestamp: boolean;
+	private readonly level: LogLevel;
+	private readonly showRequestId: boolean;
+	private readonly showPerformance: boolean;
+	private readonly showMemoryUsage: boolean;
 
 	constructor(options: ServerLoggerOptions = {}) {
 		this.context = options.context || 'Server';

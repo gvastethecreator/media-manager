@@ -32,7 +32,10 @@ type File3DRow = typeof file3Ds.$inferSelect;
 type DocumentRow = typeof documents.$inferSelect;
 type JsonFileRow = typeof jsonFiles.$inferSelect;
 type UploadedImageRow = typeof uploadedImages.$inferSelect;
-type ListOptions = { limit?: number; offset?: number };
+interface ListOptions {
+	limit?: number;
+	offset?: number;
+}
 type MutableInput = Record<string, unknown>;
 
 // ============= File3D Service =============

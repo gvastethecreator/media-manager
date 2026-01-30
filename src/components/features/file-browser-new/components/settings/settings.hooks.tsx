@@ -29,6 +29,25 @@ export function useSettingsBindings() {
 	const resetAll = useViewOptionsStore((s) => s.resetAll);
 	const resetLocalStorage = useViewOptionsStore((s) => s.resetLocalStorage);
 
+	// Settings visuales
+	const showThumbnails = useViewOptionsStore((s) => s.showThumbnails);
+	const setShowThumbnails = useViewOptionsStore((s) => s.setShowThumbnails);
+	const toggleShowThumbnails = useViewOptionsStore((s) => s.toggleShowThumbnails);
+	const showMetadata = useViewOptionsStore((s) => s.showMetadata);
+	const setShowMetadata = useViewOptionsStore((s) => s.setShowMetadata);
+	const toggleShowMetadata = useViewOptionsStore((s) => s.toggleShowMetadata);
+	const showTags = useViewOptionsStore((s) => s.showTags);
+	const setShowTags = useViewOptionsStore((s) => s.setShowTags);
+	const toggleShowTags = useViewOptionsStore((s) => s.toggleShowTags);
+	const showStats = useViewOptionsStore((s) => s.showStats);
+	const setShowStats = useViewOptionsStore((s) => s.setShowStats);
+	const toggleShowStats = useViewOptionsStore((s) => s.toggleShowStats);
+	const enableAnimations = useViewOptionsStore((s) => s.enableAnimations);
+	const setEnableAnimations = useViewOptionsStore((s) => s.setEnableAnimations);
+	const toggleEnableAnimations = useViewOptionsStore((s) => s.toggleEnableAnimations);
+	const animationDuration = useViewOptionsStore((s) => s.animationDuration);
+	const setAnimationDuration = useViewOptionsStore((s) => s.setAnimationDuration);
+
 	return {
 		viewMode,
 		setViewMode,
@@ -56,6 +75,24 @@ export function useSettingsBindings() {
 		resetFilters,
 		resetAll,
 		resetLocalStorage,
+		// Settings visuales
+		showThumbnails,
+		setShowThumbnails,
+		toggleShowThumbnails,
+		showMetadata,
+		setShowMetadata,
+		toggleShowMetadata,
+		showTags,
+		setShowTags,
+		toggleShowTags,
+		showStats,
+		setShowStats,
+		toggleShowStats,
+		enableAnimations,
+		setEnableAnimations,
+		toggleEnableAnimations,
+		animationDuration,
+		setAnimationDuration,
 	};
 }
 

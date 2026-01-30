@@ -173,7 +173,7 @@ export function getEntityTypeFromId(id: string): EntityType | null {
  * @returns ID único
  */
 export function generateUniqueId(entityType: EntityType, name?: string): string {
-	if (name && name.trim()) {
+	if (name?.trim()) {
 		return generateReadableId(entityType, name, 1);
 	}
 

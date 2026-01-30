@@ -9,7 +9,7 @@ import type { ThumbnailQuality } from '@/lib/config/thumbnail.config';
 /**
  * Tipo unificado utilizado por las vistas del FileBrowser
  */
-export type MediaItem = {
+export interface MediaItem {
 	id: string;
 	name: string;
 	entityType: 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d' | 'folder';
@@ -26,7 +26,7 @@ export type MediaItem = {
 	totalItems?: number;
 	emoji?: string | null;
 	color?: string | null;
-};
+}
 
 export interface MediaThumbnailProps extends React.ImgHTMLAttributes<HTMLImageElement> {
 	item: MediaItem;

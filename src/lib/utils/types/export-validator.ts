@@ -32,7 +32,7 @@ export interface Entity {
 export type VerifyEntityType<T extends Entity> = T;
 
 // Verificar todas las entidades
-export type VerifiedEntityTypes = {
+export interface VerifiedEntityTypes {
 	album: VerifyEntityType<AlbumWithStats>;
 	character: VerifyEntityType<CharacterWithStats>;
 	collection: VerifyEntityType<CollectionWithStats>;
@@ -48,7 +48,7 @@ export type VerifiedEntityTypes = {
 	video: VerifyEntityType<VideoWithStats>;
 	wildcard: VerifyEntityType<WildcardWithStats>;
 	'world-item': VerifyEntityType<WorldItemComplete>;
-};
+}
 
 /**
  * Esta función se utiliza solo para validación en tiempo de desarrollo

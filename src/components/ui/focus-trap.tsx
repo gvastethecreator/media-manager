@@ -65,7 +65,7 @@ export function FocusTrap({
 
 	// Manejar foco inicial
 	useEffect(() => {
-		if (!active || !containerRef.current) return;
+		if (!(active && containerRef.current)) return;
 
 		const container = containerRef.current;
 		let targetElement: HTMLElement | null = null;
@@ -75,8 +75,8 @@ export function FocusTrap({
 				targetElement = container.querySelector(FOCUSABLE_SELECTORS);
 				break;
 			case 'last': {
-				const elements = container.querySelectorAll(FOCUSABLE_SELECTORS);
-				targetElement = elements[elements.length - 1] as HTMLElement;
+				const elements = Array.from(container.querySelectorAll(FOCUSABLE_SELECTORS)) as HTMLElement[];
+				targetElement = elements[elements.length - 1] || null;
 				break;
 			}
 			case 'auto':
@@ -125,13 +125,13 @@ export function FocusTrap({
 			if (e.shiftKey) {
 				if (activeElement === firstElement || !containerRef.current.contains(activeElement)) {
 					e.preventDefault();
-					lastElement.focus();
+					lastElement?.focus();
 				}
 			} else {
 				// Tab en último elemento -> va al primero
 				if (activeElement === lastElement) {
 					e.preventDefault();
-					firstElement.focus();
+					firstElement?.focus();
 				}
 			}
 		};
@@ -142,13 +142,13 @@ export function FocusTrap({
 
 	return (
 		<div
-			ref={containerRef}
 			className={cn('outline-none', className)}
-			tabIndex={-1}
 			onClick={(e) => {
 				// Prevenir que clicks fuera de elementos focusables rompan el trap
 				e.stopPropagation();
 			}}
+			ref={containerRef}
+			tabIndex={-1}
 		>
 			{children}
 		</div>

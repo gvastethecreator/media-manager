@@ -5,17 +5,16 @@
  */
 
 import React, { createContext, useCallback, useContext, useState } from 'react';
-import { ConfirmDialog, type ConfirmDialogProps, type ConfirmVariant } from './confirm-dialog';
 import {
 	AlertDialog,
 	AlertDialogAction,
-	AlertDialogCancel,
 	AlertDialogContent,
 	AlertDialogDescription,
 	AlertDialogFooter,
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from './alert-dialog';
+import { ConfirmDialog, type ConfirmDialogProps, type ConfirmVariant } from './confirm-dialog';
 
 // ============================================================================
 // CONTEXT
@@ -155,22 +154,22 @@ export function FeedbackProvider({ children }: { children: React.ReactNode }) {
 			{/* Confirm Dialog */}
 			{confirmState.options && (
 				<ConfirmDialog
-					open={confirmState.isOpen}
+					cancelText={confirmState.options.cancelText}
+					confirmText={confirmState.options.confirmText}
+					description={confirmState.options.description}
+					disableConfirmDuration={confirmState.options.disableConfirmDuration}
 					onClose={handleCancel}
 					onConfirm={handleConfirm}
-					title={confirmState.options.title}
-					description={confirmState.options.description}
-					confirmText={confirmState.options.confirmText}
-					cancelText={confirmState.options.cancelText}
-					variant={confirmState.options.variant}
+					open={confirmState.isOpen}
 					showIcon={confirmState.options.showIcon}
-					disableConfirmDuration={confirmState.options.disableConfirmDuration}
+					title={confirmState.options.title}
+					variant={confirmState.options.variant}
 				/>
 			)}
 
 			{/* Alert Dialog */}
 			{alertState.options && (
-				<AlertDialog open={alertState.isOpen} onOpenChange={(open) => !open && handleAlertClose()}>
+				<AlertDialog onOpenChange={(open) => !open && handleAlertClose()} open={alertState.isOpen}>
 					<AlertDialogContent>
 						<AlertDialogHeader>
 							<AlertDialogTitle>{alertState.options.title}</AlertDialogTitle>

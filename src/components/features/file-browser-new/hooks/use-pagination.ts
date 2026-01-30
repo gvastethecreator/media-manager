@@ -4,7 +4,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { InfiniteScrollOptions, PaginationState } from '../types';
+import type { InfiniteScrollOptions, PaginationState } from '../types/view.types';
 
 export interface UsePaginationOptions {
 	/** Total de items */

@@ -1,7 +1,7 @@
 import { Heart } from 'lucide-react';
 import React from 'react';
-import { FavoriteCard } from '@/components/cards/favorite-card';
-import { LoadingScreen } from '@/components/core/feedback';
+import { FavoriteCard } from '@/components/cards/favorite-card/favorite-card';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -125,7 +125,7 @@ const FavoritesContentView: React.FC<FavoritesContentViewProps> = ({
 				{favorites?.length || isLoading || showForm ? (
 					<motion.div
 						animate={{ opacity: 1, y: 0 }}
-						className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5"
+						className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
 						initial={{ opacity: 0, y: 20 }}
 						transition={{ duration: 0.3 }}
 					>

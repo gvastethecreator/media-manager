@@ -77,6 +77,44 @@ export function useThumbnail(
 	const abortControllerRef = useRef<AbortController | null>(null);
 	const retriesRef = useRef(0);
 	const maxRetries = 2;
+	const generateThumbnailRef = useRef<() => Promise<void>>(async () => {});
+
+	const generateThumbnail = useCallback(async () => {
+		if (!(entityType && entityId)) return;
+
+		setState((s) => ({ ...s, loading: true, error: null }));
+
+		try {
+			const response = await fetch('/api/thumbnails/unified/generate', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({
+					entityType,
+					entityId,
+					options,
+				}),
+			});
+
+			if (response.ok) {
+				// Volver a intentar obtener el thumbnail
+				await fetchThumbnail();
+			} else {
+				const error = await response.json();
+				throw new Error(error.error || 'Generation failed');
+			}
+		} catch (error) {
+			clientLogger.warn('Error generating thumbnail:', error);
+			setState({
+				url: null,
+				loading: false,
+				error: error instanceof Error ? error.message : 'Generation failed',
+				exists: false,
+			});
+		}
+	}, [entityType, entityId, options]);
+
+	// Store reference to avoid circular dependency
+	generateThumbnailRef.current = generateThumbnail;
 
 	const fetchThumbnail = useCallback(async () => {
 		if (!(entityType && entityId)) {
@@ -123,7 +161,7 @@ export function useThumbnail(
 				// No existe thumbnail, intentar generar
 				if (retriesRef.current < maxRetries) {
 					retriesRef.current++;
-					await generateThumbnail();
+					await generateThumbnailRef.current?.();
 				} else {
 					setState({
 						url: null,
@@ -150,40 +188,6 @@ export function useThumbnail(
 		}
 	}, [entityType, entityId, options.width, options.height, options.quality, options.force]);
 
-	const generateThumbnail = useCallback(async () => {
-		if (!(entityType && entityId)) return;
-
-		setState((s) => ({ ...s, loading: true, error: null }));
-
-		try {
-			const response = await fetch('/api/thumbnails/unified/generate', {
-				method: 'POST',
-				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({
-					entityType,
-					entityId,
-					options,
-				}),
-			});
-
-			if (response.ok) {
-				// Volver a intentar obtener el thumbnail
-				await fetchThumbnail();
-			} else {
-				const error = await response.json();
-				throw new Error(error.error || 'Generation failed');
-			}
-		} catch (error) {
-			clientLogger.warn('Error generating thumbnail:', error);
-			setState({
-				url: null,
-				loading: false,
-				error: error instanceof Error ? error.message : 'Generation failed',
-				exists: false,
-			});
-		}
-	}, [entityType, entityId, options, fetchThumbnail]);
-
 	const refresh = useCallback(() => {
 		retriesRef.current = 0;
 		fetchThumbnail();
@@ -202,7 +206,7 @@ export function useThumbnail(
 				URL.revokeObjectURL(state.url);
 			}
 		};
-	}, [fetchThumbnail]);
+	}, [fetchThumbnail, state.url]);
 
 	return {
 		...state,

@@ -8,7 +8,7 @@ import type { TagBase } from '@/types/entities/tag';
 
 type ViewType = 'files' | 'collections' | 'folders' | 'tags';
 
-type ProfileContextType = {
+interface ProfileContextType {
 	currentUser: User;
 	openProfileSettings: () => void;
 	openSettingsTab: (tab: string) => void;
@@ -17,7 +17,7 @@ type ProfileContextType = {
 	tags: TagBase[];
 	currentView: ViewType;
 	setCurrentView: (view: ViewType) => void;
-};
+}
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);
 
