@@ -1,0 +1,157 @@
+'use client';
+
+import { cva, type VariantProps } from 'class-variance-authority';
+import { X } from 'lucide-react';
+import React from 'react';
+import { toast as sonnerToast } from 'sonner';
+
+import { cn } from '@/lib/utils';
+
+/**
+ * Toast variants con Design Tokens v2
+ * - Borde 2px para mayor definición
+ * - Sombra elevada (shadow-dt-3)
+ * - Indicador lateral de color según variante
+ * - Gradiente de fondo sutil
+ * - Transiciones suaves
+ */
+const toastVariants = cva(
+	'group data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full data-[state=open]:sm:slide-in-from-bottom-full pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-dt-md border-2 p-6 pr-8 shadow-dt-3 transition-all duration-dt-normal before:absolute before:top-0 before:bottom-0 before:left-0 before:w-1 before:rounded-l-dt-md data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[state=closed]:animate-out data-[state=open]:animate-in data-[swipe=end]:animate-out data-[swipe=move]:transition-none',
+	{
+		variants: {
+			variant: {
+				default: 'border-border/50 bg-gradient-to-b from-background to-background/98 text-foreground before:bg-primary',
+				destructive:
+					'destructive group border-ui-error-border bg-gradient-to-b from-ui-error to-ui-error/50 text-destructive-foreground before:bg-destructive',
+				success:
+					'border-ui-success-border bg-gradient-to-b from-ui-success to-ui-success/50 text-foreground before:bg-ui-success-text',
+				warning:
+					'border-ui-warning-border bg-gradient-to-b from-ui-warning to-ui-warning/50 text-foreground before:bg-ui-warning-text',
+			},
+		},
+		defaultVariants: {
+			variant: 'default',
+		},
+	}
+);
+
+// Tipos para mantener compatibilidad
+type ToastProps = VariantProps<typeof toastVariants> & {
+	title?: React.ReactNode;
+	description?: React.ReactNode;
+	action?: React.ReactElement;
+	id?: string;
+	className?: string;
+} & React.ComponentProps<'div'>;
+
+interface ToastActionElement extends React.ReactElement {}
+
+// Hook para usar toast con sonner
+function useToast() {
+	return {
+		toast: (props: Omit<ToastProps, 'id'>) => {
+			const { title, description, variant = 'default', action } = props;
+
+			const toastContent = (
+				<div className="grid gap-1">
+					{title && <div className="font-semibold text-base">{title}</div>}
+					{description && <div className="text-base opacity-90">{description}</div>}
+					{action && action}
+				</div>
+			);
+
+			switch (variant) {
+				case 'destructive':
+					return sonnerToast.error(toastContent);
+				default:
+					return sonnerToast(toastContent);
+			}
+		},
+		dismiss: (toastId?: string | number) => {
+			if (toastId) {
+				sonnerToast.dismiss(toastId);
+			} else {
+				sonnerToast.dismiss();
+			}
+		},
+	};
+}
+
+// Componentes de compatibilidad (no se usan con sonner pero mantienen la API)
+function Toast({ className, variant, title, description, action, ...props }: ToastProps) {
+	return (
+		<div className={cn(toastVariants({ variant }), className)} {...props}>
+			<div className="grid gap-1">
+				{title && <ToastTitle>{title}</ToastTitle>}
+				{description && <ToastDescription>{description}</ToastDescription>}
+			</div>
+			{action}
+			<ToastClose />
+		</div>
+	);
+}
+
+function ToastAction({ className, ...props }: React.ComponentProps<'button'>) {
+	return (
+		<button
+			className={cn(
+				'inline-flex h-9 shrink-0 items-center justify-center rounded-dt-sm border-2 bg-transparent px-4 font-medium text-base ring-offset-background transition-all duration-dt-fast hover:bg-secondary hover:shadow-dt-1 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:focus:ring-destructive group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground',
+				className
+			)}
+			{...props}
+		/>
+	);
+}
+
+function ToastClose({ className, ...props }: React.ComponentProps<'button'>) {
+	return (
+		<button
+			className={cn(
+				'absolute top-2 right-2 rounded-dt-xs p-1 text-foreground/50 opacity-0 transition-all duration-dt-fast hover:bg-muted/50 hover:text-foreground focus:opacity-100 focus:outline-none focus:ring-2 group-hover:opacity-100 group-[.destructive]:text-red-300 group-[.destructive]:focus:ring-red-400 group-[.destructive]:focus:ring-offset-red-600 group-[.destructive]:hover:text-red-50',
+				className
+			)}
+			{...props}
+		>
+			<X className="h-4 w-4" />
+		</button>
+	);
+}
+
+function ToastTitle({ className, ...props }: React.ComponentProps<'div'>) {
+	return <div className={cn('font-semibold text-base', className)} {...props} />;
+}
+
+function ToastDescription({ className, ...props }: React.ComponentProps<'div'>) {
+	return <div className={cn('text-base opacity-90', className)} {...props} />;
+}
+
+// Viewport para compatibilidad (no se usa con sonner)
+function ToastViewport({ className, ...props }: React.ComponentProps<'div'>) {
+	return (
+		<div
+			className={cn(
+				'fixed top-0 z-100 flex max-h-screen w-full flex-col-reverse p-4 sm:top-auto sm:right-0 sm:bottom-0 sm:flex-col md:max-w-105',
+				className
+			)}
+			{...props}
+		/>
+	);
+}
+
+// Provider para compatibilidad (no se usa con sonner)
+function ToastProvider({ children }: { children: React.ReactNode }) {
+	return <>{children}</>;
+}
+
+export {
+	Toast,
+	ToastAction,
+	ToastClose,
+	ToastDescription,
+	ToastProvider,
+	ToastTitle,
+	ToastViewport,
+	useToast,
+	type ToastActionElement,
+	type ToastProps,
+};

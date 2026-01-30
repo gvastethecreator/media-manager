@@ -1,0 +1,309 @@
+/**
+ * @file Transiciones para Settings
+ * @module components/settings/settings-transitions
+ * @description Envoltorios con transiciones para el panel de configuraciones
+ */
+
+import React from 'react';
+import { FlipContainer } from '@/components/transitions/FlipContainer';
+import { AnimatePresence, TransitionGroup, TransitionItem } from '@/components/transitions/TransitionGroup';
+import { useEnterExit } from '@/hooks/transitions';
+import { customEasings } from '@/lib/transitions';
+import { cn } from '@/lib/utils';
+
+// ============================================================================
+// Transición de Página de Settings
+// ============================================================================
+
+interface SettingsPageTransitionProps {
+	/** Contenido */
+	children: React.ReactNode;
+	/** Sección activa */
+	activeSection?: string;
+}
+
+/**
+ * Página de settings con transición de entrada
+ */
+export function SettingsPageTransition({ children, activeSection }: SettingsPageTransitionProps) {
+	const { ref, isTransitioning } = useEnterExit({
+		id: 'settings-page',
+		isVisible: true,
+		enterConfig: {
+			type: 'slide',
+			direction: 'right',
+			distance: 30,
+			duration: 400,
+			easing: customEasings.easeOutSuper,
+		},
+	});
+
+	return (
+		<div
+			className={cn('settings-page-transition h-full', isTransitioning && 'transitioning')}
+			ref={ref as React.RefObject<HTMLDivElement>}
+		>
+			{children}
+		</div>
+	);
+}
+
+// ============================================================================
+// Transición de Sección de Settings
+// ============================================================================
+
+interface SettingsSectionTransitionProps {
+	/** ID de la sección */
+	sectionId: string;
+	/** Título */
+	title: React.ReactNode;
+	/** Descripción */
+	description?: React.ReactNode;
+	/** Contenido */
+	children: React.ReactNode;
+	/** Si está expandida */
+	isExpanded?: boolean;
+	/** Toggle */
+	onToggle?: () => void;
+}
+
+/**
+ * Sección colapsable de settings
+ */
+export function SettingsSectionTransition({
+	sectionId,
+	title,
+	description,
+	children,
+	isExpanded = true,
+	onToggle,
+}: SettingsSectionTransitionProps) {
+	const { ref, isTransitioning, isVisible } = useEnterExit({
+		id: `settings-section-${sectionId}`,
+		isVisible: isExpanded,
+		enterConfig: {
+			type: 'slide',
+			direction: 'top',
+			distance: 20,
+			duration: 300,
+			easing: customEasings.easeOutSuper,
+		},
+		exitConfig: {
+			type: 'slide',
+			direction: 'top',
+			distance: 15,
+			duration: 200,
+			easing: customEasings.easeInSuper,
+		},
+	});
+
+	return (
+		<FlipContainer
+			className="settings-section-transition rounded-lg border border-border bg-card"
+			flipId={`settings-section-container-${sectionId}`}
+		>
+			<button
+				className={cn(
+					'settings-section-header flex w-full items-center justify-between',
+					'rounded-lg p-4 text-left transition-colors hover:bg-accent/50'
+				)}
+				onClick={onToggle}
+				type="button"
+			>
+				<div className="flex-1">
+					<h3 className="font-medium">{title}</h3>
+					{description && <p className="text-muted-foreground text-sm">{description}</p>}
+				</div>
+				<span
+					className={cn('ml-4 transform transition-transform duration-200', isExpanded ? 'rotate-180' : 'rotate-0')}
+				>
+					▼
+				</span>
+			</button>
+
+			{(isExpanded || isTransitioning) && (
+				<div className="settings-section-content p-4 pt-0" ref={ref as React.RefObject<HTMLDivElement>}>
+					{children}
+				</div>
+			)}
+		</FlipContainer>
+	);
+}
+
+// ============================================================================
+// Transición de Item de Setting
+// ============================================================================
+
+interface SettingsItemTransitionProps {
+	/** ID del item */
+	itemId: string;
+	/** Índice para stagger */
+	index?: number;
+	/** Label */
+	label: React.ReactNode;
+	/** Descripción */
+	description?: React.ReactNode;
+	/** Control */
+	control: React.ReactNode;
+	/** Si está deshabilitado */
+	isDisabled?: boolean;
+}
+
+/**
+ * Item individual de setting con transición
+ */
+export function SettingsItemTransition({
+	itemId,
+	index = 0,
+	label,
+	description,
+	control,
+	isDisabled,
+}: SettingsItemTransitionProps) {
+	return (
+		<TransitionItem id={`setting-item-${itemId}`} index={index}>
+			<div
+				className={cn(
+					'settings-item-transition',
+					'flex items-center justify-between gap-4 py-3',
+					'border-border border-b last:border-0',
+					isDisabled && 'opacity-50'
+				)}
+			>
+				<div className="min-w-0 flex-1">
+					<label className="font-medium text-sm">{label}</label>
+					{description && <p className="mt-0.5 text-muted-foreground text-xs">{description}</p>}
+				</div>
+				<div className="flex-shrink-0">{control}</div>
+			</div>
+		</TransitionItem>
+	);
+}
+
+// ============================================================================
+// Transición de Formulario de Settings
+// ============================================================================
+
+interface SettingsFormTransitionProps {
+	/** ID del formulario */
+	formId: string;
+	/** Contenido */
+	children: React.ReactNode;
+	/** Si está guardando */
+	isSaving?: boolean;
+}
+
+/**
+ * Formulario de settings con transiciones
+ */
+export function SettingsFormTransition({ formId, children, isSaving }: SettingsFormTransitionProps) {
+	return (
+		<TransitionGroup
+			className="settings-form-transition space-y-1"
+			enterConfig={{
+				type: 'slide',
+				direction: 'bottom',
+				distance: 15,
+				duration: 300,
+				easing: customEasings.easeOutSuper,
+			}}
+			exitConfig={{
+				type: 'slide',
+				direction: 'bottom',
+				distance: 10,
+				duration: 200,
+				easing: customEasings.easeInSuper,
+			}}
+			id={`settings-form-${formId}`}
+			isVisible={true}
+			staggerDelay={20}
+		>
+			{children}
+		</TransitionGroup>
+	);
+}
+
+// ============================================================================
+// Transición de Toast/Notificación de Settings
+// ============================================================================
+
+interface SettingsToastTransitionProps {
+	/** Si está visible */
+	isVisible: boolean;
+	/** Tipo */
+	type?: 'success' | 'error' | 'info';
+	/** Mensaje */
+	message: React.ReactNode;
+}
+
+/**
+ * Toast de notificación para settings
+ */
+export function SettingsToastTransition({ isVisible, type = 'info', message }: SettingsToastTransitionProps) {
+	const typeStyles = {
+		success: 'bg-green-500/10 text-green-700 border-green-500/20',
+		error: 'bg-red-500/10 text-red-700 border-red-500/20',
+		info: 'bg-blue-500/10 text-blue-700 border-blue-500/20',
+	};
+
+	return (
+		<AnimatePresence
+			enter={{
+				type: 'slide',
+				direction: 'top',
+				distance: 20,
+				duration: 300,
+				easing: customEasings.easeOutSuper,
+			}}
+			exit={{
+				type: 'slide',
+				direction: 'top',
+				distance: 15,
+				duration: 200,
+				easing: customEasings.easeInSuper,
+			}}
+			present={isVisible}
+		>
+			<div
+				className={cn(
+					'settings-toast-transition',
+					'fixed right-4 bottom-4 z-50',
+					'rounded-lg border px-4 py-3 shadow-lg',
+					typeStyles[type]
+				)}
+			>
+				{message}
+			</div>
+		</AnimatePresence>
+	);
+}
+
+// ============================================================================
+// Transición de Tabs de Settings
+// ============================================================================
+
+interface SettingsTabsTransitionProps {
+	/** ID de la tab activa */
+	activeTab: string;
+	/** Contenido de las tabs */
+	children: React.ReactNode;
+}
+
+/**
+ * Contenedor de tabs de settings con transición
+ */
+export function SettingsTabsTransition({ activeTab, children }: SettingsTabsTransitionProps) {
+	return (
+		<FlipContainer
+			className="settings-tabs-transition"
+			flipId={`settings-tab-${activeTab}`}
+			key={activeTab}
+			options={{
+				duration: 300,
+				easing: customEasings.quickSlow,
+			}}
+		>
+			{children}
+		</FlipContainer>
+	);
+}

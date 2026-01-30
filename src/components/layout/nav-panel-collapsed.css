@@ -1,0 +1,39 @@
+/* Estilos para el panel de navegación colapsado */
+
+/* Estilos para el handle cuando el panel está colapsado */
+.nav-panel-collapsed-handle {
+	position: absolute;
+	width: 12px;
+	height: 40px;
+	border-radius: 3px;
+	background-color: var(--panel-border-soft);
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	cursor: col-resize;
+	opacity: 0.8;
+	transition: all 0.2s ease;
+	left: 64px;
+	top: 50%;
+	transform: translateY(-50%);
+	z-index: 10;
+}
+
+.nav-panel-collapsed-handle:hover {
+	background-color: var(--handler-bg-hover);
+	opacity: 1;
+}
+
+/* Ajuste para la transición del panel */
+.view-container-transition {
+	transition:
+		opacity 0.3s ease,
+		visibility 0.3s ease;
+}
+
+/* Estilos para prevenir selección de texto durante el resize */
+body.resize-active {
+	user-select: none;
+	-webkit-user-select: none;
+	cursor: col-resize;
+}

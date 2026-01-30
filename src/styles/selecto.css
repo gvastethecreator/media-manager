@@ -1,0 +1,139 @@
+/* Estilos para Selecto - Selección por arrastrar */
+
+/* Área de selección activa */
+.selecto-selection {
+	position: absolute;
+	background: var(--selection-bg);
+	border: 2px solid color-mix(in oklab, var(--primary), transparent 40%);
+	border-radius: 4px;
+	z-index: 1000;
+	pointer-events: none;
+	transition: all 0.1s ease;
+	backdrop-filter: blur(1px);
+}
+
+/* Elementos que están siendo seleccionados (durante el drag) */
+.selecto-selecting {
+	outline: 2px solid color-mix(in oklab, var(--primary), transparent 40%) !important;
+	outline-offset: 2px;
+	transform: scale(1.02);
+	transition: all 0.1s ease;
+	z-index: 10;
+	position: relative;
+}
+
+/* Elementos que ya están seleccionados */
+.selecto-selected {
+	outline: 2px solid var(--marked-border) !important;
+	outline-offset: 2px;
+	background: var(--marked-bg);
+	transform: scale(1.01);
+	transition: all 0.2s ease;
+	z-index: 5;
+	position: relative;
+}
+
+/* Elementos seleccionables */
+[data-selectable="true"] {
+	cursor: pointer;
+	transition: all 0.15s ease;
+	position: relative;
+}
+
+[data-selectable="true"]:hover {
+	outline: 1px solid color-mix(in oklab, var(--primary), transparent 70%);
+	outline-offset: 1px;
+	transform: scale(1.005);
+}
+
+/* Estados combinados */
+.selecto-selected.selecto-selecting {
+	outline: 2px solid color-mix(in oklab, var(--accent), transparent 30%) !important;
+	background: color-mix(in oklch, var(--accent) 20%, transparent);
+}
+
+/* Desactivar selección de texto durante la selección */
+.selecto-active {
+	user-select: none !important;
+	-webkit-user-select: none !important;
+	-moz-user-select: none !important;
+	-ms-user-select: none !important;
+}
+
+/* Optimizaciones de rendimiento */
+.selecto-selection,
+.selecto-selecting,
+.selecto-selected {
+	will-change: transform, outline;
+	contain: layout style paint;
+}
+
+/* Tema oscuro */
+/* Los tokens ya contemplan tema oscuro */
+
+/* Animaciones suaves para mejores transiciones */
+@keyframes selectoHighlight {
+	0% {
+		outline-width: 0px;
+		transform: scale(1);
+	}
+
+	100% {
+		outline-width: 2px;
+		transform: scale(1.01);
+	}
+}
+
+.selecto-selected {
+	animation: selectoHighlight 0.2s ease-out;
+}
+
+/* Responsive: Ajustar en móviles */
+@media (max-width: 768px) {
+	.selecto-selection {
+		border-width: 3px;
+	}
+
+	.selecto-selecting,
+	.selecto-selected {
+		outline-width: 3px !important;
+		outline-offset: 3px;
+	}
+
+	[data-selectable="true"]:hover {
+		outline-width: 2px;
+		outline-offset: 2px;
+	}
+}
+
+/* Accesibilidad: modo de alto contraste */
+@media (prefers-contrast: high) {
+	.selecto-selection {
+		background: color-mix(in oklab, var(--primary), transparent 80%);
+		border-color: var(--primary);
+		border-width: 3px;
+	}
+
+	.selecto-selecting {
+		outline-color: var(--primary) !important;
+		outline-width: 3px !important;
+	}
+
+	.selecto-selected {
+		outline-color: var(--status-success) !important;
+		outline-width: 3px !important;
+		background: color-mix(in oklch, var(--status-success) 15%, transparent);
+	}
+}
+
+/* Reducir movimiento para usuarios que lo prefieren */
+@media (prefers-reduced-motion: reduce) {
+	.selecto-selection,
+	.selecto-selecting,
+	.selecto-selected,
+	[data-selectable="true"] {
+		transition: none !important;
+		animation: none !important;
+		transform: none !important;
+	}
+}
