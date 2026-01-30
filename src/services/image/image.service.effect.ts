@@ -50,7 +50,19 @@ import {
 } from './image-errors.effect';
 import { thumbnailService } from './image-thumbnail.service';
 
-const logger = serverLogger.withContext('ImageService');
+// Helper para crear un logger seguro que funcione en tests y producción
+const createSafeLogger = (context: string) => {
+	const baseLogger = serverLogger.withContext(context);
+	// En tests, el mock puede no tener todas las funciones, así que las proporcionamos
+	return {
+		debug: baseLogger.debug?.bind(baseLogger) ?? (() => {}),
+		info: baseLogger.info?.bind(baseLogger) ?? (() => {}),
+		warn: baseLogger.warn?.bind(baseLogger) ?? (() => {}),
+		error: baseLogger.error?.bind(baseLogger) ?? (() => {}),
+	};
+};
+
+const logger = createSafeLogger('ImageService');
 
 // ============================================================================
 // INTERNAL HELPERS

@@ -113,7 +113,7 @@ export function useDataSource({
 		// Convertir archivos cargados con guardas básicas
 		const fileItems = files
 			.filter(Boolean)
-			.map((file) => toBrowserItem(file as Record<string, unknown>))
+			.map((file) => toBrowserItem(file as unknown as Record<string, unknown>))
 			.filter((item) => Boolean(item?.id) && Boolean(item?.entityType));
 		return [...folderItems, ...fileItems];
 	}, [directItems, files, folderItems]);
