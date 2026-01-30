@@ -29,11 +29,11 @@ export const WildcardStatsSchema = z.object({
 /**
  * Tipo para hijos de comodín (recursivo)
  */
-export type WildcardChild = {
+export interface WildcardChild {
 	id: string;
 	name: string;
 	children?: WildcardChild[];
-};
+}
 
 /**
  * Esquema para hijos de comodín (estructura anidada)

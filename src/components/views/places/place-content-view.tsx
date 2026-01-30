@@ -1,8 +1,9 @@
 import { MapPin } from 'lucide-react';
 import { memo, useCallback, useMemo } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
-import { LoadingScreen } from '@/components/core/feedback';
-import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { BaseContentView } from '@/components/views/base/base-content-view';
 import { usePlaceImages } from '@/lib/api/places';
 import { useDetailsPanel } from '@/store/details-panel.store';

@@ -3,10 +3,9 @@
 import * as DialogPrimitive from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
 import * as React from 'react';
-
-import { FocusTrap } from './focus-trap';
 import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { cn } from '@/lib/utils';
+import { FocusTrap } from './focus-trap';
 
 const Dialog = DialogPrimitive.Root;
 
@@ -32,7 +31,7 @@ const DialogOverlay = React.forwardRef<
 		<DialogPrimitive.Overlay
 			className={cn(
 				'fixed inset-0 z-50 bg-black/60 backdrop-blur-sm',
-				'data-[state=open]:animate-in data-[state=closed]:animate-out',
+				'data-[state=closed]:animate-out data-[state=open]:animate-in',
 				prefersReducedMotion ? '' : 'data-[state=open]:fade-in-0 data-[state=closed]:fade-out-0',
 				className
 			)}
@@ -111,13 +110,12 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
 
 		const content = (
 			<DialogPrimitive.Content
-				ref={ref}
 				className={cn(
 					'fixed top-[50%] left-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4',
 					'border-2 border-border/50 bg-linear-to-b from-background to-background/98 p-6 shadow-dt-4',
 					'sm:rounded-dt-lg',
 					'focus:outline-none',
-					'data-[state=open]:animate-in data-[state=closed]:animate-out',
+					'data-[state=closed]:animate-out data-[state=open]:animate-in',
 					'data-[state=closed]:fade-out-0 data-[state=closed]:zoom-out-95',
 					'data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%]',
 					'data-[state=open]:fade-in-0 data-[state=open]:zoom-in-95',
@@ -125,10 +123,12 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
 					prefersReducedMotion && 'duration-0',
 					className
 				)}
+				ref={ref}
 				{...props}
 			>
 				{children}
 				<DialogPrimitive.Close
+					aria-label="Cerrar diálogo"
 					className={cn(
 						'absolute top-4 right-4 rounded-dt-xs p-1 opacity-70',
 						'ring-offset-background transition-all duration-dt-fast',
@@ -138,9 +138,8 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
 						'disabled:pointer-events-none',
 						'data-[state=open]:bg-accent data-[state=open]:text-muted-foreground'
 					)}
-					aria-label="Cerrar diálogo"
 				>
-					<X className="h-4 w-4" aria-hidden="true" />
+					<X aria-hidden="true" className="h-4 w-4" />
 					<span className="sr-only">Cerrar</span>
 				</DialogPrimitive.Close>
 			</DialogPrimitive.Content>
@@ -150,7 +149,7 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
 			<DialogPortal>
 				<DialogOverlay />
 				{trapFocus ? (
-					<FocusTrap active={isOpen} onEscape={() => {}} initialFocus="first">
+					<FocusTrap active={isOpen} initialFocus="first" onEscape={() => {}}>
 						{content}
 					</FocusTrap>
 				) : (
@@ -180,8 +179,8 @@ const DialogTitle = React.forwardRef<
 	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Title>
 >(({ className, ...props }, ref) => (
 	<DialogPrimitive.Title
-		ref={ref}
 		className={cn('font-semibold text-lg leading-none tracking-tight', className)}
+		ref={ref}
 		{...props}
 	/>
 ));
@@ -191,7 +190,7 @@ const DialogDescription = React.forwardRef<
 	React.ElementRef<typeof DialogPrimitive.Description>,
 	React.ComponentPropsWithoutRef<typeof DialogPrimitive.Description>
 >(({ className, ...props }, ref) => (
-	<DialogPrimitive.Description ref={ref} className={cn('text-muted-foreground text-sm', className)} {...props} />
+	<DialogPrimitive.Description className={cn('text-muted-foreground text-sm', className)} ref={ref} {...props} />
 ));
 DialogDescription.displayName = DialogPrimitive.Description.displayName;
 

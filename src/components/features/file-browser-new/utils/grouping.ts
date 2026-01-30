@@ -3,7 +3,7 @@
  * @module file-browser-new/utils/grouping
  */
 
-import type { BrowserEntityType, BrowserItem, BrowserItemGroup } from '../types';
+import type { BrowserEntityType, BrowserItem, BrowserItemGroup } from '../types/item.types';
 
 /**
  * Nombres de display para tipos de entidad
@@ -177,7 +177,6 @@ export function applyGrouping(items: BrowserItem[], options: GroupingOptions): B
 				return groupByField(items, options.field);
 			}
 			return null;
-		case 'none':
 		default:
 			return null;
 	}

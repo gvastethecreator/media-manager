@@ -8,15 +8,11 @@ import { CornerUpLeft, Folder } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { formatFileSize } from '@/lib/utils/format.utils';
-import { type MediaItem, MediaThumbnail } from '../components/media-thumbnail';
-import type {
-	BrowserEntityType,
-	BrowserItem,
-	BrowserViewProps,
-	CardsViewConfig,
-	ClickModifiers,
-	ItemContextMenuHandler,
-} from '../types';
+import { MediaThumbnail } from '../components/media-thumbnail/media-thumbnail';
+import type { MediaItem } from '../components/media-thumbnail/types';
+import type { BrowserEntityType, BrowserItem } from '../types/item.types';
+import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '../types/props.types';
+import type { CardsViewConfig } from '../types/view.types';
 
 export interface CardsViewProps extends Omit<BrowserViewProps, 'config'> {
 	/** Configuración de cards */

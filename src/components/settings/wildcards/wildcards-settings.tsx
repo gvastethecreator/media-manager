@@ -20,7 +20,7 @@ import type { WildcardCreateInput, WildcardUpdateInput, WildcardWithStats } from
 import { WildcardPreview } from './wildcard-preview';
 
 // Importar el tipo de formulario que hemos definido
-type CreateWildcardFormValues = {
+interface CreateWildcardFormValues {
 	name: string;
 	emoji: string;
 	color: string;
@@ -33,7 +33,7 @@ type CreateWildcardFormValues = {
 	isFavorite: boolean;
 	sortBy?: string;
 	viewMode?: string;
-};
+}
 
 // Carga perezosa del formulario
 const CreateWildcardForm = lazy(() =>

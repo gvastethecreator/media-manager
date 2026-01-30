@@ -29,12 +29,12 @@ export type Image = ImageWithStats;
 export type ImageComplete = ImageWithStats;
 export type ImageCreateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt'>>;
 export type ImageUpdateInput = Partial<Omit<ImageBase, 'id' | 'createdAt' | 'updatedAt'>>;
-export type ImageSearchOptions = {
+export interface ImageSearchOptions {
 	skip?: number;
 	take?: number;
 	orderBy?: Record<string, 'asc' | 'desc'>;
 	where?: Record<string, unknown>;
-};
+}
 
 export {
 	IMAGE_SORT_PROPERTY_MAP,

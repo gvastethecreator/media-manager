@@ -50,10 +50,12 @@ export function useKeyboardNavigation(shortcuts: KeyboardShortcut[]) {
 				// Verificar si solo debe activarse cuando está enfocado
 				if (shortcut.onlyWhenFocused) {
 					const target = shortcut.target;
-					if (target instanceof HTMLElement) {
-						if (document.activeElement !== target && !target.contains(document.activeElement)) {
-							continue;
-						}
+					if (
+						target instanceof HTMLElement &&
+						document.activeElement !== target &&
+						!target.contains(document.activeElement)
+					) {
+						continue;
 					}
 				}
 
@@ -178,10 +180,10 @@ export function useFocusManager() {
 		const container = containerRef.current;
 		if (!container) return;
 
-		const focusable = container.querySelectorAll(
-			'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
-		);
-		const last = focusable[focusable.length - 1] as HTMLElement;
+		const focusable = Array.from(
+			container.querySelectorAll('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])')
+		) as HTMLElement[];
+		const last = focusable[focusable.length - 1];
 		last?.focus();
 	}, []);
 

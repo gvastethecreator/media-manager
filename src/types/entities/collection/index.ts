@@ -39,9 +39,9 @@ import type { CollectionBase, CollectionWithStats } from './base';
 export type CollectionComplete = CollectionWithStats;
 export type CollectionCreateInput = Partial<CollectionBase>;
 export type CollectionUpdateInput = Partial<Omit<CollectionBase, 'id' | 'createdAt' | 'updatedAt'>>;
-export type CollectionSearchOptions = {
+export interface CollectionSearchOptions {
 	skip?: number;
 	take?: number;
 	orderBy?: Record<string, 'asc' | 'desc'>;
 	where?: Record<string, unknown>;
-};
+}

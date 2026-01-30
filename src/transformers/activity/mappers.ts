@@ -6,7 +6,7 @@
 
 import { type ActivityFilters, ActivityType, type CreateActivityData } from '../../types/entities/activity/index';
 
-type DrizzleCreateActivityData = {
+interface DrizzleCreateActivityData {
 	type: string;
 	entityType: string;
 	entityId: string;
@@ -17,24 +17,24 @@ type DrizzleCreateActivityData = {
 	ipAddress?: string | null;
 	userAgent?: string | null;
 	sessionId?: string | null;
-};
+}
 
-type DrizzleWhereFilter = {
+interface DrizzleWhereFilter {
 	AND?: DrizzleWhereFilter[];
 	OR?: DrizzleWhereFilter[];
 	type?: { in?: string[] };
 	imageId?: string;
 	createdAt?: { gte?: Date; lte?: Date };
 	description?: { contains?: string };
-};
+}
 
-type DrizzleFindManyArgs = {
+interface DrizzleFindManyArgs {
 	where?: DrizzleWhereFilter;
 	take?: number;
 	skip?: number;
 	orderBy?: { [key: string]: 'asc' | 'desc' };
 	// Los includes se manejan por separado en Drizzle
-};
+}
 
 /**
  * Mapea datos de creación de actividad a formato compatible con Drizzle

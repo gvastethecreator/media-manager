@@ -347,7 +347,7 @@ function MediaThumbnailInner({
 
 	React.useEffect(() => {
 		setIsLoaded(false);
-	}, [validSrc]);
+	}, []);
 
 	React.useEffect(() => {
 		return () => {
@@ -490,10 +490,6 @@ function getFallbackIcon(entityType: MediaItem['entityType']): string {
 	switch (entityType) {
 		case 'folder':
 			return '/globe.svg';
-		case 'audio':
-		case 'document':
-		case 'jsonFile':
-		case 'file3d':
 		default:
 			return '/file.svg';
 	}

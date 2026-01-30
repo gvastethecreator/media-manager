@@ -12,7 +12,7 @@ import type { AlbumCreateInput, AlbumStatistics, AlbumWithStats } from '../../ty
 /**
  * Tipo para datos de álbum que vienen de Drizzle con relaciones
  */
-type DrizzleAlbumWithRelations = {
+interface DrizzleAlbumWithRelations {
 	id: string;
 	name: string;
 	description: string | null;
@@ -45,12 +45,12 @@ type DrizzleAlbumWithRelations = {
 	wildcards?: { id: string }[];
 	properties?: { id: string }[];
 	groups?: { id: string }[];
-};
+}
 
 /**
  * Estructura para datos de creación de álbum compatible con Drizzle
  */
-type DrizzleCreateAlbumData = {
+interface DrizzleCreateAlbumData {
 	name: string;
 	description?: string | null;
 	emoji?: string | null;
@@ -67,26 +67,26 @@ type DrizzleCreateAlbumData = {
 	metadata?: string | null;
 	lastImageAddedAt?: Date | null;
 	lastVideoAddedAt?: Date | null;
-};
+}
 
 /**
  * Estructura para filtros de álbum compatible con Drizzle
  */
-type DrizzleAlbumFilters = {
+interface DrizzleAlbumFilters {
 	AND?: DrizzleAlbumFilters[];
 	OR?: DrizzleAlbumFilters[];
 	name?: { contains?: string };
 	category?: { in?: string[] };
 	isFavorite?: boolean;
 	createdAt?: { gte?: Date; lte?: Date };
-};
+}
 
-type DrizzleFindManyArgs = {
+interface DrizzleFindManyArgs {
 	where?: DrizzleAlbumFilters;
 	take?: number;
 	skip?: number;
 	orderBy?: { [key: string]: 'asc' | 'desc' };
-};
+}
 
 /**
  * Mapea datos de creación de álbum a formato compatible con Drizzle

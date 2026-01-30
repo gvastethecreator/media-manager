@@ -1,9 +1,9 @@
 import { Users } from 'lucide-react';
 import React from 'react';
-import { CharacterCard } from '@/components/cards/character-card';
+import { CharacterCard } from '@/components/cards/character-card/character-card';
 import { adaptCharacterWithStats } from '@/components/cards/character-card/character-card-adapter';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

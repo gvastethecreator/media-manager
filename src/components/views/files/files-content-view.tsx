@@ -1,7 +1,7 @@
 import { FileIcon, Upload } from 'lucide-react';
 import React, { useCallback } from 'react';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -166,7 +166,7 @@ const FilesContentView: React.FC<FilesContentViewProps> = ({
 					{/* Grid de archivos */}
 					<motion.div
 						animate={{ opacity: 1 }}
-						className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-6"
+						className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6"
 						initial={{ opacity: 0 }}
 						transition={{ delay: 0.1 }}
 					>

@@ -9,7 +9,7 @@ import { Separator } from '@/components/ui/separator';
 import { useProfileContext } from '@/lib/contexts';
 import { DEFAULT_ENTITY_COLOR } from '@/lib/styles/color-tokens';
 import { cn } from '@/lib/utils';
-import type { UpdateProfileInput as ProfileUpdate } from '@/services/profile';
+import type { UpdateProfileInput as ProfileUpdate } from '@/services/profile/client';
 
 export function ProfilesSettings() {
 	const { settings, updateProfile, setActiveProfile, deleteProfile } = useProfileContext();

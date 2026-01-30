@@ -11,12 +11,12 @@ import { Effect } from 'effect';
 /**
  * Error de transformación
  */
-export type TransformError = {
+export interface TransformError {
 	_tag: 'TransformError';
 	message: string;
 	cause?: unknown;
 	timestamp: Date;
-};
+}
 
 /**
  * Crea un TransformError

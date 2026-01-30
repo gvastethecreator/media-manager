@@ -1,7 +1,7 @@
 /**
  * 🗿 Modelo base de Group, basado en el esquema de Drizzle.
  */
-export type GroupBase = {
+export interface GroupBase {
 	id: string;
 	name: string;
 	description: string | null;
@@ -25,7 +25,7 @@ export type GroupBase = {
 	featuredImage?: string;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 import { EntityStats } from '../entity.types';
 

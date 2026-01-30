@@ -69,8 +69,8 @@ export function useReducedMotion(): boolean {
  * // Retorna { duration: 300, delay: 100 } si no
  */
 export function useAnimationConfig(
-	duration: number = 300,
-	delay: number = 0
+	duration = 300,
+	delay = 0
 ): { duration: number; delay: number; shouldAnimate: boolean } {
 	const prefersReducedMotion = useReducedMotion();
 
@@ -87,7 +87,7 @@ export function useAnimationConfig(
  * @param duration - Duración en ms
  * @returns Objeto de estilos CSS
  */
-export function useTransitionStyles(properties: string[] = ['all'], duration: number = 300): { transition: string } {
+export function useTransitionStyles(properties: string[] = ['all'], duration = 300): { transition: string } {
 	const prefersReducedMotion = useReducedMotion();
 
 	if (prefersReducedMotion) {

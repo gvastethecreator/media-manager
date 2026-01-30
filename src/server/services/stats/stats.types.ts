@@ -130,36 +130,40 @@ export interface ExtendedStats {
 /**
  * Tipos helper internos para queries
  */
-export type CountRow = { count: number };
-export type SizeRow = { totalSize: number };
+export interface CountRow {
+	count: number;
+}
+export interface SizeRow {
+	totalSize: number;
+}
 
 /**
  * Conteos de archivos multimedia
  */
-export type MediaCounts = {
+export interface MediaCounts {
 	images: number;
 	videos: number;
 	audios: number;
 	documents: number;
 	jsonFiles: number;
 	file3Ds: number;
-};
+}
 
 /**
  * Conteos de entidades organizacionales
  */
-export type OrgCounts = {
+export interface OrgCounts {
 	folders: number;
 	albums: number;
 	collections: number;
 	tags: number;
 	favorites: number;
-};
+}
 
 /**
  * Conteos de entidades worldbuilding
  */
-export type WorldCounts = {
+export interface WorldCounts {
 	characters: number;
 	places: number;
 	worldItems: number;
@@ -168,26 +172,26 @@ export type WorldCounts = {
 	notes: number;
 	properties: number;
 	wildcards: number;
-};
+}
 
 /**
  * Conteos de entidades del sistema
  */
-export type SystemCounts = {
+export interface SystemCounts {
 	thumbnails: number;
 	metadatas: number;
-};
+}
 
 /**
  * Sumas de tamaños por tipo de archivo
  */
-export type SizeSums = {
+export interface SizeSums {
 	totalFoldersSize: number;
 	totalAudioSize: number;
 	totalDocumentSize: number;
 	totalJsonSize: number;
 	totalFile3DSize: number;
-};
+}
 
 /**
  * Tag popular con conteo de imágenes

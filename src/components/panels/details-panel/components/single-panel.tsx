@@ -18,7 +18,6 @@ import {
 	Package,
 	RefreshCw,
 	Settings,
-	Share2,
 	Tag,
 	Target,
 	Zap,
@@ -36,7 +35,9 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ImageFallback } from '@/components/ui/image-fallback';
+import { ImageZoomDialog } from '@/components/ui/image-zoom';
 import { Label } from '@/components/ui/label';
+import { useFavorite } from '@/hooks/use-favorite';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { useEnhancedMetadata } from '../hooks/use-enhanced-metadata';
@@ -98,7 +99,14 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 		exportMetadata,
 	} = useEnhancedMetadata(shouldUseInternalHook ? item : undefined);
 
+	const { toggleFavorite, isLoading: isFavoriteLoading } = useFavorite({
+		entityId: item.id,
+		entityType: item.entityType,
+		initialIsFavorite: 'isFavorite' in item ? item.isFavorite : false,
+	});
+
 	const [detectedLoras, setDetectedLoras] = React.useState<string[]>([]);
+	const [zoomOpen, setZoomOpen] = React.useState(false);
 	const prevItemIdRef = React.useRef<string | undefined>(undefined);
 
 	React.useEffect(() => {
@@ -334,7 +342,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 								)}
 							</div>
 							<p className="mt-1 w-full overflow-hidden truncate break-all font-mono text-[9px] text-muted-foreground opacity-50">
-								{'path' in item ? (item.path as string) : 'ID: ' + item.id}
+								{'path' in item ? (item.path as string) : `ID: ${item.id}`}
 							</p>
 						</div>
 					</div>
@@ -346,6 +354,8 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 									? 'bg-destructive/10 text-destructive'
 									: 'opacity-40 hover:opacity-100'
 							)}
+							disabled={isFavoriteLoading}
+							onClick={toggleFavorite}
 							size="icon"
 							variant="ghost"
 						>
@@ -405,6 +415,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 								</Button>
 								<Button
 									className="h-6 min-w-0 flex-1 rounded-md border-none bg-background/90 px-2 font-black text-[8px] uppercase tracking-wider shadow-xl backdrop-blur"
+									onClick={() => setZoomOpen(true)}
 									size="sm"
 								>
 									<Fullscreen className="mr-1 h-2.5 w-2.5 shrink-0" /> <span className="truncate">ZOOM</span>
@@ -563,18 +574,20 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 				<div className="flex w-full min-w-0 items-center gap-2">
 					<Button
 						className="h-7 min-w-0 flex-1 border-border/40 px-1 font-black text-[8px] uppercase tracking-tighter hover:bg-muted/50"
-						variant="outline"
-					>
-						<Share2 className="mr-1 h-3 w-3 shrink-0 opacity-60" /> <span className="truncate">COMPARTIR</span>
-					</Button>
-					<Button
-						className="h-7 min-w-0 flex-1 border-border/40 px-1 font-black text-[8px] uppercase tracking-tighter hover:bg-muted/50"
+						disabled={!('path' in item && item.path)}
+						onClick={handleOpenInFolder}
 						variant="outline"
 					>
 						<ExternalLink className="mr-1 h-3 w-3 shrink-0 opacity-60" /> <span className="truncate">ABRIR</span>
 					</Button>
 				</div>
 			</footer>
+			<ImageZoomDialog
+				imageUrl={mainImageUrl || ''}
+				isOpen={zoomOpen}
+				onClose={() => setZoomOpen(false)}
+				title={itemName}
+			/>
 		</div>
 	);
 };

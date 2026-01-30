@@ -27,7 +27,9 @@ const logger = serverLogger.withContext('PromptMappers');
 
 // #region Tipos auxiliares
 
-type RelationObject = { id: string };
+interface RelationObject {
+	id: string;
+}
 type RelationInput = (string | RelationObject)[];
 
 // #endregion

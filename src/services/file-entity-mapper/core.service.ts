@@ -22,9 +22,9 @@ import { MetricsCollector } from './utils/metrics.utils';
  */
 export class FileEntityMapperCore {
 	private static instance: FileEntityMapperCore;
-	private processors: Map<EntityType, any>;
-	private metrics: MetricsCollector;
-	private queue: PQueue;
+	private readonly processors: Map<EntityType, any>;
+	private readonly metrics: MetricsCollector;
+	private readonly queue: PQueue;
 	private basicStageChain: Promise<unknown>;
 
 	private constructor() {

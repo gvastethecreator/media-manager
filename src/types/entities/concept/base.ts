@@ -8,7 +8,7 @@
 /**
  * 🗿 Modelo base de Concept, basado en el esquema de Drizzle.
  */
-export type ConceptBase = {
+export interface ConceptBase {
 	id: string;
 	name: string;
 	emoji: string;
@@ -30,7 +30,7 @@ export type ConceptBase = {
 	parentId: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 import { EntityStats } from '../entity.types';
 

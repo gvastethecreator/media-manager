@@ -15,8 +15,8 @@ export interface ClientLoggerOptions {
  * Logger para el cliente que es seguro en entornos del navegador
  */
 export class ClientLogger {
-	private context: string;
-	private level: LogLevel;
+	private readonly context: string;
+	private readonly level: LogLevel;
 
 	constructor(options: ClientLoggerOptions = {}) {
 		this.context = options.context || 'Client';

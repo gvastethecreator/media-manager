@@ -17,7 +17,7 @@ export interface ApiResponse<T = unknown> {
 }
 
 export class ApiClient {
-	private baseURL: string;
+	private readonly baseURL: string;
 
 	constructor() {
 		// Usar el proxy de Vite en desarrollo y la misma URL base en producción

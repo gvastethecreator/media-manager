@@ -15,9 +15,9 @@ export type ChartConfig = {
 	} & ({ color?: string; theme?: never } | { color?: never; theme: Record<keyof typeof THEMES, string> });
 };
 
-type ChartContextProps = {
+interface ChartContextProps {
 	config: ChartConfig;
-};
+}
 
 const ChartContext = React.createContext<ChartContextProps | null>(null);
 
@@ -117,7 +117,7 @@ const ChartTooltipContent = React.forwardRef<
 		labelKey,
 	} = props as any;
 	const { config } = useChart();
-	const typedPayload = (payload ?? []) as Array<any>;
+	const typedPayload = (payload ?? []) as any[];
 
 	const tooltipLabel = React.useMemo(() => {
 		if (hideLabel || !typedPayload.length) {
@@ -139,7 +139,7 @@ const ChartTooltipContent = React.forwardRef<
 		}
 
 		return <div className={cn('font-medium', labelClassName)}>{value}</div>;
-	}, [label, labelFormatter, typedPayload, hideLabel, labelClassName, config, labelKey]);
+	}, [label, labelFormatter, typedPayload, hideLabel, labelClassName, config, labelKey, payload]);
 
 	if (!(active && typedPayload.length)) {
 		return null;
@@ -228,14 +228,14 @@ const ChartLegend = RechartsPrimitive.Legend;
 const ChartLegendContent = React.forwardRef<
 	HTMLDivElement,
 	React.ComponentProps<'div'> & {
-		payload?: Array<any>;
+		payload?: any[];
 		verticalAlign?: 'top' | 'bottom';
 		hideIcon?: boolean;
 		nameKey?: string;
 	}
 >(({ className, hideIcon = false, payload, verticalAlign = 'bottom', nameKey }, ref) => {
 	const { config } = useChart();
-	const typedPayload = (payload ?? []) as Array<any>;
+	const typedPayload = (payload ?? []) as any[];
 
 	if (!typedPayload.length) {
 		return null;

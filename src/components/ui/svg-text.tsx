@@ -1,7 +1,7 @@
 'use client';
 
 import * as React from 'react';
-import { ElementType, ReactNode, useEffect, useRef, useState } from 'react';
+import { ReactNode, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 
 export interface SvgTextProps {
@@ -27,25 +27,13 @@ export interface SvgTextProps {
 	 * @default "bold"
 	 */
 	fontWeight?: string | number;
-	/**
-	 * The element type to render for the container
-	 * @default "div"
-	 */
-	as?: ElementType;
 }
 
 /**
  * SvgText displays content with an SVG background fill effect.
  * The SVG is masked by the content, creating a dynamic text look.
  */
-export function SvgText({
-	svg,
-	children,
-	className = '',
-	fontSize = '20vw',
-	fontWeight = 'bold',
-	as: Component = 'div',
-}: SvgTextProps) {
+export function SvgText({ svg, children, className = '', fontSize = '20vw', fontWeight = 'bold' }: SvgTextProps) {
 	const textRef = useRef<HTMLDivElement>(null);
 	const [textDimensions, setTextDimensions] = useState({ width: 0, height: 0 });
 	const content = React.Children.toArray(children).join('');
@@ -75,7 +63,7 @@ export function SvgText({
 	}, []);
 
 	return (
-		<Component className={cn('relative inline-block', className)}>
+		<div className={cn('relative inline-block', className)}>
 			{/* Hidden text for measuring */}
 			<div
 				className="pointer-events-none absolute whitespace-nowrap font-bold opacity-0"
@@ -108,11 +96,9 @@ export function SvgText({
 						<text
 							dominantBaseline="central"
 							fill="white"
-							style={{
-								fontSize: typeof fontSize === 'number' ? `${fontSize}px` : fontSize,
-								fontWeight,
-								fontFamily: 'system-ui, -apple-system, sans-serif',
-							}}
+							fontFamily="system-ui, -apple-system, sans-serif"
+							fontSize="1em"
+							fontWeight={fontWeight}
 							textAnchor="middle"
 							x="50%"
 							y="50%"
@@ -122,41 +108,9 @@ export function SvgText({
 					</mask>
 				</defs>
 
-				{/* Background SVG with proper scaling */}
-				<g mask={`url(#${maskId})`}>
-					<foreignObject
-						height="100%"
-						style={{
-							overflow: 'visible',
-						}}
-						width="100%"
-					>
-						<div
-							style={{
-								width: `${textDimensions.width}px`,
-								height: `${textDimensions.height}px`,
-								display: 'flex',
-								alignItems: 'center',
-								justifyContent: 'center',
-							}}
-						>
-							<div
-								style={{
-									width: '400px',
-									height: '200px',
-									transform: `scale(${Math.max(textDimensions.width / 400, textDimensions.height / 200)})`,
-									transformOrigin: 'center',
-								}}
-							>
-								{svg}
-							</div>
-						</div>
-					</foreignObject>
-				</g>
+				{/* Background SVG with mask */}
+				<g mask={`url(#${maskId})`}>{svg}</g>
 			</svg>
-
-			{/* Screen reader text */}
-			<span className="sr-only">{content}</span>
-		</Component>
+		</div>
 	);
 }

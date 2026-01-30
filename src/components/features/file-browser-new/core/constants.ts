@@ -3,7 +3,7 @@
  * @module file-browser-new/core/constants
  */
 
-import type { InfiniteScrollOptions, SortOption, ViewConfig, ViewMode } from '../types';
+import type { InfiniteScrollOptions, SortOption, ViewConfig, ViewMode } from '../types/view.types';
 
 /**
  * Modo de vista por defecto

@@ -6,7 +6,7 @@
 import { ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { StatusBarProps } from '../types';
+import type { StatusBarProps } from '../types/props.types';
 
 export function FileBrowserStatusBar({
 	totalItems,

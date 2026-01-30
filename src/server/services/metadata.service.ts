@@ -57,7 +57,7 @@ export interface ImageMetadata {
 }
 
 // Tipo local para imagen de Drizzle
-type DrizzleImage = {
+interface DrizzleImage {
 	id: string;
 	name: string | null;
 	path: string;
@@ -77,7 +77,7 @@ type DrizzleImage = {
 	addedAt: Date;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 export interface ImageWithMetadata extends DrizzleImage {
 	parsedMetadata?: ImageMetadata;

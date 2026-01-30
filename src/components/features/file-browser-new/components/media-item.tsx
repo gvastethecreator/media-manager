@@ -10,9 +10,10 @@ import { CornerUpLeft, Folder } from 'lucide-react';
 import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import { formatFileSize } from '@/lib/utils/format.utils';
-import type { BrowserItem } from '../types';
+import type { BrowserItem } from '../types/item.types';
 // MediaThumbnail del módulo migrado
-import { type MediaItem, MediaThumbnail } from './media-thumbnail';
+import { MediaThumbnail } from './media-thumbnail/media-thumbnail';
+import type { MediaItem } from './media-thumbnail/types';
 
 /**
  * Convierte BrowserItem a MediaItem compatible

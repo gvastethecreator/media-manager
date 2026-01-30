@@ -14,7 +14,9 @@ export * from './database';
 export * from './dev';
 export * from './errors';
 export * from './events';
-export * from './filesystem';
+// NOTA: filesystem NO se exporta aquí porque contiene código de Node.js
+// que no debe incluirse en el bundle del cliente.
+// Importar directamente desde '@/lib/filesystem' solo en código de servidor.
 export * from './hooks';
 export * from './image';
 // Logger

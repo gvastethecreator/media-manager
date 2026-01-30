@@ -17,18 +17,18 @@ import type {
 const logger = serverLogger.withContext('NoteMappers');
 
 // Tipos locales para Drizzle ORM
-type DrizzleCreateNoteData = {
+interface DrizzleCreateNoteData {
 	title: string;
 	content: string;
 	category: string;
 	priority: number;
 	status: string;
 	isFavorite: boolean;
-};
+}
 
 type DrizzleUpdateNoteData = Partial<DrizzleCreateNoteData>;
 
-type DrizzleWhereFilter = {
+interface DrizzleWhereFilter {
 	AND?: DrizzleWhereFilter[];
 	OR?: DrizzleWhereFilter[];
 	title?: { contains?: string; equals?: string };
@@ -37,19 +37,19 @@ type DrizzleWhereFilter = {
 	priority?: { in?: number[] };
 	status?: { in?: string[] };
 	isFavorite?: boolean;
-};
+}
 
-type DrizzleFindManyArgs = {
+interface DrizzleFindManyArgs {
 	where?: DrizzleWhereFilter;
 	orderBy?: { [key: string]: 'asc' | 'desc' };
 	skip?: number;
 	take?: number;
-};
+}
 
-type DrizzleUpdateResult = {
+interface DrizzleUpdateResult {
 	data: DrizzleUpdateNoteData;
 	// Los includes se manejan por separado en Drizzle
-};
+}
 
 /**
  * 🔄 Mapea datos de creación de nota a formato compatible con Drizzle.

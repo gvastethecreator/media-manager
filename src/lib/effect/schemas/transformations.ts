@@ -169,7 +169,7 @@ export const FlexibleDateFromString = Schema.Union(
 			strict: false,
 			decode: (s) => {
 				const date = new Date(s);
-				if (isNaN(date.getTime())) {
+				if (Number.isNaN(date.getTime())) {
 					throw new Error(`Invalid date string: ${s}`);
 				}
 				return date;

@@ -3,7 +3,7 @@
  * @module file-browser-new/components/settings
  */
 
-import { FolderTree, Gauge, Monitor, RefreshCcw, RotateCcw, Search, Settings, Sliders, X } from 'lucide-react';
+import { Eye, FolderTree, Gauge, Monitor, RefreshCcw, RotateCcw, Search, Settings, Sliders, X } from 'lucide-react';
 import { memo, useMemo } from 'react';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Button } from '@/components/ui/button';
@@ -46,6 +46,18 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 		resetFilters,
 		resetAll,
 		resetLocalStorage,
+		showThumbnails,
+		toggleShowThumbnails,
+		showMetadata,
+		toggleShowMetadata,
+		showTags,
+		toggleShowTags,
+		showStats,
+		toggleShowStats,
+		enableAnimations,
+		toggleEnableAnimations,
+		animationDuration,
+		setAnimationDuration,
 	} = useSettingsBindings();
 
 	const { setShowInterfaceSettings } = useDetailsPanel();
@@ -119,7 +131,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 			</div>
 
 			<div className="flex-1 overflow-y-auto p-4 pt-2">
-				<Accordion className="w-full" defaultValue="appearance" type="single">
+				<Accordion className="w-full" defaultValue={['appearance', 'visual']} type="multiple">
 					{/* 1. APARIENCIA */}
 					<AccordionItem className="border-border/40" value="appearance">
 						<AccordionTrigger className="py-3 hover:no-underline">
@@ -208,7 +220,62 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 						</AccordionContent>
 					</AccordionItem>
 
-					{/* 3. RENDIMIENTO */}
+					{/* 3. VISUALIZACIÓN */}
+					<AccordionItem className="border-border/40" value="visual">
+						<AccordionTrigger className="py-3 hover:no-underline">
+							<div className="flex items-center gap-2.5">
+								<Eye className="h-4 w-4" style={{ color: 'var(--dt-warning-500)' }} />
+								<span className="font-semibold text-sm">Visualización</span>
+							</div>
+						</AccordionTrigger>
+						<AccordionContent className="space-y-3 pb-4">
+							<div className="space-y-3">
+								<Label className="font-bold text-[11px] text-muted-foreground/70 uppercase tracking-wider">
+									Elementos a mostrar
+								</Label>
+								<Row>
+									<Label className="font-medium text-muted-foreground text-xs">Mostrar thumbnails</Label>
+									<Switch checked={showThumbnails} onCheckedChange={toggleShowThumbnails} />
+								</Row>
+								<Row>
+									<Label className="font-medium text-muted-foreground text-xs">Mostrar metadata</Label>
+									<Switch checked={showMetadata} onCheckedChange={toggleShowMetadata} />
+								</Row>
+								<Row>
+									<Label className="font-medium text-muted-foreground text-xs">Mostrar tags</Label>
+									<Switch checked={showTags} onCheckedChange={toggleShowTags} />
+								</Row>
+								<Row>
+									<Label className="font-medium text-muted-foreground text-xs">Mostrar estadísticas</Label>
+									<Switch checked={showStats} onCheckedChange={toggleShowStats} />
+								</Row>
+							</div>
+
+							<div className="space-y-3 pt-2">
+								<Label className="font-bold text-[11px] text-muted-foreground/70 uppercase tracking-wider">
+									Animaciones
+								</Label>
+								<Row>
+									<Label className="font-medium text-muted-foreground text-xs">Activar animaciones</Label>
+									<Switch checked={enableAnimations} onCheckedChange={toggleEnableAnimations} />
+								</Row>
+								<Row>
+									<Label className="font-medium text-muted-foreground text-xs">Duración (ms)</Label>
+									<Input
+										className="h-7 w-20 text-right text-xs"
+										disabled={!enableAnimations}
+										max={1000}
+										min={0}
+										onChange={(e) => setAnimationDuration(Number(e.target.value))}
+										type="number"
+										value={animationDuration}
+									/>
+								</Row>
+							</div>
+						</AccordionContent>
+					</AccordionItem>
+
+					{/* 4. RENDIMIENTO */}
 					<AccordionItem className="border-border/40" value="performance">
 						<AccordionTrigger className="py-3 hover:no-underline">
 							<div className="flex items-center gap-2.5">

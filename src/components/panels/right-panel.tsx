@@ -1,13 +1,15 @@
 import { lazy, memo as reactMemo, Suspense, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { DetailsPanel } from '@/components/panels/details-panel';
+import { DetailsPanel } from '@/components/panels/details-panel/details-panel';
 import { FolderStatsDisplay } from '@/components/panels/stats-panel/folder-stats-display';
 import { SystemStatsDisplay } from '@/components/panels/stats-panel/system-stats-display';
 import { cn } from '@/lib/utils';
 import { useDetailsPanel } from '@/store/details-panel.store';
 
 // Lazy load InterfaceSection para no impactar bundle inicial
-const FileBrowserSettings = lazy(() => import('@/components/features/file-browser-new/components/settings'));
+const FileBrowserSettings = lazy(
+	() => import('@/components/features/file-browser-new/components/settings/file-browser-settings')
+);
 
 // Componente para manejar la carga perezosa del StatsPanel
 const LazyStatsPanel = reactMemo(function RightPanelLazyStatsPanel({

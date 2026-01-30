@@ -10,7 +10,7 @@ import { deserializeJsonField, serializeJsonField } from '../../lib/utils/transf
 import { type QueueJobExtended, type QueueJobMetadata, QueueJobStatus } from '../../types/entities/queue-job';
 
 // Tipo local equivalente a Drizzle (migración a Drizzle)
-type DrizzleQueueJob = {
+interface DrizzleQueueJob {
 	id: string;
 	queue: string;
 	data: string; // JSON
@@ -26,7 +26,7 @@ type DrizzleQueueJob = {
 	priority: number;
 	metadata?: string | null; // JSON
 	retryAt?: Date | null;
-};
+}
 
 const logger = serverLogger.withContext('QueueJobTransformer');
 

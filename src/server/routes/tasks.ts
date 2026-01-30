@@ -19,7 +19,7 @@ import {
 	toggleTaskFavorite,
 	updateTask,
 	updateTaskProgress,
-} from '@/services/task';
+} from '@/services/task/task.service';
 import { serializeTask, serializeTasks } from '@/transformers/task';
 import type { TaskCreateInput, TaskUpdateInput } from '@/types/entities/task';
 

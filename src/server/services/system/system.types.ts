@@ -5,7 +5,7 @@
 /**
  * Estadísticas de navegación del sistema
  */
-export type NavigationStats = {
+export interface NavigationStats {
 	totalImages: number;
 	totalFolders: number;
 	totalCollections: number;
@@ -21,7 +21,7 @@ export type NavigationStats = {
 	totalDownloads: number;
 	topTags: Array<{ id: string; name: string; count: number }>;
 	recentActivity: unknown[];
-};
+}
 
 /**
  * Estadísticas de entidades de la base de datos para el frontend

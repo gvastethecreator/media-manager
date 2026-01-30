@@ -28,7 +28,8 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Toggle } from '@/components/ui/toggle';
 import { cn } from '@/lib/utils';
-import type { SortOption, ToolbarProps, ViewMode } from '../types';
+import type { ToolbarProps } from '../types/props.types';
+import type { SortOption, ViewMode } from '../types/view.types';
 
 const VIEW_ICONS: Record<ViewMode, React.ComponentType<{ className?: string }>> = {
 	grid: Grid,

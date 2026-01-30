@@ -1,8 +1,8 @@
 import { GlobeIcon } from 'lucide-react';
 import { memo, useMemo } from 'react';
-import { WorldItemCard } from '@/components/cards/world-item-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { WorldItemCard } from '@/components/cards/world-item-card/world-item-card';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/animejs-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useWorldItems } from '@/lib/api/world-items';

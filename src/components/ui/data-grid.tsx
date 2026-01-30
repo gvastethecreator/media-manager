@@ -17,22 +17,22 @@ declare module '@tanstack/react-table' {
 	}
 }
 
-export type DataGridApiFetchParams = {
+export interface DataGridApiFetchParams {
 	pageIndex: number;
 	pageSize: number;
 	sorting?: SortingState;
 	filters?: ColumnFiltersState;
 	searchQuery?: string;
-};
+}
 
-export type DataGridApiResponse<T> = {
+export interface DataGridApiResponse<T> {
 	data: T[];
 	empty: boolean;
 	pagination: {
 		total: number;
 		page: number;
 	};
-};
+}
 
 export interface DataGridContextProps<TData extends object> {
 	props: DataGridProps<TData>;
@@ -41,12 +41,12 @@ export interface DataGridContextProps<TData extends object> {
 	isLoading: boolean;
 }
 
-export type DataGridRequestParams = {
+export interface DataGridRequestParams {
 	pageIndex: number;
 	pageSize: number;
 	sorting?: SortingState;
 	columnFilters?: ColumnFiltersState;
-};
+}
 
 export interface DataGridProps<TData extends object> {
 	className?: string;

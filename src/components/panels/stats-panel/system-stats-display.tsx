@@ -14,13 +14,17 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useNavigationStats } from '@/lib/api/navigation';
 import { cn, formatFileSize } from '@/lib/utils';
 
+interface IconProps {
+	className?: string;
+}
+
 const StatsItem = memo(function StatsItemComponent({
 	icon: Icon,
 	label,
 	value,
 	color = 'text-muted-foreground',
 }: {
-	icon: React.ElementType;
+	icon: React.ComponentType<IconProps>;
 	label: string;
 	value: string | number;
 	color?: string;
@@ -43,7 +47,7 @@ const StatsGrid = memo(function StatsGridComponent({
 	items,
 }: {
 	title: string;
-	items: Array<{ icon: React.ElementType; label: string; value: string | number; color?: string }>;
+	items: Array<{ icon: React.ComponentType<IconProps>; label: string; value: string | number; color?: string }>;
 }) {
 	return (
 		<div className="rounded-dt-md border border-border/50 bg-card/50 p-3">

@@ -13,7 +13,7 @@ import {
 } from '@/types/entities/profile/types';
 
 // Tipo local para Profile de Drizzle
-type DrizzleProfile = {
+interface DrizzleProfile {
 	id: string;
 	name: string;
 	description: string | null;
@@ -24,7 +24,7 @@ type DrizzleProfile = {
 	updatedAt: Date | null;
 	settingsId: string | null;
 	imageId: string | null;
-};
+}
 
 /**
  * Construye condiciones de filtro para consultas Drizzle

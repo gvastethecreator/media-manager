@@ -2,7 +2,7 @@ import { StateCreator } from 'zustand';
 // Ahora usamos el cliente de API y no el servicio del servidor
 import { createNoteInApi, deleteNoteFromApi, getNotesFromApi, updateNoteInApi } from '@/lib/api/client/note.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/services/toast/toast.service';
 import { adaptNoteCompleteToWithStats, adaptNotesCompleteToWithStats } from '@/transformers/note/note-adapter';
 import type { NoteCreateInput, NoteUpdateInput, NoteWithStats } from '@/types/entities/note';
 import type { NoteStore } from '../types';

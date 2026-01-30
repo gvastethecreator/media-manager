@@ -1,4 +1,4 @@
-import { Edit, PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Settings } from 'lucide-react';
+import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen, Settings } from 'lucide-react';
 import { memo } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -13,12 +13,13 @@ export interface ViewToolbarProps {
 	toggleRightPanelCollapse?: () => void;
 	isLeftPanelCollapsed?: boolean;
 	toggleLeftPanelCollapse?: () => void;
-	allItemIds?: string[]; // IDs de todos los elementos disponibles para selección
-	// Props para acciones de carpeta
+	// Props adicionales para integración con file-browser
+	allItemIds?: string[];
 	currentFolderId?: string;
-	onScanFolder?: () => void;
-	onRefreshFolder?: () => void;
 	isRetrying?: boolean;
+	onRefreshFolder?: () => Promise<void>;
+	onScanFolder?: () => Promise<void>;
+	// Nota: Las acciones específicas de carpeta (scan, refresh) están en file-browser-toolbar.tsx
 }
 
 export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
@@ -26,6 +27,17 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	toggleRightPanelCollapse,
 	isLeftPanelCollapsed,
 	toggleLeftPanelCollapse,
+	// Props adicionales (reservadas para uso futuro)
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	allItemIds,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	currentFolderId,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	isRetrying,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	onRefreshFolder,
+	// eslint-disable-next-line @typescript-eslint/no-unused-vars
+	onScanFolder,
 }) {
 	const location = useLocation();
 	const params = useParams<{ id: string }>();
@@ -51,16 +63,14 @@ export const ViewToolbar = memo<ViewToolbarProps>(function ViewToolbarInner({
 	// ========================================================================
 
 	const renderContextActions = () => {
+		// Acciones contextuales específicas por vista pueden agregarse aquí
+		// Por ahora, las acciones principales están en file-browser-toolbar.tsx
 		switch (currentView) {
 			case 'collection-content':
-				return (
-					<div className="flex items-center gap-0.5">
-						<Button className="h-7 px-2 hover:bg-accent" size="sm" variant="ghost">
-							<Edit className="mr-1 h-3.5 w-3.5" />
-						</Button>
-					</div>
-				);
+				// Acciones para colección (ej: editar, compartir)
+				return null;
 			case 'folder-content':
+				// Acciones para carpeta (ej: scan, refresh) están en file-browser-toolbar
 				return null;
 			default:
 				return null;

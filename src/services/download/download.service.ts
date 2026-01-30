@@ -95,8 +95,8 @@ export interface BatchDownloadResult {
  * Enhanced Download Service Class
  */
 class EnhancedDownloadService {
-	private activeDownloads = new Map<string, AbortController>();
-	private maxConcurrentDownloads = 3;
+	private readonly activeDownloads = new Map<string, AbortController>();
+	private readonly maxConcurrentDownloads = 3;
 
 	/**
 	 * Download a single file with enhanced options

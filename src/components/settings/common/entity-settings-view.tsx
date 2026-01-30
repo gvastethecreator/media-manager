@@ -5,8 +5,9 @@
  */
 
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
+import type { LucideIcon } from 'lucide-react';
 import { Grid3X3, List, Loader2, Plus, Search } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -265,7 +266,7 @@ export function EntitySettingsView<T extends EntityWithStats>({
 		return (
 			<EmptyState
 				description={error.message || `No se pudieron cargar los ${entityLabelPlural.toLowerCase()}`}
-				icon={Icon}
+				icon={Icon as LucideIcon}
 				title="Error al cargar"
 			/>
 		);
@@ -365,7 +366,9 @@ export function EntitySettingsView<T extends EntityWithStats>({
 			{filteredEntities.length === 0 ? (
 				<div className="flex flex-col items-center justify-center py-12 text-center">
 					<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
-						<Icon className="h-6 w-6 text-muted-foreground" />
+						{React.createElement(Icon as React.ComponentType<{ className?: string }>, {
+							className: 'h-6 w-6 text-muted-foreground',
+						})}
 					</div>
 					<h3 className="font-medium text-lg">No hay {entityLabelPlural.toLowerCase()}</h3>
 					<p className="mt-1 max-w-sm text-muted-foreground text-sm">

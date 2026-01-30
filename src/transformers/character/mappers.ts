@@ -14,7 +14,7 @@ import type {
 } from '@/types/entities/character';
 
 // Tipos locales equivalentes a Drizzle
-type DrizzleCharacterCreateInput = {
+interface DrizzleCharacterCreateInput {
 	id?: string;
 	name: string;
 	description?: string | null;
@@ -39,9 +39,9 @@ type DrizzleCharacterCreateInput = {
 	parentId?: string | null;
 	createdAt?: Date;
 	updatedAt?: Date;
-};
+}
 
-type DrizzleCharacterUpdateInput = {
+interface DrizzleCharacterUpdateInput {
 	name?: string;
 	description?: string | null;
 	emoji?: string | null;
@@ -64,9 +64,9 @@ type DrizzleCharacterUpdateInput = {
 	featuredImage?: string | null;
 	parentId?: string | null;
 	updatedAt?: Date;
-};
+}
 
-type DrizzleCharacterWhereInput = {
+interface DrizzleCharacterWhereInput {
 	id?: string;
 	name?: { contains?: string };
 	description?: { contains?: string };
@@ -87,15 +87,15 @@ type DrizzleCharacterWhereInput = {
 	parentId?: string;
 	OR?: DrizzleCharacterWhereInput[];
 	tags?: { some?: { id?: { in?: string[] } } };
-};
+}
 
-type DrizzleCharacterFindManyArgs = {
+interface DrizzleCharacterFindManyArgs {
 	where?: DrizzleCharacterWhereInput;
 	orderBy?: { [key: string]: 'asc' | 'desc' } | { [key: string]: 'asc' | 'desc' }[];
 	skip?: number;
 	take?: number;
 	// Los includes se manejan por separado en Drizzle con joins
-};
+}
 
 /**
  * 🔄 Mapea un `CharacterCreateInput` a un `DrizzleCharacterCreateInput`.

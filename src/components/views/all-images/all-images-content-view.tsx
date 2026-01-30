@@ -1,7 +1,8 @@
 import { AlertTriangle, FolderSync, Upload } from 'lucide-react';
 import { useCallback, useState } from 'react';
-import { LoadingScreen } from '@/components/core/feedback';
-import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { motion } from '@/components/ui/animejs-shim';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';

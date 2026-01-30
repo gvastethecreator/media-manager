@@ -12,16 +12,14 @@ import type { ProcessStatus } from '@/types/folders';
 import type { ReindexOptions, ReindexPhaseResult } from './folder-reindex-types';
 
 // Importar fases desde módulos separados
-import {
-	phase1_analyzeStructure,
-	phase2_checkExistence,
-	phase3_removeNonExistentFolders,
-	phase4_buildSubfolderStructure,
-	phase5_indexFiles,
-	phase6_generateThumbnails,
-	phase7_extractMetadata,
-	phase8_verifyIntegrity,
-} from './reindex-phases';
+import { phase1_analyzeStructure } from './reindex-phases/phase1-analyze';
+import { phase2_checkExistence } from './reindex-phases/phase2-existence';
+import { phase3_removeNonExistentFolders } from './reindex-phases/phase3-deletion';
+import { phase4_buildSubfolderStructure } from './reindex-phases/phase4-structure';
+import { phase5_indexFiles } from './reindex-phases/phase5-indexing';
+import { phase6_generateThumbnails } from './reindex-phases/phase6-thumbnails';
+import { phase7_extractMetadata } from './reindex-phases/phase7-metadata';
+import { phase8_verifyIntegrity } from './reindex-phases/phase8-verification';
 
 // Re-exports para compatibilidad backward
 export type { ReindexAnalysisResult, ReindexOptions, ReindexPhaseResult } from './folder-reindex-types';

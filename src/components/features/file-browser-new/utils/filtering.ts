@@ -3,7 +3,8 @@
  * @module file-browser-new/utils/filtering
  */
 
-import type { BrowserItem, FilterOption } from '../types';
+import type { BrowserItem } from '../types/item.types';
+import type { FilterOption } from '../types/view.types';
 
 /**
  * Obtiene valor de un campo para filtrado

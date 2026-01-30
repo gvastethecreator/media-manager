@@ -1,10 +1,10 @@
 import { Filter, Grid, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { DocumentCard } from '@/components/cards/document-card';
-import { FolderCard } from '@/components/cards/folder-card';
-import { ImageCard } from '@/components/cards/image-card';
-import { VideoCard } from '@/components/cards/video-card';
-import { LoadingScreen } from '@/components/core/feedback';
+import { DocumentCard } from '@/components/cards/document-card/document-card';
+import { FolderCard } from '@/components/cards/folder-card/folder-card';
+import { ImageCard } from '@/components/cards/image-card/index';
+import { VideoCard } from '@/components/cards/video-card/video-card';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';

@@ -59,7 +59,7 @@ export function CodeViewer({ isOpen, onOpenChange, file }: CodeViewerProps) {
 
 	useEffect(() => {
 		if (isOpen) loadContent();
-	}, [isOpen]);
+	}, [isOpen, loadContent]);
 
 	const handleDownload = () => {
 		const blob = new Blob([code], { type: 'text/plain' });
