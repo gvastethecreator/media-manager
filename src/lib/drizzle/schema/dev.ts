@@ -1,4 +1,8 @@
-import { boolean, index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+
+// Enums para TypeScript (no exportados de drizzle-orm/sqlite-core)
+export const featureStatusEnum = ['pending', 'in-progress', 'completed', 'cancelled'] as const;
+export const alertLevelEnum = ['info', 'warning', 'error', 'critical'] as const;
 
 /**
  * Tabla de Features (Roadmap simple) - SQLite

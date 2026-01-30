@@ -1,14 +1,15 @@
 import si from 'systeminformation';
-import { clientLogger } from '@/lib/logger/server-logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 export async function getRealSystemMetrics() {
 	try {
-		const [cpuLoad, mem, fsSize, osInfo, cpu] = await Promise.all([
+		const [cpuLoad, mem, fsSize, osInfo, cpu, time] = await Promise.all([
 			si.currentLoad(),
 			si.mem(),
-			si.fsSize('/'),
+			si.fsSize(),
 			si.osInfo(),
 			si.cpu(),
+			si.time(),
 		]);
 
 		return {
@@ -27,21 +28,21 @@ export async function getRealSystemMetrics() {
 				swapused: mem.swapused,
 				usagePercentage: Math.round((mem.used / mem.total) * 100),
 			},
-			disk: {
-				total: fsSize.size,
-				used: fsSize.used,
-				available: fsSize.available,
-				usagePercentage: Math.round((fsSize.used / fsSize.size) * 100),
-			},
+			disk: fsSize && fsSize.length > 0 ? {
+				total: fsSize[0].size,
+				used: fsSize[0].used,
+				available: fsSize[0].available,
+				usagePercentage: Math.round((fsSize[0].used / fsSize[0].size) * 100),
+			} : null,
 			os: {
 				platform: osInfo.platform,
 				release: osInfo.release,
 				hostname: osInfo.hostname,
-				uptime: osInfo.uptime,
+				uptime: time.uptime,
 			},
 		};
 	} catch (error) {
-		clientLogger.error('Error al obtener métricas del sistema:', error);
+		serverLogger.error('Error al obtener métricas del sistema:', error);
 		return null;
 	}
 }

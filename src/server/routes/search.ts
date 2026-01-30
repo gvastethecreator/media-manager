@@ -8,13 +8,14 @@ const logger = serverLogger.withContext('SearchRoute');
 const router = express.Router();
 
 // GET /search - Búsqueda global (UNIFICADA)
-router.get('/', async (req, res) => {
+router.get('/', async (req, res): Promise<void> => {
 	try {
 		const { q, query, limit = '50', offset = '0', type = 'all' } = req.query;
 		const searchQuery = (q || query) as string;
 
 		if (!searchQuery || typeof searchQuery !== 'string') {
-			return res.json({ query: '', type: 'all', total: 0, results: [] });
+			res.json({ query: '', type: 'all', total: 0, results: [] });
+			return;
 		}
 
 		const parsedLimit = Math.min(100, parseInt(limit as string, 10) || 50);

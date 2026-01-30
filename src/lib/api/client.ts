@@ -27,8 +27,22 @@ export class ApiClient {
 	/**
 	 * Realiza una petición GET
 	 */
-	get<T>(endpoint: string): Promise<T> {
-		return this.request<T>('GET', endpoint);
+	get<T>(endpoint: string, options?: { params?: Record<string, unknown> }): Promise<T> {
+		// Construir URL con query params si se proporcionan
+		let url = endpoint;
+		if (options?.params) {
+			const searchParams = new URLSearchParams();
+			for (const [key, value] of Object.entries(options.params)) {
+				if (value !== undefined && value !== null) {
+					searchParams.append(key, String(value));
+				}
+			}
+			const queryString = searchParams.toString();
+			if (queryString) {
+				url = `${endpoint}?${queryString}`;
+			}
+		}
+		return this.request<T>('GET', url);
 	}
 
 	/**

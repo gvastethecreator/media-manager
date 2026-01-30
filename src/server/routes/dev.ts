@@ -33,7 +33,7 @@ router.get('/alerts', async (req, res, next) => {
 		const { level, service, resolved } = req.query;
 		const conditions = [];
 		
-		if (level) conditions.push(eq(serverAlerts.level, level as string));
+		if (level) conditions.push(eq(serverAlerts.level, level as 'info' | 'warning' | 'error' | 'critical'));
 		if (service) conditions.push(eq(serverAlerts.service, service as string));
 		if (resolved !== undefined) conditions.push(eq(serverAlerts.resolved, resolved === 'true'));
 
