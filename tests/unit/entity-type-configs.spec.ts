@@ -17,7 +17,9 @@ describe('entity-type-configs', () => {
 	it('retorna config válida para IMAGE', () => {
 		const cfg = getEntityTypeConfig(EntityStatsType.IMAGE);
 		expect(cfg?.displayName).toBe('Imagen');
-		expect(getEntityTypeColor(EntityStatsType.IMAGE)).toMatch(/^#/);
+		// Acepta tanto colores hex (#RRGGBB) como variables CSS (var(--...))
+		const color = getEntityTypeColor(EntityStatsType.IMAGE);
+		expect(color).toMatch(/^(#[0-9A-Fa-f]{6}|var\(--[\w-]+\))$/);
 		expect(getEntityTypeDisplayName(EntityStatsType.IMAGE)).toBe('Imagen');
 		expect(getEntityTypeDisplayName(EntityStatsType.IMAGE, true)).toBe('Imágenes');
 		expect(getEntityTypeEmoji(EntityStatsType.IMAGE)).toBeTruthy();
