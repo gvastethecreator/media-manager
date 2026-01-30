@@ -91,7 +91,7 @@ export function CollectionCardHeader({
 
 			{/* Tipo de la carta - estilo TCG */}
 			<div
-				className="flex items-center justify-between border-y bg-muted/40 px-3.5 py-1.5 text-white text-sm"
+				className="flex items-center justify-between border-y bg-muted/40 px-3.5 py-1.5 text-sm text-white"
 				style={{
 					borderBottom: `1px solid ${color}50`,
 					borderTop: `1px solid ${color}30`,

@@ -8,20 +8,12 @@
 import { and, eq } from 'drizzle-orm';
 import express from 'express';
 import { db } from '@/lib/drizzle';
-import {
-	audios,
-	documents,
-	file3Ds,
-	images,
-	jsonFiles,
-	metadatas,
-	videos,
-} from '@/lib/drizzle/schema';
+import { audios, documents, file3Ds, images, jsonFiles, metadatas, videos } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import {
-	thumbnailUnifiedService,
 	type ThumbnailEntityType,
 	type ThumbnailOptions,
+	thumbnailUnifiedService,
 } from '@/services/thumbnail/thumbnail-unified.service';
 
 const router = express.Router();
@@ -202,7 +194,7 @@ router.post('/generate', async (req, res) => {
 	try {
 		const { entityType, entityId, options = {} } = req.body;
 
-		if (!entityType || !entityId) {
+		if (!(entityType && entityId)) {
 			res.status(400).json({ error: 'entityType and entityId are required' });
 			return;
 		}
@@ -320,44 +312,45 @@ router.get('/info/:entityType/:entityId', async (req, res) => {
 router.get('/stats', async (_req, res) => {
 	try {
 		// Contar thumbnails por tipo
-		const [
-			imageStats,
-			videoStats,
-			audioStats,
-			documentStats,
-			jsonStats,
-			file3dStats,
-		] = await Promise.all([
+		const [imageStats, videoStats, audioStats, documentStats, jsonStats, file3dStats] = await Promise.all([
 			// Imágenes con thumbnail
 			db
 				.select({ count: db.fn.count() })
 				.from(images)
 				.where(and(eq(db.sql`length(${images.thumbnail})`, images.thumbnail))),
 			// Videos con thumbnail
-			db.select({ count: db.fn.count() }).from(videos).where(and(eq(videos.thumbnail, videos.thumbnail))),
+			db
+				.select({ count: db.fn.count() })
+				.from(videos)
+				.where(and(eq(videos.thumbnail, videos.thumbnail))),
 			// Audio con waveform (buscando en metadata)
-			db.select({ count: db.fn.count() }).from(audios),
+			db
+				.select({ count: db.fn.count() })
+				.from(audios),
 			// Documentos con thumbnail (en metadatas)
 			db
 				.select({ count: db.fn.count() })
 				.from(metadatas)
 				.where(and(eq(metadatas.entityType, 'document'), eq(metadatas.key, 'thumbnail'))),
 			// JSON con thumbnail
-			db.select({ count: db.fn.count() }).from(jsonFiles),
+			db
+				.select({ count: db.fn.count() })
+				.from(jsonFiles),
 			// 3D con thumbnail
-			db.select({ count: db.fn.count() }).from(file3Ds),
+			db
+				.select({ count: db.fn.count() })
+				.from(file3Ds),
 		]);
 
 		// Totales
-		const [totalImages, totalVideos, totalAudios, totalDocuments, totalJsonFiles, totalFile3Ds] =
-			await Promise.all([
-				db.select({ count: db.fn.count() }).from(images),
-				db.select({ count: db.fn.count() }).from(videos),
-				db.select({ count: db.fn.count() }).from(audios),
-				db.select({ count: db.fn.count() }).from(documents),
-				db.select({ count: db.fn.count() }).from(jsonFiles),
-				db.select({ count: db.fn.count() }).from(file3Ds),
-			]);
+		const [totalImages, totalVideos, totalAudios, totalDocuments, totalJsonFiles, totalFile3Ds] = await Promise.all([
+			db.select({ count: db.fn.count() }).from(images),
+			db.select({ count: db.fn.count() }).from(videos),
+			db.select({ count: db.fn.count() }).from(audios),
+			db.select({ count: db.fn.count() }).from(documents),
+			db.select({ count: db.fn.count() }).from(jsonFiles),
+			db.select({ count: db.fn.count() }).from(file3Ds),
+		]);
 
 		res.json({
 			byType: {

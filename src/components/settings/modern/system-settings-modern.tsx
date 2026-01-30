@@ -8,30 +8,15 @@ import {
 	AlertTriangle,
 	CheckCircle,
 	ChevronDown,
-	ChevronRight,
 	Cpu,
 	Database,
 	Eye,
 	HardDrive,
-	MemoryStick,
 	RefreshCw,
 	Server,
 	Zap,
 } from 'lucide-react';
 import { useState } from 'react';
-import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Progress } from '@/components/ui/progress';
-import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
-import { cn } from '@/lib/utils';
-import { SettingsCard, SettingsGroup, SettingsRow } from '../modern/settings-card';
-import { useRepairSystem, useResetDatabase, useSystemStats } from '@/lib/api/system';
-import { toastService } from '@/lib/ui/toast';
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -43,6 +28,18 @@ import {
 	AlertDialogTitle,
 	AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Label } from '@/components/ui/label';
+import { Progress } from '@/components/ui/progress';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { useRepairSystem, useResetDatabase, useSystemStats } from '@/lib/api/system';
+import { toastService } from '@/lib/ui/toast';
+import { cn } from '@/lib/utils';
+import { SettingsCard, SettingsGroup, SettingsRow } from '../modern/settings-card';
 
 export function SystemSettingsModern() {
 	const [autoRefresh, setAutoRefresh] = useState(true);
@@ -59,7 +56,11 @@ export function SystemSettingsModern() {
 		memoryUsage: 0, // Not provided by current API
 		dbSize: rawStats?.formattedDatabaseSize || '0 B',
 		dbSizeRaw: rawStats?.databaseSize || 0,
-		totalEntities: (rawStats?.totalImages || 0) + (rawStats?.totalVideos || 0) + (rawStats?.totalAudio || 0) + (rawStats?.totalFolders || 0),
+		totalEntities:
+			(rawStats?.totalImages || 0) +
+			(rawStats?.totalVideos || 0) +
+			(rawStats?.totalAudio || 0) +
+			(rawStats?.totalFolders || 0),
 		totalTables: 0, // Not provided by API explicitly
 		uptime: 'N/A', // Not provided
 		version: '2.4.1', // Hardcoded for now
@@ -249,11 +250,10 @@ export function SystemSettingsModern() {
 					</SettingsCard>
 				</CollapsibleTrigger>
 				<CollapsibleContent className="space-y-4 pt-4">
-
 					<SettingsGroup title="Mantenimiento">
 						<SettingsRow description="Verificar integridad y reparar índices" label="Reparar Sistema">
 							<Button disabled={repairSystemMutation.isPending} onClick={handleRepair} size="sm" variant="outline">
-								<Eye className={cn("mr-2 h-4 w-4", repairSystemMutation.isPending && "animate-spin")} />
+								<Eye className={cn('mr-2 h-4 w-4', repairSystemMutation.isPending && 'animate-spin')} />
 								{repairSystemMutation.isPending ? 'Reparando...' : 'Ejecutar Reparación'}
 							</Button>
 						</SettingsRow>
@@ -274,7 +274,10 @@ export function SystemSettingsModern() {
 									</AlertDialogHeader>
 									<AlertDialogFooter>
 										<AlertDialogCancel>Cancelar</AlertDialogCancel>
-										<AlertDialogAction onClick={handleReset} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+										<AlertDialogAction
+											className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+											onClick={handleReset}
+										>
 											Sí, resetear
 										</AlertDialogAction>
 									</AlertDialogFooter>

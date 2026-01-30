@@ -90,7 +90,7 @@ export const NoteCardImages = memo(function NoteCardImagesComponent({
 										className={cn(
 											'relative h-full w-full overflow-hidden',
 											tcgMode &&
-											'transition-all duration-300 hover:z-10 hover:scale-105 hover:transform hover:brightness-110'
+												'transition-all duration-300 hover:z-10 hover:scale-105 hover:transform hover:brightness-110'
 										)}
 										key={image.id}
 									>

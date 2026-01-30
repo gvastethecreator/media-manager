@@ -4,8 +4,8 @@
  */
 
 import type { StateCreator } from 'zustand';
-import type { VideoWithStats } from '../../../../types/entities/video';
-import { VideoSortCriteria } from '../../../../types/entities/video/enums';
+import type { VideoWithStats } from '@/types/entities/video';
+import { VideoSortCriteria } from '@/types/entities/video/enums';
 import type { VideoStore } from '..';
 
 export interface VideoFiltersState {

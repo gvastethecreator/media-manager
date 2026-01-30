@@ -11,13 +11,7 @@ import { clientLogger } from '@/lib/logger/client-logger';
 /**
  * Tipos de entidades soportadas
  */
-export type ThumbnailEntityType =
-	| 'image'
-	| 'video'
-	| 'audio'
-	| 'document'
-	| 'jsonFile'
-	| 'file3d';
+export type ThumbnailEntityType = 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d';
 
 /**
  * Opciones de thumbnail
@@ -85,7 +79,7 @@ export function useThumbnail(
 	const maxRetries = 2;
 
 	const fetchThumbnail = useCallback(async () => {
-		if (!entityType || !entityId) {
+		if (!(entityType && entityId)) {
 			setState((s) => ({ ...s, url: null, exists: false }));
 			return;
 		}
@@ -157,7 +151,7 @@ export function useThumbnail(
 	}, [entityType, entityId, options.width, options.height, options.quality, options.force]);
 
 	const generateThumbnail = useCallback(async () => {
-		if (!entityType || !entityId) return;
+		if (!(entityType && entityId)) return;
 
 		setState((s) => ({ ...s, loading: true, error: null }));
 
@@ -282,16 +276,13 @@ export function useThumbnailsBatch(
 /**
  * Hook para obtener información del thumbnail sin descargarlo
  */
-export function useThumbnailInfo(
-	entityType: ThumbnailEntityType | null,
-	entityId: string | null
-) {
+export function useThumbnailInfo(entityType: ThumbnailEntityType | null, entityId: string | null) {
 	const [info, setInfo] = useState<ThumbnailInfo | null>(null);
 	const [loading, setLoading] = useState(false);
 	const [error, setError] = useState<string | null>(null);
 
 	const fetchInfo = useCallback(async () => {
-		if (!entityType || !entityId) {
+		if (!(entityType && entityId)) {
 			setInfo(null);
 			return;
 		}
@@ -300,9 +291,7 @@ export function useThumbnailInfo(
 		setError(null);
 
 		try {
-			const response = await fetch(
-				`/api/thumbnails/unified/info/${entityType}/${entityId}`
-			);
+			const response = await fetch(`/api/thumbnails/unified/info/${entityType}/${entityId}`);
 
 			if (response.ok) {
 				const data = await response.json();

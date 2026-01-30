@@ -49,13 +49,14 @@ export const METRIC_COLORS = {
 
 /**
  * Colores para distribución de tipos de archivo
+ * Todas las variables están definidas en src/styles/tokens.css
  */
 export const FILE_TYPE_COLORS = {
 	images: 'var(--preset-emerald)',
 	videos: 'var(--preset-violet)',
 	audio: 'var(--preset-yellow)',
 	documents: 'var(--dt-danger-500)',
-	others: 'oklch(0.7 0.15 90)', // --preset-citrico
+	others: 'var(--preset-citrico)',
 	database: 'var(--dt-primary-500)',
 	cache: 'var(--preset-orange)',
 } as const;

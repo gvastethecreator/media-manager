@@ -164,7 +164,10 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 				>
 					<div className="flex items-start justify-between">
 						<div className="flex items-center gap-3">
-							<div className="rounded-md p-2" style={{ backgroundColor: `color-mix(in oklab, ${config.color}, transparent 80%)` }}>
+							<div
+								className="rounded-md p-2"
+								style={{ backgroundColor: `color-mix(in oklab, ${config.color}, transparent 80%)` }}
+							>
 								<config.icon className="h-5 w-5" style={{ color: config.color }} />
 							</div>
 							<div>
@@ -189,7 +192,10 @@ export const EntityTypeInfo = memo<EntityTypeInfoProps>(
 			>
 				<div className="flex items-start justify-between">
 					<div className="flex items-center gap-4">
-						<div className="rounded-lg p-3" style={{ backgroundColor: `color-mix(in oklab, ${config.color}, transparent 80%)` }}>
+						<div
+							className="rounded-lg p-3"
+							style={{ backgroundColor: `color-mix(in oklab, ${config.color}, transparent 80%)` }}
+						>
 							<config.icon className="h-8 w-8" style={{ color: config.color }} />
 						</div>
 						<div>

@@ -27,7 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useFolders, useReindexFolder, useDeleteFolder } from '@/lib/api/folders';
+import { useDeleteFolder, useFolders, useReindexFolder } from '@/lib/api/folders';
 import {
 	useCleanThumbnails,
 	useLastProcessedThumbnails,
@@ -43,8 +43,8 @@ import { formatBytes } from '@/lib/utils/format.utils';
 import type { FolderWithStats } from '@/types/entities/folder';
 import type { CardActions } from '../common/entity-settings-view';
 import { FolderForm } from '../folders/folders-form';
-import { useReindexConfig } from '../folders/hooks/use-reindex-config';
 import { StructuredReindexConfig } from '../folders/folders-reindex-config';
+import { useReindexConfig } from '../folders/hooks/use-reindex-config';
 import { ReindexTerminal } from '../folders/reindex-terminal';
 
 // ============================================================================
@@ -369,10 +369,10 @@ export function FilesSettingsModern() {
 								</div>
 
 								<Button
-									variant="outline"
-									size="icon"
 									onClick={() => setShowAdvancedConfig(true)}
+									size="icon"
 									title="Configuración Avanzada de Reindexado"
+									variant="outline"
 								>
 									<Settings2 className="h-4 w-4" />
 								</Button>
@@ -574,18 +574,14 @@ export function FilesSettingsModern() {
 
 			{/* Reindex Terminal - Always mounted but visually toggled or shown when active */}
 			<div className="mt-6 border-t pt-6">
-				<div className="flex items-center justify-between mb-4">
-					<h3 className="text-lg font-medium flex items-center gap-2">
+				<div className="mb-4 flex items-center justify-between">
+					<h3 className="flex items-center gap-2 font-medium text-lg">
 						<Zap className="h-4 w-4" />
 						Terminal de Procesamiento
 					</h3>
 				</div>
-				<Card className="h-[400px] overflow-hidden bg-zinc-950 border-zinc-800">
-					<ReindexTerminal
-						isActive={true}
-						className="h-full"
-						showProgress={true}
-					/>
+				<Card className="h-[400px] overflow-hidden border-zinc-800 bg-zinc-950">
+					<ReindexTerminal className="h-full" isActive={true} showProgress={true} />
 				</Card>
 			</div>
 		</div>

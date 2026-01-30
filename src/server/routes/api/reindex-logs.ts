@@ -5,8 +5,8 @@
  */
 
 import express from 'express';
-import { reindexFileLogger } from '../../../lib/logger/reindex-file-logger';
-import { serverLogger } from '../../../lib/logger/server-logger';
+import { reindexFileLogger } from '@/lib/logger/reindex-file-logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 export const reindexLogsRouter = express.Router();
 

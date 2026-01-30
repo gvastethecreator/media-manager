@@ -156,22 +156,25 @@ export class DocumentProcessor {
 			// Guardar en tabla metadatas (no hay campo thumbnail dedicado en documents)
 			const svgBase64 = Buffer.from(svg).toString('base64');
 
-			await db.insert(metadatas).values({
-				id: `${entityId}-thumbnail`,
-				entityType: 'document',
-				entityId,
-				key: 'thumbnail',
-				value: svgBase64,
-				type: 'base64',
-				category: 'preview',
-				description: 'Document thumbnail preview',
-			}).onConflictDoUpdate({
-				target: metadatas.id,
-				set: {
+			await db
+				.insert(metadatas)
+				.values({
+					id: `${entityId}-thumbnail`,
+					entityType: 'document',
+					entityId,
+					key: 'thumbnail',
 					value: svgBase64,
-					updatedAt: new Date(),
-				},
-			});
+					type: 'base64',
+					category: 'preview',
+					description: 'Document thumbnail preview',
+				})
+				.onConflictDoUpdate({
+					target: metadatas.id,
+					set: {
+						value: svgBase64,
+						updatedAt: new Date(),
+					},
+				});
 
 			serverLogger.debug(`✅ [DocumentProcessor] Thumbnail generado: ${fileName}`);
 			return { success: true };
@@ -212,9 +215,13 @@ export class DocumentProcessor {
 					${pageInfo}
 				</text>
 
-				${wordInfo ? `<text x="106" y="185" font-family="monospace" font-size="10" fill="oklch(0.55 0.002 0)" text-anchor="middle">
+				${
+					wordInfo
+						? `<text x="106" y="185" font-family="monospace" font-size="10" fill="oklch(0.55 0.002 0)" text-anchor="middle">
 					${wordInfo}
-				</text>` : ''}
+				</text>`
+						: ''
+				}
 
 				<!-- Badge de "Document" -->
 				<rect x="50" y="260" width="112" height="20" rx="10" fill="oklch(0.25 0.002 0)"/>

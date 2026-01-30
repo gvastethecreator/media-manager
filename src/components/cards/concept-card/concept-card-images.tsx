@@ -59,7 +59,9 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 					backgroundImage: tcgMode
 						? `linear-gradient(to bottom, color-mix(in oklab, ${secondaryColor}, transparent 50%), ${secondaryColor})`
 						: `linear-gradient(to bottom, color-mix(in oklab, ${primaryColor}, transparent 81%), color-mix(in oklab, ${secondaryColor}, transparent 69%))`,
-					borderBottom: tcgMode ? `2px solid ${primaryColor}` : `1px solid color-mix(in oklab, ${primaryColor}, transparent 69%)`,
+					borderBottom: tcgMode
+						? `2px solid ${primaryColor}`
+						: `1px solid color-mix(in oklab, ${primaryColor}, transparent 69%)`,
 				}}
 			>
 				<Suspense fallback={<ImageLoading backgroundColor={secondaryColor} tcgMode={tcgMode} />}>
@@ -93,7 +95,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 										<Sparkles className="ml-1 h-5 w-5 text-white/40" />
 									</div>
 									<p className="font-semibold text-sm text-white/80">Imaginación Conceptual</p>
-									<p className="text-white/50 text-sm italic">Sin visualizaciones</p>
+									<p className="text-sm text-white/50 italic">Sin visualizaciones</p>
 								</div>
 							) : (
 								<>
@@ -144,7 +146,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 
 			{/* Sello de agua TCG */}
 			{tcgMode && (
-				<div className="absolute right-2 bottom-2 font-mono text-white text-sm tracking-tight opacity-20">
+				<div className="absolute right-2 bottom-2 font-mono text-sm text-white tracking-tight opacity-20">
 					◊ C-{conceptId.substring(0, 4)} ◊
 				</div>
 			)}
@@ -160,7 +162,11 @@ function ImageLoading({ backgroundColor, tcgMode = false }: { backgroundColor: s
 				'relative flex h-full w-full animate-pulse items-center justify-center overflow-hidden',
 				tcgMode ? 'border border-border/20' : ''
 			)}
-			style={{ backgroundColor: tcgMode ? `color-mix(in oklab, ${backgroundColor}, transparent 63%)` : `color-mix(in oklab, ${backgroundColor}, transparent 81%)` }}
+			style={{
+				backgroundColor: tcgMode
+					? `color-mix(in oklab, ${backgroundColor}, transparent 63%)`
+					: `color-mix(in oklab, ${backgroundColor}, transparent 81%)`,
+			}}
 		>
 			<ImageIcon className="h-5 w-5 opacity-20" />
 		</div>

@@ -1,13 +1,13 @@
-import { Edit2, FileText, Loader2, PlusCircle, Trash } from 'lucide-react';
+import { Edit2, FileText, Loader2, Trash } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useCreateDocument, useDeleteDocument, useDocuments, useUpdateDocument } from '@/lib/api/documents';
+import { useDeleteDocument, useDocuments, useUpdateDocument } from '@/lib/api/documents';
 import { toastService } from '@/lib/ui/toast';
-import type { DocumentCreateInput, DocumentWithStats } from '@/types/entities/document';
+import type { DocumentWithStats } from '@/types/entities/document';
 
 export function DocumentSettings() {
 	const { data, isLoading, error } = useDocuments();
@@ -23,8 +23,6 @@ export function DocumentSettings() {
 		() => documents.filter((d: DocumentWithStats) => d.name.toLowerCase().includes(search.toLowerCase())),
 		[documents, search]
 	);
-
-
 
 	const handleUpdate = async () => {
 		try {
@@ -119,8 +117,6 @@ export function DocumentSettings() {
 					)}
 				</CardContent>
 			</Card>
-
-
 
 			<Dialog
 				onOpenChange={(o) => {

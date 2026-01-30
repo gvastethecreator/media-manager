@@ -12,8 +12,19 @@ import { cn } from '@/lib/utils';
  * - Gradientes sutiles same-family para profundidad
  * - Border-pulse en active state
  * - Transiciones suaves con tokens de motion
+ * - Touch targets accesibles (mínimo 44px)
+ * - Focus visible mejorado
  */
 const buttonVariants = cva(
+	// Base: inline-flex para alineación, items-center para centrado vertical
+	// gap-2 para espacio entre icono y texto
+	// whitespace-nowrap para evitar saltos de línea
+	// rounded-dt-sm para bordes consistentes
+	// font-medium text-base para tipografía
+	// transition-all para animaciones suaves
+	// focus-visible para estados de foco accesibles
+	// disabled para estados deshabilitados
+	// [&_svg] para estilos de iconos internos
 	'btn-pulse inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-dt-sm font-medium text-base transition-all duration-dt-normal ease-dt-out focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:size-4 [&_svg]:shrink-0',
 	{
 		variants: {
@@ -33,16 +44,24 @@ const buttonVariants = cva(
 				link: 'text-primary underline-offset-4 hover:underline',
 			},
 			size: {
-				default: 'h-10 px-5 py-2.5',
-				sm: 'h-9 rounded-dt-xs px-4 text-sm',
-				md: 'h-10 px-5 py-2.5',
-				lg: 'h-11 rounded-dt-md px-10 text-lg',
-				icon: 'h-10 w-10',
+				// Touch targets mínimo 44px (WCAG 2.5.5)
+				default: 'h-10 min-h-[44px] px-5 py-2.5',
+				sm: 'h-9 min-h-[40px] rounded-dt-xs px-4 text-sm',
+				md: 'h-10 min-h-[44px] px-5 py-2.5',
+				lg: 'h-11 min-h-[48px] rounded-dt-md px-10 text-lg',
+				icon: 'h-10 w-10 min-h-[44px] min-w-[44px]',
+				xs: 'h-8 min-h-[36px] rounded-dt-xs px-3 text-xs',
+			},
+			// Variante para touch targets más grandes en móvil
+			touch: {
+				default: '',
+				large: 'min-h-[48px] min-w-[48px]',
 			},
 		},
 		defaultVariants: {
 			variant: 'default',
 			size: 'default',
+			touch: 'default',
 		},
 	}
 );
@@ -57,19 +76,78 @@ export interface ButtonProps
 	 * como señal semántica (icon vs default). No afecta estilos: usa `size`.
 	 */
 	mode?: string;
+	/** Si debe mostrar ripple effect al hacer click */
+	ripple?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-	({ className, variant, size, mode: _mode, asChild = false, loading = false, children, disabled, ...props }, ref) => {
+	(
+		{
+			className,
+			variant,
+			size,
+			touch,
+			mode: _mode,
+			asChild = false,
+			loading = false,
+			children,
+			disabled,
+			ripple = false,
+			...props
+		},
+		ref
+	) => {
 		const Comp = asChild ? Slot : 'button';
+
+		// Handler para ripple effect
+		const handleClick = React.useCallback(
+			(e: React.MouseEvent<HTMLButtonElement>) => {
+				if (ripple && !disabled && !loading) {
+					const button = e.currentTarget;
+					const rect = button.getBoundingClientRect();
+					const x = e.clientX - rect.left;
+					const y = e.clientY - rect.top;
+
+					const rippleElement = document.createElement('span');
+					rippleElement.className = 'ripple-effect';
+					rippleElement.style.cssText = `
+						position: absolute;
+						background: color-mix(in oklch, var(--primary-foreground) 30%, transparent);
+						border-radius: 50%;
+						transform: scale(0);
+						animation: ripple 0.6s linear;
+						left: ${x}px;
+						top: ${y}px;
+						width: 20px;
+						height: 20px;
+						margin-left: -10px;
+						margin-top: -10px;
+						pointer-events: none;
+					`;
+
+					button.style.position = 'relative';
+					button.style.overflow = 'hidden';
+					button.appendChild(rippleElement);
+
+					setTimeout(() => rippleElement.remove(), 600);
+				}
+
+				props.onClick?.(e);
+			},
+			[ripple, disabled, loading, props]
+		);
+
 		return (
 			<Comp
-				className={cn(buttonVariants({ variant, size, className }))}
-				disabled={loading || disabled}
+				className={cn(buttonVariants({ variant, size, touch, className }))}
 				ref={ref}
+				disabled={loading || disabled}
+				aria-disabled={loading || disabled}
+				aria-busy={loading}
+				onClick={handleClick}
 				{...props}
 			>
-				{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+				{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
 				{children}
 			</Comp>
 		);
@@ -78,3 +156,17 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 Button.displayName = 'Button';
 
 export { Button, buttonVariants };
+
+// CSS para ripple effect
+const style = document.createElement('style');
+style.textContent = `
+	@keyframes ripple {
+		to {
+			transform: scale(4);
+			opacity: 0;
+		}
+	}
+`;
+if (typeof document !== 'undefined') {
+	document.head.appendChild(style);
+}
