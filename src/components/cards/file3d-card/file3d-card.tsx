@@ -223,7 +223,7 @@ export const File3DCard = memo(function File3DCard({
 
 								{/* Badge del formato */}
 								<div
-									className="absolute -top-2 -right-2 rounded-md px-2 py-1 font-bold text-xs"
+									className="absolute -top-2 -right-2 rounded-md px-2 py-1 font-bold text-sm"
 									style={{
 										backgroundColor: primaryColor,
 										color: 'white',
@@ -234,7 +234,7 @@ export const File3DCard = memo(function File3DCard({
 
 								{/* Indicador de complejidad */}
 								<div
-									className="absolute -bottom-2 -left-2 rounded-md px-2 py-1 font-bold text-xs"
+									className="absolute -bottom-2 -left-2 rounded-md px-2 py-1 font-bold text-sm"
 									style={{
 										backgroundColor: secondaryColor,
 										color: 'white',
@@ -249,7 +249,7 @@ export const File3DCard = memo(function File3DCard({
 
 						{/* Estadísticas en modo TCG */}
 						{tcgMode && (
-							<div className="grid grid-cols-2 gap-2 text-xs">
+							<div className="grid grid-cols-2 gap-2 text-sm">
 								<div
 									className="flex items-center justify-between rounded px-2 py-1"
 									style={{ backgroundColor: `${primaryColor}20` }}
@@ -271,7 +271,7 @@ export const File3DCard = memo(function File3DCard({
 
 				{/* Pie de tarjeta */}
 				<div className="border-border/20 border-t p-3">
-					<div className="flex items-center justify-between text-xs">
+					<div className="flex items-center justify-between text-sm">
 						{/* Controles 3D */}
 						<div className="flex items-center gap-2">
 							<button
@@ -281,7 +281,7 @@ export const File3DCard = memo(function File3DCard({
 								title={isRotating ? 'Detener rotación' : 'Iniciar rotación'}
 								type="button"
 							>
-								<RotateCcwIcon className="h-3.5 w-3.5" />
+								<RotateCcwIcon className="h-4 w-4" />
 							</button>
 							<button
 								className="rounded p-1 transition-colors hover:bg-muted/50"
@@ -289,7 +289,7 @@ export const File3DCard = memo(function File3DCard({
 								title="Vista previa"
 								type="button"
 							>
-								<EyeIcon className="h-3.5 w-3.5" />
+								<EyeIcon className="h-4 w-4" />
 							</button>
 							<button
 								className="rounded p-1 transition-colors hover:bg-muted/50"
@@ -297,7 +297,7 @@ export const File3DCard = memo(function File3DCard({
 								title="Zoom"
 								type="button"
 							>
-								<ZoomInIcon className="h-3.5 w-3.5" />
+								<ZoomInIcon className="h-4 w-4" />
 							</button>
 							<button
 								className="rounded p-1 transition-colors hover:bg-muted/50"
@@ -305,7 +305,7 @@ export const File3DCard = memo(function File3DCard({
 								title="Descargar"
 								type="button"
 							>
-								<DownloadIcon className="h-3.5 w-3.5" />
+								<DownloadIcon className="h-4 w-4" />
 							</button>
 						</div>
 

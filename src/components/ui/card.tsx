@@ -33,14 +33,14 @@ CardHeader.displayName = 'CardHeader';
 
 const CardTitle = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
 	({ className, ...props }, ref) => (
-		<div className={cn('font-semibold leading-none tracking-tight', className)} ref={ref} {...props} />
+		<div className={cn('font-semibold text-lg leading-none tracking-tight', className)} ref={ref} {...props} />
 	)
 );
 CardTitle.displayName = 'CardTitle';
 
 const CardDescription = React.forwardRef<HTMLDivElement, React.HTMLAttributes<HTMLDivElement>>(
 	({ className, ...props }, ref) => (
-		<div className={cn('text-muted-foreground text-sm', className)} ref={ref} {...props} />
+		<div className={cn('text-base text-muted-foreground', className)} ref={ref} {...props} />
 	)
 );
 CardDescription.displayName = 'CardDescription';

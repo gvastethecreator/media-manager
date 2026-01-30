@@ -128,12 +128,12 @@ const CategoryAndStatus: React.FC<{ category?: string | null; status?: string | 
 	primaryColor,
 }) => (
 	<div className="mb-2 flex items-center justify-between">
-		<div className="font-medium text-xs uppercase tracking-wider" style={{ color: primaryColor }}>
+		<div className="font-medium text-sm uppercase tracking-wider" style={{ color: primaryColor }}>
 			{category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Nota'}
 		</div>
 		{status && (
-			<div className="flex items-center gap-1 text-xs">
-				<ListChecks className="h-3.5 w-3.5" />
+			<div className="flex items-center gap-1 text-sm">
+				<ListChecks className="h-4 w-4" />
 				<span className="capitalize" style={{ color: primaryColor }}>
 					{status}
 				</span>
@@ -147,8 +147,8 @@ const PriorityDisplay: React.FC<{ primaryColor: string; priorityLabel: string }>
 	priorityLabel,
 }) => (
 	<div className="mb-2 flex items-center">
-		<BarChart4 className="mr-1 h-3.5 w-3.5 text-muted-foreground" />
-		<span className="text-muted-foreground text-xs">
+		<BarChart4 className="mr-1 h-4 w-4 text-muted-foreground" />
+		<span className="text-muted-foreground text-sm">
 			Prioridad: <span style={{ color: primaryColor }}>{priorityLabel}</span>
 		</span>
 	</div>
@@ -178,23 +178,27 @@ const TagsBlock: React.FC<{ tags: string[]; primaryColor: string; renderKey: str
 	renderKey,
 }) => (
 	<div className="mb-2">
-		<div className="mb-1 flex items-center gap-1 text-xs opacity-70">
-			<Tag className="h-3.5 w-3.5" />
+		<div className="mb-1 flex items-center gap-1 text-sm opacity-70">
+			<Tag className="h-4 w-4" />
 			<span>Etiquetas</span>
 		</div>
 		<div className="flex flex-wrap gap-1">
 			{tags.slice(0, 5).map((tag) => (
 				<Badge
-					className="rounded-sm px-1.5 py-0.5 text-xs"
+					className="rounded-sm px-2 py-1 text-sm"
 					key={`tag-${renderKey}-${tag}`}
-					style={{ backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 80%)`, borderColor: `color-mix(in oklab, ${primaryColor}, transparent 60%)`, color: primaryColor }}
+					style={{
+						backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 80%)`,
+						borderColor: `color-mix(in oklab, ${primaryColor}, transparent 60%)`,
+						color: primaryColor,
+					}}
 					variant="outline"
 				>
 					{tag}
 				</Badge>
 			))}
 			{tags.length > 5 && (
-				<Badge className="px-1.5 py-0.5 text-xs opacity-70" variant="outline">
+				<Badge className="px-2 py-1 text-sm opacity-70" variant="outline">
 					+{tags.length - 5} más
 				</Badge>
 			)}
@@ -208,28 +212,28 @@ const TCGStats: React.FC<{ relationCounts?: Record<string, number>; primaryColor
 }) => (
 	<div className="mt-auto grid grid-cols-2 gap-x-4 gap-y-1 rounded border border-border/40 bg-muted/30 px-3 py-2">
 		<StatBar
-			icon={<Image className="h-3.5 w-3.5" />}
+			icon={<Image className="h-4 w-4" />}
 			label="Imágenes"
 			maxValue={20}
 			primaryColor={primaryColor}
 			value={relationCounts?.images || 0}
 		/>
 		<StatBar
-			icon={<Video className="h-3.5 w-3.5" />}
+			icon={<Video className="h-4 w-4" />}
 			label="Videos"
 			maxValue={20}
 			primaryColor={primaryColor}
 			value={relationCounts?.videos || 0}
 		/>
 		<StatBar
-			icon={<UserSquare className="h-3.5 w-3.5" />}
+			icon={<UserSquare className="h-4 w-4" />}
 			label="Personajes"
 			maxValue={20}
 			primaryColor={primaryColor}
 			value={relationCounts?.characters || 0}
 		/>
 		<StatBar
-			icon={<FolderOpen className="h-3.5 w-3.5" />}
+			icon={<FolderOpen className="h-4 w-4" />}
 			label="Colecciones"
 			maxValue={20}
 			primaryColor={primaryColor}
@@ -242,28 +246,28 @@ const StandardCounters: React.FC<{ relationCounts?: Record<string, number>; prim
 	relationCounts,
 	primaryColor,
 }) => (
-	<div className="mt-auto grid grid-cols-2 gap-2 text-xs">
+	<div className="mt-auto grid grid-cols-2 gap-2 text-sm">
 		<StatCounter
 			count={relationCounts?.characters || 0}
-			icon={<UserSquare className="h-3.5 w-3.5" />}
+			icon={<UserSquare className="h-4 w-4" />}
 			label="Personajes"
 			primaryColor={primaryColor}
 		/>
 		<StatCounter
 			count={relationCounts?.places || 0}
-			icon={<MapPin className="h-3.5 w-3.5" />}
+			icon={<MapPin className="h-4 w-4" />}
 			label="Lugares"
 			primaryColor={primaryColor}
 		/>
 		<StatCounter
 			count={(relationCounts?.worldItems || 0) + (relationCounts?.concepts || 0)}
-			icon={<FileText className="h-3.5 w-3.5" />}
+			icon={<FileText className="h-4 w-4" />}
 			label="Objetos"
 			primaryColor={primaryColor}
 		/>
 		<StatCounter
 			count={relationCounts?.prompts || 0}
-			icon={<ListChecks className="h-3.5 w-3.5" />}
+			icon={<ListChecks className="h-4 w-4" />}
 			label="Prompts"
 			primaryColor={primaryColor}
 		/>
@@ -276,26 +280,26 @@ const AdditionalRelations: React.FC<{ relationCounts?: Record<string, number>; p
 }) => (
 	<div className="mt-2 flex justify-center gap-2" style={{ ['--accent' as any]: primaryColor }}>
 		{relationCounts?.tags && relationCounts.tags > 0 && (
-			<Badge className="flex items-center gap-1 border-border/60 bg-muted/40 px-1.5 py-0.5 text-xs" variant="outline">
-				<TagIcon className="h-3 w-3" />
+			<Badge className="flex items-center gap-1 border-border/60 bg-muted/40 px-1.5 py-0.5 text-sm" variant="outline">
+				<TagIcon className="h-4 w-4" />
 				<span>{relationCounts.tags}</span>
 			</Badge>
 		)}
 		{relationCounts?.prompts && relationCounts.prompts > 0 && (
-			<Badge className="flex items-center gap-1 border-border/60 bg-muted/40 px-1.5 py-0.5 text-xs" variant="outline">
-				<BookMarked className="h-3 w-3" />
+			<Badge className="flex items-center gap-1 border-border/60 bg-muted/40 px-1.5 py-0.5 text-sm" variant="outline">
+				<BookMarked className="h-4 w-4" />
 				<span>{relationCounts.prompts}</span>
 			</Badge>
 		)}
 		{relationCounts?.places && relationCounts.places > 0 && (
-			<Badge className="flex items-center gap-1 border-border/60 bg-muted/40 px-1.5 py-0.5 text-xs" variant="outline">
-				<MapPin className="h-3 w-3" />
+			<Badge className="flex items-center gap-1 border-border/60 bg-muted/40 px-1.5 py-0.5 text-sm" variant="outline">
+				<MapPin className="h-4 w-4" />
 				<span>{relationCounts.places}</span>
 			</Badge>
 		)}
 		{relationCounts?.worldItems && relationCounts.worldItems > 0 && (
-			<Badge className="flex items-center gap-1 border-border/60 bg-muted/40 px-1.5 py-0.5 text-xs" variant="outline">
-				<HashIcon className="h-3 w-3" />
+			<Badge className="flex items-center gap-1 border-border/60 bg-muted/40 px-1.5 py-0.5 text-sm" variant="outline">
+				<HashIcon className="h-4 w-4" />
 				<span>{relationCounts.worldItems}</span>
 			</Badge>
 		)}

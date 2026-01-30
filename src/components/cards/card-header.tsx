@@ -37,7 +37,7 @@ export function CardHeader({
 			{/* Emoji o icono si está presente */}
 			{emoji && (
 				<div className="flex-shrink-0">
-					<span className={compact ? 'text-sm' : 'text-base'}>{emoji}</span>
+					<span className={compact ? 'text-base' : 'text-lg'}>{emoji}</span>
 				</div>
 			)}
 			{!emoji && icon && (
@@ -52,12 +52,12 @@ export function CardHeader({
 			{/* Contenido de texto */}
 			<div className="min-w-0 flex-1">
 				{/* Título principal */}
-				<h3 className={cn('truncate font-bold', compact ? 'text-sm' : 'text-base')} style={{ color: primaryColor }}>
+				<h3 className={cn('truncate font-bold', compact ? 'text-base' : 'text-lg')} style={{ color: primaryColor }}>
 					{title}
 				</h3>
 
 				{/* Subtítulo opcional - solo si no es compact */}
-				{!compact && subtitle && <p className="truncate text-muted-foreground text-xs capitalize">{subtitle}</p>}
+				{!compact && subtitle && <p className="truncate text-muted-foreground text-sm capitalize">{subtitle}</p>}
 			</div>
 		</div>
 	);

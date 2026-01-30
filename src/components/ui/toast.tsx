@@ -54,8 +54,8 @@ function useToast() {
 
 			const toastContent = (
 				<div className="grid gap-1">
-					{title && <div className="font-semibold text-sm">{title}</div>}
-					{description && <div className="text-sm opacity-90">{description}</div>}
+					{title && <div className="font-semibold text-base">{title}</div>}
+					{description && <div className="text-base opacity-90">{description}</div>}
 					{action && action}
 				</div>
 			);
@@ -95,7 +95,7 @@ function ToastAction({ className, ...props }: React.ComponentProps<'button'>) {
 	return (
 		<button
 			className={cn(
-				'inline-flex h-8 shrink-0 items-center justify-center rounded-dt-sm border-2 bg-transparent px-3 font-medium text-sm ring-offset-background transition-all duration-dt-fast hover:bg-secondary hover:shadow-dt-1 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:focus:ring-destructive group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground',
+				'inline-flex h-9 shrink-0 items-center justify-center rounded-dt-sm border-2 bg-transparent px-4 font-medium text-base ring-offset-background transition-all duration-dt-fast hover:bg-secondary hover:shadow-dt-1 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 group-[.destructive]:border-muted/40 group-[.destructive]:focus:ring-destructive group-[.destructive]:hover:border-destructive/30 group-[.destructive]:hover:bg-destructive group-[.destructive]:hover:text-destructive-foreground',
 				className
 			)}
 			{...props}
@@ -118,11 +118,11 @@ function ToastClose({ className, ...props }: React.ComponentProps<'button'>) {
 }
 
 function ToastTitle({ className, ...props }: React.ComponentProps<'div'>) {
-	return <div className={cn('font-semibold text-sm', className)} {...props} />;
+	return <div className={cn('font-semibold text-base', className)} {...props} />;
 }
 
 function ToastDescription({ className, ...props }: React.ComponentProps<'div'>) {
-	return <div className={cn('text-sm opacity-90', className)} {...props} />;
+	return <div className={cn('text-base opacity-90', className)} {...props} />;
 }
 
 // Viewport para compatibilidad (no se usa con sonner)

@@ -91,7 +91,7 @@ export function CollectionCardHeader({
 
 			{/* Tipo de la carta - estilo TCG */}
 			<div
-				className="flex items-center justify-between border-y bg-muted/40 px-3.5 py-1.5 text-white text-xs"
+				className="flex items-center justify-between border-y bg-muted/40 px-3.5 py-1.5 text-white text-sm"
 				style={{
 					borderBottom: `1px solid ${color}50`,
 					borderTop: `1px solid ${color}30`,
@@ -101,9 +101,9 @@ export function CollectionCardHeader({
 				{/* Categoría (como tipo de carta TCG) */}
 				<div className="flex items-center gap-1">
 					{category?.toUpperCase() === 'NFT' ? (
-						<Gem className="h-3.5 w-3.5 opacity-80" />
+						<Gem className="h-4 w-4 opacity-80" />
 					) : (
-						<Dices className="h-3.5 w-3.5 opacity-80" />
+						<Dices className="h-4 w-4 opacity-80" />
 					)}
 					<span className="font-semibold uppercase tracking-wide">{category || 'COLECCIÓN'}</span>
 				</div>
@@ -111,9 +111,9 @@ export function CollectionCardHeader({
 				{/* Plataforma (como subtipo en cartas TCG) */}
 				{platform && (
 					<div className="flex items-center gap-1">
-						<Globe className="h-3.5 w-3.5 opacity-80" />
+						<Globe className="h-4 w-4 opacity-80" />
 						<span
-							className="rounded-sm bg-muted/30 px-1.5 py-0.5 text-[10px] opacity-90"
+							className="rounded-sm bg-muted/30 px-1.5 py-0.5 text-xs opacity-90"
 							style={{ border: `1px solid ${color}40` }}
 						>
 							{platform}

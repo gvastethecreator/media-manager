@@ -5,8 +5,11 @@
  * @created 2025-01-10 - Phase 6.2 VideoService Effect Implementation
  */
 
+import { eq } from 'drizzle-orm';
 import { Effect } from 'effect';
 import express from 'express';
+import { db } from '@/lib/drizzle';
+import { videos } from '@/lib/drizzle/schema';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
 import { VideoService, VideoServiceLive } from '@/services/video/video.service.effect';
 
@@ -398,19 +401,41 @@ router.get('/:id/thumbnail', async (req, res) => {
 			}
 		}
 
-		// Fallback: generar thumbnail estático con mediabunny
+		// Fallback: generar thumbnail estático con FFmpeg
 		try {
-			const { generateVideoThumbnail } = await import('@/server/services/media/mediabunny-thumbnail.service');
+			const { generateStaticVideoThumbnailFFmpeg } = await import('@/lib/utils/video/ffmpeg-thumbnails');
 			const timestamp = Number.isFinite(time) ? Math.max(0.05, Math.min(time as number, 36_000)) : 1;
 
-			const thumbnailBuffer = await generateVideoThumbnail(video.path, timestamp, 320, 240);
+			const thumbnailBuffer = await generateStaticVideoThumbnailFFmpeg(video.path, {
+				time: timestamp,
+				width: 320,
+				height: 240,
+				quality: 'medium',
+			});
 
 			if (thumbnailBuffer) {
+				// Guardar el thumbnail generado en la base de datos para futuras solicitudes
+				try {
+					await db
+						.update(videos)
+						.set({
+							thumbnail: thumbnailBuffer.toString('base64'),
+							thumbnailSize: thumbnailBuffer.length,
+							thumbnailWidth: 320,
+							thumbnailHeight: 240,
+							updatedAt: new Date(),
+						})
+						.where(eq(videos.id, id));
+				} catch (saveError) {
+					// Log pero no fallar si no se puede guardar
+					console.warn('No se pudo guardar el thumbnail en la base de datos:', saveError);
+				}
+
 				const etag = `W/"${thumbnailBuffer.length.toString(16)}-${id}"`;
 				const lastModified = new Date().toUTCString();
 
 				res.set({
-					'Content-Type': 'image/jpeg',
+					'Content-Type': 'image/webp',
 					'Content-Length': thumbnailBuffer.length.toString(),
 					'Cache-Control': 'public, max-age=86400',
 					ETag: etag,
@@ -421,7 +446,7 @@ router.get('/:id/thumbnail', async (req, res) => {
 				return;
 			}
 		} catch (error) {
-			console.error('Error generating static thumbnail with mediabunny:', error);
+			console.error('Error generating static thumbnail with FFmpeg:', error);
 		}
 
 		res.status(500).send('Unable to generate thumbnail');

@@ -131,7 +131,7 @@ const RarityBadge: React.FC<{
 }> = ({ metadata, rarityColors }) => (
 	<div className="absolute -top-1 -right-1 flex items-center gap-1">
 		<Badge
-			className="h-5 py-0 font-bold text-[9px] uppercase shadow-md"
+			className="h-5 py-0 font-bold text-xs uppercase shadow-md"
 			style={{
 				backgroundColor: rarityColors.background,
 				color: rarityColors.text,
@@ -144,7 +144,7 @@ const RarityBadge: React.FC<{
 );
 
 const Description: React.FC<{ text: string; primaryColor: string }> = ({ text, primaryColor }) => (
-	<div className="mb-2 line-clamp-3 text-xs leading-relaxed" style={{ color: `${primaryColor}DD` }}>
+	<div className="mb-2 line-clamp-3 text-sm leading-relaxed" style={{ color: `${primaryColor}DD` }}>
 		<p className="italic">{text}</p>
 	</div>
 );
@@ -154,12 +154,12 @@ const Counters: React.FC<{
 	rarityColors: { border: string };
 }> = ({ metadata, rarityColors }) => (
 	<div className="mb-2 flex items-center gap-3">
-		<motion.div className="flex items-center gap-1 text-xs" whileHover={{ scale: 1.05 }}>
-			<Diamond className="h-3.5 w-3.5" style={{ color: rarityColors.border }} />
+		<motion.div className="flex items-center gap-1 text-sm" whileHover={{ scale: 1.05 }}>
+			<Diamond className="h-4 w-4" style={{ color: rarityColors.border }} />
 			<span className="font-bold">{metadata.cardId}</span>
 		</motion.div>
-		<motion.div className="flex items-center gap-1 text-xs" whileHover={{ scale: 1.05 }}>
-			<Bookmark className="h-3.5 w-3.5 text-muted-foreground" />
+		<motion.div className="flex items-center gap-1 text-sm" whileHover={{ scale: 1.05 }}>
+			<Bookmark className="h-4 w-4 text-muted-foreground" />
 			<span className="font-medium">{metadata.totalItems} elementos</span>
 		</motion.div>
 	</div>
@@ -172,7 +172,7 @@ const PropertiesBox: React.FC<{
 	boxShadowColor: string;
 }> = ({ children, borderColor, backgroundColor, boxShadowColor }) => (
 	<div
-		className="mt-auto space-y-1.5 rounded-sm border-t p-1 pt-1 text-xs"
+		className="mt-auto space-y-1.5 rounded-sm border-t p-1 pt-1 text-sm"
 		style={{ borderColor, backgroundColor, boxShadow: `inset 0 0 10px ${boxShadowColor}` }}
 	>
 		{children}
@@ -199,32 +199,32 @@ const PropertiesGrid: React.FC<PropertiesGridProps> = ({ platform, formattedPric
 );
 
 const PlatformItem: React.FC<{ platform: string }> = ({ platform }) => (
-	<div className="flex items-center gap-1 text-xs">
-		<Globe className="h-3.5 w-3.5 text-muted-foreground" />
+	<div className="flex items-center gap-1 text-sm">
+		<Globe className="h-4 w-4 text-muted-foreground" />
 		<span className="truncate font-medium">{platform}</span>
 	</div>
 );
 const PriceItem: React.FC<{ price: string }> = ({ price }) => (
-	<div className="flex items-center gap-1 text-xs">
-		<Tag className="h-3.5 w-3.5 text-muted-foreground" />
+	<div className="flex items-center gap-1 text-sm">
+		<Tag className="h-4 w-4 text-muted-foreground" />
 		<span className="font-medium">{price}</span>
 	</div>
 );
 const NetworkItem: React.FC<{ network: string }> = ({ network }) => (
-	<div className="flex items-center gap-1 text-xs">
-		<Currency className="h-3.5 w-3.5 text-muted-foreground" />
+	<div className="flex items-center gap-1 text-sm">
+		<Currency className="h-4 w-4 text-muted-foreground" />
 		<span className="truncate font-medium">{network}</span>
 	</div>
 );
 const TokenItem: React.FC<{ tokenId: string }> = ({ tokenId }) => (
-	<div className="flex items-center gap-1 text-xs">
-		<span className="text-muted-foreground text-xs">Token:</span>
+	<div className="flex items-center gap-1 text-sm">
+		<span className="text-muted-foreground text-sm">Token:</span>
 		<span className="truncate font-medium">{tokenId.length > 8 ? `${tokenId.substring(0, 5)}...` : tokenId}</span>
 	</div>
 );
 const UrlItem: React.FC<{ url: string }> = ({ url }) => (
-	<div className="col-span-2 flex items-center gap-1 text-xs">
-		<Link className="h-3.5 w-3.5 text-muted-foreground" />
+	<div className="col-span-2 flex items-center gap-1 text-sm">
+		<Link className="h-4 w-4 text-muted-foreground" />
 		<span className="truncate font-medium text-primary underline hover:text-primary">
 			{url.replace(URL_PROTOCOL_REGEX, '').substring(0, 30)}
 			{url.length > 30 && '...'}
@@ -241,13 +241,13 @@ const EditionsList: React.FC<{ editionsList: CollectionEdition[]; primaryColor: 
 	}
 	return (
 		<div className="mt-1 border-t border-dashed pt-1" style={{ borderColor: `${primaryColor}20` }}>
-			<div className="mb-1 flex items-center gap-1 text-muted-foreground text-xs">
-				<Calendar className="h-3.5 w-3.5" />
+			<div className="mb-1 flex items-center gap-1 text-muted-foreground text-sm">
+				<Calendar className="h-4 w-4" />
 				<span className="font-medium">Ediciones</span>
 			</div>
-			<ul className="scrollbar-thin max-h-12 space-y-0.5 overflow-y-auto overflow-x-hidden text-xs">
+			<ul className="scrollbar-thin max-h-12 space-y-0.5 overflow-y-auto overflow-x-hidden text-sm">
 				{editionsList.slice(0, 2).map((edition) => (
-					<li className="flex justify-between text-muted-foreground text-xs" key={edition.name}>
+					<li className="flex justify-between text-muted-foreground text-sm" key={edition.name}>
 						<span className="truncate font-medium">{edition.name}</span>
 						{edition.releaseDate && (
 							<span className="ml-1 whitespace-nowrap text-muted-foreground">
@@ -257,7 +257,7 @@ const EditionsList: React.FC<{ editionsList: CollectionEdition[]; primaryColor: 
 					</li>
 				))}
 				{editionsList.length > 2 && (
-					<li className="text-muted-foreground text-xs italic">...y {editionsList.length - 2} más</li>
+					<li className="text-muted-foreground text-sm italic">...y {editionsList.length - 2} más</li>
 				)}
 			</ul>
 		</div>

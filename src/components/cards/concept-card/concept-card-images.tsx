@@ -93,7 +93,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 										<Sparkles className="ml-1 h-5 w-5 text-white/40" />
 									</div>
 									<p className="font-semibold text-sm text-white/80">Imaginación Conceptual</p>
-									<p className="text-white/50 text-xs italic">Sin visualizaciones</p>
+									<p className="text-white/50 text-sm italic">Sin visualizaciones</p>
 								</div>
 							) : (
 								<>
@@ -144,7 +144,7 @@ export function ConceptCardImages({ conceptId, primaryColor, secondaryColor, tcg
 
 			{/* Sello de agua TCG */}
 			{tcgMode && (
-				<div className="absolute right-2 bottom-2 font-mono text-white text-xs tracking-tight opacity-20">
+				<div className="absolute right-2 bottom-2 font-mono text-white text-sm tracking-tight opacity-20">
 					◊ C-{conceptId.substring(0, 4)} ◊
 				</div>
 			)}

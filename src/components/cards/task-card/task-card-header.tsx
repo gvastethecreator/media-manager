@@ -71,7 +71,7 @@ export function TaskCardHeader({
 						}}
 						type="button"
 					>
-						<Star className={cn('h-3.5 w-3.5', isFavorite && 'fill-current')} />
+						<Star className={cn('h-4 w-4', isFavorite && 'fill-current')} />
 					</button>
 				)}
 
@@ -90,7 +90,7 @@ export function TaskCardHeader({
 						}}
 						type="button"
 					>
-						<Archive className={cn('h-3.5 w-3.5', isArchived && 'fill-current')} />
+						<Archive className={cn('h-4 w-4', isArchived && 'fill-current')} />
 					</button>
 				)}
 			</div>

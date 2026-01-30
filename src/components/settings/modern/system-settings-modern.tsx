@@ -4,7 +4,6 @@
  * @description Vista de configuración del sistema con diseño mejorado
  */
 
-import React, { useState } from 'react';
 import {
 	AlertTriangle,
 	CheckCircle,
@@ -19,21 +18,18 @@ import {
 	Server,
 	Zap,
 } from 'lucide-react';
+import { useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
-import {
-	SettingsCard,
-	SettingsRow,
-	SettingsGroup,
-} from '../modern/settings-card';
+import { SettingsCard, SettingsGroup, SettingsRow } from '../modern/settings-card';
 
 /**
  * Datos simulados de estadísticas del sistema
@@ -65,18 +61,10 @@ export function SystemSettingsModern() {
 			{/* Header Section */}
 			<div className="flex items-center justify-between">
 				<div>
-					<h2 className="text-2xl font-semibold text-foreground">Configuración del Sistema</h2>
-					<p className="mt-1 text-sm text-muted-foreground">
-						Monitoreo y configuración general del servidor
-					</p>
+					<h2 className="font-semibold text-2xl text-foreground">Configuración del Sistema</h2>
+					<p className="mt-1 text-muted-foreground text-sm">Monitoreo y configuración general del servidor</p>
 				</div>
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={handleRefresh}
-					disabled={isRefreshing}
-					className="gap-2"
-				>
+				<Button className="gap-2" disabled={isRefreshing} onClick={handleRefresh} size="sm" variant="outline">
 					<RefreshCw className={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
 					Actualizar
 				</Button>
@@ -88,24 +76,18 @@ export function SystemSettingsModern() {
 				<Card className="border-l-4" style={{ borderLeftColor: 'var(--primary)' }}>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-sm font-medium">CPU</CardTitle>
+							<CardTitle className="font-medium text-sm">CPU</CardTitle>
 							<Cpu className="h-4 w-4 text-muted-foreground" />
 						</div>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-2">
 							<div className="flex items-baseline gap-2">
-								<span className="text-3xl font-bold text-foreground">
-									{SYSTEM_STATS.cpu.usage}%
-								</span>
-								<span className="text-xs text-muted-foreground">
-									{SYSTEM_STATS.cpu.cores} núcleos
-								</span>
+								<span className="font-bold text-3xl text-foreground">{SYSTEM_STATS.cpu.usage}%</span>
+								<span className="text-muted-foreground text-sm">{SYSTEM_STATS.cpu.cores} núcleos</span>
 							</div>
-							<Progress value={SYSTEM_STATS.cpu.usage} className="h-2" />
-							<p className="text-xs text-muted-foreground">
-								{SYSTEM_STATS.cpu.model}
-							</p>
+							<Progress className="h-2" value={SYSTEM_STATS.cpu.usage} />
+							<p className="text-muted-foreground text-sm">{SYSTEM_STATS.cpu.model}</p>
 						</div>
 					</CardContent>
 				</Card>
@@ -114,22 +96,20 @@ export function SystemSettingsModern() {
 				<Card className="border-l-4" style={{ borderLeftColor: 'var(--entity-tag)' }}>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-sm font-medium">Memoria</CardTitle>
+							<CardTitle className="font-medium text-sm">Memoria</CardTitle>
 							<MemoryStick className="h-4 w-4 text-muted-foreground" />
 						</div>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-2">
 							<div className="flex items-baseline gap-2">
-								<span className="text-3xl font-bold text-foreground">
-									{SYSTEM_STATS.memory.usage}%
-								</span>
-								<span className="text-xs text-muted-foreground">
+								<span className="font-bold text-3xl text-foreground">{SYSTEM_STATS.memory.usage}%</span>
+								<span className="text-muted-foreground text-sm">
 									{SYSTEM_STATS.memory.used} / {SYSTEM_STATS.memory.total}
 								</span>
 							</div>
-							<Progress value={SYSTEM_STATS.memory.usage} className="h-2" />
-							<Badge variant="outline" className="w-fit text-xs">
+							<Progress className="h-2" value={SYSTEM_STATS.memory.usage} />
+							<Badge className="w-fit text-sm" variant="outline">
 								32GB DDR4
 							</Badge>
 						</div>
@@ -140,24 +120,20 @@ export function SystemSettingsModern() {
 				<Card className="border-l-4" style={{ borderLeftColor: 'var(--entity-folder)' }}>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-sm font-medium">Almacenamiento</CardTitle>
+							<CardTitle className="font-medium text-sm">Almacenamiento</CardTitle>
 							<HardDrive className="h-4 w-4 text-muted-foreground" />
 						</div>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-2">
 							<div className="flex items-baseline gap-2">
-								<span className="text-3xl font-bold text-foreground">
-									{SYSTEM_STATS.disk.usage}%
-								</span>
-								<span className="text-xs text-muted-foreground">
+								<span className="font-bold text-3xl text-foreground">{SYSTEM_STATS.disk.usage}%</span>
+								<span className="text-muted-foreground text-sm">
 									{SYSTEM_STATS.disk.used} / {SYSTEM_STATS.disk.total}
 								</span>
 							</div>
-							<Progress value={SYSTEM_STATS.disk.usage} className="h-2" />
-							<p className="text-xs text-muted-foreground">
-								NVMe SSD 512GB
-							</p>
+							<Progress className="h-2" value={SYSTEM_STATS.disk.usage} />
+							<p className="text-muted-foreground text-sm">NVMe SSD 512GB</p>
 						</div>
 					</CardContent>
 				</Card>
@@ -166,25 +142,21 @@ export function SystemSettingsModern() {
 				<Card className="border-l-4" style={{ borderLeftColor: 'var(--entity-collection)' }}>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
-							<CardTitle className="text-sm font-medium">Base de Datos</CardTitle>
+							<CardTitle className="font-medium text-sm">Base de Datos</CardTitle>
 							<Database className="h-4 w-4 text-muted-foreground" />
 						</div>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-2">
 							<div className="flex items-baseline gap-2">
-								<span className="text-3xl font-bold text-foreground">
-									{SYSTEM_STATS.database.tables}
-								</span>
-								<span className="text-xs text-muted-foreground">
-									tablas
-								</span>
+								<span className="font-bold text-3xl text-foreground">{SYSTEM_STATS.database.tables}</span>
+								<span className="text-muted-foreground text-sm">tablas</span>
 							</div>
 							<div className="flex items-center gap-2">
-								<Badge variant="secondary" className="text-xs">
+								<Badge className="text-sm" variant="secondary">
 									{SYSTEM_STATS.database.size}
 								</Badge>
-								<Badge variant="outline" className="text-xs">
+								<Badge className="text-sm" variant="outline">
 									{SYSTEM_STATS.database.connections} conexiones
 								</Badge>
 							</div>
@@ -195,27 +167,24 @@ export function SystemSettingsModern() {
 
 			{/* Server Configuration Card */}
 			<SettingsCard
+				color="var(--primary)"
+				description="Ajustes de rendimiento y disponibilidad"
 				icon={<Server />}
 				title="Configuración del Servidor"
-				description="Ajustes de rendimiento y disponibilidad"
-				color="var(--primary)"
 				variant="outlined"
 			>
 				<SettingsGroup title="Rendimiento">
 					<SettingsRow
-						label="Auto-actualización de estadísticas"
 						description="Actualizar métricas del sistema cada 30 segundos"
+						label="Auto-actualización de estadísticas"
 					>
 						<Switch checked={autoRefresh} onCheckedChange={setAutoRefresh} />
 					</SettingsRow>
-					<SettingsRow label="Cache de consultas" description="Habilitar caché para queries frecuentes">
+					<SettingsRow description="Habilitar caché para queries frecuentes" label="Cache de consultas">
 						<Switch defaultChecked />
 					</SettingsRow>
-					<SettingsRow
-						label="Límite de memoria de workers"
-						description="Máximo de memoria RAM por worker (MB)"
-					>
-						<Input type="number" defaultValue={512} className="w-24" />
+					<SettingsRow description="Máximo de memoria RAM por worker (MB)" label="Límite de memoria de workers">
+						<Input className="w-24" defaultValue={512} type="number" />
 					</SettingsRow>
 				</SettingsGroup>
 
@@ -224,17 +193,17 @@ export function SystemSettingsModern() {
 				<SettingsGroup title="Nivel de Logging">
 					<div className="space-y-3">
 						{['error', 'warn', 'info', 'debug'].map((level) => (
-							<div key={level} className="flex items-center justify-between">
-								<Label htmlFor={`log-${level}`} className="cursor-pointer">
+							<div className="flex items-center justify-between" key={level}>
+								<Label className="cursor-pointer" htmlFor={`log-${level}`}>
 									{level.charAt(0).toUpperCase() + level.slice(1)}
 								</Label>
 								<input
-									id={`log-${level}`}
-									type="radio"
-									name="log-level"
 									checked={logLevel === level}
-									onChange={() => setLogLevel(level)}
 									className="h-4 w-4 cursor-pointer accent-primary"
+									id={`log-${level}`}
+									name="log-level"
+									onChange={() => setLogLevel(level)}
+									type="radio"
 								/>
 							</div>
 						))}
@@ -246,27 +215,24 @@ export function SystemSettingsModern() {
 			<Collapsible defaultOpen>
 				<CollapsibleTrigger asChild>
 					<SettingsCard
+						className="cursor-pointer hover:bg-muted/50"
+						color="var(--entity-collection)"
+						description="Configuración y mantenimiento de Drizzle ORM"
 						icon={<Database />}
 						title="Base de Datos"
-						description="Configuración y mantenimiento de Drizzle ORM"
-						color="var(--entity-collection)"
-						className="cursor-pointer hover:bg-muted/50"
 					>
 						<ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
 					</SettingsCard>
 				</CollapsibleTrigger>
 				<CollapsibleContent className="space-y-4 pt-4">
 					<SettingsGroup title="Backups Automáticos">
-						<SettingsRow
-							label="Activar backups diarios"
-							description="Crear copia de seguridad a las 02:00 AM"
-						>
+						<SettingsRow description="Crear copia de seguridad a las 02:00 AM" label="Activar backups diarios">
 							<Switch defaultChecked />
 						</SettingsRow>
-						<SettingsRow label="Retención de backups" description="Días a conservar">
+						<SettingsRow description="Días a conservar" label="Retención de backups">
 							<div className="flex items-center gap-2">
-								<Input type="number" defaultValue={7} className="w-20" />
-								<span className="text-sm text-muted-foreground">días</span>
+								<Input className="w-20" defaultValue={7} type="number" />
+								<span className="text-muted-foreground text-sm">días</span>
 							</div>
 						</SettingsRow>
 					</SettingsGroup>
@@ -274,20 +240,17 @@ export function SystemSettingsModern() {
 					<Separator />
 
 					<SettingsGroup title="Mantenimiento">
-						<SettingsRow label="Optimización automática" description="Ejecutar VACUUM semanalmente">
+						<SettingsRow description="Ejecutar VACUUM semanalmente" label="Optimización automática">
 							<Switch defaultChecked />
 						</SettingsRow>
-						<SettingsRow
-							label="Analizar tabla"
-							description="Ejecutar ANALYZE para actualizar estadísticas"
-						>
-							<Button variant="outline" size="sm">
+						<SettingsRow description="Ejecutar ANALYZE para actualizar estadísticas" label="Analizar tabla">
+							<Button size="sm" variant="outline">
 								<Eye className="mr-2 h-4 w-4" />
 								Analizar
 							</Button>
 						</SettingsRow>
-						<SettingsRow label="Vaciar caché" description="Limpiar caché de consultas">
-							<Button variant="destructive" size="sm">
+						<SettingsRow description="Limpiar caché de consultas" label="Vaciar caché">
+							<Button size="sm" variant="destructive">
 								<AlertTriangle className="mr-2 h-4 w-4" />
 								Vaciar
 							</Button>
@@ -302,13 +265,11 @@ export function SystemSettingsModern() {
 								<CheckCircle className="h-5 w-5 text-green-600" />
 							</div>
 							<div className="flex flex-col gap-0.5">
-								<span className="text-sm font-medium text-foreground">Estado: Sano</span>
-								<span className="text-xs text-muted-foreground">
-									Último backup: hace 23h 45m
-								</span>
+								<span className="font-medium text-foreground text-sm">Estado: Sano</span>
+								<span className="text-muted-foreground text-sm">Último backup: hace 23h 45m</span>
 							</div>
 						</div>
-						<Button variant="outline" size="sm">
+						<Button size="sm" variant="outline">
 							Ver logs
 							<ChevronRight className="ml-2 h-4 w-4" />
 						</Button>
@@ -318,10 +279,10 @@ export function SystemSettingsModern() {
 
 			{/* System Info Card */}
 			<SettingsCard
+				color="var(--entity-system)"
+				description="Detalles técnicos y versión"
 				icon={<Zap />}
 				title="Información del Sistema"
-				description="Detalles técnicos y versión"
-				color="var(--entity-system)"
 				variant="outlined"
 			>
 				<div className="space-y-4">
@@ -329,19 +290,16 @@ export function SystemSettingsModern() {
 						<Badge variant="outline">{SYSTEM_STATS.version}</Badge>
 					</SettingsRow>
 					<SettingsRow label="Build">
-						<span className="text-sm text-muted-foreground">{SYSTEM_STATS.build}</span>
+						<span className="text-muted-foreground text-sm">{SYSTEM_STATS.build}</span>
 					</SettingsRow>
 					<SettingsRow label="Tiempo activo">
-						<span className="text-sm text-foreground font-medium">{SYSTEM_STATS.uptime}</span>
+						<span className="font-medium text-foreground text-sm">{SYSTEM_STATS.uptime}</span>
 					</SettingsRow>
 					<Separator />
-					<SettingsRow
-						label="Actualización automática"
-						description="Buscar actualizaciones periódicamente"
-					>
+					<SettingsRow description="Buscar actualizaciones periódicamente" label="Actualización automática">
 						<Switch defaultChecked />
 					</SettingsRow>
-					<Button variant="outline" className="w-full">
+					<Button className="w-full" variant="outline">
 						<RefreshCw className="mr-2 h-4 w-4" />
 						Ver actualizaciones
 					</Button>

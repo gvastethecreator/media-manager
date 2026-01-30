@@ -31,15 +31,15 @@ export function GroupCardHeader({
 	const getOrgTypeIcon = () => {
 		switch (organizationType.toLowerCase()) {
 			case 'archivo':
-				return <LibraryBigIcon className="h-3 w-3" />;
+				return <LibraryBigIcon className="h-4 w-4" />;
 			case 'colección':
-				return <PackageOpenIcon className="h-3 w-3" />;
+				return <PackageOpenIcon className="h-4 w-4" />;
 			case 'mundo':
-				return <FolderTreeIcon className="h-3 w-3" />;
+				return <FolderTreeIcon className="h-4 w-4" />;
 			case 'utilidad':
-				return <FolderIcon className="h-3 w-3" />;
+				return <FolderIcon className="h-4 w-4" />;
 			default:
-				return <FolderIcon className="h-3 w-3" />;
+				return <FolderIcon className="h-4 w-4" />;
 		}
 	};
 
@@ -86,7 +86,7 @@ export function GroupCardHeader({
 				<div className="min-w-0 flex-1">
 					<h3 className={cn('line-clamp-1 font-semibold', compact ? 'text-sm' : 'text-base')}>{name}</h3>
 					<div className="flex items-center">
-						<span className={cn('text-xs opacity-80', compact ? 'line-clamp-1' : '')}>{category}</span>
+						<span className={cn('text-sm opacity-80', compact ? 'line-clamp-1' : '')}>{category}</span>
 					</div>
 				</div>
 
@@ -94,7 +94,7 @@ export function GroupCardHeader({
 				{tcgMode && (
 					<div className="ml-2 flex flex-col items-end">
 						<div className="mb-1 flex items-center">
-							<span className="mr-1 font-medium text-xs">{organizationType}</span>
+							<span className="mr-1 font-medium text-sm">{organizationType}</span>
 							{getOrgTypeIcon()}
 						</div>
 
@@ -104,7 +104,7 @@ export function GroupCardHeader({
 								const levelValue = `org-level-${name}-${i + 1}-${organizationLevel}`;
 								return <div className="h-1.5 w-1.5 rounded-full" key={levelValue} style={{ backgroundColor: color }} />;
 							})}
-							{organizationLevel > 5 && <span className="ml-1 text-[10px]">+{organizationLevel - 5}</span>}
+							{organizationLevel > 5 && <span className="ml-1 text-xs">+{organizationLevel - 5}</span>}
 						</div>
 					</div>
 				)}
@@ -125,7 +125,7 @@ export function GroupCardHeader({
 			)}
 
 			{/* Estrella de favorito */}
-			{isFavorite && <div className="absolute top-1 right-1 text-warning text-xs">★</div>}
+			{isFavorite && <div className="absolute top-1 right-1 text-warning text-sm">★</div>}
 		</div>
 	);
 }

@@ -15,17 +15,8 @@ import { and, asc, count, desc, eq, gte, like, lte, or } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import {
-	albums,
-	characters,
-	collections,
-	concepts,
 	folders,
 	groupVideos,
-	notes,
-	places,
-	prompts,
-	properties,
-	tags,
 	videoAlbums,
 	videoCharacters,
 	videoCollections,
@@ -34,12 +25,10 @@ import {
 	videoPlaces,
 	videoPrompts,
 	videoProperties,
+	videos,
 	videoTags,
 	videoWildcards,
 	videoWorldItems,
-	videos,
-	wildcards,
-	worldItems,
 } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { VideoError } from './video-errors.effect';
@@ -209,6 +198,14 @@ export interface VideoServiceInterface {
 
 	// Operaciones específicas de video
 	readonly getFormatStats: () => Effect.Effect<VideoFormatStats[], VideoError>;
+
+	// Thumbnails
+	readonly getThumbnail: (
+		id: string,
+		time?: number,
+		width?: number,
+		height?: number
+	) => Effect.Effect<Buffer, VideoError>;
 }
 
 /**
@@ -934,6 +931,79 @@ const make = (): VideoServiceInterface => {
 		});
 
 	// -------------------------------------------------------------------------------
+	// GET THUMBNAIL
+	// -------------------------------------------------------------------------------
+	const getThumbnail = (
+		id: string,
+		time?: number,
+		width?: number,
+		height?: number
+	): Effect.Effect<Buffer, VideoError> =>
+		Effect.gen(function* () {
+			videoServiceLogger.info('Generando thumbnail para video:', { id, time, width, height });
+
+			// Obtener video
+			const video = yield* getById(id);
+
+			// Si ya tiene thumbnail en DB, devolverlo
+			if (video.thumbnail) {
+				try {
+					const buffer = Buffer.from(video.thumbnail, 'base64');
+					videoServiceLogger.info('Thumbnail encontrado en DB:', { id, size: buffer.length });
+					return buffer;
+				} catch (error) {
+					videoServiceLogger.warn('Error decodificando thumbnail de DB, regenerando:', error);
+				}
+			}
+
+			// Importar FFmpeg helper
+			const { generateStaticVideoThumbnailFFmpeg } = yield* Effect.tryPromise({
+				try: async () => {
+					const module = await import('@/lib/utils/video/ffmpeg-thumbnails');
+					return module;
+				},
+				catch: (error) => toVideoError(error, 'getThumbnail:import'),
+			});
+
+			// Generar thumbnail con FFmpeg
+			const thumbnailBuffer = yield* Effect.tryPromise({
+				try: async () => {
+					const buffer = await generateStaticVideoThumbnailFFmpeg(video.path, {
+						time: time || 1,
+						width: width || 320,
+						height: height || 240,
+						quality: 'medium',
+					});
+					if (!buffer) {
+						throw new Error('No se pudo generar el thumbnail con FFmpeg');
+					}
+					return buffer;
+				},
+				catch: (error) => toVideoError(error, 'getThumbnail:generate'),
+			});
+
+			// Guardar thumbnail en DB
+			yield* Effect.tryPromise({
+				try: async () => {
+					await db
+						.update(videos)
+						.set({
+							thumbnail: thumbnailBuffer.toString('base64'),
+							thumbnailSize: thumbnailBuffer.length,
+							thumbnailWidth: width || 320,
+							thumbnailHeight: height || 240,
+							updatedAt: new Date(),
+						})
+						.where(eq(videos.id, id));
+				},
+				catch: (error) => toVideoError(error, 'getThumbnail:save'),
+			});
+
+			videoServiceLogger.info('Thumbnail generado y guardado:', { id, size: thumbnailBuffer.length });
+			return thumbnailBuffer;
+		});
+
+	// -------------------------------------------------------------------------------
 	// RETURN SERVICE INTERFACE
 	// -------------------------------------------------------------------------------
 	return {
@@ -952,6 +1022,7 @@ const make = (): VideoServiceInterface => {
 		toggleFavorite,
 		setFavoriteMany,
 		getFormatStats,
+		getThumbnail,
 	};
 };
 

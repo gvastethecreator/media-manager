@@ -88,7 +88,7 @@ export function ConceptCardFooter({
 	return (
 		<div
 			className={cn(
-				'px-3 py-2 text-white/80 text-xs',
+				'px-3 py-2 text-white/80 text-sm',
 				tcgMode ? 'border-border/40 border-t' : '',
 				isFavorite && tcgMode ? 'bg-linear-to-t from-amber-950/40 to-amber-900/20' : ''
 			)}

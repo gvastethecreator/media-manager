@@ -41,39 +41,39 @@ export function PlaceCardHeader({
 	const getTypeIcon = () => {
 		const typeLC = type.toLowerCase();
 		if (typeLC.includes('city') || typeLC.includes('ciudad')) {
-			return <Building2 className="h-3.5 w-3.5" />;
+			return <Building2 className="h-4 w-4" />;
 		}
 		if (typeLC.includes('forest') || typeLC.includes('bosque')) {
-			return <Trees className="h-3.5 w-3.5" />;
+			return <Trees className="h-4 w-4" />;
 		}
 		if (typeLC.includes('mountain') || typeLC.includes('montaña')) {
-			return <Mountain className="h-3.5 w-3.5" />;
+			return <Mountain className="h-4 w-4" />;
 		}
 		if (typeLC.includes('desert') || typeLC.includes('desierto')) {
-			return <Palmtree className="h-3.5 w-3.5" />;
+			return <Palmtree className="h-4 w-4" />;
 		}
-		return <Compass className="h-3.5 w-3.5" />;
+		return <Compass className="h-4 w-4" />;
 	};
 
 	// Determinar icono según el clima
 	const getClimateIcon = () => {
 		const climateLC = climate.toLowerCase();
 		if (climateLC.includes('tropical')) {
-			return <Palmtree className="h-3.5 w-3.5" />;
+			return <Palmtree className="h-4 w-4" />;
 		}
 		if (climateLC.includes('desert') || climateLC.includes('desierto')) {
-			return <Palmtree className="h-3.5 w-3.5" />;
+			return <Palmtree className="h-4 w-4" />;
 		}
 		if (climateLC.includes('cold') || climateLC.includes('frío')) {
-			return <Cloud className="h-3.5 w-3.5" />;
+			return <Cloud className="h-4 w-4" />;
 		}
 		if (climateLC.includes('rain') || climateLC.includes('lluvia')) {
-			return <Droplets className="h-3.5 w-3.5" />;
+			return <Droplets className="h-4 w-4" />;
 		}
 		if (climateLC.includes('forest') || climateLC.includes('bosque')) {
-			return <Sprout className="h-3.5 w-3.5" />;
+			return <Sprout className="h-4 w-4" />;
 		}
-		return <Cloud className="h-3.5 w-3.5" />;
+		return <Cloud className="h-4 w-4" />;
 	};
 
 	return (
@@ -145,8 +145,8 @@ export function PlaceCardHeader({
 						</h3>
 
 						{/* Subtítulo con región */}
-						<div className="flex items-center gap-1 text-white/80 text-xs">
-							<Compass className="h-3.5 w-3.5" />
+						<div className="flex items-center gap-1 text-sm text-white/80">
+							<Compass className="h-4 w-4" />
 							<span className="truncate">{region}</span>
 						</div>
 					</div>
@@ -192,7 +192,7 @@ export function PlaceCardHeader({
 
 			{/* Tipo de lugar - similar a la línea de tipo en TCG */}
 			<div
-				className="relative flex items-center justify-between px-3.5 py-1.5 text-white text-xs"
+				className="relative flex items-center justify-between px-3.5 py-1.5 text-sm text-white"
 				style={{
 					borderBottom: `2px solid color-mix(in oklab, ${color}, transparent 30%)`,
 					background:

@@ -104,7 +104,7 @@ export function WorldItemCardContent({
 
 	return (
 		<div
-			className="flex flex-1 flex-col gap-2 overflow-hidden p-3 text-xs"
+			className="flex flex-1 flex-col gap-2 overflow-hidden p-4 text-sm"
 			style={{
 				borderTop: `1px solid ${primaryColor}20`,
 				borderBottom: `1px solid ${primaryColor}20`,
@@ -119,7 +119,7 @@ export function WorldItemCardContent({
 				<div className="flex flex-wrap gap-1">
 					{parsedAttributes.map((attr: string, _index: number) => (
 						<span
-							className="rounded-sm px-1.5 py-0.5 font-medium text-[10px]"
+							className="rounded-sm px-1.5 py-0.5 font-medium text-xs"
 							key={`attr-${renderKey}-${attr}`}
 							style={{
 								backgroundColor: `${primaryColor}20`,
@@ -134,7 +134,7 @@ export function WorldItemCardContent({
 
 			{/* Origen */}
 			{origin && (
-				<div className="text-muted-foreground text-xs">
+				<div className="text-muted-foreground text-sm">
 					<span className="font-semibold text-foreground" style={{ color: primaryColor }}>
 						Origen:
 					</span>{' '}
@@ -147,7 +147,7 @@ export function WorldItemCardContent({
 				<div className="mt-1">
 					{parsedProperties.map((prop: WorldItemProperty, index: number) => (
 						<div
-							className="mb-0.5 flex justify-between text-xs"
+							className="mb-0.5 flex justify-between text-sm"
 							key={`prop-${renderKey}-${prop.name || `property-${index + 1}`}`}
 						>
 							<span className="font-medium">{prop.name || 'Propiedad'}</span>
@@ -164,7 +164,7 @@ export function WorldItemCardContent({
 					style={{ borderColor: `${primaryColor}30` }}
 				>
 					{Object.entries(parsedStats).map(([key, value]) => (
-						<div className="flex justify-between text-[10px]" key={`stat-${renderKey}-${key}`}>
+						<div className="flex justify-between text-xs" key={`stat-${renderKey}-${key}`}>
 							<span className="font-semibold" style={{ color: primaryColor }}>
 								{key}:
 							</span>
@@ -177,11 +177,11 @@ export function WorldItemCardContent({
 			{/* Efectos */}
 			{parsedEffects && parsedEffects.length > 0 && (
 				<div className="mt-1 border-t border-dashed pt-1" style={{ borderColor: `${primaryColor}30` }}>
-					<div className="mb-0.5 font-semibold text-xs" style={{ color: primaryColor }}>
+					<div className="mb-0.5 font-semibold text-sm" style={{ color: primaryColor }}>
 						Efectos:
 					</div>
 					{parsedEffects.map((effect: WorldItemEffect, index: number) => (
-						<div className="mb-0.5 text-[10px]" key={`effect-${renderKey}-${effect.name || `effect-${index + 1}`}`}>
+						<div className="mb-0.5 text-xs" key={`effect-${renderKey}-${effect.name || `effect-${index + 1}`}`}>
 							<span className="font-medium">{String(effect.name || '')}: </span>
 							<span className="text-muted-foreground">{String(effect.description || '')}</span>
 						</div>
@@ -192,11 +192,11 @@ export function WorldItemCardContent({
 			{/* Requerimientos */}
 			{parsedRequirements && Object.keys(parsedRequirements).length > 0 && (
 				<div className="mt-1 border-t border-dashed pt-1" style={{ borderColor: `${primaryColor}30` }}>
-					<div className="mb-0.5 font-semibold text-xs" style={{ color: primaryColor }}>
+					<div className="mb-0.5 font-semibold text-sm" style={{ color: primaryColor }}>
 						Requisitos:
 					</div>
 					{Object.entries(parsedRequirements).map(([key, req]) => (
-						<div className="mb-0.5 text-[10px]" key={`req-${renderKey}-${key}`}>
+						<div className="mb-0.5 text-xs" key={`req-${renderKey}-${key}`}>
 							<span className="font-medium">{key}: </span>
 							<span className="text-muted-foreground">
 								{typeof req === 'object' && req !== null && 'value' in req
@@ -212,7 +212,7 @@ export function WorldItemCardContent({
 			{rarity && (
 				<div
 					className={cn(
-						'mt-auto rounded-sm pt-1 text-center font-semibold text-[10px]',
+						'mt-auto rounded-sm pt-1 text-center font-semibold text-xs',
 						rarity.toLowerCase() === 'legendary' && 'animate-pulse'
 					)}
 					style={{

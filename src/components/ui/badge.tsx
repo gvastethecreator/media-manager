@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
  * - Transiciones suaves
  */
 const badgeVariants = cva(
-	'inline-flex items-center rounded-dt-xs border-2 px-2.5 py-0.5 font-semibold text-xs transition-all duration-dt-fast ease-dt-out focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
+	'inline-flex items-center rounded-dt-xs border-2 px-3 py-1 font-semibold text-sm transition-all duration-dt-fast ease-dt-out focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2',
 	{
 		variants: {
 			variant: {

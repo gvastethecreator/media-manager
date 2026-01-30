@@ -51,8 +51,8 @@ function FavoriteIndicator({ isFavorite, tcgMode }: { isFavorite: boolean; tcgMo
 				boxShadow: tcgMode ? '0 0 5px rgba(239, 68, 68, 0.3)' : 'none',
 			}}
 		>
-			<Heart className="h-3.5 w-3.5 fill-current" />
-			<span className="font-medium text-xs uppercase tracking-wide">Fav</span>
+			<Heart className="h-4 w-4 fill-current" />
+			<span className="font-medium text-sm uppercase tracking-wide">Fav</span>
 		</div>
 	);
 }
@@ -114,7 +114,7 @@ export function TagCardFooter({
 					<Counter
 						count={imagesCount}
 						glow={glow}
-						icon={<Image className="h-3.5 w-3.5" />}
+						icon={<Image className="h-4 w-4" />}
 						primaryColor={primaryColor}
 						secondaryColor={secondaryColor}
 						tcgMode={tcgMode}
@@ -125,7 +125,7 @@ export function TagCardFooter({
 						<Counter
 							count={videosCount}
 							glow={glow}
-							icon={<Video className="h-3.5 w-3.5" />}
+							icon={<Video className="h-4 w-4" />}
 							primaryColor={primaryColor}
 							secondaryColor={secondaryColor}
 							tcgMode={tcgMode}
@@ -139,18 +139,18 @@ export function TagCardFooter({
 
 			{/* Información adicional - Similar a la línea de coleccionista en cartas TCG */}
 			<div
-				className={cn('flex items-center justify-between text-muted-foreground text-xs', compact ? 'mt-1.5' : 'mt-2')}
+				className={cn('flex items-center justify-between text-muted-foreground text-sm', compact ? 'mt-1.5' : 'mt-2')}
 			>
 				{/* Fecha de creación */}
 				<div className="flex items-center gap-1">
-					<Calendar className="h-3 w-3" />
+					<Calendar className="h-4 w-4" />
 					<span className="mr-1 opacity-70">Creado:</span>
 					<span className="font-medium">{formattedCreated}</span>
 				</div>
 
 				{/* Fecha de actualización */}
 				<div className="flex items-center gap-1">
-					<Clock className="h-3 w-3" />
+					<Clock className="h-4 w-4" />
 					<span className="mr-1 opacity-70">Act:</span>
 					<span className="font-medium">{formattedUpdated}</span>
 				</div>
@@ -159,7 +159,7 @@ export function TagCardFooter({
 			{/* Línea de colección */}
 			{tcgMode && (
 				<div
-					className={cn('text-center text-muted-foreground text-xs italic', compact ? 'mt-0.5' : 'mt-1')}
+					className={cn('text-center text-muted-foreground text-sm italic', compact ? 'mt-0.5' : 'mt-1')}
 					style={{ opacity: 0.7 }}
 				>
 					♦ Colección personal ♦
