@@ -75,7 +75,7 @@ export const PropertyCard = memo(function PropertyCard({
 					<div className="mt-auto flex flex-wrap gap-1">
 						{totalRelations > 0 && (
 							<Badge
-								className="text-xs"
+								className="text-sm"
 								style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 50%)` }}
 								variant="outline"
 							>

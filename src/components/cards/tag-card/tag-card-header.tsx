@@ -92,7 +92,7 @@ export function TagCardHeader({
 
 			{/* Barra secundaria con categoría y rareza */}
 			<div
-				className={cn('flex items-center justify-between text-white text-xs', compact ? 'px-3 py-1' : 'px-3.5 py-1.5')}
+				className={cn('flex items-center justify-between text-white text-sm', compact ? 'px-3 py-1' : 'px-3.5 py-1.5')}
 				style={{
 					background: tcgMode ? 'rgba(var(--effect-shadow-rgb), 0.3)' : 'rgba(var(--effect-shadow-rgb), 0.2)',
 					borderBottom: `1px solid ${color}50`,
@@ -105,7 +105,7 @@ export function TagCardHeader({
 						<>
 							<span className="mx-0.5">•</span>
 							<div className="flex items-center gap-1">
-								<BookOpen className="h-3 w-3" />
+								<BookOpen className="h-4 w-4" />
 								<span>{typeof category === 'string' ? category.toUpperCase() : 'GENERAL'}</span>
 							</div>
 						</>
@@ -115,7 +115,7 @@ export function TagCardHeader({
 				{/* Indicador de rareza para modo TCG */}
 				{tcgMode && (
 					<div className="flex items-center gap-1">
-						{rarity !== TagRarity.COMMON && <Sparkles className="h-3 w-3" />}
+						{rarity !== TagRarity.COMMON && <Sparkles className="h-4 w-4" />}
 						<span className="font-medium">{rarityLabel}</span>
 					</div>
 				)}

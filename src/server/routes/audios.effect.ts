@@ -7,6 +7,9 @@
 
 import { Effect } from 'effect';
 import express from 'express';
+import { eq } from 'drizzle-orm';
+import { db } from '@/lib/drizzle/index.js';
+import { audios } from '@/lib/drizzle/schema/index.js';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
 import { AudioService, AudioServiceLive } from '@/services/audio/audio.service.effect';
 
@@ -175,6 +178,68 @@ router.get('/folder/:folderId/count', async (req, res) => {
 	}).pipe(Effect.provide(AudioServiceLive));
 
 	await runEffectForExpress(effect, res);
+});
+
+/**
+ * GET /audios/:id/waveform - Obtener waveform de audio
+ */
+router.get('/:id/waveform', async (req, res) => {
+	try {
+		const { id } = req.params;
+		const options: any = {
+			width: Number.parseInt(req.query.width as string, 10) || 300,
+			height: Number.parseInt(req.query.height as string, 10) || 100,
+			color: `#${(req.query.color as string) || '3b82f6'}`,
+			backgroundColor: `#${(req.query.backgroundColor as string) || 'ffffff'}`,
+		};
+
+		// Obtener audio de la base de datos
+		const audioRecords = await db.select({ metadata: audios.metadata }).from(audios).where(eq(audios.id, id));
+
+		if (audioRecords.length === 0) {
+			res.status(404).json({ error: 'Audio not found' });
+			return;
+		}
+
+		const audio = audioRecords[0];
+		let metadata: any = null;
+
+		// Parsear metadata si existe
+		if (audio.metadata) {
+			try {
+				metadata = JSON.parse(audio.metadata);
+			} catch (e) {
+				console.warn(`Error parsing metadata for audio ${id}:`, e);
+			}
+		}
+
+		// Si ya tiene waveform generado en metadata
+		if (metadata?.waveform) {
+			const waveformSvg = metadata.waveform;
+			res.setHeader('Content-Type', 'image/svg+xml');
+			res.setHeader('Cache-Control', 'public, max-age=3600');
+			res.send(waveformSvg);
+			return;
+		}
+
+		// Fallback: generar placeholder
+		const errorSVG = `
+<svg width="${options.width}" height="${options.height}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="${options.backgroundColor}"/>
+  <g transform="translate(${options.width / 2},${options.height / 2})">
+    <text text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="#1f2937">
+      🎵 Audio
+    </text>
+  </g>
+</svg>`;
+
+		res.setHeader('Content-Type', 'image/svg+xml');
+		res.setHeader('Cache-Control', 'public, max-age=60');
+		res.send(errorSVG);
+	} catch (error) {
+		console.error('Error generando waveform:', error);
+		res.status(500).json({ error: 'Error generating waveform' });
+	}
 });
 
 /**

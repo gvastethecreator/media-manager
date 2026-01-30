@@ -4,7 +4,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 
 const alertVariants = cva(
-	'relative w-full rounded-dt-lg border-2 px-4 py-3 text-sm shadow-dt-1 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:top-4 [&>svg]:left-4 [&>svg]:text-foreground [&>svg~*]:pl-7',
+	'relative w-full rounded-dt-lg border-2 px-4 py-3 text-base shadow-dt-1 [&>svg+div]:translate-y-[-3px] [&>svg]:absolute [&>svg]:top-4 [&>svg]:left-4 [&>svg]:text-foreground [&>svg~*]:pl-7',
 	{
 		variants: {
 			variant: {
@@ -39,7 +39,7 @@ AlertTitle.displayName = 'AlertTitle';
 
 const AlertDescription = React.forwardRef<HTMLParagraphElement, React.HTMLAttributes<HTMLParagraphElement>>(
 	({ className, ...props }, ref) => (
-		<div className={cn('text-sm [&_p]:leading-relaxed', className)} ref={ref} {...props} />
+		<div className={cn('text-base [&_p]:leading-relaxed', className)} ref={ref} {...props} />
 	)
 );
 AlertDescription.displayName = 'AlertDescription';

@@ -90,10 +90,10 @@ export function NoteCardFooter({
 		>
 			{/* Fila superior con estado y prioridad */}
 			{(status || priority !== undefined) && (
-				<div className="flex items-center justify-between text-xs">
+				<div className="flex items-center justify-between text-sm">
 					{status && (
 						<div className="flex items-center gap-1">
-							<ListChecks className="h-3 w-3" style={{ color: primaryColor }} />
+							<ListChecks className="h-4 w-4" style={{ color: primaryColor }} />
 							<span className={cn('opacity-80', tcgMode && 'font-medium tracking-wide')}>
 								{status.charAt(0).toUpperCase() + status.slice(1)}
 							</span>
@@ -101,7 +101,7 @@ export function NoteCardFooter({
 					)}
 					{priority !== undefined && (
 						<div className="flex items-center gap-1">
-							<BarChart4 className="h-3 w-3" style={{ color: getPriorityColor() }} />
+							<BarChart4 className="h-4 w-4" style={{ color: getPriorityColor() }} />
 							<span className={cn('opacity-80', tcgMode && 'font-medium')} style={{ color: getPriorityColor() }}>
 								P{priority}
 							</span>
@@ -111,43 +111,43 @@ export function NoteCardFooter({
 			)}
 
 			{/* Fila de contadores con iconos */}
-			<div className="flex items-center justify-between text-xs">
+			<div className="flex items-center justify-between text-sm">
 				<div className="flex items-center gap-3">
 					{/* Contador de imágenes */}
 					<div className="flex items-center gap-1">
-						<Image className="h-3 w-3 text-muted-foreground" />
+						<Image className="h-4 w-4 text-muted-foreground" />
 						<span className="opacity-80">{imagesCount}</span>
 					</div>
 
 					{/* Contador de videos */}
 					{(videosCount > 0 || tcgMode) && (
 						<div className="flex items-center gap-1">
-							<Video className="h-3 w-3 text-muted-foreground" />
+							<Video className="h-4 w-4 text-muted-foreground" />
 							<span className="opacity-80">{videosCount}</span>
 						</div>
 					)}
 
 					{/* Contador de relaciones */}
 					<div className="flex items-center gap-1">
-						<LinkIcon className="h-3 w-3 text-muted-foreground" />
+						<LinkIcon className="h-4 w-4 text-muted-foreground" />
 						<span className="opacity-80">{relationsCount}</span>
 					</div>
 
 					{/* Indicador de favorito */}
 					{isFavorite &&
 						(tcgMode ? (
-							<Star className="h-3.5 w-3.5 fill-current text-warning" />
+							<Star className="h-4 w-4 fill-current text-warning" />
 						) : (
-							<Heart className="h-3 w-3 fill-current text-pink-500" />
+							<Heart className="h-4 w-4 fill-current text-pink-500" />
 						))}
 				</div>
 
 				{/* Fecha */}
 				<div className="flex items-center gap-1">
 					{wasUpdated ? (
-						<RefreshCw className="h-3 w-3 text-muted-foreground" />
+						<RefreshCw className="h-4 w-4 text-muted-foreground" />
 					) : (
-						<Calendar className="h-3 w-3 text-muted-foreground" />
+						<Calendar className="h-4 w-4 text-muted-foreground" />
 					)}
 					<span className={cn('text-[0.65rem] opacity-80', tcgMode && 'tracking-tight')}>
 						{wasUpdated ? updatedFormattedDate : formattedDate}

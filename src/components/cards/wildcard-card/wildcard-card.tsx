@@ -87,19 +87,31 @@ export const WildcardCard = memo(function WildcardCard({
 				{showBadges && (
 					<div className="mt-auto flex flex-wrap gap-1">
 						{totalMedia > 0 && (
-							<Badge className="text-xs" style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 50%)` }} variant="outline">
+							<Badge
+								className="px-2 py-1 text-sm"
+								style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 50%)` }}
+								variant="outline"
+							>
 								{totalMedia} archivos
 							</Badge>
 						)}
 
 						{childCount > 0 && (
-							<Badge className="text-xs" style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 50%)` }} variant="outline">
+							<Badge
+								className="px-2 py-1 text-sm"
+								style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 50%)` }}
+								variant="outline"
+							>
 								{childCount} variantes
 							</Badge>
 						)}
 
 						{Array.isArray(children) && children.length > 0 && (
-							<Badge className="text-xs" style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 50%)` }} variant="outline">
+							<Badge
+								className="px-2 py-1 text-sm"
+								style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 50%)` }}
+								variant="outline"
+							>
 								{children.length} opciones
 							</Badge>
 						)}

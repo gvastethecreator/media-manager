@@ -31,7 +31,7 @@ export const UploadedImageCard = memo(function UploadedImageCard({
 							src={thumb}
 						/>
 					) : (
-						<div className="flex h-full w-full items-center justify-center text-muted-foreground text-xs">
+						<div className="flex h-full w-full items-center justify-center text-muted-foreground text-sm">
 							Sin thumbnail
 						</div>
 					)}
@@ -55,7 +55,7 @@ export const UploadedImageCard = memo(function UploadedImageCard({
 						src={thumb}
 					/>
 				) : (
-					<div className="flex h-full w-full items-center justify-center text-muted-foreground text-xs">
+					<div className="flex h-full w-full items-center justify-center text-muted-foreground text-sm">
 						Sin thumbnail
 					</div>
 				)}
