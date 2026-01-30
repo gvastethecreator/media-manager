@@ -3,7 +3,7 @@
  * @module store/entities/activity/types
  */
 
-import { ActivityCategory, ActivityComplete, ActivitySortCriteria } from '../../../types/entities/activity';
+import { ActivityCategory, ActivityComplete, ActivitySortCriteria } from '@/types/entities/activity';
 
 /**
  * Estado principal del store de actividades (estructura plana)

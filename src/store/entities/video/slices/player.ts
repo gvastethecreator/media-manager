@@ -4,7 +4,7 @@
  */
 
 import type { StateCreator } from 'zustand';
-import { VideoPlayState } from '../../../../types/entities/video/enums';
+import { VideoPlayState } from '@/types/entities/video/enums';
 import type { VideoStore } from '..';
 
 export interface VideoPlayerState {

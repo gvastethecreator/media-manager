@@ -130,70 +130,70 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 							stats.totalImages !== undefined ||
 							stats.totalSize !== undefined ||
 							stats.lastUpdated !== undefined) && (
-								<div className="grid grid-cols-4 gap-2">
-									<TooltipProvider>
-										{stats.totalItems !== undefined && (
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
-														<Hash className="mb-1 h-4 w-4 text-primary" />
-														<p className="numeric-md">{stats.totalItems}</p>
-														<p className="caption">Total</p>
-													</div>
-												</TooltipTrigger>
-												<TooltipContent>
-													<p>Total de elementos</p>
-												</TooltipContent>
-											</Tooltip>
-										)}
+							<div className="grid grid-cols-4 gap-2">
+								<TooltipProvider>
+									{stats.totalItems !== undefined && (
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
+													<Hash className="mb-1 h-4 w-4 text-primary" />
+													<p className="numeric-md">{stats.totalItems}</p>
+													<p className="caption">Total</p>
+												</div>
+											</TooltipTrigger>
+											<TooltipContent>
+												<p>Total de elementos</p>
+											</TooltipContent>
+										</Tooltip>
+									)}
 
-										{stats.totalImages !== undefined && (
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
-														<ImageIcon className="mb-1 h-4 w-4 text-primary" />
-														<p className="numeric-md">{stats.totalImages}</p>
-														<p className="caption">Imágenes</p>
-													</div>
-												</TooltipTrigger>
-												<TooltipContent>
-													<p>Total de imágenes asociadas</p>
-												</TooltipContent>
-											</Tooltip>
-										)}
+									{stats.totalImages !== undefined && (
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
+													<ImageIcon className="mb-1 h-4 w-4 text-primary" />
+													<p className="numeric-md">{stats.totalImages}</p>
+													<p className="caption">Imágenes</p>
+												</div>
+											</TooltipTrigger>
+											<TooltipContent>
+												<p>Total de imágenes asociadas</p>
+											</TooltipContent>
+										</Tooltip>
+									)}
 
-										{stats.totalSize !== undefined && (
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
-														<HardDrive className="mb-1 h-4 w-4 text-primary" />
-														<p className="numeric-md">{formatSize(stats.totalSize)}</p>
-														<p className="caption">Tamaño</p>
-													</div>
-												</TooltipTrigger>
-												<TooltipContent>
-													<p>Tamaño total de archivos</p>
-												</TooltipContent>
-											</Tooltip>
-										)}
+									{stats.totalSize !== undefined && (
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
+													<HardDrive className="mb-1 h-4 w-4 text-primary" />
+													<p className="numeric-md">{formatSize(stats.totalSize)}</p>
+													<p className="caption">Tamaño</p>
+												</div>
+											</TooltipTrigger>
+											<TooltipContent>
+												<p>Tamaño total de archivos</p>
+											</TooltipContent>
+										</Tooltip>
+									)}
 
-										{stats.lastUpdated && (
-											<Tooltip>
-												<TooltipTrigger asChild>
-													<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
-														<Calendar className="mb-1 h-4 w-4 text-primary" />
-														<p className="body-sm font-medium">{formatDate(stats.lastUpdated)}</p>
-														<p className="caption">Actualizado</p>
-													</div>
-												</TooltipTrigger>
-												<TooltipContent>
-													<p>Última actualización</p>
-												</TooltipContent>
-											</Tooltip>
-										)}
-									</TooltipProvider>
-								</div>
-							)}
+									{stats.lastUpdated && (
+										<Tooltip>
+											<TooltipTrigger asChild>
+												<div className="flex flex-col items-center justify-center rounded-dt-sm bg-background/50 p-2 transition-colors duration-dt-fast hover:bg-background/80">
+													<Calendar className="mb-1 h-4 w-4 text-primary" />
+													<p className="body-sm font-medium">{formatDate(stats.lastUpdated)}</p>
+													<p className="caption">Actualizado</p>
+												</div>
+											</TooltipTrigger>
+											<TooltipContent>
+												<p>Última actualización</p>
+											</TooltipContent>
+										</Tooltip>
+									)}
+								</TooltipProvider>
+							</div>
+						)}
 
 						{/* Items recientes */}
 						{stats.recentItems && stats.recentItems.length > 0 && (
@@ -218,10 +218,10 @@ export function StatsCard({ title, icon, isLoading, stats }: StatsCardProps) {
 														style={
 															item.color
 																? {
-																	backgroundColor: `color-mix(in oklab, ${item.color}, transparent 90%)`,
-																	color: item.color,
-																	borderColor: `color-mix(in oklab, ${item.color}, transparent 80%)`,
-																}
+																		backgroundColor: `color-mix(in oklab, ${item.color}, transparent 90%)`,
+																		color: item.color,
+																		borderColor: `color-mix(in oklab, ${item.color}, transparent 80%)`,
+																	}
 																: undefined
 														}
 													>

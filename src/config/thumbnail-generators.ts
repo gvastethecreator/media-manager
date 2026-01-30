@@ -122,9 +122,7 @@ export function generateAdvancedVideoThumbnail(
 	}
 
 	// Usar API unificada
-	return Promise.resolve(
-		buildUnifiedThumbnailUrl('video', item.id, { quality, time: timeOffset })
-	);
+	return Promise.resolve(buildUnifiedThumbnailUrl('video', item.id, { quality, time: timeOffset }));
 }
 
 /**
@@ -145,9 +143,7 @@ export function generateAudioWaveform(
 
 	// Usar API unificada
 	const { width = 300, height = 100 } = options;
-	return Promise.resolve(
-		buildUnifiedThumbnailUrl('audio', item.id, { width, height })
-	);
+	return Promise.resolve(buildUnifiedThumbnailUrl('audio', item.id, { width, height }));
 }
 
 /**
@@ -164,9 +160,7 @@ export function generateDocumentPreview(
 	const { page = 1, quality = ThumbnailQuality.MEDIUM } = options;
 
 	// Usar API unificada
-	return Promise.resolve(
-		buildUnifiedThumbnailUrl('document', item.id, { quality, page })
-	);
+	return Promise.resolve(buildUnifiedThumbnailUrl('document', item.id, { quality, page }));
 }
 
 /**
@@ -193,9 +187,7 @@ export function generateJsonPreview(
 
 	// Usar API unificada
 	const { width = 300, height = 400 } = options;
-	return Promise.resolve(
-		buildUnifiedThumbnailUrl('jsonFile', item.id, { width, height })
-	);
+	return Promise.resolve(buildUnifiedThumbnailUrl('jsonFile', item.id, { width, height }));
 }
 
 /**
@@ -223,9 +215,7 @@ export function generate3DModelThumbnail(
 
 	// Usar API unificada
 	const { width = 300, height = 300 } = options;
-	return Promise.resolve(
-		buildUnifiedThumbnailUrl('file3d', item.id, { width, height })
-	);
+	return Promise.resolve(buildUnifiedThumbnailUrl('file3d', item.id, { width, height }));
 }
 
 /**
@@ -374,11 +364,7 @@ export function buildThumbnailUrl(
 /**
  * 🔗 Construye URL del endpoint unificado de thumbnails
  */
-function buildUnifiedThumbnailUrl(
-	entityType: string,
-	entityId: string,
-	options: Record<string, any> = {}
-): string {
+function buildUnifiedThumbnailUrl(entityType: string, entityId: string, options: Record<string, any> = {}): string {
 	const mapping: Record<string, string> = {
 		image: 'image',
 		video: 'video',

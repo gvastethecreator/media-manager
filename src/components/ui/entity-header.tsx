@@ -312,7 +312,7 @@ export function EntityHeader({
 												className={cn(
 													'cursor-pointer',
 													action.variant === 'destructive' &&
-													'text-destructive hover:text-destructive focus:text-destructive'
+														'text-destructive hover:text-destructive focus:text-destructive'
 												)}
 												key={action.label}
 												onClick={action.onClick}

@@ -125,7 +125,7 @@ export function GroupCardHeader({
 			)}
 
 			{/* Estrella de favorito */}
-			{isFavorite && <div className="absolute top-1 right-1 text-warning text-sm">★</div>}
+			{isFavorite && <div className="absolute top-1 right-1 text-sm text-warning">★</div>}
 		</div>
 	);
 }

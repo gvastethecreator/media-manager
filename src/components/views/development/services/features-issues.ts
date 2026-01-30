@@ -18,7 +18,7 @@ export async function getFeatures(): Promise<Feature[]> {
 		const response = await fetch('/api/dev/features');
 		if (!response.ok) throw new Error('Failed to fetch features');
 		const data = await response.json();
-		
+
 		return data.map((f: any) => ({
 			name: f.name,
 			description: f.description,
@@ -36,7 +36,7 @@ export async function getIssues(): Promise<Issue[]> {
 		const response = await fetch('/api/dev/alerts?resolved=false');
 		if (!response.ok) throw new Error('Failed to fetch alerts');
 		const data: ServerAlert[] = await response.json();
-		
+
 		return data.map((alert) => ({
 			id: alert.id,
 			title: alert.title,
@@ -52,11 +52,16 @@ export async function getIssues(): Promise<Issue[]> {
 
 function mapLevelToSeverity(level: string): 'low' | 'medium' | 'high' | 'critical' {
 	switch (level) {
-		case 'info': return 'low';
-		case 'warning': return 'medium';
-		case 'error': return 'high';
-		case 'critical': return 'critical';
-		default: return 'medium';
+		case 'info':
+			return 'low';
+		case 'warning':
+			return 'medium';
+		case 'error':
+			return 'high';
+		case 'critical':
+			return 'critical';
+		default:
+			return 'medium';
 	}
 }
 

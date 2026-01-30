@@ -38,13 +38,13 @@ export const SettingsCard = React.forwardRef<HTMLDivElement, SettingsCardProps>(
 
 		return (
 			<div
-				ref={ref}
 				className={cn(
 					'flex flex-col gap-4 rounded-xl p-6 transition-all duration-200',
 					'hover:border-border/60',
 					variants[variant],
 					className
 				)}
+				ref={ref}
 				style={color ? { borderColor: color + '20' } : undefined}
 				{...props}
 			>
@@ -64,10 +64,8 @@ export const SettingsCard = React.forwardRef<HTMLDivElement, SettingsCardProps>(
 							</div>
 						)}
 						<div className="flex min-w-0 flex-1 flex-col gap-1">
-							<h3 className="text-sm font-semibold leading-none text-foreground">{title}</h3>
-							{description && (
-								<p className="text-xs text-muted-foreground leading-relaxed">{description}</p>
-							)}
+							<h3 className="font-semibold text-foreground text-sm leading-none">{title}</h3>
+							{description && <p className="text-muted-foreground text-xs leading-relaxed">{description}</p>}
 						</div>
 					</div>
 				)}
@@ -97,12 +95,12 @@ export const SettingsRow = ({ label, description, children, border = false }: Se
 		<div
 			className={cn(
 				'flex flex-col gap-2 sm:flex-row sm:items-start sm:justify-between sm:gap-4',
-				border && 'border-b border-border/50 pb-4'
+				border && 'border-border/50 border-b pb-4'
 			)}
 		>
 			<div className="flex min-w-0 flex-1 flex-col gap-1">
-				<span className="text-sm font-medium text-foreground">{label}</span>
-				{description && <span className="text-xs text-muted-foreground">{description}</span>}
+				<span className="font-medium text-foreground text-sm">{label}</span>
+				{description && <span className="text-muted-foreground text-xs">{description}</span>}
 			</div>
 			<div className="shrink-0">{children}</div>
 		</div>
@@ -121,7 +119,7 @@ export interface SettingsGroupProps {
 export const SettingsGroup = ({ title, children }: SettingsGroupProps) => {
 	return (
 		<div className="flex flex-col gap-4">
-			{title && <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">{title}</h4>}
+			{title && <h4 className="font-semibold text-muted-foreground text-xs uppercase tracking-wider">{title}</h4>}
 			<div className="flex flex-col gap-3">{children}</div>
 		</div>
 	);

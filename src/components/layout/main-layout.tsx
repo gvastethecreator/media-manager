@@ -6,6 +6,11 @@ import { NavPanel } from '@/components/navigation/navigation-panel';
 import { RightPanel } from '@/components/panels/right-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
 import { NavigationTransition } from '@/components/transitions/ViewTransition';
+import { 
+  NavPanelTransition, 
+  DetailsPanelTransition,
+  ResizablePanelTransition 
+} from '@/components/panels/panel-transitions';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useReindexFolder } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -232,7 +237,7 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 	return (
 		<div className="flex h-screen min-h-0 w-full min-w-0 bg-background text-foreground">
 			<ResizablePanelGroup className="h-full" id="main-layout-v13-final" orientation="horizontal">
-				{/* Panel de navegación izquierdo */}
+				{/* Panel de navegación izquierdo con transiciones */}
 				<ResizablePanel
 					className={cn('border-border border-r', !isLeftCollapsed && 'is-expanded')}
 					collapsedSize="0"
@@ -243,9 +248,12 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 					onResize={handleLeftPanelResize}
 					panelRef={leftPanelRef}
 				>
-					<div className="h-full w-full overflow-hidden">
+					<NavPanelTransition
+						isExpanded={!isLeftCollapsed}
+						isAnimating={isLeftAnimating}
+					>
 						<NavPanel isAnimating={isLeftAnimating} isCollapsed={isLeftCollapsed} onToggleCollapse={toggleLeftPanel} />
-					</div>
+					</NavPanelTransition>
 				</ResizablePanel>
 
 				<ResizableHandle withHandle />
@@ -274,14 +282,19 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 								/>
 							</div>
 						)}
-						{/* Contenido principal */}
-						<NavigationTransition className="min-h-0 min-w-0 flex-1 overflow-hidden bg-background">
+						{/* Contenido principal - id para SkipLink WCAG 2.4.1 */}
+						<NavigationTransition
+							id="main-content"
+							tabIndex={-1}
+							className="min-h-0 min-w-0 flex-1 overflow-hidden bg-background outline-none focus:outline-none"
+							aria-label="Contenido principal"
+						>
 							<Outlet />
 						</NavigationTransition>
 					</div>
 				</ResizablePanel>
 
-				{/* Panel de detalles derecho - solo mostrar en vistas que lo necesiten */}
+				{/* Panel de detalles derecho con transiciones - solo mostrar en vistas que lo necesiten */}
 				{!shouldHideToolbarAndPanel && (
 					<>
 						<ResizableHandle withHandle />
@@ -295,13 +308,16 @@ const MainLayoutComponent = memo(function MainLayoutImpl() {
 							onResize={handleRightPanelResize}
 							panelRef={rightPanelRef}
 						>
-							<div className="h-full w-full overflow-hidden">
+							<DetailsPanelTransition
+								isVisible={!isRightCollapsed}
+								isAnimating={isRightAnimating}
+							>
 								<RightPanel
 									isAnimating={isRightAnimating}
 									isCollapsed={isRightCollapsed}
 									onToggleCollapse={toggleRightPanel}
 								/>
-							</div>
+							</DetailsPanelTransition>
 						</ResizablePanel>
 					</>
 				)}

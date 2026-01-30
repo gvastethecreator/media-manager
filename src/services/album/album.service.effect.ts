@@ -10,9 +10,9 @@ import { and, asc, count, desc, eq, like, or, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
 import { albums, imageAlbums, images } from '@/lib/drizzle/schema';
-import { generateReadableId, normalizeNameForId } from '@/lib/utils/id-generator';
 import { Album, AlbumCreateInput, AlbumUpdateInput, AlbumWithStats } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import {
 	AlbumDatabaseError,
 	AlbumError,

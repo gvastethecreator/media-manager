@@ -143,10 +143,10 @@ export function EntityStats({
 									style={{ borderLeft: `3px solid ${stat.color || primaryColor}` }}
 									{...(animated
 										? {
-											initial: { opacity: 0, y: 5 },
-											animate: { opacity: 1, y: 0 },
-											transition: { delay: index * 0.1 },
-										}
+												initial: { opacity: 0, y: 5 },
+												animate: { opacity: 1, y: 0 },
+												transition: { delay: index * 0.1 },
+											}
 										: {})}
 								>
 									{stat.icon && <span className="mr-1.5">{stat.icon}</span>}

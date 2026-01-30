@@ -1,7 +1,7 @@
 import express from 'express';
 import { isFts5Enabled } from '@/lib/drizzle/fts5';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { searchFilesFts, searchImages, performSearch } from '../services/search.service';
+import { performSearch, searchFilesFts, searchImages } from '../services/search.service';
 
 const logger = serverLogger.withContext('SearchRoute');
 
@@ -18,10 +18,12 @@ router.get('/', async (req, res): Promise<void> => {
 			return;
 		}
 
-		const parsedLimit = Math.min(100, parseInt(limit as string, 10) || 50);
-		const parsedOffset = Math.max(0, parseInt(offset as string, 10) || 0);
+		const parsedLimit = Math.min(100, Number.parseInt(limit as string, 10) || 50);
+		const parsedOffset = Math.max(0, Number.parseInt(offset as string, 10) || 0);
 		const validTypes = ['all', 'image', 'video', 'audio', 'document'];
-		const searchType = validTypes.includes(type as string) ? (type as 'all' | 'image' | 'video' | 'audio' | 'document') : 'all';
+		const searchType = validTypes.includes(type as string)
+			? (type as 'all' | 'image' | 'video' | 'audio' | 'document')
+			: 'all';
 
 		const startTime = Date.now();
 		const searchResults = await performSearch(searchQuery, searchType, parsedLimit, parsedOffset);

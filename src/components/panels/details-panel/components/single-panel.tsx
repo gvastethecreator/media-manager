@@ -3,10 +3,7 @@ import {
 	Bot,
 	Camera,
 	Copy,
-	Cpu,
-	Crosshair,
 	Download,
-	Edit,
 	ExternalLink,
 	FileJson,
 	FolderOpen,
@@ -19,7 +16,6 @@ import {
 	Monitor,
 	MoreVertical,
 	Package,
-	Plus,
 	RefreshCw,
 	Settings,
 	Share2,
@@ -28,15 +24,9 @@ import {
 	Zap,
 } from 'lucide-react';
 import React, { useMemo } from 'react';
-import {
-	Accordion,
-	AccordionContent,
-	AccordionItem,
-	AccordionTrigger,
-} from '@/components/ui/accordion';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import {
 	DropdownMenu,
 	DropdownMenuContent,
@@ -46,7 +36,7 @@ import {
 	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { ImageFallback } from '@/components/ui/image-fallback';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { useEnhancedMetadata } from '../hooks/use-enhanced-metadata';
@@ -209,7 +199,18 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 			}));
 
 		const paramKeys = [
-			'Pasos', 'CFG Scale', 'Guidance Scale', 'Sampler', 'Scheduler', 'Seed', 'Ancho', 'Alto', 'Tamaño', 'Batch Size', 'Denoising Strength', 'CLIP Skip',
+			'Pasos',
+			'CFG Scale',
+			'Guidance Scale',
+			'Sampler',
+			'Scheduler',
+			'Seed',
+			'Ancho',
+			'Alto',
+			'Tamaño',
+			'Batch Size',
+			'Denoising Strength',
+			'CLIP Skip',
 		];
 		const paramRows = paramKeys
 			.filter((k) => has(k))
@@ -217,9 +218,11 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 				let icon = Settings;
 				let iconColor = 'text-emerald-500';
 				if (k === 'Seed') {
-					icon = Target; iconColor = 'text-amber-500';
+					icon = Target;
+					iconColor = 'text-amber-500';
 				} else if (['Ancho', 'Alto', 'Tamaño'].includes(k)) {
-					icon = Monitor; iconColor = 'text-blue-400';
+					icon = Monitor;
+					iconColor = 'text-blue-400';
 				} else if (['Pasos', 'CFG Scale'].includes(k)) {
 					icon = Gauge;
 				}
@@ -232,7 +235,14 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 				icon: AlignLeft,
 				iconColor: 'text-primary',
 				label: 'Prompt',
-				value: <CollapsiblePrompt collapsedLines={6} defaultExpanded onLorasDetected={handleLorasDetected} prompt={take('Prompt') ?? ''} />,
+				value: (
+					<CollapsiblePrompt
+						collapsedLines={6}
+						defaultExpanded
+						onLorasDetected={handleLorasDetected}
+						prompt={take('Prompt') ?? ''}
+					/>
+				),
 				fullWidth: true,
 			});
 		}
@@ -241,7 +251,14 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 				icon: AlignLeft,
 				iconColor: 'text-destructive',
 				label: 'Negativo',
-				value: <CollapsiblePrompt collapsedLines={6} defaultExpanded onLorasDetected={handleLorasDetected} prompt={take('Prompt Negativo') ?? ''} />,
+				value: (
+					<CollapsiblePrompt
+						collapsedLines={6}
+						defaultExpanded
+						onLorasDetected={handleLorasDetected}
+						prompt={take('Prompt Negativo') ?? ''}
+					/>
+				),
 				fullWidth: true,
 			});
 		}
@@ -263,14 +280,14 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 		}
 
 		return (
-			<div className="space-y-3 pt-1 min-w-0 w-full overflow-hidden">
+			<div className="w-full min-w-0 space-y-3 overflow-hidden pt-1">
 				{effectiveError && (
-					<div className="rounded-md border border-destructive/20 bg-destructive/5 p-2.5 text-[11px] min-w-0 overflow-hidden">
-						<div className="flex items-center gap-2 font-bold text-destructive mb-1 uppercase tracking-tighter">
+					<div className="min-w-0 overflow-hidden rounded-md border border-destructive/20 bg-destructive/5 p-2.5 text-[11px]">
+						<div className="mb-1 flex items-center gap-2 font-bold text-destructive uppercase tracking-tighter">
 							<Info className="h-3 w-3 shrink-0" /> Error
 						</div>
-						<p className="text-muted-foreground mb-2 break-words leading-tight">{effectiveError}</p>
-						<Button className="h-6 px-2 text-[9px] font-bold" onClick={() => refetch()} size="sm" variant="outline">
+						<p className="mb-2 break-words text-muted-foreground leading-tight">{effectiveError}</p>
+						<Button className="h-6 px-2 font-bold text-[9px]" onClick={() => refetch()} size="sm" variant="outline">
 							<RefreshCw className="mr-1 h-2.5 w-2.5" /> REINTENTAR
 						</Button>
 					</div>
@@ -284,7 +301,7 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 					<MetadataTable
 						dense
 						multiColumn
-						rows={detectedLoras.map((lora, i) => ({ icon: Zap, label: `L${i+1}`, value: lora, compact: true }))}
+						rows={detectedLoras.map((lora, i) => ({ icon: Zap, label: `L${i + 1}`, value: lora, compact: true }))}
 						title={`LoRAs (${detectedLoras.length})`}
 					/>
 				)}
@@ -294,33 +311,40 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 	}, [groupedMetadata.ia, effectiveLoading, effectiveError, handleLorasDetected, detectedLoras, refetch]);
 
 	return (
-		<div className={cn('flex h-full w-full min-w-0 flex-col bg-background overflow-hidden relative', className)}>
+		<div className={cn('relative flex h-full w-full min-w-0 flex-col overflow-hidden bg-background', className)}>
 			{/* HEADER ULTRA-FLEXIBLE */}
-			<header className="flex flex-col border-b bg-background/95 backdrop-blur shrink-0 min-w-0 w-full overflow-hidden">
-				<div className="flex items-start justify-between gap-2 px-3 py-3 sm:px-4 min-w-0 w-full">
-					<div className="flex items-start gap-2.5 min-w-0 flex-1 overflow-hidden">
-						<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-primary/5 text-primary border border-primary/10 mt-0.5">
+			<header className="flex w-full min-w-0 shrink-0 flex-col overflow-hidden border-b bg-background/95 backdrop-blur">
+				<div className="flex w-full min-w-0 items-start justify-between gap-2 px-3 py-3 sm:px-4">
+					<div className="flex min-w-0 flex-1 items-start gap-2.5 overflow-hidden">
+						<div className="mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-primary/10 bg-primary/5 text-primary">
 							<EntityIcon className="h-4.5 w-4.5" />
 						</div>
 						<div className="min-w-0 flex-1 overflow-hidden">
-							<div className="flex flex-wrap items-center gap-1.5 min-w-0 overflow-hidden">
-								<h2 className="font-bold text-xs sm:text-sm truncate text-foreground leading-none max-w-full">{itemName}</h2>
+							<div className="flex min-w-0 flex-wrap items-center gap-1.5 overflow-hidden">
+								<h2 className="max-w-full truncate font-bold text-foreground text-xs leading-none sm:text-sm">
+									{itemName}
+								</h2>
 								{itemExtension && (
-									<Badge className="h-3.5 px-1 text-[7px] font-black tracking-tighter shrink-0 uppercase border-none bg-muted text-muted-foreground" variant="outline">
+									<Badge
+										className="h-3.5 shrink-0 border-none bg-muted px-1 font-black text-[7px] text-muted-foreground uppercase tracking-tighter"
+										variant="outline"
+									>
 										{itemExtension}
 									</Badge>
 								)}
 							</div>
-							<p className="text-[9px] text-muted-foreground truncate opacity-50 font-mono mt-1 w-full overflow-hidden break-all">
+							<p className="mt-1 w-full overflow-hidden truncate break-all font-mono text-[9px] text-muted-foreground opacity-50">
 								{'path' in item ? (item.path as string) : 'ID: ' + item.id}
 							</p>
 						</div>
 					</div>
-					<div className="flex items-center gap-0.5 shrink-0 ml-1">
+					<div className="ml-1 flex shrink-0 items-center gap-0.5">
 						<Button
 							className={cn(
 								'h-7 w-7 transition-all',
-								'isFavorite' in item && item.isFavorite ? 'text-destructive bg-destructive/10' : 'opacity-40 hover:opacity-100'
+								'isFavorite' in item && item.isFavorite
+									? 'bg-destructive/10 text-destructive'
+									: 'opacity-40 hover:opacity-100'
 							)}
 							size="icon"
 							variant="ghost"
@@ -333,21 +357,25 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 									<MoreVertical className="h-3.5 w-3.5" />
 								</Button>
 							</DropdownMenuTrigger>
-							<DropdownMenuContent align="end" className="w-48 shadow-xl border-border/40">
-								<DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.1em] opacity-40">Acciones</DropdownMenuLabel>
-								<DropdownMenuItem className="text-xs font-medium" onClick={handleOpenInFolder}>
+							<DropdownMenuContent align="end" className="w-48 border-border/40 shadow-xl">
+								<DropdownMenuLabel className="font-black text-[10px] uppercase tracking-[0.1em] opacity-40">
+									Acciones
+								</DropdownMenuLabel>
+								<DropdownMenuItem className="font-medium text-xs" onClick={handleOpenInFolder}>
 									<FolderOpen className="mr-2 h-3.5 w-3.5 opacity-60" /> Abrir Carpeta
 								</DropdownMenuItem>
-								<DropdownMenuItem className="text-xs font-medium" onClick={handleCopyImage}>
+								<DropdownMenuItem className="font-medium text-xs" onClick={handleCopyImage}>
 									<Copy className="mr-2 h-3.5 w-3.5 opacity-60" /> Copiar Imagen
 								</DropdownMenuItem>
 								<DropdownMenuSeparator className="opacity-40" />
-								<DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.1em] opacity-40">Herramientas</DropdownMenuLabel>
-								<DropdownMenuItem className="text-xs font-medium" onClick={() => refetch()}>
+								<DropdownMenuLabel className="font-black text-[10px] uppercase tracking-[0.1em] opacity-40">
+									Herramientas
+								</DropdownMenuLabel>
+								<DropdownMenuItem className="font-medium text-xs" onClick={() => refetch()}>
 									<RefreshCw className={cn('mr-2 h-3.5 w-3.5 opacity-60', effectiveLoading && 'animate-spin')} />
 									Extraer Metadata
 								</DropdownMenuItem>
-								<DropdownMenuItem className="text-xs font-medium" onClick={() => exportMetadata?.('json')}>
+								<DropdownMenuItem className="font-medium text-xs" onClick={() => exportMetadata?.('json')}>
 									<FileJson className="mr-2 h-3.5 w-3.5 opacity-60" /> Exportar JSON
 								</DropdownMenuItem>
 							</DropdownMenuContent>
@@ -356,40 +384,55 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 				</div>
 			</header>
 
-			<div className="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar bg-muted/5 min-w-0 w-full">
+			<div className="custom-scrollbar w-full min-w-0 flex-1 overflow-y-auto overflow-x-hidden bg-muted/5">
 				{/* HERO SECTION - ADAPTIVE */}
-				<div className="relative group w-full bg-black/5 border-b overflow-hidden flex items-center justify-center min-h-[150px] max-h-[350px]">
+				<div className="group relative flex max-h-[350px] min-h-[150px] w-full items-center justify-center overflow-hidden border-b bg-black/5">
 					{mainImageUrl ? (
 						<>
 							<ImageFallback
 								alt={itemName}
-								className="w-full h-full object-contain transition-all duration-700 group-hover:scale-105"
+								className="h-full w-full object-contain transition-all duration-700 group-hover:scale-105"
 								src={mainImageUrl}
 							/>
-							<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-							<div className="absolute bottom-2 inset-x-2 flex items-center justify-center gap-1.5 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
-								<Button className="h-6 px-2 rounded-md bg-background/90 backdrop-blur shadow-xl text-[8px] font-black border-none uppercase tracking-wider flex-1 min-w-0" onClick={handleDownload} size="sm">
+							<div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+							<div className="absolute inset-x-2 bottom-2 flex translate-y-2 items-center justify-center gap-1.5 opacity-0 transition-all duration-300 group-hover:translate-y-0 group-hover:opacity-100">
+								<Button
+									className="h-6 min-w-0 flex-1 rounded-md border-none bg-background/90 px-2 font-black text-[8px] uppercase tracking-wider shadow-xl backdrop-blur"
+									onClick={handleDownload}
+									size="sm"
+								>
 									<Download className="mr-1 h-2.5 w-2.5 shrink-0" /> <span className="truncate">GUARDAR</span>
 								</Button>
-								<Button className="h-6 px-2 rounded-md bg-background/90 backdrop-blur shadow-xl text-[8px] font-black border-none uppercase tracking-wider flex-1 min-w-0" size="sm">
+								<Button
+									className="h-6 min-w-0 flex-1 rounded-md border-none bg-background/90 px-2 font-black text-[8px] uppercase tracking-wider shadow-xl backdrop-blur"
+									size="sm"
+								>
 									<Fullscreen className="mr-1 h-2.5 w-2.5 shrink-0" /> <span className="truncate">ZOOM</span>
 								</Button>
 							</div>
 						</>
 					) : (
-						<div className="flex flex-col items-center gap-3 text-muted-foreground/10 py-12">
+						<div className="flex flex-col items-center gap-3 py-12 text-muted-foreground/10">
 							<EntityIcon className="h-10 w-10" />
-							<span className="text-[8px] font-black uppercase tracking-[0.2em] opacity-50 text-center px-4">Preview unavailable</span>
+							<span className="px-4 text-center font-black text-[8px] uppercase tracking-[0.2em] opacity-50">
+								Preview unavailable
+							</span>
 						</div>
 					)}
 				</div>
 
-				<div className="p-3 sm:p-4 space-y-4 sm:space-y-5 min-w-0 w-full overflow-hidden">
+				<div className="w-full min-w-0 space-y-4 overflow-hidden p-3 sm:space-y-5 sm:p-4">
 					{/* RELATIONS - WRAPPABLE */}
 					{relatedEntities.length > 0 && (
-						<div className="flex flex-wrap gap-1 w-full min-w-0 overflow-hidden">
+						<div className="flex w-full min-w-0 flex-wrap gap-1 overflow-hidden">
 							{relatedEntities.map(({ type, count, icon: Icon, color }) => (
-								<div className={cn('h-5 px-1.5 rounded-md flex items-center gap-1 text-[9px] font-black uppercase border-none tracking-tight shrink-0', color)} key={type}>
+								<div
+									className={cn(
+										'flex h-5 shrink-0 items-center gap-1 rounded-md border-none px-1.5 font-black text-[9px] uppercase tracking-tight',
+										color
+									)}
+									key={type}
+								>
 									<Icon className="h-2.5 w-2.5 shrink-0" /> <span>{count}</span>
 								</div>
 							))}
@@ -398,30 +441,43 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 
 					{/* DESCRIPTION - FLEXIBLE */}
 					{'description' in item && item.description && (
-						<div className="space-y-1 pl-2.5 border-l-2 border-primary/20 bg-primary/[0.02] py-1.5 rounded-r-md min-w-0 w-full overflow-hidden">
-							<Label className="text-[8px] font-black uppercase tracking-[0.15em] text-primary opacity-60">Descripción</Label>
-							<p className="text-[11px] leading-snug text-foreground/80 font-medium italic break-words">{item.description}</p>
+						<div className="w-full min-w-0 space-y-1 overflow-hidden rounded-r-md border-primary/20 border-l-2 bg-primary/[0.02] py-1.5 pl-2.5">
+							<Label className="font-black text-[8px] text-primary uppercase tracking-[0.15em] opacity-60">
+								Descripción
+							</Label>
+							<p className="break-words font-medium text-[11px] text-foreground/80 italic leading-snug">
+								{item.description}
+							</p>
 						</div>
 					)}
 
 					{/* ACCORDION - REFINED TRIGGER FOR NARROW SPACE */}
 					<Accordion className="w-full space-y-1.5" defaultValue={['ai', 'general']} type="multiple">
 						{(effectiveEnhanced.length > 0 || effectiveLoading || effectiveError) && (
-							<AccordionItem className="border-none bg-card/40 rounded-lg overflow-hidden border border-border/5" value="ai">
-								<AccordionTrigger className="px-2.5 hover:no-underline py-2 sm:py-2.5 hover:bg-muted/30 transition-colors group">
-									<div className="flex items-center gap-2 min-w-0 w-full text-left">
-										<div className="rounded-md bg-amber-500/10 p-1 shrink-0 group-data-[state=open]:bg-amber-500/20 transition-colors">
+							<AccordionItem
+								className="overflow-hidden rounded-lg border border-border/5 border-none bg-card/40"
+								value="ai"
+							>
+								<AccordionTrigger className="group px-2.5 py-2 transition-colors hover:bg-muted/30 hover:no-underline sm:py-2.5">
+									<div className="flex w-full min-w-0 items-center gap-2 text-left">
+										<div className="shrink-0 rounded-md bg-amber-500/10 p-1 transition-colors group-data-[state=open]:bg-amber-500/20">
 											<Zap className="h-3.5 w-3.5 text-amber-500" />
 										</div>
-										<span className="text-[9.5px] font-black uppercase tracking-tight truncate flex-1 min-w-0">IA & Generación</span>
-										{effectiveLoading && <RefreshCw className="h-3 w-3 animate-spin text-muted-foreground mr-1 shrink-0" />}
+										<span className="min-w-0 flex-1 truncate font-black text-[9.5px] uppercase tracking-tight">
+											IA & Generación
+										</span>
+										{effectiveLoading && (
+											<RefreshCw className="mr-1 h-3 w-3 shrink-0 animate-spin text-muted-foreground" />
+										)}
 									</div>
 								</AccordionTrigger>
-								<AccordionContent className="px-1.5 pb-2.5 pt-0 min-w-0 w-full overflow-hidden">
+								<AccordionContent className="w-full min-w-0 overflow-hidden px-1.5 pt-0 pb-2.5">
 									{metaLoading ? (
-										<div className="py-8 flex flex-col items-center justify-center gap-3">
+										<div className="flex flex-col items-center justify-center gap-3 py-8">
 											<RefreshCw className="h-5 w-5 animate-spin text-primary/40" />
-											<p className="text-[8px] font-black text-muted-foreground uppercase tracking-[0.2em] animate-pulse">Scanning...</p>
+											<p className="animate-pulse font-black text-[8px] text-muted-foreground uppercase tracking-[0.2em]">
+												Scanning...
+											</p>
 										</div>
 									) : (
 										aiSection
@@ -430,38 +486,48 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 							</AccordionItem>
 						)}
 
-						<AccordionItem className="border-none bg-card/40 rounded-lg overflow-hidden border border-border/5" value="general">
-							<AccordionTrigger className="px-2.5 hover:no-underline py-2 sm:py-2.5 hover:bg-muted/30 transition-colors group">
-								<div className="flex items-center gap-2 min-w-0 w-full text-left">
-									<div className="rounded-md bg-blue-500/10 p-1 shrink-0 group-data-[state=open]:bg-blue-500/20 transition-colors">
+						<AccordionItem
+							className="overflow-hidden rounded-lg border border-border/5 border-none bg-card/40"
+							value="general"
+						>
+							<AccordionTrigger className="group px-2.5 py-2 transition-colors hover:bg-muted/30 hover:no-underline sm:py-2.5">
+								<div className="flex w-full min-w-0 items-center gap-2 text-left">
+									<div className="shrink-0 rounded-md bg-blue-500/10 p-1 transition-colors group-data-[state=open]:bg-blue-500/20">
 										<Info className="h-3.5 w-3.5 text-blue-500" />
 									</div>
-									<span className="text-[9.5px] font-black uppercase tracking-tight truncate flex-1 min-w-0">Propiedades</span>
+									<span className="min-w-0 flex-1 truncate font-black text-[9.5px] uppercase tracking-tight">
+										Propiedades
+									</span>
 								</div>
 							</AccordionTrigger>
-							<AccordionContent className="px-1.5 pb-2.5 pt-0 min-w-0 w-full overflow-hidden">
+							<AccordionContent className="w-full min-w-0 overflow-hidden px-1.5 pt-0 pb-2.5">
 								<MetadataTable
 									dense
 									rows={basicMetadata.map(({ key, value, icon: Icon }) => ({
 										icon: Icon,
 										label: key,
-										value: value,
+										value,
 									}))}
 								/>
 							</AccordionContent>
 						</AccordionItem>
 
 						{(groupedMetadata.exif || groupedMetadata.iptc || groupedMetadata.xmp) && (
-							<AccordionItem className="border-none bg-card/40 rounded-lg overflow-hidden border border-border/5" value="technical">
-								<AccordionTrigger className="px-2.5 hover:no-underline py-2 sm:py-2.5 hover:bg-muted/30 transition-colors group">
-									<div className="flex items-center gap-2 min-w-0 w-full text-left">
-										<div className="rounded-md bg-emerald-500/10 p-1 shrink-0 group-data-[state=open]:bg-emerald-500/20 transition-colors">
+							<AccordionItem
+								className="overflow-hidden rounded-lg border border-border/5 border-none bg-card/40"
+								value="technical"
+							>
+								<AccordionTrigger className="group px-2.5 py-2 transition-colors hover:bg-muted/30 hover:no-underline sm:py-2.5">
+									<div className="flex w-full min-w-0 items-center gap-2 text-left">
+										<div className="shrink-0 rounded-md bg-emerald-500/10 p-1 transition-colors group-data-[state=open]:bg-emerald-500/20">
 											<Camera className="h-3.5 w-3.5 text-emerald-500" />
 										</div>
-										<span className="text-[9.5px] font-black uppercase tracking-tight truncate flex-1 min-w-0">Técnico</span>
+										<span className="min-w-0 flex-1 truncate font-black text-[9.5px] uppercase tracking-tight">
+											Técnico
+										</span>
 									</div>
 								</AccordionTrigger>
-								<AccordionContent className="px-1.5 pb-2.5 pt-0 space-y-2 min-w-0 w-full overflow-hidden">
+								<AccordionContent className="w-full min-w-0 space-y-2 overflow-hidden px-1.5 pt-0 pb-2.5">
 									{['exif', 'iptc', 'xmp'].map((cat) => {
 										const items = groupedMetadata[cat];
 										if (!items || items.length === 0) return null;
@@ -478,8 +544,9 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 												multiColumn
 												rows={items.map((it) => ({ label: it.key, value: it.value, compact: true }))}
 												title={
-													<div className="flex items-center gap-2 min-w-0 overflow-hidden">
-														<info.icon className={cn('h-2.5 w-2.5 shrink-0', info.color)} /> <span className="truncate">{info.label}</span>
+													<div className="flex min-w-0 items-center gap-2 overflow-hidden">
+														<info.icon className={cn('h-2.5 w-2.5 shrink-0', info.color)} />{' '}
+														<span className="truncate">{info.label}</span>
 													</div>
 												}
 											/>
@@ -492,12 +559,18 @@ export const SinglePanel: React.FC<SinglePanelProps> = ({ item, enhancedMetadata
 				</div>
 			</div>
 
-			<footer className="border-t bg-background/95 backdrop-blur px-3 py-2.5 shrink-0 min-w-0 w-full overflow-hidden">
-				<div className="flex items-center gap-2 min-w-0 w-full">
-					<Button className="flex-1 h-7 px-1 text-[8px] font-black uppercase tracking-tighter border-border/40 hover:bg-muted/50 min-w-0" variant="outline">
+			<footer className="w-full min-w-0 shrink-0 overflow-hidden border-t bg-background/95 px-3 py-2.5 backdrop-blur">
+				<div className="flex w-full min-w-0 items-center gap-2">
+					<Button
+						className="h-7 min-w-0 flex-1 border-border/40 px-1 font-black text-[8px] uppercase tracking-tighter hover:bg-muted/50"
+						variant="outline"
+					>
 						<Share2 className="mr-1 h-3 w-3 shrink-0 opacity-60" /> <span className="truncate">COMPARTIR</span>
 					</Button>
-					<Button className="flex-1 h-7 px-1 text-[8px] font-black uppercase tracking-tighter border-border/40 hover:bg-muted/50 min-w-0" variant="outline">
+					<Button
+						className="h-7 min-w-0 flex-1 border-border/40 px-1 font-black text-[8px] uppercase tracking-tighter hover:bg-muted/50"
+						variant="outline"
+					>
 						<ExternalLink className="mr-1 h-3 w-3 shrink-0 opacity-60" /> <span className="truncate">ABRIR</span>
 					</Button>
 				</div>

@@ -1,11 +1,11 @@
-import { Edit2, Loader2, Music2, PlusCircle, Trash } from 'lucide-react';
+import { Edit2, Loader2, Music2, Trash } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useAudios, useCreateAudio, useDeleteAudio, useUpdateAudio } from '@/lib/api/audio';
+import { useAudios, useDeleteAudio, useUpdateAudio } from '@/lib/api/audio';
 import { toastService } from '@/lib/ui/toast';
 import type { AudioWithStats } from '@/types/entities/audio';
 
@@ -23,8 +23,6 @@ export function AudioSettings() {
 		() => audios.filter((a) => a.name.toLowerCase().includes(search.toLowerCase())),
 		[audios, search]
 	);
-
-
 
 	const handleUpdate = async () => {
 		try {
@@ -109,8 +107,6 @@ export function AudioSettings() {
 					)}
 				</CardContent>
 			</Card>
-
-
 
 			<Dialog
 				onOpenChange={(o) => {

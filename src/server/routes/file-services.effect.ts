@@ -5,12 +5,12 @@
  * @created 2025-10-11 - Fase 10 Effect Implementation
  */
 
+import { eq } from 'drizzle-orm';
 import { Effect } from 'effect';
 import express from 'express';
-import { eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle/index.js';
-import { file3Ds, jsonFiles } from '@/lib/drizzle/schema/index.js';
 import { metadatas } from '@/lib/drizzle/schema/core/metadatas.js';
+import { file3Ds, jsonFiles } from '@/lib/drizzle/schema/index.js';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
 import {
 	deleteUploadedImage,
@@ -232,7 +232,10 @@ jsonFilesEffectRouter.get('/:id/preview', async (req, res) => {
 		};
 
 		// Obtener JSON file de la base de datos
-		const jsonFileRecords = await db.select({ metadata: jsonFiles.metadata }).from(jsonFiles).where(eq(jsonFiles.id, id));
+		const jsonFileRecords = await db
+			.select({ metadata: jsonFiles.metadata })
+			.from(jsonFiles)
+			.where(eq(jsonFiles.id, id));
 
 		if (jsonFileRecords.length === 0) {
 			res.status(404).json({ error: 'JSON file not found' });

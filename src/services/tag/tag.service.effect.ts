@@ -6,29 +6,12 @@
  */
 
 import { Schema } from '@effect/schema';
-import * as crypto from 'crypto';
 import { and, asc, count, desc, eq, isNotNull, like, or } from 'drizzle-orm';
 import { Context, Effect, Layer, pipe } from 'effect';
 import { db } from '@/lib/drizzle';
-import { generateReadableId } from '@/lib/utils/id-generator';
-import {
-	albums,
-	characters,
-	collections,
-	concepts,
-	groupTags,
-	images,
-	imageTags,
-	notes,
-	places,
-	prompts,
-	properties,
-	tags,
-	videoTags,
-	wildcards,
-	worldItems,
-} from '@/lib/drizzle/schema';
+import { groupTags, images, imageTags, tags, videoTags } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import {
 	fromUnknownError,
 	TagError,
@@ -188,11 +171,7 @@ const make = (): TagServiceInterface => {
 
 			// Obtener conteos reales de todas las relaciones existentes
 			const [imageCountResult, videoCountResult, groupCountResult] = yield* Effect.tryPromise<
-				[
-					Array<{ count: number }>,
-					Array<{ count: number }>,
-					Array<{ count: number }>,
-				],
+				[Array<{ count: number }>, Array<{ count: number }>, Array<{ count: number }>],
 				TagError
 			>({
 				try: () =>

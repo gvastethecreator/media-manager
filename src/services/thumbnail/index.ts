@@ -4,30 +4,27 @@
  * @description Exporta el servicio unificado de thumbnails y utilidades relacionadas
  */
 
+// Exportar también el servicio legacy por compatibilidad
+export { thumbnailService } from '../image/image-thumbnail.service';
+// Servicio unificado
+// Re-exportar thumbnailUnifiedService como thumbnailService para código que espera
+// el servicio con métodos legacy
+export {
+	type ThumbnailEntityType,
+	type ThumbnailInfo,
+	type ThumbnailOptions,
+	type ThumbnailResult,
+	ThumbnailUnifiedService,
+	thumbnailUnifiedService,
+	thumbnailUnifiedService as thumbnailUnified,
+} from './thumbnail-unified.service';
 // Tipos (Legacy compatibility)
 export type {
 	ProcessStatus,
 	ThumbnailError,
-	ThumbnailStats,
 	ThumbnailProcessOptions,
+	ThumbnailStats,
 } from './types';
-
-// Servicio unificado
-export {
-	thumbnailUnifiedService,
-	ThumbnailUnifiedService,
-	type ThumbnailEntityType,
-	type ThumbnailOptions,
-	type ThumbnailResult,
-	type ThumbnailInfo,
-} from './thumbnail-unified.service';
-
-// Exportar también el servicio legacy por compatibilidad
-export { thumbnailService } from '../image/image-thumbnail.service';
-
-// Re-exportar thumbnailUnifiedService como thumbnailService para código que espera
-// el servicio con métodos legacy
-export { thumbnailUnifiedService as thumbnailUnified } from './thumbnail-unified.service';
 
 // Event emitter mock para compatibilidad (el código legacy usa eventos)
 class ThumbnailEventEmitter {
@@ -58,14 +55,30 @@ class ThumbnailEventEmitter {
 	}
 
 	// Métodos específicos para compatibilidad
-	onProgress(callback: (status: any) => void): void { this.on('progress', callback); }
-	offProgress(callback: (status: any) => void): void { this.off('progress', callback); }
-	onError(callback: (error: any) => void): void { this.on('error', callback); }
-	offError(callback: (error: any) => void): void { this.off('error', callback); }
-	onComplete(callback: (data: any) => void): void { this.on('complete', callback); }
-	offComplete(callback: (data: any) => void): void { this.off('complete', callback); }
-	onStats(callback: (stats: any) => void): void { this.on('stats', callback); }
-	offStats(callback: (stats: any) => void): void { this.off('stats', callback); }
+	onProgress(callback: (status: any) => void): void {
+		this.on('progress', callback);
+	}
+	offProgress(callback: (status: any) => void): void {
+		this.off('progress', callback);
+	}
+	onError(callback: (error: any) => void): void {
+		this.on('error', callback);
+	}
+	offError(callback: (error: any) => void): void {
+		this.off('error', callback);
+	}
+	onComplete(callback: (data: any) => void): void {
+		this.on('complete', callback);
+	}
+	offComplete(callback: (data: any) => void): void {
+		this.off('complete', callback);
+	}
+	onStats(callback: (stats: any) => void): void {
+		this.on('stats', callback);
+	}
+	offStats(callback: (stats: any) => void): void {
+		this.off('stats', callback);
+	}
 
 	// Métodos del servicio legacy que no existen
 	async optimizeThumbnails(_options?: any): Promise<any> {

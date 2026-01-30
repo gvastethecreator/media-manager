@@ -13,12 +13,12 @@ async function addMetadataFields() {
 
 		// Agregar campo metadata a Audio
 		console.log('  ➕ Agregando metadata a Audio...');
-		await db.run(sql.raw(`ALTER TABLE Audio ADD COLUMN metadata text`));
+		await db.run(sql.raw('ALTER TABLE Audio ADD COLUMN metadata text'));
 		console.log('  ✅ Campo metadata agregado a Audio');
 
 		// Agregar campo metadata a File3D
 		console.log('  ➕ Agregando metadata a File3D...');
-		await db.run(sql.raw(`ALTER TABLE File3D ADD COLUMN metadata text`));
+		await db.run(sql.raw('ALTER TABLE File3D ADD COLUMN metadata text'));
 		console.log('  ✅ Campo metadata agregado a File3D');
 
 		console.log('\n🎉 Campos metadata agregados exitosamente\n');

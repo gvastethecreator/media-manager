@@ -1,4 +1,4 @@
-import { Folder, FolderOpen } from 'lucide-react';
+import { FolderOpen } from 'lucide-react';
 import type React from 'react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
@@ -130,11 +130,11 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 	return (
 		<form className="space-y-3" onSubmit={handleSubmit}>
 			<div className="flex flex-col gap-1.5">
-				<Label className="text-sm font-semibold opacity-90">Path Selection</Label>
+				<Label className="font-semibold text-sm opacity-90">Path Selection</Label>
 				<div className="flex items-center gap-2">
 					<div className="relative flex-1">
 						<Input
-							className={`pr-10 bg-card border-input/60 focus-visible:ring-primary/20 ${errorMessage ? 'border-destructive' : ''}`}
+							className={`border-input/60 bg-card pr-10 focus-visible:ring-primary/20 ${errorMessage ? 'border-destructive' : ''}`}
 							disabled={isSubmitting || isProcessing || isLoading}
 							onChange={handleInputChange}
 							placeholder="Route de la carpeta"
@@ -142,13 +142,13 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 							value={folderPath}
 						/>
 						<Button
-							className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 cursor-pointer text-muted-foreground transition-colors hover:text-foreground hover:bg-muted/50 p-0"
+							className="absolute top-1/2 right-1 h-7 w-7 -translate-y-1/2 cursor-pointer p-0 text-muted-foreground transition-colors hover:bg-muted/50 hover:text-foreground"
 							disabled={isSubmitting || isProcessing || isLoading}
 							onClick={handleBrowse}
 							size="icon"
+							title="Explore Folders"
 							type="button"
 							variant="ghost"
-							title="Explore Folders"
 						>
 							<FolderOpen className="h-4 w-4" />
 						</Button>
@@ -178,9 +178,9 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 			</Button>
 
 			{errorMessage && (
-				<div className="mt-1 rounded-md border-ui-error-border bg-ui-error/10 p-2 border border-destructive/20">
+				<div className="mt-1 rounded-md border border-destructive/20 border-ui-error-border bg-ui-error/10 p-2">
 					<div className="flex items-start gap-2">
-						<div className="text-destructive text-xs font-medium">{errorMessage}</div>
+						<div className="font-medium text-destructive text-xs">{errorMessage}</div>
 					</div>
 				</div>
 			)}

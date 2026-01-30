@@ -10,13 +10,21 @@ export const alertLevelEnum = ['info', 'warning', 'error', 'critical'] as const;
 export const devFeatures = sqliteTable(
 	'dev_features',
 	{
-		id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
 		name: text('name').notNull(),
 		description: text('description').notNull(),
-		status: text('status', { enum: ['pending', 'in-progress', 'completed', 'cancelled'] }).notNull().default('pending'),
+		status: text('status', { enum: ['pending', 'in-progress', 'completed', 'cancelled'] })
+			.notNull()
+			.default('pending'),
 		progress: integer('progress').notNull().default(0),
-		createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
-		updatedAt: integer('updated_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
+		updatedAt: integer('updated_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
 	},
 	(table) => ({
 		statusIdx: index('feature_status_idx').on(table.status),
@@ -29,15 +37,21 @@ export const devFeatures = sqliteTable(
 export const serverAlerts = sqliteTable(
 	'server_alerts',
 	{
-		id: text('id').primaryKey().$defaultFn(() => crypto.randomUUID()),
-		level: text('level', { enum: ['info', 'warning', 'error', 'critical'] }).notNull().default('info'),
+		id: text('id')
+			.primaryKey()
+			.$defaultFn(() => crypto.randomUUID()),
+		level: text('level', { enum: ['info', 'warning', 'error', 'critical'] })
+			.notNull()
+			.default('info'),
 		service: text('service'),
 		title: text('title').notNull(),
 		message: text('message').notNull(),
 		details: text('details'),
 		resolved: integer('resolved', { mode: 'boolean' }).notNull().default(false),
 		resolvedAt: integer('resolved_at', { mode: 'timestamp' }),
-		createdAt: integer('created_at', { mode: 'timestamp' }).notNull().$defaultFn(() => new Date()),
+		createdAt: integer('created_at', { mode: 'timestamp' })
+			.notNull()
+			.$defaultFn(() => new Date()),
 	},
 	(table) => ({
 		levelIdx: index('alert_level_idx').on(table.level),

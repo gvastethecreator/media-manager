@@ -1,10 +1,10 @@
-import { Router } from 'express';
+import { existsSync } from 'node:fs';
 import { eq } from 'drizzle-orm';
+import { Router } from 'express';
 import { db } from '@/lib/drizzle/index';
 import { videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateStaticVideoThumbnailFFmpeg } from '@/lib/utils/video/ffmpeg-thumbnails';
-import { existsSync } from 'node:fs';
 
 const router = Router();
 const logger = serverLogger.withContext('VideoThumbnailRoute');
@@ -44,7 +44,7 @@ router.get('/:id/thumbnail', async (req, res) => {
 		}
 
 		// 3. Si no tiene, generar uno nuevo
-		if (!video.path || !existsSync(video.path)) {
+		if (!(video.path && existsSync(video.path))) {
 			logger.error(`❌ Video file not found: ${video.path}`);
 			res.status(404).json({ error: 'Video file missing on disk' });
 			return;

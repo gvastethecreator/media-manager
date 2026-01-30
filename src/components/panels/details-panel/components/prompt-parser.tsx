@@ -122,18 +122,24 @@ export const PromptParser: React.FC<PromptParserProps> = ({ prompt, className, o
 	}, [segments, onLorasDetected]);
 
 	if (!prompt.trim()) {
-		return <span className="text-muted-foreground italic text-[10px]">Sin prompt</span>;
+		return <span className="text-[10px] text-muted-foreground italic">Sin prompt</span>;
 	}
 
 	return (
-		<div className={cn('whitespace-pre-wrap break-words [word-break:break-word] font-sans leading-relaxed text-[11px] min-w-0 w-full', className)}>
+		<div
+			className={cn(
+				'w-full min-w-0 whitespace-pre-wrap break-words font-sans text-[11px] leading-relaxed [word-break:break-word]',
+				className
+			)}
+		>
 			{segments.map((segment, idx) => {
-				const badgeBase = "inline-flex items-center gap-1 px-1.5 py-0 h-auto text-[9px] font-bold tracking-tighter uppercase mb-1 mr-1 max-w-full";
+				const badgeBase =
+					'inline-flex items-center gap-1 px-1.5 py-0 h-auto text-[9px] font-bold tracking-tighter uppercase mb-1 mr-1 max-w-full';
 				switch (segment.type) {
 					case 'lora':
 						return (
 							<Badge
-								className={cn(badgeBase, "bg-blue-500/10 text-blue-600 border-blue-500/20 hover:bg-blue-500/20")}
+								className={cn(badgeBase, 'border-blue-500/20 bg-blue-500/10 text-blue-600 hover:bg-blue-500/20')}
 								key={idx}
 								variant="secondary"
 							>
@@ -146,7 +152,10 @@ export const PromptParser: React.FC<PromptParserProps> = ({ prompt, className, o
 					case 'embedding':
 						return (
 							<Badge
-								className={cn(badgeBase, "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20")}
+								className={cn(
+									badgeBase,
+									'border-emerald-500/20 bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/20'
+								)}
 								key={idx}
 								variant="secondary"
 							>
@@ -159,7 +168,7 @@ export const PromptParser: React.FC<PromptParserProps> = ({ prompt, className, o
 					case 'network':
 						return (
 							<Badge
-								className={cn(badgeBase, "bg-amber-500/10 text-amber-600 border-amber-500/20 hover:bg-amber-500/20")}
+								className={cn(badgeBase, 'border-amber-500/20 bg-amber-500/10 text-amber-600 hover:bg-amber-500/20')}
 								key={idx}
 								variant="secondary"
 							>
@@ -169,7 +178,11 @@ export const PromptParser: React.FC<PromptParserProps> = ({ prompt, className, o
 							</Badge>
 						);
 					default:
-						return <span className="break-words" key={idx}>{segment.content}</span>;
+						return (
+							<span className="break-words" key={idx}>
+								{segment.content}
+							</span>
+						);
 				}
 			})}
 		</div>
@@ -187,7 +200,7 @@ export const CollapsiblePrompt: React.FC<{
 	const needsCollapse = prompt.split('\n').length > collapsedLines || prompt.length > 800;
 
 	const content = (
-		<div className={cn(expanded ? 'max-h-none' : 'line-clamp-6', className, "min-w-0 w-full overflow-hidden")}>
+		<div className={cn(expanded ? 'max-h-none' : 'line-clamp-6', className, 'w-full min-w-0 overflow-hidden')}>
 			<PromptParser onLorasDetected={onLorasDetected} prompt={prompt} />
 		</div>
 	);
@@ -195,10 +208,10 @@ export const CollapsiblePrompt: React.FC<{
 	if (!needsCollapse) return content;
 
 	return (
-		<div className="space-y-1.5 min-w-0 w-full overflow-hidden">
+		<div className="w-full min-w-0 space-y-1.5 overflow-hidden">
 			{content}
 			<button
-				className="text-[9px] font-black uppercase tracking-widest text-primary/60 transition-colors hover:text-primary"
+				className="font-black text-[9px] text-primary/60 uppercase tracking-widest transition-colors hover:text-primary"
 				onClick={() => setExpanded((v) => !v)}
 				type="button"
 			>

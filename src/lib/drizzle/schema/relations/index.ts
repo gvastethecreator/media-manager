@@ -21,6 +21,8 @@ export { imageAlbums } from './imageAlbums';
 export { imageCollections } from './imageCollections';
 export { imageProperties } from './imageProperties';
 export { imageTags } from './imageTags';
+// Exportar helpers para crear nuevas relaciones
+export { createRelationTable, type RelationTable } from './relation-helpers';
 // Importar las relaciones restantes desde remainingRelations
 export * from './remainingRelations';
 export { videoAlbums } from './videoAlbums';

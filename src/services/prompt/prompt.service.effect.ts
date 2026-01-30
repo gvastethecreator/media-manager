@@ -7,10 +7,10 @@ import { Schema } from '@effect/schema';
 import { asc, count, desc, eq, like, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
-import { generateReadableId } from '@/lib/utils/id-generator';
 import { imagePrompts, images, prompts } from '@/lib/drizzle/schema';
 import { Prompt, PromptCreateInput, PromptUpdateInput, PromptWithStats } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import {
 	fromUnknownPromptError,
 	PromptDatabaseError,

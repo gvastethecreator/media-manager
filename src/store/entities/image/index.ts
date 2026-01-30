@@ -5,7 +5,7 @@
 
 import { create } from 'zustand';
 import { devtools, persist } from 'zustand/middleware';
-import { ImageSortCriteria, ImageSortOption, ImageViewMode } from '../../../types/entities/image/types';
+import { ImageSortCriteria, ImageSortOption, ImageViewMode } from '@/types/entities/image/types';
 import { createImageCoreSlice, type ImageCoreSlice } from './slices/core';
 import { createImageUISlice, type ImageUISlice } from './slices/ui';
 import type { ImageState } from './types';

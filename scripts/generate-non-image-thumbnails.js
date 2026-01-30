@@ -131,7 +131,9 @@ async function generateNonImageThumbnails() {
 		console.log(`   Total procesados: ${totalProcessed}`);
 		console.log(`   Exitosos: ${totalSuccess}`);
 		console.log(`   Errores: ${totalErrors}`);
-		console.log(`   Tasa de éxito: ${totalProcessed > 0 ? `${((totalSuccess / totalProcessed) * 100).toFixed(1)}%` : '0%'}`);
+		console.log(
+			`   Tasa de éxito: ${totalProcessed > 0 ? `${((totalSuccess / totalProcessed) * 100).toFixed(1)}%` : '0%'}`
+		);
 		console.log('\n✅ Script completado\n');
 	} catch (error) {
 		console.error('❌ Error al generar thumbnails:', error);

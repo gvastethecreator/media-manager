@@ -4,34 +4,15 @@
  * @description Configuración de apariencia, temas y modo oscuro usando Global Store real
  */
 
-import React from 'react';
-import {
-	Moon,
-	Palette,
-	Sun,
-	Monitor,
-	Sliders,
-	Type,
-	Image as ImageIcon,
-	LayoutGrid,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
+import { Image as ImageIcon, LayoutGrid, Monitor, Moon, Palette, Sun, Type } from 'lucide-react';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Slider } from '@/components/ui/slider';
-import { Separator } from '@/components/ui/separator';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { cn } from '@/lib/utils';
-import {
-	SettingsCard,
-	SettingsGroup,
-	SettingsRow,
-} from '../modern/settings-card';
+import { Switch } from '@/components/ui/switch';
+import { useTheme } from '@/hooks/use-theme';
 
 // Imports de lógica real
 import { useInterfaceSettingsStore } from '@/store/entities/settings/store';
-import { useTheme } from '@/hooks/use-theme';
+import { SettingsCard, SettingsGroup, SettingsRow } from '../modern/settings-card';
 
 type FontSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 type Density = 'comfortable' | 'default' | 'compact';
@@ -46,7 +27,7 @@ export function AppearanceSettingsModern() {
 	const handleGridDensityChange = (value: number[]) => {
 		// Asumiendo que 'mosaic' es el valor representativo para la demo
 		setPreferences({
-			thumbnailsBorderRadius: { ...preferences?.thumbnailsBorderRadius, mosaic: value[0] }
+			thumbnailsBorderRadius: { ...preferences?.thumbnailsBorderRadius, mosaic: value[0] },
 		});
 	};
 
@@ -62,50 +43,48 @@ export function AppearanceSettingsModern() {
 		<div className="space-y-6">
 			{/* Header */}
 			<div>
-				<h2 className="text-2xl font-semibold text-foreground">Apariencia</h2>
-				<p className="mt-1 text-sm text-muted-foreground">
-					Personaliza el tema, colores y estilo de la interfaz
-				</p>
+				<h2 className="font-semibold text-2xl text-foreground">Apariencia</h2>
+				<p className="mt-1 text-muted-foreground text-sm">Personaliza el tema, colores y estilo de la interfaz</p>
 			</div>
 
 			{/* Color Scheme Card */}
 			<SettingsCard
+				color="var(--primary)"
+				description="Elige entre modo claro, oscuro o automático"
 				icon={<Palette />}
 				title="Tema"
-				description="Elige entre modo claro, oscuro o automático"
-				color="var(--primary)"
 			>
-				<RadioGroup value={theme} onValueChange={(v) => setTheme(v as any)}>
+				<RadioGroup onValueChange={(v) => setTheme(v as any)} value={theme}>
 					<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 						{/* Light Mode */}
 						<RadioGroupItem
-							value="light"
 							className="flex h-24 flex-col items-center justify-center gap-3 rounded-xl border-2 transition-all hover:bg-muted/50 data-[state=checked]:border-primary data-[state=checked]:bg-primary/5"
+							value="light"
 						>
 							<Sun className="h-8 w-8 text-amber-500" />
-							<Label htmlFor="light" className="cursor-pointer">
+							<Label className="cursor-pointer" htmlFor="light">
 								<span className="font-medium">Claro</span>
 							</Label>
 						</RadioGroupItem>
 
 						{/* Dark Mode */}
 						<RadioGroupItem
-							value="dark"
 							className="flex h-24 flex-col items-center justify-center gap-3 rounded-xl border-2 transition-all hover:bg-muted/50 data-[state=checked]:border-primary data-[state=checked]:bg-primary/5"
+							value="dark"
 						>
 							<Moon className="h-8 w-8 text-indigo-500" />
-							<Label htmlFor="dark" className="cursor-pointer">
+							<Label className="cursor-pointer" htmlFor="dark">
 								<span className="font-medium">Oscuro</span>
 							</Label>
 						</RadioGroupItem>
 
 						{/* Auto Mode */}
 						<RadioGroupItem
-							value="system"
 							className="flex h-24 flex-col items-center justify-center gap-3 rounded-xl border-2 transition-all hover:bg-muted/50 data-[state=checked]:border-primary data-[state=checked]:bg-primary/5"
+							value="system"
 						>
 							<Monitor className="h-8 w-8 text-muted-foreground" />
-							<Label htmlFor="system" className="cursor-pointer">
+							<Label className="cursor-pointer" htmlFor="system">
 								<span className="font-medium">Automático</span>
 							</Label>
 						</RadioGroupItem>
@@ -114,12 +93,7 @@ export function AppearanceSettingsModern() {
 			</SettingsCard>
 
 			{/* Typography & Density Card */}
-			<SettingsCard
-				icon={<Type />}
-				title="Tipografía"
-				description="Ajusta tamaño de fuente"
-				color="var(--primary)"
-			>
+			<SettingsCard color="var(--primary)" description="Ajusta tamaño de fuente" icon={<Type />} title="Tipografía">
 				<SettingsGroup title="Tamaño de Fuente">
 					<div className="flex flex-col gap-3">
 						{[
@@ -130,11 +104,11 @@ export function AppearanceSettingsModern() {
 							{ value: 'xl', label: 'Extra grande', size: 'text-xl' },
 						].map((item) => (
 							<RadioGroupItem
-								key={item.value}
-								value={item.value}
 								checked={preferences.fontSize === item.value}
-								onClick={() => setPreferences({ fontSize: item.value as FontSize })}
 								className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all hover:bg-muted/50 data-[state=checked]:border-primary data-[state=checked]:bg-primary/5"
+								key={item.value}
+								onClick={() => setPreferences({ fontSize: item.value as FontSize })}
+								value={item.value}
 							>
 								<span className={item.size}>Abc</span>
 								<span className="text-sm">{item.label}</span>
@@ -146,26 +120,23 @@ export function AppearanceSettingsModern() {
 
 			{/* Display & Effects Card */}
 			<SettingsCard
+				color="var(--primary)"
+				description="Animaciones y rendimiento"
 				icon={<LayoutGrid />}
 				title="Efectos Visuales"
-				description="Animaciones y rendimiento"
-				color="var(--primary)"
 			>
-				<SettingsRow label="Animaciones Globales" description="Habilitar animaciones de interfaz">
-					<Switch
-						checked={preferences.animations}
-						onCheckedChange={(v) => setPreferences({ animations: v })}
-					/>
+				<SettingsRow description="Habilitar animaciones de interfaz" label="Animaciones Globales">
+					<Switch checked={preferences.animations} onCheckedChange={(v) => setPreferences({ animations: v })} />
 				</SettingsRow>
 
-				<SettingsRow label="Animaciones en Miniaturas" description="Efectos hover en items">
+				<SettingsRow description="Efectos hover en items" label="Animaciones en Miniaturas">
 					<Switch
 						checked={preferences.thumbnailsAnimations}
 						onCheckedChange={(v) => setPreferences({ thumbnailsAnimations: v })}
 					/>
 				</SettingsRow>
 
-				<SettingsRow label="Ultra Performance" description="Desactivar efectos costosos">
+				<SettingsRow description="Desactivar efectos costosos" label="Ultra Performance">
 					<Switch
 						checked={preferences.thumbnailsUltraPerformance}
 						onCheckedChange={(v) => setPreferences({ thumbnailsUltraPerformance: v })}
@@ -175,14 +146,14 @@ export function AppearanceSettingsModern() {
 
 			{/* Media Display Card */}
 			<SettingsCard
+				color="var(--entity-image)"
+				description="Configuración de grid"
 				icon={<ImageIcon />}
 				title="Visualización de Media"
-				description="Configuración de grid"
-				color="var(--entity-image)"
 			>
 				<SettingsGroup title="Opciones de Grid">
 					<div className="space-y-3">
-						<SettingsRow label="Respetar Aspect Ratio" description="Mantener proporción original en grid">
+						<SettingsRow description="Mantener proporción original en grid" label="Respetar Aspect Ratio">
 							<Switch
 								checked={preferences.thumbnailsRespectAspectRatio}
 								onCheckedChange={(v) => setPreferences({ thumbnailsRespectAspectRatio: v })}

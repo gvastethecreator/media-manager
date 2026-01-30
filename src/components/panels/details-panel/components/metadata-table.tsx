@@ -9,15 +9,15 @@ export interface MetadataTableRow {
 	value: React.ReactNode;
 	fullWidth?: boolean;
 	className?: string;
-	compact?: boolean; 
-	category?: string; 
+	compact?: boolean;
+	category?: string;
 }
 export interface MetadataTableProps {
 	title?: React.ReactNode;
 	rows: MetadataTableRow[];
 	className?: string;
 	dense?: boolean;
-	multiColumn?: boolean; 
+	multiColumn?: boolean;
 }
 
 const renderRowValue = (row: MetadataTableRow): React.ReactNode => {
@@ -41,9 +41,14 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({ title, rows, class
 	const normalRows = rows.filter((row) => !row.compact || row.fullWidth);
 
 	return (
-		<div className={cn('rounded-lg border border-border/40 bg-card/30 text-card-foreground shadow-sm min-w-0 w-full overflow-hidden', className)}>
+		<div
+			className={cn(
+				'w-full min-w-0 overflow-hidden rounded-lg border border-border/40 bg-card/30 text-card-foreground shadow-sm',
+				className
+			)}
+		>
 			{title && (
-				<div className="px-3 py-2 border-b border-border/20 bg-muted/20 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
+				<div className="border-border/20 border-b bg-muted/20 px-3 py-2 font-bold text-[10px] text-muted-foreground/70 uppercase tracking-wider">
 					{title}
 				</div>
 			)}
@@ -54,24 +59,20 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({ title, rows, class
 					return (
 						<div
 							className={cn(
-								'flex flex-col gap-1 p-2.5 min-w-0',
+								'flex min-w-0 flex-col gap-1 p-2.5',
 								!row.fullWidth && 'xs:flex-row xs:items-start xs:gap-3'
 							)}
 							key={`${row.label}-${idx}`}
 						>
-							<div className={cn(
-								'flex items-center gap-2 shrink-0 min-w-0',
-								!row.fullWidth && 'xs:w-[90px] sm:w-[110px]'
-							)}>
+							<div
+								className={cn('flex min-w-0 shrink-0 items-center gap-2', !row.fullWidth && 'xs:w-[90px] sm:w-[110px]')}
+							>
 								{Icon && <Icon className={cn('h-3 w-3 shrink-0', row.iconColor || 'text-muted-foreground/60')} />}
-								<div className="truncate font-bold text-muted-foreground/80 uppercase tracking-tighter text-[9px]">
+								<div className="truncate font-bold text-[9px] text-muted-foreground/80 uppercase tracking-tighter">
 									{row.label}
 								</div>
 							</div>
-							<div className={cn(
-								'min-w-0 break-words leading-normal text-foreground/90 flex-1',
-								row.className
-							)}>
+							<div className={cn('min-w-0 flex-1 break-words text-foreground/90 leading-normal', row.className)}>
 								{renderRowValue(row)}
 							</div>
 						</div>
@@ -82,17 +83,22 @@ export const MetadataTable: React.FC<MetadataTableProps> = ({ title, rows, class
 			{compactRows.length > 0 && multiColumn && (
 				<div
 					className={cn(
-						'grid gap-1.5 p-2.5 min-w-0 w-full bg-muted/5',
-						normalRows.length > 0 && 'border-t border-border/10',
+						'grid w-full min-w-0 gap-1.5 bg-muted/5 p-2.5',
+						normalRows.length > 0 && 'border-border/10 border-t',
 						'grid-cols-1 min-[300px]:grid-cols-2'
 					)}
 				>
 					{compactRows.map((row, idx) => {
 						const Icon = row.icon;
 						return (
-							<div className="flex flex-col gap-0.5 min-w-0 border border-border/10 rounded p-1.5 bg-background/50" key={`compact-${row.label}-${idx}`}>
+							<div
+								className="flex min-w-0 flex-col gap-0.5 rounded border border-border/10 bg-background/50 p-1.5"
+								key={`compact-${row.label}-${idx}`}
+							>
 								<div className="flex items-center gap-1.5 opacity-60">
-									{Icon && <Icon className={cn('h-2.5 w-2.5 flex-shrink-0', row.iconColor || 'text-muted-foreground')} />}
+									{Icon && (
+										<Icon className={cn('h-2.5 w-2.5 flex-shrink-0', row.iconColor || 'text-muted-foreground')} />
+									)}
 									<span className="truncate font-bold text-[8px] uppercase tracking-tighter">{row.label}</span>
 								</div>
 								<div className={cn('truncate font-medium text-[10px]', row.className)}>{renderRowValue(row)}</div>

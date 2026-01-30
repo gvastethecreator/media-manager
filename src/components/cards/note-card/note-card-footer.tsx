@@ -46,8 +46,8 @@ export function NoteCardFooter({
 	const wasUpdated = updatedAtDate.getTime() - createdAtDate.getTime() > 60_000; // 1 minuto de diferencia
 	const updatedFormattedDate = wasUpdated
 		? formatDistanceToNow(updatedAtDate, {
-			addSuffix: true,
-		})
+				addSuffix: true,
+			})
 		: null;
 
 	// Obtener color de prioridad

@@ -4,7 +4,7 @@ import { desc, ilike, like, or, sql } from 'drizzle-orm';
 import { Effect } from 'effect';
 import { db, getDbClient } from '@/lib/drizzle';
 import { isFts5Enabled } from '@/lib/drizzle/fts5';
-import { files, images, videos, audios, documents } from '@/lib/drizzle/schema/index';
+import { audios, documents, files, images, videos } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { convertServerImageToFileItem, type ServerImage } from '@/services/image/converter.service';
 import { getAll } from '@/services/image/image.service.effect';
@@ -151,16 +151,32 @@ export async function performSearch(
 	const searchPromises: Promise<any[]>[] = [];
 
 	if (typesToSearch.includes('image')) {
-		searchPromises.push(searchImagesUnified(query, limit, offset).then(rows => rows.map((r: any) => ({ type: 'image' as const, data: r }))));
+		searchPromises.push(
+			searchImagesUnified(query, limit, offset).then((rows) =>
+				rows.map((r: any) => ({ type: 'image' as const, data: r }))
+			)
+		);
 	}
 	if (typesToSearch.includes('video')) {
-		searchPromises.push(searchVideosUnified(query, limit, offset).then(rows => rows.map((r: any) => ({ type: 'video' as const, data: r }))));
+		searchPromises.push(
+			searchVideosUnified(query, limit, offset).then((rows) =>
+				rows.map((r: any) => ({ type: 'video' as const, data: r }))
+			)
+		);
 	}
 	if (typesToSearch.includes('audio')) {
-		searchPromises.push(searchAudiosUnified(query, limit, offset).then(rows => rows.map((r: any) => ({ type: 'audio' as const, data: r }))));
+		searchPromises.push(
+			searchAudiosUnified(query, limit, offset).then((rows) =>
+				rows.map((r: any) => ({ type: 'audio' as const, data: r }))
+			)
+		);
 	}
 	if (typesToSearch.includes('document')) {
-		searchPromises.push(searchDocumentsUnified(query, limit, offset).then(rows => rows.map((r: any) => ({ type: 'document' as const, data: r }))));
+		searchPromises.push(
+			searchDocumentsUnified(query, limit, offset).then((rows) =>
+				rows.map((r: any) => ({ type: 'document' as const, data: r }))
+			)
+		);
 	}
 
 	const results = await Promise.all(searchPromises);

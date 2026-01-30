@@ -28,12 +28,15 @@ export async function getRealSystemMetrics() {
 				swapused: mem.swapused,
 				usagePercentage: Math.round((mem.used / mem.total) * 100),
 			},
-			disk: fsSize && fsSize.length > 0 ? {
-				total: fsSize[0].size,
-				used: fsSize[0].used,
-				available: fsSize[0].available,
-				usagePercentage: Math.round((fsSize[0].used / fsSize[0].size) * 100),
-			} : null,
+			disk:
+				fsSize && fsSize.length > 0
+					? {
+							total: fsSize[0].size,
+							used: fsSize[0].used,
+							available: fsSize[0].available,
+							usagePercentage: Math.round((fsSize[0].used / fsSize[0].size) * 100),
+						}
+					: null,
 			os: {
 				platform: osInfo.platform,
 				release: osInfo.release,

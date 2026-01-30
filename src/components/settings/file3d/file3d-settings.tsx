@@ -1,13 +1,13 @@
-import { Box, Edit2, Loader2, PlusCircle, Trash } from 'lucide-react';
+import { Box, Edit2, Loader2, Trash } from 'lucide-react';
 import { useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { useCreateFile3D, useDeleteFile3D, useFile3Ds, useUpdateFile3D } from '@/lib/api/file3ds';
+import { useDeleteFile3D, useFile3Ds, useUpdateFile3D } from '@/lib/api/file3ds';
 import { toastService } from '@/lib/ui/toast';
-import type { File3DCreateInput, File3DWithStats } from '@/types/entities/file3d';
+import type { File3DWithStats } from '@/types/entities/file3d';
 
 export function File3DSettings() {
 	const { data, isLoading, error } = useFile3Ds();
@@ -23,8 +23,6 @@ export function File3DSettings() {
 		() => file3ds.filter((f: File3DWithStats) => f.name.toLowerCase().includes(search.toLowerCase())),
 		[file3ds, search]
 	);
-
-
 
 	const handleUpdate = async () => {
 		try {
@@ -123,8 +121,6 @@ export function File3DSettings() {
 					)}
 				</CardContent>
 			</Card>
-
-
 
 			<Dialog
 				onOpenChange={(o) => {
