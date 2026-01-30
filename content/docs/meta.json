@@ -1,0 +1,16 @@
+{
+  "title": "Documentación",
+  "pages": [
+    "index",
+    "quick-start",
+    "architecture",
+    "backend",
+    "database",
+    "frontend",
+    "dev-flow",
+    "testing",
+    "scripts",
+    "features",
+    "reference"
+  ]
+}
