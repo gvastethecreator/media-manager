@@ -67,9 +67,8 @@ export function FavoritesView({ isVisible }: ViewProps) {
 		createFavorite({
 			entityId: `manual-${Date.now()}`,
 			entityType: 'collection',
-			name: newFavoriteName,
-			description: newFavoriteDescription,
-			priority: 'normal',
+			notes: `${newFavoriteName}: ${newFavoriteDescription}`,
+			priority: 1,
 		});
 
 		setNewFavoriteName('');
