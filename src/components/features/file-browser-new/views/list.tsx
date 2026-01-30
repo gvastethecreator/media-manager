@@ -6,7 +6,9 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { MediaItemList } from '../components/media-item';
-import type { BrowserItem, BrowserViewProps, ClickModifiers, ItemContextMenuHandler, ListViewConfig } from '../types';
+import type { BrowserItem } from '../types/item.types';
+import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '../types/props.types';
+import type { ListViewConfig } from '../types/view.types';
 
 export interface ListViewProps extends Omit<BrowserViewProps, 'config'> {
 	/** Configuración de lista */

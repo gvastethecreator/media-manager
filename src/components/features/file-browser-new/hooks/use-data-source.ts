@@ -8,8 +8,8 @@ import { useFolder, useFolders } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
 import { DEFAULT_PAGE_SIZE } from '../core/constants';
-import type { BrowserItem } from '../types';
-import { createParentNavItem, toBrowserItem } from '../types';
+import type { BrowserItem } from '../types/item.types';
+import { createParentNavItem, toBrowserItem } from '../types/item.types';
 import { useFolderFilesPaginated } from './use-folder-files-paginated';
 
 const logger = clientLogger.withContext('UseDataSource');

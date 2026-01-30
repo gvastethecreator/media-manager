@@ -3,8 +3,8 @@ import express from 'express';
 import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
-import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail';
-import { thumbnailEventService as baseThumbnailService } from '@/services/thumbnail';
+import { thumbnailEventService as baseThumbnailService } from '@/services/thumbnail/thumbnail-events.service';
+import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail/types';
 import {
 	bulkGenerateThumbnails,
 	cleanThumbnails,

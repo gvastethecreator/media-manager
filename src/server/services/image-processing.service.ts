@@ -37,7 +37,7 @@ export async function processImage(imageId: string, options: ImageProcessingOpti
 
 		// Protección contra rutas corruptas o demasiado largas
 		if (!image.path || image.path.length > 1024) {
-			const errorMsg = `Ruta de archivo inválida o demasiado larga: ${image.path ? image.path.substring(0, 50) + '...' : 'null'}`;
+			const errorMsg = `Ruta de archivo inválida o demasiado larga: ${image.path ? `${image.path.substring(0, 50)}...` : 'null'}`;
 			imageLogger.error(`❌ ${errorMsg}`);
 			throw createFileNotFoundError(image.path || 'unknown', { imageId, error: errorMsg }, SERVICE_NAME);
 		}

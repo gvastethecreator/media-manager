@@ -12,13 +12,13 @@ import type { NextFunction, Request, Response } from 'express';
 /**
  * Error de validación HTTP
  */
-export type ValidationError = {
+export interface ValidationError {
 	_tag: 'ValidationError';
 	message: string;
 	field?: string;
 	details: unknown;
 	timestamp: Date;
-};
+}
 
 /**
  * Crea un ValidationError a partir de ParseError
@@ -213,7 +213,7 @@ export const validate = (options: {
 	body?: Schema.Schema.Any;
 	query?: Schema.Schema.Any;
 }) => {
-	const middlewares: Array<ReturnType<typeof validateParams | typeof validateBody | typeof validateQuery>> = [];
+	const middlewares: ReturnType<typeof validateParams | typeof validateBody | typeof validateQuery>[] = [];
 
 	if (options.params) {
 		middlewares.push(validateParams(options.params as any));

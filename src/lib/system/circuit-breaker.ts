@@ -44,10 +44,10 @@ export interface CircuitBreakerState {
  * Circuit Breaker que previene loops infinitos y operaciones repetitivas fallidas
  */
 export class CircuitBreaker {
-	private name: string;
-	private config: CircuitBreakerConfig;
+	private readonly name: string;
+	private readonly config: CircuitBreakerConfig;
 	private state: CircuitBreakerState;
-	private activeOperations = new Set<string>();
+	private readonly activeOperations = new Set<string>();
 
 	constructor(name: string, config: Partial<CircuitBreakerConfig> = {}) {
 		this.name = name;
@@ -263,7 +263,7 @@ export class CircuitBreaker {
  * Registry global de circuit breakers
  */
 class CircuitBreakerRegistry {
-	private breakers = new Map<string, CircuitBreaker>();
+	private readonly breakers = new Map<string, CircuitBreaker>();
 
 	/**
 	 * Obtiene o crea un circuit breaker

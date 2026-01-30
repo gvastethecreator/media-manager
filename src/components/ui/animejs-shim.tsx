@@ -189,7 +189,7 @@ function createMotionComponent(tag: keyof JSX.IntrinsicElements) {
 					set(elementRef.current, initialProps);
 				}
 			}
-		}, []); // Run once on mount
+		}, [resolvedInitial]); // Run once on mount
 
 		// Animate to target state
 		useEffect(() => {
@@ -210,7 +210,7 @@ function createMotionComponent(tag: keyof JSX.IntrinsicElements) {
 			return () => {
 				// Optional: cleanup
 			};
-		}, [resolvedAnimate, transition, variants]);
+		}, [resolvedAnimate, transition]);
 
 		// Handle exit animation
 		useEffect(() => {

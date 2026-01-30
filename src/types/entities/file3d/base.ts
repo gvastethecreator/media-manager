@@ -7,7 +7,7 @@
 /**
  * 🧊 Tipo base de File3D directamente desde el schema de Drizzle.
  */
-export type File3DBase = {
+export interface File3DBase {
 	id: string;
 	name: string;
 	path: string;
@@ -36,7 +36,7 @@ export type File3DBase = {
 	boundingBox: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 import { EntityStats } from '../entity.types';
 

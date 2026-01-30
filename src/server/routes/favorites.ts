@@ -2,7 +2,7 @@ import type { Request, Response } from 'express';
 import { Router } from 'express';
 import { z } from 'zod';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { favoriteService } from '@/services/favorite';
+import { favoriteService } from '@/services/favorite/favorite.service';
 import { FavoriteEntityType } from '@/types/entities/favorite';
 
 const router = Router() as any;

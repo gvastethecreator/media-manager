@@ -1,4 +1,3 @@
-import { animate } from 'animejs';
 import { AlertCircle, Check, Info, Terminal } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
@@ -105,8 +104,10 @@ export function ReindexTerminal({
 	};
 
 	// Animación para nuevas líneas con Anime.js
-	const animateNewLog = (element: HTMLElement) => {
-		animate(element, {
+	const animateNewLog = async (element: HTMLElement) => {
+		const animeLib = await import('@/lib/anime');
+		await animeLib.animate({
+			targets: element,
 			translateX: [-20, 0],
 			opacity: [0, 1],
 			scale: [0.95, 1],
@@ -452,7 +453,7 @@ export function ReindexTerminal({
 				animateNewLog(lastLog);
 			}
 		}
-	}, [logs.length]);
+	}, [logs.length, animateNewLog]);
 
 	// Renderizar entrada de log con soporte para sticky
 	const renderLogEntry = (log: LogEntry, index: number) => {

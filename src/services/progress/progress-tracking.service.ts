@@ -35,7 +35,7 @@ type ProgressEvents =
 type Listener<T> = (payload: T) => void;
 
 class TypedEventEmitter {
-	private events: Map<string, Set<Listener<any>>> = new Map();
+	private readonly events: Map<string, Set<Listener<any>>> = new Map();
 
 	on<TEvent extends ProgressEvents['type']>(
 		event: TEvent,
@@ -106,9 +106,9 @@ export type ProgressCallback = (operation: ProgressOperation) => void;
  * Manages progress tracking for long-running file operations
  */
 class ProgressTrackingService extends TypedEventEmitter {
-	private operations = new Map<string, ProgressOperation>();
-	private callbacks = new Map<string, ProgressCallback[]>();
-	private toastIds = new Map<string, string | number>();
+	private readonly operations = new Map<string, ProgressOperation>();
+	private readonly callbacks = new Map<string, ProgressCallback[]>();
+	private readonly toastIds = new Map<string, string | number>();
 
 	/**
 	 * Generate unique operation ID

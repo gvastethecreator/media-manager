@@ -7,7 +7,8 @@ import { Box, File, FileJson, FileText, Folder, Image, Music, Video } from 'luci
 import { memo } from 'react';
 import { cn } from '@/lib/utils';
 import { formatFileSize } from '@/lib/utils/format.utils';
-import type { BrowserEntityType, BrowserItem, ItemRendererProps } from '../types';
+import type { BrowserEntityType, BrowserItem } from '../types/item.types';
+import type { ItemRendererProps } from '../types/props.types';
 
 /**
  * Iconos por tipo de entidad

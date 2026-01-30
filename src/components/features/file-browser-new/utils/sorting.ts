@@ -3,7 +3,8 @@
  * @module file-browser-new/utils/sorting
  */
 
-import type { BrowserItem, SortOption } from '../types';
+import type { BrowserItem } from '../types/item.types';
+import type { SortOption } from '../types/view.types';
 
 /**
  * Obtiene valor de un campo para ordenamiento

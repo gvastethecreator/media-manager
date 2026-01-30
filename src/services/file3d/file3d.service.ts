@@ -13,7 +13,7 @@ import { file3Ds } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats/stats.service';
 import { fromDrizzleFile3D, fromDrizzleFile3Ds } from '@/transformers/file3d/transformer';
 import type { File3DCreateInput, File3DUpdateInput, File3DWithStats } from '@/types/entities/file3d';
 

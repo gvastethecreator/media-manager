@@ -3,7 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 
 // Propiedades básicas para el componente
-type ImageFallbackProps = {
+interface ImageFallbackProps {
 	src?: string;
 	alt: string;
 	className?: string;
@@ -12,7 +12,7 @@ type ImageFallbackProps = {
 	height?: number | string;
 	onLoad?: () => void;
 	onError?: () => void;
-};
+}
 
 /**
  * Componente que muestra una imagen con un fallback para cuando la imagen

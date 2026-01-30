@@ -9,66 +9,63 @@
 // ============================================================================
 
 export {
-  FlipEngine,
-  getFlipEngine,
-  destroyFlipEngine,
-  calculateOptimalDirection,
-  isElementInViewport,
-  distanceToViewportCenter,
-} from './core/flip-engine';
-
-export {
-  MorphEngine,
-  getMorphEngine,
-  destroyMorphEngine,
-  generateClipPath,
-  generateBorderRadius,
-  createLiquidMorph,
-  createExpandFromPoint,
-  createContractToPoint,
-} from './core/morph-engine';
-
-export {
-  DirectionTracker,
-  getDirectionTracker,
-  destroyDirectionTracker,
-  isDiagonalDirection,
-  getOppositeDirection,
-  combineDirections,
-  predictPosition,
+	combineDirections,
+	DirectionTracker,
+	destroyDirectionTracker,
+	getDirectionTracker,
+	getOppositeDirection,
+	isDiagonalDirection,
+	predictPosition,
 } from './core/direction-tracker';
-
 export {
-  EnterExitCoordinator,
-  getEnterExitCoordinator,
-  destroyEnterExitCoordinator,
+	destroyEnterExitCoordinator,
+	EnterExitCoordinator,
+	getEnterExitCoordinator,
 } from './core/enter-exit-coordinator';
+export {
+	calculateOptimalDirection,
+	destroyFlipEngine,
+	distanceToViewportCenter,
+	FlipEngine,
+	getFlipEngine,
+	isElementInViewport,
+} from './core/flip-engine';
+export {
+	createContractToPoint,
+	createExpandFromPoint,
+	createLiquidMorph,
+	destroyMorphEngine,
+	generateBorderRadius,
+	generateClipPath,
+	getMorphEngine,
+	MorphEngine,
+} from './core/morph-engine';
 
 // ============================================================================
 // Animaciones
 // ============================================================================
 
 export {
-  customEasings,
-  contextualEasings,
-  springConfigs,
-  springToCubicBezier,
-  getDurationByDistance,
-  getEasingByMovement,
-  velocityCurves,
-  getOptimalVelocityCurve,
+	contextualEasings,
+	customEasings,
+	getDurationByDistance,
+	getEasingByMovement,
+	getOptimalVelocityCurve,
+	springConfigs,
+	springToCubicBezier,
+	velocityCurves,
 } from './animations/easings';
 
 export {
-  enterPresets,
-  exitPresets,
-  statePresets,
-  compositePresets,
-  allPresets,
-  getDirectionalEnterPreset,
-  getDirectionalExitPreset,
-  applyPreset,
-  getAnimeConfig,
+	allPresets,
+	applyPreset,
+	compositePresets,
+	enterPresets,
+	exitPresets,
+	getAnimeConfig,
+	getDirectionalEnterPreset,
+	getDirectionalExitPreset,
+	statePresets,
 } from './animations/presets';
 
 // ============================================================================
@@ -76,33 +73,33 @@ export {
 // ============================================================================
 
 export type {
-  TransitionDirection,
-  TransformAxis,
-  EntryExitType,
-  FlipState,
-  FlipOptions,
-  FlipElementConfig,
-  MorphConfig,
-  MorphProperty,
-  MorphState,
-  EnterConfig,
-  ExitConfig,
-  EnterExitConfig,
-  SharedElementConfig,
-  SharedElementState,
-  TransitionGroupConfig,
-  AnimationSequence,
-  AnimationStep,
-  PerformanceOptions,
-  PerformanceMetrics,
-  FlipContainerProps,
-  MorphElementProps,
-  TransitionGroupProps,
-  TransitionsContextValue,
-  Point2D,
-  TransformedRect,
-  AnimationState,
-  TransitionEvent,
+	AnimationSequence,
+	AnimationState,
+	AnimationStep,
+	EnterConfig,
+	EnterExitConfig,
+	EntryExitType,
+	ExitConfig,
+	FlipContainerProps,
+	FlipElementConfig,
+	FlipOptions,
+	FlipState,
+	MorphConfig,
+	MorphElementProps,
+	MorphProperty,
+	MorphState,
+	PerformanceMetrics,
+	PerformanceOptions,
+	Point2D,
+	SharedElementConfig,
+	SharedElementState,
+	TransformAxis,
+	TransformedRect,
+	TransitionDirection,
+	TransitionEvent,
+	TransitionGroupConfig,
+	TransitionGroupProps,
+	TransitionsContextValue,
 } from './types';
 
 // ============================================================================
@@ -129,35 +126,35 @@ export const DEFAULT_DISTANCE = 30;
  * Verifica si el navegador soporta las APIs necesarias
  */
 export function checkBrowserSupport(): {
-  flip: boolean;
-  morph: boolean;
-  webAnimations: boolean;
-  clipPath: boolean;
+	flip: boolean;
+	morph: boolean;
+	webAnimations: boolean;
+	clipPath: boolean;
 } {
-  return {
-    flip: typeof window !== 'undefined' && 'getBoundingClientRect' in document.documentElement,
-    morph: typeof window !== 'undefined',
-    webAnimations: typeof document !== 'undefined' && 'animate' in document.documentElement,
-    clipPath: typeof document !== 'undefined' && CSS.supports('clip-path', 'inset(0)'),
-  };
+	return {
+		flip: typeof window !== 'undefined' && 'getBoundingClientRect' in document.documentElement,
+		morph: typeof window !== 'undefined',
+		webAnimations: typeof document !== 'undefined' && 'animate' in document.documentElement,
+		clipPath: typeof document !== 'undefined' && CSS.supports('clip-path', 'inset(0)'),
+	};
 }
 
 /**
  * Verifica si se debe reducir el movimiento
  */
 export function shouldReduceMotion(): boolean {
-  if (typeof window === 'undefined') return false;
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+	if (typeof window === 'undefined') return false;
+	return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }
 
 /**
  * Obtiene duración ajustada según preferencias
  */
 export function getAdjustedDuration(preferredDuration: number): number {
-  if (shouldReduceMotion()) {
-    return Math.min(preferredDuration, 150);
-  }
-  return preferredDuration;
+	if (shouldReduceMotion()) {
+		return Math.min(preferredDuration, 150);
+	}
+	return preferredDuration;
 }
 
 // ============================================================================
@@ -167,17 +164,17 @@ export function getAdjustedDuration(preferredDuration: number): number {
 let debugEnabled = false;
 
 export function enableTransitionsDebug(): void {
-  debugEnabled = true;
-  console.log('[Transitions] Debug enabled');
+	debugEnabled = true;
+	console.log('[Transitions] Debug enabled');
 }
 
 export function disableTransitionsDebug(): void {
-  debugEnabled = false;
-  console.log('[Transitions] Debug disabled');
+	debugEnabled = false;
+	console.log('[Transitions] Debug disabled');
 }
 
 export function logTransition(message: string, data?: unknown): void {
-  if (debugEnabled) {
-    console.log(`[Transitions] ${message}`, data);
-  }
+	if (debugEnabled) {
+		console.log(`[Transitions] ${message}`, data);
+	}
 }

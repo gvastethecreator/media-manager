@@ -6,7 +6,9 @@
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { MediaItemGrid } from '../components/media-item';
-import type { BrowserItem, BrowserViewProps, ClickModifiers, GridViewConfig, ItemContextMenuHandler } from '../types';
+import type { BrowserItem } from '../types/item.types';
+import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '../types/props.types';
+import type { GridViewConfig } from '../types/view.types';
 
 export interface GridViewProps extends Omit<BrowserViewProps, 'config'> {
 	/** Configuración de grid */

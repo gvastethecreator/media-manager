@@ -2,7 +2,7 @@ export * from './extended';
 export * from './types';
 
 // Tipos para operaciones
-export type CreateMetadataData = {
+export interface CreateMetadataData {
 	imageId: string;
 	format: string;
 	width: number;
@@ -11,6 +11,6 @@ export type CreateMetadataData = {
 	colorSpace?: string;
 	hasAlpha?: boolean;
 	orientation?: number;
-};
+}
 
 export type UpdateMetadataData = Partial<CreateMetadataData>;

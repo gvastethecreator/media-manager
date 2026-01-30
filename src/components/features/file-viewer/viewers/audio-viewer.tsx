@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
 import { formatDurationSeconds as formatDuration, formatFileSize } from '@/lib/utils';
 import type { AudioWithStats } from '@/types/entities/audio';
+import { WaveformVisualizer } from './waveform-visualizer';
 
 interface AudioViewerProps {
 	audio: AudioWithStats;
@@ -233,10 +234,17 @@ export function AudioViewer({ audio, onClose, onNext, onPrevious }: AudioViewerP
 					</div>
 				</div>
 
-				{/* Waveform Placeholder */}
-				<div className="mb-8 flex h-32 w-full max-w-2xl items-center justify-center rounded-lg bg-muted">
-					<div className="text-muted-foreground text-sm">Visualización de forma de onda</div>
-				</div>
+				{/* Waveform Visualizer */}
+				<WaveformVisualizer
+					audioUrl={audioSrc}
+					className="mb-8"
+					height={128}
+					isPlaying={isPlaying}
+					onPositionClick={(percent: number) => {
+						handleSeek([percent]);
+					}}
+					progress={progress}
+				/>
 
 				{/* Error State */}
 				{error && <div className="mb-4 text-center text-destructive">{error}</div>}

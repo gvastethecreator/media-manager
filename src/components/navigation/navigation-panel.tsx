@@ -6,7 +6,7 @@ import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { cn } from '@/lib/utils';
 import { NavMainNavigation } from './components/nav-main-navigation';
 import { NavPanelHeader } from './components/nav-panel-header';
-import { useCategoryStats } from './hooks';
+import { useCategoryStats } from './hooks/use-category-stats';
 
 const NavPanelComponent = memo(function NavPanelImpl({
 	isCollapsed = false,

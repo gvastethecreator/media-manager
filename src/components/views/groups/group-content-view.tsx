@@ -1,8 +1,9 @@
 import { FileBox, ImageIcon, TagIcon } from 'lucide-react';
 import { useCallback, useMemo } from 'react';
 import { useParams } from 'react-router-dom';
-import { LoadingScreen } from '@/components/core/feedback';
-import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useGroup, useGroupImages } from '@/lib/api/groups';
@@ -123,7 +124,7 @@ export function GroupContentView(_props: ViewProps) {
 
 					<TabsContent className="space-y-4" value="entities">
 						<p className="py-10 text-center text-muted-foreground">Este grupo contiene entidades de diferentes tipos</p>
-						<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4">
+						<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
 							{/* Información general */}
 							<div className="rounded-lg border bg-background p-4 transition-shadow hover:shadow-md">
 								<p className="font-medium">Total de elementos</p>

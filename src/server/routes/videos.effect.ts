@@ -317,7 +317,7 @@ router.get('/:id/content', async (req, res) => {
 	try {
 		const video = await Effect.runPromise(effect);
 
-		if (!(video && video.path)) {
+		if (!video?.path) {
 			res.status(404).send('Video not found');
 			return;
 		}

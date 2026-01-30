@@ -13,8 +13,8 @@ const cacheLogger = clientLogger.withContext('FolderCache');
  * para respuestas de carpetas y otros datos
  */
 class FolderResponseCache {
-	private cache: Map<string, any>;
-	private maxSize: number;
+	private readonly cache: Map<string, any>;
+	private readonly maxSize: number;
 	private hits = 0;
 	private misses = 0;
 

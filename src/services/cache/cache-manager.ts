@@ -48,7 +48,7 @@ export class CacheManager {
 	private cache = new Map<CacheKey, CacheEntry<CacheValue>>();
 	private config: CacheConfig;
 	private statistics: CacheStatistics;
-	private events: CacheEvents;
+	private readonly events: CacheEvents;
 	private cleanupTimer: ReturnType<typeof setInterval> | null = null;
 	private accessTimes: number[] = [];
 

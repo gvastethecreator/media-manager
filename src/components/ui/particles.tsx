@@ -66,7 +66,7 @@ function parseColor(color: string, canvas: HTMLCanvasElement): number[] {
 	return match ? match.slice(0, 3).map(Number) : [255, 255, 255];
 }
 
-type Circle = {
+interface Circle {
 	x: number;
 	y: number;
 	translateX: number;
@@ -77,7 +77,7 @@ type Circle = {
 	dx: number;
 	dy: number;
 	magnetism: number;
-};
+}
 
 const Particles: React.FC<ParticlesProps> = ({
 	className = '',

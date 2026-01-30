@@ -10,7 +10,7 @@ import type { TagWithStats } from '../tag';
 /**
  * 🖼️ Modelo base de Image, basado en el esquema de Drizzle.
  */
-export type ImageBase = {
+export interface ImageBase {
 	id: string;
 	name: string;
 	description: string | null;
@@ -35,7 +35,7 @@ export type ImageBase = {
 	updatedAt: Date;
 	addedAt: Date;
 	tags?: TagWithStats[];
-};
+}
 
 import type { EntityStats } from '../entity.types';
 

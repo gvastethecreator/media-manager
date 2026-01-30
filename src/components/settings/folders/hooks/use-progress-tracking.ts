@@ -13,8 +13,8 @@ export function useProgressTracking(
 	setShowCompleteAnimation: (show: boolean) => void
 ): void {
 	// Memoizar funciones para evitar re-renders
-	const memoizedSetLastProgress = useCallback(setLastProgress, []);
-	const memoizedSetShowCompleteAnimation = useCallback(setShowCompleteAnimation, []);
+	const memoizedSetLastProgress = useCallback(setLastProgress, [setLastProgress]);
+	const memoizedSetShowCompleteAnimation = useCallback(setShowCompleteAnimation, [setShowCompleteAnimation]);
 
 	useEffect(() => {
 		const isActiveProcess = isReindexing && processStatus?.folderId === folderId;

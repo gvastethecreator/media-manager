@@ -24,7 +24,7 @@ enum VideoQualityLocal {
 }
 
 // Tipos locales equivalentes a Drizzle (migración a Drizzle)
-type DrizzleVideoWithCounts = {
+interface DrizzleVideoWithCounts {
 	id: string;
 	name: string | null;
 	path: string;
@@ -60,7 +60,7 @@ type DrizzleVideoWithCounts = {
 		properties?: number;
 		groups?: number;
 	};
-};
+}
 
 type DrizzleVideoFromDrizzle = DrizzleVideoWithCounts & {
 	folder?: { id: string; name: string };

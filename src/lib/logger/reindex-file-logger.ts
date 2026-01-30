@@ -28,7 +28,7 @@ export interface ReindexLogEntry {
  * File logger específico para el sistema de reindexado
  */
 export class ReindexFileLogger {
-	private baseDir: string;
+	private readonly baseDir: string;
 	private currentDate!: string;
 	private errorLogPath!: string;
 	private warningLogPath!: string;

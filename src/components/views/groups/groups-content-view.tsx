@@ -1,8 +1,8 @@
 import { Group as GroupIcon } from 'lucide-react';
 import React, { memo } from 'react';
-import { GroupCard } from '@/components/cards/group-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { GroupCard } from '@/components/cards/group-card/group-card';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';

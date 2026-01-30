@@ -1,10 +1,10 @@
 // Polling legado deshabilitado: la app usa SSE para estado en tiempo real.
 // Este stub evita errores de importación y reduce complejidad a cero.
 
-export type UsePollingOptions = {
+export interface UsePollingOptions {
 	onStatusUpdate: (status: unknown) => void;
 	onComplete: (folderId: string) => void;
-};
+}
 
 export function useFoldersPolling(_: UsePollingOptions) {
 	return {

@@ -20,7 +20,7 @@ export class OperationQueue {
 		id: string;
 	}> = [];
 	private isProcessing = false;
-	private maxSize = MAX_OPERATION_QUEUE;
+	private readonly maxSize = MAX_OPERATION_QUEUE;
 	private currentOperation: { id: string; startTime: number } | null = null;
 
 	/**

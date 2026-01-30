@@ -56,9 +56,9 @@ interface DirectoryCacheEntry extends CacheEntry<FileItem[]> {
 
 // Implementación de caché LRU
 class LRUCache<K, V extends CacheEntry<any>> {
-	private cache = new Map<K, V>();
-	private maxSize: number;
-	private ttl: number;
+	private readonly cache = new Map<K, V>();
+	private readonly maxSize: number;
+	private readonly ttl: number;
 
 	constructor(maxSize: number, ttl: number) {
 		this.maxSize = maxSize;
@@ -203,9 +203,9 @@ class LRUCache<K, V extends CacheEntry<any>> {
  * Servicio de caché especializado para el navegador de archivos
  */
 export class FileBrowserCacheService {
-	private thumbnailCache: LRUCache<string, ThumbnailCacheEntry>;
-	private metadataCache: LRUCache<string, MetadataCacheEntry>;
-	private directoryCache: LRUCache<string, DirectoryCacheEntry>;
+	private readonly thumbnailCache: LRUCache<string, ThumbnailCacheEntry>;
+	private readonly metadataCache: LRUCache<string, MetadataCacheEntry>;
+	private readonly directoryCache: LRUCache<string, DirectoryCacheEntry>;
 	private config: CacheConfig;
 	private cleanupInterval: NodeJS.Timeout | null = null;
 
