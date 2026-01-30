@@ -244,7 +244,7 @@ export function withViewTransition<P extends object>(
 					setIsTransitioning(false);
 				}
 			},
-			[startTransition, transitionOptions]
+			[startTransition]
 		);
 
 		// Agregar props de transición al componente

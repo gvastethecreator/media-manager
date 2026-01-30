@@ -16,7 +16,7 @@ export type EntityWithStats<T, S> = T & { stats: S };
  * Este es el tipo base para un lugar, derivado directamente del schema de Drizzle.
  * Incluye todos los campos escalares y las relaciones básicas.
  */
-export type PlaceBase = {
+export interface PlaceBase {
 	id: string;
 	name: string;
 	description: string | null;
@@ -46,7 +46,7 @@ export type PlaceBase = {
 	shortcut?: string;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 import { EntityStats } from '../entity.types';
 

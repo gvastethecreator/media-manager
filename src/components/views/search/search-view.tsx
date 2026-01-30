@@ -1,8 +1,9 @@
 import { Search } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
-import { LoadingScreen } from '@/components/core/feedback';
-import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
+import { FileBrowser } from '@/components/features/file-browser-new/file-browser';
+import { type BrowserItem, toBrowserItem } from '@/components/features/file-browser-new/types/item.types';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';

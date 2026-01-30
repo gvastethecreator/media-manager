@@ -33,9 +33,9 @@ export type NavigationCategory =
  * @description Representa una entidad que puede tener un conteo de imágenes asociadas.
  *              Utilizado comúnmente por modelos de Drizzle ORM con relaciones _count.
  */
-export type ItemWithImageCount = {
+export interface ItemWithImageCount {
 	_count?: { images?: number }; // 🖼️ El conteo de imágenes es opcional.
-};
+}
 
 export interface NavPanelProps {
 	initialData: NavigationData;

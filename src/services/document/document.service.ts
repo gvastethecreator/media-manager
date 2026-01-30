@@ -14,7 +14,7 @@ import { documents } from '@/lib/drizzle/schema/index';
 import { createEntityErrorObject, EntityErrorCode } from '@/lib/errors';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { type EventType, emit } from '@/lib/server/events.server';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats/stats.service';
 import { toDocumentWithStats } from '@/transformers/document';
 import type { DocumentCreateInput, DocumentUpdateInput } from '@/transformers/document/validators';
 import type { DocumentWithStats } from '@/types/entities/document';

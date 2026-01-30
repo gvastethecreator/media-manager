@@ -294,7 +294,7 @@ const make = (): TagServiceInterface => {
 			}
 
 			// Query principal
-			const rawTags = yield* Effect.tryPromise<Array<typeof tags.$inferSelect>, TagError>({
+			const rawTags = yield* Effect.tryPromise<(typeof tags.$inferSelect)[], TagError>({
 				try: () => {
 					let query = db.select().from(tags);
 
@@ -372,7 +372,7 @@ const make = (): TagServiceInterface => {
 			});
 
 			// Verificar conflicto de nombre
-			const existingTags = yield* Effect.tryPromise<Array<typeof tags.$inferSelect>, TagError>({
+			const existingTags = yield* Effect.tryPromise<(typeof tags.$inferSelect)[], TagError>({
 				try: () => db.select().from(tags).where(eq(tags.name, validated.name)).limit(1),
 				catch: (error: unknown) => fromUnknownError('create.checkConflict', error),
 			});
@@ -444,7 +444,7 @@ const make = (): TagServiceInterface => {
 
 			// Si se cambia el nombre, verificar conflictos
 			if (validated.name) {
-				const existing = yield* Effect.tryPromise<Array<typeof tags.$inferSelect>, TagError>({
+				const existing = yield* Effect.tryPromise<(typeof tags.$inferSelect)[], TagError>({
 					try: () => db.select().from(tags).where(eq(tags.name, validated.name!)).limit(1),
 					catch: (error: unknown) => fromUnknownError('update.checkConflict', error),
 				});

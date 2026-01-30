@@ -4,7 +4,8 @@
  */
 
 import { cn } from '@/lib/utils';
-import type { LoadingStateProps, ViewMode } from '../types';
+import type { LoadingStateProps } from '../types/props.types';
+import type { ViewMode } from '../types/view.types';
 
 interface SkeletonItemProps {
 	size: number;

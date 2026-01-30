@@ -13,7 +13,7 @@ import { Effect, Schema } from 'effect';
 /**
  * Estructura para datos de creación de álbum compatible con Drizzle
  */
-export type CreateAlbumData = {
+export interface CreateAlbumData {
 	name: string;
 	description?: string | null;
 	emoji?: string | null;
@@ -23,12 +23,12 @@ export type CreateAlbumData = {
 	metadata?: unknown;
 	folderId?: string | null;
 	tags?: readonly string[];
-};
+}
 
 /**
  * Estructura para filtros de álbum compatible con Drizzle
  */
-export type DrizzleAlbumFilters = {
+export interface DrizzleAlbumFilters {
 	name?: string;
 	description?: string;
 	isFavorite?: boolean;
@@ -40,7 +40,7 @@ export type DrizzleAlbumFilters = {
 	tags?: readonly string[];
 	createdAfter?: Date;
 	createdBefore?: Date;
-};
+}
 
 // ============= Error Types =============
 

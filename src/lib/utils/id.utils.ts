@@ -60,3 +60,30 @@ export function areIdsEquivalent(id1: string, id2: string): boolean {
 	}
 	return normalizeId(id1) === normalizeId(id2);
 }
+
+/**
+ * Extrae un ID de carta desde una URL o string
+ * Útil para obtener el ID desde URLs de navegación o referencias
+ *
+ * @param url URL o string que contiene el ID
+ * @returns El ID extraído o el string original si no se encuentra un patrón específico
+ */
+export function getCardIdFromUrl(url: string): string {
+	if (!url) {
+		return url;
+	}
+
+	// Si parece ser ya un ID (comienza con cm8 o similar), retornarlo directamente
+	if (/^cm8[a-z0-9]+$/i.test(url)) {
+		return url;
+	}
+
+	// Intentar extraer ID desde URL tipo /characters/[id] o similar
+	const urlMatch = url.match(/\/([^/]+)\/?$/);
+	if (urlMatch?.[1]) {
+		return urlMatch[1];
+	}
+
+	// Si no se encuentra un patrón específico, retornar el input
+	return url;
+}

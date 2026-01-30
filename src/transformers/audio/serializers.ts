@@ -4,7 +4,7 @@ import { createDefaultEntityStats } from '@/lib/utils';
 import type { AudioCreateInput, AudioUpdateInput, AudioWithStats } from '@/types/entities/audio';
 import { audioSchema } from '@/types/entities/audio/audio.schema';
 
-type DrizzleAudio = {
+interface DrizzleAudio {
 	id: string;
 	name: string;
 	filePath: string;
@@ -21,7 +21,7 @@ type DrizzleAudio = {
 	folderId: string;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 /**
  * Valida un objeto Audio usando el schema

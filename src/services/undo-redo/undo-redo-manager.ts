@@ -9,11 +9,14 @@
 import { clientLogger } from '@/lib/logger/client-logger';
 
 // Browser-compatible EventEmitter implementation
-type UndoRedoEvents = { type: 'stateChanged'; payload: UndoRedoState };
+interface UndoRedoEvents {
+	type: 'stateChanged';
+	payload: UndoRedoState;
+}
 type URListener<T> = (payload: T) => void;
 
 class EventEmitter {
-	private events = new Map<string, Set<URListener<any>>>();
+	private readonly events = new Map<string, Set<URListener<any>>>();
 
 	on<TEvent extends UndoRedoEvents['type']>(
 		event: TEvent,
@@ -126,7 +129,7 @@ export interface UndoRedoState {
 class UndoRedoManager extends EventEmitter {
 	private history: UndoableAction[] = [];
 	private currentIndex = -1;
-	private options: Required<UndoRedoOptions>;
+	private readonly options: Required<UndoRedoOptions>;
 	private cleanupTimer?: ReturnType<typeof setInterval>;
 
 	constructor(options: UndoRedoOptions = {}) {

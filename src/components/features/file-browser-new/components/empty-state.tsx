@@ -7,7 +7,7 @@ import type { LucideIcon } from 'lucide-react';
 import { FolderOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { EmptyState } from '@/components/ui/empty-state';
-import type { EmptyStateProps } from '../types';
+import type { EmptyStateProps } from '../types/props.types';
 
 export function FileBrowserEmptyState({
 	title = 'Sin archivos',

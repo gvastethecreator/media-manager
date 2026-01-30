@@ -5,7 +5,7 @@
 
 import { serverLogger } from '@/lib/logger/server-logger';
 import { emit } from '@/lib/server/events.server';
-import { STATS_EVENTS, statsEventEmitter } from '@/services/stats';
+import { STATS_EVENTS, statsEventEmitter } from '@/services/stats/stats.service';
 import type { CharacterWithStats } from '@/types/entities/character';
 
 const logger = serverLogger.withContext('CharacterEvents');

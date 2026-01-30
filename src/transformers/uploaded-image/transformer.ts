@@ -12,7 +12,7 @@ import {
 } from '../../types/entities/uploaded-image/types';
 
 // Tipos locales para uploaded image (migración a Drizzle)
-type DrizzleUploadedImageWithRelations = {
+interface DrizzleUploadedImageWithRelations {
 	id: string;
 	name: string;
 	path: string;
@@ -29,9 +29,9 @@ type DrizzleUploadedImageWithRelations = {
 	image?: {
 		thumbnailPath?: string;
 	} | null;
-};
+}
 
-type DrizzleUploadedImageBase = {
+interface DrizzleUploadedImageBase {
 	id: string;
 	name: string;
 	path: string;
@@ -45,7 +45,7 @@ type DrizzleUploadedImageBase = {
 	height: number | null;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 /**
  * Transforms a base Drizzle UploadedImage object into a canonical UploadedImageBase.

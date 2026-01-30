@@ -9,7 +9,7 @@ import type { EntityStats } from '../entity.types';
 /**
  * 🎵 Tipo base de Audio directamente desde el schema de Drizzle.
  */
-export type AudioBase = {
+export interface AudioBase {
 	id: string;
 	name: string;
 	description: string | null;
@@ -43,7 +43,7 @@ export type AudioBase = {
 	mood: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 /**
  * 📊 Métricas y estadísticas calculadas para un archivo de Audio.

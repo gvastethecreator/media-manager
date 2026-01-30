@@ -83,7 +83,6 @@ export function useImageLoader(images: ImageItem[], currentIndex: number, isOpen
 							return `/api/files/content?path=${encodeURIComponent(item.path)}`;
 						}
 						return `/api/files/${imageId}/content`;
-					case 'image':
 					default:
 						// Usar el endpoint de contenido completo para imágenes
 						return `/api/images/${imageId}/content`;

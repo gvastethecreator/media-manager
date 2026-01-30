@@ -49,7 +49,7 @@ const buttonVariants = cva(
 				sm: 'h-9 min-h-[40px] rounded-dt-xs px-4 text-sm',
 				md: 'h-10 min-h-[44px] px-5 py-2.5',
 				lg: 'h-11 min-h-[48px] rounded-dt-md px-10 text-lg',
-				icon: 'h-10 w-10 min-h-[44px] min-w-[44px]',
+				icon: 'h-10 min-h-[44px] w-10 min-w-[44px]',
 				xs: 'h-8 min-h-[36px] rounded-dt-xs px-3 text-xs',
 			},
 			// Variante para touch targets más grandes en móvil
@@ -139,15 +139,15 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
 
 		return (
 			<Comp
-				className={cn(buttonVariants({ variant, size, touch, className }))}
-				ref={ref}
-				disabled={loading || disabled}
-				aria-disabled={loading || disabled}
 				aria-busy={loading}
+				aria-disabled={loading || disabled}
+				className={cn(buttonVariants({ variant, size, touch, className }))}
+				disabled={loading || disabled}
 				onClick={handleClick}
+				ref={ref}
 				{...props}
 			>
-				{loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" aria-hidden="true" />}
+				{loading && <Loader2 aria-hidden="true" className="mr-2 h-4 w-4 animate-spin" />}
 				{children}
 			</Comp>
 		);

@@ -4,8 +4,8 @@
  */
 
 import { useMemo } from 'react';
-import { useFileBrowser } from '../hooks';
-import type { FileBrowserProviderProps } from '../types';
+import { useFileBrowser } from '../hooks/use-file-browser';
+import type { FileBrowserProviderProps } from '../types/props.types';
 import { FileBrowserContext, type FileBrowserContextValue } from './context';
 
 /**

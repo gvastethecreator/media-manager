@@ -8,7 +8,7 @@
 /**
  * 🗿 Modelo base de Collection, basado en el esquema de Drizzle.
  */
-export type CollectionBase = {
+export interface CollectionBase {
 	id: string;
 	name: string;
 	description: string | null;
@@ -34,7 +34,7 @@ export type CollectionBase = {
 	sourceImage: string | null;
 	createdAt: Date;
 	updatedAt: Date;
-};
+}
 
 export interface CollectionEdition {
 	id: string;

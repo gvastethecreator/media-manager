@@ -5,7 +5,6 @@
 import { Canvas, RootState, useFrame, useThree } from '@react-three/fiber';
 /* eslint-disable react/no-unknown-property */
 import React, { forwardRef, useLayoutEffect, useMemo, useRef } from 'react';
-// @ts-expect-error: Three.js types not available, but module works correctly
 import { Color, IUniform, Mesh, ShaderMaterial } from 'three';
 
 interface UniformValue<T = number | Color> {

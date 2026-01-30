@@ -45,7 +45,7 @@ export const SettingsCard = React.forwardRef<HTMLDivElement, SettingsCardProps>(
 					className
 				)}
 				ref={ref}
-				style={color ? { borderColor: color + '20' } : undefined}
+				style={color ? { borderColor: `${color}20` } : undefined}
 				{...props}
 			>
 				{/* Header con Icono y Título */}

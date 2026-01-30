@@ -8,24 +8,20 @@
 // Componentes Base
 // ============================================================================
 
-export {
-  FlipContainer,
-  TransitionGroup,
-  TransitionItem,
-  MorphContainer,
-  AnimatePresence,
-} from './index';
+export { FlipContainer } from './FlipContainer';
+export { MorphContainer } from './MorphContainer';
+export { AnimatePresence, TransitionGroup, TransitionItem } from './TransitionGroup';
 
 // ============================================================================
 // Componentes de File Viewer
 // ============================================================================
 
 export {
-  FileViewerTransition,
-  FileNavigationTransition,
-  ThumbnailTransition,
-  ThumbnailGridTransition,
-  ToolbarTransition,
+	FileNavigationTransition,
+	FileViewerTransition,
+	ThumbnailGridTransition,
+	ThumbnailTransition,
+	ToolbarTransition,
 } from '@/components/features/file-viewer/file-viewer-transitions';
 
 // ============================================================================
@@ -33,12 +29,12 @@ export {
 // ============================================================================
 
 export {
-  NavPanelTransition,
-  DetailsPanelTransition,
-  PanelItemTransition,
-  PanelSectionTransition,
-  ResizablePanelTransition,
-  PanelOverlayTransition,
+	DetailsPanelTransition,
+	NavPanelTransition,
+	PanelItemTransition,
+	PanelOverlayTransition,
+	PanelSectionTransition,
+	ResizablePanelTransition,
 } from '@/components/panels/panel-transitions';
 
 // ============================================================================
@@ -46,12 +42,12 @@ export {
 // ============================================================================
 
 export {
-  SettingsPageTransition,
-  SettingsSectionTransition,
-  SettingsItemTransition,
-  SettingsFormTransition,
-  SettingsToastTransition,
-  SettingsTabsTransition,
+	SettingsFormTransition,
+	SettingsItemTransition,
+	SettingsPageTransition,
+	SettingsSectionTransition,
+	SettingsTabsTransition,
+	SettingsToastTransition,
 } from '@/components/settings/settings-transitions';
 
 // ============================================================================
@@ -59,11 +55,11 @@ export {
 // ============================================================================
 
 export {
-  EntityCardTransition,
-  EntityCardGridTransition,
-  EntityListTransition,
-  ExpandableCardTransition,
-  EntityPreviewTransition,
+	EntityCardGridTransition,
+	EntityCardTransition,
+	EntityListTransition,
+	EntityPreviewTransition,
+	ExpandableCardTransition,
 } from '@/components/cards/card-transitions';
 
 // ============================================================================
@@ -71,14 +67,14 @@ export {
 // ============================================================================
 
 export {
-  useFlip,
-  useFlipGroup,
-  useMorph,
-  useMorphLoop,
-  useEnterExit,
-  useEnterExitGroup,
-  useEntityCardTransition,
-  useEntityCardGroupTransition,
+	useEnterExit,
+	useEnterExitGroup,
+	useEntityCardGroupTransition,
+	useEntityCardTransition,
+	useFlip,
+	useFlipGroup,
+	useMorph,
+	useMorphLoop,
 } from '@/hooks/transitions';
 
 // ============================================================================
@@ -86,40 +82,36 @@ export {
 // ============================================================================
 
 export {
-  // Motores
-  getFlipEngine,
-  getMorphEngine,
-  getDirectionTracker,
-  getEnterExitCoordinator,
-  
-  // Funciones de morphing
-  generateClipPath,
-  generateBorderRadius,
-  createLiquidMorph,
-  createExpandFromPoint,
-  createContractToPoint,
-  
-  // Easings
-  customEasings,
-  contextualEasings,
-  springConfigs,
-  getDurationByDistance,
-  getEasingByMovement,
-  
-  // Presets
-  enterPresets,
-  exitPresets,
-  statePresets,
-  getDirectionalEnterPreset,
-  getDirectionalExitPreset,
-  
-  // Configuración
-  checkBrowserSupport,
-  shouldReduceMotion,
-  getAdjustedDuration,
-  enableTransitionsDebug,
-  disableTransitionsDebug,
-  logTransition,
+	// Configuración
+	checkBrowserSupport,
+	contextualEasings,
+	createContractToPoint,
+	createExpandFromPoint,
+	createLiquidMorph,
+	// Easings
+	customEasings,
+	disableTransitionsDebug,
+	enableTransitionsDebug,
+	// Presets
+	enterPresets,
+	exitPresets,
+	generateBorderRadius,
+	// Funciones de morphing
+	generateClipPath,
+	getAdjustedDuration,
+	getDirectionalEnterPreset,
+	getDirectionalExitPreset,
+	getDirectionTracker,
+	getDurationByDistance,
+	getEasingByMovement,
+	getEnterExitCoordinator,
+	// Motores
+	getFlipEngine,
+	getMorphEngine,
+	logTransition,
+	shouldReduceMotion,
+	springConfigs,
+	statePresets,
 } from '@/lib/transitions';
 
 // ============================================================================
@@ -127,10 +119,10 @@ export {
 // ============================================================================
 
 export type {
-  TransitionDirection,
-  FlipOptions,
-  MorphConfig,
-  EnterConfig,
-  ExitConfig,
-  TransitionGroupConfig,
+	EnterConfig,
+	ExitConfig,
+	FlipOptions,
+	MorphConfig,
+	TransitionDirection,
+	TransitionGroupConfig,
 } from '@/lib/transitions';

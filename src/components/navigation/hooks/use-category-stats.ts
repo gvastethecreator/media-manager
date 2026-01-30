@@ -3,7 +3,7 @@ import { useNavigationData, useNavigationStats } from '@/lib/api/navigation';
 import type { CategoryChild, NavigationCategory } from '../types';
 
 // Tipo que representa cualquier posible item de navegación
-type NavItem = {
+interface NavItem {
 	id: string;
 	name?: string;
 	title?: string;
@@ -23,7 +23,7 @@ type NavItem = {
 		collections?: number;
 		tags?: number;
 	};
-};
+}
 
 /**
  * Hook que proporciona funciones para calcular estadísticas de categorías

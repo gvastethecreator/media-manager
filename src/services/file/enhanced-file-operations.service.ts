@@ -8,7 +8,7 @@
 import { serverLogger } from '@/lib/logger/server-logger';
 import { createDefaultEntityStats } from '@/lib/utils';
 import { getEntityName, getEntityPath } from '@/lib/utils/entity-properties.utils';
-import { toastService } from '@/services/toast';
+import { toastService } from '@/services/toast/toast.service';
 import { undoRedoManager } from '@/services/undo-redo/undo-redo-manager';
 import type { AnyEntityWithStats } from '@/types/entities';
 import { FileErrorCode } from '@/types/entities/file';

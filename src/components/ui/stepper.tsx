@@ -7,12 +7,12 @@ import { cn } from '@/lib/utils';
 // Types
 type StepperOrientation = 'horizontal' | 'vertical';
 type StepState = 'active' | 'completed' | 'inactive' | 'loading';
-type StepIndicators = {
+interface StepIndicators {
 	active?: React.ReactNode;
 	completed?: React.ReactNode;
 	inactive?: React.ReactNode;
 	loading?: React.ReactNode;
-};
+}
 
 interface StepperContextValue {
 	activeStep: number;

@@ -99,138 +99,44 @@ export function EmptyState({
  * Estados vacíos predefinidos para casos comunes
  * ===================================================== */
 
-export interface PresetEmptyStateProps extends Omit<EmptyStateProps, 'icon' | 'title' | 'description'> {
-	/** Acción primaria */
-	onPrimaryAction?: () => void;
-	/** Texto del botón primario */
-	primaryActionLabel?: string;
+interface PresetEmptyStateProps extends Omit<EmptyStateProps, 'icon'> {
+	type: 'inbox' | 'search' | 'folder' | 'image' | 'error' | 'documents';
 }
 
-/** Estado vacío: Sin resultados de búsqueda */
-export function EmptySearchResults({
-	onPrimaryAction,
-	primaryActionLabel = 'Limpiar búsqueda',
-	...props
-}: PresetEmptyStateProps) {
+export function PresetEmptyState({ type, ...props }: PresetEmptyStateProps) {
+	const presets = {
+		inbox: { icon: Inbox, title: 'No hay elementos', description: 'Los nuevos elementos aparecerán aquí' },
+		search: { icon: SearchX, title: 'Sin resultados', description: 'No se encontraron elementos con esos criterios' },
+		folder: { icon: FolderOpen, title: 'Carpeta vacía', description: 'Arrastra archivos aquí o usa el botón de subir' },
+		image: { icon: ImageOff, title: 'Sin imágenes', description: 'No hay imágenes para mostrar' },
+		error: { icon: AlertCircle, title: 'Algo salió mal', description: 'Hubo un error al cargar los datos' },
+		documents: { icon: FileQuestion, title: 'Sin documentos', description: 'No hay documentos para mostrar' },
+	};
+
+	const preset = presets[type];
+
+	return <EmptyState {...props} description={preset.description} icon={preset.icon} title={preset.title} />;
+}
+
+/* =====================================================
+ * 🔄 EMPTY STATE CON ACCIÓN
+ * Con botón de acción integrado
+ * ===================================================== */
+
+interface ActionEmptyStateProps extends Omit<EmptyStateProps, 'actions'> {
+	actionLabel: string;
+	onAction: () => void;
+}
+
+export function ActionEmptyState({ actionLabel, onAction, ...props }: ActionEmptyStateProps) {
 	return (
 		<EmptyState
+			{...props}
 			actions={
-				onPrimaryAction && (
-					<Button onClick={onPrimaryAction} size="sm" variant="outline">
-						{primaryActionLabel}
-					</Button>
-				)
+				<Button onClick={onAction} variant="outline">
+					{actionLabel}
+				</Button>
 			}
-			description="No encontramos coincidencias para tu búsqueda. Intenta con otros términos o ajusta los filtros."
-			icon={SearchX}
-			iconVariant="warning"
-			title="Sin resultados"
-			{...props}
-		/>
-	);
-}
-
-/** Estado vacío: Carpeta vacía */
-export function EmptyFolder({
-	onPrimaryAction,
-	primaryActionLabel = 'Agregar archivos',
-	...props
-}: PresetEmptyStateProps) {
-	return (
-		<EmptyState
-			actions={
-				onPrimaryAction && (
-					<Button onClick={onPrimaryAction} size="sm">
-						{primaryActionLabel}
-					</Button>
-				)
-			}
-			description="Esta carpeta no contiene archivos aún. Arrastra archivos aquí o usa el botón para agregarlos."
-			icon={FolderOpen}
-			iconVariant="primary"
-			title="Carpeta vacía"
-			{...props}
-		/>
-	);
-}
-
-/** Estado vacío: Sin imágenes */
-export function EmptyImages({
-	onPrimaryAction,
-	primaryActionLabel = 'Subir imágenes',
-	...props
-}: PresetEmptyStateProps) {
-	return (
-		<EmptyState
-			actions={
-				onPrimaryAction && (
-					<Button onClick={onPrimaryAction} size="sm">
-						{primaryActionLabel}
-					</Button>
-				)
-			}
-			description="No hay imágenes disponibles. Sube imágenes para comenzar a organizar tu colección."
-			icon={ImageOff}
-			iconVariant="default"
-			title="Sin imágenes"
-			{...props}
-		/>
-	);
-}
-
-/** Estado vacío: Inbox vacío */
-export function EmptyInbox({
-	onPrimaryAction,
-	primaryActionLabel = 'Importar contenido',
-	...props
-}: PresetEmptyStateProps) {
-	return (
-		<EmptyState
-			actions={
-				onPrimaryAction && (
-					<Button onClick={onPrimaryAction} size="sm" variant="outline">
-						{primaryActionLabel}
-					</Button>
-				)
-			}
-			description="No tienes elementos pendientes. Cuando haya contenido nuevo, aparecerá aquí."
-			icon={Inbox}
-			iconVariant="success"
-			title="¡Todo al día!"
-			{...props}
-		/>
-	);
-}
-
-/** Estado vacío: Archivo no encontrado */
-export function EmptyNotFound({ ...props }: Omit<PresetEmptyStateProps, 'onPrimaryAction' | 'primaryActionLabel'>) {
-	return (
-		<EmptyState
-			description="El recurso que buscas no existe o fue movido. Verifica la ruta o vuelve al inicio."
-			icon={FileQuestion}
-			iconVariant="warning"
-			title="No encontrado"
-			{...props}
-		/>
-	);
-}
-
-/** Estado vacío: Error */
-export function EmptyError({ onPrimaryAction, primaryActionLabel = 'Reintentar', ...props }: PresetEmptyStateProps) {
-	return (
-		<EmptyState
-			actions={
-				onPrimaryAction && (
-					<Button onClick={onPrimaryAction} size="sm" variant="destructive">
-						{primaryActionLabel}
-					</Button>
-				)
-			}
-			description="Ocurrió un error inesperado. Por favor intenta de nuevo o contacta soporte si el problema persiste."
-			icon={AlertCircle}
-			iconVariant="error"
-			title="Algo salió mal"
-			{...props}
 		/>
 	);
 }

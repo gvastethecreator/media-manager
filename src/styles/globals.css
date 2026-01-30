@@ -2,6 +2,9 @@
 @tailwind components;
 @tailwind utilities;
 
+/* TCG Card Styles */
+@import "../components/ui/tcg/tcg-card.css";
+
 @layer base {
 	:root {
 		--background: 0 0% 100%;

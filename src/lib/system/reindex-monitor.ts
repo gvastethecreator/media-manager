@@ -36,8 +36,8 @@ export interface SystemHealth {
  * Monitor global para operaciones de reindexado
  */
 class ReindexMonitor {
-	private operations = new Map<string, OperationMetrics>();
-	private maxOperationsHistory = 100;
+	private readonly operations = new Map<string, OperationMetrics>();
+	private readonly maxOperationsHistory = 100;
 	private healthCheckInterval?: NodeJS.Timeout;
 	private isMonitoring = false;
 

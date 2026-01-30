@@ -1,8 +1,8 @@
 import { ImageIcon } from 'lucide-react';
 import { memo, useMemo } from 'react';
-import { UploadedImageCard } from '@/components/cards/uploaded-image-card';
-import { EmptyState } from '@/components/core/data-display';
-import { LoadingScreen } from '@/components/core/feedback';
+import { UploadedImageCard } from '@/components/cards/uploaded-image-card/index';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
+import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/animejs-shim';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useUploadedImages } from '@/lib/api/uploaded-images';
@@ -36,7 +36,7 @@ const UploadedImagesContentView = () => {
 				{items.length === 0 ? (
 					<EmptyState description="Aún no has subido imágenes." icon={ImageIcon} title="Sin imágenes subidas" />
 				) : (
-					<div className="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6">
+					<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
 						{items.map((uploaded, index) => (
 							<motion.div
 								animate={{ opacity: 1, y: 0 }}

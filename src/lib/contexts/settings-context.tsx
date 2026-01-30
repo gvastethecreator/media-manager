@@ -2,8 +2,12 @@
 
 import { createContext, type ReactNode, useCallback, useContext, useEffect, useState } from 'react';
 import { ensureDefaultProfile } from '@/lib/utils/profile/profile-utils';
-import { type CreateProfileInput, type ProfileExtended, type UpdateProfileInput } from '@/services/profile';
-import { profileClient } from '@/services/profile/client';
+import {
+	type CreateProfileInput,
+	type ProfileExtended,
+	profileClient,
+	type UpdateProfileInput,
+} from '@/services/profile/client';
 import { toastService } from '@/services/toast/toast.service';
 import type { ThumbnailQuality } from '@/types/thumbnails';
 import type { ThumbnailAdvancedConfig } from '@/types/thumbnails-advanced.config';

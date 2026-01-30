@@ -31,7 +31,7 @@ import {
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { type EntityOption, useContextMenuEntities } from '@/hooks/use-context-menu-entities';
 import { cn } from '@/lib/utils';
-import type { BrowserItem } from '../types';
+import type { BrowserItem } from '../types/item.types';
 
 // Tipos de acciones del menú contextual
 export type ContextMenuAction =
