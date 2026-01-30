@@ -151,16 +151,16 @@ export async function performSearch(
 	const searchPromises: Promise<any[]>[] = [];
 
 	if (typesToSearch.includes('image')) {
-		searchPromises.push(searchImagesUnified(query, limit, offset).then(rows => rows.map(r => ({ type: 'image' as const, data: r }))));
+		searchPromises.push(searchImagesUnified(query, limit, offset).then(rows => rows.map((r: any) => ({ type: 'image' as const, data: r }))));
 	}
 	if (typesToSearch.includes('video')) {
-		searchPromises.push(searchVideosUnified(query, limit, offset).then(rows => rows.map(r => ({ type: 'video' as const, data: r }))));
+		searchPromises.push(searchVideosUnified(query, limit, offset).then(rows => rows.map((r: any) => ({ type: 'video' as const, data: r }))));
 	}
 	if (typesToSearch.includes('audio')) {
-		searchPromises.push(searchAudiosUnified(query, limit, offset).then(rows => rows.map(r => ({ type: 'audio' as const, data: r }))));
+		searchPromises.push(searchAudiosUnified(query, limit, offset).then(rows => rows.map((r: any) => ({ type: 'audio' as const, data: r }))));
 	}
 	if (typesToSearch.includes('document')) {
-		searchPromises.push(searchDocumentsUnified(query, limit, offset).then(rows => rows.map(r => ({ type: 'document' as const, data: r }))));
+		searchPromises.push(searchDocumentsUnified(query, limit, offset).then(rows => rows.map((r: any) => ({ type: 'document' as const, data: r }))));
 	}
 
 	const results = await Promise.all(searchPromises);

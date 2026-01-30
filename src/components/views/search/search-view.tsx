@@ -39,8 +39,8 @@ export function SearchView(_props: ViewProps) {
 		if (!entity) return;
 
 		if (entity.entityType === 'image') {
-			const imageItems = browserItems.map(i => i.raw).filter(i => i?.entityType === 'image');
-			const imgIndex = imageItems.findIndex(i => i.id === entity.id);
+			const imageItems = browserItems.map((i: BrowserItem) => i.raw).filter((i: any) => i?.entityType === 'image');
+			const imgIndex = imageItems.findIndex((i: any) => i.id === entity.id);
 			openViewer(imageItems as any, Math.max(0, imgIndex));
 		} else {
 			clientLogger.info('Abrir entidad no-imagen (placeholder)', { id: entity.id });
