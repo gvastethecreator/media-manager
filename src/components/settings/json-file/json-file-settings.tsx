@@ -11,12 +11,10 @@ import type { JsonFileWithStats } from '@/types/entities/json-file';
 
 export function JsonFileSettings() {
 	const { data, isLoading, error } = useJsonFiles();
-	const createJsonFile = useCreateJsonFile();
 	const updateJsonFile = useUpdateJsonFile();
 	const deleteJsonFile = useDeleteJsonFile();
 
 	const [search, setSearch] = useState('');
-	const [showCreate, setShowCreate] = useState(false);
 	const [editing, setEditing] = useState<JsonFileWithStats | null>(null);
 	const [nameInput, setNameInput] = useState('');
 
@@ -26,31 +24,7 @@ export function JsonFileSettings() {
 		[jsonFiles, search]
 	);
 
-	const handleCreate = async () => {
-		try {
-			if (!nameInput.trim()) return;
-			// Crear entrada mínima con datos requeridos por schema
-			await createJsonFile.mutateAsync({
-				name: nameInput.trim(),
-				path: `virtual:${Date.now()}.json`,
-				size: 0,
-				hash: `${Date.now()}`,
-				mimeType: 'application/json',
-				extension: 'json',
-				folderId: 'root',
-				isFavorite: false,
-				isArchived: false,
-				content: '{}',
-				isValid: true,
-			});
-			setNameInput('');
-			setShowCreate(false);
-			toastService.success('Archivo JSON creado');
-		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al crear archivo JSON', { description: msg });
-		}
-	};
+
 
 	const handleUpdate = async () => {
 		try {
@@ -88,9 +62,6 @@ export function JsonFileSettings() {
 				<CardContent className="p-3">
 					<div className="mb-3 flex items-center gap-2">
 						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Buscar archivos JSON..." value={search} />
-						<Button onClick={() => setShowCreate(true)} size="sm">
-							<PlusCircle className="mr-2 h-4 w-4" /> Nuevo
-						</Button>
 					</div>
 
 					{isLoading ? (
@@ -146,36 +117,7 @@ export function JsonFileSettings() {
 				</CardContent>
 			</Card>
 
-			<Dialog
-				onOpenChange={(o) => {
-					if (!o) {
-						setShowCreate(false);
-						setNameInput('');
-					}
-				}}
-				open={showCreate}
-			>
-				<DialogContent className="max-w-md">
-					<DialogHeader>
-						<DialogTitle>Nuevo archivo JSON</DialogTitle>
-					</DialogHeader>
-					<div className="space-y-3">
-						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
-						<div className="flex justify-end gap-2">
-							<Button
-								onClick={() => {
-									setShowCreate(false);
-									setNameInput('');
-								}}
-								variant="outline"
-							>
-								Cancelar
-							</Button>
-							<Button onClick={handleCreate}>Crear</Button>
-						</div>
-					</div>
-				</DialogContent>
-			</Dialog>
+
 
 			<Dialog
 				onOpenChange={(o) => {
