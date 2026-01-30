@@ -10,9 +10,14 @@ export interface SystemStats {
 	totalCharacters: number;
 	totalCollections: number;
 	totalTags: number;
+	totalDocuments: number;
+	totalJsonFiles: number;
+	totalFile3D: number;
 	storageUsed: number;
 	storageAvailable: number;
 	dbSize: number;
+	databaseSize: number;
+	formattedDatabaseSize: string;
 	lastBackup?: string;
 }
 

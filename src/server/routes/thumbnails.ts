@@ -4,7 +4,7 @@ import { db } from '@/lib/drizzle';
 import { images } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import type { ProcessStatus, ThumbnailError } from '@/services/thumbnail';
-import { thumbnailService as baseThumbnailService } from '@/services/thumbnail';
+import { thumbnailEventService as baseThumbnailService } from '@/services/thumbnail';
 import {
 	bulkGenerateThumbnails,
 	cleanThumbnails,

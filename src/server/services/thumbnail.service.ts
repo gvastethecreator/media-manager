@@ -9,7 +9,7 @@ import { images } from '@/lib/drizzle/schema/index';
 import type { ThumbnailResult as LibThumbResult } from '@/lib/image/thumbnail';
 import { generateThumbnail } from '@/lib/image/thumbnail';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { thumbnailService as baseThumbnailService } from '@/services/thumbnail/index'; // Renombrado para evitar conflicto
+import { thumbnailUnified as baseThumbnailService } from '@/services/thumbnail/index'; // Usar servicio unificado
 import type { ThumbnailStats } from '@/types/stats';
 import type { LastProcessedThumbnail, ProcessOptions } from '@/types/thumbnails';
 

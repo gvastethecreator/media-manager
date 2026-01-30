@@ -11,12 +11,10 @@ import type { DocumentCreateInput, DocumentWithStats } from '@/types/entities/do
 
 export function DocumentSettings() {
 	const { data, isLoading, error } = useDocuments();
-	const createDocument = useCreateDocument();
 	const updateDocument = useUpdateDocument();
 	const deleteDocument = useDeleteDocument();
 
 	const [search, setSearch] = useState('');
-	const [showCreate, setShowCreate] = useState(false);
 	const [editing, setEditing] = useState<DocumentWithStats | null>(null);
 	const [nameInput, setNameInput] = useState('');
 
@@ -26,44 +24,7 @@ export function DocumentSettings() {
 		[documents, search]
 	);
 
-	const handleCreate = async () => {
-		try {
-			if (!nameInput.trim()) return;
-			const createData: DocumentCreateInput = {
-				name: nameInput.trim(),
-				path: `virtual:${Date.now()}.txt`,
-				size: 0,
-				hash: `${Date.now()}`,
-				mimeType: 'text/plain',
-				extension: 'txt',
-				folderId: 'root',
-				isFavorite: false,
-				isArchived: false,
-				pageCount: null,
-				wordCount: null,
-				language: null,
-				title: nameInput.trim(),
-				author: null,
-				subject: null,
-				keywords: null,
-				creator: null,
-				producer: null,
-				creationDate: null,
-				modificationDate: null,
-				encrypted: false,
-				version: null,
-				content: '',
-				summary: null,
-			};
-			await createDocument.mutateAsync(createData);
-			setNameInput('');
-			setShowCreate(false);
-			toastService.success('Documento creado');
-		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al crear documento', { description: msg });
-		}
-	};
+
 
 	const handleUpdate = async () => {
 		try {
@@ -107,9 +68,6 @@ export function DocumentSettings() {
 				<CardContent className="p-3">
 					<div className="mb-3 flex items-center gap-2">
 						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Buscar documentos..." value={search} />
-						<Button onClick={() => setShowCreate(true)} size="sm">
-							<PlusCircle className="mr-2 h-4 w-4" /> Nuevo
-						</Button>
 					</div>
 
 					{isLoading ? (
@@ -162,36 +120,7 @@ export function DocumentSettings() {
 				</CardContent>
 			</Card>
 
-			<Dialog
-				onOpenChange={(o) => {
-					if (!o) {
-						setShowCreate(false);
-						setNameInput('');
-					}
-				}}
-				open={showCreate}
-			>
-				<DialogContent className="max-w-md">
-					<DialogHeader>
-						<DialogTitle>Nuevo documento</DialogTitle>
-					</DialogHeader>
-					<div className="space-y-3">
-						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
-						<div className="flex justify-end gap-2">
-							<Button
-								onClick={() => {
-									setShowCreate(false);
-									setNameInput('');
-								}}
-								variant="outline"
-							>
-								Cancelar
-							</Button>
-							<Button onClick={handleCreate}>Crear</Button>
-						</div>
-					</div>
-				</DialogContent>
-			</Dialog>
+
 
 			<Dialog
 				onOpenChange={(o) => {

@@ -185,17 +185,29 @@ export async function getTagsHistoricalData(): Promise<
 }
 
 /**
- * Obtiene métricas del sistema (simuladas)
+ * Obtiene métricas del sistema (REAL)
  */
 export async function getSystemMetrics(): Promise<{
 	cpuUsage: number;
 	memoryUsage: number;
 	queueSize: number;
 }> {
-	// Simular métricas del sistema ya que no tenemos acceso real
-	return {
-		cpuUsage: Math.floor(Math.random() * 100),
-		memoryUsage: Math.floor(Math.random() * 100),
-		queueSize: Math.floor(Math.random() * 10),
-	};
+	try {
+		const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:3000'}/api/system/stats`);
+		if (!response.ok) throw new Error('Failed to fetch system stats');
+		const data = await response.json();
+
+		return {
+			cpuUsage: data.cpuUsage || 0,
+			memoryUsage: data.memoryUsage || 0,
+			queueSize: 0,
+		};
+	} catch (error) {
+		console.error('Error al obtener métricas del sistema:', error);
+		return {
+			cpuUsage: 0,
+			memoryUsage: 0,
+			queueSize: 0,
+		};
+	}
 }

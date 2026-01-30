@@ -3,6 +3,7 @@ import { useCreateFavorite, useFavorites } from '@/lib/api/favorites';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useFavoriteStore } from '@/store/entities/favorite';
+import { toastService } from '@/lib/ui/toast';
 import type { ViewProps } from '../types';
 import FavoritesContentView from './favorites-content-view';
 
@@ -57,21 +58,24 @@ export function FavoritesView({ isVisible }: ViewProps) {
 	);
 
 	const handleCreateFavorite = useCallback(() => {
-		// const { toast } = useToast();
 		if (newFavoriteName.trim() === '') {
-			// toast({
-			// 	title: '❌ Error',
-			// 	description: 'El nombre del favorito no puede estar vacío.',
-			// 	variant: 'destructive',
-			// });
+			toastService.error('El nombre del favorito no puede estar vacío.');
 			return;
 		}
-		// TODO: Implementar correctamente con entityId y entityType
-		// createFavorite({ entityId: 'temp', entityType: FavoriteEntityType.IMAGE, userId: null, addedAt: new Date(), notes: newFavoriteDescription, category: null, priority: null });
+
+		// Crear favorito con entity genérica (placeholder funcional)
+		createFavorite({
+			entityId: `manual-${Date.now()}`,
+			entityType: 'collection',
+			name: newFavoriteName,
+			description: newFavoriteDescription,
+			priority: 'normal',
+		});
+
 		setNewFavoriteName('');
 		setNewFavoriteDescription('');
 		setShowForm(false);
-	}, [newFavoriteName]);
+	}, [newFavoriteName, newFavoriteDescription, createFavorite]);
 
 	const handleRetry = useCallback(() => {
 		viewLogger.info('🔄 Reintentando cargar favorites');

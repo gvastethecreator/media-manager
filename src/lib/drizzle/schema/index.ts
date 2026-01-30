@@ -114,6 +114,16 @@ export {
 } from './worldbuilding';
 
 // =================================================================================
+// DEV DOMAIN EXPORTS
+// =================================================================================
+export {
+	devFeatures,
+	serverAlerts,
+	featureStatusEnum,
+	alertLevelEnum,
+} from './dev';
+
+// =================================================================================
 // SCHEMA OBJECT FOR DRIZZLE KIT
 // =================================================================================
 // El objeto schema se crea en drizzle/index.ts para evitar problemas de importación circular

@@ -11,12 +11,10 @@ import type { File3DCreateInput, File3DWithStats } from '@/types/entities/file3d
 
 export function File3DSettings() {
 	const { data, isLoading, error } = useFile3Ds();
-	const createFile3D = useCreateFile3D();
 	const updateFile3D = useUpdateFile3D();
 	const deleteFile3D = useDeleteFile3D();
 
 	const [search, setSearch] = useState('');
-	const [showCreate, setShowCreate] = useState(false);
 	const [editing, setEditing] = useState<File3DWithStats | null>(null);
 	const [nameInput, setNameInput] = useState('');
 
@@ -26,45 +24,7 @@ export function File3DSettings() {
 		[file3ds, search]
 	);
 
-	const handleCreate = async () => {
-		try {
-			if (!nameInput.trim()) return;
-			const createData: File3DCreateInput = {
-				name: nameInput.trim(),
-				path: `virtual:${Date.now()}.obj`,
-				size: 0,
-				hash: `${Date.now()}`,
-				mimeType: 'model/obj',
-				extension: 'obj',
-				folderId: 'root',
-				isFavorite: false,
-				isArchived: false,
-				format: 'obj',
-				version: null,
-				vertices: null,
-				faces: null,
-				triangles: null,
-				materials: null,
-				textures: null,
-				animations: null,
-				bones: null,
-				scenes: null,
-				cameras: null,
-				lights: null,
-				hasUV: false,
-				hasNormals: false,
-				hasColors: false,
-				boundingBox: null,
-			};
-			await createFile3D.mutateAsync(createData);
-			setNameInput('');
-			setShowCreate(false);
-			toastService.success('Archivo 3D creado');
-		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al crear archivo 3D', { description: msg });
-		}
-	};
+
 
 	const handleUpdate = async () => {
 		try {
@@ -107,9 +67,6 @@ export function File3DSettings() {
 				<CardContent className="p-3">
 					<div className="mb-3 flex items-center gap-2">
 						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Buscar archivos 3D..." value={search} />
-						<Button onClick={() => setShowCreate(true)} size="sm">
-							<PlusCircle className="mr-2 h-4 w-4" /> Nuevo
-						</Button>
 					</div>
 
 					{isLoading ? (
@@ -167,36 +124,7 @@ export function File3DSettings() {
 				</CardContent>
 			</Card>
 
-			<Dialog
-				onOpenChange={(o) => {
-					if (!o) {
-						setShowCreate(false);
-						setNameInput('');
-					}
-				}}
-				open={showCreate}
-			>
-				<DialogContent className="max-w-md">
-					<DialogHeader>
-						<DialogTitle>Nuevo archivo 3D</DialogTitle>
-					</DialogHeader>
-					<div className="space-y-3">
-						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
-						<div className="flex justify-end gap-2">
-							<Button
-								onClick={() => {
-									setShowCreate(false);
-									setNameInput('');
-								}}
-								variant="outline"
-							>
-								Cancelar
-							</Button>
-							<Button onClick={handleCreate}>Crear</Button>
-						</div>
-					</div>
-				</DialogContent>
-			</Dialog>
+
 
 			<Dialog
 				onOpenChange={(o) => {

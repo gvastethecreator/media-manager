@@ -15,6 +15,9 @@ import { MediaSettingsModern } from './media-settings-modern';
 import { OrganizationSettingsModern } from './organization-settings-modern';
 import { TaxonomySettingsModern } from './taxonomy-settings-modern';
 import { WorldbuildingSettingsModern } from './worldbuilding-settings-modern';
+import { ProfilesSettings } from '../profiles/profiles-settings';
+import { EntitiesCardsSettings } from '../entities-cards/entities-cards-settings';
+import { UploadedImagesSettings } from '../uploaded-images/uploaded-images-settings';
 
 /**
  * Componente de contenido dinámico basado en el item seleccionado
@@ -47,10 +50,16 @@ function SettingsContent({ itemId }: { itemId: string }) {
 		case 'database':
 			return <SystemSettingsModern />;
 
+		case 'profiles':
+			return <ProfilesSettings />;
+
 		case 'appearance':
 		case 'shortcuts':
 		case 'panels':
 			return <AppearanceSettingsModern />;
+
+		case 'entities-cards':
+			return <EntitiesCardsSettings />;
 
 		case 'folders':
 		case 'thumbnails':
@@ -63,6 +72,9 @@ function SettingsContent({ itemId }: { itemId: string }) {
 		case '3d-files':
 		case 'json-files':
 			return <MediaSettingsModern />;
+
+		case 'uploaded-images':
+			return <UploadedImagesSettings />;
 
 		case 'albums':
 		case 'collections':

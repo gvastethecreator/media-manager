@@ -11,12 +11,10 @@ import type { AudioWithStats } from '@/types/entities/audio';
 
 export function AudioSettings() {
 	const { data, isLoading, error } = useAudios();
-	const createAudio = useCreateAudio();
 	const updateAudio = useUpdateAudio();
 	const deleteAudio = useDeleteAudio();
 
 	const [search, setSearch] = useState('');
-	const [showCreate, setShowCreate] = useState(false);
 	const [editing, setEditing] = useState<AudioWithStats | null>(null);
 	const [nameInput, setNameInput] = useState('');
 
@@ -26,51 +24,7 @@ export function AudioSettings() {
 		[audios, search]
 	);
 
-	const handleCreate = async () => {
-		try {
-			if (!nameInput.trim()) return;
-			// Crear mínimo viable: nombre y placeholders obligatorios
-			// Nota: Estos campos deben existir según el schema base
-			await createAudio.mutateAsync({
-				name: nameInput.trim(),
-				description: null,
-				path: `virtual:${Date.now()}`,
-				size: 0,
-				hash: `${Date.now()}`,
-				mimeType: 'audio/mpeg',
-				extension: 'mp3',
-				folderId: 'root',
-				isFavorite: false,
-				isArchived: false,
-				duration: null,
-				bitrate: null,
-				sampleRate: null,
-				channels: null,
-				format: 'mp3',
-				codec: 'mp3',
-				title: null,
-				artist: null,
-				album: null,
-				year: null,
-				genre: null,
-				track: null,
-				disc: null,
-				albumArtist: null,
-				composer: null,
-				comment: null,
-				lyrics: null,
-				bpm: null,
-				key: null,
-				mood: null,
-			});
-			setNameInput('');
-			setShowCreate(false);
-			toastService.success('Audio creado');
-		} catch (e) {
-			const msg = e instanceof Error ? e.message : 'Error desconocido';
-			toastService.error('Error al crear audio', { description: msg });
-		}
-	};
+
 
 	const handleUpdate = async () => {
 		try {
@@ -108,9 +62,6 @@ export function AudioSettings() {
 				<CardContent className="p-3">
 					<div className="mb-3 flex items-center gap-2">
 						<Input onChange={(e) => setSearch(e.target.value)} placeholder="Buscar audios..." value={search} />
-						<Button onClick={() => setShowCreate(true)} size="sm">
-							<PlusCircle className="mr-2 h-4 w-4" /> Nuevo
-						</Button>
 					</div>
 
 					{isLoading ? (
@@ -159,36 +110,7 @@ export function AudioSettings() {
 				</CardContent>
 			</Card>
 
-			<Dialog
-				onOpenChange={(o) => {
-					if (!o) {
-						setShowCreate(false);
-						setNameInput('');
-					}
-				}}
-				open={showCreate}
-			>
-				<DialogContent className="max-w-md">
-					<DialogHeader>
-						<DialogTitle>Nuevo audio</DialogTitle>
-					</DialogHeader>
-					<div className="space-y-3">
-						<Input onChange={(e) => setNameInput(e.target.value)} placeholder="Nombre" value={nameInput} />
-						<div className="flex justify-end gap-2">
-							<Button
-								onClick={() => {
-									setShowCreate(false);
-									setNameInput('');
-								}}
-								variant="outline"
-							>
-								Cancelar
-							</Button>
-							<Button onClick={handleCreate}>Crear</Button>
-						</div>
-					</div>
-				</DialogContent>
-			</Dialog>
+
 
 			<Dialog
 				onOpenChange={(o) => {
