@@ -123,6 +123,71 @@ export async function phase6_generateThumbnails(
 			logger.error(errorMsg);
 		}
 
+		// ===== AUDIOS =====
+		try {
+			logger.debug('🎵 Procesando waveforms para audios');
+			const { db } = await import('@/lib/drizzle');
+			const { audios } = await import('@/lib/drizzle/schema/index');
+			const { inArray, eq } = await import('drizzle-orm');
+			const { generateAudioWaveformImageFFmpeg } = await import('@/lib/utils/video/ffmpeg-thumbnails');
+
+			// Buscar audios
+			const audiosToCheck = await db
+				.select({
+					id: audios.id,
+					path: audios.path,
+					metadata: audios.metadata,
+					folderId: audios.folderId,
+				})
+				.from(audios)
+				.where(inArray(audios.folderId, folderIds));
+
+			logger.info(`🎵 Verificando waveforms para ${audiosToCheck.length} audios`);
+
+			for (const audio of audiosToCheck) {
+				let metadata: any = {};
+				try {
+					if (audio.metadata) metadata = JSON.parse(audio.metadata);
+				} catch {}
+
+				// Si ya tiene waveformBase64, saltar
+				if (metadata.waveformBase64) continue;
+
+				try {
+					const waveBuffer = await generateAudioWaveformImageFFmpeg(audio.path, {
+						width: 600,
+						height: 200,
+						color: '#3b82f6',
+					});
+
+					if (waveBuffer) {
+						metadata.waveformBase64 = waveBuffer.toString('base64');
+						
+						await db
+							.update(audios)
+							.set({
+								metadata: JSON.stringify(metadata),
+								updatedAt: new Date(),
+							})
+							.where(eq(audios.id, audio.id));
+
+						processed++;
+						logger.debug(`✅ Waveform generado para audio: ${audio.path}`);
+					} else {
+						skipped++;
+					}
+				} catch (error) {
+					const errorMsg = `Error generando waveform para audio ${audio.path}: ${error instanceof Error ? error.message : 'Error desconocido'}`;
+					errors.push(errorMsg);
+					logger.error(errorMsg);
+				}
+			}
+		} catch (error) {
+			const errorMsg = `Error procesando waveforms de audios: ${error instanceof Error ? error.message : 'Error desconocido'}`;
+			errors.push(errorMsg);
+			logger.error(errorMsg);
+		}
+
 		logger.info('✅ Generación de thumbnails completada', {
 			procesados: processed,
 			skipped,

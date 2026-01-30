@@ -1,10 +1,10 @@
 /**
  * @file Modern Appearance Settings
  * @module components/settings/modern/appearance-settings-modern
- * @description Configuración de apariencia, temas y modo oscuro
+ * @description Configuración de apariencia, temas y modo oscuro usando Global Store real
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import {
 	Moon,
 	Palette,
@@ -29,29 +29,34 @@ import {
 	SettingsRow,
 } from '../modern/settings-card';
 
-type ColorScheme = 'light' | 'dark' | 'auto';
+// Imports de lógica real
+import { useInterfaceSettingsStore } from '@/store/entities/settings/store';
+import { useTheme } from '@/hooks/use-theme';
+
 type FontSize = 'xs' | 'sm' | 'md' | 'lg' | 'xl';
 type Density = 'comfortable' | 'default' | 'compact';
-type AccentColor = 'blue' | 'purple' | 'pink' | 'green' | 'orange' | 'red';
-
-const ACCENT_COLORS: Record<AccentColor, { name: string; value: string }> = {
-	blue: { name: 'Azul', value: 'hsl(var(--accent-blue))' },
-	purple: { name: 'Púrpura', value: 'hsl(var(--accent-purple))' },
-	pink: { name: 'Rosa', value: 'hsl(var(--accent-pink))' },
-	green: { name: 'Verde', value: 'hsl(var(--accent-green))' },
-	orange: { name: 'Naranja', value: 'hsl(var(--accent-orange))' },
-	red: { name: 'Rojo', value: 'hsl(var(--accent-red))' },
-};
 
 export function AppearanceSettingsModern() {
-	const [colorScheme, setColorScheme] = useState<ColorScheme>('auto');
-	const [fontSize, setFontSize] = useState<FontSize>('md');
-	const [density, setDensity] = useState<Density>('default');
-	const [accentColor, setAccentColor] = useState<AccentColor>('blue');
-	const [transparency, setTransparency] = useState([80]);
-	const [animations, setAnimations] = useState(true);
-	const [gridDensity, setGridDensity] = useState([3]);
-	const [imageQuality, setImageQuality] = useState([100]);
+	// Hooks reales
+	const { theme, setTheme } = useTheme();
+	const preferences = useInterfaceSettingsStore((s) => s.preferences);
+	const setPreferences = useInterfaceSettingsStore((s) => s.setPreferences);
+
+	// Helpers para mapeo de valores
+	const handleGridDensityChange = (value: number[]) => {
+		// Asumiendo que 'mosaic' es el valor representativo para la demo
+		setPreferences({
+			thumbnailsBorderRadius: { ...preferences?.thumbnailsBorderRadius, mosaic: value[0] }
+		});
+	};
+
+	// Mapeo seguro de valores
+	const fontSize = (preferences?.fontSize as FontSize) || 'base';
+	const density = 'default'; // TODO: Agregar density al store si no existe
+
+	if (!preferences) {
+		return <div className="p-4 text-center">Cargando configuración...</div>;
+	}
 
 	return (
 		<div className="space-y-6">
@@ -70,7 +75,7 @@ export function AppearanceSettingsModern() {
 				description="Elige entre modo claro, oscuro o automático"
 				color="var(--primary)"
 			>
-				<RadioGroup value={colorScheme} onValueChange={(v) => setColorScheme(v as ColorScheme)}>
+				<RadioGroup value={theme} onValueChange={(v) => setTheme(v as any)}>
 					<div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
 						{/* Light Mode */}
 						<RadioGroupItem
@@ -96,11 +101,11 @@ export function AppearanceSettingsModern() {
 
 						{/* Auto Mode */}
 						<RadioGroupItem
-							value="auto"
+							value="system"
 							className="flex h-24 flex-col items-center justify-center gap-3 rounded-xl border-2 transition-all hover:bg-muted/50 data-[state=checked]:border-primary data-[state=checked]:bg-primary/5"
 						>
 							<Monitor className="h-8 w-8 text-muted-foreground" />
-							<Label htmlFor="auto" className="cursor-pointer">
+							<Label htmlFor="system" className="cursor-pointer">
 								<span className="font-medium">Automático</span>
 							</Label>
 						</RadioGroupItem>
@@ -108,55 +113,27 @@ export function AppearanceSettingsModern() {
 				</RadioGroup>
 			</SettingsCard>
 
-			{/* Accent Color Card */}
-			<SettingsCard
-				icon={<Sliders />}
-				title="Color de Acento"
-				description="Elige el color principal de la interfaz"
-				color="var(--primary)"
-			>
-				<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-					{Object.entries(ACCENT_COLORS).map(([key, { name, value }]) => (
-						<button
-							key={key}
-							onClick={() => setAccentColor(key as AccentColor)}
-							className={cn(
-								'group flex h-16 flex-col items-center justify-center gap-2 rounded-xl border-2 transition-all',
-								'hover:bg-muted/50',
-								accentColor === key
-									? 'border-primary ring-2 ring-primary/20'
-									: 'border-transparent'
-							)}
-						>
-							<div
-								className="h-6 w-6 rounded-full transition-transform group-hover:scale-110"
-								style={{ backgroundColor: value }}
-							/>
-							<span className="text-xs">{name}</span>
-						</button>
-					))}
-				</div>
-			</SettingsCard>
-
 			{/* Typography & Density Card */}
 			<SettingsCard
 				icon={<Type />}
-				title="Tipografía y Densidad"
-				description="Ajusta tamaño de fuente y espaciado"
+				title="Tipografía"
+				description="Ajusta tamaño de fuente"
 				color="var(--primary)"
 			>
 				<SettingsGroup title="Tamaño de Fuente">
 					<div className="flex flex-col gap-3">
 						{[
-							{ value: 'xs' as FontSize, label: 'Extra pequeño', size: 'text-xs' },
-							{ value: 'sm' as FontSize, label: 'Pequeño', size: 'text-sm' },
-							{ value: 'md' as FontSize, label: 'Mediano', size: 'text-base' },
-							{ value: 'lg' as FontSize, label: 'Grande', size: 'text-lg' },
-							{ value: 'xl' as FontSize, label: 'Extra grande', size: 'text-xl' },
+							{ value: 'xs', label: 'Extra pequeño', size: 'text-xs' },
+							{ value: 'sm', label: 'Pequeño', size: 'text-sm' },
+							{ value: 'base', label: 'Normal', size: 'text-base' },
+							{ value: 'lg', label: 'Grande', size: 'text-lg' },
+							{ value: 'xl', label: 'Extra grande', size: 'text-xl' },
 						].map((item) => (
 							<RadioGroupItem
 								key={item.value}
 								value={item.value}
+								checked={preferences.fontSize === item.value}
+								onClick={() => setPreferences({ fontSize: item.value as FontSize })}
 								className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all hover:bg-muted/50 data-[state=checked]:border-primary data-[state=checked]:bg-primary/5"
 							>
 								<span className={item.size}>Abc</span>
@@ -165,50 +142,34 @@ export function AppearanceSettingsModern() {
 						))}
 					</div>
 				</SettingsGroup>
-
-				<Separator />
-
-				<SettingsGroup title="Densidad de Interfaz">
-					<Tabs defaultValue={density} onValueChange={(v) => setDensity(v as Density)}>
-						<TabsList className="grid w-full grid-cols-3">
-							<TabsTrigger value="comfortable" className="text-sm">
-								Confortable
-							</TabsTrigger>
-							<TabsTrigger value="default" className="text-sm">
-								Default
-							</TabsTrigger>
-							<TabsTrigger value="compact" className="text-sm">
-								Compacto
-							</TabsTrigger>
-						</TabsList>
-					</Tabs>
-				</SettingsGroup>
 			</SettingsCard>
 
 			{/* Display & Effects Card */}
 			<SettingsCard
 				icon={<LayoutGrid />}
-				title="Visualización y Efectos"
-				description="Transparencia, animaciones y calidad"
+				title="Efectos Visuales"
+				description="Animaciones y rendimiento"
 				color="var(--primary)"
 			>
-				<SettingsRow label="Transparencia del panel" description="Opacidad de paneles flotantes">
-					<div className="flex w-48 items-center gap-3">
-						<Slider
-							value={transparency}
-							onValueChange={setTransparency}
-							max={100}
-							step={5}
-							className="flex-1"
-						/>
-						<span className="text-sm tabular-nums text-muted-foreground w-10">
-							{transparency[0]}%
-						</span>
-					</div>
+				<SettingsRow label="Animaciones Globales" description="Habilitar animaciones de interfaz">
+					<Switch
+						checked={preferences.animations}
+						onCheckedChange={(v) => setPreferences({ animations: v })}
+					/>
 				</SettingsRow>
 
-				<SettingsRow label="Animaciones" description="Animaciones y transiciones suaves">
-					<Switch checked={animations} onCheckedChange={setAnimations} />
+				<SettingsRow label="Animaciones en Miniaturas" description="Efectos hover en items">
+					<Switch
+						checked={preferences.thumbnailsAnimations}
+						onCheckedChange={(v) => setPreferences({ thumbnailsAnimations: v })}
+					/>
+				</SettingsRow>
+
+				<SettingsRow label="Ultra Performance" description="Desactivar efectos costosos">
+					<Switch
+						checked={preferences.thumbnailsUltraPerformance}
+						onCheckedChange={(v) => setPreferences({ thumbnailsUltraPerformance: v })}
+					/>
 				</SettingsRow>
 			</SettingsCard>
 
@@ -216,60 +177,19 @@ export function AppearanceSettingsModern() {
 			<SettingsCard
 				icon={<ImageIcon />}
 				title="Visualización de Media"
-				description="Configuración de grid y calidad de imágenes"
+				description="Configuración de grid"
 				color="var(--entity-image)"
 			>
-				<SettingsGroup title="Densidad de Grid">
+				<SettingsGroup title="Opciones de Grid">
 					<div className="space-y-3">
-						<div className="flex items-center justify-between">
-							<Label htmlFor="grid-density">Columnas por fila</Label>
-							<span className="text-sm text-muted-foreground">{gridDensity[0]} columnas</span>
-						</div>
-						<Slider
-							id="grid-density"
-							value={gridDensity}
-							onValueChange={setGridDensity}
-							min={2}
-							max={8}
-							step={1}
-						/>
+						<SettingsRow label="Respetar Aspect Ratio" description="Mantener proporción original en grid">
+							<Switch
+								checked={preferences.thumbnailsRespectAspectRatio}
+								onCheckedChange={(v) => setPreferences({ thumbnailsRespectAspectRatio: v })}
+							/>
+						</SettingsRow>
 					</div>
 				</SettingsGroup>
-
-				<Separator />
-
-				<SettingsRow label="Calidad de imágenes" description="Balance entre calidad y rendimiento">
-					<div className="flex w-48 items-center gap-3">
-						<Slider
-							value={imageQuality}
-							onValueChange={setImageQuality}
-							min={50}
-							max={100}
-							step={10}
-							className="flex-1"
-						/>
-						<span className="text-sm tabular-nums text-muted-foreground w-10">
-							{imageQuality[0]}%
-						</span>
-					</div>
-				</SettingsRow>
-
-				<SettingsRow label="Cargar thumbnails en scroll" description="Lazy loading de miniaturas">
-					<Switch defaultChecked />
-				</SettingsRow>
-			</SettingsCard>
-
-			{/* Reset Card */}
-			<SettingsCard
-				icon={<Monitor />}
-				title="Restaurar Defaults"
-				description="Vuelve a la configuración original"
-				color="var(--destructive)"
-				variant="outlined"
-			>
-				<Button variant="destructive" className="w-full">
-					Restaurar configuración por defecto
-				</Button>
 			</SettingsCard>
 		</div>
 	);

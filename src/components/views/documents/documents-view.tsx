@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { LoadingScreen } from '@/components/core/feedback';
 import { type BrowserItem, FileBrowser, toBrowserItem } from '@/components/features/file-browser-new';
+import { CodeViewer } from '@/components/viewers/code-viewer';
+import { PdfViewer } from '@/components/viewers/pdf-viewer';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useDocumentStore } from '@/store/entities/document';
 import type { ViewProps } from '../types';
@@ -14,6 +16,9 @@ export default function DocumentsView(_props: ViewProps) {
 	const fetchDocuments = useDocumentStore((s) => s.fetchDocuments);
 
 	const hasInitRef = useRef(false);
+	const [codeViewerOpen, setCodeViewerOpen] = useState(false);
+	const [pdfViewerOpen, setPdfViewerOpen] = useState(false);
+	const [selectedDocument, setSelectedDocument] = useState<any>(null);
 
 	const documents = useMemo(() => Object.values(documentsRecord || {}), [documentsRecord]);
 	const count = documents.length;
@@ -35,8 +40,16 @@ export default function DocumentsView(_props: ViewProps) {
 	}, []);
 
 	const handleDoubleClick = useCallback((item: BrowserItem) => {
-		// Por ahora, no abrimos visor específico; se podría integrar un viewer de documentos
-		logger.info('Doble click en documento', { id: item.id, name: item.name });
+		const entity = item.raw as any;
+		if (!entity) return;
+
+		setSelectedDocument(entity);
+		const ext = entity.name.split('.').pop()?.toLowerCase();
+
+		if (ext === 'pdf') setPdfViewerOpen(true);
+		else setCodeViewerOpen(true);
+
+		logger.info('Doble click en documento -> Abriendo visor', { id: entity.id });
 	}, []);
 
 	if (isLoading && count === 0) {
@@ -63,7 +76,6 @@ export default function DocumentsView(_props: ViewProps) {
 
 	return (
 		<div className="h-full">
-			{/* Toolbar con controles superiores */}
 			<div className="flex items-center justify-between gap-3 border-border border-b bg-background/40 px-3 py-2 backdrop-blur-sm">
 				<div className="flex min-w-0 items-center gap-3">
 					<div className="min-w-0">
@@ -74,8 +86,6 @@ export default function DocumentsView(_props: ViewProps) {
 					</div>
 				</div>
 			</div>
-
-			{/* FileBrowser para mostrar todos los documentos */}
 			<div className="min-h-0 flex-1 overflow-hidden">
 				<FileBrowser
 					className="h-full"
@@ -84,6 +94,29 @@ export default function DocumentsView(_props: ViewProps) {
 					onItemDoubleClick={handleDoubleClick}
 				/>
 			</div>
+			{selectedDocument && (
+				<>
+					<CodeViewer
+						file={{
+							id: selectedDocument.id,
+							name: selectedDocument.name,
+							content: selectedDocument.content,
+							url: selectedDocument.url || `/api/documents/${selectedDocument.id}/content`,
+						}}
+						isOpen={codeViewerOpen}
+						onOpenChange={setCodeViewerOpen}
+					/>
+					<PdfViewer
+						file={{
+							id: selectedDocument.id,
+							name: selectedDocument.name,
+							url: selectedDocument.url || `/api/documents/${selectedDocument.id}/download`,
+						}}
+						isOpen={pdfViewerOpen}
+						onOpenChange={setPdfViewerOpen}
+					/>
+				</>
+			)}
 		</div>
 	);
 }

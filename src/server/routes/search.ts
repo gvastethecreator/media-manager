@@ -1,38 +1,33 @@
 import express from 'express';
 import { isFts5Enabled } from '@/lib/drizzle/fts5';
 import { serverLogger } from '@/lib/logger/server-logger';
-import { searchFilesFts, searchImages } from '../services/search.service';
+import { searchFilesFts, searchImages, performSearch } from '../services/search.service';
 
 const logger = serverLogger.withContext('SearchRoute');
 
 const router = express.Router();
 
-// GET /search - Búsqueda global
+// GET /search - Búsqueda global (UNIFICADA)
 router.get('/', async (req, res) => {
 	try {
-		const { query, limit = '100', type = 'all', sortBy = 'relevance', sortOrder = 'desc' } = req.query;
+		const { q, query, limit = '50', offset = '0', type = 'all' } = req.query;
+		const searchQuery = (q || query) as string;
 
-		if (!query || typeof query !== 'string') {
-			res.status(400).json({ error: 'El parámetro query es requerido' });
-			return;
+		if (!searchQuery || typeof searchQuery !== 'string') {
+			return res.json({ query: '', type: 'all', total: 0, results: [] });
 		}
+
+		const parsedLimit = Math.min(100, parseInt(limit as string, 10) || 50);
+		const parsedOffset = Math.max(0, parseInt(offset as string, 10) || 0);
+		const validTypes = ['all', 'image', 'video', 'audio', 'document'];
+		const searchType = validTypes.includes(type as string) ? (type as 'all' | 'image' | 'video' | 'audio' | 'document') : 'all';
 
 		const startTime = Date.now();
-
-		// Por ahora solo implementamos búsqueda de imágenes
-		// TODO: Expandir para videos, audio, etc.
-		let items: any[] = [];
-		if (type === 'images' || type === 'all') {
-			items = await searchImages(query, Number.parseInt(limit as string, 10));
-		}
-
+		const searchResults = await performSearch(searchQuery, searchType, parsedLimit, parsedOffset);
 		const took = Date.now() - startTime;
 
 		res.json({
-			items,
-			results: items,
-			total: items.length,
-			query,
+			...searchResults,
 			took,
 			engine: 'like',
 		});

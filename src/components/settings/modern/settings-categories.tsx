@@ -24,6 +24,9 @@ import {
 	Eye,
 	Server,
 	Zap,
+	IdCard,
+	UploadCloud,
+	UserCog,
 } from 'lucide-react';
 import type { SettingsCategory, SettingsNavItem } from '../modern/modern-settings-layout';
 
@@ -60,6 +63,13 @@ export const SETTINGS_CATEGORIES: SettingsCategory[] = [
 				color: 'var(--entity-system)',
 				description: 'Configuración y mantenimiento de BD',
 			},
+			{
+				id: 'profiles',
+				label: 'Perfiles',
+				icon: <UserCog className="h-4 w-4" />,
+				color: 'var(--entity-profile)',
+				description: 'Gestión de perfiles de usuario',
+			},
 		],
 	},
 	{
@@ -88,6 +98,13 @@ export const SETTINGS_CATEGORIES: SettingsCategory[] = [
 				icon: <LayoutGrid className="h-4 w-4" />,
 				color: 'var(--primary)',
 				description: 'Layout de paneles laterales',
+			},
+			{
+				id: 'entities-cards',
+				label: 'Tarjetas',
+				icon: <IdCard className="h-4 w-4" />,
+				color: 'var(--entity-file)',
+				description: 'Personalización de tarjetas de entidad',
 			},
 		],
 	},
@@ -160,6 +177,13 @@ export const SETTINGS_CATEGORIES: SettingsCategory[] = [
 				icon: <FileText className="h-4 w-4" />,
 				color: 'var(--entity-json)',
 				description: 'Editor y validador de JSON',
+			},
+			{
+				id: 'uploaded-images',
+				label: 'Imágenes Subidas',
+				icon: <UploadCloud className="h-4 w-4" />,
+				color: 'var(--entity-image)',
+				description: 'Gestión de imágenes subidas',
 			},
 		],
 	},

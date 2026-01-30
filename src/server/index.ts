@@ -50,6 +50,7 @@ import tagsEffectRouter from './routes/tags.effect';
 import tasksRouter from './routes/tasks';
 import testCharactersRouter from './routes/test-characters';
 import thumbnailsRouter from './routes/thumbnails';
+import { thumbnailsUnifiedRouter } from './routes/thumbnails-unified';
 import videosEffectRouter from './routes/videos.effect';
 import {
 	conceptsRouter as conceptsEffectRouter,
@@ -131,6 +132,7 @@ app.use('/api/metadata', metadataRouter);
 app.use('/api/metadata-advanced', metadataAdvancedRouter);
 app.use('/api/settings', settingsRouter);
 app.use('/api/thumbnails', thumbnailsRouter);
+app.use('/api/thumbnails/unified', thumbnailsUnifiedRouter);
 app.use('/api/stats', statsRouter);
 app.use('/api/profiles', profilesRouter);
 app.use('/api/activity', activityRouter);

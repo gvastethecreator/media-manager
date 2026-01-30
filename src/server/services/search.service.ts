@@ -1,10 +1,10 @@
 // Usar servicio de imágenes en lugar de server action
 
-import { like, or, sql } from 'drizzle-orm';
+import { desc, ilike, like, or, sql } from 'drizzle-orm';
 import { Effect } from 'effect';
 import { db, getDbClient } from '@/lib/drizzle';
 import { isFts5Enabled } from '@/lib/drizzle/fts5';
-import { files } from '@/lib/drizzle/schema/index';
+import { files, images, videos, audios, documents } from '@/lib/drizzle/schema/index';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { convertServerImageToFileItem, type ServerImage } from '@/services/image/converter.service';
 import { getAll } from '@/services/image/image.service.effect';
@@ -81,4 +81,91 @@ export async function searchFilesFts(query: string, limit = 50, offset = 0): Pro
 	log.debug('search.fts', { query, rows: rows.length, engine, ms: Math.round(took * 100) / 100 });
 
 	return { items: rows, total, engine };
+}
+
+// === NUEVA FUNCIÓN: BÚSQUEDA GLOBAL UNIFICADA ===
+
+export type SearchResultType = 'image' | 'video' | 'audio' | 'document';
+
+export interface SearchResponse {
+	query: string;
+	type: SearchResultType | 'all';
+	total: number;
+	results: Array<{
+		type: SearchResultType;
+		data: any;
+	}>;
+}
+
+async function searchImagesUnified(query: string, limit: number, offset: number) {
+	return db
+		.select()
+		.from(images)
+		.where(or(ilike(images.name, `%${query}%`), ilike(images.path, `%${query}%`)))
+		.orderBy(desc(images.createdAt))
+		.limit(limit)
+		.offset(offset);
+}
+
+async function searchVideosUnified(query: string, limit: number, offset: number) {
+	return db
+		.select()
+		.from(videos)
+		.where(or(ilike(videos.name, `%${query}%`), ilike(videos.path, `%${query}%`)))
+		.orderBy(desc(videos.createdAt))
+		.limit(limit)
+		.offset(offset);
+}
+
+async function searchAudiosUnified(query: string, limit: number, offset: number) {
+	return db
+		.select()
+		.from(audios)
+		.where(or(ilike(audios.name, `%${query}%`), ilike(audios.path, `%${query}%`)))
+		.orderBy(desc(audios.createdAt))
+		.limit(limit)
+		.offset(offset);
+}
+
+async function searchDocumentsUnified(query: string, limit: number, offset: number) {
+	return db
+		.select()
+		.from(documents)
+		.where(or(ilike(documents.name, `%${query}%`), ilike(documents.path, `%${query}%`)))
+		.orderBy(desc(documents.createdAt))
+		.limit(limit)
+		.offset(offset);
+}
+
+export async function performSearch(
+	query: string,
+	type: 'all' | SearchResultType,
+	limit = 50,
+	offset = 0
+): Promise<SearchResponse> {
+	if (!query.trim()) {
+		return { query, type, total: 0, results: [] };
+	}
+
+	const typesToSearch = type === 'all' ? ['image', 'video', 'audio', 'document'] : [type];
+	const searchPromises: Promise<any[]>[] = [];
+
+	if (typesToSearch.includes('image')) {
+		searchPromises.push(searchImagesUnified(query, limit, offset).then(rows => rows.map(r => ({ type: 'image' as const, data: r }))));
+	}
+	if (typesToSearch.includes('video')) {
+		searchPromises.push(searchVideosUnified(query, limit, offset).then(rows => rows.map(r => ({ type: 'video' as const, data: r }))));
+	}
+	if (typesToSearch.includes('audio')) {
+		searchPromises.push(searchAudiosUnified(query, limit, offset).then(rows => rows.map(r => ({ type: 'audio' as const, data: r }))));
+	}
+	if (typesToSearch.includes('document')) {
+		searchPromises.push(searchDocumentsUnified(query, limit, offset).then(rows => rows.map(r => ({ type: 'document' as const, data: r }))));
+	}
+
+	const results = await Promise.all(searchPromises);
+	const flattenedResults = results.flat();
+	const total = flattenedResults.length;
+
+	return { query, type, total, results: flattenedResults };
 }

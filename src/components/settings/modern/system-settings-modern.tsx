@@ -1,7 +1,7 @@
 /**
  * @file Modern System Settings
  * @module components/settings/modern/system-settings-modern
- * @description Vista de configuración del sistema con diseño mejorado
+ * @description Vista de configuración del sistema con diseño mejorado y datos reales
  */
 
 import {
@@ -30,30 +30,71 @@ import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { cn } from '@/lib/utils';
 import { SettingsCard, SettingsGroup, SettingsRow } from '../modern/settings-card';
-
-/**
- * Datos simulados de estadísticas del sistema
- */
-const SYSTEM_STATS = {
-	cpu: { usage: 45, cores: 8, model: 'Intel Core i9' },
-	memory: { used: '12.4 GB', total: '32 GB', usage: 38.75 },
-	disk: { used: '234.5 GB', total: '512 GB', usage: 45.8 },
-	database: { size: '1.2 GB', tables: 24, connections: 5 },
-	uptime: '15d 7h 23m',
-	version: 'v2.4.1',
-	build: '2025-01-29',
-};
+import { useRepairSystem, useResetDatabase, useSystemStats } from '@/lib/api/system';
+import { toastService } from '@/lib/ui/toast';
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+	AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 
 export function SystemSettingsModern() {
-	const [isRefreshing, setIsRefreshing] = useState(false);
 	const [autoRefresh, setAutoRefresh] = useState(true);
 	const [logLevel, setLogLevel] = useState('info');
 
+	// Real Data Hooks
+	const { data: rawStats, isLoading, refetch } = useSystemStats();
+	const repairSystemMutation = useRepairSystem();
+	const resetDatabaseMutation = useResetDatabase();
+
+	// Helper to extract stats safely
+	const stats = {
+		cpuUsage: 0, // Not provided by current API
+		memoryUsage: 0, // Not provided by current API
+		dbSize: rawStats?.formattedDatabaseSize || '0 B',
+		dbSizeRaw: rawStats?.databaseSize || 0,
+		totalEntities: (rawStats?.totalImages || 0) + (rawStats?.totalVideos || 0) + (rawStats?.totalAudio || 0) + (rawStats?.totalFolders || 0),
+		totalTables: 0, // Not provided by API explicitly
+		uptime: 'N/A', // Not provided
+		version: '2.4.1', // Hardcoded for now
+	};
+
 	const handleRefresh = async () => {
-		setIsRefreshing(true);
-		// Simular refresh
-		await new Promise((resolve) => setTimeout(resolve, 1500));
-		setIsRefreshing(false);
+		await refetch();
+	};
+
+	const handleRepair = async () => {
+		try {
+			const result = await repairSystemMutation.mutateAsync();
+			if (result.success) {
+				toastService.success(result.message);
+				refetch();
+			} else {
+				toastService.error(result.message);
+			}
+		} catch (error) {
+			toastService.error('Error al reparar el sistema');
+		}
+	};
+
+	const handleReset = async () => {
+		try {
+			const result = await resetDatabaseMutation.mutateAsync();
+			if (result.success) {
+				toastService.success(result.message);
+				refetch();
+			} else {
+				toastService.error(result.message);
+			}
+		} catch (error) {
+			toastService.error('Error crítico al resetear base de datos');
+		}
 	};
 
 	return (
@@ -64,59 +105,52 @@ export function SystemSettingsModern() {
 					<h2 className="font-semibold text-2xl text-foreground">Configuración del Sistema</h2>
 					<p className="mt-1 text-muted-foreground text-sm">Monitoreo y configuración general del servidor</p>
 				</div>
-				<Button className="gap-2" disabled={isRefreshing} onClick={handleRefresh} size="sm" variant="outline">
-					<RefreshCw className={cn('h-4 w-4', isRefreshing && 'animate-spin')} />
+				<Button className="gap-2" disabled={isLoading} onClick={handleRefresh} size="sm" variant="outline">
+					<RefreshCw className={cn('h-4 w-4', isLoading && 'animate-spin')} />
 					Actualizar
 				</Button>
 			</div>
 
-			{/* Stats Overview - 4 Cards */}
+			{/* Stats Overview - 3 Cards (CPU/Mem unavailable on current API) */}
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-				{/* CPU Card */}
+				{/* CPU Card - Placeholder for future API */}
 				<Card className="border-l-4" style={{ borderLeftColor: 'var(--primary)' }}>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
-							<CardTitle className="font-medium text-sm">CPU</CardTitle>
+							<CardTitle className="font-medium text-sm">CPU (Simulado)</CardTitle>
 							<Cpu className="h-4 w-4 text-muted-foreground" />
 						</div>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-2">
 							<div className="flex items-baseline gap-2">
-								<span className="font-bold text-3xl text-foreground">{SYSTEM_STATS.cpu.usage}%</span>
-								<span className="text-muted-foreground text-sm">{SYSTEM_STATS.cpu.cores} núcleos</span>
+								<span className="font-bold text-3xl text-foreground">--</span>
 							</div>
-							<Progress className="h-2" value={SYSTEM_STATS.cpu.usage} />
-							<p className="text-muted-foreground text-sm">{SYSTEM_STATS.cpu.model}</p>
+							<Progress className="h-2" value={0} />
 						</div>
 					</CardContent>
 				</Card>
 
-				{/* Memory Card */}
+				{/* Entities Card - Real Data */}
 				<Card className="border-l-4" style={{ borderLeftColor: 'var(--entity-tag)' }}>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
-							<CardTitle className="font-medium text-sm">Memoria</CardTitle>
-							<MemoryStick className="h-4 w-4 text-muted-foreground" />
+							<CardTitle className="font-medium text-sm">Entidades Totales</CardTitle>
+							<Database className="h-4 w-4 text-muted-foreground" />
 						</div>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-2">
 							<div className="flex items-baseline gap-2">
-								<span className="font-bold text-3xl text-foreground">{SYSTEM_STATS.memory.usage}%</span>
-								<span className="text-muted-foreground text-sm">
-									{SYSTEM_STATS.memory.used} / {SYSTEM_STATS.memory.total}
-								</span>
+								<span className="font-bold text-3xl text-foreground">{stats.totalEntities}</span>
+								<span className="text-muted-foreground text-sm">registros</span>
 							</div>
-							<Progress className="h-2" value={SYSTEM_STATS.memory.usage} />
-							<Badge className="w-fit text-sm" variant="outline">
-								32GB DDR4
-							</Badge>
+							<Progress className="h-2" value={100} />
 						</div>
 					</CardContent>
 				</Card>
 
-				{/* Disk Card */}
+				{/* Disk Card - Placeholder */}
 				<Card className="border-l-4" style={{ borderLeftColor: 'var(--entity-folder)' }}>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
@@ -127,37 +161,30 @@ export function SystemSettingsModern() {
 					<CardContent>
 						<div className="space-y-2">
 							<div className="flex items-baseline gap-2">
-								<span className="font-bold text-3xl text-foreground">{SYSTEM_STATS.disk.usage}%</span>
-								<span className="text-muted-foreground text-sm">
-									{SYSTEM_STATS.disk.used} / {SYSTEM_STATS.disk.total}
-								</span>
+								<span className="font-bold text-3xl text-foreground">--</span>
 							</div>
-							<Progress className="h-2" value={SYSTEM_STATS.disk.usage} />
-							<p className="text-muted-foreground text-sm">NVMe SSD 512GB</p>
+							<Progress className="h-2" value={0} />
+							<p className="text-muted-foreground text-sm">Local System</p>
 						</div>
 					</CardContent>
 				</Card>
 
-				{/* Database Card */}
+				{/* Database Card - Real Data */}
 				<Card className="border-l-4" style={{ borderLeftColor: 'var(--entity-collection)' }}>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
-							<CardTitle className="font-medium text-sm">Base de Datos</CardTitle>
+							<CardTitle className="font-medium text-sm">DB Size</CardTitle>
 							<Database className="h-4 w-4 text-muted-foreground" />
 						</div>
 					</CardHeader>
 					<CardContent>
 						<div className="space-y-2">
 							<div className="flex items-baseline gap-2">
-								<span className="font-bold text-3xl text-foreground">{SYSTEM_STATS.database.tables}</span>
-								<span className="text-muted-foreground text-sm">tablas</span>
+								<span className="font-bold text-3xl text-foreground">{stats.dbSize}</span>
 							</div>
 							<div className="flex items-center gap-2">
-								<Badge className="text-sm" variant="secondary">
-									{SYSTEM_STATS.database.size}
-								</Badge>
 								<Badge className="text-sm" variant="outline">
-									{SYSTEM_STATS.database.connections} conexiones
+									SQLite
 								</Badge>
 							</div>
 						</div>
@@ -182,9 +209,6 @@ export function SystemSettingsModern() {
 					</SettingsRow>
 					<SettingsRow description="Habilitar caché para queries frecuentes" label="Cache de consultas">
 						<Switch defaultChecked />
-					</SettingsRow>
-					<SettingsRow description="Máximo de memoria RAM por worker (MB)" label="Límite de memoria de workers">
-						<Input className="w-24" defaultValue={512} type="number" />
 					</SettingsRow>
 				</SettingsGroup>
 
@@ -219,41 +243,43 @@ export function SystemSettingsModern() {
 						color="var(--entity-collection)"
 						description="Configuración y mantenimiento de Drizzle ORM"
 						icon={<Database />}
-						title="Base de Datos"
+						title="Acciones de Base de Datos"
 					>
 						<ChevronDown className="ml-auto h-4 w-4 text-muted-foreground" />
 					</SettingsCard>
 				</CollapsibleTrigger>
 				<CollapsibleContent className="space-y-4 pt-4">
-					<SettingsGroup title="Backups Automáticos">
-						<SettingsRow description="Crear copia de seguridad a las 02:00 AM" label="Activar backups diarios">
-							<Switch defaultChecked />
-						</SettingsRow>
-						<SettingsRow description="Días a conservar" label="Retención de backups">
-							<div className="flex items-center gap-2">
-								<Input className="w-20" defaultValue={7} type="number" />
-								<span className="text-muted-foreground text-sm">días</span>
-							</div>
-						</SettingsRow>
-					</SettingsGroup>
-
-					<Separator />
 
 					<SettingsGroup title="Mantenimiento">
-						<SettingsRow description="Ejecutar VACUUM semanalmente" label="Optimización automática">
-							<Switch defaultChecked />
-						</SettingsRow>
-						<SettingsRow description="Ejecutar ANALYZE para actualizar estadísticas" label="Analizar tabla">
-							<Button size="sm" variant="outline">
-								<Eye className="mr-2 h-4 w-4" />
-								Analizar
+						<SettingsRow description="Verificar integridad y reparar índices" label="Reparar Sistema">
+							<Button disabled={repairSystemMutation.isPending} onClick={handleRepair} size="sm" variant="outline">
+								<Eye className={cn("mr-2 h-4 w-4", repairSystemMutation.isPending && "animate-spin")} />
+								{repairSystemMutation.isPending ? 'Reparando...' : 'Ejecutar Reparación'}
 							</Button>
 						</SettingsRow>
-						<SettingsRow description="Limpiar caché de consultas" label="Vaciar caché">
-							<Button size="sm" variant="destructive">
-								<AlertTriangle className="mr-2 h-4 w-4" />
-								Vaciar
-							</Button>
+						<SettingsRow description="Eliminar todos los datos y reiniciar (Destructivo)" label="Resetear DB">
+							<AlertDialog>
+								<AlertDialogTrigger asChild>
+									<Button size="sm" variant="destructive">
+										<AlertTriangle className="mr-2 h-4 w-4" />
+										Resetear Todo
+									</Button>
+								</AlertDialogTrigger>
+								<AlertDialogContent>
+									<AlertDialogHeader>
+										<AlertDialogTitle>¿Está seguro?</AlertDialogTitle>
+										<AlertDialogDescription>
+											Esta acción eliminará PERMANENTEMENTE todos los datos de la base de datos.
+										</AlertDialogDescription>
+									</AlertDialogHeader>
+									<AlertDialogFooter>
+										<AlertDialogCancel>Cancelar</AlertDialogCancel>
+										<AlertDialogAction onClick={handleReset} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+											Sí, resetear
+										</AlertDialogAction>
+									</AlertDialogFooter>
+								</AlertDialogContent>
+							</AlertDialog>
 						</SettingsRow>
 					</SettingsGroup>
 
@@ -265,14 +291,10 @@ export function SystemSettingsModern() {
 								<CheckCircle className="h-5 w-5 text-green-600" />
 							</div>
 							<div className="flex flex-col gap-0.5">
-								<span className="font-medium text-foreground text-sm">Estado: Sano</span>
-								<span className="text-muted-foreground text-sm">Último backup: hace 23h 45m</span>
+								<span className="font-medium text-foreground text-sm">Estado: Conectado</span>
+								<span className="text-muted-foreground text-sm">Driver: SQLite-Drizzle</span>
 							</div>
 						</div>
-						<Button size="sm" variant="outline">
-							Ver logs
-							<ChevronRight className="ml-2 h-4 w-4" />
-						</Button>
 					</div>
 				</CollapsibleContent>
 			</Collapsible>
@@ -287,22 +309,8 @@ export function SystemSettingsModern() {
 			>
 				<div className="space-y-4">
 					<SettingsRow label="Versión">
-						<Badge variant="outline">{SYSTEM_STATS.version}</Badge>
+						<Badge variant="outline">{stats.version}</Badge>
 					</SettingsRow>
-					<SettingsRow label="Build">
-						<span className="text-muted-foreground text-sm">{SYSTEM_STATS.build}</span>
-					</SettingsRow>
-					<SettingsRow label="Tiempo activo">
-						<span className="font-medium text-foreground text-sm">{SYSTEM_STATS.uptime}</span>
-					</SettingsRow>
-					<Separator />
-					<SettingsRow description="Buscar actualizaciones periódicamente" label="Actualización automática">
-						<Switch defaultChecked />
-					</SettingsRow>
-					<Button className="w-full" variant="outline">
-						<RefreshCw className="mr-2 h-4 w-4" />
-						Ver actualizaciones
-					</Button>
 				</div>
 			</SettingsCard>
 		</div>

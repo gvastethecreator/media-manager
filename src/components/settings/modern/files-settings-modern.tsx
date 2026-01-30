@@ -14,6 +14,7 @@ import {
 	Plus,
 	RefreshCw,
 	Search,
+	Settings2,
 	Trash2,
 	Zap,
 } from 'lucide-react';
@@ -26,7 +27,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useFolders, useReindexFolder } from '@/lib/api/folders';
+import { useFolders, useReindexFolder, useDeleteFolder } from '@/lib/api/folders';
 import {
 	useCleanThumbnails,
 	useLastProcessedThumbnails,
@@ -42,6 +43,9 @@ import { formatBytes } from '@/lib/utils/format.utils';
 import type { FolderWithStats } from '@/types/entities/folder';
 import type { CardActions } from '../common/entity-settings-view';
 import { FolderForm } from '../folders/folders-form';
+import { useReindexConfig } from '../folders/hooks/use-reindex-config';
+import { StructuredReindexConfig } from '../folders/folders-reindex-config';
+import { ReindexTerminal } from '../folders/reindex-terminal';
 
 // ============================================================================
 // COMPONENTE DE CARPETA
@@ -134,12 +138,26 @@ export function FilesSettingsModern() {
 
 	const { settings, updateSettings } = useSettings();
 
+	// Advanced Reindex Config Hook
+	const {
+		showAdvancedConfig,
+		useStructuredFlow,
+		skipThumbnails,
+		skipMetadata,
+		setShowAdvancedConfig,
+		setUseStructuredFlow,
+		setSkipThumbnails,
+		setSkipMetadata,
+		getConfig,
+	} = useReindexConfig();
+
 	// Hooks de datos
 	const foldersQuery = useFolders({ search: searchQuery });
 	const thumbnailStatsQuery = useThumbnailStats();
 	const _lastProcessedQuery = useLastProcessedThumbnails(9);
 
 	// Mutations
+	const deleteFolderMutation = useDeleteFolder();
 	const reindexFolderMutation = useReindexFolder();
 	const optimizeMutation = useOptimizeThumbnails();
 	const reprocessMutation = useReprocessThumbnails();
@@ -217,9 +235,11 @@ export function FilesSettingsModern() {
 		async (folderId: string) => {
 			setReindexingFolderId(folderId);
 			try {
+				// Use advanced config
+				const config = getConfig();
 				await reindexFolderMutation.mutateAsync({
 					id: folderId,
-					options: { skipThumbnails: false },
+					options: config,
 				});
 				toastService.success('Carpeta reindexada correctamente');
 			} catch (err) {
@@ -228,7 +248,7 @@ export function FilesSettingsModern() {
 				setReindexingFolderId(null);
 			}
 		},
-		[reindexFolderMutation]
+		[reindexFolderMutation, getConfig]
 	);
 
 	const handleOptimizeThumbnails = useCallback(async () => {
@@ -347,6 +367,16 @@ export function FilesSettingsModern() {
 										<List className="h-4 w-4" />
 									</Button>
 								</div>
+
+								<Button
+									variant="outline"
+									size="icon"
+									onClick={() => setShowAdvancedConfig(true)}
+									title="Configuración Avanzada de Reindexado"
+								>
+									<Settings2 className="h-4 w-4" />
+								</Button>
+
 								<Button className="gap-2" onClick={handleCreateFolder}>
 									<Plus className="h-4 w-4" />
 									Agregar Carpeta
@@ -388,7 +418,16 @@ export function FilesSettingsModern() {
 									<FolderCard
 										actions={{
 											onEdit: () => handleEditFolder(folder),
-											onDelete: () => {}, // TODO: Implementar
+											onDelete: async () => {
+												if (confirm('¿Estás seguro de eliminar esta carpeta?')) {
+													try {
+														await deleteFolderMutation.mutateAsync(folder.id);
+														toastService.success('Carpeta eliminada');
+													} catch (error) {
+														toastService.error('Error al eliminar carpeta');
+													}
+												}
+											},
 										}}
 										folder={folder}
 										isGrid={viewMode === 'grid'}
@@ -520,6 +559,35 @@ export function FilesSettingsModern() {
 					/>
 				</DialogContent>
 			</Dialog>
+
+			{/* Advanced Reindex Config Dialog */}
+			<StructuredReindexConfig
+				isOpen={showAdvancedConfig}
+				onSkipMetadataChange={setSkipMetadata}
+				onSkipThumbnailsChange={setSkipThumbnails}
+				onToggle={() => setShowAdvancedConfig(!showAdvancedConfig)}
+				onUseStructuredFlowChange={setUseStructuredFlow}
+				skipMetadata={skipMetadata}
+				skipThumbnails={skipThumbnails}
+				useStructuredFlow={useStructuredFlow}
+			/>
+
+			{/* Reindex Terminal - Always mounted but visually toggled or shown when active */}
+			<div className="mt-6 border-t pt-6">
+				<div className="flex items-center justify-between mb-4">
+					<h3 className="text-lg font-medium flex items-center gap-2">
+						<Zap className="h-4 w-4" />
+						Terminal de Procesamiento
+					</h3>
+				</div>
+				<Card className="h-[400px] overflow-hidden bg-zinc-950 border-zinc-800">
+					<ReindexTerminal
+						isActive={true}
+						className="h-full"
+						showProgress={true}
+					/>
+				</Card>
+			</div>
 		</div>
 	);
 }

@@ -14,6 +14,7 @@ import { TooltipProvider } from './components/ui/tooltip';
 import { ReactScanProvider } from './lib/dev/react-scan';
 // import lastLogContent from './logs/last-log.json' with { type: 'json' };
 import { ViewTransitionProvider } from './providers/ViewTransitionProvider';
+import { InterfaceSynchronizer } from './components/core/interface-synchronizer';
 import { router } from './router';
 
 function SSENavigationRefresher() {
@@ -35,6 +36,7 @@ export function App() {
 			<TooltipProvider>
 				<ViewTransitionProvider>
 					<ReactScanProvider>
+						<InterfaceSynchronizer />
 						<ErrorBoundary>
 							<SSENavigationRefresher />
 							<EntityCatalogBootstrapper />
