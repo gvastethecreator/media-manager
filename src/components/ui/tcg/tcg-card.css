@@ -1,0 +1,627 @@
+/**
+ * @file Estilos para cards TCG (Trading Card Game)
+ * @description Efectos visuales, shaders, bordes dinámicos y animaciones para cartas estilo juego
+ */
+
+/* ========================================
+   BASE TCG CARD
+   ======================================== */
+
+.tcg-card {
+	--tcg-bg: var(--card);
+	--tcg-fg: var(--card-foreground);
+	--tcg-border: var(--border);
+	--tcg-accent: var(--primary);
+	--tcg-accent-secondary: var(--secondary);
+	--tcg-glow: 0 0 20px rgba(255, 255, 255, 0.1);
+	--tcg-border-width: 2px;
+	--tcg-radius: 16px;
+	--tcg-inner-radius: 12px;
+
+	position: relative;
+	display: flex;
+	flex-direction: column;
+	width: var(--tcg-width, 220px);
+	min-height: var(--tcg-min-height, 300px);
+	font-size: var(--tcg-font-size, 1rem);
+	border-radius: var(--tcg-radius);
+	background:
+		linear-gradient(
+			145deg,
+			rgba(255, 255, 255, 0.1) 0%,
+			transparent 50%,
+			rgba(0, 0, 0, 0.1) 100%
+		),
+		var(--tcg-bg);
+	backdrop-filter: blur(10px);
+	transform-style: preserve-3d;
+	will-change: transform;
+	cursor: pointer;
+	user-select: none;
+}
+
+/* Frame exterior con borde dinámico */
+.tcg-card__frame {
+	position: relative;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	padding: 12px;
+	border-radius: var(--tcg-radius);
+	border: var(--tcg-border-width) solid transparent;
+	background:
+		linear-gradient(var(--tcg-bg), var(--tcg-bg)) padding-box,
+		linear-gradient(
+			135deg,
+			color-mix(in oklch, var(--tcg-accent) 80%, transparent) 0%,
+			color-mix(
+					in oklch,
+					var(--tcg-accent-secondary, var(--tcg-accent)) 40%,
+					transparent
+				)
+				50%,
+			color-mix(in oklch, var(--tcg-accent) 80%, transparent) 100%
+		)
+		border-box;
+	box-shadow:
+		inset 0 1px 1px rgba(255, 255, 255, 0.1),
+		inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+		var(--tcg-glow);
+	overflow: hidden;
+}
+
+/* Efecto de textura sutil */
+.tcg-card__texture {
+	position: absolute;
+	inset: 0;
+	background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+	opacity: 0.03;
+	pointer-events: none;
+	mix-blend-mode: overlay;
+}
+
+/* ========================================
+   GLARE/REFLECTION EFFECT
+   ======================================== */
+
+.tcg-card__glare {
+	position: absolute;
+	inset: 0;
+	border-radius: var(--tcg-radius);
+	pointer-events: none;
+	z-index: 20;
+}
+
+/* ========================================
+   HEADER
+   ======================================== */
+
+.tcg-card__header {
+	position: relative;
+	z-index: 5;
+	margin-bottom: 8px;
+}
+
+.tcg-card-header {
+	--header-accent: var(--tcg-accent);
+
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	padding: 8px 12px;
+	background: linear-gradient(
+		90deg,
+		color-mix(in oklch, var(--header-accent) 20%, transparent) 0%,
+		color-mix(in oklch, var(--header-accent) 10%, transparent) 100%
+	);
+	border-radius: var(--tcg-inner-radius);
+	border: 1px solid color-mix(in oklch, var(--header-accent) 30%, transparent);
+}
+
+.tcg-card-header__main {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	flex: 1;
+	min-width: 0;
+}
+
+.tcg-card-header__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 28px;
+	height: 28px;
+	border-radius: 6px;
+	background: color-mix(in oklch, var(--header-accent) 30%, transparent);
+	color: var(--header-accent);
+	flex-shrink: 0;
+}
+
+.tcg-card-header__info {
+	display: flex;
+	flex-direction: column;
+	min-width: 0;
+	flex: 1;
+}
+
+.tcg-card-header__title {
+	font-size: 0.95em;
+	font-weight: 700;
+	color: var(--tcg-fg);
+	margin: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	line-height: 1.2;
+}
+
+.tcg-card-header__type {
+	font-size: 0.75em;
+	color: color-mix(in oklch, var(--tcg-fg) 70%, transparent);
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	line-height: 1.2;
+}
+
+.tcg-card-header__cost {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	min-width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: linear-gradient(
+		145deg,
+		color-mix(in oklch, var(--header-accent) 60%, white) 0%,
+		color-mix(in oklch, var(--header-accent) 80%, black) 100%
+	);
+	color: white;
+	font-weight: 700;
+	font-size: 0.9em;
+	box-shadow:
+		0 2px 4px rgba(0, 0, 0, 0.3),
+		inset 0 1px 1px rgba(255, 255, 255, 0.3);
+	flex-shrink: 0;
+}
+
+/* ========================================
+   THUMBNAIL CONTAINER
+   ======================================== */
+
+.tcg-card__thumbnail-container {
+	position: relative;
+	aspect-ratio: 4 / 3;
+	margin-bottom: 12px;
+	border-radius: var(--tcg-inner-radius);
+	overflow: hidden;
+	background: linear-gradient(
+		145deg,
+		color-mix(in oklch, var(--tcg-accent) 10%, var(--muted)) 0%,
+		color-mix(in oklch, var(--tcg-accent) 5%, var(--muted)) 100%
+	);
+}
+
+.tcg-card__thumbnail-frame {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	padding: 4px;
+}
+
+.tcg-card__thumbnail-frame > * {
+	width: 100%;
+	height: 100%;
+	object-fit: cover;
+	border-radius: calc(var(--tcg-inner-radius) - 4px);
+}
+
+.tcg-card__thumbnail-overlay {
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		to bottom,
+		transparent 60%,
+		color-mix(in oklch, var(--tcg-accent) 20%, transparent) 100%
+	);
+	pointer-events: none;
+}
+
+/* ========================================
+   CONTENT
+   ======================================== */
+
+.tcg-card__content {
+	position: relative;
+	z-index: 5;
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding: 0 4px;
+}
+
+/* ========================================
+   FOOTER / STATS
+   ======================================== */
+
+.tcg-card__footer {
+	position: relative;
+	z-index: 5;
+	margin-top: auto;
+	padding-top: 12px;
+}
+
+.tcg-card-stats {
+	--stats-accent: var(--tcg-accent);
+
+	display: flex;
+	gap: 8px;
+	padding: 8px;
+	background: color-mix(in oklch, var(--muted) 50%, transparent);
+	border-radius: var(--tcg-inner-radius);
+}
+
+.tcg-card-stats--horizontal {
+	flex-direction: row;
+	justify-content: space-around;
+}
+
+.tcg-card-stats--vertical {
+	flex-direction: column;
+}
+
+.tcg-card-stat {
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.tcg-card-stat__icon {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 20px;
+	height: 20px;
+	color: var(--stats-accent);
+	opacity: 0.8;
+}
+
+.tcg-card-stat__info {
+	display: flex;
+	flex-direction: column;
+	gap: 1px;
+}
+
+.tcg-card-stat__value {
+	font-size: 0.9em;
+	font-weight: 700;
+	color: var(--tcg-fg);
+	line-height: 1;
+}
+
+.tcg-card-stat__label {
+	font-size: 0.7em;
+	color: color-mix(in oklch, var(--tcg-fg) 60%, transparent);
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	line-height: 1;
+}
+
+/* ========================================
+   DECORATIVE CORNERS
+   ======================================== */
+
+.tcg-card__corner {
+	position: absolute;
+	width: 20px;
+	height: 20px;
+	border: 2px solid color-mix(in oklch, var(--tcg-accent) 50%, transparent);
+	pointer-events: none;
+	z-index: 3;
+}
+
+.tcg-card__corner--tl {
+	top: 8px;
+	left: 8px;
+	border-right: none;
+	border-bottom: none;
+	border-top-left-radius: 8px;
+}
+
+.tcg-card__corner--tr {
+	top: 8px;
+	right: 8px;
+	border-left: none;
+	border-bottom: none;
+	border-top-right-radius: 8px;
+}
+
+.tcg-card__corner--bl {
+	bottom: 8px;
+	left: 8px;
+	border-right: none;
+	border-top: none;
+	border-bottom-left-radius: 8px;
+}
+
+.tcg-card__corner--br {
+	bottom: 8px;
+	right: 8px;
+	border-left: none;
+	border-top: none;
+	border-bottom-right-radius: 8px;
+}
+
+/* ========================================
+   SELECTION INDICATOR
+   ======================================== */
+
+.tcg-card--selected .tcg-card__frame {
+	border-color: var(--primary);
+	box-shadow:
+		inset 0 1px 1px rgba(255, 255, 255, 0.1),
+		inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+		0 0 0 3px color-mix(in oklch, var(--primary) 50%, transparent),
+		var(--tcg-glow);
+}
+
+.tcg-card__selection-indicator {
+	position: absolute;
+	inset: -4px;
+	border-radius: calc(var(--tcg-radius) + 4px);
+	border: 2px solid var(--primary);
+	pointer-events: none;
+	z-index: 15;
+}
+
+.tcg-card__selection-glow {
+	position: absolute;
+	inset: -2px;
+	border-radius: inherit;
+	background: transparent;
+	box-shadow: 0 0 20px color-mix(in oklch, var(--primary) 60%, transparent);
+	animation: tcg-selection-pulse 2s ease-in-out infinite;
+}
+
+/* ========================================
+   COMPACT MODE
+   ======================================== */
+
+.tcg-card--compact {
+	--tcg-radius: 12px;
+	--tcg-inner-radius: 8px;
+}
+
+.tcg-card--compact .tcg-card__frame {
+	padding: 8px;
+}
+
+.tcg-card--compact .tcg-card__thumbnail-container {
+	aspect-ratio: 16 / 10;
+	margin-bottom: 8px;
+}
+
+.tcg-card--compact .tcg-card-header {
+	padding: 6px 8px;
+}
+
+.tcg-card--compact .tcg-card-header__icon {
+	width: 22px;
+	height: 22px;
+}
+
+.tcg-card--compact .tcg-card-header__title {
+	font-size: 0.85em;
+}
+
+.tcg-card--compact .tcg-card-header__type {
+	font-size: 0.65em;
+}
+
+.tcg-card--compact .tcg-card-header__cost {
+	min-width: 26px;
+	height: 26px;
+	font-size: 0.8em;
+}
+
+.tcg-card--compact .tcg-card__corner {
+	width: 14px;
+	height: 14px;
+}
+
+/* ========================================
+   NO 3D MODE
+   ======================================== */
+
+.tcg-card--no-3d {
+	transition:
+		transform 0.3s ease,
+		box-shadow 0.3s ease;
+}
+
+.tcg-card--no-3d:hover {
+	transform: translateY(-4px);
+	box-shadow:
+		0 8px 24px rgba(0, 0, 0, 0.15),
+		var(--tcg-glow);
+}
+
+/* ========================================
+   BADGES
+   ======================================== */
+
+.tcg-card-badge {
+	--badge-color: var(--tcg-accent);
+
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 8px;
+	border-radius: 4px;
+	font-size: 0.7em;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.03em;
+	background: color-mix(in oklch, var(--badge-color) 20%, transparent);
+	color: color-mix(in oklch, var(--badge-color) 90%, var(--tcg-fg));
+	border: 1px solid color-mix(in oklch, var(--badge-color) 40%, transparent);
+}
+
+.tcg-card-badge--rarity {
+	background: linear-gradient(
+		135deg,
+		color-mix(in oklch, var(--badge-color) 40%, transparent) 0%,
+		color-mix(in oklch, var(--badge-color) 20%, transparent) 100%
+	);
+}
+
+/* ========================================
+   ANIMATIONS KEYFRAMES
+   ======================================== */
+
+@keyframes tcg-shimmer {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.7;
+	}
+}
+
+@keyframes tcg-legendary-glow {
+	0%,
+	100% {
+		box-shadow:
+			inset 0 1px 1px rgba(255, 255, 255, 0.1),
+			inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+			0 0 40px color-mix(in oklch, var(--tcg-accent) 40%, transparent),
+			0 0 80px color-mix(in oklch, var(--tcg-accent) 20%, transparent);
+	}
+	50% {
+		box-shadow:
+			inset 0 1px 1px rgba(255, 255, 255, 0.1),
+			inset 0 -1px 1px rgba(0, 0, 0, 0.1),
+			0 0 60px color-mix(in oklch, var(--tcg-accent) 60%, transparent),
+			0 0 120px color-mix(in oklch, var(--tcg-accent) 30%, transparent);
+	}
+}
+
+@keyframes tcg-mythic-shimmer {
+	0% {
+		background-position: -200% 0;
+	}
+	100% {
+		background-position: 200% 0;
+	}
+}
+
+@keyframes tcg-selection-pulse {
+	0%,
+	100% {
+		opacity: 0.6;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 1;
+		transform: scale(1.02);
+	}
+}
+
+/* Efecto de borde animado para cartas míticas */
+.tcg-card__frame[data-rarity="mythic"]::before {
+	content: "";
+	position: absolute;
+	inset: -2px;
+	border-radius: calc(var(--tcg-radius) + 2px);
+	background: linear-gradient(
+		90deg,
+		var(--tcg-accent) 0%,
+		var(--tcg-accent-secondary, var(--tcg-accent)) 25%,
+		white 50%,
+		var(--tcg-accent-secondary, var(--tcg-accent)) 75%,
+		var(--tcg-accent) 100%
+	);
+	background-size: 200% 100%;
+	z-index: -1;
+	animation: tcg-mythic-shimmer 3s linear infinite;
+}
+
+/* ========================================
+   HOVER STATES
+   ======================================== */
+
+.tcg-card:hover .tcg-card__frame {
+	border-color: color-mix(in oklch, var(--tcg-accent) 60%, transparent);
+}
+
+.tcg-card:hover .tcg-card__corner {
+	border-color: color-mix(in oklch, var(--tcg-accent) 70%, transparent);
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 640px) {
+	.tcg-card {
+		--tcg-width: 160px;
+		--tcg-min-height: 220px;
+		--tcg-font-size: 0.875rem;
+	}
+
+	.tcg-card__frame {
+		padding: 8px;
+	}
+
+	.tcg-card-header {
+		padding: 6px 8px;
+	}
+
+	.tcg-card-header__icon {
+		width: 22px;
+		height: 22px;
+	}
+
+	.tcg-card__corner {
+		width: 14px;
+		height: 14px;
+	}
+}
+
+/* ========================================
+   DARK MODE ADJUSTMENTS
+   ======================================== */
+
+@media (prefers-color-scheme: dark) {
+	.tcg-card {
+		background:
+			linear-gradient(
+				145deg,
+				rgba(255, 255, 255, 0.05) 0%,
+				transparent 50%,
+				rgba(0, 0, 0, 0.2) 100%
+			),
+			var(--tcg-bg);
+	}
+
+	.tcg-card__texture {
+		opacity: 0.05;
+	}
+}
+
+/* ========================================
+   REDUCED MOTION
+   ======================================== */
+
+@media (prefers-reduced-motion: reduce) {
+	.tcg-card,
+	.tcg-card__frame,
+	.tcg-card__glare,
+	.tcg-card__selection-glow {
+		animation: none !important;
+		transition: none !important;
+	}
+}

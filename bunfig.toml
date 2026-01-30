@@ -1,0 +1,4 @@
+# Tests unitarios ahora usan Vitest (ver vitest.config.ts)
+# Esta sección solo se mantiene como referencia / legacy
+# [test]
+# ...configuración anterior removida...

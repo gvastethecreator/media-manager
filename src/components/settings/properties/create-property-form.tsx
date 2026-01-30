@@ -1,0 +1,125 @@
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useForm } from 'react-hook-form';
+import { z } from 'zod';
+
+import { Button } from '@/components/ui/button';
+import { ColorPicker } from '@/components/ui/color-picker';
+import { DialogContent, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { EmojiPicker } from '@/components/ui/emoji-picker';
+import { useCreateProperty, useUpdateProperty } from '@/lib/api/properties';
+import { clientLogger } from '@/lib/logger/client-logger';
+import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';
+import { CreatePropertySchema } from '@/types/entities/property/schema';
+import type { PropertyWithStats as Property } from '@/types/entities/property/types';
+import { DynamicCreateForm } from '../common/dynamic-create-form';
+
+type FormData = z.infer<typeof CreatePropertySchema>;
+
+interface CreatePropertyFormProps {
+	property?: Property;
+	isEditing?: boolean;
+	onCreated: (data: Property) => void;
+	onUpdated: (data: Property) => void;
+	onCancel: () => void;
+	onPreview?: () => void;
+}
+
+export function CreatePropertyForm({
+	property,
+	isEditing = false,
+	onCreated,
+	onUpdated,
+	onCancel,
+}: CreatePropertyFormProps) {
+	// React Query mutations
+	const createPropertyMutation = useCreateProperty();
+	const updatePropertyMutation = useUpdateProperty();
+
+	const form = useForm<FormData>({
+		resolver: zodResolver(CreatePropertySchema),
+		defaultValues: {
+			name: property?.name ?? '',
+			category: property?.category ?? 'general',
+			emoji: property?.emoji ?? '🔧',
+			color: property?.color ?? DEFAULT_NEUTRAL_COLOR,
+			description: property?.description ?? '',
+			shortcut: property?.shortcut ?? '',
+			featuredImage: property?.featuredImage ?? undefined,
+			isFavorite: property?.isFavorite ?? false,
+		},
+	});
+
+	const optionalFields = [
+		{
+			name: 'emoji' as const,
+			label: 'Emoji',
+			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => (
+				<EmojiPicker compact onEmojiSelect={onChange} showLabel={false} value={value} />
+			),
+		},
+		{
+			name: 'color' as const,
+			label: 'Color',
+			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => (
+				<ColorPicker compact onChange={onChange} showLabel={false} value={value} />
+			),
+		},
+		{
+			name: 'description' as const,
+			label: 'Descripción',
+			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => (
+				<textarea
+					className="w-full resize-none rounded border p-2 text-xs"
+					onChange={(e) => onChange(e.target.value)}
+					placeholder="Descripción de la propiedad..."
+					rows={3}
+					value={value || ''}
+				/>
+			),
+		},
+		// ...agregar más campos opcionales si es necesario...
+	];
+
+	const handleSubmit = async (data: FormData) => {
+		// Validar que name esté presente
+		if (!data.name) {
+			return;
+		}
+
+		try {
+			if (isEditing && property) {
+				const updated = await updatePropertyMutation.mutateAsync({ id: property.id, data });
+				if (updated) {
+					onUpdated?.(updated);
+				}
+			} else {
+				const created = await createPropertyMutation.mutateAsync(data);
+				if (created) {
+					onCreated?.(created);
+				}
+			}
+		} catch (error) {
+			clientLogger.error('Error al procesar la propiedad:', error);
+		}
+	};
+
+	return (
+		<DialogContent className="max-h-[90vh] max-w-2xl overflow-y-auto">
+			<DialogHeader>
+				<DialogTitle>{property ? 'Editar propiedad' : 'Crear nueva propiedad'}</DialogTitle>
+			</DialogHeader>
+
+			<DynamicCreateForm
+				onSubmit={handleSubmit}
+				optionalFields={optionalFields}
+				submitLabel={isEditing ? 'Guardar cambios' : 'Crear propiedad'}
+			/>
+
+			<DialogFooter>
+				<Button onClick={onCancel} type="button" variant="outline">
+					Cancelar
+				</Button>
+			</DialogFooter>
+		</DialogContent>
+	);
+}
