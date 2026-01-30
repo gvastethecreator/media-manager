@@ -4,13 +4,13 @@
  * @description Layout actualizado con sidebar izquierda, breadcrumbs y diseño responsive
  */
 
-import React, { useCallback, useState } from 'react';
 import { ChevronRight, Search, Settings2, X } from 'lucide-react';
+import React, { useCallback, useState } from 'react';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 import { cn } from '@/lib/utils';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
 
 // Tipos para los items de navegación
 export interface SettingsNavItem {
@@ -80,9 +80,7 @@ function SettingsSidebar({
 			.map((cat) => ({
 				...cat,
 				items: cat.items.filter(
-					(item) =>
-						item.label.toLowerCase().includes(lower) ||
-						item.description?.toLowerCase().includes(lower)
+					(item) => item.label.toLowerCase().includes(lower) || item.description?.toLowerCase().includes(lower)
 				),
 			}))
 			.filter((cat) => cat.items.length > 0);
@@ -97,7 +95,7 @@ function SettingsSidebar({
 						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
 							<Settings2 className="h-4 w-4 text-primary" />
 						</div>
-						<span className="text-sm font-semibold">Configuración</span>
+						<span className="font-semibold text-sm">Configuración</span>
 					</div>
 				</div>
 
@@ -105,17 +103,17 @@ function SettingsSidebar({
 
 				{/* Search Bar */}
 				<div className="relative">
-					<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+					<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 					<Input
+						className="h-9 pl-9 text-sm"
+						onChange={(e) => onSearch(e.target.value)}
 						placeholder="Buscar configuración..."
 						value={searchTerm}
-						onChange={(e) => onSearch(e.target.value)}
-						className="h-9 pl-9 text-sm"
 					/>
 					{searchTerm && (
 						<button
+							className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
 							onClick={() => onSearch('')}
-							className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
 						>
 							<X className="h-4 w-4" />
 						</button>
@@ -129,15 +127,15 @@ function SettingsSidebar({
 						const isActive = activeCategory === category.id;
 
 						return (
-							<div key={category.id} className="space-y-1">
+							<div className="space-y-1" key={category.id}>
 								{/* Category Header */}
 								<button
-									onClick={() => toggleCategory(category.id)}
 									className={cn(
-										'flex w-full items-center justify-between rounded-lg px-3 py-2 text-sm font-medium transition-all duration-200',
+										'flex w-full items-center justify-between rounded-lg px-3 py-2 font-medium text-sm transition-all duration-200',
 										isActive && 'bg-secondary/50',
 										'hover:bg-secondary/30'
 									)}
+									onClick={() => toggleCategory(category.id)}
 								>
 									<div className="flex items-center gap-2">
 										<span
@@ -157,7 +155,7 @@ function SettingsSidebar({
 										<span>{category.label}</span>
 									</div>
 									{category.badge && (
-										<span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 text-xs font-medium text-primary-foreground">
+										<span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 font-medium text-primary-foreground text-xs">
 											{category.badge}
 										</span>
 									)}
@@ -165,24 +163,22 @@ function SettingsSidebar({
 
 								{/* Items Expandibles */}
 								{isExpanded && (
-									<div className="ml-4 mt-1 flex flex-col space-y-0.5">
+									<div className="mt-1 ml-4 flex flex-col space-y-0.5">
 										{category.items.map((item) => {
 											const isItemActive = activeItem === item.id;
 
 											return (
 												<button
-													key={item.id}
-													onClick={() => onNavigate(category.id, item.id)}
 													className={cn(
 														'group flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-all duration-200',
-														isItemActive && 'bg-primary/10 border border-primary/20',
+														isItemActive && 'border border-primary/20 bg-primary/10',
 														'hover:bg-secondary/40'
 													)}
+													key={item.id}
+													onClick={() => onNavigate(category.id, item.id)}
 												>
 													<div className="flex items-center gap-2.5">
-														<div className={cn('h-4 w-4', isItemActive && 'text-primary')}>
-															{item.icon}
-														</div>
+														<div className={cn('h-4 w-4', isItemActive && 'text-primary')}>{item.icon}</div>
 														<span className={isItemActive ? 'font-medium' : ''}>{item.label}</span>
 													</div>
 													<ChevronRight
@@ -233,12 +229,12 @@ export function ModernSettingsLayout({
 			{/* Sidebar Izquierda - Navegación */}
 			<div className="h-full w-80 shrink-0 border-r bg-muted/30">
 				<SettingsSidebar
-					categories={categories}
 					activeCategory={activeSection}
 					activeItem={activeItemId}
+					categories={categories}
 					onNavigate={handleNavigate}
-					searchTerm={searchTerm}
 					onSearch={setSearchTerm}
+					searchTerm={searchTerm}
 				/>
 			</div>
 
@@ -249,7 +245,7 @@ export function ModernSettingsLayout({
 					<Breadcrumb>
 						<BreadcrumbList>
 							<BreadcrumbItem>
-								<BreadcrumbLink href="/settings" className="text-muted-foreground hover:text-foreground">
+								<BreadcrumbLink className="text-muted-foreground hover:text-foreground" href="/settings">
 									<Settings2 className="h-4 w-4" />
 								</BreadcrumbLink>
 							</BreadcrumbItem>
@@ -280,7 +276,7 @@ export function ModernSettingsLayout({
 								>
 									<div className="h-2.5 w-2.5 text-white">{activeItem.icon}</div>
 								</span>
-								<span className="text-xs font-medium">{activeItem.label}</span>
+								<span className="font-medium text-xs">{activeItem.label}</span>
 							</div>
 						)}
 					</div>
@@ -318,9 +314,9 @@ export function ModernSettingsLayoutWrapper({
 
 	return (
 		<ModernSettingsLayout
-			categories={categories}
-			activeSection={activeSection}
 			activeItemId={activeItemId}
+			activeSection={activeSection}
+			categories={categories}
 			onNavigate={handleNavigate}
 		>
 			{children}

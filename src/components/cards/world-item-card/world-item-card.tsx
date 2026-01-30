@@ -8,7 +8,6 @@ import { WorldItemCardContent } from './world-item-card-content';
 import { WorldItemCardFooter } from './world-item-card-footer';
 import { WorldItemCardImages } from './world-item-card-images';
 
-
 // Helper genérico para parsear JSON seguro
 function parseJSONOr<TFallback>(value: unknown, fallback: TFallback): TFallback {
 	if (!value) {
@@ -99,7 +98,9 @@ function TCGVisualEffects({
 			/>
 			<div
 				className="pointer-events-none absolute top-1/4 left-1/2 h-24 w-24 -translate-x-1/2 -translate-y-1/2 opacity-10"
-				style={{ background: `radial-gradient(circle, color-mix(in oklab, ${rarityColor}, transparent 50%) 0%, transparent 70%)` }}
+				style={{
+					background: `radial-gradient(circle, color-mix(in oklab, ${rarityColor}, transparent 50%) 0%, transparent 70%)`,
+				}}
 			>
 				<div className="flex h-full w-full items-center justify-center">{icon}</div>
 			</div>
@@ -142,11 +143,27 @@ function computeItemVisuals(worldItem?: Pick<WorldItemWithStats, 'color' | 'type
 	const baseColor = worldItem?.color || 'var(--dt-primary-600)';
 	const key = worldItem?.type?.toLowerCase() || 'default';
 	const map: Record<string, { icon: React.ReactNode; p: string; s: string }> = {
-		artifact: { icon: <GemIcon className="h-4 w-4" />, p: baseColor, s: `color-mix(in oklab, ${baseColor}, black 20%)` },
-		book: { icon: <BookOpenText className="h-4 w-4" />, p: baseColor, s: `color-mix(in oklab, ${baseColor}, black 20%)` },
-		consumable: { icon: <Beaker className="h-4 w-4" />, p: baseColor, s: `color-mix(in oklab, ${baseColor}, black 20%)` },
+		artifact: {
+			icon: <GemIcon className="h-4 w-4" />,
+			p: baseColor,
+			s: `color-mix(in oklab, ${baseColor}, black 20%)`,
+		},
+		book: {
+			icon: <BookOpenText className="h-4 w-4" />,
+			p: baseColor,
+			s: `color-mix(in oklab, ${baseColor}, black 20%)`,
+		},
+		consumable: {
+			icon: <Beaker className="h-4 w-4" />,
+			p: baseColor,
+			s: `color-mix(in oklab, ${baseColor}, black 20%)`,
+		},
 		weapon: { icon: <Sword className="h-4 w-4" />, p: baseColor, s: `color-mix(in oklab, ${baseColor}, black 20%)` },
-		equipment: { icon: <StoreIcon className="h-4 w-4" />, p: baseColor, s: `color-mix(in oklab, ${baseColor}, black 20%)` },
+		equipment: {
+			icon: <StoreIcon className="h-4 w-4" />,
+			p: baseColor,
+			s: `color-mix(in oklab, ${baseColor}, black 20%)`,
+		},
 		default: { icon: <Box className="h-4 w-4" />, p: baseColor, s: `color-mix(in oklab, ${baseColor}, black 20%)` },
 	};
 	const def = map[key] || map.default;

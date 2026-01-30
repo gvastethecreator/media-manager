@@ -199,31 +199,41 @@ export const PRESET_COLOR_VARS = [
 ] as const;
 
 /**
- * Paleta de colores hex para el ColorPicker (necesarios para valores de formulario)
- * Solo usar en contextos donde se necesite el valor hex explícito
+ * Paleta de colores para el ColorPicker usando variables CSS del sistema de tokens.
+ * Todos los valores utilizan variables CSS para garantizar compatibilidad con temas.
+ *
+ * ⚠️ NUNCA usar valores hex hardcodeados. Siempre usar las variables del sistema.
+ *
+ * @see src/styles/design-tokens.css para la definición de los valores
  */
-export const PRESET_COLORS_HEX = [
+export const PRESET_COLORS_CSS = [
 	'var(--dt-primary-500)', // blue
 	'var(--dt-danger-500)', // red
-	'#22c55e', // green
-	'#eab308', // yellow
-	'#ec4899', // pink
-	'#8b5cf6', // purple
-	'#06b6d4', // cyan
-	'#f97316', // orange
-	'#14b8a6', // teal
-	'#f43f5e', // rose
-	'#6366f1', // indigo
-	'#0ea5e9', // sky
-	'#64748b', // slate
-	'#6b7280', // gray
-	'#d946ef', // fuchsia
-	'#84cc16', // lime
-	'#0891b2', // cyan-dark
-	'#9333ea', // purple-dark
+	'var(--dt-success-500)', // green
+	'var(--dt-warning-500)', // yellow
+	'var(--preset-pink)', // pink
+	'var(--preset-purple)', // purple
+	'var(--preset-cyan)', // cyan
+	'var(--preset-orange)', // orange
+	'var(--preset-teal)', // teal
+	'var(--preset-rose)', // rose
+	'var(--preset-indigo)', // indigo
+	'var(--preset-sky)', // sky
+	'var(--preset-slate)', // slate
+	'var(--preset-gray)', // gray
+	'var(--preset-fuchsia)', // fuchsia
+	'var(--preset-lime)', // lime
+	'var(--preset-cyan-dark)', // cyan-dark
+	'var(--preset-purple-dark)', // purple-dark
 	'var(--dt-neutral-950)', // black
 	'var(--background)', // white
 ] as const;
+
+/**
+ * @deprecated Usar PRESET_COLORS_CSS en su lugar. Los valores hex hardcodeados
+ * no respetan los temas y pueden causar inconsistencias visuales.
+ */
+export const PRESET_COLORS_HEX = PRESET_COLORS_CSS;
 
 /**
  * Color por defecto para nuevas entidades

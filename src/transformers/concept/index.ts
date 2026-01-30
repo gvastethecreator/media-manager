@@ -39,7 +39,6 @@ export { deserializeTags, serializeTags } from './serializers';
 export {
 	fromDrizzleConcept,
 	fromDrizzleConcepts,
-	fromDrizzleConceptWithRelations,
 } from './transformer';
 // 🛡️ Validators - Validaciones con Zod
 export {

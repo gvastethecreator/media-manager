@@ -1,9 +1,9 @@
 // Se reemplaza react-markdown por el visor de @uiw/react-md-editor
 import MDEditor from '@uiw/react-md-editor';
-import { BarChart, Bug, Code2, FileCode2, Folder, Gauge, Image, Loader2, RefreshCw, Server, Tag } from 'lucide-react';
+import { BarChart, Bug, Code2, FileCode2, Folder, Gauge, Image, Loader2, RefreshCw, Server, Sparkles, Tag } from 'lucide-react';
+import { ScannedImagesSettings } from '@/components/settings/image/scanned-images-settings';
 import { FilesSettingsModern } from '@/components/settings/modern/files-settings-modern';
 import { TaxonomySettingsModern } from '@/components/settings/modern/taxonomy-settings-modern';
-import { ScannedImagesSettings } from '@/components/settings/image/scanned-images-settings';
 import { motion } from '@/components/ui/animejs-shim';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -19,6 +19,7 @@ import {
 	SystemPerformanceChart,
 } from './charts/system-charts';
 import { SystemMetricsPanel } from './charts/tech-metrics';
+import { TransitionsDemo } from './transitions-demo';
 import { DOCUMENTATION_FILES, useDocumentation } from './hooks/use-documentation';
 import { useFeaturesIssues } from './hooks/use-features-issues';
 import { useSystemStats } from './hooks/use-system-stats';
@@ -103,6 +104,10 @@ export function DevelopmentView(_props: ViewProps) {
 						<TabsTrigger className="gap-2" value="tech">
 							<Gauge className="h-4 w-4" />
 							Métricas Técnicas
+						</TabsTrigger>
+						<TabsTrigger className="gap-2" value="transitions">
+							<Sparkles className="h-4 w-4" />
+							Transiciones
 						</TabsTrigger>
 					</TabsList>
 
@@ -209,6 +214,10 @@ export function DevelopmentView(_props: ViewProps) {
 								<SystemMetricsPanel />
 							</CardContent>
 						</Card>
+					</TabsContent>
+
+					<TabsContent className="mt-4" value="transitions">
+						<TransitionsDemo />
 					</TabsContent>
 				</Tabs>
 

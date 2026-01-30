@@ -9,7 +9,6 @@ import { Schema } from '@effect/schema';
 import { and, asc, count, desc, eq, isNull, like, ne, or } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
-import { generateReadableId } from '@/lib/utils/id-generator';
 import { collections, imageCollections, images } from '@/lib/drizzle/schema';
 import {
 	Collection,
@@ -18,6 +17,7 @@ import {
 	CollectionWithStats,
 } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import type { CollectionError } from './collection-errors.effect';
 import {
 	CollectionDatabaseError,

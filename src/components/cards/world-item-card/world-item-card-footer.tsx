@@ -52,7 +52,7 @@ export const WorldItemCardFooter: React.FC<WorldItemCardFooterProps> = ({
 
 	return (
 		<div
-			className="px-3 py-2 text-white/80 text-sm"
+			className="px-3 py-2 text-sm text-white/80"
 			style={{
 				background: `linear-gradient(to top, ${secondaryColor}90, ${secondaryColor}60)`,
 				borderTop: `1px solid ${primaryColor}40`,

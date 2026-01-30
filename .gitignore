@@ -56,3 +56,9 @@ logs/*.log
 logs/*.jsonl
 
 .qodo
+
+# agent directories with broken symlinks
+.cline
+.codex
+.gemini
+.opencode

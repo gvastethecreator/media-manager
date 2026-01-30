@@ -1,5 +1,5 @@
+import { and, desc, eq } from 'drizzle-orm';
 import { Router } from 'express';
-import { desc, eq, and } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
 import { devFeatures, serverAlerts } from '@/lib/drizzle/schema/dev';
 import { createServerAlert } from '@/server/utils/logger.alert';
@@ -18,10 +18,7 @@ router.get('/features', async (req, res, next) => {
 router.post('/features', async (req, res, next) => {
 	try {
 		const { name, description, status, progress } = req.body;
-		const [newFeature] = await db
-			.insert(devFeatures)
-			.values({ name, description, status, progress })
-			.returning();
+		const [newFeature] = await db.insert(devFeatures).values({ name, description, status, progress }).returning();
 		res.json(newFeature);
 	} catch (error) {
 		next(error);
@@ -32,7 +29,7 @@ router.get('/alerts', async (req, res, next) => {
 	try {
 		const { level, service, resolved } = req.query;
 		const conditions = [];
-		
+
 		if (level) conditions.push(eq(serverAlerts.level, level as 'info' | 'warning' | 'error' | 'critical'));
 		if (service) conditions.push(eq(serverAlerts.service, service as string));
 		if (resolved !== undefined) conditions.push(eq(serverAlerts.resolved, resolved === 'true'));
@@ -59,10 +56,7 @@ router.post('/alerts', async (req, res, next) => {
 router.patch('/alerts/:id/resolve', async (req, res, next) => {
 	try {
 		const { id } = req.params;
-		await db
-			.update(serverAlerts)
-			.set({ resolved: true, resolvedAt: new Date() })
-			.where(eq(serverAlerts.id, id));
+		await db.update(serverAlerts).set({ resolved: true, resolvedAt: new Date() }).where(eq(serverAlerts.id, id));
 		res.json({ success: true });
 	} catch (error) {
 		next(error);

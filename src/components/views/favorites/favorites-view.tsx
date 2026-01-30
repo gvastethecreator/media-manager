@@ -2,8 +2,8 @@ import { useCallback, useState } from 'react';
 import { useCreateFavorite, useFavorites } from '@/lib/api/favorites';
 import { clientEvents } from '@/lib/client/events.client';
 import { clientLogger } from '@/lib/logger/client-logger';
-import { useFavoriteStore } from '@/store/entities/favorite';
 import { toastService } from '@/lib/ui/toast';
+import { useFavoriteStore } from '@/store/entities/favorite';
 import type { ViewProps } from '../types';
 import FavoritesContentView from './favorites-content-view';
 

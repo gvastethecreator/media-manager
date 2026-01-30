@@ -123,9 +123,7 @@ export const HexColorWithAlpha = Schema.String.pipe(Schema.pattern(/^#[0-9A-Fa-f
 /**
  * CSS variable color preset (var(--preset-*))
  */
-export const PresetColor = Schema.String.pipe(
-	Schema.pattern(/^var\(--preset-[a-z]+\)$/)
-).annotations({
+export const PresetColor = Schema.String.pipe(Schema.pattern(/^var\(--preset-[a-z]+\)$/)).annotations({
 	identifier: 'PresetColor',
 	title: 'Preset color variable',
 	description: 'CSS variable preset color like var(--preset-purple)',

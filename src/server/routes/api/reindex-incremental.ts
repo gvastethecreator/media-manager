@@ -11,8 +11,8 @@ import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import {
 	ReindexIncrementalService,
 	ReindexIncrementalServiceLive,
-} from '@/services/folders/reindex-incremental.service.effect';
-import type { IncrementalReindexOptions } from '@/services/folders/reindex-incremental-types';
+} from '@/services/folder/reindex/reindex-incremental.service.effect';
+import type { IncrementalReindexOptions } from '@/services/folder/reindex/reindex-incremental-types';
 
 const router = express.Router();
 

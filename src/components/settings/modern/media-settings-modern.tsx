@@ -4,47 +4,26 @@
  * @description Configuración de media: imágenes, videos, audio, documentos, 3D y JSON
  */
 
-import React, { useState, useEffect, useMemo } from 'react';
+import { Box, Code, FileJson, FileText, Film, Image, Layers, Music, Volume2 } from 'lucide-react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useSystemStats } from '@/lib/api/system';
-import {
-	Image,
-	Box,
-	AudioWaveform,
-	FileText,
-	FileJson,
-	Settings,
-	Play,
-	Volume2,
-	Eye,
-	Maximize,
-	RotateCw,
-	Monitor,
-	FileType,
-	Code,
-	Layers,
-	Film,
-	Music,
-	Type,
-} from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Switch } from '@/components/ui/switch';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Separator } from '@/components/ui/separator';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider';
-import { SettingsCard, SettingsRow, SettingsGroup } from '../modern/settings-card';
+import { Switch } from '@/components/ui/switch';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useSystemStats } from '@/lib/api/system';
 import { cn } from '@/lib/utils';
+import { AudioSettings } from '../audio/audio-settings';
 import { DocumentSettings } from '../document/document-settings';
 import { File3DSettings } from '../file3d/file3d-settings';
-import { JsonFileSettings } from '../json-file/json-file-settings';
-import { UploadedImagesSettings } from '../uploaded-images/uploaded-images-settings';
 import { ScannedImagesSettings } from '../image/scanned-images-settings';
-import { AudioSettings } from '../audio/audio-settings';
+import { JsonFileSettings } from '../json-file/json-file-settings';
+import { SettingsCard, SettingsGroup, SettingsRow } from '../modern/settings-card';
+import { UploadedImagesSettings } from '../uploaded-images/uploaded-images-settings';
+import { VideosSettings } from '../video/videos-settings';
 
 // Tipos de media soportados
 const MEDIA_TYPES = [
@@ -71,14 +50,22 @@ export function MediaSettingsModern() {
 	// Update MEDIA_TYPES with real counts
 	const mediaTypesWithStats = useMemo(() => {
 		if (!stats) return MEDIA_TYPES;
-		return MEDIA_TYPES.map(media => ({
+		return MEDIA_TYPES.map((media) => ({
 			...media,
-			count: media.id === 'images' ? stats.totalImages :
-				media.id === 'videos' ? stats.totalVideos :
-					media.id === 'audio' ? stats.totalAudio :
-						media.id === 'documents' ? stats.totalDocuments :
-							media.id === '3d' ? (stats as any).totalFile3D || 0 :
-								media.id === 'json' ? (stats as any).totalJsonFiles || 0 : media.count
+			count:
+				media.id === 'images'
+					? stats.totalImages
+					: media.id === 'videos'
+						? stats.totalVideos
+						: media.id === 'audio'
+							? stats.totalAudio
+							: media.id === 'documents'
+								? stats.totalDocuments
+								: media.id === '3d'
+									? (stats as any).totalFile3D || 0
+									: media.id === 'json'
+										? (stats as any).totalJsonFiles || 0
+										: media.count,
 		}));
 	}, [stats]);
 
@@ -149,8 +136,8 @@ export function MediaSettingsModern() {
 		<div className="space-y-6">
 			{/* Header */}
 			<div>
-				<h2 className="text-2xl font-semibold text-foreground">Configuración de Media</h2>
-				<p className="mt-1 text-sm text-muted-foreground">
+				<h2 className="font-semibold text-2xl text-foreground">Configuración de Media</h2>
+				<p className="mt-1 text-muted-foreground text-sm">
 					Personaliza la visualización y comportamiento de cada tipo de archivo
 				</p>
 			</div>
@@ -162,14 +149,12 @@ export function MediaSettingsModern() {
 					const isActive = activeTab === media.id;
 					return (
 						<button
-							key={media.id}
-							onClick={() => handleTabChange(media.id)}
 							className={cn(
 								'flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all',
-								isActive
-									? 'border-primary bg-primary/5'
-									: 'border-transparent bg-muted/30 hover:bg-muted/50'
+								isActive ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'
 							)}
+							key={media.id}
+							onClick={() => handleTabChange(media.id)}
 						>
 							<div
 								className="flex h-10 w-10 items-center justify-center rounded-lg"
@@ -177,10 +162,8 @@ export function MediaSettingsModern() {
 							>
 								<Icon className="h-5 w-5" style={{ color: media.color }} />
 							</div>
-							<span className={cn('text-sm font-medium', isActive && 'text-primary')}>
-								{media.label}
-							</span>
-							<Badge variant="secondary" className="text-xs">
+							<span className={cn('font-medium text-sm', isActive && 'text-primary')}>{media.label}</span>
+							<Badge className="text-xs" variant="secondary">
 								{media.count.toLocaleString()}
 							</Badge>
 						</button>
@@ -190,51 +173,36 @@ export function MediaSettingsModern() {
 
 			{/* Content based on active tab */}
 			{activeTab === 'images' && (
-				<Tabs defaultValue="settings" className="w-full">
+				<Tabs className="w-full" defaultValue="settings">
 					<TabsList className="grid w-full grid-cols-2">
 						<TabsTrigger value="settings">Configuración</TabsTrigger>
 						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
 					</TabsList>
 
-					<TabsContent value="settings" className="space-y-6 mt-6">
+					<TabsContent className="mt-6 space-y-6" value="settings">
 						<SettingsCard
+							color="var(--entity-image)"
+							description="Configura cómo se muestran las imágenes"
 							icon={<Image />}
 							title="Visualización de Imágenes"
-							description="Configura cómo se muestran las imágenes"
-							color="var(--entity-image)"
 						>
 							<SettingsGroup title="Comportamiento">
-								<SettingsRow
-									label="Rotación automática"
-									description="Rotar según metadata EXIF"
-								>
+								<SettingsRow description="Rotar según metadata EXIF" label="Rotación automática">
 									<Switch
 										checked={imageSettings.autoRotate}
-										onCheckedChange={(checked) =>
-											setImageSettings((s) => ({ ...s, autoRotate: checked }))
-										}
+										onCheckedChange={(checked) => setImageSettings((s) => ({ ...s, autoRotate: checked }))}
 									/>
 								</SettingsRow>
-								<SettingsRow
-									label="Preview de alta calidad"
-									description="Cargar versión completa en preview"
-								>
+								<SettingsRow description="Cargar versión completa en preview" label="Preview de alta calidad">
 									<Switch
 										checked={imageSettings.highQualityPreview}
-										onCheckedChange={(checked) =>
-											setImageSettings((s) => ({ ...s, highQualityPreview: checked }))
-										}
+										onCheckedChange={(checked) => setImageSettings((s) => ({ ...s, highQualityPreview: checked }))}
 									/>
 								</SettingsRow>
-								<SettingsRow
-									label="Mostrar metadata"
-									description="Mostrar información EXIF en panel"
-								>
+								<SettingsRow description="Mostrar información EXIF en panel" label="Mostrar metadata">
 									<Switch
 										checked={imageSettings.showMetadata}
-										onCheckedChange={(checked) =>
-											setImageSettings((s) => ({ ...s, showMetadata: checked }))
-										}
+										onCheckedChange={(checked) => setImageSettings((s) => ({ ...s, showMetadata: checked }))}
 									/>
 								</SettingsRow>
 							</SettingsGroup>
@@ -245,24 +213,24 @@ export function MediaSettingsModern() {
 								<div className="space-y-3">
 									<div className="flex items-center justify-between">
 										<Label>Nivel de zoom inicial</Label>
-										<span className="text-sm text-muted-foreground">{imageSettings.defaultZoom}%</span>
+										<span className="text-muted-foreground text-sm">{imageSettings.defaultZoom}%</span>
 									</div>
 									<Slider
-										value={[imageSettings.defaultZoom]}
-										onValueChange={([v]) => setImageSettings((s) => ({ ...s, defaultZoom: v }))}
-										min={50}
 										max={200}
+										min={50}
+										onValueChange={([v]) => setImageSettings((s) => ({ ...s, defaultZoom: v }))}
 										step={10}
+										value={[imageSettings.defaultZoom]}
 									/>
 								</div>
 							</SettingsGroup>
 						</SettingsCard>
 
 						<SettingsCard
+							color="var(--entity-image)"
+							description="Extensiones de archivo reconocidas"
 							icon={<Layers />}
 							title="Formatos Soportados"
-							description="Extensiones de archivo reconocidas"
-							color="var(--entity-image)"
 							variant="outlined"
 						>
 							<div className="flex flex-wrap gap-2">
@@ -275,27 +243,27 @@ export function MediaSettingsModern() {
 						</SettingsCard>
 					</TabsContent>
 
-					<TabsContent value="library" className="mt-6">
-						<Tabs defaultValue="scanned" className="w-full">
-							<TabsList className="w-full justify-start border-b rounded-none h-auto p-0 bg-transparent gap-6">
+					<TabsContent className="mt-6" value="library">
+						<Tabs className="w-full" defaultValue="scanned">
+							<TabsList className="h-auto w-full justify-start gap-6 rounded-none border-b bg-transparent p-0">
 								<TabsTrigger
+									className="rounded-none border-transparent border-b-2 px-0 py-2 data-[state=active]:border-primary data-[state=active]:shadow-none"
 									value="scanned"
-									className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none px-0 py-2"
 								>
 									Biblioteca Escaneada
 								</TabsTrigger>
 								<TabsTrigger
+									className="rounded-none border-transparent border-b-2 px-0 py-2 data-[state=active]:border-primary data-[state=active]:shadow-none"
 									value="uploaded"
-									className="rounded-none border-b-2 border-transparent data-[state=active]:border-primary data-[state=active]:shadow-none px-0 py-2"
 								>
 									Imágenes Subidas
 								</TabsTrigger>
 							</TabsList>
 							<div className="mt-6">
-								<TabsContent value="scanned" className="m-0">
+								<TabsContent className="m-0" value="scanned">
 									<ScannedImagesSettings />
 								</TabsContent>
-								<TabsContent value="uploaded" className="m-0">
+								<TabsContent className="m-0" value="uploaded">
 									<UploadedImagesSettings />
 								</TabsContent>
 							</div>
@@ -305,120 +273,121 @@ export function MediaSettingsModern() {
 			)}
 
 			{activeTab === 'videos' && (
-				<>
-					<SettingsCard
-						icon={<Film />}
-						title="Reproductor de Video"
-						description="Configura el comportamiento del reproductor"
-						color="var(--entity-video)"
-					>
-						<SettingsGroup title="Reproducción">
-							<SettingsRow label="Autoplay" description="Reproducir automáticamente al abrir">
-								<Switch
-									checked={videoSettings.autoplay}
-									onCheckedChange={(checked) =>
-										setVideoSettings((s) => ({ ...s, autoplay: checked }))
-									}
-								/>
-							</SettingsRow>
-							<SettingsRow label="Silenciado por defecto" description="Iniciar videos sin sonido">
-								<Switch
-									checked={videoSettings.muted}
-									onCheckedChange={(checked) =>
-										setVideoSettings((s) => ({ ...s, muted: checked }))
-									}
-								/>
-							</SettingsRow>
-							<SettingsRow label="Loop" description="Repetir video automáticamente">
-								<Switch
-									checked={videoSettings.loop}
-									onCheckedChange={(checked) =>
-										setVideoSettings((s) => ({ ...s, loop: checked }))
-									}
-								/>
-							</SettingsRow>
-						</SettingsGroup>
-
-						<Separator className="my-4" />
-
-						<SettingsGroup title="Volumen y Precarga">
-							<SettingsRow label="Volumen por defecto" description="Nivel inicial de volumen">
-								<div className="flex w-48 items-center gap-3">
-									<Volume2 className="h-4 w-4 text-muted-foreground" />
-									<Slider
-										value={[videoSettings.defaultVolume]}
-										onValueChange={([v]) => setVideoSettings((s) => ({ ...s, defaultVolume: v }))}
-										max={100}
-										step={5}
-									/>
-									<span className="text-sm tabular-nums w-8">{videoSettings.defaultVolume}%</span>
-								</div>
-							</SettingsRow>
-							<SettingsRow label="Precarga" description="Cuánto cargar anticipadamente">
-								<Select
-									value={videoSettings.preload}
-									onValueChange={(v) => setVideoSettings((s) => ({ ...s, preload: v }))}
-								>
-									<SelectTrigger className="w-[160px]">
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="none">Ninguna</SelectItem>
-										<SelectItem value="metadata">Metadata</SelectItem>
-										<SelectItem value="auto">Automática</SelectItem>
-									</SelectContent>
-								</Select>
-							</SettingsRow>
-						</SettingsGroup>
-					</SettingsCard>
-
-					<SettingsCard
-						icon={<Layers />}
-						title="Formatos Soportados"
-						description="Codecs y contenedores compatibles"
-						color="var(--entity-video)"
-						variant="outlined"
-					>
-						<div className="flex flex-wrap gap-2">
-							{['.mp4', '.webm', '.mov', '.avi', '.mkv', '.m4v', '.ogv'].map((ext) => (
-								<Badge key={ext} variant="secondary">
-									{ext}
-								</Badge>
-							))}
-						</div>
-					</SettingsCard>
-				</>
-			)}
-
-			{activeTab === 'audio' && (
-				<Tabs defaultValue="settings" className="w-full">
+				<Tabs className="w-full" defaultValue="settings">
 					<TabsList className="grid w-full grid-cols-2">
 						<TabsTrigger value="settings">Configuración</TabsTrigger>
 						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
 					</TabsList>
 
-					<TabsContent value="settings" className="space-y-6 mt-6">
+					<TabsContent className="mt-6 space-y-6" value="settings">
 						<SettingsCard
-							icon={<Music />}
-							title="Reproductor de Audio"
-							description="Configura el comportamiento del reproductor de audio"
-							color="var(--entity-audio)"
+							color="var(--entity-video)"
+							description="Configura el comportamiento del reproductor"
+							icon={<Film />}
+							title="Reproductor de Video"
 						>
 							<SettingsGroup title="Reproducción">
-								<SettingsRow label="Autoplay" description="Reproducir automáticamente">
+								<SettingsRow description="Reproducir automáticamente al abrir" label="Autoplay">
 									<Switch
-										checked={audioSettings.autoplay}
-										onCheckedChange={(checked) =>
-											setAudioSettings((s) => ({ ...s, autoplay: checked }))
-										}
+										checked={videoSettings.autoplay}
+										onCheckedChange={(checked) => setVideoSettings((s) => ({ ...s, autoplay: checked }))}
 									/>
 								</SettingsRow>
-								<SettingsRow label="Visualizador" description="Mostrar ondas de audio">
+								<SettingsRow description="Iniciar videos sin sonido" label="Silenciado por defecto">
+									<Switch
+										checked={videoSettings.muted}
+										onCheckedChange={(checked) => setVideoSettings((s) => ({ ...s, muted: checked }))}
+									/>
+								</SettingsRow>
+								<SettingsRow description="Repetir video automáticamente" label="Loop">
+									<Switch
+										checked={videoSettings.loop}
+										onCheckedChange={(checked) => setVideoSettings((s) => ({ ...s, loop: checked }))}
+									/>
+								</SettingsRow>
+							</SettingsGroup>
+
+							<Separator className="my-4" />
+
+							<SettingsGroup title="Volumen y Precarga">
+								<SettingsRow description="Nivel inicial de volumen" label="Volumen por defecto">
+									<div className="flex w-48 items-center gap-3">
+										<Volume2 className="h-4 w-4 text-muted-foreground" />
+										<Slider
+											max={100}
+											onValueChange={([v]) => setVideoSettings((s) => ({ ...s, defaultVolume: v }))}
+											step={5}
+											value={[videoSettings.defaultVolume]}
+										/>
+										<span className="w-8 text-sm tabular-nums">{videoSettings.defaultVolume}%</span>
+									</div>
+								</SettingsRow>
+								<SettingsRow description="Cuánto cargar anticipadamente" label="Precarga">
+									<Select
+										onValueChange={(v) => setVideoSettings((s) => ({ ...s, preload: v }))}
+										value={videoSettings.preload}
+									>
+										<SelectTrigger className="w-[160px]">
+											<SelectValue />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="none">Ninguna</SelectItem>
+											<SelectItem value="metadata">Metadata</SelectItem>
+											<SelectItem value="auto">Automática</SelectItem>
+										</SelectContent>
+									</Select>
+								</SettingsRow>
+							</SettingsGroup>
+						</SettingsCard>
+
+						<SettingsCard
+							color="var(--entity-video)"
+							description="Codecs y contenedores compatibles"
+							icon={<Layers />}
+							title="Formatos Soportados"
+							variant="outlined"
+						>
+							<div className="flex flex-wrap gap-2">
+								{['.mp4', '.webm', '.mov', '.avi', '.mkv', '.m4v', '.ogv'].map((ext) => (
+									<Badge key={ext} variant="secondary">
+										{ext}
+									</Badge>
+								))}
+							</div>
+						</SettingsCard>
+					</TabsContent>
+
+					<TabsContent className="mt-6" value="library">
+						<VideosSettings />
+					</TabsContent>
+				</Tabs>
+			)}
+
+			{activeTab === 'audio' && (
+				<Tabs className="w-full" defaultValue="settings">
+					<TabsList className="grid w-full grid-cols-2">
+						<TabsTrigger value="settings">Configuración</TabsTrigger>
+						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
+					</TabsList>
+
+					<TabsContent className="mt-6 space-y-6" value="settings">
+						<SettingsCard
+							color="var(--entity-audio)"
+							description="Configura el comportamiento del reproductor de audio"
+							icon={<Music />}
+							title="Reproductor de Audio"
+						>
+							<SettingsGroup title="Reproducción">
+								<SettingsRow description="Reproducir automáticamente" label="Autoplay">
+									<Switch
+										checked={audioSettings.autoplay}
+										onCheckedChange={(checked) => setAudioSettings((s) => ({ ...s, autoplay: checked }))}
+									/>
+								</SettingsRow>
+								<SettingsRow description="Mostrar ondas de audio" label="Visualizador">
 									<Switch
 										checked={audioSettings.visualizer}
-										onCheckedChange={(checked) =>
-											setAudioSettings((s) => ({ ...s, visualizer: checked }))
-										}
+										onCheckedChange={(checked) => setAudioSettings((s) => ({ ...s, visualizer: checked }))}
 									/>
 								</SettingsRow>
 							</SettingsGroup>
@@ -430,23 +399,18 @@ export function MediaSettingsModern() {
 									<div className="flex w-48 items-center gap-3">
 										<Volume2 className="h-4 w-4 text-muted-foreground" />
 										<Slider
-											value={[audioSettings.defaultVolume]}
-											onValueChange={([v]) => setAudioSettings((s) => ({ ...s, defaultVolume: v }))}
 											max={100}
+											onValueChange={([v]) => setAudioSettings((s) => ({ ...s, defaultVolume: v }))}
 											step={5}
+											value={[audioSettings.defaultVolume]}
 										/>
-										<span className="text-sm tabular-nums w-8">{audioSettings.defaultVolume}%</span>
+										<span className="w-8 text-sm tabular-nums">{audioSettings.defaultVolume}%</span>
 									</div>
 								</SettingsRow>
 							</SettingsGroup>
 						</SettingsCard>
 
-						<SettingsCard
-							icon={<Layers />}
-							title="Formatos Soportados"
-							color="var(--entity-audio)"
-							variant="outlined"
-						>
+						<SettingsCard color="var(--entity-audio)" icon={<Layers />} title="Formatos Soportados" variant="outlined">
 							<div className="flex flex-wrap gap-2">
 								{['.mp3', '.wav', '.ogg', '.flac', '.m4a', '.aac', '.wma'].map((ext) => (
 									<Badge key={ext} variant="secondary">
@@ -457,33 +421,31 @@ export function MediaSettingsModern() {
 						</SettingsCard>
 					</TabsContent>
 
-					<TabsContent value="library" className="mt-6">
+					<TabsContent className="mt-6" value="library">
 						<AudioSettings />
 					</TabsContent>
 				</Tabs>
 			)}
 
 			{activeTab === 'documents' && (
-				<Tabs defaultValue="settings" className="w-full">
+				<Tabs className="w-full" defaultValue="settings">
 					<TabsList className="grid w-full grid-cols-2">
 						<TabsTrigger value="settings">Configuración</TabsTrigger>
 						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
 					</TabsList>
 
-					<TabsContent value="settings" className="space-y-6 mt-6">
+					<TabsContent className="mt-6 space-y-6" value="settings">
 						<SettingsCard
+							color="var(--entity-document)"
+							description="Configura el visor de PDF y documentos"
 							icon={<FileText />}
 							title="Visor de Documentos"
-							description="Configura el visor de PDF y documentos"
-							color="var(--entity-document)"
 						>
 							<SettingsGroup title="Visualización">
-								<SettingsRow label="Panel lateral" description="Mostrar navegación de páginas">
+								<SettingsRow description="Mostrar navegación de páginas" label="Panel lateral">
 									<Switch
 										checked={documentSettings.sidebarOpen}
-										onCheckedChange={(checked) =>
-											setDocumentSettings((s) => ({ ...s, sidebarOpen: checked }))
-										}
+										onCheckedChange={(checked) => setDocumentSettings((s) => ({ ...s, sidebarOpen: checked }))}
 									/>
 								</SettingsRow>
 							</SettingsGroup>
@@ -493,8 +455,8 @@ export function MediaSettingsModern() {
 							<SettingsGroup title="Renderizado">
 								<SettingsRow label="Modo de renderizado">
 									<Select
-										value={documentSettings.renderMode}
 										onValueChange={(v) => setDocumentSettings((s) => ({ ...s, renderMode: v }))}
+										value={documentSettings.renderMode}
 									>
 										<SelectTrigger className="w-[160px]">
 											<SelectValue />
@@ -508,22 +470,22 @@ export function MediaSettingsModern() {
 								<SettingsRow label="Zoom por defecto">
 									<div className="flex w-48 items-center gap-3">
 										<Slider
-											value={[documentSettings.defaultZoom]}
-											onValueChange={([v]) => setDocumentSettings((s) => ({ ...s, defaultZoom: v }))}
-											min={50}
 											max={200}
+											min={50}
+											onValueChange={([v]) => setDocumentSettings((s) => ({ ...s, defaultZoom: v }))}
 											step={10}
+											value={[documentSettings.defaultZoom]}
 										/>
-										<span className="text-sm tabular-nums w-10">{documentSettings.defaultZoom}%</span>
+										<span className="w-10 text-sm tabular-nums">{documentSettings.defaultZoom}%</span>
 									</div>
 								</SettingsRow>
 							</SettingsGroup>
 						</SettingsCard>
 
 						<SettingsCard
+							color="var(--entity-document)"
 							icon={<Layers />}
 							title="Formatos Soportados"
-							color="var(--entity-document)"
 							variant="outlined"
 						>
 							<div className="flex flex-wrap gap-2">
@@ -536,46 +498,46 @@ export function MediaSettingsModern() {
 						</SettingsCard>
 					</TabsContent>
 
-					<TabsContent value="library" className="mt-6">
+					<TabsContent className="mt-6" value="library">
 						<DocumentSettings />
 					</TabsContent>
 				</Tabs>
 			)}
 
 			{activeTab === '3d' && (
-				<Tabs defaultValue="settings" className="w-full">
+				<Tabs className="w-full" defaultValue="settings">
 					<TabsList className="grid w-full grid-cols-2">
 						<TabsTrigger value="settings">Configuración</TabsTrigger>
 						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
 					</TabsList>
 
-					<TabsContent value="settings" className="space-y-6 mt-6">
+					<TabsContent className="mt-6 space-y-6" value="settings">
 						<SettingsCard
+							color="var(--entity-file-3d)"
+							description="Configura el visor de modelos 3D"
 							icon={<Box />}
 							title="Visor 3D"
-							description="Configura el visor de modelos 3D"
-							color="var(--entity-file-3d)"
 						>
 							<SettingsGroup title="Visualización">
-								<SettingsRow label="Rotación automática" description="Rotar modelo al cargar">
+								<SettingsRow description="Rotar modelo al cargar" label="Rotación automática">
 									<Switch
 										checked={settings3D.autoRotate}
 										onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, autoRotate: checked }))}
 									/>
 								</SettingsRow>
-								<SettingsRow label="Sombras" description="Mostrar sombras proyectadas">
+								<SettingsRow description="Mostrar sombras proyectadas" label="Sombras">
 									<Switch
 										checked={settings3D.shadows}
 										onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, shadows: checked }))}
 									/>
 								</SettingsRow>
-								<SettingsRow label="Malla wireframe" description="Ver modelo en wireframe">
+								<SettingsRow description="Ver modelo en wireframe" label="Malla wireframe">
 									<Switch
 										checked={settings3D.wireframe}
 										onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, wireframe: checked }))}
 									/>
 								</SettingsRow>
-								<SettingsRow label="Grid" description="Mostrar cuadrícula de referencia">
+								<SettingsRow description="Mostrar cuadrícula de referencia" label="Grid">
 									<Switch
 										checked={settings3D.grid}
 										onCheckedChange={(checked) => setSettings3D((s) => ({ ...s, grid: checked }))}
@@ -585,9 +547,9 @@ export function MediaSettingsModern() {
 						</SettingsCard>
 
 						<SettingsCard
+							color="var(--entity-file-3d)"
 							icon={<Layers />}
 							title="Formatos Soportados"
-							color="var(--entity-file-3d)"
 							variant="outlined"
 						>
 							<div className="flex flex-wrap gap-2">
@@ -600,68 +562,55 @@ export function MediaSettingsModern() {
 						</SettingsCard>
 					</TabsContent>
 
-					<TabsContent value="library" className="mt-6">
+					<TabsContent className="mt-6" value="library">
 						<File3DSettings />
 					</TabsContent>
 				</Tabs>
 			)}
 
 			{activeTab === 'json' && (
-				<Tabs defaultValue="settings" className="w-full">
+				<Tabs className="w-full" defaultValue="settings">
 					<TabsList className="grid w-full grid-cols-2">
 						<TabsTrigger value="settings">Configuración</TabsTrigger>
 						<TabsTrigger value="library">Biblioteca & Gestión</TabsTrigger>
 					</TabsList>
 
-					<TabsContent value="settings" className="space-y-6 mt-6">
+					<TabsContent className="mt-6 space-y-6" value="settings">
 						<SettingsCard
+							color="var(--entity-json)"
+							description="Configura el editor y visualizador de JSON"
 							icon={<FileJson />}
 							title="Editor JSON"
-							description="Configura el editor y visualizador de JSON"
-							color="var(--entity-json)"
 						>
 							<SettingsGroup title="Editor">
-								<SettingsRow label="Formatear al cargar" description="Auto-formatear JSON al abrir">
+								<SettingsRow description="Auto-formatear JSON al abrir" label="Formatear al cargar">
 									<Switch
 										checked={jsonSettings.formatOnLoad}
-										onCheckedChange={(checked) =>
-											setJsonSettings((s) => ({ ...s, formatOnLoad: checked }))
-										}
+										onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, formatOnLoad: checked }))}
 									/>
 								</SettingsRow>
-								<SettingsRow label="Validar schema" description="Validar contra schema si existe">
+								<SettingsRow description="Validar contra schema si existe" label="Validar schema">
 									<Switch
 										checked={jsonSettings.validateSchema}
-										onCheckedChange={(checked) =>
-											setJsonSettings((s) => ({ ...s, validateSchema: checked }))
-										}
+										onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, validateSchema: checked }))}
 									/>
 								</SettingsRow>
-								<SettingsRow label="Números de línea" description="Mostrar números de línea">
+								<SettingsRow description="Mostrar números de línea" label="Números de línea">
 									<Switch
 										checked={jsonSettings.lineNumbers}
-										onCheckedChange={(checked) =>
-											setJsonSettings((s) => ({ ...s, lineNumbers: checked }))
-										}
+										onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, lineNumbers: checked }))}
 									/>
 								</SettingsRow>
-								<SettingsRow label="Plegado de código" description="Permitir fold/unfold de bloques">
+								<SettingsRow description="Permitir fold/unfold de bloques" label="Plegado de código">
 									<Switch
 										checked={jsonSettings.folding}
-										onCheckedChange={(checked) =>
-											setJsonSettings((s) => ({ ...s, folding: checked }))
-										}
+										onCheckedChange={(checked) => setJsonSettings((s) => ({ ...s, folding: checked }))}
 									/>
 								</SettingsRow>
 							</SettingsGroup>
 						</SettingsCard>
 
-						<SettingsCard
-							icon={<Code />}
-							title="Formatos Soportados"
-							color="var(--entity-json)"
-							variant="outlined"
-						>
+						<SettingsCard color="var(--entity-json)" icon={<Code />} title="Formatos Soportados" variant="outlined">
 							<div className="flex flex-wrap gap-2">
 								{['.json', '.jsonc', '.json5'].map((ext) => (
 									<Badge key={ext} variant="secondary">
@@ -672,7 +621,7 @@ export function MediaSettingsModern() {
 						</SettingsCard>
 					</TabsContent>
 
-					<TabsContent value="library" className="mt-6">
+					<TabsContent className="mt-6" value="library">
 						<JsonFileSettings />
 					</TabsContent>
 				</Tabs>

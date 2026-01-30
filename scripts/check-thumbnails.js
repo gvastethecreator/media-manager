@@ -16,7 +16,9 @@ async function checkThumbnailStatus() {
 
 		// Verificar videos
 		console.log('📹 Videos:');
-		const allVideos = await db.select({ id: videos.id, name: videos.name, hasThumbnail: videos.thumbnail }).from(videos);
+		const allVideos = await db
+			.select({ id: videos.id, name: videos.name, hasThumbnail: videos.thumbnail })
+			.from(videos);
 		const videosWithThumbnails = allVideos.filter((v) => v.hasThumbnail !== null).length;
 		const videosWithoutThumbnails = allVideos.length - videosWithThumbnails;
 		console.log(`   Total: ${allVideos.length}`);

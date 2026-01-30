@@ -162,7 +162,7 @@ export async function phase6_generateThumbnails(
 
 					if (waveBuffer) {
 						metadata.waveformBase64 = waveBuffer.toString('base64');
-						
+
 						await db
 							.update(audios)
 							.set({

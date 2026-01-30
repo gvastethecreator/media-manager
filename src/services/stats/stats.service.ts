@@ -95,8 +95,11 @@ export const statsEventEmitter = {
 };
 
 // Re-exportar la clase optimizada para compatibilidad
-export { OptimizedStatsService as StatsService, OptimizedStatsService } from './optimized-stats.service';
-export { optimizedStatsUtils } from './optimized-stats.service';
+export {
+	OptimizedStatsService as StatsService,
+	OptimizedStatsService,
+	optimizedStatsUtils,
+} from './optimized-stats.service';
 
 // Exportar instancia singleton
 import { OptimizedStatsService } from './optimized-stats.service';

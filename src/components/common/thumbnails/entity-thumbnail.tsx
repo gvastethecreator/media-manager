@@ -91,10 +91,10 @@ export const EntityThumbnail = memo<EntityThumbnailProps>(
 		// Props para el componente motion
 		const motionProps = animated
 			? {
-				whileHover: { scale: 1.05 },
-				whileTap: { scale: 0.95 },
-				transition: { type: 'spring' as const, stiffness: 300, damping: 30 },
-			}
+					whileHover: { scale: 1.05 },
+					whileTap: { scale: 0.95 },
+					transition: { type: 'spring' as const, stiffness: 300, damping: 30 },
+				}
 			: {};
 
 		// Renderizar thumbnail específico según el tipo de entidad

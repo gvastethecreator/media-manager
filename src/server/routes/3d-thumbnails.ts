@@ -3,8 +3,8 @@
  * @module server/routes/3d-thumbnails
  */
 
-import express from 'express';
 import { eq } from 'drizzle-orm';
+import express from 'express';
 import { db } from '@/lib/drizzle/index.js';
 import { file3Ds } from '@/lib/drizzle/schema/index.js';
 import { serverLogger } from '@/lib/logger/server-logger';

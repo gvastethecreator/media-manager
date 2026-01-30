@@ -9,7 +9,6 @@ import { Schema } from '@effect/schema';
 import { and, asc, count, desc, eq, isNull, like, sql } from 'drizzle-orm';
 import { Context, Effect, Layer } from 'effect';
 import { db } from '@/lib/drizzle';
-import { generateReadableId } from '@/lib/utils/id-generator';
 import { characters, imageCharacters, imageNotes } from '@/lib/drizzle/schema';
 import {
 	Character,
@@ -18,6 +17,7 @@ import {
 	CharacterWithStats,
 } from '@/lib/effect/schemas/entities';
 import { serverLogger } from '@/lib/logger/server-logger';
+import { generateReadableId } from '@/lib/utils/id-generator';
 import {
 	CharacterDatabaseError,
 	type CharacterError,

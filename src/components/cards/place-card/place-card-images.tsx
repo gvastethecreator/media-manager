@@ -239,7 +239,8 @@ export function PlaceCardImages({
 					<div
 						className="absolute inset-3 rounded border border-border/40"
 						style={{
-							boxShadow: rarityLevel >= 5 ? `0 0 10px color-mix(in oklab, ${primaryColor}, transparent 69%) inset` : 'none',
+							boxShadow:
+								rarityLevel >= 5 ? `0 0 10px color-mix(in oklab, ${primaryColor}, transparent 69%) inset` : 'none',
 						}}
 					/>
 

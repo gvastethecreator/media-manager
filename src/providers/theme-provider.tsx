@@ -4,7 +4,8 @@ import { useEffect } from 'react';
 import type { ThemeProviderProps } from '@/lib/contexts/theme-context';
 import { ThemeProvider as NativeThemeProvider, useTheme } from '@/lib/contexts/theme-context';
 
-// Definimos los temas personalizados
+// Definimos los temas personalizados disponibles
+// Cada tema tiene su definición en src/app/themes.css
 const customThemes = [
 	'light',
 	'dark',
@@ -18,6 +19,8 @@ const customThemes = [
 	'carbon',
 	'teal',
 	'citrico',
+	'aurora',
+	'neon',
 ];
 
 // Componente de debug para monitorear cambios en el tema

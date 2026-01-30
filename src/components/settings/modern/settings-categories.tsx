@@ -15,18 +15,15 @@ import {
 	Folder,
 	Globe,
 	HardDrive,
+	IdCard,
 	Image,
 	Keyboard,
 	LayoutGrid,
 	List,
 	Tag,
-	Users,
-	Eye,
-	Server,
-	Zap,
-	IdCard,
 	UploadCloud,
 	UserCog,
+	Users,
 } from 'lucide-react';
 import type { SettingsCategory, SettingsNavItem } from '../modern/modern-settings-layout';
 

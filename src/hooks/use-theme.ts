@@ -7,7 +7,8 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-// Definimos los temas personalizados
+// Definimos los temas personalizados disponibles
+// Cada tema tiene su definición en src/app/themes.css
 const customThemes = [
 	'light',
 	'dark',
@@ -21,6 +22,8 @@ const customThemes = [
 	'carbon',
 	'teal',
 	'citrico',
+	'aurora',
+	'neon',
 ] as const;
 
 type Theme = (typeof customThemes)[number] | 'system';

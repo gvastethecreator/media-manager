@@ -93,14 +93,15 @@ export function useSearchUnified(params: SearchParams) {
 
 	return useQuery({
 		queryKey: searchKeys.unified(params),
-		queryFn: () => apiClient.get<any>('/api/search', { 
-			params: {
-				q: params.query,
-				type: params.type,
-				limit: params.limit,
-				offset: params.offset,
-			}
-		}),
+		queryFn: () =>
+			apiClient.get<any>('/api/search', {
+				params: {
+					q: params.query,
+					type: params.type,
+					limit: params.limit,
+					offset: params.offset,
+				},
+			}),
 		enabled,
 		staleTime: 30_000,
 	});
