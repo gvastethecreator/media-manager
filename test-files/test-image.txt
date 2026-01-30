@@ -1,3 +1,0 @@
-This is a test image file for indexing verification.
-Created to test the FileEntityMapperService integration.
-File type: Image simulation
