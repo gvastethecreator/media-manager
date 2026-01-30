@@ -82,26 +82,28 @@ function getThemeIcon(theme: string | undefined) {
 			return <Sun className="h-4 w-4 text-primary" />;
 		case 'dark':
 			return <Moon className="h-4 w-4 text-primary" />;
-		case 'cafe':
-			return <Palette className="h-4 w-4 text-primary" />;
-		case 'violeta':
-			return <Palette className="h-4 w-4 text-primary" />;
-		case 'madera':
-			return <Palette className="h-4 w-4 text-primary" />;
 		case 'nocturno':
-			return <Moon className="h-4 w-4 text-primary" />;
-		case 'verde':
-			return <Palette className="h-4 w-4 text-primary" />;
-		case 'atardecer':
-			return <Palette className="h-4 w-4 text-primary" />;
-		case 'corporativo':
-			return <Palette className="h-4 w-4 text-primary" />;
 		case 'carbon':
-			return <Palette className="h-4 w-4 text-primary" />;
+			return <Moon className="h-4 w-4 text-primary" />;
+		case 'cafe':
+		case 'madera':
+			return <Palette className="h-4 w-4 text-amber-600" />;
+		case 'violeta':
+			return <Palette className="h-4 w-4 text-purple-500" />;
+		case 'verde':
+			return <Palette className="h-4 w-4 text-green-500" />;
+		case 'atardecer':
+			return <Palette className="h-4 w-4 text-orange-500" />;
+		case 'corporativo':
+			return <Palette className="h-4 w-4 text-blue-500" />;
 		case 'teal':
-			return <Palette className="h-4 w-4 text-primary" />;
+			return <Palette className="h-4 w-4 text-teal-500" />;
 		case 'citrico':
-			return <Palette className="h-4 w-4 text-primary" />;
+			return <Palette className="h-4 w-4 text-lime-500" />;
+		case 'aurora':
+			return <Palette className="h-4 w-4 text-cyan-400" />;
+		case 'neon':
+			return <Palette className="h-4 w-4 text-pink-500" />;
 		default:
 			return <Palette className="h-4 w-4 text-primary" />;
 	}

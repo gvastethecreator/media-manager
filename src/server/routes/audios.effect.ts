@@ -5,9 +5,9 @@
  * @created 2025-01-10 - Phase 6.3 AudioService Effect Implementation
  */
 
+import { eq } from 'drizzle-orm';
 import { Effect } from 'effect';
 import express from 'express';
-import { eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle/index.js';
 import { audios } from '@/lib/drizzle/schema/index.js';
 import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';

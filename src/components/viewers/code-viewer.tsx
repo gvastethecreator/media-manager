@@ -1,6 +1,6 @@
 import Editor from '@monaco-editor/react';
-import { useEffect, useState } from 'react';
 import { Check, Copy, Download, FileJson } from 'lucide-react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { toastService } from '@/lib/ui/toast';
@@ -35,15 +35,13 @@ export function CodeViewer({ isOpen, onOpenChange, file }: CodeViewerProps) {
 			}
 			setCode(content);
 
-			if (!file.language) {
-				if (file.name.endsWith('.json')) setLanguage('json');
-				else if (file.name.endsWith('.js')) setLanguage('javascript');
-				else if (file.name.endsWith('.ts')) setLanguage('typescript');
-				else if (file.name.endsWith('.md')) setLanguage('markdown');
-				else setLanguage('plaintext');
-			} else {
+			if (file.language) {
 				setLanguage(file.language);
-			}
+			} else if (file.name.endsWith('.json')) setLanguage('json');
+			else if (file.name.endsWith('.js')) setLanguage('javascript');
+			else if (file.name.endsWith('.ts')) setLanguage('typescript');
+			else if (file.name.endsWith('.md')) setLanguage('markdown');
+			else setLanguage('plaintext');
 		} catch (error) {
 			toastService.error('Error al cargar el archivo');
 		} finally {
@@ -83,35 +81,49 @@ export function CodeViewer({ isOpen, onOpenChange, file }: CodeViewerProps) {
 	};
 
 	return (
-		<Dialog open={isOpen} onOpenChange={handleClose}>
-			<DialogContent className="max-w-[90vw] h-[85vh] flex flex-col p-0 overflow-hidden">
+		<Dialog onOpenChange={handleClose} open={isOpen}>
+			<DialogContent className="flex h-[85vh] max-w-[90vw] flex-col overflow-hidden p-0">
 				<DialogHeader className="flex flex-row items-center justify-between border-b bg-muted/30 px-4 py-3">
 					<div className="flex items-center gap-2 truncate">
 						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
 							<FileJson className="h-4 w-4 text-blue-500" />
 						</div>
-						<DialogTitle className="truncate text-sm font-medium">{file.name}</DialogTitle>
+						<DialogTitle className="truncate font-medium text-sm">{file.name}</DialogTitle>
 					</div>
 					<div className="flex items-center gap-2">
-						<Button className="h-7 gap-1.5 text-xs" onClick={handleDownload} size="sm" variant="outline" disabled={loading || !code}>
+						<Button
+							className="h-7 gap-1.5 text-xs"
+							disabled={loading || !code}
+							onClick={handleDownload}
+							size="sm"
+							variant="outline"
+						>
 							<Download className="h-3.5 w-3.5" /> Descargar
 						</Button>
-						<Button className="h-7 w-7 p-0" onClick={handleCopy} size="icon" variant="ghost" disabled={loading || !code}>
+						<Button
+							className="h-7 w-7 p-0"
+							disabled={loading || !code}
+							onClick={handleCopy}
+							size="icon"
+							variant="ghost"
+						>
 							{copied ? <Check className="h-3.5 w-3.5 text-green-500" /> : <Copy className="h-3.5 w-3.5" />}
 						</Button>
 					</div>
 				</DialogHeader>
 				<div className="flex-1 overflow-hidden">
 					{loading ? (
-						<div className="flex h-full items-center justify-center text-muted-foreground text-sm">Cargando archivo...</div>
+						<div className="flex h-full items-center justify-center text-muted-foreground text-sm">
+							Cargando archivo...
+						</div>
 					) : (
 						<Editor
 							height="100%"
 							language={language}
-							theme="vs-dark"
-							value={code}
 							onChange={(value) => setCode(value || '')}
 							options={{ readOnly: true, minimap: { enabled: true }, fontSize: 12, lineNumbers: 'on' }}
+							theme="vs-dark"
+							value={code}
 						/>
 					)}
 				</div>

@@ -11,7 +11,7 @@ import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
 import { FolderCreateInput, FolderUpdateInput } from '@/lib/effect/schemas/entities';
 import { FolderService, FolderServiceLive } from '@/services/folder/folder.service.effect';
-import { FolderReindexService } from '@/services/folders/folder-reindex.service';
+import { FolderReindexService } from '@/services/folder/reindex/folder-reindex.service';
 
 const router = express.Router();
 

@@ -28,8 +28,8 @@ export function FileBrowserStatusBar({
 				'flex items-center justify-between border-t px-3 py-1.5 text-caption text-muted-foreground',
 				className
 			)}
-			style={{ backgroundColor: 'color-mix(in oklab, var(--muted), transparent 70%)' }}
 			data-testid="file-browser-status-bar"
+			style={{ backgroundColor: 'color-mix(in oklab, var(--muted), transparent 70%)' }}
 		>
 			{/* Lado izquierdo: conteos */}
 			<div className="flex items-center gap-3">

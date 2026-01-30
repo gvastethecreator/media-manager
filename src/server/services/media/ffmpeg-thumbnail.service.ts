@@ -8,7 +8,7 @@ import { existsSync, unlinkSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { serverLogger } from '../../../lib/logger/server-logger';
+import { serverLogger } from '@/lib/logger/server-logger';
 
 const logger = serverLogger.withContext('FFmpegThumbnailService');
 

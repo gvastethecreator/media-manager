@@ -300,20 +300,136 @@ Available aliases:
 
 ## 🎨 Design System & Styling
 
-### Design Tokens
+### Design Tokens v2.0
 
-- Defined in `src/styles/tokens.css`
-- Design Tokens v2.0 with transitions and typography
-- Border-radius tokens: `rounded-dt-sm`, `rounded-dt-md`, etc.
-- Shadow tokens: `shadow-dt-1`, `shadow-dt-2`, etc.
-- Motion tokens: `duration-dt-normal`, `ease-dt-out`
+El proyecto usa un sistema completo de tokens CSS centralizados:
+
+**Archivos principales:**
+- `src/styles/tokens.css` - Tokens semánticos de color (entidades, estados, UI)
+- `src/styles/design-tokens.css` - Design tokens v2.0 (paletas, sombras, timing)
+- `src/styles/utilities/theme-system.css` - Sistema de themes y transiciones
+- `src/styles/utilities/transitions.css` - Transiciones de estado
+- `src/styles/utilities/animations.css` - Animaciones keyframes
+- `src/styles/utilities/typography.css` - Sistema tipográfico
+
+**Tokens de color disponibles:**
+```css
+/* Variables de tema (shadcn/ui compatibles) */
+--background, --foreground
+--card, --card-foreground
+--popover, --popover-foreground
+--primary, --primary-foreground
+--secondary, --secondary-foreground
+--muted, --muted-foreground
+--accent, --accent-foreground
+--destructive, --destructive-foreground
+--border, --input, --ring
+
+/* Paletas de design tokens */
+--dt-primary-50 a --dt-primary-950
+--dt-neutral-50 a --dt-neutral-950
+--dt-success-50 a --dt-success-900
+--dt-warning-50 a --dt-warning-900
+--dt-danger-50 a --dt-danger-900
+
+/* Colores de entidades */
+--entity-image, --entity-video, --entity-audio
+--entity-folder, --entity-album, --entity-collection
+--entity-character, --entity-place, --entity-tag
+
+/* Sombras */
+--dt-shadow-0 a --dt-shadow-4
+--dt-inset-1, --dt-inset-2
+
+/* Timing */
+--dt-duration-instant: 50ms
+--dt-duration-fast: 150ms
+--dt-duration-normal: 250ms
+--dt-duration-slow: 400ms
+```
+
+### Sistema de Themes
+
+**14 temas disponibles:**
+- `light` - Tema claro por defecto
+- `dark` - Tema oscuro por defecto
+- `cafe` - Tonos marrones cálidos
+- `violeta` - Púrpuras oscuros
+- `madera` - Tonos madera neutros
+- `nocturno` - Azulado para fatiga visual
+- `verde` - Esmeralda oscuro
+- `atardecer` - Naranjas y rojos
+- `corporativo` - Azul profesional
+- `carbon` - Negro carbón
+- `teal` - Verde azulado
+- `citrico` - Amarillos vibrantes
+- `aurora` - Inspirado en auroras boreales
+- `neon` - Estilo cyberpunk/neón
+
+**Uso del Theme Provider:**
+```tsx
+import { ThemeProvider, useTheme } from '@/components/ui/theme-provider';
+
+// En App.tsx
+<ThemeProvider defaultTheme="system" storageKey="theme">
+  {children}
+</ThemeProvider>
+
+// En componentes
+const { theme, setTheme, themes, resolvedTheme } = useTheme();
+setTheme('dark'); // o cualquier tema disponible
+```
+
+**Theme Toggle:**
+```tsx
+import { ThemeToggle } from '@/components/core/theme/theme-toggle';
+
+// O usar directamente desde NavPanelHeader (ya integrado)
+```
 
 ### Tailwind Configuration
 
 - Framework: Tailwind CSS 4
-- CSS variables for theming
-- Border-pulse animations for active states
-- Transition classes from design tokens
+- CSS variables para theming (OKLCH)
+- Animaciones border-pulse para estados activos
+- Transiciones fluidas entre themes (300ms)
+
+**Clases de utilidad disponibles:**
+```css
+/* Bordes */
+rounded-dt-xs, rounded-dt-sm, rounded-dt-md, rounded-dt-lg, rounded-dt-xl
+
+/* Sombras */
+shadow-dt-0, shadow-dt-1, shadow-dt-2, shadow-dt-3, shadow-dt-4
+shadow-dt-inset-1, shadow-dt-inset-2
+
+/* Timing */
+duration-dt-instant, duration-dt-fast, duration-dt-normal, duration-dt-slow
+
+/* Timing functions */
+ease-dt-default, ease-dt-in, ease-dt-out, ease-dt-bounce
+```
+
+### Reglas de Estilo IMPORTANTES
+
+**❌ NUNCA usar colores hardcodeados:**
+```tsx
+// MAL - No hacer esto
+<div style={{ color: '#3b82f6' }} />
+<div className="text-[#3b82f6]" />
+<div style={{ background: 'rgba(255, 255, 255, 0.3)' }} />
+```
+
+**✅ SIEMPRE usar tokens CSS:**
+```tsx
+// BIEN - Usar variables CSS
+<div className="text-primary" />
+<div className="bg-dt-primary-500" />
+<div style={{ background: 'var(--primary)' }} />
+
+// Para opacidad, usar color-mix
+<div style={{ background: 'color-mix(in oklch, var(--primary) 30%, transparent)' }} />
+```
 
 ### Component Variants
 

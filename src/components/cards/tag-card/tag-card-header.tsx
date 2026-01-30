@@ -92,7 +92,7 @@ export function TagCardHeader({
 
 			{/* Barra secundaria con categoría y rareza */}
 			<div
-				className={cn('flex items-center justify-between text-white text-sm', compact ? 'px-3 py-1' : 'px-3.5 py-1.5')}
+				className={cn('flex items-center justify-between text-sm text-white', compact ? 'px-3 py-1' : 'px-3.5 py-1.5')}
 				style={{
 					background: tcgMode ? 'rgba(var(--effect-shadow-rgb), 0.3)' : 'rgba(var(--effect-shadow-rgb), 0.2)',
 					borderBottom: `1px solid ${color}50`,

@@ -217,7 +217,7 @@ export async function generateAnimatedVideoThumbnailFFmpeg(
  * @param checkLocal - Si true, también verifica el binario local en bin/
  * @returns true si FFmpeg está disponible
  */
-export async function isFFmpegAvailable(checkLocal: boolean = true): Promise<boolean> {
+export async function isFFmpegAvailable(checkLocal = true): Promise<boolean> {
 	try {
 		// ✅ Verificar binario local primero si se solicita
 		if (checkLocal) {
@@ -252,7 +252,9 @@ export async function getVideoInfo(videoPath: string): Promise<{
 } | null> {
 	try {
 		const ffprobePath = await getFFmpegPath('ffprobe');
-		const { stdout } = await execAsync(`"${ffprobePath}" -v quiet -print_format json -show_format -show_streams "${videoPath}"`);
+		const { stdout } = await execAsync(
+			`"${ffprobePath}" -v quiet -print_format json -show_format -show_streams "${videoPath}"`
+		);
 		const data = JSON.parse(stdout);
 
 		const videoStream = data.streams?.find((stream: any) => stream.codec_type === 'video');
@@ -320,7 +322,7 @@ export async function generateAudioWaveformImageFFmpeg(
 		// Aseguramos que el color no tenga var() CSS
 		const waveColor = color.startsWith('var(') ? '#3b82f6' : color;
 		// Si es transparente, ffmpeg usa por defecto negro/transparente dependiendo del formato
-		
+
 		// Filtro showwavespic
 		// colors: color de la onda
 		// split_channels: 0 (mezclado) o 1 (separado). Usamos 0 por defecto.

@@ -5,36 +5,21 @@
  *              para imágenes, videos, audio, documentos, JSON y modelos 3D
  */
 
-import { eq } from 'drizzle-orm';
+import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
-import { extname } from 'node:path';
+import { eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import {
-	audios,
-	documents,
-	file3Ds,
-	images,
-	jsonFiles,
-	metadatas,
-	videos,
-} from '@/lib/drizzle/schema';
+import { audios, documents, file3Ds, images, jsonFiles, metadatas, videos } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateAndSaveWaveform } from '@/lib/utils/audio/waveform-generator';
 import { generateStaticVideoThumbnailFFmpeg } from '@/lib/utils/video/ffmpeg-thumbnails';
-import { existsSync } from 'node:fs';
 
 const logger = serverLogger.withContext('ThumbnailUnified');
 
 /**
  * Tipos de entidades soportadas para thumbnails
  */
-export type ThumbnailEntityType =
-	| 'image'
-	| 'video'
-	| 'audio'
-	| 'document'
-	| 'jsonFile'
-	| 'file3d';
+export type ThumbnailEntityType = 'image' | 'video' | 'audio' | 'document' | 'jsonFile' | 'file3d';
 
 /**
  * Opciones de generación de thumbnail
@@ -149,10 +134,7 @@ class ThumbnailUnifiedService {
 	/**
 	 * Obtiene información del thumbnail sin generar
 	 */
-	async getThumbnailInfo(
-		entityType: ThumbnailEntityType,
-		entityId: string
-	): Promise<ThumbnailInfo> {
+	async getThumbnailInfo(entityType: ThumbnailEntityType, entityId: string): Promise<ThumbnailInfo> {
 		try {
 			switch (entityType) {
 				case 'image': {
@@ -226,9 +208,7 @@ class ThumbnailUnifiedService {
 						where: eq(jsonFiles.id, entityId),
 						columns: { metadata: true },
 					});
-					const metadata = jsonFile?.metadata
-						? JSON.parse(jsonFile.metadata as string)
-						: null;
+					const metadata = jsonFile?.metadata ? JSON.parse(jsonFile.metadata as string) : null;
 					return {
 						hasThumbnail: !!metadata?.thumbnail,
 						mimeType: 'image/svg+xml',
@@ -241,9 +221,7 @@ class ThumbnailUnifiedService {
 						where: eq(file3Ds.id, entityId),
 						columns: { metadata: true },
 					});
-					const metadata = file3d?.metadata
-						? JSON.parse(file3d.metadata as string)
-						: null;
+					const metadata = file3d?.metadata ? JSON.parse(file3d.metadata as string) : null;
 					return {
 						hasThumbnail: !!metadata?.thumbnail,
 						mimeType: 'image/svg+xml',
@@ -317,10 +295,7 @@ class ThumbnailUnifiedService {
 	/**
 	 * Obtiene thumbnail existente de la base de datos
 	 */
-	private async getExistingThumbnail(
-		entityType: ThumbnailEntityType,
-		entityId: string
-	): Promise<ThumbnailResult> {
+	private async getExistingThumbnail(entityType: ThumbnailEntityType, entityId: string): Promise<ThumbnailResult> {
 		switch (entityType) {
 			case 'image': {
 				const image = await db.query.images.findFirst({
@@ -485,10 +460,7 @@ class ThumbnailUnifiedService {
 	/**
 	 * Genera thumbnail para imagen
 	 */
-	private async generateImageThumbnail(
-		entityId: string,
-		options: ThumbnailOptions
-	): Promise<ThumbnailResult> {
+	private async generateImageThumbnail(entityId: string, options: ThumbnailOptions): Promise<ThumbnailResult> {
 		try {
 			const { thumbnailService } = await import('@/services/image/image-thumbnail.service');
 			await thumbnailService.generateThumbnail(entityId);
@@ -527,17 +499,14 @@ class ThumbnailUnifiedService {
 	/**
 	 * Genera thumbnail para video usando FFmpeg
 	 */
-	private async generateVideoThumbnail(
-		entityId: string,
-		options: ThumbnailOptions
-	): Promise<ThumbnailResult> {
+	private async generateVideoThumbnail(entityId: string, options: ThumbnailOptions): Promise<ThumbnailResult> {
 		try {
 			const video = await db.query.videos.findFirst({
 				where: eq(videos.id, entityId),
 				columns: { path: true },
 			});
 
-			if (!video?.path || !existsSync(video.path)) {
+			if (!(video?.path && existsSync(video.path))) {
 				return { success: false, error: 'Video file not found' };
 			}
 
@@ -585,17 +554,14 @@ class ThumbnailUnifiedService {
 	/**
 	 * Genera thumbnail (waveform) para audio
 	 */
-	private async generateAudioThumbnail(
-		entityId: string,
-		options: ThumbnailOptions
-	): Promise<ThumbnailResult> {
+	private async generateAudioThumbnail(entityId: string, options: ThumbnailOptions): Promise<ThumbnailResult> {
 		try {
 			const audio = await db.query.audios.findFirst({
 				where: eq(audios.id, entityId),
 				columns: { path: true, name: true },
 			});
 
-			if (!audio?.path || !existsSync(audio.path)) {
+			if (!(audio?.path && existsSync(audio.path))) {
 				return { success: false, error: 'Audio file not found' };
 			}
 
@@ -640,10 +606,7 @@ class ThumbnailUnifiedService {
 	/**
 	 * Genera thumbnail para documento
 	 */
-	private async generateDocumentThumbnail(
-		entityId: string,
-		options: ThumbnailOptions
-	): Promise<ThumbnailResult> {
+	private async generateDocumentThumbnail(entityId: string, options: ThumbnailOptions): Promise<ThumbnailResult> {
 		try {
 			const document = await db.query.documents.findFirst({
 				where: eq(documents.id, entityId),
@@ -698,17 +661,14 @@ class ThumbnailUnifiedService {
 	/**
 	 * Genera thumbnail para archivo JSON
 	 */
-	private async generateJsonThumbnail(
-		entityId: string,
-		options: ThumbnailOptions
-	): Promise<ThumbnailResult> {
+	private async generateJsonThumbnail(entityId: string, options: ThumbnailOptions): Promise<ThumbnailResult> {
 		try {
 			const jsonFile = await db.query.jsonFiles.findFirst({
 				where: eq(jsonFiles.id, entityId),
 				columns: { path: true, name: true },
 			});
 
-			if (!jsonFile?.path || !existsSync(jsonFile.path)) {
+			if (!(jsonFile?.path && existsSync(jsonFile.path))) {
 				return { success: false, error: 'JSON file not found' };
 			}
 
@@ -722,9 +682,7 @@ class ThumbnailUnifiedService {
 				columns: { metadata: true },
 			});
 
-			const existingMetadata = existing?.metadata
-				? JSON.parse(existing.metadata as string)
-				: {};
+			const existingMetadata = existing?.metadata ? JSON.parse(existing.metadata as string) : {};
 
 			await db
 				.update(jsonFiles)
@@ -763,10 +721,7 @@ class ThumbnailUnifiedService {
 	/**
 	 * Genera thumbnail para modelo 3D
 	 */
-	private async generate3DThumbnail(
-		entityId: string,
-		options: ThumbnailOptions
-	): Promise<ThumbnailResult> {
+	private async generate3DThumbnail(entityId: string, options: ThumbnailOptions): Promise<ThumbnailResult> {
 		try {
 			const file3d = await db.query.file3Ds.findFirst({
 				where: eq(file3Ds.id, entityId),
@@ -785,9 +740,7 @@ class ThumbnailUnifiedService {
 				columns: { metadata: true },
 			});
 
-			const existingMetadata = existing?.metadata
-				? JSON.parse(existing.metadata as string)
-				: {};
+			const existingMetadata = existing?.metadata ? JSON.parse(existing.metadata as string) : {};
 
 			await db
 				.update(file3Ds)
@@ -861,7 +814,9 @@ class ThumbnailUnifiedService {
 		try {
 			const parsed = JSON.parse(content);
 			const keys = Object.keys(parsed).slice(0, 5);
-			previewContent = keys.map((k, i) => `<tspan x="20" dy="15" fill="${i % 2 === 0 ? '#a855f7' : '#059669'}">"${k}": ...</tspan>`).join('');
+			previewContent = keys
+				.map((k, i) => `<tspan x="20" dy="15" fill="${i % 2 === 0 ? '#a855f7' : '#059669'}">"${k}": ...</tspan>`)
+				.join('');
 		} catch {
 			previewContent = '<tspan x="20" dy="15" fill="#dc2626">Invalid JSON</tspan>';
 		}

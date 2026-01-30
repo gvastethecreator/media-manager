@@ -94,8 +94,8 @@ export const FolderCard = memo(
 				style={
 					tcgMode
 						? {
-							boxShadow: `0 10px 15px -3px color-mix(in oklab, ${primaryColor}, transparent 80%), 0 4px 6px -4px color-mix(in oklab, ${primaryColor}, transparent 70%)`,
-						}
+								boxShadow: `0 10px 15px -3px color-mix(in oklab, ${primaryColor}, transparent 80%), 0 4px 6px -4px color-mix(in oklab, ${primaryColor}, transparent 70%)`,
+							}
 						: {}
 				}
 			>
@@ -150,7 +150,7 @@ export const FolderCard = memo(
 				>
 					{tcgMode && (
 						<div className="flex items-center">
-							<span className="text-white/60 text-sm">
+							<span className="text-sm text-white/60">
 								{folderData.updatedAt ? new Date(folderData.updatedAt).toLocaleDateString() : ''}
 							</span>
 						</div>

@@ -42,7 +42,9 @@ export function TaskCardFooter({
 			className={cn('mt-auto border-t px-3 py-2', tcgMode && 'bg-muted/10')}
 			style={{
 				borderColor: `color-mix(in oklab, ${primaryColor}, transparent 80%)`,
-				background: tcgMode ? `linear-gradient(to top, color-mix(in oklab, ${secondaryColor}, transparent 88%), color-mix(in oklab, ${secondaryColor}, transparent 94%))` : undefined,
+				background: tcgMode
+					? `linear-gradient(to top, color-mix(in oklab, ${secondaryColor}, transparent 88%), color-mix(in oklab, ${secondaryColor}, transparent 94%))`
+					: undefined,
 			}}
 		>
 			{/* Relaciones */}
