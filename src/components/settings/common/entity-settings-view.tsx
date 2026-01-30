@@ -4,10 +4,9 @@
  * @description Componente genérico que unifica la lógica común de todas las vistas de settings
  */
 
-import { Plus, Search, Grid3X3, List, Loader2 } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
 import type { UseMutationResult, UseQueryResult } from '@tanstack/react-query';
-import { Badge } from '@/components/ui/badge';
+import { Grid3X3, List, Loader2, Plus, Search } from 'lucide-react';
+import { useCallback, useMemo, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { EmptyState } from '@/components/ui/empty-state';
@@ -140,7 +139,11 @@ export function EntitySettingsView<T extends EntityWithStats>({
 	// -------------------------------------------------------------------------
 	// HOOKS DE DATOS
 	// -------------------------------------------------------------------------
-	const { data: response, isLoading, error } = useListQuery({
+	const {
+		data: response,
+		isLoading,
+		error,
+	} = useListQuery({
 		search: searchQuery,
 		limit: 1000,
 	});
@@ -251,7 +254,7 @@ export function EntitySettingsView<T extends EntityWithStats>({
 				<CardContent className="p-8">
 					<div className="flex items-center justify-center gap-3">
 						<Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-						<p className="text-sm text-muted-foreground">Cargando {entityLabelPlural.toLowerCase()}...</p>
+						<p className="text-muted-foreground text-sm">Cargando {entityLabelPlural.toLowerCase()}...</p>
 					</div>
 				</CardContent>
 			</Card>
@@ -261,9 +264,9 @@ export function EntitySettingsView<T extends EntityWithStats>({
 	if (error) {
 		return (
 			<EmptyState
-				title="Error al cargar"
 				description={error.message || `No se pudieron cargar los ${entityLabelPlural.toLowerCase()}`}
 				icon={Icon}
+				title="Error al cargar"
 			/>
 		);
 	}
@@ -275,8 +278,8 @@ export function EntitySettingsView<T extends EntityWithStats>({
 		<div className={cn('space-y-6', className)}>
 			{/* Header */}
 			<div>
-				<h2 className="text-2xl font-semibold text-foreground">{entityLabelPlural}</h2>
-				<p className="mt-1 text-sm text-muted-foreground">
+				<h2 className="font-semibold text-2xl text-foreground">{entityLabelPlural}</h2>
+				<p className="mt-1 text-muted-foreground text-sm">
 					Gestiona tus {entityLabelPlural.toLowerCase()} y configura sus opciones
 				</p>
 			</div>
@@ -284,17 +287,13 @@ export function EntitySettingsView<T extends EntityWithStats>({
 			{/* Stats Grid */}
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 				{stats.map((stat) => (
-					<Card
-						key={stat.key}
-						className="border-l-4"
-						style={{ borderLeftColor: stat.color }}
-					>
+					<Card className="border-l-4" key={stat.key} style={{ borderLeftColor: stat.color }}>
 						<CardContent className="p-4">
 							<div className="flex items-center justify-between">
 								<div>
-									<p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-									<p className="text-2xl font-bold">{stat.value}</p>
-									{stat.subtitle && <p className="text-xs text-muted-foreground">{stat.subtitle}</p>}
+									<p className="font-medium text-muted-foreground text-sm">{stat.label}</p>
+									<p className="font-bold text-2xl">{stat.value}</p>
+									{stat.subtitle && <p className="text-muted-foreground text-sm">{stat.subtitle}</p>}
 								</div>
 								<div
 									className="flex h-10 w-10 items-center justify-center rounded-lg"
@@ -313,21 +312,21 @@ export function EntitySettingsView<T extends EntityWithStats>({
 				<div className="flex items-center gap-3">
 					{filterConfig.enableSearch && (
 						<div className="relative">
-							<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+							<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 							<Input
+								className="w-[280px] pl-9"
+								onChange={(e) => setSearchQuery(e.target.value)}
 								placeholder={`Buscar ${entityLabelPlural.toLowerCase()}...`}
 								value={searchQuery}
-								onChange={(e) => setSearchQuery(e.target.value)}
-								className="pl-9 w-[280px]"
 							/>
 						</div>
 					)}
 
 					{filterConfig.enableFavorites && (
 						<Button
-							variant={onlyFavorites ? 'secondary' : 'outline'}
-							size="sm"
 							onClick={() => setOnlyFavorites(!onlyFavorites)}
+							size="sm"
+							variant={onlyFavorites ? 'secondary' : 'outline'}
 						>
 							⭐ Favoritos
 						</Button>
@@ -336,26 +335,26 @@ export function EntitySettingsView<T extends EntityWithStats>({
 
 				<div className="flex items-center gap-2">
 					{/* View Mode Toggle */}
-					<div className="flex items-center border rounded-lg p-0.5">
+					<div className="flex items-center rounded-lg border p-0.5">
 						<Button
-							variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-							size="sm"
 							className="h-8 w-8 p-0"
 							onClick={() => setViewMode('grid')}
+							size="sm"
+							variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
 						>
 							<Grid3X3 className="h-4 w-4" />
 						</Button>
 						<Button
-							variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-							size="sm"
 							className="h-8 w-8 p-0"
 							onClick={() => setViewMode('list')}
+							size="sm"
+							variant={viewMode === 'list' ? 'secondary' : 'ghost'}
 						>
 							<List className="h-4 w-4" />
 						</Button>
 					</div>
 
-					<Button onClick={handleCreate} className="gap-2">
+					<Button className="gap-2" onClick={handleCreate}>
 						<Plus className="h-4 w-4" />
 						Crear {entityLabel}
 					</Button>
@@ -365,18 +364,18 @@ export function EntitySettingsView<T extends EntityWithStats>({
 			{/* Content */}
 			{filteredEntities.length === 0 ? (
 				<div className="flex flex-col items-center justify-center py-12 text-center">
-					<div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+					<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
 						<Icon className="h-6 w-6 text-muted-foreground" />
 					</div>
-					<h3 className="text-lg font-medium">No hay {entityLabelPlural.toLowerCase()}</h3>
-					<p className="text-sm text-muted-foreground mt-1 max-w-sm">
+					<h3 className="font-medium text-lg">No hay {entityLabelPlural.toLowerCase()}</h3>
+					<p className="mt-1 max-w-sm text-muted-foreground text-sm">
 						{searchQuery || onlyFavorites
 							? 'No se encontraron resultados con los filtros aplicados'
 							: `Comienza creando tu primer ${entityLabel.toLowerCase()}`}
 					</p>
 					<div className="mt-4">
 						{searchQuery || onlyFavorites ? (
-							<Button variant="outline" onClick={clearFilters}>
+							<Button onClick={clearFilters} variant="outline">
 								Limpiar filtros
 							</Button>
 						) : (

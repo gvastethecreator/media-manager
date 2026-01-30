@@ -150,7 +150,7 @@ export const FolderCard = memo(
 				>
 					{tcgMode && (
 						<div className="flex items-center">
-							<span className="text-white/60 text-xs">
+							<span className="text-white/60 text-sm">
 								{folderData.updatedAt ? new Date(folderData.updatedAt).toLocaleDateString() : ''}
 							</span>
 						</div>

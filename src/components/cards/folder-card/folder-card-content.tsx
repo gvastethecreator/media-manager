@@ -113,7 +113,7 @@ export const FolderCardContent = memo(function FolderCardContent({
 				{/* Estadísticas de la carpeta (como caja de texto en TCG) */}
 				<div
 					className={cn(
-						'rounded-sm pt-1 text-xs',
+						'rounded-sm pt-1 text-sm',
 						tcgMode ? 'border border-border/40 bg-muted/30 p-2 shadow-inner' : 'border-t p-1'
 					)}
 					style={
@@ -153,14 +153,14 @@ export const FolderCardContent = memo(function FolderCardContent({
 					<div className="grid grid-cols-2 gap-2">
 						<div className="flex items-center justify-between">
 							<span className={tcgMode ? 'font-medium text-white/70' : 'text-muted-foreground'}>
-								<FolderOutputIcon className="mr-1 inline h-3 w-3" />
+								<FolderOutputIcon className="mr-1 inline h-4 w-4" />
 								Archivos:
 							</span>
 							<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{totalFiles}</span>
 						</div>
 						<div className="flex items-center justify-between">
 							<span className={tcgMode ? 'font-medium text-white/70' : 'text-muted-foreground'}>
-								<HardDriveIcon className="mr-1 inline h-3 w-3" />
+								<HardDriveIcon className="mr-1 inline h-4 w-4" />
 								Tamaño:
 							</span>
 							<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{computedStats.formattedSize}</span>
@@ -186,7 +186,7 @@ export const FolderCardContent = memo(function FolderCardContent({
 						style={tcgMode ? {} : { borderColor: `${primaryColor}20` }}
 					>
 						<span className={tcgMode ? 'font-medium text-white/70' : 'text-muted-foreground'}>
-							<TimerResetIcon className="mr-1 inline h-3 w-3" />
+							<TimerResetIcon className="mr-1 inline h-4 w-4" />
 							Última indexación:
 						</span>
 						<span className={tcgMode ? 'font-bold text-white' : 'font-medium'}>{formattedLastIndexed}</span>

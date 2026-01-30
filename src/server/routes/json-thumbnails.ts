@@ -3,7 +3,10 @@
  * @module server/routes/json-thumbnails
  */
 
+import { eq } from 'drizzle-orm';
 import express from 'express';
+import { db } from '@/lib/drizzle/index.js';
+import { jsonFiles } from '@/lib/drizzle/schema/index.js';
 import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
@@ -202,24 +205,52 @@ router.get('/:id/preview', async (req, res) => {
 			showLineNumbers: req.query.showLineNumbers === 'true',
 		};
 
-		// TODO: Obtener el archivo JSON desde la base de datos usando el id
-		// Por ahora, usamos un ejemplo
-		const jsonContent = `{
-  "name": "example",
-  "version": "1.0.0",
-  "description": "Sample JSON file",
-  "data": {
-    "items": [1, 2, 3],
-    "enabled": true,
-    "config": null
-  }
-}`;
+		// Obtener JSON file de la base de datos
+		const jsonRecords = await db.select({ metadata: jsonFiles.metadata }).from(jsonFiles).where(eq(jsonFiles.id, id));
 
-		const previewSVG = generateJsonPreviewSVG(jsonContent, options);
+		if (jsonRecords.length === 0) {
+			res.status(404).json({ error: 'JSON file not found' });
+			return;
+		}
+
+		const jsonFile = jsonRecords[0];
+		let metadata: any = null;
+
+		// Parsear metadata si existe
+		if (jsonFile.metadata) {
+			try {
+				metadata = JSON.parse(jsonFile.metadata);
+			} catch (e) {
+				serverLogger.warn(`Error parsing metadata for JSON file ${id}:`, e);
+			}
+		}
+
+		// Si ya tiene thumbnail generado en metadata
+		if (metadata?.thumbnail) {
+			const thumbnailSvg = metadata.thumbnail;
+			res.setHeader('Content-Type', 'image/svg+xml');
+			res.setHeader('Cache-Control', 'public, max-age=3600');
+			res.send(thumbnailSvg);
+			return;
+		}
+
+		// Fallback: generar placeholder
+		const themeColors = options.theme === 'dark' ? THEMES.dark : THEMES.light;
+		const svgWidth = options.width ?? 300;
+		const svgHeight = options.height ?? 400;
+		const errorSVG = `
+<svg width="${svgWidth}" height="${svgHeight}" xmlns="http://www.w3.org/2000/svg">
+  <rect width="100%" height="100%" fill="${themeColors.background}"/>
+  <g transform="translate(${svgWidth / 2},${svgHeight / 2})">
+    <text text-anchor="middle" font-family="Arial, sans-serif" font-size="14" fill="${themeColors.text}">
+      📋 JSON File
+    </text>
+  </g>
+</svg>`;
 
 		res.setHeader('Content-Type', 'image/svg+xml');
-		res.setHeader('Cache-Control', 'public, max-age=3600');
-		res.send(previewSVG);
+		res.setHeader('Cache-Control', 'public, max-age=60');
+		res.send(errorSVG);
 	} catch (error) {
 		serverLogger.error('Error generando preview JSON:', error);
 		res.status(500).json({ error: 'Error generating JSON preview' });

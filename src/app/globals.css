@@ -181,7 +181,7 @@
 */
 html,
 html[data-theme="light"] {
-	--font-scale: 0.95;
+	--font-scale: 1;
 	--radius: 0.625rem;
 
 	--background: oklch(1 0 0);

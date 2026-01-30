@@ -55,10 +55,10 @@ export function CharacterCardContent({
 		return (
 			<div className="flex flex-col gap-1 px-3 py-2">
 				{displayDescription && (
-					<p className="line-clamp-2 text-muted-foreground text-xs italic">{displayDescription}</p>
+					<p className="line-clamp-2 text-muted-foreground text-sm italic">{displayDescription}</p>
 				)}
 				<div className="mt-auto flex items-center justify-between gap-2">
-					<div className="flex items-center gap-1.5 text-xs">
+					<div className="flex items-center gap-1.5 text-sm">
 						<span
 							className="rounded px-1.5 py-0.5 font-medium"
 							style={{
@@ -74,13 +74,13 @@ export function CharacterCardContent({
 					</div>
 					{metadata?.power && (
 						<div
-							className="flex items-center gap-0.5 rounded px-1.5 py-0.5 font-bold text-xs"
+							className="flex items-center gap-0.5 rounded px-1.5 py-0.5 font-bold text-sm"
 							style={{
 								backgroundColor: `color-mix(in oklab, ${secondaryColor}, transparent 70%)`,
 								color: secondaryColor,
 							}}
 						>
-							<ArrowUpRight className="h-3 w-3" />
+							<ArrowUpRight className="h-4 w-4" />
 							{metadata.power}
 						</div>
 					)}
@@ -95,7 +95,7 @@ export function CharacterCardContent({
 				<div className="pointer-events-none absolute top-2 right-2 bottom-2 left-2 rounded border border-border/40" />
 			)}
 			{displayDescription && (
-				<div className="relative line-clamp-3 text-sm italic">
+				<div className="relative line-clamp-3 text-base italic">
 					{tcgMode && (
 						<div
 							className="absolute -top-1 -right-2 -bottom-1 -left-2 rounded opacity-10"
@@ -111,9 +111,9 @@ export function CharacterCardContent({
 				<div className="my-1 grid grid-cols-2 gap-1.5">
 					{metadata.healthPoints && (
 						<div className="space-y-0.5">
-							<div className="flex items-center justify-between text-[10px]">
+							<div className="flex items-center justify-between text-sm">
 								<span className="flex items-center gap-0.5 font-semibold">
-									<Heart className="h-3 w-3 fill-red-500 stroke-red-600" /> HP
+									<Heart className="h-4 w-4 fill-red-500 stroke-red-600" /> HP
 								</span>
 								<span>{metadata.healthPoints}</span>
 							</div>
@@ -125,9 +125,9 @@ export function CharacterCardContent({
 					)}
 					{metadata.manaPoints && (
 						<div className="space-y-0.5">
-							<div className="flex items-center justify-between text-[10px]">
+							<div className="flex items-center justify-between text-sm">
 								<span className="flex items-center gap-0.5 font-semibold">
-									<Wand className="h-3 w-3 text-blue-400" /> MP
+									<Wand className="h-4 w-4 text-blue-400" /> MP
 								</span>
 								<span>{metadata.manaPoints}</span>
 							</div>
@@ -158,7 +158,7 @@ export function CharacterCardContent({
 				primaryColor={primaryColor}
 				secondaryColor={secondaryColor}
 			/>
-			{tcgMode && metadata?.cardId && <div className="mt-auto text-right text-[9px] opacity-60">{metadata.cardId}</div>}
+			{tcgMode && metadata?.cardId && <div className="mt-auto text-right text-sm opacity-60">{metadata.cardId}</div>}
 		</div>
 	);
 }
@@ -212,21 +212,21 @@ function normalizeAbilities(
 function statIcon(statKey: string) {
 	const key = statKey.toLowerCase();
 	const iconMatchers: Array<{ match: string[]; icon: React.ReactElement }> = [
-		{ match: ['str', 'force', 'power'], icon: <Swords className="h-3 w-3" /> },
-		{ match: ['int', 'intellect'], icon: <Brain className="h-3 w-3" /> },
-		{ match: ['wis', 'wisdom'], icon: <Sparkles className="h-3 w-3" /> },
-		{ match: ['dex', 'agility', 'speed'], icon: <Zap className="h-3 w-3" /> },
-		{ match: ['con', 'armor', 'stamina'], icon: <Shield className="h-3 w-3" /> },
-		{ match: ['cha', 'soc', 'charisma'], icon: <User className="h-3 w-3" /> },
-		{ match: ['hp', 'health'], icon: <Heart className="h-3 w-3" /> },
-		{ match: ['mp', 'mana'], icon: <Wand className="h-3 w-3" /> },
+		{ match: ['str', 'force', 'power'], icon: <Swords className="h-4 w-4" /> },
+		{ match: ['int', 'intellect'], icon: <Brain className="h-4 w-4" /> },
+		{ match: ['wis', 'wisdom'], icon: <Sparkles className="h-4 w-4" /> },
+		{ match: ['dex', 'agility', 'speed'], icon: <Zap className="h-4 w-4" /> },
+		{ match: ['con', 'armor', 'stamina'], icon: <Shield className="h-4 w-4" /> },
+		{ match: ['cha', 'soc', 'charisma'], icon: <User className="h-4 w-4" /> },
+		{ match: ['hp', 'health'], icon: <Heart className="h-4 w-4" /> },
+		{ match: ['mp', 'mana'], icon: <Wand className="h-4 w-4" /> },
 	];
 	for (const { match, icon } of iconMatchers) {
 		if (match.some((m) => key.includes(m))) {
 			return icon;
 		}
 	}
-	return <Star className="h-3 w-3" />;
+	return <Star className="h-4 w-4" />;
 }
 
 function formatStatName(statKey: string) {
@@ -269,7 +269,7 @@ const StatsGrid: React.FC<{ stats?: CharacterStats | null; primaryColor: string;
 		return null;
 	}
 	return (
-		<div className="mt-1 grid grid-cols-3 gap-x-2 gap-y-1 text-xs">
+		<div className="mt-1 grid grid-cols-3 gap-x-2 gap-y-1 text-sm">
 			{Object.entries(stats)
 				.filter(([_, value]) => value !== undefined && typeof value === 'number')
 				.slice(0, 6)
@@ -283,7 +283,7 @@ const StatsGrid: React.FC<{ stats?: CharacterStats | null; primaryColor: string;
 						}}
 						whileHover={{ scale: 1.05, backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 70%)` }}
 					>
-						<div className="flex items-center gap-1">
+						<div className="flex items-center gap-1.5">
 							{statIcon(key)}
 							<span className="font-semibold">{formatStatName(key)}</span>
 						</div>
@@ -300,7 +300,7 @@ const AlignmentAndRarity: React.FC<{
 	metadata?: CharacterCardContentProps['metadata'];
 	secondaryColor: string;
 }> = ({ alignment, alignmentColor, metadata, secondaryColor }) => (
-	<div className="mt-1 flex items-center justify-between text-xs">
+	<div className="mt-1 flex items-center justify-between text-sm">
 		<div
 			className="flex items-center gap-1 rounded-md px-2 py-0.5 font-bold"
 			style={{
@@ -309,7 +309,7 @@ const AlignmentAndRarity: React.FC<{
 				border: `1px dashed color-mix(in oklab, ${alignmentColor}, transparent 60%)`,
 			}}
 		>
-			<Sparkles className="h-3 w-3" /> {alignment}
+			<Sparkles className="h-4 w-4" /> {alignment}
 		</div>
 		{metadata?.rarityLevel && (
 			<div
@@ -337,14 +337,14 @@ const AbilitiesList: React.FC<{
 	}
 	return (
 		<div className="mt-1.5 space-y-1.5">
-			<div className="flex items-center font-semibold text-xs">
-				<Sparkles className="mr-1 h-3.5 w-3.5 text-warning" />
+			<div className="flex items-center font-semibold text-sm">
+				<Sparkles className="mr-1 h-4 w-4 text-warning" />
 				<span>HABILIDADES</span>
 			</div>
 			<div className="space-y-1.5">
 				{abilities.slice(0, 2).map((ability) => (
 					<motion.div
-						className="relative overflow-hidden rounded border px-2 py-1.5 text-xs"
+						className="relative overflow-hidden rounded border px-2 py-1.5 text-sm"
 						key={`ability-${ability.name}`}
 						style={{
 							backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 70%)`,
@@ -363,11 +363,11 @@ const AbilitiesList: React.FC<{
 						)}
 						<div className="relative z-10">
 							<div className="flex items-center font-bold">
-								<Star className="mr-1 h-3 w-3 text-warning" />
+								<Star className="mr-1 h-4 w-4 text-warning" />
 								{ability.name}
 							</div>
 							{ability.description && (
-								<div className="mt-0.5 line-clamp-2 text-[10px] italic opacity-80">{ability.description}</div>
+								<div className="mt-0.5 line-clamp-2 text-sm italic opacity-80">{ability.description}</div>
 							)}
 						</div>
 					</motion.div>
@@ -387,9 +387,12 @@ const GoalsAndPersonality: React.FC<{
 		return null;
 	}
 	return (
-		<div className="mt-2 grid grid-cols-2 gap-1.5 text-[10px] opacity-90">
+		<div className="mt-2 grid grid-cols-2 gap-1.5 text-sm opacity-90">
 			{goals && goals.length > 0 && (
-				<div className="rounded px-1.5 py-1" style={{ backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 85%)` }}>
+				<div
+					className="rounded px-1.5 py-1"
+					style={{ backgroundColor: `color-mix(in oklab, ${primaryColor}, transparent 85%)` }}
+				>
 					<div className="mb-0.5 font-semibold">OBJETIVOS:</div>
 					<ul className="list-inside list-disc pl-1">
 						{goals.slice(0, 2).map((goal) => (
@@ -401,7 +404,10 @@ const GoalsAndPersonality: React.FC<{
 				</div>
 			)}
 			{personality && personality.length > 0 && (
-				<div className="rounded px-1.5 py-1" style={{ backgroundColor: `color-mix(in oklab, ${secondaryColor}, transparent 85%)` }}>
+				<div
+					className="rounded px-1.5 py-1"
+					style={{ backgroundColor: `color-mix(in oklab, ${secondaryColor}, transparent 85%)` }}
+				>
 					<div className="mb-0.5 font-semibold">PERSONALIDAD:</div>
 					<ul className="list-inside list-disc pl-1">
 						{personality.slice(0, 2).map((trait) => (

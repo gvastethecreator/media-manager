@@ -205,7 +205,7 @@ const TCGEffects: React.FC<{
 					className="flex h-full w-full items-center justify-center rounded-full border-2 border-dashed"
 					style={{ borderColor: primaryColor }}
 				>
-					<div className="font-bold text-xs" style={{ color: primaryColor }}>
+					<div className="font-bold text-sm" style={{ color: primaryColor }}>
 						VALOR
 						<br />
 						{valueLevel}

@@ -4,6 +4,9 @@
  */
 
 import express from 'express';
+import { eq } from 'drizzle-orm';
+import { db } from '@/lib/drizzle/index.js';
+import { file3Ds } from '@/lib/drizzle/schema/index.js';
 import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
@@ -179,27 +182,45 @@ router.get('/:id/thumbnail', async (req, res) => {
 			autoRotate: req.query.autoRotate === 'true',
 		};
 
-		// TODO: Obtener el archivo 3D desde la base de datos usando el id
-		// Por ahora, usamos un path de ejemplo
-		const modelPath = `/path/to/model_${id}.glb`;
+		// Obtener modelo 3D de la base de datos
+		const model3DRecords = await db.select({ metadata: file3Ds.metadata }).from(file3Ds).where(eq(file3Ds.id, id));
 
-		// Intentar renderizado headless primero
-		const thumbnailBuffer = await render3DModelHeadless(modelPath, options);
-
-		if (thumbnailBuffer) {
-			res.setHeader('Content-Type', 'image/png');
-			res.setHeader('Cache-Control', 'public, max-age=3600');
-			res.send(thumbnailBuffer);
+		if (model3DRecords.length === 0) {
+			res.status(404).json({ error: '3D model not found' });
 			return;
 		}
 
-		// Fallback: analizar modelo y generar SVG informativo
-		const modelInfo = await analyze3DModel(modelPath);
-		const infoSVG = generate3DInfoSVG(modelInfo, options);
+		const model3D = model3DRecords[0];
+		let metadata: any = null;
+
+		// Parsear metadata si existe
+		if (model3D.metadata) {
+			try {
+				metadata = JSON.parse(model3D.metadata);
+			} catch (e) {
+				serverLogger.warn(`Error parsing metadata for 3D model ${id}:`, e);
+			}
+		}
+
+		// Si ya tiene thumbnail generado en metadata
+		if (metadata?.thumbnail) {
+			const thumbnailSvg = metadata.thumbnail;
+			res.setHeader('Content-Type', 'image/svg+xml');
+			res.setHeader('Cache-Control', 'public, max-age=3600');
+			res.send(thumbnailSvg);
+			return;
+		}
+
+		// Fallback: generar placeholder
+		const errorSVG = generate3DPlaceholderSVG({
+			width: options.width,
+			height: options.height,
+			backgroundColor: options.backgroundColor,
+		});
 
 		res.setHeader('Content-Type', 'image/svg+xml');
-		res.setHeader('Cache-Control', 'public, max-age=3600');
-		res.send(infoSVG);
+		res.setHeader('Cache-Control', 'public, max-age=60');
+		res.send(errorSVG);
 	} catch (error) {
 		serverLogger.error('Error generando thumbnail 3D:', error);
 

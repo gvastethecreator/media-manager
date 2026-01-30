@@ -8,7 +8,7 @@ function ImagePlaceholder({ primaryColor, error }: { primaryColor: string; error
 	return (
 		<div className="flex h-full flex-col items-center justify-center">
 			<ImageIcon className="mb-2 text-muted-foreground" style={{ color: `${primaryColor}70` }} />
-			<p className="text-center text-muted-foreground text-xs" style={{ color: `${primaryColor}90` }}>
+			<p className="text-center text-muted-foreground text-sm" style={{ color: `${primaryColor}90` }}>
 				{error?.message || 'No hay imágenes con esta etiqueta'}
 			</p>
 		</div>
@@ -218,7 +218,7 @@ export function TagCardImages({
 			{/* Indicador de total */}
 			{tcgMode && images.length > 6 && (
 				<div
-					className="absolute right-1 bottom-1 z-10 rounded-sm px-1.5 py-0.5 text-xs backdrop-blur-sm"
+					className="absolute right-1 bottom-1 z-10 rounded-sm px-1.5 py-0.5 text-sm backdrop-blur-sm"
 					style={{
 						background: `${primaryColor}80`,
 						color: 'white',

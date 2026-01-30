@@ -4,15 +4,28 @@
  * @description Configuración de archivos: carpetas y miniaturas
  */
 
-import { Folder, Image, HardDrive, RefreshCw, Search, Grid3X3, List, Plus, Trash2, Zap, AlertCircle } from 'lucide-react';
+import {
+	AlertCircle,
+	Folder,
+	Grid3X3,
+	HardDrive,
+	Image,
+	List,
+	Plus,
+	RefreshCw,
+	Search,
+	Trash2,
+	Zap,
+} from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFolders, useReindexFolder } from '@/lib/api/folders';
 import {
 	useCleanThumbnails,
@@ -21,15 +34,14 @@ import {
 	useReprocessThumbnails,
 	useThumbnailStats,
 } from '@/lib/api/thumbnails';
-import { useSettings } from '@/lib/contexts';
 import { ThumbnailQuality } from '@/lib/config/thumbnail.config';
+import { useSettings } from '@/lib/contexts';
 import { toastService } from '@/lib/ui/toast';
+import { cn } from '@/lib/utils';
 import { formatBytes } from '@/lib/utils/format.utils';
 import type { FolderWithStats } from '@/types/entities/folder';
-import { cn } from '@/lib/utils';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { FolderForm } from '../folders/folders-form';
 import type { CardActions } from '../common/entity-settings-view';
+import { FolderForm } from '../folders/folders-form';
 
 // ============================================================================
 // COMPONENTE DE CARPETA
@@ -51,32 +63,29 @@ function FolderCard({
 	if (isGrid) {
 		return (
 			<Card className="group overflow-hidden">
-				<div className="aspect-video bg-muted relative">
+				<div className="relative aspect-video bg-muted">
 					<div className="absolute inset-0 flex items-center justify-center">
 						<Folder className="h-12 w-12 text-muted-foreground/30" />
 					</div>
-					<div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-						<Button size="sm" variant="secondary" onClick={actions.onEdit}>
+					<div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+						<Button onClick={actions.onEdit} size="sm" variant="secondary">
 							Editar
 						</Button>
-						<Button
-							size="sm"
-							variant="outline"
-							onClick={onReindex}
-							disabled={isReindexing}
-						>
+						<Button disabled={isReindexing} onClick={onReindex} size="sm" variant="outline">
 							{isReindexing ? '...' : 'Reindexar'}
 						</Button>
 					</div>
 				</div>
 				<CardHeader className="p-4">
-					<CardTitle className="text-base truncate">{folder.name}</CardTitle>
-					<p className="text-xs text-muted-foreground truncate">{folder.path}</p>
+					<CardTitle className="truncate text-base">{folder.name}</CardTitle>
+					<p className="truncate text-muted-foreground text-sm">{folder.path}</p>
 				</CardHeader>
 				<CardContent className="p-4 pt-0">
-					<div className="flex items-center justify-between text-xs text-muted-foreground">
+					<div className="flex items-center justify-between text-muted-foreground text-sm">
 						<span>{folder.stats?.imageCount || 0} imágenes</span>
-						<Badge variant="default" className="text-xs">Activo</Badge>
+						<Badge className="text-sm" variant="default">
+							Activo
+						</Badge>
 					</div>
 				</CardContent>
 			</Card>
@@ -84,30 +93,26 @@ function FolderCard({
 	}
 
 	return (
-		<div className="flex items-center justify-between rounded-lg border p-4 hover:bg-muted/30 transition-colors">
-			<div className="flex items-center gap-3 flex-1 min-w-0">
+		<div className="flex items-center justify-between rounded-lg border p-4 transition-colors hover:bg-muted/30">
+			<div className="flex min-w-0 flex-1 items-center gap-3">
 				<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
 					<Folder className="h-5 w-5 text-primary" />
 				</div>
 				<div className="min-w-0 flex-1">
-					<p className="font-medium truncate">{folder.name}</p>
-					<p className="text-sm text-muted-foreground truncate">{folder.path}</p>
+					<p className="truncate font-medium">{folder.name}</p>
+					<p className="truncate text-muted-foreground text-sm">{folder.path}</p>
 				</div>
 			</div>
 			<div className="flex items-center gap-4">
-				<span className="text-sm text-muted-foreground">{folder.stats?.imageCount || 0} items</span>
-				<Badge variant="default" className="text-xs">Activo</Badge>
-				<Button
-					variant="outline"
-					size="sm"
-					onClick={onReindex}
-					disabled={isReindexing}
-					className="gap-1"
-				>
+				<span className="text-muted-foreground text-sm">{folder.stats?.imageCount || 0} items</span>
+				<Badge className="text-sm" variant="default">
+					Activo
+				</Badge>
+				<Button className="gap-1" disabled={isReindexing} onClick={onReindex} size="sm" variant="outline">
 					<RefreshCw className={cn('h-3 w-3', isReindexing && 'animate-spin')} />
 					{isReindexing ? 'Reindexando...' : 'Reindexar'}
 				</Button>
-				<Button variant="ghost" size="sm" onClick={actions.onDelete}>
+				<Button onClick={actions.onDelete} size="sm" variant="ghost">
 					<Trash2 className="h-4 w-4" />
 				</Button>
 			</div>
@@ -141,7 +146,9 @@ export function FilesSettingsModern() {
 	const cleanMutation = useCleanThumbnails();
 
 	const folders = Array.isArray(foldersQuery.data) ? foldersQuery.data : [];
-	const thumbnailStats = thumbnailStatsQuery.data as unknown as { total: number; pending: number; errors: number; totalSize?: number } | undefined;
+	const thumbnailStats = thumbnailStatsQuery.data as unknown as
+		| { total: number; pending: number; errors: number; totalSize?: number }
+		| undefined;
 
 	// Stats
 	const folderStats = useMemo(
@@ -267,35 +274,35 @@ export function FilesSettingsModern() {
 		<div className="space-y-6">
 			{/* Header */}
 			<div>
-				<h2 className="text-2xl font-semibold text-foreground">Archivos y Almacenamiento</h2>
-				<p className="mt-1 text-sm text-muted-foreground">
+				<h2 className="font-semibold text-2xl text-foreground">Archivos y Almacenamiento</h2>
+				<p className="mt-1 text-muted-foreground text-sm">
 					Gestiona carpetas, miniaturas y configuración de almacenamiento
 				</p>
 			</div>
 
-			<Tabs value={activeTab} onValueChange={setActiveTab}>
+			<Tabs onValueChange={setActiveTab} value={activeTab}>
 				<TabsList className="grid w-full grid-cols-2 lg:w-[400px]">
-					<TabsTrigger value="folders" className="gap-2">
+					<TabsTrigger className="gap-2" value="folders">
 						<Folder className="h-4 w-4" />
 						Carpetas
 					</TabsTrigger>
-					<TabsTrigger value="thumbnails" className="gap-2">
+					<TabsTrigger className="gap-2" value="thumbnails">
 						<Image className="h-4 w-4" />
 						Miniaturas
 					</TabsTrigger>
 				</TabsList>
 
 				<div className="mt-6 space-y-6">
-					<TabsContent value="folders" className="m-0 space-y-6">
+					<TabsContent className="m-0 space-y-6" value="folders">
 						{/* Stats */}
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 							{folderStats.map((stat) => (
-								<Card key={stat.label} className="border-l-4" style={{ borderLeftColor: stat.color }}>
+								<Card className="border-l-4" key={stat.label} style={{ borderLeftColor: stat.color }}>
 									<CardContent className="p-4">
 										<div className="flex items-center justify-between">
 											<div>
-												<p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-												<p className="text-2xl font-bold">{stat.value}</p>
+												<p className="font-medium text-muted-foreground text-sm">{stat.label}</p>
+												<p className="font-bold text-2xl">{stat.value}</p>
 											</div>
 											<div
 												className="flex h-10 w-10 items-center justify-center rounded-lg"
@@ -312,35 +319,35 @@ export function FilesSettingsModern() {
 						{/* Toolbar */}
 						<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 							<div className="relative max-w-sm">
-								<Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+								<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
 								<input
-									type="text"
-									placeholder="Buscar carpetas..."
-									value={searchQuery}
+									className="w-full rounded-lg border bg-background px-4 py-2 pl-10 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
 									onChange={(e) => setSearchQuery(e.target.value)}
-									className="w-full px-4 py-2 pl-10 text-sm border rounded-lg bg-background focus:outline-none focus:ring-2 focus:ring-primary"
+									placeholder="Buscar carpetas..."
+									type="text"
+									value={searchQuery}
 								/>
 							</div>
 							<div className="flex items-center gap-2">
-								<div className="flex items-center border rounded-lg p-0.5">
+								<div className="flex items-center rounded-lg border p-0.5">
 									<Button
-										variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
-										size="sm"
 										className="h-8 w-8 p-0"
 										onClick={() => setViewMode('grid')}
+										size="sm"
+										variant={viewMode === 'grid' ? 'secondary' : 'ghost'}
 									>
 										<Grid3X3 className="h-4 w-4" />
 									</Button>
 									<Button
-										variant={viewMode === 'list' ? 'secondary' : 'ghost'}
-										size="sm"
 										className="h-8 w-8 p-0"
 										onClick={() => setViewMode('list')}
+										size="sm"
+										variant={viewMode === 'list' ? 'secondary' : 'ghost'}
 									>
 										<List className="h-4 w-4" />
 									</Button>
 								</div>
-								<Button onClick={handleCreateFolder} className="gap-2">
+								<Button className="gap-2" onClick={handleCreateFolder}>
 									<Plus className="h-4 w-4" />
 									Agregar Carpeta
 								</Button>
@@ -350,20 +357,20 @@ export function FilesSettingsModern() {
 						{/* Folders List */}
 						{foldersQuery.isLoading ? (
 							<div className="flex items-center justify-center p-12">
-								<div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
+								<div className="h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
 							</div>
 						) : folders.length === 0 ? (
 							<div className="flex flex-col items-center justify-center py-12 text-center">
-								<div className="h-12 w-12 rounded-full bg-muted flex items-center justify-center mb-4">
+								<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
 									<Folder className="h-6 w-6 text-muted-foreground" />
 								</div>
-								<h3 className="text-lg font-medium">No hay carpetas</h3>
-								<p className="text-sm text-muted-foreground mt-1">
+								<h3 className="font-medium text-lg">No hay carpetas</h3>
+								<p className="mt-1 text-muted-foreground text-sm">
 									{searchQuery ? 'No se encontraron resultados' : 'Agrega una carpeta para comenzar'}
 								</p>
 								<div className="mt-4">
 									{searchQuery ? (
-										<Button variant="outline" onClick={() => setSearchQuery('')}>
+										<Button onClick={() => setSearchQuery('')} variant="outline">
 											Limpiar búsqueda
 										</Button>
 									) : (
@@ -374,41 +381,37 @@ export function FilesSettingsModern() {
 						) : (
 							<div
 								className={
-									viewMode === 'grid'
-										? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4'
-										: 'flex flex-col gap-2'
+									viewMode === 'grid' ? 'grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3' : 'flex flex-col gap-2'
 								}
 							>
 								{folders.map((folder: FolderWithStats) => (
 									<FolderCard
-										key={folder.id}
-										folder={folder}
 										actions={{
 											onEdit: () => handleEditFolder(folder),
 											onDelete: () => {}, // TODO: Implementar
 										}}
+										folder={folder}
 										isGrid={viewMode === 'grid'}
-										onReindex={() => handleReindexFolder(folder.id)}
 										isReindexing={reindexingFolderId === folder.id}
+										key={folder.id}
+										onReindex={() => handleReindexFolder(folder.id)}
 									/>
 								))}
 							</div>
 						)}
 					</TabsContent>
 
-					<TabsContent value="thumbnails" className="m-0 space-y-6">
+					<TabsContent className="m-0 space-y-6" value="thumbnails">
 						{/* Stats */}
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 							{thumbnailStatCards.map((stat) => (
-								<Card key={stat.label} className="border-l-4" style={{ borderLeftColor: stat.color }}>
+								<Card className="border-l-4" key={stat.label} style={{ borderLeftColor: stat.color }}>
 									<CardContent className="p-4">
 										<div className="flex items-center justify-between">
 											<div>
-												<p className="text-sm font-medium text-muted-foreground">{stat.label}</p>
-												<p className="text-2xl font-bold">{stat.value}</p>
-												{stat.subtitle && (
-													<p className="text-xs text-muted-foreground">{stat.subtitle}</p>
-												)}
+												<p className="font-medium text-muted-foreground text-sm">{stat.label}</p>
+												<p className="font-bold text-2xl">{stat.value}</p>
+												{stat.subtitle && <p className="text-muted-foreground text-sm">{stat.subtitle}</p>}
 											</div>
 											<div
 												className="flex h-10 w-10 items-center justify-center rounded-lg"
@@ -425,7 +428,7 @@ export function FilesSettingsModern() {
 						{/* Quality Settings */}
 						<Card>
 							<CardHeader>
-								<CardTitle className="text-lg flex items-center gap-2">
+								<CardTitle className="flex items-center gap-2 text-lg">
 									<Image className="h-5 w-5" />
 									Configuración de Miniaturas
 								</CardTitle>
@@ -434,13 +437,11 @@ export function FilesSettingsModern() {
 								<div className="flex items-center justify-between">
 									<div>
 										<p className="font-medium">Calidad de miniaturas</p>
-										<p className="text-sm text-muted-foreground">
-											Balance entre calidad visual y espacio en disco
-										</p>
+										<p className="text-muted-foreground text-sm">Balance entre calidad visual y espacio en disco</p>
 									</div>
 									<Select
-										value={settings?.thumbnailQuality || ThumbnailQuality.MEDIUM}
 										onValueChange={(v) => handleQualityChange(v as ThumbnailQuality)}
+										value={settings?.thumbnailQuality || ThumbnailQuality.MEDIUM}
 									>
 										<SelectTrigger className="w-[200px]">
 											<SelectValue />
@@ -458,9 +459,7 @@ export function FilesSettingsModern() {
 								<div className="flex items-center justify-between">
 									<div>
 										<p className="font-medium">Animación en videos</p>
-										<p className="text-sm text-muted-foreground">
-											Mostrar preview animado al pasar el cursor
-										</p>
+										<p className="text-muted-foreground text-sm">Mostrar preview animado al pasar el cursor</p>
 									</div>
 									<Switch
 										checked={settings?.videoThumbnailAnimation ?? true}
@@ -475,25 +474,25 @@ export function FilesSettingsModern() {
 						{/* Maintenance */}
 						<Card>
 							<CardHeader>
-								<CardTitle className="text-lg flex items-center gap-2">
+								<CardTitle className="flex items-center gap-2 text-lg">
 									<Zap className="h-5 w-5" />
 									Mantenimiento
 								</CardTitle>
 							</CardHeader>
 							<CardContent>
 								<div className="flex flex-wrap gap-2">
-									<Button variant="outline" className="gap-2" onClick={handleOptimizeThumbnails}>
+									<Button className="gap-2" onClick={handleOptimizeThumbnails} variant="outline">
 										<Zap className="h-4 w-4" />
 										Optimizar
 									</Button>
-									<Button variant="outline" className="gap-2" onClick={handleReprocessThumbnails}>
+									<Button className="gap-2" onClick={handleReprocessThumbnails} variant="outline">
 										<RefreshCw className="h-4 w-4" />
 										Reprocesar todo
 									</Button>
 									<Button
-										variant="outline"
 										className="gap-2 text-destructive hover:text-destructive"
 										onClick={handleCleanThumbnails}
+										variant="outline"
 									>
 										<Trash2 className="h-4 w-4" />
 										Limpiar huérfanas
@@ -506,18 +505,18 @@ export function FilesSettingsModern() {
 			</Tabs>
 
 			{/* Folder Form Dialog */}
-			<Dialog open={showFolderForm} onOpenChange={setShowFolderForm}>
+			<Dialog onOpenChange={setShowFolderForm} open={showFolderForm}>
 				<DialogContent className="sm:max-w-[600px]">
 					<DialogHeader>
 						<DialogTitle>{editingFolder ? 'Editar Carpeta' : 'Agregar Carpeta'}</DialogTitle>
 					</DialogHeader>
 					<FolderForm
+						isLoading={false}
+						isProcessing={false}
 						onAddFolder={async (_path: string) => {
 							console.log('Add folder');
 							setShowFolderForm(false);
 						}}
-						isProcessing={false}
-						isLoading={false}
 					/>
 				</DialogContent>
 			</Dialog>

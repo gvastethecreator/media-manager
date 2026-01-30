@@ -31,7 +31,7 @@ export function AlbumCardFooter({
 	};
 
 	return (
-		<footer className="relative border-border/40 border-t p-2 text-xs">
+		<footer className="relative border-border/40 border-t p-2 text-sm">
 			{/* Id de carta y contenido tipo TCG */}
 			<div className="flex items-center justify-between">
 				<div className="flex items-center gap-1">
@@ -62,7 +62,7 @@ export function AlbumCardFooter({
 			{tcgMode && (
 				<div
 					className={cn(
-						'absolute bottom-1 left-1/2 z-20 -translate-x-1/2 rounded-full px-3 py-0.5 font-medium text-[10px]',
+						'absolute bottom-1 left-1/2 z-20 -translate-x-1/2 rounded-full px-3 py-0.5 font-medium text-xs',
 						rarityLevel === 'Mítica' && 'bg-gradient-to-r from-amber-400 via-purple-500 to-pink-500 text-white',
 						rarityLevel === 'Rara' && 'bg-gradient-to-r from-indigo-500 to-purple-600 text-white',
 						rarityLevel === 'Poco común' && 'bg-gradient-to-r from-emerald-500 to-teal-600 text-white',

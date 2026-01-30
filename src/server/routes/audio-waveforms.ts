@@ -3,10 +3,14 @@
  * @module server/routes/audio-waveforms
  */
 
+import { eq } from 'drizzle-orm';
 import express from 'express';
+import { db } from '@/lib/drizzle/index.js';
+import { audios } from '@/lib/drizzle/schema/index.js';
 import { serverLogger } from '@/lib/logger/server-logger';
 
 const router = express.Router();
+const logger = serverLogger.withContext('AudioWaveformRoute');
 
 /**
  * 🎵 Interfaz para opciones de generación de waveform
@@ -16,10 +20,17 @@ interface AudioWaveformOptions {
 	height?: number;
 	color?: string;
 	backgroundColor?: string;
-	samples?: number;
+	bars?: number;
 	style?: 'bars' | 'curve' | 'filled';
 	showAxis?: boolean;
 }
+
+/**
+ * 🗂️ Caché en memoria para waveforms generados
+ * Key: `${audioId}:${width}:${height}:${bars}:${color}`
+ */
+const waveformCache = new Map<string, { svg: string; timestamp: number }>();
+const CACHE_DURATION = 24 * 60 * 60 * 1000; // 24 horas
 
 /**
  * 📊 Interfaz para información de audio
@@ -35,14 +46,14 @@ interface AudioInfo {
 /**
  * 🎨 Genera datos de waveform simulados (placeholder)
  */
-function generateMockWaveformData(samples: number): number[] {
+function generateMockWaveformData(bars: number): number[] {
 	const data: number[] = [];
 
-	for (let i = 0; i < samples; i++) {
+	for (let i = 0; i < bars; i++) {
 		// Generar una onda simulada con variaciones
 		const baseWave = Math.sin(i * 0.1) * 0.5;
 		const noise = (Math.random() - 0.5) * 0.3;
-		const envelope = Math.exp((-i / samples) * 2); // Decaimiento
+		const envelope = Math.exp((-i / bars) * 2); // Decaimiento
 
 		const amplitude = (baseWave + noise) * envelope;
 		data.push(Math.max(-1, Math.min(1, amplitude)));
@@ -67,6 +78,9 @@ function generateWaveformSVG(waveformData: number[], options: AudioWaveformOptio
 	const centerY = height / 2;
 	const barWidth = width / waveformData.length;
 
+	// Usar el color proporcionado o un color SVG válido
+	const svgColor = color?.startsWith('var(') ? '#3b82f6' : color;
+
 	let pathData = '';
 	let elements = '';
 
@@ -86,7 +100,7 @@ function generateWaveformSVG(waveformData: number[], options: AudioWaveformOptio
 				const amplitude = Math.abs(waveformData[i]);
 				const barHeight = amplitude * centerY;
 
-				elements += `<rect x="${x}" y="${centerY - barHeight}" width="${barWidth * 0.8}" height="${barHeight * 2}" fill="${color}" opacity="0.8"/>`;
+				elements += `<rect x="${x}" y="${centerY - barHeight}" width="${barWidth * 0.8}" height="${barHeight * 2}" fill="${svgColor}" opacity="0.8"/>`;
 			}
 			break;
 		}
@@ -102,7 +116,7 @@ function generateWaveformSVG(waveformData: number[], options: AudioWaveformOptio
 			}
 
 			pathData += ` L ${width} ${centerY} Z`;
-			elements += `<path d="${pathData}" fill="${color}" opacity="0.6"/>`;
+			elements += `<path d="${pathData}" fill="${svgColor}" opacity="0.6"/>`;
 
 			// Línea superior
 			let topPath = `M 0 ${centerY}`;
@@ -111,7 +125,7 @@ function generateWaveformSVG(waveformData: number[], options: AudioWaveformOptio
 				const y = centerY - waveformData[i] * centerY * 0.8;
 				topPath += ` L ${x} ${y}`;
 			}
-			elements += `<path d="${topPath}" stroke="${color}" stroke-width="2" fill="none"/>`;
+			elements += `<path d="${topPath}" stroke="${svgColor}" stroke-width="2" fill="none"/>`;
 			break;
 		}
 
@@ -125,7 +139,7 @@ function generateWaveformSVG(waveformData: number[], options: AudioWaveformOptio
 				pathData += ` L ${x} ${y}`;
 			}
 
-			elements += `<path d="${pathData}" stroke="${color}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
+			elements += `<path d="${pathData}" stroke="${svgColor}" stroke-width="2" fill="none" stroke-linecap="round"/>`;
 			break;
 		}
 	}
@@ -235,34 +249,48 @@ router.get('/:id/waveform', async (req, res) => {
 		const options: AudioWaveformOptions = {
 			width: Number.parseInt(req.query.width as string, 10) || 300,
 			height: Number.parseInt(req.query.height as string, 10) || 100,
-			color: `#${(req.query.color as string) || '3b82f6'}`,
-			backgroundColor: `#${(req.query.backgroundColor as string) || 'ffffff'}`,
-			samples: Number.parseInt(req.query.samples as string, 10) || 200,
+			color: (req.query.color as string) || '#3b82f6',
+			backgroundColor: (req.query.backgroundColor as string) || 'transparent',
+			bars: Number.parseInt(req.query.bars as string, 10) || 50,
 			style: (req.query.style as 'bars' | 'curve' | 'filled') || 'bars',
 			showAxis: req.query.showAxis === 'true',
 		};
 
-		// TODO: Obtener el archivo de audio desde la base de datos
-		const audioPath = `/path/to/audio_${id}.mp3`;
+		// Obtener audio de la base de datos
+		const audioRecords = await db.select({ metadata: audios.metadata }).from(audios).where(eq(audios.id, id));
 
-		// Extraer waveform del archivo
-		const waveformData = await extractWaveformFromAudio(audioPath, options.samples || 200);
-
-		if (waveformData) {
-			const waveformSVG = generateWaveformSVG(waveformData, options);
-
-			res.setHeader('Content-Type', 'image/svg+xml');
-			res.setHeader('Cache-Control', 'public, max-age=3600');
-			res.send(waveformSVG);
-		} else {
-			// Fallback: generar placeholder con info básica
-			const audioInfo = await analyzeAudioFile(audioPath);
-			const infoSVG = generateAudioInfoSVG(audioInfo, options);
-
-			res.setHeader('Content-Type', 'image/svg+xml');
-			res.setHeader('Cache-Control', 'public, max-age=3600');
-			res.send(infoSVG);
+		if (audioRecords.length === 0) {
+			res.status(404).json({ error: 'Audio not found' });
+			return;
 		}
+
+		const audio = audioRecords[0];
+		let metadata: any = null;
+
+		// Parsear metadata si existe
+		if (audio.metadata) {
+			try {
+				metadata = JSON.parse(audio.metadata);
+			} catch (e) {
+				serverLogger.warn(`Error parsing metadata for audio ${id}:`, e);
+			}
+		}
+
+		// Si ya tiene waveform generado en metadata
+		if (metadata?.waveform) {
+			const waveformSvg = metadata.waveform;
+			res.setHeader('Content-Type', 'image/svg+xml');
+			res.setHeader('Cache-Control', 'public, max-age=3600');
+			res.send(waveformSvg);
+			return;
+		}
+
+		// Fallback: generar placeholder con info básica
+		const errorSVG = generateAudioInfoSVG(null, options);
+
+		res.setHeader('Content-Type', 'image/svg+xml');
+		res.setHeader('Cache-Control', 'public, max-age=60');
+		res.send(errorSVG);
 	} catch (error) {
 		serverLogger.error('Error generando waveform:', error);
 
@@ -316,9 +344,9 @@ router.get('/:id/waveform/preview', async (req, res) => {
 		const options: AudioWaveformOptions = {
 			width: 150,
 			height: 50,
-			color: 'var(--dt-success-500)',
+			color: '#10b981',
 			backgroundColor: 'transparent',
-			samples: 50,
+			bars: 30,
 			style: 'bars',
 			showAxis: false,
 		};

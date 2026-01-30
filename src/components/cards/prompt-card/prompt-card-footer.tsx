@@ -36,12 +36,14 @@ export function PromptCardFooter({
 
 	// Color estilizado para el footer
 	const borderColor = `color-mix(in oklab, ${primaryColor}, transparent 60%)`;
-	const bgColor = tcgMode ? `linear-gradient(to top, color-mix(in oklab, ${primaryColor}, transparent 80%), transparent)` : undefined;
+	const bgColor = tcgMode
+		? `linear-gradient(to top, color-mix(in oklab, ${primaryColor}, transparent 80%), transparent)`
+		: undefined;
 
 	return (
 		<div
 			className={cn(
-				'mt-auto flex items-center justify-between px-3 py-2 text-muted-foreground text-xs',
+				'mt-auto flex items-center justify-between px-4 py-3 text-muted-foreground text-sm',
 				tcgMode && 'rounded-b-lg'
 			)}
 			style={{
@@ -51,7 +53,7 @@ export function PromptCardFooter({
 		>
 			{/* Fecha de actualización */}
 			<div className="flex items-center gap-1">
-				<Calendar className="h-3.5 w-3.5" />
+				<Calendar className="h-4 w-4" />
 				<span>{formattedDate}</span>
 				{isRecent && (
 					<span
@@ -67,14 +69,14 @@ export function PromptCardFooter({
 			<div className="flex items-center gap-2">
 				{/* Contador de imágenes */}
 				<div className="flex items-center gap-1">
-					<Image className="h-3.5 w-3.5" />
+					<Image className="h-4 w-4" />
 					<span>{imagesCount}</span>
 				</div>
 
 				{/* Contador de vídeos */}
 				{videosCount > 0 && (
 					<div className="flex items-center gap-1">
-						<Video className="h-3.5 w-3.5" />
+						<Video className="h-4 w-4" />
 						<span>{videosCount}</span>
 					</div>
 				)}
@@ -82,7 +84,7 @@ export function PromptCardFooter({
 				{/* Contador de etiquetas */}
 				{tagsCount > 0 && (
 					<div className="flex items-center gap-1">
-						<Tag className="h-3.5 w-3.5" />
+						<Tag className="h-4 w-4" />
 						<span>{tagsCount}</span>
 					</div>
 				)}

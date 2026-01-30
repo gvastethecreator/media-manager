@@ -142,7 +142,7 @@ export function ConceptCardContent({
 					{tcgMode ? '◇ Concepto ◇' : 'Concepto'}
 				</div>
 				{category && (
-					<div className="flex items-center text-xs opacity-70">
+					<div className="flex items-center text-sm opacity-70">
 						<span className="capitalize">{category}</span>
 						{tcgMode && (
 							<span
@@ -194,7 +194,7 @@ export function ConceptCardContent({
 					<div className="flex flex-wrap gap-1">
 						{parsedTags.slice(0, 5).map((tag: string, _index: number) => (
 							<span
-								className={`rounded-sm px-1.5 py-0.5 text-xs ${tcgMode ? 'border border-border/40' : 'bg-primary/10'}`}
+								className={`rounded-sm px-1.5 py-0.5 text-sm ${tcgMode ? 'border border-border/40' : 'bg-primary/10'}`}
 								key={`tag-${renderKey}-${tag}`}
 								style={{
 									backgroundColor: tcgMode ? `${primaryColor}30` : `${primaryColor}20`,
@@ -206,7 +206,7 @@ export function ConceptCardContent({
 							</span>
 						))}
 						{parsedTags.length > 5 && (
-							<span className={`rounded-sm px-1.5 py-0.5 text-xs opacity-80 ${tcgMode ? 'bg-muted/20' : ''}`}>
+							<span className={`rounded-sm px-1.5 py-0.5 text-sm opacity-80 ${tcgMode ? 'bg-muted/20' : ''}`}>
 								+{parsedTags.length - 5}
 							</span>
 						)}
@@ -253,9 +253,9 @@ export function ConceptCardContent({
 			)}
 
 			{/* Contadores de relaciones */}
-			<div className="mt-auto grid grid-cols-4 gap-2 text-xs">
+			<div className="mt-auto grid grid-cols-4 gap-2 text-sm">
 				<div className="col-span-4 mb-1">
-					<div className="mb-1 flex justify-between border-border/40 border-b pb-1 text-xs opacity-60">
+					<div className="mb-1 flex justify-between border-border/40 border-b pb-1 text-sm opacity-60">
 						<span>Relaciones principales</span>
 						<span>{totalRelations}</span>
 					</div>
@@ -264,25 +264,25 @@ export function ConceptCardContent({
 				{/* Primera fila - Mundo */}
 				<StatCounter
 					count={relationCounts.characters}
-					icon={<UserSquare className="h-3 w-3" />}
+					icon={<UserSquare className="h-4 w-4" />}
 					label="Personajes"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
 					count={relationCounts.places}
-					icon={<Globe className="h-3 w-3" />}
+					icon={<Globe className="h-4 w-4" />}
 					label="Lugares"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
 					count={relationCounts.worldItems}
-					icon={<Package className="h-3 w-3" />}
+					icon={<Package className="h-4 w-4" />}
 					label="Objetos"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
 					count={relationCounts.notes}
-					icon={<BookText className="h-3 w-3" />}
+					icon={<BookText className="h-4 w-4" />}
 					label="Notas"
 					primaryColor={primaryColor}
 				/>
@@ -290,25 +290,25 @@ export function ConceptCardContent({
 				{/* Segunda fila - Contenido */}
 				<StatCounter
 					count={relationCounts.images}
-					icon={<Image className="h-3 w-3" />}
+					icon={<Image className="h-4 w-4" />}
 					label="Imágenes"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
 					count={relationCounts.videos}
-					icon={<VideoIcon className="h-3 w-3" />}
+					icon={<VideoIcon className="h-4 w-4" />}
 					label="Videos"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
 					count={relationCounts.prompts}
-					icon={<MessageSquare className="h-3 w-3" />}
+					icon={<MessageSquare className="h-4 w-4" />}
 					label="Prompts"
 					primaryColor={primaryColor}
 				/>
 				<StatCounter
 					count={relationCounts.properties}
-					icon={<Tag className="h-3 w-3" />}
+					icon={<Tag className="h-4 w-4" />}
 					label="Props"
 					primaryColor={primaryColor}
 				/>

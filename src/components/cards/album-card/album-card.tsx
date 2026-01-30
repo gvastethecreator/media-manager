@@ -242,19 +242,19 @@ export function AlbumCard({
 
 					{/* Ornamentos decorativos en las esquinas */}
 					<div
-						className="absolute top-3 left-3 z-20 h-3 w-3 rounded-full opacity-70"
+						className="absolute top-3 left-3 z-20 h-4 w-4 rounded-full opacity-70"
 						style={{ backgroundColor: `${primaryColor}` }}
 					/>
 					<div
-						className="absolute top-3 right-3 z-20 h-3 w-3 rounded-full opacity-70"
+						className="absolute top-3 right-3 z-20 h-4 w-4 rounded-full opacity-70"
 						style={{ backgroundColor: `${primaryColor}` }}
 					/>
 					<div
-						className="absolute bottom-3 left-3 z-20 h-3 w-3 rounded-full opacity-70"
+						className="absolute bottom-3 left-3 z-20 h-4 w-4 rounded-full opacity-70"
 						style={{ backgroundColor: `${primaryColor}` }}
 					/>
 					<div
-						className="absolute right-3 bottom-3 z-20 h-3 w-3 rounded-full opacity-70"
+						className="absolute right-3 bottom-3 z-20 h-4 w-4 rounded-full opacity-70"
 						style={{ backgroundColor: `${primaryColor}` }}
 					/>
 				</>
