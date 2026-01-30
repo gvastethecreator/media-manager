@@ -303,19 +303,80 @@ router.post(
 );
 
 /**
+ * POST /folders/:id/reindex - Reindexar una carpeta específica con flujo estructurado
+ */
+router.post(
+	'/:id/reindex',
+	effectHandler((req, res) =>
+		Effect.gen(function* () {
+			const folderId = req.params.id;
+			const options = req.body || {};
+
+			console.log('🔄 [DEBUG] Reindexando carpeta específica:', { folderId, options });
+
+			const result = yield* Effect.tryPromise({
+				try: () =>
+					reindexService.executeStructuredReindex({
+						folderId,
+						emitEvents: true,
+						includeSubfolders: options.includeSubfolders ?? true,
+						skipThumbnails: options.skipThumbnails,
+						skipMetadata: options.skipMetadata,
+						concurrency: 3,
+					}),
+				catch: (error) => new Error(`Reindex failed: ${error instanceof Error ? error.message : 'Unknown error'}`),
+			});
+
+			res.json({
+				success: result.success,
+				folderId,
+				phases: result.phases,
+				summary: result.summary,
+				totalDuration: result.totalDuration,
+			});
+
+			return result;
+		})
+	)
+);
+
+/**
  * POST /folders/reindex - Iniciar reindexado de carpetas
+ * @deprecated Usar /folders/:id/reindex o /folders/reindex-all
  */
 router.post(
 	'/reindex',
 	effectHandler((req, res) =>
 		Effect.gen(function* () {
 			const { folderIds } = req.body;
-			if (!Array.isArray(folderIds)) {
-				return yield* Effect.fail(new Error('folderIds must be an array'));
+			if (!Array.isArray(folderIds) || folderIds.length === 0) {
+				return yield* Effect.fail(new Error('folderIds must be a non-empty array'));
 			}
-			res.status(202);
-			return { message: 'Reindex started', folderIds };
-		}).pipe(Effect.provide(FolderServiceLive))
+
+			// Reindexar la primera carpeta del array (mantener compatibilidad)
+			const folderId = folderIds[0];
+			console.log('🔄 [DEBUG] Reindexando desde endpoint /reindex (legacy):', { folderId });
+
+			const result = yield* Effect.tryPromise({
+				try: () =>
+					reindexService.executeStructuredReindex({
+						folderId,
+						emitEvents: true,
+						includeSubfolders: true,
+						concurrency: 3,
+					}),
+				catch: (error) => new Error(`Reindex failed: ${error instanceof Error ? error.message : 'Unknown error'}`),
+			});
+
+			res.json({
+				success: result.success,
+				folderId,
+				folderIds,
+				message: 'Reindex completed',
+				phases: result.phases,
+				summary: result.summary,
+			});
+		})
 	)
 );
 
