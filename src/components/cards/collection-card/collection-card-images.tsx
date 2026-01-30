@@ -40,7 +40,7 @@ export function CollectionCardImages({ collectionId, primaryColor, secondaryColo
 		<div className="flex h-full items-center justify-center p-4 text-center" style={{ color: `${primaryColor}80` }}>
 			<div className="flex flex-col items-center gap-2">
 				<ImageOffIcon className="h-10 w-10 opacity-40" />
-				<p className="text-xs opacity-60">No hay imágenes disponibles</p>
+				<p className="text-sm opacity-60">No hay imágenes disponibles</p>
 			</div>
 		</div>
 	);
@@ -98,7 +98,7 @@ export function CollectionCardImages({ collectionId, primaryColor, secondaryColo
 									{/* Indicador para videos */}
 									{thumbnail.isVideo && (
 										<div className="absolute right-1 bottom-1 rounded-full bg-black/60 p-0.5">
-											<VideoIcon className="h-3 w-3 text-white" />
+											<VideoIcon className="h-4 w-4 text-white" />
 										</div>
 									)}
 								</motion.div>

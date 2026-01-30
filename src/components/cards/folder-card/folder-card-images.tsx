@@ -152,7 +152,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 
 						{/* Marcador de elementos */}
 						<div
-							className="absolute top-1 right-1 rounded-sm px-1 font-bold text-xs"
+							className="absolute top-1 right-1 rounded-sm px-1 font-bold text-sm"
 							style={{
 								background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`,
 								color: 'white',

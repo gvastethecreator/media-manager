@@ -34,7 +34,7 @@ export function AlbumCardHeader({ album, primaryColor, compact = false }: AlbumC
 			{/* Texto y categoría */}
 			<div className="flex-1 overflow-hidden">
 				<h3 className={cn('truncate font-bold text-foreground', compact ? 'text-sm' : 'text-base')}>{name}</h3>
-				{category && !compact && <p className="truncate text-muted-foreground text-xs">{category}</p>}
+				{category && !compact && <p className="truncate text-muted-foreground text-sm">{category}</p>}
 			</div>
 
 			{/* Indicador de favorito */}

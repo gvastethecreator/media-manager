@@ -32,13 +32,13 @@ export const FolderCardFooter = memo(function FolderCardFooter({
 			<div className="flex items-center gap-2">
 				{/* Información de la carta TCG */}
 				{tcgMode && (
-					<div className="flex items-center text-xs">
+					<div className="flex items-center text-sm">
 						<div
 							className="flex h-5 w-5 items-center justify-center rounded-full border border-border/40 bg-muted/50"
 							style={{ borderColor: `${folder.color ?? 'var(--dt-neutral-950)'}50` }}
 							title="Folder icon"
 						>
-							<FolderIcon className="h-3 w-3" style={{ color: folder.color ?? 'var(--dt-neutral-950)' }} />
+							<FolderIcon className="h-4 w-4" style={{ color: folder.color ?? 'var(--dt-neutral-950)' }} />
 						</div>
 						<span className="ml-1 font-semibold text-[0.65rem] text-white/70">
 							Collection ID: {folderId.slice(0, 8)}

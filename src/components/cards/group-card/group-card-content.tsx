@@ -75,16 +75,16 @@ export function GroupCardContent({
 		>
 			{/* Descripción del grupo */}
 			{shortDescription && (
-				<div className={cn('text-xs leading-tight', compact ? 'line-clamp-2' : 'line-clamp-3')}>{shortDescription}</div>
+				<div className={cn('text-sm leading-tight', compact ? 'line-clamp-2' : 'line-clamp-3')}>{shortDescription}</div>
 			)}
 
 			{/* Filtros y flexibilidad en modo TCG */}
 			{tcgMode && !compact && (
-				<div className="flex justify-between text-xs">
+				<div className="flex justify-between text-sm">
 					{/* Filtros */}
 					{filtersCount > 0 && (
 						<div className="flex items-center space-x-1">
-							<FilterIcon className="h-3 w-3" style={{ color: primaryColor }} />
+							<FilterIcon className="h-4 w-4" style={{ color: primaryColor }} />
 							<span className="font-medium">
 								{filtersCount} {filtersCount === 1 ? 'filtro' : 'filtros'}
 							</span>
@@ -94,7 +94,7 @@ export function GroupCardContent({
 					{/* Flexibilidad */}
 					{flexibilityScore > 0 && (
 						<div className="flex items-center space-x-1">
-							<FunctionSquareIcon className="h-3 w-3" style={{ color: primaryColor }} />
+							<FunctionSquareIcon className="h-4 w-4" style={{ color: primaryColor }} />
 							<span className="font-medium">Flex: {flexibilityScore}</span>
 						</div>
 					)}
@@ -106,7 +106,7 @@ export function GroupCardContent({
 				<div className={cn('grid gap-1', compact ? 'grid-cols-2' : 'grid-cols-4')}>
 					{mediaCount > 0 && (
 						<div
-							className="flex items-center justify-between rounded bg-black/5 px-1.5 py-0.5 text-xs"
+							className="flex items-center justify-between rounded bg-black/5 px-1.5 py-0.5 text-sm"
 							style={{ borderLeft: `2px solid ${primaryColor}` }}
 						>
 							<span>Media</span>
@@ -116,7 +116,7 @@ export function GroupCardContent({
 
 					{collectionCount > 0 && (
 						<div
-							className="flex items-center justify-between rounded bg-black/5 px-1.5 py-0.5 text-xs"
+							className="flex items-center justify-between rounded bg-black/5 px-1.5 py-0.5 text-sm"
 							style={{ borderLeft: `2px solid ${primaryColor}` }}
 						>
 							<span>Colec.</span>
@@ -126,7 +126,7 @@ export function GroupCardContent({
 
 					{worldCount > 0 && (
 						<div
-							className="flex items-center justify-between rounded bg-black/5 px-1.5 py-0.5 text-xs"
+							className="flex items-center justify-between rounded bg-black/5 px-1.5 py-0.5 text-sm"
 							style={{ borderLeft: `2px solid ${primaryColor}` }}
 						>
 							<span>Mundo</span>
@@ -136,7 +136,7 @@ export function GroupCardContent({
 
 					{utilityCount > 0 && (
 						<div
-							className="flex items-center justify-between rounded bg-black/5 px-1.5 py-0.5 text-xs"
+							className="flex items-center justify-between rounded bg-black/5 px-1.5 py-0.5 text-sm"
 							style={{ borderLeft: `2px solid ${primaryColor}` }}
 						>
 							<span>Util.</span>
@@ -147,7 +147,7 @@ export function GroupCardContent({
 					{/* Si hay más categorías que las que caben, mostrar total */}
 					{compact && totalEntities > 0 && (
 						<div
-							className="flex items-center justify-between rounded bg-black/5 px-1.5 py-0.5 text-xs"
+							className="flex items-center justify-between rounded bg-black/5 px-1.5 py-0.5 text-sm"
 							style={{ borderLeft: `2px solid ${primaryColor}` }}
 						>
 							<span>Total</span>
@@ -159,26 +159,26 @@ export function GroupCardContent({
 
 			{/* Información no-TCG */}
 			{!tcgMode && (
-				<div className="mt-auto flex flex-wrap gap-1 text-xs">
+				<div className="mt-auto flex flex-wrap gap-1 text-sm">
 					<Badge className="h-5 px-1" variant="outline">
-						<span className="text-xs">{category}</span>
+						<span className="text-sm">{category}</span>
 					</Badge>
 
 					{organizationType && (
 						<Badge className="h-5 px-1" variant="outline">
-							<span className="text-xs">{organizationType}</span>
+							<span className="text-sm">{organizationType}</span>
 						</Badge>
 					)}
 
 					{filtersCount > 0 && (
 						<Badge className="h-5 px-1" variant="outline">
-							<span className="text-xs">{filtersCount} filtros</span>
+							<span className="text-sm">{filtersCount} filtros</span>
 						</Badge>
 					)}
 
 					{totalEntities > 0 && (
 						<Badge className="h-5 px-1" variant="outline">
-							<span className="text-xs">{totalEntities} elementos</span>
+							<span className="text-sm">{totalEntities} elementos</span>
 						</Badge>
 					)}
 				</div>

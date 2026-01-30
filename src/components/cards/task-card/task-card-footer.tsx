@@ -47,34 +47,34 @@ export function TaskCardFooter({
 		>
 			{/* Relaciones */}
 			{hasRelations && (
-				<div className="mb-2 flex flex-wrap items-center gap-2 text-xs">
+				<div className="mb-2 flex flex-wrap items-center gap-2 text-sm">
 					{subtasksCount > 0 && (
 						<div className="flex items-center gap-1 opacity-70">
-							<ListTree className="h-3 w-3" />
+							<ListTree className="h-4 w-4" />
 							<span>{subtasksCount}</span>
 						</div>
 					)}
 					{imagesCount > 0 && (
 						<div className="flex items-center gap-1 opacity-70">
-							<Image className="h-3 w-3" />
+							<Image className="h-4 w-4" />
 							<span>{imagesCount}</span>
 						</div>
 					)}
 					{videosCount > 0 && (
 						<div className="flex items-center gap-1 opacity-70">
-							<Video className="h-3 w-3" />
+							<Video className="h-4 w-4" />
 							<span>{videosCount}</span>
 						</div>
 					)}
 					{albumsCount > 0 && (
 						<div className="flex items-center gap-1 opacity-70">
-							<Album className="h-3 w-3" />
+							<Album className="h-4 w-4" />
 							<span>{albumsCount}</span>
 						</div>
 					)}
 					{charactersCount > 0 && (
 						<div className="flex items-center gap-1 opacity-70">
-							<User className="h-3 w-3" />
+							<User className="h-4 w-4" />
 							<span>{charactersCount}</span>
 						</div>
 					)}
@@ -82,7 +82,7 @@ export function TaskCardFooter({
 			)}
 
 			{/* Timestamps */}
-			<div className="flex items-center justify-between text-[10px] opacity-50">
+			<div className="flex items-center justify-between text-xs opacity-50">
 				<span>Creado {getRelativeTime(createdAt)}</span>
 				<span>Act. {getRelativeTime(updatedAt)}</span>
 			</div>

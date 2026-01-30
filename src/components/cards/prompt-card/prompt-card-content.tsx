@@ -87,7 +87,7 @@ function CategoryHeader({
 	return (
 		<div className="mb-2 flex items-center justify-between">
 			<div
-				className="flex items-center gap-1 font-medium text-xs uppercase tracking-wider"
+				className="flex items-center gap-1 font-medium text-sm uppercase tracking-wider"
 				style={{ color: primaryColor }}
 			>
 				{category ? category.charAt(0).toUpperCase() + category.slice(1) : 'Prompt'}
@@ -95,8 +95,8 @@ function CategoryHeader({
 			</div>
 
 			{hasParameters && (
-				<div className="flex items-center text-xs opacity-70">
-					<Settings className="mr-1 h-3.5 w-3.5" />
+				<div className="flex items-center text-sm opacity-70">
+					<Settings className="mr-1 h-4 w-4" />
 					<span>
 						{parameterKeys.length} {parameterKeys.length === 1 ? 'parámetro' : 'parámetros'}
 					</span>
@@ -145,8 +145,8 @@ function PurposeSection({
 
 	return (
 		<div className="mb-2 flex items-start gap-1">
-			<Target className="mt-0.5 h-3.5 w-3.5 flex-shrink-0 text-primary" style={{ color: primaryColor }} />
-			<div className="line-clamp-2 text-muted-foreground text-xs">{purpose}</div>
+			<Target className="mt-0.5 h-4 w-4 flex-shrink-0 text-primary" style={{ color: primaryColor }} />
+			<div className="line-clamp-2 text-muted-foreground text-sm">{purpose}</div>
 		</div>
 	);
 }
@@ -177,7 +177,7 @@ function TagsSection({
 			<div className="flex flex-wrap gap-1">
 				{parsedTags.slice(0, maxTagsToShow).map((tag: string) => (
 					<Badge
-						className="px-1.5 py-0.5 text-xs"
+						className="px-1.5 py-0.5 text-sm"
 						key={`tag-${tag}`}
 						style={{
 							backgroundColor: tagColor,
@@ -191,7 +191,7 @@ function TagsSection({
 					</Badge>
 				))}
 				{parsedTags.length > maxTagsToShow && (
-					<Badge className="px-1.5 py-0.5 text-xs opacity-70" variant="outline">
+					<Badge className="px-1.5 py-0.5 text-sm opacity-70" variant="outline">
 						+{parsedTags.length - maxTagsToShow}
 					</Badge>
 				)}
@@ -218,12 +218,15 @@ function ParametersSection({
 	}
 
 	return (
-		<div className="mb-2 rounded border bg-black/5 p-1.5" style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 60%)` }}>
-			<div className="mb-1 flex items-center gap-1 font-medium text-xs" style={{ color: primaryColor }}>
-				<Settings className="h-3.5 w-3.5" />
+		<div
+			className="mb-2 rounded border bg-black/5 p-1.5"
+			style={{ borderColor: `color-mix(in oklab, ${primaryColor}, transparent 60%)` }}
+		>
+			<div className="mb-1 flex items-center gap-1 font-medium text-sm" style={{ color: primaryColor }}>
+				<Settings className="h-4 w-4" />
 				<span>Parámetros</span>
 			</div>
-			<div className="grid grid-cols-2 gap-1.5 text-xs">
+			<div className="grid grid-cols-2 gap-1.5 text-sm">
 				{parameterKeys.slice(0, 4).map((key) => (
 					<div
 						className="flex justify-between overflow-hidden rounded bg-black/5 px-1.5 py-0.5"
@@ -235,7 +238,7 @@ function ParametersSection({
 							{typeof parsedParameters[key] === 'object'
 								? '{...}'
 								: String(parsedParameters[key]).substring(0, 10) +
-								(String(parsedParameters[key]).length > 10 ? '...' : '')}
+									(String(parsedParameters[key]).length > 10 ? '...' : '')}
 						</span>
 					</div>
 				))}
@@ -254,28 +257,28 @@ function StatsGrid({
 	primaryColor: string;
 }) {
 	return (
-		<div className="mt-auto grid grid-cols-4 gap-2 text-xs">
+		<div className="mt-auto grid grid-cols-4 gap-2 text-sm">
 			<StatCounter
 				count={relationCounts.collections || 0}
-				icon={<Image className="h-3.5 w-3.5" />}
+				icon={<Image className="h-4 w-4" />}
 				label="Colecciones"
 				primaryColor={primaryColor}
 			/>
 			<StatCounter
 				count={relationCounts.albums || 0}
-				icon={<Album className="h-3.5 w-3.5" />}
+				icon={<Album className="h-4 w-4" />}
 				label="Álbumes"
 				primaryColor={primaryColor}
 			/>
 			<StatCounter
 				count={relationCounts.characters || 0}
-				icon={<UserSquare className="h-3.5 w-3.5" />}
+				icon={<UserSquare className="h-4 w-4" />}
 				label="Personajes"
 				primaryColor={primaryColor}
 			/>
 			<StatCounter
 				count={content ? Math.ceil(content.length / 100) : 0}
-				icon={<Code className="h-3.5 w-3.5" />}
+				icon={<Code className="h-4 w-4" />}
 				label="Tokens"
 				primaryColor={primaryColor}
 			/>
@@ -316,7 +319,9 @@ export function PromptCardContent({
 		<div
 			className={cn('flex flex-1 flex-col overflow-hidden p-3', tcgMode ? 'bg-card/80' : 'bg-card')}
 			style={{
-				background: tcgMode ? `linear-gradient(to bottom, transparent, color-mix(in oklab, ${primaryColor}, transparent 90%))` : undefined,
+				background: tcgMode
+					? `linear-gradient(to bottom, transparent, color-mix(in oklab, ${primaryColor}, transparent 90%))`
+					: undefined,
 				borderBottom: tcgMode ? `1px solid ${borderColor}` : undefined,
 				boxShadow: tcgMode ? `0 0 15px color-mix(in oklab, ${primaryColor}, transparent 80%) inset` : undefined,
 			}}

@@ -50,7 +50,7 @@ export function AlbumCardImages({
 		return (
 			<div className={cn('flex flex-col items-center justify-center gap-2 bg-background/10 p-4', className)}>
 				<ImageOff className="h-8 w-8 text-muted-foreground/50" />
-				<p className="text-muted-foreground text-xs">Sin imágenes</p>
+				<p className="text-muted-foreground text-sm">Sin imágenes</p>
 			</div>
 		);
 	}

@@ -27,13 +27,13 @@ export function CharacterCardHeader({
 	const classIcon = () => {
 		const lowerCaseClass = characterClass?.toLowerCase();
 		if (lowerCaseClass?.includes('warrior')) {
-			return <Sword className="h-3.5 w-3.5" />;
+			return <Sword className="h-4 w-4" />;
 		}
 		if (lowerCaseClass?.includes('mage')) {
-			return <Wand className="h-3.5 w-3.5" />;
+			return <Wand className="h-4 w-4" />;
 		}
 		if (lowerCaseClass?.includes('tank')) {
-			return <Shield className="h-3.5 w-3.5" />;
+			return <Shield className="h-4 w-4" />;
 		}
 		return null;
 	};
@@ -43,8 +43,8 @@ export function CharacterCardHeader({
 			<div className="flex items-center gap-2 rounded-t-lg bg-muted/50 p-2">
 				<span className="text-lg">{emoji}</span>
 				<div className="flex-1 truncate">
-					<h3 className="truncate font-bold text-foreground text-sm">{name}</h3>
-					<p className="truncate text-muted-foreground text-xs">
+					<h3 className="truncate font-bold text-base text-foreground">{name}</h3>
+					<p className="truncate text-muted-foreground text-sm">
 						{characterClass ?? 'Unknown'} • Lvl {level ?? '?'}
 					</p>
 				</div>
@@ -107,7 +107,7 @@ export function CharacterCardHeader({
 							{name}
 							{isFavorite && <Sparkles className="-mt-1 ml-1 inline h-4 w-4 text-yellow-200" />}
 						</h3>
-						<div className="flex items-center gap-1 text-white/80 text-xs">
+						<div className="flex items-center gap-1 text-sm text-white/80">
 							{classIcon()}
 							<span className="truncate">
 								{characterClass ?? 'Unknown'}
@@ -149,7 +149,7 @@ export function CharacterCardHeader({
 				/>
 			</div>
 			<div
-				className="relative flex items-center justify-between px-3.5 py-1.5 text-white text-xs"
+				className="relative flex items-center justify-between px-3.5 py-1.5 text-sm text-white"
 				style={{
 					borderBottom: `2px solid color-mix(in oklab, ${color}, transparent 30%)`,
 					background:
@@ -172,7 +172,7 @@ export function CharacterCardHeader({
 						const starValue = `${name}-star-${i + 1}`;
 						return (
 							<div
-								className="h-3 w-3 rounded-full bg-yellow-300"
+								className="h-4 w-4 rounded-full bg-yellow-300"
 								key={starValue}
 								style={{ boxShadow: '0 0 3px rgba(var(--effect-highlight-rgb), 0.7)' }}
 							/>
