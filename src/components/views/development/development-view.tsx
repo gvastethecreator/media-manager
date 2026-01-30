@@ -1,6 +1,6 @@
 // Se reemplaza react-markdown por el visor de @uiw/react-md-editor
 import MDEditor from '@uiw/react-md-editor';
-import { BarChart, Bug, Code2, FileCode2, Folder, Gauge, Loader2, RefreshCw, Server, Tag } from 'lucide-react';
+import { BarChart, Bug, Code2, FileCode2, Folder, Gauge, Image, Loader2, RefreshCw, Server, Tag } from 'lucide-react';
 import { FilesSettingsModern } from '@/components/settings/modern/files-settings-modern';
 import { TaxonomySettingsModern } from '@/components/settings/modern/taxonomy-settings-modern';
 import { ScannedImagesSettings } from '@/components/settings/image/scanned-images-settings';
