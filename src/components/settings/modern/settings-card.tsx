@@ -33,7 +33,7 @@ export const SettingsCard = React.forwardRef<HTMLDivElement, SettingsCardProps>(
 		const variants = {
 			default: 'bg-card border',
 			outlined: 'bg-transparent border border-muted/30',
-			elevated: 'bg-card border shadow-md',
+			elevated: 'bg-card border shadow-dt-1',
 		};
 
 		return (

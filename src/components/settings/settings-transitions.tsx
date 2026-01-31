@@ -268,7 +268,7 @@ export function SettingsToastTransition({ isVisible, type = 'info', message }: S
 				className={cn(
 					'settings-toast-transition',
 					'fixed right-4 bottom-4 z-50',
-					'rounded-lg border px-4 py-3 shadow-lg',
+					'rounded-lg border px-4 py-3 shadow-dt-2',
 					typeStyles[type]
 				)}
 			>

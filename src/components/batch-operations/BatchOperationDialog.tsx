@@ -9,7 +9,7 @@ import { AlertTriangle, Copy, FolderOpen, Move, Settings, Trash2 } from 'lucide-
 import { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Checkbox } from '@/components/ui/checkbox-v3';
 import {
 	Dialog,
 	DialogContent,

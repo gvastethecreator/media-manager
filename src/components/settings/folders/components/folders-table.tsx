@@ -497,7 +497,7 @@ export function FoldersTable({
 													<Tooltip>
 														<TooltipTrigger asChild>
 															<Button
-																className="h-7 w-7 p-0 shadow-sm transition-all hover:shadow-md"
+																className="h-7 w-7 p-0 shadow-dt-0 transition-all hover:shadow-dt-1"
 																disabled={disabled}
 																onClick={() => onReindex(folder.id)}
 																size="sm"
@@ -511,7 +511,7 @@ export function FoldersTable({
 													<Tooltip>
 														<TooltipTrigger asChild>
 															<Button
-																className="h-7 w-7 p-0 shadow-sm transition-all hover:shadow-md"
+																className="h-7 w-7 p-0 shadow-dt-0 transition-all hover:shadow-dt-1"
 																onClick={() => onFolderClick(folder.id)}
 																size="sm"
 																variant={isSelected ? 'destructive' : 'outline'}

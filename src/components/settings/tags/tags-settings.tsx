@@ -3,7 +3,7 @@ import { useCallback, useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Checkbox } from '@/components/ui/checkbox-v3';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { EmptyState } from '@/components/ui/empty-state';
 import { Input } from '@/components/ui/input';
@@ -256,7 +256,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 						<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 							{filteredTags.map((tag) => (
 								<Card
-									className="rounded-dt-sm border-border/30 shadow-sm transition-shadow hover:shadow-md"
+									className="rounded-dt-sm border-border/30 shadow-dt-0 transition-shadow hover:shadow-dt-1"
 									key={tag.id}
 								>
 									<CardHeader className="pb-3">

@@ -1,9 +1,9 @@
+/* TCG Card Styles - Must be at the top before Tailwind */
+@import "../components/ui/tcg/tcg-card.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
-/* TCG Card Styles */
-@import "../components/ui/tcg/tcg-card.css";
 
 @layer base {
 	:root {

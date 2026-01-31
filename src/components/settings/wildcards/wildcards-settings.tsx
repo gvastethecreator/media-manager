@@ -433,7 +433,7 @@ export function WildcardsSettings() {
 						isEditMode ? (
 							<Dialog onOpenChange={setIsEditMode} open={isEditMode}>
 								<DialogContent className="max-w-3xl overflow-hidden p-0">
-									<Suspense fallback={<div className="p-8">Cargando formulario…</div>}>
+									<Suspense fallback={<div className="p-4">Cargando formulario…</div>}>
 										<CreateWildcardForm
 											onCancel={() => setIsEditMode(false)}
 											onSubmit={(data) => handleUpdateWildcard(selectedWildcard.id, data)}
@@ -462,7 +462,7 @@ export function WildcardsSettings() {
 			{/* Dialog para crear nuevo comodín */}
 			<Dialog onOpenChange={setIsCreateDialogOpen} open={isCreateDialogOpen}>
 				<DialogContent className="max-w-3xl overflow-hidden p-0">
-					<Suspense fallback={<div className="p-8">Cargando formulario…</div>}>
+					<Suspense fallback={<div className="p-4">Cargando formulario…</div>}>
 						<CreateWildcardForm
 							onCancel={() => setIsCreateDialogOpen(false)}
 							onSubmit={handleCreateWildcard}

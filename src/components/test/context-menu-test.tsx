@@ -1,4 +1,4 @@
-import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu';
+import { ContextMenu, ContextMenuContent, ContextMenuItem, ContextMenuTrigger } from '@/components/ui/context-menu-v3';
 
 // Test component to verify context menu functionality
 export function ContextMenuTest() {

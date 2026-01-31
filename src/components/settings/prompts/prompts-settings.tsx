@@ -210,7 +210,7 @@ export const PromptSettings = () => {
 	if (error) {
 		return (
 			<ScrollArea className="h-[calc(100vh-8rem)] w-full">
-				<div className="p-6">
+				<div className="p-4">
 					<div className="flex flex-col items-center gap-4 text-center">
 						<AlertCircle className="h-12 w-12 text-destructive" />
 						<div>
@@ -314,7 +314,7 @@ export const PromptSettings = () => {
 							<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
 								{filteredPrompts.map((prompt) => (
 									<div
-										className="rounded-lg border bg-card p-4 shadow-sm transition-all hover:shadow-md"
+										className="rounded-lg border bg-card p-4 shadow-dt-0 transition-all hover:shadow-dt-1"
 										key={prompt.id}
 									>
 										<div className="flex items-start justify-between">

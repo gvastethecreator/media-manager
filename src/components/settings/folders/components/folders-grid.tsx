@@ -60,9 +60,9 @@ export function FoldersGrid({
 				return (
 					<button
 						className={cn(
-							'group relative overflow-hidden border border-border/50 transition-all hover:border-primary/50 hover:shadow-md',
-							isSelected && 'border-2 border-primary bg-primary/5',
-							hasError && 'border-2 border-destructive bg-destructive/5',
+							'group relative overflow-hidden border border-border/50 transition-all hover:border-primary/50 hover:shadow-dt-1',
+							isSelected && 'border border-primary bg-primary/5',
+							hasError && 'border border-destructive bg-destructive/5',
 							isReindexing && 'pointer-events-none opacity-60'
 						)}
 						key={folder.id}

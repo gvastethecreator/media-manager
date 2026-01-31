@@ -10,7 +10,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+import { Switch } from '@/components/ui/switch-v3';
 import { Textarea } from '@/components/ui/textarea';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { toastService } from '@/lib/ui/toast';

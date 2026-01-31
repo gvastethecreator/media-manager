@@ -155,7 +155,7 @@ const FolderThumbnail = memo(({ folderStats, isCompact = false, isLoading = fals
 			<div
 				className={cn(
 					'group/thumbnail relative shrink-0 overflow-hidden transition-all duration-300',
-					'hover:scale-105 hover:shadow-md hover:ring-2 hover:ring-primary/20',
+					'hover:scale-105 hover:shadow-dt-1 hover:ring-2 hover:ring-primary/20',
 					size
 				)}
 			>
@@ -355,16 +355,16 @@ export const FolderCard = memo(
 						'group relative h-full overflow-hidden transition-all duration-300 ease-out',
 						// Padding adaptativo según el modo - más compacto
 						isFocusedMode ? 'p-4' : 'p-2.5',
-						'border border-border/40 bg-gradient-to-br from-card to-card/95 shadow-sm',
+						'border border-border/40 bg-gradient-to-br from-card to-card/95 shadow-dt-0',
 						// Hover effects con animaciones suaves
-						'hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10',
+						'hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-dt-2 hover:shadow-primary/10',
 						// Estados visuales con bordes suaves y transiciones
 						{
-							'translate-y-0 border-primary/40 shadow-md shadow-primary/5': isSelected,
-							'border-success/40 shadow-md shadow-success/5': showCompleteAnimation,
-							'scale-[1.01] border-info/50 shadow-info/5 shadow-lg': isReindexing && isFocusedMode,
-							'border-info/40 shadow-info/5 shadow-md': isReindexing && !isFocusedMode,
-							'border-destructive/40 shadow-destructive/5 shadow-md': hasError,
+							'translate-y-0 border-primary/40 shadow-dt-1 shadow-primary/5': isSelected,
+							'border-success/40 shadow-dt-1 shadow-success/5': showCompleteAnimation,
+							'scale-[1.01] border-info/50 shadow-dt-2 shadow-info/5': isReindexing && isFocusedMode,
+							'border-info/40 shadow-dt-1 shadow-info/5': isReindexing && !isFocusedMode,
+							'border-destructive/40 shadow-destructive/5 shadow-dt-1': hasError,
 						}
 					)}
 				>
@@ -401,9 +401,9 @@ export const FolderCard = memo(
 						<div
 							aria-label="Controles de carpeta"
 							className={cn(
-								'flex items-center gap-1 rounded-lg border border-border/30 bg-background/95 shadow-lg backdrop-blur-sm',
+								'flex items-center gap-1 rounded-lg border border-border/30 bg-background/95 shadow-dt-2 backdrop-blur-sm',
 								'opacity-0 transition-all duration-200 ease-out group-hover:opacity-100',
-								'translate-x-2 hover:bg-background hover:shadow-xl group-hover:translate-x-0',
+								'translate-x-2 hover:bg-background hover:shadow-dt-3 group-hover:translate-x-0',
 								// Padding adaptativo para controles
 								isFocusedMode ? 'p-1.5' : 'p-1'
 							)}

@@ -42,7 +42,7 @@ const MicroProgressBar = memo(function MicroProgressBar({
 			</div>
 			<div
 				className={cn(
-					'absolute -top-8 left-1/2 z-10 -translate-x-1/2 rounded bg-popover px-2 py-1 text-[10px] text-popover-foreground shadow-md',
+					'absolute -top-8 left-1/2 z-10 -translate-x-1/2 rounded bg-popover px-2 py-1 text-[10px] text-popover-foreground shadow-dt-1',
 					'opacity-0 transition-all duration-200 ease-out',
 					'group-hover:-translate-y-1 group-hover:opacity-100'
 				)}
