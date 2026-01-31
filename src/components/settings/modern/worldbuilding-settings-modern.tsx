@@ -32,6 +32,7 @@ import { useDeletePrompt, usePrompts } from '@/lib/api/prompts';
 import { useDeleteWildcard, useWildcards } from '@/lib/api/wildcards';
 import { useDeleteWorldItem, useWorldItems } from '@/lib/api/world-items';
 import { toastService } from '@/lib/ui/toast';
+import { cn } from '@/lib/utils';
 import type { CharacterWithStats } from '@/types/entities/character';
 import type { ConceptWithStats } from '@/types/entities/concept';
 import type { NoteWithStats } from '@/types/entities/note';
@@ -155,7 +156,9 @@ function CharacterCard({
 			</CardHeader>
 			<CardContent>
 				<div className="flex items-center justify-between">
-					<div className="flex gap-1">{character.isFavorite && <span className="text-amber-400">★</span>}</div>
+					<div className="flex gap-1">
+						{character.isFavorite && <span style={{ color: 'var(--entity-favorite)' }}>★</span>}
+					</div>
 					<span className="text-muted-foreground text-sm">{character.statistics?.imageCount || 0} imágenes</span>
 				</div>
 			</CardContent>
@@ -173,7 +176,11 @@ function CharacterCard({
 				<div>
 					<p className="flex items-center gap-2 font-medium">
 						{character.name}
-						{character.isFavorite && <span className="text-amber-400 text-sm">★</span>}
+						{character.isFavorite && (
+							<span className="text-sm" style={{ color: 'var(--entity-favorite)' }}>
+								★
+							</span>
+						)}
 					</p>
 					{character.description && <p className="text-muted-foreground text-sm">{character.description}</p>}
 				</div>
@@ -208,7 +215,9 @@ function PlaceCard({ place, actions, isGrid }: { place: PlaceWithStats; actions:
 			</CardHeader>
 			<CardContent>
 				<div className="flex items-center justify-between">
-					<div className="flex gap-1">{place.isFavorite && <span className="text-amber-400">★</span>}</div>
+					<div className="flex gap-1">
+						{place.isFavorite && <span style={{ color: 'var(--entity-favorite)' }}>★</span>}
+					</div>
 					<span className="text-muted-foreground text-sm">{place.statistics?.imageCount || 0} imágenes</span>
 				</div>
 			</CardContent>
@@ -226,7 +235,11 @@ function PlaceCard({ place, actions, isGrid }: { place: PlaceWithStats; actions:
 				<div>
 					<p className="flex items-center gap-2 font-medium">
 						{place.name}
-						{place.isFavorite && <span className="text-amber-400 text-sm">★</span>}
+						{place.isFavorite && (
+							<span className="text-sm" style={{ color: 'var(--entity-favorite)' }}>
+								★
+							</span>
+						)}
 					</p>
 					{place.description && <p className="text-muted-foreground text-sm">{place.description}</p>}
 				</div>
@@ -261,7 +274,9 @@ function WorldItemCard({ item, actions, isGrid }: { item: WorldItemWithStats; ac
 			</CardHeader>
 			<CardContent>
 				<div className="flex items-center justify-between">
-					<div className="flex gap-1">{item.isFavorite && <span className="text-amber-400">★</span>}</div>
+					<div className="flex gap-1">
+						{item.isFavorite && <span style={{ color: 'var(--entity-favorite)' }}>★</span>}
+					</div>
 					<span className="text-muted-foreground text-sm">{item.statistics?.imageCount || 0} imágenes</span>
 				</div>
 			</CardContent>
@@ -279,7 +294,11 @@ function WorldItemCard({ item, actions, isGrid }: { item: WorldItemWithStats; ac
 				<div>
 					<p className="flex items-center gap-2 font-medium">
 						{item.name}
-						{item.isFavorite && <span className="text-amber-400 text-sm">★</span>}
+						{item.isFavorite && (
+							<span className="text-sm" style={{ color: 'var(--entity-favorite)' }}>
+								★
+							</span>
+						)}
 					</p>
 					{item.description && <p className="text-muted-foreground text-sm">{item.description}</p>}
 				</div>
@@ -322,7 +341,9 @@ function ConceptCard({
 			</CardHeader>
 			<CardContent>
 				<div className="flex items-center justify-between">
-					<div className="flex gap-1">{concept.isFavorite && <span className="text-amber-400">★</span>}</div>
+					<div className="flex gap-1">
+						{concept.isFavorite && <span style={{ color: 'var(--entity-favorite)' }}>★</span>}
+					</div>
 					<span className="text-muted-foreground text-sm">{concept.statistics?.imageCount || 0} imágenes</span>
 				</div>
 			</CardContent>
@@ -340,7 +361,11 @@ function ConceptCard({
 				<div>
 					<p className="flex items-center gap-2 font-medium">
 						{concept.name}
-						{concept.isFavorite && <span className="text-amber-400 text-sm">★</span>}
+						{concept.isFavorite && (
+							<span className="text-sm" style={{ color: 'var(--entity-favorite)' }}>
+								★
+							</span>
+						)}
 					</p>
 					{concept.description && <p className="text-muted-foreground text-sm">{concept.description}</p>}
 				</div>
@@ -711,20 +736,26 @@ export function WorldbuildingSettingsModern() {
 
 					return (
 						<button
-							className={`flex flex-col items-center gap-2 rounded-xl border-2 p-3 transition-all${isActive ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'}
-						`}
+							className={cn(
+								'flex flex-col items-center gap-1.5 rounded-lg border p-2.5 transition-all duration-200',
+								isActive
+									? 'border-primary/40 bg-primary/5'
+									: 'border-border/30 bg-muted/30 hover:border-border/50 hover:bg-muted/50'
+							)}
 							key={type}
 							onClick={() => setActiveEntity(type)}
 							type="button"
 						>
 							<div
-								className="flex h-8 w-8 items-center justify-center rounded-lg"
-								style={{ backgroundColor: `${entityConfig.color}20` }}
+								className="flex h-7 w-7 items-center justify-center rounded-md"
+								style={{ backgroundColor: `color-mix(in oklch, ${entityConfig.color} 15%, transparent)` }}
 							>
-								<Icon className="h-4 w-4" style={{ color: entityConfig.color }} />
+								<Icon className="h-3.5 w-3.5" style={{ color: entityConfig.color }} />
 							</div>
-							<span className={`font-medium text-sm ${isActive ? 'text-primary' : ''}`}>{entityConfig.label}</span>
-							<Badge className="text-xs" variant="secondary">
+							<span className={cn('font-medium text-xs', isActive ? 'text-primary' : 'text-foreground')}>
+								{entityConfig.label}
+							</span>
+							<Badge className="h-4 px-1.5 text-[10px]" variant="secondary">
 								{count}
 							</Badge>
 						</button>
@@ -737,7 +768,11 @@ export function WorldbuildingSettingsModern() {
 				{stats.map((stat) => {
 					const Icon = stat.icon;
 					return (
-						<Card className="border-l-4" key={stat.label} style={{ borderLeftColor: stat.color }}>
+						<Card
+							className="border-l-4"
+							key={stat.label}
+							style={{ borderLeftColor: `color-mix(in oklch, ${stat.color} 60%, transparent)` }}
+						>
 							<CardContent className="p-4">
 								<div className="flex items-center justify-between">
 									<div>
@@ -746,7 +781,7 @@ export function WorldbuildingSettingsModern() {
 									</div>
 									<div
 										className="flex h-10 w-10 items-center justify-center rounded-lg"
-										style={{ backgroundColor: `${stat.color}20` }}
+										style={{ backgroundColor: `color-mix(in oklch, ${stat.color} 12%, transparent)` }}
 									>
 										<Icon className="h-5 w-5" style={{ color: stat.color }} />
 									</div>
@@ -797,11 +832,11 @@ export function WorldbuildingSettingsModern() {
 
 			{/* Content */}
 			{isLoading ? (
-				<div className="flex items-center justify-center p-12">
+				<div className="flex items-center justify-center p-6">
 					<div className="h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
 				</div>
 			) : items.length === 0 ? (
-				<div className="flex flex-col items-center justify-center py-12 text-center">
+				<div className="flex flex-col items-center justify-center py-6 text-center">
 					<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
 						<config.icon className="h-6 w-6 text-muted-foreground" />
 					</div>

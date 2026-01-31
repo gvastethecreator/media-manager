@@ -1,11 +1,11 @@
 /**
- * @file Layout moderno de Settings
+ * @file Layout moderno de Settings - Rediseñado al estilo NavPanel
  * @module components/settings/modern/modern-settings-layout
- * @description Layout actualizado con sidebar izquierda, breadcrumbs y diseño responsive
+ * @description Layout compacto con colores de entidad y diseño consistente con el navigation panel
  */
 
 import { ChevronRight, Search, Settings2, X } from 'lucide-react';
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -39,7 +39,7 @@ interface ModernSettingsLayoutProps {
 }
 
 /**
- * Componente de sidebar con categorías y items
+ * Componente de sidebar con diseño compacto estilo NavPanel
  */
 function SettingsSidebar({
 	categories,
@@ -72,7 +72,7 @@ function SettingsSidebar({
 		});
 	}, []);
 
-	const filteredCategories = React.useMemo(() => {
+	const filteredCategories = useMemo(() => {
 		if (!searchTerm) return categories;
 
 		const lower = searchTerm.toLowerCase();
@@ -88,115 +88,146 @@ function SettingsSidebar({
 
 	return (
 		<ScrollArea className="flex h-full w-full">
-			<div className="flex h-full w-full flex-col space-y-4 p-4">
-				{/* Header de Settings */}
-				<div className="flex items-center justify-between">
-					<div className="flex items-center gap-2">
-						<div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-							<Settings2 className="h-4 w-4 text-primary" />
+			<div className="flex h-full w-full flex-col py-2">
+				{/* Header de Settings - Estilo NavPanelHeader */}
+				<div className="px-2 pb-2">
+					<div className="flex items-center gap-2 px-2 py-1.5">
+						<div
+							className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
+							style={{
+								backgroundColor: 'color-mix(in oklch, var(--primary) 15%, transparent)',
+							}}
+						>
+							<Settings2 className="h-3.5 w-3.5 text-primary" />
 						</div>
-						<span className="font-semibold text-sm">Configuración</span>
+						<span className="flex-1 truncate font-semibold text-xs">Configuración</span>
 					</div>
 				</div>
 
-				<Separator className="bg-border/50" />
+				<Separator className="bg-border/30" />
 
-				{/* Search Bar */}
-				<div className="relative">
-					<Search className="absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-					<Input
-						className="h-9 pl-9 text-sm"
-						onChange={(e) => onSearch(e.target.value)}
-						placeholder="Buscar configuración..."
-						value={searchTerm}
-					/>
-					{searchTerm && (
-						<button
-							className="absolute top-1/2 right-3 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
-							onClick={() => onSearch('')}
-							type="button"
-						>
-							<X className="h-4 w-4" />
-						</button>
-					)}
+				{/* Search Bar - Compacto */}
+				<div className="px-2 py-2">
+					<div className="relative">
+						<Search className="absolute top-1/2 left-2 h-3.5 w-3.5 -translate-y-1/2 text-muted-foreground" />
+						<Input
+							className="h-8 pr-7 pl-8 text-xs"
+							onChange={(e) => onSearch(e.target.value)}
+							placeholder="Buscar..."
+							value={searchTerm}
+						/>
+						{searchTerm && (
+							<button
+								className="absolute top-1/2 right-2 -translate-y-1/2 text-muted-foreground transition-colors hover:text-foreground"
+								onClick={() => onSearch('')}
+								type="button"
+							>
+								<X className="h-3.5 w-3.5" />
+							</button>
+						)}
+					</div>
 				</div>
 
-				{/* Categorías y Items */}
-				<div className="flex flex-1 flex-col space-y-1">
+				{/* Categorías y Items - Estilo NavMainNavigation */}
+				<div className="flex flex-1 flex-col gap-0.5 px-1">
 					{filteredCategories.map((category) => {
 						const isExpanded = expandedCategories.has(category.id) || searchTerm !== '';
-						const isActive = activeCategory === category.id;
+						const isCategoryActive = activeCategory === category.id;
 
 						return (
-							<div className="space-y-1" key={category.id}>
-								{/* Category Header */}
+							<div className="mb-1" key={category.id}>
+								{/* Category Header - Compacto con color de entidad */}
 								<button
 									className={cn(
-										'flex w-full items-center justify-between rounded-lg px-3 py-2 font-medium text-sm transition-all duration-200',
-										isActive && 'bg-secondary/50',
-										'hover:bg-secondary/30'
+										'group flex w-full items-center gap-1.5 rounded-md px-2 py-1.5 text-left text-xs transition-all duration-200',
+										'hover:bg-secondary/40',
+										isCategoryActive && 'bg-secondary/60'
 									)}
 									onClick={() => {
-										// Navigate to first item in category
 										if (category.items.length > 0) {
 											onNavigate(category.id, category.items[0].id);
 										}
-										// Also expand if collapsed
-										if (!isExpanded) {
+										if (!(isExpanded || searchTerm)) {
 											toggleCategory(category.id);
 										}
 									}}
 									type="button"
 								>
-									<div className="flex items-center gap-2">
-										<span
-											className={cn(
-												'flex h-5 w-5 items-center justify-center rounded-md',
-												isActive && 'bg-background shadow-sm'
-											)}
-											style={{ backgroundColor: isActive ? category.color : `${category.color}15` }}
-										>
-											<div
-												className={cn('h-3 w-3', isActive && category.color)}
-												style={isActive ? { color: category.color } : {}}
-											>
-												{category.icon}
-											</div>
-										</span>
-										<span>{category.label}</span>
+									{/* Icono con color de entidad */}
+									<div className="flex h-4 w-4 shrink-0 items-center justify-center" style={{ color: category.color }}>
+										{category.icon}
 									</div>
-									{category.badge && (
-										<span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1.5 font-medium text-primary-foreground text-xs">
+
+									{/* Label con color de entidad */}
+									<span
+										className={cn('flex-1 truncate font-semibold', isCategoryActive ? 'text-foreground' : '')}
+										style={{ color: isCategoryActive ? undefined : category.color }}
+									>
+										{category.label}
+									</span>
+
+									{/* Badge de conteo */}
+									{category.badge ? (
+										<span className="flex h-4 min-w-4 items-center justify-center rounded-full bg-muted px-1 font-medium text-[10px] text-muted-foreground">
 											{category.badge}
 										</span>
+									) : (
+										<span className="text-[10px] text-muted-foreground">{category.items.length}</span>
 									)}
+
+									{/* Chevron indicator */}
+									<ChevronRight
+										className={cn(
+											'h-3.5 w-3.5 shrink-0 text-muted-foreground transition-transform duration-200',
+											isExpanded && 'rotate-90'
+										)}
+									/>
 								</button>
 
-								{/* Items Expandibles */}
+								{/* Items Expandibles - Estilo compacto */}
 								{isExpanded && (
-									<div className="mt-1 ml-4 flex flex-col space-y-0.5">
+									<div className="mt-0.5 ml-4 flex flex-col gap-0.5 border-border/30 border-l pl-2">
 										{category.items.map((item) => {
 											const isItemActive = activeItem === item.id;
 
 											return (
 												<button
 													className={cn(
-														'group flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition-all duration-200',
-														isItemActive && 'border border-primary/20 bg-primary/10',
-														'hover:bg-secondary/40'
+														'group flex w-full items-center justify-between rounded px-2 py-1 text-left text-xs transition-all duration-200',
+														'hover:bg-secondary/50',
+														isItemActive && 'bg-secondary font-medium'
 													)}
 													key={item.id}
 													onClick={() => onNavigate(category.id, item.id)}
 													type="button"
 												>
-													<div className="flex items-center gap-2.5">
-														<div className={cn('h-4 w-4', isItemActive && 'text-primary')}>{item.icon}</div>
-														<span className={isItemActive ? 'font-medium' : ''}>{item.label}</span>
+													<div className="flex min-w-0 flex-1 items-center gap-2">
+														{/* Indicador lateral para item activo */}
+														{isItemActive && (
+															<div className="h-3 w-0.5 rounded-full" style={{ backgroundColor: item.color }} />
+														)}
+
+														{/* Icono del item */}
+														<div
+															className="flex h-3 w-3 shrink-0 items-center justify-center"
+															style={{ color: isItemActive ? item.color : 'var(--muted-foreground)' }}
+														>
+															{item.icon}
+														</div>
+
+														{/* Label del item */}
+														<span
+															className={cn('truncate', isItemActive ? 'text-foreground' : 'text-muted-foreground')}
+														>
+															{item.label}
+														</span>
 													</div>
+
+													{/* Indicador de activo (chevron) */}
 													<ChevronRight
 														className={cn(
-															'h-3.5 w-3.5 text-muted-foreground transition-transform duration-200',
-															isItemActive && 'rotate-90 text-primary'
+															'h-3 w-3 shrink-0 text-muted-foreground transition-transform duration-200',
+															isItemActive && 'rotate-90 text-foreground'
 														)}
 													/>
 												</button>
@@ -214,7 +245,7 @@ function SettingsSidebar({
 }
 
 /**
- * Layout principal de Settings con sidebar izquierda
+ * Layout principal de Settings con sidebar izquierda estilo NavPanel
  */
 export function ModernSettingsLayout({
 	categories,
@@ -238,8 +269,8 @@ export function ModernSettingsLayout({
 
 	return (
 		<div className="flex h-full w-full overflow-hidden bg-background">
-			{/* Sidebar Izquierda - Navegación */}
-			<div className="h-full w-80 shrink-0 border-r bg-muted/30">
+			{/* Sidebar Izquierda - Navegación estilo NavPanel */}
+			<div className="h-full w-72 shrink-0 border-border/30 border-r bg-muted/20">
 				<SettingsSidebar
 					activeCategory={activeSection}
 					activeItem={activeItemId}
@@ -252,52 +283,58 @@ export function ModernSettingsLayout({
 
 			{/* Área Principal - Contenido */}
 			<div className="flex h-full flex-1 flex-col overflow-hidden">
-				{/* Header Superior con Breadcrumbs */}
-				<div className="flex h-14 shrink-0 items-center justify-between border-b px-6">
+				{/* Header Superior con Breadcrumbs - Más compacto */}
+				<div className="flex h-12 shrink-0 items-center justify-between border-border/30 border-b bg-gradient-to-b from-background/90 to-transparent px-4 shadow-sm">
 					<Breadcrumb>
 						<BreadcrumbList>
 							<BreadcrumbItem>
-								<BreadcrumbLink className="text-muted-foreground hover:text-foreground" href="/settings">
-									<Settings2 className="h-4 w-4" />
+								<BreadcrumbLink
+									className="text-muted-foreground transition-colors hover:text-foreground"
+									href="/settings"
+								>
+									<Settings2 className="h-3.5 w-3.5" />
 								</BreadcrumbLink>
 							</BreadcrumbItem>
 							{activeCategory && (
 								<BreadcrumbItem>
-									<ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-									<BreadcrumbPage className="text-muted-foreground hover:text-foreground">
+									<ChevronRight className="h-3 w-3 text-muted-foreground/50" />
+									<BreadcrumbPage
+										className="text-muted-foreground transition-colors hover:text-foreground"
+										style={{ color: activeCategory.color }}
+									>
 										{activeCategory.label}
 									</BreadcrumbPage>
 								</BreadcrumbItem>
 							)}
 							{activeItem && (
 								<BreadcrumbItem>
-									<ChevronRight className="h-4 w-4 text-muted-foreground/50" />
-									<BreadcrumbPage>{activeItem.label}</BreadcrumbPage>
+									<ChevronRight className="h-3 w-3 text-muted-foreground/50" />
+									<BreadcrumbPage className="text-foreground">{activeItem.label}</BreadcrumbPage>
 								</BreadcrumbItem>
 							)}
 						</BreadcrumbList>
 					</Breadcrumb>
 
-					{/* Acciones rápidas del header */}
-					<div className="flex items-center gap-2">
-						{activeItem && (
-							<div className="flex h-8 items-center gap-2 rounded-full border bg-background px-3 shadow-sm">
-								<span
-									className="flex h-4 w-4 items-center justify-center rounded-full"
-									style={{ backgroundColor: activeItem.color }}
-								>
-									<div className="h-2.5 w-2.5 text-white">{activeItem.icon}</div>
-								</span>
-								<span className="font-medium text-xs">{activeItem.label}</span>
+					{/* Indicador de item activo con color */}
+					{activeItem && (
+						<div className="flex h-7 items-center gap-2 rounded-full border border-border/50 bg-background px-2.5 shadow-sm">
+							<div
+								className="flex h-3 w-3 items-center justify-center rounded-full"
+								style={{ backgroundColor: activeItem.color }}
+							>
+								<div className="h-2 w-2" style={{ color: 'var(--primary-foreground)' }}>
+									{activeItem.icon}
+								</div>
 							</div>
-						)}
-					</div>
+							<span className="font-medium text-[11px]">{activeItem.label}</span>
+						</div>
+					)}
 				</div>
 
 				{/* Contenido Scrollable */}
 				<div className="flex-1 overflow-hidden">
 					<ScrollArea className="h-full">
-						<div className="p-6">{children}</div>
+						<div className="p-5">{children}</div>
 					</ScrollArea>
 				</div>
 			</div>

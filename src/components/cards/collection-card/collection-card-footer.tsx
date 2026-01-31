@@ -80,8 +80,8 @@ export function CollectionCardFooter({
 					<div
 						className="flex items-center gap-1 rounded-sm bg-destructive/10 px-2 py-1"
 						style={{
-							color: 'rgb(239, 68, 68)',
-							boxShadow: '0 0 5px rgba(239, 68, 68, 0.3)',
+							color: 'var(--ui-error-text)',
+							boxShadow: '0 0 5px color-mix(in oklch, var(--ui-error-text), transparent 70%)',
 						}}
 					>
 						<Heart className="h-4 w-4 fill-current" />

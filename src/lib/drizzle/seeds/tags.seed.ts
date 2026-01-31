@@ -6,6 +6,10 @@ import { seedLogger } from './index';
 /**
  * Siembra etiquetas con IDs legibles
  * Formato: tag-nombre-01, tag-nombre-02, etc.
+ *
+ * NOTA: Los colores hex en este archivo son datos de prueba para inicializar la DB.
+ * No se usan directamente en la UI de producción - la UI usa tokens CSS
+ * definidos en src/styles/tokens.css y src/styles/design-tokens.css.
  */
 export async function seedTags(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('🏷️ Creando etiquetas de prueba...');

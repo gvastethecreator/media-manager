@@ -6,6 +6,10 @@ import { seedLogger } from './index';
 /**
  * Siembra conceptos con IDs legibles
  * Formato: cpt-nombre-01, cpt-nombre-02, etc.
+ *
+ * NOTA: Los colores hex en este archivo son datos de prueba para inicializar la DB.
+ * No se usan directamente en la UI de producción - la UI usa tokens CSS
+ * definidos en src/styles/tokens.css y src/styles/design-tokens.css.
  */
 export async function seedConcepts(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('💡 Creando conceptos de prueba...');

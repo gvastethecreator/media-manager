@@ -143,16 +143,16 @@ function VideoRenderer({ item, contentUrl, onError, onLoad, transformStyle, clas
  */
 function AudioRenderer({ item, contentUrl, onError, onLoad, className }: FileContentRendererProps) {
 	return (
-		<div className={cn('absolute inset-0 flex flex-col items-center justify-center gap-8 p-8', className)}>
+		<div className={cn('absolute inset-0 flex flex-col items-center justify-center gap-8 p-6', className)}>
 			{/* Icono grande */}
 			<div className="flex h-48 w-48 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-orange-600 shadow-2xl">
-				<Music className="h-24 w-24 text-white" />
+				<Music className="h-24 w-24 text-primary-foreground" />
 			</div>
 
 			{/* Nombre del archivo */}
 			<div className="max-w-lg text-center">
-				<h3 className="truncate font-semibold text-white text-xl">{item.name}</h3>
-				<p className="mt-1 text-sm text-white/60">
+				<h3 className="truncate font-semibold text-foreground text-xl">{item.name}</h3>
+				<p className="mt-1 text-muted-foreground text-sm">
 					{item.size ? `${(item.size / 1024 / 1024).toFixed(2)} MB` : 'Audio'}
 				</p>
 			</div>
@@ -195,7 +195,7 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 	if (isPdf && pdfUrl) {
 		return (
 			<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)}>
-				<iframe className="h-full w-full rounded-lg bg-background shadow-2xl" src={pdfUrl} title={item.name} />
+				<iframe className="h-full w-full rounded-lg bg-background shadow-dt-3" src={pdfUrl} title={item.name} />
 			</div>
 		);
 	}
@@ -204,8 +204,8 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 	if (isTextBased && textContent) {
 		return (
 			<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)}>
-				<div className="h-full w-full max-w-4xl overflow-auto rounded-lg bg-zinc-900 p-6 shadow-2xl">
-					<pre className="whitespace-pre-wrap font-mono text-sm text-white leading-relaxed">{textContent}</pre>
+				<div className="h-full w-full max-w-4xl overflow-auto rounded-lg bg-muted p-6 shadow-dt-3">
+					<pre className="whitespace-pre-wrap font-mono text-foreground text-sm leading-relaxed">{textContent}</pre>
 				</div>
 			</div>
 		);
@@ -214,12 +214,12 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 	// Otros documentos: mostrar placeholder con enlace de descarga
 	return (
 		<div className={cn('absolute inset-0 flex flex-col items-center justify-center gap-6', className)}>
-			<div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-gradient-to-br from-red-400 to-red-600 shadow-2xl">
-				<FileText className="h-16 w-16 text-white" />
+			<div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-gradient-to-br from-red-400 to-red-600 shadow-dt-3">
+				<FileText className="h-16 w-16 text-primary-foreground" />
 			</div>
 			<div className="text-center">
-				<h3 className="font-semibold text-white text-xl">{item.name}</h3>
-				<p className="mt-1 text-sm text-white/60">
+				<h3 className="font-semibold text-foreground text-xl">{item.name}</h3>
+				<p className="mt-1 text-muted-foreground text-sm">
 					{item.size ? `${(item.size / 1024 / 1024).toFixed(2)} MB` : 'Documento'}
 				</p>
 			</div>

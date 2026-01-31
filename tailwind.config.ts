@@ -151,6 +151,15 @@ const config: Config = {
 					note: 'var(--entity-note)',
 					prompt: 'var(--entity-prompt)',
 				},
+				// Rareza para TCG cards
+				rarity: {
+					common: 'var(--rarity-common)',
+					uncommon: 'var(--rarity-uncommon)',
+					rare: 'var(--rarity-rare)',
+					epic: 'var(--rarity-epic)',
+					legendary: 'var(--rarity-legendary)',
+					mythic: 'var(--rarity-mythic)',
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

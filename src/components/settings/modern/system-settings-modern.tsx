@@ -131,7 +131,10 @@ export function SystemSettingsModern() {
 			{/* Stats Overview - 4 Real Data Cards */}
 			<div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
 				{/* Storage Card - Real Data */}
-				<Card className="border-l-2 bg-card/50" style={{ borderLeftColor: 'var(--entity-folder)' }}>
+				<Card
+					className="overflow-hidden border-l bg-card/50"
+					style={{ borderLeftColor: 'color-mix(in oklch, var(--entity-folder) 50%, transparent)' }}
+				>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
 							<CardTitle className="font-medium text-sm">Almacenamiento</CardTitle>
@@ -161,7 +164,10 @@ export function SystemSettingsModern() {
 				</Card>
 
 				{/* Entities Card - Real Data */}
-				<Card className="border-l-2 bg-card/50" style={{ borderLeftColor: 'var(--entity-tag)' }}>
+				<Card
+					className="overflow-hidden border-l bg-card/50"
+					style={{ borderLeftColor: 'color-mix(in oklch, var(--entity-tag) 50%, transparent)' }}
+				>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
 							<CardTitle className="font-medium text-sm">Archivos Totales</CardTitle>
@@ -186,7 +192,10 @@ export function SystemSettingsModern() {
 				</Card>
 
 				{/* Org Card - Real Data */}
-				<Card className="border-l-2 bg-card/50" style={{ borderLeftColor: 'var(--entity-character)' }}>
+				<Card
+					className="overflow-hidden border-l bg-card/50"
+					style={{ borderLeftColor: 'color-mix(in oklch, var(--entity-character) 50%, transparent)' }}
+				>
 					<CardHeader className="pb-3">
 						<div className="flex items-center justify-between">
 							<CardTitle className="font-medium text-sm">Organización</CardTitle>

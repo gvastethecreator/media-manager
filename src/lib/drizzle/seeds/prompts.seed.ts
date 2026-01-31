@@ -6,6 +6,10 @@ import { seedLogger } from './index';
 /**
  * Siembra prompts con IDs legibles
  * Formato: prmpt-nombre-01, prmpt-nombre-02, etc.
+ *
+ * NOTA: Los colores hex en este archivo son datos de prueba para inicializar la DB.
+ * No se usan directamente en la UI de producción - la UI usa tokens CSS
+ * definidos en src/styles/tokens.css y src/styles/design-tokens.css.
  */
 export async function seedPrompts(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('🔮 Creando prompts de prueba...');

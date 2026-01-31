@@ -151,13 +151,13 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 				classes.push('bg-transparent border-2 border-border rounded-lg');
 				break;
 			case 'tcg':
-				classes.push('bg-gradient-to-b from-gray-900 to-black border border-white/10 rounded-lg shadow-lg');
+				classes.push('bg-gradient-to-b from-muted to-background border border-border rounded-lg shadow-lg');
 				break;
 			case 'polaroid':
-				classes.push('bg-white border border-gray-200 rounded-lg shadow-sm p-2');
+				classes.push('bg-card border border-border rounded-lg shadow-sm p-2');
 				break;
 			case 'glass':
-				classes.push('bg-white/10 backdrop-blur-md border border-white/20 rounded-lg');
+				classes.push('bg-background/10 backdrop-blur-md border border-border/20 rounded-lg');
 				break;
 			default:
 				break;

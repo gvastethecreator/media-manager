@@ -8,7 +8,12 @@ This guide provides essential information for AI agents working in this reposito
 
 **Type**: Monolithic client-server application (web + desktop via Tauri)
 **Purpose**: Intelligent multimedia file management system for large volumes of content
-**Tech Stack**: React 19 + Express + Bun + Drizzle ORM + SQLite + Playwright + Tauri
+**Tech Stack**: React 19 + Express + Bun + Drizzle ORM + SQLite + Playwright + Tauri 2
+**Runtime**: Bun 1.2+ (can use Node.js 20+ as fallback)
+
+**Deployment Options**:
+- **Web App**: Full-stack (React + Express) via `bun run dev:full`
+- **Desktop App**: Tauri 2 wrapper around the web app via `bun run dev:tauri`
 
 ---
 
@@ -108,6 +113,25 @@ bun run logs:clean
 # Check errors
 bun run check:errors
 ```
+
+### Desktop (Tauri)
+
+```bash
+# Tauri development
+bun run dev:tauri
+
+# Tauri build
+bun run build:tauri
+```
+
+**Tauri Integration**:
+- React frontend runs at `http://localhost:5173` (Vite dev server)
+- Express backend runs at `http://localhost:4000` (server)
+- Tauri Rust bridge (`src-tauri/src/`) provides:
+  - `check_backend_health()` - Verify backend is running
+  - `get_app_data_dir()` - Get cross-platform app data directory
+- Tauri config: `src-tauri/tauri.conf.json`
+- Backend resources bundled in Tauri builds (see bundle.resources in config)
 
 ---
 
@@ -710,6 +734,716 @@ const AsyncComponent = lazy(() =>
 
 ---
 
+## 🧠 Effect-TS Pattern (Advanced)
+
+### Overview
+
+The project is migrating to Effect-TS for functional error handling and composition. See `docs/guides/EFFECT-TS-MIGRATION.md` for complete migration status (22/22 services migrated as of 2025-10-11).
+
+### Effect Service Pattern
+
+```typescript
+// 1. Define errors with Data.TaggedError
+export class VideoNotFound extends Data.TaggedError('VideoNotFound')<{
+  readonly id: string;
+}> {}
+
+// 2. Define service interface
+export interface VideoServiceInterface {
+  readonly getById: (id: string) => Effect.Effect<VideoWithStats, VideoError>;
+  readonly getAll: (options?: GetOptions) => Effect.Effect<VideoListResult, VideoError>;
+  readonly create: (input: CreateVideoInput) => Effect.Effect<Video, VideoError>;
+  readonly update: (id: string, input: UpdateVideoInput) => Effect.Effect<Video, VideoError>;
+  readonly delete: (id: string) => Effect.Effect<void, VideoError>;
+}
+
+// 3. Create Context.Tag for dependency injection
+export class VideoService extends Context.Tag('VideoService')<
+  VideoService,
+  VideoServiceInterface
+>() {}
+
+// 4. Implement the service
+export const make = (): VideoServiceInterface => {
+  const getById = (id: string): Effect.Effect<VideoWithStats, VideoError> =>
+    Effect.gen(function* () {
+      // Access dependencies
+      const db = yield* DrizzleService;
+
+      // Query database
+      const [video] = yield* Effect.tryPromise({
+        try: () => db.select().from(videos).where(eq(videos.id, id)).limit(1),
+        catch: (error) => new DatabaseError({ message: String(error), cause: error })
+      });
+
+      if (!video) {
+        return yield* Effect.fail(new VideoNotFound({ id }));
+      }
+
+      // Transform result
+      return yield* Effect.succeed(fromDrizzleVideoWithCounts(video));
+    });
+
+  const getAll = (options?: GetOptions): Effect.Effect<VideoListResult, VideoError> =>
+    Effect.gen(function* () {
+      const db = yield* DrizzleService;
+
+      // Build query
+      let query = db.select().from(videos);
+      if (options?.search) {
+        query = query.where(like(videos.name, `%${options.search}%`));
+      }
+      if (options?.limit) {
+        query = query.limit(options.limit);
+      }
+      if (options?.offset) {
+        query = query.offset(options.offset);
+      }
+
+      const results = yield* Effect.tryPromise({
+        try: () => query,
+        catch: (error) => new DatabaseError({ message: String(error), cause: error })
+      });
+
+      return { videos: results, total: results.length };
+    });
+
+  return { getById, getAll, /* ... */ };
+};
+
+// 5. Create Layer
+export const VideoServiceLive = Layer.effect(VideoService, make());
+```
+
+### Effect Route Handler Pattern
+
+```typescript
+import { Effect } from 'effect';
+import express from 'express';
+import { runEffectForExpress } from '@/lib/effect/adapters/express.adapter';
+import { VideoService, VideoServiceLive } from '@/services/video/video.service.effect';
+
+const router = express.Router();
+
+router.get('/:id', async (req, res) => {
+  const { id } = req.params;
+
+  const effect = Effect.gen(function* () {
+    // Inject service
+    const videoService = yield* VideoService;
+
+    // Call service method
+    const video = yield* videoService.getById(id);
+
+    return res.json(video);
+  }).pipe(Effect.provide(VideoServiceLive));
+
+  await runEffectForExpress(effect, res);
+});
+
+router.post('/', async (req, res) => {
+  const effect = Effect.gen(function* () {
+    const videoService = yield* VideoService;
+
+    // Validate input
+    const input = yield* Effect.tryPromise({
+      try: () => createVideoSchema.parseAsync(req.body),
+      catch: (error) => new ValidationError({ message: 'Invalid input', cause: error })
+    });
+
+    const video = yield* videoService.create(input);
+
+    return res.status(201).json(video);
+  }).pipe(Effect.provide(VideoServiceLive));
+
+  await runEffectForExpress(effect, res);
+});
+
+export default router;
+```
+
+### Effect Adapter
+
+The `runEffectForExpress` adapter handles:
+- Effect execution
+- Error mapping to HTTP status codes
+- Response sending
+- Logging
+
+```typescript
+// src/lib/effect/adapters/express.adapter.ts
+export async function runEffectForExpress<R>(
+  effect: Effect.Effect<R, unknown>,
+  res: express.Response
+): Promise<void> {
+  const result = await Effect.runPromise(effect);
+
+  if (result._tag === 'Left') {
+    // Error case
+    const httpError = errorToHttpStatus(result.left);
+    res.status(httpError.status).json({
+      error: httpError.message,
+      ...(process.env.NODE_ENV === 'development' && { details: httpError.details })
+    });
+  } else {
+    // Success case - result is already sent via res.json()
+  }
+}
+```
+
+### Key Effect Concepts
+
+**Effect.gen**: Generator-based sequencing
+```typescript
+const effect = Effect.gen(function* () {
+  const a = yield* Effect.succeed(1);
+  const b = yield* Effect.succeed(2);
+  return a + b; // 3
+});
+```
+
+**Effect.tryPromise**: Convert promises to Effects
+```typescript
+const result = yield* Effect.tryPromise({
+  try: () => fs.readFile(path),
+  catch: (error) => new FileReadError({ path, error })
+});
+```
+
+**Context.Tag**: Dependency injection
+```typescript
+// Define
+export class Database extends Context.Tag('Database')<Database, DB>() {}
+
+// Use in service
+const db = yield* Database;
+
+// Provide in Layer
+export const DatabaseLive = Layer.effect(Database, makeDb());
+```
+
+**Layers**: Compose dependencies
+```typescript
+const MainLive = Layer.provide(
+  VideoServiceLive,
+  DatabaseLive.pipe(Layer.provide(LoggerService))
+);
+```
+
+---
+
+## 🔄 Batch Operations & Event-Driven Architecture
+
+### Batch Operations Pattern
+
+The project has a comprehensive batch operations system for handling multiple file operations:
+
+**Key Files**:
+- `src/services/file/batch-operations.service.ts` - Core batch service
+- `src/components/batch-operations/` - UI components
+
+**Service Pattern**:
+```typescript
+// EventEmitter-based pattern for browser compatibility
+class EventEmitter {
+  private readonly events = new Map<string, Set<BatchListener<any>>>();
+
+  on<TEvent extends BatchEvents['type']>(event, listener): this;
+  emit<TEvent>(event, payload): boolean;
+  removeListener(event, listener): this;
+}
+
+// Batch operation types
+type BatchOperationType = 'copy' | 'move' | 'delete' | 'reindex' | 'tag';
+type BatchOperationStatus = 'pending' | 'running' | 'paused' | 'completed' | 'failed' | 'cancelled';
+
+interface BatchOperation {
+  id: string;
+  type: BatchOperationType;
+  items: AnyEntityWithStats[];
+  status: BatchOperationStatus;
+  progress: number;
+  total: number;
+  startedAt: Date;
+  completedAt?: Date;
+  error?: string;
+}
+```
+
+**Usage Pattern**:
+```typescript
+// 1. Start operation
+const operationId = batchFileOperationsService.startOperation({
+  type: 'move',
+  items: selectedEntities,
+  destination: folderId
+});
+
+// 2. Listen for progress updates
+batchFileOperationsService.on('operationProgress', (operation) => {
+  console.log(`${operation.progress}/${operation.total} completed`);
+});
+
+// 3. Pause/Resume/Cancel
+batchFileOperationsService.pauseOperation(operationId);
+batchFileOperationsService.resumeOperation(operationId);
+batchFileOperationsService.cancelOperation(operationId);
+```
+
+### Progress Tracking
+
+Long-running operations use a centralized progress tracking system:
+
+**Service**: `src/services/progress/progress-tracking.service.ts`
+
+**Features**:
+- Real-time progress updates
+- Operation queuing and priority
+- Error handling and retry logic
+- Duration estimation
+
+**Usage**:
+```typescript
+import { progressTrackingService } from '@/services/progress/progress-tracking.service';
+
+const tracker = progressTrackingService.createTracker({
+  operationId: 'reindex-folder-123',
+  total: 1000,
+  label: 'Reindexing folder'
+});
+
+// Update progress
+tracker.updateProgress(500); // 50% complete
+
+// Mark complete
+tracker.complete();
+
+// Handle errors
+tracker.error(new Error('Failed to process file'));
+```
+
+### Server-Sent Events (SSE)
+
+For real-time progress updates from backend to frontend:
+
+**Route Pattern** (server-side):
+```typescript
+router.get('/events', (req, res) => {
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+
+  // Send events
+  const sendEvent = (data) => {
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  };
+
+  progressTrackingService.on('progress', (data) => {
+    sendEvent({ type: 'progress', data });
+  });
+});
+```
+
+**Client-side**:
+```typescript
+const eventSource = new EventSource('/api/operations/events');
+
+eventSource.addEventListener('progress', (event) => {
+  const data = JSON.parse(event.data);
+  console.log('Progress update:', data);
+});
+```
+
+**Example SSE Endpoints**:
+- `/thumbnails/events` - Thumbnail generation progress
+- `/reindex/events` - Folder reindexing progress
+- `/batch/events` - Batch operation progress
+
+---
+
+## 🖼️ Thumbnail System
+
+### Thumbnail Architecture
+
+**Components**:
+- `src/services/thumbnail/thumbnail-events.service.ts` - Event-driven thumbnail generation
+- `src/services/media/ffmpeg-thumbnail.service.ts` - Video thumbnails (FFmpeg)
+- `src/services/media/mediabunny-thumbnail.service.ts` - Unified thumbnail service
+- `src/transformers/thumbnail/` - Thumbnail DTO transformers
+
+**Thumbnail Generation Flow**:
+```
+Request Thumbnail
+    ↓
+Check Cache (DB thumbnails table)
+    ↓ (not found)
+Generate with Sharp/FFmpeg
+    ↓
+Save to DB (thumbnail blob)
+    ↓
+Return thumbnail data
+```
+
+**API Endpoints**:
+```bash
+# Get thumbnail
+GET /thumbnails/image/:imageId?quality=medium
+
+# Generate thumbnail
+POST /thumbnails/generate/:imageId
+
+# Bulk generate
+POST /thumbnails/bulk-generate { imageIds: [...], quality: 'medium' }
+
+# Batch processing
+POST /thumbnails/batch { requests: [{imageId, quality}, ...] }
+
+# SSE events for progress
+GET /thumbnails/events
+```
+
+**Thumbnail Quality Levels**:
+- `thumbnail` - Small (100x100)
+- `small` - Small (200x200)
+- `medium` - Medium (400x400)
+- `large` - Large (800x800)
+- `original` - Original size
+
+**Thumbnail States**:
+- `thumbnail` - BLOB data in DB
+- `thumbnailError` - Error message if generation failed
+- `thumbnailErrorAt` - Timestamp of error
+- `thumbnailOptimizedAt` - Timestamp of last optimization
+
+---
+
+## 🔁 Incremental Reindexing System
+
+### Hash-Based Change Detection
+
+**Core Concept**: Files are only reprocessed if their SHA-256 hash changes.
+
+**Key Files**:
+- `src/services/folder/reindex/reindex-incremental.service.effect.ts` - Effect-TS implementation
+- `src/services/file-changes/file-change-detector.service.effect.ts` - Change detection
+- `docs/guides/REINDEX-INCREMENTAL.md` - Full documentation
+
+**How It Works**:
+1. Calculate SHA-256 hash of file content
+2. Compare with stored hash in database
+3. If different → Process file (extract metadata, generate thumbnail)
+4. If same → Skip (no changes detected)
+
+**Benefits**:
+- 95% time savings on incremental reindex
+- Detects file content changes (not just modification time)
+- Works with renamed/moved files
+- No unnecessary thumbnail regeneration
+
+**API**:
+```bash
+# Start incremental reindex
+POST /folders/:id/reindex { mode: 'incremental' }
+
+# Get reindex progress (SSE)
+GET /reindex/events
+
+# Check reindex status
+GET /folders/:id/reindex/status
+```
+
+**Reindex Modes**:
+- `full` - Process all files (slow, initial indexing)
+- `incremental` - Only process changed files (fast, subsequent indexing)
+
+---
+
+## 🗂️ File System Integration
+
+### File Entity Mapper
+
+Handles automatic detection and routing of files to correct entity types.
+
+**Service**: `src/services/file-entity-mapper/`
+
+**Architecture**:
+- **Core Service** (`core.service.ts`) - Orchestrates the 3-stage pipeline
+- **Processors** (`processors/`) - Specialized handlers per file type:
+  - `image.processor.ts` - EXIF/IPTC/XMP/AI metadata
+  - `video.processor.ts` - ffprobe + animated WebP thumbnails
+  - `audio.processor.ts` - ID3 tags + waveform
+  - `document.processor.ts` - PDF/MD/TXT parsing
+  - `file3d.processor.ts` - GLTF/GLB/OBJ parsing
+  - `json.processor.ts` - Validation + preview
+
+**3-Stage Pipeline**:
+```
+Stage 1: Basic Creation
+  - Quick pre-check (stat + extension)
+  - Size validation (skip before hash)
+  - SHA-256 hash calculation (with LRU cache)
+  - Duplicate verification
+  - Basic DB record creation
+
+Stage 2: Metadata Extraction
+  - Dispatch to specialized processor
+  - Extract type-specific metadata
+
+Stage 3: Thumbnail Generation
+  - Generate appropriate thumbnail type
+```
+
+**Supported File Types**:
+| Extension | Entity Type | Processor |
+|-----------|--------------|------------|
+| .jpg, .jpeg, .png, .gif, .webp | Image | ImageProcessor |
+| .mp4, .mov, .avi, .mkv | Video | VideoProcessor |
+| .mp3, .wav, .flac, .ogg | Audio | AudioProcessor |
+| .pdf, .doc, .docx, .txt | Document | DocumentProcessor |
+| .json | JSON File | JsonProcessor |
+| .glb, .gltf, .obj | 3D File | File3DProcessor |
+
+**Usage**:
+```typescript
+import { FileEntityMapperCore } from '@/services/file-entity-mapper';
+
+const mapper = FileEntityMapperCore.getInstance();
+
+// Process single file
+const result = await mapper.createEntityFromFile('/path/to/file.jpg', 'folder-id');
+// Returns: { success: true, entityType: 'image', entityId: 'uuid' }
+
+// Process multiple files
+const stats = await mapper.processFiles([
+  '/path/to/image1.jpg',
+  '/path/to/video.mp4'
+], 'folder-id');
+// Returns: { totalFiles: 2, successful: 2, failed: 0, ... }
+```
+
+---
+
+## 🔄 Undo/Redo System
+
+### Pattern Overview
+
+The undo/redo system allows users to revert file operations like copy, move, delete, and rename.
+
+**Service**: `src/services/undo-redo/undo-redo-manager.ts`
+
+**Key Features**:
+- Action history with branching support
+- EventEmitter for state change notifications
+- Automatic cleanup of old actions
+- Browser-compatible implementation
+
+**Undoable Action Pattern**:
+```typescript
+export interface UndoableAction {
+  id: string;
+  type: UndoActionType;
+  timestamp: number;
+  description: string;
+  execute: () => Promise<void>;
+  undo: () => Promise<void>;
+  canUndo: () => boolean;
+  originalData?: any;
+  targetData?: any;
+}
+
+export type UndoActionType =
+  | 'copy'
+  | 'move'
+  | 'delete'
+  | 'rename'
+  | 'create-folder'
+  | 'paste'
+  | 'duplicate'
+  | 'add-to-collection'
+  | 'remove-from-collection'
+  | 'add-tag'
+  | 'remove-tag';
+```
+
+**Usage**:
+```typescript
+import { undoRedoManager } from '@/services/undo-redo/undo-redo-manager';
+
+// Create and execute action
+const moveAction = undoRedoManager.createMoveAction(items, targetPath);
+await undoRedoManager.execute(moveAction);
+
+// Undo last action
+await undoRedoManager.undo();
+
+// Redo next action
+await undoRedoManager.redo();
+
+// Listen to state changes
+undoRedoManager.on('stateChanged', (state) => {
+  console.log('Can undo:', state.canUndo);
+  console.log('Can redo:', state.canRedo);
+});
+```
+
+---
+
+## 🖥️ Tauri Desktop Integration
+
+### Architecture Overview
+
+Tauri wraps the web application as a desktop app with native Rust capabilities.
+
+**Key Components**:
+- **Frontend**: React app running at `http://localhost:5173`
+- **Backend**: Express server running at `http://localhost:4000`
+- **Rust Bridge**: `src-tauri/src/` - Native commands
+
+### Tauri Configuration
+
+**File**: `src-tauri/tauri.conf.json`
+
+```json
+{
+  "productName": "Image Manager",
+  "version": "0.1.0",
+  "identifier": "com.imagemanager.app",
+  "build": {
+    "frontendDist": "../dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "bun run dev:vite",
+    "beforeBuildCommand": "bun run build:vite"
+  },
+  "bundle": {
+    "active": true,
+    "targets": "all",
+    "resources": {
+      "../dist/server/index.js": "server/index.js",
+      "../dist/server/wrapper.js": "server/wrapper.js",
+      "../dist/server/db.sqlite": "server/db.sqlite"
+    }
+  }
+}
+```
+
+### Rust Commands
+
+**File**: `src-tauri/src/`
+
+```rust
+// Commands available to frontend
+#[tauri::command]
+async fn check_backend_health() -> Result<bool, String> {
+    // Check if backend is running at localhost:4000
+}
+
+#[tauri::command]
+async fn get_app_data_dir() -> Result<String, String> {
+    // Get cross-platform app data directory
+}
+
+#[tauri::command]
+async fn open_in_explorer(path: String) -> Result<(), String> {
+    // Open file explorer at path
+}
+```
+
+### Desktop vs Web Behavior
+
+**Web Mode**:
+- Runs in browser
+- Backend at `localhost:4000` (must be started separately)
+- No native file system access
+
+**Desktop Mode**:
+- Runs in Tauri window
+- Backend bundled in app
+- Native file system access via Tauri APIs
+- System tray, native menus, etc.
+
+---
+
+## 🎯 View Architecture
+
+### Entity Card TCG Pattern
+
+All 20 entity views use a unified TCG (Trading Card Game) card pattern.
+
+**Card Features**:
+- Holographic effects on hover
+- Dynamic gradients by entity type
+- Golden glow for favorites
+- 3D perspective effects
+- Smooth animations (60fps)
+
+**Card Structure**:
+```typescript
+interface EntityCardProps {
+  entity: AnyEntityWithStats;
+  onClick: (entity: AnyEntityWithStats) => void;
+  onContextMenu?: (event, entity) => void;
+  isSelected?: boolean;
+}
+```
+
+**Available Cards**:
+- `EntityCard` - Generic card (search, favorites, mixed views)
+- `AlbumCard`, `CollectionCard`, `GroupCard` - Organization entities
+- `CharacterCard`, `PlaceCard`, `ConceptCard`, `WorldItemCard` - Worldbuilding
+- `ImageCard`, `VideoCard`, `AudioCard`, `DocumentCard` - File types
+- `TagCard`, `PromptCard`, `NoteCard`, `PropertyCard` - Taxonomy
+- `WildcardCard` - Pattern matching
+
+### View Pattern
+
+All entity views follow a consistent pattern:
+
+```typescript
+export function EntityView({}: ViewProps) {
+  // 1. Store
+  const { entities, isLoading, error, loadEntities } = useEntityStore();
+
+  // 2. Load on mount
+  useEffect(() => {
+    if (isEmpty(entities)) loadEntities();
+  }, []);
+
+  // 3. States
+  if (error) return <ErrorState />;
+  if (isLoading) return <LoadingScreen />;
+  if (isEmpty(entities)) return <EmptyState />;
+
+  // 4. Grid with animations
+  return (
+    <ScrollArea>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {entities.map((entity, index) => (
+          <motion.div
+            key={entity.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: index * 0.05 }}
+          >
+            <EntityCard entity={entity} onClick={handleClick} />
+          </motion.div>
+        ))}
+      </div>
+    </ScrollArea>
+  );
+}
+```
+
+**View Structure**:
+```
+src/components/views/<entity>/
+├── <entity>-view.tsx          # Main view component
+├── <entity>-content-view.tsx   # Content layout
+├── <entities>-content-view.tsx  # List/grid view
+└── README.md                   # View documentation
+```
+
+---
+
 ## 🚨 Gotchas & Anti-Patterns
 
 ### ❌ Avoid
@@ -816,12 +1550,14 @@ find src/transformers -type f -name "transformer.ts"
 
 ## 📚 Documentation References
 
-- **Architecture**: `docs/ARCHITECTURE.md` - Complete system architecture
-- **Database Schema**: `docs/DATABASE-SCHEMA.md` - Detailed schema documentation
-- **API Reference**: `docs/API-REFERENCE.md` - API endpoints documentation
-- **Services Guide**: `docs/SERVICES-GUIDE.md` - Service layer patterns
-- **Frontend Guide**: `docs/FRONTEND-GUIDE.md` - Frontend patterns
-- **PRD**: `docs/PRD.md` - Product requirements
+- **Architecture**: `docs/core/ARCHITECTURE.md` - Complete system architecture
+- **Database Schema**: `docs/core/DATABASE-SCHEMA.md` - Detailed schema documentation
+- **API Reference**: `docs/core/API-REFERENCE.md` - API endpoints documentation
+- **Services Guide**: `docs/core/SERVICES-GUIDE.md` - Service layer patterns
+- **Frontend Guide**: `docs/core/FRONTEND-GUIDE.md` - Frontend patterns
+- **PRD**: `docs/core/PRD.md` - Product requirements
+- **Effect-TS Migration**: `docs/guides/EFFECT-TS-MIGRATION.md` - Effect-TS migration status (100% complete)
+- **Reindex Incremental**: `docs/guides/REINDEX-INCREMENTAL.md` - Hash-based reindex system
 - **Existing Rules**: `.github/copilot-instructions.md` - Development rules (Spanish)
 
 ---
@@ -948,17 +1684,17 @@ bun run dev:full
 
 ## ✨ Quick Reference
 
-| Task | Command |
-|------|---------|
-| Start dev | `bun run dev:full` |
-| Build | `bun run build` |
-| Test unit | `bun run test` |
-| Test E2E | `bun run test:e2e` |
-| Lint | `bun run biome` |
-| Format | `bun run format` |
-| Type check | `bun run tsc` |
-| DB Studio | `bun run db:studio` |
-| Logs | `bun run logs:list` |
+|| Task | Command |
+||------|---------|
+|| Start dev | `bun run dev:full` |
+|| Build | `bun run build` |
+|| Test unit | `bun run test` |
+|| Test E2E | `bun run test:e2e` |
+|| Lint | `bun run biome` |
+|| Format | `bun run format` |
+|| Type check | `bun run tsc` |
+|| DB Studio | `bun run db:studio` |
+|| Logs | `bun run logs:list` |
 
 ---
 

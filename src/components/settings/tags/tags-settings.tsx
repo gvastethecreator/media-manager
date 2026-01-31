@@ -101,7 +101,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 		return (
 			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<CardContent>
-					<div className="flex items-center justify-center gap-2 p-8">
+					<div className="flex items-center justify-center gap-2 p-4">
 						<Loader2 className="h-8 w-8 animate-spin text-muted-foreground" />
 						<span className="text-body-sm text-muted-foreground">Cargando etiquetas...</span>
 					</div>
@@ -115,7 +115,7 @@ export function TagsSettings({ className }: TagsSettingsProps) {
 		return (
 			<Card className="rounded-dt-md border-none bg-muted/30 shadow-sm">
 				<CardContent>
-					<div className="flex items-center justify-center gap-2 p-8">
+					<div className="flex items-center justify-center gap-2 p-4">
 						<p className="text-body-sm text-destructive">Error al cargar etiquetas: {error.message}</p>
 					</div>
 				</CardContent>
