@@ -1,42 +1,36 @@
 /**
- * 🎬 FILE CONTENT RENDERER
+ * FILE CONTENT RENDERER
  *
- * Renderiza contenido de archivo según su tipo (imagen, video, audio, documento, JSON, 3D)
+ * Renderiza contenido de archivo segun su tipo (imagen, video, audio, documento, JSON, 3D)
  */
 
-import { AlertCircle, Box, File, FileJson, FileText, Image, Loader2, Music, Video } from 'lucide-react';
+import { AlertCircle, Box, File, FileJson, FileText, Image, Info, Loader2, Music, Video } from 'lucide-react';
 import { memo, useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import type { ImageItem } from './file-viewer.types';
-import { JsonAdvancedViewer } from './json-advanced-viewer';
+import { FileInfoPanel } from './file-info-panel';
+import { EnhancedAudioViewer } from './viewers/enhanced-audio-viewer';
+import { JsonFlowViewer } from './viewers/json-flow-viewer';
+import { MarkdownViewer } from './viewers/markdown-viewer';
+import { ThreeDViewer } from './viewers/three-d-viewer';
 
 export interface FileContentRendererProps {
-	/** Item a renderizar */
 	item: ImageItem;
-	/** URL del contenido */
 	contentUrl: string;
-	/** Si está cargando */
 	isLoading?: boolean;
-	/** Callback de error */
 	onError?: () => void;
-	/** Callback de carga exitosa */
 	onLoad?: () => void;
-	/** Estilos de transformación (zoom/pan) */
 	transformStyle?: React.CSSProperties;
-	/** Clase adicional */
 	className?: string;
 }
 
-/**
- * Detecta el tipo de archivo basado en mimeType, type, o extensión
- */
 function detectFileType(item: ImageItem): 'image' | 'video' | 'audio' | 'document' | 'json' | 'file3d' | 'unknown' {
 	const mimeType = item.mimeType?.toLowerCase() || '';
 	const type = item.type?.toLowerCase() || '';
 	const ext = item.name?.toLowerCase().split('.').pop() || '';
 
-	// Por mimeType
 	if (mimeType.startsWith('image/')) return 'image';
 	if (mimeType.startsWith('video/')) return 'video';
 	if (mimeType.startsWith('audio/')) return 'audio';
@@ -44,7 +38,6 @@ function detectFileType(item: ImageItem): 'image' | 'video' | 'audio' | 'documen
 	if (mimeType.includes('json')) return 'json';
 	if (mimeType.includes('model') || mimeType.includes('gltf') || mimeType.includes('obj')) return 'file3d';
 
-	// Por type del item
 	if (type === 'image') return 'image';
 	if (type === 'video') return 'video';
 	if (type === 'audio') return 'audio';
@@ -52,7 +45,6 @@ function detectFileType(item: ImageItem): 'image' | 'video' | 'audio' | 'documen
 	if (type === 'json' || type === 'jsonfile') return 'json';
 	if (type === 'file3d' || type === '3d') return 'file3d';
 
-	// Por extensión
 	const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'bmp', 'tiff', 'tif', 'svg', 'ico'];
 	const videoExts = ['mp4', 'webm', 'avi', 'mov', 'mkv', 'flv', 'wmv', 'm4v', 'mpg', 'mpeg', '3gp'];
 	const audioExts = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'wma', 'm4a', 'opus', 'aiff'];
@@ -70,9 +62,6 @@ function detectFileType(item: ImageItem): 'image' | 'video' | 'audio' | 'documen
 	return 'unknown';
 }
 
-/**
- * Icono según tipo de archivo
- */
 function FileTypeIcon({ type, className }: { type: ReturnType<typeof detectFileType>; className?: string }) {
 	const iconClass = cn('h-16 w-16', className);
 
@@ -94,10 +83,7 @@ function FileTypeIcon({ type, className }: { type: ReturnType<typeof detectFileT
 	}
 }
 
-/**
- * Renderizador de imágenes
- */
-function ImageRenderer({ item, contentUrl, onError, onLoad, transformStyle, className }: FileContentRendererProps) {
+function ImageRendererBase({ item, contentUrl, onError, onLoad, transformStyle, className }: FileContentRendererProps) {
 	return (
 		<div
 			className={cn('pointer-events-none absolute inset-0 flex items-center justify-center', className)}
@@ -114,10 +100,7 @@ function ImageRenderer({ item, contentUrl, onError, onLoad, transformStyle, clas
 	);
 }
 
-/**
- * Renderizador de videos
- */
-function VideoRenderer({ item, contentUrl, onError, onLoad, transformStyle, className }: FileContentRendererProps) {
+function VideoRendererBase({ item, contentUrl, onError, onLoad, transformStyle, className }: FileContentRendererProps) {
 	return (
 		<div
 			className={cn('pointer-events-none absolute inset-0 flex items-center justify-center', className)}
@@ -138,46 +121,25 @@ function VideoRenderer({ item, contentUrl, onError, onLoad, transformStyle, clas
 	);
 }
 
-/**
- * Renderizador de audio con visualización
- */
-function AudioRenderer({ item, contentUrl, onError, onLoad, className }: FileContentRendererProps) {
+function AudioRendererBase({ item, contentUrl, className }: FileContentRendererProps) {
 	return (
-		<div className={cn('absolute inset-0 flex flex-col items-center justify-center gap-8 p-6', className)}>
-			{/* Icono grande */}
-			<div className="flex h-48 w-48 items-center justify-center rounded-full bg-gradient-to-br from-orange-400 to-orange-600 shadow-2xl">
-				<Music className="h-24 w-24 text-primary-foreground" />
-			</div>
-
-			{/* Nombre del archivo */}
-			<div className="max-w-lg text-center">
-				<h3 className="truncate font-semibold text-foreground text-xl">{item.name}</h3>
-				<p className="mt-1 text-muted-foreground text-sm">
-					{item.size ? `${(item.size / 1024 / 1024).toFixed(2)} MB` : 'Audio'}
-				</p>
-			</div>
-
-			{/* Reproductor de audio */}
-			<audio autoPlay className="w-full max-w-md" controls onError={onError} onLoadedData={onLoad} src={contentUrl}>
-				Tu navegador no soporta el elemento de audio.
-			</audio>
+		<div className={cn('absolute inset-0', className)} data-no-drag>
+			<EnhancedAudioViewer audioUrl={contentUrl} fileName={item.name} />
 		</div>
 	);
 }
 
-/**
- * Renderizador de documentos (PDF, TXT, MD)
- */
 function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: FileContentRendererProps) {
 	const [textContent, setTextContent] = useState<string | null>(null);
 	const [pdfUrl, setPdfUrl] = useState<string | null>(null);
+	const [showInfo, setShowInfo] = useState(false);
 	const ext = item.name?.toLowerCase().split('.').pop() || '';
-	const isTextBased = ['txt', 'md', 'rtf'].includes(ext);
+	const isMarkdown = ext === 'md';
+	const isText = ext === 'txt' || ext === 'rtf';
 	const isPdf = ext === 'pdf';
 
 	useEffect(() => {
-		if (isTextBased && contentUrl) {
-			// Cargar contenido de texto
+		if ((isMarkdown || isText) && contentUrl) {
 			fetch(contentUrl)
 				.then((res) => res.text())
 				.then((text) => {
@@ -189,29 +151,61 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 			setPdfUrl(contentUrl);
 			onLoad?.();
 		}
-	}, [contentUrl, isTextBased, isPdf, onError, onLoad]);
+	}, [contentUrl, isMarkdown, isText, isPdf, onError, onLoad]);
 
-	// PDF: usar iframe
 	if (isPdf && pdfUrl) {
 		return (
 			<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)}>
 				<iframe className="h-full w-full rounded-lg bg-background shadow-dt-3" src={pdfUrl} title={item.name} />
+				<Button
+					className="absolute top-4 right-4 z-50"
+					size="icon"
+					variant="secondary"
+					onClick={() => setShowInfo(!showInfo)}
+				>
+					<Info className="h-4 w-4" />
+				</Button>
+				{showInfo && <FileInfoPanel item={item} />}
 			</div>
 		);
 	}
 
-	// Texto: mostrar en pre
-	if (isTextBased && textContent) {
+	if (isMarkdown && textContent) {
 		return (
-			<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)}>
+			<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)} data-no-drag>
+				<MarkdownViewer className="h-full w-full max-w-4xl" content={textContent} />
+				<Button
+					className="absolute top-4 right-4 z-50"
+					size="icon"
+					variant="secondary"
+					onClick={() => setShowInfo(!showInfo)}
+				>
+					<Info className="h-4 w-4" />
+				</Button>
+				{showInfo && <FileInfoPanel item={item} />}
+			</div>
+		);
+	}
+
+	if (isText && textContent) {
+		return (
+			<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)} data-no-drag>
 				<div className="h-full w-full max-w-4xl overflow-auto rounded-lg bg-muted p-6 shadow-dt-3">
 					<pre className="whitespace-pre-wrap font-mono text-foreground text-sm leading-relaxed">{textContent}</pre>
 				</div>
+				<Button
+					className="absolute top-4 right-4 z-50"
+					size="icon"
+					variant="secondary"
+					onClick={() => setShowInfo(!showInfo)}
+				>
+					<Info className="h-4 w-4" />
+				</Button>
+				{showInfo && <FileInfoPanel item={item} />}
 			</div>
 		);
 	}
 
-	// Otros documentos: mostrar placeholder con enlace de descarga
 	return (
 		<div className={cn('absolute inset-0 flex flex-col items-center justify-center gap-6', className)}>
 			<div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-gradient-to-br from-red-400 to-red-600 shadow-dt-3">
@@ -230,14 +224,20 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 			>
 				Descargar archivo
 			</a>
+			<Button
+				className="absolute top-4 right-4 z-50"
+				size="icon"
+				variant="secondary"
+				onClick={() => setShowInfo(!showInfo)}
+			>
+				<Info className="h-4 w-4" />
+			</Button>
+			{showInfo && <FileInfoPanel item={item} />}
 		</div>
 	);
 }
 
-/**
- * Renderizador de JSON con visualizador avanzado multi-modo
- */
-function JsonRenderer({ item, contentUrl, onError, onLoad, className }: FileContentRendererProps) {
+function JsonRendererBase({ item, contentUrl, onError, onLoad, className }: FileContentRendererProps) {
 	const [jsonContent, setJsonContent] = useState<string | null>(null);
 
 	useEffect(() => {
@@ -261,46 +261,23 @@ function JsonRenderer({ item, contentUrl, onError, onLoad, className }: FileCont
 	}
 
 	return (
-		<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)}>
-			<JsonAdvancedViewer className="h-full w-full max-w-6xl" content={jsonContent} fileName={item.name} />
+		<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)} data-no-drag>
+			<JsonFlowViewer className="h-full w-full max-w-6xl" content={jsonContent} fileName={item.name} />
 		</div>
 	);
 }
 
-/**
- * Renderizador de modelos 3D (placeholder con información)
- */
-function File3DRenderer({ item, contentUrl, className }: FileContentRendererProps) {
-	const ext = item.name?.toLowerCase().split('.').pop() || '';
-
+function File3DRendererBase({ item, contentUrl, className }: FileContentRendererProps) {
 	return (
-		<div className={cn('absolute inset-0 flex flex-col items-center justify-center gap-6', className)}>
-			<div className="flex h-32 w-32 animate-pulse items-center justify-center rounded-2xl bg-gradient-to-br from-purple-400 to-purple-600 shadow-2xl">
-				<Box className="h-16 w-16 text-white" />
-			</div>
-			<div className="text-center">
-				<h3 className="font-semibold text-white text-xl">{item.name}</h3>
-				<p className="mt-1 text-sm text-white/60">Modelo 3D ({ext.toUpperCase()})</p>
-				{item.size && <p className="mt-0.5 text-white/40 text-xs">{(item.size / 1024 / 1024).toFixed(2)} MB</p>}
-			</div>
-			<a
-				className="mt-4 rounded-lg bg-background/10 px-6 py-2 text-white transition-colors hover:bg-background/20"
-				download={item.name}
-				href={contentUrl}
-			>
-				Descargar modelo
-			</a>
-			<p className="max-w-sm text-center text-white/40 text-xs">
-				Vista previa 3D próximamente. Por ahora puedes descargar el archivo para verlo en tu aplicación preferida.
-			</p>
+		<div className={cn('absolute inset-0', className)} data-no-drag>
+			<ThreeDViewer fileName={item.name} src={contentUrl} />
 		</div>
 	);
 }
 
-/**
- * Renderizador para tipos desconocidos
- */
 function UnknownRenderer({ item, contentUrl, className }: FileContentRendererProps) {
+	const [showInfo, setShowInfo] = useState(false);
+
 	return (
 		<div className={cn('absolute inset-0 flex flex-col items-center justify-center gap-6', className)}>
 			<div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-400 to-zinc-600 shadow-2xl">
@@ -317,13 +294,114 @@ function UnknownRenderer({ item, contentUrl, className }: FileContentRendererPro
 			>
 				Descargar archivo
 			</a>
+			<Button
+				className="absolute top-4 right-4 z-50"
+				size="icon"
+				variant="secondary"
+				onClick={() => setShowInfo(!showInfo)}
+			>
+				<Info className="h-4 w-4" />
+			</Button>
+			{showInfo && <FileInfoPanel item={item} />}
 		</div>
 	);
 }
 
-/**
- * Componente principal que renderiza el contenido según el tipo
- */
+function ImageRenderer(props: FileContentRendererProps) {
+	const [showInfo, setShowInfo] = useState(false);
+
+	return (
+		<>
+			<ImageRendererBase {...props} />
+			<Button
+				className="absolute top-4 right-4 z-50"
+				size="icon"
+				variant="secondary"
+				onClick={() => setShowInfo(!showInfo)}
+			>
+				<Info className="h-4 w-4" />
+			</Button>
+			{showInfo && <FileInfoPanel item={props.item} />}
+		</>
+	);
+}
+
+function VideoRenderer(props: FileContentRendererProps) {
+	const [showInfo, setShowInfo] = useState(false);
+
+	return (
+		<>
+			<VideoRendererBase {...props} />
+			<Button
+				className="absolute top-4 right-4 z-50"
+				size="icon"
+				variant="secondary"
+				onClick={() => setShowInfo(!showInfo)}
+			>
+				<Info className="h-4 w-4" />
+			</Button>
+			{showInfo && <FileInfoPanel item={props.item} />}
+		</>
+	);
+}
+
+function AudioRenderer(props: FileContentRendererProps) {
+	const [showInfo, setShowInfo] = useState(false);
+
+	return (
+		<>
+			<AudioRendererBase {...props} />
+			<Button
+				className="absolute top-4 right-4 z-50"
+				size="icon"
+				variant="secondary"
+				onClick={() => setShowInfo(!showInfo)}
+			>
+				<Info className="h-4 w-4" />
+			</Button>
+			{showInfo && <FileInfoPanel item={props.item} />}
+		</>
+	);
+}
+
+function JsonRenderer(props: FileContentRendererProps) {
+	const [showInfo, setShowInfo] = useState(false);
+
+	return (
+		<>
+			<JsonRendererBase {...props} />
+			<Button
+				className="absolute top-4 right-4 z-50"
+				size="icon"
+				variant="secondary"
+				onClick={() => setShowInfo(!showInfo)}
+			>
+				<Info className="h-4 w-4" />
+			</Button>
+			{showInfo && <FileInfoPanel item={props.item} />}
+		</>
+	);
+}
+
+function File3DRenderer(props: FileContentRendererProps) {
+	const [showInfo, setShowInfo] = useState(false);
+
+	return (
+		<>
+			<File3DRendererBase {...props} />
+			<Button
+				className="absolute top-4 right-4 z-50"
+				size="icon"
+				variant="secondary"
+				onClick={() => setShowInfo(!showInfo)}
+			>
+				<Info className="h-4 w-4" />
+			</Button>
+			{showInfo && <FileInfoPanel item={props.item} />}
+		</>
+	);
+}
+
 function FileContentRendererInner(props: FileContentRendererProps) {
 	const { item, isLoading } = props;
 	const fileType = detectFileType(item);
@@ -358,6 +436,4 @@ function FileContentRendererInner(props: FileContentRendererProps) {
 }
 
 export const FileContentRenderer = memo(FileContentRendererInner);
-
-// Re-export del detector para uso externo
 export { detectFileType };
