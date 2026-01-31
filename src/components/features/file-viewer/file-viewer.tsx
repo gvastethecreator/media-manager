@@ -44,10 +44,8 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	// Custom hooks
 	const {
 		resetView,
-		scale,
-		position,
 		imageContainerRef,
-		handleZoom,
+		contentRef,
 		handleZoomIn,
 		handleZoomOut,
 		handleMouseDown,
@@ -60,6 +58,16 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	useFocusManagement(isOpen, closeButtonRef, dialogRef, triggerRef);
 
 	const { handleCopy, handleDownload } = useToolbarActions(currentImage, urls, setUrls, loadImageUrl);
+
+	// Handler de zoom para teclado - usando DOM directo
+	const handleZoom = useCallback((factor: number) => {
+		if (!contentRef.current) return;
+		const currentTransform = contentRef.current.style.transform;
+		const match = currentTransform.match(/scale\(([^)]+)\)/);
+		const currentScale = match ? Number.parseFloat(match[1]) : 1;
+		const newScale = Math.min(Math.max(0.1, currentScale + factor), 8);
+		contentRef.current.style.transform = currentTransform.replace(/scale\([^)]+\)/, `scale(${newScale})`);
+	}, []);
 
 	const { announceMessage } = useKeyboardNavigation(
 		isOpen,
@@ -293,9 +301,17 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 			<div
 				className="relative flex h-full w-full cursor-grab select-none flex-col items-center justify-center active:cursor-grabbing"
 				onDoubleClick={resetView}
-				onMouseDown={handleMouseDown}
+				onMouseDown={(e) => {
+					// No iniciar drag si el click fue en un elemento con data-no-drag
+					if ((e.target as HTMLElement).closest('[data-no-drag]')) return;
+					handleMouseDown(e);
+				}}
 				onMouseLeave={handleMouseUp}
-				onMouseMove={handleMouseMove}
+				onMouseMove={(e) => {
+					// No mover si estamos sobre un elemento con data-no-drag
+					if ((e.target as HTMLElement).closest('[data-no-drag]')) return;
+					handleMouseMove(e);
+				}}
 				onMouseUp={handleMouseUp}
 				ref={imageContainerRef}
 			>
@@ -368,16 +384,19 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 						</AnimatePresence>
 
 						{!isLoading && currentImage && urls[currentImage.id] && (
-							<FileContentRenderer
-								contentUrl={urls[currentImage.id]}
-								isLoading={false}
-								item={currentImage}
-								onError={() => setIsLoading(false)}
-								onLoad={() => setIsLoading(false)}
-								transformStyle={{
-									transform: `translate(${position.x}px, ${position.y}px) scale(${scale})`,
-								}}
-							/>
+							<div
+								className="absolute inset-0 flex items-center justify-center"
+								ref={contentRef}
+								style={{ transform: 'translate(0px, 0px) scale(1)' }}
+							>
+								<FileContentRenderer
+									contentUrl={urls[currentImage.id]}
+									isLoading={false}
+									item={currentImage}
+									onError={() => setIsLoading(false)}
+									onLoad={() => setIsLoading(false)}
+								/>
+							</div>
 						)}
 
 						{!isLoading && (!currentImage || (currentImage && !urls[currentImage.id])) && (
