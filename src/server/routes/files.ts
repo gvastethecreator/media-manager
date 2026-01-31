@@ -4,6 +4,8 @@
  * ✅ MIGRADO DESDE SERVER ACTIONS - 2025-07-03
  */
 
+import { createReadStream } from 'node:fs';
+import { stat } from 'node:fs/promises';
 import { Effect } from 'effect';
 import express from 'express';
 import { effectHandler } from '@/lib/effect/adapters/express.adapter';
@@ -154,6 +156,49 @@ router.post(
 		})
 	)
 );
+
+/**
+ * GET /api/files/content - Servir contenido de archivo por path
+ * Query params: path (ruta completa del archivo)
+ */
+router.get('/content', async (req, res) => {
+	try {
+		const filePath = req.query.path as string;
+
+		if (!filePath) {
+			res.status(400).json({ error: 'Path query parameter requerido' });
+			return;
+		}
+
+		// Verificar que el archivo existe
+		const fileStat = await stat(filePath);
+
+		if (!fileStat.isFile()) {
+			res.status(404).json({ error: 'No es un archivo válido' });
+			return;
+		}
+
+		// Crear stream de lectura
+		const stream = createReadStream(filePath);
+
+		// Manejar errores del stream
+		stream.on('error', (error: Error) => {
+			logger.error('Error leyendo archivo:', error);
+			if (!res.headersSent) {
+				res.status(500).json({ error: 'Error leyendo archivo' });
+			}
+		});
+
+		// Enviar archivo
+		stream.pipe(res);
+	} catch (error) {
+		logger.error('Error sirviendo archivo:', error);
+		res.status(404).json({
+			error: 'Archivo no encontrado',
+			path: req.query.path,
+		});
+	}
+});
 
 export default router;
 

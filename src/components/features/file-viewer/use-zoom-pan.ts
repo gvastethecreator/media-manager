@@ -1,22 +1,37 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+
+interface ZoomPanState {
+	scale: number;
+	x: number;
+	y: number;
+}
 
 /**
- * 🔍 HOOK: useZoomPan
+ * 🔍 HOOK: useZoomPan (Optimizado - sin re-renders durante interacción)
  *
- * Gestiona zoom y paneo (pan) de la imagen
+ * Gestiona zoom y paneo (pan) usando refs y DOM directo
+ * para evitar re-renders de React durante la interacción
  */
 export function useZoomPan(isOpen: boolean) {
-	const [scale, setScale] = useState(1);
-	const [position, setPosition] = useState({ x: 0, y: 0 });
 	const imageContainerRef = useRef<HTMLDivElement>(null);
+	const contentRef = useRef<HTMLDivElement>(null);
+	const stateRef = useRef<ZoomPanState>({ scale: 1, x: 0, y: 0 });
 	const isDraggingRef = useRef(false);
 	const startPosRef = useRef({ x: 0, y: 0 });
+	const rafRef = useRef<number | null>(null);
 
-	// Resetear estado cuando se abre el visor
-	const resetView = useCallback(() => {
-		setScale(1);
-		setPosition({ x: 0, y: 0 });
+	// Aplicar transformación al DOM sin causar render
+	const applyTransform = useCallback(() => {
+		if (!contentRef.current) return;
+		const { scale, x, y } = stateRef.current;
+		contentRef.current.style.transform = `translate(${x}px, ${y}px) scale(${scale})`;
 	}, []);
+
+	// Resetear vista
+	const resetView = useCallback(() => {
+		stateRef.current = { scale: 1, x: 0, y: 0 };
+		applyTransform();
+	}, [applyTransform]);
 
 	// Reset cuando se abre
 	useEffect(() => {
@@ -25,32 +40,49 @@ export function useZoomPan(isOpen: boolean) {
 		}
 	}, [isOpen, resetView]);
 
-	// Manejar zoom con la rueda - usando WheelEvent nativo
-	const handleWheel = useCallback((e: WheelEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-		const zoomFactor = 0.1;
-		setScale((prevScale) => {
-			const delta = e.deltaY > 0 ? -zoomFactor : zoomFactor;
-			return Math.min(Math.max(0.1, prevScale + prevScale * delta), 8);
-		});
-	}, []);
+	// Manejar zoom con la rueda - usando RAF para suavidad
+	const handleWheel = useCallback(
+		(e: WheelEvent) => {
+			// No hacer zoom si el cursor está sobre un elemento con data-no-drag
+			const target = e.target as HTMLElement;
+			if (target.closest('[data-no-drag]')) return;
 
-	// Función memoizada para cambiar el zoom
-	const handleZoom = useCallback((factor: number) => {
-		setScale((prevScale) => {
+			e.preventDefault();
+			e.stopPropagation();
+
+			if (rafRef.current) {
+				cancelAnimationFrame(rafRef.current);
+			}
+
+			rafRef.current = requestAnimationFrame(() => {
+				const zoomFactor = 0.1;
+				const delta = e.deltaY > 0 ? -zoomFactor : zoomFactor;
+				const prevScale = stateRef.current.scale;
+				const newScale = Math.min(Math.max(0.1, prevScale + prevScale * delta), 8);
+
+				stateRef.current.scale = newScale;
+				applyTransform();
+			});
+		},
+		[applyTransform]
+	);
+
+	// Cambiar zoom programáticamente
+	const handleZoom = useCallback(
+		(factor: number) => {
+			const prevScale = stateRef.current.scale;
 			const newScale = Math.min(Math.max(0.1, prevScale + factor), 8);
-			return newScale;
-		});
-	}, []);
+			stateRef.current.scale = newScale;
+			applyTransform();
+		},
+		[applyTransform]
+	);
 
-	// Funciones memoizadas para los botones de la barra de herramientas
 	const handleZoomIn = useCallback(() => handleZoom(0.2), [handleZoom]);
 	const handleZoomOut = useCallback(() => handleZoom(-0.2), [handleZoom]);
 
-	// Manejar drag con click central o izquierdo
+	// Manejar drag - usando refs, NO state
 	const handleMouseDown = useCallback((e: React.MouseEvent) => {
-		// Click izquierdo (0) o central (1)
 		if (e.button === 0 || e.button === 1) {
 			e.preventDefault();
 			isDraggingRef.current = true;
@@ -58,20 +90,30 @@ export function useZoomPan(isOpen: boolean) {
 		}
 	}, []);
 
-	const handleMouseMove = useCallback((e: React.MouseEvent) => {
-		if (!isDraggingRef.current) return;
-		e.preventDefault();
-		const dx = e.clientX - startPosRef.current.x;
-		const dy = e.clientY - startPosRef.current.y;
-		setPosition((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
-		startPosRef.current = { x: e.clientX, y: e.clientY };
-	}, []);
+	const handleMouseMove = useCallback(
+		(e: React.MouseEvent) => {
+			if (!isDraggingRef.current) return;
+			e.preventDefault();
+
+			const dx = e.clientX - startPosRef.current.x;
+			const dy = e.clientY - startPosRef.current.y;
+
+			stateRef.current.x += dx;
+			stateRef.current.y += dy;
+			startPosRef.current = { x: e.clientX, y: e.clientY };
+
+			// Aplicar directamente sin render de React
+			if (rafRef.current) cancelAnimationFrame(rafRef.current);
+			rafRef.current = requestAnimationFrame(applyTransform);
+		},
+		[applyTransform]
+	);
 
 	const handleMouseUp = useCallback(() => {
 		isDraggingRef.current = false;
 	}, []);
 
-	// Registrar wheel event nativo (passive: false para poder preventDefault)
+	// Registrar wheel event
 	useEffect(() => {
 		const container = imageContainerRef.current;
 		if (!(container && isOpen)) return;
@@ -82,17 +124,25 @@ export function useZoomPan(isOpen: boolean) {
 		};
 	}, [isOpen, handleWheel]);
 
+	// Cleanup RAF
+	useEffect(() => {
+		return () => {
+			if (rafRef.current) cancelAnimationFrame(rafRef.current);
+		};
+	}, []);
+
 	return {
-		scale,
-		position,
+		scale: stateRef.current.scale,
+		position: { x: stateRef.current.x, y: stateRef.current.y },
 		imageContainerRef,
+		contentRef,
 		handleZoom,
 		handleZoomIn,
 		handleZoomOut,
 		resetView,
-		// Mouse handlers para drag
 		handleMouseDown,
 		handleMouseMove,
 		handleMouseUp,
+		applyTransform,
 	};
 }
