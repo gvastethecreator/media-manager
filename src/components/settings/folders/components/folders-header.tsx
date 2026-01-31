@@ -1,7 +1,7 @@
 import { Grid3x3, List, RefreshCw, Settings as SettingsIcon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
-import { Switch } from '@/components/ui/switch';
+import { Switch } from '@/components/ui/switch-v3';
 import { cn } from '@/lib/utils';
 import { GlobalReindexProgress } from './global-reindex-progress';
 

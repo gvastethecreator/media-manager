@@ -408,6 +408,8 @@ export function OrganizationSettingsModern() {
 						</DialogContent>
 					</Dialog>
 				);
+			default:
+				return null;
 		}
 	};
 

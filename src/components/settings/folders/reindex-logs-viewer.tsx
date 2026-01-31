@@ -173,7 +173,7 @@ export default function ReindexLogsViewer() {
 	return (
 		<div className="space-y-6">
 			{/* Header con estadísticas */}
-			<div className="rounded-lg border border-border bg-card p-6">
+			<div className="rounded-lg border border-border bg-card p-4">
 				<div className="mb-4 flex items-center justify-between">
 					<div className="flex items-center gap-2">
 						<FileText className="h-6 w-6 text-primary" />
@@ -294,7 +294,7 @@ export default function ReindexLogsViewer() {
 				</div>
 
 				{/* Content */}
-				<div className="p-6">
+				<div className="p-4">
 					{currentQuery.isLoading && (
 						<div className="flex items-center justify-center py-8">
 							<RefreshCw className="h-6 w-6 animate-spin text-primary" />
