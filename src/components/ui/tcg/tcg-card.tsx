@@ -53,30 +53,30 @@ export interface TCGCardProps extends React.HTMLAttributes<HTMLDivElement> {
  */
 const RARITY_EFFECTS: Record<TCGCardRarity, { glow: string; borderWidth: string; animation?: string }> = {
 	common: {
-		glow: '0 0 20px var(--glow-color, rgba(200,200,200,0.3))',
+		glow: 'var(--tcg-glow-1)',
 		borderWidth: '2px',
 	},
 	uncommon: {
-		glow: '0 0 30px var(--glow-color, rgba(100,200,100,0.4))',
+		glow: 'var(--tcg-glow-2)',
 		borderWidth: '2px',
 	},
 	rare: {
-		glow: '0 0 40px var(--glow-color, rgba(100,150,255,0.5))',
+		glow: 'var(--tcg-glow-3)',
 		borderWidth: '3px',
 		animation: 'tcg-shimmer 3s ease-in-out infinite',
 	},
 	epic: {
-		glow: '0 0 50px var(--glow-color, rgba(200,100,255,0.6))',
+		glow: 'var(--tcg-glow-4)',
 		borderWidth: '3px',
 		animation: 'tcg-shimmer 2s ease-in-out infinite',
 	},
 	legendary: {
-		glow: '0 0 60px var(--glow-color, rgba(255,200,50,0.7))',
+		glow: 'var(--tcg-glow-5)',
 		borderWidth: '4px',
 		animation: 'tcg-legendary-glow 2s ease-in-out infinite',
 	},
 	mythic: {
-		glow: '0 0 80px var(--glow-color, rgba(255,50,100,0.8))',
+		glow: 'var(--tcg-glow-6)',
 		borderWidth: '4px',
 		animation: 'tcg-mythic-shimmer 1.5s ease-in-out infinite',
 	},

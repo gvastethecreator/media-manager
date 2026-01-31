@@ -174,8 +174,8 @@ const FolderThumbnail = memo(({ folderStats, isCompact = false, isLoading = fals
 	return (
 		<div
 			className={cn(
-				'flex shrink-0 items-center justify-center border-2 border-dashed transition-all duration-300',
-				'border-muted-foreground/20 bg-muted/30 hover:scale-105 hover:border-muted-foreground/40 hover:bg-muted/50',
+				'flex shrink-0 items-center justify-center border border-dashed transition-all duration-300',
+				'border-border/40 bg-muted/30 hover:scale-105 hover:border-border/60 hover:bg-muted/50',
 				size
 			)}
 		>
@@ -352,22 +352,19 @@ export const FolderCard = memo(
 			<div>
 				<div
 					className={cn(
-						'group overflow-hiddenborder-2 relative h-full transition-all duration-300 ease-out',
-						// Padding adaptativo según el modo
-						isFocusedMode ? 'p-6' : 'p-3',
-						'border-border/60 bg-gradient-to-br from-card to-card/95 shadow-sm',
+						'group relative h-full overflow-hidden transition-all duration-300 ease-out',
+						// Padding adaptativo según el modo - más compacto
+						isFocusedMode ? 'p-4' : 'p-2.5',
+						'border border-border/40 bg-gradient-to-br from-card to-card/95 shadow-sm',
 						// Hover effects con animaciones suaves
 						'hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg hover:shadow-primary/10',
-						// Estados visuales con mejor destacado en modo focused y transiciones
+						// Estados visuales con bordes suaves y transiciones
 						{
-							'translate-y-0 border-primary/30 shadow-lg shadow-primary/10 ring-2 ring-primary/20': isSelected,
-							'border-ui-success-border shadow-lg shadow-ui-success ring-2 ring-ui-success-border':
-								showCompleteAnimation,
-							'scale-[1.02] border-ui-info-border shadow-ui-info shadow-xl ring-4 ring-ui-info-border':
-								isReindexing && isFocusedMode,
-							'border-ui-info-border shadow-md shadow-ui-info ring-2 ring-ui-info-border':
-								isReindexing && !isFocusedMode,
-							'border-destructive/30 shadow-destructive/10 shadow-lg ring-2 ring-destructive/20': hasError,
+							'translate-y-0 border-primary/40 shadow-md shadow-primary/5': isSelected,
+							'border-success/40 shadow-md shadow-success/5': showCompleteAnimation,
+							'scale-[1.01] border-info/50 shadow-info/5 shadow-lg': isReindexing && isFocusedMode,
+							'border-info/40 shadow-info/5 shadow-md': isReindexing && !isFocusedMode,
+							'border-destructive/40 shadow-destructive/5 shadow-md': hasError,
 						}
 					)}
 				>

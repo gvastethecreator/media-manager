@@ -107,16 +107,38 @@ export function EntityCardTransition({
 				className={cn(
 					'entity-type-indicator absolute top-2 left-2 z-10',
 					'h-2 w-2 rounded-full',
-					entityType === 'folder' && 'bg-yellow-500',
-					entityType === 'image' && 'bg-blue-500',
-					entityType === 'video' && 'bg-red-500',
-					entityType === 'audio' && 'bg-purple-500',
-					entityType === 'document' && 'bg-gray-500',
-					entityType === 'tag' && 'bg-green-500',
-					entityType === 'character' && 'bg-pink-500',
-					entityType === 'collection' && 'bg-indigo-500',
-					entityType === 'album' && 'bg-orange-500'
+					entityType === 'folder' && 'bg-entity-folder',
+					entityType === 'image' && 'bg-entity-image',
+					entityType === 'video' && 'bg-entity-video',
+					entityType === 'audio' && 'bg-entity-audio',
+					entityType === 'document' && 'bg-entity-document',
+					entityType === 'tag' && 'bg-entity-tag',
+					entityType === 'character' && 'bg-entity-character',
+					entityType === 'collection' && 'bg-entity-collection',
+					entityType === 'album' && 'bg-entity-album'
 				)}
+				style={{
+					backgroundColor:
+						entityType === 'folder'
+							? 'var(--entity-folder)'
+							: entityType === 'image'
+								? 'var(--entity-image)'
+								: entityType === 'video'
+									? 'var(--entity-video)'
+									: entityType === 'audio'
+										? 'var(--entity-audio)'
+										: entityType === 'document'
+											? 'var(--entity-document)'
+											: entityType === 'tag'
+												? 'var(--entity-tag)'
+												: entityType === 'character'
+													? 'var(--entity-character)'
+													: entityType === 'collection'
+														? 'var(--entity-collection)'
+														: entityType === 'album'
+															? 'var(--entity-album)'
+															: undefined,
+				}}
 			/>
 
 			{children}
