@@ -164,7 +164,7 @@ function layoutNodes(
 }
 
 export function JsonFlowViewer({ content, fileName, className }: JsonFlowViewerProps) {
-	const [activeTab, setActiveTab] = useState('diagram');
+	const [activeTab, setActiveTab] = useState('code');
 	const [copied, setCopied] = useState(false);
 
 	const parsedJson = useMemo(() => {
@@ -245,13 +245,13 @@ export function JsonFlowViewer({ content, fileName, className }: JsonFlowViewerP
 			{/* Tabs */}
 			<Tabs className="flex min-h-0 flex-1 flex-col" onValueChange={setActiveTab} value={activeTab}>
 				<TabsList className="mx-4 mt-2 shrink-0">
-					<TabsTrigger className="flex items-center gap-2 text-xs" value="diagram">
-						<FolderTree className="h-3 w-3" />
-						Diagrama
-					</TabsTrigger>
 					<TabsTrigger className="flex items-center gap-2 text-xs" value="code">
 						<Code2 className="h-3 w-3" />
 						JSON
+					</TabsTrigger>
+					<TabsTrigger className="flex items-center gap-2 text-xs" value="diagram">
+						<FolderTree className="h-3 w-3" />
+						Diagrama
 					</TabsTrigger>
 				</TabsList>
 

@@ -30,26 +30,22 @@ interface NavPanelTransitionProps {
 
 /**
  * Panel de navegación con transiciones fluidas
+ * NOTA: El ancho es controlado por react-resizable-panels, no por CSS
  */
-export function NavPanelTransition({
-	isExpanded,
-	isAnimating,
-	children,
-	expandedWidth = '280px',
-	collapsedWidth = '48px',
-}: NavPanelTransitionProps) {
+export function NavPanelTransition({ isExpanded, isAnimating, children }: NavPanelTransitionProps) {
 	return (
 		<FlipContainer
-			className={cn('nav-panel-transition h-full', 'flex flex-col', 'overflow-hidden', isAnimating && 'animating')}
+			className={cn(
+				'nav-panel-transition h-full w-full',
+				'flex flex-col',
+				'overflow-hidden',
+				isAnimating && 'animating'
+			)}
 			flipId="nav-panel"
 			options={{
 				duration: 350,
 				easing: customEasings.slideSmooth,
 				animateBorderRadius: true,
-			}}
-			style={{
-				width: isExpanded ? expandedWidth : collapsedWidth,
-				transition: isAnimating ? undefined : 'none',
 			}}
 		>
 			{children}
@@ -107,11 +103,7 @@ export function DetailsPanelTransition({
 
 	return (
 		<div
-			className={cn(
-				'details-panel-transition flex h-full flex-col',
-				'border-border border-l bg-background',
-				isAnimating && 'animating'
-			)}
+			className={cn('details-panel-transition flex h-full flex-col', 'bg-background', isAnimating && 'animating')}
 			ref={ref as React.RefObject<HTMLDivElement>}
 		>
 			{header && <div className="details-panel-header flex-shrink-0 border-border border-b p-4">{header}</div>}

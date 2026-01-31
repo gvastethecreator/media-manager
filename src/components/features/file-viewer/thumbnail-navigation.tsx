@@ -12,12 +12,12 @@ export const ThumbnailNavigation = memo(function ThumbnailNavigationImpl({
 	currentIndex: number;
 	onSelectImage: (index: number) => void;
 }) {
-	// Mostrar anteriores 5 y siguientes 5 (±5), sin duplicados, con wrap-around
+	// Mostrar anteriores 7 y siguientes 7 (±7), sin duplicados, con wrap-around
 	const visibleThumbnails = useMemo(() => {
 		const out: { image: ImageItem; isActive: boolean; index: number }[] = [];
 		const n = images.length;
 		if (n === 0) return out;
-		const maxEachSide = 5;
+		const maxEachSide = 7;
 		const seen = new Set<number>();
 		for (let o = -maxEachSide; o <= maxEachSide; o++) {
 			let idx = (currentIndex + o) % n;
@@ -30,9 +30,9 @@ export const ThumbnailNavigation = memo(function ThumbnailNavigationImpl({
 	}, [images, currentIndex]);
 
 	return (
-		<div className="fixed bottom-8 left-1/2 z-[10000] flex -translate-x-1/2 items-center justify-center">
+		<div className="fixed bottom-6 left-1/2 z-[10000] flex w-full max-w-4xl -translate-x-1/2 items-center justify-center px-4">
 			<motion.div
-				className="flex items-center gap-2 rounded-full border border-border/40 bg-muted/50 p-2 shadow-xl backdrop-blur-md"
+				className="scrollbar-hide flex w-full items-center justify-center gap-2 overflow-x-auto rounded-full border border-border/40 bg-background/60 p-2 shadow-xl backdrop-blur-md"
 				layout
 			>
 				{visibleThumbnails.map(({ image, isActive, index }) => (
