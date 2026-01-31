@@ -47,8 +47,8 @@ function FavoriteIndicator({ isFavorite, tcgMode }: { isFavorite: boolean; tcgMo
 		<div
 			className={cn('flex items-center gap-1 rounded-sm bg-muted/10 px-2 py-1', tcgMode && 'border border-red-900/20')}
 			style={{
-				color: 'rgb(239, 68, 68)',
-				boxShadow: tcgMode ? '0 0 5px rgba(239, 68, 68, 0.3)' : 'none',
+				color: 'var(--ui-error-text)',
+				boxShadow: tcgMode ? '0 0 5px color-mix(in oklch, var(--ui-error-text), transparent 70%)' : 'none',
 			}}
 		>
 			<Heart className="h-4 w-4 fill-current" />

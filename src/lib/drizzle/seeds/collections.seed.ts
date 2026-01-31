@@ -6,6 +6,10 @@ import { seedLogger } from './index';
 /**
  * Siembra colecciones con IDs legibles
  * Formato: collection-nombre-01, collection-nombre-02, etc.
+ *
+ * NOTA: Los colores hex en este archivo son datos de prueba para inicializar la DB.
+ * No se usan directamente en la UI de producción - la UI usa tokens CSS
+ * definidos en src/styles/tokens.css y src/styles/design-tokens.css.
  */
 export async function seedCollections(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('📚 Creando colecciones de prueba...');

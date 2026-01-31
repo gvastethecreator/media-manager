@@ -70,21 +70,20 @@ export function CharacterCardFooter({
 		return RARITY_NAMES[threshold];
 	};
 
-	// Determinar el color de rareza
 	const getRarityColor = (level: number) => {
 		if (level >= 9) {
-			return 'rgb(255, 100, 255)'; // Mítico
+			return 'var(--rarity-mythic)';
 		}
 		if (level >= 7) {
-			return 'rgb(255, 128, 0)'; // Legendario
+			return 'var(--rarity-legendary)';
 		}
 		if (level >= 5) {
-			return 'rgb(163, 53, 238)'; // Épico
+			return 'var(--rarity-epic)';
 		}
 		if (level >= 3) {
-			return 'rgb(0, 112, 221)'; // Raro
+			return 'var(--rarity-rare)';
 		}
-		return 'rgb(30, 255, 0)'; // Común
+		return 'var(--rarity-common)';
 	};
 
 	// Calcular estrellas de rareza (1-5)

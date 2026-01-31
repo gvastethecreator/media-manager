@@ -9,7 +9,7 @@ import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { eq } from 'drizzle-orm';
 import { db } from '@/lib/drizzle';
-import { audios, documents, file3Ds, images, jsonFiles, metadatas, videos } from '@/lib/drizzle/schema';
+import { audios, documents, file3Ds, images, jsonFiles, videos } from '@/lib/drizzle/schema';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { generateAndSaveWaveform } from '@/lib/utils/audio/waveform-generator';
 import { generateStaticVideoThumbnailFFmpeg } from '@/lib/utils/video/ffmpeg-thumbnails';
@@ -191,15 +191,21 @@ class ThumbnailUnifiedService {
 				}
 
 				case 'document': {
-					const meta = await db.query.metadatas.findFirst({
-						where: eq(metadatas.id, `${entityId}-thumbnail`),
-						columns: { value: true, updatedAt: true },
+					const document = await db.query.documents.findFirst({
+						where: eq(documents.id, entityId),
+						columns: {
+							thumbnail: true,
+							thumbnailWidth: true,
+							thumbnailHeight: true,
+							thumbnailMimeType: true,
+						},
 					});
 					return {
-						hasThumbnail: !!meta?.value,
-						mimeType: 'image/svg+xml',
+						hasThumbnail: !!document?.thumbnail,
+						width: document?.thumbnailWidth || DEFAULT_DIMENSIONS.document.width,
+						height: document?.thumbnailHeight || DEFAULT_DIMENSIONS.document.height,
+						mimeType: document?.thumbnailMimeType || 'image/svg+xml',
 						url: `/api/thumbnails/unified/document/${entityId}`,
-						generatedAt: meta?.updatedAt || undefined,
 					};
 				}
 
@@ -365,18 +371,23 @@ class ThumbnailUnifiedService {
 			}
 
 			case 'document': {
-				const meta = await db.query.metadatas.findFirst({
-					where: eq(metadatas.id, `${entityId}-thumbnail`),
-					columns: { value: true },
+				const document = await db.query.documents.findFirst({
+					where: eq(documents.id, entityId),
+					columns: {
+						thumbnail: true,
+						thumbnailWidth: true,
+						thumbnailHeight: true,
+						thumbnailMimeType: true,
+					},
 				});
 
-				if (meta?.value) {
+				if (document?.thumbnail) {
 					return {
 						success: true,
-						data: Buffer.from(meta.value, 'base64'),
-						mimeType: 'image/svg+xml',
-						width: DEFAULT_DIMENSIONS.document.width,
-						height: DEFAULT_DIMENSIONS.document.height,
+						data: Buffer.from(document.thumbnail, 'base64'),
+						mimeType: document.thumbnailMimeType || 'image/svg+xml',
+						width: document.thumbnailWidth || DEFAULT_DIMENSIONS.document.width,
+						height: document.thumbnailHeight || DEFAULT_DIMENSIONS.document.height,
 					};
 				}
 				return { success: false };
@@ -621,26 +632,18 @@ class ThumbnailUnifiedService {
 			const svg = this.createDocumentSVG(document.name, document.pageCount, document.wordCount);
 			const svgBase64 = Buffer.from(svg).toString('base64');
 
-			// Guardar en metadatas
+			// Guardar en tabla documents
 			await db
-				.insert(metadatas)
-				.values({
-					id: `${entityId}-thumbnail`,
-					entityType: 'document',
-					entityId,
-					key: 'thumbnail',
-					value: svgBase64,
-					type: 'base64',
-					category: 'preview',
-					description: 'Document thumbnail preview',
+				.update(documents)
+				.set({
+					thumbnail: svgBase64,
+					thumbnailSize: svgBase64.length,
+					thumbnailWidth: DEFAULT_DIMENSIONS.document.width,
+					thumbnailHeight: DEFAULT_DIMENSIONS.document.height,
+					thumbnailMimeType: 'image/svg+xml',
+					updatedAt: new Date(),
 				})
-				.onConflictDoUpdate({
-					target: metadatas.id,
-					set: {
-						value: svgBase64,
-						updatedAt: new Date(),
-					},
-				});
+				.where(eq(documents.id, entityId));
 
 			return {
 				success: true,

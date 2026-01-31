@@ -323,7 +323,7 @@ export function FoldersTable({
 					<TableBody>
 						{rows.length === 0 ? (
 							<TableRow>
-								<TableCell className="py-12 text-center text-muted-foreground" colSpan={4}>
+								<TableCell className="py-6 text-center text-muted-foreground" colSpan={4}>
 									{filterText || filterStatus !== 'all' ? (
 										<div className="space-y-4">
 											<Folder className="mx-auto h-12 w-12 text-muted-foreground/30" />

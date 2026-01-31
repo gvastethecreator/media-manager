@@ -536,7 +536,7 @@ export function ReindexTerminal({
 			{/* Terminal con soporte para sticky logs */}
 			<div className="relative flex-1 overflow-y-auto rounded-sm border border-border/40 bg-background shadow-inner">
 				{logs.length === 0 ? (
-					<div className="flex items-center justify-center p-8 text-muted-foreground/40">
+					<div className="flex items-center justify-center p-4 text-muted-foreground/40">
 						<Terminal className="mr-3 h-5 w-5" />
 						<span className="font-mono text-sm">Esperando logs...</span>
 					</div>

@@ -106,10 +106,13 @@ function AlbumCard({ album, actions, isGrid }: { album: AlbumWithStats; actions:
 					</div>
 					{album.isFavorite && (
 						<div className="absolute top-2 right-2">
-							<Star className="h-4 w-4 fill-amber-400 text-amber-400" />
+							<Star className="h-4 w-4" style={{ fill: 'var(--entity-favorite)', color: 'var(--entity-favorite)' }} />
 						</div>
 					)}
-					<div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+					<div
+						className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 transition-opacity group-hover:opacity-100"
+						style={{ backgroundColor: 'color-mix(in oklch, var(--background) 50%, transparent)' }}
+					>
 						<Button onClick={actions.onEdit} size="sm" variant="secondary">
 							<Edit2 className="h-4 w-4" />
 						</Button>
@@ -147,7 +150,9 @@ function AlbumCard({ album, actions, isGrid }: { album: AlbumWithStats; actions:
 				<div>
 					<p className="flex items-center gap-2 font-medium">
 						{album.name}
-						{album.isFavorite && <Star className="h-3 w-3 fill-amber-400 text-amber-400" />}
+						{album.isFavorite && (
+							<Star className="h-3 w-3" style={{ fill: 'var(--entity-favorite)', color: 'var(--entity-favorite)' }} />
+						)}
 					</p>
 					{album.description && <p className="text-muted-foreground text-sm">{album.description}</p>}
 				</div>
@@ -537,7 +542,7 @@ function EntityList({
 
 	if (isLoading) {
 		return (
-			<div className="flex items-center justify-center p-12">
+			<div className="flex items-center justify-center p-6">
 				<div className="h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
 			</div>
 		);
@@ -548,7 +553,11 @@ function EntityList({
 			{/* Stats */}
 			<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 				{statsData.map((stat: any) => (
-					<Card className="border-l-4" key={stat.key} style={{ borderLeftColor: stat.color }}>
+					<Card
+						className="border-l-4"
+						key={stat.key}
+						style={{ borderLeftColor: `color-mix(in oklch, ${stat.color} 60%, transparent)` }}
+					>
 						<CardContent className="p-4">
 							<div className="flex items-center justify-between">
 								<div>
@@ -558,7 +567,7 @@ function EntityList({
 								</div>
 								<div
 									className="flex h-10 w-10 items-center justify-center rounded-lg"
-									style={{ backgroundColor: `${stat.color}20` }}
+									style={{ backgroundColor: `color-mix(in oklch, ${stat.color} 12%, transparent)` }}
 								>
 									<div style={{ color: stat.color }}>{stat.icon}</div>
 								</div>
@@ -636,7 +645,7 @@ function EntityList({
 
 function EmptyState({ title, description, action }: { title: string; description: string; action?: React.ReactNode }) {
 	return (
-		<div className="flex flex-col items-center justify-center py-12 text-center">
+		<div className="flex flex-col items-center justify-center py-6 text-center">
 			<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
 				<Album className="h-6 w-6 text-muted-foreground" />
 			</div>

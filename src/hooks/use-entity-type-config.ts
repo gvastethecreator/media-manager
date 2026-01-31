@@ -118,9 +118,9 @@ export function useEntityTypeFromItem(item: AnyEntityWithStats | null) {
 			return {
 				type: null,
 				config: null,
-				color: '#6b7280',
+				color: 'var(--dt-neutral-500)',
 				secondaryColor: undefined,
-				icon: getEntityTypeIcon(EntityStatsType.IMAGE), // Fallback
+				icon: getEntityTypeIcon(EntityStatsType.IMAGE),
 				displayName: 'Elemento',
 				displayNamePlural: 'Elementos',
 				emoji: '📄',

@@ -20,28 +20,33 @@ const statCardVariants = cva(
 		variants: {
 			variant: {
 				default: 'border-border/30 bg-card/80 hover:bg-card/95',
-				blue: 'border-blue-500/30 bg-linear-to-br from-blue-500/10 to-blue-600/20 hover:from-blue-500/20 hover:to-blue-600/30',
-				purple:
-					'border-purple-500/30 bg-linear-to-br from-purple-500/10 to-purple-600/20 hover:from-purple-500/20 hover:to-purple-600/30',
-				green:
-					'border-green-500/30 bg-linear-to-br from-green-500/10 to-green-600/20 hover:from-green-500/20 hover:to-green-600/30',
-				orange:
-					'border-orange-500/30 bg-linear-to-br from-orange-500/10 to-orange-600/20 hover:from-orange-500/20 hover:to-orange-600/30',
-				yellow:
-					'border-yellow-500/30 bg-linear-to-br from-yellow-500/10 to-yellow-600/20 hover:from-yellow-500/20 hover:to-yellow-600/30',
-				indigo:
-					'border-indigo-500/30 bg-linear-to-br from-indigo-500/10 to-indigo-600/20 hover:from-indigo-500/20 hover:to-indigo-600/30',
-				cyan: 'border-cyan-500/30 bg-linear-to-br from-cyan-500/10 to-cyan-600/20 hover:from-cyan-500/20 hover:to-cyan-600/30',
-				amber:
-					'border-amber-500/30 bg-linear-to-br from-amber-500/10 to-amber-600/20 hover:from-amber-500/20 hover:to-amber-600/30',
-				teal: 'border-teal-500/30 bg-linear-to-br from-teal-500/10 to-teal-600/20 hover:from-teal-500/20 hover:to-teal-600/30',
-				rose: 'border-rose-500/30 bg-linear-to-br from-rose-500/10 to-rose-600/20 hover:from-rose-500/20 hover:to-rose-600/30',
-				emerald:
-					'border-emerald-500/30 bg-linear-to-br from-emerald-500/10 to-emerald-600/20 hover:from-emerald-500/20 hover:to-emerald-600/30',
-				violet:
-					'border-violet-500/30 bg-linear-to-br from-violet-500/10 to-violet-600/20 hover:from-violet-500/20 hover:to-violet-600/30',
-				slate:
-					'border-slate-500/30 bg-linear-to-br from-slate-500/10 to-slate-600/20 hover:from-slate-500/20 hover:to-slate-600/30',
+				primary:
+					'border-primary/30 bg-linear-to-br from-primary/10 to-primary/20 hover:from-primary/20 hover:to-primary/30',
+				secondary:
+					'border-secondary/30 bg-linear-to-br from-secondary/10 to-secondary/20 hover:from-secondary/20 hover:to-secondary/30',
+				success:
+					'border-success/30 bg-linear-to-br from-success/10 to-success/20 hover:from-success/20 hover:to-success/30',
+				warning:
+					'border-warning/30 bg-linear-to-br from-warning/10 to-warning/20 hover:from-warning/20 hover:to-warning/30',
+				destructive:
+					'border-destructive/30 bg-linear-to-br from-destructive/10 to-destructive/20 hover:from-destructive/20 hover:to-destructive/30',
+				info: 'border-info/30 bg-linear-to-br from-info/10 to-info/20 hover:from-info/20 hover:to-info/30',
+				accent: 'border-accent/30 bg-linear-to-br from-accent/10 to-accent/20 hover:from-accent/20 hover:to-accent/30',
+				muted: 'border-muted/30 bg-linear-to-br from-muted/10 to-muted/20 hover:from-muted/20 hover:to-muted/30',
+				image:
+					'border-[var(--entity-image)]/30 bg-linear-to-br from-[var(--entity-image)]/10 to-[var(--entity-image)]/20',
+				video:
+					'border-[var(--entity-video)]/30 bg-linear-to-br from-[var(--entity-video)]/10 to-[var(--entity-video)]/20',
+				folder:
+					'border-[var(--entity-folder)]/30 bg-linear-to-br from-[var(--entity-folder)]/10 to-[var(--entity-folder)]/20',
+				album:
+					'border-[var(--entity-album)]/30 bg-linear-to-br from-[var(--entity-album)]/10 to-[var(--entity-album)]/20',
+				collection:
+					'border-[var(--entity-collection)]/30 bg-linear-to-br from-[var(--entity-collection)]/10 to-[var(--entity-collection)]/20',
+				character:
+					'border-[var(--entity-character)]/30 bg-linear-to-br from-[var(--entity-character)]/10 to-[var(--entity-character)]/20',
+				place:
+					'border-[var(--entity-place)]/30 bg-linear-to-br from-[var(--entity-place)]/10 to-[var(--entity-place)]/20',
 			},
 			size: {
 				sm: 'p-2',
@@ -58,36 +63,40 @@ const statCardVariants = cva(
 
 const iconColorMap: Record<string, string> = {
 	default: 'text-foreground',
-	blue: 'text-ui-info-text',
-	purple: 'text-entity-character',
-	green: 'text-ui-success-text',
-	orange: 'text-ui-warning-text',
-	yellow: 'text-ui-warning-text',
-	indigo: 'text-entity-file-3d',
-	cyan: 'text-entity-collection',
-	amber: 'text-ui-warning-text',
-	teal: 'text-entity-group',
-	rose: 'text-ui-error-text',
-	emerald: 'text-ui-success-text',
-	violet: 'text-entity-album',
-	slate: 'text-muted-foreground',
+	primary: 'text-primary',
+	secondary: 'text-secondary',
+	success: 'text-success',
+	warning: 'text-warning',
+	destructive: 'text-destructive',
+	info: 'text-info',
+	accent: 'text-accent',
+	muted: 'text-muted-foreground',
+	image: 'text-[var(--entity-image)]',
+	video: 'text-[var(--entity-video)]',
+	folder: 'text-[var(--entity-folder)]',
+	album: 'text-[var(--entity-album)]',
+	collection: 'text-[var(--entity-collection)]',
+	character: 'text-[var(--entity-character)]',
+	place: 'text-[var(--entity-place)]',
 };
 
 const subtitleColorMap: Record<string, string> = {
 	default: 'text-muted-foreground',
-	blue: 'text-ui-info-text/70',
-	purple: 'text-entity-character/70',
-	green: 'text-ui-success-text/70',
-	orange: 'text-ui-warning-text/70',
-	yellow: 'text-ui-warning-text/70',
-	indigo: 'text-entity-file-3d/70',
-	cyan: 'text-entity-collection/70',
-	amber: 'text-ui-warning-text/70',
-	teal: 'text-entity-group/70',
-	rose: 'text-ui-error-text/70',
-	emerald: 'text-ui-success-text/70',
-	violet: 'text-entity-album/70',
-	slate: 'text-muted-foreground/70',
+	primary: 'text-primary/70',
+	secondary: 'text-secondary/70',
+	success: 'text-success/70',
+	warning: 'text-warning/70',
+	destructive: 'text-destructive/70',
+	info: 'text-info/70',
+	accent: 'text-accent/70',
+	muted: 'text-muted-foreground/70',
+	image: 'text-[var(--entity-image)]/70',
+	video: 'text-[var(--entity-video)]/70',
+	folder: 'text-[var(--entity-folder)]/70',
+	album: 'text-[var(--entity-album)]/70',
+	collection: 'text-[var(--entity-collection)]/70',
+	character: 'text-[var(--entity-character)]/70',
+	place: 'text-[var(--entity-place)]/70',
 };
 
 /* =====================================================

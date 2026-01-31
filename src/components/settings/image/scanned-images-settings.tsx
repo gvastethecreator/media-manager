@@ -98,7 +98,7 @@ export function ScannedImagesSettings() {
 					) : error ? (
 						<div className="p-4 text-center text-destructive text-sm">Error al cargar imágenes: {error.message}</div>
 					) : images.length === 0 ? (
-						<div className="py-12 text-center text-muted-foreground">
+						<div className="py-6 text-center text-muted-foreground">
 							<div className="mb-2 flex justify-center">
 								<ImageIcon className="h-10 w-10 opacity-20" />
 							</div>

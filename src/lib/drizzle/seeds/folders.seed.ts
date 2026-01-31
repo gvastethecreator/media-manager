@@ -4,6 +4,10 @@ import { seedLogger } from './index';
 
 /**
  * Siembra las carpetas por defecto en la base de datos con Drizzle
+ *
+ * NOTA: Los colores hex en este archivo son datos de prueba para inicializar la DB.
+ * No se usan directamente en la UI de producción - la UI usa tokens CSS
+ * definidos en src/styles/tokens.css y src/styles/design-tokens.css.
  */
 export async function seedFolders(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('📁 Creando carpetas por defecto...');
