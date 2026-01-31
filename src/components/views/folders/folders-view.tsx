@@ -1,7 +1,8 @@
-import { RefreshCw } from 'lucide-react';
+import { FolderOpen, RefreshCw } from 'lucide-react';
 import { useCallback, useMemo, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { FolderCard } from '@/components/cards/folder-card/folder-card';
+import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';
 import { useCreateFolder, useFolders } from '@/lib/api/folders';
@@ -87,18 +88,35 @@ export default function FoldersView({ className = '' }: FoldersViewProps) {
 		);
 	}
 
+	// Estado vacío: no hay carpetas
+	if (!isLoading && allFolders.length === 0) {
+		return (
+			<EmptyState
+				description="No tienes carpetas configuradas. Agrega una carpeta para comenzar a organizar tus archivos."
+				icon={FolderOpen}
+				title="Sin carpetas"
+			/>
+		);
+	}
+
 	return (
-		<div className={`flex h-full flex-col overflow-auto ${className}`}>
-			<div className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
+		<div aria-label="Lista de carpetas" className={`flex h-full flex-col overflow-auto ${className}`} role="region">
+			<div
+				aria-label={`${allFolders.length} carpetas encontradas`}
+				className="grid grid-cols-2 gap-3 p-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5"
+				role="list"
+			>
 				{allFolders.map((folder) => (
-					<FolderCard
-						className="h-full"
-						folder={folder}
-						interactive={true}
-						key={folder.id}
-						onClick={folderClickHandlers.get(folder.id)}
-						tcgMode={false}
-					/>
+					<div key={folder.id} role="listitem">
+						<FolderCard
+							aria-label={`Carpeta: ${folder.name}`}
+							className="h-full"
+							folder={folder}
+							interactive={true}
+							onClick={folderClickHandlers.get(folder.id)}
+							tcgMode={false}
+						/>
+					</div>
 				))}
 			</div>
 		</div>

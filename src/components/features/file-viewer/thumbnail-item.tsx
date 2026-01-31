@@ -1,10 +1,100 @@
-import { Image as ImageIcon } from 'lucide-react';
+import { Box, File, FileJson, FileText, Image as ImageIcon, Music, Video } from 'lucide-react';
 import { memo, useEffect, useMemo, useState } from 'react';
 import { motion } from '@/components/ui/animejs-shim';
 import { cn } from '@/lib/utils';
-import { useImageResources } from '@/store/image-resources.store';
 import type { ImageItem } from './file-viewer.types';
 import { isValidSrc, THUMBNAIL_SIZES } from './file-viewer.types';
+
+/**
+ * Detecta el tipo de archivo basado en mimeType, type, o extensión
+ */
+function detectFileType(item: ImageItem): 'image' | 'video' | 'audio' | 'document' | 'json' | 'file3d' | 'unknown' {
+	const mimeType = item.mimeType?.toLowerCase() || '';
+	const type = item.type?.toLowerCase() || '';
+	const ext = item.name?.toLowerCase().split('.').pop() || '';
+
+	if (mimeType.startsWith('image/')) return 'image';
+	if (mimeType.startsWith('video/')) return 'video';
+	if (mimeType.startsWith('audio/')) return 'audio';
+	if (mimeType.includes('pdf') || mimeType.includes('document') || mimeType.includes('text')) return 'document';
+	if (mimeType.includes('json')) return 'json';
+	if (mimeType.includes('model') || mimeType.includes('gltf') || mimeType.includes('obj')) return 'file3d';
+
+	if (type === 'image') return 'image';
+	if (type === 'video') return 'video';
+	if (type === 'audio') return 'audio';
+	if (type === 'document') return 'document';
+	if (type === 'json' || type === 'jsonfile') return 'json';
+	if (type === 'file3d' || type === '3d') return 'file3d';
+
+	const imageExts = ['jpg', 'jpeg', 'png', 'gif', 'webp', 'avif', 'bmp', 'tiff', 'tif', 'svg', 'ico'];
+	const videoExts = ['mp4', 'webm', 'avi', 'mov', 'mkv', 'flv', 'wmv', 'm4v', 'mpg', 'mpeg', '3gp'];
+	const audioExts = ['mp3', 'wav', 'flac', 'aac', 'ogg', 'wma', 'm4a', 'opus', 'aiff'];
+	const docExts = ['pdf', 'doc', 'docx', 'txt', 'md', 'rtf', 'odt', 'pages', 'epub', 'mobi'];
+	const jsonExts = ['json'];
+	const file3dExts = ['obj', 'fbx', 'gltf', 'glb', 'dae', '3ds', 'blend', 'stl', 'ply', 'x3d'];
+
+	if (imageExts.includes(ext)) return 'image';
+	if (videoExts.includes(ext)) return 'video';
+	if (audioExts.includes(ext)) return 'audio';
+	if (docExts.includes(ext)) return 'document';
+	if (jsonExts.includes(ext)) return 'json';
+	if (file3dExts.includes(ext)) return 'file3d';
+
+	return 'unknown';
+}
+
+/**
+ * Icono según tipo de archivo con colores consistentes
+ */
+function FileTypeIcon({ type, className }: { type: ReturnType<typeof detectFileType>; className?: string }) {
+	const iconClass = cn('h-6 w-6', className);
+
+	switch (type) {
+		case 'image':
+			return (
+				<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-blue-400 to-blue-600">
+					<ImageIcon className={cn(iconClass, 'text-white')} />
+				</div>
+			);
+		case 'video':
+			return (
+				<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-red-400 to-red-600">
+					<Video className={cn(iconClass, 'text-white')} />
+				</div>
+			);
+		case 'audio':
+			return (
+				<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-orange-400 to-orange-600">
+					<Music className={cn(iconClass, 'text-white')} />
+				</div>
+			);
+		case 'document':
+			return (
+				<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-red-500 to-red-700">
+					<FileText className={cn(iconClass, 'text-white')} />
+				</div>
+			);
+		case 'json':
+			return (
+				<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-green-400 to-green-600">
+					<FileJson className={cn(iconClass, 'text-white')} />
+				</div>
+			);
+		case 'file3d':
+			return (
+				<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-purple-400 to-purple-600">
+					<Box className={cn(iconClass, 'text-white')} />
+				</div>
+			);
+		default:
+			return (
+				<div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-gray-400 to-gray-600">
+					<File className={cn(iconClass, 'text-white')} />
+				</div>
+			);
+	}
+}
 
 export const ThumbnailItem = memo(function ThumbnailItemImpl({
 	image,
@@ -15,34 +105,27 @@ export const ThumbnailItem = memo(function ThumbnailItemImpl({
 	isActive: boolean;
 	onClick: () => void;
 }) {
-	const imageResources = useImageResources();
 	const [error, setError] = useState(false);
 	const [thumbnail, setThumbnail] = useState<string | null>(null);
+	const fileType = useMemo(() => detectFileType(image), [image]);
 
 	// Obtener la miniatura de forma optimizada
 	useEffect(() => {
-		// Prioridad:
-		// 1. thumbnailUrl directo del item (si existe)
-		// 2. thumbnail del store de recursos
-		// 3. Construcción manual de URL si tenemos ID
-
 		let url = image.thumbnailUrl;
 
 		if (!url && image.id) {
-			if (image.type === 'video' || image.mimeType?.startsWith('video/')) {
+			if (fileType === 'video') {
 				url = `/api/videos/${image.id}/thumbnail`;
-			} else {
+			} else if (fileType === 'image') {
 				url = `/api/images/${image.id}/thumbnail`;
 			}
 		}
 
-		if (url !== thumbnail) {
-			setThumbnail(url || null);
+		if (url && url !== thumbnail) {
+			setThumbnail(url);
+			setError(false);
 		}
-
-		// Resetear error si conseguimos thumbnail
-		if (url && error) setError(false);
-	}, [image.id, image.thumbnailUrl, image.type, image.mimeType, thumbnail, error]);
+	}, [image.id, image.thumbnailUrl, fileType, thumbnail]);
 
 	// Memoizar la clase base
 	const baseClassName = useMemo(
@@ -56,14 +139,12 @@ export const ThumbnailItem = memo(function ThumbnailItemImpl({
 
 	// Renderizado condicional memoizado
 	const thumbnailContent = useMemo(() => {
+		// Si hay error al cargar thumbnail o no hay thumbnail disponible, mostrar icono según tipo
 		if (error || !thumbnail) {
-			return (
-				<div className="flex h-full w-full items-center justify-center bg-muted">
-					<ImageIcon className="h-6 w-6 text-muted-foreground/50" />
-				</div>
-			);
+			return <FileTypeIcon type={fileType} />;
 		}
 
+		// Para imágenes y videos, mostrar thumbnail
 		return (
 			<div className="h-full w-full">
 				{isValidSrc(thumbnail) ? (
@@ -75,13 +156,11 @@ export const ThumbnailItem = memo(function ThumbnailItemImpl({
 						src={thumbnail}
 					/>
 				) : (
-					<div className="flex h-full w-full items-center justify-center bg-muted">
-						<ImageIcon className="h-6 w-6 text-muted-foreground/50" />
-					</div>
+					<FileTypeIcon type={fileType} />
 				)}
 			</div>
 		);
-	}, [error, thumbnail, image.name]);
+	}, [error, thumbnail, image.name, fileType]);
 
 	// Memoizar los estilos de animación
 	const animateStyles = useMemo(

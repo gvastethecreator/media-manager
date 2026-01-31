@@ -251,17 +251,21 @@ export function useFileBrowser({
 				return;
 			}
 
-			// Fallback: abrir visor para imágenes y videos
-			if (item.entityType === 'image' || item.entityType === 'video') {
-				const mediaItems = processedData.linearItems.filter(
-					(it) => it.entityType === 'image' || it.entityType === 'video'
+			// Fallback: abrir visor para archivos soportados
+			// Tipos soportados: image, video, audio, document, jsonFile, file3d
+			const supportedTypes = ['image', 'video', 'audio', 'document', 'jsonFile', 'file3d'] as const;
+			if (supportedTypes.includes(item.entityType as (typeof supportedTypes)[number])) {
+				// Incluir TODOS los archivos soportados en el carousel, no solo del mismo tipo
+				const allMediaItems = processedData.linearItems.filter((it) =>
+					supportedTypes.includes(it.entityType as (typeof supportedTypes)[number])
 				);
-				const index = mediaItems.findIndex((it) => it.id === item.id);
+				const index = allMediaItems.findIndex((it) => it.id === item.id);
+
 				if (index >= 0) {
-					const viewerItems = mediaItems.map((it) => ({
+					const viewerItems = allMediaItems.map((it) => ({
 						id: it.id,
 						name: it.name,
-						type: it.entityType as 'image' | 'video',
+						type: it.entityType as 'image' | 'video' | 'audio' | 'document' | 'json' | 'file3d',
 						path: it.path || '',
 						size: it.size ?? 0,
 						width: it.width ?? null,
