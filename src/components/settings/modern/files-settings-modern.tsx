@@ -18,7 +18,7 @@ import {
 	Trash2,
 	Zap,
 } from 'lucide-react';
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,7 +27,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useDeleteFolder, useFolders, useReindexFolder } from '@/lib/api/folders';
+import {
+	useCreateFolder,
+	useDeleteFolder,
+	useFolders,
+	useReindexAllFolders,
+	useReindexFolder,
+} from '@/lib/api/folders';
 import {
 	useCleanThumbnails,
 	useLastProcessedThumbnails,
@@ -128,8 +134,15 @@ function FolderCard({
 // COMPONENTE PRINCIPAL
 // ============================================================================
 
-export function FilesSettingsModern() {
-	const [activeTab, setActiveTab] = useState('folders');
+export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: string }) {
+	const [activeTab, setActiveTab] = useState(defaultTab);
+
+	// Sync with prop when URL changes
+	useEffect(() => {
+		if (defaultTab === 'folders' || defaultTab === 'thumbnails') {
+			setActiveTab(defaultTab);
+		}
+	}, [defaultTab]);
 	const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
 	const [searchQuery, setSearchQuery] = useState('');
 	const [showFolderForm, setShowFolderForm] = useState(false);
@@ -157,13 +170,15 @@ export function FilesSettingsModern() {
 	const _lastProcessedQuery = useLastProcessedThumbnails(9);
 
 	// Mutations
+	const createFolderMutation = useCreateFolder();
 	const deleteFolderMutation = useDeleteFolder();
 	const reindexFolderMutation = useReindexFolder();
+	const reindexAllFoldersMutation = useReindexAllFolders();
 	const optimizeMutation = useOptimizeThumbnails();
 	const reprocessMutation = useReprocessThumbnails();
 	const cleanMutation = useCleanThumbnails();
 
-	const folders = Array.isArray(foldersQuery.data) ? foldersQuery.data : [];
+	const folders = foldersQuery.data?.data || [];
 	const thumbnailStats = thumbnailStatsQuery.data as unknown as
 		| { total: number; pending: number; errors: number; totalSize?: number }
 		| undefined;
@@ -381,6 +396,24 @@ export function FilesSettingsModern() {
 									<Plus className="h-4 w-4" />
 									Agregar Carpeta
 								</Button>
+
+								<Button
+									className="gap-2"
+									disabled={reindexAllFoldersMutation.isPending}
+									onClick={async () => {
+										try {
+											const config = getConfig();
+											await reindexAllFoldersMutation.mutateAsync(config);
+											toastService.success('Reindexación global iniciada');
+										} catch (err) {
+											toastService.error('Error al iniciar reindexación global');
+										}
+									}}
+									variant="default"
+								>
+									<RefreshCw className={cn('h-4 w-4', reindexAllFoldersMutation.isPending && 'animate-spin')} />
+									{reindexAllFoldersMutation.isPending ? 'Reindexando...' : 'Reindexar Todo'}
+								</Button>
 							</div>
 						</div>
 
@@ -550,11 +583,16 @@ export function FilesSettingsModern() {
 						<DialogTitle>{editingFolder ? 'Editar Carpeta' : 'Agregar Carpeta'}</DialogTitle>
 					</DialogHeader>
 					<FolderForm
-						isLoading={false}
-						isProcessing={false}
-						onAddFolder={async (_path: string) => {
-							console.log('Add folder');
-							setShowFolderForm(false);
+						isLoading={createFolderMutation.isPending}
+						isProcessing={createFolderMutation.isPending}
+						onAddFolder={async (path: string) => {
+							try {
+								await createFolderMutation.mutateAsync({ name: path.split(/[\\/]/).pop() || 'Nueva Carpeta', path });
+								toastService.success('Carpeta agregada correctamente');
+								setShowFolderForm(false);
+							} catch (error) {
+								toastService.error('Error al agregar carpeta');
+							}
 						}}
 					/>
 				</DialogContent>
