@@ -9,8 +9,8 @@ import { memo, useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
-import type { ImageItem } from './file-viewer.types';
 import { FileInfoPanel } from './file-info-panel';
+import type { ImageItem } from './file-viewer.types';
 import { EnhancedAudioViewer } from './viewers/enhanced-audio-viewer';
 import { JsonFlowViewer } from './viewers/json-flow-viewer';
 import { MarkdownViewer } from './viewers/markdown-viewer';
@@ -86,7 +86,7 @@ function FileTypeIcon({ type, className }: { type: ReturnType<typeof detectFileT
 function ImageRendererBase({ item, contentUrl, onError, onLoad, transformStyle, className }: FileContentRendererProps) {
 	return (
 		<div
-			className={cn('pointer-events-none absolute inset-0 flex items-center justify-center', className)}
+			className={cn('pointer-events-none relative flex h-full w-full items-center justify-center', className)}
 			style={transformStyle}
 		>
 			<img
@@ -103,7 +103,7 @@ function ImageRendererBase({ item, contentUrl, onError, onLoad, transformStyle, 
 function VideoRendererBase({ item, contentUrl, onError, onLoad, transformStyle, className }: FileContentRendererProps) {
 	return (
 		<div
-			className={cn('pointer-events-none absolute inset-0 flex items-center justify-center', className)}
+			className={cn('pointer-events-none relative flex h-full w-full items-center justify-center', className)}
 			style={transformStyle}
 		>
 			<video
@@ -123,7 +123,7 @@ function VideoRendererBase({ item, contentUrl, onError, onLoad, transformStyle, 
 
 function AudioRendererBase({ item, contentUrl, className }: FileContentRendererProps) {
 	return (
-		<div className={cn('absolute inset-0', className)} data-no-drag>
+		<div className={cn('relative h-full w-full', className)} data-no-drag>
 			<EnhancedAudioViewer audioUrl={contentUrl} fileName={item.name} />
 		</div>
 	);
@@ -155,13 +155,13 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 
 	if (isPdf && pdfUrl) {
 		return (
-			<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)}>
+			<div className={cn('relative flex h-full w-full items-center justify-center p-4', className)}>
 				<iframe className="h-full w-full rounded-lg bg-background shadow-dt-3" src={pdfUrl} title={item.name} />
 				<Button
 					className="absolute top-4 right-4 z-50"
+					onClick={() => setShowInfo(!showInfo)}
 					size="icon"
 					variant="secondary"
-					onClick={() => setShowInfo(!showInfo)}
 				>
 					<Info className="h-4 w-4" />
 				</Button>
@@ -172,13 +172,13 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 
 	if (isMarkdown && textContent) {
 		return (
-			<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)} data-no-drag>
+			<div className={cn('relative flex h-full w-full items-center justify-center p-4', className)} data-no-drag>
 				<MarkdownViewer className="h-full w-full max-w-4xl" content={textContent} />
 				<Button
 					className="absolute top-4 right-4 z-50"
+					onClick={() => setShowInfo(!showInfo)}
 					size="icon"
 					variant="secondary"
-					onClick={() => setShowInfo(!showInfo)}
 				>
 					<Info className="h-4 w-4" />
 				</Button>
@@ -189,15 +189,15 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 
 	if (isText && textContent) {
 		return (
-			<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)} data-no-drag>
-				<div className="h-full w-full max-w-4xl overflow-auto rounded-lg bg-muted p-6 shadow-dt-3">
+			<div className={cn('relative flex h-full w-full items-center justify-center p-4', className)} data-no-drag>
+				<div className="h-full w-full max-w-4xl overflow-auto rounded-lg border border-border/50 bg-background/80 p-6 shadow-dt-3 backdrop-blur-sm">
 					<pre className="whitespace-pre-wrap font-mono text-foreground text-sm leading-relaxed">{textContent}</pre>
 				</div>
 				<Button
 					className="absolute top-4 right-4 z-50"
+					onClick={() => setShowInfo(!showInfo)}
 					size="icon"
 					variant="secondary"
-					onClick={() => setShowInfo(!showInfo)}
 				>
 					<Info className="h-4 w-4" />
 				</Button>
@@ -207,7 +207,7 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 	}
 
 	return (
-		<div className={cn('absolute inset-0 flex flex-col items-center justify-center gap-6', className)}>
+		<div className={cn('relative flex h-full w-full flex-col items-center justify-center gap-6', className)}>
 			<div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-gradient-to-br from-red-400 to-red-600 shadow-dt-3">
 				<FileText className="h-16 w-16 text-primary-foreground" />
 			</div>
@@ -226,9 +226,9 @@ function DocumentRenderer({ item, contentUrl, onError, onLoad, className }: File
 			</a>
 			<Button
 				className="absolute top-4 right-4 z-50"
+				onClick={() => setShowInfo(!showInfo)}
 				size="icon"
 				variant="secondary"
-				onClick={() => setShowInfo(!showInfo)}
 			>
 				<Info className="h-4 w-4" />
 			</Button>
@@ -254,14 +254,14 @@ function JsonRendererBase({ item, contentUrl, onError, onLoad, className }: File
 
 	if (!jsonContent) {
 		return (
-			<div className={cn('absolute inset-0 flex items-center justify-center', className)}>
+			<div className={cn('relative flex h-full w-full items-center justify-center', className)}>
 				<Loader2 className="h-8 w-8 animate-spin text-white/50" />
 			</div>
 		);
 	}
 
 	return (
-		<div className={cn('absolute inset-0 flex items-center justify-center p-4', className)} data-no-drag>
+		<div className={cn('relative flex h-full w-full items-center justify-center p-4', className)} data-no-drag>
 			<JsonFlowViewer className="h-full w-full max-w-6xl" content={jsonContent} fileName={item.name} />
 		</div>
 	);
@@ -269,7 +269,7 @@ function JsonRendererBase({ item, contentUrl, onError, onLoad, className }: File
 
 function File3DRendererBase({ item, contentUrl, className }: FileContentRendererProps) {
 	return (
-		<div className={cn('absolute inset-0', className)} data-no-drag>
+		<div className={cn('relative h-full w-full', className)} data-no-drag>
 			<ThreeDViewer fileName={item.name} src={contentUrl} />
 		</div>
 	);
@@ -279,7 +279,7 @@ function UnknownRenderer({ item, contentUrl, className }: FileContentRendererPro
 	const [showInfo, setShowInfo] = useState(false);
 
 	return (
-		<div className={cn('absolute inset-0 flex flex-col items-center justify-center gap-6', className)}>
+		<div className={cn('relative flex h-full w-full flex-col items-center justify-center gap-6', className)}>
 			<div className="flex h-32 w-32 items-center justify-center rounded-2xl bg-gradient-to-br from-zinc-400 to-zinc-600 shadow-2xl">
 				<AlertCircle className="h-16 w-16 text-white" />
 			</div>
@@ -296,9 +296,9 @@ function UnknownRenderer({ item, contentUrl, className }: FileContentRendererPro
 			</a>
 			<Button
 				className="absolute top-4 right-4 z-50"
+				onClick={() => setShowInfo(!showInfo)}
 				size="icon"
 				variant="secondary"
-				onClick={() => setShowInfo(!showInfo)}
 			>
 				<Info className="h-4 w-4" />
 			</Button>
@@ -311,18 +311,18 @@ function ImageRenderer(props: FileContentRendererProps) {
 	const [showInfo, setShowInfo] = useState(false);
 
 	return (
-		<>
+		<div className="relative h-full w-full">
 			<ImageRendererBase {...props} />
 			<Button
 				className="absolute top-4 right-4 z-50"
+				onClick={() => setShowInfo(!showInfo)}
 				size="icon"
 				variant="secondary"
-				onClick={() => setShowInfo(!showInfo)}
 			>
 				<Info className="h-4 w-4" />
 			</Button>
 			{showInfo && <FileInfoPanel item={props.item} />}
-		</>
+		</div>
 	);
 }
 
@@ -330,18 +330,18 @@ function VideoRenderer(props: FileContentRendererProps) {
 	const [showInfo, setShowInfo] = useState(false);
 
 	return (
-		<>
+		<div className="relative h-full w-full">
 			<VideoRendererBase {...props} />
 			<Button
 				className="absolute top-4 right-4 z-50"
+				onClick={() => setShowInfo(!showInfo)}
 				size="icon"
 				variant="secondary"
-				onClick={() => setShowInfo(!showInfo)}
 			>
 				<Info className="h-4 w-4" />
 			</Button>
 			{showInfo && <FileInfoPanel item={props.item} />}
-		</>
+		</div>
 	);
 }
 
@@ -349,18 +349,18 @@ function AudioRenderer(props: FileContentRendererProps) {
 	const [showInfo, setShowInfo] = useState(false);
 
 	return (
-		<>
+		<div className="relative h-full w-full">
 			<AudioRendererBase {...props} />
 			<Button
 				className="absolute top-4 right-4 z-50"
+				onClick={() => setShowInfo(!showInfo)}
 				size="icon"
 				variant="secondary"
-				onClick={() => setShowInfo(!showInfo)}
 			>
 				<Info className="h-4 w-4" />
 			</Button>
 			{showInfo && <FileInfoPanel item={props.item} />}
-		</>
+		</div>
 	);
 }
 
@@ -368,18 +368,18 @@ function JsonRenderer(props: FileContentRendererProps) {
 	const [showInfo, setShowInfo] = useState(false);
 
 	return (
-		<>
+		<div className="relative h-full w-full">
 			<JsonRendererBase {...props} />
 			<Button
 				className="absolute top-4 right-4 z-50"
+				onClick={() => setShowInfo(!showInfo)}
 				size="icon"
 				variant="secondary"
-				onClick={() => setShowInfo(!showInfo)}
 			>
 				<Info className="h-4 w-4" />
 			</Button>
 			{showInfo && <FileInfoPanel item={props.item} />}
-		</>
+		</div>
 	);
 }
 
@@ -387,18 +387,18 @@ function File3DRenderer(props: FileContentRendererProps) {
 	const [showInfo, setShowInfo] = useState(false);
 
 	return (
-		<>
+		<div className="relative h-full w-full">
 			<File3DRendererBase {...props} />
 			<Button
 				className="absolute top-4 right-4 z-50"
+				onClick={() => setShowInfo(!showInfo)}
 				size="icon"
 				variant="secondary"
-				onClick={() => setShowInfo(!showInfo)}
 			>
 				<Info className="h-4 w-4" />
 			</Button>
 			{showInfo && <FileInfoPanel item={props.item} />}
-		</>
+		</div>
 	);
 }
 
@@ -408,7 +408,7 @@ function FileContentRendererInner(props: FileContentRendererProps) {
 
 	if (isLoading) {
 		return (
-			<div className="absolute inset-0 flex items-center justify-center">
+			<div className="relative flex h-full w-full items-center justify-center">
 				<div className="flex flex-col items-center gap-4">
 					<FileTypeIcon className="animate-pulse text-white/30" type={fileType} />
 					<Skeleton className="h-4 w-32" />
