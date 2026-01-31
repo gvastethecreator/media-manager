@@ -136,7 +136,16 @@ function SettingsSidebar({
 										isActive && 'bg-secondary/50',
 										'hover:bg-secondary/30'
 									)}
-									onClick={() => toggleCategory(category.id)}
+									onClick={() => {
+										// Navigate to first item in category
+										if (category.items.length > 0) {
+											onNavigate(category.id, category.items[0].id);
+										}
+										// Also expand if collapsed
+										if (!isExpanded) {
+											toggleCategory(category.id);
+										}
+									}}
 									type="button"
 								>
 									<div className="flex items-center gap-2">

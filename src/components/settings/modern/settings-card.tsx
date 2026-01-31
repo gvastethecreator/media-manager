@@ -40,12 +40,12 @@ export const SettingsCard = React.forwardRef<HTMLDivElement, SettingsCardProps>(
 			<div
 				className={cn(
 					'flex flex-col gap-4 rounded-xl p-6 transition-all duration-200',
-					'hover:border-border/60',
+					'hover:border-border/40',
 					variants[variant],
 					className
 				)}
 				ref={ref}
-				style={color ? { borderColor: `${color}20` } : undefined}
+				style={color ? { borderColor: `${color}15` } : undefined}
 				{...props}
 			>
 				{/* Header con Icono y Título */}
@@ -55,7 +55,7 @@ export const SettingsCard = React.forwardRef<HTMLDivElement, SettingsCardProps>(
 							<div
 								className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl"
 								style={{
-									backgroundColor: color ? `${color}15` : 'var(--muted)',
+									backgroundColor: color ? `${color}10` : 'var(--muted)',
 								}}
 							>
 								<div className="h-5 w-5" style={{ color: color || 'var(--muted-foreground)' }}>
