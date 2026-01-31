@@ -5,7 +5,7 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { MediaItemGrid } from '../components/media-item';
+import { MediaItemGridV3 } from '../components/media-item-v3';
 import type { BrowserItem } from '../types/item.types';
 import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '../types/props.types';
 import type { MasonryViewConfig } from '../types/view.types';
@@ -190,7 +190,7 @@ export function MasonryView({
 			<div className="h-full w-full" data-testid="masonry-view">
 				{!shouldVirtualize && (
 					<div
-						className="flex p-2"
+						className="flex p-3"
 						data-testid="masonry-view-container"
 						ref={(el) => onLayoutRootReady?.(el)}
 						style={{ gap: `${gap}px` }}
@@ -205,7 +205,7 @@ export function MasonryView({
 									{column.map((item, itemIndex) => {
 										const layoutIndex = columnIndexOffset + itemIndex;
 										return (
-											<MediaItemGrid
+											<MediaItemGridV3
 												animateIn={!suppressAppearAnimation}
 												isActive={activeId === item.id}
 												isSelected={selectedIds.has(item.id)}
@@ -228,10 +228,11 @@ export function MasonryView({
 				)}
 				{shouldVirtualize && (
 					<div
-						className="relative p-2"
+						className="relative p-3"
 						data-testid="masonry-view-container"
 						ref={(el) => onLayoutRootReady?.(el)}
 						style={{
+							gap: `${gap}px`,
 							height: virtualizer.getTotalSize(),
 							width: actualColumnWidth * columnCount + gap * (columnCount - 1),
 						}}
@@ -254,7 +255,7 @@ export function MasonryView({
 										transform: `translate(${x}px, ${virtualItem.start}px)`,
 									}}
 								>
-									<MediaItemGrid
+									<MediaItemGridV3
 										animateIn={!suppressAppearAnimation}
 										isActive={activeId === item.id}
 										isSelected={selectedIds.has(item.id)}

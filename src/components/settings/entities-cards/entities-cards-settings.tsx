@@ -6,8 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider-v3';
+import { Switch } from '@/components/ui/switch-v3';
 
 export const EntitiesCardsSettings: React.FC = () => {
 	const [cardSize, setCardSize] = React.useState([250]);
@@ -18,11 +18,11 @@ export const EntitiesCardsSettings: React.FC = () => {
 	const [densityMode, setDensityMode] = React.useState('comfortable');
 
 	return (
-		<div className="space-y-6 p-6">
+		<div className="space-y-6 p-4">
 			{/* Header */}
 			<div className="flex items-center gap-3">
-				<div className="rounded-lg bg-blue-100 p-2 dark:bg-blue-900/20">
-					<IdCard className="h-5 w-5 text-primary dark:text-blue-400" />
+				<div className="rounded-lg bg-primary/10 p-2 dark:bg-primary/20">
+					<IdCard className="h-5 w-5 text-primary dark:text-primary" />
 				</div>
 				<div>
 					<h2 className="font-semibold text-xl">Configuración de Tarjetas de Entidades</h2>
@@ -34,7 +34,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 
 			<Separator />
 
-			<div className="grid gap-6">
+			<div className="grid gap-4">
 				{/* Apariencia General */}
 				<Card>
 					<CardHeader>
@@ -148,13 +148,13 @@ export const EntitiesCardsSettings: React.FC = () => {
 							<div
 								className={`rounded-lg border p-3 bg-background${cardStyle === 'rounded' ? 'rounded-xl' : ''}
 									${cardStyle === 'sharp' ? 'rounded-none' : ''}
-									${cardStyle === 'shadow' ? 'shadow-lg' : ''}
-									${cardStyle === 'minimal' ? 'border-none shadow-sm' : ''}
-									${hoverEffects ? 'transition-all duration-200 hover:scale-[1.02] hover:shadow-md' : ''}
+									${cardStyle === 'shadow' ? 'shadow-dt-2' : ''}
+									${cardStyle === 'minimal' ? 'border-none shadow-dt-0' : ''}
+									${hoverEffects ? 'transition-all duration-200 hover:scale-[1.02] hover:shadow-dt-1' : ''}
 								`}
 								style={{ width: Math.min(cardSize[0], 300) }}
 							>
-								<div className="mb-3 flex aspect-video items-center justify-center rounded-md bg-gradient-to-br from-blue-100 to-purple-100 dark:from-blue-900/20 dark:to-purple-900/20">
+								<div className="mb-3 flex aspect-video items-center justify-center rounded-md bg-gradient-to-br from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20">
 									<IdCard className="h-8 w-8 text-muted-foreground" />
 								</div>
 								<h3 className="mb-1 font-medium text-sm">Tarjeta de Ejemplo</h3>

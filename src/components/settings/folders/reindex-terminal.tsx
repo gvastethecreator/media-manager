@@ -471,7 +471,7 @@ export function ReindexTerminal({
 					'flex min-h-[32px] items-center gap-3 px-3 py-2',
 					// Estilo para carpetas sticky
 					log.isSticky && {
-						'sticky top-0 z-10 border-primary/30 border-b py-3 shadow-lg backdrop-blur-sm': true,
+						'sticky top-0 z-10 border-primary/30 border-b py-3 shadow-dt-2 backdrop-blur-sm': true,
 						'bg-gradient-to-r from-primary/20 via-primary/10 to-transparent': true,
 						'ring-1 ring-primary/30': true,
 					},

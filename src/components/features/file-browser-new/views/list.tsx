@@ -5,7 +5,7 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { MediaItemList } from '../components/media-item';
+import { MediaItemListV3 } from '../components/media-item-v3';
 import type { BrowserItem } from '../types/item.types';
 import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '../types/props.types';
 import type { ListViewConfig } from '../types/view.types';
@@ -104,9 +104,9 @@ export function ListView({
 				onContainerReady?.(el);
 			}}
 		>
-			<div className="h-full w-full" data-testid="list-view">
+			<div className="h-full w-full py-2" data-testid="list-view">
 				<div
-					className="relative"
+					className="relative p-2"
 					data-testid="listview-container"
 					ref={(el) => onLayoutRootReady?.(el)}
 					style={{ height: shouldVirtualize ? rowVirtualizer.getTotalSize() : 'auto' }}
@@ -126,7 +126,7 @@ export function ListView({
 											transform: `translateY(${virtualRow.start}px)`,
 										}}
 									>
-										<MediaItemList
+										<MediaItemListV3
 											animateIn={!suppressAppearAnimation}
 											isActive={activeId === item.id}
 											isSelected={selectedIds.has(item.id)}
@@ -143,7 +143,7 @@ export function ListView({
 								);
 							})
 						: items.map((item, index) => (
-								<MediaItemList
+								<MediaItemListV3
 									animateIn={!suppressAppearAnimation}
 									isActive={activeId === item.id}
 									isSelected={selectedIds.has(item.id)}

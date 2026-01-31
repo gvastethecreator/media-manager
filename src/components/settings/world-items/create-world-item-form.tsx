@@ -9,7 +9,7 @@ import { z } from 'zod';
 import { ColorPicker } from '@/components/ui/color-picker';
 import { EmojiPicker } from '@/components/ui/emoji-picker';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Switch } from '@/components/ui/switch';
+import { Switch } from '@/components/ui/switch-v3';
 import { useCreateWorldItem, useUpdateWorldItem } from '@/lib/api/world-items';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { DEFAULT_NEUTRAL_COLOR } from '@/lib/styles/color-tokens';

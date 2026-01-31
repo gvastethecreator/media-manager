@@ -11,8 +11,8 @@ import { Badge } from '@/components/ui/badge';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
+import { Slider } from '@/components/ui/slider-v3';
+import { Switch } from '@/components/ui/switch-v3';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSystemStats } from '@/lib/api/system';
 import { cn } from '@/lib/utils';
@@ -150,7 +150,7 @@ export function MediaSettingsModern() {
 					return (
 						<button
 							className={cn(
-								'flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all',
+								'flex flex-col items-center gap-2 rounded-xl border p-4 transition-all',
 								isActive ? 'border-primary bg-primary/5' : 'border-transparent bg-muted/30 hover:bg-muted/50'
 							)}
 							key={media.id}

@@ -2,7 +2,7 @@ import { Cell, Column, flexRender, Header, HeaderGroup, Row } from '@tanstack/re
 import { cva } from 'class-variance-authority';
 import * as React from 'react';
 import { CSSProperties, Fragment, ReactNode } from 'react';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Checkbox } from '@/components/ui/checkbox-v3';
 import { useDataGrid } from '@/components/ui/data-grid';
 import { cn } from '@/lib/utils';
 

@@ -5,7 +5,7 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { MediaItemGrid } from '../components/media-item';
+import { MediaItemGridV3 } from '../components/media-item-v3';
 import type { BrowserItem } from '../types/item.types';
 import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '../types/props.types';
 import type { GridViewConfig } from '../types/view.types';
@@ -153,7 +153,7 @@ export function GridView({
 			<div className="h-full w-full" data-testid="grid-view">
 				{!shouldVirtualize && (
 					<div
-						className="grid p-2"
+						className="grid p-3"
 						data-testid="grid-view-container"
 						ref={(el) => onLayoutRootReady?.(el)}
 						style={{
@@ -162,7 +162,7 @@ export function GridView({
 						}}
 					>
 						{displayItems.map((item, index) => (
-							<MediaItemGrid
+							<MediaItemGridV3
 								animateIn={!suppressAppearAnimation}
 								isActive={activeId === item.id}
 								isSelected={selectedIds.has(item.id)}
@@ -180,7 +180,7 @@ export function GridView({
 				)}
 				{shouldVirtualize && (
 					<div
-						className="relative p-2"
+						className="relative p-3"
 						data-testid="grid-view-container"
 						ref={(el) => onLayoutRootReady?.(el)}
 						style={{ height: rowVirtualizer.getTotalSize() }}
@@ -204,7 +204,7 @@ export function GridView({
 									}}
 								>
 									{rowItems.map((item, index) => (
-										<MediaItemGrid
+										<MediaItemGridV3
 											animateIn={!suppressAppearAnimation}
 											isActive={activeId === item.id}
 											isSelected={selectedIds.has(item.id)}

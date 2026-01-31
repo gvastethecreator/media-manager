@@ -47,7 +47,7 @@ export function ProfilesSettings() {
 						</span>
 					</CardTitle>
 				</CardHeader>
-				<CardContent className="p-6 py-8 text-center">
+				<CardContent className="p-4 py-6 text-center">
 					<UserPlus className="mx-auto mb-3 h-8 w-8 text-muted-foreground/50" />
 					<p className="text-muted-foreground text-sm">No hay perfiles configurados</p>
 					<p className="mt-1 mb-4 text-muted-foreground/75 text-xs">Crea un perfil para personalizar tu experiencia</p>
@@ -160,7 +160,7 @@ export function ProfilesSettings() {
 												</div>
 											</div>
 										</div>
-										<div className="absolute top-8 right-0 flex items-center gap-1 opacity-0 shadow-lg transition-opacity group-hover:opacity-100">
+										<div className="absolute top-8 right-0 flex items-center gap-1 opacity-0 shadow-dt-2 transition-opacity group-hover:opacity-100">
 											<Button
 												className="h-4 gap-1 rounded-sm p-2 text-[9px] text-xs"
 												onClick={() => setActiveProfile(profile.id)}

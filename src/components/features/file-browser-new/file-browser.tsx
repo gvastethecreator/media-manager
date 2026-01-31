@@ -452,7 +452,14 @@ export function FileBrowser({
 				itemSize={browser.itemSize}
 				onClearSelection={browser.clearSelection}
 				onItemSizeChange={(size) => runLayoutUpdate(() => browser.setItemSize(size), { duration: 250 })}
-				onRefresh={() => runLayoutUpdate(() => void browser.refresh(), { duration: 300 })}
+				onRefresh={() =>
+					runLayoutUpdate(
+						() => {
+							browser.refresh();
+						},
+						{ duration: 300 }
+					)
+				}
 				onSearchChange={(query) => runLayoutUpdate(() => browser.setSearchQuery(query), { duration: 200 })}
 				onSelectAll={browser.selectAll}
 				onSortChange={(field) =>

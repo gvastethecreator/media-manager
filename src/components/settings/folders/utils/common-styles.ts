@@ -96,9 +96,9 @@ export const ANIMATIONS = {
 
 // ===== UTILIDADES DE CLASE =====
 export const COMMON_CLASSES = {
-	cardBase: 'relative h-full cursor-pointer overflow-hidden border-2 px-1 py-2 transition-all duration-200',
+	cardBase: 'relative h-full cursor-pointer overflow-hidden border px-1 py-2 transition-all duration-200',
 	cardGradient: 'border-border/60 bg-gradient-to-br from-card to-card/95',
-	cardHover: 'hover:-translate-y-1 hover:shadow-lg hover:shadow-primary/5',
+	cardHover: 'hover:-translate-y-1 hover:shadow-dt-2 hover:shadow-primary/5',
 	textTruncate: 'truncate font-semibold text-foreground text-md leading-tight',
 	flexCenter: 'flex items-center justify-center',
 	absoluteTopRight: 'absolute bottom-0 right-0',
