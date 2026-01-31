@@ -252,7 +252,7 @@ export function EntitySettingsView<T extends EntityWithStats>({
 	if (isLoading) {
 		return (
 			<Card className="rounded-xl border-none bg-muted/30 shadow-sm">
-				<CardContent className="p-8">
+				<CardContent className="p-4">
 					<div className="flex items-center justify-center gap-3">
 						<Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
 						<p className="text-muted-foreground text-sm">Cargando {entityLabelPlural.toLowerCase()}...</p>
@@ -364,7 +364,7 @@ export function EntitySettingsView<T extends EntityWithStats>({
 
 			{/* Content */}
 			{filteredEntities.length === 0 ? (
-				<div className="flex flex-col items-center justify-center py-12 text-center">
+				<div className="flex flex-col items-center justify-center py-6 text-center">
 					<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
 						{React.createElement(Icon as React.ComponentType<{ className?: string }>, {
 							className: 'h-6 w-6 text-muted-foreground',

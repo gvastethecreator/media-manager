@@ -5,6 +5,10 @@ import { seedLogger } from './index';
 
 /**
  * Siembra perfiles minimalistas para verificación del sistema
+ *
+ * NOTA: Los colores hex en este archivo son datos de prueba para inicializar la DB.
+ * No se usan directamente en la UI de producción - la UI usa tokens CSS
+ * definidos en src/styles/tokens.css y src/styles/design-tokens.css.
  */
 export async function seedProfiles(db: LibSQLDatabase<Record<string, never>>) {
 	seedLogger.info('👤 Creando perfiles de prueba...');

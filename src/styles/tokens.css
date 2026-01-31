@@ -55,6 +55,11 @@
 	--entity-property: oklch(0.7 0.15 350); /* Rosa claro - propiedades */
 	--entity-wildcard: oklch(0.7 0.2 350); /* Rosa - wildcards */
 
+	/* Entidades de sistema */
+	--entity-system: oklch(
+		0.55 0.12 240
+	); /* Azul grisáceo - sistema/configuración */
+
 	/* =====================================================
    * COLORES FUNCIONALES
    * Usa estos tokens para estados y acciones
@@ -200,6 +205,58 @@
 	--panel-border-medium: var(--border);
 	--panel-border-accent: oklch(from var(--accent) l c h / 0.15);
 	--panel-bg-overlay: oklch(from var(--background) l c h / 0.4);
+
+	/* =====================================================
+    * COLORES DE RAREZA (TCG/Character Cards)
+    * Para tarjetas de personajes y efectos de rareza
+    * ===================================================== */
+	--rarity-common: oklch(0.6 0.25 145);
+	--rarity-uncommon: oklch(0.55 0.18 240);
+	--rarity-rare: oklch(0.55 0.2 280);
+	--rarity-epic: oklch(0.65 0.25 320);
+	--rarity-legendary: oklch(0.7 0.2 70);
+	--rarity-mythic: oklch(0.65 0.25 340);
+
+	/* =====================================================
+    * TCG CARD GLOW EFFECTS
+    * Efectos de brillo para tarjetas de estilo TCG
+    * ===================================================== */
+	--tcg-glow-1: 0 0 20px
+		color-mix(
+			in oklch,
+			var(--glow-color, var(--dt-neutral-300)),
+			transparent 70%
+		);
+	--tcg-glow-2: 0 0 30px
+		color-mix(
+			in oklch,
+			var(--glow-color, var(--dt-success-400)),
+			transparent 60%
+		);
+	--tcg-glow-3: 0 0 40px
+		color-mix(
+			in oklch,
+			var(--glow-color, var(--dt-primary-400)),
+			transparent 50%
+		);
+	--tcg-glow-4: 0 0 50px
+		color-mix(
+			in oklch,
+			var(--glow-color, var(--dt-primary-500)),
+			transparent 40%
+		);
+	--tcg-glow-5: 0 0 60px
+		color-mix(
+			in oklch,
+			var(--glow-color, var(--dt-warning-500)),
+			transparent 30%
+		);
+	--tcg-glow-6: 0 0 80px
+		color-mix(
+			in oklch,
+			var(--glow-color, var(--dt-danger-500)),
+			transparent 20%
+		);
 }
 
 /* Tema oscuro - ajustar opacidades y brillos */

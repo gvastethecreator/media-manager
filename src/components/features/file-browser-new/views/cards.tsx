@@ -210,7 +210,7 @@ function CardItem({
 				className="file-browser-item-content relative mb-2 overflow-hidden rounded-lg"
 				style={{ height: size * 0.65 }}
 			>
-				<MediaThumbnail className="h-full w-full object-cover" item={mediaItem} lockAspectRatio />
+				<MediaThumbnail className="h-full w-full object-cover" item={mediaItem} lockAspectRatio={true} />
 			</div>
 
 			{/* Info */}

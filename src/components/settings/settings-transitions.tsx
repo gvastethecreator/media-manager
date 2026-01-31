@@ -241,9 +241,9 @@ interface SettingsToastTransitionProps {
  */
 export function SettingsToastTransition({ isVisible, type = 'info', message }: SettingsToastTransitionProps) {
 	const typeStyles = {
-		success: 'bg-green-500/10 text-green-700 border-green-500/20',
-		error: 'bg-red-500/10 text-red-700 border-red-500/20',
-		info: 'bg-blue-500/10 text-blue-700 border-blue-500/20',
+		success: 'bg-success/10 text-success border-success/20',
+		error: 'bg-destructive/10 text-destructive border-destructive/20',
+		info: 'bg-info/10 text-info border-info/20',
 	};
 
 	return (

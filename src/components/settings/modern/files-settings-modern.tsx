@@ -77,7 +77,10 @@ function FolderCard({
 					<div className="absolute inset-0 flex items-center justify-center">
 						<Folder className="h-12 w-12 text-muted-foreground/30" />
 					</div>
-					<div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/50 opacity-0 transition-opacity group-hover:opacity-100">
+					<div
+						className="absolute inset-0 flex items-center justify-center gap-2 opacity-0 transition-opacity group-hover:opacity-100"
+						style={{ backgroundColor: 'color-mix(in oklch, var(--background) 50%, transparent)' }}
+					>
 						<Button onClick={actions.onEdit} size="sm" variant="secondary">
 							Editar
 						</Button>
@@ -332,7 +335,11 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 						{/* Stats */}
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 							{folderStats.map((stat) => (
-								<Card className="border-l-4" key={stat.label} style={{ borderLeftColor: stat.color }}>
+								<Card
+									className="border-l-4"
+									key={stat.label}
+									style={{ borderLeftColor: `color-mix(in oklch, ${stat.color} 60%, transparent)` }}
+								>
 									<CardContent className="p-4">
 										<div className="flex items-center justify-between">
 											<div>
@@ -341,7 +348,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 											</div>
 											<div
 												className="flex h-10 w-10 items-center justify-center rounded-lg"
-												style={{ backgroundColor: `${stat.color}20` }}
+												style={{ backgroundColor: `color-mix(in oklch, ${stat.color} 12%, transparent)` }}
 											>
 												<div style={{ color: stat.color }}>{stat.icon}</div>
 											</div>
@@ -419,11 +426,11 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 
 						{/* Folders List */}
 						{foldersQuery.isLoading ? (
-							<div className="flex items-center justify-center p-12">
+							<div className="flex items-center justify-center p-6">
 								<div className="h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
 							</div>
 						) : folders.length === 0 ? (
-							<div className="flex flex-col items-center justify-center py-12 text-center">
+							<div className="flex flex-col items-center justify-center py-6 text-center">
 								<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
 									<Folder className="h-6 w-6 text-muted-foreground" />
 								</div>
@@ -477,7 +484,11 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 						{/* Stats */}
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 							{thumbnailStatCards.map((stat) => (
-								<Card className="border-l-4" key={stat.label} style={{ borderLeftColor: stat.color }}>
+								<Card
+									className="border-l-4"
+									key={stat.label}
+									style={{ borderLeftColor: `color-mix(in oklch, ${stat.color} 60%, transparent)` }}
+								>
 									<CardContent className="p-4">
 										<div className="flex items-center justify-between">
 											<div>
@@ -487,7 +498,7 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 											</div>
 											<div
 												className="flex h-10 w-10 items-center justify-center rounded-lg"
-												style={{ backgroundColor: `${stat.color}20` }}
+												style={{ backgroundColor: `color-mix(in oklch, ${stat.color} 12%, transparent)` }}
 											>
 												<div style={{ color: stat.color }}>{stat.icon}</div>
 											</div>
@@ -610,18 +621,23 @@ export function FilesSettingsModern({ defaultTab = 'folders' }: { defaultTab?: s
 				useStructuredFlow={useStructuredFlow}
 			/>
 
-			{/* Reindex Terminal - Always mounted but visually toggled or shown when active */}
-			<div className="mt-6 border-t pt-6">
-				<div className="mb-4 flex items-center justify-between">
-					<h3 className="flex items-center gap-2 font-medium text-lg">
-						<Zap className="h-4 w-4" />
-						Terminal de Procesamiento
-					</h3>
+			{/* Reindex Terminal - Solo visible cuando hay actividad de reindexado */}
+			{(reindexFolderMutation.isPending || reindexAllFoldersMutation.isPending) && (
+				<div className="mt-6 border-border/30 border-t pt-6">
+					<div className="mb-4 flex items-center justify-between">
+						<h3 className="flex items-center gap-2 font-medium text-base">
+							<Zap className="h-4 w-4 text-primary" />
+							Terminal de Procesamiento
+						</h3>
+						<span className="text-muted-foreground text-xs">
+							{reindexingFolderId ? 'Reindexando carpeta...' : 'Reindexando todas las carpetas...'}
+						</span>
+					</div>
+					<Card className="h-[300px] overflow-hidden border-border/30 bg-muted/50">
+						<ReindexTerminal className="h-full" isActive={true} showProgress={true} />
+					</Card>
 				</div>
-				<Card className="h-[400px] overflow-hidden border-zinc-800 bg-zinc-950">
-					<ReindexTerminal className="h-full" isActive={true} showProgress={true} />
-				</Card>
-			</div>
+			)}
 		</div>
 	);
 }

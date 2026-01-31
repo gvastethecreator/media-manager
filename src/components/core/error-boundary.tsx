@@ -72,63 +72,63 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 
 				// In development, show the detailed error UI.
 				return (
-					<div className="flex h-full flex-row items-stretch justify-center gap-8 bg-neutral-900 p-8 text-neutral-100">
+					<div className="flex h-full flex-row items-stretch justify-center gap-8 bg-background p-8 text-foreground">
 						<div className="flex max-w-2xl flex-1 flex-col items-center justify-center">
-							<div className="flex w-full flex-col items-center rounded-xl border border-neutral-700 bg-neutral-800 p-8 shadow-lg">
-								<h1 className="mb-4 font-bold text-3xl text-red-400">¡Algo salió mal!</h1>
-								<p className="mb-4 text-neutral-200">Intenta recargar la página o reporta el error.</p>
+							<div className="flex w-full flex-col items-center rounded-xl border border-border/50 bg-card p-8 shadow-lg">
+								<h1 className="mb-4 font-bold text-3xl text-destructive">¡Algo salió mal!</h1>
+								<p className="mb-4 text-foreground/80">Intenta recargar la página o reporta el error.</p>
 								<button className="btn btn-primary mb-4" onClick={this.handleReload} type="button">
 									Recargar
 								</button>
 								<div className="mt-4 flex w-full flex-col items-start gap-6">
-									<div className="w-full rounded-lg border border-neutral-700 bg-neutral-900 p-4">
-										<strong className="text-red-300">Archivos afectados:</strong>
-										<ul className="mt-2 ml-6 list-disc text-neutral-200 text-xs">
+									<div className="w-full rounded-lg border border-border/50 bg-background p-4">
+										<strong className="text-destructive/80">Archivos afectados:</strong>
+										<ul className="mt-2 ml-6 list-disc text-foreground/80 text-xs">
 											{affectedFiles.length === 0 && <li>No detectados en el stack trace.</li>}
 											{affectedFiles.map((f) => (
 												<li key={`${f.file}:${f.line}`}>
-													<span className="font-mono text-blue-300">
+													<span className="font-mono text-info">
 														{f.file}:{f.line}
 													</span>
 												</li>
 											))}
 										</ul>
 									</div>
-									<div className="w-full rounded-lg border border-neutral-700 bg-neutral-900 p-4">
+									<div className="w-full rounded-lg border border-border/50 bg-background p-4">
 										<div className="mb-2 flex items-center">
-											<strong className="text-blue-300">Stack trace:</strong>
+											<strong className="text-info">Stack trace:</strong>
 											<button
-												className="ml-2 text-blue-400 text-xs underline hover:text-blue-200"
+												className="ml-2 text-info/80 text-xs underline hover:text-info"
 												onClick={() => navigator.clipboard.writeText(stack)}
 												type="button"
 											>
 												Copiar
 											</button>
 										</div>
-										<pre className="mt-2 max-w-xl overflow-x-auto rounded bg-neutral-800 p-2 text-neutral-200 text-xs">
+										<pre className="mt-2 max-w-xl overflow-x-auto rounded bg-card p-2 text-foreground/80 text-xs">
 											{stack}
 										</pre>
 									</div>
-									<div className="w-full rounded-lg border border-neutral-700 bg-neutral-900 p-4">
-										<strong className="text-green-300">Información de entorno:</strong>
-										<ul className="mt-2 ml-4 text-neutral-200 text-xs">
+									<div className="w-full rounded-lg border border-border/50 bg-background p-4">
+										<strong className="text-success">Información de entorno:</strong>
+										<ul className="mt-2 ml-4 text-foreground/80 text-xs">
 											<li>
-												Versión: <span className="font-mono text-green-200">{envInfo.version}</span>
+												Versión: <span className="font-mono text-success/80">{envInfo.version}</span>
 											</li>
 											<li>
-												Rama: <span className="font-mono text-green-200">{envInfo.branch}</span>
+												Rama: <span className="font-mono text-success/80">{envInfo.branch}</span>
 											</li>
 											<li>
-												Fecha: <span className="font-mono text-green-200">{envInfo.date}</span>
+												Fecha: <span className="font-mono text-success/80">{envInfo.date}</span>
 											</li>
 											<li>
-												Ruta: <span className="font-mono text-green-200">{envInfo.path}</span>
+												Ruta: <span className="font-mono text-success/80">{envInfo.path}</span>
 											</li>
 										</ul>
 									</div>
-									<div className="w-full rounded-lg border border-neutral-700 bg-neutral-900 p-4">
-										<strong className="text-yellow-300">Estado de stores (debug):</strong>
-										<pre className="mt-2 max-h-40 overflow-auto rounded bg-neutral-800 p-2 text-xs text-yellow-200">
+									<div className="w-full rounded-lg border border-border/50 bg-background p-4">
+										<strong className="text-warning">Estado de stores (debug):</strong>
+										<pre className="mt-2 max-h-40 overflow-auto rounded bg-card p-2 text-warning/80 text-xs">
 											{JSON.stringify(
 												{ /* TODO: dump real de stores aquí */ demo: 'Implementa aquí el snapshot de Zustand o Redux' },
 												null,
@@ -140,11 +140,11 @@ export class ErrorBoundary extends React.Component<ErrorBoundaryProps, ErrorBoun
 							</div>
 						</div>
 						{this.props.lastLogContent && (
-							<aside className="flex w-[420px] max-w-full flex-col overflow-auto rounded-lg border-neutral-800 border-l bg-neutral-950 p-4 shadow-inner">
-								<h2 className="mb-2 font-semibold text-neutral-200 text-sm">
-									Último log: <span className="font-mono text-blue-300 text-xs">{this.props.lastLogContent.file}</span>
+							<aside className="flex w-[420px] max-w-full flex-col overflow-auto rounded-lg border-border/30 border-l bg-muted p-4 shadow-inner">
+								<h2 className="mb-2 font-semibold text-foreground/80 text-sm">
+									Último log: <span className="font-mono text-info text-xs">{this.props.lastLogContent.file}</span>
 								</h2>
-								<pre className="max-h-[400px] overflow-auto rounded bg-neutral-900 p-2 text-neutral-300 text-xs">
+								<pre className="max-h-[400px] overflow-auto rounded bg-background p-2 text-foreground/70 text-xs">
 									{this.props.lastLogContent.lines.join('\n')}
 								</pre>
 							</aside>

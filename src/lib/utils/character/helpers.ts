@@ -31,12 +31,8 @@ export function generateCharacterId(): string {
  * @returns Objeto Character con valores predeterminados
  */
 export function createNewCharacter(overrides: Partial<CharacterBase> = {}): CharacterBase {
-	// Lógica comentada que dependía de getSuggestedAppearance
-	// const characterClass = (overrides.class?.toLowerCase() || 'warrior') as CharacterClass;
-	// const { color, emoji } = getSuggestedAppearance(characterClass);
-
-	// Valores por defecto temporales para color y emoji
-	const color = '#CCCCCC';
+	const characterClass = (overrides.class?.toLowerCase() || 'warrior') as CharacterClass;
+	const color = 'var(--dt-neutral-400)';
 	const emoji = '👤';
 
 	const now = new Date();

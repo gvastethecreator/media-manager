@@ -86,7 +86,7 @@ function TagCard({ tag, actions, isGrid }: { tag: TagWithStats; actions: CardAct
 							<span className="text-2xl">{emoji}</span>
 							{tag.color && <div className="h-6 w-6 rounded-full border" style={{ backgroundColor: tag.color }} />}
 						</div>
-						{tag.isFavorite && <span className="text-amber-400">★</span>}
+						{tag.isFavorite && <span style={{ color: 'var(--entity-favorite)' }}>★</span>}
 					</div>
 					<CardTitle className="mt-2 text-base">{tag.name}</CardTitle>
 					<Badge className="mt-1 text-sm capitalize" variant="secondary">
@@ -118,7 +118,11 @@ function TagCard({ tag, actions, isGrid }: { tag: TagWithStats; actions: CardAct
 				<div>
 					<p className="flex items-center gap-2 font-medium">
 						{tag.name}
-						{tag.isFavorite && <span className="text-amber-400 text-sm">★</span>}
+						{tag.isFavorite && (
+							<span className="text-sm" style={{ color: 'var(--entity-favorite)' }}>
+								★
+							</span>
+						)}
 					</p>
 					<p className="text-muted-foreground text-sm capitalize">{tag.category}</p>
 				</div>
@@ -341,7 +345,11 @@ export function TaxonomySettingsModern() {
 					{/* Stats */}
 					<div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
 						{currentStats.map((stat) => (
-							<Card className="border-l-4" key={stat.key} style={{ borderLeftColor: stat.color }}>
+							<Card
+								className="border-l-4"
+								key={stat.key}
+								style={{ borderLeftColor: `color-mix(in oklch, ${stat.color} 60%, transparent)` }}
+							>
 								<CardContent className="p-4">
 									<div className="flex items-center justify-between">
 										<div>
@@ -351,7 +359,7 @@ export function TaxonomySettingsModern() {
 										</div>
 										<div
 											className="flex h-10 w-10 items-center justify-center rounded-lg"
-											style={{ backgroundColor: `${stat.color}20` }}
+											style={{ backgroundColor: `color-mix(in oklch, ${stat.color} 12%, transparent)` }}
 										>
 											<div style={{ color: stat.color }}>{stat.icon}</div>
 										</div>
@@ -401,11 +409,11 @@ export function TaxonomySettingsModern() {
 
 					{/* Content */}
 					{isLoading ? (
-						<div className="flex items-center justify-center p-12">
+						<div className="flex items-center justify-center p-6">
 							<div className="h-8 w-8 animate-spin rounded-full border-primary border-b-2" />
 						</div>
 					) : currentItems.length === 0 ? (
-						<div className="flex flex-col items-center justify-center py-12 text-center">
+						<div className="flex flex-col items-center justify-center py-6 text-center">
 							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-muted">
 								<Tag className="h-6 w-6 text-muted-foreground" />
 							</div>
