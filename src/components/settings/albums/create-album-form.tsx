@@ -235,7 +235,7 @@ export function CreateAlbumForm({
 					Color
 				</Label>
 				<div className="flex items-center gap-2">
-					<div className="h-8 w-8 rounded border-2 border-border" style={{ backgroundColor: formData.color }} />
+					<div className="h-8 w-8 rounded border border-border" style={{ backgroundColor: formData.color }} />
 					<Input
 						className="w-20"
 						id="color"

@@ -61,7 +61,7 @@ export const ThumbnailGrid = memo(function ThumbnailGrid({
 									<ImageIcon className="h-3 w-3 text-muted-foreground/60" />
 								</div>
 							) : (
-								<div className="h-full w-full border-2 border-muted-foreground/20 border-dashed bg-muted/30" />
+								<div className="h-full w-full border border-muted-foreground/20 border-dashed bg-muted/30" />
 							)}
 						</div>
 					);

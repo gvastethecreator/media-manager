@@ -5,8 +5,8 @@
  */
 
 import { Check, Image as ImageIcon, LayoutGrid, Monitor, Moon, Palette, Sun, Type } from 'lucide-react';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Switch } from '@/components/ui/switch';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group-v3';
+import { Switch } from '@/components/ui/switch-v3';
 import { useTheme } from '@/hooks/use-theme';
 import { cn } from '@/lib/utils';
 
@@ -194,7 +194,7 @@ export function AppearanceSettingsModern() {
 						].map((item) => (
 							<button
 								className={cn(
-									'flex flex-col items-start gap-1 rounded-lg border-2 p-3 text-left transition-all',
+									'flex flex-col items-start gap-1 rounded-lg border p-3 text-left transition-all',
 									'hover:border-border/80 hover:bg-muted/50',
 									density === item.value ? 'border-primary bg-primary/5' : 'border-border/50 bg-card'
 								)}
@@ -270,8 +270,8 @@ export function AppearanceSettingsModern() {
 						label="Mostrar Metadatos en Grid"
 					>
 						<Switch
-							checked={preferences.showMetadataInGrid}
-							onCheckedChange={(v) => setPreferences({ showMetadataInGrid: v })}
+							checked={Boolean(preferences.showMetadataInGrid)}
+							onCheckedChange={(v: boolean) => setPreferences({ showMetadataInGrid: v })}
 						/>
 					</SettingsRow>
 
@@ -282,8 +282,10 @@ export function AppearanceSettingsModern() {
 						<div className="flex items-center gap-2">
 							<select
 								className="rounded-md border border-border/50 bg-background px-3 py-1.5 text-sm outline-none focus:border-primary"
-								onChange={(e) => setPreferences({ thumbnailQuality: e.target.value as 'low' | 'medium' | 'high' })}
-								value={preferences.thumbnailQuality || 'medium'}
+								onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
+									setPreferences({ thumbnailQuality: e.target.value as 'low' | 'medium' | 'high' })
+								}
+								value={String(preferences.thumbnailQuality || 'medium')}
 							>
 								<option value="low">Baja (rápido)</option>
 								<option value="medium">Media (balance)</option>

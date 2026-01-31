@@ -68,7 +68,7 @@ function TableThumbnail({ item }: { item: BrowserItem }) {
 	// Item sintético de navegación
 	if (item.isSynthetic && item.name === '..') {
 		return (
-			<div className="flex h-6 w-6 shrink-0 items-center justify-center rounded bg-muted">
+			<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border/20 bg-muted">
 				<CornerUpLeft className="h-3.5 w-3.5 text-muted-foreground" />
 			</div>
 		);
@@ -78,7 +78,7 @@ function TableThumbnail({ item }: { item: BrowserItem }) {
 	if (item.entityType === 'folder') {
 		return (
 			<div
-				className="flex h-6 w-6 shrink-0 items-center justify-center rounded"
+				className="flex h-8 w-8 shrink-0 items-center justify-center rounded-md border border-border/20"
 				style={{ backgroundColor: item.color ?? 'hsl(var(--muted))' }}
 			>
 				{item.emoji ? <span className="text-xs">{item.emoji}</span> : <Folder className="h-3.5 w-3.5 text-warning" />}
@@ -89,7 +89,7 @@ function TableThumbnail({ item }: { item: BrowserItem }) {
 	// Archivo multimedia
 	const mediaItem = toMediaItem(item);
 	return (
-		<div className="h-6 w-6 shrink-0 overflow-hidden rounded">
+		<div className="h-8 w-8 shrink-0 overflow-hidden rounded-md border border-border/20">
 			<MediaThumbnail className="h-full w-full object-cover" item={mediaItem} />
 		</div>
 	);
@@ -248,7 +248,7 @@ export function TableView({
 		>
 			<table className="w-full border-collapse text-sm" data-testid="table-view">
 				{/* Header */}
-				<thead className="sticky top-0 z-10 border-b bg-background">
+				<thead className="sticky top-0 z-10 border-border/40 border-b-2 bg-muted/50 pt-1">
 					<tr>
 						{columns.map((col) => {
 							const sortState = getSortState(col.key);
@@ -293,12 +293,12 @@ export function TableView({
 							<tr
 								className={cn(
 									!suppressAppearAnimation && 'file-browser-item',
-									'border-b',
+									'border-border/30 border-b',
 									'cursor-pointer',
-									'transition-colors',
-									'hover:bg-accent/50',
-									selectedIds.has(item.id) && 'bg-accent',
-									activeId === item.id && 'ring-1 ring-primary/50 ring-inset'
+									'transition-all duration-200',
+									'hover:border-l-2 hover:border-l-primary/30 hover:bg-muted/60',
+									selectedIds.has(item.id) && 'border-l-[3px] border-l-primary bg-muted/80',
+									activeId === item.id && 'ring-1 ring-primary/30'
 								)}
 								{...(shouldLayout
 									? {

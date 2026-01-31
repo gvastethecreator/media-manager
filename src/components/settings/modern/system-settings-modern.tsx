@@ -35,8 +35,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Label } from '@/components/ui/label';
 import { Progress } from '@/components/ui/progress';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group-v3';
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
+import { Switch } from '@/components/ui/switch-v3';
 import { useRepairSystem, useResetDatabase, useSystemStats, useSystemVersion } from '@/lib/api/system';
 import { toastService } from '@/lib/ui/toast';
 import { cn } from '@/lib/utils';
@@ -268,23 +269,16 @@ export function SystemSettingsModern() {
 					<Separator className="my-4" />
 
 					<SettingsGroup title="Nivel de Logging">
-						<div className="space-y-3">
+						<RadioGroup className="space-y-3" onValueChange={(value) => setLogLevel(value)} value={logLevel}>
 							{['error', 'warn', 'info', 'debug'].map((level) => (
 								<div className="flex items-center justify-between" key={level}>
 									<Label className="cursor-pointer" htmlFor={`log-${level}`}>
 										{level.charAt(0).toUpperCase() + level.slice(1)}
 									</Label>
-									<input
-										checked={logLevel === level}
-										className="h-4 w-4 cursor-pointer accent-primary"
-										id={`log-${level}`}
-										name="log-level"
-										onChange={() => setLogLevel(level)}
-										type="radio"
-									/>
+									<RadioGroupItem id={`log-${level}`} value={level} />
 								</div>
 							))}
-						</div>
+						</RadioGroup>
 					</SettingsGroup>
 				</SettingsCard>
 			</div>
