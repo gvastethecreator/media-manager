@@ -145,7 +145,7 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 	// Si no es un formato soportado o hay error, mostrar placeholder
 	if (!isSupported || error) {
 		return (
-			<Card className={cn('flex h-[500px] items-center justify-center', className)}>
+			<Card className={cn('flex h-full items-center justify-center', className)}>
 				<ErrorPlaceholder
 					error={error || (isSupported ? undefined : `Formato .${fileExtension} no soportado para vista previa`)}
 					fileName={fileName}
@@ -156,7 +156,7 @@ export const ThreeDViewer = memo(function ThreeDViewer({ src, fileName, classNam
 	}
 
 	return (
-		<Card className={cn('relative h-[500px] overflow-hidden', className)}>
+		<Card className={cn('relative h-full overflow-hidden', className)}>
 			{/* Canvas 3D - Solo se renderiza una vez */}
 			<div className="absolute inset-0 bg-gradient-to-b from-background to-muted">
 				<Canvas
