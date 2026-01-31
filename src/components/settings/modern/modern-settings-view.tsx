@@ -8,6 +8,7 @@ import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { EntitiesCardsSettings } from '../entities-cards/entities-cards-settings';
 import { ProfilesSettings } from '../profiles/profiles-settings';
+import { ShortcutsSettings } from '../shortcuts/shortcuts-settings';
 import { UploadedImagesSettings } from '../uploaded-images/uploaded-images-settings';
 import { AppearanceSettingsModern } from './appearance-settings-modern';
 import { FilesSettingsModern } from './files-settings-modern';
@@ -54,16 +55,18 @@ function SettingsContent({ itemId }: { itemId: string }) {
 			return <ProfilesSettings />;
 
 		case 'appearance':
-		case 'shortcuts':
-		case 'panels':
 			return <AppearanceSettingsModern />;
+		case 'shortcuts':
+			return <ShortcutsSettings />;
+		case 'panels':
+			return <AppearanceSettingsModern />; // Still fallback until panels exist
 
 		case 'entities-cards':
 			return <EntitiesCardsSettings />;
 
 		case 'folders':
 		case 'thumbnails':
-			return <FilesSettingsModern />;
+			return <FilesSettingsModern defaultTab={itemId} />;
 
 		case 'images':
 		case 'videos':

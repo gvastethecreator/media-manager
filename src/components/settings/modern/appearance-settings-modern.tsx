@@ -23,17 +23,8 @@ export function AppearanceSettingsModern() {
 	const preferences = useInterfaceSettingsStore((s) => s.preferences);
 	const setPreferences = useInterfaceSettingsStore((s) => s.setPreferences);
 
-	// Helpers para mapeo de valores
-	const handleGridDensityChange = (value: number[]) => {
-		// Asumiendo que 'mosaic' es el valor representativo para la demo
-		setPreferences({
-			thumbnailsBorderRadius: { ...preferences?.thumbnailsBorderRadius, mosaic: value[0] },
-		});
-	};
-
 	// Mapeo seguro de valores
 	const fontSize = (preferences?.fontSize as FontSize) || 'base';
-	const density = 'default'; // TODO: Agregar density al store si no existe
 
 	if (!preferences) {
 		return <div className="p-4 text-center">Cargando configuración...</div>;
@@ -95,26 +86,26 @@ export function AppearanceSettingsModern() {
 			{/* Typography & Density Card */}
 			<SettingsCard color="var(--primary)" description="Ajusta tamaño de fuente" icon={<Type />} title="Tipografía">
 				<SettingsGroup title="Tamaño de Fuente">
-					<div className="flex flex-col gap-3">
-						{[
-							{ value: 'xs', label: 'Extra pequeño', size: 'text-xs' },
-							{ value: 'sm', label: 'Pequeño', size: 'text-sm' },
-							{ value: 'base', label: 'Normal', size: 'text-base' },
-							{ value: 'lg', label: 'Grande', size: 'text-lg' },
-							{ value: 'xl', label: 'Extra grande', size: 'text-xl' },
-						].map((item) => (
-							<RadioGroupItem
-								checked={preferences.fontSize === item.value}
-								className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all hover:bg-muted/50 data-[state=checked]:border-primary data-[state=checked]:bg-primary/5"
-								key={item.value}
-								onClick={() => setPreferences({ fontSize: item.value as FontSize })}
-								value={item.value}
-							>
-								<span className={item.size}>Abc</span>
-								<span className="text-sm">{item.label}</span>
-							</RadioGroupItem>
-						))}
-					</div>
+					<RadioGroup onValueChange={(v) => setPreferences({ fontSize: v as FontSize })} value={preferences.fontSize}>
+						<div className="flex flex-col gap-3">
+							{[
+								{ value: 'xs', label: 'Extra pequeño', size: 'text-xs' },
+								{ value: 'sm', label: 'Pequeño', size: 'text-sm' },
+								{ value: 'base', label: 'Normal', size: 'text-base' },
+								{ value: 'lg', label: 'Grande', size: 'text-lg' },
+								{ value: 'xl', label: 'Extra grande', size: 'text-xl' },
+							].map((item) => (
+								<RadioGroupItem
+									className="flex cursor-pointer items-center gap-3 rounded-lg border p-3 transition-all hover:bg-muted/50 data-[state=checked]:border-primary data-[state=checked]:bg-primary/5"
+									key={item.value}
+									value={item.value}
+								>
+									<span className={item.size}>Abc</span>
+									<span className="text-sm">{item.label}</span>
+								</RadioGroupItem>
+							))}
+						</div>
+					</RadioGroup>
 				</SettingsGroup>
 			</SettingsCard>
 
