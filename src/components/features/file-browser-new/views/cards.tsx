@@ -5,8 +5,16 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { MediaItemGridV3 } from '@/components/features/file-browser-new/components/media-item-v3';
-import type { BrowserItem } from '../types/item.types';
+import type { BrowserEntityType, BrowserItem } from '../types/item.types';
+import { toTypedBrowserItem } from '../types/item.types';
+import { TCG3DCard } from '../components/tcg-cards/tcg-3d-card';
+import { TCGAudioCard } from '../components/tcg-cards/tcg-audio-card';
+import { TCGCardBase } from '../components/tcg-cards/tcg-card-base';
+import { TCGDocumentCard } from '../components/tcg-cards/tcg-document-card';
+import { TCGFolderCard } from '../components/tcg-cards/tcg-folder-card';
+import { TCGImageCard } from '../components/tcg-cards/tcg-image-card';
+import { TCGJsonCard } from '../components/tcg-cards/tcg-json-card';
+import { TCGVideoCard } from '../components/tcg-cards/tcg-video-card';
 import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '../types/props.types';
 import type { CardsViewConfig } from '../types/view.types';
 
@@ -45,6 +53,7 @@ export function CardsView({
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [internalScrollEl, setInternalScrollEl] = useState<HTMLDivElement | null>(null);
 	const [containerWidth, setContainerWidth] = useState(0);
+	const [containerHeight, setContainerHeight] = useState(0);
 
 	const cardSize = config.cardSize;
 	const gap = config.gap;
@@ -65,15 +74,22 @@ export function CardsView({
 		return items;
 	}, [items, page, pageSize]);
 	const shouldVirtualize = virtualizationConfig.enabled && displayItems.length >= virtualizationConfig.threshold;
+	const allowAppearAnimation = !(suppressAppearAnimation || shouldVirtualize);
 	const safeWidth = Math.max(containerWidth, cardSize);
 	const columns = Math.max(1, Math.floor((safeWidth + gap) / (cardSize + gap)));
-	const columnWidth = Math.max(cardSize, Math.floor((safeWidth - gap * (columns - 1)) / columns));
+	const actualCardWidth = Math.max(1, Math.round((safeWidth - gap * (columns - 1)) / columns));
+	const cardHeight = Math.round(actualCardWidth * 1.32);
+	const rowHeight = cardHeight + gap;
 	const rowCount = Math.ceil(displayItems.length / columns);
+	const overscanRows = Math.max(
+		virtualizationConfig.overscan,
+		containerHeight > 0 ? Math.ceil(containerHeight / rowHeight) : 0
+	);
 	const rowVirtualizer = useVirtualizer({
 		count: rowCount,
 		getScrollElement: () => containerRef.current,
-		estimateSize: () => cardSize + gap,
-		overscan: virtualizationConfig.overscan,
+		estimateSize: () => rowHeight,
+		overscan: overscanRows,
 	});
 
 	// Scroll al inicio cuando cambia la página
@@ -89,11 +105,13 @@ export function CardsView({
 		const observer = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				setContainerWidth(entry.contentRect.width);
+				setContainerHeight(entry.contentRect.height);
 			}
 		});
 
 		observer.observe(container);
 		setContainerWidth(container.clientWidth);
+		setContainerHeight(container.clientHeight);
 
 		return () => observer.disconnect();
 	}, []);
@@ -137,6 +155,88 @@ export function CardsView({
 		[onItemContextMenu]
 	);
 
+	const renderCardItem = useCallback(
+		(item: BrowserItem, index: number) => {
+			const isSelected = selectedIds.has(item.id);
+			const isActive = activeId === item.id;
+
+			const baseProps = {
+				className: 'tcg-card--hover-reveal',
+				height: cardHeight,
+				isActive,
+				isSelected,
+				onClick: (e: React.MouseEvent) => handleItemClick(item, e),
+				onContextMenu: (e: React.MouseEvent) => handleItemContextMenu(item, e),
+				onDoubleClick: () => handleItemDoubleClick(item),
+				variant: 'card' as const,
+				width: actualCardWidth,
+			};
+
+			switch (item.entityType) {
+				case 'image':
+					return (
+						<TCGImageCard
+							{...baseProps}
+							item={toTypedBrowserItem(item, 'image')}
+							key={item.id}
+							showExif
+						/>
+					);
+				case 'video':
+					return (
+						<TCGVideoCard {...baseProps} item={toTypedBrowserItem(item, 'video')} key={item.id} />
+					);
+				case 'audio':
+					return (
+						<TCGAudioCard {...baseProps} item={toTypedBrowserItem(item, 'audio')} key={item.id} />
+					);
+				case 'document':
+					return (
+						<TCGDocumentCard {...baseProps} item={toTypedBrowserItem(item, 'document')} key={item.id} />
+					);
+				case 'jsonFile':
+					return (
+						<TCGJsonCard {...baseProps} item={toTypedBrowserItem(item, 'jsonFile')} key={item.id} />
+					);
+				case 'file3d':
+					return (
+						<TCG3DCard {...baseProps} item={toTypedBrowserItem(item, 'file3d')} key={item.id} />
+					);
+				case 'folder':
+					return (
+						<TCGFolderCard {...baseProps} item={toTypedBrowserItem(item, 'folder')} key={item.id} />
+					);
+				default: {
+					const fallbackType = item.entityType as BrowserEntityType;
+					return (
+						<TCGCardBase
+							{...baseProps}
+							accentColor="var(--dt-primary-500)"
+							item={item}
+							key={item.id}
+							thumbnailContent={
+								<div className="flex h-full w-full items-center justify-center text-muted-foreground">
+									{fallbackType}
+								</div>
+							}
+							variant="card"
+							width={actualCardWidth}
+						/>
+					);
+				}
+			}
+		},
+		[
+			activeId,
+			actualCardWidth,
+			cardHeight,
+			handleItemClick,
+			handleItemContextMenu,
+			handleItemDoubleClick,
+			selectedIds,
+		]
+	);
+
 	return (
 		<div
 			className="h-full w-full overflow-auto"
@@ -150,26 +250,16 @@ export function CardsView({
 			<div className="h-full w-full" data-testid="cards-view">
 				{!shouldVirtualize && (
 					<div
-						className="flex flex-wrap p-3"
+						className="grid p-4"
 						data-testid="cards-view-container"
 						ref={(el) => onLayoutRootReady?.(el)}
-						style={{ gap: `${gap}px` }}
+						style={{
+							gridTemplateColumns: `repeat(auto-fill, minmax(${cardSize}px, 1fr))`,
+							columnGap: `${gap}px`,
+							rowGap: `${gap}px`,
+						}}
 					>
-						{displayItems.map((item, index) => (
-							<MediaItemGridV3
-								animateIn={!suppressAppearAnimation}
-								isActive={activeId === item.id}
-								isSelected={selectedIds.has(item.id)}
-								item={item}
-								key={item.id}
-								layoutItem={index < layoutItemLimit}
-								layoutOrder={index}
-								onClick={(e) => handleItemClick(item, e)}
-								onContextMenu={(e) => handleItemContextMenu(item, e)}
-								onDoubleClick={() => handleItemDoubleClick(item)}
-								size={cardSize}
-							/>
-						))}
+						{displayItems.map((item, index) => renderCardItem(item, index))}
 					</div>
 				)}
 				{shouldVirtualize && (
@@ -186,7 +276,7 @@ export function CardsView({
 
 							return (
 								<div
-									className="flex"
+									className="grid"
 									key={virtualRow.key}
 									style={{
 										position: 'absolute',
@@ -194,24 +284,14 @@ export function CardsView({
 										left: 0,
 										width: '100%',
 										transform: `translateY(${virtualRow.start}px)`,
+										gridTemplateColumns: `repeat(${columns}, 1fr)`,
 										gap: `${gap}px`,
+										paddingBottom: `${gap}px`,
 									}}
 								>
-									{rowItems.map((item, index) => (
-										<MediaItemGridV3
-											animateIn={!suppressAppearAnimation}
-											isActive={activeId === item.id}
-											isSelected={selectedIds.has(item.id)}
-											item={item}
-											key={item.id}
-											layoutItem={from + index < layoutItemLimit}
-											layoutOrder={from + index}
-											onClick={(e) => handleItemClick(item, e)}
-											onContextMenu={(e) => handleItemContextMenu(item, e)}
-											onDoubleClick={() => handleItemDoubleClick(item)}
-											size={columnWidth}
-										/>
-									))}
+									{rowItems.map((item, index) => {
+										return renderCardItem(item, from + index);
+									})}
 								</div>
 							);
 						})}

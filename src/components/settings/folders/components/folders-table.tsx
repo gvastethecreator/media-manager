@@ -410,9 +410,7 @@ export function FoldersTable({
 															>
 																{folder.name}
 															</span>
-															{folder.isFavorite && (
-																<Star className="h-3 w-3 fill-amber-500 text-warning dark:fill-amber-400 dark:text-amber-400" />
-															)}
+															{folder.isFavorite && <Star className="h-3 w-3 fill-warning text-warning" />}
 															{folder._isOrphan && (
 																<Badge className="text-[11px]" variant="destructive">
 																	Huérfana

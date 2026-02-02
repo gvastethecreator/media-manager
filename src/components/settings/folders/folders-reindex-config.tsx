@@ -105,7 +105,7 @@ export function StructuredReindexConfig({
 									<span>Limpieza</span>
 								</div>
 								<div className="flex items-center gap-1 text-muted-foreground">
-									<div className="h-2 w-2 rounded-full bg-purple-500" />
+									<div className="h-2 w-2 rounded-full bg-entity-collection" />
 									<span>Estructura</span>
 								</div>
 								<div className="flex items-center gap-1 text-muted-foreground">
@@ -113,11 +113,11 @@ export function StructuredReindexConfig({
 									<span>Indexado</span>
 								</div>
 								<div className="flex items-center gap-1 text-muted-foreground">
-									<div className="h-2 w-2 rounded-full bg-orange-500" />
+									<div className="h-2 w-2 rounded-full bg-entity-image" />
 									<span>Thumbnails</span>
 								</div>
 								<div className="flex items-center gap-1 text-muted-foreground">
-									<div className="h-2 w-2 rounded-full bg-teal-500" />
+									<div className="h-2 w-2 rounded-full bg-entity-tag" />
 									<span>Metadata</span>
 								</div>
 								<div className="flex items-center gap-1 text-muted-foreground">
@@ -166,7 +166,7 @@ export function StructuredReindexConfig({
 						<div className="flex items-center justify-between">
 							<div className="space-y-1">
 								<Label className="flex items-center gap-2 text-sm" htmlFor="skip-metadata">
-									<FileText className="h-3.5 w-3.5 text-teal-500" />
+									<FileText className="h-3.5 w-3.5 text-entity-tag" />
 									Saltar Metadata
 								</Label>
 								<p className="text-muted-foreground text-xs">

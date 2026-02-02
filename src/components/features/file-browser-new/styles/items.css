@@ -20,6 +20,31 @@
 	animation-delay: var(--fb-item-delay, 0ms);
 }
 
+.fb-entity-badge {
+	background: color-mix(in oklch, var(--fb-entity-color) 18%, transparent);
+	border: 1px solid color-mix(in oklch, var(--fb-entity-color) 35%, transparent);
+	color: color-mix(
+		in oklch,
+		var(--fb-entity-color) 65%,
+		hsl(var(--foreground))
+	);
+}
+
+.fb-entity-badge--overlay {
+	background: color-mix(in oklch, var(--fb-entity-color) 55%, transparent);
+	border-color: color-mix(in oklch, var(--fb-entity-color) 60%, transparent);
+	color: hsl(var(--foreground));
+}
+
+.fb-thumb-overlay {
+	background: linear-gradient(
+		to top,
+		color-mix(in oklch, var(--foreground) 65%, transparent),
+		color-mix(in oklch, var(--foreground) 30%, transparent),
+		transparent
+	);
+}
+
 @media (prefers-reduced-motion: reduce) {
 	.file-browser-item {
 		animation: none;

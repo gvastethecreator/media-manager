@@ -229,33 +229,58 @@ export const getFolderStats = async (
 		thumbnailUrl?: string;
 	}>;
 }> => {
-	const response = await apiClient.get<{
-		totalImages: number;
-		totalVideos: number;
-		totalAudio: number;
-		totalDocuments: number;
-		totalOthers: number;
-		totalSize: number;
-		lastActivity: string | null; // ✅ Fix: JSON serializa fechas como strings
-		recentImages?: Array<{
-			id: string;
-			name: string;
-			thumbnailUrl?: string;
-		}>;
-	}>(`/folders/${folderId}/stats`);
+	const response = await apiClient.get<
+		| {
+				images?: number;
+				videos?: number;
+				audios?: number;
+				documents?: number;
+				jsonFiles?: number;
+				file3Ds?: number;
+				total?: number;
+		  }
+		| {
+				totalImages: number;
+				totalVideos: number;
+				totalAudio: number;
+				totalDocuments: number;
+				totalOthers: number;
+				totalSize: number;
+				lastActivity: string | null;
+				recentImages?: Array<{
+					id: string;
+					name: string;
+					thumbnailUrl?: string;
+				}>;
+		  }
+	>(`/folders/${folderId}/files/stats`);
 
-	// Normalizar para asegurar thumbnailUrl presente y parsear lastActivity correctamente
+	const legacy = response as {
+		images?: number;
+		videos?: number;
+		audios?: number;
+		documents?: number;
+		jsonFiles?: number;
+		file3Ds?: number;
+		parseError?: boolean;
+	};
+
 	const normalized = {
-		...response,
-		// ✅ Fix: Convertir string ISO a Date o null
-		lastActivity: response.lastActivity ? new Date(response.lastActivity) : null,
-		recentImages: response.recentImages?.map((img: any) => ({
+		totalImages: (legacy.images ?? (response as any).totalImages ?? 0) as number,
+		totalVideos: (legacy.videos ?? (response as any).totalVideos ?? 0) as number,
+		totalAudio: (legacy.audios ?? (response as any).totalAudio ?? 0) as number,
+		totalDocuments: (legacy.documents ?? (response as any).totalDocuments ?? 0) as number,
+		totalOthers:
+			((response as any).totalOthers as number | undefined) ?? (legacy.jsonFiles ?? 0) + (legacy.file3Ds ?? 0),
+		totalSize: (response as any).totalSize ?? 0,
+		lastActivity: (response as any).lastActivity ? new Date((response as any).lastActivity) : null,
+		recentImages: (response as any).recentImages?.map((img: any) => ({
 			id: img.id,
 			name: img.name,
-			// Preferir thumbnailUrl, fallback a thumbnail
 			thumbnailUrl: img.thumbnailUrl ?? img.thumbnail ?? undefined,
 		})),
 	};
+
 	return normalized;
 };
 

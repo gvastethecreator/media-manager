@@ -60,7 +60,6 @@ const PropertiesView = lazy(() =>
 	import('@/components/views/properties/properties-view').then((m) => ({ default: m.PropertiesView }))
 );
 const SearchView = lazy(() => import('@/components/views/search/search-view').then((m) => ({ default: m.SearchView })));
-const SettingsContentView = lazy(() => import('@/components/views/settings/settings-content-view'));
 const TagContentView = lazy(() =>
 	import('@/components/views/tags/tag-content-view').then((m) => ({ default: m.TagContentView }))
 );
@@ -145,10 +144,6 @@ export const router = createBrowserRouter([
 				element: <Dashboard />,
 			},
 			// Rutas principales
-			{
-				path: 'settings',
-				element: <SettingsContentView />,
-			},
 			{
 				path: 'development',
 				element: <DevelopmentContentView />,

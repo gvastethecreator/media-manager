@@ -14,6 +14,12 @@ export interface PerViewConfigBase {
 export interface GridLikeViewConfig extends PerViewConfigBase {
 	itemSize: number; // tamaño de celda o tarjeta
 	gap?: number;
+	padding?: number;
+	tcgHoverReveal?: boolean;
+	tcgHolo?: boolean;
+	tcgShadows?: boolean;
+	tcgRounded?: boolean;
+	tcgTilt?: boolean;
 }
 
 export interface ListLikeViewConfig extends PerViewConfigBase {
@@ -128,8 +134,8 @@ const DEFAULT_STATE = {
 	enableAnimations: true,
 	animationDuration: 300,
 	pagination: {
-		mode: 'infinite' as PaginationMode,
-		pageSize: 20,
+		mode: 'pagination' as PaginationMode,
+		pageSize: 200,
 	},
 	infiniteScroll: {
 		enabled: true,
@@ -140,7 +146,18 @@ const DEFAULT_STATE = {
 	views: {
 		grid: { kind: 'grid', renderingMode: 'canvas', itemSize: 150, gap: 8 },
 		list: { kind: 'list', renderingMode: 'canvas', rowHeight: 36 },
-		masonry: { kind: 'grid', renderingMode: 'canvas', itemSize: 150, gap: 8 },
+		masonry: {
+			kind: 'masonry',
+			renderingMode: 'canvas',
+			itemSize: 200,
+			gap: 8,
+			padding: 16,
+			tcgHoverReveal: true,
+			tcgHolo: true,
+			tcgShadows: true,
+			tcgRounded: true,
+			tcgTilt: true,
+		},
 		cards: { kind: 'grid', renderingMode: 'canvas', itemSize: 180, gap: 12 },
 		table: { kind: 'list', renderingMode: 'canvas', rowHeight: 32 },
 	} as Record<ViewKey, PerViewConfig>,
@@ -173,7 +190,9 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 			setPaginationMode: (mode: PaginationMode) =>
 				set((state: ViewOptionsState) => ({ pagination: { ...state.pagination, mode } })),
 			setPageSize: (size: number) =>
-				set((state: ViewOptionsState) => ({ pagination: { ...state.pagination, pageSize: Math.max(1, size) } })),
+				set((state: ViewOptionsState) => ({
+					pagination: { ...state.pagination, pageSize: Math.min(200, Math.max(1, size)) },
+				})),
 
 			setViewMode: (mode: ViewMode) => {
 				if (get().viewMode === mode) return;
@@ -319,6 +338,8 @@ export const useViewOptionsStore = create<ViewOptionsState>()(
 				// defaults para nuevos campos
 				merged.backgroundColor ??= DEFAULT_STATE.backgroundColor;
 				merged.pagination ??= DEFAULT_STATE.pagination;
+				merged.pagination.mode ??= DEFAULT_STATE.pagination.mode;
+				merged.pagination.pageSize = Math.min(200, Math.max(1, merged.pagination.pageSize ?? 200));
 				merged.infiniteScroll ??= DEFAULT_STATE.infiniteScroll;
 				merged.infiniteScroll.cooldownMs ??= DEFAULT_STATE.infiniteScroll.cooldownMs;
 				merged.includeSubfolders ??= DEFAULT_STATE.includeSubfolders;

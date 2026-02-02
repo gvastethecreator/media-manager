@@ -3,11 +3,11 @@
  * @module file-browser-new/hooks/use-data-source
  */
 
-import { useCallback, useMemo, useRef } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useFolder, useFolders } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import { DEFAULT_PAGE_SIZE } from '../core/constants';
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE } from '../core/constants';
 import type { BrowserItem } from '../types/item.types';
 import { createParentNavItem, toBrowserItem } from '../types/item.types';
 import { useFolderFilesPaginated } from './use-folder-files-paginated';
@@ -21,6 +21,8 @@ export interface UseDataSourceOptions {
 	directItems?: BrowserItem[];
 	/** Tamaño de página */
 	pageSize?: number;
+	/** Modo de paginación */
+	paginationMode?: 'pagination' | 'infinite';
 	/** Incluir subcarpetas */
 	includeSubfolders?: boolean;
 	/** Habilitado */
@@ -62,9 +64,23 @@ export function useDataSource({
 	folderId,
 	directItems,
 	pageSize = DEFAULT_PAGE_SIZE,
+	paginationMode = 'infinite',
 	includeSubfolders: includeSubfoldersOverride,
 	enabled = true,
 }: UseDataSourceOptions): UseDataSourceResult {
+	const safePageSize = Math.min(pageSize, MAX_PAGE_SIZE);
+
+	const [directLoadedCount, setDirectLoadedCount] = useState(() =>
+		directItems ? Math.min(directItems.length, safePageSize) : 0
+	);
+
+	useEffect(() => {
+		if (!directItems) return;
+		setDirectLoadedCount(
+			paginationMode === 'pagination' ? directItems.length : Math.min(directItems.length, safePageSize)
+		);
+	}, [directItems, paginationMode, safePageSize]);
+
 	// Configuración global
 	const includeSubfoldersGlobal = useViewOptionsStore((s) => s.includeSubfolders);
 	const includeSubfolders = includeSubfoldersOverride ?? includeSubfoldersGlobal;
@@ -81,13 +97,24 @@ export function useDataSource({
 	} = useFolders(folderId ? { parentId: folderId, limit: 500 } : {}, { enabled: !!folderId && !directItems });
 
 	// Hook de carga paginada
-	const { files, isLoading, isLoadingMore, error, hasMore, loadMore, total, loadedCount, refetch, invalidate } =
-		useFolderFilesPaginated({
-			folderId,
-			includeSubfolders,
-			pageSize,
-			enabled: enabled && !!folderId && !directItems,
-		});
+	const {
+		files,
+		flatFiles,
+		isLoading,
+		isLoadingMore,
+		error,
+		hasMore,
+		loadMore,
+		total,
+		loadedCount,
+		refetch,
+		invalidate,
+	} = useFolderFilesPaginated({
+		folderId,
+		includeSubfolders,
+		pageSize: safePageSize,
+		enabled: enabled && !!folderId && !directItems,
+	});
 
 	const folderItems = useMemo(() => {
 		if (!folderId || directItems) {
@@ -105,18 +132,22 @@ export function useDataSource({
 	const items = useMemo(() => {
 		// Si hay items directos, usarlos (filtrar nulos)
 		if (directItems) {
-			return directItems.filter(Boolean) as BrowserItem[];
+			const filtered = directItems.filter(Boolean) as BrowserItem[];
+			if (paginationMode === 'pagination') {
+				return filtered;
+			}
+			return filtered.slice(0, directLoadedCount);
 		}
 
-		logger.info('🔄 Converting files to items', { filesCount: files.length });
+		logger.info('🔄 Converting files to items', { filesCount: flatFiles.length });
 
-		// Convertir archivos cargados con guardas básicas
-		const fileItems = files
+		// Convertir archivos cargados con guardas básicas (usar flatFiles con metadata completo)
+		const fileItems = flatFiles
 			.filter(Boolean)
 			.map((file) => toBrowserItem(file as unknown as Record<string, unknown>))
 			.filter((item) => Boolean(item?.id) && Boolean(item?.entityType));
 		return [...folderItems, ...fileItems];
-	}, [directItems, files, folderItems]);
+	}, [directItems, directLoadedCount, paginationMode, flatFiles, folderItems]);
 
 	// Items con navegación a padre
 	const itemsWithParent = useMemo(() => {
@@ -135,17 +166,26 @@ export function useDataSource({
 
 	// Resultado para items directos
 	if (directItems) {
+		const totalCount = directItems.length;
+		const hasMoreDirect = paginationMode === 'pagination' ? false : totalCount > directLoadedCount;
+		const loadMoreDirect = () => {
+			if (paginationMode === 'pagination') return;
+			setDirectLoadedCount((count) => Math.min(count + safePageSize, totalCount));
+		};
+		const refreshDirect = async () => {
+			setDirectLoadedCount(paginationMode === 'pagination' ? totalCount : Math.min(totalCount, safePageSize));
+		};
 		return {
 			items: itemsWithParent,
 			isLoading: false,
 			isLoadingMore: false,
 			error: null,
-			totalCount: directItems.length,
-			loadedCount: directItems.length,
-			hasMore: false,
-			loadMore: () => {},
-			refresh: async () => {},
-			invalidate: () => {},
+			totalCount,
+			loadedCount: paginationMode === 'pagination' ? totalCount : directLoadedCount,
+			hasMore: hasMoreDirect,
+			loadMore: loadMoreDirect,
+			refresh: refreshDirect,
+			invalidate: refreshDirect,
 			scrollContainerRef,
 			parentFolderId: null,
 		};
