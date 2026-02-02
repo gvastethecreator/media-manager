@@ -6,7 +6,7 @@
 
 import { ChevronRight, Search, Settings2, X } from 'lucide-react';
 import React, { useCallback, useMemo, useState } from 'react';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
+import { Breadcrumb, BreadcrumbItem, BreadcrumbList, BreadcrumbPage } from '@/components/ui/breadcrumb';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
@@ -288,12 +288,9 @@ export function ModernSettingsLayout({
 					<Breadcrumb>
 						<BreadcrumbList>
 							<BreadcrumbItem>
-								<BreadcrumbLink
-									className="text-muted-foreground transition-colors hover:text-foreground"
-									href="/settings"
-								>
+								<span className="text-muted-foreground">
 									<Settings2 className="h-3.5 w-3.5" />
-								</BreadcrumbLink>
+								</span>
 							</BreadcrumbItem>
 							{activeCategory && (
 								<BreadcrumbItem>

@@ -79,7 +79,7 @@ const FileTypeProgressBars = memo(function FileTypeProgressBars({
 			count: folderStats?.totalVideos || 0,
 			icon: Video,
 			label: 'videos',
-			color: 'bg-purple-500',
+			color: 'bg-entity-video',
 		},
 		{
 			count: folderStats?.totalAudio || 0,
@@ -91,7 +91,7 @@ const FileTypeProgressBars = memo(function FileTypeProgressBars({
 			count: folderStats?.totalDocuments || 0,
 			icon: FileText,
 			label: 'docs',
-			color: 'bg-orange-500',
+			color: 'bg-entity-document',
 		},
 		{
 			count: folderStats?.totalOthers || 0,

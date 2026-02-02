@@ -98,7 +98,16 @@ export function FileBrowser({
 	// Opciones de vista
 	const backgroundColor = useViewOptionsStore((s) => s.backgroundColor);
 	const infiniteScroll = useViewOptionsStore((s) => s.infiniteScroll);
+	const paginationMode = useViewOptionsStore((s) => s.pagination.mode);
 	const virtualization = useViewOptionsStore((s) => s.virtualization);
+	const effectiveInfiniteScroll =
+		paginationMode === 'infinite'
+			? infiniteScroll
+			: {
+				...infiniteScroll,
+				enabled: false,
+				autoLoad: false,
+			};
 
 	// Navegación por teclado
 	const { handleNativeKeyDown } = useKeyboardNavigation({
@@ -357,6 +366,8 @@ export function FileBrowser({
 					<ListView
 						{...viewProps}
 						config={config.kind === 'list' ? config : { kind: 'list', renderMode: 'canvas', gap: 0, rowHeight: 36 }}
+						page={effectiveInfiniteScroll.enabled ? undefined : browser.pagination.page}
+						pageSize={browser.pagination.pageSize}
 					/>
 				);
 
@@ -365,9 +376,22 @@ export function FileBrowser({
 					<MasonryView
 						{...viewProps}
 						config={
-							config.kind === 'masonry' ? config : { kind: 'masonry', renderMode: 'canvas', gap: 8, columnWidth: 200 }
+							config.kind === 'masonry'
+								? config
+								: {
+									kind: 'masonry',
+									renderMode: 'canvas',
+									gap: 8,
+									columnWidth: 200,
+									padding: 16,
+									tcgHoverReveal: true,
+									tcgHolo: true,
+									tcgShadows: true,
+									tcgRounded: true,
+									tcgTilt: true,
+								}
 						}
-						page={infiniteScroll.enabled ? undefined : browser.pagination.page}
+						page={effectiveInfiniteScroll.enabled ? undefined : browser.pagination.page}
 						pageSize={browser.pagination.pageSize}
 					/>
 				);
@@ -380,14 +404,16 @@ export function FileBrowser({
 							config.kind === 'table'
 								? config
 								: {
-										kind: 'table',
-										renderMode: 'canvas',
-										gap: 0,
-										rowHeight: 32,
-										visibleColumns: ['name', 'entityType', 'size', 'createdAt'],
-									}
+									kind: 'table',
+									renderMode: 'canvas',
+									gap: 0,
+									rowHeight: 32,
+									visibleColumns: ['name', 'entityType', 'size', 'createdAt'],
+								}
 						}
 						onSortChange={browser.toggleSortField}
+						page={effectiveInfiniteScroll.enabled ? undefined : browser.pagination.page}
+						pageSize={browser.pagination.pageSize}
 						sortOptions={browser.sortOptions}
 					/>
 				);
@@ -401,7 +427,7 @@ export function FileBrowser({
 								? config
 								: { kind: 'cards', renderMode: 'canvas', gap: 12, cardSize: 180, showDetails: true }
 						}
-						page={infiniteScroll.enabled ? undefined : browser.pagination.page}
+						page={effectiveInfiniteScroll.enabled ? undefined : browser.pagination.page}
 						pageSize={browser.pagination.pageSize}
 					/>
 				);
@@ -415,12 +441,12 @@ export function FileBrowser({
 								: { kind: 'grid', renderMode: 'canvas', gap: 8, itemSize: 150, columns: 0 }
 						}
 						itemSize={browser.itemSize}
-						page={infiniteScroll.enabled ? undefined : browser.pagination.page}
+						page={effectiveInfiniteScroll.enabled ? undefined : browser.pagination.page}
 						pageSize={browser.pagination.pageSize}
 					/>
 				);
 		}
-	}, [browser, viewProps, infiniteScroll.enabled]);
+	}, [browser, viewProps, effectiveInfiniteScroll.enabled]);
 
 	// IDs para toolbar (sin sintéticos)
 	const toolbarItemIds = useMemo(
@@ -517,15 +543,17 @@ export function FileBrowser({
 			</section>
 
 			{/* Botón de cargar más (si no es infinite scroll automático) */}
-			{!(infiniteScroll.enabled && infiniteScroll.autoLoad) && browser.shouldRenderContent && browser.hasMore && (
-				<LoadMoreButton
-					hasMore={browser.hasMore}
-					isLoading={browser.isLoadingMore}
-					loadedCount={browser.realItemCount}
-					onLoadMore={browser.loadMore}
-					totalCount={browser.pagination.totalItems}
-				/>
-			)}
+			{!(effectiveInfiniteScroll.enabled && effectiveInfiniteScroll.autoLoad) &&
+				browser.shouldRenderContent &&
+				browser.hasMore && (
+					<LoadMoreButton
+						hasMore={browser.hasMore}
+						isLoading={browser.isLoadingMore}
+						loadedCount={browser.realItemCount}
+						onLoadMore={browser.loadMore}
+						totalCount={browser.pagination.totalItems}
+					/>
+				)}
 
 			{/* Status Bar */}
 			<FileBrowserStatusBar

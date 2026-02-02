@@ -14,52 +14,44 @@ import { cn } from '@/lib/utils';
  * 🎨 VARIANTS
  * ===================================================== */
 
-const statCardVariants = cva(
-	'group relative overflow-hidden rounded-[4px] border transition-all duration-dt-normal',
-	{
-		variants: {
-			variant: {
-				default: 'border-white/10 bg-[#1a1a1a] hover:border-white/20 hover:bg-[#202020]',
-				primary:
-					'border-primary/20 bg-[#1a1a1a] hover:border-primary/40',
-				secondary:
-					'border-secondary/20 bg-[#1a1a1a] hover:border-secondary/40',
-				success:
-					'border-success/20 bg-[#1a1a1a] hover:border-success/40',
-				warning:
-					'border-warning/20 bg-[#1a1a1a] hover:border-warning/40',
-				destructive:
-					'border-destructive/20 bg-[#1a1a1a] hover:border-destructive/40',
-				info: 'border-info/20 bg-[#1a1a1a] hover:border-info/40',
-				accent: 'border-accent/20 bg-[#1a1a1a] hover:border-accent/40',
-				muted: 'border-muted/20 bg-[#1a1a1a] hover:border-muted/40',
-				image:
-					'border-[var(--entity-image)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-image)]/40 hover:bg-[var(--entity-image)]/5',
-				video:
-					'border-[var(--entity-video)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-video)]/40 hover:bg-[var(--entity-video)]/5',
-				folder:
-					'border-[var(--entity-folder)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-folder)]/40 hover:bg-[var(--entity-folder)]/5',
-				album:
-					'border-[var(--entity-album)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-album)]/40 hover:bg-[var(--entity-album)]/5',
-				collection:
-					'border-[var(--entity-collection)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-collection)]/40 hover:bg-[var(--entity-collection)]/5',
-				character:
-					'border-[var(--entity-character)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-character)]/40 hover:bg-[var(--entity-character)]/5',
-				place:
-					'border-[var(--entity-place)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-place)]/40 hover:bg-[var(--entity-place)]/5',
-			},
-			size: {
-				sm: 'p-2',
-				md: 'p-3',
-				lg: 'p-4',
-			},
+const statCardVariants = cva('group relative overflow-hidden rounded-dt-xs border transition-all duration-dt-normal', {
+	variants: {
+		variant: {
+			default: 'border-border/20 bg-card hover:border-border/40 hover:bg-card/90',
+			primary: 'border-primary/20 bg-card hover:border-primary/40 hover:bg-primary/5',
+			secondary: 'border-secondary/20 bg-card hover:border-secondary/40 hover:bg-secondary/5',
+			success: 'border-success/20 bg-card hover:border-success/40 hover:bg-success/5',
+			warning: 'border-warning/20 bg-card hover:border-warning/40 hover:bg-warning/5',
+			destructive: 'border-destructive/20 bg-card hover:border-destructive/40 hover:bg-destructive/5',
+			info: 'border-info/20 bg-card hover:border-info/40 hover:bg-info/5',
+			accent: 'border-accent/20 bg-card hover:border-accent/40 hover:bg-accent/5',
+			muted: 'border-muted/20 bg-card hover:border-muted/40 hover:bg-muted/5',
+			image:
+				'border-[var(--entity-image)]/20 bg-card hover:border-[var(--entity-image)]/40 hover:bg-[var(--entity-image)]/5',
+			video:
+				'border-[var(--entity-video)]/20 bg-card hover:border-[var(--entity-video)]/40 hover:bg-[var(--entity-video)]/5',
+			folder:
+				'border-[var(--entity-folder)]/20 bg-card hover:border-[var(--entity-folder)]/40 hover:bg-[var(--entity-folder)]/5',
+			album:
+				'border-[var(--entity-album)]/20 bg-card hover:border-[var(--entity-album)]/40 hover:bg-[var(--entity-album)]/5',
+			collection:
+				'border-[var(--entity-collection)]/20 bg-card hover:border-[var(--entity-collection)]/40 hover:bg-[var(--entity-collection)]/5',
+			character:
+				'border-[var(--entity-character)]/20 bg-card hover:border-[var(--entity-character)]/40 hover:bg-[var(--entity-character)]/5',
+			place:
+				'border-[var(--entity-place)]/20 bg-card hover:border-[var(--entity-place)]/40 hover:bg-[var(--entity-place)]/5',
 		},
-		defaultVariants: {
-			variant: 'default',
-			size: 'sm',
+		size: {
+			sm: 'p-2',
+			md: 'p-3',
+			lg: 'p-4',
 		},
-	}
-);
+	},
+	defaultVariants: {
+		variant: 'default',
+		size: 'sm',
+	},
+});
 
 const iconColorMap: Record<string, string> = {
 	default: 'text-foreground',
@@ -82,21 +74,21 @@ const iconColorMap: Record<string, string> = {
 
 const subtitleColorMap: Record<string, string> = {
 	default: 'text-muted-foreground',
-	primary: 'text-primary/70',
-	secondary: 'text-secondary/70',
-	success: 'text-success/70',
-	warning: 'text-warning/70',
-	destructive: 'text-destructive/70',
-	info: 'text-info/70',
-	accent: 'text-accent/70',
-	muted: 'text-muted-foreground/70',
-	image: 'text-[var(--entity-image)]/70',
-	video: 'text-[var(--entity-video)]/70',
-	folder: 'text-[var(--entity-folder)]/70',
-	album: 'text-[var(--entity-album)]/70',
-	collection: 'text-[var(--entity-collection)]/70',
-	character: 'text-[var(--entity-character)]/70',
-	place: 'text-[var(--entity-place)]/70',
+	primary: 'text-primary/80',
+	secondary: 'text-secondary/80',
+	success: 'text-success/80',
+	warning: 'text-warning/80',
+	destructive: 'text-destructive/80',
+	info: 'text-info/80',
+	accent: 'text-accent/80',
+	muted: 'text-muted-foreground/80',
+	image: 'text-[var(--entity-image)]/80',
+	video: 'text-[var(--entity-video)]/80',
+	folder: 'text-[var(--entity-folder)]/80',
+	album: 'text-[var(--entity-album)]/80',
+	collection: 'text-[var(--entity-collection)]/80',
+	character: 'text-[var(--entity-character)]/80',
+	place: 'text-[var(--entity-place)]/80',
 };
 
 /* =====================================================
@@ -105,7 +97,7 @@ const subtitleColorMap: Record<string, string> = {
 
 export interface DashboardStatCardProps
 	extends React.HTMLAttributes<HTMLDivElement>,
-	VariantProps<typeof statCardVariants> {
+		VariantProps<typeof statCardVariants> {
 	/** Icono de la tarjeta */
 	icon: LucideIcon;
 	/** Título/etiqueta de la estadística */

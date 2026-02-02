@@ -85,14 +85,7 @@ interface CategoryCardProps {
 	stats?: { label: string; value: string }[];
 }
 
-const CategoryCard = memo(function CategoryCard({
-	title,
-	icon: Icon,
-	count,
-	href,
-	color,
-	stats,
-}: CategoryCardProps) {
+const CategoryCard = memo(function CategoryCard({ title, icon: Icon, count, href, color, stats }: CategoryCardProps) {
 	return (
 		<Link
 			className={cn(
@@ -109,7 +102,7 @@ const CategoryCard = memo(function CategoryCard({
 			<div
 				className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 				style={{
-					background: `radial-gradient(600px circle at top right, color-mix(in oklch, ${color} 6%, transparent), transparent 50%)`,
+					background: `radial-gradient(600px circle at top right, color-mix(in oklch, ${color} 15%, transparent), transparent 50%)`,
 				}}
 			/>
 
@@ -119,8 +112,8 @@ const CategoryCard = memo(function CategoryCard({
 					<div
 						className="flex h-10 w-10 items-center justify-center rounded-dt-xs"
 						style={{
-							backgroundColor: `color-mix(in oklch, ${color} 8%, transparent)`,
-							borderColor: `color-mix(in oklch, ${color} 20%, var(--border))`,
+							backgroundColor: `color-mix(in oklch, ${color} 20%, transparent)`,
+							borderColor: `color-mix(in oklch, ${color} 40%, var(--border))`,
 							borderWidth: '1px',
 						}}
 					>
@@ -132,7 +125,7 @@ const CategoryCard = memo(function CategoryCard({
 							<span className="font-bold text-lg leading-none" style={{ color }}>
 								{count === 0 ? '0' : formatNumber(count)}
 							</span>
-							<span className="text-muted-foreground/50 text-xs font-normal">items</span>
+							<span className="font-normal text-muted-foreground/50 text-xs">items</span>
 						</div>
 					</div>
 				</div>
@@ -150,15 +143,15 @@ const CategoryCard = memo(function CategoryCard({
 			</div>
 
 			{/* Divider */}
-			<div className="relative mx-4 h-px bg-border/10" />
+			<div className="relative mx-4 h-px bg-border/25" />
 
 			{/* Mini Stats */}
 			{stats && stats.length > 0 && (
 				<div className="relative grid grid-cols-2 gap-2 px-4 py-3">
 					{stats.map((stat, i) => (
 						<div className="flex flex-col" key={i}>
-							<span className="text-[10px] text-muted-foreground/40 uppercase tracking-widest">{stat.label}</span>
-							<span className="font-medium text-xs text-muted-foreground/70">{stat.value}</span>
+							<span className="text-[10px] text-muted-foreground/65 uppercase tracking-widest">{stat.label}</span>
+							<span className="font-medium text-muted-foreground/70 text-xs">{stat.value}</span>
 						</div>
 					))}
 				</div>
@@ -619,25 +612,28 @@ export const Dashboard = memo(function Dashboard() {
 						{/* Quick Stats Summary */}
 						<div className="hidden items-center gap-6 md:flex">
 							<div className="text-right">
-								<p className="text-muted-foreground/50 text-xs uppercase tracking-wider">Total Media</p>
+								<p className="text-muted-foreground/80 text-xs uppercase tracking-wider">Total Media</p>
 								<p className="font-bold text-2xl text-foreground">{formatNumber(totalMediaFiles)}</p>
 							</div>
 							<div className="h-10 w-px bg-border/40" />
 							<div className="text-right">
-								<p className="text-muted-foreground/50 text-xs uppercase tracking-wider">Almacenamiento</p>
+								<p className="text-muted-foreground/80 text-xs uppercase tracking-wider">Almacenamiento</p>
 								<p className="font-bold text-2xl text-foreground">{formatBytes(combinedStats.storageUsed)}</p>
 							</div>
 						</div>
 					</div>
 
 					{/* Stats Grid */}
-					<section className="rounded-dt-sm border border-border/20 bg-card/50 p-6 shadow-dt-2">
+					<section className="rounded-dt-sm border border-border/40 bg-card/90 p-6 shadow-dt-2">
 						<div className="mb-6 flex items-center justify-between">
 							<div className="flex items-center gap-2">
 								<div className="h-5 w-1 rounded-full bg-primary" />
 								<h2 className="font-bold text-foreground text-lg tracking-tight">Resumen Rápido</h2>
 							</div>
-							<Badge className="rounded-dt-xs border-border/15 bg-background/10 font-mono text-xs text-muted-foreground/60" variant="outline">
+							<Badge
+								className="rounded-dt-xs border-border/25 bg-background/25 font-mono text-muted-foreground/85 text-xs"
+								variant="outline"
+							>
 								{formatNumber(totalMediaFiles)} archivos totales
 							</Badge>
 						</div>
@@ -688,33 +684,35 @@ export const Dashboard = memo(function Dashboard() {
 					{/* Bottom Info Cards */}
 					<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 						{/* Storage Card */}
-						<div className="group relative overflow-hidden rounded-dt-sm border border-border/20 bg-card/60 p-5 shadow-dt-1 transition-all duration-dt-normal hover:border-border/40">
+						<div className="group relative overflow-hidden rounded-dt-sm border border-border/40 bg-card/90 p-5 shadow-dt-1 transition-all duration-dt-normal hover:border-border/60">
 							<div className="mb-4 flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-dt-xs bg-background/8 border border-border/10">
+								<div className="flex h-10 w-10 items-center justify-center rounded-dt-xs border border-border/10 bg-background/20">
 									<HardDrive className="h-5 w-5 text-muted-foreground/80" />
 								</div>
 								<div>
 									<h3 className="font-bold text-foreground text-sm">Almacenamiento</h3>
-									<p className="text-muted-foreground/40 text-[10px] uppercase tracking-wider">Espacio utilizado</p>
+									<p className="text-[10px] text-muted-foreground/40 uppercase tracking-wider">Espacio utilizado</p>
 								</div>
 							</div>
 
 							<div className="space-y-4">
 								<div className="flex items-baseline justify-between">
-									<span className="font-bold text-2xl text-foreground tracking-tight">{formatBytes(combinedStats.storageUsed)}</span>
-									<span className="text-muted-foreground/40 text-xs">
+									<span className="font-bold text-2xl text-foreground tracking-tight">
+										{formatBytes(combinedStats.storageUsed)}
+									</span>
+									<span className="text-muted-foreground/70 text-xs">
 										de {formatBytes(combinedStats.storageUsed + combinedStats.storageAvailable)}
 									</span>
 								</div>
 
-								<div className="relative h-1.5 overflow-hidden rounded-full bg-border/15">
+								<div className="relative h-1.5 overflow-hidden rounded-full bg-border/30">
 									<div
 										className="h-full rounded-full bg-primary transition-all duration-1000"
 										style={{ width: `${storageUsedPercentage}%` }}
 									/>
 								</div>
 
-								<div className="flex justify-between text-[10px] text-muted-foreground/40 font-mono">
+								<div className="flex justify-between font-mono text-[10px] text-muted-foreground/60">
 									<span>{storageUsedPercentage.toFixed(1)}% USADO</span>
 									<span>{formatBytes(combinedStats.storageAvailable)} LIBRE</span>
 								</div>
@@ -722,14 +720,14 @@ export const Dashboard = memo(function Dashboard() {
 						</div>
 
 						{/* Activity Card */}
-						<div className="group relative overflow-hidden rounded-dt-sm border border-border/20 bg-card/60 p-5 shadow-dt-1 transition-all duration-dt-normal hover:border-border/40">
+						<div className="group relative overflow-hidden rounded-dt-sm border border-border/40 bg-card/90 p-5 shadow-dt-1 transition-all duration-dt-normal hover:border-border/60">
 							<div className="mb-4 flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-dt-xs bg-background/8 border border-border/10">
+								<div className="flex h-10 w-10 items-center justify-center rounded-dt-xs border border-border/10 bg-background/20">
 									<Activity className="h-5 w-5 text-status-success/80" />
 								</div>
 								<div>
 									<h3 className="font-bold text-foreground text-sm">Actividad</h3>
-									<p className="text-muted-foreground/40 text-[10px] uppercase tracking-wider">Últimas acciones</p>
+									<p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider">Últimas acciones</p>
 								</div>
 							</div>
 
@@ -746,12 +744,14 @@ export const Dashboard = memo(function Dashboard() {
 											className="flex items-center gap-3 rounded-dt-xs border border-border/10 bg-background/5 p-2 transition-colors hover:bg-background/10"
 											key={activity.id || i}
 										>
-											<div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/8 border border-primary/15">
-												<span className="text-primary/80 text-[10px] font-bold">{activity.entityType?.[0]?.toUpperCase()}</span>
+											<div className="flex h-7 w-7 items-center justify-center rounded-full border border-primary/25 bg-primary/15">
+												<span className="font-bold text-[10px] text-primary/80">
+													{activity.entityType?.[0]?.toUpperCase()}
+												</span>
 											</div>
 											<div className="min-w-0 flex-1">
-												<p className="truncate font-semibold text-xs text-foreground/80">{activity.entityName}</p>
-												<p className="text-muted-foreground/40 text-[10px] uppercase tracking-tighter">
+												<p className="truncate font-semibold text-foreground/80 text-xs">{activity.entityName}</p>
+												<p className="text-[10px] text-muted-foreground/70 uppercase tracking-tighter">
 													{activity.type} • {activity.entityType}
 												</p>
 											</div>
@@ -761,20 +761,20 @@ export const Dashboard = memo(function Dashboard() {
 							) : (
 								<div className="flex flex-col items-center justify-center py-6 text-center">
 									<Activity className="mb-2 h-6 w-6 opacity-10" />
-									<p className="text-muted-foreground/30 text-xs">Sin actividad reciente</p>
+									<p className="text-muted-foreground/60 text-xs">Sin actividad reciente</p>
 								</div>
 							)}
 						</div>
 
 						{/* Tags Card */}
-						<div className="group relative overflow-hidden rounded-dt-sm border border-border/20 bg-card/60 p-5 shadow-dt-1 transition-all duration-dt-normal hover:border-border/40">
+						<div className="group relative overflow-hidden rounded-dt-sm border border-border/40 bg-card/90 p-5 shadow-dt-1 transition-all duration-dt-normal hover:border-border/60">
 							<div className="mb-4 flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-dt-xs bg-background/8 border border-border/10">
+								<div className="flex h-10 w-10 items-center justify-center rounded-dt-xs border border-border/10 bg-background/20">
 									<Star className="h-5 w-5 text-status-warning/80" />
 								</div>
 								<div>
 									<h3 className="font-bold text-foreground text-sm">Tags Populares</h3>
-									<p className="text-muted-foreground/40 text-[10px] uppercase tracking-wider">Más utilizados</p>
+									<p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider">Más utilizados</p>
 								</div>
 							</div>
 
@@ -793,16 +793,21 @@ export const Dashboard = memo(function Dashboard() {
 										>
 											<div className="flex min-w-0 items-center gap-2">
 												{tag.emoji && <span className="text-base">{tag.emoji}</span>}
-												<span className="truncate font-semibold text-xs text-foreground/80">{tag.name}</span>
+												<span className="truncate font-semibold text-foreground/80 text-xs">{tag.name}</span>
 											</div>
-											<Badge className="rounded-dt-xs bg-background/10 text-[10px] text-muted-foreground/60" variant="secondary">{tag.imageCount}</Badge>
+											<Badge
+												className="rounded-dt-xs bg-background/20 text-[10px] text-muted-foreground/80"
+												variant="secondary"
+											>
+												{tag.imageCount}
+											</Badge>
 										</div>
 									))}
 								</div>
 							) : (
 								<div className="flex flex-col items-center justify-center py-6 text-center">
 									<Tags className="mb-2 h-6 w-6 opacity-10" />
-									<p className="text-muted-foreground/30 text-xs">Sin etiquetas aún</p>
+									<p className="text-muted-foreground/60 text-xs">Sin etiquetas aún</p>
 								</div>
 							)}
 						</div>

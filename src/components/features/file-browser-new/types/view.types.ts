@@ -50,6 +50,18 @@ export interface MasonryViewConfig extends ViewConfigBase {
 	kind: 'masonry';
 	/** Ancho mínimo de columna */
 	columnWidth: number;
+	/** Padding del contenedor */
+	padding?: number;
+	/** TCG: revelar info solo en hover */
+	tcgHoverReveal?: boolean;
+	/** TCG: efecto holográfico */
+	tcgHolo?: boolean;
+	/** TCG: sombras */
+	tcgShadows?: boolean;
+	/** TCG: bordes redondeados */
+	tcgRounded?: boolean;
+	/** TCG: tilt 3D en hover */
+	tcgTilt?: boolean;
 }
 
 /**
@@ -101,6 +113,12 @@ export const DEFAULT_VIEW_CONFIGS: Record<ViewMode, ViewConfig> = {
 		renderMode: 'canvas',
 		gap: 8,
 		columnWidth: 200,
+		padding: 16,
+		tcgHoverReveal: true,
+		tcgHolo: true,
+		tcgShadows: true,
+		tcgRounded: true,
+		tcgTilt: true,
 	},
 	table: {
 		kind: 'table',

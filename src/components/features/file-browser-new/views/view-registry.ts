@@ -55,6 +55,12 @@ export const VIEW_REGISTRY: Record<ViewMode, ViewRegistryEntry> = {
 			renderMode: 'canvas',
 			gap: 8,
 			columnWidth: 200,
+			padding: 16,
+			tcgHoverReveal: true,
+			tcgHolo: true,
+			tcgShadows: true,
+			tcgRounded: true,
+			tcgTilt: true,
 		},
 	},
 	table: {

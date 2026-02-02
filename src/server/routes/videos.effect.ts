@@ -62,7 +62,22 @@ router.get('/', async (req, res) => {
 
 		const result = yield* videoService.getAll(filters);
 
-		return res.json(result);
+		const data = result.map((video) => ({
+			...video,
+			entityType: 'video' as const,
+			thumbnailUrl: `/api/videos/${video.id}/thumbnail`,
+		}));
+
+		return res.json({
+			data,
+			pagination: {
+				total: data.length,
+				limit: filters.limit,
+				offset: filters.offset,
+				hasNext: data.length >= filters.limit,
+				hasPrev: filters.offset > 0,
+			},
+		});
 	}).pipe(Effect.provide(VideoServiceLive));
 
 	await runEffectForExpress(effect, res);
@@ -87,7 +102,13 @@ router.get('/favorites', async (req, res) => {
 
 		const result = yield* videoService.getAllFavorites(filters);
 
-		return res.json(result);
+		const data = result.map((video) => ({
+			...video,
+			entityType: 'video' as const,
+			thumbnailUrl: `/api/videos/${video.id}/thumbnail`,
+		}));
+
+		return res.json(data);
 	}).pipe(Effect.provide(VideoServiceLive));
 
 	await runEffectForExpress(effect, res);
@@ -153,7 +174,13 @@ router.get('/folder/:folderId', async (req, res) => {
 
 		const result = yield* videoService.getByFolder(folderId, filters);
 
-		return res.json(result);
+		const data = result.map((video) => ({
+			...video,
+			entityType: 'video' as const,
+			thumbnailUrl: `/api/videos/${video.id}/thumbnail`,
+		}));
+
+		return res.json(data);
 	}).pipe(Effect.provide(VideoServiceLive));
 
 	await runEffectForExpress(effect, res);

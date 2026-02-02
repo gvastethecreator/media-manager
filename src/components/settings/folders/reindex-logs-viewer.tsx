@@ -63,7 +63,7 @@ const formatRelativeTime = (timestamp: string): string => {
  * Obtiene el color para el tipo de log
  */
 const getLogTypeColor = (level: 'ERROR' | 'WARN'): string => {
-	return level === 'ERROR' ? 'text-destructive dark:text-red-400' : 'text-warning dark:text-warning';
+	return level === 'ERROR' ? 'text-destructive' : 'text-warning';
 };
 
 /**
@@ -78,12 +78,12 @@ const getLogTypeIcon = (level: 'ERROR' | 'WARN') => {
  */
 const getSourceColor = (source: string): string => {
 	const colors: Record<string, string> = {
-		'circuit-breaker': 'bg-destructive/10 text-destructive dark:bg-destructive/20',
-		'auto-indexing': 'bg-primary/10 text-primary dark:bg-primary/20',
-		'folder-stats': 'bg-success/10 text-success dark:bg-success/20',
-		monitor: 'bg-violet-500/10 text-violet-500 dark:bg-violet-500/20',
-		'operation-queue': 'bg-warning/10 text-warning dark:bg-warning/20',
-		'file-browser': 'bg-indigo-500/10 text-indigo-500 dark:bg-indigo-500/20',
+		'circuit-breaker': 'bg-destructive/10 text-destructive',
+		'auto-indexing': 'bg-primary/10 text-primary',
+		'folder-stats': 'bg-success/10 text-success',
+		monitor: 'bg-entity-image/10 text-entity-image',
+		'operation-queue': 'bg-warning/10 text-warning',
+		'file-browser': 'bg-entity-folder/10 text-entity-folder',
 	};
 	return colors[source] || 'bg-muted text-muted-foreground';
 };

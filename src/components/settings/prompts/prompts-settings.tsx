@@ -293,7 +293,7 @@ export const PromptSettings = () => {
 							onClick={() => setShowOnlyFavorites(!showOnlyFavorites)}
 							variant={showOnlyFavorites ? 'default' : 'outline'}
 						>
-							<Star className={`mr-2 h-4 w-4 ${showOnlyFavorites ? 'fill-yellow-300 text-yellow-300' : ''}`} />
+							<Star className={`mr-2 h-4 w-4 ${showOnlyFavorites ? 'fill-warning text-warning' : ''}`} />
 							Solo favoritos
 						</Button>
 					</div>
@@ -325,7 +325,7 @@ export const PromptSettings = () => {
 													<p className="text-muted-foreground text-xs">{prompt.category}</p>
 												</div>
 											</div>
-											{prompt.isFavorite && <Star className="h-4 w-4 fill-yellow-300 text-yellow-300" />}
+											{prompt.isFavorite && <Star className="h-4 w-4 fill-warning text-warning" />}
 										</div>
 
 										<p className="mt-2 line-clamp-2 text-muted-foreground text-sm">
