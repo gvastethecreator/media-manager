@@ -15,38 +15,38 @@ import { cn } from '@/lib/utils';
  * ===================================================== */
 
 const statCardVariants = cva(
-	'group relative overflow-hidden rounded-dt-md border backdrop-blur-sm transition-all duration-dt-normal',
+	'group relative overflow-hidden rounded-[4px] border transition-all duration-dt-normal',
 	{
 		variants: {
 			variant: {
-				default: 'border-border/30 bg-card/80 hover:bg-card/95',
+				default: 'border-white/10 bg-[#1a1a1a] hover:border-white/20 hover:bg-[#202020]',
 				primary:
-					'border-primary/30 bg-linear-to-br from-primary/10 to-primary/20 hover:from-primary/20 hover:to-primary/30',
+					'border-primary/20 bg-[#1a1a1a] hover:border-primary/40',
 				secondary:
-					'border-secondary/30 bg-linear-to-br from-secondary/10 to-secondary/20 hover:from-secondary/20 hover:to-secondary/30',
+					'border-secondary/20 bg-[#1a1a1a] hover:border-secondary/40',
 				success:
-					'border-success/30 bg-linear-to-br from-success/10 to-success/20 hover:from-success/20 hover:to-success/30',
+					'border-success/20 bg-[#1a1a1a] hover:border-success/40',
 				warning:
-					'border-warning/30 bg-linear-to-br from-warning/10 to-warning/20 hover:from-warning/20 hover:to-warning/30',
+					'border-warning/20 bg-[#1a1a1a] hover:border-warning/40',
 				destructive:
-					'border-destructive/30 bg-linear-to-br from-destructive/10 to-destructive/20 hover:from-destructive/20 hover:to-destructive/30',
-				info: 'border-info/30 bg-linear-to-br from-info/10 to-info/20 hover:from-info/20 hover:to-info/30',
-				accent: 'border-accent/30 bg-linear-to-br from-accent/10 to-accent/20 hover:from-accent/20 hover:to-accent/30',
-				muted: 'border-muted/30 bg-linear-to-br from-muted/10 to-muted/20 hover:from-muted/20 hover:to-muted/30',
+					'border-destructive/20 bg-[#1a1a1a] hover:border-destructive/40',
+				info: 'border-info/20 bg-[#1a1a1a] hover:border-info/40',
+				accent: 'border-accent/20 bg-[#1a1a1a] hover:border-accent/40',
+				muted: 'border-muted/20 bg-[#1a1a1a] hover:border-muted/40',
 				image:
-					'border-[var(--entity-image)]/30 bg-linear-to-br from-[var(--entity-image)]/10 to-[var(--entity-image)]/20',
+					'border-[var(--entity-image)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-image)]/40 hover:bg-[var(--entity-image)]/5',
 				video:
-					'border-[var(--entity-video)]/30 bg-linear-to-br from-[var(--entity-video)]/10 to-[var(--entity-video)]/20',
+					'border-[var(--entity-video)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-video)]/40 hover:bg-[var(--entity-video)]/5',
 				folder:
-					'border-[var(--entity-folder)]/30 bg-linear-to-br from-[var(--entity-folder)]/10 to-[var(--entity-folder)]/20',
+					'border-[var(--entity-folder)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-folder)]/40 hover:bg-[var(--entity-folder)]/5',
 				album:
-					'border-[var(--entity-album)]/30 bg-linear-to-br from-[var(--entity-album)]/10 to-[var(--entity-album)]/20',
+					'border-[var(--entity-album)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-album)]/40 hover:bg-[var(--entity-album)]/5',
 				collection:
-					'border-[var(--entity-collection)]/30 bg-linear-to-br from-[var(--entity-collection)]/10 to-[var(--entity-collection)]/20',
+					'border-[var(--entity-collection)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-collection)]/40 hover:bg-[var(--entity-collection)]/5',
 				character:
-					'border-[var(--entity-character)]/30 bg-linear-to-br from-[var(--entity-character)]/10 to-[var(--entity-character)]/20',
+					'border-[var(--entity-character)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-character)]/40 hover:bg-[var(--entity-character)]/5',
 				place:
-					'border-[var(--entity-place)]/30 bg-linear-to-br from-[var(--entity-place)]/10 to-[var(--entity-place)]/20',
+					'border-[var(--entity-place)]/20 bg-[#1a1a1a]/80 hover:border-[var(--entity-place)]/40 hover:bg-[var(--entity-place)]/5',
 			},
 			size: {
 				sm: 'p-2',
@@ -105,7 +105,7 @@ const subtitleColorMap: Record<string, string> = {
 
 export interface DashboardStatCardProps
 	extends React.HTMLAttributes<HTMLDivElement>,
-		VariantProps<typeof statCardVariants> {
+	VariantProps<typeof statCardVariants> {
 	/** Icono de la tarjeta */
 	icon: LucideIcon;
 	/** Título/etiqueta de la estadística */
