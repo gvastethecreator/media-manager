@@ -209,7 +209,7 @@ export function ConceptsSettings() {
 											<div className="space-y-2">
 												<Label htmlFor={categorySelectId}>Categoría</Label>
 												<select
-													className="h-8 w-full rounded-md border border-input px-3 text-xs"
+													className="h-8 w-full rounded-md border border-input bg-background px-3 text-foreground text-xs"
 													id={categorySelectId}
 													onChange={(e) => setSelectedCategory(e.target.value || null)}
 													value={selectedCategory || ''}
@@ -308,9 +308,10 @@ export function ConceptsSettings() {
 												type="button"
 											>
 												<div
-													className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md text-white"
+													className="flex h-6 w-6 shrink-0 items-center justify-center rounded-md"
 													style={{
 														backgroundColor: concept.color,
+														color: 'var(--background)',
 													}}
 												>
 													<span className="text-xs">{concept.emoji}</span>

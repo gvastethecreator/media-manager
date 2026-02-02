@@ -165,7 +165,7 @@ const FolderThumbnail = memo(({ folderStats, isCompact = false, isLoading = fals
 					totalImages={folderStats.totalImages || 0}
 				/>
 				{/* Overlay sutil en hover */}
-				<div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover/thumbnail:opacity-100" />
+				<div className="absolute inset-0 bg-gradient-to-t from-foreground/10 via-transparent to-transparent opacity-0 transition-opacity duration-200 group-hover/thumbnail:opacity-100" />
 			</div>
 		);
 	}

@@ -7,7 +7,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigation } from '@/components/navigation/hooks/navigation.utils';
 import { useFileViewerStore } from '@/store/ui/file-viewer.slice';
 import { useViewOptionsStore } from '@/store/ui/view-options.slice';
-import { DEFAULT_PAGE_SIZE, VIEW_CONFIGS } from '../core/constants';
+import { DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE, VIEW_CONFIGS } from '../core/constants';
 import type { BrowserItem, BrowserItemGroup } from '../types/item.types';
 import type { ItemClickHandler, ItemDoubleClickHandler } from '../types/props.types';
 import type { PaginationState, SortOption, ViewConfig, ViewMode } from '../types/view.types';
@@ -114,11 +114,21 @@ export function useFileBrowser({
 	// Store de vista
 	const viewMode = useViewOptionsStore((s) => s.viewMode) as ViewMode;
 	const itemSize = useViewOptionsStore((s) => s.itemSize);
+	const views = useViewOptionsStore((s) => s.views);
 	const sortOptions = useViewOptionsStore((s) => s.sortOptions);
 	const searchQuery = useViewOptionsStore((s) => s.searchQuery);
 	const groupByType = useViewOptionsStore((s) => s.groupByEntityType);
 	const infiniteScroll = useViewOptionsStore((s) => s.infiniteScroll);
-	const pageSize = useViewOptionsStore((s) => s.pagination.pageSize) ?? DEFAULT_PAGE_SIZE;
+	const paginationMode = useViewOptionsStore((s) => s.pagination.mode);
+	const pageSize = Math.min(useViewOptionsStore((s) => s.pagination.pageSize) ?? DEFAULT_PAGE_SIZE, MAX_PAGE_SIZE);
+	const effectiveInfiniteScroll =
+		paginationMode === 'infinite'
+			? infiniteScroll
+			: {
+					...infiniteScroll,
+					enabled: false,
+					autoLoad: false,
+				};
 
 	const setViewMode = useViewOptionsStore((s) => s.setViewMode);
 	const setItemSize = useViewOptionsStore((s) => s.setItemSize);
@@ -155,6 +165,7 @@ export function useFileBrowser({
 		folderId: folderId ?? null,
 		directItems,
 		pageSize,
+		paginationMode,
 	});
 
 	// Procesar items: búsqueda -> sort -> group
@@ -195,22 +206,55 @@ export function useFileBrowser({
 
 	// Paginación
 	const pagination = usePagination({
-		totalItems: processedData.realItems.length,
+		totalItems: paginationMode === 'pagination' ? dataSource.totalCount : processedData.realItems.length,
 		pageSize,
-		infiniteScroll,
-		hasMoreItems: dataSource.hasMore,
-		onLoadMore: dataSource.loadMore,
-		isLoadingMore: dataSource.isLoadingMore,
+		infiniteScroll: effectiveInfiniteScroll,
+		hasMoreItems: paginationMode === 'infinite' ? dataSource.hasMore : false,
+		onLoadMore: paginationMode === 'infinite' ? dataSource.loadMore : undefined,
+		isLoadingMore: paginationMode === 'infinite' ? dataSource.isLoadingMore : false,
 	});
+
+	useEffect(() => {
+		if (paginationMode !== 'pagination') return;
+		if (!dataSource.hasMore || dataSource.isLoadingMore) return;
+		const required = (pagination.state.page + 1) * pageSize;
+		if (dataSource.loadedCount < required) {
+			dataSource.loadMore();
+		}
+	}, [
+		paginationMode,
+		pagination.state.page,
+		pageSize,
+		dataSource.loadedCount,
+		dataSource.hasMore,
+		dataSource.isLoadingMore,
+		dataSource.loadMore,
+	]);
 
 	// Config de vista actual
 	const viewConfig = useMemo(() => {
 		const base = VIEW_CONFIGS[viewMode] ?? VIEW_CONFIGS.grid;
-		if (base.kind === 'grid' || base.kind === 'cards' || base.kind === 'masonry') {
+		const perView = views[viewMode as keyof typeof views] as any;
+
+		if (base.kind === 'masonry') {
+			return {
+				...base,
+				columnWidth: perView?.itemSize ?? base.columnWidth,
+				gap: perView?.gap ?? base.gap,
+				padding: perView?.padding ?? base.padding,
+				tcgHoverReveal: perView?.tcgHoverReveal ?? base.tcgHoverReveal,
+				tcgHolo: perView?.tcgHolo ?? base.tcgHolo,
+				tcgShadows: perView?.tcgShadows ?? base.tcgShadows,
+				tcgRounded: perView?.tcgRounded ?? base.tcgRounded,
+				tcgTilt: perView?.tcgTilt ?? base.tcgTilt,
+			};
+		}
+
+		if (base.kind === 'grid' || base.kind === 'cards') {
 			return { ...base, itemSize };
 		}
 		return base;
-	}, [viewMode, itemSize]);
+	}, [itemSize, viewMode, views]);
 
 	// Handler de click
 	const handleItemClick: ItemClickHandler = useCallback(

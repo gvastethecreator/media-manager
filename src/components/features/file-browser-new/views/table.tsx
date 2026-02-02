@@ -5,7 +5,8 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { ArrowDown, ArrowUp, ArrowUpDown, CornerUpLeft, Folder } from 'lucide-react';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import type { CSSProperties } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { formatFileSize } from '@/lib/utils/format.utils';
@@ -19,6 +20,10 @@ import { ENTITY_TYPE_DISPLAY_NAMES } from '../utils/grouping';
 export interface TableViewProps extends Omit<BrowserViewProps, 'config'> {
 	/** Configuración de tabla */
 	config: TableViewConfig;
+	/** Página actual (para paginación) */
+	page?: number;
+	/** Tamaño de página */
+	pageSize?: number;
 	/** IDs seleccionados */
 	selectedIds?: Set<string>;
 	/** ID activo */
@@ -149,6 +154,8 @@ export function TableView({
 	onItemDoubleClick,
 	onItemContextMenu,
 	config,
+	page,
+	pageSize = 300,
 	scrollContainer,
 	onContainerReady,
 	onLayoutRootReady,
@@ -162,8 +169,16 @@ export function TableView({
 }: TableViewProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [internalScrollEl, setInternalScrollEl] = useState<HTMLDivElement | null>(null);
+	const [containerHeight, setContainerHeight] = useState(0);
 
 	const rowHeight = config.rowHeight;
+	const displayItems = useMemo(() => {
+		if (typeof page === 'number') {
+			const start = page * pageSize;
+			return items.slice(start, start + pageSize);
+		}
+		return items;
+	}, [items, page, pageSize]);
 	const columns = DEFAULT_COLUMNS.filter((col) => !config.visibleColumns || config.visibleColumns.includes(col.key));
 	const virtualizationConfig = virtualization ?? {
 		enabled: false,
@@ -172,12 +187,17 @@ export function TableView({
 		estimatedItemHeight: rowHeight,
 		maxItems: Number.POSITIVE_INFINITY,
 	};
-	const shouldVirtualize = virtualizationConfig.enabled && items.length >= virtualizationConfig.threshold;
+	const overscanRows = Math.max(
+		virtualizationConfig.overscan,
+		containerHeight > 0 ? Math.ceil(containerHeight / rowHeight) : 0
+	);
+	const shouldVirtualize = virtualizationConfig.enabled && displayItems.length >= virtualizationConfig.threshold;
+	const allowRowAnimation = !(suppressAppearAnimation || shouldVirtualize);
 	const rowVirtualizer = useVirtualizer({
-		count: items.length,
+		count: displayItems.length,
 		getScrollElement: () => containerRef.current,
 		estimateSize: () => rowHeight,
-		overscan: virtualizationConfig.overscan,
+		overscan: overscanRows,
 	});
 	const virtualRows = shouldVirtualize ? rowVirtualizer.getVirtualItems() : [];
 	const paddingTop = virtualRows.length > 0 ? virtualRows[0].start : 0;
@@ -200,6 +220,27 @@ export function TableView({
 			activeElement.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
 		}
 	}, [activeId]);
+
+	useEffect(() => {
+		if (typeof page !== 'number') return;
+		containerRef.current?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+	}, [page]);
+
+	useEffect(() => {
+		const container = containerRef.current;
+		if (!container) return;
+
+		const observer = new ResizeObserver((entries) => {
+			for (const entry of entries) {
+				setContainerHeight(entry.contentRect.height);
+			}
+		});
+
+		observer.observe(container);
+		setContainerHeight(container.clientHeight);
+
+		return () => observer.disconnect();
+	}, []);
 
 	// Handlers
 	const handleItemClick = useCallback(
@@ -285,14 +326,14 @@ export function TableView({
 							<td colSpan={columns.length} style={{ height: paddingTop }} />
 						</tr>
 					)}
-					{(shouldVirtualize ? virtualRows : items.map((_, index) => ({ index }) as const)).map((virtualRow) => {
-						const item = items[virtualRow.index];
+					{(shouldVirtualize ? virtualRows : displayItems.map((_, index) => ({ index }) as const)).map((virtualRow) => {
+						const item = displayItems[virtualRow.index];
 						if (!item) return null;
 						const shouldLayout = virtualRow.index < layoutItemLimit;
 						return (
 							<tr
 								className={cn(
-									!suppressAppearAnimation && 'file-browser-item',
+									allowRowAnimation && 'file-browser-item',
 									'border-border/30 border-b',
 									'cursor-pointer',
 									'transition-all duration-200',
@@ -302,20 +343,22 @@ export function TableView({
 								)}
 								{...(shouldLayout
 									? {
-											'data-layout-id': item.id,
-											'data-layout-item': 'true',
-											'data-layout-order': String(virtualRow.index),
-										}
+										'data-layout-id': item.id,
+										'data-layout-item': 'true',
+										'data-layout-order': String(virtualRow.index),
+									}
 									: {})}
 								data-item-id={item.id}
 								key={item.id}
 								onClick={(e) => handleItemClick(item, e)}
 								onContextMenu={(e) => handleItemContextMenu(item, e)}
 								onDoubleClick={() => handleItemDoubleClick(item)}
-								style={{
-									height: rowHeight,
-									...(suppressAppearAnimation ? {} : { animationDelay: `${Math.min(virtualRow.index * 6, 200)}ms` }),
-								}}
+								style={
+									{
+										height: rowHeight,
+										...(allowRowAnimation ? { '--fb-item-delay': `${Math.min(virtualRow.index * 6, 200)}ms` } : {}),
+									} as CSSProperties
+								}
 							>
 								{columns.map((col) => (
 									<td className="truncate px-3 py-2" key={col.key}>

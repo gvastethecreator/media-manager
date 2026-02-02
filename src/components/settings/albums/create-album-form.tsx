@@ -183,7 +183,7 @@ export function CreateAlbumForm({
 		<form className="space-y-4" onSubmit={handleSubmit}>
 			{/* Nombre */}
 			<div>
-				<Label className="font-medium text-sm" htmlFor="name">
+				<Label className="font-medium text-foreground text-sm" htmlFor="name">
 					Nombre *
 				</Label>
 				<Input
@@ -199,7 +199,7 @@ export function CreateAlbumForm({
 
 			{/* Descripción */}
 			<div>
-				<Label className="font-medium text-sm" htmlFor="description">
+				<Label className="font-medium text-foreground text-sm" htmlFor="description">
 					Descripción
 				</Label>
 				<Textarea
@@ -213,7 +213,7 @@ export function CreateAlbumForm({
 
 			{/* Emoji */}
 			<div>
-				<Label className="font-medium text-sm" htmlFor="emoji">
+				<Label className="font-medium text-foreground text-sm" htmlFor="emoji">
 					Emoji
 				</Label>
 				<div className="flex items-center gap-2">
@@ -231,7 +231,7 @@ export function CreateAlbumForm({
 
 			{/* Color */}
 			<div>
-				<Label className="font-medium text-sm" htmlFor="color">
+				<Label className="font-medium text-foreground text-sm" htmlFor="color">
 					Color
 				</Label>
 				<div className="flex items-center gap-2">
@@ -248,7 +248,7 @@ export function CreateAlbumForm({
 
 			{/* Categoría */}
 			<div>
-				<Label className="font-medium text-sm" htmlFor="category">
+				<Label className="font-medium text-foreground text-sm" htmlFor="category">
 					Categoría
 				</Label>
 				<Select onValueChange={(value) => handleChange('category', value)} value={formData.category}>

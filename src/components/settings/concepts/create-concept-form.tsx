@@ -151,7 +151,7 @@ export function CreateConceptForm({
 			label: 'Descripción',
 			render: ({ value, onChange }: any) => (
 				<textarea
-					className="w-full resize-none rounded border p-2 text-xs"
+					className="w-full resize-none rounded border border-input bg-background p-2 text-foreground text-xs"
 					onChange={(e) => onChange(e.target.value)}
 					placeholder="Descripción del concepto..."
 					rows={3}

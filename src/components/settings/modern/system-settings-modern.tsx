@@ -338,8 +338,11 @@ export function SystemSettingsModern() {
 
 						<div className="flex items-center justify-between rounded-lg border bg-muted/30 p-4">
 							<div className="flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-full bg-green-500/10">
-									<CheckCircle className="h-5 w-5 text-green-600" />
+								<div
+									className="flex h-10 w-10 items-center justify-center rounded-full"
+									style={{ backgroundColor: 'color-mix(in oklch, var(--dt-success-500) 10%, transparent)' }}
+								>
+									<CheckCircle className="h-5 w-5" style={{ color: 'var(--dt-success-600)' }} />
 								</div>
 								<div className="flex flex-col gap-0.5">
 									<span className="font-medium text-foreground text-sm">Estado: Conectado</span>

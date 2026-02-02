@@ -13,12 +13,12 @@ export const DEFAULT_VIEW_MODE: ViewMode = 'grid';
 /**
  * Tamaño de página por defecto
  */
-export const DEFAULT_PAGE_SIZE = 20;
+export const DEFAULT_PAGE_SIZE = 200;
 
 /**
  * Tamaño máximo de página
  */
-export const MAX_PAGE_SIZE = 500;
+export const MAX_PAGE_SIZE = 200;
 
 /**
  * Tamaño de item por defecto
@@ -73,6 +73,12 @@ export const VIEW_CONFIGS: Record<ViewMode, ViewConfig> = {
 		renderMode: 'canvas',
 		gap: 8,
 		columnWidth: 200,
+		padding: 16,
+		tcgHoverReveal: true,
+		tcgHolo: true,
+		tcgShadows: true,
+		tcgRounded: true,
+		tcgTilt: true,
 	},
 	table: {
 		kind: 'table',

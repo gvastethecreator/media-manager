@@ -59,8 +59,14 @@ router.get('/', async (req, res) => {
 
 		const result = yield* imageService.getAll(options);
 
+		const data = result.images.map((image) => ({
+			...image,
+			entityType: 'image' as const,
+			thumbnailUrl: `/api/images/${image.id}/thumbnail`,
+		}));
+
 		return {
-			data: result.images,
+			data,
 			pagination: {
 				total: result.total,
 				limit: result.limit,

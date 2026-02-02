@@ -66,7 +66,13 @@ router.get('/', async (req, res) => {
 
 		const result = yield* audioService.getAll(filters);
 
-		return res.json(result);
+		const data = result.map((audio) => ({
+			...audio,
+			entityType: 'audio' as const,
+			thumbnailUrl: `/api/audio/${audio.id}/waveform`,
+		}));
+
+		return res.json(data);
 	}).pipe(Effect.provide(AudioServiceLive));
 
 	await runEffectForExpress(effect, res);
@@ -91,7 +97,13 @@ router.get('/favorites', async (req, res) => {
 
 		const result = yield* audioService.getAllFavorites(filters);
 
-		return res.json(result);
+		const data = result.map((audio) => ({
+			...audio,
+			entityType: 'audio' as const,
+			thumbnailUrl: `/api/audio/${audio.id}/waveform`,
+		}));
+
+		return res.json(data);
 	}).pipe(Effect.provide(AudioServiceLive));
 
 	await runEffectForExpress(effect, res);
@@ -157,7 +169,13 @@ router.get('/folder/:folderId', async (req, res) => {
 
 		const result = yield* audioService.getByFolder(folderId, filters);
 
-		return res.json(result);
+		const data = result.map((audio) => ({
+			...audio,
+			entityType: 'audio' as const,
+			thumbnailUrl: `/api/audio/${audio.id}/waveform`,
+		}));
+
+		return res.json(data);
 	}).pipe(Effect.provide(AudioServiceLive));
 
 	await runEffectForExpress(effect, res);

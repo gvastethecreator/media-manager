@@ -69,7 +69,7 @@ export function CreatePropertyForm({
 			label: 'Descripción',
 			render: ({ value, onChange }: { value: any; onChange: (v: any) => void }) => (
 				<textarea
-					className="w-full resize-none rounded border p-2 text-xs"
+					className="w-full resize-none rounded border border-input bg-background p-2 text-foreground text-xs"
 					onChange={(e) => onChange(e.target.value)}
 					placeholder="Descripción de la propiedad..."
 					rows={3}

@@ -130,7 +130,7 @@ export function FolderForm({ onAddFolder, isProcessing, isLoading }: FolderFormP
 	return (
 		<form className="space-y-3" onSubmit={handleSubmit}>
 			<div className="flex flex-col gap-1.5">
-				<Label className="font-semibold text-sm opacity-90">Path Selection</Label>
+				<Label className="font-semibold text-foreground text-sm opacity-90">Path Selection</Label>
 				<div className="flex items-center gap-2">
 					<div className="relative flex-1">
 						<Input

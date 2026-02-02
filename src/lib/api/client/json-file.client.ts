@@ -11,7 +11,11 @@ export async function getJsonFilesFromApi(): Promise<JsonFileWithStats[]> {
 	if (!response.ok) {
 		throw new Error('Error al obtener archivos JSON');
 	}
-	return response.json();
+	const payload = await response.json();
+	if (Array.isArray(payload)) {
+		return payload as JsonFileWithStats[];
+	}
+	return (payload?.data as JsonFileWithStats[]) || [];
 }
 
 export async function createJsonFileInApi(data: JsonFileCreateInput): Promise<JsonFileWithStats> {

@@ -31,11 +31,14 @@ export function fromDrizzleImageWithCounts(drizzleImage: DrizzleImageWithCounts)
 		// 📊 Calcular estadísticas
 		const statistics = calculateImageStatistics(drizzleImage);
 
+		// Siempre generar la URL del thumbnail - la API se encarga de generarlo si no existe
+		const thumbnailUrl = `/api/images/${drizzleImage.id}/thumbnail`;
+
 		const imageWithStats: ImageWithStats = {
 			...drizzleImage,
 			entityType: 'image' as const,
 			stats: statistics,
-			thumbnailUrl: drizzleImage.thumbnail ? `/api/images/${drizzleImage.id}/thumbnail` : '',
+			thumbnailUrl,
 			fullUrl: `/api/images/${drizzleImage.id}/full`,
 			tags: drizzleImage.tags || [],
 		};

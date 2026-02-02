@@ -37,12 +37,16 @@ export function fromDrizzleAudio(drizzleAudio: AudioBase): AudioWithStats {
 			isFile: true,
 		};
 
+		// Generar URL del thumbnail (waveform) - la API se encarga de generarlo si no existe
+		const thumbnailUrl = `/api/audio/${drizzleAudio.id}/waveform`;
+
 		const audioWithStats: AudioWithStats = {
 			...drizzleAudio,
 			entityType: 'audio',
 			statistics: audioStats,
 			stats: audioStats,
-		};
+			thumbnailUrl,
+		} as AudioWithStats;
 
 		return audioWithStats;
 	} catch (error) {

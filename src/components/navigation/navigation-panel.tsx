@@ -1,6 +1,7 @@
 import { memo, useCallback } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { NavPanelProps } from '@/components/navigation/types';
+import { SettingsModal, useSettingsModal } from '@/components/settings/settings-modal';
 import { ViewType } from '@/components/views/types';
 import { useSeamlessNavigation } from '@/hooks/use-seamless-navigation';
 import { cn } from '@/lib/utils';
@@ -16,6 +17,7 @@ const NavPanelComponent = memo(function NavPanelImpl({
 	const { navigateWithTransition } = useSeamlessNavigation();
 	const location = useLocation();
 	const { stats } = useCategoryStats();
+	const { isOpen, open: openSettings, close: closeSettings } = useSettingsModal();
 
 	// Obtener la vista actual desde la URL
 	const currentView = location.pathname.slice(1) || '';
@@ -28,10 +30,6 @@ const NavPanelComponent = memo(function NavPanelImpl({
 		},
 		[navigateWithTransition]
 	);
-
-	const handleOpenSettings = useCallback(() => {
-		navigateWithTransition('/settings');
-	}, [navigateWithTransition]);
 
 	const handleOpenDevelopment = useCallback(() => {
 		navigateWithTransition('/development');
@@ -53,10 +51,11 @@ const NavPanelComponent = memo(function NavPanelImpl({
 					isCollapsed={isCollapsed}
 					onOpenDevelopment={handleOpenDevelopment}
 					onOpenEntityCards={handleOpenEntityCards}
-					onOpenSettings={handleOpenSettings}
+					onOpenSettings={openSettings}
 				/>
 			</div>
 			<NavMainNavigation currentView={currentView} isCollapsed={isCollapsed} />
+			<SettingsModal onOpenChange={closeSettings} open={isOpen} />
 		</aside>
 	);
 });
