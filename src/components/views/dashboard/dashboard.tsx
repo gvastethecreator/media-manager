@@ -82,10 +82,6 @@ interface CategoryCardProps {
 	count: number;
 	href: string;
 	color: string;
-	gradientFrom: string;
-	gradientTo: string;
-	previews?: PreviewItem[];
-	isLoading?: boolean;
 	stats?: { label: string; value: string }[];
 }
 
@@ -95,158 +91,78 @@ const CategoryCard = memo(function CategoryCard({
 	count,
 	href,
 	color,
-	gradientFrom,
-	gradientTo,
-	previews,
-	isLoading,
 	stats,
 }: CategoryCardProps) {
 	return (
 		<Link
 			className={cn(
-				'group relative overflow-hidden rounded-dt-xl border backdrop-blur-md transition-all duration-dt-normal',
-				'hover:scale-[1.02] hover:shadow-dt-3',
-				'bg-gradient-to-br from-card/90 to-card/70',
-				'border-border/30 hover:border-border/50'
+				'group relative overflow-hidden rounded-dt-sm border transition-all duration-dt-normal',
+				'hover:scale-[1.01]'
 			)}
 			style={{
-				background: `linear-gradient(135deg, color-mix(in oklch, ${gradientFrom} 8%, var(--card)) 0%, color-mix(in oklch, ${gradientTo} 5%, var(--card)) 100%)`,
+				background: 'var(--card)',
+				borderColor: 'var(--border)',
 			}}
 			to={href}
 		>
-			{/* Glow Effect */}
+			{/* Subtle Glow Effect on Hover */}
 			<div
-				className="absolute -inset-px opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+				className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 				style={{
-					background: `radial-gradient(600px circle at 50% 0%, ${color}20, transparent 40%)`,
+					background: `radial-gradient(600px circle at top right, color-mix(in oklch, ${color} 6%, transparent), transparent 50%)`,
 				}}
 			/>
 
 			{/* Header */}
-			<div className="relative flex items-center justify-between p-5">
-				<div className="flex items-center gap-4">
+			<div className="relative flex items-center justify-between p-4">
+				<div className="flex items-center gap-3">
 					<div
-						className={cn(
-							'flex h-12 w-12 items-center justify-center rounded-dt-lg',
-							'transition-transform duration-dt-normal group-hover:scale-110'
-						)}
+						className="flex h-10 w-10 items-center justify-center rounded-dt-xs"
 						style={{
-							background: `linear-gradient(135deg, ${gradientFrom}40 0%, ${gradientTo}30 100%)`,
-							boxShadow: `0 4px 20px ${color}20`,
+							backgroundColor: `color-mix(in oklch, ${color} 8%, transparent)`,
+							borderColor: `color-mix(in oklch, ${color} 20%, var(--border))`,
+							borderWidth: '1px',
 						}}
 					>
-						<Icon className="h-6 w-6" style={{ color }} />
+						<Icon className="h-5 w-5" style={{ color }} />
 					</div>
-					<div>
-						<h3 className="font-bold text-foreground">{title}</h3>
-						<p className="text-muted-foreground text-sm">{formatNumber(count)} items</p>
+					<div className="flex flex-col">
+						<h3 className="font-bold text-foreground text-sm tracking-tight">{title}</h3>
+						<div className="flex items-baseline gap-1">
+							<span className="font-bold text-lg leading-none" style={{ color }}>
+								{count === 0 ? '0' : formatNumber(count)}
+							</span>
+							<span className="text-muted-foreground/50 text-xs font-normal">items</span>
+						</div>
 					</div>
 				</div>
 				<div
 					className={cn(
-						'flex h-8 w-8 items-center justify-center rounded-full',
+						'flex h-7 w-7 items-center justify-center rounded-full',
 						'transition-all duration-dt-normal',
 						'opacity-0 group-hover:opacity-100',
 						'-translate-x-2 group-hover:translate-x-0'
 					)}
-					style={{ backgroundColor: `${color}15` }}
+					style={{ backgroundColor: `color-mix(in oklch, ${color} 10%, transparent)` }}
 				>
-					<ArrowRight className="h-4 w-4" style={{ color }} />
+					<ArrowRight className="h-3.5 w-3.5" style={{ color }} />
 				</div>
 			</div>
 
+			{/* Divider */}
+			<div className="relative mx-4 h-px bg-border/10" />
+
 			{/* Mini Stats */}
 			{stats && stats.length > 0 && (
-				<div className="relative flex gap-4 px-5 pb-3">
+				<div className="relative grid grid-cols-2 gap-2 px-4 py-3">
 					{stats.map((stat, i) => (
 						<div className="flex flex-col" key={i}>
-							<span className="text-[10px] text-muted-foreground uppercase tracking-wider">{stat.label}</span>
-							<span className="font-semibold text-sm" style={{ color }}>
-								{stat.value}
-							</span>
+							<span className="text-[10px] text-muted-foreground/40 uppercase tracking-widest">{stat.label}</span>
+							<span className="font-medium text-xs text-muted-foreground/70">{stat.value}</span>
 						</div>
 					))}
 				</div>
 			)}
-
-			{/* Previews Grid */}
-			<div className="relative px-5 pb-5">
-				{isLoading ? (
-					<div className="flex gap-2">
-						{Array.from({ length: 4 }).map((_, i) => (
-							<div
-								className="aspect-square flex-1 animate-pulse rounded-dt-md bg-muted/50"
-								key={i}
-								style={{ animationDelay: `${i * 100}ms` }}
-							/>
-						))}
-					</div>
-				) : previews && previews.length > 0 ? (
-					<div className="flex gap-2">
-						{previews.slice(0, 4).map((item, index) => (
-							<div
-								className={cn(
-									'group/item relative aspect-square flex-1 overflow-hidden rounded-dt-md',
-									'border border-border/20',
-									'transition-all duration-dt-normal',
-									'hover:scale-105 hover:shadow-lg'
-								)}
-								key={item.id}
-								style={{
-									animationDelay: `${index * 50}ms`,
-									zIndex: 4 - index,
-								}}
-							>
-								{item.thumbnailUrl ? (
-									<img
-										alt={item.name || ''}
-										className="h-full w-full object-cover transition-transform duration-500 group-hover/item:scale-110"
-										loading="lazy"
-										src={item.thumbnailUrl}
-									/>
-								) : (
-									<div className="flex h-full w-full flex-col items-center justify-center bg-muted/30">
-										<Icon className="mb-1 h-5 w-5 opacity-30" />
-										<span className="max-w-[80%] truncate px-1 text-[10px] text-muted-foreground/60">
-											{item.name || 'Sin nombre'}
-										</span>
-									</div>
-								)}
-
-								{/* Hover Overlay */}
-								<div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors duration-300 group-hover/item:bg-black/20">
-									<div className="scale-0 opacity-0 transition-all duration-300 group-hover/item:scale-100 group-hover/item:opacity-100">
-										<div
-											className="flex h-8 w-8 items-center justify-center rounded-full backdrop-blur-sm"
-											style={{ backgroundColor: `${color}90` }}
-										>
-											<ArrowRight className="h-4 w-4 text-white" />
-										</div>
-									</div>
-								</div>
-							</div>
-						))}
-						{previews.length > 4 && (
-							<div className="flex aspect-square flex-1 items-center justify-center rounded-dt-md border border-border/20 bg-muted/40">
-								<span className="font-bold text-muted-foreground text-sm">+{previews.length - 4}</span>
-							</div>
-						)}
-					</div>
-				) : (
-					<div className="flex aspect-[4/1] flex-col items-center justify-center gap-2 rounded-dt-md border border-border/30 border-dashed bg-muted/20">
-						<Icon className="h-6 w-6 opacity-20" style={{ color }} />
-						<span className="text-muted-foreground/50 text-xs">Sin contenido aún</span>
-					</div>
-				)}
-			</div>
-
-			{/* Bottom Accent Line */}
-			<div
-				className="absolute right-0 bottom-0 left-0 h-1 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
-				style={{
-					background: `linear-gradient(90deg, transparent 0%, ${color}60 50%, transparent 100%)`,
-				}}
-			/>
 		</Link>
 	);
 });
@@ -342,7 +258,7 @@ export const Dashboard = memo(function Dashboard() {
 			? (combinedStats.storageUsed / (combinedStats.storageUsed + combinedStats.storageAvailable)) * 100
 			: 0;
 
-	// Main categories with real previews
+	// Main categories
 	const mainCategories = useMemo(
 		() => [
 			{
@@ -351,14 +267,6 @@ export const Dashboard = memo(function Dashboard() {
 				count: combinedStats.totalImages,
 				href: '/all-images',
 				color: 'var(--entity-image)',
-				gradientFrom: '#3b82f6',
-				gradientTo: '#8b5cf6',
-				previews: recentImages?.data?.map((img) => ({
-					id: img.id,
-					thumbnailUrl: img.thumbnailUrl,
-					name: img.name,
-				})),
-				isLoading: imagesLoading,
 				stats: [
 					{ label: 'Nuevas', value: formatNumber(recentImages?.data?.length || 0) },
 					{ label: 'Total', value: formatNumber(combinedStats.totalImages) },
@@ -370,14 +278,6 @@ export const Dashboard = memo(function Dashboard() {
 				count: combinedStats.totalVideos,
 				href: '/videos',
 				color: 'var(--entity-video)',
-				gradientFrom: '#8b5cf6',
-				gradientTo: '#ec4899',
-				previews: recentVideos?.data?.map((video) => ({
-					id: video.id,
-					thumbnailUrl: video.thumbnailUrl,
-					name: video.name,
-				})),
-				isLoading: videosLoading,
 				stats: [
 					{ label: 'Nuevos', value: formatNumber(recentVideos?.data?.length || 0) },
 					{ label: 'Total', value: formatNumber(combinedStats.totalVideos) },
@@ -388,14 +288,7 @@ export const Dashboard = memo(function Dashboard() {
 				icon: Music,
 				count: combinedStats.totalAudio,
 				href: '/audio',
-				color: 'var(--dt-success-500)',
-				gradientFrom: '#10b981',
-				gradientTo: '#059669',
-				previews: recentAudio?.slice(0, 4).map((audio) => ({
-					id: audio.id,
-					name: audio.name,
-				})),
-				isLoading: audioLoading,
+				color: 'var(--entity-audio)',
 				stats: [
 					{ label: 'Nuevos', value: formatNumber(recentAudio?.length || 0) },
 					{ label: 'Total', value: formatNumber(combinedStats.totalAudio) },
@@ -407,10 +300,6 @@ export const Dashboard = memo(function Dashboard() {
 				count: combinedStats.totalFolders,
 				href: '/folders',
 				color: 'var(--entity-folder)',
-				gradientFrom: '#f59e0b',
-				gradientTo: '#d97706',
-				previews: [],
-				isLoading: folderLoading,
 				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalFolders) }],
 			},
 			{
@@ -419,13 +308,6 @@ export const Dashboard = memo(function Dashboard() {
 				count: combinedStats.totalAlbums,
 				href: '/albums',
 				color: 'var(--entity-album)',
-				gradientFrom: '#06b6d4',
-				gradientTo: '#0891b2',
-				previews: recentAlbums?.data?.slice(0, 4).map((album) => ({
-					id: album.id,
-					name: album.name,
-				})),
-				isLoading: albumsLoading,
 				stats: [
 					{ label: 'Nuevos', value: formatNumber(recentAlbums?.data?.length || 0) },
 					{ label: 'Total', value: formatNumber(combinedStats.totalAlbums) },
@@ -437,13 +319,6 @@ export const Dashboard = memo(function Dashboard() {
 				count: combinedStats.totalCollections,
 				href: '/collections',
 				color: 'var(--entity-collection)',
-				gradientFrom: '#f97316',
-				gradientTo: '#ea580c',
-				previews: recentCollections?.data?.slice(0, 4).map((collection) => ({
-					id: collection.id,
-					name: collection.name,
-				})),
-				isLoading: collectionsLoading,
 				stats: [
 					{ label: 'Nuevas', value: formatNumber(recentCollections?.data?.length || 0) },
 					{ label: 'Total', value: formatNumber(combinedStats.totalCollections) },
@@ -454,11 +329,7 @@ export const Dashboard = memo(function Dashboard() {
 				icon: Tags,
 				count: combinedStats.totalTags,
 				href: '/tags',
-				color: 'var(--dt-primary-500)',
-				gradientFrom: '#6366f1',
-				gradientTo: '#4f46e5',
-				previews: [],
-				isLoading: tagsLoading,
+				color: 'var(--entity-tag)',
 				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalTags) }],
 			},
 			{
@@ -466,11 +337,7 @@ export const Dashboard = memo(function Dashboard() {
 				icon: Heart,
 				count: combinedStats.totalFavorites,
 				href: '/favorites',
-				color: 'var(--dt-danger-500)',
-				gradientFrom: '#ef4444',
-				gradientTo: '#dc2626',
-				previews: [],
-				isLoading: false,
+				color: 'var(--entity-favorite)',
 				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalFavorites) }],
 			},
 		],
@@ -500,10 +367,6 @@ export const Dashboard = memo(function Dashboard() {
 				count: combinedStats.totalCharacters,
 				href: '/characters',
 				color: 'var(--entity-character)',
-				gradientFrom: '#14b8a6',
-				gradientTo: '#0d9488',
-				previews: [],
-				isLoading: false,
 				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalCharacters) }],
 			},
 			{
@@ -512,10 +375,6 @@ export const Dashboard = memo(function Dashboard() {
 				count: combinedStats.totalPlaces,
 				href: '/places',
 				color: 'var(--entity-place)',
-				gradientFrom: '#22c55e',
-				gradientTo: '#16a34a',
-				previews: [],
-				isLoading: false,
 				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalPlaces) }],
 			},
 			{
@@ -523,11 +382,7 @@ export const Dashboard = memo(function Dashboard() {
 				icon: Zap,
 				count: combinedStats.totalConcepts,
 				href: '/concepts',
-				color: 'var(--dt-violet-500)',
-				gradientFrom: '#8b5cf6',
-				gradientTo: '#7c3aed',
-				previews: [],
-				isLoading: false,
+				color: 'var(--entity-concept)',
 				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalConcepts) }],
 			},
 			{
@@ -535,11 +390,7 @@ export const Dashboard = memo(function Dashboard() {
 				icon: BookOpen,
 				count: combinedStats.totalNotes,
 				href: '/notes',
-				color: 'var(--dt-warning-500)',
-				gradientFrom: '#eab308',
-				gradientTo: '#ca8a04',
-				previews: [],
-				isLoading: false,
+				color: 'var(--entity-note)',
 				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalNotes) }],
 			},
 		],
@@ -726,7 +577,8 @@ export const Dashboard = memo(function Dashboard() {
 		return (
 			<div className="relative flex h-full w-full items-center justify-center">
 				<div className="absolute inset-0 z-0">
-					<Silk color="var(--background)" noiseIntensity={1.2} rotation={0.1} scale={1.2} speed={3} />
+					<Silk color="var(--canvas-bg-dark)" noiseIntensity={1.2} rotation={0.1} scale={1.2} speed={3} />
+					<div className="absolute inset-0 bg-background/96" />
 				</div>
 				<div className="relative z-10 flex flex-col items-center gap-4">
 					<div className="h-8 w-8 animate-spin rounded-full border-2 border-primary border-t-transparent" />
@@ -740,18 +592,19 @@ export const Dashboard = memo(function Dashboard() {
 		<div className="relative h-full w-full overflow-hidden">
 			{/* Animated Background */}
 			<div className="absolute inset-0 z-0">
-				<Silk color="var(--background)" noiseIntensity={1.5} rotation={0.2} scale={1.3} speed={4} />
+				<Silk color="var(--canvas-bg-dark)" noiseIntensity={1.5} rotation={0.2} scale={1.3} speed={4} />
+				<div className="absolute inset-0 bg-background/94" />
 			</div>
 
 			{/* Content */}
 			<div className="relative z-10 h-full overflow-auto">
-				<div className="container mx-auto max-w-7xl space-y-8 p-6">
+				<div className="container mx-auto max-w-7xl space-y-6 p-6">
 					{/* Enhanced Header */}
 					<div className="flex items-center justify-between">
 						<div className="flex items-center gap-4">
 							<div className="relative">
-								<div className="absolute inset-0 rounded-full bg-primary/20 blur-xl" />
-								<div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary/80 to-primary/40 shadow-lg">
+								<div className="absolute inset-0 rounded-full bg-primary/15 blur-xl" />
+								<div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary/70 to-primary/40 shadow-dt-2">
 									<Sparkles className="h-6 w-6 text-primary-foreground" />
 								</div>
 							</div>
@@ -759,29 +612,34 @@ export const Dashboard = memo(function Dashboard() {
 								<h1 className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text font-bold text-3xl text-transparent">
 									Dashboard
 								</h1>
-								<p className="text-muted-foreground">Bienvenido a tu gestor de multimedia</p>
+								<p className="text-muted-foreground/70">Bienvenido a tu gestor de multimedia</p>
 							</div>
 						</div>
 
 						{/* Quick Stats Summary */}
 						<div className="hidden items-center gap-6 md:flex">
 							<div className="text-right">
-								<p className="text-muted-foreground text-xs uppercase tracking-wider">Total Media</p>
+								<p className="text-muted-foreground/50 text-xs uppercase tracking-wider">Total Media</p>
 								<p className="font-bold text-2xl text-foreground">{formatNumber(totalMediaFiles)}</p>
 							</div>
-							<div className="h-10 w-px bg-border/50" />
+							<div className="h-10 w-px bg-border/40" />
 							<div className="text-right">
-								<p className="text-muted-foreground text-xs uppercase tracking-wider">Almacenamiento</p>
+								<p className="text-muted-foreground/50 text-xs uppercase tracking-wider">Almacenamiento</p>
 								<p className="font-bold text-2xl text-foreground">{formatBytes(combinedStats.storageUsed)}</p>
 							</div>
 						</div>
 					</div>
 
 					{/* Stats Grid */}
-					<section className="rounded-dt-xl border border-border/20 bg-card/30 p-6 backdrop-blur-sm">
-						<div className="mb-4 flex items-center justify-between">
-							<h2 className="font-semibold text-foreground">Resumen Rápido</h2>
-							<Badge variant="outline">{formatNumber(totalMediaFiles)} archivos totales</Badge>
+					<section className="rounded-dt-sm border border-border/20 bg-card/50 p-6 shadow-dt-2">
+						<div className="mb-6 flex items-center justify-between">
+							<div className="flex items-center gap-2">
+								<div className="h-5 w-1 rounded-full bg-primary" />
+								<h2 className="font-bold text-foreground text-lg tracking-tight">Resumen Rápido</h2>
+							</div>
+							<Badge className="rounded-dt-xs border-border/15 bg-background/10 font-mono text-xs text-muted-foreground/60" variant="outline">
+								{formatNumber(totalMediaFiles)} archivos totales
+							</Badge>
 						</div>
 						<DashboardStatGrid>
 							{mainStatCards.map((card) => (
@@ -793,13 +651,13 @@ export const Dashboard = memo(function Dashboard() {
 						</DashboardStatGrid>
 					</section>
 
-					{/* Main Categories - Elevated Design */}
+					{/* Main Categories */}
 					<section>
 						<div className="mb-4 flex items-center gap-2">
-							<div className="h-6 w-1 rounded-full bg-gradient-to-b from-primary to-primary/50" />
-							<h2 className="font-semibold text-foreground text-xl">Categorías Principales</h2>
+							<div className="h-5 w-1 rounded-full bg-primary" />
+							<h2 className="font-bold text-foreground text-xl tracking-tight">Categorías Principales</h2>
 						</div>
-						<div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 							{mainCategories.map((category, index) => (
 								<div
 									className="fade-in slide-in-from-bottom-4 animate-in duration-500"
@@ -816,10 +674,10 @@ export const Dashboard = memo(function Dashboard() {
 					{combinedStats.totalCharacters + combinedStats.totalPlaces + combinedStats.totalConcepts > 0 && (
 						<section>
 							<div className="mb-4 flex items-center gap-2">
-								<div className="h-6 w-1 rounded-full bg-gradient-to-b from-secondary to-secondary/50" />
-								<h2 className="font-semibold text-foreground text-xl">Worldbuilding</h2>
+								<div className="h-5 w-1 rounded-full bg-secondary" />
+								<h2 className="font-bold text-foreground text-xl tracking-tight">Worldbuilding</h2>
 							</div>
-							<div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
+							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
 								{worldbuildingCategories.map((category) => (
 									<CategoryCard key={category.title} {...category} />
 								))}
@@ -828,79 +686,72 @@ export const Dashboard = memo(function Dashboard() {
 					)}
 
 					{/* Bottom Info Cards */}
-					<div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+					<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
 						{/* Storage Card */}
-						<div className="group relative overflow-hidden rounded-dt-xl border border-border/30 bg-gradient-to-br from-card/80 to-card/60 p-5 backdrop-blur-md transition-all duration-300 hover:border-border/50 hover:shadow-lg">
+						<div className="group relative overflow-hidden rounded-dt-sm border border-border/20 bg-card/60 p-5 shadow-dt-1 transition-all duration-dt-normal hover:border-border/40">
 							<div className="mb-4 flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-dt-lg bg-gradient-to-br from-slate-500/20 to-slate-600/20">
-									<HardDrive className="h-5 w-5 text-slate-500" />
+								<div className="flex h-10 w-10 items-center justify-center rounded-dt-xs bg-background/8 border border-border/10">
+									<HardDrive className="h-5 w-5 text-muted-foreground/80" />
 								</div>
 								<div>
-									<h3 className="font-semibold text-foreground">Almacenamiento</h3>
-									<p className="text-muted-foreground text-xs">Espacio utilizado</p>
+									<h3 className="font-bold text-foreground text-sm">Almacenamiento</h3>
+									<p className="text-muted-foreground/40 text-[10px] uppercase tracking-wider">Espacio utilizado</p>
 								</div>
 							</div>
 
-							<div className="space-y-3">
+							<div className="space-y-4">
 								<div className="flex items-baseline justify-between">
-									<span className="font-bold text-2xl text-foreground">{formatBytes(combinedStats.storageUsed)}</span>
-									<span className="text-muted-foreground text-sm">
+									<span className="font-bold text-2xl text-foreground tracking-tight">{formatBytes(combinedStats.storageUsed)}</span>
+									<span className="text-muted-foreground/40 text-xs">
 										de {formatBytes(combinedStats.storageUsed + combinedStats.storageAvailable)}
 									</span>
 								</div>
 
-								<div className="relative h-2 overflow-hidden rounded-full bg-muted">
+								<div className="relative h-1.5 overflow-hidden rounded-full bg-border/15">
 									<div
-										className="h-full rounded-full bg-gradient-to-r from-primary to-primary/70 transition-all duration-1000"
+										className="h-full rounded-full bg-primary transition-all duration-1000"
 										style={{ width: `${storageUsedPercentage}%` }}
 									/>
 								</div>
 
-								<div className="flex justify-between text-xs">
-									<span className="text-muted-foreground">{storageUsedPercentage.toFixed(1)}% usado</span>
-									<span className="text-muted-foreground">{formatBytes(combinedStats.storageAvailable)} libre</span>
+								<div className="flex justify-between text-[10px] text-muted-foreground/40 font-mono">
+									<span>{storageUsedPercentage.toFixed(1)}% USADO</span>
+									<span>{formatBytes(combinedStats.storageAvailable)} LIBRE</span>
 								</div>
-
-								{combinedStats.averageFileSize > 0 && (
-									<div className="mt-3 flex items-center gap-2 border-border/20 border-t pt-3 text-xs">
-										<span className="text-muted-foreground">Tamaño promedio:</span>
-										<span className="font-medium">{formatBytes(combinedStats.averageFileSize)}</span>
-									</div>
-								)}
 							</div>
 						</div>
 
 						{/* Activity Card */}
-						<div className="group relative overflow-hidden rounded-dt-xl border border-border/30 bg-gradient-to-br from-card/80 to-card/60 p-5 backdrop-blur-md transition-all duration-300 hover:border-border/50 hover:shadow-lg">
+						<div className="group relative overflow-hidden rounded-dt-sm border border-border/20 bg-card/60 p-5 shadow-dt-1 transition-all duration-dt-normal hover:border-border/40">
 							<div className="mb-4 flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-dt-lg bg-gradient-to-br from-success/20 to-success/30">
-									<Activity className="h-5 w-5 text-success" />
+								<div className="flex h-10 w-10 items-center justify-center rounded-dt-xs bg-background/8 border border-border/10">
+									<Activity className="h-5 w-5 text-status-success/80" />
 								</div>
 								<div>
-									<h3 className="font-semibold text-foreground">Actividad Reciente</h3>
-									<p className="text-muted-foreground text-xs">Últimas acciones</p>
+									<h3 className="font-bold text-foreground text-sm">Actividad</h3>
+									<p className="text-muted-foreground/40 text-[10px] uppercase tracking-wider">Últimas acciones</p>
 								</div>
 							</div>
 
 							{activityLoading ? (
 								<div className="space-y-2">
 									{Array.from({ length: 3 }).map((_, i) => (
-										<div className="h-8 animate-pulse rounded bg-muted/50" key={i} />
+										<div className="h-10 animate-pulse rounded-dt-xs bg-border/10" key={i} />
 									))}
 								</div>
 							) : recentActivity && recentActivity.length > 0 ? (
-								<div className="space-y-3">
+								<div className="space-y-2">
 									{recentActivity.slice(0, 3).map((activity, i) => (
 										<div
-											className="flex items-center gap-3 rounded-lg border border-border/20 bg-background/50 p-2 transition-colors hover:bg-background/80"
+											className="flex items-center gap-3 rounded-dt-xs border border-border/10 bg-background/5 p-2 transition-colors hover:bg-background/10"
 											key={activity.id || i}
 										>
-											<div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary/10">
-												<span className="text-primary text-xs">{activity.entityType?.[0]?.toUpperCase()}</span>
+											<div className="flex h-7 w-7 items-center justify-center rounded-full bg-primary/8 border border-primary/15">
+												<span className="text-primary/80 text-[10px] font-bold">{activity.entityType?.[0]?.toUpperCase()}</span>
 											</div>
 											<div className="min-w-0 flex-1">
-												<p className="truncate font-medium text-sm">{activity.entityName}</p>
-												<p className="text-muted-foreground text-xs capitalize">
+												<p className="truncate font-semibold text-xs text-foreground/80">{activity.entityName}</p>
+												<p className="text-muted-foreground/40 text-[10px] uppercase tracking-tighter">
 													{activity.type} • {activity.entityType}
 												</p>
 											</div>
@@ -908,50 +759,50 @@ export const Dashboard = memo(function Dashboard() {
 									))}
 								</div>
 							) : (
-								<div className="flex flex-col items-center justify-center py-8 text-center">
-									<Activity className="mb-2 h-8 w-8 opacity-20" />
-									<p className="text-muted-foreground text-sm">Sin actividad reciente</p>
+								<div className="flex flex-col items-center justify-center py-6 text-center">
+									<Activity className="mb-2 h-6 w-6 opacity-10" />
+									<p className="text-muted-foreground/30 text-xs">Sin actividad reciente</p>
 								</div>
 							)}
 						</div>
 
 						{/* Tags Card */}
-						<div className="group relative overflow-hidden rounded-dt-xl border border-border/30 bg-gradient-to-br from-card/80 to-card/60 p-5 backdrop-blur-md transition-all duration-300 hover:border-border/50 hover:shadow-lg">
+						<div className="group relative overflow-hidden rounded-dt-sm border border-border/20 bg-card/60 p-5 shadow-dt-1 transition-all duration-dt-normal hover:border-border/40">
 							<div className="mb-4 flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-dt-lg bg-gradient-to-br from-warning/20 to-warning/30">
-									<Star className="h-5 w-5 text-warning" />
+								<div className="flex h-10 w-10 items-center justify-center rounded-dt-xs bg-background/8 border border-border/10">
+									<Star className="h-5 w-5 text-status-warning/80" />
 								</div>
 								<div>
-									<h3 className="font-semibold text-foreground">Tags Populares</h3>
-									<p className="text-muted-foreground text-xs">Más utilizados</p>
+									<h3 className="font-bold text-foreground text-sm">Tags Populares</h3>
+									<p className="text-muted-foreground/40 text-[10px] uppercase tracking-wider">Más utilizados</p>
 								</div>
 							</div>
 
 							{tagsLoading ? (
 								<div className="space-y-2">
 									{Array.from({ length: 4 }).map((_, i) => (
-										<div className="h-10 animate-pulse rounded bg-muted/50" key={i} />
+										<div className="h-10 animate-pulse rounded-dt-xs bg-border/10" key={i} />
 									))}
 								</div>
 							) : topTags && topTags.length > 0 ? (
 								<div className="space-y-2">
 									{topTags.slice(0, 5).map((tag) => (
 										<div
-											className="flex items-center justify-between rounded-lg border border-border/20 bg-background/50 p-2 transition-colors hover:bg-background/80"
+											className="flex items-center justify-between rounded-dt-xs border border-border/10 bg-background/5 p-2 transition-colors hover:bg-background/10"
 											key={tag.id}
 										>
 											<div className="flex min-w-0 items-center gap-2">
-												{tag.emoji && <span className="text-lg">{tag.emoji}</span>}
-												<span className="truncate font-medium text-sm">{tag.name}</span>
+												{tag.emoji && <span className="text-base">{tag.emoji}</span>}
+												<span className="truncate font-semibold text-xs text-foreground/80">{tag.name}</span>
 											</div>
-											<Badge variant="secondary">{tag.imageCount}</Badge>
+											<Badge className="rounded-dt-xs bg-background/10 text-[10px] text-muted-foreground/60" variant="secondary">{tag.imageCount}</Badge>
 										</div>
 									))}
 								</div>
 							) : (
-								<div className="flex flex-col items-center justify-center py-8 text-center">
-									<Tags className="mb-2 h-8 w-8 opacity-20" />
-									<p className="text-muted-foreground text-sm">Sin etiquetas aún</p>
+								<div className="flex flex-col items-center justify-center py-6 text-center">
+									<Tags className="mb-2 h-6 w-6 opacity-10" />
+									<p className="text-muted-foreground/30 text-xs">Sin etiquetas aún</p>
 								</div>
 							)}
 						</div>
