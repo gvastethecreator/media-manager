@@ -69,12 +69,11 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 
 		switch (viewMode) {
 			case 'grid':
-			case 'masonry':
 			case 'cards':
 				return (
 					<Row>
 						<Label className="text-muted-foreground text-xs">
-							{viewMode === 'masonry' ? 'Ancho base' : 'Tamaño de celda'}
+							Tamaño de celda
 						</Label>
 						<div className="flex items-center gap-2">
 							<Input
@@ -88,6 +87,89 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 						</div>
 					</Row>
 				);
+			case 'masonry': {
+				const masonry = config as any;
+				return (
+					<div className="space-y-2">
+						<Row>
+							<Label className="text-muted-foreground text-xs">Ancho columna</Label>
+							<div className="flex items-center gap-2">
+								<Input
+									className="h-7 w-20 text-right text-xs"
+									min={100}
+									onChange={(e) =>
+										setViewConfig('masonry' as any, { itemSize: Number(e.target.value) } as any)
+									}
+									type="number"
+									value={masonry.itemSize}
+								/>
+								<span className="text-[10px] text-muted-foreground">px</span>
+							</div>
+						</Row>
+						<Row>
+							<Label className="text-muted-foreground text-xs">Gap</Label>
+							<div className="flex items-center gap-2">
+								<Input
+									className="h-7 w-20 text-right text-xs"
+									min={0}
+									onChange={(e) => setViewConfig('masonry' as any, { gap: Number(e.target.value) } as any)}
+									type="number"
+									value={masonry.gap ?? 8}
+								/>
+								<span className="text-[10px] text-muted-foreground">px</span>
+							</div>
+						</Row>
+						<Row>
+							<Label className="text-muted-foreground text-xs">Padding</Label>
+							<div className="flex items-center gap-2">
+								<Input
+									className="h-7 w-20 text-right text-xs"
+									min={0}
+									onChange={(e) => setViewConfig('masonry' as any, { padding: Number(e.target.value) } as any)}
+									type="number"
+									value={masonry.padding ?? 16}
+								/>
+								<span className="text-[10px] text-muted-foreground">px</span>
+							</div>
+						</Row>
+						<Row>
+							<Label className="text-muted-foreground text-xs">Hover reveal</Label>
+							<Switch
+								checked={masonry.tcgHoverReveal ?? true}
+								onCheckedChange={(v) => setViewConfig('masonry' as any, { tcgHoverReveal: v } as any)}
+							/>
+						</Row>
+						<Row>
+							<Label className="text-muted-foreground text-xs">Holográfico</Label>
+							<Switch
+								checked={masonry.tcgHolo ?? true}
+								onCheckedChange={(v) => setViewConfig('masonry' as any, { tcgHolo: v } as any)}
+							/>
+						</Row>
+						<Row>
+							<Label className="text-muted-foreground text-xs">Sombras</Label>
+							<Switch
+								checked={masonry.tcgShadows ?? true}
+								onCheckedChange={(v) => setViewConfig('masonry' as any, { tcgShadows: v } as any)}
+							/>
+						</Row>
+						<Row>
+							<Label className="text-muted-foreground text-xs">Bordes redondeados</Label>
+							<Switch
+								checked={masonry.tcgRounded ?? true}
+								onCheckedChange={(v) => setViewConfig('masonry' as any, { tcgRounded: v } as any)}
+							/>
+						</Row>
+						<Row>
+							<Label className="text-muted-foreground text-xs">Tilt 3D</Label>
+							<Switch
+								checked={masonry.tcgTilt ?? true}
+								onCheckedChange={(v) => setViewConfig('masonry' as any, { tcgTilt: v } as any)}
+							/>
+						</Row>
+					</div>
+				);
+			}
 			case 'list':
 			case 'table':
 				return (
@@ -350,6 +432,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 									<div className="flex items-center gap-1.5">
 										<Input
 											className="h-7 w-20 text-right text-xs"
+											max={200}
 											min={1}
 											onChange={(e) => setPageSize(Number(e.target.value))}
 											type="number"

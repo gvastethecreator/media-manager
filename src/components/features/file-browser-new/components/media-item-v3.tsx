@@ -5,6 +5,7 @@
  */
 
 import { CornerUpLeft, Folder } from 'lucide-react';
+import type { CSSProperties } from 'react';
 import { memo, useCallback, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 import { formatFileSize } from '@/lib/utils/format.utils';
@@ -15,15 +16,47 @@ import type { MediaItem } from './media-thumbnail/types';
 /**
  * Colores de entidad consistentes
  */
-const ENTITY_COLORS: Record<string, { bg: string; text: string; border: string }> = {
-	folder: { bg: 'bg-amber-500/15', text: 'text-amber-600', border: 'border-amber-500/30' },
-	image: { bg: 'bg-blue-500/15', text: 'text-blue-600', border: 'border-blue-500/30' },
-	video: { bg: 'bg-purple-500/15', text: 'text-purple-600', border: 'border-purple-500/30' },
-	audio: { bg: 'bg-green-500/15', text: 'text-green-600', border: 'border-green-500/30' },
-	document: { bg: 'bg-red-500/15', text: 'text-red-600', border: 'border-red-500/30' },
-	jsonFile: { bg: 'bg-orange-500/15', text: 'text-orange-600', border: 'border-orange-500/30' },
-	file3d: { bg: 'bg-cyan-500/15', text: 'text-cyan-600', border: 'border-cyan-500/30' },
+const ENTITY_TOKENS: Record<string, string> = {
+	folder: 'var(--entity-folder)',
+	image: 'var(--entity-image)',
+	video: 'var(--entity-video)',
+	audio: 'var(--entity-audio)',
+	document: 'var(--dt-danger-500)',
+	jsonFile: 'var(--dt-warning-500)',
+	file3d: 'var(--dt-success-500)',
 };
+
+const DEFAULT_ENTITY_TOKEN = 'var(--dt-primary-500)';
+
+const ANIMATED_ITEM_IDS = new Set<string>();
+
+function prefersReducedMotion(): boolean {
+	if (typeof window === 'undefined') return false;
+	return window.matchMedia?.('(prefers-reduced-motion: reduce)')?.matches ?? false;
+}
+
+function getEntityToken(entityType?: string): string {
+	if (!entityType) return DEFAULT_ENTITY_TOKEN;
+	return ENTITY_TOKENS[entityType] ?? DEFAULT_ENTITY_TOKEN;
+}
+
+function getThumbHeight({
+	variant,
+	size,
+	item,
+}: {
+	variant: MediaItemV3Props['variant'];
+	size: number;
+	item: BrowserItem;
+}): number {
+	if (variant === 'masonry') {
+		const aspectRatio = item.width && item.height ? item.width / item.height : 1;
+		const estimated = Math.round(size / aspectRatio);
+		return Math.max(Math.round(size * 0.6), Math.min(Math.round(size * 1.8), estimated));
+	}
+	if (variant === 'card') return Math.round(size * 0.72);
+	return Math.round(size * 0.75);
+}
 
 /**
  * Hook para animaciones con animejs
@@ -99,17 +132,23 @@ const MediaItemGridV3 = memo(function MediaItemGridV3({
 	layoutItem = true,
 	layoutOrder,
 	animateIn = true,
+	variant = 'grid',
 }: MediaItemV3Props) {
 	const itemRef = useRef<HTMLButtonElement>(null);
 	const { animateEntry, animateHover, animateSelection } = useAnimeAnimation();
-	const colors = ENTITY_COLORS[item.entityType] || ENTITY_COLORS.document;
+	const entityToken = getEntityToken(item.entityType);
+	const thumbHeight = getThumbHeight({ variant, size, item });
+	const isCompact = variant === 'grid' || variant === 'masonry';
 
 	useEffect(() => {
 		if (!(animateIn && layoutItem && itemRef.current)) return;
+		if (prefersReducedMotion()) return;
+		if (ANIMATED_ITEM_IDS.has(item.id)) return;
 
-		const delay = layoutOrder != null ? Math.min(layoutOrder * 30, 300) : 0;
+		ANIMATED_ITEM_IDS.add(item.id);
+		const delay = layoutOrder != null ? Math.min(layoutOrder * 24, 240) : 0;
 		animateEntry(itemRef.current, delay);
-	}, [animateIn, layoutItem, layoutOrder, animateEntry]);
+	}, [animateIn, layoutItem, layoutOrder, animateEntry, item.id]);
 
 	useEffect(() => {
 		if (isSelected && itemRef.current) {
@@ -118,11 +157,11 @@ const MediaItemGridV3 = memo(function MediaItemGridV3({
 	}, [isSelected, animateSelection]);
 
 	const handleMouseEnter = () => {
-		if (itemRef.current) animateHover(itemRef.current, true);
+		if (itemRef.current && !prefersReducedMotion()) animateHover(itemRef.current, true);
 	};
 
 	const handleMouseLeave = () => {
-		if (itemRef.current) animateHover(itemRef.current, false);
+		if (itemRef.current && !prefersReducedMotion()) animateHover(itemRef.current, false);
 	};
 
 	// Item sintético ".."
@@ -131,7 +170,7 @@ const MediaItemGridV3 = memo(function MediaItemGridV3({
 			<button
 				className={cn(
 					'group relative flex flex-col items-center justify-center gap-2',
-					'rounded-lg border-2 border-border/40 bg-card p-3',
+					'rounded-lg border border-border/30 bg-card/80 p-3',
 					'transition-shadow duration-300',
 					'hover:border-border/60 hover:shadow-dt-2',
 					isSelected && 'border-l-[3px] border-l-primary shadow-dt-2',
@@ -145,7 +184,7 @@ const MediaItemGridV3 = memo(function MediaItemGridV3({
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 				ref={itemRef}
-				style={{ width: size, height: size, ...style }}
+				style={{ width: size, height: size, ...style, '--fb-entity-color': entityToken } as CSSProperties}
 				type="button"
 			>
 				<div className="flex h-16 w-16 items-center justify-center rounded-full bg-muted">
@@ -162,13 +201,10 @@ const MediaItemGridV3 = memo(function MediaItemGridV3({
 			<button
 				className={cn(
 					'group relative flex flex-col rounded-lg',
-					'border-2 border-border/40 bg-card p-2',
+					isCompact ? 'border border-border/30 bg-card/70 p-1.5' : 'border-2 border-border/40 bg-card p-2',
 					'transition-all duration-300',
-					// Hover elegante
 					'hover:border-border/60 hover:shadow-dt-2',
-					// Selected con borde lateral
 					isSelected && 'border-l-[3px] border-l-primary shadow-dt-2',
-					// Active
 					isActive && 'ring-1 ring-primary/30',
 					className
 				)}
@@ -181,35 +217,37 @@ const MediaItemGridV3 = memo(function MediaItemGridV3({
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 				ref={itemRef}
-				style={{ width: size, ...style }}
+				style={{ '--fb-entity-color': entityToken, ...style } as CSSProperties}
 				type="button"
 			>
 				{/* Thumbnail area */}
 				<div
-					className="relative mb-2 flex items-center justify-center overflow-hidden rounded-lg border border-border/20"
-					style={{ height: size * 0.65, backgroundColor: item.color || 'hsl(var(--muted))' }}
+					className="relative flex aspect-4/3 w-full items-center justify-center overflow-hidden rounded-lg border border-border/20"
+					style={{ backgroundColor: item.color || 'hsl(var(--muted))' }}
 				>
 					{item.emoji ? (
 						<span className="text-4xl drop-shadow-md">{item.emoji}</span>
 					) : (
-						<Folder className="h-1/3 w-1/3 text-amber-500" />
+						<Folder className="h-1/3 w-1/3 text-(--fb-entity-color)" />
 					)}
 					{/* Overlay al hover */}
-					<div className="absolute inset-0 bg-gradient-to-t from-black/10 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
+					<div className="fb-thumb-overlay absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
 				</div>
 
-				{/* Info */}
-				<div className="min-w-0 flex-1 px-1">
-					<h4 className="truncate font-medium text-sm" title={item.name}>
-						{item.name}
-					</h4>
-					<div className="mt-1 flex items-center gap-2">
-						<span className={cn('rounded px-1.5 py-0.5 text-xs', colors.bg, colors.text)}>carpeta</span>
-						{item.totalItems !== undefined && (
-							<span className="text-muted-foreground text-xs">{item.totalItems} items</span>
-						)}
+				{/* Info - solo si no es masonry */}
+				{variant !== 'masonry' && (
+					<div className="mt-2 min-w-0 flex-1 px-1">
+						<h4 className="truncate font-medium text-sm" title={item.name}>
+							{item.name}
+						</h4>
+						<div className="mt-1 flex items-center gap-2">
+							<span className="fb-entity-badge rounded px-1.5 py-0.5 text-xs">carpeta</span>
+							{item.totalItems !== undefined && (
+								<span className="text-muted-foreground text-xs">{item.totalItems} items</span>
+							)}
+						</div>
 					</div>
-				</div>
+				)}
 			</button>
 		);
 	}
@@ -236,7 +274,7 @@ const MediaItemGridV3 = memo(function MediaItemGridV3({
 		<button
 			className={cn(
 				'group relative flex flex-col rounded-lg',
-				'border-2 border-border/40 bg-card p-2',
+				isCompact ? 'border border-border/30 bg-card/70 p-1.5' : 'border-2 border-border/40 bg-card p-2',
 				'transition-all duration-300',
 				// Hover elegante
 				'hover:border-border/60 hover:shadow-dt-2',
@@ -255,22 +293,17 @@ const MediaItemGridV3 = memo(function MediaItemGridV3({
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
 			ref={itemRef}
-			style={{ width: size, ...style }}
+			style={{ '--fb-entity-color': entityToken, ...style } as CSSProperties}
 			type="button"
 		>
 			{/* Thumbnail */}
-			<div className="relative mb-2 overflow-hidden rounded-lg border border-border/20" style={{ height: size * 0.65 }}>
+			<div className="relative aspect-4/3 w-full overflow-hidden rounded-lg border border-border/20">
 				<MediaThumbnail className="h-full w-full object-cover" item={mediaItem} lockAspectRatio={true} />
 
 				{/* Overlay con info al hover */}
-				<div className="absolute inset-0 flex flex-col justify-end bg-gradient-to-t from-black/60 via-black/20 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100">
+				<div className="fb-thumb-overlay absolute inset-0 flex flex-col justify-end opacity-0 transition-opacity duration-300 group-hover:opacity-100">
 					<div className="p-2">
-						<span
-							className={cn(
-								'rounded px-1.5 py-0.5 font-medium text-[10px] text-white',
-								colors.bg.replace('/15', '/80')
-							)}
-						>
+						<span className="fb-entity-badge fb-entity-badge--overlay rounded px-1.5 py-0.5 font-medium text-[10px]">
 							{item.entityType}
 						</span>
 						{item.size != null && <span className="ml-2 text-[10px] text-white/90">{formatFileSize(item.size)}</span>}
@@ -278,15 +311,30 @@ const MediaItemGridV3 = memo(function MediaItemGridV3({
 				</div>
 			</div>
 
-			{/* Info */}
-			<div className="min-w-0 flex-1 px-1">
-				<h4 className="truncate font-medium text-sm" title={item.name}>
-					{item.name}
-				</h4>
-				<div className="mt-1 flex items-center gap-2">
-					<span className={cn('rounded px-1.5 py-0.5 text-xs', colors.bg, colors.text)}>{item.entityType}</span>
+			{/* Info - solo si no es masonry */}
+			{variant !== 'masonry' && (
+				<div className="mt-2 min-w-0 flex-1 px-1">
+					<h4 className="truncate font-medium text-sm" title={item.name}>
+						{item.name}
+					</h4>
+					{variant === 'card' && (
+						<div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-muted-foreground text-xs">
+							{item.size != null && <span>{formatFileSize(item.size)}</span>}
+							{item.width && item.height && (
+								<span>
+									{item.width}×{item.height}
+								</span>
+							)}
+							{item.createdAt && <span>{new Date(item.createdAt).toLocaleDateString('es-ES')}</span>}
+						</div>
+					)}
+					{variant === 'grid' && (
+						<div className="mt-1 flex items-center gap-2">
+							<span className="fb-entity-badge rounded px-1.5 py-0.5 text-xs">{item.entityType}</span>
+						</div>
+					)}
 				</div>
-			</div>
+			)}
 		</button>
 	);
 });
@@ -310,21 +358,24 @@ const MediaItemListV3 = memo(function MediaItemListV3({
 }: MediaItemV3Props) {
 	const itemRef = useRef<HTMLButtonElement>(null);
 	const { animateEntry, animateHover } = useAnimeAnimation();
-	const colors = ENTITY_COLORS[item.entityType] || ENTITY_COLORS.document;
+	const entityToken = getEntityToken(item.entityType);
 
 	useEffect(() => {
 		if (!(animateIn && layoutItem && itemRef.current)) return;
+		if (prefersReducedMotion()) return;
+		if (ANIMATED_ITEM_IDS.has(item.id)) return;
 
-		const delay = layoutOrder != null ? Math.min(layoutOrder * 20, 200) : 0;
+		ANIMATED_ITEM_IDS.add(item.id);
+		const delay = layoutOrder != null ? Math.min(layoutOrder * 16, 160) : 0;
 		animateEntry(itemRef.current, delay);
-	}, [animateIn, layoutItem, layoutOrder, animateEntry]);
+	}, [animateIn, layoutItem, layoutOrder, animateEntry, item.id]);
 
 	const handleMouseEnter = () => {
-		if (itemRef.current) animateHover(itemRef.current, true);
+		if (itemRef.current && !prefersReducedMotion()) animateHover(itemRef.current, true);
 	};
 
 	const handleMouseLeave = () => {
-		if (itemRef.current) animateHover(itemRef.current, false);
+		if (itemRef.current && !prefersReducedMotion()) animateHover(itemRef.current, false);
 	};
 
 	// Item sintético
@@ -332,8 +383,8 @@ const MediaItemListV3 = memo(function MediaItemListV3({
 		return (
 			<button
 				className={cn(
-					'flex w-full items-center gap-3 px-3 py-2',
-					'border-border/30 border-b',
+					'flex w-full items-center gap-4 rounded-lg px-4 py-3',
+					'border border-border/30 bg-card/50',
 					'transition-colors duration-200',
 					'hover:bg-muted/50',
 					isSelected && 'border-l-[3px] border-l-primary bg-muted/80',
@@ -347,10 +398,10 @@ const MediaItemListV3 = memo(function MediaItemListV3({
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 				ref={itemRef}
-				style={style}
+				style={{ ...style, '--fb-entity-color': entityToken } as CSSProperties}
 				type="button"
 			>
-				<div className="flex h-8 w-8 shrink-0 items-center justify-center rounded bg-muted">
+				<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-muted">
 					<CornerUpLeft className="h-4 w-4 text-muted-foreground" />
 				</div>
 				<span className="font-medium text-muted-foreground text-sm">Subir nivel</span>
@@ -363,10 +414,10 @@ const MediaItemListV3 = memo(function MediaItemListV3({
 		return (
 			<button
 				className={cn(
-					'flex w-full items-center gap-3 px-3 py-2',
-					'border-border/30 border-b',
+					'flex w-full items-center gap-4 rounded-lg px-4 py-3',
+					'border border-border/30 bg-card/50',
 					'transition-all duration-200',
-					'hover:bg-muted/50 hover:pl-4',
+					'hover:bg-muted/50 hover:shadow-sm',
 					isSelected && 'border-l-[3px] border-l-primary bg-muted/80',
 					isActive && 'ring-1 ring-primary/30 ring-inset',
 					className
@@ -380,19 +431,19 @@ const MediaItemListV3 = memo(function MediaItemListV3({
 				onMouseEnter={handleMouseEnter}
 				onMouseLeave={handleMouseLeave}
 				ref={itemRef}
-				style={style}
+				style={{ ...style, '--fb-entity-color': entityToken } as CSSProperties}
 				type="button"
 			>
 				<div
-					className="flex h-8 w-8 shrink-0 items-center justify-center rounded"
+					className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg"
 					style={{ backgroundColor: item.color || 'hsl(var(--muted))' }}
 				>
 					{item.emoji ? <span className="text-sm">{item.emoji}</span> : <Folder className="h-4 w-4 text-amber-500" />}
 				</div>
 				<div className="min-w-0 flex-1 text-left">
 					<div className="truncate font-medium text-sm">{item.name}</div>
-					<div className="flex items-center gap-2 text-muted-foreground text-xs">
-						<span className={cn('rounded px-1', colors.bg, colors.text)}>carpeta</span>
+					<div className="mt-1 flex items-center gap-3 text-muted-foreground text-xs">
+						<span className="fb-entity-badge rounded px-1.5 py-0.5">carpeta</span>
 						{item.totalItems !== undefined && <span>{item.totalItems} items</span>}
 					</div>
 				</div>
@@ -421,10 +472,10 @@ const MediaItemListV3 = memo(function MediaItemListV3({
 	return (
 		<button
 			className={cn(
-				'flex w-full items-center gap-3 px-3 py-2',
-				'border-border/30 border-b',
+				'flex w-full items-center gap-4 rounded-lg px-4 py-3',
+				'border border-border/30 bg-card/50',
 				'transition-all duration-200',
-				'hover:bg-muted/50 hover:pl-4',
+				'hover:bg-muted/50 hover:shadow-sm',
 				isSelected && 'border-l-[3px] border-l-primary bg-muted/80',
 				isActive && 'ring-1 ring-primary/30 ring-inset',
 				className
@@ -438,17 +489,22 @@ const MediaItemListV3 = memo(function MediaItemListV3({
 			onMouseEnter={handleMouseEnter}
 			onMouseLeave={handleMouseLeave}
 			ref={itemRef}
-			style={style}
+			style={{ ...style, '--fb-entity-color': entityToken } as CSSProperties}
 			type="button"
 		>
-			<div className="h-8 w-8 shrink-0 overflow-hidden rounded border border-border/20">
+			<div className="h-12 w-12 shrink-0 overflow-hidden rounded-lg border border-border/20">
 				<MediaThumbnail className="h-full w-full object-cover" item={mediaItem} />
 			</div>
 			<div className="min-w-0 flex-1 text-left">
 				<div className="truncate font-medium text-sm">{item.name}</div>
-				<div className="flex items-center gap-3 text-muted-foreground text-xs">
-					<span className={cn('rounded px-1', colors.bg, colors.text)}>{item.entityType}</span>
+				<div className="mt-1 flex items-center gap-3 text-muted-foreground text-xs">
+					<span className="fb-entity-badge rounded px-1.5 py-0.5">{item.entityType}</span>
 					{item.size != null && <span>{formatFileSize(item.size)}</span>}
+					{item.width && item.height && (
+						<span>
+							{item.width}×{item.height}
+						</span>
+					)}
 					{item.createdAt && <span>{new Date(item.createdAt).toLocaleDateString('es-ES')}</span>}
 				</div>
 			</div>

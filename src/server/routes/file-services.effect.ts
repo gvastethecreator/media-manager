@@ -35,7 +35,15 @@ const file3dsEffectRouter = express.Router();
 file3dsEffectRouter.get('/', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* File3DService;
-		return yield* service.getAll({ limit: Number(req.query.limit) || 50, offset: Number(req.query.offset) || 0 });
+		const result = yield* service.getAll({
+			limit: Number(req.query.limit) || 50,
+			offset: Number(req.query.offset) || 0,
+		});
+		return result.data.map((file3d) => ({
+			...file3d,
+			entityType: 'file3d' as const,
+			thumbnailUrl: `/api/thumbnails/unified/3d/${file3d.id}`,
+		}));
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(File3DServiceLive)), res);
 });
@@ -131,7 +139,15 @@ const documentsEffectRouter = express.Router();
 documentsEffectRouter.get('/', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* DocumentService;
-		return yield* service.getAll({ limit: Number(req.query.limit) || 50, offset: Number(req.query.offset) || 0 });
+		const result = yield* service.getAll({
+			limit: Number(req.query.limit) || 50,
+			offset: Number(req.query.offset) || 0,
+		});
+		return result.data.map((document) => ({
+			...document,
+			entityType: 'document' as const,
+			thumbnailUrl: `/api/thumbnails/unified/document/${document.id}`,
+		}));
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(DocumentServiceLive)), res);
 });
@@ -219,7 +235,25 @@ const jsonFilesEffectRouter = express.Router();
 jsonFilesEffectRouter.get('/', async (req, res) => {
 	const effect = Effect.gen(function* () {
 		const service = yield* JsonFileService;
-		return yield* service.getAll({ limit: Number(req.query.limit) || 50, offset: Number(req.query.offset) || 0 });
+		const limit = Number(req.query.limit) || 50;
+		const offset = Number(req.query.offset) || 0;
+		const result = yield* service.getAll({ limit, offset });
+		const data = result.data.map((jsonFile) => ({
+			...jsonFile,
+			entityType: 'jsonFile' as const,
+			thumbnailUrl: `/api/thumbnails/unified/json/${jsonFile.id}`,
+		}));
+
+		return {
+			data,
+			pagination: {
+				total: result.total,
+				limit,
+				offset,
+				hasNext: data.length >= limit,
+				hasPrev: offset > 0,
+			},
+		};
 	});
 	await runEffectForExpress(effect.pipe(Effect.provide(JsonFileServiceLive)), res);
 });

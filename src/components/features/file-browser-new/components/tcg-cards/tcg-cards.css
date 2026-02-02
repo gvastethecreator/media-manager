@@ -1,0 +1,607 @@
+/**
+ * TCG Cards Styles - Estilos estilo Trading Card Game
+ * Inspirado en Pokémon/Magic cards con efectos holográficos
+ */
+
+/* ============================================================================
+   BASE CARD
+   ============================================================================ */
+
+.tcg-card {
+	/* Dimensiones explícitas */
+	width: var(--card-width);
+	height: var(--card-height);
+	min-width: var(--card-width);
+
+	/* Reset button */
+	appearance: none;
+	border: none;
+	background: transparent;
+	padding: 0;
+	margin: 0;
+	cursor: pointer;
+	text-align: left;
+	font: inherit;
+	color: inherit;
+
+	/* Layout */
+	position: relative;
+	display: flex;
+	flex-direction: column;
+
+	/* 3D perspective */
+	transform-style: preserve-3d;
+	transform: perspective(1000px) rotateX(var(--rotate-x, 0deg))
+		rotateY(var(--rotate-y, 0deg));
+	transition:
+		transform 150ms ease-out,
+		box-shadow 200ms ease-out;
+
+	/* Sombra base */
+	--shadow-color: color-mix(in oklch, var(--muted-foreground) 20%, transparent);
+	box-shadow:
+		0 2px 4px -1px rgba(0, 0, 0, 0.2),
+		0 4px 8px -2px var(--shadow-color);
+
+	/* Outline para focus */
+	outline: none;
+	border-radius: 12px;
+	overflow: hidden;
+
+	/* Contenedor stacking */
+	isolation: isolate;
+}
+
+.tcg-card:hover {
+	--shadow-color: color-mix(in oklch, var(--accent-color) 30%, transparent);
+	transform: perspective(1000px) rotateX(var(--rotate-x, 0deg))
+		rotateY(var(--rotate-y, 0deg)) translateY(-4px) scale(1.02);
+	box-shadow:
+		0 8px 16px -4px rgba(0, 0, 0, 0.25),
+		0 12px 24px -6px var(--shadow-color);
+	z-index: 10;
+}
+
+.tcg-card:focus-visible {
+	box-shadow:
+		0 0 0 2px var(--background),
+		0 0 0 4px var(--accent-color);
+}
+
+/* ============================================================================
+   HOLOGRAPHIC EFFECT
+   ============================================================================ */
+
+.tcg-card__holo {
+	position: absolute;
+	inset: 0;
+	z-index: 5;
+	pointer-events: none;
+	opacity: 0;
+	transition: opacity 300ms ease;
+
+	/* Gradiente holográfico */
+	background: linear-gradient(
+		135deg,
+		transparent 25%,
+		color-mix(in oklch, var(--accent-color) 40%, white) 35%,
+		color-mix(in oklch, var(--accent-color) 20%, transparent) 50%,
+		transparent 75%
+	);
+	background-size: 200% 200%;
+	background-position: var(--mouse-x, 50%) var(--mouse-y, 50%);
+
+	mix-blend-mode: overlay;
+	border-radius: inherit;
+}
+
+.tcg-card:hover .tcg-card__holo {
+	opacity: 0.6;
+}
+
+/* Mayor efecto para rarezas altas */
+.tcg-card--rare:hover .tcg-card__holo {
+	opacity: 0.7;
+}
+
+.tcg-card--epic:hover .tcg-card__holo,
+.tcg-card--legendary:hover .tcg-card__holo {
+	opacity: 0.8;
+	background: linear-gradient(
+		135deg,
+		transparent 15%,
+		color-mix(in oklch, var(--accent-color) 60%, white) 25%,
+		color-mix(in oklch, var(--accent-color) 40%, cyan) 40%,
+		color-mix(in oklch, var(--accent-color) 60%, magenta) 60%,
+		color-mix(in oklch, var(--accent-color) 40%, transparent) 75%,
+		transparent 85%
+	);
+}
+
+/* ============================================================================
+   BORDER GRADIENT
+   ============================================================================ */
+
+.tcg-card__border {
+	position: absolute;
+	inset: 0;
+	z-index: 1;
+	border-radius: 12px;
+	padding: 2px;
+	pointer-events: none;
+
+	/* Gradiente del borde */
+	background: linear-gradient(
+		145deg,
+		color-mix(in oklch, var(--border) 90%, transparent),
+		color-mix(in oklch, var(--border) 70%, transparent),
+		color-mix(in oklch, var(--border) 90%, transparent)
+	);
+
+	/* Máscara para hacer solo borde visible */
+	-webkit-mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
+	mask:
+		linear-gradient(#fff 0 0) content-box,
+		linear-gradient(#fff 0 0);
+	-webkit-mask-composite: xor;
+	mask-composite: exclude;
+}
+
+.tcg-card--selected .tcg-card__border {
+	padding: 3px;
+	background: linear-gradient(
+		145deg,
+		color-mix(in oklch, var(--accent-color) 100%, white 40%),
+		var(--accent-color),
+		color-mix(in oklch, var(--accent-color) 100%, black 20%)
+	);
+	animation: tcg-border-pulse 1.5s ease-in-out infinite;
+}
+
+.tcg-card:hover .tcg-card__border {
+	background: linear-gradient(
+		145deg,
+		color-mix(in oklch, var(--accent-color) 80%, white),
+		color-mix(in oklch, var(--accent-color) 100%, black 20%),
+		color-mix(in oklch, var(--accent-color) 60%, black 40%)
+	);
+}
+
+@keyframes tcg-border-pulse {
+	0%,
+	100% {
+		opacity: 1;
+	}
+	50% {
+		opacity: 0.7;
+	}
+}
+
+/* ============================================================================
+   INNER CONTENT
+   ============================================================================ */
+
+.tcg-card__inner {
+	position: relative;
+	z-index: 2;
+	width: 100%;
+	height: 100%;
+	display: flex;
+	flex-direction: column;
+
+	/* Fondo interno */
+	background: linear-gradient(
+		180deg,
+		var(--card) 0%,
+		color-mix(in oklch, var(--card) 98%, var(--muted)) 100%
+	);
+	border-radius: 10px;
+	overflow: hidden;
+}
+
+.tcg-card:hover .tcg-card__inner {
+	background: linear-gradient(
+		180deg,
+		var(--card) 0%,
+		color-mix(in oklch, var(--card) 92%, var(--accent-color)) 100%
+	);
+}
+
+/* ============================================================================
+   THUMBNAIL AREA
+   ============================================================================ */
+
+.tcg-card__thumbnail {
+	position: relative;
+	flex: 1 1 auto;
+	min-height: 0;
+	overflow: hidden;
+
+	/* Fondo de respaldo */
+	background: color-mix(in oklch, var(--muted) 50%, transparent);
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+}
+
+.tcg-card__thumbnail::before {
+	content: "";
+	position: absolute;
+	inset: -10%;
+	background-image: var(--thumb-url);
+	background-size: cover;
+	background-position: center;
+	filter: blur(18px) saturate(1.1);
+	opacity: 0.7;
+	transform: scale(1.1);
+	z-index: 0;
+}
+
+.tcg-card__thumbnail::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	background: linear-gradient(
+		180deg,
+		color-mix(in oklch, var(--card) 10%, transparent) 0%,
+		color-mix(in oklch, var(--card) 35%, transparent) 100%
+	);
+	opacity: 0.6;
+	z-index: 1;
+}
+
+.tcg-card__thumbnail > * {
+	position: relative;
+	z-index: 2;
+}
+
+.tcg-card__thumbnail img,
+.tcg-card__thumbnail video {
+	width: 100%;
+	height: 100%;
+	object-fit: contain;
+}
+
+/* ==========================================================================
+   OPCIONES CONFIGURABLES (masonry TCG)
+   ========================================================================== */
+
+.tcg-card--no-holo .tcg-card__holo {
+	display: none;
+}
+
+.tcg-card--no-shadows {
+	box-shadow: none;
+}
+
+.tcg-card--no-shadows:hover {
+	box-shadow: none;
+}
+
+.tcg-card--no-rounded,
+.tcg-card--no-rounded .tcg-card__border,
+.tcg-card--no-rounded .tcg-card__inner,
+.tcg-card--no-rounded .tcg-card__thumbnail {
+	border-radius: 0;
+}
+
+.tcg-card--no-tilt {
+	transform: none;
+}
+
+.tcg-card--no-tilt:hover {
+	transform: none;
+}
+
+/* ============================================================================
+   FOOTER INFO
+   ============================================================================ */
+
+.tcg-card__footer {
+	flex: 0 0 auto;
+	padding: 8px 10px;
+	min-height: 48px;
+
+	/* Fondo con gradiente sutil */
+	background: linear-gradient(
+		180deg,
+		color-mix(in oklch, var(--card) 90%, var(--accent-color)) 0%,
+		var(--card) 100%
+	);
+	border-top: 1px solid
+		color-mix(in oklch, var(--accent-color) 30%, transparent);
+
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+
+/* Relaciones (tags, álbumes, colecciones) */
+.tcg-relations {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 6px;
+	align-items: center;
+	color: color-mix(in oklch, var(--muted-foreground) 85%, transparent);
+	font-size: 11px;
+}
+
+.tcg-relations__item {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+}
+
+/* ============================================================================
+   SELECTION GLOW
+   ============================================================================ */
+
+.tcg-card__selection-glow {
+	position: absolute;
+	inset: -4px;
+	z-index: 0;
+	border-radius: 16px;
+	pointer-events: none;
+
+	background: radial-gradient(
+		ellipse at center,
+		var(--accent-color) 0%,
+		transparent 70%
+	);
+	opacity: 0.4;
+	animation: tcg-glow-pulse 2s ease-in-out infinite;
+}
+
+@keyframes tcg-glow-pulse {
+	0%,
+	100% {
+		opacity: 0.4;
+		transform: scale(1);
+	}
+	50% {
+		opacity: 0.25;
+		transform: scale(1.05);
+	}
+}
+
+/* ============================================================================
+   VARIANT: GRID
+   ============================================================================ */
+
+.tcg-card--grid {
+	/* Grid usa tamaño completo, sin modificaciones adicionales */
+	box-sizing: border-box;
+}
+
+/* ============================================================================
+   VARIANT: CARD (más grande, más info)
+   ============================================================================ */
+
+.tcg-card--card {
+	/* Cards son más elaboradas con mayor prominencia */
+	box-sizing: border-box;
+}
+
+.tcg-card--card .tcg-card__thumbnail::before {
+	opacity: 0;
+}
+
+.tcg-card--card .tcg-card__footer {
+	min-height: 56px;
+	padding: 10px 12px;
+}
+
+/* ============================================================================
+   VARIANT: MASONRY (solo imagen, sin footer)
+   ============================================================================ */
+
+.tcg-card--masonry {
+	border-radius: 8px;
+}
+
+.tcg-card--masonry .tcg-card__border {
+	border-radius: 8px;
+}
+
+.tcg-card--masonry .tcg-card__inner {
+	border-radius: 6px;
+}
+
+.tcg-card--masonry .tcg-card__thumbnail {
+	border-radius: 6px;
+}
+
+.tcg-card--masonry .tcg-card__thumbnail::before {
+	opacity: 0;
+}
+
+.tcg-card--masonry .tcg-card__thumbnail img,
+.tcg-card--masonry .tcg-card__thumbnail video {
+	object-fit: cover;
+}
+
+/* ============================================================================
+   VARIANT: LIST (horizontal, compacto)
+   ============================================================================ */
+
+.tcg-card--list {
+	width: 100%;
+	height: auto;
+	min-height: 64px;
+	flex-direction: row;
+	border-radius: 8px;
+}
+
+.tcg-card--list .tcg-card__border {
+	border-radius: 8px;
+}
+
+.tcg-card--list .tcg-card__inner {
+	flex-direction: row;
+	border-radius: 6px;
+}
+
+.tcg-card--list .tcg-card__thumbnail {
+	flex: 0 0 80px;
+	width: 80px;
+	height: 64px;
+	border-radius: 6px 0 0 6px;
+}
+
+.tcg-card--list .tcg-card__footer {
+	flex: 1 1 auto;
+	border-top: none;
+	border-left: 1px solid
+		color-mix(in oklch, var(--accent-color) 30%, transparent);
+	justify-content: center;
+	min-height: 0;
+	padding: 8px 12px;
+}
+
+/* ============================================================================
+   ACTIVE STATE
+   ============================================================================ */
+
+.tcg-card--active {
+	box-shadow:
+		0 0 0 2px var(--accent-color),
+		0 8px 16px -4px rgba(0, 0, 0, 0.3);
+}
+
+/* ============================================================================
+   ENTITY TYPE BADGES (dentro del thumbnail)
+   ============================================================================ */
+
+.tcg-entity-badge {
+	position: absolute;
+	top: 6px;
+	left: 6px;
+	z-index: 10;
+
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	width: 24px;
+	height: 24px;
+	border-radius: 6px;
+
+	background: color-mix(in oklch, var(--accent-color) 90%, black 20%);
+	color: white;
+	font-size: 12px;
+	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+.tcg-entity-badge svg {
+	width: 14px;
+	height: 14px;
+}
+
+/* Stats badge (duración, tamaño, etc) */
+.tcg-stat-badge {
+	position: absolute;
+	bottom: 6px;
+	right: 6px;
+	z-index: 10;
+
+	display: flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 6px;
+	border-radius: 4px;
+
+	background: rgba(0, 0, 0, 0.7);
+	color: white;
+	font-size: 11px;
+	font-weight: 500;
+	backdrop-filter: blur(4px);
+}
+
+/* Favorite indicator */
+.tcg-favorite-badge {
+	position: absolute;
+	top: 6px;
+	right: 6px;
+	z-index: 10;
+
+	color: #fbbf24;
+	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+	animation: tcg-star-pulse 2s ease-in-out infinite;
+}
+
+/* ==========================================================================
+   HOVER REVEAL (info solo en hover)
+   ========================================================================== */
+
+.tcg-card--hover-reveal .tcg-card__inner {
+	position: relative;
+}
+
+.tcg-card--hover-reveal .tcg-card__footer,
+.tcg-card--hover-reveal .tcg-entity-badge,
+.tcg-card--hover-reveal .tcg-stat-badge,
+.tcg-card--hover-reveal .tcg-favorite-badge {
+	opacity: 0;
+	transform: translateY(6px);
+	transition:
+		opacity 200ms ease,
+		transform 200ms ease;
+}
+
+.tcg-card--hover-reveal .tcg-card__footer {
+	position: absolute;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	border-top: none;
+	background: linear-gradient(
+		180deg,
+		color-mix(in oklch, var(--card) 20%, transparent) 0%,
+		color-mix(in oklch, var(--card) 80%, var(--accent-color)) 100%
+	);
+}
+
+.tcg-card--hover-reveal:hover .tcg-card__footer,
+.tcg-card--hover-reveal:hover .tcg-entity-badge,
+.tcg-card--hover-reveal:hover .tcg-stat-badge,
+.tcg-card--hover-reveal:hover .tcg-favorite-badge {
+	opacity: 1;
+	transform: translateY(0);
+}
+
+@keyframes tcg-star-pulse {
+	0%,
+	100% {
+		transform: scale(1);
+	}
+	50% {
+		transform: scale(1.1);
+	}
+}
+
+/* ============================================================================
+   REDUCED MOTION
+   ============================================================================ */
+
+@media (prefers-reduced-motion: reduce) {
+	.tcg-card {
+		transform: none;
+		transition: box-shadow 200ms ease-out;
+	}
+
+	.tcg-card:hover {
+		transform: none;
+	}
+
+	.tcg-card__holo {
+		display: none;
+	}
+
+	.tcg-card__selection-glow,
+	.tcg-card--selected .tcg-card__border,
+	.tcg-favorite-badge {
+		animation: none;
+	}
+}

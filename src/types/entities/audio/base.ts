@@ -79,6 +79,8 @@ export interface AudioWithStats extends AudioBase {
 	stats: AudioStatistics;
 	/** Alias para compatibilidad - apunta a stats */
 	statistics?: AudioStatistics;
+	/** URL del thumbnail (waveform) */
+	thumbnailUrl?: string;
 	_count?: {
 		albums?: number;
 		collections?: number;

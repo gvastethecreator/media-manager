@@ -5,7 +5,8 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { MediaItemGridV3 } from '../components/media-item-v3';
+import { cn } from '@/lib/utils';
+import { MediaThumbnail } from '../components/media-thumbnail/media-thumbnail';
 import type { BrowserItem } from '../types/item.types';
 import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '../types/props.types';
 import type { GridViewConfig } from '../types/view.types';
@@ -48,6 +49,7 @@ export function GridView({
 	const containerRef = useRef<HTMLDivElement>(null);
 	const [internalScrollEl, setInternalScrollEl] = useState<HTMLDivElement | null>(null);
 	const [containerWidth, setContainerWidth] = useState(0);
+	const [containerHeight, setContainerHeight] = useState(0);
 
 	const itemSize = itemSizeOverride ?? config.itemSize;
 	const gap = config.gap;
@@ -68,15 +70,22 @@ export function GridView({
 		return items;
 	}, [items, page, pageSize]);
 	const shouldVirtualize = virtualizationConfig.enabled && displayItems.length >= virtualizationConfig.threshold;
+	const allowAppearAnimation = !(suppressAppearAnimation || shouldVirtualize);
 	const safeWidth = Math.max(containerWidth, itemSize);
 	const columns = Math.max(1, Math.floor((safeWidth + gap) / (itemSize + gap)));
-	const columnWidth = Math.max(itemSize, Math.floor((safeWidth - gap * (columns - 1)) / columns));
+	const actualItemWidth = Math.max(1, Math.round((safeWidth - gap * (columns - 1)) / columns));
+	const itemHeight = actualItemWidth;
+	const rowHeight = itemHeight + gap;
 	const rowCount = Math.ceil(displayItems.length / columns);
+	const overscanRows = Math.max(
+		virtualizationConfig.overscan,
+		containerHeight > 0 ? Math.ceil(containerHeight / rowHeight) : 0
+	);
 	const rowVirtualizer = useVirtualizer({
 		count: rowCount,
 		getScrollElement: () => containerRef.current,
-		estimateSize: () => itemSize + gap,
-		overscan: virtualizationConfig.overscan,
+		estimateSize: () => rowHeight,
+		overscan: overscanRows,
 	});
 
 	useEffect(() => {
@@ -86,11 +95,13 @@ export function GridView({
 		const observer = new ResizeObserver((entries) => {
 			for (const entry of entries) {
 				setContainerWidth(entry.contentRect.width);
+				setContainerHeight(entry.contentRect.height);
 			}
 		});
 
 		observer.observe(container);
 		setContainerWidth(container.clientWidth);
+		setContainerHeight(container.clientHeight);
 
 		return () => observer.disconnect();
 	}, []);
@@ -140,6 +151,39 @@ export function GridView({
 		[onItemContextMenu]
 	);
 
+	const renderGridItem = useCallback(
+		(item: BrowserItem, index: number) => {
+			const isSelected = selectedIds.has(item.id);
+			const isActive = activeId === item.id;
+			return (
+				<button
+					className={cn(
+						'group relative aspect-square cursor-pointer overflow-hidden rounded-lg bg-muted/50',
+						'transition-all duration-200',
+						isSelected ? 'ring-2 ring-primary ring-offset-2 ring-offset-background' : 'hover:ring-1 hover:ring-border',
+						isActive && 'ring-2 ring-primary/70'
+					)}
+					data-item-id={item.id}
+					key={item.id}
+					onClick={(e) => handleItemClick(item, e)}
+					onContextMenu={(e) => handleItemContextMenu(item, e)}
+					onDoubleClick={() => handleItemDoubleClick(item)}
+					type="button"
+				>
+					{/* Thumbnail puro - object-cover para llenar el cuadrado */}
+					<MediaThumbnail className="h-full w-full" item={item} style={{ objectFit: 'cover' }} />
+					{/* Nombre solo en hover */}
+					<div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/80 via-black/40 to-transparent p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+						<span className="block truncate font-medium text-white text-xs" title={item.name}>
+							{item.name}
+						</span>
+					</div>
+				</button>
+			);
+		},
+		[activeId, handleItemClick, handleItemContextMenu, handleItemDoubleClick, selectedIds]
+	);
+
 	return (
 		<div
 			className="h-full w-full overflow-auto"
@@ -153,7 +197,7 @@ export function GridView({
 			<div className="h-full w-full" data-testid="grid-view">
 				{!shouldVirtualize && (
 					<div
-						className="grid p-3"
+						className="grid p-4"
 						data-testid="grid-view-container"
 						ref={(el) => onLayoutRootReady?.(el)}
 						style={{
@@ -161,21 +205,7 @@ export function GridView({
 							gap: `${gap}px`,
 						}}
 					>
-						{displayItems.map((item, index) => (
-							<MediaItemGridV3
-								animateIn={!suppressAppearAnimation}
-								isActive={activeId === item.id}
-								isSelected={selectedIds.has(item.id)}
-								item={item}
-								key={item.id}
-								layoutItem={index < layoutItemLimit}
-								layoutOrder={index}
-								onClick={(e) => handleItemClick(item, e)}
-								onContextMenu={(e) => handleItemContextMenu(item, e)}
-								onDoubleClick={() => handleItemDoubleClick(item)}
-								size={itemSize}
-							/>
-						))}
+						{displayItems.map((item, index) => renderGridItem(item, index))}
 					</div>
 				)}
 				{shouldVirtualize && (
@@ -192,7 +222,7 @@ export function GridView({
 
 							return (
 								<div
-									className="flex"
+									className="grid"
 									key={virtualRow.key}
 									style={{
 										position: 'absolute',
@@ -200,24 +230,14 @@ export function GridView({
 										left: 0,
 										width: '100%',
 										transform: `translateY(${virtualRow.start}px)`,
+										gridTemplateColumns: `repeat(${columns}, 1fr)`,
 										gap: `${gap}px`,
+										paddingBottom: `${gap}px`,
 									}}
 								>
-									{rowItems.map((item, index) => (
-										<MediaItemGridV3
-											animateIn={!suppressAppearAnimation}
-											isActive={activeId === item.id}
-											isSelected={selectedIds.has(item.id)}
-											item={item}
-											key={item.id}
-											layoutItem={from + index < layoutItemLimit}
-											layoutOrder={from + index}
-											onClick={(e) => handleItemClick(item, e)}
-											onContextMenu={(e) => handleItemContextMenu(item, e)}
-											onDoubleClick={() => handleItemDoubleClick(item)}
-											size={columnWidth}
-										/>
-									))}
+									{rowItems.map((item, index) => {
+										return renderGridItem(item, from + index);
+									})}
 								</div>
 							);
 						})}

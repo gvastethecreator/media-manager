@@ -326,7 +326,7 @@ export function CreateWorldItemForm({
 			label: 'Descripción',
 			render: ({ value, onChange }: any) => (
 				<textarea
-					className="w-full resize-none rounded border p-2 text-xs"
+					className="w-full resize-none rounded border border-input bg-background p-2 text-foreground text-xs"
 					onChange={(e) => onChange(e.target.value)}
 					placeholder="Descripción del objeto..."
 					rows={3}
@@ -396,7 +396,7 @@ export function CreateWorldItemForm({
 			label: 'Origen',
 			render: ({ value, onChange }: any) => (
 				<input
-					className="w-full rounded border p-2 text-xs"
+					className="w-full rounded border border-input bg-background p-2 text-foreground text-xs"
 					onChange={(e) => onChange(e.target.value)}
 					placeholder="Origen del objeto"
 					type="text"

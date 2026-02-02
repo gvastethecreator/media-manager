@@ -6,6 +6,14 @@ import { invoke } from '@tauri-apps/api/core';
 import { useEffect, useState } from 'react';
 import { clientLogger } from '@/lib/logger/client-logger';
 
+// --- Constantes ---
+const HEALTH_CHECK_INTERVAL = 900_000; // 15 minutos (900s)
+const DEFAULT_API_URL = 'http://localhost:4000/api';
+const TAURI_COMMANDS = {
+	CHECK_HEALTH: 'check_backend_health',
+	GET_APP_DATA_DIR: 'get_app_data_dir',
+} as const;
+
 interface BackendStatus {
 	isRunning: boolean;
 	isChecking: boolean;
@@ -23,7 +31,7 @@ export function useTauriBackend() {
 		try {
 			setStatus((prev) => ({ ...prev, isChecking: true, error: null }));
 
-			const result = await invoke<string>('check_backend_health');
+			const result = await invoke<string>(TAURI_COMMANDS.CHECK_HEALTH);
 			clientLogger.debug('Backend health check:', result);
 
 			setStatus({
@@ -43,7 +51,7 @@ export function useTauriBackend() {
 
 	const getAppDataDir = async () => {
 		try {
-			const appDataDir = await invoke<string>('get_app_data_dir');
+			const appDataDir = await invoke<string>(TAURI_COMMANDS.GET_APP_DATA_DIR);
 			return appDataDir;
 		} catch (error) {
 			clientLogger.error('Failed to get app data directory:', error);
@@ -57,7 +65,7 @@ export function useTauriBackend() {
 			try {
 				setStatus((prev) => ({ ...prev, isChecking: true, error: null }));
 
-				const result = await invoke<string>('check_backend_health');
+				const result = await invoke<string>(TAURI_COMMANDS.CHECK_HEALTH);
 				clientLogger.debug('Backend health check:', result);
 
 				setStatus({
@@ -78,8 +86,8 @@ export function useTauriBackend() {
 		// Verificar salud del backend al cargar
 		performHealthCheck();
 
-		// Verificar cada 30 segundos si el backend sigue funcionando
-		const interval = setInterval(performHealthCheck, 30_000);
+		// Verificar salud periódicamente para reducir ruido
+		const interval = setInterval(performHealthCheck, HEALTH_CHECK_INTERVAL);
 
 		return () => clearInterval(interval);
 	}, []);
@@ -120,9 +128,9 @@ export function useTauriContext() {
 export function getApiBaseUrl(): string {
 	// En desarrollo, usar localhost directo
 	if (process.env.NODE_ENV === 'development') {
-		return 'http://localhost:4000/api';
+		return DEFAULT_API_URL;
 	}
 
 	// En producción, usar la variable de entorno o fallback
-	return process.env.VITE_API_URL || 'http://localhost:4000/api';
+	return process.env.VITE_API_URL || DEFAULT_API_URL;
 }

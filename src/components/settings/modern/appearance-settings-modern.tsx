@@ -4,42 +4,33 @@
  * @description Configuración de apariencia, temas y modo oscuro usando Global Store real
  */
 
-import { Check, Image as ImageIcon, LayoutGrid, Monitor, Moon, Palette, Sun, Type } from 'lucide-react';
+import { Check, Edit, Image as ImageIcon, LayoutGrid, Monitor, Moon, Palette, Plus, Sun, Type } from 'lucide-react';
+import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group-v3';
 import { Switch } from '@/components/ui/switch-v3';
 import { useTheme } from '@/hooks/use-theme';
 import { cn } from '@/lib/utils';
-
-// Imports de lógica real
 import { useInterfaceSettingsStore } from '@/store/entities/settings/store';
+// Imports de lógica real
+import { useCustomThemeStore } from '@/store/entities/themes/custom-theme.store';
+import { BUILT_IN_THEMES } from '@/types/theme';
 import { SettingsCard, SettingsGroup, SettingsRow } from '../modern/settings-card';
+import { ThemeColorStrip } from '../themes/theme-preview';
+import { ThemeSettings } from '../themes/theme-settings';
 
 type FontSize = 'xs' | 'sm' | 'base' | 'lg' | 'xl';
 type Density = 'comfortable' | 'default' | 'compact';
-
-// Lista de temas disponibles con tokens CSS
-const THEMES = [
-	{ id: 'light', label: 'Claro', icon: Sun, color: 'var(--dt-warning-500)' },
-	{ id: 'dark', label: 'Oscuro', icon: Moon, color: 'var(--dt-primary-500)' },
-	{ id: 'cafe', label: 'Café', icon: Sun, color: 'var(--dt-neutral-500)' },
-	{ id: 'violeta', label: 'Violeta', icon: Moon, color: 'var(--dt-primary-600)' },
-	{ id: 'madera', label: 'Madera', icon: Sun, color: 'var(--dt-warning-600)' },
-	{ id: 'nocturno', label: 'Nocturno', icon: Moon, color: 'var(--dt-primary-700)' },
-	{ id: 'verde', label: 'Verde', icon: Sun, color: 'var(--dt-success-500)' },
-	{ id: 'atardecer', label: 'Atardecer', icon: Sun, color: 'var(--dt-warning-500)' },
-	{ id: 'corporativo', label: 'Corporativo', icon: Monitor, color: 'var(--dt-primary-500)' },
-	{ id: 'carbon', label: 'Carbón', icon: Moon, color: 'var(--dt-neutral-700)' },
-	{ id: 'teal', label: 'Teal', icon: Sun, color: 'var(--dt-success-600)' },
-	{ id: 'citrico', label: 'Cítrico', icon: Sun, color: 'var(--dt-warning-400)' },
-	{ id: 'aurora', label: 'Aurora', icon: Moon, color: 'var(--dt-primary-400)' },
-	{ id: 'neon', label: 'Neón', icon: Moon, color: 'var(--dt-success-400)' },
-] as const;
 
 export function AppearanceSettingsModern() {
 	// Hooks reales
 	const { theme, setTheme, resolvedTheme } = useTheme();
 	const preferences = useInterfaceSettingsStore((s) => s.preferences);
 	const setPreferences = useInterfaceSettingsStore((s) => s.setPreferences);
+	const { customThemes, applyThemeToDOM } = useCustomThemeStore();
+
+	// Estado para vista de temas expandida
+	const [showThemeSettings, setShowThemeSettings] = useState(false);
 
 	// Mapeo seguro de valores
 	const fontSize = (preferences?.fontSize as FontSize) || 'base';
@@ -50,6 +41,18 @@ export function AppearanceSettingsModern() {
 	}
 
 	const currentTheme = theme || 'system';
+
+	// Si se muestra la vista de temas completa
+	if (showThemeSettings) {
+		return (
+			<div className="space-y-4">
+				<Button className="mb-2" onClick={() => setShowThemeSettings(false)} size="sm" variant="ghost">
+					← Volver a Apariencia
+				</Button>
+				<ThemeSettings />
+			</div>
+		);
+	}
 
 	return (
 		<div className="space-y-6">
@@ -68,14 +71,15 @@ export function AppearanceSettingsModern() {
 				icon={<Palette />}
 				title="Tema de Color"
 			>
-				<div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
-					{THEMES.map((t) => {
-						const Icon = t.icon;
+				{/* Quick access to built-in themes (showing first 8) */}
+				<div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+					{BUILT_IN_THEMES.slice(0, 8).map((t) => {
+						const Icon = t.icon === 'sun' ? Sun : t.icon === 'moon' ? Moon : Monitor;
 						const isSelected = currentTheme === t.id;
 						return (
 							<button
 								className={cn(
-									'group relative flex flex-col items-center gap-2 rounded-xl border p-4 transition-all duration-200',
+									'group relative flex flex-col items-center gap-2 rounded-xl border p-3 transition-all duration-200',
 									'hover:border-border/80 hover:bg-muted/50',
 									isSelected ? 'border-primary bg-primary/5 shadow-sm' : 'border-border/50 bg-card'
 								)}
@@ -85,36 +89,61 @@ export function AppearanceSettingsModern() {
 							>
 								{/* Check indicator */}
 								{isSelected && (
-									<div className="absolute top-2 right-2 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
-										<Check className="h-3 w-3" />
+									<div className="absolute top-1 right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
+										<Check className="h-2.5 w-2.5" />
 									</div>
 								)}
 
 								{/* Theme preview circle usando color-mix */}
 								<div
-									className="flex h-12 w-12 items-center justify-center rounded-full transition-transform group-hover:scale-110"
+									className="flex h-10 w-10 items-center justify-center rounded-full transition-transform group-hover:scale-110"
 									style={{
-										background: `linear-gradient(135deg, ${t.color} 0%, color-mix(in oklch, ${t.color} 70%, black) 100%)`,
+										background: `linear-gradient(135deg, ${t.previewColor} 0%, color-mix(in oklch, ${t.previewColor} 70%, black) 100%)`,
 										boxShadow: isSelected
-											? `0 0 0 2px var(--primary), 0 4px 12px color-mix(in oklch, ${t.color} 25%, transparent)`
+											? `0 0 0 2px var(--primary), 0 4px 12px color-mix(in oklch, ${t.previewColor} 25%, transparent)`
 											: 'none',
 									}}
 								>
-									<Icon className="h-5 w-5 text-white" />
+									<Icon className="h-4 w-4" style={{ color: 'var(--background)' }} />
 								</div>
 
 								{/* Theme label */}
-								<span className={cn('font-medium text-sm', isSelected && 'text-primary')}>{t.label}</span>
+								<span className={cn('font-medium text-xs', isSelected && 'text-primary')}>{t.name}</span>
 							</button>
 						);
 					})}
 				</div>
 
-				{/* System preference option */}
-				<div className="mt-4 border-border/50 border-t pt-4">
+				{/* Custom themes preview (if any) */}
+				{customThemes.length > 0 && (
+					<div className="mt-4 border-border/50 border-t pt-4">
+						<div className="mb-2 flex items-center justify-between">
+							<span className="font-medium text-muted-foreground text-sm">Mis Temas ({customThemes.length})</span>
+						</div>
+						<div className="flex flex-wrap gap-2">
+							{customThemes.slice(0, 4).map((t) => (
+								<button
+									className="flex items-center gap-2 rounded-lg border border-border/50 bg-card px-3 py-2 transition-all hover:border-border/80"
+									key={t.id}
+									onClick={() => applyThemeToDOM(t)}
+									type="button"
+								>
+									<ThemeColorStrip colors={t.colors} size="sm" />
+									<span className="text-xs">{t.name}</span>
+								</button>
+							))}
+							{customThemes.length > 4 && (
+								<span className="flex items-center text-muted-foreground text-xs">+{customThemes.length - 4} más</span>
+							)}
+						</div>
+					</div>
+				)}
+
+				{/* System preference + Link to full theme editor */}
+				<div className="mt-4 flex flex-col gap-3 border-border/50 border-t pt-4 sm:flex-row sm:items-center sm:justify-between">
 					<button
 						className={cn(
-							'flex w-full items-center gap-3 rounded-lg border p-3 transition-all',
+							'flex flex-1 items-center gap-3 rounded-lg border p-3 transition-all',
 							currentTheme === 'system'
 								? 'border-primary bg-primary/5'
 								: 'border-border/50 bg-card hover:border-border/80 hover:bg-muted/50'
@@ -122,21 +151,32 @@ export function AppearanceSettingsModern() {
 						onClick={() => setTheme('system')}
 						type="button"
 					>
-						<div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted">
-							<Monitor className="h-5 w-5 text-muted-foreground" />
+						<div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
+							<Monitor className="h-4 w-4 text-muted-foreground" />
 						</div>
 						<div className="flex-1 text-left">
-							<span className="font-medium text-foreground">Automático</span>
+							<span className="font-medium text-foreground text-sm">Automático</span>
 							<p className="text-muted-foreground text-xs">
-								Usar preferencia del sistema ({resolvedTheme === 'dark' ? 'oscuro' : 'claro'})
+								Según sistema ({resolvedTheme === 'dark' ? 'oscuro' : 'claro'})
 							</p>
 						</div>
 						{currentTheme === 'system' && (
-							<div className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
-								<Check className="h-3 w-3" />
+							<div className="flex h-4 w-4 items-center justify-center rounded-full bg-primary text-primary-foreground">
+								<Check className="h-2.5 w-2.5" />
 							</div>
 						)}
 					</button>
+
+					<div className="flex gap-2">
+						<Button className="gap-2" onClick={() => setShowThemeSettings(true)} size="sm" variant="outline">
+							<Edit className="h-3.5 w-3.5" />
+							Editar Temas
+						</Button>
+						<Button className="gap-2" onClick={() => setShowThemeSettings(true)} size="sm" variant="default">
+							<Plus className="h-3.5 w-3.5" />
+							Crear Tema
+						</Button>
+					</div>
 				</div>
 			</SettingsCard>
 
@@ -281,7 +321,7 @@ export function AppearanceSettingsModern() {
 					>
 						<div className="flex items-center gap-2">
 							<select
-								className="rounded-md border border-border/50 bg-background px-3 py-1.5 text-sm outline-none focus:border-primary"
+								className="rounded-md border border-border/50 bg-background px-3 py-1.5 text-foreground text-sm outline-none focus:border-primary"
 								onChange={(e: React.ChangeEvent<HTMLSelectElement>) =>
 									setPreferences({ thumbnailQuality: e.target.value as 'low' | 'medium' | 'high' })
 								}

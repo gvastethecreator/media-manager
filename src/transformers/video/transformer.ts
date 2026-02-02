@@ -170,6 +170,9 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 		// 🔍 Detección de duplicados (basada en hash - consistente con imágenes)
 		const duplicateStatus = determineDuplicateStatus(baseData.hash);
 
+		// Siempre generar la URL del thumbnail - la API se encarga de generarlo si no existe
+		const thumbnailUrl = `/api/videos/${baseData.id}/thumbnail`;
+
 		// 📊 Estadísticas completas
 		const statistics: VideoStatistics = {
 			...createDefaultEntityStats(),
@@ -221,7 +224,9 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 
 			// Estado de duplicados
 			duplicateStatus,
-			thumbnailUrl: baseData.thumbnail ? `/api/videos/${baseData.id}/thumbnail` : null,
+
+			// Thumbnail URL
+			thumbnailUrl,
 		};
 
 		return {
@@ -234,7 +239,7 @@ export function fromDrizzleVideoWithCounts(drizzleVideo: DrizzleVideoWithCounts)
 			isPublic: false,
 			statistics,
 			stats: statistics,
-			thumbnailUrl: baseData.thumbnail ? `/api/videos/${baseData.id}/thumbnail` : null,
+			thumbnailUrl,
 			description: null,
 			hash: baseData.hash || '',
 			_count: counts,

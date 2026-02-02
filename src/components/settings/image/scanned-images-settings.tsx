@@ -124,7 +124,7 @@ export function ScannedImagesSettings() {
 											)}
 
 											{/* Actions Overlay */}
-											<div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/60 opacity-0 transition-opacity group-hover:opacity-100">
+											<div className="absolute inset-0 flex items-center justify-center gap-2 bg-background/60 opacity-0 transition-opacity group-hover:opacity-100">
 												<Button
 													className="h-8 w-8 bg-background/80 text-foreground hover:bg-background"
 													onClick={() => {
@@ -140,7 +140,7 @@ export function ScannedImagesSettings() {
 												<Button
 													className={cn(
 														'h-8 w-8 hover:bg-background/80',
-														img.isFavorite ? 'text-yellow-400' : 'text-white/70 hover:text-white'
+														img.isFavorite ? 'text-warning' : 'text-muted-foreground/70 hover:text-foreground'
 													)}
 													onClick={() => handleToggleFavorite(img)}
 													size="icon"
