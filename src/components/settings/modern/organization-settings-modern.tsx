@@ -18,10 +18,10 @@ import { toastService } from '@/lib/ui/toast';
 import type { AlbumWithStats } from '@/types/entities/album';
 import type { CollectionWithStats } from '@/types/entities/collection';
 import type { GroupWithStats } from '@/types/entities/group';
-import { CreateAlbumForm } from '../albums/create-album-form';
-import { CreateCollectionForm } from '../collections/create-collection-form';
 import type { CardActions } from '../common/entity-settings-view';
-import { CreateGroupForm } from '../groups/create-group-form';
+import { CreateAlbumForm } from '../forms/create-album-form';
+import { CreateCollectionForm } from '../forms/create-collection-form';
+import { CreateGroupForm } from '../forms/create-group-form';
 
 // ============================================================================
 // CONFIGURACIONES DE STATS

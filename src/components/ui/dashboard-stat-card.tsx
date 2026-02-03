@@ -17,29 +17,29 @@ import { cn } from '@/lib/utils';
 const statCardVariants = cva('group relative overflow-hidden rounded-dt-xs border transition-all duration-dt-normal', {
 	variants: {
 		variant: {
-			default: 'border-border/20 bg-card hover:border-border/40 hover:bg-card/90',
-			primary: 'border-primary/20 bg-card hover:border-primary/40 hover:bg-primary/5',
-			secondary: 'border-secondary/20 bg-card hover:border-secondary/40 hover:bg-secondary/5',
-			success: 'border-success/20 bg-card hover:border-success/40 hover:bg-success/5',
-			warning: 'border-warning/20 bg-card hover:border-warning/40 hover:bg-warning/5',
-			destructive: 'border-destructive/20 bg-card hover:border-destructive/40 hover:bg-destructive/5',
-			info: 'border-info/20 bg-card hover:border-info/40 hover:bg-info/5',
-			accent: 'border-accent/20 bg-card hover:border-accent/40 hover:bg-accent/5',
-			muted: 'border-muted/20 bg-card hover:border-muted/40 hover:bg-muted/5',
+			default: 'border-border/15 bg-card hover:border-border/25 hover:bg-card/90',
+			primary: 'border-primary/10 bg-card hover:border-primary/20 hover:bg-primary/5',
+			secondary: 'border-secondary/10 bg-card hover:border-secondary/20 hover:bg-secondary/5',
+			success: 'border-success/10 bg-card hover:border-success/20 hover:bg-success/5',
+			warning: 'border-warning/10 bg-card hover:border-warning/20 hover:bg-warning/5',
+			destructive: 'border-destructive/10 bg-card hover:border-destructive/20 hover:bg-destructive/5',
+			info: 'border-info/10 bg-card hover:border-info/20 hover:bg-info/5',
+			accent: 'border-accent/10 bg-card hover:border-accent/20 hover:bg-accent/5',
+			muted: 'border-muted/10 bg-card hover:border-muted/20 hover:bg-muted/5',
 			image:
-				'border-[var(--entity-image)]/20 bg-card hover:border-[var(--entity-image)]/40 hover:bg-[var(--entity-image)]/5',
+				'border-[var(--entity-image)]/10 bg-card hover:border-[var(--entity-image)]/20 hover:bg-[var(--entity-image)]/5',
 			video:
-				'border-[var(--entity-video)]/20 bg-card hover:border-[var(--entity-video)]/40 hover:bg-[var(--entity-video)]/5',
+				'border-[var(--entity-video)]/10 bg-card hover:border-[var(--entity-video)]/20 hover:bg-[var(--entity-video)]/5',
 			folder:
-				'border-[var(--entity-folder)]/20 bg-card hover:border-[var(--entity-folder)]/40 hover:bg-[var(--entity-folder)]/5',
+				'border-[var(--entity-folder)]/10 bg-card hover:border-[var(--entity-folder)]/20 hover:bg-[var(--entity-folder)]/5',
 			album:
-				'border-[var(--entity-album)]/20 bg-card hover:border-[var(--entity-album)]/40 hover:bg-[var(--entity-album)]/5',
+				'border-[var(--entity-album)]/10 bg-card hover:border-[var(--entity-album)]/20 hover:bg-[var(--entity-album)]/5',
 			collection:
-				'border-[var(--entity-collection)]/20 bg-card hover:border-[var(--entity-collection)]/40 hover:bg-[var(--entity-collection)]/5',
+				'border-[var(--entity-collection)]/10 bg-card hover:border-[var(--entity-collection)]/20 hover:bg-[var(--entity-collection)]/5',
 			character:
-				'border-[var(--entity-character)]/20 bg-card hover:border-[var(--entity-character)]/40 hover:bg-[var(--entity-character)]/5',
+				'border-[var(--entity-character)]/10 bg-card hover:border-[var(--entity-character)]/20 hover:bg-[var(--entity-character)]/5',
 			place:
-				'border-[var(--entity-place)]/20 bg-card hover:border-[var(--entity-place)]/40 hover:bg-[var(--entity-place)]/5',
+				'border-[var(--entity-place)]/10 bg-card hover:border-[var(--entity-place)]/20 hover:bg-[var(--entity-place)]/5',
 		},
 		size: {
 			sm: 'p-2',

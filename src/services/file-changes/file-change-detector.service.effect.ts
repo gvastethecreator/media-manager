@@ -178,6 +178,8 @@ const make = (): FileChangeDetectorServiceInterface => {
 						catch: (error) => fromUnknownError('get-file3d', error),
 					});
 					break;
+				default:
+					return yield* Effect.fail(new FileNotFoundError({ fileId, entityType }));
 			}
 
 			if (!dbFile || dbFile.length === 0) {
@@ -275,6 +277,8 @@ const make = (): FileChangeDetectorServiceInterface => {
 									.where(eq(file3Ds.id, fileId)),
 							catch: (error) => fromUnknownError('update-file3d', error),
 						});
+						break;
+					default:
 						break;
 				}
 

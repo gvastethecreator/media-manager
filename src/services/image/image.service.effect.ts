@@ -1228,8 +1228,8 @@ export interface ImageServiceInterface {
 		ids: string[],
 		options?: { force?: boolean }
 	) => Effect.Effect<{ deletedCount: number }, ImageError, never>;
-	readonly getByHash: (hash: string) => Effect.Effect<Image | null, ImageError, never>;
-	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Image | null, ImageError, never>;
+	readonly getByHash: (hash: string) => Effect.Effect<Image, ImageError, never>;
+	readonly getByPathAndFolder: (path: string, folderId: string) => Effect.Effect<Image, ImageError, never>;
 	readonly getAllFavorites: () => Effect.Effect<Image[], ImageError, never>;
 	readonly getByFolder: (
 		folderId: string,

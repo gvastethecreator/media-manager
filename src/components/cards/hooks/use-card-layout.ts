@@ -222,7 +222,7 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 
 		// Variantes específicas para imágenes
 		if (config.variant === 'polaroid') {
-			classes.push('border border-gray-100');
+			classes.push('border border-border/30');
 		}
 
 		return cn(classes);
@@ -299,7 +299,8 @@ export function useCardLayout(props: Partial<BaseCardProps>, preset?: string): U
 
 		// Estilos específicos para TCG mode
 		if (config.variant === 'tcg') {
-			styles.boxShadow = '0 10px 15px -3px rgba(59, 130, 246, 0.2), 0 4px 6px -4px rgba(59, 130, 246, 0.3)';
+			styles.boxShadow =
+				'0 10px 15px -3px color-mix(in oklch, var(--dt-primary-500) 20%, transparent), 0 4px 6px -4px color-mix(in oklch, var(--dt-primary-500) 30%, transparent)';
 		}
 
 		return styles;

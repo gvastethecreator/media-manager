@@ -7,6 +7,7 @@
 
 import { Effect } from 'effect';
 import type { NextFunction, Request, Response } from 'express';
+import type { RequestHandler } from 'express-serve-static-core';
 import { serverLogger } from '@/lib/logger/server-logger';
 import { runPromise } from '../runtime/runtime';
 
@@ -38,7 +39,6 @@ export const errorToHttpStatus = (error: unknown): HttpError => {
 			case 'ImageFileNotFound':
 			case 'VideoFileNotFound':
 			case 'AudioFileNotFound':
-			case 'FolderNotFound':
 				return {
 					status: 404,
 					message: taggedError.displayMessage || taggedError.message || 'Resource not found',
@@ -161,8 +161,8 @@ export const effectHandler = <A, E>(
 		/** Handler de error personalizado */
 		onError?: (error: E, res: Response) => void;
 	}
-) => {
-	return async (req: Request, res: Response, next: NextFunction) => {
+): RequestHandler => {
+	const handler = async (req: Request, res: Response, next: NextFunction) => {
 		try {
 			const effect = fn(req, res);
 
@@ -202,6 +202,7 @@ export const effectHandler = <A, E>(
 			}
 		}
 	};
+	return handler as RequestHandler;
 };
 
 /**
@@ -272,10 +273,10 @@ export const runEffectForExpress = async <A, E>(
 /**
  * Type augmentation para Express Request con runEffect
  */
-declare global {
-	namespace Express {
-		interface Request {
-			runEffect<A, E, R>(effect: Effect.Effect<A, E, R>): Promise<A>;
-		}
+import 'express';
+
+declare module 'express' {
+	interface Request {
+		runEffect<A, E, R>(effect: Effect.Effect<A, E, R>): Promise<A>;
 	}
 }

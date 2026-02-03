@@ -33,18 +33,18 @@ import type { SortOption, ViewMode } from '../types/view.types';
 
 const VIEW_ICONS: Record<ViewMode, React.ComponentType<{ className?: string }>> = {
 	grid: Grid,
-	list: List,
 	masonry: LayoutGrid,
-	table: Table2,
 	cards: Columns3,
+	list: List,
+	table: Table2,
 };
 
 const VIEW_LABELS: Record<ViewMode, string> = {
 	grid: 'Cuadrícula',
-	list: 'Lista',
 	masonry: 'Masonry',
-	table: 'Tabla',
 	cards: 'Tarjetas',
+	list: 'Lista',
+	table: 'Tabla',
 };
 
 export interface FileBrowserToolbarProps extends ToolbarProps {

@@ -40,14 +40,14 @@ import type { PlaceWithStats } from '@/types/entities/place';
 import type { PromptWithStats } from '@/types/entities/prompt';
 import type { WildcardWithStats } from '@/types/entities/wildcard';
 import type { WorldItemWithStats } from '@/types/entities/world-item';
-import { CreateCharacterForm } from '../characters/create-character-form';
 import type { CardActions } from '../common/entity-settings-view';
-import { CreateConceptForm } from '../concepts/create-concept-form';
-import { CreateNoteForm } from '../notes/create-note-form';
-import { CreatePlaceForm } from '../places/create-place-form';
-import { CreatePromptForm } from '../prompts/create-prompt-form';
-import { CreateWildcardForm } from '../wildcards/create-wildcard-form';
-import { CreateWorldItemForm } from '../world-items/create-world-item-form';
+import { CreateCharacterForm } from '../forms/create-character-form';
+import { CreateConceptForm } from '../forms/create-concept-form';
+import { CreateNoteForm } from '../forms/create-note-form';
+import { CreatePlaceForm } from '../forms/create-place-form';
+import { CreatePromptForm } from '../forms/create-prompt-form';
+import { CreateWildcardForm } from '../forms/create-wildcard-form';
+import { CreateWorldItemForm } from '../forms/create-world-item-form';
 
 // ============================================================================
 // CONFIGURACIÓN DE ENTIDADES

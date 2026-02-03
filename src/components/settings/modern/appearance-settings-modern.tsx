@@ -21,6 +21,22 @@ import { ThemeSettings } from '../themes/theme-settings';
 
 type FontSize = 'xs' | 'sm' | 'base' | 'lg' | 'xl';
 type Density = 'comfortable' | 'default' | 'compact';
+type Theme =
+	| 'light'
+	| 'dark'
+	| 'cafe'
+	| 'violeta'
+	| 'madera'
+	| 'nocturno'
+	| 'verde'
+	| 'atardecer'
+	| 'corporativo'
+	| 'carbon'
+	| 'teal'
+	| 'citrico'
+	| 'aurora'
+	| 'neon'
+	| 'system';
 
 export function AppearanceSettingsModern() {
 	// Hooks reales
@@ -84,7 +100,7 @@ export function AppearanceSettingsModern() {
 									isSelected ? 'border-primary bg-primary/5 shadow-sm' : 'border-border/50 bg-card'
 								)}
 								key={t.id}
-								onClick={() => setTheme(t.id)}
+								onClick={() => setTheme(t.id as Theme)}
 								type="button"
 							>
 								{/* Check indicator */}
@@ -128,7 +144,7 @@ export function AppearanceSettingsModern() {
 									onClick={() => applyThemeToDOM(t)}
 									type="button"
 								>
-									<ThemeColorStrip colors={t.colors} size="sm" />
+									<ThemeColorStrip colors={t.colors} />
 									<span className="text-xs">{t.name}</span>
 								</button>
 							))}

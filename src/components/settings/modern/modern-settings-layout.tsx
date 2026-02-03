@@ -284,7 +284,7 @@ export function ModernSettingsLayout({
 			{/* Área Principal - Contenido */}
 			<div className="flex h-full flex-1 flex-col overflow-hidden">
 				{/* Header Superior con Breadcrumbs - Más compacto */}
-				<div className="flex h-12 shrink-0 items-center justify-between border-border/30 border-b bg-gradient-to-b from-background/90 to-transparent px-4 shadow-sm">
+				<div className="flex h-12 shrink-0 items-center justify-between border-border/30 border-b bg-linear-to-b from-background/90 to-transparent px-4 shadow-sm">
 					<Breadcrumb>
 						<BreadcrumbList>
 							<BreadcrumbItem>

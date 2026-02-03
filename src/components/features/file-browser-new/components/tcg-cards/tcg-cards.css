@@ -40,7 +40,7 @@
 	/* Sombra base */
 	--shadow-color: color-mix(in oklch, var(--muted-foreground) 20%, transparent);
 	box-shadow:
-		0 2px 4px -1px rgba(0, 0, 0, 0.2),
+		0 2px 4px -1px oklch(0 0 0 / 0.2),
 		0 4px 8px -2px var(--shadow-color);
 
 	/* Outline para focus */
@@ -57,7 +57,7 @@
 	transform: perspective(1000px) rotateX(var(--rotate-x, 0deg))
 		rotateY(var(--rotate-y, 0deg)) translateY(-4px) scale(1.02);
 	box-shadow:
-		0 8px 16px -4px rgba(0, 0, 0, 0.25),
+		0 8px 16px -4px oklch(0 0 0 / 0.25),
 		0 12px 24px -6px var(--shadow-color);
 	z-index: 10;
 }
@@ -84,7 +84,7 @@
 	background: linear-gradient(
 		135deg,
 		transparent 25%,
-		color-mix(in oklch, var(--accent-color) 40%, white) 35%,
+		color-mix(in oklch, var(--accent-color) 40%, var(--primary-foreground)) 35%,
 		color-mix(in oklch, var(--accent-color) 20%, transparent) 50%,
 		transparent 75%
 	);
@@ -110,9 +110,9 @@
 	background: linear-gradient(
 		135deg,
 		transparent 15%,
-		color-mix(in oklch, var(--accent-color) 60%, white) 25%,
-		color-mix(in oklch, var(--accent-color) 40%, cyan) 40%,
-		color-mix(in oklch, var(--accent-color) 60%, magenta) 60%,
+		color-mix(in oklch, var(--accent-color) 60%, var(--primary-foreground)) 25%,
+		color-mix(in oklch, var(--accent-color) 40%, var(--dt-primary-300)) 40%,
+		color-mix(in oklch, var(--accent-color) 60%, var(--dt-primary-700)) 60%,
 		color-mix(in oklch, var(--accent-color) 40%, transparent) 75%,
 		transparent 85%
 	);
@@ -140,11 +140,11 @@
 
 	/* Máscara para hacer solo borde visible */
 	-webkit-mask:
-		linear-gradient(#fff 0 0) content-box,
-		linear-gradient(#fff 0 0);
+		linear-gradient(var(--primary-foreground) 0 0) content-box,
+		linear-gradient(var(--primary-foreground) 0 0);
 	mask:
-		linear-gradient(#fff 0 0) content-box,
-		linear-gradient(#fff 0 0);
+		linear-gradient(var(--primary-foreground) 0 0) content-box,
+		linear-gradient(var(--primary-foreground) 0 0);
 	-webkit-mask-composite: xor;
 	mask-composite: exclude;
 }
@@ -153,9 +153,13 @@
 	padding: 3px;
 	background: linear-gradient(
 		145deg,
-		color-mix(in oklch, var(--accent-color) 100%, white 40%),
+		color-mix(
+			in oklch,
+			var(--accent-color) 100%,
+			var(--primary-foreground) 40%
+		),
 		var(--accent-color),
-		color-mix(in oklch, var(--accent-color) 100%, black 20%)
+		color-mix(in oklch, var(--accent-color) 100%, var(--dt-neutral-900) 20%)
 	);
 	animation: tcg-border-pulse 1.5s ease-in-out infinite;
 }
@@ -163,9 +167,9 @@
 .tcg-card:hover .tcg-card__border {
 	background: linear-gradient(
 		145deg,
-		color-mix(in oklch, var(--accent-color) 80%, white),
-		color-mix(in oklch, var(--accent-color) 100%, black 20%),
-		color-mix(in oklch, var(--accent-color) 60%, black 40%)
+		color-mix(in oklch, var(--accent-color) 80%, var(--primary-foreground)),
+		color-mix(in oklch, var(--accent-color) 100%, var(--dt-neutral-900) 20%),
+		color-mix(in oklch, var(--accent-color) 60%, var(--dt-neutral-900) 40%)
 	);
 }
 
@@ -468,7 +472,7 @@
 .tcg-card--active {
 	box-shadow:
 		0 0 0 2px var(--accent-color),
-		0 8px 16px -4px rgba(0, 0, 0, 0.3);
+		0 8px 16px -4px oklch(0 0 0 / 0.3);
 }
 
 /* ============================================================================
@@ -488,10 +492,14 @@
 	height: 24px;
 	border-radius: 6px;
 
-	background: color-mix(in oklch, var(--accent-color) 90%, black 20%);
-	color: white;
+	background: color-mix(
+		in oklch,
+		var(--accent-color) 90%,
+		var(--dt-neutral-900) 20%
+	);
+	color: var(--primary-foreground);
 	font-size: 12px;
-	box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+	box-shadow: 0 2px 4px oklch(0 0 0 / 0.3);
 }
 
 .tcg-entity-badge svg {
@@ -512,8 +520,8 @@
 	padding: 2px 6px;
 	border-radius: 4px;
 
-	background: rgba(0, 0, 0, 0.7);
-	color: white;
+	background: oklch(0 0 0 / 0.7);
+	color: var(--primary-foreground);
 	font-size: 11px;
 	font-weight: 500;
 	backdrop-filter: blur(4px);
@@ -526,8 +534,8 @@
 	right: 6px;
 	z-index: 10;
 
-	color: #fbbf24;
-	filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.4));
+	color: var(--dt-warning-400);
+	filter: drop-shadow(0 2px 4px oklch(0 0 0 / 0.4));
 	animation: tcg-star-pulse 2s ease-in-out infinite;
 }
 
