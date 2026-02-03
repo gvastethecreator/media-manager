@@ -63,135 +63,170 @@ function prefersReducedMotion(): boolean {
 // COMPONENTE
 // ============================================================================
 
-export const TCGCardBase = memo(function TCGCardBase({
-	item,
-	width,
-	height,
-	variant,
-	isSelected = false,
-	isActive = false,
-	animateIn = true,
-	layoutOrder,
-	thumbnailContent,
-	footerContent,
-	accentColor,
-	rarity = 'common',
-	onClick,
-	onDoubleClick,
-	onContextMenu,
-	className,
-	style,
-	testId,
-}: TCGCardBaseProps) {
-	const cardRef = useRef<HTMLButtonElement>(null);
+export const TCGCardBase = memo(
+	function TCGCardBase({
+		item,
+		width,
+		height,
+		variant,
+		isSelected = false,
+		isActive = false,
+		animateIn = true,
+		layoutOrder,
+		thumbnailContent,
+		footerContent,
+		accentColor,
+		rarity = 'common',
+		onClick,
+		onDoubleClick,
+		onContextMenu,
+		className,
+		style,
+		testId,
+	}: TCGCardBaseProps) {
+		const cardRef = useRef<HTMLButtonElement>(null);
 
-	// Calcular altura basada en ratio TCG (típico: 2.5:3.5 o ~0.714)
-	const cardHeight = height ?? Math.round(width * 1.35);
-	const isMasonry = variant === 'masonry';
-	const showFooter = !isMasonry && footerContent;
-	const resolvedHeight = isMasonry ? (height ? `${height}px` : 'auto') : `${cardHeight}px`;
+		// Calcular altura basada en ratio TCG (típico: 2.5:3.5 o ~0.714)
+		const cardHeight = height ?? Math.round(width * 1.35);
+		const isMasonry = variant === 'masonry';
+		const showFooter = !isMasonry && footerContent;
+		const resolvedHeight = isMasonry ? (height ? `${height}px` : 'auto') : `${cardHeight}px`;
 
-	// Animación de entrada
-	useEffect(() => {
-		const card = cardRef.current;
-		if (!(animateIn && card)) return;
-		if (prefersReducedMotion()) return;
-		if (ANIMATED_CARD_IDS.has(item.id)) return;
+		// Animación de entrada - solo en mount inicial y si no se ha animado antes
+		// biome-ignore lint/correctness/useExhaustiveDependencies: mount-only animation
+		useEffect(() => {
+			const card = cardRef.current;
+			// Early exit checks para minimizar trabajo
+			if (!(animateIn && card)) return;
+			if (prefersReducedMotion()) return;
+			if (ANIMATED_CARD_IDS.has(item.id)) return;
 
-		ANIMATED_CARD_IDS.add(item.id);
+			// Marcar como animado inmediatamente para evitar re-runs
+			ANIMATED_CARD_IDS.add(item.id);
 
-		const delay = layoutOrder != null ? Math.min(layoutOrder * 20, 200) : 0;
+			// Usar requestAnimationFrame para no bloquear el hilo principal
+			const rafId = requestAnimationFrame(() => {
+				const delay = layoutOrder != null ? Math.min(layoutOrder * 20, 200) : 0;
 
-		const importAnime = async () => {
-			const { animate } = await import('animejs');
-			animate(card, {
-				opacity: [0, 1],
-				translateY: [12, 0],
-				scale: [0.96, 1],
-				ease: 'easeOutQuad',
-				duration: 350,
-				delay,
+				// Import dinámico con timeout para no bloquear
+				const timer = setTimeout(() => {
+					const runAnimation = async () => {
+						try {
+							const { animate } = await import('animejs');
+							animate(card, {
+								opacity: [0, 1],
+								translateY: [12, 0],
+								scale: [0.96, 1],
+								ease: 'easeOutQuad',
+								duration: 350,
+								delay,
+							});
+						} catch {
+							// Silenciar errores de import
+						}
+					};
+					runAnimation();
+				}, 0);
+
+				return () => clearTimeout(timer);
 			});
-		};
 
-		importAnime();
-	}, [animateIn, item.id, layoutOrder]);
+			return () => cancelAnimationFrame(rafId);
+		}, []); // Solo ejecutar en mount
 
-	// Efecto de hover 3D
-	const handleMouseMove = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
-		if (prefersReducedMotion()) return;
-		const card = cardRef.current;
-		if (!card) return;
+		// Efecto de hover 3D
+		const handleMouseMove = useCallback((e: React.MouseEvent<HTMLButtonElement>) => {
+			if (prefersReducedMotion()) return;
+			const card = cardRef.current;
+			if (!card) return;
 
-		const rect = card.getBoundingClientRect();
-		const x = e.clientX - rect.left;
-		const y = e.clientY - rect.top;
-		const centerX = rect.width / 2;
-		const centerY = rect.height / 2;
+			const rect = card.getBoundingClientRect();
+			const x = e.clientX - rect.left;
+			const y = e.clientY - rect.top;
+			const centerX = rect.width / 2;
+			const centerY = rect.height / 2;
 
-		const rotateX = ((y - centerY) / centerY) * -8;
-		const rotateY = ((x - centerX) / centerX) * 8;
+			const rotateX = ((y - centerY) / centerY) * -8;
+			const rotateY = ((x - centerX) / centerX) * 8;
 
-		card.style.setProperty('--rotate-x', `${rotateX}deg`);
-		card.style.setProperty('--rotate-y', `${rotateY}deg`);
-		card.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
-		card.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
-	}, []);
+			card.style.setProperty('--rotate-x', `${rotateX}deg`);
+			card.style.setProperty('--rotate-y', `${rotateY}deg`);
+			card.style.setProperty('--mouse-x', `${(x / rect.width) * 100}%`);
+			card.style.setProperty('--mouse-y', `${(y / rect.height) * 100}%`);
+		}, []);
 
-	const handleMouseLeave = useCallback(() => {
-		const card = cardRef.current;
-		if (!card) return;
-		card.style.setProperty('--rotate-x', '0deg');
-		card.style.setProperty('--rotate-y', '0deg');
-	}, []);
+		const handleMouseLeave = useCallback(() => {
+			const card = cardRef.current;
+			if (!card) return;
+			card.style.setProperty('--rotate-x', '0deg');
+			card.style.setProperty('--rotate-y', '0deg');
+		}, []);
 
-	return (
-		<button
-			className={cn(
-				'tcg-card',
-				`tcg-card--${variant}`,
-				`tcg-card--${rarity}`,
-				isSelected && 'tcg-card--selected',
-				isActive && 'tcg-card--active',
-				className
-			)}
-			data-entity-type={item.entityType}
-			data-item-id={item.id}
-			data-testid={testId}
-			onClick={onClick}
-			onContextMenu={onContextMenu}
-			onDoubleClick={onDoubleClick}
-			onMouseLeave={handleMouseLeave}
-			onMouseMove={handleMouseMove}
-			ref={cardRef}
-			style={
-				{
-					'--card-width': `${width}px`,
-					'--card-height': resolvedHeight,
-					'--accent-color': accentColor,
-					'--thumb-url': item.thumbnailUrl ? `url("${item.thumbnailUrl}")` : 'none',
-					...style,
-				} as CSSProperties
-			}
-			type="button"
-		>
-			{/* Capa de efecto holográfico */}
-			<div className="tcg-card__holo" />
+		return (
+			<button
+				className={cn(
+					'tcg-card',
+					`tcg-card--${variant}`,
+					`tcg-card--${rarity}`,
+					isSelected && 'tcg-card--selected',
+					isActive && 'tcg-card--active',
+					className
+				)}
+				data-entity-type={item.entityType}
+				data-item-id={item.id}
+				data-testid={testId}
+				onClick={onClick}
+				onContextMenu={onContextMenu}
+				onDoubleClick={onDoubleClick}
+				onMouseLeave={handleMouseLeave}
+				onMouseMove={handleMouseMove}
+				ref={cardRef}
+				style={
+					{
+						'--card-width': `${width}px`,
+						'--card-height': resolvedHeight,
+						'--accent-color': accentColor,
+						'--thumb-url': item.thumbnailUrl ? `url("${item.thumbnailUrl}")` : 'none',
+						...style,
+					} as CSSProperties
+				}
+				type="button"
+			>
+				{/* Capa de efecto holográfico */}
+				<div className="tcg-card__holo" />
 
-			{/* Borde con gradiente */}
-			<div className="tcg-card__border" />
+				{/* Borde con gradiente */}
+				<div className="tcg-card__border" />
 
-			{/* Contenido interno */}
-			<div className="tcg-card__inner">
-				{/* Área del thumbnail */}
-				<div className="tcg-card__thumbnail">{thumbnailContent}</div>
+				{/* Contenido interno */}
+				<div className="tcg-card__inner">
+					{/* Área del thumbnail */}
+					<div className="tcg-card__thumbnail">{thumbnailContent}</div>
 
-				{/* Footer con info */}
-				{showFooter && <div className="tcg-card__footer">{footerContent}</div>}
-			</div>
+					{/* Footer con info */}
+					{showFooter && <div className="tcg-card__footer">{footerContent}</div>}
+				</div>
 
-			{/* Indicador de selección */}
-			{isSelected && <div className="tcg-card__selection-glow" />}
-		</button>
-	);
-});
+				{/* Indicador de selección */}
+				{isSelected && <div className="tcg-card__selection-glow" />}
+			</button>
+		);
+	},
+	(prev, next) => {
+		// Custom comparison: only re-render if important props change
+		// Ignore function references for handlers (they should be stable)
+		return (
+			prev.item.id === next.item.id &&
+			prev.item.entityType === next.item.entityType &&
+			prev.width === next.width &&
+			prev.height === next.height &&
+			prev.variant === next.variant &&
+			prev.isSelected === next.isSelected &&
+			prev.isActive === next.isActive &&
+			prev.accentColor === next.accentColor &&
+			prev.className === next.className &&
+			prev.rarity === next.rarity &&
+			prev.layoutOrder === next.layoutOrder
+		);
+	}
+);

@@ -137,6 +137,7 @@ const make = (): ReindexIncrementalServiceInterface => {
 
 				const allFolderIds = new Set<string>();
 				for (const rootId of folderIds) {
+					// biome-ignore lint/suspicious/useIterableCallbackReturn: map.add returns value intentionally
 					getSubfolders(rootId).forEach((id) => allFolderIds.add(id));
 				}
 				folderIds = Array.from(allFolderIds);

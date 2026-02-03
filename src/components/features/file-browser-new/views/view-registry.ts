@@ -39,6 +39,31 @@ export const VIEW_REGISTRY: Record<ViewMode, ViewRegistryEntry> = {
 			columns: 0,
 		},
 	},
+	masonry: {
+		component: MasonryView,
+		defaultConfig: {
+			kind: 'masonry',
+			renderMode: 'canvas',
+			gap: 16,
+			columnWidth: 220,
+			padding: 20,
+			tcgHoverReveal: true,
+			tcgHolo: true,
+			tcgShadows: true,
+			tcgRounded: true,
+			tcgTilt: true,
+		},
+	},
+	cards: {
+		component: CardsView,
+		defaultConfig: {
+			kind: 'cards',
+			renderMode: 'canvas',
+			gap: 32,
+			cardSize: 200,
+			showDetails: true,
+		},
+	},
 	list: {
 		component: ListView,
 		defaultConfig: {
@@ -46,21 +71,6 @@ export const VIEW_REGISTRY: Record<ViewMode, ViewRegistryEntry> = {
 			renderMode: 'canvas',
 			gap: 0,
 			rowHeight: 36,
-		},
-	},
-	masonry: {
-		component: MasonryView,
-		defaultConfig: {
-			kind: 'masonry',
-			renderMode: 'canvas',
-			gap: 8,
-			columnWidth: 200,
-			padding: 16,
-			tcgHoverReveal: true,
-			tcgHolo: true,
-			tcgShadows: true,
-			tcgRounded: true,
-			tcgTilt: true,
 		},
 	},
 	table: {
@@ -71,16 +81,6 @@ export const VIEW_REGISTRY: Record<ViewMode, ViewRegistryEntry> = {
 			gap: 0,
 			rowHeight: 32,
 			visibleColumns: ['name', 'entityType', 'size', 'createdAt'],
-		},
-	},
-	cards: {
-		component: CardsView,
-		defaultConfig: {
-			kind: 'cards',
-			renderMode: 'canvas',
-			gap: 12,
-			cardSize: 180,
-			showDetails: true,
 		},
 	},
 };

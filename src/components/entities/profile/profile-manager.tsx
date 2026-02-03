@@ -5,8 +5,8 @@
 
 import { useEffect } from 'react';
 import { useProfileStore } from '@/store/entities/profile';
-import { ProfileControls } from './ProfileControls';
-import { ProfileList } from './ProfileList';
+import { ProfileControls } from './profile-controls';
+import { ProfileList } from './profile-list';
 
 export interface ProfileManagerProps {
 	className?: string;

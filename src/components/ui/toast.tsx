@@ -22,11 +22,11 @@ const toastVariants = cva(
 			variant: {
 				default: 'border-border/50 bg-gradient-to-b from-background to-background/98 text-foreground before:bg-primary',
 				destructive:
-					'destructive group border-ui-error-border bg-gradient-to-b from-ui-error to-ui-error/50 text-destructive-foreground before:bg-destructive',
+					'destructive group border-destructive/50 bg-gradient-to-b from-destructive to-destructive/50 text-destructive-foreground before:bg-destructive',
 				success:
-					'border-ui-success-border bg-gradient-to-b from-ui-success to-ui-success/50 text-foreground before:bg-ui-success-text',
+					'success group border-ui-success-border bg-gradient-to-b from-ui-success-bg to-ui-success-bg/50 text-ui-success-text before:bg-ui-success-text',
 				warning:
-					'border-ui-warning-border bg-gradient-to-b from-ui-warning to-ui-warning/50 text-foreground before:bg-ui-warning-text',
+					'warning group border-ui-warning-border bg-gradient-to-b from-ui-warning-bg to-ui-warning-bg/50 text-ui-warning-text before:bg-ui-warning-text',
 			},
 		},
 		defaultVariants: {

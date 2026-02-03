@@ -17,7 +17,6 @@ import {
 	Key,
 	Layers,
 	Music,
-	Settings,
 	Shuffle,
 	Sparkles,
 	Star,
@@ -42,10 +41,6 @@ import { useSystemStats } from '@/lib/api/system';
 import { useVideos } from '@/lib/api/videos';
 import { cn } from '@/lib/utils';
 
-/* =====================================================
- * 🔧 UTILITY FUNCTIONS
- * ===================================================== */
-
 const formatBytes = (bytes: number): string => {
 	if (bytes === 0) return '0 B';
 	const k = 1024;
@@ -61,24 +56,9 @@ const formatNumber = (num: number): string => {
 	return `${(num / 1_000_000).toFixed(1)}M`;
 };
 
-/* =====================================================
- * 📊 PREVIEW ITEM TYPES
- * ===================================================== */
-
-interface PreviewItem {
-	id: string;
-	thumbnailUrl?: string | null;
-	name?: string;
-	type?: string;
-}
-
-/* =====================================================
- * 🎴 ENHANCED CATEGORY CARD COMPONENT
- * ===================================================== */
-
 interface CategoryCardProps {
 	title: string;
-	icon: React.ElementType;
+	icon: React.ComponentType<{ className?: string; style?: React.CSSProperties }>;
 	count: number;
 	href: string;
 	color: string;
@@ -89,7 +69,7 @@ const CategoryCard = memo(function CategoryCard({ title, icon: Icon, count, href
 	return (
 		<Link
 			className={cn(
-				'group relative overflow-hidden rounded-dt-sm border transition-all duration-dt-normal',
+				'group relative overflow-hidden rounded-dt-xs border transition-all duration-dt-normal',
 				'hover:scale-[1.01]'
 			)}
 			style={{
@@ -98,60 +78,49 @@ const CategoryCard = memo(function CategoryCard({ title, icon: Icon, count, href
 			}}
 			to={href}
 		>
-			{/* Subtle Glow Effect on Hover */}
 			<div
 				className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
 				style={{
 					background: `radial-gradient(600px circle at top right, color-mix(in oklch, ${color} 15%, transparent), transparent 50%)`,
 				}}
 			/>
-
-			{/* Header */}
-			<div className="relative flex items-center justify-between p-4">
-				<div className="flex items-center gap-3">
+			<div className="flex items-center justify-between p-3">
+				<div className="flex items-center gap-2.5">
 					<div
-						className="flex h-10 w-10 items-center justify-center rounded-dt-xs"
+						className="flex h-8 w-8 items-center justify-center rounded-dt-xs"
 						style={{
 							backgroundColor: `color-mix(in oklch, ${color} 20%, transparent)`,
 							borderColor: `color-mix(in oklch, ${color} 40%, var(--border))`,
 							borderWidth: '1px',
 						}}
 					>
-						<Icon className="h-5 w-5" style={{ color }} />
+						<Icon className="h-4 w-4" style={{ color }} />
 					</div>
 					<div className="flex flex-col">
-						<h3 className="font-bold text-foreground text-sm tracking-tight">{title}</h3>
-						<div className="flex items-baseline gap-1">
-							<span className="font-bold text-lg leading-none" style={{ color }}>
-								{count === 0 ? '0' : formatNumber(count)}
-							</span>
-							<span className="font-normal text-muted-foreground/50 text-xs">items</span>
-						</div>
+						<h3 className="font-semibold text-foreground text-xs">{title}</h3>
+						<span className="font-bold text-base leading-none" style={{ color }}>
+							{count === 0 ? '0' : formatNumber(count)}
+						</span>
 					</div>
 				</div>
 				<div
 					className={cn(
-						'flex h-7 w-7 items-center justify-center rounded-full',
+						'flex h-5 w-5 items-center justify-center rounded-full',
 						'transition-all duration-dt-normal',
 						'opacity-0 group-hover:opacity-100',
-						'-translate-x-2 group-hover:translate-x-0'
+						'-translate-x-1 group-hover:translate-x-0'
 					)}
 					style={{ backgroundColor: `color-mix(in oklch, ${color} 10%, transparent)` }}
 				>
-					<ArrowRight className="h-3.5 w-3.5" style={{ color }} />
+					<ArrowRight className="h-3 w-3" style={{ color }} />
 				</div>
 			</div>
-
-			{/* Divider */}
-			<div className="relative mx-4 h-px bg-border/25" />
-
-			{/* Mini Stats */}
 			{stats && stats.length > 0 && (
-				<div className="relative grid grid-cols-2 gap-2 px-4 py-3">
+				<div className="grid grid-cols-2 gap-1 px-3 pb-2.5">
 					{stats.map((stat, i) => (
 						<div className="flex flex-col" key={i}>
-							<span className="text-[10px] text-muted-foreground/65 uppercase tracking-widest">{stat.label}</span>
-							<span className="font-medium text-muted-foreground/70 text-xs">{stat.value}</span>
+							<span className="text-[9px] text-muted-foreground/60 uppercase tracking-wider">{stat.label}</span>
+							<span className="font-medium text-[10px] text-muted-foreground/75">{stat.value}</span>
 						</div>
 					))}
 				</div>
@@ -160,50 +129,61 @@ const CategoryCard = memo(function CategoryCard({ title, icon: Icon, count, href
 	);
 });
 
-/* =====================================================
- * 🎯 MAIN DASHBOARD COMPONENT
- * ===================================================== */
+const QuickStatItem = memo(function QuickStatItem({
+	icon: Icon,
+	label,
+	value,
+	color,
+}: {
+	icon: React.ComponentType<{ className?: string }>;
+	label: string;
+	value: string;
+	color: string;
+}) {
+	return (
+		<div className="flex items-center gap-2 rounded-dt-xs border border-border/30 bg-card/50 p-2">
+			<div className="flex h-6 w-6 items-center justify-center rounded-md" style={{ backgroundColor: `${color}20` }}>
+				<Icon className="h-3.5 w-3.5" style={{ color }} />
+			</div>
+			<div className="min-w-0 flex-1">
+				<p className="truncate font-medium text-foreground text-xs">{label}</p>
+				<p className="font-bold text-foreground text-sm tabular-nums">{value}</p>
+			</div>
+		</div>
+	);
+});
 
 export const Dashboard = memo(function Dashboard() {
-	// System stats
 	const { data: systemStats, isLoading: systemLoading } = useSystemStats();
 	const { data: extendedStats, isLoading: extendedLoading } = useSystemStatsExtended();
 	const { data: generalStats, isLoading: generalLoading } = useGeneralStats();
 	const { data: folderStats, isLoading: folderLoading } = useFolderStats();
 	const { data: recentActivity, isLoading: activityLoading } = useRecentActivity({ limit: 5 });
-	const { data: topTags, isLoading: tagsLoading } = useTopTags(6);
-
-	// Entity data with previews
+	const { data: topTags, isLoading: tagsLoading } = useTopTags(5);
 	const { data: recentImages, isLoading: imagesLoading } = useImages({
 		limit: 4,
 		sortBy: 'createdAt',
 		sortOrder: 'desc',
 	});
-
 	const { data: recentVideos, isLoading: videosLoading } = useVideos({
 		limit: 4,
 		sortBy: 'createdAt',
 		sortOrder: 'desc',
 	});
-
 	const { data: recentAudio, isLoading: audioLoading } = useAudios();
-
 	const { data: recentAlbums, isLoading: albumsLoading } = useAlbums({
 		limit: 4,
 		sortBy: 'createdAt',
 		sortOrder: 'desc',
 	});
-
 	const { data: recentCollections, isLoading: collectionsLoading } = useCollections({
 		limit: 4,
 		sortBy: 'createdAt',
 		sortOrder: 'desc',
 	});
 
-	// Loading state
 	const isLoading = systemLoading || extendedLoading || generalLoading || folderLoading;
 
-	// Combined stats
 	const combinedStats = useMemo(
 		() => ({
 			totalImages: systemStats?.totalImages || generalStats?.totalImages || extendedStats?.totalImages || 0,
@@ -251,8 +231,7 @@ export const Dashboard = memo(function Dashboard() {
 			? (combinedStats.storageUsed / (combinedStats.storageUsed + combinedStats.storageAvailable)) * 100
 			: 0;
 
-	// Main categories
-	const mainCategories = useMemo(
+	const mediaCategories = useMemo(
 		() => [
 			{
 				title: 'Imágenes',
@@ -287,6 +266,20 @@ export const Dashboard = memo(function Dashboard() {
 					{ label: 'Total', value: formatNumber(combinedStats.totalAudio) },
 				],
 			},
+			{
+				title: 'Docs',
+				icon: FileText,
+				count: combinedStats.totalDocuments,
+				href: '/documents',
+				color: 'var(--entity-document)',
+				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalDocuments) }],
+			},
+		],
+		[combinedStats, recentImages, recentVideos, recentAudio]
+	);
+
+	const orgCategories = useMemo(
+		() => [
 			{
 				title: 'Carpetas',
 				icon: Folder,
@@ -325,33 +318,10 @@ export const Dashboard = memo(function Dashboard() {
 				color: 'var(--entity-tag)',
 				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalTags) }],
 			},
-			{
-				title: 'Favoritos',
-				icon: Heart,
-				count: combinedStats.totalFavorites,
-				href: '/favorites',
-				color: 'var(--entity-favorite)',
-				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalFavorites) }],
-			},
 		],
-		[
-			combinedStats,
-			recentImages,
-			recentVideos,
-			recentAudio,
-			recentAlbums,
-			recentCollections,
-			imagesLoading,
-			videosLoading,
-			audioLoading,
-			folderLoading,
-			albumsLoading,
-			collectionsLoading,
-			tagsLoading,
-		]
+		[combinedStats, recentAlbums, recentCollections]
 	);
 
-	// Worldbuilding categories
 	const worldbuildingCategories = useMemo(
 		() => [
 			{
@@ -360,7 +330,6 @@ export const Dashboard = memo(function Dashboard() {
 				count: combinedStats.totalCharacters,
 				href: '/characters',
 				color: 'var(--entity-character)',
-				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalCharacters) }],
 			},
 			{
 				title: 'Lugares',
@@ -368,7 +337,6 @@ export const Dashboard = memo(function Dashboard() {
 				count: combinedStats.totalPlaces,
 				href: '/places',
 				color: 'var(--entity-place)',
-				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalPlaces) }],
 			},
 			{
 				title: 'Conceptos',
@@ -376,7 +344,6 @@ export const Dashboard = memo(function Dashboard() {
 				count: combinedStats.totalConcepts,
 				href: '/concepts',
 				color: 'var(--entity-concept)',
-				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalConcepts) }],
 			},
 			{
 				title: 'Notas',
@@ -384,120 +351,103 @@ export const Dashboard = memo(function Dashboard() {
 				count: combinedStats.totalNotes,
 				href: '/notes',
 				color: 'var(--entity-note)',
-				stats: [{ label: 'Total', value: formatNumber(combinedStats.totalNotes) }],
 			},
 		],
 		[combinedStats]
 	);
 
-	// Main stat cards
-	const mainStatCards = useMemo<DashboardStatCardProps[]>(
+	const extraCategories = useMemo(
+		() => [
+			{
+				title: 'JSON',
+				icon: Code,
+				count: combinedStats.totalJsonFiles,
+				href: '/json-files',
+				color: 'var(--entity-json-file)',
+			},
+			{
+				title: '3D',
+				icon: Boxes,
+				count: combinedStats.totalFile3D,
+				href: '/file-3ds',
+				color: 'var(--entity-file-3d)',
+			},
+			{
+				title: 'Favoritos',
+				icon: Heart,
+				count: combinedStats.totalFavorites,
+				href: '/favorites',
+				color: 'var(--entity-favorite)',
+			},
+			{
+				title: 'Mundos',
+				icon: Archive,
+				count: combinedStats.totalWorldItems,
+				href: '/world-items',
+				color: 'var(--entity-world-item)',
+			},
+		],
+		[combinedStats]
+	);
+
+	const quickStats = useMemo<DashboardStatCardProps[]>(
 		() => [
 			{
 				icon: ImageIcon,
 				label: 'Imágenes',
 				value: formatNumber(combinedStats.totalImages),
-				subtitle: totalMediaFiles > 0 ? `${((combinedStats.totalImages / totalMediaFiles) * 100).toFixed(1)}%` : '0%',
+				subtitle: totalMediaFiles > 0 ? `${((combinedStats.totalImages / totalMediaFiles) * 100).toFixed(0)}%` : '0%',
 				variant: 'image',
 			},
 			{
 				icon: Video,
 				label: 'Videos',
 				value: formatNumber(combinedStats.totalVideos),
-				subtitle: totalMediaFiles > 0 ? `${((combinedStats.totalVideos / totalMediaFiles) * 100).toFixed(1)}%` : '0%',
+				subtitle: totalMediaFiles > 0 ? `${((combinedStats.totalVideos / totalMediaFiles) * 100).toFixed(0)}%` : '0%',
 				variant: 'video',
 			},
 			{
 				icon: Music,
 				label: 'Audio',
 				value: formatNumber(combinedStats.totalAudio),
-				subtitle: totalMediaFiles > 0 ? `${((combinedStats.totalAudio / totalMediaFiles) * 100).toFixed(1)}%` : '0%',
 				variant: 'success',
-			},
-			{
-				icon: FileText,
-				label: 'Docs',
-				value: formatNumber(combinedStats.totalDocuments),
-				subtitle: 'Documentos',
-				variant: 'warning',
 			},
 			{
 				icon: FolderOpen,
 				label: 'Carpetas',
 				value: formatNumber(combinedStats.totalFolders),
-				subtitle: 'Organizadas',
 				variant: 'folder',
-			},
-			{
-				icon: Camera,
-				label: 'Álbumes',
-				value: formatNumber(combinedStats.totalAlbums),
-				subtitle: 'Colecciones',
-				variant: 'album',
 			},
 			{
 				icon: Tags,
 				label: 'Tags',
 				value: formatNumber(combinedStats.totalTags),
-				subtitle: 'Etiquetas',
 				variant: 'primary',
 			},
 			{
-				icon: Code,
-				label: 'JSON',
-				value: formatNumber(combinedStats.totalJsonFiles),
-				subtitle: 'Archivos',
-				variant: 'accent',
-			},
-			{
-				icon: Boxes,
-				label: '3D',
-				value: formatNumber(combinedStats.totalFile3D),
-				subtitle: 'Modelos',
-				variant: 'secondary',
-			},
-			{
-				icon: Settings,
-				label: 'Workflows',
-				value: formatNumber(combinedStats.totalWorkflows),
-				subtitle: 'Flujos',
-				variant: 'info',
-			},
-		],
-		[
-			combinedStats.totalImages,
-			combinedStats.totalVideos,
-			combinedStats.totalAudio,
-			combinedStats.totalDocuments,
-			combinedStats.totalFolders,
-			combinedStats.totalAlbums,
-			combinedStats.totalTags,
-			combinedStats.totalJsonFiles,
-			combinedStats.totalFile3D,
-			combinedStats.totalWorkflows,
-			totalMediaFiles,
-		]
-	);
-
-	// Extended stat cards
-	const extendedStatCards = useMemo<DashboardStatCardProps[]>(() => {
-		const cards: DashboardStatCardProps[] = [];
-		if (combinedStats.totalCharacters > 0) {
-			cards.push({
 				icon: Users,
 				label: 'Personajes',
 				value: formatNumber(combinedStats.totalCharacters),
 				variant: 'character',
-			});
-		}
-		if (combinedStats.totalPlaces > 0) {
-			cards.push({
+			},
+			{
 				icon: Calendar,
 				label: 'Lugares',
 				value: formatNumber(combinedStats.totalPlaces),
 				variant: 'place',
-			});
-		}
+			},
+			{
+				icon: Database,
+				label: 'BD',
+				value: formatBytes(combinedStats.dbSize),
+				variant: 'muted',
+			},
+		],
+		[combinedStats, totalMediaFiles]
+	);
+
+	const extendedStatsCards = useMemo<DashboardStatCardProps[]>(() => {
+		const cards: DashboardStatCardProps[] = [];
 		if (combinedStats.totalConcepts > 0) {
 			cards.push({
 				icon: Zap,
@@ -518,20 +468,21 @@ export const Dashboard = memo(function Dashboard() {
 			});
 		}
 		if (combinedStats.totalProperties > 0) {
-			cards.push({
-				icon: Key,
-				label: 'Propiedades',
-				value: formatNumber(combinedStats.totalProperties),
-				variant: 'muted',
-			});
+			cards.push({ icon: Key, label: 'Props', value: formatNumber(combinedStats.totalProperties), variant: 'muted' });
 		}
 		if (combinedStats.totalWildcards > 0) {
 			cards.push({
 				icon: Shuffle,
 				label: 'Comodines',
 				value: formatNumber(combinedStats.totalWildcards),
-				variant: 'primary',
+				variant: 'accent',
 			});
+		}
+		if (combinedStats.totalJsonFiles > 0) {
+			cards.push({ icon: Code, label: 'JSON', value: formatNumber(combinedStats.totalJsonFiles), variant: 'info' });
+		}
+		if (combinedStats.totalFile3D > 0) {
+			cards.push({ icon: Boxes, label: '3D', value: formatNumber(combinedStats.totalFile3D), variant: 'secondary' });
 		}
 		if (combinedStats.totalFavorites > 0) {
 			cards.push({
@@ -549,22 +500,8 @@ export const Dashboard = memo(function Dashboard() {
 				variant: 'collection',
 			});
 		}
-		if (combinedStats.dbSize > 0) {
-			cards.push({ icon: Database, label: 'BD', value: formatBytes(combinedStats.dbSize), variant: 'muted' });
-		}
 		return cards;
-	}, [
-		combinedStats.totalCharacters,
-		combinedStats.totalPlaces,
-		combinedStats.totalConcepts,
-		combinedStats.totalNotes,
-		combinedStats.totalPrompts,
-		combinedStats.totalProperties,
-		combinedStats.totalWildcards,
-		combinedStats.totalFavorites,
-		combinedStats.totalWorldItems,
-		combinedStats.dbSize,
-	]);
+	}, [combinedStats]);
 
 	if (isLoading) {
 		return (
@@ -583,220 +520,258 @@ export const Dashboard = memo(function Dashboard() {
 
 	return (
 		<div className="relative h-full w-full overflow-hidden">
-			{/* Animated Background */}
 			<div className="absolute inset-0 z-0">
 				<Silk color="var(--canvas-bg-dark)" noiseIntensity={1.5} rotation={0.2} scale={1.3} speed={4} />
 				<div className="absolute inset-0 bg-background/94" />
 			</div>
 
-			{/* Content */}
 			<div className="relative z-10 h-full overflow-auto">
-				<div className="container mx-auto max-w-7xl space-y-6 p-6">
-					{/* Enhanced Header */}
+				<div className="container mx-auto max-w-6xl space-y-5 p-5">
 					<div className="flex items-center justify-between">
-						<div className="flex items-center gap-4">
+						<div className="flex items-center gap-3">
 							<div className="relative">
 								<div className="absolute inset-0 rounded-full bg-primary/15 blur-xl" />
-								<div className="relative flex h-12 w-12 items-center justify-center rounded-full bg-gradient-to-br from-primary/70 to-primary/40 shadow-dt-2">
-									<Sparkles className="h-6 w-6 text-primary-foreground" />
+								<div className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-primary/70 to-primary/40 shadow-dt-2">
+									<Sparkles className="h-5 w-5 text-primary-foreground" />
 								</div>
 							</div>
 							<div>
-								<h1 className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text font-bold text-3xl text-transparent">
+								<h1 className="bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text font-bold text-2xl text-transparent">
 									Dashboard
 								</h1>
-								<p className="text-muted-foreground/70">Bienvenido a tu gestor de multimedia</p>
+								<p className="text-muted-foreground/70 text-xs">Bienvenido a tu gestor de multimedia</p>
 							</div>
 						</div>
-
-						{/* Quick Stats Summary */}
-						<div className="hidden items-center gap-6 md:flex">
-							<div className="text-right">
-								<p className="text-muted-foreground/80 text-xs uppercase tracking-wider">Total Media</p>
-								<p className="font-bold text-2xl text-foreground">{formatNumber(totalMediaFiles)}</p>
+						<div className="flex items-center gap-4 text-right">
+							<div>
+								<p className="text-[10px] text-muted-foreground/80 uppercase tracking-wider">Total Media</p>
+								<p className="font-bold text-foreground text-xl tabular-nums">{formatNumber(totalMediaFiles)}</p>
 							</div>
-							<div className="h-10 w-px bg-border/40" />
-							<div className="text-right">
-								<p className="text-muted-foreground/80 text-xs uppercase tracking-wider">Almacenamiento</p>
-								<p className="font-bold text-2xl text-foreground">{formatBytes(combinedStats.storageUsed)}</p>
+							<div className="h-8 w-px bg-border/40" />
+							<div>
+								<p className="text-[10px] text-muted-foreground/80 uppercase tracking-wider">Almacenamiento</p>
+								<p className="font-bold text-foreground text-xl tabular-nums">
+									{formatBytes(combinedStats.storageUsed)}
+								</p>
 							</div>
 						</div>
 					</div>
 
-					{/* Stats Grid */}
-					<section className="rounded-dt-sm border border-border/40 bg-card/90 p-6 shadow-dt-2">
-						<div className="mb-6 flex items-center justify-between">
+					<section className="rounded-dt-sm border border-border/40 bg-card/90 p-4 shadow-dt-1">
+						<div className="mb-3 flex items-center justify-between">
 							<div className="flex items-center gap-2">
-								<div className="h-5 w-1 rounded-full bg-primary" />
-								<h2 className="font-bold text-foreground text-lg tracking-tight">Resumen Rápido</h2>
+								<div className="h-4 w-1 rounded-full bg-primary" />
+								<h2 className="font-semibold text-foreground text-sm">Estadísticas Rápidas</h2>
 							</div>
 							<Badge
-								className="rounded-dt-xs border-border/25 bg-background/25 font-mono text-muted-foreground/85 text-xs"
+								className="rounded-dt-xs border-border/25 bg-background/50 font-mono text-[10px] text-muted-foreground/75"
 								variant="outline"
 							>
-								{formatNumber(totalMediaFiles)} archivos totales
+								{formatNumber(totalMediaFiles)} archivos
 							</Badge>
 						</div>
-						<DashboardStatGrid>
-							{mainStatCards.map((card) => (
-								<DashboardStatCard key={`main-${card.label}`} {...card} />
-							))}
-							{extendedStatCards.map((card) => (
-								<DashboardStatCard key={`ext-${card.label}`} {...card} />
+						<DashboardStatGrid columns={{ default: 2, sm: 3, md: 4, lg: 4, xl: 4 }}>
+							{quickStats.map((card) => (
+								<DashboardStatCard key={`stat-${card.label}`} {...card} />
 							))}
 						</DashboardStatGrid>
 					</section>
 
-					{/* Main Categories */}
-					<section>
-						<div className="mb-4 flex items-center gap-2">
-							<div className="h-5 w-1 rounded-full bg-primary" />
-							<h2 className="font-bold text-foreground text-xl tracking-tight">Categorías Principales</h2>
-						</div>
-						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-							{mainCategories.map((category, index) => (
-								<div
-									className="fade-in slide-in-from-bottom-4 animate-in duration-500"
-									key={category.title}
-									style={{ animationDelay: `${index * 50}ms` }}
-								>
-									<CategoryCard {...category} />
-								</div>
-							))}
-						</div>
-					</section>
-
-					{/* Worldbuilding Categories */}
-					{combinedStats.totalCharacters + combinedStats.totalPlaces + combinedStats.totalConcepts > 0 && (
+					<div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
 						<section>
-							<div className="mb-4 flex items-center gap-2">
-								<div className="h-5 w-1 rounded-full bg-secondary" />
-								<h2 className="font-bold text-foreground text-xl tracking-tight">Worldbuilding</h2>
+							<div className="mb-3 flex items-center gap-2">
+								<div className="h-4 w-1 rounded-full bg-[var(--entity-image)]" />
+								<h2 className="font-semibold text-base text-foreground">Media</h2>
 							</div>
-							<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-								{worldbuildingCategories.map((category) => (
-									<CategoryCard key={category.title} {...category} />
+							<div className="grid grid-cols-2 gap-3">
+								{mediaCategories.map((category, index) => (
+									<div
+										className="fade-in animate-in duration-400"
+										key={category.title}
+										style={{ animationDelay: `${index * 50}ms` }}
+									>
+										<CategoryCard {...category} />
+									</div>
 								))}
 							</div>
 						</section>
+
+						<section>
+							<div className="mb-3 flex items-center gap-2">
+								<div className="h-4 w-1 rounded-full bg-[var(--entity-folder)]" />
+								<h2 className="font-semibold text-base text-foreground">Organización</h2>
+							</div>
+							<div className="grid grid-cols-2 gap-3">
+								{orgCategories.map((category, index) => (
+									<div
+										className="fade-in animate-in duration-400"
+										key={category.title}
+										style={{ animationDelay: `${index * 50}ms` }}
+									>
+										<CategoryCard {...category} />
+									</div>
+								))}
+							</div>
+						</section>
+					</div>
+
+					<div className="grid grid-cols-1 gap-5 lg:grid-cols-2">
+						<section>
+							<div className="mb-3 flex items-center gap-2">
+								<div className="h-4 w-1 rounded-full bg-[var(--entity-character)]" />
+								<h2 className="font-semibold text-base text-foreground">Worldbuilding</h2>
+							</div>
+							<div className="grid grid-cols-2 gap-3">
+								{worldbuildingCategories.map((category, index) => (
+									<div
+										className="fade-in animate-in duration-400"
+										key={category.title}
+										style={{ animationDelay: `${index * 50}ms` }}
+									>
+										<CategoryCard {...category} />
+									</div>
+								))}
+							</div>
+						</section>
+
+						<section>
+							<div className="mb-3 flex items-center gap-2">
+								<div className="h-4 w-1 rounded-full bg-secondary" />
+								<h2 className="font-semibold text-base text-foreground">Extras</h2>
+							</div>
+							<div className="grid grid-cols-2 gap-3">
+								{extraCategories.map((category, index) => (
+									<div
+										className="fade-in animate-in duration-400"
+										key={category.title}
+										style={{ animationDelay: `${index * 50}ms` }}
+									>
+										<CategoryCard {...category} />
+									</div>
+								))}
+							</div>
+						</section>
+					</div>
+
+					{extendedStatsCards.length > 0 && (
+						<section className="rounded-dt-sm border border-border/30 bg-card/70 p-4">
+							<div className="mb-3 flex items-center gap-2">
+								<div className="h-4 w-1 rounded-full bg-muted" />
+								<h2 className="font-semibold text-foreground text-sm">Más Estadísticas</h2>
+							</div>
+							<DashboardStatGrid columns={{ default: 3, sm: 4, md: 5, lg: 6, xl: 7 }}>
+								{extendedStatsCards.map((card) => (
+									<DashboardStatCard key={`ext-${card.label}`} {...card} />
+								))}
+							</DashboardStatGrid>
+						</section>
 					)}
 
-					{/* Bottom Info Cards */}
 					<div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-						{/* Storage Card */}
-						<div className="group relative overflow-hidden rounded-dt-sm border border-border/40 bg-card/90 p-5 shadow-dt-1 transition-all duration-dt-normal hover:border-border/60">
-							<div className="mb-4 flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-dt-xs border border-border/10 bg-background/20">
-									<HardDrive className="h-5 w-5 text-muted-foreground/80" />
+						<div className="rounded-dt-sm border border-border/40 bg-card/90 p-4 shadow-dt-1">
+							<div className="mb-3 flex items-center gap-2">
+								<div className="flex h-8 w-8 items-center justify-center rounded-dt-xs border border-border/10 bg-background/20">
+									<HardDrive className="h-4 w-4 text-muted-foreground/80" />
 								</div>
 								<div>
-									<h3 className="font-bold text-foreground text-sm">Almacenamiento</h3>
-									<p className="text-[10px] text-muted-foreground/40 uppercase tracking-wider">Espacio utilizado</p>
+									<h3 className="font-semibold text-foreground text-xs">Almacenamiento</h3>
+									<p className="text-[9px] text-muted-foreground/60 uppercase tracking-wider">
+										{storageUsedPercentage.toFixed(1)}% usado
+									</p>
 								</div>
 							</div>
-
-							<div className="space-y-4">
+							<div className="space-y-2">
 								<div className="flex items-baseline justify-between">
-									<span className="font-bold text-2xl text-foreground tracking-tight">
+									<span className="font-bold text-foreground text-xl tracking-tight">
 										{formatBytes(combinedStats.storageUsed)}
 									</span>
-									<span className="text-muted-foreground/70 text-xs">
+									<span className="text-[10px] text-muted-foreground/70">
 										de {formatBytes(combinedStats.storageUsed + combinedStats.storageAvailable)}
 									</span>
 								</div>
-
 								<div className="relative h-1.5 overflow-hidden rounded-full bg-border/30">
 									<div
 										className="h-full rounded-full bg-primary transition-all duration-1000"
 										style={{ width: `${storageUsedPercentage}%` }}
 									/>
 								</div>
-
-								<div className="flex justify-between font-mono text-[10px] text-muted-foreground/60">
-									<span>{storageUsedPercentage.toFixed(1)}% USADO</span>
-									<span>{formatBytes(combinedStats.storageAvailable)} LIBRE</span>
+								<div className="flex justify-between font-mono text-[9px] text-muted-foreground/60">
+									<span>{formatBytes(combinedStats.storageAvailable)} libre</span>
 								</div>
 							</div>
 						</div>
 
-						{/* Activity Card */}
-						<div className="group relative overflow-hidden rounded-dt-sm border border-border/40 bg-card/90 p-5 shadow-dt-1 transition-all duration-dt-normal hover:border-border/60">
-							<div className="mb-4 flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-dt-xs border border-border/10 bg-background/20">
-									<Activity className="h-5 w-5 text-status-success/80" />
+						<div className="rounded-dt-sm border border-border/40 bg-card/90 p-4 shadow-dt-1">
+							<div className="mb-3 flex items-center gap-2">
+								<div className="flex h-8 w-8 items-center justify-center rounded-dt-xs border border-border/10 bg-background/20">
+									<Activity className="h-4 w-4 text-status-success/80" />
 								</div>
 								<div>
-									<h3 className="font-bold text-foreground text-sm">Actividad</h3>
-									<p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider">Últimas acciones</p>
+									<h3 className="font-semibold text-foreground text-xs">Actividad Reciente</h3>
+									<p className="text-[9px] text-muted-foreground/60 uppercase tracking-wider">Últimas acciones</p>
 								</div>
 							</div>
-
 							{activityLoading ? (
 								<div className="space-y-2">
 									{Array.from({ length: 3 }).map((_, i) => (
-										<div className="h-10 animate-pulse rounded-dt-xs bg-border/10" key={i} />
+										<div className="h-8 animate-pulse rounded-dt-xs bg-border/10" key={i} />
 									))}
 								</div>
 							) : recentActivity && recentActivity.length > 0 ? (
-								<div className="space-y-2">
-									{recentActivity.slice(0, 3).map((activity, i) => (
+								<div className="space-y-1.5">
+									{recentActivity.slice(0, 4).map((activity, i) => (
 										<div
-											className="flex items-center gap-3 rounded-dt-xs border border-border/10 bg-background/5 p-2 transition-colors hover:bg-background/10"
+											className="flex items-center gap-2 rounded-dt-xs border border-border/10 bg-background/5 p-1.5 transition-colors hover:bg-background/10"
 											key={activity.id || i}
 										>
-											<div className="flex h-7 w-7 items-center justify-center rounded-full border border-primary/25 bg-primary/15">
-												<span className="font-bold text-[10px] text-primary/80">
+											<div className="flex h-5 w-5 items-center justify-center rounded-full border border-primary/25 bg-primary/15">
+												<span className="font-bold text-[9px] text-primary/80">
 													{activity.entityType?.[0]?.toUpperCase()}
 												</span>
 											</div>
 											<div className="min-w-0 flex-1">
-												<p className="truncate font-semibold text-foreground/80 text-xs">{activity.entityName}</p>
-												<p className="text-[10px] text-muted-foreground/70 uppercase tracking-tighter">
-													{activity.type} • {activity.entityType}
-												</p>
+												<p className="truncate font-medium text-[10px] text-foreground/80">{activity.entityName}</p>
 											</div>
 										</div>
 									))}
 								</div>
 							) : (
-								<div className="flex flex-col items-center justify-center py-6 text-center">
-									<Activity className="mb-2 h-6 w-6 opacity-10" />
-									<p className="text-muted-foreground/60 text-xs">Sin actividad reciente</p>
+								<div className="flex flex-col items-center justify-center py-4 text-center">
+									<Activity className="mb-1 h-5 w-5 opacity-10" />
+									<p className="text-[10px] text-muted-foreground/60">Sin actividad reciente</p>
 								</div>
 							)}
 						</div>
 
-						{/* Tags Card */}
-						<div className="group relative overflow-hidden rounded-dt-sm border border-border/40 bg-card/90 p-5 shadow-dt-1 transition-all duration-dt-normal hover:border-border/60">
-							<div className="mb-4 flex items-center gap-3">
-								<div className="flex h-10 w-10 items-center justify-center rounded-dt-xs border border-border/10 bg-background/20">
-									<Star className="h-5 w-5 text-status-warning/80" />
+						<div className="rounded-dt-sm border border-border/40 bg-card/90 p-4 shadow-dt-1">
+							<div className="mb-3 flex items-center gap-2">
+								<div className="flex h-8 w-8 items-center justify-center rounded-dt-xs border border-border/10 bg-background/20">
+									<Star className="h-4 w-4 text-status-warning/80" />
 								</div>
 								<div>
-									<h3 className="font-bold text-foreground text-sm">Tags Populares</h3>
-									<p className="text-[10px] text-muted-foreground/70 uppercase tracking-wider">Más utilizados</p>
+									<h3 className="font-semibold text-foreground text-xs">Tags Populares</h3>
+									<p className="text-[9px] text-muted-foreground/60 uppercase tracking-wider">Más utilizados</p>
 								</div>
 							</div>
-
 							{tagsLoading ? (
 								<div className="space-y-2">
 									{Array.from({ length: 4 }).map((_, i) => (
-										<div className="h-10 animate-pulse rounded-dt-xs bg-border/10" key={i} />
+										<div className="h-8 animate-pulse rounded-dt-xs bg-border/10" key={i} />
 									))}
 								</div>
 							) : topTags && topTags.length > 0 ? (
-								<div className="space-y-2">
+								<div className="space-y-1.5">
 									{topTags.slice(0, 5).map((tag) => (
 										<div
-											className="flex items-center justify-between rounded-dt-xs border border-border/10 bg-background/5 p-2 transition-colors hover:bg-background/10"
+											className="flex items-center justify-between rounded-dt-xs border border-border/10 bg-background/5 p-1.5 transition-colors hover:bg-background/10"
 											key={tag.id}
 										>
-											<div className="flex min-w-0 items-center gap-2">
-												{tag.emoji && <span className="text-base">{tag.emoji}</span>}
-												<span className="truncate font-semibold text-foreground/80 text-xs">{tag.name}</span>
+											<div className="flex min-w-0 items-center gap-1.5">
+												{tag.emoji && <span className="text-xs">{tag.emoji}</span>}
+												<span className="truncate font-medium text-[10px] text-foreground/80">{tag.name}</span>
 											</div>
 											<Badge
-												className="rounded-dt-xs bg-background/20 text-[10px] text-muted-foreground/80"
+												className="rounded-dt-xs bg-background/20 text-[9px] text-muted-foreground/80"
 												variant="secondary"
 											>
 												{tag.imageCount}
@@ -805,9 +780,9 @@ export const Dashboard = memo(function Dashboard() {
 									))}
 								</div>
 							) : (
-								<div className="flex flex-col items-center justify-center py-6 text-center">
-									<Tags className="mb-2 h-6 w-6 opacity-10" />
-									<p className="text-muted-foreground/60 text-xs">Sin etiquetas aún</p>
+								<div className="flex flex-col items-center justify-center py-4 text-center">
+									<Tags className="mb-1 h-5 w-5 opacity-10" />
+									<p className="text-[10px] text-muted-foreground/60">Sin etiquetas aún</p>
 								</div>
 							)}
 						</div>

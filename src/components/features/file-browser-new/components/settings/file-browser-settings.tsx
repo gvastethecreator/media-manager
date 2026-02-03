@@ -72,9 +72,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 			case 'cards':
 				return (
 					<Row>
-						<Label className="text-muted-foreground text-xs">
-							Tamaño de celda
-						</Label>
+						<Label className="text-muted-foreground text-xs">Tamaño de celda</Label>
 						<div className="flex items-center gap-2">
 							<Input
 								className="h-7 w-20 text-right text-xs"
@@ -97,9 +95,7 @@ const FileBrowserSettings = memo(function FileBrowserSettingsInner() {
 								<Input
 									className="h-7 w-20 text-right text-xs"
 									min={100}
-									onChange={(e) =>
-										setViewConfig('masonry' as any, { itemSize: Number(e.target.value) } as any)
-									}
+									onChange={(e) => setViewConfig('masonry' as any, { itemSize: Number(e.target.value) } as any)}
 									type="number"
 									value={masonry.itemSize}
 								/>

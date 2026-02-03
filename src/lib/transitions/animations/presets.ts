@@ -585,6 +585,7 @@ export function applyPreset(element: HTMLElement, preset: AnimationPreset, rever
 	}
 
 	// Forzar reflow
+	// biome-ignore lint/complexity/noVoid: reflow pattern
 	void element.offsetHeight;
 }
 

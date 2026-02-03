@@ -79,34 +79,15 @@ const DialogContent = React.forwardRef<React.ElementRef<typeof DialogPrimitive.C
 
 		// Efecto para manejar scroll lock
 		React.useEffect(() => {
-			const observer = new MutationObserver((mutations) => {
-				mutations.forEach((mutation) => {
-					if (mutation.type === 'attributes' && mutation.attributeName === 'data-state') {
-						const target = mutation.target as HTMLElement;
-						const state = target.getAttribute('data-state');
-						setIsOpen(state === 'open');
+			if (!isOpen) return;
 
-						// Scroll lock
-						if (state === 'open') {
-							document.body.style.overflow = 'hidden';
-						} else {
-							document.body.style.overflow = '';
-						}
-					}
-				});
-			});
-
-			// Observar cambios en data-state
-			const dialogContent = document.querySelector('[data-radix-dialog-content]');
-			if (dialogContent) {
-				observer.observe(dialogContent, { attributes: true });
-			}
+			const originalOverflow = document.body.style.overflow;
+			document.body.style.overflow = 'hidden';
 
 			return () => {
-				observer.disconnect();
-				document.body.style.overflow = '';
+				document.body.style.overflow = originalOverflow;
 			};
-		}, []);
+		}, [isOpen]);
 
 		const content = (
 			<DialogPrimitive.Content

@@ -51,9 +51,7 @@ const useMenubarAnimation = () => {
 		if (!element) return;
 
 		animate(element, {
-			backgroundColor: isHovering
-				? 'rgba(var(--accent-rgb, 59 130 246), 0.15)'
-				: 'rgba(var(--accent-rgb, 59 130 246), 0)',
+			backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 15%, transparent)' : 'transparent',
 			scale: isHovering ? 1.02 : 1,
 			duration: 150,
 			ease: 'cubicBezier(0.4, 0, 0.2, 1)',
@@ -64,9 +62,7 @@ const useMenubarAnimation = () => {
 		if (!element) return;
 
 		animate(element, {
-			backgroundColor: isHovering
-				? 'rgba(var(--accent-rgb, 59 130 246), 0.12)'
-				: 'rgba(var(--accent-rgb, 59 130 246), 0)',
+			backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 12%, transparent)' : 'transparent',
 			duration: 200,
 			ease: 'easeOutQuad',
 		});

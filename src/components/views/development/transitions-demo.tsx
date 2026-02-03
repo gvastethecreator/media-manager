@@ -5,9 +5,9 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { FlipContainer } from '@/components/transitions/FlipContainer';
-import { MorphContainer } from '@/components/transitions/MorphContainer';
-import { TransitionGroup, TransitionItem } from '@/components/transitions/TransitionGroup';
+import { FlipContainer } from '@/components/transitions/flip-container';
+import { MorphContainer } from '@/components/transitions/morph-container';
+import { TransitionGroup, TransitionItem } from '@/components/transitions/transition-group';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';

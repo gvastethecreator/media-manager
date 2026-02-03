@@ -8,9 +8,9 @@
 // Componentes Base
 // ============================================================================
 
-export { FlipContainer } from './FlipContainer';
-export { MorphContainer } from './MorphContainer';
-export { AnimatePresence, TransitionGroup, TransitionItem } from './TransitionGroup';
+export { FlipContainer } from './flip-container';
+export { MorphContainer } from './morph-container';
+export { AnimatePresence, TransitionGroup, TransitionItem } from './transition-group';
 
 // ============================================================================
 // Componentes de File Viewer

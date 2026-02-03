@@ -62,7 +62,7 @@ const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitives.Root>, 
 					'data-[state=unchecked]:bg-muted/30',
 					'data-[state=checked]:border-primary/40 data-[state=checked]:bg-primary/20',
 					// Sombra interior sutil
-					'shadow-[inset_0_1px_3px_rgba(0,0,0,0.08)]',
+					'shadow-dt-inset-1',
 					// Focus states
 					'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2',
 					// Disabled
@@ -84,9 +84,9 @@ const Switch = React.forwardRef<React.ElementRef<typeof SwitchPrimitives.Root>, 
 						// Borde semitransparente
 						'border border-border/30',
 						// Sombra elevada elegante
-						'shadow-[0_2px_6px_rgba(0,0,0,0.15),0_1px_2px_rgba(0,0,0,0.1)]',
+						'shadow-dt-2',
 						// Brillo sutil en la parte superior
-						'relative before:absolute before:inset-x-0 before:top-0.5 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent',
+						'relative before:absolute before:inset-x-0 before:top-0.5 before:h-px before:bg-gradient-to-r before:from-transparent before:via-primary-foreground/50 before:to-transparent',
 						// Transición suave para propiedades CSS
 						'transition-[box-shadow,border-color] duration-200',
 						// Posición base

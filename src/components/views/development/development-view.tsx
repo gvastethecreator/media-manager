@@ -14,7 +14,7 @@ import {
 	Sparkles,
 	Tag,
 } from 'lucide-react';
-import { ScannedImagesSettings } from '@/components/settings/image/scanned-images-settings';
+import { ScannedImagesSettings } from '@/components/settings/media/scanned-images-settings';
 import { FilesSettingsModern } from '@/components/settings/modern/files-settings-modern';
 import { TaxonomySettingsModern } from '@/components/settings/modern/taxonomy-settings-modern';
 import { motion } from '@/components/ui/animejs-shim';

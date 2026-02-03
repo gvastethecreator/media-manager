@@ -14,9 +14,7 @@ const useToolbarAnimation = () => {
 		if (!element) return;
 
 		animate(element, {
-			backgroundColor: isHovering
-				? 'rgba(var(--accent-rgb, 59 130 246), 0.12)'
-				: 'rgba(var(--accent-rgb, 59 130 246), 0)',
+			backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 12%, transparent)' : 'transparent',
 			scale: isHovering ? 1.05 : 1,
 			duration: 150,
 			ease: 'cubicBezier(0.4, 0, 0.2, 1)',
@@ -28,9 +26,7 @@ const useToolbarAnimation = () => {
 
 		animate(element, {
 			scale: isPressed ? 0.95 : 1,
-			backgroundColor: isPressed
-				? 'rgba(var(--accent-rgb, 59 130 246), 0.2)'
-				: 'rgba(var(--accent-rgb, 59 130 246), 0)',
+			backgroundColor: isPressed ? 'color-mix(in oklch, var(--accent) 20%, transparent)' : 'transparent',
 			duration: 100,
 			ease: 'easeOutQuad',
 		});
@@ -40,10 +36,10 @@ const useToolbarAnimation = () => {
 		if (!element) return;
 
 		animate(element, {
-			backgroundColor: isToggled
-				? 'rgba(var(--primary-rgb, 37 99 235), 0.15)'
-				: 'rgba(var(--primary-rgb, 37 99 235), 0)',
-			borderColor: isToggled ? 'rgba(var(--primary-rgb, 37 99 235), 0.5)' : 'rgba(var(--border-rgb, 200 200 200), 0.2)',
+			backgroundColor: isToggled ? 'color-mix(in oklch, var(--primary) 15%, transparent)' : 'transparent',
+			borderColor: isToggled
+				? 'color-mix(in oklch, var(--primary) 50%, transparent)'
+				: 'color-mix(in oklch, var(--border) 20%, transparent)',
 			duration: 200,
 			ease: 'cubicBezier(0.4, 0, 0.2, 1)',
 		});

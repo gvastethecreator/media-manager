@@ -5,8 +5,6 @@
 
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import type { BrowserEntityType, BrowserItem } from '../types/item.types';
-import { toTypedBrowserItem } from '../types/item.types';
 import { TCG3DCard } from '../components/tcg-cards/tcg-3d-card';
 import { TCGAudioCard } from '../components/tcg-cards/tcg-audio-card';
 import { TCGCardBase } from '../components/tcg-cards/tcg-card-base';
@@ -15,6 +13,8 @@ import { TCGFolderCard } from '../components/tcg-cards/tcg-folder-card';
 import { TCGImageCard } from '../components/tcg-cards/tcg-image-card';
 import { TCGJsonCard } from '../components/tcg-cards/tcg-json-card';
 import { TCGVideoCard } from '../components/tcg-cards/tcg-video-card';
+import type { BrowserEntityType, BrowserItem } from '../types/item.types';
+import { toTypedBrowserItem } from '../types/item.types';
 import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '../types/props.types';
 import type { CardsViewConfig } from '../types/view.types';
 
@@ -51,12 +51,13 @@ export function CardsView({
 	activeId,
 }: CardsViewProps) {
 	const containerRef = useRef<HTMLDivElement>(null);
-	const [internalScrollEl, setInternalScrollEl] = useState<HTMLDivElement | null>(null);
 	const [containerWidth, setContainerWidth] = useState(0);
 	const [containerHeight, setContainerHeight] = useState(0);
 
 	const cardSize = config.cardSize;
-	const gap = config.gap;
+	// Asegurar un gap mínimo de 32px para evitar cartas pegadas
+	// Las tarjetas TCG tienen sombras grandes que necesitan más espacio
+	const gap = Math.max(config.gap ?? 32, 32);
 	const virtualizationConfig = virtualization ?? {
 		enabled: false,
 		threshold: Number.POSITIVE_INFINITY,
@@ -95,7 +96,7 @@ export function CardsView({
 	// Scroll al inicio cuando cambia la página
 	useEffect(() => {
 		if (typeof page !== 'number') return;
-		containerRef.current?.scrollTo({ top: 0, behavior: 'instant' as ScrollBehavior });
+		containerRef.current?.scrollTo({ top: 0, behavior: 'auto' });
 	}, [page]);
 
 	useEffect(() => {
@@ -174,38 +175,19 @@ export function CardsView({
 
 			switch (item.entityType) {
 				case 'image':
-					return (
-						<TCGImageCard
-							{...baseProps}
-							item={toTypedBrowserItem(item, 'image')}
-							key={item.id}
-							showExif
-						/>
-					);
+					return <TCGImageCard {...baseProps} item={toTypedBrowserItem(item, 'image')} key={item.id} showExif />;
 				case 'video':
-					return (
-						<TCGVideoCard {...baseProps} item={toTypedBrowserItem(item, 'video')} key={item.id} />
-					);
+					return <TCGVideoCard {...baseProps} item={toTypedBrowserItem(item, 'video')} key={item.id} />;
 				case 'audio':
-					return (
-						<TCGAudioCard {...baseProps} item={toTypedBrowserItem(item, 'audio')} key={item.id} />
-					);
+					return <TCGAudioCard {...baseProps} item={toTypedBrowserItem(item, 'audio')} key={item.id} />;
 				case 'document':
-					return (
-						<TCGDocumentCard {...baseProps} item={toTypedBrowserItem(item, 'document')} key={item.id} />
-					);
+					return <TCGDocumentCard {...baseProps} item={toTypedBrowserItem(item, 'document')} key={item.id} />;
 				case 'jsonFile':
-					return (
-						<TCGJsonCard {...baseProps} item={toTypedBrowserItem(item, 'jsonFile')} key={item.id} />
-					);
+					return <TCGJsonCard {...baseProps} item={toTypedBrowserItem(item, 'jsonFile')} key={item.id} />;
 				case 'file3d':
-					return (
-						<TCG3DCard {...baseProps} item={toTypedBrowserItem(item, 'file3d')} key={item.id} />
-					);
+					return <TCG3DCard {...baseProps} item={toTypedBrowserItem(item, 'file3d')} key={item.id} />;
 				case 'folder':
-					return (
-						<TCGFolderCard {...baseProps} item={toTypedBrowserItem(item, 'folder')} key={item.id} />
-					);
+					return <TCGFolderCard {...baseProps} item={toTypedBrowserItem(item, 'folder')} key={item.id} />;
 				default: {
 					const fallbackType = item.entityType as BrowserEntityType;
 					return (
@@ -226,15 +208,7 @@ export function CardsView({
 				}
 			}
 		},
-		[
-			activeId,
-			actualCardWidth,
-			cardHeight,
-			handleItemClick,
-			handleItemContextMenu,
-			handleItemDoubleClick,
-			selectedIds,
-		]
+		[activeId, actualCardWidth, cardHeight, handleItemClick, handleItemContextMenu, handleItemDoubleClick, selectedIds]
 	);
 
 	return (
@@ -242,7 +216,6 @@ export function CardsView({
 			className="h-full w-full overflow-auto"
 			data-testid="file-browser-scroll-area-viewport"
 			ref={(el) => {
-				setInternalScrollEl(el);
 				containerRef.current = el;
 				onContainerReady?.(el);
 			}}
@@ -250,13 +223,14 @@ export function CardsView({
 			<div className="h-full w-full" data-testid="cards-view">
 				{!shouldVirtualize && (
 					<div
-						className="grid p-4"
+						className="grid"
 						data-testid="cards-view-container"
 						ref={(el) => onLayoutRootReady?.(el)}
 						style={{
-							gridTemplateColumns: `repeat(auto-fill, minmax(${cardSize}px, 1fr))`,
+							gridTemplateColumns: `repeat(${columns}, minmax(0, 1fr))`,
 							columnGap: `${gap}px`,
 							rowGap: `${gap}px`,
+							padding: `${Math.max(gap * 2, 40)}px`,
 						}}
 					>
 						{displayItems.map((item, index) => renderCardItem(item, index))}

@@ -16,14 +16,14 @@ import { Switch } from '@/components/ui/switch-v3';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useSystemStats } from '@/lib/api/system';
 import { cn } from '@/lib/utils';
-import { AudioSettings } from '../audio/audio-settings';
-import { DocumentSettings } from '../document/document-settings';
-import { File3DSettings } from '../file3d/file3d-settings';
-import { ScannedImagesSettings } from '../image/scanned-images-settings';
-import { JsonFileSettings } from '../json-file/json-file-settings';
-import { SettingsCard, SettingsGroup, SettingsRow } from '../modern/settings-card';
-import { UploadedImagesSettings } from '../uploaded-images/uploaded-images-settings';
-import { VideosSettings } from '../video/videos-settings';
+import { AudioSettings } from '../media/audio-settings';
+import { DocumentSettings } from '../media/document-settings';
+import { File3DSettings } from '../media/file3d-settings';
+import { JsonFileSettings } from '../media/json-file-settings';
+import { ScannedImagesSettings } from '../media/scanned-images-settings';
+import { UploadedImagesSettings } from '../media/uploaded-images-settings';
+import { VideosSettings } from '../media/videos-settings';
+import { SettingsCard, SettingsGroup, SettingsRow } from './settings-card';
 
 // Tipos de media soportados
 const MEDIA_TYPES = [

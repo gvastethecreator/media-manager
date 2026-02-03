@@ -156,7 +156,7 @@ export const FolderCardImages = memo(function FolderCardImages({
 							style={{
 								background: `linear-gradient(to right, ${primaryColor}, ${secondaryColor})`,
 								color: 'white',
-								textShadow: '0 1px 2px rgba(0,0,0,0.5)',
+								textShadow: '0 1px 2px oklch(from var(--foreground) 0 0 0)',
 							}}
 						>
 							x{images.length}

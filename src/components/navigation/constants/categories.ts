@@ -51,7 +51,7 @@ export const NAVIGATION_CATEGORIES: CategoryItem[] = [
 		color: 'var(--entity-place)',
 	},
 	{
-		id: 'worldItems',
+		id: 'world-items',
 		icon: Box,
 		label: 'Objetos',
 		color: 'var(--entity-world-item)',
@@ -111,19 +111,13 @@ export const NAVIGATION_CATEGORIES: CategoryItem[] = [
 		color: 'var(--entity-audio)',
 	},
 	{
-		id: 'jsonFiles',
+		id: 'json-files',
 		icon: Database,
 		label: 'JSON',
 		color: 'var(--entity-json)',
 	},
 	{
-		id: 'workflows',
-		icon: Lightbulb,
-		label: 'Workflows',
-		color: 'var(--status-info)',
-	},
-	{
-		id: 'file3ds',
+		id: 'file-3ds',
 		icon: Box,
 		label: '3D',
 		color: 'var(--entity-file-3d)',

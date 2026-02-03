@@ -5,13 +5,39 @@
  */
 
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
 import { MediaThumbnail } from '../components/media-thumbnail/media-thumbnail';
 import { TCGCardBase } from '../components/tcg-cards/tcg-card-base';
 import type { BrowserItem } from '../types/item.types';
 import type { BrowserViewProps, ClickModifiers, ItemContextMenuHandler } from '../types/props.types';
 import type { MasonryViewConfig } from '../types/view.types';
+
+// Componente memoizado para thumbnail content
+const MasonryThumbnail = memo(function MasonryThumbnail({
+	item,
+	aspectRatio,
+}: {
+	item: BrowserItem;
+	aspectRatio?: number;
+}) {
+	return (
+		<div className="relative h-full w-full">
+			<MediaThumbnail
+				className="h-full w-full"
+				item={item}
+				lockAspectRatio
+				predictedAspectRatio={aspectRatio}
+				style={{ objectFit: 'cover' }}
+			/>
+			<div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 via-black/30 to-transparent p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
+				<span className="block truncate font-medium text-white text-xs" title={item.name}>
+					{item.name}
+				</span>
+			</div>
+		</div>
+	);
+});
 
 export interface MasonryViewProps extends Omit<BrowserViewProps, 'config'> {
 	/** Configuración de masonry */
@@ -65,8 +91,6 @@ function getResponsiveLayout(containerWidth: number, base: { columnWidth: number
 		padding: Math.round((preset.padding + base.padding) / 2),
 	};
 }
-
-
 
 export function MasonryView({
 	items,
@@ -122,7 +146,7 @@ export function MasonryView({
 		}
 		return imageItems;
 	}, [items, page, pageSize]);
-	const shouldVirtualize = false;
+	const shouldVirtualize = virtualizationConfig.enabled && displayItems.length >= virtualizationConfig.threshold;
 	const allowAppearAnimation = !(suppressAppearAnimation || shouldVirtualize);
 
 	// Observar cambios de tamaño del contenedor
@@ -150,7 +174,10 @@ export function MasonryView({
 
 	const safeWidth = Math.max(containerWidth, columnWidth);
 	const columnCount = Math.max(1, Math.floor((safeWidth + gap) / (columnWidth + gap)));
-	const actualColumnWidth = (safeWidth - gap * (columnCount - 1)) / columnCount;
+	const actualColumnWidth = useMemo(
+		() => Math.floor((safeWidth - gap * (columnCount - 1)) / columnCount),
+		[safeWidth, gap, columnCount]
+	);
 	const getAspectRatio = useCallback((item: BrowserItem) => {
 		const toNumber = (value: unknown) => {
 			if (typeof value === 'number') return value;
@@ -178,12 +205,12 @@ export function MasonryView({
 
 		const raw = item.raw as
 			| {
-				width?: number;
-				height?: number;
-				thumbnailWidth?: number;
-				thumbnailHeight?: number;
-				metadata?: string;
-			}
+					width?: number;
+					height?: number;
+					thumbnailWidth?: number;
+					thumbnailHeight?: number;
+					metadata?: string;
+			  }
 			| undefined;
 
 		const thumbRatio = toRatio(raw?.thumbnailWidth, raw?.thumbnailHeight);
@@ -207,13 +234,13 @@ export function MasonryView({
 
 				const exif = parsed.exif as
 					| {
-						ExifImageWidth?: number;
-						ExifImageHeight?: number;
-						ImageWidth?: number;
-						ImageHeight?: number;
-						imageWidth?: number;
-						imageHeight?: number;
-					}
+							ExifImageWidth?: number;
+							ExifImageHeight?: number;
+							ImageWidth?: number;
+							ImageHeight?: number;
+							imageWidth?: number;
+							imageHeight?: number;
+					  }
 					| undefined;
 				const exifWidth = exif?.ExifImageWidth ?? exif?.ImageWidth ?? exif?.imageWidth ?? undefined;
 				const exifHeight = exif?.ExifImageHeight ?? exif?.ImageHeight ?? exif?.imageHeight ?? undefined;
@@ -224,8 +251,31 @@ export function MasonryView({
 			}
 		}
 
-		return 1;
+		// Fallback: usar aspect ratio típico de fotos de celular (3:4 portrait)
+		// Las fotos modernas son más altas que anchas, no cuadradas ni 4:3
+		return 3 / 4;
 	}, []);
+
+	// Calcular distribución masonry real - items van a la columna más corta
+	const masonryLayout = useMemo(() => {
+		const columns: Array<Array<{ item: BrowserItem; height: number; aspectRatio: number }>> = new Array(columnCount)
+			.fill(null)
+			.map(() => []);
+		const columnHeights: number[] = new Array(columnCount).fill(0);
+
+		for (const item of displayItems) {
+			const aspectRatio = getAspectRatio(item);
+			const height = Math.round(actualColumnWidth / aspectRatio);
+
+			// Encontrar columna más corta
+			const shortestCol = columnHeights.indexOf(Math.min(...columnHeights));
+
+			columns[shortestCol].push({ item, height, aspectRatio });
+			columnHeights[shortestCol] += height + gap;
+		}
+
+		return columns;
+	}, [displayItems, columnCount, actualColumnWidth, gap, getAspectRatio]);
 	const estimateHeight = useCallback(
 		(index: number) => {
 			const item = displayItems[index];
@@ -254,39 +304,45 @@ export function MasonryView({
 		}
 	}, [activeId]);
 
-	// Handlers
-	const handleItemClick = useCallback(
-		(item: BrowserItem, e: React.MouseEvent) => {
-			const modifiers: ClickModifiers = {
-				ctrlKey: e.ctrlKey,
-				metaKey: e.metaKey,
-				shiftKey: e.shiftKey,
-			};
-			onItemClick?.(item, modifiers);
-		},
-		[onItemClick]
-	);
+	// Memoizar item handlers por ID para evitar re-renders
+	const itemClickHandlers = useMemo(() => {
+		const handlers = new Map<string, (e: React.MouseEvent) => void>();
+		for (const item of displayItems) {
+			handlers.set(item.id, (e: React.MouseEvent) => {
+				const modifiers: ClickModifiers = {
+					ctrlKey: e.ctrlKey,
+					metaKey: e.metaKey,
+					shiftKey: e.shiftKey,
+				};
+				onItemClick?.(item, modifiers);
+			});
+		}
+		return handlers;
+	}, [displayItems, onItemClick]);
 
-	const handleItemDoubleClick = useCallback(
-		(item: BrowserItem) => {
-			onItemDoubleClick?.(item);
-		},
-		[onItemDoubleClick]
-	);
+	const itemContextMenuHandlers = useMemo(() => {
+		const handlers = new Map<string, (e: React.MouseEvent) => void>();
+		for (const item of displayItems) {
+			handlers.set(item.id, (e: React.MouseEvent) => {
+				e.preventDefault();
+				onItemContextMenu?.(e, item);
+			});
+		}
+		return handlers;
+	}, [displayItems, onItemContextMenu]);
 
-	const handleItemContextMenu = useCallback(
-		(item: BrowserItem, e: React.MouseEvent) => {
-			e.preventDefault();
-			onItemContextMenu?.(e, item);
-		},
-		[onItemContextMenu]
-	);
+	const itemDoubleClickHandlers = useMemo(() => {
+		const handlers = new Map<string, () => void>();
+		for (const item of displayItems) {
+			handlers.set(item.id, () => {
+				onItemDoubleClick?.(item);
+			});
+		}
+		return handlers;
+	}, [displayItems, onItemDoubleClick]);
 
 	const renderMasonryItem = useCallback(
-		(
-			item: BrowserItem,
-			options: { height?: number; width?: number; aspectRatio?: number; marginBottom?: number }
-		) => {
+		(item: BrowserItem, options: { height?: number; width?: number; aspectRatio?: number }) => {
 			const isSelected = selectedIds.has(item.id);
 			const isActive = activeId === item.id;
 			const width = options.width ?? actualColumnWidth;
@@ -298,46 +354,35 @@ export function MasonryView({
 				!tcgRounded && 'tcg-card--no-rounded',
 				!tcgTilt && 'tcg-card--no-tilt'
 			);
+
+			// Obtener handlers memoizados
+			const onClick = itemClickHandlers.get(item.id);
+			const onContextMenu = itemContextMenuHandlers.get(item.id);
+			const onDoubleClick = itemDoubleClickHandlers.get(item.id);
+
 			return (
-				<div
-					key={item.id}
-					style={{
-						marginBottom: options.marginBottom,
-						breakInside: 'avoid',
-					}}
-				>
-					<TCGCardBase
-						accentColor="var(--entity-image, oklch(0.7 0.15 280))"
-						className={tcgClassName}
-						height={height}
-						isActive={isActive}
-						isSelected={isSelected}
-						item={item}
-						onClick={(e) => handleItemClick(item, e)}
-						onContextMenu={(e) => handleItemContextMenu(item, e)}
-						onDoubleClick={() => handleItemDoubleClick(item)}
-						thumbnailContent={
-							<div className="relative h-full w-full">
-								<MediaThumbnail className="h-full w-full" item={item} style={{ objectFit: 'cover' }} />
-								<div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 via-black/30 to-transparent p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-									<span className="block truncate font-medium text-white text-xs" title={item.name}>
-										{item.name}
-									</span>
-								</div>
-							</div>
-						}
-						variant="masonry"
-						width={width}
-					/>
-				</div>
+				<TCGCardBase
+					accentColor="var(--entity-image, oklch(0.7 0.15 280))"
+					className={tcgClassName}
+					height={height}
+					isActive={isActive}
+					isSelected={isSelected}
+					item={item}
+					onClick={onClick}
+					onContextMenu={onContextMenu}
+					onDoubleClick={onDoubleClick}
+					thumbnailContent={<MasonryThumbnail aspectRatio={options.aspectRatio} item={item} />}
+					variant="masonry"
+					width={width}
+				/>
 			);
 		},
 		[
 			activeId,
 			actualColumnWidth,
-			handleItemClick,
-			handleItemContextMenu,
-			handleItemDoubleClick,
+			itemClickHandlers,
+			itemContextMenuHandlers,
+			itemDoubleClickHandlers,
 			selectedIds,
 			tcgHolo,
 			tcgHoverReveal,
@@ -360,26 +405,27 @@ export function MasonryView({
 			<div className="h-full w-full" data-testid="masonry-view">
 				{!shouldVirtualize && (
 					<div
-						className=""
+						className="flex"
 						data-testid="masonry-view-container"
 						ref={(el) => onLayoutRootReady?.(el)}
 						style={{
-							columnGap: `${gap}px`,
-							columnWidth: `${columnWidth}px`,
-							columnFill: 'balance',
 							padding: `${padding}px`,
+							gap: `${gap}px`,
 						}}
 					>
-						{displayItems.map((item) => {
-							const aspectRatio = getAspectRatio(item);
-							const itemHeight = Math.round(actualColumnWidth / aspectRatio);
-							return renderMasonryItem(item, {
-								aspectRatio,
-								marginBottom: gap,
-								width: actualColumnWidth,
-								height: itemHeight,
-							});
-						})}
+						{masonryLayout.map((column, colIndex) => (
+							<div className="flex flex-col" key={colIndex} style={{ width: actualColumnWidth, gap: `${gap}px` }}>
+								{column.map(({ item, height, aspectRatio }) => (
+									<div key={item.id} style={{ width: '100%', height }}>
+										{renderMasonryItem(item, {
+											aspectRatio,
+											width: actualColumnWidth,
+											height,
+										})}
+									</div>
+								))}
+							</div>
+						))}
 					</div>
 				)}
 				{shouldVirtualize && (

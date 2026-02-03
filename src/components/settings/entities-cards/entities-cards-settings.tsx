@@ -1,5 +1,5 @@
-import { Eye, IdCard, Layout, Palette } from 'lucide-react';
-import React from 'react';
+import { Eye, IdCard, Layout, Palette, RotateCcw, Save } from 'lucide-react';
+import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -8,27 +8,83 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Separator } from '@/components/ui/separator';
 import { Slider } from '@/components/ui/slider-v3';
 import { Switch } from '@/components/ui/switch-v3';
+import { toastService } from '@/lib/ui/toast';
+import { useInterfaceSettingsStore } from '@/store/entities/settings/store';
+
+interface EntityCardConfig {
+	cardSize: number;
+	showMetadata: boolean;
+	showPreview: boolean;
+	cardStyle: string;
+	hoverEffects: boolean;
+	densityMode: string;
+}
+
+const defaultCardConfig: EntityCardConfig = {
+	cardSize: 250,
+	showMetadata: true,
+	showPreview: true,
+	cardStyle: 'default',
+	hoverEffects: true,
+	densityMode: 'comfortable',
+};
 
 export const EntitiesCardsSettings: React.FC = () => {
-	const [cardSize, setCardSize] = React.useState([250]);
-	const [showMetadata, setShowMetadata] = React.useState(true);
-	const [showPreview, setShowPreview] = React.useState(true);
-	const [cardStyle, setCardStyle] = React.useState('default');
-	const [hoverEffects, setHoverEffects] = React.useState(true);
-	const [densityMode, setDensityMode] = React.useState('comfortable');
+	const preferences = useInterfaceSettingsStore((s) => s.preferences);
+	const setPreferences = useInterfaceSettingsStore((s) => s.setPreferences);
+
+	// Load config from preferences
+	const [cardConfig, setCardConfig] = useState<EntityCardConfig>(() => {
+		const stored = (preferences as any)?.entityCards;
+		return stored ? { ...defaultCardConfig, ...stored } : defaultCardConfig;
+	});
+	const [hasChanges, setHasChanges] = useState(false);
+
+	// Destructure for easier access
+	const { cardSize, showMetadata, showPreview, cardStyle, hoverEffects, densityMode } = cardConfig;
+
+	const updateConfig = (updates: Partial<EntityCardConfig>) => {
+		setCardConfig((prev) => ({ ...prev, ...updates }));
+		setHasChanges(true);
+	};
+
+	const handleSave = () => {
+		setPreferences({ entityCards: cardConfig } as any);
+		setHasChanges(false);
+		toastService.success('Configuración de tarjetas guardada');
+	};
+
+	const handleReset = () => {
+		setCardConfig(defaultCardConfig);
+		setPreferences({ entityCards: defaultCardConfig } as any);
+		setHasChanges(false);
+		toastService.info('Configuración de tarjetas restaurada');
+	};
 
 	return (
 		<div className="space-y-6 p-4">
 			{/* Header */}
-			<div className="flex items-center gap-3">
-				<div className="rounded-lg bg-primary/10 p-2 dark:bg-primary/20">
-					<IdCard className="h-5 w-5 text-primary dark:text-primary" />
+			<div className="flex items-center justify-between">
+				<div className="flex items-center gap-3">
+					<div className="rounded-lg bg-primary/10 p-2 dark:bg-primary/20">
+						<IdCard className="h-5 w-5 text-primary dark:text-primary" />
+					</div>
+					<div>
+						<h2 className="font-semibold text-xl">Configuración de Tarjetas de Entidades</h2>
+						<p className="text-muted-foreground text-sm">
+							Personaliza la apariencia y comportamiento de las tarjetas de entidades
+						</p>
+					</div>
 				</div>
-				<div>
-					<h2 className="font-semibold text-xl">Configuración de Tarjetas de Entidades</h2>
-					<p className="text-muted-foreground text-sm">
-						Personaliza la apariencia y comportamiento de las tarjetas de entidades
-					</p>
+				<div className="flex gap-2">
+					<Button className="gap-2" disabled={!hasChanges} onClick={handleReset} size="sm" variant="outline">
+						<RotateCcw className="h-4 w-4" />
+						Restaurar
+					</Button>
+					<Button className="gap-2" disabled={!hasChanges} onClick={handleSave} size="sm">
+						<Save className="h-4 w-4" />
+						Guardar
+					</Button>
 				</div>
 			</div>
 
@@ -47,8 +103,15 @@ export const EntitiesCardsSettings: React.FC = () => {
 					<CardContent className="space-y-6">
 						{/* Tamaño de tarjetas */}
 						<div className="space-y-3">
-							<Label className="font-medium text-sm">Tamaño de tarjetas: {cardSize[0]}px</Label>
-							<Slider className="w-full" max={400} min={150} onValueChange={setCardSize} step={10} value={cardSize} />
+							<Label className="font-medium text-sm">Tamaño de tarjetas: {cardSize}px</Label>
+							<Slider
+								className="w-full"
+								max={400}
+								min={150}
+								onValueChange={([v]) => updateConfig({ cardSize: v })}
+								step={10}
+								value={[cardSize]}
+							/>
 							<div className="flex justify-between text-muted-foreground text-xs">
 								<span>Compacto (150px)</span>
 								<span>Grande (400px)</span>
@@ -58,7 +121,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 						{/* Estilo de tarjetas */}
 						<div className="space-y-3">
 							<Label className="font-medium text-sm">Estilo de tarjetas</Label>
-							<Select onValueChange={setCardStyle} value={cardStyle}>
+							<Select onValueChange={(v) => updateConfig({ cardStyle: v })} value={cardStyle}>
 								<SelectTrigger>
 									<SelectValue />
 								</SelectTrigger>
@@ -75,7 +138,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 						{/* Modo de densidad */}
 						<div className="space-y-3">
 							<Label className="font-medium text-sm">Densidad del </Label>
-							<Select onValueChange={setDensityMode} value={densityMode}>
+							<Select onValueChange={(v) => updateConfig({ densityMode: v })} value={densityMode}>
 								<SelectTrigger>
 									<SelectValue />
 								</SelectTrigger>
@@ -107,7 +170,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 									Incluye información adicional como fechas, tamaños y etiquetas
 								</p>
 							</div>
-							<Switch checked={showMetadata} onCheckedChange={setShowMetadata} />
+							<Switch checked={showMetadata} onCheckedChange={(v) => updateConfig({ showMetadata: v })} />
 						</div>
 
 						{/* Mostrar vista previa */}
@@ -118,7 +181,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 									Muestra una vista previa al pasar el cursor sobre la tarjeta
 								</p>
 							</div>
-							<Switch checked={showPreview} onCheckedChange={setShowPreview} />
+							<Switch checked={showPreview} onCheckedChange={(v) => updateConfig({ showPreview: v })} />
 						</div>
 
 						{/* Efectos hover */}
@@ -129,7 +192,7 @@ export const EntitiesCardsSettings: React.FC = () => {
 									Animaciones y efectos visuales al interactuar con las tarjetas
 								</p>
 							</div>
-							<Switch checked={hoverEffects} onCheckedChange={setHoverEffects} />
+							<Switch checked={hoverEffects} onCheckedChange={(v) => updateConfig({ hoverEffects: v })} />
 						</div>
 					</CardContent>
 				</Card>
@@ -146,15 +209,15 @@ export const EntitiesCardsSettings: React.FC = () => {
 					<CardContent>
 						<div className="rounded-lg border bg-muted/20 p-4">
 							<div
-								className={`rounded-lg border p-3 bg-background${cardStyle === 'rounded' ? 'rounded-xl' : ''}
+								className={`rounded-lg border bg-background p-3 ${cardStyle === 'rounded' ? 'rounded-xl' : ''}
 									${cardStyle === 'sharp' ? 'rounded-none' : ''}
 									${cardStyle === 'shadow' ? 'shadow-dt-2' : ''}
-									${cardStyle === 'minimal' ? 'border-none shadow-dt-0' : ''}
-									${hoverEffects ? 'transition-all duration-200 hover:scale-[1.02] hover:shadow-dt-1' : ''}
+									${cardStyle === 'minimal' ? 'border-none shadow-none' : ''}
+									${hoverEffects ? 'transition-all duration-200 hover:scale-[1.02] hover:shadow-md' : ''}
 								`}
-								style={{ width: Math.min(cardSize[0], 300) }}
+								style={{ width: Math.min(cardSize, 300) }}
 							>
-								<div className="mb-3 flex aspect-video items-center justify-center rounded-md bg-gradient-to-br from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20">
+								<div className="mb-3 flex aspect-video items-center justify-center rounded-md bg-linear-to-br from-primary/10 to-accent/10 dark:from-primary/20 dark:to-accent/20">
 									<IdCard className="h-8 w-8 text-muted-foreground" />
 								</div>
 								<h3 className="mb-1 font-medium text-sm">Tarjeta de Ejemplo</h3>
@@ -175,12 +238,6 @@ export const EntitiesCardsSettings: React.FC = () => {
 						</div>
 					</CardContent>
 				</Card>
-
-				{/* Acciones */}
-				<div className="flex justify-end gap-3">
-					<Button variant="outline">Restablecer</Button>
-					<Button>Guardar Cambios</Button>
-				</div>
 			</div>
 		</div>
 	);
