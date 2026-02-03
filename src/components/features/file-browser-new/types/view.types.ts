@@ -111,9 +111,9 @@ export const DEFAULT_VIEW_CONFIGS: Record<ViewMode, ViewConfig> = {
 	masonry: {
 		kind: 'masonry',
 		renderMode: 'canvas',
-		gap: 8,
-		columnWidth: 200,
-		padding: 16,
+		gap: 16,
+		columnWidth: 220,
+		padding: 20,
 		tcgHoverReveal: true,
 		tcgHolo: true,
 		tcgShadows: true,
@@ -130,8 +130,8 @@ export const DEFAULT_VIEW_CONFIGS: Record<ViewMode, ViewConfig> = {
 	cards: {
 		kind: 'cards',
 		renderMode: 'canvas',
-		gap: 12,
-		cardSize: 180,
+		gap: 32,
+		cardSize: 200,
 		showDetails: true,
 	},
 };

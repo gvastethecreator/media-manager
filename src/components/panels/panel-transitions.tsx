@@ -5,8 +5,8 @@
  */
 
 import React from 'react';
-import { FlipContainer } from '@/components/transitions/FlipContainer';
-import { AnimatePresence } from '@/components/transitions/TransitionGroup';
+import { FlipContainer } from '@/components/transitions/flip-container';
+import { AnimatePresence } from '@/components/transitions/transition-group';
 import { useEnterExit } from '@/hooks/transitions';
 import { customEasings } from '@/lib/transitions';
 import { cn } from '@/lib/utils';

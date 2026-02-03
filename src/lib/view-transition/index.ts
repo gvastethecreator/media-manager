@@ -17,7 +17,7 @@ export {
 	type ViewTransitionProps,
 	type ViewTransitionRef,
 	withViewTransitionWrapper,
-} from '@/components/transitions/ViewTransition';
+} from '@/components/transitions/view-transition';
 // Hooks de navegación
 // Re-exportar hooks específicos con nombres más simples
 export {

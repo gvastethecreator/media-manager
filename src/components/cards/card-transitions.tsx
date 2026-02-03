@@ -5,8 +5,8 @@
  */
 
 import React, { useCallback } from 'react';
-import { FlipContainer } from '@/components/transitions/FlipContainer';
-import { TransitionGroup, TransitionItem } from '@/components/transitions/TransitionGroup';
+import { FlipContainer } from '@/components/transitions/flip-container';
+import { TransitionGroup, TransitionItem } from '@/components/transitions/transition-group';
 import { useEntityCardTransition } from '@/hooks/transitions';
 import { customEasings } from '@/lib/transitions';
 import { cn } from '@/lib/utils';

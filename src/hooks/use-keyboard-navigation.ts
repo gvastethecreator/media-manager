@@ -101,6 +101,7 @@ export function useListNavigation({
 		(e: React.KeyboardEvent) => {
 			if (!enabled || itemCount === 0) return;
 
+			// biome-ignore lint/style/useDefaultSwitchClause: no default needed
 			switch (e.key) {
 				case 'ArrowDown':
 					e.preventDefault();

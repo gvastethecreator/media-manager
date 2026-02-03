@@ -2,7 +2,7 @@ import { Filter, Grid, RefreshCw } from 'lucide-react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { DocumentCard } from '@/components/cards/document-card/document-card';
 import { FolderCard } from '@/components/cards/folder-card/folder-card';
-import { ImageCard } from '@/components/cards/image-card/index';
+import { ImageCard } from '@/components/cards/image-card/image-card';
 import { VideoCard } from '@/components/cards/video-card/video-card';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { Button } from '@/components/ui/button';

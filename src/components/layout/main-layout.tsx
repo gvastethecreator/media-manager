@@ -7,7 +7,7 @@ import { NavPanel } from '@/components/navigation/navigation-panel';
 import { DetailsPanelTransition, NavPanelTransition } from '@/components/panels/panel-transitions';
 import { RightPanel } from '@/components/panels/right-panel';
 import { ViewToolbar } from '@/components/toolbar/main-toolbar';
-import { NavigationTransition } from '@/components/transitions/ViewTransition';
+import { NavigationTransition } from '@/components/transitions/view-transition';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { useReindexFolder } from '@/lib/api/folders';
 import { clientLogger } from '@/lib/logger/client-logger';

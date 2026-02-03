@@ -212,7 +212,7 @@ export function PlaceCardImages({
 								backgroundImage: `repeating-linear-gradient(
 									${90 + viewAngle.x * 20}deg,
 									transparent,
-									rgba(255, 255, 255, 0.8) 1px,
+									color-mix(in oklch, var(--effect-highlight-rgb), transparent 20%) 1px,
 									transparent 2px
 								)`,
 								backgroundSize: '4px 4px',

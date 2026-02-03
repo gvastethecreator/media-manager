@@ -1,6 +1,6 @@
 import { ImageIcon } from 'lucide-react';
 import { memo, useMemo } from 'react';
-import { UploadedImageCard } from '@/components/cards/uploaded-image-card/index';
+import { UploadedImageCard } from '@/components/cards/uploaded-image-card/uploaded-image-card';
 import { EmptyState } from '@/components/core/data-display/empty-state/empty-state';
 import { LoadingScreen } from '@/components/core/feedback/loading/loading-screen';
 import { motion } from '@/components/ui/animejs-shim';

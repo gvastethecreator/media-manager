@@ -283,6 +283,7 @@ export class EnterExitCoordinator {
 		element.style.transform = transforms.initial;
 
 		// Forzar reflow
+		// biome-ignore lint/complexity/noVoid: reflow pattern
 		void element.offsetHeight;
 
 		// Configurar animación
@@ -483,6 +484,7 @@ export class EnterExitCoordinator {
 		// Para grupos pequeños, usar dirección base para todos
 		if (elements.length <= 3) {
 			const baseDirection: TransitionDirection = type === 'enter' ? 'bottom' : 'top';
+			// biome-ignore lint/suspicious/useIterableCallbackReturn: map.set returns value intentionally
 			elements.forEach((el) => directions.set(el.id, baseDirection));
 			return directions;
 		}

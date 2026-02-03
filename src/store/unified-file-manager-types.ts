@@ -3,7 +3,7 @@
  * @module store/unified-file-manager-types
  */
 
-import type { ViewMode } from '@/components/navigation/types';
+import type { ViewMode } from '@/store/ui.store';
 import type { EntityWithStats } from '@/types/entities/entity.types';
 import type { EntityStatsType } from '@/types/file-browser/entity-stats';
 import type { OperationQueue } from './unified-file-manager-queue';

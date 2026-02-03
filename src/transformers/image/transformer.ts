@@ -64,30 +64,30 @@ export function fromDrizzleImageWithCounts(drizzleImage: DrizzleImageWithCounts)
  * 📊 Calcula estadísticas de la imagen
  */
 function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageStatistics {
-	// Verificar que _count existe y tiene la estructura esperada
+	// Valores por defecto si _count no existe (inmutable)
+	const defaultCount = {
+		albums: 0,
+		collections: 0,
+		tags: 0,
+		characters: 0,
+		places: 0,
+		worldItems: 0,
+		concepts: 0,
+		prompts: 0,
+		notes: 0,
+		wildcards: 0,
+		properties: 0,
+		groups: 0,
+	};
+
+	// Usar _count existente o valores por defecto (sin mutar el input)
+	const countData = drizzleImage._count && typeof drizzleImage._count === 'object' ? drizzleImage._count : defaultCount;
+
 	if (!drizzleImage._count || typeof drizzleImage._count !== 'object') {
 		logger.warn('⚠️ Image sin _count válido, usando valores por defecto', {
 			imageId: drizzleImage.id,
 			countValue: drizzleImage._count,
 		});
-
-		// Valores por defecto si _count no existe
-		const defaultCount = {
-			albums: 0,
-			collections: 0,
-			tags: 0,
-			characters: 0,
-			places: 0,
-			worldItems: 0,
-			concepts: 0,
-			prompts: 0,
-			notes: 0,
-			wildcards: 0,
-			properties: 0,
-			groups: 0,
-		};
-
-		drizzleImage._count = defaultCount;
 	}
 
 	const {
@@ -103,7 +103,7 @@ function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageSt
 		wildcards = 0,
 		properties = 0,
 		groups = 0,
-	} = drizzleImage._count;
+	} = countData;
 
 	// Conteos base
 	const totalAssociations =
@@ -134,10 +134,11 @@ function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageSt
 	const technicalGrade = determineTechnicalGrade(qualityScore, megapixels, aspectRatio);
 	const colorTemperature = determineColorTemperature(drizzleImage);
 
-	// Métricas de uso (simuladas por ahora)
-	const views = Math.floor(totalAssociations * 10 + Math.random() * 100);
-	const likes = Math.floor(totalAssociations * 2 + Math.random() * 20);
-	const downloads = Math.floor(totalAssociations * 1.5 + Math.random() * 15);
+	// Métricas de uso deterministas (basadas en hash de la imagen)
+	const hashSum = drizzleImage.hash.split('').reduce((sum, char) => sum + char.charCodeAt(0), 0);
+	const views = Math.floor(totalAssociations * 10 + (hashSum % 100));
+	const likes = Math.floor(totalAssociations * 2 + (hashSum % 20));
+	const downloads = Math.floor(totalAssociations * 1.5 + (hashSum % 15));
 
 	// Metadatos AI
 	const aiConfidence = calculateAIConfidence(drizzleImage);
@@ -173,8 +174,13 @@ function calculateImageStatistics(drizzleImage: DrizzleImageWithCounts): ImageSt
 function calculateQualityScore(image: DrizzleImageWithCounts, totalAssociations: number): number {
 	let score = 0;
 
+	// Guardas para valores opcionales
+	const width = image.width || 0;
+	const height = image.height || 0;
+	const size = image.size || 0;
+
 	// Resolución (30 puntos)
-	const megapixels = (image.width * image.height) / 1_000_000;
+	const megapixels = (width * height) / 1_000_000;
 	if (megapixels >= 12) {
 		score += 30;
 	} else if (megapixels >= 8) {
@@ -188,7 +194,7 @@ function calculateQualityScore(image: DrizzleImageWithCounts, totalAssociations:
 	}
 
 	// Relación de aspecto (15 puntos)
-	const aspectRatio = image.width / image.height;
+	const aspectRatio = height > 0 ? width / height : 1;
 	if (aspectRatio >= 0.8 && aspectRatio <= 1.25) {
 		score += 15; // Cuadrado
 	} else if (aspectRatio >= 1.3 && aspectRatio <= 1.8) {
@@ -200,7 +206,7 @@ function calculateQualityScore(image: DrizzleImageWithCounts, totalAssociations:
 	}
 
 	// Tamaño de archivo (15 puntos)
-	const fileSizeMB = image.size / (1024 * 1024);
+	const fileSizeMB = size / (1024 * 1024);
 	if (fileSizeMB >= 5 && fileSizeMB <= 20) {
 		score += 15; // Óptimo
 	} else if (fileSizeMB >= 2 && fileSizeMB <= 30) {
@@ -291,15 +297,15 @@ function calculateAIConfidence(image: DrizzleImageWithCounts): number {
 	try {
 		const metadata = JSON.parse(image.metadata);
 		if (metadata.ai) {
-			// Si tiene metadatos AI, alta confianza
-			return Math.floor(80 + Math.random() * 20);
+			// Si tiene metadatos AI, alta confianza (85-95)
+			return 85 + (image.hash.charCodeAt(0) % 11);
 		}
 		if (metadata.analysis) {
-			// Si tiene análisis, confianza media
-			return Math.floor(50 + Math.random() * 30);
+			// Si tiene análisis, confianza media (55-75)
+			return 55 + (image.hash.charCodeAt(1) % 21);
 		}
-		// Confianza baja
-		return Math.floor(Math.random() * 30);
+		// Confianza baja (10-30)
+		return 10 + (image.hash.charCodeAt(2) % 21);
 	} catch {
 		return 0;
 	}

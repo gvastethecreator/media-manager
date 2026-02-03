@@ -67,11 +67,11 @@ const Checkbox = React.forwardRef<React.ElementRef<typeof CheckboxPrimitive.Root
 					'data-[state=checked]:border-primary/50 data-[state=checked]:bg-primary',
 					'data-[state=indeterminate]:border-primary/50 data-[state=indeterminate]:bg-primary/80',
 					// Sombra sutil
-					'shadow-[0_1px_2px_rgba(0,0,0,0.05)]',
+					'shadow-dt-1',
 					// Transiciones suaves
 					'transition-all duration-200 ease-out',
 					// Hover effects
-					'hover:border-border/70 hover:shadow-[0_2px_8px_rgba(0,0,0,0.08)]',
+					'hover:border-border/70 hover:shadow-dt-2',
 					'hover:data-[state=checked]:shadow-[0_2px_12px_rgba(var(--primary-rgb),0.25)]',
 					// Focus states
 					'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 focus-visible:ring-offset-2',

@@ -17,8 +17,8 @@ import { toastService } from '@/lib/ui/toast';
 import type { PropertyWithStats } from '@/types/entities/property';
 import type { TagWithStats } from '@/types/entities/tag';
 import type { CardActions } from '../common/entity-settings-view';
-import { CreatePropertyForm } from '../properties/create-property-form';
-import { CreateTagForm } from '../tags/create-tag-form';
+import { CreatePropertyForm } from '../forms/create-property-form';
+import { CreateTagForm } from '../forms/create-tag-form';
 
 // ============================================================================
 // CONFIGURACIONES DE STATS

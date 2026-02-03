@@ -7,9 +7,10 @@
 import { useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { EntitiesCardsSettings } from '../entities-cards/entities-cards-settings';
+import { UploadedImagesSettings } from '../media/uploaded-images-settings';
+import { PanelsSettings } from '../panels/panels-settings';
 import { ProfilesSettings } from '../profiles/profiles-settings';
 import { ShortcutsSettings } from '../shortcuts/shortcuts-settings';
-import { UploadedImagesSettings } from '../uploaded-images/uploaded-images-settings';
 import { AppearanceSettingsModern } from './appearance-settings-modern';
 import { FilesSettingsModern } from './files-settings-modern';
 import { MediaSettingsModern } from './media-settings-modern';
@@ -28,11 +29,12 @@ function SettingsContent({ itemId }: { itemId: string }) {
 	const [isLoading, setIsLoading] = useState(false);
 
 	// Simular carga al cambiar de item
+	// biome-ignore lint/correctness/useExhaustiveDependencies: dependency needed for item changes
 	useEffect(() => {
 		setIsLoading(true);
 		const timer = setTimeout(() => setIsLoading(false), 300);
 		return () => clearTimeout(timer);
-	}, []);
+	}, [itemId]);
 
 	if (isLoading) {
 		return (
@@ -59,7 +61,7 @@ function SettingsContent({ itemId }: { itemId: string }) {
 		case 'shortcuts':
 			return <ShortcutsSettings />;
 		case 'panels':
-			return <AppearanceSettingsModern />; // Still fallback until panels exist
+			return <PanelsSettings />;
 
 		case 'entities-cards':
 			return <EntitiesCardsSettings />;

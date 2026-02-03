@@ -1,7 +1,8 @@
 import { memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import type { CategoryChild, ViewMode } from '../types';
+import type { ViewMode } from '@/store/ui.store';
+import type { CategoryChild } from '../types';
 import { FolderTreeView } from './folder-tree-view';
 
 interface NavCategoryChildrenProps {

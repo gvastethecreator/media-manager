@@ -66,6 +66,7 @@ export const FileViewer = memo(function FileViewerImpl({ triggerRef }: { trigger
 	const { handleCopy, handleDownload } = useToolbarActions(currentImage, urls, setUrls, loadImageUrl);
 
 	// Handler de zoom para teclado
+	// biome-ignore lint/correctness/useExhaustiveDependencies: ref-based zoom handler
 	const handleZoom = useCallback((factor: number) => {
 		if (!contentRef.current) return;
 		const currentTransform = contentRef.current.style.transform;

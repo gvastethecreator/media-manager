@@ -9,7 +9,7 @@ import type { CSSProperties } from 'react';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { formatFileSize } from '@/lib/utils/format.utils';
+import { formatDate, formatFileSize } from '@/lib/utils/format.utils';
 import { MediaThumbnail } from '../components/media-thumbnail/media-thumbnail';
 import type { MediaItem } from '../components/media-thumbnail/types';
 import type { BrowserItem } from '../types/item.types';
@@ -135,18 +135,6 @@ const DEFAULT_COLUMNS: TableColumn[] = [
 		render: (item) => (item.createdAt ? formatDate(item.createdAt) : '-'),
 	},
 ];
-
-// formatFileSize importada desde @/lib/utils/format.utils
-
-function formatDate(date: Date | string | number): string {
-	const d = date instanceof Date ? date : new Date(date);
-	if (Number.isNaN(d.getTime())) return '-';
-	return d.toLocaleDateString('es-ES', {
-		day: '2-digit',
-		month: '2-digit',
-		year: 'numeric',
-	});
-}
 
 export function TableView({
 	items,
@@ -343,10 +331,10 @@ export function TableView({
 								)}
 								{...(shouldLayout
 									? {
-										'data-layout-id': item.id,
-										'data-layout-item': 'true',
-										'data-layout-order': String(virtualRow.index),
-									}
+											'data-layout-id': item.id,
+											'data-layout-item': 'true',
+											'data-layout-order': String(virtualRow.index),
+										}
 									: {})}
 								data-item-id={item.id}
 								key={item.id}

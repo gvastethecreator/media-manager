@@ -97,7 +97,10 @@ export function ConceptCardFooter({
 					? `linear-gradient(to top, ${secondaryColor}, ${secondaryColor}90)`
 					: `linear-gradient(to top, ${secondaryColor}90, ${secondaryColor}60)`,
 				borderTop: tcgMode ? `1px solid ${primaryColor}60` : `1px solid ${primaryColor}40`,
-				boxShadow: isFavorite && tcgMode ? 'inset 0 0 10px rgba(255, 215, 0, 0.2)' : undefined,
+				boxShadow:
+					isFavorite && tcgMode
+						? 'inset 0 0 10px color-mix(in oklch, var(--preset-yellow), transparent 80%)'
+						: undefined,
 			}}
 		>
 			<div className="mb-1.5 flex items-center justify-between">
@@ -137,7 +140,7 @@ export function ConceptCardFooter({
 							style={{
 								backgroundColor: isFavorite ? 'var(--preset-yellow)' : primaryColor,
 								color: isFavorite ? 'black' : 'white',
-								boxShadow: isFavorite ? '0 0 5px rgba(255, 215, 0, 0.7)' : 'none',
+								boxShadow: isFavorite ? '0 0 5px color-mix(in oklch, var(--preset-yellow), transparent 30%)' : 'none',
 							}}
 						>
 							{rarity}

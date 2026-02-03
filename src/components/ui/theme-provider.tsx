@@ -110,10 +110,13 @@ export function ThemeProvider({
 		[getSystemTheme]
 	);
 
-	// Aplicar tema al DOM
+	// Aplicar tema al DOM con transición fluida
 	const applyTheme = React.useCallback(
 		(themeToApply: (typeof customThemes)[number]) => {
 			const root = document.documentElement;
+
+			// Activar transición fluida
+			root.classList.add('theme-transitioning');
 
 			// Remover todas las clases de tema anteriores
 			for (const t of customThemes) {
@@ -127,6 +130,11 @@ export function ThemeProvider({
 			if (attribute) {
 				root.setAttribute(attribute, themeToApply);
 			}
+
+			// Remover clase de transición después de completar
+			window.setTimeout(() => {
+				root.classList.remove('theme-transitioning');
+			}, 350);
 		},
 		[attribute]
 	);

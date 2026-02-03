@@ -22,8 +22,6 @@
  */
 
 import { create } from 'zustand';
-// 🚀 Importaciones actualizadas - MIGRADAS A EntityWithStats
-import type { ViewMode } from '@/components/navigation/types';
 // 🚧 Refactor: ahora usamos cliente de API en lugar de servicio del servidor
 // Uso de cliente de API para desacoplar el store de los servicios del servidor
 import { getFolderImagesFromApi } from '@/lib/api/client/folder.client';
@@ -31,6 +29,8 @@ import { folderResponseCache as folderCache } from '@/lib/filesystem/folder-cach
 import { clientLogger } from '@/lib/logger/client-logger';
 // 🎯 Cache y throttling optimizados
 import { throttleEvent } from '@/lib/system/event-throttler';
+// 🚀 Importaciones actualizadas - MIGRADAS A EntityWithStats
+import type { ViewMode } from '@/store/ui.store';
 import type { EntityWithStats } from '@/types/entities/entity.types';
 import { isFolderWithStats, isImageWithStats, isVideoWithStats } from '@/types/entity-guards';
 import { EntityStatsType } from '@/types/file-browser/entity-stats';
