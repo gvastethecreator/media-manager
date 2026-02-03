@@ -62,11 +62,11 @@ const RadioGroupItem = React.forwardRef<React.ElementRef<typeof RadioGroupPrimit
 					// Fondo
 					'bg-background',
 					// Sombra sutil
-					'shadow-[0_1px_3px_rgba(0,0,0,0.05)]',
+					'shadow-dt-1',
 					// Transiciones
 					'transition-all duration-200 ease-out',
 					// Hover
-					'hover:border-border/70 hover:shadow-[0_2px_8px_rgba(0,0,0,0.08)]',
+					'hover:border-border/70 hover:shadow-dt-2',
 					// Data states
 					'data-[state=checked]:border-primary/50 data-[state=checked]:shadow-[0_2px_12px_rgba(var(--primary-rgb),0.2)]',
 					// Focus

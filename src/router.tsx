@@ -4,6 +4,11 @@ import { HierarchicalFolderWrapper } from '@/components/features/file-browser-ne
 import { MainLayout } from '@/components/layout/main-layout';
 import ReindexLogsViewer from '@/components/settings/folders/reindex-logs-viewer';
 
+// Settings
+const SettingsContentView = lazy(() =>
+	import('@/components/views/settings/settings-content-view').then((m) => ({ default: m.SettingsContentView }))
+);
+
 // ✅ EAGER LOAD: Solo Dashboard y FolderContentView (rutas más usadas)
 import Dashboard from '@/components/views/dashboard/dashboard';
 import { FolderContentView } from '@/components/views/folders/folder-content-view';
@@ -349,6 +354,10 @@ export const router = createBrowserRouter([
 				element: <ImageDetailView />,
 			},
 			// Sistema
+			{
+				path: 'settings',
+				element: <SettingsContentView />,
+			},
 			{
 				path: 'reindex-logs',
 				element: <ReindexLogsViewer />,

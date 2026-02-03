@@ -16,7 +16,7 @@ import { DocumentCard } from './document-card/document-card';
 import { FolderCard } from './folder-card/folder-card';
 import { GroupCard } from './group-card/group-card';
 import { useCardLayout } from './hooks/use-card-layout';
-import { ImageCard } from './image-card';
+import { ImageCard } from './image-card/image-card';
 import { PlaceCard } from './place-card/place-card';
 import { PromptCard } from './prompt-card/prompt-card';
 import { PropertyCard } from './property-card/property-card';
@@ -24,7 +24,7 @@ import { TagCard } from './tag-card/tag-card';
 import { TCGEntityCard } from './tcg-entity-card';
 // Importar el nuevo sistema de layouts
 import type { BaseCardProps, CardVariant } from './types/card-layout.types';
-import { UploadedImageCard } from './uploaded-image-card';
+import { UploadedImageCard } from './uploaded-image-card/uploaded-image-card';
 import { VideoCard } from './video-card/video-card';
 import { WildcardCard } from './wildcard-card/wildcard-card';
 import { WorldItemCard } from './world-item-card/world-item-card';

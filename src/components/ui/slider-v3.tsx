@@ -85,7 +85,7 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
 							// Fondo
 							'bg-muted/50',
 							// Sombra interior sutil
-							'shadow-[inset_0_1px_3px_rgba(0,0,0,0.08)]'
+							'shadow-dt-inset-1'
 						)}
 					>
 						{showTicks && <div className="pointer-events-none absolute inset-0 px-2">{ticks}</div>}
@@ -95,7 +95,7 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
 								// Gradiente sutil
 								'bg-gradient-to-r from-primary/90 to-primary',
 								// Sombra interior
-								'shadow-[inset_0_1px_2px_rgba(0,0,0,0.1)]'
+								'shadow-dt-inset-1'
 							)}
 						/>
 					</SliderPrimitive.Track>
@@ -109,9 +109,9 @@ const Slider = React.forwardRef<React.ElementRef<typeof SliderPrimitive.Root>, S
 								// Borde 2px semitransparente
 								'border-2 border-border/40',
 								// Sombra elevada elegante
-								'shadow-[0_2px_8px_rgba(0,0,0,0.15),0_1px_3px_rgba(0,0,0,0.1)]',
+								'shadow-dt-2',
 								// Brillo sutil
-								'relative before:absolute before:inset-x-0 before:top-0.5 before:h-px before:bg-gradient-to-r before:from-transparent before:via-white/50 before:to-transparent',
+								'relative before:absolute before:inset-x-0 before:top-0.5 before:h-px before:bg-gradient-to-r before:from-transparent before:via-primary-foreground/50 before:to-transparent',
 								// Estados
 								'transition-[box-shadow,border-color] duration-200',
 								'hover:border-primary/50 hover:shadow-[0_3px_12px_rgba(var(--primary-rgb),0.25)]',

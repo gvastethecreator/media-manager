@@ -176,6 +176,7 @@ export class FlipEngine {
 		config.element.style.transformOrigin = 'center center';
 
 		// Forzar reflow para asegurar que el cambio se aplique
+		// biome-ignore lint/complexity/noVoid: reflow pattern
 		void config.element.offsetHeight;
 	}
 

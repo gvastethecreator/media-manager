@@ -32,6 +32,7 @@ class ThumbnailEventEmitter {
 	emit(event: string, data: any): void {
 		const listeners = this.listeners.get(event);
 		if (listeners) {
+			// biome-ignore lint/suspicious/useIterableCallbackReturn: callback returns void intentionally
 			listeners.forEach((callback) => callback(data));
 		}
 	}

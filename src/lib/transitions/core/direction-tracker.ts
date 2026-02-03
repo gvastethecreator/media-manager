@@ -388,6 +388,9 @@ export class DirectionTracker {
 					delays.set(el.id, baseDelay + Math.random() * maxDelay);
 				});
 				break;
+
+			default:
+				break;
 		}
 
 		return delays;

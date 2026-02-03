@@ -1,4 +1,10 @@
+/**
+ * @file Tipos para los componentes de navegación
+ * @module components/navigation/types
+ */
+
 import type { LucideIcon } from 'lucide-react';
+import { ViewType } from '@/components/views/types';
 import type { NavigationData } from '@/lib/api/navigation';
 
 /**
@@ -30,27 +36,18 @@ export type NavigationCategory =
 	| 'videos';
 
 /**
- * @description Representa una entidad que puede tener un conteo de imágenes asociadas.
- *              Utilizado comúnmente por modelos de Drizzle ORM con relaciones _count.
+ * Representa un elemento de categoría en el panel de navegación
  */
-export interface ItemWithImageCount {
-	_count?: { images?: number }; // 🖼️ El conteo de imágenes es opcional.
-}
-
-export interface NavPanelProps {
-	initialData: NavigationData;
-	isCollapsed?: boolean;
-	onToggleCollapse?: () => void;
-	isAnimating?: boolean;
-}
-
 export interface CategoryItem {
-	id: NavigationCategory;
+	id: ViewType;
 	icon: LucideIcon;
 	label: string;
 	color: string;
 }
 
+/**
+ * Representa un elemento hijo dentro de una categoría
+ */
 export interface CategoryChild {
 	id: string;
 	name: string;
@@ -73,5 +70,12 @@ export interface CategoryChild {
 	};
 }
 
-// Tipo para vista de elementos en el panel de navegación
-export type ViewMode = 'list' | 'grid';
+/**
+ * Props para el componente NavPanel
+ */
+export interface NavPanelProps {
+	initialData: NavigationData;
+	isCollapsed?: boolean;
+	onToggleCollapse?: () => void;
+	isAnimating?: boolean;
+}

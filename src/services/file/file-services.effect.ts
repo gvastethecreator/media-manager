@@ -190,11 +190,7 @@ const makeDocumentService = (): DocumentServiceInterface => {
 			catch: (error) => fromUnknownDocumentError('delete', error),
 		});
 
-	const getImages = (id: string): Effect.Effect<any[], DocumentError> =>
-		Effect.gen(function* () {
-			// Relación genérica a través de la carpeta o similar - Implementación simplificada
-			return [] as any[];
-		});
+	const getImages = (id: string): Effect.Effect<any[], DocumentError> => Effect.succeed([] as any[]);
 
 	return { getAll, getById, create, update, delete: delete_, getImages };
 };
@@ -275,10 +271,7 @@ const makeJsonFileService = (): JsonFileServiceInterface => {
 			catch: (error) => fromUnknownJsonFileError('delete', error),
 		});
 
-	const getImages = (id: string): Effect.Effect<any[], JsonFileError> =>
-		Effect.gen(function* () {
-			return [] as any[];
-		});
+	const getImages = (id: string): Effect.Effect<any[], JsonFileError> => Effect.succeed([] as any[]);
 
 	return { getAll, getById, create, update, delete: delete_, getImages };
 };

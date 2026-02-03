@@ -109,12 +109,10 @@ router.get(
 router.get(
 	'/stats',
 	effectHandler(() =>
-		Effect.gen(function* () {
-			return {
-				message: 'Estadísticas de reindexado',
-				lastReindex: null,
-				stats: null,
-			};
+		Effect.succeed({
+			message: 'Estadísticas de reindexado',
+			lastReindex: null,
+			stats: null,
 		})
 	)
 );

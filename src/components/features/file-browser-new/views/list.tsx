@@ -230,26 +230,26 @@ export function ListView({
 				>
 					{shouldVirtualize
 						? rowVirtualizer.getVirtualItems().map((virtualRow) => {
-							const item = displayItems[virtualRow.index];
-							if (!item) return null;
-							return (
-								<div
-									key={item.id}
-									style={{
-										position: 'absolute',
-										top: 0,
-										left: 0,
-										width: '100%',
-										transform: `translateY(${virtualRow.start}px)`,
-									}}
-								>
-									{renderListItem(item, virtualRow.index)}
-								</div>
-							);
-						})
+								const item = displayItems[virtualRow.index];
+								if (!item) return null;
+								return (
+									<div
+										key={item.id}
+										style={{
+											position: 'absolute',
+											top: 0,
+											left: 0,
+											width: '100%',
+											transform: `translateY(${virtualRow.start}px)`,
+										}}
+									>
+										{renderListItem(item, virtualRow.index)}
+									</div>
+								);
+							})
 						: displayItems.map((item, index) => {
-							return renderListItem(item, index);
-						})}
+								return renderListItem(item, index);
+							})}
 				</div>
 			</div>
 		</div>

@@ -5,7 +5,7 @@
  */
 
 import React from 'react';
-import { AnimatePresence, TransitionGroup, TransitionItem } from '@/components/transitions/TransitionGroup';
+import { AnimatePresence, TransitionGroup, TransitionItem } from '@/components/transitions/transition-group';
 import { useEnterExit } from '@/hooks/transitions';
 import { customEasings } from '@/lib/transitions';
 import { cn } from '@/lib/utils';
