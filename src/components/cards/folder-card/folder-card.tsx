@@ -86,7 +86,7 @@ export const FolderCard = memo(
 		const cardContent = (
 			<div
 				className={cn(
-					'group relative flex h-full flex-col overflow-hidden rounded-md transition-all duration-300',
+					'group relative flex h-full flex-col overflow-hidden rounded-md ui-motion-standard',
 					tcgMode ? 'border border-border/40 bg-gradient-to-b from-gray-900 to-black shadow-lg' : 'bg-card shadow',
 					interactive && 'cursor-pointer hover:shadow-md',
 					className
@@ -102,7 +102,7 @@ export const FolderCard = memo(
 				{/* Borde brillante para TCG mode */}
 				{tcgMode && (
 					<div
-						className="pointer-events-none absolute inset-0 rounded-md opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+						className="ui-overlay-group-glow rounded-md"
 						style={{
 							boxShadow: `inset 0 0 0 1px color-mix(in oklab, ${primaryColor}, transparent 50%), 0 0 15px color-mix(in oklab, ${primaryColor}, transparent 70%)`,
 							zIndex: 20,
@@ -161,7 +161,7 @@ export const FolderCard = memo(
 					<>
 						{/* Textura de fondo sutil */}
 						<div
-							className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+							className="ui-overlay-group-glow"
 							style={{
 								background: `radial-gradient(circle at 50% 50%, color-mix(in oklab, ${primaryColor}, transparent 90%) 0%, transparent 70%)`,
 								zIndex: 1,

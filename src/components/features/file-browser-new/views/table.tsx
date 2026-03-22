@@ -275,7 +275,7 @@ export function TableView({
 				onContainerReady?.(el);
 			}}
 		>
-			<table className="w-full border-collapse text-sm" data-testid="table-view">
+			<table className="w-full border-collapse text-sm" data-testid="table-view" role="grid">
 				{/* Header */}
 				<thead className="sticky top-0 z-10 border-border/40 border-b-2 bg-muted/50 pt-1">
 					<tr>
@@ -291,7 +291,7 @@ export function TableView({
 								>
 									{col.sortable ? (
 										<Button
-											className="h-auto p-0 font-medium hover:text-foreground"
+											className="min-h-10 px-1 py-1 font-medium hover:text-foreground"
 											onClick={() => handleSort(col.key)}
 											variant="ghost"
 										>
@@ -324,7 +324,7 @@ export function TableView({
 									allowRowAnimation && 'file-browser-item',
 									'border-border/30 border-b',
 									'cursor-pointer',
-									'transition-all duration-200',
+									'transition-all duration-dt-fast ease-dt-out',
 									'hover:border-l-2 hover:border-l-primary/30 hover:bg-muted/60',
 									selectedIds.has(item.id) && 'border-l-[3px] border-l-primary bg-muted/80',
 									activeId === item.id && 'ring-1 ring-primary/30'
@@ -343,7 +343,7 @@ export function TableView({
 								onDoubleClick={() => handleItemDoubleClick(item)}
 								style={
 									{
-										height: rowHeight,
+										height: Math.max(rowHeight, 44),
 										...(allowRowAnimation ? { '--fb-item-delay': `${Math.min(virtualRow.index * 6, 200)}ms` } : {}),
 									} as CSSProperties
 								}

@@ -3,6 +3,7 @@
 import * as ToggleGroupPrimitive from '@radix-ui/react-toggle-group';
 import gsap from 'gsap';
 import * as React from 'react';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 import { cn } from '@/lib/utils';
 
 // Final GSAP-driven toolbar implementation.
@@ -12,43 +13,44 @@ import { cn } from '@/lib/utils';
 // ============================================================================
 
 const useToolbarAnimation = () => {
+	const prefersReducedMotion = useReducedMotion();
 	const animateButtonHover = React.useCallback((element: HTMLElement, isHovering: boolean) => {
-		if (!element) return;
+		if (!(element && !prefersReducedMotion)) return;
 
 		gsap.to(element, {
 			backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 12%, transparent)' : 'transparent',
-			scale: isHovering ? 1.05 : 1,
+			scale: isHovering ? 1.02 : 1,
 			duration: 0.15,
-			ease: 'cubicBezier(0.4, 0, 0.2, 1)',
+			ease: 'power2.out',
 		});
-	}, []);
+	}, [prefersReducedMotion]);
 
 	const animateButtonPressed = React.useCallback((element: HTMLElement, isPressed: boolean) => {
-		if (!element) return;
+		if (!(element && !prefersReducedMotion)) return;
 
 		gsap.to(element, {
-			scale: isPressed ? 0.95 : 1,
+			scale: isPressed ? 0.98 : 1,
 			backgroundColor: isPressed ? 'color-mix(in oklch, var(--accent) 20%, transparent)' : 'transparent',
-			duration: 100,
-			ease: 'easeOutQuad',
+			duration: 0.08,
+			ease: 'power2.out',
 		});
-	}, []);
+	}, [prefersReducedMotion]);
 
 	const animateToggle = React.useCallback((element: HTMLElement, isToggled: boolean) => {
-		if (!element) return;
+		if (!(element && !prefersReducedMotion)) return;
 
 		gsap.to(element, {
 			backgroundColor: isToggled ? 'color-mix(in oklch, var(--primary) 15%, transparent)' : 'transparent',
 			borderColor: isToggled
 				? 'color-mix(in oklch, var(--primary) 50%, transparent)'
 				: 'color-mix(in oklch, var(--border) 20%, transparent)',
-			duration: 0.2,
-			ease: 'cubicBezier(0.4, 0, 0.2, 1)',
+			duration: 0.18,
+			ease: 'power2.out',
 		});
-	}, []);
+	}, [prefersReducedMotion]);
 
 	const animateSeparator = React.useCallback((element: HTMLElement) => {
-		if (!element) return;
+		if (!(element && !prefersReducedMotion)) return;
 
 		gsap.fromTo(
 			element,
@@ -63,7 +65,7 @@ const useToolbarAnimation = () => {
 				repeat: -1,
 			}
 		);
-	}, []);
+	}, [prefersReducedMotion]);
 
 	return { animateButtonHover, animateButtonPressed, animateToggle, animateSeparator };
 };
@@ -188,10 +190,10 @@ const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(
 			<button
 				className={cn(
 					'inline-flex items-center justify-center gap-2',
-					'rounded-dt-sm font-medium text-base',
-					'outline-none transition-all duration-dt-fast',
+					'rounded-dt-sm font-medium text-base min-h-11 min-w-11',
+					'outline-none transition-all duration-dt-fast ease-dt-out',
 					'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-					'disabled:pointer-events-none disabled:opacity-40',
+					'disabled:pointer-events-none disabled:opacity-50',
 					pressed && ['bg-primary/10 text-primary', 'border-2 border-primary/30', 'shadow-dt-inset-1'],
 					!pressed && [
 						'border-2 border-transparent',
@@ -209,7 +211,7 @@ const ToolbarButton = React.forwardRef<HTMLButtonElement, ToolbarButtonProps>(
 				type="button"
 				{...props}
 			>
-				{icon && <span className="flex-shrink-0">{icon}</span>}
+				{icon && <span className="shrink-0">{icon}</span>}
 				{children}
 			</button>
 		);
@@ -259,10 +261,10 @@ const ToolbarToggleItem = React.forwardRef<React.ElementRef<typeof ToggleGroupPr
 			<ToggleGroupPrimitive.Item
 				className={cn(
 					'inline-flex items-center justify-center gap-2',
-					'rounded-dt-sm font-medium text-base',
-					'outline-none transition-all duration-dt-normal',
+					'rounded-dt-sm font-medium text-base min-h-11 min-w-11',
+					'outline-none transition-all duration-dt-fast ease-dt-out',
 					'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-					'disabled:pointer-events-none disabled:opacity-40',
+					'disabled:pointer-events-none disabled:opacity-50',
 					// Base state
 					'border-2 border-transparent',
 					// Hover state
@@ -276,7 +278,7 @@ const ToolbarToggleItem = React.forwardRef<React.ElementRef<typeof ToggleGroupPr
 				ref={toggleRef}
 				{...props}
 			>
-				{icon && <span className="flex-shrink-0">{icon}</span>}
+				{icon && <span className="shrink-0">{icon}</span>}
 				{children}
 			</ToggleGroupPrimitive.Item>
 		);
@@ -338,8 +340,8 @@ const ToolbarLink = React.forwardRef<HTMLAnchorElement, ToolbarLinkProps>(
 			<a
 				className={cn(
 					'inline-flex items-center justify-center gap-2',
-					'rounded-dt-sm font-medium text-base text-primary',
-					'outline-none transition-all duration-dt-fast',
+					'rounded-dt-sm font-medium text-base text-primary min-h-11 min-w-11',
+					'outline-none transition-all duration-dt-fast ease-dt-out',
 					'border-2 border-transparent',
 					'hover:border-[oklch(from_var(--accent)_l_c_h_/0.25)]',
 					'hover:underline hover:underline-offset-4',
@@ -351,7 +353,7 @@ const ToolbarLink = React.forwardRef<HTMLAnchorElement, ToolbarLinkProps>(
 				ref={linkRef}
 				{...props}
 			>
-				{icon && <span className="flex-shrink-0">{icon}</span>}
+				{icon && <span className="shrink-0">{icon}</span>}
 				{children}
 			</a>
 		);
@@ -387,7 +389,7 @@ const ToolbarSeparator = React.forwardRef<HTMLDivElement, ToolbarSeparatorProps>
 		return (
 			<div
 				className={cn(
-					'bg-[oklch(from_var(--border)_l_c_h_/0.4)]',
+					'bg-[oklch(from_var(--border)_l_c_h_/0.4)] transition-opacity duration-dt-fast ease-dt-out',
 					// Horizontal separator
 					'mx-1 h-6 w-px',
 					// Vertical separator (when parent has data-orientation="vertical")

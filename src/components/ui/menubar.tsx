@@ -4,6 +4,7 @@ import * as MenubarPrimitive from '@radix-ui/react-menubar';
 import gsap from 'gsap';
 import { Check, ChevronRight, Circle } from 'lucide-react';
 import * as React from 'react';
+import { useReducedMotion } from '@/hooks/use-reduced-motion';
 
 import { cn } from '@/lib/utils';
 
@@ -14,8 +15,9 @@ import { cn } from '@/lib/utils';
 // ============================================================================
 
 const useMenubarAnimation = () => {
+	const prefersReducedMotion = useReducedMotion();
 	const animateContent = React.useCallback((element: HTMLElement, isOpen: boolean) => {
-		if (!element) return;
+		if (!(element && !prefersReducedMotion)) return;
 
 		if (isOpen) {
 			gsap.fromTo(
@@ -50,10 +52,10 @@ const useMenubarAnimation = () => {
 				}
 			);
 		}
-	}, []);
+	}, [prefersReducedMotion]);
 
 	const animateSubContent = React.useCallback((element: HTMLElement, isOpen: boolean) => {
-		if (!element) return;
+		if (!(element && !prefersReducedMotion)) return;
 
 		if (isOpen) {
 			gsap.fromTo(
@@ -70,28 +72,28 @@ const useMenubarAnimation = () => {
 				}
 			);
 		}
-	}, []);
+	}, [prefersReducedMotion]);
 
 	const animateItemHover = React.useCallback((element: HTMLElement, isHovering: boolean) => {
-		if (!element) return;
+		if (!(element && !prefersReducedMotion)) return;
 
 		gsap.to(element, {
 			backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 15%, transparent)' : 'transparent',
-			scale: isHovering ? 1.02 : 1,
+			scale: isHovering ? 1.01 : 1,
 			duration: 0.15,
-			ease: 'cubicBezier(0.4, 0, 0.2, 1)',
+			ease: 'power2.out',
 		});
-	}, []);
+	}, [prefersReducedMotion]);
 
 	const animateTriggerHover = React.useCallback((element: HTMLElement, isHovering: boolean) => {
-		if (!element) return;
+		if (!(element && !prefersReducedMotion)) return;
 
 		gsap.to(element, {
 			backgroundColor: isHovering ? 'color-mix(in oklch, var(--accent) 12%, transparent)' : 'transparent',
-			duration: 0.2,
-			ease: 'easeOutQuad',
+			duration: 0.15,
+			ease: 'power2.out',
 		});
-	}, []);
+	}, [prefersReducedMotion]);
 
 	return { animateContent, animateSubContent, animateItemHover, animateTriggerHover };
 };
@@ -171,14 +173,14 @@ const MenubarTrigger = React.forwardRef<
 		<MenubarPrimitive.Trigger
 			className={cn(
 				'flex cursor-default select-none items-center rounded-dt-sm',
-				'px-4 py-2 font-medium text-base',
-				'outline-none transition-all duration-dt-normal',
+				'min-h-11 px-4 py-2 font-medium text-base',
+				'outline-none transition-all duration-dt-fast ease-dt-out',
 				'border-2 border-transparent',
 				'data-[state=open]:border-[oklch(from_var(--accent)_l_c_h_/0.3)]',
 				'data-[state=open]:bg-accent/10',
 				'data-[state=open]:text-accent-foreground',
 				'data-[state=open]:shadow-dt-inset-1',
-				'disabled:pointer-events-none disabled:opacity-40',
+				'disabled:pointer-events-none disabled:opacity-50',
 				className
 			)}
 			onMouseEnter={handleMouseEnter}
@@ -221,11 +223,11 @@ const MenubarSubTrigger = React.forwardRef<
 		<MenubarPrimitive.SubTrigger
 			className={cn(
 				'flex cursor-default select-none items-center rounded-dt-sm',
-				'px-3 py-2.5 text-base',
-				'outline-none transition-all duration-dt-fast',
+				'min-h-11 px-3 py-2.5 text-base',
+				'outline-none transition-all duration-dt-fast ease-dt-out',
 				'focus:bg-accent/15 focus:text-accent-foreground',
 				'data-[state=open]:bg-accent/15 data-[state=open]:text-accent-foreground',
-				'disabled:pointer-events-none disabled:opacity-40',
+				'disabled:pointer-events-none disabled:opacity-50',
 				inset && 'pl-8',
 				className
 			)}
@@ -263,7 +265,7 @@ const MenubarSubContent = React.forwardRef<
 	return (
 		<MenubarPrimitive.SubContent
 			className={cn(
-				'z-50 min-w-[10rem] overflow-hidden rounded-dt-md',
+				'z-50 min-w-40 overflow-hidden rounded-dt-md',
 				'border-2 border-[oklch(from_var(--border)_l_c_h_/0.35)]',
 				'bg-popover/95 backdrop-blur-md',
 				'p-1.5 shadow-dt-3',
@@ -321,7 +323,7 @@ const MenubarContent = React.forwardRef<
 				align={align}
 				alignOffset={alignOffset}
 				className={cn(
-					'z-50 min-w-[12rem] overflow-hidden rounded-dt-md',
+					'z-50 min-w-48 overflow-hidden rounded-dt-md',
 					'border-2 border-[oklch(from_var(--border)_l_c_h_/0.35)]',
 					'bg-popover/95 backdrop-blur-md',
 					'p-1.5 shadow-dt-3',
@@ -368,10 +370,10 @@ const MenubarItem = React.forwardRef<
 		<MenubarPrimitive.Item
 			className={cn(
 				'relative flex cursor-default select-none items-center rounded-dt-sm',
-				'px-3 py-2.5 text-base',
-				'outline-none transition-all duration-dt-fast',
+				'min-h-11 px-3 py-2.5 text-base',
+				'outline-none transition-all duration-dt-fast ease-dt-out',
 				'focus:bg-accent/15 focus:text-accent-foreground',
-				'data-[disabled]:pointer-events-none data-[disabled]:opacity-40',
+				'data-disabled:pointer-events-none data-disabled:opacity-50',
 				inset && 'pl-8',
 				className
 			)}
@@ -414,10 +416,10 @@ const MenubarCheckboxItem = React.forwardRef<
 			checked={checked}
 			className={cn(
 				'relative flex cursor-default select-none items-center rounded-dt-sm',
-				'py-2.5 pr-3 pl-8 text-base',
-				'outline-none transition-all duration-dt-fast',
+				'min-h-11 py-2.5 pr-3 pl-8 text-base',
+				'outline-none transition-all duration-dt-fast ease-dt-out',
 				'focus:bg-accent/15 focus:text-accent-foreground',
-				'data-[disabled]:pointer-events-none data-[disabled]:opacity-40',
+				'data-disabled:pointer-events-none data-disabled:opacity-50',
 				className
 			)}
 			onMouseEnter={handleMouseEnter}
@@ -465,10 +467,10 @@ const MenubarRadioItem = React.forwardRef<
 		<MenubarPrimitive.RadioItem
 			className={cn(
 				'relative flex cursor-default select-none items-center rounded-dt-sm',
-				'py-2.5 pr-3 pl-8 text-base',
-				'outline-none transition-all duration-dt-fast',
+				'min-h-11 py-2.5 pr-3 pl-8 text-base',
+				'outline-none transition-all duration-dt-fast ease-dt-out',
 				'focus:bg-accent/15 focus:text-accent-foreground',
-				'data-[disabled]:pointer-events-none data-[disabled]:opacity-40',
+				'data-disabled:pointer-events-none data-disabled:opacity-50',
 				className
 			)}
 			onMouseEnter={handleMouseEnter}

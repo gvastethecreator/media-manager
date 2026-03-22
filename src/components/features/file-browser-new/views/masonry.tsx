@@ -30,8 +30,8 @@ const MasonryThumbnail = memo(function MasonryThumbnail({
 				predictedAspectRatio={aspectRatio}
 				style={{ objectFit: 'cover' }}
 			/>
-			<div className="pointer-events-none absolute inset-x-0 bottom-0 bg-linear-to-t from-black/70 via-black/30 to-transparent p-2 opacity-0 transition-opacity duration-200 group-hover:opacity-100">
-				<span className="block truncate font-medium text-white text-xs" title={item.name}>
+			<div className="pointer-events-none absolute inset-x-0 bottom-0 translate-y-2 bg-linear-to-t from-black/70 via-black/30 to-transparent p-2 opacity-0 transition-all duration-dt-normal ease-dt-out group-hover:translate-y-0 group-hover:opacity-100">
+				<span className="block truncate font-medium text-white text-xs drop-shadow-md" title={item.name}>
 					{item.name}
 				</span>
 			</div>
